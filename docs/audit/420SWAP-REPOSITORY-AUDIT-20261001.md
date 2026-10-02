@@ -213,9 +213,9 @@ The clearing-price decision remains an explicit governance/operations evidence b
 
 | Dependency | Repository evidence | Status |
 |---|---|---|
-| 420Registry | Genesis-resident components resolve shared dependencies; executor is registry-resolved | COMPLETE/PARTIAL deployment |
+| 420Registry | Genesis-resident components resolve shared dependencies; SWAP-AUDIT-7 qualifies actual ProtocolRegistry component registration, ACTIVE lifecycle, resolution and EXTCODEHASH-derived runtime identity in local EVM deployment | COMPLETE repository/local deployment binding; live public-chain evidence deferred |
 | shared Genesis interface layer | executor/registries consume canonical asset, health, governance and safety semantics | COMPLETE |
-| 420Pay | canonical settlement adapter calls exact Swap executor ABI; integration tests exist | COMPLETE in source/tests; BLOCKED live binding |
+| 420Pay | exact PaymentRouter → CanonicalSettlementAdapter → CanonicalSwapExecutor graph and executor trusted-caller identity are repository/local-EVM qualified | COMPLETE repository binding; live public-chain transactions deferred to SWAP-AUDIT-8 |
 | 420Exchange | canonical Swap adapter and full web swap execution surface exist | COMPLETE in source/tests; BLOCKED live deployment |
 | 420Wallet / authorization | Exchange web binds execution to wallet review/session/preflight; capability architecture exists above Swap | COMPLETE in client scope; live chain pending |
 | 420Bridge | Pay/Swap/Bridge integration test exists; CADC canonical route pending issuer-approved deployment | PARTIAL/BLOCKED external |
@@ -223,7 +223,7 @@ The clearing-price decision remains an explicit governance/operations evidence b
 | 420Indexer | Swap/Exchange decoder/ABI surfaces exist | PARTIAL; live chain qualification pending |
 | native $420 | Exchange has wrapped/native execution architecture; canonical pool itself is ERC20/ERC20 | PARTIAL by layer; intentional V1 pool limit |
 
-The committed Pay→Swap wiring manifest correctly remains `REMEDIATION_REQUIRED` for deployment binding: source ABI compatibility is verified, but the exact deployed `PaymentRouter → CanonicalSettlementAdapter → CanonicalSwapExecutor` instances and executor trusted-caller relation are not yet live-chain verified.
+The committed Pay→Swap wiring manifest is now `REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING`: source ABI compatibility plus the exact local-EVM `PaymentRouter → CanonicalSettlementAdapter → CanonicalSwapExecutor` identity/trusted-caller graph are qualified. `deployment_binding_verified` deliberately remains `false` until SWAP-AUDIT-8 records public-testnet addresses, transactions and block evidence.
 
 ## Application-layer audit
 
@@ -381,6 +381,34 @@ Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped sta
 
 Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
+### SWAP-AUDIT-7 retained Level 1 + deployment-binding Level 2 evidence
+
+- roadmap step: **SWAP-AUDIT-7 — deployment binding/registry qualification**
+- qualification level: **Level 1 — deployment-binding fast qualification**, plus **Level 2 — retained Swap app integration milestone** because this step introduces the shared ProtocolRegistry/420Pay authority binding
+- implementation SHA: `d42ad8a746e303cd1b3c82d6bfbbbd09ab5479c1`
+- current `main` / Level 1 base at closeout: `98e545225d54379086f0c520afcb84b4d4d97288`
+- audit PR / branch: **#455** / `audit/420swap-complete-20261001`
+- authoritative Level 1 workflow: **420Swap SWAP-AUDIT-7 Deployment Binding**, PR run **36959964085**, job **110691261681** — exact-head checkout PASS; deployment-binding manifest PASS; retained Swap interface verifier PASS; targeted compile PASS; real ProtocolRegistry/Swap/Pay binding graph PASS
+- authoritative Level 2 workflow: **420Swap Audit Qualification**, PR run **36959964102**
+- Level 2 contract job **110691297185**: static verification PASS; targeted build PASS; Genesis factory PASS; permissionless factory PASS; TWAP/oracle PASS; PublicBatchAuction PASS; canonical pool PASS; Swap integration PASS; fuzz PASS; invariant PASS; Pay/Swap + Pay/Swap/Bridge integration PASS
+- Level 2 user-surface job **110691297485**: `npm run check` PASS; Node tests PASS; qualification build PASS
+- Registry proof: actual `ProtocolRegistry.registerComponent` derives runtime code hashes from deployed code; canonical market registry, swap executor, settlement adapter and payment router resolve ACTIVE at the exact registered implementations and support version 1.0.0
+- Swap binding proof: `GenesisDEXFactory.poolImplementation` is code-bearing before registration; factory pool ID resolves to the exact concrete `CanonicalConstantProductPool420`; `CanonicalMarketRegistry` points the canonical market to that exact pool/pair/role
+- Pay→Swap proof: `PaymentRouter420.settlementAdapter == CanonicalSettlementAdapter420`; adapter `swapExecutor == CanonicalSwapExecutor420`; executor trusts the exact canonical adapter and does not implicitly trust a wrong adapter
+- fail-closed proof: a deliberately misbound replacement adapter is observable and remains untrusted; suspending the canonical market registry in ProtocolRegistry blocks its operational mutation path
+- frozen predeploy authority: SWAP-AUDIT-6 runtime identities for GenesisDEXFactory/PublicBatchAuction/TWAPOracle/ApprovedQuoteAssetRegistry remain authoritative and are checked by the binding manifest verifier
+- live-boundary discipline: registry-resolved component addresses, concrete pool address, deployment transactions, registry transactions, binding transactions and public evidence blocks remain null/empty in the repository binding manifest rather than being fabricated
+- 420Pay state: `REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING`; `deployment_binding_verified: false` intentionally remains until SWAP-AUDIT-8 live evidence
+- diagnosed qualification harness failures: earlier Level 2 runs failed before contract execution because the static verifier first mistook the legitimate `setPoolImplementation(address implementation_)` setter for constructor deployment authority and then used an over-escaped constructor regex; both verifier defects were corrected and the final exact SHA was requalified
+- Level 2 milestone: **PASS** on the same exact implementation SHA; no repository-wide Level 3 inventory was duplicated
+- Level 3: **intentionally deferred** to complete app-phase closeout
+- intentionally deferred checks: public-testnet deployed addresses/transactions/blocks, live Wallet/Exchange journeys, reorg/recovery behavior, live Pay composition, live PublicDistributionVault→auction funding, global Level 3 reconciliation and external release security review
+- blockers for this step: **none**
+- completion state: **COMPLETE**
+- next canonical roadmap step: **SWAP-AUDIT-8 — production-equivalent testnet qualification**
+
+Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
+
 ## Security classification
 
 | Area | Classification |
@@ -416,19 +444,21 @@ Audit remediation expanded the Swap contract map and clarified registry-resolved
 
 Still missing or incomplete:
 
-- final runtime materialization/code hashes for the four frozen Swap predeploys after global Genesis authority freezes the shared `genesisConfigHash`;
+- production-equivalent public-testnet deployment/journey evidence owned by SWAP-AUDIT-8;
 - app-specific Genesis acceptance record after live qualification.
 
 ## Genesis and deployment readiness
 
-The source tree and deterministic compiler provenance are substantially implemented, but final frozen-predeploy runtime materialization is not closed:
+Repository-side deterministic deployment and binding preparation is complete through SWAP-AUDIT-7:
 
-- six retained Swap compiler artifacts now pin source/compiler/runtime-template/ABI/storage-layout provenance;
-- four frozen Swap predeploy-state records retain immutable-reference locations, frozen GovernanceTimelock/ProtocolRegistry identities and explicit empty mutable storage;
-- the predeploy plan and deployment manifest deliberately remain blocked from final `runtime_code_hash` because repository authority has not frozen the shared `genesisConfigHash`;
-- Pay→Swap deployment binding remains explicitly unverified;
+- six retained Swap compiler artifacts pin source/compiler/runtime-template/ABI/storage-layout provenance;
+- the canonical global `genesisConfigHash` is frozen and all four frozen Swap predeploys have final materialized runtime hashes;
+- the predeploy plan and deployment manifest retain artifact-ready frozen runtime identities;
+- SWAP-AUDIT-7 deploys the actual registry-resolved Swap/Pay stack in a local EVM using the real `ProtocolRegistry`, proves Registry-derived runtime code identities and ACTIVE lifecycle, and qualifies the factory→pool→market plus PaymentRouter→adapter→executor trusted-caller graph;
+- `420pay-genesis-wiring.json` records repository binding qualification while deliberately leaving `deployment_binding_verified: false` until public-testnet evidence exists;
+- no public-testnet address, transaction, block or Registry revision is fabricated by SWAP-AUDIT-7;
 - CADC canonical markets remain blocked on the issuer-approved 420 deployment/path;
-- official public testnet live Swap execution evidence is not yet the basis of this audit;
+- production-equivalent public-testnet Swap execution evidence remains SWAP-AUDIT-8;
 - the repository-wide external-audit/mainnet gate remains open.
 
 ## Requirement matrix
@@ -445,11 +475,12 @@ The source tree and deterministic compiler provenance are substantially implemen
 | native $420 user path | Genesis purpose + Exchange architecture | handled above pool via wrapped/native Exchange path | Exchange tests | yes | PARTIAL | live end-to-end qualification |
 | TWAP/reference oracle | Genesis/Swap architecture | canonical pool cumulative TWAP with bounded window/freshness/source identity; direct Exchange + 420Oracle adapter integration | dedicated TWAP/adversarial/integration plus retained regressions | yes | COMPLETE source-side | live deployment/config qualification later |
 | public batch auction | frozen dApp/system map + PublicDistributionVault/quote-asset authority | pre-funded native inventory + canonical quote escrow + governed clearing + deterministic fill/refund/claim/cancel lifecycle | dedicated economic/adversarial suite + retained regressions | yes | COMPLETE source-side | retain; qualify deployed funding/binding later |
-| Pay integration | Pay/Swap architecture | canonical adapter ABI | PaySwap tests | wiring manifest | PARTIAL | live exact-instance binding |
+| Pay integration | Pay/Swap architecture + normative Genesis wiring | exact router→adapter→executor identities and executor trusted-caller relation repository/local-EVM qualified | dedicated SWAP-AUDIT-7 binding test + retained PaySwap suite | wiring manifest + binding manifest | COMPLETE repository/local binding | public-testnet transaction/block proof in SWAP-AUDIT-8 |
 | Bridge/CADC integration | CADC/Bridge docs | configured pending issuer | bridge integration tests | yes | BLOCKED | issuer-approved route/deployment |
 | Exchange user surface | Exchange web | implemented | 261 Node tests plus checks | extensive | COMPLETE source-side | live config/qualification |
 | deterministic build | Foundry + web | source builds under CI | dedicated audit workflow | dev docs | COMPLETE source-side | retain exact-head evidence |
-| Genesis predeploy artifacts | predeploy plan + Genesis interface authority | six retained compiler artifacts + four predeploy-state records; final immutable materialization withheld without global `genesisConfigHash` | dedicated generator/reproducer/verifier + factory/Genesis regressions | deployment runbook | BLOCKED GLOBAL INPUT | freeze canonical global `genesisConfigHash`, rerun generator, retain final runtime hashes |
+| Genesis predeploy artifacts | predeploy plan + Genesis interface authority | six retained compiler artifacts + four final materialized predeploy states with frozen `genesisConfigHash` and runtime code hashes | generator/reproducer/verifier + exact-head materialized-state qualification | deployment runbook | COMPLETE | retain |
+| deployment binding / Registry qualification | Swap/Pay/Registry architecture | actual local-EVM ProtocolRegistry registration and exact factory/pool/market + router/adapter/executor binding graph | `SwapDeploymentBinding420.t.sol` + binding verifier + retained Level 2 app suite | binding manifest/wiring docs | COMPLETE repository/local | live public-testnet evidence in SWAP-AUDIT-8 |
 | testnet deployment | release requirements | not live-qualified here | harness exists | Exchange testnet docs | BLOCKED | official production-equivalent testnet |
 | external security gate | security-suite registry | not external-audited | internal only | policy exists | BLOCKED | independent launch audit |
 
@@ -494,6 +525,12 @@ The source tree and deterministic compiler provenance are substantially implemen
 32. Added deterministic generation and independent verification tooling that refuses to claim final runtime hashes while the global genesisConfigHash is unresolved.
 33. Updated predeploy-plan and deployment-manifest state to explicit COMPILER_ARTIFACT_FROZEN / GLOBAL_HASH_PENDING statuses instead of stale SOURCE_READY claims.
 34. Added a dedicated Swap deployment/predeploy operations runbook and a targeted exact-head SWAP-AUDIT-6 CI workflow.
+35. Froze the canonical global Genesis configuration commitment and materialized final immutable runtimes/code hashes for all four frozen Swap predeploys.
+36. Added `swap-audit-7-deployment-binding.json` as the canonical repository/live-boundary manifest for Registry, pool/market and Pay→Swap bindings.
+37. Added `SwapDeploymentBinding420.t.sol` using the real `ProtocolRegistry` and actual Swap/Pay contracts to prove ACTIVE component registration, EXTCODEHASH-derived runtime identity, factory→pool→market bindings, exact router→adapter→executor identity, trusted-caller authority, misbinding visibility and inactive-component failure.
+38. Updated `420pay-genesis-wiring.json` to `REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING`, preserving `deployment_binding_verified: false` until public-testnet transaction evidence exists.
+39. Added `verify-swap-audit-7-deployment-binding.py` and dedicated exact-head SWAP-AUDIT-7 CI; live addresses/transactions/blocks remain explicitly null and owned by SWAP-AUDIT-8.
+40. Corrected two static-verifier harness defects discovered during Level 2 qualification: a setter-name false positive for factory deployment semantics and an over-escaped constructor regex. No protocol assertion was weakened.
 
 ## Outstanding remediation roadmap
 
@@ -517,8 +554,8 @@ The remaining work must preserve these step identities and dependency order:
 6. **SWAP-AUDIT-6 — deterministic artifacts and predeploy state — COMPLETE**  
    Canonical `genesisConfigHash` is frozen, all four frozen Swap runtimes are materially instantiated with compiler-derived immutable references, final runtime hashes are retained, and the resulting generated state is reproducible under the dedicated minimal exact-head verifier.
 
-7. **SWAP-AUDIT-7 — deployment binding and registry qualification**  
-   Deploy/register the canonical executor/pool/market stack and prove exact code identities, Registry entries and Pay→Swap trusted-caller bindings.
+7. **SWAP-AUDIT-7 — deployment binding and registry qualification — COMPLETE**  
+   The actual Registry-resolved Swap/Pay stack is repository/local-EVM qualified with real `ProtocolRegistry` component registration, Registry-derived runtime identities, ACTIVE lifecycle, factory→pool→market bindings, exact PaymentRouter→CanonicalSettlementAdapter→CanonicalSwapExecutor identity and exact adapter trusted-caller authority. Public-testnet transactions/blocks remain intentionally deferred to SWAP-AUDIT-8.
 
 8. **SWAP-AUDIT-8 — production-equivalent testnet qualification**  
    Execute live Swap journeys through Wallet/Exchange, including success, slippage, stale quote/oracle, wrong chain, disabled market, replay, reorg/recovery and Pay composition.
@@ -530,15 +567,15 @@ The remaining work must preserve these step identities and dependency order:
 
 At repository-remediation stage:
 
-- CODE COMPLETE: **YES for repository-side Swap source semantics through SWAP-AUDIT-5.**
-- BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
+- CODE COMPLETE: **YES for repository-side Swap source/deployment-binding semantics through SWAP-AUDIT-7.**
+- BUILD COMPLETE: **YES for current app-scoped source and deployment-binding scope on exact-head CI; Level 3 final merge-candidate qualification remains later.**
 - CONTRACT COMPLETE: **YES source-side through deterministic frozen-predeploy runtime materialization.**
-- TEST COMPLETE: **YES for current app-scoped source/economic qualification; Level 3 and live deployment/testnet qualification remain deferred.**
+- TEST COMPLETE: **YES through SWAP-AUDIT-7 Level 1 plus retained Level 2 app integration; Level 3 and public-testnet qualification remain deferred.**
 - DOCUMENTATION COMPLETE: **YES for current repository-side Swap deployment/predeploy scope; live Genesis acceptance remains later.**
-- INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
+- INTEGRATION COMPLETE: **YES for repository/local-EVM Swap→Registry→Pay binding; NO for public-testnet Wallet/Exchange/live-chain qualification.**
 - SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
-- TESTNET READY: **NO** — deterministic frozen runtimes are complete; live registry/binding/testnet qualification remains.
-- GENESIS READY: **NO** — deterministic predeploy artifacts/runtime hashes are complete, but live deployment binding and production-equivalent testnet qualification remain.
+- TESTNET READY: **NO** — deterministic runtimes and repository/local binding are complete; production-equivalent public-testnet qualification is SWAP-AUDIT-8.
+- GENESIS READY: **NO** — deterministic predeploy/runtime and repository binding qualification are complete, but public-testnet qualification and final Genesis acceptance remain.
 - PRODUCTION READY: **NO** — Genesis/testnet/security gates remain.
 
 ## Final determination
@@ -547,6 +584,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The remaining blockers are later deployment/release gates: live Registry/Pay→Swap/PublicDistributionVault bindings, production-equivalent testnet qualification, and external security qualification.
+The remaining blockers are later live/release gates: production-equivalent public-testnet Wallet/Exchange/Pay/PublicDistributionVault qualification in SWAP-AUDIT-8 and the independent release security/Genesis closeout gate in SWAP-AUDIT-9.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

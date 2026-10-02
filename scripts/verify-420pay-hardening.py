@@ -15,7 +15,7 @@ router=(root/"contracts/src/pay/PaymentRouter420.sol").read_text()
 for t in ["merchant underpaid","input overspend","gas overspend","slippage","consumedPaymentAuthorization","_requireSharedFeeQuote","IReplayProtection420"]:
     if t not in router: errors.append("router missing "+t)
 sett=(root/"contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol").read_text()
-for t in ["quote replay","stale quote","_requireHealthyMarket","_canonicalSettlementAsset","under settlement","merchant underpaid","consumedQuote"]:
+for t in ["quote replay","stale quote","_requireHealthyMarket","_canonicalSettlementAsset","under settlement","merchant underpaid","consumedQuote","paymentRouter","msg.sender == paymentRouter"]:
     if t not in sett: errors.append("settlement adapter missing "+t)
 health=(root/"contracts/src/pay/adapters/CanonicalSwapHealthAdapter420.sol").read_text()
 if "legacy compatibility facade" not in health.lower() or "mapping" in health:

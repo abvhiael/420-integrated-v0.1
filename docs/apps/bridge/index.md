@@ -36,3 +36,13 @@ A valid external proof alone is never enough to release value. Current route dir
 Retry guidance is fail closed: a failed, stale, replaced or reorged operation must be reconciled against canonical Bridge/RPC state before any retry. The UI must never manufacture success or blindly resubmit an ambiguous transfer.
 
 Use [Getting started](getting-started.md) before moving external assets, [Deployment operations](deployment-operations.md) for deployment/initialization/recovery procedures, and [Developer integration](developer/index.md) for route/proof semantics.
+
+
+## Canonical event and derived-consumer contract
+
+The canonical Bridge event vocabulary comes from the current Bridge contracts and is decoded by 420Indexer. Transfer lifecycle consumers use `TransferCreated`, `TransferStatus`, and `TransferTransition`; gateway movement uses `InboundAccepted`, `OutboundInitiated`, and `OutboundTransferRegistered`. Consumers must not synthesize retired names such as `TransferFinalized` or treat a derived status label as protocol authority.
+
+The transfer lifecycle states are `CREATED`, `SOURCE_PENDING`, `SOURCE_FINALIZED`, `PROOF_PENDING`, `VERIFIED`, `DESTINATION_PENDING`, `COMPLETED`, `FAILED`, `RETRYABLE`, `EXPIRED`, `PAUSED`, `DISPUTED`, and `REFUNDED`. Only the canonical transfer registry decides state; 420Indexer reconstructs a non-authoritative projection.
+
+420Exchange consumes these projections for the current Bridge UI. 420 Explorer displays their provenance, 420 Notifications may subscribe to the same replayable event stream, and 420 Analytics may aggregate the resulting protocol/event/object projections. 420 Wallet remains the authorization/navigation client. None of those surfaces can create, override, reopen, complete, refund, or otherwise mutate Bridge lifecycle state.
+

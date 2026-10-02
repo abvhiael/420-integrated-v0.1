@@ -8,6 +8,7 @@ interface IStakeWorkerCollateralRC420 {
     function slashPolicies() external view returns (address);
     function slashAuthorization() external view returns (address);
     function workerRegistry() external view returns (address);
+    function vault() external view returns (address);
 }
 
 interface IStakeVerifierCollateralRC420 {
@@ -15,6 +16,8 @@ interface IStakeVerifierCollateralRC420 {
     function slashPolicies() external view returns (address);
     function slashAuthorization() external view returns (address);
     function disputeStakeHold() external view returns (address);
+    function verifiers() external view returns (address);
+    function vault() external view returns (address);
 }
 
 interface IStakeSlashAuthorizationRC420 {
@@ -32,6 +35,7 @@ interface IStakeDistributionRC420 {
 
 interface IStakeRewardAccountingRC420 {
     function policies() external view returns (address);
+    function rewardVault() external view returns (address);
     function workerCollateral() external view returns (address);
     function verifierCollateral() external view returns (address);
 }
@@ -73,6 +77,13 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
 
     struct Graph {
         uint256 chainId;
+        Component workerRegistry;
+        Component verifierRegistry;
+        Component disputeEngine;
+        Component canonicalEntitlements;
+        Component workerCollateralVault;
+        Component verifierCollateralVault;
+        Component rewardVault;
         Component workerCollateral;
         Component verifierCollateral;
         Component exitPolicy;
@@ -86,8 +97,6 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         Component disputeIntegration;
         Component workerStake;
         Component slashRecipientResolver;
-        address disputeEngine;
-        address canonicalEntitlements;
     }
 
     Graph private _graph;
@@ -97,6 +106,13 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
 
     constructor(Graph memory g) {
         if (g.chainId != block.chainid) revert InvalidReleaseGraph();
+        _requireComponent(g.workerRegistry);
+        _requireComponent(g.verifierRegistry);
+        _requireComponent(g.disputeEngine.implementation);
+        _requireComponent(g.canonicalEntitlements.implementation);
+        _requireComponent(g.workerCollateralVault);
+        _requireComponent(g.verifierCollateralVault);
+        _requireComponent(g.rewardVault);
         _requireComponent(g.workerCollateral);
         _requireComponent(g.verifierCollateral);
         _requireComponent(g.exitPolicy);
@@ -110,9 +126,10 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         _requireComponent(g.disputeIntegration);
         _requireComponent(g.workerStake);
         _requireComponent(g.slashRecipientResolver);
-        if (g.disputeEngine.code.length == 0 || g.canonicalEntitlements.code.length == 0) {
-            revert InvalidReleaseGraph();
-        }
+        if (
+            g.rewardVault.implementation == g.workerCollateralVault.implementation
+                || g.rewardVault.implementation == g.verifierCollateralVault.implementation
+        ) revert InvalidReleaseGraph();
 
         _graph = g;
         releaseGraphHash = keccak256(abi.encode(g));
@@ -140,6 +157,13 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         Graph memory g = _graph;
         if (g.chainId != block.chainid) revert InvalidReleaseGraph();
 
+        _checkComponent(g.workerRegistry);
+        _checkComponent(g.verifierRegistry);
+        _checkComponent(g.disputeEngine.implementation);
+        _checkComponent(g.canonicalEntitlements.implementation);
+        _checkComponent(g.workerCollateralVault);
+        _checkComponent(g.verifierCollateralVault);
+        _checkComponent(g.rewardVault);
         _checkComponent(g.workerCollateral);
         _checkComponent(g.verifierCollateral);
         _checkComponent(g.exitPolicy);
@@ -175,6 +199,10 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
                 || vc.slashPolicies() != g.slashPolicy.implementation
                 || wc.slashAuthorization() != g.slashAuthorization.implementation
                 || vc.slashAuthorization() != g.slashAuthorization.implementation
+                || wc.workerRegistry() != g.workerRegistry.implementation
+                || vc.verifiers() != g.verifierRegistry.implementation
+                || wc.vault() != g.workerCollateralVault.implementation
+                || vc.vault() != g.verifierCollateralVault.implementation
         ) revert InvalidReleaseGraph();
 
         if (
@@ -189,22 +217,25 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
 
         if (
             rewards.policies() != g.rewardPolicy.implementation
+                || rewards.rewardVault() != g.rewardVault.implementation
                 || rewards.workerCollateral() != g.workerCollateral.implementation
                 || rewards.verifierCollateral() != g.verifierCollateral.implementation
+                || g.rewardVault.implementation == g.workerCollateralVault.implementation
+                || g.rewardVault.implementation == g.verifierCollateralVault.implementation
         ) revert InvalidReleaseGraph();
 
         if (
-            evidence.disputes() != g.disputeEngine
-                || integration.disputes() != g.disputeEngine
+            evidence.disputes() != g.disputeEngine.implementation
+                || integration.disputes() != g.disputeEngine.implementation
                 || integration.slashAuthorizer() != g.slashAuthorization.implementation
-                || vc.disputeStakeHold() != g.disputeEngine
+                || vc.disputeStakeHold() != g.disputeEngine.implementation
         ) revert InvalidReleaseGraph();
 
         if (
-            resolver.disputes() != g.disputeEngine
+            resolver.disputes() != g.disputeEngine.implementation
                 || resolver.verifierEvidenceAdapter() != g.disputeEvidence.implementation
-                || resolver.canonicalEntitlements() != g.canonicalEntitlements
-                || resolver.canonicalEntitlementsCodeHash() != g.canonicalEntitlements.codehash
+                || resolver.canonicalEntitlements() != g.canonicalEntitlements.implementation
+                || resolver.canonicalEntitlementsCodeHash() != g.canonicalEntitlements.runtimeCodeHash
         ) revert InvalidReleaseGraph();
 
         if (
@@ -212,8 +243,8 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
                 || !sourceBinding.active
                 || sourceBinding.source != g.workerCollateral.implementation
                 || sourceBinding.sourceCodeHash != g.workerCollateral.runtimeCodeHash
-                || sourceBinding.workerRegistry != wc.workerRegistry()
-                || workerStake.workers() != sourceBinding.workerRegistry
+                || sourceBinding.workerRegistry != g.workerRegistry.implementation
+                || workerStake.workers() != g.workerRegistry.implementation
         ) revert InvalidReleaseGraph();
     }
 

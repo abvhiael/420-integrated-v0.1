@@ -32,7 +32,17 @@ It adds a read-only release wiring checker, hostile release-wiring tests, a mach
 - WorkerRegistry stake-admission adapter;
 - canonical escrow-derived slash-recipient resolver.
 
-It also pins the common dispute engine and canonical entitlement source used by the dispute/slash-recipient path.
+It also pins the critical upstream runtimes used by the stake graph:
+
+- canonical WorkerRegistry;
+- canonical VerifierRegistry;
+- dispute engine;
+- verified entitlement source;
+- worker collateral AssetVault;
+- verifier collateral AssetVault;
+- reward AssetVault.
+
+The reward Vault must not alias either collateral Vault, preserving separate reward backing from slashable collateral.
 
 The checker validates worker/verifier collateral policy bindings, slash-authorizer/distribution graph, reward-accounting collateral graph, dispute evidence/integration graph, verifier dispute hold, escrow recipient resolver, and WorkerRegistry stake-source binding.
 
@@ -45,7 +55,8 @@ It grants no custody, stake, exit, slash, reward, settlement, publication, deplo
 - exact accumulated graph acceptance;
 - wrong runtime code hash rejection;
 - mismatched slash-distribution executor rejection;
-- WorkerRegistry/stake-source graph mismatch rejection.
+- WorkerRegistry/stake-source graph mismatch rejection;
+- reward-Vault/collateral-Vault alias rejection.
 
 These are release-time graph-drift controls, not new economic semantics.
 

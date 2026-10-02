@@ -144,3 +144,6 @@ jobs:
 
       - name: Verify CMP-1.5.8 dispute stake integration
         run: python scripts/verify-cmp-1-5-8-dispute-stake-integration.py
+
+      - name: Verify CMP-1.5.9 WorkerRegistry stake-source integration
+        run: python scripts/verify-cmp-1-5-9-workerregistry-stake-source-integration.py

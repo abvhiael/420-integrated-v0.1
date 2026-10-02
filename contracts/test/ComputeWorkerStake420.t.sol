@@ -14,10 +14,19 @@ contract MockComputeStakeSource420 is IComputeStakeSource420 {
     bytes32 internal constant SOURCE_ID =
         keccak256("420Integrated.ComputeMarket.ComputeStakeSource.v1");
 
+    address private immutable _workerRegistry;
     mapping(bytes32 => PositionRead) private _positions;
+
+    constructor(address workerRegistry_) {
+        _workerRegistry = workerRegistry_;
+    }
 
     function computeStakeSourceId() external pure returns (bytes32) {
         return SOURCE_ID;
+    }
+
+    function workerRegistry() external view returns (address) {
+        return _workerRegistry;
     }
 
     function setPosition(bytes32 workerId, bytes32 policyId, PositionRead calldata position) external {
@@ -87,7 +96,7 @@ contract ComputeWorkerStake420Test {
         ComputeAuthorization420 workerAuthorization = new ComputeAuthorization420(address(workerCaps));
         workers = new ComputeWorkerRegistry420(address(resources), address(workerAuthorization), GOV);
         workerStake = new ComputeWorkerStake420(address(workers), GOV);
-        source = new MockComputeStakeSource420();
+        source = new MockComputeStakeSource420(address(workers));
         validatorStakeLike = new WrongStakeSurface420();
 
         vm.prank(OPERATOR);
@@ -181,6 +190,22 @@ contract ComputeWorkerStake420Test {
             !workerStake.isEligible(workerId, revision, POLICY, false, bytes32(0)),
             "unbound stake source accepted"
         );
+    }
+
+    function testCompatibleMarkerWithWrongWorkerRegistryCannotBind() public {
+        ComputeWorkerCapabilityMock420 otherCaps = new ComputeWorkerCapabilityMock420();
+        ComputeAuthorization420 otherAuthorization =
+            new ComputeAuthorization420(address(otherCaps));
+        ComputeWorkerRegistry420 otherWorkers =
+            new ComputeWorkerRegistry420(address(resources), address(otherAuthorization), GOV);
+        MockComputeStakeSource420 wrongRegistrySource =
+            new MockComputeStakeSource420(address(otherWorkers));
+
+        vm.prank(GOV);
+        (bool ok,) = address(workerStake).call(
+            abi.encodeCall(workerStake.bindSource, (address(wrongRegistrySource), true))
+        );
+        require(!ok && workerStake.latestSourceBindingRevision() == 0, "cross-wired source bound");
     }
 
     function testValidatorStakeLikeSurfaceCannotBeBoundAsComputeCollateral() public {

@@ -16,6 +16,9 @@ interface IComputeStakeSource420 {
 
     function computeStakeSourceId() external pure returns (bytes32);
 
+    /// @notice Canonical WorkerRegistry whose worker IDs this source accepts.
+    function workerRegistry() external view returns (address);
+
     function readWorkerPosition(bytes32 workerId, bytes32 stakePolicyId)
         external
         view

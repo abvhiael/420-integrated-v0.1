@@ -1,6 +1,6 @@
 # CMP-1.5.4 — Exit queue / withdrawal delay
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -114,6 +114,42 @@ CMP-1.5.4 is COMPLETE only when:
 - no arbitrary recipient or parallel custody path exists;
 - focused qualification and the retained Compute app suite pass on one exact implementation SHA;
 - durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.5 — Objective slash authorization**
+
+
+## Completion evidence
+
+CMP-1.5.4 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`5b706e2b4bfa7fd2f1f3b0a70e64b23cc1f6495c`
+
+Current `main` observed at closeout:
+
+`98e545225d54379086f0c520afcb84b4d4d97288`
+
+Exact-head qualification:
+
+- Compute Market Qualification #98 — run `36943559933` — **PASS**;
+- retained `Compute*.t.sol` app suite — **PASS**;
+- CMP-1.5.4 mechanical verifier — **PASS**;
+- Solidity Contracts #3847 — run `36943559890` — **PASS** on the Compute fast path;
+- 420Docs Qualification #4060 — run `36943559899` — **PASS**;
+- Genesis Address Authority #649 — run `36943559982` — **PASS**;
+- 420Registry REG-AUDIT-4 #484 — run `36943559893` — **PASS**;
+- 420Indexer #1464 — run `36943559895` — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.4-QUALIFICATION-EVIDENCE.json`
+
+This completion record is evidence-only relative to the qualified implementation SHA above. It changes no executable source, tests, workflows, dependencies, configuration, interfaces, deployment state, generated/runtime artifacts, or substantive requirements.
+
+The CMP-1.5 exit-lifecycle Level 2 milestone is satisfied by the retained app suite on the same implementation SHA. Repository-wide Level 3 qualification remains intentionally deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

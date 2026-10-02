@@ -24,6 +24,7 @@ on:
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
       - '420-indexer/src/pay-accounting-export.ts'
+      - '420-indexer/test/abi-manifest.test.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
       - '420-indexer/test/pay-accounting-export.test.ts'
       - 'scripts/verify-420pay-*.py'
@@ -52,6 +53,7 @@ on:
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
       - '420-indexer/src/pay-accounting-export.ts'
+      - '420-indexer/test/abi-manifest.test.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
       - '420-indexer/test/pay-accounting-export.test.ts'
       - 'scripts/verify-420pay-*.py'
@@ -111,6 +113,32 @@ jobs:
           python3 scripts/generate-420pay-audit-6-deployment.py --check --output pay-audit-6-derived.json --print
           python3 scripts/verify-420pay-audit-6-deployment.py
           python3 scripts/420pay-audit-6-smoke.py
+      - name: Retain PAY-AUDIT-6 compiled artifact identities
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          names = [
+              "MerchantRegistry420", "InvoiceRegistry420", "PaymentRegistry420",
+              "PaymentRouter420", "SettlementRouter420", "RefundManager420",
+              "GasSponsor420", "CanonicalSettlementAdapter420", "CanonicalSwapHealthAdapter420",
+          ]
+          records = []
+          for name in names:
+              path = Path("contracts/out") / f"{name}.sol" / f"{name}.json"
+              payload = path.read_bytes()
+              artifact = json.loads(payload)
+              runtime = artifact.get("deployedBytecode", {}).get("object", "")
+              if runtime.startswith("0x"):
+                  runtime = runtime[2:]
+              records.append({
+                  "contract": name,
+                  "artifact_sha256": hashlib.sha256(payload).hexdigest(),
+                  "compiler_runtime_template_sha256": hashlib.sha256(bytes.fromhex(runtime)).hexdigest(),
+              })
+          print("PAY_AUDIT_6_ARTIFACT_IDENTITIES=" + json.dumps(records, sort_keys=True))
+          PY
       - name: Retain PAY-AUDIT-6 derived runtime manifest
         uses: actions/upload-artifact@v4
         with:
@@ -130,3 +158,9 @@ jobs:
             echo 'Forbidden primitive found in 420Pay sources' >&2
             exit 1
           fi
+      - name: Build and test 420Indexer Pay reconciliation
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npm run build
+          node --test --test-concurrency=1 dist/test/lifecycle-reducer.test.js dist/test/abi-manifest.test.js dist/test/pay-accounting-export.test.js

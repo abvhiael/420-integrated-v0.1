@@ -311,6 +311,7 @@
       "dapp": "420 Bridge",
       "contracts": [
         "VerifiedGateway420.sol",
+        "BridgeChainRegistry420.sol",
         "BridgeAssetRegistry.sol",
         "CADCBridgeIntegration.sol",
         "BridgeRouteRegistry.sol",

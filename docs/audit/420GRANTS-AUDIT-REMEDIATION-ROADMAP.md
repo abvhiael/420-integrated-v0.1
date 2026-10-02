@@ -8,12 +8,18 @@ No roadmap step may manufacture custody, bypass Treasury policy, invent a fixed 
 
 ## GRANTS-AUDIT-1 — canonical definition, inventory and authority graph
 
-**Status: IMPLEMENTED — pending exact-head qualification**
+**Status: COMPLETE**
 
-- reconcile architecture, Genesis map, Wallet inventory, Registry/address namespace, historical PR and contract inventory;
-- classify frontend/backend/indexer surfaces as required, optional, shared or not applicable;
-- preserve grants-router as REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS;
-- record the seven-contract canonical suite and four core upstream authorities.
+- reconciled architecture, Genesis map, Wallet inventory, Registry/address namespace, historical PR and contract inventory;
+- classified frontend/backend/indexer/client surfaces as required, optional, shared or not applicable;
+- preserved grants-router as REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS;
+- recorded the seven-contract canonical suite and four core upstream authorities;
+- Level 1 exact-head qualification **PASS** on implementation SHA `02244b26b699557c8c42600c635b38b276249183`;
+- 420Grants Audit Qualification run `37055267365`: contract-core job `110998596847` PASS and grants-security job `110998596514` PASS;
+- affected shared Solidity Contracts run `37055267238` PASS on the same implementation SHA;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-1-QUALIFICATION.md`, introduced by evidence commit `a31b4c29ab27bbba4a19c587879929470eac2b8b`.
+
+Level 2 is not triggered by this definition/inventory step. Level 3 remains deferred to GRANTS-AUDIT-8.
 
 ## GRANTS-AUDIT-2 — contract consistency and lifecycle remediation
 

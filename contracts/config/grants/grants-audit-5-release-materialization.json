@@ -1,0 +1,158 @@
+{
+  "schema": "420-grants-audit-5-release-materialization-v1",
+  "step": "GRANTS-AUDIT-5",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
+  "repository_ready": false,
+  "live_qualified": false,
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "grants_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "production_addresses_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_GRANTS_AUDIT_9"
+  },
+  "canonical_dependencies": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "publication_api": "publishRegisteredService"
+    },
+    "capability_registry": {
+      "candidate_address": "0x0000000000000000000000000000000000000447",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "treasury_disbursement_registry": {
+      "address": null,
+      "status": "REGISTRY_RESOLVED_DEPENDENCY_LIVE_ADDRESS_TESTNET_GATED",
+      "service_id_preimage": "420/service/treasury/v1",
+      "source": "contracts/config/420treasury-genesis.json"
+    }
+  },
+  "deployment_order": [
+    {
+      "order": 1,
+      "contract": "GrantAuthorization420",
+      "source": "contracts/src/grants/GrantAuthorization420.sol",
+      "constructor": ["CapabilityRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 2,
+      "contract": "GrantProgramRegistry420",
+      "source": "contracts/src/grants/GrantProgramRegistry420.sol",
+      "constructor": ["GovernanceTimelock"],
+      "post_init": []
+    },
+    {
+      "order": 3,
+      "contract": "GrantApplicationRegistry420",
+      "source": "contracts/src/grants/GrantApplicationRegistry420.sol",
+      "constructor": ["GrantAuthorization420", "GrantProgramRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 4,
+      "contract": "GrantAwardRegistry420",
+      "source": "contracts/src/grants/GrantAwardRegistry420.sol",
+      "constructor": ["GovernanceTimelock", "GrantProgramRegistry420", "GrantApplicationRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 5,
+      "contract": "GrantProgramRegistry420",
+      "action": "bindAwardRegistry",
+      "args": ["GrantAwardRegistry420"],
+      "one_time": true
+    },
+    {
+      "order": 6,
+      "contract": "GrantMilestoneRegistry420",
+      "source": "contracts/src/grants/GrantMilestoneRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock",
+        "GrantAuthorization420",
+        "GrantProgramRegistry420",
+        "GrantAwardRegistry420",
+        "TreasuryDisbursementRegistry420"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 7,
+      "contract": "GrantRouter420",
+      "source": "contracts/src/grants/GrantRouter420.sol",
+      "constructor": ["GrantProgramRegistry420", "GrantAwardRegistry420", "GrantMilestoneRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 8,
+      "contract": "ProtocolRegistry",
+      "action": "publishRegisteredService",
+      "service_id_preimage": "420/service/grants/v1",
+      "implementation": "GrantRouter420",
+      "version": 1,
+      "active": true,
+      "component_type": "SERVICE",
+      "component_id_preimage": "420/GRANTS/COMPONENT/V1",
+      "metadata_hash_policy": "keccak256(canonical Grants release metadata document)",
+      "manifest_hash_policy": "keccak256(this release materialization manifest canonical payload)",
+      "dependency_root_policy": "keccak256(ordered deployed dependency identities and runtime code hashes)",
+      "interface_hash_policy": "keccak256(canonical GrantRouter420 ABI/interface descriptor)"
+    }
+  ],
+  "artifact_identity": {
+    "compiler": "Solidity 0.8.24",
+    "evm_version": "cancun",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "artifact_paths": [
+      "contracts/out/GrantAuthorization420.sol/GrantAuthorization420.json",
+      "contracts/out/GrantProgramRegistry420.sol/GrantProgramRegistry420.json",
+      "contracts/out/GrantApplicationRegistry420.sol/GrantApplicationRegistry420.json",
+      "contracts/out/GrantAwardRegistry420.sol/GrantAwardRegistry420.json",
+      "contracts/out/GrantMilestoneRegistry420.sol/GrantMilestoneRegistry420.json",
+      "contracts/out/GrantRouter420.sol/GrantRouter420.json"
+    ],
+    "hash_evidence": "QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+  },
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/GrantsDeploymentBinding420.t.sol",
+    "verifier": "scripts/verify-grants-audit-5-release.py",
+    "proves": [
+      "constructor graph binds exact deployed Grants dependencies",
+      "GrantProgramRegistry420 award registry is bound exactly once",
+      "GrantMilestoneRegistry420 binds the exact TreasuryDisbursementRegistry420 dependency",
+      "ProtocolRegistry publishes canonical Grants service to exact GrantRouter420",
+      "ProtocolRegistry derives nonzero router EXTCODEHASH",
+      "registration profile commits nonzero manifest/interface hashes and dependency root",
+      "wrong router/dependency binding is visible and fails assertions",
+      "GrantRouter420 remains registry-resolved and is not assigned a frozen Genesis address"
+    ]
+  },
+  "repository_evidence": {
+    "chain_context": "FOUNDRY_LOCAL_EVM_ONLY",
+    "chain_id": "LOCAL_TEST_CHAIN",
+    "genesis_identity": "NOT_LIVE_GENESIS_EVIDENCE",
+    "deployed_addresses": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "runtime_code_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "artifact_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS"
+  },
+  "live_testnet_evidence": {
+    "required_in_step": "GRANTS-AUDIT-9",
+    "chain_id": null,
+    "genesis_hash": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "deployed_addresses": {},
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "runtime_code_hashes": {},
+    "constructor_binding_receipts": []
+  }
+}

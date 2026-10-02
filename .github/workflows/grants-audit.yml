@@ -42,25 +42,9 @@ jobs:
       - name: Verify Grants audit model
         run: python3 scripts/verify-grants-audit.py
 
-      - name: Emit canonical Grants formatting
+      - name: Check Grants Solidity formatting
         working-directory: contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          files=(
-            src/grants/GrantProgramRegistry420.sol
-            src/grants/GrantApplicationRegistry420.sol
-            src/grants/GrantAwardRegistry420.sol
-            src/grants/GrantMilestoneRegistry420.sol
-            test/GrantsGenesis420.t.sol
-          )
-          forge fmt "${files[@]}"
-          for file in "${files[@]}"; do
-            echo "::GRANTS_FMT_BEGIN::$file"
-            cat "$file"
-            echo "::GRANTS_FMT_END::$file"
-          done
-          git diff --exit-code -- "${files[@]}"
+        run: forge fmt --check src/grants/GrantProgramRegistry420.sol src/grants/GrantApplicationRegistry420.sol src/grants/GrantAwardRegistry420.sol src/grants/GrantMilestoneRegistry420.sol test/GrantsGenesis420.t.sol
 
       - name: Build Grants contract family
         working-directory: contracts

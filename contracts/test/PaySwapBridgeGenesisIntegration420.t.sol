@@ -10,6 +10,7 @@ import "../src/bridge/BridgeRiskManager.sol";
 import "../src/bridge/BridgeTransferRegistry.sol";
 import "../src/bridge/BridgeRouteRegistry.sol";
 import "../src/bridge/BridgeChainRegistry420.sol";
+import "../src/bridge/BridgeAccountingRegistry.sol";
 import "../src/interfaces/ICanonicalSettlement420.sol";
 import "./SwapGenesisIntegration420.t.sol";
 import "./BridgeGenesisIntegration420.t.sol";
@@ -40,6 +41,8 @@ contract PaySwapBridgeGenesisIntegration420Test {
         BridgeTransferRegistry transfers = new BridgeTransferRegistry(address(this), address(env.registry()), keccak256("transfers"));
         BridgeRouteRegistry routes = new BridgeRouteRegistry(address(this), address(env.registry()), keccak256("routes"));
         BridgeChainRegistry420 chains = new BridgeChainRegistry420(address(this), address(env.registry()), keccak256("chains"));
+        BridgeAccountingRegistry accounting =
+            new BridgeAccountingRegistry(address(this), address(env.registry()), keccak256("accounting"));
         MockBridgeAdapter420 bridgeAdapter = new MockBridgeAdapter420();
 
         env.registerResident(address(markets), markets.componentId());
@@ -51,6 +54,7 @@ contract PaySwapBridgeGenesisIntegration420Test {
         env.registerResident(address(transfers), transfers.componentId());
         env.registerResident(address(routes), routes.componentId());
         env.registerResident(address(chains), chains.componentId());
+        env.registerResident(address(accounting), accounting.componentId());
 
         env.setSettlementAsset(CADC, ASSET_ID, true);
         env.health().setMarket(MARKET_ID, true);
@@ -109,6 +113,9 @@ contract PaySwapBridgeGenesisIntegration420Test {
         risk.setRouter(address(bridge), true);
         transfers.setRouter(address(bridge), true);
         bridge.setAdapter(ADAPTER_ID, address(bridgeAdapter));
+        accounting.applyReconciliation(
+            ASSET_ID, 1_000_000 ether, 1_000_000 ether, uint64(block.timestamp), keccak256("cross-accounting")
+        );
         bridgeAdapter.setInbound(IBridgeAdapter420.VerifiedTransfer({
             routeId: ROUTE_ID, assetId: ASSET_ID, sender: address(0xA11CE), recipient: address(0xB0B),
             amount: 100 ether, sourceTxId: keccak256("source"), sourceMessageId: keccak256("message")

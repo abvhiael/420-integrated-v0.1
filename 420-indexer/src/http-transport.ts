@@ -122,6 +122,18 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
       return object ? ok420(object) : error420(404, 'not_found', 'protocol object not found');
     }
 
+    const treasuryBudgetId = pathParam420(path, /^\/v1\/treasury\/budgets\/([^/]+)$/);
+    if (treasuryBudgetId !== null) {
+      const budget = await api.treasuryBudget(chainId, treasuryBudgetId);
+      return budget ? ok420(budget) : error420(404, 'not_found', 'Treasury budget not found');
+    }
+
+    const treasuryDisbursementId = pathParam420(path, /^\/v1\/treasury\/disbursements\/([^/]+)$/);
+    if (treasuryDisbursementId !== null) {
+      const disbursement = await api.treasuryDisbursement(chainId, treasuryDisbursementId);
+      return disbursement ? ok420(disbursement) : error420(404, 'not_found', 'Treasury disbursement not found');
+    }
+
     const blockId = pathParam420(path, /^\/v1\/blocks\/([^/]+)$/);
     if (blockId !== null) {
       const block = await api.block(chainId, blockId);

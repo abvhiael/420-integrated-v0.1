@@ -1,0 +1,77 @@
+{
+  "address": "0x0000000000000000000000000000000000000439",
+  "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it",
+  "buildArtifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorMaterialization": {
+    "genesisConfigHash": "UNRESOLVED_DO_NOT_INVENT_GLOBAL_GENESIS_CONFIGURATION_COMMITMENT",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "immutableReferences": {
+      "5711": [
+        {
+          "length": 32,
+          "start": 1156
+        },
+        {
+          "length": 32,
+          "start": 1999
+        },
+        {
+          "length": 32,
+          "start": 2746
+        }
+      ],
+      "5714": [
+        {
+          "length": 32,
+          "start": 374
+        },
+        {
+          "length": 32,
+          "start": 1229
+        }
+      ],
+      "6270": [
+        {
+          "length": 32,
+          "start": 1062
+        },
+        {
+          "length": 32,
+          "start": 1893
+        }
+      ]
+    },
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "strategy": "DIRECT_GENESIS_PREDEPLOY_IMMUTABLE_MATERIALIZATION"
+  },
+  "contractName": "ApprovedQuoteAssetRegistry",
+  "deployedBytecodeTemplateKeccak256": "0x06bc16d6c6b3a78d4c81aa4588e74f71e9c441dffa4cecb6668cc2b3c061222b",
+  "invariants": [
+    "genesis alloc.code uses deployed runtime bytecode, never creation bytecode",
+    "governanceTimelock, ProtocolRegistry and genesisConfigHash are compiler-declared immutables",
+    "constructor performs no mutable storage writes in the qualified Swap predeploy design",
+    "runtime code hash is final only after the shared global genesisConfigHash is frozen"
+  ],
+  "limitations": [
+    "This record is offline deterministic predeploy evidence, not live-chain deployment evidence.",
+    "SWAP-AUDIT-7/8 remain responsible for deployed code/Registry/binding and production-equivalent testnet evidence."
+  ],
+  "runtimeMaterialized": false,
+  "schema": "420-swap-audit-6-predeploy-state-v1",
+  "source": "contracts/src/swap/ApprovedQuoteAssetRegistry.sol",
+  "sourceBlobSha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
+  "status": "SWAP_AUDIT_6_BLOCKED_GLOBAL_GENESIS_CONFIG_HASH",
+  "storage": {},
+  "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+  "storageRootBasis": "Ethereum empty Merkle-Patricia storage trie root = keccak256(0x80)",
+  "storageSlotCount": 0
+}

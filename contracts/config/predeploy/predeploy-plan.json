@@ -112,27 +112,39 @@
       "address": "0x000000000000000000000000000000000000042b",
       "source": "swap/GenesisDEXFactory.sol",
       "artifact": "contracts/artifacts/GenesisDEXFactory.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "COMPILER_ARTIFACT_FROZEN",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
+      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
+      "compiler_runtime_template_keccak256": "0x2e9c0c4a7fbcf8bcdb3c38fda23c886bd7af446c1598d59ba807e2aae154d60f",
+      "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
+      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
     },
     {
       "name": "PublicBatchAuction",
       "address": "0x000000000000000000000000000000000000042c",
       "source": "swap/PublicBatchAuction.sol",
       "artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "COMPILER_ARTIFACT_FROZEN",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
+      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
+      "compiler_runtime_template_keccak256": "0x8402f58df988b874eb7a1d3e3c05ca471e5de8dbecd987454c53ef139991da98",
+      "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
+      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
     },
     {
       "name": "TWAPOracle",
       "address": "0x000000000000000000000000000000000000042d",
       "source": "swap/TWAPOracle.sol",
       "artifact": "contracts/artifacts/TWAPOracle.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "COMPILER_ARTIFACT_FROZEN",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
+      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
+      "compiler_runtime_template_keccak256": "0x43b55b63656c9a0b3c6ed863298fe4baf9fa0f28afa511e62de79d697b429865",
+      "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
+      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
     },
     {
       "name": "ValidatorBootstrapReserve",
@@ -249,9 +261,13 @@
       "address": "0x0000000000000000000000000000000000000439",
       "source": "swap/ApprovedQuoteAssetRegistry.sol",
       "artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "status": "SOURCE_READY",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts."
+      "status": "COMPILER_ARTIFACT_FROZEN",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
+      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
+      "compiler_runtime_template_keccak256": "0x06bc16d6c6b3a78d4c81aa4588e74f71e9c441dffa4cecb6668cc2b3c061222b",
+      "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
+      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
     },
     {
       "name": "Stake420",

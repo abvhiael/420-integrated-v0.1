@@ -1,0 +1,81 @@
+{
+  "address": "0x000000000000000000000000000000000000042b",
+  "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it",
+  "buildArtifact": "contracts/artifacts/GenesisDEXFactory.json",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "constructorMaterialization": {
+    "genesisConfigHash": "UNRESOLVED_DO_NOT_INVENT_GLOBAL_GENESIS_CONFIGURATION_COMMITMENT",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "immutableReferences": {
+      "5711": [
+        {
+          "length": 32,
+          "start": 1033
+        },
+        {
+          "length": 32,
+          "start": 1320
+        },
+        {
+          "length": 32,
+          "start": 4130
+        }
+      ],
+      "5714": [
+        {
+          "length": 32,
+          "start": 212
+        },
+        {
+          "length": 32,
+          "start": 3461
+        }
+      ],
+      "6270": [
+        {
+          "length": 32,
+          "start": 354
+        },
+        {
+          "length": 32,
+          "start": 960
+        },
+        {
+          "length": 32,
+          "start": 1133
+        }
+      ]
+    },
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "strategy": "DIRECT_GENESIS_PREDEPLOY_IMMUTABLE_MATERIALIZATION"
+  },
+  "contractName": "GenesisDEXFactory",
+  "deployedBytecodeTemplateKeccak256": "0x2e9c0c4a7fbcf8bcdb3c38fda23c886bd7af446c1598d59ba807e2aae154d60f",
+  "invariants": [
+    "genesis alloc.code uses deployed runtime bytecode, never creation bytecode",
+    "governanceTimelock, ProtocolRegistry and genesisConfigHash are compiler-declared immutables",
+    "constructor performs no mutable storage writes in the qualified Swap predeploy design",
+    "runtime code hash is final only after the shared global genesisConfigHash is frozen"
+  ],
+  "limitations": [
+    "This record is offline deterministic predeploy evidence, not live-chain deployment evidence.",
+    "SWAP-AUDIT-7/8 remain responsible for deployed code/Registry/binding and production-equivalent testnet evidence."
+  ],
+  "runtimeMaterialized": false,
+  "schema": "420-swap-audit-6-predeploy-state-v1",
+  "source": "contracts/src/swap/GenesisDEXFactory.sol",
+  "sourceBlobSha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
+  "status": "SWAP_AUDIT_6_BLOCKED_GLOBAL_GENESIS_CONFIG_HASH",
+  "storage": {},
+  "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+  "storageRootBasis": "Ethereum empty Merkle-Patricia storage trie root = keccak256(0x80)",
+  "storageSlotCount": 0
+}

@@ -1,0 +1,911 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "registry_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "genesisConfigHash_",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "GENESIS_INITIALIZATION_VERSION",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_TOKEN_DECIMALS",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expectedConfigHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "assertGenesisConfiguration",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "baseline",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "timestamp",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cumulativeX96",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "sourceHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "checkpoint",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "observationCreated",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "componentId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "minWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "maxWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "maxStalenessSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "configureMarket",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "genesisConfigHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "genesisInitialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initializationVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "latest",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "timestamp",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint192",
+          "name": "priceX96",
+          "type": "uint192"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "latestSourceHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "latestWindowSeconds",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "marketConfig",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "minWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "maxWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "maxStalenessSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint16",
+              "name": "major",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "minor",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint16",
+              "name": "patch",
+              "type": "uint16"
+            }
+          ],
+          "internalType": "struct Types420.Version",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "readObservation",
+      "outputs": [
+        {
+          "internalType": "uint192",
+          "name": "priceX96",
+          "type": "uint192"
+        },
+        {
+          "internalType": "uint64",
+          "name": "observedAt",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "validUntil",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint32",
+          "name": "observationWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint16",
+          "name": "confidenceBps",
+          "type": "uint16"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "sourceHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "enum Types420.Health",
+          "name": "health",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "referencePrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "priceE18",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "minWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "maxWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "maxStalenessSeconds",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "MarketConfigured",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "timestamp",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint192",
+          "name": "priceX96",
+          "type": "uint192"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "observationWindowSeconds",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "sourceHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ObservationApplied",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "marketId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "pool",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "timestamp",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "sourceHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SourceSeeded",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InactiveComponent",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidConfig",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidIdentifier",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidMarket",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPool",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidTokenDecimals",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ObservationStale",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ObservationUnavailable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OracleDisabled",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "Paused",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PriceOverflow",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TimelockRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "componentId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint16",
+          "name": "major",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "minor",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "patch",
+          "type": "uint16"
+        }
+      ],
+      "name": "UnsupportedVersion",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WindowTooShort",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "abiSha256": "40f939fd4f975ba36e5d331114b6cb1dbe1b30437ec6b4eb83c0f67dc8f13a44",
+  "canonicalAddress": "0x000000000000000000000000000000000000042d",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "contractName": "TWAPOracle",
+  "creationBytecodeKeccak256": "0x1184dfccb5166821e72b5c89bff548cf94487dd40948670e35e81f1a8db75753",
+  "deployedBytecodeTemplate": "0x60806040526004361015610011575f80fd5b5f3560e01c8063053169ae1461094e57806316a8e6bf1461018c5780632ae9c600146109085780632b026822146108d8578063303e60451461088e578063313652621461084f57806343270bf714610395578063598663f01461037a5780635b34eba0146103525780635f6a8b69146102f357806379feb107146102ba5780637b103999146102765780637ee7d4521461018c5780639a1fdd7914610232578063ab7e1647146101a7578063c7f3c8301461018c578063d97e60f614610152578063dcaaadcb146101185763ff3277cf146100ea575f80fd5b34610114576020366003190112610114576004355f526003602052602060405f2054604051908152f35b5f80fd5b34610114575f3660031901126101145760206040517f00000000000000000000000000000000000000000000000000000000000000008152f35b34610114575f3660031901126101145760206040517fa934b2d926df56a645e1a33762bcfef5a9436fa25bc17faca22ec19d9fb872188152f35b34610114575f36600319011261011457602060405160018152f35b34610114576020366003190112610114576101c3600435610a48565b50505050509060018060c01b0316670de0b6b3a76400009081810291818304149015171561021e5760601c801561020c576001600160401b036040928351928352166020820152f35b604051639004755560e01b8152600490fd5b634e487b7160e01b5f52601160045260245ffd5b34610114575f366003190112610114576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b34610114575f366003190112610114576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b34610114576020366003190112610114576004355f5260016020526040805f20548151906001600160401b0381168252821c6020820152f35b34610114576020366003190112610114576004355f908152602081815260409182902054825163ffffffff808316825282841c81169382019390935281841c9092169282019290925260ff606092831c16151591810191909152608090f35b34610114576020366003190112610114576020610370600435610c1e565b6040519015158152f35b34610114575f36600319011261011457602060405160248152f35b346101145760a03660031901126101145763ffffffff60243516602435036101145763ffffffff60443516604435036101145763ffffffff606435166064350361011457608435151560843503610114576001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116330361076b5760405163791c260f60e01b81527f1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d6004820181905260e0826024817f000000000000000000000000000000000000000000000000000000000000000087165afa918215610760575f9261081e575b506020820191838351161580156107f2575b6107d9576040848451163f91015180159182156107ce575b50506107b65750511660405163de11892b60e01b81523360048201527f9f0be8271f4ceaf3348b53ed550f743a1c7d0fe30dc4364bd60737fe8ea171076024820152602081604481855afa908115610760575f9161077c575b501561076b57602060249160405192838092630972dbd560e11b82527f9f0be8271f4ceaf3348b53ed550f743a1c7d0fe30dc4364bd60737fe8ea1710760048301525afa908115610760575f91610726575b501561071457600435156106d9576084356106bb575b60405161057c816109c2565b63ffffffff6024351681526020810163ffffffff6044351681526040820163ffffffff6064351681526060830190608435151582526004355f525f60205263ffffffff60405f209451166bffffffff000000000000000067ffffffff000000008654955160201b16925160401b169260ff60601b9051151560601b16936cffffffffffffffffffffffffff191617171717905560046020525f600260408220828155826001820155015560016020525f6040812055600260205260405f2063ffffffff19815416905560036020525f60408120556040517f916a53a917970172b3e1655b38907e1f89614c0859cf40a7136bcef63e534a4a60043591806106b660843560643560443560243585929160609295949195608085019663ffffffff928380921687521660208601521660408401521515910152565b0390a2005b63ffffffff602435161580156106fb575b80156106eb575b15610570575b6040516306b7c75960e31b8152600490fd5b5063ffffffff60643516156106d3565b5063ffffffff6024351663ffffffff60443516106106cc565b6040516399f26d5b60e01b8152600490fd5b90506020813d602011610758575b8161074160209383610a27565b8101031261011457610752906115c1565b8161055a565b3d9150610734565b6040513d5f823e3d90fd5b6040516282b42960e81b8152600490fd5b90506020813d6020116107ae575b8161079760209383610a27565b81010312610114576107a8906115c1565b82610508565b3d915061078a565b6024906040519063e6838a9960e01b82526004820152fd5b1415905084806104af565b60405163e6838a9960e01b815260048101839052602490fd5b506080810151600881101561080a5760021415610497565b634e487b7160e01b5f52602160045260245ffd5b61084191925060e03d60e011610848575b6108398183610a27565b810190611c19565b9083610485565b503d61082f565b346101145760203660031901126101145760206040517f0000000000000000000000000000000000000000000000000000000000000000600435148152f35b34610114576020366003190112610114576004355f526004602052606060405f206001600160401b0381541690600260018201549101549060405192835260208301526040820152f35b34610114576020366003190112610114576004355f526002602052602063ffffffff60405f205416604051908152f35b34610114575f366003190112610114576060610922610bc8565b61094c60405180926040908161ffff91828151168552826020820151166020860152015116910152565bf35b346101145760203660031901126101145761ffff63ffffffff610972600435610a48565b97949095969291936040519760018060c01b031688526001600160401b03809216602089015216604087015216606085015216608083015260a0820152600582101561080a5760e09160c0820152f35b608081019081106001600160401b038211176109dd57604052565b634e487b7160e01b5f52604160045260245ffd5b604081019081106001600160401b038211176109dd57604052565b606081019081106001600160401b038211176109dd57604052565b90601f801991011681019081106001600160401b038211176109dd57604052565b90815f5260205f8152604090815f2092825193610a64856109c2565b549363ffffffff958686168252838201948787861c16865260ff818401978981841c16895260601c161580156060850152610bb857815f5260018552805f2097815198610ab08a6109f1565b54926001600160401b03948585168b52878b0194841c8552815f5260028852600383855f205416985282845f205499878d511615928315610ba5575b8315610b9c575b8315610b8f575b508215610b82575b5050610b7157610b1288916115ce565b94505050505003610b605783895116975116870180971161021e57864211610b5057505195516001600160c01b039096169581169416925f91600190565b51632914ec4160e11b8152600490fd5b8151639004755560e01b8152600490fd5b8251639004755560e01b8152600490fd5b511688119050825f610b02565b5182168a1092505f610afa565b8b159350610af3565b87516001600160c01b0316159350610aec565b51632072f0a960e01b8152600490fd5b5f60408051610bd681610a0c565b8281528260208201520152604051610bed81610a0c565b600181525f60208201525f604082015290565b8115610c0a570490565b634e487b7160e01b5f52601260045260245ffd5b60405163791c260f60e01b8082527fa934b2d926df56a645e1a33762bcfef5a9436fa25bc17faca22ec19d9fb87218600483018190525f926001600160a01b039260e0927f00000000000000000000000000000000000000000000000000000000000000008516928481602481875afa908115610760575f91611590575b50856020820151163014801590611578575b6107d95760400151801590303f821561156d575b50506107b657610cd0610bc8565b60405163062d75b160e31b8152826004820152610d0d60248201836040908161ffff91828151168552826020820151166020860152015116910152565b602081608481885afa908115610760575f91611533575b501561150257506040518281527fb6ba898fada0af5edf4e37a4f4f9727ba64450ba6e6726890fad5eb6e37311c78060048301528582602481885afa918215610760575f926114e3575b506020820191878351161580156114cb575b6107d9576040888451163f91015180159182156114c0575b50506107b65750602086606492511660405192838092630cfc449760e11b82528660048301527f6d807b665e9f97ce9f599805421d30a24cebb358d518dc060b1ca72ad37cd5be60248301525f60448301525afa908115610760575f91611486575b501561146e576040518281527fb2f9a3db669531e5f43a079726cdcd056f8afcf4e689099d1cfeb8737b2824558060048301528582602481885afa918215610760575f9261144f575b50602082019187835116158015611437575b6107d9576040888451163f910151801591821561142c575b50506107b6575051851690813b15610114575f90604460405180948193635474472960e01b83526004830152600160248301525afa801561076057611410575b5060405190815282816024817f68883ee137e70661082c5612ae8df1d82a5451349b68868ea24672af0787ca69958660048301525afa928315610760575f936113f1575b50506020820191838351161580156113d9575b6107d9576040848451163f91015180159182156113ce575b50506107b657505116604051634d4502c960e11b8152602081600481855afa9081156113c3578391611391575b50460361137f57606060049160405192838092621574e360e91b82525afa908115611374578291611335575b50610f7e610bc8565b61ffff8080845116925116820361130757505050818152806020526040812060ff60405191610fac836109c2565b5463ffffffff8116835263ffffffff8160201c16602084015263ffffffff8160401c16604084015260601c1615801560608301526112f557610fed836115ce565b939195888896949296526004602052604088206040519061100d82610a0c565b8660026001600160401b038354169283855260018101546020860152015491826040850152159182156112ea575b50506112d8576001600160401b038151166001600160401b03881611156112b2576001600160401b038151166001600160401b03881603946001600160401b0386116112c4576001600160401b0386169263ffffffff81511684106112b2576020015163ffffffff16831161129b57509060206110bb9201518803610c00565b91821561020c576110ce6110d491611c88565b91611c88565b908260ff80831690841680821115611263575050506110f86110fe9260ff92611bf7565b16611c0b565b908115610c0a576001600160c01b0382900481116112415781810291818304149015171561021e57935b84158015611253575b611241577fd1bdc8bb34d5cfa543b9db2a9aa665f29893081eb2179552a71c0e9b838234b39560028860809760018060c01b03169363ffffffff60405196611178886109f1565b6001600160401b038a168852602088019787895284875260016020526001600160401b03604088209151166001600160401b0319809a5160401b16179055169583602052604085208763ffffffff1982541617905560036020528760408620556001600160401b0360408051966111ee88610a0c565b828c16885260208801948552818801958b8752815260046020522095511690855416178455516001840155519101556001600160401b0360405194168452602084015260408301526060820152a2600190565b60405163f5c787f160e01b8152600490fd5b506001600160c01b038511611131565b98949893919311611277575b505050611128565b6112929397506110f861128c9260ff92611bf7565b90610c00565b935f808061126f565b9450505050506112af949593929193611b45565b90565b604051639568563d60e01b8152600490fd5b634e487b7160e01b8a52601160045260248afd5b505050506112af949593929193611b45565b14159050865f61103b565b604051632072f0a960e01b8152600490fd5b806040611331926020860151169401511660405193849363224cea7360e01b855260048501611b01565b0390fd5b905060603d60601161136d575b61134c8183610a27565b810190606081830312611369579061136391611aba565b5f610f75565b8280fd5b503d611342565b6040513d84823e3d90fd5b60405163eb48439160e01b8152600490fd5b90506020813d6020116113bb575b816113ac60209383610a27565b8101031261011457515f610f49565b3d915061139f565b6040513d85823e3d90fd5b141590505f80610f1c565b506080810151600881101561080a5760021415610f04565b611408929350803d10610848576108398183610a27565b905f80610ef1565b9094506001600160401b0381116109dd576040525f935f610ead565b141590505f80610e6d565b506080810151600881101561080a5760021415610e55565b611467919250863d8811610848576108398183610a27565b905f610e43565b60249060405190630cb09dc760e01b82526004820152fd5b90506020813d6020116114b8575b816114a160209383610a27565b81010312610114576114b2906115c1565b5f610dfa565b3d9150611494565b141590505f80610d98565b506080810151600881101561080a5760021415610d80565b6114fb919250863d8811610848576108398183610a27565b905f610d6e565b61ffff61133181835116916040816020860151169401511660405193849363224cea7360e01b855260048501611b01565b90506020813d602011611565575b8161154e60209383610a27565b810103126101145761155f906115c1565b5f610d24565b3d9150611541565b141590505f80610cc2565b506080810151600881101561080a5760021415610cae565b6115a79150853d8711610848576108398183610a27565b5f610c9c565b51906001600160a01b038216820361011457565b5190811515820361011457565b60405163791c260f60e01b81527fa9321d2c2855707eca2c862068544049b1e446cc14bc38b72bf06a9b6a1926bd6004820181905291929160e0826024817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03165afa918215610760575f92611a8a575b506020820180519092906001600160a01b0316158015611a72575b6107d9578251604091909101518015916001600160a01b03163f8215611a67575b50506107b6575051604051637564912b60e01b815260048101849052919060c090839060249082906001600160a01b03165afa928315610760575f905f925f915f935f965f986119e3575b5083958097829984159081156119da575b5080156119cf575b80156119be575b80156119b5575b80156119a4575b8015611993575b801561197e575b61196c57604051630dfe168160e01b8152956020876004816001600160a01b0388165afa968715610760575f97611930575b5060405163d21220a760e01b8152976020896004816001600160a01b0389165afa988915610760575f996118f4575b50604051631df8c71760e01b8152916060836004816001600160a01b038a165afa998a15610760575f905f945f9c61189f575b506001600160401b0396878d168015908115611895575b5061185c576001600160a01b039081169b16908b9082821480611880575b1561183b5750505060ff9350995b98863f6040519760208901998a5260018060a01b031660408901526060880152608087015260018060a01b031660a08601521660c084015260e083015260e08252610100820190828210908211176109dd5760405251902090565b6001600160a01b03161491508161186d575b501561185c5760ff92996117e0565b60405162820f3560e61b8152600490fd5b6001600160a01b0383161490505f61184d565b506001600160a01b03818116908616146117d2565b905042105f6117b4565b94509a50506060833d6060116118ec575b816118bd60609383610a27565b810103126101145782519260406020820151910151936001600160401b03851685036101145790939a5f61179d565b3d91506118b0565b9098506020813d602011611928575b8161191060209383610a27565b8101031261011457611921906115ad565b975f61176a565b3d9150611903565b9096506020813d602011611964575b8161194c60209383610a27565b810103126101145761195d906115ad565b955f61173b565b3d915061193f565b604051639db8d5b160e01b8152600490fd5b506001600160a01b0382811690871614611709565b506001600160a01b03861615611702565b506001600160a01b038216156116fb565b50823b156116f4565b506001600160a01b038316156116ed565b5060ff8716156116e6565b9050155f6116de565b96505095509250505060c0823d60c011611a5f575b81611a0560c09383610a27565b8101031261011457611a16826115ad565b91611a23602082016115ad565b93611a30604083016115ad565b9260608301519160ff8316830361011457611a5260a0608086015195016115c1565b959694929395965f6116cd565b3d91506119f8565b141590505f80611682565b506080810151600881101561080a5760021415611661565b611aa491925060e03d60e011610848576108398183610a27565b905f611646565b519061ffff8216820361011457565b919082606091031261011457604051611ad281610a0c565b6040611afc818395611ae381611aab565b8552611af160208201611aab565b602086015201611aab565b910152565b7fa934b2d926df56a645e1a33762bcfef5a9436fa25bc17faca22ec19d9fb87218815261ffff91821660208201529181166040830152909116606082015260800190565b92907f146e20dcaa9628a6a1bab3e32b41965b30b516aac6db83c0e9d304954570654192946040928351611b7881610a0c565b60026001600160401b0380991698898352602093848401908152878401918683528a5f5260048652885f209451166001600160401b031985541617845551600184015551910155600181525f8481205560028152835f2063ffffffff198154169055600381525f84812055835196875286015260018060a01b031693a3565b9060ff8091169116039060ff821161021e57565b604d811161021e57600a0a90565b9060e082820312610114576040519160a083018381106001600160401b038211176109dd5760c092611c709160405282518552611c58602084016115ad565b60208601526040830151604086015260608301611aba565b60608401520151600881101561011457608082015290565b5f80604051926020938481019063313ce56760e01b825260048152611cac816109f1565b51915afa3d15611d2b573d906001600160401b0382116109dd5760405191611cdd601f8201601f1916850184610a27565b82523d5f8484013e5b158015611d20575b611d0e57818180518101031261011457015160248111611d0e5760ff1690565b60405163686d360760e01b8152600490fd5b508181511415611cee565b606090611ce656fea2646970667358221220255c29a320cf61582967940e9413b9f44372c857d2057742522d419c2d49357d64736f6c63430008180033",
+  "deployedBytecodeTemplateKeccak256": "0x43b55b63656c9a0b3c6ed863298fe4baf9fa0f28afa511e62de79d697b429865",
+  "immutableReferenceCount": 8,
+  "immutableReferences": {
+    "5711": [
+      {
+        "length": 32,
+        "start": 651
+      },
+      {
+        "length": 32,
+        "start": 1108
+      },
+      {
+        "length": 32,
+        "start": 3172
+      },
+      {
+        "length": 32,
+        "start": 5646
+      }
+    ],
+    "5714": [
+      {
+        "length": 32,
+        "start": 303
+      },
+      {
+        "length": 32,
+        "start": 2151
+      }
+    ],
+    "6270": [
+      {
+        "length": 32,
+        "start": 583
+      },
+      {
+        "length": 32,
+        "start": 1008
+      }
+    ]
+  },
+  "runtimeTemplateBytes": 7529,
+  "schema": "420-swap-audit-6-compiler-artifact-v1",
+  "source": "contracts/src/swap/TWAPOracle.sol",
+  "sourceBlobSha1": "55802efd2331c6278ca4482f116c72e7cc590466",
+  "status": "SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 770,
+        "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+        "label": "marketConfig",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(MarketConfig)752_storage)"
+      },
+      {
+        "astId": 775,
+        "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+        "label": "latest",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_struct(Observation)758_storage)"
+      },
+      {
+        "astId": 779,
+        "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+        "label": "latestWindowSeconds",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_bytes32,t_uint32)"
+      },
+      {
+        "astId": 783,
+        "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+        "label": "latestSourceHash",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_bytes32)"
+      },
+      {
+        "astId": 788,
+        "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+        "label": "baseline",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_bytes32,t_struct(Baseline)765_storage)"
+      }
+    ],
+    "types": {
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_bytes32,t_struct(Baseline)765_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct TWAPOracle.Baseline)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Baseline)765_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(MarketConfig)752_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct TWAPOracle.MarketConfig)",
+        "numberOfBytes": "32",
+        "value": "t_struct(MarketConfig)752_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(Observation)758_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct TWAPOracle.Observation)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Observation)758_storage"
+      },
+      "t_mapping(t_bytes32,t_uint32)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint32)",
+        "numberOfBytes": "32",
+        "value": "t_uint32"
+      },
+      "t_struct(Baseline)765_storage": {
+        "encoding": "inplace",
+        "label": "struct TWAPOracle.Baseline",
+        "members": [
+          {
+            "astId": 760,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "timestamp",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 762,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "cumulativeX96",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 764,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "sourceHash",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_struct(MarketConfig)752_storage": {
+        "encoding": "inplace",
+        "label": "struct TWAPOracle.MarketConfig",
+        "members": [
+          {
+            "astId": 745,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "minWindowSeconds",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 747,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "maxWindowSeconds",
+            "offset": 4,
+            "slot": "0",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 749,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "maxStalenessSeconds",
+            "offset": 8,
+            "slot": "0",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 751,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "enabled",
+            "offset": 12,
+            "slot": "0",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_struct(Observation)758_storage": {
+        "encoding": "inplace",
+        "label": "struct TWAPOracle.Observation",
+        "members": [
+          {
+            "astId": 755,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "timestamp",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 757,
+            "contract": "src/swap/TWAPOracle.sol:TWAPOracle",
+            "label": "priceX96",
+            "offset": 8,
+            "slot": "0",
+            "type": "t_uint192"
+          }
+        ],
+        "numberOfBytes": "32"
+      },
+      "t_uint192": {
+        "encoding": "inplace",
+        "label": "uint192",
+        "numberOfBytes": "24"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

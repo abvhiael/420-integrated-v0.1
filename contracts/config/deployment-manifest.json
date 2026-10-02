@@ -1,7 +1,4 @@
 {
-  "schema": "420-system-contract-deployment-v2",
-  "version": 2,
-  "governance_timelock": "0x0000000000000000000000000000000000000429",
   "contracts": [
     {
       "address": "0x0000000000000000000000000000000000000420",
@@ -75,34 +72,34 @@
       "name": "PublicDistributionVault"
     },
     {
-      "name": "GenesisDEXFactory",
       "address": "0x000000000000000000000000000000000000042b",
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "runtime_artifact": "contracts/artifacts/GenesisDEXFactory.json",
+      "name": "GenesisDEXFactory",
       "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
-      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
-      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
-      "runtime_code_hash": "0x1c9e72335d2da9ef3a7c65bcfab88364ba04ec6ed85789ff8c3b231e89e10e35"
+      "runtime_artifact": "contracts/artifacts/GenesisDEXFactory.json",
+      "runtime_code_hash": "0x1c9e72335d2da9ef3a7c65bcfab88364ba04ec6ed85789ff8c3b231e89e10e35",
+      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd"
     },
     {
-      "name": "PublicBatchAuction",
       "address": "0x000000000000000000000000000000000000042c",
-      "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "runtime_artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
-      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
       "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
-      "runtime_code_hash": "0xe2f81400c625114689b744ff4dd116143d4991e01f1608370a65566938df9203"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "PublicBatchAuction",
+      "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/PublicBatchAuction.json",
+      "runtime_code_hash": "0xe2f81400c625114689b744ff4dd116143d4991e01f1608370a65566938df9203",
+      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29"
     },
     {
-      "name": "TWAPOracle",
       "address": "0x000000000000000000000000000000000000042d",
-      "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "runtime_artifact": "contracts/artifacts/TWAPOracle.json",
-      "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
-      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
       "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
-      "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "TWAPOracle",
+      "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/TWAPOracle.json",
+      "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32",
+      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466"
     },
     {
       "address": "0x000000000000000000000000000000000000042e",
@@ -175,14 +172,14 @@
       "name": "VerifiedGateway420"
     },
     {
-      "name": "ApprovedQuoteAssetRegistry",
       "address": "0x0000000000000000000000000000000000000439",
-      "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "runtime_artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
-      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
       "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
-      "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6"
+      "deployment": "GENESIS_SYSTEM_ADDRESS",
+      "name": "ApprovedQuoteAssetRegistry",
+      "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
+      "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6",
+      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e"
     },
     {
       "address": "0x000000000000000000000000000000000000043a",
@@ -205,15 +202,18 @@
       "name": "ConsensusSystemCall420"
     }
   ],
+  "extended_candidate_addresses": "config/extended-system-addresses.json",
+  "genesis_dapps": "contracts/config/genesis-dapp-contract-map.json",
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
+  "namespace_authority": "contracts/config/genesis-address-namespace.json",
+  "namespace_policy": "FROZEN_STEP6_2_PRESERVED",
   "notes": [
     "Code at 0x0420-0x043c is placed directly in genesis alloc from pinned runtime artifacts.",
     "Constructor and post-init effects are materialized through contracts/config/predeploy/storage-init.json.",
     "ValidatorRegistry and RewardController are bound to ConsensusSystemCall420 at 0x043c before the first non-genesis consensus write.",
     "ConsensusSystemCall420 is invoked only through the patched node420 native EVM system-call path from go-ethereum params.SystemAddress."
   ],
-  "genesis_dapps": "contracts/config/genesis-dapp-contract-map.json",
-  "extended_candidate_addresses": "config/extended-system-addresses.json",
   "readiness_note": "Genesis system-contract identity is frozen through 0x043c; bytecode/storage roots and patched node420 tree hash remain release-artifact gates.",
-  "namespace_authority": "contracts/config/genesis-address-namespace.json",
-  "namespace_policy": "FROZEN_STEP6_2_PRESERVED"
+  "schema": "420-system-contract-deployment-v2",
+  "version": 2
 }

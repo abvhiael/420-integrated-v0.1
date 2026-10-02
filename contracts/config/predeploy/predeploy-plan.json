@@ -1,12 +1,6 @@
 {
-  "schema": "420-genesis-predeploy-plan-v1",
-  "status": "FROZEN_ADDRESS_MAP_ARTIFACTS_PENDING",
-  "solidity": {
-    "evm_version": "cancun",
-    "optimizer": true,
-    "optimizer_runs": 200,
-    "version": "0.8.24"
-  },
+  "namespace_authority": "contracts/config/genesis-address-namespace.json",
+  "namespace_policy": "FROZEN_STEP6_2_PRESERVED",
   "predeploys": [
     {
       "address": "0x0000000000000000000000000000000000000420",
@@ -120,43 +114,43 @@
       "status": "SOURCE_READY"
     },
     {
-      "name": "GenesisDEXFactory",
       "address": "0x000000000000000000000000000000000000042b",
-      "source": "swap/GenesisDEXFactory.sol",
       "artifact": "contracts/artifacts/GenesisDEXFactory.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
-      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
       "compiler_runtime_template_keccak256": "0x2e9c0c4a7fbcf8bcdb3c38fda23c886bd7af446c1598d59ba807e2aae154d60f",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "name": "GenesisDEXFactory",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
-      "runtime_code_hash": "0x1c9e72335d2da9ef3a7c65bcfab88364ba04ec6ed85789ff8c3b231e89e10e35"
+      "runtime_code_hash": "0x1c9e72335d2da9ef3a7c65bcfab88364ba04ec6ed85789ff8c3b231e89e10e35",
+      "source": "swap/GenesisDEXFactory.sol",
+      "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
+      "status": "ARTIFACT_READY"
     },
     {
-      "name": "PublicBatchAuction",
       "address": "0x000000000000000000000000000000000000042c",
-      "source": "swap/PublicBatchAuction.sol",
       "artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
-      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
       "compiler_runtime_template_keccak256": "0x8402f58df988b874eb7a1d3e3c05ca471e5de8dbecd987454c53ef139991da98",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "name": "PublicBatchAuction",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
-      "runtime_code_hash": "0xe2f81400c625114689b744ff4dd116143d4991e01f1608370a65566938df9203"
+      "runtime_code_hash": "0xe2f81400c625114689b744ff4dd116143d4991e01f1608370a65566938df9203",
+      "source": "swap/PublicBatchAuction.sol",
+      "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
+      "status": "ARTIFACT_READY"
     },
     {
-      "name": "TWAPOracle",
       "address": "0x000000000000000000000000000000000000042d",
-      "source": "swap/TWAPOracle.sol",
       "artifact": "contracts/artifacts/TWAPOracle.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
-      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
       "compiler_runtime_template_keccak256": "0x43b55b63656c9a0b3c6ed863298fe4baf9fa0f28afa511e62de79d697b429865",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "name": "TWAPOracle",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
-      "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32"
+      "runtime_code_hash": "0x581a2ab1d4f8ffcecd88bb9bce1b868b4de39b52e1911957dbdc93759631fb32",
+      "source": "swap/TWAPOracle.sol",
+      "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000042e",
@@ -269,17 +263,17 @@
       "status": "SOURCE_READY"
     },
     {
-      "name": "ApprovedQuoteAssetRegistry",
       "address": "0x0000000000000000000000000000000000000439",
-      "source": "swap/ApprovedQuoteAssetRegistry.sol",
       "artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "status": "ARTIFACT_READY",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
-      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
-      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
       "compiler_runtime_template_keccak256": "0x06bc16d6c6b3a78d4c81aa4588e74f71e9c441dffa4cecb6668cc2b3c061222b",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "name": "ApprovedQuoteAssetRegistry",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
-      "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6"
+      "runtime_code_hash": "0x7ed9d661715160092a1fd1fdbd4ff09dca80714f2ff0270855d1c5ed1ab315f6",
+      "source": "swap/ApprovedQuoteAssetRegistry.sol",
+      "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000043a",
@@ -321,6 +315,12 @@
     "Genesis generator must never infer storage layouts from source text.",
     "ConsensusSystemCall420 MUST be present at 0x043c before ValidatorRegistry or RewardController consensus writes can succeed."
   ],
-  "namespace_authority": "contracts/config/genesis-address-namespace.json",
-  "namespace_policy": "FROZEN_STEP6_2_PRESERVED"
+  "schema": "420-genesis-predeploy-plan-v1",
+  "solidity": {
+    "evm_version": "cancun",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "version": "0.8.24"
+  },
+  "status": "FROZEN_ADDRESS_MAP_ARTIFACTS_PENDING"
 }

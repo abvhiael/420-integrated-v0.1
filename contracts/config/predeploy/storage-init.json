@@ -1,11 +1,8 @@
 {
-  "schema": "420-predeploy-storage-init-v2",
-  "governance_timelock": "0x0000000000000000000000000000000000000429",
-  "consensus_system_call": "0x000000000000000000000000000000000000043c",
-  "community_validator_reserve": "0x0000000000000000000000000000000000000425",
-  "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
-  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
+  "bootstrap_governor": "0x0000000000000000000000000000000000000437",
   "bridge_verifier": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION",
+  "community_validator_reserve": "0x0000000000000000000000000000000000000425",
+  "consensus_system_call": "0x000000000000000000000000000000000000043c",
   "dex_pool_implementation": "UNRESOLVED_NOT_REQUIRED_FOR_SWAP_PREDEPLOY_BIND_AFTER_QUALIFIED_POOL_DEPLOYMENT",
   "entries": {
     "AIJobEscrow": {
@@ -185,6 +182,12 @@
       ]
     }
   },
+  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
+  "genesis_config_commitment": "contracts/config/genesis-config-commitment.json",
+  "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+  "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
+  "protocol_registry": "0x0000000000000000000000000000000000000434",
   "rules": [
     "Direct predeploy placement does not execute Solidity constructors; constructor and post_init effects must be materialized in genesis storage deterministically.",
     "RewardController and ValidatorRegistry MUST begin with consensusSystemCaller=0x043c and consensusSystemCallerBound=true.",
@@ -195,9 +198,6 @@
     "GenesisDEXFactory begins with poolImplementation=0; governance MUST bind a qualified code-bearing implementation reference before canonical pool registration.",
     "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly."
   ],
-  "bootstrap_governor": "0x0000000000000000000000000000000000000437",
-  "protocol_registry": "0x0000000000000000000000000000000000000434",
-  "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac",
-  "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
-  "genesis_config_commitment": "contracts/config/genesis-config-commitment.json"
+  "schema": "420-predeploy-storage-init-v2",
+  "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac"
 }

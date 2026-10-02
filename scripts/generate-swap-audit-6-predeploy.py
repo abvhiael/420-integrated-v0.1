@@ -81,7 +81,7 @@ def canonical_json(obj: object) -> str:
 
 
 def manifest_json(obj: object) -> str:
-    return json.dumps(obj, indent=2) + "\n"
+    return json.dumps(obj, indent=2, sort_keys=True) + "\n"
 
 
 def normalize_hex(value: object) -> str:

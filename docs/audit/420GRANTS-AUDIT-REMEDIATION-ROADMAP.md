@@ -1,0 +1,126 @@
+# 420Grants audit remediation roadmap
+
+## Authority rule
+
+Repository truth overrides conversational memory. 420Grants is a **Genesis implementation protocol**, not a separately frozen public standalone Genesis application. Its canonical responsibility is governed grant workflow state; Civic/GovernanceTimelock owns governance authorization, 420Treasury owns budget/disbursement controls, 420Vault owns custody/release, CapabilityRegistry420 owns delegated capability authority, and Registry-resolved clients are replaceable presentation/transaction surfaces.
+
+No roadmap step may manufacture custody, bypass Treasury policy, invent a fixed Grants predeploy, or promote repository simulation as live deployment evidence.
+
+## GRANTS-AUDIT-1 — canonical definition, inventory and authority graph
+
+**Status: IMPLEMENTED — pending exact-head qualification**
+
+- reconcile architecture, Genesis map, Wallet inventory, Registry/address namespace, historical PR and contract inventory;
+- classify frontend/backend/indexer surfaces as required, optional, shared or not applicable;
+- preserve grants-router as REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS;
+- record the seven-contract canonical suite and four core upstream authorities.
+
+## GRANTS-AUDIT-2 — contract consistency and lifecycle remediation
+
+**Status: IMPLEMENTED — pending exact-head qualification**
+
+- eliminate divergent program-award accounting by making GrantProgramRegistry420.awarded authoritative;
+- bind exactly one GrantAwardRegistry420 as the only award-cap reservation controller;
+- reject new awards for inactive programs;
+- require ACTIVE parent award state at milestone approval;
+- prevent one Treasury disbursement from funding multiple milestones;
+- release an unexecuted milestone/disbursement binding only through explicit milestone cancellation;
+- prevent cancellation from hiding an already executed Treasury payment.
+
+## GRANTS-AUDIT-3 — adversarial, replay and invariant qualification
+
+**Status: IMPLEMENTED — pending exact-head qualification**
+
+Cover:
+- application replay/default-deny delegation;
+- program/per-award cap boundaries;
+- controller bypass attempts;
+- inactive-program award attempts;
+- milestone aggregate caps;
+- Treasury field mismatches;
+- duplicate Treasury-disbursement binding;
+- cancelled-parent approval attempts;
+- early finalization;
+- executed-payment cancellation;
+- delegated capability boundaries;
+- dangerous Solidity primitive scan.
+
+## GRANTS-AUDIT-4 — Civic/Treasury/Vault/capability integration reconciliation
+
+**Status: IMPLEMENTED — pending exact-head qualification**
+
+- verify Treasury interface shape matches TreasuryDisbursementRegistry420;
+- verify exact budget/recipient/amount/Civic-action/purpose binding;
+- verify Treasury execution plus nonzero Vault release commitment remains the only PAID proof;
+- verify Grants has no transfer/custody path;
+- verify GovernanceTimelock remains the only governance mutation authority;
+- verify CapabilityRegistry delegation remains object/scope bounded.
+
+## GRANTS-AUDIT-5 — Registry, address and deployment model
+
+**Status: PARTIAL**
+
+Repository work:
+- preserve Registry-resolved/no-fixed-address authority;
+- document deployment order and one-time Award Registry binding;
+- preserve dApp-map and Wallet discovery inventory.
+
+Remaining:
+- reproducible compiled artifact/runtime-hash manifest for the exact release candidate;
+- concrete Registry publication descriptor bound to those exact artifacts;
+- production-equivalent deployment receipts and runtime verification.
+
+The final item is testnet-gated.
+
+## GRANTS-AUDIT-6 — client/indexer/user-flow integration
+
+**Status: PARTIAL**
+
+420Grants is not a standalone frozen public Genesis application. A separate Grants website is therefore **not** required by current canonical Genesis scope.
+
+Repository-required integration is:
+- discoverable Grants service/component metadata;
+- Wallet/catalog awareness;
+- event/indexer compatibility sufficient for ecosystem clients to reconstruct non-authoritative program/application/award/milestone views;
+- transaction handoff that preserves Wallet/Smart Account authority.
+
+A dedicated Grants-specific Wallet workflow is not currently defined as a canonical Genesis acceptance requirement. If later adopted, it must be added as a new explicit roadmap requirement rather than inferred retroactively.
+
+## GRANTS-AUDIT-7 — documentation, threat model and operator guidance
+
+**Status: IMPLEMENTED — pending exact-head qualification**
+
+- canonical architecture remains docs/architecture/protocols/stake-governance-treasury-grants.md;
+- audit report and this remediation roadmap record actual repository state;
+- Genesis config records deployment order, address model and security invariants;
+- known testnet/live blockers remain explicit.
+
+## GRANTS-AUDIT-8 — exact-head repository qualification and durable evidence
+
+**Status: IN PROGRESS**
+
+Required exact-head gates:
+- python3 scripts/verify-grants-audit.py;
+- forge fmt --check src/grants test/GrantsGenesis420.t.sol;
+- forge build src/grants --force --sizes;
+- forge test --match-path test/GrantsGenesis420.t.sol -vvv under CI profile;
+- same retained suite under hardening profile;
+- broader affected repository CI required by the PR;
+- no unresolved failed/cancelled required checks;
+- clean branch divergence/evidence tied to one exact SHA.
+
+Do not mark COMPLETE until these gates are green against the exact final bookkeeping head.
+
+## GRANTS-AUDIT-9 — production-equivalent testnet qualification
+
+**Status: BLOCKED — official production-equivalent testnet required**
+
+Collect durable live evidence for chain/genesis identity; deployed Grants addresses/runtime hashes; constructor/immutable bindings; one-time Award Registry controller binding; Registry publication/discovery; live CapabilityRegistry delegation; a complete program-to-PAID Treasury/Vault flow; rejection of duplicate Treasury-disbursement reuse; client/indexer reconstruction; and restart/reorg/RPC-disagreement behavior.
+
+Local Anvil, mocks and CI cannot close this step.
+
+## GRANTS-AUDIT-10 — Genesis candidate / production closeout
+
+**Status: BLOCKED on GRANTS-AUDIT-9 and whole-system Genesis gates**
+
+Reconcile all prior evidence and separately report CODE, BUILD, CONTRACT, TEST, DOCUMENTATION, INTEGRATION, SECURITY, TESTNET, GENESIS and PRODUCTION readiness. No readiness state is inferred from another.

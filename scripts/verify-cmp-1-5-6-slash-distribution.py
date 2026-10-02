@@ -54,7 +54,11 @@ def main():
         "function bindDistribution(",
         "function consumeDistribution(",
         "candidate.authorizer() != address(this)",
-        "distributionPolicies.currentPolicy(policyCommitment)"
+        "distributionPolicies.currentPolicy(policyCommitment)",
+        "recipients.harmedPayer",
+        "recipients.replacementWorker",
+        "recipients.challenger",
+        "protocolTreasury: distributionPolicy.protocolTreasury"
     ], errors)
 
     require_text(EXECUTOR, [
@@ -65,7 +69,8 @@ def main():
         "authorizer.consumeDistribution(",
         "e.distributedAmount == e.totalAmount",
         "p.recipientResolver.codehash",
-        "resolved.harmedPayer == a.subjectAccount"
+        "a.harmedPayer == a.subjectAccount",
+        "e.harmedPayer = a.harmedPayer"
     ], errors)
 
     for path, collateral_type in (

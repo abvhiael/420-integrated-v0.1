@@ -92,7 +92,7 @@ jobs:
           python3 scripts/verify-genesis-interface-layer.py
       - name: Check Pay Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/pay/adapters/CanonicalSettlementAdapter420.sol test/ReplayProtectionConsumer420.t.sol
+        run: forge fmt --check src/pay/PaymentRegistry420.sol src/pay/adapters/CanonicalSettlementAdapter420.sol test/PayAudit3Lifecycle420.t.sol test/ReplayProtectionConsumer420.t.sol
       - name: Build Pay and required settlement boundary
         working-directory: contracts
         run: forge build src/pay src/swap/CanonicalSwapExecutor420.sol src/system/ReplayProtectionConsumer420.sol

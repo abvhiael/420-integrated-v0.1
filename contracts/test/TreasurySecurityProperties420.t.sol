@@ -202,7 +202,7 @@ contract TreasurySecurityProperties420Test {
         e.disbursements.schedule(id, e.budgetId, recipient, amount, notBefore, expiresAt, ACTION, purpose);
 
         uint128 otherAmount = amount == 999 ? 998 : amount + 1;
-        address otherRecipient = _recipient(recipientSeed + 1);
+        address otherRecipient = _recipient(uint256(keccak256(abi.encode(recipientSeed, "alternate"))));
 
         require(
             e.disbursements.canonicalId(
@@ -258,7 +258,7 @@ contract TreasurySecurityProperties420Test {
         e.disbursements.markExecuted(first, keccak256("release-first"));
 
         TreasuryPolicyRegistry420.AssetPolicy memory beforeRevision = e.policy.assetPolicy(ASSET);
-        e.policy.setAssetPolicy(ASSET, true, 1000, 900, 100);
+        e.policy.setAssetPolicy(ASSET, true, 900, 900, 100);
         TreasuryPolicyRegistry420.AssetPolicy memory afterRevision = e.policy.assetPolicy(ASSET);
         require(afterRevision.revision == beforeRevision.revision + 1, "revision did not advance");
 

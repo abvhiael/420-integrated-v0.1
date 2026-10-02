@@ -11,6 +11,7 @@ import "../vault/VaultIds420.sol";
 import "../vault/VaultRegistry420.sol";
 import "./ComputeWorkerRegistry420.sol";
 import "./ComputeStakeExitPolicy420.sol";
+import "./ComputeStakeSlashPolicy420.sol";
 
 /// @notice CMP-1.5.1 worker collateral source backed by canonical 420Vault obligations.
 /// @dev This step implements worker deposits/position reads only. Exit, unstake, slashing,
@@ -35,6 +36,8 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
         bytes32 stakePolicyId;
         address owner;
         uint64 openedAt;
+        uint32 slashPolicyRevision;
+        bytes32 slashPolicyCommitment;
         uint64 revision;
         uint64 trancheCount;
         uint64 withdrawalCursor;
@@ -59,6 +62,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
 
     ComputeWorkerRegistry420 public immutable workers;
     ComputeStakeExitPolicy420 public immutable exitPolicies;
+    ComputeStakeSlashPolicy420 public immutable slashPolicies;
     AssetVault420 public immutable vault;
     VaultRegistry420 public immutable vaultRegistry;
     VaultAccounting420 public immutable accounting;
@@ -112,17 +116,19 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
         uint64 positionRevision
     );
 
-    constructor(address workerRegistry_, address collateralVault_, address exitPolicy_) {
+    constructor(address workerRegistry_, address collateralVault_, address exitPolicy_, address slashPolicy_) {
         if (
             workerRegistry_.code.length == 0
                 || collateralVault_.code.length == 0
                 || exitPolicy_.code.length == 0
+                || slashPolicy_.code.length == 0
         ) {
             revert InvalidConfiguration();
         }
         workers = ComputeWorkerRegistry420(workerRegistry_);
         slashBindingAdmin = msg.sender;
         exitPolicies = ComputeStakeExitPolicy420(exitPolicy_);
+        slashPolicies = ComputeStakeSlashPolicy420(slashPolicy_);
         vault = AssetVault420(payable(collateralVault_));
         vaultRegistry = vault.registry();
         accounting = vault.accounting();
@@ -190,13 +196,23 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
             p.stakePolicyId = stakePolicyId;
             p.owner = worker.operator;
             p.openedAt = uint64(block.timestamp);
+            uint32 frozenSlashPolicyRevision =
+                slashPolicies.latestRevision(p.stakePolicyId, 1);
+            if (frozenSlashPolicyRevision == 0) revert InvalidStake();
+            p.slashPolicyRevision = frozenSlashPolicyRevision;
+            p.slashPolicyCommitment =
+                slashPolicies.commitment(p.stakePolicyId, 1, frozenSlashPolicyRevision);
             p.active = true;
             p.exists = true;
         } else if (
             p.owner != worker.operator
                 || p.workerId != workerId
                 || p.stakePolicyId != stakePolicyId
+                || !p.active
                 || p.exiting
+                || slashPolicies.latestRevision(stakePolicyId, 1) != p.slashPolicyRevision
+                || slashPolicies.commitment(stakePolicyId, 1, p.slashPolicyRevision)
+                    != p.slashPolicyCommitment
         ) {
             revert InvalidStake();
         }
@@ -413,6 +429,8 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
         bytes32 stakePolicyId,
         uint64 positionRevision,
         uint64 openedAt,
+        uint32 slashPolicyRevision,
+        bytes32 slashPolicyCommitment,
         uint256 slashableAmount,
         bool active,
         bool exiting,
@@ -426,6 +444,8 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
             p.stakePolicyId,
             p.revision,
             p.openedAt,
+            p.slashPolicyRevision,
+            p.slashPolicyCommitment,
             p.slashableAmount,
             p.active,
             p.exiting,

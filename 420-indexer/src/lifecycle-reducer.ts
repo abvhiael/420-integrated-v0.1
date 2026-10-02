@@ -1,6 +1,6 @@
 import type { DecodedProtocolEvent420 } from './protocol-decoder.js';
 
-export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED';
+export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'CREATED' | 'SOURCE_PENDING' | 'SOURCE_FINALIZED' | 'PROOF_PENDING' | 'VERIFIED' | 'DESTINATION_PENDING' | 'COMPLETED' | 'FAILED' | 'RETRYABLE' | 'EXPIRED' | 'PAUSED' | 'DISPUTED' | 'REFUNDED' | 'CANCELLED' | 'REVOKED';
 
 export interface LifecycleRule420 {
   eventName: string;
@@ -105,12 +105,49 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'PaymentExpired', state: 'EXPIRED', terminal: true }
   ]},
   { protocol: '420Bridge', rules: [
-    { eventName: 'TransferRequested', state: 'PENDING' },
-    { eventName: 'BridgeTransferRequested', state: 'PENDING' },
-    { eventName: 'TransferFinalized', state: 'COMPLETED', terminal: true },
-    { eventName: 'BridgeTransferFinalized', state: 'COMPLETED', terminal: true },
-    { eventName: 'TransferCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'TransferFailed', state: 'FAILED', terminal: true }
+    { eventName: 'TransferCreated', state: 'CREATED' },
+    {
+      eventName: 'TransferStatus',
+      state: 'UNKNOWN',
+      stateField: 'status',
+      stateMap: {
+        '1': 'CREATED',
+        '2': 'SOURCE_PENDING',
+        '3': 'SOURCE_FINALIZED',
+        '4': 'PROOF_PENDING',
+        '5': 'VERIFIED',
+        '6': 'DESTINATION_PENDING',
+        '7': 'COMPLETED',
+        '8': 'FAILED',
+        '9': 'RETRYABLE',
+        '10': 'EXPIRED',
+        '11': 'PAUSED',
+        '12': 'DISPUTED',
+        '13': 'REFUNDED'
+      },
+      terminalFieldValues: ['7','13']
+    },
+    {
+      eventName: 'TransferTransition',
+      state: 'UNKNOWN',
+      stateField: 'toStatus',
+      stateMap: {
+        '1': 'CREATED',
+        '2': 'SOURCE_PENDING',
+        '3': 'SOURCE_FINALIZED',
+        '4': 'PROOF_PENDING',
+        '5': 'VERIFIED',
+        '6': 'DESTINATION_PENDING',
+        '7': 'COMPLETED',
+        '8': 'FAILED',
+        '9': 'RETRYABLE',
+        '10': 'EXPIRED',
+        '11': 'PAUSED',
+        '12': 'DISPUTED',
+        '13': 'REFUNDED'
+      },
+      terminalFieldValues: ['7','13']
+    }
   ]},
   { protocol: '420Rights', rules: [
     { eventName: 'RightRegistered', state: 'ACTIVE' },

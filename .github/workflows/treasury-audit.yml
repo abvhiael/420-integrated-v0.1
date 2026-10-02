@@ -169,8 +169,26 @@ jobs:
       - name: Treasury forbidden primitive scan
         shell: bash
         run: |
-          set -euo pipefail
-          if grep -R -nE '\\btx\\.origin\\b|\\bselfdestruct\\s*\\(|\\.delegatecall\\s*\\(' contracts/src/treasury; then
-            echo 'Forbidden authority/opcode primitive found in Treasury sources' >&2
-            exit 1
-          fi
+          python3 - <<'PY'
+          import pathlib
+          import re
+
+          root = pathlib.Path("contracts/src/treasury")
+          patterns = {
+              "tx.origin": re.compile(r"\\btx\\.origin\\b"),
+              "selfdestruct": re.compile(r"\\bselfdestruct\\s*\\("),
+              "delegatecall": re.compile(r"\\.delegatecall\\s*\\("),
+          }
+          hits = []
+          for path in sorted(root.glob("*.sol")):
+              text = path.read_text(encoding="utf-8")
+              for name, pattern in patterns.items():
+                  for match in pattern.finditer(text):
+                      line = text.count("\\n", 0, match.start()) + 1
+                      hits.append(f"{path}:{line}: {name}")
+          if hits:
+              print("Forbidden authority/opcode primitive found in Treasury sources:")
+              print("\\n".join(hits))
+              raise SystemExit(1)
+          print("Treasury forbidden primitive scan PASS")
+          PY

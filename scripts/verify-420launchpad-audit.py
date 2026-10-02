@@ -52,6 +52,32 @@ if recon_path.is_file():
     require(recon["protocol"]["boundary"] == "NON_CUSTODIAL_COMMITMENT_REGISTRY", "protocol boundary reconciliation drift")
     require(recon["genesisFacingCrowdfunding"]["securitiesOrEquityEnabled"] is False, "crowdfunding feature-gate drift")
 
+hardening_path = ROOT / "contracts/config/interfaces/420launchpad-v1-hardening.json"
+require(hardening_path.is_file(), "V1 hardening policy missing")
+if hardening_path.is_file():
+    hardening = json.loads(hardening_path.read_text())
+    require(hardening.get("schema") == "420-launchpad-v1-hardening-v1", "unexpected V1 hardening schema")
+    require(hardening.get("serviceId") == "420/service/launchpad/v1", "V1 hardening service ID drift")
+    require(hardening.get("scope") == "NON_CUSTODIAL_COMMITMENT_REGISTRY", "V1 hardening scope drift")
+    commitments = hardening.get("commitments", {})
+    for kind in ("payment", "delivery", "refund"):
+        policy = commitments.get(kind, {})
+        require(policy.get("requiredNonzero") is True, f"{kind} commitment must remain nonzero")
+        require(policy.get("uniquenessEnforcedByV1") is False, f"{kind} commitment uniqueness semantics drift")
+        require(policy.get("semantics") == "OPAQUE_AUDIT_REFERENCE", f"{kind} commitment semantics drift")
+        require(policy.get("canonicalSettlementBindingDeferredTo") == "LAUNCHPAD-AUDIT-3", f"{kind} settlement deferral drift")
+    rounding = hardening.get("allocationRounding", {})
+    require(rounding.get("participantClaimsNeverExceedAllocation") is True, "allocation conservation policy drift")
+    require(rounding.get("residualDust") == "UNASSIGNED_ACCOUNTING_DUST", "allocation dust semantics drift")
+    require(rounding.get("dustCustody") is False, "V1 must not custody rounding dust")
+    require(rounding.get("sweepAuthority") is False, "V1 must not gain dust sweep authority")
+    project_active = hardening.get("projectActive", {})
+    require(project_active.get("semantics") == "IMMUTABLE_REGISTRATION_MARKER", "project active semantics drift")
+    require(project_active.get("mutableLifecycleControl") is False, "project active lifecycle drift")
+    sec = hardening.get("securityBoundary", {})
+    for key in ("custody", "minting", "paymentExecution", "refundExecution", "deliveryExecution", "swapAuthority"):
+        require(sec.get(key) is False, f"V1 hardening security boundary drift: {key}")
+
 test = ROOT / "contracts/test/LaunchpadGenesis420.t.sol"
 audit_test = ROOT / "contracts/test/LaunchpadAudit420.t.sol"
 require(test.is_file(), "focused Launchpad test missing")
@@ -70,6 +96,7 @@ if roadmap.is_file():
 solidity = "\n".join((src / name).read_text() for name in required)
 for forbidden in (".transfer(", ".transferFrom(", ".safeTransferFrom(", ".call{value:", "selfdestruct(", "delegatecall("):
     require(forbidden not in solidity, f"forbidden V1 custody/execution primitive found: {forbidden}")
+require("420Swap" not in solidity and "Swap420" not in solidity, "V1 must not import or invoke 420Swap authority")
 
 if errors:
     print("420Launchpad audit verification FAILED")

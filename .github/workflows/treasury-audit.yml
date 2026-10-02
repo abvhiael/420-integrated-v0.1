@@ -8,6 +8,9 @@ on:
       - 'contracts/test/GrantsGenesis420.t.sol'
       - 'contracts/src/grants/GrantMilestoneRegistry420.sol'
       - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/treasury/treasury-audit-6-release-materialization.json'
+      - 'contracts/test/TreasuryDeploymentBinding420.t.sol'
+      - 'scripts/verify-treasury-audit-6-release.py'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
       - '420-indexer/descriptors/treasury420-v1.json'
@@ -80,6 +83,43 @@ jobs:
 
       - name: Verify modern Treasury descriptor against compiled ABI
         run: python3 scripts/verify-treasury-audit-5-descriptor.py
+
+      - name: Verify TREASURY-AUDIT-6 release materialization
+        run: python3 scripts/verify-treasury-audit-6-release.py
+
+      - name: Retain Treasury compiled artifact identities
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          names = [
+              "TreasuryAuthorization420",
+              "TreasuryPolicyRegistry420",
+              "TreasuryBudgetRegistry420",
+              "TreasuryDisbursementRegistry420",
+              "TreasuryRouter420",
+          ]
+          records = []
+          for name in names:
+              path = Path("contracts/out") / f"{name}.sol" / f"{name}.json"
+              payload = path.read_bytes()
+              artifact = json.loads(payload)
+              deployed = artifact.get("deployedBytecode", {}).get("object", "")
+              if deployed.startswith("0x"):
+                  deployed = deployed[2:]
+              records.append({
+                  "contract": name,
+                  "artifact_sha256": hashlib.sha256(payload).hexdigest(),
+                  "compiler_runtime_template_sha256": hashlib.sha256(bytes.fromhex(deployed)).hexdigest() if deployed else None,
+              })
+          print("TREASURY_AUDIT_6_ARTIFACT_IDENTITIES=" + json.dumps(records, sort_keys=True))
+          PY
+
+      - name: Run Treasury deployment and Registry binding qualification
+        working-directory: contracts
+        run: forge test --match-path test/TreasuryDeploymentBinding420.t.sol -vvvv
 
       - name: Run Treasury lifecycle regression suite
         working-directory: contracts

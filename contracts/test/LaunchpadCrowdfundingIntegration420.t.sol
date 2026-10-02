@@ -412,6 +412,29 @@ contract LaunchpadCrowdfundingIntegration420Test {
             "preorder mode"
         );
 
+        sales.activate(donation);
+        sales.activate(community);
+        sales.activate(preorder);
+        vm.warp(43);
+
+        bytes32 donationPayment = keccak256("payment/donation");
+        bytes32 communityPayment = keccak256("payment/community");
+        bytes32 preorderPayment = keccak256("payment/preorder");
+        pay.setPayment(donationPayment, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        pay.setPayment(communityPayment, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        pay.setPayment(preorderPayment, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+
+        vm.prank(ALICE);
+        allocations.contribute(donation, 100, donationPayment);
+        vm.prank(ALICE);
+        allocations.contribute(community, 100, communityPayment);
+        vm.prank(ALICE);
+        allocations.contribute(preorder, 100, preorderPayment);
+
+        require(allocations.contributed(donation, ALICE) == 100, "donation contribution");
+        require(allocations.contributed(community, ALICE) == 100, "community contribution");
+        require(allocations.contributed(preorder, ALICE) == 100, "preorder contribution");
+
         vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidCampaignMode.selector);
         integration.setCampaignMode(
             saleId, LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION
@@ -533,7 +556,7 @@ contract LaunchpadCrowdfundingIntegration420Test {
         integration.prepareRefund(saleId);
 
         pay.setPayment(paymentA, ALICE, RECEIVER, PAYMENT_ASSET, 200, 6, 200);
-        pay.setPayment(paymentB, ALICE, RECEIVER, PAYMENT_ASSET, 200, 7, 200);
+        pay.setPayment(paymentB, ALICE, RECEIVER, PAYMENT_ASSET, 200, 6, 200);
 
         vm.prank(ALICE);
         bytes32 refundCommitment = integration.prepareRefund(saleId);

@@ -62,12 +62,7 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'CivicProposalRegistered', state: 'ACTIVE' }
   ]},
   { protocol: '420Pay', rules: [
-    { eventName: 'PaymentCreated', state: 'PENDING' },
-    { eventName: 'PaymentAuthorized', state: 'ACTIVE' },
-    { eventName: 'PaymentSettled', state: 'COMPLETED', terminal: true },
-    { eventName: 'PaymentRefunded', state: 'COMPLETED', terminal: true },
-    { eventName: 'PaymentCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'PaymentExpired', state: 'EXPIRED', terminal: true }
+    { eventName: 'PaymentAuthorized', state: 'ACTIVE' }
   ]},
   { protocol: '420Bridge', rules: [
     { eventName: 'TransferRequested', state: 'PENDING' },
@@ -111,6 +106,18 @@ function governanceLifecycleRule420(event: DecodedProtocolEvent420): LifecycleRu
   return null;
 }
 
+function payLifecycleRule420(event: DecodedProtocolEvent420): LifecycleRule420 | null {
+  if (event.eventName === 'PaymentAuthorized') return { eventName: event.eventName, state: 'ACTIVE' };
+  if (event.eventName !== 'PaymentSet') return null;
+  const raw = event.fields.status;
+  if (typeof raw !== 'bigint') return null;
+  if (raw === 1n) return { eventName: event.eventName, state: 'PENDING' }; // SUBMITTED
+  if (raw === 2n || raw === 3n || raw === 4n || raw === 7n) return { eventName: event.eventName, state: 'ACTIVE' };
+  if (raw === 5n || raw === 6n) return { eventName: event.eventName, state: 'COMPLETED', terminal: true };
+  if (raw === 8n) return { eventName: event.eventName, state: 'FAILED', terminal: true };
+  return null;
+}
+
 function compareOrder(a: DecodedProtocolEvent420, b: DecodedProtocolEvent420): number {
   if (a.blockNumber !== b.blockNumber) return a.blockNumber < b.blockNumber ? -1 : 1;
   if (a.transactionIndex !== b.transactionIndex) return a.transactionIndex - b.transactionIndex;
@@ -129,7 +136,9 @@ export function reduceProtocolLifecycle420(events: readonly DecodedProtocolEvent
       ? activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName)
       : event.protocol === '420Governance'
         ? governanceLifecycleRule420(event)
-        : activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName);
+        : event.protocol === '420Pay'
+          ? payLifecycleRule420(event)
+          : activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName);
     if (!rule) continue;
 
     const current = states.get(key);

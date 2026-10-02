@@ -237,6 +237,24 @@ Action:
 
 Do not mutate canonical Treasury state to match a derived service.
 
+## Incident evidence preservation checklist
+
+For any Treasury incident, retain before making corrective changes:
+
+- chain ID and network/genesis identity;
+- evidence block number and block hash;
+- TreasuryRouter, Budget, Disbursement, Policy and Authorization addresses;
+- runtime code hashes for all affected Treasury contracts;
+- ProtocolRegistry service/component records and publication transactions;
+- relevant Civic/governance action IDs and transaction receipts;
+- CapabilityRegistry grant IDs, scopes, limits, revisions and revocation transactions;
+- budget/disbursement records and all corresponding Treasury event logs;
+- actual 420Vault release transaction/event/receipt evidence when execution is involved;
+- Indexer/Explorer/Analytics provenance showing what derived services observed;
+- operator actions taken during containment and recovery.
+
+Do not overwrite or discard evidence merely because a corrected deployment or projection is later produced.
+
 ## Recovery boundaries
 
 Treasury recovery is governance/deployment reconciliation, not state rewriting.

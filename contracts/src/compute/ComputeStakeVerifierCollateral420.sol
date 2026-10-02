@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "../interfaces/IComputeVerifierStakeSource420.sol";
+import "../interfaces/IComputeSlashableCollateral420.sol";
+import "../interfaces/IComputeSlashHold420.sol";
 import "../vault/AssetVault420.sol";
 import "../vault/VaultAccounting420.sol";
 import "../vault/VaultIds420.sol";
@@ -13,7 +15,7 @@ import "./ComputeStakeExitPolicy420.sol";
 /// @notice CMP-1.5.2 verifier collateral source backed by canonical 420Vault obligations.
 /// @dev This step implements verifier deposits/current-position reads only. Minimum-policy
 /// enforcement, exit, unstake, slashing, rewards and dispute integration remain later steps.
-contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeSource420 {
+contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeSource420, IComputeSlashableCollateral420 {
     bytes32 public constant SOURCE_ID =
         keccak256("420Integrated.ComputeMarket.ComputeVerifierStakeSource.v1");
     bytes32 public constant POSITION_DOMAIN =
@@ -32,6 +34,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         bytes32 verifierId;
         bytes32 stakePolicyId;
         address authority;
+        uint64 openedAt;
         uint64 openedAtVerifierRevision;
         uint64 latestVerifierRevision;
         uint64 revision;
@@ -63,6 +66,8 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     VaultRegistry420 public immutable vaultRegistry;
     VaultAccounting420 public immutable accounting;
     bytes32 public immutable vaultId;
+    address public immutable slashBindingAdmin;
+    address public slashAuthorization;
 
     mapping(bytes32 => Position) private _positions;
     mapping(bytes32 => mapping(uint64 => Tranche)) private _tranches;
@@ -77,7 +82,9 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     error RevisionExhausted();
     error ExitNotReady();
     error InvalidExit();
+    error UnauthorizedSlashBinding();
 
+    event SlashAuthorizationBound(address indexed slashAuthorization);
     event VerifierCollateralStaked(
         bytes32 indexed positionId,
         bytes32 indexed verifierId,
@@ -119,6 +126,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         }
 
         verifiers = ComputeVerifierRegistry420(verifierRegistry_);
+        slashBindingAdmin = msg.sender;
         exitPolicies = ComputeStakeExitPolicy420(exitPolicy_);
         vault = AssetVault420(payable(collateralVault_));
         vaultRegistry = vault.registry();
@@ -132,6 +140,16 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
                 || address(vault.registry()) != address(vaultRegistry)
                 || address(vault.accounting()) != address(accounting)
         ) revert InvalidConfiguration();
+    }
+
+    function bindSlashAuthorization(address slashAuthorization_) external {
+        if (
+            msg.sender != slashBindingAdmin
+                || slashAuthorization != address(0)
+                || slashAuthorization_.code.length == 0
+        ) revert UnauthorizedSlashBinding();
+        slashAuthorization = slashAuthorization_;
+        emit SlashAuthorizationBound(slashAuthorization_);
     }
 
     function systemName() external pure returns (string memory) {
@@ -192,6 +210,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             p.verifierId = verifierId;
             p.stakePolicyId = stakePolicyId;
             p.authority = verifier.authority;
+            p.openedAt = uint64(block.timestamp);
             p.openedAtVerifierRevision = verifier.revision;
             p.latestVerifierRevision = verifier.revision;
             p.active = true;
@@ -336,6 +355,10 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         returns (uint256 amount, uint64 throughTranche)
     {
         if (entered || maxTranches == 0) revert InvalidExit();
+        if (
+            slashAuthorization != address(0)
+                && IComputeSlashHold420(slashAuthorization).outstandingSlash(id) != 0
+        ) revert InvalidExit();
         entered = true;
 
         Position storage p = _positions[id];
@@ -428,6 +451,33 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             exiting: p.exiting,
             withdrawableAt: p.withdrawableAt
         });
+    }
+
+    function slashSnapshot(bytes32 id) external view returns (
+        uint8 subjectKind,
+        bytes32 subjectRef,
+        address beneficiary,
+        bytes32 stakePolicyId,
+        uint64 positionRevision,
+        uint64 openedAt,
+        uint256 slashableAmount,
+        bool active,
+        bool exiting,
+        bool exists
+    ) {
+        Position storage p = _positions[id];
+        return (
+            2,
+            bytes32(uint256(uint160(p.authority))),
+            p.authority,
+            p.stakePolicyId,
+            p.revision,
+            p.openedAt,
+            p.slashableAmount,
+            p.active,
+            p.exiting,
+            p.exists
+        );
     }
 
     function position(bytes32 id) external view returns (Position memory p) {

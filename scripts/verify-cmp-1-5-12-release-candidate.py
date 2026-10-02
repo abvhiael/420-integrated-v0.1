@@ -17,6 +17,7 @@ EXPECTED_ROLES = [
     "ComputeVerifierRegistry420",
     "ComputeDisputeResolution420",
     "ComputeVerifiedEntitlement420",
+    "PayerEscrowAssetVault420",
     "WorkerCollateralAssetVault420",
     "VerifierCollateralAssetVault420",
     "RewardAssetVault420",
@@ -138,6 +139,8 @@ def repository_ready(d, allow_live=False):
         "resolver.canonicalEntitlementsCodeHash() != g.canonicalEntitlements.runtimeCodeHash",
         "auth.distributionExecutor() != g.distribution.implementation",
         "wc.workerRegistry() != g.workerRegistry.implementation",
+        "entitlements.vault() != g.payerEscrowVault.implementation",
+        "g.payerEscrowVault.implementation == g.workerCollateralVault.implementation",
         "vc.verifiers() != g.verifierRegistry.implementation",
         "rewards.rewardVault() != g.rewardVault.implementation",
         "g.rewardVault.implementation == g.workerCollateralVault.implementation",
@@ -152,6 +155,7 @@ def repository_ready(d, allow_live=False):
         "testMismatchedDistributionExecutorFailsClosed",
         "testWorkerStakeCrossRegistryBindingFailsClosed",
         "testRewardVaultCannotAliasCollateralVault",
+        "testPayerEscrowVaultCannotAliasStakeOrRewardVault",
     ):
         if needle not in tests:
             fail(f"release test missing {needle}")

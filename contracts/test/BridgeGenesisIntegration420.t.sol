@@ -25,10 +25,23 @@ contract MockBridgeAdapter420 is IBridgeAdapter420 {
     { require(!failOutbound, "outbound failure"); return nextOutboundId; }
 }
 
+contract MockWrongBridgeAdapter420 is IBridgeAdapter420 {
+    VerifiedTransfer public nextTransfer;
+    bytes32 public nextOutboundId = keccak256("wrong-outbound-message");
+
+    function adapterId() external pure returns (bytes32) { return keccak256("TEST/BRIDGE/WRONG_ADAPTER"); }
+    function setInbound(VerifiedTransfer calldata v) external { nextTransfer = v; }
+    function verifyInbound(bytes calldata) external view returns (VerifiedTransfer memory) { return nextTransfer; }
+    function initiateOutbound(bytes32,bytes32,address,bytes calldata,uint256,bytes calldata)
+        external payable returns(bytes32 sourceMessageId)
+    { return nextOutboundId; }
+}
+
 contract BridgeGenesisIntegration420Test {
     bytes32 constant ROUTE_ID = keccak256("CADC/LZ/ETH-420");
     bytes32 constant ASSET_ID = keccak256("CADC");
     bytes32 constant ADAPTER_ID = keccak256("TEST/BRIDGE/ADAPTER");
+    bytes32 constant WRONG_ADAPTER_ID = keccak256("TEST/BRIDGE/WRONG_ADAPTER");
     address constant TOKEN = address(0xCA420);
 
     struct Fixture {
@@ -122,6 +135,41 @@ contract BridgeGenesisIntegration420Test {
         require(messageId != bytes32(0), "message");
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
         require(routeTVL == 60 ether, "tvl");
+    }
+
+    function testInboundWrongRegisteredAdapterFailsClosed() public {
+        Fixture memory f = _setup();
+        MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
+        wrong.setInbound(_inbound(10 ether));
+        f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));
+        (bool ok,) = address(f.router).call(
+            abi.encodeWithSelector(f.router.acceptInbound.selector, WRONG_ADAPTER_ID, hex"4201")
+        );
+        require(!ok, "wrong route adapter accepted");
+        (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
+        require(routeTVL == 0, "risk consumed for wrong adapter");
+    }
+
+    function testOutboundWrongRegisteredAdapterFailsClosed() public {
+        Fixture memory f = _setup();
+        f.adapter.setInbound(_inbound(100 ether));
+        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
+        f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));
+        (bool ok,) = address(f.router).call(
+            abi.encodeWithSelector(
+                f.router.initiateOutbound.selector,
+                WRONG_ADAPTER_ID,
+                ROUTE_ID,
+                ASSET_ID,
+                hex"0102",
+                10 ether,
+                hex""
+            )
+        );
+        require(!ok, "wrong outbound route adapter accepted");
+        (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
+        require(routeTVL == 100 ether, "risk changed for wrong adapter");
     }
 
     function testDirectionDisabledFailsClosed() public {

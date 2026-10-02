@@ -51,10 +51,16 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(health.routeHealthy(routeId), "route unhealthy");
     }
 
-    function _requireRouteDirection(bytes32 routeId, bytes32 assetId, bool inbound) internal view {
-        (bytes32 configuredAsset,,,,,,,, uint8 status, bool inboundEnabled, bool outboundEnabled) =
+    function _requireRouteDirection(
+        bytes32 routeId,
+        bytes32 assetId,
+        bytes32 adapterId_,
+        bool inbound
+    ) internal view {
+        (bytes32 configuredAsset,,,,, bytes32 configuredAdapter,,, uint8 status, bool inboundEnabled, bool outboundEnabled) =
             IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY)).routes(routeId);
         require(status == 2 && configuredAsset == assetId, "inactive route"); // ACTIVE
+        require(configuredAdapter == adapterId_, "route adapter");
         require(inbound ? inboundEnabled : outboundEnabled, "direction disabled");
     }
 
@@ -70,7 +76,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
         _requireBridgeAsset(v.assetId);
         _requireRouteHealthy(v.routeId);
-        _requireRouteDirection(v.routeId, v.assetId, true);
+        _requireRouteDirection(v.routeId, v.assetId, adapterId_, true);
 
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(v.routeId, v.assetId, true, v.amount);
         transferId = IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)).create(
@@ -97,7 +103,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(recipient.length != 0 && amount > 0, "transfer");
         _requireBridgeAsset(assetId);
         _requireRouteHealthy(routeId);
-        _requireRouteDirection(routeId, assetId, false);
+        _requireRouteDirection(routeId, assetId, adapterId_, false);
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(routeId, assetId, false, amount);
         sourceMessageId = IBridgeAdapter420(adapter).initiateOutbound{ value: msg.value }(
             routeId, assetId, msg.sender, recipient, amount, extra

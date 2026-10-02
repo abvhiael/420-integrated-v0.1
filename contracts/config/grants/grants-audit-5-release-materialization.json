@@ -2,7 +2,7 @@
   "schema": "420-grants-audit-5-release-materialization-v1",
   "step": "GRANTS-AUDIT-5",
   "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
-  "repository_ready": false,
+  "repository_ready": true,
   "live_qualified": false,
   "address_policy": {
     "namespace_authority": "contracts/config/genesis-address-namespace.json",
@@ -38,35 +38,48 @@
       "order": 1,
       "contract": "GrantAuthorization420",
       "source": "contracts/src/grants/GrantAuthorization420.sol",
-      "constructor": ["CapabilityRegistry420"],
+      "constructor": [
+        "CapabilityRegistry420"
+      ],
       "post_init": []
     },
     {
       "order": 2,
       "contract": "GrantProgramRegistry420",
       "source": "contracts/src/grants/GrantProgramRegistry420.sol",
-      "constructor": ["GovernanceTimelock"],
+      "constructor": [
+        "GovernanceTimelock"
+      ],
       "post_init": []
     },
     {
       "order": 3,
       "contract": "GrantApplicationRegistry420",
       "source": "contracts/src/grants/GrantApplicationRegistry420.sol",
-      "constructor": ["GrantAuthorization420", "GrantProgramRegistry420"],
+      "constructor": [
+        "GrantAuthorization420",
+        "GrantProgramRegistry420"
+      ],
       "post_init": []
     },
     {
       "order": 4,
       "contract": "GrantAwardRegistry420",
       "source": "contracts/src/grants/GrantAwardRegistry420.sol",
-      "constructor": ["GovernanceTimelock", "GrantProgramRegistry420", "GrantApplicationRegistry420"],
+      "constructor": [
+        "GovernanceTimelock",
+        "GrantProgramRegistry420",
+        "GrantApplicationRegistry420"
+      ],
       "post_init": []
     },
     {
       "order": 5,
       "contract": "GrantProgramRegistry420",
       "action": "bindAwardRegistry",
-      "args": ["GrantAwardRegistry420"],
+      "args": [
+        "GrantAwardRegistry420"
+      ],
       "one_time": true
     },
     {
@@ -86,7 +99,11 @@
       "order": 7,
       "contract": "GrantRouter420",
       "source": "contracts/src/grants/GrantRouter420.sol",
-      "constructor": ["GrantProgramRegistry420", "GrantAwardRegistry420", "GrantMilestoneRegistry420"],
+      "constructor": [
+        "GrantProgramRegistry420",
+        "GrantAwardRegistry420",
+        "GrantMilestoneRegistry420"
+      ],
       "post_init": []
     },
     {

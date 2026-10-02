@@ -24,15 +24,18 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: `docs/audit/420TREASURY-AUDIT-2-QUALIFICATION.md` introduced by evidence commit `bd55b7cd06381a8e398b73196c9bc23e104efeec`.
 - Broad Genesis/global inventory qualification remains intentionally deferred to its canonical Level 3 owners; it is not required for this Level 1 step.
 
-## TREASURY-AUDIT-3 — security/property/invariant expansion — PARTIAL
-Required:
-- add fuzz/property coverage for reserve/settle/release conservation;
-- prove `executed <= committed <= ceiling` across arbitrary schedules/cancels/executes;
-- fuzz canonical-ID collision/replay boundaries;
-- prove policy-revision and epoch-boundary behavior;
-- test external dependency failure/revert behavior;
-- perform Slither/static analysis on the exact candidate head;
-- retain exact-head evidence.
+## TREASURY-AUDIT-3 — security/property/invariant expansion — COMPLETE
+- Added fuzz/property coverage for reserve/settle/release conservation across mixed schedule/execute/cancel sequences.
+- Proved `executed <= committed <= ceiling` and router remaining-budget reconciliation throughout arbitrary tested lifecycle transitions.
+- Added canonical-ID field-binding and replay fuzz coverage.
+- Qualified policy revision and epoch-boundary behavior.
+- Remediated the epoch-bucket reset risk by making `epochSeconds` immutable after an asset policy's initial revision while preserving ordinary policy-cap revisions.
+- Added fail-closed external capability-dependency revert coverage with no accounting/state mutation.
+- Added targeted Treasury Slither qualification and retained forbidden-primitive scanning.
+- Level 1 exact-head qualification **PASS** on implementation SHA `0ace5e5a8e64c2ce56b5f51e793fb7dfc4cc1468`.
+- Treasury qualification workflow run `36970820536`, job `110724220149`: formatting PASS; build PASS; lifecycle suite **9/9 PASS**; security/property suite **5/5 PASS**; authority/config verifier PASS; targeted Slither **0 high-severity findings**; forbidden-primitive scan PASS.
+- Durable evidence: `docs/audit/420TREASURY-AUDIT-3-QUALIFICATION.md`, introduced by evidence commit `e4e1b10c0741037037fe797e81a9f812068ae10b`.
+- Level 2 was not required for this ordinary app-scoped step; full repository-wide Level 3 closeout remains intentionally deferred to the canonical phase closeout.
 
 ## TREASURY-AUDIT-4 — Vault release evidence model — BLOCKED ON CANONICAL DECISION
 Current Treasury execution accepts a nonzero `vaultReleaseHash` from an authorized executor and records it as an audit commitment. It does not cryptographically verify a Vault release inside Treasury.

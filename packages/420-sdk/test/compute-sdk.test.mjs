@@ -311,3 +311,27 @@ test('rejects malformed, stale, unavailable, zero-capacity, zero-price and empty
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ availableFrom: 1001n })), /availability/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ jurisdictionHash: b32(0) })), /empty canonical commitment/);
 });
+
+test('CMP-2.2 request validation and independent canonical ABI vectors', async () => {
+  const { validateComputeRequest420, encodeComputeRequestId420, encodeComputeRequestCommitment420 } = await import('../dist/index.js');
+  const v = JSON.parse(await readFile(new URL('./fixtures/compute-request-vector.json', import.meta.url), 'utf8'));
+  const r = v.request;
+  for (const key of ['createdAt','revision']) r[key] = BigInt(r[key]);
+  for (const key of ['capacityUnits','deadline','expiresAt','maximumPrice']) r.terms[key] = BigInt(r.terms[key]);
+  assert.equal(validateComputeRequest420(r,1n,100n,42000n),r);
+  assert.equal(encodeComputeRequestId420(v.requestDomain,420n,v.registry,r.owner,1n),v.idPreimage);
+  assert.equal(encodeComputeRequestCommitment420(v.commitmentDomain,420n,v.registry,v.requestId,r),v.commitmentPreimage);
+  assert.throws(() => validateComputeRequest420(r,2n),/revision/);
+  assert.throws(() => validateComputeRequest420(r,1n,900n),/expired/);
+  assert.throws(() => validateComputeRequest420(r,1n,100n,9999n),/signed maximum/);
+  for (const patch of [{status:2},{owner:addr(0)},{manifestHash:b32(0)},{revision:0n}]) {
+    assert.throws(() => validateComputeRequest420({...r,...patch}));
+  }
+  for (const patch of [
+    {resourceClass:b32(0)}, {runtimeHash:b32(0)}, {jurisdictionHash:b32(0)},
+    {replicationFactor:0}, {partitionCount:1.5}, {replicationFactor:2**32},
+    {maximumPrice:0n}, {capacityUnits:(1n<<256n)-1n}, {deadline:1n<<64n},
+    {expiresAt:1001n}, {privacy:{...r.terms.privacy,version:0}},
+    {verification:{...r.terms.verification,commitment:b32(0)}}
+  ]) assert.throws(() => validateComputeRequest420({...r,terms:{...r.terms,...patch}}));
+});

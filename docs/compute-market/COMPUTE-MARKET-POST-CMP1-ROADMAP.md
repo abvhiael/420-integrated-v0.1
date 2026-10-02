@@ -264,6 +264,8 @@ Durable evidence: [CMP-2.1 qualification](CMP-2.1-QUALIFICATION-EVIDENCE.md). Le
 Advertise hardware/software capacity, availability, jurisdiction and price.
 
 ## CMP-2.2 — Compute requests
+**Status: implementation/Level 1 qualification in progress.**
+
 Express required resource class, runtime, verification, replication, privacy, deadline and maximum price.
 
 ## CMP-2.3 — Replaceable matching engine

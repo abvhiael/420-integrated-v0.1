@@ -18,6 +18,8 @@ contract ComputeAuthorization420 is I420System {
     bytes32 public constant ACTION_UPDATE_OFFER = keccak256("420/COMPUTE/ACTION/UPDATE_OFFER/V1");
     bytes32 public constant ACTION_CANCEL_OFFER = keccak256("420/COMPUTE/ACTION/CANCEL_OFFER/V1");
     bytes32 public constant ACTION_CREATE_REQUEST = keccak256("420/COMPUTE/ACTION/CREATE_REQUEST/V1");
+    bytes32 public constant ACTION_UPDATE_REQUEST = keccak256("420/COMPUTE/ACTION/UPDATE_REQUEST/V1");
+    bytes32 public constant ACTION_CANCEL_REQUEST = keccak256("420/COMPUTE/ACTION/CANCEL_REQUEST/V1");
     bytes32 public constant ACTION_AUTHORIZE_FUNDING = keccak256("420/COMPUTE/ACTION/AUTHORIZE_FUNDING/V1");
     bytes32 public constant ACTION_ACCEPT_MATCH = keccak256("420/COMPUTE/ACTION/ACCEPT_MATCH/V1");
     bytes32 public constant ACTION_EXECUTE_ATTEMPT = keccak256("420/COMPUTE/ACTION/EXECUTE_ATTEMPT/V1");
@@ -116,7 +118,8 @@ contract ComputeAuthorization420 is I420System {
         return actionId == ACTION_REGISTER_PROVIDER || actionId == ACTION_MANAGE_NODE
             || actionId == ACTION_MANAGE_RESOURCE || actionId == ACTION_PUBLISH_OFFER
             || actionId == ACTION_UPDATE_OFFER || actionId == ACTION_CANCEL_OFFER
-            || actionId == ACTION_CREATE_REQUEST || actionId == ACTION_AUTHORIZE_FUNDING
+            || actionId == ACTION_CREATE_REQUEST || actionId == ACTION_UPDATE_REQUEST
+            || actionId == ACTION_CANCEL_REQUEST || actionId == ACTION_AUTHORIZE_FUNDING
             || actionId == ACTION_ACCEPT_MATCH || actionId == ACTION_EXECUTE_ATTEMPT
             || actionId == ACTION_SUBMIT_RECEIPT || actionId == ACTION_VERIFY_RESULT
             || actionId == ACTION_CHALLENGE || actionId == ACTION_ADJUDICATE

@@ -65,8 +65,8 @@
       "runtime_artifact": "contracts/artifacts/GenesisDEXFactory.json",
       "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
       "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
-      "artifact_status": "SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN_GLOBAL_HASH_PENDING",
-      "artifact_blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0x71cfd26ecde73f51a93cbce4877fd4edd6882c9d5d51b40c25df97e2348d106f"
     },
     {
       "name": "PublicBatchAuction",
@@ -75,8 +75,8 @@
       "runtime_artifact": "contracts/artifacts/PublicBatchAuction.json",
       "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
       "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
-      "artifact_status": "SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN_GLOBAL_HASH_PENDING",
-      "artifact_blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0xeeb69fc49b1ff4edd0d8bf94f7ec8e1f75cd064720226a4856043b531cf3c228"
     },
     {
       "name": "TWAPOracle",
@@ -85,8 +85,8 @@
       "runtime_artifact": "contracts/artifacts/TWAPOracle.json",
       "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
       "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
-      "artifact_status": "SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN_GLOBAL_HASH_PENDING",
-      "artifact_blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0x7ad49e839308f3e0d9c0047203cf007bfc9b978608e4eca838f751f5f78f36ca"
     },
     {
       "name": "ValidatorBootstrapReserve",
@@ -165,8 +165,8 @@
       "runtime_artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
       "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
       "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
-      "artifact_status": "SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN_GLOBAL_HASH_PENDING",
-      "artifact_blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "artifact_status": "SWAP_AUDIT_6_ARTIFACT_READY",
+      "runtime_code_hash": "0x6ffa02b1b5638190a68fa72faf1465d9f0e52b479cc9d5920d83f3c55a4b3b37"
     },
     {
       "name": "Stake420",

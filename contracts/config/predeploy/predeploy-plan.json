@@ -112,39 +112,39 @@
       "address": "0x000000000000000000000000000000000000042b",
       "source": "swap/GenesisDEXFactory.sol",
       "artifact": "contracts/artifacts/GenesisDEXFactory.json",
-      "status": "COMPILER_ARTIFACT_FROZEN",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
-      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd",
       "compiler_runtime_template_keccak256": "0x2e9c0c4a7fbcf8bcdb3c38fda23c886bd7af446c1598d59ba807e2aae154d60f",
       "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
-      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "runtime_code_hash": "0x71cfd26ecde73f51a93cbce4877fd4edd6882c9d5d51b40c25df97e2348d106f"
     },
     {
       "name": "PublicBatchAuction",
       "address": "0x000000000000000000000000000000000000042c",
       "source": "swap/PublicBatchAuction.sol",
       "artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "status": "COMPILER_ARTIFACT_FROZEN",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
-      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29",
       "compiler_runtime_template_keccak256": "0x8402f58df988b874eb7a1d3e3c05ca471e5de8dbecd987454c53ef139991da98",
       "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
-      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "runtime_code_hash": "0xeeb69fc49b1ff4edd0d8bf94f7ec8e1f75cd064720226a4856043b531cf3c228"
     },
     {
       "name": "TWAPOracle",
       "address": "0x000000000000000000000000000000000000042d",
       "source": "swap/TWAPOracle.sol",
       "artifact": "contracts/artifacts/TWAPOracle.json",
-      "status": "COMPILER_ARTIFACT_FROZEN",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
-      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466",
       "compiler_runtime_template_keccak256": "0x43b55b63656c9a0b3c6ed863298fe4baf9fa0f28afa511e62de79d697b429865",
       "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
-      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "runtime_code_hash": "0x7ad49e839308f3e0d9c0047203cf007bfc9b978608e4eca838f751f5f78f36ca"
     },
     {
       "name": "ValidatorBootstrapReserve",
@@ -261,13 +261,13 @@
       "address": "0x0000000000000000000000000000000000000439",
       "source": "swap/ApprovedQuoteAssetRegistry.sol",
       "artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "status": "COMPILER_ARTIFACT_FROZEN",
-      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION_PENDING_GLOBAL_CONFIG_HASH",
-      "notes": "SWAP-AUDIT-6: compiler artifact/storage layout/immutable references frozen; final runtime hash is intentionally blocked until global Genesis authority freezes genesisConfigHash.",
+      "status": "ARTIFACT_READY",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
+      "notes": "SWAP-AUDIT-6: deterministic Solidity 0.8.24/Cancun runtime and empty mutable storage materialized from frozen GovernanceTimelock, ProtocolRegistry and canonical global genesisConfigHash. Live deployment verification remains SWAP-AUDIT-7/8.",
       "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e",
       "compiler_runtime_template_keccak256": "0x06bc16d6c6b3a78d4c81aa4588e74f71e9c441dffa4cecb6668cc2b3c061222b",
       "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
-      "blocker": "global Genesis authority has not frozen genesis_config_hash; app audit must not invent it"
+      "runtime_code_hash": "0x6ffa02b1b5638190a68fa72faf1465d9f0e52b479cc9d5920d83f3c55a4b3b37"
     },
     {
       "name": "Stake420",

@@ -42,6 +42,8 @@ Application-created ERC20/ERC721/ERC1155 assets are separate assets. Before anot
 
 An invoice commits merchant identity/address, metadata hash, currency, amount, expiry/refund window, accepted-assets hash, settlement-plan hash, tip policy, slippage bound and mode. The signing root is domain separated under `420/APP/420PAY_INVOICE`.
 
+Decision #4 permits invoices to be composed and signed while offline, but separately requires online acceptance. The signing root is therefore an offline presentation/integrity commitment, not an alternate state-mutation authority: canonical invoice state is created only by the bound merchant submitting the invoice online through `createInvoice`. A relayer or third party cannot manufacture canonical invoice acceptance merely by possessing the offline root or a presentation signature. Introducing delegated or signature-based canonical acceptance would require a new frozen authorization/version decision rather than silently broadening the merchant authority boundary.
+
 Current constraints include:
 
 - supported invoice currencies `CAD`, `USD` and `420`;
@@ -58,7 +60,7 @@ Optional invoice metadata must agree with the shared metadata commitment when on
 
 `PaymentRegistry420` derives a payment ID from the invoice, payer, merchant, input asset/amount, settlement asset/amount, quote ID and payer nonce under `420/APP/420PAY_PAYMENT_ID`.
 
-The lifecycle distinguishes `SUBMITTED`, `INCLUDED`, `CERTIFIED`, `FINALIZED`, `SETTLED`, refund states and failure. Finalization does not merely mean a frontend saw a transaction; the canonical registry only accepts the allowed predecessor states and verifies invoice/settlement fields before marking the payment finalized.
+The lifecycle distinguishes `SUBMITTED`, `INCLUDED`, `CERTIFIED`, `FINALIZED`, `SETTLED`, refund states and failure. Canonical lifecycle mutations are Genesis-governed. `INCLUDED` requires `SUBMITTED`; `CERTIFIED` requires `INCLUDED`; finalization accepts the retained canonical predecessors `SUBMITTED`, `INCLUDED` or `CERTIFIED` while verifying invoice/settlement fields; `SETTLED` requires `FINALIZED`; and `FAILED` is permitted only before finalization from `SUBMITTED`, `INCLUDED` or `CERTIFIED`. Refund states remain reachable only from finalized/settled/refundable state. Terminal failure and completed refund states cannot be resurrected through lifecycle mutation.
 
 Settlement assets must be canonical under the shared asset interface. Duplicate payment IDs are rejected.
 

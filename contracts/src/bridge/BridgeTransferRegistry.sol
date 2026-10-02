@@ -294,7 +294,12 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
     }
 
     function refundTransfer(bytes32 id, bytes32 evidenceHash) external {
-        _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
+        _requireGenesisGovernance(BridgeIds420.ACTION_WITHDRAWAL_RECOVERY);
+        _requireOperational(
+            BridgeIds420.ACTION_WITHDRAWAL_RECOVERY,
+            ISystemSafety420.ActionClass.WITHDRAWAL_ONLY,
+            Types420.Direction.NONE
+        );
         Status current = _transfer(id).status;
         require(current == Status.FAILED || current == Status.EXPIRED || current == Status.DISPUTED, "refund state");
         _transition(id, Status.REFUNDED, evidenceHash);

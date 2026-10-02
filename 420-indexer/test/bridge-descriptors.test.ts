@@ -70,7 +70,10 @@ test('decoder supports identical Bridge event signatures on distinct bound contr
   assert.equal(riskDecoded?.fields.trusted,true);
   assert.equal(transferDecoded?.contractAddress,addresses.BridgeTransferRegistry);
   assert.equal(transferDecoded?.fields.trusted,false);
-  assert.equal(registry.decode(log(address(250),risk.topic0,[routerWord],[word(1)],2)),null);
+  assert.throws(
+    () => registry.decode(log(address(250),risk.topic0,[routerWord],[word(1)],2)),
+    /protocol descriptor contract mismatch/
+  );
 });
 
 test('canonical Bridge transfer events reconstruct exact lifecycle and preserve terminal completion', () => {

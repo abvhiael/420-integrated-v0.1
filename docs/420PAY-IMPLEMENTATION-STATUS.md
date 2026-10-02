@@ -1,27 +1,32 @@
+# 420Pay — Genesis implementation and qualification status
 
-# 420Pay — Genesis Contract Implementation & Test Status
+420Pay is a registry-resolved Genesis economic protocol. Genesis Decisions #1–#4 and the parameter profile in `contracts/config/pay/420pay-parameters.json` are frozen.
 
-Genesis Decisions #1–#4 are frozen.
+## Implemented protocol components
 
-Implemented source-level components:
-- InvoiceRegistry420
-- PaymentRegistry420
-- MerchantRegistry420 with versioned/delayed payout profiles
-- PaymentRouter420 with payer spend limits and fail-closed health checks
-- SettlementRouter420 with max-eight split settlement and deterministic remainder
-- RefundManager420
-- GasSponsor420 with frozen sponsorship caps and reserve floor
-- AccountingCommitment420
+- `PayIds420`
+- `MerchantRegistry420`
+- `InvoiceRegistry420`
+- `PaymentRegistry420`
+- `PaymentRouter420`
+- `SettlementRouter420`
+- `RefundManager420`
+- `GasSponsor420`
+- `AccountingCommitment420`
+- `CanonicalSwapHealthAdapter420`
+- `CanonicalSettlementAdapter420`
+- shared replay consumption through `ReplayProtectionConsumer420` / `IReplayConsumer420`
 
-Foundry test sources cover settlement remainder and core constants. Static verification checks the
-frozen invariants.
+The canonical settlement path is `PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420`. The adapter is source-bound to the configured `PaymentRouter420`; the swap executor trusts only explicitly governed callers. The Pay replay domain is bound to the canonical payment router through the shared replay consumer.
 
-This runtime does not necessarily contain Foundry/solc. A PASS from static verification is not a
-claim that Solidity has compiled, executed or been audited. The release remains blocked until:
-1. pinned Solidity compilation succeeds;
-2. all Foundry tests pass;
-3. fuzz/invariant tests run;
-4. canonical market/asset-health adapters are wired;
-5. payment swaps are implemented atomically against the canonical DEX;
-6. cryptographic invoice-signature verification is finalized and tested;
-7. external security review completes.
+## Qualification already demonstrated in repository history
+
+Prior 420Pay implementation/hardening PRs compiled under Solidity 0.8.24 and executed Foundry, fuzz/property, Genesis and integrated qualification successfully. Those historical results are not used as exact-head evidence for later commits.
+
+## Current release gates
+
+Repository-side implementation can be qualified independently, but live Genesis/testnet deployment is still required to prove the exact deployed router/adapter/executor/replay instances, registry lifecycle/code hashes, trusted-caller relation, replay-domain relation, ownership/timelock configuration and smoke transactions.
+
+The repository security policy also retains an external independent security review as a mainnet/production release gate. No such third-party audit is claimed here.
+
+420Pay has no canonical standalone frontend in the current repository. User signing and payment presentation are expected to be provided through Wallet/application clients, while canonical authority remains in the Pay contracts and Registry-discovered dependencies.

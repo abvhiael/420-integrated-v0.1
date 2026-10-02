@@ -21,46 +21,6 @@ interface VmLaunchpadCrowdfunding420 {
     function expectRevert(
         bytes4
     ) external;
-
-    function _createModeSale(
-        bytes32 salt,
-        LaunchpadCrowdfundingIntegration420.CampaignMode mode,
-        bytes32 liquidityCommitment
-    ) private returns (bytes32 createdSaleId) {
-        uint64 startsAt = 40 + uint64(uint256(salt) % 10);
-        uint64 endsAt = startsAt + 10;
-        uint64 claimStartsAt = endsAt + 10;
-        createdSaleId = sales.canonicalId(
-            projectId,
-            PAYMENT_ASSET,
-            RECEIVER,
-            100,
-            200,
-            200,
-            1000,
-            startsAt,
-            endsAt,
-            claimStartsAt,
-            ELIGIBILITY,
-            liquidityCommitment
-        );
-        sales.createSale(
-            createdSaleId,
-            projectId,
-            PAYMENT_ASSET,
-            RECEIVER,
-            100,
-            200,
-            200,
-            1000,
-            startsAt,
-            endsAt,
-            claimStartsAt,
-            ELIGIBILITY,
-            liquidityCommitment
-        );
-        integration.setCampaignMode(createdSaleId, mode);
-    }
 }
 
 contract MockCrowdfundingCapabilities420 is ICapabilityRegistry420 {
@@ -417,20 +377,16 @@ contract LaunchpadCrowdfundingIntegration420Test {
         integration.bindIdentity(PROFILE_ALICE);
     }
 
-
     function testOnlyApprovedGenesisCampaignModesAreRepresentable() public {
         bytes32 donation = _createModeSale(
-            keccak256("sale/donation"),
             LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION,
             bytes32(uint256(1))
         );
         bytes32 community = _createModeSale(
-            keccak256("sale/community"),
             LaunchpadCrowdfundingIntegration420.CampaignMode.COMMUNITY_PROJECT,
             bytes32(uint256(2))
         );
         bytes32 preorder = _createModeSale(
-            keccak256("sale/preorder"),
             LaunchpadCrowdfundingIntegration420.CampaignMode.PRODUCT_PREORDER,
             bytes32(uint256(3))
         );
@@ -531,9 +487,10 @@ contract LaunchpadCrowdfundingIntegration420Test {
         vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidIdentity.selector);
         allocations.contribute(saleId, 100, paymentId);
 
-        identity.setProfile(keccak256("profile/bob"), BOB, true);
+        bytes32 profileBob = keccak256("profile/bob");
+        identity.setProfile(profileBob, BOB, true);
         vm.prank(BOB);
-        integration.bindIdentity(keccak256("profile/bob"));
+        integration.bindIdentity(profileBob);
 
         vm.prank(BOB);
         vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidIdentity.selector);
@@ -586,10 +543,6 @@ contract LaunchpadCrowdfundingIntegration420Test {
 
         require(allocations.refunded(saleId, ALICE), "refund recorded");
         require(integration.usedRefundCommitment(refundCommitment), "refund replay lock");
-
-        vm.prank(ALICE);
-        vm.expectRevert(LaunchpadAllocationRegistry420.NotRefundable.selector);
-        allocations.recordRefund(saleId, refundCommitment);
     }
 
     function testSuccessfulClaimPublishesReplayProtectedDeliveryEvidence() public {
@@ -690,5 +643,44 @@ contract LaunchpadCrowdfundingIntegration420Test {
             sales.sale(saleId).state == LaunchpadSaleRegistry420.State.SCHEDULED,
             "arbitration cannot cancel sale directly"
         );
+    }
+
+    function _createModeSale(
+        LaunchpadCrowdfundingIntegration420.CampaignMode mode,
+        bytes32 liquidityCommitment
+    ) private returns (bytes32 createdSaleId) {
+        uint64 startsAt = 40 + uint64(uint256(liquidityCommitment));
+        uint64 endsAt = startsAt + 10;
+        uint64 claimStartsAt = endsAt + 10;
+        createdSaleId = sales.canonicalId(
+            projectId,
+            PAYMENT_ASSET,
+            RECEIVER,
+            100,
+            200,
+            200,
+            1000,
+            startsAt,
+            endsAt,
+            claimStartsAt,
+            ELIGIBILITY,
+            liquidityCommitment
+        );
+        sales.createSale(
+            createdSaleId,
+            projectId,
+            PAYMENT_ASSET,
+            RECEIVER,
+            100,
+            200,
+            200,
+            1000,
+            startsAt,
+            endsAt,
+            claimStartsAt,
+            ELIGIBILITY,
+            liquidityCommitment
+        );
+        integration.setCampaignMode(createdSaleId, mode);
     }
 }

@@ -60,6 +60,7 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
 
     mapping(bytes32 => Milestone) private _milestones;
     mapping(bytes32 => uint128) public milestoneTotal;
+    mapping(bytes32 => mapping(uint32 => bool)) public milestoneOrdinalUsed;
 
     /// @notice A Treasury disbursement may fund at most one Grants milestone.
     /// The binding is released only when an approved milestone is cancelled
@@ -119,8 +120,10 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
                 || id != canonicalId(awardId, ordinal, amount, purposeHash)
         ) revert InvalidMilestone();
         if (_milestones[id].exists) revert MilestoneExists();
+        if (milestoneOrdinalUsed[awardId][ordinal]) revert MilestoneExists();
         if (uint256(milestoneTotal[awardId]) + amount > a.amount) revert InvalidMilestone();
 
+        milestoneOrdinalUsed[awardId][ordinal] = true;
         milestoneTotal[awardId] += amount;
         _milestones[id] = Milestone(awardId, amount, purposeHash, bytes32(0), bytes32(0), State.PENDING, true);
         emit MilestoneCreated(id, awardId, amount, purposeHash);
@@ -187,14 +190,16 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
 
         if (m.state == State.APPROVED) {
             ITreasuryDisbursementGrant420.Disbursement memory d = treasury.disbursement(m.treasuryDisbursementId);
-            // An already executed Treasury transfer is historical fact and cannot
-            // be hidden by cancelling the Grants object. It must be finalized paid.
-            if (d.state == ITreasuryDisbursementGrant420.State.EXECUTED) revert InvalidState();
+            // Never detach Grants from a payment Treasury can still execute. The
+            // Treasury disbursement must be cancelled first; executed payments
+            // remain historical fact and must be finalized PAID instead.
+            if (d.state != ITreasuryDisbursementGrant420.State.CANCELLED) revert InvalidState();
 
             delete treasuryDisbursementMilestone[m.treasuryDisbursementId];
             m.treasuryDisbursementId = bytes32(0);
         }
 
+        milestoneTotal[m.awardId] -= m.amount;
         m.state = State.CANCELLED;
         emit MilestoneCancelled(id);
     }

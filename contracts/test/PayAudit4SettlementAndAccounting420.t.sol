@@ -189,6 +189,7 @@ contract PayAudit4SettlementAndAccounting420Test {
     function testNativeSplitIsAtomicAndLeavesNoRouterResidue() public {
         (, PaymentRouter420 router, SettlementRouter420 settlement,,,,) = _splitStack();
         (address[] memory recipients, uint16[] memory bps) = _split();
+        vm.deal(address(settlement), 7);
         vm.deal(ALICE, 101);
 
         vm.prank(ALICE);
@@ -199,7 +200,7 @@ contract PayAudit4SettlementAndAccounting420Test {
         require(RECIPIENT_A.balance == 35, "native primary");
         require(RECIPIENT_B.balance == 33, "native b");
         require(RECIPIENT_C.balance == 33, "native c");
-        require(address(settlement).balance == 0, "native residue");
+        require(address(settlement).balance == 7, "native new residue");
     }
 
     function testSwapBackedSplitRoutesThroughCanonicalAdapterAtomically() public {
@@ -212,6 +213,7 @@ contract PayAudit4SettlementAndAccounting420Test {
             PayAudit4SwapExecutor420 executor
         ) = _splitStack();
         (address[] memory recipients, uint16[] memory bps) = _split();
+        token.mint(address(settlement), 7);
         token.mint(address(executor), 101);
 
         ICanonicalSettlement420.Quote memory q = ICanonicalSettlement420.Quote({
@@ -245,7 +247,7 @@ contract PayAudit4SettlementAndAccounting420Test {
         require(token.balanceOf(RECIPIENT_A) == 35, "swap primary");
         require(token.balanceOf(RECIPIENT_B) == 33, "swap b");
         require(token.balanceOf(RECIPIENT_C) == 33, "swap c");
-        require(token.balanceOf(address(settlement)) == 0, "swap residue");
+        require(token.balanceOf(address(settlement)) == 7, "swap new residue");
     }
 
     function testRefundEvidenceCannotExceedCanonicalAuthorizedRefund() public {

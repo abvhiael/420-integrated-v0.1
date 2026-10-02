@@ -15,6 +15,14 @@ Use these repository files together:
 
 Do not infer missing authority or addresses from documentation prose.
 
+## Configuration and environment
+
+Governance has no operator secret, owner key or Governance-specific environment variable that grants protocol authority.
+
+Canonical fixed addresses, compiler settings, runtime hashes, Registry identifiers and initialization values come from committed configuration. Registry-resolved Civic addresses are deployment outputs and must be discovered/published rather than supplied as guessed constants.
+
+420Wallet runtime configuration must provide canonical ProtocolRegistry-backed Governance discovery for the selected network. Hosted Indexer/Search/Explorer/Notifications endpoints are replaceable consumer configuration and do not become Governance authority.
+
 ## Build and verification
 
 From repository root:

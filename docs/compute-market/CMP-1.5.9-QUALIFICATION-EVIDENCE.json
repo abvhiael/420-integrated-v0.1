@@ -44,12 +44,50 @@
     "retained_suite": "Compute*.t.sol"
   },
   "workflows": [
-    {"name":"Genesis Address Authority","run_number":913,"run_id":37047725177,"job_id":110973185802,"conclusion":"success"},
-    {"name":"420Docs Qualification","run_number":4345,"run_id":37047725101,"job_id":110973185513,"conclusion":"success"},
-    {"name":"420Registry REG-AUDIT-4","run_number":748,"run_id":37047725458,"job_id":110973187901,"conclusion":"success"},
-    {"name":"420Indexer","run_number":1731,"run_id":37047725072,"job_id":110973185385,"conclusion":"success"},
-    {"name":"Solidity Contracts","run_number":4132,"run_id":37047725134,"job_id":110973251472,"job":"compute-fast","conclusion":"success"},
-    {"name":"Compute Market Qualification","run_number":139,"run_id":37047725202,"job_id":110973186409,"job":"fast-qualification","conclusion":"success"}
+    {
+      "name": "Genesis Address Authority",
+      "run_number": 913,
+      "run_id": 37047725177,
+      "job_id": 110973185802,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_number": 4345,
+      "run_id": 37047725101,
+      "job_id": 110973185513,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-4",
+      "run_number": 748,
+      "run_id": 37047725458,
+      "job_id": 110973187901,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "run_number": 1731,
+      "run_id": 37047725072,
+      "job_id": 110973185385,
+      "conclusion": "success"
+    },
+    {
+      "name": "Solidity Contracts",
+      "run_number": 4132,
+      "run_id": 37047725134,
+      "job_id": 110973251472,
+      "job": "compute-fast",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compute Market Qualification",
+      "run_number": 139,
+      "run_id": 37047725202,
+      "job_id": 110973186409,
+      "job": "fast-qualification",
+      "conclusion": "success"
+    }
   ],
   "security_results": [
     "cross-wired marker-compatible source fails closed",
@@ -68,5 +106,7 @@
     "repository-wide Level 3 qualification remains deferred to CMP-1.5.13"
   ],
   "blockers": [],
-  "next_canonical_step": "CMP-1.5.10 — ComputeEscrow slash-redistribution integration"
+  "next_canonical_step": "CMP-1.5.10 — ComputeEscrow slash-redistribution integration",
+  "evidence_commit_sha": "19eeaa5b6610feedebf24bccc9bd422625773d04",
+  "closeout_bookkeeping_head": "5d1c196c427847b8fcc8cde461de85d511bfd637"
 }

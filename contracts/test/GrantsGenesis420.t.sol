@@ -339,11 +339,7 @@ contract GrantsGenesis420Test {
 
         vm.prank(ALICE);
         (bool milestoneCreated,) = address(e.milestones)
-            .call(
-                abi.encodeWithSelector(
-                    e.milestones.createMilestone.selector, m, a, uint32(1), uint128(300), purpose
-                )
-            );
+            .call(abi.encodeWithSelector(e.milestones.createMilestone.selector, m, a, uint32(1), uint128(300), purpose));
         require(!milestoneCreated, "non-timelock created milestone");
 
         vm.prank(ALICE);

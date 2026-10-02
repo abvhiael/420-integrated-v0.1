@@ -32,7 +32,8 @@
       "deploy GrantMilestoneRegistry420 against GovernanceTimelock, GrantAuthorization420, GrantProgramRegistry420, GrantAwardRegistry420 and canonical TreasuryDisbursementRegistry420",
       "deploy GrantRouter420 against GrantProgramRegistry420, GrantAwardRegistry420 and GrantMilestoneRegistry420",
       "publish the qualified Grants service/component graph through the canonical Registry"
-    ]
+    ],
+    "releaseMaterialization": "contracts/config/grants/grants-audit-5-release-materialization.json"
   },
   "invariants": [
     "GRANT-INV-001: grant programs bind to one Treasury budget and one Civic action commitment",

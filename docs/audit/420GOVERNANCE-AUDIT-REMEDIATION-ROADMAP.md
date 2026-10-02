@@ -272,6 +272,8 @@ Every required Governance dependency and consumer has a tested, documented autho
 
 ## GOV-AUDIT-8 — documentation, operator, threat-model and phase closeout
 
+**Status: COMPLETE — qualified at implementation/closeout SHA `330388bbd0c819e2ac331f060da856de5bf12e80`; final repository Level 3 phase-closeout evidence: `docs/audit/GOV-AUDIT-8-QUALIFICATION.md`.**
+
 ### Purpose
 Make the repository sufficient for a new developer/operator to build, test, deploy, operate and recover Governance.
 

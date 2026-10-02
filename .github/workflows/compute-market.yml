@@ -156,3 +156,14 @@ jobs:
 
       - name: Verify CMP-1.5.11 hostile economic qualification
         run: python scripts/verify-cmp-1-5-11-hostile-economic-qualification.py
+
+      - name: Verify CMP-1.5.12 repository release candidate
+        run: python scripts/verify-cmp-1-5-12-release-candidate.py --repository-ready
+
+      - name: Verify CMP-1.5.12 live readiness remains fail-closed
+        shell: bash
+        run: |
+          if python scripts/verify-cmp-1-5-12-release-candidate.py; then
+            echo "CMP-1.5.12 live readiness unexpectedly passed"
+            exit 1
+          fi

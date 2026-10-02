@@ -35,7 +35,9 @@ Live deployment binding remains a PAY-AUDIT-7 requirement.
 
 ## PAY-AUDIT-3 — invoice/offline authorization and payment lifecycle completion
 
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+**Status: COMPLETE.**
+
+Durable Level 1 qualification: implementation SHA `452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8` passed 420Pay audit qualification run #91 (`37043694408`, job `110959749763`) and Solidity Contracts run #4128 (`37043694394`). The dedicated run passed exact-head verification, static Pay verification, formatting, the Pay/settlement-boundary build, PAY-AUDIT-3 focused Solidity qualification, forbidden-primitive scan, and 420Indexer Pay reconciliation. This completion record is evidence-only and therefore does not recursively require requalification.
 
 Canonical resolution:
 1. Decision #4's `offline_invoice_creation: true` and `online_acceptance_required: true` are treated together. Offline invoice signing is a presentation/integrity commitment; it does not create a second canonical state-mutation authority. Canonical invoice creation remains an online transaction from the bound merchant through `InvoiceRegistry420.createInvoice`.
@@ -107,7 +109,7 @@ Pay components are registry-resolved; do not assign frozen addresses unless the 
 
 ## PAY-AUDIT-7 — production-equivalent testnet qualification
 
-**Status: BLOCKED until the approved live testnet candidate exists and PAY-AUDIT-3/4/6 repository work is complete.**
+**Status: BLOCKED until the approved live testnet candidate exists and PAY-AUDIT-4/6 repository work is complete.**
 
 Retain exact release-SHA evidence for:
 - chain/genesis identity;

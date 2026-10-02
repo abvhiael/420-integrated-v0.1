@@ -43,7 +43,9 @@ contract GrantProgramRegistry420 is I420System, SystemAccess {
     event ProgramAwardedChanged(bytes32 indexed programId, uint128 awarded);
     event AwardRegistryBound(address indexed awardRegistry);
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
     function systemName() external pure returns (string memory) {
         return "GrantProgramRegistry420";
@@ -53,7 +55,9 @@ contract GrantProgramRegistry420 is I420System, SystemAccess {
         return 1;
     }
 
-    function bindAwardRegistry(address awardRegistry_) external onlyGovernance {
+    function bindAwardRegistry(
+        address awardRegistry_
+    ) external onlyGovernance {
         if (awardRegistry_ == address(0) || awardRegistry != address(0)) revert InvalidAwardRegistry();
         awardRegistry = awardRegistry_;
         emit AwardRegistryBound(awardRegistry_);
@@ -77,18 +81,35 @@ contract GrantProgramRegistry420 is I420System, SystemAccess {
         ) revert InvalidProgram();
         if (_programs[id].exists) revert ProgramExists();
 
-        _programs[id] =
-            Program(programType, treasuryBudgetId, civicActionHash, totalCap, maxAward, 0, opensAt, closesAt, metadataHash, true, true);
+        _programs[id] = Program(
+            programType,
+            treasuryBudgetId,
+            civicActionHash,
+            totalCap,
+            maxAward,
+            0,
+            opensAt,
+            closesAt,
+            metadataHash,
+            true,
+            true
+        );
         emit ProgramCreated(id, treasuryBudgetId, programType, totalCap, maxAward, opensAt, closesAt, civicActionHash);
     }
 
-    function setActive(bytes32 id, bool active) external onlyGovernance {
+    function setActive(
+        bytes32 id,
+        bool active
+    ) external onlyGovernance {
         Program storage p = _get(id);
         p.active = active;
         emit ProgramActiveChanged(id, active);
     }
 
-    function reserveAward(bytes32 id, uint128 amount) external {
+    function reserveAward(
+        bytes32 id,
+        uint128 amount
+    ) external {
         if (msg.sender != awardRegistry || awardRegistry == address(0)) revert Unauthorized();
         Program storage p = _get(id);
         if (!p.active || amount == 0 || amount > p.maxAward || uint256(p.awarded) + amount > p.totalCap) {
@@ -98,16 +119,22 @@ contract GrantProgramRegistry420 is I420System, SystemAccess {
         emit ProgramAwardedChanged(id, p.awarded);
     }
 
-    function program(bytes32 id) external view returns (Program memory) {
+    function program(
+        bytes32 id
+    ) external view returns (Program memory) {
         return _get(id);
     }
 
-    function isOpen(bytes32 id) public view returns (bool) {
+    function isOpen(
+        bytes32 id
+    ) public view returns (bool) {
         Program storage p = _programs[id];
         return p.exists && p.active && block.timestamp >= p.opensAt && block.timestamp <= p.closesAt;
     }
 
-    function _get(bytes32 id) private view returns (Program storage p) {
+    function _get(
+        bytes32 id
+    ) private view returns (Program storage p) {
         p = _programs[id];
         if (!p.exists) revert ProgramNotFound();
     }

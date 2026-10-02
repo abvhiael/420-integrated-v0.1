@@ -108,8 +108,8 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         if (g.chainId != block.chainid) revert InvalidReleaseGraph();
         _requireComponent(g.workerRegistry);
         _requireComponent(g.verifierRegistry);
-        _requireComponent(g.disputeEngine.implementation);
-        _requireComponent(g.canonicalEntitlements.implementation);
+        _requireComponent(g.disputeEngine);
+        _requireComponent(g.canonicalEntitlements);
         _requireComponent(g.workerCollateralVault);
         _requireComponent(g.verifierCollateralVault);
         _requireComponent(g.rewardVault);
@@ -159,8 +159,8 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
 
         _checkComponent(g.workerRegistry);
         _checkComponent(g.verifierRegistry);
-        _checkComponent(g.disputeEngine.implementation);
-        _checkComponent(g.canonicalEntitlements.implementation);
+        _checkComponent(g.disputeEngine);
+        _checkComponent(g.canonicalEntitlements);
         _checkComponent(g.workerCollateralVault);
         _checkComponent(g.verifierCollateralVault);
         _checkComponent(g.rewardVault);

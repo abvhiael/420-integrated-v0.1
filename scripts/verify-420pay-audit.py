@@ -67,6 +67,69 @@ decision4=json.loads(read("contracts/config/pay/420pay-decision-4.json") or "{}"
 if decision4.get("offline_invoice_creation") is not True or decision4.get("online_acceptance_required") is not True:
     errors.append("PAY-AUDIT-3 frozen offline/online invoice decision changed; reconcile semantics")
 
+
+settlement_router=read("contracts/src/pay/SettlementRouter420.sol")
+for token in [
+    "executeNativeSplit",
+    "executeDirectTokenSplit",
+    "executeHeldTokenSplit",
+    "consumedSplit",
+    "setPaymentRouter",
+    "setSettlementAdapter",
+    "AccountingMismatch",
+]:
+    if token not in settlement_router: errors.append(f"PAY-AUDIT-4 split execution missing: {token}")
+
+for token in ["executeSwapSplitSettlement", "executeDirectTokenSplitSettlement", "executeNativeSplitSettlement", "setSettlementRouter"]:
+    if token not in router: errors.append(f"PAY-AUDIT-4 payment-router split path missing: {token}")
+
+for token in ["setSettlementRouter", "executeSplit", "executeHeldTokenSplit"]:
+    if token not in adapter: errors.append(f"PAY-AUDIT-4 adapter split path missing: {token}")
+
+refund_manager=read("contracts/src/pay/RefundManager420.sol")
+for token in ["setPaymentRegistry", "refundAccounting", "refund exceeds authorized", "refund recipient", "refund maximum"]:
+    if token not in refund_manager: errors.append(f"PAY-AUDIT-4 refund reconciliation missing: {token}")
+
+gas_sponsor=read("contracts/src/pay/GasSponsor420.sol")
+for token in ["authorizedRelayer", "setRelayer", "reimburseSponsored", "totalReimbursed", "reserveFloor", "UnauthorizedRelayer"]:
+    if token not in gas_sponsor: errors.append(f"PAY-AUDIT-4 gas sponsorship completion missing: {token}")
+if ".call{ value: actualCost }" not in gas_sponsor:
+    errors.append("PAY-AUDIT-4 relayer reimbursement transfer missing")
+
+export_schema=json.loads(read("contracts/config/pay/accounting-export-schema.json") or "{}")
+frozen_fields=json.loads(read("contracts/config/pay/420pay-parameters.json") or "{}").get("accounting_exports",{}).get("fields",[])
+schema_fields=[x.get("name") for x in export_schema.get("fields",[])]
+if schema_fields != frozen_fields:
+    errors.append("PAY-AUDIT-4 accounting export schema does not exactly match frozen field order")
+if export_schema.get("delivery_model") != "DERIVED_REPLACEABLE_EXPORTER":
+    errors.append("PAY-AUDIT-4 accounting export delivery model missing")
+
+accounting_export=read("420-indexer/src/pay-accounting-export.ts")
+for token in ["PayAccountingExport420", "PayAccountingExportSink420", "PayAccountingExportService420", "refund_total exceeds canonical refundable value"]:
+    if token not in accounting_export: errors.append(f"PAY-AUDIT-4 accounting exporter missing: {token}")
+
+audit4_test=read("contracts/test/PayAudit4SettlementAndAccounting420.t.sol")
+for token in [
+    "testDirectTokenSplitConservesValueAssignsRemainderAndRejectsReplay",
+    "testDirectTokenSplitRequiresPayerCaller",
+    "testNativeSplitIsAtomicAndLeavesNoRouterResidue",
+    "testSwapBackedSplitRoutesThroughCanonicalAdapterAtomically",
+    "testRefundEvidenceCannotExceedCanonicalAuthorizedRefund",
+    "testGasSponsorReimbursesOnlyAuthorizedRelayerAndPreservesReserve",
+]:
+    if token not in audit4_test: errors.append(f"PAY-AUDIT-4 regression missing: {token}")
+
+wiring_checks=[
+    ("payment_router","settlement_router_binding"),
+    ("settlement_adapter","settlement_router_binding"),
+    ("settlement_router","payment_router_binding"),
+    ("settlement_router","settlement_adapter_binding"),
+    ("refund_manager","payment_registry_binding"),
+]
+for section,key in wiring_checks:
+    if key not in wiring.get(section, {}):
+        errors.append(f"PAY-AUDIT-4 wiring manifest missing {section}.{key}")
+
 genesis_apps=json.loads(read("config/genesis-applications.json") or "{}")
 names={x.get("name") for x in genesis_apps.get("apps",[])}
 if "420 Pay" in names or "420Pay" in names:

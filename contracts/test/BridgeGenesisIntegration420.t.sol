@@ -137,7 +137,7 @@ contract BridgeGenesisIntegration420Test {
         f.adapter.setInbound(_inbound(100 ether));
         bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, hex"4201");
         (,,,,uint256 amount,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(transferId);
-        require(amount == 100 ether && status == BridgeTransferRegistry.Status.CREATED, "transfer");
+        require(amount == 100 ether && status == BridgeTransferRegistry.Status.VERIFIED, "transfer");
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
         require(routeTVL == 100 ether, "route risk");
     }
@@ -157,8 +157,18 @@ contract BridgeGenesisIntegration420Test {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
         f.router.acceptInbound(ADAPTER_ID, hex"4201");
-        bytes32 messageId = f.router.initiateOutbound(ADAPTER_ID, ROUTE_ID, ASSET_ID, hex"0102", 40 ether, hex"");
+        bytes memory recipient = hex"0102";
+        bytes32 messageId = f.router.initiateOutbound(ADAPTER_ID, ROUTE_ID, ASSET_ID, recipient, 40 ether, hex"");
         require(messageId != bytes32(0), "message");
+        bytes32 transferId = f.transfers.deriveOutboundTransferId(
+            ROUTE_ID, ASSET_ID, address(this), keccak256(recipient), 40 ether, messageId
+        );
+        (,,,,,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(transferId);
+        require(status == BridgeTransferRegistry.Status.SOURCE_PENDING, "outbound not registered");
+        require(
+            f.transfers.transferDirection(transferId) == BridgeTransferRegistry.Direction.OUTBOUND,
+            "outbound direction"
+        );
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
         require(routeTVL == 60 ether, "tvl");
     }

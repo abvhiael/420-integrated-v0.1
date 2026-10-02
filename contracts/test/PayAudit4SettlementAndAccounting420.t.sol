@@ -11,31 +11,49 @@ import "../src/interfaces/ICanonicalSettlement420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmPayAudit4 {
-    function prank(address) external;
-    function deal(address account, uint256 newBalance) external;
+    function prank(
+        address
+    ) external;
+    function deal(
+        address account,
+        uint256 newBalance
+    ) external;
 }
 
 contract PayAudit4Token420 {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
-    function mint(address to, uint256 amount) external {
+    function mint(
+        address to,
+        uint256 amount
+    ) external {
         balanceOf[to] += amount;
     }
 
-    function approve(address spender, uint256 amount) external returns (bool) {
+    function approve(
+        address spender,
+        uint256 amount
+    ) external returns (bool) {
         allowance[msg.sender][spender] = amount;
         return true;
     }
 
-    function transfer(address to, uint256 amount) external returns (bool) {
+    function transfer(
+        address to,
+        uint256 amount
+    ) external returns (bool) {
         require(balanceOf[msg.sender] >= amount, "balance");
         balanceOf[msg.sender] -= amount;
         balanceOf[to] += amount;
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool) {
         uint256 approved = allowance[from][msg.sender];
         require(approved >= amount && balanceOf[from] >= amount, "allowance/balance");
         allowance[from][msg.sender] = approved - amount;
@@ -61,8 +79,7 @@ contract PayAudit4SwapExecutor420 {
 }
 
 contract PayAudit4SettlementAndAccounting420Test {
-    VmPayAudit4 internal constant vm =
-        VmPayAudit4(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmPayAudit4 internal constant vm = VmPayAudit4(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address internal constant ALICE = address(0xA11CE);
     address internal constant BOB = address(0xB0B);
@@ -75,11 +92,7 @@ contract PayAudit4SettlementAndAccounting420Test {
 
     receive() external payable { }
 
-    function _split()
-        internal
-        pure
-        returns (address[] memory recipients, uint16[] memory bps)
-    {
+    function _split() internal pure returns (address[] memory recipients, uint16[] memory bps) {
         recipients = new address[](3);
         recipients[0] = RECIPIENT_A;
         recipients[1] = RECIPIENT_B;
@@ -136,9 +149,7 @@ contract PayAudit4SettlementAndAccounting420Test {
 
         bytes32 paymentId = keccak256("direct-split");
         vm.prank(ALICE);
-        router.executeDirectTokenSplitSettlement(
-            paymentId, ALICE, address(token), 101, recipients, bps, 0
-        );
+        router.executeDirectTokenSplitSettlement(paymentId, ALICE, address(token), 101, recipients, bps, 0);
 
         require(token.balanceOf(RECIPIENT_A) == 35, "primary remainder");
         require(token.balanceOf(RECIPIENT_B) == 33, "recipient b");
@@ -146,18 +157,19 @@ contract PayAudit4SettlementAndAccounting420Test {
         require(token.balanceOf(address(settlement)) == 0, "router residue");
 
         vm.prank(ALICE);
-        (bool replayOk,) = address(router).call(
-            abi.encodeWithSelector(
-                router.executeDirectTokenSplitSettlement.selector,
-                paymentId,
-                ALICE,
-                address(token),
-                101,
-                recipients,
-                bps,
-                uint8(0)
-            )
-        );
+        (bool replayOk,) = address(router)
+            .call(
+                abi.encodeWithSelector(
+                    router.executeDirectTokenSplitSettlement.selector,
+                    paymentId,
+                    ALICE,
+                    address(token),
+                    101,
+                    recipients,
+                    bps,
+                    uint8(0)
+                )
+            );
         require(!replayOk, "split replay accepted");
     }
 
@@ -170,18 +182,19 @@ contract PayAudit4SettlementAndAccounting420Test {
         token.approve(address(settlement), 100);
 
         vm.prank(BOB);
-        (bool ok,) = address(router).call(
-            abi.encodeWithSelector(
-                router.executeDirectTokenSplitSettlement.selector,
-                keccak256("third-party-split"),
-                ALICE,
-                address(token),
-                100,
-                recipients,
-                bps,
-                uint8(0)
-            )
-        );
+        (bool ok,) = address(router)
+            .call(
+                abi.encodeWithSelector(
+                    router.executeDirectTokenSplitSettlement.selector,
+                    keccak256("third-party-split"),
+                    ALICE,
+                    address(token),
+                    100,
+                    recipients,
+                    bps,
+                    uint8(0)
+                )
+            );
         require(!ok, "third party spent payer allowance");
         require(token.balanceOf(ALICE) == 100, "payer balance changed");
     }
@@ -193,9 +206,7 @@ contract PayAudit4SettlementAndAccounting420Test {
         vm.deal(ALICE, 101);
 
         vm.prank(ALICE);
-        router.executeNativeSplitSettlement{value: 101}(
-            keccak256("native-split"), ALICE, recipients, bps, 0
-        );
+        router.executeNativeSplitSettlement{ value: 101 }(keccak256("native-split"), ALICE, recipients, bps, 0);
 
         require(RECIPIENT_A.balance == 35, "native primary");
         require(RECIPIENT_B.balance == 33, "native b");
@@ -207,8 +218,7 @@ contract PayAudit4SettlementAndAccounting420Test {
         (
             ,
             PaymentRouter420 router,
-            SettlementRouter420 settlement,
-            ,
+            SettlementRouter420 settlement,,
             PayAudit4Token420 token,
             PayAudit4SwapExecutor420 executor
         ) = _splitStack();
@@ -270,43 +280,41 @@ contract PayAudit4SettlementAndAccounting420Test {
         payments.recordFinalized(paymentId, invoiceId, keccak256("receipt"), address(token), 84, 6);
         payments.applyRefund(paymentId, 40, false);
 
-        (bool inflatedMaximum,) = address(refunds).call(
-            abi.encodeWithSelector(
-                refunds.recordRefund.selector,
-                keccak256("bad-max"),
-                paymentId,
-                address(token),
-                address(this),
-                40,
-                91,
-                bytes32(0)
-            )
-        );
+        (bool inflatedMaximum,) = address(refunds)
+            .call(
+                abi.encodeWithSelector(
+                    refunds.recordRefund.selector,
+                    keccak256("bad-max"),
+                    paymentId,
+                    address(token),
+                    address(this),
+                    40,
+                    91,
+                    bytes32(0)
+                )
+            );
         require(!inflatedMaximum, "caller selected refund maximum");
 
-        refunds.recordRefund(
-            keccak256("refund-1"), paymentId, address(token), address(this), 40, 90, bytes32(0)
-        );
+        refunds.recordRefund(keccak256("refund-1"), paymentId, address(token), address(this), 40, 90, bytes32(0));
         require(refunds.refundedByPayment(paymentId) == 40, "authorized refund not recorded");
 
-        (bool overAuthorized,) = address(refunds).call(
-            abi.encodeWithSelector(
-                refunds.recordRefund.selector,
-                keccak256("refund-over"),
-                paymentId,
-                address(token),
-                address(this),
-                1,
-                90,
-                bytes32(0)
-            )
-        );
+        (bool overAuthorized,) = address(refunds)
+            .call(
+                abi.encodeWithSelector(
+                    refunds.recordRefund.selector,
+                    keccak256("refund-over"),
+                    paymentId,
+                    address(token),
+                    address(this),
+                    1,
+                    90,
+                    bytes32(0)
+                )
+            );
         require(!overAuthorized, "refund evidence exceeded authorized amount");
 
         payments.applyRefund(paymentId, 50, true);
-        refunds.recordRefund(
-            keccak256("refund-2"), paymentId, address(token), address(this), 50, 90, bytes32(0)
-        );
+        refunds.recordRefund(keccak256("refund-2"), paymentId, address(token), address(this), 50, 90, bytes32(0));
         require(refunds.refundedByPayment(paymentId) == 90, "full refund reconciliation");
     }
 
@@ -319,7 +327,7 @@ contract PayAudit4SettlementAndAccounting420Test {
         sponsor.setRelayer(address(this), true);
 
         vm.deal(address(this), 2 ether);
-        (bool funded,) = address(sponsor).call{value: 1 ether}("");
+        (bool funded,) = address(sponsor).call{ value: 1 ether }("");
         require(funded, "funding");
         uint256 before = address(this).balance;
 
@@ -329,18 +337,19 @@ contract PayAudit4SettlementAndAccounting420Test {
         require(address(sponsor).balance >= sponsor.reserveFloor(), "reserve breached");
 
         vm.prank(ALICE);
-        (bool unauthorized,) = address(sponsor).call(
-            abi.encodeWithSelector(
-                sponsor.reimburseSponsored.selector,
-                ALICE,
-                keccak256("merchant-2"),
-                OPERATION,
-                100_000,
-                0.001 ether,
-                true,
-                false
-            )
-        );
+        (bool unauthorized,) = address(sponsor)
+            .call(
+                abi.encodeWithSelector(
+                    sponsor.reimburseSponsored.selector,
+                    ALICE,
+                    keccak256("merchant-2"),
+                    OPERATION,
+                    100_000,
+                    0.001 ether,
+                    true,
+                    false
+                )
+            );
         require(!unauthorized, "unauthorized relayer reimbursed");
     }
 }

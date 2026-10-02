@@ -88,6 +88,14 @@ interface ILaunchpadArbitrationRulings420 {
 }
 
 contract LaunchpadCrowdfundingIntegration420 is I420System {
+    enum CampaignMode {
+        NONE,
+        REWARD,
+        DONATION,
+        COMMUNITY_PROJECT,
+        PRODUCT_PREORDER
+    }
+
     uint8 private constant PAY_STATUS_SETTLED = 5;
     uint8 private constant PAY_STATUS_REFUNDED = 6;
     uint8 private constant PAY_STATUS_PARTIALLY_REFUNDED = 7;
@@ -123,6 +131,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     ILaunchpadArbitrationCases420 public immutable arbitrationCases;
     ILaunchpadArbitrationRulings420 public immutable arbitrationRulings;
 
+    mapping(bytes32 => CampaignMode) public campaignMode;
     mapping(address => bytes32) public profileByParticipant;
     mapping(bytes32 => mapping(address => bytes32)) public profileAtSale;
     mapping(bytes32 => bool) public usedPaymentId;
@@ -139,6 +148,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     error ZeroAddress();
     error OnlyAllocationRegistry();
     error InvalidIdentity();
+    error InvalidCampaignMode();
     error InvalidSettlement();
     error Replay();
     error TooManyPaymentReferences();
@@ -147,6 +157,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     error InvalidDispute();
     error DisputeOutcomeUnavailable();
 
+    event CampaignModeSet(bytes32 indexed saleId, CampaignMode mode);
     event IdentityBound(address indexed participant, bytes32 indexed profileId);
     event ContributionSettlementBound(
         bytes32 indexed saleId,
@@ -239,6 +250,20 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         return 1;
     }
 
+    function setCampaignMode(
+        bytes32 saleId,
+        CampaignMode mode
+    ) external {
+        if (msg.sender != sales.governanceTimelock()) revert InvalidCampaignMode();
+        LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
+        if (
+            mode == CampaignMode.NONE || campaignMode[saleId] != CampaignMode.NONE
+                || sale_.state != LaunchpadSaleRegistry420.State.SCHEDULED
+        ) revert InvalidCampaignMode();
+        campaignMode[saleId] = mode;
+        emit CampaignModeSet(saleId, mode);
+    }
+
     function bindIdentity(
         bytes32 profileId
     ) external {
@@ -257,6 +282,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         if (paymentId == bytes32(0) || usedPaymentId[paymentId]) revert Replay();
 
         LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
+        if (campaignMode[saleId] == CampaignMode.NONE) revert InvalidCampaignMode();
         bytes32 profileId = profileByParticipant[participant];
         if (profileId == bytes32(0)) revert InvalidIdentity();
         (address controller,,,,,, bool active) = identity.profiles(profileId);

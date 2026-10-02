@@ -25,9 +25,20 @@ for entry in adapters:
     p=ROOT/path
     require(p.exists(),f"missing adapter {path}")
     require(entry["launchSlice"] in roadmap_status,f"launch slice missing {entry['launchSlice']}")
+    launch_entry=roadmap_status.get(entry["launchSlice"],{})
+    require(str(launch_entry.get("status","")).startswith("COMPLETED_QUALIFIED"),f"{entry['launchSlice']}: production adapter launch slice not qualified")
     domains.append(entry["domain"])
     if not p.exists(): continue
     src=p.read_text(encoding="utf-8")
+    iface=entry.get("verifierInterface","")
+    iface_path=ROOT/iface if iface else None
+    require(bool(iface) and iface_path.exists(),f"{path}: missing canonical verifier interface {iface}")
+    if iface:
+        require(pathlib.Path(iface).name in src,f"{path}: verifier interface import drift {pathlib.Path(iface).name}")
+    markers=entry.get("requiredFinalityProofMarkers",[])
+    require(len(markers)>=3,f"{path}: finality/proof semantic marker inventory incomplete")
+    for marker in markers:
+        require(marker in src,f"{path}: missing required finality/proof semantic {marker}")
     for marker in [
         "IBridgeAdapter420",
         "ADAPTER_ID",

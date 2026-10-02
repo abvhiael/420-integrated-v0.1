@@ -13,9 +13,6 @@ on:
       - ".github/workflows/exchange-testnet-swap.yml"
       - "wallet/web/scripts/qualify-live-testnet.mjs"
       - ".github/workflows/wallet-live-testnet.yml"
-      - "contracts/test/SwapTWAPOracle420.t.sol"
-      - "contracts/test/SwapGenesisIntegration420.t.sol"
-      - "contracts/test/PaySwapGenesisIntegration420.t.sol"
       - ".github/workflows/swap-audit-8.yml"
   workflow_dispatch:
 
@@ -49,10 +46,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
 
       - name: Verify fail-closed official-testnet readiness
         run: python3 scripts/verify-swap-audit-8-testnet-readiness.py

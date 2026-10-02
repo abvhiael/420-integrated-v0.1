@@ -50,6 +50,10 @@ contract MockSlashDistributionDisputes420 is IComputeSlashDistributionDisputes42
         entitlements = entitlements_;
     }
 
+    function setEntitlements(address entitlements_) external {
+        entitlements = entitlements_;
+    }
+
     function set(VerificationReview calldata review) external {
         _review = review;
     }
@@ -88,7 +92,7 @@ contract ComputeVerifierDisputeSlashRecipientResolver420Test {
                 verificationPolicyId: keccak256("policy"),
                 verificationPolicyRevision: 1,
                 verificationPolicyCommitment: keccak256("policy-commitment"),
-                groundsCode: keccak256("ground"),
+                groundsCode: resolver.OBJECTIVE_VERIFIER_ERROR_GROUND(),
                 evidenceCommitment: keccak256("evidence"),
                 responseCommitment: keccak256("response"),
                 decisionCommitment: keccak256("decision"),
@@ -126,6 +130,84 @@ contract ComputeVerifierDisputeSlashRecipientResolver420Test {
         require(r.harmedPayer == entitlements.payer(), "payer");
         require(r.challenger == CHALLENGER, "challenger");
         require(r.replacementWorker == address(0), "invented replacement");
+    }
+
+    function testResolverFreezesCanonicalEscrowEntitlementsRuntime() public {
+        require(resolver.canonicalEntitlements() == address(entitlements), "entitlements binding");
+        require(
+            resolver.canonicalEntitlementsCodeHash() == address(entitlements).codehash,
+            "entitlements code hash"
+        );
+
+        MockSlashDistributionEntitlements420 replacement =
+            new MockSlashDistributionEntitlements420();
+        disputes.setEntitlements(address(replacement));
+
+        (bool ok,) = address(resolver).staticcall(
+            abi.encodeCall(
+                resolver.resolve,
+                (
+                    keccak256("auth"),
+                    keccak256("dispute"),
+                    address(evidenceAdapter),
+                    bytes32(0),
+                    VERIFIER
+                )
+            )
+        );
+        require(!ok, "entitlement endpoint drift accepted");
+    }
+
+    function testGenericAdverseGroundCannotResolveEscrowPayer() public {
+        IComputeSlashDistributionDisputes420.VerificationReview memory r =
+            IComputeSlashDistributionDisputes420.VerificationReview({
+                disputeId: keccak256("generic-dispute"),
+                jobId: keccak256("job"),
+                verificationRef: keccak256("verification"),
+                resultCommitment: keccak256("result"),
+                verifier: VERIFIER,
+                verificationPolicyId: keccak256("policy"),
+                verificationPolicyRevision: 1,
+                verificationPolicyCommitment: keccak256("policy-commitment"),
+                groundsCode: keccak256("generic-payer-win"),
+                evidenceCommitment: keccak256("evidence"),
+                responseCommitment: keccak256("response"),
+                decisionCommitment: keccak256("decision"),
+                appealCommitment: bytes32(0),
+                appealDecisionCommitment: bytes32(0),
+                resolutionRef: keccak256("resolution"),
+                claimant: CHALLENGER,
+                respondent: address(0xDEAD),
+                initialAdjudicator: address(0xAAAA),
+                appealAdjudicator: address(0),
+                openedAt: 1,
+                responseDeadline: 2,
+                decisionDeadline: 3,
+                appealDeadline: 4,
+                appealDecisionDeadline: 0,
+                status: 5,
+                holdActive: false,
+                appealed: false,
+                appealResolved: false,
+                providerWins: false,
+                finalDisposition: true,
+                adverseToOriginalVerification: true
+            });
+        disputes.set(r);
+
+        (bool ok,) = address(resolver).staticcall(
+            abi.encodeCall(
+                resolver.resolve,
+                (
+                    keccak256("auth"),
+                    keccak256("generic-dispute"),
+                    address(evidenceAdapter),
+                    bytes32(0),
+                    VERIFIER
+                )
+            )
+        );
+        require(!ok, "generic adverse dispute resolved slash payer");
     }
 
     function testEvidenceAdapterOrSubjectMismatchFailsClosed() public {

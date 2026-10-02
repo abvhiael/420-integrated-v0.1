@@ -69,8 +69,13 @@ interface IComputeSlashDistributionEntitlements420 {
 contract ComputeVerifierDisputeSlashRecipientResolver420
     is I420System, IComputeSlashRecipientResolver420
 {
+    bytes32 public constant OBJECTIVE_VERIFIER_ERROR_GROUND =
+        keccak256("420/CMP/DISPUTE/GROUND/VERIFIER_OBJECTIVE_ERROR/V1");
+
     IComputeSlashDistributionDisputes420 public immutable disputes;
     address public immutable verifierEvidenceAdapter;
+    address public immutable canonicalEntitlements;
+    bytes32 public immutable canonicalEntitlementsCodeHash;
 
     error InvalidResolution();
 
@@ -80,6 +85,11 @@ contract ComputeVerifierDisputeSlashRecipientResolver420
         }
         disputes = IComputeSlashDistributionDisputes420(disputes_);
         verifierEvidenceAdapter = verifierEvidenceAdapter_;
+
+        address entitlements_ = disputes.entitlements();
+        if (entitlements_.code.length == 0) revert InvalidResolution();
+        canonicalEntitlements = entitlements_;
+        canonicalEntitlementsCodeHash = entitlements_.codehash;
     }
 
     function systemName() external pure returns (string memory) {
@@ -109,13 +119,18 @@ contract ComputeVerifierDisputeSlashRecipientResolver420
             !r.finalDisposition
                 || !r.adverseToOriginalVerification
                 || r.providerWins
+                || r.groundsCode != OBJECTIVE_VERIFIER_ERROR_GROUND
                 || r.verifier != subjectAccount
                 || r.claimant == address(0)
                 || r.jobId == bytes32(0)
         ) revert InvalidResolution();
 
         address entitlements = disputes.entitlements();
-        if (entitlements.code.length == 0) revert InvalidResolution();
+        if (
+            entitlements != canonicalEntitlements
+                || entitlements.code.length == 0
+                || entitlements.codehash != canonicalEntitlementsCodeHash
+        ) revert InvalidResolution();
 
         (
             bytes32 entitlementRef,

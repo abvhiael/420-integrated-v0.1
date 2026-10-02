@@ -69,9 +69,10 @@ Provides:
 - dispute freeze and adjudicated liability;
 - solvency/reentrancy/accounting hardening.
 
-Remaining cross-phase dependency:
+Cross-phase stake/slash integration:
 
-- stake/slash redistribution must originate from CMP-1.5 collateral, never payer escrow.
+- repository integration is implemented in CMP-1.5.10: slash redistribution originates from CMP-1.5 collateral, never payer escrow;
+- live deployment evidence remains gated by CMP-1.2.9 / later public testnet qualification.
 
 Question answered:
 
@@ -212,6 +213,9 @@ Freeze canonical verifier identity at dispute opening, preserve verifier collate
 Bind WorkerRegistry admission to the actual Vault-backed CMP-1.5 worker collateral source with canonical WorkerRegistry identity and frozen source code-hash checks.
 
 ### CMP-1.5.10 — ComputeEscrow slash-redistribution integration
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `0a6fe7d7a3d5b7bb6ea768a842bc98819efa3ce2`.**
+
+Bind the harmed-payer recipient to the exact canonical ComputeEscrow entitlement/dispute state while proving that all redistributed slash value originates only from separately backed CMP-1.5 collateral and never payer escrow.
 
 ### CMP-1.5.11 — Hostile economic qualification
 
@@ -523,7 +527,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.10 ComputeEscrow slash-redistribution integration; CMP-1.5.0–1.5.9 complete |
+| CMP-1.5 ComputeStake | current: CMP-1.5.11 hostile economic qualification; CMP-1.5.0–1.5.10 complete |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

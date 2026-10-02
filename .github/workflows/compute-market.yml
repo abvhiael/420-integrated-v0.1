@@ -147,3 +147,9 @@ jobs:
 
       - name: Verify CMP-1.5.9 WorkerRegistry stake-source integration
         run: python scripts/verify-cmp-1-5-9-workerregistry-stake-source-integration.py
+
+      - name: Verify CMP-1.2.10 closeout after stake-slash integration
+        run: python scripts/verify-cmp-1-2-10-closeout.py
+
+      - name: Verify CMP-1.5.10 ComputeEscrow slash redistribution
+        run: python scripts/verify-cmp-1-5-10-computeescrow-slash-redistribution.py

@@ -189,9 +189,10 @@
     "ValidatorRegistry and CommunityValidatorReserve MUST begin mutually bound at 0x0423/0x0425.",
     "AttentionTreasury and CannaseurCampaignRegistry MUST begin mutually bound at 0x0421/0x043b; campaign reward registry remains separately governance-bound when the Genesis attention module set is deployed.",
     "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress.",
-    "Genesis-resident Swap predeploys materialize governanceTimelock=0x0429, ProtocolRegistry=0x0434, and one shared canonical genesis_config_hash; that hash MUST be frozen by global Genesis authority and MUST NOT be invented by an app audit.",
-    "GenesisDEXFactory begins with poolImplementation=0; governance MUST bind a qualified code-bearing implementation reference before canonical pool registration."
+    "GenesisDEXFactory begins with poolImplementation=0; governance MUST bind a qualified code-bearing implementation reference before canonical pool registration.",
+    "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly."
   ],
   "protocol_registry": "0x0000000000000000000000000000000000000434",
-  "genesis_config_hash": "UNRESOLVED_DO_NOT_INVENT_GLOBAL_GENESIS_CONFIGURATION_COMMITMENT"
+  "genesis_config_hash": "0xd5121ed76a785afb903129f8677323477e3cfded1126bc2320ac881a7e68fb38",
+  "genesis_config_commitment": "contracts/config/genesis-config-commitment.json"
 }

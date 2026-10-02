@@ -1,6 +1,6 @@
 # CMP-1.5.7 — Reward accounting
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -169,3 +169,14 @@ CMP-1.5.7 is COMPLETE only when:
 Next canonical step:
 
 **CMP-1.5.8 — Dispute/stake integration**
+
+
+## Reconciled qualification evidence
+
+Qualified implementation SHA: `7fd48bcdf2ecbc618d110b34d5b081d2f3cca874`.
+
+PR #475 exact-head qualification passed Solidity Contracts #4034, Compute Market #124, Genesis #818, Registry #653, Docs #4247 and Indexer #1636.
+
+Durable evidence is recorded in `docs/compute-market/CMP-1.5.7-QUALIFICATION-EVIDENCE.json`.
+
+This bookkeeping correction is reconciled during CMP-1.5.13 and does not retroactively alter the qualified implementation SHA.

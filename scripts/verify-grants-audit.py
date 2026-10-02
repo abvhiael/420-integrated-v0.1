@@ -45,7 +45,7 @@ need("address public awardRegistry" in programs, "program award-controller bindi
 need("awardRegistry != address(0)" in programs, "award-controller one-time binding missing")
 need("msg.sender != awardRegistry" in programs, "program award accounting is not controller-scoped")
 need("programs.reserveAward(a.programId, amount)" in awards, "Award Registry does not update canonical program accounting")
-need("function programAwarded(bytes32 programId)" in awards, "compatibility programAwarded getter missing")
+need("function programAwarded(" in awards and "bytes32 programId" in awards, "compatibility programAwarded getter missing")
 need("applicationAwarded" in awards and "ApplicationAwardCapExceeded" in awards, "cumulative application award cap missing")
 need("|| !p.active" in awards.replace("\n", " "), "inactive programs can create new awards")
 

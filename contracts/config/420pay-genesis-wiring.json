@@ -1,6 +1,6 @@
 {
   "schema": "420pay-genesis-wiring-v1",
-  "status": "REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING",
+  "status": "SOURCE_WIRING_REMEDIATED_DEPLOYMENT_VERIFICATION_REQUIRED",
   "payment_router": {
     "contract": "PaymentRouter420.sol",
     "settlement_adapter": "CanonicalSettlementAdapter420.sol",
@@ -10,7 +10,9 @@
     "contract": "CanonicalSettlementAdapter420.sol",
     "swap_executor": "CanonicalSwapExecutor420.sol",
     "constructor_or_config_binding_required": true,
-    "abi_verified": "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)"
+    "abi_verified": "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)",
+    "payment_router": "PaymentRouter420.sol",
+    "payment_router_binding": "CanonicalSettlementAdapter420.setPaymentRouter(PaymentRouter420)"
   },
   "swap_executor": {
     "contract": "CanonicalSwapExecutor420.sol",
@@ -19,6 +21,7 @@
   },
   "invariants": [
     "PaymentRouter420 settlementAdapter MUST resolve to CanonicalSettlementAdapter420 before payment service activation.",
+    "CanonicalSettlementAdapter420 paymentRouter MUST resolve to the exact canonical PaymentRouter420 instance before payment service activation.",
     "CanonicalSettlementAdapter420 swapExecutor MUST resolve to CanonicalSwapExecutor420 before payment service activation.",
     "CanonicalSwapExecutor420 MUST mark the exact CanonicalSettlementAdapter420 instance as trusted before payment service activation.",
     "No user, merchant, smart account, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
@@ -27,7 +30,5 @@
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,
   "deployment_binding_verified": false,
-  "note": "Repository/local-EVM qualification now proves the exact PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding graph, active ProtocolRegistry component identity/codehash derivation, and executor trusted-caller relation. Public-testnet deployed addresses/transactions remain false until SWAP-AUDIT-8.",
-  "repository_binding_qualified": true,
-  "binding_qualification_test": "contracts/test/SwapDeploymentBinding420.t.sol"
+  "note": "Source-level Pay -> SettlementAdapter -> SwapExecutor authority wiring and Pay replay-consumer bindings are implemented and tested. Live deployment binding remains false until Genesis/testnet deployment verification proves the exact configured instances, runtime identities, registry state, trusted-caller relation, adapter router binding, and replay-domain binding."
 }

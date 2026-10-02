@@ -875,10 +875,14 @@
         "test_plan": "contracts/config/pay/hardening-test-plan.json",
         "canonical_health_adapter": "CanonicalSwapHealthAdapter420",
         "canonical_settlement_adapter": "CanonicalSettlementAdapter420",
-        "production_swap_executor_wired": "SOURCE_AND_TEST_WIRING_VERIFIED_DEPLOYMENT_PENDING",
+        "production_swap_executor_wired": false,
         "foundry_execution_required": true,
-        "payment_router_binding_required": true
-      }
+        "payment_router_binding_required": true,
+        "source_swap_executor_wiring_verified": true,
+        "deployment_swap_executor_wiring_verified": false
+      },
+      "exact_head_audit_qualification": false,
+      "historical_solidity_compile_pass": true
     },
     "security_toolchain": {
       "foundry_required": true,

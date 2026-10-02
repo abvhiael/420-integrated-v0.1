@@ -11,7 +11,7 @@ This page is the application-level index to durable audit evidence. Individual e
 | GOV-AUDIT-5 | COMPLETE | `docs/audit/GOV-AUDIT-5-QUALIFICATION.md` |
 | GOV-AUDIT-6 | COMPLETE | `docs/audit/GOV-AUDIT-6-QUALIFICATION.md` |
 | GOV-AUDIT-7 | COMPLETE | `docs/audit/GOV-AUDIT-7-QUALIFICATION.md` |
-| GOV-AUDIT-8 | phase closeout in qualification | `docs/audit/GOV-AUDIT-8-QUALIFICATION.md` after exact-SHA Level 3 qualification |
+| GOV-AUDIT-8 | COMPLETE | `docs/audit/GOV-AUDIT-8-QUALIFICATION.md` |
 | GOV-AUDIT-9 | pending live production-equivalent testnet | canonical roadmap |
 | GOV-AUDIT-10 | future Genesis candidate/production closeout | canonical roadmap |
 

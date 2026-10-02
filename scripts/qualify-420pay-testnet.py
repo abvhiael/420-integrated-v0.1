@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, json, pathlib, sys, urllib.request
+import argparse, json, pathlib, subprocess, sys, urllib.request
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 
@@ -52,9 +52,9 @@ def main():
         if not is_addr(addr) or not is_b32(expected): fail(f"{name} deployment evidence")
         code=rpc(url,"eth_getCode",[addr,hex(blockn)])
         if not code or code=="0x": fail(f"{name} missing code")
-        # Runtime hash is retained in the evidence draft and independently compared during operator review.
-        # eth_getCode bytes are also emitted into the retained report for deterministic post-run hashing.
-        item["observedCode"]=code
+        observed=subprocess.check_output(["cast","keccak",code],text=True).strip().lower()
+        if observed!=str(expected).lower(): fail(f"{name} runtime code hash mismatch")
+        item["observedRuntimeCodeHash"]=observed
     for name,tx in ev.get("transactions",{}).items():
         if not is_tx(tx): fail(f"{name} tx hash")
         receipt=rpc(url,"eth_getTransactionReceipt",[tx])

@@ -1,0 +1,1011 @@
+{
+  "schema": "420pay-audit-6-deployment-package-v1",
+  "step": "PAY-AUDIT-6",
+  "status": "REPOSITORY_READY_LIVE_DEPLOYMENT_PENDING",
+  "repository_ready": true,
+  "live_qualified": false,
+  "address_policy": "REGISTRY_RESOLVED_NO_FIXED_PAY_ADDRESSES",
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
+  "protocol_registry": "0x0000000000000000000000000000000000000434",
+  "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "residents": [
+    {
+      "abi_sha256": "34666f25a54937202df00c6ebbbfd7c86668535647ccd4ba0dee08a29b90288e",
+      "artifact": "contracts/out/MerchantRegistry420.sol/MerchantRegistry420.json",
+      "component_id_preimage": "420/APP/420PAY/MERCHANT_REGISTRY",
+      "contract": "MerchantRegistry420",
+      "creation_bytecode_hash": "0xd440daca9af6ba4f13ff97049148d4f9973da0ef277035593f473a017ce7f210",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 482,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 1387,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 1522,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3237,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 5980,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 6282,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 6453,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 219,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 3014,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 384,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 1173,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 6639,
+      "runtime_code_hash": "0x46b97e9d6aae24fce442eeb825c156d057f1fe2c7a05cf0dd654277c26071f79",
+      "runtime_template_hash": "0x1bd8fd0149356dc9deb1afb905b516cc243c28ba5436464fe6926767ca84431c",
+      "source": "contracts/src/pay/MerchantRegistry420.sol",
+      "source_blob_sha1": "292333164b2958b6fb60291b9c4c9a20b515b34b"
+    },
+    {
+      "abi_sha256": "2bb87e2d944a6a78be575d6f4d4cee2f34202c3a86cfe5e862e22e24446689ac",
+      "artifact": "contracts/out/InvoiceRegistry420.sol/InvoiceRegistry420.json",
+      "component_id_preimage": "420/APP/420PAY/INVOICE_REGISTRY",
+      "contract": "InvoiceRegistry420",
+      "creation_bytecode_hash": "0x785e6d22ff47873f677980e8e02ffd1efb984cde0b0c6aa0217923da1801322e",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 1447,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4478,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4761,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 5741,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 8676,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 8918,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 363,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 7692,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 1236,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 5699,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 9104,
+      "runtime_code_hash": "0x624d2c65e1e5c063f97b62684e5e4b2af04f5e0840a825b3519121e966eb893b",
+      "runtime_template_hash": "0xab2166fd628a10f15c5ec8018f9f2054687a364442f44477aecf68636604d79f",
+      "source": "contracts/src/pay/InvoiceRegistry420.sol",
+      "source_blob_sha1": "90904d89ced185ad5932c1730a45e8770cc4f177"
+    },
+    {
+      "abi_sha256": "964b86a540c70d31e0ea83c5313bf8642643e6096de560fc1bfa5956940b326b",
+      "artifact": "contracts/out/PaymentRegistry420.sol/PaymentRegistry420.json",
+      "component_id_preimage": "420/APP/420PAY/PAYMENT_REGISTRY",
+      "contract": "PaymentRegistry420",
+      "creation_bytecode_hash": "0xb016c440991f8b9acf378056195f119f9b3212d10322b58fb4e0c8d266eb74fe",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 879,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2768,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2914,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3113,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3350,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3765,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4027,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4271,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 6953,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 9637,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 10681,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 10972,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 11143,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 271,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 6567,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 2520,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 6728,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 8949,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 9260,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 11361,
+      "runtime_code_hash": "0x58fc4d1dfb69e8ecc16d8af28440e0c6cf744b5bebb429be5eb0e215717ce8ac",
+      "runtime_template_hash": "0x33b7cebe8186e93003d30a0d6977f093e1e96fab8a84879a89e2089536aa5e8a",
+      "source": "contracts/src/pay/PaymentRegistry420.sol",
+      "source_blob_sha1": "bd5c48580d8a6373eb4fa2bfe9a357ea408e1cce"
+    },
+    {
+      "abi_sha256": "75444366b00047f0edf3d1a3a56fa42fd6fda15970d2ae489bd89797ced2d21c",
+      "artifact": "contracts/out/PaymentRouter420.sol/PaymentRouter420.json",
+      "component_id_preimage": "420/APP/420PAY/PAYMENT_ROUTER",
+      "contract": "PaymentRouter420",
+      "creation_bytecode_hash": "0x5e3747a2340b5d40ab4bb8699f1df4969ee701b7fa9e5bcca3cbcea7bdd9bf51",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 4057,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 8958,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 10699,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 11390,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 11701,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 11872,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 12043,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 12214,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3304,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 4194,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 3551,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 8229,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 8537,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 12710,
+      "runtime_code_hash": "0x23229257e9368e576e5e28ace3d4be0ff7b02b7594d79c9aff4ccaa2e0c6900e",
+      "runtime_template_hash": "0x7a742dadd61cccd81d9f6e89cb4c3c29a0566ac0d706d14e4d191fdb7286de33",
+      "source": "contracts/src/pay/PaymentRouter420.sol",
+      "source_blob_sha1": "3341fa734911cc128791f24766718601829196db"
+    },
+    {
+      "abi_sha256": "0a0e6ec0ec183305b03725e053555c2ce0a140af1e7f09d83acd1b23aa3069fe",
+      "artifact": "contracts/out/SettlementRouter420.sol/SettlementRouter420.json",
+      "component_id_preimage": "420/APP/420PAY/SETTLEMENT_ROUTER",
+      "contract": "SettlementRouter420",
+      "creation_bytecode_hash": "0xdaa22418d11aab4c5cbe61cbc853a338bb11c58524f676973a5062b00a71c808",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 1913,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4963,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 6707,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 8618,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 9276,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 339,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 2712,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 1317,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 8512,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 9570,
+      "runtime_code_hash": "0x3f1acffba6ad41a0a40c4025c542cca9707e1b978abe5f466a950db1b7f03305",
+      "runtime_template_hash": "0x5f4d7d103ce4b675c1851152c0be94f203f4280c83a120d047fa77573eb7e656",
+      "source": "contracts/src/pay/SettlementRouter420.sol",
+      "source_blob_sha1": "97f22ac57508fc508be1b3c780a89e972a094c8e"
+    },
+    {
+      "abi_sha256": "3a2f1158e24a12816c16613a66a0a5af09ed9f7ca9a483972c65651364b65f2b",
+      "artifact": "contracts/out/RefundManager420.sol/RefundManager420.json",
+      "component_id_preimage": "420/APP/420PAY/REFUND_MANAGER",
+      "contract": "RefundManager420",
+      "creation_bytecode_hash": "0x1f8fd60b1ca4db41a961b5fcb3a011cacde396d7cf2cb698ae52fe696966a208",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 1032,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 1407,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 1606,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 1720,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2021,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2355,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2617,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2863,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 6419,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 249,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 5709,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 436,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 847,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 1136,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 6676,
+      "runtime_code_hash": "0x8d09fa4f299eb3326396c4872b5200373cfb3fe73ff5a217053fab33e91a1f7c",
+      "runtime_template_hash": "0x561996e324e0cfea4f735cc4aac4bf0d4fb3744f68e0eee68884e32bef73d62f",
+      "source": "contracts/src/pay/RefundManager420.sol",
+      "source_blob_sha1": "d50c9af043912bf22aaf2c8c9bedb17e55adf2e7"
+    },
+    {
+      "abi_sha256": "f010a327dd9788478e65dcd9409ebdb7f50817358784b8d6255dfaeadbd293ff",
+      "artifact": "contracts/out/GasSponsor420.sol/GasSponsor420.json",
+      "component_id_preimage": "420/APP/420PAY/GAS_SPONSOR",
+      "contract": "GasSponsor420",
+      "creation_bytecode_hash": "0xd939a1648dea11e9b67b1ac0aba738ed62a722d91e8b8e47a0e478d2940e7768",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 1634,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3488,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3687,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3803,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4104,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4363,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 7289,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 646,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 2270,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 755,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 1459,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 3100,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 7687,
+      "runtime_code_hash": "0x6f753c83720149afa59e3b59aab91316705af00e248e8aa182d90d3c3d6595ff",
+      "runtime_template_hash": "0xca41dd7b70b96331cb72cf2a84a7cae0e4aa5ec39dcb2ff7537631096864a7da",
+      "source": "contracts/src/pay/GasSponsor420.sol",
+      "source_blob_sha1": "4b6eaee1987bd8d689efcc9607247b19025797f0"
+    },
+    {
+      "abi_sha256": "93950aaf423d9d7453a93127900bd300ecba7110f037c2e2d2bed8cfa0bc4160",
+      "artifact": "contracts/out/CanonicalSettlementAdapter420.sol/CanonicalSettlementAdapter420.json",
+      "component_id_preimage": "420/APP/420PAY/SETTLEMENT_ADAPTER",
+      "contract": "CanonicalSettlementAdapter420",
+      "creation_bytecode_hash": "0x94d016e8b1680a2292a98387bad47d29b0bdd4d6475f5e414d6fb5cde43808e7",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 1773,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3031,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3602,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3801,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 3917,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4220,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4482,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 4924,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 5185,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 8018,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 579,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 2334,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 1493,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        },
+        {
+          "length": 32,
+          "start": 2925,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 8324,
+      "runtime_code_hash": "0x49c98a763d4e1c4d514ef0c83e769f39fd1f906e92e785fc669d8f850119dc32",
+      "runtime_template_hash": "0x744c5754e0c343893aa968e2924f20eabb19b1e06e0d6e4892088d044975d1d3",
+      "source": "contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol",
+      "source_blob_sha1": "5fd478f4a44481b0ffc0064c46c877edda6ac5e0"
+    },
+    {
+      "abi_sha256": "cea4d183c614b99a01db852ddccd196bcd6d6d2473c393662da8abb71b8aebaa",
+      "artifact": "contracts/out/CanonicalSwapHealthAdapter420.sol/CanonicalSwapHealthAdapter420.json",
+      "component_id_preimage": "420/APP/420PAY/SWAP_HEALTH_ADAPTER",
+      "contract": "CanonicalSwapHealthAdapter420",
+      "creation_bytecode_hash": "0x0ca5a558658ed1b8b22addf1dba529d32d91b3f3d0a4f9bc5540034f543ed90f",
+      "deployment_address": null,
+      "immutable_materialization": [
+        {
+          "length": 32,
+          "start": 388,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 846,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 2452,
+          "value": "0x0000000000000000000000000000000000000434",
+          "variable": "registry"
+        },
+        {
+          "length": 32,
+          "start": 177,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 633,
+          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+          "variable": "genesisConfigHash"
+        },
+        {
+          "length": 32,
+          "start": 321,
+          "value": "0x0000000000000000000000000000000000000429",
+          "variable": "governanceTimelock"
+        }
+      ],
+      "runtime_bytes": 2910,
+      "runtime_code_hash": "0x88f49324c466e9c5013603af5b1a2f000d07f21670131a9dff83b91b2ee81e03",
+      "runtime_template_hash": "0x6aff5ccb783e4873e489896e0dea8a6841db182f27ac1ae1051f0bbc76732d3c",
+      "source": "contracts/src/pay/adapters/CanonicalSwapHealthAdapter420.sol",
+      "source_blob_sha1": "0526054526289bc32c23082f2823dbf4932be3ed"
+    }
+  ],
+  "external_dependencies": {
+    "canonical_swap_executor": {
+      "contract": "CanonicalSwapExecutor420",
+      "component_id_preimage": "420/APP/420SWAP/CANONICAL_SWAP_EXECUTOR",
+      "deployment_address": null,
+      "requirement": "code-bearing ACTIVE ProtocolRegistry component before Pay activation"
+    },
+    "replay_protection": {
+      "contract": "ReplayProtectionConsumer420",
+      "dependency_id_preimage": "420/APP/REPLAY_PROTECTION",
+      "deployment_address": null,
+      "requirement": "code-bearing ACTIVE ProtocolRegistry dependency with PAY_SETTLEMENT domain bound exclusively to PaymentRouter420"
+    }
+  },
+  "registry_publication": {
+    "api": "registerComponent",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "runtime_hash_source": "ProtocolRegistry derives implementation.codehash",
+    "component_ids": [
+      {
+        "contract": "MerchantRegistry420",
+        "component_id_preimage": "420/APP/420PAY/MERCHANT_REGISTRY"
+      },
+      {
+        "contract": "InvoiceRegistry420",
+        "component_id_preimage": "420/APP/420PAY/INVOICE_REGISTRY"
+      },
+      {
+        "contract": "PaymentRegistry420",
+        "component_id_preimage": "420/APP/420PAY/PAYMENT_REGISTRY"
+      },
+      {
+        "contract": "PaymentRouter420",
+        "component_id_preimage": "420/APP/420PAY/PAYMENT_ROUTER"
+      },
+      {
+        "contract": "SettlementRouter420",
+        "component_id_preimage": "420/APP/420PAY/SETTLEMENT_ROUTER"
+      },
+      {
+        "contract": "RefundManager420",
+        "component_id_preimage": "420/APP/420PAY/REFUND_MANAGER"
+      },
+      {
+        "contract": "GasSponsor420",
+        "component_id_preimage": "420/APP/420PAY/GAS_SPONSOR"
+      },
+      {
+        "contract": "CanonicalSettlementAdapter420",
+        "component_id_preimage": "420/APP/420PAY/SETTLEMENT_ADAPTER"
+      },
+      {
+        "contract": "CanonicalSwapHealthAdapter420",
+        "component_id_preimage": "420/APP/420PAY/SWAP_HEALTH_ADAPTER"
+      }
+    ],
+    "invariant": "Each resident is first registered SUSPENDED; after all wiring/runtime/governance assertions pass, lifecycle transitions to ACTIVE. Registry runtimeCodeHash must equal EXTCODEHASH and supportsVersion(1.0.0) must be true.",
+    "staging_lifecycle": "SUSPENDED",
+    "activation_lifecycle": "ACTIVE"
+  },
+  "deployment_order": [
+    "Verify frozen GovernanceTimelock, ProtocolRegistry, genesisConfigHash, canonical swap executor and replay-protection dependency identities.",
+    "Deploy MerchantRegistry420, InvoiceRegistry420, PaymentRegistry420, PaymentRouter420, SettlementRouter420, RefundManager420, GasSponsor420 and CanonicalSwapHealthAdapter420 with frozen timelock/Registry/config immutables.",
+    "Deploy CanonicalSettlementAdapter420 with frozen timelock/Registry/config immutables and the exact canonical CanonicalSwapExecutor420 constructor dependency.",
+    "Verify each deployed EXTCODEHASH equals the retained PAY-AUDIT-6 runtime_code_hash before Registry publication.",
+    "Register all nine Pay residents with ProtocolRegistry.registerComponent at version 1.0.0 and lifecycle SUSPENDED.",
+    "Bind PaymentRouter420, CanonicalSettlementAdapter420, SettlementRouter420 and RefundManager420 through GovernanceTimelock-authorized calls.",
+    "Authorize CanonicalSwapExecutor420.setTrustedCaller(CanonicalSettlementAdapter420,true) and bind the PAY_SETTLEMENT replay domain exclusively to PaymentRouter420.",
+    "Verify all immutables, runtime hashes, SUSPENDED Registry identities, exact wiring graph, trusted-caller state, replay-domain state and governance-only mutation boundaries.",
+    "Transition all nine Pay residents from SUSPENDED to ACTIVE through ProtocolRegistry.setComponentLifecycle.",
+    "Verify ACTIVE resolution/version/code-hash parity, run the operator smoke, and only then enable Pay-dependent clients/services."
+  ],
+  "required_bindings": {
+    "payment_router_settlement_adapter": "PaymentRouter420.settlementAdapter == CanonicalSettlementAdapter420",
+    "payment_router_settlement_router": "PaymentRouter420.settlementRouter == SettlementRouter420",
+    "settlement_adapter_payment_router": "CanonicalSettlementAdapter420.paymentRouter == PaymentRouter420",
+    "settlement_adapter_settlement_router": "CanonicalSettlementAdapter420.settlementRouter == SettlementRouter420",
+    "settlement_adapter_swap_executor": "CanonicalSettlementAdapter420.swapExecutor == CanonicalSwapExecutor420",
+    "settlement_router_payment_router": "SettlementRouter420.paymentRouter == PaymentRouter420",
+    "settlement_router_settlement_adapter": "SettlementRouter420.settlementAdapter == CanonicalSettlementAdapter420",
+    "refund_manager_payment_registry": "RefundManager420.paymentRegistry == PaymentRegistry420",
+    "executor_trusted_caller": "CanonicalSwapExecutor420.trustedCaller(CanonicalSettlementAdapter420) == true",
+    "replay_domain_consumer": "ReplayProtectionConsumer420.domainConsumer(PAY_SETTLEMENT) == PaymentRouter420",
+    "registry_identity": "All nine Pay residents are published SUSPENDED, verified against retained runtime identities, then transitioned ACTIVE; ProtocolRegistry.runtimeCodeHash equals deployed EXTCODEHASH throughout.",
+    "governance_handoff": "Only the frozen GovernanceTimelock/governance authority may configure Pay or transition Registry lifecycle; no Pay resident is ACTIVE before complete wiring verification."
+  },
+  "local_repository_qualification": {
+    "test": "contracts/test/PayAudit6DeploymentPackage420.t.sol",
+    "generator": "scripts/generate-420pay-audit-6-deployment.py",
+    "verifier": "scripts/verify-420pay-audit-6-deployment.py",
+    "smoke": "scripts/420pay-audit-6-smoke.py",
+    "proves": [
+      "deterministic runtime materialization from frozen compiler and immutable inputs",
+      "real ProtocolRegistry ACTIVE component publication and runtime-code-hash derivation",
+      "exact Pay resident version 1.0.0 support",
+      "complete PaymentRouter/SettlementRouter/Adapter/SwapExecutor/RefundManager wiring graph",
+      "PAY_SETTLEMENT replay-domain consumer binding",
+      "governance handoff rejects unauthorized configuration mutation",
+      "no fixed Pay deployment addresses are invented"
+    ]
+  },
+  "live_testnet_evidence": {
+    "owner": "PAY-AUDIT-7",
+    "chain_id": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "binding_transactions": [],
+    "addresses": {}
+  },
+  "limitations": [
+    "This package is deterministic repository deployment evidence, not proof of a live public-testnet deployment.",
+    "Registry-resolved Pay deployment addresses remain intentionally unfrozen and must be recorded from the approved PAY-AUDIT-7 candidate.",
+    "CanonicalSwapExecutor420 and ReplayProtectionConsumer420 are shared external dependencies and are verified/bound rather than re-owned by 420Pay.",
+    "Independent external security audit and final Genesis/production closeout remain PAY-AUDIT-8."
+  ],
+  "constructor_manifest": {
+    "MerchantRegistry420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "InvoiceRegistry420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "PaymentRegistry420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "PaymentRouter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "SettlementRouter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "RefundManager420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "GasSponsor420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "CanonicalSettlementAdapter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {
+        "canonical_swap_executor": "PAY-AUDIT-7 deployed canonical CanonicalSwapExecutor420 address; repository-local qualification uses exact deployed executor instance"
+      },
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_, address executor_)"
+    },
+    "CanonicalSwapHealthAdapter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    }
+  },
+  "qualification_evidence": {
+    "implementation_sha": "9bfe0d72c8d696b4908f819612608ca5279ce930",
+    "level": "Level 1 — per-roadmap-step fast qualification",
+    "pay_audit_workflow": {
+      "name": "420Pay audit qualification",
+      "run_number": 216,
+      "run_id": 37061442891,
+      "job_id": 111018792122,
+      "conclusion": "success"
+    },
+    "solidity_workflow": {
+      "name": "Solidity Contracts",
+      "run_number": 4259,
+      "run_id": 37061442991,
+      "conclusion": "success"
+    },
+    "note": "Repository deployment readiness is qualified. Live chain/address/transaction qualification remains PAY-AUDIT-7."
+  }
+}

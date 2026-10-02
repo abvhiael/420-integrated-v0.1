@@ -22,5 +22,15 @@
   "local_payment_authorization_replay_consumed_atomically": true,
   "payer_originated_payment_path_supported": true,
   "external_security_audit_complete": false,
-  "note": "Updated after merged PR #20 qualification. Remaining remediation items are explicit Genesis trust wiring for CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 and a legitimate mutable shared replay-consumption boundary; these are not represented as complete until verified."
+  "note": "Historical compile/test fields describe retained earlier qualification only. Current source implements Pay -> SettlementAdapter -> SwapExecutor authority wiring, explicit adapter-to-PaymentRouter binding, and domain-bound mutable replay consumption. Exact-head audit qualification passed on `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8`; live deployment binding, and external independent security review remain release gates.",
+  "mutable_replay_companion_present": true,
+  "settlement_adapter_router_binding": true,
+  "source_swap_executor_trust_wiring_verified": true,
+  "deployment_swap_executor_trust_wiring_verified": false,
+  "source_replay_domain_binding_verified": true,
+  "deployment_replay_domain_binding_verified": false,
+  "exact_head_audit_qualification_pass": true,
+  "exact_head_audit_qualification_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+  "exact_head_audit_qualification_run_id": 36965952679,
+  "exact_head_audit_qualification_run_number": 59
 }

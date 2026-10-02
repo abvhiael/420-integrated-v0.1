@@ -1,6 +1,32 @@
 name: 420Bridge AUDIT-8 Level 2
 
 on:
+  push:
+    branches:
+      - 'audit/420bridge-*'
+      - 'qualification/bridge-a8-*'
+    paths:
+      - '420-indexer/**'
+      - 'exchange/read-service/**'
+      - 'exchange/web/**'
+      - 'analytics/**'
+      - 'contracts/src/bridge/**'
+      - 'contracts/test/Bridge*.t.sol'
+      - 'contracts/test/*BridgeAdapter420.t.sol'
+      - 'contracts/test/*Hardening420.t.sol'
+      - 'contracts/test/ExchangeBridgeQualification420.t.sol'
+      - 'contracts/test/PaySwapBridgeGenesisIntegration420.t.sol'
+      - 'contracts/config/bridge/**'
+      - 'docs/apps/bridge/**'
+      - 'docs/apps/wallet/index.md'
+      - 'docs/apps/explorer/index.md'
+      - 'docs/apps/notifications/index.md'
+      - 'docs/apps/analytics/index.md'
+      - 'docs/developers/bridge-integration.md'
+      - 'docs/troubleshooting/value-movement-economics.md'
+      - 'docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md'
+      - 'scripts/verify-bridge-*.py'
+      - '.github/workflows/bridge-audit-8.yml'
   pull_request:
     paths:
       - '420-indexer/**'

@@ -30,7 +30,8 @@ export interface LifecycleSnapshot420 {
 
 const KEY_FIELDS = [
   'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
-  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId'
+  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId',
+  'programId','applicationId','awardId','milestoneId'
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
@@ -96,13 +97,41 @@ const POLICY_LIST: LifecyclePolicy420[] = [
   { protocol: '420Governance', rules: [
     { eventName: 'CivicProposalRegistered', state: 'ACTIVE' }
   ]},
+  { protocol: '420Grants', rules: [
+    { eventName: 'ProgramCreated', state: 'ACTIVE' },
+    { eventName: 'ApplicationSubmitted', state: 'ACTIVE' },
+    { eventName: 'AwardCreated', state: 'ACTIVE' },
+    {
+      eventName: 'AwardStateChanged',
+      state: 'UNKNOWN',
+      stateField: 'state',
+      stateMap: { '1': 'ACTIVE', '2': 'CANCELLED', '3': 'COMPLETED' },
+      terminalFieldValues: ['2','3']
+    },
+    { eventName: 'MilestoneCreated', state: 'PENDING' },
+    { eventName: 'MilestoneClaimed', state: 'CLAIMED' },
+    { eventName: 'MilestoneApproved', state: 'APPROVED' },
+    { eventName: 'MilestonePaid', state: 'PAID', terminal: true },
+    { eventName: 'MilestoneCancelled', state: 'CANCELLED', terminal: true }
+  ]},
   { protocol: '420Pay', rules: [
-    { eventName: 'PaymentCreated', state: 'PENDING' },
-    { eventName: 'PaymentAuthorized', state: 'ACTIVE' },
-    { eventName: 'PaymentSettled', state: 'COMPLETED', terminal: true },
-    { eventName: 'PaymentRefunded', state: 'COMPLETED', terminal: true },
-    { eventName: 'PaymentCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'PaymentExpired', state: 'EXPIRED', terminal: true }
+    {
+      eventName: 'PaymentSet',
+      state: 'UNKNOWN',
+      stateField: 'status',
+      stateMap: {
+        '1': 'PENDING',
+        '2': 'ACTIVE',
+        '3': 'ACTIVE',
+        '4': 'ACTIVE',
+        '5': 'COMPLETED',
+        '6': 'COMPLETED',
+        '7': 'ACTIVE',
+        '8': 'FAILED'
+      },
+      terminalFieldValues: ['5','6','8']
+    },
+    { eventName: 'PaymentAuthorized', state: 'ACTIVE' }
   ]},
   { protocol: '420Bridge', rules: [
     { eventName: 'TransferRequested', state: 'PENDING' },

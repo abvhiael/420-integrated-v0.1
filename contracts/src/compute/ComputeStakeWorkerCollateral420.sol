@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "../interfaces/IComputeStakeSource420.sol";
+import "../interfaces/IComputeSlashableCollateral420.sol";
+import "../interfaces/IComputeSlashHold420.sol";
 import "../vault/AssetVault420.sol";
 import "../vault/VaultAccounting420.sol";
 import "../vault/VaultIds420.sol";
@@ -13,7 +15,7 @@ import "./ComputeStakeExitPolicy420.sol";
 /// @notice CMP-1.5.1 worker collateral source backed by canonical 420Vault obligations.
 /// @dev This step implements worker deposits/position reads only. Exit, unstake, slashing,
 /// policy-minimum enforcement, rewards and verifier collateral remain later CMP-1.5 steps.
-contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
+contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, IComputeSlashableCollateral420 {
     bytes32 public constant SOURCE_ID =
         keccak256("420Integrated.ComputeMarket.ComputeStakeSource.v1");
     bytes32 public constant POSITION_DOMAIN =
@@ -32,6 +34,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
         bytes32 workerId;
         bytes32 stakePolicyId;
         address owner;
+        uint64 openedAt;
         uint64 revision;
         uint64 trancheCount;
         uint64 withdrawalCursor;
@@ -60,6 +63,8 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
     VaultRegistry420 public immutable vaultRegistry;
     VaultAccounting420 public immutable accounting;
     bytes32 public immutable vaultId;
+    address public immutable slashBindingAdmin;
+    address public slashAuthorization;
 
     mapping(bytes32 => Position) private _positions;
     mapping(bytes32 => mapping(uint64 => Tranche)) private _tranches;
@@ -74,7 +79,9 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
     error RevisionExhausted();
     error ExitNotReady();
     error InvalidExit();
+    error UnauthorizedSlashBinding();
 
+    event SlashAuthorizationBound(address indexed slashAuthorization);
     event WorkerCollateralStaked(
         bytes32 indexed positionId,
         bytes32 indexed workerId,
@@ -114,6 +121,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
             revert InvalidConfiguration();
         }
         workers = ComputeWorkerRegistry420(workerRegistry_);
+        slashBindingAdmin = msg.sender;
         exitPolicies = ComputeStakeExitPolicy420(exitPolicy_);
         vault = AssetVault420(payable(collateralVault_));
         vaultRegistry = vault.registry();
@@ -127,6 +135,16 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
                 || address(vault.registry()) != address(vaultRegistry)
                 || address(vault.accounting()) != address(accounting)
         ) revert InvalidConfiguration();
+    }
+
+    function bindSlashAuthorization(address slashAuthorization_) external {
+        if (
+            msg.sender != slashBindingAdmin
+                || slashAuthorization != address(0)
+                || slashAuthorization_.code.length == 0
+        ) revert UnauthorizedSlashBinding();
+        slashAuthorization = slashAuthorization_;
+        emit SlashAuthorizationBound(slashAuthorization_);
     }
 
     function systemName() external pure returns (string memory) {
@@ -171,6 +189,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
             p.workerId = workerId;
             p.stakePolicyId = stakePolicyId;
             p.owner = worker.operator;
+            p.openedAt = uint64(block.timestamp);
             p.active = true;
             p.exists = true;
         } else if (
@@ -293,6 +312,10 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
         returns (uint256 amount, uint64 throughTranche)
     {
         if (entered || maxTranches == 0) revert InvalidExit();
+        if (
+            slashAuthorization != address(0)
+                && IComputeSlashHold420(slashAuthorization).outstandingSlash(id) != 0
+        ) revert InvalidExit();
         entered = true;
 
         Position storage p = _positions[id];
@@ -381,6 +404,33 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420 {
             exiting: p.exiting,
             withdrawableAt: p.withdrawableAt
         });
+    }
+
+    function slashSnapshot(bytes32 id) external view returns (
+        uint8 subjectKind,
+        bytes32 subjectRef,
+        address beneficiary,
+        bytes32 stakePolicyId,
+        uint64 positionRevision,
+        uint64 openedAt,
+        uint256 slashableAmount,
+        bool active,
+        bool exiting,
+        bool exists
+    ) {
+        Position storage p = _positions[id];
+        return (
+            1,
+            p.workerId,
+            p.owner,
+            p.stakePolicyId,
+            p.revision,
+            p.openedAt,
+            p.slashableAmount,
+            p.active,
+            p.exiting,
+            p.exists
+        );
     }
 
     function position(bytes32 id) external view returns (Position memory p) {

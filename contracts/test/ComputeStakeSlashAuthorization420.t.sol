@@ -12,7 +12,15 @@ interface VmComputeStakeSlashAuthorization420 {
     function warp(uint256) external;
 }
 
-contract MockSlashDistributionExecutor420 {}
+contract MockSlashDistributionExecutor420 {
+    address public immutable authorizer;
+    address public immutable policies;
+
+    constructor(address authorizer_, address policies_) {
+        authorizer = authorizer_;
+        policies = policies_;
+    }
+}
 
 contract MockObjectiveSlashEvidence420 is IComputeObjectiveSlashEvidence420 {
     mapping(bytes32 => Evidence) private _evidence;
@@ -170,12 +178,12 @@ contract ComputeStakeSlashAuthorization420Test {
             0,
             10_000
         );
-        distributionExecutor = new MockSlashDistributionExecutor420();
-
         authorizer = new ComputeStakeSlashAuthorization420(address(policies));
         workerSource = new MockSlashableCollateral420(address(authorizer));
         verifierSource = new MockSlashableCollateral420(address(authorizer));
         authorizer.bindSources(address(workerSource), address(verifierSource));
+        distributionExecutor =
+            new MockSlashDistributionExecutor420(address(authorizer), address(distributionPolicies));
         authorizer.bindDistribution(address(distributionPolicies), address(distributionExecutor));
 
         workerSource.set(

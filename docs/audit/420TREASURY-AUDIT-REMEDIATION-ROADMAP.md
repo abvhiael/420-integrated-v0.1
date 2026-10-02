@@ -13,12 +13,16 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Confirmed TreasuryRouter420 is registry-resolved and has no fixed Genesis address.
 - Confirmed GovernanceTimelock/Civic owns budget creation, scheduling and cancellation; scoped capabilities gate execution.
 
-## TREASURY-AUDIT-2 — contract lifecycle and fail-closed hardening — IMPLEMENTED, QUALIFICATION PENDING
+## TREASURY-AUDIT-2 — contract lifecycle and fail-closed hardening — COMPLETE
 - Prevent scheduled disbursements from outliving parent-budget validity.
 - Re-check parent-budget effectiveness at execution.
 - Re-check current Treasury asset policy and single-disbursement allowance at execution.
 - Keep router executable-state reporting aligned with the write path.
-- Expand tests for policy revocation, epoch limits, budget-window escape, zero release commitment, cancellation accounting, replay, authorization and timing.
+- Expanded focused tests for policy revocation, epoch limits, budget-window escape, zero release commitment, cancellation accounting, replay, authorization and timing.
+- Level 1 exact-head qualification **PASS** on implementation SHA `56429210af5738114b47a1aa658509ee19a3b440`.
+- Treasury qualification workflow run `36967108988`, job `110713142223`: formatting PASS; Treasury build PASS; 9/9 focused tests PASS; Treasury authority/config boundary PASS; forbidden-primitive scan PASS.
+- Durable evidence: `docs/audit/420TREASURY-AUDIT-2-QUALIFICATION.md` introduced by evidence commit `bd55b7cd06381a8e398b73196c9bc23e104efeec`.
+- Broad Genesis/global inventory qualification remains intentionally deferred to its canonical Level 3 owners; it is not required for this Level 1 step.
 
 ## TREASURY-AUDIT-3 — security/property/invariant expansion — PARTIAL
 Required:

@@ -16,6 +16,7 @@ interface IBridgeTransferCreate420 {
 }
 interface IBridgeRouteRegistryView420 {
     function routes(bytes32) external view returns (bytes32,uint64,uint64,bytes32,bytes32,bytes32,bytes32,uint32,uint8,bool,bool);
+    function requireRouteChainsCurrent(bytes32) external view;
 }
 
 contract GatewayRouter420 is GenesisResidentAccess420 {
@@ -57,11 +58,14 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         bytes32 adapterId_,
         bool inbound
     ) internal view {
+        IBridgeRouteRegistryView420 routes =
+            IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY));
         (bytes32 configuredAsset,,,,, bytes32 configuredAdapter,,, uint8 status, bool inboundEnabled, bool outboundEnabled) =
-            IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY)).routes(routeId);
+            routes.routes(routeId);
         require(status == 2 && configuredAsset == assetId, "inactive route"); // ACTIVE
         require(configuredAdapter == adapterId_, "route adapter");
         require(inbound ? inboundEnabled : outboundEnabled, "direction disabled");
+        routes.requireRouteChainsCurrent(routeId);
     }
 
     function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {

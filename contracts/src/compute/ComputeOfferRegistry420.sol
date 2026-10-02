@@ -107,7 +107,8 @@ contract ComputeOfferRegistry420 is I420System {
             pricingPolicyId,
             pricingVersion,
             fixedPrice,
-            true
+            false,
+            false
         );
     }
 
@@ -130,6 +131,7 @@ contract ComputeOfferRegistry420 is I420System {
             pricingPolicyId,
             pricingVersion,
             fixedPrice,
+            true,
             false
         );
     }
@@ -164,6 +166,7 @@ contract ComputeOfferRegistry420 is I420System {
             r.nodeId,
             current.resourceId,
             fixedPrice,
+            true,
             false
         );
 
@@ -216,6 +219,7 @@ contract ComputeOfferRegistry420 is I420System {
             o.nodeId,
             o.resourceId,
             0,
+            true,
             true
         );
         o.active = false;
@@ -271,7 +275,8 @@ contract ComputeOfferRegistry420 is I420System {
         bytes32 pricingPolicyId,
         uint32 pricingVersion,
         uint256 fixedPrice,
-        bool directOnly
+        bool allowDelegated,
+        bool allowInactiveOperator
     ) private returns (bytes32 offerId) {
         if (
             resourceId == bytes32(0) || jurisdictionHash == bytes32(0)
@@ -291,7 +296,8 @@ contract ComputeOfferRegistry420 is I420System {
             r.nodeId,
             resourceId,
             fixedPrice,
-            directOnly
+            allowDelegated,
+            allowInactiveOperator
         );
 
         if (n.providerId != r.providerId || p.settlementAccount == address(0)) revert InvalidOffer();
@@ -366,16 +372,16 @@ contract ComputeOfferRegistry420 is I420System {
         bytes32 nodeId,
         bytes32 resourceId,
         uint256 amount,
-        bool allowStoredOperator
+        bool allowDelegated,
+        bool allowInactiveOperator
     ) private view {
         ComputeNodeRegistry420.Node memory n = resources.nodes().node(nodeId);
         if (
-            actor == n.operator && providers.isOperator(providerId, actor)
-                || (
-                    allowStoredOperator && actor == n.operator
-                )
+            actor == n.operator
+                && (allowInactiveOperator || providers.isOperator(providerId, actor))
         ) return;
 
+        if (!allowDelegated) revert Unauthorized();
         bytes32 scope = authorization.scopeResource(providerId, nodeId, resourceId);
         if (!authorization.isAuthorized(actor, action, scope, amount)) revert Unauthorized();
     }

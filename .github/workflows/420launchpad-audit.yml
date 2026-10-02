@@ -6,26 +6,34 @@ on:
       - 'audit/420launchpad-*'
     paths:
       - 'contracts/src/launchpad/**'
+      - 'contracts/src/arbitration/ArbitrationCaseRegistry420.sol'
       - 'contracts/src/libraries/ServiceIds420.sol'
       - 'contracts/config/420launchpad-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
       - 'contracts/config/interfaces/420launchpad-dependency-reconciliation.json'
       - 'contracts/config/interfaces/420launchpad-v1-hardening.json'
+      - 'contracts/config/interfaces/420launchpad-crowdfunding-integration.json'
       - 'contracts/test/Launchpad*.t.sol'
       - 'config/genesis-consumer-services.json'
       - 'scripts/verify-420launchpad-audit.py'
       - 'docs/audit/420LAUNCHPAD-*'
+      - 'docs/apps/launchpad/**'
       - '.github/workflows/420launchpad-audit.yml'
   pull_request:
     paths:
       - 'contracts/src/launchpad/**'
+      - 'contracts/src/arbitration/ArbitrationCaseRegistry420.sol'
       - 'contracts/src/libraries/ServiceIds420.sol'
       - 'contracts/config/420launchpad-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
       - 'contracts/config/interfaces/420launchpad-dependency-reconciliation.json'
       - 'contracts/config/interfaces/420launchpad-v1-hardening.json'
+      - 'contracts/config/interfaces/420launchpad-crowdfunding-integration.json'
       - 'contracts/test/Launchpad*.t.sol'
       - 'config/genesis-consumer-services.json'
       - 'scripts/verify-420launchpad-audit.py'
       - 'docs/audit/420LAUNCHPAD-*'
+      - 'docs/apps/launchpad/**'
       - '.github/workflows/420launchpad-audit.yml'
   workflow_dispatch:
 
@@ -47,24 +55,35 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
+
       - name: Verify exact qualification head
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Verify Launchpad audit model
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Verify Launchpad Audit-3 model
         run: python3 scripts/verify-420launchpad-audit.py
-      - name: Check Launchpad audit test formatting
+
+      - name: Check affected Solidity formatting
         working-directory: contracts
-        run: forge fmt --check test/LaunchpadAudit420.t.sol
-      - name: Build Launchpad contracts
+        run: forge fmt --check test/Launchpad*420.t.sol src/launchpad/*.sol src/arbitration/ArbitrationCaseRegistry420.sol
+
+      - name: Build affected Launchpad and Arbitration contracts
         working-directory: contracts
-        run: forge build src/launchpad
-      - name: Run Launchpad qualification tests
+        run: forge build src/launchpad src/arbitration/ArbitrationCaseRegistry420.sol
+
+      - name: Level 1 focused Launchpad qualification
         working-directory: contracts
         run: forge test --match-path 'test/Launchpad*420.t.sol' -vvv
+
       - name: Forbidden primitive scan
         shell: bash
         run: |
@@ -73,3 +92,13 @@ jobs:
             echo 'Forbidden primitive found in 420Launchpad sources' >&2
             exit 1
           fi
+          if grep -R -nE '\.transfer\s*\(|\.transferFrom\s*\(|\.safeTransferFrom\s*\(|\.call\{value:' contracts/src/launchpad; then
+            echo 'Custody/payment execution primitive found in 420Launchpad sources' >&2
+            exit 1
+          fi
+
+      - name: Level 2 Reputation integration boundary
+        run: go test ./reputation/interactions
+
+      - name: Level 2 Notifications replay and provenance boundary
+        run: go test ./notifications/replay ./notifications/architecture

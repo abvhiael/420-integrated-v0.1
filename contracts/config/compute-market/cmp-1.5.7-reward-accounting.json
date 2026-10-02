@@ -1,0 +1,66 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.7.RewardAccounting.v1",
+  "step": "CMP-1.5.7",
+  "title": "Reward accounting",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "8e4a15594fff7d4d3834a2c7856ba401462478f8",
+  "canonical_definition": "Reward accounting",
+  "architecture_rule": "Reward accounting must use a separately authorized reward source and canonical backing. It cannot mint through ComputeStake, seize payer escrow or fabricate Vault balance.",
+  "implementation": {
+    "reward_policy": "contracts/src/compute/ComputeStakeRewardPolicy420.sol",
+    "reward_accounting": "contracts/src/compute/ComputeStakeRewardAccounting420.sol",
+    "reward_source_interface": "contracts/src/interfaces/IComputeStakeRewardSource420.sol",
+    "worker_collateral": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "verifier_collateral": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "canonical_vault": "contracts/src/vault/AssetVault420.sol"
+  },
+  "requirements": [
+    "reward evidence authority is explicit, append-only, stake-policy and subject-kind scoped",
+    "reward source address and runtime code hash are frozen per reward-policy revision",
+    "every reward is final-evidence bound, nonzero, capped by the frozen reward policy and replay safe",
+    "reward evidence binds exact collateral position, worker/verifier identity, beneficiary and stake policy",
+    "reward evidence cannot predate the bound collateral position",
+    "historically earned reward is not confiscated solely because the collateral position later becomes inactive",
+    "reward accounting does not compute issuance or infer beneficiary/amount from relayer input",
+    "reward value is backed by a separately funded canonical Vault before credit can succeed",
+    "reward credit creates and releases an immutable native-$420 Vault obligation to the exact beneficiary",
+    "insufficient Vault free balance reverts atomically without consuming the reward or changing accounting",
+    "beneficiary and position cumulative reward accounting is deterministic and exactly-once",
+    "beneficiary claims through canonical Vault claim semantics",
+    "reward accounting does not mint, mutate collateral, debit payer escrow, alter ComputeEscrow entitlement or reuse consensus RewardController authority"
+  ],
+  "security_boundaries": [
+    "permissionless relay does not grant reward-selection authority",
+    "governance may publish bounded reward-source policies but cannot use the accounting contract as arbitrary Vault withdrawal authority",
+    "reward-source code-hash drift fails closed",
+    "worker and verifier identities are verified against their exact collateral source",
+    "inactive historical positions remain identity evidence but cannot change the frozen earned reward",
+    "reward Vault solvency is enforced by canonical Vault free-balance accounting",
+    "payer escrow and consensus issuance remain separate economic domains"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "reward accounting introduces a new economic authority crossing reward-source policy, worker/verifier collateral identity and canonical Vault-backed claimability.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "deferred": [
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused reward-policy/reward-accounting/Vault solvency tests",
+      "CMP-1.5.7 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.8 — Dispute/stake integration"
+}

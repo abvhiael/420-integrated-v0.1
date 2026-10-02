@@ -1,6 +1,8 @@
 {
   "schema": "420-launchpad-dependency-reconciliation-v1",
   "auditBaseline": "f529533ebe62b63ad3f30f685f0c1c44f69ec06b",
+  "audit3ReconciliationMain": "b58b09a17e641a42b81d832bad913a83c7caada9",
+  "audit3ReconciliationMerge": "7992b93e9bfd97a452432019fb7b8c19e931fd00",
   "protocol": {
     "serviceId": "420/service/launchpad/v1",
     "boundary": "NON_CUSTODIAL_COMMITMENT_REGISTRY",
@@ -10,9 +12,18 @@
       "LaunchpadProjectRegistry420.sol",
       "LaunchpadSaleRegistry420.sol",
       "LaunchpadAllocationRegistry420.sol",
-      "LaunchpadRouter420.sol"
+      "LaunchpadRouter420.sol",
+      "ILaunchpadCrowdfundingIntegration420.sol",
+      "LaunchpadCrowdfundingIntegration420.sol"
     ],
-    "directDependencies": ["CapabilityRegistry420", "Governance/SystemAccess"],
+    "directDependencies": [
+      "CapabilityRegistry420",
+      "Governance/SystemAccess",
+      "PaymentRegistry420",
+      "Identity420/IIdentityCredential420",
+      "ArbitrationCaseRegistry420",
+      "ArbitrationRulingRegistry420"
+    ],
     "paymentExecution": false,
     "refundExecution": false,
     "tokenDeliveryExecution": false
@@ -21,12 +32,33 @@
     "serviceId": "420/service/launchpad-crowdfunding/v1",
     "target": "reward_donation_community_project_product_preorder",
     "securitiesOrEquityEnabled": false,
+    "integrationContract": "LaunchpadCrowdfundingIntegration420.sol",
     "dependencies": [
-      {"name":"420 Identity","status":"PARTIAL","reason":"Capability authorization can carry eligibility decisions, but no end-to-end crowdfunding Identity workflow is implemented."},
-      {"name":"420 Pay","status":"MISSING","reason":"V1 accepts opaque nonzero payment/refund commitments and does not bind them to canonical Pay settlement state."},
-      {"name":"420 Arbitration","status":"MISSING","reason":"No Launchpad dispute/escalation integration identified."},
-      {"name":"420Reputation","status":"MISSING","reason":"No project delivery-history publication/query integration identified."},
-      {"name":"420 Notifications","status":"MISSING","reason":"No campaign lifecycle notification integration identified."}
+      {
+        "name": "420 Identity",
+        "status": "REPOSITORY_INTEGRATED",
+        "reason": "Participant profile/controller/activity and sale eligibilityPolicyHash credential-type checks are enforced before a Pay-backed contribution is accepted."
+      },
+      {
+        "name": "420 Pay",
+        "status": "REPOSITORY_INTEGRATED",
+        "reason": "Contribution evidence is a globally one-use PaymentRegistry paymentId in SETTLED state with exact payer, merchant, settlement asset, amount and nonzero receipt binding; refund recording requires canonical Pay refund state."
+      },
+      {
+        "name": "420 Arbitration",
+        "status": "REPOSITORY_INTEGRATED",
+        "reason": "Launchpad verifies canonical case claimant/respondent/domain/component/sale origin and publishes finalized ruling/remedy evidence without acquiring ruling, cancellation or refund-execution authority."
+      },
+      {
+        "name": "420Reputation",
+        "status": "REPOSITORY_INTEGRATED_EVENT_BOUNDARY",
+        "reason": "Replay-protected CROWDFUNDING contribution and reward-delivery evidence events preserve canonical evidence references for the replaceable Reputation service without creating universal reputation authority."
+      },
+      {
+        "name": "420 Notifications",
+        "status": "REPOSITORY_INTEGRATED_EVENT_BOUNDARY",
+        "reason": "Deterministic replay-protected Launchpad contribution/refund/delivery/dispute/ruling events plus canonical sale lifecycle events provide the registered dApp notification source boundary; Notifications remains non-authoritative."
+      }
     ]
   },
   "release": {

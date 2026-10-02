@@ -7,6 +7,7 @@ import "../src/bridge/BridgeTransferRegistry.sol";
 import "../src/bridge/BridgeRouteRegistry.sol";
 import "../src/bridge/BridgeChainRegistry420.sol";
 import "../src/bridge/BridgeAccountingRegistry.sol";
+import "../src/bridge/VerifiedGateway420.sol";
 import "../src/interfaces/IBridgeAdapter420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "./helpers/GenesisMocks420.sol";
@@ -38,6 +39,15 @@ contract MockWrongBridgeAdapter420 is IBridgeAdapter420 {
     function initiateOutbound(bytes32,bytes32,address,bytes calldata,uint256,bytes calldata)
         external payable returns(bytes32 sourceMessageId)
     { return nextOutboundId; }
+}
+
+contract MockVerifiedGatewayVerifier420 is IVerifiedGatewayVerifier420 {
+    function verifyDeposit(bytes calldata) external pure returns (bytes32,address,address,uint256) {
+        return (keccak256("deposit"), address(0xB0B), address(0xCA420), 1 ether);
+    }
+    function verifyWithdrawal(bytes calldata) external pure returns (bytes32,address,address,uint256) {
+        return (keccak256("withdrawal"), address(0xB0B), address(0xCA420), 1 ether);
+    }
 }
 
 interface VmBridgeAccounting420 { function warp(uint256) external; }
@@ -394,6 +404,33 @@ contract BridgeGenesisIntegration420Test {
         f.transfers.refundTransfer(transferId, keccak256("approved-withdrawal-recovery"));
         (,,,,,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(transferId);
         require(status == BridgeTransferRegistry.Status.REFUNDED, "safe refund blocked");
+    }
+
+    function testFrozenGatewayMayStartFailClosedWithoutVerifier() public {
+        GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
+        VerifiedGateway420 gateway =
+            new VerifiedGateway420(address(this), address(env.registry()), keccak256("gateway-genesis"), address(0));
+        env.registerResident(address(gateway), gateway.componentId());
+        require(gateway.verifier() == address(0), "genesis verifier not disabled");
+
+        (bool ok,) = address(gateway).call(abi.encodeWithSelector(gateway.verifyDeposit.selector, hex"4201"));
+        require(!ok, "disabled verifier accepted proof");
+    }
+
+    function testFrozenGatewayVerifierActivationRequiresCode() public {
+        GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
+        VerifiedGateway420 gateway =
+            new VerifiedGateway420(address(this), address(env.registry()), keccak256("gateway-genesis"), address(0));
+        env.registerResident(address(gateway), gateway.componentId());
+
+        (bool eoaOk,) = address(gateway).call(
+            abi.encodeWithSelector(gateway.setVerifier.selector, address(0x1234))
+        );
+        require(!eoaOk, "non-code verifier accepted");
+
+        MockVerifiedGatewayVerifier420 verifier = new MockVerifiedGatewayVerifier420();
+        gateway.setVerifier(address(verifier));
+        require(gateway.verifier() == address(verifier), "verifier not installed");
     }
 
     function testSharedPauseFailsClosed() public {

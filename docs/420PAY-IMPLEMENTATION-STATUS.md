@@ -19,6 +19,12 @@
 
 The canonical settlement path is `PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420`. The adapter is source-bound to the configured `PaymentRouter420`; the swap executor trusts only explicitly governed callers. The Pay replay domain is bound to the canonical payment router through the shared replay consumer.
 
+## PAY-AUDIT-3 implementation state
+
+Decision #4's `offline_invoice_creation: true` and `online_acceptance_required: true` are applied together. Offline invoice construction/signing is retained as a presentation/integrity commitment over the canonical invoice signing root; it does not create an alternate canonical mutation authority. Canonical invoice state remains accepted online only when the bound merchant calls `InvoiceRegistry420.createInvoice`. No unversioned relayer, delegated signer, EOA-signature or ERC-1271 acceptance path is introduced.
+
+`PaymentRegistry420` now exposes explicit Genesis-governed lifecycle transitions for `INCLUDED`, `CERTIFIED`, `SETTLED` and `FAILED`. Inclusion requires `SUBMITTED`; certification requires `INCLUDED`; settlement requires `FINALIZED`; failure is limited to pre-final `SUBMITTED`, `INCLUDED` or `CERTIFIED` states. Existing finalization and bounded refund behavior is retained. PAY-AUDIT-3 regression coverage verifies valid progression, invalid-predecessor rejection, terminal failure non-resurrection, governance-only lifecycle mutation, and the rule that an offline invoice root does not authorize third-party canonical creation.
+
 ## Qualification already demonstrated in repository history
 
 Prior 420Pay implementation/hardening PRs compiled under Solidity 0.8.24 and executed Foundry, fuzz/property, Genesis and integrated qualification successfully. Those historical results are not used as exact-head evidence for later commits.

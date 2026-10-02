@@ -68,19 +68,10 @@ jobs:
 
       - name: Run retained cross-adapter security hardening suites
         working-directory: contracts
-        run: >-
-          forge test
-          --match-contract
-          '^(CrossAdapterHardeningBridgeAdapter420Test|NativeAdapterReplayDomainHardening420Test|VerifierRotationHardening420Test|EmergencyControlsHardening420Test|MalformedProofRecipientFuzzHardening420Test|DomainNonceRouterBypassHardening420Test|GovernanceAccountingRecoveryHardening420Test)
-      - name: Run affected Exchange Bridge qualification tests
-        working-directory: contracts
-        run: forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vvv
-
-      - name: Run Pay/Swap/Bridge cross-suite integration
-        working-directory: contracts
-        run: forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vvv
-
-          -vvv
+        run: |
+          forge test \
+            --match-contract '^(CrossAdapterHardeningBridgeAdapter420Test|NativeAdapterReplayDomainHardening420Test|VerifierRotationHardening420Test|EmergencyControlsHardening420Test|MalformedProofRecipientFuzzHardening420Test|DomainNonceRouterBypassHardening420Test|GovernanceAccountingRecoveryHardening420Test)$' \
+            -vvv
 
       - name: Run affected Exchange Bridge qualification tests
         working-directory: contracts

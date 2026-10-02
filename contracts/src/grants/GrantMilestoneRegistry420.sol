@@ -30,7 +30,9 @@ interface ITreasuryDisbursementGrant420 {
         bool exists;
     }
 
-    function disbursement(bytes32 id) external view returns (Disbursement memory);
+    function disbursement(
+        bytes32 id
+    ) external view returns (Disbursement memory);
 }
 
 contract GrantMilestoneRegistry420 is I420System, SystemAccess {
@@ -81,9 +83,13 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
     event MilestonePaid(bytes32 indexed milestoneId, bytes32 indexed treasuryDisbursementId);
     event MilestoneCancelled(bytes32 indexed milestoneId);
 
-    constructor(address timelock_, address authorization_, address programs_, address awards_, address treasury_)
-        SystemAccess(timelock_)
-    {
+    constructor(
+        address timelock_,
+        address authorization_,
+        address programs_,
+        address awards_,
+        address treasury_
+    ) SystemAccess(timelock_) {
         require(
             authorization_ != address(0) && programs_ != address(0) && awards_ != address(0) && treasury_ != address(0),
             "dependency"
@@ -102,22 +108,26 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         return 1;
     }
 
-    function canonicalId(bytes32 awardId, uint32 ordinal, uint128 amount, bytes32 purposeHash)
-        public
-        pure
-        returns (bytes32)
-    {
+    function canonicalId(
+        bytes32 awardId,
+        uint32 ordinal,
+        uint128 amount,
+        bytes32 purposeHash
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(keccak256("420/GRANTS/MILESTONE/V1"), awardId, ordinal, amount, purposeHash));
     }
 
-    function createMilestone(bytes32 id, bytes32 awardId, uint32 ordinal, uint128 amount, bytes32 purposeHash)
-        external
-        onlyGovernance
-    {
+    function createMilestone(
+        bytes32 id,
+        bytes32 awardId,
+        uint32 ordinal,
+        uint128 amount,
+        bytes32 purposeHash
+    ) external onlyGovernance {
         GrantAwardRegistry420.Award memory a = awards.award(awardId);
         if (
-            a.state != GrantAwardRegistry420.State.ACTIVE || id == bytes32(0) || amount == 0 || purposeHash == bytes32(0)
-                || id != canonicalId(awardId, ordinal, amount, purposeHash)
+            a.state != GrantAwardRegistry420.State.ACTIVE || id == bytes32(0) || amount == 0
+                || purposeHash == bytes32(0) || id != canonicalId(awardId, ordinal, amount, purposeHash)
         ) revert InvalidMilestone();
         if (_milestones[id].exists) revert MilestoneExists();
         if (milestoneOrdinalUsed[awardId][ordinal]) revert MilestoneExists();
@@ -129,7 +139,10 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         emit MilestoneCreated(id, awardId, amount, purposeHash);
     }
 
-    function submitClaim(bytes32 id, bytes32 claimHash) external {
+    function submitClaim(
+        bytes32 id,
+        bytes32 claimHash
+    ) external {
         Milestone storage m = _get(id);
         if (m.state != State.PENDING || claimHash == bytes32(0)) revert InvalidState();
 
@@ -145,7 +158,10 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         emit MilestoneClaimed(id, claimHash, msg.sender);
     }
 
-    function approve(bytes32 id, bytes32 treasuryDisbursementId) external onlyGovernance {
+    function approve(
+        bytes32 id,
+        bytes32 treasuryDisbursementId
+    ) external onlyGovernance {
         Milestone storage m = _get(id);
         if (m.state != State.CLAIMED || treasuryDisbursementId == bytes32(0)) revert InvalidState();
 
@@ -171,7 +187,9 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         emit MilestoneApproved(id, treasuryDisbursementId);
     }
 
-    function finalizePaid(bytes32 id) external {
+    function finalizePaid(
+        bytes32 id
+    ) external {
         Milestone storage m = _get(id);
         if (m.state != State.APPROVED) revert InvalidState();
 
@@ -184,7 +202,9 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         emit MilestonePaid(id, m.treasuryDisbursementId);
     }
 
-    function cancel(bytes32 id) external onlyGovernance {
+    function cancel(
+        bytes32 id
+    ) external onlyGovernance {
         Milestone storage m = _get(id);
         if (m.state == State.PAID || m.state == State.CANCELLED) revert InvalidState();
 
@@ -204,11 +224,15 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         emit MilestoneCancelled(id);
     }
 
-    function milestone(bytes32 id) external view returns (Milestone memory) {
+    function milestone(
+        bytes32 id
+    ) external view returns (Milestone memory) {
         return _get(id);
     }
 
-    function _get(bytes32 id) private view returns (Milestone storage m) {
+    function _get(
+        bytes32 id
+    ) private view returns (Milestone storage m) {
         m = _milestones[id];
         if (!m.exists) revert MilestoneNotFound();
     }

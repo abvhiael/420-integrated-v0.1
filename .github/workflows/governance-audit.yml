@@ -19,6 +19,7 @@ on:
       - 'scripts/verify-governance-audit-4.py'
       - 'scripts/verify-governance-audit-6.py'
       - 'scripts/verify-governance-audit-7.py'
+      - 'scripts/verify-governance-audit-8.py'
       - 'scripts/audit-genesis-address-collisions.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
@@ -83,6 +84,7 @@ on:
       - 'scripts/verify-governance-audit-4.py'
       - 'scripts/verify-governance-audit-6.py'
       - 'scripts/verify-governance-audit-7.py'
+      - 'scripts/verify-governance-audit-8.py'
       - 'scripts/audit-genesis-address-collisions.py'
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
@@ -174,6 +176,7 @@ jobs:
           python scripts/verify-governance-audit-3.py
           python scripts/verify-governance-audit-6.py
           python scripts/verify-governance-audit-7.py
+          python scripts/verify-governance-audit-8.py
           python scripts/verify-genesis-interface-layer.py
 
       - name: Verify affected Genesis address and predeploy authority

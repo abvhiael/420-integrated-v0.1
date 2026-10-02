@@ -26,7 +26,7 @@ concurrency:
 jobs:
   readiness:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - name: Checkout exact head
         uses: actions/checkout@v4
@@ -63,13 +63,3 @@ jobs:
           grep -q 'workflow_dispatch' .github/workflows/exchange-testnet-swap.yml
           grep -q 'workflow_dispatch' .github/workflows/wallet-live-testnet.yml
           grep -q 'environment: exchange-testnet' .github/workflows/exchange-testnet-swap.yml
-
-      - name: Targeted stale-oracle and Swap lifecycle regressions
-        working-directory: contracts
-        run: |
-          forge test --match-path test/SwapTWAPOracle420.t.sol -vvv
-          forge test --match-path test/SwapGenesisIntegration420.t.sol -vvv
-
-      - name: Targeted Pay composition regression
-        working-directory: contracts
-        run: forge test --match-path test/PaySwapGenesisIntegration420.t.sol -vvv

@@ -39,6 +39,8 @@ function api420(overrides: Partial<IndexerPublicApi420> = {}): IndexerPublicApi4
     async assetTransfers() { return page420(transfer); },
     async protocolEvents() { return page420(event); },
     async protocolObject() { return object; },
+    async treasuryBudget() { return null; },
+    async treasuryDisbursement() { return null; },
     async search() { return [{ type: 'transaction', key: txHash, value: txHash }]; },
     ...overrides,
   };

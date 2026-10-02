@@ -62,6 +62,29 @@ type ProtocolObject struct {
 	TxHash      string         `json:"txHash,omitempty"`
 }
 
+type TreasuryBudget struct {
+	ChainID         string `json:"chainId"`
+	BudgetID        string `json:"budgetId"`
+	Asset           string `json:"asset"`
+	Ceiling         string `json:"ceiling"`
+	Committed       string `json:"committed"`
+	Executed        string `json:"executed"`
+	BlockNumber     string `json:"blockNumber"`
+	Authoritative   bool   `json:"authoritative"`
+}
+
+type TreasuryDisbursement struct {
+	ChainID          string `json:"chainId"`
+	DisbursementID   string `json:"disbursementId"`
+	BudgetID         string `json:"budgetId"`
+	Asset            string `json:"asset"`
+	Amount           string `json:"amount"`
+	State            string `json:"state"`
+	VaultReleaseHash *string `json:"vaultReleaseHash"`
+	BlockNumber      string `json:"blockNumber"`
+	Authoritative    bool   `json:"authoritative"`
+}
+
 type SnapshotProvenance struct {
 	ChainID         uint64
 	IndexedHeight   uint64
@@ -220,6 +243,30 @@ func (c *Client) ProtocolObject(ctx context.Context, protocol, objectKey string)
 	path := "/v1/protocols/" + url.PathEscape(protocol) + "/objects/" + url.PathEscape(objectKey) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
 	var out ProtocolObject
 	return out, c.getData(ctx, path, &out)
+}
+
+func (c *Client) TreasuryBudget(ctx context.Context, budgetID string) (TreasuryBudget, error) {
+	budgetID = strings.TrimSpace(budgetID)
+	if budgetID == "" { return TreasuryBudget{}, errors.New("Treasury budget id required") }
+	path := "/v1/treasury/budgets/" + url.PathEscape(budgetID) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
+	var out TreasuryBudget
+	if err := c.getData(ctx, path, &out); err != nil { return out, err }
+	if out.ChainID != strconv.FormatUint(c.requiredChainID, 10) { return out, ErrWrongChain }
+	if out.Authoritative { return out, ErrIndexerAuthoritative }
+	if strings.TrimSpace(out.BudgetID) == "" || strings.TrimSpace(out.BlockNumber) == "" { return out, ErrIndexerNotReady }
+	return out, nil
+}
+
+func (c *Client) TreasuryDisbursement(ctx context.Context, disbursementID string) (TreasuryDisbursement, error) {
+	disbursementID = strings.TrimSpace(disbursementID)
+	if disbursementID == "" { return TreasuryDisbursement{}, errors.New("Treasury disbursement id required") }
+	path := "/v1/treasury/disbursements/" + url.PathEscape(disbursementID) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
+	var out TreasuryDisbursement
+	if err := c.getData(ctx, path, &out); err != nil { return out, err }
+	if out.ChainID != strconv.FormatUint(c.requiredChainID, 10) { return out, ErrWrongChain }
+	if out.Authoritative { return out, ErrIndexerAuthoritative }
+	if strings.TrimSpace(out.DisbursementID) == "" || strings.TrimSpace(out.BlockNumber) == "" { return out, ErrIndexerNotReady }
+	return out, nil
 }
 
 func (c *Client) getData(ctx context.Context, path string, out any) error {

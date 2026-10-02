@@ -83,3 +83,11 @@ Before activation, discard any candidate deployment whose constructor binding, r
 If a wrong component revision was published, governance corrects or deprecates it before activation. If adapter/verifier configuration is wrong, keep routes disabled and replace it through governance. If accounting is unhealthy, movement remains blocked until newer distinct evidence restores health. Source reorgs use the canonical lifecycle retry/reorg path; never manufacture a second payout identity.
 
 After live testnet launch, preserve deployment receipts, addresses, runtime hashes, Registry publication transactions, route/adapter/verifier configuration transactions and smoke/recovery results under BRIDGE-AUDIT-9 evidence.
+
+
+## Indexer and consumer publication
+
+The repository Bridge ABI/event descriptor at `420-indexer/descriptors/bridge420-v1.json` intentionally contains no invented deployment addresses for registry-resolved components. After deployment and ProtocolRegistry publication, bind the descriptor to the exact resolved addresses for `BridgeChainRegistry420`, `BridgeAssetRegistry`, `BridgeRouteRegistry`, `BridgeRiskManager`, `BridgeTransferRegistry`, `BridgeAccountingRegistry`, `GatewayRouter420`, `VerifiedGateway420` and `CADCBridgeIntegration`.
+
+Before treating derived Bridge reads as qualified, verify that 420Indexer decodes the canonical `TransferCreated`, `TransferStatus`, `TransferTransition`, `InboundAccepted`, `OutboundInitiated` and `OutboundTransferRegistered` events from those exact addresses. Then smoke the Exchange Bridge read surface, Explorer provenance display, Notifications event subscriptions and Analytics protocol projections. These checks validate derived consumers only; they do not replace canonical Bridge/RPC verification or live BRIDGE-AUDIT-9 cross-chain evidence.
+

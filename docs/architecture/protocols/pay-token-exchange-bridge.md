@@ -204,6 +204,10 @@ Routes move through explicit states such as approved-inactive, active, suspended
 
 Transfer state distinguishes source pending/finalized, proof pending, verified, destination pending, completed, failed/retryable, expired, paused, disputed and refunded states. External release/mint/burn logic must respect the route's required source finality/proof semantics rather than interpreting creation as completion.
 
+The canonical normal path is monotonic: `CREATED -> SOURCE_PENDING -> SOURCE_FINALIZED -> PROOF_PENDING -> VERIFIED -> DESTINATION_PENDING -> COMPLETED`. `COMPLETED` and `REFUNDED` are terminal and cannot be reopened. A failed transfer records the exact stage that failed before entering `FAILED -> RETRYABLE`; retry returns only to that recorded stage. A source reorg before destination execution fails the transfer with a retry target of `SOURCE_PENDING`. A paused transfer records and may resume only to its exact prior stage. Governance exception paths may dispute or expire eligible nonterminal transfers and may refund only `FAILED`, `EXPIRED` or `DISPUTED` transfers. Every lifecycle mutation requires a nonzero evidence hash and emits the previous state, next state, evidence hash and actor.
+
+Inbound proof acceptance records the already-validated source/proof milestones through `VERIFIED` atomically with canonical transfer creation. Outbound initiation creates a canonical outbound transfer identity bound to route, asset, sender, external-recipient hash, amount and source message ID, then enters `SOURCE_PENDING`; source finality cannot be recorded until a nonzero source transaction ID has been bound.
+
 ### Accounting evidence
 
 `BridgeAccountingRegistry` stores authorized-versus-observed supply reconciliation plus an evidence hash and health result. It explicitly does **not** mint, burn or repair balances.

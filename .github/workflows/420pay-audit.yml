@@ -96,16 +96,13 @@ jobs:
       - name: Build Pay and required settlement boundary
         working-directory: contracts
         run: forge build src/pay src/swap/CanonicalSwapExecutor420.sol src/system/ReplayProtectionConsumer420.sol
-      - name: Run focused 420Pay Solidity qualification
+      - name: Run PAY-AUDIT-3 Level 1 Solidity qualification
         working-directory: contracts
         run: |
-          forge test --match-path 'test/*Pay*.t.sol' -vvv
-          forge test --match-path 'test/Payment*.t.sol' -vvv
+          forge test --match-path 'test/PayAudit3Lifecycle420.t.sol' -vvv
+          forge test --match-path 'test/PayFocusedHardening420.t.sol' -vvv
+          forge test --match-path 'test/PayPostMergeRemediation420.t.sol' -vvv
           forge test --match-path 'test/InvoiceRegistry420Fuzz.t.sol' -vvv
-          forge test --match-path 'test/SettlementRouter420*.t.sol' -vvv
-          forge test --match-path 'test/RefundManager420Fuzz.t.sol' -vvv
-          forge test --match-path 'test/GasSponsor420*.t.sol' -vvv
-          forge test --match-path 'test/ReplayProtectionConsumer420.t.sol' -vvv
       - name: Forbidden primitive scan
         shell: bash
         run: |

@@ -79,12 +79,27 @@ jobs:
         with:
           version: stable
 
+      - name: Build canonical Bridge ABI artifacts
+        working-directory: contracts
+        run: |
+          forge build \
+            src/bridge/BridgeChainRegistry420.sol \
+            src/bridge/BridgeAssetRegistry.sol \
+            src/bridge/BridgeRouteRegistry.sol \
+            src/bridge/BridgeRiskManager.sol \
+            src/bridge/BridgeTransferRegistry.sol \
+            src/bridge/BridgeAccountingRegistry.sol \
+            src/bridge/GatewayRouter420.sol \
+            src/bridge/VerifiedGateway420.sol \
+            src/bridge/CADCBridgeIntegration.sol
+
       - name: Run retained Bridge verifiers
         run: |
           python3 scripts/verify-bridge-hardening.py
           python3 scripts/verify-bridge-audit-6-deployment.py
           python3 scripts/verify-bridge-audit-7-security.py
           python3 scripts/verify-bridge-audit-8-integration.py
+          python3 scripts/verify-bridge-audit-8-abi.py
 
       - name: Run Bridge contract suite
         working-directory: contracts

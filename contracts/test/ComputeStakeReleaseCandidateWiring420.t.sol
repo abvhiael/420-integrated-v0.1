@@ -10,16 +10,21 @@ contract RCCollateral420 {
     address public slashPolicies;
     address public slashAuthorization;
     address public workerRegistry;
+    address public verifiers;
     address public disputeStakeHold;
+    address public vault;
 
     constructor(
         address exitPolicy_,
         address slashPolicy_,
-        address workerRegistry_
+        address registry_,
+        address vault_
     ) {
         exitPolicies = exitPolicy_;
         slashPolicies = slashPolicy_;
-        workerRegistry = workerRegistry_;
+        workerRegistry = registry_;
+        verifiers = registry_;
+        vault = vault_;
     }
 
     function setSlashAuthorization(address value) external {
@@ -67,11 +72,18 @@ contract RCDistribution420 {
 
 contract RCRewardAccounting420 {
     address public policies;
+    address public rewardVault;
     address public workerCollateral;
     address public verifierCollateral;
 
-    constructor(address policies_, address worker_, address verifier_) {
+    constructor(
+        address policies_,
+        address rewardVault_,
+        address worker_,
+        address verifier_
+    ) {
         policies = policies_;
+        rewardVault = rewardVault_;
         workerCollateral = worker_;
         verifierCollateral = verifier_;
     }
@@ -143,8 +155,12 @@ contract ComputeStakeReleaseCandidateWiring420Test {
     RCComponent420 private distributionPolicy;
     RCComponent420 private rewardPolicy;
     RCComponent420 private workerRegistry;
+    RCComponent420 private verifierRegistry;
     RCComponent420 private disputeEngine;
     RCComponent420 private entitlements;
+    RCComponent420 private workerCollateralVault;
+    RCComponent420 private verifierCollateralVault;
+    RCComponent420 private rewardVault;
 
     RCCollateral420 private workerCollateral;
     RCCollateral420 private verifierCollateral;
@@ -162,18 +178,24 @@ contract ComputeStakeReleaseCandidateWiring420Test {
         distributionPolicy = new RCComponent420();
         rewardPolicy = new RCComponent420();
         workerRegistry = new RCComponent420();
+        verifierRegistry = new RCComponent420();
         disputeEngine = new RCComponent420();
         entitlements = new RCComponent420();
+        workerCollateralVault = new RCComponent420();
+        verifierCollateralVault = new RCComponent420();
+        rewardVault = new RCComponent420();
 
         workerCollateral = new RCCollateral420(
             address(exitPolicy),
             address(slashPolicy),
-            address(workerRegistry)
+            address(workerRegistry),
+            address(workerCollateralVault)
         );
         verifierCollateral = new RCCollateral420(
             address(exitPolicy),
             address(slashPolicy),
-            address(0)
+            address(verifierRegistry),
+            address(verifierCollateralVault)
         );
 
         authorizer = new RCSlashAuthorization420(
@@ -194,6 +216,7 @@ contract ComputeStakeReleaseCandidateWiring420Test {
 
         rewardAccounting = new RCRewardAccounting420(
             address(rewardPolicy),
+            address(rewardVault),
             address(workerCollateral),
             address(verifierCollateral)
         );
@@ -265,12 +288,33 @@ contract ComputeStakeReleaseCandidateWiring420Test {
         require(reverted, "cross-registry stake source accepted");
     }
 
+    function testRewardVaultCannotAliasCollateralVault() public {
+        ComputeStakeReleaseCandidateWiring420.Graph memory g = _graph();
+        g.rewardVault = g.workerCollateralVault;
+
+        bool reverted;
+        try new ComputeStakeReleaseCandidateWiring420(g) returns (
+            ComputeStakeReleaseCandidateWiring420
+        ) {
+        } catch {
+            reverted = true;
+        }
+        require(reverted, "reward backing reused collateral vault");
+    }
+
     function _graph()
         private
         view
         returns (ComputeStakeReleaseCandidateWiring420.Graph memory g)
     {
         g.chainId = block.chainid;
+        g.workerRegistry = _component(address(workerRegistry));
+        g.verifierRegistry = _component(address(verifierRegistry));
+        g.disputeEngine = _component(address(disputeEngine));
+        g.canonicalEntitlements = _component(address(entitlements));
+        g.workerCollateralVault = _component(address(workerCollateralVault));
+        g.verifierCollateralVault = _component(address(verifierCollateralVault));
+        g.rewardVault = _component(address(rewardVault));
         g.workerCollateral = _component(address(workerCollateral));
         g.verifierCollateral = _component(address(verifierCollateral));
         g.exitPolicy = _component(address(exitPolicy));
@@ -284,8 +328,6 @@ contract ComputeStakeReleaseCandidateWiring420Test {
         g.disputeIntegration = _component(address(integration));
         g.workerStake = _component(address(workerStake));
         g.slashRecipientResolver = _component(address(resolver));
-        g.disputeEngine = address(disputeEngine);
-        g.canonicalEntitlements = address(entitlements);
     }
 
     function _component(address implementation)

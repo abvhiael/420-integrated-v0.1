@@ -6,12 +6,13 @@ import "../src/pay/PaymentRegistry420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmPayAudit3 {
-    function prank(address) external;
+    function prank(
+        address
+    ) external;
 }
 
 contract PayAudit3Lifecycle420Test {
-    VmPayAudit3 internal constant vm =
-        VmPayAudit3(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmPayAudit3 internal constant vm = VmPayAudit3(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address internal constant ALICE = address(0xA11CE);
     address internal constant BOB = address(0xB0B);
@@ -25,7 +26,10 @@ contract PayAudit3Lifecycle420Test {
         env.setSettlementAsset(SETTLEMENT, ASSET_ID, true);
     }
 
-    function _create(PaymentRegistry420 payments, uint256 nonce) internal returns (bytes32) {
+    function _create(
+        PaymentRegistry420 payments,
+        uint256 nonce
+    ) internal returns (bytes32) {
         return payments.createPayment(
             keccak256(abi.encode("invoice", nonce)),
             ALICE,
@@ -39,7 +43,9 @@ contract PayAudit3Lifecycle420Test {
         );
     }
 
-    function _invoice(address merchant) internal view returns (InvoiceRegistry420.Invoice memory i) {
+    function _invoice(
+        address merchant
+    ) internal view returns (InvoiceRegistry420.Invoice memory i) {
         i = InvoiceRegistry420.Invoice({
             merchantId: keccak256(abi.encode(merchant)),
             merchant: merchant,
@@ -99,8 +105,7 @@ contract PayAudit3Lifecycle420Test {
             address(payments).call(abi.encodeWithSelector(payments.recordCertified.selector, paymentId));
         require(!certifyEarly, "certified before inclusion");
 
-        (bool settleEarly,) =
-            address(payments).call(abi.encodeWithSelector(payments.recordSettled.selector, paymentId));
+        (bool settleEarly,) = address(payments).call(abi.encodeWithSelector(payments.recordSettled.selector, paymentId));
         require(!settleEarly, "settled before finalization");
 
         payments.recordFailed(paymentId);
@@ -112,17 +117,12 @@ contract PayAudit3Lifecycle420Test {
         require(!includeAfterFailure, "failed payment resurrected");
 
         bytes32 invoiceId = keccak256(abi.encode("invoice", uint256(2)));
-        (bool finalizeAfterFailure,) = address(payments).call(
-            abi.encodeWithSelector(
-                payments.recordFinalized.selector,
-                paymentId,
-                invoiceId,
-                keccak256("receipt"),
-                SETTLEMENT,
-                84,
-                0
-            )
-        );
+        (bool finalizeAfterFailure,) = address(payments)
+            .call(
+                abi.encodeWithSelector(
+                    payments.recordFinalized.selector, paymentId, invoiceId, keccak256("receipt"), SETTLEMENT, 84, 0
+                )
+            );
         require(!finalizeAfterFailure, "failed payment finalized");
     }
 
@@ -132,8 +132,7 @@ contract PayAudit3Lifecycle420Test {
         env.governance().set(false, false);
 
         vm.prank(ALICE);
-        (bool included,) =
-            address(payments).call(abi.encodeWithSelector(payments.recordIncluded.selector, paymentId));
+        (bool included,) = address(payments).call(abi.encodeWithSelector(payments.recordIncluded.selector, paymentId));
         require(!included, "payer mutated canonical lifecycle");
     }
 

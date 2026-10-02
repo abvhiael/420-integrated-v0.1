@@ -35,4 +35,4 @@ A valid external proof alone is never enough to release value. Current route dir
 
 Retry guidance is fail closed: a failed, stale, replaced or reorged operation must be reconciled against canonical Bridge/RPC state before any retry. The UI must never manufacture success or blindly resubmit an ambiguous transfer.
 
-Use [Getting started](getting-started.md) before moving external assets and [Developer integration](developer/index.md) for route/proof semantics.
+Use [Getting started](getting-started.md) before moving external assets, [Deployment operations](deployment-operations.md) for deployment/initialization/recovery procedures, and [Developer integration](developer/index.md) for route/proof semantics.

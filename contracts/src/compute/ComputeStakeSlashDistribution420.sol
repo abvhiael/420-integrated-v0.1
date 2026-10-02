@@ -201,30 +201,21 @@ contract ComputeStakeSlashDistribution420 is I420System {
                 )
         ) revert InvalidDistribution();
 
-        IComputeSlashRecipientResolver420.Recipients memory resolved;
-        if (p.recipientResolver != address(0)) {
-            resolved = IComputeSlashRecipientResolver420(p.recipientResolver).resolve(
-                authorizationRef,
-                a.evidenceRef,
-                a.evidenceAdapter,
-                a.subjectRef,
-                a.subjectAccount
-            );
-        }
-
         if (
             (p.harmedPayerBps != 0
-                && (resolved.harmedPayer == address(0)
-                    || resolved.harmedPayer == a.subjectAccount))
+                && (a.harmedPayer == address(0)
+                    || a.harmedPayer == a.subjectAccount))
                 || (p.replacementWorkerBps != 0
-                    && (resolved.replacementWorker == address(0)
-                        || resolved.replacementWorker == a.subjectAccount))
+                    && (a.replacementWorker == address(0)
+                        || a.replacementWorker == a.subjectAccount))
                 || (p.challengerBps != 0
-                    && (resolved.challenger == address(0)
-                        || resolved.challenger == a.subjectAccount))
+                    && (a.challenger == address(0)
+                        || a.challenger == a.subjectAccount))
                 || (p.protocolTreasuryBps != 0
-                    && (p.protocolTreasury == address(0)
-                        || p.protocolTreasury == a.subjectAccount))
+                    && (a.protocolTreasury == address(0)
+                        || a.protocolTreasury == a.subjectAccount
+                        || a.protocolTreasury != p.protocolTreasury))
+                || (p.protocolTreasuryBps == 0 && a.protocolTreasury != address(0))
         ) revert InvalidDistribution();
 
         uint256[4] memory targets;
@@ -248,10 +239,10 @@ contract ComputeStakeSlashDistribution420 is I420System {
         e.positionId = a.positionId;
         e.subjectKind = a.subjectKind;
         e.totalAmount = a.amount;
-        e.harmedPayer = resolved.harmedPayer;
-        e.replacementWorker = resolved.replacementWorker;
-        e.challenger = resolved.challenger;
-        e.protocolTreasury = p.protocolTreasury;
+        e.harmedPayer = a.harmedPayer;
+        e.replacementWorker = a.replacementWorker;
+        e.challenger = a.challenger;
+        e.protocolTreasury = a.protocolTreasury;
         e.harmedPayerTarget = targets[0];
         e.replacementWorkerTarget = targets[1];
         e.challengerTarget = targets[2];

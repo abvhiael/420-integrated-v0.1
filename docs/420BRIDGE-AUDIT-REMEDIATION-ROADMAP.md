@@ -110,15 +110,40 @@ Required outcome:
 **Qualification evidence SHA:** `d0663def685fd6ad5969843af903dba7d4aafdcc`  
 **Level 1:** PASS — exact-head Bridge Fast qualification runs #60 (`37058372514`) and #61 (`37058375444`) both passed the A7 verifier, Bridge contract tests, canonical production adapter suites, retained hardening suites, Exchange Bridge qualification and Pay/Swap/Bridge integration. Exact-head Solidity workflows #4228 (`37058372855`) and #4229 (`37058375313`) also completed successfully; their PR shards were classifier-skipped and are supplemental rather than substitutes for Bridge Fast evidence.
 
-### BRIDGE-AUDIT-8 — Documentation, ABI, Indexer and cross-app integration reconciliation
+### BRIDGE-AUDIT-8 — Documentation, ABI, Indexer and cross-app integration reconciliation — **COMPLETE**
 Purpose: close repository-side integration and documentation before live deployment.
 
-Required outcome:
-- generated/current ABIs and Indexer decoding cover canonical Bridge events/contracts;
-- Wallet/Exchange/Explorer/Notifications/Analytics consumers agree on event names and lifecycle semantics;
-- app/developer/security/troubleshooting/operator/deployment documentation matches implementation;
-- requirement matrix has no repository-remediable PARTIAL/MISSING/BROKEN/STALE items;
-- Level 2 Bridge milestone qualification is green on the exact implementation SHA.
+Completed outcome:
+- canonical `420Bridge` Indexer descriptor covers 9 Bridge deployment components / 27 current events and remains address-unbound until exact deployment/ProtocolRegistry resolution;
+- generated Foundry ABIs are checked against the retained descriptor for exact event signatures, fields and indexed attributes;
+- Indexer decoding supports duplicate event topics across different bound Bridge contracts while preserving fail-closed wrong-contract identity checks;
+- canonical transfer lifecycle reconstruction uses `TransferCreated`, `TransferStatus` and `TransferTransition`, keyed by `transferId`;
+- Exchange/read-model plus Wallet/Explorer/Notifications/Analytics consumer documentation agree on canonical event names, lifecycle semantics and derived/non-authoritative boundaries;
+- app/developer/security/troubleshooting/operator/deployment documentation is reconciled to the implementation;
+- the audit requirement matrix has no repository-remediable PARTIAL/MISSING/BROKEN/STALE items; live/testnet-only rows remain explicitly BLOCKED for BRIDGE-AUDIT-9;
+- exact-head Level 2 Bridge milestone qualification is green.
+
+Qualification:
+- authoritative implementation SHA: `8845396b3a51efa08f30773113eff0c5cdbcfead`;
+- workflow run `37067605885` (run #9) — **SUCCESS**;
+- consumer/integration job `111039209150` — **SUCCESS**;
+- retained Bridge Level 2 job `111039209489` — **SUCCESS**;
+- 420Indexer: 206 pass / 0 fail;
+- Exchange read-service: 12 pass / 0 fail;
+- Exchange web: 264 pass / 0 fail;
+- Analytics Indexer/protocol packages: PASS;
+- canonical production adapter suites: 166 pass / 0 fail / 0 skipped;
+- retained Bridge security suites: 44 pass / 0 fail / 0 skipped;
+- Exchange Bridge qualification: 10 pass / 0 fail;
+- Pay/Swap/Bridge Genesis integration: 1 pass / 0 fail.
+
+Qualification corrected two real Indexer regressions before the authoritative run: Bridge object-key precedence now selects `transferId` ahead of `routeId`, and the multi-address topic decoder preserves the existing fail-closed wrong-contract-address invariant.
+
+Durable evidence:
+- `docs/audit/420BRIDGE-AUDIT-8-QUALIFICATION.md`;
+- evidence document commit: `f944737574e4e18037dccea4fa8d37925d3b12fc`.
+
+Level 3 repository-wide qualification was not run here by design. Live external proof/finality, deployment receipts/runtime hashes/Registry publication and production-equivalent testnet evidence remain BRIDGE-AUDIT-9 scope. The long-lived audit PR's reconciliation/mergeability against the latest `main` is not claimed by this A8 qualification.
 
 ### BRIDGE-AUDIT-9 — Production-equivalent live testnet deployment qualification
 Purpose: prove real cross-chain operation rather than mocked repository behavior.

@@ -208,12 +208,12 @@ Separately authorized, canonical-Vault-backed worker/verifier reward accounting 
 Freeze canonical verifier identity at dispute opening, preserve verifier collateral through active/objective-final dispute state, and atomically hand qualified objective verifier-error evidence into the existing slash authorization path before releasing the dispute stake hold.
 
 ### CMP-1.5.9 — WorkerRegistry stake-source integration
-**Status: implementation/Level 1 + Level 2 qualification in progress.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `4845679d1ca41152e3299870af2ed3b8e9e06c1e`.**
 
 Bind WorkerRegistry admission to the actual Vault-backed CMP-1.5 worker collateral source with canonical WorkerRegistry identity and frozen source code-hash checks.
 
 ### CMP-1.5.10 — ComputeEscrow slash-redistribution integration
-**Status: implementation/Level 1 + Level 2 qualification in progress.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `0a6fe7d7a3d5b7bb6ea768a842bc98819efa3ce2`.**
 
 Bind the harmed-payer recipient to the exact canonical ComputeEscrow entitlement/dispute state while proving that all redistributed slash value originates only from separately backed CMP-1.5 collateral and never payer escrow.
 
@@ -527,7 +527,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.9 WorkerRegistry stake-source integration; CMP-1.5.0–1.5.8 complete |
+| CMP-1.5 ComputeStake | current: CMP-1.5.11 hostile economic qualification; CMP-1.5.0–1.5.10 complete |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

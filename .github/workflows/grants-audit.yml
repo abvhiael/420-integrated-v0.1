@@ -48,7 +48,7 @@ jobs:
 
       - name: Build Grants contract family
         working-directory: contracts
-        run: forge build src/grants --force --sizes
+        run: forge build src/grants --sizes
 
       - name: Run Grants lifecycle and adversarial regressions
         working-directory: contracts

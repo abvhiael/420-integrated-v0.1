@@ -458,9 +458,7 @@ contract GrantsGenesis420Test {
         vm.prank(ALICE);
         (bool overRequested,) = address(e.applications)
             .call(
-                abi.encodeWithSelector(
-                    e.applications.submit.selector, app, p, ALICE, uint256(1), uint128(701), content
-                )
+                abi.encodeWithSelector(e.applications.submit.selector, app, p, ALICE, uint256(1), uint128(701), content)
             );
         require(!overRequested, "application exceeded per-award cap");
         require(!e.applications.applicationNonceUsed(p, ALICE, 1), "failed capped application consumed nonce");

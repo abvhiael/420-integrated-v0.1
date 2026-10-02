@@ -5,21 +5,29 @@
   "commitments": {
     "payment": {
       "requiredNonzero": true,
-      "uniquenessEnforcedByV1": false,
-      "semantics": "OPAQUE_AUDIT_REFERENCE",
-      "canonicalSettlementBindingDeferredTo": "LAUNCHPAD-AUDIT-3"
+      "uniquenessEnforcedByBaseV1": false,
+      "baseSemantics": "OPAQUE_AUDIT_REFERENCE_WHEN_CROWDFUNDING_INTEGRATION_UNBOUND",
+      "crowdfundingBinding": "CANONICAL_420PAY_SETTLED_PAYMENT_ID",
+      "crowdfundingReplayProtection": true,
+      "canonicalSettlementBindingImplementedBy": "LaunchpadCrowdfundingIntegration420"
     },
     "delivery": {
       "requiredNonzero": true,
-      "uniquenessEnforcedByV1": false,
-      "semantics": "OPAQUE_AUDIT_REFERENCE",
-      "canonicalSettlementBindingDeferredTo": "LAUNCHPAD-AUDIT-3"
+      "uniquenessEnforcedByBaseV1": false,
+      "baseSemantics": "OPAQUE_AUDIT_REFERENCE_WHEN_CROWDFUNDING_INTEGRATION_UNBOUND",
+      "crowdfundingBinding": "REPLAY_PROTECTED_DELIVERY_EVIDENCE",
+      "crowdfundingReplayProtection": true,
+      "canonicalDeliveryExecution": false,
+      "reputationPublicationImplementedBy": "LaunchpadCrowdfundingIntegration420"
     },
     "refund": {
       "requiredNonzero": true,
-      "uniquenessEnforcedByV1": false,
-      "semantics": "OPAQUE_AUDIT_REFERENCE",
-      "canonicalSettlementBindingDeferredTo": "LAUNCHPAD-AUDIT-3"
+      "uniquenessEnforcedByBaseV1": false,
+      "baseSemantics": "OPAQUE_AUDIT_REFERENCE_WHEN_CROWDFUNDING_INTEGRATION_UNBOUND",
+      "crowdfundingBinding": "CANONICAL_420PAY_REFUND_BATCH",
+      "crowdfundingReplayProtection": true,
+      "canonicalRefundExecution": false,
+      "canonicalRefundBindingImplementedBy": "LaunchpadCrowdfundingIntegration420"
     }
   },
   "allocationRounding": {
@@ -43,8 +51,9 @@
     "swapAuthority": false
   },
   "qualification": {
-    "step": "LAUNCHPAD-AUDIT-2",
-    "level": 1,
+    "audit2Step": "LAUNCHPAD-AUDIT-2",
+    "audit2Level": 1,
+    "audit3BindingStep": "LAUNCHPAD-AUDIT-3",
     "requiresDirectNegativeAndBoundaryCoverageForAllV1Invariants": true
   }
 }

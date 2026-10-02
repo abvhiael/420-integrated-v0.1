@@ -1,0 +1,50 @@
+{
+  "schema": "420-launchpad-v1-hardening-v1",
+  "serviceId": "420/service/launchpad/v1",
+  "scope": "NON_CUSTODIAL_COMMITMENT_REGISTRY",
+  "commitments": {
+    "payment": {
+      "requiredNonzero": true,
+      "uniquenessEnforcedByV1": false,
+      "semantics": "OPAQUE_AUDIT_REFERENCE",
+      "canonicalSettlementBindingDeferredTo": "LAUNCHPAD-AUDIT-3"
+    },
+    "delivery": {
+      "requiredNonzero": true,
+      "uniquenessEnforcedByV1": false,
+      "semantics": "OPAQUE_AUDIT_REFERENCE",
+      "canonicalSettlementBindingDeferredTo": "LAUNCHPAD-AUDIT-3"
+    },
+    "refund": {
+      "requiredNonzero": true,
+      "uniquenessEnforcedByV1": false,
+      "semantics": "OPAQUE_AUDIT_REFERENCE",
+      "canonicalSettlementBindingDeferredTo": "LAUNCHPAD-AUDIT-3"
+    }
+  },
+  "allocationRounding": {
+    "formula": "floor(tokenAllocation * participantContribution / raised)",
+    "participantClaimsNeverExceedAllocation": true,
+    "residualDust": "UNASSIGNED_ACCOUNTING_DUST",
+    "dustCustody": false,
+    "sweepAuthority": false
+  },
+  "projectActive": {
+    "semantics": "IMMUTABLE_REGISTRATION_MARKER",
+    "mutableLifecycleControl": false,
+    "saleLifecycleAuthority": "LaunchpadSaleRegistry420.State"
+  },
+  "securityBoundary": {
+    "custody": false,
+    "minting": false,
+    "paymentExecution": false,
+    "refundExecution": false,
+    "deliveryExecution": false,
+    "swapAuthority": false
+  },
+  "qualification": {
+    "step": "LAUNCHPAD-AUDIT-2",
+    "level": 1,
+    "requiresDirectNegativeAndBoundaryCoverageForAllV1Invariants": true
+  }
+}

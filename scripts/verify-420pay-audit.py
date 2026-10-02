@@ -36,7 +36,7 @@ for stale in ["PaymentCreated", "PaymentSettled", "PaymentRefunded", "PaymentCan
     bridge_start=lifecycle.find("{ protocol: '420Bridge'")
     if pay_start >= 0 and bridge_start > pay_start and stale in lifecycle[pay_start:bridge_start]:
         errors.append(f"stale Pay lifecycle event retained: {stale}")
-for token in ["PaymentSet", "payLifecycleRule420", "PaymentAuthorized"]:
+for token in ["PaymentSet", "PaymentAuthorized", "stateField", "stateMap"]:
     if token not in lifecycle: errors.append(f"Pay lifecycle handling missing: {token}")
 
 abi=read("420-indexer/src/abi-manifest.ts")

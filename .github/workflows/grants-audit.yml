@@ -6,8 +6,11 @@ on:
       - "contracts/src/grants/**"
       - "contracts/test/GrantsGenesis420.t.sol"
       - "contracts/config/420grants-genesis.json"
+      - "contracts/config/grants/**"
+      - "contracts/test/GrantsDeploymentBinding420.t.sol"
       - "docs/audit/420GRANTS-*"
       - "scripts/verify-grants-audit.py"
+      - "scripts/verify-grants-audit-5-release.py"
       - ".github/workflows/grants-audit.yml"
   workflow_dispatch:
 
@@ -42,13 +45,51 @@ jobs:
       - name: Verify Grants audit model
         run: python3 scripts/verify-grants-audit.py
 
+      - name: Verify GRANTS-AUDIT-5 release materialization
+        run: python3 scripts/verify-grants-audit-5-release.py
+
       - name: Check Grants Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/grants/GrantProgramRegistry420.sol src/grants/GrantApplicationRegistry420.sol src/grants/GrantAwardRegistry420.sol src/grants/GrantMilestoneRegistry420.sol test/GrantsGenesis420.t.sol
+        run: forge fmt --check src/grants/GrantProgramRegistry420.sol src/grants/GrantApplicationRegistry420.sol src/grants/GrantAwardRegistry420.sol src/grants/GrantMilestoneRegistry420.sol test/GrantsGenesis420.t.sol test/GrantsDeploymentBinding420.t.sol
 
       - name: Build Grants contract family
         working-directory: contracts
         run: forge build src/grants --sizes
+
+      - name: Retain Grants compiled artifact identities
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          names = [
+              "GrantAuthorization420",
+              "GrantProgramRegistry420",
+              "GrantApplicationRegistry420",
+              "GrantAwardRegistry420",
+              "GrantMilestoneRegistry420",
+              "GrantRouter420",
+          ]
+          records = []
+          for name in names:
+              path = Path("contracts/out") / f"{name}.sol" / f"{name}.json"
+              payload = path.read_bytes()
+              artifact = json.loads(payload)
+              deployed = artifact.get("deployedBytecode", {}).get("object", "")
+              if deployed.startswith("0x"):
+                  deployed = deployed[2:]
+              records.append({
+                  "contract": name,
+                  "artifact_sha256": hashlib.sha256(payload).hexdigest(),
+                  "compiler_runtime_template_sha256": hashlib.sha256(bytes.fromhex(deployed)).hexdigest() if deployed else None,
+              })
+          print("GRANTS_AUDIT_5_ARTIFACT_IDENTITIES=" + json.dumps(records, sort_keys=True))
+          PY
+
+      - name: Run Grants deployment and Registry binding qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/GrantsDeploymentBinding420.t.sol' -vvvv
 
       - name: Run Grants lifecycle and adversarial regressions
         working-directory: contracts

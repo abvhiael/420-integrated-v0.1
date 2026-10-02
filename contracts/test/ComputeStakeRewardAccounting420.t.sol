@@ -167,12 +167,14 @@ contract ComputeStakeRewardAccounting420Test {
         verifierCollateral = new MockRewardCollateral420();
 
         rewardPolicy = new ComputeStakeRewardPolicy420(GOV);
+        uint8 workerSubjectKind = rewardPolicy.SUBJECT_WORKER();
+        uint8 verifierSubjectKind = rewardPolicy.SUBJECT_VERIFIER();
         vm.prank(GOV);
         workerRewardPolicyRevision =
-            rewardPolicy.publish(STAKE_POLICY, rewardPolicy.SUBJECT_WORKER(), address(source), 50 ether);
+            rewardPolicy.publish(STAKE_POLICY, workerSubjectKind, address(source), 50 ether);
         vm.prank(GOV);
         verifierRewardPolicyRevision =
-            rewardPolicy.publish(STAKE_POLICY, rewardPolicy.SUBJECT_VERIFIER(), address(source), 25 ether);
+            rewardPolicy.publish(STAKE_POLICY, verifierSubjectKind, address(source), 25 ether);
 
         caps = new MockRewardCaps420();
         auth = new VaultAuthorization420(address(caps));

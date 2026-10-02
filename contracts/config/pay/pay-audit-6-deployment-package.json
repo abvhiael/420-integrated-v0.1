@@ -922,5 +922,72 @@
     "Registry-resolved Pay deployment addresses remain intentionally unfrozen and must be recorded from the approved PAY-AUDIT-7 candidate.",
     "CanonicalSwapExecutor420 and ReplayProtectionConsumer420 are shared external dependencies and are verified/bound rather than re-owned by 420Pay.",
     "Independent external security audit and final Genesis/production closeout remain PAY-AUDIT-8."
-  ]
+  ],
+  "constructor_manifest": {
+    "MerchantRegistry420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "InvoiceRegistry420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "PaymentRegistry420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "PaymentRouter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "SettlementRouter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "RefundManager420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "GasSponsor420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    },
+    "CanonicalSettlementAdapter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {
+        "canonical_swap_executor": "PAY-AUDIT-7 deployed canonical CanonicalSwapExecutor420 address; repository-local qualification uses exact deployed executor instance"
+      },
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_, address executor_)"
+    },
+    "CanonicalSwapHealthAdapter420": {
+      "governance_timelock": "0x0000000000000000000000000000000000000429",
+      "protocol_registry": "0x0000000000000000000000000000000000000434",
+      "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "additional_arguments": {},
+      "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
+    }
+  }
 }

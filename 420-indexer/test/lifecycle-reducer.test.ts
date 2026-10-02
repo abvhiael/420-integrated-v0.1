@@ -22,16 +22,31 @@ test('extracts canonical object keys from common genesis identifiers', () => {
   assert.equal(protocolObjectKey420(e), 'labelHash:0xabc');
 });
 
-test('reduces lifecycle events in canonical order', () => {
+test('reduces canonical 420Pay PaymentSet lifecycle in chain order', () => {
   const snapshots = reduceProtocolLifecycle420([
-    event('420Pay', 'PaymentSettled', 3n, { paymentId: '0x01' }),
-    event('420Pay', 'PaymentCreated', 1n, { paymentId: '0x01' }),
+    event('420Pay', 'PaymentSet', 3n, { paymentId: '0x01', status: 5n }),
+    event('420Pay', 'PaymentSet', 1n, { paymentId: '0x01', status: 1n }),
     event('420Pay', 'PaymentAuthorized', 2n, { paymentId: '0x01' })
   ]);
   assert.equal(snapshots.length, 1);
   assert.equal(snapshots[0].state, 'COMPLETED');
   assert.equal(snapshots[0].terminal, true);
-  assert.equal(snapshots[0].eventName, 'PaymentSettled');
+  assert.equal(snapshots[0].eventName, 'PaymentSet');
+});
+
+test('maps partial refund as nonterminal and refund as terminal', () => {
+  const partial = reduceProtocolLifecycle420([
+    event('420Pay', 'PaymentSet', 1n, { paymentId: '0x02', status: 4n }),
+    event('420Pay', 'PaymentSet', 2n, { paymentId: '0x02', status: 7n })
+  ]);
+  assert.equal(partial[0].state, 'ACTIVE');
+  assert.equal(partial[0].terminal, false);
+  const full = reduceProtocolLifecycle420([
+    event('420Pay', 'PaymentSet', 1n, { paymentId: '0x03', status: 4n }),
+    event('420Pay', 'PaymentSet', 2n, { paymentId: '0x03', status: 6n })
+  ]);
+  assert.equal(full[0].state, 'COMPLETED');
+  assert.equal(full[0].terminal, true);
 });
 
 test('terminal lifecycle states cannot be resurrected by later events', () => {

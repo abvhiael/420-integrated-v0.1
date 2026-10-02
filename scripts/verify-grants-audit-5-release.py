@@ -116,6 +116,7 @@ need(paths == expected_paths, "artifact path inventory drift")
 need(artifact.get("hash_evidence") == "QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE", "artifact hash evidence policy drift")
 
 need(cfg.get("deployment", {}).get("addressModel") == "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS", "Grants genesis address model drift")
+need(cfg.get("deployment", {}).get("releaseMaterialization") == "contracts/config/grants/grants-audit-5-release-materialization.json", "Grants release materialization pointer drift")
 
 canon_entries = {x.get("id"): x for x in canon.get("registry_resolved", canon.get("registryResolved", []))}
 if "grants-router" in canon_entries:

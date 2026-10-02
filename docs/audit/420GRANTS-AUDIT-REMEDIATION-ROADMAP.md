@@ -85,19 +85,27 @@ Level 2 is not triggered by this reconciliation-only step because no new shared 
 
 ## GRANTS-AUDIT-5 — Registry, address and deployment model
 
-**Status: PARTIAL**
+**Status: COMPLETE**
 
-Repository work:
-- preserve Registry-resolved/no-fixed-address authority;
-- document deployment order and one-time Award Registry binding;
-- preserve dApp-map and Wallet discovery inventory.
+- preserved GrantRouter420 as `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS` with no invented fixed predeploy or CREATE2 address;
+- preserved frozen GovernanceTimelock `0x0000000000000000000000000000000000000429` and ProtocolRegistry `0x0000000000000000000000000000000000000434`;
+- retained CapabilityRegistry420 candidate status without promoting it to live deployment evidence;
+- added `contracts/config/grants/grants-audit-5-release-materialization.json` with deterministic deployment order, constructor graph, one-time Award Registry binding, exact artifact inventory, Registry publication descriptor and explicit repository/live evidence boundary;
+- linked the Grants Genesis config to the release materialization;
+- added `contracts/test/GrantsDeploymentBinding420.t.sol` using real ProtocolRegistry, CapabilityRegistry420, TreasuryDisbursementRegistry420 and the complete Grants deployment graph;
+- proved exact constructor/dependency bindings, one-time Award Registry binding, canonical `420/service/grants/v1` publication, active resolution to the exact GrantRouter420, Registry EXTCODEHASH identity and wrong-router visibility;
+- retained exact compiled artifact SHA-256, compiler runtime-template SHA-256 and local deployed runtime code hashes for all six deployable Grants contracts;
+- retained dependency-root, manifest and interface commitments;
+- added `scripts/verify-grants-audit-5-release.py` to fail closed on namespace/address/deployment/publication drift or fabricated live evidence;
+- extended Grants CI to qualify the release package and retain artifact/runtime identities;
+- Level 1 exact-head qualification **PASS** on implementation SHA `19c8a7875525b0e363c3a537d5de8e03a8182386`;
+- 420Grants Audit Qualification run `37069334943` / #42: grants-contract-core job `111045205831` PASS and grants-security job `111045206014` PASS;
+- affected Solidity Contracts workflow run `37069334633` / #4303 completed SUCCESS on the same SHA under app-scoped classification;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-5-QUALIFICATION.md`, introduced by evidence commit `1b8c26941227c6ee9696a0e4d531f7c3e55d3953`.
 
-Remaining:
-- reproducible compiled artifact/runtime-hash manifest for the exact release candidate;
-- concrete Registry publication descriptor bound to those exact artifacts;
-- production-equivalent deployment receipts and runtime verification.
+Production-equivalent chain/genesis identity, deployed addresses/runtime hashes, constructor-binding receipts and live ProtocolRegistry transactions remain explicitly testnet-gated to GRANTS-AUDIT-9 and are not blockers for repository completion of this step.
 
-The final item is testnet-gated.
+Level 2 is not separately triggered because the real Registry/Capability/Treasury deployment graph is exercised directly in Level 1 together with retained Grants lifecycle/security qualification. Level 3 remains deferred to GRANTS-AUDIT-8.
 
 ## GRANTS-AUDIT-6 — client/indexer/user-flow integration
 

@@ -108,7 +108,10 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
             : subjectKind == policies.SUBJECT_VERIFIER()
                 ? verifierCollateral
                 : address(0);
-        if (source == address(0)) revert InvalidAuthorization();
+        if (
+            source == address(0)
+                || IComputeSlashableCollateral420(source).slashAuthorization() != address(this)
+        ) revert InvalidAuthorization();
 
         (
             uint8 actualKind,

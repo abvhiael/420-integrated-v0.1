@@ -44,7 +44,7 @@ jobs:
 
       - name: Check Grants Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/grants test/GrantsGenesis420.t.sol
+        run: forge fmt --check src/grants/GrantProgramRegistry420.sol src/grants/GrantApplicationRegistry420.sol src/grants/GrantAwardRegistry420.sol src/grants/GrantMilestoneRegistry420.sol test/GrantsGenesis420.t.sol
 
       - name: Build Grants contract family
         working-directory: contracts

@@ -112,10 +112,21 @@ jobs:
         working-directory: contracts
         shell: bash
         run: |
+          cat > TreasuryAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/treasury/TreasuryIds420.sol";
+          import "./src/treasury/TreasuryAuthorization420.sol";
+          import "./src/treasury/TreasuryPolicyRegistry420.sol";
+          import "./src/treasury/TreasuryBudgetRegistry420.sol";
+          import "./src/treasury/TreasuryDisbursementRegistry420.sol";
+          import "./src/treasury/TreasuryRouter420.sol";
+          SOL
           set +e
-          slither . --exclude-dependencies --json /tmp/treasury-slither.json >/tmp/treasury-slither.txt 2>&1
+          slither TreasuryAuditSlitherTarget.sol --json /tmp/treasury-slither.json >/tmp/treasury-slither.txt 2>&1
           STATUS=$?
           set -e
+          rm -f TreasuryAuditSlitherTarget.sol
           python - <<'PY'
           import json
           import pathlib

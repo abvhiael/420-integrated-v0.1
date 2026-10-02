@@ -79,7 +79,7 @@ Required outcome:
 **Qualified implementation SHA:** `85ffe2a2d788a1bacbaab4db139e8f0aa89a0bfe`  
 **Level 1:** PASS — exact-head Exchange web/read-service/Indexer/browser qualification and Bridge fast contract/integration qualification passed.
 
-### BRIDGE-AUDIT-6 — Deployment, initialization and Registry publication closure
+### BRIDGE-AUDIT-6 — Deployment, initialization and Registry publication closure — COMPLETE
 Purpose: make every required Bridge component deployable and reproducibly initialized.
 
 Required outcome:
@@ -90,6 +90,11 @@ Required outcome:
 - router trust bindings, adapters, routes, assets, chain identities, limits and verifier configuration are initialized reproducibly;
 - post-deployment governance/timelock ownership and emergency authority are verified;
 - smoke/rollback/recovery runbook exists.
+
+**Durable qualification:** `docs/audit/BRIDGE-AUDIT-6-QUALIFICATION.md`  
+**Qualified implementation SHA:** `6cb672b3035ff707f879971f1c1a648057091cd1`  
+**Qualification evidence SHA:** `7a50712a27f1ff847e75157580f8dbd331f47fa3`  
+**Level 1:** PASS — Bridge Fast, Docs, Genesis Address Authority and all four real Solidity PR shards passed on the neutral qualification head; the trigger commit is evidence-only and inherits the implementation SHA.
 
 ### BRIDGE-AUDIT-7 — Security, adapter and invariant completion
 Purpose: close remaining security/testing coverage for the complete Bridge architecture.

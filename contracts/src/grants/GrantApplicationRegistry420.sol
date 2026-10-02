@@ -36,7 +36,10 @@ contract GrantApplicationRegistry420 is I420System {
         bytes32 contentHash
     );
 
-    constructor(address authorization_, address programs_) {
+    constructor(
+        address authorization_,
+        address programs_
+    ) {
         require(authorization_ != address(0) && programs_ != address(0), "dependency");
         authorization = GrantAuthorization420(authorization_);
         programs = GrantProgramRegistry420(programs_);
@@ -50,11 +53,12 @@ contract GrantApplicationRegistry420 is I420System {
         return 1;
     }
 
-    function canonicalId(bytes32 programId, address applicant, uint256 nonce, bytes32 contentHash)
-        public
-        pure
-        returns (bytes32)
-    {
+    function canonicalId(
+        bytes32 programId,
+        address applicant,
+        uint256 nonce,
+        bytes32 contentHash
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(keccak256("420/GRANTS/APPLICATION/V1"), programId, applicant, nonce, contentHash));
     }
 
@@ -86,7 +90,9 @@ contract GrantApplicationRegistry420 is I420System {
         emit ApplicationSubmitted(id, programId, applicant, requestedAmount, contentHash);
     }
 
-    function application(bytes32 id) external view returns (Application memory) {
+    function application(
+        bytes32 id
+    ) external view returns (Application memory) {
         Application memory a = _applications[id];
         if (!a.exists) revert ApplicationNotFound();
         return a;

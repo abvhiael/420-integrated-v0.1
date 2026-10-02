@@ -81,9 +81,9 @@ contract PayAudit3Lifecycle420Test {
         require(settled == PaymentRegistry420.Status.SETTLED, "settled");
 
         payments.applyRefund(paymentId, 40, false);
-        (,,,,,,,,,,, uint256 refunded, PaymentRegistry420.Status partial) = payments.payments(paymentId);
+        (,,,,,,,,,,, uint256 refunded, PaymentRegistry420.Status partialStatus) = payments.payments(paymentId);
         require(refunded == 40, "partial amount");
-        require(partial == PaymentRegistry420.Status.PARTIALLY_REFUNDED, "partial status");
+        require(partialStatus == PaymentRegistry420.Status.PARTIALLY_REFUNDED, "partial status");
 
         payments.applyRefund(paymentId, 50, true);
         (,,,,,,,,,,, uint256 fullyRefunded, PaymentRegistry420.Status refundedStatus) = payments.payments(paymentId);

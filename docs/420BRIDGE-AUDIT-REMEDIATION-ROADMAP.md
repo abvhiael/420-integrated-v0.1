@@ -96,7 +96,7 @@ Required outcome:
 **Qualification evidence SHA:** `7a50712a27f1ff847e75157580f8dbd331f47fa3`  
 **Level 1:** PASS — Bridge Fast, Docs, Genesis Address Authority and all four real Solidity PR shards passed on the neutral qualification head; the trigger commit is evidence-only and inherits the implementation SHA.
 
-### BRIDGE-AUDIT-7 — Security, adapter and invariant completion
+### BRIDGE-AUDIT-7 — Security, adapter and invariant completion — COMPLETE
 Purpose: close remaining security/testing coverage for the complete Bridge architecture.
 
 Required outcome:
@@ -104,6 +104,11 @@ Required outcome:
 - audit all production adapters/verifiers against launch manifests and required finality/proof semantics;
 - fuzz/property/invariant coverage for risk windows/TVL, replay identities, transition graph and accounting monotonicity;
 - static/security tooling covers all Bridge production contracts and reports accepted design risks separately from unresolved defects.
+
+**Durable qualification:** `docs/audit/BRIDGE-AUDIT-7-QUALIFICATION.md`  
+**Qualified implementation SHA:** `33f5a376d17478cea68cdafd04144498b6f4fe4b`  
+**Qualification evidence SHA:** `d0663def685fd6ad5969843af903dba7d4aafdcc`  
+**Level 1:** PASS — exact-head Bridge Fast qualification runs #60 (`37058372514`) and #61 (`37058375444`) both passed the A7 verifier, Bridge contract tests, canonical production adapter suites, retained hardening suites, Exchange Bridge qualification and Pay/Swap/Bridge integration. Exact-head Solidity workflows #4228 (`37058372855`) and #4229 (`37058375313`) also completed successfully; their PR shards were classifier-skipped and are supplemental rather than substitutes for Bridge Fast evidence.
 
 ### BRIDGE-AUDIT-8 — Documentation, ABI, Indexer and cross-app integration reconciliation
 Purpose: close repository-side integration and documentation before live deployment.

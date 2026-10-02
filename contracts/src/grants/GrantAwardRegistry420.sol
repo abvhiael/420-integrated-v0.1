@@ -28,11 +28,13 @@ contract GrantAwardRegistry420 is I420System, SystemAccess {
     GrantApplicationRegistry420 public immutable applications;
 
     mapping(bytes32 => Award) private _awards;
+    mapping(bytes32 => uint128) public applicationAwarded;
 
     error InvalidAward();
     error AwardExists();
     error AwardNotFound();
     error InvalidState();
+    error ApplicationAwardCapExceeded();
 
     event AwardCreated(
         bytes32 indexed awardId,
@@ -79,11 +81,15 @@ contract GrantAwardRegistry420 is I420System, SystemAccess {
                 || id != canonicalId(applicationId, recipient, amount, termsHash) || !p.active
         ) revert InvalidAward();
         if (_awards[id].exists) revert AwardExists();
+        if (uint256(applicationAwarded[applicationId]) + amount > a.requestedAmount) {
+            revert ApplicationAwardCapExceeded();
+        }
 
         // GrantProgramRegistry420 is the single source of truth for aggregate
         // program-award accounting. It accepts reservations only from this
         // one-time-bound Award Registry.
         programs.reserveAward(a.programId, amount);
+        applicationAwarded[applicationId] += amount;
 
         _awards[id] = Award(a.programId, applicationId, recipient, amount, termsHash, State.ACTIVE, true);
         emit AwardCreated(id, a.programId, applicationId, recipient, amount, termsHash);

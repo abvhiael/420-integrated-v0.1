@@ -36,6 +36,8 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         bytes32 stakePolicyId;
         address authority;
         uint64 openedAt;
+        uint32 slashPolicyRevision;
+        bytes32 slashPolicyCommitment;
         uint64 openedAtVerifierRevision;
         uint64 latestVerifierRevision;
         uint64 revision;

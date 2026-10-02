@@ -68,7 +68,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
     VaultAccounting420 public immutable accounting;
     bytes32 public immutable vaultId;
     address public immutable slashBindingAdmin;
-    address public slashAuthorization;
+    address public override slashAuthorization;
 
     mapping(bytes32 => Position) private _positions;
     mapping(bytes32 => mapping(uint64 => Tranche)) private _tranches;
@@ -422,7 +422,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
         });
     }
 
-    function slashSnapshot(bytes32 id) external view returns (
+    function slashSnapshot(bytes32 id) external view override returns (
         uint8 subjectKind,
         bytes32 subjectRef,
         address beneficiary,

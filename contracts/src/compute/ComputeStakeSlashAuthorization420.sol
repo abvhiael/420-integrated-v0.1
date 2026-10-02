@@ -8,6 +8,11 @@ import "../interfaces/IComputeSlashHold420.sol";
 import "./ComputeStakeSlashPolicy420.sol";
 import "./ComputeStakeSlashDistributionPolicy420.sol";
 
+interface IComputeSlashDistributionBinding420 {
+    function authorizer() external view returns (address);
+    function policies() external view returns (address);
+}
+
 /// @notice Objective, replay-safe slash authorization for CMP collateral.
 /// @dev This contract reserves slashable collateral logically but never releases, claims,
 ///      redirects or distributes Vault funds. CMP-1.5.6 owns authorization consumption/distribution.
@@ -91,6 +96,13 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
                 || distributionExecutor != address(0)
                 || distributionPolicies_.code.length == 0
                 || distributionExecutor_.code.length == 0
+        ) revert Unauthorized();
+
+        IComputeSlashDistributionBinding420 candidate =
+            IComputeSlashDistributionBinding420(distributionExecutor_);
+        if (
+            candidate.authorizer() != address(this)
+                || candidate.policies() != distributionPolicies_
         ) revert Unauthorized();
 
         distributionPolicies = ComputeStakeSlashDistributionPolicy420(distributionPolicies_);

@@ -43,6 +43,30 @@ contract PayAudit6DeploymentPackage420Test {
         registry.registerComponent(id, implementation, _v(), Types420.Lifecycle.ACTIVE);
     }
 
+    function _stage(
+        ProtocolRegistry registry,
+        bytes32 id,
+        address implementation
+    ) private {
+        vm.prank(TIMELOCK);
+        registry.registerComponent(id, implementation, _v(), Types420.Lifecycle.SUSPENDED);
+        Types420.ContractRef memory ref = registry.component(id);
+        require(ref.implementation == implementation, "staged implementation");
+        require(ref.runtimeCodeHash == implementation.codehash, "staged runtime hash");
+        require(ref.lifecycle == Types420.Lifecycle.SUSPENDED, "staged lifecycle");
+        require(!registry.isActive(id), "staged component active");
+        (bool resolveOk,) = address(registry).staticcall(abi.encodeWithSelector(registry.resolve.selector, id));
+        require(!resolveOk, "staged component resolved");
+    }
+
+    function _activate(
+        ProtocolRegistry registry,
+        bytes32 id
+    ) private {
+        vm.prank(TIMELOCK);
+        registry.setComponentLifecycle(id, Types420.Lifecycle.ACTIVE);
+    }
+
     function _assertRegistered(
         ProtocolRegistry registry,
         bytes32 id,
@@ -80,15 +104,15 @@ contract PayAudit6DeploymentPackage420Test {
         _register(registry, replay.componentId(), address(replay));
         _register(registry, AppDependencyIds420.REPLAY_PROTECTION, address(replay));
 
-        _register(registry, merchants.componentId(), address(merchants));
-        _register(registry, invoices.componentId(), address(invoices));
-        _register(registry, payments.componentId(), address(payments));
-        _register(registry, paymentRouter.componentId(), address(paymentRouter));
-        _register(registry, settlementRouter.componentId(), address(settlementRouter));
-        _register(registry, refunds.componentId(), address(refunds));
-        _register(registry, sponsor.componentId(), address(sponsor));
-        _register(registry, adapter.componentId(), address(adapter));
-        _register(registry, health.componentId(), address(health));
+        _stage(registry, merchants.componentId(), address(merchants));
+        _stage(registry, invoices.componentId(), address(invoices));
+        _stage(registry, payments.componentId(), address(payments));
+        _stage(registry, paymentRouter.componentId(), address(paymentRouter));
+        _stage(registry, settlementRouter.componentId(), address(settlementRouter));
+        _stage(registry, refunds.componentId(), address(refunds));
+        _stage(registry, sponsor.componentId(), address(sponsor));
+        _stage(registry, adapter.componentId(), address(adapter));
+        _stage(registry, health.componentId(), address(health));
 
         vm.prank(TIMELOCK);
         paymentRouter.setSettlementAdapter(address(adapter));
@@ -110,6 +134,16 @@ contract PayAudit6DeploymentPackage420Test {
         executor.setTrustedCaller(address(adapter), true);
         vm.prank(TIMELOCK);
         replay.setDomainConsumer(ReplayDomainIds420.PAY_SETTLEMENT, address(paymentRouter));
+
+        _activate(registry, merchants.componentId());
+        _activate(registry, invoices.componentId());
+        _activate(registry, payments.componentId());
+        _activate(registry, paymentRouter.componentId());
+        _activate(registry, settlementRouter.componentId());
+        _activate(registry, refunds.componentId());
+        _activate(registry, sponsor.componentId());
+        _activate(registry, adapter.componentId());
+        _activate(registry, health.componentId());
 
         _assertRegistered(registry, merchants.componentId(), address(merchants));
         _assertRegistered(registry, invoices.componentId(), address(invoices));

@@ -222,7 +222,6 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         status = p.status;
     }
 
-
     function applyRefund(
         bytes32 paymentId,
         uint256 amount,

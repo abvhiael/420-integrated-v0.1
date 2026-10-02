@@ -50,12 +50,50 @@
     "retained_suite": "Compute*.t.sol"
   },
   "workflows": [
-    {"name":"420Registry REG-AUDIT-4","run_number":750,"run_id":37047737139,"job_id":110973274414,"conclusion":"success"},
-    {"name":"Genesis Address Authority","run_number":915,"run_id":37047737178,"job_id":110973277929,"conclusion":"success"},
-    {"name":"420Docs Qualification","run_number":4347,"run_id":37047737150,"job_id":110973470224,"conclusion":"success"},
-    {"name":"420Indexer","run_number":1733,"run_id":37047737154,"job_id":110973230542,"conclusion":"success"},
-    {"name":"Solidity Contracts","run_number":4134,"run_id":37047737205,"job_id":110973320088,"job":"compute-fast","conclusion":"success"},
-    {"name":"Compute Market Qualification","run_number":141,"run_id":37047737161,"job_id":110975128215,"job":"fast-qualification","conclusion":"success"}
+    {
+      "name": "420Registry REG-AUDIT-4",
+      "run_number": 750,
+      "run_id": 37047737139,
+      "job_id": 110973274414,
+      "conclusion": "success"
+    },
+    {
+      "name": "Genesis Address Authority",
+      "run_number": 915,
+      "run_id": 37047737178,
+      "job_id": 110973277929,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_number": 4347,
+      "run_id": 37047737150,
+      "job_id": 110973470224,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "run_number": 1733,
+      "run_id": 37047737154,
+      "job_id": 110973230542,
+      "conclusion": "success"
+    },
+    {
+      "name": "Solidity Contracts",
+      "run_number": 4134,
+      "run_id": 37047737205,
+      "job_id": 110973320088,
+      "job": "compute-fast",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compute Market Qualification",
+      "run_number": 141,
+      "run_id": 37047737161,
+      "job_id": 110975128215,
+      "job": "fast-qualification",
+      "conclusion": "success"
+    }
   ],
   "security_results": [
     "entitlement endpoint/runtime drift rejected",
@@ -80,5 +118,7 @@
     "repository-wide Level 3 qualification remains deferred to CMP-1.5.13"
   ],
   "blockers": [],
-  "next_canonical_step": "CMP-1.5.11 — Hostile economic qualification"
+  "next_canonical_step": "CMP-1.5.11 — Hostile economic qualification",
+  "evidence_commit_sha": "a1dec932095106f540078bf9a2b031ed91ea676a",
+  "closeout_bookkeeping_head": "2722042ae8735f7be6b2a8aeb6908876436b07f6"
 }

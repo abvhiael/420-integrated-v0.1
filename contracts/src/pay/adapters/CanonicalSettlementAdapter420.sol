@@ -13,9 +13,11 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
     uint64 public constant QUOTE_LIFETIME = 42 seconds;
 
     address public swapExecutor;
+    address public paymentRouter;
     mapping(bytes32 => bool) public consumedQuote;
 
     event SwapExecutorSet(address indexed executor);
+    event PaymentRouterSet(address indexed router);
     event SettlementExecuted(
         bytes32 indexed quoteId,
         address indexed payer,
@@ -43,6 +45,13 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         emit SwapExecutorSet(executor_);
     }
 
+    function setPaymentRouter(address router_) external {
+        _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
+        require(router_ != address(0) && router_.code.length != 0, "router");
+        paymentRouter = router_;
+        emit PaymentRouterSet(router_);
+    }
+
     function quote(bytes32, address, address, uint256) external pure returns (Quote memory) {
         revert("quote produced by canonical quote engine");
     }
@@ -58,7 +67,7 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.OUTBOUND
         );
-        require(msg.sender.code.length != 0, "router caller");
+        require(paymentRouter != address(0) && msg.sender == paymentRouter, "payment router");
         require(payer != address(0) && recipient != address(0), "party");
         require(exactSettlementAmount > 0, "amount");
         require(!consumedQuote[q.quoteId], "quote replay");

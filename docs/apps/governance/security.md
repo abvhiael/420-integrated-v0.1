@@ -63,7 +63,7 @@ Canonical Civic execution intentionally permits Governance-authorized arbitrary 
 
 The Timelock marks its operation executed before the external call. Reentry into the same operation cannot replay it. Direct entry into the queued Governor batch is Timelock-only. Atomic EVM rollback prevents partial committed execution when a target reverts.
 
-Civic does not add an undocumented global reentrancy lock; governed target contracts must enforce their own safety.
+Civic does not add an undocumented global reentrancy lock; governed target contracts must enforce their own safety. Target contracts remain responsible for their own reentrancy safety, authorization, accounting, and failure behavior.
 
 ## Threat: cancellation or emergency override backdoor
 

@@ -207,6 +207,9 @@ Separately authorized, canonical-Vault-backed worker/verifier reward accounting 
 Freeze canonical verifier identity at dispute opening, preserve verifier collateral through active/objective-final dispute state, and atomically hand qualified objective verifier-error evidence into the existing slash authorization path before releasing the dispute stake hold.
 
 ### CMP-1.5.9 — WorkerRegistry stake-source integration
+**Status: implementation/Level 1 + Level 2 qualification in progress.**
+
+Bind WorkerRegistry admission to the actual Vault-backed CMP-1.5 worker collateral source with canonical WorkerRegistry identity and frozen source code-hash checks.
 
 ### CMP-1.5.10 — ComputeEscrow slash-redistribution integration
 

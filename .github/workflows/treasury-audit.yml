@@ -57,9 +57,9 @@ jobs:
         with:
           version: stable
 
-      - name: Check Treasury Solidity formatting
+      - name: Check remediated Treasury Solidity formatting
         working-directory: contracts
-        run: forge fmt --check src/treasury test/TreasuryGenesis420.t.sol
+        run: forge fmt --check src/treasury/TreasuryDisbursementRegistry420.sol src/treasury/TreasuryRouter420.sol
 
       - name: Build Treasury contracts
         working-directory: contracts

@@ -167,3 +167,19 @@ jobs:
             echo "CMP-1.5.12 live readiness unexpectedly passed"
             exit 1
           fi
+
+      - name: Verify CMP-1.5.13 phase closeout inventory
+        run: python scripts/verify-cmp-1-5-13-closeout.py
+
+      - name: Setup Node for affected Compute SDK
+        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build and test affected @420/sdk Compute surface
+        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002'
+        working-directory: packages/420-sdk
+        run: |
+          npm install --no-audit --no-fund
+          npm test

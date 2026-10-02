@@ -61,8 +61,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: 420-indexer/package-lock.json
 
       - uses: actions/setup-go@v5
         with:
@@ -98,7 +96,7 @@ jobs:
       - name: Build affected 420Indexer integration surface
         working-directory: 420-indexer
         run: |
-          npm ci
+          npm install --no-audit --no-fund --no-package-lock
           npm run build
 
       - name: Run Treasury Indexer descriptor/read/reorg/API qualification

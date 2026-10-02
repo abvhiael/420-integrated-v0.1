@@ -349,11 +349,11 @@ Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped sta
 - completion state: **COMPLETE**
 - next canonical roadmap step: **SWAP-AUDIT-6 — deterministic artifacts and predeploy state**
 
-### SWAP-AUDIT-6 retained Level 1 repository-preparation evidence
+### SWAP-AUDIT-6 retained Level 1 deterministic-predeploy evidence
 
 - roadmap step: **SWAP-AUDIT-6 — deterministic artifacts and predeploy state**
 - qualification level: **Level 1 — per-roadmap-step fast qualification**
-- generated implementation/artifact SHA: `bdc9447c3fa111718df848d3a540ecaa19af7af0`
+- final materialized artifact SHA: `b9de9f1c86e81e2d5a7b222f51a544a1e7d51221`
 - current `main` observed during SWAP-AUDIT-6 work: `98e545225d54379086f0c520afcb84b4d4d97288`
 - audit PR / branch: **#455** / `audit/420swap-complete-20261001`
 - first successful generation workflow: **420Swap SWAP-AUDIT-6 Predeploy Qualification**, PR run **36943686717**, job **110640795060**
@@ -367,16 +367,17 @@ Audit remediation added `.github/workflows/swap-audit.yml` to run app-scoped sta
 - diagnosed tooling defect: initial run **36943564356** compiled successfully but generation failed because normal Foundry artifact JSON omitted `storageLayout`; generator was corrected to use compiler-authoritative `forge inspect ... storage-layout --json`, matching existing repository predeploy tooling
 - generated-output transition: run **36943686717** qualified the pre-generation head and produced generated SHA `bdc9447c3fa111718df848d3a540ecaa19af7af0`; the Actions-authored commit produced an empty `action_required` follow-up and was not counted as qualification evidence
 - authoritative exact-head qualification: **420Swap SWAP-AUDIT-6 Predeploy Qualification**, PR run **36944384597**, job **110642979282**, exact head/evidence SHA `493927086538841a8792fb7c1e57221debe5b082` — exact-head checkout PASS; pinned compiler settings PASS; targeted compile PASS; deterministic generation PASS; reproducibility PASS; independent verifier PASS; GenesisDEXFactory regression PASS; Swap Genesis integration PASS; generated outputs already current/no implementation mutation
-- **canonical blocker:** repository authority contains no frozen bytes32 value or derivation rule for the shared `genesisConfigHash` required by `GenesisResidentAccess420`. The Genesis interface requires this commitment to be introspectable/hash-verifiable, but an app audit is not authorized to invent it
-- fail-closed materialization state: each frozen Swap predeploy is recorded as `SWAP_AUDIT_6_BLOCKED_GLOBAL_GENESIS_CONFIG_HASH`; predeploy plan status is `COMPILER_ARTIFACT_FROZEN`; deployment manifest status is `SWAP_AUDIT_6_COMPILER_ARTIFACT_FROZEN_GLOBAL_HASH_PENDING`; no final runtime code hash is claimed
+- canonical global Genesis configuration commitment: `0xd5121ed76a785afb903129f8677323477e3cfded1126bc2320ac881a7e68fb38`, frozen by `contracts/config/genesis-config-commitment.json` over the versioned non-generated Genesis authority input set
+- final materialization state: all four frozen Swap predeploys are recorded as `SWAP_AUDIT_6_FINAL_PREDEPLOY_STATE`; predeploy plan entries are `ARTIFACT_READY`; deployment manifest entries are `SWAP_AUDIT_6_ARTIFACT_READY`
+- final runtime code hashes: GenesisDEXFactory `0x71cfd26ecde73f51a93cbce4877fd4edd6882c9d5d51b40c25df97e2348d106f`; PublicBatchAuction `0xeeb69fc49b1ff4edd0d8bf94f7ec8e1f75cd064720226a4856043b531cf3c228`; TWAPOracle `0x7ad49e839308f3e0d9c0047203cf007bfc9b978608e4eca838f751f5f78f36ca`; ApprovedQuoteAssetRegistry `0x6ffa02b1b5638190a68fa72faf1465d9f0e52b479cc9d5920d83f3c55a4b3b37`
 - Level 2: **not required at this ordinary deployment-preparation step**; no new cross-app runtime milestone is introduced
 - Level 3: **intentionally deferred** to complete app-phase closeout
 - intentionally deferred live checks: deployed `eth_getCode`/immutable/storage identity, ProtocolRegistry entries, Pay→Swap trusted-caller binding, PublicDistributionVault→auction live funding, Wallet/Exchange journeys, production-equivalent testnet behavior and external release security review
-- implementation SHA: `bdc9447c3fa111718df848d3a540ecaa19af7af0`
-- evidence / exact-qualified head SHA: `493927086538841a8792fb7c1e57221debe5b082`
-- completion state: **BLOCKED — GLOBAL GENESIS CONFIGURATION COMMITMENT REQUIRED**
-- blocker ownership: **global Genesis/address-authority phase**, not 420Swap application semantics
-- next canonical roadmap step: **SWAP-AUDIT-6 remains current until the canonical global `genesisConfigHash` is frozen and final runtime hashes are materialized; SWAP-AUDIT-7 must not begin before this exit criterion is satisfied**
+- materialized implementation SHA: `b9de9f1c86e81e2d5a7b222f51a544a1e7d51221`
+- authoritative minimal exact-head requalification: **420Swap SWAP-AUDIT-6 Materialized Head**, PR run **36956873407**, job **110681683282**, exact head `b400568520d15ddc740c30c04e4fff868e764e8c` — targeted compile PASS; frozen Genesis commitment PASS; retained runtime/hash reproduction PASS; independent predeploy-state verification PASS; generated outputs already reproducible/no further artifact mutation
+- completion state: **COMPLETE**
+- blockers for this step: **none**
+- next canonical roadmap step: **SWAP-AUDIT-7 — deployment binding/registry qualification**
 
 Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
@@ -513,8 +514,8 @@ The remaining work must preserve these step identities and dependency order:
 5. **SWAP-AUDIT-5 — PublicBatchAuction completion — COMPLETE**  
    PublicBatchAuction is now a real pre-funded public-distribution auction with canonical quote escrow, governed clearing price, deterministic under/oversubscribed fills, proceeds/refunds, replay-safe pull claims and cancellation recovery.
 
-6. **SWAP-AUDIT-6 — deterministic artifacts and predeploy state — BLOCKED ON GLOBAL GENESIS INPUT**  
-   Compiler artifacts, storage layouts, immutable-reference provenance, constructor authority and symbolic frozen-predeploy state are retained and reproducible. Final materialized runtime hashes cannot be produced until global Genesis authority freezes the shared `genesisConfigHash`; the app audit must not invent it.
+6. **SWAP-AUDIT-6 — deterministic artifacts and predeploy state — COMPLETE**  
+   Canonical `genesisConfigHash` is frozen, all four frozen Swap runtimes are materially instantiated with compiler-derived immutable references, final runtime hashes are retained, and the resulting generated state is reproducible under the dedicated minimal exact-head verifier.
 
 7. **SWAP-AUDIT-7 — deployment binding and registry qualification**  
    Deploy/register the canonical executor/pool/market stack and prove exact code identities, Registry entries and Pay→Swap trusted-caller bindings.
@@ -531,13 +532,13 @@ At repository-remediation stage:
 
 - CODE COMPLETE: **YES for repository-side Swap source semantics through SWAP-AUDIT-5.**
 - BUILD COMPLETE: **YES for source tree on repository CI; final audit workflow must close on exact final SHA.**
-- CONTRACT COMPLETE: **YES source-side; deterministic compiler/predeploy provenance is retained, but final frozen runtime materialization is blocked on the global `genesisConfigHash`.**
+- CONTRACT COMPLETE: **YES source-side through deterministic frozen-predeploy runtime materialization.**
 - TEST COMPLETE: **YES for current app-scoped source/economic qualification; Level 3 and live deployment/testnet qualification remain deferred.**
 - DOCUMENTATION COMPLETE: **YES for current repository-side Swap deployment/predeploy scope; live Genesis acceptance remains later.**
 - INTEGRATION COMPLETE: **NO** — live Pay/Registry/Wallet/Exchange bindings remain unverified.
 - SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
-- TESTNET READY: **NO** — final frozen runtime hashes require the global `genesisConfigHash`, and live binding remains incomplete.
-- GENESIS READY: **NO** — compiler/predeploy evidence exists, but final runtime materialization is blocked on the canonical global `genesisConfigHash`; testnet qualification also remains.
+- TESTNET READY: **NO** — deterministic frozen runtimes are complete; live registry/binding/testnet qualification remains.
+- GENESIS READY: **NO** — deterministic predeploy artifacts/runtime hashes are complete, but live deployment binding and production-equivalent testnet qualification remain.
 - PRODUCTION READY: **NO** — Genesis/testnet/security gates remain.
 
 ## Final determination
@@ -546,6 +547,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The immediate blocker is global Genesis authority: the shared `genesisConfigHash` required to materialize the four frozen Swap runtimes has no canonical repository value or derivation rule and cannot be invented by this app audit. After that is frozen, later blockers remain live Registry/Pay→Swap/PublicDistributionVault bindings, production-equivalent testnet qualification, and external security qualification.
+The remaining blockers are later deployment/release gates: live Registry/Pay→Swap/PublicDistributionVault bindings, production-equivalent testnet qualification, and external security qualification.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

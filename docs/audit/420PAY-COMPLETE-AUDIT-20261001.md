@@ -267,10 +267,10 @@ Genesis activation still lacks:
 
 ## Readiness state after source-head qualification
 
-- CODE COMPLETE: **NO overall** — PAY-AUDIT-4 is source-complete and Level-1 qualified; PAY-AUDIT-6 deployment tooling remains missing.
+- CODE COMPLETE: **YES for repository-side 420Pay through PAY-AUDIT-6** — contract, integration, deterministic deployment package and Registry-publication tooling are implemented and qualified. Live deployment evidence remains PAY-AUDIT-7.
 - BUILD COMPLETE: **YES for the implemented source surface** — PAY-AUDIT-4 implementation head `3378b3b9efcc2fd2f70124daa7eb520d96aad6f6` passed the dedicated Pay Level 1 build/qualification workflow and Solidity Contracts #4172. Overall application completion remains NO because PAY-AUDIT-6 is unresolved.
 - CONTRACT COMPLETE: **YES for the repository-side Pay contract surface through PAY-AUDIT-4** — settlement splits, refund reconciliation and sponsorship execution boundaries are implemented and Level-1 qualified; live deployment qualification remains later.
-- TEST COMPLETE: **NO overall** — PAY-AUDIT-4 targeted Level-1 qualification passed, while PAY-AUDIT-6/7/8 remain later-phase gates.
+- TEST COMPLETE: **NO overall** — repository-side Level-1 qualification through PAY-AUDIT-6 passed; PAY-AUDIT-7 live production-equivalent qualification and PAY-AUDIT-8 external/final closeout remain.
 - DOCUMENTATION COMPLETE: **NO** — unresolved semantics and deployment/operator material remain.
 - INTEGRATION COMPLETE: **NO** — live Registry/Swap/replay/Indexer deployment binding is absent.
 - SECURITY QUALIFIED: **NO overall** — the repaired PAY-AUDIT-2 source boundary passed exact-head CI, but live deployment qualification and the required independent audit remain outstanding.
@@ -336,6 +336,24 @@ PAY-AUDIT-4 is **COMPLETE** at qualification Level 1.
 - Evidence-only closeout began at `6c3a8aa85cfc732bcf3da5b82cc28886bdf42b55`; evidence-only commits do not recursively invalidate the qualified implementation SHA.
 
 Next canonical roadmap step: **PAY-AUDIT-6 — deterministic deployment package and Registry publication**.
+
+## PAY-AUDIT-6 Level 1 qualification evidence
+
+PAY-AUDIT-6 is **COMPLETE** at qualification Level 1.
+
+- Implementation SHA: `9bfe0d72c8d696b4908f819612608ca5279ce930`
+- 420Pay audit qualification: run #216, run ID `37061442891`, job `111018792122`, **SUCCESS**
+- Solidity Contracts: run #4259, run ID `37061442991`, **SUCCESS**
+- Qualified checks: exact-head verification; static Pay verification; formatting; Pay/settlement-boundary build; deterministic runtime materialization/verification; compiled artifact identity retention; derived runtime manifest retention; PAY-AUDIT-6 deployment/publication qualification; forbidden-primitive scan; 420Indexer Pay reconciliation.
+- Repository package state: `REPOSITORY_READY_LIVE_DEPLOYMENT_PENDING`.
+- Repository readiness: **true**.
+- Live qualification: **false**; PAY-AUDIT-7 owns chain IDs, deployed addresses, transaction receipts, evidence block/hash, Registry revisions and live binding proof.
+- All nine Pay residents remain Registry-resolved with null/unfrozen production addresses in repository evidence.
+- Registry activation is staged `SUSPENDED -> governed wiring/verification -> ACTIVE`.
+- Level 2: not separately triggered.
+- Level 3: deferred to final app-phase reconciliation/merge closeout.
+
+Next canonical roadmap step: **PAY-AUDIT-7 — production-equivalent testnet qualification**.
 
 ## Final determination
 

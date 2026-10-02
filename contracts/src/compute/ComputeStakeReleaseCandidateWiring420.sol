@@ -40,6 +40,10 @@ interface IStakeRewardAccountingRC420 {
     function verifierCollateral() external view returns (address);
 }
 
+interface IVerifiedEntitlementRC420 {
+    function vault() external view returns (address);
+}
+
 interface IVerifierDisputeStakeEvidenceRC420 {
     function disputes() external view returns (address);
 }
@@ -81,6 +85,7 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         Component verifierRegistry;
         Component disputeEngine;
         Component canonicalEntitlements;
+        Component payerEscrowVault;
         Component workerCollateralVault;
         Component verifierCollateralVault;
         Component rewardVault;
@@ -110,6 +115,7 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         _requireComponent(g.verifierRegistry);
         _requireComponent(g.disputeEngine);
         _requireComponent(g.canonicalEntitlements);
+        _requireComponent(g.payerEscrowVault);
         _requireComponent(g.workerCollateralVault);
         _requireComponent(g.verifierCollateralVault);
         _requireComponent(g.rewardVault);
@@ -127,7 +133,10 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         _requireComponent(g.workerStake);
         _requireComponent(g.slashRecipientResolver);
         if (
-            g.rewardVault.implementation == g.workerCollateralVault.implementation
+            g.payerEscrowVault.implementation == g.workerCollateralVault.implementation
+                || g.payerEscrowVault.implementation == g.verifierCollateralVault.implementation
+                || g.payerEscrowVault.implementation == g.rewardVault.implementation
+                || g.rewardVault.implementation == g.workerCollateralVault.implementation
                 || g.rewardVault.implementation == g.verifierCollateralVault.implementation
         ) revert InvalidReleaseGraph();
 
@@ -161,6 +170,7 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         _checkComponent(g.verifierRegistry);
         _checkComponent(g.disputeEngine);
         _checkComponent(g.canonicalEntitlements);
+        _checkComponent(g.payerEscrowVault);
         _checkComponent(g.workerCollateralVault);
         _checkComponent(g.verifierCollateralVault);
         _checkComponent(g.rewardVault);
@@ -183,6 +193,8 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
         IStakeSlashAuthorizationRC420 auth = IStakeSlashAuthorizationRC420(g.slashAuthorization.implementation);
         IStakeDistributionRC420 dist = IStakeDistributionRC420(g.distribution.implementation);
         IStakeRewardAccountingRC420 rewards = IStakeRewardAccountingRC420(g.rewardAccounting.implementation);
+        IVerifiedEntitlementRC420 entitlements =
+            IVerifiedEntitlementRC420(g.canonicalEntitlements.implementation);
         IVerifierDisputeStakeEvidenceRC420 evidence =
             IVerifierDisputeStakeEvidenceRC420(g.disputeEvidence.implementation);
         IVerifierDisputeStakeIntegrationRC420 integration =
@@ -213,6 +225,13 @@ contract ComputeStakeReleaseCandidateWiring420 is I420System {
                 || auth.distributionExecutor() != g.distribution.implementation
                 || dist.authorizer() != g.slashAuthorization.implementation
                 || dist.policies() != g.distributionPolicy.implementation
+        ) revert InvalidReleaseGraph();
+
+        if (
+            entitlements.vault() != g.payerEscrowVault.implementation
+                || g.payerEscrowVault.implementation == g.workerCollateralVault.implementation
+                || g.payerEscrowVault.implementation == g.verifierCollateralVault.implementation
+                || g.payerEscrowVault.implementation == g.rewardVault.implementation
         ) revert InvalidReleaseGraph();
 
         if (

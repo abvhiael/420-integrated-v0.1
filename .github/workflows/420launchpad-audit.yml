@@ -1,0 +1,75 @@
+name: 420Launchpad audit qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420launchpad-*'
+    paths:
+      - 'contracts/src/launchpad/**'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/config/420launchpad-genesis.json'
+      - 'contracts/config/interfaces/420launchpad-dependency-reconciliation.json'
+      - 'contracts/test/Launchpad*.t.sol'
+      - 'config/genesis-consumer-services.json'
+      - 'scripts/verify-420launchpad-audit.py'
+      - 'docs/audit/420LAUNCHPAD-*'
+      - '.github/workflows/420launchpad-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/launchpad/**'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/config/420launchpad-genesis.json'
+      - 'contracts/config/interfaces/420launchpad-dependency-reconciliation.json'
+      - 'contracts/test/Launchpad*.t.sol'
+      - 'config/genesis-consumer-services.json'
+      - 'scripts/verify-420launchpad-audit.py'
+      - 'docs/audit/420LAUNCHPAD-*'
+      - '.github/workflows/420launchpad-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: launchpad-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify Launchpad audit model
+        run: python3 scripts/verify-420launchpad-audit.py
+      - name: Check Launchpad audit test formatting
+        working-directory: contracts
+        run: forge fmt --check test/LaunchpadAudit420.t.sol
+      - name: Build Launchpad contracts
+        working-directory: contracts
+        run: forge build src/launchpad
+      - name: Run Launchpad qualification tests
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/LaunchpadGenesis420.t.sol' -vvv
+          forge test --match-path 'test/LaunchpadAudit420.t.sol' -vvv
+      - name: Forbidden primitive scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/launchpad; then
+            echo 'Forbidden primitive found in 420Launchpad sources' >&2
+            exit 1
+          fi

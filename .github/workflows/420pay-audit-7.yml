@@ -65,6 +65,10 @@ jobs:
           fi
           test ! -f /tmp/should-not-exist.json
 
+      - name: Build PAY-AUDIT-6 retained deployment artifacts
+        working-directory: contracts
+        run: forge build src/pay src/swap/CanonicalSwapExecutor420.sol src/system/ReplayProtectionConsumer420.sol
+
       - name: Retain PAY-AUDIT-6 deployment readiness
         run: |
           python3 scripts/generate-420pay-audit-6-deployment.py --check

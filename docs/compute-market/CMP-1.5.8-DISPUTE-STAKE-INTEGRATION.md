@@ -1,6 +1,6 @@
 # CMP-1.5.8 — Dispute/stake integration
 
-Status: **IMPLEMENTED. LEVEL 1 + LEVEL 2 QUALIFICATION PENDING.**
+Status: **COMPLETE. LEVEL 1 + LEVEL 2 QUALIFIED.**
 
 ## Canonical definition
 
@@ -164,6 +164,38 @@ CMP-1.5.8 is COMPLETE only when:
 - focused Level 1 qualification passes;
 - retained Compute Level 2 qualification passes on the same exact implementation SHA;
 - durable evidence records that SHA.
+
+Next canonical step:
+
+**CMP-1.5.9 — WorkerRegistry stake-source integration**
+
+
+## Completion evidence
+
+CMP-1.5.8 is **COMPLETE**.
+
+Qualified implementation SHA:
+
+`ceecba734b057c031f5e5a6ee8a9c91f84839ab8`
+
+Exact-head qualification:
+
+- Compute Market Qualification #125 — run `36973429348` — **PASS**;
+- Solidity Contracts #4072 — Compute fast job `110733119601` — **PASS**;
+- retained `Compute*.t.sol` app integration suite — **PASS**;
+- CMP-1.5.8 mechanical verifier — **PASS**;
+- 420Docs Qualification #4285 — **PASS**;
+- 420Indexer #1671 — **PASS**;
+- 420Registry REG-AUDIT-4 #688 — **PASS**;
+- Genesis Address Authority #853 — **PASS**.
+
+Durable machine-readable evidence:
+
+`docs/compute-market/CMP-1.5.8-QUALIFICATION-EVIDENCE.json`
+
+This closeout sequence is evidence/documentation-only relative to the qualified implementation SHA above. It does not modify executable source, tests, workflows, dependencies, configuration, interfaces, deployment state or generated/runtime artifacts.
+
+Repository-wide Level 3 remains intentionally deferred to **CMP-1.5.13 — Phase closeout**.
 
 Next canonical step:
 

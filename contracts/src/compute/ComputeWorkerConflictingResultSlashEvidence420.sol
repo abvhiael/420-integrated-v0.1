@@ -169,8 +169,12 @@ contract ComputeWorkerConflictingResultSlashEvidence420
         );
         if (evidenceForMisconduct[misconductKey] != bytes32(0)) revert Replay();
 
-        (bytes32 low, bytes32 high) =
-            firstDigest < secondDigest ? (firstDigest, secondDigest) : (secondDigest, firstDigest);
+        bytes32 low = firstDigest;
+        bytes32 high = secondDigest;
+        if (high < low) {
+            low = secondDigest;
+            high = firstDigest;
+        }
         bytes32 evidenceCommitment = keccak256(
             abi.encode(
                 EVIDENCE_DOMAIN,

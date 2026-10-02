@@ -108,10 +108,11 @@ contract ComputeWorkerStakeSourceIntegration420Test {
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
 
+        bytes32 computeClass = resources.CPU_GENERAL();
         vm.prank(OPERATOR);
         bytes32 resourceId = resources.register(
             nodeId,
-            resources.CPU_GENERAL(),
+            computeClass,
             keccak256("hardware"),
             keccak256("runtime"),
             keccak256("capability"),

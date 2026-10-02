@@ -55,10 +55,7 @@ contract GrantsDeploymentBinding420Test {
         e.treasuryPolicy = new TreasuryPolicyRegistry420(address(this));
         e.treasuryBudgets = new TreasuryBudgetRegistry420(address(this), address(e.treasuryPolicy));
         e.treasuryDisbursements = new TreasuryDisbursementRegistry420(
-            address(this),
-            address(e.treasuryAuthorization),
-            address(e.treasuryPolicy),
-            address(e.treasuryBudgets)
+            address(this), address(e.treasuryAuthorization), address(e.treasuryPolicy), address(e.treasuryBudgets)
         );
         e.treasuryBudgets.setController(address(e.treasuryDisbursements));
 
@@ -95,23 +92,25 @@ contract GrantsDeploymentBinding420Test {
             )
         );
 
-        e.registry.registerComponent(
-            GrantIds420.COMPONENT_GRANTS,
-            address(e.router),
-            Types420.Version({major: 1, minor: 0, patch: 0}),
-            Types420.Lifecycle.ACTIVE
-        );
-        e.registry.publishRegisteredService(
-            GRANTS_SERVICE_ID,
-            address(e.router),
-            METADATA_HASH,
-            1,
-            true,
-            ProtocolRegistry.ComponentType.SERVICE,
-            MANIFEST_HASH,
-            e.dependencyRoot,
-            INTERFACE_HASH
-        );
+        e.registry
+            .registerComponent(
+                GrantIds420.COMPONENT_GRANTS,
+                address(e.router),
+                Types420.Version({ major: 1, minor: 0, patch: 0 }),
+                Types420.Lifecycle.ACTIVE
+            );
+        e.registry
+            .publishRegisteredService(
+                GRANTS_SERVICE_ID,
+                address(e.router),
+                METADATA_HASH,
+                1,
+                true,
+                ProtocolRegistry.ComponentType.SERVICE,
+                MANIFEST_HASH,
+                e.dependencyRoot,
+                INTERFACE_HASH
+            );
 
         emit DeploymentAddress("GrantAuthorization420", address(e.authorization));
         emit DeploymentAddress("GrantProgramRegistry420", address(e.programs));
@@ -136,7 +135,9 @@ contract GrantsDeploymentBinding420Test {
 
         require(address(e.authorization.capabilityRegistry()) == address(e.caps), "authorization/capability binding");
         require(e.programs.governanceTimelock() == address(this), "program/timelock binding");
-        require(address(e.applications.authorization()) == address(e.authorization), "application/authorization binding");
+        require(
+            address(e.applications.authorization()) == address(e.authorization), "application/authorization binding"
+        );
         require(address(e.applications.programs()) == address(e.programs), "application/program binding");
         require(e.awards.governanceTimelock() == address(this), "award/timelock binding");
         require(address(e.awards.programs()) == address(e.programs), "award/program binding");
@@ -165,8 +166,7 @@ contract GrantsDeploymentBinding420Test {
         require(service.metadataHash == METADATA_HASH, "service metadata");
         require(service.version == 1 && service.active, "service lifecycle");
 
-        ProtocolRegistry.RegistrationProfile memory profile =
-            e.registry.getRegistrationProfile(GRANTS_SERVICE_ID, 1);
+        ProtocolRegistry.RegistrationProfile memory profile = e.registry.getRegistrationProfile(GRANTS_SERVICE_ID, 1);
         require(profile.componentType == ProtocolRegistry.ComponentType.SERVICE, "component type");
         require(profile.manifestHash == MANIFEST_HASH, "manifest hash");
         require(profile.dependencyRoot == e.dependencyRoot, "dependency root");

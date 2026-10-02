@@ -100,7 +100,7 @@ The router has local atomic payment-authorization replay state and reads shared 
 | Pay Solidity source family | COMPLETE | substantive implementations present |
 | canonical settlement adapter | COMPLETE after audit repair | baseline caller boundary was broken |
 | shared replay companion | COMPLETE | source exists; live binding pending |
-| focused unit/fuzz/invariant/integration tests | COMPLETE as source | exact-head execution pending |
+| focused unit/fuzz/invariant/integration tests | COMPLETE for PAY-AUDIT-3 implemented surface | exact-head Level 1 run #91 passed on `452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8` |
 | frozen Pay parameters/Decision #4 | COMPLETE | present and frozen |
 | Pay static verifiers | COMPLETE after audit repair | audit verifier added |
 | dedicated Pay audit CI | COMPLETE after audit repair | exact-head workflow added |
@@ -230,7 +230,7 @@ Genesis activation still lacks:
 | domain-separated invoice root | Decision #4 | implemented | root-binding tests | present | COMPLETE | retain |
 | offline invoice creation | Decision #4 | merchant-only online canonical acceptance; offline root is presentation/integrity commitment | authority regression | clarified | COMPLETE | retain until versioned authorization change |
 | payment ID domain/fields/nonce | Decision #4 | implemented | focused tests | present | COMPLETE | exact-head run |
-| payment lifecycle states | protocol architecture | explicit governed transitions implemented | PAY-AUDIT-3 lifecycle regression | present | COMPLETE | Level 1 exact-head qualification |
+| payment lifecycle states | protocol architecture | explicit governed transitions implemented | PAY-AUDIT-3 lifecycle regression | present | COMPLETE | qualified by Level 1 run #91 |
 | payer/governance settlement authorization | authority map | implemented | negative/reentrancy | present | COMPLETE | exact-head run |
 | quote lifetime 42s | frozen parameters | implemented | boundary tests | present | COMPLETE | exact-head run |
 | max default slippage 42 bps | frozen parameters | implemented | limits/fuzz | present | COMPLETE | exact-head run |
@@ -268,9 +268,9 @@ Genesis activation still lacks:
 ## Readiness state after source-head qualification
 
 - CODE COMPLETE: **NO overall** — PAY-AUDIT-3 is implemented; PAY-AUDIT-4/6 functional/deployment gaps remain.
-- BUILD COMPLETE: **YES for the implemented source surface** — exact-head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed the dedicated Pay build/qualification workflow and generic Solidity workflow. Overall application completion remains NO because PAY-AUDIT-4/6 are unresolved.
+- BUILD COMPLETE: **YES for the implemented source surface** — PAY-AUDIT-3 implementation head `452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8` passed the dedicated Pay Level 1 build/qualification workflow and Solidity Contracts #4128. Overall application completion remains NO because PAY-AUDIT-4/6 are unresolved.
 - CONTRACT COMPLETE: **NO overall** — PAY-AUDIT-3 invoice/lifecycle semantics are resolved; split/sponsorship/accounting work remains.
-- TEST COMPLETE: **NO overall** — the implemented PAY-AUDIT-1/2/5 source surface passed exact-head qualification, but PAY-AUDIT-4/6 functionality remains incomplete or missing and therefore cannot yet be fully tested.
+- TEST COMPLETE: **NO overall** — PAY-AUDIT-1/2/3/5 are exact-head qualified for their implemented source surfaces, but PAY-AUDIT-4/6 functionality remains incomplete or missing and therefore cannot yet be fully tested.
 - DOCUMENTATION COMPLETE: **NO** — unresolved semantics and deployment/operator material remain.
 - INTEGRATION COMPLETE: **NO** — live Registry/Swap/replay/Indexer deployment binding is absent.
 - SECURITY QUALIFIED: **NO overall** — the repaired PAY-AUDIT-2 source boundary passed exact-head CI, but live deployment qualification and the required independent audit remain outstanding.
@@ -286,6 +286,23 @@ The remediation source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed bo
 - Solidity Contracts run #4003, run ID `36965952612`: **SUCCESS**.
 
 The dedicated Pay run passed exact-head verification, static Pay verification, Solidity formatting, the Pay/settlement-boundary build, focused 420Pay Solidity qualification, the forbidden-primitive scan, and the 420Indexer Pay reconciliation build/tests. This evidence qualifies PAY-AUDIT-1, PAY-AUDIT-2 and PAY-AUDIT-5 at the source head. Their durable COMPLETE state is conditioned on the bookkeeping commit carrying this evidence also passing the dedicated exact-head Pay workflow; that run is attached to the commit itself, avoiding a self-referential evidence-SHA mutation.
+
+## PAY-AUDIT-3 Level 1 qualification evidence
+
+PAY-AUDIT-3 is **COMPLETE** at qualification Level 1.
+
+- Implementation SHA: `452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8`
+- Base/main SHA: `27ae1873edcca8fb05dec9f4e70af9832b5dafe2`
+- Audit branch / PR: `audit/420pay-complete-20261001-r3` / PR #473
+- 420Pay audit qualification: run #91, run ID `37043694408`, job `110959749763`, **SUCCESS**
+- Solidity Contracts: run #4128, run ID `37043694394`, **SUCCESS**
+- Dedicated Level 1 checks passed: exact-head checkout verification, static Pay verifiers, Solidity formatting, Pay/settlement-boundary build, PAY-AUDIT-3 focused Solidity qualification, forbidden-primitive scan, and 420Indexer Pay reconciliation build/tests.
+- Level 2: not triggered; this app-scoped lifecycle/authority completion did not introduce a milestone requiring a broader retained Pay integration sweep.
+- Level 3: intentionally deferred to complete app-phase closeout.
+- Live/testnet deployment evidence and independent audit remain later-roadmap gates, not PAY-AUDIT-3 exit criteria.
+- Evidence-only closeout began at `7a79e91d29b2deecf023c2a98533f773416f590f`; evidence-only commits do not recursively invalidate the qualified implementation SHA.
+
+Next canonical roadmap step: **PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion**.
 
 ## Final determination
 

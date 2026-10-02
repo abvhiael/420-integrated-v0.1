@@ -200,6 +200,29 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         emit PaymentSet(paymentId, p.invoiceId, p.status);
     }
 
+    function refundAccounting(
+        bytes32 paymentId
+    )
+        external
+        view
+        returns (
+            address payer,
+            address settlementAsset,
+            uint256 refundableMaximum,
+            uint256 authorizedRefunded,
+            Status status
+        )
+    {
+        Payment storage p = payments[paymentId];
+        require(p.status != Status.NONE, "unknown payment");
+        payer = p.payer;
+        settlementAsset = p.settlementAsset;
+        refundableMaximum = p.settlementAmount + p.tipAmount;
+        authorizedRefunded = p.refundedAmount;
+        status = p.status;
+    }
+
+
     function applyRefund(
         bytes32 paymentId,
         uint256 amount,

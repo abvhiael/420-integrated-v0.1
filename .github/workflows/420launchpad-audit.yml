@@ -64,9 +64,7 @@ jobs:
         run: forge build src/launchpad
       - name: Run Launchpad qualification tests
         working-directory: contracts
-        run: |
-          forge test --match-path 'test/LaunchpadGenesis420.t.sol' -vvv
-          forge test --match-path 'test/LaunchpadAudit420.t.sol' -vvv
+        run: forge test --match-path 'test/Launchpad*420.t.sol' -vvv
       - name: Forbidden primitive scan
         shell: bash
         run: |

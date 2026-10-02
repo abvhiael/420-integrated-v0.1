@@ -1,0 +1,38 @@
+{
+  "schema": "420-launchpad-dependency-reconciliation-v1",
+  "auditBaseline": "f529533ebe62b63ad3f30f685f0c1c44f69ec06b",
+  "protocol": {
+    "serviceId": "420/service/launchpad/v1",
+    "boundary": "NON_CUSTODIAL_COMMITMENT_REGISTRY",
+    "contracts": [
+      "LaunchpadIds420.sol",
+      "LaunchpadAuthorization420.sol",
+      "LaunchpadProjectRegistry420.sol",
+      "LaunchpadSaleRegistry420.sol",
+      "LaunchpadAllocationRegistry420.sol",
+      "LaunchpadRouter420.sol"
+    ],
+    "directDependencies": ["CapabilityRegistry420", "Governance/SystemAccess"],
+    "paymentExecution": false,
+    "refundExecution": false,
+    "tokenDeliveryExecution": false
+  },
+  "genesisFacingCrowdfunding": {
+    "serviceId": "420/service/launchpad-crowdfunding/v1",
+    "target": "reward_donation_community_project_product_preorder",
+    "securitiesOrEquityEnabled": false,
+    "dependencies": [
+      {"name":"420 Identity","status":"PARTIAL","reason":"Capability authorization can carry eligibility decisions, but no end-to-end crowdfunding Identity workflow is implemented."},
+      {"name":"420 Pay","status":"MISSING","reason":"V1 accepts opaque nonzero payment/refund commitments and does not bind them to canonical Pay settlement state."},
+      {"name":"420 Arbitration","status":"MISSING","reason":"No Launchpad dispute/escalation integration identified."},
+      {"name":"420Reputation","status":"MISSING","reason":"No project delivery-history publication/query integration identified."},
+      {"name":"420 Notifications","status":"MISSING","reason":"No campaign lifecycle notification integration identified."}
+    ]
+  },
+  "release": {
+    "deterministicDeploymentPackage": "MISSING",
+    "retainedRuntimeEvidence": "MISSING",
+    "userFacingApplication": "MISSING",
+    "productionEquivalentTestnet": "BLOCKED"
+  }
+}

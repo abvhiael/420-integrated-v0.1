@@ -197,6 +197,9 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 Policy-bound distribution to harmed payer, replacement worker, challenger and/or protocol treasury.
 
 ### CMP-1.5.7 — Reward accounting
+**Status: implementation/Level 1 + Level 2 qualification in progress.**
+
+Separately authorized, canonical-Vault-backed worker/verifier reward accounting with exact collateral identity, replay protection and no payer-escrow or consensus-issuance authority.
 
 ### CMP-1.5.8 — Dispute/stake integration
 

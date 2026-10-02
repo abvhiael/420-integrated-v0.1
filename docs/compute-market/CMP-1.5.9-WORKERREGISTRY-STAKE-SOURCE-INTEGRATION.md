@@ -45,7 +45,7 @@ CMP-1.5.9 therefore strengthens the binding without changing the already-qualifi
 
 - expected ComputeStake source ID;
 - source contract code;
-- source-reported WorkerRegistry equal to its own immutable WorkerRegistry;
+- source-reported WorkerRegistry equal to the **same canonical WorkerRegistry** used by the admission adapter;
 - nonzero source runtime code hash.
 
 Each source-binding revision freezes:

@@ -7,9 +7,15 @@ import "../src/governance/ICivicElectorateSource420.sol";
 import "../src/governance/CivicElectorateRegistry420.sol";
 
 interface VmCivicElectorate420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
-    function roll(uint256) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract MockElectorateSource420 is ICivicElectorateSource420 {
@@ -18,7 +24,9 @@ contract MockElectorateSource420 is ICivicElectorateSource420 {
     uint256 public totalWeight;
     mapping(bytes32 => mapping(address => uint256)) public weights;
 
-    constructor(bytes32 type_) {
+    constructor(
+        bytes32 type_
+    ) {
         _type = type_;
     }
 
@@ -26,40 +34,73 @@ contract MockElectorateSource420 is ICivicElectorateSource420 {
         return _type;
     }
 
-    function setSnapshot(bytes32 root_, uint256 totalWeight_) external {
+    function setSnapshot(
+        bytes32 root_,
+        uint256 totalWeight_
+    ) external {
         root = root_;
         totalWeight = totalWeight_;
     }
 
-    function setWeight(bytes32 root_, address voter, uint256 weight) external {
+    function setWeight(
+        bytes32 root_,
+        address voter,
+        uint256 weight
+    ) external {
         weights[root_][voter] = weight;
     }
 
-    function snapshotAt(uint64) external view returns (bytes32 electorateRoot, uint256 totalWeight_) {
+    function snapshotAt(
+        uint64
+    ) external view returns (bytes32 electorateRoot, uint256 totalWeight_) {
         return (root, totalWeight);
     }
 
-    function votingWeight(bytes32 electorateRoot, address voter, bytes calldata)
-        external
-        view
-        returns (uint256 weight)
-    {
+    function votingWeight(
+        bytes32 electorateRoot,
+        address voter,
+        bytes calldata
+    ) external view returns (uint256 weight) {
         return weights[electorateRoot][voter];
     }
 }
 
+contract MockSnapshotAuthority420 {
+    address public immutable electorateRegistry;
+    address public immutable timelock;
+
+    constructor(
+        address electorateRegistry_,
+        address timelock_
+    ) {
+        electorateRegistry = electorateRegistry_;
+        timelock = timelock_;
+    }
+
+    function snapshot(
+        CivicElectorateRegistry420 registry,
+        bytes32 proposalId,
+        uint64 snapshotBlock,
+        bool dualHouseRequired
+    ) external {
+        registry.snapshotProposal(proposalId, snapshotBlock, dualHouseRequired);
+    }
+}
+
 contract CivicElectorateRegistry420Test {
-    VmCivicElectorate420 constant vm =
-        VmCivicElectorate420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmCivicElectorate420 constant vm = VmCivicElectorate420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address constant ALICE = address(0xA11CE);
-    address constant GOVERNOR = address(0x0437);
     bytes32 constant COMMUNITY_TYPE = keccak256("COMMUNITY_CHECKPOINT_V1");
     bytes32 constant VALIDATOR_TYPE = keccak256("VALIDATOR_SET_V1");
     bytes32 constant ROOT_A = keccak256("ROOT_A");
     bytes32 constant ROOT_B = keccak256("ROOT_B");
 
-    function _source(bytes32 type_, bytes32 root_, uint256 totalWeight_) private returns (MockElectorateSource420 s) {
+    function _source(
+        bytes32 type_,
+        bytes32 root_,
+        uint256 totalWeight_
+    ) private returns (MockElectorateSource420 s) {
         s = new MockElectorateSource420(type_);
         s.setSnapshot(root_, totalWeight_);
     }
@@ -86,12 +127,12 @@ contract CivicElectorateRegistry420Test {
 
     function testSnapshotFailsClosedWithoutCommunitySource() public {
         CivicElectorateRegistry420 registry = new CivicElectorateRegistry420(address(this));
-        registry.bindSnapshotAuthority(GOVERNOR);
+        MockSnapshotAuthority420 authority = new MockSnapshotAuthority420(address(registry), address(this));
+        registry.bindSnapshotAuthority(address(authority));
         vm.roll(100);
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicElectorateRegistry420.SourceNotConfigured.selector);
-        registry.snapshotProposal(keccak256("P1"), 99, false);
+        authority.snapshot(registry, keccak256("P1"), 99, false);
     }
 
     function testSnapshotIsImmutableAcrossSourceUpgrade() public {
@@ -102,12 +143,12 @@ contract CivicElectorateRegistry420Test {
         b.setWeight(ROOT_B, ALICE, 99);
 
         registry.setHouseSource(CivicIds420.House.COMMUNITY, address(a));
-        registry.bindSnapshotAuthority(GOVERNOR);
+        MockSnapshotAuthority420 authority = new MockSnapshotAuthority420(address(registry), address(this));
+        registry.bindSnapshotAuthority(address(authority));
         vm.roll(100);
 
         bytes32 p1 = keccak256("P1");
-        vm.prank(GOVERNOR);
-        registry.snapshotProposal(p1, 99, false);
+        authority.snapshot(registry, p1, 99, false);
 
         registry.setHouseSource(CivicIds420.House.COMMUNITY, address(b));
 
@@ -118,9 +159,8 @@ contract CivicElectorateRegistry420Test {
         require(snap.community.totalWeight == 100, "frozen total");
         require(registry.votingWeight(p1, CivicIds420.House.COMMUNITY, ALICE, "") == 10, "old source weight");
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicElectorateRegistry420.SnapshotExists.selector);
-        registry.snapshotProposal(p1, 99, false);
+        authority.snapshot(registry, p1, 99, false);
     }
 
     function testDualHouseRequiresAndFreezesValidatorElectorate() public {
@@ -129,17 +169,16 @@ contract CivicElectorateRegistry420Test {
         MockElectorateSource420 validators = _source(VALIDATOR_TYPE, ROOT_B, 30);
 
         registry.setHouseSource(CivicIds420.House.COMMUNITY, address(community));
-        registry.bindSnapshotAuthority(GOVERNOR);
+        MockSnapshotAuthority420 authority = new MockSnapshotAuthority420(address(registry), address(this));
+        registry.bindSnapshotAuthority(address(authority));
         vm.roll(200);
 
         bytes32 p1 = keccak256("DUAL");
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicElectorateRegistry420.SourceNotConfigured.selector);
-        registry.snapshotProposal(p1, 199, true);
+        authority.snapshot(registry, p1, 199, true);
 
         registry.setHouseSource(CivicIds420.House.VALIDATOR, address(validators));
-        vm.prank(GOVERNOR);
-        registry.snapshotProposal(p1, 199, true);
+        authority.snapshot(registry, p1, 199, true);
 
         CivicElectorateRegistry420.ProposalSnapshot memory snap = registry.proposalSnapshot(p1);
         require(snap.dualHouseRequired, "dual house");
@@ -152,12 +191,12 @@ contract CivicElectorateRegistry420Test {
         CivicElectorateRegistry420 registry = new CivicElectorateRegistry420(address(this));
         MockElectorateSource420 community = _source(COMMUNITY_TYPE, ROOT_A, 1000);
         registry.setHouseSource(CivicIds420.House.COMMUNITY, address(community));
-        registry.bindSnapshotAuthority(GOVERNOR);
+        MockSnapshotAuthority420 authority = new MockSnapshotAuthority420(address(registry), address(this));
+        registry.bindSnapshotAuthority(address(authority));
         vm.roll(50);
 
         bytes32 p1 = keccak256("COMMUNITY_ONLY");
-        vm.prank(GOVERNOR);
-        registry.snapshotProposal(p1, 49, false);
+        authority.snapshot(registry, p1, 49, false);
 
         vm.expectRevert(CivicElectorateRegistry420.HouseNotRequired.selector);
         registry.votingWeight(p1, CivicIds420.House.VALIDATOR, ALICE, "");
@@ -167,15 +206,14 @@ contract CivicElectorateRegistry420Test {
         CivicElectorateRegistry420 registry = new CivicElectorateRegistry420(address(this));
         MockElectorateSource420 community = _source(COMMUNITY_TYPE, bytes32(0), 0);
         registry.setHouseSource(CivicIds420.House.COMMUNITY, address(community));
-        registry.bindSnapshotAuthority(GOVERNOR);
+        MockSnapshotAuthority420 authority = new MockSnapshotAuthority420(address(registry), address(this));
+        registry.bindSnapshotAuthority(address(authority));
         vm.roll(100);
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicElectorateRegistry420.InvalidSnapshot.selector);
-        registry.snapshotProposal(keccak256("FUTURE"), 100, false);
+        authority.snapshot(registry, keccak256("FUTURE"), 100, false);
 
-        vm.prank(GOVERNOR);
         vm.expectRevert(CivicElectorateRegistry420.InvalidSnapshot.selector);
-        registry.snapshotProposal(keccak256("EMPTY"), 99, false);
+        authority.snapshot(registry, keccak256("EMPTY"), 99, false);
     }
 }

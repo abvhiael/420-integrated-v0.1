@@ -1,0 +1,23 @@
+{
+  "address": "0x0000000000000000000000000000000000000429",
+  "constructorMaterialization": {
+    "bootstrapGovernor": "0x0000000000000000000000000000000000000437",
+    "civicAuthorityActivated": false,
+    "scheduler": "0x0000000000000000000000000000000000000437"
+  },
+  "contractName": "GovernanceTimelock",
+  "invariants": [
+    "bootstrapGovernor immutable is Governance420@0x0437",
+    "scheduler begins as Governance420@0x0437",
+    "civicAuthorityActivated begins false",
+    "runtimeCodeHash equals keccak256(materialized deployed bytecode)"
+  ],
+  "runtimeArtifact": "contracts/artifacts/GovernanceTimelock.json",
+  "runtimeCodeHash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
+  "schema": "420-governance-timelock-predeploy-state-v1",
+  "status": "GOV_AUDIT_6_PREDEPLOY_READY",
+  "storage": {
+    "0x0000000000000000000000000000000000000000000000000000000000000000": "0x0000000000000000000000000000000000000000000000000000000000000437"
+  },
+  "storageSlotCount": 1
+}

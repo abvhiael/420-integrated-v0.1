@@ -1,0 +1,18 @@
+{
+  "address": "0x0000000000000000000000000000000000000437",
+  "constructorMaterialization": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429"
+  },
+  "contractName": "Governance420",
+  "invariants": [
+    "all compatibility/bootstrap mutable state begins zero/false",
+    "governanceTimelock immutable is 0x0429",
+    "runtimeCodeHash equals keccak256(materialized deployed bytecode)"
+  ],
+  "runtimeArtifact": "contracts/artifacts/Governance420.json",
+  "runtimeCodeHash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
+  "schema": "420-governance420-predeploy-state-v1",
+  "status": "GOV_AUDIT_6_PREDEPLOY_READY",
+  "storage": {},
+  "storageSlotCount": 0
+}

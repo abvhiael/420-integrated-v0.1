@@ -18,10 +18,10 @@ const SOURCE_EVENT_420: ProtocolEventDto420 = {
   logIndex: 3,
   contractAddress: '0xAbCd',
   protocol: '420Governance',
-  eventName: 'ProposalActivated',
-  objectKey: 'proposal:42',
+  eventName: 'CivicProposalRegistered',
+  objectKey: 'proposalId:0x42',
   lifecycleState: 'ACTIVE',
-  fields: { proposalId: '42' }
+  fields: { proposalId: '0x42' }
 };
 
 const EVENT_420 = indexerEventEnvelope420(SOURCE_EVENT_420);
@@ -40,20 +40,20 @@ test('subscription matching combines selectors deterministically', () => {
     enabled: true,
     chainIds: ['420'],
     protocols: ['420Governance'],
-    eventNames: ['ProposalActivated'],
-    topics: ['420Governance.ProposalActivated'],
-    objectKeys: ['proposal:42'],
+    eventNames: ['CivicProposalRegistered'],
+    topics: ['420Governance.CivicProposalRegistered'],
+    objectKeys: ['proposalId:0x42'],
     lifecycleStates: ['ACTIVE'],
     contractAddresses: ['0xABCD']
   };
   assert.equal(indexerEventMatchesSubscription420(subscription, EVENT_420), true);
-  assert.equal(indexerEventMatchesSubscription420({ ...subscription, objectKeys: ['proposal:7'] }, EVENT_420), false);
+  assert.equal(indexerEventMatchesSubscription420({ ...subscription, objectKeys: ['proposalId:0x07'] }, EVENT_420), false);
 });
 
 test('contract-address matching is case-insensitive while protocol and object keys stay exact', () => {
   assert.equal(indexerEventMatchesSubscription420({ id: 'address', enabled: true, contractAddresses: ['0xabcd'] }, EVENT_420), true);
   assert.equal(indexerEventMatchesSubscription420({ id: 'protocol-case', enabled: true, protocols: ['420governance'] }, EVENT_420), false);
-  assert.equal(indexerEventMatchesSubscription420({ id: 'object-case', enabled: true, objectKeys: ['Proposal:42'] }, EVENT_420), false);
+  assert.equal(indexerEventMatchesSubscription420({ id: 'object-case', enabled: true, objectKeys: ['ProposalId:0x42'] }, EVENT_420), false);
 });
 
 test('matcher returns deterministic subscription/event identities and rejects duplicate subscription ids', () => {
@@ -69,7 +69,7 @@ test('matcher returns deterministic subscription/event identities and rejects du
   assert.throws(
     () => matchIndexerEventSubscriptions420([
       { id: 'same', enabled: true, protocols: ['420Governance'] },
-      { id: 'same', enabled: true, eventNames: ['ProposalActivated'] }
+      { id: 'same', enabled: true, eventNames: ['CivicProposalRegistered'] }
     ], EVENT_420),
     /duplicate subscription id/
   );

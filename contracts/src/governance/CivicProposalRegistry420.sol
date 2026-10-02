@@ -43,12 +43,12 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
         uint64 voteEnd
     );
     event CivicProposalStateChanged(
-        bytes32 indexed proposalId,
-        CivicIds420.ProposalState previousState,
-        CivicIds420.ProposalState newState
+        bytes32 indexed proposalId, CivicIds420.ProposalState previousState, CivicIds420.ProposalState newState
     );
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
     modifier onlyProposalAuthority() {
         if (msg.sender != proposalAuthority || proposalAuthority == address(0)) revert UnauthorizedAuthority();
@@ -65,11 +65,27 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
 
     /// @notice Bind the sole proposal lifecycle authority once.
     /// @dev Intended to bind the mature Governance420/Civic governor compatibility surface.
-    function bindProposalAuthority(address authority) external onlyGovernance {
+    function bindProposalAuthority(
+        address authority
+    ) external onlyGovernance {
         if (proposalAuthority != address(0)) revert AuthorityAlreadyBound();
-        if (authority == address(0)) revert UnauthorizedAuthority();
+        if (!_isCanonicalProposalAuthority(authority)) revert UnauthorizedAuthority();
         proposalAuthority = authority;
         emit ProposalAuthorityBound(authority);
+    }
+
+    function _isCanonicalProposalAuthority(
+        address authority
+    ) private view returns (bool) {
+        if (authority == address(0) || authority.code.length == 0) return false;
+
+        (bool proposalOk, bytes memory proposalData) =
+            authority.staticcall(abi.encodeWithSignature("proposalRegistry()"));
+        (bool timelockOk, bytes memory timelockData) = authority.staticcall(abi.encodeWithSignature("timelock()"));
+        if (!proposalOk || proposalData.length < 32 || !timelockOk || timelockData.length < 32) return false;
+
+        return abi.decode(proposalData, (address)) == address(this)
+            && abi.decode(timelockData, (address)) == governanceTimelock;
     }
 
     function registerProposal(
@@ -82,7 +98,10 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
         uint64 voteStart,
         uint64 voteEnd
     ) external onlyProposalAuthority {
-        if (proposalId == bytes32(0) || proposer == address(0) || metadataHash == bytes32(0) || actionsHash == bytes32(0)) {
+        if (
+            proposalId == bytes32(0) || proposer == address(0) || metadataHash == bytes32(0)
+                || actionsHash == bytes32(0)
+        ) {
             revert InvalidId();
         }
         if (voteStart <= snapshotBlock || voteEnd <= voteStart) revert InvalidWindow();
@@ -106,7 +125,10 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
     }
 
     /// @notice Apply only an explicitly legal proposal lifecycle transition.
-    function transition(bytes32 proposalId, CivicIds420.ProposalState next) external onlyProposalAuthority {
+    function transition(
+        bytes32 proposalId,
+        CivicIds420.ProposalState next
+    ) external onlyProposalAuthority {
         Proposal storage p = proposals[proposalId];
         if (!p.exists) revert NotFound();
         CivicIds420.ProposalState previous = p.state;
@@ -115,16 +137,18 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
         emit CivicProposalStateChanged(proposalId, previous, next);
     }
 
-    function _allowed(CivicIds420.ProposalState from, CivicIds420.ProposalState to) private pure returns (bool) {
+    function _allowed(
+        CivicIds420.ProposalState from,
+        CivicIds420.ProposalState to
+    ) private pure returns (bool) {
         if (from == CivicIds420.ProposalState.ACTIVE) {
-            return to == CivicIds420.ProposalState.PASSED || to == CivicIds420.ProposalState.FAILED
-                || to == CivicIds420.ProposalState.CANCELLED;
+            return to == CivicIds420.ProposalState.PASSED || to == CivicIds420.ProposalState.FAILED;
         }
         if (from == CivicIds420.ProposalState.PASSED) {
-            return to == CivicIds420.ProposalState.QUEUED || to == CivicIds420.ProposalState.CANCELLED;
+            return to == CivicIds420.ProposalState.QUEUED;
         }
         if (from == CivicIds420.ProposalState.QUEUED) {
-            return to == CivicIds420.ProposalState.EXECUTED || to == CivicIds420.ProposalState.CANCELLED;
+            return to == CivicIds420.ProposalState.EXECUTED;
         }
         return false;
     }

@@ -7,6 +7,8 @@ select
       e.fields->>'profileId',
       e.fields->>'issuerId'
     )
+    when e.protocol = '420Governance' and e.fields ? 'proposalId' then
+      'proposalId:' || lower(e.fields->>'proposalId')
     else coalesce(
       e.fields->>'objectId',
       e.fields->>'componentId',
@@ -46,6 +48,20 @@ select
         when 'CredentialRejected' then 'REJECTED'
         else null
       end
+    when e.protocol = '420Governance' then
+      case e.event_name
+        when 'CivicProposalRegistered' then 'ACTIVE'
+        when 'CivicProposalStateChanged' then
+          case e.fields->>'newState'
+            when '1' then 'ACTIVE'
+            when '2' then 'PASSED'
+            when '3' then 'FAILED'
+            when '4' then 'QUEUED'
+            when '5' then 'EXECUTED'
+            else null
+          end
+        else null
+      end
     else coalesce(
       e.fields->>'stateAfter',
       e.fields->>'status',
@@ -83,7 +99,24 @@ create or replace view idx_stake_state as
 select * from idx_protocol_latest_object_state where protocol = '420Stake';
 
 create or replace view idx_governance_state as
-select * from idx_protocol_latest_object_state where protocol = '420Governance';
+select distinct on (chain_id, protocol, object_key)
+  chain_id,
+  protocol,
+  object_key,
+  contract_address,
+  event_name,
+  lifecycle_state,
+  fields,
+  block_number,
+  block_hash,
+  tx_hash,
+  tx_index,
+  log_index
+from idx_protocol_object_events
+where protocol = '420Governance'
+  and object_key is not null
+  and lifecycle_state is not null
+order by chain_id, protocol, object_key, block_number desc, tx_index desc, log_index desc;
 
 create or replace view idx_pay_state as
 select * from idx_protocol_latest_object_state where protocol = '420Pay';

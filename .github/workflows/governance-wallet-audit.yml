@@ -1,0 +1,60 @@
+name: 420Governance Wallet GOV-AUDIT-5
+
+on:
+  push:
+    branches:
+      - 'audit/420governance-*'
+    paths:
+      - 'wallet/web/core/governance-management.js'
+      - 'wallet/web/governance-management-ui.js'
+      - 'wallet/web/test/governance-management*.test.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/styles.css'
+      - 'wallet/web/scripts/check-governance.mjs'
+      - '.github/workflows/governance-wallet-audit.yml'
+  pull_request:
+    paths:
+      - 'wallet/web/core/governance-management.js'
+      - 'wallet/web/governance-management-ui.js'
+      - 'wallet/web/test/governance-management*.test.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/styles.css'
+      - 'wallet/web/scripts/check-governance.mjs'
+      - '.github/workflows/governance-wallet-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-wallet-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420governance-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Governance Wallet static contract
+        working-directory: wallet/web
+        run: node scripts/check-governance.mjs
+      - name: Governance Wallet unit and integration tests
+        working-directory: wallet/web
+        run: node --test --test-concurrency=1 test/governance-management.test.js test/governance-management-ui.test.js
+      - name: Wallet Web retained static qualification
+        working-directory: wallet/web
+        run: npm run check
+      - name: Wallet Web complete test inventory
+        working-directory: wallet/web
+        run: npm test

@@ -1,0 +1,64 @@
+name: 420Bridge Fast Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/bridge/**"
+      - "contracts/src/exchange/ExchangeBridgeQualification420.sol"
+      - "contracts/test/Bridge*.t.sol"
+      - "contracts/test/ExchangeBridgeQualification420.t.sol"
+      - "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol"
+      - "contracts/config/bridge/**"
+      - "scripts/verify-bridge-hardening.py"
+      - "scripts/verify-bridge-audit-6-deployment.py"
+      - "contracts/config/predeploy/storage-init.json"
+      - "contracts/config/genesis-config-commitment.json"
+      - "contracts/config/genesis-canonical-addresses.json"
+      - "docs/apps/bridge/deployment-operations.md"
+      - ".github/workflows/bridge-fast.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: bridge-fast-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bridge-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Run Bridge hardening verifier
+        run: python3 scripts/verify-bridge-hardening.py
+
+      - name: Run BRIDGE-AUDIT-6 deployment verifier
+        run: python3 scripts/verify-bridge-audit-6-deployment.py
+
+      - name: Run Bridge contract tests
+        working-directory: contracts
+        run: forge test --match-path 'test/Bridge*.t.sol' -vvv
+
+      - name: Run affected Exchange Bridge qualification tests
+        working-directory: contracts
+        run: forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vvv
+
+      - name: Run Pay/Swap/Bridge cross-suite integration
+        working-directory: contracts
+        run: forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vvv

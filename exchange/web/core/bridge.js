@@ -37,8 +37,15 @@ export function normalizeBridgeRoute(route){
     settlementHealthy:route.settlementHealthy===true,
     paused:route.paused===true,
     bridgeFee:Number(route.bridgeFee??0),
+    routeLimit:route.routeLimit??null,
+    assetLimit:route.assetLimit??null,
+    finality:route.finality??'unknown',
+    freshness:route.freshness??'degraded',
+    canonicality:route.canonicality??'unknown',
+    observedAt:Number(route.observedAt??0),
   };
   if(!Number.isFinite(normalized.bridgeFee)||normalized.bridgeFee<0) throw new Error('invalid bridgeFee');
+  if(!Number.isFinite(normalized.observedAt)||normalized.observedAt<0) throw new Error('invalid observedAt');
   return normalized;
 }
 
@@ -56,6 +63,8 @@ export function bridgeQualification(route){
     ['provenance-mismatch',r.provenanceHash===r.verificationHash],
     ['settlement-unhealthy',r.settlementHealthy],
     ['paused',!r.paused],
+    ['stale',r.freshness!=='stale'],
+    ['noncanonical',r.canonicality!=='reorged'&&r.canonicality!=='unknown'],
   ];
   const failed=checks.find(([,ok])=>!ok);
   return failed?{ok:false,reason:failed[0]}:{ok:true,reason:null};
@@ -80,6 +89,12 @@ export function buildBridgeIntent(route,{amount,recipient}){
     amount:positive(amount,'amount'),
     recipient:id(recipient,'recipient'),
     quotedBridgeFee:r.bridgeFee,
+    routeLimit:r.routeLimit,
+    assetLimit:r.assetLimit,
+    finality:r.finality,
+    freshness:r.freshness,
+    canonicality:r.canonicality,
+    observedAt:r.observedAt,
   });
 }
 
@@ -96,6 +111,11 @@ export function normalizeSettlement(record){
     retryable:record.retryable===true,
     failureReason:record.failureReason??null,
     active:record.active!==false,
+    finality:record.finality??'unknown',
+    freshness:record.freshness??'degraded',
+    canonicality:record.canonicality??(record.active===false?'reorged':'canonical'),
+    observedAt:Number(record.observedAt??0),
+    replacementId:record.replacementId??null,
   };
 }
 

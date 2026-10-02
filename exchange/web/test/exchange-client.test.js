@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ExchangeApiError, ExchangeClient, validateHistoryPage, validateSnapshot, validateStreamEvent } from '../core/exchange-client.js';
+import { ExchangeApiError, ExchangeClient, validateBridgeSurface, validateHistoryPage, validateSnapshot, validateStreamEvent } from '../core/exchange-client.js';
 
 function response(body, { ok = true, status = 200, major = '13', minor = '6' } = {}) {
   return {
@@ -33,4 +33,12 @@ test('replacement event requires distinct old and new record IDs', () => {
 
 test('snapshot without canonical identity fails closed', () => {
   assert.throws(() => validateSnapshot({ snapshotId:'x', canonicalHead:1, canonicality:'canonical' }));
+});
+
+
+test('bridge endpoint requires RPC fallback readiness and preserves route identity', async () => {
+  const surface={schema:'420-exchange-bridge-response-v13.6',routes:[{routeId:'r1',sourceChain:'ethereum',destinationChain:'420'}],settlements:[],provenance:{rpcFallbackReady:true}};
+  const client=new ExchangeClient({baseUrl:'https://api.example.test',fetchImpl:async()=>response(surface)});
+  assert.equal((await client.bridge()).routes[0].routeId,'r1');
+  assert.throws(()=>validateBridgeSurface({...surface,provenance:{rpcFallbackReady:false}}),/RPC fallback readiness/);
 });

@@ -43,7 +43,13 @@ A distribution policy cannot authorize a slash and cannot move collateral.
 
 Every authorization freezes:
 - distribution-policy revision;
-- exact distribution-policy commitment.
+- exact distribution-policy commitment;
+- resolved harmed-payer address;
+- resolved replacement-worker address;
+- resolved challenger address;
+- explicit protocol-treasury address.
+
+Recipient resolution therefore occurs before authorization is created. Later resolver-state changes cannot redirect an existing authorization.
 
 The bound executor must prove reciprocal wiring to:
 - the exact slash authorizer;
@@ -79,10 +85,9 @@ The slashed subject may never receive its own slash distribution.
 On first execution it:
 1. loads the exact authorization;
 2. verifies the frozen distribution-policy revision/commitment;
-3. verifies recipient-resolver code hash;
-4. resolves recipients;
-5. freezes exact recipient addresses and target amounts;
-6. deterministically assigns any rounding remainder to the first nonzero policy slot.
+3. uses only the recipient addresses already frozen in that authorization;
+4. freezes exact recipient target amounts;
+5. deterministically assigns any rounding remainder to the first nonzero policy slot.
 
 Execution may then continue in bounded batches.
 

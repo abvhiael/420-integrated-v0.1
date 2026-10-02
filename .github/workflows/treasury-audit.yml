@@ -5,10 +5,13 @@ on:
     paths:
       - 'contracts/src/treasury/**'
       - 'contracts/test/Treasury*.t.sol'
+      - 'contracts/test/GrantsGenesis420.t.sol'
+      - 'contracts/src/grants/GrantMilestoneRegistry420.sol'
       - 'contracts/config/420treasury-genesis.json'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
       - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
+      - 'docs/architecture/decisions/TREASURY-AUDIT-4-VAULT-RELEASE-EVIDENCE-MODEL.md'
       - '.github/workflows/treasury-audit.yml'
   workflow_dispatch:
 
@@ -50,9 +53,9 @@ jobs:
             src/treasury/TreasuryDisbursementRegistry420.sol \
             src/treasury/TreasuryRouter420.sol
 
-      - name: Build Treasury contracts and security tests
+      - name: Build Treasury contracts and affected Grants consumer tests
         working-directory: contracts
-        run: forge build src/treasury test/TreasuryGenesis420.t.sol test/TreasurySecurityProperties420.t.sol
+        run: forge build src/treasury src/grants/GrantMilestoneRegistry420.sol test/TreasuryGenesis420.t.sol test/TreasurySecurityProperties420.t.sol test/GrantsGenesis420.t.sol
 
       - name: Run Treasury lifecycle regression suite
         working-directory: contracts
@@ -61,6 +64,10 @@ jobs:
       - name: Run Treasury security/property suite
         working-directory: contracts
         run: forge test --match-path test/TreasurySecurityProperties420.t.sol -vvv
+
+      - name: Run affected Grants release-evidence consumer suite
+        working-directory: contracts
+        run: forge test --match-path test/GrantsGenesis420.t.sol -vvv
 
       - name: Verify Treasury canonical authority/config boundary
         shell: bash
@@ -84,6 +91,13 @@ jobs:
           need("420Vault VAULT_TREASURY" in treasury.get("custody_model", ""), "Treasury/420Vault custody boundary drift")
           need("GovernanceTimelock/Civic-controlled" in treasury.get("governance_model", ""), "Treasury governance boundary drift")
 
+          evidence = treasury.get("vault_release_evidence_model", {})
+          need(evidence.get("version") == "420/TREASURY/VAULT_RELEASE_COMMITMENT/V1", "Vault release evidence model version drift")
+          need(evidence.get("mode") == "AUTHORIZED_EXECUTOR_COMMITMENT_ONLY", "Vault release evidence model mode drift")
+          need(evidence.get("treasury_verifies_vault_release") is False, "Treasury must not claim cryptographic Vault verification")
+          need(evidence.get("custody_authority") == "420Vault VAULT_TREASURY", "Vault custody authority drift")
+          need("not independent cryptographic proof" in evidence.get("consumer_rule", ""), "consumer evidence semantics drift")
+
           invariants = treasury.get("invariants", [])
           for n in range(1, 11):
               prefix = f"TREASURY-INV-{n:03d}:"
@@ -103,6 +117,39 @@ jobs:
               print(json.dumps({"pass": False, "errors": errors}, indent=2))
               raise SystemExit(2)
           print(json.dumps({"pass": True, "invariants": len(invariants), "treasuryRouter": router}, indent=2))
+          PY
+
+      - name: Verify Vault release evidence consumer inventory
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path("contracts/src")
+          users = []
+          for path in sorted(root.rglob("*.sol")):
+              text = path.read_text(encoding="utf-8")
+              if "vaultReleaseHash" in text:
+                  users.append(path.as_posix())
+
+          expected = {
+              "contracts/src/treasury/TreasuryDisbursementRegistry420.sol",
+              "contracts/src/grants/GrantMilestoneRegistry420.sol",
+          }
+          if set(users) != expected:
+              raise SystemExit(f"unqualified vaultReleaseHash consumer inventory drift: {users}")
+
+          grants = Path("contracts/src/grants/GrantMilestoneRegistry420.sol").read_text(encoding="utf-8")
+          required = [
+              "d.state!=ITreasuryDisbursementGrant420.State.EXECUTED",
+              "d.vaultReleaseHash==bytes32(0)",
+          ]
+          missing = [item for item in required if item not in grants]
+          if missing:
+              raise SystemExit(f"Grants release-evidence gate drift: {missing}")
+
+          print("Vault release evidence consumer inventory PASS")
+          print("\n".join(users))
           PY
 
       - name: Install Slither for Treasury security qualification

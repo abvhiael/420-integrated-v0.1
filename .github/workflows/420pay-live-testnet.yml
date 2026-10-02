@@ -1,0 +1,62 @@
+name: 420Pay live testnet qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: Official production-equivalent public-testnet manifest/metadata JSON
+        required: true
+        default: testnet/public/metadata/chain.json
+      evidence_draft_path:
+        description: Reviewed PAY-AUDIT-7 live evidence draft with real non-secret transaction/drill evidence
+        required: true
+        default: docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.json
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Verify official live inputs exist and are not templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${{ inputs.manifest_path }}"
+          test -f "${{ inputs.evidence_draft_path }}"
+          test "${{ inputs.evidence_draft_path }}" != "docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json"
+          ! grep -q 'REPLACE_' "${{ inputs.manifest_path }}"
+          ! grep -q 'REPLACE_' "${{ inputs.evidence_draft_path }}"
+
+      - name: Run PAY-AUDIT-7 production-equivalent verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/pay
+          python3 scripts/qualify-420pay-testnet.py \
+            --manifest "${{ inputs.manifest_path }}" \
+            --evidenceDraft "${{ inputs.evidence_draft_path }}" \
+            --repositorySha "${{ github.sha }}" \
+            --output artifacts/pay/pay-audit-7-live-testnet.json
+
+      - name: Upload PAY-AUDIT-7 live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pay-audit-7-live-testnet
+          path: artifacts/pay/pay-audit-7-live-testnet.json
+          if-no-files-found: warn

@@ -21,7 +21,7 @@ Required outcome:
 - bridge hardening verifier checks the canonical core inventory and adapter binding;
 - Genesis dApp inventory no longer omits BridgeChainRegistry420.
 
-### BRIDGE-AUDIT-2 — Chain identity enforcement in canonical route admission
+### BRIDGE-AUDIT-2 — Chain identity enforcement in canonical route admission — COMPLETE
 Purpose: make BridgeChainRegistry420 authoritative to Bridge execution rather than only Exchange qualification/documentation.
 
 Required outcome:
@@ -30,6 +30,10 @@ Required outcome:
 - route changes cannot retain a stale chain binding;
 - tests cover forks/testnets, duplicate route-chain IDs, inactive chains, rebinding and direction-specific routes;
 - deployment/bootstrap data includes every Genesis/testnet route-chain identity.
+
+**Durable qualification:** `docs/audit/BRIDGE-AUDIT-2-QUALIFICATION.md`  
+**Qualified implementation SHA:** `fdb6c49217b0e9626c2de1f0664a20be2b90767a`  
+**Level 1:** PASS — Bridge fast qualification and all four real Solidity PR shards passed on the exact implementation SHA.
 
 ### BRIDGE-AUDIT-3 — Canonical transfer lifecycle and outbound registration
 Purpose: make the documented transfer lifecycle an enforced on-chain state machine.

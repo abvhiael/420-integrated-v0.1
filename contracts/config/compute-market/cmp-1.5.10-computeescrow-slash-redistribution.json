@@ -3,7 +3,7 @@
   "step": "CMP-1.5.10",
   "title": "ComputeEscrow slash-redistribution integration",
   "status": "IMPLEMENTED_QUALIFICATION_PENDING",
-  "base_head": "b828cd0a41aa61cedb44bd54c9a01fb13d1e8a50",
+  "base_head": "d6ef9b0cc64636dbcee6dfe7f53abd766b47d876",
   "canonical_definition": "ComputeEscrow slash-redistribution integration",
   "purpose": "Close the original CMP-1.2 slash-redistribution cross-phase dependency without ever treating payer escrow as slash collateral.",
   "implementation": {

@@ -85,7 +85,7 @@ for marker in ["testAllowedTransitionMatrixMatchesFrozenGraph","COMPLETED","REFU
 
 # Retained V12.6 hardening slices must still exist and be mapped to tests.
 slice_tests={
-    "contracts/config/bridge/cross-adapter-hardening-v12.6.1.json":"contracts/test/CrossAdapterHardening420.t.sol",
+    "contracts/config/bridge/cross-adapter-hardening-v12.6.1.json":"contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol",
     "contracts/config/bridge/cross-adapter-hardening-v12.6.2.json":"contracts/test/NativeAdapterReplayDomainHardening420.t.sol",
     "contracts/config/bridge/cross-adapter-hardening-v12.6.4.json":"contracts/test/EmergencyControlsHardening420.t.sol",
     "contracts/config/bridge/cross-adapter-hardening-v12.6.5.json":"contracts/test/MalformedProofRecipientFuzzHardening420.t.sol",

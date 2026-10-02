@@ -1,4 +1,5 @@
 name: 420Swap SWAP-AUDIT-6 Materialized Head
+# Normal user-authored retrigger after CI retained the final normalized artifacts.
 
 on:
   pull_request:

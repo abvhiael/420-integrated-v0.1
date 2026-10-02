@@ -3,53 +3,277 @@
   "status": "IDENTITY_REGISTRY_FOUNDATION",
   "policy": "Canonical network identity and verifier configuration must be registered before a bridge route can qualify an Exchange asset.",
   "roadmap_status": {
-    "V12.5.6": {"asset":"XRP","status":"SUPERSEDED_BY_V12.5.15_REQUALIFICATION"},
-    "V12.5.7": {"asset":"TRX","status":"COMPLETED_QUALIFIED_MERGED"},
-    "V12.5.8": {"asset":"AUDIO","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.9": {"asset":"POT","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_POTCOIN_CHAIN_ADAPTER"},
-    "V12.5.10": {"asset":"BOB","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_DOBBSCOIN_CHAIN_ADAPTER"},
-    "V12.5.11": {"asset":"CURE","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_CURECOIN_CHAIN_ADAPTER"},
-    "V12.5.12": {"asset":"ARRR","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_PIRATE_CHAIN_SHIELDED_ADAPTER"},
-    "V12.5.13": {"asset":"LTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_LITECOIN_CHAIN_ADAPTER"},
-    "V12.5.14": {"asset":"BTC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_BITCOIN_CHAIN_ADAPTER"},
-    "V12.5.15": {"asset":"XRP","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"NATIVE_XRPL_VALIDATED_LEDGER_ADAPTER"},
-    "V12.5.16": {"asset":"UNI","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.17": {"asset":"LINK","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.18": {"asset":"AAVE","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.19": {"asset":"USDT","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.20": {"asset":"QCAD","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.21": {"asset":"EURC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"},
-    "V12.5.22": {"asset":"EURC","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_SOLANA_ADAPTER"},
-    "V12.5.23": {"asset":"RAY","status":"COMPLETED_QUALIFIED_MERGED","integration_type":"TOKEN_OVER_EXISTING_SOLANA_ADAPTER"},
-    "V12.6.1": {"scope":"CROSS_ADAPTER_COMMON_INVARIANTS","status":"COMPLETED_QUALIFIED_UNMERGED","integration_type":"BRIDGE_HARDENING"},
-    "V12.6.2": {"scope":"REPLAY_NAMESPACE_AND_COLLISION_HARDENING","status":"COMPLETED_QUALIFIED_UNMERGED","integration_type":"BRIDGE_HARDENING"},
-    "V12.6.3": {"scope":"VERIFIER_ROTATION_AND_AUTHORIZATION_HARDENING","status":"IN_PROGRESS","integration_type":"BRIDGE_HARDENING","note":"Hardens governance-only verifier rotation, rejects zero/non-contract verifier targets and verifies authority transfers cleanly from the old verifier to the new verifier without altering adapter replay, route or asset state."}
+    "V12.5.6": {
+      "asset": "XRP",
+      "status": "SUPERSEDED_BY_V12.5.15_REQUALIFICATION"
+    },
+    "V12.5.7": {
+      "asset": "TRX",
+      "status": "COMPLETED_QUALIFIED_MERGED"
+    },
+    "V12.5.8": {
+      "asset": "AUDIO",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.9": {
+      "asset": "POT",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_POTCOIN_CHAIN_ADAPTER"
+    },
+    "V12.5.10": {
+      "asset": "BOB",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_DOBBSCOIN_CHAIN_ADAPTER"
+    },
+    "V12.5.11": {
+      "asset": "CURE",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_CURECOIN_CHAIN_ADAPTER"
+    },
+    "V12.5.12": {
+      "asset": "ARRR",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_PIRATE_CHAIN_SHIELDED_ADAPTER"
+    },
+    "V12.5.13": {
+      "asset": "LTC",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_LITECOIN_CHAIN_ADAPTER"
+    },
+    "V12.5.14": {
+      "asset": "BTC",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_BITCOIN_CHAIN_ADAPTER"
+    },
+    "V12.5.15": {
+      "asset": "XRP",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "NATIVE_XRPL_VALIDATED_LEDGER_ADAPTER"
+    },
+    "V12.5.16": {
+      "asset": "UNI",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.17": {
+      "asset": "LINK",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.18": {
+      "asset": "AAVE",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.19": {
+      "asset": "USDT",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.20": {
+      "asset": "QCAD",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.21": {
+      "asset": "EURC",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_ETHEREUM_ADAPTER"
+    },
+    "V12.5.22": {
+      "asset": "EURC",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_SOLANA_ADAPTER"
+    },
+    "V12.5.23": {
+      "asset": "RAY",
+      "status": "COMPLETED_QUALIFIED_MERGED",
+      "integration_type": "TOKEN_OVER_EXISTING_SOLANA_ADAPTER"
+    },
+    "V12.6.1": {
+      "scope": "CROSS_ADAPTER_COMMON_INVARIANTS",
+      "status": "COMPLETED_QUALIFIED_UNMERGED",
+      "integration_type": "BRIDGE_HARDENING"
+    },
+    "V12.6.2": {
+      "scope": "REPLAY_NAMESPACE_AND_COLLISION_HARDENING",
+      "status": "COMPLETED_QUALIFIED_UNMERGED",
+      "integration_type": "BRIDGE_HARDENING"
+    },
+    "V12.6.3": {
+      "scope": "VERIFIER_ROTATION_AND_AUTHORIZATION_HARDENING",
+      "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
+      "integration_type": "BRIDGE_HARDENING"
+    },
+    "V12.6.4": {
+      "scope": "DIRECTIONAL_PAUSE_AND_EMERGENCY_CONTROLS",
+      "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
+      "integration_type": "BRIDGE_HARDENING"
+    },
+    "V12.6.5": {
+      "scope": "MALFORMED_PROOF_AND_RECIPIENT_FUZZ_HARDENING",
+      "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
+      "integration_type": "BRIDGE_HARDENING"
+    },
+    "V12.6.6": {
+      "scope": "DOMAIN_NONCE_AND_ROUTER_BYPASS_HARDENING",
+      "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
+      "integration_type": "BRIDGE_HARDENING"
+    },
+    "V12.6.7": {
+      "scope": "GOVERNANCE_ACCOUNTING_REGISTRY_AND_RECOVERY_HARDENING",
+      "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
+      "integration_type": "BRIDGE_HARDENING"
+    }
   },
   "assets": [
-    {"symbol":"BTC","canonical_network":"BITCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BTC","adapter_slice":"V12.5.14"},
-    {"symbol":"ETH","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.4"},
-    {"symbol":"SOL","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.2"},
-    {"symbol":"BNB","canonical_network":"BNB_SMART_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/BNB","adapter_slice":"V12.5.3"},
-    {"symbol":"DOGE","canonical_network":"DOGECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/DOGE","adapter_slice":"V12.5.5"},
-    {"symbol":"XRP","canonical_network":"XRP_LEDGER","canonical_chain_key":"420/BRIDGE/CHAIN/XRP","adapter_slice":"V12.5.15"},
-    {"symbol":"TRX","canonical_network":"TRON","canonical_chain_key":"420/BRIDGE/CHAIN/TRX","adapter_slice":"V12.5.7"},
-    {"symbol":"POT","canonical_network":"POTCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/POT","adapter_slice":"V12.5.9"},
-    {"symbol":"USDC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"existing-CCTP-plus-launch-qualification"},
-    {"symbol":"CADC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"existing-LayerZero-plus-launch-qualification"},
-    {"symbol":"AUDIO","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.8-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"UNI","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.16-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"LINK","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.17-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"AAVE","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.18-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"USDT","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.19-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"QCAD","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.20-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"EURC","canonical_network":"ETHEREUM","canonical_chain_key":"420/BRIDGE/CHAIN/ETH","adapter_slice":"V12.5.21-token-qualification-over-EthereumBridgeAdapter420"},
-    {"symbol":"EURC","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.22-token-qualification-over-SolanaBridgeAdapter420"},
-    {"symbol":"RAY","canonical_network":"SOLANA","canonical_chain_key":"420/BRIDGE/CHAIN/SOL","adapter_slice":"V12.5.23-token-qualification-over-SolanaBridgeAdapter420"},
-    {"symbol":"BOB","canonical_network":"DOBBSCOIN","canonical_chain_key":"420/BRIDGE/CHAIN/BOB","adapter_slice":"V12.5.10"},
-    {"symbol":"CURE","canonical_network":"CURECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/CURE","adapter_slice":"V12.5.11"},
-    {"symbol":"ARRR","canonical_network":"PIRATE_CHAIN","canonical_chain_key":"420/BRIDGE/CHAIN/ARRR","adapter_slice":"V12.5.12"},
-    {"symbol":"LTC","canonical_network":"LITECOIN","canonical_chain_key":"420/BRIDGE/CHAIN/LTC","adapter_slice":"V12.5.13"}
+    {
+      "symbol": "BTC",
+      "canonical_network": "BITCOIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/BTC",
+      "adapter_slice": "V12.5.14"
+    },
+    {
+      "symbol": "ETH",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.4"
+    },
+    {
+      "symbol": "SOL",
+      "canonical_network": "SOLANA",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
+      "adapter_slice": "V12.5.2"
+    },
+    {
+      "symbol": "BNB",
+      "canonical_network": "BNB_SMART_CHAIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/BNB",
+      "adapter_slice": "V12.5.3"
+    },
+    {
+      "symbol": "DOGE",
+      "canonical_network": "DOGECOIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/DOGE",
+      "adapter_slice": "V12.5.5"
+    },
+    {
+      "symbol": "XRP",
+      "canonical_network": "XRP_LEDGER",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/XRP",
+      "adapter_slice": "V12.5.15"
+    },
+    {
+      "symbol": "TRX",
+      "canonical_network": "TRON",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/TRX",
+      "adapter_slice": "V12.5.7"
+    },
+    {
+      "symbol": "POT",
+      "canonical_network": "POTCOIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/POT",
+      "adapter_slice": "V12.5.9"
+    },
+    {
+      "symbol": "USDC",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "existing-CCTP-plus-launch-qualification"
+    },
+    {
+      "symbol": "CADC",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "existing-LayerZero-plus-launch-qualification"
+    },
+    {
+      "symbol": "AUDIO",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.8-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "UNI",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.16-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "LINK",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.17-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "AAVE",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.18-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "USDT",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.19-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "QCAD",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.20-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "EURC",
+      "canonical_network": "ETHEREUM",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
+      "adapter_slice": "V12.5.21-token-qualification-over-EthereumBridgeAdapter420"
+    },
+    {
+      "symbol": "EURC",
+      "canonical_network": "SOLANA",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
+      "adapter_slice": "V12.5.22-token-qualification-over-SolanaBridgeAdapter420"
+    },
+    {
+      "symbol": "RAY",
+      "canonical_network": "SOLANA",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/SOL",
+      "adapter_slice": "V12.5.23-token-qualification-over-SolanaBridgeAdapter420"
+    },
+    {
+      "symbol": "BOB",
+      "canonical_network": "DOBBSCOIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/BOB",
+      "adapter_slice": "V12.5.10"
+    },
+    {
+      "symbol": "CURE",
+      "canonical_network": "CURECOIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/CURE",
+      "adapter_slice": "V12.5.11"
+    },
+    {
+      "symbol": "ARRR",
+      "canonical_network": "PIRATE_CHAIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/ARRR",
+      "adapter_slice": "V12.5.12"
+    },
+    {
+      "symbol": "LTC",
+      "canonical_network": "LITECOIN",
+      "canonical_chain_key": "420/BRIDGE/CHAIN/LTC",
+      "adapter_slice": "V12.5.13"
+    }
   ],
-  "identity_fields_required_before_activation": ["routeChainId","networkId","nativeAssetId","verifierFamily","chainFamily","active"],
+  "identity_fields_required_before_activation": [
+    "routeChainId",
+    "networkId",
+    "nativeAssetId",
+    "verifierFamily",
+    "chainFamily",
+    "active"
+  ],
   "note": "Non-EVM routeChainId values are internal canonical bridge identifiers. Exact network fingerprints and verifier parameters are pinned during each adapter implementation slice rather than guessed in this catalogue."
 }

@@ -41,6 +41,16 @@ for k in ("deployment_transactions","registry_transactions","binding_transaction
     if live.get(k)!=[]: fail("fabricated live "+k)
 if live.get("addresses")!={}: fail("fabricated live addresses")
 if live.get("owner")!="PAY-AUDIT-7": fail("live evidence owner")
+ctor=d.get("constructor_manifest",{})
+if set(ctor)!=set(EXPECTED): fail("constructor manifest inventory")
+for name,item in ctor.items():
+    if item.get("governance_timelock")!=d.get("governance_timelock"): fail(name+" constructor timelock")
+    if item.get("protocol_registry")!=d.get("protocol_registry"): fail(name+" constructor registry")
+    if item.get("genesis_config_hash")!=d.get("genesis_config_hash"): fail(name+" constructor config")
+    if name=="CanonicalSettlementAdapter420":
+        if "executor_" not in item.get("constructor_signature",""): fail("adapter constructor executor")
+        if not item.get("additional_arguments",{}).get("canonical_swap_executor"): fail("adapter executor manifest")
+    elif item.get("additional_arguments")!={}: fail(name+" unexpected constructor dependency")
 rp=d.get("registry_publication",{})
 if rp.get("api")!="registerComponent" or rp.get("version")!={"major":1,"minor":0,"patch":0}: fail("Registry publication")
 if rp.get("staging_lifecycle")!="SUSPENDED" or rp.get("activation_lifecycle")!="ACTIVE": fail("Registry lifecycle staging")

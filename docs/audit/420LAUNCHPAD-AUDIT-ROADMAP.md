@@ -92,7 +92,7 @@ Exit: all V1 invariants have direct negative + boundary coverage and unresolved 
 This closeout is documentation/evidence-only and references the already-qualified implementation SHA above. It does not change executable source, tests, workflows, configuration, dependencies, interfaces, generated artifacts, deployment state, or substantive requirements, so recursive qualification is not required.
 
 ## LAUNCHPAD-AUDIT-3 — crowdfunding dependency integration
-Status: **PENDING**
+Status: **IMPLEMENTED; LEVEL 1 + LEVEL 2 QUALIFICATION PENDING**
 
 - define exact contract/API boundary to canonical 420Pay settlement records;
 - bind contribution evidence to canonical paid/settled state rather than arbitrary nonzero hashes;
@@ -103,6 +103,18 @@ Status: **PENDING**
 - publish lifecycle events to 420Notifications;
 - add replay/idempotency rules for all cross-service references;
 - keep securities/equity disabled.
+
+Implemented integration boundary:
+- contributions bind to canonical `PaymentRegistry420` `SETTLED` payment IDs with exact payer/merchant/asset/amount/receipt checks and global replay protection;
+- refund recording binds to a deterministic participant/sale refund batch only after all backing Pay records show sufficient canonical refund state;
+- participant Identity profile ownership/activity and `hasValidCredential(profileId, sale.eligibilityPolicyHash)` are enforced in addition to CapabilityRegistry authorization;
+- Arbitration case origin is checked against participant, project controller, crowdfunding domain, Launchpad component and exact sale; finalized ruling/remedy data is published as evidence without transferring ruling/cancellation/refund authority;
+- domain-scoped contribution/reward-delivery evidence is published for 420Reputation without universal-score authority;
+- deterministic contribution/refund/delivery/dispute/ruling source events are published for 420Notifications without canonical authority;
+- payment IDs, refund batches, delivery commitments, dispute links/outcomes, Reputation evidence and notification IDs are replay/idempotency protected;
+- only reward, donation, community-project and product-preorder modes are representable; securities/equity remains disabled.
+
+Milestone: **Level 2 required** because Audit-3 introduces current shared Pay, Identity and Arbitration authority dependencies plus Reputation/Notifications consumer boundaries. The branch was reconciled with current `main@b58b09a17e641a42b81d832bad913a83c7caada9` through merge `7992b93e9bfd97a452432019fb7b8c19e931fd00` before dependency binding.
 
 Exit: repository integration tests prove reward/donation/community-project/preorder flows against canonical dependency interfaces.
 

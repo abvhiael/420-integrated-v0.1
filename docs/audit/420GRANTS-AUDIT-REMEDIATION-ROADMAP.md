@@ -109,17 +109,31 @@ Level 2 is not separately triggered because the real Registry/Capability/Treasur
 
 ## GRANTS-AUDIT-6 — client/indexer/user-flow integration
 
-**Status: PARTIAL**
+**Status: COMPLETE**
 
-420Grants is not a standalone frozen public Genesis application. A separate Grants website is therefore **not** required by current canonical Genesis scope.
+420Grants remains a non-standalone frozen Genesis implementation protocol. A separate Grants website is therefore **not** required by current canonical Genesis scope.
 
-Repository-required integration is:
-- discoverable Grants service/component metadata;
-- Wallet/catalog awareness;
-- event/indexer compatibility sufficient for ecosystem clients to reconstruct non-authoritative program/application/award/milestone views;
-- transaction handoff that preserves Wallet/Smart Account authority.
+Completed repository integration:
+- preserved canonical Wallet/catalog awareness for `420 Grants` / `420/service/grants/v1`;
+- added artifact-derived Grants event descriptors for all four event-emitting Grants registries and all 12 canonical events;
+- added fail-closed deployment-address binding for Grants Indexer descriptors;
+- registered `420Grants` in the shared Indexer protocol catalogue;
+- added generic lifecycle object-key support for program/application/award/milestone IDs while preserving the shared lifecycle vocabulary;
+- added typed non-authoritative read models for Programs, Applications, Awards and Milestones with event provenance and replay/transition checks;
+- added public Indexer API methods and HTTP GET routes for all four Grants object families;
+- added explicit Wallet Grants transaction handoff through existing SmartAccount420 execution authority, with no independent signer/broadcaster and no native-value transfer;
+- added focused Grants Indexer and Wallet regression suites plus a fail-closed AUDIT-6 verifier;
+- reconciled existing Indexer HTTP/testnet test doubles with the expanded public API rather than weakening the interface;
+- Level 1 exact-head contract/security qualification **PASS** on implementation SHA `b82de3494315ef5f5a8e097deb391291ad693132`;
+- focused Level 2 Grants/Indexer/Wallet integration milestone **PASS** on the same SHA;
+- 420Grants Audit Qualification run `37078114603` / #61: grants-contract-core job `111072419199` PASS, grants-security job `111072419469` PASS, grants-client-integration job `111074493945` PASS;
+- focused Grants Indexer suite **9/9 PASS** and affected Wallet catalogue/handoff suite **13/13 PASS**;
+- affected Solidity Contracts workflow run `37078114618` / #4341 completed SUCCESS on the same SHA under fast affected-path classification, without duplicating Level 3 full Foundry inventory;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-6-QUALIFICATION.md`, introduced by evidence commit `94a91c1fc5cffe8a69d654a8d406a9cdf7faf691`.
 
-A dedicated Grants-specific Wallet workflow is not currently defined as a canonical Genesis acceptance requirement. If later adopted, it must be added as a new explicit roadmap requirement rather than inferred retroactively.
+A dedicated Grants-specific Wallet workflow remains outside current canonical Genesis acceptance scope. If later adopted, it must be added as a new explicit roadmap requirement rather than inferred retroactively.
+
+Current branch/main divergence is explicitly deferred to GRANTS-AUDIT-8 Level 3 reconciliation. Live deployed client/indexer reconstruction remains GRANTS-AUDIT-9 work.
 
 ## GRANTS-AUDIT-7 — documentation, threat model and operator guidance
 

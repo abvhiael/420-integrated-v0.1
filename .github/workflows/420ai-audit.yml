@@ -1,0 +1,49 @@
+name: 420AI Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/ai/**'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'docs/420-AI-V1-ARCHITECTURE.md'
+      - 'docs/architecture/infrastructure/420ai-compute-infrastructure.md'
+      - 'docs/apps/ai/**'
+      - 'docs/audit/420AI-**'
+      - 'scripts/verify-420ai-audit-state.py'
+      - '.github/workflows/420ai-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-state:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify durable 420AI audit state
+        run: python3 scripts/verify-420ai-audit-state.py
+
+  focused-ai-contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build contracts
+        run: forge build
+      - name: Run implemented 420AI contract suites
+        run: |
+          forge test --match-path 'test/AIHardening420.t.sol'
+          forge test --match-path 'test/AIMature420.t.sol'
+          forge test --match-path 'test/AIModelRegistryHardening420.t.sol'
+          forge test --match-path 'test/AIModelTrainingRights420.t.sol'
+          forge test --match-path 'test/AIRewardsIntegration420.t.sol'

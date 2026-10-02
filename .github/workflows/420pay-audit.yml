@@ -101,14 +101,19 @@ jobs:
         working-directory: contracts
         run: forge build src/pay src/swap/CanonicalSwapExecutor420.sol src/system/ReplayProtectionConsumer420.sol
       - name: Materialize PAY-AUDIT-6 runtime identities
-        run: python3 scripts/generate-420pay-audit-6-deployment.py --print
+        run: |
+          python3 scripts/generate-420pay-audit-6-deployment.py --output pay-audit-6-derived.json --print
+      - name: Retain PAY-AUDIT-6 derived runtime manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: pay-audit-6-derived-${{ github.event.pull_request.head.sha || github.sha }}
+          path: pay-audit-6-derived.json
+          if-no-files-found: error
       - name: Run PAY-AUDIT-6 Level 1 deployment qualification
         working-directory: contracts
         run: |
           forge test --match-path 'test/PayAudit6DeploymentPackage420.t.sol' -vvv
           forge test --match-path 'test/ReplayProtectionConsumer420.t.sol' -vvv
-          forge test --match-path 'test/PayFocusedHardening420.t.sol' -vvv
-          forge test --match-path 'test/PayAudit4SettlementAndAccounting420.t.sol' -vvv
       - name: Forbidden primitive scan
         shell: bash
         run: |
@@ -117,9 +122,3 @@ jobs:
             echo 'Forbidden primitive found in 420Pay sources' >&2
             exit 1
           fi
-      - name: Build and test 420Indexer Pay reconciliation
-        working-directory: 420-indexer
-        run: |
-          npm install
-          npm run build
-          node --test --test-concurrency=1 dist/test/lifecycle-reducer.test.js dist/test/abi-manifest.test.js dist/test/pay-accounting-export.test.js

@@ -71,6 +71,8 @@ contract ComputeVerifierDisputeSlashRecipientResolver420
 {
     IComputeSlashDistributionDisputes420 public immutable disputes;
     address public immutable verifierEvidenceAdapter;
+    address public immutable canonicalEntitlements;
+    bytes32 public immutable canonicalEntitlementsCodeHash;
 
     error InvalidResolution();
 
@@ -80,6 +82,11 @@ contract ComputeVerifierDisputeSlashRecipientResolver420
         }
         disputes = IComputeSlashDistributionDisputes420(disputes_);
         verifierEvidenceAdapter = verifierEvidenceAdapter_;
+
+        address entitlements_ = disputes.entitlements();
+        if (entitlements_.code.length == 0) revert InvalidResolution();
+        canonicalEntitlements = entitlements_;
+        canonicalEntitlementsCodeHash = entitlements_.codehash;
     }
 
     function systemName() external pure returns (string memory) {
@@ -115,7 +122,11 @@ contract ComputeVerifierDisputeSlashRecipientResolver420
         ) revert InvalidResolution();
 
         address entitlements = disputes.entitlements();
-        if (entitlements.code.length == 0) revert InvalidResolution();
+        if (
+            entitlements != canonicalEntitlements
+                || entitlements.code.length == 0
+                || entitlements.codehash != canonicalEntitlementsCodeHash
+        ) revert InvalidResolution();
 
         (
             bytes32 entitlementRef,

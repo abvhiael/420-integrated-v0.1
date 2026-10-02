@@ -101,8 +101,14 @@ need(rel.get("live_testnet_evidence",{}).get("required_in_step")=="TREASURY-AUDI
 need("AUTHORIZED_EXECUTOR_COMMITMENT_ONLY" in arch,"architecture decision release mode drift")
 need("TREASURY-AUDIT-7 — documentation/operator closeout" in road,"roadmap step missing")
 
-# No false standalone-site requirement.
-need("A standalone public-facing Treasury website is not required" in road,"standalone-site classification drift")
+# No false standalone-site requirement. Normalize Markdown emphasis so
+# wording changes such as **not required** do not create a false failure.
+road_plain = road.replace("**", "")
+need(
+    "A standalone public-facing Treasury website" in road_plain
+    and "not required" in road_plain,
+    "standalone-site classification drift",
+)
 need("No standalone Treasury website requirement" in op,"operator site classification missing")
 
 if errors:

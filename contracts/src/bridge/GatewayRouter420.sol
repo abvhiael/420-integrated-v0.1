@@ -11,6 +11,7 @@ import "../libraries/GenesisInterfaceIds420.sol";
 import "./BridgeIds420.sol";
 
 interface IBridgeRiskConsumer420 { function consume(bytes32, bytes32, bool, uint256) external; }
+interface IBridgeAccountingHealth420 { function movementHealthy(bytes32) external view returns (bool); }
 interface IBridgeTransferCreate420 {
     function create(bytes32, bytes32, address, address, uint256, bytes32, bytes32) external returns (bytes32);
     function createOutbound(bytes32, bytes32, address, bytes32, uint256, bytes32) external returns (bytes32);
@@ -58,6 +59,12 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(health.routeHealthy(routeId), "route unhealthy");
     }
 
+    function _requireAccountingHealthy(bytes32 assetId) internal view {
+        IBridgeAccountingHealth420 accounting =
+            IBridgeAccountingHealth420(_resolveRequired(BridgeIds420.ACCOUNTING_REGISTRY));
+        require(accounting.movementHealthy(assetId), "accounting unhealthy");
+    }
+
     function _requireRouteDirection(
         bytes32 routeId,
         bytes32 assetId,
@@ -86,6 +93,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
         _requireBridgeAsset(v.assetId);
         _requireRouteHealthy(v.routeId);
+        _requireAccountingHealthy(v.assetId);
         _requireRouteDirection(v.routeId, v.assetId, adapterId_, true);
 
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(v.routeId, v.assetId, true, v.amount);
@@ -125,6 +133,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(recipient.length != 0 && amount > 0, "transfer");
         _requireBridgeAsset(assetId);
         _requireRouteHealthy(routeId);
+        _requireAccountingHealthy(assetId);
         _requireRouteDirection(routeId, assetId, adapterId_, false);
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(routeId, assetId, false, amount);
         sourceMessageId = IBridgeAdapter420(adapter).initiateOutbound{ value: msg.value }(

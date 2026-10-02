@@ -24,7 +24,8 @@
         "SOLANA_MAINNET_GENESIS_HASH",
         "p.finalized",
         "p.genesisHash",
-        "p.programId"
+        "p.slot",
+        "p.gatewayProgram"
       ]
     },
     {

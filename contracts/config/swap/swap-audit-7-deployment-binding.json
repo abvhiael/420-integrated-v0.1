@@ -100,5 +100,7 @@
     "deployment_transactions": [],
     "registry_transactions": [],
     "binding_transactions": []
-  }
+  },
+  "interface_verifier": "scripts/verify-420swap-interface-v1.py",
+  "interface_verifier_required": true
 }

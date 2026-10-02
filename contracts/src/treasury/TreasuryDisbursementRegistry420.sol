@@ -53,7 +53,8 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         uint128 amount,
         uint64 notBefore,
         uint64 expiresAt,
-        bytes32 civicActionHash
+        bytes32 civicActionHash,
+        bytes32 purposeHash
     );
     event DisbursementExecuted(bytes32 indexed disbursementId, bytes32 vaultReleaseHash, address indexed executor);
     event DisbursementCancelled(bytes32 indexed disbursementId);
@@ -138,7 +139,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
             State.SCHEDULED,
             true
         );
-        emit DisbursementScheduled(id, budgetId, recipient, b.asset, amount, notBefore, expiresAt, civicActionHash);
+        emit DisbursementScheduled(id, budgetId, recipient, b.asset, amount, notBefore, expiresAt, civicActionHash, purposeHash);
     }
 
     function markExecuted(

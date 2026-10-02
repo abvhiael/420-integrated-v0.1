@@ -13,6 +13,10 @@ on:
       - '.github/workflows/420ai-audit.yml'
   workflow_dispatch:
 
+concurrency:
+  group: 420ai-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -38,8 +42,8 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Build contracts
-        run: forge build
+      - name: Build implemented 420AI contracts
+        run: forge build src/ai
       - name: Run implemented 420AI contract suites
         run: |
           forge test --match-path 'test/AIHardening420.t.sol'

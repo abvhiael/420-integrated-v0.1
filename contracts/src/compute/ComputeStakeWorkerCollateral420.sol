@@ -613,6 +613,7 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
                     address(this),
                     authorizationRef,
                     id,
+                    p.revision,
                     recipients[i],
                     i,
                     recipientAmounts[i]
@@ -628,11 +629,11 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
                 authorizationRef
             );
             vault.releaseObligation(
-                keccak256(abi.encode(SLASH_RELEASE_DOMAIN, authorizationRef, obligationId)),
+                keccak256(abi.encode(SLASH_RELEASE_DOMAIN, authorizationRef, p.revision, obligationId)),
                 obligationId
             );
             vault.claim(
-                keccak256(abi.encode(SLASH_CLAIM_DOMAIN, authorizationRef, obligationId)),
+                keccak256(abi.encode(SLASH_CLAIM_DOMAIN, authorizationRef, p.revision, obligationId)),
                 obligationId
             );
         }

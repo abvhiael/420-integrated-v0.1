@@ -98,40 +98,34 @@ contract BridgeRouteRegistry is GenesisResidentAccess420 {
         ) return false;
 
         BridgeChainRegistry420 chains = BridgeChainRegistry420(_resolveRequired(BridgeIds420.CHAIN_REGISTRY));
-        if (
-            chains.chainKeyByRouteId(r.sourceChainId) != b.sourceChainKey
-                || chains.chainKeyByRouteId(r.destinationChainId) != b.destinationChainKey
-                || !chains.isActiveRoute(b.sourceChainKey, r.sourceChainId)
-                || !chains.isActiveRoute(b.destinationChainKey, r.destinationChainId)
-        ) return false;
-
-        (
-            uint64 currentSourceRouteId,
-            bytes32 currentSourceNetworkId,
-            bytes32 sourceNativeAssetId,
-            bytes32 sourceVerifierFamily,
-            BridgeChainRegistry420.ChainFamily sourceFamily,
-            bool sourceActive
-        ) = chains.chains(b.sourceChainKey);
-        (
-            uint64 currentDestinationRouteId,
-            bytes32 currentDestinationNetworkId,
-            bytes32 destinationNativeAssetId,
-            bytes32 destinationVerifierFamily,
-            BridgeChainRegistry420.ChainFamily destinationFamily,
-            bool destinationActive
-        ) = chains.chains(b.destinationChainKey);
-
-        return sourceActive && destinationActive && currentSourceRouteId == r.sourceChainId
-            && currentDestinationRouteId == r.destinationChainId && currentSourceNetworkId == b.sourceNetworkId
-            && currentDestinationNetworkId == b.destinationNetworkId && sourceNativeAssetId != bytes32(0)
-            && destinationNativeAssetId != bytes32(0) && sourceVerifierFamily != bytes32(0)
-            && destinationVerifierFamily != bytes32(0) && sourceFamily != BridgeChainRegistry420.ChainFamily.NONE
-            && destinationFamily != BridgeChainRegistry420.ChainFamily.NONE;
+        return _bindingCurrent(chains, b.sourceChainKey, r.sourceChainId, b.sourceNetworkId)
+            && _bindingCurrent(chains, b.destinationChainKey, r.destinationChainId, b.destinationNetworkId);
     }
 
     function requireRouteChainsCurrent(bytes32 routeId) external view {
         _requireCurrentChainBinding(routeId);
+    }
+
+    function _bindingCurrent(
+        BridgeChainRegistry420 chains,
+        bytes32 chainKey,
+        uint64 routeChainId,
+        bytes32 expectedNetworkId
+    ) private view returns (bool) {
+        if (chains.chainKeyByRouteId(routeChainId) != chainKey || !chains.isActiveRoute(chainKey, routeChainId)) {
+            return false;
+        }
+        (
+            uint64 currentRouteChainId,
+            bytes32 currentNetworkId,
+            bytes32 nativeAssetId,
+            bytes32 verifierFamily,
+            BridgeChainRegistry420.ChainFamily family,
+            bool active
+        ) = chains.chains(chainKey);
+        return active && currentRouteChainId == routeChainId && currentNetworkId == expectedNetworkId
+            && nativeAssetId != bytes32(0) && verifierFamily != bytes32(0)
+            && family != BridgeChainRegistry420.ChainFamily.NONE;
     }
 
     function _activeChainIdentity(uint64 routeChainId) private view returns (bytes32 chainKey, bytes32 networkId) {

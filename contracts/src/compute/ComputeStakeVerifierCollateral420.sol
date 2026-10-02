@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "../interfaces/IComputeVerifierStakeSource420.sol";
+import "../interfaces/IComputeVerifierDisputeStakeHold420.sol";
 import "../interfaces/IComputeSlashableCollateral420.sol";
 import "../interfaces/IComputeSlashHold420.sol";
 import "../interfaces/IComputeSlashDistributionSource420.sol";
@@ -87,6 +88,7 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     bytes32 public immutable vaultId;
     address public immutable slashBindingAdmin;
     address public override slashAuthorization;
+    address public disputeStakeHold;
 
     mapping(bytes32 => Position) private _positions;
     mapping(bytes32 => mapping(uint64 => Tranche)) private _tranches;
@@ -102,9 +104,11 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
     error ExitNotReady();
     error InvalidExit();
     error UnauthorizedSlashBinding();
+    error InvalidDisputeStakeHoldBinding();
     error InvalidSlashDistribution();
 
     event SlashAuthorizationBound(address indexed slashAuthorization);
+    event DisputeStakeHoldBound(address indexed disputeStakeHold);
     event VerifierCollateralSlashed(
         bytes32 indexed positionId,
         bytes32 indexed authorizationRef,
@@ -179,6 +183,16 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
         ) revert UnauthorizedSlashBinding();
         slashAuthorization = slashAuthorization_;
         emit SlashAuthorizationBound(slashAuthorization_);
+    }
+
+    function bindDisputeStakeHold(address disputeStakeHold_) external {
+        if (
+            msg.sender != slashBindingAdmin
+                || disputeStakeHold != address(0)
+                || disputeStakeHold_.code.length == 0
+        ) revert InvalidDisputeStakeHoldBinding();
+        disputeStakeHold = disputeStakeHold_;
+        emit DisputeStakeHoldBound(disputeStakeHold_);
     }
 
     function systemName() external pure returns (string memory) {
@@ -398,9 +412,16 @@ contract ComputeStakeVerifierCollateral420 is I420System, IComputeVerifierStakeS
             slashAuthorization != address(0)
                 && IComputeSlashHold420(slashAuthorization).outstandingSlash(id) != 0
         ) revert InvalidExit();
+        Position storage p = _positions[id];
+        if (
+            disputeStakeHold != address(0)
+                && p.exists
+                && IComputeVerifierDisputeStakeHold420(disputeStakeHold)
+                    .verifierStakeHold(p.authority)
+        ) revert InvalidExit();
+
         entered = true;
 
-        Position storage p = _positions[id];
         if (
             !p.exists
                 || !p.active

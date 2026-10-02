@@ -103,7 +103,7 @@ def main():
 
     for n in range(1,8):
         need(f"GOV-AUDIT-{n} | COMPLETE" in qualification,f"qualification ledger missing completed GOV-AUDIT-{n}",errors)
-    need("GOV-AUDIT-8 | phase closeout in qualification" in qualification,"qualification ledger missing GOV-AUDIT-8 closeout state",errors)
+    need(("GOV-AUDIT-8 | phase closeout in qualification" in qualification) or ("GOV-AUDIT-8 | COMPLETE" in qualification),"qualification ledger missing GOV-AUDIT-8 closeout state",errors)
 
     for token in [
         "Operator Guide: apps/governance/operator-guide.md",

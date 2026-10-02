@@ -449,6 +449,172 @@ contract GrantsGenesis420Test {
         require(e.milestones.milestoneTotal(a) == 500, "replacement milestone capacity unavailable");
     }
 
+    function testPerAwardCapFailsClosed() public {
+        Env memory e = setup();
+        (bytes32 p,,) = makeProgram(e);
+        bytes32 app = submit(e, p, 800, 1);
+
+        bytes32 terms = keccak256("over-per-award-cap");
+        bytes32 awardId = e.awards.canonicalId(app, ALICE, 701, terms);
+        (bool created,) = address(e.awards)
+            .call(abi.encodeWithSelector(e.awards.createAward.selector, awardId, app, ALICE, uint128(701), terms));
+        require(!created, "per-award cap bypass");
+        require(e.programs.program(p).awarded == 0, "failed award changed program accounting");
+        require(e.awards.applicationAwarded(app) == 0, "failed award changed application accounting");
+    }
+
+    function testTreasuryBindingRejectsEveryCanonicalFieldMismatch() public {
+        Env memory e = setup();
+        (bytes32 p, bytes32 budget, bytes32 civic) = makeProgram(e);
+        bytes32 app = submit(e, p, 300, 1);
+        bytes32 a = award(e, app, 300);
+        bytes32 purpose = keccak256("treasury-field-matrix");
+        bytes32 m = claimedMilestone(e, a, 1, 300, purpose);
+        bytes32 d = keccak256("treasury-field-matrix-disbursement");
+
+        e.treasury
+            .set(
+                d,
+                keccak256("wrong-budget"),
+                ALICE,
+                ASSET,
+                300,
+                civic,
+                purpose,
+                ITreasuryDisbursementGrant420.State.SCHEDULED,
+                bytes32(0)
+            );
+        (bool badBudget,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        require(!badBudget, "budget mismatch accepted");
+
+        e.treasury
+            .set(
+                d,
+                budget,
+                DELEGATE,
+                ASSET,
+                300,
+                civic,
+                purpose,
+                ITreasuryDisbursementGrant420.State.SCHEDULED,
+                bytes32(0)
+            );
+        (bool badRecipient,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        require(!badRecipient, "recipient mismatch accepted");
+
+        e.treasury
+            .set(
+                d, budget, ALICE, ASSET, 299, civic, purpose, ITreasuryDisbursementGrant420.State.SCHEDULED, bytes32(0)
+            );
+        (bool badAmount,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        require(!badAmount, "amount mismatch accepted");
+
+        e.treasury
+            .set(
+                d,
+                budget,
+                ALICE,
+                ASSET,
+                300,
+                keccak256("wrong-civic"),
+                purpose,
+                ITreasuryDisbursementGrant420.State.SCHEDULED,
+                bytes32(0)
+            );
+        (bool badCivic,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        require(!badCivic, "civic mismatch accepted");
+
+        e.treasury
+            .set(
+                d,
+                budget,
+                ALICE,
+                ASSET,
+                300,
+                civic,
+                keccak256("wrong-purpose"),
+                ITreasuryDisbursementGrant420.State.SCHEDULED,
+                bytes32(0)
+            );
+        (bool badPurpose,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        require(!badPurpose, "purpose mismatch accepted");
+
+        e.treasury
+            .set(
+                d,
+                budget,
+                ALICE,
+                ASSET,
+                300,
+                civic,
+                purpose,
+                ITreasuryDisbursementGrant420.State.EXECUTED,
+                keccak256("release")
+            );
+        (bool badState,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.approve.selector, m, d));
+        require(!badState, "non-scheduled Treasury state accepted");
+
+        require(e.milestones.treasuryDisbursementMilestone(d) == bytes32(0), "failed mismatch bound disbursement");
+        require(e.milestones.milestone(m).state == GrantMilestoneRegistry420.State.CLAIMED, "mismatch changed state");
+    }
+
+    function testMilestoneDelegationIsDefaultDenyAndScopeBound() public {
+        Env memory e = setup();
+        (bytes32 p,,) = makeProgram(e);
+        bytes32 app = submit(e, p, 300, 1);
+        bytes32 a = award(e, app, 300);
+        bytes32 purpose = keccak256("delegated-milestone");
+        bytes32 m = e.milestones.canonicalId(a, 1, 300, purpose);
+        e.milestones.createMilestone(m, a, 1, 300, purpose);
+        bytes32 claimHash = keccak256("delegated-claim");
+
+        vm.prank(DELEGATE);
+        (bool defaultAllowed,) =
+            address(e.milestones).call(abi.encodeWithSelector(e.milestones.submitClaim.selector, m, claimHash));
+        require(!defaultAllowed, "milestone delegation default allow");
+
+        e.caps
+            .set(
+                DELEGATE,
+                GrantIds420.COMPONENT_GRANTS,
+                GrantIds420.ACTION_SUBMIT_MILESTONE,
+                e.auth.scopeAward(keccak256("wrong-award")),
+                true
+            );
+        vm.prank(DELEGATE);
+        (bool wrongScope,) =
+            address(e.milestones).call(abi.encodeWithSelector(e.milestones.submitClaim.selector, m, claimHash));
+        require(!wrongScope, "wrong award scope accepted");
+
+        e.caps
+            .set(
+                DELEGATE,
+                GrantIds420.COMPONENT_GRANTS,
+                GrantIds420.ACTION_SUBMIT_APPLICATION,
+                e.auth.scopeAward(a),
+                true
+            );
+        vm.prank(DELEGATE);
+        (bool wrongAction,) =
+            address(e.milestones).call(abi.encodeWithSelector(e.milestones.submitClaim.selector, m, claimHash));
+        require(!wrongAction, "wrong action capability accepted");
+
+        e.caps
+            .set(
+                DELEGATE,
+                GrantIds420.COMPONENT_GRANTS,
+                GrantIds420.ACTION_SUBMIT_MILESTONE,
+                e.auth.scopeAward(a),
+                true
+            );
+        vm.prank(DELEGATE);
+        e.milestones.submitClaim(m, claimHash);
+
+        GrantMilestoneRegistry420.Milestone memory claimed = e.milestones.milestone(m);
+        require(claimed.state == GrantMilestoneRegistry420.State.CLAIMED, "scoped milestone delegation failed");
+        require(claimed.claimHash == claimHash, "delegated claim hash mismatch");
+    }
+
     function testMilestoneTotalCannotExceedAward() public {
         Env memory e = setup();
         (bytes32 p,,) = makeProgram(e);

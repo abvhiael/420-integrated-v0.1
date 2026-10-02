@@ -5,6 +5,13 @@ import "../src/compute/ComputeStakeReleaseCandidateWiring420.sol";
 
 contract RCComponent420 {}
 
+contract RCEntitlements420 {
+    address public vault;
+    constructor(address vault_) {
+        vault = vault_;
+    }
+}
+
 contract RCCollateral420 {
     address public exitPolicies;
     address public slashPolicies;
@@ -157,7 +164,8 @@ contract ComputeStakeReleaseCandidateWiring420Test {
     RCComponent420 private workerRegistry;
     RCComponent420 private verifierRegistry;
     RCComponent420 private disputeEngine;
-    RCComponent420 private entitlements;
+    RCEntitlements420 private entitlements;
+    RCComponent420 private payerEscrowVault;
     RCComponent420 private workerCollateralVault;
     RCComponent420 private verifierCollateralVault;
     RCComponent420 private rewardVault;
@@ -180,7 +188,8 @@ contract ComputeStakeReleaseCandidateWiring420Test {
         workerRegistry = new RCComponent420();
         verifierRegistry = new RCComponent420();
         disputeEngine = new RCComponent420();
-        entitlements = new RCComponent420();
+        payerEscrowVault = new RCComponent420();
+        entitlements = new RCEntitlements420(address(payerEscrowVault));
         workerCollateralVault = new RCComponent420();
         verifierCollateralVault = new RCComponent420();
         rewardVault = new RCComponent420();
@@ -288,6 +297,20 @@ contract ComputeStakeReleaseCandidateWiring420Test {
         require(reverted, "cross-registry stake source accepted");
     }
 
+    function testPayerEscrowVaultCannotAliasStakeOrRewardVault() public {
+        ComputeStakeReleaseCandidateWiring420.Graph memory g = _graph();
+        g.payerEscrowVault = g.workerCollateralVault;
+
+        bool reverted;
+        try new ComputeStakeReleaseCandidateWiring420(g) returns (
+            ComputeStakeReleaseCandidateWiring420
+        ) {
+        } catch {
+            reverted = true;
+        }
+        require(reverted, "payer escrow reused collateral vault");
+    }
+
     function testRewardVaultCannotAliasCollateralVault() public {
         ComputeStakeReleaseCandidateWiring420.Graph memory g = _graph();
         g.rewardVault = g.workerCollateralVault;
@@ -312,6 +335,7 @@ contract ComputeStakeReleaseCandidateWiring420Test {
         g.verifierRegistry = _component(address(verifierRegistry));
         g.disputeEngine = _component(address(disputeEngine));
         g.canonicalEntitlements = _component(address(entitlements));
+        g.payerEscrowVault = _component(address(payerEscrowVault));
         g.workerCollateralVault = _component(address(workerCollateralVault));
         g.verifierCollateralVault = _component(address(verifierCollateralVault));
         g.rewardVault = _component(address(rewardVault));

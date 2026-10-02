@@ -47,8 +47,10 @@ def main():
             for x in expected:
                 if x not in vals: fail("missing binding "+x)
             rp=d.get("registry_publication",{})
-            if rp.get("api")!="registerComponent" or rp.get("version")!={"major":1,"minor":0,"patch":0} or rp.get("lifecycle")!="ACTIVE":
+            if rp.get("api")!="registerComponent" or rp.get("version")!={"major":1,"minor":0,"patch":0}:
                 fail("Registry publication drift")
+            if rp.get("staging_lifecycle")!="SUSPENDED" or rp.get("activation_lifecycle")!="ACTIVE":
+                fail("Registry lifecycle staging drift")
         if args.show:
             print("PAY-AUDIT-6 deterministic plan")
             print("timelock="+d["governance_timelock"])

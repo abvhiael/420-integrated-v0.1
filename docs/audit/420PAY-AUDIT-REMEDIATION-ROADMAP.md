@@ -6,7 +6,9 @@ Requirement numbering is stable. Do not renumber closed or blocked items.
 
 ## PAY-AUDIT-1 — canonical definition and dependency reconciliation
 
-**Status: IMPLEMENTED — exact-head qualification pending.**
+**Status: COMPLETE.**
+
+Durable qualification basis: source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed 420Pay audit qualification run #59 (`36965952679`) and Solidity Contracts run #4003 (`36965952612`). This bookkeeping state is valid only while the commit carrying it also passes the dedicated exact-head 420Pay audit workflow.
 
 Freeze the repository-grounded scope, classify the generic shared-interface dependency row, and preserve the contradiction between the frozen Genesis user-application catalogue (which omits 420Pay) and the Genesis contract/interface records (which include it).
 
@@ -18,7 +20,9 @@ Deliverables:
 
 ## PAY-AUDIT-2 — settlement authority and replay hardening
 
-**Status: IMPLEMENTED — exact-head qualification pending.**
+**Status: COMPLETE.**
+
+Durable qualification basis: source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed 420Pay audit qualification run #59 (`36965952679`) and Solidity Contracts run #4003 (`36965952612`). The caller-boundary, replay, build, focused Solidity, forbidden-primitive and Indexer checks all passed. This bookkeeping state is valid only while the commit carrying it also passes the dedicated exact-head 420Pay audit workflow.
 
 Requirements:
 - `PaymentRouter420` remains the payer/governance authorization boundary;
@@ -61,7 +65,9 @@ Required remediation:
 
 ## PAY-AUDIT-5 — Indexer/event-model integration
 
-**Status: IMPLEMENTED — exact-head qualification pending.**
+**Status: COMPLETE.**
+
+Durable qualification basis: source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed 420Pay audit qualification run #59 (`36965952679`), including the 420Indexer Pay reconciliation build/regressions. This bookkeeping state is valid only while the commit carrying it also passes the dedicated exact-head 420Pay audit workflow.
 
 The baseline Indexer referenced nonexistent Pay lifecycle events. The audit:
 - maps canonical Pay contract names to `420Pay`;

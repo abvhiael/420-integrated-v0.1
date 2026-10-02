@@ -28,6 +28,9 @@ on:
       - 'scripts/verify-treasury-audit-5-descriptor.py'
       - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
       - 'docs/architecture/decisions/TREASURY-AUDIT-4-VAULT-RELEASE-EVIDENCE-MODEL.md'
+      - 'docs/apps/treasury/operator-guide.md'
+      - 'docs/apps/treasury/reference.md'
+      - 'scripts/verify-treasury-audit-7-docs.py'
       - '.github/workflows/treasury-audit.yml'
   workflow_dispatch:
 
@@ -86,6 +89,9 @@ jobs:
 
       - name: Verify TREASURY-AUDIT-6 release materialization
         run: python3 scripts/verify-treasury-audit-6-release.py
+
+      - name: Verify TREASURY-AUDIT-7 documentation/operator closeout
+        run: python3 scripts/verify-treasury-audit-7-docs.py
 
       - name: Retain Treasury compiled artifact identities
         shell: bash

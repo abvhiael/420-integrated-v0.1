@@ -35,22 +35,25 @@ Any source/compiler/toolchain/ABI/immutable/runtime drift must fail qualificatio
 2. Verify the canonical `CanonicalSwapExecutor420` and shared `ReplayProtectionConsumer420` dependencies are the approved deployment candidates.
 3. Deploy the nine Pay residents using the exact constructor inputs retained in the package. `CanonicalSettlementAdapter420` additionally receives the exact canonical Swap executor address.
 4. Do not activate traffic before Registry publication and wiring validation complete.
-5. Publish each Pay resident through the canonical ProtocolRegistry component API.
-6. Apply the wiring graph below through GovernanceTimelock-authorized calls.
-7. Verify all runtime identities, Registry lifecycle/version, replay binding and privileged-call boundaries.
-8. Only after every postcondition passes may the deployment candidate be considered ready for PAY-AUDIT-7 live qualification.
+5. Publish each Pay resident through the canonical ProtocolRegistry component API with lifecycle `SUSPENDED`.
+6. Apply the wiring graph below through GovernanceTimelock-authorized calls while the Pay residents remain non-active.
+7. Verify all runtime identities, SUSPENDED Registry identity/version, replay binding, trusted-caller state and privileged-call boundaries.
+8. Transition each Pay resident to `ACTIVE` only after every wiring assertion passes.
+9. Re-verify ACTIVE resolution/version/runtime identity and run the operator smoke before enabling Pay-dependent traffic.
 
 ## Registry publication
 
 For each of the nine Pay residents call:
 
-`ProtocolRegistry.registerComponent(componentId, implementation, Version(1,0,0), Lifecycle.ACTIVE)`.
+`ProtocolRegistry.registerComponent(componentId, implementation, Version(1,0,0), Lifecycle.SUSPENDED)`.
+
+After all governed wiring and identity checks pass, call `ProtocolRegistry.setComponentLifecycle(componentId, Lifecycle.ACTIVE)` for each Pay resident.
 
 Postconditions:
 - `component(componentId).implementation` equals the exact deployed instance.
 - `component(componentId).runtimeCodeHash` equals `EXTCODEHASH(implementation)`.
-- lifecycle is `ACTIVE`.
-- `resolve(componentId)` returns the exact instance.
+- before activation, lifecycle is `SUSPENDED`, `isActive(componentId)` is false, and `resolve(componentId)` fails closed;
+- after the complete binding graph is verified, lifecycle is `ACTIVE` and `resolve(componentId)` returns the exact instance.
 - `supportsVersion(componentId, 1.0.0)` is true.
 - deployed runtime code hash equals the retained PAY-AUDIT-6 package hash for that contract.
 

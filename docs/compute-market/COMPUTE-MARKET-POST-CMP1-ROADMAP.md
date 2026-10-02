@@ -223,6 +223,9 @@ Bind the harmed-payer recipient to the exact canonical ComputeEscrow entitlement
 Run the frozen hostile-economic campaign across solvency, isolation, exit races, slash finality, replay, duplicate withdrawal/slash/reward, hostile authorization, reentrancy and failure atomicity.
 
 ### CMP-1.5.12 — Release candidate
+**Status: implementation/repository-readiness qualification in progress; live deployment blocked.**
+
+Freeze the accumulated CMP-1.5 graph, pin runtime/dependency bindings, prepare truthful ProtocolRegistry publication/deployment evidence, and keep live fields fail-closed until real testnet deployment exists.
 
 ### CMP-1.5.13 — Phase closeout
 

@@ -1,43 +1,115 @@
 {
-  "schema": "420pay-audit-qualification-evidence-v1",
+  "schema": "420pay-audit-qualification-evidence-v2",
   "component": "420Pay",
+  "audit_branch": "audit/420pay-complete-20261001-r3",
+  "current_main_base_sha": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
   "qualified_steps": [
     "PAY-AUDIT-1",
     "PAY-AUDIT-2",
+    "PAY-AUDIT-3",
     "PAY-AUDIT-5"
   ],
-  "source_qualification": {
-    "sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
-    "pay_audit_workflow": {
-      "name": "420Pay audit qualification",
-      "run_number": 59,
-      "run_id": 36965952679,
-      "conclusion": "success",
-      "checks": [
-        "exact-head verification",
-        "static Pay verification",
-        "Solidity formatting",
-        "Pay and settlement-boundary build",
-        "focused 420Pay Solidity qualification",
-        "forbidden primitive scan",
-        "420Indexer Pay reconciliation build and tests"
-      ]
+  "qualification_records": [
+    {
+      "steps": [
+        "PAY-AUDIT-1",
+        "PAY-AUDIT-2",
+        "PAY-AUDIT-5"
+      ],
+      "qualification_level": "Level 1 / durable bookkeeping requalification",
+      "implementation_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+      "bookkeeping_sha": "8995285db1d00961a3ef78785d7f177e3e8203de",
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 68,
+        "run_id": 36970777683,
+        "conclusion": "success"
+      },
+      "solidity_workflow": {
+        "name": "Solidity Contracts",
+        "run_number": 4040,
+        "run_id": 36970777671,
+        "conclusion": "success"
+      }
     },
-    "solidity_workflow": {
-      "name": "Solidity Contracts",
-      "run_number": 4003,
-      "run_id": 36965952612,
-      "conclusion": "success"
+    {
+      "steps": [
+        "PAY-AUDIT-3"
+      ],
+      "qualification_level": "Level 1 — per-roadmap-step fast qualification",
+      "implementation_sha": "452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8",
+      "evidence_sha": "7a79e91d29b2deecf023c2a98533f773416f590f",
+      "implementation_summary": [
+        "Reconciled Decision #4 offline invoice creation with mandatory online acceptance without inventing signature-based canonical state authority.",
+        "Added explicit governed INCLUDED, CERTIFIED, SETTLED and FAILED payment lifecycle transitions with fail-closed predecessor rules.",
+        "Added PAY-AUDIT-3 lifecycle, authority and terminal-state regression coverage.",
+        "Updated protocol architecture, audit verifier, implementation status and app-specific CI scope."
+      ],
+      "files_changed": [
+        "contracts/src/pay/PaymentRegistry420.sol",
+        "contracts/test/PayAudit3Lifecycle420.t.sol",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/420PAY-IMPLEMENTATION-STATUS.md",
+        "docs/audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/audit/420PAY-COMPLETE-AUDIT-20261001.md",
+        "scripts/verify-420pay-audit.py",
+        ".github/workflows/420pay-audit.yml"
+      ],
+      "requirements_satisfied": [
+        "Offline invoice root remains presentation/integrity commitment; canonical invoice creation requires bound merchant online acceptance.",
+        "Every modeled V1 lifecycle state is reachable through explicit canonical lifecycle/refund paths.",
+        "Invalid lifecycle predecessor transitions fail closed.",
+        "FAILED cannot be resurrected into included/finalized/settled state.",
+        "Lifecycle mutation remains Genesis-governed.",
+        "Third parties cannot use an offline invoice root to manufacture canonical invoice state."
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 91,
+        "run_id": 37043694408,
+        "job_id": 110959749763,
+        "conclusion": "success",
+        "checks": [
+          "exact-head verification",
+          "static Pay verification",
+          "Solidity formatting",
+          "Pay and settlement-boundary build",
+          "PAY-AUDIT-3 Level 1 Solidity qualification",
+          "forbidden primitive scan",
+          "420Indexer Pay reconciliation build and tests"
+        ]
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4128,
+        "run_id": 37043694394,
+        "conclusion": "success",
+        "note": "Not required as a separate Level 1 gate, but it also passed on the exact PAY-AUDIT-3 implementation SHA."
+      },
+      "security_adversarial_results": [
+        "invalid predecessor transitions rejected",
+        "terminal FAILED state resurrection rejected",
+        "non-governance lifecycle mutation rejected",
+        "offline invoice root does not grant third-party creation authority",
+        "forbidden primitive scan passed"
+      ],
+      "milestone_status": "No Level 2 milestone triggered by this app-scoped lifecycle/authority completion.",
+      "intentionally_deferred": [
+        "Level 2 broader app integration until a documented/meaningful Pay integration milestone",
+        "Level 3 repository-wide app-phase closeout until the accumulated 420Pay audit phase is ready",
+        "live deployment/testnet binding under PAY-AUDIT-7",
+        "independent security audit under PAY-AUDIT-8"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion"
     }
-  },
-  "bookkeeping_head_policy": {
-    "mode": "SELF_QUALIFYING_EXACT_HEAD_CI",
-    "required_workflow": "420Pay audit qualification",
-    "rule": "PAY-AUDIT-1, PAY-AUDIT-2 and PAY-AUDIT-5 are formally COMPLETE only if the commit carrying this evidence and the COMPLETE roadmap statuses itself passes the dedicated exact-head 420Pay audit workflow.",
-    "reason": "The workflow is attached to and verifies the exact commit SHA, avoiding an impossible evidence-file update that would continuously change the qualified SHA."
+  ],
+  "evidence_only_commit_policy": {
+    "mode": "QUALIFIED_IMPLEMENTATION_SHA_WITH_NONRECURSIVE_EVIDENCE_COMMITS",
+    "rule": "Evidence-only commits may reference an already-qualified implementation SHA without rerunning qualification when they change no executable code, tests, workflows, dependencies, configuration, runtime/generated artifacts, interfaces, deployment state, or substantive requirements."
   },
   "remaining_blockers_not_closed_by_this_evidence": [
-    "PAY-AUDIT-3 offline invoice authorization and payment lifecycle semantics",
     "PAY-AUDIT-4 split execution, sponsorship execution boundary, accounting export and related semantic decisions",
     "PAY-AUDIT-6 deterministic deployment package and Registry publication",
     "PAY-AUDIT-7 live production-equivalent testnet qualification",

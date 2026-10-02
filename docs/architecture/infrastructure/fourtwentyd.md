@@ -152,11 +152,19 @@ Consensus and execution divergence is a fail-closed recovery condition.
 
 ## Consensus-system calls
 
-Protocol-owned state transitions such as qualified reward/slash/system outcomes use the canonical consensus-system-call path rather than ordinary user transactions.
+Protocol-owned state transitions such as qualified validator lifecycle, exit, rotation, reward and slash outcomes use the canonical consensus-system-call path rather than ordinary user transactions.
 
-`fourtwentyd` is responsible for producing the qualified deterministic consensus-side inputs. `node420` is responsible for applying the corresponding execution state transition under the custom Engine/system-call integration.
+`fourtwentyd` now has a production derivation layer in `consensus/systemcall/stake_derivation.go`. It deterministically converts finalized Stake outcomes into the five frozen ValidatorRegistry/RewardController routes, applies integer-only reward/slash arithmetic, canonicalizes participant and validator ordering, and produces exact Solidity ABI calldata before the batch root is committed.
 
-The consensus daemon must not bypass this boundary by impersonating a normal EOA, paying ordinary user gas, or directly mutating execution storage outside the execution client.
+`consensus/engine/stake_systemcalls.go` wires that constructor into both local payload building and received-payload validation. Both paths derive the same batch before using `engine420_submitSystemCallsV1`; neither accepts a UI, Indexer, RPC projection, governance call, or ordinary transaction as reward/lifecycle/slash authority.
+
+The chain-global gateway sequence remains canonical execution state. `consensus/systemcall/sequence_state.go` persists the last canonical execution block/hash and applied sequence using an atomic local journal. A restart may continue only when that journal matches the independently verified canonical parent. A reorg or lost journal requires explicit recovery from verified parent/gateway state; local persistence is never allowed to overrule canonical execution.
+
+A staged, rejected, or abandoned payload must not advance the durable sequence cursor. The child sequence anchor is committed only after the caller accepts the child as canonical/finalized.
+
+`node420` remains responsible for applying the corresponding execution transition under the custom Engine/system-call integration. The consensus daemon must not bypass this boundary by impersonating a normal EOA, paying ordinary user gas, or directly mutating execution storage outside the execution client.
+
+See `docs/architecture/decisions/STAKE-AUDIT-2-SYSTEM-CALL-DERIVATION.md` for exact ordering, reward/slash arithmetic, ABI vectors and restart/reorg semantics.
 
 ## Consensus P2P
 
@@ -463,11 +471,15 @@ Co-locating processes on one machine does not erase their authority boundary.
 - **FTD-010** — startup readiness must validate network identity, execution compatibility, consensus state, and signing safety before duties begin.
 - **FTD-011** — restart/recovery must preserve finalized-history and slash-evidence safety; live finalized history must not be rewritten as an operational shortcut.
 - **FTD-012** — failure of derived infrastructure, AI, storage, oracle, Explorer, or Indexer must not alter `fourtwentyd` consensus rules or liveness prerequisites.
+- **FTD-013** — Stake consensus-system calls must be derived deterministically from finalized consensus outcomes using the frozen routes and exact ABI payloads.
+- **FTD-014** — local system-call sequence persistence must fail closed on canonical-parent mismatch and may move backward only after explicit recovery from independently verified canonical execution state.
+- **FTD-015** — staged/rejected payloads must not advance the durable system-call sequence cursor.
 
 ## Implementation references
 
 - `consensus/cmd/fourtwentyd/main.go`
 - `consensus/engine/`
+- `consensus/systemcall/`
 - `consensus/storage/`
 - `consensus/p2p/`
 - `consensus/devnet/`

@@ -138,3 +138,21 @@ func TestHandlerRejectsMutationMethods(t *testing.T) {
 	Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodPost, "/", strings.NewReader("x")))
 	if rr.Code != http.StatusMethodNotAllowed { t.Fatalf("status=%d", rr.Code) }
 }
+
+
+func TestExplorerScriptContainsStakeRewardWorkflow(t *testing.T) {
+	rr:=httptest.NewRecorder()
+	Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/app.js",nil))
+	if rr.Code!=http.StatusOK{t.Fatalf("status=%d",rr.Code)}
+	body:=rr.Body.String()
+	for _,marker:=range []string{"Stake & rewards","/v1/stake/activity","stakeActivityTable","rebuildable Indexer projection","ValidatorRegistry / RewardController"}{
+		if !strings.Contains(body,marker){t.Fatalf("app.js missing STAKE-AUDIT-6 marker %q",marker)}
+	}
+	rr=httptest.NewRecorder()
+	Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/",nil))
+	if rr.Code!=http.StatusOK{t.Fatalf("shell status=%d",rr.Code)}
+	if !strings.Contains(rr.Body.String(),"#/stake")||!strings.Contains(rr.Body.String(),"Stake & Rewards"){
+		t.Fatalf("Explorer shell missing Stake navigation: %s",rr.Body.String())
+	}
+	if strings.Contains(body,"eth_get")||strings.Contains(body,"INDEXER_RPC_URL"){t.Fatal("Stake workflow must remain an Explorer API consumer")}
+}

@@ -1,0 +1,76 @@
+name: 420Stake STAKE-AUDIT-1
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/StakeDependencyAccess420.sol'
+      - 'contracts/src/libraries/StakeIds420.sol'
+      - 'contracts/config/interfaces/dependency-matrix.json'
+      - 'contracts/config/interfaces/stake-dependency-model.json'
+      - 'contracts/config/predeploy/storage-init.json'
+      - 'contracts/test/StakeValidatorGenesis420.t.sol'
+      - 'contracts/test/ValidatorEligibility420.t.sol'
+      - 'scripts/verify-stake-dependency-model.py'
+      - 'docs/architecture/decisions/STAKE-AUDIT-1-INTERFACE-LAYER.md'
+      - '.github/workflows/stake-audit-1.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Stake dependency reconciliation
+        run: python scripts/verify-stake-dependency-model.py
+      - name: Verify frozen Genesis interface layer remains valid
+        run: python scripts/verify-genesis-interface-layer.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile ValidatorRegistry dependency boundary
+        working-directory: contracts
+        run: forge build src/system/ValidatorRegistry.sol
+      - name: Run Stake lifecycle, custody and shared-safety qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeValidatorGenesis420.t.sol' -vvv
+      - name: Run validator eligibility regression
+        working-directory: contracts
+        run: forge test --match-path 'test/ValidatorEligibility420.t.sol' -vvv
+
+  level-2-stake-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run retained consensus-system-call regression
+        working-directory: contracts
+        run: forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vvv

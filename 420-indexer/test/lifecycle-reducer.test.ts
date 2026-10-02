@@ -93,3 +93,39 @@ test('does not synthesize Civic v1 cancellation from non-canonical or unsupporte
   assert.equal(snapshots[0].state, 'ACTIVE');
   assert.equal(snapshots[0].eventName, 'CivicProposalRegistered');
 });
+
+
+test('420Stake lifecycle uses canonical ValidatorRegistry events and status fields', () => {
+  const validatorId = '0x' + '42'.repeat(32);
+  const snapshots = reduceProtocolLifecycle420([
+    event('420Stake', 'ValidatorRegistered', 1n, { validatorId }),
+    event('420Stake', 'ConsensusStateApplied', 2n, { validatorId, previousStatus: 1n, newStatus: 3n }),
+    event('420Stake', 'ExitNoticeApplied', 3n, { validatorId, noticeRotation: 4n, exitEligibleRotation: 5n }),
+    event('420Stake', 'ConsensusStateApplied', 4n, { validatorId, previousStatus: 3n, newStatus: 8n }),
+    event('420Stake', 'ValidatorBondWithdrawn', 5n, { validatorId })
+  ]);
+  assert.equal(snapshots.length, 1);
+  assert.equal(snapshots[0].state, 'COMPLETED');
+  assert.equal(snapshots[0].terminal, true);
+  assert.equal(snapshots[0].eventName, 'ValidatorBondWithdrawn');
+});
+
+test('420Stake slash status remains reconstructable without inventing terminality', () => {
+  const validatorId = '0x' + '24'.repeat(32);
+  const snapshots = reduceProtocolLifecycle420([
+    event('420Stake', 'ValidatorRegistered', 1n, { validatorId }),
+    event('420Stake', 'SlashApplied', 2n, { validatorId, resultingStatus: 6n })
+  ]);
+  assert.equal(snapshots.length, 1);
+  assert.equal(snapshots[0].state, 'FAILED');
+  assert.equal(snapshots[0].terminal, false);
+  assert.equal(snapshots[0].eventName, 'SlashApplied');
+});
+
+test('obsolete synthetic Stake events do not fabricate validator lifecycle state', () => {
+  const snapshots = reduceProtocolLifecycle420([
+    event('420Stake', 'StakeCreated', 1n, { stakeId: '0x01' }),
+    event('420Stake', 'StakeActivated', 2n, { stakeId: '0x01' })
+  ]);
+  assert.deepEqual(snapshots, []);
+});

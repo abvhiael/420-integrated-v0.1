@@ -1,0 +1,77 @@
+{
+  "address": "0x0000000000000000000000000000000000000420",
+  "constructorArguments": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429"
+  },
+  "contractName": "RewardController",
+  "genesisBalanceWei": "0",
+  "genesisConfigHash": null,
+  "invariants": [
+    "genesis alloc.code uses exact materialized deployed runtime bytecode, never creation bytecode",
+    "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)",
+    "runtime differs from compiler template only at compiler-reported immutable references",
+    "mutable storage is read from compiler-declared root slots after documented genesis post-init calls",
+    "storageRoot is the eth_getProof storageHash of that exact local materialized storage state"
+  ],
+  "limitations": [
+    "Anvil is used only as a deterministic constructor/post-init materialization fixture.",
+    "This record is offline Genesis evidence and is not live-chain deployment evidence.",
+    "STAKE-AUDIT-8 remains responsible for production-equivalent testnet code/storage/binding verification."
+  ],
+  "postInit": [
+    {
+      "signature": "bindConsensusSystemCaller(address)",
+      "values": [
+        "0x000000000000000000000000000000000000043c"
+      ]
+    }
+  ],
+  "runtimeArtifact": "contracts/artifacts/RewardController.json",
+  "runtimeCodeBytes": 2018,
+  "runtimeCodeHash": "0xc1468f48a745511b99577d9381462fc75b2357725d58c59cd5102cc6fd0df30d",
+  "schema": "420-stake-predeploy-state-v1",
+  "sourceBlobSha1": "012c9e24b4e7a37ca89aad1c887529a19c70bb16",
+  "status": "STAKE_AUDIT_7_FINAL_PREDEPLOY_STATE",
+  "storage": {
+    "0x0000000000000000000000000000000000000000000000000000000000000000": "0x000000000000000000000001000000000000000000000000000000000000043c"
+  },
+  "storageLayoutRoots": {
+    "consensusSystemCaller": {
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    },
+    "consensusSystemCallerBound": {
+      "offset": 20,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    "grossAttentionIssued": {
+      "offset": 0,
+      "slot": "2",
+      "type": "t_uint256"
+    },
+    "grossDevelopmentIssued": {
+      "offset": 0,
+      "slot": "3",
+      "type": "t_uint256"
+    },
+    "grossSecurityIssued": {
+      "offset": 0,
+      "slot": "1",
+      "type": "t_uint256"
+    },
+    "rewardApplied": {
+      "offset": 0,
+      "slot": "5",
+      "type": "t_mapping(t_uint64,t_bool)"
+    },
+    "validatorAccrued": {
+      "offset": 0,
+      "slot": "4",
+      "type": "t_mapping(t_address,t_uint256)"
+    }
+  },
+  "storageRoot": "0x6c057db5efdf4eea1c5348e7cea01706e04eaa263525d7b204dfd72b80045c51",
+  "storageSlotCount": 1
+}

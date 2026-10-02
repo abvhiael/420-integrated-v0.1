@@ -1,0 +1,105 @@
+{
+  "schema": "420-stake-dependency-model-v1",
+  "status": "CANONICAL_FOR_STAKE_AUDIT_1",
+  "app": "420Stake",
+  "runtime_contract": "ValidatorRegistry",
+  "normative_runtime_dependencies": [
+    "ProtocolRegistry",
+    "GovernanceAuthority",
+    "SystemSafety",
+    "GenesisInitialization"
+  ],
+  "decisions": [
+    {
+      "dependency": "ProtocolRegistry",
+      "classification": "REQUIRED_DIRECT",
+      "matrix_action": "RETAIN",
+      "basis": "ValidatorRegistry resolves the canonical SystemSafety component through IProtocolRegistry420 and rejects inactive or runtime-code-hash-mismatched dependencies."
+    },
+    {
+      "dependency": "GovernanceAuthority",
+      "classification": "REQUIRED_DIRECT_EXISTING_AUTHORITY",
+      "matrix_action": "RETAIN",
+      "basis": "Stake system contracts retain constructor-bound GovernanceTimelock authority through SystemAccess for governance-owned bindings and reserve administration. Consensus-owned lifecycle, slash and reward outcomes remain separately restricted to ConsensusSystemCall420."
+    },
+    {
+      "dependency": "PauseRegistry",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Stake has no generic directional application route. Canonical activation and withdrawal emergency behavior is expressed by SystemSafety action classes while consensus and withdrawal-address authorization remain independent."
+    },
+    {
+      "dependency": "HealthRegistry",
+      "classification": "CONSENSUS_OWNED",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Validator liveness, readiness and eligibility are consensus lifecycle state. A generic HealthRegistry must not override fourtwentyd validator adjudication."
+    },
+    {
+      "dependency": "IdentityCredentials",
+      "classification": "NOT_APPLICABLE_CURRENT_GENESIS",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Frozen Genesis validator registration requires unique owner and BLS key, real collateral and lifecycle qualification; no Identity credential is a canonical eligibility requirement."
+    },
+    {
+      "dependency": "CapabilityRegistry",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Stake exposes direct owner or withdrawal authority plus governance and native consensus authority. It has no delegated operational capability surface."
+    },
+    {
+      "dependency": "SystemSafety",
+      "classification": "REQUIRED_DIRECT",
+      "matrix_action": "RETAIN",
+      "basis": "Frozen system-safety semantics require new activation to be NORMAL_ONLY and mature withdrawal to be WITHDRAWAL_ONLY. ValidatorRegistry enforces both through registry-resolved ISystemSafety420."
+    },
+    {
+      "dependency": "GenesisInitialization",
+      "classification": "REQUIRED_DIRECT_INTROSPECTION",
+      "matrix_action": "RETAIN",
+      "basis": "ValidatorRegistry exposes IGenesisInitializable420-compatible configuration hash, initialization status and initialization version. Exact predeploy storage materialization remains STAKE-AUDIT-7."
+    },
+    {
+      "dependency": "Migration",
+      "classification": "RELEASE_LAYER",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "The frozen Stake contracts are non-proxy predeploys with no runtime migration entry point. Historical implementation and version migration is a deployment and registry provenance concern."
+    },
+    {
+      "dependency": "SignedEnvelope",
+      "classification": "NOT_APPLICABLE",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "Validator mutations are native transactions or authenticated consensus system calls; Stake has no relayed off-chain signed-command execution path."
+    },
+    {
+      "dependency": "ReplayProtection",
+      "classification": "LOCAL_AND_CONSENSUS_MECHANISMS",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "ConsensusSystemCall420 enforces strict sequence replay protection; ValidatorRegistry records single-use slash evidence and RewardController records single-use reward blocks."
+    },
+    {
+      "dependency": "ChainContext",
+      "classification": "CONSENSUS_AND_TRANSACTION_CONTEXT",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "ConsensusSystemCall420 validates chainId, block and parent for consensus writes. Direct user registration and withdrawal execute in native EVM transaction context."
+    },
+    {
+      "dependency": "MetadataCommitment",
+      "classification": "LOCAL_COMMITMENT",
+      "matrix_action": "REMOVE_FROM_RUNTIME_MATRIX",
+      "basis": "ValidatorRegistry stores an opaque metadata commitment in the canonical validator record. It does not delegate validator authority or mutable metadata ownership to IMetadataCommitment420."
+    }
+  ],
+  "invariants": [
+    "Governance cannot forge consensus-owned validator lifecycle, slash, rotation or reward outcomes.",
+    "A transition into ACTIVE fails closed unless registry-resolved SystemSafety permits NORMAL_ONLY activation.",
+    "Mature bond withdrawal fails closed unless registry-resolved SystemSafety permits WITHDRAWAL_ONLY execution.",
+    "SystemSafety resolution fails closed on inactive, missing or runtime-code-hash-mismatched registry entries.",
+    "Generic health, identity, pause or capability systems cannot silently become validator-consensus authority.",
+    "Genesis initialization configuration is inspectable on ValidatorRegistry; exact storage materialization is deferred only to STAKE-AUDIT-7.",
+    "Replay protection remains at the authority that owns each replay domain rather than adding a second mutable global nonce authority."
+  ],
+  "follow_up": {
+    "STAKE-AUDIT-2": "Preserve ConsensusSystemCall420 chain, context and sequence authority while implementing deterministic fourtwentyd lifecycle, slash, rotation and reward call derivation.",
+    "STAKE-AUDIT-7": "Materialize the exact ValidatorRegistry ProtocolRegistry binding and genesisConfigHash in deterministic frozen predeploy storage."
+  }
+}

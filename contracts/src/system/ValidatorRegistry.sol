@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./ConsensusSystemAccess420.sol";
+import "./StakeDependencyAccess420.sol";
 import "../interfaces/I420System.sol";
 
 interface ICommunityValidatorReserve420 {
@@ -11,7 +12,7 @@ interface ICommunityValidatorReserve420 {
 /// @notice Canonical execution-layer validator registry and native 420 bond vault.
 /// @dev fourtwentyd remains authoritative for committee selection, proposer scheduling,
 /// finality, randomness and slash adjudication. Economic balances here are backed by native 420 custody.
-contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
+contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420, I420System {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
     uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
     uint256 public constant MIN_OWNED_BOND = 21_000 ether;
@@ -84,6 +85,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     mapping(bytes32 => Validator) private _validators;
     mapping(address => bytes32) public ownerValidatorId;
     mapping(bytes32 => bool) public blsPubkeyHashUsed;
+    mapping(bytes32 => bool) public slashEvidenceApplied;
 
     mapping(bytes32 => uint256) public pendingProtocolCredit;
     mapping(bytes32 => address) public pendingCreditBeneficiary;
@@ -113,7 +115,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     event ValidatorBondWithdrawn(bytes32 indexed validatorId, address indexed withdrawal, uint256 ownedAmount, uint256 recycledCredit);
     event ConsensusStateApplied(bytes32 indexed validatorId, Status previousStatus, Status newStatus, uint64 effectiveSlot, uint64 activationRotation, uint64 scheduledExitRotation, uint64 cooldownUntilRotation);
     event ExitNoticeApplied(bytes32 indexed validatorId, uint64 noticeRotation, uint64 exitEligibleRotation);
-    event SlashApplied(bytes32 indexed validatorId, SlashOffense offense, uint8 correlationTier, uint256 ownedSlashed, uint256 creditSlashed, bytes32 evidenceHash);
+    event SlashApplied(bytes32 indexed validatorId, SlashOffense offense, uint8 correlationTier, uint256 ownedSlashed, uint256 creditSlashed, bytes32 evidenceHash, Status resultingStatus);
     event RotationSnapshotApplied(uint64 indexed rotation, uint256 eligibleCount, uint16 candidateTarget, uint16 activeTarget);
     event ActiveTargetChanged(uint16 previousTarget, uint16 newTarget, uint64 indexed rotation, bool safetyOverride);
 
@@ -129,6 +131,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     error InvalidRotation();
     error InvalidEligibleSnapshot();
     error InvalidEvidence();
+    error EvidenceAlreadyApplied();
     error InvalidActiveCount();
     error ActivationDelayActive();
     error ExitNoticeMissing();
@@ -144,7 +147,10 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
     error NotWithdrawalAddress();
     error BondAlreadyFull();
 
-    constructor(address timelock_) ConsensusSystemAccess420(timelock_) {}
+    constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)
+        ConsensusSystemAccess420(timelock_)
+        StakeDependencyAccess420(registry_, genesisConfigHash_)
+    {}
 
     function systemName() external pure returns (string memory) { return "ValidatorRegistry"; }
     function protocolVersion() external pure returns (uint32) { return 3; }
@@ -292,6 +298,9 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         Status previous = v.status;
         if (!_validTransition(previous, newStatus)) revert InvalidTransition();
         _validateLifecycleTransition(v, previous, newStatus, activationRotation, scheduledExitRotation, cooldownUntilRotation);
+        if (newStatus == Status.ACTIVE && previous != Status.ACTIVE) {
+            _requireStakeActivationAllowed();
+        }
 
         bool wasEligible = _countsAsEligible(previous);
         bool nowEligible = _countsAsEligible(newStatus);
@@ -325,6 +334,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         Status resultingStatus
     ) external onlyConsensusSystem {
         if (evidenceHash == bytes32(0)) revert InvalidEvidence();
+        if (slashEvidenceApplied[evidenceHash]) revert EvidenceAlreadyApplied();
         Validator storage v = _requireValidator(validatorId);
         if (resultingStatus != v.status && !_validTransition(v.status, resultingStatus)) revert InvalidTransition();
 
@@ -346,6 +356,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         }
 
         if (ownedSlashed > v.ownedBond || creditSlashed > v.protocolCredit) revert InvalidBondComposition();
+        slashEvidenceApplied[evidenceHash] = true;
         bool wasEligible = _countsAsEligible(v.status);
         v.ownedBond -= ownedSlashed;
         v.protocolCredit -= creditSlashed;
@@ -369,7 +380,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
             _returnProtocolCredit(validatorId, creditSlashed);
         }
 
-        emit SlashApplied(validatorId, offense, correlationTier, ownedSlashed, creditSlashed, evidenceHash);
+        emit SlashApplied(validatorId, offense, correlationTier, ownedSlashed, creditSlashed, evidenceHash, resultingStatus);
     }
 
     /// @notice Withdraws operator-owned collateral and recycles all remaining protocol credit after consensus hold expires.
@@ -377,6 +388,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, I420System {
         Validator storage v = _requireValidator(validatorId);
         if (msg.sender != v.withdrawal) revert NotWithdrawalAddress();
         if (v.status != Status.WITHDRAWABLE) revert InvalidTransition();
+        _requireStakeWithdrawalAllowed();
 
         ownedAmount = v.ownedBond;
         recycledCredit = v.protocolCredit;

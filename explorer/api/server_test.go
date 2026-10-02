@@ -23,6 +23,7 @@ type fakeIndexer struct {
 	tx      model.TransactionRecord
 	receipt model.ReceiptRecord
 	service decoder.ServiceVersion
+	stake   indexerapi.StakeActivityPage
 }
 
 func (f *fakeIndexer) Health(context.Context) (indexerapi.HealthResponse, error) { return f.health, nil }
@@ -32,6 +33,7 @@ func (f *fakeIndexer) Transaction(context.Context, string) (model.TransactionRec
 func (f *fakeIndexer) Receipt(context.Context, string) (model.ReceiptRecord, error) { return f.receipt, nil }
 func (f *fakeIndexer) BlockLogs(context.Context, uint64) ([]model.LogRecord, error) { return f.logs, nil }
 func (f *fakeIndexer) ServiceVersion(context.Context, string, uint32) (decoder.ServiceVersion, error) { return f.service, nil }
+func (f *fakeIndexer) StakeActivity(context.Context, string, string, uint32) (indexerapi.StakeActivityPage, error) { return f.stake, nil }
 
 func newTestServer(t *testing.T, f *fakeIndexer) *Server {
 	t.Helper()
@@ -220,4 +222,26 @@ func TestConsensusRouteFailsClosedWhenProviderUnavailable(t *testing.T) {
 	rr:=httptest.NewRecorder()
 	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/consensus",nil))
 	if rr.Code==http.StatusOK { t.Fatalf("consensus route unexpectedly succeeded: %s",rr.Body.String()) }
+}
+
+
+func TestStakeActivityRoute(t *testing.T) {
+	validatorID := "0x" + strings.Repeat("a", 64)
+	f := &fakeIndexer{stake:indexerapi.StakeActivityPage{
+		Meta:indexerapi.PageMeta{ChainID:420,SnapshotHeight:12,SnapshotHash:"0x12",SafeHeight:11,FinalizedHeight:10},
+		ValidatorID:validatorID,
+		Records:[]model.StakeActivityRecord{{
+			ChainID:420,BlockNumber:10,BlockHash:"0x10",TransactionHash:"0xtx",
+			ContractAddress:indexerapi.StakeValidatorRegistryAddress,EventName:"ValidatorRegistered",
+			ValidatorID:validatorID,Finality:model.FinalityFinalized,
+		}},
+		CanonicalAuthority:false,
+	}}
+	s:=newTestServer(t,f)
+	rr:=httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr,httptest.NewRequest(http.MethodGet,"/v1/stake/activity?validatorId="+validatorID+"&limit=25",nil))
+	if rr.Code!=http.StatusOK{t.Fatalf("status=%d body=%s",rr.Code,rr.Body.String())}
+	var got explorerservice.StakeActivityView
+	if err:=json.Unmarshal(rr.Body.Bytes(),&got);err!=nil{t.Fatal(err)}
+	if got.Count!=1||got.Records[0].EventName!="ValidatorRegistered"||got.CanonicalAuthority{t.Fatalf("unexpected Stake view: %+v",got)}
 }

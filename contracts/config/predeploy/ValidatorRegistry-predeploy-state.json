@@ -1,0 +1,156 @@
+{
+  "address": "0x0000000000000000000000000000000000000423",
+  "constructorArguments": {
+    "genesisConfigHash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "protocolRegistry": "0x0000000000000000000000000000000000000434"
+  },
+  "contractName": "ValidatorRegistry",
+  "genesisBalanceWei": "0",
+  "genesisConfigHash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac",
+  "invariants": [
+    "genesis alloc.code uses exact materialized deployed runtime bytecode, never creation bytecode",
+    "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)",
+    "runtime differs from compiler template only at compiler-reported immutable references",
+    "mutable storage is read from compiler-declared root slots after documented genesis post-init calls",
+    "storageRoot is the eth_getProof storageHash of that exact local materialized storage state"
+  ],
+  "limitations": [
+    "Anvil is used only as a deterministic constructor/post-init materialization fixture.",
+    "This record is offline Genesis evidence and is not live-chain deployment evidence.",
+    "STAKE-AUDIT-8 remains responsible for production-equivalent testnet code/storage/binding verification."
+  ],
+  "postInit": [
+    {
+      "signature": "bindConsensusSystemCaller(address)",
+      "values": [
+        "0x000000000000000000000000000000000000043c"
+      ]
+    },
+    {
+      "signature": "bindCommunityValidatorReserve(address)",
+      "values": [
+        "0x0000000000000000000000000000000000000425"
+      ]
+    }
+  ],
+  "runtimeArtifact": "contracts/artifacts/ValidatorRegistry.json",
+  "runtimeCodeBytes": 14088,
+  "runtimeCodeHash": "0x9f67ac365954920c3e06a73a0af5cb2f114bf504108cec9ea3a516bc8d32731b",
+  "schema": "420-stake-predeploy-state-v1",
+  "sourceBlobSha1": "e534624f007024d65fcbb9e0f730bafbb8077767",
+  "status": "STAKE_AUDIT_7_FINAL_PREDEPLOY_STATE",
+  "storage": {
+    "0x0000000000000000000000000000000000000000000000000000000000000000": "0x000000000000000000000001000000000000000000000000000000000000043c",
+    "0x0000000000000000000000000000000000000000000000000000000000000007": "0x0000000000000000000000010000000000000000000000000000000000000425"
+  },
+  "storageLayoutRoots": {
+    "_validators": {
+      "offset": 0,
+      "slot": "1",
+      "type": "t_mapping(t_bytes32,t_struct(Validator)765_storage)"
+    },
+    "activeTarget": {
+      "offset": 0,
+      "slot": "15",
+      "type": "t_uint16"
+    },
+    "blsPubkeyHashUsed": {
+      "offset": 0,
+      "slot": "3",
+      "type": "t_mapping(t_bytes32,t_bool)"
+    },
+    "communityValidatorReserve": {
+      "offset": 0,
+      "slot": "7",
+      "type": "t_address"
+    },
+    "communityValidatorReserveBound": {
+      "offset": 20,
+      "slot": "7",
+      "type": "t_bool"
+    },
+    "consensusSystemCaller": {
+      "offset": 0,
+      "slot": "0",
+      "type": "t_address"
+    },
+    "consensusSystemCallerBound": {
+      "offset": 20,
+      "slot": "0",
+      "type": "t_bool"
+    },
+    "eligibleValidatorCount": {
+      "offset": 0,
+      "slot": "14",
+      "type": "t_uint256"
+    },
+    "lastRotationSnapshot": {
+      "offset": 5,
+      "slot": "15",
+      "type": "t_uint64"
+    },
+    "ownerValidatorId": {
+      "offset": 0,
+      "slot": "2",
+      "type": "t_mapping(t_address,t_bytes32)"
+    },
+    "pendingActiveTarget": {
+      "offset": 2,
+      "slot": "15",
+      "type": "t_uint16"
+    },
+    "pendingCreditBeneficiary": {
+      "offset": 0,
+      "slot": "6",
+      "type": "t_mapping(t_bytes32,t_address)"
+    },
+    "pendingProtocolCredit": {
+      "offset": 0,
+      "slot": "5",
+      "type": "t_mapping(t_bytes32,t_uint256)"
+    },
+    "pendingTargetSnapshots": {
+      "offset": 4,
+      "slot": "15",
+      "type": "t_uint8"
+    },
+    "slashEvidenceApplied": {
+      "offset": 0,
+      "slot": "4",
+      "type": "t_mapping(t_bytes32,t_bool)"
+    },
+    "totalOwnedCustody": {
+      "offset": 0,
+      "slot": "8",
+      "type": "t_uint256"
+    },
+    "totalOwnedSlashed": {
+      "offset": 0,
+      "slot": "11",
+      "type": "t_uint256"
+    },
+    "totalOwnedWithdrawn": {
+      "offset": 0,
+      "slot": "13",
+      "type": "t_uint256"
+    },
+    "totalPendingProtocolCredit": {
+      "offset": 0,
+      "slot": "10",
+      "type": "t_uint256"
+    },
+    "totalProtocolCreditCustody": {
+      "offset": 0,
+      "slot": "9",
+      "type": "t_uint256"
+    },
+    "totalProtocolCreditRecycled": {
+      "offset": 0,
+      "slot": "12",
+      "type": "t_uint256"
+    }
+  },
+  "storageRoot": "0xe2296a7ff3c2cf889461acdd0a8348f78661a0db1bc7477142ac461ce20fe988",
+  "storageSlotCount": 2
+}

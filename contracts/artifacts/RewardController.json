@@ -1,0 +1,518 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "ATTENTION_TREASURY",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "CANONICAL_CONSENSUS_SYSTEM_CALL",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEVELOPMENT_TREASURY",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_ACTIVE_VALIDATORS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "blockNumber",
+          "type": "uint64"
+        },
+        {
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "participants",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "proposerAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "perParticipantAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "attentionAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "developmentAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "applyConsensusReward",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "bindConsensusSystemCaller",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "consensusSystemCaller",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "consensusSystemCallerBound",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "grossAttentionIssued",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "grossDevelopmentIssued",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "grossSecurityIssued",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "name": "rewardApplied",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "validatorAccrued",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "ConsensusSystemCallerBound",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "blockNumber",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "proposerAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "participantAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "attentionAmount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "developmentAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "RewardApplied",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "ConsensusSystemCallerAlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ConsensusSystemCallerNotBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidConsensusSystemCaller",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidParticipantSet",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidProposer",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidRewardBlock",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotConsensusSystemCaller",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RewardAlreadyApplied",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "authority": "offline_materialized_predeploy_not_live_deployment_evidence",
+  "canonicalAddress": "0x0000000000000000000000000000000000000420",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "compilerDeployedBytecodeTemplate": "0x6080604090808252600480361015610015575f80fd5b5f3560e01c91826307dd2e4b1461067f575081632ae9c600146106645781632d1eb6d714610648578163388140da1461062a57816338e08d89146105ed5781635bba1f16146105c85781635d887462146105ad5781636ed953c91461058f5781639a1fdd791461054c578163ac11b5e114610254578163b5467c041461021f578163bdd3c9e114610201578163bf1b3cd51461013257508063c27dcaab14610116578063cf691845146100ef5763f979c9d5146100d0575f80fd5b346100eb575f3660031901126100eb57602090516104218152f35b5f80fd5b50346100eb575f3660031901126100eb575f5490516001600160a01b039091168152602090f35b50346100eb575f3660031901126100eb576020905161043c8152f35b9050346100eb5760203660031901126100eb5761014d61073d565b906001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000811633036101f3575f549260ff8460a01c166101e357169261043c84036101d65750506001600160a81b0319168117600160a01b175f9081557fa5aa80ef7382955d962fde8d8abe4c4db1b2939f3c326b8b4eece92bb2382c4d9080a2005b5163d48a5fb960e01b8152fd5b845163c0d5891960e01b81528390fd5b5082516282b42960e81b8152fd5b82346100eb575f3660031901126100eb576020906002549051908152f35b82346100eb5760203660031901126100eb576020916001600160a01b0361024461073d565b165f528252805f20549051908152f35b9050346100eb5760e03660031901126100eb5761026f610726565b916024359260018060a01b03928385168095036100eb576044359267ffffffffffffffff948585116100eb57366023860112156100eb5784830135908682116100eb576024860195602436918460051b0101116100eb576064359560843560a4359560c435975f5460ff8160a01c161561053c578561043c33149182159261052e575b505061051f578a169943168a0361050e57895f526020600560205260ff875f2054166104ff578b156104f0576001948587018088116104dd57601e106104cd5795939291905f5b85811061043757508b5f526005602052875f208660ff198254161790558c5f5281602052875f2061036b8c8254610753565b90555f965f955b8087106103ee57508d8d7fae18fd01a17597538ecc00e53160b731f191d8172d52086d7ad0ca16a76816ef60808f8f8f8f8f8f6103b96103b28388610753565b8254610753565b90556103c783600254610753565b6002556103d684600354610753565b600355815194855260208501528301526060820152a3005b9091929394959761042a8689928561040f61040a8e888e610774565b610798565b165f528787528c5f20610423838254610753565b9055610753565b9801959493929190610372565b8d8861044d61040a848a8a9b9d9798999a610774565b169081159081156104c3575b506104b3579087915f5b848b84831061047d57505050500196949392919096610339565b8394955061040a83610492928d969596610774565b16146104a357880190889291610463565b8a51634515059360e01b81528690fd5b8951634515059360e01b81528590fd5b905081148f610459565b8751634515059360e01b81528390fd5b601184634e487b7160e01b5f525260245ffd5b508551634100ac0360e01b8152fd5b5085516307691a9f60e21b8152fd5b855160016277d85960e11b03198152fd5b50855163318e931b60e01b8152fd5b90915016331415855f6102f2565b8751631999cd4960e11b81528390fd5b82346100eb575f3660031901126100eb57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b82346100eb575f3660031901126100eb576020906003549051908152f35b82346100eb575f3660031901126100eb5760209051601e8152f35b82346100eb575f3660031901126100eb5760209060ff5f5460a01c1690519015158152f35b82346100eb5760203660031901126100eb5760209067ffffffffffffffff610613610726565b165f526005825260ff815f20541690519015158152f35b82346100eb575f3660031901126100eb576020906001549051908152f35b82346100eb575f3660031901126100eb57602090516104228152f35b82346100eb575f3660031901126100eb576020905160028152f35b8382346100eb575f3660031901126100eb578183019083821067ffffffffffffffff831117610713575081526010825260206f2932bbb0b93221b7b73a3937b63632b960811b60208401528151928391602083528151918260208501525f5b8381106106fd5750505f83830185015250601f01601f19168101030190f35b81810183015187820187015286945082016106de565b604190634e487b7160e01b5f525260245ffd5b6004359067ffffffffffffffff821682036100eb57565b600435906001600160a01b03821682036100eb57565b9190820180921161076057565b634e487b7160e01b5f52601160045260245ffd5b91908110156107845760051b0190565b634e487b7160e01b5f52603260045260245ffd5b356001600160a01b03811681036100eb579056fea2646970667358221220126b453a80f232c378931a6c3f3c31888e6e817988b2b306b6b9b219d02381ae64736f6c63430008180033",
+  "constructor": {
+    "strategy": "DIRECT_GENESIS_RUNTIME_AND_STORAGE_MATERIALIZATION",
+    "types": [
+      "address"
+    ],
+    "values": [
+      "0x0000000000000000000000000000000000000429"
+    ]
+  },
+  "contractName": "RewardController",
+  "contractSchema": "420-stake-reward-controller-predeploy-v1",
+  "deployedBytecode": "0x6080604090808252600480361015610015575f80fd5b5f3560e01c91826307dd2e4b1461067f575081632ae9c600146106645781632d1eb6d714610648578163388140da1461062a57816338e08d89146105ed5781635bba1f16146105c85781635d887462146105ad5781636ed953c91461058f5781639a1fdd791461054c578163ac11b5e114610254578163b5467c041461021f578163bdd3c9e114610201578163bf1b3cd51461013257508063c27dcaab14610116578063cf691845146100ef5763f979c9d5146100d0575f80fd5b346100eb575f3660031901126100eb57602090516104218152f35b5f80fd5b50346100eb575f3660031901126100eb575f5490516001600160a01b039091168152602090f35b50346100eb575f3660031901126100eb576020905161043c8152f35b9050346100eb5760203660031901126100eb5761014d61073d565b906001600160a01b037f0000000000000000000000000000000000000000000000000000000000000429811633036101f3575f549260ff8460a01c166101e357169261043c84036101d65750506001600160a81b0319168117600160a01b175f9081557fa5aa80ef7382955d962fde8d8abe4c4db1b2939f3c326b8b4eece92bb2382c4d9080a2005b5163d48a5fb960e01b8152fd5b845163c0d5891960e01b81528390fd5b5082516282b42960e81b8152fd5b82346100eb575f3660031901126100eb576020906002549051908152f35b82346100eb5760203660031901126100eb576020916001600160a01b0361024461073d565b165f528252805f20549051908152f35b9050346100eb5760e03660031901126100eb5761026f610726565b916024359260018060a01b03928385168095036100eb576044359267ffffffffffffffff948585116100eb57366023860112156100eb5784830135908682116100eb576024860195602436918460051b0101116100eb576064359560843560a4359560c435975f5460ff8160a01c161561053c578561043c33149182159261052e575b505061051f578a169943168a0361050e57895f526020600560205260ff875f2054166104ff578b156104f0576001948587018088116104dd57601e106104cd5795939291905f5b85811061043757508b5f526005602052875f208660ff198254161790558c5f5281602052875f2061036b8c8254610753565b90555f965f955b8087106103ee57508d8d7fae18fd01a17597538ecc00e53160b731f191d8172d52086d7ad0ca16a76816ef60808f8f8f8f8f8f6103b96103b28388610753565b8254610753565b90556103c783600254610753565b6002556103d684600354610753565b600355815194855260208501528301526060820152a3005b9091929394959761042a8689928561040f61040a8e888e610774565b610798565b165f528787528c5f20610423838254610753565b9055610753565b9801959493929190610372565b8d8861044d61040a848a8a9b9d9798999a610774565b169081159081156104c3575b506104b3579087915f5b848b84831061047d57505050500196949392919096610339565b8394955061040a83610492928d969596610774565b16146104a357880190889291610463565b8a51634515059360e01b81528690fd5b8951634515059360e01b81528590fd5b905081148f610459565b8751634515059360e01b81528390fd5b601184634e487b7160e01b5f525260245ffd5b508551634100ac0360e01b8152fd5b5085516307691a9f60e21b8152fd5b855160016277d85960e11b03198152fd5b50855163318e931b60e01b8152fd5b90915016331415855f6102f2565b8751631999cd4960e11b81528390fd5b82346100eb575f3660031901126100eb57517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b82346100eb575f3660031901126100eb576020906003549051908152f35b82346100eb575f3660031901126100eb5760209051601e8152f35b82346100eb575f3660031901126100eb5760209060ff5f5460a01c1690519015158152f35b82346100eb5760203660031901126100eb5760209067ffffffffffffffff610613610726565b165f526005825260ff815f20541690519015158152f35b82346100eb575f3660031901126100eb576020906001549051908152f35b82346100eb575f3660031901126100eb57602090516104228152f35b82346100eb575f3660031901126100eb576020905160028152f35b8382346100eb575f3660031901126100eb578183019083821067ffffffffffffffff831117610713575081526010825260206f2932bbb0b93221b7b73a3937b63632b960811b60208401528151928391602083528151918260208501525f5b8381106106fd5750505f83830185015250601f01601f19168101030190f35b81810183015187820187015286945082016106de565b604190634e487b7160e01b5f525260245ffd5b6004359067ffffffffffffffff821682036100eb57565b600435906001600160a01b03821682036100eb57565b9190820180921161076057565b634e487b7160e01b5f52601160045260245ffd5b91908110156107845760051b0190565b634e487b7160e01b5f52603260045260245ffd5b356001600160a01b03811681036100eb579056fea2646970667358221220126b453a80f232c378931a6c3f3c31888e6e817988b2b306b6b9b219d02381ae64736f6c63430008180033",
+  "genesisConfigHash": null,
+  "immutableReferences": {
+    "1975": [
+      {
+        "length": 32,
+        "start": 344
+      },
+      {
+        "length": 32,
+        "start": 1376
+      }
+    ]
+  },
+  "postInit": [
+    {
+      "signature": "bindConsensusSystemCaller(address)",
+      "values": [
+        "0x000000000000000000000000000000000000043c"
+      ]
+    }
+  ],
+  "runtimeCodeBytes": 2018,
+  "runtimeCodeHash": "0xc1468f48a745511b99577d9381462fc75b2357725d58c59cd5102cc6fd0df30d",
+  "schema": "420-stake-predeploy-artifact-v1",
+  "source": "contracts/src/system/RewardController.sol",
+  "sourceBlobSha1": "012c9e24b4e7a37ca89aad1c887529a19c70bb16",
+  "status": "STAKE_AUDIT_7_ARTIFACT_READY",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 23,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "consensusSystemCaller",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 25,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "consensusSystemCallerBound",
+        "offset": 20,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 124,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "grossSecurityIssued",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 126,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "grossAttentionIssued",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 128,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "grossDevelopmentIssued",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 132,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "validatorAccrued",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_address,t_uint256)"
+      },
+      {
+        "astId": 136,
+        "contract": "src/system/RewardController.sol:RewardController",
+        "label": "rewardApplied",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_uint64,t_bool)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_mapping(t_uint64,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_uint64",
+        "label": "mapping(uint64 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

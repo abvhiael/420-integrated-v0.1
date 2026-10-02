@@ -243,6 +243,31 @@ async function assets() {
   ]) + `<div class="panel"><p class="muted">Native and token movement projected from qualified indexed transactions and logs.</p>${assetTable(qualifiedTransfers)}</div>`;
 }
 
+function stakeEventLabel(eventName) {
+  if (eventName === 'RewardApplied') return 'RewardApplied · validator reward';
+  if (eventName === 'SlashApplied') return 'SlashApplied · validator slash';
+  if (eventName === 'ConsensusStateApplied') return 'ConsensusStateApplied · lifecycle';
+  return eventName;
+}
+
+function stakeActivityTable(records) {
+  if (!records.length) return '<p class="muted">No indexed staking or reward activity for this filter.</p>';
+  return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Event</th><th>Validator / address</th><th>Finality</th><th>Transaction</th></tr></thead><tbody>${records.map(r => {
+    const subject = r.validatorId || (r.addresses?.[0] ?? '—');
+    return `<tr><td>${link(`#/blocks/${r.blockNumber}`,r.blockNumber)}</td><td><span class="badge">${esc(stakeEventLabel(r.eventName))}</span></td><td title="${esc(subject)}">${mono(short(subject))}</td><td>${finalityBadge(r.finality)}</td><td>${link(`#/transactions/${r.transactionHash}`,short(r.transactionHash))}</td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+async function stake() {
+  const params = new URLSearchParams();
+  params.set('limit','100');
+  const view = await api(`/v1/stake/activity?${params.toString()}`);
+  const records = view.records || [];
+  app.innerHTML = title('Stake & rewards', 'derived from canonical ValidatorRegistry / RewardController logs') + stats([
+    ['Snapshot',view.meta?.snapshotHeight],['Safe',view.meta?.safeHeight],['Finalized',view.meta?.finalizedHeight],['Events',view.count ?? records.length]
+  ]) + `<div class="panel"><p class="muted">This is a rebuildable Indexer projection. Validator eligibility, balances, rewards and finality remain canonical only in consensus/execution state.</p>${stakeActivityTable(records)}</div>`;
+}
+
 function assetTable(rows) {
   if (!rows.length) return '<p class="muted">No indexed asset transfers available.</p>';
   return `<div class="table-wrap"><table><thead><tr><th>Block</th><th>Asset</th><th>Kind</th><th>Token ID</th><th>Amount</th><th>From</th><th>To</th><th>Tx</th></tr></thead><tbody>${rows.map(({t,label,blockLink,txLink,fromLink,toLink}) => `<tr><td>${blockLink}</td><td title="${label}">${label}</td><td><span class="badge">${esc(String(t.assetKind || '').toUpperCase())}</span></td><td>${t.tokenId ? mono(t.tokenId) : '—'}</td><td>${mono(t.amount)}</td><td>${fromLink}</td><td>${toLink}</td><td>${txLink}</td></tr>`).join('')}</tbody></table></div>`;
@@ -318,6 +343,7 @@ async function route() {
     if (root === 'registry' && parts[1]) return await registryService(decodeURIComponent(parts[1]));
     if (root === 'registry') return await registry();
     if (root === 'assets') return await assets();
+    if (root === 'stake') return await stake();
     if (root === 'consensus') return await consensus();
     if (root === 'status') return await statusPage();
     app.innerHTML = title('Not found') + '<div class="panel"><p class="muted">Unknown Explorer route.</p></div>';

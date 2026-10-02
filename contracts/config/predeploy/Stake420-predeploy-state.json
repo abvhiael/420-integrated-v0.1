@@ -1,0 +1,33 @@
+{
+  "address": "0x000000000000000000000000000000000000043a",
+  "constructorArguments": {
+    "rewardController": "0x0000000000000000000000000000000000000420",
+    "validatorRegistry": "0x0000000000000000000000000000000000000423"
+  },
+  "contractName": "Stake420",
+  "genesisBalanceWei": "0",
+  "genesisConfigHash": null,
+  "invariants": [
+    "genesis alloc.code uses exact materialized deployed runtime bytecode, never creation bytecode",
+    "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)",
+    "runtime differs from compiler template only at compiler-reported immutable references",
+    "mutable storage is read from compiler-declared root slots after documented genesis post-init calls",
+    "storageRoot is the eth_getProof storageHash of that exact local materialized storage state"
+  ],
+  "limitations": [
+    "Anvil is used only as a deterministic constructor/post-init materialization fixture.",
+    "This record is offline Genesis evidence and is not live-chain deployment evidence.",
+    "STAKE-AUDIT-8 remains responsible for production-equivalent testnet code/storage/binding verification."
+  ],
+  "postInit": [],
+  "runtimeArtifact": "contracts/artifacts/Stake420.json",
+  "runtimeCodeBytes": 3978,
+  "runtimeCodeHash": "0x7de1130ee3db2866b6ea0a88de44d5699cec5444a0010c03e9a6b4f13a4be8ea",
+  "schema": "420-stake-predeploy-state-v1",
+  "sourceBlobSha1": "e26b6ec304bb9db2742796821caa0e549a145bba",
+  "status": "STAKE_AUDIT_7_FINAL_PREDEPLOY_STATE",
+  "storage": {},
+  "storageLayoutRoots": {},
+  "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+  "storageSlotCount": 0
+}

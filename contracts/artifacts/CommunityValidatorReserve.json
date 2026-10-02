@@ -1,0 +1,668 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    },
+    {
+      "inputs": [],
+      "name": "GENESIS_RESERVE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_CREDIT_PER_VALIDATOR",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "assignCredit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "assignedCredit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "validatorRegistry_",
+          "type": "address"
+        }
+      ],
+      "name": "bindValidatorRegistry",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "creditBeneficiary",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "fundCredit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "fundedCredit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "reclaimUnregisteredCredit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "releaseCredit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "reserveInvariant",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "returnCredit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalAssigned",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalFunded",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reason",
+          "type": "bytes32"
+        }
+      ],
+      "name": "treasuryTransfer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unencumberedBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "validatorRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "validatorRegistryBound",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "CreditAssigned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "beneficiary",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "CreditFunded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "CreditReleased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "validatorId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "CreditReturned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reason",
+          "type": "bytes32"
+        }
+      ],
+      "name": "TreasuryTransfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "validatorRegistry",
+          "type": "address"
+        }
+      ],
+      "name": "ValidatorRegistryBound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CreditAlreadyFunded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "CreditNotAssigned",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "FundedCreditLocked",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidCredit",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotValidatorRegistry",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReservedCollateral",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "authority": "offline_materialized_predeploy_not_live_deployment_evidence",
+  "canonicalAddress": "0x0000000000000000000000000000000000000425",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "compilerDeployedBytecodeTemplate": "0x608060409080825260049182361015610022575b5050503615610020575f80fd5b005b5f915f3560e01c90816307dd2e4b14610b23575080630fe0182914610aff57806328c34ccf14610ada5780632ae9c60014610abf5780633867e4c214610a9c57806339163c45146109df57806341c085f9146109b75780634303103f1461098757806346bdda021461096a5780634ae40f1514610942578063595abce11461091d578063745534451461078d5780638819a7a71461064657806388a58954146105fd5780639850de4d146105095780639a1fdd79146104c6578063ad044f49146104a8578063ec327a0314610344578063eec7d89f14610223578063f376ebbb146101fc5763f93f3ed20361001357346101f85760203660031901126101f8576001600160a01b0392803591907f0000000000000000000000000000000000000000000000000000000000000000851633036101eb5783549460ff8660a01c16156101dc57838552600260205282852054156101cd5784951692833b156101c957602485928385519687948593639d98d89f60e01b85528401525af19081156101c057506101ad5750f35b6101b690610bd7565b6101bd5780f35b80fd5b513d84823e3d90fd5b8480fd5b50905163057a5db560e51b8152fd5b5090516306d5542760e51b8152fd5b90516282b42960e81b8152fd5b5080fd5b50346101f857816003193601126101f857905490516001600160a01b039091168152602090f35b5060208060031936011261034057825484359290336001600160a01b0382161480159190610331575b5061032257828452600282528084205434158015610319575b61030957946102987f1b0a392a98275c2066521f3951062b620ea896a4659bae5f4d666a7cedf120549495963490610bff565b85875260028452828720556102af34600554610bff565b600555848652600183528186206102c7348254610bff565b90556102d4348254610bff565b90558385526001825280852054156102ef575b51348152a280f35b6003825280852080546001600160a01b03191690556102e7565b81516356749e3960e11b81528690fd5b50803411610265565b516306d5542760e51b81528490fd5b60ff915060a01c16155f61024c565b8280fd5b50829034610340576060366003190112610340576001600160a01b039180358381169291908390036101c957602435937f00000000000000000000000000000000000000000000000000000000000000001633036101eb57821561049a576103aa610c20565b841161048d578480808087875af13d156104885767ffffffffffffffff3d81811161047557845191601f8201601f19908116603f011683019081118382101761046257855281528660203d92013e5b1561042e5750519182527f1946dbebab6e28f12be16d43ca1ba1612d08952697e00392bd8691afb32ac770602060443593a380f35b6020606492519162461bcd60e51b8352820152600f60248201526e1d1c985b9cd9995c8819985a5b1959608a1b6044820152fd5b604185634e487b7160e01b5f525260245ffd5b604184634e487b7160e01b5f525260245ffd5b6103f9565b905162c24d8f60e01b8152fd5b905163d92e233d60e01b8152fd5b50346101f857816003193601126101f8576020906005549051908152f35b50346101f857816003193601126101f857517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b50346101f857602080600319360112610340578335917f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031633036105ef5782845260028252808420546105e05782845260018252808420549081156105d1578495847fbc55fddbad3bc69eb5a693441f78435b6973263e45fe19f0f0930e62484aaa4a959652600184528682812055600384528187206bffffffffffffffffffffffff60a01b81541690556105c7838254610bff565b905551908152a280f35b5163057a5db560e51b81528590fd5b5163640aa89760e01b81528490fd5b516282b42960e81b81528490fd5b5082903461034057826003193601126103405760209250600554915480831115928361062e575b5050519015158152f35b61063c919293504792610bff565b1115908380610624565b508234610340576060366003190112610340576001600160a01b0360243581811693833593909185900361078957604435927f00000000000000000000000000000000000000000000000000000000000000001633036101eb5783158015610781575b8015610779575b8015610766575b6107475783865260016020528186205415801590610755575b610747576106dc610c20565b831161048d57916020917fa1ab3daf25edc1353a58499fa6969323d15b190f49d4028ff5dd327e39c6f4f09385885260018452828289205560038452818820876bffffffffffffffffffffffff60a01b82541617905561073d838254610c4b565b905551908152a380f35b90516356749e3960e11b8152fd5b5060026020528186205415156106d0565b50690472698b413b4320000083116106b7565b5082156106b0565b5084156106a9565b5f80fd5b50823461078957602080600319360112610789576001600160a01b0392823592907f0000000000000000000000000000000000000000000000000000000000000000851633036109115760ff5f5460a01c161561090457835f5260018352805f2054916003845285825f20541695831580156108fc575b6101cd57855f5260028552825f20546108ee574784116108e057855f526002855283835f205561083684600554610c4b565b6005555f541690813b15610789578560445f92868651958694859363d0225a6f60e01b85528401528b60248401525af180156108d65761089d575b50519081527f9fcbf05827a0710508d212685c01e448003f5e3637afedd57d4ae1318718889f9190a380f35b7f9fcbf05827a0710508d212685c01e448003f5e3637afedd57d4ae1318718889f93929196506108cc90610bd7565b5f95909192610871565b82513d5f823e3d90fd5b50905162c24d8f60e01b8152fd5b50905162709c2160e91b8152fd5b508615610804565b516306d5542760e51b8152fd5b516282b42960e81b8152fd5b5034610789575f36600319011261078957602090516a053613af307172a98000008152f35b83823461078957602036600319011261078957602091355f5260018252805f20549051908152f35b838234610789575f36600319011261078957602091549051908152f35b83823461078957602036600319011261078957602091355f526003825260018060a01b03815f2054169051908152f35b83823461078957602036600319011261078957602091355f5260028252805f20549051908152f35b8382346107895760203660031901126107895781356001600160a01b038181169391849003610789577f00000000000000000000000000000000000000000000000000000000000000001633036101eb575f549160ff8360a01c16610a8f578315610a825750506001600160a81b0319168117600160a01b175f9081557fac95d317014874c37d8cbc736bda22218a82b91d99a96957dbcdeb08bb4a56d59080a2005b5163d92e233d60e01b8152fd5b5163682a906560e01b8152fd5b5034610789575f36600319011261078957602090610ab8610c20565b9051908152f35b5034610789575f366003190112610789576020905160028152f35b5034610789575f3660031901126107895760209060ff5f5460a01c1690519015158152f35b5034610789575f3660031901126107895760209051690472698b413b432000008152f35b828534610789575f366003190112610789578183019083821067ffffffffffffffff831117610bc4575081526019825260207f436f6d6d756e69747956616c696461746f72526573657276650000000000000060208401528151928391602083528151918260208501525f5b838110610bae5750505f83830185015250601f01601f19168101030190f35b8181018301518782018701528694508201610b8f565b604190634e487b7160e01b5f525260245ffd5b67ffffffffffffffff8111610beb57604052565b634e487b7160e01b5f52604160045260245ffd5b91908203918211610c0c57565b634e487b7160e01b5f52601160045260245ffd5b610c2f60045460055490610bff565b479080821115610c4557610c4291610bff565b90565b50505f90565b91908201809211610c0c5756fea26469706673582212204e4bd4997ca24fe25c6252f290ec4b116628b9adbf5dafaf34bda1f74090460564736f6c63430008180033",
+  "constructor": {
+    "strategy": "DIRECT_GENESIS_RUNTIME_AND_STORAGE_MATERIALIZATION",
+    "types": [
+      "address"
+    ],
+    "values": [
+      "0x0000000000000000000000000000000000000429"
+    ]
+  },
+  "contractName": "CommunityValidatorReserve",
+  "contractSchema": "420-stake-community-validator-reserve-predeploy-v1",
+  "deployedBytecode": "0x608060409080825260049182361015610022575b5050503615610020575f80fd5b005b5f915f3560e01c90816307dd2e4b14610b23575080630fe0182914610aff57806328c34ccf14610ada5780632ae9c60014610abf5780633867e4c214610a9c57806339163c45146109df57806341c085f9146109b75780634303103f1461098757806346bdda021461096a5780634ae40f1514610942578063595abce11461091d578063745534451461078d5780638819a7a71461064657806388a58954146105fd5780639850de4d146105095780639a1fdd79146104c6578063ad044f49146104a8578063ec327a0314610344578063eec7d89f14610223578063f376ebbb146101fc5763f93f3ed20361001357346101f85760203660031901126101f8576001600160a01b0392803591907f0000000000000000000000000000000000000000000000000000000000000429851633036101eb5783549460ff8660a01c16156101dc57838552600260205282852054156101cd5784951692833b156101c957602485928385519687948593639d98d89f60e01b85528401525af19081156101c057506101ad5750f35b6101b690610bd7565b6101bd5780f35b80fd5b513d84823e3d90fd5b8480fd5b50905163057a5db560e51b8152fd5b5090516306d5542760e51b8152fd5b90516282b42960e81b8152fd5b5080fd5b50346101f857816003193601126101f857905490516001600160a01b039091168152602090f35b5060208060031936011261034057825484359290336001600160a01b0382161480159190610331575b5061032257828452600282528084205434158015610319575b61030957946102987f1b0a392a98275c2066521f3951062b620ea896a4659bae5f4d666a7cedf120549495963490610bff565b85875260028452828720556102af34600554610bff565b600555848652600183528186206102c7348254610bff565b90556102d4348254610bff565b90558385526001825280852054156102ef575b51348152a280f35b6003825280852080546001600160a01b03191690556102e7565b81516356749e3960e11b81528690fd5b50803411610265565b516306d5542760e51b81528490fd5b60ff915060a01c16155f61024c565b8280fd5b50829034610340576060366003190112610340576001600160a01b039180358381169291908390036101c957602435937f00000000000000000000000000000000000000000000000000000000000004291633036101eb57821561049a576103aa610c20565b841161048d578480808087875af13d156104885767ffffffffffffffff3d81811161047557845191601f8201601f19908116603f011683019081118382101761046257855281528660203d92013e5b1561042e5750519182527f1946dbebab6e28f12be16d43ca1ba1612d08952697e00392bd8691afb32ac770602060443593a380f35b6020606492519162461bcd60e51b8352820152600f60248201526e1d1c985b9cd9995c8819985a5b1959608a1b6044820152fd5b604185634e487b7160e01b5f525260245ffd5b604184634e487b7160e01b5f525260245ffd5b6103f9565b905162c24d8f60e01b8152fd5b905163d92e233d60e01b8152fd5b50346101f857816003193601126101f8576020906005549051908152f35b50346101f857816003193601126101f857517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b50346101f857602080600319360112610340578335917f00000000000000000000000000000000000000000000000000000000000004296001600160a01b031633036105ef5782845260028252808420546105e05782845260018252808420549081156105d1578495847fbc55fddbad3bc69eb5a693441f78435b6973263e45fe19f0f0930e62484aaa4a959652600184528682812055600384528187206bffffffffffffffffffffffff60a01b81541690556105c7838254610bff565b905551908152a280f35b5163057a5db560e51b81528590fd5b5163640aa89760e01b81528490fd5b516282b42960e81b81528490fd5b5082903461034057826003193601126103405760209250600554915480831115928361062e575b5050519015158152f35b61063c919293504792610bff565b1115908380610624565b508234610340576060366003190112610340576001600160a01b0360243581811693833593909185900361078957604435927f00000000000000000000000000000000000000000000000000000000000004291633036101eb5783158015610781575b8015610779575b8015610766575b6107475783865260016020528186205415801590610755575b610747576106dc610c20565b831161048d57916020917fa1ab3daf25edc1353a58499fa6969323d15b190f49d4028ff5dd327e39c6f4f09385885260018452828289205560038452818820876bffffffffffffffffffffffff60a01b82541617905561073d838254610c4b565b905551908152a380f35b90516356749e3960e11b8152fd5b5060026020528186205415156106d0565b50690472698b413b4320000083116106b7565b5082156106b0565b5084156106a9565b5f80fd5b50823461078957602080600319360112610789576001600160a01b0392823592907f0000000000000000000000000000000000000000000000000000000000000429851633036109115760ff5f5460a01c161561090457835f5260018352805f2054916003845285825f20541695831580156108fc575b6101cd57855f5260028552825f20546108ee574784116108e057855f526002855283835f205561083684600554610c4b565b6005555f541690813b15610789578560445f92868651958694859363d0225a6f60e01b85528401528b60248401525af180156108d65761089d575b50519081527f9fcbf05827a0710508d212685c01e448003f5e3637afedd57d4ae1318718889f9190a380f35b7f9fcbf05827a0710508d212685c01e448003f5e3637afedd57d4ae1318718889f93929196506108cc90610bd7565b5f95909192610871565b82513d5f823e3d90fd5b50905162c24d8f60e01b8152fd5b50905162709c2160e91b8152fd5b508615610804565b516306d5542760e51b8152fd5b516282b42960e81b8152fd5b5034610789575f36600319011261078957602090516a053613af307172a98000008152f35b83823461078957602036600319011261078957602091355f5260018252805f20549051908152f35b838234610789575f36600319011261078957602091549051908152f35b83823461078957602036600319011261078957602091355f526003825260018060a01b03815f2054169051908152f35b83823461078957602036600319011261078957602091355f5260028252805f20549051908152f35b8382346107895760203660031901126107895781356001600160a01b038181169391849003610789577f00000000000000000000000000000000000000000000000000000000000004291633036101eb575f549160ff8360a01c16610a8f578315610a825750506001600160a81b0319168117600160a01b175f9081557fac95d317014874c37d8cbc736bda22218a82b91d99a96957dbcdeb08bb4a56d59080a2005b5163d92e233d60e01b8152fd5b5163682a906560e01b8152fd5b5034610789575f36600319011261078957602090610ab8610c20565b9051908152f35b5034610789575f366003190112610789576020905160028152f35b5034610789575f3660031901126107895760209060ff5f5460a01c1690519015158152f35b5034610789575f3660031901126107895760209051690472698b413b432000008152f35b828534610789575f366003190112610789578183019083821067ffffffffffffffff831117610bc4575081526019825260207f436f6d6d756e69747956616c696461746f72526573657276650000000000000060208401528151928391602083528151918260208501525f5b838110610bae5750505f83830185015250601f01601f19168101030190f35b8181018301518782018701528694508201610b8f565b604190634e487b7160e01b5f525260245ffd5b67ffffffffffffffff8111610beb57604052565b634e487b7160e01b5f52604160045260245ffd5b91908203918211610c0c57565b634e487b7160e01b5f52601160045260245ffd5b610c2f60045460055490610bff565b479080821115610c4557610c4291610bff565b90565b50505f90565b91908201809211610c0c5756fea26469706673582212204e4bd4997ca24fe25c6252f290ec4b116628b9adbf5dafaf34bda1f74090460564736f6c63430008180033",
+  "genesisConfigHash": null,
+  "immutableReferences": {
+    "1975": [
+      {
+        "length": 32,
+        "start": 305
+      },
+      {
+        "length": 32,
+        "start": 886
+      },
+      {
+        "length": 32,
+        "start": 1242
+      },
+      {
+        "length": 32,
+        "start": 1313
+      },
+      {
+        "length": 32,
+        "start": 1658
+      },
+      {
+        "length": 32,
+        "start": 1968
+      },
+      {
+        "length": 32,
+        "start": 2570
+      }
+    ]
+  },
+  "postInit": [
+    {
+      "signature": "bindValidatorRegistry(address)",
+      "values": [
+        "0x0000000000000000000000000000000000000423"
+      ]
+    }
+  ],
+  "runtimeCodeBytes": 3214,
+  "runtimeCodeHash": "0xbba4f158ad05a0397a8a711dee181f2f3035e374d063293f06786393dd69b90e",
+  "schema": "420-stake-predeploy-artifact-v1",
+  "source": "contracts/src/system/CommunityValidatorReserve.sol",
+  "sourceBlobSha1": "6ae1657a5ab45e97c76013ea45a310ae8fcd411c",
+  "status": "STAKE_AUDIT_7_ARTIFACT_READY",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 41,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "validatorRegistry",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 43,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "validatorRegistryBound",
+        "offset": 20,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 47,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "assignedCredit",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 51,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "fundedCredit",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 55,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "creditBeneficiary",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes32,t_address)"
+      },
+      {
+        "astId": 57,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "totalAssigned",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 59,
+        "contract": "src/system/CommunityValidatorReserve.sol:CommunityValidatorReserve",
+        "label": "totalFunded",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_bytes32,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

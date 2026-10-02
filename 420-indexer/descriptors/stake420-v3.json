@@ -1,0 +1,41 @@
+{
+  "schema": "420-stake-release-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Stake",
+  "contracts": [
+    {
+      "contractName": "ValidatorRegistry",
+      "protocolVersion": 3,
+      "canonicalAddress": "0x0000000000000000000000000000000000000423",
+      "artifact": {
+        "path": "contracts/artifacts/ValidatorRegistry.abi.json",
+        "gitBlobSha": "0c2e65d38a5eb322bf3baba9c6ee9cd8ee771391"
+      }
+    },
+    {
+      "contractName": "RewardController",
+      "protocolVersion": 2,
+      "canonicalAddress": "0x0000000000000000000000000000000000000420",
+      "artifact": {
+        "path": "contracts/artifacts/RewardController.abi.json",
+        "gitBlobSha": "9423d01d4277764837a1cb60edca3ae906260f4c"
+      }
+    }
+  ],
+  "requiredEvents": [
+    "CommunityValidatorReserveBound(address)",
+    "ProtocolCreditReceived(bytes32,address,uint256)",
+    "PendingProtocolCreditReturned(bytes32,uint256)",
+    "ValidatorRegistered(bytes32,address,address,uint256,uint256)",
+    "OwnedBondToppedUp(bytes32,uint256,uint256)",
+    "ProtocolCreditReplaced(bytes32,uint256,uint256,uint256)",
+    "ValidatorBondWithdrawn(bytes32,address,uint256,uint256)",
+    "ConsensusStateApplied(bytes32,uint8,uint8,uint64,uint64,uint64,uint64)",
+    "ExitNoticeApplied(bytes32,uint64,uint64)",
+    "SlashApplied(bytes32,uint8,uint8,uint256,uint256,bytes32,uint8)",
+    "RotationSnapshotApplied(uint64,uint256,uint16,uint16)",
+    "ActiveTargetChanged(uint16,uint16,uint64,bool)",
+    "RewardApplied(uint64,address,uint256,uint256,uint256,uint256)"
+  ],
+  "authority": "repository_descriptor_only_not_live_stake_authority"
+}

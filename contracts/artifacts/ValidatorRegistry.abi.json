@@ -1,0 +1,332 @@
+{
+  "schema": "420-retained-abi-artifact-v1",
+  "contractName": "ValidatorRegistry",
+  "protocol": "420Stake",
+  "protocolVersion": 3,
+  "source": {
+    "path": "contracts/src/system/ValidatorRegistry.sol",
+    "gitBlobSha": "e534624f007024d65fcbb9e0f730bafbb8077767"
+  },
+  "abi": [
+    {
+      "type": "event",
+      "name": "CommunityValidatorReserveBound",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "reserve",
+          "type": "address",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ProtocolCreditReceived",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "beneficiary",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "PendingProtocolCreditReturned",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ValidatorRegistered",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "withdrawal",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "ownedBond",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "protocolCredit",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "OwnedBondToppedUp",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "ownedBond",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ProtocolCreditReplaced",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "ownedBond",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "protocolCredit",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ValidatorBondWithdrawn",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "withdrawal",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "ownedAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "recycledCredit",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ConsensusStateApplied",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "previousStatus",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "newStatus",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "effectiveSlot",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "activationRotation",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "scheduledExitRotation",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "cooldownUntilRotation",
+          "type": "uint64",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ExitNoticeApplied",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "noticeRotation",
+          "type": "uint64",
+          "indexed": false
+        },
+        {
+          "name": "exitEligibleRotation",
+          "type": "uint64",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "SlashApplied",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "validatorId",
+          "type": "bytes32",
+          "indexed": true
+        },
+        {
+          "name": "offense",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "correlationTier",
+          "type": "uint8",
+          "indexed": false
+        },
+        {
+          "name": "ownedSlashed",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "creditSlashed",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "evidenceHash",
+          "type": "bytes32",
+          "indexed": false
+        },
+        {
+          "name": "resultingStatus",
+          "type": "uint8",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "RotationSnapshotApplied",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "rotation",
+          "type": "uint64",
+          "indexed": true
+        },
+        {
+          "name": "eligibleCount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "candidateTarget",
+          "type": "uint16",
+          "indexed": false
+        },
+        {
+          "name": "activeTarget",
+          "type": "uint16",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "ActiveTargetChanged",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "previousTarget",
+          "type": "uint16",
+          "indexed": false
+        },
+        {
+          "name": "newTarget",
+          "type": "uint16",
+          "indexed": false
+        },
+        {
+          "name": "rotation",
+          "type": "uint64",
+          "indexed": true
+        },
+        {
+          "name": "safetyOverride",
+          "type": "bool",
+          "indexed": false
+        }
+      ]
+    }
+  ],
+  "authority": "abi_only_no_bytecode_or_live_deployment_claim"
+}

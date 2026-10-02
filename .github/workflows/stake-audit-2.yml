@@ -1,0 +1,80 @@
+name: 420Stake STAKE-AUDIT-2
+
+on:
+  pull_request:
+    paths:
+      - 'consensus/systemcall/**'
+      - 'consensus/engine/stake_systemcalls.go'
+      - 'consensus/engine/stake_systemcalls_test.go'
+      - 'contracts/test/StakeSystemCallABIVectors420.t.sol'
+      - 'scripts/verify-stake-audit-2-systemcalls.py'
+      - 'docs/architecture/decisions/STAKE-AUDIT-2-SYSTEM-CALL-DERIVATION.md'
+      - 'docs/architecture/infrastructure/fourtwentyd.md'
+      - '.github/workflows/stake-audit-2.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: stake-audit-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify STAKE-AUDIT-2 repository anchors
+        run: python scripts/verify-stake-audit-2-systemcalls.py
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Run deterministic derivation and sequence recovery tests
+        run: go test ./consensus/systemcall ./consensus/engine
+      - name: Compile fourtwentyd with production derivation path
+        run: go build ./consensus/cmd/fourtwentyd
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Cross-check exact ABI payload vectors in Solidity
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeSystemCallABIVectors420.t.sol' -vvv
+
+  level-2-stake-consensus-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Run retained consensus integration suite
+        run: go test ./consensus/...
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run retained consensus gateway regression
+        working-directory: contracts
+        run: forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vvv
+      - name: Run retained Stake lifecycle and settlement regression
+        working-directory: contracts
+        run: forge test --match-path 'test/StakeValidatorGenesis420.t.sol' -vvv

@@ -35,7 +35,7 @@ Required outcome:
 **Qualified implementation SHA:** `fdb6c49217b0e9626c2de1f0664a20be2b90767a`  
 **Level 1:** PASS — Bridge fast qualification and all four real Solidity PR shards passed on the exact implementation SHA.
 
-### BRIDGE-AUDIT-3 — Canonical transfer lifecycle and outbound registration
+### BRIDGE-AUDIT-3 — Canonical transfer lifecycle and outbound registration — COMPLETE
 Purpose: make the documented transfer lifecycle an enforced on-chain state machine.
 
 Required outcome:
@@ -45,6 +45,10 @@ Required outcome:
 - record outbound initiation as a canonical transfer/operation identity instead of emitting only an adapter message event;
 - prevent terminal-state reopening, arbitrary completion/refund, duplicate destination release and replay across retry paths;
 - tests cover every permitted transition and every prohibited edge.
+
+**Durable qualification:** `docs/audit/BRIDGE-AUDIT-3-QUALIFICATION.md`  
+**Qualified implementation SHA:** `42060ec5c0ea5efde0c527b38333381c44fb5f59`  
+**Level 1:** PASS — Bridge fast qualification and all four real Solidity PR shards passed on the exact implementation SHA.
 
 ### BRIDGE-AUDIT-4 — Accounting-health enforcement and recovery boundary
 Purpose: reconcile BridgeAccountingRegistry evidence with the execution safety boundary.

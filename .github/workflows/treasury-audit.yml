@@ -1,0 +1,85 @@
+name: 420Treasury audit qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420treasury-*'
+    paths:
+      - 'contracts/src/treasury/**'
+      - 'contracts/test/TreasuryGenesis420.t.sol'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
+      - 'docs/audit/420TREASURY-*'
+      - '.github/workflows/treasury-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/treasury/**'
+      - 'contracts/test/TreasuryGenesis420.t.sol'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
+      - 'docs/audit/420TREASURY-*'
+      - '.github/workflows/treasury-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: treasury-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420treasury-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check Treasury Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/treasury test/TreasuryGenesis420.t.sol
+
+      - name: Build Treasury contracts
+        working-directory: contracts
+        run: forge build src/treasury
+
+      - name: Run Treasury qualification suite
+        working-directory: contracts
+        run: forge test --match-path test/TreasuryGenesis420.t.sol -vvv
+
+      - name: Verify Genesis application mapping
+        run: python3 scripts/verify-genesis-dapps.py
+
+      - name: Verify Governance/Treasury authority boundary
+        run: python3 scripts/verify-governance-audit-7.py
+
+      - name: Treasury forbidden primitive scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/treasury; then
+            echo 'Forbidden authority/opcode primitive found in Treasury sources' >&2
+            exit 1
+          fi

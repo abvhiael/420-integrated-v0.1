@@ -170,9 +170,9 @@ The emergency controller has no custody or confiscation authority and cannot rew
 
 ### Chain identity
 
-`BridgeChainRegistry420` binds a compact `routeChainId` to a chain key, network fingerprint, native asset identity, verifier family and chain family. Supported family categories include EVM, Solana, UTXO, XRPL, Tron, shielded and custom systems.
+`BridgeChainRegistry420` binds a compact `routeChainId` to a chain key, network fingerprint, native asset identity, verifier family and chain family. The registry is authoritative for both the local 420 network and admitted external networks used by active bridge routes. Supported family categories include EVM, Solana, UTXO, XRPL, Tron, shielded and custom systems.
 
-The network fingerprint is important: a familiar numeric chain identifier alone is not enough to distinguish forks/testnets or another network with the same external numbering convention.
+The network fingerprint is important: a familiar numeric chain identifier alone is not enough to distinguish forks/testnets or another network with the same external numbering convention. An ACTIVE route snapshots the canonical source/destination chain keys and network fingerprints at activation, and Bridge execution revalidates that snapshot against the live chain registry. Chain deactivation, route-ID rebinding or a changed network fingerprint therefore makes the existing route fail closed until governance explicitly reactivates it against the new identity.
 
 ### Bridge assets
 
@@ -192,9 +192,9 @@ An active bridge asset must agree with the shared canonical-asset registry. Brid
 - version/status;
 - independent inbound/outbound enable flags.
 
-Routes move through explicit states such as approved-inactive, active, suspended and deprecated. Direction can be disabled independently.
+Routes move through explicit states such as approved-inactive, active, suspended and deprecated. Direction can be disabled independently. Activation requires both source and destination `routeChainId` values to resolve to active canonical chain-registry identities; inactive or unknown chains cannot be hidden behind a numerically valid route.
 
-`GatewayRouter420` maps governed adapter IDs to contracts whose self-reported ID must match. For inbound transfers, the adapter verifies the external proof, but the router still rechecks local asset usability, route health/direction, risk limits and replay-safe transfer creation. For outbound transfers, it performs the same local policy/risk checks before asking the adapter to initiate the external message.
+`GatewayRouter420` maps governed adapter IDs to contracts whose self-reported ID must match. For inbound transfers, the adapter verifies the external proof, but the router still rechecks local asset usability, canonical route-chain identity, route health/direction, risk limits and replay-safe transfer creation. For outbound transfers, it performs the same local policy/risk checks before asking the adapter to initiate the external message.
 
 ### Risk and replay
 

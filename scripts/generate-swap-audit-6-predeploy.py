@@ -190,37 +190,20 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
 
 
 def immutable_name_map() -> dict[str, str]:
-    result: dict[str, str] = {}
-    parents = [
-        ("SystemAccess", "src/system/SystemAccess.sol:SystemAccess"),
-        ("GenesisResidentAccess420", "src/system/GenesisResidentAccess420.sol:GenesisResidentAccess420"),
-    ]
-    for name, target in parents:
-        raw = load_raw(name)
-        ast = raw.get("ast")
-        if not isinstance(ast, dict):
-            try:
-                ast = json.loads(subprocess.check_output(
-                    ["forge", "inspect", target, "ast", "--json"],
-                    cwd=CONTRACTS,
-                    text=True,
-                ).strip())
-            except (subprocess.CalledProcessError, json.JSONDecodeError):
-                ast = {}
-        stack = [ast]
-        while stack:
-            node = stack.pop()
-            if isinstance(node, dict):
-                if node.get("nodeType") == "VariableDeclaration" and node.get("mutability") == "immutable":
-                    ident = node.get("id")
-                    var_name = node.get("name")
-                    if isinstance(ident, int) and isinstance(var_name, str):
-                        result[str(ident)] = var_name
-                stack.extend(v for v in node.values() if isinstance(v, (dict, list)))
-            elif isinstance(node, list):
-                stack.extend(node)
-    return result
-
+    # Solidity 0.8.24 compiler-emitted AST identifiers for the three inherited
+    # GenesisResidentAccess420 immutables at the frozen SWAP-AUDIT-6 source
+    # provenance. These IDs are retained in every compiled frozen Swap
+    # predeploy's deployedBytecode.immutableReferences.
+    #
+    # The mapping is deliberately pinned rather than inferred from source text
+    # or an unsupported Forge AST surface. Any source/compiler change that
+    # alters the emitted immutable IDs MUST fail closed and require an explicit
+    # new artifact/materialization qualification.
+    return {
+        "5711": "registry",
+        "5714": "genesisConfigHash",
+        "6270": "governanceTimelock",
+    }
 
 def encode_value(name: str, genesis_hash: str) -> bytes:
     if name == "governanceTimelock":
@@ -246,6 +229,13 @@ def materialize_runtime(artifact: dict, names: dict[str, str], genesis_hash: str
     refs = artifact.get("immutableReferences", {})
     patched: list[dict] = []
     expected = {"governanceTimelock", "registry", "genesisConfigHash"}
+    expected_ids = set(names)
+    actual_ids = set(refs) if isinstance(refs, dict) else set()
+    if actual_ids != expected_ids:
+        fail(
+            f"{artifact['contractName']} immutable identifier drift: "
+            f"expected {sorted(expected_ids)}, got {sorted(actual_ids)}"
+        )
     seen: set[str] = set()
     for immutable_id, locations in refs.items():
         var_name = names.get(str(immutable_id))

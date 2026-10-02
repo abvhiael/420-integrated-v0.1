@@ -181,9 +181,11 @@ contract ComputeStakeSlashAuthorization420Test {
         authorizer = new ComputeStakeSlashAuthorization420(address(policies));
         workerSource = new MockSlashableCollateral420(address(authorizer));
         verifierSource = new MockSlashableCollateral420(address(authorizer));
+        vm.prank(authorizer.bindingAdmin());
         authorizer.bindSources(address(workerSource), address(verifierSource));
         distributionExecutor =
             new MockSlashDistributionExecutor420(address(authorizer), address(distributionPolicies));
+        vm.prank(authorizer.bindingAdmin());
         authorizer.bindDistribution(address(distributionPolicies), address(distributionExecutor));
 
         workerSource.set(

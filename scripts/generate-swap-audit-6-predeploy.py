@@ -153,7 +153,7 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
     runtime = normalize_hex(deployed.get("object"))
     creation = normalize_hex(bytecode.get("object"))
     refs = deployed.get("immutableReferences", {})
-    names = immutable_name_map(refs)
+    names = immutable_name_map(name, refs)
     semantic_refs = {
         names[str(immutable_id)]: locations
         for immutable_id, locations in refs.items()
@@ -194,24 +194,23 @@ def artifact_record(name: str, rel_source: str, address: str | None, compiler: d
     return record
 
 
-def immutable_name_map(refs: dict) -> dict[str, str]:
+def immutable_name_map(contract_name: str, refs: dict) -> dict[str, str]:
     # Solidity AST identifiers are allocation-order metadata and can change
-    # when Forge compiles a different source graph even when the contract
-    # semantics/runtime layout are unchanged. The inherited immutable
-    # declaration order is stable and source-authoritative:
-    # GenesisResidentAccess420.registry,
-    # GenesisResidentAccess420.genesisConfigHash,
-    # SystemAccess.governanceTimelock.
-    #
-    # Fail closed unless the compiler emits exactly three immutable IDs.
-    if not isinstance(refs, dict) or len(refs) != 3:
-        fail(f"expected exactly three Genesis-resident immutable identifiers, got {sorted(refs) if isinstance(refs, dict) else refs}")
+    # when Forge compiles a different source graph. Normalize them to semantic
+    # immutable names using the source-declaration order for each retained
+    # contract family, while preserving compiler-reported byte offsets.
+    if contract_name == "CanonicalConstantProductPool420":
+        ordered_names = ["token0", "token1", "executor", "feeBps"]
+    else:
+        ordered_names = ["registry", "genesisConfigHash", "governanceTimelock"]
+
+    if not isinstance(refs, dict) or len(refs) != len(ordered_names):
+        fail(
+            f"{contract_name} immutable count mismatch: "
+            f"expected {len(ordered_names)}, got {sorted(refs) if isinstance(refs, dict) else refs}"
+        )
     ids = sorted(refs.keys(), key=lambda value: int(value))
-    return {
-        ids[0]: "registry",
-        ids[1]: "genesisConfigHash",
-        ids[2]: "governanceTimelock",
-    }
+    return {immutable_id: ordered_names[index] for index, immutable_id in enumerate(ids)}
 
 def encode_value(name: str, genesis_hash: str) -> bytes:
     if name == "governanceTimelock":

@@ -141,3 +141,6 @@ jobs:
 
       - name: Verify CMP-1.5.7 reward accounting
         run: python scripts/verify-cmp-1-5-7-reward-accounting.py
+
+      - name: Verify CMP-1.5.8 dispute stake integration
+        run: python scripts/verify-cmp-1-5-8-dispute-stake-integration.py

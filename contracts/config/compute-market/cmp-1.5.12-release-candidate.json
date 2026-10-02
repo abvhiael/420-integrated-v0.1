@@ -72,6 +72,14 @@
         "runtime_code_hash": null
       },
       {
+        "role": "PayerEscrowAssetVault420",
+        "source": "contracts/src/vault/AssetVault420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
         "role": "WorkerCollateralAssetVault420",
         "source": "contracts/src/vault/AssetVault420.sol",
         "address": null,
@@ -239,7 +247,8 @@
     "worker_collateral_vault": null,
     "verifier_collateral_verifier_registry": null,
     "verifier_collateral_vault": null,
-    "reward_accounting_reward_vault": null
+    "reward_accounting_reward_vault": null,
+    "canonical_entitlements_vault": null
   },
   "dependency_reconciliation": {
     "cmp_1_5_repository_complete_through_1_5_11": true,
@@ -281,11 +290,13 @@
     "No live network addresses, deployment transactions, blocks, runtime code hashes, graph hash or binding addresses are fabricated.",
     "Public-testnet availability and live ComputeStake deployment remain external/live blockers.",
     "Level 3 comprehensive phase closeout remains CMP-1.5.13.",
-    "Repository release wiring pins separate reward backing from collateral Vault backing."
+    "Repository release wiring pins separate reward backing from collateral Vault backing.",
+    "Payer escrow Vault is explicitly separated from all ComputeStake collateral and reward backing."
   ],
   "exit_criteria": [
     "Release-candidate wiring checker pins exact runtime code hashes and canonical bindings across the accumulated ComputeStake graph.",
     "Critical upstream WorkerRegistry, VerifierRegistry, dispute, entitlement and Vault runtimes are pinned.",
+    "Payer escrow Vault is runtime-pinned and cannot alias worker collateral, verifier collateral, or reward backing.",
     "Reward Vault is runtime-pinned and must not alias either collateral Vault.",
     "Hostile release-wiring tests reject runtime-hash drift and cross-component binding drift.",
     "Release manifest inventories the accumulated CMP-1.5 graph and ProtocolRegistry publication requirements.",

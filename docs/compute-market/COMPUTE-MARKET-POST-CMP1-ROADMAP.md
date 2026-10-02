@@ -228,6 +228,7 @@ Run the frozen hostile-economic campaign across solvency, isolation, exit races,
 Freeze the accumulated CMP-1.5 graph, pin runtime/dependency bindings, prepare truthful ProtocolRegistry publication/deployment evidence, and keep live fields fail-closed until real testnet deployment exists.
 
 ### CMP-1.5.13 — Phase closeout
+**Status: reconciliation complete; Level 3 comprehensive qualification in progress.**
 
 Question answered:
 
@@ -533,7 +534,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.13 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
+| CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

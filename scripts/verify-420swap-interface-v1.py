@@ -18,7 +18,7 @@ for f in required:
 factory=(root/'contracts/src/swap/GenesisDEXFactory.sol').read_text()
 for t in ['REGISTRATION_ONLY','registration-only','registerPool','poolImplementation','implementation unset','_requireGenesisGovernance','_requireOperational']:
     if t not in factory:e.append('genesis factory missing '+t)
-if re.search(r'constructor\\s*\\([^)]*address\\s+implementation_', factory, re.S) or 'new CanonicalConstantProductPool420' in factory or 'function createPool' in factory or 'create2(' in factory.lower():
+if re.search(r'constructor\s*\([^)]*address\s+implementation_', factory, re.S) or 'new CanonicalConstantProductPool420' in factory or 'function createPool' in factory or 'create2(' in factory.lower():
     e.append('genesis factory unexpectedly contains pool deployment semantics')
 
 permissionless=(root/'contracts/src/swap/PermissionlessDEXFactory.sol').read_text()

@@ -13,6 +13,11 @@ import "./BridgeIds420.sol";
 interface IBridgeRiskConsumer420 { function consume(bytes32, bytes32, bool, uint256) external; }
 interface IBridgeTransferCreate420 {
     function create(bytes32, bytes32, address, address, uint256, bytes32, bytes32) external returns (bytes32);
+    function createOutbound(bytes32, bytes32, address, bytes32, uint256, bytes32) external returns (bytes32);
+    function markSourcePending(bytes32, bytes32) external;
+    function markSourceFinalized(bytes32, bytes32) external;
+    function markProofPending(bytes32, bytes32) external;
+    function markVerified(bytes32, bytes32) external;
 }
 interface IBridgeRouteRegistryView420 {
     function routes(bytes32) external view returns (bytes32,uint64,uint64,bytes32,bytes32,bytes32,bytes32,uint32,uint8,bool,bool);
@@ -25,6 +30,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
     event AdapterSet(bytes32 indexed adapterId, address indexed adapter);
     event InboundAccepted(bytes32 indexed transferId, bytes32 indexed adapterId);
     event OutboundInitiated(bytes32 indexed routeId, bytes32 indexed adapterId, bytes32 sourceMessageId);
+    event OutboundTransferRegistered(bytes32 indexed transferId, bytes32 indexed routeId, bytes32 sourceMessageId);
 
     constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)
         GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_)
@@ -83,8 +89,20 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         _requireRouteDirection(v.routeId, v.assetId, adapterId_, true);
 
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(v.routeId, v.assetId, true, v.amount);
-        transferId = IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)).create(
+        IBridgeTransferCreate420 transferRegistry =
+            IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));
+        transferId = transferRegistry.create(
             v.routeId, v.assetId, v.sender, v.recipient, v.amount, v.sourceTxId, v.sourceMessageId
+        );
+        bytes32 sourceEvidence = keccak256(abi.encode(v.sourceTxId, v.sourceMessageId));
+        bytes32 proofEvidence = keccak256(proof);
+        transferRegistry.markSourcePending(transferId, sourceEvidence);
+        transferRegistry.markSourceFinalized(
+            transferId, keccak256(abi.encode(sourceEvidence, keccak256("SOURCE_FINALIZED")))
+        );
+        transferRegistry.markProofPending(transferId, proofEvidence);
+        transferRegistry.markVerified(
+            transferId, keccak256(abi.encode(adapterId_, proofEvidence, keccak256("PROOF_VERIFIED")))
         );
         emit InboundAccepted(transferId, adapterId_);
     }
@@ -113,6 +131,18 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
             routeId, assetId, msg.sender, recipient, amount, extra
         );
         require(sourceMessageId != bytes32(0), "message id");
+
+        IBridgeTransferCreate420 transferRegistry =
+            IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));
+        bytes32 recipientHash = keccak256(recipient);
+        bytes32 transferId = transferRegistry.createOutbound(
+            routeId, assetId, msg.sender, recipientHash, amount, sourceMessageId
+        );
+        transferRegistry.markSourcePending(
+            transferId, keccak256(abi.encode(adapterId_, sourceMessageId, recipientHash))
+        );
+
         emit OutboundInitiated(routeId, adapterId_, sourceMessageId);
+        emit OutboundTransferRegistered(transferId, routeId, sourceMessageId);
     }
 }

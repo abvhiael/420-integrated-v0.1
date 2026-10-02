@@ -50,6 +50,10 @@ contract MockSlashDistributionDisputes420 is IComputeSlashDistributionDisputes42
         entitlements = entitlements_;
     }
 
+    function setEntitlements(address entitlements_) external {
+        entitlements = entitlements_;
+    }
+
     function set(VerificationReview calldata review) external {
         _review = review;
     }
@@ -126,6 +130,32 @@ contract ComputeVerifierDisputeSlashRecipientResolver420Test {
         require(r.harmedPayer == entitlements.payer(), "payer");
         require(r.challenger == CHALLENGER, "challenger");
         require(r.replacementWorker == address(0), "invented replacement");
+    }
+
+    function testResolverFreezesCanonicalEscrowEntitlementsRuntime() public {
+        require(resolver.canonicalEntitlements() == address(entitlements), "entitlements binding");
+        require(
+            resolver.canonicalEntitlementsCodeHash() == address(entitlements).codehash,
+            "entitlements code hash"
+        );
+
+        MockSlashDistributionEntitlements420 replacement =
+            new MockSlashDistributionEntitlements420();
+        disputes.setEntitlements(address(replacement));
+
+        (bool ok,) = address(resolver).staticcall(
+            abi.encodeCall(
+                resolver.resolve,
+                (
+                    keccak256("auth"),
+                    keccak256("dispute"),
+                    address(evidenceAdapter),
+                    bytes32(0),
+                    VERIFIER
+                )
+            )
+        );
+        require(!ok, "entitlement endpoint drift accepted");
     }
 
     function testEvidenceAdapterOrSubjectMismatchFailsClosed() public {

@@ -1,0 +1,104 @@
+{
+  "schema": "420-swap-audit-7-deployment-binding-v1",
+  "step": "SWAP-AUDIT-7",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "protocol_registry": {
+    "frozen_address": "0x0000000000000000000000000000000000000434",
+    "component_registration_api": "registerComponent",
+    "required_lifecycle": "ACTIVE",
+    "runtime_code_hash_source": "EXTCODEHASH_DERIVED_BY_PROTOCOL_REGISTRY"
+  },
+  "frozen_swap_predeploys": [
+    {
+      "contract": "GenesisDEXFactory",
+      "address": "0x000000000000000000000000000000000000042b",
+      "runtime_code_hash": "0x71cfd26ecde73f51a93cbce4877fd4edd6882c9d5d51b40c25df97e2348d106f"
+    },
+    {
+      "contract": "PublicBatchAuction",
+      "address": "0x000000000000000000000000000000000000042c",
+      "runtime_code_hash": "0xeeb69fc49b1ff4edd0d8bf94f7ec8e1f75cd064720226a4856043b531cf3c228"
+    },
+    {
+      "contract": "TWAPOracle",
+      "address": "0x000000000000000000000000000000000000042d",
+      "runtime_code_hash": "0x7ad49e839308f3e0d9c0047203cf007bfc9b978608e4eca838f751f5f78f36ca"
+    },
+    {
+      "contract": "ApprovedQuoteAssetRegistry",
+      "address": "0x0000000000000000000000000000000000000439",
+      "runtime_code_hash": "0x6ffa02b1b5638190a68fa72faf1465d9f0e52b479cc9d5920d83f3c55a4b3b37"
+    }
+  ],
+  "registry_resolved_components": [
+    {
+      "contract": "CanonicalMarketRegistry",
+      "component_id_preimage": "420/APP/420SWAP/CANONICAL_MARKET_REGISTRY",
+      "address": null,
+      "runtime_code_hash": null,
+      "registry_revision": null
+    },
+    {
+      "contract": "CanonicalSwapExecutor420",
+      "component_id_preimage": "420/APP/420SWAP/CANONICAL_SWAP_EXECUTOR",
+      "address": null,
+      "runtime_code_hash": null,
+      "registry_revision": null
+    },
+    {
+      "contract": "CanonicalSettlementAdapter420",
+      "component_id_preimage": "420/APP/420PAY/SETTLEMENT_ADAPTER",
+      "address": null,
+      "runtime_code_hash": null,
+      "registry_revision": null
+    },
+    {
+      "contract": "PaymentRouter420",
+      "component_id_preimage": "420/APP/420PAY/PAYMENT_ROUTER",
+      "address": null,
+      "runtime_code_hash": null,
+      "registry_revision": null
+    }
+  ],
+  "canonical_pool": {
+    "contract": "CanonicalConstantProductPool420",
+    "address": null,
+    "runtime_code_hash": null,
+    "factory_registration_required": true,
+    "canonical_market_registration_required": true,
+    "note": "Concrete pool address/runtime depends on immutable token pair, executor and fee inputs and is not a frozen predeploy."
+  },
+  "required_bindings": {
+    "payment_router_settlement_adapter": "PaymentRouter420.settlementAdapter == CanonicalSettlementAdapter420",
+    "settlement_adapter_swap_executor": "CanonicalSettlementAdapter420.swapExecutor == CanonicalSwapExecutor420",
+    "executor_trusted_caller": "CanonicalSwapExecutor420.trustedCaller(CanonicalSettlementAdapter420) == true",
+    "factory_pool_implementation": "GenesisDEXFactory.poolImplementation is code-bearing before pool registration",
+    "factory_pool_registration": "GenesisDEXFactory.pools(poolId) == concrete canonical pool",
+    "market_registration": "CanonicalMarketRegistry.markets(marketId).pool == concrete canonical pool",
+    "registry_components_active": "All registry-resolved components are ACTIVE and ProtocolRegistry runtimeCodeHash equals EXTCODEHASH"
+  },
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/SwapDeploymentBinding420.t.sol",
+    "proves": [
+      "actual ProtocolRegistry component registration derives runtime code hashes",
+      "active Registry resolution of canonical market registry, swap executor, settlement adapter and payment router",
+      "GenesisDEXFactory implementation and pool binding",
+      "canonical market points to the exact deployed pool and pair",
+      "PaymentRouter -> CanonicalSettlementAdapter -> CanonicalSwapExecutor identity chain",
+      "CanonicalSettlementAdapter is the exact trusted caller",
+      "wrong/unregistered/misbound components fail qualification assertions"
+    ]
+  },
+  "live_testnet_evidence": {
+    "required_in_step": "SWAP-AUDIT-8",
+    "chain_id": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "binding_transactions": []
+  }
+}

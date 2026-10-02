@@ -124,14 +124,14 @@ Repository implementation:
 - `scripts/420pay-audit-6-deployment-plan.py` verifies the deterministic deployment/registration/wiring sequence and refuses live transaction planning without PAY-AUDIT-7 candidate evidence.
 - `scripts/verify-420pay-audit-6-deployment.py` independently validates address policy, resident/component inventory, constructor bindings, Registry publication semantics, wiring, live-evidence separation and runbook authority.
 - `scripts/420pay-audit-6-smoke.py` provides repository/offline deployment smoke without claiming live-chain qualification.
-- `contracts/test/PayAudit6DeploymentPackage420.t.sol` uses the actual ProtocolRegistry, frozen authority/config immutables and all nine Pay residents to prove ACTIVE version-1.0.0 Registry publication, exact deployed `EXTCODEHASH` equality to the retained package, the complete settlement/refund/replay wiring graph and governance-only mutation.
+- `contracts/test/PayAudit6DeploymentPackage420.t.sol` uses the actual ProtocolRegistry, frozen authority/config immutables and all nine Pay residents to prove version-1.0.0 publication first at `SUSPENDED`, fail-closed resolution before activation, complete settlement/refund/replay wiring, exact deployed `EXTCODEHASH` equality to the retained package, governance-only mutation, and final transition to `ACTIVE` only after all assertions pass.
 - `docs/apps/pay/deployment-operations.md` defines deployment, Registry publication, governance handoff, monitoring, incident response, rollback/recovery, Indexer recovery and secrets handling.
 - `contracts/config/420pay-genesis-wiring.json` links the PAY-AUDIT-6 package/test/verifiers while preserving the already-qualified Swap-owned binding record and keeping `deployment_binding_verified: false` until PAY-AUDIT-7.
 
 Exit criteria:
 - exact compiler/runtime identity evidence exists for every deployed Pay resident;
 - constructor/immutable arguments and the settlement-executor dependency are retained and drift-checked;
-- deployment order, ProtocolRegistry publication at version 1.0.0 / ACTIVE, initialization and wiring are deterministic and machine-verifiable;
+- deployment order, ProtocolRegistry publication at version 1.0.0 / `SUSPENDED`, initialization/wiring verification, and governed transition to `ACTIVE` are deterministic and machine-verifiable;
 - all nine Registry-resolved residents retain null/unfrozen production addresses in repository evidence;
 - adapter/router/executor/split/refund/replay bindings and governance handoff are proven in the local-EVM deployment suite;
 - reproducibility/drift verification and offline smoke fail closed;

@@ -161,8 +161,13 @@ def repository_ready(d, allow_live=False):
             fail(f"release test missing {needle}")
 
     doc = DOC.read_text(encoding="utf-8")
-    for needle in (
+    durable_states = (
         "REPOSITORY-READINESS QUALIFICATION PENDING",
+        "COMPLETE — REPOSITORY-QUALIFIED RELEASE CANDIDATE",
+    )
+    if not any(state in doc for state in durable_states):
+        fail("release doc missing repository-readiness or durable COMPLETE state")
+    for needle in (
         "LIVE DEPLOYMENT BLOCKED",
         "publishRegisteredService",
         "CMP-1.5.13 — Phase closeout",

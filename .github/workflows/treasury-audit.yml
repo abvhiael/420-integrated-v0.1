@@ -10,6 +10,19 @@ on:
       - 'contracts/config/420treasury-genesis.json'
       - 'contracts/config/genesis-canonical-addresses.json'
       - 'contracts/config/genesis-address-namespace.json'
+      - '420-indexer/descriptors/treasury420-v1.json'
+      - '420-indexer/src/treasury-descriptors.ts'
+      - '420-indexer/src/treasury-read-model.ts'
+      - '420-indexer/src/api-surface.ts'
+      - '420-indexer/src/http-transport.ts'
+      - '420-indexer/src/index.ts'
+      - '420-indexer/test/treasury420-integration.test.ts'
+      - '420-indexer/test/http-transport.test.ts'
+      - 'analytics/indexerclient/client.go'
+      - 'analytics/indexerclient/client_test.go'
+      - 'analytics/metrics/economic.go'
+      - 'analytics/metrics/economic_test.go'
+      - 'scripts/verify-treasury-audit-5-descriptor.py'
       - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
       - 'docs/architecture/decisions/TREASURY-AUDIT-4-VAULT-RELEASE-EVIDENCE-MODEL.md'
       - '.github/workflows/treasury-audit.yml'
@@ -45,6 +58,16 @@ jobs:
         with:
           version: stable
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
       - name: Check Treasury Solidity formatting
         working-directory: contracts
         run: |
@@ -57,6 +80,9 @@ jobs:
         working-directory: contracts
         run: forge build src/treasury src/grants/GrantMilestoneRegistry420.sol test/TreasuryGenesis420.t.sol test/TreasurySecurityProperties420.t.sol test/GrantsGenesis420.t.sol
 
+      - name: Verify modern Treasury descriptor against compiled ABI
+        run: python3 scripts/verify-treasury-audit-5-descriptor.py
+
       - name: Run Treasury lifecycle regression suite
         working-directory: contracts
         run: forge test --match-path test/TreasuryGenesis420.t.sol -vvv
@@ -68,6 +94,19 @@ jobs:
       - name: Run affected Grants release-evidence consumer suite
         working-directory: contracts
         run: forge test --match-path test/GrantsGenesis420.t.sol -vvv
+
+      - name: Build affected 420Indexer integration surface
+        working-directory: 420-indexer
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run Treasury Indexer descriptor/read/reorg/API qualification
+        working-directory: 420-indexer
+        run: node --test --test-concurrency=1 dist/test/treasury420-integration.test.js dist/test/http-transport.test.js dist/test/api-surface.test.js
+
+      - name: Run affected Analytics Treasury boundary qualification
+        run: go test ./analytics/indexerclient ./analytics/metrics
 
       - name: Verify Treasury canonical authority/config boundary
         shell: bash

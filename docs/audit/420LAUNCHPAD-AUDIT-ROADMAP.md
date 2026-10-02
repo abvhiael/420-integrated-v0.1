@@ -42,7 +42,7 @@ Exit: dedicated audit verifier + focused tests pass on exact audit head.
 The evidence record above is documentation-only and references the already-qualified implementation SHA. Under the audit qualification model, this evidence-only closeout does not create a new implementation SHA requiring recursive qualification.
 
 ## LAUNCHPAD-AUDIT-2 — V1 contract hardening
-Status: **PENDING**
+Status: **IMPLEMENTED; CI QUALIFICATION PENDING**
 
 - expand authorization, zero/boundary, state-transition, duplicate-operation and terminal-state tests;
 - explicitly decide/document payment/delivery/refund commitment uniqueness semantics;
@@ -50,6 +50,11 @@ Status: **PENDING**
 - decide whether project `active` is immutable metadata or a real governed lifecycle control;
 - add fuzz/property coverage for caps and allocation conservation;
 - run forbidden-primitive/static analysis.
+
+Frozen V1 semantics for this step:
+- payment/delivery/refund commitments are required nonzero opaque audit references; V1 does not enforce global commitment uniqueness, and canonical settlement/replay binding is deferred to LAUNCHPAD-AUDIT-3;
+- pro-rata allocation uses floor division; aggregate claims may leave unassigned accounting dust, with no custody or sweep authority in V1;
+- `Project.active` is an immutable registration marker in V1; sale lifecycle authority is `LaunchpadSaleRegistry420.State`.
 
 Exit: all V1 invariants have direct negative + boundary coverage and unresolved semantics are frozen.
 

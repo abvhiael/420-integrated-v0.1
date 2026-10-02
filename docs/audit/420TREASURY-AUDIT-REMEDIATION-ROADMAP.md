@@ -51,17 +51,21 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Architecture decision: `docs/architecture/decisions/TREASURY-AUDIT-4-VAULT-RELEASE-EVIDENCE-MODEL.md`.
 - Level 2 was not required; the directly affected Grants consumer was included in the Level 1 gate. Full Level 3 closeout remains deferred.
 
-## TREASURY-AUDIT-5 — Indexer/Explorer/Analytics integration — PARTIAL
-Current:
-- generic `idx_treasury_events` projection exists;
-- Analytics contains Treasury budget/disbursement projections;
-- legacy `AttentionTreasury` and `DevelopmentTreasury` are mapped to 420Treasury in the Genesis ABI manifest.
-
-Required:
-- add/qualify event descriptors for the modern Treasury contract family once registry-resolved deployment identities are materialized;
-- prove rebuild/reorg/replay behavior;
-- expose budget/disbursement state in Explorer or another qualified read surface if required by the release architecture;
-- preserve the rule that derived services never become Treasury authority.
+## TREASURY-AUDIT-5 — Indexer/Explorer/Analytics integration — COMPLETE
+- Closed the modern Treasury event-reconstruction gap by adding `metadataHash` to `BudgetCreated` and `purposeHash` to `DisbursementScheduled`, allowing complete derived reconstruction from canonical event history.
+- Added an address-unbound modern Treasury descriptor covering `TreasuryPolicyRegistry420`, `TreasuryBudgetRegistry420` and `TreasuryDisbursementRegistry420`.
+- Added a retained compiled-ABI verifier so event signatures, field types and indexed flags cannot drift silently from the Indexer descriptor.
+- Added deterministic non-authoritative Indexer reconstruction for Treasury budget and disbursement state, including fail-closed accounting-corruption and terminal-replay checks.
+- Added stable public Indexer routes:
+  - `GET /v1/treasury/budgets/:id?chainId=...`
+  - `GET /v1/treasury/disbursements/:id?chainId=...`
+- Qualified rebuild/reorg/replay behavior, including idempotent projection, block-bounded rollback and canonical replay after rollback.
+- Qualified Analytics against the same public Indexer boundary; Analytics rejects wrong-chain or authority-claiming Treasury responses and remains non-canonical.
+- Did not invent live Treasury deployment addresses. Runtime address binding remains assigned to TREASURY-AUDIT-6 because the modern Treasury family is registry-resolved.
+- Level 1 exact-head qualification **PASS** on implementation SHA `8f184754c2497dd5add35e9d5f3e97555a1d8883`.
+- Treasury qualification workflow run `37038055729`, job `110941058630`: build PASS; compiled-ABI descriptor verifier PASS; lifecycle **9/9 PASS**; security/property **5/5 PASS** with **2,500 runs per fuzz property**; Grants **4/4 PASS**; affected 420Indexer build PASS; Treasury Indexer descriptor/read/reorg/API qualification **18 tests PASS**; affected Analytics qualification PASS; authority/config verifier PASS; release-evidence consumer inventory PASS; targeted Slither **0 high-severity findings**; forbidden-primitive scan PASS.
+- Durable evidence: `docs/audit/420TREASURY-AUDIT-5-QUALIFICATION.md`, introduced by evidence commit `a119b7a09a6515b192f9b5442d682431a2f1446a`.
+- Level 2 was not separately required because all directly affected Treasury/Indexer/Analytics boundaries were included in the exact-head Level 1 gate. Full Level 3 closeout remains deferred.
 
 ## TREASURY-AUDIT-6 — deployment, registry publication and release materialization — PARTIAL
 Current:

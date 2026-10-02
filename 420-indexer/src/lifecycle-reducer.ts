@@ -97,12 +97,23 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'CivicProposalRegistered', state: 'ACTIVE' }
   ]},
   { protocol: '420Pay', rules: [
-    { eventName: 'PaymentCreated', state: 'PENDING' },
-    { eventName: 'PaymentAuthorized', state: 'ACTIVE' },
-    { eventName: 'PaymentSettled', state: 'COMPLETED', terminal: true },
-    { eventName: 'PaymentRefunded', state: 'COMPLETED', terminal: true },
-    { eventName: 'PaymentCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'PaymentExpired', state: 'EXPIRED', terminal: true }
+    {
+      eventName: 'PaymentSet',
+      state: 'UNKNOWN',
+      stateField: 'status',
+      stateMap: {
+        '1': 'PENDING',
+        '2': 'ACTIVE',
+        '3': 'ACTIVE',
+        '4': 'ACTIVE',
+        '5': 'COMPLETED',
+        '6': 'COMPLETED',
+        '7': 'ACTIVE',
+        '8': 'FAILED'
+      },
+      terminalFieldValues: ['5','6','8']
+    },
+    { eventName: 'PaymentAuthorized', state: 'ACTIVE' }
   ]},
   { protocol: '420Bridge', rules: [
     { eventName: 'TransferRequested', state: 'PENDING' },

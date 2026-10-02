@@ -91,16 +91,23 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: `docs/audit/420TREASURY-AUDIT-6-QUALIFICATION.md`, introduced by evidence commit `bdcc672c168d53562f6940f2227d97190e6d092d`.
 - Level 2 was not separately required because the real Registry/Capability integration was exercised directly in the exact-head Level 1 deployment suite. Full Level 3 closeout remains deferred.
 
-## TREASURY-AUDIT-7 — documentation/operator closeout — PARTIAL
-Required:
-- app/protocol-specific operator runbook;
-- deployment/configuration reference;
-- roles/permissions and incident/recovery procedures;
-- event/error/API reference;
-- explicit known-limitations section covering the Vault release evidence model;
-- exact test/build commands and qualification evidence links.
-
-A standalone public-facing Treasury website is not required by the current canonical classification.
+## TREASURY-AUDIT-7 — documentation/operator closeout — COMPLETE
+- Added `docs/apps/treasury/operator-guide.md` as the Treasury-specific operator runbook.
+- Documented deployment/configuration authority, the exact AUDIT-6 deployment/initialization sequence, frozen GovernanceTimelock/ProtocolRegistry identities, registry-resolved TreasuryRouter semantics and the CapabilityRegistry candidate/live distinction.
+- Added a roles/permissions authority table covering GovernanceTimelock/Civic, the Disbursement controller, scoped executors, CapabilityRegistry component authority, ProtocolRegistry, derived services and 420Vault.
+- Added normal operating procedures for policy, budget creation, scheduling, execution and cancellation.
+- Added monitoring/reconciliation rules including `executed <= committed <= ceiling` and required Vault-release evidence correlation.
+- Added incident response for deployment/Registry mismatch, capability compromise, suspicious Vault release commitments, policy incidents and Indexer/Explorer/Analytics inconsistency.
+- Added an explicit incident evidence-preservation checklist and recovery boundaries; operators cannot rewrite executed state, replace release hashes, reset epoch duration or replace the one-time controller.
+- Added `docs/apps/treasury/reference.md` covering Treasury events, errors, contract reads/writes and the qualified non-authoritative Indexer budget/disbursement routes plus HTTP error behavior.
+- Explicitly documented the `420/TREASURY/VAULT_RELEASE_COMMITMENT/V1` limitation: a nonzero `vaultReleaseHash` is Treasury completion evidence, not cryptographic proof of an actual 420Vault release.
+- Added exact Foundry, verifier, Indexer and Analytics qualification commands and durable evidence links.
+- Added `scripts/verify-treasury-audit-7-docs.py` and wired it into the exact-head Treasury workflow so required sections, identities, authority boundaries, API/error references, live-evidence ownership and the no-standalone-site classification fail closed on drift.
+- Level 1 exact-head qualification **PASS** on implementation SHA `d830f464e46f7eeffaee462f3e813224e081f83c`.
+- Treasury qualification workflow run `37048836697`, job `110976867842`: AUDIT-7 docs/operator verifier PASS; build/ABI/release verifiers PASS; deployment/Registry binding **4/4 PASS**; lifecycle **9/9 PASS**; security/property **5/5 PASS**; Grants **4/4 PASS**; Indexer Treasury qualification **18 tests PASS**; Analytics PASS; authority/config PASS; release-evidence consumer inventory PASS; targeted Slither **0 high-severity findings**; forbidden-primitive scan PASS.
+- Durable evidence: `docs/audit/420TREASURY-AUDIT-7-QUALIFICATION.md`, introduced by evidence commit `d027e848fb03b5a3610b4db8f7401eed5f9a5bc1`.
+- Level 2 was not separately required for this ordinary documentation/operator closeout. Full Level 3 closeout remains intentionally deferred.
+- A standalone public-facing Treasury website remains **not required** by the canonical classification.
 
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:

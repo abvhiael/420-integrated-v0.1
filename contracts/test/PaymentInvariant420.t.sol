@@ -7,6 +7,24 @@ import "../src/pay/PaymentRouter420.sol";
 import "./helpers/GenesisMocks420.sol";
 import "./helpers/InvariantTarget420.sol";
 
+contract PayInvariantRefundAccounting420 {
+    address public immutable settlementAsset;
+    address public immutable payer;
+    uint256 public immutable maximum;
+
+    constructor(address settlementAsset_, address payer_, uint256 maximum_) {
+        settlementAsset = settlementAsset_;
+        payer = payer_;
+        maximum = maximum_;
+    }
+
+    function refundAccounting(
+        bytes32
+    ) external view returns (address, address, uint256, uint256, uint8) {
+        return (payer, settlementAsset, maximum, maximum, 7);
+    }
+}
+
 contract PayInvariantHandler420 {
     RefundManager420 public refunds;
     SettlementRouter420 public splits;
@@ -14,16 +32,23 @@ contract PayInvariantHandler420 {
     bool public configured;
     bytes32 public constant PAYMENT_ID = keccak256("invariant-payment");
     uint256 public constant REFUND_MAXIMUM = 1_000_000 ether;
+    address public constant REFUND_RECIPIENT = address(0xBEEF);
 
     uint256 public lastSplitInput;
     uint256 public lastSplitOutput;
 
-    function configure(RefundManager420 refunds_, SettlementRouter420 splits_, address settlementAsset_) external {
+    function configure(
+        RefundManager420 refunds_,
+        SettlementRouter420 splits_,
+        address settlementAsset_,
+        address refundAccounting_
+    ) external {
         if (configured) return;
         configured = true;
         refunds = refunds_;
         splits = splits_;
         settlementAsset = settlementAsset_;
+        refunds_.setPaymentRegistry(refundAccounting_);
     }
 
     function stepRefund(uint96 rawAmount) external {
@@ -32,7 +57,15 @@ contract PayInvariantHandler420 {
         uint256 room = REFUND_MAXIMUM - refunded;
         uint256 amount = (uint256(rawAmount) % room) + 1;
         bytes32 refundId = keccak256(abi.encode(refunded, rawAmount, block.number));
-        refunds.recordRefund(refundId, PAYMENT_ID, settlementAsset, address(0xBEEF), amount, REFUND_MAXIMUM, bytes32(0));
+        refunds.recordRefund(
+            refundId,
+            PAYMENT_ID,
+            settlementAsset,
+            REFUND_RECIPIENT,
+            amount,
+            REFUND_MAXIMUM,
+            bytes32(0)
+        );
     }
 
     function stepSplit(uint96 rawAmount, uint16 a, uint16 b) external {
@@ -67,13 +100,14 @@ contract PaymentInvariant420Test is InvariantTarget420 {
 
         address settlementAsset = address(0xCA420);
         env.setSettlementAsset(settlementAsset, keccak256("CADC"), true);
-        // The invariant handler is the governance timelock for the refund instance it mutates.
         handler = new PayInvariantHandler420();
         RefundManager420 handlerRefunds = new RefundManager420(
             address(handler), address(env.registry()), keccak256("handler-refund-invariant")
         );
+        PayInvariantRefundAccounting420 accounting =
+            new PayInvariantRefundAccounting420(settlementAsset, handler.REFUND_RECIPIENT(), handler.REFUND_MAXIMUM());
         env.registerResident(address(handlerRefunds), handlerRefunds.componentId());
-        handler.configure(handlerRefunds, splits, settlementAsset);
+        handler.configure(handlerRefunds, splits, settlementAsset, address(accounting));
         targetContract(address(handler));
     }
 

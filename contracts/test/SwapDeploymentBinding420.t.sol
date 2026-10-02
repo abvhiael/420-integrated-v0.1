@@ -98,7 +98,7 @@ contract SwapDeploymentBinding420Test {
         require(registry.supportsVersion(id, _v()), "registry version");
     }
 
-    function testDeploymentBindingGraphIsCanonicalAndActive() public {
+    function testDeploymentBindingRegistryAndFailClosedGraph() public {
         Deployment memory d = _deploy();
 
         _assertRegistered(d.registry, SwapIds420.GENESIS_DEX_FACTORY, address(d.factory));
@@ -106,6 +106,15 @@ contract SwapDeploymentBinding420Test {
         _assertRegistered(d.registry, SwapIds420.CANONICAL_SWAP_EXECUTOR, address(d.executor));
         _assertRegistered(d.registry, PayIds420.SETTLEMENT_ADAPTER, address(d.adapter));
         _assertRegistered(d.registry, PayIds420.PAYMENT_ROUTER, address(d.pay));
+
+        require(
+            d.registry.runtimeCodeHash(SwapIds420.CANONICAL_SWAP_EXECUTOR) == address(d.executor).codehash,
+            "executor identity mismatch"
+        );
+        require(
+            d.registry.runtimeCodeHash(PayIds420.SETTLEMENT_ADAPTER) == address(d.adapter).codehash,
+            "adapter identity mismatch"
+        );
 
         require(d.factory.poolImplementation() == address(d.pool), "factory implementation binding");
         require(d.factory.pools(POOL_ID) == address(d.pool), "factory pool binding");
@@ -127,40 +136,19 @@ contract SwapDeploymentBinding420Test {
         require(d.pay.settlementAdapter() == address(d.adapter), "router adapter binding");
         require(d.adapter.swapExecutor() == address(d.executor), "adapter executor binding");
         require(d.executor.trustedCaller(address(d.adapter)), "adapter not trusted");
-    }
 
-    function testRegistryDerivesRuntimeIdentityRatherThanCallerSupplyingIt() public {
-        Deployment memory d = _deploy();
-        require(
-            d.registry.runtimeCodeHash(SwapIds420.CANONICAL_SWAP_EXECUTOR) == address(d.executor).codehash,
-            "executor identity mismatch"
-        );
-        require(
-            d.registry.runtimeCodeHash(PayIds420.SETTLEMENT_ADAPTER) == address(d.adapter).codehash,
-            "adapter identity mismatch"
-        );
-    }
-
-    function testWrongAdapterBindingDoesNotSatisfyCanonicalGraph() public {
-        Deployment memory d = _deploy();
         CanonicalSettlementAdapter420 wrong =
             new CanonicalSettlementAdapter420(address(this), address(d.registry), CFG, address(d.executor));
         _register(d.registry, keccak256("420/TEST/WRONG_ADAPTER"), address(wrong));
-
         d.pay.setSettlementAdapter(address(wrong));
-
         require(d.pay.settlementAdapter() != address(d.adapter), "misbinding hidden");
         require(!d.executor.trustedCaller(address(wrong)), "wrong adapter trusted");
         require(d.executor.trustedCaller(address(d.adapter)), "canonical trust lost");
-    }
 
-    function testInactiveRegistryEntryFailsClosedForOperationalMarketMutation() public {
-        Deployment memory d = _deploy();
         d.registry.setComponentLifecycle(
             SwapIds420.CANONICAL_MARKET_REGISTRY,
             Types420.Lifecycle.SUSPENDED
         );
-
         (bool ok,) = address(d.markets).call(
             abi.encodeWithSelector(
                 d.markets.setMarket.selector,

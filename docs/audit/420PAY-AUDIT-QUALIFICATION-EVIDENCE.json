@@ -1,0 +1,46 @@
+{
+  "schema": "420pay-audit-qualification-evidence-v1",
+  "component": "420Pay",
+  "qualified_steps": [
+    "PAY-AUDIT-1",
+    "PAY-AUDIT-2",
+    "PAY-AUDIT-5"
+  ],
+  "source_qualification": {
+    "sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+    "pay_audit_workflow": {
+      "name": "420Pay audit qualification",
+      "run_number": 59,
+      "run_id": 36965952679,
+      "conclusion": "success",
+      "checks": [
+        "exact-head verification",
+        "static Pay verification",
+        "Solidity formatting",
+        "Pay and settlement-boundary build",
+        "focused 420Pay Solidity qualification",
+        "forbidden primitive scan",
+        "420Indexer Pay reconciliation build and tests"
+      ]
+    },
+    "solidity_workflow": {
+      "name": "Solidity Contracts",
+      "run_number": 4003,
+      "run_id": 36965952612,
+      "conclusion": "success"
+    }
+  },
+  "bookkeeping_head_policy": {
+    "mode": "SELF_QUALIFYING_EXACT_HEAD_CI",
+    "required_workflow": "420Pay audit qualification",
+    "rule": "PAY-AUDIT-1, PAY-AUDIT-2 and PAY-AUDIT-5 are formally COMPLETE only if the commit carrying this evidence and the COMPLETE roadmap statuses itself passes the dedicated exact-head 420Pay audit workflow.",
+    "reason": "The workflow is attached to and verifies the exact commit SHA, avoiding an impossible evidence-file update that would continuously change the qualified SHA."
+  },
+  "remaining_blockers_not_closed_by_this_evidence": [
+    "PAY-AUDIT-3 offline invoice authorization and payment lifecycle semantics",
+    "PAY-AUDIT-4 split execution, sponsorship execution boundary, accounting export and related semantic decisions",
+    "PAY-AUDIT-6 deterministic deployment package and Registry publication",
+    "PAY-AUDIT-7 live production-equivalent testnet qualification",
+    "PAY-AUDIT-8 independent audit and Genesis/production closeout"
+  ]
+}

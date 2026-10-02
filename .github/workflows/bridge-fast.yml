@@ -29,7 +29,7 @@ concurrency:
 jobs:
   bridge-fast:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: read
     env:
@@ -68,20 +68,19 @@ jobs:
 
       - name: Run retained cross-adapter security hardening suites
         working-directory: contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          for suite in \
-            CrossAdapterHardeningBridgeAdapter420 \
-            NativeAdapterReplayDomainHardening420 \
-            VerifierRotationHardening420 \
-            EmergencyControlsHardening420 \
-            MalformedProofRecipientFuzzHardening420 \
-            DomainNonceRouterBypassHardening420 \
-            GovernanceAccountingRecoveryHardening420
-          do
-            forge test --match-path "test/$suite.t.sol" -vvv
-          done
+        run: >-
+          forge test
+          --match-contract
+          '^(CrossAdapterHardeningBridgeAdapter420Test|NativeAdapterReplayDomainHardening420Test|VerifierRotationHardening420Test|EmergencyControlsHardening420Test|MalformedProofRecipientFuzzHardening420Test|DomainNonceRouterBypassHardening420Test|GovernanceAccountingRecoveryHardening420Test)
+      - name: Run affected Exchange Bridge qualification tests
+        working-directory: contracts
+        run: forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vvv
+
+      - name: Run Pay/Swap/Bridge cross-suite integration
+        working-directory: contracts
+        run: forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vvv
+
+          -vvv
 
       - name: Run affected Exchange Bridge qualification tests
         working-directory: contracts

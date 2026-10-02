@@ -75,10 +75,10 @@ def repository_ready(d,allow_live=False):
         fail("fabricated live binding")
 
     deps=d.get("dependency_reconciliation",{})
-    if deps.get("cmp_1_4_4_internal_release_blocker") is not True:
-        fail("CMP-1.4.4 blocker not preserved")
-    if not allow_live and deps.get("cmp_1_4_4_signed_verdict_provenance_complete") is not False:
-        fail("CMP-1.4.4 falsely marked complete")
+    if deps.get("cmp_1_4_4_internal_release_blocker") is not False:
+        fail("CMP-1.4.4 internal blocker must be cleared after closeout reconciliation")
+    if deps.get("cmp_1_4_4_signed_verdict_provenance_complete") is not True:
+        fail("CMP-1.4.4 signed verdict provenance must be repository-complete")
     if deps.get("no_fixed_genesis_predeploy_allocated") is not True:
         fail("fixed Genesis predeploy was allocated")
     if deps.get("discovery_path")!="ProtocolRegistry": fail("wrong discovery path")
@@ -98,9 +98,11 @@ def repository_ready(d,allow_live=False):
         "cmp_1_4_10_adversarial_qualification"
     ]:
         if gates.get(k) is not True: fail(f"missing qualified gate {k}")
+    if gates.get("cmp_1_4_4_signed_verdict_provenance") is not True:
+        fail("CMP-1.4.4 release gate must be complete")
     if not allow_live:
-        for k in ["cmp_1_4_4_signed_verdict_provenance","cmp_1_5_compute_stake_live_source","public_testnet_live"]:
-            if gates.get(k) is not False: fail(f"blocked gate {k} must remain false")
+        for k in ["cmp_1_5_compute_stake_live_source","public_testnet_live"]:
+            if gates.get(k) is not False: fail(f"blocked live gate {k} must remain false")
 
     if d.get("milestone_relationship",{}).get("level_2_required_now") is not False:
         fail("unexpected additional Level 2 requirement")

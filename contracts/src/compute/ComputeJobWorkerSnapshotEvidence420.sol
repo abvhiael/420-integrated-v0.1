@@ -802,6 +802,36 @@ contract ComputeJobWorkerSnapshotEvidence420 is IComputeJobWorkerEvidence420 {
             && life.resultCommittedAt <= life.acceptedDeadline;
     }
 
+    /// @notice Canonical signed-verdict execution context for the latest result-bearing attempt.
+    /// @dev The current CMP-1 fixed-price scope is one canonical unit per job, so unitId == jobId.
+    /// Retry provenance is preserved by the latest attemptRef/attempt while the JobRegistry keeps
+    /// its immutable root assignment reference.
+    function verdictContext(bytes32 jobId) external view returns (
+        bytes32 unitId,
+        bytes32 attemptRef,
+        uint64 attempt,
+        address worker,
+        bytes32 resultCommitment,
+        bytes32 executionEvidenceCommitment
+    ) {
+        attemptRef = assignmentForJob[jobId];
+        Assignment storage a = _assignments[attemptRef];
+        AttemptLifecycle storage life = _attemptLifecycle[attemptRef];
+        if (!a.exists || !life.exists || a.jobId != jobId
+            || life.status != AttemptStatus.RESULT_COMMITTED
+            || a.resultCommitment == bytes32(0) || a.receiptHash == bytes32(0)
+            || a.snapshotCommitment == bytes32(0)) revert InvalidEvidence();
+        unitId = jobId;
+        attempt = a.attempt;
+        worker = a.operator;
+        resultCommitment = a.resultCommitment;
+        executionEvidenceCommitment = keccak256(abi.encode(
+            RESULT_DOMAIN, jobId, attemptRef, life.rootAssignmentRef, a.workerId,
+            a.workerRevision, a.resourceId, a.resourceRevision, a.operator, a.attempt,
+            a.snapshotCommitment, a.receiptHash, a.resultCommitment, life.resultCommittedAt
+        ));
+    }
+
     function getAssignment(bytes32 assignmentRef) external view returns (Assignment memory a) {
         a = _assignments[assignmentRef];
         if (!a.exists) revert InvalidEvidence();

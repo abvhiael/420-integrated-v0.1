@@ -26,11 +26,11 @@ printf 'Shard %s/%s: %s primary units, %s deployable sources and %s test sources
   "$shard" "$count" "${#targets[@]}" "${#sources[@]}" "${#tests[@]}" "${#all[@]}"
 printf '%s\n' "${targets[@]}" > "../artifacts/contracts/shard-${shard}-targets.txt"
 # Compile all assigned sources, tests and scripts; compiler errors fail immediately.
-forge build --force "${targets[@]}"
-# Enforce deployable runtime/initcode limits on production sources only.
+forge build "${targets[@]}"
+# Enforce deployable runtime/initcode limits on production sources only. Reuse the\n# first build cache rather than forcing a second cold compilation.
 if (( ${#sources[@]} )); then
   echo "=== DEPLOYABLE SOURCE SIZE CHECK: ${#sources[@]} sources ==="
-  forge build --force --sizes "${sources[@]}"
+  forge build --sizes "${sources[@]}"
 fi
 # Run EVERY assigned test file, even if an earlier file fails, to expose the
 # complete list of failing test files in one CI pass. Never hide the failure:

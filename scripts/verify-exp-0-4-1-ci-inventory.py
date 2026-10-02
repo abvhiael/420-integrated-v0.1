@@ -12,6 +12,10 @@ def require_text(text, needles, label, errors):
     for n in needles:
         if n not in text: errors.append(f"{label}: missing expected text: {n}")
 
+def forbid_text(text, needles, label, errors):
+    for n in needles:
+        if n in text: errors.append(f"{label}: unexpected deprecated text: {n}")
+
 def main():
     errors=[]
     if not INV.exists():
@@ -20,8 +24,8 @@ def main():
     if inv.get("schema")!="420explorer-exp-0.4.1-ci-qualification-inventory-v1": errors.append("schema drift")
     if inv.get("milestone")!="EXP-0.4.1": errors.append("milestone drift")
     wfs=inv.get("workflows",[]); mechs=inv.get("mechanisms",[])
-    if len(wfs)!=7: errors.append(f"workflow count drift: {len(wfs)}")
-    if len(mechs)!=21: errors.append(f"mechanism count drift: {len(mechs)}")
+    if len(wfs)!=8: errors.append(f"workflow count drift: {len(wfs)}")
+    if len(mechs)!=22: errors.append(f"mechanism count drift: {len(mechs)}")
     for key,rows in (("workflow",wfs),("mechanism",mechs)):
         ids=[x.get("id") for x in rows]
         if any(not x for x in ids) or len(ids)!=len(set(ids)): errors.append(f"{key} IDs missing/duplicate")
@@ -34,6 +38,7 @@ def main():
       "EXP-CI-005":".github/workflows/genesis-address-authority.yml",
       "EXP-CI-006":".github/workflows/testnet-rc.yml",
       "EXP-CI-007":".github/workflows/explorer-exp-next-4.yml",
+      "EXP-CI-008":".github/workflows/contracts-foundry.yml",
     }
     if set(by)!=set(expected): errors.append("workflow ID set drift")
     texts={}
@@ -70,7 +75,10 @@ def main():
     if "EXP-CI-005" in texts:
         require_text(texts["EXP-CI-005"],[
           "name: Genesis Address Authority","python scripts/verify-genesis-canonical-addresses.py",
-          "python scripts/verify-genesis-predeploy-authority.py","bash scripts/qualify-foundry-shard.sh"
+          "python scripts/verify-genesis-predeploy-authority.py","python scripts/audit-genesis-address-collisions.py"
+        ],"EXP-CI-005",errors)
+        forbid_text(texts["EXP-CI-005"],[
+          "full-foundry-pr-inventory:","bash scripts/qualify-foundry-shard.sh"
         ],"EXP-CI-005",errors)
     if "EXP-CI-006" in texts:
         require_text(texts["EXP-CI-006"],[
@@ -82,13 +90,18 @@ def main():
           "name: 420Explorer EXP-NEXT.4 Repository Readiness","verify-exp-next-4-repository-readiness.py",
           "go test ./explorer/cmd/explorerlivevalidate","go test ./explorer/...","go vet ./explorer/...","npm test"
         ],"EXP-CI-007",errors)
+    if "EXP-CI-008" in texts:
+        require_text(texts["EXP-CI-008"],[
+          "name: Solidity Contracts","pr-shards:","shard: [0, 1, 2, 3]",
+          "bash scripts/qualify-foundry-shard.sh '${{ matrix.shard }}' '4'"
+        ],"EXP-CI-008",errors)
 
     if by.get("EXP-CI-001",{}).get("authority")!="authoritative_for_repository_source_scope": errors.append("primary source authority drift")
     if by.get("EXP-CI-002",{}).get("authority")!="authoritative_for_executed_live_witness_scope": errors.append("live authority drift")
-    for wid in ("EXP-CI-003","EXP-CI-004","EXP-CI-005","EXP-CI-006","EXP-CI-007"):
+    for wid in ("EXP-CI-003","EXP-CI-004","EXP-CI-005","EXP-CI-006","EXP-CI-007","EXP-CI-008"):
         if by.get(wid,{}).get("authority")=="authoritative_for_executed_live_witness_scope": errors.append(f"{wid}: supporting workflow mislabeled live authority")
     summary=inv.get("summary",{})
-    if summary.get("workflow_count")!=7 or summary.get("mechanism_count")!=21: errors.append("summary count drift")
+    if summary.get("workflow_count")!=8 or summary.get("mechanism_count")!=22: errors.append("summary count drift")
     if summary.get("primary_source_gate")!="EXP-CI-001" or summary.get("live_gate")!="EXP-CI-002": errors.append("summary gate identity drift")
 
     EVIDENCE.mkdir(exist_ok=True)

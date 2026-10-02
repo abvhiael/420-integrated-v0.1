@@ -152,6 +152,20 @@ Its classifier completed successfully and correctly skipped the expensive reposi
 
 Unrelated Treasury, Registry, Docs, Indexer and Genesis workflows resolved as expected path/classification skips and are not counted as passing AUDIT-4 evidence.
 
+## Bookkeeping requalification / evidence reuse validation
+
+After exact-head implementation qualification passed, the closeout introduced documentation bookkeeping only.
+
+Comparison from implementation SHA `7973f0d7f75209d48531f02e00f6ca31d3e7a73b` through roadmap bookkeeping commit `31005d1c29e06171ab8fb10ef3047fd6bf4a1474` contains only:
+
+- `docs/audit/420GRANTS-AUDIT-4-QUALIFICATION.md`;
+- `docs/audit/420GRANTS-AUDIT-REMEDIATION-ROADMAP.md`.
+
+No executable Solidity, test, workflow, dependency, configuration, generated/runtime artifact, interface, deployment state or substantive requirement changed. Therefore exact-SHA run `37065796100` remains authoritative for GRANTS-AUDIT-4 and no recursive app qualification is required solely for evidence bookkeeping.
+
+Evidence document creation commit: `57d972dddbc14bf768804b6e58b8bf672c92244e`.  
+Roadmap completion bookkeeping commit: `31005d1c29e06171ab8fb10ef3047fd6bf4a1474`.
+
 ## Files materially changed for this step
 
 - `contracts/test/GrantsGenesis420.t.sol`

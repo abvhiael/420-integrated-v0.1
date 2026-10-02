@@ -111,3 +111,12 @@ Complete repository Solidity/Genesis inventories, 420 Integrated Qualification, 
 **IMPLEMENTATION COMPLETE / EXTERNAL CI QUEUE PENDING — DO NOT ADVANCE TO GOV-AUDIT-2 YET.**
 
 No remaining repository implementation gap is known for GOV-AUDIT-1. The step becomes COMPLETE only when the exact implementation SHA's required Governance qualification executes successfully.
+
+
+## Retrospective completion reconciliation
+
+The original GOV-AUDIT-1 implementation SHA `fde6b37d02db1a180a8635aeb037efd7db0d2cc6` did not receive a counted green retained Governance run before later audit work advanced; its recorded pull-request run was cancelled by subsequent branch movement. That historical queue/cancellation record remains preserved above and is not reclassified as success.
+
+GOV-AUDIT-1 completion was subsequently re-established by the retained **420Governance audit qualification** suite on exact head `28f32c3c090f2b7b1020dafa2ed8a4bb5ee308c7` (run ID `36914171425`, run #119, conclusion **SUCCESS**). That retained suite executes the GOV-AUDIT-1 authority/dependency verifier, Genesis interface verification, Governance formatting/build, Civic/Governance contract tests, forbidden-primitive scan and Governance Indexer mappings while preserving the GOV-AUDIT-1 implementation. The later SHA therefore provides durable non-regression qualification for the GOV-AUDIT-1 requirements without pretending that the cancelled original run succeeded.
+
+**Reconciled status: COMPLETE.** The implementation identity remains `fde6b37d...`; the counted retained qualification evidence is `28f32c3...` / run `36914171425`.

@@ -71,6 +71,7 @@ contract PaymentGenesisIntegration420Test {
         env.health().setMarket(marketId, true);
         env.fees().set(1 ether, 0, false);
         router.setSettlementAdapter(address(adapter));
+        adapter.setPaymentRouter(address(router));
 
         ICanonicalSettlement420.Quote memory q = _quote(settlementAsset, 1 ether);
         PaymentRouter420.PayerLimits memory limits = PaymentRouter420.PayerLimits({
@@ -109,6 +110,7 @@ contract PaymentGenesisIntegration420Test {
         env.health().setMarket(keccak256("CADC/420"), true);
         env.fees().set(0, 0, false);
         router.setSettlementAdapter(address(adapter));
+        adapter.setPaymentRouter(address(router));
 
         ICanonicalSettlement420.Quote memory q = _quote(settlementAsset, 0);
         PaymentRouter420.PayerLimits memory limits = PaymentRouter420.PayerLimits(

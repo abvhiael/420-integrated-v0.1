@@ -56,7 +56,7 @@ contract ReentrantSlashRecipient420 {
     bool public reentrySucceeded;
 
     constructor(address stakeSource_, bytes32 positionId_) {
-        stakeSource = ComputeStakeWorkerCollateral420(stakeSource_);
+        stakeSource = ComputeStakeWorkerCollateral420(payable(stakeSource_));
         positionId = positionId_;
     }
 

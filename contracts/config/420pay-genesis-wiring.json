@@ -1,6 +1,6 @@
 {
   "schema": "420pay-genesis-wiring-v1",
-  "status": "SOURCE_WIRING_REMEDIATED_DEPLOYMENT_VERIFICATION_REQUIRED",
+  "status": "REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING",
   "payment_router": {
     "contract": "PaymentRouter420.sol",
     "settlement_adapter": "CanonicalSettlementAdapter420.sol",
@@ -39,7 +39,7 @@
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,
   "deployment_binding_verified": false,
-  "note": "Source-level Pay -> SettlementAdapter -> SwapExecutor authority wiring, split routing, refund-accounting binding, and Pay replay-consumer bindings are implemented and tested. Live deployment binding remains false until Genesis/testnet deployment verification proves the exact configured instances, runtime identities, registry state, trusted-caller relation, split-router relations, refund-registry relation, relayer authorization policy, and replay-domain binding.",
+  "note": "Repository qualification covers both the retained Swap-owned PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding proof and the expanded PAY-AUDIT-6 deterministic package for all nine Registry-resolved Pay residents, split/refund/replay wiring, runtime identities and governance handoff. deployment_binding_verified remains false; public-testnet addresses, Registry revisions and transactions are PAY-AUDIT-7 evidence.",
   "settlement_router": {
     "contract": "SettlementRouter420.sol",
     "payment_router": "PaymentRouter420.sol",
@@ -51,5 +51,14 @@
     "contract": "RefundManager420.sol",
     "payment_registry": "PaymentRegistry420.sol",
     "payment_registry_binding": "RefundManager420.setPaymentRegistry(PaymentRegistry420)"
-  }
+  },
+  "repository_binding_qualified": true,
+  "binding_qualification_test": "contracts/test/SwapDeploymentBinding420.t.sol",
+  "pay_audit_6_repository_package": "contracts/config/pay/pay-audit-6-deployment-package.json",
+  "pay_audit_6_qualification_test": "contracts/test/PayAudit6DeploymentPackage420.t.sol",
+  "pay_audit_6_runtime_generator": "scripts/generate-420pay-audit-6-deployment.py",
+  "pay_audit_6_deployment_verifier": "scripts/verify-420pay-audit-6-deployment.py",
+  "pay_audit_6_offline_smoke": "scripts/420pay-audit-6-smoke.py",
+  "pay_audit_6_repository_ready": true,
+  "pay_audit_6_live_qualified": false
 }

@@ -93,26 +93,28 @@ Required remediation: BRIDGE-AUDIT-6 and live BRIDGE-AUDIT-9.
 
 ## Requirement matrix
 
-| Requirement | Canonical source | Current implementation | Tests | Documentation | Status | Required remediation |
+| Requirement | Canonical source | Reconciled implementation | Qualification coverage | Documentation | Status | Remaining owner |
 |---|---|---|---|---|---|---|
-| Explicit chain identity/fingerprint | Bridge architecture/integration docs | BridgeChainRegistry420 exists; core route admission does not consume it | chain-registry unit tests | present | PARTIAL | BRIDGE-AUDIT-2 |
-| Canonical asset qualification | value-movement architecture | BridgeAssetRegistry + shared canonical-asset checks | integration/adapters | present | COMPLETE | retain |
-| Route status/direction | value-movement architecture | BridgeRouteRegistry + router checks | BridgeGenesisIntegration | present | COMPLETE | retain |
-| Route-bound adapter authority | security docs / route model | fixed in audit branch | new inbound/outbound negative tests | present | COMPLETE | exact-head CI |
-| Verifier/proof boundary | route/adapters/manifests | chain-specific adapters/verifiers exist with activation gates | numerous adapter suites | present | PARTIAL | adapter-by-adapter BRIDGE-AUDIT-7 + live proof evidence |
-| Risk limits | frozen bridge risk limits | route + asset + shared risk enforcement | integration, fuzz, invariant | present | COMPLETE | exact-head CI |
-| Replay protection | value-movement architecture | transfer-local + shared replay; adapter-specific replay varies | integration/adapters | present | PARTIAL | full adapter/retry lifecycle audit |
-| Canonical transfer state machine | app/user architecture | enum exists; generic unconstrained status setter | no complete transition suite | docs overstate | BROKEN | BRIDGE-AUDIT-3 |
-| Outbound canonical lifecycle | app/user architecture | event/message only; no transfer record | partial outbound integration | docs imply lifecycle | PARTIAL | BRIDGE-AUDIT-3 |
-| Reconciliation evidence | architecture | monotonic BridgeAccountingRegistry | accounting hardening tests exist | present | COMPLETE | retain |
-| Reconciliation safety gating | security/troubleshooting | not explicitly wired to router admission | not established | docs imply halt/escalate | PARTIAL | BRIDGE-AUDIT-4 |
-| User-facing frontend | app metadata/manual | Exchange supplies bridge UX; no dedicated Bridge app | Exchange web tests | Bridge docs present | PARTIAL | BRIDGE-AUDIT-5 |
-| Backend/API/indexing | developer/API docs | shared Indexer + Exchange read service consume Bridge events | Exchange/Indexer tests | partial | PARTIAL | BRIDGE-AUDIT-8 |
-| Genesis fixed address authority | frozen address maps | VerifiedGateway420 = 0x0438; router registry-resolved | address authority CI | present | COMPLETE | retain |
-| Modern Bridge component inventory | dApp map / architecture | chain registry omission fixed in audit branch | hardening gate updated | corrected | COMPLETE | exact-head CI |
-| Deployment/init/Registry publication | Genesis/deployment requirements | fragmented/candidate data; no complete modern Bridge release manifest proven | partial | partial | PARTIAL | BRIDGE-AUDIT-6 |
-| Production-equivalent testnet proof | release requirement | not available | mocked/repository tests only | live Exchange bridge runbook exists | BLOCKED | BRIDGE-AUDIT-9 |
-| Production readiness | release requirement | external verifiers/gateways/routes and live operations not proven | no production evidence | partial | BLOCKED | post-testnet/production deployment |
+| Explicit chain identity/fingerprint | Bridge architecture/integration docs | BridgeChainRegistry420 is authoritative to route activation/admission | A2 route-chain identity + retained Bridge suites | reconciled | COMPLETE | retain |
+| Canonical asset qualification | value-movement architecture | BridgeAssetRegistry + shared canonical-asset checks | integration/adapters | reconciled | COMPLETE | retain |
+| Route status/direction | value-movement architecture | BridgeRouteRegistry + router checks | BridgeGenesisIntegration | reconciled | COMPLETE | retain |
+| Route-bound adapter authority | security docs / route model | exact route adapter binding enforced | A1/A7 negative and retained adapter suites | reconciled | COMPLETE | retain |
+| Verifier/proof boundary | route/adapters/manifests | all 12 production adapters pinned to verifier interfaces and chain-specific finality/proof semantics | A7 verifier + adapter/security suites | reconciled | COMPLETE | live external proof evidence deferred to BRIDGE-AUDIT-9 |
+| Risk limits | frozen bridge risk limits | route + asset + shared risk enforcement with atomic rollback | integration, fuzz, invariant | reconciled | COMPLETE | retain |
+| Replay protection | value-movement architecture | transfer/shared replay plus canonical adapter-domain isolation and retry safety | A3/A7 lifecycle, adapter and replay suites | reconciled | COMPLETE | retain |
+| Canonical transfer state machine | app/user architecture | guarded named transition graph with evidence/actor/terminal rules | BridgeTransferLifecycle + A7 retained hardening | reconciled | COMPLETE | retain |
+| Outbound canonical lifecycle | app/user architecture | outbound initiation registers canonical transfer identity and lifecycle | BridgeGenesisIntegration + cross-suite integration | reconciled | COMPLETE | retain |
+| Reconciliation evidence | architecture | monotonic BridgeAccountingRegistry | accounting hardening tests | reconciled | COMPLETE | retain |
+| Reconciliation safety gating | security/troubleshooting | unhealthy/unknown reconciliation blocks new movement before risk/adapter execution | A4 accounting-health qualification + retained suites | reconciled | COMPLETE | retain |
+| User-facing frontend | app metadata/manual | canonical Bridge UI is the 420Exchange `/bridge` route; Wallet is authorization/navigation client | A5 Exchange web/read-service qualification | reconciled | COMPLETE | retain |
+| ABI/event descriptor and Indexer decoding | Indexer/developer architecture | 27 canonical events across 9 Bridge contracts; address-unbound descriptor bound to exact deployment addresses; duplicate topics dispatch by address | A8 descriptor/decoder/lifecycle tests | reconciled | COMPLETE | retain |
+| Backend/API/indexing | developer/API docs | 420Indexer + Exchange read service consume canonical Bridge events/lifecycle with provenance/finality | A8 Indexer + Exchange projection qualification | reconciled | COMPLETE | retain |
+| Explorer/Notifications/Analytics consumers | derived-service architecture | consumers use the shared non-authoritative 420Indexer Bridge event/lifecycle projection | A8 retained Indexer/Analytics + static consumer reconciliation | reconciled | COMPLETE | retain |
+| Genesis fixed address authority | frozen address maps | VerifiedGateway420 = 0x0438; other Bridge components registry-resolved | address-authority/A6 qualification | reconciled | COMPLETE | retain |
+| Modern Bridge component inventory | dApp map / architecture | chain/asset/route/risk/transfer/accounting/router/gateway/CADC inventory reconciled | A6/A8 manifest verifiers | reconciled | COMPLETE | retain |
+| Deployment/init/Registry publication | Genesis/deployment requirements | canonical deployment-v1 manifest, ordered initialization, Registry IDs/runtime-hash checks and operations runbook | A6 deployment verifier/tests | reconciled | COMPLETE | live receipts/addresses deferred to BRIDGE-AUDIT-9 |
+| Production-equivalent testnet proof | release requirement | repository implementation ready; no live deployment/proof witness claimed | repository/mock qualification only | live evidence boundary explicit | BLOCKED | BRIDGE-AUDIT-9 |
+| Production readiness | release requirement | repository-side remediation converges at A8; live external verifiers/routes/operations remain unproven | no production evidence claimed | boundary explicit | BLOCKED | BRIDGE-AUDIT-9 then final closeout |
 
 ## Files
 

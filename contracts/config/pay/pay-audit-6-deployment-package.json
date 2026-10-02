@@ -1,8 +1,8 @@
 {
   "schema": "420pay-audit-6-deployment-package-v1",
   "step": "PAY-AUDIT-6",
-  "status": "REPOSITORY_READY_LIVE_DEPLOYMENT_PENDING",
-  "repository_ready": true,
+  "status": "IMPLEMENTED_LEVEL_1_QUALIFICATION_PENDING",
+  "repository_ready": false,
   "live_qualified": false,
   "address_policy": "REGISTRY_RESOLVED_NO_FIXED_PAY_ADDRESSES",
   "governance_timelock": "0x0000000000000000000000000000000000000429",
@@ -823,7 +823,6 @@
       "minor": 0,
       "patch": 0
     },
-    "lifecycle": "ACTIVE",
     "runtime_hash_source": "ProtocolRegistry derives implementation.codehash",
     "component_ids": [
       {
@@ -863,20 +862,21 @@
         "component_id_preimage": "420/APP/420PAY/SWAP_HEALTH_ADAPTER"
       }
     ],
-    "invariant": "Registry runtimeCodeHash(componentId) must equal EXTCODEHASH of the exact deployed resident and supportsVersion(1.0.0) must be true."
+    "invariant": "Each resident is first registered SUSPENDED; after all wiring/runtime/governance assertions pass, lifecycle transitions to ACTIVE. Registry runtimeCodeHash must equal EXTCODEHASH and supportsVersion(1.0.0) must be true.",
+    "staging_lifecycle": "SUSPENDED",
+    "activation_lifecycle": "ACTIVE"
   },
   "deployment_order": [
     "Verify frozen GovernanceTimelock, ProtocolRegistry, genesisConfigHash, canonical swap executor and replay-protection dependency identities.",
     "Deploy MerchantRegistry420, InvoiceRegistry420, PaymentRegistry420, PaymentRouter420, SettlementRouter420, RefundManager420, GasSponsor420 and CanonicalSwapHealthAdapter420 with frozen timelock/Registry/config immutables.",
     "Deploy CanonicalSettlementAdapter420 with frozen timelock/Registry/config immutables and the exact canonical CanonicalSwapExecutor420 constructor dependency.",
-    "Register all nine Pay residents with ProtocolRegistry.registerComponent at version 1.0.0 and lifecycle ACTIVE.",
-    "Bind PaymentRouter420.setSettlementAdapter and setSettlementRouter.",
-    "Bind CanonicalSettlementAdapter420.setPaymentRouter, setSettlementRouter and setSwapExecutor.",
-    "Bind SettlementRouter420.setPaymentRouter and setSettlementAdapter.",
-    "Bind RefundManager420.setPaymentRegistry.",
-    "Authorize CanonicalSwapExecutor420.setTrustedCaller(CanonicalSettlementAdapter420,true).",
-    "Bind ReplayProtectionConsumer420 PAY_SETTLEMENT domain exclusively to PaymentRouter420.",
-    "Verify runtime hashes, ACTIVE Registry resolution, version support, exact wiring graph and governance-only mutation before service activation."
+    "Verify each deployed EXTCODEHASH equals the retained PAY-AUDIT-6 runtime_code_hash before Registry publication.",
+    "Register all nine Pay residents with ProtocolRegistry.registerComponent at version 1.0.0 and lifecycle SUSPENDED.",
+    "Bind PaymentRouter420, CanonicalSettlementAdapter420, SettlementRouter420 and RefundManager420 through GovernanceTimelock-authorized calls.",
+    "Authorize CanonicalSwapExecutor420.setTrustedCaller(CanonicalSettlementAdapter420,true) and bind the PAY_SETTLEMENT replay domain exclusively to PaymentRouter420.",
+    "Verify all immutables, runtime hashes, SUSPENDED Registry identities, exact wiring graph, trusted-caller state, replay-domain state and governance-only mutation boundaries.",
+    "Transition all nine Pay residents from SUSPENDED to ACTIVE through ProtocolRegistry.setComponentLifecycle.",
+    "Verify ACTIVE resolution/version/code-hash parity, run the operator smoke, and only then enable Pay-dependent clients/services."
   ],
   "required_bindings": {
     "payment_router_settlement_adapter": "PaymentRouter420.settlementAdapter == CanonicalSettlementAdapter420",
@@ -889,8 +889,8 @@
     "refund_manager_payment_registry": "RefundManager420.paymentRegistry == PaymentRegistry420",
     "executor_trusted_caller": "CanonicalSwapExecutor420.trustedCaller(CanonicalSettlementAdapter420) == true",
     "replay_domain_consumer": "ReplayProtectionConsumer420.domainConsumer(PAY_SETTLEMENT) == PaymentRouter420",
-    "registry_identity": "All nine Pay residents resolve ACTIVE and ProtocolRegistry.runtimeCodeHash equals deployed EXTCODEHASH",
-    "governance_handoff": "All privileged configuration remains callable only through the frozen GovernanceTimelock/governance authority boundary"
+    "registry_identity": "All nine Pay residents are published SUSPENDED, verified against retained runtime identities, then transitioned ACTIVE; ProtocolRegistry.runtimeCodeHash equals deployed EXTCODEHASH throughout.",
+    "governance_handoff": "Only the frozen GovernanceTimelock/governance authority may configure Pay or transition Registry lifecycle; no Pay resident is ACTIVE before complete wiring verification."
   },
   "local_repository_qualification": {
     "test": "contracts/test/PayAudit6DeploymentPackage420.t.sol",

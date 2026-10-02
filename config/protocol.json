@@ -31,7 +31,7 @@
       "minimum_active_validators": 15,
       "maximum_active_validators": 30,
       "security_percent_at_15_active": 28.34467120181406,
-      "security_percent_at_30_active": 50.0,
+      "security_percent_at_30_active": 50,
       "formula": "securityPct = minSecurity + (active-15)*(50-minSecurity)/15, clamped to [minSecurity,50]",
       "attention_formula": "(100-securityPct)/2",
       "development_formula": "(100-securityPct)/2",
@@ -292,7 +292,7 @@
       "percent_of_genesis_supply": 2.380952380952381,
       "purpose": "compensation/allocation for people actively working on the project",
       "liquidity_at_genesis": "TBD",
-      "vesting_schedule": "TBD \u2014 recommended time-lock/vesting rather than fully liquid at block 0"
+      "vesting_schedule": "TBD — recommended time-lock/vesting rather than fully liquid at block 0"
     },
     "community_testnet_distribution_420": 8400000,
     "testnet_validator_bond_credit": {
@@ -345,7 +345,7 @@
     "decision_02_slot_and_fallback_timing": "FROZEN_FOR_TESTNET",
     "decision_03_proposer_selection": "FROZEN_FOR_TESTNET",
     "decision_18_implementation_architecture": "FROZEN_FOR_TESTNET",
-    "next_step": "Step 4 \u2014 executable protocol construction"
+    "next_step": "Step 4 — executable protocol construction"
   },
   "implementation_architecture": {
     "decision_18_status": "FROZEN_FOR_TESTNET",
@@ -426,7 +426,7 @@
       "consensus_binary": "fourtwentyd",
       "execution_binary": "node420",
       "geth_baseline": "v1.17.5",
-      "next": "Step 4.2 \u2014 integrate pinned Geth execution and Engine API payload flow"
+      "next": "Step 4.2 — integrate pinned Geth execution and Engine API payload flow"
     },
     "milestone_4_2": {
       "status": "IMPLEMENTED_ENGINE_API_CLIENT_AND_MOCK_PAYLOAD_FLOW",
@@ -440,7 +440,7 @@
         "engine_getPayloadV3",
         "engine_newPayloadV3"
       ],
-      "next": "Step 4.3 \u2014 canonical consensus SSZ types, BLS signing, QCs and chained finality"
+      "next": "Step 4.3 — canonical consensus SSZ types, BLS signing, QCs and chained finality"
     },
     "milestone_4_2a": {
       "status": "ENCODED_NATIVE_AI_GENESIS_PREPARATION",
@@ -452,7 +452,7 @@
         "AIJobEscrow": "0x0000000000000000000000000000000000000432",
         "AIReputationRegistry": "0x0000000000000000000000000000000000000433"
       },
-      "next": "Step 4.3 \u2014 canonical consensus SSZ types, BLS signing, QCs and chained finality"
+      "next": "Step 4.3 — canonical consensus SSZ types, BLS signing, QCs and chained finality"
     },
     "milestone_4_3": {
       "status": "IMPLEMENTED_CONSENSUS_CORE_BLS_ADAPTER_ENCODED",
@@ -470,7 +470,7 @@
         "head/safe/finalized mapping",
         "ConsensusBlock binds execution payload hash"
       ],
-      "next": "Step 4.4 \u2014 validator committee, proposer scheduling, attestation collection and 15-validator simulation",
+      "next": "Step 4.4 — validator committee, proposer scheduling, attestation collection and 15-validator simulation",
       "production_bls_validation_in_current_runtime": false,
       "production_bls_validation_blocker": "runtime cannot resolve proxy.golang.org; external dependency unavailable",
       "default_offline_tests_use": "deterministic AggregateVerifier test double only"
@@ -490,7 +490,7 @@
         "15-validator in-process simulation",
         "primary and fallback fault scenarios"
       ],
-      "next": "Step 4.5 \u2014 multi-process local devnet and libp2p consensus transport"
+      "next": "Step 4.5 — multi-process local devnet and libp2p consensus transport"
     },
     "milestone_4_5": {
       "status": "EXECUTABLE_MULTIPROCESS_DEVNET_LIBP2P_ADAPTER_ENCODED",
@@ -509,7 +509,7 @@
         "/420/consensus/1/evidence",
         "/420/consensus/1/recovery"
       ],
-      "next": "Step 4.6 \u2014 devnet hardening: real node420 execution instances, persistent consensus DB, live BLS/libp2p build, fault/partition harness"
+      "next": "Step 4.6 — devnet hardening: real node420 execution instances, persistent consensus DB, live BLS/libp2p build, fault/partition harness"
     },
     "milestone_4_6": {
       "status": "IMPLEMENTED_DEVNET_HARDENING_HARNESS",
@@ -532,7 +532,7 @@
         "persistent validator keys/remote signer",
         "soak testing"
       ],
-      "next": "Step 4.7 \u2014 real execution devnet packaging and public-testnet readiness checklist"
+      "next": "Step 4.7 — real execution devnet packaging and public-testnet readiness checklist"
     },
     "milestone_4_7": {
       "status": "PACKAGED_REAL_EXECUTION_DEVNET_PUBLIC_TESTNET_NOT_READY",
@@ -545,7 +545,7 @@
       "devnet_pairs": 15,
       "readiness_gate": "release/readiness.json",
       "public_testnet_ready": false,
-      "next": "Step 4.8 \u2014 networked dependency build + live node420/Engine/libp2p/blst integration and soak/fault matrix"
+      "next": "Step 4.8 — networked dependency build + live node420/Engine/libp2p/blst integration and soak/fault matrix"
     },
     "milestone_4_8": {
       "status": "LOCAL_QUALIFICATION_IMPLEMENTED_PRODUCTION_EVIDENCE_PENDING",
@@ -568,7 +568,7 @@
         "go-libp2p-pubsub": "v0.17.0"
       },
       "public_testnet_ready": false,
-      "next": "Step 4.9 \u2014 real production-transport 15-node harness, signed CI evidence, and release-candidate testnet package"
+      "next": "Step 4.9 — real production-transport 15-node harness, signed CI evidence, and release-candidate testnet package"
     },
     "milestone_4_9": {
       "status": "TESTNET_RC_PACKAGING_IMPLEMENTED_PUBLIC_LAUNCH_EVIDENCE_GATED",
@@ -581,7 +581,7 @@
       "networked_qualification": "scripts/qualify-testnet-rc.sh",
       "ci_workflow": ".github/workflows/testnet-rc.yml",
       "public_testnet_ready": false,
-      "next": "Step 5 \u2014 public testnet launch preparation after Step 4.9 evidence gates pass"
+      "next": "Step 5 — public testnet launch preparation after Step 4.9 evidence gates pass"
     }
   },
   "native_ai": {
@@ -790,7 +790,7 @@
       "ValidatorBootstrapReserve"
     ],
     "genesis_code_placement_frozen": false,
-    "next": "Step 6.1 \u2014 freeze extended system addresses, complete remaining reserve/distribution contracts, compile/audit Solidity, and generate deterministic genesis bytecode/storage allocation.",
+    "next": "Step 6.1 — freeze extended system addresses, complete remaining reserve/distribution contracts, compile/audit Solidity, and generate deterministic genesis bytecode/storage allocation.",
     "genesis_application_decision": "GENESIS_APPLICATION_DECISION_1_FROZEN",
     "genesis_dapp_contract_map": "contracts/config/genesis-dapp-contract-map.json",
     "extended_candidate_system_addresses": "config/extended-system-addresses.json",
@@ -811,7 +811,7 @@
         "bridge verifier",
         "Foundry/solc compilation"
       ],
-      "next": "Step 6.2 \u2014 compile/test/audit the Solidity suite on a networked Foundry runner, materialize constructor storage, and generate the first executable predeployed genesis."
+      "next": "Step 6.2 — compile/test/audit the Solidity suite on a networked Foundry runner, materialize constructor storage, and generate the first executable predeployed genesis."
     },
     "cadc_integration": {
       "status": "CONFIGURED_PENDING_ISSUER_LAYERZERO_420_DEPLOYMENT",
@@ -839,7 +839,7 @@
       "production_adapter_verifiers_wired": false
     },
     "420pay": {
-      "status": "GENESIS_DECISIONS_1_AND_2_FROZEN",
+      "status": "SOURCE_IMPLEMENTED_AUDIT_REMEDIATION_IN_PROGRESS",
       "parameters": "contracts/config/pay/420pay-parameters.json",
       "contracts": [
         "InvoiceRegistry420",
@@ -856,7 +856,7 @@
       "centralized_price_fallback": false,
       "silent_settlement_substitution": false,
       "decision_4": "FROZEN",
-      "implementation_status": "SOURCE_IMPLEMENTED_STATIC_TESTS_READY_SOLIDITY_COMPILE_PENDING",
+      "implementation_status": "SOURCE_IMPLEMENTED_COMPILED_TESTED_HISTORICALLY_EXACT_HEAD_REQUALIFICATION_REQUIRED",
       "implementation_contracts": [
         "InvoiceRegistry420",
         "PaymentRegistry420",
@@ -868,16 +868,21 @@
         "AccountingCommitment420"
       ],
       "foundry_test_sources": true,
-      "solidity_compiled": false,
+      "solidity_compiled": true,
       "security_audited": false,
       "hardening": {
-        "status": "FUZZ_INVARIANT_TEST_SOURCES_AND_CANONICAL_ADAPTERS_IMPLEMENTED",
+        "status": "SOURCE_HARDENED_CANONICAL_ADAPTERS_IMPLEMENTED",
         "test_plan": "contracts/config/pay/hardening-test-plan.json",
         "canonical_health_adapter": "CanonicalSwapHealthAdapter420",
         "canonical_settlement_adapter": "CanonicalSettlementAdapter420",
         "production_swap_executor_wired": false,
-        "foundry_execution_required": true
-      }
+        "foundry_execution_required": true,
+        "payment_router_binding_required": true,
+        "source_swap_executor_wiring_verified": true,
+        "deployment_swap_executor_wiring_verified": false
+      },
+      "exact_head_audit_qualification": false,
+      "historical_solidity_compile_pass": true
     },
     "security_toolchain": {
       "foundry_required": true,

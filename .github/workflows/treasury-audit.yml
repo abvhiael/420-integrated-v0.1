@@ -1,17 +1,6 @@
 name: 420Treasury audit qualification
 
 on:
-  push:
-    branches:
-      - 'audit/420treasury-*'
-    paths:
-      - 'contracts/src/treasury/**'
-      - 'contracts/test/Treasury*.t.sol'
-      - 'contracts/config/420treasury-genesis.json'
-      - 'contracts/config/genesis-canonical-addresses.json'
-      - 'contracts/config/genesis-address-namespace.json'
-      - 'docs/architecture/protocols/stake-governance-treasury-grants.md'
-      - '.github/workflows/treasury-audit.yml'
   pull_request:
     paths:
       - 'contracts/src/treasury/**'

@@ -139,7 +139,9 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
             State.SCHEDULED,
             true
         );
-        emit DisbursementScheduled(id, budgetId, recipient, b.asset, amount, notBefore, expiresAt, civicActionHash, purposeHash);
+        emit DisbursementScheduled(
+            id, budgetId, recipient, b.asset, amount, notBefore, expiresAt, civicActionHash, purposeHash
+        );
     }
 
     function markExecuted(

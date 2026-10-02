@@ -159,6 +159,23 @@ contract GrantsGenesis420Test {
         require(!replay, "application replay");
     }
 
+    function testApplicationNonceCannotBeReusedWithDifferentContent() public {
+        Env memory e = setup();
+        (bytes32 p,,) = makeProgram(e);
+        bytes32 firstContent = keccak256("first");
+        bytes32 firstId = e.applications.canonicalId(p, ALICE, 9, firstContent);
+        vm.prank(ALICE);
+        e.applications.submit(firstId, p, ALICE, 9, 300, firstContent);
+
+        bytes32 secondContent = keccak256("second");
+        bytes32 secondId = e.applications.canonicalId(p, ALICE, 9, secondContent);
+        vm.prank(ALICE);
+        (bool reused,) = address(e.applications).call(
+            abi.encodeWithSelector(e.applications.submit.selector, secondId, p, ALICE, uint256(9), uint128(300), secondContent)
+        );
+        require(!reused, "application nonce replay accepted");
+    }
+
     function testProgramAndAwardCapsFailClosedAndAccountingAgrees() public {
         Env memory e = setup();
         (bytes32 p,,) = makeProgram(e);
@@ -177,6 +194,24 @@ contract GrantsGenesis420Test {
         );
         require(!over, "program cap bypass");
         require(e.programs.program(p).awarded == 700, "failed award changed accounting");
+    }
+
+    function testApplicationCannotBeOverAwardedAcrossMultipleAwards() public {
+        Env memory e = setup();
+        (bytes32 p,,) = makeProgram(e);
+        bytes32 app = submit(e, p, 500, 1);
+
+        bytes32 terms1 = keccak256("partial-1");
+        bytes32 a1 = e.awards.canonicalId(app, ALICE, 300, terms1);
+        e.awards.createAward(a1, app, ALICE, 300, terms1);
+
+        bytes32 terms2 = keccak256("partial-2");
+        bytes32 a2 = e.awards.canonicalId(app, ALICE, 300, terms2);
+        (bool over,) = address(e.awards).call(
+            abi.encodeWithSelector(e.awards.createAward.selector, a2, app, ALICE, uint128(300), terms2)
+        );
+        require(!over, "application over-awarded");
+        require(e.awards.applicationAwarded(app) == 300, "failed award changed application accounting");
     }
 
     function testOnlyBoundAwardRegistryCanReserveProgramCap() public {
@@ -283,7 +318,7 @@ contract GrantsGenesis420Test {
         require(!approved, "cancelled award approved milestone");
     }
 
-    function testCancellingApprovedUnexecutedMilestoneReleasesBinding() public {
+    function testApprovedMilestoneRequiresTreasuryCancellationBeforeGrantCancellation() public {
         Env memory e = setup();
         (bytes32 p, bytes32 budget, bytes32 civic) = makeProgram(e);
         bytes32 app = submit(e, p, 600, 1);
@@ -296,8 +331,15 @@ contract GrantsGenesis420Test {
         );
 
         e.milestones.approve(m, d);
+        (bool orphaned,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.cancel.selector, m));
+        require(!orphaned, "scheduled Treasury payment detached from Grants");
+
+        e.treasury.set(
+            d, budget, ALICE, ASSET, 300, civic, purpose, ITreasuryDisbursementGrant420.State.CANCELLED, bytes32(0)
+        );
         e.milestones.cancel(m);
         require(e.milestones.treasuryDisbursementMilestone(d) == bytes32(0), "binding not released");
+        require(e.milestones.milestoneTotal(a) == 0, "cancelled milestone capacity not released");
     }
 
     function testExecutedTreasuryPaymentCannotBeHiddenByMilestoneCancellation() public {
@@ -327,6 +369,32 @@ contract GrantsGenesis420Test {
         (bool cancelled,) = address(e.milestones).call(abi.encodeWithSelector(e.milestones.cancel.selector, m));
         require(!cancelled, "executed payment hidden by cancellation");
         e.milestones.finalizePaid(m);
+    }
+
+    function testMilestoneOrdinalCannotBeReusedAndCancelledCapacityCanBeReplaced() public {
+        Env memory e = setup();
+        (bytes32 p,,) = makeProgram(e);
+        bytes32 app = submit(e, p, 500, 1);
+        bytes32 a = award(e, app, 500);
+
+        bytes32 p1 = keccak256("ordinal-one");
+        bytes32 m1 = e.milestones.canonicalId(a, 1, 300, p1);
+        e.milestones.createMilestone(m1, a, 1, 300, p1);
+
+        bytes32 p1b = keccak256("ordinal-one-different");
+        bytes32 duplicateOrdinal = e.milestones.canonicalId(a, 1, 200, p1b);
+        (bool reused,) = address(e.milestones).call(
+            abi.encodeWithSelector(e.milestones.createMilestone.selector, duplicateOrdinal, a, uint32(1), uint128(200), p1b)
+        );
+        require(!reused, "milestone ordinal replay accepted");
+
+        e.milestones.cancel(m1);
+        require(e.milestones.milestoneTotal(a) == 0, "cancelled capacity not released");
+
+        bytes32 p2 = keccak256("ordinal-two");
+        bytes32 m2 = e.milestones.canonicalId(a, 2, 500, p2);
+        e.milestones.createMilestone(m2, a, 2, 500, p2);
+        require(e.milestones.milestoneTotal(a) == 500, "replacement milestone capacity unavailable");
     }
 
     function testMilestoneTotalCannotExceedAward() public {

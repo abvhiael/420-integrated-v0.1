@@ -223,6 +223,9 @@ Bind the harmed-payer recipient to the exact canonical ComputeEscrow entitlement
 Run the frozen hostile-economic campaign across solvency, isolation, exit races, slash finality, replay, duplicate withdrawal/slash/reward, hostile authorization, reentrancy and failure atomicity.
 
 ### CMP-1.5.12 — Release candidate
+**Status: COMPLETE — repository-qualified release candidate on `cb67b0b4a564d90c7c6ca910288c6946b9a5929c`; live deployment blocked.**
+
+Freeze the accumulated CMP-1.5 graph, pin runtime/dependency bindings, prepare truthful ProtocolRegistry publication/deployment evidence, and keep live fields fail-closed until real testnet deployment exists.
 
 ### CMP-1.5.13 — Phase closeout
 
@@ -530,7 +533,7 @@ Production target flow:
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
-| CMP-1.5 ComputeStake | current: CMP-1.5.12 release candidate; CMP-1.5.0–1.5.11 complete |
+| CMP-1.5 ComputeStake | current: CMP-1.5.13 phase closeout; CMP-1.5.0–1.5.12 repository-qualified (CMP-1.5.7 roadmap status pending reconciliation in closeout) |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

@@ -21,6 +21,7 @@
     "dynamic recipient classes require a code-hash-frozen resolver",
     "protocol treasury routing is explicit and cannot be inferred",
     "each slash authorization freezes exact distribution-policy revision and commitment before authorization succeeds",
+    "each slash authorization resolves and freezes the exact dynamic recipient addresses before authorization succeeds",
     "distribution executor is reciprocally bound to the exact authorizer and distribution-policy contract",
     "distribution is permissionless to relay but cannot alter frozen recipients/shares",
     "worker and verifier slash execution is bounded by maxTranches and supports resumable multi-batch completion",

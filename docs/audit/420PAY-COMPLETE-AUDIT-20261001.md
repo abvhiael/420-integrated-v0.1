@@ -111,9 +111,9 @@ The router has local atomic payment-authorization replay state and reads shared 
 | dedicated Pay backend/API | NOT APPLICABLE for canonical authority | no canonical backend authority specified |
 | Registry-resolved deployment descriptor/artifact set | MISSING | required before live indexing/deployment |
 | deterministic deployment/wiring script | MISSING | wiring requirements exist, executable deployment package does not |
-| canonical accounting-export implementation | MISSING | frozen fields exist; only tax-summary hash helper is implemented |
-| executable split payout path | PARTIAL | validation/math only, no transfer path |
-| GasSponsor execution/paymaster binding | PARTIAL | caps/accounting exist, reimbursement/execution boundary absent |
+| canonical accounting-export implementation | COMPLETE after PAY-AUDIT-4 implementation | frozen 15-field schema + Indexer DTO/replaceable exporter |
+| executable split payout path | COMPLETE after PAY-AUDIT-4 implementation | native/direct-token/swap-backed atomic paths; exact balance deltas and zero-residue checks |
+| GasSponsor execution/paymaster binding | COMPLETE after PAY-AUDIT-4 implementation | governed relayer reimbursement; sponsor has no arbitrary call/recipient authority |
 | offline invoice authorization semantics | COMPLETE after PAY-AUDIT-3 | Decision #4 reconciled as offline presentation/integrity plus merchant-only online canonical acceptance |
 | complete payment lifecycle transition surface | COMPLETE after PAY-AUDIT-3 | explicit governed INCLUDED/CERTIFIED/FINALIZED/SETTLED/FAILED paths with invalid-transition rejection |
 | production-equivalent testnet evidence | BLOCKED | no live candidate evidence |
@@ -148,9 +148,9 @@ The trusted `CanonicalSettlementAdapter420` required only that the caller contai
 
 1. **Offline invoice authorization — RESOLVED in PAY-AUDIT-3.** Decision #4's offline creation and online acceptance flags are applied together: the signing root is an offline presentation/integrity commitment, while canonical invoice state is created only by the bound merchant online through `createInvoice`. No unversioned signature/relayer authority is invented.
 2. **Payment lifecycle — RESOLVED in PAY-AUDIT-3.** Explicit governed transitions now make INCLUDED, CERTIFIED, SETTLED and FAILED reachable with fail-closed predecessor rules; retained finalization semantics remain compatible and refund states continue through the bounded refund path.
-3. **Split settlement — PARTIAL.** `SettlementRouter420` calculates/validates splits only. It never transfers and never emits its declared settlement events.
-4. **Gas sponsorship — PARTIAL.** usage/cap accounting exists, but the contract does not itself pay a relayer/paymaster or debit its balance when `recordSponsored` is called. The execution/reimbursement authority must be frozen before implementing it.
-5. **Accounting exports — MISSING.** Genesis parameters require export fields; no canonical export DTO/service was found.
+3. **Split settlement — RESOLVED in PAY-AUDIT-4.** `SettlementRouter420` now executes native, direct-token and adapter-funded token splits atomically, enforces replay and exact balance deltas, emits settlement/split events, and leaves no new router residue.
+4. **Gas sponsorship — RESOLVED in PAY-AUDIT-4.** V1 reimbursement is bound to governance-authorized relayer contracts because no canonical Pay paymaster runtime exists. The sponsor never executes the user call or selects an arbitrary reimbursement recipient; the calling relayer is reimbursed atomically within caps/reserve constraints.
+5. **Accounting exports — RESOLVED in PAY-AUDIT-4.** The frozen 15-field schema is retained in `contracts/config/pay/accounting-export-schema.json` and implemented as a derived Indexer DTO with a replaceable sink/service.
 6. **Live shared replay — BLOCKED.** source support exists, but exact Registry deployment and domain-consumer binding are not live-verified.
 
 ## Integration audit
@@ -219,7 +219,7 @@ Genesis activation still lacks:
 - exact adapter->router, adapter->executor, executor trusted-caller and replay-domain live evidence;
 - final governance/timelock handoff evidence;
 - production-equivalent smoke/reorg/recovery evidence;
-- resolution of PAY-AUDIT-4 functional gaps and the Genesis application catalogue contradiction.
+- PAY-AUDIT-4 exact-head qualification, PAY-AUDIT-6 deployment package work, and the Genesis application catalogue contradiction.
 
 ## Requirement matrix
 
@@ -242,12 +242,12 @@ Genesis activation still lacks:
 | atomic settlement rollback | protocol architecture | implemented | failure rollback tests | present | COMPLETE | exact-head run |
 | payer max spend / merchant minimum | Decision #4/value invariants | implemented | focused/integration | present | COMPLETE | exact-head run |
 | split <=8 / 10000 bps / primary remainder | Decision #4 | math/validation implemented | fuzz/invariant | present | COMPLETE | retain |
-| executable split payment | frozen split-settlement requirement | no transfer path | none | insufficient | PARTIAL | architecture decision + implementation |
+| executable split payment | frozen split-settlement requirement | atomic native/direct-token/swap-backed routing implemented | PAY-AUDIT-4 regression | architecture updated | COMPLETE pending exact-head Level 1 | qualify exact head |
 | refund accounting bounded | Pay parameters/authority map | implemented | focused/fuzz | present | COMPLETE | live integration |
 | refund arbitrary custody authority prohibited | authority map | no arbitrary custody path | n/a | present | COMPLETE | retain |
 | GasSponsor allowlist/caps | Pay parameters | implemented | limit tests | present | COMPLETE | exact-head run |
-| GasSponsor actual execution/reimbursement | sponsorship purpose | accounting only | integration accounting only | insufficient | PARTIAL | bind canonical relayer/paymaster execution |
-| accounting export fields | frozen parameters | no exporter found | absent | fields listed only | MISSING | schema/exporter/reconciliation |
+| GasSponsor actual execution/reimbursement | sponsorship purpose | governed relayer reimbursement implemented; no arbitrary execution target | PAY-AUDIT-4 regression | architecture updated | COMPLETE pending exact-head Level 1 | qualify exact head |
+| accounting export fields | frozen parameters | exact schema + replaceable Indexer exporter implemented | Indexer regression | schema/architecture present | COMPLETE pending exact-head Level 1 | qualify exact head |
 | Registry discovery/no invented fixed Pay address | address policy | implemented policy | address verifiers | present | COMPLETE | deployment descriptors |
 | shared dependency matrix | frozen interface layer | generic row overstates runtime dependencies | audit reconciliation added | audit record | COMPLETE | exact-head verifier |
 | Indexer Pay classification | derived-service architecture | audit fixed | regression | audit report | COMPLETE | exact-head run/live descriptor |
@@ -263,14 +263,14 @@ Genesis activation still lacks:
 
 **Accepted design risk:** governance can reconfigure Pay dependencies under the canonical timelock/authority model; Swap execution depends on the canonical market/pool implementation and allowances/custody policy outside Pay.
 
-**Unresolved:** executable split semantics, actual gas-sponsor reimbursement authority, missing accounting exporter, live exact-instance wiring, and no independent audit of the frozen candidate.
+**Unresolved:** PAY-AUDIT-4 exact-head qualification, deterministic deployment/Registry publication, live exact-instance wiring, and independent audit of the frozen candidate.
 
 ## Readiness state after source-head qualification
 
-- CODE COMPLETE: **NO overall** — PAY-AUDIT-3 is implemented; PAY-AUDIT-4/6 functional/deployment gaps remain.
+- CODE COMPLETE: **NO overall** — PAY-AUDIT-4 source implementation is present but still requires exact-head Level 1 qualification; PAY-AUDIT-6 deployment tooling remains missing.
 - BUILD COMPLETE: **YES for the implemented source surface** — PAY-AUDIT-3 implementation head `452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8` passed the dedicated Pay Level 1 build/qualification workflow and Solidity Contracts #4128. Overall application completion remains NO because PAY-AUDIT-4/6 are unresolved.
-- CONTRACT COMPLETE: **NO overall** — PAY-AUDIT-3 invoice/lifecycle semantics are resolved; split/sponsorship/accounting work remains.
-- TEST COMPLETE: **NO overall** — PAY-AUDIT-1/2/3/5 are exact-head qualified for their implemented source surfaces, but PAY-AUDIT-4/6 functionality remains incomplete or missing and therefore cannot yet be fully tested.
+- CONTRACT COMPLETE: **PENDING PAY-AUDIT-4 qualification** — split/refund/sponsorship source gaps are implemented; exact-head Level 1 evidence is still required.
+- TEST COMPLETE: **NO overall** — PAY-AUDIT-4 targeted qualification is pending, and PAY-AUDIT-6/7/8 remain later-phase gates.
 - DOCUMENTATION COMPLETE: **NO** — unresolved semantics and deployment/operator material remain.
 - INTEGRATION COMPLETE: **NO** — live Registry/Swap/replay/Indexer deployment binding is absent.
 - SECURITY QUALIFIED: **NO overall** — the repaired PAY-AUDIT-2 source boundary passed exact-head CI, but live deployment qualification and the required independent audit remain outstanding.

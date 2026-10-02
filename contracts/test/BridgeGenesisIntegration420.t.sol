@@ -8,6 +8,7 @@ import "../src/bridge/BridgeRouteRegistry.sol";
 import "../src/bridge/BridgeChainRegistry420.sol";
 import "../src/bridge/BridgeAccountingRegistry.sol";
 import "../src/interfaces/IBridgeAdapter420.sol";
+import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 contract MockBridgeAdapter420 is IBridgeAdapter420 {
@@ -381,15 +382,18 @@ contract BridgeGenesisIntegration420Test {
             ASSET_ID, 1_000_000 ether, 999_999 ether, uint64(block.timestamp), keccak256("refund-mismatch")
         );
         f.env.safety().setState(ISystemSafety420.SafetyState.HALTED);
+        f.env.safety().setAllowed(false);
+        (bool denied,) = address(f.transfers).call(
+            abi.encodeWithSelector(
+                f.transfers.refundTransfer.selector, transferId, keccak256("denied-withdrawal-recovery")
+            )
+        );
+        require(!denied, "safety denial bypassed");
+
+        f.env.safety().setAllowed(true);
         f.transfers.refundTransfer(transferId, keccak256("approved-withdrawal-recovery"));
         (,,,,,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(transferId);
         require(status == BridgeTransferRegistry.Status.REFUNDED, "safe refund blocked");
-
-        f.env.safety().setAllowed(false);
-        bytes32 secondId = f.transfers.deriveTransferId(
-            ROUTE_ID, ASSET_ID, address(0xA11CE), address(0xB0B), 26 ether, keccak256("tx-two"), keccak256("msg-two")
-        );
-        secondId;
     }
 
     function testSharedPauseFailsClosed() public {

@@ -63,7 +63,9 @@ Exit criteria:
 
 ## PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion
 
-**Status: IMPLEMENTED — Level 1 qualification pending.**
+**Status: COMPLETE.**
+
+Durable Level 1 qualification: implementation SHA `3378b3b9efcc2fd2f70124daa7eb520d96aad6f6` passed 420Pay audit qualification run #157 (`37050677411`, job `110983005816`) and Solidity Contracts run #4172 (`37050677237`). The dedicated Pay run passed exact-head verification, static Pay verification, Solidity formatting, the Pay/settlement-boundary build, PAY-AUDIT-4 focused Solidity qualification, forbidden-primitive scan, and 420Indexer Pay reconciliation. This completion record is evidence-only and therefore does not recursively require requalification.
 
 Canonical resolution:
 1. **Split execution ownership:** `SettlementRouter420` owns split distribution only. `PaymentRouter420` remains the payer authorization/replay boundary and `CanonicalSettlementAdapter420` remains the swap execution boundary. Direct native/token splits require the payer itself; swap-backed splits deliver canonical settlement assets into `SettlementRouter420` and distribute them atomically in the same transaction.
@@ -128,7 +130,7 @@ Pay components are registry-resolved; do not assign frozen addresses unless the 
 
 ## PAY-AUDIT-7 — production-equivalent testnet qualification
 
-**Status: BLOCKED until the approved live testnet candidate exists and PAY-AUDIT-4/6 repository work is complete.**
+**Status: BLOCKED until the approved live testnet candidate exists and PAY-AUDIT-6 repository work is complete.**
 
 Retain exact release-SHA evidence for:
 - chain/genesis identity;

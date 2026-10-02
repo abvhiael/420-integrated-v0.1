@@ -62,11 +62,14 @@ contract ReplayProtectionConsumer420Test {
         env.registry().set(AppDependencyIds420.REPLAY_PROTECTION, address(replay));
 
         router.setSettlementAdapter(address(adapter));
+        adapter.setPaymentRouter(address(router));
+        adapter.setPaymentRouter(address(router));
         executor.setTrustedCaller(address(adapter), true);
         replay.setDomainConsumer(ReplayDomainIds420.PAY_SETTLEMENT, address(router));
 
         require(router.settlementAdapter() == address(adapter), "router adapter wiring");
         require(adapter.swapExecutor() == address(executor), "adapter executor wiring");
+        require(adapter.paymentRouter() == address(router), "adapter router wiring");
         require(executor.trustedCaller(address(adapter)), "executor trust wiring");
         require(replay.domainConsumer(ReplayDomainIds420.PAY_SETTLEMENT) == address(router), "replay consumer wiring");
     }

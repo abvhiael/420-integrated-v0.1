@@ -76,6 +76,16 @@ Launchpad requires no new frozen predeploy. The canonical Launchpad router is re
 - V1 has no arbitrary external calls, delegatecall, token approvals, token custody, native-value custody, or reentrancy-sensitive transfer path;
 - the controller may be set only once and cannot be zero.
 
+### V1 hardening semantics frozen by LAUNCHPAD-AUDIT-2
+
+The V1 contract family remains a non-custodial commitment registry. Audit-2 freezes the following semantics rather than silently expanding V1 authority:
+
+- payment, delivery and refund commitments are nonzero opaque audit references; V1 does not enforce global commitment uniqueness. Canonical settlement binding, replay/idempotency across services and 420Pay evidence validation belong to LAUNCHPAD-AUDIT-3;
+- participant allocation is calculated as `floor(tokenAllocation * participantContribution / raised)`. Aggregate claims therefore never exceed the configured allocation, but integer division may leave unassigned accounting dust. V1 neither custodies nor sweeps that residual;
+- `Project.active` is an immutable registration marker in V1, not a mutable pause/deactivation control. Sale lifecycle authority remains the explicit `LaunchpadSaleRegistry420.State` machine.
+
+The focused Audit-2 suite directly covers canonical/replay-safe identities, immutable economics, cap boundaries, soft-cap finalization, refund/claim terminal behavior, default-deny authorization, nonzero commitment requirements, contribution time boundaries, duplicate-operation behavior, cancellation, and fuzzed allocation/cap conservation. Static verification retains the no-custody/no-mint/no-payment-execution/no-Swap-authority boundary.
+
 ### Risks / limitations
 
 1. **Commitment-only settlement.** A nonzero payment/delivery/refund commitment is evidence supplied by the caller; V1 does not cryptographically bind that commitment to a canonical 420Pay settlement record or token transfer.

@@ -1,0 +1,88 @@
+name: 420Grants Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/grants/**"
+      - "contracts/test/GrantsGenesis420.t.sol"
+      - "contracts/config/420grants-genesis.json"
+      - "docs/audit/420GRANTS-*"
+      - "scripts/verify-grants-audit.py"
+      - ".github/workflows/grants-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: grants-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  grants-contract-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Verify Grants audit model
+        run: python3 scripts/verify-grants-audit.py
+
+      - name: Check Grants Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/grants test/GrantsGenesis420.t.sol
+
+      - name: Build Grants contract family
+        working-directory: contracts
+        run: forge build src/grants --force --sizes
+
+      - name: Run Grants lifecycle and adversarial regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+
+  grants-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Reject dangerous Grants primitives
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\b(delegatecall|selfdestruct|tx\.origin)\b' contracts/src/grants; then
+            echo "Forbidden authority/opcode primitive found in 420Grants." >&2
+            exit 1
+          fi
+
+      - name: Re-run Grants tests under hardening profile
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: hardening
+        run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv

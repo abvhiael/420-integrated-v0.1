@@ -79,7 +79,7 @@ contract BridgeTransferLifecycle420Test {
         require(!ok, "completed reopened");
     }
 
-    function testFailureRetryReturnsOnlyToRecordedStage() public {
+    function testRetryReturnsOnlyToRecordedFailedStage() public {
         bytes32 id = _advanceTo(BridgeTransferRegistry.Status.PROOF_PENDING);
         registry.markFailed(id, _evidence("proof failure"));
         require(registry.retryTarget(id) == BridgeTransferRegistry.Status.PROOF_PENDING, "retry stage");

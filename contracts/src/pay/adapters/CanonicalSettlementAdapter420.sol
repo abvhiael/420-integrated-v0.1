@@ -104,10 +104,11 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         require(paymentId != bytes32(0), "payment id");
         consumedQuote[q.quoteId] = true;
 
+        uint256 residualBefore = IERC20PaySplit420(q.settlementAsset).balanceOf(settlementRouter);
         (inputSpent, settlementDelivered) =
             _executeSwap(q, payer, settlementRouter, exactSettlementAmount);
         SettlementRouter420(settlementRouter).executeHeldTokenSplit(
-            paymentId, q.settlementAsset, settlementDelivered, recipients, bps, primaryIndex
+            paymentId, q.settlementAsset, settlementDelivered, residualBefore, recipients, bps, primaryIndex
         );
         emit SettlementExecuted(q.quoteId, payer, settlementRouter, inputSpent, settlementDelivered);
     }

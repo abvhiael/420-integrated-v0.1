@@ -38,6 +38,7 @@ contract PaySwapGenesisIntegration420Test {
         );
         swapExecutor.setTrustedCaller(address(settlementAdapter), true);
         pay.setSettlementAdapter(address(settlementAdapter));
+        settlementAdapter.setPaymentRouter(address(pay));
         pool.setResult(90 ether, 84 ether, false);
 
         ICanonicalSettlement420.Quote memory q = ICanonicalSettlement420.Quote({
@@ -88,6 +89,7 @@ contract PaySwapGenesisIntegration420Test {
         markets.setMarket(MARKET_ID, address(pool), INPUT, SETTLEMENT, CanonicalMarketRegistry.Role.CANONICAL_CAD, bytes32(0), true);
         swapExecutor.setTrustedCaller(address(settlementAdapter), true);
         pay.setSettlementAdapter(address(settlementAdapter));
+        settlementAdapter.setPaymentRouter(address(pay));
         pool.setResult(0, 0, true);
 
         bytes32 paymentId = keccak256("pay-swap-rollback");

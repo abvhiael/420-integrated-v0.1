@@ -171,14 +171,17 @@ jobs:
       - name: Verify CMP-1.5.13 phase closeout inventory
         run: python scripts/verify-cmp-1-5-13-closeout.py
 
+      - name: Verify CMP-2.1 worker offers
+        run: python scripts/verify-cmp-2-1-worker-offers.py
+
       - name: Setup Node for affected Compute SDK
-        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002'
+        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
       - name: Build and test affected @420/sdk Compute surface
-        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002'
+        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         working-directory: packages/420-sdk
         run: |
           npm install --no-audit --no-fund

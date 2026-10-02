@@ -43,6 +43,30 @@ abi=read("420-indexer/src/abi-manifest.ts")
 for name in ["InvoiceRegistry420","PaymentRegistry420","PaymentRouter420","SettlementRouter420","RefundManager420","GasSponsor420","CanonicalSettlementAdapter420"]:
     if f"{name}: '420Pay'" not in abi: errors.append(f"Indexer 420Pay classification missing: {name}")
 
+payment_registry=read("contracts/src/pay/PaymentRegistry420.sol")
+for token in ["recordIncluded", "recordCertified", "recordSettled", "recordFailed", "invalid inclusion state", "invalid certification state", "invalid settlement state", "invalid failure state"]:
+    if token not in payment_registry: errors.append(f"PAY-AUDIT-3 lifecycle completion missing: {token}")
+
+invoice_registry=read("contracts/src/pay/InvoiceRegistry420.sol")
+if 'require(i.merchant == msg.sender, "merchant")' not in invoice_registry:
+    errors.append("PAY-AUDIT-3 merchant-only online invoice acceptance boundary missing")
+for forbidden in ["acceptSignedInvoice", "createSignedInvoice", "ecrecover("]:
+    if forbidden in invoice_registry:
+        errors.append(f"PAY-AUDIT-3 unexpected signature-based canonical invoice authority: {forbidden}")
+
+audit3_test=read("contracts/test/PayAudit3Lifecycle420.t.sol")
+for token in [
+    "testLifecycleSequentialPathReachesEveryNonRefundTerminalState",
+    "testLifecycleRejectsInvalidPredecessorsAndTerminalResurrection",
+    "testLifecycleMutationRequiresGenesisGovernance",
+    "testOfflineInvoiceRootDoesNotGrantCanonicalCreationAuthority",
+]:
+    if token not in audit3_test: errors.append(f"PAY-AUDIT-3 regression missing: {token}")
+
+decision4=json.loads(read("contracts/config/pay/420pay-decision-4.json") or "{}")
+if decision4.get("offline_invoice_creation") is not True or decision4.get("online_acceptance_required") is not True:
+    errors.append("PAY-AUDIT-3 frozen offline/online invoice decision changed; reconcile semantics")
+
 genesis_apps=json.loads(read("config/genesis-applications.json") or "{}")
 names={x.get("name") for x in genesis_apps.get("apps",[])}
 if "420 Pay" in names or "420Pay" in names:

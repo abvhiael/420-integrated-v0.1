@@ -28,7 +28,7 @@ contract TreasuryPolicyRegistry420 is I420System, SystemAccess {
 
     constructor(
         address timelock_
-    ) SystemAccess(timelock_) {}
+    ) SystemAccess(timelock_) { }
 
     function systemName() external pure returns (string memory) {
         return "TreasuryPolicyRegistry420";
@@ -65,7 +65,10 @@ contract TreasuryPolicyRegistry420 is I420System, SystemAccess {
         return _assetPolicies[asset];
     }
 
-    function isAllowed(address asset, uint256 amount) external view returns (bool) {
+    function isAllowed(
+        address asset,
+        uint256 amount
+    ) external view returns (bool) {
         AssetPolicy memory p = _assetPolicies[asset];
         return p.allowed && amount > 0 && amount <= p.maxSingleDisbursement;
     }

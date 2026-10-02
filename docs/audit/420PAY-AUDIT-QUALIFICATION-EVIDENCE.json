@@ -2,7 +2,7 @@
   "schema": "420pay-audit-qualification-evidence-v3",
   "component": "420Pay",
   "audit_branch": "audit/420pay-complete-20261001-r3",
-  "current_main_base_sha": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+  "current_main_base_sha": "14d46231aa4350b2e84dee52f0f664bdd2e785f4",
   "qualified_steps": [
     "PAY-AUDIT-1",
     "PAY-AUDIT-2",
@@ -167,6 +167,62 @@
         "deterministic deployment package and Registry publication under PAY-AUDIT-6",
         "live production-equivalent testnet qualification under PAY-AUDIT-7",
         "independent security audit and Genesis/production closeout under PAY-AUDIT-8"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-6 — deterministic deployment package and Registry publication"
+    },
+    {
+      "steps": [
+        "PAY-AUDIT-5"
+      ],
+      "qualification_level": "Level 1 — retained qualification revalidation",
+      "original_implementation_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+      "revalidated_implementation_sha": "3378b3b9efcc2fd2f70124daa7eb520d96aad6f6",
+      "implementation_unchanged": {
+        "420-indexer/src/abi-manifest.ts": {
+          "original_blob_sha": "2a15b71950454799c1f6898b9be0445e67ab5173",
+          "current_blob_sha": "2a15b71950454799c1f6898b9be0445e67ab5173"
+        },
+        "420-indexer/src/lifecycle-reducer.ts": {
+          "original_blob_sha": "8adf4af68fe4d1a49111dc4889b2d72d85b1ab9c",
+          "current_blob_sha": "8adf4af68fe4d1a49111dc4889b2d72d85b1ab9c"
+        },
+        "420-indexer/test/abi-manifest.test.ts": {
+          "original_blob_sha": "f71487934689a9c49d2ec25a35cde7024031a919",
+          "current_blob_sha": "f71487934689a9c49d2ec25a35cde7024031a919"
+        },
+        "420-indexer/test/lifecycle-reducer.test.ts": {
+          "original_blob_sha": "4159eb2c255eb4a7ce3a70164d4b779639b987af",
+          "current_blob_sha": "4159eb2c255eb4a7ce3a70164d4b779639b987af"
+        }
+      },
+      "requirements_satisfied": [
+        "Pay contracts remain classified under the canonical 420Pay protocol family",
+        "Pay lifecycle reconstruction continues to derive from real PaymentSet(status) and PaymentAuthorized events",
+        "obsolete synthetic PaymentCreated/PaymentSettled/PaymentRefunded/PaymentCancelled/PaymentExpired lifecycle semantics remain absent",
+        "current app-specific CI still builds the Indexer and runs the retained ABI-manifest/lifecycle regressions"
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 157,
+        "run_id": 37050677411,
+        "job_id": 110983005816,
+        "conclusion": "success",
+        "relevant_check": "Build and test 420Indexer Pay reconciliation"
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4172,
+        "run_id": 37050677237,
+        "conclusion": "success"
+      },
+      "current_main_base_sha": "14d46231aa4350b2e84dee52f0f664bdd2e785f4",
+      "milestone_status": "No Level 2 milestone triggered; PAY-AUDIT-5 implementation remained unchanged and was revalidated inside the current app-specific Level 1 workflow.",
+      "intentionally_deferred": [
+        "Level 2 broader Pay integration until a documented/meaningful milestone",
+        "Level 3 app-phase closeout after reconciliation with current main",
+        "live deployed Registry-resolved Pay descriptor/address validation under PAY-AUDIT-7"
       ],
       "blockers": [],
       "completion_state": "COMPLETE",

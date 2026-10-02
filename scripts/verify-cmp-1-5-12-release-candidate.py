@@ -135,7 +135,7 @@ def repository_ready(d, allow_live=False):
         "contract ComputeStakeReleaseCandidateWiring420",
         "releaseGraphHash",
         "sourceBinding.sourceCodeHash != g.workerCollateral.runtimeCodeHash",
-        "resolver.canonicalEntitlementsCodeHash() != g.canonicalEntitlements.codehash",
+        "resolver.canonicalEntitlementsCodeHash() != g.canonicalEntitlements.runtimeCodeHash",
         "auth.distributionExecutor() != g.distribution.implementation",
         "wc.workerRegistry() != g.workerRegistry.implementation",
         "vc.verifiers() != g.verifierRegistry.implementation",

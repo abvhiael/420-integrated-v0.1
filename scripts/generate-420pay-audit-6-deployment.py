@@ -173,9 +173,12 @@ def main() -> int:
     p=argparse.ArgumentParser()
     p.add_argument("--print",action="store_true",dest="print_output")
     p.add_argument("--check",action="store_true")
+    p.add_argument("--output")
     args=p.parse_args()
     try:
         d=derive()
+        if args.output:
+            pathlib.Path(args.output).write_text(json.dumps(d,indent=2,sort_keys=True)+"\n",encoding="utf-8")
         if args.print_output:
             print(json.dumps(d,sort_keys=True))
         if args.check:

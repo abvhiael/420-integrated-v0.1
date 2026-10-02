@@ -7,7 +7,7 @@ on:
     paths:
       - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
       - 'scripts/verify-governance-audit-7.py'
-      - 'contracts/test/GovernanceAudit7Integration420.t.sol'
+      - 'contracts/test-governance-audit-7/GovernanceAudit7Integration420.t.sol'
       - 'contracts/src/governance/**'
       - 'contracts/src/system/ValidatorRegistry.sol'
       - 'contracts/src/treasury/**'
@@ -31,7 +31,7 @@ on:
     paths:
       - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
       - 'scripts/verify-governance-audit-7.py'
-      - 'contracts/test/GovernanceAudit7Integration420.t.sol'
+      - 'contracts/test-governance-audit-7/GovernanceAudit7Integration420.t.sol'
       - 'contracts/src/governance/**'
       - 'contracts/src/system/ValidatorRegistry.sol'
       - 'contracts/src/treasury/**'
@@ -89,11 +89,11 @@ jobs:
       - name: Format and build affected contract integration
         working-directory: contracts
         run: |
-          forge fmt --check test/GovernanceAudit7Integration420.t.sol
+          forge fmt --check test-governance-audit-7/GovernanceAudit7Integration420.t.sol
           forge build src/governance src/system/ValidatorRegistry.sol src/treasury src/vault
       - name: GOV-AUDIT-7 Treasury Vault Stake integration
         working-directory: contracts
-        run: forge test --match-path test/GovernanceAudit7Integration420.t.sol -vvv
+        run: FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
       - name: Governance Wallet consumer boundary
         working-directory: wallet/web
         run: |

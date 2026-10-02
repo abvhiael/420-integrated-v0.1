@@ -108,6 +108,7 @@ contract ComputeWorkerStakeSourceIntegration420Test {
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
 
+        // Read the class before vm.prank: an external getter would otherwise consume the one-shot prank.
         bytes32 computeClass = resources.CPU_GENERAL();
         vm.prank(OPERATOR);
         bytes32 resourceId = resources.register(

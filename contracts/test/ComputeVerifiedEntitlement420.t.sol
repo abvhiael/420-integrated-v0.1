@@ -955,11 +955,12 @@ contract ComputeVerifiedEntitlement420Test {
         _makeClaimable(id);
 
         uint64 revision = jobs.job(id).revision;
+        bytes32 objectiveGround = disputes.OBJECTIVE_VERIFIER_ERROR_GROUND();
         vm.prank(payerA);
         bytes32 disputeId = disputes.openDispute(
             id,
             revision,
-            disputes.OBJECTIVE_VERIFIER_ERROR_GROUND(),
+            objectiveGround,
             keccak256("cmp-1.5.10/objective-verifier-error")
         );
 

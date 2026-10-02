@@ -41,6 +41,10 @@ function api420(overrides: Partial<IndexerPublicApi420> = {}): IndexerPublicApi4
     async protocolObject() { return object; },
     async treasuryBudget() { return null; },
     async treasuryDisbursement() { return null; },
+    async grantsProgram() { return null; },
+    async grantsApplication() { return null; },
+    async grantsAward() { return null; },
+    async grantsMilestone() { return null; },
     async search() { return [{ type: 'transaction', key: txHash, value: txHash }]; },
     ...overrides,
   };

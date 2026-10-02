@@ -218,11 +218,13 @@ contract ComputeStakeSlashDistribution420Test {
         require(first == 40 ether && !done, "first batch");
         require(authorizer.consumeCount() == 0, "consumed early");
 
-        (uint256 second, done) = distribution.executeBatch(AUTH_REF, 1);
+        uint256 second;
+        (second, done) = distribution.executeBatch(AUTH_REF, 1);
         require(second == 40 ether && !done, "second batch");
         require(authorizer.consumeCount() == 0, "consumed early two");
 
-        (uint256 third, done) = distribution.executeBatch(AUTH_REF, 2);
+        uint256 third;
+        (third, done) = distribution.executeBatch(AUTH_REF, 2);
         require(third == totalAmount - 80 ether && done, "final batch");
         require(authorizer.consumeCount() == 1, "not consumed");
 

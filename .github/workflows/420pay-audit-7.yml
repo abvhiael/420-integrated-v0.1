@@ -1,0 +1,60 @@
+name: 420Pay PAY-AUDIT-7
+
+on:
+  pull_request:
+    paths:
+      - "scripts/qualify-420pay-testnet.py"
+      - "scripts/verify-420pay-audit-7-testnet-readiness.py"
+      - ".github/workflows/420pay-live-testnet.yml"
+      - ".github/workflows/420pay-audit-7.yml"
+      - "docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json"
+      - "docs/audit/420PAY-AUDIT-7-TESTNET-QUALIFICATION.md"
+      - "docs/audit/420PAY-AUDIT-7-TESTNET-QUALIFICATION.json"
+      - "docs/audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md"
+  workflow_dispatch:
+
+concurrency:
+  group: pay-audit-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Validate PAY-AUDIT-7 Python
+        run: |
+          python3 -m py_compile scripts/qualify-420pay-testnet.py
+          python3 -m py_compile scripts/verify-420pay-audit-7-testnet-readiness.py
+
+      - name: Fail-closed PAY-AUDIT-7 readiness
+        run: python3 scripts/verify-420pay-audit-7-testnet-readiness.py
+
+      - name: Retain PAY-AUDIT-6 deployment readiness
+        run: |
+          python3 scripts/generate-420pay-audit-6-deployment.py --check
+          python3 scripts/verify-420pay-audit-6-deployment.py
+          python3 scripts/420pay-audit-6-smoke.py
+
+      - name: Ensure live workflow is manual and templates contain no secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'workflow_dispatch' .github/workflows/420pay-live-testnet.yml
+          grep -q 'qualify-420pay-testnet.py' .github/workflows/420pay-live-testnet.yml
+          grep -q 'DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE' docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json
+          ! grep -R -nE '(PRIVATE_KEY|MNEMONIC|BEARER|PASSWORD|TOKEN=)' docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json

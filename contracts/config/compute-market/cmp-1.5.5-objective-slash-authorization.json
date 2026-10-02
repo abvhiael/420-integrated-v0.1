@@ -1,0 +1,74 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.5.ObjectiveSlashAuthorization.v1",
+  "step": "CMP-1.5.5",
+  "title": "Objective slash authorization",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "bc814aee0e314ce306addab48507586077829c22",
+  "canonical_definition": "Objective slash authorization",
+  "implementation": {
+    "policy": "contracts/src/compute/ComputeStakeSlashPolicy420.sol",
+    "authorization": "contracts/src/compute/ComputeStakeSlashAuthorization420.sol",
+    "worker_evidence": "contracts/src/compute/ComputeWorkerConflictingResultSlashEvidence420.sol",
+    "verifier_evidence": "contracts/src/compute/ComputeVerifierDisputeSlashEvidence420.sol",
+    "worker_collateral": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "verifier_collateral": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "evidence_interface": "contracts/src/interfaces/IComputeObjectiveSlashEvidence420.sol",
+    "collateral_interface": "contracts/src/interfaces/IComputeSlashableCollateral420.sol",
+    "hold_interface": "contracts/src/interfaces/IComputeSlashHold420.sol"
+  },
+  "requirements": [
+    "slash authorization is separate from slash execution/distribution",
+    "slash policy is append-only and governance-published before a collateral position can freeze it",
+    "each collateral position freezes exact slash-policy revision and commitment at first stake",
+    "later slash-policy revisions cannot retroactively alter an existing position",
+    "policy freezes exact evidence-adapter address/code hash, violation predicate, bounded penalty and optional verification-policy tuple",
+    "authorization is permissionless to relay but can succeed only from final objective evidence",
+    "authorization binds exact collateral position, subject identity/account, stake policy, evidence adapter, evidence reference and unique misconduct key",
+    "misconduct events are exactly-once/replay protected",
+    "authorized amount is bounded by policy bps/max cap and remaining slashable collateral after outstanding authorizations",
+    "outstanding authorization blocks matured collateral withdrawal until later slash distribution consumes it",
+    "worker objective evidence requires two conflicting canonical result digests signed by the frozen execution key for the same worker attempt and stake policy",
+    "verifier objective evidence requires final independent adjudication of the explicit verifier-objective-error ground; timeout, generic payer win or unresolved appeal are insufficient",
+    "no authorization path releases, claims, redirects or distributes Vault funds"
+  ],
+  "security_boundaries": [
+    "generic FAILED job state is not objective worker slash evidence",
+    "provider suspension or registry status is not slash evidence",
+    "generic adverse dispute disposition is not verifier-fault proof",
+    "Trust/reputation is not slash authority",
+    "governance cannot apply a newly published slash policy to a position that froze an earlier revision",
+    "evidence-adapter code hash is frozen in the slash policy",
+    "payer escrow and unrelated collateral cannot satisfy or fund a slash authorization"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "a shared objective slash authority now spans worker/verifier collateral sources, immutable policy snapshots, objective evidence adapters and withdrawal holds.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "deferred": [
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "limitations": [
+    "CMP-1.5.5 records/reserves authorization only; no authorization is consumable into Vault redistribution until CMP-1.5.6",
+    "additional worker misconduct classes require their own preaccepted objective evidence adapter; failure state alone remains fail-closed"
+  ],
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused slash-policy/authorization/worker-evidence/verifier-evidence/collateral-hold tests",
+      "CMP-1.5.5 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.6 — Slash distribution"
+}

@@ -35,17 +35,29 @@ Live deployment binding remains a PAY-AUDIT-7 requirement.
 
 ## PAY-AUDIT-3 — invoice/offline authorization and payment lifecycle completion
 
-**Status: BLOCKED — canonical architecture decision required.**
+**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
 
-The frozen Decision #4 says offline invoice creation is supported and defines an invoice signing domain/root, but the current on-chain registry only accepts `createInvoice` from `i.merchant == msg.sender`; no signature-verification/acceptance path exists.
+Canonical resolution:
+1. Decision #4's `offline_invoice_creation: true` and `online_acceptance_required: true` are treated together. Offline invoice signing is a presentation/integrity commitment; it does not create a second canonical state-mutation authority. Canonical invoice creation remains an online transaction from the bound merchant through `InvoiceRegistry420.createInvoice`.
+2. No EOA-signature, ERC-1271, relayer, delegate, or generic signed-envelope acceptance path is introduced in V1 because the frozen decision does not grant that authority or freeze its replay/chain/delegation semantics.
+3. Payment lifecycle transitions are now explicit and governed: `SUBMITTED -> INCLUDED -> CERTIFIED`; retained direct finalization may occur from `SUBMITTED`, `INCLUDED`, or `CERTIFIED`; `FINALIZED -> SETTLED`; and pre-final states may transition to `FAILED`. Refund states remain bounded by the existing refund path.
+4. Invalid predecessor transitions, terminal-state resurrection, non-governance lifecycle mutation, and third-party invoice creation are covered by PAY-AUDIT-3 regressions.
 
-`PaymentRegistry420.Status` also contains INCLUDED, CERTIFIED, SETTLED and FAILED, but the current public mutation surface creates SUBMITTED, records FINALIZED, and applies refund states only.
+Implementation:
+- `PaymentRegistry420.recordIncluded`;
+- `PaymentRegistry420.recordCertified`;
+- `PaymentRegistry420.recordSettled`;
+- `PaymentRegistry420.recordFailed`;
+- `contracts/test/PayAudit3Lifecycle420.t.sol`;
+- protocol architecture clarification preserving merchant-only online canonical acceptance.
 
-Required decision:
-1. define whether offline signed invoices are merely off-chain presentation objects or must be accepted/verified by canonical Pay state;
-2. if canonical, freeze signature scheme, signer/controller resolution, chain/domain binding, expiry and replay semantics before implementation;
-3. define authorized transitions for INCLUDED/CERTIFIED/SETTLED/FAILED or remove unreachable states in a versioned migration;
-4. add negative, replay, malformed-signature and lifecycle-transition tests.
+Exit criteria:
+- every modeled V1 payment lifecycle state is reachable through an explicit canonical path or is a refund state already covered by `applyRefund`;
+- invalid lifecycle transitions fail closed;
+- failure cannot resurrect into a finalized/settled path;
+- lifecycle mutation remains Genesis-governed;
+- offline invoice roots cannot manufacture canonical invoice state;
+- exact-head Level 1 Pay qualification passes.
 
 ## PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion
 

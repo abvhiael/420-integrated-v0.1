@@ -1,0 +1,47 @@
+{
+  "schema": "420-genesis-configuration-commitment-v1",
+  "status": "FROZEN_V1",
+  "commitmentAlgorithm": "keccak256",
+  "canonicalization": "UTF-8 JSON of commitmentPayload with lexicographically sorted object keys, compact separators ',' and ':', arrays preserved in declared order",
+  "commitmentPayload": {
+    "authorityInputs": [
+      {
+        "gitBlobSha1": "5db5eb46deda78dae39d8cc7225b92cb2ba16e30",
+        "path": "contracts/config/genesis-address-namespace.json"
+      },
+      {
+        "gitBlobSha1": "50c8d7c860ff48d52f41874bc55ee092cc9c5b6d",
+        "path": "contracts/config/system-addresses.json"
+      },
+      {
+        "gitBlobSha1": "e5fc64b454dcaca4bbf112b1488986377d711128",
+        "path": "contracts/config/interfaces/genesis-interface-layer.json"
+      },
+      {
+        "gitBlobSha1": "c8d3697a02dbc7b4fbd6e3713f5ac4a0e6611806",
+        "path": "config/genesis-applications.json"
+      },
+      {
+        "gitBlobSha1": "564d67fe2f959a96ed0c54d7862dd21bef30a8e9",
+        "path": "config/genesis-allocations.json"
+      },
+      {
+        "gitBlobSha1": "789c750c7fb2eb2cbd6844122789b6611e91fbb0",
+        "path": "config/ai-genesis.json"
+      }
+    ],
+    "domain": "420/GENESIS/CONFIG/V1",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "initializationVersion": 1,
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "scope": "GENESIS_RESIDENT_CONTRACT_CONFIGURATION"
+  },
+  "genesisConfigHash": "0xd5121ed76a785afb903129f8677323477e3cfded1126bc2320ac881a7e68fb38",
+  "exclusions": [
+    "Generated predeploy artifacts/runtime bytecode are excluded to prevent circular commitment.",
+    "Execution and consensus genesis output files are excluded because they are generated/ceremony outputs with independent freeze/checksum authority.",
+    "Testnet genesis time, validator seed and live endpoint topology are not part of the resident-contract configuration commitment.",
+    "Any change to an authority input requires an explicit commitment-version decision and re-materialization of affected Genesis-resident runtimes; silent regeneration under FROZEN_V1 is forbidden."
+  ],
+  "authority": "Global Genesis resident-contract configuration identity for IGenesisInitializable420 / GenesisResidentAccess420"
+}

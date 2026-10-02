@@ -10,6 +10,11 @@ on:
       - "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol"
       - "contracts/config/bridge/**"
       - "scripts/verify-bridge-hardening.py"
+      - "scripts/verify-bridge-audit-6-deployment.py"
+      - "contracts/config/predeploy/storage-init.json"
+      - "contracts/config/genesis-config-commitment.json"
+      - "contracts/config/genesis-canonical-addresses.json"
+      - "docs/apps/bridge/deployment-operations.md"
       - ".github/workflows/bridge-fast.yml"
   workflow_dispatch:
 
@@ -42,6 +47,9 @@ jobs:
 
       - name: Run Bridge hardening verifier
         run: python3 scripts/verify-bridge-hardening.py
+
+      - name: Run BRIDGE-AUDIT-6 deployment verifier
+        run: python3 scripts/verify-bridge-audit-6-deployment.py
 
       - name: Run Bridge contract tests
         working-directory: contracts

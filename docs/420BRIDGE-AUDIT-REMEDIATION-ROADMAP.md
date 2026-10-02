@@ -64,7 +64,7 @@ Required outcome:
 **Qualified implementation SHA:** `52f5aadbe89b52697df7bb91bd461f2008ce03e2`  
 **Level 1:** PASS — Bridge fast qualification and all four real Solidity PR shards passed on the exact implementation SHA.
 
-### BRIDGE-AUDIT-5 — Bridge application/service surface completion
+### BRIDGE-AUDIT-5 — Bridge application/service surface completion — COMPLETE
 Purpose: reconcile the repository claim that 420Bridge is a user-facing Genesis application with the actual deployable application surface.
 
 Required outcome:
@@ -74,6 +74,10 @@ Required outcome:
 - canonical reads use 420Indexer/RPC with reorg/finality/freshness handling and safe canonical fallback;
 - transaction review shows exact source/destination chain, canonical asset, route, adapter/verifier identity, amount, recipient, limits and pending/finality state;
 - errors/retries are replay-safe and do not manufacture success.
+
+**Durable qualification:** `docs/audit/BRIDGE-AUDIT-5-QUALIFICATION.md`  
+**Qualified implementation SHA:** `85ffe2a2d788a1bacbaab4db139e8f0aa89a0bfe`  
+**Level 1:** PASS — exact-head Exchange web/read-service/Indexer/browser qualification and Bridge fast contract/integration qualification passed.
 
 ### BRIDGE-AUDIT-6 — Deployment, initialization and Registry publication closure
 Purpose: make every required Bridge component deployable and reproducibly initialized.

@@ -46,7 +46,11 @@ contract GrantAwardRegistry420 is I420System, SystemAccess {
     );
     event AwardStateChanged(bytes32 indexed awardId, State state);
 
-    constructor(address timelock_, address programs_, address applications_) SystemAccess(timelock_) {
+    constructor(
+        address timelock_,
+        address programs_,
+        address applications_
+    ) SystemAccess(timelock_) {
         require(programs_ != address(0) && applications_ != address(0), "dependency");
         programs = GrantProgramRegistry420(programs_);
         applications = GrantApplicationRegistry420(applications_);
@@ -60,18 +64,22 @@ contract GrantAwardRegistry420 is I420System, SystemAccess {
         return 1;
     }
 
-    function canonicalId(bytes32 applicationId, address recipient, uint128 amount, bytes32 termsHash)
-        public
-        pure
-        returns (bytes32)
-    {
+    function canonicalId(
+        bytes32 applicationId,
+        address recipient,
+        uint128 amount,
+        bytes32 termsHash
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(keccak256("420/GRANTS/AWARD/V1"), applicationId, recipient, amount, termsHash));
     }
 
-    function createAward(bytes32 id, bytes32 applicationId, address recipient, uint128 amount, bytes32 termsHash)
-        external
-        onlyGovernance
-    {
+    function createAward(
+        bytes32 id,
+        bytes32 applicationId,
+        address recipient,
+        uint128 amount,
+        bytes32 termsHash
+    ) external onlyGovernance {
         GrantApplicationRegistry420.Application memory a = applications.application(applicationId);
         GrantProgramRegistry420.Program memory p = programs.program(a.programId);
 
@@ -95,29 +103,39 @@ contract GrantAwardRegistry420 is I420System, SystemAccess {
         emit AwardCreated(id, a.programId, applicationId, recipient, amount, termsHash);
     }
 
-    function cancel(bytes32 id) external onlyGovernance {
+    function cancel(
+        bytes32 id
+    ) external onlyGovernance {
         Award storage a = _get(id);
         if (a.state != State.ACTIVE) revert InvalidState();
         a.state = State.CANCELLED;
         emit AwardStateChanged(id, a.state);
     }
 
-    function markCompleted(bytes32 id) external onlyGovernance {
+    function markCompleted(
+        bytes32 id
+    ) external onlyGovernance {
         Award storage a = _get(id);
         if (a.state != State.ACTIVE) revert InvalidState();
         a.state = State.COMPLETED;
         emit AwardStateChanged(id, a.state);
     }
 
-    function programAwarded(bytes32 programId) external view returns (uint128) {
+    function programAwarded(
+        bytes32 programId
+    ) external view returns (uint128) {
         return programs.program(programId).awarded;
     }
 
-    function award(bytes32 id) external view returns (Award memory) {
+    function award(
+        bytes32 id
+    ) external view returns (Award memory) {
         return _get(id);
     }
 
-    function _get(bytes32 id) private view returns (Award storage a) {
+    function _get(
+        bytes32 id
+    ) private view returns (Award storage a) {
         a = _awards[id];
         if (!a.exists) revert AwardNotFound();
     }

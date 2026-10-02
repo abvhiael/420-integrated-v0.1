@@ -1,0 +1,105 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.0.QualificationEvidence.v1",
+  "step": "CMP-1.5.0",
+  "title": "Stake architecture",
+  "qualification_level": 1,
+  "completion_state": "COMPLETE",
+  "canonical_definition": "Reuse canonical $420 custody/accounting. Do not create an unrelated collateral treasury.",
+  "implementation_sha": "af9f926465dff1a89e53150d030591e71411787f",
+  "reconciliation_base_sha": "f6c4d082f60d2ac706a941c9289ed7a7309cf3ab",
+  "pr": 452,
+  "branch": "cmp-1.5.0-stake-architecture-20261001",
+  "implementation_summary": [
+    "froze 420Vault/AssetVault420/VaultAccounting420 as the canonical Compute collateral custody/accounting family",
+    "selected a dedicated registered VAULT_COLLATERAL instance for Compute collateral without creating a parallel treasury/accounting system",
+    "separated Compute collateral liabilities from payer escrow liabilities",
+    "made validator stake, wallet balances, payer credit, Treasury state and reputation explicit non-substitutes",
+    "preserved canonical CMP-1.5.1 through CMP-1.5.13 ownership",
+    "added exact-head CMP-1.5.0 architecture verification and retained Compute qualification wiring"
+  ],
+  "changed_files": [
+    ".github/workflows/compute-market.yml",
+    "contracts/config/compute-market/cmp-1.5.0-stake-architecture.json",
+    "docs/compute-market/CMP-1.5.0-STAKE-ARCHITECTURE.md",
+    "docs/compute-market/COMPUTE-MARKET-CI-QUALIFICATION-POLICY.md",
+    "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
+    "docs/compute-market/cmp-1.3.14-invariant-evidence.json",
+    "scripts/verify-cmp-1-5-0-stake-architecture.py"
+  ],
+  "requirements_satisfied": [
+    "canonical $420 collateral reuses 420Vault custody/accounting",
+    "no unrelated collateral treasury introduced",
+    "dedicated Compute collateral Vault remains inside canonical Vault family",
+    "payer escrow and Compute collateral remain separate liability domains",
+    "validator stake/wallet balance/payer credit/reputation cannot substitute for Compute collateral",
+    "authority boundaries and relevant CMP invariants are frozen",
+    "later CMP-1.5 canonical substeps remain uncollapsed and unrenumbered"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 80,
+      "run_id": 36921251308,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3701,
+      "run_id": 36921251392,
+      "conclusion": "success",
+      "scope": "compute-fast; full repository shards intentionally skipped by Level 1 classification"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 3908,
+      "run_id": 36921251324,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 503,
+      "run_id": 36921251292,
+      "conclusion": "success",
+      "scope": "cross-manifest authority only; no duplicate full Foundry inventory"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 338,
+      "run_id": 36921251276,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1318,
+      "run_id": 36921251321,
+      "conclusion": "success"
+    }
+  ],
+  "security_invariant_result": "PASS — architecture preserves custody separation, solvency/backing requirements, position isolation, objective slash gating, non-confiscatory emergency behavior and non-substitute boundaries.",
+  "milestone_status": "ordinary CMP-1.5 roadmap step complete at Level 1; not a Level 2 milestone or Level 3 phase closeout",
+  "intentionally_deferred": [
+    "CMP-1.5.1 worker collateral runtime",
+    "CMP-1.5.2 verifier collateral runtime",
+    "CMP-1.5.3 policy-specific minimum collateral",
+    "CMP-1.5.4 exit queue / withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 Level 3 phase closeout"
+  ],
+  "live_external_blockers": [
+    "no live ComputeStake deployment",
+    "no live collateral Vault deployment",
+    "no ProtocolRegistry publication",
+    "no runtime code-hash deployment evidence",
+    "no public-testnet collateral/slash evidence"
+  ],
+  "evidence_only_closeout": true,
+  "evidence_sha": null,
+  "next_canonical_step": "CMP-1.5.1 — Worker collateral"
+}

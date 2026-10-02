@@ -216,8 +216,6 @@ nav:
                   - Examples: apps/identity/developer/examples.md
           - 420 Swap:
               - Overview: apps/swap/index.md
-              - Deployment Operations: apps/swap/deployment-operations.md
-              - Testnet Qualification: apps/swap/testnet-qualification.md
               - Getting Started: apps/swap/getting-started.md
               - User Guide: apps/swap/user-guide.md
               - Concepts: apps/swap/concepts.md
@@ -226,6 +224,8 @@ nav:
               - Fees: apps/swap/fees.md
               - Security: apps/swap/security.md
               - Troubleshooting: apps/swap/troubleshooting.md
+              - Deployment & Operations: apps/swap/deployment-operations.md
+              - Testnet Qualification: apps/swap/testnet-qualification.md
               - FAQ: apps/swap/faq.md
               - Developer Integration:
                   - Overview: apps/swap/developer/index.md
@@ -234,6 +234,9 @@ nav:
                   - Events & Finality: apps/swap/developer/events.md
                   - Errors & Retries: apps/swap/developer/errors.md
                   - Examples: apps/swap/developer/examples.md
+          - 420 Treasury:
+              - Operator Guide: apps/treasury/operator-guide.md
+              - Reference: apps/treasury/reference.md
           - 420 Bridge:
               - Overview: apps/bridge/index.md
               - Deployment Operations: apps/bridge/deployment-operations.md

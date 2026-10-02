@@ -19,7 +19,7 @@ button:disabled { opacity: .42; cursor: default; }
 .wallet-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: 100vh; }
 .sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 18px; border-right: 1px solid var(--border); background: rgba(8, 11, 9, .94); display: flex; flex-direction: column; gap: 28px; }
 .brand { display: flex; align-items: center; gap: 11px; }
-.brand-mark { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: var(--accent); color: #0a0d0b; font-weight: 900; letter-spacing: -.05em; }
+.brand-logo { display: block; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 4px 14px rgba(0,0,0,.35); }
 .brand div { display: grid; }
 .brand small { color: var(--muted); }
 .sidebar nav { display: grid; gap: 6px; }

@@ -252,14 +252,15 @@ Do not mark CMP-1.2.9 or the overall CMP-1.2 phase COMPLETE until `python3 scrip
 
 ## CMP-1.2.10 — phase reconciliation and release closeout
 
-**Status: COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE; LIVE/RELEASE QUALIFICATION BLOCKED BY CMP-1.2.9 AND CMP-1.5 STAKE-SLASH PREREQUISITES.**
+**Status: COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE; LIVE/RELEASE QUALIFICATION BLOCKED BY CMP-1.2.9. CMP-1.5.10 closes the repository-level stake/slash prerequisite.**
 
 Latest `main` `b03e247aa4df0a6a6d978ffad8eedfe2487a3a6b` was explicitly reconciled into this CMP branch at merge commit `ee5e97bd9cc322e0794e2c57a4523035370788be`; the branch is behind current `main` by **0 commits** at the recorded reconciliation point.
 
-The final reconciliation confirms repository-level qualification for the current fixed-price, single-assignment native-$420 escrow path through CMP-1.2.8, and repository deployment readiness for CMP-1.2.9. It preserves two explicit release blockers:
+The final reconciliation confirms repository-level qualification for the current fixed-price, single-assignment native-$420 escrow path through CMP-1.2.8, and repository deployment readiness for CMP-1.2.9. It preserves the live release blocker:
 
 1. **CMP-1.2.9-LIVE** — the canonical public/authorized testnet is not live, so deployed addresses, receipts, runtime hashes, live grants, Registry publication and real funded/settled/refunded transaction evidence do not exist yet.
-2. **CMP-1.5-STAKE-SLASH** — the original `slash redistribution` roadmap item may only redistribute separately backed and objectively forfeited CMP-1.5 stake/collateral. It remains fail-closed and must never be sourced from payer deposits.
+
+The prior **CMP-1.5-STAKE-SLASH** repository blocker is resolved by CMP-1.5.10. Slash redistribution is qualified only as separately backed/objectively forfeited CMP-1.5 collateral routed to a payer resolved from canonical ComputeEscrow state; payer deposits remain forbidden as slash collateral.
 
 Full closeout: [`CMP-1.2.10-PHASE-RECONCILIATION-AND-CLOSEOUT.md`](CMP-1.2.10-PHASE-RECONCILIATION-AND-CLOSEOUT.md).
 
@@ -267,11 +268,11 @@ Machine-readable authority: `contracts/config/compute-market/cmp-1.2.10-phase-cl
 
 Closeout verifier: `python3 scripts/verify-cmp-1-2-10-closeout.py`.
 
-Do not label CMP-1.2 live/production release complete until both blockers are independently satisfied.
+Do not label CMP-1.2 live/production release complete until the CMP-1.2.9 live gate is independently satisfied.
 
 
 ### CMP-1.2.10 exact-head retained qualification evidence
 
 Implementation/evidence head `b2b3ee9fb1322b09669325f84eafd6689e6d866e` passed the full retained suite: Solidity Contracts `36342887946` (16/16 shards), Genesis Address Authority `36342888001` (cross-manifest authority + 16/16 full-inventory shards), 420 Integrated Qualification `36342888290` (all four jobs), 420Docs Qualification `36342888026`, and 420Indexer `36342888155`. The final evidence-recording head must rerun these retained gates before merge.
 
-This closes CMP-1.2 for repository qualification scope only. CMP-1.2.9-LIVE and CMP-1.5-STAKE-SLASH remain explicit release prerequisites and do not become synthetic completion evidence.
+This closes CMP-1.2 for repository qualification scope only. CMP-1.2.9-LIVE remains the explicit release prerequisite. CMP-1.5.10 resolves the repository stake/slash dependency without creating synthetic live-chain evidence.

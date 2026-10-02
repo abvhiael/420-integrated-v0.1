@@ -1,0 +1,127 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.4.QualificationEvidence.v1",
+  "step": "CMP-1.5.4",
+  "title": "Exit queue / withdrawal delay",
+  "completion_state": "COMPLETE",
+  "implementation_sha": "5b706e2b4bfa7fd2f1f3b0a70e64b23cc1f6495c",
+  "evidence_only_closeout": true,
+  "current_main_observed": "98e545225d54379086f0c520afcb84b4d4d97288",
+  "stacked_base_sha": "52568690f89d3bda3bff5b31b5edb5d6ec840baa",
+  "pr": 462,
+  "qualification": {
+    "level_1": "PASS",
+    "level_2_milestone": "PASS",
+    "level_3": "DEFERRED_TO_CMP-1.5.13"
+  },
+  "implementation_summary": [
+    "added append-only ComputeStakeExitPolicy420 withdrawal-delay authority",
+    "added worker/verifier requestExit(positionId) with exact exit-policy revision/commitment snapshots",
+    "added batched matured withdrawal through canonical Vault release and claim operations",
+    "kept all unwithdrawn collateral active/slashable through the delay and partial withdrawal",
+    "preserved historical verifier authority exit rights across authority rotation",
+    "rejected top-up after exit request and premature/unauthorized withdrawal"
+  ],
+  "requirements_satisfied": [
+    "nonzero governance-published versioned withdrawal delays",
+    "pending exit timing cannot be rewritten by later delay revisions",
+    "worker owner and stored verifier authority exclusively control their own position exit",
+    "historical verifier collateral can be exited by its immutable pre-rotation authority",
+    "withdrawal before maturity fails closed",
+    "exit request preserves active/slashable backing until actual withdrawal",
+    "batched withdrawal prevents unbounded tranche-loop lockout",
+    "each processed tranche is revalidated and released/claimed through canonical 420Vault",
+    "remaining tranches stay reserved and slashable after partial withdrawal",
+    "final withdrawal deactivates position and zeros active/slashable accounting",
+    "no arbitrary withdrawal recipient is introduced"
+  ],
+  "files_changed": [
+    ".github/workflows/compute-market.yml",
+    "contracts/config/compute-market/cmp-1.5.4-exit-queue-withdrawal-delay.json",
+    "contracts/src/compute/ComputeStakeExitPolicy420.sol",
+    "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "contracts/test/ComputeStakeExitPolicy420.t.sol",
+    "contracts/test/ComputeStakeWorkerCollateral420.t.sol",
+    "contracts/test/ComputeStakeVerifierCollateral420.t.sol",
+    "docs/compute-market/CMP-1.5.4-EXIT-QUEUE-WITHDRAWAL-DELAY.md",
+    "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
+    "scripts/verify-cmp-1-5-4-exit-queue-withdrawal-delay.py"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 98,
+      "run_id": 36943559933,
+      "conclusion": "success",
+      "scope": "Level 1 build/verifier plus retained Compute*.t.sol Level 2 app suite"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3847,
+      "run_id": 36943559890,
+      "conclusion": "success",
+      "scope": "compute-fast; full repository shards intentionally skipped"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 4060,
+      "run_id": 36943559899,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 649,
+      "run_id": 36943559982,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 484,
+      "run_id": 36943559893,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1464,
+      "run_id": 36943559895,
+      "conclusion": "success"
+    }
+  ],
+  "verifier_checks": [
+    "retained Compute Market Solidity suite PASS",
+    "verification-script compilation PASS",
+    "CMP-1.5.4 exit queue and withdrawal delay verifier PASS"
+  ],
+  "security_adversarial_results": [
+    "premature worker/verifier withdrawal rejected",
+    "unauthorized exit request/withdrawal rejected",
+    "top-up during pending exit rejected",
+    "later delay revision cannot accelerate pending exit",
+    "historical verifier authority can exit only its own old position after rotation",
+    "partial withdrawal leaves remaining collateral slashable",
+    "Vault accounting returns to exact zero after complete withdrawal",
+    "reentrant exit/withdraw lifecycle is guarded"
+  ],
+  "milestone_status": {
+    "level_2_milestone": true,
+    "rationale": "shared exit lifecycle and delay policy modify both worker/verifier collateral sources and canonical Vault release/claim paths",
+    "retained_app_suite": "PASS"
+  },
+  "intentionally_deferred": [
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "limitations": [
+    "no slash authorization/distribution is introduced at this step",
+    "release/claim Vault grants remain deployment-time configuration and are not live deployment evidence"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.5 — Objective slash authorization"
+}

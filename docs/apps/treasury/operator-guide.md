@@ -4,7 +4,7 @@ audience:
   - operator
   - developer
   - security
-category: operations
+category: how-to
 status: current
 version: current
 ---

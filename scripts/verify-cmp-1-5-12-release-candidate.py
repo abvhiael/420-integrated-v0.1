@@ -13,6 +13,13 @@ TEST = ROOT / "contracts/test/ComputeStakeReleaseCandidateWiring420.t.sol"
 ROADMAP = ROOT / "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md"
 
 EXPECTED_ROLES = [
+    "ComputeWorkerRegistry420",
+    "ComputeVerifierRegistry420",
+    "ComputeDisputeResolution420",
+    "ComputeVerifiedEntitlement420",
+    "WorkerCollateralAssetVault420",
+    "VerifierCollateralAssetVault420",
+    "RewardAssetVault420",
     "ComputeStakeExitPolicy420",
     "ComputeStakeSlashPolicy420",
     "ComputeStakeWorkerCollateral420",
@@ -130,6 +137,10 @@ def repository_ready(d, allow_live=False):
         "sourceBinding.sourceCodeHash != g.workerCollateral.runtimeCodeHash",
         "resolver.canonicalEntitlementsCodeHash() != g.canonicalEntitlements.codehash",
         "auth.distributionExecutor() != g.distribution.implementation",
+        "wc.workerRegistry() != g.workerRegistry.implementation",
+        "vc.verifiers() != g.verifierRegistry.implementation",
+        "rewards.rewardVault() != g.rewardVault.implementation",
+        "g.rewardVault.implementation == g.workerCollateralVault.implementation",
     ):
         if needle not in wiring:
             fail(f"wiring missing {needle}")
@@ -140,6 +151,7 @@ def repository_ready(d, allow_live=False):
         "testWrongRuntimeCodeHashFailsClosed",
         "testMismatchedDistributionExecutorFailsClosed",
         "testWorkerStakeCrossRegistryBindingFailsClosed",
+        "testRewardVaultCannotAliasCollateralVault",
     ):
         if needle not in tests:
             fail(f"release test missing {needle}")

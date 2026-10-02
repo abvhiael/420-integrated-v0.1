@@ -236,6 +236,8 @@ The complete canonical Governance stack can be reproduced and deployed from a cl
 
 ## GOV-AUDIT-7 — cross-protocol integration qualification
 
+**Status: COMPLETE — qualified at implementation SHA `f3a46c4ccb51a777b3ac0a6966851aa8a42b0142`; evidence: `docs/audit/GOV-AUDIT-7-QUALIFICATION.md`.**
+
 ### Purpose
 Verify Governance as one bounded authority inside 420Integrated.
 

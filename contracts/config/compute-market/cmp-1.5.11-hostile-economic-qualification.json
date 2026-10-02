@@ -1,0 +1,125 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.11.HostileEconomicQualification.v1",
+  "step": "CMP-1.5.11",
+  "title": "Hostile economic qualification",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "e4b70ae9c7800ed681e261cee74d1aa9548c9c12",
+  "canonical_definition": "Hostile economic qualification",
+  "purpose": "Qualify the accumulated CMP-1.5 stake lifecycle against hostile economic behavior without expanding authority or duplicating Level 3 repository-wide qualification.",
+  "required_campaigns": [
+    "solvency",
+    "isolation",
+    "exit races",
+    "slash finality",
+    "replay",
+    "duplicate withdrawal",
+    "duplicate slash",
+    "duplicate reward",
+    "hostile authorization",
+    "reentrancy",
+    "failure atomicity"
+  ],
+  "coverage": {
+    "solvency": [
+      "ComputeStakeWorkerCollateral420Test.testMixedSlashExitWithdrawSequenceRemainsExactlySolvent",
+      "ComputeStakeRewardAccounting420Test.testInsufficientBackingRevertsWithoutConsumingReward"
+    ],
+    "isolation": [
+      "ComputeStakeWorkerCollateral420Test.testPolicyPositionsRemainIsolated",
+      "ComputeStakeVerifierCollateral420Test.testPolicyPositionsRemainIsolated"
+    ],
+    "exit_races": [
+      "ComputeStakeWorkerCollateral420Test.testOutstandingObjectiveSlashBlocksMatureWithdrawal",
+      "ComputeStakeVerifierCollateral420Test.testActiveDisputeStakeHoldBlocksMatureVerifierWithdrawal",
+      "ComputeStakeWorkerCollateral420Test.testWithdrawalBeforeMaturityFailsAndTopUpAfterExitFails"
+    ],
+    "slash_finality": [
+      "ComputeStakeSlashAuthorization420Test.testNonFinalEvidenceCannotAuthorize",
+      "ComputeVerifierDisputeStakeIntegration420Test.testAuthorizerFailureLeavesStakeDispositionPending"
+    ],
+    "replay": [
+      "ComputeStakeSlashAuthorization420Test.testWorkerObjectiveEvidenceAuthorizesBoundedAmountAndReplayFails",
+      "ComputeStakeSlashDistribution420Test.testCompletedDistributionCannotReplay",
+      "ComputeStakeRewardAccounting420Test.testRewardReplayFailsClosed"
+    ],
+    "duplicate_withdrawal": [
+      "ComputeStakeWorkerCollateral420Test.testDuplicateFullWithdrawalFailsWithoutChangingBacking"
+    ],
+    "duplicate_slash": [
+      "ComputeStakeSlashDistribution420Test.testCompletedDistributionCannotReplay",
+      "ComputeStakeSlashAuthorization420Test.testMultipleDistinctMisconductCannotReserveBeyondSlashable"
+    ],
+    "duplicate_reward": [
+      "ComputeStakeRewardAccounting420Test.testRewardReplayFailsClosed"
+    ],
+    "hostile_authorization": [
+      "ComputeStakeWorkerCollateral420Test.testNonOperatorCannotStakeForWorker",
+      "ComputeStakeWorkerCollateral420Test.testOnlyPositionOwnerCanRequestOrWithdrawExit",
+      "ComputeStakeRewardAccounting420Test.testWrongBeneficiarySubjectAndStakePolicyFailClosed",
+      "ComputeStakeSlashAuthorization420Test.testSubjectOrStakePolicyMismatchFailsClosed"
+    ],
+    "reentrancy": [
+      "ComputeStakeWorkerCollateral420Test.testHostileReentrantSlashRecipientCannotMutateStakeLifecycle"
+    ],
+    "failure_atomicity": [
+      "ComputeStakeWorkerCollateral420Test.testMissingVaultCreateGrantRevertsAtomically",
+      "ComputeStakeRewardAccounting420Test.testInsufficientBackingRevertsWithoutConsumingReward",
+      "ComputeVerifierDisputeStakeIntegration420Test.testAuthorizerFailureLeavesStakeDispositionPending"
+    ]
+  },
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-009",
+    "CMP-INV-010",
+    "CMP-INV-013",
+    "CMP-INV-018",
+    "CMP-INV-019",
+    "CMP-INV-020",
+    "CMP-INV-021",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-028",
+    "CMP-INV-029",
+    "CMP-INV-030"
+  ],
+  "security_boundaries": [
+    "hostile testing must not weaken authorization, replay or finality checks",
+    "payer escrow remains outside ComputeStake collateral solvency",
+    "validator stake and arbitrary wallet balances remain invalid substitutes",
+    "reentrant payout callbacks cannot mutate stake lifecycle",
+    "failed Vault or slash hand-offs must leave accounting and replay state unchanged",
+    "Level 3 full-repository qualification remains deferred to CMP-1.5.13"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "CMP-1.5.11 is the explicit adversarial convergence point for worker/verifier collateral, exits, objective slash, distribution, reward accounting and cross-phase dispute/escrow integrations.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "new hostile economic collateral regressions",
+      "retained directly applicable hostile tests across CMP-1.5.1 through CMP-1.5.10",
+      "CMP-1.5.11 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ],
+    "deferred_level_3": [
+      "canonical full repository Solidity inventory",
+      "Genesis/address-authority phase closeout",
+      "420 Integrated/global closeout",
+      "Docs/global reconciliation",
+      "complete CMP-1.5 merge-candidate qualification"
+    ]
+  },
+  "deferred": [
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout",
+    "live/public-testnet economic abuse campaign under later operational qualification"
+  ],
+  "next_canonical_step": "CMP-1.5.12 — Release candidate"
+}

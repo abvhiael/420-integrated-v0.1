@@ -153,3 +153,6 @@ jobs:
 
       - name: Verify CMP-1.5.10 ComputeEscrow slash redistribution
         run: python scripts/verify-cmp-1-5-10-computeescrow-slash-redistribution.py
+
+      - name: Verify CMP-1.5.11 hostile economic qualification
+        run: python scripts/verify-cmp-1-5-11-hostile-economic-qualification.py

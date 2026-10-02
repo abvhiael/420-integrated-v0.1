@@ -50,6 +50,23 @@ contract MockSlashHoldCollateral420 {
     }
 }
 
+contract ReentrantSlashRecipient420 {
+    ComputeStakeWorkerCollateral420 public immutable stakeSource;
+    bytes32 public immutable positionId;
+    bool public reentrySucceeded;
+
+    constructor(address stakeSource_, bytes32 positionId_) {
+        stakeSource = ComputeStakeWorkerCollateral420(payable(stakeSource_));
+        positionId = positionId_;
+    }
+
+    receive() external payable {
+        (reentrySucceeded,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.requestExit, (positionId))
+        );
+    }
+}
+
 contract ComputeStakeWorkerCollateral420Test {
     VmComputeStakeWorkerCollateral420 private constant vm =
         VmComputeStakeWorkerCollateral420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -465,6 +482,127 @@ contract ComputeStakeWorkerCollateral420Test {
                 && a.claimable == 0
                 && a.released == 25 ether,
             "slash accounting"
+        );
+    }
+
+    function testDuplicateFullWithdrawalFailsWithoutChangingBacking() public {
+        bytes32 id = _stake(POLICY_A, 30 ether);
+        vm.prank(OPERATOR);
+        uint64 maturity = stakeSource.requestExit(id);
+        vm.warp(maturity);
+
+        vm.prank(OPERATOR);
+        (uint256 amount,) = stakeSource.withdraw(id, 10);
+        require(amount == 30 ether, "initial withdrawal");
+
+        VaultAccounting420.AssetAccounting memory beforeAccounting =
+            accounting.getAccounting(VAULT_ID, address(0));
+        uint256 beforeBalance = OPERATOR.balance;
+
+        vm.prank(OPERATOR);
+        (bool ok,) = address(stakeSource).call(
+            abi.encodeCall(stakeSource.withdraw, (id, uint64(10)))
+        );
+        require(!ok, "duplicate withdrawal succeeded");
+
+        VaultAccounting420.AssetAccounting memory afterAccounting =
+            accounting.getAccounting(VAULT_ID, address(0));
+        require(OPERATOR.balance == beforeBalance, "duplicate withdrawal paid");
+        require(
+            afterAccounting.recordedBalance == beforeAccounting.recordedBalance
+                && afterAccounting.reserved == beforeAccounting.reserved
+                && afterAccounting.claimable == beforeAccounting.claimable
+                && afterAccounting.released == beforeAccounting.released,
+            "duplicate withdrawal changed accounting"
+        );
+    }
+
+    function testHostileReentrantSlashRecipientCannotMutateStakeLifecycle() public {
+        bytes32 id = _stake(POLICY_A, 40 ether);
+        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420(address(this));
+        stakeSource.bindSlashAuthorization(address(hold));
+
+        ReentrantSlashRecipient420 attacker =
+            new ReentrantSlashRecipient420(address(stakeSource), id);
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(attacker);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 10 ether;
+
+        stakeSource.executeSlashBatch(
+            id,
+            keccak256("hostile-reentrant-slash"),
+            10 ether,
+            1,
+            recipients,
+            amounts
+        );
+
+        require(!attacker.reentrySucceeded(), "reentrant stake mutation succeeded");
+        require(address(attacker).balance == 10 ether, "slash payout failed");
+        ComputeStakeWorkerCollateral420.Position memory p = stakeSource.position(id);
+        require(
+            p.activeAmount == 30 ether
+                && p.slashableAmount == 30 ether
+                && p.active
+                && !p.exiting,
+            "reentrant callback corrupted position"
+        );
+    }
+
+    function testMixedSlashExitWithdrawSequenceRemainsExactlySolvent() public {
+        bytes32 a = _stake(POLICY_A, 100 ether);
+        bytes32 b = _stake(POLICY_B, 50 ether);
+
+        MockSlashHoldCollateral420 hold = new MockSlashHoldCollateral420(address(this));
+        stakeSource.bindSlashAuthorization(address(hold));
+
+        address[] memory recipients = new address[](1);
+        recipients[0] = address(0x1111);
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 25 ether;
+        stakeSource.executeSlashBatch(
+            a,
+            keccak256("hostile-solvency-slash"),
+            25 ether,
+            1,
+            recipients,
+            amounts
+        );
+
+        vm.prank(OPERATOR);
+        uint64 maturity = stakeSource.requestExit(b);
+        vm.warp(maturity);
+        vm.prank(OPERATOR);
+        (uint256 withdrawn,) = stakeSource.withdraw(b, 10);
+        require(withdrawn == 50 ether, "policy-b withdrawal");
+
+        ComputeStakeWorkerCollateral420.Position memory pa = stakeSource.position(a);
+        ComputeStakeWorkerCollateral420.Position memory pb = stakeSource.position(b);
+        VaultAccounting420.AssetAccounting memory va =
+            accounting.getAccounting(VAULT_ID, address(0));
+
+        require(
+            pa.activeAmount == 75 ether
+                && pa.slashableAmount == 75 ether
+                && pa.active,
+            "policy-a remainder"
+        );
+        require(
+            pb.activeAmount == 0
+                && pb.slashableAmount == 0
+                && !pb.active
+                && !pb.exiting,
+            "policy-b terminal state"
+        );
+        require(address(vault).balance == 75 ether, "vault backing");
+        require(
+            va.recordedBalance == 75 ether
+                && va.reserved == 75 ether
+                && va.claimable == 0
+                && va.released == 75 ether,
+            "mixed-path accounting insolvent"
         );
     }
 

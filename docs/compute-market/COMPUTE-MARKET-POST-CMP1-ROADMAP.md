@@ -192,6 +192,8 @@ Reuse canonical $420 custody/accounting. Do not create an unrelated collateral t
 
 
 ### CMP-1.5.6 — Slash distribution
+**Status: implementation/Level 1 + Level 2 distribution qualification in progress.**
+
 Policy-bound distribution to harmed payer, replacement worker, challenger and/or protocol treasury.
 
 ### CMP-1.5.7 — Reward accounting

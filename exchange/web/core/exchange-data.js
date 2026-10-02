@@ -44,6 +44,15 @@ export class ExchangeDataLayer {
     return page;
   }
 
+  async loadBridge() {
+    const key = queryCacheKey({ surface: 'bridge', subjectId: '420Bridge' });
+    const cached = this.cache.get(key);
+    if (cached) return cached;
+    const bridge = await this.client.bridge();
+    this.cache.set(key, bridge);
+    return bridge;
+  }
+
   connectStream() {
     if (!this.streamUrl) throw new Error('Exchange streamUrl required');
     if (this.disconnect) return this.disconnect;

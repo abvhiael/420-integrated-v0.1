@@ -221,6 +221,7 @@ contract ExchangeBridgeQualification420 is SystemAccess {
             routeStatus != BridgeRouteRegistry.Status.ACTIVE || routeAssetId != bridgeAssetId || sourceChainId == destinationChainId
                 || version == 0 || verifierConfigHash == bytes32(0) || configuredAdapterId != adapterId
                 || (inboundRequired && !inboundEnabled) || (outboundRequired && !outboundEnabled)
+                || !bridgeRoutes.routeChainsCurrent(routeId)
         ) revert RouteIneligible();
 
         bytes32 localAsset = bytes32(uint256(uint160(exchangeToken)));

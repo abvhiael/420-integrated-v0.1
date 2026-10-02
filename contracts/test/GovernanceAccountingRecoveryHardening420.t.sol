@@ -124,6 +124,52 @@ contract GovernanceAccountingRecoveryHardening420Test {
         require(observedAt == nowTs && evidence == keccak256("newer") && !healthy, "state drifted");
     }
 
+    function testFuzz_StaleOrDuplicateObservedAtCannotReplaceLatest(uint32 rawDelta) public {
+        vm.warp(1_000_000);
+        uint64 latest = uint64(vm.getBlockTimestamp());
+        bytes32 latestEvidence = keccak256("fuzz-latest");
+        accounting.applyReconciliation(ASSET, 9_000, 8_999, latest, latestEvidence);
+
+        uint64 delta = uint64(rawDelta % 10_000);
+        uint64 candidate = delta >= latest ? 0 : latest - delta;
+        (bool ok,) = address(accounting).call(
+            abi.encodeCall(
+                accounting.applyReconciliation,
+                (ASSET, 9_000, 9_000, candidate, keccak256(abi.encode("fuzz-stale", rawDelta)))
+            )
+        );
+        require(!ok, "non-newer observedAt accepted");
+
+        (uint256 authorizedSupply, uint256 observedSupply, uint64 observedAt, bytes32 evidence, bool healthy) =
+            accounting.reconciliations(ASSET);
+        require(authorizedSupply == 9_000 && observedSupply == 8_999, "latest supply evidence replaced");
+        require(observedAt == latest, "latest observedAt replaced");
+        require(evidence == latestEvidence, "latest evidence hash replaced");
+        require(!healthy, "latest mismatch health replaced");
+    }
+
+    function testReplayedEvidenceCannotRestoreHealthEvenAtNewerTimestamp() public {
+        uint64 first = uint64(vm.getBlockTimestamp());
+        bytes32 evidence = keccak256("replayed-mismatch");
+        accounting.applyReconciliation(ASSET, 4_200, 4_199, first, evidence);
+        require(!accounting.movementHealthy(ASSET), "mismatch healthy");
+
+        vm.warp(uint256(first) + 1);
+        uint64 second = uint64(vm.getBlockTimestamp());
+        (bool ok,) = address(accounting).call(abi.encodeCall(
+            accounting.applyReconciliation,
+            (ASSET, 4_200, 4_200, second, evidence)
+        ));
+        require(!ok, "replayed evidence restored health");
+        require(!accounting.movementHealthy(ASSET), "replay changed health");
+    }
+
+    function testUnknownAccountingStateFailsClosedForMovementHealth() public view {
+        bytes32 unknown = keccak256("unobserved-canonical");
+        require(accounting.healthState(unknown) == BridgeAccountingRegistry.HealthState.UNKNOWN, "unknown state");
+        require(!accounting.movementHealthy(unknown), "unknown movement healthy");
+    }
+
     function testNewerEvidenceRecoversUnhealthyState() public {
         uint64 first = uint64(vm.getBlockTimestamp());
         accounting.applyReconciliation(ASSET, 4_200, 4_199, first, keccak256("unhealthy"));

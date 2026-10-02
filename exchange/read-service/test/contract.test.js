@@ -12,7 +12,13 @@ const addr=n=>'0x'+BigInt(n).toString(16).padStart(40,'0');
 const catalogue=validateCatalogue({schema:'420-exchange-catalogue-v1',version:1,markets:[{
   marketSubjectId:id(1),canonicalMarketId:id(11),marketLabel:'420 / TEST',baseSymbol:'420',quoteSymbol:'TEST',
   qualification:'DISPLAY_ONLY_QUALIFIED_METADATA',routeHealthy:true,settlementHealthy:true,source:'test-catalogue'
-}],assets:[{assetId:'420',symbol:'420',qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'test'}],routes:[{routeId:'r1',marketSubjectId:id(1),qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'test'}]});
+}],assets:[{assetId:'420',symbol:'420',qualification:'DISPLAY_ONLY_UNQUALIFIED',source:'test'}],routes:[{routeId:'r1',marketSubjectId:id(1),qualification:'DISPLAY_ONLY_QUALIFIED_METADATA',source:'test',bridge:{
+  exchangeAssetId:id(70),localToken:addr(70),canonicalAsset:id(71),sourceChain:'ethereum:1',destinationChain:'420:1056',
+  sourceAssetId:id(72),destinationAssetId:id(73),adapterId:id(74),adapterAddress:addr(74),verifierId:id(75),
+  provenanceHash:id(76),verificationHash:id(76),direction:'OUTBOUND',qualified:true,representationActive:true,
+  canonicalRepresentation:true,routeActive:true,directionEnabled:true,adapterLive:true,adapterMatches:true,
+  verifierConfigured:true,settlementHealthy:true,paused:false,bridgeFee:0,routeLimit:'1000',assetLimit:'10000'
+}}]});
 function event({eventName='AtomicPathExecuted',blockNumber='10',blockHash=id(20),tx=id(30),logIndex=0,fields={},protocol='420Exchange'}={}){
  return {chainId:'1056',blockNumber,blockHash,transactionHash:tx,transactionIndex:0,logIndex,contractAddress:addr(99),protocol,eventName,objectKey:null,lifecycleState:null,fields};
 }
@@ -43,6 +49,9 @@ test('browser ExchangeClient and server adapter pass the same V13 snapshot/histo
    assert.equal(snap.snapshotId,id(2));assert.equal(snap.canonicalHead,12);assert.equal(snap.provenance.authoritative,false);
    const page=await client.history({kind:'TRADE',activeOnly:false});
    assert.equal(page.records.length,1);assert.equal(page.records[0].provenance.source,'420Indexer/v1');assert.equal(page.records[0].active,true);
+   const bridge=await client.bridge();
+   assert.equal(bridge.routes.length,1);assert.equal(bridge.routes[0].routeId,'r1');
+   assert.equal(bridge.routes[0].freshness,'canonical');assert.equal(bridge.provenance.rpcFallbackReady,true);
  });
 });
 

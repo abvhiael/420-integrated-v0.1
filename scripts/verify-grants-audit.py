@@ -86,9 +86,11 @@ if entries:
     need(entries[0].get("status") == "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS", "Grants router address model drift")
 
 dapp_map = json.loads(text("contracts/config/genesis-dapp-contract-map.json"))
-rows = [x for x in dapp_map if isinstance(x, dict) and x.get("dapp") == "420 Grants"] if isinstance(dapp_map, list) else [
-    x for x in dapp_map.get("dapps", []) if x.get("dapp") == "420 Grants"
-]
+if isinstance(dapp_map, list):
+    dapp_rows = dapp_map
+else:
+    dapp_rows = dapp_map.get("apps", dapp_map.get("dapps", []))
+rows = [x for x in dapp_rows if isinstance(x, dict) and x.get("dapp") == "420 Grants"]
 need(len(rows) == 1, "420 Grants dApp-map row missing/duplicated")
 if rows:
     need(set(rows[0].get("contracts", [])) == required_contracts, "420 Grants dApp-map contract inventory drift")

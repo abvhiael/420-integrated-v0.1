@@ -131,7 +131,7 @@ The authorized executor supplies `vaultReleaseHash`. Treasury validates only tha
 | notBefore/expiry | manifest | enforced | tests | yes | COMPLETE | retain |
 | cancellation releases commitment | manifest | enforced | branch test | yes | COMPLETE on branch | exact-head qualify |
 | nonzero Vault release commitment | manifest | enforced | branch test | yes | COMPLETE | retain |
-| cryptographic/atomic Vault release proof | PR language vs current architecture | not present | none | ambiguous | PARTIAL | TREASURY-AUDIT-4 decision |
+| cryptographic/atomic Vault release proof | TREASURY-AUDIT-4 adopted commitment-only model | intentionally not performed by Treasury | commitment-only model + Grants consumer qualification | yes | NOT APPLICABLE | live qualification correlates commitment to actual Vault evidence |
 | registry-resolved router identity | address authority | declared | config verification indirect | partial | PARTIAL | deployment/publication evidence |
 | Indexer modern Treasury descriptors | derived-service architecture | generic protocol view only | no focused modern suite found | partial | PARTIAL | TREASURY-AUDIT-5 |
 | Analytics projection | Analytics implementation | present | Analytics tests | yes | PARTIAL | bind to qualified live Indexer |
@@ -149,7 +149,6 @@ Still required:
 - ProtocolRegistry publication procedure;
 - event/error integration reference;
 - operator/recovery guide;
-- explicit release-evidence model for `vaultReleaseHash`;
 - retained testnet/production qualification evidence.
 
 ## Genesis/deployment determination
@@ -160,19 +159,19 @@ The release still requires deterministic deployment artifacts, constructor bindi
 
 ## Readiness state
 
-- CODE COMPLETE: **NO** — lifecycle remediation is implemented, but the Vault release evidence-model contradiction remains unresolved.
-- BUILD COMPLETE: **NO** — exact-head CI is pending and no Treasury deployment artifact package is retained.
-- CONTRACT COMPLETE: **NO** — TREASURY-AUDIT-4 must be formally resolved and invariant coverage expanded.
-- TEST COMPLETE: **NO** — focused tests are substantially improved; fuzz/property/static/security and live tests remain.
+- CODE COMPLETE: **NO** — core Treasury lifecycle, property/security and release-evidence semantics are qualified through TREASURY-AUDIT-4; modern integration/deployment materialization remains.
+- BUILD COMPLETE: **NO** — exact-head Treasury CI is green through TREASURY-AUDIT-4, but no final Treasury deployment artifact package is retained.
+- CONTRACT COMPLETE: **NO** — repository contract behavior through TREASURY-AUDIT-4 is qualified, but deployment-bound and final external-review closeout remain.
+- TEST COMPLETE: **NO** — lifecycle, fuzz/property, static/security and Grants consumer qualification are retained; live deployment/integration tests remain.
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/recovery/evidence references remain.
 - INTEGRATION COMPLETE: **NO** — modern Treasury Indexer/deployment publication evidence remains.
-- SECURITY QUALIFIED: **NO** — exact-head static/security qualification and external review remain.
+- SECURITY QUALIFIED: **NO** — exact-head Treasury static/security qualification is green through TREASURY-AUDIT-4; external review remains.
 - TESTNET READY: **NO** — deployment/publication/evidence materialization is incomplete.
 - GENESIS READY: **NO** — live testnet, security and final release evidence remain.
 - PRODUCTION READY: **NO** — Genesis/security/operational closeout remains.
 
 ## Final determination
 
-The baseline implementation was **not genuinely complete** despite having a coherent contract family and green historical integration evidence. The audit identified real fail-closed lifecycle gaps in the state-changing execution path and an unresolved boundary between Treasury accounting and Vault release evidence.
+The baseline implementation was **not genuinely complete** despite having a coherent contract family and green historical integration evidence. The audit identified real fail-closed lifecycle gaps and an ambiguous Treasury/Vault release-evidence boundary. The lifecycle gaps were remediated in TREASURY-AUDIT-2/3, and TREASURY-AUDIT-4 has now formally adopted and qualified the commitment-only Vault release evidence model without creating a second custody authority.
 
-Repository-side remediation has begun on the audit branch. The remaining work is preserved in `docs/audit/420TREASURY-AUDIT-REMEDIATION-ROADMAP.md`; no later step may be treated as complete merely because the focused unit suite is green.
+Remaining repository and live-release work is preserved in `docs/audit/420TREASURY-AUDIT-REMEDIATION-ROADMAP.md`; no later step may be treated as complete merely because the retained Level 1 suites are green.

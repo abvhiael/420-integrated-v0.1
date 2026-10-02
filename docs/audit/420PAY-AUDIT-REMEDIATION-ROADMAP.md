@@ -143,19 +143,48 @@ Exit criteria:
 
 ## PAY-AUDIT-7 — production-equivalent testnet qualification
 
-**Status: BLOCKED until the approved live production-equivalent testnet candidate exists. PAY-AUDIT-6 repository work is COMPLETE.**
+**Status: NOT YET COMPLETE — BLOCKED ON APPROVED LIVE PUBLIC TESTNET. Repository-side live-qualification harness implemented; Level 1 qualification pending.**
+
+Repository-side implementation:
+- `docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json` defines the required real non-secret deployment/transaction/failure/accounting/Indexer evidence;
+- `scripts/qualify-420pay-testnet.py` verifies the exact live chain/genesis/evidence block, deployed runtime hashes and successful transaction receipts before accepting reviewed binding/failure/accounting/Indexer evidence;
+- `scripts/verify-420pay-audit-7-testnet-readiness.py` fails closed across the deployment boundary and forbids retained PASS evidence while the public network is not live/frozen;
+- `.github/workflows/420pay-live-testnet.yml` is manual-only and executes production-equivalent verification on the exact release SHA;
+- `.github/workflows/420pay-audit-7.yml` provides targeted Level 1 repository-harness qualification;
+- `docs/audit/420PAY-AUDIT-7-TESTNET-QUALIFICATION.md` and JSON companion retain the canonical live exit-criterion matrix.
+
+Current blocker evidence:
+- `config/protocol.json` does not declare the public testnet live;
+- `testnet/public/metadata/chain.json` remains `CANDIDATE_UNTIL_FINAL_PREFLIGHT_FREEZE`;
+- RPC/WS/Explorer/Faucet/Status endpoints remain placeholders;
+- Genesis digests and release checksum remain placeholders;
+- therefore no live Pay deployment address, Registry revision, transaction, block/hash, Indexer recovery result or PASS evidence may be fabricated.
 
 Retain exact release-SHA evidence for:
 - chain/genesis identity;
-- deployed runtime hashes and Registry lifecycle;
+- all nine deployed Pay runtime hashes and Registry lifecycle/version;
 - governance/timelock bindings;
 - Pay->SettlementAdapter->SwapExecutor and replay-domain wiring;
+- SettlementRouter and RefundManager bindings;
 - canonical asset/fee/health dependencies;
-- invoice/payment/refund paths;
+- invoice/payment/settlement/refund paths;
 - swap failure atomic rollback and replay rejection;
-- split/sponsorship/export behavior after PAY-AUDIT-4 is implemented;
-- Indexer reconstruction/reorg/restart behavior;
-- Wallet/client transaction review if a canonical user surface is later required.
+- direct/swap-backed split settlement;
+- GasSponsor authorized-relayer reimbursement;
+- accounting export reconciliation;
+- Indexer reconstruction/reorg/restart/idempotence behavior;
+- retained receipts/logs/manifests tied to the exact release SHA;
+- Wallet/client transaction review only if a canonical user surface becomes required.
+
+Exit criteria:
+- approved production-equivalent public testnet exists;
+- all required live evidence above is retained for one exact release SHA;
+- the manual 420Pay live testnet qualification workflow passes;
+- `scripts/verify-420pay-audit-7-testnet-readiness.py` reports live evidence retained;
+- `contracts/config/420pay-genesis-wiring.json.deployment_binding_verified` is true only after live proof;
+- `contracts/config/pay/pay-audit-6-deployment-package.json.live_qualified` is true only after live proof;
+- TESTNET READY = YES;
+- only then may PAY-AUDIT-7 be marked COMPLETE.
 
 ## PAY-AUDIT-8 — independent audit and Genesis/production closeout
 

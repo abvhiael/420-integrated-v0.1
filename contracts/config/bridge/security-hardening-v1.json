@@ -18,73 +18,171 @@
       "name": "SolanaBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol",
       "domain": "420/BRIDGE/SOLANA/MAINNET/V12.5.2",
-      "launchSlice": "V12.5.2"
+      "launchSlice": "V12.5.2",
+      "verifierInterface": "contracts/src/interfaces/ISolanaFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "SOLANA_MAINNET_GENESIS_HASH",
+        "p.finalized",
+        "p.genesisHash",
+        "p.programId"
+      ]
     },
     {
       "name": "BnbBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol",
       "domain": "420/BRIDGE/BNB/MAINNET/V12.5.3",
-      "launchSlice": "V12.5.3"
+      "launchSlice": "V12.5.3",
+      "verifierInterface": "contracts/src/interfaces/IBnbFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "BNB_MAINNET_CHAIN_ID",
+        "p.finalized",
+        "p.sourceChainId",
+        "p.blockHash"
+      ]
     },
     {
       "name": "EthereumBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol",
       "domain": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
-      "launchSlice": "V12.5.4"
+      "launchSlice": "V12.5.4",
+      "verifierInterface": "contracts/src/interfaces/IEthereumFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "ETHEREUM_MAINNET_CHAIN_ID",
+        "p.finalized",
+        "p.sourceChainId",
+        "p.receiptsRoot"
+      ]
     },
     {
       "name": "DogecoinBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol",
       "domain": "420/BRIDGE/DOGECOIN/MAINNET/V12.5.5",
-      "launchSlice": "V12.5.5"
+      "launchSlice": "V12.5.5",
+      "verifierInterface": "contracts/src/interfaces/IDogecoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "DOGE_MAINNET_GENESIS_HASH",
+        "DOGE_MAINNET_MESSAGE_START",
+        "p.finalized",
+        "p.genesisHash",
+        "p.messageStart"
+      ]
     },
     {
       "name": "TronBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/TronBridgeAdapter420.sol",
       "domain": "420/BRIDGE/TRON/MAINNET/V12.5.7",
-      "launchSlice": "V12.5.7"
+      "launchSlice": "V12.5.7",
+      "verifierInterface": "contracts/src/interfaces/ITronFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "TRON_MAINNET_NETWORK_ID",
+        "p.solidified",
+        "p.executionSuccess",
+        "p.networkId"
+      ]
     },
     {
       "name": "PotcoinBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol",
       "domain": "420/BRIDGE/POTCOIN/MAINNET/V12.5.9",
-      "launchSlice": "V12.5.9"
+      "launchSlice": "V12.5.9",
+      "verifierInterface": "contracts/src/interfaces/IPotcoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "POT_MAINNET_NETWORK_ID",
+        "POT_LAST_POW_BLOCK",
+        "p.finalized",
+        "p.proofOfStake",
+        "p.networkId"
+      ]
     },
     {
       "name": "DobbscoinBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol",
       "domain": "420/BRIDGE/DOBBSCOIN/MAINNET/V12.5.10",
-      "launchSlice": "V12.5.10"
+      "launchSlice": "V12.5.10",
+      "verifierInterface": "contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "BOB_MAINNET_GENESIS_HASH",
+        "BOB_MAINNET_MESSAGE_START",
+        "MIN_CONFIRMATIONS",
+        "AUXPOW_ACTIVATION_HEIGHT",
+        "p.finalized",
+        "p.confirmations",
+        "p.auxPowValidated"
+      ]
     },
     {
       "name": "CurecoinBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol",
       "domain": "420/BRIDGE/CURECOIN/MAINNET/V12.5.11",
-      "launchSlice": "V12.5.11"
+      "launchSlice": "V12.5.11",
+      "verifierInterface": "contracts/src/interfaces/ICurecoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "CURE_MAINNET_GENESIS_HASH",
+        "CURE_MAINNET_MESSAGE_START",
+        "p.finalized",
+        "p.proofOfStake",
+        "p.genesisHash"
+      ]
     },
     {
       "name": "PirateChainBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol",
       "domain": "420/BRIDGE/PIRATE/MAINNET/V12.5.12",
-      "launchSlice": "V12.5.12"
+      "launchSlice": "V12.5.12",
+      "verifierInterface": "contracts/src/interfaces/IPirateChainFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "PIRATE_MAINNET_NETWORK_ID",
+        "MIN_DPOW_CONFIRMATIONS",
+        "p.finalized",
+        "p.equihashValidated",
+        "p.notarizationValidated",
+        "p.confirmations"
+      ]
     },
     {
       "name": "LitecoinBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol",
       "domain": "420/BRIDGE/LITECOIN/MAINNET/V12.5.13",
-      "launchSlice": "V12.5.13"
+      "launchSlice": "V12.5.13",
+      "verifierInterface": "contracts/src/interfaces/ILitecoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "LTC_MAINNET_GENESIS_HASH",
+        "LTC_MAINNET_MESSAGE_START",
+        "MIN_CONFIRMATIONS",
+        "p.finalized",
+        "p.scryptPowValidated",
+        "p.chainWorkValidated",
+        "p.confirmations"
+      ]
     },
     {
       "name": "BitcoinBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol",
       "domain": "420/BRIDGE/BITCOIN/MAINNET/V12.5.14",
-      "launchSlice": "V12.5.14"
+      "launchSlice": "V12.5.14",
+      "verifierInterface": "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "BTC_MAINNET_GENESIS_HASH",
+        "BTC_MAINNET_MESSAGE_START",
+        "MIN_CONFIRMATIONS",
+        "p.finalized",
+        "p.sha256dPowValidated",
+        "p.chainWorkValidated",
+        "p.confirmations"
+      ]
     },
     {
       "name": "XrplBridgeAdapter420",
       "path": "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol",
       "domain": "420/BRIDGE/XRPL/MAINNET/V12.5.15",
-      "launchSlice": "V12.5.15"
+      "launchSlice": "V12.5.15",
+      "verifierInterface": "contracts/src/interfaces/IXrplFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "p.validated",
+        "p.ledgerIndex",
+        "p.ledgerHash",
+        "p.transactionRoot"
+      ]
     }
   ],
   "disabledLegacyScaffolds": [

@@ -63,19 +63,38 @@ Exit criteria:
 
 ## PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion
 
-**Status: PARTIAL / BLOCKED on semantic decisions.**
+**Status: IMPLEMENTED — Level 1 qualification pending.**
 
-Current facts:
-- `SettlementRouter420` validates split shape and calculates deterministic amounts, but exposes no transfer/execution function; its `NativeSettlement` and `SplitPaid` events are not emitted.
-- refunds are canonical accounting/lifecycle records; no Pay contract has arbitrary custody-release authority, consistent with the authority map.
-- `GasSponsor420` enforces allowlists/caps and records sponsored cost, but does not itself execute or reimburse an account-abstraction transaction.
-- `AccountingCommitment420` hashes a tax summary, while the frozen Genesis accounting-export field set has no retained exporter/service/schema implementation.
+Canonical resolution:
+1. **Split execution ownership:** `SettlementRouter420` owns split distribution only. `PaymentRouter420` remains the payer authorization/replay boundary and `CanonicalSettlementAdapter420` remains the swap execution boundary. Direct native/token splits require the payer itself; swap-backed splits deliver canonical settlement assets into `SettlementRouter420` and distribute them atomically in the same transaction.
+2. **No hidden custody:** successful split execution must leave zero new router residue. ERC-20 input/output deltas are checked exactly; fee-on-transfer/false-return behavior fails closed. Payment IDs are replay-protected locally and by the existing PaymentRouter shared replay path.
+3. **Refund reconciliation:** `PaymentRegistry420` is the canonical refund-authorization ledger. `RefundManager420` records refund evidence only when recipient, settlement asset, refundable maximum and cumulative authorized refund match the bound canonical payment record. RefundManager does not gain asset custody or release authority.
+4. **Gas sponsorship:** no canonical ERC-4337/paymaster runtime exists in the repository. V1 therefore binds reimbursement to governance-authorized relayer contracts. `GasSponsor420` never executes the user call and cannot choose an arbitrary reimbursement recipient; the calling authorized relayer is reimbursed only for an allowlisted/capped operation while preserving the reserve floor.
+5. **Accounting export:** the frozen 15-field Genesis export is implemented as a derived Indexer DTO/schema plus replaceable sink interface. Export services receive no protocol mutation authority and sensitive purchase details are not moved on-chain.
 
-Required remediation:
-1. freeze whether split execution belongs in Pay, the canonical settlement adapter, Wallet/account execution, or another custody component; then implement atomically without creating hidden custody;
-2. retain refund accounting/non-custody semantics unless a separately authorized custody integration is approved;
-3. bind GasSponsor accounting to the canonical relayer/paymaster/account-abstraction execution boundary and prove debits/reimbursement/reserve accounting;
-4. implement a canonical export DTO/schema and a replaceable exporter for the frozen fields, with reconciliation tests.
+Implementation:
+- atomic native, direct-token and held-token split execution in `SettlementRouter420`;
+- direct and swap-backed split authorization paths in `PaymentRouter420`;
+- swap-backed split composition in `CanonicalSettlementAdapter420`;
+- canonical refund accounting view in `PaymentRegistry420`;
+- `RefundManager420 -> PaymentRegistry420` binding and authorized-refund reconciliation;
+- governed GasSponsor relayer allowlist plus exact reimbursement and cumulative reimbursement accounting;
+- `contracts/config/pay/accounting-export-schema.json`;
+- `420-indexer/src/pay-accounting-export.ts` and regression coverage;
+- Genesis wiring/check updates for all new source bindings;
+- PAY-AUDIT-4 focused Solidity and Indexer regression suites.
+
+Exit criteria:
+- split recipient count, 10,000-bps total and primary-recipient rounding remain frozen;
+- native, direct-token and swap-backed split paths conserve value atomically and leave no new SettlementRouter residue;
+- a third party cannot spend a payer's standing token allowance through the direct split path;
+- split/payment replay fails closed;
+- refund evidence cannot exceed or contradict canonical PaymentRegistry refund authorization;
+- RefundManager retains no arbitrary custody/release authority;
+- only explicitly governed relayer contracts can receive GasSponsor reimbursement;
+- sponsorship limits and reserve floor are enforced before reimbursement;
+- all frozen accounting-export fields are present exactly once and refund totals reconcile to canonical refundable value;
+- exact-head Level 1 Pay qualification passes.
 
 ## PAY-AUDIT-5 — Indexer/event-model integration
 

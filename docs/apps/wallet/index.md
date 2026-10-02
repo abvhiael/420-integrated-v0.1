@@ -83,3 +83,7 @@ A qualified client must not:
 - [Transactions](../../architecture/chain/transactions.md)
 - [Gas, fees and native `$420`](../../architecture/chain/gas-fees-native-420.md)
 - [Registry, Names, Identity and 420-IS](../../architecture/protocols/registry-names-identity-420is.md)
+
+
+For 420 Bridge, Wallet is the authorization and navigation client for the canonical Exchange `/bridge` surface. Bridge activity shown in Wallet may consume 420Indexer-derived `TransferCreated`, `TransferStatus` and `TransferTransition` projections, but Wallet does not own the lifecycle and cannot infer `COMPLETED` or `REFUNDED` from a local submission, notification or stale activity record.
+

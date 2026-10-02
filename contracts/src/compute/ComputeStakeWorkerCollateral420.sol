@@ -188,6 +188,10 @@ contract ComputeStakeWorkerCollateral420 is I420System, IComputeStakeSource420, 
         return SOURCE_ID;
     }
 
+    function workerRegistry() external view returns (address) {
+        return address(workers);
+    }
+
     function positionId(bytes32 workerId, bytes32 stakePolicyId) public view returns (bytes32) {
         if (workerId == bytes32(0) || stakePolicyId == bytes32(0)) revert InvalidStake();
         return keccak256(

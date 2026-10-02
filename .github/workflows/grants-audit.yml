@@ -11,6 +11,22 @@ on:
       - "docs/audit/420GRANTS-*"
       - "scripts/verify-grants-audit.py"
       - "scripts/verify-grants-audit-5-release.py"
+      - "scripts/verify-grants-audit-6-client-indexer.py"
+      - "420-indexer/descriptors/grants420-v1.json"
+      - "420-indexer/src/grants-descriptors.ts"
+      - "420-indexer/src/grants-read-model.ts"
+      - "420-indexer/src/protocol-decoder.ts"
+      - "420-indexer/src/lifecycle-reducer.ts"
+      - "420-indexer/src/api-surface.ts"
+      - "420-indexer/src/http-transport.ts"
+      - "420-indexer/src/index.ts"
+      - "420-indexer/test/grants420-integration.test.ts"
+      - "wallet/web/core/genesis-app-catalog.js"
+      - "wallet/web/core/grants-handoff.js"
+      - "wallet/web/core/execution.js"
+      - "wallet/web/test/genesis-app-catalog.test.js"
+      - "wallet/web/test/apps.test.js"
+      - "wallet/web/test/grants-handoff.test.js"
       - ".github/workflows/grants-audit.yml"
   workflow_dispatch:
 
@@ -94,6 +110,52 @@ jobs:
       - name: Run Grants lifecycle and adversarial regressions
         working-directory: contracts
         run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+
+  grants-client-integration:
+    needs: grants-contract-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Materialize Grants compiled ABI artifacts
+        working-directory: contracts
+        run: forge build src/grants
+
+      - name: Verify GRANTS-AUDIT-6 client/indexer integration model
+        run: python3 scripts/verify-grants-audit-6-client-indexer.py
+
+      - name: Install 420Indexer dependencies
+        working-directory: 420-indexer
+        run: npm ci
+
+      - name: Build affected 420Indexer
+        working-directory: 420-indexer
+        run: npm run build
+
+      - name: Run retained Grants Indexer integration suite
+        working-directory: 420-indexer
+        run: node --test dist/test/grants420-integration.test.js
+
+      - name: Run affected Wallet catalogue and Grants handoff regressions
+        working-directory: wallet/web
+        run: node --test test/genesis-app-catalog.test.js test/apps.test.js test/grants-handoff.test.js
 
   grants-security:
     runs-on: ubuntu-latest

@@ -37,3 +37,42 @@ This is not an alternate governance authority. The bootstrap surface is permissi
 Activation is fail-closed: `Governance420.activateCanonicalCivic` verifies the configured sources, revision-1 rules, Governor/Registry bindings and active Registry resolutions before `GovernanceTimelock.activateCivicAuthority` transfers scheduling authority irreversibly to `CivicGovernor420`. After that transition the bootstrap path cannot be scheduled again and bootstrap cancellation is disabled.
 
 The canonical COMMUNITY and VALIDATOR electorate adapters are `CivicMerkleElectorateSource420` deployments. Both are equal-weight membership sources. COMMUNITY is one eligible address = one vote. VALIDATOR is one eligible active-validator owner = one vote; validator stake, bond size and delegated stake do not increase Civic voting weight.
+
+
+## Component map
+
+```text
+Governance420@0x0437 --bootstrap only--> GovernanceTimelock@0x0429
+                                              |
+                                              v
+                                      CivicGovernor420
+                                       /    |    |    \
+                                      v     v    v     v
+                          Constitution  Proposal  Electorate  Voting
+                                        Registry    Registry
+                                                   /      \
+                                                  v        v
+                                         COMMUNITY source  VALIDATOR source
+```
+
+After verified bootstrap activation, `GovernanceTimelock.scheduler` is `CivicGovernor420`. The compatibility contract is no longer a scheduling authority.
+
+## Proposal state machine
+
+```text
+                 +--> FAILED
+                 |
+ACTIVE --> PASSED --> QUEUED --> EXECUTED
+```
+
+`CANCELLED` is reserved but not reachable for canonical Civic v1 proposals. Timelock cancellation before Civic activation applies only to bootstrap/legacy operations and is not a proposal-state transition.
+
+## Registry/discovery map
+
+Fixed addresses:
+
+- ProtocolRegistry: `0x0000000000000000000000000000000000000434`;
+- GovernanceTimelock: `0x0000000000000000000000000000000000000429`;
+- Governance420: `0x0000000000000000000000000000000000000437`.
+
+The five Civic core modules and two electorate-source deployments are Registry-resolved deployment outputs. Their component IDs and publication profile are defined by `contracts/config/governance-deployment-v1.json`.

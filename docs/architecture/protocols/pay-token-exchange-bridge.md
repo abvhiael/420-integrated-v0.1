@@ -210,9 +210,13 @@ Inbound proof acceptance records the already-validated source/proof milestones t
 
 ### Accounting evidence
 
-`BridgeAccountingRegistry` stores authorized-versus-observed supply reconciliation plus an evidence hash and health result. It explicitly does **not** mint, burn or repair balances.
+`BridgeAccountingRegistry` stores authorized-versus-observed supply reconciliation plus an evidence hash and health result. It explicitly does **not** mint, burn, transfer, confiscate or repair balances.
 
-A mismatch is evidence of an unhealthy bridge state that should stop unsafe value movement and trigger reconciliation/incident handling; it is not permission for the accounting registry to silently change user balances.
+Accounting health is a canonical Bridge execution boundary with four states: `UNKNOWN`, `HEALTHY`, `AUTHORIZED_EXCEEDS_OBSERVED` and `OBSERVED_EXCEEDS_AUTHORIZED`. Only `HEALTHY` admits **new** inbound or outbound movement. Missing reconciliation evidence and either mismatch direction fail closed before Bridge risk consumption or adapter execution.
+
+Reconciliation remains governance-authorized and `SAFE_WHEN_PAUSED`. Observation time must move strictly forward, and an evidence hash may be consumed only once; a stale timestamp or replayed evidence hash cannot restore health. Recovery from a mismatch therefore requires a strictly newer observation with distinct qualified evidence showing authorized and observed supply agree.
+
+Accounting recovery changes only the latest reconciliation record and health result. It cannot rewrite an already-settled transfer, replay state, route/asset identity or user balance history. Existing-transfer refund/recovery is a separate governed lifecycle path classified `WITHDRAWAL_ONLY` under shared system safety; it is not a new outbound bridge initiation and it does not grant `BridgeAccountingRegistry` custody authority.
 
 ## Exchange ↔ Bridge provenance
 

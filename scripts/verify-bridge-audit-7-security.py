@@ -41,6 +41,8 @@ for entry in adapters:
     ]:
         require(marker in src,f"{path}: missing security marker {marker}")
     require(entry["domain"] in src,f"{path}: ADAPTER_ID domain drift")
+    adapter_test=ROOT/("contracts/test/"+entry["name"]+".t.sol")
+    require(adapter_test.exists(),f"{path}: missing dedicated adapter test {adapter_test.relative_to(ROOT)}")
     require("tx.origin" not in src,f"{path}: forbidden tx.origin")
     require("selfdestruct" not in src,f"{path}: forbidden selfdestruct")
     require(".delegatecall" not in src,f"{path}: forbidden delegatecall")

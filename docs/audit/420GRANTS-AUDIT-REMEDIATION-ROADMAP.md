@@ -42,21 +42,27 @@ Level 2 is not triggered by this lifecycle-remediation step alone. Level 3 remai
 
 ## GRANTS-AUDIT-3 — adversarial, replay and invariant qualification
 
-**Status: IMPLEMENTED — pending exact-head qualification**
+**Status: COMPLETE**
 
-Cover:
-- application replay/default-deny delegation;
-- program/per-award cap boundaries;
-- controller bypass attempts;
-- inactive-program award attempts;
-- milestone aggregate caps;
-- Treasury field mismatches;
-- duplicate Treasury-disbursement binding;
-- cancelled-parent approval attempts;
-- early finalization;
-- executed-payment cancellation;
-- delegated capability boundaries;
-- dangerous Solidity primitive scan.
+- qualified application replay resistance and application-nonce replay rejection with altered content;
+- proved application delegation is default-deny and program-scope bounded;
+- qualified program-cap, per-award-cap and cumulative application-award boundaries;
+- rejected direct program-cap reservation outside the bound Award Registry controller;
+- rejected new awards after program deactivation;
+- qualified milestone aggregate caps, ordinal replay rejection and safe cancelled-capacity replacement;
+- rejected Treasury budget, recipient, amount, Civic-action, purpose and state mismatches without mutating binding/state;
+- rejected duplicate Treasury-disbursement binding across milestones;
+- rejected approval after parent-award cancellation;
+- rejected PAID finalization before Treasury execution and without nonzero Vault release commitment;
+- rejected milestone cancellation after Treasury execution;
+- proved milestone delegation is default-deny and award-scope/action bounded;
+- dangerous Solidity primitive scan and targeted Slither high-severity gate PASS;
+- Level 1 exact-head qualification **PASS** on implementation SHA `ab6d245a193ac2e9d0369d2279090de276d9fc57`;
+- 420Grants Audit Qualification run `37059922255` / #24: contract-core job `111014056705` PASS and grants-security job `111014056888` PASS;
+- affected shared Solidity Contracts run `37059921662` / #4236 PASS on the same implementation SHA;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-3-QUALIFICATION.md`, introduced by evidence commit `09938328fde916d6c6caf84c299b7c9e04426df2`.
+
+Level 2 is not triggered by this adversarial/invariant step alone. Complete repository exact-final-head closeout remains deferred to GRANTS-AUDIT-8.
 
 ## GRANTS-AUDIT-4 — Civic/Treasury/Vault/capability integration reconciliation
 

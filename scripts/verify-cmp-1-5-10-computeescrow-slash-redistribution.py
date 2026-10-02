@@ -36,6 +36,8 @@ def main():
         errors.append("next-step drift")
 
     require_text(RESOLVER, [
+        "OBJECTIVE_VERIFIER_ERROR_GROUND",
+        "r.groundsCode != OBJECTIVE_VERIFIER_ERROR_GROUND",
         "address public immutable canonicalEntitlements",
         "bytes32 public immutable canonicalEntitlementsCodeHash",
         "address entitlements_ = disputes.entitlements()",
@@ -49,6 +51,7 @@ def main():
 
     require_text(RESOLVER_TEST, [
         "testResolverFreezesCanonicalEscrowEntitlementsRuntime",
+        "testGenericAdverseGroundCannotResolveEscrowPayer",
         "resolver.canonicalEntitlements()",
         "resolver.canonicalEntitlementsCodeHash()",
         "disputes.setEntitlements(address(replacement))",

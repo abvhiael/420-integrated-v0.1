@@ -19,19 +19,19 @@ import "../src/libraries/AppDependencyIds420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmPayAudit6 {
-    function prank(address) external;
+    function prank(
+        address
+    ) external;
 }
 
 contract PayAudit6DeploymentPackage420Test {
-    VmPayAudit6 internal constant vm =
-        VmPayAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmPayAudit6 internal constant vm = VmPayAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address internal constant TIMELOCK = 0x0000000000000000000000000000000000000429;
-    bytes32 internal constant CFG =
-        0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921;
+    bytes32 internal constant CFG = 0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921;
 
     function _v() private pure returns (Types420.Version memory) {
-        return Types420.Version({major: 1, minor: 0, patch: 0});
+        return Types420.Version({ major: 1, minor: 0, patch: 0 });
     }
 
     function _register(
@@ -133,14 +133,11 @@ contract PayAudit6DeploymentPackage420Test {
         require(settlementRouter.settlementAdapter() == address(adapter), "split adapter");
         require(refunds.paymentRegistry() == address(payments), "refund registry");
         require(executor.trustedCaller(address(adapter)), "executor trust");
-        require(
-            replay.domainConsumer(ReplayDomainIds420.PAY_SETTLEMENT) == address(paymentRouter),
-            "replay domain"
-        );
+        require(replay.domainConsumer(ReplayDomainIds420.PAY_SETTLEMENT) == address(paymentRouter), "replay domain");
 
         vm.prank(address(0xBEEF));
-        (bool unauthorized,) =
-            address(paymentRouter).call(abi.encodeWithSelector(paymentRouter.setSettlementAdapter.selector, address(health)));
+        (bool unauthorized,) = address(paymentRouter)
+            .call(abi.encodeWithSelector(paymentRouter.setSettlementAdapter.selector, address(health)));
         require(!unauthorized, "governance handoff bypass");
     }
 }

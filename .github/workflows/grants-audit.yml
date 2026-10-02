@@ -143,7 +143,7 @@ jobs:
 
       - name: Install 420Indexer dependencies
         working-directory: 420-indexer
-        run: npm ci
+        run: npm install --no-audit --no-fund --no-package-lock
 
       - name: Build affected 420Indexer
         working-directory: 420-indexer

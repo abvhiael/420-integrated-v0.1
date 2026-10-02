@@ -77,6 +77,9 @@ need("testProgramAndAwardCapsFailClosedAndAccountingAgrees" in tests, "program a
 need("testExecutedTreasuryPaymentCannotBeHiddenByMilestoneCancellation" in tests, "executed-payment cancellation regression missing")
 need("testApprovedMilestoneRequiresTreasuryCancellationBeforeGrantCancellation" in tests, "Treasury-first cancellation regression missing")
 need("testMilestoneOrdinalCannotBeReusedAndCancelledCapacityCanBeReplaced" in tests, "milestone ordinal/capacity regression missing")
+need("testPerAwardCapFailsClosed" in tests, "explicit per-award cap boundary regression missing")
+need("testTreasuryBindingRejectsEveryCanonicalFieldMismatch" in tests, "Treasury canonical-field mismatch matrix missing")
+need("testMilestoneDelegationIsDefaultDenyAndScopeBound" in tests, "milestone delegated capability boundary regression missing")
 
 need("420 Grants" in arch and "Treasury" in arch and "Vault" in arch, "canonical architecture coverage missing")
 need("420 Grants" in wallet_cfg, "Wallet Genesis inventory no longer recognizes Grants")

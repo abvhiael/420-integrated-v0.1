@@ -5,6 +5,7 @@ import "../interfaces/I420System.sol";
 import "../interfaces/IComputeObjectiveSlashEvidence420.sol";
 import "../interfaces/IComputeSlashableCollateral420.sol";
 import "../interfaces/IComputeSlashHold420.sol";
+import "../interfaces/IComputeSlashRecipientResolver420.sol";
 import "./ComputeStakeSlashPolicy420.sol";
 import "./ComputeStakeSlashDistributionPolicy420.sol";
 
@@ -37,6 +38,10 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
         uint256 amount;
         uint32 distributionPolicyRevision;
         bytes32 distributionPolicyCommitment;
+        address harmedPayer;
+        address replacementWorker;
+        address challenger;
+        address protocolTreasury;
         uint64 authorizedAt;
         bool distributed;
         bool exists;
@@ -236,6 +241,33 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
                 )
         ) revert InvalidAuthorization();
 
+        IComputeSlashRecipientResolver420.Recipients memory recipients;
+        if (distributionPolicy.recipientResolver != address(0)) {
+            recipients = IComputeSlashRecipientResolver420(
+                distributionPolicy.recipientResolver
+            ).resolve(
+                bytes32(0),
+                evidenceRef,
+                p.evidenceAdapter,
+                subjectRef,
+                beneficiary
+            );
+        }
+        if (
+            (distributionPolicy.harmedPayerBps != 0
+                && (recipients.harmedPayer == address(0)
+                    || recipients.harmedPayer == beneficiary))
+                || (distributionPolicy.replacementWorkerBps != 0
+                    && (recipients.replacementWorker == address(0)
+                        || recipients.replacementWorker == beneficiary))
+                || (distributionPolicy.challengerBps != 0
+                    && (recipients.challenger == address(0)
+                        || recipients.challenger == beneficiary))
+                || (distributionPolicy.protocolTreasuryBps != 0
+                    && (distributionPolicy.protocolTreasury == address(0)
+                        || distributionPolicy.protocolTreasury == beneficiary))
+        ) revert InvalidAuthorization();
+
         authorizationRef = keccak256(
             abi.encode(
                 AUTHORIZATION_DOMAIN,
@@ -254,7 +286,11 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
                 e.evidenceCommitment,
                 amount,
                 distributionPolicy.revision,
-                distributionPolicyCommitment
+                distributionPolicyCommitment,
+                recipients.harmedPayer,
+                recipients.replacementWorker,
+                recipients.challenger,
+                distributionPolicy.protocolTreasury
             )
         );
         if (_authorizations[authorizationRef].exists) revert Replay();
@@ -278,6 +314,10 @@ contract ComputeStakeSlashAuthorization420 is I420System, IComputeSlashHold420 {
             amount: amount,
             distributionPolicyRevision: distributionPolicy.revision,
             distributionPolicyCommitment: distributionPolicyCommitment,
+            harmedPayer: recipients.harmedPayer,
+            replacementWorker: recipients.replacementWorker,
+            challenger: recipients.challenger,
+            protocolTreasury: distributionPolicy.protocolTreasury,
             authorizedAt: uint64(block.timestamp),
             distributed: false,
             exists: true

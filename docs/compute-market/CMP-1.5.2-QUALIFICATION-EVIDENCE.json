@@ -1,0 +1,90 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.2.QualificationEvidence.v1",
+  "step": "CMP-1.5.2",
+  "title": "Verifier collateral",
+  "qualification_level": 1,
+  "completion_state": "COMPLETE",
+  "implementation_sha": "baa6ea2e5adc0315d6e6c89010b5c58a03c0532c",
+  "evidence_only_closeout": true,
+  "current_main_observed": "98e545225d54379086f0c520afcb84b4d4d97288",
+  "stacked_base_sha": "a5157eb48a1e30b70ade3fb1e5810aa9097270dc",
+  "pr": 460,
+  "implementation_summary": [
+    "added a verifier collateral read interface and canonical Vault-backed verifier collateral runtime",
+    "bound deposits to the exact current verifier authority and verifier identity",
+    "preserved collateral across lifecycle revisions while preventing authority rotation from transferring old collateral",
+    "isolated verifier/policy positions and backing tranches",
+    "fixed Solidity PR classification so Compute-specific interfaces use Compute fast qualification"
+  ],
+  "requirements_satisfied": [
+    "native $420 collateral is held by registered VAULT_COLLATERAL 420Vault custody/accounting",
+    "only current verifier authority can add collateral",
+    "every deposit is atomically backed by a distinct Vault obligation",
+    "same-authority lifecycle revisions retain the same collateral position",
+    "authority rotation creates a separate current position and leaves prior collateral historically intact",
+    "retired and unauthorized verifiers cannot add collateral",
+    "failed Vault authorization rolls back atomically",
+    "focused verifier-collateral interface/read semantics are available for later policy enforcement"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 91,
+      "run_id": 36935785406,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3770,
+      "run_id": 36935785381,
+      "conclusion": "success",
+      "scope": "compute-fast; full repository shards intentionally skipped"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 3983,
+      "run_id": 36935785324,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 572,
+      "run_id": 36935785428,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 407,
+      "run_id": 36935785453,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1387,
+      "run_id": 36935785307,
+      "conclusion": "success"
+    }
+  ],
+  "verifier_checks": [
+    "retained Compute Market Solidity suite PASS",
+    "verification-script compilation PASS",
+    "CMP-1.5.2 verifier collateral verifier PASS"
+  ],
+  "ci_defect_repaired": "Solidity classifier now treats contracts/src/interfaces/ICompute*.sol as Compute scope while retaining generic interfaces on broad qualification.",
+  "level_2_status": "not required for this ordinary verifier-collateral slice",
+  "intentionally_deferred": [
+    "CMP-1.5.3 policy-specific minimum collateral",
+    "CMP-1.5.4 exit queue / withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.3 — Policy-specific minimum collateral"
+}

@@ -38,7 +38,7 @@ jobs:
           compute_only=true
           while IFS= read -r file; do
             case "$file" in
-              contracts/src/compute/*|contracts/test/Compute*.t.sol|contracts/config/compute-market/*|docs/compute-market/*|docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md|scripts/verify-cmp-*|scripts/test-cmp-*|.github/workflows/compute-market.yml)
+              contracts/src/compute/*|contracts/src/interfaces/ICompute*.sol|contracts/test/Compute*.t.sol|contracts/config/compute-market/*|docs/compute-market/*|docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md|scripts/verify-cmp-*|scripts/test-cmp-*|.github/workflows/compute-market.yml|.github/workflows/contracts-foundry.yml)
                 ;;
               *)
                 compute_only=false

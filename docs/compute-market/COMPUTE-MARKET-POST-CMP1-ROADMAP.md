@@ -202,6 +202,9 @@ Policy-bound distribution to harmed payer, replacement worker, challenger and/or
 Separately authorized, canonical-Vault-backed worker/verifier reward accounting with exact collateral identity, replay protection and no payer-escrow or consensus-issuance authority.
 
 ### CMP-1.5.8 — Dispute/stake integration
+**Status: implementation/Level 1 + Level 2 qualification in progress.**
+
+Freeze canonical verifier identity at dispute opening, preserve verifier collateral through active/objective-final dispute state, and atomically hand qualified objective verifier-error evidence into the existing slash authorization path before releasing the dispute stake hold.
 
 ### CMP-1.5.9 — WorkerRegistry stake-source integration
 

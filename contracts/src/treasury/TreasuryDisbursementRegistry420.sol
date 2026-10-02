@@ -58,11 +58,13 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     event DisbursementExecuted(bytes32 indexed disbursementId, bytes32 vaultReleaseHash, address indexed executor);
     event DisbursementCancelled(bytes32 indexed disbursementId);
 
-    constructor(address timelock_, address authorization_, address policy_, address budgets_) SystemAccess(timelock_) {
-        require(
-            authorization_ != address(0) && policy_ != address(0) && budgets_ != address(0),
-            "dependency"
-        );
+    constructor(
+        address timelock_,
+        address authorization_,
+        address policy_,
+        address budgets_
+    ) SystemAccess(timelock_) {
+        require(authorization_ != address(0) && policy_ != address(0) && budgets_ != address(0), "dependency");
         authorization = TreasuryAuthorization420(authorization_);
         policy = TreasuryPolicyRegistry420(policy_);
         budgets = TreasuryBudgetRegistry420(budgets_);
@@ -139,18 +141,19 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         emit DisbursementScheduled(id, budgetId, recipient, b.asset, amount, notBefore, expiresAt, civicActionHash);
     }
 
-    function markExecuted(bytes32 id, bytes32 vaultReleaseHash) external {
+    function markExecuted(
+        bytes32 id,
+        bytes32 vaultReleaseHash
+    ) external {
         Disbursement storage d = _get(id);
         if (d.state != State.SCHEDULED) revert InvalidState();
         if (
             block.timestamp < d.notBefore || block.timestamp > d.expiresAt || vaultReleaseHash == bytes32(0)
                 || !budgets.isEffective(d.budgetId) || !policy.isAllowed(d.asset, d.amount)
         ) revert NotExecutable();
-        if (
-            !authorization.isDisbursementAuthorized(
+        if (!authorization.isDisbursementAuthorized(
                 msg.sender, id, TreasuryIds420.ACTION_EXECUTE_DISBURSEMENT, d.amount
-            )
-        ) revert ExecutionUnauthorized();
+            )) revert ExecutionUnauthorized();
 
         TreasuryPolicyRegistry420.AssetPolicy memory p = policy.assetPolicy(d.asset);
         uint256 epoch = block.timestamp / p.epochSeconds;
@@ -163,7 +166,9 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         emit DisbursementExecuted(id, vaultReleaseHash, msg.sender);
     }
 
-    function cancel(bytes32 id) external onlyGovernance {
+    function cancel(
+        bytes32 id
+    ) external onlyGovernance {
         Disbursement storage d = _get(id);
         if (d.state != State.SCHEDULED) revert InvalidState();
         budgets.release(d.budgetId, d.amount);
@@ -171,11 +176,15 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         emit DisbursementCancelled(id);
     }
 
-    function disbursement(bytes32 id) external view returns (Disbursement memory) {
+    function disbursement(
+        bytes32 id
+    ) external view returns (Disbursement memory) {
         return _get(id);
     }
 
-    function _get(bytes32 id) private view returns (Disbursement storage d) {
+    function _get(
+        bytes32 id
+    ) private view returns (Disbursement storage d) {
         d = _disbursements[id];
         if (!d.exists) revert DisbursementNotFound();
     }

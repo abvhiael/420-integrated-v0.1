@@ -102,5 +102,7 @@
     "binding_transactions": []
   },
   "interface_verifier": "scripts/verify-420swap-interface-v1.py",
-  "interface_verifier_required": true
+  "interface_verifier_required": true,
+  "qualification_workflow": ".github/workflows/swap-audit-7.yml",
+  "level_2_workflow": ".github/workflows/swap-audit.yml"
 }

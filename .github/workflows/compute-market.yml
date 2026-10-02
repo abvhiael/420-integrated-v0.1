@@ -138,3 +138,6 @@ jobs:
 
       - name: Verify CMP-1.5.6 slash distribution
         run: python scripts/verify-cmp-1-5-6-slash-distribution.py
+
+      - name: Verify CMP-1.5.7 reward accounting
+        run: python scripts/verify-cmp-1-5-7-reward-accounting.py

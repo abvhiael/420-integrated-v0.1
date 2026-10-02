@@ -105,10 +105,29 @@ contract BridgeRouteRegistry is GenesisResidentAccess420 {
                 || !chains.isActiveRoute(b.destinationChainKey, r.destinationChainId)
         ) return false;
 
-        (, bytes32 currentSourceNetworkId,,,, bool sourceActive) = chains.chains(b.sourceChainKey);
-        (, bytes32 currentDestinationNetworkId,,,, bool destinationActive) = chains.chains(b.destinationChainKey);
-        return sourceActive && destinationActive && currentSourceNetworkId == b.sourceNetworkId
-            && currentDestinationNetworkId == b.destinationNetworkId;
+        (
+            uint64 currentSourceRouteId,
+            bytes32 currentSourceNetworkId,
+            bytes32 sourceNativeAssetId,
+            bytes32 sourceVerifierFamily,
+            BridgeChainRegistry420.ChainFamily sourceFamily,
+            bool sourceActive
+        ) = chains.chains(b.sourceChainKey);
+        (
+            uint64 currentDestinationRouteId,
+            bytes32 currentDestinationNetworkId,
+            bytes32 destinationNativeAssetId,
+            bytes32 destinationVerifierFamily,
+            BridgeChainRegistry420.ChainFamily destinationFamily,
+            bool destinationActive
+        ) = chains.chains(b.destinationChainKey);
+
+        return sourceActive && destinationActive && currentSourceRouteId == r.sourceChainId
+            && currentDestinationRouteId == r.destinationChainId && currentSourceNetworkId == b.sourceNetworkId
+            && currentDestinationNetworkId == b.destinationNetworkId && sourceNativeAssetId != bytes32(0)
+            && destinationNativeAssetId != bytes32(0) && sourceVerifierFamily != bytes32(0)
+            && destinationVerifierFamily != bytes32(0) && sourceFamily != BridgeChainRegistry420.ChainFamily.NONE
+            && destinationFamily != BridgeChainRegistry420.ChainFamily.NONE;
     }
 
     function requireRouteChainsCurrent(bytes32 routeId) external view {

@@ -407,6 +407,30 @@ Exact-final-head comprehensive Level 3 results remain intentionally deferred unt
 - completion state: **COMPLETE**
 - next canonical roadmap step: **SWAP-AUDIT-8 — production-equivalent testnet qualification**
 
+### SWAP-AUDIT-8 retained Level 1 repository-readiness evidence
+
+- roadmap step: **SWAP-AUDIT-8 — production-equivalent testnet qualification**
+- qualification level: **Level 1 — app-scoped live-testnet readiness/harness qualification**; the roadmap exit criterion itself is operational/live and cannot be satisfied by synthetic CI
+- repository-readiness implementation SHA: `7b7883998bdbfe4da3e48aef61e4482eff50386e`
+- current `main` / observed base during closeout: `d30c81cfbea7847817654b39491694a23c8701e4`
+- audit PR / branch: **#455** / `audit/420swap-complete-20261001`
+- authoritative readiness workflow: **420Swap SWAP-AUDIT-8 Testnet Readiness**, push run **36961637620**, job **110696399107** — exact-head checkout PASS; fail-closed official-testnet readiness verifier PASS; Exchange live-swap harness PASS; Wallet live-runner syntax/authority validation PASS; protected live workflows confirmed manual-only PASS
+- readiness evidence contract: `contracts/config/swap/swap-audit-8-testnet-qualification.json` enumerates exactly eight mandatory live journeys: success, slippage, stale quote/oracle, wrong chain, disabled market, replay, reorg/recovery and Pay composition
+- fail-closed verifier: `scripts/verify-swap-audit-8-testnet-readiness.py` proves SWAP-AUDIT-7 repository binding remains qualified, required Wallet/Exchange live tooling exists, no official testnet evidence is fabricated, and missing official infrastructure remains visibly BLOCKED
+- operator runbook: `docs/apps/swap/testnet-qualification.md` defines prerequisite launch authority, exact release-candidate binding, evidence fields, protected workflows, journey-specific requirements and the durable live-evidence file contract
+- Exchange harness result: all retained V15.6 live-swap qualification unit tests PASS, including successful finality/indexer reconciliation, unresolved-runtime rejection, reorg rejection, reverted-receipt rejection and V13/RPC conflict rejection
+- Wallet harness result: live-testnet runner validates syntactically and retains chain-ID/block-height/deployed-code/Explorer/Faucet checks for an official resolved manifest/runtime
+- protected execution discipline: `.github/workflows/exchange-testnet-swap.yml` and `.github/workflows/wallet-live-testnet.yml` remain `workflow_dispatch` live workflows; Exchange continues to use the protected `exchange-testnet` environment
+- prior qualification harness defect: PR run **36961421569** failed only because stale Forge steps remained after Foundry setup was intentionally removed as redundant; the log showed `forge: command not found`. Those duplicate contract reruns were removed because SWAP-AUDIT-8 changed no contract implementation and prior exact-SHA contract qualification remains valid
+- launch authority observed: `docs/STEP-5-TESTNET-LAUNCH.md` states **PUBLIC TESTNET NOT YET AUTHORIZED**; `docs/STEP-5.4-PUBLIC-TESTNET.md` states **TESTNET NOT DECLARED LIVE**
+- official infrastructure state: `developer-hub/manifests/testnet.json` is absent; `testnet/services/endpoints.json` still contains placeholder RPC/WebSocket/Explorer/Faucet/metadata endpoints; launch chain ID status remains candidate pending collision preflight
+- live evidence state: exact release-candidate SHA/chain/evidence block, deployed dynamic Swap/Pay addresses, Registry/binding transactions and live Wallet/Exchange workflow IDs intentionally remain null/empty; `docs/audit/SWAP-AUDIT-8-LIVE-TESTNET-EVIDENCE.json` does not exist
+- Level 2: **not re-run for readiness-only repository changes**; the retained app integration milestone from SWAP-AUDIT-7 remains authoritative because no Swap/Pay executable source changed. The actual production-equivalent integration milestone is inherently the blocked live SWAP-AUDIT-8 execution
+- Level 3: **intentionally deferred** to complete app-phase closeout after live SWAP-AUDIT-8 succeeds
+- blockers: official production-equivalent testnet is not authorized/live; official testnet manifest absent; public endpoints remain placeholders; no live deployed dynamic Swap/Pay binding evidence; none of the eight mandatory live journeys has retained public-testnet evidence
+- completion state: **BLOCKED — OFFICIAL PRODUCTION-EQUIVALENT TESTNET NOT LIVE**
+- next canonical roadmap step: **SWAP-AUDIT-8 remains current. Do not advance to SWAP-AUDIT-9 until every live journey and deployment evidence requirement passes on one exact release candidate.**
+
 Exact-final-head comprehensive Level 3 results remain intentionally deferred until complete app-phase closeout.
 
 ## Security classification
@@ -557,8 +581,8 @@ The remaining work must preserve these step identities and dependency order:
 7. **SWAP-AUDIT-7 — deployment binding and registry qualification — COMPLETE**  
    The actual Registry-resolved Swap/Pay stack is repository/local-EVM qualified with real `ProtocolRegistry` component registration, Registry-derived runtime identities, ACTIVE lifecycle, factory→pool→market bindings, exact PaymentRouter→CanonicalSettlementAdapter→CanonicalSwapExecutor identity and exact adapter trusted-caller authority. Public-testnet transactions/blocks remain intentionally deferred to SWAP-AUDIT-8.
 
-8. **SWAP-AUDIT-8 — production-equivalent testnet qualification**  
-   Execute live Swap journeys through Wallet/Exchange, including success, slippage, stale quote/oracle, wrong chain, disabled market, replay, reorg/recovery and Pay composition.
+8. **SWAP-AUDIT-8 — production-equivalent testnet qualification — BLOCKED ON LIVE NETWORK**  
+   Repository readiness/evidence tooling is implemented and exact-head qualified, but the canonical public testnet is not yet authorized/live. Execute and retain all eight required Wallet/Exchange/Pay journeys on one exact production-equivalent release candidate before completing this step.
 
 9. **SWAP-AUDIT-9 — Genesis closeout and release security gate**  
    Reconcile exact deployed state with frozen address/namespace authority, retain Genesis acceptance evidence, complete independent security review required by release policy, and only then assess production readiness.
@@ -567,15 +591,15 @@ The remaining work must preserve these step identities and dependency order:
 
 At repository-remediation stage:
 
-- CODE COMPLETE: **YES for repository-side Swap source/deployment-binding semantics through SWAP-AUDIT-7.**
+- CODE COMPLETE: **YES for repository-side Swap source/deployment-binding semantics and SWAP-AUDIT-8 live-readiness tooling.**
 - BUILD COMPLETE: **YES for current app-scoped source and deployment-binding scope on exact-head CI; Level 3 final merge-candidate qualification remains later.**
 - CONTRACT COMPLETE: **YES source-side through deterministic frozen-predeploy runtime materialization.**
-- TEST COMPLETE: **YES through SWAP-AUDIT-7 Level 1 plus retained Level 2 app integration; Level 3 and public-testnet qualification remain deferred.**
-- DOCUMENTATION COMPLETE: **YES for current repository-side Swap deployment/predeploy scope; live Genesis acceptance remains later.**
+- TEST COMPLETE: **YES for repository-side readiness/harness qualification through SWAP-AUDIT-8; NO for the required live production-equivalent journeys.**
+- DOCUMENTATION COMPLETE: **YES for repository-side Swap deployment, testnet qualification and evidence procedures; live evidence/Genesis acceptance remain later.**
 - INTEGRATION COMPLETE: **YES for repository/local-EVM Swap→Registry→Pay binding; NO for public-testnet Wallet/Exchange/live-chain qualification.**
 - SECURITY QUALIFIED: **NO** — internal hardening is not the required external release gate and unresolved components remain.
-- TESTNET READY: **NO** — deterministic runtimes and repository/local binding are complete; production-equivalent public-testnet qualification is SWAP-AUDIT-8.
-- GENESIS READY: **NO** — deterministic predeploy/runtime and repository binding qualification are complete, but public-testnet qualification and final Genesis acceptance remain.
+- TESTNET READY: **NO** — readiness tooling is complete, but the official production-equivalent public testnet is not authorized/live and all eight live SWAP-AUDIT-8 journeys remain outstanding.
+- GENESIS READY: **NO** — deterministic predeploy/runtime, repository binding and testnet-readiness tooling are complete, but live SWAP-AUDIT-8 qualification and final Genesis acceptance remain.
 - PRODUCTION READY: **NO** — Genesis/testnet/security gates remain.
 
 ## Final determination
@@ -584,6 +608,6 @@ At repository-remediation stage:
 
 The production-candidate ERC20/ERC20 liquidity path, canonical executor, core registries and composed Exchange user surface are real and testable. The audit repaired the stale scaffold/inventory/verification state instead of treating old metadata as truth.
 
-The remaining blockers are later live/release gates: production-equivalent public-testnet Wallet/Exchange/Pay/PublicDistributionVault qualification in SWAP-AUDIT-8 and the independent release security/Genesis closeout gate in SWAP-AUDIT-9.
+The immediate blocker is operational rather than repository-side: the official production-equivalent public testnet is not authorized/live, so the eight mandatory Wallet/Exchange/Pay journeys cannot yet produce honest evidence. After SWAP-AUDIT-8 passes, the remaining gate is the independent release security/Genesis closeout in SWAP-AUDIT-9.
 
 Do not mark 420Swap complete solely because the core Swap and Exchange tests are green.

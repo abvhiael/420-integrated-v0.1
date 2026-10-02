@@ -115,6 +115,7 @@ contract SettlementRouter420 is GenesisResidentAccess420 {
             PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND
         );
         require(msg.value == amount && amount > 0, "native amount");
+        uint256 residualBefore = address(this).balance - msg.value;
         _consume(paymentId);
         validateSplit(recipients, bps, primaryIndex);
         uint256[] memory amounts = splitAmounts(amount, bps, primaryIndex);
@@ -125,7 +126,7 @@ contract SettlementRouter420 is GenesisResidentAccess420 {
             }
             emit SplitPaid(paymentId, recipients[i], amounts[i], bps[i]);
         }
-        if (address(this).balance != 0) revert AccountingMismatch();
+        if (address(this).balance != residualBefore) revert AccountingMismatch();
         emit NativeSettlement(paymentId, address(0), amount);
     }
 
@@ -158,6 +159,7 @@ contract SettlementRouter420 is GenesisResidentAccess420 {
         bytes32 paymentId,
         address asset,
         uint256 amount,
+        uint256 expectedResidual,
         address[] calldata recipients,
         uint16[] calldata bps,
         uint8 primaryIndex
@@ -173,8 +175,8 @@ contract SettlementRouter420 is GenesisResidentAccess420 {
 
         IERC20PaySplit420 token = IERC20PaySplit420(asset);
         uint256 balanceBefore = token.balanceOf(address(this));
-        if (balanceBefore != amount) revert AccountingMismatch();
-        _distributeToken(paymentId, token, amount, recipients, bps, primaryIndex, 0);
+        if (balanceBefore != expectedResidual + amount) revert AccountingMismatch();
+        _distributeToken(paymentId, token, amount, recipients, bps, primaryIndex, expectedResidual);
     }
 
     function requireHealthy(address settlementAsset, bytes32 marketId, bool conversionRequired) public view {

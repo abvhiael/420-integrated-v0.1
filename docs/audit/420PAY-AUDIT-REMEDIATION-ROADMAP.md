@@ -102,7 +102,7 @@ Exit criteria:
 
 **Status: COMPLETE.**
 
-Durable qualification basis: source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed 420Pay audit qualification run #59 (`36965952679`), including the 420Indexer Pay reconciliation build/regressions. This bookkeeping state is valid only while the commit carrying it also passes the dedicated exact-head 420Pay audit workflow.
+Durable qualification basis: source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` originally passed 420Pay audit qualification run #59 (`36965952679`), including the 420Indexer Pay reconciliation build/regressions. The canonical PAY-AUDIT-5 implementation files remain byte-for-byte unchanged through current qualified implementation SHA `3378b3b9efcc2fd2f70124daa7eb520d96aad6f6`; that SHA re-ran the current app-specific workflow and passed 420Pay audit qualification run #157 (`37050677411`, job `110983005816`) plus Solidity Contracts #4172 (`37050677237`). Run #157 passed the 420Indexer Pay reconciliation build/tests under the current workflow, so PAY-AUDIT-5 remains COMPLETE without reopening implementation.
 
 The baseline Indexer referenced nonexistent Pay lifecycle events. The audit:
 - maps canonical Pay contract names to `420Pay`;

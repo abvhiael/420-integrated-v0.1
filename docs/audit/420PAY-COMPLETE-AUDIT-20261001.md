@@ -267,18 +267,27 @@ Genesis activation still lacks:
 
 **Unresolved:** offline signature model, unreachable lifecycle semantics, executable split semantics, actual gas-sponsor reimbursement authority, missing accounting exporter, live exact-instance wiring, and no independent audit of the frozen candidate.
 
-## Readiness state before exact-head CI
+## Readiness state after source-head qualification
 
 - CODE COMPLETE: **NO** — PAY-AUDIT-3/4 functional gaps remain.
-- BUILD COMPLETE: **NO** — the remediation head has not yet passed exact-head CI.
+- BUILD COMPLETE: **YES for the implemented source surface** — exact-head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed the dedicated Pay build/qualification workflow and generic Solidity workflow. Overall application completion remains NO because PAY-AUDIT-3/4/6 are unresolved.
 - CONTRACT COMPLETE: **NO** — offline invoice/lifecycle/split/sponsorship semantics remain incomplete or unresolved.
-- TEST COMPLETE: **NO** — missing features cannot be qualified; exact-head branch execution is pending.
+- TEST COMPLETE: **NO overall** — the implemented PAY-AUDIT-1/2/5 source surface passed exact-head qualification, but PAY-AUDIT-3/4/6 functionality remains incomplete or missing and therefore cannot yet be fully tested.
 - DOCUMENTATION COMPLETE: **NO** — unresolved semantics and deployment/operator material remain.
 - INTEGRATION COMPLETE: **NO** — live Registry/Swap/replay/Indexer deployment binding is absent.
-- SECURITY QUALIFIED: **NO** — a material source issue was repaired, but exact-head CI and independent audit are still outstanding.
+- SECURITY QUALIFIED: **NO overall** — the repaired PAY-AUDIT-2 source boundary passed exact-head CI, but live deployment qualification and the required independent audit remain outstanding.
 - TESTNET READY: **NO** — deployment package and live candidate evidence are absent.
 - GENESIS READY: **NO** — functional/deployment/catalogue blockers remain.
 - PRODUCTION READY: **NO** — testnet, external audit, deployment, monitoring and closeout remain.
+
+## Durable source qualification evidence
+
+The remediation source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed both required repository workflows:
+
+- 420Pay audit qualification run #59, run ID `36965952679`: **SUCCESS**.
+- Solidity Contracts run #4003, run ID `36965952612`: **SUCCESS**.
+
+The dedicated Pay run passed exact-head verification, static Pay verification, Solidity formatting, the Pay/settlement-boundary build, focused 420Pay Solidity qualification, the forbidden-primitive scan, and the 420Indexer Pay reconciliation build/tests. This evidence qualifies PAY-AUDIT-1, PAY-AUDIT-2 and PAY-AUDIT-5 at the source head. Their durable COMPLETE state is conditioned on the bookkeeping commit carrying this evidence also passing the dedicated exact-head Pay workflow; that run is attached to the commit itself, avoiding a self-referential evidence-SHA mutation.
 
 ## Final determination
 

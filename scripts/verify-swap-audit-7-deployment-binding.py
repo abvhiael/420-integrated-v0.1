@@ -22,6 +22,7 @@ if d.get("step")!="SWAP-AUDIT-7": fail("step")
 if d.get("repository_ready") is not True: fail("repository_ready")
 if d.get("live_qualified") is not False: fail("fabricated live qualification")
 if d.get("status")!="REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED": fail("status")
+if d.get("interface_verifier")!="scripts/verify-420swap-interface-v1.py": fail("interface verifier authority")
 
 reg=d.get("protocol_registry",{})
 if reg.get("frozen_address")!="0x0000000000000000000000000000000000000434": fail("registry address")

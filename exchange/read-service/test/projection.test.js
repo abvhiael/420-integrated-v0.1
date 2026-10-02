@@ -52,3 +52,19 @@ test('pagination cursor is query-bound and activeOnly preserves orphan/replaceme
  assert.throws(()=>historyPage(records,{kind:'TRADE',activeOnly:false,limit:2,cursor:p1.nextCursor}),/cursor\/query mismatch/);
  assert.equal(historyPage(records,{kind:'FILL',activeOnly:true,limit:100}).records.length,4);
 });
+
+
+test('canonical Bridge lifecycle events map without synthetic legacy names',()=>{
+ const transferId=id(420),routeId=id(421),assetId=id(422);
+ const created=map(event({protocol:'420Bridge',eventName:'TransferCreated',fields:{transferId,routeId,assetId,amount:42}}));
+ assert.equal(created.kind,'BRIDGE_LIFECYCLE');
+ assert.equal(created.subjectId,transferId);
+ assert.equal(created.bridgeLifecycleState,'CREATED');
+ const transition=map(event({protocol:'420Bridge',eventName:'TransferTransition',hash:id(44),tx:id(45),logIndex:1,fields:{transferId,fromStatus:6,toStatus:7,evidenceHash:id(46),actor:addr(7)}}));
+ assert.equal(transition.kind,'BRIDGE_LIFECYCLE');
+ assert.equal(transition.bridgeLifecycleState,'COMPLETED');
+ const outbound=map(event({protocol:'420Bridge',eventName:'OutboundTransferCreated',hash:id(47),tx:id(48),logIndex:2,fields:{transferId,routeId,assetId,sender:addr(1),recipientHash:id(49),sourceMessageId:id(50),amount:42}}));
+ assert.equal(outbound.kind,'BRIDGE_WITHDRAWAL');
+ assert.equal(outbound.bridgeLifecycleState,'CREATED');
+ assert.equal(map(event({protocol:'420Bridge',eventName:'TransferFinalized',fields:{transferId}})),null);
+});

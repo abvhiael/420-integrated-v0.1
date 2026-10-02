@@ -15,3 +15,7 @@ Start with [Getting started](getting-started.md), then use the [User guide](user
 
 ## Authority label
 **Derived/rebuildable presentation.** Source truth remains with consensus/execution and the canonical protocol that owns each domain.
+
+
+For Bridge activity, Explorer consumes the qualified 420Indexer `420Bridge` projection and preserves the canonical event names and provenance. Lifecycle presentation is derived from `TransferCreated`, `TransferStatus` and `TransferTransition`; Explorer must not invent a separate Bridge lifecycle or treat a displayed `COMPLETED`/`REFUNDED` state as authority over the owning contracts.
+

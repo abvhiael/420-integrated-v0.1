@@ -239,6 +239,7 @@ nav:
               - Reference: apps/treasury/reference.md
           - 420 Bridge:
               - Overview: apps/bridge/index.md
+              - Deployment Operations: apps/bridge/deployment-operations.md
               - Getting Started: apps/bridge/getting-started.md
               - User Guide: apps/bridge/user-guide.md
               - Concepts: apps/bridge/concepts.md

@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-cross-adapter-hardening-v12.6.7",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
   "scope": "GOVERNANCE_ACCOUNTING_REGISTRY_AND_RECOVERY_HARDENING",
   "model": "The final V12.6 qualification step pins governance-only mutation boundaries, live registry provenance, monotonic bridge accounting evidence, unhealthy mismatch recording, and recovery using strictly newer reconciliation evidence. Recovery changes health evidence only; it does not mint, burn, confiscate or rewrite settled history.",
   "invariants": [
@@ -24,5 +24,6 @@
     "healthy recovery preserves asset identity and replaces only reconciliation evidence",
     "live bridge qualification fails after registry provenance drift and succeeds only after governed requalification"
   ],
-  "follow_on": "final V12.6 exact-head qualification, reconcile with main, then merge PR #331"
+  "follow_on": "final V12.6 exact-head qualification, reconcile with main, then merge PR #331",
+  "superseded_by": "BRIDGE-AUDIT-7 exact-head Level 1 qualification evidence"
 }

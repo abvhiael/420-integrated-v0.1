@@ -306,3 +306,18 @@ Value-moving retries are high risk. A timeout, stale UI, delayed derived index o
 - [420 Stake](../apps/stake/index.md)
 - [Core value-movement architecture](../architecture/protocols/value-movement.md)
 - [Generated reference](../reference/index.md)
+
+
+### TRB-BRIDGE-006 — Bridge lifecycle differs across derived consumers
+
+- **Audience:** user, developer, operator
+- **Surface:** Wallet / Exchange / Explorer / Notifications / Analytics Bridge presentation
+- **Symptom:** one derived surface shows a different Bridge status or history from another.
+- **Severity:** value-risk when a retry or compensating action is being considered.
+- **Authority source:** canonical `BridgeTransferRegistry` and `GatewayRouter420` state/events plus canonical receipt/finality evidence.
+- **Likely causes:** Indexer lag or reorg recovery; consumer cache/delivery lag; mismatched deployment address binding; obsolete synthetic event vocabulary.
+- **Retry safety:** unsafe until canonical state is reconciled.
+- **Safe diagnostics:** chain ID, transfer ID, route ID, contract addresses, block/hash, transaction/log provenance, and the canonical `TransferCreated`, `TransferStatus` / `TransferTransition` history.
+- **Recovery:** reconcile canonical state first, then rebuild/replay 420Indexer and downstream derived consumers. Do not mutate Bridge state or resend value merely to make a derived display agree.
+- **Stop/escalate when:** the exact canonical deployment cannot be resolved or the owning Bridge contracts and finalized event history cannot be reconciled.
+

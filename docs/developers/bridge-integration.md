@@ -59,7 +59,9 @@ Bridge proof validity does not grant general Oracle authority and does not make 
 
 Bridge accounting records authorized-versus-observed supply evidence and health. It cannot mint, burn or repair balances by itself.
 
-If reconciliation is unhealthy, halt/escalate according to safety policy and reconcile canonical state. Do not "fix" the discrepancy by mutating balances from an off-chain spreadsheet or provider report.
+If reconciliation is `UNKNOWN` or reports either authorized-versus-observed mismatch direction, new inbound and outbound Bridge movement fails closed before risk consumption or adapter execution. Recovery requires a strictly newer observation with a distinct evidence hash that returns authorized and observed supply to equality.
+
+Reconciliation remains evidence-only: do not "fix" the discrepancy by mutating balances from an off-chain spreadsheet or provider report. Existing-transfer refund/recovery is separately governed and safety-classified; it does not turn accounting evidence into custody or permit a new outbound initiation.
 
 ## Failure handling
 
@@ -76,3 +78,17 @@ If reconciliation is unhealthy, halt/escalate according to safety policy and rec
 - [420 Bridge application manual](../apps/bridge/index.md)
 - [Provider-backed integration model](provider-backed-integrations.md)
 - [Events, logs and finality](events-and-finality.md)
+
+
+## Canonical events and Indexer vocabulary
+
+Bridge integrations that consume 420Indexer must use the actual contract event vocabulary rather than synthetic lifecycle aliases:
+
+- `BridgeTransferRegistry`: `TransferCreated`, `OutboundTransferCreated`, `SourceTransactionBound`, `TransferStatus`, `TransferTransition`;
+- `GatewayRouter420`: `InboundAccepted`, `OutboundInitiated`, `OutboundTransferRegistered`;
+- route/configuration consumers additionally use the current chain, asset, route, risk and accounting events from the canonical Bridge descriptor.
+
+`TransferStatus.status` and `TransferTransition.toStatus` encode: 1 `CREATED`, 2 `SOURCE_PENDING`, 3 `SOURCE_FINALIZED`, 4 `PROOF_PENDING`, 5 `VERIFIED`, 6 `DESTINATION_PENDING`, 7 `COMPLETED`, 8 `FAILED`, 9 `RETRYABLE`, 10 `EXPIRED`, 11 `PAUSED`, 12 `DISPUTED`, 13 `REFUNDED`. `COMPLETED` and `REFUNDED` are terminal.
+
+Registry-resolved Bridge contracts do not acquire fabricated fixed addresses in the Indexer descriptor. The ABI/event descriptor is address-unbound repository evidence; runtime descriptors must be bound to the exact deployment/ProtocolRegistry addresses before log decoding. 420Indexer output is derived and rebuildable, so any security-sensitive Bridge decision must still be checked against canonical Bridge state/RPC.
+

@@ -43,7 +43,7 @@ function decodeValue420(kind: ProtocolFieldKind420, value: Hex): string | bigint
 }
 
 export class ProtocolDecoderRegistry420 {
-  private readonly byTopic = new Map<string, ProtocolEventDescriptor420>();
+  private readonly byTopic = new Map<string, ProtocolEventDescriptor420[]>();
 
   constructor(descriptors: readonly ProtocolEventDescriptor420[] = []) {
     for (const descriptor of descriptors) this.register(descriptor);
@@ -51,20 +51,41 @@ export class ProtocolDecoderRegistry420 {
 
   register(descriptor: ProtocolEventDescriptor420): void {
     const key = descriptor.topic0.toLowerCase();
-    const existing = this.byTopic.get(key);
-    if (existing && (existing.protocol !== descriptor.protocol || existing.eventName !== descriptor.eventName)) {
+    const existing = this.byTopic.get(key) ?? [];
+    const normalizedAddress = descriptor.contractAddress?.toLowerCase();
+    if (existing.some((candidate) =>
+      candidate.protocol === descriptor.protocol &&
+      candidate.eventName === descriptor.eventName &&
+      candidate.contractAddress?.toLowerCase() === normalizedAddress
+    )) return;
+    if (existing.some((candidate) => {
+      const candidateAddress = candidate.contractAddress?.toLowerCase();
+      if (candidateAddress !== normalizedAddress) return false;
+      return candidate.protocol !== descriptor.protocol || candidate.eventName !== descriptor.eventName;
+    })) {
       throw new Error(`protocol topic collision: ${descriptor.topic0}`);
     }
-    this.byTopic.set(key, descriptor);
+    if (existing.some((candidate) => candidate.contractAddress === undefined) && normalizedAddress !== undefined) {
+      throw new Error(`protocol topic wildcard collision: ${descriptor.topic0}`);
+    }
+    if (normalizedAddress === undefined && existing.length !== 0) {
+      throw new Error(`protocol topic wildcard collision: ${descriptor.topic0}`);
+    }
+    existing.push(descriptor);
+    this.byTopic.set(key, existing);
   }
 
   decode(log: IndexerLog): DecodedProtocolEvent420 | null {
     const topic0 = log.topics[0]?.toLowerCase();
     if (!topic0) return null;
-    const descriptor = this.byTopic.get(topic0);
-    if (!descriptor) return null;
-    if (descriptor.contractAddress && log.address.toLowerCase() !== descriptor.contractAddress.toLowerCase()) {
-      throw new Error('protocol descriptor contract mismatch: ' + descriptor.protocol + '.' + descriptor.eventName);
+    const candidates = this.byTopic.get(topic0);
+    if (!candidates) return null;
+    const address = log.address.toLowerCase();
+    const descriptor = candidates.find((candidate) => candidate.contractAddress?.toLowerCase() === address)
+      ?? candidates.find((candidate) => candidate.contractAddress === undefined);
+    if (!descriptor) {
+      const names = [...new Set(candidates.map((candidate) => candidate.protocol + '.' + candidate.eventName))].join(',');
+      throw new Error('protocol descriptor contract mismatch: ' + names);
     }
 
     const fields: Record<string, string | bigint | boolean> = {};

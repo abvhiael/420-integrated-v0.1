@@ -461,6 +461,20 @@ Those skips are **not** counted as passing evidence.
 
 The directly applicable Wallet and Indexer work is instead owned by the exact-head `grants-client-integration` job above, which explicitly builds the affected Indexer and runs the required Wallet/Grants tests.
 
+## Bookkeeping requalification / evidence reuse validation
+
+After exact-head implementation qualification passed, closeout introduced documentation bookkeeping only.
+
+Comparison from implementation SHA `b82de3494315ef5f5a8e097deb391291ad693132` through roadmap bookkeeping commit `c77de896c5e9743d10c40dd94c62e7bf52124d0f` contains only:
+
+- `docs/audit/420GRANTS-AUDIT-6-QUALIFICATION.md`;
+- `docs/audit/420GRANTS-AUDIT-REMEDIATION-ROADMAP.md`.
+
+No executable source, test, workflow, dependency, configuration, generated/runtime artifact, interface, deployment state or substantive requirement changed. Therefore exact-SHA workflow run `37078114603` and affected Solidity run `37078114618` remain authoritative for GRANTS-AUDIT-6, and no recursive qualification is required solely for evidence bookkeeping.
+
+Evidence document creation commit: `94a91c1fc5cffe8a69d654a8d406a9cdf7faf691`.  
+Roadmap completion bookkeeping commit: `c77de896c5e9743d10c40dd94c62e7bf52124d0f`.
+
 ## Requirement-by-requirement exit verification
 
 ### Discoverable Grants service/component metadata

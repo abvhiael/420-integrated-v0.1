@@ -1,0 +1,79 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.7.QualificationEvidence.v1",
+  "step": "CMP-1.5.7",
+  "title": "Reward accounting",
+  "completion_state": "COMPLETE",
+  "qualification_level": 2,
+  "implementation_sha": "7fd48bcdf2ecbc618d110b34d5b081d2f3cca874",
+  "pull_request": 475,
+  "branch": "cmp-1.5.7-reward-accounting-20261001",
+  "evidence_reconciled_during": "CMP-1.5.13",
+  "requirements_satisfied": [
+    "versioned reward-source authority",
+    "frozen reward-source code identity",
+    "exact collateral identity",
+    "caller cannot choose beneficiary or amount",
+    "final bounded exactly-once rewards",
+    "historical earned entitlement survives later inactivity",
+    "canonical Vault backing",
+    "insufficient backing atomic rollback",
+    "no mint/payer-escrow/collateral mutation"
+  ],
+  "workflows": [
+    {
+      "name": "Solidity Contracts",
+      "run_number": 4034,
+      "run_id": 36970641218,
+      "job_id": 110723721804,
+      "job": "compute-fast",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compute Market Qualification",
+      "run_number": 124,
+      "run_id": 36970641208,
+      "job_id": 110723693493,
+      "conclusion": "success"
+    },
+    {
+      "name": "Genesis Address Authority",
+      "run_number": 818,
+      "run_id": 36970641190,
+      "job_id": 110723693652,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-4",
+      "run_number": 653,
+      "run_id": 36970641124,
+      "job_id": 110723693644,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_number": 4247,
+      "run_id": 36970641237,
+      "job_id": 110723694055,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "run_number": 1636,
+      "run_id": 36970641258,
+      "job_id": 110723693768,
+      "conclusion": "success"
+    }
+  ],
+  "level_1": {
+    "status": "PASS"
+  },
+  "level_2": {
+    "status": "PASS",
+    "retained_suite": "Compute*.t.sol"
+  },
+  "blockers": [],
+  "limitations": [
+    "live deployment deferred"
+  ],
+  "next_canonical_step": "CMP-1.5.8 — Dispute/stake integration"
+}

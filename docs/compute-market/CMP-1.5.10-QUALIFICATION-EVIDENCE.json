@@ -1,0 +1,124 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.10.QualificationEvidence.v1",
+  "step": "CMP-1.5.10",
+  "title": "ComputeEscrow slash-redistribution integration",
+  "completion_state": "COMPLETE",
+  "qualification_level": 2,
+  "implementation_sha": "0a6fe7d7a3d5b7bb6ea768a842bc98819efa3ce2",
+  "evidence_only_closeout": true,
+  "current_main_observed": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+  "predecessor_step": "CMP-1.5.9",
+  "predecessor_qualified_sha": "4845679d1ca41152e3299870af2ed3b8e9e06c1e",
+  "configured_base_head_at_qualification": "880c210683695a407f9d3f119601bacc2040dc17",
+  "predecessor_note": "The CMP-1.5.10 branch independently carried the same CMP-1.5.9 documentation qualification fix before its own exact-head run; the configured base_head is therefore an earlier executable-equivalent predecessor head, while CMP-1.5.9 formal qualification completed on 4845679d1ca41152e3299870af2ed3b8e9e06c1e.",
+  "pull_request": 482,
+  "branch": "cmp-1.5.10-computeescrow-slash-redistribution-20261002",
+  "implementation_summary": [
+    "freeze the canonical ComputeEscrow entitlement endpoint and runtime code hash in the verifier-dispute slash recipient resolver",
+    "require the explicit objective verifier-error dispute ground before harmed-payer resolution",
+    "derive harmed payer only from canonical finalized ComputeEscrow/dispute state",
+    "prove slash-recipient resolution is read-only with respect to payer Vault balance, accounting and refund obligations",
+    "retain CMP-1.5 collateral as the only slash-value source",
+    "reconcile the CMP-1.2 closeout ledger so the repository stake/slash dependency is satisfied without claiming live deployment"
+  ],
+  "requirements_satisfied": [
+    "canonical entitlement endpoint and runtime code hash frozen",
+    "endpoint/runtime drift fails closed",
+    "generic adverse payer-win dispute cannot resolve slash recipient",
+    "objective finalized verifier-error dispute required",
+    "canonical harmed payer reconstructed from escrow entitlement state",
+    "recipient resolution leaves payer escrow accounting unchanged",
+    "slash value originates only from separately backed CMP-1.5 collateral",
+    "payer deposits never become stake or slash backing",
+    "CMP-1.2 repository stake/slash blocker resolved",
+    "CMP-1.2.9 live deployment blocker preserved"
+  ],
+  "level_1": {
+    "status": "PASS",
+    "checks": [
+      "Compute contract build",
+      "canonical escrow payer recipient-resolution tests",
+      "endpoint/runtime drift rejection tests",
+      "generic adverse-ground rejection",
+      "CMP-1.2.10 closeout verifier regression",
+      "CMP-1.5.10 mechanical verifier"
+    ]
+  },
+  "level_2": {
+    "status": "PASS",
+    "milestone": "cross-phase ComputeEscrow payer accounting to CMP-1.5 collateral redistribution",
+    "retained_suite": "Compute*.t.sol"
+  },
+  "workflows": [
+    {
+      "name": "420Registry REG-AUDIT-4",
+      "run_number": 750,
+      "run_id": 37047737139,
+      "job_id": 110973274414,
+      "conclusion": "success"
+    },
+    {
+      "name": "Genesis Address Authority",
+      "run_number": 915,
+      "run_id": 37047737178,
+      "job_id": 110973277929,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_number": 4347,
+      "run_id": 37047737150,
+      "job_id": 110973470224,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "run_number": 1733,
+      "run_id": 37047737154,
+      "job_id": 110973230542,
+      "conclusion": "success"
+    },
+    {
+      "name": "Solidity Contracts",
+      "run_number": 4134,
+      "run_id": 37047737205,
+      "job_id": 110973320088,
+      "job": "compute-fast",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compute Market Qualification",
+      "run_number": 141,
+      "run_id": 37047737161,
+      "job_id": 110975128215,
+      "job": "fast-qualification",
+      "conclusion": "success"
+    }
+  ],
+  "security_results": [
+    "entitlement endpoint/runtime drift rejected",
+    "generic adverse dispute rejected as slash-recipient source",
+    "canonical harmed-payer resolution leaves payer escrow balance and accounting unchanged",
+    "payer refund obligation identity and state remain unchanged by slash-recipient resolution",
+    "collateral distribution authority remains separate from ComputeEscrow settlement/refund authority"
+  ],
+  "cross_phase_reconciliation": {
+    "cmp_1_2_slash_redistribution": "QUALIFIED_VIA_CMP_1_5_10_COLLATERAL_REDISTRIBUTION",
+    "remaining_cmp_1_2_release_blocker": "CMP-1.2.9-LIVE"
+  },
+  "intentionally_deferred": [
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 Level 3 phase closeout",
+    "CMP-1.2.9 live testnet deployment qualification"
+  ],
+  "limitations": [
+    "no live deployment, Registry publication or live slash transaction claim",
+    "live operational stake slashing remains blocked pending testnet deployment evidence",
+    "repository-wide Level 3 qualification remains deferred to CMP-1.5.13"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.11 — Hostile economic qualification",
+  "evidence_commit_sha": "a1dec932095106f540078bf9a2b031ed91ea676a",
+  "closeout_bookkeeping_head": "2722042ae8735f7be6b2a8aeb6908876436b07f6"
+}

@@ -69,9 +69,10 @@ Provides:
 - dispute freeze and adjudicated liability;
 - solvency/reentrancy/accounting hardening.
 
-Remaining cross-phase dependency:
+Cross-phase stake/slash integration:
 
-- stake/slash redistribution must originate from CMP-1.5 collateral, never payer escrow.
+- repository integration is implemented in CMP-1.5.10: slash redistribution originates from CMP-1.5 collateral, never payer escrow;
+- live deployment evidence remains gated by CMP-1.2.9 / later public testnet qualification.
 
 Question answered:
 
@@ -105,7 +106,7 @@ Question answered:
 
 ## CMP-1.4 — ComputeVerifierRegistry
 
-**Status: NEXT CORE PHASE after CMP-1.3 closeout.**
+**Status: repository-qualified through CMP-1.4.12 phase closeout.**
 
 Purpose:
 
@@ -156,7 +157,7 @@ Question answered:
 
 ## CMP-1.5 — ComputeStake
 
-**Status: FINAL CORE CONTRACT PHASE after CMP-1.4.**
+**Status: CURRENT CORE CONTRACT PHASE after CMP-1.4 closeout.**
 
 Canonical responsibilities:
 
@@ -167,34 +168,67 @@ Canonical responsibilities:
 - reward().
 
 ### CMP-1.5.0 — Stake architecture
+**Status: COMPLETE — Level 1 exact-head qualified on `af9f926465dff1a89e53150d030591e71411787f`.**
+
 Reuse canonical $420 custody/accounting. Do not create an unrelated collateral treasury.
 
 ### CMP-1.5.1 — Worker collateral
+**Status: COMPLETE — Level 1 exact-head qualified on `98a8f71b28048e81a3475e421aca06661eb94217`.**
+
 
 ### CMP-1.5.2 — Verifier collateral
+**Status: COMPLETE — Level 1 exact-head qualified on `baa6ea2e5adc0315d6e6c89010b5c58a03c0532c`.**
+
 
 ### CMP-1.5.3 — Policy-specific minimum collateral
+**Status: COMPLETE — Level 1 + first CMP-1.5 Level 2 milestone qualified on `d72dc4c2f5fc2772fd2ea4299dbce9936e78cece`.**
+
 
 ### CMP-1.5.4 — Exit queue / withdrawal delay
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `5b706e2b4bfa7fd2f1f3b0a70e64b23cc1f6495c`.**
+
 
 ### CMP-1.5.5 — Objective slash authorization
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `8847b36b8e50905402f45e5c0f121c80464673e4`.**
+
 
 ### CMP-1.5.6 — Slash distribution
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `306cd68139963c11bf346db8e700fa6cf40bac4d`.**
+
 Policy-bound distribution to harmed payer, replacement worker, challenger and/or protocol treasury.
 
 ### CMP-1.5.7 — Reward accounting
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `7fd48bcdf2ecbc618d110b34d5b081d2f3cca874`; durable evidence reconciled in CMP-1.5.13.**
+
+Separately authorized, canonical-Vault-backed worker/verifier reward accounting with exact collateral identity, replay protection and no payer-escrow or consensus-issuance authority.
 
 ### CMP-1.5.8 — Dispute/stake integration
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `ceecba734b057c031f5e5a6ee8a9c91f84839ab8`.**
+
+Freeze canonical verifier identity at dispute opening, preserve verifier collateral through active/objective-final dispute state, and atomically hand qualified objective verifier-error evidence into the existing slash authorization path before releasing the dispute stake hold.
 
 ### CMP-1.5.9 — WorkerRegistry stake-source integration
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `4845679d1ca41152e3299870af2ed3b8e9e06c1e`.**
+
+Bind WorkerRegistry admission to the actual Vault-backed CMP-1.5 worker collateral source with canonical WorkerRegistry identity and frozen source code-hash checks.
 
 ### CMP-1.5.10 — ComputeEscrow slash-redistribution integration
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `0a6fe7d7a3d5b7bb6ea768a842bc98819efa3ce2`.**
+
+Bind the harmed-payer recipient to the exact canonical ComputeEscrow entitlement/dispute state while proving that all redistributed slash value originates only from separately backed CMP-1.5 collateral and never payer escrow.
 
 ### CMP-1.5.11 — Hostile economic qualification
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `1235f24d51d60a6fee2f71e495b34975d879029c`.**
+
+Run the frozen hostile-economic campaign across solvency, isolation, exit races, slash finality, replay, duplicate withdrawal/slash/reward, hostile authorization, reentrancy and failure atomicity.
 
 ### CMP-1.5.12 — Release candidate
+**Status: COMPLETE — repository-qualified release candidate on `cb67b0b4a564d90c7c6ca910288c6946b9a5929c`; live deployment blocked.**
+
+Freeze the accumulated CMP-1.5 graph, pin runtime/dependency bindings, prepare truthful ProtocolRegistry publication/deployment evidence, and keep live fields fail-closed until real testnet deployment exists.
 
 ### CMP-1.5.13 — Phase closeout
+**Status: reconciliation complete; Level 3 comprehensive qualification in progress.**
 
 Question answered:
 
@@ -499,8 +533,8 @@ Production target flow:
 | CMP-1.1 JobRegistry | built / repository-qualified scope |
 | CMP-1.2 ComputeEscrow/Vault accounting | repository-qualified; live/stake dependencies remain |
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
-| CMP-1.4 VerifierRegistry | next |
-| CMP-1.5 ComputeStake | forthcoming |
+| CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
+| CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | forthcoming |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |

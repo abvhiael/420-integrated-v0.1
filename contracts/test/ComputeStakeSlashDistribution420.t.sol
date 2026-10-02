@@ -197,6 +197,10 @@ contract ComputeStakeSlashDistribution420Test {
             amount: totalAmount,
             distributionPolicyRevision: distributionRevision,
             distributionPolicyCommitment: exactDistributionCommitment,
+            harmedPayer: PAYER,
+            replacementWorker: REPLACEMENT,
+            challenger: CHALLENGER,
+            protocolTreasury: TREASURY,
             authorizedAt: uint64(block.timestamp),
             distributed: false,
             exists: true
@@ -265,12 +269,25 @@ contract ComputeStakeSlashDistribution420Test {
         require(authorizer.consumeCount() == 0, "failed distribution consumed");
     }
 
-    function testSubjectCannotReceiveItsOwnSlashDistribution() public {
-        resolver.set(SUBJECT, REPLACEMENT, CHALLENGER);
+    function testResolverStateChangeCannotRedirectFrozenAuthorization() public {
+        resolver.set(SUBJECT, address(0x9998), address(0x9997));
+        distribution.executeBatch(AUTH_REF, 10);
+        require(workerSource.paid(PAYER) != 0, "frozen payer not used");
+        require(workerSource.paid(SUBJECT) == 0, "resolver redirected payer");
+    }
+
+    function testSubjectCannotReceiveItsOwnFrozenSlashDistribution() public {
+        bytes32 badRef = keccak256("subject-self-auth");
+        ComputeStakeSlashAuthorization420.Authorization memory a =
+            _authorization(distributionCommitment);
+        a.authorizationRef = badRef;
+        a.harmedPayer = SUBJECT;
+        authorizer.setAuthorization(badRef, a);
+        workerSource.set(POSITION, totalAmount);
+
         (bool ok,) = address(distribution).call(
-            abi.encodeCall(distribution.executeBatch, (AUTH_REF, uint64(1)))
+            abi.encodeCall(distribution.executeBatch, (badRef, uint64(1)))
         );
         require(!ok, "subject received own slash");
-        require(workerSource.remaining(POSITION) == totalAmount, "failed route moved funds");
     }
 }

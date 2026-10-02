@@ -1,11 +1,18 @@
 {
-  "schema":"420treasury-genesis-v1",
-  "status":"IMPLEMENTATION_QUALIFICATION",
-  "suite":"420 Treasury",
-  "custody_model":"420Vault VAULT_TREASURY; Treasury contracts are budget/disbursement control plane, not independent custody",
-  "governance_model":"budget creation, scheduling and cancellation are GovernanceTimelock/Civic-controlled; execution is narrowly capability-scoped per disbursement",
-  "contracts":["TreasuryIds420.sol","TreasuryAuthorization420.sol","TreasuryPolicyRegistry420.sol","TreasuryBudgetRegistry420.sol","TreasuryDisbursementRegistry420.sol","TreasuryRouter420.sol"],
-  "invariants":[
+  "schema": "420treasury-genesis-v1",
+  "status": "IMPLEMENTATION_QUALIFICATION",
+  "suite": "420 Treasury",
+  "custody_model": "420Vault VAULT_TREASURY; Treasury contracts are budget/disbursement control plane, not independent custody",
+  "governance_model": "budget creation, scheduling and cancellation are GovernanceTimelock/Civic-controlled; execution is narrowly capability-scoped per disbursement",
+  "contracts": [
+    "TreasuryIds420.sol",
+    "TreasuryAuthorization420.sol",
+    "TreasuryPolicyRegistry420.sol",
+    "TreasuryBudgetRegistry420.sol",
+    "TreasuryDisbursementRegistry420.sol",
+    "TreasuryRouter420.sol"
+  ],
+  "invariants": [
     "TREASURY-INV-001: no Treasury contract creates a parallel asset-custody path around 420Vault",
     "TREASURY-INV-002: budgets require an explicit Civic action commitment and bounded validity window",
     "TREASURY-INV-003: scheduled disbursements must bind exactly to the parent budget Civic action hash",
@@ -17,5 +24,13 @@
     "TREASURY-INV-009: cancellation releases unexecuted budget commitment and cannot revive terminal disbursements",
     "TREASURY-INV-010: execution records a nonzero Vault release commitment for public auditability"
   ],
-  "new_frozen_predeploy_required":false
+  "new_frozen_predeploy_required": false,
+  "vault_release_evidence_model": {
+    "version": "420/TREASURY/VAULT_RELEASE_COMMITMENT/V1",
+    "mode": "AUTHORIZED_EXECUTOR_COMMITMENT_ONLY",
+    "treasury_verifies_vault_release": false,
+    "custody_authority": "420Vault VAULT_TREASURY",
+    "executor_trust_assumption": "An executor already authorized for the exact disbursement submits a nonzero commitment derived from the actual Vault release evidence. Treasury records that commitment but does not cryptographically verify the Vault release.",
+    "consumer_rule": "EXECUTED plus nonzero vaultReleaseHash is Treasury completion evidence, not independent cryptographic proof of a Vault transfer. Live qualification must correlate the commitment to the actual 420Vault release evidence."
+  }
 }

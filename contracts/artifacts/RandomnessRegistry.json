@@ -367,12 +367,12 @@
   "immutableReferences": {
     "governanceTimelock": [
       {
-        "start": 1261,
-        "length": 32
+        "length": 32,
+        "start": 1261
       },
       {
-        "start": 1433,
-        "length": 32
+        "length": 32,
+        "start": 1433
       }
     ]
   },

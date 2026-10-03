@@ -48,7 +48,10 @@ contract ResourceSessionRegistry420 is I420System {
     event SessionCancelled(bytes32 indexed sessionId);
     event SessionSettled(bytes32 indexed sessionId, uint256 settledAmount420);
 
-    constructor(address offers_, address authorization_) {
+    constructor(
+        address offers_,
+        address authorization_
+    ) {
         require(offers_ != address(0) && authorization_ != address(0), "dependency");
         offers = ResourceOfferRegistry420(offers_);
         authorization = ResourceAuthorization420(authorization_);
@@ -62,11 +65,20 @@ contract ResourceSessionRegistry420 is I420System {
         return 1;
     }
 
-    function canonicalSessionId(address consumer, bytes32 offerId, uint256 nonce) public view returns (bytes32) {
+    function canonicalSessionId(
+        address consumer,
+        bytes32 offerId,
+        uint256 nonce
+    ) public view returns (bytes32) {
         return keccak256(abi.encode("420/RESOURCE/SESSION/V1", block.chainid, address(this), consumer, offerId, nonce));
     }
 
-    function openSession(bytes32 sessionId, bytes32 offerId, uint128 maxUnits, uint64 expiresAt) external {
+    function openSession(
+        bytes32 sessionId,
+        bytes32 offerId,
+        uint128 maxUnits,
+        uint64 expiresAt
+    ) external {
         if (
             sessionId == bytes32(0) || offerId == bytes32(0) || maxUnits == 0 || expiresAt <= block.timestamp
                 || !offers.isEffective(offerId)
@@ -86,7 +98,9 @@ contract ResourceSessionRegistry420 is I420System {
         emit SessionOpened(sessionId, offerId, msg.sender, maxUnits, maxSpend420, expiresAt);
     }
 
-    function closeSession(bytes32 sessionId) external {
+    function closeSession(
+        bytes32 sessionId
+    ) external {
         Session storage s = _get(sessionId);
         if (msg.sender != s.consumer) revert Unauthorized();
         if (s.state != State.OPEN) revert InvalidState();
@@ -95,7 +109,9 @@ contract ResourceSessionRegistry420 is I420System {
         emit SessionClosed(sessionId);
     }
 
-    function cancelSession(bytes32 sessionId) external {
+    function cancelSession(
+        bytes32 sessionId
+    ) external {
         Session storage s = _get(sessionId);
         if (msg.sender != s.consumer) revert Unauthorized();
         if (s.state != State.OPEN) revert InvalidState();
@@ -104,29 +120,36 @@ contract ResourceSessionRegistry420 is I420System {
         emit SessionCancelled(sessionId);
     }
 
-    function markSettled(bytes32 sessionId, uint256 settledAmount420) external {
+    function markSettled(
+        bytes32 sessionId,
+        uint256 settledAmount420
+    ) external {
         Session storage s = _get(sessionId);
         if (s.state != State.CLOSED || settledAmount420 > s.maxSpend420) revert InvalidState();
-        if (
-            !authorization.isSessionAuthorized(
-                msg.sender, sessionId, ResourceIds420.ACTION_SETTLE, settledAmount420
-            )
-        ) revert Unauthorized();
+        if (!authorization.isSessionAuthorized(msg.sender, sessionId, ResourceIds420.ACTION_SETTLE, settledAmount420)) {
+            revert Unauthorized();
+        }
 
         s.state = State.SETTLED;
         emit SessionSettled(sessionId, settledAmount420);
     }
 
-    function getSession(bytes32 id) external view returns (Session memory) {
+    function getSession(
+        bytes32 id
+    ) external view returns (Session memory) {
         return _get(id);
     }
 
-    function isOpen(bytes32 id) external view returns (bool) {
+    function isOpen(
+        bytes32 id
+    ) external view returns (bool) {
         Session memory s = _sessions[id];
         return s.exists && s.state == State.OPEN && block.timestamp <= s.expiresAt;
     }
 
-    function _get(bytes32 id) private view returns (Session storage s) {
+    function _get(
+        bytes32 id
+    ) private view returns (Session storage s) {
         s = _sessions[id];
         if (!s.exists) revert InvalidSession();
     }

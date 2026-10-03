@@ -42,6 +42,22 @@ Development is stacked on `feature/gen10-4-420analytics-v1` and merged once afte
 | ANALYTICS-9 | Testnet qualification | live Indexer integration, seeded metric evidence, restart/rebuild/reorg validation and machine-readable evidence |
 | ANALYTICS-10 | Genesis closeout | full ANL invariant audit, docs/readiness completion, final qualification matrix and reconciliation with current main |
 
+
+## Audit remediation status
+
+- **ANALYTICS-AUDIT-1 — exact-head repository qualification: COMPLETE**
+  - qualification level: Level 1 app-specific fast qualification;
+  - qualified implementation SHA: `988842ee7fcfdb804af699358458718063624af1`;
+  - durable evidence commit: `aab878b282ae6815ad9d55937c549a27573d2c92`;
+  - workflow: `420Analytics Audit Qualification`;
+  - run: `37102656876`;
+  - job: `111145094012`;
+  - unit/integration, race, static analysis, runtime builds, Analytics Genesis-profile verification and explicit ANALYTICS-9 live-gate verification all PASS;
+  - no Level 2 milestone run was required;
+  - Level 3 repository-wide closeout qualification remains intentionally deferred.
+- **Next audit remediation step: ANALYTICS-AUDIT-2 — durable repository audit evidence.**
+- Canonical product phase remains **ANALYTICS-9 — Testnet qualification**; this audit bookkeeping does not advance or fabricate live-testnet readiness.
+
 ## Qualification policy
 
 Every phase must remain green before moving forward. ANALYTICS-0 through ANALYTICS-10 remain stacked on this branch; the branch is reconciled against current `main`, fully requalified, and merged once at GEN-10.4 closeout.

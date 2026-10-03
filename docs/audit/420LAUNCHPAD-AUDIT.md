@@ -51,11 +51,11 @@ Launchpad requires no new frozen predeploy. The canonical Launchpad router is re
 | Genesis config | COMPLETE for V1 boundary | Ten invariants and non-custodial boundary declared. |
 | dApp contract map | COMPLETE | Base contracts plus `LaunchpadCrowdfundingIntegration420.sol` listed. |
 | canonical service ID | COMPLETE | `420/service/launchpad/v1` exists in `ServiceIds420.sol`. |
-| application docs | PARTIAL | User/developer docs exist, but they describe the narrow V1 protocol and do not fully reconcile the newer crowdfunding target. |
-| deployment package/scripts | MISSING | No Launchpad-specific deterministic deployment/materialization package was identified. |
-| retained ABI/runtime qualification | MISSING | No Launchpad-specific exact-head artifact/runtime evidence was identified. |
-| user-facing Launchpad web application | MISSING | No real Launchpad route/site implementation was identified. Wallet catalogue exposure is discovery, not a Launchpad UI. |
-| Launchpad backend/API/indexer | MISSING for crowdfunding target | No Launchpad-specific service implementation was identified. |
+| application docs | COMPLETE through Audit-5 repository scope | User/developer/deployment docs now describe crowdfunding runtime, participant workflows, governance creator boundary and live-testnet limitations. |
+| deployment package/scripts | COMPLETE for repository scope | Audit-4 freezes deterministic deployment order, bindings, Registry publication and address policy; live deployment remains Audit-6. |
+| retained ABI/runtime qualification | COMPLETE for repository/local-EVM scope | Audit-4 retains exact-head artifact/ABI/runtime-template identities and local deployed code-hash evidence; live hashes remain Audit-6. |
+| user-facing Launchpad web application | COMPLETE for repository scope | `launchpad/web` provides discovery/detail, wallet/network validation, contribution/claim/two-phase refund, transaction review, recovery states and bounded creator requests. |
+| Launchpad backend/API/indexer | COMPLETE for repository application scope | `launchpad/service` resolves canonical Registry/contract bindings, performs direct participant reads, consumes a provenance-checked projection only for non-enumerable discovery, and prepares canonical participant calldata. |
 | 420Pay integration | COMPLETE for repository scope | Crowdfunding contributions require canonical settled PaymentRegistry records; refund recording requires canonical Pay refund state. |
 | Arbitration integration | COMPLETE for repository scope | Canonical case origin and finalized ruling/remedy evidence are linked without transferring Arbitration authority. |
 | Reputation integration | MISSING | No creator/project delivery-history publication or query integration. |
@@ -118,7 +118,7 @@ The shared Arbitration change is a read-only `caseOrigin` view exposing already-
 - **mitigated risk:** participant action authorization delegated to CapabilityRegistry.
 - **accepted design risk:** governance lifecycle authority and commitment-only non-custodial evidence model.
 - **unresolved vulnerability / release risk:** none identified that permits direct theft from Launchpad itself because Launchpad holds no funds; however, presenting commitment-only state as actual payment/refund/delivery would be a serious application-layer integrity failure.
-- **unresolved integration risk:** crowdfunding settlement, dispute, reputation and notification dependencies are not implemented.
+- **remaining integration risk:** live production-equivalent deployment, event-indexer/reorg recovery, notification/reputation side-effect verification and funded end-to-end paths remain testnet-gated under LAUNCHPAD-AUDIT-6.
 
 ## Documentation audit
 
@@ -136,9 +136,9 @@ Existing docs are useful for the narrow protocol but do not constitute a complet
 | non-custodial boundary | V1 config/PR #27 | no transfer/custody code | static audit | yes | COMPLETE | preserve boundary |
 | auditable payment/delivery/refund commitments | V1 config | nonzero hashes only | focused + audit | yes | COMPLETE | do not describe as executed settlement |
 | canonical service identity | ServiceIds420 | launchpad/v1 | static verifier | partial | COMPLETE | none |
-| deterministic deployment package | release requirement | none found | none | none | MISSING | LAUNCHPAD-AUDIT-4 |
-| exact-head retained runtime/ABI evidence | release requirement | none found | none | none | MISSING | LAUNCHPAD-AUDIT-4 |
-| user-facing Launchpad application | app/protocol distinction + crowdfunding target | no real Launchpad UI found | none | manuals only | MISSING | LAUNCHPAD-AUDIT-5 |
+| deterministic deployment package | release requirement | Audit-4 deterministic materialization + Registry publication | local-EVM deployment/binding suite | deployment operations | COMPLETE repository scope | live evidence Audit-6 |
+| exact-head retained runtime/ABI evidence | release requirement | Audit-4 exact-build artifact/ABI/runtime identity retention | dedicated exact-head CI | deployment operations | COMPLETE repository scope | live runtime evidence Audit-6 |
+| user-facing Launchpad application | app/protocol distinction + crowdfunding target | `launchpad/web` + `launchpad/service` | Audit-5 browser/service tests + verifier + clean build | user/developer docs | COMPLETE repository scope | live deployment/flows Audit-6 |
 | Identity crowdfunding integration | consumer-services registry | active controlled profile + sale-policy credential + CapabilityRegistry | Audit-3 integration suite | architecture/security docs | COMPLETE repository scope | deployment/UI remain Audit-4/5/6 |
 | 420Pay contract-backed settlement | consumer-services registry | settled PaymentRegistry binding + canonical refund-state linkage | Audit-3 integration suite | architecture/security docs | COMPLETE repository scope | deployment evidence Audit-4/6 |
 | Arbitration integration | consumer-services registry | canonical case-origin + finalized ruling/remedy evidence | Audit-3 integration + real registry test | architecture/security docs | COMPLETE repository scope | live dispute path Audit-6 |
@@ -160,6 +160,16 @@ Existing docs are useful for the narrow protocol but do not constitute a complet
 - GENESIS READY: **NO** — Genesis-facing crowdfunding target is incomplete.
 - PRODUCTION READY: **NO** — testnet, deployment, operations, monitoring and user-facing service are incomplete.
 
+## Current remediation state after LAUNCHPAD-AUDIT-5
+
+Repository-side implementation is complete through the user-facing application/service layer. The browser fails closed until its service runtime resolves the canonical Launchpad service through ProtocolRegistry and returns chain-matched Router/Sale/Allocation/Crowdfunding/Project bindings. Non-enumerable campaign discovery is allowed through a provenance-preserving projection; participant contribution/claim/refund state is read directly from canonical contracts.
+
+Participant transaction preparation covers settled-payment-backed contribution, claim, refund-batch preparation and refund recording. Exact target/calldata/value are shown before injected-wallet submission. The service never owns wallet signing or transaction submission.
+
+Because project registration and sale lifecycle mutation are governance-only, the creator UI produces governance request drafts for bounded existing-campaign lifecycle actions rather than direct creator transactions.
+
+The remaining Launchpad release work is production-equivalent live testnet qualification in LAUNCHPAD-AUDIT-6, followed by Genesis closeout and later production operations/security closeout.
+
 ## Final determination
 
-420Launchpad is **not complete** as a Genesis-facing crowdfunding application. The original V1 contract family is a coherent, intentionally narrow non-custodial commitment-registry protocol, but the repository's later Genesis-facing crowdfunding definition added real product and integration requirements that are not implemented by those contracts. Exact-head CI added by this audit must qualify the current protocol baseline, after which remediation should proceed in the dependency order recorded in `420LAUNCHPAD-AUDIT-ROADMAP.md`.
+420Launchpad is **repository-complete through LAUNCHPAD-AUDIT-5**, including the narrow non-custodial protocol, crowdfunding dependency integration, deterministic repository deployment materialization and user-facing application/service layer. It is **not yet production-equivalent testnet qualified, Genesis-closed or production-ready**. Those states require the live evidence and later closeout steps recorded in `420LAUNCHPAD-AUDIT-ROADMAP.md`.

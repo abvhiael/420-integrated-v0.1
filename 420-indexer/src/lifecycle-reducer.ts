@@ -41,7 +41,9 @@ export function protocolObjectKey420(event: DecodedProtocolEvent420): string | n
   // first generic identifier present in the event.
   const keys = event.protocol === '420Identity'
     ? ['credentialId','profileId','issuerId'] as const
-    : KEY_FIELDS;
+    : event.protocol === '420Randomness'
+      ? ['requestId','profileId','routeId'] as const
+      : KEY_FIELDS;
   for (const key of keys) {
     const value = event.fields[key];
     if (value !== undefined && value !== null) return `${key}:${String(value).toLowerCase()}`;

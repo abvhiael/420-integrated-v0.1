@@ -134,7 +134,7 @@ Unresolved release risk:
 | Runtime ABI | V1 model | readNumeric/readResult | Oracle suites | app docs | COMPLETE | none |
 | Frozen legacy Oracle ABI | interface-layer v1.0 | retained old ABI | genesis verifier | audit docs | PARTIAL | major-version migration if convergence is required |
 | Swap TWAP integration | V1 model / Swap audit | TWAP adapter | SwapTWAPOracle420 | Swap + Oracle docs | COMPLETE | none |
-| Automation consumer integration | DOC-5.8 | 420-automation canonical read consumer exists | automation suite outside Oracle scope | architecture | PARTIAL | cross-app exact-head integration qualification |
+| Automation consumer integration | DOC-5.8 | 420-automation canonical read consumer | 126-test Automation suite + Oracle consumer verifier | architecture + audit evidence | COMPLETE | none |
 | Bridge boundary | DOC-5.8 | documented separation | structural | architecture | COMPLETE | no generic Oracle substitution |
 | Frontend | frozen model | none intended | N/A | app docs | NOT APPLICABLE | none |
 | Backend/database/indexer | frozen model | none required | N/A | app docs | NOT APPLICABLE | none |
@@ -165,7 +165,7 @@ Unresolved release risk:
 3. **ORACLE-AUDIT-3 — deployment and ProtocolRegistry binding package** — COMPLETE; deployment binding passed on exact qualified implementation SHA.
 4. **ORACLE-AUDIT-4 — interface-layer compatibility containment** — COMPLETE for runtime containment; frozen-interface major migration remains explicitly deferred.
 5. **ORACLE-AUDIT-5 — exact-head repository qualification and durable evidence** — COMPLETE. Implementation SHA `28c61dc020a02b6fa981eecd566d533ca6a6f0f2`; workflow run `37093500837`; durable evidence commit `67d1e5d8e58e48af4cb08231b56b877dcd8c174c`.
-6. **ORACLE-AUDIT-6 — cross-application consumer qualification** — PENDING; verify Automation/Swap and any Pay/Exchange consumers against the canonical runtime ABI.
+6. **ORACLE-AUDIT-6 — cross-application consumer qualification** — COMPLETE. Level 2 implementation SHA `e97958eda4dbf230d1f5add8e3adc8cc40d70e43`; workflow run `37094115610`; Automation 126/126 PASS; Swap adapter integration 9/9 PASS; Exchange classified as separate `referencePrice` consumer; no Pay direct Oracle consumer.
 7. **ORACLE-AUDIT-7 — production-equivalent testnet deployment** — BLOCKED on live testnet, governance addresses, provider/feed/source decisions, and provider operators.
 8. **ORACLE-AUDIT-8 — Genesis/production closeout** — BLOCKED on retained testnet evidence, production provider diversity/credentials/monitoring, final deployment approval, and operational incident/recovery evidence.
 
@@ -193,3 +193,35 @@ Level 2 was not required for this ordinary exact-head repository step. Level 3 r
 **ORACLE-AUDIT-5 is COMPLETE.**
 
 Next canonical roadmap step: **ORACLE-AUDIT-6 — cross-application consumer qualification**.
+
+
+## ORACLE-AUDIT-6 closeout
+
+Qualification level: **Level 2 — app integration milestone**.
+
+Authoritative implementation SHA: `e97958eda4dbf230d1f5add8e3adc8cc40d70e43`.
+
+Reconciliation/base `main` SHA: `edfd0752e825fc5379700851358e8398efb0b9c5`. At qualification the audit branch was 14 commits ahead and 0 behind.
+
+Authoritative app-specific CI: **420Oracle audit qualification**, run **37094115610**, **PASS**.
+
+- `consumer-boundaries` job **111120426674**: exact-head PASS; Oracle consumer verifier PASS; 420Automation build/test **126 passed / 0 failed**; Swap-to-Oracle integration **9 passed / 0 failed / 0 skipped**.
+- `audit-state` job **111120426766**: exact-head PASS; Oracle repository verifier PASS; frozen Genesis interface verifier PASS.
+- `oracle-contracts` job **111120426775**: exact-head PASS; format PASS; Oracle release graph build PASS; retained Oracle suites **18 passed / 0 failed / 0 skipped**; static security PASS.
+- Same-SHA supplemental Solidity Contracts run **37094115528**: PASS. This is not treated as Level 3 closeout evidence.
+
+Consumer classification at this milestone:
+
+- **420Automation** is the canonical application-layer Oracle consumer and is qualified against the runtime `readNumeric/readResult` field model plus local freshness/confidence/quorum/spread policy.
+- **420Swap** is an upstream source through `TWAPOracleSourceAdapter420`, qualified by the focused Swap/Oracle integration suite.
+- **420Exchange** consumes its separate fail-closed `IExchangeReferenceOracle420.referencePrice` boundary and is not falsely classified as a direct `IOracle420` consumer.
+- **420Pay** has no direct current Oracle consumer surface.
+- No production Solidity consumer imports the frozen legacy Genesis `IOracle420` ABI.
+
+Durable evidence record: `docs/audit/evidence/oracle-audit-6-20261003.md` at evidence commit `d59800efc6edbbf6a9a6910085914a071a3aca41`.
+
+Full Level 3 repository/global closeout remains intentionally deferred. Live deployment, ProtocolRegistry publication, governance addresses, provider/feed/source provisioning, provider operators/credentials, monitoring, and production-equivalent testnet evidence remain for the next step.
+
+**ORACLE-AUDIT-6 is COMPLETE.**
+
+Next canonical roadmap step: **ORACLE-AUDIT-7 — production-equivalent testnet deployment**.

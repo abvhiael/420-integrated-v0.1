@@ -13,6 +13,8 @@ export * from './protocol-projections.js';
 export * from './abi-manifest.js';
 export * from './governance-descriptors.js';
 export * from './treasury-descriptors.js';
+export * from './ai-descriptors.js';
+export * from './ai-read-model.js';
 export * from './lifecycle-reducer.js';
 export * from './query-layer.js';
 export * from './query-service.js';

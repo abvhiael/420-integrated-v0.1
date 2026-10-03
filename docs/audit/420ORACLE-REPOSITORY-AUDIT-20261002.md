@@ -10,6 +10,8 @@ Baseline `main`: `edfd0752e825fc5379700851358e8398efb0b9c5`
 
 Audit branch: `audit/oracle-interface-layer-remediation-20261002`
 
+Pull request: **#497**
+
 Normative sources reviewed include the frozen Oracle V1 model, DOC-5.8 infrastructure architecture, randomness/oracle protocol boundary, Genesis dApp map, service ID catalogue, frozen address namespace, Genesis interface-layer freeze/policy, Oracle contracts, tests, Swap TWAP integration, and prior Oracle PR history.
 
 ## Canonical purpose and architecture

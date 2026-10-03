@@ -26,7 +26,7 @@ for key in ("requireWalletChainMatch","requireRegistryResolution","requireCanoni
     need(cfg.get("execution",{}).get(key) is True,f"missing execution gate {key}")
 
 html=read("launchpad/web/index.html")
-for token in ("campaign-grid","detail","participant-state","contribution-amount","payment-id","delivery-commitment","creator-form","review-gate","aria-live","Skip to content"):
+for token in ("campaign-grid","detail","participant-state","contribution-amount","payment-id","delivery-commitment","refund-commitment","creator-form","review-gate","aria-live","Skip to content"):
     need(token in html,f"UI requirement missing: {token}")
 need("Registration is not endorsement" in html,"Launchpad risk disclosure missing")
 for mode in ("REWARD","DONATION","COMMUNITY_PROJECT","PRODUCT_PREORDER"):
@@ -50,7 +50,7 @@ projection=read("launchpad/service/core/projection.mjs")
 server=read("launchpad/service/server.mjs")
 for token in ("resolveActive(bytes32)","sales()","allocations()","crowdfundingIntegration()","projects()"):
     need(token in rpc,f"canonical discovery missing: {token}")
-for token in ("contributed(bytes32,address)","claimed(bytes32,address)","refunded(bytes32,address)","contribute(bytes32,uint128,bytes32)","claim(bytes32,bytes32)","prepareRefund(bytes32)"):
+for token in ("contributed(bytes32,address)","claimed(bytes32,address)","refunded(bytes32,address)","contribute(bytes32,uint128,bytes32)","claim(bytes32,bytes32)","prepareRefund(bytes32)","recordRefund(bytes32,bytes32)"):
     need(token in planner,f"participant workflow binding missing: {token}")
 need("requiresGovernance:true" in planner,"creator request must retain governance authority")
 need("transaction" not in planner.split("export function creatorRequest",1)[1].split("}",1)[0],"creator request unexpectedly exposes direct transaction")

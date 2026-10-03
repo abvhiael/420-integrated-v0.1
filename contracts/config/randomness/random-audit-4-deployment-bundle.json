@@ -1,0 +1,159 @@
+{
+  "schema": "420-randomness-audit-4-deployment-bundle-v1",
+  "step": "RANDOM-AUDIT-4",
+  "status": "REPOSITORY_DEPLOYMENT_BUNDLE_READY_LIVE_TESTNET_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "randomness_registry": "0x0000000000000000000000000000000000000428",
+    "randomness_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "production_router_address_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_RANDOM_AUDIT_5"
+  },
+  "canonical_dependencies": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "component_api": "registerComponent",
+      "publication_api": "publishRegisteredService"
+    },
+    "randomness_registry": {
+      "address": "0x0000000000000000000000000000000000000428",
+      "source": "contracts/config/predeploy/RandomnessRegistry-predeploy-state.json",
+      "artifact": "contracts/artifacts/RandomnessRegistry.json",
+      "runtime_code_hash": "0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a",
+      "binding_api": "bindRouter"
+    }
+  },
+  "protocol_registry_identity": {
+    "router_component_id_preimage": "420/APP/420RANDOM/RANDOMNESS_ROUTER",
+    "router_component_version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "router_component_lifecycle": "ACTIVE",
+    "service_id_preimage": "420/service/randomness/v1",
+    "service_version": 1,
+    "service_active": true,
+    "component_type": "SERVICE",
+    "metadata_hash_preimage": "420/RANDOMNESS/RELEASE/METADATA/V1",
+    "manifest_hash_preimage": "420/RANDOMNESS/AUDIT-4/DEPLOYMENT-BUNDLE/V1",
+    "interface_hash_preimage": "420/RANDOMNESS/RANDOMNESS_ROUTER/INTERFACE/V1",
+    "dependency_root_policy": "keccak256(abi.encode(routeRegistry,profileRegistry,randomnessRegistry,router,routeRegistry.codehash,profileRegistry.codehash,randomnessRegistry.codehash,router.codehash))"
+  },
+  "deployment_order": [
+    {
+      "order": 1,
+      "contract": "RandomnessRouteRegistry420",
+      "source": "contracts/src/randomness/RandomnessRouteRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 2,
+      "contract": "RandomnessProfileRegistry420",
+      "source": "contracts/src/randomness/RandomnessProfileRegistry420.sol",
+      "constructor": [
+        "GovernanceTimelock"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 3,
+      "contract": "RandomnessRouter420",
+      "source": "contracts/src/randomness/RandomnessRouter420.sol",
+      "constructor": [
+        "RandomnessProfileRegistry420",
+        "RandomnessRouteRegistry420",
+        "RandomnessRegistry@0x0000000000000000000000000000000000000428"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 4,
+      "contract": "ProtocolRegistry",
+      "action": "registerComponent",
+      "component_id_preimage": "420/APP/420RANDOM/RANDOMNESS_ROUTER",
+      "implementation": "RandomnessRouter420",
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE"
+    },
+    {
+      "order": 5,
+      "contract": "ProtocolRegistry",
+      "action": "publishRegisteredService",
+      "service_id_preimage": "420/service/randomness/v1",
+      "implementation": "RandomnessRouter420",
+      "version": 1,
+      "active": true,
+      "component_type": "SERVICE",
+      "metadata_hash_preimage": "420/RANDOMNESS/RELEASE/METADATA/V1",
+      "manifest_hash_preimage": "420/RANDOMNESS/AUDIT-4/DEPLOYMENT-BUNDLE/V1",
+      "dependency_root_policy": "canonical dependency_root_policy",
+      "interface_hash_preimage": "420/RANDOMNESS/RANDOMNESS_ROUTER/INTERFACE/V1"
+    },
+    {
+      "order": 6,
+      "contract": "RandomnessRegistry@0x0000000000000000000000000000000000000428",
+      "action": "bindRouter",
+      "args": [
+        "RandomnessRouter420"
+      ],
+      "one_time": true,
+      "governance_only": true,
+      "precondition": "ProtocolRegistry component and service publication succeeded for the exact router"
+    }
+  ],
+  "safety_invariants": [
+    "RandomnessRegistry at 0x0428 is not redeployed by this bundle.",
+    "RandomnessRouter420 receives no fixed Genesis address and must be discovered through ProtocolRegistry.",
+    "The router constructor binds the exact deployed profile registry, route registry and frozen RandomnessRegistry predeploy.",
+    "ProtocolRegistry component and service records must resolve to the exact same router runtime identity.",
+    "RandomnessRegistry.bindRouter executes only after successful ProtocolRegistry publication and exactly once.",
+    "Route/profile population is operational configuration and remains RANDOM-AUDIT-5 live qualification evidence.",
+    "No private keys, signer secrets, fabricated transaction hashes or fabricated live addresses are retained in this bundle."
+  ],
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/RandomnessDeploymentBinding420.t.sol",
+    "verifier": "scripts/verify-random-audit-4-deployment.py",
+    "proves": [
+      "constructor graph binds exact Randomness dependencies",
+      "ProtocolRegistry component record binds exact RandomnessRouter420 runtime identity",
+      "ProtocolRegistry canonical randomness service resolves to exact RandomnessRouter420 runtime identity",
+      "registration profile commits nonzero manifest/interface hashes and dependency root",
+      "RandomnessRegistry router binding is governance-only and one-time",
+      "binding occurs to the same router published through ProtocolRegistry",
+      "randomness-router remains registry-resolved with no invented frozen address"
+    ]
+  },
+  "live_testnet_evidence": {
+    "required_in_step": "RANDOM-AUDIT-5",
+    "chain_id": null,
+    "genesis_hash": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "route_registry_address": null,
+    "profile_registry_address": null,
+    "router_address": null,
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "bind_router_transaction": null,
+    "runtime_code_hashes": {},
+    "configured_routes": [],
+    "configured_profiles": []
+  }
+}

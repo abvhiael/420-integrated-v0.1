@@ -49,14 +49,13 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
     );
     event RandomnessFallbackActivated(bytes32 indexed requestId, bytes32 indexed fallbackRoute);
     event RandomnessRequestVoided(bytes32 indexed requestId);
-    event RandomnessResolved(
-        bytes32 indexed requestId,
-        bytes32 indexed routeId,
-        bytes32 randomness,
-        bytes32 proofHash
-    );
+    event RandomnessResolved(bytes32 indexed requestId, bytes32 indexed routeId, bytes32 randomness, bytes32 proofHash);
 
-    constructor(address profileRegistry_, address routeRegistry_, address randomnessRegistry_) {
+    constructor(
+        address profileRegistry_,
+        address routeRegistry_,
+        address randomnessRegistry_
+    ) {
         if (profileRegistry_ == address(0) || routeRegistry_ == address(0) || randomnessRegistry_ == address(0)) {
             revert InvalidRequest();
         }
@@ -65,12 +64,20 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         randomnessRegistry = RandomnessRegistry(randomnessRegistry_);
     }
 
-    function systemName() external pure returns (string memory) { return "RandomnessRouter420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function systemName() external pure returns (string memory) {
+        return "RandomnessRouter420";
+    }
 
-    function requestRandomness(bytes32 profileId, bytes32 domain, bytes32 purpose, uint64 deadline)
-        external returns (bytes32 requestId)
-    {
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
+
+    function requestRandomness(
+        bytes32 profileId,
+        bytes32 domain,
+        bytes32 purpose,
+        uint64 deadline
+    ) external returns (bytes32 requestId) {
         if (profileId == bytes32(0) || domain == bytes32(0) || purpose == bytes32(0)) revert InvalidRequest();
         if (deadline <= block.timestamp) revert InvalidDeadline();
 
@@ -79,7 +86,9 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         if (uint256(deadline) > block.timestamp + profile_.maxTimeoutSeconds) revert InvalidDeadline();
 
         RandomnessRouteRegistry420.Route memory primary = routeRegistry.route(profile_.primaryRoute);
-        if (!primary.active || primary.revision == 0 || primary.operator == address(0) || primary.verifier == address(0)) {
+        if (
+            !primary.active || primary.revision == 0 || primary.operator == address(0) || primary.verifier == address(0)
+        ) {
             revert InvalidRoute();
         }
 
@@ -89,7 +98,10 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         } else if (profile_.fallbackPolicy == RandomnessIds420.FALLBACK_ONCE_THEN_VOID) {
             if (profile_.fallbackRoute == bytes32(0)) revert InvalidProfile();
             fallback_ = routeRegistry.route(profile_.fallbackRoute);
-            if (!fallback_.active || fallback_.revision == 0 || fallback_.operator == address(0) || fallback_.verifier == address(0)) {
+            if (
+                !fallback_.active || fallback_.revision == 0 || fallback_.operator == address(0)
+                    || fallback_.verifier == address(0)
+            ) {
                 revert InvalidRoute();
             }
         } else {
@@ -161,7 +173,11 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         );
     }
 
-    function fulfillRandomness(bytes32 requestId, bytes32 providerRandomness, bytes calldata proof) external {
+    function fulfillRandomness(
+        bytes32 requestId,
+        bytes32 providerRandomness,
+        bytes calldata proof
+    ) external {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED && request_.status != Status.FALLBACK_ACTIVE) revert WrongStatus();
@@ -189,13 +205,8 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         }
 
         if (msg.sender != operator) revert UnauthorizedOperator();
-        bool valid = IRandomnessVerifier420(verifier).verifyRandomness(
-            requestId,
-            request_.domain,
-            request_.purpose,
-            providerRandomness,
-            proof
-        );
+        bool valid = IRandomnessVerifier420(verifier)
+            .verifyRandomness(requestId, request_.domain, request_.purpose, providerRandomness, proof);
         if (!valid) revert InvalidProof();
 
         bytes32 randomness = keccak256(
@@ -219,21 +230,25 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         emit RandomnessResolved(requestId, routeId, randomness, proofHash);
     }
 
-    function activateFallback(bytes32 requestId) external {
+    function activateFallback(
+        bytes32 requestId
+    ) external {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED) revert WrongStatus();
-        if (
-            request_.fallbackPolicy != RandomnessIds420.FALLBACK_ONCE_THEN_VOID ||
-            request_.fallbackRoute == bytes32(0)
-        ) revert FallbackUnavailable();
+        if (request_.fallbackPolicy != RandomnessIds420.FALLBACK_ONCE_THEN_VOID || request_.fallbackRoute == bytes32(0))
+        {
+            revert FallbackUnavailable();
+        }
         if (block.timestamp <= request_.primaryDeadline) revert FallbackTooEarly();
         if (block.timestamp > request_.deadline) revert RequestExpired();
         request_.status = Status.FALLBACK_ACTIVE;
         emit RandomnessFallbackActivated(requestId, request_.fallbackRoute);
     }
 
-    function voidExpired(bytes32 requestId) external {
+    function voidExpired(
+        bytes32 requestId
+    ) external {
         Request storage request_ = _requests[requestId];
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED && request_.status != Status.FALLBACK_ACTIVE) revert WrongStatus();
@@ -242,16 +257,22 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         emit RandomnessRequestVoided(requestId);
     }
 
-    function status(bytes32 requestId) external view returns (Status) {
+    function status(
+        bytes32 requestId
+    ) external view returns (Status) {
         return _requests[requestId].status;
     }
 
-    function request(bytes32 requestId) external view returns (Request memory) {
+    function request(
+        bytes32 requestId
+    ) external view returns (Request memory) {
         if (_requests[requestId].status == Status.NONE) revert UnknownRequest();
         return _requests[requestId];
     }
 
-    function result(bytes32 requestId) external view returns (bytes32 randomness, bytes32 proofHash) {
+    function result(
+        bytes32 requestId
+    ) external view returns (bytes32 randomness, bytes32 proofHash) {
         if (_requests[requestId].status == Status.NONE) revert UnknownRequest();
         return randomnessRegistry.result(requestId);
     }

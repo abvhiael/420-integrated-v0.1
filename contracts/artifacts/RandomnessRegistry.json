@@ -1,0 +1,522 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "timelock_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "router_",
+          "type": "address"
+        }
+      ],
+      "name": "bindRouter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceTimelock",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "protocolVersion",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "randomnessRouter",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "record",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "bindingHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "randomness",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "proofHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "routeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "requestedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "fulfilledAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "fulfilled",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct RandomnessRegistry.Record",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "bindingHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "requestedAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "recordRequest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "routeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "randomness",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "proofHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "fulfilledAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "recordResult",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "result",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "randomness",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "proofHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "routeId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "randomness",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "proofHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "fulfilledAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "RandomnessFulfilled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "bindingHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "requestedAt",
+          "type": "uint64"
+        }
+      ],
+      "name": "RandomnessRequested",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "router",
+          "type": "address"
+        }
+      ],
+      "name": "RandomnessRouterBound",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyFulfilled",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidRequest",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidResult",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OnlyRouter",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RequestAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RouterAlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RouterNotBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "Unauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnknownRequest",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddress",
+      "type": "error"
+    }
+  ],
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "compilerDeployedBytecode": "0x6080604081815260049182361015610015575f80fd5b5f3560e01c90816307dd2e4b1461060c575080632ae9c600146105f157806339a926c4146105c85780639a1fdd79146105855780639cc0a471146104c2578063abc1fbe114610307578063b5c645bd14610205578063c3f7aff2146101de5763cdf4725a14610082575f80fd5b346101da5760a03660031901126101da5781359060243592604435916064356084359267ffffffffffffffff8416938481036101da5760018060a01b035f5416803314908115916101d1575b506101c257865f526001602052835f2082810192835460ff8160801c16156101b35760881c60ff166101a5578915801561019d575b61019057509161016f8492606097956002868d60037fa9ea2834d15615ae519259f294c6626ba288cd0552f583ef7a4845d65acc97409d9b9901558960018201550155829067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b805460ff60881b1916600160881b17905581519384526020840152820152a3005b855162f8b33f60e71b8152fd5b508615610103565b8551634a4117f960e01b8152fd5b508551636d08029760e01b8152fd5b508251639e41bdd760e01b8152fd5b9050155f6100ce565b5f80fd5b50346101da575f3660031901126101da575f5490516001600160a01b039091168152602090f35b50346101da5760203660031901126101da57610100915f60e06102266106b5565b82815282602082015282858201528260608201528260808201528260a08201528260c0820152015280355f526001602052815f206102626106b5565b90805493848352600182015490602084019182526002830154948185019586526003840154936060860194855201549467ffffffffffffffff9384926080870192848916845260a0880195858a841c16875260ff60e060c08b019a828d60801c1615158c52019a60881c1615158a5282519a8b525160208b0152519089015251606088015251166080860152511660a084015251151560c083015251151560e0820152f35b5090346101da5760603660031901126101da57803590602435926044359167ffffffffffffffff908184168094036101da5760018060a01b035f5416803314908115916104b9575b506104ab57841580156104a3575b801561049b575b61048d57845f52600160205260ff81845f20015460801c1661047f57917ffeff9f2372f33b11e4b982c836337959410fc484af4e21fe9037b534386bf20693918560209461044d6103b36106b5565b938a8552878501925f845281878701915f835260608801975f895260808101988b8a5260a08201945f865260c083019860018a5260e084019a5f8c525f5260018f528c5f20935184555160018401555160028301555160038201550196511667ffffffffffffffff198754161786555116849067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b518254915161ffff60801b1990921690151560801b60ff60801b161790151560881b60ff60881b1617905551908152a3005b82516317b5787760e11b8152fd5b82516341abc80160e01b8152fd5b508315610364565b50851561035d565b8251639e41bdd760e01b8152fd5b9050155f61034f565b50346101da5760203660031901126101da576001600160a01b03823581811692908390036101da57817f0000000000000000000000000000000000000000000000000000000000000000163303610577578215610568575f5491821661055957506001600160a01b03191681175f9081557ff9b36d45c720d09ce89d81ae2a1d9127e60aa158053cf03543a772172ef359699080a2005b516397a7051d60e01b81528390fd5b5163781ed2c760e11b81528390fd5b516282b42960e81b81528390fd5b50346101da575f3660031901126101da57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5090346101da5760203660031901126101da576105e590356106ea565b82519182526020820152f35b50346101da575f3660031901126101da576020905160018152f35b8284346101da575f3660031901126101da578183019083821067ffffffffffffffff8311176106a2575081526012825260207152616e646f6d6e657373526567697374727960701b60208401528151928391602083528151918260208501525f5b83811061068c5750505f83830185015250601f01601f19168101030190f35b818101830151878201870152869450820161066d565b604190634e487b7160e01b5f525260245ffd5b60405190610100820182811067ffffffffffffffff8211176106d657604052565b634e487b7160e01b5f52604160045260245ffd5b5f52600160205260405f2090600482015460ff8160801c16156107265760881c60ff161561071f576002600183015492015490565b5f91508190565b604051636d08029760e01b8152600490fdfea2646970667358221220365c7a2d5e1f0de8af27d38047b9b6055e193231abbc300de308a5b6e3b523f564736f6c63430008180033",
+  "compilerRuntimeTemplateSha256": "530bbc0a72108e2965c9be94d94716eab93612193c467d88b27ad28e16b6bb17",
+  "constructor": {
+    "arguments": {
+      "timelock_": "0x0000000000000000000000000000000000000429"
+    },
+    "mutableStorageWrites": 0,
+    "strategy": "DIRECT_GENESIS_PREDEPLOY_IMMUTABLE_MATERIALIZATION"
+  },
+  "contractName": "RandomnessRegistry",
+  "creationBytecode": "0x60a03461008957601f61081038819003918201601f19168301916001600160401b0383118484101761008d5780849260209460405283398101031261008957516001600160a01b03811680820361008957156100775760805260405161076e90816100a282396080518181816104ed01526105990152f35b60405163d92e233d60e01b8152600490fd5b5f80fd5b634e487b7160e01b5f52604160045260245ffdfe6080604081815260049182361015610015575f80fd5b5f3560e01c90816307dd2e4b1461060c575080632ae9c600146105f157806339a926c4146105c85780639a1fdd79146105855780639cc0a471146104c2578063abc1fbe114610307578063b5c645bd14610205578063c3f7aff2146101de5763cdf4725a14610082575f80fd5b346101da5760a03660031901126101da5781359060243592604435916064356084359267ffffffffffffffff8416938481036101da5760018060a01b035f5416803314908115916101d1575b506101c257865f526001602052835f2082810192835460ff8160801c16156101b35760881c60ff166101a5578915801561019d575b61019057509161016f8492606097956002868d60037fa9ea2834d15615ae519259f294c6626ba288cd0552f583ef7a4845d65acc97409d9b9901558960018201550155829067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b805460ff60881b1916600160881b17905581519384526020840152820152a3005b855162f8b33f60e71b8152fd5b508615610103565b8551634a4117f960e01b8152fd5b508551636d08029760e01b8152fd5b508251639e41bdd760e01b8152fd5b9050155f6100ce565b5f80fd5b50346101da575f3660031901126101da575f5490516001600160a01b039091168152602090f35b50346101da5760203660031901126101da57610100915f60e06102266106b5565b82815282602082015282858201528260608201528260808201528260a08201528260c0820152015280355f526001602052815f206102626106b5565b90805493848352600182015490602084019182526002830154948185019586526003840154936060860194855201549467ffffffffffffffff9384926080870192848916845260a0880195858a841c16875260ff60e060c08b019a828d60801c1615158c52019a60881c1615158a5282519a8b525160208b0152519089015251606088015251166080860152511660a084015251151560c083015251151560e0820152f35b5090346101da5760603660031901126101da57803590602435926044359167ffffffffffffffff908184168094036101da5760018060a01b035f5416803314908115916104b9575b506104ab57841580156104a3575b801561049b575b61048d57845f52600160205260ff81845f20015460801c1661047f57917ffeff9f2372f33b11e4b982c836337959410fc484af4e21fe9037b534386bf20693918560209461044d6103b36106b5565b938a8552878501925f845281878701915f835260608801975f895260808101988b8a5260a08201945f865260c083019860018a5260e084019a5f8c525f5260018f528c5f20935184555160018401555160028301555160038201550196511667ffffffffffffffff198754161786555116849067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b518254915161ffff60801b1990921690151560801b60ff60801b161790151560881b60ff60881b1617905551908152a3005b82516317b5787760e11b8152fd5b82516341abc80160e01b8152fd5b508315610364565b50851561035d565b8251639e41bdd760e01b8152fd5b9050155f61034f565b50346101da5760203660031901126101da576001600160a01b03823581811692908390036101da57817f0000000000000000000000000000000000000000000000000000000000000000163303610577578215610568575f5491821661055957506001600160a01b03191681175f9081557ff9b36d45c720d09ce89d81ae2a1d9127e60aa158053cf03543a772172ef359699080a2005b516397a7051d60e01b81528390fd5b5163781ed2c760e11b81528390fd5b516282b42960e81b81528390fd5b50346101da575f3660031901126101da57517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5090346101da5760203660031901126101da576105e590356106ea565b82519182526020820152f35b50346101da575f3660031901126101da576020905160018152f35b8284346101da575f3660031901126101da578183019083821067ffffffffffffffff8311176106a2575081526012825260207152616e646f6d6e657373526567697374727960701b60208401528151928391602083528151918260208501525f5b83811061068c5750505f83830185015250601f01601f19168101030190f35b818101830151878201870152869450820161066d565b604190634e487b7160e01b5f525260245ffd5b60405190610100820182811067ffffffffffffffff8211176106d657604052565b634e487b7160e01b5f52604160045260245ffd5b5f52600160205260405f2090600482015460ff8160801c16156107265760881c60ff161561071f576002600183015492015490565b5f91508190565b604051636d08029760e01b8152600490fdfea2646970667358221220365c7a2d5e1f0de8af27d38047b9b6055e193231abbc300de308a5b6e3b523f564736f6c63430008180033",
+  "deployedBytecode": "0x6080604081815260049182361015610015575f80fd5b5f3560e01c90816307dd2e4b1461060c575080632ae9c600146105f157806339a926c4146105c85780639a1fdd79146105855780639cc0a471146104c2578063abc1fbe114610307578063b5c645bd14610205578063c3f7aff2146101de5763cdf4725a14610082575f80fd5b346101da5760a03660031901126101da5781359060243592604435916064356084359267ffffffffffffffff8416938481036101da5760018060a01b035f5416803314908115916101d1575b506101c257865f526001602052835f2082810192835460ff8160801c16156101b35760881c60ff166101a5578915801561019d575b61019057509161016f8492606097956002868d60037fa9ea2834d15615ae519259f294c6626ba288cd0552f583ef7a4845d65acc97409d9b9901558960018201550155829067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b805460ff60881b1916600160881b17905581519384526020840152820152a3005b855162f8b33f60e71b8152fd5b508615610103565b8551634a4117f960e01b8152fd5b508551636d08029760e01b8152fd5b508251639e41bdd760e01b8152fd5b9050155f6100ce565b5f80fd5b50346101da575f3660031901126101da575f5490516001600160a01b039091168152602090f35b50346101da5760203660031901126101da57610100915f60e06102266106b5565b82815282602082015282858201528260608201528260808201528260a08201528260c0820152015280355f526001602052815f206102626106b5565b90805493848352600182015490602084019182526002830154948185019586526003840154936060860194855201549467ffffffffffffffff9384926080870192848916845260a0880195858a841c16875260ff60e060c08b019a828d60801c1615158c52019a60881c1615158a5282519a8b525160208b0152519089015251606088015251166080860152511660a084015251151560c083015251151560e0820152f35b5090346101da5760603660031901126101da57803590602435926044359167ffffffffffffffff908184168094036101da5760018060a01b035f5416803314908115916104b9575b506104ab57841580156104a3575b801561049b575b61048d57845f52600160205260ff81845f20015460801c1661047f57917ffeff9f2372f33b11e4b982c836337959410fc484af4e21fe9037b534386bf20693918560209461044d6103b36106b5565b938a8552878501925f845281878701915f835260608801975f895260808101988b8a5260a08201945f865260c083019860018a5260e084019a5f8c525f5260018f528c5f20935184555160018401555160028301555160038201550196511667ffffffffffffffff198754161786555116849067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b518254915161ffff60801b1990921690151560801b60ff60801b161790151560881b60ff60881b1617905551908152a3005b82516317b5787760e11b8152fd5b82516341abc80160e01b8152fd5b508315610364565b50851561035d565b8251639e41bdd760e01b8152fd5b9050155f61034f565b50346101da5760203660031901126101da576001600160a01b03823581811692908390036101da57817f0000000000000000000000000000000000000000000000000000000000000429163303610577578215610568575f5491821661055957506001600160a01b03191681175f9081557ff9b36d45c720d09ce89d81ae2a1d9127e60aa158053cf03543a772172ef359699080a2005b516397a7051d60e01b81528390fd5b5163781ed2c760e11b81528390fd5b516282b42960e81b81528390fd5b50346101da575f3660031901126101da57517f00000000000000000000000000000000000000000000000000000000000004296001600160a01b03168152602090f35b5090346101da5760203660031901126101da576105e590356106ea565b82519182526020820152f35b50346101da575f3660031901126101da576020905160018152f35b8284346101da575f3660031901126101da578183019083821067ffffffffffffffff8311176106a2575081526012825260207152616e646f6d6e657373526567697374727960701b60208401528151928391602083528151918260208501525f5b83811061068c5750505f83830185015250601f01601f19168101030190f35b818101830151878201870152869450820161066d565b604190634e487b7160e01b5f525260245ffd5b60405190610100820182811067ffffffffffffffff8211176106d657604052565b634e487b7160e01b5f52604160045260245ffd5b5f52600160205260405f2090600482015460ff8160801c16156107265760881c60ff161561071f576002600183015492015490565b5f91508190565b604051636d08029760e01b8152600490fdfea2646970667358221220365c7a2d5e1f0de8af27d38047b9b6055e193231abbc300de308a5b6e3b523f564736f6c63430008180033",
+  "immutableReferences": {
+    "governanceTimelock": [
+      {
+        "length": 32,
+        "start": 1261
+      },
+      {
+        "length": 32,
+        "start": 1433
+      }
+    ]
+  },
+  "materializedImmutableReferences": [
+    {
+      "immutableId": "governanceTimelock",
+      "length": 32,
+      "materializedValue": "0x0000000000000000000000000000000000000000000000000000000000000429",
+      "originalCompilerBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "start": 1261
+    },
+    {
+      "immutableId": "governanceTimelock",
+      "length": 32,
+      "materializedValue": "0x0000000000000000000000000000000000000000000000000000000000000429",
+      "originalCompilerBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "start": 1433
+    }
+  ],
+  "predeployAddress": "0x0000000000000000000000000000000000000428",
+  "runtimeCodeBytes": 1902,
+  "runtimeCodeHash": "0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a",
+  "schema": "420-randomness-predeploy-artifact-v1",
+  "source": "contracts/src/randomness/RandomnessRegistry.sol",
+  "sourceBlobSha1": "4f5548314eb37c7c52f8199560439f97c6c837ce",
+  "status": "RANDOM_AUDIT_3_ARTIFACT_READY",
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 40,
+        "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+        "label": "randomnessRouter",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 45,
+        "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+        "label": "_records",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_struct(Record)38_storage)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_struct(Record)38_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct RandomnessRegistry.Record)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Record)38_storage"
+      },
+      "t_struct(Record)38_storage": {
+        "encoding": "inplace",
+        "label": "struct RandomnessRegistry.Record",
+        "members": [
+          {
+            "astId": 23,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "bindingHash",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 25,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "randomness",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 27,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "proofHash",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 29,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "routeId",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_bytes32"
+          },
+          {
+            "astId": 31,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "requestedAt",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 33,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "fulfilledAt",
+            "offset": 8,
+            "slot": "4",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 35,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "exists",
+            "offset": 16,
+            "slot": "4",
+            "type": "t_bool"
+          },
+          {
+            "astId": 37,
+            "contract": "src/randomness/RandomnessRegistry.sol:RandomnessRegistry",
+            "label": "fulfilled",
+            "offset": 17,
+            "slot": "4",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "160"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

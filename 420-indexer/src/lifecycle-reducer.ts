@@ -150,8 +150,12 @@ const POLICY_LIST: LifecyclePolicy420[] = [
   ]},
   { protocol: '420Randomness', rules: [
     { eventName: 'RandomnessRequested', state: 'PENDING' },
-    { eventName: 'RequestCreated', state: 'PENDING' },
+    { eventName: 'RandomnessRequestCreated', state: 'PENDING' },
+    { eventName: 'RandomnessFallbackActivated', state: 'ACTIVE' },
     { eventName: 'RandomnessFulfilled', state: 'COMPLETED', terminal: true },
+    { eventName: 'RandomnessResolved', state: 'COMPLETED', terminal: true },
+    { eventName: 'RandomnessRequestVoided', state: 'EXPIRED', terminal: true },
+    { eventName: 'RequestCreated', state: 'PENDING' },
     { eventName: 'RequestFulfilled', state: 'COMPLETED', terminal: true },
     { eventName: 'RequestCancelled', state: 'CANCELLED', terminal: true },
     { eventName: 'RequestExpired', state: 'EXPIRED', terminal: true }

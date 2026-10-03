@@ -46,10 +46,6 @@ jobs:
         with:
           version: stable
 
-      - name: Check Resource Solidity formatting
-        working-directory: contracts
-        run: forge fmt --check src/resource/ResourceProviderRegistry420.sol src/resource/ResourceNodeRegistry420.sol src/resource/ResourceOfferRegistry420.sol src/resource/ResourceSessionRegistry420.sol src/resource/ResourceReceiptRegistry420.sol
-
       - name: Build Resource contract family
         working-directory: contracts
         run: forge build src/resource --sizes
@@ -71,6 +67,10 @@ jobs:
             test/StorageSettlementRegistry420.t.sol; do
             forge test --match-path "$suite" -vvv
           done
+
+      - name: Check Resource Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/resource/ResourceProviderRegistry420.sol src/resource/ResourceNodeRegistry420.sol src/resource/ResourceOfferRegistry420.sol src/resource/ResourceSessionRegistry420.sol src/resource/ResourceReceiptRegistry420.sol
 
   resource-runtime-sdk:
     runs-on: ubuntu-latest

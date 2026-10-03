@@ -22,7 +22,7 @@ contract MockJobsAI4 is IAIComputeJobRegistry420 {
     function job(bytes32 id) external view returns(Job memory){return js[id];}
 }
 contract MockMatchesAI4 is IAIComputeAcceptedMatch420 {
-    mapping(bytes32=>Match) internal ms; mapping(bytes32=>PriceReservation) internal ps; mapping(bytes32=>bytes32) public priceReservationForJob;
+    mapping(bytes32=>Match) internal ms; mapping(bytes32=>PriceReservation) internal ps; mapping(bytes32=>bytes32) public override priceReservationForJob;
     function setMatch(bytes32 id,Match calldata m) external{ms[id]=m;}
     function setPrice(bytes32 jobId,bytes32 ref,PriceReservation calldata p) external{priceReservationForJob[jobId]=ref;ps[ref]=p;}
     function getMatch(bytes32 id) external view returns(Match memory){return ms[id];}
@@ -34,7 +34,7 @@ contract MockProviderAI4 is IAIComputeProviderRegistry420 {
     function provider(bytes32 id) external view returns(Provider memory){return ps[id];}
 }
 contract MockEntitlementAI4 is IAIComputeEntitlement420 {
-    mapping(bytes32=>Entitlement) internal es; mapping(bytes32=>bytes32) public entitlementForJob;
+    mapping(bytes32=>Entitlement) internal es; mapping(bytes32=>bytes32) public override entitlementForJob;
     mapping(bytes32=>bytes32) internal settledRef; mapping(bytes32=>bytes32) internal refundRef;
     function setEntitlement(bytes32 jobId,bytes32 ref,Entitlement calldata e) external{entitlementForJob[jobId]=ref;es[ref]=e;}
     function setSettled(bytes32 jobId,bytes32 ref) external{settledRef[jobId]=ref;}

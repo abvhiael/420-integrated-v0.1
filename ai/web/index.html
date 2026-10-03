@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="420AI client for model discovery, AI request lifecycle and wallet-approved requester actions.">
+  <title>420AI</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header>
+  <div>
+    <p class="eyebrow">420 Integrated</p>
+    <h1>420AI</h1>
+  </div>
+  <div class="wallet-box">
+    <span id="network-badge" class="badge">network unresolved</span>
+    <button id="connect-wallet" type="button">Connect wallet</button>
+  </div>
+</header>
+<div id="status" class="status" role="status" aria-live="polite">Loading runtime configuration…</div>
+
+<main id="main">
+  <section aria-labelledby="discovery-title">
+    <div class="section-heading">
+      <div><p class="eyebrow">Discovery</p><h2 id="discovery-title">Models & deployments</h2></div>
+      <button id="refresh-discovery" type="button">Refresh</button>
+    </div>
+    <p class="muted">Public discovery comes from the non-authoritative 420Indexer projection. On-chain registries remain canonical.</p>
+    <div class="grid three">
+      <article><h3>Models</h3><div id="model-list" class="stack" aria-live="polite">Read API unavailable.</div></article>
+      <article><h3>Versions</h3><div id="version-list" class="stack">Read API unavailable.</div></article>
+      <article><h3>Deployments</h3><div id="deployment-list" class="stack">Read API unavailable.</div></article>
+    </div>
+  </section>
+
+  <section aria-labelledby="request-title">
+    <p class="eyebrow">Requester transaction</p>
+    <h2 id="request-title">Create AI request</h2>
+    <p class="muted">Your private input is hashed locally into a commitment. Plaintext is not placed in calldata, the public indexer, browser storage, or runtime configuration.</p>
+    <form id="request-form">
+      <div class="form-grid">
+        <label>Model version ID<input id="model-version-id" autocomplete="off" spellcheck="false" required placeholder="0x…"></label>
+        <label>Workload class<input id="workload-class" autocomplete="off" spellcheck="false" required placeholder="0x…"></label>
+        <label>Privacy policy ID<input id="privacy-policy-id" autocomplete="off" spellcheck="false" required placeholder="0x…"></label>
+        <label>Verification profile ID<input id="verification-profile-id" autocomplete="off" spellcheck="false" required placeholder="0x…"></label>
+        <label>Maximum spend (raw 420 units)<input id="max-spend" inputmode="numeric" required value="1"></label>
+        <label>Deadline (Unix seconds)<input id="deadline" inputmode="numeric" required></label>
+      </div>
+      <label>Private input<textarea id="private-input" rows="5" required autocomplete="off" spellcheck="false" placeholder="Private prompt or request input"></textarea></label>
+      <button id="prepare-request" type="submit">Review request</button>
+    </form>
+    <div id="review-panel" class="review" hidden>
+      <h3>Review before wallet approval</h3>
+      <dl id="review-details"></dl>
+      <p class="warning">Funding is not sent by this transaction. 420AI funding is bound through the canonical Vault/settlement adapter path; direct browser escrow funding is disabled by protocol design.</p>
+      <div class="actions">
+        <button id="submit-reviewed" type="button">Approve in wallet</button>
+        <button id="clear-review" type="button" class="secondary">Clear review</button>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="job-title">
+    <p class="eyebrow">Lifecycle</p>
+    <h2 id="job-title">Request & funding state</h2>
+    <form id="job-form" class="inline-form">
+      <label>Job ID<input id="job-id" required autocomplete="off" spellcheck="false" placeholder="0x…"></label>
+      <button type="submit">Load job</button>
+    </form>
+    <article id="job-detail" class="job-detail" aria-live="polite">Enter a job ID to inspect indexed lifecycle state.</article>
+    <div class="actions">
+      <button id="prepare-cancel" type="button" disabled>Review cancellation</button>
+      <button id="prepare-dispute" type="button" disabled>Review dispute</button>
+    </div>
+    <div id="dispute-box" hidden>
+      <label>Dispute reference<input id="dispute-ref" autocomplete="off" spellcheck="false" placeholder="0x…"></label>
+      <button id="confirm-dispute-review" type="button">Prepare dispute review</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="tx-title">
+    <p class="eyebrow">Recovery</p>
+    <h2 id="tx-title">Transaction status</h2>
+    <div id="transaction-state" class="transaction-state">No transaction submitted.</div>
+    <p class="muted">If a receipt is reorged, reverted, dropped, or confirmation times out, the client reports the condition and does not silently claim success.</p>
+  </section>
+</main>
+
+<footer>
+  <p>420AI browser client · no provider credentials or privileged secrets are stored in the page.</p>
+</footer>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

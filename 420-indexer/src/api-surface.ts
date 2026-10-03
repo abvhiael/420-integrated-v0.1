@@ -31,9 +31,9 @@ import type { IndexerRuntimeState420 } from './runtime-state.js';
 import {
   aiProviderState420, aiProviders420, aiModelState420, aiModels420,
   aiModelVersionState420, aiModelVersions420, aiDeploymentState420, aiDeployments420,
-  aiJobState420, aiJobs420,
+  aiJobState420, aiJobs420, aiPolicyState420, aiPolicies420, aiReputationState420, aiReputations420,
   type AiPageRequest420, type AiProviderState420, type AiModelState420,
-  type AiModelVersionState420, type AiDeploymentState420, type AiJobState420
+  type AiModelVersionState420, type AiDeploymentState420, type AiJobState420, type AiPolicyState420, type AiReputationState420
 } from './ai-read-model.js';
 
 export const INDEXER_API_VERSION_420 = 'v1' as const;
@@ -103,6 +103,10 @@ export interface IndexerPublicApi420 {
   aiDeployment(chainId: bigint, deploymentId: string): Promise<AiDeploymentState420 | null>;
   aiJobs(chainId: bigint, request?: AiPageRequest420): Promise<QueryPage420<AiJobState420>>;
   aiJob(chainId: bigint, jobId: string): Promise<AiJobState420 | null>;
+  aiPolicies(chainId: bigint, request?: AiPageRequest420): Promise<QueryPage420<AiPolicyState420>>;
+  aiPolicy(chainId: bigint, policyId: string): Promise<AiPolicyState420 | null>;
+  aiReputations(chainId: bigint, request?: AiPageRequest420): Promise<QueryPage420<AiReputationState420>>;
+  aiReputation(chainId: bigint, providerId: string): Promise<AiReputationState420 | null>;
   search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]>;
 }
 
@@ -213,6 +217,10 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   aiDeployment(chainId: bigint, deploymentId: string): Promise<AiDeploymentState420 | null> { return aiDeploymentState420(this.service.db, chainId, deploymentId, this.aiReadConfig()); }
   aiJobs(chainId: bigint, request: AiPageRequest420 = {}): Promise<QueryPage420<AiJobState420>> { return aiJobs420(this.service.db, chainId, request, this.aiReadConfig()); }
   aiJob(chainId: bigint, jobId: string): Promise<AiJobState420 | null> { return aiJobState420(this.service.db, chainId, jobId, this.aiReadConfig()); }
+  aiPolicies(chainId: bigint, request: AiPageRequest420 = {}): Promise<QueryPage420<AiPolicyState420>> { return aiPolicies420(this.service.db, chainId, request, this.aiReadConfig()); }
+  aiPolicy(chainId: bigint, policyId: string): Promise<AiPolicyState420 | null> { return aiPolicyState420(this.service.db, chainId, policyId, this.aiReadConfig()); }
+  aiReputations(chainId: bigint, request: AiPageRequest420 = {}): Promise<QueryPage420<AiReputationState420>> { return aiReputations420(this.service.db, chainId, request, this.aiReadConfig()); }
+  aiReputation(chainId: bigint, providerId: string): Promise<AiReputationState420 | null> { return aiReputationState420(this.service.db, chainId, providerId, this.aiReadConfig()); }
 
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> {
     return (await this.service.search(chainId, term, limit)).map(searchResult420);

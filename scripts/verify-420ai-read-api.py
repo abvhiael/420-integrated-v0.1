@@ -35,7 +35,7 @@ for token in [
 
 for token in [
  "AIProviderRegistry","AIModelRegistry","AIModelDeploymentRegistry420",
- "AIJobManager","AIJobEscrow","AIPolicyRegistry420",
+ "AIJobManager","AIJobEscrow","AIPolicyRegistry420","AIReputationRegistry",
  "artifact_events_only_addresses_resolved_by_deployment",
  "420AI private field cannot enter index descriptor"
 ]:
@@ -51,7 +51,7 @@ for token in [
 
 for route in [
  "/v1/ai/providers","/v1/ai/models","/v1/ai/model-versions",
- "/v1/ai/deployments","/v1/ai/jobs"
+ "/v1/ai/deployments","/v1/ai/jobs","/v1/ai/policies","/v1/ai/reputation"
 ]:
     if route not in http or route not in contract or route not in docs:
         errors.append("AI public route missing from implementation/contract/docs: "+route)

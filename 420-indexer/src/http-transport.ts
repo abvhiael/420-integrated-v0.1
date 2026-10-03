@@ -132,6 +132,10 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (aiDeploymentId !== null) { const value = await api.aiDeployment(chainId, aiDeploymentId); return value ? ok420(value) : error420(404, 'not_found', 'AI deployment not found'); }
     const aiJobId = pathParam420(path, /^\/v1\/ai\/jobs\/([^/]+)$/);
     if (aiJobId !== null) { const value = await api.aiJob(chainId, aiJobId); return value ? ok420(value) : error420(404, 'not_found', 'AI job not found'); }
+    const aiPolicyId = pathParam420(path, /^\/v1\/ai\/policies\/([^/]+)$/);
+    if (aiPolicyId !== null) { const value = await api.aiPolicy(chainId, aiPolicyId); return value ? ok420(value) : error420(404, 'not_found', 'AI policy not found'); }
+    const aiReputationId = pathParam420(path, /^\/v1\/ai\/reputation\/([^/]+)$/);
+    if (aiReputationId !== null) { const value = await api.aiReputation(chainId, aiReputationId); return value ? ok420(value) : error420(404, 'not_found', 'AI reputation not found'); }
 
     const treasuryBudgetId = pathParam420(path, /^\/v1\/treasury\/budgets\/([^/]+)$/);
     if (treasuryBudgetId !== null) {
@@ -190,6 +194,8 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (path === '/v1/ai/model-versions') return ok420(await api.aiModelVersions(chainId, pageRequest420(url)));
     if (path === '/v1/ai/deployments') return ok420(await api.aiDeployments(chainId, pageRequest420(url)));
     if (path === '/v1/ai/jobs') return ok420(await api.aiJobs(chainId, pageRequest420(url)));
+    if (path === '/v1/ai/policies') return ok420(await api.aiPolicies(chainId, pageRequest420(url)));
+    if (path === '/v1/ai/reputation') return ok420(await api.aiReputations(chainId, pageRequest420(url)));
     if (path === '/v1/search') {
       const q = url.searchParams.get('q')?.trim() ?? '';
       if (!q) return error420(400, 'invalid_request', 'q is required');

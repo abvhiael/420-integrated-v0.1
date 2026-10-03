@@ -29,7 +29,7 @@ test('IDX-7 contract names the first-party consumers that bind to the stable pub
 
 test('AI read routes are versioned, chain scoped and collections are paged', () => {
   const ai=INDEXER_V1_ROUTES_420.filter((route)=>route.id.startsWith('ai-'));
-  assert.equal(ai.length,10);
+  assert.equal(ai.length,14);
   assert.equal(ai.every((route)=>route.scope==='chain'),true);
   assert.equal(ai.filter((route)=>route.path.endsWith('s')).every((route)=>route.paged),true);
 });

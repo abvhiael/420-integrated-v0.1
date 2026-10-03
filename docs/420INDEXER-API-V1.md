@@ -48,6 +48,10 @@ Invalid client input returns `400 invalid_request`. Missing resources return `40
 | GET | `/v1/ai/deployments/:deploymentId?chainId=` | yes | no | 420AI deployment |
 | GET | `/v1/ai/jobs?chainId=` | yes | yes | 420AI/CMP job projection |
 | GET | `/v1/ai/jobs/:jobId?chainId=` | yes | no | 420AI/CMP job |
+| GET | `/v1/ai/policies?chainId=` | yes | yes | 420AI policy event projection |
+| GET | `/v1/ai/policies/:policyId?chainId=` | yes | no | 420AI policy |
+| GET | `/v1/ai/reputation?chainId=` | yes | yes | 420AI Trust-evidence counters |
+| GET | `/v1/ai/reputation/:providerId?chainId=` | yes | no | provider evidence counters |
 | GET | `/v1/search?chainId=&q=` | yes | no | bounded deterministic search |
 
 ## Paging and filters

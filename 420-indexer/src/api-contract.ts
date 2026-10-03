@@ -34,6 +34,10 @@ export const INDEXER_V1_ROUTES_420: readonly IndexerApiRoute420[] = [
   { id: 'ai-deployment', method: 'GET', path: '/v1/ai/deployments/:deploymentId', scope: 'chain', paged: false, description: 'AI deployment projection by id' },
   { id: 'ai-jobs', method: 'GET', path: '/v1/ai/jobs', scope: 'chain', paged: true, description: 'paged AI/CMP job projection' },
   { id: 'ai-job', method: 'GET', path: '/v1/ai/jobs/:jobId', scope: 'chain', paged: false, description: 'AI/CMP job projection by id' },
+  { id: 'ai-policies', method: 'GET', path: '/v1/ai/policies', scope: 'chain', paged: true, description: 'paged AI policy projection' },
+  { id: 'ai-policy', method: 'GET', path: '/v1/ai/policies/:policyId', scope: 'chain', paged: false, description: 'AI policy projection by id' },
+  { id: 'ai-reputations', method: 'GET', path: '/v1/ai/reputation', scope: 'chain', paged: true, description: 'paged AI Trust-evidence counters' },
+  { id: 'ai-reputation', method: 'GET', path: '/v1/ai/reputation/:providerId', scope: 'chain', paged: false, description: 'AI Trust-evidence counters by provider' },
   { id: 'search', method: 'GET', path: '/v1/search', scope: 'chain', paged: false, description: 'bounded deterministic index search' }
 ] as const;
 

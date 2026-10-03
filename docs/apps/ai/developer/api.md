@@ -16,6 +16,10 @@
 | GET | `/v1/ai/deployments/:deploymentId?chainId=` | no | one deployment |
 | GET | `/v1/ai/jobs?chainId=` | yes | AI job + CMP correlation + escrow/settlement evidence |
 | GET | `/v1/ai/jobs/:jobId?chainId=` | no | one job |
+| GET | `/v1/ai/policies?chainId=` | yes | policy revisions projected from public events |
+| GET | `/v1/ai/policies/:policyId?chainId=` | no | one policy projection |
+| GET | `/v1/ai/reputation?chainId=` | yes | Trust-applied provider evidence counters |
+| GET | `/v1/ai/reputation/:providerId?chainId=` | no | one provider's evidence counters |
 
 Collection routes use the shared opaque cursor contract and bounded `limit` (1–200), with `direction=asc|desc`.
 
@@ -36,3 +40,7 @@ AI descriptors and DTOs contain only IDs, addresses, numeric lifecycle/economic 
 Private prompts, documents, datasets, access material, raw model inputs and raw model outputs must never be written to public indexer projections.
 
 Off-chain provider endpoints may handle encrypted payload delivery and worker operations, but they are not canonical authorization.
+
+Policy event projections intentionally leave `privacyPolicyId` and `servicePricingPolicyId` null because the current `PolicyConfigured` event does not emit those values. The indexer does not invent or infer them. Canonical current-state enrichment can use `AIPolicyRegistry420.getPolicy` once deployment/Registry addresses are materialized in AI-AUDIT-9.
+
+AI reputation reads expose only Trust-applied evidence counters and latest evidence/outcome references. They do not synthesize a universal reputation score.

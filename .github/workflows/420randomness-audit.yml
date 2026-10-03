@@ -11,6 +11,11 @@ on:
       - 'contracts/config/genesis-dapp-contract-map.json'
       - 'contracts/config/genesis-address-namespace.json'
       - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/predeploy/RandomnessRegistry-predeploy-state.json'
+      - 'contracts/artifacts/RandomnessRegistry.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'scripts/generate-random-audit-3-genesis.py'
+      - 'scripts/test-random-audit-3-genesis.py'
       - 'scripts/verify-420randomness-audit.py'
       - 'docs/audit/420RANDOMNESS-*'
       - 'docs/apps/randomness/**'
@@ -30,13 +35,44 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: randomness-audit-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  materialize_once:
+    if: github.event_name == 'pull_request' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build and materialize RandomnessRegistry
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd contracts && forge build src/randomness/RandomnessRegistry.sol)
+          python3 scripts/generate-random-audit-3-genesis.py --write --print
+          python3 scripts/test-random-audit-3-genesis.py
+          git status --porcelain -- contracts/artifacts/RandomnessRegistry.json contracts/config/predeploy/RandomnessRegistry-predeploy-state.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json | tee /tmp/randomness-materialization.txt
+          test -s /tmp/randomness-materialization.txt
+      - name: Commit deterministic materialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add contracts/artifacts/RandomnessRegistry.json contracts/config/predeploy/RandomnessRegistry-predeploy-state.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json
+          git commit -m "RANDOM-AUDIT-3: materialize deterministic Genesis state"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
   qualify:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -62,6 +98,17 @@ jobs:
       - name: Build canonical Randomness graph
         working-directory: contracts
         run: forge build src/randomness src/interfaces/IRandomnessRouter420.sol src/interfaces/IRandomnessVerifier420.sol
+      - name: Verify deterministic RandomnessRegistry Genesis materialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-random-audit-3-genesis.py --check --print
+          python3 scripts/test-random-audit-3-genesis.py
+          git status --porcelain -- contracts/artifacts/RandomnessRegistry.json contracts/config/predeploy/RandomnessRegistry-predeploy-state.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json | tee /tmp/randomness-genesis-status.txt
+          if [ -s /tmp/randomness-genesis-status.txt ]; then
+            echo 'Committed RandomnessRegistry Genesis materialization is stale.' >&2
+            exit 1
+          fi
       - name: Run Randomness qualification suite
         working-directory: contracts
         run: forge test --match-path 'test/Randomness*.t.sol' -vvv

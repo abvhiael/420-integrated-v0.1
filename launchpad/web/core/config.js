@@ -20,7 +20,6 @@ export function validateRuntimeConfig(config){
 export function runtimeReadiness(config,{walletChainId=null}={}){
   const missing=[];
   if(!config?.network?.chainId)missing.push('chainId');
-  if(!config?.network?.rpcUrl)missing.push('rpcUrl');
   if(!config?.api?.baseUrl)missing.push('apiBaseUrl');
   for(const key of ['launchpadRouterAddress','allocationRegistryAddress','crowdfundingIntegrationAddress']){
     if(!config?.registry?.[key])missing.push(key);

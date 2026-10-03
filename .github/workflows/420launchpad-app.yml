@@ -1,0 +1,86 @@
+name: 420Launchpad app qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420launchpad-*'
+    paths:
+      - 'launchpad/web/**'
+      - 'launchpad/service/**'
+      - 'scripts/verify-launchpad-audit-5-app.py'
+      - '.github/workflows/420launchpad-app.yml'
+  pull_request:
+    paths:
+      - 'launchpad/web/**'
+      - 'launchpad/service/**'
+      - 'scripts/verify-launchpad-audit-5-app.py'
+      - '.github/workflows/420launchpad-app.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: launchpad-app-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Verify Audit-5 application boundary
+        run: python3 scripts/verify-launchpad-audit-5-app.py
+
+      - name: Qualify Launchpad browser surface
+        working-directory: launchpad/web
+        run: |
+          npm run check
+          npm test
+          npm run build
+
+      - name: Qualify Launchpad service layer
+        working-directory: launchpad/service
+        run: npm test
+
+      - name: Verify clean production artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f launchpad/web/dist/index.html
+          test -f launchpad/web/dist/runtime-config.json
+          test -f launchpad/web/dist/build-meta.json
+          test -f launchpad/web/dist/_headers
+          grep -q '420 Launchpad' launchpad/web/dist/index.html
+          grep -q 'DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED' launchpad/web/dist/runtime-config.json
+
+      - name: Static security and authority scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE 'eval\s*\(|new Function\s*\(|document\.write\s*\(' launchpad/web launchpad/service; then
+            echo 'Unsafe dynamic execution primitive found' >&2
+            exit 1
+          fi
+          if grep -R -nE 'http://|ws://' launchpad/web launchpad/service --exclude='*.test.*'; then
+            echo 'Insecure production URL literal found' >&2
+            exit 1
+          fi
+          if grep -R -n 'service.prepare.*creator' launchpad/web; then
+            echo 'Creator workflow incorrectly exposes direct transaction preparation' >&2
+            exit 1
+          fi

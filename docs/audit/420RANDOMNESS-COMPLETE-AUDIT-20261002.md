@@ -17,12 +17,12 @@ The Genesis contract map names eight required Solidity/interface files for 420 R
 | Route registry | `RandomnessRouteRegistry420` | base + audit negative tests | architecture + app README | COMPLETE | none |
 | Profile registry | `RandomnessProfileRegistry420` | base + audit fallback/timeout tests | architecture + app README | COMPLETE | none |
 | Canonical router | `RandomnessRouter420` | request/proof/fallback/expiry/replay tests | architecture + app README | COMPLETE | live deployment/Registry publication later |
-| Immutable result registry | `src/randomness/RandomnessRegistry.sol` | router-scope/one-time-binding tests | architecture + app README | PARTIAL | deterministic `0x0428` artifact/state materialization |
+| Immutable result registry | `src/randomness/RandomnessRegistry.sol` + retained `0x0428` materialization | router-scope/one-time-binding + deterministic materialization verification | architecture + app README + RANDOM-AUDIT-3 evidence | COMPLETE | live deployment/binding later |
 | Verifier interface | `IRandomnessVerifier420` | mock verifier exercised | architecture | COMPLETE | production verifier implementations are route-specific deployment inputs |
 | Draw helpers | `RandomnessDraw420` | deterministic/bounds/sample tests | architecture | COMPLETE | none |
 | Genesis source wiring | frozen `0x0428` predeploy plan and Step-6 verifier point to `src/randomness/RandomnessRegistry.sol`; legacy system registry retained only as historical evidence | exact-head verifier + CI | this audit + RANDOM-AUDIT-1 evidence | COMPLETE | none for RANDOM-AUDIT-1 |
-| Retained runtime artifact | absent on baseline | none | historical Step-6 docs | MISSING | compile/pin artifact and runtime hash |
-| Retained predeploy state | absent on baseline | none | historical Step-6 docs | MISSING | materialize GovernanceTimelock constructor storage and retain state record |
+| Retained runtime artifact | `contracts/artifacts/RandomnessRegistry.json`; runtime hash `0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a` | exact-head reproducibility check | RANDOM-AUDIT-3 evidence | COMPLETE | live code identity later |
+| Retained predeploy state | `RandomnessRegistry-predeploy-state.json`; immutable GovernanceTimelock `0x0429`, zero mutable slots, empty storage root | generator/verifier + clean-tree check | RANDOM-AUDIT-3 evidence | COMPLETE | live storage verification later |
 | Router deployment | Registry-resolved identity only | repository tests | app README | BLOCKED | production-equivalent testnet deployment |
 | Router one-time binding | implemented | unit test | app README | BLOCKED | execute only after qualified router deployment |
 | ProtocolRegistry publication | identity declared | indirect | architecture | BLOCKED | testnet deployment/publication evidence |
@@ -36,18 +36,18 @@ Verified/mitigated repository behavior: frozen request authority, proof-gated fu
 
 Accepted design risk: governance can configure routes/profiles and therefore controls which operators/verifiers become eligible. Operational governance security is outside these contracts.
 
-Unresolved release risk: the frozen `0x0428` predeploy provenance is inconsistent on baseline because legacy Step-6 material points to a different contract with the same name and different storage/API semantics.
+Resolved repository provenance finding: the baseline `0x0428` source ambiguity has been removed, and the canonical generalized registry now has retained compiler/runtime/storage provenance. Live-chain code/storage identity and production verifier/operator security remain later qualification work.
 
 ## Readiness
 
 - CODE COMPLETE: **YES** for the canonical generalized protocol sources.
-- BUILD COMPLETE: **NO** until exact-head CI succeeds and the deterministic runtime artifact is retained.
+- BUILD COMPLETE: **YES** for repository/offline materialization; exact-head CI and deterministic runtime/state reproduction pass.
 - CONTRACT COMPLETE: **YES** at source level.
 - TEST COMPLETE: **NO** until exact-head CI and deployment smoke qualification are retained.
 - DOCUMENTATION COMPLETE: **PARTIAL**; this audit adds the app-level operator/integration reference, but deployment evidence is outstanding.
 - INTEGRATION COMPLETE: **NO**; ProtocolRegistry publication and deployed indexer ABI identity are outstanding.
 - SECURITY QUALIFIED: **NO** for production; repository review is not an independent external audit.
-- TESTNET READY: **NO** until `0x0428` artifact/state provenance and deployment bundle are frozen.
+- TESTNET READY: **NO**; `0x0428` artifact/state provenance is now frozen, but RANDOM-AUDIT-4 deployment bundle and later live qualification remain.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.
 
@@ -55,7 +55,7 @@ Unresolved release risk: the frozen `0x0428` predeploy provenance is inconsisten
 
 1. **RANDOM-AUDIT-1 — canonical source reconciliation — COMPLETE.** `0x0428` predeploy source and the retained Step-6 verifier now resolve `src/randomness/RandomnessRegistry.sol`; the legacy `src/system/RandomnessRegistry.sol` remains historical evidence only. Level 1 exact-head qualification passed on implementation SHA `95b7b4c7f6cfc214ab10c8673a665788b389568b`, workflow run `37093289263`, job `111117991983`.
 2. **RANDOM-AUDIT-2 — repository qualification — COMPLETE.** The complete retained Randomness source/interface/test set is formatter-clean and passed the dedicated verifier, canonical build, all `Randomness*.t.sol` tests and app-scoped static security scan on exact implementation SHA `f40d9b89e9e4c8626a8105c61385041b986853ca`; workflow run `37094231759`, job `111120749696`.
-3. **RANDOM-AUDIT-3 — deterministic Genesis materialization.** Retain the exact compiler artifact, source blob, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`.
+3. **RANDOM-AUDIT-3 — deterministic Genesis materialization — COMPLETE.** Retained exact compiler/runtime artifact, source blob, stable compiler-derived immutable locations, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`; exact implementation SHA `809cff5ea67fc48c3082f5ce0702b8572b18c663`, workflow run `37098929839`, job `111134459600`.
 4. **RANDOM-AUDIT-4 — deployment bundle.** Freeze deployment ordering/arguments for route registry, profile registry and router; define the exact ProtocolRegistry component publication and one-time `bindRouter` transaction.
 5. **RANDOM-AUDIT-5 — production-equivalent testnet qualification.** Deploy exact artifacts, verify code/storage identities, publish Registry entries, bind the router, configure qualified routes/profiles, execute primary/fallback/void smoke tests, and verify indexer lifecycle projection.
 6. **RANDOM-AUDIT-6 — production security/release closeout.** Independent security review, operational route/verifier evidence, monitoring/runbook validation and final Genesis/mainnet evidence.

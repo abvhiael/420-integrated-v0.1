@@ -137,12 +137,22 @@ Current branch/main divergence is explicitly deferred to GRANTS-AUDIT-8 Level 3 
 
 ## GRANTS-AUDIT-7 — documentation, threat model and operator guidance
 
-**Status: IMPLEMENTED — pending exact-head qualification**
+**Status: COMPLETE**
 
-- canonical architecture remains docs/architecture/protocols/stake-governance-treasury-grants.md;
-- audit report and this remediation roadmap record actual repository state;
-- Genesis config records deployment order, address model and security invariants;
-- known testnet/live blockers remain explicit.
+- canonical architecture remains `docs/architecture/protocols/stake-governance-treasury-grants.md` and now cross-links the Grants operator guide, threat model and audit report;
+- added `docs/apps/grants/operator-guide.md` with deployment, authority, operating, monitoring, incident-response, evidence-preservation, recovery and live-limitations guidance;
+- added `docs/apps/grants/threat-model.md` covering governance/capability/replay/cap/accounting/Treasury/Registry/client trust boundaries, fail-closed abuse cases, mitigations and residual live risks;
+- added `docs/audit/420GRANTS-AUDIT-REPORT.md` reconciling actual repository state, qualification ownership and explicit testnet/production blockers;
+- added `scripts/verify-grants-audit-7-docs.py` to fail closed on documentation/config/release drift, all GRANT-INV-001..019 invariants, address/classification drift, false live claims, authority/custody drift, missing operator/threat/report sections and missing `authoritative: false` client semantics;
+- extended `.github/workflows/grants-audit.yml` so Grants-owned documentation changes trigger exact-head app-specific qualification;
+- initial candidate `47592e72fee02a31c0ff20abca0cb0ffbff96bd0` correctly failed AUDIT-7 verification because the operator guide omitted the exact `authoritative: false` API marker; documentation was corrected without weakening the verifier;
+- Level 1 exact-head qualification **PASS** on implementation SHA `14c6732aa1d30bed5e5e5459ee930bafc9c54426`;
+- 420Grants Audit Qualification run `37086042799` / #68: grants-contract-core job `111096496881` PASS, grants-security job `111096497208` PASS, grants-client-integration job `111098474470` PASS;
+- affected Solidity Contracts run `37086042862` / #4399 SUCCESS on the same SHA: classify-pr job `111096584447` PASS, compute-fast job `111096611080` PASS, full Foundry/pr-shards correctly skipped for this documentation-focused ordinary step;
+- 420Docs Qualification run `37086042760` / #4616 skipped under its current path/classification policy and is **not** counted as passing evidence; global Docs reconciliation remains GRANTS-AUDIT-8 Level 3 work;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-7-QUALIFICATION.md`, introduced by evidence commit `ce02105c798d645b579f952a6513cb1464fbff82`.
+
+Level 2 is not triggered by this documentation/operator closeout step. Level 3 remains deferred to GRANTS-AUDIT-8. Live deployment and Treasury/Vault correlation remain GRANTS-AUDIT-9 work.
 
 ## GRANTS-AUDIT-8 — exact-head repository qualification and durable evidence
 

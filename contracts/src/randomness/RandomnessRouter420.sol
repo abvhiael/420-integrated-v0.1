@@ -237,7 +237,9 @@ contract RandomnessRouter420 is I420System, IRandomnessRouter420 {
         if (request_.status == Status.NONE) revert UnknownRequest();
         if (request_.status != Status.REQUESTED) revert WrongStatus();
         if (request_.fallbackPolicy != RandomnessIds420.FALLBACK_ONCE_THEN_VOID || request_.fallbackRoute == bytes32(0))
-        revert FallbackUnavailable();
+        {
+            revert FallbackUnavailable();
+        }
         if (block.timestamp <= request_.primaryDeadline) revert FallbackTooEarly();
         if (block.timestamp > request_.deadline) revert RequestExpired();
         request_.status = Status.FALLBACK_ACTIVE;

@@ -75,7 +75,7 @@ export class ProviderRuntime420 {
           if(await this._canonicalAlreadyHas(jobId,result.resultCommitment)) return {reconciled:true,attempt};
           throw error;
         }
-      },{maxAttempts:this.config.maxAttempts,baseDelayMs:this.config.retryBaseMs,deadlineMs:Math.min(job.deadlineMs,this.now()+30_000),sleep:this.sleep});
+      },{maxAttempts:this.config.maxAttempts,baseDelayMs:this.config.retryBaseMs,deadlineMs:Math.min(job.deadlineMs,this.now()+30_000),sleep:this.sleep,now:this.now});
       state={...state,status:"submitted",submission,updatedAt:this.now()};
       await this.stateStore.put(state);
       this.observe("info","receipt_submitted",{jobId,receiptId,resultCommitment:result.resultCommitment});

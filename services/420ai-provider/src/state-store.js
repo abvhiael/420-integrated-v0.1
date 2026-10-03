@@ -5,7 +5,7 @@ export class MemoryRuntimeStateStore420 {
   constructor(seed=[]) { this.jobs=new Map(seed.map((x)=>[x.jobId,structuredClone(x)])); }
   async get(jobId){return this.jobs.has(jobId)?structuredClone(this.jobs.get(jobId)):null;}
   async put(state){this.jobs.set(state.jobId,structuredClone(state));return structuredClone(state);}
-  async list(){return [...this.jobs.values()].map(structuredClone);}
+  async list(){return [...this.jobs.values()].map((value)=>structuredClone(value));}
 }
 
 export class FileRuntimeStateStore420 {

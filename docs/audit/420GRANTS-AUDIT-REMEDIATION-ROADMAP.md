@@ -156,19 +156,22 @@ Level 2 is not triggered by this documentation/operator closeout step. Level 3 r
 
 ## GRANTS-AUDIT-8 — exact-head repository qualification and durable evidence
 
-**Status: IN PROGRESS**
+**Status: COMPLETE**
 
-Required exact-head gates:
-- python3 scripts/verify-grants-audit.py;
-- forge fmt --check src/grants test/GrantsGenesis420.t.sol;
-- forge build src/grants --force --sizes;
-- forge test --match-path test/GrantsGenesis420.t.sol -vvv under CI profile;
-- same retained suite under hardening profile;
-- broader affected repository CI required by the PR;
-- no unresolved failed/cancelled required checks;
-- clean branch divergence/evidence tied to one exact SHA.
+- reconciled the complete accumulated Grants audit phase against current `main` base `b58b09a17e641a42b81d832bad913a83c7caada9`;
+- established exact Level 3 merge-candidate implementation SHA `c95e72c8037bd52c4a7b1844104dc3e5444e2e4a`;
+- PR #484 was mergeable and **0 commits behind** current main at implementation qualification;
+- canonical Solidity full repository qualification ran once through Solidity Contracts #4448 / run `37088753146` with four successful PR shards: jobs `111105262734`, `111105262741`, `111105262829`, `111105262888`; the monolithic Foundry job was skipped and is not counted as passing evidence;
+- Genesis Address Authority #1219 / run `37088753244`, job `111104366510` PASS on the same exact SHA without duplicating the full Foundry inventory;
+- 420Grants Audit Qualification #79 / run `37088753167`: contract-core `111104414441` PASS, security `111104414660` PASS, client-integration `111106985471` PASS;
+- 420Docs Qualification #4665 / run `37088753247`, job `111104366298` PASS after correcting the governed Grants threat-model category and linking the inherited 420Pay deployment-operations page into documentation navigation;
+- affected 420Indexer runs #1160 / `37088753170` job `111104365858` PASS and #2040 / `37088753275` job `111104366473` PASS;
+- affected 420 Wallet Web Verification #1480 / run `37088753218`, job `111104366758` PASS;
+- 420 Integrated Qualification is **not applicable** to this Grants candidate because its canonical workflow is path-scoped to consensus/execution/integration/node-build/Exchange/selected Compute closeout surfaces and none of those paths are changed by the final Grants diff;
+- all original GRANTS-AUDIT-8 exit criteria are individually satisfied on the exact merge-candidate SHA;
+- durable evidence: `docs/audit/420GRANTS-AUDIT-8-QUALIFICATION.md`, introduced by evidence commit `05635a9c1c7d085f722cd199f236f6267a32b7f7`.
 
-Do not mark COMPLETE until these gates are green against the exact final bookkeeping head.
+Repository/app-phase closeout is complete. Production-equivalent deployment evidence remains GRANTS-AUDIT-9 work and is not inferred from repository qualification.
 
 ## GRANTS-AUDIT-9 — production-equivalent testnet qualification
 

@@ -8,25 +8,32 @@ tests = (ROOT / "contracts/test/ComputeMatchingEngine420.t.sol").read_text()
 config = json.loads((ROOT / "contracts/config/compute-market/cmp-2.3-replaceable-matching.json").read_text())
 doc = (ROOT / "docs/compute-market/CMP-2.3-REPLACEABLE-MATCHING.md").read_text()
 
+normalized = "".join(contract.split())
 required_contract = [
-    "contract ComputeMatch420",
-    "function propose(",
-    "function accept(",
-    "function proposalEligible(",
+    "contractComputeMatch420",
+    "functionpropose(",
+    "functionaccept(",
+    "functionproposalEligible(",
     "acceptedForRequest",
     "requests.isEffective",
     "offers.isEffective",
     "requestCommitment",
     "offerCommitment",
-    "msg.sender != r.owner",
-    "r.terms.resourceClass != o.computeClass",
-    "r.terms.runtimeHash != o.runtimeProfileHash",
-    "r.terms.capabilityHash != o.capabilityHash",
-    "r.terms.jurisdictionHash != o.jurisdictionHash",
-    "o.fixedPrice > r.terms.maximumPrice",
+    "msg.sender!=r.owner",
+    "r.terms.resourceClass!=o.computeClass",
+    "r.terms.runtimeHash!=o.runtimeProfileHash",
+    "r.terms.capabilityHash!=o.capabilityHash",
+    "r.terms.jurisdictionHash!=o.jurisdictionHash",
 ]
 for token in required_contract:
-    assert token in contract, f"missing CMP-2.3 contract gate: {token}"
+    assert token in normalized, f"missing CMP-2.3 contract gate: {token}"
+
+# CMP-2.4 generalizes the original fixed-price budget check to a deterministic
+# accepted quote ceiling while preserving the CMP-2.3 requester maximum invariant.
+assert (
+    "o.fixedPrice>r.terms.maximumPrice" in normalized
+    or "quotedMaximum>r.terms.maximumPrice" in normalized
+), "missing CMP-2.3 requester maximum-price gate"
 
 required_tests = [
     "testReplaceableSchedulersCanProposeButDoNotOwnAuthority",

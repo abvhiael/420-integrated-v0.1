@@ -46,3 +46,12 @@ Policy event projections intentionally leave `privacyPolicyId` and `servicePrici
 AI reputation reads expose only Trust-applied evidence counters and latest evidence/outcome references. They do not synthesize a universal reputation score.
 
 <!-- AI-AUDIT-7 qualification trigger: no behavioral change -->
+
+
+## Browser client
+
+The production browser client source is `ai/web`. It consumes this read API only for non-authoritative discovery and lifecycle display, while requester-authorized mutations are sent directly through the user's injected EIP-1193 wallet to the canonical `AIJobManager`.
+
+Private input plaintext is reduced locally to a bytes32 commitment before request calldata is produced. The browser does not persist private input to runtime configuration or public indexed storage. Funding is display-only because direct AI escrow custody is deliberately disabled; canonical funding arrives through the Vault/settlement adapter path.
+
+The committed `runtime-config.json` is intentionally unresolved/fail-closed until AI-AUDIT-9 deployment materialization.

@@ -280,7 +280,11 @@ CMP-2.3 is the first offers/requests/matching convergence milestone, so the reta
 Durable evidence: [`CMP-2.3-QUALIFICATION-EVIDENCE.md`](./CMP-2.3-QUALIFICATION-EVIDENCE.md). Level 3 remains deferred to CMP-2.8.
 
 ## CMP-2.4 — Pricing model
+**Status: implementation / Level 1 qualification in progress.**
+
 Support fixed-price, work-unit, CPU-time, GPU-time and verified-result pricing.
+
+CMP-2.4 is an ordinary Level 1 step. The offers/requests/matching convergence milestone was qualified at Level 2 in CMP-2.3; Level 3 remains CMP-2.8.
 
 ## CMP-2.5 — Capacity-aware assignment
 Consume CMP-1.3 capacity reservations atomically.

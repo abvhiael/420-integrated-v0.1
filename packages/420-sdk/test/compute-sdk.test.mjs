@@ -288,6 +288,13 @@ function workerOffer(overrides = {}) {
     pricingPolicyId: b32(11),
     pricingVersion: 1,
     fixedPrice: 3n * 10n ** 18n,
+    pricingModel: 1,
+    unitRate: 0n,
+    unitScale: 1n,
+    minimumCharge: 3n * 10n ** 18n,
+    maximumCharge: 3n * 10n ** 18n,
+    maximumBillableUnits: 0n,
+    pricingTermsCommitment: b32(13),
     revision: 2n,
     predecessorCommitment: b32(12),
     exists: true,
@@ -310,6 +317,19 @@ test('rejects malformed, stale, unavailable, zero-capacity, zero-price and empty
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ fixedPrice: 0n })), /price/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ availableFrom: 1001n })), /availability/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ jurisdictionHash: b32(0) })), /empty canonical commitment/);
+});
+
+test('CMP-2.4 validates and quotes all bounded pricing models', async () => {
+  const { quoteComputeWorkerOffer420 } = await import('../dist/index.js');
+  for (const pricingModel of [2,3,4,5]) {
+    const offer=workerOffer({fixedPrice:0n,pricingModel,unitRate:5n,unitScale:2n,minimumCharge:3n,maximumCharge:20n,maximumBillableUnits:10n});
+    assert.equal(validateComputeWorkerOffer420(offer),offer);
+    assert.equal(quoteComputeWorkerOffer420(offer,3n),8n);
+    assert.throws(()=>quoteComputeWorkerOffer420(offer,11n),/bounds/);
+  }
+  assert.equal(quoteComputeWorkerOffer420(workerOffer(),0n),3n*10n**18n);
+  assert.throws(()=>quoteComputeWorkerOffer420(workerOffer(),1n),/zero billable units/);
+  assert.throws(()=>validateComputeWorkerOffer420(workerOffer({pricingModel:0})),/unsupported/);
 });
 
 test('CMP-2.2 request validation and independent canonical ABI vectors', async () => {

@@ -327,8 +327,10 @@ export function createComputeWorkerClient420(reader: ComputeWorkerReader420): Co
 }
 
 
-export const COMPUTE_WORKER_OFFER_SCHEMA_420 = '420-compute-worker-offer-v2' as const;
-export const COMPUTE_WORKER_OFFER_VERSION_420 = 2 as const;
+export const COMPUTE_WORKER_OFFER_SCHEMA_420 = '420-compute-worker-offer-v3' as const;
+export const COMPUTE_WORKER_OFFER_VERSION_420 = 3 as const;
+export const COMPUTE_PRICING_MODEL_420 = { FIXED_PRICE: 1, WORK_UNIT: 2, CPU_TIME: 3, GPU_TIME: 4, VERIFIED_RESULT: 5 } as const;
+export type ComputePricingModel420 = typeof COMPUTE_PRICING_MODEL_420[keyof typeof COMPUTE_PRICING_MODEL_420];
 
 export interface ComputeWorkerOffer420 {
   readonly providerId: Hex420;
@@ -349,6 +351,13 @@ export interface ComputeWorkerOffer420 {
   readonly pricingPolicyId: Hex420;
   readonly pricingVersion: number;
   readonly fixedPrice: bigint;
+  readonly pricingModel: ComputePricingModel420;
+  readonly unitRate: bigint;
+  readonly unitScale: bigint;
+  readonly minimumCharge: bigint;
+  readonly maximumCharge: bigint;
+  readonly maximumBillableUnits: bigint;
+  readonly pricingTermsCommitment: Hex420;
   readonly revision: bigint;
   readonly predecessorCommitment: Hex420;
   readonly exists: boolean;
@@ -369,6 +378,7 @@ export function validateComputeWorkerOffer420(
     ['capabilityHash', offer.capabilityHash],
     ['jurisdictionHash', offer.jurisdictionHash],
     ['pricingPolicyId', offer.pricingPolicyId],
+    ['pricingTermsCommitment', offer.pricingTermsCommitment],
     ['predecessorCommitment', offer.predecessorCommitment]
   ] as const) {
     assertBytes32420(value, label);
@@ -384,9 +394,14 @@ export function validateComputeWorkerOffer420(
     throw new ComputeReadModelError420('stale or mismatched worker offer revision');
   }
   if (offer.capacityUnits <= 0n) throw new ComputeReadModelError420('worker offer capacity must be positive');
-  if (offer.fixedPrice <= 0n || offer.pricingVersion <= 0) {
-    throw new ComputeReadModelError420('worker offer price must be positive and versioned');
-  }
+  if (offer.pricingVersion <= 0) throw new ComputeReadModelError420('worker offer pricing must be versioned');
+  const fixed = offer.pricingModel === COMPUTE_PRICING_MODEL_420.FIXED_PRICE;
+  const variable = offer.pricingModel >= COMPUTE_PRICING_MODEL_420.WORK_UNIT && offer.pricingModel <= COMPUTE_PRICING_MODEL_420.VERIFIED_RESULT;
+  if (fixed) {
+    if (offer.fixedPrice <= 0n || offer.unitRate !== 0n || offer.unitScale !== 1n || offer.minimumCharge !== offer.fixedPrice || offer.maximumCharge !== offer.fixedPrice || offer.maximumBillableUnits !== 0n) throw new ComputeReadModelError420('worker offer fixed pricing terms are not canonical');
+  } else if (variable) {
+    if (offer.fixedPrice !== 0n || offer.unitRate <= 0n || offer.unitScale <= 0n || offer.maximumCharge <= 0n || offer.maximumBillableUnits <= 0n || offer.minimumCharge > offer.maximumCharge) throw new ComputeReadModelError420('worker offer variable pricing terms are invalid');
+  } else throw new ComputeReadModelError420('worker offer pricing model is unsupported');
   if (offer.availableFrom > offer.validUntil) {
     throw new ComputeReadModelError420('worker offer availability window is invalid');
   }
@@ -399,6 +414,22 @@ export function validateComputeWorkerOffer420(
     throw new ComputeReadModelError420('worker offer contains an empty canonical commitment');
   }
   return offer;
+}
+export function quoteComputeWorkerOffer420(offer: ComputeWorkerOffer420, billableUnits: bigint): bigint {
+  validateComputeWorkerOffer420(offer);
+  if (billableUnits < 0n) throw new ComputeReadModelError420('billable units cannot be negative');
+  if (offer.pricingModel === COMPUTE_PRICING_MODEL_420.FIXED_PRICE) {
+    if (billableUnits !== 0n) throw new ComputeReadModelError420('fixed-price quote requires zero billable units');
+    return offer.fixedPrice;
+  }
+  if (billableUnits <= 0n || billableUnits > offer.maximumBillableUnits) throw new ComputeReadModelError420('billable units exceed published pricing bounds');
+  const max=(1n<<256n)-1n;
+  if (offer.unitRate > max / billableUnits) throw new ComputeReadModelError420('pricing multiplication overflows uint256');
+  const numerator=offer.unitRate*billableUnits; let amount=numerator/offer.unitScale;
+  if (numerator % offer.unitScale !== 0n) amount += 1n;
+  if (amount < offer.minimumCharge) amount=offer.minimumCharge;
+  if (amount > offer.maximumCharge) amount=offer.maximumCharge;
+  return amount;
 }
 
 export const COMPUTE_REQUEST_SCHEMA_420 = '420-compute-market-request-v1' as const;

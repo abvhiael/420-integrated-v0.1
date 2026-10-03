@@ -289,6 +289,57 @@ contract ComputeMatchingEngine420Test {
         require(matches.nextProposalSerial() == 0, "failed proposal consumed serial");
     }
 
+
+    function _pricedOffer(ComputePricing420.Model model, uint256 rate, uint256 scale, uint256 minimumCharge, uint256 maximumCharge, uint256 maximumUnits) private returns (bytes32 offerId) {
+        ComputePricing420.Terms memory pricing = ComputePricing420.Terms(model,0,rate,scale,minimumCharge,maximumCharge,maximumUnits);
+        vm.prank(OPERATOR);
+        offerId = offers.publishPricedWorkerOffer(resourceId,JURISDICTION,uint64(block.timestamp),uint64(block.timestamp + 2 days),PRICING,1,pricing);
+    }
+    function _pricedProposal(address scheduler, bytes32 requestId, bytes32 offerId, uint256 units) private returns (bytes32 proposalId) {
+        vm.prank(scheduler); proposalId = matches.proposePriced(requestId, offerId, units);
+    }
+    function _assertVariablePricingModel(ComputePricing420.Model model) private {
+        bytes32 requestId=_request(20); bytes32 offerId=_pricedOffer(model,5,2,3,20,10);
+        bytes32 proposalId=_pricedProposal(SCHEDULER_A,requestId,offerId,3);
+        ComputeMatch420.Proposal memory p=matches.proposal(proposalId);
+        require(p.billableUnits==3&&p.quotedMaximum==8,"deterministic rounded quote");
+        vm.prank(owner); bytes32 matchId=matches.accept(proposalId,1,1);
+        ComputeMatch420.AcceptedMatch memory m=matches.acceptedMatch(matchId);
+        require(m.pricingModel==model&&m.unitRate==5&&m.unitScale==2,"pricing snapshot");
+        require(m.minimumCharge==3&&m.maximumCharge==20&&m.maximumBillableUnits==10,"pricing bounds snapshot");
+        require(m.billableUnits==3&&m.acceptedMaximum==8&&m.fixedPrice==0,"accepted maximum snapshot");
+        require(m.pricingTermsCommitment!=bytes32(0),"pricing commitment");
+    }
+    function testAllCmp24VariablePricingModelsProduceDeterministicAcceptedCeilings() public {
+        _assertVariablePricingModel(ComputePricing420.Model.WORK_UNIT);
+        _assertVariablePricingModel(ComputePricing420.Model.CPU_TIME);
+        _assertVariablePricingModel(ComputePricing420.Model.GPU_TIME);
+        _assertVariablePricingModel(ComputePricing420.Model.VERIFIED_RESULT);
+    }
+    function testVariablePricingBoundsAndRequesterMaximumFailClosedAtomically() public {
+        bytes32 requestId=_request(7); bytes32 offerId=_pricedOffer(ComputePricing420.Model.GPU_TIME,5,2,3,20,10);
+        require(!_try(SCHEDULER_A,abi.encodeCall(matches.proposePriced,(requestId,offerId,uint256(3)))),"over-budget metered proposal admitted");
+        require(matches.nextProposalSerial()==0,"failed metered proposal consumed serial");
+        bytes32 affordableRequest=_request(20);
+        require(!_try(SCHEDULER_A,abi.encodeCall(matches.proposePriced,(affordableRequest,offerId,uint256(11)))),"over-unit-cap proposal admitted");
+        require(matches.nextProposalSerial()==0,"over-unit-cap consumed serial");
+    }
+    function testFixedPriceCompatibilityAndVariableMinimumMaximumCaps() public {
+        bytes32 fixedRequest=_request(5 ether); bytes32 fixedOffer=_offer(3 ether);
+        bytes32 fixedProposal=_propose(SCHEDULER_A,fixedRequest,fixedOffer);
+        require(matches.proposal(fixedProposal).quotedMaximum==3 ether,"fixed quote changed");
+        bytes32 minRequest=_request(20); bytes32 minOffer=_pricedOffer(ComputePricing420.Model.WORK_UNIT,1,10,4,20,100);
+        require(matches.proposal(_pricedProposal(SCHEDULER_A,minRequest,minOffer,1)).quotedMaximum==4,"minimum charge not applied");
+        bytes32 capRequest=_request(20); bytes32 capOffer=_pricedOffer(ComputePricing420.Model.CPU_TIME,10,1,0,12,100);
+        require(matches.proposal(_pricedProposal(SCHEDULER_A,capRequest,capOffer,2)).quotedMaximum==12,"maximum charge cap not applied");
+    }
+    function testMalformedPricingTermsRejectBeforeOfferAllocation() public {
+        ComputePricing420.Terms memory invalid=ComputePricing420.Terms(ComputePricing420.Model.GPU_TIME,0,5,0,0,20,10);
+        vm.prank(OPERATOR);
+        (bool ok,)=address(offers).call(abi.encodeCall(offers.publishPricedWorkerOffer,(resourceId,JURISDICTION,uint64(block.timestamp),uint64(block.timestamp+2 days),PRICING,uint32(1),invalid)));
+        require(!ok&&offers.nextSerial()==0,"malformed pricing allocated offer");
+    }
+
     function testContractRejectsResourceDriftAndPreservesFailedAcceptanceAtomicity() public {
         bytes32 requestId = _request(5 ether);
         bytes32 offerId = _offer(3 ether);

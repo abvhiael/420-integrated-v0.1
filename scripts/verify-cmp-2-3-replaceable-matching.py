@@ -52,6 +52,7 @@ assert "python scripts/verify-cmp-2-3-replaceable-matching.py" in workflow
 
 roadmap = (ROOT / "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md").read_text()
 assert "## CMP-2.3 — Replaceable matching engine" in roadmap
-assert "implementation / Level 1 + Level 2 qualification in progress" in roadmap
+assert "Status: COMPLETE — Level 1 + Level 2 exact-head qualified" in roadmap
+assert "CMP-2.3-QUALIFICATION-EVIDENCE.md" in roadmap
 
 print("CMP-2.3 verifier: PASS")

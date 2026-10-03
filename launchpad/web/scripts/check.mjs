@@ -1,0 +1,10 @@
+import fs from 'node:fs';import path from 'node:path';
+const root=path.resolve(import.meta.dirname,'..');const errors=[];
+for(const f of ['index.html','app.js','styles.css','runtime-config.json','core/config.js','core/service.js','core/wallet.js'])if(!fs.existsSync(path.join(root,f)))errors.push('missing '+f);
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8'),app=fs.readFileSync(path.join(root,'app.js'),'utf8'),service=fs.readFileSync(path.join(root,'core/service.js'),'utf8'),wallet=fs.readFileSync(path.join(root,'core/wallet.js'),'utf8');
+for(const token of ['campaign-grid','participant-state','creator-form','review-gate','aria-live'])if(!html.includes(token))errors.push('UI requirement missing '+token);
+for(const token of ['runtime()','campaigns(','participant(','prepare(','creatorRequest('])if(!service.includes(token))errors.push('service client missing '+token);
+for(const token of ['WRONG_NETWORK','CANONICAL_ADDRESSES_UNRESOLVED','CANONICAL_REVIEW_REQUIRED','UNEXPECTED_TRANSACTION_TARGET'])if(!wallet.includes(token))errors.push('wallet gate missing '+token);
+if(!app.includes('Creator governance request prepared'))errors.push('creator governance boundary missing');
+if(/innerHTML\s*=\s*[^'"]/.test(app))errors.push('dynamic innerHTML assignment detected');
+if(errors.length){console.error(errors.join('\n'));process.exit(1)}console.log('420Launchpad web check PASS');

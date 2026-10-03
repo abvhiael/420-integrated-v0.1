@@ -91,8 +91,8 @@
       "artifact": "contracts/artifacts/RandomnessRegistry.json",
       "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
       "name": "RandomnessRegistry",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
-      "source": "system/RandomnessRegistry.sol",
+      "notes": "RANDOM-AUDIT-1: canonical generalized 420Random registry; legacy system/RandomnessRegistry.sol is not the 0x0428 application authority. Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "source": "randomness/RandomnessRegistry.sol",
       "status": "SOURCE_READY"
     },
     {

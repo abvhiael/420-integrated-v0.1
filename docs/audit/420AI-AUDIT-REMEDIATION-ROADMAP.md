@@ -55,10 +55,14 @@ Implement the architecture-named modules that are still absent from current `mai
 - Implement or reconcile AI read models from canonical Registry/CMP/AI events and state.
 - Support reorg-safe indexing, recovery/rebuild, versioned schemas, pagination, network validation and no plaintext-private-payload leakage.
 
+- **Implementation is present on the audit branch, but formal exact-head qualification remains pending because GitHub Actions has not emitted the required app-specific run for the current connector-written implementation heads. Do not treat AI-AUDIT-7 as COMPLETE until `ai-read-api` passes on an exact implementation SHA.**
+
 ## AI-AUDIT-8 — user-facing AI client
 - Implement the actual 420AI user-facing client; current `main` has manuals but no production AI web application.
 - Real wallet connection, network validation, model/version/deployment discovery, request/funding state, transaction/error/recovery states, accessibility/responsiveness and production configuration.
 - No privileged browser secrets or provider credentials.
+
+- **Repository implementation is complete at `b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad`, but formal qualification is BLOCKED by the same GitHub Actions trigger defect: no exact-head 420AI Audit Qualification run exists for this SHA. Local targeted qualification passed (`npm run build`, structural check, and 16/16 client tests), but missing CI is not counted as green. Durable implementation record: `docs/audit/420AI-AUDIT-8-IMPLEMENTATION.md`.**
 
 ## AI-AUDIT-9 — deployment and Genesis materialization
 - Materialize/verify frozen predeploy runtime where required.

@@ -419,6 +419,18 @@ The provider runtime is implemented under `services/420ai-provider` and follows 
 - operational logs redact private payloads, prompts, documents, tokens, secrets, credentials and raw byte buffers;
 - the runtime gains no custody, settlement, governance, validator, identity or arbitrary lifecycle authority.
 
+### AI-AUDIT-7 read API / indexer boundary
+
+420AI uses the shared 420Indexer v1 public read surface rather than creating a second authoritative AI database. Current AI event descriptors cover provider, model, model-version, deployment, job, escrow and policy event families and remain deployment-address agnostic until canonical Registry/deployment configuration binds contract identities.
+
+AI read state is reconstructed from the canonical typed protocol-event journal in block/transaction/log order. The shared Indexer owns canonical ancestry, reorg rollback and replay. AI-specific projections therefore remain rebuildable caches: every returned AI object carries `authoritative: false`, while Registry, ComputeMarket, Vault and AI contracts remain the protocol authority.
+
+The AI read schema is versioned as `420-ai-read-v1`. Collection endpoints use the shared bounded opaque keyset cursor semantics and every query is chain scoped; deployments may additionally pin an expected AI chain ID and fail closed on mismatch.
+
+Public AI projections are allowlisted to IDs, addresses, hashes/commitments, lifecycle/economic values and provenance. Descriptor generation rejects private-payload field classes and the reducer rejects contaminated event rows. Plaintext prompts, documents, datasets, access tokens, credentials, private keys and raw input/output bytes are never part of the public AI read model.
+
+Job projections preserve current AI-to-CMP correlation identifiers such as `computeRequestId`, `computeJobId` and provider references, but neither the indexer nor its HTTP API may create or reinterpret canonical execution, verification, settlement or dispute authority.
+
 ## Implementation order
 
 1. Freeze ComputeMarket V1 architecture.

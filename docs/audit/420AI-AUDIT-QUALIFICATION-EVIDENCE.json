@@ -13,6 +13,7 @@
     "required_jobs": [
       "audit-state",
       "genesis-compatibility",
+      "v1-modules",
       "focused-ai-contracts"
     ]
   },
@@ -46,10 +47,83 @@
         "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global and Docs/global closeout remain deferred to AI-AUDIT-10/phase closeout as defined by the audit model.",
         "live": "Genesis materialization, ProtocolRegistry publication, current ComputeMarket integration and production-equivalent testnet evidence remain later roadmap work."
       }
+    },
+    "AI-AUDIT-3": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "b04ead697a90f325f952ba41ca50bdbda57d4258",
+      "base_sha": "b58b09a17e641a42b81d832bad913a83c7caada9",
+      "workflow_run": 37090313576,
+      "jobs": {
+        "focused-ai-contracts": 111109054477,
+        "v1-modules": 111109054604,
+        "audit-state": 111109054647,
+        "genesis-compatibility": 111109054652
+      },
+      "implementation_summary": [
+        "Implemented AIAuthorization420, AIPolicyRegistry420, AIModelDeploymentRegistry420, AIRequestRegistry420, AIResultRegistry420, AIComputeAdapter420, AIRouter420 and IAI420.",
+        "Extended AIIds420 for mature component/action/workload identities.",
+        "Preserved AIModelRegistry as the single writable model/model-version authority and removed stale AIModelVersionRegistry420 from the canonical dApp map.",
+        "Kept AIRequestRegistry420 and AIResultRegistry420 as read-through views over AIJobManager.",
+        "Kept AIComputeAdapter420 fail-closed at the current ComputeRouter graph boundary; current Compute request/match/job/economic integration remains AI-AUDIT-4."
+      ],
+      "files_changed": [
+        "contracts/src/ai/AIIds420.sol",
+        "contracts/src/ai/AIAuthorization420.sol",
+        "contracts/src/ai/AIPolicyRegistry420.sol",
+        "contracts/src/ai/AIModelDeploymentRegistry420.sol",
+        "contracts/src/ai/AIRequestRegistry420.sol",
+        "contracts/src/ai/AIResultRegistry420.sol",
+        "contracts/src/ai/AIComputeAdapter420.sol",
+        "contracts/src/ai/AIRouter420.sol",
+        "contracts/src/ai/IAI420.sol",
+        "contracts/test/AIV1Modules420.t.sol",
+        "scripts/verify-420ai-v1-modules.py",
+        "scripts/verify-420ai-audit-state.py",
+        ".github/workflows/420ai-audit.yml",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "docs/420-AI-V1-ARCHITECTURE.md"
+      ],
+      "requirements_satisfied": [
+        "All eight architecture-named AI-AUDIT-3 V1 modules are present.",
+        "No independently writable AIModelVersionRegistry420 exists.",
+        "Genesis dApp map and architecture documentation reflect the single-authority model/version design.",
+        "Request and result registries create no duplicate mutable lifecycle authority.",
+        "AI router is immutable read/discovery only.",
+        "Compute adapter cannot advance legacy AI lifecycle before current ComputeMarket validation."
+      ],
+      "test_results": {
+        "workflow": "success",
+        "focused_ai_contracts": "success",
+        "retained_ai_suites": "all passed",
+        "v1_modules": "success",
+        "audit_state": "success",
+        "genesis_compatibility": "success"
+      },
+      "security_adversarial_invariant_results": [
+        "Authorization adapter fails closed for unknown actions and unavailable capability grants.",
+        "Policy revisions preserve immutable historical snapshots.",
+        "Deployment lifecycle enforces provider/model operational state and terminal retirement semantics.",
+        "Read-through request/result modules expose AIJobManager state without duplicate mutation paths.",
+        "Compute binding snapshots immutable AI constraints and does not advance job lifecycle.",
+        "Retained compatibility, hardening, model rights and rewards suites remain green."
+      ],
+      "milestone_status": "AI-AUDIT-3 ordinary step complete; no Level 2 milestone required at this boundary.",
+      "deferred": {
+        "level_2": "Not required for AI-AUDIT-3. Broader retained app integration remains reserved for a meaningful cross-component milestone.",
+        "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global, Docs/global and other comprehensive closeout checks remain deferred to complete 420AI audit-phase closeout.",
+        "later_steps": "Current ComputeMarket request/match/worker/verifier/economic binding is AI-AUDIT-4; custody/settlement/disputes are AI-AUDIT-5; deployment/materialization and live testnet qualification remain later roadmap work."
+      },
+      "limitations": [
+        "AIComputeAdapter420 deliberately stops at canonical ComputeRouter graph binding in this step.",
+        "No production-equivalent testnet evidence is claimed."
+      ],
+      "blockers": [],
+      "next_step": "AI-AUDIT-4 — current ComputeMarket integration"
     }
   },
   "scope": {
-    "claim": "repository-state audit plus frozen Genesis compatibility-layer qualification",
+    "claim": "repository-state audit, frozen Genesis compatibility qualification, and canonical AI V1 module implementation",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
@@ -61,7 +135,7 @@
   },
   "canonical_findings": {
     "fixed_genesis_compatibility_addresses_preserved": true,
-    "mature_v1_contract_inventory_complete": false,
+    "mature_v1_contract_inventory_complete": true,
     "provider_runtime_present": false,
     "read_api_present": false,
     "production_web_client_present": false,

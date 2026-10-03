@@ -20,7 +20,7 @@ The Genesis contract map names eight required Solidity/interface files for 420 R
 | Immutable result registry | `src/randomness/RandomnessRegistry.sol` | router-scope/one-time-binding tests | architecture + app README | PARTIAL | deterministic `0x0428` artifact/state materialization |
 | Verifier interface | `IRandomnessVerifier420` | mock verifier exercised | architecture | COMPLETE | production verifier implementations are route-specific deployment inputs |
 | Draw helpers | `RandomnessDraw420` | deterministic/bounds/sample tests | architecture | COMPLETE | none |
-| Genesis source wiring | frozen address exists, but historical predeploy plan points at legacy system registry | verifier | this audit | BROKEN | repoint predeploy source to canonical generalized registry |
+| Genesis source wiring | frozen `0x0428` predeploy plan and Step-6 verifier point to `src/randomness/RandomnessRegistry.sol`; legacy system registry retained only as historical evidence | exact-head verifier + CI | this audit + RANDOM-AUDIT-1 evidence | COMPLETE | none for RANDOM-AUDIT-1 |
 | Retained runtime artifact | absent on baseline | none | historical Step-6 docs | MISSING | compile/pin artifact and runtime hash |
 | Retained predeploy state | absent on baseline | none | historical Step-6 docs | MISSING | materialize GovernanceTimelock constructor storage and retain state record |
 | Router deployment | Registry-resolved identity only | repository tests | app README | BLOCKED | production-equivalent testnet deployment |
@@ -53,7 +53,7 @@ Unresolved release risk: the frozen `0x0428` predeploy provenance is inconsisten
 
 ## Remediation roadmap
 
-1. **RANDOM-AUDIT-1 — canonical source reconciliation.** Repoint `0x0428` predeploy source from the stale consensus-mirror registry to `src/randomness/RandomnessRegistry.sol`; retain the legacy source as historical evidence only.
+1. **RANDOM-AUDIT-1 — canonical source reconciliation — COMPLETE.** `0x0428` predeploy source and the retained Step-6 verifier now resolve `src/randomness/RandomnessRegistry.sol`; the legacy `src/system/RandomnessRegistry.sol` remains historical evidence only. Level 1 exact-head qualification passed on implementation SHA `95b7b4c7f6cfc214ab10c8673a665788b389568b`, workflow run `37093289263`, job `111117991983`.
 2. **RANDOM-AUDIT-2 — repository qualification.** Run the dedicated verifier, formatting, canonical build and all `Randomness*.t.sol` tests on the exact branch head.
 3. **RANDOM-AUDIT-3 — deterministic Genesis materialization.** Retain the exact compiler artifact, source blob, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`.
 4. **RANDOM-AUDIT-4 — deployment bundle.** Freeze deployment ordering/arguments for route registry, profile registry and router; define the exact ProtocolRegistry component publication and one-time `bindRouter` transaction.

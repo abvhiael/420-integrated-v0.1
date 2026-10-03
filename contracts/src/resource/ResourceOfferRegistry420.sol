@@ -40,7 +40,12 @@ contract ResourceOfferRegistry420 is I420System {
         uint64 validUntil
     );
 
-    constructor(address n, address p, address pol, address a) {
+    constructor(
+        address n,
+        address p,
+        address pol,
+        address a
+    ) {
         require(n != address(0) && p != address(0) && pol != address(0) && a != address(0), "dependency");
         nodes = ResourceNodeRegistry420(n);
         providers = ResourceProviderRegistry420(p);
@@ -88,12 +93,16 @@ contract ResourceOfferRegistry420 is I420System {
         emit OfferPublished(offerId, nodeId, n.serviceId, unitPrice420, maxUnits, termsHash, validUntil);
     }
 
-    function getOffer(bytes32 offerId) external view returns (Offer memory o) {
+    function getOffer(
+        bytes32 offerId
+    ) external view returns (Offer memory o) {
         o = _offers[offerId];
         require(o.exists, "offer");
     }
 
-    function isEffective(bytes32 offerId) external view returns (bool) {
+    function isEffective(
+        bytes32 offerId
+    ) external view returns (bool) {
         Offer memory o = _offers[offerId];
         return o.exists && o.active && (o.validUntil == 0 || block.timestamp <= o.validUntil)
             && nodes.isActiveFor(o.nodeId, o.serviceId) && policy.isActive(o.serviceId);

@@ -30,13 +30,41 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: randomness-audit-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  format_once:
+    if: github.event_name == 'push' && github.ref_name == 'audit/420randomness-remediation' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/420randomness-remediation
+          fetch-depth: 0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Apply deterministic Randomness formatting
+        working-directory: contracts
+        run: forge fmt src/randomness src/interfaces/IRandomnessRouter420.sol src/interfaces/IRandomnessVerifier420.sol test/Randomness420.t.sol test/RandomnessAudit420.t.sol test/RandomnessDraw420.t.sol
+      - name: Commit formatter output
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- contracts/src/randomness contracts/src/interfaces/IRandomnessRouter420.sol contracts/src/interfaces/IRandomnessVerifier420.sol contracts/test/Randomness420.t.sol contracts/test/RandomnessAudit420.t.sol contracts/test/RandomnessDraw420.t.sol; then
+            echo "No formatting changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add contracts/src/randomness contracts/src/interfaces/IRandomnessRouter420.sol contracts/src/interfaces/IRandomnessVerifier420.sol contracts/test/Randomness420.t.sol contracts/test/RandomnessAudit420.t.sol contracts/test/RandomnessDraw420.t.sol
+          git commit -m "RANDOM-AUDIT-2: normalize retained Randomness formatting"
+          git push origin HEAD:audit/420randomness-remediation
+
   qualify:
     runs-on: ubuntu-latest
     timeout-minutes: 30

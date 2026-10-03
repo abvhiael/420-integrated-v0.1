@@ -171,18 +171,7 @@ contract LaunchpadDeploymentBinding420Test {
         e.projects.registerProject(pid, address(this), address(0x7001), keccak256("m"), keccak256("i"));
         bytes32 sale = e.sales
             .canonicalId(
-                pid,
-                address(0x420),
-                address(0xBEEF),
-                100,
-                1000,
-                250,
-                10000,
-                10,
-                20,
-                30,
-                keccak256("elig"),
-                bytes32(0)
+                pid, address(0x420), address(0xBEEF), 100, 1000, 250, 10000, 10, 20, 30, keccak256("elig"), bytes32(0)
             );
         e.sales
             .createSale(

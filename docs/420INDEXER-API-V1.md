@@ -38,6 +38,16 @@ Invalid client input returns `400 invalid_request`. Missing resources return `40
 | GET | `/v1/assets/transfers?chainId=` | yes | yes | normalized asset transfers |
 | GET | `/v1/protocols/events?chainId=` | yes | yes | typed protocol event journal |
 | GET | `/v1/protocols/:protocol/objects/:key?chainId=` | yes | no | latest typed protocol-object state |
+| GET | `/v1/ai/providers?chainId=` | yes | yes | 420AI provider projection |
+| GET | `/v1/ai/providers/:providerId?chainId=` | yes | no | 420AI provider |
+| GET | `/v1/ai/models?chainId=` | yes | yes | 420AI model projection |
+| GET | `/v1/ai/models/:modelId?chainId=` | yes | no | 420AI model |
+| GET | `/v1/ai/model-versions?chainId=` | yes | yes | 420AI model versions |
+| GET | `/v1/ai/model-versions/:modelVersionId?chainId=` | yes | no | 420AI model version |
+| GET | `/v1/ai/deployments?chainId=` | yes | yes | 420AI deployment projection |
+| GET | `/v1/ai/deployments/:deploymentId?chainId=` | yes | no | 420AI deployment |
+| GET | `/v1/ai/jobs?chainId=` | yes | yes | 420AI/CMP job projection |
+| GET | `/v1/ai/jobs/:jobId?chainId=` | yes | no | 420AI/CMP job |
 | GET | `/v1/search?chainId=&q=` | yes | no | bounded deterministic search |
 
 ## Paging and filters
@@ -63,3 +73,7 @@ Operational metadata describes the indexer's projection state only. It does not 
 ## Stability boundary
 
 The stable consumer boundary consists of the exported DTOs, `IndexerPublicApi420`, `INDEXER_V1_ROUTES_420`, versioned HTTP envelopes, bounded paging semantics, and documented route behavior. Internal query rows and storage schemas are not public API.
+
+## 420AI projection safety
+
+420AI DTOs use schema identifier `420-ai-read-v1`, are always non-authoritative, and are rebuilt from canonical AI protocol events after normal indexer rollback/replay. The public projection intentionally excludes plaintext prompts, payloads, documents, datasets, access tokens, credentials, private keys and raw model input/output bytes. Deployment-specific AI descriptor addresses are resolved from the canonical deployment/Registry configuration rather than hardcoded in the read model.

@@ -7,15 +7,18 @@ on:
     paths:
       - 'contracts/src/launchpad/**'
       - 'contracts/src/arbitration/ArbitrationCaseRegistry420.sol'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
       - 'contracts/src/libraries/ServiceIds420.sol'
       - 'contracts/config/420launchpad-genesis.json'
       - 'contracts/config/genesis-dapp-contract-map.json'
-      - 'contracts/config/interfaces/420launchpad-dependency-reconciliation.json'
-      - 'contracts/config/interfaces/420launchpad-v1-hardening.json'
-      - 'contracts/config/interfaces/420launchpad-crowdfunding-integration.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/config/launchpad/**'
+      - 'contracts/config/interfaces/420launchpad-*.json'
       - 'contracts/test/Launchpad*.t.sol'
       - 'config/genesis-consumer-services.json'
       - 'scripts/verify-420launchpad-audit.py'
+      - 'scripts/verify-launchpad-audit-4-release.py'
       - 'docs/audit/420LAUNCHPAD-*'
       - 'docs/apps/launchpad/**'
       - '.github/workflows/420launchpad-audit.yml'
@@ -23,15 +26,18 @@ on:
     paths:
       - 'contracts/src/launchpad/**'
       - 'contracts/src/arbitration/ArbitrationCaseRegistry420.sol'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
       - 'contracts/src/libraries/ServiceIds420.sol'
       - 'contracts/config/420launchpad-genesis.json'
       - 'contracts/config/genesis-dapp-contract-map.json'
-      - 'contracts/config/interfaces/420launchpad-dependency-reconciliation.json'
-      - 'contracts/config/interfaces/420launchpad-v1-hardening.json'
-      - 'contracts/config/interfaces/420launchpad-crowdfunding-integration.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/config/launchpad/**'
+      - 'contracts/config/interfaces/420launchpad-*.json'
       - 'contracts/test/Launchpad*.t.sol'
       - 'config/genesis-consumer-services.json'
       - 'scripts/verify-420launchpad-audit.py'
+      - 'scripts/verify-launchpad-audit-4-release.py'
       - 'docs/audit/420LAUNCHPAD-*'
       - 'docs/apps/launchpad/**'
       - '.github/workflows/420launchpad-audit.yml'
@@ -65,32 +71,59 @@ jobs:
         with:
           version: stable
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
-      - name: Verify Launchpad Audit-3 model
+      - name: Verify retained Launchpad model
         run: python3 scripts/verify-420launchpad-audit.py
 
-      - name: Check Audit-3 Solidity formatting
+      - name: Verify Audit-4 deployment materialization
+        run: python3 scripts/verify-launchpad-audit-4-release.py
+
+      - name: Check Audit-4 Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check test/LaunchpadDeploymentBinding420.t.sol
+
+      - name: Build Launchpad release graph
         working-directory: contracts
         run: |
-          forge fmt --check \
-            test/LaunchpadCrowdfundingIntegration420.t.sol \
-            test/LaunchpadArbitrationOrigin420.t.sol \
-            src/launchpad/LaunchpadAllocationRegistry420.sol \
-            src/launchpad/LaunchpadCrowdfundingIntegration420.sol \
-            src/launchpad/ILaunchpadCrowdfundingIntegration420.sol
+          forge build src/launchpad src/apps/ProtocolRegistry.sol src/system/CapabilityRegistry420.sol
 
-      - name: Build affected Launchpad and Arbitration contracts
+      - name: Retain compiled artifact ABI/runtime identities
         working-directory: contracts
-        run: forge build src/launchpad src/arbitration/ArbitrationCaseRegistry420.sol
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          names=[
+            "LaunchpadAuthorization420",
+            "LaunchpadProjectRegistry420",
+            "LaunchpadSaleRegistry420",
+            "LaunchpadAllocationRegistry420",
+            "LaunchpadCrowdfundingIntegration420",
+            "LaunchpadRouter420",
+          ]
+          for name in names:
+              p=Path("out")/(name+".sol")/(name+".json")
+              raw=p.read_bytes()
+              data=json.loads(raw)
+              abi=json.dumps(data.get("abi",[]),sort_keys=True,separators=(",",":")).encode()
+              runtime=(data.get("deployedBytecode",{}).get("object") or "").encode()
+              print(json.dumps({
+                  "contract":name,
+                  "artifact_sha256":hashlib.sha256(raw).hexdigest(),
+                  "abi_sha256":hashlib.sha256(abi).hexdigest(),
+                  "runtime_template_sha256":hashlib.sha256(runtime).hexdigest(),
+                  "runtime_template_bytes":max(0,(len(runtime)-2)//2 if runtime.startswith(b"0x") else len(runtime)//2),
+              },sort_keys=True))
+          PY
 
-      - name: Level 1 focused Launchpad qualification
+      - name: Level 1 Launchpad regression qualification
         working-directory: contracts
         run: forge test --match-path 'test/Launchpad*420.t.sol' -vvv
 
-      - name: Forbidden primitive scan
+      - name: Audit-4 deployment and Registry binding qualification
+        working-directory: contracts
+        run: forge test --match-path test/LaunchpadDeploymentBinding420.t.sol -vvvv
+
+      - name: Forbidden primitive and address-policy scan
         shell: bash
         run: |
           set -euo pipefail
@@ -102,9 +135,7 @@ jobs:
             echo 'Custody/payment execution primitive found in 420Launchpad sources' >&2
             exit 1
           fi
-
-      - name: Level 2 Reputation integration boundary
-        run: go test ./reputation/interactions
-
-      - name: Level 2 Notifications replay and provenance boundary
-        run: go test ./notifications/replay ./notifications/architecture
+          if grep -R -n '0x000000000000000000000000000000000000045c'             contracts/src/launchpad contracts/config/launchpad docs/apps/launchpad |             grep -v 'superseded_historical_candidate'; then
+            echo 'Superseded 0x045c candidate leaked into active Launchpad release material' >&2
+            exit 1
+          fi

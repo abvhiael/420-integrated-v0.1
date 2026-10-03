@@ -1,0 +1,218 @@
+name: 420ResourceProtocol Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/resource/**"
+      - "contracts/test/ResourceGenesis420.t.sol"
+      - "contracts/test/Storage*420.t.sol"
+      - "contracts/config/420resource-genesis.json"
+      - "contracts/config/420storage-proof-v1.json"
+      - "execution/storage/**"
+      - "sdk/storage420/**"
+      - "docs/architecture/infrastructure/420store-roadmap.md"
+      - "docs/architecture/infrastructure/storage-resource-infrastructure.md"
+      - "docs/architecture/protocols/storage-proof-resource-protocol.md"
+      - "docs/developers/storage-and-resource-integration.md"
+      - "docs/audit/420RESOURCE-*"
+      - ".github/workflows/resource-protocol-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: resource-protocol-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  resource-contract-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Build Resource contract family
+        working-directory: contracts
+        run: forge build src/resource --sizes
+
+      - name: Run Resource protocol adversarial suite
+        working-directory: contracts
+        run: forge test --match-path 'test/ResourceGenesis420.t.sol' -vvvv
+
+      - name: Check Resource Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/resource/ResourceProviderRegistry420.sol src/resource/ResourceNodeRegistry420.sol src/resource/ResourceOfferRegistry420.sol src/resource/ResourceSessionRegistry420.sol src/resource/ResourceReceiptRegistry420.sol
+
+  resource-storage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Run storage protocol suites
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in \
+            test/StorageCapacityRegistry420.t.sol \
+            test/StorageProofProtocol420.t.sol \
+            test/StorageAgreementRegistry420.t.sol \
+            test/StorageObjectManifestRegistry420.t.sol \
+            test/StorageSettlementRegistry420.t.sol; do
+            forge test --match-path "$suite" -vvv
+          done
+
+  resource-runtime-sdk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Test Resource Network runtime
+        run: go test ./execution/storage/...
+
+      - name: Test storage SDK
+        run: go test ./sdk/storage420/...
+
+  resource-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Reject dangerous Resource primitives
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\b(delegatecall|selfdestruct|tx\.origin)\b' contracts/src/resource; then
+            echo "Forbidden authority/opcode primitive found in 420ResourceProtocol." >&2
+            exit 1
+          fi
+
+      - name: Re-run Resource core under hardening profile
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: hardening
+        run: forge test --match-path 'test/ResourceGenesis420.t.sol' -vvv
+
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+
+      - name: Targeted Resource Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > ResourceAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/resource/ResourceAuthorization420.sol";
+          import "./src/resource/ResourcePolicyRegistry420.sol";
+          import "./src/resource/ResourceProviderRegistry420.sol";
+          import "./src/resource/ResourceNodeRegistry420.sol";
+          import "./src/resource/ResourceOfferRegistry420.sol";
+          import "./src/resource/ResourceSessionRegistry420.sol";
+          import "./src/resource/ResourceReceiptRegistry420.sol";
+          import "./src/resource/ResourceRouter420.sol";
+          import "./src/resource/StorageProofSchemeRegistry420.sol";
+          import "./src/resource/StorageCapacityRegistry420.sol";
+          import "./src/resource/StorageCommitmentRegistry420.sol";
+          import "./src/resource/StorageProofRegistry420.sol";
+          import "./src/resource/StorageAgreementRegistry420.sol";
+          import "./src/resource/StorageObjectManifestRegistry420.sol";
+          import "./src/resource/StorageSettlementRegistry420.sol";
+          SOL
+          set +e
+          slither ResourceAuditSlitherTarget.sol --json /tmp/resource-slither.json >/tmp/resource-slither.txt 2>&1
+          STATUS=$?
+          set -e
+          rm -f ResourceAuditSlitherTarget.sol
+          python - <<'PY'
+          import json
+          import pathlib
+
+          report_path = pathlib.Path("/tmp/resource-slither.json")
+          log_path = pathlib.Path("/tmp/resource-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+          report = json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+          findings = []
+          high = []
+          for detector in report.get("results", {}).get("detectors", []):
+              resource_elements = [
+                  element for element in detector.get("elements", [])
+                  if element.get("source_mapping", {}).get("filename_relative", "").startswith("src/resource/")
+              ]
+              if not resource_elements:
+                  continue
+              item = {
+                  "check": detector.get("check"),
+                  "impact": detector.get("impact"),
+                  "confidence": detector.get("confidence"),
+                  "description": detector.get("description", "").splitlines()[0],
+              }
+              findings.append(item)
+              if detector.get("impact") == "High":
+                  high.append(item)
+          print(json.dumps({"resourceFindings": findings, "highSeverity": high}, indent=2))
+          if high:
+              raise SystemExit("High-severity Slither finding in Resource source")
+          PY

@@ -168,10 +168,10 @@ require(integration.get("milestone", {}).get("level2RequiredNow") is True, "Audi
 integration_src = read("contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol")
 for needle in (
     "enum CampaignMode",
-    "CampaignMode.REWARD",
-    "CampaignMode.DONATION",
-    "CampaignMode.COMMUNITY_PROJECT",
-    "CampaignMode.PRODUCT_PREORDER",
+    "REWARD,",
+    "DONATION,",
+    "COMMUNITY_PROJECT,",
+    "PRODUCT_PREORDER",
     "status != PAY_STATUS_SETTLED",
     "payer != participant",
     "merchant != sale_.proceedsReceiver",

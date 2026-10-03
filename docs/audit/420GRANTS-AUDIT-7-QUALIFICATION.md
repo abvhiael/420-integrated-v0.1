@@ -292,6 +292,24 @@ This skip is not counted as passing evidence.
 
 Global Docs reconciliation is intentionally deferred to GRANTS-AUDIT-8 Level 3. AUDIT-7's directly applicable documentation contract is owned and passed by the exact-head app-specific Grants verifier.
 
+## Bookkeeping requalification / evidence reuse validation
+
+After exact-head implementation qualification passed, closeout introduced documentation bookkeeping only.
+
+Comparison from implementation SHA `14c6732aa1d30bed5e5e5459ee930bafc9c54426` through bookkeeping head `28657a38c8f82a8d777ec55f6f5ec5399c9e43e3` contains only:
+
+- `docs/audit/420GRANTS-AUDIT-7-QUALIFICATION.md`;
+- `docs/audit/420GRANTS-AUDIT-REMEDIATION-ROADMAP.md`;
+- `docs/audit/420GRANTS-AUDIT-REPORT.md`.
+
+No executable source, test, workflow, dependency, configuration, generated/runtime artifact, interface, deployment state or substantive requirement changed.
+
+Therefore exact-SHA 420Grants run `37086042799` / #68 and affected Solidity run `37086042862` / #4399 remain authoritative for GRANTS-AUDIT-7. No recursive qualification is required solely for evidence bookkeeping.
+
+Evidence document creation commit: `ce02105c798d645b579f952a6513cb1464fbff82`.  
+Roadmap completion commit: `3adcd4ab81f898f37b1f66587bbaeaab930f8497`.  
+Audit-report reconciliation commit: `28657a38c8f82a8d777ec55f6f5ec5399c9e43e3`.
+
 ## Requirement-by-requirement exit verification
 
 ### Canonical architecture remains authoritative

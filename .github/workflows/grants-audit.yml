@@ -12,6 +12,9 @@ on:
       - "scripts/verify-grants-audit.py"
       - "scripts/verify-grants-audit-5-release.py"
       - "scripts/verify-grants-audit-6-client-indexer.py"
+      - "scripts/verify-grants-audit-7-docs.py"
+      - "docs/apps/grants/**"
+      - "docs/architecture/protocols/stake-governance-treasury-grants.md"
       - "420-indexer/descriptors/grants420-v1.json"
       - "420-indexer/src/grants-descriptors.ts"
       - "420-indexer/src/grants-read-model.ts"
@@ -63,6 +66,9 @@ jobs:
 
       - name: Verify GRANTS-AUDIT-5 release materialization
         run: python3 scripts/verify-grants-audit-5-release.py
+
+      - name: Verify GRANTS-AUDIT-7 documentation and operator closeout
+        run: python3 scripts/verify-grants-audit-7-docs.py
 
       - name: Check Grants Solidity formatting
         working-directory: contracts

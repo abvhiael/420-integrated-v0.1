@@ -15,6 +15,7 @@ This roadmap preserves the frozen 420AI V1 architecture. It does not redefine 42
 - Requalify `AIProviderRegistry`, `AIModelRegistry`, `AIJobManager`, `AIJobEscrow`, and `AIReputationRegistry`.
 - Verify the fixed discovery identities `0x042f` through `0x0433`, constructor/init assumptions, authority boundaries, lifecycle constraints, Vault-only escrow compatibility, and Trust-derived reputation behavior.
 - Expand adversarial tests for authorization, replay, terminal states, arbitrary-recipient prevention, provider suspension and model/version immutability where current tests are insufficient.
+- **Repository-side status: COMPLETE. Level 1 qualified at implementation SHA `a524c83a576fabafec466e469a51fc8522d23035` by 420AI Audit Qualification run `37085984181`. Durable evidence: `docs/audit/420AI-AUDIT-2-QUALIFICATION.md`.**
 
 ## AI-AUDIT-3 — canonical AI V1 modules
 Implement the architecture-named modules that are still absent from current `main`, adapting them to **current** ComputeMarket and Vault interfaces rather than copying the stale 2026-09 recovery branch:

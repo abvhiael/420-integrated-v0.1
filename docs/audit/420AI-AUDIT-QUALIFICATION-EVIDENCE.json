@@ -12,17 +12,51 @@
     "workflow_path": ".github/workflows/420ai-audit.yml",
     "required_jobs": [
       "audit-state",
+      "genesis-compatibility",
       "focused-ai-contracts"
     ]
   },
+  "step_qualifications": {
+    "AI-AUDIT-1": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "85ce7bb8e59c5f78b629ddc44a1c407f84e9318b",
+      "workflow_run": 37079442111
+    },
+    "AI-AUDIT-2": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "a524c83a576fabafec466e469a51fc8522d23035",
+      "workflow_run": 37085984181,
+      "jobs": {
+        "audit-state": 111096280240,
+        "genesis-compatibility": 111096280351,
+        "focused-ai-contracts": 111096280301
+      },
+      "test_results": {
+        "AICompatibility420.t.sol": "8 passed; 0 failed; 0 skipped",
+        "AIHardening420.t.sol": "5 passed; 0 failed; 0 skipped",
+        "AIMature420.t.sol": "6 passed; 0 failed; 0 skipped",
+        "AIModelRegistryHardening420.t.sol": "6 passed; 0 failed; 0 skipped",
+        "AIModelTrainingRights420.t.sol": "5 passed; 0 failed; 0 skipped",
+        "AIRewardsIntegration420.t.sol": "7 passed; 0 failed; 0 skipped"
+      },
+      "deferred": {
+        "level_2": "No Level 2 milestone qualification required for this isolated compatibility-layer step.",
+        "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global and Docs/global closeout remain deferred to AI-AUDIT-10/phase closeout as defined by the audit model.",
+        "live": "Genesis materialization, ProtocolRegistry publication, current ComputeMarket integration and production-equivalent testnet evidence remain later roadmap work."
+      }
+    }
+  },
   "scope": {
-    "claim": "repository-state audit qualification only",
+    "claim": "repository-state audit plus frozen Genesis compatibility-layer qualification",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
       "420AI production readiness",
       "live testnet deployment",
-      "live ProtocolRegistry publication"
+      "live ProtocolRegistry publication",
+      "current ComputeMarket integration"
     ]
   },
   "canonical_findings": {

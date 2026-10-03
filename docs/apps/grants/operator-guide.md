@@ -214,7 +214,7 @@ Operational invariants to reconcile:
 - PAID implies bound Treasury state EXECUTED and nonzero `vaultReleaseHash`;
 - cancelled approved milestone implies Treasury was CANCELLED before the Grants binding was released.
 
-Indexer routes are useful monitoring surfaces but return non-authoritative derived state.
+Indexer routes are useful monitoring surfaces but return non-authoritative derived state with `authoritative: false`.
 
 ## Incident response
 

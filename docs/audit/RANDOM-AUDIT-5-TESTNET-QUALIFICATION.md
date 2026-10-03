@@ -101,6 +101,9 @@ A frozen qualification branch/PR was created solely to establish one exact imple
 - temporary draft PR: **#499 — RANDOM-AUDIT-5 exact-head qualification**
 - exact qualified implementation SHA: `c867398cfe640064f09e0fac65f83f4551ab59de`
 - qualification base `main`: `d37d751dfa232b20c8158d55c20c13cc1d7a10ef`
+- initial durable evidence commit: `4fb84f68afa549599f8dff04e55cb1253ebca9fa`
+- roadmap bookkeeping commit: `f1f2a3a6703eae358fd9a0b4d3e2b65546752e70`
+- temporary qualification PR #499: **CLOSED UNMERGED after successful exact-head qualification**
 
 The Step-5 implementation blobs on the qualification branch and primary `audit/420randomness-remediation` branch were compared and match for the Randomness descriptor, descriptor binder, lifecycle reducer, descriptor tests, live evidence template, live verifier, readiness verifier, live workflow, Step-5 workflow and retained Randomness verifier/workflow material.
 

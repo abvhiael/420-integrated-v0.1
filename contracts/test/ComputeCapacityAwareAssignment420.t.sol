@@ -165,9 +165,10 @@ contract ComputeCapacityAwareAssignment420Test {
             serial, r.providerId, r.nodeId, resourceId, r.revision, OPERATOR,
             executionSigner, WORKER_CAPABILITY, JURISDICTION
         );
+        bytes memory proof = _sign(EXEC_KEY, digest);
         vm.prank(OPERATOR);
         id = workers.register(
-            resourceId, executionSigner, WORKER_CAPABILITY, JURISDICTION, _sign(EXEC_KEY, digest)
+            resourceId, executionSigner, WORKER_CAPABILITY, JURISDICTION, proof
         );
     }
 

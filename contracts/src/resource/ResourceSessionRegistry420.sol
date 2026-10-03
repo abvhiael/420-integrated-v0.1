@@ -45,6 +45,7 @@ contract ResourceSessionRegistry420 is I420System {
         uint64 expiresAt
     );
     event SessionClosed(bytes32 indexed sessionId);
+    event SessionCancelled(bytes32 indexed sessionId);
     event SessionSettled(bytes32 indexed sessionId, uint256 settledAmount420);
 
     constructor(address offers_, address authorization_) {
@@ -92,6 +93,15 @@ contract ResourceSessionRegistry420 is I420System {
 
         s.state = State.CLOSED;
         emit SessionClosed(sessionId);
+    }
+
+    function cancelSession(bytes32 sessionId) external {
+        Session storage s = _get(sessionId);
+        if (msg.sender != s.consumer) revert Unauthorized();
+        if (s.state != State.OPEN) revert InvalidState();
+
+        s.state = State.CANCELLED;
+        emit SessionCancelled(sessionId);
     }
 
     function markSettled(bytes32 sessionId, uint256 settledAmount420) external {

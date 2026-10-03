@@ -264,7 +264,9 @@ Durable evidence: [CMP-2.1 qualification](CMP-2.1-QUALIFICATION-EVIDENCE.md). Le
 Advertise hardware/software capacity, availability, jurisdiction and price.
 
 ## CMP-2.2 — Compute requests
-**Status: implementation/Level 1 qualification in progress.**
+**Status: COMPLETE — Level 1 exact-head qualified on `6738c1a5a5a38c40bd6482ab3338705d16dd4fe3`.**
+
+Durable evidence: [CMP-2.2 qualification](CMP-2.2-QUALIFICATION-EVIDENCE.md). Level 2 deferred until CMP-2.3 offers/requests/matching integration; Level 3 remains CMP-2.8.
 
 Express required resource class, runtime, verification, replication, privacy, deadline and maximum price.
 
@@ -541,7 +543,7 @@ Production target flow:
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
-| CMP-2 matching marketplace | CMP-2.1 COMPLETE (Level 1); CMP-2.2 next |
+| CMP-2 matching marketplace | CMP-2.1 and CMP-2.2 COMPLETE (Level 1); CMP-2.3 next |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |

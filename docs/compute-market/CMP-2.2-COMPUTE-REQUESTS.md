@@ -1,6 +1,8 @@
 # CMP-2.2 — Compute requests
 
-Status: **IMPLEMENTED — Level 1 qualification in progress.**
+Status: **COMPLETE — Level 1 exact-head qualified on `6738c1a5a5a38c40bd6482ab3338705d16dd4fe3`.**
+
+Durable evidence: [CMP-2.2 qualification](CMP-2.2-QUALIFICATION-EVIDENCE.md). The frozen config records implementation-time state; this document and the durable evidence record final qualification status.
 
 ## Canonical definition and boundaries
 

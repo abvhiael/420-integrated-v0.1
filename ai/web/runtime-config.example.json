@@ -1,0 +1,33 @@
+{
+  "schema": "420-ai-web-runtime-v1",
+  "site": {
+    "name": "420AI",
+    "productionOrigin": "https://ai.420integrated.org"
+  },
+  "network": {
+    "name": "420 Integrated",
+    "chainId": "0x1a4",
+    "rpcUrl": "https://rpc.example.invalid",
+    "explorerUrl": "https://explorer.example.invalid"
+  },
+  "readApi": {
+    "baseUrl": "https://indexer.example.invalid",
+    "schema": "420-ai-read-v1"
+  },
+  "contracts": {
+    "jobManager": "0x0000000000000000000000000000000000000431",
+    "jobEscrow": "0x0000000000000000000000000000000000000432"
+  },
+  "transactions": {
+    "minConfirmations": 1,
+    "pollIntervalMs": 1500,
+    "timeoutMs": 120000
+  },
+  "features": {
+    "walletConnection": true,
+    "requestCreation": true,
+    "requestCancellation": true,
+    "disputeOpening": true,
+    "fundingDisplay": true
+  }
+}

@@ -40,7 +40,10 @@ contract ResourceNodeRegistry420 is I420System {
     event NodeUpdated(bytes32 indexed nodeId, bytes32 endpointHash, bytes32 capacityHash, uint32 revision);
     event NodeStateChanged(bytes32 indexed nodeId, State state);
 
-    constructor(address authorization_, address providers_) {
+    constructor(
+        address authorization_,
+        address providers_
+    ) {
         require(authorization_ != address(0) && providers_ != address(0), "dependency");
         authorization = ResourceAuthorization420(authorization_);
         providers = ResourceProviderRegistry420(providers_);
@@ -71,9 +74,7 @@ contract ResourceNodeRegistry420 is I420System {
         ResourceProviderRegistry420.Provider memory p = providers.getProvider(providerId);
         if (
             msg.sender != p.operatorAccount
-                && !authorization.isNodeAuthorized(
-                    msg.sender, providerId, nodeId, ResourceIds420.ACTION_REGISTER_NODE
-                )
+                && !authorization.isNodeAuthorized(msg.sender, providerId, nodeId, ResourceIds420.ACTION_REGISTER_NODE)
         ) revert Unauthorized();
 
         _nodes[nodeId] =
@@ -81,7 +82,11 @@ contract ResourceNodeRegistry420 is I420System {
         emit NodeRegistered(nodeId, providerId, serviceId);
     }
 
-    function updateNode(bytes32 nodeId, bytes32 endpointHash, bytes32 capacityHash) external {
+    function updateNode(
+        bytes32 nodeId,
+        bytes32 endpointHash,
+        bytes32 capacityHash
+    ) external {
         Node storage n = _get(nodeId);
         if (endpointHash == 0 || capacityHash == 0) revert InvalidNode();
         if (n.state == State.ACTIVE || n.state == State.RETIRED) revert InvalidState();
@@ -89,9 +94,7 @@ contract ResourceNodeRegistry420 is I420System {
         ResourceProviderRegistry420.Provider memory p = providers.getProvider(n.providerId);
         if (
             msg.sender != n.operatorAccount && msg.sender != p.operatorAccount
-                && !authorization.isNodeAuthorized(
-                    msg.sender, n.providerId, nodeId, ResourceIds420.ACTION_UPDATE_NODE
-                )
+                && !authorization.isNodeAuthorized(msg.sender, n.providerId, nodeId, ResourceIds420.ACTION_UPDATE_NODE)
         ) revert Unauthorized();
 
         n.endpointHash = endpointHash;
@@ -100,7 +103,10 @@ contract ResourceNodeRegistry420 is I420System {
         emit NodeUpdated(nodeId, endpointHash, capacityHash, n.revision);
     }
 
-    function setState(bytes32 nodeId, State next) external {
+    function setState(
+        bytes32 nodeId,
+        State next
+    ) external {
         Node storage n = _get(nodeId);
         ResourceProviderRegistry420.Provider memory p = providers.getProvider(n.providerId);
         if (
@@ -122,16 +128,23 @@ contract ResourceNodeRegistry420 is I420System {
         emit NodeStateChanged(nodeId, next);
     }
 
-    function getNode(bytes32 nodeId) external view returns (Node memory) {
+    function getNode(
+        bytes32 nodeId
+    ) external view returns (Node memory) {
         return _get(nodeId);
     }
 
-    function isActiveFor(bytes32 nodeId, bytes32 serviceId) external view returns (bool) {
+    function isActiveFor(
+        bytes32 nodeId,
+        bytes32 serviceId
+    ) external view returns (bool) {
         Node memory n = _nodes[nodeId];
         return n.exists && n.state == State.ACTIVE && n.serviceId == serviceId && providers.isActive(n.providerId);
     }
 
-    function _get(bytes32 id) private view returns (Node storage n) {
+    function _get(
+        bytes32 id
+    ) private view returns (Node storage n) {
         n = _nodes[id];
         if (!n.exists) revert NodeNotFound();
     }

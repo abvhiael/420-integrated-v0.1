@@ -12,3 +12,5 @@ It exists so the monolithic merge candidate is qualified once at Level 3 by the 
 - 420Launchpad app qualification — retained Launchpad browser/service suite.
 
 The marker does not assert live testnet readiness. LAUNCHPAD-AUDIT-6 remains blocked until the approved production-equivalent public testnet exists.
+
+Documentation orphan-navigation repair for the final candidate links Launchpad and Pay deployment-operation pages from reachable application indexes before rerunning the exact-head Level 3 owners.

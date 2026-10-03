@@ -9,9 +9,13 @@ Qualification level: **Level 1 — per-roadmap-step fast qualification**
 - Repository: `abvhiael/420-integrated-v0.1`
 - Audit branch: `audit/420randomness-remediation`
 - PR: **#496**
-- Current/base `main`: `edfd0752e825fc5379700851358e8398efb0b9c5`
+- Qualification base `main`: `edfd0752e825fc5379700851358e8398efb0b9c5`
+- Current `main` at durable-bookkeeping review: `d37d751dfa232b20c8158d55c20c13cc1d7a10ef`
 - Qualified implementation SHA: `809cff5ea67fc48c3082f5ce0702b8572b18c663`
-- Branch divergence at qualification: **34 ahead / 0 behind main**
+- Evidence lineage HEAD before this bookkeeping update: `e041f9f0d3a4a0b9fe6c3ca9c041c00db4bb0dd8`
+- Branch divergence at qualification: **34 ahead / 0 behind qualification-base main**
+- Branch divergence at durable-bookkeeping review: **36 ahead / 27 behind current main**
+- The delta from the qualified implementation SHA through evidence lineage HEAD contains only `docs/audit/RANDOM-AUDIT-3-QUALIFICATION.md` and `docs/audit/420RANDOMNESS-COMPLETE-AUDIT-20261002.md`; no requalification-triggering files changed.
 - Workflow: **420Randomness audit qualification**
 - Run: **37098929839**
 - Job: **111134459600**
@@ -99,6 +103,19 @@ Foundry result:
 - Run `37098855306` on `b808685dc06113e1734ba9de4e8ff0217dac2667` exposed the unstable raw compiler AST immutable identifier described above. Verifier, formatting and build passed; deterministic materialization reproducibility failed. The root cause was fixed before final qualification.
 
 No protocol semantics, authorization, tests, assertions, replay rules, fallback rules or safety gates were weakened.
+
+## Exact-SHA / evidence-only authority
+
+The exact implementation authority remains `809cff5ea67fc48c3082f5ce0702b8572b18c663`, qualified by run `37098929839`, job `111134459600`.
+
+Subsequent RANDOM-AUDIT-3 commits through `e041f9f0d3a4a0b9fe6c3ca9c041c00db4bb0dd8` are documentation-only bookkeeping. Repository comparison confirms the only changed paths relative to the qualified implementation SHA are:
+
+- `docs/audit/RANDOM-AUDIT-3-QUALIFICATION.md`
+- `docs/audit/420RANDOMNESS-COMPLETE-AUDIT-20261002.md`
+
+Therefore the audit's evidence-only exception applies: the implementation qualification is not recursively invalidated by these documentation updates.
+
+Current `main` has advanced independently to `d37d751dfa232b20c8158d55c20c13cc1d7a10ef`. Reconciliation with that newer base is intentionally deferred to the appropriate later milestone/Level 3 closeout and does not invalidate this ordinary Level 1 step's exact-SHA evidence.
 
 ## Milestone status
 

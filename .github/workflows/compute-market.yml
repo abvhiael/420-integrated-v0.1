@@ -183,6 +183,9 @@ jobs:
       - name: Verify CMP-2.4 pricing model
         run: python scripts/verify-cmp-2-4-pricing-model.py
 
+      - name: Verify CMP-2.5 capacity-aware assignment
+        run: python scripts/verify-cmp-2-5-capacity-aware-assignment.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

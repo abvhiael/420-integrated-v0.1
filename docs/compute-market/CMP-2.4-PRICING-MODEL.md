@@ -1,6 +1,8 @@
 # CMP-2.4 — Pricing model
 
-Status: implementation / Level 1 qualification in progress.
+Status: **COMPLETE — Level 1 exact-head qualified on `880aee2edd699f54467145d7cf99cbde3871a6cc`.**
+
+Durable evidence: [CMP-2.4 qualification](CMP-2.4-QUALIFICATION-EVIDENCE.md).
 
 Canonical definition: **Support fixed-price, work-unit, CPU-time, GPU-time and verified-result pricing.**
 

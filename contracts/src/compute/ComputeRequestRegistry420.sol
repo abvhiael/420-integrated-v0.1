@@ -160,6 +160,29 @@ contract ComputeRequestRegistry420 is I420System {
             r.manifestHash, r.workloadType, r.inputCommitment, r.outputSchemaCommitment,
             signedRequests.getRequest(r.signedRequestId).deadline);
     }
+
+    /// @notice JobRegistry-compatible proof that this exact market request is still authoritative.
+    /// @dev This view grants no funding, matching, assignment, or scheduler authority.
+    function validRequest(
+        bytes32 requestId,
+        address owner,
+        bytes32 requestCommitment,
+        bytes32 manifestHash,
+        bytes32 workloadType,
+        bytes32 inputCommitment,
+        bytes32 outputSchemaCommitment,
+        uint64 deadline
+    ) external view returns (bool) {
+        Request storage r = _requests[requestId];
+        return isEffective(requestId)
+            && r.owner == owner
+            && r.manifestHash == manifestHash
+            && r.workloadType == workloadType
+            && r.inputCommitment == inputCommitment
+            && r.outputSchemaCommitment == outputSchemaCommitment
+            && r.terms.deadline == deadline
+            && commitment(requestId, r.revision) == requestCommitment;
+    }
     function _guard(bytes32 id, uint64 expectedRevision) private view returns (Request storage r) {
         r = _requests[id];
         if (!isEffective(id)) revert InvalidRequest();

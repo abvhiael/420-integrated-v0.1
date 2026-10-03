@@ -22,6 +22,7 @@ assert cfg["step"]=="CMP-2.4" and cfg["qualificationLevel"]==1 and cfg["level2Re
 assert cfg["nextCanonicalStep"]=="CMP-2.5 — Capacity-aware assignment"
 assert "Support fixed-price, work-unit, CPU-time, GPU-time and verified-result pricing." in doc
 assert "Level 3 remains reserved for CMP-2.8" in doc
-assert "## CMP-2.4 — Pricing model" in road and "Level 1 qualification in progress" in road
+assert "## CMP-2.4 — Pricing model" in road and "COMPLETE — Level 1 exact-head qualified" in road
+assert "CMP-2.4-QUALIFICATION-EVIDENCE.md" in road
 assert "Verify CMP-2.4 pricing model" in wf
 print("CMP-2.4 verifier: PASS")

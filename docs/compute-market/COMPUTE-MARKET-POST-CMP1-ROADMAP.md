@@ -280,14 +280,20 @@ CMP-2.3 is the first offers/requests/matching convergence milestone, so the reta
 Durable evidence: [`CMP-2.3-QUALIFICATION-EVIDENCE.md`](./CMP-2.3-QUALIFICATION-EVIDENCE.md). Level 3 remains deferred to CMP-2.8.
 
 ## CMP-2.4 — Pricing model
-**Status: implementation / Level 1 qualification in progress.**
+**Status: COMPLETE — Level 1 exact-head qualified on `880aee2edd699f54467145d7cf99cbde3871a6cc`.**
 
 Support fixed-price, work-unit, CPU-time, GPU-time and verified-result pricing.
 
 CMP-2.4 is an ordinary Level 1 step. The offers/requests/matching convergence milestone was qualified at Level 2 in CMP-2.3; Level 3 remains CMP-2.8.
 
+Durable evidence: [CMP-2.4 qualification](CMP-2.4-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-2.5 — Capacity-aware assignment
+**Status: implementation / Level 1 qualification in progress.**
+
 Consume CMP-1.3 capacity reservations atomically.
+
+CMP-2.5 reuses the canonical CMP-1.3 WorkerSnapshot -> capacity reservation -> JobRegistry assignment boundary. The market adapter does not receive capacity-controller authority. Level 2 is not required for this ordinary step; Level 3 remains CMP-2.8.
 
 ## CMP-2.6 — Scheduler redundancy and non-authority
 

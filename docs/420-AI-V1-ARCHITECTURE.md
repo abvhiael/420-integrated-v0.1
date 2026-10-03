@@ -337,7 +337,6 @@ AIIds420.sol
 AIAuthorization420.sol
 AIPolicyRegistry420.sol
 AIModelRegistry420.sol
-AIModelVersionRegistry420.sol
 AIModelDeploymentRegistry420.sol
 AIRequestRegistry420.sol
 AIResultRegistry420.sol
@@ -347,6 +346,17 @@ IAI420.sol
 ```
 
 Legacy predeploy contracts remain at their frozen identities as hardened implementations/facades where required.
+
+
+### AI-AUDIT-3 single-authority implementation decision
+
+The mature V1 module graph preserves one writable authority for each canonical object.
+
+- **AIModelRegistry owns canonical model and model-version state.** A standalone `AIModelVersionRegistry420` is intentionally absent because a second writable registry would split model-version authority.
+- **AIRequestRegistry420 is a read-through view over AIJobManager.** It does not duplicate request lifecycle state.
+- **AIResultRegistry420 is a read-through view over AIJobManager.** It exposes committed result state without a second result mutation path.
+- **AIComputeAdapter420** binds the canonical ComputeRouter graph identity and snapshots the AI request constraints, but does not advance the AI job lifecycle in AI-AUDIT-3. Validation against current Compute request/match/job economics and narrowing is **AI-AUDIT-4**.
+- **AIRouter420** is immutable read/discovery only. User-authorizing writes stay on the owning module so router calls cannot obscure `msg.sender`.
 
 ## Frozen V1 invariants
 

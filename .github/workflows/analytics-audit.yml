@@ -1,0 +1,57 @@
+name: 420Analytics Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'analytics/**'
+      - 'docs/420ANALYTICS*'
+      - 'docs/apps/analytics/**'
+      - 'contracts/config/420analytics-genesis.json'
+      - 'testnet/public-services/analytics/**'
+      - '.github/workflows/analytics-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: analytics-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: true
+      - name: Verify exact checked-out SHA
+        run: |
+          echo "QUALIFICATION_SHA=$(git rev-parse HEAD)"
+          test -z "$(git status --porcelain)"
+      - name: Unit and integration tests
+        run: go test ./analytics/...
+      - name: Race qualification
+        run: go test -race ./analytics/...
+      - name: Static analysis
+        run: go vet ./analytics/...
+      - name: Build runtime and live validator
+        run: |
+          go build ./analytics/cmd/analytics420
+          go build ./analytics/cmd/analyticslivevalidate
+      - name: Verify Genesis Analytics profile
+        run: python3 scripts/verify-genesis-dapps.py
+      - name: Verify live gate remains explicit
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("testnet/public-services/analytics/readiness.json")
+          d=json.loads(p.read_text())
+          assert d["phase"]=="ANALYTICS-9"
+          assert d["status"]=="LIVE_QUALIFICATION_READY"
+          assert d["gates"]["liveTestnetEvidence"] is False
+          assert d["gates"]["genesisCloseout"] is False
+          PY

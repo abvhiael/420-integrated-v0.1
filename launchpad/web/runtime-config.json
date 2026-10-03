@@ -1,0 +1,33 @@
+{
+  "schema": "420-launchpad-web-runtime-v1",
+  "network": {
+    "name": "420 Integrated",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": null
+  },
+  "registry": {
+    "protocolRegistryAddress": "0x0000000000000000000000000000000000000434",
+    "serviceId": "420/service/launchpad/v1",
+    "launchpadRouterAddress": null,
+    "allocationRegistryAddress": null,
+    "crowdfundingIntegrationAddress": null
+  },
+  "api": {
+    "baseUrl": null,
+    "projectionSchema": "420-launchpad-projection-v1"
+  },
+  "features": {
+    "discovery": true,
+    "contribution": true,
+    "claim": true,
+    "refund": true,
+    "creatorManagement": true
+  },
+  "execution": {
+    "status": "DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED",
+    "requireWalletChainMatch": true,
+    "requireRegistryResolution": true,
+    "requireCanonicalProjectionProvenance": true
+  }
+}

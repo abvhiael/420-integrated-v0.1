@@ -34,7 +34,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          # Checkout fetched full history; never introduce a shallow boundary at main.
+          git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          scope_files="$RUNNER_TEMP/compute-pr-files.txt"
+          # Materialize first so a missing merge base is a fatal classification error.
+          git diff --name-only "origin/${{ github.base_ref }}...HEAD" > "$scope_files"
+          cat "$scope_files"
           compute_only=true
           while IFS= read -r file; do
             case "$file" in
@@ -44,7 +49,7 @@ jobs:
                 compute_only=false
                 ;;
             esac
-          done < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          done < "$scope_files"
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
 
   compute-fast:

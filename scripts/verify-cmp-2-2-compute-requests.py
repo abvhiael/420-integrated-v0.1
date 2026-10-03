@@ -47,6 +47,7 @@ def main():
         'packages/420-sdk/test/compute-sdk.test.mjs': ['CMP-2.2 request validation and independent canonical ABI vectors'],
         'docs/compute-market/CMP-2.2-COMPUTE-REQUESTS.md': ['# CMP-2.2 — Compute requests', 'CMP-2.3 — Replaceable matching engine'],
         'docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md': ['## CMP-2.2 — Compute requests', expected['canonical_definition']],
+        '.github/workflows/contracts-foundry.yml': ['scope_files=','done < "$scope_files"', 'git fetch --no-tags origin'],
         '.github/workflows/compute-market.yml': ['python scripts/verify-cmp-2-2-compute-requests.py','npm test'],
     }
     for path, needles in required.items():

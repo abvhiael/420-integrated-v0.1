@@ -407,6 +407,18 @@ The mature V1 module graph preserves one writable authority for each canonical o
 - **AI-INV-031:** legacy AIJobEscrow cannot preserve arbitrary-recipient governance release authority in the mature implementation.
 - **AI-INV-032:** job/result/settlement history is reconstructable from canonical chain state plus committed open specifications/manifests.
 
+### AI-AUDIT-6 off-chain runtime boundary
+
+The provider runtime is implemented under `services/420ai-provider` and follows the frozen V1 authority model:
+
+- canonical RPC/Registry/CMP state is re-read before execution and before any retry;
+- signed execution manifests and receipts are domain-separated and job/assignment/provider/resource scoped;
+- private payloads remain off-chain, encrypted at rest with bounded retention and assignment-scoped authenticated data;
+- retry behavior is finite and receipt submission is idempotent against a stable receipt identity;
+- restart recovery reconciles from canonical state outward and never treats the local queue as protocol truth;
+- operational logs redact private payloads, prompts, documents, tokens, secrets, credentials and raw byte buffers;
+- the runtime gains no custody, settlement, governance, validator, identity or arbitrary lifecycle authority.
+
 ## Implementation order
 
 1. Freeze ComputeMarket V1 architecture.

@@ -410,6 +410,22 @@ Off-chain worker queues may be rebuilt from canonical requests/jobs plus committ
 - **AI-INFRA-011** — provider/matcher/worker/Trust outages degrade AI service only and cannot halt consensus or rewrite canonical history.
 - **AI-INFRA-012** — provider suspension, emergency action, or infrastructure recovery cannot confiscate or redirect already-earned valid entitlements except through the bound dispute/verification path.
 
+## AI-AUDIT-6 provider runtime implementation
+
+The repository now contains a runnable off-chain provider runtime at `services/420ai-provider`. It is intentionally a replaceable service, not protocol authority.
+
+The runtime consumes a narrow canonical client backed by the current RPC/Registry/ComputeMarket state. Before execution it verifies the configured chain ID, canonical ComputeMarket component graph, provider identity, permitted resource identity, assignment reference, input commitment, deadline and RUNNING state. Canonical state wins whenever local queue/runtime state disagrees.
+
+Each execution produces a domain-separated provider-signed execution manifest and a provider-signed receipt. The manifest binds chain, ComputeMarket graph, AI/compute request and job identities, assignment, provider/resource, model version, workload, privacy and verification policy references, input commitment, canonical manifest hash, runtime identity and a bounded expiry. The receipt binds that manifest digest to the canonical assignment and result commitment.
+
+Private inputs are handled through an encrypted private payload store using AES-256-GCM with assignment-scoped authenticated data and an explicit maximum retention window. Plaintext prompts/documents/datasets are never persisted by the runtime state store and observability recursively redacts payload, prompt, token, secret, credential and raw byte fields. Expired or scope-mismatched payload access fails closed.
+
+Receipt submission uses a stable receipt-derived idempotency key, bounded exponential backoff, a finite deadline and canonical-state reconciliation before resubmission. A lost RPC response is therefore not treated as proof of failure: if the canonical job already contains the same result commitment, the runtime records the operation as reconciled instead of submitting a duplicate receipt.
+
+Restart recovery reads only nonsecret local workflow state, then re-reads canonical job state. Already-committed results are reconciled without rerunning inference; terminal canonical jobs are closed locally; other interrupted jobs become explicitly recoverable rather than being blindly replayed. Health/observability output is non-authoritative and reports service state without promoting local queues to protocol truth.
+
+The runtime does not implement custody, settlement, dispute adjudication, provider slashing, or arbitrary lifecycle mutation. Those remain owned by canonical CMP/Vault/AI contracts and later audit steps.
+
 ## Implementation status and evolution
 
 The Genesis-compatible AI provider/model/job/escrow/reputation contracts are implemented and hardened around bounded authority, while the mature V1 architecture freezes the direction toward explicit model/deployment/request/result objects and shared 420 ComputeMarket execution infrastructure.

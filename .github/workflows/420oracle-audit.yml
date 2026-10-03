@@ -1,0 +1,69 @@
+name: 420Oracle audit qualification
+
+on:
+  push:
+    branches:
+      - 'audit/oracle-interface-layer-*'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oracle-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit-state:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify Oracle repository model
+        run: python3 scripts/verify-420oracle-audit.py
+      - name: Verify frozen Genesis interface layer remains intact
+        run: python3 scripts/verify-genesis-interface-layer.py
+
+  oracle-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Format check
+        working-directory: contracts
+        run: forge fmt --check src/oracle test/Oracle420.t.sol test/Oracle420Epoch.t.sol test/Oracle420Risk.t.sol test/Oracle420Hardening.t.sol test/Oracle420DeploymentBinding.t.sol
+      - name: Build Oracle release graph
+        working-directory: contracts
+        run: forge build src/oracle src/interfaces/IOracle420.sol src/interfaces/IOracleSourceAdapter420.sol src/interfaces/IRandomnessRouter420.sol src/apps/ProtocolRegistry.sol test/Oracle420.t.sol test/Oracle420Epoch.t.sol test/Oracle420Risk.t.sol test/Oracle420Hardening.t.sol test/Oracle420DeploymentBinding.t.sol --sizes
+      - name: Run Oracle suites
+        working-directory: contracts
+        run: forge test --match-path 'test/Oracle420*.t.sol' -vvv
+      - name: Static security scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/oracle; then
+            echo 'Forbidden primitive found in 420Oracle sources' >&2
+            exit 1
+          fi
+          if grep -R -nE '\.transfer\s*\(|\.transferFrom\s*\(|\.safeTransferFrom\s*\(|\.call\{value:' contracts/src/oracle; then
+            echo 'Unexpected custody/value-transfer primitive found in 420Oracle sources' >&2
+            exit 1
+          fi

@@ -218,7 +218,7 @@ Exit: reproducible deployment package and exact runtime identity evidence exist.
 This closeout is evidence/documentation-only and references the already-qualified exact implementation SHA. It changes no executable source, tests, workflow logic, dependency, configuration, interface, generated/runtime artifact or deployment state, so recursive qualification is not required.
 
 ## LAUNCHPAD-AUDIT-5 — user-facing application and service layer
-Status: **PENDING**
+Status: **COMPLETE**
 
 - implement actual Launchpad project/campaign discovery and detail UI;
 - Wallet/network validation and canonical address discovery;
@@ -231,6 +231,52 @@ Status: **PENDING**
 - tests for frontend-contract-service integration.
 
 Exit: production build succeeds from clean checkout and primary user/creator workflows are covered.
+
+### Durable qualification evidence
+
+- Qualification level: **Level 1 — per-roadmap-step fast qualification**
+- Implementation SHA: `99956355cec519c790663f8518b583332b537000`
+- Audit branch: `audit/420launchpad-remediation`
+- Pull request: **#489**
+- Current `main` / base SHA at closeout: `b58b09a17e641a42b81d832bad913a83c7caada9`
+- Branch state immediately before evidence closeout: **106 commits ahead / 0 behind** current `main`; PR mergeable.
+- Exact-head qualification workflow: `420Launchpad app qualification`
+- Passing run: **37088613999**
+- Passing job: **111103935989**
+- Exact-head verification: **PASS**
+- Audit-5 application-boundary verifier: **PASS**
+- Browser static/application check: **PASS**
+- Browser unit/integration suite: **7/7 PASS**
+- Launchpad service suite: **5/5 PASS**
+- Clean production web artifact build from CI checkout: **PASS**
+- Production artifact verification (`index.html`, runtime config, build metadata, security headers): **PASS**
+- Static security/authority scan: **PASS**
+- Project/campaign discovery and detail UI: **SATISFIED** — `launchpad/web` renders campaign catalogue/detail, caps/progress, modes, lifecycle, canonical IDs, controller, payment asset, receiver and eligibility policy.
+- Wallet/network validation: **SATISFIED** — injected-wallet account/chain validation is fail-closed and transaction execution requires a chain match.
+- Canonical address discovery: **SATISFIED** — `launchpad/service` resolves `420/service/launchpad/v1` through ProtocolRegistry and derives Router -> SaleRegistry/AllocationRegistry -> CrowdfundingIntegration plus ProjectRegistry bindings from canonical contract getters; configured chain ID is verified against RPC `eth_chainId`.
+- Contribution workflow: **SATISFIED** — browser supplies amount + canonical settled 420Pay payment ID; service prepares exact `contribute(bytes32,uint128,bytes32)` calldata to the resolved AllocationRegistry; browser displays target/calldata/value and submits only through the connected wallet after canonical-review gating.
+- Claim workflow: **SATISFIED** — direct participant status read plus exact `claim(bytes32,bytes32)` review/submission with delivery commitment.
+- Refund workflow: **SATISFIED** — two-phase `prepareRefund(bytes32)` through the resolved CrowdfundingIntegration followed by `recordRefund(bytes32,bytes32)` through the resolved AllocationRegistry; participant refunded state is read directly from chain.
+- Loading/empty/error/transaction/recovery states: **SATISFIED** — runtime-unresolved, loading, empty discovery, service/provenance failure, review gate, submitted transaction and retry/canonical-state guidance are present.
+- Responsive/accessibility baseline: **SATISFIED** — responsive layout, keyboard focus/skip link, live status region, semantic controls and reduced-motion handling are present.
+- API/indexer boundary: **SATISFIED** — provenance-checked `420-launchpad-projection-v1` is used only for non-enumerable campaign discovery/detail; participant contribution/claim/refund status is read directly from canonical contracts. Projection chain ID and block-hash provenance are fail-closed.
+- Creator campaign management: **SATISFIED WITH CANONICAL AUTHORITY PRESERVED** — because project registration and sale lifecycle mutations are governance-only, the creator surface produces bounded governance request drafts for existing-campaign mode/activate/finalize/cancel actions and exposes no direct creator transaction path.
+- Frontend-contract-service integration: **SATISFIED** — tests cover Registry-derived graph resolution, direct AllocationRegistry status reads, participant transaction planning, projection provenance rejection, wrong-network/unexpected-target rejection, exact wallet submission and governance-only creator behavior.
+- Service ingress hardening: **PASS** — HTTPS production URL policy, JSON request-size bound, safe parsing, CORS preflight, no backend wallet submission and no unsafe dynamic execution primitives.
+- Demo/fixture execution path: **NONE** — Audit-5 browser verifier rejects demo/fixture-backed execution semantics.
+- Primary implementation files: `launchpad/web/**`, `launchpad/service/**`, `scripts/verify-launchpad-audit-5-app.py`, `.github/workflows/420launchpad-app.yml`.
+- Documentation reconciled after qualification: Launchpad getting-started/user guide and repository audit now describe the qualified runtime, participant workflows, projection boundary and governance-only creator authority.
+- Level 2 milestone qualification: **NOT REQUIRED** — Audit-5 consumes the already-qualified ProtocolRegistry/Launchpad contract authority boundary without changing shared contract/service authority or lifecycle semantics; its frontend/service integration is fully exercised by the step-specific Level 1 suite.
+- Level 3 closeout qualification: **INTENTIONALLY DEFERRED** to final accumulated Launchpad app-phase closeout as required by the phase model. fileciteturn672file0L21-L24
+- Intentionally deferred live checks: production-equivalent deployment, funded contribution/success/claim, failure/refund, cancellation/dispute, reorg/index recovery, Notifications/Reputation live effects and retained tx/code-hash evidence are owned by **LAUNCHPAD-AUDIT-6**.
+- Original exit criterion — production build succeeds from clean checkout: **PASS**
+- Original exit criterion — primary user workflows covered: **PASS**
+- Original exit criterion — creator workflow covered with bounded authority: **PASS**
+- Remaining blockers for this step: **NONE**
+- Completion state: **COMPLETE**
+- Next canonical roadmap step: **LAUNCHPAD-AUDIT-6 — production-equivalent testnet qualification**
+
+This closeout and the preceding manual/audit reconciliation commits are documentation/evidence-only and reference the already-qualified implementation SHA above. They change no executable source, tests, workflows, dependencies, runtime configuration, interfaces, generated artifacts or deployment state, so recursive qualification is not required.
 
 ## LAUNCHPAD-AUDIT-6 — production-equivalent testnet qualification
 Status: **BLOCKED — LIVE TESTNET REQUIRED**

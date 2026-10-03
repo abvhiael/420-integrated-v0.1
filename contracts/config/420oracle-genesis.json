@@ -1,0 +1,38 @@
+{
+  "schema": "420-oracle-genesis-v1",
+  "status": "REPOSITORY_READY_TESTNET_DEPLOYMENT_REQUIRED",
+  "serviceId": "420/service/oracle/v1",
+  "serviceDiscovery": {
+    "registry": "ProtocolRegistry",
+    "registryAddressSource": "contracts/config/genesis-canonical-addresses.json",
+    "publishedImplementation": "OracleRouter420.sol",
+    "fixedAddress": null,
+    "addressPolicy": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+  },
+  "deploymentOrder": [
+    {"contract":"OracleProviderRegistry420.sol","constructor":["governanceTimelock"]},
+    {"contract":"OracleFeedRegistry420.sol","constructor":["governanceTimelock","OracleProviderRegistry420"]},
+    {"contract":"OracleRiskPolicy420.sol","constructor":["governanceTimelock"]},
+    {"contract":"OracleRouter420.sol","constructor":["governanceTimelock","OracleProviderRegistry420","OracleFeedRegistry420","OracleRiskPolicy420"]},
+    {"contract":"TWAPOracleSourceAdapter420.sol","constructor":["canonicalSwapTWAPOracle"],"optional":true,"note":"Deployment does not make the adapter or its source canonical."}
+  ],
+  "postDeployment": [
+    "publish OracleRouter420 under 420/service/oracle/v1 through ProtocolRegistry",
+    "retain exact runtime code hashes and constructor dependency addresses",
+    "configure providers, feeds, sources and risk policy only through governance",
+    "run canonical-read smoke tests before consumers are enabled",
+    "retain registry publication transaction and testnet qualification evidence"
+  ],
+  "interfaceAuthority": {
+    "runtimeCanonical": "contracts/src/interfaces/IOracle420.sol",
+    "frozenGenesisLegacy": "contracts/src/interfaces/genesis/IOracle420.sol",
+    "compatibility": "INCOMPATIBLE_MAJOR_SURFACES",
+    "rule": "The frozen v1.0 Genesis interface is retained as historical compatibility authority and must not be imported by OracleRouter420 or treated as the runtime 420Oracle V1 ABI. Any migration of the frozen interface requires the interface-layer major-version process."
+  },
+  "externalDependencies":["ProtocolRegistry","governance timelock","optional canonical Swap TWAP oracle","off-chain provider operators"],
+  "frontendRequired": false,
+  "backendRequired": false,
+  "indexerRequiredForCorrectness": false,
+  "operatorServiceRequired": true,
+  "testnetBlockers":["live chain deployment","governance timelock address","ProtocolRegistry publication","provider/feed/source seed decisions","external provider credentials and operator infrastructure"]
+}

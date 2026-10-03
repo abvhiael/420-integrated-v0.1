@@ -19,6 +19,7 @@ on:
       - 'scripts/verify-420ai-audit-state.py'
       - 'scripts/verify-420ai-genesis-compatibility.py'
       - 'scripts/verify-420ai-v1-modules.py'
+      - 'scripts/verify-420ai-compute-integration.py'
       - '.github/workflows/420ai-audit.yml'
   workflow_dispatch:
 
@@ -59,6 +60,16 @@ jobs:
           python-version: '3.12'
       - name: Verify canonical 420AI V1 modules
         run: python3 scripts/verify-420ai-v1-modules.py
+
+  compute-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify current ComputeMarket integration
+        run: python3 scripts/verify-420ai-compute-integration.py
 
   focused-ai-contracts:
     runs-on: ubuntu-latest

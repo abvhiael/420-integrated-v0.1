@@ -225,6 +225,20 @@ ComputeMarket returns/binds:
 
 420AI may not broaden the user's compute or payment authorization during adaptation.
 
+
+### AI-AUDIT-4 current ComputeMarket integration decision
+
+The mature adapter binds directly to the current ComputeMarket component graph and does not create a parallel AI marketplace.
+
+- The **signed CMP request** must be owned by the AI requester and may narrow, but never enlarge, the AI request's maximum spend or deadline.
+- AI workload class and input commitment map exactly into the CMP request. The model-version schema becomes the CMP output-schema commitment.
+- Privacy policy, verification profile, model version, compute-requirement identity, deployment constraint, workload, input/output commitments, narrowed spend ceiling and narrowed deadline are bound into the deterministic AI-to-CMP manifest commitment.
+- The selected AI deployment constrains the exact accepted CMP offer. The AI provider's `computeProviderRef` must equal the accepted CMP provider identity.
+- The **accepted priced match** freezes the CMP resource, payer, canonical provider-derived beneficiary and accepted amount. None may exceed or contradict the earlier AI/CMP request binding.
+- The canonical CMP result commitment is copied unchanged into the AI job. AI stores a deterministic commitment to the CMP assignment/result evidence tuple rather than inventing a second result.
+- AI verification advances only after a matching **verified entitlement** binds the same request, match, result commitment, verifier, payer, provider, resource, beneficiary and accepted economic ceiling.
+- Canonical CMP settlement and payer-refund references are observed and retained by the adapter. Compatibility escrow/custody state reconciliation remains **AI-AUDIT-5**, so AI-AUDIT-4 does not fabricate transfers or bypass 420Vault/CMP settlement authority.
+
 ## Pricing
 
 AI service pricing and raw compute pricing are distinct layers.

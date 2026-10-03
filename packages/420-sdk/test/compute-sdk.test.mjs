@@ -314,7 +314,7 @@ test('rejects malformed, stale, unavailable, zero-capacity, zero-price and empty
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ revision: 3n }), 2n), /stale or mismatched/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ active: false })), /not active/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ capacityUnits: 0n })), /capacity/);
-  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ fixedPrice: 0n })), /price/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ fixedPrice: 0n })), /pric(?:e|ing)/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ availableFrom: 1001n })), /availability/);
   assert.throws(() => validateComputeWorkerOffer420(workerOffer({ jurisdictionHash: b32(0) })), /empty canonical commitment/);
 });

@@ -217,8 +217,7 @@ contract MockLaunchpadArbitrationCases420 is ILaunchpadArbitrationCases420 {
         uint8 state,
         uint8 round
     ) external {
-        records[caseId] =
-            CaseData(claimant, respondent, domainId, originComponentId, originObjectId, state, round);
+        records[caseId] = CaseData(claimant, respondent, domainId, originComponentId, originObjectId, state, round);
     }
 
     function caseOrigin(
@@ -333,43 +332,24 @@ contract LaunchpadCrowdfundingIntegration420Test {
         allocations = new LaunchpadAllocationRegistry420(address(authorization), address(sales));
         sales.setController(address(allocations));
 
-        projectId = projects.canonicalId(
-            address(this), SALE_ASSET, keccak256("project/meta"), keccak256("project/issuance")
-        );
+        projectId =
+            projects.canonicalId(address(this), SALE_ASSET, keccak256("project/meta"), keccak256("project/issuance"));
         projects.registerProject(
-            projectId,
-            address(this),
-            SALE_ASSET,
-            keccak256("project/meta"),
-            keccak256("project/issuance")
+            projectId, address(this), SALE_ASSET, keccak256("project/meta"), keccak256("project/issuance")
         );
 
         saleId = sales.canonicalId(
             projectId, PAYMENT_ASSET, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30, ELIGIBILITY, bytes32(0)
         );
         sales.createSale(
-            saleId,
-            projectId,
-            PAYMENT_ASSET,
-            RECEIVER,
-            500,
-            1000,
-            600,
-            10000,
-            10,
-            20,
-            30,
-            ELIGIBILITY,
-            bytes32(0)
+            saleId, projectId, PAYMENT_ASSET, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30, ELIGIBILITY, bytes32(0)
         );
 
         integration = new LaunchpadCrowdfundingIntegration420(
             address(allocations), address(pay), address(identity), address(cases), address(rulings)
         );
         allocations.setCrowdfundingIntegration(address(integration));
-        integration.setCampaignMode(
-            saleId, LaunchpadCrowdfundingIntegration420.CampaignMode.REWARD
-        );
+        integration.setCampaignMode(saleId, LaunchpadCrowdfundingIntegration420.CampaignMode.REWARD);
 
         identity.setProfile(PROFILE_ALICE, ALICE, true);
         identity.setCredential(PROFILE_ALICE, ELIGIBILITY, true);
@@ -378,37 +358,26 @@ contract LaunchpadCrowdfundingIntegration420Test {
     }
 
     function testOnlyApprovedGenesisCampaignModesAreRepresentable() public {
-        bytes32 donation = _createModeSale(
-            LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION,
-            bytes32(uint256(1))
-        );
-        bytes32 community = _createModeSale(
-            LaunchpadCrowdfundingIntegration420.CampaignMode.COMMUNITY_PROJECT,
-            bytes32(uint256(2))
-        );
-        bytes32 preorder = _createModeSale(
-            LaunchpadCrowdfundingIntegration420.CampaignMode.PRODUCT_PREORDER,
-            bytes32(uint256(3))
-        );
+        bytes32 donation =
+            _createModeSale(LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION, bytes32(uint256(1)));
+        bytes32 community =
+            _createModeSale(LaunchpadCrowdfundingIntegration420.CampaignMode.COMMUNITY_PROJECT, bytes32(uint256(2)));
+        bytes32 preorder =
+            _createModeSale(LaunchpadCrowdfundingIntegration420.CampaignMode.PRODUCT_PREORDER, bytes32(uint256(3)));
 
         require(
-            integration.campaignMode(saleId)
-                == LaunchpadCrowdfundingIntegration420.CampaignMode.REWARD,
-            "reward mode"
+            integration.campaignMode(saleId) == LaunchpadCrowdfundingIntegration420.CampaignMode.REWARD, "reward mode"
         );
         require(
-            integration.campaignMode(donation)
-                == LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION,
+            integration.campaignMode(donation) == LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION,
             "donation mode"
         );
         require(
-            integration.campaignMode(community)
-                == LaunchpadCrowdfundingIntegration420.CampaignMode.COMMUNITY_PROJECT,
+            integration.campaignMode(community) == LaunchpadCrowdfundingIntegration420.CampaignMode.COMMUNITY_PROJECT,
             "community mode"
         );
         require(
-            integration.campaignMode(preorder)
-                == LaunchpadCrowdfundingIntegration420.CampaignMode.PRODUCT_PREORDER,
+            integration.campaignMode(preorder) == LaunchpadCrowdfundingIntegration420.CampaignMode.PRODUCT_PREORDER,
             "preorder mode"
         );
 
@@ -436,9 +405,7 @@ contract LaunchpadCrowdfundingIntegration420Test {
         require(allocations.contributed(preorder, ALICE) == 100, "preorder contribution");
 
         vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidCampaignMode.selector);
-        integration.setCampaignMode(
-            saleId, LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION
-        );
+        integration.setCampaignMode(saleId, LaunchpadCrowdfundingIntegration420.CampaignMode.DONATION);
     }
 
     function testCrowdfundingIntegrationIsOneShotGovernanceBinding() public {
@@ -648,13 +615,7 @@ contract LaunchpadCrowdfundingIntegration420Test {
             3,
             0
         );
-        rulings.setRuling(
-            caseId,
-            0,
-            1,
-            keccak256("ruling/final"),
-            keccak256("remedy/refund-or-cancel-review")
-        );
+        rulings.setRuling(caseId, 0, 1, keccak256("ruling/final"), keccak256("remedy/refund-or-cancel-review"));
 
         integration.publishFinalizedDisputeOutcome(saleId, ALICE);
         require(integration.publishedDisputeOutcome(caseId), "ruling published");

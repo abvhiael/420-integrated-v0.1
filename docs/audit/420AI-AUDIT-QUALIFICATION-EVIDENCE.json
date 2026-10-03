@@ -14,6 +14,7 @@
       "audit-state",
       "genesis-compatibility",
       "v1-modules",
+      "compute-integration",
       "focused-ai-contracts"
     ]
   },
@@ -120,17 +121,97 @@
       ],
       "blockers": [],
       "next_step": "AI-AUDIT-4 — current ComputeMarket integration"
+    },
+    "AI-AUDIT-4": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 + Level 2 app-integration milestone",
+      "implementation_sha": "3108fa8f17c1e9482c6506cc39ea64e56fd8727f",
+      "qualification_base_sha": "b58b09a17e641a42b81d832bad913a83c7caada9",
+      "current_main_at_closeout": "edfd0752e825fc5379700851358e8398efb0b9c5",
+      "workflow_run": 37093230900,
+      "jobs": {
+        "compute-integration": 111117818705,
+        "genesis-compatibility": 111117818829,
+        "focused-ai-contracts": 111117818837,
+        "v1-modules": 111117818860,
+        "audit-state": 111117818885
+      },
+      "implementation_summary": [
+        "Reworked AIComputeAdapter420 from AI-AUDIT-3 graph-only binding into a narrow adapter over the current ComputeMarket signed-request, canonical job, accepted priced-match, provider, verified-entitlement, settlement and refund evidence authorities.",
+        "Bound AI request semantics to a deterministic AI-to-CMP manifest containing model version, compute requirement, privacy policy, verification profile, workload, input/output commitments, narrowed spend ceiling and narrowed deadline.",
+        "Bound deployment and AI-provider identities to the exact accepted CMP offer and compute-provider identity through AIProviderRegistry.computeProviderRef.",
+        "Bound accepted CMP resource, payer, canonical provider-derived beneficiary and accepted price, rejecting broadened or contradictory terms.",
+        "Synchronized canonical CMP running/result/verified evidence into the constrained AIJobManager lifecycle without creating duplicate compute economics or result authority.",
+        "Observed canonical CMP settlement and refund references while intentionally deferring compatibility escrow/custody reconciliation to AI-AUDIT-5."
+      ],
+      "files_changed": [
+        "contracts/src/ai/AIComputeAdapter420.sol",
+        "contracts/test/AIComputeIntegration420.t.sol",
+        "contracts/test/AIV1Modules420.t.sol",
+        "scripts/verify-420ai-compute-integration.py",
+        "scripts/verify-420ai-v1-modules.py",
+        ".github/workflows/420ai-audit.yml",
+        "docs/420-AI-V1-ARCHITECTURE.md"
+      ],
+      "requirements_satisfied": [
+        "AI requests bind to current CMP signed request and canonical job evidence.",
+        "Adaptation narrows and cannot broaden requester-authorized spend or deadline.",
+        "Privacy policy, verification profile, compute requirement, deployment/provider constraint, workload and input/output commitments are cryptographically included in the deterministic adaptation manifest.",
+        "Accepted CMP provider/resource identity must match the bound AI deployment/provider relation.",
+        "Accepted price is bounded by the narrowed request maximum; payer and provider-derived beneficiary are frozen from current CMP evidence.",
+        "Canonical CMP result commitment and verification reference are bound without fabricating an alternate result.",
+        "Verified entitlement must match request, match, result, verifier, payer, provider, resource, beneficiary and accepted economic ceiling.",
+        "Canonical settlement and original-payer refund references are bound as evidence.",
+        "Targeted end-to-end AI -> CMP -> verified entitlement/settlement and failed-job refund evidence tests are committed."
+      ],
+      "ci_results": {
+        "workflow": "420AI Audit Qualification",
+        "workflow_run": 37093230900,
+        "result": "success",
+        "exact_head": true,
+        "jobs": {
+          "compute-integration": "PASS",
+          "genesis-compatibility": "PASS",
+          "focused-ai-contracts": "PASS",
+          "v1-modules": "PASS",
+          "audit-state": "PASS"
+        },
+        "contract_build": "PASS",
+        "focused_ai_contract_suites": "PASS"
+      },
+      "security_adversarial_invariant_results": [
+        "Broadened spend or contradictory manifest binding fails closed.",
+        "Wrong accepted provider or beneficiary fails closed.",
+        "AI adapter status progression rejects unrelated terminal CMP enum values rather than relying on enum ordering.",
+        "Provider, resource, payer, beneficiary and accepted price are derived from accepted canonical CMP evidence.",
+        "Result commitment and verified entitlement evidence must remain cross-consistent.",
+        "Refund evidence is accepted only from the bound canonical CMP job and settlement adapter.",
+        "Retained AI compatibility, hardening, model-rights, mature V1 and rewards suites remain green."
+      ],
+      "milestone_status": "AI-AUDIT-4 is a meaningful cross-component AI/ComputeMarket integration boundary. The exact-head 420AI Audit Qualification included the targeted compute-integration verifier plus the broader retained focused AI contract suite, satisfying Level 2 app-focused integration coverage without invoking unrelated repository-wide Level 3 closeout.",
+      "deferred": {
+        "level_3": "Full repository Solidity inventory, Genesis/address-authority closeout, 420 Integrated/global qualification, Docs/global reconciliation and other complete app-phase checks remain deferred to Level 3 closeout.",
+        "custody_and_disputes": "Compatibility AI escrow/custody reconciliation, one-time payout/refund synchronization, dispute holds/resolution and related non-confiscatory behavior remain AI-AUDIT-5.",
+        "live": "Live deployment, ProtocolRegistry publication and production-equivalent testnet evidence remain AI-AUDIT-9 through AI-AUDIT-11."
+      },
+      "limitations": [
+        "This step validates and binds current CMP evidence; it does not create or replace CMP economics, Vault custody, verification or settlement authority.",
+        "AIJobEscrow compatibility-state reconciliation to already-executed CMP settlement/refund remains deliberately deferred to AI-AUDIT-5.",
+        "The audit branch was qualified against PR base b58b09a17e641a42b81d832bad913a83c7caada9; current main advanced to edfd0752e825fc5379700851358e8398efb0b9c5 after qualification. Reconciliation with current main is not part of this evidence-only closeout and remains required at the appropriate later milestone/Level 3 boundary."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_step": "AI-AUDIT-5 — custody, settlement and disputes"
     }
   },
   "scope": {
-    "claim": "repository-state audit, frozen Genesis compatibility qualification, and canonical AI V1 module implementation",
+    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, and current ComputeMarket integration",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
       "420AI production readiness",
       "live testnet deployment",
-      "live ProtocolRegistry publication",
-      "current ComputeMarket integration"
+      "live ProtocolRegistry publication"
     ]
   },
   "canonical_findings": {
@@ -140,7 +221,8 @@
     "read_api_present": false,
     "production_web_client_present": false,
     "production_equivalent_testnet_evidence_present": false,
-    "historical_recovery_pr_348_merged": false
+    "historical_recovery_pr_348_merged": false,
+    "current_compute_market_integration_complete": true
   },
   "readiness": {
     "code_complete": false,
@@ -155,5 +237,6 @@
     "production_ready": false
   },
   "roadmap": "docs/audit/420AI-AUDIT-REMEDIATION-ROADMAP.md",
-  "report": "docs/audit/420AI-COMPLETE-AUDIT-20261002.md"
+  "report": "docs/audit/420AI-COMPLETE-AUDIT-20261002.md",
+  "current_main_at_ai_audit_4_closeout": "edfd0752e825fc5379700851358e8398efb0b9c5"
 }

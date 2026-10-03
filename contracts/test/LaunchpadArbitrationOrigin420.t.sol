@@ -5,10 +5,8 @@ import "../src/arbitration/ArbitrationPolicyRegistry420.sol";
 import "../src/arbitration/ArbitrationCaseRegistry420.sol";
 
 contract LaunchpadArbitrationOrigin420Test {
-    bytes32 internal constant DOMAIN =
-        keccak256("420/arbitration/domain/launchpad-crowdfunding/v1");
-    bytes32 internal constant COMPONENT =
-        keccak256("420/COMPONENT/LAUNCHPAD/V1");
+    bytes32 internal constant DOMAIN = keccak256("420/arbitration/domain/launchpad-crowdfunding/v1");
+    bytes32 internal constant COMPONENT = keccak256("420/COMPONENT/LAUNCHPAD/V1");
     bytes32 internal constant SALE_ID = keccak256("launchpad/sale");
     address internal constant RESPONDENT = address(0xBEEF);
 
@@ -22,14 +20,7 @@ contract LaunchpadArbitrationOrigin420Test {
     }
 
     function testCaseOriginReturnsImmutableLaunchpadBinding() public {
-        bytes32 caseId = cases.openCase(
-            DOMAIN,
-            RESPONDENT,
-            COMPONENT,
-            SALE_ID,
-            keccak256("claim"),
-            keccak256("remedy")
-        );
+        bytes32 caseId = cases.openCase(DOMAIN, RESPONDENT, COMPONENT, SALE_ID, keccak256("claim"), keccak256("remedy"));
 
         (
             address claimant,

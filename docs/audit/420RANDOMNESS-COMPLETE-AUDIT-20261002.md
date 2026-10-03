@@ -67,3 +67,9 @@ Resolved repository provenance finding: the baseline `0x0428` source ambiguity h
 4. **RANDOM-AUDIT-4 — deployment bundle — COMPLETE.** Frozen six-step deployment/publication/binding sequence for route registry, profile registry and router; exact ProtocolRegistry router component identity and canonical `420/service/randomness/v1` publication; post-publication one-time `RandomnessRegistry@0x0428.bindRouter(RandomnessRouter420)` transaction. Level 1 exact-head qualification passed on implementation SHA `5158e7f5505d51cfa7db0d778de3871dd2525653`, workflow run `37101060785`, job `111140517818`; 24 passed / 0 failed / 0 skipped. Durable evidence: `docs/audit/RANDOM-AUDIT-4-QUALIFICATION.md`.
 5. **RANDOM-AUDIT-5 — production-equivalent testnet qualification.** Deploy exact artifacts, verify code/storage identities, publish Registry entries, bind the router, configure qualified routes/profiles, execute primary/fallback/void smoke tests, and verify indexer lifecycle projection.
 6. **RANDOM-AUDIT-6 — production security/release closeout.** Independent security review, operational route/verifier evidence, monitoring/runbook validation and final Genesis/mainnet evidence.
+
+## Testnet handoff and merge-candidate reconciliation
+
+Repository remediation remains complete through **RANDOM-AUDIT-4**. The unfinished work is retained on the canonical `docs/ROADMAP.md` testnet handoff as **RANDOM-AUDIT-5 — production-equivalent testnet qualification**, followed by **RANDOM-AUDIT-6 — production security/release closeout**. RANDOM-AUDIT-5 requires genuine live-chain deployment, publication, binding, smoke/failure-path and Indexer evidence; repository/local-EVM evidence must not be promoted to live completion evidence.
+
+This audit branch was reconciled with current `main` at `d37d751dfa232b20c8158d55c20c13cc1d7a10ef` before final merge-candidate qualification. The final merge candidate must pass the dedicated 420Randomness exact-head workflow before merge.

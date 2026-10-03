@@ -34,7 +34,7 @@ Canonical upstream authorities:
 | GRANTS-AUDIT-4 | COMPLETE | Civic/Treasury/Vault/capability boundary reconciled |
 | GRANTS-AUDIT-5 | COMPLETE | Registry/address/deployment materialization qualified |
 | GRANTS-AUDIT-6 | COMPLETE | client/indexer/Wallet integration qualified |
-| GRANTS-AUDIT-7 | IMPLEMENTED — pending exact-head qualification | documentation/threat model/operator closeout |
+| GRANTS-AUDIT-7 | COMPLETE | documentation/threat model/operator closeout qualified on exact head |
 | GRANTS-AUDIT-8 | IN PROGRESS | Level 3 accumulated merge-candidate reconciliation/qualification |
 | GRANTS-AUDIT-9 | BLOCKED | production-equivalent testnet required |
 | GRANTS-AUDIT-10 | BLOCKED | depends on AUDIT-9 and whole-system Genesis gates |
@@ -203,6 +203,7 @@ Qualification evidence is retained in:
 - `docs/audit/420GRANTS-AUDIT-4-QUALIFICATION.md`;
 - `docs/audit/420GRANTS-AUDIT-5-QUALIFICATION.md`;
 - `docs/audit/420GRANTS-AUDIT-6-QUALIFICATION.md`;
+- `docs/audit/420GRANTS-AUDIT-7-QUALIFICATION.md`;
 - `docs/audit/420GRANTS-AUDIT-REMEDIATION-ROADMAP.md`.
 
-GRANTS-AUDIT-7 evidence is added only after exact-head documentation qualification passes.
+GRANTS-AUDIT-7 exact-head implementation qualification: `14c6732aa1d30bed5e5e5459ee930bafc9c54426`, 420Grants Audit Qualification run `37086042799` / #68 SUCCESS, affected Solidity Contracts run `37086042862` / #4399 SUCCESS. GRANTS-AUDIT-8 remains the accumulated Level 3 merge-candidate closeout.

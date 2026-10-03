@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import type { SqlExecutor420 } from '../src/core-projections.js';
+import type { SqlExecutor420, TransactionalSql420 } from '../src/core-projections.js';
+import type { Hex, IndexerLog } from '../src/chain-source.js';
+import { ProtocolDecoderRegistry420 } from '../src/protocol-decoder.js';
+import { ProtocolProjection420 } from '../src/protocol-projections.js';
 import { aiJobState420, aiProviderState420, aiJobs420, AI_READ_SCHEMA_VERSION_420 } from '../src/ai-read-model.js';
 
 const h=(n:number)=>`0x${n.toString(16).padStart(64,'0')}`;
@@ -51,4 +54,15 @@ test('AI collection reads use bounded opaque keyset pagination and chain scope',
 test('AI event history is queried in canonical replay order so reorg rollback/rebuild can reconstruct state',async()=>{
  const db=new QueueDb();db.queue.push({rows:[row('ProviderRegistered',{providerId:h(1),operatorAccount:a(1),settlementAccount:a(2),stakeRef:h(3),computeProviderRef:h(4)},5)]});
  await aiProviderState420(db,420n,h(1));assert.match(db.calls[0]!.sql,/order by block_number asc, tx_index asc, log_index asc/);
+});
+
+test('AI protocol projection rollback removes orphaned events and permits canonical replay',async()=>{
+ class TxDb extends QueueDb implements TransactionalSql420{async transaction<T>(work:(tx:SqlExecutor420)=>Promise<T>):Promise<T>{return work(this);}}
+ const db=new TxDb();const topic=h(999) as Hex;
+ const projection=new ProtocolProjection420(db,new ProtocolDecoderRegistry420([{protocol:'420AI',eventName:'JobStatus',topic0:topic,fields:[{name:'jobId',kind:'bytes32',indexed:true},{name:'previousStatus',kind:'uint8',indexed:false},{name:'newStatus',kind:'uint8',indexed:false}]}]));
+ const data=`0x${BigInt(5).toString(16).padStart(64,'0')}${BigInt(6).toString(16).padStart(64,'0')}` as Hex;
+ const log:IndexerLog={address:a(9) as Hex,blockHash:h(90) as Hex,blockNumber:50n,transactionHash:h(91) as Hex,transactionIndex:0,logIndex:1,topics:[topic,h(1) as Hex],data};
+ await projection.applyLogs(420n,[log]);await projection.rollbackTo(49n);await projection.applyLogs(420n,[{...log,blockHash:h(92) as Hex,transactionHash:h(93) as Hex}]);
+ assert.equal(db.calls.filter((x)=>/insert into idx_protocol_events/.test(x.sql)).length,2);
+ assert.equal(db.calls.some((x)=>/delete from idx_protocol_events where block_number > \$1/.test(x.sql)),true);
 });

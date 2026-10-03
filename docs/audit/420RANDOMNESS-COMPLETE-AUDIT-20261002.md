@@ -1,6 +1,6 @@
 # 420Randomness complete audit — 2026-10-02
 
-Status: **REPOSITORY REMEDIATION IN PROGRESS; DEPLOYMENT QUALIFICATION BLOCKED**
+Status: **REPOSITORY REMEDIATION THROUGH RANDOM-AUDIT-4 COMPLETE; LIVE TESTNET QUALIFICATION BLOCKED**
 
 Baseline main: `edfd0752e825fc5379700851358e8398efb0b9c5`
 
@@ -31,9 +31,9 @@ The Genesis contract map names eight required Solidity/interface files for 420 R
 | Genesis source wiring | frozen `0x0428` predeploy plan and Step-6 verifier point to `src/randomness/RandomnessRegistry.sol`; legacy system registry retained only as historical evidence | exact-head verifier + CI | this audit + RANDOM-AUDIT-1 evidence | COMPLETE | none for RANDOM-AUDIT-1 |
 | Retained runtime artifact | `contracts/artifacts/RandomnessRegistry.json`; runtime hash `0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a` | exact-head reproducibility check | RANDOM-AUDIT-3 evidence | COMPLETE | live code identity later |
 | Retained predeploy state | `RandomnessRegistry-predeploy-state.json`; immutable GovernanceTimelock `0x0429`, zero mutable slots, empty storage root | generator/verifier + clean-tree check | RANDOM-AUDIT-3 evidence | COMPLETE | live storage verification later |
-| Router deployment | Registry-resolved identity only | repository tests | app README | BLOCKED | production-equivalent testnet deployment |
-| Router one-time binding | implemented | unit test | app README | BLOCKED | execute only after qualified router deployment |
-| ProtocolRegistry publication | identity declared | indirect | architecture | BLOCKED | testnet deployment/publication evidence |
+| Router deployment | deterministic RANDOM-AUDIT-4 deployment bundle freezes constructor graph and Registry-resolved address policy | deployment-binding + full Randomness tests | RANDOM-AUDIT-4 evidence | REPOSITORY COMPLETE / LIVE BLOCKED | execute exact bundle on production-equivalent testnet |
+| Router one-time binding | exact post-publication `RandomnessRegistry@0x0428.bindRouter(RandomnessRouter420)` transaction frozen | governance/one-time/rebinding tests | RANDOM-AUDIT-4 evidence | REPOSITORY COMPLETE / LIVE BLOCKED | execute once on qualified testnet deployment |
+| ProtocolRegistry publication | exact router component registration + `420/service/randomness/v1` publication frozen | exact router/codehash/profile-resolution tests | RANDOM-AUDIT-4 evidence | REPOSITORY COMPLETE / LIVE BLOCKED | retain live publication transactions and resolve-active evidence |
 | Indexer lifecycle | `420-indexer` recognizes request/fulfillment terminal state | reducer tests exist | system docs | PARTIAL | exact deployed ABI/event descriptor qualification |
 | Frontend | no dedicated frontend required by canonical architecture | N/A | protocol docs | NOT APPLICABLE | consumers integrate through router |
 | Backend worker | provider-specific and replaceable, not canonical app authority | N/A | trust model | NOT APPLICABLE | route operators/verifiers qualified separately |
@@ -55,7 +55,7 @@ Resolved repository provenance finding: the baseline `0x0428` source ambiguity h
 - DOCUMENTATION COMPLETE: **PARTIAL**; this audit adds the app-level operator/integration reference, but deployment evidence is outstanding.
 - INTEGRATION COMPLETE: **NO**; ProtocolRegistry publication and deployed indexer ABI identity are outstanding.
 - SECURITY QUALIFIED: **NO** for production; repository review is not an independent external audit.
-- TESTNET READY: **NO**; `0x0428` artifact/state provenance is now frozen, but RANDOM-AUDIT-4 deployment bundle and later live qualification remain.
+- TESTNET READY: **NO**; `0x0428` artifact/state provenance and the RANDOM-AUDIT-4 deployment bundle are frozen, but RANDOM-AUDIT-5 must execute and qualify them on a production-equivalent testnet.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.
 
@@ -64,6 +64,6 @@ Resolved repository provenance finding: the baseline `0x0428` source ambiguity h
 1. **RANDOM-AUDIT-1 — canonical source reconciliation — COMPLETE.** `0x0428` predeploy source and the retained Step-6 verifier now resolve `src/randomness/RandomnessRegistry.sol`; the legacy `src/system/RandomnessRegistry.sol` remains historical evidence only. Level 1 exact-head qualification passed on implementation SHA `95b7b4c7f6cfc214ab10c8673a665788b389568b`, workflow run `37093289263`, job `111117991983`.
 2. **RANDOM-AUDIT-2 — repository qualification — COMPLETE.** The complete retained Randomness source/interface/test set is formatter-clean and passed the dedicated verifier, canonical build, all `Randomness*.t.sol` tests and app-scoped static security scan on exact implementation SHA `f40d9b89e9e4c8626a8105c61385041b986853ca`; workflow run `37094231759`, job `111120749696`.
 3. **RANDOM-AUDIT-3 — deterministic Genesis materialization — COMPLETE.** Retained exact compiler/runtime artifact, source blob, stable compiler-derived immutable locations, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`; exact implementation SHA `809cff5ea67fc48c3082f5ce0702b8572b18c663`, workflow run `37098929839`, job `111134459600`; durable evidence: `docs/audit/RANDOM-AUDIT-3-QUALIFICATION.md`. The subsequent closeout commits are documentation-only and preserve the exact-SHA qualification under the evidence-only exception.
-4. **RANDOM-AUDIT-4 — deployment bundle.** Freeze deployment ordering/arguments for route registry, profile registry and router; define the exact ProtocolRegistry component publication and one-time `bindRouter` transaction.
+4. **RANDOM-AUDIT-4 — deployment bundle — COMPLETE.** Frozen six-step deployment/publication/binding sequence for route registry, profile registry and router; exact ProtocolRegistry router component identity and canonical `420/service/randomness/v1` publication; post-publication one-time `RandomnessRegistry@0x0428.bindRouter(RandomnessRouter420)` transaction. Level 1 exact-head qualification passed on implementation SHA `5158e7f5505d51cfa7db0d778de3871dd2525653`, workflow run `37101060785`, job `111140517818`; 24 passed / 0 failed / 0 skipped. Durable evidence: `docs/audit/RANDOM-AUDIT-4-QUALIFICATION.md`.
 5. **RANDOM-AUDIT-5 — production-equivalent testnet qualification.** Deploy exact artifacts, verify code/storage identities, publish Registry entries, bind the router, configure qualified routes/profiles, execute primary/fallback/void smoke tests, and verify indexer lifecycle projection.
 6. **RANDOM-AUDIT-6 — production security/release closeout.** Independent security review, operational route/verifier evidence, monitoring/runbook validation and final Genesis/mainnet evidence.

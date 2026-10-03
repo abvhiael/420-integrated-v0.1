@@ -166,7 +166,7 @@ Unresolved release risk:
 4. **ORACLE-AUDIT-4 — interface-layer compatibility containment** — COMPLETE for runtime containment; frozen-interface major migration remains explicitly deferred.
 5. **ORACLE-AUDIT-5 — exact-head repository qualification and durable evidence** — COMPLETE. Implementation SHA `28c61dc020a02b6fa981eecd566d533ca6a6f0f2`; workflow run `37093500837`; durable evidence commit `67d1e5d8e58e48af4cb08231b56b877dcd8c174c`.
 6. **ORACLE-AUDIT-6 — cross-application consumer qualification** — COMPLETE. Level 2 implementation SHA `e97958eda4dbf230d1f5add8e3adc8cc40d70e43`; workflow run `37094115610`; Automation 126/126 PASS; Swap adapter integration 9/9 PASS; Exchange classified as separate `referencePrice` consumer; no Pay direct Oracle consumer.
-7. **ORACLE-AUDIT-7 — production-equivalent testnet deployment** — BLOCKED on live testnet, governance addresses, provider/feed/source decisions, and provider operators.
+7. **ORACLE-AUDIT-7 — production-equivalent testnet deployment** — REPOSITORY HANDOFF READY / LIVE STEP BLOCKED. Testnet qualification state, verifier and operating checklist are committed; live completion still requires the approved testnet, frozen network identity, deployed governance/Registry/Oracle contracts, provider/feed/source configuration, provider operators and retained live evidence.
 8. **ORACLE-AUDIT-8 — Genesis/production closeout** — BLOCKED on retained testnet evidence, production provider diversity/credentials/monitoring, final deployment approval, and operational incident/recovery evidence.
 
 
@@ -225,3 +225,49 @@ Full Level 3 repository/global closeout remains intentionally deferred. Live dep
 **ORACLE-AUDIT-6 is COMPLETE.**
 
 Next canonical roadmap step: **ORACLE-AUDIT-7 — production-equivalent testnet deployment**.
+
+
+## ORACLE-AUDIT-7 repository handoff
+
+Canonical step: **ORACLE-AUDIT-7 — production-equivalent testnet deployment**.
+
+Qualification classification for the repository-side work: **Level 1 — per-roadmap-step fast qualification**. The live roadmap step itself cannot be declared COMPLETE from repository evidence.
+
+Repository implementation added for the handoff:
+
+- `contracts/config/oracle-audit-7-testnet-qualification.json` — canonical fail-closed live qualification state and required evidence inventory.
+- `scripts/verify-oracle-audit-7-testnet-readiness.py` — readiness/evidence verifier that validates the Oracle release boundary and refuses synthetic promotion.
+- `docs/apps/oracle/testnet-qualification.md` — operator/testnet deployment and retained-evidence contract.
+- `.github/workflows/420oracle-audit.yml` — exact-head `testnet-readiness` job.
+- `docs/ROADMAP.md` — global testnet handoff and required live evidence inventory.
+
+The repository harness requires fourteen live checks tied to one exact release/deployment lineage:
+
+1. network/genesis/evidence-block identity;
+2. deployed Oracle component code hashes and constructor bindings;
+3. ProtocolRegistry discovery of `420/service/oracle/v1`;
+4. governance-only configuration authority;
+5. independent provider provisioning/key-custody review;
+6. numeric quorum;
+7. exact-result quorum/conflict handling;
+8. freshness/inactive/insufficient-source failures;
+9. replay/ordering rejection;
+10. feed/provider/source epoch invalidation;
+11. confidence/deviation/circuit-breaker controls;
+12. Swap TWAP source-adapter behavior;
+13. 420Automation canonical consumer behavior;
+14. provider restart/reorg/reconciliation behavior.
+
+The harness intentionally expects **BLOCKED_OFFICIAL_TESTNET_NOT_LIVE** while:
+
+- `developer-hub/manifests/testnet.json` is absent;
+- chain ID remains candidate/not frozen;
+- public service endpoints remain placeholders;
+- launch authority says public testnet is not yet authorized/live;
+- no live Oracle deployment/provider evidence exists.
+
+Repository/local-EVM/CI evidence is explicitly prohibited from satisfying the live checks.
+
+ORACLE-AUDIT-7 can become COMPLETE only after the official production-equivalent testnet exists and all fourteen checks are retained as PASS in `docs/audit/ORACLE-AUDIT-7-LIVE-TESTNET-EVIDENCE.json` against one exact release/deployment lineage.
+
+**Current live status: BLOCKED on external/live testnet prerequisites, not on missing repository preparation.**

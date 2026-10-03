@@ -15,6 +15,11 @@ export class LaunchpadService {
     if(!payload?.source?.blockHash||!payload?.source?.chainId)throw new Error('projection provenance incomplete');
     return payload;
   }
+  async runtime(){
+    const result=await json(this.fetch,`${this.baseUrl}/v1/launchpad/runtime`,{cache:'no-store'});
+    if(result?.schema!=='420-launchpad-runtime-v1'||result?.canonical!==true)throw new Error('untrusted Launchpad runtime');
+    return result;
+  }
   async campaigns({cursor='',limit=24}={}){
     const q=new URLSearchParams({limit:String(limit)});if(cursor)q.set('cursor',cursor);
     return this._verify(await json(this.fetch,`${this.baseUrl}/v1/launchpad/campaigns?${q}`,{cache:'no-store'}));
@@ -26,13 +31,20 @@ export class LaunchpadService {
     return this._verify(await json(this.fetch,`${this.baseUrl}/v1/launchpad/campaigns/${encodeURIComponent(saleId)}/participants/${encodeURIComponent(address)}`,{cache:'no-store'}));
   }
   async prepare(kind,payload){
-    if(!['contribute','claim','refund','creator'].includes(kind))throw new Error('unsupported Launchpad transaction kind');
+    if(!['contribute','claim','refund'].includes(kind))throw new Error('unsupported Launchpad transaction kind');
     const result=await json(this.fetch,`${this.baseUrl}/v1/launchpad/prepare/${kind}`,{
       method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)
     });
     if(result?.schema!=='420-launchpad-transaction-review-v1')throw new Error('untrusted transaction review schema');
     if(result?.canonical!==true||!/^0x[0-9a-fA-F]{40}$/.test(result?.transaction?.to||''))throw new Error('invalid canonical transaction review');
     if(!/^0x[0-9a-fA-F]*$/.test(result?.transaction?.data||''))throw new Error('invalid transaction calldata');
+    return result;
+  }
+  async creatorRequest(payload){
+    const result=await json(this.fetch,`${this.baseUrl}/v1/launchpad/creator-requests`,{
+      method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)
+    });
+    if(result?.schema!=='420-launchpad-creator-request-v1'||result?.canonical!==true||result?.requiresGovernance!==true)throw new Error('invalid creator governance request');
     return result;
   }
 }

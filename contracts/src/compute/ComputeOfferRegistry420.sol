@@ -233,7 +233,8 @@ contract ComputeOfferRegistry420 is I420System {
         ComputeNodeRegistry420.Node memory n = resources.nodes().node(nodeId);
         if (actor == n.operator && (allowInactiveOperator || providers.isOperator(providerId, actor))) return;
         if (!allowDelegated) revert Unauthorized();
-        if (!authorization.isAuthorized(actor, action, authorization.scopeResource(providerId,nodeId,resourceId), amount)) revert Unauthorized();
+        bytes32 scope = authorization.scopeResource(providerId, nodeId, resourceId);
+        if (!authorization.isAuthorized(actor, action, scope, amount)) revert Unauthorized();
     }
     function _commitment(Offer memory o) private pure returns (bytes32) {
         return keccak256(abi.encode(o.providerId,o.nodeId,o.resourceId,o.providerRevision,o.resourceRevision,o.operator,

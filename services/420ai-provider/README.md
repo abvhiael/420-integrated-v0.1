@@ -16,7 +16,7 @@ Use separate keys for provider/operator transactions, receipt signing, and priva
 
 The local state store contains only workflow identifiers, manifest/receipt digests, canonical result commitments and recovery status. Private payload plaintext and decryption keys are never persisted there.
 
-Restart recovery is fail-closed: canonical chain state wins over the local queue. Interrupted execution is marked recoverable unless the canonical job already records the same result or has become terminal.
+Restart recovery is fail-closed: canonical chain state wins over the local queue. Signed manifests and receipts contain only commitments/identities and are persisted so a pending receipt can be resumed without decrypting or re-executing the private workload. Interrupted execution with no durable result receipt is marked recoverable and requires the explicit `retryExecution` path after canonical revalidation; ordinary `process` will not silently rerun it.
 
 ## Tests
 

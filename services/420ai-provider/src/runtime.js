@@ -43,17 +43,49 @@ export class ProviderRuntime420 {
     const j=await this.canonical.job(jobId);
     return SUCCESS_STATES.has(j?.status)&&j?.resultCommitment===resultCommitment;
   }
-  async process(jobId,payloadId) {
+  _validatePersistedSubmission(state) {
+    const m=state?.signedManifest?.payload, r=state?.signedReceipt?.payload;
+    if(!m||!r||state.receiptId!==digestObject420(r)) throw new Error("persisted receipt state invalid");
+    if(m.jobId!==state.jobId||r.jobId!==state.jobId||m.assignmentRef!==state.assignmentRef||r.assignmentRef!==state.assignmentRef) throw new Error("persisted receipt scope mismatch");
+    if(r.manifestDigest!==state.signedManifest.digest||r.resultCommitment!==state.resultCommitment) throw new Error("persisted receipt commitment mismatch");
+    if(m.providerId!==this.config.providerId||r.providerId!==this.config.providerId) throw new Error("persisted provider mismatch");
+  }
+  async _submitPending(state) {
+    this._validatePersistedSubmission(state);
+    const {jobId,resultCommitment,signedManifest,signedReceipt,receiptId}=state;
+    const deadlineMs=signedManifest.payload.expiresAt;
+    const submission=await withBoundedRetry420(async ({attempt})=>{
+      if(await this._canonicalAlreadyHas(jobId,resultCommitment)) return {reconciled:true,attempt};
+      const current=await this.canonical.job(jobId);
+      if(TERMINAL_STATES.has(current?.status)&&current?.resultCommitment!==resultCommitment) throw new Error("canonical job became terminal");
+      if(current?.status!=="RUNNING") throw new Error("canonical job no longer submit-eligible");
+      if(current.assignmentRef!==state.assignmentRef||current.providerId!==this.config.providerId||current.resourceId!==signedReceipt.payload.resourceId) throw new Error("canonical assignment changed");
+      try { return await this.canonical.submitReceipt({jobId,signedManifest,signedReceipt,receiptId,idempotencyKey:receiptId}); }
+      catch(error) {
+        if(await this._canonicalAlreadyHas(jobId,resultCommitment)) return {reconciled:true,attempt};
+        throw error;
+      }
+    },{maxAttempts:this.config.maxAttempts,baseDelayMs:this.config.retryBaseMs,deadlineMs:Math.min(deadlineMs,this.now()+30_000),sleep:this.sleep,now:this.now});
+    const next={...state,status:"submitted",submission,updatedAt:this.now()};
+    await this.stateStore.put(next);
+    this.observe("info","receipt_submitted",{jobId,receiptId,resultCommitment});
+    return next;
+  }
+  async process(jobId,payloadId,{allowReexecute=false}={}) {
     const existing=await this.stateStore.get(jobId);
     if(existing?.status==="submitted") return existing;
     await this._environment();
+    if(existing?.status==="pending_submit") return this._submitPending(existing);
+    if(existing?.status==="terminal") throw new Error("canonical job already terminal");
+    if((existing?.status==="executing"||existing?.status==="recoverable")&&!allowReexecute) throw new Error("interrupted execution requires explicit reexecution");
+
     const job=await this.canonical.job(jobId);this._validateJob(job);
     const aad={jobId:job.jobId,assignmentRef:job.assignmentRef,inputCommitment:job.inputCommitment};
     const payload=await this.privatePayloads.get(payloadId,{aad});
     try {
       if(!(await this.commitmentVerifier(payload,job.inputCommitment))) throw new Error("private payload commitment mismatch");
       const signedManifest=signObject420(this._manifest(job),this.signingKey);
-      await this.stateStore.put({jobId,status:"executing",payloadId,manifestDigest:signedManifest.digest,assignmentRef:job.assignmentRef,updatedAt:this.now()});
+      await this.stateStore.put({jobId,status:"executing",payloadId,manifestDigest:signedManifest.digest,signedManifest,assignmentRef:job.assignmentRef,updatedAt:this.now()});
       this.observe("info","execution_started",{jobId,assignmentRef:job.assignmentRef,manifestDigest:signedManifest.digest});
       const result=await this.executor.execute({job:structuredClone(job),payload,manifest:signedManifest});
       req(result?.resultCommitment,"resultCommitment");
@@ -64,25 +96,22 @@ export class ProviderRuntime420 {
         evidenceRef:result.evidenceRef??null,completedAt:this.now()
       };
       const signedReceipt=signObject420(receipt,this.signingKey), receiptId=digestObject420(signedReceipt.payload);
-      let state={jobId,status:"pending_submit",payloadId,assignmentRef:job.assignmentRef,manifestDigest:signedManifest.digest,receiptId,resultCommitment:result.resultCommitment,updatedAt:this.now()};
+      const state={jobId,status:"pending_submit",payloadId,assignmentRef:job.assignmentRef,manifestDigest:signedManifest.digest,signedManifest,signedReceipt,receiptId,resultCommitment:result.resultCommitment,updatedAt:this.now()};
       await this.stateStore.put(state);
-      const submission=await withBoundedRetry420(async ({attempt})=>{
-        if(await this._canonicalAlreadyHas(jobId,result.resultCommitment)) return {reconciled:true,attempt};
-        const current=await this.canonical.job(jobId);
-        if(TERMINAL_STATES.has(current?.status)&&current?.resultCommitment!==result.resultCommitment) throw new Error("canonical job became terminal");
-        try { return await this.canonical.submitReceipt({jobId,signedManifest,signedReceipt,receiptId,idempotencyKey:receiptId}); }
-        catch(error) {
-          if(await this._canonicalAlreadyHas(jobId,result.resultCommitment)) return {reconciled:true,attempt};
-          throw error;
-        }
-      },{maxAttempts:this.config.maxAttempts,baseDelayMs:this.config.retryBaseMs,deadlineMs:Math.min(job.deadlineMs,this.now()+30_000),sleep:this.sleep,now:this.now});
-      state={...state,status:"submitted",submission,updatedAt:this.now()};
-      await this.stateStore.put(state);
-      this.observe("info","receipt_submitted",{jobId,receiptId,resultCommitment:result.resultCommitment});
-      return state;
+      return this._submitPending(state);
     } finally {
       if(Buffer.isBuffer(payload)) payload.fill(0);
     }
+  }
+  async retryExecution(jobId,payloadId) {
+    return this.process(jobId,payloadId,{allowReexecute:true});
+  }
+  async resumeSubmission(jobId) {
+    await this._environment();
+    const state=await this.stateStore.get(jobId);
+    if(state?.status==="submitted") return state;
+    if(state?.status!=="pending_submit") throw new Error("no pending receipt submission");
+    return this._submitPending(state);
   }
   async recover() {
     await this._environment();
@@ -96,7 +125,11 @@ export class ProviderRuntime420 {
       if(TERMINAL_STATES.has(job?.status)) {
         const next={...state,status:"terminal",terminalStatus:job.status,updatedAt:this.now()};await this.stateStore.put(next);recovered.push(next);continue;
       }
-      const next={...state,status:"recoverable",updatedAt:this.now()};await this.stateStore.put(next);recovered.push(next);
+      if(state.status==="pending_submit") {
+        this._validatePersistedSubmission(state);
+        const next={...state,recovery:"submission_pending",updatedAt:this.now()};await this.stateStore.put(next);recovered.push(next);continue;
+      }
+      const next={...state,status:"recoverable",recovery:"explicit_reexecution_required",updatedAt:this.now()};await this.stateStore.put(next);recovered.push(next);
     }
     this.observe("info","recovery_complete",{recovered:recovered.length});
     return recovered;

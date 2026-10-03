@@ -25,7 +25,7 @@ for token in [
     "this.canonical.environment","this.canonical.job","this.canonical.submitReceipt",
     "computeGraphHash","provider identity mismatch","resource not allowed",
     "420AI_PROVIDER_EXECUTION_V1","420AI_PROVIDER_RECEIPT_V1",
-    "idempotencyKey","withBoundedRetry420","recover()","authoritative:false"
+    "idempotencyKey","withBoundedRetry420","recover()","resumeSubmission","retryExecution","explicit reexecution","authoritative:false"
 ]:
     if token not in runtime:
         errors.append(f"runtime missing canonical/recovery boundary: {token}")
@@ -46,7 +46,11 @@ for token in [
     "bounded retry",
     "timeout after canonical success",
     "restart recovery trusts canonical result",
-    "wrong chain/provider/resource/deadline",
+    "pending receipt survives restart and resumes without decrypting or re-executing",
+    "interrupted execution requires explicit canonical reexecution",
+    "wrong chain and ComputeMarket graph fail before private execution",
+    "wrong provider, resource, deadline and input commitment fail closed",
+    "non-transient receipt failure is not retried",
     "observability redacts payloads"
 ]:
     if token not in tests:

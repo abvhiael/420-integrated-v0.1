@@ -126,7 +126,9 @@ contract ResourceSessionRegistry420 is I420System {
     ) external {
         Session storage s = _get(sessionId);
         if (s.state != State.CLOSED || settledAmount420 > s.maxSpend420) revert InvalidState();
-        if (!authorization.isSessionAuthorized(msg.sender, sessionId, ResourceIds420.ACTION_SETTLE, settledAmount420)) {\n            revert Unauthorized();\n        }
+        if (!authorization.isSessionAuthorized(msg.sender, sessionId, ResourceIds420.ACTION_SETTLE, settledAmount420)) {
+            revert Unauthorized();
+        }
 
         s.state = State.SETTLED;
         emit SessionSettled(sessionId, settledAmount420);

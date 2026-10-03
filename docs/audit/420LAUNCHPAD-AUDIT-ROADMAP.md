@@ -161,7 +161,7 @@ Exit: repository integration tests prove reward/donation/community-project/preor
 This closeout is documentation/evidence-only and references the already-qualified implementation SHA. It changes no executable source, tests, workflows, dependencies, configuration, interfaces, generated/runtime artifacts or deployment state, so recursive qualification is not required.
 
 ## LAUNCHPAD-AUDIT-4 — deterministic deployment and Registry publication
-Status: **PENDING**
+Status: **IMPLEMENTED; LEVEL 1 QUALIFICATION PENDING**
 
 - freeze deployment order and constructor arguments;
 - generate ABI/runtime identities from exact build;
@@ -170,6 +170,17 @@ Status: **PENDING**
 - reconcile router address with canonical address authority;
 - add smoke and code-hash verification;
 - retain exact-head evidence.
+
+Implemented repository materialization:
+- froze a deterministic ten-step deployment/publication sequence covering Authorization, ProjectRegistry, SaleRegistry, AllocationRegistry, both one-shot wiring operations, CrowdfundingIntegration, Router, ProtocolRegistry component registration and canonical service publication;
+- preserved `launchpad-router` as `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS`;
+- explicitly rejected the superseded historical `0x045c` candidate as an active release address;
+- retained compiler/EVM/optimizer/via-IR identity and exact artifact paths;
+- added local-EVM deployment/binding, Registry resolution, Router smoke and wrong-router visibility tests;
+- added a fail-closed Audit-4 verifier and exact-head CI artifact/ABI/runtime identity retention;
+- kept public-testnet addresses, transactions, runtime hashes and chain/genesis evidence empty for LAUNCHPAD-AUDIT-6.
+
+Qualification level: **Level 1**. A separate Level 2 milestone is not required because the ProtocolRegistry publication boundary is exercised directly in the Audit-4 local-EVM deployment suite and this step does not change the previously-qualified shared service implementations.
 
 Exit: reproducible deployment package and exact runtime identity evidence exist.
 

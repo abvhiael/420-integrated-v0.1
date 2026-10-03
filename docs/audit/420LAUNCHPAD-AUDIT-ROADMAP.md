@@ -161,7 +161,7 @@ Exit: repository integration tests prove reward/donation/community-project/preor
 This closeout is documentation/evidence-only and references the already-qualified implementation SHA. It changes no executable source, tests, workflows, dependencies, configuration, interfaces, generated/runtime artifacts or deployment state, so recursive qualification is not required.
 
 ## LAUNCHPAD-AUDIT-4 — deterministic deployment and Registry publication
-Status: **IMPLEMENTED; LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE**
 
 - freeze deployment order and constructor arguments;
 - generate ABI/runtime identities from exact build;
@@ -183,6 +183,39 @@ Implemented repository materialization:
 Qualification level: **Level 1**. A separate Level 2 milestone is not required because the ProtocolRegistry publication boundary is exercised directly in the Audit-4 local-EVM deployment suite and this step does not change the previously-qualified shared service implementations.
 
 Exit: reproducible deployment package and exact runtime identity evidence exist.
+
+### Durable qualification evidence
+
+- Qualification level: **Level 1 — per-roadmap-step fast qualification**
+- Implementation SHA: `40ea52ac5eebb89b19ad683c67764947759dd03b`
+- Audit branch: `audit/420launchpad-remediation`
+- Pull request: **#489**
+- Current `main` / base SHA: `b58b09a17e641a42b81d832bad913a83c7caada9`
+- Branch state at closeout: **61 commits ahead / 0 behind** current `main`; PR mergeable.
+- Exact-head qualification workflow: `420Launchpad audit qualification`
+- Passing exact-head runs: **37087290525** (job **111100112076**) and **37087294484** (job **111100122788**)
+- Exact-head verification: **PASS**
+- Retained Launchpad model verifier: **PASS**
+- Audit-4 deployment materialization verifier: **PASS**
+- Audit-4 Solidity formatting gate: **PASS**
+- Launchpad release-graph build: **PASS**
+- Compiled artifact / ABI / runtime identity retention: **PASS**
+- Level 1 Launchpad regression qualification: **PASS**
+- Audit-4 deployment + ProtocolRegistry binding qualification: **PASS**
+- Forbidden primitive / non-custody / superseded-address policy scan: **PASS**
+- Address policy: `launchpad-router` remains **REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS**; no fixed Genesis predeploy or invented CREATE2 address was introduced.
+- Historical `0x000000000000000000000000000000000000045c` candidate remains explicitly superseded and excluded from active release material.
+- Repository deployment materialization freezes deterministic deployment order, constructor dependencies, one-shot controller/integration bindings, exact Router registration and `420/service/launchpad/v1` publication through ProtocolRegistry.
+- Local-EVM Registry qualification proves exact Router/service resolution, deployed code hash, dependency/manifest/interface commitments, read smoke paths and wrong-router visibility.
+- Public-testnet chain identity, deployed addresses, transactions and live code hashes remain intentionally unset and owned by **LAUNCHPAD-AUDIT-6**.
+- Earlier failures were diagnosed as CI/test-harness defects: a formatting mismatch and then a false-positive superseded-address scan that included explanatory documentation. Neither failed run was accepted as evidence.
+- Level 2 milestone qualification: **NOT REQUIRED** — Audit-4 exercises the real ProtocolRegistry boundary directly without changing shared service authority or lifecycle semantics.
+- Level 3 closeout qualification: **INTENTIONALLY DEFERRED** to final accumulated Launchpad app-phase closeout.
+- Remaining blockers for this step: **NONE**
+- Completion state: **COMPLETE**
+- Next canonical roadmap step: **LAUNCHPAD-AUDIT-5 — user-facing application and service layer**
+
+This closeout is evidence/documentation-only and references the already-qualified exact implementation SHA. It changes no executable source, tests, workflow logic, dependency, configuration, interface, generated/runtime artifact or deployment state, so recursive qualification is not required.
 
 ## LAUNCHPAD-AUDIT-5 — user-facing application and service layer
 Status: **PENDING**

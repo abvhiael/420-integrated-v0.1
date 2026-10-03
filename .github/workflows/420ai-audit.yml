@@ -8,6 +8,8 @@ on:
       - 'docs/apps/ai/developer/api.md'
       - 'scripts/verify-420ai-read-api.py'
       - '420-indexer/**'
+      - 'ai/web/**'
+      - 'scripts/verify-420ai-client.py'
       - 'contracts/config/genesis-dapp-contract-map.json'
       - 'config/ai-genesis.json'
       - 'config/system-addresses.json'
@@ -125,6 +127,25 @@ jobs:
         run: node --test --test-concurrency=1 420-indexer/dist/test/ai420-descriptors.test.js 420-indexer/dist/test/ai420-read-model.test.js 420-indexer/dist/test/api-contract.test.js 420-indexer/dist/test/api-surface.test.js 420-indexer/dist/test/http-transport.test.js 420-indexer/dist/test/reorg.test.js
       - name: Verify AI-AUDIT-7 read API/indexer boundaries
         run: python3 scripts/verify-420ai-read-api.py
+
+  ai-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact AI qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and test 420AI browser client
+        working-directory: ai/web
+        run: npm run build
+      - name: Verify AI-AUDIT-8 client boundaries
+        run: python3 scripts/verify-420ai-client.py
 
   focused-ai-contracts:
     runs-on: ubuntu-latest

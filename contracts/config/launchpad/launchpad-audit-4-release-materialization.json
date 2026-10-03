@@ -1,0 +1,199 @@
+{
+  "schema": "420-launchpad-audit-4-release-materialization-v1",
+  "step": "LAUNCHPAD-AUDIT-4",
+  "status": "REPOSITORY_MATERIALIZATION_PENDING_QUALIFICATION",
+  "repository_ready": false,
+  "live_qualified": false,
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "canonical_address_mirror": "contracts/config/genesis-canonical-addresses.json",
+    "launchpad_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "superseded_historical_candidate": "0x000000000000000000000000000000000000045c",
+    "superseded_candidate_source": "contracts/config/w14-7-4-global-address-reconciliation.json",
+    "production_addresses_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_LAUNCHPAD_AUDIT_6"
+  },
+  "canonical_authorities": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "publication_api": "publishRegisteredService"
+    },
+    "launchpad_component": {
+      "component_id_preimage": "420/COMPONENT/LAUNCHPAD/V1",
+      "source": "contracts/src/launchpad/LaunchpadIds420.sol"
+    }
+  },
+  "external_dependencies": {
+    "CapabilityRegistry420": {
+      "binding": "LaunchpadAuthorization420.capabilityRegistry",
+      "production_source": "canonical CapabilityRegistry deployment/address authority",
+      "fixed_address_claim": null
+    },
+    "PaymentRegistry420": {
+      "binding": "LaunchpadCrowdfundingIntegration420.paymentRegistry",
+      "production_source": "qualified 420Pay deployment plus ProtocolRegistry/live manifest",
+      "fixed_address_claim": null
+    },
+    "Identity420": {
+      "binding": "LaunchpadCrowdfundingIntegration420.identity",
+      "production_source": "canonical Identity420 address authority/live verification",
+      "fixed_address_claim": "0x0000000000000000000000000000000000000436"
+    },
+    "ArbitrationCaseRegistry420": {
+      "binding": "LaunchpadCrowdfundingIntegration420.arbitrationCases",
+      "production_source": "qualified 420Arbitration deployment plus ProtocolRegistry/live manifest",
+      "fixed_address_claim": null
+    },
+    "ArbitrationRulingRegistry420": {
+      "binding": "LaunchpadCrowdfundingIntegration420.arbitrationRulings",
+      "production_source": "qualified 420Arbitration deployment plus ProtocolRegistry/live manifest",
+      "fixed_address_claim": null
+    }
+  },
+  "deployment_order": [
+    {
+      "order": 1,
+      "contract": "LaunchpadAuthorization420",
+      "source": "contracts/src/launchpad/LaunchpadAuthorization420.sol",
+      "constructor": ["CapabilityRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 2,
+      "contract": "LaunchpadProjectRegistry420",
+      "source": "contracts/src/launchpad/LaunchpadProjectRegistry420.sol",
+      "constructor": ["GovernanceTimelock"],
+      "post_init": []
+    },
+    {
+      "order": 3,
+      "contract": "LaunchpadSaleRegistry420",
+      "source": "contracts/src/launchpad/LaunchpadSaleRegistry420.sol",
+      "constructor": ["GovernanceTimelock", "LaunchpadProjectRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 4,
+      "contract": "LaunchpadAllocationRegistry420",
+      "source": "contracts/src/launchpad/LaunchpadAllocationRegistry420.sol",
+      "constructor": ["LaunchpadAuthorization420", "LaunchpadSaleRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 5,
+      "contract": "LaunchpadSaleRegistry420",
+      "action": "setController",
+      "args": ["LaunchpadAllocationRegistry420"],
+      "one_time": true
+    },
+    {
+      "order": 6,
+      "contract": "LaunchpadCrowdfundingIntegration420",
+      "source": "contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol",
+      "constructor": [
+        "LaunchpadAllocationRegistry420",
+        "PaymentRegistry420",
+        "Identity420",
+        "ArbitrationCaseRegistry420",
+        "ArbitrationRulingRegistry420"
+      ],
+      "post_init": []
+    },
+    {
+      "order": 7,
+      "contract": "LaunchpadAllocationRegistry420",
+      "action": "setCrowdfundingIntegration",
+      "args": ["LaunchpadCrowdfundingIntegration420"],
+      "one_time": true
+    },
+    {
+      "order": 8,
+      "contract": "LaunchpadRouter420",
+      "source": "contracts/src/launchpad/LaunchpadRouter420.sol",
+      "constructor": ["LaunchpadSaleRegistry420", "LaunchpadAllocationRegistry420"],
+      "post_init": []
+    },
+    {
+      "order": 9,
+      "contract": "ProtocolRegistry",
+      "action": "registerComponent",
+      "component_id_preimage": "420/COMPONENT/LAUNCHPAD/V1",
+      "implementation": "LaunchpadRouter420",
+      "version": "1.0.0",
+      "lifecycle": "ACTIVE"
+    },
+    {
+      "order": 10,
+      "contract": "ProtocolRegistry",
+      "action": "publishRegisteredService",
+      "service_id_preimage": "420/service/launchpad/v1",
+      "implementation": "LaunchpadRouter420",
+      "version": 1,
+      "active": true,
+      "component_type": "SERVICE",
+      "metadata_hash_policy": "keccak256(canonical Launchpad release metadata document)",
+      "manifest_hash_policy": "keccak256(this Audit-4 release materialization canonical payload)",
+      "dependency_root_policy": "keccak256(ordered Launchpad deployment graph, external dependency addresses and deployed runtime code hashes)",
+      "interface_hash_policy": "keccak256(canonical LaunchpadRouter420 ABI/interface descriptor)"
+    }
+  ],
+  "artifact_identity": {
+    "compiler": "Solidity 0.8.24",
+    "evm_version": "cancun",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "via_ir": true,
+    "artifact_paths": [
+      "contracts/out/LaunchpadAuthorization420.sol/LaunchpadAuthorization420.json",
+      "contracts/out/LaunchpadProjectRegistry420.sol/LaunchpadProjectRegistry420.json",
+      "contracts/out/LaunchpadSaleRegistry420.sol/LaunchpadSaleRegistry420.json",
+      "contracts/out/LaunchpadAllocationRegistry420.sol/LaunchpadAllocationRegistry420.json",
+      "contracts/out/LaunchpadCrowdfundingIntegration420.sol/LaunchpadCrowdfundingIntegration420.json",
+      "contracts/out/LaunchpadRouter420.sol/LaunchpadRouter420.json"
+    ],
+    "hash_evidence": "EXACT_HEAD_QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+  },
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/LaunchpadDeploymentBinding420.t.sol",
+    "verifier": "scripts/verify-launchpad-audit-4-release.py",
+    "proves": [
+      "exact Launchpad deployment order and constructor dependency graph",
+      "SaleRegistry controller is bound exactly once to AllocationRegistry",
+      "AllocationRegistry crowdfunding integration is bound exactly once",
+      "CrowdfundingIntegration immutable external dependencies match deployment inputs",
+      "Router binds exact SaleRegistry and AllocationRegistry",
+      "ProtocolRegistry component registration binds the canonical Launchpad component ID to the exact Router",
+      "ProtocolRegistry publishes 420/service/launchpad/v1 to the exact Router",
+      "ProtocolRegistry derives nonzero Router EXTCODEHASH and retains nonzero manifest/interface/dependency commitments",
+      "wrong Router/dependency binding is visible and cannot masquerade as the registered canonical Router",
+      "LaunchpadRouter remains registry-resolved with no fixed Genesis address"
+    ]
+  },
+  "repository_evidence": {
+    "chain_context": "FOUNDRY_LOCAL_EVM_ONLY",
+    "chain_id": "LOCAL_TEST_CHAIN",
+    "genesis_identity": "NOT_LIVE_GENESIS_EVIDENCE",
+    "deployed_addresses": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "runtime_code_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "artifact_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS"
+  },
+  "live_testnet_evidence": {
+    "required_in_step": "LAUNCHPAD-AUDIT-6",
+    "chain_id": null,
+    "genesis_hash": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "deployed_addresses": {},
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "runtime_code_hashes": {},
+    "constructor_binding_receipts": []
+  }
+}

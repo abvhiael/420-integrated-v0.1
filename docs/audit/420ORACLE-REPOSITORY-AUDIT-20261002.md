@@ -145,15 +145,15 @@ Unresolved release risk:
 | Genesis release evidence | Genesis intent | repository package present | no live evidence | audit record | BLOCKED | testnet qualification and retained deployment evidence |
 | Production readiness | operator requirements | no live providers/monitoring evidence | none | architecture | BLOCKED | production provider diversity, operations, monitoring, incident drills |
 
-## Readiness before exact-head CI
+## Readiness after ORACLE-AUDIT-5 exact-head qualification
 
 - CODE COMPLETE: **YES** for the frozen on-chain V1 scope.
-- BUILD COMPLETE: **NO** until the remediation head passes exact-head CI.
+- BUILD COMPLETE: **YES** for the Oracle V1 repository/release graph at qualified implementation SHA `28c61dc020a02b6fa981eecd566d533ca6a6f0f2`.
 - CONTRACT COMPLETE: **YES** for the frozen V1 contract boundary.
-- TEST COMPLETE: **NO** until new and retained tests pass on the exact remediation head.
+- TEST COMPLETE: **YES** for ORACLE-AUDIT-5 Level 1 scope: 18/18 retained Oracle tests passed on the exact qualified implementation SHA.
 - DOCUMENTATION COMPLETE: **YES** for repository-level V1/deployment/operator boundaries.
 - INTEGRATION COMPLETE: **NO** because live ProtocolRegistry publication and cross-app/testnet evidence do not exist.
-- SECURITY QUALIFIED: **NO** until exact-head CI/static qualification passes; live operator security remains outside repository evidence.
+- SECURITY QUALIFIED: **YES** for ORACLE-AUDIT-5 repository/static scope; live provider/operator security remains outside repository evidence and is deferred to later release stages.
 - TESTNET READY: **YES** at repository/package level, but actual deployment is not yet qualified.
 - GENESIS READY: **NO**; live testnet deployment/seed/registry evidence is required.
 - PRODUCTION READY: **NO**; provider operations, monitoring, credentials, production deployment, and incident evidence are required.
@@ -161,10 +161,35 @@ Unresolved release risk:
 ## Non-renumbering remediation roadmap
 
 1. **ORACLE-AUDIT-1 — canonical inventory and architecture reconciliation** — COMPLETE.
-2. **ORACLE-AUDIT-2 — contract/adversarial hardening and bounded-source qualification** — IMPLEMENTED, exact-head CI pending.
-3. **ORACLE-AUDIT-3 — deployment and ProtocolRegistry binding package** — IMPLEMENTED, exact-head CI pending.
-4. **ORACLE-AUDIT-4 — interface-layer compatibility containment** — IMPLEMENTED for runtime containment; frozen-interface major migration remains explicitly deferred.
-5. **ORACLE-AUDIT-5 — exact-head repository qualification and durable evidence** — PENDING.
+2. **ORACLE-AUDIT-2 — contract/adversarial hardening and bounded-source qualification** — COMPLETE; exact-head coverage retained in ORACLE-AUDIT-5 run `37093500837`.
+3. **ORACLE-AUDIT-3 — deployment and ProtocolRegistry binding package** — COMPLETE; deployment binding passed on exact qualified implementation SHA.
+4. **ORACLE-AUDIT-4 — interface-layer compatibility containment** — COMPLETE for runtime containment; frozen-interface major migration remains explicitly deferred.
+5. **ORACLE-AUDIT-5 — exact-head repository qualification and durable evidence** — COMPLETE. Implementation SHA `28c61dc020a02b6fa981eecd566d533ca6a6f0f2`; workflow run `37093500837`; durable evidence commit `67d1e5d8e58e48af4cb08231b56b877dcd8c174c`.
 6. **ORACLE-AUDIT-6 — cross-application consumer qualification** — PENDING; verify Automation/Swap and any Pay/Exchange consumers against the canonical runtime ABI.
 7. **ORACLE-AUDIT-7 — production-equivalent testnet deployment** — BLOCKED on live testnet, governance addresses, provider/feed/source decisions, and provider operators.
 8. **ORACLE-AUDIT-8 — Genesis/production closeout** — BLOCKED on retained testnet evidence, production provider diversity/credentials/monitoring, final deployment approval, and operational incident/recovery evidence.
+
+
+## ORACLE-AUDIT-5 closeout
+
+Qualification level: **Level 1 — per-roadmap-step fast qualification**.
+
+Authoritative implementation SHA: `28c61dc020a02b6fa981eecd566d533ca6a6f0f2`.
+
+Reconciliation/base `main` SHA: `edfd0752e825fc5379700851358e8398efb0b9c5`. At qualification the audit branch was 10 commits ahead and 0 behind.
+
+Authoritative app-specific CI: **420Oracle audit qualification**, run **37093500837**, **PASS**.
+
+- `audit-state` job **111118614968**: exact-head check PASS; Oracle repository verifier PASS; frozen Genesis interface verifier PASS.
+- `oracle-contracts` job **111118614777**: exact-head check PASS; audit-scope format check PASS; Oracle release-graph build PASS; retained Oracle suites PASS; static security scan PASS.
+- retained Oracle tests: **18 passed / 0 failed / 0 skipped** across deployment binding, hardening, epoch, risk, and core Oracle suites.
+
+Prior run **37093325288** failed at a workflow formatting gate that swept pre-existing Oracle test formatting. That was diagnosed as a CI-scope defect rather than protocol behavior. The gate was narrowed to the audit-owned formatting surface, the deployment-binding test was corrected to consume the canonical `ProtocolRegistry.Service` return struct, and the resulting new executable/workflow/test head was requalified from scratch.
+
+Durable evidence record: `docs/audit/evidence/oracle-audit-5-20261003.md` at evidence commit `67d1e5d8e58e48af4cb08231b56b877dcd8c174c`.
+
+Level 2 was not required for this ordinary exact-head repository step. Level 3 repository-wide closeout checks remain intentionally deferred to app-phase closeout. Automatically skipped/classifier-only unrelated workflows are not treated as passing evidence.
+
+**ORACLE-AUDIT-5 is COMPLETE.**
+
+Next canonical roadmap step: **ORACLE-AUDIT-6 — cross-application consumer qualification**.

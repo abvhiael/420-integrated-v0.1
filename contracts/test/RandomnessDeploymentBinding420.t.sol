@@ -9,8 +9,12 @@ import "../src/randomness/RandomnessRouteRegistry420.sol";
 import "../src/randomness/RandomnessRouter420.sol";
 
 interface VmRandomnessDeployment420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract RandomnessDeploymentBinding420Test {
@@ -18,13 +22,10 @@ contract RandomnessDeploymentBinding420Test {
         VmRandomnessDeployment420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     bytes32 internal constant RANDOMNESS_SERVICE_ID = keccak256("420/service/randomness/v1");
-    bytes32 internal constant RANDOMNESS_ROUTER_COMPONENT_ID =
-        keccak256("420/APP/420RANDOM/RANDOMNESS_ROUTER");
+    bytes32 internal constant RANDOMNESS_ROUTER_COMPONENT_ID = keccak256("420/APP/420RANDOM/RANDOMNESS_ROUTER");
     bytes32 internal constant METADATA_HASH = keccak256("420/RANDOMNESS/RELEASE/METADATA/V1");
-    bytes32 internal constant MANIFEST_HASH =
-        keccak256("420/RANDOMNESS/AUDIT-4/DEPLOYMENT-BUNDLE/V1");
-    bytes32 internal constant INTERFACE_HASH =
-        keccak256("420/RANDOMNESS/RANDOMNESS_ROUTER/INTERFACE/V1");
+    bytes32 internal constant MANIFEST_HASH = keccak256("420/RANDOMNESS/AUDIT-4/DEPLOYMENT-BUNDLE/V1");
+    bytes32 internal constant INTERFACE_HASH = keccak256("420/RANDOMNESS/RANDOMNESS_ROUTER/INTERFACE/V1");
 
     struct Env {
         ProtocolRegistry protocolRegistry;
@@ -55,23 +56,25 @@ contract RandomnessDeploymentBinding420Test {
             )
         );
 
-        e.protocolRegistry.registerComponent(
-            RANDOMNESS_ROUTER_COMPONENT_ID,
-            address(e.router),
-            Types420.Version({major: 1, minor: 0, patch: 0}),
-            Types420.Lifecycle.ACTIVE
-        );
-        e.protocolRegistry.publishRegisteredService(
-            RANDOMNESS_SERVICE_ID,
-            address(e.router),
-            METADATA_HASH,
-            1,
-            true,
-            ProtocolRegistry.ComponentType.SERVICE,
-            MANIFEST_HASH,
-            e.dependencyRoot,
-            INTERFACE_HASH
-        );
+        e.protocolRegistry
+            .registerComponent(
+                RANDOMNESS_ROUTER_COMPONENT_ID,
+                address(e.router),
+                Types420.Version({ major: 1, minor: 0, patch: 0 }),
+                Types420.Lifecycle.ACTIVE
+            );
+        e.protocolRegistry
+            .publishRegisteredService(
+                RANDOMNESS_SERVICE_ID,
+                address(e.router),
+                METADATA_HASH,
+                1,
+                true,
+                ProtocolRegistry.ComponentType.SERVICE,
+                MANIFEST_HASH,
+                e.dependencyRoot,
+                INTERFACE_HASH
+            );
 
         e.randomnessRegistry.bindRouter(address(e.router));
     }

@@ -431,6 +431,25 @@ Public AI projections are allowlisted to IDs, addresses, hashes/commitments, lif
 
 Job projections preserve current AI-to-CMP correlation identifiers such as `computeRequestId`, `computeJobId` and provider references, but neither the indexer nor its HTTP API may create or reinterpret canonical execution, verification, settlement or dispute authority.
 
+### AI-AUDIT-8 user-facing client boundary
+
+The canonical browser client lives under `ai/web` and is a thin requester-facing application over the existing AI protocol and shared 420Indexer read surface.
+
+The client may:
+- discover model, version, deployment, policy and request state through the non-authoritative `420-ai-read-v1` API;
+- connect an injected EIP-1193 wallet and validate the configured target chain;
+- prepare and submit requester-authorized `AIJobManager` calls such as request creation, cancellation and dispute opening;
+- display Vault/funding, ComputeMarket correlation and result lifecycle state from indexed protocol evidence; and
+- track wallet transaction simulation, submission, confirmation, revert, drop and reorg outcomes.
+
+The client must not:
+- store provider credentials, privileged secrets, private keys or API tokens in browser runtime configuration;
+- treat indexer projections as protocol authority;
+- send plaintext private AI input to public indexer routes or calldata; or
+- fabricate a direct funding flow. `AIJobEscrow.fund` remains intentionally disabled and funding is bound through the canonical Vault/settlement adapter path.
+
+The committed runtime configuration remains fail-closed until AI-AUDIT-9 materializes live network/read-service values and enables transaction feature flags.
+
 ## Implementation order
 
 1. Freeze ComputeMarket V1 architecture.

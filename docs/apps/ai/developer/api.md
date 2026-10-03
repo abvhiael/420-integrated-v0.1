@@ -44,3 +44,5 @@ Off-chain provider endpoints may handle encrypted payload delivery and worker op
 Policy event projections intentionally leave `privacyPolicyId` and `servicePricingPolicyId` null because the current `PolicyConfigured` event does not emit those values. The indexer does not invent or infer them. Canonical current-state enrichment can use `AIPolicyRegistry420.getPolicy` once deployment/Registry addresses are materialized in AI-AUDIT-9.
 
 AI reputation reads expose only Trust-applied evidence counters and latest evidence/outcome references. They do not synthesize a universal reputation score.
+
+<!-- AI-AUDIT-7 qualification trigger: no behavioral change -->

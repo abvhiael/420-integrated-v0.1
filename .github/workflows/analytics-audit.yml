@@ -23,13 +23,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
           cache: true
-      - name: Verify exact checked-out SHA
+      - name: Verify exact implementation SHA
+        shell: bash
         run: |
-          echo "QUALIFICATION_SHA=$(git rev-parse HEAD)"
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          EXPECTED_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          echo "QUALIFICATION_SHA=$ACTUAL_SHA"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
           test -z "$(git status --porcelain)"
       - name: Unit and integration tests
         run: go test ./analytics/...
@@ -41,17 +47,53 @@ jobs:
         run: |
           go build ./analytics/cmd/analytics420
           go build ./analytics/cmd/analyticslivevalidate
-      - name: Verify Genesis Analytics profile
-        run: python3 scripts/verify-genesis-dapps.py
+      - name: Verify Analytics Genesis profile
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          profile = json.loads(Path("contracts/config/420analytics-genesis.json").read_text())
+          assert profile["schema"] == "420-analytics-genesis-v1"
+          assert profile["application"] == "420Analytics"
+          assert profile["class"] == "GENESIS_USER_APP"
+          assert profile["serviceId"] == "420/service/analytics/v1"
+          assert profile["contractsRequired"] is False
+          assert profile["canonicalStateAuthority"] is False
+          assert profile["chainSource"] == "420Indexer"
+          assert profile["directRpcAllowed"] is False
+          assert profile["ownsChainIngestion"] is False
+          assert profile["databaseCanonical"] is False
+          assert profile["derivedDataRebuildable"] is True
+
+          assert set(profile["metricClasses"]) == {
+              "network", "validator", "protocol", "economic",
+              "cohort", "ranking", "forecast", "anomaly"
+          }
+          assert set(profile["requiredResultContext"]) == {
+              "methodologyVersion", "observationWindow", "sourceProvenance",
+              "chainId", "indexedHeight", "finalizedHeight", "freshness"
+          }
+          assert set(profile["privacyExclusions"]) == {
+              "private_messenger", "private_commons", "private_identity",
+              "encrypted_resource_payload", "raw_attention_telemetry"
+          }
+
+          invariant_text = "\n".join(profile["invariants"])
+          for invariant in [f"ANL-INV-{n:03d}" for n in range(1, 13)]:
+              assert invariant in invariant_text, invariant
+          PY
       - name: Verify live gate remains explicit
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
-          p=Path("testnet/public-services/analytics/readiness.json")
-          d=json.loads(p.read_text())
+          d=json.loads(Path("testnet/public-services/analytics/readiness.json").read_text())
+          q=json.loads(Path("testnet/public-services/analytics/qualification.json").read_text())
           assert d["phase"]=="ANALYTICS-9"
           assert d["status"]=="LIVE_QUALIFICATION_READY"
           assert d["gates"]["liveTestnetEvidence"] is False
           assert d["gates"]["genesisCloseout"] is False
+          assert q["phase"]=="ANALYTICS-9"
+          assert q["live"]["status"]=="READY_FOR_LIVE_EXECUTION"
           PY

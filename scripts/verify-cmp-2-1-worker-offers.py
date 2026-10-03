@@ -47,7 +47,7 @@ def main():
         "authorization.ACTION_PUBLISH_OFFER()",
         "authorization.ACTION_UPDATE_OFFER()",
         "authorization.ACTION_CANCEL_OFFER()",
-        "authorization.scopeResource(providerId, nodeId, resourceId)",
+        "authorization.scopeResource(providerId,nodeId,resourceId)",
         "block.timestamp < o.availableFrom",
         "r.revision != o.resourceRevision",
         "r.hardwareProfileHash != o.hardwareProfileHash",

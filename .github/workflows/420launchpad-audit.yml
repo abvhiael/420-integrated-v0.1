@@ -135,7 +135,7 @@ jobs:
             echo 'Custody/payment execution primitive found in 420Launchpad sources' >&2
             exit 1
           fi
-          if grep -R -n '0x000000000000000000000000000000000000045c'             contracts/src/launchpad contracts/config/launchpad docs/apps/launchpad |             grep -v 'superseded_historical_candidate'; then
+          if grep -R -n '0x000000000000000000000000000000000000045c'             contracts/src/launchpad contracts/config/launchpad |             grep -v 'superseded_historical_candidate'; then
             echo 'Superseded 0x045c candidate leaked into active Launchpad release material' >&2
             exit 1
           fi

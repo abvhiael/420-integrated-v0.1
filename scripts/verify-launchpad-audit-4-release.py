@@ -104,8 +104,8 @@ for token in ['solc_version = "0.8.24"','evm_version = "cancun"','optimizer = tr
 for token in [
  'new LaunchpadAuthorization420(address(e.caps))',
  'new LaunchpadProjectRegistry420(address(this))',
- 'new LaunchpadSaleRegistry420(address(this),address(e.projects))',
- 'new LaunchpadAllocationRegistry420(address(e.auth),address(e.sales))',
+ 'new LaunchpadSaleRegistry420(address(this), address(e.projects))',
+ 'new LaunchpadAllocationRegistry420(address(e.auth), address(e.sales))',
  'e.sales.setController(address(e.allocations))',
  'new LaunchpadCrowdfundingIntegration420(',
  'e.allocations.setCrowdfundingIntegration(address(e.crowdfunding))',

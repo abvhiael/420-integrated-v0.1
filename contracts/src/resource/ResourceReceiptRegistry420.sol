@@ -37,7 +37,11 @@ contract ResourceReceiptRegistry420 is I420System {
         uint64 observedAt
     );
 
-    constructor(address s, address o, address n) {
+    constructor(
+        address s,
+        address o,
+        address n
+    ) {
         require(s != address(0) && o != address(0) && n != address(0), "dependency");
         sessions = ResourceSessionRegistry420(s);
         offers = ResourceOfferRegistry420(o);
@@ -52,18 +56,26 @@ contract ResourceReceiptRegistry420 is I420System {
         return 1;
     }
 
-    function canonicalReceiptId(bytes32 sessionId, uint128 cumulativeUnits, bytes32 usageHash)
-        public
-        view
-        returns (bytes32)
-    {
+    function canonicalReceiptId(
+        bytes32 sessionId,
+        uint128 cumulativeUnits,
+        bytes32 usageHash
+    ) public view returns (bytes32) {
         return keccak256(
             abi.encode("420/RESOURCE/RECEIPT/V1", block.chainid, address(this), sessionId, cumulativeUnits, usageHash)
         );
     }
 
-    function submitReceipt(bytes32 receiptId, bytes32 sessionId, uint128 cumulativeUnits, bytes32 usageHash) external {
-        if (receiptId != canonicalReceiptId(sessionId, cumulativeUnits, usageHash) || cumulativeUnits == 0 || usageHash == 0) {
+    function submitReceipt(
+        bytes32 receiptId,
+        bytes32 sessionId,
+        uint128 cumulativeUnits,
+        bytes32 usageHash
+    ) external {
+        if (
+            receiptId != canonicalReceiptId(sessionId, cumulativeUnits, usageHash) || cumulativeUnits == 0
+                || usageHash == 0
+        ) {
             revert InvalidReceipt();
         }
         if (_receipts[receiptId].exists) revert ReceiptExists();
@@ -88,7 +100,9 @@ contract ResourceReceiptRegistry420 is I420System {
         emit ReceiptSubmitted(receiptId, sessionId, o.nodeId, cumulativeUnits, usageHash, observedAt);
     }
 
-    function getReceipt(bytes32 id) external view returns (Receipt memory r) {
+    function getReceipt(
+        bytes32 id
+    ) external view returns (Receipt memory r) {
         r = _receipts[id];
         require(r.exists, "receipt");
     }

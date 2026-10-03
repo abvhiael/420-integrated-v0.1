@@ -22,7 +22,7 @@ tests=(SERVICE/"test/provider-runtime.test.js").read_text()
 infra=(ROOT/"docs/architecture/infrastructure/420ai-compute-infrastructure.md").read_text()
 
 for token in [
-    "canonicalClient.environment","canonicalClient.job","canonicalClient.submitReceipt",
+    "this.canonical.environment","this.canonical.job","this.canonical.submitReceipt",
     "computeGraphHash","provider identity mismatch","resource not allowed",
     "420AI_PROVIDER_EXECUTION_V1","420AI_PROVIDER_RECEIPT_V1",
     "idempotencyKey","withBoundedRetry420","recover()","authoritative:false"
@@ -52,15 +52,15 @@ for token in [
     if token not in tests:
         errors.append(f"provider runtime test coverage missing: {token}")
 
-for token in [
-    "AI-AUDIT-6 provider runtime implementation",
-    "signed execution manifests",
-    "encrypted private payload",
-    "restart recovery",
-    "bounded retry"
+for alternatives in [
+    ("AI-AUDIT-6 provider runtime implementation",),
+    ("provider-signed execution manifest", "signed execution manifests"),
+    ("encrypted private payload", "Private inputs are handled through an encrypted private payload store"),
+    ("Restart recovery", "restart recovery"),
+    ("bounded exponential backoff", "bounded retry"),
 ]:
-    if token not in infra:
-        errors.append(f"infrastructure docs missing runtime statement: {token}")
+    if not any(token in infra for token in alternatives):
+        errors.append(f"infrastructure docs missing runtime statement: {' / '.join(alternatives)}")
 
 if errors:
     print("420AI AI-AUDIT-6 provider runtime qualification FAILED")

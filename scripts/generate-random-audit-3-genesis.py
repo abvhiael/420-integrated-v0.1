@@ -128,7 +128,7 @@ def records(raw):
         "RandomnessRegistry constructor performs no mutable storage writes",
         "randomnessRouter begins address(0) and must be bound exactly once only after qualified router deployment",
         "_records begins empty",
-        "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode"
+        "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)"
       ],
       "limitations":[
         "This is deterministic offline Genesis materialization, not live-chain deployment evidence.",

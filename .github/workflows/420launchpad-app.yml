@@ -9,12 +9,14 @@ on:
       - 'launchpad/service/**'
       - 'scripts/verify-launchpad-audit-5-app.py'
       - '.github/workflows/420launchpad-app.yml'
+      - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
   pull_request:
     paths:
       - 'launchpad/web/**'
       - 'launchpad/service/**'
       - 'scripts/verify-launchpad-audit-5-app.py'
       - '.github/workflows/420launchpad-app.yml'
+      - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
   workflow_dispatch:
 
 permissions:

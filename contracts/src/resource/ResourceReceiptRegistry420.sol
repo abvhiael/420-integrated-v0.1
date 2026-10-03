@@ -63,7 +63,7 @@ contract ResourceReceiptRegistry420 is I420System {
     }
 
     function submitReceipt(bytes32 receiptId, bytes32 sessionId, uint128 cumulativeUnits, bytes32 usageHash) external {
-        if (receiptId != canonicalReceiptId(sessionId, cumulativeUnits, usageHash) || usageHash == 0) {
+        if (receiptId != canonicalReceiptId(sessionId, cumulativeUnits, usageHash) || cumulativeUnits == 0 || usageHash == 0) {
             revert InvalidReceipt();
         }
         if (_receipts[receiptId].exists) revert ReceiptExists();
@@ -78,7 +78,7 @@ contract ResourceReceiptRegistry420 is I420System {
                     msg.sender, n.providerId, o.nodeId, ResourceIds420.ACTION_SUBMIT_RECEIPT
                 )
         ) revert Unauthorized();
-        if (!sessions.isOpen(sessionId) || cumulativeUnits < lastUnits[sessionId] || cumulativeUnits > s.maxUnits) {
+        if (!sessions.isOpen(sessionId) || cumulativeUnits <= lastUnits[sessionId] || cumulativeUnits > s.maxUnits) {
             revert InvalidReceipt();
         }
 

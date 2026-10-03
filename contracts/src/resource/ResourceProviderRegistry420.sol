@@ -37,7 +37,9 @@ contract ResourceProviderRegistry420 is I420System {
     event ProviderUpdated(bytes32 indexed providerId, bytes32 metadataHash, bytes32 stakeRef, uint32 revision);
     event ProviderStateChanged(bytes32 indexed providerId, State state);
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         require(authorization_ != address(0), "dependency");
         authorization = ResourceAuthorization420(authorization_);
     }
@@ -50,29 +52,31 @@ contract ResourceProviderRegistry420 is I420System {
         return 1;
     }
 
-    function registerProvider(bytes32 providerId, address operatorAccount, bytes32 metadataHash, bytes32 stakeRef)
-        external
-    {
+    function registerProvider(
+        bytes32 providerId,
+        address operatorAccount,
+        bytes32 metadataHash,
+        bytes32 stakeRef
+    ) external {
         if (providerId == 0 || operatorAccount == address(0)) revert InvalidProvider();
         if (_providers[providerId].exists) revert ProviderExists();
         if (
             msg.sender != operatorAccount
-                && !authorization.isProviderAuthorized(
-                    msg.sender, providerId, ResourceIds420.ACTION_REGISTER_PROVIDER
-                )
+                && !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_REGISTER_PROVIDER)
         ) revert Unauthorized();
 
         _providers[providerId] = Provider(operatorAccount, metadataHash, stakeRef, 1, State.REGISTERED, true);
         emit ProviderRegistered(providerId, operatorAccount, stakeRef);
     }
 
-    function setState(bytes32 providerId, State next) external {
+    function setState(
+        bytes32 providerId,
+        State next
+    ) external {
         Provider storage p = _get(providerId);
         if (
             msg.sender != p.operatorAccount
-                && !authorization.isProviderAuthorized(
-                    msg.sender, providerId, ResourceIds420.ACTION_SET_PROVIDER_STATE
-                )
+                && !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_SET_PROVIDER_STATE)
         ) revert Unauthorized();
 
         State old = p.state;
@@ -87,14 +91,16 @@ contract ResourceProviderRegistry420 is I420System {
         emit ProviderStateChanged(providerId, next);
     }
 
-    function updateProvider(bytes32 providerId, bytes32 metadataHash, bytes32 stakeRef) external {
+    function updateProvider(
+        bytes32 providerId,
+        bytes32 metadataHash,
+        bytes32 stakeRef
+    ) external {
         Provider storage p = _get(providerId);
         if (p.state == State.ACTIVE || p.state == State.RETIRED) revert InvalidState();
         if (
             msg.sender != p.operatorAccount
-                && !authorization.isProviderAuthorized(
-                    msg.sender, providerId, ResourceIds420.ACTION_UPDATE_PROVIDER
-                )
+                && !authorization.isProviderAuthorized(msg.sender, providerId, ResourceIds420.ACTION_UPDATE_PROVIDER)
         ) revert Unauthorized();
 
         p.metadataHash = metadataHash;
@@ -103,15 +109,21 @@ contract ResourceProviderRegistry420 is I420System {
         emit ProviderUpdated(providerId, metadataHash, stakeRef, p.revision);
     }
 
-    function getProvider(bytes32 providerId) external view returns (Provider memory) {
+    function getProvider(
+        bytes32 providerId
+    ) external view returns (Provider memory) {
         return _get(providerId);
     }
 
-    function isActive(bytes32 providerId) external view returns (bool) {
+    function isActive(
+        bytes32 providerId
+    ) external view returns (bool) {
         return _providers[providerId].exists && _providers[providerId].state == State.ACTIVE;
     }
 
-    function _get(bytes32 id) private view returns (Provider storage p) {
+    function _get(
+        bytes32 id
+    ) private view returns (Provider storage p) {
         p = _providers[id];
         if (!p.exists) revert ProviderNotFound();
     }

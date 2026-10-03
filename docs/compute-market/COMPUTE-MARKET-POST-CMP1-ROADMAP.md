@@ -271,11 +271,13 @@ Durable evidence: [CMP-2.2 qualification](CMP-2.2-QUALIFICATION-EVIDENCE.md). Le
 Express required resource class, runtime, verification, replication, privacy, deadline and maximum price.
 
 ## CMP-2.3 — Replaceable matching engine
-**Status: implementation / Level 1 + Level 2 qualification in progress.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `103791e7c700ccd53607613b7d0cd2b6ab376902`.**
 
 Schedulers propose matches; contracts remain authoritative.
 
 CMP-2.3 is the first offers/requests/matching convergence milestone, so the retained Compute Market suite serves as the app-focused Level 2 integration gate in addition to targeted Level 1 checks.
+
+Durable evidence: [`CMP-2.3-QUALIFICATION-EVIDENCE.md`](./CMP-2.3-QUALIFICATION-EVIDENCE.md). Level 3 remains deferred to CMP-2.8.
 
 ## CMP-2.4 — Pricing model
 Support fixed-price, work-unit, CPU-time, GPU-time and verified-result pricing.

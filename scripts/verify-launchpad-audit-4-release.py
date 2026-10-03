@@ -109,7 +109,7 @@ for token in [
  'e.sales.setController(address(e.allocations))',
  'new LaunchpadCrowdfundingIntegration420(',
  'e.allocations.setCrowdfundingIntegration(address(e.crowdfunding))',
- 'new LaunchpadRouter420(address(e.sales),address(e.allocations))',
+ 'new LaunchpadRouter420(address(e.sales), address(e.allocations))',
  'registerComponent(',
  'publishRegisteredService(',
  'address(e.router).codehash',

@@ -267,7 +267,7 @@ Exit: production build succeeds from clean checkout and primary user/creator wor
 - Primary implementation files: `launchpad/web/**`, `launchpad/service/**`, `scripts/verify-launchpad-audit-5-app.py`, `.github/workflows/420launchpad-app.yml`.
 - Documentation reconciled after qualification: Launchpad getting-started/user guide and repository audit now describe the qualified runtime, participant workflows, projection boundary and governance-only creator authority.
 - Level 2 milestone qualification: **NOT REQUIRED** — Audit-5 consumes the already-qualified ProtocolRegistry/Launchpad contract authority boundary without changing shared contract/service authority or lifecycle semantics; its frontend/service integration is fully exercised by the step-specific Level 1 suite.
-- Level 3 closeout qualification: **INTENTIONALLY DEFERRED** to final accumulated Launchpad app-phase closeout as required by the phase model. fileciteturn672file0L21-L24
+- Level 3 closeout qualification: **INTENTIONALLY DEFERRED** to final accumulated Launchpad app-phase closeout as required by the phase model.
 - Intentionally deferred live checks: production-equivalent deployment, funded contribution/success/claim, failure/refund, cancellation/dispute, reorg/index recovery, Notifications/Reputation live effects and retained tx/code-hash evidence are owned by **LAUNCHPAD-AUDIT-6**.
 - Original exit criterion — production build succeeds from clean checkout: **PASS**
 - Original exit criterion — primary user workflows covered: **PASS**

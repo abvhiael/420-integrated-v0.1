@@ -15,6 +15,7 @@
       "genesis-compatibility",
       "v1-modules",
       "compute-integration",
+      "provider-runtime",
       "focused-ai-contracts"
     ]
   },
@@ -202,10 +203,110 @@
       "blockers": [],
       "completion_state": "COMPLETE",
       "next_step": "AI-AUDIT-5 — custody, settlement and disputes"
+    },
+    "AI-AUDIT-6": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "0a70e753256e3d3c8cead2894ee9924c72d1b570",
+      "qualification_base_sha": "b58b09a17e641a42b81d832bad913a83c7caada9",
+      "current_main_at_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
+      "workflow_run": 37099378185,
+      "jobs": {
+        "focused-ai-contracts": 111135768844,
+        "v1-modules": 111135768883,
+        "provider-runtime": 111135768935,
+        "audit-state": 111135768966,
+        "compute-integration": 111135768976,
+        "genesis-compatibility": 111135768981
+      },
+      "implementation_summary": [
+        "Added a runnable dependency-light off-chain provider runtime under services/420ai-provider instead of reviving stale provider code.",
+        "Kept protocol authority in canonical RPC/Registry/ComputeMarket state through a narrow injected canonical client; local queues and health state are explicitly non-authoritative.",
+        "Added domain-separated provider-signed execution manifests and receipts binding chain, ComputeMarket graph, AI/CMP request and job identities, assignment, provider/resource, model/workload, privacy/verification references, input commitment, canonical manifest hash, runtime identity, result commitment and bounded timing.",
+        "Added AES-256-GCM private-payload storage with assignment-scoped authenticated data, maximum retention, expiry deletion and no plaintext persistence in runtime workflow state.",
+        "Added bounded retry and stable receipt-derived idempotency with canonical-state reconciliation after transient failures or lost RPC responses.",
+        "Added replay-safe restart recovery: durable nonsecret signed manifest/receipt state can resume pending submission without re-decrypting or re-executing; interrupted execution requires an explicit re-execution path after canonical revalidation.",
+        "Added redacted observability and non-authoritative health reporting."
+      ],
+      "files_changed": [
+        "services/420ai-provider/package.json",
+        "services/420ai-provider/config.example.json",
+        "services/420ai-provider/README.md",
+        "services/420ai-provider/src/canonical-json.js",
+        "services/420ai-provider/src/private-payload-store.js",
+        "services/420ai-provider/src/retry.js",
+        "services/420ai-provider/src/state-store.js",
+        "services/420ai-provider/src/observability.js",
+        "services/420ai-provider/src/runtime.js",
+        "services/420ai-provider/src/index.js",
+        "services/420ai-provider/test/provider-runtime.test.js",
+        "scripts/verify-420ai-provider-runtime.py",
+        ".github/workflows/420ai-audit.yml",
+        "docs/420-AI-V1-ARCHITECTURE.md",
+        "docs/architecture/infrastructure/420ai-compute-infrastructure.md"
+      ],
+      "requirements_satisfied": [
+        "A runnable off-chain 420AI provider service now exists and is built against the current repository's injected RPC/Registry/CMP service boundary rather than stale provider implementation assumptions.",
+        "Execution is refused on wrong chain, wrong ComputeMarket graph, wrong provider, unapproved resource, expired deadline or mismatched private-input commitment.",
+        "Execution manifests and receipts are provider-signed, domain-separated and scope-bound.",
+        "Private payloads are encrypted at rest with AES-256-GCM, assignment-scoped authenticated data and bounded retention/expiry.",
+        "Receipt submission uses bounded retry, stable idempotency identity and canonical-state reconciliation before duplicate submission.",
+        "Non-transient submission failures are not blindly retried.",
+        "Restart recovery trusts canonical state, reconciles already-committed results, preserves pending receipt submission without rerunning inference and requires explicit re-execution for interrupted workloads.",
+        "Operational logs recursively redact private payload, prompt, token, secret, credential and raw byte fields.",
+        "Health reporting is operational only and never claims protocol authority.",
+        "The runtime does not create custody, settlement, verifier, governance, validator, identity or arbitrary lifecycle authority."
+      ],
+      "ci_results": {
+        "workflow": "420AI Audit Qualification",
+        "workflow_run": 37099378185,
+        "result": "success",
+        "exact_head": true,
+        "jobs": {
+          "focused-ai-contracts": "PASS",
+          "v1-modules": "PASS",
+          "provider-runtime": "PASS",
+          "audit-state": "PASS",
+          "compute-integration": "PASS",
+          "genesis-compatibility": "PASS"
+        },
+        "provider_runtime_tests": "14 passed; 0 failed; 0 skipped",
+        "provider_runtime_verifier": "PASS",
+        "contract_build": "PASS",
+        "focused_ai_contract_suites": "PASS"
+      },
+      "security_adversarial_invariant_results": [
+        "Signed execution-object tampering fails verification.",
+        "Private payload ciphertext does not contain plaintext, wrong authenticated scope is rejected and expired payloads are deleted.",
+        "Local replay returns the same submitted receipt state without a second execution or second canonical submission.",
+        "Transient submission failures retry only within bounded attempts/deadline; non-transient failures do not retry.",
+        "A lost RPC response after canonical success reconciles from canonical state instead of submitting a duplicate receipt.",
+        "Pending signed receipt state survives restart and resumes without private-payload decryption or workload re-execution.",
+        "Interrupted execution cannot silently rerun; an explicit retryExecution path is required after canonical revalidation.",
+        "Wrong chain, ComputeMarket graph, provider, resource, deadline and input commitment fail before successful execution/submission.",
+        "Terminal canonical jobs remain terminal during restart recovery.",
+        "Observability redacts private payloads, prompts, tokens, secrets, credentials and raw buffers."
+      ],
+      "milestone_status": "AI-AUDIT-6 is a service-scoped runtime step. Level 1 app-specific qualification is sufficient at this boundary; no separate Level 2 milestone is required because no new broader app integration milestone beyond the already-qualified AI/CMP boundary was introduced.",
+      "deferred": {
+        "level_2": "Not required for AI-AUDIT-6. Broader cross-component milestone coverage remains tied to the canonical integration milestones.",
+        "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global, Docs/global, full service/client inventory and release closeout remain deferred to AI-AUDIT-10/complete app-phase closeout.",
+        "custody_and_disputes": "AI-AUDIT-5 remains outstanding and is not satisfied by this provider-runtime step.",
+        "read_api": "Indexer/read-model implementation remains AI-AUDIT-7.",
+        "live": "Deployment/materialization, ProtocolRegistry publication and production-equivalent testnet evidence remain AI-AUDIT-9 through AI-AUDIT-11."
+      },
+      "limitations": [
+        "The provider runtime consumes a narrow injected canonical client following repository service conventions; live RPC/Registry endpoint materialization and deployment configuration are later deployment steps.",
+        "The provider-signed off-chain receipt is provenance evidence. Current on-chain CMP receipt/result authority remains the canonical authorized worker/receipt path and is not replaced by the service signature.",
+        "The audit branch was qualified against PR base b58b09a17e641a42b81d832bad913a83c7caada9; current main advanced to d37d751dfa232b20c8158d55c20c13cc1d7a10ef after qualification. Reconciliation with current main is not part of this evidence-only closeout."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_step": "AI-AUDIT-7 — read API / indexer"
     }
   },
   "scope": {
-    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, and current ComputeMarket integration",
+    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, current ComputeMarket integration, and qualified provider runtime/private-payload path",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
@@ -217,7 +318,7 @@
   "canonical_findings": {
     "fixed_genesis_compatibility_addresses_preserved": true,
     "mature_v1_contract_inventory_complete": true,
-    "provider_runtime_present": false,
+    "provider_runtime_present": true,
     "read_api_present": false,
     "production_web_client_present": false,
     "production_equivalent_testnet_evidence_present": false,
@@ -238,5 +339,6 @@
   },
   "roadmap": "docs/audit/420AI-AUDIT-REMEDIATION-ROADMAP.md",
   "report": "docs/audit/420AI-COMPLETE-AUDIT-20261002.md",
-  "current_main_at_ai_audit_4_closeout": "edfd0752e825fc5379700851358e8398efb0b9c5"
+  "current_main_at_ai_audit_4_closeout": "edfd0752e825fc5379700851358e8398efb0b9c5",
+  "current_main_at_ai_audit_6_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef"
 }

@@ -17,6 +17,9 @@ required = [
     "contracts/src/interfaces/IRandomnessVerifier420.sol",
     "contracts/test/Randomness420.t.sol",
     "contracts/test/RandomnessAudit420.t.sol",
+    "contracts/test/RandomnessDeploymentBinding420.t.sol",
+    "contracts/config/randomness/random-audit-4-deployment-bundle.json",
+    "scripts/verify-random-audit-4-deployment.py",
     "docs/architecture/protocols/randomness-oracle-interface.md",
 ]
 for path in required:

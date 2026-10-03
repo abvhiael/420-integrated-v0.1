@@ -22,7 +22,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 420ai-audit-${{ github.event.pull_request.number || github.ref }}
+  group: 420ai-audit-v2-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -63,10 +63,4 @@ jobs:
       - name: Build implemented 420AI contracts
         run: forge build src/ai
       - name: Run implemented 420AI contract suites
-        run: |
-          forge test --match-path 'test/AICompatibility420.t.sol'
-          forge test --match-path 'test/AIHardening420.t.sol'
-          forge test --match-path 'test/AIMature420.t.sol'
-          forge test --match-path 'test/AIModelRegistryHardening420.t.sol'
-          forge test --match-path 'test/AIModelTrainingRights420.t.sol'
-          forge test --match-path 'test/AIRewardsIntegration420.t.sol'
+        run: forge test --match-path 'test/AI*420.t.sol'

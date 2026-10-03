@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {inspectAiTransaction420} from '../core/transactions.js';
+const tx='0x'+'1'.repeat(64),bh='0x'+'2'.repeat(64);
+test('transaction lifecycle detects canonical confirmation',async()=>{const p={request:async({method})=>method==='eth_getTransactionReceipt'?{transactionHash:tx,blockNumber:'0x5',blockHash:bh,status:'0x1'}:method==='eth_getBlockByNumber'?{hash:bh}:method==='eth_blockNumber'?'0x6':null};const s=await inspectAiTransaction420(p,tx,{minConfirmations:2});assert.equal(s.state,'CONFIRMED');assert.equal(s.confirmations,2);});
+test('transaction lifecycle detects reorged receipt',async()=>{const p={request:async({method})=>method==='eth_getTransactionReceipt'?{transactionHash:tx,blockNumber:'0x5',blockHash:bh,status:'0x1'}:method==='eth_getBlockByNumber'?{hash:'0x'+'3'.repeat(64)}:method==='eth_blockNumber'?'0x6':null};assert.equal((await inspectAiTransaction420(p,tx)).state,'REORGED');});

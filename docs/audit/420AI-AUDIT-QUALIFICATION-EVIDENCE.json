@@ -16,6 +16,8 @@
       "v1-modules",
       "compute-integration",
       "provider-runtime",
+      "ai-read-api",
+      "ai-client",
       "focused-ai-contracts"
     ]
   },
@@ -303,6 +305,89 @@
       "blockers": [],
       "completion_state": "COMPLETE",
       "next_step": "AI-AUDIT-7 — read API / indexer"
+    },
+    "AI-AUDIT-8": {
+      "status": "IMPLEMENTED_AWAITING_CI",
+      "qualification_level": "Level 1 required; Level 2 app milestone pending because AI read + wallet/client lifecycle converge here",
+      "implementation_sha": "b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad",
+      "current_main_at_implementation_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
+      "files_changed": [
+        ".github/workflows/420ai-audit.yml",
+        "ai/web/README.md",
+        "ai/web/app.js",
+        "ai/web/core/abi.js",
+        "ai/web/core/config.js",
+        "ai/web/core/controller.js",
+        "ai/web/core/read-api.js",
+        "ai/web/core/transactions.js",
+        "ai/web/core/wallet.js",
+        "ai/web/index.html",
+        "ai/web/package.json",
+        "ai/web/runtime-config.example.json",
+        "ai/web/runtime-config.json",
+        "ai/web/scripts/check.mjs",
+        "ai/web/security-headers.json",
+        "ai/web/styles.css",
+        "ai/web/test/abi.test.js",
+        "ai/web/test/config.test.js",
+        "ai/web/test/controller.test.js",
+        "ai/web/test/read-api.test.js",
+        "ai/web/test/transactions.test.js",
+        "ai/web/test/wallet.test.js",
+        "docs/420-AI-V1-ARCHITECTURE.md",
+        "docs/apps/ai/developer/api.md",
+        "scripts/verify-420ai-client.py"
+      ],
+      "requirements_satisfied": [
+        "Actual user-facing 420AI browser application exists under ai/web.",
+        "Injected EIP-1193 wallet connection is implemented with target-chain validation and authority invalidation on account/chain/disconnect changes.",
+        "Model, model-version, deployment, policy and AI job discovery is implemented against the chain-scoped 420-ai-read-v1 API.",
+        "Requester-authorized createRequest, cancel and openDispute calldata is generated from canonical AIJobManager interfaces and wallet transactions are simulated before submission.",
+        "Funding and settlement state is displayed from indexed canonical evidence; the browser does not fabricate direct AI escrow funding because AIJobEscrow.fund is disabled.",
+        "Transaction lifecycle distinguishes submitted, included, confirmed, reverted, reorged, dropped and timeout/error behavior and stale reviewed intent is cleared after failures.",
+        "Private input plaintext is converted locally to a commitment and is not included in public calldata, runtime config, indexed projections or browser persistence.",
+        "Runtime configuration rejects privileged secret/API credential fields and credential-bearing URLs.",
+        "Responsive CSS, skip navigation, labels, focus styling and aria-live status surfaces are present.",
+        "Committed runtime configuration is fail-closed until AI-AUDIT-9 materializes live network/read-service values; production-origin/config shape and restrictive browser security headers are present."
+      ],
+      "local_targeted_results": {
+        "environment": "Node 22 local container reconstruction of exact committed client modules and final app.js",
+        "command": "npm run build",
+        "structural_check": "PASS",
+        "tests": "16 passed; 0 failed; 0 skipped",
+        "app_js_syntax": "PASS"
+      },
+      "ci_results": {
+        "required_workflow": "420AI Audit Qualification",
+        "expected_jobs": [
+          "ai-client",
+          "ai-read-api",
+          "provider-runtime",
+          "compute-integration",
+          "v1-modules",
+          "audit-state",
+          "genesis-compatibility",
+          "focused-ai-contracts"
+        ],
+        "exact_head_run": null,
+        "result": "UNTRIGGERED",
+        "reason": "GitHub Actions has not emitted pull_request workflow runs for connector-generated branch updates; a temporary exact-SHA qualification PR also produced no run."
+      },
+      "security_adversarial_results": [
+        "Wrong network is rejected before wallet authority is established.",
+        "Wallet account/chain/disconnect events invalidate local authority and pending review.",
+        "Runtime config rejects secret/credential/API-key/private-key/password-style fields and credential-bearing URLs.",
+        "Private input plaintext is absent from reviewed transaction data; only its bytes32 commitment is retained.",
+        "Indexed/review data is rendered with textContent/DOM nodes rather than innerHTML.",
+        "Reverted, reorged and dropped transaction states fail closed and never report success.",
+        "Unmaterialized runtime keeps create/cancel/dispute feature flags disabled."
+      ],
+      "milestone_status": "AI-AUDIT-8 is the next meaningful app integration milestone because user wallet execution, AI read/indexer state and canonical AI requester lifecycle converge. Level 2 retained AI qualification must run once Actions can execute on the exact implementation SHA.",
+      "blockers": [
+        "Required exact-head app-specific GitHub Actions workflow is untriggered; missing required CI cannot be treated as passing evidence."
+      ],
+      "completion_state": "NOT_COMPLETE_CI_BLOCKED",
+      "next_step": "AI-AUDIT-9 — deployment and Genesis materialization (must not be marked started as a substitute for missing AI-AUDIT-8 CI qualification)"
     }
   },
   "scope": {

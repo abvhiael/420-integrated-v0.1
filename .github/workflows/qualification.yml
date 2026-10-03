@@ -27,6 +27,7 @@ on:
       - 'contracts/config/compute-market/cmp-1.5.13-phase-closeout.json'
       - 'docs/compute-market/CMP-1.5.13-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-1-5-13-closeout.py'
+      - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
   pull_request:
     paths:
       - 'consensus/**'
@@ -50,6 +51,7 @@ on:
       - 'contracts/config/compute-market/cmp-1.5.13-phase-closeout.json'
       - 'docs/compute-market/CMP-1.5.13-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-1-5-13-closeout.py'
+      - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -60,7 +62,7 @@ permissions:
 
 jobs:
   offline-core:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +80,7 @@ jobs:
       - run: go build ./execution/cmd/node420
 
   production-dependencies:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +96,7 @@ jobs:
       - run: bash ./scripts/install-production-deps.sh
 
   geth-engine:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -116,7 +118,7 @@ jobs:
       - run: bash ./scripts/live-engine-smoke.sh
 
   fault-matrix:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

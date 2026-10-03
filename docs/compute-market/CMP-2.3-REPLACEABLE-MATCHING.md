@@ -49,3 +49,8 @@ Those responsibilities remain with later canonical steps, especially CMP-2.4 pri
 ## Qualification
 
 CMP-2.3 is the first offers/requests/matching convergence point. Qualification therefore includes ordinary Level 1 targeted checks plus the deferred Level 2 retained Compute Market integration suite. Level 3 remains reserved for CMP-2.8 phase closeout.
+
+
+## Qualification evidence
+
+Durable qualification evidence is recorded in [`CMP-2.3-QUALIFICATION-EVIDENCE.md`](./CMP-2.3-QUALIFICATION-EVIDENCE.md). Level 3 remains reserved for CMP-2.8 phase closeout.

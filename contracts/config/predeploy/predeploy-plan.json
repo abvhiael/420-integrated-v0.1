@@ -89,11 +89,15 @@
     {
       "address": "0x0000000000000000000000000000000000000428",
       "artifact": "contracts/artifacts/RandomnessRegistry.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "compiler_runtime_template_sha256": "530bbc0a72108e2965c9be94d94716eab93612193c467d88b27ad28e16b6bb17",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_MATERIALIZATION",
       "name": "RandomnessRegistry",
-      "notes": "RANDOM-AUDIT-1: canonical generalized 420Random registry; legacy system/RandomnessRegistry.sol is not the 0x0428 application authority. Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "RANDOM-AUDIT-3: canonical generalized 420Random registry; governanceTimelock immutable materialized to 0x0429 from compiler-reported references; constructor has no mutable storage writes; randomnessRouter begins zero and _records empty. Live deployment/binding remains later audit work.",
+      "predeploy_state": "contracts/config/predeploy/RandomnessRegistry-predeploy-state.json",
+      "runtime_code_hash": "0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a",
       "source": "randomness/RandomnessRegistry.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "4f5548314eb37c7c52f8199560439f97c6c837ce",
+      "status": "RANDOM_AUDIT_3_ARTIFACT_READY"
     },
     {
       "address": "0x0000000000000000000000000000000000000429",

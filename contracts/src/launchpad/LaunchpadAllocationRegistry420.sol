@@ -24,23 +24,12 @@ contract LaunchpadAllocationRegistry420 is I420System {
 
     event CrowdfundingIntegrationSet(address indexed integration);
     event ContributionRecorded(
-        bytes32 indexed saleId,
-        address indexed participant,
-        uint128 amount,
-        bytes32 paymentCommitment
+        bytes32 indexed saleId, address indexed participant, uint128 amount, bytes32 paymentCommitment
     );
     event AllocationClaimed(
-        bytes32 indexed saleId,
-        address indexed participant,
-        uint128 tokenAmount,
-        bytes32 deliveryCommitment
+        bytes32 indexed saleId, address indexed participant, uint128 tokenAmount, bytes32 deliveryCommitment
     );
-    event RefundRecorded(
-        bytes32 indexed saleId,
-        address indexed participant,
-        uint128 amount,
-        bytes32 refundCommitment
-    );
+    event RefundRecorded(bytes32 indexed saleId, address indexed participant, uint128 amount, bytes32 refundCommitment);
 
     constructor(
         address authorization_,
@@ -63,10 +52,9 @@ contract LaunchpadAllocationRegistry420 is I420System {
         address integration_
     ) external {
         if (msg.sender != sales.governanceTimelock()) revert UnauthorizedAction();
-        if (
-            crowdfundingIntegration != address(0) || integration_ == address(0)
-                || integration_.code.length == 0
-        ) revert InvalidIntegration();
+        if (crowdfundingIntegration != address(0) || integration_ == address(0) || integration_.code.length == 0) {
+            revert InvalidIntegration();
+        }
         crowdfundingIntegration = integration_;
         emit CrowdfundingIntegrationSet(integration_);
     }
@@ -78,21 +66,17 @@ contract LaunchpadAllocationRegistry420 is I420System {
     ) external {
         LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
         if (
-            amount == 0 || paymentCommitment == bytes32(0)
-                || sale_.state != LaunchpadSaleRegistry420.State.ACTIVE
+            amount == 0 || paymentCommitment == bytes32(0) || sale_.state != LaunchpadSaleRegistry420.State.ACTIVE
                 || block.timestamp < sale_.startsAt || block.timestamp > sale_.endsAt
                 || uint256(contributed[saleId][msg.sender]) + amount > sale_.perWalletCap
-                || !authorization.isAuthorized(
-                    msg.sender, saleId, LaunchpadIds420.ACTION_CONTRIBUTE, amount
-                )
+                || !authorization.isAuthorized(msg.sender, saleId, LaunchpadIds420.ACTION_CONTRIBUTE, amount)
         ) revert InvalidContribution();
 
         address integration = crowdfundingIntegration;
         if (
             integration != address(0)
-                && !ILaunchpadCrowdfundingIntegration420(integration).consumeContribution(
-                    msg.sender, saleId, amount, paymentCommitment
-                )
+                && !ILaunchpadCrowdfundingIntegration420(integration)
+                    .consumeContribution(msg.sender, saleId, amount, paymentCommitment)
         ) revert InvalidContribution();
 
         contributed[saleId][msg.sender] += amount;
@@ -107,12 +91,9 @@ contract LaunchpadAllocationRegistry420 is I420System {
         LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
         uint128 paid = contributed[saleId][msg.sender];
         if (
-            sale_.state != LaunchpadSaleRegistry420.State.SUCCEEDED
-                || block.timestamp < sale_.claimStartsAt || paid == 0
-                || claimed[saleId][msg.sender] != 0 || deliveryCommitment == bytes32(0)
-                || !authorization.isAuthorized(
-                    msg.sender, saleId, LaunchpadIds420.ACTION_CLAIM, 0
-                )
+            sale_.state != LaunchpadSaleRegistry420.State.SUCCEEDED || block.timestamp < sale_.claimStartsAt
+                || paid == 0 || claimed[saleId][msg.sender] != 0 || deliveryCommitment == bytes32(0)
+                || !authorization.isAuthorized(msg.sender, saleId, LaunchpadIds420.ACTION_CLAIM, 0)
         ) revert NotClaimable();
 
         uint128 tokens = uint128((uint256(sale_.tokenAllocation) * paid) / sale_.raised);
@@ -120,9 +101,8 @@ contract LaunchpadAllocationRegistry420 is I420System {
 
         address integration = crowdfundingIntegration;
         if (integration != address(0)) {
-            ILaunchpadCrowdfundingIntegration420(integration).recordDelivery(
-                msg.sender, saleId, tokens, deliveryCommitment
-            );
+            ILaunchpadCrowdfundingIntegration420(integration)
+                .recordDelivery(msg.sender, saleId, tokens, deliveryCommitment);
         }
 
         emit AllocationClaimed(saleId, msg.sender, tokens, deliveryCommitment);
@@ -135,22 +115,17 @@ contract LaunchpadAllocationRegistry420 is I420System {
         LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
         uint128 paid = contributed[saleId][msg.sender];
         if (
-            (
-                sale_.state != LaunchpadSaleRegistry420.State.FAILED
-                    && sale_.state != LaunchpadSaleRegistry420.State.CANCELLED
-            ) || paid == 0 || refunded[saleId][msg.sender]
-                || refundCommitment == bytes32(0)
-                || !authorization.isAuthorized(
-                    msg.sender, saleId, LaunchpadIds420.ACTION_REFUND, paid
-                )
+            (sale_.state != LaunchpadSaleRegistry420.State.FAILED
+                    && sale_.state != LaunchpadSaleRegistry420.State.CANCELLED) || paid == 0
+                || refunded[saleId][msg.sender] || refundCommitment == bytes32(0)
+                || !authorization.isAuthorized(msg.sender, saleId, LaunchpadIds420.ACTION_REFUND, paid)
         ) revert NotRefundable();
 
         address integration = crowdfundingIntegration;
         if (
             integration != address(0)
-                && !ILaunchpadCrowdfundingIntegration420(integration).consumeRefund(
-                    msg.sender, saleId, paid, refundCommitment
-                )
+                && !ILaunchpadCrowdfundingIntegration420(integration)
+                    .consumeRefund(msg.sender, saleId, paid, refundCommitment)
         ) revert NotRefundable();
 
         refunded[saleId][msg.sender] = true;

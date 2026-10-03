@@ -9,20 +9,41 @@ import "../src/randomness/RandomnessRegistry.sol";
 import "../src/randomness/RandomnessDraw420.sol";
 
 interface VmRandomnessAudit420 {
-    function prank(address) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract RandomnessDrawHarness420 {
-    function bounded(bytes32 root, bytes32 domain, uint256 index, uint256 upper) external pure returns (uint256) {
+    function bounded(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256 upper
+    ) external pure returns (uint256) {
         return RandomnessDraw420.boundedUint(root, domain, index, upper);
     }
-    function range(bytes32 root, bytes32 domain, uint256 index, uint256 min, uint256 max) external pure returns (uint256) {
+
+    function range(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256 min,
+        uint256 max
+    ) external pure returns (uint256) {
         return RandomnessDraw420.uniformRange(root, domain, index, min, max);
     }
-    function sample(bytes32 root, bytes32 domain, uint256 index, uint256 population, uint256 count)
-        external pure returns (uint256[] memory)
-    {
+
+    function sample(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256 population,
+        uint256 count
+    ) external pure returns (uint256[] memory) {
         return RandomnessDraw420.sampleWithoutReplacement(root, domain, index, population, count);
     }
 }

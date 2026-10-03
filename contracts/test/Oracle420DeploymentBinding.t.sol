@@ -29,10 +29,10 @@ contract Oracle420DeploymentBindingTest {
             keccak256("IOracle420.readNumeric.readResult.v1")
         );
 
-        (address implementation, bytes32 codeHash,, uint32 version, bool active) = registry.getService(ORACLE_SERVICE);
-        require(implementation == address(router), "wrong router");
-        require(codeHash == address(router).codehash, "wrong code hash");
-        require(version == 1, "wrong version");
-        require(active, "inactive service");
+        ProtocolRegistry.Service memory service = registry.getService(ORACLE_SERVICE);
+        require(service.implementation == address(router), "wrong router");
+        require(service.codeHash == address(router).codehash, "wrong code hash");
+        require(service.version == 1, "wrong version");
+        require(service.active, "inactive service");
     }
 }

@@ -4,31 +4,49 @@ pragma solidity ^0.8.24;
 import "../src/randomness/RandomnessDraw420.sol";
 
 contract RandomnessDrawHarness420 {
-    function derive(bytes32 root, bytes32 domain, uint256 index) external pure returns (bytes32) {
+    function derive(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index
+    ) external pure returns (bytes32) {
         return RandomnessDraw420.deriveDraw(root, domain, index);
     }
 
-    function bounded(bytes32 root, bytes32 domain, uint256 index, uint256 upperExclusive)
-        external pure returns (uint256)
-    {
+    function bounded(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256 upperExclusive
+    ) external pure returns (uint256) {
         return RandomnessDraw420.boundedUint(root, domain, index, upperExclusive);
     }
 
-    function range(bytes32 root, bytes32 domain, uint256 index, uint256 minInclusive, uint256 maxInclusive)
-        external pure returns (uint256)
-    {
+    function range(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256 minInclusive,
+        uint256 maxInclusive
+    ) external pure returns (uint256) {
         return RandomnessDraw420.uniformRange(root, domain, index, minInclusive, maxInclusive);
     }
 
-    function weighted(bytes32 root, bytes32 domain, uint256 index, uint256[] memory weights)
-        external pure returns (uint256)
-    {
+    function weighted(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256[] memory weights
+    ) external pure returns (uint256) {
         return RandomnessDraw420.weightedSelection(root, domain, index, weights);
     }
 
-    function sample(bytes32 root, bytes32 domain, uint256 index, uint256 population, uint256 count)
-        external pure returns (uint256[] memory)
-    {
+    function sample(
+        bytes32 root,
+        bytes32 domain,
+        uint256 index,
+        uint256 population,
+        uint256 count
+    ) external pure returns (uint256[] memory) {
         return RandomnessDraw420.sampleWithoutReplacement(root, domain, index, population, count);
     }
 }

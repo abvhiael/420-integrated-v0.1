@@ -34,10 +34,17 @@ contract RandomnessRouteRegistry420 is SystemAccess, I420System {
         bool active
     );
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
-    function systemName() external pure returns (string memory) { return "RandomnessRouteRegistry420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function systemName() external pure returns (string memory) {
+        return "RandomnessRouteRegistry420";
+    }
+
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
 
     function setRoute(
         bytes32 routeId,
@@ -65,11 +72,16 @@ contract RandomnessRouteRegistry420 is SystemAccess, I420System {
         emit RouteSet(routeId, nextRevision, operator, verifier, methodId, stakeReference, metadataHash, active);
     }
 
-    function route(bytes32 routeId) external view returns (Route memory) {
+    function route(
+        bytes32 routeId
+    ) external view returns (Route memory) {
         return _routes[routeId];
     }
 
-    function isAuthorizedOperator(bytes32 routeId, address operator) external view returns (bool) {
+    function isAuthorizedOperator(
+        bytes32 routeId,
+        address operator
+    ) external view returns (bool) {
         Route storage route_ = _routes[routeId];
         return route_.active && route_.operator == operator;
     }

@@ -122,7 +122,7 @@ jobs:
         working-directory: 420-indexer
         run: npm run build
       - name: Run AI read/indexer qualification tests
-        run: node --test --test-concurrency=1 420-indexer/dist/test/ai420-descriptors.test.js 420-indexer/dist/test/ai420-read-model.test.js 420-indexer/dist/test/api-contract.test.js 420-indexer/dist/test/http-transport.test.js 420-indexer/dist/test/reorg.test.js
+        run: node --test --test-concurrency=1 420-indexer/dist/test/ai420-descriptors.test.js 420-indexer/dist/test/ai420-read-model.test.js 420-indexer/dist/test/api-contract.test.js 420-indexer/dist/test/api-surface.test.js 420-indexer/dist/test/http-transport.test.js 420-indexer/dist/test/reorg.test.js
       - name: Verify AI-AUDIT-7 read API/indexer boundaries
         run: python3 scripts/verify-420ai-read-api.py
 

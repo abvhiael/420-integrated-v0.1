@@ -59,10 +59,46 @@ if legacy.exists():
 
 artifact = root / "contracts/artifacts/RandomnessRegistry.json"
 state = root / "contracts/config/predeploy/RandomnessRegistry-predeploy-state.json"
+manifest_path = root / "contracts/config/deployment-manifest.json"
 if not artifact.exists():
-    warnings.append("Genesis runtime artifact not yet retained: contracts/artifacts/RandomnessRegistry.json")
+    errors.append("Genesis runtime artifact missing: contracts/artifacts/RandomnessRegistry.json")
 if not state.exists():
-    warnings.append("Genesis predeploy state not yet retained: contracts/config/predeploy/RandomnessRegistry-predeploy-state.json")
+    errors.append("Genesis predeploy state missing: contracts/config/predeploy/RandomnessRegistry-predeploy-state.json")
+if artifact.exists() and state.exists():
+    a = json.loads(artifact.read_text())
+    s = json.loads(state.read_text())
+    if a.get("status") != "RANDOM_AUDIT_3_ARTIFACT_READY":
+        errors.append("RandomnessRegistry artifact status drift")
+    if s.get("status") != "RANDOM_AUDIT_3_FINAL_PREDEPLOY_STATE":
+        errors.append("RandomnessRegistry predeploy state status drift")
+    if a.get("predeployAddress", "").lower() != "0x0000000000000000000000000000000000000428":
+        errors.append("RandomnessRegistry artifact address drift")
+    if a.get("runtimeCodeHash") != s.get("runtimeCodeHash"):
+        errors.append("RandomnessRegistry artifact/state runtime hash mismatch")
+    if s.get("storage") != {} or s.get("storageSlotCount") != 0:
+        errors.append("RandomnessRegistry Genesis mutable storage must be empty")
+    if s.get("declaredStorageRoots") != {"_records": "1", "randomnessRouter": "0"}:
+        errors.append("RandomnessRegistry storage layout roots drift")
+    if s.get("constructorMaterialization", {}).get("governanceTimelock", "").lower() != "0x0000000000000000000000000000000000000429":
+        errors.append("RandomnessRegistry governanceTimelock materialization drift")
+    if pre:
+        if pre.get("status") != "RANDOM_AUDIT_3_ARTIFACT_READY":
+            errors.append("RandomnessRegistry predeploy plan status drift")
+        if pre.get("runtime_code_hash") != a.get("runtimeCodeHash"):
+            errors.append("RandomnessRegistry predeploy plan runtime hash drift")
+        if pre.get("predeploy_state") != "contracts/config/predeploy/RandomnessRegistry-predeploy-state.json":
+            errors.append("RandomnessRegistry predeploy state binding drift")
+    manifest = json.loads(manifest_path.read_text())
+    dm = next((x for x in manifest.get("contracts", []) if x.get("name") == "RandomnessRegistry"), None)
+    if not dm:
+        errors.append("RandomnessRegistry deployment-manifest entry missing")
+    else:
+        if dm.get("artifact_status") != "RANDOM_AUDIT_3_ARTIFACT_READY":
+            errors.append("RandomnessRegistry deployment-manifest artifact status drift")
+        if dm.get("runtime_code_hash") != a.get("runtimeCodeHash"):
+            errors.append("RandomnessRegistry deployment-manifest runtime hash drift")
+        if dm.get("predeploy_state") != "contracts/config/predeploy/RandomnessRegistry-predeploy-state.json":
+            errors.append("RandomnessRegistry deployment-manifest state binding drift")
 
 out = {"pass": not errors, "errors": errors, "warnings": warnings}
 print(json.dumps(out, indent=2))

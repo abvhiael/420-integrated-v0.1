@@ -1,0 +1,93 @@
+{
+  "schema": "420-randomness-release-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Randomness",
+  "protocolVersion": 1,
+  "authority": "repository_descriptor_only_live_router_address_resolved_by_protocol_registry",
+  "contracts": [
+    {
+      "contractName": "RandomnessRegistry",
+      "sourcePath": "contracts/src/randomness/RandomnessRegistry.sol",
+      "addressPolicy": "FROZEN_0x0000000000000000000000000000000000000428",
+      "events": [
+        {
+          "name": "RandomnessRouterBound",
+          "signature": "RandomnessRouterBound(address)",
+          "inputs": [
+            { "name": "router", "type": "address", "indexed": true }
+          ]
+        },
+        {
+          "name": "RandomnessRequested",
+          "signature": "RandomnessRequested(bytes32,bytes32,uint64)",
+          "inputs": [
+            { "name": "requestId", "type": "bytes32", "indexed": true },
+            { "name": "bindingHash", "type": "bytes32", "indexed": true },
+            { "name": "requestedAt", "type": "uint64", "indexed": false }
+          ]
+        },
+        {
+          "name": "RandomnessFulfilled",
+          "signature": "RandomnessFulfilled(bytes32,bytes32,bytes32,bytes32,uint64)",
+          "inputs": [
+            { "name": "requestId", "type": "bytes32", "indexed": true },
+            { "name": "routeId", "type": "bytes32", "indexed": true },
+            { "name": "randomness", "type": "bytes32", "indexed": false },
+            { "name": "proofHash", "type": "bytes32", "indexed": false },
+            { "name": "fulfilledAt", "type": "uint64", "indexed": false }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "RandomnessRouter420",
+      "sourcePath": "contracts/src/randomness/RandomnessRouter420.sol",
+      "addressPolicy": "PROTOCOL_REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "events": [
+        {
+          "name": "RandomnessRequestCreated",
+          "signature": "RandomnessRequestCreated(bytes32,address,bytes32,uint32,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint8,uint8)",
+          "inputs": [
+            { "name": "requestId", "type": "bytes32", "indexed": true },
+            { "name": "requester", "type": "address", "indexed": true },
+            { "name": "profileId", "type": "bytes32", "indexed": true },
+            { "name": "profileRevision", "type": "uint32", "indexed": false },
+            { "name": "domain", "type": "bytes32", "indexed": false },
+            { "name": "purpose", "type": "bytes32", "indexed": false },
+            { "name": "primaryRoute", "type": "bytes32", "indexed": false },
+            { "name": "fallbackRoute", "type": "bytes32", "indexed": false },
+            { "name": "primaryDeadline", "type": "uint64", "indexed": false },
+            { "name": "deadline", "type": "uint64", "indexed": false },
+            { "name": "securityTier", "type": "uint8", "indexed": false },
+            { "name": "fallbackPolicy", "type": "uint8", "indexed": false }
+          ]
+        },
+        {
+          "name": "RandomnessFallbackActivated",
+          "signature": "RandomnessFallbackActivated(bytes32,bytes32)",
+          "inputs": [
+            { "name": "requestId", "type": "bytes32", "indexed": true },
+            { "name": "fallbackRoute", "type": "bytes32", "indexed": true }
+          ]
+        },
+        {
+          "name": "RandomnessRequestVoided",
+          "signature": "RandomnessRequestVoided(bytes32)",
+          "inputs": [
+            { "name": "requestId", "type": "bytes32", "indexed": true }
+          ]
+        },
+        {
+          "name": "RandomnessResolved",
+          "signature": "RandomnessResolved(bytes32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            { "name": "requestId", "type": "bytes32", "indexed": true },
+            { "name": "routeId", "type": "bytes32", "indexed": true },
+            { "name": "randomness", "type": "bytes32", "indexed": false },
+            { "name": "proofHash", "type": "bytes32", "indexed": false }
+          ]
+        }
+      ]
+    }
+  ]
+}

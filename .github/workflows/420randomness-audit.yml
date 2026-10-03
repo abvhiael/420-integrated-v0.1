@@ -21,6 +21,15 @@ on:
       - 'scripts/verify-420randomness-audit.py'
       - 'docs/audit/420RANDOMNESS-*'
       - 'docs/apps/randomness/**'
+      - '420-indexer/descriptors/randomness-v1.json'
+      - '420-indexer/src/randomness-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/test/randomness420-release-descriptor.test.ts'
+      - 'scripts/qualify-randomness-testnet.py'
+      - 'scripts/verify-random-audit-5-testnet-readiness.py'
+      - '.github/workflows/randomness-live-testnet.yml'
+      - '.github/workflows/randomness-audit-5.yml'
+      - 'docs/audit/RANDOM-AUDIT-5-*'
       - '.github/workflows/420randomness-audit.yml'
   pull_request:
     paths:
@@ -35,6 +44,15 @@ on:
       - 'scripts/verify-420randomness-audit.py'
       - 'docs/audit/420RANDOMNESS-*'
       - 'docs/apps/randomness/**'
+      - '420-indexer/descriptors/randomness-v1.json'
+      - '420-indexer/src/randomness-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/test/randomness420-release-descriptor.test.ts'
+      - 'scripts/qualify-randomness-testnet.py'
+      - 'scripts/verify-random-audit-5-testnet-readiness.py'
+      - '.github/workflows/randomness-live-testnet.yml'
+      - '.github/workflows/randomness-audit-5.yml'
+      - 'docs/audit/RANDOM-AUDIT-5-*'
       - '.github/workflows/420randomness-audit.yml'
   workflow_dispatch:
 

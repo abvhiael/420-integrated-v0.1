@@ -257,19 +257,43 @@ At this point the protocol has the core smart-contract market, but not yet the f
 Purpose: convert registered jobs and workers into an actual resource market.
 
 ## CMP-2.1 — Worker offers
+**Status: COMPLETE — Level 1 exact-head qualified on `1463c5ef83e522f20c4cff8f015d4cf389fc64ab`.**
+
+Durable evidence: [CMP-2.1 qualification](CMP-2.1-QUALIFICATION-EVIDENCE.md). Level 2 deferred until offers/requests/matching integration; Level 3 reserved for CMP-2.8.
+
 Advertise hardware/software capacity, availability, jurisdiction and price.
 
 ## CMP-2.2 — Compute requests
+**Status: COMPLETE — Level 1 exact-head qualified on `6738c1a5a5a38c40bd6482ab3338705d16dd4fe3`.**
+
+Durable evidence: [CMP-2.2 qualification](CMP-2.2-QUALIFICATION-EVIDENCE.md). Level 2 deferred until CMP-2.3 offers/requests/matching integration; Level 3 remains CMP-2.8.
+
 Express required resource class, runtime, verification, replication, privacy, deadline and maximum price.
 
 ## CMP-2.3 — Replaceable matching engine
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `103791e7c700ccd53607613b7d0cd2b6ab376902`.**
+
 Schedulers propose matches; contracts remain authoritative.
 
+CMP-2.3 is the first offers/requests/matching convergence milestone, so the retained Compute Market suite serves as the app-focused Level 2 integration gate in addition to targeted Level 1 checks.
+
+Durable evidence: [`CMP-2.3-QUALIFICATION-EVIDENCE.md`](./CMP-2.3-QUALIFICATION-EVIDENCE.md). Level 3 remains deferred to CMP-2.8.
+
 ## CMP-2.4 — Pricing model
+**Status: COMPLETE — Level 1 exact-head qualified on `880aee2edd699f54467145d7cf99cbde3871a6cc`.**
+
 Support fixed-price, work-unit, CPU-time, GPU-time and verified-result pricing.
 
+CMP-2.4 is an ordinary Level 1 step. The offers/requests/matching convergence milestone was qualified at Level 2 in CMP-2.3; Level 3 remains CMP-2.8.
+
+Durable evidence: [CMP-2.4 qualification](CMP-2.4-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-2.5 — Capacity-aware assignment
+**Status: implementation / Level 1 qualification in progress.**
+
 Consume CMP-1.3 capacity reservations atomically.
+
+CMP-2.5 reuses the canonical CMP-1.3 WorkerSnapshot -> capacity reservation -> JobRegistry assignment boundary. The market adapter does not receive capacity-controller authority. Level 2 is not required for this ordinary step; Level 3 remains CMP-2.8.
 
 ## CMP-2.6 — Scheduler redundancy and non-authority
 
@@ -535,7 +559,7 @@ Production target flow:
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
-| CMP-2 matching marketplace | forthcoming |
+| CMP-2 matching marketplace | CMP-2.1 and CMP-2.2 COMPLETE (Level 1); CMP-2.3 next |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |

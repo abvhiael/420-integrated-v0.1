@@ -100,7 +100,7 @@ contract ComputeAcceptedPriceMatch420Test {
         providers = new ComputeProviderRegistry420(GOV);
         nodes = new ComputeNodeRegistry420(address(providers), GOV);
         resources = new ComputeResourceRegistry420(address(nodes), GOV);
-        offers = new ComputeOfferRegistry420(address(resources));
+        offers = new ComputeOfferRegistry420(address(resources), address(computeAuth));
         matches = new ComputeAcceptedPriceMatch420(address(resources), address(computeAuth),
             address(funding), address(offers));
         AcceptedPriceDeny420 denied = new AcceptedPriceDeny420();

@@ -6,6 +6,7 @@ import {
   ComputeReadModelError420,
   createComputeWorkerClient420,
   validateAttemptBundle420,
+  validateComputeWorkerOffer420,
   validateWorkerRevision420
 } from '../dist/index.js';
 
@@ -264,4 +265,93 @@ test('stale and malformed fixtures remain machine-consumable and fail closed', a
     new RegExp(fixtures.invalidReference.expectedError)
   );
   assert.equal(fixtures.valid.workloadType, 'VIDEO_TRANSCODE');
+});
+
+
+function workerOffer(overrides = {}) {
+  return {
+    providerId: b32(1),
+    nodeId: b32(2),
+    resourceId: b32(3),
+    providerRevision: 4n,
+    resourceRevision: 5n,
+    operator: addr(4),
+    settlementAccount: addr(5),
+    computeClass: b32(6),
+    hardwareProfileHash: b32(7),
+    runtimeProfileHash: b32(8),
+    capabilityHash: b32(9),
+    capacityUnits: 16n,
+    jurisdictionHash: b32(10),
+    availableFrom: 100n,
+    validUntil: 1000n,
+    pricingPolicyId: b32(11),
+    pricingVersion: 1,
+    fixedPrice: 3n * 10n ** 18n,
+    pricingModel: 1,
+    unitRate: 0n,
+    unitScale: 1n,
+    minimumCharge: 3n * 10n ** 18n,
+    maximumCharge: 3n * 10n ** 18n,
+    maximumBillableUnits: 0n,
+    pricingTermsCommitment: b32(13),
+    revision: 2n,
+    predecessorCommitment: b32(12),
+    exists: true,
+    active: true,
+    ...overrides
+  };
+}
+
+test('validates canonical CMP-2.1 worker-offer schema and exact revision', () => {
+  const offer = validateComputeWorkerOffer420(workerOffer(), 2n);
+  assert.equal(offer.capacityUnits, 16n);
+  assert.equal(offer.fixedPrice, 3n * 10n ** 18n);
+  assert.equal(offer.revision, 2n);
+});
+
+test('rejects malformed, stale, unavailable, zero-capacity, zero-price and empty-jurisdiction worker offers', () => {
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ revision: 3n }), 2n), /stale or mismatched/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ active: false })), /not active/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ capacityUnits: 0n })), /capacity/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ fixedPrice: 0n })), /pric(?:e|ing)/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ availableFrom: 1001n })), /availability/);
+  assert.throws(() => validateComputeWorkerOffer420(workerOffer({ jurisdictionHash: b32(0) })), /empty canonical commitment/);
+});
+
+test('CMP-2.4 validates and quotes all bounded pricing models', async () => {
+  const { quoteComputeWorkerOffer420 } = await import('../dist/index.js');
+  for (const pricingModel of [2,3,4,5]) {
+    const offer=workerOffer({fixedPrice:0n,pricingModel,unitRate:5n,unitScale:2n,minimumCharge:3n,maximumCharge:20n,maximumBillableUnits:10n});
+    assert.equal(validateComputeWorkerOffer420(offer),offer);
+    assert.equal(quoteComputeWorkerOffer420(offer,3n),8n);
+    assert.throws(()=>quoteComputeWorkerOffer420(offer,11n),/bounds/);
+  }
+  assert.equal(quoteComputeWorkerOffer420(workerOffer(),0n),3n*10n**18n);
+  assert.throws(()=>quoteComputeWorkerOffer420(workerOffer(),1n),/zero billable units/);
+  assert.throws(()=>validateComputeWorkerOffer420(workerOffer({pricingModel:0})),/unsupported/);
+});
+
+test('CMP-2.2 request validation and independent canonical ABI vectors', async () => {
+  const { validateComputeRequest420, encodeComputeRequestId420, encodeComputeRequestCommitment420 } = await import('../dist/index.js');
+  const v = JSON.parse(await readFile(new URL('./fixtures/compute-request-vector.json', import.meta.url), 'utf8'));
+  const r = v.request;
+  for (const key of ['createdAt','revision']) r[key] = BigInt(r[key]);
+  for (const key of ['capacityUnits','deadline','expiresAt','maximumPrice']) r.terms[key] = BigInt(r.terms[key]);
+  assert.equal(validateComputeRequest420(r,1n,100n,42000n),r);
+  assert.equal(encodeComputeRequestId420(v.requestDomain,420n,v.registry,r.owner,1n),v.idPreimage);
+  assert.equal(encodeComputeRequestCommitment420(v.commitmentDomain,420n,v.registry,v.requestId,r),v.commitmentPreimage);
+  assert.throws(() => validateComputeRequest420(r,2n),/revision/);
+  assert.throws(() => validateComputeRequest420(r,1n,900n),/expired/);
+  assert.throws(() => validateComputeRequest420(r,1n,100n,9999n),/signed maximum/);
+  for (const patch of [{status:2},{owner:addr(0)},{manifestHash:b32(0)},{revision:0n}]) {
+    assert.throws(() => validateComputeRequest420({...r,...patch}));
+  }
+  for (const patch of [
+    {resourceClass:b32(0)}, {runtimeHash:b32(0)}, {jurisdictionHash:b32(0)},
+    {replicationFactor:0}, {partitionCount:1.5}, {replicationFactor:2**32},
+    {maximumPrice:0n}, {capacityUnits:(1n<<256n)-1n}, {deadline:1n<<64n},
+    {expiresAt:1001n}, {privacy:{...r.terms.privacy,version:0}},
+    {verification:{...r.terms.verification,commitment:b32(0)}}
+  ]) assert.throws(() => validateComputeRequest420({...r,terms:{...r.terms,...patch}}));
 });

@@ -1,0 +1,89 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-2.1.WorkerOffers.v1",
+  "step": "CMP-2.1",
+  "title": "Worker offers",
+  "canonical_definition": "Advertise hardware/software capacity, availability, jurisdiction and price.",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "c3fbda60247e76f26a7e183069dd6782ed0da038",
+  "purpose": "Extend the qualified fixed-price ComputeOfferRegistry420 into the canonical worker-market offer surface without implementing requests or matching.",
+  "implementation": {
+    "offer_registry": "contracts/src/compute/ComputeOfferRegistry420.sol",
+    "authorization": "contracts/src/compute/ComputeAuthorization420.sol",
+    "contract_tests": "contracts/test/ComputeWorkerOffers420.t.sol",
+    "accepted_price_regression": "contracts/test/ComputeAcceptedPriceMatch420.t.sol",
+    "entitlement_regression": "contracts/test/ComputeVerifiedEntitlement420.t.sol",
+    "sdk": "packages/420-sdk/src/compute.ts",
+    "sdk_tests": "packages/420-sdk/test/compute-sdk.test.mjs"
+  },
+  "requirements": [
+    "canonical provider/node/resource identity retained",
+    "hardware profile commitment advertised from canonical resource",
+    "software/runtime and capability commitments advertised from canonical resource",
+    "capacity units advertised from canonical resource",
+    "explicit availability start and expiry",
+    "explicit jurisdiction commitment",
+    "versioned fixed native-$420 price",
+    "immutable offer identity with monotonic revisions",
+    "immutable historical revision reconstruction",
+    "resource/provider revision drift invalidates future effectiveness",
+    "authorized revision refreshes resource/profile snapshots",
+    "scoped offer publish/update/cancel delegation",
+    "direct canonical operator compatibility retained for legacy fixed-price publish",
+    "cancellation is terminal and cannot resurrect an offer",
+    "no request, match, reservation, settlement or scheduler authority introduced"
+  ],
+  "authority": {
+    "direct_operator": "canonical node operator under active provider",
+    "delegated_scope": "ComputeAuthorization420.scopeResource(providerId,nodeId,resourceId)",
+    "delegated_actions": [
+      "ACTION_PUBLISH_OFFER",
+      "ACTION_UPDATE_OFFER",
+      "ACTION_CANCEL_OFFER"
+    ],
+    "scheduler_authority": false
+  },
+  "invariants": [
+    "offer terms cannot outlive or override canonical provider/node/resource ancestry",
+    "offer effectiveness fails closed on resource/provider revision drift",
+    "historical offer revisions are immutable",
+    "price and capacity are positive and bounded by versioned offer terms",
+    "future availability cannot be treated as currently effective",
+    "cancelled offers cannot be updated or resurrected",
+    "delegated authority is exact-resource scoped and amount bounded"
+  ],
+  "qualification": {
+    "level": 1,
+    "required": [
+      "affected Compute contract build",
+      "CMP-2.1 focused Foundry tests",
+      "retained accepted-price and entitlement regressions",
+      "affected @420/sdk build and tests",
+      "CMP-2.1 mechanical verifier",
+      "directly applicable Compute Market and Solidity-fast CI"
+    ],
+    "level_2_required_now": false,
+    "level_2_rationale": "Worker offers are the first CMP-2 market-side component. Broader matching integration is deferred until requests and matching converge.",
+    "level_3_deferred_to": "CMP-2.8 — Phase closeout"
+  },
+  "intentionally_deferred": [
+    "CMP-2.2 compute requests",
+    "CMP-2.3 replaceable matching engine",
+    "CMP-2.4 pricing model beyond fixed-price worker offers",
+    "CMP-2.5 capacity-aware assignment",
+    "CMP-2.6 scheduler redundancy and non-authority",
+    "CMP-2.7 market adversarial qualification",
+    "CMP-2.8 Level 3 phase closeout"
+  ],
+  "exit_criteria": [
+    "worker offer exposes canonical hardware/software/capability/capacity snapshot",
+    "worker offer exposes availability, jurisdiction and price",
+    "publish/update/cancel authority is fail-closed and exact-resource scoped",
+    "offer history is reconstructable and immutable",
+    "resource/provider drift invalidates stale offers",
+    "legacy accepted-price path remains compatible",
+    "SDK validates the same public worker-offer schema",
+    "Level 1 exact-head qualification passes",
+    "durable evidence records the exact qualified implementation SHA"
+  ],
+  "next_canonical_step": "CMP-2.2 — Compute requests"
+}

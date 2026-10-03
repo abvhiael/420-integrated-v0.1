@@ -83,10 +83,11 @@ contract ComputeMatchingEngine420Test {
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
 
+        bytes32 cls = resources.GPU_INFERENCE();
         vm.prank(OPERATOR);
         resourceId = resources.register(
             nodeId,
-            resources.GPU_INFERENCE(),
+            cls,
             HARDWARE,
             RUNTIME,
             CAPABILITY,

@@ -42,6 +42,32 @@ Development is stacked on `feature/gen10-4-420analytics-v1` and merged once afte
 | ANALYTICS-9 | Testnet qualification | live Indexer integration, seeded metric evidence, restart/rebuild/reorg validation and machine-readable evidence |
 | ANALYTICS-10 | Genesis closeout | full ANL invariant audit, docs/readiness completion, final qualification matrix and reconciliation with current main |
 
+
+## Audit remediation status
+
+- **ANALYTICS-AUDIT-1 — exact-head repository qualification: COMPLETE**
+  - qualification level: Level 1 app-specific fast qualification;
+  - qualified implementation SHA: `988842ee7fcfdb804af699358458718063624af1`;
+  - durable evidence commit: `aab878b282ae6815ad9d55937c549a27573d2c92`;
+  - workflow: `420Analytics Audit Qualification`;
+  - run: `37102656876`;
+  - job: `111145094012`;
+  - unit/integration, race, static analysis, runtime builds, Analytics Genesis-profile verification and explicit ANALYTICS-9 live-gate verification all PASS;
+  - no Level 2 milestone run was required;
+  - Level 3 repository-wide closeout qualification remains intentionally deferred.
+- **ANALYTICS-AUDIT-2 — durable repository audit evidence: COMPLETE**
+  - qualification level: Level 1 evidence-only app-scoped closeout;
+  - qualified implementation SHA remains `988842ee7fcfdb804af699358458718063624af1`;
+  - durable AUDIT-2 evidence ledger commit: `06eecb26f1a3c66a1191f807b396ac51d4d42718`;
+  - retained workflow/run/job evidence: `420Analytics Audit Qualification` / `37102656876` / `111145094012`;
+  - no executable source, tests, workflows, dependencies, configuration, generated/runtime artifacts, interfaces or deployment state changed in AUDIT-2;
+  - no recursive CI run is required under the evidence-only qualification rule;
+  - no Level 2 milestone run was required;
+  - Level 3 repository-wide closeout qualification remains intentionally deferred;
+  - live testnet and Genesis closeout gates remain incomplete and unchanged.
+- **Next canonical roadmap step: ANALYTICS-9 — Testnet qualification.**
+- Canonical product phase remains **ANALYTICS-9 / LIVE_QUALIFICATION_READY**; this audit bookkeeping does not advance or fabricate live-testnet evidence.
+
 ## Qualification policy
 
 Every phase must remain green before moving forward. ANALYTICS-0 through ANALYTICS-10 remain stacked on this branch; the branch is reconciled against current `main`, fully requalified, and merged once at GEN-10.4 closeout.

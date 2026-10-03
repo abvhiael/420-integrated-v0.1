@@ -54,7 +54,7 @@ Unresolved release risk: the frozen `0x0428` predeploy provenance is inconsisten
 ## Remediation roadmap
 
 1. **RANDOM-AUDIT-1 — canonical source reconciliation — COMPLETE.** `0x0428` predeploy source and the retained Step-6 verifier now resolve `src/randomness/RandomnessRegistry.sol`; the legacy `src/system/RandomnessRegistry.sol` remains historical evidence only. Level 1 exact-head qualification passed on implementation SHA `95b7b4c7f6cfc214ab10c8673a665788b389568b`, workflow run `37093289263`, job `111117991983`.
-2. **RANDOM-AUDIT-2 — repository qualification.** Run the dedicated verifier, formatting, canonical build and all `Randomness*.t.sol` tests on the exact branch head.
+2. **RANDOM-AUDIT-2 — repository qualification — IN PROGRESS.** Qualify the complete retained Randomness source/interface/test set with the dedicated verifier, full Randomness formatting check, canonical build, all `Randomness*.t.sol` tests and the app-scoped static security scan on one exact branch head.
 3. **RANDOM-AUDIT-3 — deterministic Genesis materialization.** Retain the exact compiler artifact, source blob, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`.
 4. **RANDOM-AUDIT-4 — deployment bundle.** Freeze deployment ordering/arguments for route registry, profile registry and router; define the exact ProtocolRegistry component publication and one-time `bindRouter` transaction.
 5. **RANDOM-AUDIT-5 — production-equivalent testnet qualification.** Deploy exact artifacts, verify code/storage identities, publish Registry entries, bind the router, configure qualified routes/profiles, execute primary/fallback/void smoke tests, and verify indexer lifecycle projection.

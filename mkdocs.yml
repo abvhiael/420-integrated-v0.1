@@ -214,6 +214,8 @@ nav:
                   - Events & Finality: apps/identity/developer/events.md
                   - Errors & Retries: apps/identity/developer/errors.md
                   - Examples: apps/identity/developer/examples.md
+          - 420 Pay:
+              - Deployment & Operations: apps/pay/deployment-operations.md
           - 420 Swap:
               - Overview: apps/swap/index.md
               - Getting Started: apps/swap/getting-started.md

@@ -4,6 +4,14 @@ Status: **REPOSITORY REMEDIATION IN PROGRESS; DEPLOYMENT QUALIFICATION BLOCKED**
 
 Baseline main: `edfd0752e825fc5379700851358e8398efb0b9c5`
 
+Current main at RANDOM-AUDIT-3 durable closeout review: `d37d751dfa232b20c8158d55c20c13cc1d7a10ef`
+
+RANDOM-AUDIT-3 exact qualified implementation SHA: `809cff5ea67fc48c3082f5ce0702b8572b18c663`  
+Qualification workflow run/job: `37098929839` / `111134459600`  
+Durable evidence: `docs/audit/RANDOM-AUDIT-3-QUALIFICATION.md`
+
+The post-qualification delta through the documentation closeout lineage is evidence-only: only this audit record and the RANDOM-AUDIT-3 qualification evidence file changed. Current-main reconciliation is intentionally deferred to the appropriate later integration/Level-3 boundary.
+
 ## Canonical definition
 
 The current architecture defines generalized 420 Randomness as a provider-neutral request protocol with governance-versioned routes and profiles, a canonical router, a one-time-router-bound immutable result registry, method-specific proof verifiers and deterministic draw helpers. Randomness and ordinary oracle facts are separate trust domains and failure is fail-closed.
@@ -55,7 +63,7 @@ Resolved repository provenance finding: the baseline `0x0428` source ambiguity h
 
 1. **RANDOM-AUDIT-1 — canonical source reconciliation — COMPLETE.** `0x0428` predeploy source and the retained Step-6 verifier now resolve `src/randomness/RandomnessRegistry.sol`; the legacy `src/system/RandomnessRegistry.sol` remains historical evidence only. Level 1 exact-head qualification passed on implementation SHA `95b7b4c7f6cfc214ab10c8673a665788b389568b`, workflow run `37093289263`, job `111117991983`.
 2. **RANDOM-AUDIT-2 — repository qualification — COMPLETE.** The complete retained Randomness source/interface/test set is formatter-clean and passed the dedicated verifier, canonical build, all `Randomness*.t.sol` tests and app-scoped static security scan on exact implementation SHA `f40d9b89e9e4c8626a8105c61385041b986853ca`; workflow run `37094231759`, job `111120749696`.
-3. **RANDOM-AUDIT-3 — deterministic Genesis materialization — COMPLETE.** Retained exact compiler/runtime artifact, source blob, stable compiler-derived immutable locations, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`; exact implementation SHA `809cff5ea67fc48c3082f5ce0702b8572b18c663`, workflow run `37098929839`, job `111134459600`.
+3. **RANDOM-AUDIT-3 — deterministic Genesis materialization — COMPLETE.** Retained exact compiler/runtime artifact, source blob, stable compiler-derived immutable locations, runtime hash, storage layout and `RandomnessRegistry-predeploy-state.json` for `0x0428`; exact implementation SHA `809cff5ea67fc48c3082f5ce0702b8572b18c663`, workflow run `37098929839`, job `111134459600`; durable evidence: `docs/audit/RANDOM-AUDIT-3-QUALIFICATION.md`. The subsequent closeout commits are documentation-only and preserve the exact-SHA qualification under the evidence-only exception.
 4. **RANDOM-AUDIT-4 — deployment bundle.** Freeze deployment ordering/arguments for route registry, profile registry and router; define the exact ProtocolRegistry component publication and one-time `bindRouter` transaction.
 5. **RANDOM-AUDIT-5 — production-equivalent testnet qualification.** Deploy exact artifacts, verify code/storage identities, publish Registry entries, bind the router, configure qualified routes/profiles, execute primary/fallback/void smoke tests, and verify indexer lifecycle projection.
 6. **RANDOM-AUDIT-6 — production security/release closeout.** Independent security review, operational route/verifier evidence, monitoring/runbook validation and final Genesis/mainnet evidence.

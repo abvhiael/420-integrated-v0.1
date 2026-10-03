@@ -1,0 +1,72 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.8.DisputeStakeIntegration.v1",
+  "step": "CMP-1.5.8",
+  "title": "Dispute/stake integration",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "7fd48bcdf2ecbc618d110b34d5b081d2f3cca874",
+  "canonical_definition": "Dispute/stake integration",
+  "purpose": "Preserve verifier collateral through dispute finality and atomically hand independently adjudicated objective verifier-error evidence into the existing policy-bound slash authorization path.",
+  "implementation": {
+    "dispute_engine": "contracts/src/compute/ComputeDisputeResolution420.sol",
+    "verifier_collateral": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "stake_evidence": "contracts/src/compute/ComputeVerifierDisputeStakeEvidence420.sol",
+    "stake_integration": "contracts/src/compute/ComputeVerifierDisputeStakeIntegration420.sol",
+    "stake_hold_interface": "contracts/src/interfaces/IComputeVerifierDisputeStakeHold420.sol",
+    "slash_authorizer": "contracts/src/compute/ComputeStakeSlashAuthorization420.sol"
+  },
+  "requirements": [
+    "opening a dispute under bound CMP-1.5.8 wiring freezes the canonical verifierId associated with the original verifier authority",
+    "address-cast verifier identity is not sufficient for CMP-1.5.8 objective stake evidence",
+    "active verifier disputes hold the verifier's collateral from withdrawal without themselves authorizing a slash",
+    "provider-win, withdrawn and timed-out cases release the dispute stake hold without creating slash authorization",
+    "generic adverse disputes do not remain a verifier slash hold merely because the payer won",
+    "a FINAL objective verifier-error disposition preserves the stake hold until a nonzero objective slash authorization is recorded",
+    "objective verifier-dispute evidence binds exact verifierId, verifier authority, immutable stakePolicyId and verification-policy tuple",
+    "nonfinal, timed-out, generic-ground, unresolved-appeal and non-independent-appeal cases fail closed as slash evidence",
+    "the integration hand-off calls the existing ComputeStakeSlashAuthorization420 path before acknowledging/releasing the dispute stake hold",
+    "if slash authorization reverts, the dispute stake hold remains pending atomically",
+    "verifier collateral withdrawal checks the dispute hold independently of the ordinary outstanding-slash hold",
+    "payer escrow, provider entitlement allocation and dispute economic resolution remain owned by the existing settlement layer",
+    "CMP-1.5.8 introduces no arbitrary governance slash, no Trust/reputation slash path and no beneficiary selection"
+  ],
+  "security_boundaries": [
+    "an allegation or active dispute is a withdrawal-preservation hold only, not objective misconduct proof",
+    "only the explicit objective verifier-error ground can remain pending for slash hand-off after FINAL disposition",
+    "stake evidence uses frozen canonical verifierId instead of reconstructing identity from an address after possible rotation",
+    "stake policy is immutable in the evidence adapter instance and rechecked by the frozen slash policy",
+    "slash authorization remains responsible for policy revision, code hash, subject, evidence, chronology, amount and replay checks",
+    "stake hold acknowledgement requires the bound integration controller and a nonzero authorization reference",
+    "failed hand-off leaves collateral held",
+    "existing dispute settlement remains noncustodial with respect to ComputeStake collateral"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "CMP-1.5.8 crosses the qualified dispute lifecycle, verifier identity, verifier collateral, objective slash evidence and slash authorization boundaries.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused dispute/stake evidence, hand-off and withdrawal-hold tests",
+      "CMP-1.5.8 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ],
+    "deferred_level_3": [
+      "canonical full repository Solidity inventory",
+      "Genesis/address-authority phase closeout",
+      "420 Integrated/global closeout",
+      "complete CMP-1.5 phase reconciliation"
+    ]
+  },
+  "deferred": [
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "next_canonical_step": "CMP-1.5.9 — WorkerRegistry stake-source integration"
+}

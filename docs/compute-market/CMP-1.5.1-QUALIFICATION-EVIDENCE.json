@@ -1,0 +1,120 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.1.QualificationEvidence.v1",
+  "step": "CMP-1.5.1",
+  "title": "Worker collateral",
+  "qualification_level": 1,
+  "completion_state": "COMPLETE",
+  "canonical_definition": "Worker collateral",
+  "implementation_sha": "98a8f71b28048e81a3475e421aca06661eb94217",
+  "stacked_base_sha": "9a487ebeb24c28ceebfe2f0d794463939956ad9e",
+  "current_main_sha_at_closeout": "cdd5f58f20a3673bb9a81c6210be2a3019e22380",
+  "current_main_delta_since_reconciliation": "Status-site/Cloudflare-only; no Compute, Vault, Solidity-qualification, roadmap, or shared-authority dependency changes.",
+  "pr": 454,
+  "branch": "cmp-1.5.1-worker-collateral-20261001",
+  "implementation_summary": [
+    "added ComputeStakeWorkerCollateral420 implementing IComputeStakeSource420",
+    "restricted deposits to the canonical current worker operator and rejected retired workers",
+    "custodied native $420 exclusively in the registered VAULT_COLLATERAL AssetVault420",
+    "created one immutable canonical Vault obligation per worker-collateral deposit tranche",
+    "kept worker/policy positions domain-separated and revisioned",
+    "made activeAmount/slashableAmount equal accumulated live collateral at this step without pulling forward exit/slash semantics",
+    "added focused accounting, isolation, authorization, rollback and direct-ETH rejection tests",
+    "added mechanical CMP-1.5.1 verifier and Compute CI wiring"
+  ],
+  "files_changed": [
+    ".github/workflows/compute-market.yml",
+    "contracts/config/compute-market/cmp-1.5.1-worker-collateral.json",
+    "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "contracts/test/ComputeStakeWorkerCollateral420.t.sol",
+    "docs/compute-market/CMP-1.5.1-WORKER-COLLATERAL.md",
+    "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
+    "scripts/verify-cmp-1-5-1-worker-collateral.py"
+  ],
+  "requirements_satisfied": [
+    "worker collateral is canonical 420Vault-backed native $420",
+    "only the canonical worker operator can add collateral",
+    "retired workers cannot add collateral",
+    "every successful deposit has exact Vault balance/accounting/reserved-obligation backing",
+    "top-ups create distinct immutable tranches and advance position revision",
+    "worker/stake-policy positions remain isolated",
+    "missing Vault authority reverts deposit and position mutation atomically",
+    "direct ETH to the stake-source contract is rejected",
+    "source implements IComputeStakeSource420 for existing fail-closed consumers"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 86,
+      "run_id": 36927006502,
+      "conclusion": "success",
+      "details": "331 tests passed, 0 failed, 0 skipped; CMP-1.5.1 verifier PASS"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3730,
+      "run_id": 36927006455,
+      "conclusion": "success",
+      "scope": "compute-fast; full repository shards intentionally skipped by Level 1 classification"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 3939,
+      "run_id": 36927006410,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 532,
+      "run_id": 36927006458,
+      "conclusion": "success",
+      "scope": "address/manifest authority; no duplicate full Foundry inventory"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 367,
+      "run_id": 36927006636,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1347,
+      "run_id": 36927006761,
+      "conclusion": "success"
+    }
+  ],
+  "diagnosed_superseded_failure": {
+    "superseded_sha": "546de980a3becdcb010897cb0a4b7237e7844be0",
+    "run_id": 36925061203,
+    "result": "324 passed, 1 failed",
+    "failure": "ComputeStakeWorkerCollateral420Test.setUp() UnauthorizedOperator()",
+    "classification": "test-harness defect",
+    "root_cause": "vm.prank(OPERATOR) was consumed by resources.CPU_GENERAL() getter before resources.register()",
+    "fix": "read CPU_GENERAL before vm.prank; assertions/protocol semantics unchanged"
+  },
+  "security_adversarial_invariant_result": "PASS — canonical Vault backing, worker/operator authorization, retired-worker rejection, policy-position isolation, tranche isolation, atomic rollback and direct-ETH rejection are covered; later exit/slash/reward behavior remains absent by design.",
+  "milestone_status": "ordinary Level 1 roadmap step; no Level 2 milestone required",
+  "intentionally_deferred": [
+    "CMP-1.5.2 verifier collateral",
+    "CMP-1.5.3 policy-specific minimum collateral",
+    "CMP-1.5.4 exit queue / withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 Level 3 phase closeout"
+  ],
+  "blockers": [],
+  "limitations": [
+    "no verifier collateral yet",
+    "no minimum-collateral policy enforcement yet",
+    "no exit/unstake path yet",
+    "no slash/reward mutation yet",
+    "no live/testnet deployment claim"
+  ],
+  "evidence_only_closeout": true,
+  "next_canonical_step": "CMP-1.5.2 — Verifier collateral"
+}

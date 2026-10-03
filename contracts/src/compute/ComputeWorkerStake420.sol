@@ -16,6 +16,8 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
 
     struct SourceBinding {
         address source;
+        address workerRegistry;
+        bytes32 sourceCodeHash;
         uint32 revision;
         bool active;
         bool exists;
@@ -37,6 +39,7 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
         uint32 stakePolicyRevision;
         uint32 sourceBindingRevision;
         address source;
+        bytes32 sourceCodeHash;
         bytes32 positionId;
         uint64 positionRevision;
         uint256 activeAmount;
@@ -67,7 +70,13 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
     error UnknownReference();
     error SerialExhausted();
 
-    event ComputeStakeSourceBound(uint32 indexed revision, address indexed source, bool active);
+    event ComputeStakeSourceBound(
+        uint32 indexed revision,
+        address indexed source,
+        address indexed workerRegistry,
+        bytes32 sourceCodeHash,
+        bool active
+    );
     event StakePolicyPublished(
         bytes32 indexed stakePolicyId,
         uint32 indexed revision,
@@ -113,8 +122,8 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
         b = _sourceBindings[revision];
     }
 
-    /// @notice Binds a source only if it positively identifies as the CMP-1.5 compute-stake interface.
-    /// @dev The initial unbound state intentionally makes every stake-required admission fail closed.
+    /// @notice Binds only a CMP-1.5 source attached to this exact canonical WorkerRegistry.
+    /// @dev Runtime code hash and registry identity are frozen per binding revision.
     function bindSource(address source, bool active) external onlyGovernance returns (uint32 revision) {
         if (source == address(0) || source.code.length == 0) revert InvalidSource();
 
@@ -124,17 +133,30 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
             revert InvalidSource();
         }
 
+        address sourceWorkers;
+        try IComputeStakeSource420(source).workerRegistry() returns (address workerRegistry_) {
+            sourceWorkers = workerRegistry_;
+        } catch {
+            revert InvalidSource();
+        }
+        if (sourceWorkers != address(workers)) revert InvalidSource();
+
+        bytes32 codeHash = source.codehash;
+        if (codeHash == bytes32(0)) revert InvalidSource();
+
         uint32 previous = latestSourceBindingRevision;
         if (previous == type(uint32).max) revert InvalidSource();
         revision = previous + 1;
         _sourceBindings[revision] = SourceBinding({
             source: source,
+            workerRegistry: sourceWorkers,
+            sourceCodeHash: codeHash,
             revision: revision,
             active: active,
             exists: true
         });
         latestSourceBindingRevision = revision;
-        emit ComputeStakeSourceBound(revision, source, active);
+        emit ComputeStakeSourceBound(revision, source, sourceWorkers, codeHash, active);
     }
 
     function publishPolicy(
@@ -201,6 +223,7 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
         returns (IComputeStakeSource420.PositionRead memory out)
     {
         SourceBinding memory b = currentSourceBinding();
+        if (!_bindingUsable(b)) revert InvalidSource();
         out = IComputeStakeSource420(b.source).readWorkerPosition(workerId, stakePolicyId);
     }
 
@@ -231,7 +254,7 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
         uint32 bindingRevision = latestSourceBindingRevision;
         if (bindingRevision == 0) revert InvalidSource();
         SourceBinding memory b = _sourceBindings[bindingRevision];
-        if (!b.active) revert InvalidSource();
+        if (!_bindingUsable(b)) revert InvalidSource();
 
         IComputeStakeSource420.PositionRead memory position =
             IComputeStakeSource420(b.source).readWorkerPosition(workerId, stakePolicyId);
@@ -251,6 +274,7 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
                 policyRevision,
                 bindingRevision,
                 b.source,
+                b.sourceCodeHash,
                 position.positionId,
                 position.positionRevision,
                 position.activeAmount,
@@ -279,6 +303,7 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
             stakePolicyRevision: policyRevision,
             sourceBindingRevision: bindingRevision,
             source: b.source,
+            sourceCodeHash: b.sourceCodeHash,
             positionId: position.positionId,
             positionRevision: position.positionRevision,
             activeAmount: position.activeAmount,
@@ -319,7 +344,7 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
         uint32 bindingRevision = latestSourceBindingRevision;
         if (bindingRevision == 0) return false;
         SourceBinding memory b = _sourceBindings[bindingRevision];
-        if (!b.active) return false;
+        if (!_bindingUsable(b)) return false;
 
         IComputeStakeSource420.PositionRead memory position;
         try IComputeStakeSource420(b.source).readWorkerPosition(workerId, stakePolicyId)
@@ -343,9 +368,33 @@ contract ComputeWorkerStake420 is SystemAccess, I420System {
                 || r.stakePolicyRevision != policyRevision
                 || r.sourceBindingRevision != bindingRevision
                 || r.source != b.source
+                || r.sourceCodeHash != b.sourceCodeHash
                 || r.positionId != position.positionId
         ) return false;
 
         return true;
     }
+    function _bindingUsable(SourceBinding memory b) private view returns (bool) {
+        if (
+            !b.exists
+                || !b.active
+                || b.source == address(0)
+                || b.workerRegistry != address(workers)
+                || b.source.code.length == 0
+                || b.source.codehash != b.sourceCodeHash
+        ) return false;
+
+        try IComputeStakeSource420(b.source).workerRegistry() returns (address workerRegistry_) {
+            if (workerRegistry_ != address(workers)) return false;
+        } catch {
+            return false;
+        }
+
+        try IComputeStakeSource420(b.source).computeStakeSourceId() returns (bytes32 sourceId) {
+            return sourceId == EXPECTED_SOURCE_ID;
+        } catch {
+            return false;
+        }
+    }
+
 }

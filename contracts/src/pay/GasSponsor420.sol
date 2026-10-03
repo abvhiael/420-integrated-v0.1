@@ -31,42 +31,76 @@ contract GasSponsor420 is GenesisResidentAccess420 {
     Usage public globalUsage;
     mapping(address => uint16) public lifetimeProtocolSuccesses;
     mapping(bytes32 => bool) public operationAllowlist;
+    mapping(address => bool) public authorizedRelayer;
     uint256 public fundedPrincipal;
+    uint256 public totalReimbursed;
+    uint256 private _entered;
 
+    event OperationSet(bytes32 indexed operation, bool allowed);
+    event RelayerSet(address indexed relayer, bool authorized);
     event Sponsored(
+        address indexed wallet, bytes32 indexed merchantId, bytes32 indexed operation, uint256 actualCost, bool success
+    );
+    event SponsoredReimbursed(
+        address indexed relayer,
         address indexed wallet,
         bytes32 indexed merchantId,
-        bytes32 indexed operation,
+        bytes32 operation,
         uint256 actualCost,
         bool success
     );
 
-    constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)
-        GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_)
-    {}
+    error UnauthorizedRelayer();
+    error Reentrancy();
+    error ReimbursementFailed();
 
-    function componentId() public pure override returns (bytes32) { return PayIds420.GAS_SPONSOR; }
+    constructor(
+        address timelock_,
+        address registry_,
+        bytes32 genesisConfigHash_
+    ) GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_) { }
 
-    receive() external payable { fundedPrincipal += msg.value; }
+    modifier nonReentrant() {
+        if (_entered != 0) revert Reentrancy();
+        _entered = 1;
+        _;
+        _entered = 0;
+    }
 
-    function setOperation(bytes32 operation, bool allowed) external {
+    function componentId() public pure override returns (bytes32) {
+        return PayIds420.GAS_SPONSOR;
+    }
+
+    receive() external payable {
+        fundedPrincipal += msg.value;
+    }
+
+    function setOperation(
+        bytes32 operation,
+        bool allowed
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
+        require(operation != bytes32(0), "operation");
         operationAllowlist[operation] = allowed;
+        emit OperationSet(operation, allowed);
     }
 
-    function _roll(Usage storage u) internal {
-        uint64 d = uint64(block.timestamp / 1 days);
-        if (u.dayIndex != d) {
-            u.dayIndex = d;
-            u.spend = 0;
-            u.ops = 0;
-            u.successes = 0;
-            u.failures = 0;
-        }
+    function setRelayer(
+        address relayer,
+        bool authorized
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
+        require(relayer != address(0) && relayer.code.length != 0, "relayer");
+        authorizedRelayer[relayer] = authorized;
+        emit RelayerSet(relayer, authorized);
     }
 
-    function reserveFloor() public view returns (uint256) { return fundedPrincipal * RESERVE_FLOOR_BPS / 10_000; }
+    function reserveFloor() public view returns (uint256) {
+        return fundedPrincipal * RESERVE_FLOOR_BPS / 10_000;
+    }
 
+    /// @notice Governance-only accounting hook retained for migration and administrative reconciliation.
+    /// @dev This function records usage but never transfers sponsor funds.
     function recordSponsored(
         address wallet,
         bytes32 merchantId,
@@ -77,10 +111,40 @@ contract GasSponsor420 is GenesisResidentAccess420 {
         bool protocolFunded
     ) external {
         _requireGenesisGovernance(PayIds420.ACTION_SPONSOR);
+        _recordUsage(wallet, merchantId, operation, gasUsed, actualCost, success, protocolFunded);
+    }
+
+    /// @notice Reimburse the exact relayer that submitted an allowlisted sponsored operation.
+    /// @dev The sponsor never executes the user call and cannot choose an arbitrary reimbursement recipient.
+    function reimburseSponsored(
+        address wallet,
+        bytes32 merchantId,
+        bytes32 operation,
+        uint256 gasUsed,
+        uint256 actualCost,
+        bool success,
+        bool protocolFunded
+    ) external nonReentrant {
+        if (!authorizedRelayer[msg.sender]) revert UnauthorizedRelayer();
+        require(actualCost > 0, "cost");
+        _recordUsage(wallet, merchantId, operation, gasUsed, actualCost, success, protocolFunded);
+        totalReimbursed += actualCost;
+        (bool ok,) = payable(msg.sender).call{ value: actualCost }("");
+        if (!ok) revert ReimbursementFailed();
+        emit SponsoredReimbursed(msg.sender, wallet, merchantId, operation, actualCost, success);
+    }
+
+    function _recordUsage(
+        address wallet,
+        bytes32 merchantId,
+        bytes32 operation,
+        uint256 gasUsed,
+        uint256 actualCost,
+        bool success,
+        bool protocolFunded
+    ) private {
         _requireOperational(
-            PayIds420.ACTION_SPONSOR,
-            ISystemSafety420.ActionClass.NORMAL_ONLY,
-            Types420.Direction.OUTBOUND
+            PayIds420.ACTION_SPONSOR, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND
         );
         require(wallet != address(0) && merchantId != bytes32(0), "identity");
         require(operationAllowlist[operation], "operation");
@@ -120,5 +184,18 @@ contract GasSponsor420 is GenesisResidentAccess420 {
         g.spend += actualCost;
         g.ops += 1;
         emit Sponsored(wallet, merchantId, operation, actualCost, success);
+    }
+
+    function _roll(
+        Usage storage u
+    ) private {
+        uint64 d = uint64(block.timestamp / 1 days);
+        if (u.dayIndex != d) {
+            u.dayIndex = d;
+            u.spend = 0;
+            u.ops = 0;
+            u.successes = 0;
+            u.failures = 0;
+        }
     }
 }

@@ -1,0 +1,74 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.8.QualificationEvidence.v1",
+  "step": "CMP-1.5.8",
+  "title": "Dispute/stake integration",
+  "completion_state": "COMPLETE",
+  "qualification_level": 2,
+  "implementation_sha": "ceecba734b057c031f5e5a6ee8a9c91f84839ab8",
+  "evidence_only_closeout": true,
+  "current_main_observed": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+  "stacked_base_sha": "7fd48bcdf2ecbc618d110b34d5b081d2f3cca874",
+  "pull_request": 477,
+  "branch": "cmp-1.5.8-dispute-stake-integration-20261002",
+  "implementation_summary": [
+    "freeze canonical verifierId at dispute opening when CMP-1.5.8 wiring is bound",
+    "preserve verifier collateral through active disputes and objective-final pending slash disposition",
+    "bind objective verifier-dispute evidence to exact verifierId, authority, stakePolicyId and verification-policy tuple",
+    "atomically authorize slash before releasing dispute stake hold",
+    "block mature verifier collateral withdrawal while dispute stake hold is active"
+  ],
+  "requirements_satisfied": [
+    "canonical verifier identity freeze",
+    "active-dispute stake preservation without slash authority",
+    "non-objective terminal hold release",
+    "objective FINAL hold retention until slash authorization",
+    "canonical verifier/stake-policy evidence binding",
+    "failed slash hand-off atomicity",
+    "successful hand-off no-withdrawal-gap invariant",
+    "verifier withdrawal hold enforcement",
+    "payer escrow and slash-distribution authority separation"
+  ],
+  "level_1": {
+    "status": "PASS",
+    "checks": [
+      "affected Compute contracts build",
+      "focused dispute/stake evidence tests",
+      "focused atomic hand-off tests",
+      "verifier collateral dispute-hold regression",
+      "CMP-1.5.8 mechanical verifier"
+    ]
+  },
+  "level_2": {
+    "status": "PASS",
+    "milestone": "dispute/verifier identity/collateral/slash-authorization integration",
+    "retained_suite": "Compute*.t.sol"
+  },
+  "workflows": [
+    {"name":"Compute Market Qualification","run_number":125,"run_id":36973429348,"job_id":110732060067,"conclusion":"success"},
+    {"name":"Solidity Contracts","run_number":4072,"run_id":36973429352,"job_id":110733119601,"job":"compute-fast","conclusion":"success"},
+    {"name":"420Docs Qualification","run_number":4285,"run_id":36973429375,"job_id":110732060316,"conclusion":"success"},
+    {"name":"420Indexer","run_number":1671,"run_id":36973429334,"job_id":110732060344,"conclusion":"success"},
+    {"name":"420Registry REG-AUDIT-4","run_number":688,"run_id":36973429321,"job_id":110732059928,"conclusion":"success"},
+    {"name":"Genesis Address Authority","run_number":853,"run_id":36973429449,"job_id":110732060796,"conclusion":"success"}
+  ],
+  "security_results": [
+    "generic/nonfinal disputes fail closed as slash evidence",
+    "unresolved/non-independent appeals fail closed",
+    "address-only verifier identity is insufficient",
+    "slash authorizer failure preserves pending stake hold",
+    "mature collateral cannot withdraw while dispute hold is active"
+  ],
+  "intentionally_deferred": [
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 Level 3 phase closeout"
+  ],
+  "limitations": [
+    "no live deployment or ProtocolRegistry publication claim",
+    "Level 3 repository-wide qualification deferred to CMP-1.5.13"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.9 — WorkerRegistry stake-source integration"
+}

@@ -1,0 +1,119 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.6.QualificationEvidence.v1",
+  "step": "CMP-1.5.6",
+  "title": "Slash distribution",
+  "completion_state": "COMPLETE",
+  "implementation_sha": "306cd68139963c11bf346db8e700fa6cf40bac4d",
+  "evidence_only_closeout": true,
+  "current_main_observed": "27ae1873edcca8fb05dec9f4e70af9832b5dafe2",
+  "stacked_base_sha": "a62bffc91350ddae6dacb7a4ae953b9c9b5dd7ed",
+  "pr": 471,
+  "branch": "cmp-1.5.6-slash-distribution-20261001",
+  "qualification": {
+    "level_1": "PASS",
+    "level_2_milestone": "PASS",
+    "level_3": "DEFERRED_TO_CMP-1.5.13"
+  },
+  "implementation_summary": [
+    "added append-only slash-distribution policy keyed to the exact frozen slash-policy commitment",
+    "froze exact distribution-policy revision, commitment and resolved recipient addresses into each new slash authorization",
+    "added reciprocal authorizer/distributor binding and permissionless resumable slash execution",
+    "added deterministic recipient target accounting for harmed payer, replacement worker, challenger and protocol treasury",
+    "added bounded worker/verifier collateral slash batches with partial-tranche cancel-and-rebind of unslashed collateral",
+    "routed slash payouts through canonical AssetVault420 obligations, releases and claims",
+    "added concrete verifier-dispute recipient resolution for harmed payer and challenger",
+    "preserved outstanding slash withdrawal holds until full distribution and consumed authorization exactly once at completion"
+  ],
+  "requirements_satisfied": [
+    "recipient shares are immutable per authorization",
+    "exact dynamic recipients are resolved and frozen before authorization completes",
+    "later distribution-policy or resolver-state changes cannot redirect an existing authorization",
+    "worker and verifier slash execution is bounded and resumable",
+    "partial tranche slashing cannot over-release collateral",
+    "unslashed collateral remainder is canonically re-reserved to the original staker beneficiary",
+    "recipient payouts use canonical Vault create/release/claim accounting",
+    "subject self-payment is rejected",
+    "authorization remains outstanding through interrupted batches",
+    "full completion consumes authorization exactly once",
+    "payer escrow remains untouched"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 119,
+      "run_id": 36965709094,
+      "conclusion": "success",
+      "scope": "Level 1 build/mechanical verifier plus retained Compute*.t.sol Level 2 app suite"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3998,
+      "run_id": 36965709076,
+      "conclusion": "success",
+      "scope": "compute-fast; retained Compute*.t.sol suite; full repository Foundry shards intentionally skipped"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 4211,
+      "run_id": 36965709077,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 797,
+      "run_id": 36965709102,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 632,
+      "run_id": 36965709142,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1615,
+      "run_id": 36965709084,
+      "conclusion": "success"
+    }
+  ],
+  "verifier_checks": [
+    "retained Compute Market Solidity suite PASS",
+    "verification-script compilation PASS",
+    "CMP-1.5.6 slash distribution mechanical verifier PASS"
+  ],
+  "security_adversarial_results": [
+    "distribution-policy governance and malformed-share combinations fail closed",
+    "dynamic recipient classes require a code-hash-frozen resolver",
+    "frozen distribution commitment mismatch fails closed",
+    "resolver-state changes cannot redirect frozen authorization recipients",
+    "slashed subject cannot receive its own distribution",
+    "resumable multi-batch execution preserves the outstanding slash hold",
+    "completed distribution cannot replay",
+    "partial worker collateral slash rebinds the exact remainder and pays exact recipients",
+    "partial verifier collateral slash rebinds the exact remainder and pays exact recipients",
+    "recipient payout totals and Vault accounting remain exact"
+  ],
+  "milestone_status": {
+    "level_2_milestone": true,
+    "rationale": "slash distribution crosses authorization, worker/verifier collateral, recipient policy/resolution and canonical Vault cancel/create/release/claim accounting",
+    "retained_app_suite": "PASS"
+  },
+  "intentionally_deferred": [
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "limitations": [
+    "CMP-1.5.6 distributes only already-authorized objective slashes",
+    "replacement-worker routing still requires a resolver backed by canonical replacement-worker state",
+    "reward accounting and broader dispute/stake orchestration remain later steps",
+    "live deployment/ProtocolRegistry publication is not claimed by this repository qualification"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.7 — Reward accounting"
+}

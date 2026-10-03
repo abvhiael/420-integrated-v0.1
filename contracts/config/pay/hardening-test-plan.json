@@ -1,6 +1,6 @@
 {
   "schema": "420pay-hardening-test-plan-v1",
-  "status": "IMPLEMENTED_SOURCE_PENDING_FOUNDRY_EXECUTION",
+  "status": "IMPLEMENTED_REQUIRES_EXACT_HEAD_EXECUTION",
   "suites": [
     {
       "name": "split_conservation",
@@ -31,6 +31,11 @@
       "name": "atomic_settlement",
       "type": "failure/postcondition",
       "file": "contracts/test/PaymentAtomicSettlement420.t.sol"
+    },
+    {
+      "name": "adapter_router_authority",
+      "type": "authorization/adversarial",
+      "file": "contracts/test/ReplayProtectionConsumer420.t.sol"
     }
   ],
   "required_invariants": [
@@ -40,6 +45,7 @@
     "payer input/gas/slippage/tip/conversion/protocol fee bounds cannot be exceeded",
     "failed atomic settlement leaves payment authorization unconsumed due EVM revert",
     "merchant receives at least exact invoice settlement amount",
-    "GasSponsor wallet/merchant/global/gas/cost/reserve limits fail closed"
+    "GasSponsor wallet/merchant/global/gas/cost/reserve limits fail closed",
+    "CanonicalSettlementAdapter420 rejects every caller except its governance-configured PaymentRouter420"
   ]
 }

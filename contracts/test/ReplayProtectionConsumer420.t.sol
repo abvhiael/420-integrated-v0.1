@@ -9,10 +9,18 @@ import "../src/swap/CanonicalSwapExecutor420.sol";
 import "../src/libraries/AppDependencyIds420.sol";
 import "./helpers/GenesisMocks420.sol";
 
-interface VmReplay420 { function prank(address) external; }
+interface VmReplay420 {
+    function prank(
+        address
+    ) external;
+}
 
 contract ReplayConsumerCaller420 {
-    function consume(ReplayProtectionConsumer420 replay, bytes32 objectId, bytes32 domain) external {
+    function consume(
+        ReplayProtectionConsumer420 replay,
+        bytes32 objectId,
+        bytes32 domain
+    ) external {
         replay.consume(objectId, domain);
     }
 }
@@ -22,7 +30,8 @@ contract ReplayProtectionConsumer420Test {
 
     function testDomainBoundReplayRejectsGriefAndConsumesOnce() public {
         GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
-        ReplayProtectionConsumer420 replay = new ReplayProtectionConsumer420(address(this), address(env.registry()), keccak256("replay"));
+        ReplayProtectionConsumer420 replay =
+            new ReplayProtectionConsumer420(address(this), address(env.registry()), keccak256("replay"));
         env.registerResident(address(replay), replay.componentId());
 
         ReplayConsumerCaller420 allowed = new ReplayConsumerCaller420();
@@ -31,7 +40,8 @@ contract ReplayProtectionConsumer420Test {
         bytes32 objectId = keccak256("object");
         replay.setDomainConsumer(domain, address(allowed));
 
-        (bool griefOk,) = address(attacker).call(abi.encodeWithSelector(attacker.consume.selector, replay, objectId, domain));
+        (bool griefOk,) =
+            address(attacker).call(abi.encodeWithSelector(attacker.consume.selector, replay, objectId, domain));
         require(!griefOk, "unbound consumer griefed replay id");
         require(!replay.isConsumed(objectId), "failed grief consumed object");
 
@@ -40,8 +50,40 @@ contract ReplayProtectionConsumer420Test {
         require(replay.objectDomain(objectId) == domain, "domain not recorded");
         require(replay.nonce(address(allowed), domain) == 1, "consumer nonce not advanced");
 
-        (bool duplicateOk,) = address(allowed).call(abi.encodeWithSelector(allowed.consume.selector, replay, objectId, domain));
+        (bool duplicateOk,) =
+            address(allowed).call(abi.encodeWithSelector(allowed.consume.selector, replay, objectId, domain));
         require(!duplicateOk, "duplicate replay consumption accepted");
+    }
+
+    function testSettlementAdapterRejectsNonRouterCaller() public {
+        GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
+        bytes32 cfg = keccak256("pay-adapter-caller");
+        CanonicalSwapExecutor420 executor = new CanonicalSwapExecutor420(address(this), address(env.registry()), cfg);
+        env.registerResident(address(executor), executor.componentId());
+        CanonicalSettlementAdapter420 adapter =
+            new CanonicalSettlementAdapter420(address(this), address(env.registry()), cfg, address(executor));
+        env.registerResident(address(adapter), adapter.componentId());
+        PaymentRouter420 router = new PaymentRouter420(address(this), address(env.registry()), cfg);
+        env.registerResident(address(router), router.componentId());
+        adapter.setPaymentRouter(address(router));
+        executor.setTrustedCaller(address(adapter), true);
+
+        ICanonicalSettlement420.Quote memory q = ICanonicalSettlement420.Quote({
+            quoteId: keccak256("direct-adapter"),
+            marketId: keccak256("market"),
+            inputAsset: address(0x420),
+            settlementAsset: address(0xCA420),
+            inputAmount: 100,
+            minimumSettlementAmount: 84,
+            quotedSettlementAmount: 84,
+            conversionFee: 0,
+            slippageBps: 0,
+            quotedAt: uint64(block.timestamp)
+        });
+        (bool ok,) = address(adapter)
+            .call(abi.encodeWithSelector(adapter.execute.selector, q, address(0xA11CE), address(0xB0B), 84));
+        require(!ok, "non-router adapter caller accepted");
+        require(!adapter.consumedQuote(q.quoteId), "rejected call consumed quote");
     }
 
     function testGenesisPaySwapWiringInvariant() public {
@@ -51,22 +93,26 @@ contract ReplayProtectionConsumer420Test {
         CanonicalSwapExecutor420 executor = new CanonicalSwapExecutor420(address(this), address(env.registry()), cfg);
         env.registerResident(address(executor), executor.componentId());
 
-        CanonicalSettlementAdapter420 adapter = new CanonicalSettlementAdapter420(address(this), address(env.registry()), cfg, address(executor));
+        CanonicalSettlementAdapter420 adapter =
+            new CanonicalSettlementAdapter420(address(this), address(env.registry()), cfg, address(executor));
         env.registerResident(address(adapter), adapter.componentId());
 
         PaymentRouter420 router = new PaymentRouter420(address(this), address(env.registry()), cfg);
         env.registerResident(address(router), router.componentId());
 
-        ReplayProtectionConsumer420 replay = new ReplayProtectionConsumer420(address(this), address(env.registry()), cfg);
+        ReplayProtectionConsumer420 replay =
+            new ReplayProtectionConsumer420(address(this), address(env.registry()), cfg);
         env.registerResident(address(replay), replay.componentId());
         env.registry().set(AppDependencyIds420.REPLAY_PROTECTION, address(replay));
 
         router.setSettlementAdapter(address(adapter));
+        adapter.setPaymentRouter(address(router));
         executor.setTrustedCaller(address(adapter), true);
         replay.setDomainConsumer(ReplayDomainIds420.PAY_SETTLEMENT, address(router));
 
         require(router.settlementAdapter() == address(adapter), "router adapter wiring");
         require(adapter.swapExecutor() == address(executor), "adapter executor wiring");
+        require(adapter.paymentRouter() == address(router), "adapter router wiring");
         require(executor.trustedCaller(address(adapter)), "executor trust wiring");
         require(replay.domainConsumer(ReplayDomainIds420.PAY_SETTLEMENT) == address(router), "replay consumer wiring");
     }

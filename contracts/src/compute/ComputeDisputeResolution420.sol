@@ -5,6 +5,7 @@ import "./ComputeJobRegistry420.sol";
 import "./ComputeAcceptedPriceMatch420.sol";
 import "./ComputeAuthorization420.sol";
 import "./ComputeVerifierIndependencePolicy420.sol";
+import "./ComputeVerifierRegistry420.sol";
 
 interface IComputeDisputeEntitlement420 {
     function disputes() external view returns (address);
@@ -114,6 +115,8 @@ contract ComputeDisputeResolution420 {
 
     bytes32 private constant DISPUTE_DOMAIN = keccak256("420/CMP/DISPUTE/CASE/V1");
     bytes32 private constant RESOLUTION_DOMAIN = keccak256("420/CMP/DISPUTE/RESOLUTION/V1");
+    bytes32 public constant OBJECTIVE_VERIFIER_ERROR_GROUND =
+        keccak256("420/CMP/DISPUTE/GROUND/VERIFIER_OBJECTIVE_ERROR/V1");
 
     ComputeAcceptedPriceMatch420 public immutable matches;
     ComputeAuthorization420 public immutable authorization;
@@ -122,9 +125,15 @@ contract ComputeDisputeResolution420 {
 
     ComputeJobRegistry420 public jobs;
     IComputeDisputeEntitlement420 public entitlements;
+    ComputeVerifierRegistry420 public verifierRegistry;
+    address public stakeDispositionController;
     uint64 public nextCaseNonce;
     mapping(bytes32 => DisputeCase) private _cases;
     mapping(bytes32 => bytes32) public disputeForJob;
+    mapping(bytes32 => bytes32) public verifierIdForDispute;
+    mapping(address => uint256) public activeVerifierStakeHoldCount;
+    mapping(bytes32 => bool) public stakeDispositionPending;
+    mapping(bytes32 => bytes32) public stakeAuthorizationForDispute;
     bool private entered;
 
     error InvalidDispute();
@@ -133,6 +142,22 @@ contract ComputeDisputeResolution420 {
 
     event EntitlementsBound(address indexed entitlements);
     event JobsBound(address indexed jobs);
+    event VerifierStakeIntegrationBound(
+        address indexed verifierRegistry,
+        address indexed stakeDispositionController
+    );
+    event VerifierStakeHoldOpened(
+        bytes32 indexed disputeId,
+        bytes32 indexed verifierId,
+        address indexed verifier,
+        uint256 activeHoldCount
+    );
+    event VerifierStakeHoldReleased(
+        bytes32 indexed disputeId,
+        address indexed verifier,
+        bytes32 indexed authorizationRef,
+        uint256 activeHoldCount
+    );
     event DisputeOpened(bytes32 indexed disputeId, bytes32 indexed jobId,
         address indexed claimant, address respondent, bytes32 groundsCode,
         bytes32 evidenceCommitment, bytes32 verificationRef, bytes32 resultCommitment,
@@ -175,6 +200,29 @@ contract ComputeDisputeResolution420 {
             || address(matches.jobs()) != jobs_) revert InvalidDispute();
         jobs = candidate;
         emit JobsBound(jobs_);
+    }
+
+    /// @notice One-time CMP-1.5.8 binding for canonical verifier identity and stake disposition.
+    /// @dev Existing dispute semantics remain usable before this optional integration is bound.
+    function bindVerifierStakeIntegration(
+        address verifierRegistry_,
+        address stakeDispositionController_
+    ) external {
+        if (
+            msg.sender != bindingAdmin
+                || address(verifierRegistry) != address(0)
+                || stakeDispositionController != address(0)
+                || verifierRegistry_.code.length == 0
+                || stakeDispositionController_.code.length == 0
+        ) revert Unauthorized();
+
+        verifierRegistry = ComputeVerifierRegistry420(verifierRegistry_);
+        stakeDispositionController = stakeDispositionController_;
+
+        emit VerifierStakeIntegrationBound(
+            verifierRegistry_,
+            stakeDispositionController_
+        );
     }
 
     function openDispute(bytes32 jobId, uint64 expectedRevision,
@@ -240,6 +288,15 @@ contract ComputeDisputeResolution420 {
         uint64 responseDeadline = _deadline(openedAt, p.responseWindow);
         uint64 decisionDeadline = _deadline(responseDeadline, p.decisionWindow);
 
+        bytes32 verifierId;
+        if (address(verifierRegistry) != address(0)) {
+            verifierId = verifierRegistry.verifierIdForAuthority(j.verifier);
+            if (verifierId == bytes32(0)) revert InvalidDispute();
+            ComputeVerifierRegistry420.Verifier memory canonicalVerifier =
+                verifierRegistry.verifier(verifierId);
+            if (canonicalVerifier.authority != j.verifier) revert InvalidDispute();
+        }
+
         _cases[disputeId] = DisputeCase({
             jobId: jobId,
             matchId: j.matchId,
@@ -275,6 +332,16 @@ contract ComputeDisputeResolution420 {
             status: CaseStatus.OPEN
         });
         disputeForJob[jobId] = disputeId;
+        if (verifierId != bytes32(0)) {
+            verifierIdForDispute[disputeId] = verifierId;
+            activeVerifierStakeHoldCount[j.verifier] += 1;
+            emit VerifierStakeHoldOpened(
+                disputeId,
+                verifierId,
+                j.verifier,
+                activeVerifierStakeHoldCount[j.verifier]
+            );
+        }
 
         entitlements.enterDispute(jobId, expectedRevision, disputeId);
         emit DisputeOpened(disputeId, jobId, msg.sender, respondent, groundsCode,
@@ -523,11 +590,71 @@ contract ComputeDisputeResolution420 {
         d.providerWins = providerWins;
         d.resolutionRef = resolutionRef;
         d.status = terminalStatus;
+
+        bool objectiveVerifierStakeCase =
+            verifierIdForDispute[disputeId] != bytes32(0)
+                && terminalStatus == CaseStatus.FINAL
+                && !providerWins
+                && d.groundsCode == OBJECTIVE_VERIFIER_ERROR_GROUND;
+
+        if (objectiveVerifierStakeCase) {
+            stakeDispositionPending[disputeId] = true;
+        } else if (verifierIdForDispute[disputeId] != bytes32(0)) {
+            _releaseVerifierStakeHold(disputeId, d.verifier, bytes32(0));
+        }
+
         entitlements.applyDisputeResolution(
             d.jobId, j.revision, disputeId, resolutionRef, providerWins
         );
         emit DisputeFinalized(disputeId, d.jobId, providerWins, resolutionRef, terminalStatus);
         entered = false;
+    }
+
+    /// @notice True while a bound verifier has an open dispute or a finalized objective
+    ///         verifier-error case awaiting atomic slash authorization.
+    function verifierStakeHold(address verifier) external view returns (bool) {
+        return activeVerifierStakeHoldCount[verifier] != 0;
+    }
+
+    /// @notice Release the finalized objective-dispute stake hold only after a nonzero slash
+    ///         authorization has been recorded by the bound CMP-1.5.8 controller.
+    function acknowledgeStakeDisposition(
+        bytes32 disputeId,
+        bytes32 authorizationRef
+    ) external {
+        if (
+            msg.sender != stakeDispositionController
+                || authorizationRef == bytes32(0)
+                || !stakeDispositionPending[disputeId]
+        ) revert Unauthorized();
+
+        DisputeCase storage d = _case(disputeId);
+        if (
+            d.status != CaseStatus.FINAL
+                || d.providerWins
+                || d.groundsCode != OBJECTIVE_VERIFIER_ERROR_GROUND
+                || verifierIdForDispute[disputeId] == bytes32(0)
+        ) revert InvalidDispute();
+
+        stakeDispositionPending[disputeId] = false;
+        stakeAuthorizationForDispute[disputeId] = authorizationRef;
+        _releaseVerifierStakeHold(disputeId, d.verifier, authorizationRef);
+    }
+
+    function _releaseVerifierStakeHold(
+        bytes32 disputeId,
+        address verifier,
+        bytes32 authorizationRef
+    ) private {
+        uint256 count = activeVerifierStakeHoldCount[verifier];
+        if (count == 0) revert InvalidDispute();
+        activeVerifierStakeHoldCount[verifier] = count - 1;
+        emit VerifierStakeHoldReleased(
+            disputeId,
+            verifier,
+            authorizationRef,
+            count - 1
+        );
     }
 
     function _requireAdjudicator(bytes32 jobId, address candidate) private view {

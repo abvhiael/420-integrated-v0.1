@@ -6,6 +6,7 @@ import "../../interfaces/genesis/Types420.sol";
 import "../../interfaces/genesis/ISystemSafety420.sol";
 import "../../interfaces/ICanonicalSettlement420.sol";
 import "../PayIds420.sol";
+import "../SettlementRouter420.sol";
 
 /// @notice Policy wrapper around the canonical 420Swap executor.
 /// @dev Health and asset eligibility are consumed from the frozen shared interface layer.
@@ -13,15 +14,15 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
     uint64 public constant QUOTE_LIFETIME = 42 seconds;
 
     address public swapExecutor;
+    address public paymentRouter;
+    address public settlementRouter;
     mapping(bytes32 => bool) public consumedQuote;
 
     event SwapExecutorSet(address indexed executor);
+    event PaymentRouterSet(address indexed router);
+    event SettlementRouterSet(address indexed router);
     event SettlementExecuted(
-        bytes32 indexed quoteId,
-        address indexed payer,
-        address indexed recipient,
-        uint256 inputSpent,
-        uint256 delivered
+        bytes32 indexed quoteId, address indexed payer, address indexed recipient, uint256 inputSpent, uint256 delivered
     );
 
     constructor(
@@ -34,16 +35,43 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         swapExecutor = executor_;
     }
 
-    function componentId() public pure override returns (bytes32) { return PayIds420.SETTLEMENT_ADAPTER; }
+    function componentId() public pure override returns (bytes32) {
+        return PayIds420.SETTLEMENT_ADAPTER;
+    }
 
-    function setSwapExecutor(address executor_) external {
+    function setSwapExecutor(
+        address executor_
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
         require(executor_ != address(0) && executor_.code.length != 0, "executor");
         swapExecutor = executor_;
         emit SwapExecutorSet(executor_);
     }
 
-    function quote(bytes32, address, address, uint256) external pure returns (Quote memory) {
+    function setPaymentRouter(
+        address router_
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
+        require(router_ != address(0) && router_.code.length != 0, "router");
+        paymentRouter = router_;
+        emit PaymentRouterSet(router_);
+    }
+
+    function setSettlementRouter(
+        address router_
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_CONFIGURE);
+        require(router_ != address(0) && router_.code.length != 0, "settlement router");
+        settlementRouter = router_;
+        emit SettlementRouterSet(router_);
+    }
+
+    function quote(
+        bytes32,
+        address,
+        address,
+        uint256
+    ) external pure returns (Quote memory) {
         revert("quote produced by canonical quote engine");
     }
 
@@ -53,13 +81,47 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         address recipient,
         uint256 exactSettlementAmount
     ) external payable returns (uint256 inputSpent, uint256 settlementDelivered) {
+        _validateExecution(q, payer, exactSettlementAmount);
+        require(recipient != address(0), "recipient");
+        consumedQuote[q.quoteId] = true;
+
+        (inputSpent, settlementDelivered) = _executeSwap(q, payer, recipient, exactSettlementAmount);
+        emit SettlementExecuted(q.quoteId, payer, recipient, inputSpent, settlementDelivered);
+    }
+
+    function executeSplit(
+        Quote calldata q,
+        address payer,
+        bytes32 paymentId,
+        uint256 exactSettlementAmount,
+        address[] calldata recipients,
+        uint16[] calldata bps,
+        uint8 primaryIndex
+    ) external payable returns (uint256 inputSpent, uint256 settlementDelivered) {
+        _validateExecution(q, payer, exactSettlementAmount);
+        require(settlementRouter != address(0) && settlementRouter.code.length != 0, "settlement router");
+        require(paymentId != bytes32(0), "payment id");
+        consumedQuote[q.quoteId] = true;
+
+        uint256 residualBefore = IERC20PaySplit420(q.settlementAsset).balanceOf(settlementRouter);
+        (inputSpent, settlementDelivered) = _executeSwap(q, payer, settlementRouter, exactSettlementAmount);
+        SettlementRouter420(settlementRouter)
+            .executeHeldTokenSplit(
+                paymentId, q.settlementAsset, settlementDelivered, residualBefore, recipients, bps, primaryIndex
+            );
+        emit SettlementExecuted(q.quoteId, payer, settlementRouter, inputSpent, settlementDelivered);
+    }
+
+    function _validateExecution(
+        Quote calldata q,
+        address payer,
+        uint256 exactSettlementAmount
+    ) private view {
         _requireOperational(
-            PayIds420.ACTION_SETTLE,
-            ISystemSafety420.ActionClass.NORMAL_ONLY,
-            Types420.Direction.OUTBOUND
+            PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND
         );
-        require(msg.sender.code.length != 0, "router caller");
-        require(payer != address(0) && recipient != address(0), "party");
+        require(paymentRouter != address(0) && msg.sender == paymentRouter, "payment router");
+        require(payer != address(0), "payer");
         require(exactSettlementAmount > 0, "amount");
         require(!consumedQuote[q.quoteId], "quote replay");
         require(q.quoteId != bytes32(0), "quote id");
@@ -68,8 +130,14 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         _requireHealthyMarket(q.marketId);
         require(q.quotedSettlementAmount >= exactSettlementAmount, "under settlement");
         require(q.minimumSettlementAmount >= exactSettlementAmount, "minimum below invoice");
+    }
 
-        consumedQuote[q.quoteId] = true;
+    function _executeSwap(
+        Quote calldata q,
+        address payer,
+        address recipient,
+        uint256 exactSettlementAmount
+    ) private returns (uint256 inputSpent, uint256 settlementDelivered) {
         (bool ok, bytes memory data) = swapExecutor.call{ value: msg.value }(
             abi.encodeWithSignature(
                 "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)",
@@ -87,6 +155,5 @@ contract CanonicalSettlementAdapter420 is GenesisResidentAccess420, ICanonicalSe
         (inputSpent, settlementDelivered) = abi.decode(data, (uint256, uint256));
         require(inputSpent <= q.inputAmount, "input overspend");
         require(settlementDelivered >= exactSettlementAmount, "merchant underpaid");
-        emit SettlementExecuted(q.quoteId, payer, recipient, inputSpent, settlementDelivered);
     }
 }

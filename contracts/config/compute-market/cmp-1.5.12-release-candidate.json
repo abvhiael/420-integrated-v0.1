@@ -1,0 +1,311 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.12.ReleaseCandidate.v1",
+  "step": "CMP-1.5.12",
+  "title": "Release candidate",
+  "canonical_definition": "Release candidate",
+  "status": "REPOSITORY_READY_LIVE_BLOCKED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "base_head": "239198af9cf0ea24ab65c32bbc854dc0f8e04ead",
+  "network": {
+    "chain_id": null,
+    "network_name": null,
+    "rpc_evidence_block": null,
+    "rpc_evidence_block_hash": null
+  },
+  "governance": {
+    "timelock": null,
+    "publication_transaction": null
+  },
+  "protocol_registry": {
+    "address": "0x0000000000000000000000000000000000000434",
+    "publication_api": "publishRegisteredService",
+    "publication_complete": false,
+    "extension_service_ids_require_governance_approval": true,
+    "required_registration_fields": [
+      "implementation",
+      "runtime_code_hash",
+      "metadata_hash",
+      "version",
+      "active",
+      "component_type",
+      "manifest_hash",
+      "dependency_root",
+      "interface_hash"
+    ],
+    "service_entries": []
+  },
+  "release_candidate": {
+    "wiring_contract": "contracts/src/compute/ComputeStakeReleaseCandidateWiring420.sol",
+    "graph_hash": null,
+    "components": [
+      {
+        "role": "ComputeWorkerRegistry420",
+        "source": "contracts/src/compute/ComputeWorkerRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierRegistry420",
+        "source": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeDisputeResolution420",
+        "source": "contracts/src/compute/ComputeDisputeResolution420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifiedEntitlement420",
+        "source": "contracts/src/compute/ComputeVerifiedEntitlement420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "PayerEscrowAssetVault420",
+        "source": "contracts/src/vault/AssetVault420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "WorkerCollateralAssetVault420",
+        "source": "contracts/src/vault/AssetVault420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "VerifierCollateralAssetVault420",
+        "source": "contracts/src/vault/AssetVault420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "RewardAssetVault420",
+        "source": "contracts/src/vault/AssetVault420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeExitPolicy420",
+        "source": "contracts/src/compute/ComputeStakeExitPolicy420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeSlashPolicy420",
+        "source": "contracts/src/compute/ComputeStakeSlashPolicy420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeWorkerCollateral420",
+        "source": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeVerifierCollateral420",
+        "source": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeSlashAuthorization420",
+        "source": "contracts/src/compute/ComputeStakeSlashAuthorization420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeSlashDistributionPolicy420",
+        "source": "contracts/src/compute/ComputeStakeSlashDistributionPolicy420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeSlashDistribution420",
+        "source": "contracts/src/compute/ComputeStakeSlashDistribution420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeRewardPolicy420",
+        "source": "contracts/src/compute/ComputeStakeRewardPolicy420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeRewardAccounting420",
+        "source": "contracts/src/compute/ComputeStakeRewardAccounting420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierDisputeStakeEvidence420",
+        "source": "contracts/src/compute/ComputeVerifierDisputeStakeEvidence420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierDisputeStakeIntegration420",
+        "source": "contracts/src/compute/ComputeVerifierDisputeStakeIntegration420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeWorkerStake420",
+        "source": "contracts/src/compute/ComputeWorkerStake420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeVerifierDisputeSlashRecipientResolver420",
+        "source": "contracts/src/compute/ComputeVerifierDisputeSlashRecipientResolver420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      },
+      {
+        "role": "ComputeStakeReleaseCandidateWiring420",
+        "source": "contracts/src/compute/ComputeStakeReleaseCandidateWiring420.sol",
+        "address": null,
+        "deployment_tx": null,
+        "deployment_block": null,
+        "runtime_code_hash": null
+      }
+    ]
+  },
+  "bindings": {
+    "worker_collateral_exit_policy": null,
+    "worker_collateral_slash_policy": null,
+    "worker_collateral_slash_authorization": null,
+    "worker_collateral_worker_registry": null,
+    "verifier_collateral_exit_policy": null,
+    "verifier_collateral_slash_policy": null,
+    "verifier_collateral_slash_authorization": null,
+    "verifier_collateral_dispute_hold": null,
+    "slash_authorization_policy": null,
+    "slash_authorization_worker_collateral": null,
+    "slash_authorization_verifier_collateral": null,
+    "slash_authorization_distribution_policy": null,
+    "slash_authorization_distribution_executor": null,
+    "distribution_authorizer": null,
+    "distribution_policy": null,
+    "reward_accounting_policy": null,
+    "reward_accounting_worker_collateral": null,
+    "reward_accounting_verifier_collateral": null,
+    "dispute_evidence_engine": null,
+    "dispute_integration_engine": null,
+    "dispute_integration_slash_authorizer": null,
+    "worker_stake_registry": null,
+    "worker_stake_source": null,
+    "slash_recipient_dispute_engine": null,
+    "slash_recipient_evidence_adapter": null,
+    "slash_recipient_entitlements": null,
+    "worker_collateral_vault": null,
+    "verifier_collateral_verifier_registry": null,
+    "verifier_collateral_vault": null,
+    "reward_accounting_reward_vault": null,
+    "canonical_entitlements_vault": null
+  },
+  "dependency_reconciliation": {
+    "cmp_1_5_repository_complete_through_1_5_11": true,
+    "canonical_compute_collateral_required": true,
+    "validator_stake_is_not_compute_collateral": true,
+    "wallet_balance_is_not_compute_collateral": true,
+    "payer_escrow_is_not_compute_collateral": true,
+    "reward_backing_is_separate_from_collateral": true,
+    "public_testnet_available": false,
+    "live_compute_stake_deployment_qualified": false,
+    "protocol_registry_publication_complete": false,
+    "no_fixed_genesis_predeploy_allocated": true,
+    "discovery_path": "ProtocolRegistry"
+  },
+  "release_gates": {
+    "cmp_1_5_0_architecture": true,
+    "cmp_1_5_1_worker_collateral": true,
+    "cmp_1_5_2_verifier_collateral": true,
+    "cmp_1_5_3_policy_minimums": true,
+    "cmp_1_5_4_exit_queue": true,
+    "cmp_1_5_5_objective_slash_authorization": true,
+    "cmp_1_5_6_slash_distribution": true,
+    "cmp_1_5_7_reward_accounting": true,
+    "cmp_1_5_8_dispute_stake_integration": true,
+    "cmp_1_5_9_worker_registry_stake_source": true,
+    "cmp_1_5_10_compute_escrow_slash_redistribution": true,
+    "cmp_1_5_11_hostile_economic_qualification": true,
+    "public_testnet_live": false,
+    "live_deployment": false,
+    "protocol_registry_publication": false
+  },
+  "milestone_relationship": {
+    "preceding_level_2_step": "CMP-1.5.11",
+    "level_2_required_now": false,
+    "rationale": "CMP-1.5.11 immediately preceding this release-candidate step already qualified the accumulated hostile economic integration milestone. CMP-1.5.12 adds release wiring/evidence only; the retained Compute suite remains directly applicable Level 1 release-candidate CI."
+  },
+  "limitations": [
+    "Repository readiness does not imply live deployment or ProtocolRegistry publication.",
+    "No live network addresses, deployment transactions, blocks, runtime code hashes, graph hash or binding addresses are fabricated.",
+    "Public-testnet availability and live ComputeStake deployment remain external/live blockers.",
+    "Level 3 comprehensive phase closeout remains CMP-1.5.13.",
+    "Repository release wiring pins separate reward backing from collateral Vault backing.",
+    "Payer escrow Vault is explicitly separated from all ComputeStake collateral and reward backing."
+  ],
+  "exit_criteria": [
+    "Release-candidate wiring checker pins exact runtime code hashes and canonical bindings across the accumulated ComputeStake graph.",
+    "Critical upstream WorkerRegistry, VerifierRegistry, dispute, entitlement and Vault runtimes are pinned.",
+    "Payer escrow Vault is runtime-pinned and cannot alias worker collateral, verifier collateral, or reward backing.",
+    "Reward Vault is runtime-pinned and must not alias either collateral Vault.",
+    "Hostile release-wiring tests reject runtime-hash drift and cross-component binding drift.",
+    "Release manifest inventories the accumulated CMP-1.5 graph and ProtocolRegistry publication requirements.",
+    "Repository mode contains no fabricated live evidence.",
+    "All CMP-1.5.0 through CMP-1.5.11 repository gates are true.",
+    "Repository-ready verifier passes on the exact implementation SHA.",
+    "Live verifier remains fail-closed while public-testnet/deployment/publication evidence is absent.",
+    "Directly applicable exact-head CI passes.",
+    "Level 3 remains deferred to CMP-1.5.13."
+  ],
+  "next_canonical_step": "CMP-1.5.13 — Phase closeout"
+}

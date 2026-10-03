@@ -42,6 +42,8 @@ Application-created ERC20/ERC721/ERC1155 assets are separate assets. Before anot
 
 An invoice commits merchant identity/address, metadata hash, currency, amount, expiry/refund window, accepted-assets hash, settlement-plan hash, tip policy, slippage bound and mode. The signing root is domain separated under `420/APP/420PAY_INVOICE`.
 
+Decision #4 permits invoices to be composed and signed while offline, but separately requires online acceptance. The signing root is therefore an offline presentation/integrity commitment, not an alternate state-mutation authority: canonical invoice state is created only by the bound merchant submitting the invoice online through `createInvoice`. A relayer or third party cannot manufacture canonical invoice acceptance merely by possessing the offline root or a presentation signature. Introducing delegated or signature-based canonical acceptance would require a new frozen authorization/version decision rather than silently broadening the merchant authority boundary.
+
 Current constraints include:
 
 - supported invoice currencies `CAD`, `USD` and `420`;
@@ -58,7 +60,7 @@ Optional invoice metadata must agree with the shared metadata commitment when on
 
 `PaymentRegistry420` derives a payment ID from the invoice, payer, merchant, input asset/amount, settlement asset/amount, quote ID and payer nonce under `420/APP/420PAY_PAYMENT_ID`.
 
-The lifecycle distinguishes `SUBMITTED`, `INCLUDED`, `CERTIFIED`, `FINALIZED`, `SETTLED`, refund states and failure. Finalization does not merely mean a frontend saw a transaction; the canonical registry only accepts the allowed predecessor states and verifies invoice/settlement fields before marking the payment finalized.
+The lifecycle distinguishes `SUBMITTED`, `INCLUDED`, `CERTIFIED`, `FINALIZED`, `SETTLED`, refund states and failure. Canonical lifecycle mutations are Genesis-governed. `INCLUDED` requires `SUBMITTED`; `CERTIFIED` requires `INCLUDED`; finalization accepts the retained canonical predecessors `SUBMITTED`, `INCLUDED` or `CERTIFIED` while verifying invoice/settlement fields; `SETTLED` requires `FINALIZED`; and `FAILED` is permitted only before finalization from `SUBMITTED`, `INCLUDED` or `CERTIFIED`. Refund states remain reachable only from finalized/settled/refundable state. Terminal failure and completed refund states cannot be resurrected through lifecycle mutation.
 
 Settlement assets must be canonical under the shared asset interface. Duplicate payment IDs are rejected.
 
@@ -87,7 +89,17 @@ Replay authorization is consumed before external settlement execution. Post-exec
 
 `SettlementRouter420` supports at most eight recipients. Basis-point shares must total exactly 10,000. Integer rounding remainder is assigned deterministically to the declared primary recipient so the split always reconciles to the source amount.
 
-Refund accounting is bounded to the original payment entitlement. `PaymentRegistry420` and `RefundManager420` prevent cumulative refunds from exceeding the refundable payment amount, while preserving partial-versus-complete refund state.
+Split distribution is a bounded settlement primitive, not a new custody authority. `PaymentRouter420` remains the payer authorization and shared replay boundary. Direct token and native splits require the payer itself to submit the settlement. Swap-backed splits use the existing `PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420` path, deliver the settlement asset to `SettlementRouter420`, and distribute it in the same atomic transaction. ERC-20 balance deltas are checked on ingress and at every recipient; fee-on-transfer, false-return, under-delivery, replay, or residual-value mismatches revert. Successful split settlement leaves no new value resident in the split router.
+
+Refund accounting is bounded to the original payment entitlement. `PaymentRegistry420` is the canonical refund-authorization ledger. `RefundManager420` is bound to the exact payment registry and records refund evidence only when the payer/recipient, settlement asset, refundable maximum, and cumulative authorized refund agree with canonical payment state. It does not gain arbitrary custody or asset-release authority.
+
+### Gas sponsorship
+
+`GasSponsor420` never executes a wallet/user transaction. It applies the frozen operation allowlist, per-wallet/per-merchant/global limits, onboarding limits, per-operation cost/gas ceilings, and reserve floor. Because the repository does not define a canonical ERC-4337/paymaster runtime for 420Pay, V1 reimbursement is bound to explicitly governance-authorized relayer contracts. The relayer that submits the accounting call is the only reimbursement recipient; the sponsor cannot direct funds to an arbitrary third party. Reimbursement and usage accounting are atomic and revert together on failure.
+
+### Accounting exports
+
+The Genesis accounting export remains a derived/off-chain surface. `contracts/config/pay/accounting-export-schema.json` freezes the exact field order required by `420pay-parameters.json`, and the Indexer exposes a canonical DTO plus replaceable exporter sink. Export records reconcile refund totals against settlement amount plus tip and validate canonical bytes32 commitments. Export sinks do not receive protocol mutation authority, and sensitive purchase details are not added to on-chain state.
 
 ## 420 Token
 

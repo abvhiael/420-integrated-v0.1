@@ -1,0 +1,73 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.6.SlashDistribution.v1",
+  "step": "CMP-1.5.6",
+  "title": "Slash distribution",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "a62bffc91350ddae6dacb7a4ae953b9c9b5dd7ed",
+  "canonical_definition": "Policy-bound distribution to harmed payer, replacement worker, challenger and/or protocol treasury.",
+  "implementation": {
+    "distribution_policy": "contracts/src/compute/ComputeStakeSlashDistributionPolicy420.sol",
+    "distribution_executor": "contracts/src/compute/ComputeStakeSlashDistribution420.sol",
+    "authorization": "contracts/src/compute/ComputeStakeSlashAuthorization420.sol",
+    "worker_collateral": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "verifier_collateral": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "verifier_dispute_recipient_resolver": "contracts/src/compute/ComputeVerifierDisputeSlashRecipientResolver420.sol",
+    "recipient_resolver_interface": "contracts/src/interfaces/IComputeSlashRecipientResolver420.sol",
+    "distribution_source_interface": "contracts/src/interfaces/IComputeSlashDistributionSource420.sol"
+  },
+  "requirements": [
+    "slash distribution policy is append-only and keyed to the exact frozen slash-policy commitment",
+    "recipient shares total exactly 10000 basis points",
+    "dynamic recipient classes require a code-hash-frozen resolver",
+    "protocol treasury routing is explicit and cannot be inferred",
+    "each slash authorization freezes exact distribution-policy revision and commitment before authorization succeeds",
+    "each slash authorization resolves and freezes the exact dynamic recipient addresses before authorization succeeds",
+    "distribution executor is reciprocally bound to the exact authorizer and distribution-policy contract",
+    "distribution is permissionless to relay but cannot alter frozen recipients/shares",
+    "worker and verifier slash execution is bounded by maxTranches and supports resumable multi-batch completion",
+    "partial tranche slashing cancels the original collateral obligation and rebinds the unslashed remainder to the immutable staker beneficiary",
+    "slashed value is paid through canonical Vault obligations, releases and claims rather than a parallel treasury",
+    "unprocessed/unreserved collateral remains canonically reserved for the staker",
+    "recipient-obligation operation identities are domain-separated by authorization, position and position revision",
+    "the slashed subject cannot receive its own slash distribution",
+    "authorization remains outstanding until the full authorized amount is distributed",
+    "final distribution consumes the authorization exactly once and clears only that authorization's outstanding amount",
+    "concrete verifier-dispute resolution can objectively resolve harmed payer and challenger",
+    "replacement-worker routing requires a resolver that can prove a canonical replacement worker; it is not invented by this step",
+    "payer escrow is not debited, mutated or treated as slash collateral"
+  ],
+  "security_boundaries": [
+    "CMP-1.5.6 cannot create slash authorization; it consumes only CMP-1.5.5 authorization",
+    "CMP-1.5.6 does not create reward accounting",
+    "CMP-1.5.6 does not mutate ComputeEscrow payer obligations",
+    "CMP-1.5.6 does not infer replacement workers",
+    "distribution policy changes after authorization cannot redirect an existing authorization",
+    "partial-batch interruption leaves outstanding authorization and blocks withdrawal until completion"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "slash distribution crosses authorization, worker/verifier collateral, recipient policy/resolution and canonical Vault cancel/create/release/claim accounting.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "deferred": [
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash-redistribution integration",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused slash-distribution policy/executor/collateral-accounting tests",
+      "CMP-1.5.6 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.7 — Reward accounting"
+}

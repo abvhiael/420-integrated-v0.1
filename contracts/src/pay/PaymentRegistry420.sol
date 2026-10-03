@@ -9,7 +9,17 @@ import "./PayIds420.sol";
 contract PaymentRegistry420 is GenesisResidentAccess420 {
     bytes32 public constant PAYMENT_DOMAIN = keccak256("420/APP/420PAY_PAYMENT_ID");
 
-    enum Status { NONE, SUBMITTED, INCLUDED, CERTIFIED, FINALIZED, SETTLED, REFUNDED, PARTIALLY_REFUNDED, FAILED }
+    enum Status {
+        NONE,
+        SUBMITTED,
+        INCLUDED,
+        CERTIFIED,
+        FINALIZED,
+        SETTLED,
+        REFUNDED,
+        PARTIALLY_REFUNDED,
+        FAILED
+    }
 
     struct Payment {
         bytes32 invoiceId;
@@ -30,11 +40,15 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
     mapping(bytes32 => Payment) public payments;
     event PaymentSet(bytes32 indexed paymentId, bytes32 indexed invoiceId, Status status);
 
-    constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)
-        GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_)
-    {}
+    constructor(
+        address timelock_,
+        address registry_,
+        bytes32 genesisConfigHash_
+    ) GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_) { }
 
-    function componentId() public pure override returns (bytes32) { return PayIds420.PAYMENT_REGISTRY; }
+    function componentId() public pure override returns (bytes32) {
+        return PayIds420.PAYMENT_REGISTRY;
+    }
 
     function derivePaymentId(
         bytes32 invoiceId,
@@ -63,6 +77,32 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         );
     }
 
+    function recordIncluded(
+        bytes32 paymentId
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(p.status == Status.SUBMITTED, "invalid inclusion state");
+        p.status = Status.INCLUDED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
+    function recordCertified(
+        bytes32 paymentId
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(p.status == Status.INCLUDED, "invalid certification state");
+        p.status = Status.CERTIFIED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
     function recordFinalized(
         bytes32 paymentId,
         bytes32 invoiceId,
@@ -73,9 +113,7 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
     ) external {
         _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
         _requireOperational(
-            PayIds420.ACTION_MARK_PAID,
-            ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
-            Types420.Direction.NONE
+            PayIds420.ACTION_MARK_PAID, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
         );
         Payment storage p = payments[paymentId];
         require(
@@ -106,23 +144,13 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         require(payer != address(0), "payer");
         if (msg.sender != payer) _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
         _requireOperational(
-            PayIds420.ACTION_SETTLE,
-            ISystemSafety420.ActionClass.NORMAL_ONLY,
-            Types420.Direction.INBOUND
+            PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.INBOUND
         );
         require(invoiceId != bytes32(0) && merchant != address(0), "party");
         require(inputAmount > 0 && settlementAmount > 0, "amount");
         _canonicalSettlementAsset(settlementAsset);
         paymentId = derivePaymentId(
-            invoiceId,
-            payer,
-            merchant,
-            inputAsset,
-            inputAmount,
-            settlementAsset,
-            settlementAmount,
-            quoteId,
-            payerNonce
+            invoiceId, payer, merchant, inputAsset, inputAmount, settlementAsset, settlementAmount, quoteId, payerNonce
         );
         require(payments[paymentId].status == Status.NONE, "duplicate");
         payments[paymentId] = Payment(
@@ -143,12 +171,65 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         emit PaymentSet(paymentId, invoiceId, Status.SUBMITTED);
     }
 
-    function applyRefund(bytes32 paymentId, uint256 amount, bool complete) external {
+    function recordSettled(
+        bytes32 paymentId
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_SETTLE);
+        _requireOperational(
+            PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(p.status == Status.FINALIZED, "invalid settlement state");
+        p.status = Status.SETTLED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
+    function recordFailed(
+        bytes32 paymentId
+    ) external {
+        _requireGenesisGovernance(PayIds420.ACTION_MARK_PAID);
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
+        );
+        Payment storage p = payments[paymentId];
+        require(
+            p.status == Status.SUBMITTED || p.status == Status.INCLUDED || p.status == Status.CERTIFIED,
+            "invalid failure state"
+        );
+        p.status = Status.FAILED;
+        emit PaymentSet(paymentId, p.invoiceId, p.status);
+    }
+
+    function refundAccounting(
+        bytes32 paymentId
+    )
+        external
+        view
+        returns (
+            address payer,
+            address settlementAsset,
+            uint256 refundableMaximum,
+            uint256 authorizedRefunded,
+            Status status
+        )
+    {
+        Payment storage p = payments[paymentId];
+        require(p.status != Status.NONE, "unknown payment");
+        payer = p.payer;
+        settlementAsset = p.settlementAsset;
+        refundableMaximum = p.settlementAmount + p.tipAmount;
+        authorizedRefunded = p.refundedAmount;
+        status = p.status;
+    }
+
+    function applyRefund(
+        bytes32 paymentId,
+        uint256 amount,
+        bool complete
+    ) external {
         _requireGenesisGovernance(PayIds420.ACTION_REFUND);
         _requireOperational(
-            PayIds420.ACTION_REFUND,
-            ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
-            Types420.Direction.NONE
+            PayIds420.ACTION_REFUND, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
         );
         Payment storage p = payments[paymentId];
         require(

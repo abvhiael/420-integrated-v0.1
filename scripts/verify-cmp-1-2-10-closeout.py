@@ -49,15 +49,15 @@ req=e.get("original_compute_escrow_requirements",{})
 for k in ("deposit","reserve","release","refund","partial_release","timeout_refund","dispute_freeze"):
     if req.get(k)!="QUALIFIED_REPOSITORY_SCOPE":
         errors.append("repository requirement not qualified: "+k)
-if req.get("slash_redistribution")!="FAIL_CLOSED_PENDING_CMP_1_5_STAKE":
-    errors.append("slash redistribution must remain fail-closed pending CMP-1.5")
+if req.get("slash_redistribution")!="QUALIFIED_VIA_CMP_1_5_10_COLLATERAL_REDISTRIBUTION":
+    errors.append("slash redistribution must be qualified through CMP-1.5.10 collateral redistribution")
 
 public_live=bool(p.get("step5",{}).get("substep_5_4",{}).get("public_testnet_live",False))
 if public_live:
     errors.append("closeout manifest is stale: public testnet is now live; rerun CMP-1.2.9 live gate first")
 
 blockers={b.get("id") for b in e.get("release_blockers",[])}
-if blockers!={"CMP-1.2.9-LIVE","CMP-1.5-STAKE-SLASH"}:
+if blockers!={"CMP-1.2.9-LIVE"}:
     errors.append("unexpected release blocker set")
 
 repository_closeout_ok=not errors

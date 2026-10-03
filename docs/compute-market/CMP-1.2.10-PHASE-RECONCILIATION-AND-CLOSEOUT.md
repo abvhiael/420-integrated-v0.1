@@ -1,6 +1,6 @@
 # CMP-1.2.10 — Phase reconciliation and release closeout
 
-Status: **COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE; CMP-1.2 LIVE/PRODUCTION RELEASE REMAINS BLOCKED BY LIVE DEPLOYMENT AND CMP-1.5 STAKE-SLASH PREREQUISITES.**
+Status: **COMPLETE WITHIN REPOSITORY QUALIFICATION SCOPE; CMP-1.2 LIVE/PRODUCTION RELEASE REMAINS BLOCKED BY LIVE DEPLOYMENT. CMP-1.5.10 closes the repository-level stake/slash prerequisite.**
 
 This step is the final reconciliation gate for the original CMP-1.2 ComputeEscrow deliverable. It reconciles the implementation history, current `main`, the original roadmap requirements, repository qualification evidence and the remaining operational/cross-phase gates. It does not convert an unavailable live network or an unimplemented stake-slashing source into synthetic evidence.
 
@@ -52,9 +52,9 @@ Repository-level disposition:
 - **partial release** — qualified through provider earning plus independent payer residual obligation/refund;
 - **timeout refund** — qualified through bounded terminal expiry/failure/refund paths in the fixed-price single-assignment model;
 - **dispute freeze** — qualified through held provider liability, bounded independent adjudication and fail-closed resolution;
-- **slash redistribution** — **not implemented as payer-escrow redistribution and intentionally remains fail-closed**. The 1.2.0 frozen design requires any slash redistribution to originate only from separately backed and objectively forfeited CMP-1.5 stake/collateral. CMP-1.5 stake, slash adjudication and recipient-split qualification must close before this requirement can become operational. Payer deposits must never substitute for stake.
+- **slash redistribution** — **qualified at repository scope through CMP-1.5.10 as separately backed collateral redistribution, never payer-escrow redistribution**. The canonical harmed payer is resolved from the exact frozen ComputeEscrow entitlement/dispute state, while actual redistributed value originates only from objectively forfeited CMP-1.5 collateral. Resolver reads are code-hash-bound and do not mutate payer Vault accounting. Payer deposits never substitute for stake.
 
-This is an explicit cross-phase dependency, not an omitted escrow test.
+This was an explicit cross-phase dependency. CMP-1.5.10 supplies the missing repository integration evidence without changing the original payer-escrow conservation model.
 
 ## Live deployment blocker
 
@@ -90,7 +90,8 @@ The closeout authority is:
 The verifier is designed to pass only when the repository closeout is internally consistent and the unresolved blocker set remains exactly:
 
 1. `CMP-1.2.9-LIVE`
-2. `CMP-1.5-STAKE-SLASH`
+
+The prior `CMP-1.5-STAKE-SLASH` repository blocker is resolved by CMP-1.5.10; this does not create live deployment evidence.
 
 If the public testnet becomes live, the verifier deliberately fails until CMP-1.2.9 is rerun and its evidence is updated.
 
@@ -102,7 +103,7 @@ If the public testnet becomes live, the verifier deliberately fails until CMP-1.
 
 **CMP-1.2 live/production release: BLOCKED.**
 
-Do not claim production readiness, live Registry publication, live funded settlement, operational stake slashing or full release until both the CMP-1.2.9 live gate and the CMP-1.5 stake/slash prerequisite are satisfied.
+Do not claim production readiness, live Registry publication, live funded settlement, or live operational stake slashing until the CMP-1.2.9 live gate and the later Compute testnet deployment evidence are satisfied.
 
 ## Exact-head CI evidence
 

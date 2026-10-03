@@ -4,13 +4,19 @@
   "payment_router": {
     "contract": "PaymentRouter420.sol",
     "settlement_adapter": "CanonicalSettlementAdapter420.sol",
-    "binding": "PaymentRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)"
+    "binding": "PaymentRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)",
+    "settlement_router": "SettlementRouter420.sol",
+    "settlement_router_binding": "PaymentRouter420.setSettlementRouter(SettlementRouter420)"
   },
   "settlement_adapter": {
     "contract": "CanonicalSettlementAdapter420.sol",
     "swap_executor": "CanonicalSwapExecutor420.sol",
     "constructor_or_config_binding_required": true,
-    "abi_verified": "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)"
+    "abi_verified": "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)",
+    "payment_router": "PaymentRouter420.sol",
+    "payment_router_binding": "CanonicalSettlementAdapter420.setPaymentRouter(PaymentRouter420)",
+    "settlement_router": "SettlementRouter420.sol",
+    "settlement_router_binding": "CanonicalSettlementAdapter420.setSettlementRouter(SettlementRouter420)"
   },
   "swap_executor": {
     "contract": "CanonicalSwapExecutor420.sol",
@@ -19,15 +25,41 @@
   },
   "invariants": [
     "PaymentRouter420 settlementAdapter MUST resolve to CanonicalSettlementAdapter420 before payment service activation.",
+    "PaymentRouter420 settlementRouter MUST resolve to the exact canonical SettlementRouter420 before split service activation.",
+    "CanonicalSettlementAdapter420 paymentRouter MUST resolve to the exact canonical PaymentRouter420 instance before payment service activation.",
+    "CanonicalSettlementAdapter420 settlementRouter MUST resolve to the exact canonical SettlementRouter420 instance before swap-backed split activation.",
     "CanonicalSettlementAdapter420 swapExecutor MUST resolve to CanonicalSwapExecutor420 before payment service activation.",
+    "SettlementRouter420 paymentRouter MUST resolve to the exact canonical PaymentRouter420 instance before direct split activation.",
+    "SettlementRouter420 settlementAdapter MUST resolve to the exact canonical CanonicalSettlementAdapter420 instance before swap-backed split activation.",
+    "RefundManager420 paymentRegistry MUST resolve to the exact canonical PaymentRegistry420 instance before refund evidence activation.",
     "CanonicalSwapExecutor420 MUST mark the exact CanonicalSettlementAdapter420 instance as trusted before payment service activation.",
-    "No user, merchant, smart account, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
-    "Genesis verification MUST fail closed if any of the three bindings above are absent or point to code with an unexpected runtime identity."
+    "No user, merchant, smart account, relayer, or unrelated dApp receives trusted-caller authority on CanonicalSwapExecutor420 merely by using 420Pay.",
+    "Genesis verification MUST fail closed if any required binding above is absent or points to code with an unexpected runtime identity."
   ],
   "source_contracts_present": true,
   "adapter_executor_abi_match_verified": true,
   "deployment_binding_verified": false,
-  "note": "Repository/local-EVM qualification now proves the exact PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding graph, active ProtocolRegistry component identity/codehash derivation, and executor trusted-caller relation. Public-testnet deployed addresses/transactions remain false until SWAP-AUDIT-8.",
+  "note": "Repository qualification covers the retained Swap-owned PaymentRouter420 -> CanonicalSettlementAdapter420 -> CanonicalSwapExecutor420 binding proof and the complete PAY-AUDIT-6 deterministic package for all nine Registry-resolved Pay residents, split/refund/replay wiring, runtime identities, staged SUSPENDED->ACTIVE publication and governance handoff. PAY-AUDIT-6 repository readiness is qualified at exact implementation SHA 9bfe0d72c8d696b4908f819612608ca5279ce930 by 420Pay audit qualification #216 and Solidity Contracts #4259. deployment_binding_verified remains false until PAY-AUDIT-7 live evidence.",
+  "settlement_router": {
+    "contract": "SettlementRouter420.sol",
+    "payment_router": "PaymentRouter420.sol",
+    "payment_router_binding": "SettlementRouter420.setPaymentRouter(PaymentRouter420)",
+    "settlement_adapter": "CanonicalSettlementAdapter420.sol",
+    "settlement_adapter_binding": "SettlementRouter420.setSettlementAdapter(CanonicalSettlementAdapter420)"
+  },
+  "refund_manager": {
+    "contract": "RefundManager420.sol",
+    "payment_registry": "PaymentRegistry420.sol",
+    "payment_registry_binding": "RefundManager420.setPaymentRegistry(PaymentRegistry420)"
+  },
   "repository_binding_qualified": true,
-  "binding_qualification_test": "contracts/test/SwapDeploymentBinding420.t.sol"
+  "binding_qualification_test": "contracts/test/SwapDeploymentBinding420.t.sol",
+  "pay_audit_6_repository_package": "contracts/config/pay/pay-audit-6-deployment-package.json",
+  "pay_audit_6_qualification_test": "contracts/test/PayAudit6DeploymentPackage420.t.sol",
+  "pay_audit_6_runtime_generator": "scripts/generate-420pay-audit-6-deployment.py",
+  "pay_audit_6_deployment_verifier": "scripts/verify-420pay-audit-6-deployment.py",
+  "pay_audit_6_offline_smoke": "scripts/420pay-audit-6-smoke.py",
+  "pay_audit_6_repository_ready": true,
+  "pay_audit_6_live_qualified": false,
+  "pay_audit_6_status": "COMPLETE"
 }

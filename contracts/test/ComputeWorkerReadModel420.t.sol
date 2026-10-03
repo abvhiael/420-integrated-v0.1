@@ -48,8 +48,18 @@ contract ReadTrustSourceMock420 is ITrust420 {
 }
 
 contract ReadStakeSourceMock420 is IComputeStakeSource420 {
+    address private immutable _workerRegistry;
+
+    constructor(address workerRegistry_) {
+        _workerRegistry = workerRegistry_;
+    }
+
     function computeStakeSourceId() external pure returns (bytes32) {
         return keccak256("420Integrated.ComputeMarket.ComputeStakeSource.v1");
+    }
+
+    function workerRegistry() external view returns (address) {
+        return _workerRegistry;
     }
 
     function readWorkerPosition(bytes32 workerId, bytes32 stakePolicyId)
@@ -209,7 +219,8 @@ contract ComputeWorkerReadModel420Test {
         ReadTrustSourceMock420 trustSource = new ReadTrustSourceMock420(TRUST_DOMAIN, TRUST_UNIT);
         workerTrust = new ComputeWorkerTrust420(address(workers), address(trustSource), GOV);
         workerStake = new ComputeWorkerStake420(address(workers), GOV);
-        ReadStakeSourceMock420 stakeSource = new ReadStakeSourceMock420();
+        ReadStakeSourceMock420 stakeSource =
+            new ReadStakeSourceMock420(address(workers));
 
         ReadJobEvidenceMock420 commonEvidence = new ReadJobEvidenceMock420();
         ReadMatchMock420 matchEvidence = new ReadMatchMock420();

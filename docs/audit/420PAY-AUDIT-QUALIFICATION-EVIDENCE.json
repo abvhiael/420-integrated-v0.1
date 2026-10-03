@@ -1,0 +1,300 @@
+{
+  "schema": "420pay-audit-qualification-evidence-v4",
+  "component": "420Pay",
+  "audit_branch": "audit/420pay-complete-20261001-r3",
+  "current_main_base_sha": "14d46231aa4350b2e84dee52f0f664bdd2e785f4",
+  "qualified_steps": [
+    "PAY-AUDIT-1",
+    "PAY-AUDIT-2",
+    "PAY-AUDIT-3",
+    "PAY-AUDIT-5",
+    "PAY-AUDIT-4",
+    "PAY-AUDIT-6"
+  ],
+  "qualification_records": [
+    {
+      "steps": [
+        "PAY-AUDIT-1",
+        "PAY-AUDIT-2",
+        "PAY-AUDIT-5"
+      ],
+      "qualification_level": "Level 1 / durable bookkeeping requalification",
+      "implementation_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+      "bookkeeping_sha": "8995285db1d00961a3ef78785d7f177e3e8203de",
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 68,
+        "run_id": 36970777683,
+        "conclusion": "success"
+      },
+      "solidity_workflow": {
+        "name": "Solidity Contracts",
+        "run_number": 4040,
+        "run_id": 36970777671,
+        "conclusion": "success"
+      }
+    },
+    {
+      "steps": [
+        "PAY-AUDIT-3"
+      ],
+      "qualification_level": "Level 1 — per-roadmap-step fast qualification",
+      "implementation_sha": "452bfd2f4214cf0e01d7564944aaaa9f9a70f4e8",
+      "evidence_sha": "7a79e91d29b2deecf023c2a98533f773416f590f",
+      "implementation_summary": [
+        "Reconciled Decision #4 offline invoice creation with mandatory online acceptance without inventing signature-based canonical state authority.",
+        "Added explicit governed INCLUDED, CERTIFIED, SETTLED and FAILED payment lifecycle transitions with fail-closed predecessor rules.",
+        "Added PAY-AUDIT-3 lifecycle, authority and terminal-state regression coverage.",
+        "Updated protocol architecture, audit verifier, implementation status and app-specific CI scope."
+      ],
+      "files_changed": [
+        "contracts/src/pay/PaymentRegistry420.sol",
+        "contracts/test/PayAudit3Lifecycle420.t.sol",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/420PAY-IMPLEMENTATION-STATUS.md",
+        "docs/audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/audit/420PAY-COMPLETE-AUDIT-20261001.md",
+        "scripts/verify-420pay-audit.py",
+        ".github/workflows/420pay-audit.yml"
+      ],
+      "requirements_satisfied": [
+        "Offline invoice root remains presentation/integrity commitment; canonical invoice creation requires bound merchant online acceptance.",
+        "Every modeled V1 lifecycle state is reachable through explicit canonical lifecycle/refund paths.",
+        "Invalid lifecycle predecessor transitions fail closed.",
+        "FAILED cannot be resurrected into included/finalized/settled state.",
+        "Lifecycle mutation remains Genesis-governed.",
+        "Third parties cannot use an offline invoice root to manufacture canonical invoice state."
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 91,
+        "run_id": 37043694408,
+        "job_id": 110959749763,
+        "conclusion": "success",
+        "checks": [
+          "exact-head verification",
+          "static Pay verification",
+          "Solidity formatting",
+          "Pay and settlement-boundary build",
+          "PAY-AUDIT-3 Level 1 Solidity qualification",
+          "forbidden primitive scan",
+          "420Indexer Pay reconciliation build and tests"
+        ]
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4128,
+        "run_id": 37043694394,
+        "conclusion": "success",
+        "note": "Not required as a separate Level 1 gate, but it also passed on the exact PAY-AUDIT-3 implementation SHA."
+      },
+      "security_adversarial_results": [
+        "invalid predecessor transitions rejected",
+        "terminal FAILED state resurrection rejected",
+        "non-governance lifecycle mutation rejected",
+        "offline invoice root does not grant third-party creation authority",
+        "forbidden primitive scan passed"
+      ],
+      "milestone_status": "No Level 2 milestone triggered by this app-scoped lifecycle/authority completion.",
+      "intentionally_deferred": [
+        "Level 2 broader app integration until a documented/meaningful Pay integration milestone",
+        "Level 3 repository-wide app-phase closeout until the accumulated 420Pay audit phase is ready",
+        "live deployment/testnet binding under PAY-AUDIT-7",
+        "independent security audit under PAY-AUDIT-8"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-4 — settlement splits, refunds, sponsorship and accounting completion"
+    },
+    {
+      "steps": [
+        "PAY-AUDIT-4"
+      ],
+      "qualification_level": "Level 1 — per-roadmap-step fast qualification",
+      "implementation_sha": "3378b3b9efcc2fd2f70124daa7eb520d96aad6f6",
+      "evidence_only_closeout_started_at": "6c3a8aa85cfc732bcf3da5b82cc28886bdf42b55",
+      "implementation_summary": [
+        "Implemented atomic native, direct-token and swap-backed split settlement with payer/replay boundaries and zero-new-residue accounting.",
+        "Bound RefundManager420 evidence to canonical PaymentRegistry420 refund authorization rather than caller-selected maxima.",
+        "Implemented governance-authorized relayer reimbursement in GasSponsor420 without arbitrary user-call execution or arbitrary reimbursement recipients.",
+        "Implemented the frozen 15-field 420Pay accounting export as a derived Indexer DTO/schema with a replaceable sink."
+      ],
+      "requirements_satisfied": [
+        "split recipient count, 10,000-bps total and primary-recipient rounding remain frozen",
+        "native, direct-token and swap-backed splits conserve value atomically and add no SettlementRouter residue",
+        "third parties cannot spend a payer standing allowance through the direct split path",
+        "split/payment replay fails closed",
+        "refund evidence cannot exceed or contradict canonical PaymentRegistry authorization",
+        "RefundManager retains no arbitrary custody/release authority",
+        "only governance-authorized relayers can receive GasSponsor reimbursement",
+        "sponsorship caps and reserve floor are enforced before reimbursement",
+        "all frozen accounting-export fields are present exactly once and refund totals reconcile to settlement amount plus tip"
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 157,
+        "run_id": 37050677411,
+        "job_id": 110983005816,
+        "conclusion": "success",
+        "checks": [
+          "exact-head verification",
+          "static Pay verification",
+          "Solidity formatting",
+          "Pay and required settlement-boundary build",
+          "PAY-AUDIT-4 Level 1 Solidity qualification",
+          "forbidden primitive scan",
+          "420Indexer Pay reconciliation build and tests"
+        ]
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4172,
+        "run_id": 37050677237,
+        "conclusion": "success",
+        "note": "Additional exact-head evidence on the same PAY-AUDIT-4 implementation SHA; not required as a separate Level 1 gate."
+      },
+      "security_adversarial_results": [
+        "direct split requires the payer caller",
+        "split replay rejected",
+        "pre-existing native/token dust does not create new split-router residue",
+        "refund evidence exceeding canonical authorization rejected",
+        "unauthorized sponsor relayer reimbursement rejected",
+        "forbidden primitive scan passed"
+      ],
+      "milestone_status": "No Level 2 milestone triggered by this app-scoped settlement/refund/sponsorship/accounting completion.",
+      "intentionally_deferred": [
+        "Level 2 broader app integration until a documented/meaningful Pay integration milestone",
+        "Level 3 repository-wide app-phase closeout until the accumulated 420Pay audit phase is ready",
+        "deterministic deployment package and Registry publication under PAY-AUDIT-6",
+        "live production-equivalent testnet qualification under PAY-AUDIT-7",
+        "independent security audit and Genesis/production closeout under PAY-AUDIT-8"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-6 — deterministic deployment package and Registry publication"
+    },
+    {
+      "steps": [
+        "PAY-AUDIT-5"
+      ],
+      "qualification_level": "Level 1 — retained qualification revalidation",
+      "original_implementation_sha": "79e3bc85f3f2de1778e0200b7eb5dc7895e699f8",
+      "revalidated_implementation_sha": "3378b3b9efcc2fd2f70124daa7eb520d96aad6f6",
+      "implementation_unchanged": {
+        "420-indexer/src/abi-manifest.ts": {
+          "original_blob_sha": "2a15b71950454799c1f6898b9be0445e67ab5173",
+          "current_blob_sha": "2a15b71950454799c1f6898b9be0445e67ab5173"
+        },
+        "420-indexer/src/lifecycle-reducer.ts": {
+          "original_blob_sha": "8adf4af68fe4d1a49111dc4889b2d72d85b1ab9c",
+          "current_blob_sha": "8adf4af68fe4d1a49111dc4889b2d72d85b1ab9c"
+        },
+        "420-indexer/test/abi-manifest.test.ts": {
+          "original_blob_sha": "f71487934689a9c49d2ec25a35cde7024031a919",
+          "current_blob_sha": "f71487934689a9c49d2ec25a35cde7024031a919"
+        },
+        "420-indexer/test/lifecycle-reducer.test.ts": {
+          "original_blob_sha": "4159eb2c255eb4a7ce3a70164d4b779639b987af",
+          "current_blob_sha": "4159eb2c255eb4a7ce3a70164d4b779639b987af"
+        }
+      },
+      "requirements_satisfied": [
+        "Pay contracts remain classified under the canonical 420Pay protocol family",
+        "Pay lifecycle reconstruction continues to derive from real PaymentSet(status) and PaymentAuthorized events",
+        "obsolete synthetic PaymentCreated/PaymentSettled/PaymentRefunded/PaymentCancelled/PaymentExpired lifecycle semantics remain absent",
+        "current app-specific CI still builds the Indexer and runs the retained ABI-manifest/lifecycle regressions"
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 157,
+        "run_id": 37050677411,
+        "job_id": 110983005816,
+        "conclusion": "success",
+        "relevant_check": "Build and test 420Indexer Pay reconciliation"
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4172,
+        "run_id": 37050677237,
+        "conclusion": "success"
+      },
+      "current_main_base_sha": "14d46231aa4350b2e84dee52f0f664bdd2e785f4",
+      "milestone_status": "No Level 2 milestone triggered; PAY-AUDIT-5 implementation remained unchanged and was revalidated inside the current app-specific Level 1 workflow.",
+      "intentionally_deferred": [
+        "Level 2 broader Pay integration until a documented/meaningful milestone",
+        "Level 3 app-phase closeout after reconciliation with current main",
+        "live deployed Registry-resolved Pay descriptor/address validation under PAY-AUDIT-7"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-6 — deterministic deployment package and Registry publication"
+    },
+    {
+      "steps": [
+        "PAY-AUDIT-6"
+      ],
+      "qualification_level": "Level 1 — per-roadmap-step fast qualification",
+      "implementation_sha": "9bfe0d72c8d696b4908f819612608ca5279ce930",
+      "implementation_summary": [
+        "Retained deterministic deployment/runtime package for all nine Registry-resolved Pay residents.",
+        "Materialized exact runtime identities from Foundry compiler artifacts plus frozen GovernanceTimelock, ProtocolRegistry and global genesisConfigHash immutables.",
+        "Added deterministic deployment plan, independent verifier, offline smoke, local-EVM Registry publication/wiring qualification and operator runbook.",
+        "Staged ProtocolRegistry publication through SUSPENDED before wiring verification and ACTIVE only after all identity/binding assertions pass.",
+        "Preserved null/unfrozen Pay deployment addresses and empty live-chain evidence for PAY-AUDIT-7."
+      ],
+      "requirements_satisfied": [
+        "exact compiler/runtime identity evidence exists for every Pay resident",
+        "constructor/immutable inputs and settlement-executor dependency are retained and drift-checked",
+        "Registry publication/version/lifecycle and deployment order are deterministic and machine-verifiable",
+        "all nine Pay deployment addresses remain intentionally unfrozen/null",
+        "router/adapter/executor/split/refund/replay bindings and governance handoff are proven locally",
+        "reproducibility verifier and offline smoke fail closed",
+        "rollback/recovery/operator guidance is retained",
+        "live chain/address/transaction evidence remains empty and owned by PAY-AUDIT-7"
+      ],
+      "pay_audit_workflow": {
+        "name": "420Pay audit qualification",
+        "run_number": 216,
+        "run_id": 37061442891,
+        "job_id": 111018792122,
+        "conclusion": "success",
+        "checks": [
+          "exact-head verification",
+          "static Pay verification",
+          "Solidity formatting",
+          "Pay and required settlement-boundary build",
+          "PAY-AUDIT-6 runtime materialization and verification",
+          "compiled artifact identity retention",
+          "derived runtime manifest retention",
+          "PAY-AUDIT-6 Level 1 deployment qualification",
+          "forbidden primitive scan",
+          "420Indexer Pay reconciliation"
+        ]
+      },
+      "additional_exact_head_evidence": {
+        "name": "Solidity Contracts",
+        "run_number": 4259,
+        "run_id": 37061442991,
+        "conclusion": "success"
+      },
+      "milestone_status": "No separate Level 2 milestone triggered; PAY-AUDIT-6 repository deployment readiness is complete and PAY-AUDIT-7 owns live production-equivalent testnet validation.",
+      "intentionally_deferred": [
+        "Level 2 broader integration unless a later deployment milestone requires it",
+        "Level 3 app-phase closeout until the audit is ready to merge",
+        "live production-equivalent deployment/address/transaction evidence under PAY-AUDIT-7",
+        "independent security audit and Genesis/production closeout under PAY-AUDIT-8"
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_canonical_step": "PAY-AUDIT-7 — production-equivalent testnet qualification"
+    }
+  ],
+  "evidence_only_commit_policy": {
+    "mode": "QUALIFIED_IMPLEMENTATION_SHA_WITH_NONRECURSIVE_EVIDENCE_COMMITS",
+    "rule": "Evidence-only commits may reference an already-qualified implementation SHA without rerunning qualification when they change no executable code, tests, workflows, dependencies, configuration, runtime/generated artifacts, interfaces, deployment state, or substantive requirements."
+  },
+  "remaining_blockers_not_closed_by_this_evidence": [
+    "PAY-AUDIT-7 live production-equivalent testnet qualification",
+    "PAY-AUDIT-8 independent audit and Genesis/production closeout"
+  ]
+}

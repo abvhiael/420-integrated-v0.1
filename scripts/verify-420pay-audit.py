@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+import json, pathlib, sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+errors=[]
+
+def read(path):
+    p=ROOT/path
+    if not p.exists():
+        errors.append(f"missing {path}")
+        return ""
+    return p.read_text()
+
+adapter=read("contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol")
+for token in ["address public paymentRouter", "setPaymentRouter", "msg.sender == paymentRouter"]:
+    if token not in adapter: errors.append(f"adapter authority missing: {token}")
+
+router=read("contracts/src/pay/PaymentRouter420.sol")
+for token in ["_requirePayerOrGovernance", "_consumeSharedReplay", "PAY_SETTLEMENT", "_requireSharedFeeQuote", "merchant underpaid"]:
+    if token not in router: errors.append(f"router invariant missing: {token}")
+
+wiring=json.loads(read("contracts/config/420pay-genesis-wiring.json") or "{}")
+if wiring.get("deployment_binding_verified") is not False:
+    errors.append("live deployment binding must remain false until chain evidence exists")
+if "payment_router_binding" not in wiring.get("settlement_adapter", {}):
+    errors.append("settlement adapter payment-router binding missing from wiring manifest")
+
+dep=json.loads(read("contracts/config/interfaces/420pay-dependency-reconciliation.json") or "{}")
+required=set(dep.get("required_dependencies", []))
+for name in ["ProtocolRegistry","CanonicalAssetRegistry","GovernanceAuthority","PauseRegistry","SettlementHealth","FeeQuote","SystemSafety","ReplayProtection","ChainContext","MetadataCommitment","AssetCapabilities"]:
+    if name not in required: errors.append(f"required dependency missing: {name}")
+
+lifecycle=read("420-indexer/src/lifecycle-reducer.ts")
+for stale in ["PaymentCreated", "PaymentSettled", "PaymentRefunded", "PaymentCancelled", "PaymentExpired"]:
+    pay_start=lifecycle.find("{ protocol: '420Pay'")
+    bridge_start=lifecycle.find("{ protocol: '420Bridge'")
+    if pay_start >= 0 and bridge_start > pay_start and stale in lifecycle[pay_start:bridge_start]:
+        errors.append(f"stale Pay lifecycle event retained: {stale}")
+for token in ["PaymentSet", "PaymentAuthorized", "stateField", "stateMap"]:
+    if token not in lifecycle: errors.append(f"Pay lifecycle handling missing: {token}")
+
+abi=read("420-indexer/src/abi-manifest.ts")
+for name in ["InvoiceRegistry420","PaymentRegistry420","PaymentRouter420","SettlementRouter420","RefundManager420","GasSponsor420","CanonicalSettlementAdapter420"]:
+    if f"{name}: '420Pay'" not in abi: errors.append(f"Indexer 420Pay classification missing: {name}")
+
+payment_registry=read("contracts/src/pay/PaymentRegistry420.sol")
+for token in ["recordIncluded", "recordCertified", "recordSettled", "recordFailed", "invalid inclusion state", "invalid certification state", "invalid settlement state", "invalid failure state"]:
+    if token not in payment_registry: errors.append(f"PAY-AUDIT-3 lifecycle completion missing: {token}")
+
+invoice_registry=read("contracts/src/pay/InvoiceRegistry420.sol")
+if 'require(i.merchant == msg.sender, "merchant")' not in invoice_registry:
+    errors.append("PAY-AUDIT-3 merchant-only online invoice acceptance boundary missing")
+for forbidden in ["acceptSignedInvoice", "createSignedInvoice", "ecrecover("]:
+    if forbidden in invoice_registry:
+        errors.append(f"PAY-AUDIT-3 unexpected signature-based canonical invoice authority: {forbidden}")
+
+audit3_test=read("contracts/test/PayAudit3Lifecycle420.t.sol")
+for token in [
+    "testLifecycleSequentialPathReachesEveryNonRefundTerminalState",
+    "testLifecycleRejectsInvalidPredecessorsAndTerminalResurrection",
+    "testLifecycleMutationRequiresGenesisGovernance",
+    "testOfflineInvoiceRootDoesNotGrantCanonicalCreationAuthority",
+]:
+    if token not in audit3_test: errors.append(f"PAY-AUDIT-3 regression missing: {token}")
+
+decision4=json.loads(read("contracts/config/pay/420pay-decision-4.json") or "{}")
+if decision4.get("offline_invoice_creation") is not True or decision4.get("online_acceptance_required") is not True:
+    errors.append("PAY-AUDIT-3 frozen offline/online invoice decision changed; reconcile semantics")
+
+
+settlement_router=read("contracts/src/pay/SettlementRouter420.sol")
+for token in [
+    "executeNativeSplit",
+    "executeDirectTokenSplit",
+    "executeHeldTokenSplit",
+    "consumedSplit",
+    "setPaymentRouter",
+    "setSettlementAdapter",
+    "AccountingMismatch",
+]:
+    if token not in settlement_router: errors.append(f"PAY-AUDIT-4 split execution missing: {token}")
+
+for token in ["executeSwapSplitSettlement", "executeDirectTokenSplitSettlement", "executeNativeSplitSettlement", "setSettlementRouter"]:
+    if token not in router: errors.append(f"PAY-AUDIT-4 payment-router split path missing: {token}")
+
+for token in ["setSettlementRouter", "executeSplit", "executeHeldTokenSplit"]:
+    if token not in adapter: errors.append(f"PAY-AUDIT-4 adapter split path missing: {token}")
+
+refund_manager=read("contracts/src/pay/RefundManager420.sol")
+for token in ["setPaymentRegistry", "refundAccounting", "refund exceeds authorized", "refund recipient", "refund maximum"]:
+    if token not in refund_manager: errors.append(f"PAY-AUDIT-4 refund reconciliation missing: {token}")
+
+gas_sponsor=read("contracts/src/pay/GasSponsor420.sol")
+for token in ["authorizedRelayer", "setRelayer", "reimburseSponsored", "totalReimbursed", "reserveFloor", "UnauthorizedRelayer"]:
+    if token not in gas_sponsor: errors.append(f"PAY-AUDIT-4 gas sponsorship completion missing: {token}")
+if ".call{ value: actualCost }" not in gas_sponsor:
+    errors.append("PAY-AUDIT-4 relayer reimbursement transfer missing")
+
+export_schema=json.loads(read("contracts/config/pay/accounting-export-schema.json") or "{}")
+frozen_fields=json.loads(read("contracts/config/pay/420pay-parameters.json") or "{}").get("accounting_exports",{}).get("fields",[])
+schema_fields=[x.get("name") for x in export_schema.get("fields",[])]
+if schema_fields != frozen_fields:
+    errors.append("PAY-AUDIT-4 accounting export schema does not exactly match frozen field order")
+if export_schema.get("delivery_model") != "DERIVED_REPLACEABLE_EXPORTER":
+    errors.append("PAY-AUDIT-4 accounting export delivery model missing")
+
+accounting_export=read("420-indexer/src/pay-accounting-export.ts")
+for token in ["PayAccountingExport420", "PayAccountingExportSink420", "PayAccountingExportService420", "refund_total exceeds canonical refundable value"]:
+    if token not in accounting_export: errors.append(f"PAY-AUDIT-4 accounting exporter missing: {token}")
+
+audit4_test=read("contracts/test/PayAudit4SettlementAndAccounting420.t.sol")
+for token in [
+    "testDirectTokenSplitConservesValueAssignsRemainderAndRejectsReplay",
+    "testDirectTokenSplitRequiresPayerCaller",
+    "testNativeSplitIsAtomicAndLeavesNoRouterResidue",
+    "testSwapBackedSplitRoutesThroughCanonicalAdapterAtomically",
+    "testRefundEvidenceCannotExceedCanonicalAuthorizedRefund",
+    "testGasSponsorReimbursesOnlyAuthorizedRelayerAndPreservesReserve",
+]:
+    if token not in audit4_test: errors.append(f"PAY-AUDIT-4 regression missing: {token}")
+
+wiring_checks=[
+    ("payment_router","settlement_router_binding"),
+    ("settlement_adapter","settlement_router_binding"),
+    ("settlement_router","payment_router_binding"),
+    ("settlement_router","settlement_adapter_binding"),
+    ("refund_manager","payment_registry_binding"),
+]
+for section,key in wiring_checks:
+    if key not in wiring.get(section, {}):
+        errors.append(f"PAY-AUDIT-4 wiring manifest missing {section}.{key}")
+
+genesis_apps=json.loads(read("config/genesis-applications.json") or "{}")
+names={x.get("name") for x in genesis_apps.get("apps",[])}
+if "420 Pay" in names or "420Pay" in names:
+    errors.append("audit assumption changed: frozen Genesis application catalogue now contains 420Pay; reconcile audit report")
+
+summary={
+ "schema":"420pay-complete-audit-verifier-v1",
+ "pass":not errors,
+ "errors":errors,
+ "known_blockers_enforced":[
+   "deployment binding remains unverified until live evidence",
+   "frozen Genesis user-application catalogue currently omits 420Pay",
+   "external security audit remains separate production gate"
+ ]
+}
+print(json.dumps(summary, indent=2))
+sys.exit(0 if not errors else 2)

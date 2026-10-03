@@ -24,6 +24,9 @@ on:
       - 'contracts/config/compute-market/cmp-1.4.12-phase-closeout.json'
       - 'docs/compute-market/CMP-1.4.12-VERIFIER-REGISTRY-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-1-4-12-closeout.py'
+      - 'contracts/config/compute-market/cmp-1.5.13-phase-closeout.json'
+      - 'docs/compute-market/CMP-1.5.13-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-1-5-13-closeout.py'
   pull_request:
     paths:
       - 'consensus/**'
@@ -44,6 +47,9 @@ on:
       - 'contracts/config/compute-market/cmp-1.4.12-phase-closeout.json'
       - 'docs/compute-market/CMP-1.4.12-VERIFIER-REGISTRY-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-1-4-12-closeout.py'
+      - 'contracts/config/compute-market/cmp-1.5.13-phase-closeout.json'
+      - 'docs/compute-market/CMP-1.5.13-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-1-5-13-closeout.py'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

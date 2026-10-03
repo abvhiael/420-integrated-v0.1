@@ -19,7 +19,8 @@ asset, no quote replay, no payer input overspend, and merchant delivery at or ab
 settlement amount. If the underlying canonical swap call fails or any postcondition is violated, the
 EVM transaction reverts atomically.
 
-The current swap executor remains an external audited component to be wired to the finalized
-canonical 420 Swap implementation. Test mocks are not production executors.
+The repository contains the canonical `CanonicalSwapExecutor420` implementation and Pay/Swap integration tests. Production activation still requires deployment-time verification of the exact Registry-resolved `PaymentRouter420`, `CanonicalSettlementAdapter420`, `CanonicalSwapExecutor420`, and replay-consumer bindings. Test mocks are not production executors.
 
-Foundry/solc execution remains a release gate when those tools are unavailable in the current runtime.
+The settlement adapter is explicitly bound to the canonical payment router so another contract cannot use the executor-trusted adapter to bypass Pay authorization, limits, fee checks, or replay handling.
+
+Foundry/solc execution is an exact-head qualification gate, and external independent security review remains a production/mainnet release gate under repository policy.

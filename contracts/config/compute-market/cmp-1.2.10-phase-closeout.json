@@ -25,25 +25,21 @@
     "partial_release": "QUALIFIED_REPOSITORY_SCOPE",
     "timeout_refund": "QUALIFIED_REPOSITORY_SCOPE",
     "dispute_freeze": "QUALIFIED_REPOSITORY_SCOPE",
-    "slash_redistribution": "FAIL_CLOSED_PENDING_CMP_1_5_STAKE"
+    "slash_redistribution": "QUALIFIED_VIA_CMP_1_5_10_COLLATERAL_REDISTRIBUTION"
   },
   "release_blockers": [
     {
       "id": "CMP-1.2.9-LIVE",
       "reason": "Canonical public/authorized testnet is not live; deployment addresses, receipts, runtime hashes, live grants, Registry publication and real funded/settled/refunded transactions are unavailable.",
       "verifier": "python3 scripts/verify-cmp-1-2-9-deployment.py"
-    },
-    {
-      "id": "CMP-1.5-STAKE-SLASH",
-      "reason": "Original slash redistribution requirement may only redistribute separately backed and objectively forfeited CMP-1.5 stake/collateral, never payer escrow. CMP-1.5 stake source/adjudication is not yet qualified."
     }
   ],
   "forbidden_closeout_claims": [
     "CMP-1.2 production ready",
     "CMP-1.2 live testnet qualified",
-    "stake slashing operational",
     "slash redistribution implemented from payer deposits",
-    "ProtocolRegistry live publication proven"
+    "ProtocolRegistry live publication proven",
+    "live stake slashing operational before CMP testnet deployment evidence"
   ],
   "exact_head_ci": {
     "qualified_head": "b2b3ee9fb1322b09669325f84eafd6689e6d866e",

@@ -1,0 +1,107 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.11.QualificationEvidence.v1",
+  "step": "CMP-1.5.11",
+  "title": "Hostile economic qualification",
+  "completion_state": "COMPLETE",
+  "qualification_level": 2,
+  "implementation_sha": "1235f24d51d60a6fee2f71e495b34975d879029c",
+  "evidence_only_closeout": true,
+  "current_main_observed": "14d46231aa4350b2e84dee52f0f664bdd2e785f4",
+  "stacked_base_step": "CMP-1.5.10",
+  "pull_request": 483,
+  "branch": "cmp-1.5.11-hostile-economic-qualification-20261002",
+  "implementation_summary": [
+    "add explicit duplicate-withdrawal rejection after terminal withdrawal",
+    "add hostile reentrant slash-recipient callback coverage",
+    "add mixed slash-exit-withdraw solvency coverage against canonical collateral Vault",
+    "retain and map accumulated hostile coverage across isolation, exit races, finality, replay, duplicate slash/reward, hostile authorization and failure atomicity"
+  ],
+  "requirements_satisfied": [
+    "solvency",
+    "isolation",
+    "exit races",
+    "slash finality",
+    "replay",
+    "duplicate withdrawal",
+    "duplicate slash",
+    "duplicate reward",
+    "hostile authorization",
+    "reentrancy",
+    "failure atomicity"
+  ],
+  "level_1": {
+    "status": "PASS",
+    "checks": [
+      "Compute contract build",
+      "new hostile-economic collateral regressions",
+      "CMP-1.5.11 mechanical verifier"
+    ]
+  },
+  "level_2": {
+    "status": "PASS",
+    "milestone": "accumulated CMP-1.5 hostile economic convergence",
+    "retained_suite": "Compute*.t.sol"
+  },
+  "workflows": [
+    {
+      "name": "Genesis Address Authority",
+      "run_number": 964,
+      "run_id": 37053774586,
+      "job_id": 110993304640,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-4",
+      "run_number": 799,
+      "run_id": 37053774320,
+      "job_id": 110993305152,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_number": 4397,
+      "run_id": 37053774227,
+      "job_id": 110993302204,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "run_number": 1783,
+      "run_id": 37053774309,
+      "job_id": 110993372272,
+      "conclusion": "success"
+    },
+    {
+      "name": "Compute Market Qualification",
+      "run_number": 149,
+      "run_id": 37053774271,
+      "job_id": 110993302786,
+      "conclusion": "success"
+    },
+    {
+      "name": "Solidity Contracts",
+      "run_number": 4184,
+      "run_id": 37053774290,
+      "job_id": 110993349234,
+      "job": "compute-fast",
+      "conclusion": "success"
+    }
+  ],
+  "security_results": [
+    "duplicate full withdrawal rejected without accounting movement",
+    "reentrant slash recipient unable to mutate stake lifecycle",
+    "mixed slash-exit-withdraw sequence remained exactly solvent",
+    "retained replay, finality, isolation, hostile authorization and failure-atomicity coverage stayed green"
+  ],
+  "intentionally_deferred": [
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 Level 3 phase closeout",
+    "live/public-testnet hostile economic campaign"
+  ],
+  "limitations": [
+    "no live deployment claim",
+    "repository-wide Level 3 qualification deferred to CMP-1.5.13"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.12 — Release candidate"
+}

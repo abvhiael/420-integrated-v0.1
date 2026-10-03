@@ -1,0 +1,144 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.5.QualificationEvidence.v1",
+  "step": "CMP-1.5.5",
+  "title": "Objective slash authorization",
+  "completion_state": "COMPLETE",
+  "implementation_sha": "8847b36b8e50905402f45e5c0f121c80464673e4",
+  "evidence_only_closeout": true,
+  "current_main_observed": "98e545225d54379086f0c520afcb84b4d4d97288",
+  "stacked_base_sha": "bc814aee0e314ce306addab48507586077829c22",
+  "pr": 469,
+  "branch": "cmp-1.5.5-objective-slash-authorization-20261001",
+  "qualification": {
+    "level_1": "PASS",
+    "level_2_milestone": "PASS",
+    "level_3": "DEFERRED_TO_CMP-1.5.13"
+  },
+  "implementation_summary": [
+    "added append-only objective slash policy with frozen evidence-adapter code hash, violation predicate, optional verification-policy tuple and bounded penalty terms",
+    "worker and verifier collateral positions freeze exact slash-policy revision and commitment at first stake",
+    "added permissionless slash authorization that binds exact collateral position, subject, stake policy, evidence reference, misconduct key and bounded amount",
+    "added objective worker evidence for conflicting signed results on one canonical worker attempt",
+    "added objective verifier evidence requiring final independently adjudicated verifier-error dispute evidence",
+    "added replay protection and outstanding slash reservations that block collateral withdrawal without moving Vault funds"
+  ],
+  "requirements_satisfied": [
+    "slash authorization is separate from slash execution/distribution",
+    "later slash-policy revisions cannot retroactively alter existing collateral positions",
+    "evidence adapter address/code hash and violation predicate are frozen in policy",
+    "generic FAILED state is not sufficient worker slash evidence",
+    "generic adverse dispute disposition is not sufficient verifier slash evidence",
+    "worker evidence requires two conflicting canonical result digests signed by the frozen execution key for the same canonical attempt",
+    "verifier evidence requires terminal objective verifier-error adjudication and resolved independent appeal when appealed",
+    "authorization is permissionless to relay but subject/account/stake-policy/policy/evidence bound",
+    "misconduct keys are exactly-once/replay protected",
+    "authorization amount is bounded by slash bps, optional max cap and remaining unreserved slashable collateral",
+    "outstanding authorization blocks matured collateral withdrawal",
+    "authorization performs no Vault release, claim, redirect or distribution"
+  ],
+  "files_changed": [
+    ".github/workflows/compute-market.yml",
+    "contracts/config/compute-market/cmp-1.5.5-objective-slash-authorization.json",
+    "contracts/src/compute/ComputeStakeSlashAuthorization420.sol",
+    "contracts/src/compute/ComputeStakeSlashPolicy420.sol",
+    "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "contracts/src/compute/ComputeVerifierDisputeSlashEvidence420.sol",
+    "contracts/src/compute/ComputeWorkerConflictingResultSlashEvidence420.sol",
+    "contracts/src/interfaces/IComputeObjectiveSlashEvidence420.sol",
+    "contracts/src/interfaces/IComputeSlashHold420.sol",
+    "contracts/src/interfaces/IComputeSlashableCollateral420.sol",
+    "contracts/test/ComputeStakeSlashAuthorization420.t.sol",
+    "contracts/test/ComputeStakeSlashPolicy420.t.sol",
+    "contracts/test/ComputeStakeVerifierCollateral420.t.sol",
+    "contracts/test/ComputeStakeWorkerCollateral420.t.sol",
+    "contracts/test/ComputeVerifierDisputeSlashEvidence420.t.sol",
+    "contracts/test/ComputeWorkerConflictingResultSlashEvidence420.t.sol",
+    "docs/compute-market/CMP-1.5.5-OBJECTIVE-SLASH-AUTHORIZATION.md",
+    "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
+    "scripts/verify-cmp-1-5-5-objective-slash-authorization.py"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 108,
+      "run_id": 36956107284,
+      "conclusion": "success",
+      "scope": "Level 1 build/verifier plus retained Compute*.t.sol Level 2 app suite"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3925,
+      "run_id": 36956107199,
+      "conclusion": "success",
+      "scope": "compute-fast; full repository Foundry shards intentionally skipped"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 4138,
+      "run_id": 36956107143,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 727,
+      "run_id": 36956107316,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 562,
+      "run_id": 36956107224,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1542,
+      "run_id": 36956107256,
+      "conclusion": "success"
+    }
+  ],
+  "verifier_checks": [
+    "retained Compute Market Solidity suite PASS",
+    "verification-script compilation PASS",
+    "CMP-1.5.5 objective slash authorization verifier PASS"
+  ],
+  "security_adversarial_results": [
+    "malformed slash policies rejected",
+    "later policy revision rejected against frozen collateral policy snapshot",
+    "subject/account/stake-policy mismatch rejected",
+    "verification-policy mismatch rejected",
+    "non-final evidence rejected",
+    "misconduct replay rejected",
+    "cumulative slash reservations cannot exceed live slashable collateral",
+    "matured worker/verifier withdrawal blocked while objective slash authorization remains outstanding",
+    "identical worker result pair rejected as non-conflicting",
+    "wrong worker execution signature rejected",
+    "swapped conflicting result pair cannot create a second misconduct event",
+    "missing worker stake binding rejected",
+    "timeout/non-final/generic adverse verifier dispute rejected",
+    "unresolved or non-independent verifier appeal rejected"
+  ],
+  "milestone_status": {
+    "level_2_milestone": true,
+    "rationale": "shared objective slash authority spans worker/verifier collateral, frozen slash policy, evidence adapters and withdrawal holds",
+    "retained_app_suite": "PASS"
+  },
+  "intentionally_deferred": [
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "limitations": [
+    "CMP-1.5.5 authorizes/reserves slash amounts only; it does not execute or distribute them",
+    "additional worker misconduct classes require separate preaccepted objective evidence adapters",
+    "live deployment/ProtocolRegistry publication is not claimed by this repository qualification"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.6 — Slash distribution"
+}

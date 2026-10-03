@@ -1,0 +1,108 @@
+{
+  "schema": "420pay-live-testnet-evidence-draft-v1",
+  "phase": "PAY-AUDIT-7",
+  "status": "DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE",
+  "instructions": "Copy to docs/audit/420PAY-AUDIT-7-LIVE-EVIDENCE-DRAFT.json only after the approved production-equivalent public testnet exists. Replace every REPLACE value with real non-secret chain/deployment/transaction/drill evidence. Never commit private keys, bearer tokens, RPC credentials, or credential-bearing endpoints.",
+  "release": {
+    "repositorySha": "REPLACE_EXACT_RELEASE_SHA",
+    "chainId": 0,
+    "genesisHash": "REPLACE_BYTES32",
+    "evidenceBlock": 0,
+    "evidenceBlockHash": "REPLACE_BYTES32"
+  },
+  "deployments": {
+    "MerchantRegistry420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x46b97e9d6aae24fce442eeb825c156d057f1fe2c7a05cf0dd654277c26071f79"
+    },
+    "InvoiceRegistry420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x624d2c65e1e5c063f97b62684e5e4b2af04f5e0840a825b3519121e966eb893b"
+    },
+    "PaymentRegistry420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x58fc4d1dfb69e8ecc16d8af28440e0c6cf744b5bebb429be5eb0e215717ce8ac"
+    },
+    "PaymentRouter420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x23229257e9368e576e5e28ace3d4be0ff7b02b7594d79c9aff4ccaa2e0c6900e"
+    },
+    "SettlementRouter420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x3f1acffba6ad41a0a40c4025c542cca9707e1b978abe5f466a950db1b7f03305"
+    },
+    "RefundManager420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x8d09fa4f299eb3326396c4872b5200373cfb3fe73ff5a217053fab33e91a1f7c"
+    },
+    "GasSponsor420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x6f753c83720149afa59e3b59aab91316705af00e248e8aa182d90d3c3d6595ff"
+    },
+    "CanonicalSettlementAdapter420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x49c98a763d4e1c4d514ef0c83e769f39fd1f906e92e785fc669d8f850119dc32"
+    },
+    "CanonicalSwapHealthAdapter420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "0x88f49324c466e9c5013603af5b1a2f000d07f21670131a9dff83b91b2ee81e03"
+    }
+  },
+  "bindings": {
+    "registryAllActive": false,
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "paymentRouterAdapterMatch": false,
+    "paymentRouterSettlementRouterMatch": false,
+    "adapterPaymentRouterMatch": false,
+    "adapterSettlementRouterMatch": false,
+    "adapterSwapExecutorCanonical": false,
+    "settlementRouterPaymentRouterMatch": false,
+    "settlementRouterAdapterMatch": false,
+    "refundManagerPaymentRegistryMatch": false,
+    "swapExecutorTrustsCanonicalAdapter": false,
+    "replayDomainBindsPaymentRouter": false
+  },
+  "transactions": {
+    "invoiceCreateTx": "REPLACE_TX_HASH",
+    "paymentCreateTx": "REPLACE_TX_HASH",
+    "paymentFinalizeTx": "REPLACE_TX_HASH",
+    "paymentSettleTx": "REPLACE_TX_HASH",
+    "refundPartialTx": "REPLACE_TX_HASH",
+    "refundCompleteTx": "REPLACE_TX_HASH",
+    "directSplitTx": "REPLACE_TX_HASH",
+    "swapBackedSplitTx": "REPLACE_TX_HASH",
+    "sponsoredReimbursementTx": "REPLACE_TX_HASH"
+  },
+  "negativeAndFailurePaths": {
+    "unauthorizedInvoiceRejected": false,
+    "unauthorizedLifecycleMutationRejected": false,
+    "settlementAdapterDirectBypassRejected": false,
+    "replayRejected": false,
+    "splitReplayRejected": false,
+    "refundOverAuthorizationRejected": false,
+    "unauthorizedSponsorRelayerRejected": false,
+    "swapFailureAtomicRollback": false,
+    "wrongChainRejected": false,
+    "staleQuoteRejected": false
+  },
+  "accountingExport": {
+    "qualified": false,
+    "paymentId": "REPLACE_BYTES32",
+    "exportDigest": "REPLACE_BYTES32",
+    "refundTotalReconciled": false,
+    "finalityStatus": "REPLACE_FINALITY_STATUS"
+  },
+  "indexer": {
+    "qualified": false,
+    "chainId": 0,
+    "genesisHash": "REPLACE_BYTES32",
+    "paymentLifecycleReconstructed": false,
+    "restartQualified": false,
+    "repeatedRestartProcessedZero": false,
+    "boundedReorgRecovered": false,
+    "deepReorgRejectedWithoutMutation": false,
+    "checkpointBefore": 0,
+    "checkpointAfter": 0,
+    "evidenceReportDigest": "REPLACE_BYTES32"
+  }
+}

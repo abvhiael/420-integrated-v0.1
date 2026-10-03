@@ -1,0 +1,66 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.4.ExitQueueWithdrawalDelay.v1",
+  "step": "CMP-1.5.4",
+  "title": "Exit queue / withdrawal delay",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "52568690f89d3bda3bff5b31b5edb5d6ec840baa",
+  "canonical_definition": "Exit queue / withdrawal delay",
+  "implementation": {
+    "exit_policy": "contracts/src/compute/ComputeStakeExitPolicy420.sol",
+    "worker_collateral": "contracts/src/compute/ComputeStakeWorkerCollateral420.sol",
+    "verifier_collateral": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "worker_tests": "contracts/test/ComputeStakeWorkerCollateral420.t.sol",
+    "verifier_tests": "contracts/test/ComputeStakeVerifierCollateral420.t.sol",
+    "exit_policy_tests": "contracts/test/ComputeStakeExitPolicy420.t.sol"
+  },
+  "requirements": [
+    "withdrawal delay policy is append-only, governance-published and nonzero",
+    "exit requests snapshot exact delay policy revision and commitment",
+    "later policy revisions cannot accelerate or extend an already-requested exit",
+    "only the immutable worker owner or stored verifier authority may request/withdraw its position",
+    "verifier authority rotation cannot strand or transfer historical collateral exit rights",
+    "requesting exit keeps all unwithdrawn collateral active and slashable through the delay",
+    "top-ups are rejected once a position is exiting",
+    "withdrawal before maturity fails closed",
+    "withdrawals are batched across immutable collateral tranches to avoid unbounded-loop lockout",
+    "each withdrawn tranche is released and claimed through canonical 420Vault accounting",
+    "remaining unwithdrawn tranches remain active/slashable after partial withdrawal",
+    "completed withdrawal zeros active/slashable amounts and deactivates the position",
+    "Vault beneficiary remains immutable and no arbitrary recipient is introduced"
+  ],
+  "security_boundaries": [
+    "CMP-1.5.4 does not authorize slashing or select slash recipients",
+    "CMP-1.5.4 does not introduce rewards or Treasury authority",
+    "release/claim authority is exercised only for tranches already bound to the exact collateral position",
+    "withdrawal operation IDs are domain-separated by chain, source contract, position and tranche",
+    "reentrant stake/withdraw/exit attempts are rejected while withdrawal is executing"
+  ],
+  "milestone": {
+    "level_2_required_now": true,
+    "rationale": "exit lifecycle and a shared delay-policy dependency now modify both worker and verifier collateral sources and their Vault release/claim path.",
+    "retained_app_suite": "retained Compute*.t.sol suite"
+  },
+  "deferred": [
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "qualification": {
+    "level": 2,
+    "level_1_required": [
+      "Compute contract build",
+      "focused exit-policy/worker-exit/verifier-exit tests",
+      "CMP-1.5.4 mechanical verifier"
+    ],
+    "level_2_required": [
+      "retained Compute*.t.sol app integration suite"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.5 — Objective slash authorization"
+}

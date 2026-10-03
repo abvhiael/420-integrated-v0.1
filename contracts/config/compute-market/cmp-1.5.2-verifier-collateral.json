@@ -1,0 +1,64 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.2.VerifierCollateral.v1",
+  "step": "CMP-1.5.2",
+  "title": "Verifier collateral",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "a5157eb48a1e30b70ade3fb1e5810aa9097270dc",
+  "canonical_definition": "Verifier collateral",
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeStakeVerifierCollateral420.sol",
+    "interface": "contracts/src/interfaces/IComputeVerifierStakeSource420.sol",
+    "test": "contracts/test/ComputeStakeVerifierCollateral420.t.sol",
+    "verifier_registry": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+    "vault": "contracts/src/vault/AssetVault420.sol",
+    "accounting": "contracts/src/vault/VaultAccounting420.sol"
+  },
+  "requirements": [
+    "only the current canonical verifier authority may add collateral for that verifier identity",
+    "verifier collateral is native $420 deposited into the registered VAULT_COLLATERAL 420Vault",
+    "every deposit is atomically backed by a distinct canonical Vault obligation",
+    "position identity is domain-separated by chain, contract, verifier identity, current authority and stake-policy reference",
+    "lifecycle revisions with the same authority do not orphan collateral",
+    "authority rotation cannot transfer or rewrite the prior authority collateral position",
+    "top-ups create immutable backing tranches and advance position revision",
+    "activeAmount and slashableAmount equal accumulated live verifier collateral at this step",
+    "verifier-policy positions remain isolated",
+    "retired verifiers cannot add collateral",
+    "missing Vault authorization reverts deposit and position mutation atomically",
+    "current verifier collateral can be read through IComputeVerifierStakeSource420"
+  ],
+  "deferred": [
+    "CMP-1.5.3 policy-specific minimum collateral enforcement",
+    "CMP-1.5.4 exit queue and withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 final WorkerRegistry stake-source integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "invariants": [
+    "CMP-INV-005",
+    "CMP-INV-016",
+    "CMP-INV-019",
+    "CMP-INV-020",
+    "CMP-INV-021",
+    "CMP-INV-022",
+    "CMP-INV-023",
+    "CMP-INV-025",
+    "CMP-INV-026"
+  ],
+  "qualification": {
+    "level": 1,
+    "required": [
+      "Compute contract build",
+      "retained Compute*.t.sol suite",
+      "focused ComputeStakeVerifierCollateral420 tests",
+      "CMP-1.5.2 verifier"
+    ]
+  },
+  "next_canonical_step": "CMP-1.5.3 — Policy-specific minimum collateral"
+}

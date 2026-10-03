@@ -17,9 +17,9 @@ Ordinary CMP roadmap steps qualify only the surfaces they change:
 
 The stable `Compute Market Qualification` workflow is the default CI gate for Compute-only changes.
 
-A Compute-only Solidity PR is classified by `Solidity Contracts` and runs focused Compute qualification instead of the complete 16-shard repository inventory.
+A Compute-only Solidity PR is classified by `Solidity Contracts` and runs focused Compute qualification instead of the complete repository Foundry inventory.
 
-A Compute-only `contracts/config/compute-market/**` change still runs Genesis cross-manifest authority checks when triggered, but does not duplicate the complete 16-shard Foundry inventory unless the PR also changes non-Compute/global authority surfaces.
+A Compute-only `contracts/config/compute-market/**` change still runs Genesis cross-manifest authority checks when triggered. Genesis Address Authority does not duplicate the full Foundry inventory; Solidity Contracts is the canonical owner of that inventory.
 
 ## Level 2 — integration milestone qualification
 
@@ -29,8 +29,8 @@ At meaningful multi-step integration boundaries, run the broader retained Comput
 
 At major Compute phase closeout, explicitly run the expensive retained global gates that are applicable to the phase, including:
 
-- complete Solidity inventory;
-- Genesis Address Authority when address/predeploy authority is affected;
+- complete Solidity inventory through the canonical Solidity Contracts owner (currently four runner-aware deterministic PR shards unless repository evidence warrants another count);
+- Genesis Address Authority when address/predeploy authority is affected, without a duplicate full Foundry inventory;
 - 420 Integrated Qualification when consensus/execution/global runtime behavior is affected or as a deliberate final closeout gate;
 - other affected application qualification workflows.
 

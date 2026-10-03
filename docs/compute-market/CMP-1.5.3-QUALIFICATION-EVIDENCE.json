@@ -1,0 +1,119 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.3.QualificationEvidence.v1",
+  "step": "CMP-1.5.3",
+  "title": "Policy-specific minimum collateral",
+  "completion_state": "COMPLETE",
+  "implementation_sha": "d72dc4c2f5fc2772fd2ea4299dbce9936e78cece",
+  "evidence_only_closeout": true,
+  "current_main_observed": "98e545225d54379086f0c520afcb84b4d4d97288",
+  "stacked_base_sha": "3773f00e067ccef50b40ff35a9f11449e403476f",
+  "pr": 461,
+  "qualification": {
+    "level_1": "PASS",
+    "level_2_milestone": "PASS",
+    "level_3": "DEFERRED_TO_CMP-1.5.13"
+  },
+  "implementation_summary": [
+    "added ComputeStakeCollateralPolicy420 as the canonical CMP-1.5 minimum-collateral policy authority",
+    "added append-only versioned worker/verifier collateral minima with exact policy commitments",
+    "separated mutable new-acceptance gating from immutable historical policy revisions",
+    "added independent worker/verifier active/slashable threshold evaluation with optional exit rejection",
+    "preserved custody/source-selection separation; the policy contract is non-custodial and source-neutral"
+  ],
+  "requirements_satisfied": [
+    "governance-only append-only policy publication",
+    "at least one collateral role is required per policy revision",
+    "required roles use nonzero minima and slashable minimum cannot exceed active minimum",
+    "disabled roles carry zero minima",
+    "worker and verifier requirements/minima are independently evaluated",
+    "historical revisions and commitments remain immutable after supersession or acceptance suspension",
+    "exact current revision/commitment is required for new acceptance",
+    "worker position evaluation enforces identity/revision, active state, active/slashable minima and optional exit rejection",
+    "verifier position evaluation additionally requires verifier authority and verifier revision",
+    "policy authority never custodies collateral or chooses a stake source"
+  ],
+  "files_changed": [
+    ".github/workflows/compute-market.yml",
+    "contracts/config/compute-market/cmp-1.5.3-policy-minimum-collateral.json",
+    "contracts/src/compute/ComputeStakeCollateralPolicy420.sol",
+    "contracts/test/ComputeStakeCollateralPolicy420.t.sol",
+    "docs/compute-market/CMP-1.5.3-POLICY-SPECIFIC-MINIMUM-COLLATERAL.md",
+    "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
+    "scripts/verify-cmp-1-5-3-policy-minimum-collateral.py"
+  ],
+  "exact_head_ci": [
+    {
+      "workflow": "Compute Market Qualification",
+      "run_number": 94,
+      "run_id": 36939546185,
+      "conclusion": "success",
+      "scope": "Level 1 build/verifier plus retained Compute*.t.sol Level 2 app suite"
+    },
+    {
+      "workflow": "Solidity Contracts",
+      "run_number": 3809,
+      "run_id": 36939546206,
+      "conclusion": "success",
+      "scope": "compute-fast; full repository Foundry shards intentionally skipped"
+    },
+    {
+      "workflow": "420Docs Qualification",
+      "run_number": 4022,
+      "run_id": 36939546320,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "Genesis Address Authority",
+      "run_number": 611,
+      "run_id": 36939546297,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Registry REG-AUDIT-4",
+      "run_number": 446,
+      "run_id": 36939546365,
+      "conclusion": "success"
+    },
+    {
+      "workflow": "420Indexer",
+      "run_number": 1426,
+      "run_id": 36939546384,
+      "conclusion": "success"
+    }
+  ],
+  "verifier_checks": [
+    "retained Compute Market Solidity suite PASS",
+    "verification-script compilation PASS",
+    "CMP-1.5.3 policy-specific minimum collateral verifier PASS"
+  ],
+  "security_adversarial_results": [
+    "unauthorized policy publication rejected",
+    "unauthorized acceptance toggling rejected",
+    "invalid zero/partial/minimum relationships rejected",
+    "under-collateralized worker positions rejected",
+    "under-collateralized verifier positions rejected",
+    "inactive/exiting positions rejected when policy requires",
+    "worker/verifier minima remain independent",
+    "historical policy revisions and commitments remain unchanged after new revision or acceptance gating"
+  ],
+  "milestone_status": {
+    "first_cmp_1_5_level_2_milestone": true,
+    "reason": "worker collateral, verifier collateral and shared minimum-collateral policy converge",
+    "retained_app_suite": "PASS"
+  },
+  "compatibility_note": "ComputeWorkerStake420 retains its older local worker-admission policy surface until CMP-1.5.9 integration; it is not the canonical CMP-1.5 minimum-collateral policy authority.",
+  "intentionally_deferred": [
+    "CMP-1.5.4 exit queue / withdrawal delay",
+    "CMP-1.5.5 objective slash authorization",
+    "CMP-1.5.6 slash distribution",
+    "CMP-1.5.7 reward accounting",
+    "CMP-1.5.8 dispute/stake integration",
+    "CMP-1.5.9 WorkerRegistry stake-source and canonical-policy integration",
+    "CMP-1.5.10 ComputeEscrow slash redistribution",
+    "CMP-1.5.11 hostile economic qualification",
+    "CMP-1.5.12 release candidate",
+    "CMP-1.5.13 phase closeout"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.4 — Exit queue / withdrawal delay"
+}

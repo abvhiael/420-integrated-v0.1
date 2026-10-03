@@ -1,0 +1,99 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-1.5.12.QualificationEvidence.v1",
+  "step": "CMP-1.5.12",
+  "title": "Release candidate",
+  "completion_state": "COMPLETE_REPOSITORY_READY_LIVE_BLOCKED",
+  "qualification_level": 1,
+  "implementation_sha": "cb67b0b4a564d90c7c6ca910288c6946b9a5929c",
+  "evidence_only_closeout": true,
+  "pull_request": 485,
+  "branch": "cmp-1.5.12-release-candidate-20261002",
+  "implementation_summary": [
+    "freeze accumulated ComputeStake release graph with exact runtime code hashes and canonical bindings",
+    "pin WorkerRegistry, VerifierRegistry, dispute engine, entitlement source, payer escrow Vault, worker/verifier collateral Vaults and reward Vault",
+    "enforce separation of payer escrow, slashable collateral and reward backing",
+    "add hostile release-wiring tests",
+    "add truthful repository-ready/live-blocked release manifest and ProtocolRegistry publication requirements"
+  ],
+  "requirements_satisfied": [
+    "complete release graph pinned",
+    "critical upstream runtime identities pinned",
+    "payer escrow, collateral and reward Vault domains separated",
+    "ProtocolRegistry publication path pinned",
+    "repository live evidence remains null/truthful",
+    "repository-ready verifier passes",
+    "live-ready verifier remains fail-closed",
+    "CMP-1.5.0 through CMP-1.5.11 repository gates retained"
+  ],
+  "level_1": {
+    "status": "PASS",
+    "retained_compute_suite_directly_applicable": true
+  },
+  "level_2": {
+    "status": "NOT_RERUN",
+    "reason": "CMP-1.5.11 immediately preceding this step qualified the Level 2 hostile-economic integration milestone; CMP-1.5.12 changes release wiring/evidence only."
+  },
+  "workflows": [
+    {
+      "name": "Genesis Address Authority",
+      "run_number": 1007,
+      "run_id": 37057737579,
+      "job_id": 111006492553,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_number": 4440,
+      "run_id": 37057737629,
+      "job_id": 111006492144,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Indexer",
+      "run_number": 1826,
+      "run_id": 37057737700,
+      "job_id": 111006495091,
+      "conclusion": "success"
+    },
+    {
+      "name": "Solidity Contracts",
+      "run_number": 4227,
+      "run_id": 37057737607,
+      "job_id": 111007855645,
+      "job": "compute-fast",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compute Market Qualification",
+      "run_number": 162,
+      "run_id": 37057737542,
+      "job_id": 111006905401,
+      "job": "fast-qualification",
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-4",
+      "run_number": 842,
+      "run_id": 37057737465,
+      "job_id": 111006490904,
+      "conclusion": "success"
+    }
+  ],
+  "security_results": [
+    "runtime-hash drift rejected",
+    "slash-distribution binding drift rejected",
+    "cross-registry stake-source mismatch rejected",
+    "reward Vault cannot alias collateral Vault",
+    "payer escrow Vault cannot alias collateral or reward backing"
+  ],
+  "intentionally_deferred": [
+    "CMP-1.5.13 Level 3 phase closeout",
+    "live/public-testnet deployment and ProtocolRegistry publication"
+  ],
+  "limitations": [
+    "repository-ready does not imply live deployment",
+    "all live addresses/tx/block/runtime/publication evidence remain null until real deployment"
+  ],
+  "blockers": [],
+  "next_canonical_step": "CMP-1.5.13 — Phase closeout"
+}

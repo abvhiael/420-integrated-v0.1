@@ -17,6 +17,7 @@ on:
       - 'scripts/verify-cmp-1-4-0-verifier-architecture.py'
       - 'scripts/verify-cmp-1-4-4-signed-verdict-provenance.py'
       - 'scripts/verify-cmp-1-4-12-closeout.py'
+      - 'scripts/verify-cmp-1-5-13-closeout.py'
       - 'scripts/validate-doc-frontmatter.py'
       - 'scripts/validate-doc-version-metadata.py'
       - 'scripts/validate-doc-version-registry.py'
@@ -192,3 +193,6 @@ jobs:
 
       - name: Verify CMP-1.4.12 verifier phase closeout
         run: python scripts/verify-cmp-1-4-12-closeout.py
+
+      - name: Verify CMP-1.5.13 ComputeStake phase closeout
+        run: python scripts/verify-cmp-1-5-13-closeout.py

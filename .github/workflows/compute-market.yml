@@ -117,3 +117,69 @@ jobs:
 
       - name: Verify CMP-1.4.12 phase closeout reconciliation
         run: python scripts/verify-cmp-1-4-12-closeout.py
+
+      - name: Verify CMP-1.5.0 stake architecture
+        run: python scripts/verify-cmp-1-5-0-stake-architecture.py
+
+      - name: Verify CMP-1.5.1 worker collateral
+        run: python scripts/verify-cmp-1-5-1-worker-collateral.py
+
+      - name: Verify CMP-1.5.2 verifier collateral
+        run: python scripts/verify-cmp-1-5-2-verifier-collateral.py
+
+      - name: Verify CMP-1.5.3 policy-specific minimum collateral
+        run: python scripts/verify-cmp-1-5-3-policy-minimum-collateral.py
+
+      - name: Verify CMP-1.5.4 exit queue and withdrawal delay
+        run: python scripts/verify-cmp-1-5-4-exit-queue-withdrawal-delay.py
+
+      - name: Verify CMP-1.5.5 objective slash authorization
+        run: python scripts/verify-cmp-1-5-5-objective-slash-authorization.py
+
+      - name: Verify CMP-1.5.6 slash distribution
+        run: python scripts/verify-cmp-1-5-6-slash-distribution.py
+
+      - name: Verify CMP-1.5.7 reward accounting
+        run: python scripts/verify-cmp-1-5-7-reward-accounting.py
+
+      - name: Verify CMP-1.5.8 dispute stake integration
+        run: python scripts/verify-cmp-1-5-8-dispute-stake-integration.py
+
+      - name: Verify CMP-1.5.9 WorkerRegistry stake-source integration
+        run: python scripts/verify-cmp-1-5-9-workerregistry-stake-source-integration.py
+
+      - name: Verify CMP-1.2.10 closeout after stake-slash integration
+        run: python scripts/verify-cmp-1-2-10-closeout.py
+
+      - name: Verify CMP-1.5.10 ComputeEscrow slash redistribution
+        run: python scripts/verify-cmp-1-5-10-computeescrow-slash-redistribution.py
+
+      - name: Verify CMP-1.5.11 hostile economic qualification
+        run: python scripts/verify-cmp-1-5-11-hostile-economic-qualification.py
+
+      - name: Verify CMP-1.5.12 repository release candidate
+        run: python scripts/verify-cmp-1-5-12-release-candidate.py --repository-ready
+
+      - name: Verify CMP-1.5.12 live readiness remains fail-closed
+        shell: bash
+        run: |
+          if python scripts/verify-cmp-1-5-12-release-candidate.py; then
+            echo "CMP-1.5.12 live readiness unexpectedly passed"
+            exit 1
+          fi
+
+      - name: Verify CMP-1.5.13 phase closeout inventory
+        run: python scripts/verify-cmp-1-5-13-closeout.py
+
+      - name: Setup Node for affected Compute SDK
+        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build and test affected @420/sdk Compute surface
+        if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002'
+        working-directory: packages/420-sdk
+        run: |
+          npm install --no-audit --no-fund
+          npm test

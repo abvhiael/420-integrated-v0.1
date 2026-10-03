@@ -67,3 +67,33 @@ jobs:
             echo 'Unexpected custody/value-transfer primitive found in 420Oracle sources' >&2
             exit 1
           fi
+
+  consumer-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify Oracle consumer boundaries
+        run: python3 scripts/verify-420oracle-consumers.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build and test 420Automation Oracle consumer
+        working-directory: 420-automation
+        run: |
+          npm install --no-package-lock
+          npm test
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run Swap-to-Oracle source adapter integration
+        working-directory: contracts
+        run: forge test --match-path test/SwapTWAPOracle420.t.sol -vvv

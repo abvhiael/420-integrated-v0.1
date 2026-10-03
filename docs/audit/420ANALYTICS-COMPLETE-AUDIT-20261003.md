@@ -105,6 +105,33 @@ This closes the repository-local exact-head qualification gap only. It does not 
 - **Evidence policy:** subsequent documentation-only bookkeeping commits do not alter the qualified implementation SHA and do not require recursive qualification.
 - **Next canonical audit step:** ANALYTICS-AUDIT-2 — durable repository audit evidence.
 
+## ANALYTICS-AUDIT-2 durable repository audit evidence
+
+- **Roadmap step:** ANALYTICS-AUDIT-2 — durable repository audit evidence
+- **Qualification level:** Level 1 — evidence-only app-scoped closeout
+- **Status:** **COMPLETE**
+- **Purpose:** retain the complete Analytics audit, exact-head Level 1 CI evidence, remediation decisions, limitations and handoff state in the repository without changing executable behavior or falsely advancing live qualification.
+- **Implementation summary:** no executable implementation change is required for this step. The authoritative implementation remains the ANALYTICS-AUDIT-1-qualified SHA; this step closes the repository evidence/bookkeeping requirement only.
+- **Files changed by AUDIT-2:** `docs/audit/420ANALYTICS-COMPLETE-AUDIT-20261003.md` and `docs/420ANALYTICS-ROADMAP.md` only.
+- **Requirements satisfied:** durable audit retained; exact-head workflow/run/job evidence retained; implementation/base identities retained; qualification level and milestone policy retained; security/adversarial results retained; deferred Level 3 checks identified; live/testnet blockers retained; next canonical phase identified; no live gate promoted.
+- **Qualified implementation SHA:** `988842ee7fcfdb804af699358458718063624af1`
+- **Prior durable ANALYTICS-AUDIT-1 evidence commit:** `aab878b282ae6815ad9d55937c549a27573d2c92`
+- **Formal ANALYTICS-AUDIT-1 roadmap bookkeeping commit:** `48a63f6c05f32737564f11cac81e2dfdbb6d8298`
+- **Audit base/current main SHA:** `d37d751dfa232b20c8158d55c20c13cc1d7a10ef`
+- **Audit branch / PR:** `analytics-audit-20261003` / #500
+- **CI evidence retained:** `420Analytics Audit Qualification` run `37102656876`, job `111145094012`, exact implementation SHA PASS.
+- **Tests/checks/verifiers represented by retained evidence:** `go test ./analytics/...` PASS; `go test -race ./analytics/...` PASS; `go vet ./analytics/...` PASS; `analytics420` build PASS; `analyticslivevalidate` build PASS; Analytics Genesis-profile verification PASS; explicit ANALYTICS-9 live-gate verification PASS.
+- **Security/adversarial/invariant result:** race and static qualification PASS; Analytics authority, privacy, provenance/source-boundary and ANL invariant profile checks PASS at the qualified implementation SHA.
+- **Repository-state check for AUDIT-2:** branch remains ahead of current `main` with no behind commits at step start; post-qualification changes are documentation/evidence only.
+- **Milestone status:** this is not a Level 2 integration milestone; no broader app suite is required.
+- **Intentionally deferred Level 3 checks:** canonical full Solidity inventory, Genesis/address-authority qualification, 420 Integrated/global qualification, Docs/global reconciliation and other whole-repository closeout suites.
+- **Limitations:** repository evidence does not prove a production-equivalent live deployment.
+- **Blocker / live handoff:** ANALYTICS-9 remains blocked on an approved production-equivalent testnet and qualified live 420Indexer binding/evidence.
+- **Live-gate integrity:** `liveTestnetEvidence=false` and `genesisCloseout=false` remain authoritative; AUDIT-2 does not modify those manifests.
+- **Evidence-only qualification rule:** this step changes documentation/evidence only, so the already-qualified implementation SHA remains authoritative and recursive CI qualification is not required.
+- **Completion state:** **ANALYTICS-AUDIT-2 COMPLETE**.
+- **Next canonical roadmap step:** **ANALYTICS-9 — production-equivalent testnet qualification**.
+
 ## Remediation roadmap
 
 1. **ANALYTICS-AUDIT-1 — exact-head repository qualification — COMPLETE**
@@ -125,9 +152,11 @@ This closes the repository-local exact-head qualification gap only. It does not 
    - Level 3 repository-wide qualification intentionally deferred to app-phase closeout;
    - completion state: **COMPLETE**.
 
-2. **ANALYTICS-AUDIT-2 — durable repository audit evidence**
-   - retain this audit, exact-head CI evidence and any corrections;
-   - do not mark live gates complete.
+2. **ANALYTICS-AUDIT-2 — durable repository audit evidence — COMPLETE**
+   - retained this audit, exact-head CI evidence, remediation decisions, limitations and blocker state;
+   - confirmed the step is evidence-only and does not change the qualified implementation SHA;
+   - preserved ANALYTICS-9 live/testnet gates as incomplete;
+   - recorded the canonical handoff to ANALYTICS-9.
 
 3. **ANALYTICS-9 — production-equivalent testnet qualification**
    - deploy qualified 420Indexer and `analytics420`;

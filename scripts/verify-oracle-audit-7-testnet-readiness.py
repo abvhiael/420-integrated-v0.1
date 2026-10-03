@@ -81,10 +81,13 @@ for item in checks:
 deployment = load(DEPLOYMENT)
 if deployment.get("status") != "REPOSITORY_READY_TESTNET_DEPLOYMENT_REQUIRED":
     fail("Oracle deployment manifest status drift")
-if deployment.get("fixedAddress") is not None:
+discovery = deployment.get("serviceDiscovery", {})
+if discovery.get("fixedAddress") is not None:
     fail("Oracle router incorrectly assigned a fixed address")
-if deployment.get("addressPolicy") != "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS":
+if discovery.get("addressPolicy") != "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS":
     fail("Oracle address policy drift")
+if discovery.get("registry") != "ProtocolRegistry":
+    fail("Oracle registry discovery source drift")
 if deployment.get("serviceId") != "420/service/oracle/v1":
     fail("Oracle service ID drift")
 

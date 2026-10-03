@@ -32,13 +32,13 @@ export async function prepareParticipant(rpc,runtime,kind,payload){
 }
 function review(kind,to,data,summary){return {schema:'420-launchpad-transaction-review-v1',canonical:true,kind,summary,transaction:{to,data,value:'0x0'}};}
 export function creatorRequest(payload,runtime){
-  const allowed=new Set(['registerProject','createSale','setCampaignMode','activate','finalize','cancel']);
+  const allowed=new Set(['setCampaignMode','activate','finalize','cancel']);
   const action=String(payload.action||'');if(!allowed.has(action))throw new Error('unsupported creator request');
   if(!/^0x[0-9a-fA-F]{40}$/.test(payload.account||''))throw new Error('creator account required');
   return {
     schema:'420-launchpad-creator-request-v1',canonical:true,action,requester:payload.account,
     projectId:String(payload.projectId||''),saleId:String(payload.saleId||''),metadataHash:String(payload.metadataHash||''),mode:String(payload.mode||''),
-    requiresGovernance:true,authorityTarget:runtime.saleRegistryAddress,
+    requiresGovernance:true,authorityTarget:action==='setCampaignMode'?runtime.crowdfundingIntegrationAddress:runtime.saleRegistryAddress,
     notice:'Launchpad project registration and sale lifecycle are governance-only. This request grants no direct mutation authority.'
   };
 }

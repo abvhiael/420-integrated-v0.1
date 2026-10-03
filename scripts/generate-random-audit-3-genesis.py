@@ -59,15 +59,19 @@ def patch_runtime(raw):
     if not isinstance(refs,dict) or len(refs)!=1: fail("expected one immutable identifier")
     encoded=bytes.fromhex("00"*12+TIMELOCK[2:])
     code=bytearray.fromhex(runtime[2:]); patched=[]
-    for iid,locs in refs.items():
+    normalized=[]
+    for _iid,locs in refs.items():
         if not isinstance(locs,list) or not locs: fail("empty immutable refs")
         for loc in locs:
             start,length=loc.get("start"),loc.get("length")
             if not isinstance(start,int) or length!=32 or start<0 or start+length>len(code): fail("invalid immutable ref")
             original=bytes(code[start:start+length])
             code[start:start+length]=encoded
-            patched.append({"immutableId":str(iid),"start":start,"length":length,"originalCompilerBytes":"0x"+original.hex(),"materializedValue":"0x"+encoded.hex()})
-    return "0x"+code.hex(),refs,patched
+            normalized.append({"start":start,"length":length})
+            patched.append({"immutableId":"governanceTimelock","start":start,"length":length,"originalCompilerBytes":"0x"+original.hex(),"materializedValue":"0x"+encoded.hex()})
+    normalized.sort(key=lambda x:(x["start"],x["length"]))
+    patched.sort(key=lambda x:(x["start"],x["length"]))
+    return "0x"+code.hex(),{"governanceTimelock":normalized},patched
 
 def storage_layout(raw):
     layout=raw.get("storageLayout")

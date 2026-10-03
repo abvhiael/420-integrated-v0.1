@@ -17,25 +17,18 @@ function renderList(selector,items,label,selectVersion=false){
   }
 }
 function renderDiscovery(result){state.discovery=result;renderList('#model-list',result.models,'models');renderList('#version-list',result.versions,'versions',true);renderList('#deployment-list',result.deployments,'deployments');}
-function reviewRows(intent){return Object.entries(intent).map(([k,v])=>'<dt>'+k.replace(/[A-Z]/g,m=>' '+m.toLowerCase())+'</dt><dd>'+String(v)+'</dd>').join('');}
-function renderReview(kind,intent){state.review={kind,intent};$('#review-panel').hidden=false;$('#review-details').innerHTML=reviewRows(intent);$('#submit-reviewed').disabled=!state.wallet;}
+function renderDefinitionList(root,entries){root.replaceChildren();for(const [key,value] of entries){const dt=document.createElement('dt');dt.textContent=key;const dd=document.createElement('dd');dd.textContent=String(value??'—');root.append(dt,dd);}}
+function renderReview(kind,intent){state.review={kind,intent};$('#review-panel').hidden=false;renderDefinitionList($('#review-details'),Object.entries(intent).map(([k,v])=>[k.replace(/[A-Z]/g,m=>' '+m.toLowerCase()),v]));$('#submit-reviewed').disabled=!state.wallet;}
 function clearReview(){state.review=null;state.controller?.clearReview();$('#review-panel').hidden=true;$('#review-details').replaceChildren();}
 function renderJob(job){
   state.job=job;const root=$('#job-detail');
   if(!job){root.textContent='Job not found.';return;}
-  root.innerHTML='<dl>'+
-    '<dt>Job</dt><dd>'+job.jobId+'</dd>'+
-    '<dt>Status</dt><dd>'+job.status+'</dd>'+
-    '<dt>Requester</dt><dd>'+job.requester+'</dd>'+
-    '<dt>Model version</dt><dd>'+job.modelVersionId+'</dd>'+
-    '<dt>Maximum spend</dt><dd>'+job.maxSpend+'</dd>'+
-    '<dt>Funded amount</dt><dd>'+(job.fundedAmount??'not funded')+'</dd>'+
-    '<dt>Funding reference</dt><dd>'+(job.fundingRef??'—')+'</dd>'+
-    '<dt>Vault reference</dt><dd>'+(job.vaultRef??'—')+'</dd>'+
-    '<dt>Provider</dt><dd>'+(job.providerId??'unmatched')+'</dd>'+
-    '<dt>Compute job</dt><dd>'+(job.computeJobId??'—')+'</dd>'+
-    '<dt>Result commitment</dt><dd>'+(job.resultHash??'—')+'</dd>'+
-    '<dt>Authoritative</dt><dd>'+String(job.authoritative)+'</dd></dl>';
+  const dl=document.createElement('dl');renderDefinitionList(dl,[
+    ['Job',job.jobId],['Status',job.status],['Requester',job.requester],['Model version',job.modelVersionId],
+    ['Maximum spend',job.maxSpend],['Funded amount',job.fundedAmount??'not funded'],['Funding reference',job.fundingRef],
+    ['Vault reference',job.vaultRef],['Provider',job.providerId??'unmatched'],['Compute job',job.computeJobId],
+    ['Result commitment',job.resultHash],['Authoritative',String(job.authoritative)]
+  ]);root.replaceChildren(dl);
   const mine=state.wallet&&job.requester?.toLowerCase()===state.wallet.account;
   $('#prepare-cancel').disabled=!(mine&&job.status==='CREATED'&&state.config.features.requestCancellation);
   $('#prepare-dispute').disabled=!(mine&&['RESULT_COMMITTED','VERIFIED'].includes(job.status)&&state.config.features.disputeOpening);

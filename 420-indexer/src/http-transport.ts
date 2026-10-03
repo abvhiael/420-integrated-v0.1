@@ -122,6 +122,17 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
       return object ? ok420(object) : error420(404, 'not_found', 'protocol object not found');
     }
 
+    const aiProviderId = pathParam420(path, /^\/v1\/ai\/providers\/([^/]+)$/);
+    if (aiProviderId !== null) { const value = await api.aiProvider(chainId, aiProviderId); return value ? ok420(value) : error420(404, 'not_found', 'AI provider not found'); }
+    const aiModelVersionId = pathParam420(path, /^\/v1\/ai\/model-versions\/([^/]+)$/);
+    if (aiModelVersionId !== null) { const value = await api.aiModelVersion(chainId, aiModelVersionId); return value ? ok420(value) : error420(404, 'not_found', 'AI model version not found'); }
+    const aiModelId = pathParam420(path, /^\/v1\/ai\/models\/([^/]+)$/);
+    if (aiModelId !== null) { const value = await api.aiModel(chainId, aiModelId); return value ? ok420(value) : error420(404, 'not_found', 'AI model not found'); }
+    const aiDeploymentId = pathParam420(path, /^\/v1\/ai\/deployments\/([^/]+)$/);
+    if (aiDeploymentId !== null) { const value = await api.aiDeployment(chainId, aiDeploymentId); return value ? ok420(value) : error420(404, 'not_found', 'AI deployment not found'); }
+    const aiJobId = pathParam420(path, /^\/v1\/ai\/jobs\/([^/]+)$/);
+    if (aiJobId !== null) { const value = await api.aiJob(chainId, aiJobId); return value ? ok420(value) : error420(404, 'not_found', 'AI job not found'); }
+
     const treasuryBudgetId = pathParam420(path, /^\/v1\/treasury\/budgets\/([^/]+)$/);
     if (treasuryBudgetId !== null) {
       const budget = await api.treasuryBudget(chainId, treasuryBudgetId);
@@ -174,6 +185,11 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
         objectKey: url.searchParams.get('objectKey') ?? undefined
       }));
     }
+    if (path === '/v1/ai/providers') return ok420(await api.aiProviders(chainId, pageRequest420(url)));
+    if (path === '/v1/ai/models') return ok420(await api.aiModels(chainId, pageRequest420(url)));
+    if (path === '/v1/ai/model-versions') return ok420(await api.aiModelVersions(chainId, pageRequest420(url)));
+    if (path === '/v1/ai/deployments') return ok420(await api.aiDeployments(chainId, pageRequest420(url)));
+    if (path === '/v1/ai/jobs') return ok420(await api.aiJobs(chainId, pageRequest420(url)));
     if (path === '/v1/search') {
       const q = url.searchParams.get('q')?.trim() ?? '';
       if (!q) return error420(400, 'invalid_request', 'q is required');

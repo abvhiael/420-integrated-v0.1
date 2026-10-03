@@ -335,3 +335,6 @@ Recover from canonical chain state outward: Civic → Treasury/Vault → Grants 
 - [Rewards and issuance](../consensus/rewards-and-issuance.md)
 - [Trust-boundary model](../trust-boundary-model.md)
 - [Wallet permissions and sessions](../../users/wallet/permissions-and-sessions.md)
+- [420Grants operator guide](../../apps/grants/operator-guide.md)
+- [420Grants threat model](../../apps/grants/threat-model.md)
+- [420Grants audit report](../../audit/420GRANTS-AUDIT-REPORT.md)

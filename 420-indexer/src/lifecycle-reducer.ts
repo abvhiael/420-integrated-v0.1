@@ -30,7 +30,8 @@ export interface LifecycleSnapshot420 {
 
 const KEY_FIELDS = [
   'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
-  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId'
+  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId',
+  'programId','applicationId','awardId','milestoneId'
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
@@ -95,6 +96,23 @@ const POLICY_LIST: LifecyclePolicy420[] = [
   ]},
   { protocol: '420Governance', rules: [
     { eventName: 'CivicProposalRegistered', state: 'ACTIVE' }
+  ]},
+  { protocol: '420Grants', rules: [
+    { eventName: 'ProgramCreated', state: 'ACTIVE' },
+    { eventName: 'ApplicationSubmitted', state: 'ACTIVE' },
+    { eventName: 'AwardCreated', state: 'ACTIVE' },
+    {
+      eventName: 'AwardStateChanged',
+      state: 'UNKNOWN',
+      stateField: 'state',
+      stateMap: { '1': 'ACTIVE', '2': 'CANCELLED', '3': 'COMPLETED' },
+      terminalFieldValues: ['2','3']
+    },
+    { eventName: 'MilestoneCreated', state: 'PENDING' },
+    { eventName: 'MilestoneClaimed', state: 'ACTIVE' },
+    { eventName: 'MilestoneApproved', state: 'ACTIVE' },
+    { eventName: 'MilestonePaid', state: 'COMPLETED', terminal: true },
+    { eventName: 'MilestoneCancelled', state: 'CANCELLED', terminal: true }
   ]},
   { protocol: '420Pay', rules: [
     {

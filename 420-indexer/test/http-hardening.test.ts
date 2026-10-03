@@ -22,6 +22,10 @@ function throwingApi420(): IndexerPublicApi420 {
     async protocolObject() { throw new Error('backend unavailable'); },
     async treasuryBudget() { throw new Error('backend unavailable'); },
     async treasuryDisbursement() { throw new Error('backend unavailable'); },
+    async grantsProgram() { throw new Error('backend unavailable'); },
+    async grantsApplication() { throw new Error('backend unavailable'); },
+    async grantsAward() { throw new Error('backend unavailable'); },
+    async grantsMilestone() { throw new Error('backend unavailable'); },
     async search() { throw new Error('backend unavailable'); }
   } as IndexerPublicApi420;
 }

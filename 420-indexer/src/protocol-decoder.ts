@@ -91,5 +91,5 @@ export class ProtocolDecoderRegistry420 {
 }
 
 export const GENESIS_PROTOCOLS_420 = [
-  '420Registry','420Names','420Identity','420Stake','420Governance','420Treasury','420Pay','420Swap','420Exchange','420Bridge','420Rights','420Randomness'
+  '420Registry','420Names','420Identity','420Stake','420Governance','420Treasury','420Grants','420Pay','420Swap','420Exchange','420Bridge','420Rights','420Randomness'
 ] as const;

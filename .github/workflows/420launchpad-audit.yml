@@ -74,7 +74,14 @@ jobs:
 
       - name: Check affected Solidity formatting
         working-directory: contracts
-        run: forge fmt --check test/Launchpad*420.t.sol src/launchpad/*.sol src/arbitration/ArbitrationCaseRegistry420.sol
+        run: |
+          forge fmt --check \
+            test/LaunchpadCrowdfundingIntegration420.t.sol \
+            test/LaunchpadArbitrationOrigin420.t.sol \
+            src/launchpad/LaunchpadAllocationRegistry420.sol \
+            src/launchpad/LaunchpadCrowdfundingIntegration420.sol \
+            src/launchpad/ILaunchpadCrowdfundingIntegration420.sol \
+            src/arbitration/ArbitrationCaseRegistry420.sol
 
       - name: Build affected Launchpad and Arbitration contracts
         working-directory: contracts

@@ -1,0 +1,34 @@
+{
+  "address": "0x0000000000000000000000000000000000000428",
+  "constructorMaterialization": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "immutableReferenceCount": 2,
+    "method": "compiler-emitted immutableReferences patched with ABI-encoded constructor address"
+  },
+  "contractName": "RandomnessRegistry",
+  "declaredStorageRoots": {
+    "_records": "1",
+    "randomnessRouter": "0"
+  },
+  "invariants": [
+    "genesis alloc.code uses materialized deployed runtime bytecode, never creation bytecode",
+    "governanceTimelock is embedded as a Solidity immutable and is not written to storage",
+    "RandomnessRegistry constructor performs no mutable storage writes",
+    "randomnessRouter begins address(0) and must be bound exactly once only after qualified router deployment",
+    "_records begins empty",
+    "runtimeCodeHash equals keccak256(materialized deployed runtime bytecode)"
+  ],
+  "limitations": [
+    "This is deterministic offline Genesis materialization, not live-chain deployment evidence.",
+    "RANDOM-AUDIT-4 retains deployment/binding instructions; RANDOM-AUDIT-5 retains production-equivalent testnet evidence."
+  ],
+  "runtimeArtifact": "contracts/artifacts/RandomnessRegistry.json",
+  "runtimeCodeHash": "0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a",
+  "schema": "420-randomness-predeploy-state-v1",
+  "sourceBlobSha1": "4f5548314eb37c7c52f8199560439f97c6c837ce",
+  "status": "RANDOM_AUDIT_3_FINAL_PREDEPLOY_STATE",
+  "storage": {},
+  "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
+  "storageRootBasis": "Ethereum empty Merkle-Patricia storage trie root = keccak256(0x80)",
+  "storageSlotCount": 0
+}

@@ -1,0 +1,94 @@
+name: 420Randomness RANDOM-AUDIT-5
+
+on:
+  pull_request:
+    paths:
+      - "420-indexer/descriptors/randomness-v1.json"
+      - "420-indexer/src/randomness-descriptors.ts"
+      - "420-indexer/src/lifecycle-reducer.ts"
+      - "420-indexer/test/randomness420-release-descriptor.test.ts"
+      - "scripts/qualify-randomness-testnet.py"
+      - "scripts/verify-random-audit-5-testnet-readiness.py"
+      - ".github/workflows/randomness-live-testnet.yml"
+      - ".github/workflows/randomness-audit-5.yml"
+      - "docs/audit/RANDOM-AUDIT-5-LIVE-EVIDENCE-DRAFT.example.json"
+      - "docs/audit/RANDOM-AUDIT-5-TESTNET-QUALIFICATION.md"
+      - "docs/audit/420RANDOMNESS-COMPLETE-AUDIT-20261002.md"
+  workflow_dispatch:
+
+concurrency:
+  group: randomness-audit-5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate RANDOM-AUDIT-5 Python
+        run: |
+          python3 -m py_compile scripts/qualify-randomness-testnet.py
+          python3 -m py_compile scripts/verify-random-audit-5-testnet-readiness.py
+
+      - name: Fail-closed RANDOM-AUDIT-5 readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-random-audit-5-testnet-readiness.py | tee /tmp/random-audit-5-readiness.txt
+          grep -q 'RANDOM_AUDIT_5_READINESS=BLOCKED_PUBLIC_TESTNET_NOT_LIVE' /tmp/random-audit-5-readiness.txt
+          grep -q 'liveQualificationComplete=false' /tmp/random-audit-5-readiness.txt
+
+      - name: Hostile template cannot satisfy live qualification
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if python3 scripts/qualify-randomness-testnet.py \
+            --manifest testnet/public/metadata/chain.json \
+            --evidenceDraft docs/audit/RANDOM-AUDIT-5-LIVE-EVIDENCE-DRAFT.example.json \
+            --repositorySha "$EXPECTED_SHA" \
+            --output /tmp/should-not-exist.json; then
+            echo "example/placeholder evidence unexpectedly qualified" >&2
+            exit 1
+          fi
+          test ! -f /tmp/should-not-exist.json
+
+      - name: Install 420Indexer dependencies
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund --no-package-lock
+
+      - name: Build 420Indexer
+        working-directory: 420-indexer
+        run: npm run build
+
+      - name: Focused generalized Randomness Indexer qualification
+        working-directory: 420-indexer
+        run: node --test --test-concurrency=1 dist/test/randomness420-release-descriptor.test.js dist/test/lifecycle-reducer.test.js
+
+      - name: Full directly affected 420Indexer regression
+        working-directory: 420-indexer
+        run: node --test --test-concurrency=1 dist/test/*.test.js
+
+      - name: Ensure live workflow is manual and template contains no secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'workflow_dispatch' .github/workflows/randomness-live-testnet.yml
+          grep -q 'qualify-randomness-testnet.py' .github/workflows/randomness-live-testnet.yml
+          grep -q 'DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE' docs/audit/RANDOM-AUDIT-5-LIVE-EVIDENCE-DRAFT.example.json
+          ! grep -R -nE '(PRIVATE_KEY|MNEMONIC|BEARER|PASSWORD|TOKEN=)' docs/audit/RANDOM-AUDIT-5-LIVE-EVIDENCE-DRAFT.example.json

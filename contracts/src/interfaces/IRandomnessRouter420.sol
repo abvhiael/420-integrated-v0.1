@@ -4,7 +4,13 @@ pragma solidity ^0.8.24;
 /// @notice Canonical application-facing interface for generalized 420Random.
 /// @dev Randomness is deliberately separate from ordinary 420Oracle data feeds.
 interface IRandomnessRouter420 {
-    enum Status { NONE, REQUESTED, FALLBACK_ACTIVE, FULFILLED, VOIDED }
+    enum Status {
+        NONE,
+        REQUESTED,
+        FALLBACK_ACTIVE,
+        FULFILLED,
+        VOIDED
+    }
 
     struct Request {
         address requester;
@@ -30,13 +36,31 @@ interface IRandomnessRouter420 {
         Status status;
     }
 
-    function requestRandomness(bytes32 profileId, bytes32 domain, bytes32 purpose, uint64 deadline)
-        external returns (bytes32 requestId);
+    function requestRandomness(
+        bytes32 profileId,
+        bytes32 domain,
+        bytes32 purpose,
+        uint64 deadline
+    ) external returns (bytes32 requestId);
 
-    function fulfillRandomness(bytes32 requestId, bytes32 providerRandomness, bytes calldata proof) external;
-    function activateFallback(bytes32 requestId) external;
-    function voidExpired(bytes32 requestId) external;
-    function status(bytes32 requestId) external view returns (Status);
-    function request(bytes32 requestId) external view returns (Request memory);
-    function result(bytes32 requestId) external view returns (bytes32 randomness, bytes32 proofHash);
+    function fulfillRandomness(
+        bytes32 requestId,
+        bytes32 providerRandomness,
+        bytes calldata proof
+    ) external;
+    function activateFallback(
+        bytes32 requestId
+    ) external;
+    function voidExpired(
+        bytes32 requestId
+    ) external;
+    function status(
+        bytes32 requestId
+    ) external view returns (Status);
+    function request(
+        bytes32 requestId
+    ) external view returns (Request memory);
+    function result(
+        bytes32 requestId
+    ) external view returns (bytes32 randomness, bytes32 proofHash);
 }

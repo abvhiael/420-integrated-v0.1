@@ -41,10 +41,17 @@ contract RandomnessProfileRegistry420 is SystemAccess, I420System {
         bool active
     );
 
-    constructor(address timelock_) SystemAccess(timelock_) {}
+    constructor(
+        address timelock_
+    ) SystemAccess(timelock_) { }
 
-    function systemName() external pure returns (string memory) { return "RandomnessProfileRegistry420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function systemName() external pure returns (string memory) {
+        return "RandomnessProfileRegistry420";
+    }
+
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
 
     function setProfile(
         bytes32 profileId,
@@ -97,7 +104,9 @@ contract RandomnessProfileRegistry420 is SystemAccess, I420System {
         );
     }
 
-    function profile(bytes32 profileId) external view returns (Profile memory) {
+    function profile(
+        bytes32 profileId
+    ) external view returns (Profile memory) {
         return _profiles[profileId];
     }
 }

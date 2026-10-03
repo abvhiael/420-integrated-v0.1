@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+import json, pathlib, subprocess, sys
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+def fail(m): raise SystemExit("RANDOM-AUDIT-3 test failed: "+m)
+def load(p): return json.loads((ROOT/p).read_text())
+a=load("contracts/artifacts/RandomnessRegistry.json")
+s=load("contracts/config/predeploy/RandomnessRegistry-predeploy-state.json")
+p=load("contracts/config/predeploy/predeploy-plan.json")
+m=load("contracts/config/deployment-manifest.json")
+if a.get("status")!="RANDOM_AUDIT_3_ARTIFACT_READY": fail("artifact status")
+if s.get("status")!="RANDOM_AUDIT_3_FINAL_PREDEPLOY_STATE": fail("state status")
+if a.get("predeployAddress")!="0x0000000000000000000000000000000000000428": fail("address")
+if s.get("storage")!={} or s.get("storageSlotCount")!=0: fail("non-empty genesis storage")
+if s.get("declaredStorageRoots")!={"_records":"1","randomnessRouter":"0"}: fail("layout roots")
+if s.get("constructorMaterialization",{}).get("governanceTimelock")!="0x0000000000000000000000000000000000000429": fail("timelock")
+if not a.get("materializedImmutableReferences"): fail("immutable refs")
+if a.get("runtimeCodeHash")!=s.get("runtimeCodeHash"): fail("artifact/state runtime hash")
+pe=next((x for x in p.get("predeploys",[]) if x.get("name")=="RandomnessRegistry"),None)
+me=next((x for x in m.get("contracts",[]) if x.get("name")=="RandomnessRegistry"),None)
+if not pe or not me: fail("authority entries")
+for e in (pe,me):
+    if e.get("runtime_code_hash")!=a.get("runtimeCodeHash"): fail("authority runtime hash")
+    if e.get("source_blob_sha1")!=a.get("sourceBlobSha1"): fail("authority source blob")
+if pe.get("predeploy_state")!="contracts/config/predeploy/RandomnessRegistry-predeploy-state.json": fail("plan state path")
+if me.get("predeploy_state")!="contracts/config/predeploy/RandomnessRegistry-predeploy-state.json": fail("manifest state path")
+subprocess.run([sys.executable,str(ROOT/"scripts/generate-random-audit-3-genesis.py"),"--check"],cwd=ROOT,check=True)
+print("RANDOM_AUDIT_3_TEST=PASS")

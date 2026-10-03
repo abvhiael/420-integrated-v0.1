@@ -54,6 +54,30 @@ jobs:
         working-directory: contracts
         run: forge test --match-path 'test/ResourceGenesis420.t.sol' -vvvv
 
+      - name: Check Resource Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/resource/ResourceProviderRegistry420.sol src/resource/ResourceNodeRegistry420.sol src/resource/ResourceOfferRegistry420.sol src/resource/ResourceSessionRegistry420.sol src/resource/ResourceReceiptRegistry420.sol
+
+  resource-storage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
       - name: Run storage protocol suites
         working-directory: contracts
         shell: bash
@@ -67,10 +91,6 @@ jobs:
             test/StorageSettlementRegistry420.t.sol; do
             forge test --match-path "$suite" -vvv
           done
-
-      - name: Check Resource Solidity formatting
-        working-directory: contracts
-        run: forge fmt --check src/resource/ResourceProviderRegistry420.sol src/resource/ResourceNodeRegistry420.sol src/resource/ResourceOfferRegistry420.sol src/resource/ResourceSessionRegistry420.sol src/resource/ResourceReceiptRegistry420.sol
 
   resource-runtime-sdk:
     runs-on: ubuntu-latest

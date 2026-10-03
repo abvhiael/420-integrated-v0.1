@@ -35,7 +35,7 @@ Canonical upstream authorities:
 | GRANTS-AUDIT-5 | COMPLETE | Registry/address/deployment materialization qualified |
 | GRANTS-AUDIT-6 | COMPLETE | client/indexer/Wallet integration qualified |
 | GRANTS-AUDIT-7 | COMPLETE | documentation/threat model/operator closeout qualified on exact head |
-| GRANTS-AUDIT-8 | IN PROGRESS | Level 3 accumulated merge-candidate reconciliation/qualification |
+| GRANTS-AUDIT-8 | COMPLETE | Level 3 accumulated merge-candidate reconciliation/qualification passed on exact head |
 | GRANTS-AUDIT-9 | BLOCKED | production-equivalent testnet required |
 | GRANTS-AUDIT-10 | BLOCKED | depends on AUDIT-9 and whole-system Genesis gates |
 
@@ -204,6 +204,9 @@ Qualification evidence is retained in:
 - `docs/audit/420GRANTS-AUDIT-5-QUALIFICATION.md`;
 - `docs/audit/420GRANTS-AUDIT-6-QUALIFICATION.md`;
 - `docs/audit/420GRANTS-AUDIT-7-QUALIFICATION.md`;
+- `docs/audit/420GRANTS-AUDIT-8-QUALIFICATION.md`;
 - `docs/audit/420GRANTS-AUDIT-REMEDIATION-ROADMAP.md`.
 
-GRANTS-AUDIT-7 exact-head implementation qualification: `14c6732aa1d30bed5e5e5459ee930bafc9c54426`, 420Grants Audit Qualification run `37086042799` / #68 SUCCESS, affected Solidity Contracts run `37086042862` / #4399 SUCCESS. GRANTS-AUDIT-8 remains the accumulated Level 3 merge-candidate closeout.
+GRANTS-AUDIT-7 exact-head implementation qualification: `14c6732aa1d30bed5e5e5459ee930bafc9c54426`, 420Grants Audit Qualification run `37086042799` / #68 SUCCESS, affected Solidity Contracts run `37086042862` / #4399 SUCCESS.
+
+GRANTS-AUDIT-8 Level 3 exact merge-candidate qualification: `c95e72c8037bd52c4a7b1844104dc3e5444e2e4a`. Canonical Solidity Contracts #4448 / run `37088753146` SUCCESS, Genesis Address Authority #1219 / `37088753244` SUCCESS, 420Grants #79 / `37088753167` SUCCESS, 420Docs #4665 / `37088753247` SUCCESS, 420Indexer #1160 / `37088753170` SUCCESS and #2040 / `37088753275` SUCCESS, Wallet Web #1480 / `37088753218` SUCCESS. Repository/app-phase closeout is COMPLETE; live production-equivalent evidence remains GRANTS-AUDIT-9.

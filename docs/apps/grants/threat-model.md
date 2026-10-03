@@ -4,7 +4,7 @@ audience:
   - security
   - developer
   - operator
-category: security
+category: architecture
 status: current
 version: current
 ---

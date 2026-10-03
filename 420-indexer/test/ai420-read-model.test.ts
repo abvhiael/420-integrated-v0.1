@@ -4,7 +4,7 @@ import type { SqlExecutor420, TransactionalSql420 } from '../src/core-projection
 import type { Hex, IndexerLog } from '../src/chain-source.js';
 import { ProtocolDecoderRegistry420 } from '../src/protocol-decoder.js';
 import { ProtocolProjection420 } from '../src/protocol-projections.js';
-import { aiJobState420, aiProviderState420, aiJobs420, AI_READ_SCHEMA_VERSION_420 } from '../src/ai-read-model.js';
+import { aiJobState420, aiProviderState420, aiPolicyState420, aiReputationState420, aiJobs420, AI_READ_SCHEMA_VERSION_420 } from '../src/ai-read-model.js';
 
 const h=(n:number)=>`0x${n.toString(16).padStart(64,'0')}`;
 const a=(n:number)=>`0x${n.toString(16).padStart(40,'0')}`;
@@ -65,4 +65,18 @@ test('AI protocol projection rollback removes orphaned events and permits canoni
  await projection.applyLogs(420n,[log]);await projection.rollbackTo(49n);await projection.applyLogs(420n,[{...log,blockHash:h(92) as Hex,transactionHash:h(93) as Hex}]);
  assert.equal(db.calls.filter((x)=>/insert into idx_protocol_events/.test(x.sql)).length,2);
  assert.equal(db.calls.some((x)=>/delete from idx_protocol_events where block_number > \$1/.test(x.sql)),true);
+});
+
+
+test('AI policy projection is versioned and does not invent non-emitted privacy or pricing ids',async()=>{
+ const db=new QueueDb();db.queue.push({rows:[row('PolicyConfigured',{policyId:h(1),revision:'2',workloadClass:h(2),verificationProfileId:h(3),maxSpend420:'99',maxDeadlineSeconds:'300',active:true},4)]});
+ const s=await aiPolicyState420(db,420n,h(1));assert.equal(s?.revision,'2');assert.equal(s?.privacyPolicyId,null);assert.equal(s?.servicePricingPolicyId,null);assert.equal(s?.active,true);
+});
+
+test('AI reputation projection follows Trust-applied evidence counters without inventing a score',async()=>{
+ const db=new QueueDb();db.queue.push({rows:[
+  row('EvidenceApplied',{providerId:h(1),evidenceId:h(2),outcome:h(3),completed:'4',disputed:'1',upheld:'1',failed:'0'},6),
+  row('ReputationApplied',{providerId:h(1),completed:'4',disputed:'1',upheld:'1'},6)
+ ]});
+ const s=await aiReputationState420(db,420n,h(1));assert.equal(s?.completed,'4');assert.equal(s?.failed,'0');assert.equal(s?.latestEvidenceId,h(2));assert.equal(s?.latestOutcome,h(3));assert.equal('score' in (s??{}),false);
 });

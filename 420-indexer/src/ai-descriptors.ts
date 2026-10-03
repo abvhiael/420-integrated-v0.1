@@ -5,7 +5,7 @@ import type { ProtocolEventDescriptor420, ProtocolFieldKind420 } from './protoco
 
 export const AI_EVENT_CONTRACTS_420 = [
   'AIProviderRegistry','AIModelRegistry','AIModelDeploymentRegistry420',
-  'AIJobManager','AIJobEscrow','AIPolicyRegistry420'
+  'AIJobManager','AIJobEscrow','AIPolicyRegistry420','AIReputationRegistry'
 ] as const;
 export type AiEventContract420 = typeof AI_EVENT_CONTRACTS_420[number];
 

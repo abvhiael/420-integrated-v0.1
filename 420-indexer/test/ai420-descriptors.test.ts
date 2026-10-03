@@ -10,7 +10,7 @@ function artifacts():ReadonlyMap<string,Artifact420>{return new Map(manifest.con
 
 test('420AI descriptor covers provider/model/deployment/job/escrow/policy read families without private fields',()=>{
  const descriptors=aiDescriptorsFromArtifacts420(manifest,artifacts());
- assert.equal(descriptors.length,27);
+ assert.equal(descriptors.length,30);
  assert.deepEqual([...new Set(descriptors.map((d)=>d.contractName))].sort(),[...AI_EVENT_CONTRACTS_420].sort());
  assert.equal(descriptors.every((d)=>d.protocol==='420AI'),true);
  assert.equal(descriptors.flatMap((d)=>d.fields).some((f)=>/(payload|prompt|secret|token|credential)/i.test(f.name)),false);

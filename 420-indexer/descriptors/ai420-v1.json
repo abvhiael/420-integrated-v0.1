@@ -696,6 +696,90 @@
           ]
         }
       ]
+    },
+    {
+      "contractName": "AIReputationRegistry",
+      "sourcePath": "contracts/src/ai/AIReputationRegistry.sol",
+      "events": [
+        {
+          "name": "TrustAdapterBound",
+          "signature": "TrustAdapterBound(address)",
+          "inputs": [
+            {
+              "name": "adapter",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "ReputationApplied",
+          "signature": "ReputationApplied(bytes32,uint64,uint64,uint64)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "completed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "disputed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "upheld",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "EvidenceApplied",
+          "signature": "EvidenceApplied(bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "evidenceId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "outcome",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "completed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "disputed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "upheld",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "failed",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        }
+      ]
     }
   ]
 }

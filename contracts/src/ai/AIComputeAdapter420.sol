@@ -478,7 +478,7 @@ contract AIComputeAdapter420 is I420System {
                 || j.workloadType != b.workloadClass || j.inputCommitment != r.inputCommitment
                 || j.outputSchemaCommitment != b.outputSchemaCommitment || j.deadline != b.deadline
         ) revert EvidenceMismatch();
-        if (uint8(j.status) < uint8(IAIComputeJobRegistry420.Status.FUNDED)) revert WrongState();
+        if (j.status != IAIComputeJobRegistry420.Status.FUNDED) revert WrongState();
 
         b.computeJobId = computeJobId;
         emit ComputeJobBound(aiRequestId, computeJobId);
@@ -489,9 +489,7 @@ contract AIComputeAdapter420 is I420System {
         if (b.computeJobId == bytes32(0) || b.accepted) revert InvalidBinding();
 
         IAIComputeJobRegistry420.Job memory j = computeJobs.job(b.computeJobId);
-        if (uint8(j.status) < uint8(IAIComputeJobRegistry420.Status.ACCEPTED) || j.matchId == bytes32(0)) {
-            revert WrongState();
-        }
+        if (!_acceptedOrLater(j.status) || j.matchId == bytes32(0)) revert WrongState();
 
         IAIComputeAcceptedMatch420.Match memory m = computeMatches.getMatch(j.matchId);
         bytes32 priceRef = computeMatches.priceReservationForJob(b.computeJobId);
@@ -539,20 +537,14 @@ contract AIComputeAdapter420 is I420System {
         (,,,,,,,,,,,,,,,, AIJobManager.Status aiStatus) = jobs.jobs(aiRequestId);
 
         if (
-            aiStatus == AIJobManager.Status.ACCEPTED
-                && uint8(c.status) >= uint8(IAIComputeJobRegistry420.Status.RUNNING)
-                && c.status != IAIComputeJobRegistry420.Status.FAILED
-                && c.status != IAIComputeJobRegistry420.Status.REFUNDED
+            aiStatus == AIJobManager.Status.ACCEPTED && _runningOrLater(c.status)
         ) {
             jobs.markRunning(aiRequestId);
             aiStatus = AIJobManager.Status.RUNNING;
         }
 
         if (
-            aiStatus == AIJobManager.Status.RUNNING
-                && uint8(c.status) >= uint8(IAIComputeJobRegistry420.Status.RESULT_COMMITTED)
-                && c.status != IAIComputeJobRegistry420.Status.FAILED
-                && c.status != IAIComputeJobRegistry420.Status.REFUNDED
+            aiStatus == AIJobManager.Status.RUNNING && _resultOrLater(c.status)
         ) {
             if (c.resultCommitment == bytes32(0) || c.assignmentRef == bytes32(0)) revert EvidenceMismatch();
             bytes32 resultEvidenceHash = keccak256(
@@ -592,9 +584,8 @@ contract AIComputeAdapter420 is I420System {
 
         IAIComputeJobRegistry420.Job memory j = computeJobs.job(b.computeJobId);
         if (
-            uint8(j.status) < uint8(IAIComputeJobRegistry420.Status.VERIFIED)
-                || j.resultCommitment != b.resultCommitment || j.verificationRef == bytes32(0)
-                || j.verifier == address(0)
+            !_verifiedOrLater(j.status) || j.resultCommitment != b.resultCommitment
+                || j.verificationRef == bytes32(0) || j.verifier == address(0)
         ) revert EvidenceMismatch();
 
         bytes32 entitlementRef = computeEntitlements.entitlementForJob(b.computeJobId);
@@ -649,6 +640,36 @@ contract AIComputeAdapter420 is I420System {
 
     function getBinding(bytes32 aiRequestId) external view returns (Binding memory) {
         return _binding(aiRequestId);
+    }
+
+    function _acceptedOrLater(IAIComputeJobRegistry420.Status s) private pure returns (bool) {
+        return s == IAIComputeJobRegistry420.Status.ACCEPTED
+            || s == IAIComputeJobRegistry420.Status.RUNNING
+            || s == IAIComputeJobRegistry420.Status.RESULT_COMMITTED
+            || s == IAIComputeJobRegistry420.Status.VERIFIED
+            || s == IAIComputeJobRegistry420.Status.SETTLED
+            || s == IAIComputeJobRegistry420.Status.DISPUTED;
+    }
+
+    function _runningOrLater(IAIComputeJobRegistry420.Status s) private pure returns (bool) {
+        return s == IAIComputeJobRegistry420.Status.RUNNING
+            || s == IAIComputeJobRegistry420.Status.RESULT_COMMITTED
+            || s == IAIComputeJobRegistry420.Status.VERIFIED
+            || s == IAIComputeJobRegistry420.Status.SETTLED
+            || s == IAIComputeJobRegistry420.Status.DISPUTED;
+    }
+
+    function _resultOrLater(IAIComputeJobRegistry420.Status s) private pure returns (bool) {
+        return s == IAIComputeJobRegistry420.Status.RESULT_COMMITTED
+            || s == IAIComputeJobRegistry420.Status.VERIFIED
+            || s == IAIComputeJobRegistry420.Status.SETTLED
+            || s == IAIComputeJobRegistry420.Status.DISPUTED;
+    }
+
+    function _verifiedOrLater(IAIComputeJobRegistry420.Status s) private pure returns (bool) {
+        return s == IAIComputeJobRegistry420.Status.VERIFIED
+            || s == IAIComputeJobRegistry420.Status.SETTLED
+            || s == IAIComputeJobRegistry420.Status.DISPUTED;
     }
 
     function _binding(bytes32 aiRequestId) private view returns (Binding storage b) {

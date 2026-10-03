@@ -102,26 +102,17 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     uint8 private constant ARBITRATION_STATE_FINALIZED = 3;
     uint256 public constant MAX_PAYMENT_REFERENCES_PER_SALE = 32;
 
-    bytes32 public constant CROWDFUNDING_DOMAIN =
-        keccak256("420/arbitration/domain/launchpad-crowdfunding/v1");
-    bytes32 public constant REFUND_BATCH_DOMAIN =
-        keccak256("420/launchpad/crowdfunding/refund-batch/v1");
-    bytes32 public constant NOTIFICATION_DOMAIN =
-        keccak256("420/launchpad/crowdfunding/notification/v1");
-    bytes32 public constant REPUTATION_KIND_CONTRIBUTION =
-        keccak256("420/reputation/crowdfunding/contribution/v1");
+    bytes32 public constant CROWDFUNDING_DOMAIN = keccak256("420/arbitration/domain/launchpad-crowdfunding/v1");
+    bytes32 public constant REFUND_BATCH_DOMAIN = keccak256("420/launchpad/crowdfunding/refund-batch/v1");
+    bytes32 public constant NOTIFICATION_DOMAIN = keccak256("420/launchpad/crowdfunding/notification/v1");
+    bytes32 public constant REPUTATION_KIND_CONTRIBUTION = keccak256("420/reputation/crowdfunding/contribution/v1");
     bytes32 public constant REPUTATION_KIND_REWARD_DELIVERY =
         keccak256("420/reputation/crowdfunding/reward-delivery/v1");
-    bytes32 public constant NOTIFY_CONTRIBUTION =
-        keccak256("420/notifications/launchpad/contribution/v1");
-    bytes32 public constant NOTIFY_REFUND =
-        keccak256("420/notifications/launchpad/refund/v1");
-    bytes32 public constant NOTIFY_DELIVERY =
-        keccak256("420/notifications/launchpad/delivery/v1");
-    bytes32 public constant NOTIFY_DISPUTE =
-        keccak256("420/notifications/launchpad/dispute/v1");
-    bytes32 public constant NOTIFY_RULING =
-        keccak256("420/notifications/launchpad/ruling/v1");
+    bytes32 public constant NOTIFY_CONTRIBUTION = keccak256("420/notifications/launchpad/contribution/v1");
+    bytes32 public constant NOTIFY_REFUND = keccak256("420/notifications/launchpad/refund/v1");
+    bytes32 public constant NOTIFY_DELIVERY = keccak256("420/notifications/launchpad/delivery/v1");
+    bytes32 public constant NOTIFY_DISPUTE = keccak256("420/notifications/launchpad/dispute/v1");
+    bytes32 public constant NOTIFY_RULING = keccak256("420/notifications/launchpad/ruling/v1");
 
     LaunchpadAllocationRegistry420 public immutable allocations;
     LaunchpadSaleRegistry420 public immutable sales;
@@ -168,28 +159,15 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         bytes32 receiptHash
     );
     event RefundBatchPrepared(
-        bytes32 indexed saleId,
-        address indexed participant,
-        bytes32 indexed refundCommitment,
-        uint128 amount
+        bytes32 indexed saleId, address indexed participant, bytes32 indexed refundCommitment, uint128 amount
     );
     event RefundSettlementBound(
-        bytes32 indexed saleId,
-        address indexed participant,
-        bytes32 indexed refundCommitment,
-        uint128 amount
+        bytes32 indexed saleId, address indexed participant, bytes32 indexed refundCommitment, uint128 amount
     );
     event DeliveryEvidenceBound(
-        bytes32 indexed saleId,
-        address indexed participant,
-        bytes32 indexed deliveryCommitment,
-        uint128 tokenAmount
+        bytes32 indexed saleId, address indexed participant, bytes32 indexed deliveryCommitment, uint128 tokenAmount
     );
-    event DisputeLinked(
-        bytes32 indexed saleId,
-        address indexed participant,
-        bytes32 indexed caseId
-    );
+    event DisputeLinked(bytes32 indexed saleId, address indexed participant, bytes32 indexed caseId);
     event DisputeOutcomePublished(
         bytes32 indexed saleId,
         address indexed participant,
@@ -287,8 +265,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         if (profileId == bytes32(0)) revert InvalidIdentity();
         (address controller,,,,,, bool active) = identity.profiles(profileId);
         if (
-            controller != participant || !active
-                || !identity.hasValidCredential(profileId, sale_.eligibilityPolicyHash)
+            controller != participant || !active || !identity.hasValidCredential(profileId, sale_.eligibilityPolicyHash)
         ) revert InvalidIdentity();
 
         bytes32 frozenProfile = profileAtSale[saleId][participant];
@@ -301,23 +278,16 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         (
             ,
             address payer,
-            address merchant,
-            ,
-            ,
+            address merchant,,,
             address settlementAsset,
-            uint256 settlementAmount,
-            ,
-            ,
-            bytes32 receiptHash,
-            ,
-            ,
+            uint256 settlementAmount,,,
+            bytes32 receiptHash,,,
             uint8 status
         ) = paymentRegistry.payments(paymentId);
 
         if (
             status != PAY_STATUS_SETTLED || payer != participant || merchant != sale_.proceedsReceiver
-                || settlementAsset != sale_.paymentAsset || settlementAmount != amount
-                || receiptHash == bytes32(0)
+                || settlementAsset != sale_.paymentAsset || settlementAmount != amount || receiptHash == bytes32(0)
         ) revert InvalidSettlement();
 
         bytes32[] storage refs = _paymentIds[saleId][participant];
@@ -328,14 +298,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         refs.push(paymentId);
 
         emit ContributionSettlementBound(saleId, participant, paymentId, profileId, amount, receiptHash);
-        _publishReputation(
-            paymentId,
-            saleId,
-            sale_.projectId,
-            participant,
-            profileId,
-            REPUTATION_KIND_CONTRIBUTION
-        );
+        _publishReputation(paymentId, saleId, sale_.projectId, participant, profileId, REPUTATION_KIND_CONTRIBUTION);
         _publishNotification(saleId, participant, NOTIFY_CONTRIBUTION, paymentId);
         return true;
     }
@@ -356,25 +319,10 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         uint256 canonicalRefundedContribution;
         for (uint256 i = 0; i < length; ++i) {
             bytes32 paymentId = refs[i];
-            (
-                ,
-                address payer,
-                ,
-                ,
-                ,
-                ,
-                ,
-                ,
-                ,
-                ,
-                ,
-                uint256 refundedAmount,
-                uint8 status
-            ) = paymentRegistry.payments(paymentId);
+            (, address payer,,,,,,,,,, uint256 refundedAmount, uint8 status) = paymentRegistry.payments(paymentId);
             uint128 contributionAmount = contributionAmountByPayment[paymentId];
             if (
-                payer != msg.sender
-                    || (status != PAY_STATUS_REFUNDED && status != PAY_STATUS_PARTIALLY_REFUNDED)
+                payer != msg.sender || (status != PAY_STATUS_REFUNDED && status != PAY_STATUS_PARTIALLY_REFUNDED)
                     || refundedAmount < contributionAmount
             ) revert InvalidRefund();
             canonicalRefundedContribution += contributionAmount;
@@ -383,8 +331,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         uint128 paid = allocations.contributed(saleId, msg.sender);
         if (paid == 0 || canonicalRefundedContribution != paid) revert InvalidRefund();
 
-        refundCommitment =
-            keccak256(abi.encode(REFUND_BATCH_DOMAIN, saleId, msg.sender, refs));
+        refundCommitment = keccak256(abi.encode(REFUND_BATCH_DOMAIN, saleId, msg.sender, refs));
         if (usedRefundCommitment[refundCommitment]) revert Replay();
         preparedRefundCommitment[saleId][msg.sender] = refundCommitment;
         emit RefundBatchPrepared(saleId, msg.sender, refundCommitment, paid);
@@ -397,10 +344,8 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         bytes32 refundCommitment
     ) external onlyAllocations returns (bool) {
         if (
-            refundCommitment == bytes32(0)
-                || preparedRefundCommitment[saleId][participant] != refundCommitment
-                || usedRefundCommitment[refundCommitment]
-                || amount != allocations.contributed(saleId, participant)
+            refundCommitment == bytes32(0) || preparedRefundCommitment[saleId][participant] != refundCommitment
+                || usedRefundCommitment[refundCommitment] || amount != allocations.contributed(saleId, participant)
         ) revert InvalidRefund();
 
         usedRefundCommitment[refundCommitment] = true;
@@ -417,10 +362,9 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         uint128 tokenAmount,
         bytes32 deliveryCommitment
     ) external onlyAllocations {
-        if (
-            deliveryCommitment == bytes32(0) || usedDeliveryCommitment[deliveryCommitment]
-                || tokenAmount == 0
-        ) revert InvalidDelivery();
+        if (deliveryCommitment == bytes32(0) || usedDeliveryCommitment[deliveryCommitment] || tokenAmount == 0) {
+            revert InvalidDelivery();
+        }
 
         LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
         if (sale_.state != LaunchpadSaleRegistry420.State.SUCCEEDED) revert InvalidDelivery();
@@ -431,12 +375,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         usedDeliveryCommitment[deliveryCommitment] = true;
         emit DeliveryEvidenceBound(saleId, participant, deliveryCommitment, tokenAmount);
         _publishReputation(
-            deliveryCommitment,
-            saleId,
-            sale_.projectId,
-            participant,
-            profileId,
-            REPUTATION_KIND_REWARD_DELIVERY
+            deliveryCommitment, saleId, sale_.projectId, participant, profileId, REPUTATION_KIND_REWARD_DELIVERY
         );
         _publishNotification(saleId, participant, NOTIFY_DELIVERY, deliveryCommitment);
     }
@@ -461,10 +400,8 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         ) = arbitrationCases.caseOrigin(caseId);
 
         if (
-            claimant != msg.sender || respondent != project_.controller
-                || domainId != CROWDFUNDING_DOMAIN
-                || originComponentId != LaunchpadIds420.COMPONENT_LAUNCHPAD
-                || originObjectId != saleId || state == 0
+            claimant != msg.sender || respondent != project_.controller || domainId != CROWDFUNDING_DOMAIN
+                || originComponentId != LaunchpadIds420.COMPONENT_LAUNCHPAD || originObjectId != saleId || state == 0
         ) revert InvalidDispute();
 
         disputeCase[saleId][msg.sender] = caseId;
@@ -485,20 +422,14 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         if (state != ARBITRATION_STATE_FINALIZED) revert DisputeOutcomeUnavailable();
 
         uint8 round = arbitrationCases.caseRound(caseId);
-        ILaunchpadArbitrationRulings420.Ruling memory ruling =
-            arbitrationRulings.getRuling(caseId, round);
+        ILaunchpadArbitrationRulings420.Ruling memory ruling = arbitrationRulings.getRuling(caseId, round);
         if (!ruling.exists || ruling.outcomeCode == 0 || ruling.rulingHash == bytes32(0)) {
             revert DisputeOutcomeUnavailable();
         }
 
         publishedDisputeOutcome[caseId] = true;
         emit DisputeOutcomePublished(
-            saleId,
-            participant,
-            caseId,
-            ruling.outcomeCode,
-            ruling.rulingHash,
-            ruling.remedyCommitment
+            saleId, participant, caseId, ruling.outcomeCode, ruling.rulingHash, ruling.remedyCommitment
         );
         _publishNotification(saleId, participant, NOTIFY_RULING, caseId);
     }
@@ -531,14 +462,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         );
         if (publishedReputationEvidence[key]) revert Replay();
         publishedReputationEvidence[key] = true;
-        emit ReputationEvidencePublished(
-            evidenceRef,
-            saleId,
-            projectId,
-            participant,
-            profileId,
-            interactionKind
-        );
+        emit ReputationEvidencePublished(evidenceRef, saleId, projectId, participant, profileId, interactionKind);
     }
 
     function _publishNotification(
@@ -547,8 +471,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         bytes32 eventType,
         bytes32 sourceRef
     ) private {
-        bytes32 eventId =
-            keccak256(abi.encode(NOTIFICATION_DOMAIN, saleId, participant, eventType, sourceRef));
+        bytes32 eventId = keccak256(abi.encode(NOTIFICATION_DOMAIN, saleId, participant, eventType, sourceRef));
         if (publishedNotification[eventId]) revert Replay();
         publishedNotification[eventId] = true;
         emit NotificationPublished(eventId, saleId, participant, eventType, sourceRef);

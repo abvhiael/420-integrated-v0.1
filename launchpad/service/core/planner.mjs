@@ -25,6 +25,10 @@ export async function prepareParticipant(rpc,runtime,kind,payload){
     return review(kind,target,encodeStatic(sel,[sale,delivery]),'Record successful-sale claim with delivery commitment');
   }
   if(kind==='refund'){
+    if(payload.refundCommitment){
+      const commitment=bytes32(payload.refundCommitment),sel=await rpc.selector('recordRefund(bytes32,bytes32)');
+      return review(kind,runtime.allocationRegistryAddress,encodeStatic(sel,[sale,commitment]),'Record Launchpad refund after canonical refund batch preparation');
+    }
     const sel=await rpc.selector('prepareRefund(bytes32)');
     return review(kind,runtime.crowdfundingIntegrationAddress,encodeStatic(sel,[sale]),'Prepare canonical refund batch after 420Pay refund settlement');
   }

@@ -72,6 +72,8 @@ Implement the architecture-named modules that are still absent from current `mai
 - Publish canonical component IDs through ProtocolRegistry.
 - Define deployer/admin transfer, smoke tests, rollback/recovery, monitoring and DNS/API dependencies.
 
+- **Repository-side status: COMPLETE. Level 1 exact-head qualification passed at implementation SHA `ed7ab3af91d54b36d3ca6595eaf1363e07f09a55` in 420AI Audit Qualification run `37228805812`; all 10 required jobs passed, including `deployment-materialization` job `111513926105`. Durable evidence: `docs/audit/420AI-AUDIT-9-QUALIFICATION.md`. Live chain addresses, transaction hashes, Registry publication transactions, DNS/API materialization and production-equivalent runtime evidence remain explicitly deferred to AI-AUDIT-11.**
+
 ## AI-AUDIT-10 — exact-head pre-testnet qualification
 - Clean build from documented instructions.
 - Focused AI Foundry suite plus required CMP/Vault/Registry/Identity integration suites.

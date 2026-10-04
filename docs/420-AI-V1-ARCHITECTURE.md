@@ -450,6 +450,19 @@ The client must not:
 
 The committed runtime configuration remains fail-closed until AI-AUDIT-9 materializes live network/read-service values and enables transaction feature flags.
 
+
+### AI-AUDIT-9 deployment and Genesis materialization boundary
+
+The five legacy AI compatibility identities remain direct Genesis predeploys at `0x042f` through `0x0433`. Their runtime must be materialized from the exact qualified compiler/source state with GovernanceTimelock `0x0429` embedded as the immutable governance authority; those addresses are never reassigned to mature V1 modules.
+
+The mature V1 modules are Registry-resolved and have no implied fixed Genesis address. AI-AUDIT-9 freezes explicit component-ID preimages under `420/component/ai/.../v1`, stages every AI component as `SUSPENDED`, applies and verifies the one-shot Compute/Vault/settlement/Trust bindings, then activates the graph and publishes canonical service ID `420/service/ai/v1` to `AIRouter420`.
+
+ProtocolRegistry publication records discovery identity and runtime code hash only. It does not create custody, provider authority, settlement authority, compute authority or upgrade power.
+
+Repository materialization is not live-chain evidence. Registry-resolved production addresses, deployment/publication transactions, evidence blocks, network manifest values, DNS/API origins and real provider endpoints remain unset until the production-equivalent deployment step. The browser remains fail-closed while those live values are absent.
+
+Rollback for Registry-resolved modules means governance-controlled suspension/deprecation plus a newly qualified replacement deployment. Frozen predeploy identities are not moved or repurposed, and recovery may never fabricate or rewrite canonical CMP/Vault settlement, refund or dispute history.
+
 ## Implementation order
 
 1. Freeze ComputeMarket V1 architecture.

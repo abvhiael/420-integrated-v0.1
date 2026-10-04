@@ -5,6 +5,7 @@ import type { Hex } from '../src/chain-source.js';
 import type { Artifact420, AbiEvent420 } from '../src/abi-manifest.js';
 import {
   bindRightsDescriptors420,
+  bindRightsDescriptorsWithCodeIdentity420,
   rightsDescriptorsFromArtifacts420,
   type RightsArtifactManifest420
 } from '../src/rights-descriptors.js';
@@ -84,4 +85,56 @@ test('420Rights descriptor binding rejects malformed deployment address', () => 
     RightsLicenseRegistry420: '0x1234'
   } as unknown as Record<'RightsPolicyRegistry420'|'RightsAssetRegistry420'|'RightsClaimRegistry420'|'RightsLicenseRegistry420', Hex>;
   assert.throws(() => bindRightsDescriptors420(descriptors, addresses), /Rights deployment address invalid/);
+});
+
+
+test('420Rights code-identity binding accepts exact registry addresses and nonzero runtime hashes', () => {
+  const descriptors = rightsDescriptorsFromArtifacts420(manifest, artifactMap());
+  const deployments = {
+    RightsPolicyRegistry420: {
+      address: '0x0000000000000000000000000000000000001001',
+      runtimeCodeHash: '0x1111111111111111111111111111111111111111111111111111111111111111'
+    },
+    RightsAssetRegistry420: {
+      address: '0x0000000000000000000000000000000000001002',
+      runtimeCodeHash: '0x2222222222222222222222222222222222222222222222222222222222222222'
+    },
+    RightsClaimRegistry420: {
+      address: '0x0000000000000000000000000000000000001003',
+      runtimeCodeHash: '0x3333333333333333333333333333333333333333333333333333333333333333'
+    },
+    RightsLicenseRegistry420: {
+      address: '0x0000000000000000000000000000000000001004',
+      runtimeCodeHash: '0x4444444444444444444444444444444444444444444444444444444444444444'
+    }
+  } as const;
+  const bound = bindRightsDescriptorsWithCodeIdentity420(descriptors, deployments);
+  assert.equal(bound.length, 9);
+  assert.ok(bound.every((descriptor) => /^0x[0-9a-f]{64}$/.test(descriptor.runtimeCodeHash)));
+});
+
+test('420Rights code-identity binding rejects zero runtime code hash', () => {
+  const descriptors = rightsDescriptorsFromArtifacts420(manifest, artifactMap());
+  const deployments = {
+    RightsPolicyRegistry420: {
+      address: '0x0000000000000000000000000000000000001001',
+      runtimeCodeHash: '0x0000000000000000000000000000000000000000000000000000000000000000'
+    },
+    RightsAssetRegistry420: {
+      address: '0x0000000000000000000000000000000000001002',
+      runtimeCodeHash: '0x2222222222222222222222222222222222222222222222222222222222222222'
+    },
+    RightsClaimRegistry420: {
+      address: '0x0000000000000000000000000000000000001003',
+      runtimeCodeHash: '0x3333333333333333333333333333333333333333333333333333333333333333'
+    },
+    RightsLicenseRegistry420: {
+      address: '0x0000000000000000000000000000000000001004',
+      runtimeCodeHash: '0x4444444444444444444444444444444444444444444444444444444444444444'
+    }
+  } as const;
+  assert.throws(
+    () => bindRightsDescriptorsWithCodeIdentity420(descriptors, deployments),
+    /Rights deployment runtime code hash invalid/
+  );
 });

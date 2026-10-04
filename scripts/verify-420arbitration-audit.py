@@ -21,6 +21,7 @@ case_src = read("contracts/src/arbitration/ArbitrationCaseRegistry420.sol")
 ruling_src = read("contracts/src/arbitration/ArbitrationRulingRegistry420.sol")
 policy_src = read("contracts/src/arbitration/ArbitrationPolicyRegistry420.sol")
 arch = read("docs/architecture/protocols/arbitration.md")
+app_arch = read("docs/apps/arbitration/architecture.md")
 
 expected_contracts = [
     "ArbitrationIds420.sol",
@@ -77,6 +78,8 @@ need(
     "originating protocol" in arch.lower() and "custody" in arch.lower(),
     "authority boundary documentation missing",
 )
+need("ArbitrationRouter420" in arch and "420/service/arbitration/v1" in arch, "protocol router/discovery architecture missing")
+need("ArbitrationRouter420" in app_arch and "Wallet-integrated" in app_arch, "user runtime architecture missing")
 
 if errors:
     print(json.dumps({"pass": False, "errors": errors}, indent=2))

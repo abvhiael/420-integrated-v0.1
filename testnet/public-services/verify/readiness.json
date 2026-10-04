@@ -1,16 +1,16 @@
 {
   "schema": "420-testnet-verify-readiness-v1",
-  "implementation_status": "AUDIT_REMEDIATION_IN_PROGRESS",
-  "implementation_phase": "VERIFY-AUDIT-7",
+  "implementation_status": "AUDIT_CLOSEOUT_QUALIFICATION_PENDING",
+  "implementation_phase": "VERIFY-AUDIT-8",
   "audit": {
     "branch": "audit/420verify-20261003",
     "pr": 503,
-    "current_step": "VERIFY-AUDIT-7",
-    "next_step": "VERIFY-AUDIT-8",
-    "last_qualified_implementation_sha": "868095783962370149e685f6145c0163b84ba5e8",
+    "current_step": "VERIFY-AUDIT-8",
+    "next_step": "PUBLIC_TESTNET_DEPLOYMENT",
+    "last_qualified_implementation_sha": "a5b8edaf68fd864af0b7d17b99631c22c7fd8ab8",
     "last_qualification_workflow": "420Verify Audit Qualification",
-    "last_qualification_run": 37175301638,
-    "last_qualification_job": 111356576146,
+    "last_qualification_run": 37175783882,
+    "last_qualification_job": 111357979714,
     "final_exact_head_qualification_required": true
   },
   "backend": {

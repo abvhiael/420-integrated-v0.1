@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {AiReadApi420} from '../core/read-api.js';
+test('AI read API always scopes requests to configured chain',async()=>{let url=null;const api=new AiReadApi420({baseUrl:'https://indexer.example',chainId:420n,fetchImpl:async(u)=>{url=u;return{ok:true,json:async()=>({data:{items:[],nextCursor:null}})}}});await api.models({limit:5});assert.match(url,/chainId=420/);assert.match(url,/limit=5/);});
+test('AI read API rejects mismatched projected schema',async()=>{const api=new AiReadApi420({baseUrl:'https://indexer.example',chainId:420n,fetchImpl:async()=>({ok:true,json:async()=>({data:{schemaVersion:'wrong'}})})});await assert.rejects(()=>api.job('0xabc'),/schema mismatch/);});

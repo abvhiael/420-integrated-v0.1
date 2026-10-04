@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {AiClientController420} from '../core/controller.js';
+const h=n=>'0x'+n.toString(16).padStart(64,'0');
+const config={features:{walletConnection:true,requestCreation:true,requestCancellation:true,disputeOpening:true},network:{chainId:'0x1a4'},readApi:{baseUrl:null},contracts:{jobManager:'0x0000000000000000000000000000000000000431'},transactions:{minConfirmations:1,pollIntervalMs:1,timeoutMs:100}};
+test('request review stores commitment but never private input',()=>{const seen=[];const c=new AiClientController420({config,onState:s=>seen.push(s)});const p=c.prepareRequest({modelVersionId:h(2),workloadClass:h(3),privateInput:'secret prompt',privacyPolicyId:h(4),verificationProfileId:h(5),maxSpend:10,deadline:999});assert.equal(JSON.stringify(p).includes('secret prompt'),false);assert.match(p.intent.inputCommitment,/^0x[0-9a-f]{64}$/);});
+test('review mutation paths are bounded to requester methods',()=>{const c=new AiClientController420({config});assert.equal(c.prepareCancel(h(1)).kind,'CANCEL');assert.equal(c.prepareDispute(h(1),h(2)).kind,'DISPUTE');});

@@ -1,0 +1,785 @@
+{
+  "schema": "420-ai-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420AI",
+  "authority": "artifact_events_only_addresses_resolved_by_deployment",
+  "contracts": [
+    {
+      "contractName": "AIProviderRegistry",
+      "sourcePath": "contracts/src/ai/AIProviderRegistry.sol",
+      "events": [
+        {
+          "name": "ProviderRegistered",
+          "signature": "ProviderRegistered(bytes32,address,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "operatorAccount",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "settlementAccount",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "stakeRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "computeProviderRef",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProviderMetadataUpdated",
+          "signature": "ProviderMetadataUpdated(bytes32,bytes32,uint32)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProviderSettlementUpdated",
+          "signature": "ProviderSettlementUpdated(bytes32,address,uint32)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "settlementAccount",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProviderStakeReferenceUpdated",
+          "signature": "ProviderStakeReferenceUpdated(bytes32,bytes32,uint32)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "stakeRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProviderComputeReferenceUpdated",
+          "signature": "ProviderComputeReferenceUpdated(bytes32,bytes32,uint32)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "computeProviderRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProviderStateChanged",
+          "signature": "ProviderStateChanged(bytes32,uint8,uint8,uint32)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previousState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "newState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "AIModelRegistry",
+      "sourcePath": "contracts/src/ai/AIModelRegistry.sol",
+      "events": [
+        {
+          "name": "ModelRegistered",
+          "signature": "ModelRegistered(bytes32,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "modelId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "creator",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "licensePolicyId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ModelUpdated",
+          "signature": "ModelUpdated(bytes32,bytes32,bytes32,uint32)",
+          "inputs": [
+            {
+              "name": "modelId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "licensePolicyId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ModelStateChanged",
+          "signature": "ModelStateChanged(bytes32,uint8,uint8,uint32)",
+          "inputs": [
+            {
+              "name": "modelId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previousState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "newState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ModelVersionRegistered",
+          "signature": "ModelVersionRegistered(bytes32,bytes32,uint32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "modelVersionId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "modelId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "version",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "artifactHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "artifactManifestHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ModelVersionDeprecated",
+          "signature": "ModelVersionDeprecated(bytes32)",
+          "inputs": [
+            {
+              "name": "modelVersionId",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "AIModelDeploymentRegistry420",
+      "sourcePath": "contracts/src/ai/AIModelDeploymentRegistry420.sol",
+      "events": [
+        {
+          "name": "DeploymentRegistered",
+          "signature": "DeploymentRegistered(bytes32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "deploymentId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "modelVersionId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "computeOfferRef",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "DeploymentUpdated",
+          "signature": "DeploymentUpdated(bytes32,bytes32,uint32)",
+          "inputs": [
+            {
+              "name": "deploymentId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "endpointManifestHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "DeploymentStateChanged",
+          "signature": "DeploymentStateChanged(bytes32,uint8,uint8,uint32)",
+          "inputs": [
+            {
+              "name": "deploymentId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previousState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "newState",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "AIJobManager",
+      "sourcePath": "contracts/src/ai/AIJobManager.sol",
+      "events": [
+        {
+          "name": "JobCreated",
+          "signature": "JobCreated(bytes32,address,bytes32,bytes32,uint256,uint64)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "requester",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "modelVersionId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "workloadClass",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "maxSpend",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "deadline",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "FundingConfirmed",
+          "signature": "FundingConfirmed(bytes32,bytes32,uint256)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "fundingRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ComputeMatched",
+          "signature": "ComputeMatched(bytes32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "computeRequestId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "computeJobId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "JobStatus",
+          "signature": "JobStatus(bytes32,uint8,uint8)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previousStatus",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "newStatus",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ResultCommitted",
+          "signature": "ResultCommitted(bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "resultHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "resultManifestHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "DisputeOpened",
+          "signature": "DisputeOpened(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "disputeRef",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "DisputeResolved",
+          "signature": "DisputeResolved(bytes32,bool,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "upheld",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "resolutionRef",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "AIJobEscrow",
+      "sourcePath": "contracts/src/ai/AIJobEscrow.sol",
+      "events": [
+        {
+          "name": "Funded",
+          "signature": "Funded(bytes32,address,bytes32,uint256)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "payer",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "FundingBound",
+          "signature": "FundingBound(bytes32,bytes32,bytes32,address,uint256)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "vaultRef",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "fundingRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "beneficiary",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "Released",
+          "signature": "Released(bytes32,address,uint256)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "Refunded",
+          "signature": "Refunded(bytes32,address,uint256)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "SettlementReferenceBound",
+          "signature": "SettlementReferenceBound(bytes32,bytes32,uint8)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "settlementRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "state",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "AIPolicyRegistry420",
+      "sourcePath": "contracts/src/ai/AIPolicyRegistry420.sol",
+      "events": [
+        {
+          "name": "PolicyConfigured",
+          "signature": "PolicyConfigured(bytes32,uint32,bytes32,bytes32,uint256,uint64,bool)",
+          "inputs": [
+            {
+              "name": "policyId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint32",
+              "indexed": true
+            },
+            {
+              "name": "workloadClass",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "verificationProfileId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "maxSpend420",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "maxDeadlineSeconds",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "active",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "AIReputationRegistry",
+      "sourcePath": "contracts/src/ai/AIReputationRegistry.sol",
+      "events": [
+        {
+          "name": "TrustAdapterBound",
+          "signature": "TrustAdapterBound(address)",
+          "inputs": [
+            {
+              "name": "adapter",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "ReputationApplied",
+          "signature": "ReputationApplied(bytes32,uint64,uint64,uint64)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "completed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "disputed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "upheld",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "EvidenceApplied",
+          "signature": "EvidenceApplied(bytes32,bytes32,bytes32,uint64,uint64,uint64,uint64)",
+          "inputs": [
+            {
+              "name": "providerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "evidenceId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "outcome",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "completed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "disputed",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "upheld",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "failed",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

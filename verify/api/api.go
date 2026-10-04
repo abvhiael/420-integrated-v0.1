@@ -122,6 +122,11 @@ func (s *Service) submit(w http.ResponseWriter, r *http.Request) {
 	if err:=dec.Decode(&req); err!=nil { writeJSON(w,http.StatusBadRequest,errorBody(fmt.Errorf("decode submission: %w",err))); return }
 	if req.ChainID==0 || !validAddress(req.Address) { writeJSON(w,http.StatusBadRequest,errorBody(errors.New("non-zero chainId and valid address are required"))); return }
 	if err:=hardening.ValidateSubmission(req.Submission); err!=nil { writeJSON(w,http.StatusRequestEntityTooLarge,errorBody(err)); return }
+	if strings.TrimSpace(req.Submission.BundleHash) == "" {
+		hash, hashErr := req.Submission.ComputedBundleHash()
+		if hashErr != nil { writeJSON(w,http.StatusBadRequest,errorBody(fmt.Errorf("invalid source submission: %w",hashErr))); return }
+		req.Submission.BundleHash = hash
+	}
 	if err:=req.Submission.ValidateCommitment(); err!=nil { writeJSON(w,http.StatusBadRequest,errorBody(fmt.Errorf("invalid source/build submission: %w",err))); return }
 
 	select {

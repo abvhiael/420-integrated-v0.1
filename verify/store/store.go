@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -132,6 +133,17 @@ func (s *Store) AppendWithProxy(deployment evidence.DeploymentEvidence, submitte
 		return Record{}, err
 	}
 	if err := os.Rename(tmpName, final); err != nil {
+		return Record{}, err
+	}
+	dirHandle, err := os.Open(dir)
+	if err != nil {
+		return Record{}, err
+	}
+	if err := dirHandle.Sync(); err != nil {
+		_ = dirHandle.Close()
+		return Record{}, err
+	}
+	if err := dirHandle.Close(); err != nil {
 		return Record{}, err
 	}
 
@@ -259,13 +271,22 @@ func validateRecord(record Record) error {
 	if err := record.Submission.ValidateCommitment(); err != nil {
 		return err
 	}
+	if err := compiler.ValidateBuildEvidence(record.Build, record.Submission); err != nil {
+		return fmt.Errorf("build evidence: %w", err)
+	}
+	reclassified := matcher.Classify(record.Deployment, record.Build, record.Submission, record.Build.HasImmutables)
+	if !reflect.DeepEqual(reclassified, record.Classification) {
+		return errors.New("stored classification does not reproduce from deployment and build evidence")
+	}
 	if record.Proxy != nil {
 		if err := record.Proxy.Validate(); err != nil {
 			return err
 		}
 		if record.Proxy.ChainID != record.Deployment.ChainID ||
 			!strings.EqualFold(record.Proxy.ProxyAddress, record.Deployment.Address) ||
-			!strings.EqualFold(record.Proxy.ProxyRuntimeCodeHash, record.Deployment.RuntimeCodeHash) {
+			!strings.EqualFold(record.Proxy.ProxyRuntimeCodeHash, record.Deployment.RuntimeCodeHash) ||
+			record.Proxy.ObservedBlock != record.Deployment.ObservedAt.Number ||
+			!strings.EqualFold(record.Proxy.ObservedBlockHash, record.Deployment.ObservedAt.Hash) {
 			return errors.New("record proxy relationship binding mismatch")
 		}
 	}

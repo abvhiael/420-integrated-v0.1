@@ -131,6 +131,39 @@ func (b BuildSettings) Validate() error {
 	return nil
 }
 
+func (s Submission) ComputedBundleHash() (string, error) {
+	var want string
+	switch s.Kind {
+	case InputStandardJSON:
+		canonical, err := canonicalJSON(s.StandardJSON)
+		if err != nil {
+			return "", err
+		}
+		want = hashParts([]part{{name: "standard-json", content: canonical}})
+	case InputMultiFile, InputFlattened:
+		if len(s.Sources) == 0 {
+			return "", errors.New("source files are required")
+		}
+		parts := make([]part, 0, len(s.Sources))
+		seen := map[string]bool{}
+		for _, f := range s.Sources {
+			if err := validatePath(f.Path); err != nil {
+				return "", err
+			}
+			if seen[f.Path] {
+				return "", errors.New("duplicate source path")
+			}
+			seen[f.Path] = true
+			parts = append(parts, part{name: f.Path, content: []byte(f.Content)})
+		}
+		sort.Slice(parts, func(i, j int) bool { return parts[i].name < parts[j].name })
+		want = hashParts(parts)
+	default:
+		return "", errors.New("unsupported input kind")
+	}
+	return want, nil
+}
+
 func (s Submission) ValidateCommitment() error {
 	if (strings.TrimSpace(s.TargetSource) == "") != (strings.TrimSpace(s.TargetContract) == "") {
 		return errors.New("targetSource and targetContract must be provided together")
@@ -143,34 +176,9 @@ func (s Submission) ValidateCommitment() error {
 			return errors.New("target contract is required")
 		}
 	}
-	var want string
-	switch s.Kind {
-	case InputStandardJSON:
-		canonical, err := canonicalJSON(s.StandardJSON)
-		if err != nil {
-			return err
-		}
-		want = hashParts([]part{{name: "standard-json", content: canonical}})
-	case InputMultiFile, InputFlattened:
-		if len(s.Sources) == 0 {
-			return errors.New("source files are required")
-		}
-		parts := make([]part, 0, len(s.Sources))
-		seen := map[string]bool{}
-		for _, f := range s.Sources {
-			if err := validatePath(f.Path); err != nil {
-				return err
-			}
-			if seen[f.Path] {
-				return errors.New("duplicate source path")
-			}
-			seen[f.Path] = true
-			parts = append(parts, part{name: f.Path, content: []byte(f.Content)})
-		}
-		sort.Slice(parts, func(i, j int) bool { return parts[i].name < parts[j].name })
-		want = hashParts(parts)
-	default:
-		return errors.New("unsupported input kind")
+	want, err := s.ComputedBundleHash()
+	if err != nil {
+		return err
 	}
 	if s.BundleHash != want {
 		return errors.New("source bundle commitment mismatch")

@@ -15,6 +15,10 @@
 - Current `main` observed at closeout: `38a5326cd12e0b48851945be07957a87265b6642`
 - Audit branch: `audit/420arbitration-complete-20261004`
 - PR: **#509**
+- Closeout confirmation head: `80aa33fe1666e1f6015614015dc02ac2dc71b0a8`
+- Closeout confirmation workflow run: **37238594853** (#27)
+- Closeout confirmation qualify job: **111542609087 — PASS**
+- Closeout confirmation security job: **111542608940 — PASS**
 - Live testnet qualification: **not claimed; owned by ARBITRATION-AUDIT-5**
 
 ## Implementation completed
@@ -112,6 +116,12 @@ A repository compare of the 109 main-only commits found **no overlap with the Ar
 - retained Medium Slither debt resolved: **PASS**
 - required app-specific qualification: **PASS**
 - live production-equivalent testnet evidence: **intentionally deferred to ARBITRATION-AUDIT-5**
+
+## Final closeout confirmation
+
+After the durable Audit-4 evidence/roadmap bookkeeping was committed, the exact branch head `80aa33fe1666e1f6015614015dc02ac2dc71b0a8` was requalified by Arbitration workflow run **37238594853** (#27). Both jobs passed: qualify **111542609087** and security **111542608940**. This confirms the documentation/evidence closeout did not invalidate the qualified repository state.
+
+ARBITRATION-AUDIT-4 is therefore **formally COMPLETE**. No repository-local work remains in Audit-4.
 
 ## Next canonical step
 

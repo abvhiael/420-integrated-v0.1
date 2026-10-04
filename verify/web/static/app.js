@@ -188,6 +188,7 @@ $("submission-form").addEventListener("submit", async (event) => {
       body: JSON.stringify({
         chainId: Number($("submit-chain").value),
         address: $("submit-address").value.trim(),
+        publishSource: $("publish-source").checked,
         submission
       })
     });

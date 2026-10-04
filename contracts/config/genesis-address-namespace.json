@@ -271,7 +271,8 @@
     {
       "id": "ai-router",
       "contract": "AIRouter420.sol",
-      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "componentIdPreimage": "420/component/ai/router/v1"
     },
     {
       "id": "resource-router",

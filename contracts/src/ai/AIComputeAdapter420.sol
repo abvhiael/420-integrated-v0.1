@@ -122,6 +122,38 @@ interface IAIComputeProviderRegistry420 {
     function provider(bytes32 providerId) external view returns (Provider memory);
 }
 
+interface IAIComputeFunding420 {
+    struct Credit {
+        bytes32 requestId;
+        address owner;
+        address payer;
+        uint256 deposited;
+        uint256 maximumSpend;
+        uint64 deadline;
+        bytes32 obligationId;
+        bool exists;
+        bool refunded;
+        bool allocated;
+        uint256 earnedAllocated;
+        bytes32 providerObligationId;
+        bytes32 payerResidualObligationId;
+        bytes32 disputeRefundObligationId;
+    }
+    function credit(bytes32 jobId) external view returns (Credit memory);
+    function funded(bytes32 jobId, address owner, bytes32 fundingRef) external view returns (bool);
+}
+
+interface IAICustodyEscrow420 {
+    function confirmCanonicalVaultFunding(
+        bytes32 jobId, address payer, bytes32 vaultRef, bytes32 fundingRef, uint256 amount
+    ) external;
+    function bindSettlementBeneficiary(bytes32 jobId, bytes32 providerId, address beneficiary) external;
+    function markClaimable(bytes32 jobId, bytes32 settlementRef) external;
+    function markRefundable(bytes32 jobId, bytes32 settlementRef) external;
+    function release(bytes32 jobId, address payable to) external;
+    function refund(bytes32 jobId) external;
+}
+
 interface IAIComputeEntitlement420 {
     struct Entitlement {
         bytes32 jobId;
@@ -198,6 +230,8 @@ contract AIComputeAdapter420 is I420System {
     IAIComputeAcceptedMatch420 public immutable computeMatches;
     IAIComputeEntitlement420 public immutable computeEntitlements;
     IAIComputeProviderRegistry420 public immutable computeProviders;
+    IAIComputeFunding420 public immutable computeFunding;
+    IAICustodyEscrow420 public immutable aiEscrow;
 
     mapping(bytes32 => Binding) private bindings;
 
@@ -263,9 +297,12 @@ contract AIComputeAdapter420 is I420System {
         address matchRegistry_ = ICompute420(computeRouter_).matchRegistry();
         address settlementAdapter_ = ICompute420(computeRouter_).settlementAdapter();
         address providerRegistry_ = ICompute420(computeRouter_).providerRegistry();
+        address fundingAdapter_ = ICompute420(computeRouter_).fundingAdapter();
+        address aiEscrow_ = AIJobManager(jobs_).AI_JOB_ESCROW();
         if (
             jobRegistry_.code.length == 0 || matchRegistry_.code.length == 0
                 || settlementAdapter_.code.length == 0 || providerRegistry_.code.length == 0
+                || fundingAdapter_.code.length == 0 || aiEscrow_.code.length == 0
         ) revert InvalidDependency();
 
         computeJobs = IAIComputeJobRegistry420(jobRegistry_);
@@ -275,6 +312,8 @@ contract AIComputeAdapter420 is I420System {
         computeMatches = IAIComputeAcceptedMatch420(matchRegistry_);
         computeEntitlements = IAIComputeEntitlement420(settlementAdapter_);
         computeProviders = IAIComputeProviderRegistry420(providerRegistry_);
+        computeFunding = IAIComputeFunding420(fundingAdapter_);
+        aiEscrow = IAICustodyEscrow420(aiEscrow_);
     }
 
     function systemName() external pure returns (string memory) { return "AIComputeAdapter420"; }
@@ -336,7 +375,7 @@ contract AIComputeAdapter420 is I420System {
             uint256 aiMaxSpend,
             uint64 aiDeadline,
             ,
-            uint256 fundedAmount,
+            ,
             ,
             ,
             ,
@@ -346,7 +385,7 @@ contract AIComputeAdapter420 is I420System {
             AIJobManager.Status aiStatus
         ) = jobs.jobs(aiRequestId);
 
-        if (aiStatus != AIJobManager.Status.FUNDED) revert WrongState();
+        if (aiStatus != AIJobManager.Status.CREATED) revert WrongState();
         if (
             msg.sender != requester
                 && !authorization.isRequestAuthorized(
@@ -407,7 +446,7 @@ contract AIComputeAdapter420 is I420System {
                 || r.inputCommitment != inputCommitment || r.outputSchemaCommitment != schemaHash
         ) revert EvidenceMismatch();
         if (
-            r.maxSpend == 0 || r.maxSpend > aiMaxSpend || r.maxSpend > fundedAmount
+            r.maxSpend == 0 || r.maxSpend > aiMaxSpend
                 || r.deadline > aiDeadline || r.authorizationExpiry < r.deadline
         ) revert ConstraintBroadened();
 
@@ -478,8 +517,23 @@ contract AIComputeAdapter420 is I420System {
                 || j.workloadType != b.workloadClass || j.inputCommitment != r.inputCommitment
                 || j.outputSchemaCommitment != b.outputSchemaCommitment || j.deadline != b.deadline
         ) revert EvidenceMismatch();
-        if (j.status != IAIComputeJobRegistry420.Status.FUNDED) revert WrongState();
+        if (j.status != IAIComputeJobRegistry420.Status.FUNDED || j.fundingRef == bytes32(0)) {
+            revert WrongState();
+        }
 
+        IAIComputeFunding420.Credit memory c = computeFunding.credit(computeJobId);
+        if (
+            !c.exists || c.refunded || c.allocated || c.requestId != b.computeRequestId
+                || c.owner != r.owner || c.payer != b.payer || c.payer == address(0)
+                || c.deposited == 0 || c.deposited > b.maxSpend
+                || c.maximumSpend == 0 || c.maximumSpend > b.maxSpend
+                || c.deadline != b.deadline || c.obligationId == bytes32(0)
+                || !computeFunding.funded(computeJobId, r.owner, j.fundingRef)
+        ) revert EvidenceMismatch();
+
+        aiEscrow.confirmCanonicalVaultFunding(
+            aiRequestId, c.payer, c.obligationId, j.fundingRef, c.deposited
+        );
         b.computeJobId = computeJobId;
         emit ComputeJobBound(aiRequestId, computeJobId);
     }
@@ -516,6 +570,7 @@ contract AIComputeAdapter420 is I420System {
         b.acceptedPrice = p.acceptedAmount;
         b.accepted = true;
 
+        aiEscrow.bindSettlementBeneficiary(aiRequestId, b.computeProviderId, b.beneficiary);
         jobs.matchCompute(aiRequestId, b.computeRequestId, b.computeJobId, b.aiProviderId);
         jobs.acceptCompute(aiRequestId);
         emit AcceptedComputeBound(
@@ -623,6 +678,8 @@ contract AIComputeAdapter420 is I420System {
                 || !computeEntitlements.settled(b.computeJobId, b.verificationRef, j.settlementRef)
         ) revert EvidenceMismatch();
         b.settlementRef = j.settlementRef;
+        aiEscrow.markClaimable(aiRequestId, j.settlementRef);
+        aiEscrow.release(aiRequestId, payable(b.beneficiary));
         emit SettlementObserved(aiRequestId, b.computeJobId, j.settlementRef);
     }
 
@@ -635,6 +692,8 @@ contract AIComputeAdapter420 is I420System {
                 || !computeEntitlements.refunded(b.computeJobId, j.settlementRef)
         ) revert EvidenceMismatch();
         b.refundRef = j.settlementRef;
+        aiEscrow.markRefundable(aiRequestId, j.settlementRef);
+        aiEscrow.refund(aiRequestId);
         emit RefundObserved(aiRequestId, b.computeJobId, j.settlementRef);
     }
 

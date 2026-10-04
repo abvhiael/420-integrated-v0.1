@@ -1,0 +1,48 @@
+name: 420Notifications Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'notifications/**'
+      - 'docs/420NOTIFICATIONS*.md'
+      - 'contracts/config/420notifications-genesis.json'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/test/NotificationsGenesis420.t.sol'
+      - 'scripts/verify-genesis-dapps.py'
+      - '.github/workflows/notifications-audit.yml'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  notifications:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Unit and integration qualification
+        run: go test -count=1 ./notifications/...
+      - name: Race qualification
+        run: go test -race -count=1 ./notifications/...
+      - name: Vet
+        run: go vet ./notifications/...
+      - name: Build notifications420
+        run: go build ./notifications/cmd/notifications420
+      - name: Verify Genesis application/service invariants
+        run: python3 scripts/verify-genesis-dapps.py

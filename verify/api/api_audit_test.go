@@ -87,3 +87,27 @@ func TestSubmissionRequiresExplicitSourcePublicationConsent(t *testing.T) {
 		t.Fatalf("missing publication-consent diagnostic: %s", w.Body.String())
 	}
 }
+
+
+func TestSubmissionRejectsProcessorEvidenceForDifferentRequestedSubject(t *testing.T) {
+	s, record, submitted := fixture(t)
+	service, err := New(s, processorStub{record: record})
+	if err != nil {
+		t.Fatal(err)
+	}
+	otherAddress := "0x2222222222222222222222222222222222222222"
+	body, err := json.Marshal(SubmissionRequest{
+		ChainID:       420,
+		Address:       otherAddress,
+		PublishSource: true,
+		Submission:    submitted,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := httptest.NewRecorder()
+	service.Handler().ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/v1/verify/submissions", bytes.NewReader(body)))
+	if w.Code != http.StatusBadGateway {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
+	}
+}

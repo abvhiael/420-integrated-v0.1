@@ -13,7 +13,9 @@ The repository audit does **not** claim live-testnet, Genesis, external-security
 - AUDIT-4 workflow run: **37237412184**
 - Qualify job: **111539203484 — PASS**
 - Security job: **111539203626 — PASS**
-- Current `main` observed at AUDIT-4 closeout: `38a5326cd12e0b48851945be07957a87265b6642`
+- Closeout confirmation head: `80aa33fe1666e1f6015614015dc02ac2dc71b0a8`
+- Closeout confirmation run: **37238594853** (#27), qualify **111542609087 — PASS**, security **111542608940 — PASS**
+- Current `main` observed during final bookkeeping: `58b6b17c6538bd3cd22694e417a32472aae899f4`
 - Durable AUDIT-4 evidence: `docs/audit/420ARBITRATION-AUDIT-4-QUALIFICATION.md`
 
 ## Canonical purpose and authority
@@ -256,6 +258,12 @@ Under the phase qualification model, full branch reconciliation and comprehensiv
 - TESTNET QUALIFIED: **NO — live testnet evidence does not yet exist**
 - GENESIS READY: **NO**
 - PRODUCTION READY: **NO**
+
+## Formal ARBITRATION-AUDIT-4 closeout
+
+ARBITRATION-AUDIT-4 is **COMPLETE**. The repository-side application/runtime and release-materialization scope has been implemented, documented, mechanically verified, and exact-head qualified. A subsequent exact-head confirmation on `80aa33fe1666e1f6015614015dc02ac2dc71b0a8` passed both the qualify and security jobs, so the durable closeout documentation did not invalidate the qualified state.
+
+No further repository-local work is required to complete ARBITRATION-AUDIT-4. The next audit step requires live deployment evidence and therefore cannot be completed from repository CI, local EVMs, or synthetic fixtures alone.
 
 ## Remaining canonical work
 

@@ -1,0 +1,52 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-2.2.ComputeRequests.v1",
+  "step": "CMP-2.2",
+  "canonical_definition": "Express required resource class, runtime, verification, replication, privacy, deadline and maximum price.",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_head": "29aec4c53ed72e7b4152264189a804d2d53036c3",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_3_deferred_to": "CMP-2.8 \u2014 Phase closeout"
+  },
+  "implementation": {
+    "registry": "contracts/src/compute/ComputeRequestRegistry420.sol",
+    "signed_authority": "contracts/src/compute/ComputeJobSignedRequestAuthority420.sol",
+    "authorization": "contracts/src/compute/ComputeAuthorization420.sol",
+    "tests": "contracts/test/ComputeRequests420.t.sol",
+    "sdk": "packages/420-sdk/src/compute.ts",
+    "sdk_tests": "packages/420-sdk/test/compute-sdk.test.mjs",
+    "encoding_vector": "packages/420-sdk/test/fixtures/compute-request-vector.json",
+    "verifier": "scripts/verify-cmp-2-2-compute-requests.py"
+  },
+  "exit_criteria": [
+    "explicit resource/runtime/capability requirements",
+    "versioned verification/privacy/pricing/SLA commitments",
+    "bounded partition/replica/capacity plan",
+    "deadline/expiry/jurisdiction/data-access commitments",
+    "aggregate native-$420 ceiling bounded by existing requester AND payer signed authorization",
+    "direct requester consent or requester-approved exact-scope delegate",
+    "single-use signed anchor, immutable history and terminal cancellation/expiry",
+    "SDK typed schema and independent static ABI vectors",
+    "negative/boundary/authorization/replay/overflow/failure-atomicity tests",
+    "all required Level 1 gates pass on one exact SHA and durable evidence is committed"
+  ],
+  "invariants": [
+    "CMP-INV-002 (request-side): market request and signed authorization use distinct domain-scoped IDs; complete cross-object matching deferred",
+    "CMP-INV-003 (request-side): allocated identity/owner/payer/manifest persist; duplicate signed anchor rejects",
+    "CMP-INV-006/009 (request-side): aggregate advertisement ceiling stays within signed payer cap and cannot increase by revision; funding/settlement integration deferred",
+    "CMP-INV-012 (request-side): creation/update/cancel authority and revision prerequisites checked",
+    "CMP-INV-013 (request-side analogue): terminal request rejects update/reuse; complete terminal job qualification retained from core phases",
+    "CMP-INV-024 (schema boundary): input/privacy/data-access represented by commitments; live encrypted evidence retrieval deferred",
+    "CMP-INV-026 (request-side): immutable revision/predecessor state reconstructs advertised history; complete accepted-job evidence deferred",
+    "CMP-INV-007/008/017/027/028: accepted constraint/policy/authority snapshots converge with CMP-2.3 matching, not claimed by request publication"
+  ],
+  "intentionally_deferred": [
+    "CMP-2.3 live policy eligibility, dual-sided matching and immutable accepted snapshot",
+    "CMP-2.4 pricing formula evaluation",
+    "CMP-2.5 capacity and Vault reservation integration",
+    "CMP-2.7 wider market adversarial campaign",
+    "CMP-2.8 deployment/address publication and Level 3 phase closeout"
+  ],
+  "next_canonical_step": "CMP-2.3 \u2014 Replaceable matching engine"
+}

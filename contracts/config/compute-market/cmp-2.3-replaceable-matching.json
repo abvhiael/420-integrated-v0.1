@@ -1,0 +1,50 @@
+{
+  "step": "CMP-2.3",
+  "title": "Replaceable matching engine",
+  "qualificationLevel": 2,
+  "purpose": "Schedulers propose matches; contracts remain authoritative.",
+  "dependencies": [
+    "CMP-2.1 Worker offers",
+    "CMP-2.2 Compute requests",
+    "ComputeAuthorization420"
+  ],
+  "authoritativeContract": "ComputeMatch420",
+  "schedulerAuthority": "proposal-only",
+  "acceptanceAuthority": "request-owner",
+  "proposalRequirements": [
+    "effective exact-revision request",
+    "effective exact-revision offer",
+    "resource class equality",
+    "runtime profile equality",
+    "capability profile equality",
+    "jurisdiction equality",
+    "pricing policy id/version equality",
+    "fixed price within requester maximum",
+    "aggregate requested capacity within advertised offer capacity"
+  ],
+  "acceptanceRequirements": [
+    "proposal still eligible",
+    "request and offer revisions unchanged",
+    "request and offer commitments unchanged",
+    "one accepted match per request",
+    "immutable accepted snapshot"
+  ],
+  "deferred": {
+    "CMP-2.4": "additional pricing models and metering",
+    "CMP-2.5": "atomic capacity reservation/consumption",
+    "CMP-2.6": "scheduler redundancy service policy beyond protocol replaceability",
+    "CMP-2.7": "full market adversarial campaign",
+    "CMP-2.8": "Level 3 phase closeout"
+  },
+  "exitCriteria": [
+    "two independent schedulers can propose the same eligible pair without gaining authority",
+    "contract revalidates all implemented request/offer compatibility constraints",
+    "stale request or offer revision invalidates a proposal",
+    "resource/offer drift invalidates a proposal",
+    "only the request owner can accept in CMP-2.3",
+    "a request can be accepted at most once",
+    "accepted match freezes reconstructable request/offer commitments and identities",
+    "failed proposal/acceptance is atomic",
+    "retained offers/requests/matching integration passes at Level 2"
+  ]
+}

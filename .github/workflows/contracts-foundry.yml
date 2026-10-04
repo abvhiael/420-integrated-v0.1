@@ -38,17 +38,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin "${{ github.base_ref }}" --depth=1
+          # Checkout fetched full history; never introduce a shallow boundary at main.
+          git fetch --no-tags origin "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+          scope_files="$RUNNER_TEMP/compute-pr-files.txt"
+          # Materialize first so a missing merge base is a fatal classification error.
+          git diff --name-only "origin/${{ github.base_ref }}...HEAD" > "$scope_files"
+          cat "$scope_files"
           compute_only=true
           while IFS= read -r file; do
             case "$file" in
-              contracts/src/compute/*|contracts/src/interfaces/ICompute*.sol|contracts/test/Compute*.t.sol|contracts/config/compute-market/*|docs/compute-market/*|docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md|scripts/verify-cmp-*|scripts/test-cmp-*|.github/workflows/compute-market.yml|.github/workflows/contracts-foundry.yml)
+              contracts/src/compute/*|contracts/src/interfaces/ICompute*.sol|contracts/test/Compute*.t.sol|contracts/config/compute-market/*|docs/compute-market/*|docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md|scripts/verify-cmp-*|scripts/test-cmp-*|packages/420-sdk/src/compute.ts|packages/420-sdk/test/compute-sdk.test.mjs|packages/420-sdk/test/fixtures/compute-*|.github/workflows/compute-market.yml|.github/workflows/contracts-foundry.yml)
                 ;;
               *)
                 compute_only=false
                 ;;
             esac
-          done < <(git diff --name-only "origin/${{ github.base_ref }}...HEAD")
+          done < "$scope_files"
+          # CMP-2.8 is the Compute marketplace Level 3 phase-closeout boundary.
+          # Force the canonical four-shard repository inventory even though the
+          # changed surface is otherwise Compute-scoped.
+          if grep -Fxq 'contracts/config/compute-market/cmp-2.8-phase-closeout.json' "$scope_files"; then
+            compute_only=false
+          fi
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"
 
   compute-fast:

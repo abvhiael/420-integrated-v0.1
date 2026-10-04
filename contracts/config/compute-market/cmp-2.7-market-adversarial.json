@@ -1,0 +1,126 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-2.7.MarketAdversarialQualification.v1",
+  "step": "CMP-2.7",
+  "title": "Market adversarial qualification",
+  "qualification_level": 2,
+  "canonical_definition": "Adversarially qualify the accumulated CMP-2 marketplace before phase closeout.",
+  "implementation": {
+    "production_contract_changes": false,
+    "strengthened_test_file": "contracts/test/ComputeMatchingEngine420.t.sol",
+    "rationale": "Existing production guards are retained. CMP-2.7 closes hostile sequencing and failure-atomicity gaps with explicit cross-surface tests and a durable threat matrix."
+  },
+  "threat_matrix": [
+    {
+      "threat": "request_authorization_replay_and_malformed_terms",
+      "evidence": [
+        "contracts/test/ComputeRequests420.t.sol::testOutsiderAndSignedAuthorizationReuseFailAtomically",
+        "contracts/test/ComputeRequests420.t.sol::testMalformedPolicyPlanWindowBudgetAndOverflowRejectWithoutAllocation",
+        "contracts/test/ComputeRequests420.t.sol::testDelegationNeedsOwnerConsentExactScopeActionAndPriceAndExpiresOnRevision"
+      ]
+    },
+    {
+      "threat": "offer_authority_scope_and_resource_drift",
+      "evidence": [
+        "contracts/test/ComputeWorkerOffers420.t.sol::testScopedDelegateCanPublishUpdateAndCancelButWrongScopeAndOutsiderFail",
+        "contracts/test/ComputeWorkerOffers420.t.sol::testWrongResourceScopeAndPriceLimitFailClosed",
+        "contracts/test/ComputeWorkerOffers420.t.sol::testResourceDriftInvalidatesUntilAuthorizedOfferRevisionRefreshesSnapshot"
+      ]
+    },
+    {
+      "threat": "stale_request_offer_and_resource_revision",
+      "evidence": [
+        "contracts/test/ComputeMatchingEngine420.t.sol::testRequestRevisionMakesSchedulerProposalStale",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testOfferRevisionMakesSchedulerProposalStale",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testContractRejectsResourceDriftAndPreservesFailedAcceptanceAtomicity",
+        "contracts/test/ComputeCapacityAwareAssignment420.t.sol::testResourceRevisionDriftBlocksJobLinkBeforeCapacityMutation"
+      ]
+    },
+    {
+      "threat": "unauthorized_acceptance_and_scheduler_privilege",
+      "evidence": [
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp27OutsiderAcceptanceFailsWithoutMutationAndOwnerCanStillAccept",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testReplaceableSchedulersCanProposeButDoNotOwnAuthority",
+        "contracts/test/ComputeCapacityAwareAssignment420.t.sol::testSchedulerCannotLinkJobOrReserveCapacityDirectly"
+      ]
+    },
+    {
+      "threat": "terminal_request_resurrection_and_double_match",
+      "evidence": [
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp27CancelledRequestCannotBeResurrectedByExistingProposal",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testOwnerAcceptsOneProposalAndImmutableSnapshotWins",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp26CompetingSchedulersCannotDoubleAcceptOrRewriteWinner"
+      ]
+    },
+    {
+      "threat": "pricing_overbid_bounds_rounding_and_overflow",
+      "evidence": [
+        "contracts/test/ComputeMatchingEngine420.t.sol::testContractRejectsIncompatiblePriceWithoutAllocatingProposal",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testVariablePricingBoundsAndRequesterMaximumFailClosedAtomically",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testFixedPriceCompatibilityAndVariableMinimumMaximumCaps",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp27MeteredMultiplicationOverflowFailsWithoutProposalAllocation"
+      ]
+    },
+    {
+      "threat": "provider_beneficiary_and_identity_drift",
+      "evidence": [
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp27ProviderBeneficiaryDriftCannotRewriteAcceptedMatchOrEnableFreshProposal",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testOwnerAcceptsOneProposalAndImmutableSnapshotWins"
+      ]
+    },
+    {
+      "threat": "scheduler_outage_replacement_and_race",
+      "evidence": [
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp26SchedulerFailoverUsesFreshProposalWithoutPrivilege",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp26RequesterCanSelfProposeWhenExternalSchedulersAreUnavailable",
+        "contracts/test/ComputeMatchingEngine420.t.sol::testCmp26CompetingSchedulersCannotDoubleAcceptOrRewriteWinner"
+      ]
+    },
+    {
+      "threat": "capacity_oversubscription_and_partial_mutation",
+      "evidence": [
+        "contracts/test/ComputeCapacityAwareAssignment420.t.sol::testAcceptedMarketMatchConsumesCmp13ReservationAtomicallyAtWorkerAssignment",
+        "contracts/test/ComputeCapacityAwareAssignment420.t.sol::testCapacityExhaustionRevertsAssignmentWithoutPartialMutation"
+      ]
+    }
+  ],
+  "authority_boundaries": [
+    "Rejected request/offer/match actions do not allocate a proposal, accepted match or capacity reservation unless the operation is explicitly successful.",
+    "Only the request owner accepts a market proposal; scheduler identity never implies acceptance, job-link, capacity, custody or settlement authority.",
+    "Accepted provider/resource/beneficiary economics are immutable under later provider or resource revision.",
+    "Pricing arithmetic fails closed on overflow, over-budget, malformed bounds or unsupported billable units.",
+    "Terminal or stale request/offer state cannot be resurrected by a previously created proposal.",
+    "Capacity exhaustion leaves no partial assignment or stranded reservation."
+  ],
+  "invariants": [
+    "CMP-INV-002",
+    "CMP-INV-003",
+    "CMP-INV-004",
+    "CMP-INV-005",
+    "CMP-INV-006",
+    "CMP-INV-007",
+    "CMP-INV-008",
+    "CMP-INV-009",
+    "CMP-INV-010",
+    "CMP-INV-011",
+    "CMP-INV-012",
+    "CMP-INV-018",
+    "CMP-INV-019",
+    "CMP-INV-020",
+    "CMP-INV-025",
+    "CMP-INV-026",
+    "CMP-INV-027",
+    "CMP-INV-028",
+    "CMP-INV-029"
+  ],
+  "milestone_relationship": {
+    "level_2_required_now": true,
+    "milestone": "CMP-2 accumulated market adversarial integration",
+    "rationale": "CMP-2.7 spans request authorization, offer authority, matching, pricing, scheduler replacement, provider/resource immutability and CMP-1.3 capacity admission, so the retained full Compute Market suite is required on the same exact implementation SHA."
+  },
+  "deferred": [
+    "CMP-2.8 Level 3 phase closeout",
+    "live/testnet deployment and funded-chain evidence under later canonical phases"
+  ],
+  "next_canonical_step": "CMP-2.8 — Phase closeout",
+  "status": "IMPLEMENTATION_LEVEL_1_AND_LEVEL_2_QUALIFICATION_PENDING"
+}

@@ -325,3 +325,240 @@ export function createComputeWorkerClient420(reader: ComputeWorkerReader420): Co
     }
   });
 }
+
+
+export const COMPUTE_WORKER_OFFER_SCHEMA_420 = '420-compute-worker-offer-v3' as const;
+export const COMPUTE_WORKER_OFFER_VERSION_420 = 3 as const;
+export const COMPUTE_PRICING_MODEL_420 = { FIXED_PRICE: 1, WORK_UNIT: 2, CPU_TIME: 3, GPU_TIME: 4, VERIFIED_RESULT: 5 } as const;
+export type ComputePricingModel420 = typeof COMPUTE_PRICING_MODEL_420[keyof typeof COMPUTE_PRICING_MODEL_420];
+
+export interface ComputeWorkerOffer420 {
+  readonly providerId: Hex420;
+  readonly nodeId: Hex420;
+  readonly resourceId: Hex420;
+  readonly providerRevision: bigint;
+  readonly resourceRevision: bigint;
+  readonly operator: Hex420;
+  readonly settlementAccount: Hex420;
+  readonly computeClass: Hex420;
+  readonly hardwareProfileHash: Hex420;
+  readonly runtimeProfileHash: Hex420;
+  readonly capabilityHash: Hex420;
+  readonly capacityUnits: bigint;
+  readonly jurisdictionHash: Hex420;
+  readonly availableFrom: bigint;
+  readonly validUntil: bigint;
+  readonly pricingPolicyId: Hex420;
+  readonly pricingVersion: number;
+  readonly fixedPrice: bigint;
+  readonly pricingModel: ComputePricingModel420;
+  readonly unitRate: bigint;
+  readonly unitScale: bigint;
+  readonly minimumCharge: bigint;
+  readonly maximumCharge: bigint;
+  readonly maximumBillableUnits: bigint;
+  readonly pricingTermsCommitment: Hex420;
+  readonly revision: bigint;
+  readonly predecessorCommitment: Hex420;
+  readonly exists: boolean;
+  readonly active: boolean;
+}
+
+export function validateComputeWorkerOffer420(
+  offer: ComputeWorkerOffer420,
+  expectedRevision?: bigint
+): ComputeWorkerOffer420 {
+  for (const [label, value] of [
+    ['providerId', offer.providerId],
+    ['nodeId', offer.nodeId],
+    ['resourceId', offer.resourceId],
+    ['computeClass', offer.computeClass],
+    ['hardwareProfileHash', offer.hardwareProfileHash],
+    ['runtimeProfileHash', offer.runtimeProfileHash],
+    ['capabilityHash', offer.capabilityHash],
+    ['jurisdictionHash', offer.jurisdictionHash],
+    ['pricingPolicyId', offer.pricingPolicyId],
+    ['pricingTermsCommitment', offer.pricingTermsCommitment],
+    ['predecessorCommitment', offer.predecessorCommitment]
+  ] as const) {
+    assertBytes32420(value, label);
+  }
+  assertAddress420(offer.operator, 'operator');
+  assertAddress420(offer.settlementAccount, 'settlementAccount');
+
+  if (!offer.exists || !offer.active) throw new ComputeReadModelError420('worker offer is not active');
+  if (offer.providerRevision <= 0n || offer.resourceRevision <= 0n || offer.revision <= 0n) {
+    throw new ComputeReadModelError420('worker offer revision must be positive');
+  }
+  if (expectedRevision !== undefined && offer.revision !== expectedRevision) {
+    throw new ComputeReadModelError420('stale or mismatched worker offer revision');
+  }
+  if (offer.capacityUnits <= 0n) throw new ComputeReadModelError420('worker offer capacity must be positive');
+  if (offer.pricingVersion <= 0) throw new ComputeReadModelError420('worker offer pricing must be versioned');
+  const fixed = offer.pricingModel === COMPUTE_PRICING_MODEL_420.FIXED_PRICE;
+  const variable = offer.pricingModel >= COMPUTE_PRICING_MODEL_420.WORK_UNIT && offer.pricingModel <= COMPUTE_PRICING_MODEL_420.VERIFIED_RESULT;
+  if (fixed) {
+    if (offer.fixedPrice <= 0n || offer.unitRate !== 0n || offer.unitScale !== 1n || offer.minimumCharge !== offer.fixedPrice || offer.maximumCharge !== offer.fixedPrice || offer.maximumBillableUnits !== 0n) throw new ComputeReadModelError420('worker offer fixed pricing terms are not canonical');
+  } else if (variable) {
+    if (offer.fixedPrice !== 0n || offer.unitRate <= 0n || offer.unitScale <= 0n || offer.maximumCharge <= 0n || offer.maximumBillableUnits <= 0n || offer.minimumCharge > offer.maximumCharge) throw new ComputeReadModelError420('worker offer variable pricing terms are invalid');
+  } else throw new ComputeReadModelError420('worker offer pricing model is unsupported');
+  if (offer.availableFrom > offer.validUntil) {
+    throw new ComputeReadModelError420('worker offer availability window is invalid');
+  }
+  const zero = /^0x0{64}$/i;
+  if (
+    zero.test(offer.computeClass) || zero.test(offer.hardwareProfileHash)
+      || zero.test(offer.runtimeProfileHash) || zero.test(offer.capabilityHash)
+      || zero.test(offer.jurisdictionHash) || zero.test(offer.pricingPolicyId)
+  ) {
+    throw new ComputeReadModelError420('worker offer contains an empty canonical commitment');
+  }
+  return offer;
+}
+export function quoteComputeWorkerOffer420(offer: ComputeWorkerOffer420, billableUnits: bigint): bigint {
+  validateComputeWorkerOffer420(offer);
+  if (billableUnits < 0n) throw new ComputeReadModelError420('billable units cannot be negative');
+  if (offer.pricingModel === COMPUTE_PRICING_MODEL_420.FIXED_PRICE) {
+    if (billableUnits !== 0n) throw new ComputeReadModelError420('fixed-price quote requires zero billable units');
+    return offer.fixedPrice;
+  }
+  if (billableUnits <= 0n || billableUnits > offer.maximumBillableUnits) throw new ComputeReadModelError420('billable units exceed published pricing bounds');
+  const max=(1n<<256n)-1n;
+  if (offer.unitRate > max / billableUnits) throw new ComputeReadModelError420('pricing multiplication overflows uint256');
+  const numerator=offer.unitRate*billableUnits; let amount=numerator/offer.unitScale;
+  if (numerator % offer.unitScale !== 0n) amount += 1n;
+  if (amount < offer.minimumCharge) amount=offer.minimumCharge;
+  if (amount > offer.maximumCharge) amount=offer.maximumCharge;
+  return amount;
+}
+
+export const COMPUTE_REQUEST_SCHEMA_420 = '420-compute-market-request-v1' as const;
+export const COMPUTE_REQUEST_VERSION_420 = 1 as const;
+export interface ComputeRequestPolicy420 {
+  readonly id: Hex420;
+  readonly version: number;
+  readonly commitment: Hex420;
+}
+export interface ComputeRequestTerms420 {
+  readonly resourceClass: Hex420;
+  readonly runtimeHash: Hex420;
+  readonly capabilityHash: Hex420;
+  readonly verification: ComputeRequestPolicy420;
+  readonly privacy: ComputeRequestPolicy420;
+  readonly jurisdictionHash: Hex420;
+  readonly dataAccessHash: Hex420;
+  readonly partitionPlanHash: Hex420;
+  readonly partitionCount: number;
+  readonly replicationFactor: number;
+  readonly capacityUnits: bigint;
+  readonly pricing: ComputeRequestPolicy420;
+  readonly sla: ComputeRequestPolicy420;
+  readonly deadline: bigint;
+  readonly expiresAt: bigint;
+  readonly maximumPrice: bigint;
+  readonly fundingReference: Hex420;
+}
+export interface ComputeRequest420 {
+  readonly owner: Hex420;
+  readonly payer: Hex420;
+  readonly signedRequestId: Hex420;
+  readonly manifestHash: Hex420;
+  readonly workloadType: Hex420;
+  readonly inputCommitment: Hex420;
+  readonly outputSchemaCommitment: Hex420;
+  readonly terms: ComputeRequestTerms420;
+  readonly createdAt: bigint;
+  readonly revision: bigint;
+  readonly predecessorCommitment: Hex420;
+  readonly status: number;
+}
+const REQUEST_UINT256_MAX_420 = (1n << 256n) - 1n;
+function requestUint420(value: bigint, bits: number, label: string, positive = false): void {
+  if (typeof value !== 'bigint' || value < (positive ? 1n : 0n) || value >= (1n << BigInt(bits))) {
+    throw new ComputeReadModelError420(`request ${label} is outside uint${bits}`);
+  }
+}
+function requestNumber420(value: number, label: string): void {
+  if (!Number.isInteger(value) || value <= 0 || value > 0xffffffff) {
+    throw new ComputeReadModelError420(`request ${label} is outside positive uint32`);
+  }
+}
+function requestCommitment420(value: Hex420, label: string): void {
+  assertBytes32420(value, label);
+  if (/^0x0{64}$/i.test(value)) throw new ComputeReadModelError420(`request ${label} is empty`);
+}
+export function validateComputeRequest420(
+  request: ComputeRequest420,
+  expectedRevision?: bigint,
+  now?: bigint,
+  signedMaximumPrice?: bigint
+): ComputeRequest420 {
+  assertAddress420(request.owner, 'owner'); assertAddress420(request.payer, 'payer');
+  if (/^0x0{40}$/i.test(request.owner) || /^0x0{40}$/i.test(request.payer)) {
+    throw new ComputeReadModelError420('request owner/payer is empty');
+  }
+  for (const label of ['signedRequestId', 'manifestHash', 'workloadType', 'inputCommitment', 'outputSchemaCommitment'] as const) {
+    requestCommitment420(request[label], label);
+  }
+  assertBytes32420(request.predecessorCommitment, 'predecessorCommitment');
+  requestUint420(request.revision, 64, 'revision', true);
+  requestUint420(request.createdAt, 64, 'createdAt');
+  if (expectedRevision !== undefined && request.revision !== expectedRevision) {
+    throw new ComputeReadModelError420('stale or mismatched request revision');
+  }
+  if (request.status !== 1) throw new ComputeReadModelError420('request is not open');
+  const t = request.terms;
+  for (const label of ['resourceClass', 'runtimeHash', 'capabilityHash', 'jurisdictionHash', 'dataAccessHash', 'partitionPlanHash'] as const) {
+    requestCommitment420(t[label], label);
+  }
+  assertBytes32420(t.fundingReference, 'fundingReference');
+  for (const label of ['verification', 'privacy', 'pricing', 'sla'] as const) {
+    requestCommitment420(t[label].id, `${label}.id`);
+    requestNumber420(t[label].version, `${label}.version`);
+    requestCommitment420(t[label].commitment, `${label}.commitment`);
+  }
+  requestNumber420(t.partitionCount, 'partitionCount'); requestNumber420(t.replicationFactor, 'replicationFactor');
+  requestUint420(t.capacityUnits, 256, 'capacityUnits', true);
+  requestUint420(t.maximumPrice, 256, 'maximumPrice', true);
+  requestUint420(t.deadline, 64, 'deadline', true); requestUint420(t.expiresAt, 64, 'expiresAt', true);
+  if (BigInt(t.partitionCount) * BigInt(t.replicationFactor) * t.capacityUnits > REQUEST_UINT256_MAX_420) {
+    throw new ComputeReadModelError420('request aggregate capacity overflows uint256');
+  }
+  if (t.expiresAt > t.deadline || t.expiresAt <= request.createdAt || (now !== undefined && now >= t.expiresAt)) {
+    throw new ComputeReadModelError420('request availability window is invalid or expired');
+  }
+  if (signedMaximumPrice !== undefined && t.maximumPrice > signedMaximumPrice) {
+    throw new ComputeReadModelError420('request exceeds payer signed maximum price');
+  }
+  return request;
+}
+
+// Static ABI encoding: each nested tuple field occupies one 32-byte word in declaration order.
+function requestWord420(value: Hex420 | bigint | number): string {
+  if (typeof value === 'string') {
+    if (!/^0x(?:[0-9a-f]{40}|[0-9a-f]{64})$/i.test(value)) throw new ComputeReadModelError420('invalid ABI word');
+    return value.slice(2).toLowerCase().padStart(64, '0');
+  }
+  if (typeof value === 'number' && !Number.isSafeInteger(value)) throw new ComputeReadModelError420('invalid ABI integer');
+  const n = BigInt(value); requestUint420(n, 256, 'ABI word'); return n.toString(16).padStart(64, '0');
+}
+export function encodeComputeRequestId420(domain: Hex420, chainId: bigint, registry: Hex420, owner: Hex420, nonce: bigint): Hex420 {
+  assertBytes32420(domain, 'domain'); assertAddress420(registry, 'registry'); assertAddress420(owner, 'owner');
+  requestUint420(chainId, 256, 'chainId'); requestUint420(nonce, 64, 'nonce', true);
+  return `0x${[domain,chainId,registry,owner,nonce].map(requestWord420).join('')}`;
+}
+export function encodeComputeRequestCommitment420(domain: Hex420, chainId: bigint, registry: Hex420, id: Hex420, r: ComputeRequest420): Hex420 {
+  // Historical terminal revisions are encodable; live eligibility uses validateComputeRequest420 separately.
+  assertBytes32420(domain, 'domain'); assertBytes32420(id, 'requestId'); assertAddress420(registry, 'registry');
+  validateComputeRequest420({ ...r, status: 1 });
+  if (!Number.isInteger(r.status) || r.status < 1 || r.status > 3) throw new ComputeReadModelError420('invalid historical request status');
+  requestUint420(chainId, 256, 'chainId');
+  const t = r.terms;
+  const policy = (p: ComputeRequestPolicy420) => [p.id,p.version,p.commitment] as const;
+  const words = [domain,chainId,registry,id,r.owner,r.payer,r.signedRequestId,r.manifestHash,r.workloadType,
+    r.inputCommitment,r.outputSchemaCommitment,t.resourceClass,t.runtimeHash,t.capabilityHash,
+    ...policy(t.verification),...policy(t.privacy),t.jurisdictionHash,t.dataAccessHash,t.partitionPlanHash,
+    t.partitionCount,t.replicationFactor,t.capacityUnits,...policy(t.pricing),...policy(t.sla),
+    t.deadline,t.expiresAt,t.maximumPrice,t.fundingReference,r.createdAt,r.revision,r.predecessorCommitment,r.status];
+  return `0x${words.map(requestWord420).join('')}`;
+}

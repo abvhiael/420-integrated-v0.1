@@ -1,0 +1,34 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-2.5.CapacityAwareAssignment.v1",
+  "step": "CMP-2.5",
+  "canonicalDefinition": "Consume CMP-1.3 capacity reservations atomically.",
+  "qualificationLevel": 1,
+  "level2RequiredNow": false,
+  "dependencies": [
+    "CMP-2.3 accepted market match authority",
+    "CMP-2.4 deterministic accepted pricing",
+    "CMP-1.3 ComputeWorkerRegistry420",
+    "CMP-1.3 ComputeWorkerCapacityReservation420",
+    "CMP-1.3 ComputeJobWorkerSnapshotEvidence420",
+    "ComputeJobRegistry420"
+  ],
+  "authority": {
+    "schedulerCanProposeOnly": true,
+    "jobOwnerLinksAcceptedMarketMatch": true,
+    "workerSnapshotRemainsCapacityController": true,
+    "adapterMayReserveCapacityDirectly": false
+  },
+  "atomicBoundary": "ComputeJobWorkerSnapshotEvidence420.acceptAssignment -> capacity.reserve -> jobs.assignWorker",
+  "requiredFailureAtomicity": [
+    "capacity exhaustion leaves job ACCEPTED",
+    "failed assignment leaves no assignment reference",
+    "failed assignment leaves no reservation",
+    "failed assignment does not increment live capacity"
+  ],
+  "deferred": [
+    "CMP-2.6 scheduler redundancy/non-authority",
+    "CMP-2.7 market adversarial qualification",
+    "CMP-2.8 Level 3 phase closeout"
+  ],
+  "nextCanonicalStep": "CMP-2.6 — Scheduler redundancy and non-authority"
+}

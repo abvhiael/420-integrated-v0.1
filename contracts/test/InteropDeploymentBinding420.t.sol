@@ -15,41 +15,38 @@ contract InteropReleaseAdapter420 is I420ISAdapter {
     bytes32 public immutable manifest;
     mapping(bytes32 => bool) public supported;
 
-    constructor(
-        bytes32 kind_,
-        bytes32 manifest_
-    ) {
+    constructor(bytes32 kind_, bytes32 manifest_) {
         kind = kind_;
         manifest = manifest_;
     }
 
-    function standardVersion() external pure override returns (uint32) {
-        return 1;
-    }
-
-    function adapterType() external view override returns (bytes32) {
-        return kind;
-    }
-
-    function supportsDomain(
-        bytes32 domainId
-    ) external view override returns (bool) {
-        return supported[domainId];
-    }
-
-    function adapterManifestHash() external view override returns (bytes32) {
-        return manifest;
-    }
-
-    function setSupported(
-        bytes32 domainId,
-        bool value
-    ) external {
-        supported[domainId] = value;
-    }
+    function standardVersion() external pure override returns (uint32) { return 1; }
+    function adapterType() external view override returns (bytes32) { return kind; }
+    function supportsDomain(bytes32 domainId) external view override returns (bool) { return supported[domainId]; }
+    function adapterManifestHash() external view override returns (bytes32) { return manifest; }
+    function setSupported(bytes32 domainId, bool value) external { supported[domainId] = value; }
 
     function publish(
         InteropNamespaceRegistry420 registry,
+        bytes32 namespaceId,
+        bytes32 externalIdHash,
+        bytes32 canonicalId,
+        bytes32 attestationHash
+    ) external returns (bytes32) {
+        return registry.publishMapping(namespaceId, externalIdHash, canonicalId, attestationHash);
+    }
+
+    function checkpoint(
+        InteropCheckpointRegistry420 registry,
+        bytes32 providerId,
+        bytes32 domainId,
+        uint64 sequence,
+        bytes32 stateHash,
+        bytes32 previousHash
+    ) external returns (bytes32) {
+        return registry.publishCheckpoint(providerId, domainId, sequence, stateHash, previousHash);
+    }
+}
 
 contract InteropDeploymentBinding420Test {
     bytes32 internal constant INTEROP_SERVICE_ID = keccak256("420/service/420-is/v1");
@@ -97,28 +94,47 @@ contract InteropDeploymentBinding420Test {
             )
         );
 
-        e.registry
-            .registerComponent(
-                InteropIds420.COMPONENT_420_IS,
-                address(e.router),
-                Types420.Version({ major: 1, minor: 0, patch: 0 }),
-                Types420.Lifecycle.ACTIVE
-            );
-        e.registry
-            .publishRegisteredService(
-                INTEROP_SERVICE_ID,
-                address(e.router),
-                METADATA_HASH,
-                1,
-                true,
-                ProtocolRegistry.ComponentType.SERVICE,
-                MANIFEST_HASH,
-                e.dependencyRoot,
-                INTERFACE_HASH
-            );
+        e.registry.registerComponent(
+            InteropIds420.COMPONENT_420_IS,
+            address(e.router),
+            Types420.Version({major: 1, minor: 0, patch: 0}),
+            Types420.Lifecycle.ACTIVE
+        );
+        e.registry.publishRegisteredService(
+            INTEROP_SERVICE_ID,
+            address(e.router),
+            METADATA_HASH,
+            1,
+            true,
+            ProtocolRegistry.ComponentType.SERVICE,
+            MANIFEST_HASH,
+            e.dependencyRoot,
+            INTERFACE_HASH
+        );
 
         emit DeploymentAddress("InteropProviderRegistry420", address(e.providers));
         emit DeploymentAddress("InteropNamespaceRegistry420", address(e.namespaces));
+        emit DeploymentAddress("InteropCheckpointRegistry420", address(e.checkpoints));
+        emit DeploymentAddress("InteropRouter420", address(e.router));
+        emit RuntimeCodeHash("InteropProviderRegistry420", address(e.providers).codehash);
+        emit RuntimeCodeHash("InteropNamespaceRegistry420", address(e.namespaces).codehash);
+        emit RuntimeCodeHash("InteropCheckpointRegistry420", address(e.checkpoints).codehash);
+        emit RuntimeCodeHash("InteropRouter420", address(e.router).codehash);
+        emit ReleaseCommitment("dependencyRoot", e.dependencyRoot);
+        emit ReleaseCommitment("manifestHash", MANIFEST_HASH);
+        emit ReleaseCommitment("interfaceHash", INTERFACE_HASH);
+    }
+
+    function testDeploymentOrderAndConstructorBindings() public {
+        Env memory e = _deploy();
+
+        require(e.providers.governanceTimelock() == address(this), "provider/timelock");
+        require(e.namespaces.governanceTimelock() == address(this), "namespace/timelock");
+        require(address(e.namespaces.providers()) == address(e.providers), "namespace/providers");
+        require(address(e.checkpoints.providers()) == address(e.providers), "checkpoint/providers");
+        require(address(e.router.providers()) == address(e.providers), "router/providers");
+        require(address(e.router.namespaces()) == address(e.namespaces), "router/namespaces");
+        require(address(e.router.checkpoints()) == address(e.checkpoints), "router/checkpoints");
     }
 
     function testProtocolRegistryPublicationBindsRouterCodeAndProfile() public {
@@ -129,10 +145,31 @@ contract InteropDeploymentBinding420Test {
         require(service.codeHash == address(e.router).codehash, "service codehash");
         require(service.version == 1 && service.active, "service lifecycle");
 
-        ProtocolRegistry.RegistrationProfile memory profile = e.registry.getRegistrationProfile(INTEROP_SERVICE_ID, 1);
+        ProtocolRegistry.RegistrationProfile memory profile =
+            e.registry.getRegistrationProfile(INTEROP_SERVICE_ID, 1);
         require(profile.componentType == ProtocolRegistry.ComponentType.SERVICE, "component type");
         require(profile.manifestHash == MANIFEST_HASH, "manifest");
         require(profile.interfaceHash == INTERFACE_HASH, "interface");
+        require(profile.dependencyRoot == e.dependencyRoot, "dependencies");
+
+        require(e.registry.resolve(InteropIds420.COMPONENT_420_IS) == address(e.router), "component resolve");
+        require(
+            e.registry.runtimeCodeHash(InteropIds420.COMPONENT_420_IS) == address(e.router).codehash,
+            "component codehash"
+        );
+    }
+
+    function testLocalSmokeProviderNamespaceMappingCheckpointAndRouter() public {
+        Env memory e = _deploy();
+        e.adapter = new InteropReleaseAdapter420(ADAPTER_TYPE, ADAPTER_MANIFEST);
+        e.adapter.setSupported(DOMAIN, true);
+
+        e.providers.registerProvider(PROVIDER, address(e.adapter), ADAPTER_TYPE, ADAPTER_MANIFEST);
+        e.namespaces.registerNamespace(NAMESPACE, PROVIDER, keccak256("420/IS/LOCAL/SCHEMA/V1"));
+
+        bytes32 externalIdHash = keccak256("external/local/1");
+        bytes32 canonicalId = keccak256("canonical/local/1");
+        bytes32 attestationHash = keccak256("attestation/local/1");
         e.adapter.publish(e.namespaces, NAMESPACE, externalIdHash, canonicalId, attestationHash);
 
         (bytes32 resolved, bytes32 attestation, InteropNamespaceRegistry420.MappingStatus status) =
@@ -158,18 +195,20 @@ contract InteropDeploymentBinding420Test {
             address(e.registry).call(abi.encodeWithSelector(e.registry.resolveActive.selector, INTEROP_SERVICE_ID));
         require(!staleOk, "deprecated service resolved");
 
-        e.registry
-            .publishRegisteredService(
-                INTEROP_SERVICE_ID,
-                address(e.router),
-                METADATA_HASH,
-                2,
-                true,
-                ProtocolRegistry.ComponentType.SERVICE,
-                MANIFEST_HASH,
-                e.dependencyRoot,
-                INTERFACE_HASH
-            );
+        e.registry.publishRegisteredService(
+            INTEROP_SERVICE_ID,
+            address(e.router),
+            METADATA_HASH,
+            2,
+            true,
+            ProtocolRegistry.ComponentType.SERVICE,
+            MANIFEST_HASH,
+            e.dependencyRoot,
+            INTERFACE_HASH
+        );
 
         (address resolved, uint32 version) = e.registry.resolveActive(INTEROP_SERVICE_ID);
         require(resolved == address(e.router), "recovery implementation");
+        require(version == 2, "recovery version");
+    }
+}

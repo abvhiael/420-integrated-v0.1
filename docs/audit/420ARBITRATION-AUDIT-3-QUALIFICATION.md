@@ -11,9 +11,13 @@ Branch: `audit/420arbitration-complete-20261004`
 Qualified implementation SHA: `7323c5456770f8b963b5db5a39a6010b8f4e13a5`  
 Baseline main SHA: `e22a744d8fbcff20f2b2108a1117ee3abe9dc437`  
 Workflow: `420Arbitration audit qualification`  
-Run: `37231037990`  
+Primary implementation run: `37231037990`  
 Qualify job: `111520569558`  
-Security job: `111520569744`
+Security job: `111520569744`  
+Documentation/evidence HEAD confirmation: `081b9983e780d889e00fca4b4f1fd2e87cec223e`  
+Confirmation run: `37231578673`  
+Confirmation qualify job: `111522205566`  
+Confirmation security job: `111522205711`
 
 ## Qualified changes
 
@@ -61,3 +65,17 @@ This evidence qualifies ARBITRATION-AUDIT-1 through -3 at **repository/source sc
 - external security review.
 
 Those requirements remain in ARBITRATION-AUDIT-4 through -6.
+
+
+## Exact evidence-head confirmation
+
+The documentation/evidence HEAD `081b9983e780d889e00fca4b4f1fd2e87cec223e` was requalified without implementation drift by run `37231578673`.
+
+- qualify job `111522205566`: PASS;
+- security job `111522205711`: PASS;
+- exact-head checkout: PASS in both jobs;
+- formatting/build/verifier/Foundry/forbidden-primitive checks: PASS;
+- hardening Foundry and targeted Slither gate: PASS;
+- high-severity Slither findings: 0.
+
+This confirmation establishes that the retained ARBITRATION-AUDIT-3 evidence itself sits on a green exact repository head.

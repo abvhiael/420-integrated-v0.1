@@ -52,9 +52,8 @@ contract RightsAuthorization420 is I420System {
         bytes32 rightId,
         bytes32 actionId
     ) external view returns (bool) {
-        return
-            capabilityRegistry.isAuthorized(
-                principal, RightsIds420.COMPONENT_RIGHTS, actionId, scopeForRight(rightId), 0
-            );
+        return capabilityRegistry.isAuthorized(
+            principal, RightsIds420.COMPONENT_RIGHTS, actionId, scopeForRight(rightId), 0
+        );
     }
 }

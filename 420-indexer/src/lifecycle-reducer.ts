@@ -30,11 +30,16 @@ export interface LifecycleSnapshot420 {
 
 const KEY_FIELDS = [
   'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
-  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','subjectId','rightId','oldRightId','licenseId','assetId',
+  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','subjectId','rightId','licenseId','assetId',
   'programId','applicationId','awardId','milestoneId'
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
+  if (event.protocol === '420Rights' && event.eventName === 'ClaimSuperseded') {
+    const oldRightId = event.fields.oldRightId;
+    if (oldRightId !== undefined && oldRightId !== null) return `rightId:${String(oldRightId).toLowerCase()}`;
+  }
+
   // Identity events may contain secondary identifiers (for example
   // PrimaryNameSet has labelHash and CredentialIssued has issuerId). The
   // canonical object key follows the Identity object being mutated, not the

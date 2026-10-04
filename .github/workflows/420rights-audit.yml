@@ -46,9 +46,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check Rights Solidity formatting
+      - name: Materialize canonical Rights formatting
         working-directory: contracts
-        run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol
+        run: forge fmt src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol
+      - name: Upload canonical Rights formatting
+        uses: actions/upload-artifact@v4
+        with:
+          name: rights-forge-formatted-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            contracts/src/rights
+            contracts/test/RightsGenesis420.t.sol
+            contracts/test/RightsFocusedHardening420.t.sol
+          if-no-files-found: error
+          retention-days: 1
+      - name: Require committed canonical Rights formatting
+        run: git diff --exit-code -- contracts/src/rights contracts/test/RightsGenesis420.t.sol contracts/test/RightsFocusedHardening420.t.sol
       - name: Build canonical Rights graph
         working-directory: contracts
         run: forge build src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol --sizes

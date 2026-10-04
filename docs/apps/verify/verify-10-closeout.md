@@ -1,3 +1,5 @@
+> **Historical record:** this page describes the original GEN-10.5 closeout. The active repository-grounded VERIFY-AUDIT in PR #503 supersedes its current-completeness and merge-eligibility claims. See `docs/audit/420VERIFY-AUDIT.md`. Current audit closeout is pending VERIFY-AUDIT-8.
+
 # VERIFY-10 — qualification, reconciliation and closeout
 
 VERIFY-10 closes the GEN-10.5 / 420Verify implementation phase by reconciling the long-lived Verify branch with the latest `main`, preserving the verification trust boundary, and requalifying the exact final branch head before merge.
@@ -43,8 +45,8 @@ The exact final head must pass:
 - fault-matrix;
 - geth-engine.
 
-A final head is merge-eligible only when all required workflows are green against that exact commit. Any code or documentation change after qualification invalidates the closeout evidence and requires another exact-head qualification pass.
+For the historical VERIFY-10 phase, a final head was considered merge-eligible only when its required workflows were green against that exact commit. Those historical passes do not qualify the materially changed current audit branch. The active audit uses its own phase-based qualification model and will establish a new exact merge-candidate SHA at VERIFY-AUDIT-8.
 
-## Phase handoff
+## Historical phase handoff
 
-After the final head is green, PR #303 may be merged once into `main`. GEN-10.5 is then closed and Genesis application work advances to GEN-10.6 / 420AppStore.
+PR #303 was merged into `main` as the original GEN-10.5 closeout. That event remains historical evidence only; it must not be used to bypass current VERIFY-AUDIT remediation or VERIFY-AUDIT-8 closeout qualification.

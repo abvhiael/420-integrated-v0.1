@@ -54,6 +54,10 @@ jobs:
         run: python3 scripts/verify-420arbitration-audit.py
       - name: Verify ARBITRATION-AUDIT-4 release materialization
         run: python3 scripts/verify-arbitration-audit-4-release.py
+      - name: Verify shared Genesis address namespace authority
+        run: |
+          python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
+          python3 scripts/test-reg-audit-4-genesis-address-namespace.py
       - name: Run Wallet Arbitration runtime qualification
         run: node --test wallet/web/test/arbitration-runtime.test.js
       - name: Run Arbitration Foundry qualification
@@ -137,6 +141,9 @@ jobs:
               if detector.get("impact") == "High":
                   high.append(item)
           print(json.dumps({"arbitrationFindings": findings, "highSeverity": high}, indent=2))
+          medium_unused = [x for x in findings if x.get("impact") == "Medium" and x.get("check") == "unused-return"]
           if high:
               raise SystemExit("High-severity Slither finding in Arbitration source")
+          if medium_unused:
+              raise SystemExit("Undispositioned Medium unused-return finding in Arbitration source")
           PY

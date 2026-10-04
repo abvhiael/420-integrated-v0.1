@@ -12,7 +12,7 @@ import (
 var (
 	ErrNoServices     = errors.New("compute worker daemon has no services")
 	ErrServiceExited  = errors.New("compute worker service exited unexpectedly")
-	ErrAlreadyRunning = errors.New("compute worker daemon is already running")
+	ErrAlreadyRunning = errors.New("compute worker daemon is already running or has already run")
 )
 
 type Service interface {
@@ -46,7 +46,7 @@ type Daemon struct {
 	config   Config
 	services []Service
 
-	running atomic.Bool
+	started atomic.Bool
 	mu      sync.RWMutex
 	state   Snapshot
 	ready   chan struct{}
@@ -94,10 +94,9 @@ func (d *Daemon) Snapshot() Snapshot {
 }
 
 func (d *Daemon) Run(ctx context.Context) error {
-	if !d.running.CompareAndSwap(false, true) {
+	if !d.started.CompareAndSwap(false, true) {
 		return ErrAlreadyRunning
 	}
-	defer d.running.Store(false)
 
 	stateDir, err := d.config.PrepareStateDir()
 	if err != nil {
@@ -119,22 +118,24 @@ func (d *Daemon) Run(ctx context.Context) error {
 	d.setState(StateReady, stateDir)
 	close(d.ready)
 
+	remaining := len(d.services)
 	var cause error
 	select {
 	case <-ctx.Done():
 	case first := <-results:
+		remaining--
 		if first.err == nil || errors.Is(first.err, context.Canceled) {
 			cause = fmt.Errorf("%w: %s", ErrServiceExited, first.name)
 		} else {
 			cause = fmt.Errorf("%s: %w", first.name, first.err)
 		}
-		results = drainFirst(results, first)
 	}
 
 	d.setState(StateStopping, stateDir)
 	cancel()
-	shutdownErr := d.awaitShutdown(results)
+	shutdownErr := d.awaitShutdown(results, remaining)
 	d.setState(StateStopped, stateDir)
+
 	if cause != nil && shutdownErr != nil {
 		return fmt.Errorf("%w; shutdown: %v", cause, shutdownErr)
 	}
@@ -144,36 +145,23 @@ func (d *Daemon) Run(ctx context.Context) error {
 	return shutdownErr
 }
 
-func drainFirst(results chan serviceResult, first serviceResult) chan serviceResult {
-	out := make(chan serviceResult, cap(results))
-	out <- first
-	for {
-		select {
-		case r := <-results:
-			out <- r
-		default:
-			return out
-		}
-	}
-}
-
-func (d *Daemon) awaitShutdown(results <-chan serviceResult) error {
+func (d *Daemon) awaitShutdown(results <-chan serviceResult, remaining int) error {
 	timer := time.NewTimer(d.config.ShutdownTimeout)
 	defer timer.Stop()
 
-	remaining := len(d.services)
+	var firstErr error
 	for remaining > 0 {
 		select {
 		case result := <-results:
 			remaining--
-			if result.err != nil && !errors.Is(result.err, context.Canceled) {
-				return fmt.Errorf("%s shutdown: %w", result.name, result.err)
+			if result.err != nil && !errors.Is(result.err, context.Canceled) && firstErr == nil {
+				firstErr = fmt.Errorf("%s shutdown: %w", result.name, result.err)
 			}
 		case <-timer.C:
 			return fmt.Errorf("compute worker shutdown timed out with %d service(s) remaining", remaining)
 		}
 	}
-	return nil
+	return firstErr
 }
 
 func (d *Daemon) setState(state State, stateDir string) {

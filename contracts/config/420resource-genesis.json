@@ -48,5 +48,6 @@
   "payment_unit": "native $420",
   "provider_staking": "required reference for ACTIVE provider state",
   "storage_proof_profile": "contracts/config/420storage-proof-v1.json",
-  "new_frozen_predeploy_required": false
+  "new_frozen_predeploy_required": false,
+  "deployment_package": "contracts/config/resource/resource-audit-8-deployment-package.json"
 }

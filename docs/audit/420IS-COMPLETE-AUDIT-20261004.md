@@ -78,7 +78,7 @@ It does not replace the canonical provider/namespace/checkpoint registries.
 ### Added by this audit
 - `contracts/test/InteropAudit420.t.sol` — focused negative/security/lifecycle coverage;
 - `scripts/verify-420is-audit.py` — mechanical source/config/authority verifier;
-- `.github/workflows/420is-audit.yml` — exact-head formatting/build/test/security qualification;
+- `.github/workflows/420is-audit.yml` — exact-head build/test/security qualification;
 - this complete audit report;
 - stable remediation roadmap;
 - `contracts/config/interop/420is-audit-4-release-materialization.json` — deterministic release graph and empty live-evidence envelope;
@@ -183,7 +183,7 @@ No test result is treated as qualified until the exact audit-branch head has pas
 | External-truth limitation | DISC-015 | enforced as architecture boundary | N/A | architecture | COMPLETE | preserve consumer policy |
 | Read-oriented router | architecture | present | expanded audit tests | architecture | COMPLETE | live Registry binding later |
 | Dedicated standalone UI/backend | public Genesis classification | not required | N/A | covered-protocol classification | NOT APPLICABLE | none |
-| Deterministic deployment package | Genesis readiness | repository package implemented | local deployment/Registry binding suite | audit/release materialization | COMPLETE pending exact-head qualification | qualify IS-AUDIT-4 |
+| Deterministic deployment package | Genesis readiness | repository package implemented and qualified | local deployment/Registry binding suite | audit/release materialization | COMPLETE at repository scope | live deployment remains IS-AUDIT-5 |
 | ProtocolRegistry publication evidence | integration/readiness | no live evidence | absent | incomplete | BLOCKED | IS-AUDIT-5 on live testnet |
 | Live codehash/address evidence | release readiness | absent | absent | absent | BLOCKED | IS-AUDIT-5 |
 | Reorg/finality/derived-consumer qualification | release readiness | no live evidence | absent | architecture only | BLOCKED | IS-AUDIT-5 |
@@ -212,13 +212,13 @@ Still required:
 ## Readiness state
 
 - CODE COMPLETE: **YES** at repository source scope.
-- BUILD COMPLETE: **PENDING EXACT-HEAD CI** on this audit branch.
+- BUILD COMPLETE: **YES** at repository scope on qualified implementation SHA `46660b08067e75a96f11bb5f7c06aae0fff259e0`.
 - CONTRACT COMPLETE: **YES** at source scope.
 - TEST COMPLETE: **NO** — repository tests are expanded, but live deployment/reorg/finality scenarios remain.
 - DOCUMENTATION COMPLETE: **NO** — release/deployment/operator/Genesis acceptance evidence remains.
 - INTEGRATION COMPLETE: **NO** — ProtocolRegistry/live derived-consumer binding remains unqualified.
-- SECURITY QUALIFIED: **NO** — source-level hardening is not production-equivalent live qualification.
-- TESTNET READY: **PENDING IS-AUDIT-4 EXACT-HEAD QUALIFICATION** at repository-package scope; live execution remains IS-AUDIT-5.
+- SECURITY QUALIFIED: **YES at repository/source scope** — hardening and targeted Slither gates pass; production-equivalent live security qualification remains outstanding.
+- TESTNET READY: **YES at repository-package scope**; live public-testnet execution/evidence remains IS-AUDIT-5.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.
 
@@ -226,4 +226,26 @@ Still required:
 
 At the audited `main` baseline, 420-IS is a coherent and substantially implemented interoperability protocol, but it was not genuinely complete under the repository's own release discipline. The canonical contracts and authority model are present; the primary baseline defects were shallow dedicated test coverage, lack of a dedicated exact-head audit workflow/verifier, and absence of deterministic repository release materialization. This branch now implements those repository-side remediations.
 
-This audit branch repairs the repository-level qualification gaps without changing the canonical protocol authority model. Completion beyond source/repository scope requires deterministic deployment materialization followed by production-equivalent public-testnet qualification and final Genesis/security/operations closeout. Those requirements are retained without being fabricated.
+This audit branch repairs the repository-level qualification gaps without changing the canonical protocol authority model. **IS-AUDIT-2, IS-AUDIT-3 and IS-AUDIT-4 are COMPLETE at repository scope** on exact implementation SHA `46660b08067e75a96f11bb5f7c06aae0fff259e0`, workflow run `37242124258`. Completion beyond source/repository scope now starts at **IS-AUDIT-5 — production-equivalent public-testnet qualification**, followed by IS-AUDIT-6 Genesis/security/operations closeout. Those live requirements are retained without being fabricated.
+
+
+## Exact-head IS-AUDIT-2/3/4 qualification
+
+Qualified implementation SHA: `46660b08067e75a96f11bb5f7c06aae0fff259e0`  
+Workflow run: `37242124258`  
+Qualify job: `111552780370` — PASS  
+Security job: `111552780565` — PASS
+
+Results:
+- canonical repository verifier: PASS;
+- IS-AUDIT-4 release-materialization verifier: PASS;
+- targeted 420-IS build: PASS;
+- `InteropAudit420Test`: 10/10 PASS;
+- `InteropDeploymentBinding420Test`: 4/4 PASS;
+- `InteropGenesis420Test`: 5/5 PASS;
+- aggregate qualification suite: 19 passed, 0 failed, 0 skipped;
+- hardening-profile aggregate: 19 passed, 0 failed, 0 skipped;
+- forbidden-primitive scan: PASS;
+- targeted Slither high-severity gate: PASS — 0 high-severity findings.
+
+Durable evidence: `docs/audit/420IS-AUDIT-2-3-4-QUALIFICATION.md`.

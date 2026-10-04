@@ -59,6 +59,6 @@ func (s *Service) Verify(ctx context.Context, chainID uint64, address string, su
 	if err != nil {
 		return store.Record{}, fmt.Errorf("reproducible build: %w", err)
 	}
-	result := matcher.Classify(deployment, build, submitted, false)
+	result := matcher.Classify(deployment, build, submitted, build.HasImmutables)
 	return s.store.Append(deployment, submitted, build, result)
 }

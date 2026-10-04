@@ -10,27 +10,50 @@ contract RightsAuthorization420 is I420System {
 
     error ZeroAddress();
 
-    constructor(address capabilityRegistry_) {
+    constructor(
+        address capabilityRegistry_
+    ) {
         if (capabilityRegistry_ == address(0)) revert ZeroAddress();
         capabilityRegistry = ICapabilityRegistry420(capabilityRegistry_);
     }
 
-    function systemName() external pure returns (string memory) { return "RightsAuthorization420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function systemName() external pure returns (string memory) {
+        return "RightsAuthorization420";
+    }
 
-    function scopeForSubject(bytes32 subjectId) public pure returns (bytes32) {
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
+
+    function scopeForSubject(
+        bytes32 subjectId
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(subjectId));
     }
 
-    function scopeForRight(bytes32 rightId) public pure returns (bytes32) {
+    function scopeForRight(
+        bytes32 rightId
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(rightId));
     }
 
-    function isSubjectAuthorized(address principal, bytes32 subjectId, bytes32 actionId) external view returns (bool) {
-        return capabilityRegistry.isAuthorized(principal, RightsIds420.COMPONENT_RIGHTS, actionId, scopeForSubject(subjectId), 0);
+    function isSubjectAuthorized(
+        address principal,
+        bytes32 subjectId,
+        bytes32 actionId
+    ) external view returns (bool) {
+        return capabilityRegistry.isAuthorized(
+            principal, RightsIds420.COMPONENT_RIGHTS, actionId, scopeForSubject(subjectId), 0
+        );
     }
 
-    function isRightAuthorized(address principal, bytes32 rightId, bytes32 actionId) external view returns (bool) {
-        return capabilityRegistry.isAuthorized(principal, RightsIds420.COMPONENT_RIGHTS, actionId, scopeForRight(rightId), 0);
+    function isRightAuthorized(
+        address principal,
+        bytes32 rightId,
+        bytes32 actionId
+    ) external view returns (bool) {
+        return capabilityRegistry.isAuthorized(
+            principal, RightsIds420.COMPONENT_RIGHTS, actionId, scopeForRight(rightId), 0
+        );
     }
 }

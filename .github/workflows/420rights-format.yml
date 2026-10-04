@@ -1,0 +1,19 @@
+name: 420Rights manual formatter
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify Rights scope formatting only
+        working-directory: contracts
+        run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol

@@ -217,6 +217,23 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         if (!record.exists) revert UnknownCase();
     }
 
+    function rulingSubmissionContext(
+        bytes32 caseId
+    ) external view returns (address resolver, uint8 round, State state) {
+        CaseRecord storage c = _cases[caseId];
+        if (!c.exists) revert UnknownCase();
+        resolver = c.round == 0 ? c.resolver : c.appealResolver;
+        return (resolver, c.round, c.state);
+    }
+
+    function finalizationContext(
+        bytes32 caseId
+    ) external view returns (uint8 round, State state, uint64 appealDeadline) {
+        CaseRecord storage c = _cases[caseId];
+        if (!c.exists) revert UnknownCase();
+        return (c.round, c.state, c.appealDeadline);
+    }
+
     function caseOrigin(
         bytes32 caseId
     )

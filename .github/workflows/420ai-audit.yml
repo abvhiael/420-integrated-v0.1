@@ -26,6 +26,7 @@ on:
       - 'scripts/verify-420ai-genesis-compatibility.py'
       - 'scripts/verify-420ai-v1-modules.py'
       - 'scripts/verify-420ai-compute-integration.py'
+      - 'scripts/verify-420ai-custody-settlement.py'
       - 'scripts/verify-420ai-provider-runtime.py'
       - '.github/workflows/420ai-audit.yml'
   workflow_dispatch:
@@ -85,6 +86,35 @@ jobs:
           python-version: '3.12'
       - name: Verify current ComputeMarket integration
         run: python3 scripts/verify-420ai-compute-integration.py
+
+  custody-settlement:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run AI custody/economic reconciliation suite
+        run: forge test --match-path 'test/AICustodySettlement420.t.sol'
+      - name: Run AI to CMP integration suite
+        run: forge test --match-path 'test/AIComputeIntegration420.t.sol'
+      - name: Retain CMP Vault funding qualification
+        run: forge test --match-path 'test/ComputeEscrowFunding420.t.sol'
+      - name: Retain CMP provider payout/refund qualification
+        run: forge test --match-path 'test/ComputeVerifiedEntitlement420.t.sol'
+      - name: Retain objective dispute slash evidence qualification
+        run: forge test --match-path 'test/ComputeVerifierDisputeSlashEvidence420.t.sol'
+      - name: Retain objective slash authorization qualification
+        run: forge test --match-path 'test/ComputeStakeSlashAuthorization420.t.sol'
+      - name: Verify AI-AUDIT-5 custody/settlement/dispute boundaries
+        working-directory: .
+        run: python3 scripts/verify-420ai-custody-settlement.py
 
   provider-runtime:
     runs-on: ubuntu-latest

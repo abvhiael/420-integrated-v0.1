@@ -142,6 +142,10 @@ func (s *Service) submit(w http.ResponseWriter, r *http.Request) {
 
 	record, err := s.processor.Verify(r.Context(),req.ChainID,strings.ToLower(req.Address),req.Submission)
 	if err!=nil { writeJSON(w,http.StatusUnprocessableEntity,map[string]any{"error":err.Error(),"canonical":false,"warning":warning}); return }
+	if record.Deployment.ChainID != req.ChainID || !strings.EqualFold(record.Deployment.Address, req.Address) {
+		writeJSON(w,http.StatusBadGateway,errorBody(errors.New("processor returned evidence for a different requested subject")))
+		return
+	}
 	if record.BindingKey != record.Deployment.BindingKey() || record.Classification.BindingKey != record.BindingKey {
 		writeJSON(w,http.StatusBadGateway,errorBody(errors.New("processor returned evidence with inconsistent binding")))
 		return

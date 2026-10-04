@@ -5,12 +5,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 errors = []
 
+
 def need(cond, msg):
     if not cond:
         errors.append(msg)
 
+
 def read(path):
     return (ROOT / path).read_text(encoding="utf-8")
+
 
 cfg = json.loads(read("contracts/config/420arbitration-genesis.json"))
 service_ids = read("contracts/src/libraries/ServiceIds420.sol")
@@ -58,22 +61,33 @@ for path in [
 
 need("requestedRemedyHash == bytes32(0)" in case_src, "requested-remedy commitment validation missing")
 need("EvidenceAlreadyCommitted" in case_src, "duplicate evidence replay guard missing")
-need("function getCase(bytes32 caseId)" in case_src, "case inspection getter missing")
+need(
+    "function getCase(" in case_src and "CaseRecord memory record" in case_src,
+    "case inspection getter missing",
+)
 need("remedyCommitment == bytes32(0)" in ruling_src, "ruling remedy commitment validation missing")
 need("maxAppeals > 3" in policy_src, "bounded appeal cap missing")
 need("onlyGovernance" in policy_src, "governance policy authority missing")
-need("originating protocol" in arch.lower() and "custody" in arch.lower(), "authority boundary documentation missing")
+need(
+    "originating protocol" in arch.lower() and "custody" in arch.lower(),
+    "authority boundary documentation missing",
+)
 
 if errors:
     print(json.dumps({"pass": False, "errors": errors}, indent=2))
     raise SystemExit(1)
 
-print(json.dumps({
-    "pass": True,
-    "suite": "420Arbitration",
-    "canonicalContracts": expected_contracts,
-    "invariants": len(invariants),
-    "serviceId": cfg["serviceId"],
-    "repositoryScope": "source-and-documentation",
-    "releaseMaterialization": "blocked-pending-canonical-service-endpoint-and-address-authority"
-}, indent=2))
+print(
+    json.dumps(
+        {
+            "pass": True,
+            "suite": "420Arbitration",
+            "canonicalContracts": expected_contracts,
+            "invariants": len(invariants),
+            "serviceId": cfg["serviceId"],
+            "repositoryScope": "source-and-documentation",
+            "releaseMaterialization": "blocked-pending-canonical-service-endpoint-and-address-authority",
+        },
+        indent=2,
+    )
+)

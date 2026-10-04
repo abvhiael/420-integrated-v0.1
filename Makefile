@@ -5,6 +5,7 @@ build:
 	mkdir -p bin
 	go build -o bin/fourtwentyd ./consensus/cmd/fourtwentyd
 	go build -o bin/node420 ./execution/cmd/node420
+	go build -o bin/node420-compute ./execution/cmd/node420-compute
 	go build -o bin/420-genesis ./genesis/cmd/420-genesis
 	go build -o bin/committee15-sim ./simulations/committee15/main
 	go build -o bin/devnet-bus ./devnet/cmd/devnet-bus

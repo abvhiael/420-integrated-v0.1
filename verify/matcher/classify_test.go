@@ -32,7 +32,7 @@ func build(runtime, creation string) compiler.BuildEvidence {
 }
 
 func submissionModel() submission.Submission {
-	return submission.Submission{Build:submission.BuildSettings{MetadataHashMode:"ipfs",Libraries:[]submission.LibraryLink{{Source:"lib/Math.sol",Library:"Math",Address:"0x2222222222222222222222222222222222222222"}}}}
+	return submission.Submission{Build:submission.BuildSettings{MetadataHashMode:"ipfs",ConstructorArgsKnown:true,ConstructorArguments:"0x",Libraries:[]submission.LibraryLink{{Source:"lib/Math.sol",Library:"Math",Address:"0x2222222222222222222222222222222222222222"}}}}
 }
 
 func TestFullMatchRequiresExactRuntimeAndCreationWhenRecoverable(t *testing.T) {
@@ -67,4 +67,37 @@ func TestMalformedCanonicalEvidenceIsUnverifiable(t *testing.T) {
 	e:=canonical(true); e.RuntimeCodeHash="0x1234"
 	r:=Classify(e,build("0x6001600055","0x60606001600055"),submissionModel(),false)
 	if r.Class!=architecture.ResultUnverifiable { t.Fatalf("expected invalid canonical evidence to be unverifiable: %+v",r) }
+}
+
+
+func TestKnownConstructorArgumentsAreIncludedInCreationComparison(t *testing.T) {
+	s := submissionModel()
+	s.Build.ConstructorArguments = "0x1234"
+	e := canonical(true)
+	e.Creation.CreationBytecode = "0x606060016000551234"
+	r := Classify(e, build("0x6001600055", "0x60606001600055"), s, false)
+	if r.Class != architecture.ResultFullMatch || !r.CreationExact {
+		t.Fatalf("expected constructor-aware full match: %+v", r)
+	}
+}
+
+func TestUnknownConstructorArgumentsPreventFalseCreationMismatch(t *testing.T) {
+	s := submissionModel()
+	s.Build.ConstructorArgsKnown = false
+	s.Build.ConstructorArguments = ""
+	e := canonical(true)
+	e.Creation.CreationBytecode = "0x606060016000551234"
+	r := Classify(e, build("0x6001600055", "0x60606001600055"), s, false)
+	if r.Class != architecture.ResultPartialMatch || !r.RuntimeExact || !r.CreationCompared {
+		t.Fatalf("expected runtime-exact partial match when constructor arguments are unknown: %+v", r)
+	}
+	found := false
+	for _, d := range r.Diagnostics {
+		if d.Reason == ReasonConstructorArgsUnknown {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("missing constructor-arguments diagnostic: %+v", r.Diagnostics)
+	}
 }

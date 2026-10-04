@@ -1,0 +1,138 @@
+{
+  "schema": "420ai-audit-9-deployment-package-v1",
+  "status": "REPOSITORY_MATERIALIZATION_CANDIDATE",
+  "qualificationBoundary": "AI-AUDIT-9 repository deployment/materialization; live production-equivalent deployment remains AI-AUDIT-11",
+  "compiler": {
+    "solidity": "0.8.24",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true
+  },
+  "governanceTimelock": "0x0000000000000000000000000000000000000429",
+  "protocolRegistry": "0x0000000000000000000000000000000000000434",
+  "service": {
+    "idPreimage": "420/service/ai/v1",
+    "version": 1,
+    "implementation": "AI_ROUTER_DEPLOYMENT",
+    "publication": "publishRegisteredService",
+    "componentType": "APPLICATION"
+  },
+  "frozenPredeploys": [
+    {
+      "contract": "AIProviderRegistry.sol",
+      "address": "0x000000000000000000000000000000000000042f",
+      "componentIdPreimage": "420/component/ai/provider-registry/v1",
+      "protocolVersion": "2.0.0"
+    },
+    {
+      "contract": "AIModelRegistry.sol",
+      "address": "0x0000000000000000000000000000000000000430",
+      "componentIdPreimage": "420/component/ai/model-registry/v1",
+      "protocolVersion": "2.0.0"
+    },
+    {
+      "contract": "AIJobManager.sol",
+      "address": "0x0000000000000000000000000000000000000431",
+      "componentIdPreimage": "420/component/ai/job-manager/v1",
+      "protocolVersion": "2.0.0"
+    },
+    {
+      "contract": "AIJobEscrow.sol",
+      "address": "0x0000000000000000000000000000000000000432",
+      "componentIdPreimage": "420/component/ai/job-escrow/v1",
+      "protocolVersion": "2.0.0"
+    },
+    {
+      "contract": "AIReputationRegistry.sol",
+      "address": "0x0000000000000000000000000000000000000433",
+      "componentIdPreimage": "420/component/ai/reputation-registry/v1",
+      "protocolVersion": "2.0.0"
+    }
+  ],
+  "registryResolved": [
+    {
+      "contract": "AIAuthorization420.sol",
+      "componentIdPreimage": "420/component/ai/authorization/v1",
+      "protocolVersion": "1.0.0",
+      "address": null
+    },
+    {
+      "contract": "AIPolicyRegistry420.sol",
+      "componentIdPreimage": "420/component/ai/policy-registry/v1",
+      "protocolVersion": "1.0.0",
+      "address": null
+    },
+    {
+      "contract": "AIModelDeploymentRegistry420.sol",
+      "componentIdPreimage": "420/component/ai/deployment-registry/v1",
+      "protocolVersion": "1.0.0",
+      "address": null
+    },
+    {
+      "contract": "AIRequestRegistry420.sol",
+      "componentIdPreimage": "420/component/ai/request-registry/v1",
+      "protocolVersion": "1.0.0",
+      "address": null
+    },
+    {
+      "contract": "AIResultRegistry420.sol",
+      "componentIdPreimage": "420/component/ai/result-registry/v1",
+      "protocolVersion": "1.0.0",
+      "address": null
+    },
+    {
+      "contract": "AIComputeAdapter420.sol",
+      "componentIdPreimage": "420/component/ai/compute-adapter/v1",
+      "protocolVersion": "2.0.0",
+      "address": null
+    },
+    {
+      "contract": "AIRouter420.sol",
+      "componentIdPreimage": "420/component/ai/router/v1",
+      "protocolVersion": "1.0.0",
+      "address": null
+    }
+  ],
+  "bindings": [
+    "AIJobManager.bindComputeAdapter(AIComputeAdapter420)",
+    "AIJobEscrow.bindVaultAdapter(canonical ComputeMarket funding adapter)",
+    "AIJobEscrow.bindSettlementAdapter(canonical ComputeMarket settlement adapter)",
+    "AIReputationRegistry.bindTrustAdapter(canonical Trust adapter)"
+  ],
+  "activationPolicy": "Register every component SUSPENDED, verify runtime identity and bindings, then transition ACTIVE; publish AI service only after the complete graph is active.",
+  "runtimeHashEvidence": "Exact EXTCODEHASH values are emitted by contracts/test/AIDeploymentMaterialization420.t.sol and recorded in exact-head AI-AUDIT-9 qualification evidence. Registry-resolved production addresses remain null until live deployment.",
+  "liveFields": {
+    "chainId": null,
+    "blockNumber": null,
+    "blockHash": null,
+    "deploymentTransactions": null,
+    "registryPublicationTransactions": null,
+    "dns": null,
+    "apiOrigin": null
+  },
+  "dependencies": {
+    "capabilityRegistry": "CANONICAL_REGISTRY_RESOLVED_DEPENDENCY",
+    "computeRouter": "CANONICAL_REGISTRY_RESOLVED_DEPENDENCY",
+    "computeFundingAdapter": "DISCOVERED_THROUGH_COMPUTE_ROUTER",
+    "computeSettlementAdapter": "DISCOVERED_THROUGH_COMPUTE_ROUTER",
+    "trustAdapter": "CANONICAL_TRUST_DEPENDENCY",
+    "indexerReadApi": "MATERIALIZE_DEPLOYMENT_CONFIGURATION_BEFORE_LIVE_CLIENT_ENABLEMENT"
+  },
+  "rollbackRecovery": [
+    "Keep all Registry-resolved AI components SUSPENDED until complete wiring/runtime validation passes.",
+    "If a candidate is bad, suspend/deprecate Registry discovery and deploy a newly qualified replacement; never mutate deployed runtime bytecode.",
+    "Frozen predeploy identities are not moved or repurposed; remediation requires a new qualified Genesis materialization before launch.",
+    "Never rewrite final CMP/Vault settlement or dispute history during AI recovery."
+  ],
+  "monitoring": [
+    "ProtocolRegistry AI component/service lifecycle and runtime-code-hash drift",
+    "AIJobManager computeAdapter binding",
+    "AIJobEscrow Vault/settlement adapter bindings",
+    "AIReputationRegistry Trust adapter binding",
+    "ComputeMarket graph hash and dependency identity",
+    "420Indexer AI descriptor/reorg/replay health",
+    "provider runtime health and private-payload redaction",
+    "AI web read API/network configuration"
+  ]
+}

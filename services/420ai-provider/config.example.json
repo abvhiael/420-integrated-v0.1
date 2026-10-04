@@ -1,0 +1,10 @@
+{
+  "chainId": 420,
+  "computeGraphHash": "0xREPLACE_WITH_CANONICAL_COMPUTE_GRAPH_HASH",
+  "providerId": "0xREPLACE_WITH_CANONICAL_COMPUTE_PROVIDER_ID",
+  "runtimeId": "420ai-provider-v1",
+  "resourceIds": ["0xREPLACE_WITH_ALLOWED_RESOURCE_ID"],
+  "manifestTtlMs": 900000,
+  "maxAttempts": 3,
+  "retryBaseMs": 250
+}

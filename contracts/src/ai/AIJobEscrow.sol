@@ -72,6 +72,51 @@ contract AIJobEscrow is SystemAccess, I420System {
     /// @notice Legacy direct custody is deliberately disabled; V2 funding is bound to 420Vault/approved settlement primitives.
     function fund(bytes32, bytes32) external payable { revert DirectCustodyDisabled(); }
 
+    /// @notice Mature V1 funding reconciliation. The bound Vault adapter may mirror only
+    ///         an already-proven canonical CMP/Vault funding reservation. Provider and beneficiary
+    ///         are deliberately bound later from the accepted canonical match.
+    function confirmCanonicalVaultFunding(
+        bytes32 jobId,
+        address payer,
+        bytes32 vaultRef,
+        bytes32 fundingRef,
+        uint256 amount
+    ) external onlyVaultAdapter {
+        if (jobId == bytes32(0) || payer == address(0)) revert InvalidEscrow();
+        if (
+            vaultRef == bytes32(0) || fundingRef == bytes32(0) || amount == 0
+                || escrows[jobId].state != EscrowState.NONE
+        ) revert InvalidEscrow();
+        escrows[jobId] = Escrow({
+            payer: payer,
+            beneficiary: address(0),
+            providerId: bytes32(0),
+            vaultRef: vaultRef,
+            fundingRef: fundingRef,
+            settlementRef: bytes32(0),
+            amount: amount,
+            state: EscrowState.FUNDED
+        });
+        emit Funded(jobId, payer, bytes32(0), amount);
+        emit FundingBound(jobId, vaultRef, fundingRef, address(0), amount);
+        IAIJobManagerEscrow420(AI_JOB_MANAGER).confirmFunding(jobId, fundingRef, amount);
+    }
+
+    /// @notice Freeze provider/beneficiary only after canonical CMP price acceptance.
+    ///         This cannot change payer, funding references, amount, or a previously-bound recipient.
+    function bindSettlementBeneficiary(bytes32 jobId, bytes32 providerId, address beneficiary)
+        external
+        onlySettlementAdapter
+    {
+        Escrow storage e = _get(jobId);
+        if (
+            e.state != EscrowState.FUNDED || providerId == bytes32(0) || beneficiary == address(0)
+                || e.providerId != bytes32(0) || e.beneficiary != address(0)
+        ) revert InvalidStateTransition();
+        e.providerId = providerId;
+        e.beneficiary = beneficiary;
+    }
+
     function confirmVaultFunding(
         bytes32 jobId,
         address payer,
@@ -100,7 +145,10 @@ contract AIJobEscrow is SystemAccess, I420System {
 
     function markClaimable(bytes32 jobId, bytes32 settlementRef) external onlySettlementAdapter {
         Escrow storage e = _get(jobId);
-        if (e.state != EscrowState.FUNDED || settlementRef == bytes32(0)) revert InvalidStateTransition();
+        if (
+            e.state != EscrowState.FUNDED || settlementRef == bytes32(0)
+                || e.providerId == bytes32(0) || e.beneficiary == address(0)
+        ) revert InvalidStateTransition();
         e.settlementRef = settlementRef;
         e.state = EscrowState.CLAIMABLE;
         emit SettlementReferenceBound(jobId, settlementRef, e.state);

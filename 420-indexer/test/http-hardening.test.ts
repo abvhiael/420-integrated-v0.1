@@ -26,6 +26,20 @@ function throwingApi420(): IndexerPublicApi420 {
     async grantsApplication() { throw new Error('backend unavailable'); },
     async grantsAward() { throw new Error('backend unavailable'); },
     async grantsMilestone() { throw new Error('backend unavailable'); },
+    async aiProviders() { throw new Error('backend unavailable'); },
+    async aiProvider() { throw new Error('backend unavailable'); },
+    async aiModels() { throw new Error('backend unavailable'); },
+    async aiModel() { throw new Error('backend unavailable'); },
+    async aiModelVersions() { throw new Error('backend unavailable'); },
+    async aiModelVersion() { throw new Error('backend unavailable'); },
+    async aiDeployments() { throw new Error('backend unavailable'); },
+    async aiDeployment() { throw new Error('backend unavailable'); },
+    async aiJobs() { throw new Error('backend unavailable'); },
+    async aiJob() { throw new Error('backend unavailable'); },
+    async aiPolicies() { throw new Error('backend unavailable'); },
+    async aiPolicy() { throw new Error('backend unavailable'); },
+    async aiReputations() { throw new Error('backend unavailable'); },
+    async aiReputation() { throw new Error('backend unavailable'); },
     async search() { throw new Error('backend unavailable'); }
   } as IndexerPublicApi420;
 }

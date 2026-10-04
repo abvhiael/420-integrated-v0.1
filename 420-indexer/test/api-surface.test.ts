@@ -24,3 +24,15 @@ test('public API maps search rows into transport-safe result objects', async () 
   const api = new IndexerPublicApiAdapter420(new IndexerQueryService420(db));
   assert.deepEqual(await api.search(420n, '42'), [{ type: 'block', key: '42', value: '0xblock' }]);
 });
+
+
+test('AI read adapter enforces configured network identity before querying projections', async () => {
+  const db = new FakeDb420();
+  const api = new IndexerPublicApiAdapter420(
+    new IndexerQueryService420(db),
+    { mode: 'head' },
+    { aiExpectedChainId: 420n }
+  );
+  await assert.rejects(() => api.aiProviders(1n), /AI network mismatch/);
+  assert.deepEqual(db.queue, []);
+});

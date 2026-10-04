@@ -11,19 +11,19 @@ Requirement numbering is durable. Do not renumber completed or blocked steps.
 - Preserve `interop-router` as Registry-resolved with no fixed Genesis address.
 - Preserve provider-neutral authority boundaries and external-truth limitations.
 
-## IS-AUDIT-2 — contract/security coverage hardening — IMPLEMENTED, PENDING EXACT-HEAD QUALIFICATION
+## IS-AUDIT-2 — contract/security coverage hardening — COMPLETE
 - Add focused negative/security/lifecycle coverage beyond the five retained baseline tests.
 - Cover standard-version rejection, provider revision/type drift, governance bounds, inactive namespace/provider behavior, explicit revocation, multi-revision supersession, checkpoint-chain drift and router reads.
 - Add forbidden-primitive and targeted Slither gates.
 - Qualify the exact accumulated implementation head.
 
-## IS-AUDIT-3 — repository consistency and audit qualification — IMPLEMENTED, PENDING EXACT-HEAD QUALIFICATION
+## IS-AUDIT-3 — repository consistency and audit qualification — COMPLETE
 - Add a mechanical verifier for canonical inventory, service ID, address authority, architecture invariants and source invariants.
 - Add a dedicated exact-head 420-IS audit workflow.
 - Record the exact implementation SHA and passing workflow/job IDs after the implementation head qualifies.
 - Requalify any later bookkeeping-only head before formal COMPLETE closeout.
 
-## IS-AUDIT-4 — deterministic release materialization — IMPLEMENTED, PENDING EXACT-HEAD QUALIFICATION
+## IS-AUDIT-4 — deterministic release materialization — COMPLETE
 - Materialize and mechanically verify exact deployment order:
   1. `InteropProviderRegistry420`
   2. `InteropNamespaceRegistry420`
@@ -57,4 +57,20 @@ Requirement numbering is durable. Do not renumber completed or blocked steps.
 
 ## Current readiness boundary
 
-Repository/source work through IS-AUDIT-4 is now implemented and awaiting exact-head CI qualification. IS-AUDIT-5 and IS-AUDIT-6 require a production-equivalent live testnet and retained runtime evidence. Tests being green before that point do not make 420-IS Genesis-ready or production-ready.
+Repository/source work through **IS-AUDIT-4 is COMPLETE** on qualified implementation SHA `46660b08067e75a96f11bb5f7c06aae0fff259e0`, workflow run `37242124258` (qualify job `111552780370`, security job `111552780565`). Durable evidence: `docs/audit/420IS-AUDIT-2-3-4-QUALIFICATION.md`.
+
+**Next canonical step: IS-AUDIT-5 — production-equivalent public-testnet qualification, BLOCKED ON LIVE TESTNET.** IS-AUDIT-5 and IS-AUDIT-6 require a production-equivalent live testnet and retained runtime evidence. Repository qualification does not make 420-IS Genesis-ready or production-ready.
+
+
+## Qualified repository closeout
+
+IS-AUDIT-2, IS-AUDIT-3 and IS-AUDIT-4 were qualified together on exact implementation SHA `46660b08067e75a96f11bb5f7c06aae0fff259e0` by workflow run `37242124258`:
+- qualify job `111552780370`: PASS;
+- security job `111552780565`: PASS;
+- repository verifier: PASS;
+- IS-AUDIT-4 release-materialization verifier: PASS;
+- targeted build: PASS;
+- complete Interop suite: 19 passed, 0 failed, 0 skipped;
+- hardening-profile Interop suite: 19 passed, 0 failed, 0 skipped;
+- forbidden-primitive gate: PASS;
+- targeted Slither high-severity gate: PASS, 0 high-severity findings.

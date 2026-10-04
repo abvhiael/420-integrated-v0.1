@@ -19,7 +19,8 @@
       "provider-runtime",
       "ai-read-api",
       "ai-client",
-      "focused-ai-contracts"
+      "focused-ai-contracts",
+      "deployment-materialization"
     ]
   },
   "step_qualifications": {
@@ -520,10 +521,46 @@
       "completion_state": "COMPLETE",
       "durable_evidence": "docs/audit/420AI-AUDIT-5-QUALIFICATION.md",
       "next_step": "AI-AUDIT-9 — deployment and Genesis materialization"
+    },
+    "AI-AUDIT-9": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head app-specific qualification",
+      "implementation_sha": "ed7ab3af91d54b36d3ca6595eaf1363e07f09a55",
+      "current_main_at_closeout": "e22a744d8fbcff20f2b2108a1117ee3abe9dc437",
+      "workflow_run": 37228805812,
+      "jobs": {
+        "compute-integration": 111513925933,
+        "v1-modules": 111513926031,
+        "genesis-compatibility": 111513926092,
+        "deployment-materialization": 111513926105,
+        "audit-state": 111513926111,
+        "custody-settlement": 111513926116,
+        "provider-runtime": 111513926160,
+        "ai-client": 111513926207,
+        "focused-ai-contracts": 111513926214,
+        "ai-read-api": 111513926264
+      },
+      "requirements_satisfied": [
+        "Frozen AI compatibility predeploy runtime is materialized and verified at the canonical 0x042f through 0x0433 identities in deterministic repository qualification.",
+        "Registry-resolved mature AI V1 modules are deployed in the materialization harness and runtime code hashes are verified.",
+        "Canonical AI component ID preimages are defined and published through ProtocolRegistry using the staged SUSPENDED-to-ACTIVE lifecycle.",
+        "The canonical 420/service/ai/v1 service is published to AIRouter420 after wiring verification.",
+        "Governance-only one-shot adapter bindings and unauthorized rebinding rejection are qualified.",
+        "Deployment/admin handoff, smoke tests, rollback/recovery, monitoring and DNS/API dependency boundaries are documented.",
+        "Live network fields remain intentionally unset rather than fabricated before production-equivalent testnet deployment."
+      ],
+      "limitations": [
+        "This is repository deployment/materialization readiness, not live-chain deployment evidence.",
+        "Live addresses for Registry-resolved modules, transaction hashes, block evidence, DNS/API origins and provider/runtime logs remain AI-AUDIT-11 work."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-9-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-10 — exact-head pre-testnet qualification"
     }
   },
   "scope": {
-    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, current ComputeMarket integration, qualified custody/settlement/dispute boundaries, qualified provider runtime/private-payload path, qualified read API/indexer, and qualified browser client",
+    "claim": "repository-state audit through qualified AI deployment and Genesis materialization readiness",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
@@ -541,7 +578,8 @@
     "production_equivalent_testnet_evidence_present": false,
     "historical_recovery_pr_348_merged": false,
     "current_compute_market_integration_complete": true,
-    "custody_settlement_disputes_complete": true
+    "custody_settlement_disputes_complete": true,
+    "deployment_materialization_ready": true
   },
   "readiness": {
     "code_complete": false,

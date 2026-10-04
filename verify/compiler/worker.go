@@ -43,6 +43,59 @@ type Worker struct {
 	limits  Limits
 }
 
+// ValidateBuildEvidence proves that persisted build evidence is internally
+// reproducible from the persisted submission. It does not replace re-running
+// the checksum-pinned compiler, but it prevents restart/replay from accepting
+// a record whose input/output commitments or selected bytecode were rewritten.
+func ValidateBuildEvidence(build BuildEvidence, submitted submission.Submission) error {
+	if err := submitted.ValidateCommitment(); err != nil {
+		return fmt.Errorf("submission: %w", err)
+	}
+	if build.CompilerVersion != submitted.Build.CompilerVersion {
+		return errors.New("build compiler version does not match submission")
+	}
+	if build.BundleHash != submitted.BundleHash {
+		return errors.New("build bundle hash does not match submission")
+	}
+	if len(build.CompilerSHA256) != 64 {
+		return errors.New("build compiler sha256 must be a 32-byte hex digest")
+	}
+	if _, err := hex.DecodeString(build.CompilerSHA256); err != nil {
+		return errors.New("build compiler sha256 is invalid")
+	}
+
+	input, err := standardJSONFor(submitted)
+	if err != nil {
+		return fmt.Errorf("reconstruct compiler input: %w", err)
+	}
+	inputHash := sha256.Sum256(input)
+	if build.InputSHA256 != "sha256:"+hex.EncodeToString(inputHash[:]) {
+		return errors.New("compiler input commitment mismatch")
+	}
+
+	if !json.Valid(build.CompilerOutput) {
+		return errors.New("stored compiler output is not valid JSON")
+	}
+	outputHash := sha256.Sum256(build.CompilerOutput)
+	if build.OutputSHA256 != "sha256:"+hex.EncodeToString(outputHash[:]) {
+		return errors.New("compiler output commitment mismatch")
+	}
+
+	runtimeCode, creationCode, hasImmutables, err := extractBytecode(build.CompilerOutput, submitted.TargetSource, submitted.TargetContract)
+	if err != nil {
+		return fmt.Errorf("stored compiler output: %w", err)
+	}
+	if !strings.EqualFold(runtimeCode, build.RuntimeBytecode) ||
+		!strings.EqualFold(creationCode, build.CreationBytecode) ||
+		hasImmutables != build.HasImmutables {
+		return errors.New("selected compiler bytecode evidence does not match compiler output")
+	}
+	if !build.NetworkDisabled || !build.WorkingDirClean {
+		return errors.New("hermetic build evidence is incomplete")
+	}
+	return nil
+}
+
 func NewWorker(catalog *Catalog, limits Limits) (*Worker, error) {
 	if catalog == nil {
 		return nil, errors.New("compiler catalogue is required")

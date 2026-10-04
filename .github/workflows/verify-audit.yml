@@ -7,6 +7,7 @@ on:
       - 'docs/420VERIFY*'
       - 'docs/apps/verify/**'
       - 'docs/audit/420VERIFY-AUDIT*'
+      - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
       - 'contracts/config/420verify-genesis.json'
       - 'testnet/public-services/verify/**'
       - '.github/workflows/verify-audit.yml'
@@ -72,7 +73,7 @@ jobs:
 
           assert data["schema"] == "420-testnet-verify-readiness-v1"
           assert data["audit"]["pr"] == 503
-          assert data["audit"]["current_step"] == "VERIFY-AUDIT-7"
+          assert data["audit"]["current_step"] == "VERIFY-AUDIT-8"
           assert data["audit"]["final_exact_head_qualification_required"] is True
           assert data["public_endpoint_deployment_claimed"] is False
           assert data["backend"]["status"] == "PENDING_DEPLOYMENT"

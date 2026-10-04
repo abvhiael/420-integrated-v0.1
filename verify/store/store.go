@@ -41,6 +41,7 @@ type Store struct {
 	root    string
 	mu      sync.RWMutex
 	history map[string][]Record
+	byHash  map[string]Record
 }
 
 func Open(root string) (*Store, error) {
@@ -50,7 +51,7 @@ func Open(root string) (*Store, error) {
 	if err := os.MkdirAll(root, 0o750); err != nil {
 		return nil, err
 	}
-	s := &Store{root: root, history: map[string][]Record{}}
+	s := &Store{root: root, history: map[string][]Record{}, byHash: map[string]Record{}}
 	if err := s.rebuild(); err != nil {
 		return nil, err
 	}
@@ -122,6 +123,7 @@ func (s *Store) AppendWithProxy(deployment evidence.DeploymentEvidence, submitte
 	if err := os.Rename(tmpName, final); err != nil { return Record{}, err }
 
 	s.history[binding] = append(s.history[binding], record)
+	s.byHash[strings.ToLower(record.RecordHash)] = record
 	return cloneRecord(record), nil
 }
 
@@ -140,6 +142,16 @@ func (s *Store) Latest(bindingKey string) (Record, bool) {
 	items := s.history[bindingKey]
 	if len(items) == 0 { return Record{}, false }
 	return cloneRecord(items[len(items)-1]), true
+}
+
+func (s *Store) ByHash(recordHash string) (Record, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	record, ok := s.byHash[strings.ToLower(strings.TrimSpace(recordHash))]
+	if !ok {
+		return Record{}, false
+	}
+	return cloneRecord(record), true
 }
 
 func (s *Store) Bindings() []string {
@@ -175,7 +187,16 @@ func (s *Store) rebuild() error {
 			if record.Sequence != uint64(i+1) { return fmt.Errorf("non-contiguous evidence history for %s", record.BindingKey) }
 			if i > 0 && records[i-1].BindingKey != record.BindingKey { return errors.New("mixed binding keys in evidence directory") }
 		}
-		if len(records) > 0 { s.history[records[0].BindingKey] = records }
+		if len(records) > 0 {
+			s.history[records[0].BindingKey] = records
+			for _, record := range records {
+				key := strings.ToLower(record.RecordHash)
+				if _, exists := s.byHash[key]; exists {
+					return fmt.Errorf("duplicate evidence record hash %s", record.RecordHash)
+				}
+				s.byHash[key] = record
+			}
+		}
 	}
 	return nil
 }

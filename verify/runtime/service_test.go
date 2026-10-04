@@ -24,6 +24,7 @@ func validConfig() Config {
 		RPCURL:           "http://127.0.0.1:8545",
 		ReadinessAddress: "0x0000000000000000000000000000000000000420",
 		CompilerCache:    "/tmp/420verify/compilers",
+		CompilerCatalog:  "/tmp/420verify/catalog.json",
 		EvidenceStore:    "/tmp/420verify/evidence",
 		ListenAddr:       "127.0.0.1:8420",
 	}
@@ -36,6 +37,7 @@ func TestConfigValidateFailsClosed(t *testing.T) {
 		{"bad rpc scheme", func(c *Config) { c.RPCURL = "file:///tmp/node.ipc" }},
 		{"bad readiness address", func(c *Config) { c.ReadinessAddress = "0x420" }},
 		{"missing compiler cache", func(c *Config) { c.CompilerCache = "" }},
+		{"missing compiler catalogue", func(c *Config) { c.CompilerCatalog = "" }},
 		{"missing evidence store", func(c *Config) { c.EvidenceStore = "" }},
 		{"missing listener", func(c *Config) { c.ListenAddr = "" }},
 	}

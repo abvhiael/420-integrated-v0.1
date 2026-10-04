@@ -18,6 +18,7 @@ import (
 	verifyprocessor "github.com/420integrated/420-integrated/verify/processor"
 	verifyruntime "github.com/420integrated/420-integrated/verify/runtime"
 	verifystore "github.com/420integrated/420-integrated/verify/store"
+	verifyweb "github.com/420integrated/420-integrated/verify/web"
 )
 
 type compilerCatalogFile struct {
@@ -84,6 +85,7 @@ func main() {
 	mux.Handle("/healthz", service.Handler())
 	mux.Handle("/readyz", service.Handler())
 	mux.Handle("/v1/verify/", publicAPI.Handler())
+	mux.Handle("/", verifyweb.Handler())
 
 	server := &http.Server{
 		Addr:              cfg.ListenAddr,

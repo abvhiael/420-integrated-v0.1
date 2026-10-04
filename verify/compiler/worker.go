@@ -272,7 +272,15 @@ func validateStandardJSONBuildSettings(raw []byte, build submission.BuildSetting
 }
 
 func verifyFileSHA256(path, expected string) error {
-	data, err := os.ReadFile(filepath.Clean(path))
+	clean := filepath.Clean(path)
+	info, err := os.Lstat(clean)
+	if err != nil {
+		return err
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
+		return errors.New("compiler binary must be a regular non-symlink file")
+	}
+	data, err := os.ReadFile(clean)
 	if err != nil {
 		return err
 	}

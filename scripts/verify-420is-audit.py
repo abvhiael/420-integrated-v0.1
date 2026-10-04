@@ -32,7 +32,8 @@ def load(path: str):
 
 def main() -> None:
     dapp_map = load("contracts/config/genesis-dapp-contract-map.json")
-    entry = next((x for x in dapp_map if x.get("dapp") == "420-IS"), None)
+    entries = dapp_map.get("dapps", dapp_map.get("apps", [])) if isinstance(dapp_map, dict) else dapp_map
+    entry = next((x for x in entries if x.get("dapp") == "420-IS"), None)
     if entry is None:
         raise SystemExit("420-IS missing from genesis contract map")
     if entry.get("contracts") != EXPECTED_CONTRACTS:

@@ -1,0 +1,63 @@
+name: Compute Worker Fast Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'compute/worker/**'
+      - 'execution/cmd/node420-compute/**'
+      - 'scripts/verify-cmp-3-*.py'
+      - 'docs/compute-market/CMP-3*.md'
+      - 'docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md'
+      - '.github/workflows/compute-worker-fast.yml'
+      - 'Makefile'
+  push:
+    paths:
+      - 'compute/worker/**'
+      - 'execution/cmd/node420-compute/**'
+      - 'scripts/verify-cmp-3-*.py'
+      - 'docs/compute-market/CMP-3*.md'
+      - 'docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md'
+      - '.github/workflows/compute-worker-fast.yml'
+      - 'Makefile'
+
+permissions:
+  contents: read
+
+jobs:
+  fast-qualification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        shell: bash
+        run: |
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          echo "expected=$expected"
+          echo "actual=$actual"
+          test "$actual" = "$expected"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test worker runtime
+        run: |
+          go test ./compute/worker
+          go test ./execution/cmd/node420-compute
+          go vet ./compute/worker ./execution/cmd/node420-compute
+          go build ./execution/cmd/node420-compute
+
+      - name: Verify CMP-3.1 daemon regression
+        run: python scripts/verify-cmp-3-1-worker-daemon.py
+
+      - name: Verify CMP-3.2 hardware/software discovery
+        run: python scripts/verify-cmp-3-2-hardware-software-discovery.py

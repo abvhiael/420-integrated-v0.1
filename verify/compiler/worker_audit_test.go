@@ -108,7 +108,6 @@ func TestWorkerRejectsNonSolidityStandardJSON(t *testing.T) {
 	}
 }
 
-
 func TestWorkerRejectsSymlinkedCompilerBinary(t *testing.T) {
 	cache := t.TempDir()
 	target := filepath.Join(cache, "real-solc")

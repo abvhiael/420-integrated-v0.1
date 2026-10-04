@@ -187,7 +187,6 @@ func TestHistoryReturnsDefensiveCopies(t *testing.T) {
 	}
 }
 
-
 func TestRestartRejectsRehashedForgedClassification(t *testing.T) {
 	root := t.TempDir()
 	s, err := Open(root)

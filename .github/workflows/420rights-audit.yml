@@ -6,6 +6,7 @@ on:
       - 'contracts/src/rights/**'
       - 'contracts/test/Rights*.t.sol'
       - 'contracts/config/420rights-genesis.json'
+      - 'contracts/config/rights/**'
       - 'contracts/config/genesis-address-namespace.json'
       - '420-indexer/descriptors/rights420-v1.json'
       - '420-indexer/src/rights-descriptors.ts'
@@ -15,6 +16,7 @@ on:
       - '420-indexer/test/rights420-descriptors.test.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
       - 'scripts/verify-420rights-audit.py'
+      - 'scripts/verify-rights-audit-4-release.py'
       - 'docs/audit/420RIGHTS-*'
       - '.github/workflows/420rights-audit.yml'
   workflow_dispatch:
@@ -48,12 +50,44 @@ jobs:
           node-version: '22'
       - name: Check canonical Rights formatting
         working-directory: contracts
-        run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol
+        run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol test/RightsDeploymentBinding420.t.sol
       - name: Build canonical Rights graph
         working-directory: contracts
-        run: forge build src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol --sizes
+        run: forge build src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol test/RightsDeploymentBinding420.t.sol --sizes
       - name: Verify Rights inventory, ABI descriptors, lifecycle and address authority
         run: python3 scripts/verify-420rights-audit.py
+      - name: Verify RIGHTS-AUDIT-4 release materialization
+        run: python3 scripts/verify-rights-audit-4-release.py
+      - name: Retain Rights compiled artifact identities
+        working-directory: contracts
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          names = [
+              "RightsAuthorization420",
+              "RightsPolicyRegistry420",
+              "RightsAssetRegistry420",
+              "RightsClaimRegistry420",
+              "RightsLicenseRegistry420",
+              "RightsRouter420",
+          ]
+          for name in names:
+              path = Path("out") / f"{name}.sol" / f"{name}.json"
+              raw = path.read_bytes()
+              artifact = json.loads(raw)
+              runtime = artifact.get("deployedBytecode", {}).get("object", "")
+              runtime_bytes = bytes.fromhex(runtime[2:] if runtime.startswith("0x") else runtime) if runtime else b""
+              print(json.dumps({
+                  "contract": name,
+                  "artifactSha256": hashlib.sha256(raw).hexdigest(),
+                  "compilerRuntimeTemplateSha256": hashlib.sha256(runtime_bytes).hexdigest()
+              }, sort_keys=True))
+          PY
+      - name: Run RIGHTS-AUDIT-4 deployment and Registry binding qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/RightsDeploymentBinding420.t.sol' -vvv
       - name: Run Rights contract qualification suite
         working-directory: contracts
         run: forge test --match-path 'test/Rights*.t.sol' -vvv

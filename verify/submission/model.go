@@ -43,7 +43,9 @@ type BuildSettings struct {
 }
 
 type Submission struct {
-	Kind         InputKind       `json:"kind"`
+	Kind           InputKind       `json:"kind"`
+	TargetSource   string          `json:"targetSource,omitempty"`
+	TargetContract string          `json:"targetContract,omitempty"`
 	StandardJSON json.RawMessage `json:"standardJson,omitempty"`
 	Sources      []SourceFile    `json:"sources,omitempty"`
 	Flattened    string          `json:"flattened,omitempty"`
@@ -130,6 +132,17 @@ func (b BuildSettings) Validate() error {
 }
 
 func (s Submission) ValidateCommitment() error {
+	if (strings.TrimSpace(s.TargetSource) == "") != (strings.TrimSpace(s.TargetContract) == "") {
+		return errors.New("targetSource and targetContract must be provided together")
+	}
+	if strings.TrimSpace(s.TargetSource) != "" {
+		if err := validatePath(s.TargetSource); err != nil {
+			return fmt.Errorf("target source: %w", err)
+		}
+		if strings.TrimSpace(s.TargetContract) == "" {
+			return errors.New("target contract is required")
+		}
+	}
 	var want string
 	switch s.Kind {
 	case InputStandardJSON:

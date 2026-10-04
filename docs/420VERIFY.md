@@ -2,21 +2,23 @@
 
 420Verify is the contract-source verification application for the 420 Integrated blockchain. It answers one narrow question: **do these published source/build inputs reproduce the code deployed at this address on this network?**
 
-## Genesis status
+## Historical Genesis closeout and current audit state
 
-GEN-10.5 / 420Verify is **implemented, reconciled with `main`, exact-head qualified, and merged**.
+GEN-10.5 / VERIFY-0 through VERIFY-10 was historically qualified and merged through PR #303 at merge commit `1f937b7ef641980cc118336763ba50ffc8f3cc5a`. Those records are retained as historical evidence, but their blanket implementation-complete claim is **superseded by the current repository-grounded VERIFY-AUDIT remediation in PR #503** wherever current repository evidence contradicts it.
 
 - Genesis phase: `GEN-10.5`
 - Service ID: `420/service/verify/v1`
-- Implementation phases: `VERIFY-0` through `VERIFY-10`
-- Qualified feature head: `e723037ca7cd09e530035577d7eb41319f387e75`
-- 420Docs Qualification: `#1418` — passed
-- 420 Integrated Qualification: `#3678` — passed
-- Phase merge PR: `#303`
-- Merge commit: `1f937b7ef641980cc118336763ba50ffc8f3cc5a`
+- Historical qualified feature head: `e723037ca7cd09e530035577d7eb41319f387e75`
+- Historical 420Docs Qualification: `#1418` — passed
+- Historical 420 Integrated Qualification: `#3678` — passed
+- Historical phase merge PR: `#303`
+- Current audit branch: `audit/420verify-20261003`
+- Current audit PR: `#503`
+- VERIFY-AUDIT-6 exact-head Level 1 qualification: implementation SHA `868095783962370149e685f6145c0163b84ba5e8`, run `37175301638`, job `111356576146` — passed
+- Current audit phase closeout: **pending VERIFY-AUDIT-8**
 - Public testnet endpoint deployment: **pending**
 
-Implementation completion and public deployment are deliberately separate states. The service code and Genesis behavior are qualified; production/testnet URLs must not be claimed until an actual deployment exists.
+Implementation qualification and public deployment remain separate states. No production/testnet URL may be claimed until an actual deployment exists and the testnet readiness checks pass.
 
 ## Trust boundary
 
@@ -62,7 +64,9 @@ A changed runtime code hash creates a separate evidence history rather than over
 
 420Verify detects EIP-1167 minimal proxies and EIP-1967 implementation/admin/beacon relationships where canonical state permits resolution. Proxy shells and implementations remain separate verification subjects.
 
-An implementation upgrade invalidates any inherited “current implementation” verification status. Historical results remain available as evidence, but a new implementation must be independently verified against its own address/runtime-code binding.
+Historical proxy relationship evidence remains bound to its canonical observation block. A new implementation must be independently verified against its own address/runtime-code binding.
+
+The current production entrypoint does not run a continuous proxy-upgrade tracker. Downstream consumers must revalidate canonical proxy state before presenting a persisted implementation relationship as current; historical evidence must not be silently promoted to current status.
 
 ## Public API
 
@@ -71,7 +75,7 @@ The implemented public surface includes:
 - `GET /v1/verify/{chainID}/{address}/{runtimeCodeHash}` — latest exact-binding evidence;
 - `GET /v1/verify/{chainID}/{address}/{runtimeCodeHash}/history` — append-only verification history;
 - `GET /v1/verify/evidence/{recordHash}` — evidence lookup by record content hash;
-- `POST /v1/verify/submissions` — source/build submission to the configured verification processor;
+- `POST /v1/verify/submissions` — source/build submission to the configured verification processor; public source publication requires explicit `publishSource: true`;
 - `GET /healthz` and `GET /readyz` — service health/readiness without claiming canonical authority.
 
 Consumer responses explicitly preserve `canonical: false`, `registryAuthority: false`, and `walletAuthority: false` semantics.
@@ -96,4 +100,4 @@ A successful result means the published source/build inputs correspond to deploy
 
 ## Further documentation
 
-The app-specific documentation lives under [`docs/apps/verify/`](apps/verify/index.md). The implementation history is retained in [`docs/420VERIFY-ROADMAP.md`](420VERIFY-ROADMAP.md), and deployment readiness is tracked in `testnet/public-services/verify/readiness.json`.
+The app-specific documentation lives under [`docs/apps/verify/`](apps/verify/index.md). Deployment/operations are documented in [`docs/apps/verify/deployment.md`](apps/verify/deployment.md). The historical Genesis implementation roadmap is retained in [`docs/420VERIFY-ROADMAP.md`](420VERIFY-ROADMAP.md), the active audit roadmap is [`docs/audit/420VERIFY-AUDIT.md`](audit/420VERIFY-AUDIT.md), and deployment readiness is tracked in `testnet/public-services/verify/readiness.json`.

@@ -59,12 +59,17 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         bytes32 originComponentId,
         bytes32 originObjectId
     );
-    event EvidenceCommitted(bytes32 indexed caseId, uint8 indexed round, address indexed submitter, bytes32 evidenceHash);
+    event EvidenceCommitted(
+        bytes32 indexed caseId, uint8 indexed round, address indexed submitter, bytes32 evidenceHash
+    );
     event CaseRuled(bytes32 indexed caseId, uint8 indexed round, uint64 appealDeadline);
     event CaseAppealed(bytes32 indexed caseId, uint8 indexed round, address indexed appellant, uint64 evidenceDeadline);
     event CaseFinalized(bytes32 indexed caseId, uint8 indexed round);
 
-    constructor(address timelock_, address policyRegistry_) SystemAccess(timelock_) {
+    constructor(
+        address timelock_,
+        address policyRegistry_
+    ) SystemAccess(timelock_) {
         if (policyRegistry_ == address(0)) revert ZeroAddress();
         policies = ArbitrationPolicyRegistry420(policyRegistry_);
     }
@@ -77,7 +82,9 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         return 1;
     }
 
-    function bindRulingRegistry(address registry) external onlyGovernance {
+    function bindRulingRegistry(
+        address registry
+    ) external onlyGovernance {
         if (registry == address(0)) revert ZeroAddress();
         if (rulingRegistry != address(0)) revert RulingRegistryAlreadyBound();
         rulingRegistry = registry;
@@ -136,7 +143,10 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         emit CaseOpened(caseId, domainId, msg.sender, respondent, originComponentId, originObjectId);
     }
 
-    function submitEvidence(bytes32 caseId, bytes32 evidenceHash) external {
+    function submitEvidence(
+        bytes32 caseId,
+        bytes32 evidenceHash
+    ) external {
         CaseRecord storage c = _cases[caseId];
         if (!c.exists) revert UnknownCase();
         if (c.state != State.OPEN) revert CaseNotOpen();
@@ -149,7 +159,9 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         emit EvidenceCommitted(caseId, c.round, msg.sender, evidenceHash);
     }
 
-    function appeal(bytes32 caseId) external {
+    function appeal(
+        bytes32 caseId
+    ) external {
         CaseRecord storage c = _cases[caseId];
         if (!c.exists) revert UnknownCase();
         if (msg.sender != c.claimant && msg.sender != c.respondent) revert NotParty();
@@ -164,7 +176,9 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         emit CaseAppealed(caseId, c.round, msg.sender, c.evidenceDeadline);
     }
 
-    function markRuled(bytes32 caseId) external {
+    function markRuled(
+        bytes32 caseId
+    ) external {
         if (msg.sender != rulingRegistry || rulingRegistry == address(0)) revert OnlyRulingRegistry();
         CaseRecord storage c = _cases[caseId];
         if (!c.exists) revert UnknownCase();
@@ -175,7 +189,9 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         emit CaseRuled(caseId, c.round, c.appealDeadline);
     }
 
-    function finalize(bytes32 caseId) external {
+    function finalize(
+        bytes32 caseId
+    ) external {
         if (msg.sender != rulingRegistry || rulingRegistry == address(0)) revert OnlyRulingRegistry();
         CaseRecord storage c = _cases[caseId];
         if (!c.exists) revert UnknownCase();
@@ -185,23 +201,25 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         emit CaseFinalized(caseId, c.round);
     }
 
-    function rulingContext(bytes32 caseId)
-        external
-        view
-        returns (bytes32 domainId, address resolver, uint8 round, State state, uint64 appealDeadline)
-    {
+    function rulingContext(
+        bytes32 caseId
+    ) external view returns (bytes32 domainId, address resolver, uint8 round, State state, uint64 appealDeadline) {
         CaseRecord storage c = _cases[caseId];
         if (!c.exists) revert UnknownCase();
         address selected = c.round == 0 ? c.resolver : c.appealResolver;
         return (c.domainId, selected, c.round, c.state, c.appealDeadline);
     }
 
-    function getCase(bytes32 caseId) external view returns (CaseRecord memory record) {
+    function getCase(
+        bytes32 caseId
+    ) external view returns (CaseRecord memory record) {
         record = _cases[caseId];
         if (!record.exists) revert UnknownCase();
     }
 
-    function caseOrigin(bytes32 caseId)
+    function caseOrigin(
+        bytes32 caseId
+    )
         external
         view
         returns (
@@ -225,12 +243,16 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         );
     }
 
-    function caseState(bytes32 caseId) external view returns (State) {
+    function caseState(
+        bytes32 caseId
+    ) external view returns (State) {
         if (!_cases[caseId].exists) revert UnknownCase();
         return _cases[caseId].state;
     }
 
-    function caseRound(bytes32 caseId) external view returns (uint8) {
+    function caseRound(
+        bytes32 caseId
+    ) external view returns (uint8) {
         if (!_cases[caseId].exists) revert UnknownCase();
         return _cases[caseId].round;
     }

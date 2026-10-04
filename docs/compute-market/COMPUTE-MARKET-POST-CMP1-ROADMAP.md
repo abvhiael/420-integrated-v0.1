@@ -289,11 +289,13 @@ CMP-2.4 is an ordinary Level 1 step. The offers/requests/matching convergence mi
 Durable evidence: [CMP-2.4 qualification](CMP-2.4-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-2.5 — Capacity-aware assignment
-**Status: implementation / Level 1 qualification in progress.**
+**Status: COMPLETE — Level 1 exact-head qualified on `61e40c8928138bd3b6676df0dfbe46dac4dc9e0b`.**
 
 Consume CMP-1.3 capacity reservations atomically.
 
 CMP-2.5 reuses the canonical CMP-1.3 WorkerSnapshot -> capacity reservation -> JobRegistry assignment boundary. The market adapter does not receive capacity-controller authority. Level 2 is not required for this ordinary step; Level 3 remains CMP-2.8.
+
+Durable evidence: [CMP-2.5 qualification](CMP-2.5-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-2.6 — Scheduler redundancy and non-authority
 

@@ -1,6 +1,8 @@
 # CMP-2.5 — Capacity-aware assignment
 
-Status: **implementation / Level 1 qualification in progress.**
+Status: **COMPLETE — Level 1 exact-head qualified on `61e40c8928138bd3b6676df0dfbe46dac4dc9e0b`.**
+
+Durable evidence: [CMP-2.5 qualification](CMP-2.5-QUALIFICATION-EVIDENCE.md).
 
 Canonical definition: **Consume CMP-1.3 capacity reservations atomically.**
 

@@ -1,19 +1,19 @@
 # 420Rights audit remediation roadmap
 
-Status authority: repository evidence on `audit/420rights-complete-20261003`. This roadmap does not treat historical candidate addresses or planned integrations as deployed authority.
+Status authority: repository evidence on `audit/420rights-complete-20261003`. RIGHTS-AUDIT-1 through RIGHTS-AUDIT-3 are COMPLETE on qualified implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). This roadmap does not treat historical candidate addresses or planned integrations as deployed authority.
 
-## RIGHTS-AUDIT-1 — Canonical definition and source reconciliation — IMPLEMENTED, PENDING EXACT-HEAD QUALIFICATION
+## RIGHTS-AUDIT-1 — Canonical definition and source reconciliation — COMPLETE
 - Reconcile `420rights-genesis.json`, Rights/Verify architecture, Genesis dApp map, service ID, address namespace, Wallet catalogue, Search and Indexer boundaries.
 - Preserve the seven-contract canonical suite and the eight canonical right classes.
 - Preserve 420Rights as a covered protocol rather than inventing a standalone public application.
 - Preserve `rights-router` as Registry-resolved with no fixed Genesis address.
 
-## RIGHTS-AUDIT-2 — Contract/security test hardening — IMPLEMENTED, PENDING EXACT-HEAD QUALIFICATION
+## RIGHTS-AUDIT-2 — Contract/security test hardening — COMPLETE
 - Retain lifecycle, replay, deterministic-license, capability-expiry/revocation, time-bound and succession tests.
 - Add inactive-class, missing-evidence, finite-right/license, nonrevocable-license, exact subject capability scope/action and unauthorized supersession/transfer negatives.
 - Qualify formatting, compilation, targeted Foundry tests and forbidden-primitive scan on one exact head.
 
-## RIGHTS-AUDIT-3 — Indexer/integration correctness — IMPLEMENTED, PENDING EXACT-HEAD QUALIFICATION
+## RIGHTS-AUDIT-3 — Indexer/integration correctness — COMPLETE
 - Replace obsolete synthetic Rights lifecycle events with actual emitted contract events.
 - Normalize `ClaimSuperseded.oldRightId` onto the canonical `rightId` lifecycle object.
 - Add `subjectId` lifecycle identity support.
@@ -43,3 +43,20 @@ Status authority: repository evidence on `audit/420rights-complete-20261003`. Th
 - Complete Rights deployment/operator/security/threat-model/Genesis-acceptance documentation.
 - Record exact implementation SHA and qualification run IDs.
 - Only then consider GENESIS READY / PRODUCTION READY.
+
+
+## Qualified repository closeout
+
+Implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310` passed the dedicated 420Rights audit qualification workflow, run `37177524144`.
+
+- canonical Rights formatting: PASS;
+- canonical Rights build: PASS;
+- inventory/ABI/lifecycle/address-authority verifier: PASS;
+- Foundry Rights suites: PASS — 12 passed, 0 failed, 0 skipped;
+- forbidden primitive scan: PASS;
+- 420Indexer build: PASS;
+- Rights Indexer descriptor/lifecycle qualification: PASS — 18 passed, 0 failed;
+- hardening-profile Rights suite: PASS;
+- targeted Slither high-severity gate: PASS — 0 high-severity findings (two low-impact timestamp findings retained as expected time-window semantics).
+
+The closeout bookkeeping commits after that SHA are documentation-only and do not change the qualified implementation. RIGHTS-AUDIT-4 remains the next executable remediation step.

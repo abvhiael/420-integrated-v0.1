@@ -8,6 +8,7 @@ import (
 	"github.com/420integrated/420-integrated/verify/compiler"
 	"github.com/420integrated/420-integrated/verify/evidence"
 	"github.com/420integrated/420-integrated/verify/matcher"
+	"github.com/420integrated/420-integrated/verify/proxy"
 	"github.com/420integrated/420-integrated/verify/store"
 	"github.com/420integrated/420-integrated/verify/submission"
 )
@@ -21,7 +22,7 @@ type Builder interface {
 }
 
 type EvidenceStore interface {
-	Append(evidence.DeploymentEvidence, submission.Submission, compiler.BuildEvidence, matcher.Result) (store.Record, error)
+	AppendWithProxy(evidence.DeploymentEvidence, submission.Submission, compiler.BuildEvidence, matcher.Result, *proxy.Relationship) (store.Record, error)
 }
 
 type Service struct {
@@ -60,5 +61,13 @@ func (s *Service) Verify(ctx context.Context, chainID uint64, address string, su
 		return store.Record{}, fmt.Errorf("reproducible build: %w", err)
 	}
 	result := matcher.Classify(deployment, build, submitted, build.HasImmutables)
-	return s.store.Append(deployment, submitted, build, result)
+	var storageReader proxy.StorageReader
+	if reader, ok := s.chain.(proxy.StorageReader); ok {
+		storageReader = reader
+	}
+	relationship, err := proxy.Detect(deployment, storageReader)
+	if err != nil {
+		return store.Record{}, fmt.Errorf("proxy relationship: %w", err)
+	}
+	return s.store.AppendWithProxy(deployment, submitted, build, result, &relationship)
 }

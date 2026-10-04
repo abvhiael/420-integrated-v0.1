@@ -3,6 +3,8 @@ package api
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -44,8 +46,26 @@ func fixture(t *testing.T) (*store.Store, store.Record, submission.Submission) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	build := compiler.BuildEvidence{CompilerVersion: settings.CompilerVersion, CompilerSHA256: "sha256:compiler", BundleHash: submitted.BundleHash, InputSHA256: "sha256:input", OutputSHA256: "sha256:output", NetworkDisabled: true, WorkingDirClean: true, RuntimeBytecode: deployment.RuntimeBytecode, CreationBytecode: deployment.Creation.CreationBytecode, CompilerOutput: json.RawMessage(`{"contracts":{}}`)}
-	result := matcher.Result{Class: architecture.ResultFullMatch, BindingKey: deployment.BindingKey(), RuntimeExact: true, CreationCompared: true, CreationExact: true}
+	input, err := compiler.ReproductionInput(submitted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	output := json.RawMessage(`{"contracts":{"A.sol":{"A":{"evm":{"bytecode":{"object":"6001600055"},"deployedBytecode":{"object":"60016000","immutableReferences":{}}}}}}}`)
+	inputSum := sha256.Sum256(input)
+	outputSum := sha256.Sum256(output)
+	build := compiler.BuildEvidence{
+		CompilerVersion:  settings.CompilerVersion,
+		CompilerSHA256:   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		BundleHash:       submitted.BundleHash,
+		InputSHA256:      "sha256:" + hex.EncodeToString(inputSum[:]),
+		OutputSHA256:     "sha256:" + hex.EncodeToString(outputSum[:]),
+		NetworkDisabled:  true,
+		WorkingDirClean:  true,
+		RuntimeBytecode:  deployment.RuntimeBytecode,
+		CreationBytecode: deployment.Creation.CreationBytecode,
+		CompilerOutput:   output,
+	}
+	result := matcher.Classify(deployment, build, submitted, false)
 	record, err := s.Append(deployment, submitted, build, result)
 	if err != nil {
 		t.Fatal(err)

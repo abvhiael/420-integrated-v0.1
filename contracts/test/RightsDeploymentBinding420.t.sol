@@ -62,23 +62,25 @@ contract RightsDeploymentBinding420Test {
             )
         );
 
-        e.registry.registerComponent(
-            RightsIds420.COMPONENT_RIGHTS,
-            address(e.router),
-            Types420.Version({major: 1, minor: 0, patch: 0}),
-            Types420.Lifecycle.ACTIVE
-        );
-        e.registry.publishRegisteredService(
-            RIGHTS_SERVICE_ID,
-            address(e.router),
-            METADATA_HASH,
-            1,
-            true,
-            ProtocolRegistry.ComponentType.SERVICE,
-            MANIFEST_HASH,
-            e.dependencyRoot,
-            INTERFACE_HASH
-        );
+        e.registry
+            .registerComponent(
+                RightsIds420.COMPONENT_RIGHTS,
+                address(e.router),
+                Types420.Version({ major: 1, minor: 0, patch: 0 }),
+                Types420.Lifecycle.ACTIVE
+            );
+        e.registry
+            .publishRegisteredService(
+                RIGHTS_SERVICE_ID,
+                address(e.router),
+                METADATA_HASH,
+                1,
+                true,
+                ProtocolRegistry.ComponentType.SERVICE,
+                MANIFEST_HASH,
+                e.dependencyRoot,
+                INTERFACE_HASH
+            );
 
         emit DeploymentAddress("RightsAuthorization420", address(e.authorization));
         emit DeploymentAddress("RightsPolicyRegistry420", address(e.policy));
@@ -97,7 +99,9 @@ contract RightsDeploymentBinding420Test {
         emit ReleaseCommitment("interfaceHash", INTERFACE_HASH);
     }
 
-    function _configureAllClasses(RightsPolicyRegistry420 policy) internal {
+    function _configureAllClasses(
+        RightsPolicyRegistry420 policy
+    ) internal {
         policy.setRightClass(RightsIds420.RIGHT_COPYRIGHT, keccak256("LOCAL/COPYRIGHT"), true);
         policy.setRightClass(RightsIds420.RIGHT_TRADEMARK, keccak256("LOCAL/TRADEMARK"), true);
         policy.setRightClass(RightsIds420.RIGHT_PATENT, keccak256("LOCAL/PATENT"), true);
@@ -159,40 +163,47 @@ contract RightsDeploymentBinding420Test {
         uint64 end = start + 1000;
         address licensee = address(0xBEEF);
 
-        e.assets.registerSubject(subjectId, keccak256("LOCAL/TYPE"), address(this), keccak256("LOCAL/META"), keccak256("LOCAL/PROVENANCE"));
-        e.claims.declareClaim(
-            rightId,
-            subjectId,
-            RightsIds420.RIGHT_COPYRIGHT,
-            address(this),
-            keccak256("LOCAL/JURISDICTION"),
-            keccak256("LOCAL/EVIDENCE"),
-            start,
-            end
-        );
-        bytes32 licenseId = e.licenses.deriveLicenseId(
-            rightId, licensee, scopeHash, keccak256("LOCAL/TERMS"), start, end, true
-        );
-        e.licenses.grantLicense(
-            licenseId, rightId, licensee, scopeHash, keccak256("LOCAL/TERMS"), start, end, true
-        );
+        e.assets
+            .registerSubject(
+                subjectId,
+                keccak256("LOCAL/TYPE"),
+                address(this),
+                keccak256("LOCAL/META"),
+                keccak256("LOCAL/PROVENANCE")
+            );
+        e.claims
+            .declareClaim(
+                rightId,
+                subjectId,
+                RightsIds420.RIGHT_COPYRIGHT,
+                address(this),
+                keccak256("LOCAL/JURISDICTION"),
+                keccak256("LOCAL/EVIDENCE"),
+                start,
+                end
+            );
+        bytes32 licenseId =
+            e.licenses.deriveLicenseId(rightId, licensee, scopeHash, keccak256("LOCAL/TERMS"), start, end, true);
+        e.licenses.grantLicense(licenseId, rightId, licensee, scopeHash, keccak256("LOCAL/TERMS"), start, end, true);
         require(e.router.canUse(licenseId, licensee, scopeHash), "smoke use");
 
         e.registry.deprecateService(RIGHTS_SERVICE_ID);
-        (bool staleOk,) = address(e.registry).call(abi.encodeWithSelector(e.registry.resolveActive.selector, RIGHTS_SERVICE_ID));
+        (bool staleOk,) =
+            address(e.registry).call(abi.encodeWithSelector(e.registry.resolveActive.selector, RIGHTS_SERVICE_ID));
         require(!staleOk, "deprecated service resolved");
 
-        e.registry.publishRegisteredService(
-            RIGHTS_SERVICE_ID,
-            address(e.router),
-            METADATA_HASH,
-            2,
-            true,
-            ProtocolRegistry.ComponentType.SERVICE,
-            MANIFEST_HASH,
-            e.dependencyRoot,
-            INTERFACE_HASH
-        );
+        e.registry
+            .publishRegisteredService(
+                RIGHTS_SERVICE_ID,
+                address(e.router),
+                METADATA_HASH,
+                2,
+                true,
+                ProtocolRegistry.ComponentType.SERVICE,
+                MANIFEST_HASH,
+                e.dependencyRoot,
+                INTERFACE_HASH
+            );
         (address resolved, uint32 version) = e.registry.resolveActive(RIGHTS_SERVICE_ID);
         require(resolved == address(e.router) && version == 2, "recovery publication");
     }

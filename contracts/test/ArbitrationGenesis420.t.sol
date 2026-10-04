@@ -8,9 +8,15 @@ import "../src/arbitration/ArbitrationCaseRegistry420.sol";
 import "../src/arbitration/ArbitrationRulingRegistry420.sol";
 
 interface Vm420Arb {
-    function prank(address) external;
-    function warp(uint256) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function warp(
+        uint256
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract ArbitrationGenesis420Test {
@@ -33,7 +39,9 @@ contract ArbitrationGenesis420Test {
         cases.bindRulingRegistry(address(rulings));
     }
 
-    function _open(bytes32 suffix) internal returns (bytes32 caseId) {
+    function _open(
+        bytes32 suffix
+    ) internal returns (bytes32 caseId) {
         vm.prank(CLAIMANT);
         caseId = cases.openCase(
             DOMAIN,
@@ -64,18 +72,14 @@ contract ArbitrationGenesis420Test {
         vm.prank(RESPONDENT);
         cases.submitEvidence(caseId, keccak256("respondent-evidence"));
 
-        rulings.submitRuling(
-            caseId, 1, keccak256("round0-ruling"), keccak256("round0-remedy"), keccak256("panel0")
-        );
+        rulings.submitRuling(caseId, 1, keccak256("round0-ruling"), keccak256("round0-remedy"), keccak256("panel0"));
         vm.prank(CLAIMANT);
         cases.appeal(caseId);
         require(cases.caseRound(caseId) == 1, "appeal round not advanced");
 
         vm.prank(APPEAL_RESOLVER);
-        rulings.submitRuling(
-            caseId, 2, keccak256("round1-ruling"), keccak256("round1-remedy"), keccak256("panel1")
-        );
-        (, , , , uint64 appealDeadline) = cases.rulingContext(caseId);
+        rulings.submitRuling(caseId, 2, keccak256("round1-ruling"), keccak256("round1-remedy"), keccak256("panel1"));
+        (,,,, uint64 appealDeadline) = cases.rulingContext(caseId);
         vm.warp(uint256(appealDeadline) + 1);
         rulings.finalizeRuling(caseId);
         require(cases.caseState(caseId) == ArbitrationCaseRegistry420.State.FINALIZED, "case not finalized");

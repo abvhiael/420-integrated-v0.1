@@ -186,3 +186,97 @@ func TestHistoryReturnsDefensiveCopies(t *testing.T) {
 		t.Fatal("caller mutation leaked into store state")
 	}
 }
+
+
+func TestRestartRejectsRehashedForgedClassification(t *testing.T) {
+	root := t.TempDir()
+	s, err := Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deployment, submitted, build, result := fixture(t, "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+	if _, err := s.Append(deployment, submitted, build, result); err != nil {
+		t.Fatal(err)
+	}
+
+	var recordPath string
+	if err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			recordPath = path
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(recordPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var record Record
+	if err := json.Unmarshal(data, &record); err != nil {
+		t.Fatal(err)
+	}
+	record.Classification.Class = "MISMATCH"
+	record.Classification.RuntimeExact = false
+	hash, err := recordHash(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.RecordHash = hash
+	data, _ = json.MarshalIndent(record, "", "  ")
+	if err := os.WriteFile(recordPath, data, 0o640); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(root); err == nil {
+		t.Fatal("rehashed forged classification must fail reproduction validation")
+	}
+}
+
+func TestRestartRejectsRehashedCompilerOutputDrift(t *testing.T) {
+	root := t.TempDir()
+	s, err := Open(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	deployment, submitted, build, result := fixture(t, "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+	if _, err := s.Append(deployment, submitted, build, result); err != nil {
+		t.Fatal(err)
+	}
+
+	var recordPath string
+	if err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() && filepath.Ext(path) == ".json" {
+			recordPath = path
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(recordPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var record Record
+	if err := json.Unmarshal(data, &record); err != nil {
+		t.Fatal(err)
+	}
+	record.Build.RuntimeBytecode = "0x6002"
+	hash, err := recordHash(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.RecordHash = hash
+	data, _ = json.MarshalIndent(record, "", "  ")
+	if err := os.WriteFile(recordPath, data, 0o640); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(root); err == nil {
+		t.Fatal("rehashed compiler evidence drift must fail reproduction validation")
+	}
+}

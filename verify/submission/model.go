@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 )
@@ -198,8 +199,11 @@ func canonicalJSON(raw []byte) ([]byte, error) {
 	if err := dec.Decode(&value); err != nil {
 		return nil, errors.New("standard json input must be valid JSON")
 	}
-	if dec.More() {
+	var trailing any
+	if err := dec.Decode(&trailing); err == nil {
 		return nil, errors.New("standard json input must contain exactly one JSON value")
+	} else if !errors.Is(err, io.EOF) {
+		return nil, errors.New("standard json input has invalid trailing data")
 	}
 	canonical, err := json.Marshal(value)
 	if err != nil {

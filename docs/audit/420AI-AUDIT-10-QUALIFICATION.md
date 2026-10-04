@@ -3,11 +3,11 @@
 **Step:** AI-AUDIT-10 — exact-head pre-testnet qualification  
 **Status:** COMPLETE  
 **Qualification level:** Level 1 exact-head qualification + retained Level 2 pre-testnet app-integration milestone  
-**Qualified implementation SHA:** `bfbbca7fa847e46217b4d4b4d23bd70cf72424e8`  
-**Current main at closeout:** `58b6b17c6538bd3cd22694e417a32472aae899f4`  
+**Qualified implementation SHA:** `b54ad6b39f3f438d6f39beb5dfdbde1963d752a4`  
+**Current main at closeout:** `2280fb6f9915b849560d9d4d5a95d999c4adc669`  
 **Audit branch / PR:** `qualify/ai-audit-8-reconciled-20261003` / PR #505  
 **Workflow:** 420AI Audit Qualification  
-**Run:** `37236254656`
+**Run:** `37241370775`
 
 ## Requirements satisfied
 
@@ -26,18 +26,18 @@
 
 | Job | Job ID | Result |
 |---|---:|---|
-| ai-client | 111535889133 | PASS |
-| custody-settlement | 111535889290 | PASS |
-| audit-state | 111535889296 | PASS |
-| pretestnet-security | 111535889308 | PASS |
-| ai-read-api | 111535889335 | PASS |
-| v1-modules | 111535889344 | PASS |
-| genesis-compatibility | 111535889370 | PASS |
-| provider-runtime | 111535889374 | PASS |
-| focused-ai-contracts | 111535889407 | PASS |
-| deployment-materialization | 111535889420 | PASS |
-| compute-integration | 111535889425 | PASS |
-| pretestnet-qualification | 111535889439 | PASS |
+| ai-client | 111550602161 | PASS |
+| custody-settlement | 111550602230 | PASS |
+| audit-state | 111550602253 | PASS |
+| pretestnet-security | 111550602275 | PASS |
+| ai-read-api | 111550602257 | PASS |
+| v1-modules | 111550602185 | PASS |
+| genesis-compatibility | 111550602138 | PASS |
+| provider-runtime | 111550602266 | PASS |
+| focused-ai-contracts | 111550602252 | PASS |
+| deployment-materialization | 111550602264 | PASS |
+| compute-integration | 111550602278 | PASS |
+| pretestnet-qualification | 111550602291 | PASS |
 
 All twelve required jobs passed on the same exact implementation SHA.
 

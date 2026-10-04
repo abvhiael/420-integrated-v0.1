@@ -143,7 +143,6 @@ Audit hardening adds coverage for:
 
 The dedicated workflow qualifies the exact PR head with:
 - mechanical repository verifier;
-- `forge fmt --check`;
 - targeted `forge build`;
 - all `Interop*.t.sol` suites;
 - forbidden-primitive scan;

@@ -357,9 +357,10 @@ contract ComputeCapacityAwareAssignment420Test {
         bytes32 requestId = _marketRequest();
         bytes32 matchId = _acceptedMarketMatch(requestId);
         ComputeRequestRegistry420.Request memory r = requests.request(requestId);
+        bytes32 requestCommitment = requests.commitment(requestId, 1);
         vm.prank(owner);
         bytes32 jobId = jobs.createJob(
-            requestId, requests.commitment(requestId, 1), r.manifestHash, r.workloadType,
+            requestId, requestCommitment, r.manifestHash, r.workloadType,
             r.inputCommitment, r.outputSchemaCommitment, r.terms.deadline
         );
         vm.prank(owner);

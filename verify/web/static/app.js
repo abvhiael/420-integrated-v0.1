@@ -160,12 +160,11 @@ function buildSubmission() {
     submission.sources = Object.entries(files).map(([path, content]) => ({path, content}));
   } else {
     submission.flattened = sourceRaw;
+    submission.sources = [{path: "Flattened.sol", content: sourceRaw}];
   }
 
-  // The server independently recomputes and validates the source commitment.
-  // An empty value cannot pass verification; the UI derives the commitment
-  // through a dry local representation only when a future API exposes it.
-  submission.bundleHash = "sha256:" + "0".repeat(64);
+  // The server derives the deterministic source commitment when it is omitted,
+  // then validates it before compilation and records the computed value.
   return submission;
 }
 

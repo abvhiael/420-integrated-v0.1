@@ -46,23 +46,25 @@ contract ArbitrationDeploymentBinding420Test {
             )
         );
 
-        e.registry.registerComponent(
-            ArbitrationIds420.COMPONENT_ARBITRATION,
-            address(e.router),
-            Types420.Version({major: 1, minor: 0, patch: 0}),
-            Types420.Lifecycle.ACTIVE
-        );
-        e.registry.publishRegisteredService(
-            SID,
-            address(e.router),
-            METADATA_HASH,
-            1,
-            true,
-            ProtocolRegistry.ComponentType.SERVICE,
-            MANIFEST_HASH,
-            e.dependencyRoot,
-            INTERFACE_HASH
-        );
+        e.registry
+            .registerComponent(
+                ArbitrationIds420.COMPONENT_ARBITRATION,
+                address(e.router),
+                Types420.Version({ major: 1, minor: 0, patch: 0 }),
+                Types420.Lifecycle.ACTIVE
+            );
+        e.registry
+            .publishRegisteredService(
+                SID,
+                address(e.router),
+                METADATA_HASH,
+                1,
+                true,
+                ProtocolRegistry.ComponentType.SERVICE,
+                MANIFEST_HASH,
+                e.dependencyRoot,
+                INTERFACE_HASH
+            );
     }
 
     function testDeploymentGraphAndRegistryPublication() public {
@@ -94,14 +96,15 @@ contract ArbitrationDeploymentBinding420Test {
         Env memory e = _deploy();
         e.policies.setPolicy(DOMAIN, address(this), address(this), 1 days, 1 days, 1, true);
 
-        bytes32 caseId = e.cases.openCase(
-            DOMAIN,
-            address(0xBEEF),
-            keccak256("420/component/local-origin/v1"),
-            keccak256("LOCAL/OBJECT"),
-            keccak256("LOCAL/CLAIM"),
-            keccak256("LOCAL/REMEDY")
-        );
+        bytes32 caseId = e.cases
+            .openCase(
+                DOMAIN,
+                address(0xBEEF),
+                keccak256("420/component/local-origin/v1"),
+                keccak256("LOCAL/OBJECT"),
+                keccak256("LOCAL/CLAIM"),
+                keccak256("LOCAL/REMEDY")
+            );
 
         ArbitrationCaseRegistry420.CaseRecord memory c = e.router.getCase(caseId);
         require(c.claimant == address(this) && c.respondent == address(0xBEEF), "router case");
@@ -114,17 +117,18 @@ contract ArbitrationDeploymentBinding420Test {
         (bool ok,) = address(e.registry).call(abi.encodeWithSelector(e.registry.resolveActive.selector, SID));
         require(!ok, "deprecated resolved");
 
-        e.registry.publishRegisteredService(
-            SID,
-            address(e.router),
-            METADATA_HASH,
-            2,
-            true,
-            ProtocolRegistry.ComponentType.SERVICE,
-            MANIFEST_HASH,
-            e.dependencyRoot,
-            INTERFACE_HASH
-        );
+        e.registry
+            .publishRegisteredService(
+                SID,
+                address(e.router),
+                METADATA_HASH,
+                2,
+                true,
+                ProtocolRegistry.ComponentType.SERVICE,
+                MANIFEST_HASH,
+                e.dependencyRoot,
+                INTERFACE_HASH
+            );
         (address recovered, uint32 version) = e.registry.resolveActive(SID);
         require(recovered == address(e.router) && version == 2, "recovery publication");
     }

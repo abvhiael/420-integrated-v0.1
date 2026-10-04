@@ -1,0 +1,59 @@
+{
+  "schema": "420-rights-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Rights",
+  "authority": "artifact_events_only_addresses_resolved_by_registry",
+  "contracts": [
+    {
+      "contractName": "RightsPolicyRegistry420",
+      "sourcePath": "contracts/src/rights/RightsPolicyRegistry420.sol",
+      "events": [
+        {"name":"RightClassPolicyConfigured","signature":"RightClassPolicyConfigured(bytes32,bytes32,uint32,bool)","inputs":[
+          {"name":"rightClass","type":"bytes32","indexed":true},{"name":"metadataHash","type":"bytes32","indexed":false},{"name":"revision","type":"uint32","indexed":false},{"name":"active","type":"bool","indexed":false}
+        ]}
+      ]
+    },
+    {
+      "contractName": "RightsAssetRegistry420",
+      "sourcePath": "contracts/src/rights/RightsAssetRegistry420.sol",
+      "events": [
+        {"name":"SubjectRegistered","signature":"SubjectRegistered(bytes32,bytes32,address,bytes32,bytes32)","inputs":[
+          {"name":"subjectId","type":"bytes32","indexed":true},{"name":"subjectType","type":"bytes32","indexed":true},{"name":"controller","type":"address","indexed":true},{"name":"metadataHash","type":"bytes32","indexed":false},{"name":"provenanceHash","type":"bytes32","indexed":false}
+        ]},
+        {"name":"SubjectMetadataUpdated","signature":"SubjectMetadataUpdated(bytes32,bytes32,uint32)","inputs":[
+          {"name":"subjectId","type":"bytes32","indexed":true},{"name":"metadataHash","type":"bytes32","indexed":false},{"name":"revision","type":"uint32","indexed":false}
+        ]}
+      ]
+    },
+    {
+      "contractName": "RightsClaimRegistry420",
+      "sourcePath": "contracts/src/rights/RightsClaimRegistry420.sol",
+      "events": [
+        {"name":"ClaimDeclared","signature":"ClaimDeclared(bytes32,bytes32,address,bytes32,bytes32,bytes32,uint64,uint64)","inputs":[
+          {"name":"rightId","type":"bytes32","indexed":true},{"name":"subjectId","type":"bytes32","indexed":true},{"name":"holder","type":"address","indexed":true},{"name":"rightClass","type":"bytes32","indexed":false},{"name":"jurisdictionHash","type":"bytes32","indexed":false},{"name":"evidenceHash","type":"bytes32","indexed":false},{"name":"validFrom","type":"uint64","indexed":false},{"name":"validUntil","type":"uint64","indexed":false}
+        ]},
+        {"name":"ClaimSuperseded","signature":"ClaimSuperseded(bytes32,bytes32,address)","inputs":[
+          {"name":"oldRightId","type":"bytes32","indexed":true},{"name":"newRightId","type":"bytes32","indexed":true},{"name":"actor","type":"address","indexed":true}
+        ]},
+        {"name":"RightHolderTransferred","signature":"RightHolderTransferred(bytes32,address,address,bytes32)","inputs":[
+          {"name":"rightId","type":"bytes32","indexed":true},{"name":"previousHolder","type":"address","indexed":true},{"name":"newHolder","type":"address","indexed":true},{"name":"successionEvidenceHash","type":"bytes32","indexed":false}
+        ]}
+      ]
+    },
+    {
+      "contractName": "RightsLicenseRegistry420",
+      "sourcePath": "contracts/src/rights/RightsLicenseRegistry420.sol",
+      "events": [
+        {"name":"LicenseGranted","signature":"LicenseGranted(bytes32,bytes32,address,address,bytes32,bytes32,uint64,uint64,bool)","inputs":[
+          {"name":"licenseId","type":"bytes32","indexed":true},{"name":"rightId","type":"bytes32","indexed":true},{"name":"licensee","type":"address","indexed":true},{"name":"licensor","type":"address","indexed":false},{"name":"scopeHash","type":"bytes32","indexed":false},{"name":"termsHash","type":"bytes32","indexed":false},{"name":"validFrom","type":"uint64","indexed":false},{"name":"validUntil","type":"uint64","indexed":false},{"name":"revocable","type":"bool","indexed":false}
+        ]},
+        {"name":"LicenseRevoked","signature":"LicenseRevoked(bytes32,address)","inputs":[
+          {"name":"licenseId","type":"bytes32","indexed":true},{"name":"actor","type":"address","indexed":true}
+        ]},
+        {"name":"LicenseRenounced","signature":"LicenseRenounced(bytes32,address)","inputs":[
+          {"name":"licenseId","type":"bytes32","indexed":true},{"name":"licensee","type":"address","indexed":true}
+        ]}
+      ]
+    }
+  ]
+}

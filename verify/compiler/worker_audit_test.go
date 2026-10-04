@@ -85,3 +85,26 @@ func TestWorkerRejectsStandardJSONSettingsDrift(t *testing.T) {
 		t.Fatalf("expected standard-json/build-settings drift rejection, got %v", err)
 	}
 }
+
+
+func TestWorkerRejectsNonSolidityStandardJSON(t *testing.T) {
+	worker := auditWorker(t, `{"contracts":{}}`)
+	raw := []byte(`{"language":"Yul","sources":{"A.yul":{"content":"object \"A\" {}"}},"settings":{"optimizer":{"enabled":true,"runs":200},"evmVersion":"cancun","viaIR":true,"metadata":{"bytecodeHash":"ipfs"},"libraries":{}}}`)
+	build := submission.BuildSettings{
+		CompilerVersion:      "0.8.24+commit.e11b9ed9",
+		OptimizerEnabled:     true,
+		OptimizerRuns:        200,
+		EVMVersion:           "cancun",
+		ViaIR:                true,
+		MetadataHashMode:     "ipfs",
+		ConstructorArgsKnown: true,
+		ConstructorArguments: "0x",
+	}
+	s, err := submission.NewStandardJSON(raw, build)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := worker.Compile(context.Background(), s); err == nil || !strings.Contains(err.Error(), "language must be Solidity") {
+		t.Fatalf("expected non-Solidity rejection, got %v", err)
+	}
+}

@@ -213,6 +213,11 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 func (b *limitedBuffer) Bytes() []byte  { return b.buf.Bytes() }
 func (b *limitedBuffer) String() string { return b.buf.String() }
 
+// ReproductionInput returns the exact Standard JSON bytes passed to the pinned compiler.
+func ReproductionInput(s submission.Submission) ([]byte, error) {
+	return standardJSONFor(s)
+}
+
 func standardJSONFor(s submission.Submission) ([]byte, error) {
 	if s.Kind == submission.InputStandardJSON {
 		var doc map[string]any

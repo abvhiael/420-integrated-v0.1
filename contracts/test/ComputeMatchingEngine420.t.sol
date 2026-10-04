@@ -450,4 +450,99 @@ contract ComputeMatchingEngine420Test {
         require(matches.acceptedForRequest(requestId) == acceptedBefore, "losing scheduler mutated winner");
         require(!matches.proposalEligible(proposalA), "losing proposal remained eligible after acceptance");
     }
+
+    function testCmp27OutsiderAcceptanceFailsWithoutMutationAndOwnerCanStillAccept() public {
+        bytes32 requestId = _request(5 ether);
+        bytes32 offerId = _offer(3 ether);
+        bytes32 proposalId = _propose(SCHEDULER_A, requestId, offerId);
+
+        require(
+            !_try(
+                OUTSIDER,
+                abi.encodeCall(matches.accept, (proposalId, uint64(1), uint64(1)))
+            ),
+            "outsider accepted proposal"
+        );
+        require(matches.acceptedForRequest(requestId) == bytes32(0), "outsider mutated accepted match");
+        require(matches.proposalEligible(proposalId), "failed outsider acceptance consumed proposal");
+
+        vm.prank(owner);
+        bytes32 matchId = matches.accept(proposalId, 1, 1);
+        require(matches.acceptedForRequest(requestId) == matchId, "owner could not accept after hostile attempt");
+    }
+
+    function testCmp27CancelledRequestCannotBeResurrectedByExistingProposal() public {
+        bytes32 requestId = _request(5 ether);
+        bytes32 offerId = _offer(3 ether);
+        bytes32 proposalId = _propose(SCHEDULER_A, requestId, offerId);
+
+        vm.prank(owner);
+        requests.cancelRequest(requestId, 1);
+
+        require(!matches.proposalEligible(proposalId), "cancelled request proposal remained eligible");
+        require(
+            !_try(
+                owner,
+                abi.encodeCall(matches.accept, (proposalId, uint64(1), uint64(1)))
+            ),
+            "cancelled request resurrected through acceptance"
+        );
+        require(matches.acceptedForRequest(requestId) == bytes32(0), "cancelled request gained match");
+    }
+
+    function testCmp27ProviderBeneficiaryDriftCannotRewriteAcceptedMatchOrEnableFreshProposal() public {
+        bytes32 requestId = _request(5 ether);
+        bytes32 offerId = _offer(3 ether);
+        bytes32 proposalId = _propose(SCHEDULER_A, requestId, offerId);
+
+        vm.prank(owner);
+        bytes32 matchId = matches.accept(proposalId, 1, 1);
+        ComputeMatch420.AcceptedMatch memory beforeDrift = matches.acceptedMatch(matchId);
+        require(beforeDrift.settlementAccount == BENEFICIARY, "unexpected accepted beneficiary");
+
+        address replacementBeneficiary = address(0xB0B);
+        vm.prank(OPERATOR);
+        providers.update(
+            providerId,
+            MANIFEST,
+            keccak256("cmp-2.7/security-v2"),
+            replacementBeneficiary
+        );
+
+        ComputeMatch420.AcceptedMatch memory afterDrift = matches.acceptedMatch(matchId);
+        require(afterDrift.settlementAccount == BENEFICIARY, "provider update rewrote accepted beneficiary");
+        require(afterDrift.providerId == providerId && afterDrift.resourceId == resourceId, "provider drift rewrote accepted identity");
+
+        bytes32 freshRequest = _request(5 ether);
+        uint64 serialBefore = matches.nextProposalSerial();
+        require(
+            !_try(SCHEDULER_B, abi.encodeCall(matches.propose, (freshRequest, offerId))),
+            "suspended provider offer remained matchable"
+        );
+        require(matches.nextProposalSerial() == serialBefore, "failed drifted proposal allocated serial");
+        require(matches.acceptedForRequest(freshRequest) == bytes32(0), "provider drift created fresh match");
+    }
+
+    function testCmp27MeteredMultiplicationOverflowFailsWithoutProposalAllocation() public {
+        bytes32 requestId = _request(type(uint256).max);
+        bytes32 offerId = _pricedOffer(
+            ComputePricing420.Model.GPU_TIME,
+            type(uint256).max,
+            1,
+            0,
+            type(uint256).max,
+            2
+        );
+
+        uint64 serialBefore = matches.nextProposalSerial();
+        require(
+            !_try(
+                SCHEDULER_A,
+                abi.encodeCall(matches.proposePriced, (requestId, offerId, uint256(2)))
+            ),
+            "overflowing metered quote admitted"
+        );
+        require(matches.nextProposalSerial() == serialBefore, "overflowing quote allocated proposal");
+        require(matches.acceptedForRequest(requestId) == bytes32(0), "overflowing quote created accepted match");
+    }
 }

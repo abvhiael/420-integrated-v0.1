@@ -307,6 +307,11 @@ CMP-2.6 hardens the already-qualified CMP-2.3 proposal-only matcher: multiple sc
 Durable evidence: [CMP-2.6 qualification](CMP-2.6-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-2.7 — Market adversarial qualification
+**Status: implementation / Level 1 + Level 2 qualification in progress.**
+
+Run the accumulated CMP-2 marketplace through a hostile cross-surface campaign covering authorization, replay, stale/terminal state, scheduler substitution, pricing arithmetic, resource/provider drift, duplicate acceptance, capacity exhaustion and failure atomicity.
+
+CMP-2.7 is the final substantive market milestone before phase closeout. Level 1 requires the targeted adversarial tests and mechanical threat-matrix verifier. Level 2 requires the retained full Compute Market app integration suite on the same exact implementation SHA. Repository-wide Level 3 remains reserved for CMP-2.8.
 
 ## CMP-2.8 — Phase closeout
 

@@ -189,6 +189,9 @@ jobs:
       - name: Verify CMP-2.6 scheduler redundancy and non-authority
         run: python scripts/verify-cmp-2-6-scheduler-redundancy.py
 
+      - name: Verify CMP-2.7 market adversarial qualification
+        run: python scripts/verify-cmp-2-7-market-adversarial.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

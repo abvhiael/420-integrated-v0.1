@@ -43,6 +43,9 @@ func TestSubmissionDerivesOmittedBundleCommitmentBeforeProcessing(t *testing.T) 
 	if capture.got.BundleHash != want {
 		t.Fatalf("processor got bundle hash %q want %q", capture.got.BundleHash, want)
 	}
+	if !capture.got.PublicationRequested {
+		t.Fatal("processor must receive durable publication authorization")
+	}
 }
 
 func TestSubmissionRejectsIncorrectSuppliedBundleCommitment(t *testing.T) {

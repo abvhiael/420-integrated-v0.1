@@ -12,7 +12,7 @@ import (
 func TestSubmissionRejectsSecretBearingPayload(t *testing.T) {
 	s,record,submitted:=fixture(t)
 	service,_:=New(s,processorStub{record:record})
-	body,_:=json.Marshal(SubmissionRequest{ChainID:420,Address:record.Deployment.Address,Submission:submitted})
+	body,_:=json.Marshal(SubmissionRequest{PublishSource:true,ChainID:420,Address:record.Deployment.Address,Submission:submitted})
 	body=bytes.TrimSuffix(body,[]byte("}"))
 	body=append(body,[]byte(`,"privateKey":"0xdeadbeef"}`)...)
 	w:=httptest.NewRecorder()
@@ -40,7 +40,7 @@ func TestEvidenceLookupRejectsMalformedRecordHash(t *testing.T) {
 
 func TestSubmissionRejectsTrailingJSON(t *testing.T) {
 	s,record,submitted:=fixture(t); service,_:=New(s,processorStub{record:record})
-	body,_:=json.Marshal(SubmissionRequest{ChainID:420,Address:record.Deployment.Address,Submission:submitted})
+	body,_:=json.Marshal(SubmissionRequest{PublishSource:true,ChainID:420,Address:record.Deployment.Address,Submission:submitted})
 	body=append(body,[]byte(` {"extra":true}`)...)
 	w:=httptest.NewRecorder(); service.Handler().ServeHTTP(w,httptest.NewRequest(http.MethodPost,"/v1/verify/submissions",bytes.NewReader(body)))
 	if w.Code!=http.StatusBadRequest {t.Fatalf("status=%d body=%s",w.Code,w.Body.String())}

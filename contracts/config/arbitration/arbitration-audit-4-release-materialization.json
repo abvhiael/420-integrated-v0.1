@@ -1,0 +1,95 @@
+{
+  "schema": "420-arbitration-audit-4-release-materialization-v1",
+  "step": "ARBITRATION-AUDIT-4",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "user_runtime": {
+    "canonical_path": "WALLET_INTEGRATED_GENESIS_APP",
+    "catalog": "wallet/web/core/genesis-app-catalog.js",
+    "runtime_binding": "wallet/web/core/arbitration-runtime.js",
+    "standalone_production_url_required": false,
+    "discovery_rule": "ProtocolRegistry resolveActive(420/service/arbitration/v1) plus verified router dependencies and nonzero runtime code hashes",
+    "signing_rule": "Wallet/runtime may prepare and explain calls but never auto-sign or acquire resolver/governance authority"
+  },
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "arbitration_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "production_addresses_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_ARBITRATION_AUDIT_5"
+  },
+  "canonical_dependencies": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "publication_api": "publishRegisteredService"
+    }
+  },
+  "deployment_order": [
+    {"order":1,"contract":"ArbitrationPolicyRegistry420","source":"contracts/src/arbitration/ArbitrationPolicyRegistry420.sol","constructor":["GovernanceTimelock"]},
+    {"order":2,"contract":"ArbitrationCaseRegistry420","source":"contracts/src/arbitration/ArbitrationCaseRegistry420.sol","constructor":["GovernanceTimelock","ArbitrationPolicyRegistry420"]},
+    {"order":3,"contract":"ArbitrationRulingRegistry420","source":"contracts/src/arbitration/ArbitrationRulingRegistry420.sol","constructor":["ArbitrationCaseRegistry420"]},
+    {"order":4,"contract":"ArbitrationCaseRegistry420","action":"bindRulingRegistry","argument":"ArbitrationRulingRegistry420","one_time":true},
+    {"order":5,"contract":"ArbitrationRouter420","source":"contracts/src/arbitration/ArbitrationRouter420.sol","constructor":["ArbitrationPolicyRegistry420","ArbitrationCaseRegistry420","ArbitrationRulingRegistry420"]},
+    {"order":6,"contract":"ProtocolRegistry","action":"registerComponent","component_id_preimage":"420/component/arbitration/v1","implementation":"ArbitrationRouter420","version":"1.0.0","lifecycle":"ACTIVE"},
+    {
+      "order":7,
+      "contract":"ProtocolRegistry",
+      "action":"publishRegisteredService",
+      "service_id_preimage":"420/service/arbitration/v1",
+      "implementation":"ArbitrationRouter420",
+      "version":1,
+      "active":true,
+      "component_type":"SERVICE",
+      "metadata_hash_policy":"keccak256(canonical Arbitration release metadata document)",
+      "manifest_hash_policy":"keccak256(canonical ARBITRATION-AUDIT-4 release materialization payload)",
+      "dependency_root_policy":"keccak256(ordered deployed Arbitration dependency identities and runtime code hashes)",
+      "interface_hash_policy":"keccak256(canonical ArbitrationRouter420 ABI/interface descriptor)"
+    }
+  ],
+  "artifact_identity": {
+    "compiler":"Solidity 0.8.24",
+    "evm_version":"cancun",
+    "optimizer":true,
+    "optimizer_runs":200,
+    "artifact_paths":[
+      "contracts/out/ArbitrationPolicyRegistry420.sol/ArbitrationPolicyRegistry420.json",
+      "contracts/out/ArbitrationCaseRegistry420.sol/ArbitrationCaseRegistry420.json",
+      "contracts/out/ArbitrationRulingRegistry420.sol/ArbitrationRulingRegistry420.json",
+      "contracts/out/ArbitrationRouter420.sol/ArbitrationRouter420.json"
+    ],
+    "hash_evidence":"QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+  },
+  "indexer_binding": {
+    "canonical_descriptor_present": false,
+    "decision": "NO_NEW_INDEXER_AUTHORITY_INVENTED",
+    "required_live_behavior": "reconstruct case/evidence/ruling/finalization history from canonical registry events and verify same-deployment addresses/code identities before presentation",
+    "live_owner": "ARBITRATION-AUDIT-5"
+  },
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/ArbitrationDeploymentBinding420.t.sol",
+    "verifier": "scripts/verify-arbitration-audit-4-release.py"
+  },
+  "security_disposition": {
+    "medium_unused_return": "REMEDIATED_OR_NOT_PRESENT_ON_AUDIT_4_EXACT_HEAD_REQUIRED",
+    "low_findings": "RETAIN_AND_REPORT_WITH_SOURCE_LOCATIONS; LOW FINDINGS DO NOT AUTHORIZE PRODUCTION SECURITY STATUS"
+  },
+  "live_testnet_evidence": {
+    "required_in_step":"ARBITRATION-AUDIT-5",
+    "chain_id":null,
+    "genesis_hash":null,
+    "evidence_block":null,
+    "evidence_block_hash":null,
+    "deployed_addresses":{},
+    "deployment_transactions":[],
+    "registry_transactions":[],
+    "runtime_code_hashes":{},
+    "constructor_binding_receipts":[]
+  }
+}

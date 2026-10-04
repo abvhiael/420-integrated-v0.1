@@ -1,6 +1,6 @@
 # 420Arbitration audit remediation roadmap
 
-Status authority: repository evidence on `audit/420arbitration-complete-20261004`. Initial baseline main SHA: `e22a744d8fbcff20f2b2108a1117ee3abe9dc437`. ARBITRATION-AUDIT-1 through ARBITRATION-AUDIT-4 are repository-complete. AUDIT-4 Level-2 app-integration qualification is retained on exact implementation SHA `554e16a3a3656cb61ab1819b60c10eb7c8fa8f93`, workflow run `37237412184` (qualify job `111539203484`, security job `111539203626`). Current `main` observed at AUDIT-4 closeout: `38a5326cd12e0b48851945be07957a87265b6642`.
+Status authority: repository evidence on `audit/420arbitration-complete-20261004`. Initial baseline main SHA: `e22a744d8fbcff20f2b2108a1117ee3abe9dc437`. ARBITRATION-AUDIT-1 through ARBITRATION-AUDIT-4 are repository-complete. AUDIT-4 Level-2 app-integration qualification is retained on exact implementation SHA `554e16a3a3656cb61ab1819b60c10eb7c8fa8f93`, workflow run `37237412184` (qualify job `111539203484`, security job `111539203626`). Closeout confirmation: exact branch head `80aa33fe1666e1f6015614015dc02ac2dc71b0a8` requalified by Arbitration run `37238594853` (#27), qualify `111542609087` PASS and security `111542608940` PASS. Current `main` observed during final bookkeeping: `58b6b17c6538bd3cd22694e417a32472aae899f4`.
 
 ## ARBITRATION-AUDIT-1 — Canonical definition and source reconciliation — COMPLETE
 - Reconciled Genesis config, service ID, dApp map, protocol architecture, application manuals, Wallet catalogue and integration consumers.
@@ -35,6 +35,7 @@ Status authority: repository evidence on `audit/420arbitration-complete-20261004
 - Exact implementation SHA: `554e16a3a3656cb61ab1819b60c10eb7c8fa8f93`.
 - Qualification: run `37237412184`; qualify `111539203484` PASS; security `111539203626` PASS; 13/13 Foundry tests in normal and hardening profiles; zero High and zero Medium-unused-return Slither findings.
 - Durable evidence: `docs/audit/420ARBITRATION-AUDIT-4-QUALIFICATION.md`.
+- Formal disposition: **COMPLETE; no repository-local Audit-4 work remains.**
 
 ## ARBITRATION-AUDIT-5 — Production-equivalent public testnet qualification — NEXT / BLOCKED ON LIVE TESTNET
 - Deploy the exact qualified release.

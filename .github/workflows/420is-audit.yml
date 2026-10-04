@@ -9,7 +9,9 @@ on:
       - 'contracts/src/libraries/ServiceIds420.sol'
       - 'contracts/config/genesis-dapp-contract-map.json'
       - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/interop/**'
       - 'scripts/verify-420is-audit.py'
+      - 'scripts/verify-420is-audit-4-release.py'
       - 'docs/audit/420IS-*'
       - 'docs/architecture/protocols/registry-names-identity-420is.md'
       - '.github/workflows/420is-audit.yml'
@@ -41,12 +43,14 @@ jobs:
           version: stable
       - name: Verify canonical repository model
         run: python3 scripts/verify-420is-audit.py
+      - name: Verify IS-AUDIT-4 release materialization
+        run: python3 scripts/verify-420is-audit-4-release.py
       - name: Check 420-IS formatting
         working-directory: contracts
-        run: forge fmt --check src/interfaces/I420IS.sol src/interop test/InteropGenesis420.t.sol test/InteropAudit420.t.sol
+        run: forge fmt --check src/interfaces/I420IS.sol src/interop test/InteropGenesis420.t.sol test/InteropAudit420.t.sol test/InteropDeploymentBinding420.t.sol
       - name: Build 420-IS graph
         working-directory: contracts
-        run: forge build src/interop test/InteropGenesis420.t.sol test/InteropAudit420.t.sol --sizes
+        run: forge build src/interop test/InteropGenesis420.t.sol test/InteropAudit420.t.sol test/InteropDeploymentBinding420.t.sol --sizes
       - name: Run 420-IS qualification suites
         working-directory: contracts
         run: forge test --match-path 'test/Interop*.t.sol' -vvv

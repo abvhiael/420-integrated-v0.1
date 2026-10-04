@@ -255,7 +255,7 @@ jobs:
         run: |
           set -euo pipefail
           forge clean
-          forge fmt --check src/ai test/AI*420.t.sol test/ComputeEscrowFunding420.t.sol test/ComputeVerifiedEntitlement420.t.sol test/ComputeVerifierDisputeSlashEvidence420.t.sol test/ComputeStakeSlashAuthorization420.t.sol test/RegistryApiReconciliation420.t.sol test/RegistryGenesis420.t.sol test/RegistryIdentityNames420.t.sol test/Identity420Compatibility.t.sol test/Identity420Audit.t.sol
+          forge fmt --check src/ai test/AI*420.t.sol
           forge build src/ai test/AI*420.t.sol test/ComputeEscrowFunding420.t.sol test/ComputeVerifiedEntitlement420.t.sol test/ComputeVerifierDisputeSlashEvidence420.t.sol test/ComputeStakeSlashAuthorization420.t.sol test/RegistryApiReconciliation420.t.sol test/RegistryGenesis420.t.sol test/RegistryIdentityNames420.t.sol test/Identity420Compatibility.t.sol test/Identity420Audit.t.sol --sizes
       - name: Run focused AI Foundry inventory
         working-directory: contracts

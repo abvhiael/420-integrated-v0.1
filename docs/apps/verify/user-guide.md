@@ -17,7 +17,7 @@ Evidence records preserve source commitments, compiler identity/settings, build 
 
 ## Proxies
 
-Proxy shells and implementation contracts are verified separately. An implementation upgrade invalidates the prior implementation's current status; historical evidence remains visible, but the new implementation must be verified independently.
+Proxy shells and implementation contracts are verified separately. Recorded proxy relationships include their observation block and are historical evidence. The current service does not continuously monitor upgrades, so a consumer must revalidate canonical proxy state before calling a recorded implementation relationship current. A new implementation must always be verified independently.
 
 ## Ecosystem displays
 

@@ -335,6 +335,11 @@ Durable closeout evidence is recorded only after all required Level 3 owners pas
 Purpose: allow ordinary machines to become secure compute workers.
 
 ## CMP-3.1 — Worker daemon
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+Dedicated `node420-compute` process-lifecycle foundation with fail-closed canonical identity configuration, private state directory, explicit lifecycle states, sibling failure containment and bounded graceful shutdown. Workload execution remains disabled and later CMP-3 functionality remains deferred.
+
+Durable design/exit criteria: [CMP-3.1 worker daemon](CMP-3.1-WORKER-DAEMON.md).
 
 ## CMP-3.2 — Hardware/software discovery
 

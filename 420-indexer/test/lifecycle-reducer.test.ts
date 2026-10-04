@@ -152,3 +152,50 @@ test('obsolete synthetic Stake events do not fabricate validator lifecycle state
   ]);
   assert.deepEqual(snapshots, []);
 });
+
+
+test('420Rights lifecycle uses canonical emitted contract events', () => {
+  const subjectId = '0x' + '11'.repeat(32);
+  const rightId = '0x' + '22'.repeat(32);
+  const licenseId = '0x' + '33'.repeat(32);
+
+  const subject = reduceProtocolLifecycle420([
+    event('420Rights', 'SubjectRegistered', 1n, { subjectId }),
+    event('420Rights', 'SubjectMetadataUpdated', 2n, { subjectId })
+  ]);
+  assert.equal(subject.length, 1);
+  assert.equal(subject[0].objectKey, `subjectId:${subjectId}`);
+  assert.equal(subject[0].state, 'ACTIVE');
+  assert.equal(subject[0].eventName, 'SubjectMetadataUpdated');
+
+  const claim = reduceProtocolLifecycle420([
+    event('420Rights', 'ClaimDeclared', 1n, { rightId }),
+    event('420Rights', 'RightHolderTransferred', 2n, { rightId }),
+    event('420Rights', 'ClaimSuperseded', 3n, { oldRightId: rightId, newRightId: '0x' + '44'.repeat(32) })
+  ]);
+  assert.equal(claim.length, 1);
+  assert.equal(claim[0].objectKey, `oldRightId:${rightId}`);
+  assert.equal(claim[0].state, 'REVOKED');
+  assert.equal(claim[0].terminal, true);
+  assert.equal(claim[0].eventName, 'ClaimSuperseded');
+
+  const license = reduceProtocolLifecycle420([
+    event('420Rights', 'LicenseGranted', 1n, { licenseId, rightId }),
+    event('420Rights', 'LicenseRenounced', 2n, { licenseId })
+  ]);
+  assert.equal(license.length, 1);
+  assert.equal(license[0].objectKey, `licenseId:${licenseId}`);
+  assert.equal(license[0].state, 'REVOKED');
+  assert.equal(license[0].terminal, true);
+  assert.equal(license[0].eventName, 'LicenseRenounced');
+});
+
+test('obsolete synthetic 420Rights lifecycle events do not fabricate state', () => {
+  const snapshots = reduceProtocolLifecycle420([
+    event('420Rights', 'RightRegistered', 1n, { rightId: '0x01' }),
+    event('420Rights', 'LicenseIssued', 2n, { licenseId: '0x02' }),
+    event('420Rights', 'RightRevoked', 3n, { rightId: '0x01' }),
+    event('420Rights', 'LicenseExpired', 4n, { licenseId: '0x02' })
+  ]);
+  assert.deepEqual(snapshots, []);
+});

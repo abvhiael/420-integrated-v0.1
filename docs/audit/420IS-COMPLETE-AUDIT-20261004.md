@@ -91,6 +91,18 @@ It does not replace the canonical provider/namespace/checkpoint registries.
 - production-equivalent public-testnet lifecycle/finality/reorg qualification;
 - final Genesis acceptance and production operations record.
 
+## Build and configuration
+
+420-IS is part of the shared Foundry Solidity workspace under `contracts/`; it has no separate npm/backend workspace. Canonical build settings are Solidity `0.8.24`, EVM `cancun`, optimizer enabled with 200 runs, `via_ir = true`, and no FFI. The PR qualification profile runs 2,500 fuzz cases and 128 invariant runs/depth 64 where applicable; the hardening profile raises fuzzing to 100,000 runs and invariant qualification to 4,096 runs/depth 384.
+
+420-IS requires no application-specific environment variables or committed secrets at repository scope. Release-time values are deployment identities and governed Registry/provider/namespace commitments, not local `.env` configuration.
+
+The current address authority keeps `interop-router` Registry-resolved with no fixed Genesis implementation address. Historical migration material still contains an old `0x044f` candidate reference; it is retained as historical reconciliation evidence only and must not be promoted over the current namespace authority.
+
+## Application layer
+
+A dedicated 420-IS frontend, backend, API server, database, worker or indexer is **not applicable** to canonical completeness. 420-IS is an implementation protocol. User-facing products and derived services consume its Registry-resolved contract state; they remain subordinate to canonical chain state and require their own live/reorg/finality qualification.
+
 ## Smart-contract security assessment
 
 ### Verified source-level properties

@@ -95,7 +95,7 @@ contract AIDeploymentMaterialization420Test {
         require(AIProviderRegistry(AI_PROVIDER).governanceTimelock() == TIMELOCK, "provider timelock");
         require(AIModelRegistry(AI_MODEL).governanceTimelock() == TIMELOCK, "model timelock");
         require(AIJobManager(AI_JOB_MANAGER).governanceTimelock() == TIMELOCK, "jobs timelock");
-        require(AIJobEscrow(AI_JOB_ESCROW).governanceTimelock() == TIMELOCK, "escrow timelock");
+        require(AIJobEscrow(payable(AI_JOB_ESCROW)).governanceTimelock() == TIMELOCK, "escrow timelock");
         require(AIReputationRegistry(AI_REPUTATION).governanceTimelock() == TIMELOCK, "reputation timelock");
         require(ProtocolRegistry(PROTOCOL_REGISTRY).governanceTimelock() == TIMELOCK, "registry timelock");
 
@@ -173,9 +173,9 @@ contract AIDeploymentMaterialization420Test {
         vm.prank(TIMELOCK);
         AIJobManager(AI_JOB_MANAGER).bindComputeAdapter(address(adapter));
         vm.prank(TIMELOCK);
-        AIJobEscrow(AI_JOB_ESCROW).bindVaultAdapter(compute.fundingAdapter());
+        AIJobEscrow(payable(AI_JOB_ESCROW)).bindVaultAdapter(compute.fundingAdapter());
         vm.prank(TIMELOCK);
-        AIJobEscrow(AI_JOB_ESCROW).bindSettlementAdapter(compute.settlementAdapter());
+        AIJobEscrow(payable(AI_JOB_ESCROW)).bindSettlementAdapter(compute.settlementAdapter());
         vm.prank(TIMELOCK);
         AIReputationRegistry(AI_REPUTATION).bindTrustAdapter(address(trustAdapter));
 
@@ -224,8 +224,8 @@ contract AIDeploymentMaterialization420Test {
         require(version == 1, "service version");
         require(registry.runtimeCodeHash(AIIds420.COMPONENT_AI_ROUTER) == address(router).codehash, "router hash");
         require(AIJobManager(AI_JOB_MANAGER).computeAdapter() == address(adapter), "job adapter");
-        require(AIJobEscrow(AI_JOB_ESCROW).vaultAdapter() == compute.fundingAdapter(), "vault adapter");
-        require(AIJobEscrow(AI_JOB_ESCROW).settlementAdapter() == compute.settlementAdapter(), "settlement adapter");
+        require(AIJobEscrow(payable(AI_JOB_ESCROW)).vaultAdapter() == compute.fundingAdapter(), "vault adapter");
+        require(AIJobEscrow(payable(AI_JOB_ESCROW)).settlementAdapter() == compute.settlementAdapter(), "settlement adapter");
         require(AIReputationRegistry(AI_REPUTATION).trustAdapter() == address(trustAdapter), "trust adapter");
 
         emit log_named_address("AIAuthorization420 deployment", address(auth));

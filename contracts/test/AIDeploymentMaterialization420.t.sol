@@ -203,7 +203,7 @@ contract AIDeploymentMaterialization420Test {
                 address(trustAdapter)
             )
         );
-        bytes32 interfaceHash = keccak256(type(IAI420).creationCode);
+        bytes32 interfaceHash = keccak256(abi.encodePacked(type(IAI420).interfaceId));
         bytes32 metadataHash = keccak256("420/ai/service-metadata/v1");
 
         vm.prank(TIMELOCK);

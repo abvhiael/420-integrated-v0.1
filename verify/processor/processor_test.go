@@ -2,7 +2,12 @@ package processor
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/420integrated/420-integrated/verify/architecture"
@@ -38,6 +43,33 @@ func (f fakeBuilder) Compile(context.Context, submission.Submission) (compiler.B
 	return f.build, f.err
 }
 
+func selfConsistentBuild(t *testing.T, submitted submission.Submission, runtimeCode, creationCode string) compiler.BuildEvidence {
+	t.Helper()
+	input, err := compiler.ReproductionInput(submitted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	output := json.RawMessage(fmt.Sprintf(
+		`{"contracts":{"A.sol":{"A":{"evm":{"bytecode":{"object":"%s"},"deployedBytecode":{"object":"%s","immutableReferences":{}}}}}}}`,
+		strings.TrimPrefix(creationCode, "0x"),
+		strings.TrimPrefix(runtimeCode, "0x"),
+	))
+	inputSum := sha256.Sum256(input)
+	outputSum := sha256.Sum256(output)
+	return compiler.BuildEvidence{
+		CompilerVersion:  submitted.Build.CompilerVersion,
+		CompilerSHA256:   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		BundleHash:       submitted.BundleHash,
+		InputSHA256:      "sha256:" + hex.EncodeToString(inputSum[:]),
+		OutputSHA256:     "sha256:" + hex.EncodeToString(outputSum[:]),
+		NetworkDisabled:  true,
+		WorkingDirClean:  true,
+		RuntimeBytecode:  runtimeCode,
+		CreationBytecode: creationCode,
+		CompilerOutput:   output,
+	}
+}
+
 func TestProcessorRunsCanonicalEvidenceBuildClassificationAndPersistence(t *testing.T) {
 	deployment := evidence.DeploymentEvidence{
 		ChainID:         420,
@@ -67,17 +99,7 @@ func TestProcessorRunsCanonicalEvidenceBuildClassificationAndPersistence(t *test
 	if err != nil {
 		t.Fatal(err)
 	}
-	build := compiler.BuildEvidence{
-		CompilerVersion:  settings.CompilerVersion,
-		CompilerSHA256:   "sha256:compiler",
-		BundleHash:       submitted.BundleHash,
-		InputSHA256:      "sha256:input",
-		OutputSHA256:     "sha256:output",
-		NetworkDisabled:  true,
-		WorkingDirClean:  true,
-		RuntimeBytecode:  "0x60016000",
-		CreationBytecode: "0x6002",
-	}
+	build := selfConsistentBuild(t, submitted, "0x60016000", "0x6002")
 
 	evidenceStore, err := store.Open(t.TempDir())
 	if err != nil {
@@ -152,14 +174,7 @@ func TestProcessorPersistsCanonicalEIP1967Relationship(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	build := compiler.BuildEvidence{
-		CompilerVersion:  settings.CompilerVersion,
-		BundleHash:       submitted.BundleHash,
-		InputSHA256:      "sha256:input",
-		OutputSHA256:     "sha256:output",
-		RuntimeBytecode:  deployment.RuntimeBytecode,
-		CreationBytecode: deployment.Creation.CreationBytecode,
-	}
+	build := selfConsistentBuild(t, submitted, deployment.RuntimeBytecode, deployment.Creation.CreationBytecode)
 	evidenceStore, err := store.Open(t.TempDir())
 	if err != nil {
 		t.Fatal(err)

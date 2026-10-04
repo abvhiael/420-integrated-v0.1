@@ -172,10 +172,12 @@ contract AIDeploymentMaterialization420Test {
 
         vm.prank(TIMELOCK);
         AIJobManager(AI_JOB_MANAGER).bindComputeAdapter(address(adapter));
+        address fundingAdapter = compute.fundingAdapter();
+        address settlementAdapter = compute.settlementAdapter();
         vm.prank(TIMELOCK);
-        AIJobEscrow(payable(AI_JOB_ESCROW)).bindVaultAdapter(compute.fundingAdapter());
+        AIJobEscrow(payable(AI_JOB_ESCROW)).bindVaultAdapter(fundingAdapter);
         vm.prank(TIMELOCK);
-        AIJobEscrow(payable(AI_JOB_ESCROW)).bindSettlementAdapter(compute.settlementAdapter());
+        AIJobEscrow(payable(AI_JOB_ESCROW)).bindSettlementAdapter(settlementAdapter);
         vm.prank(TIMELOCK);
         AIReputationRegistry(AI_REPUTATION).bindTrustAdapter(address(trustAdapter));
 

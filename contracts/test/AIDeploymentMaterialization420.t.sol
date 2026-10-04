@@ -226,8 +226,8 @@ contract AIDeploymentMaterialization420Test {
         require(version == 1, "service version");
         require(registry.runtimeCodeHash(AIIds420.COMPONENT_AI_ROUTER) == address(router).codehash, "router hash");
         require(AIJobManager(AI_JOB_MANAGER).computeAdapter() == address(adapter), "job adapter");
-        require(AIJobEscrow(payable(AI_JOB_ESCROW)).vaultAdapter() == compute.fundingAdapter(), "vault adapter");
-        require(AIJobEscrow(payable(AI_JOB_ESCROW)).settlementAdapter() == compute.settlementAdapter(), "settlement adapter");
+        require(AIJobEscrow(payable(AI_JOB_ESCROW)).vaultAdapter() == fundingAdapter, "vault adapter");
+        require(AIJobEscrow(payable(AI_JOB_ESCROW)).settlementAdapter() == settlementAdapter, "settlement adapter");
         require(AIReputationRegistry(AI_REPUTATION).trustAdapter() == address(trustAdapter), "trust adapter");
 
         emit log_named_address("AIAuthorization420 deployment", address(auth));

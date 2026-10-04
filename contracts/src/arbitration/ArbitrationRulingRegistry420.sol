@@ -26,39 +26,69 @@ contract ArbitrationRulingRegistry420 is I420System {
     error NotRuled();
     error AppealWindowOpen();
 
-    event RulingSubmitted(bytes32 indexed caseId, uint8 indexed round, address indexed resolver, uint32 outcomeCode, bytes32 rulingHash, bytes32 remedyCommitment, bytes32 panelCommitment);
+    event RulingSubmitted(
+        bytes32 indexed caseId,
+        uint8 indexed round,
+        address indexed resolver,
+        uint32 outcomeCode,
+        bytes32 rulingHash,
+        bytes32 remedyCommitment,
+        bytes32 panelCommitment
+    );
     event RulingFinalized(bytes32 indexed caseId, uint8 indexed round, bytes32 rulingHash, bytes32 remedyCommitment);
 
-    constructor(address caseRegistry_) {
+    constructor(
+        address caseRegistry_
+    ) {
         if (caseRegistry_ == address(0)) revert ZeroAddress();
         cases = ArbitrationCaseRegistry420(caseRegistry_);
     }
 
-    function systemName() external pure returns (string memory) { return "ArbitrationRulingRegistry420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function systemName() external pure returns (string memory) {
+        return "ArbitrationRulingRegistry420";
+    }
 
-    function submitRuling(bytes32 caseId, uint32 outcomeCode, bytes32 rulingHash, bytes32 remedyCommitment, bytes32 panelCommitment) external {
-        (, address resolver, uint8 round, ArbitrationCaseRegistry420.State state,) = cases.rulingContext(caseId);
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
+
+    function submitRuling(
+        bytes32 caseId,
+        uint32 outcomeCode,
+        bytes32 rulingHash,
+        bytes32 remedyCommitment,
+        bytes32 panelCommitment
+    ) external {
+        (address resolver, uint8 round, ArbitrationCaseRegistry420.State state) = cases.rulingSubmissionContext(caseId);
         if (state != ArbitrationCaseRegistry420.State.OPEN) revert NotOpen();
         if (msg.sender != resolver) revert UnauthorizedResolver();
-        if (outcomeCode == 0 || rulingHash == bytes32(0)) revert InvalidRuling();
+        if (outcomeCode == 0 || rulingHash == bytes32(0) || remedyCommitment == bytes32(0)) revert InvalidRuling();
         if (_rulings[caseId][round].exists) revert RulingExists();
-        _rulings[caseId][round] = Ruling(outcomeCode, rulingHash, remedyCommitment, panelCommitment, msg.sender, uint64(block.timestamp), true);
+
+        _rulings[caseId][round] = Ruling(
+            outcomeCode, rulingHash, remedyCommitment, panelCommitment, msg.sender, uint64(block.timestamp), true
+        );
         cases.markRuled(caseId);
         emit RulingSubmitted(caseId, round, msg.sender, outcomeCode, rulingHash, remedyCommitment, panelCommitment);
     }
 
-    function finalizeRuling(bytes32 caseId) external {
-        (, , uint8 round, ArbitrationCaseRegistry420.State state, uint64 appealDeadline) = cases.rulingContext(caseId);
+    function finalizeRuling(
+        bytes32 caseId
+    ) external {
+        (uint8 round, ArbitrationCaseRegistry420.State state, uint64 appealDeadline) = cases.finalizationContext(caseId);
         if (state != ArbitrationCaseRegistry420.State.RULED) revert NotRuled();
         if (block.timestamp <= appealDeadline) revert AppealWindowOpen();
+
         Ruling storage r = _rulings[caseId][round];
         if (!r.exists) revert InvalidRuling();
         cases.finalize(caseId);
         emit RulingFinalized(caseId, round, r.rulingHash, r.remedyCommitment);
     }
 
-    function getRuling(bytes32 caseId, uint8 round) external view returns (Ruling memory r) {
+    function getRuling(
+        bytes32 caseId,
+        uint8 round
+    ) external view returns (Ruling memory r) {
         r = _rulings[caseId][round];
         if (!r.exists) revert InvalidRuling();
     }

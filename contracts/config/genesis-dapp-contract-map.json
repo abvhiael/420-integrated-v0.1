@@ -104,8 +104,10 @@
         "ArbitrationIds420.sol",
         "ArbitrationPolicyRegistry420.sol",
         "ArbitrationCaseRegistry420.sol",
-        "ArbitrationRulingRegistry420.sol"
-      ]
+        "ArbitrationRulingRegistry420.sol",
+        "ArbitrationRouter420.sol"
+      ],
+      "note": "Registry-resolved Arbitration service endpoint is ArbitrationRouter420; it is read-only discovery/read aggregation over policy/case/ruling registries and receives no custody or blanket remedy authority."
     },
     {
       "dapp": "420 Trust",

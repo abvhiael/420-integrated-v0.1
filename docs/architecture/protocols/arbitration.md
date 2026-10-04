@@ -26,9 +26,20 @@ It does not answer every legal question, and it does not directly enforce arbitr
 | GovernanceTimelock | configure arbitration policy for a domain | rewrite an already-open case's snapshotted policy |
 | Case registry | bind parties, origin, claim/remedy commitments, policy snapshot, round and deadlines | decide the dispute or execute remedies |
 | Ruling registry / selected resolver | record exactly one ruling for the current round | rule for another domain/round or bypass appeal/finality rules |
+| ArbitrationRouter420 | provide the Registry-published canonical read/discovery endpoint over the exact Policy/Case/Ruling graph | mutate case/ruling state, acquire resolver authority, custody assets or execute remedies |
 | Originating protocol | optionally consume a finalized ruling through its own explicit transition | treat Arbitration as ambient authority over unrelated state |
 
 This separation means a valid arbitration ruling can be authoritative for the registered dispute process while still having **zero direct power** to seize funds, mutate Rights, slash validators, reverse bridge transfers, or override Civic governance.
+
+## Service discovery and user runtime
+
+`ArbitrationRouter420` is the canonical ProtocolRegistry implementation for `420/service/arbitration/v1`. The canonical address namespace classifies `arbitration-router` as `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS`; no additional fixed predeploy or implied CREATE2 address is created for Arbitration.
+
+The router binds the exact `ArbitrationPolicyRegistry420`, `ArbitrationCaseRegistry420` and `ArbitrationRulingRegistry420` identities as immutables and rejects a constructor graph in which the Case registry does not point to the selected Policy registry or the Ruling registry does not point to the selected Case registry. It exposes read aggregation only. Case opening, evidence, appeals, rulings and finalization continue to execute against their owning registries under the authority rules described below.
+
+The repository-qualified user path is the Wallet-integrated Genesis application surface. Before presenting actionable Arbitration targets, the runtime verifies the canonical service ID, network, service version, Router code identity and distinct Policy/Case/Ruling code identities. An unresolved, deprecated, wrong-service or unverified binding fails closed. Wallet presentation or transaction preparation never grants signing authority, resolver authority, governance authority, custody, or remedy-execution power.
+
+A standalone frontend may exist later as replaceable non-canonical infrastructure, but it must use the same Registry-derived identities and cannot become a competing source of protocol authority.
 
 ## Domain-scoped policy
 

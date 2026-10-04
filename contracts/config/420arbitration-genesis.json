@@ -7,10 +7,19 @@
     "ArbitrationIds420.sol",
     "ArbitrationPolicyRegistry420.sol",
     "ArbitrationCaseRegistry420.sol",
-    "ArbitrationRulingRegistry420.sol"
+    "ArbitrationRulingRegistry420.sol",
+    "ArbitrationRouter420.sol"
   ],
   "purpose": "Shared dispute case, evidence, resolver, ruling, appeal and finality coordination for 420 Integrated protocols without acquiring custody or blanket remedy execution authority.",
-  "domains": ["420 Market", "420 Rights", "420 Grants", "420 ComputeMarket", "420 Pay", "420 Resource Protocol", "future registered protocols"],
+  "domains": [
+    "420 Market",
+    "420 Rights",
+    "420 Grants",
+    "420 ComputeMarket",
+    "420 Pay",
+    "420 Resource Protocol",
+    "future registered protocols"
+  ],
   "model": {
     "policyIsDomainScoped": true,
     "policySnapshotAtCaseOpen": true,
@@ -32,6 +41,20 @@
     "ARB-INV-009: Originating protocols may consume finalized rulings only through their own explicit authorization, accounting and state-transition rules.",
     "ARB-INV-010: Domain policies are GovernanceTimelock-controlled, default inactive unless explicitly enabled, and may not specify an unbounded appeal count.",
     "ARB-INV-011: Arbitration records are reconstructable from chain state/events; frontends, evidence storage providers and indexers are non-canonical.",
-    "ARB-INV-012: A finalized arbitration ruling is authoritative only for the registered dispute process it represents and is not general legal authority outside the protocol." 
-  ]
+    "ARB-INV-012: A finalized arbitration ruling is authoritative only for the registered dispute process it represents and is not general legal authority outside the protocol."
+  ],
+  "deployment": {
+    "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "serviceImplementation": "ArbitrationRouter420",
+    "componentId": "420/component/arbitration/v1",
+    "releaseMaterialization": "contracts/config/arbitration/arbitration-audit-4-release-materialization.json",
+    "liveEvidenceOwner": "ARBITRATION-AUDIT-5"
+  },
+  "userRuntime": {
+    "canonicalPath": "WALLET_INTEGRATED_GENESIS_APP",
+    "catalog": "wallet/web/core/genesis-app-catalog.js",
+    "binding": "wallet/web/core/arbitration-runtime.js",
+    "standaloneProductionUrlRequired": false,
+    "failClosedOnUnresolvedOrUnverifiedRuntime": true
+  }
 }

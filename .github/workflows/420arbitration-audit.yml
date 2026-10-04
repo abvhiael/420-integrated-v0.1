@@ -1,0 +1,149 @@
+name: 420Arbitration audit qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/arbitration/**'
+      - 'contracts/test/Arbitration*.t.sol'
+      - 'contracts/config/420arbitration-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/arbitration/**'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'docs/apps/arbitration/**'
+      - 'docs/architecture/protocols/arbitration.md'
+      - 'docs/audit/420ARBITRATION-*'
+      - 'scripts/verify-420arbitration-audit.py'
+      - 'scripts/verify-arbitration-audit-4-release.py'
+      - 'wallet/web/core/arbitration-runtime.js'
+      - 'wallet/web/test/arbitration-runtime.test.js'
+      - '.github/workflows/420arbitration-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arbitration-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Check Arbitration formatting
+        working-directory: contracts
+        run: forge fmt --check src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol
+      - name: Build Arbitration graph
+        working-directory: contracts
+        run: forge build src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol --sizes
+      - name: Verify Arbitration repository contract
+        run: python3 scripts/verify-420arbitration-audit.py
+      - name: Verify ARBITRATION-AUDIT-4 release materialization
+        run: python3 scripts/verify-arbitration-audit-4-release.py
+      - name: Verify shared Genesis address namespace authority
+        run: |
+          python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
+          python3 scripts/test-reg-audit-4-genesis-address-namespace.py
+      - name: Run Wallet Arbitration runtime qualification
+        run: node --test wallet/web/test/arbitration-runtime.test.js
+      - name: Run Arbitration Foundry qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/Arbitration*.t.sol' -vvv
+      - name: Reject dangerous Arbitration primitives
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/arbitration; then
+            echo 'Forbidden primitive found in 420Arbitration sources' >&2
+            exit 1
+          fi
+
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: hardening
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run Arbitration hardening suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Arbitration*.t.sol' -vvv
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+      - name: Targeted Arbitration Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > ArbitrationAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/arbitration/ArbitrationIds420.sol";
+          import "./src/arbitration/ArbitrationPolicyRegistry420.sol";
+          import "./src/arbitration/ArbitrationCaseRegistry420.sol";
+          import "./src/arbitration/ArbitrationRulingRegistry420.sol";
+          import "./src/arbitration/ArbitrationRouter420.sol";
+          SOL
+          set +e
+          slither ArbitrationAuditSlitherTarget.sol --json /tmp/arbitration-slither.json >/tmp/arbitration-slither.txt 2>&1
+          STATUS=$?
+          set -e
+          rm -f ArbitrationAuditSlitherTarget.sol
+          python - <<'PY'
+          import json, pathlib
+          report_path = pathlib.Path("/tmp/arbitration-slither.json")
+          log_path = pathlib.Path("/tmp/arbitration-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+          report = json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+          high = []
+          findings = []
+          for detector in report.get("results", {}).get("detectors", []):
+              arb = [
+                  e for e in detector.get("elements", [])
+                  if e.get("source_mapping", {}).get("filename_relative", "").startswith("src/arbitration/")
+              ]
+              if not arb:
+                  continue
+              item = {
+                  "check": detector.get("check"),
+                  "impact": detector.get("impact"),
+                  "confidence": detector.get("confidence"),
+                  "description": detector.get("description"),
+                  "sources": sorted({e.get("source_mapping", {}).get("filename_relative", "") for e in arb}),
+              }
+              findings.append(item)
+              if detector.get("impact") == "High":
+                  high.append(item)
+          print(json.dumps({"arbitrationFindings": findings, "highSeverity": high}, indent=2))
+          medium_unused = [x for x in findings if x.get("impact") == "Medium" and x.get("check") == "unused-return"]
+          if high:
+              raise SystemExit("High-severity Slither finding in Arbitration source")
+          if medium_unused:
+              raise SystemExit("Undispositioned Medium unused-return finding in Arbitration source")
+          PY

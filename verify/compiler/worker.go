@@ -166,6 +166,13 @@ func standardJSONFor(s submission.Submission) ([]byte, error) {
 		if err := json.Unmarshal(s.StandardJSON, &doc); err != nil {
 			return nil, errors.New("standard JSON input must be valid JSON")
 		}
+		language, ok := doc["language"].(string)
+		if !ok || language != "Solidity" {
+			return nil, errors.New("standard JSON language must be Solidity")
+		}
+		if _, ok := doc["sources"].(map[string]any); !ok {
+			return nil, errors.New("standard JSON sources object is required")
+		}
 		if err := validateStandardJSONBuildSettings(s.StandardJSON, s.Build); err != nil {
 			return nil, err
 		}

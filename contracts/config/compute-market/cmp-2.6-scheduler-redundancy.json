@@ -1,0 +1,43 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-2.6.SchedulerRedundancy.v1",
+  "step": "CMP-2.6",
+  "title": "Scheduler redundancy and non-authority",
+  "qualificationLevel": 1,
+  "level2RequiredNow": false,
+  "purpose": "Matching remains available across scheduler replacement while scheduler identity grants no canonical authority.",
+  "dependencies": [
+    "CMP-2.3 replaceable matching engine",
+    "CMP-2.4 pricing model",
+    "CMP-2.5 capacity-aware assignment"
+  ],
+  "schedulerModel": {
+    "registryRequired": false,
+    "allowlistRequired": false,
+    "proposalSurfacePermissionless": true,
+    "requesterMaySelfPropose": true,
+    "multipleSchedulersMayPropose": true,
+    "staleProposalFailsClosed": true
+  },
+  "nonAuthority": [
+    "scheduler cannot accept a match",
+    "scheduler cannot mutate request or offer commitments",
+    "scheduler cannot bypass canonical compatibility checks",
+    "scheduler cannot reserve CMP-1.3 capacity",
+    "scheduler cannot link or accept a market match into a canonical job",
+    "scheduler cannot redirect provider settlement account",
+    "scheduler cannot create a second accepted match for one request"
+  ],
+  "exitCriteria": [
+    "replacement scheduler can submit a fresh proposal after another scheduler proposal becomes stale",
+    "request owner can accept replacement proposal without granting scheduler authority",
+    "request owner can self-propose when external schedulers are unavailable",
+    "competing scheduler proposals preserve identical canonical request/offer commitments and quote for the same pair",
+    "losing scheduler cannot rewrite the accepted winner",
+    "retained Compute Market regressions and CMP-2.6 verifier pass on exact implementation SHA"
+  ],
+  "nextCanonicalStep": "CMP-2.7 — Market adversarial qualification",
+  "deferred": [
+    "CMP-2.7 market adversarial qualification",
+    "CMP-2.8 Level 3 phase closeout"
+  ]
+}

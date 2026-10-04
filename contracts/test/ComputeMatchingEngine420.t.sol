@@ -364,4 +364,90 @@ contract ComputeMatchingEngine420Test {
         );
         require(matches.acceptedForRequest(requestId) == bytes32(0), "failed acceptance mutated state");
     }
+
+    function testCmp26SchedulerFailoverUsesFreshProposalWithoutPrivilege() public {
+        bytes32 requestId = _request(5 ether);
+        bytes32 offerId = _offer(3 ether);
+        bytes32 stale = _propose(SCHEDULER_A, requestId, offerId);
+
+        vm.prank(OPERATOR);
+        offers.updateOffer(
+            offerId,
+            JURISDICTION,
+            uint64(block.timestamp),
+            uint64(block.timestamp + 2 days),
+            PRICING,
+            1,
+            3 ether
+        );
+
+        require(!matches.proposalEligible(stale), "stale scheduler proposal remained eligible");
+
+        bytes32 fresh = _propose(SCHEDULER_B, requestId, offerId);
+        ComputeMatch420.Proposal memory p = matches.proposal(fresh);
+        require(p.scheduler == SCHEDULER_B, "replacement scheduler not recorded");
+        require(p.offerRevision == 2 && p.quotedMaximum == 3 ether, "replacement proposal terms wrong");
+
+        require(
+            !_try(
+                SCHEDULER_B,
+                abi.encodeCall(matches.accept, (fresh, uint64(1), uint64(2)))
+            ),
+            "replacement scheduler gained acceptance authority"
+        );
+        require(matches.acceptedForRequest(requestId) == bytes32(0), "scheduler acceptance mutated state");
+
+        vm.prank(owner);
+        bytes32 matchId = matches.accept(fresh, 1, 2);
+        ComputeMatch420.AcceptedMatch memory m = matches.acceptedMatch(matchId);
+        require(m.requestId == requestId && m.offerId == offerId, "failover changed market identity");
+        require(m.owner == owner && m.payer == payer, "failover changed requester authority");
+        require(m.operator == OPERATOR && m.settlementAccount == BENEFICIARY, "failover changed provider economics");
+        require(m.offerRevision == 2 && m.acceptedMaximum == 3 ether, "failover changed accepted terms");
+    }
+
+    function testCmp26RequesterCanSelfProposeWhenExternalSchedulersAreUnavailable() public {
+        bytes32 requestId = _request(5 ether);
+        bytes32 offerId = _offer(3 ether);
+
+        vm.prank(owner);
+        bytes32 proposalId = matches.propose(requestId, offerId);
+        require(matches.proposal(proposalId).scheduler == owner, "self-proposal scheduler identity lost");
+
+        vm.prank(owner);
+        bytes32 matchId = matches.accept(proposalId, 1, 1);
+        ComputeMatch420.AcceptedMatch memory m = matches.acceptedMatch(matchId);
+
+        require(m.owner == owner && m.payer == payer, "self-proposal changed requester parties");
+        require(m.operator == OPERATOR && m.settlementAccount == BENEFICIARY, "self-proposal changed provider parties");
+        require(m.acceptedMaximum == 3 ether, "self-proposal changed price");
+    }
+
+    function testCmp26CompetingSchedulersCannotDoubleAcceptOrRewriteWinner() public {
+        bytes32 requestId = _request(5 ether);
+        bytes32 offerId = _offer(3 ether);
+        bytes32 proposalA = _propose(SCHEDULER_A, requestId, offerId);
+        bytes32 proposalB = _propose(SCHEDULER_B, requestId, offerId);
+
+        ComputeMatch420.Proposal memory a = matches.proposal(proposalA);
+        ComputeMatch420.Proposal memory b = matches.proposal(proposalB);
+        require(a.requestCommitment == b.requestCommitment, "scheduler changed request commitment");
+        require(a.offerCommitment == b.offerCommitment, "scheduler changed offer commitment");
+        require(a.quotedMaximum == b.quotedMaximum, "scheduler changed quote");
+
+        vm.prank(owner);
+        bytes32 winner = matches.accept(proposalB, 1, 1);
+        bytes32 acceptedBefore = matches.acceptedForRequest(requestId);
+        require(acceptedBefore == winner, "winner not canonical");
+
+        require(
+            !_try(
+                SCHEDULER_A,
+                abi.encodeCall(matches.accept, (proposalA, uint64(1), uint64(1)))
+            ),
+            "losing scheduler rewrote accepted match"
+        );
+        require(matches.acceptedForRequest(requestId) == acceptedBefore, "losing scheduler mutated winner");
+        require(!matches.proposalEligible(proposalA), "losing proposal remained eligible after acceptance");
+    }
 }

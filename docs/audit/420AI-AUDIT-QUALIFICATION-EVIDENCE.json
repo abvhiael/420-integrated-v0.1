@@ -563,22 +563,22 @@
     "AI-AUDIT-10": {
       "status": "COMPLETE",
       "qualification_level": "Level 1 exact-head qualification + retained Level 2 pre-testnet app-integration milestone",
-      "implementation_sha": "bfbbca7fa847e46217b4d4b4d23bd70cf72424e8",
-      "current_main_at_closeout": "58b6b17c6538bd3cd22694e417a32472aae899f4",
-      "workflow_run": 37236254656,
+      "implementation_sha": "b54ad6b39f3f438d6f39beb5dfdbde1963d752a4",
+      "current_main_at_closeout": "2280fb6f9915b849560d9d4d5a95d999c4adc669",
+      "workflow_run": 37241370775,
       "jobs": {
-        "ai-client": 111535889133,
-        "custody-settlement": 111535889290,
-        "audit-state": 111535889296,
-        "pretestnet-security": 111535889308,
-        "ai-read-api": 111535889335,
-        "v1-modules": 111535889344,
-        "genesis-compatibility": 111535889370,
-        "provider-runtime": 111535889374,
-        "focused-ai-contracts": 111535889407,
-        "deployment-materialization": 111535889420,
-        "compute-integration": 111535889425,
-        "pretestnet-qualification": 111535889439
+        "genesis-compatibility": 111550602138,
+        "ai-client": 111550602161,
+        "v1-modules": 111550602185,
+        "custody-settlement": 111550602230,
+        "focused-ai-contracts": 111550602252,
+        "audit-state": 111550602253,
+        "ai-read-api": 111550602257,
+        "deployment-materialization": 111550602264,
+        "provider-runtime": 111550602266,
+        "pretestnet-security": 111550602275,
+        "compute-integration": 111550602278,
+        "pretestnet-qualification": 111550602291
       },
       "requirements_satisfied": [
         "Clean documented Foundry build completed from forge clean.",
@@ -606,7 +606,8 @@
       "blockers": [],
       "completion_state": "COMPLETE",
       "durable_evidence": "docs/audit/420AI-AUDIT-10-QUALIFICATION.md",
-      "next_step": "AI-AUDIT-11 — production-equivalent testnet qualification"
+      "next_step": "AI-AUDIT-11 — production-equivalent testnet qualification",
+      "reconciliation_note": "Reconciled against current main, preserving mainline Rights/indexer and Arbitration/Genesis authority changes while retaining AI namespace/dApp-map additions; exact reconciled head requalified 12/12 green before merge."
     }
   },
   "scope": {

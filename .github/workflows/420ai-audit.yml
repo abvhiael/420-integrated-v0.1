@@ -16,6 +16,7 @@ on:
       - 'contracts/config/system-addresses.json'
       - 'contracts/config/deployment-manifest.json'
       - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/config/genesis-address-namespace.json'
       - 'contracts/config/predeploy/predeploy-plan.json'
       - 'contracts/test/AI*420.t.sol'
       - 'docs/420-AI-V1-ARCHITECTURE.md'

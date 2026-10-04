@@ -95,13 +95,19 @@ for token in [
     if token not in wf:
         errors.append(f"fast workflow missing CMP-3 coverage: {token}")
 
-if "Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**" not in docs:
+if (
+    "Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**" not in docs
+    and "Status: **COMPLETE — Level 1 exact-head qualified" not in docs
+):
     errors.append("CMP-3.2 documentation status drift")
 if "Next canonical step: **CMP-3.3 — Benchmarking and capability evidence**." not in docs:
     errors.append("CMP-3.2 next-step boundary drift")
 if "## CMP-3.2 — Hardware/software discovery" not in road:
     errors.append("canonical CMP-3.2 roadmap step missing")
-if "IMPLEMENTED / Level 1 qualification pending" not in road:
+if (
+    "IMPLEMENTED / Level 1 qualification pending" not in road
+    and "COMPLETE — Level 1 exact-head qualified" not in road
+):
     errors.append("CMP-3.2 roadmap status missing or stale")
 
 if errors:

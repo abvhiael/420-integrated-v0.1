@@ -11,11 +11,15 @@ Baseline/current `main`: `1b9330871f7e9d0e79014955a61599baf70134fa`
 Audit branch: `audit/420rights-complete-20261003`  
 PR: #508  
 Dedicated workflow: `420Rights audit qualification`  
-Passing run: `37178521825` (run #18)  
-Qualify job: `111366155922` — PASS  
-Security job: `111366155820` — PASS
+Primary implementation qualification run: `37178521825` (run #18)  
+Primary qualify job: `111366155922` — PASS  
+Primary security job: `111366155820` — PASS  
+Evidence/current branch HEAD: `f35cb1f7ba23c3aa8e76e53dc9678e9b79c0a157`  
+Latest exact-head confirmation run: `37178941263` (run #21) — PASS  
+Latest qualify job: `111367356810` — PASS  
+Latest security job: `111367356945` — PASS
 
-The implementation SHA is the authority for executable/configuration qualification. Any following closeout commit that changes only audit documentation is evidence-only and does not supersede this implementation SHA.
+The implementation SHA is the authority for executable/configuration qualification. The three commits from `94473daae80d4f5ede9f74414d65a5a8774d6237` through `f35cb1f7ba23c3aa8e76e53dc9678e9b79c0a157` change only audit documentation, so they are evidence-only and do not supersede the executable implementation SHA. Run #21 nevertheless requalified the exact current head successfully.
 
 ## Requirements satisfied
 
@@ -44,7 +48,23 @@ No canonical Rights contract semantics were weakened or broadened for this step.
 
 ## Level 1 qualification results
 
-Run `37178521825` qualified exact SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`.
+Primary implementation qualification: run `37178521825` qualified exact executable/configuration SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`.
+
+Latest exact-head confirmation: run `37178941263` qualified current evidence HEAD `f35cb1f7ba23c3aa8e76e53dc9678e9b79c0a157`. The diff from the executable implementation SHA contains only:
+- `docs/audit/420RIGHTS-AUDIT-4-QUALIFICATION.md`;
+- `docs/audit/420RIGHTS-AUDIT-REMEDIATION-ROADMAP.md`;
+- `docs/audit/420RIGHTS-COMPLETE-AUDIT-20261003.md`.
+
+Run #21 results:
+- qualify job `111367356810` — PASS;
+- security job `111367356945` — PASS;
+- canonical formatting/build/verifiers — PASS;
+- RIGHTS-AUDIT-4 deployment and ProtocolRegistry binding qualification — PASS;
+- complete Rights contract qualification suite — PASS;
+- 420Indexer build and Rights descriptor/lifecycle qualification — PASS;
+- hardening suite and targeted Slither high-severity gate — PASS.
+
+Original run #18 details retained below for implementation evidence.
 
 Qualify job `111366155922`:
 - exact-head checkout: PASS;

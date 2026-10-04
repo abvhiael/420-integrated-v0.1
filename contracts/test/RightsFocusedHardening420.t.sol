@@ -12,6 +12,118 @@ import "../src/rights/RightsIds420.sol";
 interface VmRightsHardening420 {
     function prank(address) external;
     function warp(uint256) external;
+    function testInactiveRightClassAndMissingEvidenceFailClosed() public {
+        Env memory e = _setup();
+        bytes32 subjectId = keccak256("policy-work");
+        bytes32 rightId = keccak256("policy-right");
+        vm.prank(ALICE);
+        e.assets.registerSubject(subjectId, keccak256("work"), ALICE, bytes32(0), keccak256("provenance"));
+
+        e.policy.setRightClass(RightsIds420.RIGHT_COPYRIGHT, keccak256("copyright-policy-v2"), false);
+        vm.prank(ALICE);
+        (bool inactiveOk,) = address(e.claims).call(abi.encodeWithSelector(
+            e.claims.declareClaim.selector, rightId, subjectId, RightsIds420.RIGHT_COPYRIGHT,
+            ALICE, keccak256("CA"), keccak256("evidence"), uint64(block.timestamp), uint64(0)
+        ));
+        require(!inactiveOk, "inactive right class accepted");
+
+        e.policy.setRightClass(RightsIds420.RIGHT_COPYRIGHT, keccak256("copyright-policy-v3"), true);
+        vm.prank(ALICE);
+        (bool noEvidenceOk,) = address(e.claims).call(abi.encodeWithSelector(
+            e.claims.declareClaim.selector, rightId, subjectId, RightsIds420.RIGHT_COPYRIGHT,
+            ALICE, keccak256("CA"), bytes32(0), uint64(block.timestamp), uint64(0)
+        ));
+        require(!noEvidenceOk, "zero evidence accepted");
+    }
+
+    function testLicenseCannotOutliveFiniteRightAndNonrevocableCannotBeRevoked() public {
+        Env memory e = _setup();
+        bytes32 subjectId = keccak256("finite-work");
+        bytes32 rightId = keccak256("finite-right");
+        uint64 start = uint64(block.timestamp);
+        uint64 end = start + 100;
+        _subjectAndClaim(e, subjectId, rightId, keccak256("finite-evidence"), start, end);
+
+        bytes32 scope = keccak256("finite-scope");
+        bytes32 terms = keccak256("finite-terms");
+        bytes32 tooLong = e.licenses.deriveLicenseId(rightId, BOB, scope, terms, start, end + 1, true);
+        vm.prank(ALICE);
+        (bool outliveOk,) = address(e.licenses).call(abi.encodeWithSelector(
+            e.licenses.grantLicense.selector, tooLong, rightId, BOB, scope, terms, start, end + 1, true
+        ));
+        require(!outliveOk, "license outlived finite right");
+
+        bytes32 fixedLicense = e.licenses.deriveLicenseId(rightId, BOB, scope, terms, start, end, false);
+        vm.prank(ALICE);
+        e.licenses.grantLicense(fixedLicense, rightId, BOB, scope, terms, start, end, false);
+        vm.prank(ALICE);
+        (bool revokeOk,) = address(e.licenses).call(abi.encodeWithSelector(e.licenses.revokeLicense.selector, fixedLicense));
+        require(!revokeOk, "nonrevocable license revoked");
+
+        vm.prank(BOB);
+        e.licenses.renounceLicense(fixedLicense);
+        require(!e.licenses.isEffective(fixedLicense), "renounced nonrevocable license remained effective");
+    }
+
+    function testSubjectCapabilityIsExactScopeAndActionBound() public {
+        Env memory e = _setup();
+        bytes32 allowedSubject = keccak256("allowed-subject");
+        bytes32 otherSubject = keccak256("other-subject");
+        uint64 nowTs = uint64(block.timestamp);
+        e.caps.configure(
+            BOB,
+            RightsIds420.COMPONENT_RIGHTS,
+            RightsIds420.ACTION_REGISTER_ASSET,
+            e.auth.scopeForSubject(allowedSubject),
+            nowTs,
+            0,
+            false
+        );
+
+        vm.prank(BOB);
+        e.assets.registerSubject(
+            allowedSubject, keccak256("work"), ALICE, keccak256("metadata"), keccak256("provenance")
+        );
+
+        vm.prank(BOB);
+        (bool wrongScopeOk,) = address(e.assets).call(abi.encodeWithSelector(
+            e.assets.registerSubject.selector,
+            otherSubject, keccak256("work"), ALICE, keccak256("metadata"), keccak256("provenance")
+        ));
+        require(!wrongScopeOk, "subject capability escaped exact scope");
+
+        vm.prank(BOB);
+        (bool wrongActionOk,) = address(e.assets).call(abi.encodeWithSelector(
+            e.assets.updateMetadata.selector, allowedSubject, keccak256("new-metadata")
+        ));
+        require(!wrongActionOk, "register capability escaped action scope");
+    }
+
+    function testUnauthorizedSupersessionAndTransferFailClosed() public {
+        Env memory e = _setup();
+        bytes32 subjectId = keccak256("authority-work");
+        bytes32 oldRight = keccak256("authority-old");
+        bytes32 newRight = keccak256("authority-new");
+        uint64 nowTs = uint64(block.timestamp);
+        _subjectAndClaim(e, subjectId, oldRight, keccak256("evidence-old"), nowTs, 0);
+        vm.prank(ALICE);
+        e.claims.declareClaim(
+            newRight, subjectId, RightsIds420.RIGHT_COPYRIGHT, ALICE,
+            keccak256("CA"), keccak256("evidence-new"), nowTs, 0
+        );
+
+        vm.prank(BOB);
+        (bool supersedeOk,) = address(e.claims).call(
+            abi.encodeWithSelector(e.claims.supersedeClaim.selector, oldRight, newRight)
+        );
+        require(!supersedeOk, "unauthorized supersession accepted");
+
+        vm.prank(BOB);
+        (bool transferOk,) = address(e.claims).call(
+            abi.encodeWithSelector(e.claims.transferHolder.selector, oldRight, CAROL, keccak256("proof"))
+        );
+        require(!transferOk, "unauthorized transfer accepted");
+    }
 }
 
 contract ScopedCapabilityRights420 is ICapabilityRegistry420 {

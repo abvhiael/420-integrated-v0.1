@@ -16,7 +16,11 @@ contract ArbitrationRouter420 is I420System {
     error ZeroAddress();
     error DependencyMismatch();
 
-    constructor(address policyRegistry_, address caseRegistry_, address rulingRegistry_) {
+    constructor(
+        address policyRegistry_,
+        address caseRegistry_,
+        address rulingRegistry_
+    ) {
         if (policyRegistry_ == address(0) || caseRegistry_ == address(0) || rulingRegistry_ == address(0)) {
             revert ZeroAddress();
         }
@@ -25,7 +29,9 @@ contract ArbitrationRouter420 is I420System {
         ArbitrationCaseRegistry420 c = ArbitrationCaseRegistry420(caseRegistry_);
         ArbitrationRulingRegistry420 r = ArbitrationRulingRegistry420(rulingRegistry_);
 
-        if (address(c.policies()) != policyRegistry_ || address(r.cases()) != caseRegistry_) revert DependencyMismatch();
+        if (address(c.policies()) != policyRegistry_ || address(r.cases()) != caseRegistry_) {
+            revert DependencyMismatch();
+        }
 
         policies = p;
         cases = c;
@@ -40,15 +46,22 @@ contract ArbitrationRouter420 is I420System {
         return 1;
     }
 
-    function getPolicy(bytes32 domainId) external view returns (ArbitrationPolicyRegistry420.Policy memory) {
+    function getPolicy(
+        bytes32 domainId
+    ) external view returns (ArbitrationPolicyRegistry420.Policy memory) {
         return policies.getPolicy(domainId);
     }
 
-    function getCase(bytes32 caseId) external view returns (ArbitrationCaseRegistry420.CaseRecord memory) {
+    function getCase(
+        bytes32 caseId
+    ) external view returns (ArbitrationCaseRegistry420.CaseRecord memory) {
         return cases.getCase(caseId);
     }
 
-    function getRuling(bytes32 caseId, uint8 round) external view returns (ArbitrationRulingRegistry420.Ruling memory) {
+    function getRuling(
+        bytes32 caseId,
+        uint8 round
+    ) external view returns (ArbitrationRulingRegistry420.Ruling memory) {
         return rulings.getRuling(caseId, round);
     }
 }

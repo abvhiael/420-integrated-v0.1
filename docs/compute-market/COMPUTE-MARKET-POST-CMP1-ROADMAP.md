@@ -342,6 +342,12 @@ Dedicated `node420-compute` process-lifecycle foundation with fail-closed canoni
 Durable evidence and exit criteria: [CMP-3.1 worker daemon](CMP-3.1-WORKER-DAEMON.md). Compute Market Qualification #213 / run `37240782332` passed on the exact implementation SHA.
 
 ## CMP-3.2 — Hardware/software discovery
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+Local, read-only host discovery now reports a versioned non-authoritative worker snapshot covering portable OS/architecture/logical CPU/runtime data, richer Linux CPU/memory/graphics identifiers, and allowlisted relevant software presence without executing discovered tools or collecting sensitive host/network/credential identifiers. Benchmarking and capability evidence remain deferred to CMP-3.3.
+
+Durable design/exit criteria: [CMP-3.2 hardware/software discovery](CMP-3.2-HARDWARE-SOFTWARE-DISCOVERY.md).
+
 
 ## CMP-3.3 — Benchmarking and capability evidence
 

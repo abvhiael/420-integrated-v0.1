@@ -80,7 +80,7 @@ Implement the architecture-named modules that are still absent from current `mai
 - Static/security analysis, docs verifier, application build, provider/API build and no-uncommitted-change check.
 - Commit exact-head qualification evidence.
 
-- **Repository-side status: COMPLETE. Level 1 exact-head qualification plus the retained pre-testnet app-integration milestone passed at implementation SHA `bfbbca7fa847e46217b4d4b4d23bd70cf72424e8` in 420AI Audit Qualification run `37236254656`. All 12 required jobs passed, including `pretestnet-qualification` job `111535889439` and `pretestnet-security` job `111535889308`. Durable evidence: `docs/audit/420AI-AUDIT-10-QUALIFICATION.md`. AI-AUDIT-11 remains BLOCKED until the production-equivalent testnet and provider infrastructure are live.**
+- **Repository-side status: COMPLETE. Level 1 exact-head qualification plus the retained pre-testnet app-integration milestone passed at implementation SHA `b54ad6b39f3f438d6f39beb5dfdbde1963d752a4` in 420AI Audit Qualification run `37241370775`. All 12 required jobs passed, including `pretestnet-qualification` job `111550602291` and `pretestnet-security` job `111550602275`. Durable evidence: `docs/audit/420AI-AUDIT-10-QUALIFICATION.md`. AI-AUDIT-11 remains BLOCKED until the production-equivalent testnet and provider infrastructure are live.**
 
 ## AI-AUDIT-11 — production-equivalent testnet qualification
 **BLOCKED until the production-equivalent 420Integrated testnet and required provider infrastructure are live.**

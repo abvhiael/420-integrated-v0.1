@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: rights-audit-${{ github.event.pull_request.number || github.ref }}
@@ -46,35 +46,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Materialize canonical Rights formatting
+      - name: Check canonical Rights formatting
         working-directory: contracts
-        run: forge fmt src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol
-      - name: Upload canonical Rights formatting
-        uses: actions/upload-artifact@v4
-        with:
-          name: rights-forge-formatted-${{ github.event.pull_request.head.sha || github.sha }}
-          path: |
-            contracts/src/rights
-            contracts/test/RightsGenesis420.t.sol
-            contracts/test/RightsFocusedHardening420.t.sol
-          if-no-files-found: error
-          retention-days: 1
-      - name: Commit canonical Rights formatting to audit branch
-        if: github.event_name == 'pull_request'
-        env:
-          HEAD_REF: ${{ github.head_ref }}
-        run: |
-          set -euo pipefail
-          if git diff --quiet -- contracts/src/rights contracts/test/RightsGenesis420.t.sol contracts/test/RightsFocusedHardening420.t.sol; then
-            echo "Rights formatting already canonical."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add contracts/src/rights contracts/test/RightsGenesis420.t.sol contracts/test/RightsFocusedHardening420.t.sol
-          git commit -m "style(420rights): apply canonical forge formatting"
-          git push origin "HEAD:$HEAD_REF"
-          exit 1
+        run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol
       - name: Build canonical Rights graph
         working-directory: contracts
         run: forge build src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol --sizes

@@ -225,8 +225,9 @@ contract ComputeCapacityAwareAssignment420Test {
         bytes32 signedId = signedRequests.registerSignedRequest(
             a, ownerSignature, payerSignature
         );
+        ComputeRequestRegistry420.Terms memory terms = _terms(5 ether);
         vm.prank(owner);
-        requestId = requests.createRequest(signedId, _terms(5 ether));
+        requestId = requests.createRequest(signedId, terms);
     }
 
     function _acceptedMarketMatch(bytes32 requestId) private returns (bytes32 matchId) {
@@ -241,10 +242,11 @@ contract ComputeCapacityAwareAssignment420Test {
         matchId = _acceptedMarketMatch(requestId);
         ComputeRequestRegistry420.Request memory r = requests.request(requestId);
 
+        bytes32 requestCommitment = requests.commitment(requestId, r.revision);
         vm.prank(owner);
         jobId = jobs.createJob(
             requestId,
-            requests.commitment(requestId, r.revision),
+            requestCommitment,
             r.manifestHash,
             r.workloadType,
             r.inputCommitment,
@@ -321,9 +323,10 @@ contract ComputeCapacityAwareAssignment420Test {
         bytes32 requestId = _marketRequest();
         bytes32 matchId = _acceptedMarketMatch(requestId);
         ComputeRequestRegistry420.Request memory r = requests.request(requestId);
+        bytes32 requestCommitment = requests.commitment(requestId, 1);
         vm.prank(owner);
         bytes32 jobId = jobs.createJob(
-            requestId, requests.commitment(requestId, 1), r.manifestHash, r.workloadType,
+            requestId, requestCommitment, r.manifestHash, r.workloadType,
             r.inputCommitment, r.outputSchemaCommitment, r.terms.deadline
         );
         vm.prank(owner);

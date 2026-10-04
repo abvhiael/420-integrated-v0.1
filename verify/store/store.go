@@ -70,9 +70,16 @@ func (s *Store) AppendWithProxy(deployment evidence.DeploymentEvidence, submitte
 	if err := submitted.ValidateCommitment(); err != nil {
 		return Record{}, fmt.Errorf("submission evidence: %w", err)
 	}
+	if err := compiler.ValidateBuildEvidence(build, submitted); err != nil {
+		return Record{}, fmt.Errorf("build evidence: %w", err)
+	}
 	binding := deployment.BindingKey()
 	if result.BindingKey != binding {
 		return Record{}, errors.New("classification binding key does not match deployment evidence")
+	}
+	reclassified := matcher.Classify(deployment, build, submitted, build.HasImmutables)
+	if !reflect.DeepEqual(reclassified, result) {
+		return Record{}, errors.New("classification does not reproduce from deployment and build evidence")
 	}
 	if relationship != nil {
 		if err := relationship.Validate(); err != nil {

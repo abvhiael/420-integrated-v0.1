@@ -10,7 +10,7 @@ import {
 } from '../src/rights-descriptors.js';
 
 const manifest = JSON.parse(
-  readFileSync(new URL('../descriptors/rights420-v1.json', import.meta.url), 'utf8')
+  readFileSync(new URL('../../descriptors/rights420-v1.json', import.meta.url), 'utf8')
 ) as RightsArtifactManifest420;
 
 function artifactMap(): Map<string, Artifact420> {

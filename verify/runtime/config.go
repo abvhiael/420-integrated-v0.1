@@ -12,6 +12,7 @@ type Config struct {
 	RPCURL           string
 	ReadinessAddress string
 	CompilerCache    string
+	CompilerCatalog  string
 	EvidenceStore    string
 	ListenAddr       string
 }
@@ -28,6 +29,9 @@ func (c Config) Validate() error {
 	}
 	if strings.TrimSpace(c.CompilerCache) == "" {
 		return errors.New("compiler cache path is required")
+	}
+	if strings.TrimSpace(c.CompilerCatalog) == "" {
+		return errors.New("compiler catalogue path is required")
 	}
 	if strings.TrimSpace(c.EvidenceStore) == "" {
 		return errors.New("evidence store path is required")

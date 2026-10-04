@@ -9,7 +9,7 @@
 - **Compiler worker** resolves allowlisted compiler binaries, verifies checksums, executes bounded hermetic builds, and records compiler/input/output commitments.
 - **Matcher** performs exact runtime and creation-bytecode comparison and emits stable classifications/diagnostics.
 - **Evidence store** persists append-only records keyed by `chainId:address:runtimeCodeHash`; indexes are rebuildable and non-canonical.
-- **Proxy resolver** handles EIP-1167 and EIP-1967 relationships and preserves separate proxy/implementation status.
+- **Proxy resolver** can resolve EIP-1167 and EIP-1967 relationships and preserve block-scoped proxy/implementation evidence. The current production entrypoint does not run continuous proxy-upgrade tracking.
 - **Public API** exposes exact-binding lookup, history, evidence retrieval, and source/build submission.
 
 ## Authority model
@@ -18,4 +18,4 @@
 
 ## Failure model
 
-Wrong-chain observations, unavailable canonical bytecode, malformed submissions, unallowlisted compilers, checksum mismatch, compiler timeout/output limits, store tampering, broken history, and stale proxy implementation state fail closed.
+Wrong-chain observations, unavailable canonical bytecode, malformed submissions, unallowlisted compilers, checksum mismatch, compiler timeout/output limits, store tampering, and broken history fail closed. Persisted proxy evidence is historical at its observation block; currentness must be revalidated against canonical chain state before presentation.

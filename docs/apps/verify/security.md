@@ -16,7 +16,7 @@ Persisted verification records are content-hashed and bound to exact chain/addre
 
 ## Proxy safety
 
-Proxy and implementation verification are separate. Upgrades invalidate inherited implementation-current status, preventing a previously verified implementation from silently carrying forward after canonical state changes.
+Proxy and implementation verification are separate. Persisted relationships are block-scoped historical evidence. Because the production entrypoint does not continuously monitor upgrades, downstream consumers must revalidate canonical proxy state before presenting a relationship as current, and verification must never carry forward from an old implementation to a new one.
 
 ## Non-authority guarantees
 

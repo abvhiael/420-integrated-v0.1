@@ -1,0 +1,104 @@
+name: 420Verify Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'verify/**'
+      - 'docs/420VERIFY*'
+      - 'docs/apps/verify/**'
+      - 'docs/audit/420VERIFY-AUDIT*'
+      - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
+      - 'contracts/config/420verify-genesis.json'
+      - 'testnet/public-services/verify/**'
+      - '.github/workflows/verify-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
+          echo "qualified_sha=$actual"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Enforce 420Verify gofmt
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find verify -type f -name '*.go' -print | sort)
+          unformatted="$(gofmt -l "${files[@]}")"
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted files:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Run 420Verify tests
+        run: go test ./verify/...
+
+      - name: Vet 420Verify
+        run: go vet ./verify/...
+
+      - name: Build 420Verify service
+        run: go build ./verify/cmd/verify420
+
+      - name: Verify deployment readiness metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest_path = Path("testnet/public-services/verify/readiness.json")
+          data = json.loads(manifest_path.read_text())
+
+          assert data["schema"] == "420-testnet-verify-readiness-v1"
+          assert data["audit"]["pr"] == 503
+          assert data["audit"]["current_step"] == "VERIFY-AUDIT-8"
+          assert data["audit"]["final_exact_head_qualification_required"] is True
+          assert data["public_endpoint_deployment_claimed"] is False
+          assert data["backend"]["status"] == "PENDING_DEPLOYMENT"
+          assert data["frontend"]["status"] == "PENDING_DEPLOYMENT"
+          assert data["backend"]["url"] == "REPLACE"
+          assert data["frontend"]["url"] == "REPLACE"
+
+          required_docs = [
+              Path("docs/apps/verify/deployment.md"),
+              Path("docs/audit/420VERIFY-AUDIT.md"),
+          ]
+          for path in required_docs:
+              assert path.is_file() and path.stat().st_size > 0, path
+
+          deployment = required_docs[0].read_text()
+          for token in (
+              "VERIFY_RPC_URL",
+              "VERIFY_READINESS_ADDRESS",
+              "VERIFY_COMPILER_CACHE",
+              "VERIFY_COMPILER_CATALOG",
+              "VERIFY_EVIDENCE_STORE",
+              "publishSource: true",
+              "/healthz",
+              "/readyz",
+              "Proxy-currentness limitation",
+          ):
+              assert token in deployment, token
+          PY

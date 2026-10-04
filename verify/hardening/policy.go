@@ -14,12 +14,12 @@ import (
 const Phase = "VERIFY-9"
 
 const (
-	MaxRequestBytes     int64 = 8 << 20
-	MaxSourceFiles            = 256
-	MaxSourceFileBytes        = 1 << 20
-	MaxSourceBytesTotal       = 6 << 20
-	MaxStandardJSONBytes      = 7 << 20
-	MaxFlattenedBytes         = 4 << 20
+	MaxRequestBytes      int64 = 8 << 20
+	MaxSourceFiles             = 256
+	MaxSourceFileBytes         = 1 << 20
+	MaxSourceBytesTotal        = 6 << 20
+	MaxStandardJSONBytes       = 7 << 20
+	MaxFlattenedBytes          = 4 << 20
 )
 
 var forbiddenKeys = map[string]struct{}{
@@ -28,26 +28,46 @@ var forbiddenKeys = map[string]struct{}{
 }
 
 func ValidateRawJSON(raw []byte) error {
-	if len(raw) == 0 { return errors.New("request body is required") }
-	if int64(len(raw)) > MaxRequestBytes { return errors.New("request body exceeds limit") }
+	if len(raw) == 0 {
+		return errors.New("request body is required")
+	}
+	if int64(len(raw)) > MaxRequestBytes {
+		return errors.New("request body exceeds limit")
+	}
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.UseNumber()
 	var value any
-	if err := dec.Decode(&value); err != nil { return fmt.Errorf("invalid JSON: %w", err) }
+	if err := dec.Decode(&value); err != nil {
+		return fmt.Errorf("invalid JSON: %w", err)
+	}
 	var trailing any
-	if err := dec.Decode(&trailing); err == nil { return errors.New("trailing JSON value is not allowed") } else if !errors.Is(err, io.EOF) { return fmt.Errorf("invalid trailing JSON: %w", err) }
+	if err := dec.Decode(&trailing); err == nil {
+		return errors.New("trailing JSON value is not allowed")
+	} else if !errors.Is(err, io.EOF) {
+		return fmt.Errorf("invalid trailing JSON: %w", err)
+	}
 	return rejectSecrets(value)
 }
 
 func ValidateSubmission(s submission.Submission) error {
-	if len(s.StandardJSON) > MaxStandardJSONBytes { return errors.New("standard JSON input exceeds limit") }
-	if len(s.Flattened) > MaxFlattenedBytes { return errors.New("flattened source exceeds limit") }
-	if len(s.Sources) > MaxSourceFiles { return errors.New("source file count exceeds limit") }
+	if len(s.StandardJSON) > MaxStandardJSONBytes {
+		return errors.New("standard JSON input exceeds limit")
+	}
+	if len(s.Flattened) > MaxFlattenedBytes {
+		return errors.New("flattened source exceeds limit")
+	}
+	if len(s.Sources) > MaxSourceFiles {
+		return errors.New("source file count exceeds limit")
+	}
 	total := 0
 	for _, source := range s.Sources {
-		if len(source.Content) > MaxSourceFileBytes { return fmt.Errorf("source file %q exceeds limit", source.Path) }
+		if len(source.Content) > MaxSourceFileBytes {
+			return fmt.Errorf("source file %q exceeds limit", source.Path)
+		}
 		total += len(source.Content)
-		if total > MaxSourceBytesTotal { return errors.New("total source bytes exceed limit") }
+		if total > MaxSourceBytesTotal {
+			return errors.New("total source bytes exceed limit")
+		}
 	}
 	return nil
 }
@@ -57,11 +77,19 @@ func rejectSecrets(value any) error {
 	case map[string]any:
 		for key, child := range v {
 			norm := strings.ToLower(strings.TrimSpace(key))
-			if _, blocked := forbiddenKeys[norm]; blocked { return fmt.Errorf("secret-bearing field %q is not accepted", key) }
-			if err := rejectSecrets(child); err != nil { return err }
+			if _, blocked := forbiddenKeys[norm]; blocked {
+				return fmt.Errorf("secret-bearing field %q is not accepted", key)
+			}
+			if err := rejectSecrets(child); err != nil {
+				return err
+			}
 		}
 	case []any:
-		for _, child := range v { if err := rejectSecrets(child); err != nil { return err } }
+		for _, child := range v {
+			if err := rejectSecrets(child); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }

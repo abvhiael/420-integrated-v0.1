@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>420Verify · 420 Integrated</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="420Verify home">
+      <span class="mark" aria-hidden="true">420</span>
+      <span><strong>Verify</strong><small>420 Integrated</small></span>
+    </a>
+    <span class="noncanonical">non-canonical evidence service</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">source ↔ deployed bytecode</p>
+      <h1>prove what code is actually deployed.</h1>
+      <p>420Verify reproduces Solidity builds and compares them with canonical chain evidence for an exact network, address, and runtime-code-hash binding.</p>
+      <div class="warning" role="note"><strong>verification is not an audit.</strong> A match does not mean a contract is safe, official, immutable, authorized, or non-malicious.</div>
+    </section>
+
+    <nav class="tabs" aria-label="Verify workflows">
+      <button class="tab active" data-panel="lookup-panel">lookup</button>
+      <button class="tab" data-panel="submit-panel">submit source</button>
+      <button class="tab" data-panel="evidence-panel">evidence</button>
+    </nav>
+
+    <section id="lookup-panel" class="panel active">
+      <h2>verification lookup</h2>
+      <form id="lookup-form" class="grid-form">
+        <label>chain ID<input id="lookup-chain" inputmode="numeric" value="420" required></label>
+        <label>contract address<input id="lookup-address" spellcheck="false" placeholder="0x…" required></label>
+        <label class="wide">runtime code hash<input id="lookup-hash" spellcheck="false" placeholder="0x… (32 bytes)" required></label>
+        <div class="actions wide">
+          <button type="submit">lookup latest</button>
+          <button type="button" id="history-button" class="secondary">load history</button>
+        </div>
+      </form>
+      <div id="lookup-status" class="status" aria-live="polite"></div>
+      <div id="lookup-result"></div>
+    </section>
+
+    <section id="submit-panel" class="panel">
+      <h2>submit source & build configuration</h2>
+      <p class="muted">The compiler version must exist in the operator's checksum-pinned compiler catalogue. No private keys or signing secrets are accepted.</p>
+      <form id="submission-form" class="grid-form">
+        <label>chain ID<input id="submit-chain" inputmode="numeric" value="420" required></label>
+        <label>contract address<input id="submit-address" spellcheck="false" placeholder="0x…" required></label>
+        <label>input kind
+          <select id="submit-kind">
+            <option value="STANDARD_JSON">Standard JSON</option>
+            <option value="MULTI_FILE">multi-file bundle</option>
+            <option value="FLATTENED_COMPAT">flattened compatibility input</option>
+          </select>
+        </label>
+        <label>compiler version<input id="compiler-version" placeholder="0.8.24+commit.e11b9ed9" required></label>
+        <label>optimizer
+          <select id="optimizer-enabled"><option value="true">enabled</option><option value="false">disabled</option></select>
+        </label>
+        <label>optimizer runs<input id="optimizer-runs" inputmode="numeric" value="200" required></label>
+        <label>EVM version<input id="evm-version" value="cancun" required></label>
+        <label>via IR
+          <select id="via-ir"><option value="false">false</option><option value="true">true</option></select>
+        </label>
+        <label>metadata bytecode hash<input id="metadata-mode" value="ipfs" required></label>
+        <label>constructor args known
+          <select id="constructor-known"><option value="true">yes</option><option value="false">no / unavailable</option></select>
+        </label>
+        <label class="wide">constructor arguments<input id="constructor-args" value="0x" spellcheck="false"></label>
+        <label>target source (multi-contract builds)<input id="target-source" placeholder="src/Example.sol"></label>
+        <label>target contract<input id="target-contract" placeholder="Example"></label>
+        <label class="wide">source/build input
+          <textarea id="source-input" rows="12" spellcheck="false" placeholder='For Standard JSON, paste the complete solc Standard JSON input. For MULTI_FILE, paste a JSON object mapping source paths to source text. For FLATTENED, paste Solidity source.' required></textarea>
+        </label>
+        <label class="wide">linked libraries (optional)
+          <textarea id="libraries-input" rows="4" spellcheck="false" placeholder='JSON array: [{"source":"lib/Math.sol","library":"Math","address":"0x…"}]'></textarea>
+        </label>
+        <label class="wide consent"><input id="publish-source" type="checkbox" required> I explicitly authorize 420Verify to publish the submitted source/build evidence through its public evidence API.</label>
+        <div class="actions wide"><button type="submit">verify deployment</button></div>
+      </form>
+      <div id="submit-status" class="status" aria-live="polite"></div>
+      <div id="submit-result"></div>
+    </section>
+
+    <section id="evidence-panel" class="panel">
+      <h2>evidence by record hash</h2>
+      <form id="evidence-form" class="grid-form">
+        <label class="wide">record hash<input id="record-hash" placeholder="sha256:…" spellcheck="false" required></label>
+        <div class="actions wide"><button type="submit">load evidence</button></div>
+      </form>
+      <div id="evidence-status" class="status" aria-live="polite"></div>
+      <div id="evidence-result"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>420Verify is reproducibility evidence only. Canonical deployed code comes from chain state; 420Registry remains the ecosystem identity authority.</p>
+  </footer>
+  <script src="/app.js" defer></script>
+</body>
+</html>

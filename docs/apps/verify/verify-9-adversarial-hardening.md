@@ -21,7 +21,7 @@ VERIFY-4 compiler controls remain mandatory: exact allowlisted compiler versions
 
 ## Failure and recovery behavior
 
-Canonical-chain acquisition fails closed when RPC evidence is unavailable or inconsistent. VERIFY-6 evidence history is append-only, content-hashed, rebuildable after restart, and refuses to start from tampered or non-contiguous records. VERIFY-7 proxy tracking invalidates inherited implementation status whenever the canonical implementation changes and preserves prior generations as history.
+Canonical-chain acquisition fails closed when RPC evidence is unavailable or inconsistent. VERIFY-6 evidence history is append-only, content-hashed, rebuildable after restart, and refuses to start from tampered or non-contiguous records. VERIFY-7 provides proxy resolution/tracker primitives, but the production entrypoint does not continuously run the tracker; persisted relationships therefore remain historical block-scoped evidence and currentness must be revalidated before presentation.
 
 Processor output is checked again at the public API boundary: the returned record binding, deployment binding, and classification binding must agree before a result is exposed.
 

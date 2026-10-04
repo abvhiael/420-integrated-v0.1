@@ -62,9 +62,10 @@ type LookupResponse struct {
 }
 
 type SubmissionRequest struct {
-	ChainID    uint64                `json:"chainId"`
-	Address    string                `json:"address"`
-	Submission submission.Submission `json:"submission"`
+	ChainID       uint64                `json:"chainId"`
+	Address       string                `json:"address"`
+	PublishSource bool                  `json:"publishSource"`
+	Submission    submission.Submission `json:"submission"`
 }
 
 func (s *Service) Handler() http.Handler {
@@ -119,6 +120,7 @@ func (s *Service) submit(w http.ResponseWriter, r *http.Request) {
 	var req SubmissionRequest
 	if err:=dec.Decode(&req); err!=nil { writeJSON(w,http.StatusBadRequest,errorBody(fmt.Errorf("decode submission: %w",err))); return }
 	if req.ChainID==0 || !validAddress(req.Address) { writeJSON(w,http.StatusBadRequest,errorBody(errors.New("non-zero chainId and valid address are required"))); return }
+	if !req.PublishSource { writeJSON(w,http.StatusBadRequest,errorBody(errors.New("public verification submission requires publishSource=true"))); return }
 	if err:=hardening.ValidateSubmission(req.Submission); err!=nil { writeJSON(w,http.StatusRequestEntityTooLarge,errorBody(err)); return }
 	if strings.TrimSpace(req.Submission.BundleHash) == "" {
 		hash, hashErr := req.Submission.ComputedBundleHash()

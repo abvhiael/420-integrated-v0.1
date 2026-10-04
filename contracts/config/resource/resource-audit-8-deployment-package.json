@@ -1,0 +1,158 @@
+{
+  "schema": "420-resource-audit-8-deployment-package-v1",
+  "step": "RESOURCE-AUDIT-8",
+  "status": "REPOSITORY_DEPLOYMENT_PACKAGE_READY_LIVE_TESTNET_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "resource_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "production_addresses_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_RESOURCE_AUDIT_9"
+  },
+  "canonical_dependencies": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "publication_api": "publishRegisteredService"
+    },
+    "capability_registry": {
+      "candidate_address": "0x0000000000000000000000000000000000000447",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "binding_rule": "DEPLOYMENT_INPUT_MUST_BE_VERIFIED_LIVE_CAPABILITY_REGISTRY_NOT_ASSUMED_FROM_RESERVATION"
+    },
+    "vault": {
+      "binding_model": "PER_STORAGE_SETTLEMENT_OPEN",
+      "constructor_dependency": false,
+      "binding_rule": "EACH_LIVE_SETTLEMENT_MUST_USE_A_VERIFIED_REGISTERED_420VAULT_ADDRESS_AND_ASSET"
+    }
+  },
+  "protocol_registry_identity": {
+    "service_id_preimage": "420/service/resource-protocol/v1",
+    "service_version": 1,
+    "service_active": true,
+    "component_type": "SERVICE",
+    "implementation": "ResourceRouter420",
+    "metadata_hash_preimage": "420/RESOURCE/RELEASE/METADATA/V1",
+    "manifest_hash_preimage": "420/RESOURCE/AUDIT-8/DEPLOYMENT-PACKAGE/V1",
+    "interface_hash_preimage": "420/RESOURCE/RESOURCE_ROUTER/INTERFACE/V1",
+    "dependency_root_policy": "keccak256(abi.encode(ordered deployed Resource/Storage addresses and runtime code hashes plus verified external CapabilityRegistry and GovernanceTimelock identities))",
+    "component_registration": {
+      "status": "NOT_PUBLISHED_NO_CANONICAL_COMPONENT_ID_APPROVED",
+      "rule": "Do not invent a 420/APP Resource router component identifier; service publication is canonical until an approved component ID is added by Registry/Genesis authority."
+    }
+  },
+  "deployment_order": [
+    {"order":1,"contract":"ResourceAuthorization420","source":"contracts/src/resource/ResourceAuthorization420.sol","constructor":["CapabilityRegistry420"]},
+    {"order":2,"contract":"ResourcePolicyRegistry420","source":"contracts/src/resource/ResourcePolicyRegistry420.sol","constructor":["GovernanceTimelock"]},
+    {"order":3,"contract":"ResourceProviderRegistry420","source":"contracts/src/resource/ResourceProviderRegistry420.sol","constructor":["ResourceAuthorization420"]},
+    {"order":4,"contract":"ResourceNodeRegistry420","source":"contracts/src/resource/ResourceNodeRegistry420.sol","constructor":["ResourceAuthorization420","ResourceProviderRegistry420"]},
+    {"order":5,"contract":"ResourceOfferRegistry420","source":"contracts/src/resource/ResourceOfferRegistry420.sol","constructor":["ResourceNodeRegistry420","ResourceProviderRegistry420","ResourcePolicyRegistry420","ResourceAuthorization420"]},
+    {"order":6,"contract":"ResourceSessionRegistry420","source":"contracts/src/resource/ResourceSessionRegistry420.sol","constructor":["ResourceOfferRegistry420","ResourceAuthorization420"]},
+    {"order":7,"contract":"ResourceReceiptRegistry420","source":"contracts/src/resource/ResourceReceiptRegistry420.sol","constructor":["ResourceSessionRegistry420","ResourceOfferRegistry420","ResourceNodeRegistry420"]},
+    {"order":8,"contract":"ResourceRouter420","source":"contracts/src/resource/ResourceRouter420.sol","constructor":["ResourcePolicyRegistry420","ResourceNodeRegistry420","ResourceOfferRegistry420"]},
+    {"order":9,"contract":"StorageProofSchemeRegistry420","source":"contracts/src/resource/StorageProofSchemeRegistry420.sol","constructor":["ResourceAuthorization420"]},
+    {"order":10,"contract":"StorageCapacityRegistry420","source":"contracts/src/resource/StorageCapacityRegistry420.sol","constructor":["ResourceAuthorization420","ResourceNodeRegistry420","ResourceProviderRegistry420"]},
+    {"order":11,"contract":"StorageCommitmentRegistry420","source":"contracts/src/resource/StorageCommitmentRegistry420.sol","constructor":["ResourceAuthorization420","ResourceProviderRegistry420","ResourceNodeRegistry420","StorageProofSchemeRegistry420"]},
+    {"order":12,"contract":"StorageProofRegistry420","source":"contracts/src/resource/StorageProofRegistry420.sol","constructor":["StorageCommitmentRegistry420","StorageProofSchemeRegistry420","ResourceNodeRegistry420"]},
+    {"order":13,"contract":"StorageAgreementRegistry420","source":"contracts/src/resource/StorageAgreementRegistry420.sol","constructor":["ResourceAuthorization420","ResourceOfferRegistry420","ResourceNodeRegistry420","ResourceProviderRegistry420","StorageProofSchemeRegistry420","StorageCommitmentRegistry420","StorageCapacityRegistry420"]},
+    {"order":14,"contract":"StorageObjectManifestRegistry420","source":"contracts/src/resource/StorageObjectManifestRegistry420.sol","constructor":["StorageAgreementRegistry420","StorageCommitmentRegistry420"]},
+    {"order":15,"contract":"StorageSettlementRegistry420","source":"contracts/src/resource/StorageSettlementRegistry420.sol","constructor":["StorageAgreementRegistry420","StorageProofRegistry420"]},
+    {
+      "order":16,
+      "contract":"ProtocolRegistry",
+      "action":"publishRegisteredService",
+      "service_id_preimage":"420/service/resource-protocol/v1",
+      "implementation":"ResourceRouter420",
+      "version":1,
+      "active":true,
+      "component_type":"SERVICE",
+      "metadata_hash_preimage":"420/RESOURCE/RELEASE/METADATA/V1",
+      "manifest_hash_preimage":"420/RESOURCE/AUDIT-8/DEPLOYMENT-PACKAGE/V1",
+      "dependency_root_policy":"canonical dependency_root_policy",
+      "interface_hash_preimage":"420/RESOURCE/RESOURCE_ROUTER/INTERFACE/V1"
+    }
+  ],
+  "artifact_identity": {
+    "compiler": "Solidity 0.8.24",
+    "build_profile": "ci",
+    "artifact_paths": [
+      "contracts/out/ResourceAuthorization420.sol/ResourceAuthorization420.json",
+      "contracts/out/ResourcePolicyRegistry420.sol/ResourcePolicyRegistry420.json",
+      "contracts/out/ResourceProviderRegistry420.sol/ResourceProviderRegistry420.json",
+      "contracts/out/ResourceNodeRegistry420.sol/ResourceNodeRegistry420.json",
+      "contracts/out/ResourceOfferRegistry420.sol/ResourceOfferRegistry420.json",
+      "contracts/out/ResourceSessionRegistry420.sol/ResourceSessionRegistry420.json",
+      "contracts/out/ResourceReceiptRegistry420.sol/ResourceReceiptRegistry420.json",
+      "contracts/out/ResourceRouter420.sol/ResourceRouter420.json",
+      "contracts/out/StorageProofSchemeRegistry420.sol/StorageProofSchemeRegistry420.json",
+      "contracts/out/StorageCapacityRegistry420.sol/StorageCapacityRegistry420.json",
+      "contracts/out/StorageCommitmentRegistry420.sol/StorageCommitmentRegistry420.json",
+      "contracts/out/StorageProofRegistry420.sol/StorageProofRegistry420.json",
+      "contracts/out/StorageAgreementRegistry420.sol/StorageAgreementRegistry420.json",
+      "contracts/out/StorageObjectManifestRegistry420.sol/StorageObjectManifestRegistry420.json",
+      "contracts/out/StorageSettlementRegistry420.sol/StorageSettlementRegistry420.json"
+    ],
+    "runtime_codehash_commitment": "QUALIFICATION_LOG_LOCAL_EXTCODEHASH_MUST_MATCH_EXACT_QUALIFIED_ARTIFACT_RUNTIME_AND_LIVE_ETH_GETCODE_HASH",
+    "artifact_hash_evidence": "EXACT_HEAD_QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+  },
+  "post_deployment_verification": [
+    "eth_getCode returns non-empty code at every deployed Resource/Storage address",
+    "runtime code hash equals the exact qualified artifact/runtime commitment",
+    "all immutable/public constructor dependency getters equal the deployment manifest",
+    "ResourceRouter420 policy/nodes/offers getters bind the exact deployed registries",
+    "ProtocolRegistry Resource Protocol service resolves to the exact verified ResourceRouter420 and code hash",
+    "ProtocolRegistry registration profile matches the exact manifest/interface/dependency commitments",
+    "CapabilityRegistry grant/revocation behavior is verified before delegated production use",
+    "Storage settlements bind only verified registered 420Vault addresses and intended assets",
+    "minimal provider/node/offer/session/receipt and Store proof/settlement smoke paths pass before publication is treated as operational"
+  ],
+  "rollback_recovery": {
+    "fixed_predeploy_mutation": "FORBIDDEN",
+    "failed_deployment": "PRESERVE_EVIDENCE_DEPLOY_NEW_QUALIFIED_GRAPH",
+    "registry_recovery": "AUTHORIZED_NEW_SERVICE_VERSION_PUBLICATION_ONLY",
+    "historical_state": "DO_NOT_REWRITE_PRIOR_SESSIONS_RECEIPTS_COMMITMENTS_PROOFS_AGREEMENTS_MANIFESTS_OR_SETTLEMENTS"
+  },
+  "local_evm_qualification": {
+    "required": true,
+    "test": "contracts/test/ResourceDeploymentBinding420.t.sol",
+    "verifier": "scripts/verify-resource-audit-8-deployment.py",
+    "proves": [
+      "complete constructor graph binds exact deployed Resource/Storage dependencies",
+      "Resource Protocol canonical service publication resolves to exact ResourceRouter420",
+      "ProtocolRegistry derives the exact router EXTCODEHASH and nonzero release commitments",
+      "dependency root binds the complete deployed graph and verified external authority identities",
+      "wrong router visibility is detectable",
+      "resource-router remains registry-resolved with no invented frozen address or component identifier"
+    ]
+  },
+  "repository_evidence": {
+    "chain_context": "FOUNDRY_LOCAL_EVM_ONLY",
+    "chain_id": "LOCAL_TEST_CHAIN",
+    "genesis_identity": "NOT_LIVE_GENESIS_EVIDENCE",
+    "deployed_addresses": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "runtime_code_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
+    "artifact_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS"
+  },
+  "live_testnet_evidence": {
+    "required_in_step": "RESOURCE-AUDIT-9",
+    "chain_id": null,
+    "genesis_hash": null,
+    "evidence_block": null,
+    "evidence_block_hash": null,
+    "deployed_addresses": {},
+    "deployment_transactions": [],
+    "registry_transactions": [],
+    "runtime_code_hashes": {},
+    "constructor_binding_receipts": [],
+    "capability_grant_revocation_receipts": [],
+    "vault_binding_receipts": [],
+    "smoke_transactions": []
+  }
+}

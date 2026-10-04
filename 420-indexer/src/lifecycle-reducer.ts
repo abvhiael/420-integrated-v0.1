@@ -30,7 +30,7 @@ export interface LifecycleSnapshot420 {
 
 const KEY_FIELDS = [
   'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
-  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId',
+  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','subjectId','rightId','oldRightId','licenseId','assetId',
   'programId','applicationId','awardId','milestoneId'
 ] as const;
 
@@ -144,11 +144,14 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'TransferFailed', state: 'FAILED', terminal: true }
   ]},
   { protocol: '420Rights', rules: [
-    { eventName: 'RightRegistered', state: 'ACTIVE' },
-    { eventName: 'LicenseIssued', state: 'ACTIVE' },
-    { eventName: 'RightRevoked', state: 'REVOKED', terminal: true },
+    { eventName: 'SubjectRegistered', state: 'ACTIVE' },
+    { eventName: 'SubjectMetadataUpdated', state: 'ACTIVE' },
+    { eventName: 'ClaimDeclared', state: 'ACTIVE' },
+    { eventName: 'RightHolderTransferred', state: 'ACTIVE' },
+    { eventName: 'ClaimSuperseded', state: 'REVOKED', terminal: true },
+    { eventName: 'LicenseGranted', state: 'ACTIVE' },
     { eventName: 'LicenseRevoked', state: 'REVOKED', terminal: true },
-    { eventName: 'LicenseExpired', state: 'EXPIRED', terminal: true }
+    { eventName: 'LicenseRenounced', state: 'REVOKED', terminal: true }
   ]},
   { protocol: '420Randomness', rules: [
     { eventName: 'RandomnessRequested', state: 'PENDING' },

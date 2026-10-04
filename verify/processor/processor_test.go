@@ -125,7 +125,6 @@ func TestProcessorFailsClosedOnCanonicalEvidenceFailure(t *testing.T) {
 	}
 }
 
-
 func TestProcessorPersistsCanonicalEIP1967Relationship(t *testing.T) {
 	deployment := evidence.DeploymentEvidence{
 		ChainID:         420,

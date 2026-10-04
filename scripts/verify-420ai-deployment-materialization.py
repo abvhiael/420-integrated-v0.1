@@ -27,6 +27,8 @@ frozen={"AIProviderRegistry":"0x000000000000000000000000000000000000042f",
 "AIJobEscrow":"0x0000000000000000000000000000000000000432",
 "AIReputationRegistry":"0x0000000000000000000000000000000000000433"}
 actual={x["name"]:x["address"] for x in ns["fixedAssignments"]}
+ai_router=next((x for x in ns.get("registryResolved",[]) if x.get("id")=="ai-router"),None)
+if not ai_router or ai_router.get("componentIdPreimage")!="420/component/ai/router/v1": errors.append("canonical ai-router component ID preimage missing")
 for n,a in frozen.items():
     if actual.get(n)!=a: errors.append(f"frozen address drift {n}")
 

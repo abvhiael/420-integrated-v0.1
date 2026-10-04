@@ -22,8 +22,8 @@ Ordinary VERIFY-AUDIT steps use app-specific Level 1 qualification. Level 2 is r
 ## Current status
 
 - VERIFY-AUDIT-1 through VERIFY-AUDIT-6: remediation implemented; VERIFY-AUDIT-6 app-specific qualification passed on implementation SHA `868095783962370149e685f6145c0163b84ba5e8`, workflow run `37175301638`, job `111356576146`.
-- VERIFY-AUDIT-7: in progress until its exact implementation SHA passes the dedicated Level 1 workflow and durable evidence is recorded.
-- VERIFY-AUDIT-8: not started.
+- VERIFY-AUDIT-7: **COMPLETE** — exact implementation SHA `a5b8edaf68fd864af0b7d17b99631c22c7fd8ab8` passed 420Verify Audit Qualification #65, run `37175783882`, job `111357979714`. Durable record: `docs/audit/420VERIFY-AUDIT-7-QUALIFICATION.md`.
+- VERIFY-AUDIT-8: next canonical step; not started.
 - Public testnet deployment: pending; no backend/frontend URL is claimed.
 - Level 3 reconciliation and repository-wide closeout: intentionally deferred to VERIFY-AUDIT-8.
 

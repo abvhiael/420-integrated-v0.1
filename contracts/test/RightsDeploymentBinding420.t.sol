@@ -18,6 +18,10 @@ contract RightsDeploymentBinding420Test {
     bytes32 internal constant MANIFEST_HASH = keccak256("420/RIGHTS/AUDIT-4/RELEASE-MATERIALIZATION/V1");
     bytes32 internal constant INTERFACE_HASH = keccak256("420/RIGHTS/RIGHTS_ROUTER/INTERFACE/V1");
 
+    event DeploymentAddress(string name, address implementation);
+    event RuntimeCodeHash(string name, bytes32 codeHash);
+    event ReleaseCommitment(string name, bytes32 value);
+
     struct Env {
         CapabilityRegistry420 caps;
         ProtocolRegistry registry;
@@ -75,6 +79,22 @@ contract RightsDeploymentBinding420Test {
             e.dependencyRoot,
             INTERFACE_HASH
         );
+
+        emit DeploymentAddress("RightsAuthorization420", address(e.authorization));
+        emit DeploymentAddress("RightsPolicyRegistry420", address(e.policy));
+        emit DeploymentAddress("RightsAssetRegistry420", address(e.assets));
+        emit DeploymentAddress("RightsClaimRegistry420", address(e.claims));
+        emit DeploymentAddress("RightsLicenseRegistry420", address(e.licenses));
+        emit DeploymentAddress("RightsRouter420", address(e.router));
+        emit RuntimeCodeHash("RightsAuthorization420", address(e.authorization).codehash);
+        emit RuntimeCodeHash("RightsPolicyRegistry420", address(e.policy).codehash);
+        emit RuntimeCodeHash("RightsAssetRegistry420", address(e.assets).codehash);
+        emit RuntimeCodeHash("RightsClaimRegistry420", address(e.claims).codehash);
+        emit RuntimeCodeHash("RightsLicenseRegistry420", address(e.licenses).codehash);
+        emit RuntimeCodeHash("RightsRouter420", address(e.router).codehash);
+        emit ReleaseCommitment("dependencyRoot", e.dependencyRoot);
+        emit ReleaseCommitment("manifestHash", MANIFEST_HASH);
+        emit ReleaseCommitment("interfaceHash", INTERFACE_HASH);
     }
 
     function _configureAllClasses(RightsPolicyRegistry420 policy) internal {

@@ -123,6 +123,11 @@ nav:
                   - Events & Upgrades: apps/verify/developer/events.md
                   - Errors: apps/verify/developer/errors.md
                   - Examples: apps/verify/developer/examples.md
+          - 420 Oracle:
+              - Overview: apps/oracle/index.md
+              - Testnet Qualification: apps/oracle/testnet-qualification.md
+          - 420 Randomness:
+              - Overview: apps/randomness/README.md
           - 420 Notifications:
               - Overview: apps/notifications/index.md
               - Getting Started: apps/notifications/getting-started.md

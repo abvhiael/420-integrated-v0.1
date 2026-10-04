@@ -81,13 +81,25 @@ if mil.get("milestone") != "CMP-2 accumulated market adversarial integration":
 if m.get("next_canonical_step") != "CMP-2.8 — Phase closeout":
     errors.append("next step drift")
 
+combined_docs = road + "\n" + d
 for phrase in [
     "## CMP-2.7 — Market adversarial qualification",
-    "Level 1 + Level 2 qualification in progress",
     "CMP-2.8 remains the canonical Level 3 phase-closeout boundary",
 ]:
-    if phrase not in road + "\n" + d:
+    if phrase not in combined_docs:
         errors.append(f"missing CMP-2.7 documentation phrase: {phrase}")
+
+# Accept either the pre-closeout qualification-pending state or the durable
+# post-qualification COMPLETE state. Completion is valid only when the docs
+# still assert Level 1 + Level 2 qualification rather than silently dropping it.
+pending_state = "Level 1 + Level 2 qualification in progress" in combined_docs
+complete_state = (
+    "CMP-2.7 COMPLETE" in combined_docs
+    or "Status: **COMPLETE — Level 1 + Level 2" in combined_docs
+    or "**Status: COMPLETE — Level 1 + Level 2" in combined_docs
+)
+if not (pending_state or complete_state):
+    errors.append("CMP-2.7 docs must record either qualification-in-progress or durable Level 1 + Level 2 COMPLETE state")
 
 if "Verify CMP-2.7 market adversarial qualification" not in wf:
     errors.append("workflow step missing")

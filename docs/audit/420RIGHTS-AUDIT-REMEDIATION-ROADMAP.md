@@ -1,6 +1,6 @@
 # 420Rights audit remediation roadmap
 
-Status authority: repository evidence on `audit/420rights-complete-20261003`. RIGHTS-AUDIT-1 through RIGHTS-AUDIT-3 are COMPLETE on qualified implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). This roadmap does not treat historical candidate addresses or planned integrations as deployed authority.
+Status authority: repository evidence on `audit/420rights-complete-20261003`. RIGHTS-AUDIT-1 through RIGHTS-AUDIT-3 are COMPLETE on qualified implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). RIGHTS-AUDIT-4 is COMPLETE on qualified implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`, workflow run `37178521825` (qualify job `111366155922`, security job `111366155820`). This roadmap does not treat historical candidate addresses, repository-only commitments, or planned integrations as deployed authority.
 
 ## RIGHTS-AUDIT-1 — Canonical definition and source reconciliation — COMPLETE
 - Reconcile `420rights-genesis.json`, Rights/Verify architecture, Genesis dApp map, service ID, address namespace, Wallet catalogue, Search and Indexer boundaries.
@@ -21,7 +21,7 @@ Status authority: repository evidence on `audit/420rights-complete-20261003`. RI
 - Add fail-closed binding of descriptors to Registry-resolved deployment addresses.
 - Add ABI/indexing drift and lifecycle regression tests.
 
-## RIGHTS-AUDIT-4 — Deterministic release materialization and Registry publication — OUTSTANDING
+## RIGHTS-AUDIT-4 — Deterministic release materialization and Registry publication — COMPLETE
 - Freeze the exact deploy order and constructor graph.
 - Resolve the actual CapabilityRegistry420 dependency for the target release.
 - Define the governed Genesis metadata commitments for all eight right classes; do not invent hashes.
@@ -30,7 +30,7 @@ Status authority: repository evidence on `audit/420rights-complete-20261003`. RI
 - Bind Indexer descriptors to the resulting deployed registry addresses and code identities.
 - Record smoke-test and rollback/recovery procedure.
 
-## RIGHTS-AUDIT-5 — Production-equivalent public testnet qualification — BLOCKED ON LIVE TESTNET / AUDIT-4
+## RIGHTS-AUDIT-5 — Production-equivalent public testnet qualification — BLOCKED ON LIVE TESTNET
 - Deploy the exact qualified release to the production-equivalent public testnet.
 - Verify chain identity, runtime code hashes, constructor bindings, GovernanceTimelock authority, CapabilityRegistry behavior and ProtocolRegistry publication.
 - Exercise subject registration, claims, competing claims, supersession, succession, license grant/revoke/renounce and temporal expiry.
@@ -59,4 +59,16 @@ Implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310` passed the dedicat
 - hardening-profile Rights suite: PASS;
 - targeted Slither high-severity gate: PASS — 0 high-severity findings (two low-impact timestamp findings retained as expected time-window semantics).
 
-The closeout bookkeeping commits after that SHA are documentation-only and do not change the qualified implementation. RIGHTS-AUDIT-4 remains the next executable remediation step.
+The closeout bookkeeping commits after that SHA are documentation-only and do not change the qualified implementation.
+
+RIGHTS-AUDIT-4 was subsequently implemented and exact-head qualified on implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`, dedicated run `37178521825`:
+- deterministic release materialization verifier: PASS;
+- deployment/ProtocolRegistry binding: 3 passed, 0 failed, 0 skipped;
+- complete Rights Foundry suite: 15 passed, 0 failed, 0 skipped;
+- Rights Indexer descriptor/lifecycle qualification: PASS, 20 tests;
+- hardening-profile Rights suite: 15 passed, 0 failed, 0 skipped;
+- targeted Slither high-severity gate: PASS, 0 high-severity findings.
+
+Durable evidence: `docs/audit/420RIGHTS-AUDIT-4-QUALIFICATION.md`.
+
+**RIGHTS-AUDIT-5 — Production-equivalent public testnet qualification** is now the next canonical roadmap step.

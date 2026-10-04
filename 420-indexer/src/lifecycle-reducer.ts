@@ -30,14 +30,28 @@ export interface LifecycleSnapshot420 {
 
 const KEY_FIELDS = [
   'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
-  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','subjectId','rightId','licenseId','assetId',
+  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId',
   'programId','applicationId','awardId','milestoneId'
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
-  if (event.protocol === '420Rights' && event.eventName === 'ClaimSuperseded') {
-    const oldRightId = event.fields.oldRightId;
-    if (oldRightId !== undefined && oldRightId !== null) return `rightId:${String(oldRightId).toLowerCase()}`;
+  if (event.protocol === '420Rights') {
+    if (event.eventName === 'ClaimSuperseded') {
+      const oldRightId = event.fields.oldRightId;
+      if (oldRightId !== undefined && oldRightId !== null) return `rightId:${String(oldRightId).toLowerCase()}`;
+    }
+    if (event.eventName === 'SubjectRegistered' || event.eventName === 'SubjectMetadataUpdated') {
+      const subjectId = event.fields.subjectId;
+      if (subjectId !== undefined && subjectId !== null) return `subjectId:${String(subjectId).toLowerCase()}`;
+    }
+    if (event.eventName === 'ClaimDeclared' || event.eventName === 'RightHolderTransferred') {
+      const rightId = event.fields.rightId;
+      if (rightId !== undefined && rightId !== null) return `rightId:${String(rightId).toLowerCase()}`;
+    }
+    if (event.eventName === 'LicenseGranted' || event.eventName === 'LicenseRevoked' || event.eventName === 'LicenseRenounced') {
+      const licenseId = event.fields.licenseId;
+      if (licenseId !== undefined && licenseId !== null) return `licenseId:${String(licenseId).toLowerCase()}`;
+    }
   }
 
   // Identity events may contain secondary identifiers (for example

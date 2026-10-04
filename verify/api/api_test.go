@@ -60,14 +60,14 @@ func TestHistoryAndEvidenceLookup(t *testing.T){
 
 func TestSubmissionFailsClosedWhenProcessorUnavailable(t *testing.T){
 	s,_,submitted:=fixture(t); service,_:=New(s,nil)
-	body,_:=json.Marshal(SubmissionRequest{ChainID:420,Address:"0x1111111111111111111111111111111111111111",Submission:submitted})
+	body,_:=json.Marshal(SubmissionRequest{PublishSource:true,ChainID:420,Address:"0x1111111111111111111111111111111111111111",Submission:submitted})
 	w:=httptest.NewRecorder(); service.Handler().ServeHTTP(w,httptest.NewRequest(http.MethodPost,"/v1/verify/submissions",bytes.NewReader(body)))
 	if w.Code!=http.StatusServiceUnavailable {t.Fatalf("status=%d body=%s",w.Code,w.Body.String())}
 }
 
 func TestSubmissionUsesProcessorWithoutGrantingAuthority(t *testing.T){
 	s,record,submitted:=fixture(t); service,_:=New(s,processorStub{record:record})
-	body,_:=json.Marshal(SubmissionRequest{ChainID:420,Address:record.Deployment.Address,Submission:submitted})
+	body,_:=json.Marshal(SubmissionRequest{PublishSource:true,ChainID:420,Address:record.Deployment.Address,Submission:submitted})
 	w:=httptest.NewRecorder(); service.Handler().ServeHTTP(w,httptest.NewRequest(http.MethodPost,"/v1/verify/submissions",bytes.NewReader(body)))
 	if w.Code!=http.StatusCreated {t.Fatalf("status=%d body=%s",w.Code,w.Body.String())}
 	var out LookupResponse; if err:=json.Unmarshal(w.Body.Bytes(),&out); err!=nil {t.Fatal(err)}

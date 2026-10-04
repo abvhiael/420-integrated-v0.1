@@ -31,7 +31,7 @@ func TestSubmissionDerivesOmittedBundleCommitmentBeforeProcessing(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := json.Marshal(SubmissionRequest{ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
+	body, err := json.Marshal(SubmissionRequest{PublishSource:true,ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,7 +52,7 @@ func TestSubmissionRejectsIncorrectSuppliedBundleCommitment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := json.Marshal(SubmissionRequest{ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
+	body, err := json.Marshal(SubmissionRequest{PublishSource:true,ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
 	if err != nil {
 		t.Fatal(err)
 	}

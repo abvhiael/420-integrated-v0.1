@@ -2,6 +2,7 @@
 
 const $ = (id) => document.getElementById(id);
 const warning = "verification only means published source/build inputs correspond to deployed code; it does not mean audited, safe, official, immutable, authorized, or non-malicious";
+const resultClasses = new Set(["FULL_MATCH", "PARTIAL_MATCH", "MISMATCH", "UNVERIFIABLE"]);
 
 document.querySelectorAll(".tab").forEach((button) => {
   button.addEventListener("click", () => {
@@ -46,6 +47,7 @@ function renderRecord(target, payload) {
   const submitted = record.submission || {};
   const build = record.build || {};
   const classification = record.classification || {};
+  const displayClass = resultClasses.has(classification.class) ? classification.class : "UNVERIFIABLE";
   const proxy = record.proxy || {};
   const settings = submitted.build || {};
   const explorer = integration.explorerAddressPath
@@ -62,7 +64,7 @@ function renderRecord(target, payload) {
   target.innerHTML =
     '<article class="result-card">' +
       '<div class="result-head"><div><strong>verification evidence</strong><div class="muted">' + escapeHTML(record.recordHash) + '</div></div>' +
-      '<span class="badge ' + escapeHTML(classification.class) + '">' + escapeHTML(classification.class || "UNVERIFIABLE") + '</span></div>' +
+      '<span class="badge ' + escapeHTML(displayClass) + '">' + escapeHTML(displayClass) + '</span></div>' +
       '<dl class="kv">' +
         '<dt>chain ID</dt><dd>' + escapeHTML(deployment.chainId) + '</dd>' +
         '<dt>address</dt><dd>' + escapeHTML(deployment.address) + '</dd>' +

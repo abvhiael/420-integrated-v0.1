@@ -37,7 +37,9 @@ contract ArbitrationRulingRegistry420 is I420System {
     );
     event RulingFinalized(bytes32 indexed caseId, uint8 indexed round, bytes32 rulingHash, bytes32 remedyCommitment);
 
-    constructor(address caseRegistry_) {
+    constructor(
+        address caseRegistry_
+    ) {
         if (caseRegistry_ == address(0)) revert ZeroAddress();
         cases = ArbitrationCaseRegistry420(caseRegistry_);
     }
@@ -63,14 +65,17 @@ contract ArbitrationRulingRegistry420 is I420System {
         if (outcomeCode == 0 || rulingHash == bytes32(0) || remedyCommitment == bytes32(0)) revert InvalidRuling();
         if (_rulings[caseId][round].exists) revert RulingExists();
 
-        _rulings[caseId][round] =
-            Ruling(outcomeCode, rulingHash, remedyCommitment, panelCommitment, msg.sender, uint64(block.timestamp), true);
+        _rulings[caseId][round] = Ruling(
+            outcomeCode, rulingHash, remedyCommitment, panelCommitment, msg.sender, uint64(block.timestamp), true
+        );
         cases.markRuled(caseId);
         emit RulingSubmitted(caseId, round, msg.sender, outcomeCode, rulingHash, remedyCommitment, panelCommitment);
     }
 
-    function finalizeRuling(bytes32 caseId) external {
-        (, , uint8 round, ArbitrationCaseRegistry420.State state, uint64 appealDeadline) = cases.rulingContext(caseId);
+    function finalizeRuling(
+        bytes32 caseId
+    ) external {
+        (,, uint8 round, ArbitrationCaseRegistry420.State state, uint64 appealDeadline) = cases.rulingContext(caseId);
         if (state != ArbitrationCaseRegistry420.State.RULED) revert NotRuled();
         if (block.timestamp <= appealDeadline) revert AppealWindowOpen();
 
@@ -80,7 +85,10 @@ contract ArbitrationRulingRegistry420 is I420System {
         emit RulingFinalized(caseId, round, r.rulingHash, r.remedyCommitment);
     }
 
-    function getRuling(bytes32 caseId, uint8 round) external view returns (Ruling memory r) {
+    function getRuling(
+        bytes32 caseId,
+        uint8 round
+    ) external view returns (Ruling memory r) {
         r = _rulings[caseId][round];
         if (!r.exists) revert InvalidRuling();
     }

@@ -28,6 +28,7 @@ const (
 	ReasonMetadataRelevant           Reason = "METADATA_DIFFERENCE_RELEVANT"
 	ReasonLibraryLinksRelevant       Reason = "LIBRARY_LINKS_RELEVANT"
 	ReasonImmutablesRelevant         Reason = "IMMUTABLE_REFERENCES_RELEVANT"
+	ReasonConstructorArgsUnknown     Reason = "CONSTRUCTOR_ARGUMENTS_UNKNOWN"
 )
 
 type Diagnostic struct {
@@ -105,9 +106,23 @@ func Classify(chain evidence.DeploymentEvidence, build compiler.BuildEvidence, s
 		result.Diagnostics = append(result.Diagnostics, Diagnostic{Reason: ReasonInvalidBuildEvidence, Message: "compiler output did not contain valid creation bytecode required for comparison"})
 		return result
 	}
+	if submissionModel.Build.ConstructorArgsKnown {
+		constructorArgs, argsErr := normalizeBytecode(submissionModel.Build.ConstructorArguments)
+		if argsErr != nil {
+			result.Class = architecture.ResultUnverifiable
+			result.Diagnostics = append(result.Diagnostics, Diagnostic{Reason: ReasonInvalidBuildEvidence, Message: "recorded constructor arguments are invalid"})
+			return result
+		}
+		compiledCreation += strings.TrimPrefix(constructorArgs, "0x")
+	} else if canonicalCreation != compiledCreation {
+		result.Class = architecture.ResultPartialMatch
+		result.Diagnostics = append(result.Diagnostics, Diagnostic{Reason: ReasonConstructorArgsUnknown, Message: "runtime matches exactly, but recovered creation input cannot be compared conclusively because constructor arguments are unknown"})
+		appendDifferenceContext(&result)
+		return result
+	}
 	if canonicalCreation != compiledCreation {
 		result.Class = architecture.ResultMismatch
-		result.Diagnostics = append(result.Diagnostics, Diagnostic{Reason: ReasonCreationMismatch, Message: "runtime matches, but compiled creation bytecode does not exactly equal recovered canonical creation bytecode"})
+		result.Diagnostics = append(result.Diagnostics, Diagnostic{Reason: ReasonCreationMismatch, Message: "runtime matches, but compiled creation bytecode plus recorded constructor arguments does not exactly equal recovered canonical creation bytecode"})
 		appendDifferenceContext(&result)
 		return result
 	}

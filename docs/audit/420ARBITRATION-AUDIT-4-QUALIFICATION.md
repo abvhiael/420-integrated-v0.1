@@ -6,6 +6,7 @@
 - Completion state: **COMPLETE**
 - Qualification level: **Level 2 app-integration milestone** (includes all required Level 1 step-specific checks)
 - Exact qualified implementation SHA: `554e16a3a3656cb61ab1819b60c10eb7c8fa8f93`
+- Initial durable evidence commit SHA: `c62861fbc8fc04d80650ce9ec9ede98b689c49a8`
 - Qualification workflow: `420Arbitration audit qualification`
 - Workflow run: **37237412184** (#22)
 - Qualify job: **111539203484 — PASS**
@@ -90,7 +91,7 @@ Neither Low class is promoted to a production-security declaration; final produc
 
 The Audit-4 workflow directly runs the shared Genesis address-namespace verifier because this step added the registry-resolved Arbitration router entry. That verifier and its 12 adversarial tests pass on the exact implementation SHA.
 
-The repository-wide Solidity workflow was triggered automatically by the contract changes. It is not required as duplicate Level-1/Level-2 evidence for this step under the phase qualification model; canonical Level-3 full-inventory ownership remains with Solidity Contracts at final app-phase closeout.
+The repository-wide Solidity workflow was triggered automatically by the contract changes as run `37237412266` (#4711). It ultimately concluded **cancelled after the branch advanced into evidence-only closeout commits**. It is not a required Level-1/Level-2 check for this step under the phase qualification model and is therefore not substituted for, or counted as, passing AUDIT-4 evidence. Canonical Level-3 full-inventory ownership remains with Solidity Contracts at final app-phase closeout.
 
 ## Main divergence at closeout
 

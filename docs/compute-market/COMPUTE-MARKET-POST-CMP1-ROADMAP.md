@@ -298,11 +298,13 @@ CMP-2.5 reuses the canonical CMP-1.3 WorkerSnapshot -> capacity reservation -> J
 Durable evidence: [CMP-2.5 qualification](CMP-2.5-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-2.6 — Scheduler redundancy and non-authority
-**Status: implementation / Level 1 qualification in progress.**
+**Status: COMPLETE — Level 1 exact-head qualified on `ed0e1ec81ff3888db60e53ef511b66b7cf8c32ad`.**
 
 Prove that matching remains available when any external scheduler is replaced or absent, while scheduler identity grants no acceptance, capacity, custody, settlement, or canonical-term authority.
 
 CMP-2.6 hardens the already-qualified CMP-2.3 proposal-only matcher: multiple schedulers may race or replace one another, stale proposals fail closed, and the requester can self-propose through the same permissionless proposal surface if external schedulers are unavailable. Canonical contracts continue to revalidate request/offer constraints and only the request owner accepts. Level 2 is not required for this ordinary hardening step; Level 3 remains CMP-2.8.
+
+Durable evidence: [CMP-2.6 qualification](CMP-2.6-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-2.7 — Market adversarial qualification
 

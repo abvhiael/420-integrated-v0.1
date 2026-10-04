@@ -1,6 +1,8 @@
 # CMP-2.6 — Scheduler redundancy and non-authority
 
-Status: **implementation / Level 1 qualification in progress.**
+Status: **COMPLETE — Level 1 exact-head qualified on `ed0e1ec81ff3888db60e53ef511b66b7cf8c32ad`.**
+
+Durable evidence: [CMP-2.6 qualification](CMP-2.6-QUALIFICATION-EVIDENCE.md).
 
 Canonical roadmap step: **CMP-2.6 — Scheduler redundancy and non-authority.**
 

@@ -42,7 +42,15 @@ jobs:
         run: |
           set -euo pipefail
           files="$(find verify -name '*.go' -type f -print)"
-          test -z "$(gofmt -l $files)"
+          unformatted="$(gofmt -l $files)"
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted Go files:"
+            echo "$unformatted"
+            echo
+            echo "gofmt diff:"
+            gofmt -d $files
+            exit 1
+          fi
 
       - name: Run 420Verify tests
         run: go test ./verify/...

@@ -17,7 +17,7 @@ func TestHandlerServesVerifyFrontendWithSecurityHeaders(t *testing.T) {
 	}
 	body, _ := io.ReadAll(w.Result().Body)
 	text := string(body)
-	for _, want := range []string{"420Verify", "verification is not an audit", "lookup-form", "submission-form"} {
+	for _, want := range []string{"420Verify", "verification is not an audit", "lookup-form", "submission-form", `value="FLATTENED_COMPAT"`, "publish-source"} {
 		if !strings.Contains(text, want) {
 			t.Fatalf("missing %q", want)
 		}
@@ -55,7 +55,7 @@ func TestFrontendAssetsExposeRequiredVerifyWorkflows(t *testing.T) {
 	w := httptest.NewRecorder()
 	Handler().ServeHTTP(w, r)
 	js := w.Body.String()
-	for _, want := range []string{"/v1/verify/", "/history", "/submissions", "FULL_MATCH", "PARTIAL_MATCH", "MISMATCH", "UNVERIFIABLE", "explorerAddressPath"} {
+	for _, want := range []string{"/v1/verify/", "/history", "/submissions", "FULL_MATCH", "PARTIAL_MATCH", "MISMATCH", "UNVERIFIABLE", "explorerAddressPath", "publishSource"} {
 		if !strings.Contains(js, want) {
 			t.Fatalf("frontend missing %q", want)
 		}

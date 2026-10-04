@@ -39,6 +39,20 @@ class FakeApi420 implements IndexerPublicApi420 {
   async grantsApplication(chainId: bigint, applicationId: string) { this.calls.push({ name:'grantsApplication', chainId, request:{ applicationId } }); return null; }
   async grantsAward(chainId: bigint, awardId: string) { this.calls.push({ name:'grantsAward', chainId, request:{ awardId } }); return null; }
   async grantsMilestone(chainId: bigint, milestoneId: string) { this.calls.push({ name:'grantsMilestone', chainId, request:{ milestoneId } }); return null; }
+  async aiProviders(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiProviders', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiProvider(chainId: bigint, providerId: string) { this.calls.push({ name:'aiProvider', chainId, request:{ providerId } }); return providerId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), providerId, operatorAccount:'0x1', settlementAccount:'0x2', stakeRef:'0x3', computeProviderRef:'0x4', metadataHash:null, revision:null, state:'ACTIVE', blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
+  async aiModels(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiModels', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiModel(chainId: bigint, modelId: string) { this.calls.push({ name:'aiModel', chainId, request:{ modelId } }); return modelId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), modelId, creator:'0x1', metadataHash:'0x2', licensePolicyId:'0x3', revision:null, state:'ACTIVE', blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
+  async aiModelVersions(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiModelVersions', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiModelVersion(chainId: bigint, modelVersionId: string) { this.calls.push({ name:'aiModelVersion', chainId, request:{ modelVersionId } }); return modelVersionId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), modelVersionId, modelId:'0x1', version:'1', artifactHash:'0x2', artifactManifestHash:'0x3', deprecated:false, blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
+  async aiDeployments(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiDeployments', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiDeployment(chainId: bigint, deploymentId: string) { this.calls.push({ name:'aiDeployment', chainId, request:{ deploymentId } }); return deploymentId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), deploymentId, providerId:'0x1', modelVersionId:'0x2', computeOfferRef:'0x3', endpointManifestHash:null, revision:null, state:'ACTIVE', blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
+  async aiJobs(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiJobs', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiJob(chainId: bigint, jobId: string) { this.calls.push({ name:'aiJob', chainId, request:{ jobId } }); return jobId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), jobId, requester:'0x1', modelVersionId:'0x2', workloadClass:'0x3', maxSpend:'1', deadline:'2', fundingRef:null, fundedAmount:null, computeRequestId:null, computeJobId:null, providerId:null, status:'CREATED', resultHash:null, resultManifestHash:null, disputeRef:null, disputeUpheld:null, resolutionRef:null, payer:null, escrowProviderId:null, escrowAmount:null, vaultRef:null, beneficiary:null, releasedTo:null, releasedAmount:null, refundedTo:null, refundedAmount:null, settlementRef:null, escrowState:null, blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
+  async aiPolicies(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiPolicies', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiPolicy(chainId: bigint, policyId: string) { this.calls.push({ name:'aiPolicy', chainId, request:{ policyId } }); return policyId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), policyId, revision:'1', workloadClass:'0x1', verificationProfileId:'0x2', maxSpend420:'1', maxDeadlineSeconds:'2', active:true, privacyPolicyId:null, servicePricingPolicyId:null, blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
+  async aiReputations(chainId: bigint, request: PageRequest420 = {}) { this.calls.push({ name:'aiReputations', chainId, request }); return { items:[], nextCursor:null }; }
+  async aiReputation(chainId: bigint, providerId: string) { this.calls.push({ name:'aiReputation', chainId, request:{ providerId } }); return providerId==='missing'?null:{ schemaVersion:'420-ai-read-v1' as const, chainId:chainId.toString(), providerId, completed:'1', disputed:'0', upheld:'0', failed:'0', latestEvidenceId:null, latestOutcome:null, blockNumber:'1', blockHash:'0x1', transactionHash:'0x2', transactionIndex:0, logIndex:0, authoritative:false as const }; }
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> { this.calls.push({ name: 'search', chainId, request: { term, limit } }); return [{ type: 'block', key: '10', value: '0x10' }]; }
 }
 
@@ -127,4 +141,24 @@ test('HTTP transport fails closed on invalid query parameters and unknown routes
   assert.equal((await routeIndexerHttp420(api, 'GET', '/v1/nope?chainId=420')).status, 404);
   assert.equal((await routeIndexerHttp420(api, 'POST', '/v1/blocks?chainId=420')).status, 405);
   assert.equal(api.calls.length, 0);
+});
+
+test('HTTP transport exposes AI read collections and direct resources with stable pagination inputs', async () => {
+  const api=new FakeApi420();
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/providers?chainId=420&limit=5&direction=asc')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/models/0xabc?chainId=420')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/model-versions/0xdef?chainId=420')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/deployments/0x123?chainId=420')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/jobs/0x456?chainId=420')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/jobs/missing?chainId=420')).status,404);
+  assert.deepEqual(api.calls[0],{name:'aiProviders',chainId:420n,request:{cursor:undefined,limit:5,direction:'asc'}});
+});
+
+
+test('HTTP transport exposes AI policy and reputation read surfaces without authority claims', async () => {
+  const api=new FakeApi420();
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/policies?chainId=420&limit=10')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/policies/0xabc?chainId=420')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/reputation?chainId=420')).status,200);
+  assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/reputation/0xdef?chainId=420')).status,200);
 });

@@ -307,8 +307,8 @@
       "next_step": "AI-AUDIT-7 — read API / indexer"
     },
     "AI-AUDIT-8": {
-      "status": "IMPLEMENTED_AWAITING_CI",
-      "qualification_level": "Level 1 required; Level 2 app milestone pending because AI read + wallet/client lifecycle converge here",
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 plus retained Level 2 app-integration milestone",
       "implementation_sha": "b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad",
       "current_main_at_implementation_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
       "files_changed": [
@@ -369,9 +369,19 @@
           "genesis-compatibility",
           "focused-ai-contracts"
         ],
-        "exact_head_run": null,
-        "result": "UNTRIGGERED",
-        "reason": "GitHub Actions has not emitted pull_request workflow runs for connector-generated branch updates; a temporary exact-SHA qualification PR also produced no run."
+        "exact_head_run": 37173980718,
+        "exact_head_sha": "12cd213186b107210470aa0fc3fef68d7a7798c4",
+        "result": "success",
+        "jobs": {
+          "genesis-compatibility": 111352636871,
+          "compute-integration": 111352636979,
+          "ai-read-api": 111352636986,
+          "provider-runtime": 111352636995,
+          "audit-state": 111352637016,
+          "focused-ai-contracts": 111352637017,
+          "v1-modules": 111352637043,
+          "ai-client": 111352637063
+        }
       },
       "security_adversarial_results": [
         "Wrong network is rejected before wallet authority is established.",
@@ -382,16 +392,77 @@
         "Reverted, reorged and dropped transaction states fail closed and never report success.",
         "Unmaterialized runtime keeps create/cancel/dispute feature flags disabled."
       ],
-      "milestone_status": "AI-AUDIT-8 is the next meaningful app integration milestone because user wallet execution, AI read/indexer state and canonical AI requester lifecycle converge. Level 2 retained AI qualification must run once Actions can execute on the exact implementation SHA.",
-      "blockers": [
-        "Required exact-head app-specific GitHub Actions workflow is untriggered; missing required CI cannot be treated as passing evidence."
+      "milestone_status": "COMPLETE — user wallet/client, AI read/indexer, provider runtime and retained AI contract/integration qualification all passed on the same exact reconciled head.",
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_step": "AI-AUDIT-9 — deployment and Genesis materialization",
+      "qualified_reconciled_sha": "12cd213186b107210470aa0fc3fef68d7a7798c4",
+      "durable_evidence": "docs/audit/420AI-AUDIT-8-QUALIFICATION.md"
+    },
+    "AI-AUDIT-7": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head app-specific qualification",
+      "implementation_sha": "12cd213186b107210470aa0fc3fef68d7a7798c4",
+      "required_workflow": "420AI Audit Qualification",
+      "exact_head_run": 37173980718,
+      "exact_head_result": "success",
+      "job": {
+        "name": "ai-read-api",
+        "id": 111352636986,
+        "result": "success"
+      },
+      "retained_jobs": [
+        {
+          "name": "genesis-compatibility",
+          "id": 111352636871,
+          "result": "success"
+        },
+        {
+          "name": "compute-integration",
+          "id": 111352636979,
+          "result": "success"
+        },
+        {
+          "name": "provider-runtime",
+          "id": 111352636995,
+          "result": "success"
+        },
+        {
+          "name": "audit-state",
+          "id": 111352637016,
+          "result": "success"
+        },
+        {
+          "name": "focused-ai-contracts",
+          "id": 111352637017,
+          "result": "success"
+        },
+        {
+          "name": "v1-modules",
+          "id": 111352637043,
+          "result": "success"
+        },
+        {
+          "name": "ai-client",
+          "id": 111352637063,
+          "result": "success"
+        }
       ],
-      "completion_state": "NOT_COMPLETE_CI_BLOCKED",
-      "next_step": "AI-AUDIT-9 — deployment and Genesis materialization (must not be marked started as a substitute for missing AI-AUDIT-8 CI qualification)"
+      "requirements_satisfied": [
+        "Versioned AI provider/model/deployment/policy/job read API is implemented.",
+        "Indexer projections are chain-scoped, pagination-bounded and reorg/replay safe.",
+        "Private payload plaintext is excluded from indexed/public read models.",
+        "Compiled descriptor manifest is packaged into the distribution build.",
+        "Exact-head AI read/indexer build, tests and boundary verifier passed."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-7-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-8 — user-facing AI client"
     }
   },
   "scope": {
-    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, current ComputeMarket integration, and qualified provider runtime/private-payload path",
+    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, current ComputeMarket integration, qualified provider runtime/private-payload path, qualified read API/indexer, and qualified browser client",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
@@ -404,8 +475,8 @@
     "fixed_genesis_compatibility_addresses_preserved": true,
     "mature_v1_contract_inventory_complete": true,
     "provider_runtime_present": true,
-    "read_api_present": false,
-    "production_web_client_present": false,
+    "read_api_present": true,
+    "production_web_client_present": true,
     "production_equivalent_testnet_evidence_present": false,
     "historical_recovery_pr_348_merged": false,
     "current_compute_market_integration_complete": true

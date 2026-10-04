@@ -1,6 +1,6 @@
 # AI-AUDIT-8 — user-facing AI client implementation record
 
-Status: **IMPLEMENTED — FORMAL QUALIFICATION BLOCKED**  
+Status: **COMPLETE — EXACT-HEAD QUALIFIED**  
 Application: **420AI**  
 Roadmap step: **AI-AUDIT-8 — user-facing AI client**  
 Implementation SHA: `b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad`  
@@ -59,22 +59,28 @@ Coverage includes:
 - reorg detection; and
 - dropped transaction handling.
 
-## CI blocker
+## Exact-head qualification
 
-Formal AI-AUDIT-8 qualification is **not complete**.
+The prior GitHub Actions trigger blocker was eliminated by reconciling the implementation onto a fresh current-main qualification branch and PR #505.
 
-The required `420AI Audit Qualification` workflow now contains an exact-head `ai-client` job and the accumulated `ai-read-api` job. However, GitHub has not emitted a `pull_request` Actions run for the connector-generated implementation heads.
+The reconciled executable head `12cd213186b107210470aa0fc3fef68d7a7798c4` was qualified by **420AI Audit Qualification run `37173980718`**.
 
-A temporary draft qualification PR (#501) was created from the same exact implementation SHA to attempt an `opened` event without code divergence. It also produced no Actions run.
+Required results:
 
-Under the audit qualification policy, missing/untriggered required CI is not green. Therefore this record intentionally does **not** mark AI-AUDIT-8 COMPLETE.
+- `ai-client` — PASS, job `111352637063`;
+- `ai-read-api` — PASS, job `111352636986`;
+- `provider-runtime` — PASS, job `111352636995`;
+- `compute-integration` — PASS, job `111352636979`;
+- `v1-modules` — PASS, job `111352637043`;
+- `audit-state` — PASS, job `111352637016`;
+- `genesis-compatibility` — PASS, job `111352636871`; and
+- `focused-ai-contracts` — PASS, job `111352637017`.
 
-## Completion gate
+This satisfies the AI-AUDIT-8 Level 1 gate and the retained Level 2 app-integration milestone. The original client implementation SHA remains `b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad`; the authoritative exact-head qualification SHA is the reconciled `12cd213186b107210470aa0fc3fef68d7a7798c4`.
 
-AI-AUDIT-8 may be marked COMPLETE only after an exact-head 420AI Audit Qualification run validates, at minimum:
+## Completion status
 
-- `ai-client`;
-- `ai-read-api`;
-- retained provider/runtime and AI contract/integration jobs required by the app milestone.
+**AI-AUDIT-8 COMPLETE.**
 
-No executable implementation change should be made after `b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad` unless the new head is requalified.
+Durable qualification record: `docs/audit/420AI-AUDIT-8-QUALIFICATION.md`.
+

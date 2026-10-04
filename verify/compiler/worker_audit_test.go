@@ -107,3 +107,33 @@ func TestWorkerRejectsNonSolidityStandardJSON(t *testing.T) {
 		t.Fatalf("expected non-Solidity rejection, got %v", err)
 	}
 }
+
+
+func TestWorkerRejectsSymlinkedCompilerBinary(t *testing.T) {
+	cache := t.TempDir()
+	target := filepath.Join(cache, "real-solc")
+	body := []byte("#!/bin/sh\ncat >/dev/null\nprintf '%s' '{\"contracts\":{}}'\n")
+	if err := os.WriteFile(target, body, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(cache, "solc-link")
+	if err := os.Symlink(target, link); err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(body)
+	catalog, err := NewCatalog(cache, []Release{{
+		Version: "0.8.24+commit.e11b9ed9",
+		SHA256:  hex.EncodeToString(sum[:]),
+		Binary:  filepath.Base(link),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	worker, err := NewWorker(catalog, Limits{MaxInputBytes: 1 << 20, MaxOutputBytes: 1 << 20, Timeout: time.Second})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := worker.Compile(context.Background(), compilerSubmission(t, "0.8.24+commit.e11b9ed9")); err == nil || !strings.Contains(err.Error(), "non-symlink") {
+		t.Fatalf("expected symlink rejection, got %v", err)
+	}
+}

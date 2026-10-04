@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,54 +13,134 @@ import (
 	"time"
 
 	verifyapi "github.com/420integrated/420-integrated/verify/api"
+	verifycompiler "github.com/420integrated/420-integrated/verify/compiler"
+	verifyevidence "github.com/420integrated/420-integrated/verify/evidence"
+	verifyprocessor "github.com/420integrated/420-integrated/verify/processor"
 	verifyruntime "github.com/420integrated/420-integrated/verify/runtime"
 	verifystore "github.com/420integrated/420-integrated/verify/store"
+	verifyweb "github.com/420integrated/420-integrated/verify/web"
 )
 
+type compilerCatalogFile struct {
+	Releases []verifycompiler.Release `json:"releases"`
+}
+
 func main() {
-	cfg, err := loadConfig(os.Getenv); if err != nil { fatal(err) }
+	cfg, err := loadConfig(os.Getenv)
+	if err != nil {
+		fatal(err)
+	}
+
 	probe := verifyruntime.NewRPCProbe(cfg)
-	service, err := verifyruntime.NewService(cfg, probe); if err != nil { fatal(err) }
+	service, err := verifyruntime.NewService(cfg, probe)
+	if err != nil {
+		fatal(err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	if err := service.Qualify(ctx); err != nil { cancel(); fatal(err) }
+	if err := service.Qualify(ctx); err != nil {
+		cancel()
+		fatal(err)
+	}
 	cancel()
 
-	evidenceStore, err := verifystore.Open(cfg.EvidenceStore); if err != nil { fatal(err) }
-	publicAPI, err := verifyapi.New(evidenceStore, nil); if err != nil { fatal(err) }
+	evidenceStore, err := verifystore.Open(cfg.EvidenceStore)
+	if err != nil {
+		fatal(err)
+	}
+
+	catalogBytes, err := os.ReadFile(cfg.CompilerCatalog)
+	if err != nil {
+		fatal(fmt.Errorf("read compiler catalogue: %w", err))
+	}
+	var catalogFile compilerCatalogFile
+	if err := json.Unmarshal(catalogBytes, &catalogFile); err != nil {
+		fatal(fmt.Errorf("decode compiler catalogue: %w", err))
+	}
+	catalog, err := verifycompiler.NewCatalog(cfg.CompilerCache, catalogFile.Releases)
+	if err != nil {
+		fatal(err)
+	}
+	worker, err := verifycompiler.NewWorker(catalog, verifycompiler.Limits{
+		MaxInputBytes:  8 << 20,
+		MaxOutputBytes: 16 << 20,
+		Timeout:        30 * time.Second,
+	})
+	if err != nil {
+		fatal(err)
+	}
+	chainClient, err := verifyevidence.NewRPCClient(cfg.RPCURL)
+	if err != nil {
+		fatal(err)
+	}
+	verificationProcessor, err := verifyprocessor.New(chainClient, worker, evidenceStore)
+	if err != nil {
+		fatal(err)
+	}
+
+	publicAPI, err := verifyapi.New(evidenceStore, verificationProcessor)
+	if err != nil {
+		fatal(err)
+	}
 	mux := http.NewServeMux()
 	mux.Handle("/healthz", service.Handler())
 	mux.Handle("/readyz", service.Handler())
 	mux.Handle("/v1/verify/", publicAPI.Handler())
+	mux.Handle("/", verifyweb.Handler())
 
-	server := &http.Server{Addr: cfg.ListenAddr, Handler: mux, ReadHeaderTimeout: 5*time.Second}
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM); defer stop()
+	server := &http.Server{
+		Addr:              cfg.ListenAddr,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       35 * time.Second,
+		WriteTimeout:      35 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 	errCh := make(chan error, 1)
 	go func() { errCh <- server.ListenAndServe() }()
 	select {
 	case err := <-errCh:
-		if err != nil && err != http.ErrServerClosed { fatal(err) }
+		if err != nil && err != http.ErrServerClosed {
+			fatal(err)
+		}
 	case <-ctx.Done():
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second); defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil { fatal(err) }
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			fatal(err)
+		}
 	}
 }
 
 func loadConfig(getenv func(string) string) (verifyruntime.Config, error) {
 	chainID := uint64(420)
 	if raw := strings.TrimSpace(getenv("VERIFY_CHAIN_ID")); raw != "" {
-		v, err := strconv.ParseUint(raw, 10, 64); if err != nil || v == 0 { return verifyruntime.Config{}, fmt.Errorf("VERIFY_CHAIN_ID must be a non-zero uint64") }; chainID = v
+		v, err := strconv.ParseUint(raw, 10, 64)
+		if err != nil || v == 0 {
+			return verifyruntime.Config{}, fmt.Errorf("VERIFY_CHAIN_ID must be a non-zero uint64")
+		}
+		chainID = v
 	}
 	cfg := verifyruntime.Config{
-		ChainID: chainID,
-		RPCURL: strings.TrimSpace(getenv("VERIFY_RPC_URL")),
+		ChainID:          chainID,
+		RPCURL:           strings.TrimSpace(getenv("VERIFY_RPC_URL")),
 		ReadinessAddress: strings.TrimSpace(getenv("VERIFY_READINESS_ADDRESS")),
-		CompilerCache: strings.TrimSpace(getenv("VERIFY_COMPILER_CACHE")),
-		EvidenceStore: strings.TrimSpace(getenv("VERIFY_EVIDENCE_STORE")),
-		ListenAddr: strings.TrimSpace(getenv("VERIFY_LISTEN_ADDR")),
+		CompilerCache:    strings.TrimSpace(getenv("VERIFY_COMPILER_CACHE")),
+		CompilerCatalog:  strings.TrimSpace(getenv("VERIFY_COMPILER_CATALOG")),
+		EvidenceStore:    strings.TrimSpace(getenv("VERIFY_EVIDENCE_STORE")),
+		ListenAddr:       strings.TrimSpace(getenv("VERIFY_LISTEN_ADDR")),
 	}
-	if cfg.ListenAddr == "" { cfg.ListenAddr = ":8425" }
-	if err := cfg.Validate(); err != nil { return verifyruntime.Config{}, err }
+	if cfg.ListenAddr == "" {
+		cfg.ListenAddr = ":8425"
+	}
+	if err := cfg.Validate(); err != nil {
+		return verifyruntime.Config{}, err
+	}
 	return cfg, nil
 }
 
-func fatal(err error) { fmt.Fprintln(os.Stderr, err); os.Exit(1) }
+func fatal(err error) {
+	fmt.Fprintln(os.Stderr, err)
+	os.Exit(1)
+}

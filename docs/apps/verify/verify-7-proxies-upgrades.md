@@ -19,8 +19,12 @@ The relationship is bound to chain ID, proxy address, proxy runtime code hash, p
 
 Proxy verification and implementation verification remain independent result classes. The implementation must be verified against its own deployed address and runtime code hash; the proxy result cannot be copied to the implementation, and the implementation result cannot be copied to the proxy.
 
-## Upgrades
+## Upgrades and freshness
 
-420Verify maintains an append-only relationship history per chain and proxy address. When the canonical implementation changes, VERIFY-7 creates a new generation and invalidates any inherited/current implementation verification binding. Historical verification evidence is retained, but it is no longer reported as current for the upgraded proxy until the new implementation is independently verified.
+The proxy package can maintain append-only relationship generations when canonical observations are supplied to its tracker. Historical verification evidence remains valid for the block at which it was observed, and a new implementation must be independently verified against its own deployed-code binding.
 
-This enforces the Genesis rule that a proxy upgrade invalidates inherited implementation status and that verification never becomes authority over proxy administration or upgrade policy.
+The production `verify420` entrypoint does **not** currently run that tracker continuously. Persisted proxy relationship evidence therefore must be treated as historical block-scoped evidence, not as a continuously refreshed assertion of the proxy's present implementation.
+
+A downstream UI or integration may display the recorded implementation and observation block, but it must revalidate canonical proxy state before describing that relationship as current. A proxy upgrade never transfers verification from the old implementation to the new one.
+
+This preserves the Genesis rule that verification never becomes authority over proxy administration or upgrade policy while avoiding a false continuous-monitoring claim.

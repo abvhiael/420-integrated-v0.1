@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,6 +18,7 @@ import (
 	"github.com/420integrated/420-integrated/verify/compiler"
 	"github.com/420integrated/420-integrated/verify/evidence"
 	"github.com/420integrated/420-integrated/verify/matcher"
+	"github.com/420integrated/420-integrated/verify/proxy"
 	"github.com/420integrated/420-integrated/verify/submission"
 )
 
@@ -33,12 +35,14 @@ type Record struct {
 	Submission     submission.Submission       `json:"submission"`
 	Build          compiler.BuildEvidence      `json:"build"`
 	Classification matcher.Result              `json:"classification"`
+	Proxy          *proxy.Relationship         `json:"proxy,omitempty"`
 }
 
 type Store struct {
 	root    string
 	mu      sync.RWMutex
 	history map[string][]Record
+	byHash  map[string]Record
 }
 
 func Open(root string) (*Store, error) {
@@ -48,7 +52,7 @@ func Open(root string) (*Store, error) {
 	if err := os.MkdirAll(root, 0o750); err != nil {
 		return nil, err
 	}
-	s := &Store{root: root, history: map[string][]Record{}}
+	s := &Store{root: root, history: map[string][]Record{}, byHash: map[string]Record{}}
 	if err := s.rebuild(); err != nil {
 		return nil, err
 	}
@@ -56,15 +60,38 @@ func Open(root string) (*Store, error) {
 }
 
 func (s *Store) Append(deployment evidence.DeploymentEvidence, submitted submission.Submission, build compiler.BuildEvidence, result matcher.Result) (Record, error) {
+	return s.AppendWithProxy(deployment, submitted, build, result, nil)
+}
+
+func (s *Store) AppendWithProxy(deployment evidence.DeploymentEvidence, submitted submission.Submission, build compiler.BuildEvidence, result matcher.Result, relationship *proxy.Relationship) (Record, error) {
 	if err := deployment.Validate(); err != nil {
 		return Record{}, fmt.Errorf("deployment evidence: %w", err)
 	}
 	if err := submitted.ValidateCommitment(); err != nil {
 		return Record{}, fmt.Errorf("submission evidence: %w", err)
 	}
+	if err := compiler.ValidateBuildEvidence(build, submitted); err != nil {
+		return Record{}, fmt.Errorf("build evidence: %w", err)
+	}
 	binding := deployment.BindingKey()
 	if result.BindingKey != binding {
 		return Record{}, errors.New("classification binding key does not match deployment evidence")
+	}
+	reclassified := matcher.Classify(deployment, build, submitted, build.HasImmutables)
+	if !reflect.DeepEqual(reclassified, result) {
+		return Record{}, errors.New("classification does not reproduce from deployment and build evidence")
+	}
+	if relationship != nil {
+		if err := relationship.Validate(); err != nil {
+			return Record{}, fmt.Errorf("proxy relationship: %w", err)
+		}
+		if relationship.ChainID != deployment.ChainID ||
+			!strings.EqualFold(relationship.ProxyAddress, deployment.Address) ||
+			!strings.EqualFold(relationship.ProxyRuntimeCodeHash, deployment.RuntimeCodeHash) ||
+			relationship.ObservedBlock != deployment.ObservedAt.Number ||
+			!strings.EqualFold(relationship.ObservedBlockHash, deployment.ObservedAt.Hash) {
+			return Record{}, errors.New("proxy relationship does not match canonical deployment evidence")
+		}
 	}
 
 	s.mu.Lock()
@@ -72,7 +99,7 @@ func (s *Store) Append(deployment evidence.DeploymentEvidence, submitted submiss
 	seq := uint64(len(s.history[binding]) + 1)
 	record := Record{
 		Schema: schema, Sequence: seq, StoredAt: time.Now().UTC(), BindingKey: binding,
-		Deployment: deployment, Submission: submitted, Build: build, Classification: result,
+		Deployment: deployment, Submission: submitted, Build: build, Classification: result, Proxy: relationship,
 	}
 	hash, err := recordHash(record)
 	if err != nil {
@@ -97,13 +124,38 @@ func (s *Store) Append(deployment evidence.DeploymentEvidence, submitted submiss
 	tmpName := tmp.Name()
 	cleanup := func() { _ = os.Remove(tmpName) }
 	defer cleanup()
-	if err := tmp.Chmod(0o640); err != nil { _ = tmp.Close(); return Record{}, err }
-	if _, err := tmp.Write(data); err != nil { _ = tmp.Close(); return Record{}, err }
-	if err := tmp.Sync(); err != nil { _ = tmp.Close(); return Record{}, err }
-	if err := tmp.Close(); err != nil { return Record{}, err }
-	if err := os.Rename(tmpName, final); err != nil { return Record{}, err }
+	if err := tmp.Chmod(0o640); err != nil {
+		_ = tmp.Close()
+		return Record{}, err
+	}
+	if _, err := tmp.Write(data); err != nil {
+		_ = tmp.Close()
+		return Record{}, err
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		return Record{}, err
+	}
+	if err := tmp.Close(); err != nil {
+		return Record{}, err
+	}
+	if err := os.Rename(tmpName, final); err != nil {
+		return Record{}, err
+	}
+	dirHandle, err := os.Open(dir)
+	if err != nil {
+		return Record{}, err
+	}
+	if err := dirHandle.Sync(); err != nil {
+		_ = dirHandle.Close()
+		return Record{}, err
+	}
+	if err := dirHandle.Close(); err != nil {
+		return Record{}, err
+	}
 
 	s.history[binding] = append(s.history[binding], record)
+	s.byHash[strings.ToLower(record.RecordHash)] = record
 	return cloneRecord(record), nil
 }
 
@@ -112,7 +164,9 @@ func (s *Store) History(bindingKey string) []Record {
 	defer s.mu.RUnlock()
 	items := s.history[bindingKey]
 	out := make([]Record, len(items))
-	for i := range items { out[i] = cloneRecord(items[i]) }
+	for i := range items {
+		out[i] = cloneRecord(items[i])
+	}
 	return out
 }
 
@@ -120,58 +174,136 @@ func (s *Store) Latest(bindingKey string) (Record, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	items := s.history[bindingKey]
-	if len(items) == 0 { return Record{}, false }
+	if len(items) == 0 {
+		return Record{}, false
+	}
 	return cloneRecord(items[len(items)-1]), true
+}
+
+func (s *Store) ByHash(recordHash string) (Record, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	record, ok := s.byHash[strings.ToLower(strings.TrimSpace(recordHash))]
+	if !ok {
+		return Record{}, false
+	}
+	return cloneRecord(record), true
 }
 
 func (s *Store) Bindings() []string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	out := make([]string, 0, len(s.history))
-	for key := range s.history { out = append(out, key) }
+	for key := range s.history {
+		out = append(out, key)
+	}
 	sort.Strings(out)
 	return out
 }
 
 func (s *Store) rebuild() error {
 	entries, err := os.ReadDir(s.root)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	for _, entry := range entries {
-		if !entry.IsDir() { continue }
+		if !entry.IsDir() {
+			continue
+		}
 		dir := filepath.Join(s.root, entry.Name())
 		files, err := os.ReadDir(dir)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		var records []Record
 		for _, file := range files {
-			if file.IsDir() || !strings.HasSuffix(file.Name(), ".json") { continue }
+			if file.IsDir() || !strings.HasSuffix(file.Name(), ".json") {
+				continue
+			}
 			data, err := os.ReadFile(filepath.Join(dir, file.Name()))
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 			var record Record
-			if err := json.Unmarshal(data, &record); err != nil { return fmt.Errorf("decode evidence record %s: %w", file.Name(), err) }
-			if err := validateRecord(record); err != nil { return fmt.Errorf("invalid evidence record %s: %w", file.Name(), err) }
-			if keyDir(record.BindingKey) != entry.Name() { return fmt.Errorf("evidence record %s stored under wrong binding directory", file.Name()) }
+			if err := json.Unmarshal(data, &record); err != nil {
+				return fmt.Errorf("decode evidence record %s: %w", file.Name(), err)
+			}
+			if err := validateRecord(record); err != nil {
+				return fmt.Errorf("invalid evidence record %s: %w", file.Name(), err)
+			}
+			if keyDir(record.BindingKey) != entry.Name() {
+				return fmt.Errorf("evidence record %s stored under wrong binding directory", file.Name())
+			}
 			records = append(records, record)
 		}
 		sort.Slice(records, func(i, j int) bool { return records[i].Sequence < records[j].Sequence })
 		for i, record := range records {
-			if record.Sequence != uint64(i+1) { return fmt.Errorf("non-contiguous evidence history for %s", record.BindingKey) }
-			if i > 0 && records[i-1].BindingKey != record.BindingKey { return errors.New("mixed binding keys in evidence directory") }
+			if record.Sequence != uint64(i+1) {
+				return fmt.Errorf("non-contiguous evidence history for %s", record.BindingKey)
+			}
+			if i > 0 && records[i-1].BindingKey != record.BindingKey {
+				return errors.New("mixed binding keys in evidence directory")
+			}
 		}
-		if len(records) > 0 { s.history[records[0].BindingKey] = records }
+		if len(records) > 0 {
+			s.history[records[0].BindingKey] = records
+			for _, record := range records {
+				key := strings.ToLower(record.RecordHash)
+				if _, exists := s.byHash[key]; exists {
+					return fmt.Errorf("duplicate evidence record hash %s", record.RecordHash)
+				}
+				s.byHash[key] = record
+			}
+		}
 	}
 	return nil
 }
 
 func validateRecord(record Record) error {
-	if record.Schema != schema { return errors.New("unsupported evidence schema") }
-	if record.Sequence == 0 { return errors.New("record sequence is required") }
-	if record.BindingKey == "" || record.BindingKey != record.Deployment.BindingKey() { return errors.New("record binding mismatch") }
-	if record.Classification.BindingKey != record.BindingKey { return errors.New("classification binding mismatch") }
-	if err := record.Deployment.Validate(); err != nil { return err }
-	if err := record.Submission.ValidateCommitment(); err != nil { return err }
+	if record.Schema != schema {
+		return errors.New("unsupported evidence schema")
+	}
+	if record.Sequence == 0 {
+		return errors.New("record sequence is required")
+	}
+	if record.BindingKey == "" || record.BindingKey != record.Deployment.BindingKey() {
+		return errors.New("record binding mismatch")
+	}
+	if record.Classification.BindingKey != record.BindingKey {
+		return errors.New("classification binding mismatch")
+	}
+	if err := record.Deployment.Validate(); err != nil {
+		return err
+	}
+	if err := record.Submission.ValidateCommitment(); err != nil {
+		return err
+	}
+	if err := compiler.ValidateBuildEvidence(record.Build, record.Submission); err != nil {
+		return fmt.Errorf("build evidence: %w", err)
+	}
+	reclassified := matcher.Classify(record.Deployment, record.Build, record.Submission, record.Build.HasImmutables)
+	if !reflect.DeepEqual(reclassified, record.Classification) {
+		return errors.New("stored classification does not reproduce from deployment and build evidence")
+	}
+	if record.Proxy != nil {
+		if err := record.Proxy.Validate(); err != nil {
+			return err
+		}
+		if record.Proxy.ChainID != record.Deployment.ChainID ||
+			!strings.EqualFold(record.Proxy.ProxyAddress, record.Deployment.Address) ||
+			!strings.EqualFold(record.Proxy.ProxyRuntimeCodeHash, record.Deployment.RuntimeCodeHash) ||
+			record.Proxy.ObservedBlock != record.Deployment.ObservedAt.Number ||
+			!strings.EqualFold(record.Proxy.ObservedBlockHash, record.Deployment.ObservedAt.Hash) {
+			return errors.New("record proxy relationship binding mismatch")
+		}
+	}
 	expected, err := recordHash(record)
-	if err != nil { return err }
-	if record.RecordHash != expected { return errors.New("record content hash mismatch") }
+	if err != nil {
+		return err
+	}
+	if record.RecordHash != expected {
+		return errors.New("record content hash mismatch")
+	}
 	return nil
 }
 
@@ -179,7 +311,9 @@ func recordHash(record Record) (string, error) {
 	copy := record
 	copy.RecordHash = ""
 	data, err := json.Marshal(copy)
-	if err != nil { return "", err }
+	if err != nil {
+		return "", err
+	}
 	sum := sha256.Sum256(data)
 	return "sha256:" + hex.EncodeToString(sum[:]), nil
 }

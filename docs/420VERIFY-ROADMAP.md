@@ -1,6 +1,8 @@
 # 420Verify — GEN-10.5 implementation roadmap
 
-**Status: COMPLETE**
+**Historical status: COMPLETE for the original GEN-10.5 implementation phase.**
+
+> **Current audit notice:** the repository-grounded VERIFY-AUDIT in PR #503 supersedes this document's blanket implementation-complete claim wherever current repository evidence differs. The active audit roadmap is `docs/audit/420VERIFY-AUDIT.md`; final current-state closeout is pending VERIFY-AUDIT-8.
 
 420Verify is the contract-free Genesis verification service for reproducibly proving whether submitted Solidity source/build inputs reproduce deployed contract bytecode on the 420 Integrated network.
 
@@ -80,6 +82,8 @@ Verification is evidence, not authority. A verified result does not mean audited
 - Qualified the exact final feature head with both 420Docs and 420 Integrated workflows.
 - Merged PR #303 into `main`.
 
-## Post-closeout operational work
+## Current operational/audit handoff
 
-Genesis implementation is complete. Remaining operational work is deployment-specific: assign real backend/frontend testnet URLs, deploy the configured compiler catalogue/cache and evidence store, run public endpoint smoke tests, and update `testnet/public-services/verify/readiness.json` from `PENDING_DEPLOYMENT` when those endpoints actually exist.
+The original Genesis phase is historical. The current audit has remediated implementation, test, frontend, evidence-integrity, and deployment-documentation defects on PR #503 and must complete VERIFY-AUDIT-8 before a new current-state implementation-complete claim is made.
+
+Public deployment remains separate and pending: assign real backend/frontend testnet URLs, provision the configured compiler catalogue/cache and durable evidence store, run the live activation checklist in `docs/apps/verify/deployment.md`, and update `testnet/public-services/verify/readiness.json` only when those endpoints actually exist.

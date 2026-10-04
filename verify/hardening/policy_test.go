@@ -13,25 +13,35 @@ func TestValidateRawJSONRejectsSecretFields(t *testing.T) {
 		`{"nested":{"mnemonic":"word word"}}`,
 		`{"items":[{"seed_phrase":"secret"}]}`,
 	} {
-		if err := ValidateRawJSON([]byte(raw)); err == nil { t.Fatalf("expected secret rejection for %s", raw) }
+		if err := ValidateRawJSON([]byte(raw)); err == nil {
+			t.Fatalf("expected secret rejection for %s", raw)
+		}
 	}
 }
 
 func TestValidateRawJSONRejectsTrailingValue(t *testing.T) {
-	if err := ValidateRawJSON([]byte(`{"ok":true} {"extra":true}`)); err == nil { t.Fatal("expected trailing JSON rejection") }
+	if err := ValidateRawJSON([]byte(`{"ok":true} {"extra":true}`)); err == nil {
+		t.Fatal("expected trailing JSON rejection")
+	}
 }
 
 func TestValidateSubmissionRejectsOversizedSource(t *testing.T) {
-	s := submission.Submission{Sources: []submission.SourceFile{{Path:"A.sol", Content:strings.Repeat("x", MaxSourceFileBytes+1)}}}
-	if err := ValidateSubmission(s); err == nil { t.Fatal("expected oversized source rejection") }
+	s := submission.Submission{Sources: []submission.SourceFile{{Path: "A.sol", Content: strings.Repeat("x", MaxSourceFileBytes+1)}}}
+	if err := ValidateSubmission(s); err == nil {
+		t.Fatal("expected oversized source rejection")
+	}
 }
 
 func TestValidateSubmissionRejectsTooManyFiles(t *testing.T) {
 	s := submission.Submission{Sources: make([]submission.SourceFile, MaxSourceFiles+1)}
-	if err := ValidateSubmission(s); err == nil { t.Fatal("expected source count rejection") }
+	if err := ValidateSubmission(s); err == nil {
+		t.Fatal("expected source count rejection")
+	}
 }
 
 func TestValidateSubmissionAllowsBoundedInputs(t *testing.T) {
-	s := submission.Submission{Sources: []submission.SourceFile{{Path:"A.sol", Content:"contract A {}"}}}
-	if err := ValidateSubmission(s); err != nil { t.Fatalf("unexpected rejection: %v", err) }
+	s := submission.Submission{Sources: []submission.SourceFile{{Path: "A.sol", Content: "contract A {}"}}}
+	if err := ValidateSubmission(s); err != nil {
+		t.Fatalf("unexpected rejection: %v", err)
+	}
 }

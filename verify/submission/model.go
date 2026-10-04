@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 )
@@ -43,12 +44,15 @@ type BuildSettings struct {
 }
 
 type Submission struct {
-	Kind         InputKind       `json:"kind"`
-	StandardJSON json.RawMessage `json:"standardJson,omitempty"`
-	Sources      []SourceFile    `json:"sources,omitempty"`
-	Flattened    string          `json:"flattened,omitempty"`
-	Build        BuildSettings   `json:"build"`
-	BundleHash   string          `json:"bundleHash"`
+	Kind                 InputKind       `json:"kind"`
+	TargetSource         string          `json:"targetSource,omitempty"`
+	TargetContract       string          `json:"targetContract,omitempty"`
+	StandardJSON         json.RawMessage `json:"standardJson,omitempty"`
+	Sources              []SourceFile    `json:"sources,omitempty"`
+	Flattened            string          `json:"flattened,omitempty"`
+	Build                BuildSettings   `json:"build"`
+	BundleHash           string          `json:"bundleHash"`
+	PublicationRequested bool            `json:"publicationRequested"`
 }
 
 func NewStandardJSON(raw []byte, build BuildSettings) (Submission, error) {
@@ -129,27 +133,27 @@ func (b BuildSettings) Validate() error {
 	return nil
 }
 
-func (s Submission) ValidateCommitment() error {
+func (s Submission) ComputedBundleHash() (string, error) {
 	var want string
 	switch s.Kind {
 	case InputStandardJSON:
 		canonical, err := canonicalJSON(s.StandardJSON)
 		if err != nil {
-			return err
+			return "", err
 		}
 		want = hashParts([]part{{name: "standard-json", content: canonical}})
 	case InputMultiFile, InputFlattened:
 		if len(s.Sources) == 0 {
-			return errors.New("source files are required")
+			return "", errors.New("source files are required")
 		}
 		parts := make([]part, 0, len(s.Sources))
 		seen := map[string]bool{}
 		for _, f := range s.Sources {
 			if err := validatePath(f.Path); err != nil {
-				return err
+				return "", err
 			}
 			if seen[f.Path] {
-				return errors.New("duplicate source path")
+				return "", errors.New("duplicate source path")
 			}
 			seen[f.Path] = true
 			parts = append(parts, part{name: f.Path, content: []byte(f.Content)})
@@ -157,7 +161,26 @@ func (s Submission) ValidateCommitment() error {
 		sort.Slice(parts, func(i, j int) bool { return parts[i].name < parts[j].name })
 		want = hashParts(parts)
 	default:
-		return errors.New("unsupported input kind")
+		return "", errors.New("unsupported input kind")
+	}
+	return want, nil
+}
+
+func (s Submission) ValidateCommitment() error {
+	if (strings.TrimSpace(s.TargetSource) == "") != (strings.TrimSpace(s.TargetContract) == "") {
+		return errors.New("targetSource and targetContract must be provided together")
+	}
+	if strings.TrimSpace(s.TargetSource) != "" {
+		if err := validatePath(s.TargetSource); err != nil {
+			return fmt.Errorf("target source: %w", err)
+		}
+		if strings.TrimSpace(s.TargetContract) == "" {
+			return errors.New("target contract is required")
+		}
+	}
+	want, err := s.ComputedBundleHash()
+	if err != nil {
+		return err
 	}
 	if s.BundleHash != want {
 		return errors.New("source bundle commitment mismatch")
@@ -177,8 +200,11 @@ func canonicalJSON(raw []byte) ([]byte, error) {
 	if err := dec.Decode(&value); err != nil {
 		return nil, errors.New("standard json input must be valid JSON")
 	}
-	if dec.More() {
+	var trailing any
+	if err := dec.Decode(&trailing); err == nil {
 		return nil, errors.New("standard json input must contain exactly one JSON value")
+	} else if !errors.Is(err, io.EOF) {
+		return nil, errors.New("standard json input has invalid trailing data")
 	}
 	canonical, err := json.Marshal(value)
 	if err != nil {

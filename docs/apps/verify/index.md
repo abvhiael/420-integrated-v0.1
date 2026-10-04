@@ -2,7 +2,7 @@
 title: 420 Verify
 audience: [user, developer, auditor]
 category: application
-status: complete
+status: development
 version: genesis
 doc_release: genesis
 doc_environment: genesis
@@ -14,11 +14,11 @@ publication_status: current
 
 Verification is bound to network, address and deployed runtime code hash.
 
-## Genesis status
+## Status
 
-GEN-10.5 is complete. PR #303 merged the qualified VERIFY-0 through VERIFY-10 implementation into `main` at `1f937b7ef641980cc118336763ba50ffc8f3cc5a` after exact-head 420Docs Qualification #1418 and 420 Integrated Qualification #3678 passed.
+The original GEN-10.5 / VERIFY-0 through VERIFY-10 implementation was historically merged through PR #303. The current repository-grounded VERIFY-AUDIT remediation is active in PR #503 and supersedes old blanket completion claims where current repository evidence differs.
 
-The implementation is qualified; public backend/frontend deployment remains pending until real testnet endpoints are provisioned and recorded in `testnet/public-services/verify/readiness.json`.
+VERIFY-AUDIT-6 passed the dedicated exact-head Level 1 workflow at `868095783962370149e685f6145c0163b84ba5e8`. Current audit-phase closeout is pending VERIFY-AUDIT-8. Public backend/frontend deployment also remains pending until real testnet endpoints are provisioned, live-qualified, and recorded in `testnet/public-services/verify/readiness.json`.
 
 ## Core documentation
 
@@ -26,6 +26,7 @@ The implementation is qualified; public backend/frontend deployment remains pend
 - [User guide](user-guide.md) — result classes, history, evidence, and proxy behavior.
 - [Architecture](architecture.md) — trust boundary, canonical inputs, compiler worker, evidence store, API, and integrations.
 - [Security](security.md) — adversarial limits, secret rejection, fail-closed behavior, and non-authority guarantees.
+- [Deployment and operations](deployment.md) — exact runtime configuration, compiler catalogue, persistence, readiness, monitoring, recovery, proxy-currentness limitations, and public activation checklist.
 - [Permissions](permissions.md) — what Verify can and cannot authorize.
 - [Troubleshooting](troubleshooting.md) — common mismatch, unavailable-evidence, and deployment issues.
 - [FAQ](faq.md) — verification meaning and common questions.
@@ -41,3 +42,7 @@ The implementation is qualified; public backend/frontend deployment remains pend
 - [VERIFY-10 qualification, reconciliation and closeout](verify-10-closeout.md) — final exact-head qualification, latest-main reconciliation, deployment-readiness boundaries, and GEN-10.6 handoff.
 
 For the complete Genesis implementation summary, see [`docs/420VERIFY.md`](../../420VERIFY.md) and [`docs/420VERIFY-ROADMAP.md`](../../420VERIFY-ROADMAP.md).
+
+## Audit references
+
+- [Active VERIFY-AUDIT roadmap](../../audit/420VERIFY-AUDIT.md) — current audit status and canonical remediation steps.

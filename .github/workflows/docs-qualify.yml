@@ -145,7 +145,7 @@ permissions:
 
 jobs:
   qualify:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact qualification head

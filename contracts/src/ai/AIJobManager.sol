@@ -197,6 +197,23 @@ contract AIJobManager is SystemAccess, I420System {
         emit FundingConfirmed(jobId, fundingRef, amount);
     }
 
+    /// @notice Mirror canonical CMP/Vault funding after the bound compute adapter has
+    ///         independently verified payer, obligation, funding reference and spend ceiling.
+    /// @dev This records no assets and grants no transfer authority.
+    function confirmCanonicalFunding(bytes32 jobId, bytes32 fundingRef, uint256 amount)
+        external
+        onlyComputeAdapter
+    {
+        Job storage j = _get(jobId);
+        if (j.status != Status.CREATED) revert InvalidTransition();
+        if (fundingRef == bytes32(0)) revert InvalidReference();
+        if (amount == 0 || amount > j.maxSpend) revert FundingExceedsMaximum();
+        j.fundingRef = fundingRef;
+        j.fundedAmount = amount;
+        _setStatus(jobId, j, Status.FUNDED);
+        emit FundingConfirmed(jobId, fundingRef, amount);
+    }
+
     function matchCompute(bytes32 jobId, bytes32 computeRequestId, bytes32 computeJobId, bytes32 providerId)
         external
         onlyComputeAdapter
@@ -240,8 +257,23 @@ contract AIJobManager is SystemAccess, I420System {
         _advance(jobId, Status.VERIFIED, Status.SETTLED);
     }
 
+    /// @notice Mirror an already-executed canonical CMP provider payout.
+    function confirmCanonicalSettlement(bytes32 jobId) external onlyComputeAdapter {
+        _advance(jobId, Status.VERIFIED, Status.SETTLED);
+    }
+
     function confirmRefund(bytes32 jobId) external {
         if (msg.sender != AI_JOB_ESCROW) revert NotEscrow();
+        Job storage j = _get(jobId);
+        if (
+            j.status != Status.FUNDED && j.status != Status.EXPIRED && j.status != Status.FAILED
+                && j.status != Status.DISPUTED
+        ) revert InvalidTransition();
+        _setStatus(jobId, j, Status.REFUNDED);
+    }
+
+    /// @notice Mirror an already-executed canonical CMP payer refund.
+    function confirmCanonicalRefund(bytes32 jobId) external onlyComputeAdapter {
         Job storage j = _get(jobId);
         if (
             j.status != Status.FUNDED && j.status != Status.EXPIRED && j.status != Status.FAILED

@@ -121,9 +121,10 @@ contract ComputeCapacityAwareAssignment420Test {
         );
         vm.prank(OPERATOR);
         nodes.activate(nodeId);
+        bytes32 computeClass = resources.GPU_INFERENCE();
         vm.prank(OPERATOR);
         resourceId = resources.register(
-            nodeId, resources.GPU_INFERENCE(), HARDWARE, RUNTIME, CAPABILITY, 1
+            nodeId, computeClass, HARDWARE, RUNTIME, CAPABILITY, 1
         );
         vm.prank(OPERATOR);
         resources.activate(resourceId);
@@ -218,9 +219,11 @@ contract ComputeCapacityAwareAssignment420Test {
                 nonce: requestNonce
             });
         bytes32 digest = signedRequests.authorizationDigest(a);
+        bytes memory ownerSignature = _sign(OWNER_KEY, digest);
+        bytes memory payerSignature = _sign(PAYER_KEY, digest);
         vm.prank(owner);
         bytes32 signedId = signedRequests.registerSignedRequest(
-            a, _sign(OWNER_KEY, digest), _sign(PAYER_KEY, digest)
+            a, ownerSignature, payerSignature
         );
         vm.prank(owner);
         requestId = requests.createRequest(signedId, _terms(5 ether));
@@ -264,11 +267,13 @@ contract ComputeCapacityAwareAssignment420Test {
 
     function _assign(bytes32 jobId) private returns (bytes32 assignmentRef) {
         uint64 workerRevision = workers.worker(workerId).revision;
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs = _emptyRefs();
         bytes32 digest =
-            workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, _emptyRefs());
+            workerEvidence.assignmentExecutionDigest(jobId, workerId, workerRevision, 4, refs);
+        bytes memory signature = _sign(EXEC_KEY, digest);
         vm.prank(RELAYER);
         assignmentRef = workerEvidence.acceptAssignment(
-            jobId, workerId, workerRevision, 4, _emptyRefs(), _sign(EXEC_KEY, digest)
+            jobId, workerId, workerRevision, 4, refs, signature
         );
     }
 
@@ -294,15 +299,16 @@ contract ComputeCapacityAwareAssignment420Test {
         (bytes32 secondJob,) = _acceptedJob();
 
         uint64 workerRevision = workers.worker(workerId).revision;
+        ComputeJobWorkerSnapshotEvidence420.AdmissionRefs memory refs = _emptyRefs();
         bytes32 digest =
-            workerEvidence.assignmentExecutionDigest(secondJob, workerId, workerRevision, 4, _emptyRefs());
-        vm.prank(RELAYER);
-        (bool ok,) = address(workerEvidence).call(
-            abi.encodeCall(
-                workerEvidence.acceptAssignment,
-                (secondJob, workerId, workerRevision, uint64(4), _emptyRefs(), _sign(EXEC_KEY, digest))
-            )
+            workerEvidence.assignmentExecutionDigest(secondJob, workerId, workerRevision, 4, refs);
+        bytes memory signature = _sign(EXEC_KEY, digest);
+        bytes memory callData = abi.encodeCall(
+            workerEvidence.acceptAssignment,
+            (secondJob, workerId, workerRevision, uint64(4), refs, signature)
         );
+        vm.prank(RELAYER);
+        (bool ok,) = address(workerEvidence).call(callData);
 
         require(!ok, "over-capacity assignment accepted");
         require(jobs.job(secondJob).status == ComputeJobRegistry420.Status.ACCEPTED, "job partially advanced");
@@ -329,17 +335,18 @@ contract ComputeCapacityAwareAssignment420Test {
         );
         require(!ok && assignment.marketMatchForJob(jobId) == bytes32(0), "scheduler linked assignment");
 
-        vm.prank(SCHEDULER);
-        (ok,) = address(capacity).call(
-            abi.encodeCall(
-                capacity.reserve,
-                (
-                    jobId, keccak256("assignment"), workerId, workers.worker(workerId).revision,
-                    resourceId, resources.resource(resourceId).revision, uint64(4),
-                    uint64(block.timestamp + 1 days)
-                )
+        uint64 workerRevision = workers.worker(workerId).revision;
+        uint64 resourceRevision = resources.resource(resourceId).revision;
+        bytes memory reserveCall = abi.encodeCall(
+            capacity.reserve,
+            (
+                jobId, keccak256("assignment"), workerId, workerRevision,
+                resourceId, resourceRevision, uint64(4),
+                uint64(block.timestamp + 1 days)
             )
         );
+        vm.prank(SCHEDULER);
+        (ok,) = address(capacity).call(reserveCall);
         require(!ok && capacity.liveResourceUnits(resourceId) == 0, "scheduler reserved capacity");
     }
 

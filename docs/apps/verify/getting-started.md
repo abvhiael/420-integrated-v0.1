@@ -10,7 +10,11 @@ Do not submit private keys, seed phrases, signing keys, keystore passwords, or w
 
 ## Submission
 
-Use `POST /v1/verify/submissions` with the target chain/address and committed source/build submission. The service independently reads canonical deployed bytecode from its configured RPC, reproduces the build with an allowlisted compiler, compares the results, and persists reproducible evidence.
+The embedded frontend at `/` can prepare a submission, or API clients can use `POST /v1/verify/submissions` with the target chain/address and committed source/build submission.
+
+Public verification publishes source evidence. The request must therefore include explicit `publishSource: true`; requests without that consent fail closed.
+
+The service independently reads canonical deployed bytecode from its configured RPC, reproduces the build with an allowlisted compiler, compares the results, and persists reproducible evidence.
 
 ## Lookup
 
@@ -21,3 +25,7 @@ Use `GET /v1/verify/{chainID}/{address}/{runtimeCodeHash}` for the latest record
 `FULL_MATCH`, `PARTIAL_MATCH`, `MISMATCH`, and `UNVERIFIABLE` are distinct states. A successful verification proves correspondence between published build inputs and deployed code; it is not an audit, endorsement, safety guarantee, Registry registration, or Wallet permission.
 
 Public testnet URLs remain deployment-specific and are tracked in `testnet/public-services/verify/readiness.json`.
+
+## Deployment availability
+
+No public testnet URL is currently claimed. Operators should use the [deployment and operations runbook](deployment.md); live URLs remain authoritative only when recorded in `testnet/public-services/verify/readiness.json` after the activation checklist passes.

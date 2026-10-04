@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify-audit:
@@ -46,13 +46,6 @@ jobs:
           if [ -n "$unformatted" ]; then
             echo "Unformatted files:"
             echo "$unformatted"
-            gofmt -w "${files[@]}"
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add verify
-            git commit -m "chore(verify): apply gofmt across audited Go surface"
-            git push origin HEAD:${{ github.head_ref }}
-            echo "Applied and pushed gofmt repair; this qualification run is superseded."
             exit 1
           fi
 

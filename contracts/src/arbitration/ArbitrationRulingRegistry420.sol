@@ -59,7 +59,8 @@ contract ArbitrationRulingRegistry420 is I420System {
         bytes32 remedyCommitment,
         bytes32 panelCommitment
     ) external {
-        (, address resolver, uint8 round, ArbitrationCaseRegistry420.State state,) = cases.rulingContext(caseId);
+        (address resolver, uint8 round, ArbitrationCaseRegistry420.State state) =
+            cases.rulingSubmissionContext(caseId);
         if (state != ArbitrationCaseRegistry420.State.OPEN) revert NotOpen();
         if (msg.sender != resolver) revert UnauthorizedResolver();
         if (outcomeCode == 0 || rulingHash == bytes32(0) || remedyCommitment == bytes32(0)) revert InvalidRuling();
@@ -75,7 +76,8 @@ contract ArbitrationRulingRegistry420 is I420System {
     function finalizeRuling(
         bytes32 caseId
     ) external {
-        (,, uint8 round, ArbitrationCaseRegistry420.State state, uint64 appealDeadline) = cases.rulingContext(caseId);
+        (uint8 round, ArbitrationCaseRegistry420.State state, uint64 appealDeadline) =
+            cases.finalizationContext(caseId);
         if (state != ArbitrationCaseRegistry420.State.RULED) revert NotRuled();
         if (block.timestamp <= appealDeadline) revert AppealWindowOpen();
 

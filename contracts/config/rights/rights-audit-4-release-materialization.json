@@ -1,0 +1,129 @@
+{
+  "schema": "420-rights-audit-4-release-materialization-v1",
+  "step": "RIGHTS-AUDIT-4",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "address_policy": {
+    "namespace_authority": "contracts/config/genesis-address-namespace.json",
+    "rights_router_status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "new_frozen_predeploy_required": false,
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT",
+    "production_addresses_source": "LIVE_DEPLOYMENT_PLUS_PROTOCOL_REGISTRY_IN_RIGHTS_AUDIT_5"
+  },
+  "canonical_dependencies": {
+    "governance_timelock": {
+      "address": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/genesis-address-namespace.json"
+    },
+    "protocol_registry": {
+      "address": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "publication_api": "publishRegisteredService"
+    },
+    "capability_registry": {
+      "candidate_address": "0x0000000000000000000000000000000000000447",
+      "status": "CANDIDATE_NOT_DEPLOYED_NOT_FROZEN",
+      "source": "contracts/config/genesis-address-namespace.json"
+    }
+  },
+  "right_class_metadata_commitments": {
+    "authority": "GovernanceTimelock",
+    "activation_rule": "each class requires a governance-selected nonzero metadataHash before active Genesis use",
+    "hash_policy": "keccak256(canonical governed right-class metadata document)",
+    "repository_hashes_are_live_commitments": false,
+    "classes": [
+      {"name":"COPYRIGHT","id_preimage":"420/RIGHTS/CLASS/COPYRIGHT/V1","metadata_hash":null},
+      {"name":"TRADEMARK","id_preimage":"420/RIGHTS/CLASS/TRADEMARK/V1","metadata_hash":null},
+      {"name":"PATENT","id_preimage":"420/RIGHTS/CLASS/PATENT/V1","metadata_hash":null},
+      {"name":"PERSONALITY","id_preimage":"420/RIGHTS/CLASS/PERSONALITY/V1","metadata_hash":null},
+      {"name":"GENETIC","id_preimage":"420/RIGHTS/CLASS/GENETIC/V1","metadata_hash":null},
+      {"name":"DATA","id_preimage":"420/RIGHTS/CLASS/DATA/V1","metadata_hash":null},
+      {"name":"MODEL","id_preimage":"420/RIGHTS/CLASS/MODEL/V1","metadata_hash":null},
+      {"name":"CONTRACTUAL","id_preimage":"420/RIGHTS/CLASS/CONTRACTUAL/V1","metadata_hash":null}
+    ]
+  },
+  "deployment_order": [
+    {"order":1,"contract":"RightsAuthorization420","source":"contracts/src/rights/RightsAuthorization420.sol","constructor":["CapabilityRegistry420"]},
+    {"order":2,"contract":"RightsPolicyRegistry420","source":"contracts/src/rights/RightsPolicyRegistry420.sol","constructor":["GovernanceTimelock"]},
+    {"order":3,"contract":"RightsAssetRegistry420","source":"contracts/src/rights/RightsAssetRegistry420.sol","constructor":["RightsAuthorization420"]},
+    {"order":4,"contract":"RightsClaimRegistry420","source":"contracts/src/rights/RightsClaimRegistry420.sol","constructor":["RightsAuthorization420","RightsAssetRegistry420","RightsPolicyRegistry420"]},
+    {"order":5,"contract":"RightsLicenseRegistry420","source":"contracts/src/rights/RightsLicenseRegistry420.sol","constructor":["RightsAuthorization420","RightsClaimRegistry420"]},
+    {"order":6,"contract":"RightsRouter420","source":"contracts/src/rights/RightsRouter420.sol","constructor":["RightsClaimRegistry420","RightsLicenseRegistry420"]},
+    {
+      "order":7,
+      "contract":"ProtocolRegistry",
+      "action":"publishRegisteredService",
+      "service_id_preimage":"420/service/rights/v1",
+      "implementation":"RightsRouter420",
+      "version":1,
+      "active":true,
+      "component_type":"SERVICE",
+      "component_id_preimage":"420/RIGHTS/COMPONENT/V1",
+      "metadata_hash_policy":"keccak256(canonical Rights release metadata document)",
+      "manifest_hash_policy":"keccak256(canonical RIGHTS-AUDIT-4 release materialization payload)",
+      "dependency_root_policy":"keccak256(ordered deployed dependency identities and runtime code hashes)",
+      "interface_hash_policy":"keccak256(canonical RightsRouter420 ABI/interface descriptor)"
+    }
+  ],
+  "artifact_identity": {
+    "compiler":"Solidity 0.8.24",
+    "evm_version":"cancun",
+    "optimizer":true,
+    "optimizer_runs":200,
+    "artifact_paths":[
+      "contracts/out/RightsAuthorization420.sol/RightsAuthorization420.json",
+      "contracts/out/RightsPolicyRegistry420.sol/RightsPolicyRegistry420.json",
+      "contracts/out/RightsAssetRegistry420.sol/RightsAssetRegistry420.json",
+      "contracts/out/RightsClaimRegistry420.sol/RightsClaimRegistry420.json",
+      "contracts/out/RightsLicenseRegistry420.sol/RightsLicenseRegistry420.json",
+      "contracts/out/RightsRouter420.sol/RightsRouter420.json"
+    ],
+    "hash_evidence":"QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+  },
+  "indexer_binding": {
+    "descriptor":"420-indexer/descriptors/rights420-v1.json",
+    "binding_api":"bindRightsDescriptorsWithCodeIdentity420",
+    "required_event_contracts":[
+      "RightsPolicyRegistry420",
+      "RightsAssetRegistry420",
+      "RightsClaimRegistry420",
+      "RightsLicenseRegistry420"
+    ],
+    "requires_registry_resolved_address":true,
+    "requires_nonzero_runtime_code_hash":true
+  },
+  "local_evm_qualification": {
+    "required":true,
+    "test":"contracts/test/RightsDeploymentBinding420.t.sol",
+    "verifier":"scripts/verify-rights-audit-4-release.py",
+    "proves":[
+      "constructor graph binds exact deployed Rights dependencies",
+      "all eight right classes require governed metadata commitments and can be configured only by governance",
+      "ProtocolRegistry publishes canonical Rights service to exact RightsRouter420",
+      "ProtocolRegistry derives exact nonzero RightsRouter420 EXTCODEHASH",
+      "registration profile commits nonzero manifest/interface hashes and dependency root",
+      "smoke path registers a subject, declares a right, grants a license, and resolves use through RightsRouter420",
+      "service deprecation fails closed and governed version publication recovers active resolution",
+      "Indexer binding requires exact Registry-resolved addresses and nonzero runtime code hashes",
+      "RightsRouter420 remains registry-resolved and has no frozen Genesis implementation address"
+    ]
+  },
+  "rollback_recovery": {
+    "rollback":"ProtocolRegistry.deprecateService(420/service/rights/v1); clients/indexers must fail closed on inactive resolution",
+    "recovery":"governance publishes the next sequential Rights service version with verified implementation EXTCODEHASH and fresh manifest/interface/dependency commitments",
+    "state_note":"Rights registry state remains in the underlying registries; service publication changes discovery authority, not historical state"
+  },
+  "live_testnet_evidence": {
+    "required_in_step":"RIGHTS-AUDIT-5",
+    "chain_id":null,
+    "genesis_hash":null,
+    "evidence_block":null,
+    "evidence_block_hash":null,
+    "deployed_addresses":{},
+    "deployment_transactions":[],
+    "registry_transactions":[],
+    "runtime_code_hashes":{},
+    "constructor_binding_receipts":[]
+  }
+}

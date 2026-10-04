@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -30,7 +31,19 @@ func main() {
 	heartbeat := flag.Duration("heartbeat", defaults.HeartbeatPeriod, "local daemon heartbeat period")
 	shutdownTimeout := flag.Duration("shutdown-timeout", defaults.ShutdownTimeout, "bounded graceful-shutdown timeout")
 	check := flag.Bool("check", false, "validate CMP-3.1 daemon configuration and exit")
+	discover := flag.Bool("discover", false, "print CMP-3.2 local hardware/software discovery JSON and exit")
 	flag.Parse()
+
+	if *discover {
+		snapshot := worker.DiscoverHost()
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		if err := encoder.Encode(snapshot); err != nil {
+			fmt.Fprintln(os.Stderr, "node420-compute: encode discovery:", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	cfg := worker.Config{
 		Identity: worker.Identity{

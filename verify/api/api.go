@@ -25,6 +25,7 @@ const maxConcurrentSubmissions = 4
 type EvidenceStore interface {
 	History(bindingKey string) []store.Record
 	Latest(bindingKey string) (store.Record, bool)
+	ByHash(recordHash string) (store.Record, bool)
 	Bindings() []string
 }
 
@@ -94,15 +95,12 @@ func (s *Service) history(w http.ResponseWriter, r *http.Request) {
 func (s *Service) evidence(w http.ResponseWriter, r *http.Request) {
 	target := strings.ToLower(strings.TrimSpace(r.PathValue("recordHash")))
 	if !validRecordHash(target) { writeJSON(w,http.StatusBadRequest,errorBody(errors.New("valid sha256 record hash is required"))); return }
-	for _, binding := range s.store.Bindings() {
-		for _, record := range s.store.History(binding) {
-			if strings.EqualFold(record.RecordHash,target) {
-				writeJSON(w,http.StatusOK,LookupResponse{Record:record,Integration:consumerView(record)})
-				return
-			}
-		}
+	record, ok := s.store.ByHash(target)
+	if !ok {
+		writeJSON(w,http.StatusNotFound,errorBody(errors.New("verification evidence not found")))
+		return
 	}
-	writeJSON(w,http.StatusNotFound,errorBody(errors.New("verification evidence not found")))
+	writeJSON(w,http.StatusOK,LookupResponse{Record:record,Integration:consumerView(record)})
 }
 
 func (s *Service) submit(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,6 @@
 # 420Rights audit remediation roadmap
 
-Status authority: repository evidence on `audit/420rights-complete-20261003`. RIGHTS-AUDIT-1 through RIGHTS-AUDIT-3 are COMPLETE on qualified implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). RIGHTS-AUDIT-4 is COMPLETE on qualified implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`, workflow run `37178521825` (qualify job `111366155922`, security job `111366155820`). This roadmap does not treat historical candidate addresses, repository-only commitments, or planned integrations as deployed authority.
+Status authority: repository evidence on `audit/420rights-complete-20261003`. RIGHTS-AUDIT-1 through RIGHTS-AUDIT-3 are COMPLETE on qualified implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). RIGHTS-AUDIT-4 is COMPLETE on executable implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`; the current evidence HEAD `f35cb1f7ba23c3aa8e76e53dc9678e9b79c0a157` differs only by audit documentation and passed exact-head confirmation run `37178941263` (qualify job `111367356810`, security job `111367356945`). This roadmap does not treat historical candidate addresses, repository-only commitments, or planned integrations as deployed authority.
 
 ## RIGHTS-AUDIT-1 — Canonical definition and source reconciliation — COMPLETE
 - Reconcile `420rights-genesis.json`, Rights/Verify architecture, Genesis dApp map, service ID, address namespace, Wallet catalogue, Search and Indexer boundaries.
@@ -61,7 +61,7 @@ Implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310` passed the dedicat
 
 The closeout bookkeeping commits after that SHA are documentation-only and do not change the qualified implementation.
 
-RIGHTS-AUDIT-4 was subsequently implemented and exact-head qualified on implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`, dedicated run `37178521825`:
+RIGHTS-AUDIT-4 was implemented and qualified on executable implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237` (run `37178521825`), then the documentation-only evidence HEAD `f35cb1f7ba23c3aa8e76e53dc9678e9b79c0a157` was requalified successfully by run `37178941263`:
 - deterministic release materialization verifier: PASS;
 - deployment/ProtocolRegistry binding: 3 passed, 0 failed, 0 skipped;
 - complete Rights Foundry suite: 15 passed, 0 failed, 0 skipped;

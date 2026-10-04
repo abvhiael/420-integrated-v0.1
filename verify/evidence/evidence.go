@@ -23,21 +23,21 @@ type BlockContext struct {
 }
 
 type CreationContext struct {
-	TransactionHash string `json:"transactionHash,omitempty"`
+	TransactionHash  string `json:"transactionHash,omitempty"`
 	ReceiptBlockHash string `json:"receiptBlockHash,omitempty"`
 	CreationBytecode string `json:"creationBytecode,omitempty"`
 }
 
 type DeploymentEvidence struct {
-	ChainID             uint64               `json:"chainId"`
-	Address             string               `json:"address"`
-	RuntimeBytecode     string               `json:"runtimeBytecode"`
-	RuntimeCodeHash     string               `json:"runtimeCodeHash"`
-	ObservedAt          BlockContext         `json:"observedAt"`
-	FirstCodeBlock      BlockContext         `json:"firstCodeBlock"`
-	Creation            *CreationContext     `json:"creation,omitempty"`
+	ChainID              uint64               `json:"chainId"`
+	Address              string               `json:"address"`
+	RuntimeBytecode      string               `json:"runtimeBytecode"`
+	RuntimeCodeHash      string               `json:"runtimeCodeHash"`
+	ObservedAt           BlockContext         `json:"observedAt"`
+	FirstCodeBlock       BlockContext         `json:"firstCodeBlock"`
+	Creation             *CreationContext     `json:"creation,omitempty"`
 	MissingContextReason MissingContextReason `json:"missingContextReason,omitempty"`
-	Provenance          string               `json:"provenance"`
+	Provenance           string               `json:"provenance"`
 }
 
 func (e DeploymentEvidence) BindingKey() string {

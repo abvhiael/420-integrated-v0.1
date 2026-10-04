@@ -44,13 +44,13 @@ type BuildSettings struct {
 }
 
 type Submission struct {
-	Kind           InputKind       `json:"kind"`
-	TargetSource   string          `json:"targetSource,omitempty"`
-	TargetContract string          `json:"targetContract,omitempty"`
-	StandardJSON   json.RawMessage `json:"standardJson,omitempty"`
-	Sources        []SourceFile    `json:"sources,omitempty"`
-	Flattened      string          `json:"flattened,omitempty"`
-	Build          BuildSettings   `json:"build"`
+	Kind                 InputKind       `json:"kind"`
+	TargetSource         string          `json:"targetSource,omitempty"`
+	TargetContract       string          `json:"targetContract,omitempty"`
+	StandardJSON         json.RawMessage `json:"standardJson,omitempty"`
+	Sources              []SourceFile    `json:"sources,omitempty"`
+	Flattened            string          `json:"flattened,omitempty"`
+	Build                BuildSettings   `json:"build"`
 	BundleHash           string          `json:"bundleHash"`
 	PublicationRequested bool            `json:"publicationRequested"`
 }

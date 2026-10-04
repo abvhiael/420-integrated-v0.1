@@ -14,9 +14,9 @@ const Phase = "VERIFY-7"
 
 // EIP-1967 implementation/admin/beacon slots.
 const (
-	ImplementationSlot  = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
-	AdminSlot           = "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"
-	BeaconSlot          = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50"
+	ImplementationSlot = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+	AdminSlot          = "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"
+	BeaconSlot         = "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50"
 )
 
 type Kind string
@@ -28,7 +28,7 @@ const (
 )
 
 type Relationship struct {
-	ChainID              uint64 `json:"chainId"`
+	ChainID               uint64 `json:"chainId"`
 	ProxyAddress          string `json:"proxyAddress"`
 	ProxyRuntimeCodeHash  string `json:"proxyRuntimeCodeHash"`
 	Kind                  Kind   `json:"kind"`
@@ -40,11 +40,21 @@ type Relationship struct {
 }
 
 func (r Relationship) Validate() error {
-	if r.ChainID == 0 || !validAddress(r.ProxyAddress) || !validHash(r.ProxyRuntimeCodeHash) { return errors.New("proxy binding is incomplete") }
-	if r.Kind == KindNone { return nil }
-	if r.Kind != KindEIP1967 && r.Kind != KindMinimal1167 { return errors.New("unsupported proxy kind") }
-	if !validAddress(r.ImplementationAddress) { return errors.New("proxy implementation address is required") }
-	if !validHash(r.ObservedBlockHash) { return errors.New("canonical observation block hash is required") }
+	if r.ChainID == 0 || !validAddress(r.ProxyAddress) || !validHash(r.ProxyRuntimeCodeHash) {
+		return errors.New("proxy binding is incomplete")
+	}
+	if r.Kind == KindNone {
+		return nil
+	}
+	if r.Kind != KindEIP1967 && r.Kind != KindMinimal1167 {
+		return errors.New("unsupported proxy kind")
+	}
+	if !validAddress(r.ImplementationAddress) {
+		return errors.New("proxy implementation address is required")
+	}
+	if !validHash(r.ObservedBlockHash) {
+		return errors.New("canonical observation block hash is required")
+	}
 	return nil
 }
 
@@ -53,22 +63,32 @@ type StorageReader interface {
 }
 
 func Detect(deployment evidence.DeploymentEvidence, reader StorageReader) (Relationship, error) {
-	if err := deployment.Validate(); err != nil { return Relationship{}, err }
+	if err := deployment.Validate(); err != nil {
+		return Relationship{}, err
+	}
 	r := Relationship{ChainID: deployment.ChainID, ProxyAddress: strings.ToLower(deployment.Address), ProxyRuntimeCodeHash: strings.ToLower(deployment.RuntimeCodeHash), Kind: KindNone, ObservedBlock: deployment.ObservedAt.Number, ObservedBlockHash: strings.ToLower(deployment.ObservedAt.Hash)}
 	if impl, ok := minimal1167Implementation(deployment.RuntimeBytecode); ok {
 		r.Kind = KindMinimal1167
 		r.ImplementationAddress = impl
 		return r, r.Validate()
 	}
-	if reader == nil { return r, nil }
+	if reader == nil {
+		return r, nil
+	}
 	block := fmt.Sprintf("0x%x", deployment.ObservedAt.Number)
 	implWord, err := reader.StorageAt(deployment.Address, ImplementationSlot, block)
-	if err != nil { return Relationship{}, fmt.Errorf("read implementation slot: %w", err) }
+	if err != nil {
+		return Relationship{}, fmt.Errorf("read implementation slot: %w", err)
+	}
 	if impl := addressFromStorageWord(implWord); impl != "" {
 		r.Kind = KindEIP1967
 		r.ImplementationAddress = impl
-		if adminWord, err := reader.StorageAt(deployment.Address, AdminSlot, block); err == nil { r.AdminAddress = addressFromStorageWord(adminWord) }
-		if beaconWord, err := reader.StorageAt(deployment.Address, BeaconSlot, block); err == nil { r.BeaconAddress = addressFromStorageWord(beaconWord) }
+		if adminWord, err := reader.StorageAt(deployment.Address, AdminSlot, block); err == nil {
+			r.AdminAddress = addressFromStorageWord(adminWord)
+		}
+		if beaconWord, err := reader.StorageAt(deployment.Address, BeaconSlot, block); err == nil {
+			r.BeaconAddress = addressFromStorageWord(beaconWord)
+		}
 		return r, r.Validate()
 	}
 	return r, nil
@@ -78,15 +98,21 @@ func minimal1167Implementation(bytecode string) (string, bool) {
 	h := strings.TrimPrefix(strings.ToLower(strings.TrimSpace(bytecode)), "0x")
 	const prefix = "363d3d373d3d3d363d73"
 	const suffix = "5af43d82803e903d91602b57fd5bf3"
-	if len(h) != len(prefix)+40+len(suffix) || !strings.HasPrefix(h, prefix) || !strings.HasSuffix(h, suffix) { return "", false }
+	if len(h) != len(prefix)+40+len(suffix) || !strings.HasPrefix(h, prefix) || !strings.HasSuffix(h, suffix) {
+		return "", false
+	}
 	return "0x" + h[len(prefix):len(prefix)+40], true
 }
 
 func addressFromStorageWord(word string) string {
 	h := strings.TrimPrefix(strings.ToLower(strings.TrimSpace(word)), "0x")
-	if len(h) != 64 { return "" }
+	if len(h) != 64 {
+		return ""
+	}
 	addr := "0x" + h[24:]
-	if addr == "0x0000000000000000000000000000000000000000" || !validAddress(addr) { return "" }
+	if addr == "0x0000000000000000000000000000000000000000" || !validAddress(addr) {
+		return ""
+	}
 	return addr
 }
 
@@ -114,10 +140,14 @@ type Tracker struct {
 	history map[string][]UpgradeEvent
 }
 
-func NewTracker() *Tracker { return &Tracker{current: map[string]Relationship{}, history: map[string][]UpgradeEvent{}} }
+func NewTracker() *Tracker {
+	return &Tracker{current: map[string]Relationship{}, history: map[string][]UpgradeEvent{}}
+}
 
 func (t *Tracker) Observe(r Relationship) (changed bool, generation uint64, err error) {
-	if err := r.Validate(); err != nil { return false, 0, err }
+	if err := r.Validate(); err != nil {
+		return false, 0, err
+	}
 	key := fmt.Sprintf("%d:%s", r.ChainID, strings.ToLower(r.ProxyAddress))
 	previous, exists := t.current[key]
 	if !exists {
@@ -156,8 +186,12 @@ func ApplyRelationship(pair VerificationPair, relationship Relationship, changed
 }
 
 func BindImplementation(pair VerificationPair, relationship Relationship, implementation evidence.DeploymentEvidence, class architecture.ResultClass) (VerificationPair, error) {
-	if relationship.Kind == KindNone { return pair, errors.New("address is not a proxy") }
-	if !strings.EqualFold(relationship.ImplementationAddress, implementation.Address) { return pair, errors.New("implementation evidence does not match canonical proxy relationship") }
+	if relationship.Kind == KindNone {
+		return pair, errors.New("address is not a proxy")
+	}
+	if !strings.EqualFold(relationship.ImplementationAddress, implementation.Address) {
+		return pair, errors.New("implementation evidence does not match canonical proxy relationship")
+	}
 	pair.ImplementationAddress = strings.ToLower(implementation.Address)
 	pair.ImplementationBinding = implementation.BindingKey()
 	pair.ImplementationClass = class

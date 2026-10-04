@@ -128,17 +128,16 @@ func TestAcquireRejectsObservationBlockReorgDuringAcquisition(t *testing.T) {
 	}
 }
 
-
 func TestDeploymentEvidenceRejectsMalformedHexInternally(t *testing.T) {
 	e := DeploymentEvidence{
-		ChainID:         420,
-		Address:         "0xzz11111111111111111111111111111111111111",
-		RuntimeBytecode: "0x6000",
-		RuntimeCodeHash: testCodeHash,
-		ObservedAt:      BlockContext{Number: 2, Hash: block2Hash},
-		FirstCodeBlock:  BlockContext{Number: 1, Hash: block1Hash},
+		ChainID:              420,
+		Address:              "0xzz11111111111111111111111111111111111111",
+		RuntimeBytecode:      "0x6000",
+		RuntimeCodeHash:      testCodeHash,
+		ObservedAt:           BlockContext{Number: 2, Hash: block2Hash},
+		FirstCodeBlock:       BlockContext{Number: 1, Hash: block1Hash},
 		MissingContextReason: MissingCreationTxUnresolved,
-		Provenance:      "canonical_chain_state/rpc",
+		Provenance:           "canonical_chain_state/rpc",
 	}
 	if err := e.Validate(); err == nil {
 		t.Fatal("malformed address hex must be rejected")

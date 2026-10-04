@@ -86,7 +86,6 @@ func TestWorkerRejectsStandardJSONSettingsDrift(t *testing.T) {
 	}
 }
 
-
 func TestWorkerRejectsNonSolidityStandardJSON(t *testing.T) {
 	worker := auditWorker(t, `{"contracts":{}}`)
 	raw := []byte(`{"language":"Yul","sources":{"A.yul":{"content":"object \"A\" {}"}},"settings":{"optimizer":{"enabled":true,"runs":200},"evmVersion":"cancun","viaIR":true,"metadata":{"bytecodeHash":"ipfs"},"libraries":{}}}`)

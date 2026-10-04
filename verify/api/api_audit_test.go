@@ -31,7 +31,7 @@ func TestSubmissionDerivesOmittedBundleCommitmentBeforeProcessing(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := json.Marshal(SubmissionRequest{PublishSource:true,ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
+	body, err := json.Marshal(SubmissionRequest{PublishSource: true, ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestSubmissionRejectsIncorrectSuppliedBundleCommitment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	body, err := json.Marshal(SubmissionRequest{PublishSource:true,ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
+	body, err := json.Marshal(SubmissionRequest{PublishSource: true, ChainID: 420, Address: record.Deployment.Address, Submission: submitted})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,6 @@ func TestSubmissionRejectsIncorrectSuppliedBundleCommitment(t *testing.T) {
 		t.Fatalf("status=%d body=%s", w.Code, w.Body.String())
 	}
 }
-
 
 func TestSubmissionRequiresExplicitSourcePublicationConsent(t *testing.T) {
 	s, record, submitted := fixture(t)
@@ -90,7 +89,6 @@ func TestSubmissionRequiresExplicitSourcePublicationConsent(t *testing.T) {
 		t.Fatalf("missing publication-consent diagnostic: %s", w.Body.String())
 	}
 }
-
 
 func TestSubmissionRejectsProcessorEvidenceForDifferentRequestedSubject(t *testing.T) {
 	s, record, submitted := fixture(t)

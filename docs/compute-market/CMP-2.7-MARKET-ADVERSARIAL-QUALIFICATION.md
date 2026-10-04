@@ -1,6 +1,8 @@
 # CMP-2.7 — Market adversarial qualification
 
-Status: **implementation / Level 1 + Level 2 qualification in progress.**
+Status: **COMPLETE — Level 1 + Level 2 exact-head qualified on `c20d14a06c0787ac76f58b925d94b1625969105b`.**
+
+Durable evidence: [CMP-2.7 qualification](CMP-2.7-QUALIFICATION-EVIDENCE.md).
 
 ## Canonical scope
 
@@ -69,3 +71,26 @@ CMP-2.7 is COMPLETE only when:
 - CMP-2.7 verifier passes;
 - exact-head Compute Market Qualification and app-scoped Solidity qualification are green;
 - Level 2 retained app integration passes on that same implementation SHA.
+
+All completion gates passed on `c20d14a06c0787ac76f58b925d94b1625969105b`.
+
+## Qualification evidence
+
+- Compute Market Qualification #202 — run `37177056717`, job `111361804776` — **SUCCESS**
+  - retained Compute Market Solidity suite: **70 suites / 470 tests passed / 0 failed / 0 skipped**
+  - CMP-2.7 mechanical verifier: **PASS**
+  - affected SDK build: **PASS**
+  - affected SDK tests: **24/24 passed**
+- Solidity Contracts #4641 — run `37177056715` — **SUCCESS**
+  - classify-pr job `111361805106` — **SUCCESS**
+  - compute-fast job `111362665371` — **SUCCESS**
+  - retained Compute Market Solidity suite: **70 suites / 470 tests passed / 0 failed / 0 skipped**
+  - repository-wide Foundry and PR shards were skipped as intended for this app-scoped Level 2 milestone
+
+Level 3 repository-wide phase closeout remains intentionally deferred to CMP-2.8.
+
+## Completion
+
+**CMP-2.7 COMPLETE.**
+
+Next canonical roadmap step: **CMP-2.8 — Phase closeout**.

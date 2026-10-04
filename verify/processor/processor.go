@@ -25,9 +25,9 @@ type EvidenceStore interface {
 }
 
 type Service struct {
-	chain DeploymentSource
+	chain   DeploymentSource
 	builder Builder
-	store EvidenceStore
+	store   EvidenceStore
 }
 
 func New(chain DeploymentSource, builder Builder, evidenceStore EvidenceStore) (*Service, error) {

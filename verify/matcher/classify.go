@@ -16,19 +16,19 @@ const Phase = "VERIFY-5"
 type Reason string
 
 const (
-	ReasonExactRuntimeMatch          Reason = "EXACT_RUNTIME_MATCH"
-	ReasonExactCreationMatch         Reason = "EXACT_CREATION_MATCH"
-	ReasonCreationUnavailable        Reason = "CREATION_CONTEXT_UNAVAILABLE"
-	ReasonRuntimeMismatch            Reason = "RUNTIME_BYTECODE_MISMATCH"
-	ReasonCreationMismatch           Reason = "CREATION_BYTECODE_MISMATCH"
-	ReasonCompiledRuntimeMissing     Reason = "COMPILED_RUNTIME_MISSING"
-	ReasonCanonicalRuntimeMissing    Reason = "CANONICAL_RUNTIME_MISSING"
-	ReasonInvalidCanonicalEvidence   Reason = "INVALID_CANONICAL_EVIDENCE"
-	ReasonInvalidBuildEvidence       Reason = "INVALID_BUILD_EVIDENCE"
-	ReasonMetadataRelevant           Reason = "METADATA_DIFFERENCE_RELEVANT"
-	ReasonLibraryLinksRelevant       Reason = "LIBRARY_LINKS_RELEVANT"
-	ReasonImmutablesRelevant         Reason = "IMMUTABLE_REFERENCES_RELEVANT"
-	ReasonConstructorArgsUnknown     Reason = "CONSTRUCTOR_ARGUMENTS_UNKNOWN"
+	ReasonExactRuntimeMatch        Reason = "EXACT_RUNTIME_MATCH"
+	ReasonExactCreationMatch       Reason = "EXACT_CREATION_MATCH"
+	ReasonCreationUnavailable      Reason = "CREATION_CONTEXT_UNAVAILABLE"
+	ReasonRuntimeMismatch          Reason = "RUNTIME_BYTECODE_MISMATCH"
+	ReasonCreationMismatch         Reason = "CREATION_BYTECODE_MISMATCH"
+	ReasonCompiledRuntimeMissing   Reason = "COMPILED_RUNTIME_MISSING"
+	ReasonCanonicalRuntimeMissing  Reason = "CANONICAL_RUNTIME_MISSING"
+	ReasonInvalidCanonicalEvidence Reason = "INVALID_CANONICAL_EVIDENCE"
+	ReasonInvalidBuildEvidence     Reason = "INVALID_BUILD_EVIDENCE"
+	ReasonMetadataRelevant         Reason = "METADATA_DIFFERENCE_RELEVANT"
+	ReasonLibraryLinksRelevant     Reason = "LIBRARY_LINKS_RELEVANT"
+	ReasonImmutablesRelevant       Reason = "IMMUTABLE_REFERENCES_RELEVANT"
+	ReasonConstructorArgsUnknown   Reason = "CONSTRUCTOR_ARGUMENTS_UNKNOWN"
 )
 
 type Diagnostic struct {
@@ -43,13 +43,13 @@ type Context struct {
 }
 
 type Result struct {
-	Class               architecture.ResultClass `json:"class"`
-	BindingKey          string                   `json:"bindingKey,omitempty"`
-	RuntimeExact        bool                     `json:"runtimeExact"`
-	CreationCompared    bool                     `json:"creationCompared"`
-	CreationExact       bool                     `json:"creationExact"`
-	Diagnostics         []Diagnostic             `json:"diagnostics"`
-	ComparisonContext   Context                  `json:"comparisonContext"`
+	Class             architecture.ResultClass `json:"class"`
+	BindingKey        string                   `json:"bindingKey,omitempty"`
+	RuntimeExact      bool                     `json:"runtimeExact"`
+	CreationCompared  bool                     `json:"creationCompared"`
+	CreationExact     bool                     `json:"creationExact"`
+	Diagnostics       []Diagnostic             `json:"diagnostics"`
+	ComparisonContext Context                  `json:"comparisonContext"`
 }
 
 func Classify(chain evidence.DeploymentEvidence, build compiler.BuildEvidence, submissionModel submission.Submission, hasImmutables bool) Result {
@@ -146,19 +146,31 @@ func appendDifferenceContext(result *Result) {
 }
 
 func validateBuild(build compiler.BuildEvidence) error {
-	if strings.TrimSpace(build.CompilerVersion) == "" { return errors.New("compiler version is required") }
-	if strings.TrimSpace(build.BundleHash) == "" { return errors.New("source bundle hash is required") }
-	if strings.TrimSpace(build.InputSHA256) == "" || strings.TrimSpace(build.OutputSHA256) == "" { return errors.New("compiler input/output commitments are required") }
+	if strings.TrimSpace(build.CompilerVersion) == "" {
+		return errors.New("compiler version is required")
+	}
+	if strings.TrimSpace(build.BundleHash) == "" {
+		return errors.New("source bundle hash is required")
+	}
+	if strings.TrimSpace(build.InputSHA256) == "" || strings.TrimSpace(build.OutputSHA256) == "" {
+		return errors.New("compiler input/output commitments are required")
+	}
 	return nil
 }
 
 func normalizeBytecode(value string) (string, error) {
 	value = strings.TrimSpace(strings.ToLower(value))
-	if !strings.HasPrefix(value, "0x") { return "", errors.New("bytecode must be 0x-prefixed") }
+	if !strings.HasPrefix(value, "0x") {
+		return "", errors.New("bytecode must be 0x-prefixed")
+	}
 	hex := value[2:]
-	if len(hex)%2 != 0 { return "", errors.New("bytecode must contain whole bytes") }
+	if len(hex)%2 != 0 {
+		return "", errors.New("bytecode must contain whole bytes")
+	}
 	for _, r := range hex {
-		if !((r >= '0' && r <= '9') || (r >= 'a' && r <= 'f')) { return "", errors.New("bytecode contains non-hex characters") }
+		if !((r >= '0' && r <= '9') || (r >= 'a' && r <= 'f')) {
+			return "", errors.New("bytecode contains non-hex characters")
+		}
 	}
 	return value, nil
 }

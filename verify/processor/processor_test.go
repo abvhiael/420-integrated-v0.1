@@ -39,7 +39,7 @@ func TestProcessorRunsCanonicalEvidenceBuildClassificationAndPersistence(t *test
 		ObservedAt:      evidence.BlockContext{Number: 100, Hash: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
 		FirstCodeBlock:  evidence.BlockContext{Number: 90, Hash: "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
 		Creation: &evidence.CreationContext{
-			TransactionHash: "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+			TransactionHash:  "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
 			ReceiptBlockHash: "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
 			CreationBytecode: "0x60021234",
 		},

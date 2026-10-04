@@ -26,39 +26,60 @@ type compilerCatalogFile struct {
 
 func main() {
 	cfg, err := loadConfig(os.Getenv)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 
 	probe := verifyruntime.NewRPCProbe(cfg)
 	service, err := verifyruntime.NewService(cfg, probe)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	if err := service.Qualify(ctx); err != nil { cancel(); fatal(err) }
+	if err := service.Qualify(ctx); err != nil {
+		cancel()
+		fatal(err)
+	}
 	cancel()
 
 	evidenceStore, err := verifystore.Open(cfg.EvidenceStore)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 
 	catalogBytes, err := os.ReadFile(cfg.CompilerCatalog)
-	if err != nil { fatal(fmt.Errorf("read compiler catalogue: %w", err)) }
+	if err != nil {
+		fatal(fmt.Errorf("read compiler catalogue: %w", err))
+	}
 	var catalogFile compilerCatalogFile
 	if err := json.Unmarshal(catalogBytes, &catalogFile); err != nil {
 		fatal(fmt.Errorf("decode compiler catalogue: %w", err))
 	}
 	catalog, err := verifycompiler.NewCatalog(cfg.CompilerCache, catalogFile.Releases)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	worker, err := verifycompiler.NewWorker(catalog, verifycompiler.Limits{
 		MaxInputBytes:  8 << 20,
 		MaxOutputBytes: 16 << 20,
 		Timeout:        30 * time.Second,
 	})
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	chainClient, err := verifyevidence.NewRPCClient(cfg.RPCURL)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	verificationProcessor, err := verifyprocessor.New(chainClient, worker, evidenceStore)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 
 	publicAPI, err := verifyapi.New(evidenceStore, verificationProcessor)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	mux := http.NewServeMux()
 	mux.Handle("/healthz", service.Handler())
 	mux.Handle("/readyz", service.Handler())
@@ -78,11 +99,15 @@ func main() {
 	go func() { errCh <- server.ListenAndServe() }()
 	select {
 	case err := <-errCh:
-		if err != nil && err != http.ErrServerClosed { fatal(err) }
+		if err != nil && err != http.ErrServerClosed {
+			fatal(err)
+		}
 	case <-ctx.Done():
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil { fatal(err) }
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			fatal(err)
+		}
 	}
 }
 
@@ -104,8 +129,12 @@ func loadConfig(getenv func(string) string) (verifyruntime.Config, error) {
 		EvidenceStore:    strings.TrimSpace(getenv("VERIFY_EVIDENCE_STORE")),
 		ListenAddr:       strings.TrimSpace(getenv("VERIFY_LISTEN_ADDR")),
 	}
-	if cfg.ListenAddr == "" { cfg.ListenAddr = ":8425" }
-	if err := cfg.Validate(); err != nil { return verifyruntime.Config{}, err }
+	if cfg.ListenAddr == "" {
+		cfg.ListenAddr = ":8425"
+	}
+	if err := cfg.Validate(); err != nil {
+		return verifyruntime.Config{}, err
+	}
 	return cfg, nil
 }
 

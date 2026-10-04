@@ -157,7 +157,7 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 	return b.buf.Write(p)
 }
 
-func (b *limitedBuffer) Bytes() []byte { return b.buf.Bytes() }
+func (b *limitedBuffer) Bytes() []byte  { return b.buf.Bytes() }
 func (b *limitedBuffer) String() string { return b.buf.String() }
 
 func standardJSONFor(s submission.Submission) ([]byte, error) {
@@ -218,10 +218,12 @@ func validateStandardJSONBuildSettings(raw []byte, build submission.BuildSetting
 				Enabled *bool   `json:"enabled"`
 				Runs    *uint64 `json:"runs"`
 			} `json:"optimizer"`
-			EVMVersion *string                       `json:"evmVersion"`
-			ViaIR      *bool                         `json:"viaIR"`
-			Metadata   *struct{ BytecodeHash *string `json:"bytecodeHash"` } `json:"metadata"`
-			Libraries  map[string]map[string]string  `json:"libraries"`
+			EVMVersion *string `json:"evmVersion"`
+			ViaIR      *bool   `json:"viaIR"`
+			Metadata   *struct {
+				BytecodeHash *string `json:"bytecodeHash"`
+			} `json:"metadata"`
+			Libraries map[string]map[string]string `json:"libraries"`
 		} `json:"settings"`
 	}
 	if err := json.Unmarshal(raw, &doc); err != nil {

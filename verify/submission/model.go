@@ -51,7 +51,8 @@ type Submission struct {
 	Sources        []SourceFile    `json:"sources,omitempty"`
 	Flattened      string          `json:"flattened,omitempty"`
 	Build          BuildSettings   `json:"build"`
-	BundleHash     string          `json:"bundleHash"`
+	BundleHash           string          `json:"bundleHash"`
+	PublicationRequested bool            `json:"publicationRequested"`
 }
 
 func NewStandardJSON(raw []byte, build BuildSettings) (Submission, error) {

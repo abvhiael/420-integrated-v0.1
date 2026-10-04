@@ -44,7 +44,12 @@ jobs:
           mapfile -t files < <(find verify -type f -name '*.go' -print | sort)
           unformatted="$(gofmt -l "${files[@]}")"
           if [ -n "$unformatted" ]; then
+            echo "Unformatted files:"
             echo "$unformatted"
+            gofmt -w "${files[@]}"
+            echo "::group::gofmt patch"
+            git diff -- verify
+            echo "::endgroup::"
             exit 1
           fi
 

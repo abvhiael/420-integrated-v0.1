@@ -18,6 +18,7 @@ on:
       - 'scripts/test-wallet-w14-7-4-consumers.py'
       - '.github/workflows/genesis-address-authority.yml'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
+      - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
   pull_request:
     paths:
       - 'contracts/config/**'
@@ -42,7 +43,7 @@ jobs:
   # Genesis owns address/namespace/predeploy authority qualification only.
   # Canonical full Foundry qualification is owned once by Solidity Contracts.
   cross-manifest-authority:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact qualification head

@@ -4,7 +4,7 @@
 
 Repository: `abvhiael/420-integrated-v0.1`  
 Audit branch: `audit/420is-complete-20261004`  
-Baseline `main`: `58b6b17c6538bd3cd22694e417a32472aae899f4`
+Reconciled baseline `main`: `2280fb6f9915b849560d9d4d5a95d999c4adc669`
 
 420-IS is a covered Genesis implementation protocol/interoperability primitive. It is not a separate public Genesis application and therefore does not require a standalone end-user frontend or backend merely to satisfy its canonical scope.
 
@@ -80,10 +80,12 @@ It does not replace the canonical provider/namespace/checkpoint registries.
 - `scripts/verify-420is-audit.py` — mechanical source/config/authority verifier;
 - `.github/workflows/420is-audit.yml` — exact-head formatting/build/test/security qualification;
 - this complete audit report;
-- stable remediation roadmap.
+- stable remediation roadmap;
+- `contracts/config/interop/420is-audit-4-release-materialization.json` — deterministic release graph and empty live-evidence envelope;
+- `contracts/test/InteropDeploymentBinding420.t.sol` — local deployment, ProtocolRegistry publication, smoke and recovery qualification;
+- `scripts/verify-420is-audit-4-release.py` — release-materialization verifier.
 
 ### Missing or release-time by design
-- deterministic production/testnet deployment package with retained concrete deployed addresses;
 - ProtocolRegistry publication transaction evidence;
 - live runtime code-hash evidence;
 - production-equivalent public-testnet lifecycle/finality/reorg qualification;
@@ -170,7 +172,7 @@ No test result is treated as qualified until the exact audit-branch head has pas
 | External-truth limitation | DISC-015 | enforced as architecture boundary | N/A | architecture | COMPLETE | preserve consumer policy |
 | Read-oriented router | architecture | present | expanded audit tests | architecture | COMPLETE | live Registry binding later |
 | Dedicated standalone UI/backend | public Genesis classification | not required | N/A | covered-protocol classification | NOT APPLICABLE | none |
-| Deterministic deployment package | Genesis readiness | not retained for 420-IS | absent | incomplete | MISSING | IS-AUDIT-4 |
+| Deterministic deployment package | Genesis readiness | repository package implemented | local deployment/Registry binding suite | audit/release materialization | COMPLETE pending exact-head qualification | qualify IS-AUDIT-4 |
 | ProtocolRegistry publication evidence | integration/readiness | no live evidence | absent | incomplete | BLOCKED | IS-AUDIT-5 on live testnet |
 | Live codehash/address evidence | release readiness | absent | absent | absent | BLOCKED | IS-AUDIT-5 |
 | Reorg/finality/derived-consumer qualification | release readiness | no live evidence | absent | architecture only | BLOCKED | IS-AUDIT-5 |
@@ -192,7 +194,7 @@ Added:
 - mechanical repository consistency verifier.
 
 Still required:
-- deterministic deployment/recovery/operator package;
+- live deployment/operator package tied to the public testnet release;
 - live testnet deployment/Registry publication evidence;
 - final production threat/operations/monitoring and Genesis acceptance record.
 
@@ -205,12 +207,12 @@ Still required:
 - DOCUMENTATION COMPLETE: **NO** — release/deployment/operator/Genesis acceptance evidence remains.
 - INTEGRATION COMPLETE: **NO** — ProtocolRegistry/live derived-consumer binding remains unqualified.
 - SECURITY QUALIFIED: **NO** — source-level hardening is not production-equivalent live qualification.
-- TESTNET READY: **NO until IS-AUDIT-4 release materialization is complete.**
+- TESTNET READY: **PENDING IS-AUDIT-4 EXACT-HEAD QUALIFICATION** at repository-package scope; live execution remains IS-AUDIT-5.
 - GENESIS READY: **NO**.
 - PRODUCTION READY: **NO**.
 
 ## Final determination
 
-At the audited `main` baseline, 420-IS is a coherent and substantially implemented interoperability protocol, but it was not genuinely complete under the repository's own release discipline. The canonical contracts and authority model are present; the primary repository defects are shallow dedicated test coverage, lack of a dedicated exact-head audit workflow/verifier, and absence of deterministic release/deployment evidence.
+At the audited `main` baseline, 420-IS is a coherent and substantially implemented interoperability protocol, but it was not genuinely complete under the repository's own release discipline. The canonical contracts and authority model are present; the primary baseline defects were shallow dedicated test coverage, lack of a dedicated exact-head audit workflow/verifier, and absence of deterministic repository release materialization. This branch now implements those repository-side remediations.
 
 This audit branch repairs the repository-level qualification gaps without changing the canonical protocol authority model. Completion beyond source/repository scope requires deterministic deployment materialization followed by production-equivalent public-testnet qualification and final Genesis/security/operations closeout. Those requirements are retained without being fabricated.

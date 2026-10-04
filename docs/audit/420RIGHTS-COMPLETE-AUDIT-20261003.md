@@ -55,14 +55,22 @@ Canonical integrations:
 6. No dedicated Rights exact-head audit workflow existed; generic Solidity PR shards skip ordinary audit branches.
 7. Negative contract coverage omitted several important policy, evidence, scope/action, finite-license and unauthorized-transition cases.
 
+### Release materialization added by RIGHTS-AUDIT-4
+- deterministic Rights deployment order and constructor graph;
+- governed metadata-commitment policy for all eight right classes, with live/final hashes intentionally left unset;
+- canonical CapabilityRegistry candidate identity/status retained without promoting it to deployed/frozen authority;
+- compiler artifact/runtime-template identities retained for the exact qualified repository implementation;
+- local-EVM ProtocolRegistry publication, deprecation and recovery qualification for `420/service/rights/v1`;
+- Indexer binding extended to require Registry-resolved addresses plus nonzero runtime code hashes;
+- rollback/recovery procedure and explicit empty live-testnet evidence fields.
+
 ### Still absent / intentionally not fabricated
-- deterministic Rights deployment/release materialization;
-- exact governed metadata commitments for all eight right-class policies;
-- live CapabilityRegistry dependency identity for a Rights release;
-- exact Rights deployment addresses/runtime hashes;
-- ProtocolRegistry Rights publication evidence;
-- live testnet receipts/blocks/codehashes;
-- Rights-specific deployment/operator/threat-model/Genesis acceptance package.
+- live deployed Rights addresses/runtime EXTCODEHASH values;
+- public-testnet deployment and ProtocolRegistry transaction receipts;
+- live CapabilityRegistry dependency qualification;
+- governed final Genesis metadata hashes for the eight right classes;
+- live testnet receipts/blocks/reorg/finality evidence;
+- final Rights operator/threat-model/Genesis acceptance closeout package.
 
 ## Smart-contract assessment
 
@@ -101,9 +109,9 @@ No reentrancy/custody path exists in the Rights suite; it does not transfer nati
 | Indexer lifecycle | actual emitted events | repaired by audit | lifecycle regression | audit report | COMPLETE | live reorg/rebuild qualification |
 | Search Rights discovery | Search architecture | present | existing Search tests | Search docs | COMPLETE | live Indexer/Search qualification |
 | Dedicated standalone frontend/backend | documentation classification | not present | N/A | covered-protocol classification | NOT APPLICABLE | none |
-| Deterministic deployment package | Genesis readiness | absent | absent | absent | MISSING | RIGHTS-AUDIT-4 |
-| ProtocolRegistry publication evidence | integration model | source service ID only | absent live | absent closeout | MISSING | RIGHTS-AUDIT-4 |
-| Exact runtime hashes/deployment identities | Genesis readiness | absent | absent | absent | MISSING | RIGHTS-AUDIT-4 |
+| Deterministic deployment package | Genesis readiness | materialized repository release package | local deployment/binding suite | RIGHTS-AUDIT-4 evidence | COMPLETE | live deployment remains RIGHTS-AUDIT-5 |
+| ProtocolRegistry publication evidence | integration model | canonical local-EVM publication/deprecation/recovery path materialized | deployment/binding suite | RIGHTS-AUDIT-4 evidence | COMPLETE at repository scope | retain live publication receipts in RIGHTS-AUDIT-5 |
+| Exact runtime hashes/deployment identities | Genesis readiness | exact compiler artifact/runtime-template identities retained; live addresses/codehashes intentionally empty | artifact identity gate + local deployment binding | RIGHTS-AUDIT-4 evidence | COMPLETE at repository scope | retain live addresses/EXTCODEHASH in RIGHTS-AUDIT-5 |
 | Production-equivalent testnet qualification | release readiness | no live evidence | absent | absent | BLOCKED | RIGHTS-AUDIT-5 |
 | Operator/recovery/monitoring qualification | release readiness | incomplete | absent live | incomplete | PARTIAL | RIGHTS-AUDIT-6 |
 | Genesis acceptance evidence | Genesis requirements | absent | absent | absent | MISSING | RIGHTS-AUDIT-6 after testnet |
@@ -128,9 +136,9 @@ Accepted design risks:
 - live CapabilityRegistry correctness is a dependency.
 
 Unresolved release risks:
-- no exact deployed dependency/address/codehash/Registry-publication evidence;
+- no live deployed dependency/address/EXTCODEHASH/Registry-publication receipt evidence;
 - no production-equivalent testnet/reorg/finality qualification;
-- exact Genesis right-class metadata commitments are not frozen in current repository evidence.
+- final governed Genesis right-class metadata hashes are intentionally not frozen until the live release authority step.
 
 ## Documentation assessment
 
@@ -149,9 +157,9 @@ Added by this audit:
 - exact-head Rights workflow.
 
 Still required:
-- deterministic deployment/Registry publication record;
-- operator/deployment guide tied to the exact release;
-- Rights-specific threat-model/recovery/monitoring closeout;
+- live deployment/Registry publication record tied to the public testnet release;
+- operator/deployment guide tied to the live release;
+- Rights-specific final threat-model/recovery/monitoring closeout;
 - Genesis acceptance/testnet evidence.
 
 ## Readiness
@@ -163,8 +171,8 @@ Still required:
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/threat-model/Genesis acceptance documents remain.
 - INTEGRATION COMPLETE: **NO** — offline Indexer/Search/Wallet boundaries exist, but live Registry/address/codehash binding is absent.
 - SECURITY QUALIFIED: **NO** — repository hardening is not production-equivalent deployment security qualification.
-- TESTNET READY: **NO** — deterministic release package and actual dependency/publication identities remain.
-- GENESIS READY: **NO** — blocked on RIGHTS-AUDIT-4 through 6.
+- TESTNET READY: **YES at repository-package scope** — deterministic release materialization is qualified; execution is blocked only on live public testnet/deployment identities.
+- GENESIS READY: **NO** — blocked on RIGHTS-AUDIT-5 and RIGHTS-AUDIT-6.
 - PRODUCTION READY: **NO** — blocked on testnet and final release/security closeout.
 
 ## Exact-head repository qualification
@@ -194,4 +202,6 @@ The subsequent audit bookkeeping commit is documentation-only and does not modif
 
 The source-level protocol is now repository-qualified as code/contract complete on implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, dedicated workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). The run passed formatting, canonical build, repository verifier, 12/12 Foundry Rights tests, forbidden-primitive scan, 420Indexer build, 18/18 Rights Indexer descriptor/lifecycle tests, hardening-profile tests and the targeted Slither high-severity gate with zero high-severity findings. Slither retained two low-impact timestamp findings consistent with the protocol's explicit validity-window semantics.
 
-Genesis/production completion must not be declared until deterministic deployment materialization, live ProtocolRegistry publication, production-equivalent testnet qualification and final operational/security documentation are retained as exact-head evidence.
+RIGHTS-AUDIT-4 subsequently completed repository release materialization on exact implementation SHA `94473daae80d4f5ede9f74414d65a5a8774d6237`, run `37178521825` (qualify job `111366155922`, security job `111366155820`). The step qualified the deterministic deployment/constructor graph, governed eight-class metadata commitment policy, compiler artifact identities, local ProtocolRegistry publication/deprecation/recovery, runtime-code-identity-aware Indexer binding, 15/15 Rights Foundry tests, 20 passing Indexer descriptor/lifecycle tests, hardening tests and a zero-high-severity Slither gate. Durable evidence is retained in `docs/audit/420RIGHTS-AUDIT-4-QUALIFICATION.md`.
+
+Genesis/production completion must not be declared until live ProtocolRegistry publication, production-equivalent public-testnet qualification and final operational/security documentation are retained as exact evidence under RIGHTS-AUDIT-5/6.

@@ -46,6 +46,7 @@ function renderRecord(target, payload) {
   const submitted = record.submission || {};
   const build = record.build || {};
   const classification = record.classification || {};
+  const proxy = record.proxy || {};
   const settings = submitted.build || {};
   const explorer = integration.explorerAddressPath
     ? '<a href="' + escapeHTML(integration.explorerAddressPath) + '">open in 420Explorer</a>'
@@ -76,6 +77,11 @@ function renderRecord(target, payload) {
         '<dt>compiler input hash</dt><dd>' + escapeHTML(build.inputSha256) + '</dd>' +
         '<dt>compiler output hash</dt><dd>' + escapeHTML(build.outputSha256) + '</dd>' +
         '<dt>creation compared</dt><dd>' + escapeHTML(classification.creationCompared) + '</dd>' +
+        '<dt>proxy kind</dt><dd>' + escapeHTML(proxy.kind || "NONE") + '</dd>' +
+        '<dt>implementation</dt><dd>' + escapeHTML(proxy.implementationAddress || "not applicable / unresolved") + '</dd>' +
+        '<dt>proxy admin</dt><dd>' + escapeHTML(proxy.adminAddress || "not recorded") + '</dd>' +
+        '<dt>beacon</dt><dd>' + escapeHTML(proxy.beaconAddress || "not recorded") + '</dd>' +
+        '<dt>proxy observation</dt><dd>' + escapeHTML(proxy.observedBlock ? ("block " + proxy.observedBlock + " · " + proxy.observedBlockHash) : "not a supported proxy") + '</dd>' +
         '<dt>Explorer</dt><dd>' + explorer + '</dd>' +
       '</dl>' +
       '<h3>diagnostics</h3>' + diagnosticList(record) +

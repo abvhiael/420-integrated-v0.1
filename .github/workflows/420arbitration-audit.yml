@@ -7,11 +7,16 @@ on:
       - 'contracts/test/Arbitration*.t.sol'
       - 'contracts/config/420arbitration-genesis.json'
       - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/arbitration/**'
       - 'contracts/src/libraries/ServiceIds420.sol'
       - 'docs/apps/arbitration/**'
       - 'docs/architecture/protocols/arbitration.md'
       - 'docs/audit/420ARBITRATION-*'
       - 'scripts/verify-420arbitration-audit.py'
+      - 'scripts/verify-arbitration-audit-4-release.py'
+      - 'wallet/web/core/arbitration-runtime.js'
+      - 'wallet/web/test/arbitration-runtime.test.js'
       - '.github/workflows/420arbitration-audit.yml'
   workflow_dispatch:
 
@@ -41,12 +46,16 @@ jobs:
           version: stable
       - name: Check Arbitration formatting
         working-directory: contracts
-        run: forge fmt --check src/arbitration test/ArbitrationGenesis420.t.sol
+        run: forge fmt --check src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol
       - name: Build Arbitration graph
         working-directory: contracts
-        run: forge build src/arbitration test/ArbitrationGenesis420.t.sol --sizes
+        run: forge build src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol --sizes
       - name: Verify Arbitration repository contract
         run: python3 scripts/verify-420arbitration-audit.py
+      - name: Verify ARBITRATION-AUDIT-4 release materialization
+        run: python3 scripts/verify-arbitration-audit-4-release.py
+      - name: Run Wallet Arbitration runtime qualification
+        run: node --test wallet/web/test/arbitration-runtime.test.js
       - name: Run Arbitration Foundry qualification
         working-directory: contracts
         run: forge test --match-path 'test/Arbitration*.t.sol' -vvv
@@ -90,6 +99,7 @@ jobs:
           import "./src/arbitration/ArbitrationPolicyRegistry420.sol";
           import "./src/arbitration/ArbitrationCaseRegistry420.sol";
           import "./src/arbitration/ArbitrationRulingRegistry420.sol";
+          import "./src/arbitration/ArbitrationRouter420.sol";
           SOL
           set +e
           slither ArbitrationAuditSlitherTarget.sol --json /tmp/arbitration-slither.json >/tmp/arbitration-slither.txt 2>&1
@@ -120,6 +130,8 @@ jobs:
                   "check": detector.get("check"),
                   "impact": detector.get("impact"),
                   "confidence": detector.get("confidence"),
+                  "description": detector.get("description"),
+                  "sources": sorted({e.get("source_mapping", {}).get("filename_relative", "") for e in arb}),
               }
               findings.append(item)
               if detector.get("impact") == "High":

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" role="img" aria-labelledby="title desc">
+<title id="title">420Analytics</title>
+<desc id="desc">Dark green 420 mark with ascending analytics bars inside the zero and ANALYTICS wordmark below.</desc>
+<defs>
+  <linearGradient id="deep" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#073d2e"/>
+    <stop offset=".58" stop-color="#0b6543"/>
+    <stop offset="1" stop-color="#034233"/>
+  </linearGradient>
+  <linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#087c46"/><stop offset="1" stop-color="#37a95d"/>
+  </linearGradient>
+  <linearGradient id="bar2" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#08733e"/><stop offset="1" stop-color="#4cb95f"/>
+  </linearGradient>
+  <linearGradient id="bar3" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#08703a"/><stop offset="1" stop-color="#62bd58"/>
+  </linearGradient>
+  <linearGradient id="bar4" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="#148442"/><stop offset="1" stop-color="#8bc34f"/>
+  </linearGradient>
+</defs>
+<rect width="1254" height="1254" fill="#fff"/>
+<g fill="url(#deep)">
+  <path d="M84 685 384 355h5v292h68v42h-68v98h-60v-98H84zm119-42h126V505z"/>
+  <path d="M426 498c0-89 62-143 148-143 91 0 145 55 145 135 0 64-35 104-94 157l-115 102h229v38H400v-21l181-166c54-48 74-77 74-113 0-51-33-80-82-80-51 0-83 33-83 91z"/>
+  <path fill-rule="evenodd" d="M920 347c126 0 228 102 228 228s-102 228-228 228-228-102-228-228 102-228 228-228zm0 54c-96 0-174 78-174 174s78 174 174 174 174-78 174-174-78-174-174-174z"/>
+</g>
+<g>
+  <rect x="764" y="654" width="49" height="98" fill="url(#bar1)"/>
+  <rect x="835" y="586" width="50" height="166" fill="url(#bar2)"/>
+  <rect x="907" y="519" width="53" height="233" fill="url(#bar3)"/>
+  <rect x="982" y="462" width="54" height="290" fill="url(#bar4)"/>
+</g>
+<text x="627" y="925" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="91" font-weight="300" letter-spacing="31" fill="#073d2e">ANALYTICS</text>
+</svg>

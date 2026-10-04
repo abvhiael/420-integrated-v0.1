@@ -1,27 +1,38 @@
-# 420Verify audit phase closeout trigger
+# 420Verify audit phase closeout
 
-This file is the durable Level 3 qualification sentinel for **VERIFY-AUDIT-8 — durable closeout**.
+This file is the durable Level 3 closeout record for **VERIFY-AUDIT-8 — durable closeout**.
 
-Its presence in PR #503 intentionally triggers the repository's existing canonical closeout owners against the same exact pull-request head. It does not duplicate their inventories.
-
-## Reconciliation base
+## Final reconciliation
 
 - Audit branch: `audit/420verify-20261003`
 - PR: `#503`
-- Reconciled main SHA: `1b9330871f7e9d0e79014955a61599baf70134fa`
-- Reconciliation merge commit: `017c53aff7c827d70972e5c8c828fd84f7057db5`
+- Final reconciled main SHA: `e22a744d8fbcff20f2b2108a1117ee3abe9dc437`
+- Exact qualified merge-candidate SHA: `711ed3640a46298f1b508da0d11cc7c5f349cc7a`
+- At qualification close the candidate was **0 commits behind** the recorded main base and PR #503 was mergeable.
+- Earlier qualified candidates were superseded when `main` advanced; they are not used as final Level 3 evidence.
 
-## Canonical Level 3 owners
+## Canonical Level 3 owner result
 
-The exact merge-candidate PR head selected by GitHub Actions must pass:
+Every required owner passed against the same exact implementation SHA `711ed3640a46298f1b508da0d11cc7c5f349cc7a`:
 
-1. **Solidity Contracts** — canonical full repository Foundry inventory. The PR path uses the retained runner-aware four-shard inventory. This is the only full Foundry owner for this closeout.
-2. **Genesis Address Authority** — canonical frozen-address, namespace, collision, predeploy, manifest-authority, and consumer verification. It does not repeat the full Foundry inventory.
-3. **420 Integrated Qualification** — offline core, production dependencies, pinned Geth engine smoke, fault matrix, and soak.
-4. **420Docs Qualification** — repository documentation/global reconciliation.
-5. **420Verify Audit Qualification** — exact-head Verify tests, gofmt, vet, service build, and deployment/readiness verification.
+1. **Solidity Contracts** — run `37233644005` (#4684), SUCCESS.
+   - classifier job `111528354096` — SUCCESS
+   - PR shard 0 job `111528566569` — SUCCESS
+   - PR shard 1 job `111528566531` — SUCCESS
+   - PR shard 2 job `111528566707` — SUCCESS
+   - PR shard 3 job `111528566509` — SUCCESS
+   - monolithic `foundry` job was correctly skipped for the PR path
+   - `compute-fast` was correctly skipped for this non-Compute closeout
+2. **Genesis Address Authority** — run `37233643891` (#1401), job `111528353603`, SUCCESS.
+3. **420 Integrated Qualification** — run `37233643996` (#6270), SUCCESS.
+   - fault-matrix `111528354042` — SUCCESS
+   - geth-engine `111528354162` — SUCCESS
+   - offline-core `111528354238` — SUCCESS
+   - production-dependencies `111528354242` — SUCCESS
+4. **420Docs Qualification** — run `37233643965` (#4919), job `111528353842`, SUCCESS.
+5. **420Verify Audit Qualification** — run `37233643971` (#75), job `111528353668`, SUCCESS.
 
-All owners must qualify the **same exact implementation SHA**. A skipped, cancelled, missing, stale, or superseded run is not passing evidence.
+The four PR shards are the canonical full Solidity inventory for this closeout. No duplicate full Foundry run is required.
 
 ## App-specific coverage retained
 
@@ -40,13 +51,13 @@ The Verify owner includes the accumulated remediation coverage for:
 - embedded frontend/API behavior;
 - deployment configuration and readiness metadata.
 
-420Verify is contract-free. No Verify-specific Solidity contract, ABI, frozen predeploy address, SDK package, Indexer implementation, Search implementation, or RPC implementation is introduced by this audit. Those repository surfaces are therefore qualified only through their applicable canonical global owners rather than through invented Verify-specific tests.
+420Verify is contract-free. No Verify-specific Solidity contract, ABI, frozen predeploy address, SDK package, Indexer implementation, Search implementation, or RPC implementation is introduced by this audit. Those repository surfaces were covered only through applicable canonical global owners rather than invented Verify-specific tests.
 
 ## Live deployment boundary
 
 This closeout qualifies repository readiness, not a fabricated deployment.
 
-The following remain external/testnet blockers and must stay recorded after repository closeout:
+The following remain external/testnet blockers:
 
 - no real public/testnet backend URL;
 - no real public/testnet frontend URL;
@@ -55,8 +66,14 @@ The following remain external/testnet blockers and must stay recorded after repo
 - no live monitoring evidence;
 - the production entrypoint does not continuously monitor proxy upgrades; persisted proxy relationships remain historical observations unless canonical state is revalidated.
 
-## Completion rule
+The existing `testnet/public-services/verify/readiness.json` remains a deployment-state/configuration artifact and is intentionally not mutated by this post-qualification evidence-only closeout. Its deployment-facing state must be advanced during the public-testnet phase and qualified as configuration at that time.
 
-After all canonical owners pass against one exact merge-candidate implementation SHA, VERIFY-AUDIT-8 may add an **evidence-only** durable closeout record identifying that SHA, run/job IDs, the reconciliation base, remaining external blockers, and formal repository-readiness state.
+## Formal result
 
-No merge is authorized by this file.
+**VERIFY-AUDIT-8: COMPLETE**
+
+Formal repository state: **REPOSITORY_AUDIT_COMPLETE_TESTNET_DEPLOYMENT_PENDING**.
+
+Durable evidence: `docs/audit/420VERIFY-AUDIT-8-QUALIFICATION.md`.
+
+No merge is authorized by this closeout.

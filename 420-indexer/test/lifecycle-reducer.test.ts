@@ -169,7 +169,7 @@ test('420Rights lifecycle uses canonical emitted contract events', () => {
   assert.equal(subject[0].eventName, 'SubjectMetadataUpdated');
 
   const claim = reduceProtocolLifecycle420([
-    event('420Rights', 'ClaimDeclared', 1n, { rightId }),
+    event('420Rights', 'ClaimDeclared', 1n, { rightId, subjectId }),
     event('420Rights', 'RightHolderTransferred', 2n, { rightId }),
     event('420Rights', 'ClaimSuperseded', 3n, { oldRightId: rightId, newRightId: '0x' + '44'.repeat(32) })
   ]);
@@ -180,7 +180,7 @@ test('420Rights lifecycle uses canonical emitted contract events', () => {
   assert.equal(claim[0].eventName, 'ClaimSuperseded');
 
   const license = reduceProtocolLifecycle420([
-    event('420Rights', 'LicenseGranted', 1n, { licenseId, rightId }),
+    event('420Rights', 'LicenseGranted', 1n, { licenseId, rightId, licensee: '0x0000000000000000000000000000000000000001' }),
     event('420Rights', 'LicenseRenounced', 2n, { licenseId })
   ]);
   assert.equal(license.length, 1);

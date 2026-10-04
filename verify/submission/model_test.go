@@ -73,3 +73,11 @@ func TestSubmissionRejectsPathTraversalAndCommitmentTampering(t *testing.T) {
 	s.BundleHash = "sha256:deadbeef"
 	if s.ValidateCommitment() == nil { t.Fatal("tampered bundle commitment must be rejected") }
 }
+
+
+func TestStandardJSONRejectsTrailingTopLevelValue(t *testing.T) {
+	raw := []byte(`{"language":"Solidity","settings":{},"sources":{}} {"extra":true}`)
+	if _, err := NewStandardJSON(raw, buildSettings()); err == nil {
+		t.Fatal("trailing Standard JSON value must be rejected")
+	}
+}

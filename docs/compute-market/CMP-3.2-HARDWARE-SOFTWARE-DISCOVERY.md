@@ -1,6 +1,6 @@
 # CMP-3.2 — Hardware/software discovery
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `a111b1d63083ccffa8a5afacd9529728ce0a2eab`.**
 
 ## Canonical definition
 
@@ -72,6 +72,16 @@ CMP-3.2 is complete when one exact implementation SHA proves all of the followin
 10. `node420-compute --discover` emits JSON and exits without starting the daemon;
 11. targeted Go tests, vet, build and mechanical verifier pass on the same exact implementation SHA;
 12. CMP-3.1 daemon behavior remains regression-qualified.
+
+## Qualification evidence
+
+- Implementation SHA: `a111b1d63083ccffa8a5afacd9529728ce0a2eab`
+- Compute Worker Fast Qualification: **#13**
+- Run ID: `37243425378`
+- Job ID: `111556506389`
+- Result: **SUCCESS**
+- Durable evidence anchor: `822877d010f38cc16d2fb15b529b11fd765f6ef7`
+- Evidence record: [CMP-3.2 qualification evidence](CMP-3.2-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

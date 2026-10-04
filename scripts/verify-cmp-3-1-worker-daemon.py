@@ -77,7 +77,7 @@ if (
     errors.append("CMP-3.1 documentation status drift")
 if "## CMP-3.2 — Hardware/software discovery" not in roadmap_text:
     errors.append("canonical CMP-3 roadmap missing")
-if "Verify CMP-3.1 worker daemon" not in workflow_text:
+if "Verify CMP-3.1 daemon regression" not in workflow_text:
     errors.append("Compute Worker fast workflow does not own CMP-3.1 verifier")
 if "go test ./compute/worker" not in workflow_text:
     errors.append("Compute Worker fast workflow does not test worker package")

@@ -27,6 +27,9 @@ on:
       - 'scripts/verify-420ai-v1-modules.py'
       - 'scripts/verify-420ai-compute-integration.py'
       - 'scripts/verify-420ai-custody-settlement.py'
+      - 'scripts/verify-420ai-deployment-materialization.py'
+      - 'contracts/config/ai/**'
+      - 'contracts/test/AIDeploymentMaterialization420.t.sol'
       - 'scripts/verify-420ai-provider-runtime.py'
       - '.github/workflows/420ai-audit.yml'
   workflow_dispatch:
@@ -115,6 +118,32 @@ jobs:
       - name: Verify AI-AUDIT-5 custody/settlement/dispute boundaries
         working-directory: .
         run: python3 scripts/verify-420ai-custody-settlement.py
+
+
+  deployment-materialization:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact AI qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build AI deployment graph
+        run: forge build src/ai test/AIDeploymentMaterialization420.t.sol
+      - name: Materialize frozen predeploys and Registry-resolved V1 graph
+        run: forge test --match-path 'test/AIDeploymentMaterialization420.t.sol' -vv
+      - name: Verify AI-AUDIT-9 deployment/materialization boundaries
+        working-directory: .
+        run: python3 scripts/verify-420ai-deployment-materialization.py
 
   provider-runtime:
     runs-on: ubuntu-latest

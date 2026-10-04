@@ -37,22 +37,11 @@ jobs:
         with:
           go-version: '1.23.x'
 
-      - name: Enforce audit-owned gofmt
+      - name: Enforce 420Verify gofmt
         shell: bash
         run: |
           set -euo pipefail
-          files=(
-            verify/cmd/verify420/main.go
-            verify/runtime/config.go
-            verify/runtime/service_test.go
-            verify/submission/model.go
-            verify/compiler/worker.go
-            verify/compiler/worker_audit_test.go
-            verify/matcher/classify.go
-            verify/matcher/classify_test.go
-            verify/processor/processor.go
-            verify/processor/processor_test.go
-          )
+          mapfile -t files < <(find verify -type f -name '*.go' -print | sort)
           unformatted="$(gofmt -l "${files[@]}")"
           if [ -n "$unformatted" ]; then
             echo "$unformatted"

@@ -1,38 +1,50 @@
 {
   "schema": "420-testnet-verify-readiness-v1",
-  "implementation_status": "QUALIFIED_AND_MERGED",
-  "implementation_phase": "VERIFY-10",
+  "implementation_status": "AUDIT_REMEDIATION_IN_PROGRESS",
+  "implementation_phase": "VERIFY-AUDIT-7",
+  "audit": {
+    "branch": "audit/420verify-20261003",
+    "pr": 503,
+    "current_step": "VERIFY-AUDIT-7",
+    "next_step": "VERIFY-AUDIT-8",
+    "last_qualified_implementation_sha": "868095783962370149e685f6145c0163b84ba5e8",
+    "last_qualification_workflow": "420Verify Audit Qualification",
+    "last_qualification_run": 37175301638,
+    "last_qualification_job": 111356576146,
+    "final_exact_head_qualification_required": true
+  },
   "backend": {
     "url": "REPLACE",
     "status": "PENDING_DEPLOYMENT",
-    "implementation_status": "IMPLEMENTED_AND_QUALIFIED",
+    "implementation_status": "IMPLEMENTED_AUDIT_REMEDIATED_PENDING_CLOSEOUT",
     "required_checks": [
       "reads deployed runtime bytecode from configured 420 network RPC",
       "binds every result to chain ID, address and runtime code hash",
       "accepts Solidity Standard JSON Input and multi-file bundles",
+      "requires explicit publishSource=true for public source publication",
       "records exact compiler version and settings",
       "checks runtime bytecode and creation bytecode when recoverable",
       "handles linked libraries, metadata and immutable references explicitly",
       "reports FULL_MATCH, PARTIAL_MATCH, MISMATCH or UNVERIFIABLE with reasons",
-      "detects proxy relationships and verifies proxy/implementation separately",
+      "records proxy relationships as block-scoped historical evidence",
       "does not inherit verification across implementation upgrades",
-      "survives restart without losing published verification evidence",
+      "survives restart without losing or silently rewriting published verification evidence",
       "allows independent reproduction from published evidence"
     ]
   },
   "frontend": {
     "url": "REPLACE",
     "status": "PENDING_DEPLOYMENT",
-    "implementation_status": "API_AND_VIEW_MODEL_IMPLEMENTED_AND_QUALIFIED",
+    "implementation_status": "EMBEDDED_UI_IMPLEMENTED_AUDIT_REMEDIATED_PENDING_CLOSEOUT",
     "required_views": [
       "address/network verification lookup",
-      "source and compiler submission",
+      "source and compiler submission with explicit publication consent",
       "verification status and mismatch diagnostics",
       "published source bundle",
       "compiler and optimizer settings",
       "runtime/creation code hashes",
       "constructor arguments and libraries",
-      "proxy and implementation status",
+      "proxy relationship with observation block rather than unsupported currentness claim",
       "verification history",
       "open in 420Explorer",
       "verification-is-not-an-audit warning"
@@ -43,16 +55,33 @@
     "verification cannot grant Registry legitimacy",
     "verification cannot authorize wallet or Smart Account capabilities",
     "verified badge never implies audit, safety, official status or immutability",
-    "source/result provenance preserved when consumed by Explorer or AppStore"
+    "source/result provenance preserved when consumed by Explorer or AppStore",
+    "public source publication requires explicit consent"
   ],
   "reproducibility_checks": [
     "same source/compiler/settings reproduce same reported code hash",
     "different chain ID or deployed code hash cannot reuse prior result",
     "metadata mismatch cannot be silently promoted to FULL_MATCH",
     "new proxy implementation requires independent verification",
+    "stored compiler output commitment survives JSON persistence and restart",
     "alternative verifier can reproduce a published FULL_MATCH"
   ],
-  "closeout": {
+  "deployment_requirements": [
+    "real backend/frontend URL assigned",
+    "TLS valid",
+    "healthz passes without canonical-authority claim",
+    "readyz passes against intended chain",
+    "durable evidence storage and monitoring active",
+    "compiler catalogue and cache provisioned from trusted source",
+    "wrong-chain and compiler-checksum failures verified fail-closed",
+    "restart reconstruction smoke test passes",
+    "proxy currentness is not overstated"
+  ],
+  "limitations": [
+    "public testnet backend/frontend endpoints are not deployed",
+    "production entrypoint does not continuously monitor proxy upgrades; persisted relationships are historical observations"
+  ],
+  "historical_closeout": {
     "latest_main_reconciled_via_pr": 304,
     "reconciliation_commit": "afaf3e9f669590299c4b0898341f8195db30d441",
     "qualified_feature_head": "e723037ca7cd09e530035577d7eb41319f387e75",
@@ -60,7 +89,7 @@
     "integrated_qualification_run": 3678,
     "phase_pr": 303,
     "phase_merge_commit": "1f937b7ef641980cc118336763ba50ffc8f3cc5a",
-    "public_endpoint_deployment_claimed": false,
-    "final_exact_head_qualification_required": false
-  }
+    "superseded_for_current_completeness_claims": true
+  },
+  "public_endpoint_deployment_claimed": false
 }

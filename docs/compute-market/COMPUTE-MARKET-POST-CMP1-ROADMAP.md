@@ -318,9 +318,15 @@ CMP-2.7 is the final substantive market milestone before phase closeout. Level 1
 Durable evidence: [CMP-2.7 qualification](CMP-2.7-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-2.8 — Phase closeout
-**Status: NEXT — Level 3 phase closeout not yet started.**
+**Status: reconciliation complete; Level 3 comprehensive qualification in progress.**
 
 Reconcile the accumulated matching-market graph, run the required Level 3 qualification, preserve durable evidence, and prepare the handoff to CMP-3 — node420 worker runtime.
+
+Reconciliation baseline: current `main` `834fcdd58bbe597716657bf69d3f302897f7227f`; reconciliation merge `808748b291164e38e0c67afc6640b989815dfb48`; branch was 0 commits behind `main` immediately after reconciliation.
+
+Level 3 requires one exact accumulated merge-candidate SHA to pass canonical full Solidity qualification, Genesis/address-authority verification without duplicate Foundry, 420 Integrated/global qualification, Docs/global reconciliation, retained Compute Market qualification, affected SDK/client qualification, Indexer/shared-consumer checks, and required adversarial/invariant/security/static/deployment/config/build/lint/type checks.
+
+Durable closeout evidence is recorded only after all required Level 3 owners pass the same exact merge-candidate SHA.
 
 ---
 
@@ -580,7 +586,7 @@ Production target flow:
 | CMP-1.3 WorkerRegistry | current: CMP-1.3.16 closeout |
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
-| CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 phase closeout next |
+| CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | forthcoming |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |

@@ -9,7 +9,7 @@ tests = ROOT / "compute/worker/daemon_test.go"
 cmd = ROOT / "execution/cmd/node420-compute/main.go"
 doc = ROOT / "docs/compute-market/CMP-3.1-WORKER-DAEMON.md"
 roadmap = ROOT / "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md"
-workflow = ROOT / ".github/workflows/compute-market.yml"
+workflow = ROOT / ".github/workflows/compute-worker-fast.yml"
 makefile = ROOT / "Makefile"
 
 errors = []
@@ -78,9 +78,9 @@ if (
 if "## CMP-3.2 — Hardware/software discovery" not in roadmap_text:
     errors.append("canonical CMP-3 roadmap missing")
 if "Verify CMP-3.1 worker daemon" not in workflow_text:
-    errors.append("Compute Market workflow does not own CMP-3.1 verifier")
+    errors.append("Compute Worker fast workflow does not own CMP-3.1 verifier")
 if "go test ./compute/worker" not in workflow_text:
-    errors.append("Compute Market workflow does not test worker package")
+    errors.append("Compute Worker fast workflow does not test worker package")
 if "bin/node420-compute" not in make_text:
     errors.append("Makefile does not build node420-compute")
 

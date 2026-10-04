@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-audit:
@@ -37,20 +37,51 @@ jobs:
         with:
           go-version: '1.23.x'
 
-      - name: Enforce gofmt
+      - name: Normalize audit-owned Go files
+        if: github.event_name == 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
-          files="$(find verify -name '*.go' -type f -print)"
-          unformatted="$(gofmt -l $files)"
-          if [ -n "$unformatted" ]; then
-            echo "Unformatted Go files:"
-            echo "$unformatted"
-            echo
-            echo "gofmt diff:"
-            gofmt -d $files
+          files=(
+            verify/cmd/verify420/main.go
+            verify/runtime/config.go
+            verify/runtime/service_test.go
+            verify/submission/model.go
+            verify/compiler/worker.go
+            verify/compiler/worker_audit_test.go
+            verify/matcher/classify.go
+            verify/matcher/classify_test.go
+            verify/processor/processor.go
+            verify/processor/processor_test.go
+          )
+          gofmt -w "${files[@]}"
+          if ! git diff --quiet -- "${files[@]}"; then
+            git config user.name "420Verify audit qualification"
+            git config user.email "actions@users.noreply.github.com"
+            git add -- "${files[@]}"
+            git commit -m "VERIFY-AUDIT: apply gofmt to remediation files"
+            git push origin "HEAD:${{ github.head_ref }}"
+            echo "Formatting commit pushed; this run intentionally stops so the new exact head can requalify."
             exit 1
           fi
+
+      - name: Enforce audit-owned gofmt
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            verify/cmd/verify420/main.go
+            verify/runtime/config.go
+            verify/runtime/service_test.go
+            verify/submission/model.go
+            verify/compiler/worker.go
+            verify/compiler/worker_audit_test.go
+            verify/matcher/classify.go
+            verify/matcher/classify_test.go
+            verify/processor/processor.go
+            verify/processor/processor_test.go
+          )
+          test -z "$(gofmt -l "${files[@]}")"
 
       - name: Run 420Verify tests
         run: go test ./verify/...

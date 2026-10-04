@@ -24,6 +24,8 @@ app=(WEB/"app.js").read_text()
 html=(WEB/"index.html").read_text()
 controller=(WEB/"core/controller.js").read_text()
 config=(WEB/"core/config.js").read_text()
+wallet=(WEB/"core/wallet.js").read_text()
+read_api=(WEB/"core/read-api.js").read_text()
 tx=(WEB/"core/transactions.js").read_text()
 workflow=(ROOT/".github/workflows/420ai-audit.yml").read_text()
 arch=(ROOT/"docs/420-AI-V1-ARCHITECTURE.md").read_text()
@@ -44,7 +46,7 @@ for token in [
  "eth_requestAccounts","eth_sendTransaction","eth_estimateGas","wallet-invalidated",
  "prepareRequest","prepareCancel","prepareDispute","inputCommitment","420-ai-read-v1"
 ]:
-    if token not in (controller+tx): errors.append("client authority/lifecycle boundary missing: "+token)
+    if token not in (controller+wallet+read_api+tx): errors.append("client authority/lifecycle boundary missing: "+token)
 
 if "AIJobEscrow.fund" not in (WEB/"README.md").read_text(): errors.append("disabled direct funding boundary not documented")
 if "innerHTML" in app: errors.append("client must not render indexed/review data through innerHTML")

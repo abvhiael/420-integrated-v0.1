@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -164,5 +165,18 @@ func BindImplementation(pair VerificationPair, relationship Relationship, implem
 	return pair, nil
 }
 
-func validAddress(v string) bool { return len(v) == 42 && strings.HasPrefix(v, "0x") }
-func validHash(v string) bool { return len(v) == 66 && strings.HasPrefix(v, "0x") }
+func validAddress(v string) bool {
+	if len(v) != 42 || !strings.HasPrefix(v, "0x") {
+		return false
+	}
+	_, err := hex.DecodeString(v[2:])
+	return err == nil
+}
+
+func validHash(v string) bool {
+	if len(v) != 66 || !strings.HasPrefix(v, "0x") {
+		return false
+	}
+	_, err := hex.DecodeString(v[2:])
+	return err == nil
+}

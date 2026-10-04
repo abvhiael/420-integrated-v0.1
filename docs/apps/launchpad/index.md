@@ -24,3 +24,4 @@ Launchpad does not make a project safe, legitimate, profitable or endorsed merel
 - [Troubleshooting](troubleshooting.md)
 - [FAQ](faq.md)
 - [Developer integration](developer/index.md)
+- [Deployment and operations](deployment-operations.md)

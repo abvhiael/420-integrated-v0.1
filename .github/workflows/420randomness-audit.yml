@@ -1,0 +1,114 @@
+name: 420Randomness audit qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420randomness-*'
+    paths:
+      - 'contracts/src/randomness/**'
+      - 'contracts/src/interfaces/IRandomness*.sol'
+      - 'contracts/test/Randomness*.t.sol'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/predeploy/RandomnessRegistry-predeploy-state.json'
+      - 'contracts/artifacts/RandomnessRegistry.json'
+      - 'contracts/config/deployment-manifest.json'
+      - 'contracts/config/randomness/random-audit-4-deployment-bundle.json'
+      - 'scripts/generate-random-audit-3-genesis.py'
+      - 'scripts/verify-random-audit-4-deployment.py'
+      - 'scripts/test-random-audit-3-genesis.py'
+      - 'scripts/verify-420randomness-audit.py'
+      - 'docs/audit/420RANDOMNESS-*'
+      - 'docs/apps/randomness/**'
+      - '420-indexer/descriptors/randomness-v1.json'
+      - '420-indexer/src/randomness-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/test/randomness420-release-descriptor.test.ts'
+      - 'scripts/qualify-randomness-testnet.py'
+      - 'scripts/verify-random-audit-5-testnet-readiness.py'
+      - '.github/workflows/randomness-live-testnet.yml'
+      - '.github/workflows/randomness-audit-5.yml'
+      - 'docs/audit/RANDOM-AUDIT-5-*'
+      - '.github/workflows/420randomness-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/randomness/**'
+      - 'contracts/src/interfaces/IRandomness*.sol'
+      - 'contracts/test/Randomness*.t.sol'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/predeploy/predeploy-plan.json'
+      - 'contracts/config/randomness/random-audit-4-deployment-bundle.json'
+      - 'scripts/verify-random-audit-4-deployment.py'
+      - 'scripts/verify-420randomness-audit.py'
+      - 'docs/audit/420RANDOMNESS-*'
+      - 'docs/apps/randomness/**'
+      - '420-indexer/descriptors/randomness-v1.json'
+      - '420-indexer/src/randomness-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/test/randomness420-release-descriptor.test.ts'
+      - 'scripts/qualify-randomness-testnet.py'
+      - 'scripts/verify-random-audit-5-testnet-readiness.py'
+      - '.github/workflows/randomness-live-testnet.yml'
+      - '.github/workflows/randomness-audit-5.yml'
+      - 'docs/audit/RANDOM-AUDIT-5-*'
+      - '.github/workflows/420randomness-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: randomness-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify canonical Randomness inventory and Genesis wiring
+        run: python3 scripts/verify-420randomness-audit.py
+      - name: Verify RANDOM-AUDIT-4 deployment bundle
+        run: python3 scripts/verify-random-audit-4-deployment.py
+      - name: Check Randomness Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/randomness src/interfaces/IRandomnessRouter420.sol src/interfaces/IRandomnessVerifier420.sol test/Randomness420.t.sol test/RandomnessAudit420.t.sol test/RandomnessDeploymentBinding420.t.sol test/RandomnessDraw420.t.sol
+      - name: Build canonical Randomness graph
+        working-directory: contracts
+        run: forge build src/randomness src/interfaces/IRandomnessRouter420.sol src/interfaces/IRandomnessVerifier420.sol
+      - name: Verify deterministic RandomnessRegistry Genesis materialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/generate-random-audit-3-genesis.py --check --print
+          python3 scripts/test-random-audit-3-genesis.py
+          git status --porcelain -- contracts/artifacts/RandomnessRegistry.json contracts/config/predeploy/RandomnessRegistry-predeploy-state.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json | tee /tmp/randomness-genesis-status.txt
+          if [ -s /tmp/randomness-genesis-status.txt ]; then
+            echo 'Committed RandomnessRegistry Genesis materialization is stale.' >&2
+            exit 1
+          fi
+      - name: Run Randomness qualification suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Randomness*.t.sol' -vvv
+      - name: Forbidden primitive scan
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/randomness; then
+            echo 'Forbidden primitive found in 420Randomness sources' >&2
+            exit 1
+          fi

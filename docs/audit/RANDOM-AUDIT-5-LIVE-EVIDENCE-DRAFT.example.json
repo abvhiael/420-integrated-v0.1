@@ -1,0 +1,119 @@
+{
+  "schema": "420-randomness-live-testnet-evidence-draft-v1",
+  "phase": "RANDOM-AUDIT-5",
+  "status": "DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE",
+  "instructions": "Copy to docs/audit/RANDOM-AUDIT-5-LIVE-EVIDENCE-DRAFT.json only after the approved production-equivalent public testnet exists. Replace every REPLACE value with real non-secret chain/deployment/transaction/projection evidence. Never commit private keys, mnemonics, bearer tokens, passwords, RPC credentials, or credential-bearing endpoints.",
+  "release": {
+    "repositorySha": "REPLACE_EXACT_RELEASE_SHA",
+    "chainId": 0,
+    "genesisHash": "REPLACE_BYTES32",
+    "evidenceBlock": 0,
+    "evidenceBlockHash": "REPLACE_BYTES32"
+  },
+  "deployments": {
+    "RandomnessRegistry": {
+      "address": "0x0000000000000000000000000000000000000428",
+      "runtimeCodeHash": "0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a"
+    },
+    "RandomnessRouteRegistry420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "REPLACE_BYTES32"
+    },
+    "RandomnessProfileRegistry420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "REPLACE_BYTES32"
+    },
+    "RandomnessRouter420": {
+      "address": "REPLACE_ADDRESS",
+      "runtimeCodeHash": "REPLACE_BYTES32"
+    }
+  },
+  "bindings": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "routerConstructorBindingsVerified": false,
+    "registryBoundRouterVerified": false,
+    "registryBoundRouterMatchesPublishedRouter": false,
+    "bindRouterOneTimeVerified": false
+  },
+  "registryPublication": {
+    "componentIdPreimage": "420/APP/420RANDOM/RANDOMNESS_ROUTER",
+    "serviceIdPreimage": "420/service/randomness/v1",
+    "componentVersion": "1.0.0",
+    "serviceVersion": 1,
+    "componentActive": false,
+    "serviceActive": false,
+    "componentRuntimeIdentityMatches": false,
+    "serviceRuntimeIdentityMatches": false,
+    "componentRegistrationTx": "REPLACE_TX_HASH",
+    "servicePublicationTx": "REPLACE_TX_HASH",
+    "bindRouterTx": "REPLACE_TX_HASH"
+  },
+  "configuration": {
+    "primaryRouteId": "REPLACE_BYTES32",
+    "fallbackRouteId": "REPLACE_BYTES32",
+    "profileId": "REPLACE_BYTES32",
+    "primaryRouteActive": false,
+    "fallbackRouteActive": false,
+    "profileActive": false,
+    "primaryRouteRevision": 0,
+    "fallbackRouteRevision": 0,
+    "profileRevision": 0,
+    "primaryOperator": "REPLACE_ADDRESS",
+    "fallbackOperator": "REPLACE_ADDRESS",
+    "primaryVerifier": "REPLACE_ADDRESS",
+    "fallbackVerifier": "REPLACE_ADDRESS"
+  },
+  "smoke": {
+    "primary": {
+      "requestId": "REPLACE_BYTES32",
+      "requestTx": "REPLACE_TX_HASH",
+      "fulfillTx": "REPLACE_TX_HASH",
+      "resolved": false,
+      "usedPrimaryRoute": false,
+      "registryResultMatchesRouter": false
+    },
+    "fallback": {
+      "requestId": "REPLACE_BYTES32",
+      "requestTx": "REPLACE_TX_HASH",
+      "activateFallbackTx": "REPLACE_TX_HASH",
+      "fulfillTx": "REPLACE_TX_HASH",
+      "resolved": false,
+      "usedFallbackRoute": false,
+      "registryResultMatchesRouter": false
+    },
+    "void": {
+      "requestId": "REPLACE_BYTES32",
+      "requestTx": "REPLACE_TX_HASH",
+      "voidTx": "REPLACE_TX_HASH",
+      "voidedAfterDeadline": false,
+      "noResultRecorded": false
+    }
+  },
+  "negativeAndFailurePaths": {
+    "unauthorizedRouteMutationRejected": false,
+    "unauthorizedProfileMutationRejected": false,
+    "unauthorizedBindRejected": false,
+    "secondBindRejected": false,
+    "wrongOperatorFulfillmentRejected": false,
+    "invalidProofRejected": false,
+    "earlyFallbackRejected": false,
+    "postDeadlineFulfillmentRejected": false
+  },
+  "indexer": {
+    "qualified": false,
+    "chainId": 0,
+    "genesisHash": "REPLACE_BYTES32",
+    "routerAddress": "REPLACE_ADDRESS",
+    "descriptor": "420-indexer/descriptors/randomness-v1.json",
+    "primaryRequestProjected": false,
+    "primaryResolvedProjected": false,
+    "fallbackActivatedProjected": false,
+    "fallbackResolvedProjected": false,
+    "voidedProjected": false,
+    "requestObjectKeysMatch": false,
+    "terminalStatesMatch": false,
+    "canonicalBlockProvenanceRetained": false,
+    "evidenceReportDigest": "REPLACE_BYTES32"
+  }
+}

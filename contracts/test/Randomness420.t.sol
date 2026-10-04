@@ -10,9 +10,15 @@ import "../src/randomness/RandomnessRegistry.sol";
 import "../src/randomness/RandomnessRouter420.sol";
 
 interface VmRandomness420 {
-    function prank(address) external;
-    function warp(uint256) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function warp(
+        uint256
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
 }
 
 contract MockRandomnessVerifier420 is IRandomnessVerifier420 {
@@ -102,7 +108,10 @@ contract Randomness420Test {
         registry.bindRouter(address(router));
     }
 
-    function _proof(bytes32 requestId, bytes32 randomness) private pure returns (bytes memory) {
+    function _proof(
+        bytes32 requestId,
+        bytes32 randomness
+    ) private pure returns (bytes memory) {
         return abi.encode(keccak256(abi.encode(requestId, DOMAIN, PURPOSE, randomness)));
     }
 
@@ -144,7 +153,7 @@ contract Randomness420Test {
     }
 
     function testRouteRevisionDoesNotBrickAcceptedRequest() public {
-        (RandomnessRouteRegistry420 routes, , , RandomnessRouter420 router) = _deploy();
+        (RandomnessRouteRegistry420 routes,,, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
         MockRandomnessVerifier420 verifier2 = new MockRandomnessVerifier420();
         routes.setRoute(
@@ -164,7 +173,7 @@ contract Randomness420Test {
     }
 
     function testValidProofFulfillsExactlyOnceIncludingZeroProviderWord() public {
-        (, , RandomnessRegistry registry, RandomnessRouter420 router) = _deploy();
+        (,, RandomnessRegistry registry, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
         bytes32 providerRandomness = bytes32(0);
 
@@ -183,7 +192,7 @@ contract Randomness420Test {
     }
 
     function testInvalidProofAndUnauthorizedOperatorFailClosed() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
         bytes32 entropy = keccak256("entropy");
 
@@ -198,7 +207,7 @@ contract Randomness420Test {
     }
 
     function testFallbackIsPredeterminedTimeoutOnlyAndSingleStage() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
 
         vm.expectRevert(RandomnessRouter420.FallbackTooEarly.selector);
@@ -219,7 +228,7 @@ contract Randomness420Test {
     }
 
     function testVoidProfileHasNoFallbackPath() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(VOID_PROFILE, DOMAIN, PURPOSE, 1_200);
         vm.warp(1_061);
         vm.expectRevert(RandomnessRouter420.FallbackUnavailable.selector);
@@ -227,13 +236,13 @@ contract Randomness420Test {
     }
 
     function testRequestLifetimeCannotExceedProfileMaximum() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         vm.expectRevert(RandomnessRouter420.InvalidDeadline.selector);
         router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_301);
     }
 
     function testPrimaryCannotFulfillAfterFallbackWindowOpens() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
         vm.warp(1_061);
         bytes32 entropy = keccak256("late-primary");
@@ -243,7 +252,7 @@ contract Randomness420Test {
     }
 
     function testExpiredRequestVoidsAndCannotBeResolvedOrRerolled() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         bytes32 requestId = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_100);
         vm.warp(1_101);
         router.voidExpired(requestId);
@@ -256,7 +265,7 @@ contract Randomness420Test {
     }
 
     function testRequestIdsAreReplaySafePerRequesterNonce() public {
-        (, , , RandomnessRouter420 router) = _deploy();
+        (,,, RandomnessRouter420 router) = _deploy();
         bytes32 a = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
         bytes32 b = router.requestRandomness(PROFILE, DOMAIN, PURPOSE, 1_300);
         require(a != b, "request replay");

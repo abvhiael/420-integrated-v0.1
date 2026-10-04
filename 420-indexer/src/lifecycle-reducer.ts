@@ -30,7 +30,8 @@ export interface LifecycleSnapshot420 {
 
 const KEY_FIELDS = [
   'objectId','componentId','labelHash','profileId','credentialId','issuerId','validatorId','stakeId','proposalId','paymentId',
-  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId'
+  'invoiceId','routeId','swapId','transferId','bridgeId','requestId','rightId','licenseId','assetId',
+  'programId','applicationId','awardId','milestoneId'
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
@@ -40,7 +41,9 @@ export function protocolObjectKey420(event: DecodedProtocolEvent420): string | n
   // first generic identifier present in the event.
   const keys = event.protocol === '420Identity'
     ? ['credentialId','profileId','issuerId'] as const
-    : KEY_FIELDS;
+    : event.protocol === '420Randomness'
+      ? ['requestId','profileId','routeId'] as const
+      : KEY_FIELDS;
   for (const key of keys) {
     const value = event.fields[key];
     if (value !== undefined && value !== null) return `${key}:${String(value).toLowerCase()}`;
@@ -96,6 +99,23 @@ const POLICY_LIST: LifecyclePolicy420[] = [
   { protocol: '420Governance', rules: [
     { eventName: 'CivicProposalRegistered', state: 'ACTIVE' }
   ]},
+  { protocol: '420Grants', rules: [
+    { eventName: 'ProgramCreated', state: 'ACTIVE' },
+    { eventName: 'ApplicationSubmitted', state: 'ACTIVE' },
+    { eventName: 'AwardCreated', state: 'ACTIVE' },
+    {
+      eventName: 'AwardStateChanged',
+      state: 'UNKNOWN',
+      stateField: 'state',
+      stateMap: { '1': 'ACTIVE', '2': 'CANCELLED', '3': 'COMPLETED' },
+      terminalFieldValues: ['2','3']
+    },
+    { eventName: 'MilestoneCreated', state: 'PENDING' },
+    { eventName: 'MilestoneClaimed', state: 'ACTIVE' },
+    { eventName: 'MilestoneApproved', state: 'ACTIVE' },
+    { eventName: 'MilestonePaid', state: 'COMPLETED', terminal: true },
+    { eventName: 'MilestoneCancelled', state: 'CANCELLED', terminal: true }
+  ]},
   { protocol: '420Pay', rules: [
     {
       eventName: 'PaymentSet',
@@ -132,8 +152,12 @@ const POLICY_LIST: LifecyclePolicy420[] = [
   ]},
   { protocol: '420Randomness', rules: [
     { eventName: 'RandomnessRequested', state: 'PENDING' },
-    { eventName: 'RequestCreated', state: 'PENDING' },
+    { eventName: 'RandomnessRequestCreated', state: 'PENDING' },
+    { eventName: 'RandomnessFallbackActivated', state: 'ACTIVE' },
     { eventName: 'RandomnessFulfilled', state: 'COMPLETED', terminal: true },
+    { eventName: 'RandomnessResolved', state: 'COMPLETED', terminal: true },
+    { eventName: 'RandomnessRequestVoided', state: 'EXPIRED', terminal: true },
+    { eventName: 'RequestCreated', state: 'PENDING' },
     { eventName: 'RequestFulfilled', state: 'COMPLETED', terminal: true },
     { eventName: 'RequestCancelled', state: 'CANCELLED', terminal: true },
     { eventName: 'RequestExpired', state: 'EXPIRED', terminal: true }

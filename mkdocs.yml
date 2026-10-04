@@ -214,6 +214,8 @@ nav:
                   - Events & Finality: apps/identity/developer/events.md
                   - Errors & Retries: apps/identity/developer/errors.md
                   - Examples: apps/identity/developer/examples.md
+          - 420 Pay:
+              - Deployment & Operations: apps/pay/deployment-operations.md
           - 420 Swap:
               - Overview: apps/swap/index.md
               - Getting Started: apps/swap/getting-started.md
@@ -330,6 +332,11 @@ nav:
                   - Events & Finality: apps/arbitration/developer/events.md
                   - Errors & Retries: apps/arbitration/developer/errors.md
                   - Examples: apps/arbitration/developer/examples.md
+          - 420 Oracle:
+              - Overview: apps/oracle/index.md
+              - Testnet Qualification: apps/oracle/testnet-qualification.md
+          - 420 Randomness:
+              - Overview: apps/randomness/README.md
           - 420 AI:
               - Overview: apps/ai/index.md
               - Getting Started: apps/ai/getting-started.md

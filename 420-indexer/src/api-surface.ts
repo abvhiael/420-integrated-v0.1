@@ -15,6 +15,7 @@ import { logDto420, type LogDto420, type ReceiptDto420 } from './receipt-log-dto
 import { receiptByHash420 } from './receipt-log-service.js';
 import { protocolObjectState420 } from './protocol-object-service.js';
 import { treasuryBudgetState420, treasuryDisbursementState420, type TreasuryBudgetState420, type TreasuryDisbursementState420 } from './treasury-read-model.js';
+import { grantsProgramState420, grantsApplicationState420, grantsAwardState420, grantsMilestoneState420, type GrantsProgramState420, type GrantsApplicationState420, type GrantsAwardState420, type GrantsMilestoneState420 } from './grants-read-model.js';
 import {
   indexerHealth420,
   indexerReadiness420,
@@ -85,6 +86,10 @@ export interface IndexerPublicApi420 {
   protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null>;
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null>;
   treasuryDisbursement(chainId: bigint, disbursementId: string): Promise<TreasuryDisbursementState420 | null>;
+  grantsProgram(chainId: bigint, programId: string): Promise<GrantsProgramState420 | null>;
+  grantsApplication(chainId: bigint, applicationId: string): Promise<GrantsApplicationState420 | null>;
+  grantsAward(chainId: bigint, awardId: string): Promise<GrantsAwardState420 | null>;
+  grantsMilestone(chainId: bigint, milestoneId: string): Promise<GrantsMilestoneState420 | null>;
   search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]>;
 }
 
@@ -181,6 +186,22 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
 
   treasuryDisbursement(chainId: bigint, disbursementId: string): Promise<TreasuryDisbursementState420 | null> {
     return treasuryDisbursementState420(this.service.db, chainId, disbursementId);
+  }
+
+  grantsProgram(chainId: bigint, programId: string): Promise<GrantsProgramState420 | null> {
+    return grantsProgramState420(this.service.db, chainId, programId);
+  }
+
+  grantsApplication(chainId: bigint, applicationId: string): Promise<GrantsApplicationState420 | null> {
+    return grantsApplicationState420(this.service.db, chainId, applicationId);
+  }
+
+  grantsAward(chainId: bigint, awardId: string): Promise<GrantsAwardState420 | null> {
+    return grantsAwardState420(this.service.db, chainId, awardId);
+  }
+
+  grantsMilestone(chainId: bigint, milestoneId: string): Promise<GrantsMilestoneState420 | null> {
+    return grantsMilestoneState420(this.service.db, chainId, milestoneId);
   }
 
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> {

@@ -134,6 +134,30 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
       return disbursement ? ok420(disbursement) : error420(404, 'not_found', 'Treasury disbursement not found');
     }
 
+    const grantsProgramId = pathParam420(path, /^\/v1\/grants\/programs\/([^/]+)$/);
+    if (grantsProgramId !== null) {
+      const program = await api.grantsProgram(chainId, grantsProgramId);
+      return program ? ok420(program) : error420(404, 'not_found', 'Grants program not found');
+    }
+
+    const grantsApplicationId = pathParam420(path, /^\/v1\/grants\/applications\/([^/]+)$/);
+    if (grantsApplicationId !== null) {
+      const application = await api.grantsApplication(chainId, grantsApplicationId);
+      return application ? ok420(application) : error420(404, 'not_found', 'Grants application not found');
+    }
+
+    const grantsAwardId = pathParam420(path, /^\/v1\/grants\/awards\/([^/]+)$/);
+    if (grantsAwardId !== null) {
+      const award = await api.grantsAward(chainId, grantsAwardId);
+      return award ? ok420(award) : error420(404, 'not_found', 'Grants award not found');
+    }
+
+    const grantsMilestoneId = pathParam420(path, /^\/v1\/grants\/milestones\/([^/]+)$/);
+    if (grantsMilestoneId !== null) {
+      const milestone = await api.grantsMilestone(chainId, grantsMilestoneId);
+      return milestone ? ok420(milestone) : error420(404, 'not_found', 'Grants milestone not found');
+    }
+
     const blockId = pathParam420(path, /^\/v1\/blocks\/([^/]+)$/);
     if (blockId !== null) {
       const block = await api.block(chainId, blockId);

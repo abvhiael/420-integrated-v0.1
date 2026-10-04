@@ -1,0 +1,294 @@
+{
+  "schema": "420-grants-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Grants",
+  "authority": "artifact_events_only_addresses_resolved_by_registry",
+  "contracts": [
+    {
+      "contractName": "GrantProgramRegistry420",
+      "sourcePath": "contracts/src/grants/GrantProgramRegistry420.sol",
+      "events": [
+        {
+          "name": "ProgramCreated",
+          "signature": "ProgramCreated(bytes32,bytes32,bytes32,uint128,uint128,uint64,uint64,bytes32)",
+          "inputs": [
+            {
+              "name": "programId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "treasuryBudgetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "programType",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "totalCap",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "maxAward",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "opensAt",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "closesAt",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "civicActionHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProgramActiveChanged",
+          "signature": "ProgramActiveChanged(bytes32,bool)",
+          "inputs": [
+            {
+              "name": "programId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "active",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ProgramAwardedChanged",
+          "signature": "ProgramAwardedChanged(bytes32,uint128)",
+          "inputs": [
+            {
+              "name": "programId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "awarded",
+              "type": "uint128",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "AwardRegistryBound",
+          "signature": "AwardRegistryBound(address)",
+          "inputs": [
+            {
+              "name": "awardRegistry",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "GrantApplicationRegistry420",
+      "sourcePath": "contracts/src/grants/GrantApplicationRegistry420.sol",
+      "events": [
+        {
+          "name": "ApplicationSubmitted",
+          "signature": "ApplicationSubmitted(bytes32,bytes32,address,uint128,bytes32)",
+          "inputs": [
+            {
+              "name": "applicationId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "programId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "applicant",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "requestedAmount",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "contentHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "GrantAwardRegistry420",
+      "sourcePath": "contracts/src/grants/GrantAwardRegistry420.sol",
+      "events": [
+        {
+          "name": "AwardCreated",
+          "signature": "AwardCreated(bytes32,bytes32,bytes32,address,uint128,bytes32)",
+          "inputs": [
+            {
+              "name": "awardId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "programId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "applicationId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "recipient",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "termsHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "AwardStateChanged",
+          "signature": "AwardStateChanged(bytes32,uint8)",
+          "inputs": [
+            {
+              "name": "awardId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "state",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "GrantMilestoneRegistry420",
+      "sourcePath": "contracts/src/grants/GrantMilestoneRegistry420.sol",
+      "events": [
+        {
+          "name": "MilestoneCreated",
+          "signature": "MilestoneCreated(bytes32,bytes32,uint128,bytes32)",
+          "inputs": [
+            {
+              "name": "milestoneId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "awardId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint128",
+              "indexed": false
+            },
+            {
+              "name": "purposeHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "MilestoneClaimed",
+          "signature": "MilestoneClaimed(bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "name": "milestoneId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "claimHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "submitter",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "MilestoneApproved",
+          "signature": "MilestoneApproved(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "milestoneId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "treasuryDisbursementId",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "MilestonePaid",
+          "signature": "MilestonePaid(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "milestoneId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "treasuryDisbursementId",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "MilestoneCancelled",
+          "signature": "MilestoneCancelled(bytes32)",
+          "inputs": [
+            {
+              "name": "milestoneId",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

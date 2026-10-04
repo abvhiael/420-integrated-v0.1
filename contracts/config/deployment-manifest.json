@@ -58,8 +58,13 @@
     },
     {
       "address": "0x0000000000000000000000000000000000000428",
+      "artifact_status": "RANDOM_AUDIT_3_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "name": "RandomnessRegistry"
+      "name": "RandomnessRegistry",
+      "predeploy_state": "contracts/config/predeploy/RandomnessRegistry-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/RandomnessRegistry.json",
+      "runtime_code_hash": "0x0c921ab8b2282ea3ed2d7f64b5ca0f6ecb54c67d52e421a347a1449d43e8345a",
+      "source_blob_sha1": "4f5548314eb37c7c52f8199560439f97c6c837ce"
     },
     {
       "address": "0x0000000000000000000000000000000000000429",

@@ -1,0 +1,130 @@
+{
+  "schema": "420-launchpad-crowdfunding-integration-v1",
+  "step": "LAUNCHPAD-AUDIT-3",
+  "serviceId": "420/service/launchpad-crowdfunding/v1",
+  "protocolServiceId": "420/service/launchpad/v1",
+  "authority": "APPLICATION_WITH_CONTRACT_BACKED_SETTLEMENT",
+  "genesisTarget": [
+    "reward",
+    "donation",
+    "community_project",
+    "product_preorder"
+  ],
+  "securitiesOrEquityEnabled": false,
+  "contracts": {
+    "integration": "LaunchpadCrowdfundingIntegration420.sol",
+    "allocationRegistry": "LaunchpadAllocationRegistry420.sol",
+    "arbitrationCaseRegistry": "ArbitrationCaseRegistry420.sol"
+  },
+  "dependencies": {
+    "420Pay": {
+      "canonicalSource": "PaymentRegistry420.payments(paymentId)",
+      "contributionRequiredStatus": "SETTLED",
+      "bindings": [
+        "payer == participant",
+        "merchant == sale.proceedsReceiver",
+        "settlementAsset == sale.paymentAsset",
+        "settlementAmount == contributionAmount",
+        "receiptHash != bytes32(0)"
+      ],
+      "paymentIdGlobalReplayProtection": true,
+      "refundRequiredStatus": [
+        "REFUNDED",
+        "PARTIALLY_REFUNDED"
+      ],
+      "refundRule": "Every canonical payment used for the participant/sale must show refundedAmount >= the contribution amount backed by that payment before the Launchpad refund batch can be prepared.",
+      "custodyAuthorityTransferredToLaunchpad": false
+    },
+    "420Identity": {
+      "canonicalSources": [
+        "Identity420.profiles(profileId)",
+        "IIdentityCredential420.hasValidCredential(profileId, sale.eligibilityPolicyHash)"
+      ],
+      "participantControllerBindingRequired": true,
+      "activeProfileRequired": true,
+      "salePolicyHashUsedAsCredentialType": true,
+      "profileFrozenPerParticipantSale": true,
+      "identityAuthorityTransferredToLaunchpad": false
+    },
+    "420Arbitration": {
+      "canonicalSources": [
+        "ArbitrationCaseRegistry420.caseOrigin(caseId)",
+        "ArbitrationCaseRegistry420.caseRound(caseId)",
+        "ArbitrationRulingRegistry420.getRuling(caseId, round)"
+      ],
+      "requiredDomain": "420/arbitration/domain/launchpad-crowdfunding/v1",
+      "requiredOriginComponent": "420/COMPONENT/LAUNCHPAD/V1",
+      "requiredOriginObject": "saleId",
+      "requiredRespondent": "project.controller",
+      "requiredClaimant": "participant",
+      "finalizedRulingRule": "A finalized ruling is published as remedy evidence only. Arbitration cannot directly cancel Launchpad sales or reverse/execute 420Pay refunds.",
+      "arbitrationAuthorityTransferredToLaunchpad": false
+    },
+    "420Reputation": {
+      "domain": "CROWDFUNDING",
+      "interactionKinds": [
+        "CONTRIBUTION",
+        "REWARD_DELIVERY"
+      ],
+      "publication": "LaunchpadCrowdfundingIntegration420.ReputationEvidencePublished",
+      "evidenceRefs": {
+        "CONTRIBUTION": "canonical 420Pay paymentId",
+        "REWARD_DELIVERY": "replay-protected Launchpad deliveryCommitment"
+      },
+      "universalScoreAuthority": false,
+      "settlementAuthority": false
+    },
+    "420Notifications": {
+      "canonicalLifecycleSources": [
+        "LaunchpadSaleRegistry420.SaleCreated",
+        "LaunchpadSaleRegistry420.SaleStateChanged"
+      ],
+      "integrationPublication": "LaunchpadCrowdfundingIntegration420.NotificationPublished",
+      "eventTypes": [
+        "CONTRIBUTION",
+        "REFUND",
+        "DELIVERY",
+        "DISPUTE",
+        "RULING"
+      ],
+      "deterministicEventId": true,
+      "notificationAuthority": false
+    }
+  },
+  "replayAndIdempotency": {
+    "paymentId": "global one-use",
+    "refundBatchCommitment": "one-use after canonical Pay refund verification",
+    "deliveryCommitment": "global one-use",
+    "participantSaleDispute": "one canonical linked case",
+    "disputeOutcome": "one publication per case",
+    "notificationEventId": "deterministic one-use",
+    "reputationEvidence": "deterministic one-use per evidence/sale/project/participant/profile/kind"
+  },
+  "securityBoundary": {
+    "launchpadCustody": false,
+    "launchpadMinting": false,
+    "launchpadPaymentExecution": false,
+    "launchpadRefundExecution": false,
+    "launchpadArbitrationRulingAuthority": false,
+    "reputationCanonicalAuthority": false,
+    "notificationsCanonicalAuthority": false
+  },
+  "milestone": {
+    "level1Required": true,
+    "level2RequiredNow": true,
+    "reason": "This step introduces current 420Pay, 420Identity and 420Arbitration authority dependencies plus Reputation/Notifications publication boundaries."
+  },
+  "exitCriteria": [
+    "reward flow proven against canonical dependency interfaces",
+    "donation flow proven against canonical dependency interfaces",
+    "community-project flow proven against canonical dependency interfaces",
+    "product-preorder flow proven against canonical dependency interfaces",
+    "canonical settled payment required for contributions",
+    "canonical Pay refund state required for Launchpad refund record",
+    "Identity profile/controller/credential policy binding proven",
+    "Arbitration sale-origin linkage and finalized-remedy publication proven",
+    "Reputation contribution/delivery evidence publication proven",
+    "Notifications lifecycle/integration publication and replay protection proven",
+    "securities/equity remains disabled"
+  ]
+}

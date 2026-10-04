@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="420Analytics — public, derived, rebuildable analytics for the 420 Integrated network.">
+  <title>420Analytics</title>
+  <link rel="icon" type="image/svg+xml" href="/analytics-logo.svg">
+  <link rel="apple-touch-icon" href="/analytics-logo.svg">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="side">
+      <a class="brand" href="/" aria-label="420Analytics home"><img src="/analytics-logo.svg" alt="420Analytics"></a>
+      <p class="muted brand-tagline">derived · rebuildable · non-canonical</p>
+      <nav>
+        <a href="#network">Network</a>
+        <a href="#metrics">Metrics</a>
+        <a href="#trust">Trust & provenance</a>
+        <a href="#api">API</a>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <div>
+          <p class="eyebrow">420 Integrated public analytics</p>
+          <h1>Network overview</h1>
+          <p class="muted">Public analytics sourced through the qualified 420Indexer boundary.</p>
+        </div>
+        <span class="pill">non-canonical analytics</span>
+      </header>
+
+      <section id="network" class="grid" aria-label="Network overview">
+        <article class="card"><span>Chain ID</span><strong id="chainId">—</strong></article>
+        <article class="card"><span>Indexed height</span><strong id="indexedHeight">—</strong></article>
+        <article class="card"><span>Safe height</span><strong id="safeHeight">—</strong></article>
+        <article class="card"><span>Finality depth</span><strong id="finalityDepth">—</strong></article>
+        <article class="card"><span>Indexed at</span><strong id="indexedAt">—</strong></article>
+        <article class="card"><span>Readiness</span><strong id="readiness">connecting</strong></article>
+      </section>
+
+      <section class="panel notice" id="backendNotice">
+        The dashboard shell is live. Analytics data will appear when the production-equivalent 420Analytics backend is connected.
+      </section>
+
+      <section id="metrics" class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Observed metrics</p>
+            <h2>Metric catalog</h2>
+          </div>
+          <button id="refresh" type="button">Refresh</button>
+        </div>
+        <div id="metricGrid" class="grid compact">
+          <article class="card placeholder">No qualified metrics available yet.</article>
+        </div>
+      </section>
+
+      <section id="trust" class="panel">
+        <p class="eyebrow">Trust boundary</p>
+        <h2>Provenance first</h2>
+        <div class="trust-grid">
+          <article><strong>Source</strong><span>qualified 420Indexer API only</span></article>
+          <article><strong>Authority</strong><span>non-canonical, read-only derived data</span></article>
+          <article><strong>Privacy</strong><span>private and encrypted payloads excluded</span></article>
+          <article><strong>Recovery</strong><span>derived views remain rebuildable</span></article>
+        </div>
+      </section>
+
+      <section id="api" class="panel">
+        <p class="eyebrow">Public endpoints</p>
+        <h2>Analytics API</h2>
+        <div class="api-links">
+          <a href="/v1/status">status</a>
+          <a href="/v1/metrics">metrics</a>
+          <a href="/v1/series">series</a>
+          <a href="/v1/methodologies">methodologies</a>
+          <a href="/health">health</a>
+          <a href="/ready">ready</a>
+        </div>
+      </section>
+
+      <footer>420Analytics · public derived analytics for 420 Integrated</footer>
+    </main>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

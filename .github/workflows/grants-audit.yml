@@ -1,0 +1,259 @@
+name: 420Grants Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/grants/**"
+      - "contracts/test/GrantsGenesis420.t.sol"
+      - "contracts/config/420grants-genesis.json"
+      - "contracts/config/grants/**"
+      - "contracts/test/GrantsDeploymentBinding420.t.sol"
+      - "docs/audit/420GRANTS-*"
+      - "scripts/verify-grants-audit.py"
+      - "scripts/verify-grants-audit-5-release.py"
+      - "scripts/verify-grants-audit-6-client-indexer.py"
+      - "scripts/verify-grants-audit-7-docs.py"
+      - "docs/apps/grants/**"
+      - "docs/architecture/protocols/stake-governance-treasury-grants.md"
+      - "420-indexer/descriptors/grants420-v1.json"
+      - "420-indexer/src/grants-descriptors.ts"
+      - "420-indexer/src/grants-read-model.ts"
+      - "420-indexer/src/protocol-decoder.ts"
+      - "420-indexer/src/lifecycle-reducer.ts"
+      - "420-indexer/src/api-surface.ts"
+      - "420-indexer/src/http-transport.ts"
+      - "420-indexer/src/index.ts"
+      - "420-indexer/test/grants420-integration.test.ts"
+      - "wallet/web/core/genesis-app-catalog.js"
+      - "wallet/web/core/grants-handoff.js"
+      - "wallet/web/core/execution.js"
+      - "wallet/web/test/genesis-app-catalog.test.js"
+      - "wallet/web/test/apps.test.js"
+      - "wallet/web/test/grants-handoff.test.js"
+      - ".github/workflows/grants-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: grants-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  grants-contract-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Verify Grants audit model
+        run: python3 scripts/verify-grants-audit.py
+
+      - name: Verify GRANTS-AUDIT-5 release materialization
+        run: python3 scripts/verify-grants-audit-5-release.py
+
+      - name: Verify GRANTS-AUDIT-7 documentation and operator closeout
+        run: python3 scripts/verify-grants-audit-7-docs.py
+
+      - name: Check Grants Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/grants/GrantProgramRegistry420.sol src/grants/GrantApplicationRegistry420.sol src/grants/GrantAwardRegistry420.sol src/grants/GrantMilestoneRegistry420.sol test/GrantsGenesis420.t.sol test/GrantsDeploymentBinding420.t.sol
+
+      - name: Build Grants contract family
+        working-directory: contracts
+        run: forge build src/grants --sizes
+
+      - name: Retain Grants compiled artifact identities
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+
+          names = [
+              "GrantAuthorization420",
+              "GrantProgramRegistry420",
+              "GrantApplicationRegistry420",
+              "GrantAwardRegistry420",
+              "GrantMilestoneRegistry420",
+              "GrantRouter420",
+          ]
+          records = []
+          for name in names:
+              path = Path("contracts/out") / f"{name}.sol" / f"{name}.json"
+              payload = path.read_bytes()
+              artifact = json.loads(payload)
+              deployed = artifact.get("deployedBytecode", {}).get("object", "")
+              if deployed.startswith("0x"):
+                  deployed = deployed[2:]
+              records.append({
+                  "contract": name,
+                  "artifact_sha256": hashlib.sha256(payload).hexdigest(),
+                  "compiler_runtime_template_sha256": hashlib.sha256(bytes.fromhex(deployed)).hexdigest() if deployed else None,
+              })
+          print("GRANTS_AUDIT_5_ARTIFACT_IDENTITIES=" + json.dumps(records, sort_keys=True))
+          PY
+
+      - name: Run Grants deployment and Registry binding qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/GrantsDeploymentBinding420.t.sol' -vvvv
+
+      - name: Run Grants lifecycle and adversarial regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+
+  grants-client-integration:
+    needs: grants-contract-core
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Materialize Grants compiled ABI artifacts
+        working-directory: contracts
+        run: forge build src/grants
+
+      - name: Verify GRANTS-AUDIT-6 client/indexer integration model
+        run: python3 scripts/verify-grants-audit-6-client-indexer.py
+
+      - name: Install 420Indexer dependencies
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund --no-package-lock
+
+      - name: Build affected 420Indexer
+        working-directory: 420-indexer
+        run: npm run build
+
+      - name: Run retained Grants Indexer integration suite
+        working-directory: 420-indexer
+        run: node --test dist/test/grants420-integration.test.js
+
+      - name: Run affected Wallet catalogue and Grants handoff regressions
+        working-directory: wallet/web
+        run: node --test test/genesis-app-catalog.test.js test/apps.test.js test/grants-handoff.test.js
+
+  grants-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Reject dangerous Grants primitives
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\b(delegatecall|selfdestruct|tx\.origin)\b' contracts/src/grants; then
+            echo "Forbidden authority/opcode primitive found in 420Grants." >&2
+            exit 1
+          fi
+
+      - name: Re-run Grants tests under hardening profile
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: hardening
+        run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+
+      - name: Install Slither for Grants security qualification
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+
+      - name: Targeted Grants Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > GrantsAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/grants/GrantIds420.sol";
+          import "./src/grants/GrantAuthorization420.sol";
+          import "./src/grants/GrantProgramRegistry420.sol";
+          import "./src/grants/GrantApplicationRegistry420.sol";
+          import "./src/grants/GrantAwardRegistry420.sol";
+          import "./src/grants/GrantMilestoneRegistry420.sol";
+          import "./src/grants/GrantRouter420.sol";
+          SOL
+          set +e
+          slither GrantsAuditSlitherTarget.sol --json /tmp/grants-slither.json >/tmp/grants-slither.txt 2>&1
+          STATUS=$?
+          set -e
+          rm -f GrantsAuditSlitherTarget.sol
+          python - <<'PY'
+          import json
+          import pathlib
+
+          report_path = pathlib.Path("/tmp/grants-slither.json")
+          log_path = pathlib.Path("/tmp/grants-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+
+          report = json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+
+          findings = []
+          high = []
+          for detector in report.get("results", {}).get("detectors", []):
+              grant_elements = [
+                  element for element in detector.get("elements", [])
+                  if element.get("source_mapping", {}).get("filename_relative", "").startswith("src/grants/")
+              ]
+              if not grant_elements:
+                  continue
+              item = {
+                  "check": detector.get("check"),
+                  "impact": detector.get("impact"),
+                  "confidence": detector.get("confidence"),
+                  "description": detector.get("description", "").splitlines()[0],
+              }
+              findings.append(item)
+              if detector.get("impact") == "High":
+                  high.append(item)
+
+          print(json.dumps({"grantsFindings": findings, "highSeverity": high}, indent=2))
+          if high:
+              raise SystemExit("High-severity Slither finding in Grants source")
+          PY

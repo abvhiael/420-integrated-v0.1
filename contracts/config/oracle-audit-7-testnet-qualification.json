@@ -1,0 +1,181 @@
+{
+  "schema": "420-oracle-audit-7-testnet-qualification-v1",
+  "phase": "ORACLE-AUDIT-7",
+  "status": "BLOCKED_OFFICIAL_TESTNET_NOT_LIVE",
+  "repository_ready": true,
+  "live_qualified": false,
+  "source_requirements": {
+    "official_testnet_manifest": "developer-hub/manifests/testnet.json",
+    "launch_config": "testnet/config/launch.json",
+    "public_endpoints": "testnet/services/endpoints.json",
+    "deployment_manifest": "contracts/config/420oracle-genesis.json",
+    "service_id_source": "contracts/src/libraries/ServiceIds420.sol",
+    "protocol_registry": "contracts/src/apps/ProtocolRegistry.sol",
+    "runtime_interface": "contracts/src/interfaces/IOracle420.sol",
+    "provider_registry": "contracts/src/oracle/OracleProviderRegistry420.sol",
+    "feed_registry": "contracts/src/oracle/OracleFeedRegistry420.sol",
+    "risk_policy": "contracts/src/oracle/OracleRiskPolicy420.sol",
+    "router": "contracts/src/oracle/OracleRouter420.sol",
+    "automation_consumer": "420-automation/src/oracle.ts",
+    "swap_adapter": "contracts/src/oracle/TWAPOracleSourceAdapter420.sol"
+  },
+  "exact_release_candidate": {
+    "implementation_sha": null,
+    "chain_id": null,
+    "genesis_hash": null,
+    "evidence_block": null,
+    "evidence_block_hash": null
+  },
+  "deployment_evidence": {
+    "governance_timelock_address": null,
+    "protocol_registry_address": null,
+    "protocol_registry_code_hash": null,
+    "provider_registry_address": null,
+    "provider_registry_code_hash": null,
+    "feed_registry_address": null,
+    "feed_registry_code_hash": null,
+    "risk_policy_address": null,
+    "risk_policy_code_hash": null,
+    "oracle_router_address": null,
+    "oracle_router_code_hash": null,
+    "oracle_router_protocol_version": null,
+    "protocol_registry_service_version": null,
+    "protocol_registry_service_active": null,
+    "constructor_bindings_verified": false,
+    "registry_transactions": [],
+    "governance_configuration_transactions": [],
+    "provider_submission_transactions": []
+  },
+  "provider_evidence": {
+    "minimum_independent_active_providers": 2,
+    "active_provider_ids": [],
+    "provider_operator_addresses": [],
+    "provider_metadata_hashes": [],
+    "operator_key_custody_reviewed": false
+  },
+  "feed_evidence": {
+    "representative_numeric_feed_id": null,
+    "representative_result_feed_id": null,
+    "numeric_feed_type": null,
+    "result_feed_type": null,
+    "numeric_aggregation": null,
+    "result_aggregation": null,
+    "heartbeat_seconds": null,
+    "min_sources": null,
+    "risk_policy": null,
+    "active_source_ids": []
+  },
+  "live_checks": [
+    {
+      "id": "NETWORK_IDENTITY",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Observed chain ID, genesis hash, evidence block number/hash and public endpoint identity match the official production-equivalent testnet manifest."
+    },
+    {
+      "id": "DEPLOYMENT_BINDINGS",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "ProviderRegistry, FeedRegistry, RiskPolicy and OracleRouter deployed addresses/code hashes and immutable constructor bindings are verified on the same exact release lineage."
+    },
+    {
+      "id": "REGISTRY_DISCOVERY",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "ProtocolRegistry actively resolves 420/service/oracle/v1 to the exact deployed OracleRouter runtime/version."
+    },
+    {
+      "id": "GOVERNANCE_AUTHORITY",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Provider/feed/source/risk configuration succeeds only through the deployed governance authority and unauthorized configuration is rejected."
+    },
+    {
+      "id": "PROVIDER_PROVISIONING",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "At least two independent active provider identities/operators are provisioned for representative quorum feeds with non-secret metadata and reviewed operator key custody."
+    },
+    {
+      "id": "NUMERIC_QUORUM",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Independent live provider submissions produce a canonical MEDIAN_NUMERIC read with correct decimals, conservative confidence, spread metadata and configured quorum."
+    },
+    {
+      "id": "RESULT_QUORUM",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Independent live provider submissions produce a canonical QUORUM_EQUAL result read and conflicting qualifying quorums fail closed."
+    },
+    {
+      "id": "FRESHNESS_FAILURES",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Stale, future-dated, inactive-feed and insufficient-source states fail closed on the deployed router."
+    },
+    {
+      "id": "REPLAY_ORDERING",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Observation-ID replay and equal/older provider timestamps are rejected in deployed state."
+    },
+    {
+      "id": "EPOCH_INVALIDATION",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Feed revision, provider reactivation and source reactivation invalidate observations from prior authority/configuration epochs."
+    },
+    {
+      "id": "RISK_CONTROLS",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Minimum confidence, maximum deviation and circuit-breaker policy fail closed on representative deployed feeds."
+    },
+    {
+      "id": "SWAP_ADAPTER",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "A deployed/read-only Swap TWAP adapter path reports canonical source provenance and stale/unhealthy source state fails closed without gaining provider authority merely by deployment."
+    },
+    {
+      "id": "AUTOMATION_CONSUMER",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "420Automation consumes canonical Oracle facts from the verified router while preserving chain/router/feed identity, freshness/confidence/quorum policy and eligibility-only authority."
+    },
+    {
+      "id": "RESTART_REORG_RECONCILIATION",
+      "required": true,
+      "status": "PENDING_LIVE_TESTNET",
+      "evidence": null,
+      "requirement": "Provider/operator restart and chain/indexer reorg/reconciliation drills do not manufacture canonical observations, resurrect invalidated data or misreport stale/reorged evidence as current."
+    }
+  ],
+  "live_workflow_runs": {
+    "oracle_testnet": null,
+    "automation_testnet": null,
+    "swap_oracle_testnet": null
+  },
+  "evidence_policy": [
+    "Repository tests, local EVM deployments and synthetic fixtures validate the harness only and never satisfy ORACLE-AUDIT-7 live checks.",
+    "Every retained live check must bind to one exact implementation SHA, official chain ID/genesis identity, evidence block/hash and exact deployed runtime/code hashes.",
+    "Provider/operator evidence must identify independent provider IDs/operators and configuration transactions without committing private keys, seed phrases, authenticated RPC URLs, bearer tokens or other secrets.",
+    "Missing official manifest, placeholder endpoints, unresolved ProtocolRegistry service, missing deployed code, insufficient provider diversity, stale/conflicting evidence or missing live receipts must fail closed."
+  ],
+  "retained_evidence_path": "docs/audit/ORACLE-AUDIT-7-LIVE-TESTNET-EVIDENCE.json",
+  "blocker": "The repository launch authority states that the production-equivalent public testnet is not yet authorized/live; the official testnet manifest is absent, chain ID is not frozen, and public endpoints remain placeholders."
+}

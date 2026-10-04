@@ -8,7 +8,7 @@ if len(sysaddr.get("assignments",[]))!=28: errors.append(f"expected 28 frozen as
 expected={
 "ProtocolReserve":"contracts/src/system/ProtocolReserve.sol",
 "CommunityRewardReserve":"contracts/src/system/CommunityRewardReserve.sol",
-"RandomnessRegistry":"contracts/src/system/RandomnessRegistry.sol",
+"RandomnessRegistry":"contracts/src/randomness/RandomnessRegistry.sol",
 "PublicDistributionVault":"contracts/src/system/PublicDistributionVault.sol",
 "ValidatorBootstrapReserve":"contracts/src/system/ValidatorBootstrapReserve.sol",
 }

@@ -98,6 +98,7 @@ DOC-8 completed the frozen public Genesis application manual set. DOC-18 extends
 - [420 Launchpad architecture](../architecture/protocols/launchpad.md)
 - [Registry, Names, Identity & 420-IS architecture](../architecture/protocols/registry-names-identity-420is.md)
 - [Pay, Token, Swap/Exchange & Bridge architecture](../architecture/protocols/pay-token-exchange-bridge.md)
+- [420 Pay deployment operations](pay/deployment-operations.md)
 - [Stake, Governance, Treasury & Grants architecture](../architecture/protocols/stake-governance-treasury-grants.md)
 - [420 Arbitration architecture](../architecture/protocols/arbitration.md)
 - [420AI compute infrastructure](../architecture/infrastructure/420ai-compute-infrastructure.md)

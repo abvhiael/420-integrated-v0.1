@@ -78,8 +78,15 @@ func TestWorkerRejectsUnallowlistedCompiler(t *testing.T) {
 func TestWorkerRejectsCompilerChecksumMismatch(t *testing.T) {
 	cache := t.TempDir()
 	binary, _ := writeFakeCompiler(t, cache)
-	catalog, _ := NewCatalog(cache, []Release{{Version: "0.8.24+commit.e11b9ed9", SHA256: "deadbeef", Binary: binary}})
-	worker, _ := NewWorker(catalog, Limits{MaxInputBytes: 1 << 20, MaxOutputBytes: 1 << 20, Timeout: time.Second})
+	const wrongSHA = "0000000000000000000000000000000000000000000000000000000000000000"
+	catalog, err := NewCatalog(cache, []Release{{Version: "0.8.24+commit.e11b9ed9", SHA256: wrongSHA, Binary: binary}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	worker, err := NewWorker(catalog, Limits{MaxInputBytes: 1 << 20, MaxOutputBytes: 1 << 20, Timeout: time.Second})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if _, err := worker.Compile(context.Background(), compilerSubmission(t, "0.8.24+commit.e11b9ed9")); err == nil {
 		t.Fatal("compiler checksum mismatch must fail closed")
 	}

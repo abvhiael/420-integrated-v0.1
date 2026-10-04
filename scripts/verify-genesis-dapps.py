@@ -104,15 +104,19 @@ if search:
 
 analytics = load("contracts/config/420analytics-genesis.json")
 if analytics:
-    aggregation = analytics.get("aggregation", {})
-    privacy = analytics.get("privacy", {})
-    presentation = analytics.get("presentation", {})
     if analytics.get("contractsRequired") is not False or analytics.get("canonicalStateAuthority") is not False or analytics.get("serviceId") != "420/service/analytics/v1":
         errors.append("analytics authority/service invariant missing")
-    require_true(aggregation, ["databaseIsNonCanonical", "rebuildableFromCanonicalSources", "metricsCarrySourceProvenance", "metricsCarryWindowDefinition", "metricsCarryChainId", "tracksIndexedAndFinalizedHeights", "reorgRepairOnlyForNonFinalizedData", "historicalSnapshotsAreVersioned", "derivedMetricsAreNonCanonical"], "analytics aggregation invariant missing")
-    require_false(privacy, ["privateMessengerContentAggregated", "privateCommonsContentAggregated", "encryptedResourcePayloadsAggregated", "privateIdentityFieldsAggregated", "rawAttentionTelemetryAggregated", "deanonymizationOrWalletProfilingByDefault"], "analytics privacy exclusion missing")
-    require_true(presentation, ["methodologiesMustBeDocumented", "alternativeAnalyticsProvidersAllowed"], "analytics methodology invariant missing")
-    require_invariants(analytics, ["ANL-INV-001", "ANL-INV-002", "ANL-INV-003", "ANL-INV-005", "ANL-INV-007", "ANL-INV-008", "ANL-INV-009", "ANL-INV-010"], "analytics")
+    if analytics.get("chainSource") != "420Indexer" or analytics.get("directRpcAllowed") is not False or analytics.get("ownsChainIngestion") is not False:
+        errors.append("analytics Indexer/source boundary missing")
+    if analytics.get("databaseCanonical") is not False or analytics.get("derivedDataRebuildable") is not True:
+        errors.append("analytics derived-data authority invariant missing")
+    required_context = {"methodologyVersion", "observationWindow", "sourceProvenance", "chainId", "indexedHeight", "finalizedHeight", "freshness"}
+    if not required_context.issubset(set(analytics.get("requiredResultContext", []))):
+        errors.append("analytics required result context incomplete")
+    required_privacy = {"private_messenger", "private_commons", "private_identity", "encrypted_resource_payload", "raw_attention_telemetry"}
+    if not required_privacy.issubset(set(analytics.get("privacyExclusions", []))):
+        errors.append("analytics privacy exclusions incomplete")
+    require_invariants(analytics, [f"ANL-INV-{i:03d}" for i in range(1, 13)], "analytics")
 
 appstore = load("contracts/config/420appstore-genesis.json")
 if appstore:
@@ -164,7 +168,12 @@ if notifications:
     require_false(privacy, ["privateMessengerPayloadsIndexed", "privateCommonsPayloadsIndexed", "encryptedResourcePayloadsIndexed", "privateIdentityFieldsIndexed", "rawAttentionTelemetryIndexed", "walletWatchlistsPublicByDefault", "notificationHistoryPublicByDefault", "deliveryTokensOrEndpointsPublic"], "notifications privacy exclusion missing")
     require_true(privacy, ["minimizeAddressToEndpointCorrelation"], "notifications privacy minimization invariant missing")
     require_true(integrity, ["notificationIsNonCanonical", "canonicalSourceReferenceRequired", "sourceProvenanceRequired", "networkAndChainIdRequiredForOnchainEvents", "finalityOrConfirmationContextShownWhereRelevant", "staleOrReorgedNotificationsCanBeMarkedSuperseded", "clientsMayUseAlternativeNotificationProviders"], "notifications integrity invariant missing")
-    require_invariants(notifications, ["NOTIF-INV-001", "NOTIF-INV-002", "NOTIF-INV-003", "NOTIF-INV-004", "NOTIF-INV-005", "NOTIF-INV-006", "NOTIF-INV-007", "NOTIF-INV-008", "NOTIF-INV-009", "NOTIF-INV-010", "NOTIF-INV-011", "NOTIF-INV-012", "NOTIF-INV-013"], "notifications")
+    replay = notifications.get("replay", {})
+    require_true(replay, ["checkpointConsumerOwned", "checkpointChainBound", "checkpointOpaque", "advanceOnlyAfterSuccessfulBatch", "chainMismatchFailsClosed"], "notifications replay invariant missing")
+    require_false(replay, ["checkpointCanonical"], "notifications replay authority invariant missing")
+    if replay.get("canonicalityUpdates") != ["finalized", "retracted", "superseded"]:
+        errors.append("notifications canonicality update taxonomy missing")
+    require_invariants(notifications, [f"NOTIFY-INV-{i:03d}" for i in range(1, 15)], "notifications")
 
 arbitration = load("contracts/config/420arbitration-genesis.json")
 if arbitration:

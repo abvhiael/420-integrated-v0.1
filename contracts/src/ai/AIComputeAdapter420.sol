@@ -143,16 +143,6 @@ interface IAIComputeFunding420 {
     function funded(bytes32 jobId, address owner, bytes32 fundingRef) external view returns (bool);
 }
 
-interface IAICustodyEscrow420 {
-    function confirmCanonicalVaultFunding(
-        bytes32 jobId, address payer, bytes32 vaultRef, bytes32 fundingRef, uint256 amount
-    ) external;
-    function bindSettlementBeneficiary(bytes32 jobId, bytes32 providerId, address beneficiary) external;
-    function markClaimable(bytes32 jobId, bytes32 settlementRef) external;
-    function markRefundable(bytes32 jobId, bytes32 settlementRef) external;
-    function release(bytes32 jobId, address payable to) external;
-    function refund(bytes32 jobId) external;
-}
 
 interface IAIComputeEntitlement420 {
     struct Entitlement {
@@ -231,7 +221,6 @@ contract AIComputeAdapter420 is I420System {
     IAIComputeEntitlement420 public immutable computeEntitlements;
     IAIComputeProviderRegistry420 public immutable computeProviders;
     IAIComputeFunding420 public immutable computeFunding;
-    IAICustodyEscrow420 public immutable aiEscrow;
 
     mapping(bytes32 => Binding) private bindings;
 
@@ -298,11 +287,10 @@ contract AIComputeAdapter420 is I420System {
         address settlementAdapter_ = ICompute420(computeRouter_).settlementAdapter();
         address providerRegistry_ = ICompute420(computeRouter_).providerRegistry();
         address fundingAdapter_ = ICompute420(computeRouter_).fundingAdapter();
-        address aiEscrow_ = AIJobManager(jobs_).AI_JOB_ESCROW();
         if (
             jobRegistry_.code.length == 0 || matchRegistry_.code.length == 0
                 || settlementAdapter_.code.length == 0 || providerRegistry_.code.length == 0
-                || fundingAdapter_.code.length == 0 || aiEscrow_.code.length == 0
+                || fundingAdapter_.code.length == 0
         ) revert InvalidDependency();
 
         computeJobs = IAIComputeJobRegistry420(jobRegistry_);
@@ -313,7 +301,6 @@ contract AIComputeAdapter420 is I420System {
         computeEntitlements = IAIComputeEntitlement420(settlementAdapter_);
         computeProviders = IAIComputeProviderRegistry420(providerRegistry_);
         computeFunding = IAIComputeFunding420(fundingAdapter_);
-        aiEscrow = IAICustodyEscrow420(aiEscrow_);
     }
 
     function systemName() external pure returns (string memory) { return "AIComputeAdapter420"; }
@@ -531,9 +518,7 @@ contract AIComputeAdapter420 is I420System {
                 || !computeFunding.funded(computeJobId, r.owner, j.fundingRef)
         ) revert EvidenceMismatch();
 
-        aiEscrow.confirmCanonicalVaultFunding(
-            aiRequestId, c.payer, c.obligationId, j.fundingRef, c.deposited
-        );
+        jobs.confirmCanonicalFunding(aiRequestId, j.fundingRef, c.deposited);
         b.computeJobId = computeJobId;
         emit ComputeJobBound(aiRequestId, computeJobId);
     }
@@ -570,7 +555,6 @@ contract AIComputeAdapter420 is I420System {
         b.acceptedPrice = p.acceptedAmount;
         b.accepted = true;
 
-        aiEscrow.bindSettlementBeneficiary(aiRequestId, b.computeProviderId, b.beneficiary);
         jobs.matchCompute(aiRequestId, b.computeRequestId, b.computeJobId, b.aiProviderId);
         jobs.acceptCompute(aiRequestId);
         emit AcceptedComputeBound(
@@ -678,8 +662,7 @@ contract AIComputeAdapter420 is I420System {
                 || !computeEntitlements.settled(b.computeJobId, b.verificationRef, j.settlementRef)
         ) revert EvidenceMismatch();
         b.settlementRef = j.settlementRef;
-        aiEscrow.markClaimable(aiRequestId, j.settlementRef);
-        aiEscrow.release(aiRequestId, payable(b.beneficiary));
+        jobs.confirmCanonicalSettlement(aiRequestId);
         emit SettlementObserved(aiRequestId, b.computeJobId, j.settlementRef);
     }
 
@@ -692,8 +675,7 @@ contract AIComputeAdapter420 is I420System {
                 || !computeEntitlements.refunded(b.computeJobId, j.settlementRef)
         ) revert EvidenceMismatch();
         b.refundRef = j.settlementRef;
-        aiEscrow.markRefundable(aiRequestId, j.settlementRef);
-        aiEscrow.refund(aiRequestId);
+        jobs.confirmCanonicalRefund(aiRequestId);
         emit RefundObserved(aiRequestId, b.computeJobId, j.settlementRef);
     }
 

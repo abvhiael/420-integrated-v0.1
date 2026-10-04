@@ -1,6 +1,6 @@
 # CMP-3.1 — Worker daemon
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `01badf4cb9302841a00905fdfadda44224bfdd3e`.**
 
 ## Canonical definition
 
@@ -59,6 +59,22 @@ CMP-3.1 does **not** claim:
 Those belong to later canonical CMP-3 steps. The CMP-3.1 command therefore runs only a standby lifecycle service and prints an explicit notice that workload execution is disabled.
 
 ## Level 1 qualification
+
+Qualified implementation SHA: `01badf4cb9302841a00905fdfadda44224bfdd3e`.
+
+Authoritative GitHub evidence:
+
+- Compute Market Qualification #213 — run `37240782332` — **SUCCESS**.
+- The exact-head job verified the checked-out SHA before qualification.
+- Retained Compute Market Solidity suite — **SUCCESS**.
+- `go test ./compute/worker` — **SUCCESS**.
+- `go test ./execution/cmd/node420-compute` — **SUCCESS**.
+- `go build ./execution/cmd/node420-compute` — **SUCCESS**.
+- `python scripts/verify-cmp-3-1-worker-daemon.py` — **SUCCESS**.
+
+The contemporaneous 420Docs #4974 failure was outside CMP-3.1 scope: the documentation qualification reported pre-existing/unrelated orphan-navigation defects for `docs/apps/arbitration/deployment-operations.md` and `docs/apps/arbitration/threat-model.md`. It is recorded here for transparency and is not counted as a CMP-3.1 passing gate.
+
+This closeout commit is documentation/evidence-only. It does not change executable code, workflows, configuration, interfaces, dependencies, deployment behavior, or substantive CMP-3.1 requirements, so it references the qualified implementation SHA without requiring a new implementation qualification.
 
 Required CMP-3.1 Level 1 gates:
 

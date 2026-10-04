@@ -1,12 +1,13 @@
 package store
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/420integrated/420-integrated/verify/architecture"
 	"github.com/420integrated/420-integrated/verify/compiler"
 	"github.com/420integrated/420-integrated/verify/evidence"
 	"github.com/420integrated/420-integrated/verify/matcher"
@@ -30,9 +31,27 @@ func fixture(t *testing.T, runtimeHash string) (evidence.DeploymentEvidence, sub
 	if err != nil {
 		t.Fatal(err)
 	}
-	build := compiler.BuildEvidence{CompilerVersion: buildSettings.CompilerVersion, CompilerSHA256: "sha256:compiler", BundleHash: submitted.BundleHash, InputSHA256: "sha256:input", OutputSHA256: "sha256:output", NetworkDisabled: true, WorkingDirClean: true, RuntimeBytecode: deployment.RuntimeBytecode, CreationBytecode: deployment.Creation.CreationBytecode, CompilerOutput: json.RawMessage(`{"contracts":{}}`)}
-	build.CompilerOutput = json.RawMessage("{\"contracts\":{}}")
-	result := matcher.Result{Class: architecture.ResultFullMatch, BindingKey: deployment.BindingKey(), RuntimeExact: true, CreationCompared: true, CreationExact: true, Diagnostics: []matcher.Diagnostic{{Reason: matcher.ReasonExactRuntimeMatch, Message: "runtime exact"}, {Reason: matcher.ReasonExactCreationMatch, Message: "creation exact"}}}
+	input, err := compiler.ReproductionInput(submitted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	output := json.RawMessage(`{"contracts":{"A.sol":{"A":{"evm":{"bytecode":{"object":"6001600055"},"deployedBytecode":{"object":"60016000","immutableReferences":{}}}}}}}`)
+	inputSum := sha256.Sum256(input)
+	outputSum := sha256.Sum256(output)
+	build := compiler.BuildEvidence{
+		CompilerVersion:  buildSettings.CompilerVersion,
+		CompilerSHA256:   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		BundleHash:       submitted.BundleHash,
+		InputSHA256:      "sha256:" + hex.EncodeToString(inputSum[:]),
+		OutputSHA256:     "sha256:" + hex.EncodeToString(outputSum[:]),
+		NetworkDisabled:  true,
+		WorkingDirClean:  true,
+		RuntimeBytecode:  deployment.RuntimeBytecode,
+		CreationBytecode: deployment.Creation.CreationBytecode,
+		HasImmutables:    false,
+		CompilerOutput:   output,
+	}
+	result := matcher.Classify(deployment, build, submitted, false)
 	return deployment, submitted, build, result
 }
 

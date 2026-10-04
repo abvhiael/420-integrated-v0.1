@@ -32,6 +32,7 @@ on:
       - 'contracts/config/ai/**'
       - 'contracts/test/AIDeploymentMaterialization420.t.sol'
       - 'scripts/verify-420ai-provider-runtime.py'
+      - 'scripts/verify-420ai-pretestnet.py'
       - '.github/workflows/420ai-audit.yml'
   workflow_dispatch:
 
@@ -224,3 +225,157 @@ jobs:
         run: forge build src/ai
       - name: Run implemented 420AI contract suites
         run: forge test --match-path 'test/AI*420.t.sol'
+
+
+  pretestnet-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact AI qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify clean checkout
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Clean AI pre-testnet build
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge clean
+          forge fmt --check src/ai test/AI*420.t.sol test/ComputeEscrowFunding420.t.sol test/ComputeVerifiedEntitlement420.t.sol test/ComputeVerifierDisputeSlashEvidence420.t.sol test/ComputeStakeSlashAuthorization420.t.sol test/RegistryApiReconciliation420.t.sol test/RegistryGenesis420.t.sol test/RegistryIdentityNames420.t.sol test/Identity420Compatibility.t.sol test/Identity420Audit.t.sol
+          forge build src/ai test/AI*420.t.sol test/ComputeEscrowFunding420.t.sol test/ComputeVerifiedEntitlement420.t.sol test/ComputeVerifierDisputeSlashEvidence420.t.sol test/ComputeStakeSlashAuthorization420.t.sol test/RegistryApiReconciliation420.t.sol test/RegistryGenesis420.t.sol test/RegistryIdentityNames420.t.sol test/Identity420Compatibility.t.sol test/Identity420Audit.t.sol --sizes
+      - name: Run focused AI Foundry inventory
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*420.t.sol' -vv
+      - name: Run required CMP Vault Registry Identity integration
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test_file in             test/ComputeEscrowFunding420.t.sol             test/ComputeVerifiedEntitlement420.t.sol             test/ComputeVerifierDisputeSlashEvidence420.t.sol             test/ComputeStakeSlashAuthorization420.t.sol             test/RegistryApiReconciliation420.t.sol             test/RegistryGenesis420.t.sol             test/RegistryIdentityNames420.t.sol             test/Identity420Compatibility.t.sol             test/Identity420Audit.t.sol
+          do
+            forge test --match-path "$test_file" -vv
+          done
+      - name: Run AI docs and boundary verifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-420ai-audit-state.py
+          python3 scripts/verify-420ai-genesis-compatibility.py
+          python3 scripts/verify-420ai-v1-modules.py
+          python3 scripts/verify-420ai-compute-integration.py
+          python3 scripts/verify-420ai-custody-settlement.py
+          python3 scripts/verify-420ai-deployment-materialization.py
+          python3 scripts/verify-420ai-provider-runtime.py
+          python3 scripts/verify-420ai-read-api.py
+          python3 scripts/verify-420ai-client.py
+          python3 scripts/verify-420ai-pretestnet.py
+      - name: Build and test provider service
+        working-directory: services/420ai-provider
+        run: npm run build
+      - name: Build AI read API
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npm run build
+          node --test --test-concurrency=1 dist/test/ai420-descriptors.test.js dist/test/ai420-read-model.test.js dist/test/api-contract.test.js dist/test/api-surface.test.js dist/test/http-transport.test.js dist/test/reorg.test.js
+      - name: Build and test AI browser application
+        working-directory: ai/web
+        run: npm run build
+      - name: Remove qualification outputs
+        run: rm -rf contracts/out contracts/cache 420-indexer/node_modules 420-indexer/dist services/420ai-provider/node_modules ai/web/node_modules
+      - name: Verify no repository drift
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+
+  pretestnet-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_PROFILE: hardening
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact AI qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run AI hardening Foundry inventory
+        working-directory: contracts
+        run: forge test --match-path 'test/AI*420.t.sol' -vv
+      - name: Reject dangerous AI primitives
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/ai; then
+            echo 'Forbidden primitive found in 420AI sources' >&2
+            exit 1
+          fi
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+      - name: Targeted AI Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > AI420AuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/ai/AIProviderRegistry.sol";
+          import "./src/ai/AIModelRegistry.sol";
+          import "./src/ai/AIJobManager.sol";
+          import "./src/ai/AIJobEscrow.sol";
+          import "./src/ai/AIReputationRegistry.sol";
+          import "./src/ai/AIAuthorization420.sol";
+          import "./src/ai/AIPolicyRegistry420.sol";
+          import "./src/ai/AIModelDeploymentRegistry420.sol";
+          import "./src/ai/AIRequestRegistry420.sol";
+          import "./src/ai/AIResultRegistry420.sol";
+          import "./src/ai/AIComputeAdapter420.sol";
+          import "./src/ai/AIRouter420.sol";
+          SOL
+          set +e
+          slither AI420AuditSlitherTarget.sol --json /tmp/ai-slither.json >/tmp/ai-slither.txt 2>&1
+          STATUS=$?
+          set -e
+          rm -f AI420AuditSlitherTarget.sol
+          python - <<'PY'
+          import json, pathlib
+          report_path=pathlib.Path("/tmp/ai-slither.json")
+          log_path=pathlib.Path("/tmp/ai-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+          report=json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit(f"Slither analysis failed: {report.get('error') or 'unknown error'}")
+          findings=[]
+          high=[]
+          for detector in report.get("results",{}).get("detectors",[]):
+              ai=[e for e in detector.get("elements",[]) if e.get("source_mapping",{}).get("filename_relative","").startswith("src/ai/")]
+              if not ai:
+                  continue
+              item={"check":detector.get("check"),"impact":detector.get("impact"),"confidence":detector.get("confidence")}
+              findings.append(item)
+              if detector.get("impact")=="High":
+                  high.append(item)
+          print(json.dumps({"aiFindings":findings,"highSeverity":high},indent=2))
+          if high:
+              raise SystemExit("High-severity Slither finding in AI source")
+          PY

@@ -1,0 +1,54 @@
+name: 420Verify Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'verify/**'
+      - 'docs/420VERIFY*'
+      - 'docs/apps/verify/**'
+      - 'docs/audit/420VERIFY-AUDIT*'
+      - 'contracts/config/420verify-genesis.json'
+      - '.github/workflows/verify-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
+          echo "qualified_sha=$actual"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Enforce gofmt
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(find verify -name '*.go' -type f -print)"
+          test -z "$(gofmt -l $files)"
+
+      - name: Run 420Verify tests
+        run: go test ./verify/...
+
+      - name: Vet 420Verify
+        run: go vet ./verify/...
+
+      - name: Build 420Verify service
+        run: go build ./verify/cmd/verify420

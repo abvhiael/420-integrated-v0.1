@@ -110,3 +110,40 @@ export function bindRightsDescriptors420(
   if (seen.size !== RIGHTS_EVENT_CONTRACTS_420.length) throw new Error('Rights deployment address set incomplete');
   return out;
 }
+
+
+export interface RightsDeploymentIdentity420 {
+  address: Hex;
+  runtimeCodeHash: Hex;
+}
+
+export interface RightsCodeBoundDescriptor420 extends GenesisDescriptor420 {
+  runtimeCodeHash: Hex;
+}
+
+export function bindRightsDescriptorsWithCodeIdentity420(
+  descriptors: readonly RightsEventDescriptor420[],
+  deployments: Readonly<Record<RightsEventContract420, RightsDeploymentIdentity420>>
+): RightsCodeBoundDescriptor420[] {
+  const seen = new Set<RightsEventContract420>();
+  const out = descriptors.map((descriptor) => {
+    const deployment = deployments[descriptor.contractName];
+    if (!deployment || !/^0x[0-9a-fA-F]{40}$/.test(deployment.address)) {
+      throw new Error('Rights deployment address invalid: ' + descriptor.contractName);
+    }
+    if (!/^0x[0-9a-fA-F]{64}$/.test(deployment.runtimeCodeHash) ||
+        /^0x0{64}$/i.test(deployment.runtimeCodeHash)) {
+      throw new Error('Rights deployment runtime code hash invalid: ' + descriptor.contractName);
+    }
+    seen.add(descriptor.contractName);
+    return {
+      ...descriptor,
+      contractAddress: deployment.address.toLowerCase() as Hex,
+      runtimeCodeHash: deployment.runtimeCodeHash.toLowerCase() as Hex
+    };
+  });
+  if (seen.size !== RIGHTS_EVENT_CONTRACTS_420.length) {
+    throw new Error('Rights deployment identity set incomplete');
+  }
+  return out;
+}

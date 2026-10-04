@@ -20,7 +20,9 @@
       "ai-read-api",
       "ai-client",
       "focused-ai-contracts",
-      "deployment-materialization"
+      "deployment-materialization",
+      "pretestnet-qualification",
+      "pretestnet-security"
     ]
   },
   "step_qualifications": {
@@ -557,6 +559,54 @@
       "completion_state": "COMPLETE",
       "durable_evidence": "docs/audit/420AI-AUDIT-9-QUALIFICATION.md",
       "next_step": "AI-AUDIT-10 — exact-head pre-testnet qualification"
+    },
+    "AI-AUDIT-10": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head qualification + retained Level 2 pre-testnet app-integration milestone",
+      "implementation_sha": "bfbbca7fa847e46217b4d4b4d23bd70cf72424e8",
+      "current_main_at_closeout": "58b6b17c6538bd3cd22694e417a32472aae899f4",
+      "workflow_run": 37236254656,
+      "jobs": {
+        "ai-client": 111535889133,
+        "custody-settlement": 111535889290,
+        "audit-state": 111535889296,
+        "pretestnet-security": 111535889308,
+        "ai-read-api": 111535889335,
+        "v1-modules": 111535889344,
+        "genesis-compatibility": 111535889370,
+        "provider-runtime": 111535889374,
+        "focused-ai-contracts": 111535889407,
+        "deployment-materialization": 111535889420,
+        "compute-integration": 111535889425,
+        "pretestnet-qualification": 111535889439
+      },
+      "requirements_satisfied": [
+        "Clean documented Foundry build completed from forge clean.",
+        "Focused AI Foundry inventory passed.",
+        "Required ComputeMarket and Vault integration suites passed.",
+        "Required Registry and Identity integration suites passed.",
+        "Targeted AI static/security analysis passed, including forbidden-primitive scan and Slither high-severity gate.",
+        "AI audit/docs/boundary verifiers passed.",
+        "420AI browser application build/tests passed.",
+        "420AI provider build/tests passed.",
+        "420Indexer AI read API build/tests passed.",
+        "Final repository-drift check passed."
+      ],
+      "security_adversarial_invariant_results": [
+        "AI hardening Foundry inventory passed.",
+        "No forbidden tx.origin, selfdestruct or delegatecall primitive was found in AI sources.",
+        "Targeted Slither gate reported no high-severity AI finding.",
+        "Retained custody, settlement, ComputeMarket, Registry and Identity integration regressions passed."
+      ],
+      "milestone_status": "Pre-testnet repository qualification COMPLETE; production-equivalent testnet qualification remains AI-AUDIT-11.",
+      "intentionally_deferred": {
+        "level_3": "Final complete app-phase repository-wide closeout is not duplicated here; canonical broad CI ownership remains deferred to the applicable release/phase closeout.",
+        "live": "Live deployment addresses, transaction hashes, evidence blocks, Registry publication transactions, DNS/API endpoints, provider logs and recovery drills remain AI-AUDIT-11."
+      },
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-10-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-11 — production-equivalent testnet qualification"
     }
   },
   "scope": {
@@ -579,17 +629,18 @@
     "historical_recovery_pr_348_merged": false,
     "current_compute_market_integration_complete": true,
     "custody_settlement_disputes_complete": true,
-    "deployment_materialization_ready": true
+    "deployment_materialization_ready": true,
+    "pretestnet_exact_head_qualification_complete": true
   },
   "readiness": {
-    "code_complete": false,
-    "build_complete": false,
-    "contract_complete": false,
-    "test_complete": false,
-    "documentation_complete": false,
-    "integration_complete": false,
-    "security_qualified": false,
-    "testnet_ready": false,
+    "code_complete": true,
+    "build_complete": true,
+    "contract_complete": true,
+    "test_complete": true,
+    "documentation_complete": true,
+    "integration_complete": true,
+    "security_qualified": true,
+    "testnet_ready": true,
     "genesis_ready": false,
     "production_ready": false
   },

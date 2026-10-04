@@ -124,7 +124,9 @@ func (d *Daemon) Run(ctx context.Context) error {
 	case <-ctx.Done():
 	case first := <-results:
 		remaining--
-		if first.err == nil || errors.Is(first.err, context.Canceled) {
+		if ctx.Err() != nil && errors.Is(first.err, context.Canceled) {
+			cause = nil
+		} else if first.err == nil || errors.Is(first.err, context.Canceled) {
 			cause = fmt.Errorf("%w: %s", ErrServiceExited, first.name)
 		} else {
 			cause = fmt.Errorf("%s: %w", first.name, first.err)

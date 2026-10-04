@@ -15,6 +15,7 @@
       "genesis-compatibility",
       "v1-modules",
       "compute-integration",
+      "custody-settlement",
       "provider-runtime",
       "ai-read-api",
       "ai-client",
@@ -459,10 +460,70 @@
       "completion_state": "COMPLETE",
       "durable_evidence": "docs/audit/420AI-AUDIT-7-QUALIFICATION.md",
       "next_step": "AI-AUDIT-8 — user-facing AI client"
+    },
+    "AI-AUDIT-5": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head app-specific qualification",
+      "implementation_sha": "7b0aef02bd2064bfb97fec9e57d0b7c613bc5a05",
+      "required_workflow": "420AI Audit Qualification",
+      "exact_head_run": 37176098018,
+      "exact_head_result": "success",
+      "jobs": {
+        "audit-state": 111358922074,
+        "provider-runtime": 111358922220,
+        "genesis-compatibility": 111358922222,
+        "custody-settlement": 111358922262,
+        "compute-integration": 111358922277,
+        "focused-ai-contracts": 111358922278,
+        "ai-read-api": 111358922280,
+        "v1-modules": 111358922292,
+        "ai-client": 111358922304
+      },
+      "requirements_satisfied": [
+        "No unrestricted standalone AI custody path exists.",
+        "Canonical funding is payer-segregated and bounded by the requester-authorized maximum spend.",
+        "Provider beneficiary is derived from canonical accepted CMP provider/settlement evidence and frozen before claimability.",
+        "Settlement is one-time and mirrors only canonical entitlement settlement evidence.",
+        "Unused funded value remains recoverable through the canonical payer residual path.",
+        "Cancellation, expiry and failure refunds remain bound to the canonical payer.",
+        "Active disputes hold provider release and final resolution controls disposition.",
+        "Slashing remains limited to objective finalized evidence; subjective AI quality disagreement does not create slash authority.",
+        "Emergency behavior remains non-confiscatory because AI owns no alternate transfer primitive."
+      ],
+      "ci_results": {
+        "workflow": "420AI Audit Qualification",
+        "workflow_run": 37176098018,
+        "result": "success",
+        "exact_head": true,
+        "jobs": {
+          "audit-state": "PASS",
+          "provider-runtime": "PASS",
+          "genesis-compatibility": "PASS",
+          "custody-settlement": "PASS",
+          "compute-integration": "PASS",
+          "focused-ai-contracts": "PASS",
+          "ai-read-api": "PASS",
+          "v1-modules": "PASS",
+          "ai-client": "PASS"
+        },
+        "retained_economic_suites": [
+          "AICustodySettlement420.t.sol",
+          "AIComputeIntegration420.t.sol",
+          "ComputeEscrowFunding420.t.sol",
+          "ComputeVerifiedEntitlement420.t.sol",
+          "ComputeVerifierDisputeSlashEvidence420.t.sol",
+          "ComputeStakeSlashAuthorization420.t.sol"
+        ],
+        "boundary_verifier": "scripts/verify-420ai-custody-settlement.py — PASS"
+      },
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-5-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-9 — deployment and Genesis materialization"
     }
   },
   "scope": {
-    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, current ComputeMarket integration, qualified provider runtime/private-payload path, qualified read API/indexer, and qualified browser client",
+    "claim": "repository-state audit, frozen Genesis compatibility qualification, canonical AI V1 modules, current ComputeMarket integration, qualified custody/settlement/dispute boundaries, qualified provider runtime/private-payload path, qualified read API/indexer, and qualified browser client",
     "does_not_claim": [
       "420AI code completeness",
       "420AI Genesis readiness",
@@ -479,7 +540,8 @@
     "production_web_client_present": true,
     "production_equivalent_testnet_evidence_present": false,
     "historical_recovery_pr_348_merged": false,
-    "current_compute_market_integration_complete": true
+    "current_compute_market_integration_complete": true,
+    "custody_settlement_disputes_complete": true
   },
   "readiness": {
     "code_complete": false,

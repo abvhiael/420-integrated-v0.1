@@ -15,6 +15,16 @@ contract MockRequestAI4 is IAIComputeRequestAuthority420 {
     function setRequest(bytes32 id, Request calldata r) external { rs[id]=r; }
     function getRequest(bytes32 id) external view returns(Request memory){return rs[id];}
 }
+contract MockFundingAI4 is IAIComputeFunding420 {
+    mapping(bytes32=>Credit) internal cs;
+    function setCredit(bytes32 id, Credit calldata c) external { cs[id]=c; }
+    function credit(bytes32 id) external view returns(Credit memory){ return cs[id]; }
+    function funded(bytes32 jobId,address owner,bytes32 fundingRef) external view returns(bool){
+        Credit memory c=cs[jobId];
+        return c.exists && !c.refunded && !c.allocated && c.owner==owner && fundingRef==jobId
+            && c.deposited>0 && c.deposited<=c.maximumSpend && c.obligationId!=bytes32(0);
+    }
+}
 contract MockJobsAI4 is IAIComputeJobRegistry420 {
     mapping(bytes32=>Job) internal js; address public override requestEvidence;
     constructor(address r){requestEvidence=r;}
@@ -47,8 +57,9 @@ contract MockRouterAI4 is ICompute420 {
     bytes32 public immutable override componentGraphHash=keccak256("AI4/CMP/GRAPH");
     address public immutable override jobRegistry; address public immutable override matchRegistry;
     address public immutable override settlementAdapter; address public immutable override providerRegistry;
-    constructor(address j,address m,address e,address p){jobRegistry=j;matchRegistry=m;settlementAdapter=e;providerRegistry=p;}
-    function fundingAdapter()external pure returns(address){return address(0x12);}function workerEvidence()external pure returns(address){return address(0x13);}
+    address public immutable override fundingAdapter;
+    constructor(address j,address f,address m,address e,address p){jobRegistry=j;fundingAdapter=f;matchRegistry=m;settlementAdapter=e;providerRegistry=p;}
+    function workerEvidence()external pure returns(address){return address(0x13);}
     function verificationRouter()external pure returns(address){return address(0x14);}function disputeResolver()external pure returns(address){return address(0x15);}
     function nodeRegistry()external pure returns(address){return address(0x16);}function resourceRegistry()external pure returns(address){return address(0x17);}
     function offerRegistry()external pure returns(address){return address(0x18);}
@@ -63,13 +74,13 @@ contract AIComputeIntegration420Test {
     bytes32 constant SCHEMA=keccak256("schema"); bytes32 constant VERIFY=keccak256("verify"); bytes32 constant REQUIREMENT=keccak256("requirement");
     bytes32 constant PRIVACY=keccak256("privacy"); bytes32 constant INPUT=keccak256("input");
 
-    MockRequestAI4 requests; MockJobsAI4 cmpJobs; MockMatchesAI4 matches; MockProviderAI4 providers; MockEntitlementAI4 entitlements;
+    MockRequestAI4 requests; MockFundingAI4 funding; MockJobsAI4 cmpJobs; MockMatchesAI4 matches; MockProviderAI4 providers; MockEntitlementAI4 entitlements;
     MockRouterAI4 router; MockCapsAI4 caps; AIAuthorization420 auth; AIProviderRegistry aiProviders; AIModelRegistry models;
     AIModelDeploymentRegistry420 deployments; AIJobManager aiJobs; AIComputeAdapter420 adapter;
 
     function setUp() public {
-        requests=new MockRequestAI4();cmpJobs=new MockJobsAI4(address(requests));matches=new MockMatchesAI4();providers=new MockProviderAI4();entitlements=new MockEntitlementAI4();
-        router=new MockRouterAI4(address(cmpJobs),address(matches),address(entitlements),address(providers));caps=new MockCapsAI4();auth=new AIAuthorization420(address(caps));
+        requests=new MockRequestAI4();funding=new MockFundingAI4();cmpJobs=new MockJobsAI4(address(requests));matches=new MockMatchesAI4();providers=new MockProviderAI4();entitlements=new MockEntitlementAI4();
+        router=new MockRouterAI4(address(cmpJobs),address(funding),address(matches),address(entitlements),address(providers));caps=new MockCapsAI4();auth=new AIAuthorization420(address(caps));
         aiProviders=new AIProviderRegistry(address(this));models=new AIModelRegistry(address(this));deployments=new AIModelDeploymentRegistry420(address(auth),address(aiProviders),address(models));aiJobs=new AIJobManager(address(this));
         vm.prank(ALICE);aiProviders.registerProvider(AIP,ALICE,ALICE,keccak256("meta"),keccak256("stake"),CP);vm.prank(ALICE);aiProviders.activate(AIP);
         vm.prank(ALICE);models.registerModel(MODEL,keccak256("meta"),keccak256("license"));vm.prank(ALICE);models.registerVersion(VERSION,MODEL,1,keccak256("manifest"),keccak256("weights"),keccak256("runtime"),REQUIREMENT,SCHEMA,VERIFY,keccak256("license"));
@@ -81,12 +92,12 @@ contract AIComputeIntegration420Test {
     function _bound(bytes32 aiId,bytes32 reqId,bytes32 cmpJobId) private {
         uint64 aiDeadline=uint64(block.timestamp+1 days);uint64 cmpDeadline=uint64(block.timestamp+12 hours);
         vm.prank(ALICE);aiJobs.createRequest(aiId,VERSION,AIIds420.WORKLOAD_TEXT,INPUT,PRIVACY,VERIFY,100,aiDeadline);
-        vm.prank(aiJobs.AI_JOB_ESCROW());aiJobs.confirmFunding(aiId,keccak256(abi.encode("fund",aiId)),90);
         bytes32 manifest=adapter.computeManifestHash(aiId,DEPLOY,VERSION,REQUIREMENT,PRIVACY,VERIFY,AIIds420.WORKLOAD_TEXT,INPUT,SCHEMA,80,cmpDeadline);
         requests.setRequest(reqId,IAIComputeRequestAuthority420.Request(ALICE,PAYER,reqId,manifest,AIIds420.WORKLOAD_TEXT,INPUT,SCHEMA,cmpDeadline,uint64(block.timestamp+1 days),80,1,true));
         bytes32 graph=router.componentGraphHash();vm.prank(ALICE);adapter.bindComputeRequest(aiId,reqId,DEPLOY,graph);
         IAIComputeJobRegistry420.Job memory j;
-        j.owner=ALICE;j.requestId=reqId;j.requestCommitment=reqId;j.manifestHash=manifest;j.workloadType=AIIds420.WORKLOAD_TEXT;j.inputCommitment=INPUT;j.outputSchemaCommitment=SCHEMA;j.deadline=cmpDeadline;j.revision=2;j.status=IAIComputeJobRegistry420.Status.FUNDED;
+        j.owner=ALICE;j.requestId=reqId;j.requestCommitment=reqId;j.manifestHash=manifest;j.workloadType=AIIds420.WORKLOAD_TEXT;j.inputCommitment=INPUT;j.outputSchemaCommitment=SCHEMA;j.fundingRef=cmpJobId;j.deadline=cmpDeadline;j.revision=2;j.status=IAIComputeJobRegistry420.Status.FUNDED;
+        funding.setCredit(cmpJobId,IAIComputeFunding420.Credit(reqId,ALICE,PAYER,80,80,cmpDeadline,keccak256(abi.encode("obligation",cmpJobId)),true,false,false,0,bytes32(0),bytes32(0),bytes32(0)));
         cmpJobs.setJob(cmpJobId,j);adapter.bindComputeJob(aiId,cmpJobId);
         j.matchId=MATCH;j.revision=4;j.status=IAIComputeJobRegistry420.Status.ACCEPTED;cmpJobs.setJob(cmpJobId,j);
         matches.setMatch(MATCH,IAIComputeAcceptedMatch420.Match(cmpJobId,reqId,manifest,OFFER,RESOURCE,CP,keccak256("node"),1,ALICE,ALICE,PRICE,keccak256("accept"),true));
@@ -104,6 +115,7 @@ contract AIComputeIntegration420Test {
         (,,,,,,,,,,,,,,,,AIJobManager.Status st)=aiJobs.jobs(aiId);require(st==AIJobManager.Status.VERIFIED,"AI not verified");
         j.settlementRef=keccak256("settlement");j.status=IAIComputeJobRegistry420.Status.SETTLED;cmpJobs.setJob(cmpJobId,j);entitlements.setSettled(cmpJobId,j.settlementRef);adapter.observeSettlement(aiId);
         AIComputeAdapter420.Binding memory b=adapter.getBinding(aiId);require(b.entitlementRef==er&&b.settlementRef==j.settlementRef&&b.resultCommitment==j.resultCommitment,"settlement binding drift");
+        (,,,,,,,,,,,,,,,,st)=aiJobs.jobs(aiId);require(st==AIJobManager.Status.SETTLED,"AI settlement not reconciled");
     }
 
     function testRefundEvidenceBindsToOriginalCMPJob() public {
@@ -111,20 +123,21 @@ contract AIComputeIntegration420Test {
         IAIComputeJobRegistry420.Job memory j=cmpJobs.job(cmpJobId);j.status=IAIComputeJobRegistry420.Status.FAILED;cmpJobs.setJob(cmpJobId,j);adapter.syncExecution(aiId);
         j.settlementRef=keccak256("refund");j.status=IAIComputeJobRegistry420.Status.REFUNDED;cmpJobs.setJob(cmpJobId,j);entitlements.setRefunded(cmpJobId,j.settlementRef);adapter.observeRefund(aiId);
         AIComputeAdapter420.Binding memory b=adapter.getBinding(aiId);require(b.refundRef==j.settlementRef,"refund evidence missing");
+        (,,,,,,,,,,,,,,,,AIJobManager.Status st)=aiJobs.jobs(aiId);require(st==AIJobManager.Status.REFUNDED,"AI refund not reconciled");
     }
 
     function testBroadenedSpendOrManifestFailsClosed() public {
         bytes32 aiId=keccak256("ai-broad");bytes32 reqId=keccak256("req-broad");uint64 deadline=uint64(block.timestamp+12 hours);
-        vm.prank(ALICE);aiJobs.createRequest(aiId,VERSION,AIIds420.WORKLOAD_TEXT,INPUT,PRIVACY,VERIFY,100,uint64(block.timestamp+1 days));vm.prank(aiJobs.AI_JOB_ESCROW());aiJobs.confirmFunding(aiId,keccak256("fund"),90);
+        vm.prank(ALICE);aiJobs.createRequest(aiId,VERSION,AIIds420.WORKLOAD_TEXT,INPUT,PRIVACY,VERIFY,100,uint64(block.timestamp+1 days));
         requests.setRequest(reqId,IAIComputeRequestAuthority420.Request(ALICE,PAYER,reqId,keccak256("wrong"),AIIds420.WORKLOAD_TEXT,INPUT,SCHEMA,deadline,uint64(block.timestamp+1 days),95,1,true));
         vm.prank(ALICE);(bool ok,)=address(adapter).call(abi.encodeCall(adapter.bindComputeRequest,(aiId,reqId,DEPLOY,router.componentGraphHash())));require(!ok,"broadened request admitted");
     }
 
     function testWrongAcceptedProviderOrBeneficiaryFailsClosed() public {
         bytes32 aiId=keccak256("ai-bad-match");bytes32 reqId=keccak256("req-bad-match");bytes32 cmpJobId=keccak256("job-bad-match");
-        uint64 aiDeadline=uint64(block.timestamp+1 days);uint64 cmpDeadline=uint64(block.timestamp+12 hours);vm.prank(ALICE);aiJobs.createRequest(aiId,VERSION,AIIds420.WORKLOAD_TEXT,INPUT,PRIVACY,VERIFY,100,aiDeadline);vm.prank(aiJobs.AI_JOB_ESCROW());aiJobs.confirmFunding(aiId,keccak256("fund"),90);
+        uint64 aiDeadline=uint64(block.timestamp+1 days);uint64 cmpDeadline=uint64(block.timestamp+12 hours);vm.prank(ALICE);aiJobs.createRequest(aiId,VERSION,AIIds420.WORKLOAD_TEXT,INPUT,PRIVACY,VERIFY,100,aiDeadline);
         bytes32 manifest=adapter.computeManifestHash(aiId,DEPLOY,VERSION,REQUIREMENT,PRIVACY,VERIFY,AIIds420.WORKLOAD_TEXT,INPUT,SCHEMA,80,cmpDeadline);requests.setRequest(reqId,IAIComputeRequestAuthority420.Request(ALICE,PAYER,reqId,manifest,AIIds420.WORKLOAD_TEXT,INPUT,SCHEMA,cmpDeadline,uint64(block.timestamp+1 days),80,1,true));bytes32 graph=router.componentGraphHash();vm.prank(ALICE);adapter.bindComputeRequest(aiId,reqId,DEPLOY,graph);
-        IAIComputeJobRegistry420.Job memory j;j.owner=ALICE;j.requestId=reqId;j.requestCommitment=reqId;j.manifestHash=manifest;j.workloadType=AIIds420.WORKLOAD_TEXT;j.inputCommitment=INPUT;j.outputSchemaCommitment=SCHEMA;j.deadline=cmpDeadline;j.status=IAIComputeJobRegistry420.Status.FUNDED;cmpJobs.setJob(cmpJobId,j);adapter.bindComputeJob(aiId,cmpJobId);j.matchId=MATCH;j.status=IAIComputeJobRegistry420.Status.ACCEPTED;cmpJobs.setJob(cmpJobId,j);
+        IAIComputeJobRegistry420.Job memory j;j.owner=ALICE;j.requestId=reqId;j.requestCommitment=reqId;j.manifestHash=manifest;j.workloadType=AIIds420.WORKLOAD_TEXT;j.inputCommitment=INPUT;j.outputSchemaCommitment=SCHEMA;j.fundingRef=cmpJobId;j.deadline=cmpDeadline;j.status=IAIComputeJobRegistry420.Status.FUNDED;funding.setCredit(cmpJobId,IAIComputeFunding420.Credit(reqId,ALICE,PAYER,80,80,cmpDeadline,keccak256(abi.encode("obligation",cmpJobId)),true,false,false,0,bytes32(0),bytes32(0),bytes32(0)));cmpJobs.setJob(cmpJobId,j);adapter.bindComputeJob(aiId,cmpJobId);j.matchId=MATCH;j.status=IAIComputeJobRegistry420.Status.ACCEPTED;cmpJobs.setJob(cmpJobId,j);
         matches.setMatch(MATCH,IAIComputeAcceptedMatch420.Match(cmpJobId,reqId,manifest,OFFER,RESOURCE,CP,keccak256("node"),1,ALICE,ALICE,PRICE,keccak256("accept"),true));matches.setPrice(cmpJobId,PRICE,IAIComputeAcceptedMatch420.PriceReservation(cmpJobId,MATCH,OFFER,reqId,ALICE,PAYER,keccak256("wrong-provider"),RESOURCE,1,address(0xBAD),keccak256("pricing"),1,60,80,80,keccak256("dispute"),1,1,1,1,1,uint64(block.timestamp),true));
         (bool ok,)=address(adapter).call(abi.encodeCall(adapter.syncAcceptedMatch,(aiId)));require(!ok,"wrong provider/beneficiary admitted");
     }

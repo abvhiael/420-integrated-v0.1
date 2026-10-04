@@ -174,7 +174,7 @@ test('420Rights lifecycle uses canonical emitted contract events', () => {
     event('420Rights', 'ClaimSuperseded', 3n, { oldRightId: rightId, newRightId: '0x' + '44'.repeat(32) })
   ]);
   assert.equal(claim.length, 1);
-  assert.equal(claim[0].objectKey, `oldRightId:${rightId}`);
+  assert.equal(claim[0].objectKey, `rightId:${rightId}`);
   assert.equal(claim[0].state, 'REVOKED');
   assert.equal(claim[0].terminal, true);
   assert.equal(claim[0].eventName, 'ClaimSuperseded');

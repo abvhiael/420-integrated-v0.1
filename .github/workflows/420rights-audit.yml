@@ -1,0 +1,75 @@
+name: 420Rights audit qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/rights/**'
+      - 'contracts/test/Rights*.t.sol'
+      - 'contracts/config/420rights-genesis.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - '420-indexer/descriptors/rights420-v1.json'
+      - '420-indexer/src/rights-descriptors.ts'
+      - '420-indexer/src/lifecycle-reducer.ts'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/src/index.ts'
+      - '420-indexer/test/rights420-descriptors.test.ts'
+      - '420-indexer/test/lifecycle-reducer.test.ts'
+      - 'scripts/verify-420rights-audit.py'
+      - 'docs/audit/420RIGHTS-*'
+      - '.github/workflows/420rights-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rights-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Rights Solidity formatting
+        working-directory: contracts
+        run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol
+      - name: Build canonical Rights graph
+        working-directory: contracts
+        run: forge build src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol --sizes
+      - name: Verify Rights inventory, ABI descriptors, lifecycle and address authority
+        run: python3 scripts/verify-420rights-audit.py
+      - name: Run Rights contract qualification suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Rights*.t.sol' -vvv
+      - name: Reject dangerous Rights primitives
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/rights; then
+            echo 'Forbidden primitive found in 420Rights sources' >&2
+            exit 1
+          fi
+      - name: Install 420Indexer dependencies
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund --no-package-lock
+      - name: Build 420Indexer
+        working-directory: 420-indexer
+        run: npm run build
+      - name: Run Rights Indexer descriptor and lifecycle qualification
+        working-directory: 420-indexer
+        run: node --test --test-concurrency=1 dist/test/rights420-descriptors.test.js dist/test/lifecycle-reducer.test.js

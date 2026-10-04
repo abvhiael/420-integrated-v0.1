@@ -14,6 +14,7 @@ export * from './abi-manifest.js';
 export * from './governance-descriptors.js';
 export * from './treasury-descriptors.js';
 export * from './grants-descriptors.js';
+export * from './rights-descriptors.js';
 export * from './lifecycle-reducer.js';
 export * from './query-layer.js';
 export * from './query-service.js';

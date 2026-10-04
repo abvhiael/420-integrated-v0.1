@@ -27,6 +27,7 @@ expected_contracts = [
     "ArbitrationPolicyRegistry420.sol",
     "ArbitrationCaseRegistry420.sol",
     "ArbitrationRulingRegistry420.sol",
+    "ArbitrationRouter420.sol",
 ]
 
 need(cfg.get("schema") == "420-arbitration-genesis-v1", "Arbitration config schema drift")
@@ -44,6 +45,10 @@ for path in [
     "contracts/src/arbitration/ArbitrationPolicyRegistry420.sol",
     "contracts/src/arbitration/ArbitrationCaseRegistry420.sol",
     "contracts/src/arbitration/ArbitrationRulingRegistry420.sol",
+    "contracts/src/arbitration/ArbitrationRouter420.sol",
+    "contracts/test/ArbitrationDeploymentBinding420.t.sol",
+    "contracts/config/arbitration/arbitration-audit-4-release-materialization.json",
+    "wallet/web/core/arbitration-runtime.js",
     "contracts/test/ArbitrationGenesis420.t.sol",
     "docs/420ARBITRATION.md",
     "docs/apps/arbitration/architecture.md",
@@ -86,7 +91,7 @@ print(
             "invariants": len(invariants),
             "serviceId": cfg["serviceId"],
             "repositoryScope": "source-and-documentation",
-            "releaseMaterialization": "blocked-pending-canonical-service-endpoint-and-address-authority",
+            "releaseMaterialization": "ARBITRATION-AUDIT-4-materialized",
         },
         indent=2,
     )

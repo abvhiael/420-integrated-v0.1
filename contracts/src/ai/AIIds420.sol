@@ -2,6 +2,18 @@
 pragma solidity ^0.8.24;
 library AIIds420 {
     bytes32 internal constant COMPONENT_AI = keccak256("420/AI/COMPONENT/V1");
+    bytes32 internal constant COMPONENT_AI_PROVIDER_REGISTRY = keccak256("420/component/ai/provider-registry/v1");
+    bytes32 internal constant COMPONENT_AI_MODEL_REGISTRY = keccak256("420/component/ai/model-registry/v1");
+    bytes32 internal constant COMPONENT_AI_JOB_MANAGER = keccak256("420/component/ai/job-manager/v1");
+    bytes32 internal constant COMPONENT_AI_JOB_ESCROW = keccak256("420/component/ai/job-escrow/v1");
+    bytes32 internal constant COMPONENT_AI_REPUTATION_REGISTRY = keccak256("420/component/ai/reputation-registry/v1");
+    bytes32 internal constant COMPONENT_AI_AUTHORIZATION = keccak256("420/component/ai/authorization/v1");
+    bytes32 internal constant COMPONENT_AI_POLICY_REGISTRY = keccak256("420/component/ai/policy-registry/v1");
+    bytes32 internal constant COMPONENT_AI_DEPLOYMENT_REGISTRY = keccak256("420/component/ai/deployment-registry/v1");
+    bytes32 internal constant COMPONENT_AI_REQUEST_REGISTRY = keccak256("420/component/ai/request-registry/v1");
+    bytes32 internal constant COMPONENT_AI_RESULT_REGISTRY = keccak256("420/component/ai/result-registry/v1");
+    bytes32 internal constant COMPONENT_AI_COMPUTE_ADAPTER = keccak256("420/component/ai/compute-adapter/v1");
+    bytes32 internal constant COMPONENT_AI_ROUTER = keccak256("420/component/ai/router/v1");
     bytes32 internal constant ACTION_REGISTER_PROVIDER = keccak256("420/AI/ACTION/REGISTER_PROVIDER/V1");
     bytes32 internal constant ACTION_REGISTER_DEPLOYMENT = keccak256("420/AI/ACTION/REGISTER_DEPLOYMENT/V1");
     bytes32 internal constant ACTION_UPDATE_DEPLOYMENT = keccak256("420/AI/ACTION/UPDATE_DEPLOYMENT/V1");

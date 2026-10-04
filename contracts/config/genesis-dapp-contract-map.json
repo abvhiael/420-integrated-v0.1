@@ -367,7 +367,8 @@
         "AIRequestRegistry420.sol",
         "AIResultRegistry420.sol",
         "AIComputeAdapter420.sol",
-        "AIRouter420.sol"
+        "AIRouter420.sol",
+        "IAI420.sol"
       ]
     },
     {

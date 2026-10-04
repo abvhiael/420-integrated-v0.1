@@ -73,11 +73,11 @@ func ValidateBuildEvidence(build BuildEvidence, submitted submission.Submission)
 		return errors.New("compiler input commitment mismatch")
 	}
 
-	if !json.Valid(build.CompilerOutput) {
+	outputCommitment, err := compilerOutputCommitment(build.CompilerOutput)
+	if err != nil {
 		return errors.New("stored compiler output is not valid JSON")
 	}
-	outputHash := sha256.Sum256(build.CompilerOutput)
-	if build.OutputSHA256 != "sha256:"+hex.EncodeToString(outputHash[:]) {
+	if build.OutputSHA256 != outputCommitment {
 		return errors.New("compiler output commitment mismatch")
 	}
 
@@ -171,13 +171,16 @@ func (w *Worker) Compile(ctx context.Context, s submission.Submission) (BuildEvi
 		return BuildEvidence{}, err
 	}
 	inHash := sha256.Sum256(input)
-	outHash := sha256.Sum256(output)
+	outputCommitment, err := compilerOutputCommitment(output)
+	if err != nil {
+		return BuildEvidence{}, err
+	}
 	return BuildEvidence{
 		CompilerVersion:  release.Version,
 		CompilerSHA256:   release.SHA256,
 		BundleHash:       s.BundleHash,
 		InputSHA256:      "sha256:" + hex.EncodeToString(inHash[:]),
-		OutputSHA256:     "sha256:" + hex.EncodeToString(outHash[:]),
+		OutputSHA256:     outputCommitment,
 		NetworkDisabled:  true,
 		WorkingDirClean:  true,
 		RuntimeBytecode:  runtimeCode,
@@ -212,6 +215,19 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 
 func (b *limitedBuffer) Bytes() []byte  { return b.buf.Bytes() }
 func (b *limitedBuffer) String() string { return b.buf.String() }
+
+// compilerOutputCommitment hashes the whitespace-normalized JSON representation
+// of compiler output. json.RawMessage is re-indented when evidence records are
+// persisted, so committing to raw whitespace would make valid evidence fail
+// replay validation after a restart.
+func compilerOutputCommitment(raw []byte) (string, error) {
+	var compact bytes.Buffer
+	if err := json.Compact(&compact, raw); err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(compact.Bytes())
+	return "sha256:" + hex.EncodeToString(sum[:]), nil
+}
 
 // ReproductionInput returns the exact Standard JSON bytes passed to the pinned compiler.
 func ReproductionInput(s submission.Submission) ([]byte, error) {

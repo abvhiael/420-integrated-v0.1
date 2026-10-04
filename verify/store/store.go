@@ -17,6 +17,7 @@ import (
 	"github.com/420integrated/420-integrated/verify/compiler"
 	"github.com/420integrated/420-integrated/verify/evidence"
 	"github.com/420integrated/420-integrated/verify/matcher"
+	"github.com/420integrated/420-integrated/verify/proxy"
 	"github.com/420integrated/420-integrated/verify/submission"
 )
 
@@ -33,6 +34,7 @@ type Record struct {
 	Submission     submission.Submission       `json:"submission"`
 	Build          compiler.BuildEvidence      `json:"build"`
 	Classification matcher.Result              `json:"classification"`
+	Proxy          *proxy.Relationship          `json:"proxy,omitempty"`
 }
 
 type Store struct {
@@ -56,6 +58,10 @@ func Open(root string) (*Store, error) {
 }
 
 func (s *Store) Append(deployment evidence.DeploymentEvidence, submitted submission.Submission, build compiler.BuildEvidence, result matcher.Result) (Record, error) {
+	return s.AppendWithProxy(deployment, submitted, build, result, nil)
+}
+
+func (s *Store) AppendWithProxy(deployment evidence.DeploymentEvidence, submitted submission.Submission, build compiler.BuildEvidence, result matcher.Result, relationship *proxy.Relationship) (Record, error) {
 	if err := deployment.Validate(); err != nil {
 		return Record{}, fmt.Errorf("deployment evidence: %w", err)
 	}
@@ -66,13 +72,25 @@ func (s *Store) Append(deployment evidence.DeploymentEvidence, submitted submiss
 	if result.BindingKey != binding {
 		return Record{}, errors.New("classification binding key does not match deployment evidence")
 	}
+	if relationship != nil {
+		if err := relationship.Validate(); err != nil {
+			return Record{}, fmt.Errorf("proxy relationship: %w", err)
+		}
+		if relationship.ChainID != deployment.ChainID ||
+			!strings.EqualFold(relationship.ProxyAddress, deployment.Address) ||
+			!strings.EqualFold(relationship.ProxyRuntimeCodeHash, deployment.RuntimeCodeHash) ||
+			relationship.ObservedBlock != deployment.ObservedAt.Number ||
+			!strings.EqualFold(relationship.ObservedBlockHash, deployment.ObservedAt.Hash) {
+			return Record{}, errors.New("proxy relationship does not match canonical deployment evidence")
+		}
+	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	seq := uint64(len(s.history[binding]) + 1)
 	record := Record{
 		Schema: schema, Sequence: seq, StoredAt: time.Now().UTC(), BindingKey: binding,
-		Deployment: deployment, Submission: submitted, Build: build, Classification: result,
+		Deployment: deployment, Submission: submitted, Build: build, Classification: result, Proxy: relationship,
 	}
 	hash, err := recordHash(record)
 	if err != nil {
@@ -169,6 +187,14 @@ func validateRecord(record Record) error {
 	if record.Classification.BindingKey != record.BindingKey { return errors.New("classification binding mismatch") }
 	if err := record.Deployment.Validate(); err != nil { return err }
 	if err := record.Submission.ValidateCommitment(); err != nil { return err }
+	if record.Proxy != nil {
+		if err := record.Proxy.Validate(); err != nil { return err }
+		if record.Proxy.ChainID != record.Deployment.ChainID ||
+			!strings.EqualFold(record.Proxy.ProxyAddress, record.Deployment.Address) ||
+			!strings.EqualFold(record.Proxy.ProxyRuntimeCodeHash, record.Deployment.RuntimeCodeHash) {
+			return errors.New("record proxy relationship binding mismatch")
+		}
+	}
 	expected, err := recordHash(record)
 	if err != nil { return err }
 	if record.RecordHash != expected { return errors.New("record content hash mismatch") }

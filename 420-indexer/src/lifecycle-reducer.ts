@@ -35,6 +35,25 @@ const KEY_FIELDS = [
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
+  if (event.protocol === '420Rights') {
+    if (event.eventName === 'ClaimSuperseded') {
+      const oldRightId = event.fields.oldRightId;
+      if (oldRightId !== undefined && oldRightId !== null) return `rightId:${String(oldRightId).toLowerCase()}`;
+    }
+    if (event.eventName === 'SubjectRegistered' || event.eventName === 'SubjectMetadataUpdated') {
+      const subjectId = event.fields.subjectId;
+      if (subjectId !== undefined && subjectId !== null) return `subjectId:${String(subjectId).toLowerCase()}`;
+    }
+    if (event.eventName === 'ClaimDeclared' || event.eventName === 'RightHolderTransferred') {
+      const rightId = event.fields.rightId;
+      if (rightId !== undefined && rightId !== null) return `rightId:${String(rightId).toLowerCase()}`;
+    }
+    if (event.eventName === 'LicenseGranted' || event.eventName === 'LicenseRevoked' || event.eventName === 'LicenseRenounced') {
+      const licenseId = event.fields.licenseId;
+      if (licenseId !== undefined && licenseId !== null) return `licenseId:${String(licenseId).toLowerCase()}`;
+    }
+  }
+
   // Identity events may contain secondary identifiers (for example
   // PrimaryNameSet has labelHash and CredentialIssued has issuerId). The
   // canonical object key follows the Identity object being mutated, not the
@@ -144,11 +163,14 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'TransferFailed', state: 'FAILED', terminal: true }
   ]},
   { protocol: '420Rights', rules: [
-    { eventName: 'RightRegistered', state: 'ACTIVE' },
-    { eventName: 'LicenseIssued', state: 'ACTIVE' },
-    { eventName: 'RightRevoked', state: 'REVOKED', terminal: true },
+    { eventName: 'SubjectRegistered', state: 'ACTIVE' },
+    { eventName: 'SubjectMetadataUpdated', state: 'ACTIVE' },
+    { eventName: 'ClaimDeclared', state: 'ACTIVE' },
+    { eventName: 'RightHolderTransferred', state: 'ACTIVE' },
+    { eventName: 'ClaimSuperseded', state: 'REVOKED', terminal: true },
+    { eventName: 'LicenseGranted', state: 'ACTIVE' },
     { eventName: 'LicenseRevoked', state: 'REVOKED', terminal: true },
-    { eventName: 'LicenseExpired', state: 'EXPIRED', terminal: true }
+    { eventName: 'LicenseRenounced', state: 'REVOKED', terminal: true }
   ]},
   { protocol: '420Randomness', rules: [
     { eventName: 'RandomnessRequested', state: 'PENDING' },

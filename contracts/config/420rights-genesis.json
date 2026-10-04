@@ -1,6 +1,6 @@
 {
   "schema": "420rights-genesis-v1",
-  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION",
+  "status": "REPOSITORY_RELEASE_MATERIALIZED_LIVE_TESTNET_DEFERRED",
   "suite": "420 Rights",
   "contracts": [
     "RightsIds420.sol",
@@ -11,7 +11,16 @@
     "RightsLicenseRegistry420.sol",
     "RightsRouter420.sol"
   ],
-  "canonical_right_classes": ["COPYRIGHT","TRADEMARK","PATENT","PERSONALITY","GENETIC","DATA","MODEL","CONTRACTUAL"],
+  "canonical_right_classes": [
+    "COPYRIGHT",
+    "TRADEMARK",
+    "PATENT",
+    "PERSONALITY",
+    "GENETIC",
+    "DATA",
+    "MODEL",
+    "CONTRACTUAL"
+  ],
   "genesis_invariants": [
     "RIGHTS-INV-001: subject identity/provenance is canonical; metadata changes remain controller/capability scoped",
     "RIGHTS-INV-002: a rights claim references an existing subject and active configured right class and commits nonzero jurisdiction/evidence",
@@ -34,5 +43,11 @@
     "420_pay": "future invoice/payment settlement for licenses"
   },
   "new_frozen_predeploy_required": false,
-  "external_legal_adjudication": true
+  "external_legal_adjudication": true,
+  "deployment": {
+    "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "serviceIdPreimage": "420/service/rights/v1",
+    "releaseMaterialization": "contracts/config/rights/rights-audit-4-release-materialization.json",
+    "liveQualificationOwner": "RIGHTS-AUDIT-5"
+  }
 }

@@ -157,7 +157,7 @@ Still required:
 ## Readiness
 
 - CODE COMPLETE: **YES** for the canonical repository-level Rights protocol implementation.
-- BUILD COMPLETE: **PENDING exact-head qualification run**.
+- BUILD COMPLETE: **YES** for the repository-qualified implementation.
 - CONTRACT COMPLETE: **YES** at source scope; release deployment materialization remains separate.
 - TEST COMPLETE: **NO** — repository tests can qualify source behavior, but live deployment/reorg/finality/testnet scenarios remain.
 - DOCUMENTATION COMPLETE: **NO** — deployment/operator/threat-model/Genesis acceptance documents remain.
@@ -167,8 +167,31 @@ Still required:
 - GENESIS READY: **NO** — blocked on RIGHTS-AUDIT-4 through 6.
 - PRODUCTION READY: **NO** — blocked on testnet and final release/security closeout.
 
+## Exact-head repository qualification
+
+Qualified implementation SHA: `b3ea84e8a92524cfbf0f3512975efda73542b310`  
+Dedicated workflow: `420Rights audit qualification`  
+Passing run: `37177524144`  
+Qualify job: `111363160613`  
+Security job: `111363160767`
+
+Results:
+- Rights formatting: PASS;
+- canonical Rights build: PASS;
+- inventory/ABI/lifecycle/address-authority verifier: PASS;
+- Foundry Rights suites: 12 passed, 0 failed, 0 skipped;
+- forbidden primitive scan: PASS;
+- 420Indexer build: PASS;
+- Rights descriptor/lifecycle tests: 18 passed, 0 failed;
+- hardening-profile Rights suite: PASS;
+- targeted Slither high-severity gate: PASS, 0 high-severity findings; two low-impact timestamp findings.
+
+The subsequent audit bookkeeping commit is documentation-only and does not modify the qualified implementation.
+
 ## Final determination
 
 420Rights was not genuinely complete at the audited `main` baseline despite having a coherent contract suite and retained tests. The baseline had a concrete Indexer lifecycle mismatch and lacked a Rights-specific release descriptor/qualification path. The audit branch repairs those repository-level integration/test gaps without changing the canonical authority model.
 
-The source-level protocol can qualify as code/contract complete once this exact branch head passes the dedicated workflow. Genesis/production completion must not be declared until deterministic deployment materialization, live ProtocolRegistry publication, production-equivalent testnet qualification and final operational/security documentation are retained as exact-head evidence.
+The source-level protocol is now repository-qualified as code/contract complete on implementation SHA `b3ea84e8a92524cfbf0f3512975efda73542b310`, dedicated workflow run `37177524144` (qualify job `111363160613`, security job `111363160767`). The run passed formatting, canonical build, repository verifier, 12/12 Foundry Rights tests, forbidden-primitive scan, 420Indexer build, 18/18 Rights Indexer descriptor/lifecycle tests, hardening-profile tests and the targeted Slither high-severity gate with zero high-severity findings. Slither retained two low-impact timestamp findings consistent with the protocol's explicit validity-window semantics.
+
+Genesis/production completion must not be declared until deterministic deployment materialization, live ProtocolRegistry publication, production-equivalent testnet qualification and final operational/security documentation are retained as exact-head evidence.

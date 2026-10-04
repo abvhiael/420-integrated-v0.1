@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	ErrNoServices        = errors.New("compute worker daemon has no services")
-	ErrServiceExited     = errors.New("compute worker service exited unexpectedly")
-	ErrAlreadyRunning    = errors.New("compute worker daemon is already running")
+	ErrNoServices     = errors.New("compute worker daemon has no services")
+	ErrServiceExited  = errors.New("compute worker service exited unexpectedly")
+	ErrAlreadyRunning = errors.New("compute worker daemon is already running")
 )
 
 type Service interface {
@@ -37,6 +37,11 @@ type Snapshot struct {
 	ServiceNum int
 }
 
+type serviceResult struct {
+	name string
+	err  error
+}
+
 type Daemon struct {
 	config   Config
 	services []Service
@@ -54,13 +59,19 @@ func New(config Config, services ...Service) (*Daemon, error) {
 	if len(services) == 0 {
 		return nil, ErrNoServices
 	}
+	seen := make(map[string]struct{}, len(services))
 	for i, service := range services {
 		if service == nil {
 			return nil, fmt.Errorf("service %d: nil", i)
 		}
-		if service.Name() == "" {
+		name := service.Name()
+		if name == "" {
 			return nil, fmt.Errorf("service %d: empty name", i)
 		}
+		if _, ok := seen[name]; ok {
+			return nil, fmt.Errorf("duplicate service name %q", name)
+		}
+		seen[name] = struct{}{}
 	}
 	return &Daemon{
 		config:   config,
@@ -97,48 +108,72 @@ func (d *Daemon) Run(ctx context.Context) error {
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	type result struct {
-		name string
-		err  error
-	}
-	results := make(chan result, len(d.services))
+	results := make(chan serviceResult, len(d.services))
 	for _, service := range d.services {
 		service := service
 		go func() {
-			results <- result{name: service.Name(), err: service.Run(runCtx)}
+			results <- serviceResult{name: service.Name(), err: service.Run(runCtx)}
 		}()
 	}
 
 	d.setState(StateReady, stateDir)
-	select {
-	case <-d.ready:
-	default:
-		close(d.ready)
-	}
+	close(d.ready)
 
+	var cause error
 	select {
 	case <-ctx.Done():
-		d.setState(StateStopping, stateDir)
-		cancel()
-		return d.awaitShutdown(results, nil)
 	case first := <-results:
-		d.setState(StateStopping, stateDir)
-		cancel()
-		cause := first.err
-		if cause == nil || errors.Is(cause, context.Canceled) {
+		if first.err == nil || errors.Is(first.err, context.Canceled) {
 			cause = fmt.Errorf("%w: %s", ErrServiceExited, first.name)
 		} else {
-			cause = fmt.Errorf("%s: %w", first.name, cause)
+			cause = fmt.Errorf("%s: %w", first.name, first.err)
 		}
-		return d.awaitShutdown(results, cause)
+		results = drainFirst(results, first)
+	}
+
+	d.setState(StateStopping, stateDir)
+	cancel()
+	shutdownErr := d.awaitShutdown(results)
+	d.setState(StateStopped, stateDir)
+	if cause != nil && shutdownErr != nil {
+		return fmt.Errorf("%w; shutdown: %v", cause, shutdownErr)
+	}
+	if cause != nil {
+		return cause
+	}
+	return shutdownErr
+}
+
+func drainFirst(results chan serviceResult, first serviceResult) chan serviceResult {
+	out := make(chan serviceResult, cap(results))
+	out <- first
+	for {
+		select {
+		case r := <-results:
+			out <- r
+		default:
+			return out
+		}
 	}
 }
 
-func (d *Daemon) awaitShutdown(results <-chan struct {
-	name string
-	err  error
-}, cause error) error {
-	return cause
+func (d *Daemon) awaitShutdown(results <-chan serviceResult) error {
+	timer := time.NewTimer(d.config.ShutdownTimeout)
+	defer timer.Stop()
+
+	remaining := len(d.services)
+	for remaining > 0 {
+		select {
+		case result := <-results:
+			remaining--
+			if result.err != nil && !errors.Is(result.err, context.Canceled) {
+				return fmt.Errorf("%s shutdown: %w", result.name, result.err)
+			}
+		case <-timer.C:
+			return fmt.Errorf("compute worker shutdown timed out with %d service(s) remaining", remaining)
+		}
+	}
+	return nil
 }
 
 func (d *Daemon) setState(state State, stateDir string) {

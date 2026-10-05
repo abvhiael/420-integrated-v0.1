@@ -140,3 +140,16 @@ jobs:
 
       - name: Verify CMP-3.12 malicious workload protections
         run: python scripts/verify-cmp-3-12-malicious-workload-protections.py
+
+      - name: Build CMP-3.13 platform packages
+        run: python scripts/build-cmp-3-13-packages.py --output dist/node420-compute
+
+      - name: Verify CMP-3.13 Windows/Linux/macOS packaging
+        run: python scripts/verify-cmp-3-13-packaging.py --dist dist/node420-compute
+
+      - name: Upload CMP-3.13 package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: node420-compute-packages-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dist/node420-compute/
+          if-no-files-found: error

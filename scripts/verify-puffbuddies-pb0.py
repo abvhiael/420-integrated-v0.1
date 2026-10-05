@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "docs/puffbuddies/PUFFBUDDIES.md"
 ROAD = ROOT / "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md"
 EVIDENCE = ROOT / "docs/puffbuddies/PB-0.1-QUALIFICATION.md"
+SCOPE = ROOT / "docs/puffbuddies/PB-0.2-MVP-SCOPE.md"
+EVIDENCE_02 = ROOT / "docs/puffbuddies/PB-0.2-QUALIFICATION.md"
 
 errors = []
 
@@ -14,7 +16,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE):
+for path in (APP, ROAD, EVIDENCE, SCOPE, EVIDENCE_02):
     need(path.exists(), f"missing required PB-0.1 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -24,6 +26,8 @@ if errors:
 app = APP.read_text(encoding="utf-8")
 road = ROAD.read_text(encoding="utf-8")
 evidence = EVIDENCE.read_text(encoding="utf-8")
+scope = SCOPE.read_text(encoding="utf-8")
+evidence_02 = EVIDENCE_02.read_text(encoding="utf-8")
 
 required_app_tokens = [
     "# PuffBuddies",
@@ -63,6 +67,9 @@ required_road_tokens = [
     "PB-ID-001 through PB-ID-008",
     "the exact-head PuffBuddies PB-0 workflow passes",
     "### PB-0.2 — MVP scope",
+    "**Qualification level:** Level 1.",
+    "PB-MVP-001 through PB-MVP-015",
+    "PB-SCOPE-001 through PB-SCOPE-008",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]
 for token in required_road_tokens:
@@ -112,4 +119,11 @@ print(json.dumps({
     "identityInvariants": ids,
     "claimsImplementation": False,
     "assignsFixedAddress": False,
+    "pb02": {
+        "mvpCapabilities": mvp_ids,
+        "scopeInvariants": scope_ids,
+        "webFirst": True,
+        "nativeMobileDeferred": True,
+        "claimsImplementation": False,
+    },
 }, indent=2))

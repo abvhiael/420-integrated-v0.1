@@ -133,7 +133,7 @@ func TestSecurityGuardQuarantinesRepeatedAbuseAndPersistsAcrossRestart(t *testin
 }
 
 func TestSecurityIncidentEvidenceIsPrivateNonAuthoritativeAndPayloadFree(t *testing.T) {
-	lifecycle, plan, auth, guard, _ := maliciousFixture(t)
+	_, plan, auth, guard, _ := maliciousFixture(t)
 	outcome := ExecutionOutcome{
 		Record: ExecutionRecord{Status: ExecutionFailed, OutputTruncated: true},
 		Sandbox: SandboxResult{Output: "secret-output", OutputTruncated: true},

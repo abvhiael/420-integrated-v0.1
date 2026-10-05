@@ -147,6 +147,9 @@ jobs:
       - name: Verify CMP-3.13 Windows/Linux/macOS packaging
         run: python scripts/verify-cmp-3-13-packaging.py --dist dist/node420-compute
 
+      - name: Verify CMP-3.14 phase closeout inventory
+        run: python scripts/verify-cmp-3-14-closeout.py
+
       - name: Upload CMP-3.13 package artifacts
         uses: actions/upload-artifact@v4
         with:

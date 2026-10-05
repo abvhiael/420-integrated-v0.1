@@ -59,6 +59,8 @@ for i in range(1,14):
     if token not in fast and i!=13:
         fail(f"worker fast retained verifier missing CMP-3.{i}")
 if "verify-cmp-3-13-packaging.py" not in fast: fail("worker fast packaging verifier missing")
+for token in ("Verify CMP-3.14 phase closeout inventory","verify-cmp-3-14-closeout.py"):
+    if token not in fast: fail(f"worker fast CMP-3.14 closeout verifier ownership missing {token}")
 iw=INTEGRATION.read_text()
 for token in ("cmp-worker-level2","Run retained worker integration suite","go test ./compute/worker -count=1"):
     if token not in iw: fail(f"worker integration ownership missing {token}")

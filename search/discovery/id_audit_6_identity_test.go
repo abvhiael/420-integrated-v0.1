@@ -39,11 +39,21 @@ func TestIDAudit6ProfileHistoryCoversControllerTransferPrimaryNameAndReactivatio
 	}
 
 	state, err := reduceProfileHistory(profile, events)
-	if err != nil { t.Fatal(err) }
-	if !state.known || !state.active { t.Fatalf("expected active reconstructed profile: %+v", state) }
-	if state.controller != nextController { t.Fatalf("controller=%s", state.controller) }
-	if state.primaryName != nameHash { t.Fatalf("primaryName=%s", state.primaryName) }
-	if state.metadataHash != metadata2 { t.Fatalf("metadataHash=%s", state.metadataHash) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !state.known || !state.active {
+		t.Fatalf("expected active reconstructed profile: %+v", state)
+	}
+	if state.controller != nextController {
+		t.Fatalf("controller=%s", state.controller)
+	}
+	if state.primaryName != nameHash {
+		t.Fatalf("primaryName=%s", state.primaryName)
+	}
+	if state.metadataHash != metadata2 {
+		t.Fatalf("metadataHash=%s", state.metadataHash)
+	}
 	if state.last.EventName != "ProfileUpdated" || state.last.BlockNumber != "15" {
 		t.Fatalf("latest provenance not retained: %+v", state.last)
 	}
@@ -61,8 +71,8 @@ func TestIDAudit6PublicIdentitySuppressesInactiveAndRestoresAfterReactivation(t 
 	}
 	reader := &fakeNamesIdentityReader{
 		status: qualifiedStatus(),
-		state: indexerclient.ProtocolState{ChainID:"420", Protocol:"420Identity", ObjectKey:profile},
-		page: indexerclient.ProtocolEventPage{Items: base},
+		state:  indexerclient.ProtocolState{ChainID: "420", Protocol: "420Identity", ObjectKey: profile},
+		page:   indexerclient.ProtocolEventPage{Items: base},
 	}
 	d, _ := NewNamesIdentityDiscovery(reader)
 	d.now = func() time.Time { return time.Unix(2_000_000_000, 0).UTC() }
@@ -75,7 +85,9 @@ func TestIDAudit6PublicIdentitySuppressesInactiveAndRestoresAfterReactivation(t 
 		"profileId": profile, "metadataHash": "0xcommitment3", "active": true,
 	}))
 	result, ok, err := d.ResolvePublicIdentity(context.Background(), profile)
-	if err != nil || !ok { t.Fatalf("reactivated profile missing: ok=%v err=%v", ok, err) }
+	if err != nil || !ok {
+		t.Fatalf("reactivated profile missing: ok=%v err=%v", ok, err)
+	}
 	if !strings.Contains(result.Presentation.Snippet, "metadata commitment 0xcommitment3") {
 		t.Fatalf("commitment not presented as commitment: %s", result.Presentation.Snippet)
 	}
@@ -86,7 +98,7 @@ func TestIDAudit6MetadataCommitmentsNeverBecomePayloads(t *testing.T) {
 	secretLooking := "0xdeadbeef"
 	reader := &fakeNamesIdentityReader{
 		status: qualifiedStatus(),
-		state: indexerclient.ProtocolState{ChainID:"420", Protocol:"420Identity", ObjectKey:profile},
+		state:  indexerclient.ProtocolState{ChainID: "420", Protocol: "420Identity", ObjectKey: profile},
 		page: indexerclient.ProtocolEventPage{Items: []indexerclient.ProtocolEvent{
 			event420("420Identity", profile, "ProfileCreated", "10", 0, map[string]any{
 				"profileId": profile, "controller": "0xcontroller", "metadataHash": secretLooking,
@@ -97,7 +109,9 @@ func TestIDAudit6MetadataCommitmentsNeverBecomePayloads(t *testing.T) {
 	d, _ := NewNamesIdentityDiscovery(reader)
 	d.now = func() time.Time { return time.Unix(2_000_000_000, 0).UTC() }
 	result, ok, err := d.ResolvePublicIdentity(context.Background(), profile)
-	if err != nil || !ok { t.Fatalf("resolve failed: ok=%v err=%v", ok, err) }
+	if err != nil || !ok {
+		t.Fatalf("resolve failed: ok=%v err=%v", ok, err)
+	}
 	if strings.Contains(result.Presentation.Snippet, "this-field-must-never-be-indexed-by-search") {
 		t.Fatal("Search exposed metadata payload")
 	}
@@ -120,9 +134,13 @@ func TestIDAudit6ProfileRebuildIsDeterministicForCanonicalHistory(t *testing.T) 
 		}),
 	}
 	first, err := reduceProfileHistory(profile, history)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	second, err := reduceProfileHistory(profile, append([]indexerclient.ProtocolEvent(nil), history...))
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if first.controller != second.controller || first.primaryName != second.primaryName ||
 		first.metadataHash != second.metadataHash || first.active != second.active {
 		t.Fatalf("rebuild drift: first=%+v second=%+v", first, second)

@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	MaxRequestURIBytes     = 8192
-	MaxQueryTerms          = 32
-	DefaultBackendTimeout  = 3 * time.Second
+	MaxRequestURIBytes    = 8192
+	MaxQueryTerms         = 32
+	DefaultBackendTimeout = 3 * time.Second
 )
 
 var ErrRateLimited = errors.New("search request rate limited")

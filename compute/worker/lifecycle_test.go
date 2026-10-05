@@ -83,7 +83,7 @@ func (r *inputCapturingRunner) Run(ctx context.Context, _ string, _ []string, st
 		if err != nil { return err }
 		r.input = string(data)
 	}
-	if r.block {
+	if r.block && stdin != nil {
 		<-ctx.Done()
 		return ctx.Err()
 	}

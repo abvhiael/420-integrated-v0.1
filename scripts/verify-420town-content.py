@@ -52,7 +52,12 @@ def main():
             "unknown visibility must fail closed", errors)
     require(cfg["visibility"]["commentsInheritRootPostVisibility"] is True,
             "comments must inherit root post visibility", errors)
-    require(len(cfg["invariants"]) >= 17,
+    for field in ["deviceWriteLimit","deviceVoteLimit","networkWriteLimit","networkVoteLimit"]:
+        require(cfg["abuseControls"].get(field, 0) > 0,
+                f"Town content abuse control missing {field}", errors)
+    require(cfg["abuseControls"].get("deviceNetworkContext") == "TRUSTED_SERVER_SIDE_RISK_CONTEXT",
+            "device/network abuse context must remain trusted server-side context", errors)
+    require(len(cfg["invariants"]) >= 18,
             "Town content invariant inventory incomplete", errors)
 
     required_visibility = {
@@ -87,6 +92,10 @@ def main():
         "ErrIdempotencyConflict",
         "ErrRateLimited",
         "ErrDuplicateContent",
+        "DeviceKey",
+        "NetworkKey",
+        "deviceWrites",
+        "networkWrites",
         "comments",
         "fingerprints",
         "idempotency",

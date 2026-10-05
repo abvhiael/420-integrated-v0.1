@@ -27,6 +27,8 @@ SAFETY = ROOT / "docs/puffbuddies/PB-0.10-SAFETY-MODERATION-PRINCIPLES.md"
 EVIDENCE_10 = ROOT / "docs/puffbuddies/PB-0.10-QUALIFICATION.md"
 DATA = ROOT / "docs/puffbuddies/PB-0.11-DATA-LIFECYCLE-DELETION.md"
 EVIDENCE_11 = ROOT / "docs/puffbuddies/PB-0.11-QUALIFICATION.md"
+LIFE = ROOT / "docs/puffbuddies/PB-0.12-USER-LIFECYCLE.md"
+EVIDENCE_12 = ROOT / "docs/puffbuddies/PB-0.12-QUALIFICATION.md"
 
 errors = []
 
@@ -34,7 +36,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -64,6 +66,8 @@ safety = SAFETY.read_text(encoding="utf-8")
 evidence_10 = EVIDENCE_10.read_text(encoding="utf-8")
 data = DATA.read_text(encoding="utf-8")
 evidence_11 = EVIDENCE_11.read_text(encoding="utf-8")
+life = LIFE.read_text(encoding="utf-8")
+evidence_12 = EVIDENCE_12.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -148,6 +152,9 @@ for token in [
     "### PB-0.11 — Data lifecycle/deletion",
     "PB-DATA-001 through PB-DATA-036",
     "**Milestone relationship:** PB-0.11 is not a Level 2 integration milestone",
+    "### PB-0.12 — User lifecycle",
+    "PB-LIFE-001 through PB-LIFE-040",
+    "**Milestone relationship:** PB-0.12 is not treated as a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1096,13 +1103,125 @@ for token in [
 ]:
     need(token in evidence_11, f"PB-0.11 evidence record missing token: {token}")
 
+# PB-0.12 — user lifecycle
+for token in [
+    "# PuffBuddies PB-0.12 user lifecycle",
+    "## Lifecycle principles",
+    "## Canonical lifecycle states",
+    "## Canonical transition invariants",
+    "## Canonical transition matrix",
+    "## Transition authorization rule",
+    "## PB-0.12 completion boundary",
+    "UNREGISTERED",
+    "ELIGIBILITY_PENDING",
+    "ELIGIBILITY_FAILED",
+    "PROFILE_INCOMPLETE",
+    "ACTIVE",
+    "DEACTIVATED",
+    "RESTRICTED",
+    "SUSPENDED",
+    "BANNED",
+    "DELETE_REQUESTED",
+    "DELETION_IN_PROGRESS",
+    "DELETION_COMPLETE",
+    "RETAINED_EVIDENCE_ONLY",
+    "APPEAL_REVIEW",
+    "Entry starts from UNREGISTERED",
+    "Eligibility gates ordinary account activation",
+    "Profile completion gates ordinary discovery",
+    "ACTIVE can voluntarily transition to DEACTIVATED",
+    "DEACTIVATED reactivation requires current checks",
+    "Safety authority may transition into RESTRICTED",
+    "Safety authority may transition into SUSPENDED",
+    "Safety authority may transition into BANNED",
+    "Appeal transition does not restore access",
+    "Restriction removal requires explicit canonical transition",
+    "Eligibility loss can revoke ACTIVE participation",
+    "Delete request is user-authorized and terminal for ordinary participation",
+    "DELETE_REQUESTED advances through deletion processing",
+    "DELETION_COMPLETE does not reactivate",
+    "Retained evidence never becomes ordinary participation",
+    "New registration after deletion is not state restoration",
+    "Block and match state do not own lifecycle",
+    "Payment/entitlement state does not own lifecycle",
+    "Wallet and identity state do not own PuffBuddies lifecycle",
+    "Sessions follow lifecycle authority",
+    "Notifications and queues cannot transition lifecycle",
+    "Client state cannot transition protected lifecycle by itself",
+    "Conflicting lifecycle state fails closed",
+    "Lifecycle changes invalidate stale derived state",
+    "Lifecycle state remains private",
+    "Lifecycle transitions are protected and auditable",
+]:
+    need(token in life, f"PB-0.12 lifecycle document missing token: {token}")
+
+life_ids = re.findall(r"^### (PB-LIFE-\d{3})\b", life, flags=re.MULTILINE)
+need(life_ids == [f"PB-LIFE-{i:03d}" for i in range(1, 41)], f"PB-LIFE sequence drift: {life_ids}")
+need(len(life_ids) == len(set(life_ids)), "duplicate PB-LIFE identifier")
+
+for guarantee in [
+    "Lifecycle authority is separate from Wallet, Identity, Names, Messenger, Notifications, Pay, Registry, and AppStore authority",
+    "Eligibility is necessary for ordinary participation but is not itself the PuffBuddies lifecycle state",
+    "Stale clients, sessions, queues, notifications, matches, premium state, or downstream dependencies must not preserve permissions revoked by lifecycle state",
+    "UNREGISTERED or ELIGIBILITY_PENDING may advance toward PROFILE_INCOMPLETE/ACTIVE only after a current authoritative ELIGIBLE result",
+    "Prior ACTIVE status is not permanent authorization",
+    "Suspension revokes ordinary participation regardless of current match/payment/session state",
+    "No dependency may independently manufacture or reverse the PuffBuddies ban state",
+    "APPEAL_REVIEW preserves the applicable deny/restriction unless a canonical review outcome explicitly changes it",
+    "DELETION_COMPLETE cannot transition directly back to ACTIVE",
+    "Payment/entitlement state does not own lifecycle",
+    "A valid-looking token must fail authorization when canonical lifecycle state no longer permits the requested action",
+    "If current state cannot be established, ordinary participation fails closed",
+]:
+    need(guarantee in life, f"PB-0.12 missing lifecycle guarantee: {guarantee}")
+
+for transition_req in [
+    "source state(s)",
+    "destination state",
+    "authenticated actor or canonical authority",
+    "preconditions",
+    "eligibility effect",
+    "safety/moderation effect",
+    "consent/match/messaging effect",
+    "session/token invalidation effect",
+    "visibility/discovery effect",
+    "retention/deletion effect",
+    "dependency notifications or capability revocations",
+    "audit evidence",
+    "failure/stale-state behavior",
+]:
+    need(transition_req in life, f"PB-0.12 transition authorization rule missing: {transition_req}")
+
+for forbidden in [
+    "PuffBuddies lifecycle service is implemented",
+    "PuffBuddies lifecycle database is deployed",
+    "PuffBuddies lifecycle worker is live",
+    "PuffBuddies lifecycle service ID is",
+]:
+    need(forbidden not in life, f"PB-0.12 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", life) is None, "PB-0.12 must not assign an on-chain address")
+need("420/service/puff" not in life.lower(), "PB-0.12 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.12 qualification evidence",
+    "**PB-0.12 — User lifecycle**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-LIFE-001 through PB-LIFE-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.13 — Matching principles**",
+]:
+    need(token in evidence_12, f"PB-0.12 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.11", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.12", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.11",
+    "step": "PB-0.12",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1241,6 +1360,23 @@ print(json.dumps({
         "dependenciesRemainIndependent": True,
         "immutableChainLimitationExplicit": True,
         "honestDeletionCompletion": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb12": {
+        "lifecycleInvariants": life_ids,
+        "statesDefined": True,
+        "transitionsDefined": True,
+        "eligibilityGatesActivation": True,
+        "deactivationRevokesParticipation": True,
+        "safetyOverridesParticipation": True,
+        "appealDoesNotRestoreAccess": True,
+        "postDeletionRequiresNewRegistration": True,
+        "dependenciesDoNotOwnLifecycle": True,
+        "staleAuthorizationInvalidated": True,
+        "unknownLifecycleFailsClosed": True,
+        "privateAndAuditable": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

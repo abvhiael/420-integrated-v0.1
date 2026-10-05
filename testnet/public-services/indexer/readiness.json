@@ -146,7 +146,7 @@
   },
   "consumer_gates": {
     "420Explorer": "QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD",
-    "420Search": "PENDING",
+    "420Search": "QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD",
     "420Analytics": "PENDING",
     "420Notifications": "PENDING",
     "420Status": "PENDING"

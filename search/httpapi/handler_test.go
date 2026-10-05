@@ -37,7 +37,7 @@ func (s *stubBackend) Resolve(_ context.Context, req ResolveRequest) (ResolveRes
 }
 func (s *stubBackend) Health(context.Context) (OperationalStatus, error)    { return s.status, nil }
 func (s *stubBackend) Readiness(context.Context) (OperationalStatus, error) { return s.status, nil }
-func (s *stubBackend) Status(context.Context) (OperationalStatus, error)     { return s.status, nil }
+func (s *stubBackend) Status(context.Context) (OperationalStatus, error)    { return s.status, nil }
 
 func newTestHandler(t *testing.T, backend Backend) http.Handler {
 	t.Helper()

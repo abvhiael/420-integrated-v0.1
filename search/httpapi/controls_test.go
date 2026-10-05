@@ -51,7 +51,9 @@ func (blockingBackend) Status(ctx context.Context) (OperationalStatus, error) {
 
 func TestControlledRejectsOversizedRequestURI(t *testing.T) {
 	h, err := NewControlled(&stubBackend{}, Controls{})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	target := BasePath + "/search?q=" + strings.Repeat("a", MaxRequestURIBytes)
 	res := httptest.NewRecorder()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodGet, target, nil))
@@ -62,7 +64,9 @@ func TestControlledRejectsOversizedRequestURI(t *testing.T) {
 
 func TestControlledRejectsPathologicalTermCount(t *testing.T) {
 	h, err := NewControlled(&stubBackend{}, Controls{})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	q := strings.TrimSpace(strings.Repeat("x+", MaxQueryTerms+1))
 	res := httptest.NewRecorder()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodGet, BasePath+"/search?q="+q, nil))
@@ -74,7 +78,9 @@ func TestControlledRejectsPathologicalTermCount(t *testing.T) {
 func TestControlledRateLimitHookRejectsWith429(t *testing.T) {
 	limiter := &testLimiter{err: ErrRateLimited}
 	h, err := NewControlled(&stubBackend{}, Controls{RateLimiter: limiter})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	res := httptest.NewRecorder()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodGet, BasePath+"/search?q=kush", nil))
 	if res.Code != http.StatusTooManyRequests || !strings.Contains(res.Body.String(), "rate_limited") {
@@ -88,7 +94,9 @@ func TestControlledRateLimitHookRejectsWith429(t *testing.T) {
 func TestControlledRateLimiterFailureFailsClosed(t *testing.T) {
 	limiter := &testLimiter{err: errors.New("limiter backend down")}
 	h, err := NewControlled(&stubBackend{}, Controls{RateLimiter: limiter})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	res := httptest.NewRecorder()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodGet, BasePath+"/search?q=kush", nil))
 	if res.Code != http.StatusServiceUnavailable || !strings.Contains(res.Body.String(), "rate_limit_unavailable") {
@@ -101,7 +109,9 @@ func TestControlledRateLimiterFailureFailsClosed(t *testing.T) {
 
 func TestControlledBackendDeadlineBoundsExecution(t *testing.T) {
 	h, err := NewControlled(blockingBackend{}, Controls{BackendTimeout: 5 * time.Millisecond})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	res := httptest.NewRecorder()
 	start := time.Now()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodGet, BasePath+"/search?q=kush", nil))
@@ -116,7 +126,9 @@ func TestControlledBackendDeadlineBoundsExecution(t *testing.T) {
 func TestControlledAllowsHealthyRequest(t *testing.T) {
 	limiter := &testLimiter{}
 	h, err := NewControlled(&stubBackend{}, Controls{RateLimiter: limiter, BackendTimeout: time.Second})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	res := httptest.NewRecorder()
 	h.ServeHTTP(res, httptest.NewRequest(http.MethodGet, BasePath+"/search?q=kush&limit=5", nil))
 	if res.Code != http.StatusOK {

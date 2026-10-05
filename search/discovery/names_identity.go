@@ -30,7 +30,9 @@ type NamesIdentityDiscovery struct {
 }
 
 func NewNamesIdentityDiscovery(reader NamesIdentityReader) (*NamesIdentityDiscovery, error) {
-	if reader == nil { return nil, errors.New("names/identity reader required") }
+	if reader == nil {
+		return nil, errors.New("names/identity reader required")
+	}
 	return &NamesIdentityDiscovery{reader: reader, now: time.Now}, nil
 }
 
@@ -47,13 +49,13 @@ type publicNameState struct {
 }
 
 type publicProfileState struct {
-	profileID  string
-	controller string
+	profileID    string
+	controller   string
 	metadataHash string
-	primaryName string
-	active     bool
-	known      bool
-	last       indexerclient.ProtocolEvent
+	primaryName  string
+	active       bool
+	known        bool
+	last         indexerclient.ProtocolEvent
 }
 
 // ResolveName resolves a canonical label-hash object. Names420 intentionally
@@ -62,36 +64,58 @@ type publicProfileState struct {
 // records.
 func (d *NamesIdentityDiscovery) ResolveName(ctx context.Context, labelHash string) (searchresult.Result, bool, error) {
 	key := normalizeObjectKey("labelHash", labelHash)
-	if key == "" { return searchresult.Result{}, false, errors.New("label hash required") }
+	if key == "" {
+		return searchresult.Result{}, false, errors.New("label hash required")
+	}
 	status, indexedHeight, safeHeight, err := d.qualifiedStatus(ctx)
-	if err != nil { return searchresult.Result{}, false, err }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
 	_ = status
-	if _, err := d.reader.ProtocolState(ctx, "420Names", key); err != nil { return searchresult.Result{}, false, err }
+	if _, err := d.reader.ProtocolState(ctx, "420Names", key); err != nil {
+		return searchresult.Result{}, false, err
+	}
 	page, err := d.reader.ProtocolEvents(ctx, "420Names", key, protocolHistoryLimit)
-	if err != nil { return searchresult.Result{}, false, err }
-	if page.NextCursor != nil { return searchresult.Result{}, false, ErrProtocolHistoryIncomplete }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
+	if page.NextCursor != nil {
+		return searchresult.Result{}, false, ErrProtocolHistoryIncomplete
+	}
 	state, err := reduceNameHistory(key, page.Items)
-	if err != nil { return searchresult.Result{}, false, err }
-	if state.owner == "" || state.expiresAt == 0 || uint64(d.now().Unix()) >= state.expiresAt { return searchresult.Result{}, false, nil }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
+	if state.owner == "" || state.expiresAt == 0 || uint64(d.now().Unix()) >= state.expiresAt {
+		return searchresult.Result{}, false, nil
+	}
 	p, err := protocolProvenance(architecture.SourceNames, "420Names / Names420", state.last, indexedHeight, safeHeight, d.now())
-	if err != nil { return searchresult.Result{}, false, err }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
 	subtitle := state.resolvedAddress
-	if subtitle == "" { subtitle = state.owner }
+	if subtitle == "" {
+		subtitle = state.owner
+	}
 	snippet := fmt.Sprintf("canonical .420 label-hash record · owner %s · expires %d", state.owner, state.expiresAt)
-	if state.profileID != "" && !zeroHex(state.profileID) { snippet += " · profile " + state.profileID }
-	if state.serviceID != "" && !zeroHex(state.serviceID) { snippet += " · service " + state.serviceID }
+	if state.profileID != "" && !zeroHex(state.profileID) {
+		snippet += " · profile " + state.profileID
+	}
+	if state.serviceID != "" && !zeroHex(state.serviceID) {
+		snippet += " · service " + state.serviceID
+	}
 	r, err := searchresult.New(
 		architecture.DomainName,
 		key,
 		architecture.SearchModeResolver,
 		p,
 		searchresult.Presentation{
-			Title: "420 Name " + key,
-			Subtitle: subtitle,
-			Snippet: snippet,
-			Category: "420 name",
+			Title:        "420 Name " + key,
+			Subtitle:     subtitle,
+			Snippet:      snippet,
+			Category:     "420 name",
 			CanonicalURL: "/names/" + key,
-			Tags: []string{"420Names", "label-hash", "public-onchain-anchor"},
+			Tags:         []string{"420Names", "label-hash", "public-onchain-anchor"},
 		},
 	)
 	return r, true, err
@@ -103,46 +127,74 @@ func (d *NamesIdentityDiscovery) ResolveName(ctx context.Context, labelHash stri
 // emitted into public Search results.
 func (d *NamesIdentityDiscovery) ResolvePublicIdentity(ctx context.Context, profileID string) (searchresult.Result, bool, error) {
 	key := normalizeObjectKey("profileId", profileID)
-	if key == "" { return searchresult.Result{}, false, errors.New("profile id required") }
+	if key == "" {
+		return searchresult.Result{}, false, errors.New("profile id required")
+	}
 	_, indexedHeight, safeHeight, err := d.qualifiedStatus(ctx)
-	if err != nil { return searchresult.Result{}, false, err }
-	if _, err := d.reader.ProtocolState(ctx, "420Identity", key); err != nil { return searchresult.Result{}, false, err }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
+	if _, err := d.reader.ProtocolState(ctx, "420Identity", key); err != nil {
+		return searchresult.Result{}, false, err
+	}
 	page, err := d.reader.ProtocolEvents(ctx, "420Identity", key, protocolHistoryLimit)
-	if err != nil { return searchresult.Result{}, false, err }
-	if page.NextCursor != nil { return searchresult.Result{}, false, ErrProtocolHistoryIncomplete }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
+	if page.NextCursor != nil {
+		return searchresult.Result{}, false, ErrProtocolHistoryIncomplete
+	}
 	state, err := reduceProfileHistory(key, page.Items)
-	if err != nil { return searchresult.Result{}, false, err }
-	if !state.known || !state.active || state.controller == "" { return searchresult.Result{}, false, nil }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
+	if !state.known || !state.active || state.controller == "" {
+		return searchresult.Result{}, false, nil
+	}
 	p, err := protocolProvenance(architecture.SourceIdentity, "420Identity / Identity420 public on-chain anchor", state.last, indexedHeight, safeHeight, d.now())
-	if err != nil { return searchresult.Result{}, false, err }
+	if err != nil {
+		return searchresult.Result{}, false, err
+	}
 	snippet := "active public on-chain identity anchor"
-	if state.metadataHash != "" && !zeroHex(state.metadataHash) { snippet += " · metadata commitment " + state.metadataHash }
-	if state.primaryName != "" && !zeroHex(state.primaryName) { snippet += " · primary name hash " + state.primaryName }
+	if state.metadataHash != "" && !zeroHex(state.metadataHash) {
+		snippet += " · metadata commitment " + state.metadataHash
+	}
+	if state.primaryName != "" && !zeroHex(state.primaryName) {
+		snippet += " · primary name hash " + state.primaryName
+	}
 	r, err := searchresult.New(
 		architecture.DomainPublicIdentity,
 		key,
 		architecture.SearchModeResolver,
 		p,
 		searchresult.Presentation{
-			Title: "420 Identity " + key,
-			Subtitle: state.controller,
-			Snippet: snippet,
-			Category: "public identity/profile",
+			Title:        "420 Identity " + key,
+			Subtitle:     state.controller,
+			Snippet:      snippet,
+			Category:     "public identity/profile",
 			CanonicalURL: "/identities/" + key,
-			Tags: []string{"420Identity", "public-onchain-anchor"},
+			Tags:         []string{"420Identity", "public-onchain-anchor"},
 		},
 	)
 	return r, true, err
 }
 
 func (d *NamesIdentityDiscovery) qualifiedStatus(ctx context.Context) (indexerclient.Status, *uint64, *uint64, error) {
-	if err := d.reader.Qualified(ctx); err != nil { return indexerclient.Status{}, nil, nil, err }
+	if err := d.reader.Qualified(ctx); err != nil {
+		return indexerclient.Status{}, nil, nil, err
+	}
 	status, err := d.reader.Status(ctx)
-	if err != nil { return indexerclient.Status{}, nil, nil, err }
+	if err != nil {
+		return indexerclient.Status{}, nil, nil, err
+	}
 	indexed, err := parseOptionalUint(status.IndexedHead)
-	if err != nil { return indexerclient.Status{}, nil, nil, err }
+	if err != nil {
+		return indexerclient.Status{}, nil, nil, err
+	}
 	safe, err := parseOptionalUint(status.Finality.SafeHead)
-	if err != nil { return indexerclient.Status{}, nil, nil, err }
+	if err != nil {
+		return indexerclient.Status{}, nil, nil, err
+	}
 	return status, indexed, safe, nil
 }
 
@@ -152,8 +204,12 @@ func validateProtocolHistoryOrder(events []indexerclient.ProtocolEvent) error {
 	var txIndex, logIndex int
 	for _, event := range events {
 		n, err := strconv.ParseUint(event.BlockNumber, 10, 64)
-		if err != nil { return errors.New("invalid protocol event block number") }
-		if event.TransactionIndex < 0 || event.LogIndex < 0 { return errors.New("invalid protocol event position") }
+		if err != nil {
+			return errors.New("invalid protocol event block number")
+		}
+		if event.TransactionIndex < 0 || event.LogIndex < 0 {
+			return errors.New("invalid protocol event position")
+		}
 		if have && (n < block || (n == block && (event.TransactionIndex < txIndex || (event.TransactionIndex == txIndex && event.LogIndex < logIndex)))) {
 			return errors.New("protocol event history is not ascending")
 		}
@@ -163,10 +219,14 @@ func validateProtocolHistoryOrder(events []indexerclient.ProtocolEvent) error {
 }
 
 func reduceNameHistory(key string, events []indexerclient.ProtocolEvent) (publicNameState, error) {
-	if err := validateProtocolHistoryOrder(events); err != nil { return publicNameState{}, err }
+	if err := validateProtocolHistoryOrder(events); err != nil {
+		return publicNameState{}, err
+	}
 	state := publicNameState{labelHash: key}
 	for _, event := range events {
-		if event.Protocol != "420Names" || event.ObjectKey == nil || normalizeObjectKey("labelHash", *event.ObjectKey) != key { return publicNameState{}, errors.New("invalid 420Names event history") }
+		if event.Protocol != "420Names" || event.ObjectKey == nil || normalizeObjectKey("labelHash", *event.ObjectKey) != key {
+			return publicNameState{}, errors.New("invalid 420Names event history")
+		}
 		state.last = event
 		switch event.EventName {
 		case "NameRegistered":
@@ -177,8 +237,12 @@ func reduceNameHistory(key string, events []indexerclient.ProtocolEvent) (public
 			state.pendingOwner = ""
 			state.profileID, state.serviceID = "", ""
 		case "NameRenewed":
-			if owner := fieldString(event.Fields, "owner"); owner != "" { state.owner = owner }
-			if expires := fieldUint(event.Fields, "expiresAt"); expires != 0 { state.expiresAt = expires }
+			if owner := fieldString(event.Fields, "owner"); owner != "" {
+				state.owner = owner
+			}
+			if expires := fieldUint(event.Fields, "expiresAt"); expires != 0 {
+				state.expiresAt = expires
+			}
 		case "ResolutionUpdated":
 			state.resolvedAddress = fieldString(event.Fields, "resolvedAddress")
 			state.profileID = fieldString(event.Fields, "profileId")
@@ -186,7 +250,10 @@ func reduceNameHistory(key string, events []indexerclient.ProtocolEvent) (public
 		case "NameTransferStarted":
 			state.pendingOwner = fieldString(event.Fields, "pendingOwner")
 		case "NameTransferred":
-			if owner := fieldString(event.Fields, "newOwner"); owner != "" { state.owner = owner; state.resolvedAddress = owner }
+			if owner := fieldString(event.Fields, "newOwner"); owner != "" {
+				state.owner = owner
+				state.resolvedAddress = owner
+			}
 			state.pendingOwner = ""
 			state.profileID, state.serviceID = "", ""
 		}
@@ -197,7 +264,9 @@ func reduceNameHistory(key string, events []indexerclient.ProtocolEvent) (public
 func reduceProfileHistory(key string, events []indexerclient.ProtocolEvent) (publicProfileState, error) {
 	state := publicProfileState{profileID: key}
 	for _, event := range events {
-		if event.Protocol != "420Identity" || event.ObjectKey == nil || normalizeObjectKey("profileId", *event.ObjectKey) != key { return publicProfileState{}, errors.New("invalid 420Identity event history") }
+		if event.Protocol != "420Identity" || event.ObjectKey == nil || normalizeObjectKey("profileId", *event.ObjectKey) != key {
+			return publicProfileState{}, errors.New("invalid 420Identity event history")
+		}
 		state.last = event
 		switch event.EventName {
 		case "ProfileCreated":
@@ -206,12 +275,18 @@ func reduceProfileHistory(key string, events []indexerclient.ProtocolEvent) (pub
 			state.controller = fieldString(event.Fields, "controller")
 			state.metadataHash = fieldString(event.Fields, "metadataHash")
 		case "ProfileUpdated":
-			if metadata := fieldString(event.Fields, "metadataHash"); metadata != "" { state.metadataHash = metadata }
-			if active, ok := fieldBool(event.Fields, "active"); ok { state.active = active }
+			if metadata := fieldString(event.Fields, "metadataHash"); metadata != "" {
+				state.metadataHash = metadata
+			}
+			if active, ok := fieldBool(event.Fields, "active"); ok {
+				state.active = active
+			}
 		case "PrimaryNameSet":
 			state.primaryName = fieldString(event.Fields, "labelHash")
 		case "ProfileControllerTransferred":
-			if controller := fieldString(event.Fields, "newController"); controller != "" { state.controller = controller }
+			if controller := fieldString(event.Fields, "newController"); controller != "" {
+				state.controller = controller
+			}
 		}
 	}
 	return state, nil
@@ -219,24 +294,32 @@ func reduceProfileHistory(key string, events []indexerclient.ProtocolEvent) (pub
 
 func protocolProvenance(source architecture.SourceBoundary, authority string, event indexerclient.ProtocolEvent, indexedHeight, safeHeight *uint64, at time.Time) (searchresult.Provenance, error) {
 	chainID, err := strconv.ParseUint(event.ChainID, 10, 64)
-	if err != nil || chainID == 0 { return searchresult.Provenance{}, errors.New("invalid protocol event chain id") }
+	if err != nil || chainID == 0 {
+		return searchresult.Provenance{}, errors.New("invalid protocol event chain id")
+	}
 	blockNumber, err := strconv.ParseUint(event.BlockNumber, 10, 64)
-	if err != nil { return searchresult.Provenance{}, errors.New("invalid protocol event block number") }
-	if event.LogIndex < 0 { return searchresult.Provenance{}, errors.New("invalid protocol event log index") }
+	if err != nil {
+		return searchresult.Provenance{}, errors.New("invalid protocol event block number")
+	}
+	if event.LogIndex < 0 {
+		return searchresult.Provenance{}, errors.New("invalid protocol event log index")
+	}
 	logIndex := uint64(event.LogIndex)
 	finality := searchresult.FinalityHead
-	if safeHeight != nil && blockNumber <= *safeHeight { finality = searchresult.FinalitySafe }
+	if safeHeight != nil && blockNumber <= *safeHeight {
+		finality = searchresult.FinalitySafe
+	}
 	return searchresult.Provenance{
-		Source: source,
-		Authority: authority,
-		ChainID: chainID,
-		BlockNumber: &blockNumber,
-		BlockHash: event.BlockHash,
+		Source:          source,
+		Authority:       authority,
+		ChainID:         chainID,
+		BlockNumber:     &blockNumber,
+		BlockHash:       event.BlockHash,
 		TransactionHash: event.TransactionHash,
-		LogIndex: &logIndex,
-		Finality: finality,
-		IndexedAt: at,
-		IndexedHeight: indexedHeight,
+		LogIndex:        &logIndex,
+		Finality:        finality,
+		IndexedAt:       at,
+		IndexedHeight:   indexedHeight,
 	}, nil
 }
 
@@ -249,14 +332,20 @@ func normalizeObjectKey(field, value string) string {
 
 func fieldString(fields map[string]any, key string) string {
 	value, ok := fields[key]
-	if !ok || value == nil { return "" }
-	if s, ok := value.(string); ok { return strings.ToLower(strings.TrimSpace(s)) }
+	if !ok || value == nil {
+		return ""
+	}
+	if s, ok := value.(string); ok {
+		return strings.ToLower(strings.TrimSpace(s))
+	}
 	return fmt.Sprint(value)
 }
 
 func fieldUint(fields map[string]any, key string) uint64 {
 	value, ok := fields[key]
-	if !ok || value == nil { return 0 }
+	if !ok || value == nil {
+		return 0
+	}
 	s := fmt.Sprint(value)
 	n, _ := strconv.ParseUint(s, 10, 64)
 	return n
@@ -264,14 +353,22 @@ func fieldUint(fields map[string]any, key string) uint64 {
 
 func fieldBool(fields map[string]any, key string) (bool, bool) {
 	value, ok := fields[key]
-	if !ok { return false, false }
+	if !ok {
+		return false, false
+	}
 	b, ok := value.(bool)
 	return b, ok
 }
 
 func zeroHex(value string) bool {
 	value = strings.TrimPrefix(strings.ToLower(strings.TrimSpace(value)), "0x")
-	if value == "" { return true }
-	for _, r := range value { if r != '0' { return false } }
+	if value == "" {
+		return true
+	}
+	for _, r := range value {
+		if r != '0' {
+			return false
+		}
+	}
 	return true
 }

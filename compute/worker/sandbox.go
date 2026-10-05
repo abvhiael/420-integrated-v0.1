@@ -48,7 +48,7 @@ const (
 
 var (
 	ErrInvalidSandbox = errors.New("invalid compute worker sandbox request")
-	digestImagePattern = )
+	digestImagePattern = regexp.MustCompile("^(?:[a-zA-Z0-9._/:~-]+@)?sha256:[0-9a-f]{64}$")
 )
 
 type SandboxPolicy struct {

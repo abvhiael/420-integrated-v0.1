@@ -45,10 +45,13 @@ contract TownAuthorityTreasury420Test {
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
         town.setTreasuryReference(COMMUNITY, AUTH_B, TREASURY_B);
 
+        bytes32 adminRole = town.ROLE_ADMIN();
+        bytes32 manageTreasury = town.PERMISSION_MANAGE_TREASURY();
+
         vm.prank(OWNER);
-        town.assignRole(COMMUNITY, town.ROLE_ADMIN(), ADMIN);
+        town.assignRole(COMMUNITY, adminRole, ADMIN);
         vm.prank(OWNER);
-        town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), town.PERMISSION_MANAGE_TREASURY(), true);
+        town.setRolePermission(COMMUNITY, adminRole, manageTreasury, true);
 
         vm.prank(ADMIN);
         town.setTreasuryReference(COMMUNITY, AUTH_B, TREASURY_B);

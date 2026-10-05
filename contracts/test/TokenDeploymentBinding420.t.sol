@@ -10,7 +10,10 @@ import "../src/token/TokenFactory420.sol";
 contract TokenDeploymentTreasury420 {
     bytes32 public immutable vaultId = TokenIds420.COMMUNITY_TOKEN_REVENUE_VAULT;
     uint256 public totalDeposited;
-    function depositNative() external payable { totalDeposited += msg.value; }
+
+    function depositNative() external payable {
+        totalDeposited += msg.value;
+    }
 }
 
 contract TokenDeploymentBinding420Test {
@@ -38,7 +41,7 @@ contract TokenDeploymentBinding420Test {
         protocolRegistry.registerComponent(
             TokenIds420.COMPONENT_TOKEN,
             address(factory),
-            Types420.Version({major: 1, minor: 0, patch: 0}),
+            Types420.Version({ major: 1, minor: 0, patch: 0 }),
             Types420.Lifecycle.ACTIVE
         );
         protocolRegistry.publishRegisteredService(

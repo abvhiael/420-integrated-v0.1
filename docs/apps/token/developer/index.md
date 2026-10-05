@@ -33,4 +33,4 @@ Indexers may derive Token deployment views from factory events and token-standar
 
 Downstream apps must independently qualify created assets. Do not turn a factory deployment into an implicit Exchange listing, Bridge admission, Pay settlement asset, Launchpad approval or trust badge.
 
-See `contracts/config/token/token-audit-4-release-materialization.json` and `docs/apps/token/deployment-operations.md` for release/deployment requirements.
+See `contracts/config/token/token-audit-4-release-materialization.json` and [Token deployment operations](../deployment-operations.md) for release/deployment requirements.

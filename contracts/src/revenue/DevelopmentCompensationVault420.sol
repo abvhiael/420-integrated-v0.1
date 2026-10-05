@@ -6,8 +6,14 @@ import "../interfaces/genesis/ICapabilityRegistry420.sol";
 import "./DevelopmentCompensationIds420.sol";
 
 interface IERC20DevelopmentCompensation420 {
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function balanceOf(address account) external view returns (uint256);
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
+    function balanceOf(
+        address account
+    ) external view returns (uint256);
 }
 
 /// @notice Segregated, non-custodial router for the developer-compensation share of eligible application revenue.
@@ -28,6 +34,7 @@ contract DevelopmentCompensationVault420 is I420System {
 
     error ZeroAddress();
     error InvalidIdentifier();
+    error InvalidPolicyReference();
     error InvalidRevenueAmount();
     error InvalidCompensationBps();
     error IncorrectContributionAmount();
@@ -51,7 +58,10 @@ contract DevelopmentCompensationVault420 is I420System {
         bytes32 policyRef
     );
 
-    constructor(address capabilityRegistry_, address beneficiary_) {
+    constructor(
+        address capabilityRegistry_,
+        address beneficiary_
+    ) {
         if (capabilityRegistry_ == address(0) || beneficiary_ == address(0)) revert ZeroAddress();
         capabilityRegistry = ICapabilityRegistry420(capabilityRegistry_);
         beneficiary = beneficiary_;
@@ -64,20 +74,39 @@ contract DevelopmentCompensationVault420 is I420System {
         _entered = 0;
     }
 
-    function systemName() external pure returns (string memory) { return "DevelopmentCompensationVault420"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function systemName() external pure returns (string memory) {
+        return "DevelopmentCompensationVault420";
+    }
 
-    receive() external payable { revert DirectDepositDisabled(); }
-    fallback() external payable { revert DirectDepositDisabled(); }
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
 
-    function expectedCompensation(uint256 grossProtocolRevenue, uint16 compensationBps) public pure returns (uint256) {
+    receive() external payable {
+        revert DirectDepositDisabled();
+    }
+
+    fallback() external payable {
+        revert DirectDepositDisabled();
+    }
+
+    function expectedCompensation(
+        uint256 grossProtocolRevenue,
+        uint16 compensationBps
+    ) public pure returns (uint256) {
         if (grossProtocolRevenue == 0) revert InvalidRevenueAmount();
         if (compensationBps == 0 || compensationBps > MAX_COMPENSATION_BPS) revert InvalidCompensationBps();
         return (grossProtocolRevenue * compensationBps) / BPS_DENOMINATOR;
     }
 
-    function contributionId(address source, bytes32 sourceApplicationId, bytes32 revenueRef) public pure returns (bytes32) {
-        return keccak256(abi.encode("420/REVENUE/DEVELOPMENT_COMPENSATION/CONTRIBUTION/V1", source, sourceApplicationId, revenueRef));
+    function contributionId(
+        address source,
+        bytes32 sourceApplicationId,
+        bytes32 revenueRef
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode("420/REVENUE/DEVELOPMENT_COMPENSATION/CONTRIBUTION/V1", source, sourceApplicationId, revenueRef)
+        );
     }
 
     function contributeNative(
@@ -97,7 +126,7 @@ contract DevelopmentCompensationVault420 is I420System {
         // never caller-selected. Source authorization, exact fee math, replay protection and the
         // shared nonReentrant lock execute before this fixed-destination atomic forward.
         // slither-disable-next-line arbitrary-send-eth
-        (bool ok,) = payable(beneficiary).call{value: amount}("");
+        (bool ok,) = payable(beneficiary).call{ value: amount }("");
         if (!ok) revert TransferFailed();
 
         emit DevelopmentCompensationForwarded(
@@ -142,8 +171,8 @@ contract DevelopmentCompensationVault420 is I420System {
         uint256 afterSource = asset.balanceOf(msg.sender);
         uint256 afterBeneficiary = asset.balanceOf(beneficiary);
         if (
-            beforeSource < afterSource || beforeSource - afterSource != amount
-                || afterBeneficiary < beforeBeneficiary || afterBeneficiary - beforeBeneficiary != amount
+            beforeSource < afterSource || beforeSource - afterSource != amount || afterBeneficiary < beforeBeneficiary
+                || afterBeneficiary - beforeBeneficiary != amount
         ) revert UnexpectedTokenDelta();
         // slither-disable-end reentrancy-balance
 
@@ -161,13 +190,22 @@ contract DevelopmentCompensationVault420 is I420System {
         );
     }
 
-    function _validateIdentifiers(bytes32 sourceApplicationId, bytes32 revenueRef, bytes32 policyRef) private pure {
+    function _validateIdentifiers(
+        bytes32 sourceApplicationId,
+        bytes32 revenueRef,
+        bytes32 policyRef
+    ) private pure {
         if (sourceApplicationId == bytes32(0) || revenueRef == bytes32(0) || policyRef == bytes32(0)) {
             revert InvalidIdentifier();
         }
+        if (policyRef != policyId) revert InvalidPolicyReference();
     }
 
-    function _requireAuthorized(address source, bytes32 sourceApplicationId, uint256 amount) private view {
+    function _requireAuthorized(
+        address source,
+        bytes32 sourceApplicationId,
+        uint256 amount
+    ) private view {
         bool allowed = capabilityRegistry.isAuthorized(
             source,
             DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION,
@@ -178,7 +216,11 @@ contract DevelopmentCompensationVault420 is I420System {
         if (!allowed) revert UnauthorizedSource();
     }
 
-    function _consume(address source, bytes32 sourceApplicationId, bytes32 revenueRef) private returns (bytes32 id) {
+    function _consume(
+        address source,
+        bytes32 sourceApplicationId,
+        bytes32 revenueRef
+    ) private returns (bytes32 id) {
         id = contributionId(source, sourceApplicationId, revenueRef);
         if (consumedRevenueContribution[id]) revert Replay();
         consumedRevenueContribution[id] = true;

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "../src/system/SystemAccess.sol";
+
 import "../src/token/TokenIds420.sol";
 import "../src/token/TokenTemplateRegistry420.sol";
 import "../src/token/TokenFactory420.sol";

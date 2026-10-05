@@ -1,0 +1,82 @@
+{
+  "schema": "420-town-api-v1",
+  "serviceId": "420/service/town/v1",
+  "status": "API_SDK_INDEXER_RECOVERY_BASELINE",
+  "api": {
+    "basePath": "/v1",
+    "maxRequestBytes": 65536,
+    "mutationAuthentication": "REQUIRED",
+    "mutationIdempotency": "REQUIRED",
+    "publicProjectionReads": "PUBLIC_ONLY",
+    "authoritativeReads": "CONTENT_SERVICE_AUTHORIZATION",
+    "routes": [
+      "GET /v1/health",
+      "GET /v1/communities/{community}/posts",
+      "POST /v1/communities/{community}/posts",
+      "GET /v1/posts/{post}",
+      "POST /v1/posts/{post}/threads",
+      "POST /v1/threads/{thread}/comments",
+      "POST /v1/posts/{post}/votes"
+    ]
+  },
+  "sdk": {
+    "package": "sdk/town420",
+    "typedErrors": true,
+    "remoteHttpsRequired": true,
+    "writeBearerTokenRequired": true,
+    "writeIdempotencyRequired": true,
+    "maxRetryAttempts": 5,
+    "maxRetryDelayMs": 2000,
+    "retryableStatusCodes": [429, 502, 503, 504]
+  },
+  "projection": {
+    "package": "town/projection",
+    "authority": "DERIVED_NON_CANONICAL",
+    "rebuildable": true,
+    "reorgSafe": true,
+    "cursorModel": "GENERATION_BOUND_OPAQUE",
+    "publicListVisibility": "PUBLIC_ONLY",
+    "chainGapPolicy": "FAIL_CLOSED",
+    "parentMismatchPolicy": "FAIL_CLOSED"
+  },
+  "recovery": {
+    "package": "town/recovery",
+    "schema": "420-town-projection-recovery-v1",
+    "atomicFileReplace": true,
+    "fileMode": "0600",
+    "maxSnapshotBytes": 8388608,
+    "interruptionRecovery": "SNAPSHOT_AND_RESTORE"
+  },
+  "webhooks": {
+    "enabled": false,
+    "reason": "No Town webhook delivery surface is required by TOWN-AUDIT-7; signed replay-protected webhooks remain mandatory if a later roadmap step enables them."
+  },
+  "observability": {
+    "requestCount": true,
+    "errorCount": true,
+    "authFailureCount": true,
+    "mutationCount": true,
+    "totalLatencyNanos": true,
+    "healthEndpoint": "/v1/health"
+  },
+  "invariants": [
+    "TOWN-API-001_MUTATIONS_REQUIRE_AUTHENTICATION",
+    "TOWN-API-002_MUTATIONS_REQUIRE_IDEMPOTENCY_KEY",
+    "TOWN-API-003_UNKNOWN_JSON_FIELDS_FAIL_CLOSED",
+    "TOWN-API-004_REQUEST_BODY_SIZE_IS_BOUNDED",
+    "TOWN-API-005_PUBLIC_LISTS_USE_DERIVED_PUBLIC_ONLY_PROJECTION",
+    "TOWN-API-006_DIRECT_CONTENT_READS_REUSE_CONTENT_AUTHORIZATION",
+    "TOWN-API-007_PROJECTION_IS_NON_CANONICAL_AND_REBUILDABLE",
+    "TOWN-API-008_REORG_REPLACES_ORPHANED_DERIVED_STATE",
+    "TOWN-API-009_STALE_GENERATION_CURSOR_FAILS_CLOSED",
+    "TOWN-API-010_PROJECTION_CHAIN_GAPS_AND_PARENT_MISMATCH_FAIL_CLOSED",
+    "TOWN-API-011_RECOVERY_SNAPSHOT_RESTORE_VALIDATES_SCHEMA_AND_CHAIN",
+    "TOWN-API-012_RECOVERY_FILE_WRITE_IS_ATOMIC_AND_RESTRICTIVE",
+    "TOWN-API-013_SDK_REMOTE_ENDPOINTS_REQUIRE_HTTPS",
+    "TOWN-API-014_SDK_RETRY_ATTEMPTS_AND_DELAY_ARE_BOUNDED",
+    "TOWN-API-015_SDK_RETRIES_REUSE_SAME_IDEMPOTENCY_KEY",
+    "TOWN-API-016_NON_RETRYABLE_CONFLICT_IS_NOT_RETRIED",
+    "TOWN-API-017_OBSERVABILITY_DOES_NOT_BECOME_AUTHORITY",
+    "TOWN-API-018_WEBHOOK_SURFACE_DISABLED_UNTIL_SIGNED_REPLAY_PROTECTION_EXISTS"
+  ]
+}

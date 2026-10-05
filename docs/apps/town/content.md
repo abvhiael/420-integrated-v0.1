@@ -128,6 +128,8 @@ This mechanism is application replay protection. Later signed API/webhook layers
 The content service applies:
 
 - per-identity write windows;
+- trusted device-scoped write/vote windows;
+- trusted network-scoped write/vote windows;
 - separate vote-rate windows;
 - aggregate per-community write limits;
 - duplicate content fingerprint detection by author, community and body digest;
@@ -135,7 +137,7 @@ The content service applies:
 - higher limits only for verified identities old enough to satisfy the configured minimum age;
 - one canonical vote record per identity/target.
 
-Risk/assurance data is throttling context only. It never becomes protocol identity authority.
+Device/network/risk context must come from a trusted server-side adapter, not client assertions. Missing risk profiles fall back to unverified identity limits. Risk/assurance data is throttling context only and never becomes protocol identity authority.
 
 The default policy is machine-readable in `config/420town-content-v1.json`.
 

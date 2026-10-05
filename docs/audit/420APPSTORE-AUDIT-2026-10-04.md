@@ -114,6 +114,16 @@ A dedicated AppStore audit verifier and workflow are added because the generic q
 - GENESIS READY: **NO** as an operable AppStore service, despite the contract-free canonical definition being frozen.
 - PRODUCTION READY: **NO**.
 
+## Audit completion statement
+
+**Repository audit status: COMPLETE. Remediation status: OPEN.**
+
+The audit has established the canonical AppStore definition, inspected the implemented packages and production entrypoint, reconciled historical qualification claims against current repository behavior, repaired the bounded local security defects identified during inspection, and recorded a requirement matrix and remediation roadmap.
+
+The final audit determination is that **420AppStore is not presently complete or release-ready as an operable Genesis application**. Its contract-free authority model and most component packages are implemented, but the production composition path is incomplete: the executable does not yet bind a concrete Registry catalogue source, catalogue lifecycle, ApplicationView composition, discovery API, embedded frontend, abuse/dependency controls, and live deployment evidence into one qualified service.
+
+Historical APPSTORE-9/10 evidence remains provenance only and must not be used to override this current determination. Live-testnet and production claims remain blocked until the remediation roadmap is completed and requalified.
+
 ## Remediation roadmap
 
 1. **APPSTORE-AUDIT-1 — durable audit baseline and local hardening.** Preserve this report, truthful readiness state, race-safe Registry projection, deep-link hardening, finite rating validation, and exact-head audit workflow.

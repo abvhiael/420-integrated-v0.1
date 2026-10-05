@@ -255,12 +255,12 @@ func BuildCapabilityEvidence(discovery HostDiscovery, benchmark BenchmarkResult)
 }
 
 func VerifyCapabilityEvidence(discovery HostDiscovery, evidence CapabilityEvidence) error {
-	if evidence.SchemaVersion != CapabilityEvidenceSchemaV1
-		|| evidence.EvidenceType != BenchmarkEvidenceTypeV1
-		|| evidence.HashAlgorithm != CommitmentAlgorithmV1
-		|| evidence.Authoritative
-		|| evidence.IndependentlyAttested
-		|| evidence.ResultCorrectnessEvidence {
+	if evidence.SchemaVersion != CapabilityEvidenceSchemaV1 ||
+		evidence.EvidenceType != BenchmarkEvidenceTypeV1 ||
+		evidence.HashAlgorithm != CommitmentAlgorithmV1 ||
+		evidence.Authoritative ||
+		evidence.IndependentlyAttested ||
+		evidence.ResultCorrectnessEvidence {
 		return fmt.Errorf("%w: evidence authority/schema boundary violated", ErrInvalidBenchmark)
 	}
 	expected, err := BuildCapabilityEvidence(discovery, evidence.Benchmark)

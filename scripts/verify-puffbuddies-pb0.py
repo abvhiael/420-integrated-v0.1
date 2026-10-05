@@ -15,6 +15,8 @@ PRIVACY = ROOT / "docs/puffbuddies/PB-0.4-PRIVACY-INVARIANTS.md"
 EVIDENCE_04 = ROOT / "docs/puffbuddies/PB-0.4-QUALIFICATION.md"
 CONSENT = ROOT / "docs/puffbuddies/PB-0.5-CONSENT-INVARIANTS.md"
 EVIDENCE_05 = ROOT / "docs/puffbuddies/PB-0.5-QUALIFICATION.md"
+ELIG = ROOT / "docs/puffbuddies/PB-0.6-ADULT-ELIGIBILITY-POLICY.md"
+EVIDENCE_06 = ROOT / "docs/puffbuddies/PB-0.6-QUALIFICATION.md"
 
 errors = []
 
@@ -22,7 +24,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -40,6 +42,8 @@ privacy = PRIVACY.read_text(encoding="utf-8")
 evidence_04 = EVIDENCE_04.read_text(encoding="utf-8")
 consent = CONSENT.read_text(encoding="utf-8")
 evidence_05 = EVIDENCE_05.read_text(encoding="utf-8")
+elig = ELIG.read_text(encoding="utf-8")
+evidence_06 = EVIDENCE_06.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -106,6 +110,9 @@ for token in [
     "### PB-0.5 — Consent invariants",
     "PB-CONSENT-001 through PB-CONSENT-020",
     "**Milestone relationship:** PB-0.5 is not a Level 2 integration milestone",
+    "### PB-0.6 — Adult eligibility policy",
+    "PB-ELIG-001 through PB-ELIG-020",
+    "**Milestone relationship:** PB-0.6 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -465,13 +472,96 @@ for token in [
 ]:
     need(token in evidence_05, f"PB-0.5 evidence record missing token: {token}")
 
+# PB-0.6 — adult eligibility policy
+for token in [
+    "# PuffBuddies PB-0.6 adult eligibility policy",
+    "## Canonical baseline",
+    "18 years of age or older",
+    "## Eligibility interface",
+    "isEligibleForPuffBuddies(subject, policyContext) -> ELIGIBLE | INELIGIBLE | UNKNOWN",
+    "## Eligibility states",
+    "UNKNOWN must fail closed",
+    "## Canonical eligibility invariants",
+    "## Dependency on canonical identity/attestation authority",
+    "## Conceptual eligibility decision",
+    "## Failure and adversarial cases",
+    "## Privacy boundary",
+    "## PB-0.6 completion boundary",
+]:
+    need(token in elig, f"PB-0.6 eligibility policy missing token: {token}")
+
+elig_ids = re.findall(r"^### (PB-ELIG-\d{3})\b", elig, flags=re.MULTILINE)
+need(elig_ids == [f"PB-ELIG-{i:03d}" for i in range(1, 21)], f"PB-ELIG sequence drift: {elig_ids}")
+need(len(elig_ids) == len(set(elig_ids)), "duplicate PB-ELIG identifier")
+
+for guarantee in [
+    "must not lower the floor below 18",
+    "Date of birth remains private",
+    "UNKNOWN fails closed",
+    "Eligibility is time-sensitive",
+    "Revocation removes ordinary participation authority",
+    "Suspension and ban override eligibility",
+    "Eligibility does not create consent",
+    "Eligibility does not imply public membership",
+    "Reverification is required when authoritative evidence is stale",
+    "Policy-version changes can require reevaluation",
+    "Issuer/provider failure is not eligibility",
+    "Economic state cannot establish age eligibility",
+    "Moderators cannot manually fabricate eligibility",
+    "Eligibility evidence access follows least privilege",
+]:
+    need(guarantee in elig, f"PB-0.6 missing eligibility guarantee: {guarantee}")
+
+for failure_path in [
+    "credential expired between login and protected action",
+    "credential revoked after an active match exists",
+    "issuer becomes unavailable",
+    "policy version changes after prior eligibility",
+    "stale cache still says ELIGIBLE after revocation",
+    "replay of another user's eligibility proof",
+    "subject-binding mismatch",
+    "premium/payment path attempts to bypass eligibility",
+    "moderator/support attempts manual eligibility override",
+]:
+    need(failure_path in elig, f"PB-0.6 missing failure/adversarial case: {failure_path}")
+
+need("must never lower the canonical PuffBuddies adult floor below 18" in elig,
+     "PB-0.6 jurisdiction age-floor drift")
+need("Failure of an identity provider, attestation service, RPC, registry, or verifier does not itself prove eligibility" in elig,
+     "PB-0.6 fail-open provider behavior drift")
+need("PuffBuddies must not create a competing general-purpose identity system" in elig,
+     "PB-0.6 duplicate identity authority drift")
+
+for forbidden_elig_claim in [
+    "420Identity integration is implemented",
+    "PuffBuddies eligibility contract is deployed",
+    "PuffBuddies eligibility service ID is",
+    "PuffBuddies live age verification",
+]:
+    need(forbidden_elig_claim not in elig, f"PB-0.6 unsupported implementation/live claim: {forbidden_elig_claim}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", elig) is None, "PB-0.6 must not assign an on-chain address")
+need("420/service/puff" not in elig.lower(), "PB-0.6 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.6 qualification evidence",
+    "**PB-0.6 — Adult eligibility policy**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-ELIG-001 through PB-ELIG-020",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.7 — Threat/trust model**",
+]:
+    need(token in evidence_06, f"PB-0.6 evidence record missing token: {token}")
+
 if errors:
     print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.5",
+    "step": "PB-0.6",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -520,6 +610,19 @@ print(json.dumps({
         "noPurchasedAccess": True,
         "noAdministrativeFabrication": True,
         "staleAuthorizationFailsClosed": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb06": {
+        "eligibilityInvariants": elig_ids,
+        "adultFloor": 18,
+        "unknownFailsClosed": True,
+        "minimumDisclosure": True,
+        "revocationAndReverification": True,
+        "jurisdictionCanOnlyTighten": True,
+        "noEconomicBypass": True,
+        "noAdminFabrication": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

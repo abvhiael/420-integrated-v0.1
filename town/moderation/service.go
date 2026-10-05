@@ -456,7 +456,7 @@ func (s *Service) resolveTarget(kind TargetKind,id model.ObjectID)(model.ObjectI
 	if kind==TargetUser{
 		return "",id,true
 	}
-	return s.content.TargetCommunity(kind,id)
+	return s.content.TargetCommunity(string(kind),id)
 }
 
 func (s *Service) appendRecord(r Record){

@@ -6,7 +6,6 @@ ROOT=Path(__file__).resolve().parents[1]
 LEDGER=ROOT/"contracts/config/compute-market/cmp-3.14-phase-closeout.json"
 ROADMAP=ROOT/"docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md"
 CLOSEOUT=ROOT/"docs/compute-market/CMP-3.14-PHASE-CLOSEOUT.md"
-EVIDENCE=ROOT/"docs/compute-market/CMP-3.14-QUALIFICATION-EVIDENCE.md"
 FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
 FAST=ROOT/".github/workflows/compute-worker-fast.yml"
@@ -15,22 +14,13 @@ INTEGRATION=ROOT/".github/workflows/compute-worker-integration.yml"
 def fail(msg):
     raise SystemExit("CMP-3.14 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,CLOSEOUT,EVIDENCE,FOUNDRY,QUAL,FAST,INTEGRATION):
+for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,QUAL,FAST,INTEGRATION):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
 definition="Reconcile the complete accumulated CMP-3 node420 worker runtime against current main, run the required Level 3 qualification on one exact merge-candidate implementation SHA, preserve durable evidence, and prepare the handoff to CMP-4 — Scientific compute framework."
 if d.get("step")!="CMP-3.14" or d.get("canonical_definition")!=definition: fail("step/definition drift")
-if d.get("status")!="COMPLETE": fail("ledger must reflect durable COMPLETE closeout evidence")
-if d.get("completion_state")!="COMPLETE" or d.get("remaining_repository_blockers")!=[]:
-    fail("completion state/blocker ledger drift")
-q=d.get("qualification",{})
-impl=q.get("implementation_sha")
-if not isinstance(impl,str) or len(impl)!=40 or q.get("exact_sha") is not True:
-    fail("qualified exact implementation SHA missing")
-for owner in ("solidity_contracts","genesis_address_authority","integrated_global","docs_global","retained_compute_market","worker_fast","worker_integration","node420_release_gate","indexer"):
-    if q.get(owner,{}).get("result")!="SUCCESS":
-        fail(f"durable Level 3 result missing {owner}")
+if d.get("status")!="LEVEL_3_QUALIFICATION_PENDING": fail("ledger must remain qualification-pending until durable exact-SHA evidence")
 if d.get("repository_closeout_candidate") is not True or d.get("live_release") is not False: fail("repository/live flags drift")
 rec=d.get("reconciliation",{})
 if rec.get("main_sha")!="b338b9c9c140957b0ea8619b0b20bfed415f2c6d" or rec.get("github_test_merge_sha")!="c72d4795e178b66a1d4ae4737af8033f475a736a" or rec.get("reconciled_anchor_sha")!="c62b01be3dfed2618e8b0bbedf8c8e73e5fd02b1" or rec.get("behind_main")!=0:
@@ -55,8 +45,8 @@ road=ROADMAP.read_text()
 for i in range(1,14):
     pos=road.find(f"## CMP-3.{i} —")
     if pos<0 or "COMPLETE" not in road[pos:pos+600]: fail(f"roadmap prerequisite CMP-3.{i} not COMPLETE")
-if "## CMP-3.14 — Phase closeout" not in road or "COMPLETE — Level 3 exact-head qualified" not in road:
-    fail("roadmap closeout COMPLETE state drift")
+if "## CMP-3.14 — Phase closeout" not in road or "Level 3 comprehensive qualification in progress" not in road:
+    fail("roadmap closeout state drift")
 fw=FOUNDRY.read_text()
 for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-3.14-phase-closeout.json","qualify-foundry-shard.sh"):
     if token not in fw: fail(f"full Foundry ownership/trigger missing {token}")
@@ -75,11 +65,6 @@ iw=INTEGRATION.read_text()
 for token in ("cmp-worker-level2","Run retained worker integration suite","go test ./compute/worker -count=1"):
     if token not in iw: fail(f"worker integration ownership missing {token}")
 close=CLOSEOUT.read_text()
-evidence=EVIDENCE.read_text()
-if "Status: **COMPLETE — Level 3 exact-head qualified.**" not in evidence or impl not in evidence:
-    fail("durable qualification evidence drift")
-if "Status: **COMPLETE — Level 3 exact-head qualified.**" not in close:
-    fail("closeout document COMPLETE state drift")
 for heading in ("## Canonical definition","## Reconciliation baseline","## Phase inventory","## Authority and security boundaries","## Client/service reconciliation","## Repository qualification versus live deployment","## Level 3 qualification gate","## Full Solidity ownership","## Completion"):
     if heading not in close: fail(f"missing heading {heading}")
-print("CMP-3.14 phase closeout inventory/reconciliation: COMPLETE / durable evidence verified")
+print("CMP-3.14 phase closeout inventory/reconciliation: READY FOR LEVEL 3")

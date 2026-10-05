@@ -1,6 +1,6 @@
 # CMP-3.7 — Checkpointing/resume
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `c438a029a652fdeed42ef94b877e50b804842689`.**
 
 ## Canonical definition
 
@@ -175,6 +175,16 @@ CMP-3.7 is complete when one exact implementation SHA proves all of the followin
 21. a real Docker integration test proves the resumed sandbox receives the exact verified work unit and checkpoint;
 22. CMP-3.1 through CMP-3.6 regressions remain green;
 23. targeted Go tests, vet, build, real Docker resume test and CMP-3.7 verifier pass on the same exact implementation SHA.
+
+## Qualification evidence
+
+- Implementation SHA: `c438a029a652fdeed42ef94b877e50b804842689`
+- Compute Worker Fast Qualification: **#143**
+- Run ID: `37256445519`
+- Job ID: `111594452272`
+- Result: **SUCCESS**
+- Durable evidence anchor: `1971279df16ad20af1761766f67f116ceb61b866`
+- Evidence record: [CMP-3.7 qualification evidence](CMP-3.7-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

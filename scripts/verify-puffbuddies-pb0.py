@@ -17,6 +17,8 @@ CONSENT = ROOT / "docs/puffbuddies/PB-0.5-CONSENT-INVARIANTS.md"
 EVIDENCE_05 = ROOT / "docs/puffbuddies/PB-0.5-QUALIFICATION.md"
 ELIG = ROOT / "docs/puffbuddies/PB-0.6-ADULT-ELIGIBILITY-POLICY.md"
 EVIDENCE_06 = ROOT / "docs/puffbuddies/PB-0.6-QUALIFICATION.md"
+THREAT = ROOT / "docs/puffbuddies/PB-0.7-THREAT-TRUST-MODEL.md"
+EVIDENCE_07 = ROOT / "docs/puffbuddies/PB-0.7-QUALIFICATION.md"
 
 errors = []
 
@@ -24,7 +26,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -44,6 +46,8 @@ consent = CONSENT.read_text(encoding="utf-8")
 evidence_05 = EVIDENCE_05.read_text(encoding="utf-8")
 elig = ELIG.read_text(encoding="utf-8")
 evidence_06 = EVIDENCE_06.read_text(encoding="utf-8")
+threat = THREAT.read_text(encoding="utf-8")
+evidence_07 = EVIDENCE_07.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -113,6 +117,9 @@ for token in [
     "### PB-0.6 — Adult eligibility policy",
     "PB-ELIG-001 through PB-ELIG-020",
     "**Milestone relationship:** PB-0.6 is not a Level 2 integration milestone",
+    "### PB-0.7 — Threat/trust model",
+    "PB-THREAT-001 through PB-THREAT-040",
+    "**Milestone relationship:** PB-0.7 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -555,13 +562,104 @@ for token in [
 ]:
     need(token in evidence_06, f"PB-0.6 evidence record missing token: {token}")
 
+# PB-0.7 — threat/trust model
+for token in [
+    "# PuffBuddies PB-0.7 threat/trust model",
+    "## Protected assets",
+    "## Actor classes",
+    "## Trust boundaries",
+    "## Canonical abuse cases",
+    "## Authority ownership principles",
+    "## Security control expectations",
+    "## Threat acceptance rule",
+    "## PB-0.7 completion boundary",
+    "Ordinary authenticated user",
+    "Malicious or abusive user",
+    "Sybil / multi-account adversary",
+    "Compromised account adversary",
+    "Curious or malicious operator",
+    "Compromised backend/service",
+    "Compromised client",
+    "External integration failure/adversary",
+    "Public-chain observer",
+    "Network observer",
+    "Data-breach adversary",
+    "Automation/bot adversary",
+    "Client/server boundary",
+    "PuffBuddies / 420Identity boundary",
+    "PuffBuddies / 420Messenger boundary",
+    "PuffBuddies / 420Notifications boundary",
+    "PuffBuddies / 420Pay boundary",
+    "PuffBuddies / public-chain boundary",
+    "PuffBuddies / Search-Indexer-Explorer boundary",
+    "Operator / private-data boundary",
+    "Location triangulation",
+    "Relationship graph reconstruction",
+    "Wallet/profile correlation",
+    "Block bypass / ban evasion",
+    "Messaging after revocation",
+    "Eligibility bypass",
+    "Profile scraping and enumeration",
+    "Impersonation and identity deception",
+    "Report/moderation abuse",
+    "Privileged insider misuse",
+    "Metadata leakage",
+    "Data-remanence after deletion",
+    "Secret/session compromise",
+    "Rate-limit and resource abuse",
+    "Dependency compromise/failure",
+    "Replay and stale-state attacks",
+    "One authority per decision class",
+    "Safety and consent fail closed",
+    "External services are capability-limited",
+    "Auditability without public exposure",
+]:
+    need(token in threat, f"PB-0.7 threat model missing token: {token}")
+
+threat_ids = re.findall(r"^### (PB-THREAT-\d{3})\b", threat, flags=re.MULTILINE)
+need(threat_ids == [f"PB-THREAT-{i:03d}" for i in range(1, 41)], f"PB-THREAT sequence drift: {threat_ids}")
+need(len(threat_ids) == len(set(threat_ids)), "duplicate PB-THREAT identifier")
+
+for guarantee in [
+    "Client-side checks are never the sole authority boundary",
+    "must not independently manufacture PuffBuddies consent",
+    "Payments may establish entitlement state but are not trusted to establish consent",
+    "must fail closed rather than infer permission from stale or missing state",
+    "Compromise of one dependency should not automatically expose all PuffBuddies private data or authorities",
+    "Convenience, cost, or \"blockchain transparency\" alone is not sufficient justification",
+]:
+    need(guarantee in threat, f"PB-0.7 missing threat-model guarantee: {guarantee}")
+
+for forbidden in [
+    "PuffBuddies WAF is implemented",
+    "PuffBuddies rate limiter is deployed",
+    "PuffBuddies security contract is deployed",
+    "PuffBuddies threat service ID is",
+]:
+    need(forbidden not in threat, f"PB-0.7 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", threat) is None, "PB-0.7 must not assign an on-chain address")
+need("420/service/puff" not in threat.lower(), "PB-0.7 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.7 qualification evidence",
+    "**PB-0.7 — Threat/trust model**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-THREAT-001 through PB-THREAT-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.8 — Ecosystem dependencies**",
+]:
+    need(token in evidence_07, f"PB-0.7 evidence record missing token: {token}")
+
 if errors:
     print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.6",
+    "step": "PB-0.7",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -623,6 +721,19 @@ print(json.dumps({
         "jurisdictionCanOnlyTighten": True,
         "noEconomicBypass": True,
         "noAdminFabrication": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb07": {
+        "threatInvariants": threat_ids,
+        "actorsDefined": True,
+        "trustBoundariesDefined": True,
+        "abuseCasesDefined": True,
+        "authorityOwnersRequired": True,
+        "failClosed": True,
+        "capabilityLimitedDependencies": True,
+        "residualRiskRuleDefined": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

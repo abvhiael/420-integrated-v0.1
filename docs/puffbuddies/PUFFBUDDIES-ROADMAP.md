@@ -139,7 +139,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
 - durable PB-0.3 evidence records exact run/job evidence and base SHA.
 
-### PB-0.4 — Privacy invariants
+### PB-0.4 — Privacy invariants — COMPLETE
 
 **Purpose:** define stable privacy guarantees that every later PuffBuddies implementation, integration, client, service, storage layer, moderation tool, analytics path, and release must preserve.
 

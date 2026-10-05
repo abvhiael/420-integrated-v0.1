@@ -34,6 +34,7 @@ required = [
     "appstore/api/composition_test.go",
     "appstore/web/web.go",
     "appstore/cmd/appstore420/main.go",
+    "appstore/cmd/appstore420/main_test.go",
     "appstore/closeout/closeout_test.go",
     "docs/420APPSTORE-ROADMAP.md",
     "docs/apps/appstore/appstore-2-registry-sync.md",

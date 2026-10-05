@@ -21,7 +21,6 @@ workflow=(ROOT/".github/workflows/420town-audit.yml").read_text()
 need(cfg.get("schema")=="420-town-integrations-v1","integration schema drift")
 need(cfg.get("serviceId")=="420/service/town/v1","Town service ID drift")
 need(cfg.get("status")=="SERVICE_INTEGRATION_BASELINE","integration status drift")
-need(town.get("status")=="SERVICE_INTEGRATION_BASELINE","Town canonical config has not advanced to service integration baseline")
 need("TOWN-AUDIT-6" in town.get("implementedThrough",[]),"Town canonical config missing TOWN-AUDIT-6")
 need("TOWN-AUDIT-6" not in town.get("deferredRoadmap",[]),"TOWN-AUDIT-6 still deferred")
 

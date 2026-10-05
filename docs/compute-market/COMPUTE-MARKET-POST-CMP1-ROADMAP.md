@@ -417,7 +417,15 @@ CMP-3.10 does not invent a general ComputeMarket HTTP endpoint, 420Storage agree
 Durable evidence: [CMP-3.10 qualification](CMP-3.10-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.10 result/evidence upload](CMP-3.10-RESULT-EVIDENCE-UPLOAD.md). Fast #233 / run `37261236505` / job `111608720907` passed the exact implementation/spec SHA; evidence anchor `8a72024fc27543f7754b624be2cada39d4b13849`.
 
 ## CMP-3.11 — Local resource controls
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
 CPU/GPU percentage, idle-only mode, thermal ceilings, bandwidth and schedule controls.
+
+The worker now provides a versioned operator-local resource policy; automatic hard CPU quota application to the OCI sandbox; fail-closed GPU-share enforcement contracts; timezone-aware weekly schedules; continuous idle/thermal monitoring capable of cancelling active execution leases; deterministic bandwidth shaping wired into work-unit downloads and result/evidence uploads; concrete Linux /proc/sysfs telemetry; and strict node420-compute operator flags.
+
+GPU percentage never becomes advisory: GPU work is rejected unless a qualified platform-specific share enforcer is supplied. CMP-3.11 does not weaken CMP-3.4 isolation or gain canonical job/correctness/payment authority.
+
+Exit criteria and implementation boundary: [CMP-3.11 local resource controls](CMP-3.11-LOCAL-RESOURCE-CONTROLS.md).
 
 ## CMP-3.12 — Malicious workload protections
 

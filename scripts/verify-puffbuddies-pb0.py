@@ -6,6 +6,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "docs/puffbuddies/PUFFBUDDIES.md"
 ROAD = ROOT / "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md"
+EVIDENCE = ROOT / "docs/puffbuddies/PB-0.1-QUALIFICATION.md"
 
 errors = []
 
@@ -13,7 +14,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD):
+for path in (APP, ROAD, EVIDENCE):
     need(path.exists(), f"missing required PB-0.1 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -22,6 +23,7 @@ if errors:
 
 app = APP.read_text(encoding="utf-8")
 road = ROAD.read_text(encoding="utf-8")
+evidence = EVIDENCE.read_text(encoding="utf-8")
 
 required_app_tokens = [
     "# PuffBuddies",
@@ -65,6 +67,19 @@ required_road_tokens = [
 ]
 for token in required_road_tokens:
     need(token in road, f"canonical roadmap missing token: {token}")
+
+required_evidence_tokens = [
+    "# PB-0.1 qualification evidence",
+    "**PB-0.1 — Canonical app identity**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "Base/main SHA at step start:",
+    "PuffBuddies PB-0 Qualification",
+    "## Level 2 status",
+    "## Intentionally deferred Level 3 checks",
+    "**PB-0.2 — MVP scope**",
+]
+for token in required_evidence_tokens:
+    need(token in evidence, f"PB-0.1 evidence record missing token: {token}")
 
 ids = re.findall(r"^### (PB-ID-\d{3})\b", app, flags=re.MULTILINE)
 need(ids == [f"PB-ID-{i:03d}" for i in range(1, 9)], f"PB-ID invariant sequence drift: {ids}")

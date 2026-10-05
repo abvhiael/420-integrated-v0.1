@@ -14,8 +14,8 @@ import (
 
 var (
 	ErrStaleCanonicalSource = errors.New("appstore canonical source is behind persisted finality")
-	ErrFinalizedConflict     = errors.New("appstore finalized catalogue history conflict")
-	ErrCatalogueIdentity     = errors.New("appstore catalogue identity mismatch")
+	ErrFinalizedConflict    = errors.New("appstore finalized catalogue history conflict")
+	ErrCatalogueIdentity    = errors.New("appstore catalogue identity mismatch")
 )
 
 type Lifecycle struct {

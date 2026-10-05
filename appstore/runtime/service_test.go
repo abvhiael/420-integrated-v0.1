@@ -39,6 +39,11 @@ func TestConfigValidate(t *testing.T) {
 		t.Fatal("expected missing indexer URL")
 	}
 	cfg = testConfig()
+	cfg.VerifyURL = "ftp://verify.example"
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected invalid verify URL")
+	}
+	cfg = testConfig()
 	cfg.RegistryAddress = "bad"
 	if err := cfg.Validate(); err == nil {
 		t.Fatal("expected invalid registry address")
@@ -52,6 +57,9 @@ func TestQualifyReadyOnMatchingChainAndRegistry(t *testing.T) {
 	}
 	if err := s.Qualify(context.Background()); err != nil {
 		t.Fatal(err)
+	}
+	if !s.Ready() {
+		t.Fatal("qualified runtime should report ready")
 	}
 	req := httptest.NewRequest(http.MethodGet, "/readyz", nil)
 	res := httptest.NewRecorder()

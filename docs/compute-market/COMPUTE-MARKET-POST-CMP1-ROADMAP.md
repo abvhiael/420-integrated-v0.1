@@ -428,13 +428,13 @@ GPU percentage never becomes advisory: GPU work is rejected unless a qualified p
 Durable evidence: [CMP-3.11 qualification](CMP-3.11-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.11 local resource controls](CMP-3.11-LOCAL-RESOURCE-CONTROLS.md). Fast #272 / run `37262445914` / job `111612318856` passed the exact implementation/spec/workflow SHA; evidence anchor `0f63e91ae9406cdf0a5d27d7c6211fa64d7ced4b`.
 
 ## CMP-3.12 — Malicious workload protections
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `691d6296756281bc8424c17d4ad8597bf0a034b6`.**
 
 The worker now adds digest-bound malicious-workload admission and containment on top of the existing sandbox/resource limits: bounded canonical argv, immutable image/command deny policy, cumulative local violation tracking, restart-safe quarantine, private non-authoritative incident evidence, protected fresh/resume execution wrappers, and additional OCI IPC/core-dump/file-descriptor hardening.
 
 The implementation deliberately does not invent antivirus/EDR, content scanning, image-signature infrastructure, canonical slashing or correctness authority where the repository defines none.
 
-Exit criteria and implementation boundary: [CMP-3.12 malicious workload protections](CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md).
+Durable evidence: [CMP-3.12 qualification](CMP-3.12-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.12 malicious workload protections](CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md). Fast #313 / run `37264388818` / job `111618008159` passed the exact implementation/spec/workflow SHA; evidence anchor `279c78a240f5a7223341bf4461978792812b44b3`.
 
 ## CMP-3.13 — Windows/Linux/macOS packaging
 
@@ -663,7 +663,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.11 COMPLETE; CMP-3.12 malicious workload protections next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.12 COMPLETE; CMP-3.13 Windows/Linux/macOS packaging next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

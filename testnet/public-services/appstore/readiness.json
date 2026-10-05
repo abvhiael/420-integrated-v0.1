@@ -19,7 +19,7 @@
   ],
   "backend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "PARTIAL_RUNTIME_WIRING",
+    "status": "PUBLIC_RUNTIME_COMPOSED_QUALIFICATION_PENDING",
     "required_checks": [
       "resolves canonical application/service identity and version through 420Registry",
       "preserves chain ID and network identity",
@@ -33,7 +33,7 @@
   },
   "frontend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "CODE_PRESENT_RUNTIME_WIRING_PENDING",
+    "status": "RUNTIME_MOUNTED_QUALIFICATION_PENDING",
     "required_views": [
       "browse and categories",
       "search",
@@ -123,11 +123,11 @@
     ],
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
-      "production entrypoint serves health/readiness only and does not mount the APPSTORE-7 discovery API",
-      "production entrypoint does not mount the APPSTORE-9 embedded frontend",
+      "APPSTORE-AUDIT-6 repository qualification remains pending after public service composition",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-4 is repository-complete and exact-head qualified: finalized canonical catalogue records are composed with strict optional curation/security/Wallet/link inputs into an atomic retained ApplicationView set. Overall AppStore remains PARTIAL pending public API/frontend/abuse/dependency composition and live testnet evidence.",
-    "next_step": "APPSTORE-AUDIT-5"
+    "note": "APPSTORE-AUDIT-5 now mounts health/readiness, the dynamic /v1/apps* discovery API and embedded frontend under one production handler with anonymous in-memory abuse limiting and dependency-aware BLOCKED/DEGRADED behavior. Exact-head Level 1 qualification is pending.",
+    "next_step": "APPSTORE-AUDIT-5",
+    "in_progress_step": "APPSTORE-AUDIT-5"
   }
 }

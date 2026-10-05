@@ -1,6 +1,6 @@
 # CMP-3.4 — Secure workload sandbox
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `a3ad2c5c8d70b428d61c1b70f546ec5edbeedcaf`.**
 
 ## Canonical definition
 
@@ -165,6 +165,16 @@ CMP-3.4 is complete when one exact implementation SHA proves all of the followin
 15. a real Docker/scratch integration probe proves non-root, read-only rootfs, zero effective capabilities, no-new-privileges and no network egress from inside the sandbox;
 16. CMP-3.1, CMP-3.2 and CMP-3.3 regressions remain green;
 17. targeted Go tests, vet, build, real sandbox integration and CMP-3.4 mechanical verifier pass on the same exact implementation SHA.
+
+## Qualification evidence
+
+- Implementation SHA: `a3ad2c5c8d70b428d61c1b70f546ec5edbeedcaf`
+- Compute Worker Fast Qualification: **#64**
+- Run ID: `37251256261`
+- Job ID: `111579187313`
+- Result: **SUCCESS**
+- Durable evidence anchor: `618df14e25f7f5a567d785f4f13d8fa1263e7ec9`
+- Evidence record: [CMP-3.4 qualification evidence](CMP-3.4-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

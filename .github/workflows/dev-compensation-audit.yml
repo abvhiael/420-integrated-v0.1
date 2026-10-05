@@ -43,18 +43,9 @@ jobs:
         with:
           version: stable
 
-      - name: Emit Forge-formatted focused sources
+      - name: Check focused Solidity formatting
         working-directory: contracts
-        shell: bash
-        run: |
-          forge fmt src/revenue/DevelopmentCompensationVault420.sol src/revenue/DevelopmentCompensationIds420.sol test/DevelopmentCompensationVault420.t.sol test/DevelopmentCompensationGenesis420.t.sol
-          echo "__DEVCOMP_CONTRACT_BEGIN__"
-          cat src/revenue/DevelopmentCompensationVault420.sol
-          echo "__DEVCOMP_CONTRACT_END__"
-          echo "__DEVCOMP_TEST_BEGIN__"
-          cat test/DevelopmentCompensationVault420.t.sol
-          echo "__DEVCOMP_TEST_END__"
-          exit 1
+        run: forge fmt --check src/revenue/DevelopmentCompensationVault420.sol src/revenue/DevelopmentCompensationIds420.sol test/DevelopmentCompensationVault420.t.sol test/DevelopmentCompensationGenesis420.t.sol
 
       - name: Build revenue contract family
         working-directory: contracts

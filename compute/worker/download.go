@@ -79,11 +79,11 @@ func NewWorkUnitDownloader(
 	if client.Timeout <= 0 {
 		return nil, fmt.Errorf("%w: HTTP client timeout required", ErrInvalidWorkUnit)
 	}
-	if client.CheckRedirect == nil {
-		client.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
-			return http.ErrUseLastResponse
-		}
+	clientCopy := *client
+	clientCopy.CheckRedirect = func(_ *http.Request, _ []*http.Request) error {
+		return http.ErrUseLastResponse
 	}
+	client = &clientCopy
 	if maxBytes == 0 {
 		maxBytes = DefaultWorkUnitMaxBytes
 	}
@@ -244,6 +244,17 @@ func (d *WorkUnitDownloader) Fetch(ctx context.Context, source WorkUnitSource) (
 	}
 	if err := os.Rename(tmpName, finalPath); err != nil {
 		_ = os.Remove(tmpName)
+		return WorkUnitArtifact{}, err
+	}
+	if dir, err := os.Open(d.root); err == nil {
+		syncErr := dir.Sync()
+		_ = dir.Close()
+		if syncErr != nil {
+			_ = os.Remove(finalPath)
+			return WorkUnitArtifact{}, syncErr
+		}
+	} else {
+		_ = os.Remove(finalPath)
 		return WorkUnitArtifact{}, err
 	}
 

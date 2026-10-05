@@ -392,6 +392,34 @@ func (u *ResultEvidenceUploader) Upload(ctx context.Context, authorizationRef st
 	}
 	manifestDigest := sha256Hex(manifestBytes)
 
+	// Stage and verify every accepted evidence object before any transport side effect.
+	staged := make(map[uint32]string, len(auth.Evidence))
+	cleanupStaged := func() {
+		for _, path := range staged {
+			_ = os.Remove(path)
+		}
+	}
+	defer cleanupStaged()
+	for _, req := range auth.Evidence {
+		path, err := u.stageEvidence(sourceByOrdinal[req.Ordinal], req)
+		if err != nil {
+			return ResultEvidenceUploadRecord{}, err
+		}
+		staged[req.Ordinal] = path
+	}
+
+	staticTotal := uint64(len(resultBytes)) + uint64(len(receiptBytes)) + uint64(len(manifestBytes))
+	var evidenceTotal uint64
+	for _, req := range auth.Evidence {
+		if evidenceTotal > auth.MaxTotalBytes-req.SizeBytes {
+			return ResultEvidenceUploadRecord{}, fmt.Errorf("%w: upload byte total overflow", ErrInvalidResultEvidenceUpload)
+		}
+		evidenceTotal += req.SizeBytes
+	}
+	if staticTotal > auth.MaxTotalBytes || evidenceTotal > auth.MaxTotalBytes-staticTotal {
+		return ResultEvidenceUploadRecord{}, fmt.Errorf("%w: complete upload exceeds max total bytes", ErrInvalidResultEvidenceUpload)
+	}
+
 	var uploaded []ResultEvidenceUploadReceipt
 	uploadStatic := func(kind string, ordinal uint32, payload []byte, contentType string) error {
 		if uint64(len(payload)) > auth.MaxObjectBytes {
@@ -422,38 +450,29 @@ func (u *ResultEvidenceUploader) Upload(ctx context.Context, authorizationRef st
 	}
 
 	for _, req := range auth.Evidence {
-		reader := sourceByOrdinal[req.Ordinal]
-		path, err := u.stageEvidence(reader, req)
+		file, err := os.Open(staged[req.Ordinal])
 		if err != nil {
 			return ResultEvidenceUploadRecord{}, err
 		}
-		func() {
-			defer os.Remove(path)
-			file, openErr := os.Open(path)
-			if openErr != nil {
-				err = openErr
-				return
-			}
-			defer file.Close()
-			desc := UploadObjectDescriptor{
-				Kind: UploadObjectEvidence, Ordinal: req.Ordinal,
-				ObjectID: "sha256:" + req.SHA256,
-				SHA256: req.SHA256, SizeBytes: req.SizeBytes,
-				ContentType: "application/octet-stream",
-				Encrypted: req.Encrypted,
-				AccessPolicyID: req.AccessPolicyID,
-				RetentionUntil: req.RetentionUntil.UTC(),
-				ProvenanceCommitment: req.ProvenanceCommitment,
-			}
-			var receipt ResultEvidenceUploadReceipt
-			receipt, err = u.uploadObject(ctx, auth, result, signed, desc, file)
-			if err == nil {
-				uploaded = append(uploaded, receipt)
-			}
-		}()
-		if err != nil {
-			return ResultEvidenceUploadRecord{}, err
+		desc := UploadObjectDescriptor{
+			Kind: UploadObjectEvidence, Ordinal: req.Ordinal,
+			ObjectID: "sha256:" + req.SHA256,
+			SHA256: req.SHA256, SizeBytes: req.SizeBytes,
+			ContentType: "application/octet-stream",
+			Encrypted: req.Encrypted,
+			AccessPolicyID: req.AccessPolicyID,
+			RetentionUntil: req.RetentionUntil.UTC(),
+			ProvenanceCommitment: req.ProvenanceCommitment,
 		}
+		receipt, uploadErr := u.uploadObject(ctx, auth, result, signed, desc, file)
+		closeErr := file.Close()
+		if uploadErr != nil {
+			return ResultEvidenceUploadRecord{}, uploadErr
+		}
+		if closeErr != nil {
+			return ResultEvidenceUploadRecord{}, closeErr
+		}
+		uploaded = append(uploaded, receipt)
 	}
 
 	record := ResultEvidenceUploadRecord{

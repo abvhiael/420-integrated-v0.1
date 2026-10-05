@@ -1,0 +1,39 @@
+{
+  "schema": "420-messenger-readiness-v1",
+  "application": "420Messenger",
+  "serviceId": "420/service/messenger/v1",
+  "implementation_status": "REPOSITORY_AUDIT_IN_PROGRESS",
+  "deployment_status": "PENDING_PUBLIC_TESTNET",
+  "liveTestnetEvidence": false,
+  "genesisCloseout": false,
+  "productionReady": false,
+  "addressPolicy": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+  "canonicalContracts": [
+    "MessengerIds420.sol",
+    "MessengerAuthorization420.sol",
+    "MessengerEndpointRegistry420.sol",
+    "MessengerBlockRegistry420.sol",
+    "MessengerConversationRegistry420.sol",
+    "MessengerEnvelopeRegistry420.sol",
+    "MessengerReceiptRegistry420.sol",
+    "MessengerRouter420.sol"
+  ],
+  "current_audit": {
+    "branch": "messenger-remediation-20261004",
+    "status": "REPOSITORY_QUALIFICATION_PENDING",
+    "completed": [],
+    "next_step": "MESSENGER-AUDIT-1",
+    "blockers": [
+      "public-testnet deployment and live ProtocolRegistry publication do not yet exist",
+      "live off-chain encrypted transport/storage provider and end-to-end Wallet client evidence are not yet available",
+      "Genesis and production closeout require exact deployed addresses/runtime hashes and live cross-component evidence"
+    ]
+  },
+  "privacy": {
+    "plaintextOnChain": false,
+    "ciphertextBlobsOnChain": false,
+    "privateKeysOnChain": false,
+    "decryptionKeysOnChain": false,
+    "canonicalStateLimitedToCommitmentsAndCoordination": true
+  }
+}

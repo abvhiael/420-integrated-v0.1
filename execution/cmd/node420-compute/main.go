@@ -7,9 +7,15 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"github.com/420integrated/420-integrated/compute/worker"
+)
+
+var (
+	version = "dev"
+	commit  = "unknown"
 )
 
 type stringListFlag []string
@@ -41,6 +47,7 @@ func main() {
 	check := flag.Bool("check", false, "validate CMP-3.1 daemon configuration and exit")
 	discover := flag.Bool("discover", false, "print CMP-3.2 local hardware/software discovery JSON and exit")
 	benchmark := flag.Bool("benchmark", false, "run CMP-3.3 local benchmark and print self-reported capability evidence JSON")
+	showVersion := flag.Bool("version", false, "print node420-compute package version, source commit and target platform")
 
 	resourceDefaults := worker.DefaultLocalResourcePolicy()
 	cpuPercent := flag.Float64("cpu-percent", resourceDefaults.CPUPercent, "CMP-3.11 maximum local CPU percentage")
@@ -67,6 +74,11 @@ func main() {
 	flag.Var(&denyImages, "deny-image", "CMP-3.12 repeatable immutable image digest deny entry")
 	flag.Var(&denyCommands, "deny-command-sha256", "CMP-3.12 repeatable canonical command SHA-256 deny entry")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("node420-compute %s commit=%s target=%s/%s\n", version, commit, runtime.GOOS, runtime.GOARCH)
+		return
+	}
 
 	if *discover && *benchmark {
 		fmt.Fprintln(os.Stderr, "node420-compute: --discover and --benchmark are mutually exclusive")

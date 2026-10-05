@@ -127,3 +127,6 @@ jobs:
 
       - name: Verify CMP-3.9 execution-key signed receipt
         run: python scripts/verify-cmp-3-9-execution-key-signed-receipt.py
+
+      - name: Verify CMP-3.10 result/evidence upload
+        run: python scripts/verify-cmp-3-10-result-evidence-upload.py

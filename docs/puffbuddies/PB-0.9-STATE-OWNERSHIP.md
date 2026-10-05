@@ -124,7 +124,7 @@ Messenger, notifications, queues, caches, and clients must follow the updated st
 
 PuffBuddies block state has supremacy over prior match/like/messaging/premium state.
 
-Messenger-native block state may add an independent deny condition, but it does not replace or weaken PuffBuddies block authority.
+A Messenger-native block is an additional deny condition. Messenger-native block state does not replace or weaken PuffBuddies block authority.
 
 ### PB-STATE-014 — Messenger-native block state
 
@@ -260,7 +260,7 @@ PuffBuddies may observe canonical public state directly or through qualified der
 
 **Canonical owner:** none; 420Indexer projections are derived/rebuildable observations.
 
-Indexer may own its local projection database operationally but not the canonical protocol truth represented by that database.
+Indexer is not canonical authority. It may own its local projection database operationally but not the canonical protocol truth represented by that database.
 
 ### PB-STATE-033 — Search/Explorer presentation state
 

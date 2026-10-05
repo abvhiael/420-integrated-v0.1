@@ -28,7 +28,8 @@ def main():
     require("separates on-chain membership, roles, permissions, subscriptions, treasuries, and entitlements" in dependency_map,
             "dependency map no longer preserves Town authority/transport boundary", errors)
 
-    require(town_cfg["status"] == "AUTHORITY_BASELINE", "Town canonical config has not advanced to authority baseline", errors)
+    require(town_cfg["status"] in {"AUTHORITY_BASELINE", "CONTENT_BASELINE"},
+            "Town canonical config regressed below the authority baseline", errors)
     require("TOWN-AUDIT-3" in town_cfg["implementedThrough"], "Town canonical config missing TOWN-AUDIT-3", errors)
     require("TOWN-AUDIT-3" not in town_cfg["deferredRoadmap"], "Town canonical config still defers TOWN-AUDIT-3", errors)
     require(town_cfg["authorityContract"] == "TownAuthority420", "Town canonical authority contract drift", errors)

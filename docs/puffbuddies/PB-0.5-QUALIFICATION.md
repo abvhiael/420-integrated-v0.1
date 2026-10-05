@@ -39,11 +39,21 @@ No matching engine, messaging runtime, payment runtime, contract, fixed address,
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-CONSENT-001 through PB-CONSENT-020 exist exactly once and in sequence;
+- ordinary private messaging requires current reciprocal authorization;
+- one-sided likes, profile views, inactivity, payment, token, badge, and administrative state do not create messaging consent;
+- unmatch is unilateral and revoking;
+- block supremacy overrides prior likes, matches, conversation authorization, caches, invitations, premium/payment state, boosts, recommendation state, and prior ordinary interaction consent;
+- payment/token/subscription state cannot create, restore, or purchase interpersonal consent or block bypass;
+- administrators/moderators/operators/automation cannot manufacture positive interpersonal consent;
+- consent is revocable, action-scoped, current-state authoritative, and stale authorization fails closed;
+- ineligible/deactivated/deleted/suspended account states can revoke ordinary interaction authorization under later lifecycle rules;
+- canonical stale-cache, queued-delivery, retry, paid-access, forced-match, and one-sided-message failure classes are documented;
+- no matching, messaging, payment runtime, contract, fixed address, service ID, deployment, or live integration is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`df19efea5f91caff6f550a5667e304f6707d30b9`
 
 ## Base/main SHA
 
@@ -53,7 +63,19 @@ Pending exact-head qualification.
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37282698674` — **PASS**
+- job: `111674224596` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37282703838` — **PASS**
+- job: `111674240929` (`pb0-fast`) — **PASS**
+
+The unrelated governance branch-push workflow failure is outside PuffBuddies PB-0.5 ownership and is not treated as PB-0.5 evidence.
 
 ## Security/adversarial/invariant scope
 
@@ -84,11 +106,13 @@ PB-0.5 defines consent and authorization guarantees, not the exact matching algo
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.5 is formally COMPLETE.
+None for PB-0.5.
 
 ## Completion state
 
-**PB-0.5 — PENDING QUALIFICATION**
+**PB-0.5 — COMPLETE**
+
+All canonical PB-0.5 exit criteria are satisfied on exact implementation SHA `df19efea5f91caff6f550a5667e304f6707d30b9`.
 
 ## Next canonical roadmap step
 

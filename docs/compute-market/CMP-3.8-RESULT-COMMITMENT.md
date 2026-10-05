@@ -1,6 +1,6 @@
 # CMP-3.8 — Result commitment
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `05a4a5f835657c0860cd78685bd274ed66134e35`.**
 
 ## Canonical definition
 
@@ -208,6 +208,16 @@ CMP-3.8 is complete when one exact implementation SHA proves:
 19. real Docker qualification proves full-output hashing beyond diagnostic truncation;
 20. CMP-3.1 through CMP-3.7 regressions remain green;
 21. targeted Go tests, vet, build, Docker result test and CMP-3.8 verifier pass on the same exact SHA.
+
+## Qualification evidence
+
+- Implementation/spec SHA: `05a4a5f835657c0860cd78685bd274ed66134e35`
+- Compute Worker Fast Qualification: **#187**
+- Run ID: `37257986490`
+- Job ID: `111599032446`
+- Result: **SUCCESS**
+- Durable evidence anchor: `31e1343625b6bd56d8ea059a7460d1c63c5eb587`
+- Evidence record: [CMP-3.8 qualification evidence](CMP-3.8-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

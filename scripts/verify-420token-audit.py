@@ -45,7 +45,7 @@ resolved = next((x for x in canon.get("registry_resolved", []) if x.get("id") ==
 need(resolved is not None and resolved.get("contract") == "TokenFactory420.sol", "canonical token-factory resolution missing")
 ns = next((x for x in namespace.get("registryResolved", []) if x.get("id") == "token-factory"), None)
 need(ns is not None and ns.get("status") == "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS", "Token address model drift")
-need("0x0000000000000000000000000000000000000455" not in json.dumps(mat), "historical Token address resurrected")
+need("historical 0x0455 candidate as active authority" in mat.get("forbidden", []), "retired Token address guard missing")
 need(mat.get("service", {}).get("addressModel") == "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS", "release address model drift")
 need(mat.get("fixedAuthorities", {}).get("governanceTimelock") == "0x0000000000000000000000000000000000000429", "timelock authority drift")
 need(mat.get("fixedAuthorities", {}).get("protocolRegistry") == "0x0000000000000000000000000000000000000434", "ProtocolRegistry authority drift")

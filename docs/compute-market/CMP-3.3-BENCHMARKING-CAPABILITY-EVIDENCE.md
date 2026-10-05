@@ -1,6 +1,6 @@
 # CMP-3.3 — Benchmarking and capability evidence
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `0f7a5a1c3bf40308f4ab029594454f3ab7ff8795`.**
 
 ## Canonical definition
 
@@ -118,6 +118,16 @@ CMP-3.3 is complete when one exact implementation SHA proves all of the followin
 12. `node420-compute --benchmark` emits capability evidence JSON and exits before daemon startup;
 13. `--discover` and `--benchmark` cannot be requested simultaneously;
 14. targeted Go tests, vet, build, CMP-3.1 regression, CMP-3.2 regression and CMP-3.3 mechanical verifier pass on the same exact SHA.
+
+## Qualification evidence
+
+- Implementation SHA: `0f7a5a1c3bf40308f4ab029594454f3ab7ff8795`
+- Compute Worker Fast Qualification: **#35**
+- Run ID: `37250495294`
+- Job ID: `111576940200`
+- Result: **SUCCESS**
+- Durable evidence anchor: `5910c6f9100b5d2e02159861a5bac94561149d9b`
+- Evidence record: [CMP-3.3 qualification evidence](CMP-3.3-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

@@ -61,6 +61,7 @@ type WorkUnitDownloader struct {
 	client     *http.Client
 	authorizer RequestAuthorizer
 	maxBytes   uint64
+	bandwidth  *ByteRateLimiter
 	mu         sync.Mutex
 }
 
@@ -107,6 +108,21 @@ func NewWorkUnitDownloader(
 		authorizer: authorizer,
 		maxBytes:   maxBytes,
 	}, nil
+}
+
+func NewWorkUnitDownloaderWithBandwidth(
+	stateDir string,
+	client *http.Client,
+	authorizer RequestAuthorizer,
+	maxBytes uint64,
+	bandwidth *ByteRateLimiter,
+) (*WorkUnitDownloader, error) {
+	downloader, err := NewWorkUnitDownloader(stateDir, client, authorizer, maxBytes)
+	if err != nil {
+		return nil, err
+	}
+	downloader.bandwidth = bandwidth
+	return downloader, nil
 }
 
 func ValidateWorkUnitSource(source WorkUnitSource, maxBytes uint64) (*url.URL, error) {
@@ -215,7 +231,11 @@ func (d *WorkUnitDownloader) Fetch(ctx context.Context, source WorkUnitSource) (
 	}
 
 	hasher := sha256.New()
-	limited := io.LimitReader(response.Body, int64(source.SizeBytes)+1)
+	body := io.Reader(response.Body)
+	if d.bandwidth != nil {
+		body = d.bandwidth.WrapReader(ctx, body)
+	}
+	limited := io.LimitReader(body, int64(source.SizeBytes)+1)
 	written, err := io.Copy(io.MultiWriter(tmp, hasher), limited)
 	if err != nil {
 		cleanup()

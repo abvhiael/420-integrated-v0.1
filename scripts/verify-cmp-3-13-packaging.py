@@ -22,9 +22,9 @@ EXPECTED_TARGETS = (
     ("darwin", "arm64"),
 )
 EXPECTED_PLATFORM_FILES = {
-    "linux": {"node420-compute", "README.txt", "worker.args.example", "BUILD-METADATA.json", "run-node420-compute.sh", "node420-compute.service"},
-    "darwin": {"node420-compute", "README.txt", "worker.args.example", "BUILD-METADATA.json", "run-node420-compute.sh", "org.420integrated.node420-compute.plist"},
-    "windows": {"node420-compute.exe", "README.txt", "worker.args.example", "BUILD-METADATA.json", "run-node420-compute.ps1", "register-startup-task.ps1"},
+    "linux": {"node420-compute", "README.txt", "worker.args.example", "BUILD-METADATA.json", "run-node420-compute.sh", "install.sh", "node420-compute.service"},
+    "darwin": {"node420-compute", "README.txt", "worker.args.example", "BUILD-METADATA.json", "run-node420-compute.sh", "install.sh", "org.420integrated.node420-compute.plist"},
+    "windows": {"node420-compute.exe", "README.txt", "worker.args.example", "BUILD-METADATA.json", "run-node420-compute.ps1", "install.ps1", "register-startup-task.ps1"},
 }
 STATE_DIRS = {
     "linux": "/var/lib/420integrated/node420-compute",
@@ -57,10 +57,13 @@ def validate_static(errors):
         ROOT / "packaging/node420-compute/common/README.txt",
         ROOT / "packaging/node420-compute/linux/run-node420-compute.sh",
         ROOT / "packaging/node420-compute/linux/node420-compute.service",
+        ROOT / "packaging/node420-compute/linux/install.sh",
         ROOT / "packaging/node420-compute/darwin/run-node420-compute.sh",
         ROOT / "packaging/node420-compute/darwin/org.420integrated.node420-compute.plist",
+        ROOT / "packaging/node420-compute/darwin/install.sh",
         ROOT / "packaging/node420-compute/windows/run-node420-compute.ps1",
         ROOT / "packaging/node420-compute/windows/register-startup-task.ps1",
+        ROOT / "packaging/node420-compute/windows/install.ps1",
         ROOT / ".github/workflows/compute-worker-fast.yml",
         ROOT / "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md",
         ROOT / "docs/compute-market/CMP-3.13-WINDOWS-LINUX-MACOS-PACKAGING.md",

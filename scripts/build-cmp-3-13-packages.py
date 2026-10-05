@@ -31,14 +31,17 @@ STATE_DIRS = {
 PLATFORM_FILES = {
     "linux": (
         "run-node420-compute.sh",
+        "install.sh",
         "node420-compute.service",
     ),
     "darwin": (
         "run-node420-compute.sh",
+        "install.sh",
         "org.420integrated.node420-compute.plist",
     ),
     "windows": (
         "run-node420-compute.ps1",
+        "install.ps1",
         "register-startup-task.ps1",
     ),
 }

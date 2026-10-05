@@ -55,7 +55,7 @@ type CommunityAuthority interface {
 }
 
 type ContentResolver interface {
-	TargetCommunity(kind TargetKind, targetID model.ObjectID) (model.ObjectID, model.ObjectID, bool)
+	TargetCommunity(kind string, targetID model.ObjectID) (model.ObjectID, model.ObjectID, bool)
 }
 
 type Record struct {
@@ -189,7 +189,7 @@ func (s *Service) Report(actor model.ObjectID, req OpenCaseRequest) (Record, err
 		if content == nil {
 			return Record{}, ErrUnavailable
 		}
-		communityID, affectedID, ok = content.TargetCommunity(req.TargetKind, req.TargetID)
+		communityID, affectedID, ok = content.TargetCommunity(string(req.TargetKind), req.TargetID)
 	}
 	if !ok || communityID != req.CommunityID {
 		return Record{}, ErrNotFound

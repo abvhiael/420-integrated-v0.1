@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ErrInvalidHandoff      = errors.New("invalid wallet handoff")
+	ErrInvalidHandoff     = errors.New("invalid wallet handoff")
 	ErrAuthorityEscalation = errors.New("appstore handoff cannot grant or exercise authority")
 )
 
@@ -51,7 +51,7 @@ type Presentation struct {
 	Permissions           []Permission      `json:"permissions,omitempty"`
 	Capabilities          []CapabilityScope `json:"capabilities,omitempty"`
 	HighRiskActions       []string          `json:"highRiskActions,omitempty"`
-	RequiresConfirmation  bool              `json:"requiresConfirmation"`
+	RequiresConfirmation bool              `json:"requiresConfirmation"`
 	AuthorizationBoundary string            `json:"authorizationBoundary"`
 }
 
@@ -77,7 +77,9 @@ func Build(req Request) (Presentation, error) {
 
 	perms := append([]Permission(nil), req.Permissions...)
 	caps := append([]CapabilityScope(nil), req.Capabilities...)
-	sort.Slice(perms, func(i, j int) bool { return strings.ToLower(perms[i].Name) < strings.ToLower(perms[j].Name) })
+	sort.Slice(perms, func(i, j int) bool {
+		return strings.ToLower(perms[i].Name) < strings.ToLower(perms[j].Name)
+	})
 	sort.Slice(caps, func(i, j int) bool {
 		a := strings.ToLower(caps[i].Capability + ":" + caps[i].Scope)
 		b := strings.ToLower(caps[j].Capability + ":" + caps[j].Scope)
@@ -118,7 +120,7 @@ func Build(req Request) (Presentation, error) {
 		Permissions:           perms,
 		Capabilities:          caps,
 		HighRiskActions:       risk,
-		RequiresConfirmation:  req.RequiresConfirmation,
+		RequiresConfirmation: req.RequiresConfirmation,
 		AuthorizationBoundary: "420Wallet/Smart Accounts",
 	}, nil
 }

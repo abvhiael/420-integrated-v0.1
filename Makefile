@@ -184,3 +184,12 @@ verify-genesis-interface-security:
 
 verify-genesis-interface-v1:
 	python3 scripts/verify-genesis-interface-v1-freeze.py
+
+
+.PHONY: compute-worker-packages verify-compute-worker-packages
+
+compute-worker-packages:
+	python3 scripts/build-cmp-3-13-packages.py --output dist/node420-compute
+
+verify-compute-worker-packages: compute-worker-packages
+	python3 scripts/verify-cmp-3-13-packaging.py --dist dist/node420-compute

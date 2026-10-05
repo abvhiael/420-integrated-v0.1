@@ -69,7 +69,23 @@ jobs:
           echo "CMP_SANDBOX_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
 
       - name: Test real Docker sandbox isolation
-        run: go test ./compute/worker -run '^TestSandboxDockerIntegration
+        run: go test ./compute/worker -run '^TestSandboxDockerIntegration$' -count=1
+
+      - name: Build local CMP-3.7 checkpoint resume probe image
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_dir="$(mktemp -d)"
+          CGO_ENABLED=0 go build -o "$probe_dir/probe" ./compute/worker/testdata/checkpointprobe
+          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$probe_dir/Dockerfile"
+          docker build --network=none -t cmp-checkpoint-probe:ci "$probe_dir"
+          image_id="$(docker image inspect --format '{{.Id}}' cmp-checkpoint-probe:ci)"
+          test -n "$image_id"
+          echo "CMP_CHECKPOINT_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
+
+      - name: Test real Docker checkpoint resume
+        run: go test ./compute/worker -run '^TestCheckpointResumeDockerIntegration$' -count=1
+
       - name: Verify CMP-3.1 daemon regression
         run: python scripts/verify-cmp-3-1-worker-daemon.py
 
@@ -90,55 +106,3 @@ jobs:
 
       - name: Verify CMP-3.7 checkpointing and resume
         run: python scripts/verify-cmp-3-7-checkpointing-resume.py
- -count=1
-
-      - name: Build local CMP-3.7 checkpoint resume probe image
-        shell: bash
-        run: |
-          set -euo pipefail
-          probe_dir="$(mktemp -d)"
-          CGO_ENABLED=0 go build -o "$probe_dir/probe" ./compute/worker/testdata/checkpointprobe
-          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$probe_dir/Dockerfile"
-          docker build --network=none -t cmp-checkpoint-probe:ci "$probe_dir"
-          image_id="$(docker image inspect --format '{{.Id}}' cmp-checkpoint-probe:ci)"
-          test -n "$image_id"
-          echo "CMP_CHECKPOINT_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
-
-      - name: Test real Docker checkpoint resume
-        run: go test ./compute/worker -run '^TestCheckpointResumeDockerIntegration
-      - name: Verify CMP-3.1 daemon regression
-        run: python scripts/verify-cmp-3-1-worker-daemon.py
-
-      - name: Verify CMP-3.2 hardware/software discovery
-        run: python scripts/verify-cmp-3-2-hardware-software-discovery.py
-
-      - name: Verify CMP-3.3 benchmarking and capability evidence
-        run: python scripts/verify-cmp-3-3-benchmarking-capability-evidence.py
-
-      - name: Verify CMP-3.4 secure workload sandbox
-        run: python scripts/verify-cmp-3-4-secure-workload-sandbox.py
-
-      - name: Verify CMP-3.5 content-addressed work-unit download
-        run: python scripts/verify-cmp-3-5-content-addressed-work-unit-download.py
-
-      - name: Verify CMP-3.6 execution lifecycle
-        run: python scripts/verify-cmp-3-6-execution-lifecycle.py
- -count=1
-
-      - name: Verify CMP-3.1 daemon regression
-        run: python scripts/verify-cmp-3-1-worker-daemon.py
-
-      - name: Verify CMP-3.2 hardware/software discovery
-        run: python scripts/verify-cmp-3-2-hardware-software-discovery.py
-
-      - name: Verify CMP-3.3 benchmarking and capability evidence
-        run: python scripts/verify-cmp-3-3-benchmarking-capability-evidence.py
-
-      - name: Verify CMP-3.4 secure workload sandbox
-        run: python scripts/verify-cmp-3-4-secure-workload-sandbox.py
-
-      - name: Verify CMP-3.5 content-addressed work-unit download
-        run: python scripts/verify-cmp-3-5-content-addressed-work-unit-download.py
-
-      - name: Verify CMP-3.6 execution lifecycle
-        run: python scripts/verify-cmp-3-6-execution-lifecycle.py

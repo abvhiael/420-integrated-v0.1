@@ -88,6 +88,7 @@ type resultMaterialPreimage struct {
 
 type ResultStore struct {
 	config    Config
+	stateRoot string
 	root      string
 	authority CanonicalExecutionAuthority
 	mu        sync.Mutex
@@ -108,7 +109,7 @@ func NewResultStore(config Config, authority CanonicalExecutionAuthority) (*Resu
 	if err := os.Chmod(root, 0o700); err != nil {
 		return nil, err
 	}
-	return &ResultStore{config: config, root: root, authority: authority}, nil
+	return &ResultStore{config: config, stateRoot: stateRoot, root: root, authority: authority}, nil
 }
 
 func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (ResultMaterial, error) {
@@ -122,7 +123,7 @@ func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (Res
 		candidate.AuthorizationRef == "" {
 		return ResultMaterial{}, fmt.Errorf("%w: execution is not a successful exited attempt", ErrInvalidResultMaterial)
 	}
-	recordPath := filepath.Join(s.config.StateDir, "attempts", strings.ToLower(strings.TrimPrefix(candidate.AttemptRef, "0x"))+".json")
+	recordPath := filepath.Join(s.stateRoot, "attempts", strings.ToLower(strings.TrimPrefix(candidate.AttemptRef, "0x"))+".json")
 	recordPath, err := filepath.Abs(filepath.Clean(recordPath))
 	if err != nil {
 		return ResultMaterial{}, err

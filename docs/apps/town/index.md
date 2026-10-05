@@ -16,21 +16,32 @@ version: v1
 
 It is **not** part of the frozen Genesis application catalog. Its service identifier, `420/service/town/v1`, belongs to the GEN-SVC composition registry and must not be represented as a frozen Genesis application ID without a later explicit catalog decision.
 
-## TOWN-AUDIT-2 skeleton
+## Implemented through TOWN-AUDIT-3
 
-The repository owns Town application packages under `town/`. The current skeleton defines:
+The repository now contains:
 
-- package/build ownership under the root Go module;
-- canonical service configuration;
-- a local environment template with no secrets;
-- versioned object names and opaque stable IDs;
-- canonical shared visibility values;
-- CI ownership and drift verification.
+- canonical package/build ownership under `town/`;
+- canonical service/environment/schema configuration;
+- stable opaque Town object IDs and shared visibility vocabulary;
+- `TownAuthority420` for authoritative on-chain community state;
+- membership lifecycle with owner safety and controlled reinstatement;
+- fixed community-scoped MEMBER/MODERATOR/ADMIN roles;
+- owner-controlled default-deny role permissions;
+- explicit revisioned subscription and entitlement lifecycle;
+- reference-only treasury binding with no Town custody;
+- authority mutation events and machine-readable invariants;
+- exact-SHA Town CI, focused authority tests and retained Town/rewards regressions.
 
-It does not yet provide a usable community application. Community lifecycle, membership authority, content workflows, moderation, integrations, API/indexer and frontend are later roadmap steps.
+The detailed state and trust model is documented in `docs/apps/town/authority.md`.
 
 ## Trust boundary
 
-Authority-bearing membership, role, permission, subscription, entitlement and treasury references must remain independent of replaceable Search, Indexer, message transport, storage gateway, frontend and rewards surfaces.
+Authority-bearing community, membership, role, permission, subscription, entitlement and treasury-reference state is resolved from `TownAuthority420`.
 
-Post/comment bodies remain off-chain by default and are represented by references in the skeleton schema.
+Search, Indexer, message transport, storage gateway, frontend, Notifications and rewards must not widen or replace that authority.
+
+Post/comment bodies remain off-chain by default.
+
+## Remaining roadmap work
+
+Posts/threads/comments/votes, moderation and appeals, service integrations, API/SDK/indexer/recovery, the user-facing web application, broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps.

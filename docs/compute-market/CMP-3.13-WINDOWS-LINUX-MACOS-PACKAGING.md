@@ -1,6 +1,6 @@
 # CMP-3.13 — Windows/Linux/macOS packaging
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `6a5e82bbaa2fd9073c8d6f3415f2460048f115ca`.**
 
 ## Canonical definition
 
@@ -249,6 +249,19 @@ They do **not** prove that:
 These are not silently promoted to PASS.
 
 CMP-3.11 already fails closed when requested platform telemetry/enforcement is unavailable.
+
+## Qualification evidence
+
+- Implementation/spec/workflow SHA: `6a5e82bbaa2fd9073c8d6f3415f2460048f115ca`
+- Compute Worker Fast Qualification: **#344**
+- Run ID: `37269147888`
+- Job ID: `111632222887`
+- GitHub Actions package artifact ID: `11327388973`
+- Workflow artifact digest: `sha256:30ea79aadf46401450682b51994a8b84ecb22b23dc765b1bc0153d0c5d662629`
+- Evidence anchor: `32b4e5a55dd71a54ff948f8360746592b17a864f`
+- Durable evidence: [CMP-3.13 qualification evidence](CMP-3.13-QUALIFICATION-EVIDENCE.md)
+- Level 2: not required; Integration #124 skipped as expected and is not counted as passing evidence.
+- Level 3: deferred to CMP-3.14.
 
 ## Qualification level
 

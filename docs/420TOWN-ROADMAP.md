@@ -71,19 +71,46 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-4 — Content, threads, comments and votes
 
-Status: OPEN
+Status: COMPLETE
 
-Implement:
+Implemented and qualified:
 
 - posts;
 - threads;
 - comments/replies;
-- votes/reactions where canonically required;
-- content hashes/references;
-- visibility rules;
-- deletion/tombstone semantics;
-- idempotent/replay-safe writes;
-- spam/Sybil/rate-abuse controls.
+- votes;
+- SHA-256 content hashes plus off-chain content references;
+- canonical GEN-SVC visibility rules with fail-closed unknown scope handling;
+- root-thread visibility inheritance for comments/replies;
+- append-only post/comment revision history;
+- deletion/tombstone semantics that preserve stable IDs and digests while clearing body references;
+- required idempotency keys with conflicting replay rejection;
+- duplicate-content fingerprint throttling;
+- per-identity, trusted-device, trusted-network, vote and aggregate-community rate-abuse controls;
+- lower rate limits for unknown/unverified/young identities;
+- one canonical revisioned vote record per voter/target;
+- active-membership and target-visibility enforcement for votes;
+- explicit boundary keeping high-volume content bodies off-chain by default.
+
+Durable qualification evidence:
+
+- qualification level: Level 1 — per-roadmap-step fast qualification;
+- qualified implementation/test/workflow SHA: `f5f01eae23bbc04f02ac7e9f2ab648c465a86813`;
+- 420Town audit workflow run `37270292839` — PASS;
+- exact-SHA assertions — PASS in both Town jobs;
+- canonical Town audit verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- `go test ./town/...` — PASS;
+- focused Town Solidity build — PASS;
+- retained `test/Town*.t.sol` Foundry regressions — PASS;
+- cross-dApp rewards hardening — PASS;
+- current main at closeout: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`;
+- PR #523 remains open and mergeable; final reconciliation to then-current `main` remains a Level 3 closeout responsibility unless a later Town step materially requires it earlier;
+- Level 2: not required for this ordinary app-scoped content step; the prior authority milestone was qualified at TOWN-AUDIT-3;
+- Level 3 remains intentionally deferred to TOWN-AUDIT-10;
+- next canonical roadmap step: TOWN-AUDIT-5 — Moderation and appeals.
 
 High-volume content bodies remain off-chain by default.
 

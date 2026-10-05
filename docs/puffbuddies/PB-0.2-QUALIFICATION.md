@@ -38,11 +38,20 @@ No PuffBuddies runtime implementation, contract, service ID, fixed address, depl
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- canonical first-release capability boundary defined;
+- complete eligibility-to-delete MVP journey defined;
+- PB-MVP-001 through PB-MVP-015 present and ordered;
+- PB-SCOPE-001 through PB-SCOPE-008 present and ordered;
+- launch-critical safety/account-exit capabilities remain MVP;
+- web-first MVP surface is explicit;
+- native mobile, premium, advanced verification/reputation, rich media, group/event, AI matchmaking and social/community expansion are explicitly deferred;
+- deferred features are distinguished from behavior incompatible with canonical consent/privacy boundaries;
+- no contract, service ID, fixed address, deployment, client implementation, or live integration is claimed;
+- PB-0.1 remains complete and intact.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`75d7437b67bcf0038db0000ff197c15147e3b163`
 
 ## Base/main SHA
 
@@ -52,7 +61,14 @@ Pending exact-head qualification.
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+- exact-head pull-request run: `37272615333` — **PASS**
+- job: `111642649107` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 canonical verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+The earlier run on superseded SHA `3b6c940dd0454de1702e1bc3e10046897c1d307d` failed because the verifier referenced undefined `mvp_ids`/`scope_ids`. That was a test-harness defect, not product behavior. The verifier was repaired and the new exact implementation SHA above passed.
 
 ## Security/adversarial/invariant scope
 
@@ -81,11 +97,13 @@ PB-0.2 defines **capability scope**, not detailed implementation semantics. Thos
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.2 is formally COMPLETE.
+None for PB-0.2.
 
 ## Completion state
 
-**PB-0.2 — PENDING QUALIFICATION**
+**PB-0.2 — COMPLETE**
+
+All canonical PB-0.2 exit criteria are satisfied on exact implementation SHA `75d7437b67bcf0038db0000ff197c15147e3b163`.
 
 ## Next canonical roadmap step
 

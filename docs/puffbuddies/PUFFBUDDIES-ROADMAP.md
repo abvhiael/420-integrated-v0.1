@@ -489,7 +489,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.11 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.12 — User lifecycle
+### PB-0.12 — User lifecycle — COMPLETE
 
 **Purpose:** define canonical PuffBuddies account/application lifecycle states, transition authorities, revocation effects, failure behavior, and re-entry rules.
 

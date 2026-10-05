@@ -93,21 +93,47 @@ No repository evidence identified a Search-owned fund-loss, arbitrary-call, sign
 | explicit sponsorship isolation | SRCH-INV-004 | sponsorship lane | sponsorship/ranking tests | docs/UI | COMPLETE | live presentation smoke |
 | privacy exclusions | SRCH-INV-007/008 | admission/query/domain allowlist | privacy/live-validator negatives | docs | COMPLETE | live negative probes |
 | API/runtime/frontend | SEARCH-5/7/8 | present | HTTP/web/runtime tests | deployment docs | COMPLETE at repository scope | public deployment |
-| clean build/container | SEARCH-8 | Dockerfile + Go commands | dedicated audit CI | deployment docs | PARTIAL | exact-head audit CI must pass |
+| clean build/container | SEARCH-8 | Dockerfile + Go commands | dedicated audit CI | deployment docs | COMPLETE at repository scope | live deployment remains A5 |
 | SEARCH-9 live qualification | roadmap | harness exists | no live run | manifest/example | BLOCKED | approved testnet + endpoints |
 | Genesis/production operations | SEARCH-10 + release discipline | repository closeout only | no production run | partial | BLOCKED | A5 then A6 |
 
-## Current readiness determination before exact-head audit CI
+## SEARCH-AUDIT-3 durable qualification evidence
+
+- Roadmap step: **SEARCH-AUDIT-3 — integration/readiness reconciliation**
+- Qualification level: **Level 1 — app-specific fast qualification**
+- Implementation SHA: `e013430252106c533e9bc5c54b3339cbdea98681`
+- Current main/base inspected for this step: `f6a426fc386b21f871b1805e00a57b1dad2bf902`
+- Branch / PR: `audit/420search-complete-20261004` / PR #515
+- CI workflow: **420Search audit qualification**
+- CI run: **#14 / 37255553537**
+- CI job: **111591724193**
+- Exact-head assertion: **PASS**
+- Canonical Search verifier: **PASS**
+- gofmt gate: **PASS**
+- `go test ./search/... -count=1`: **PASS**
+- `go vet ./search/...`: **PASS**
+- runtime/smoke/live-validator builds: **PASS**
+- production Docker build: **PASS**
+- direct-RPC / authority-drift guard: **PASS**
+- 420Indexer consumer readiness gate: **QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD**
+- Search repository status: **REPOSITORY_QUALIFIED**
+- Live Search/Indexer binding: **NOT CLAIMED; deferred to SEARCH-AUDIT-5**
+- Level 2: **not required**; this step did not introduce a new shared authority/lifecycle milestone beyond the retained Search integration suite.
+- Level 3: **intentionally deferred** to complete app-phase closeout.
+
+The branch was four commits behind current main when this step was qualified, but the divergence consisted only of unrelated `docs/ROADMAP.md` and 420AI audit documentation changes; no Search, Indexer, shared service interface, deployment, or qualification dependency changed.
+
+## Current readiness determination after SEARCH-AUDIT-3
 
 - CODE COMPLETE: **YES**
-- BUILD COMPLETE: **NO pending exact-head audit CI**
+- BUILD COMPLETE: **YES at repository scope**
 - CONTRACT COMPLETE: **YES / NOT APPLICABLE for Search-owned contracts**
-- TEST COMPLETE: **NO** — live SEARCH-9 remains.
-- DOCUMENTATION COMPLETE: **NO** — final deployment/operations evidence remains.
-- INTEGRATION COMPLETE: **NO** — repository adapters exist; live Indexer/cross-app evidence remains.
-- SECURITY QUALIFIED: **NO** — repository security controls exist; live operational/failure qualification remains.
-- TESTNET READY: **YES at repository-package/harness scope**, but not testnet-qualified.
+- TEST COMPLETE: **YES at repository scope; NO for live SEARCH-9/testnet qualification**
+- DOCUMENTATION COMPLETE: **YES for repository integration/readiness; final live deployment/operations evidence remains A5/A6**
+- INTEGRATION COMPLETE: **YES at repository scope; NO for live deployment binding**
+- SECURITY QUALIFIED: **YES at repository scope; live operational/failure qualification remains A5/A6**
+- TESTNET READY: **YES as a repository-qualified deployment candidate**, but not live-testnet-qualified
 - GENESIS READY: **NO**
 - PRODUCTION READY: **NO**
 
-Exact-head CI evidence will be appended after the audit branch is qualified.
+Next canonical roadmap step: **SEARCH-AUDIT-4 — durable repository closeout**.

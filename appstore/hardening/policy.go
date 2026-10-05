@@ -2,6 +2,7 @@ package hardening
 
 import (
 	"errors"
+	"net"
 	"net/url"
 	"strings"
 	"sync"
@@ -83,8 +84,13 @@ func ValidatePublicURL(raw string) error {
 		return ErrUnsafeURL
 	}
 	host := strings.ToLower(u.Hostname())
-	if host == "localhost" || host == "127.0.0.1" || host == "::1" || strings.HasSuffix(host, ".local") {
+	if host == "localhost" || strings.HasSuffix(host, ".localhost") || strings.HasSuffix(host, ".local") {
 		return ErrUnsafeURL
+	}
+	if ip := net.ParseIP(host); ip != nil {
+		if ip.IsLoopback() || ip.IsPrivate() || ip.IsUnspecified() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsMulticast() {
+			return ErrUnsafeURL
+		}
 	}
 	return nil
 }

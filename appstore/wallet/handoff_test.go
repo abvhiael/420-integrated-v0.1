@@ -48,6 +48,9 @@ func TestRejectsInvalidDeepLinkInputs(t *testing.T) {
         func() Request { r := validRequest(); r.ChainID = 0; return r }(),
         func() Request { r := validRequest(); r.ServiceID = ""; return r }(),
         func() Request { r := validRequest(); r.AppURL = "javascript:alert(1)"; return r }(),
+        func() Request { r := validRequest(); r.AppURL = "http://example.420/app"; return r }(),
+        func() Request { r := validRequest(); r.AppURL = "https://127.0.0.1/internal"; return r }(),
+        func() Request { r := validRequest(); r.AppURL = "https://169.254.169.254/latest/meta-data"; return r }(),
         func() Request { r := validRequest(); r.Permissions = []Permission{{Name:""}}; return r }(),
         func() Request { r := validRequest(); r.Capabilities = []CapabilityScope{{Capability:"payments", Scope:""}}; return r }(),
     }

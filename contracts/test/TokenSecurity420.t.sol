@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "../src/system/SystemAccess.sol";
+
 import "../src/token/TokenIds420.sol";
 import "../src/token/TokenTemplateRegistry420.sol";
 import "../src/token/TokenFactory420.sol";
@@ -191,9 +193,10 @@ contract TokenSecurity420Test {
         );
         vm.prank(ALICE);
         token.mint(ALICE, 1);
+        TokenUnsafeRecipient420 bad = new TokenUnsafeRecipient420();
         vm.prank(ALICE);
         vm.expectRevert(ERC721Template420.UnsafeRecipient.selector);
-        token.safeTransferFrom(ALICE, address(new TokenUnsafeRecipient420()), 1);
+        token.safeTransferFrom(ALICE, address(bad), 1);
         require(token.ownerOf(1) == ALICE, "unsafe transfer was not atomic");
     }
 

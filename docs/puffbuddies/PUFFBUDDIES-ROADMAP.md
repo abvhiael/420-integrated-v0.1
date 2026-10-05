@@ -405,7 +405,45 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.10 — Safety/moderation principles
 
-Define report classes, moderation states, safety invariants, and escalation boundaries.
+**Purpose:** define canonical report classes, policy-level moderation states, stable safety invariants, and escalation boundaries while preserving privacy, consent, state ownership, and dependency authority.
+
+**Canonical requirements:**
+
+1. Record PB-SAFETY-001 through PB-SAFETY-040.
+2. Define report classes for harassment/threats, stalking/doxxing/location abuse, impersonation/deceptive identity, minor/adult-eligibility concerns, sexual exploitation/non-consensual sexual content, fraud/scam/extortion, hate/severe discriminatory abuse, spam/bot/platform manipulation, block/ban evasion, serious dangerous/unlawful conduct, cannabis-related coercion/unsafe transactional conduct, and other/policy-unclear concerns.
+3. Define policy-level moderation states RECEIVED, TRIAGED, REVIEWING, RESTRICTED_PENDING_REVIEW, ACTIONED, NO_ACTION, APPEALED, and CLOSED.
+4. Preserve immediate independent block authority and keep report state separate from block state.
+5. Prohibit report-count guilt, payment/premium safety exceptions, moderator-manufactured consent, retaliation enablement, public moderation/reputation state, and stale-authorization bypass.
+6. Require private reporter/evidence state, least-privilege moderator access, protected auditability, evidence integrity, and explicit automation limits.
+7. Require current safety actions to override convenience, delivery, recommendation, cached authorization, and monetization state.
+8. Define standard, high-priority, emergency/external-authority, and cross-service escalation boundaries.
+9. Define appeal/restoration principles that never force unblock, rematch, conversation restoration, or renewed contact.
+10. Do not claim moderation tooling, classifiers, operator consoles, evidence databases, contracts, addresses, service IDs, deployments, or live enforcement in PB-0.10.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.10-SAFETY-MODERATION-PRINCIPLES.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.10-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.10 is not a Level 2 integration milestone; it defines policy and escalation boundaries without executable cross-component integration.
+
+**Dependencies:** PB-0.1 through PB-0.9 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.10 safety/moderation document exists;
+- PB-SAFETY-001 through PB-SAFETY-040 exist exactly once and in sequence;
+- all required report classes and moderation states are explicit;
+- independent block authority, report/block separation, privacy, least privilege, auditability, evidence integrity, automation limits, stale-state safety, and anti-retaliation principles are explicit;
+- escalation boundaries and appeal/restoration constraints are explicit;
+- no moderation runtime/classifier/operator-console/evidence-database/contract/address/service-ID/deployment/live-enforcement implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.10 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.11 — Data lifecycle/deletion
 

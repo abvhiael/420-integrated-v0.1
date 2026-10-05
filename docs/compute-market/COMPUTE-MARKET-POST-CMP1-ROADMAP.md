@@ -408,13 +408,13 @@ Durable evidence: [CMP-3.9 qualification](CMP-3.9-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.10 — Result/evidence upload
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `356f8d77f3b4b6997f9f9d75e612a36d1a32a43f`.**
 
 The worker now implements a provider-neutral, content-addressed off-chain upload boundary for exact CMP-3.8 result material, CMP-3.9 signed receipts, a versioned evidence manifest, and every evidence object required by accepted policy. The worker validates the complete ordered evidence set, exact size/SHA-256 digests, privacy/access/retention/provenance bindings, byte ceilings, deterministic object idempotency and transport receipt identity before recording a non-authoritative upload completion.
 
 CMP-3.10 does not invent a general ComputeMarket HTTP endpoint, 420Storage agreement/capacity authority, 420AI dependency, correctness verdict, canonical `RESULT_COMMITTED`, or payment/settlement authority.
 
-Exit criteria and implementation boundary: [CMP-3.10 result/evidence upload](CMP-3.10-RESULT-EVIDENCE-UPLOAD.md).
+Durable evidence: [CMP-3.10 qualification](CMP-3.10-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.10 result/evidence upload](CMP-3.10-RESULT-EVIDENCE-UPLOAD.md). Fast #233 / run `37261236505` / job `111608720907` passed the exact implementation/spec SHA; evidence anchor `8a72024fc27543f7754b624be2cada39d4b13849`.
 
 ## CMP-3.11 — Local resource controls
 CPU/GPU percentage, idle-only mode, thermal ceilings, bandwidth and schedule controls.
@@ -648,7 +648,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.9 COMPLETE; CMP-3.10 result/evidence upload next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.10 COMPLETE; CMP-3.11 local resource controls next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

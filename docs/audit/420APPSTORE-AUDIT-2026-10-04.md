@@ -35,7 +35,7 @@ The repository contains the intended implementation layers:
 - `appstore/web`: embedded dependency-free Genesis frontend;
 - `appstore/cmd/appstore420`: production executable entrypoint.
 
-The pieces exist, but the production executable does not compose them into the application described by APPSTORE-2 through APPSTORE-9.
+The pieces exist, and APPSTORE-AUDIT-2 through APPSTORE-AUDIT-4 now wire canonical source ingestion, catalogue lifecycle and retained ApplicationView composition. The public API/frontend/abuse-control service composition described by APPSTORE-7 through APPSTORE-9 remains unfinished.
 
 ## Critical finding: production runtime is incomplete
 
@@ -79,10 +79,10 @@ The prior rating range check accepted IEEE NaN because ordinary range comparison
 | APP-INV-001..013 | Genesis config | enumerated | closeout coverage | present | COMPLETE | keep exact-head qualification |
 | Startup chain/network qualification | APPSTORE-1 | RPC chain ID + Registry bytecode probe | runtime tests | present | COMPLETE | live network qualification still required |
 | Canonical Registry ingestion | APPSTORE-2 | projection + concrete finalized 420Indexer-backed production Source wired at startup | source/projection/adversarial tests | present | COMPLETE (local) | live testnet qualification deferred to APPSTORE-AUDIT-7 |
-| Deterministic projection/persistence | APPSTORE-3 | store/rebuild/restore present; concurrency repaired | store/registry/race tests | present | COMPLETE | integrate into production lifecycle |
-| Curation/ranking | APPSTORE-4 | package present; noncanonical boundaries enforced | policy tests | present | COMPLETE | wire metadata source/runtime composition |
-| Security provenance | APPSTORE-5 | evidence package present | evidence tests | present | COMPLETE | wire live provenance inputs |
-| Wallet handoff | APPSTORE-6 | presentation/handoff present; URL hardening repaired | handoff tests | present | COMPLETE | wire runtime ApplicationView generation |
+| Deterministic projection/persistence | APPSTORE-3 | production restore/rebuild/persist/refresh lifecycle wired | store/registry/race tests | present | COMPLETE | live testnet qualification later |
+| Curation/ranking | APPSTORE-4 | noncanonical package plus production ApplicationView composition input wired | policy/composition tests | present | COMPLETE (local) | live/operator input qualification later |
+| Security provenance | APPSTORE-5 | evidence package integrated into ApplicationView composition | evidence/composition tests | present | COMPLETE (local) | live provenance-source qualification later |
+| Wallet handoff | APPSTORE-6 | handoff and requested-scope inputs integrated into canonical-bound ApplicationView composition | handoff/composition tests | present | COMPLETE (local) | live Wallet qualification later |
 | Discovery API | APPSTORE-7 | handler package present | API tests | present | PARTIAL | mount in production executable |
 | Privacy/abuse/failure policy | APPSTORE-8 | validators/limiter/dependency assessment present | hardening tests | present | PARTIAL | wire limiter/dependency state into public service |
 | Genesis frontend | APPSTORE-9 | embedded static UI present | web tests | present | PARTIAL | mount in production executable and qualify real endpoint |
@@ -129,7 +129,7 @@ Historical APPSTORE-9/10 evidence remains provenance only and must not be used t
 1. **APPSTORE-AUDIT-1 — durable audit baseline and local hardening.** Preserve this report, truthful readiness state, race-safe Registry projection, deep-link hardening, finite rating validation, and exact-head audit workflow.
 2. **APPSTORE-AUDIT-2 — production canonical source.** **COMPLETE — Level 1.** Production uses the explicitly qualified 420Indexer-backed finalized ProtocolRegistry projection, with chain/Registry/finality/authority-claim and malformed/upstream-failure checks. Exact implementation SHA `03071f147041efe2d0bcd9df151a75c54f5c467c` passed AppStore Audit Qualification run `37252857689`, job `111583875589`.
 3. **APPSTORE-AUDIT-3 — runtime catalogue lifecycle.** **COMPLETE — Level 1 + Level 2 lifecycle milestone.** Source sync, deterministic restore/rebuild/persistence, crash-safe atomic replacement, finalized-staleness/conflict protection, periodic refresh, and append-only non-canonical presentation history are wired and qualified at exact implementation SHA `6ea9a46ef889e8ebcc8888a100efaac9013f1e84`.
-4. **APPSTORE-AUDIT-4 — ApplicationView composition.** Define and wire curation/security/Wallet/link inputs without allowing any presentation source to override canonical Registry fields.
+4. **APPSTORE-AUDIT-4 — ApplicationView composition.** **IMPLEMENTED; Level 1 qualification pending exact-head CI.** Canonical latest-version records are composed with strict optional curation/security/Wallet/link inputs, retained atomically, and rebuilt after finalized catalogue refresh without allowing presentation sources to select or rewrite canonical Registry fields.
 5. **APPSTORE-AUDIT-5 — public service composition.** Mount health/readiness, `/v1/apps*`, embedded frontend, abuse controls and dependency-state behavior under one production handler; readiness must represent the composed application, not only Registry bytecode reachability.
 6. **APPSTORE-AUDIT-6 — repository qualification.** Run formatting, race tests, vet, production build, documentation qualification, and requirement-specific exact-head checks.
 7. **APPSTORE-AUDIT-7 — live testnet qualification.** Deploy backend/frontend, populate real URLs, exercise canonical Registry ingestion, restart/rebuild, Wallet handoff, outage/degraded cases, privacy boundaries and browser/API behavior against the live testnet.

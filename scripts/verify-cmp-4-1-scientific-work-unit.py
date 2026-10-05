@@ -52,7 +52,7 @@ def main():
       "docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md":[
         "## CMP-4.1 — Scientific Work Unit specification",
         "research project;","executable/container commitment;","dataset/input commitment;","parameters;",
-        "resource class;","output schema;","verification strategy;","deadline;","reward/funding reference;"
+        "resource class;","output schema;","verification strategy;","deadline;","reward/funding reference"
       ],
       "docs/compute-market/CMP-0.3-DETERMINISTIC-WORK-UNIT-IDENTITY.md":["unitId = keccak256","UNIT_DOMAIN_V1"],
       "docs/compute-market/CMP-0.4-SIGNED-EXECUTION-MANIFEST.md":["executableDigest","inputCommitment","outputSchemaHash"],

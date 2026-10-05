@@ -64,6 +64,7 @@ type ExecutionStatus string
 
 const (
 	ExecutionPrepared    ExecutionStatus = "prepared"
+	ExecutionResuming    ExecutionStatus = "resuming"
 	ExecutionRunning     ExecutionStatus = "running"
 	ExecutionExited      ExecutionStatus = "exited"
 	ExecutionFailed      ExecutionStatus = "failed"
@@ -302,6 +303,161 @@ func (l *ExecutionLifecycle) Execute(ctx context.Context, plan ExecutionPlan) (E
 	return outcome, nil
 }
 
+
+func (l *ExecutionLifecycle) Resume(
+	ctx context.Context,
+	plan ExecutionPlan,
+	checkpoints *CheckpointStore,
+) (ExecutionOutcome, error) {
+	if l == nil || l.authority == nil || l.sandbox == nil || checkpoints == nil {
+		return ExecutionOutcome{}, ErrInvalidExecutionAuthorization
+	}
+	if err := validateBytes32("authorization ref", plan.AuthorizationRef); err != nil {
+		return ExecutionOutcome{}, fmt.Errorf("%w: %v", ErrInvalidExecutionAuthorization, err)
+	}
+	auth, err := l.authority.ResolveExecutionAuthorization(ctx, plan.AuthorizationRef)
+	if err != nil {
+		return ExecutionOutcome{}, fmt.Errorf("%w: resolve canonical authorization: %v", ErrInvalidExecutionAuthorization, err)
+	}
+	if err := l.validatePlan(auth, plan); err != nil {
+		return ExecutionOutcome{}, err
+	}
+	if checkpoints.authority == nil || checkpoints.config.Identity != l.config.Identity {
+		return ExecutionOutcome{}, fmt.Errorf("%w: checkpoint store identity mismatch", ErrInvalidExecutionAuthorization)
+	}
+
+	recordPath := l.recordPath(auth.AttemptRef)
+	l.mu.Lock()
+	record, err := l.readRecord(recordPath)
+	if err != nil {
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+	if record.Status != ExecutionInterrupted {
+		l.mu.Unlock()
+		if record.Status == ExecutionPrepared || record.Status == ExecutionResuming || record.Status == ExecutionRunning {
+			return ExecutionOutcome{Record: record}, ErrAttemptInProgress
+		}
+		return ExecutionOutcome{Record: record}, ErrAttemptReplay
+	}
+
+	now := l.now().UTC()
+	if !now.Before(auth.Deadline) || !now.Before(auth.LeaseExpiresAt) {
+		record.Status = ExecutionExpired
+		record.EndedAt = now
+		record.Transitions = append(record.Transitions, ExecutionTransition{
+			Status: ExecutionExpired, At: now, Code: "resume-authorization-expired",
+		})
+		if err := l.persistRecord(recordPath, record); err != nil {
+			l.mu.Unlock()
+			return ExecutionOutcome{}, err
+		}
+		l.mu.Unlock()
+		return ExecutionOutcome{Record: record}, fmt.Errorf("%w: resume authorization expired", ErrInvalidExecutionAuthorization)
+	}
+
+	artifact, err := l.openVerifiedArtifact(auth, plan.Artifact)
+	if err != nil {
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+	checkpoint, err := checkpoints.LoadLatest(ctx, plan.AuthorizationRef)
+	if err != nil {
+		_ = artifact.Close()
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+	if !strings.EqualFold(checkpoint.Metadata.AttemptRef, auth.AttemptRef) ||
+		checkpoint.Metadata.AttemptNonce != auth.AttemptNonce ||
+		checkpoint.Metadata.WorkUnitSHA256 != auth.WorkUnitSHA256 {
+		_ = artifact.Close()
+		l.mu.Unlock()
+		return ExecutionOutcome{}, fmt.Errorf("%w: checkpoint attempt binding mismatch", ErrInvalidExecutionAuthorization)
+	}
+	checkpointFile, err := checkpoints.OpenVerified(checkpoint)
+	if err != nil {
+		_ = artifact.Close()
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+	resumeInput, err := NewResumeInput(
+		artifact, auth.WorkUnitSize,
+		checkpointFile, checkpoint.Metadata.SizeBytes,
+	)
+	if err != nil {
+		_ = artifact.Close()
+		_ = checkpointFile.Close()
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+
+	record.Status = ExecutionResuming
+	record.EndedAt = time.Time{}
+	record.Transitions = append(record.Transitions, ExecutionTransition{
+		Status: ExecutionResuming, At: now, Code: fmt.Sprintf("checkpoint-%d", checkpoint.Metadata.Sequence),
+	})
+	if err := l.persistRecord(recordPath, record); err != nil {
+		_ = artifact.Close()
+		_ = checkpointFile.Close()
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+	record.Status = ExecutionRunning
+	record.StartedAt = l.now().UTC()
+	record.Transitions = append(record.Transitions, ExecutionTransition{
+		Status: ExecutionRunning, At: record.StartedAt, Code: "resume-running",
+	})
+	if err := l.persistRecord(recordPath, record); err != nil {
+		_ = artifact.Close()
+		_ = checkpointFile.Close()
+		l.mu.Unlock()
+		return ExecutionOutcome{}, err
+	}
+	l.mu.Unlock()
+	defer artifact.Close()
+	defer checkpointFile.Close()
+
+	executionDeadline := auth.Deadline
+	if auth.LeaseExpiresAt.Before(executionDeadline) {
+		executionDeadline = auth.LeaseExpiresAt
+	}
+	runCtx, cancel := context.WithDeadline(ctx, executionDeadline)
+	defer cancel()
+
+	sandboxResult, runErr := l.sandbox.RunWithInput(runCtx, plan.Sandbox, resumeInput)
+	ended := l.now().UTC()
+	record.EndedAt = ended
+	record.ExitCode = sandboxResult.ExitCode
+	record.TimedOut = sandboxResult.TimedOut
+	record.OutputTruncated = sandboxResult.OutputTruncated
+
+	switch {
+	case errors.Is(runCtx.Err(), context.DeadlineExceeded):
+		record.Status = ExecutionExpired
+		record.Transitions = append(record.Transitions, ExecutionTransition{Status: ExecutionExpired, At: ended, Code: "resume-lease-or-deadline"})
+	case errors.Is(runCtx.Err(), context.Canceled):
+		record.Status = ExecutionCancelled
+		record.Transitions = append(record.Transitions, ExecutionTransition{Status: ExecutionCancelled, At: ended, Code: "resume-context-cancelled"})
+	case runErr != nil:
+		record.Status = ExecutionFailed
+		record.Transitions = append(record.Transitions, ExecutionTransition{Status: ExecutionFailed, At: ended, Code: "resume-sandbox-failed"})
+	default:
+		record.Status = ExecutionExited
+		record.Transitions = append(record.Transitions, ExecutionTransition{Status: ExecutionExited, At: ended, Code: "resume-process-exited"})
+	}
+	if err := l.persistRecord(recordPath, record); err != nil {
+		return ExecutionOutcome{}, err
+	}
+	outcome := ExecutionOutcome{Record: record, Sandbox: sandboxResult}
+	if runErr != nil {
+		return outcome, runErr
+	}
+	if record.Status != ExecutionExited {
+		return outcome, fmt.Errorf("resumed execution ended with local status %s", record.Status)
+	}
+	return outcome, nil
+}
+
 func (l *ExecutionLifecycle) validatePlan(auth ExecutionAuthorization, plan ExecutionPlan) error {
 	if err := ValidateExecutionAuthorization(auth); err != nil {
 		return err
@@ -470,7 +626,7 @@ func (l *ExecutionLifecycle) recoverInterrupted() error {
 		if err != nil {
 			return err
 		}
-		if record.Status != ExecutionPrepared && record.Status != ExecutionRunning {
+		if record.Status != ExecutionPrepared && record.Status != ExecutionResuming && record.Status != ExecutionRunning {
 			continue
 		}
 		record.Status = ExecutionInterrupted

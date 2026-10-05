@@ -19,6 +19,7 @@ The service is configured through:
 - `APPSTORE_REGISTRY_ADDRESS` — canonical Registry/ProtocolRegistry deployment used for startup qualification;
 - `APPSTORE_CATALOGUE_STORE` — path for the non-canonical finalized catalogue projection;
 - `APPSTORE_VIEW_INPUTS` — optional strict JSON file containing non-canonical curation, security-evidence, Wallet-request and provenance-link inputs used by APPSTORE-AUDIT-4 composition;
+- `APPSTORE_VERIFY_URL` — optional 420Verify base URL; its `/readyz` status controls whether current verification-class evidence may be served;
 - `APPSTORE_LISTEN_ADDR` — HTTP listen address; defaults to `:8426`.
 
 Invalid or incomplete configuration fails startup.
@@ -38,7 +39,7 @@ These checks establish that the service is attached to the intended network and 
 
 `GET /healthz` reports process health and explicitly returns `canonical: false`.
 
-`GET /readyz` returns success only after startup qualification passes. Readiness therefore cannot be used to imply that AppStore owns canonical application state.
+`GET /readyz` is owned by the composed public service. It returns 503 in `BLOCKED` mode when canonical Registry/RPC state cannot be claimed, and 200 with an explicit dependency assessment in `READY` or optional-service `DEGRADED` mode. Verify unavailability degrades the service and removes verification-class evidence rather than presenting it as current.
 
 ## Authority boundary
 
@@ -54,4 +55,4 @@ The runtime cannot:
 
 ## Process lifecycle
 
-The production entrypoint is `appstore/cmd/appstore420`. It qualifies the network before serving HTTP, uses bounded HTTP timeouts and shuts down gracefully on interrupt or `SIGTERM`.
+The production entrypoint is `appstore/cmd/appstore420`. It qualifies the network, bootstraps the catalogue, composes `ApplicationView` state, and then mounts one public handler containing health/readiness, `/v1/apps*`, and the embedded frontend. Public discovery requests pass through an in-memory fixed-window limiter keyed only by transport address, not Wallet/account identity. The process uses bounded HTTP timeouts and shuts down gracefully on interrupt or `SIGTERM`.

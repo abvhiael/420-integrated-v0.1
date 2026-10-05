@@ -132,6 +132,51 @@ func TestSecurityGuardQuarantinesRepeatedAbuseAndPersistsAcrossRestart(t *testin
 	}
 }
 
+func TestSecurityGuardRecoveryUsesLatestPostExpiryIncidentState(t *testing.T) {
+	lifecycle, plan, auth, _, _ := maliciousFixture(t)
+	policy := DefaultMaliciousWorkloadPolicy()
+	policy.MaxViolations = 2
+	policy.QuarantineDuration = time.Minute
+	guard, err := NewWorkloadSecurityGuard(lifecycle.config, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 10, 5, 5, 0, 0, 0, time.UTC)
+	guard.now = func() time.Time { return now }
+	bad := ExecutionOutcome{
+		Record: ExecutionRecord{Status: ExecutionFailed, TimedOut: true},
+		Sandbox: SandboxResult{TimedOut: true},
+	}
+	if err := guard.Observe(auth, plan.Sandbox, bad, errors.New("timeout")); err != nil {
+		t.Fatal(err)
+	}
+	now = now.Add(time.Second)
+	if err := guard.Observe(auth, plan.Sandbox, bad, errors.New("timeout")); err != nil {
+		t.Fatal(err)
+	}
+	now = now.Add(2 * time.Minute)
+	if err := guard.Preflight(auth, plan.Sandbox); err != nil {
+		t.Fatalf("expired quarantine did not clear: %v", err)
+	}
+	if err := guard.Observe(auth, plan.Sandbox, bad, errors.New("timeout")); err != nil {
+		t.Fatal(err)
+	}
+	restarted, err := NewWorkloadSecurityGuard(lifecycle.config, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	restarted.now = func() time.Time { return now }
+	if err := restarted.Preflight(auth, plan.Sandbox); err != nil {
+		t.Fatalf("latest post-expiry incident was not recovered as count one: %v", err)
+	}
+	if err := restarted.Observe(auth, plan.Sandbox, bad, errors.New("timeout")); err != nil {
+		t.Fatal(err)
+	}
+	if err := restarted.Preflight(auth, plan.Sandbox); !errors.Is(err, ErrWorkloadQuarantined) {
+		t.Fatalf("second post-expiry violation did not quarantine: %v", err)
+	}
+}
+
 func TestSecurityIncidentEvidenceIsPrivateNonAuthoritativeAndPayloadFree(t *testing.T) {
 	_, plan, auth, guard, _ := maliciousFixture(t)
 	outcome := ExecutionOutcome{

@@ -40,6 +40,19 @@
     ],
     "treasury_mode": "REFERENCE_ONLY"
   },
+  "content_v1": {
+    "package": "town/content",
+    "state_class": "REPLACEABLE_OFF_CHAIN_APPLICATION_STATE",
+    "body_storage": "OFF_CHAIN_BY_DEFAULT",
+    "content_digest": "SHA-256_LOWERCASE_HEX",
+    "content_status": ["ACTIVE","TOMBSTONED"],
+    "vote_target_kinds": ["POST","COMMENT"],
+    "vote_values": [-1,1],
+    "idempotency_required": true,
+    "historical_revisions": "APPEND_ONLY",
+    "comments_inherit_root_visibility": true,
+    "unknown_visibility": "DENY"
+  },
   "objects": [
     {"kind":"Community","fields":["owner_identity_id","title"]},
     {"kind":"Membership","fields":["community_id","identity_id","state"]},
@@ -48,10 +61,10 @@
     {"kind":"Subscription","fields":["community_id","subscriber_id","state"]},
     {"kind":"Entitlement","fields":["community_id","beneficiary_id","entitlement_type","state"]},
     {"kind":"TreasuryRef","fields":["community_id","authority_id"]},
-    {"kind":"Post","fields":["community_id","author_id","content_ref"]},
-    {"kind":"Thread","fields":["community_id","root_post_id"]},
-    {"kind":"Comment","fields":["community_id","parent_id","author_id","content_ref"]},
-    {"kind":"Vote","fields":["community_id","target_id","voter_id","value"]},
+    {"kind":"Post","fields":["community_id","author_id","content_ref","content_sha256","status","revision"]},
+    {"kind":"Thread","fields":["community_id","root_post_id","author_id","status"]},
+    {"kind":"Comment","fields":["community_id","thread_id","parent_id","author_id","content_ref","content_sha256","status","revision"]},
+    {"kind":"Vote","fields":["community_id","target_kind","target_id","voter_id","value","active","revision"]},
     {"kind":"ModerationAction","fields":["community_id","target_id","moderator_id","action","reason"]}
   ],
   "boundary": {
@@ -63,6 +76,12 @@
       "Subscription",
       "Entitlement",
       "TreasuryRef"
+    ],
+    "replaceable_application_state": [
+      "Post",
+      "Thread",
+      "Comment",
+      "Vote"
     ],
     "off_chain_body_defaults": [
       "Post.content_ref",

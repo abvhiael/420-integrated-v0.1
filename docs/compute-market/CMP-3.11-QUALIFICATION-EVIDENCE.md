@@ -12,6 +12,8 @@ Status: **COMPLETE**
 
 ## Qualified implementation/specification
 
+- Evidence anchor SHA: `0f63e91ae9406cdf0a5d27d7c6211fa64d7ced4b` (creation commit for this durable evidence record)
+
 - Implementation/spec/workflow SHA: `56893c5b814d14138eaafec71f1b784d4b110189`
 - Audit branch: `cmp-3.1-worker-daemon-20261004`
 - Pull request: **#512 — CMP-3: node420 compute worker runtime**

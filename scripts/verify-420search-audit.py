@@ -44,7 +44,10 @@ for binary in ["search420","searchsmoke","searchlivevalidate"]:
 readiness=json.loads((ROOT/"testnet/public-services/search/readiness.json").read_text())
 need(readiness.get("schema")=="420-testnet-search-readiness-v1","Search readiness schema drift")
 need(readiness.get("live_testnet",{}).get("qualified") is False,"live testnet must not be overpromoted")
-need(readiness.get("repository",{}).get("implementation_status")=="QUALIFICATION_CANDIDATE","repository readiness status drift")
+need(readiness.get("repository",{}).get("implementation_status")=="REPOSITORY_QUALIFIED","repository readiness status drift")
+need(readiness.get("repository",{}).get("integration_status")=="INDEXER_V1_CONSUMER_REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING","repository integration status drift")
+indexer_readiness=json.loads((ROOT/"testnet/public-services/indexer/readiness.json").read_text())
+need(indexer_readiness.get("consumer_gates",{}).get("420Search")=="QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD","420Indexer Search consumer gate drift")
 
 if errors:
     print("\n".join("FAIL: "+e for e in errors))

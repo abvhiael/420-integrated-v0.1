@@ -37,11 +37,21 @@ No lifecycle service, database, API, queue, worker, contract, fixed address, ser
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-LIFE-001 through PB-LIFE-040 exist exactly once and in sequence;
+- canonical states UNREGISTERED, ELIGIBILITY_PENDING, ELIGIBILITY_FAILED, PROFILE_INCOMPLETE, ACTIVE, DEACTIVATED, RESTRICTED, SUSPENDED, BANNED, DELETE_REQUESTED, DELETION_IN_PROGRESS, DELETION_COMPLETE, RETAINED_EVIDENCE_ONLY, and APPEAL_REVIEW are defined;
+- entry and activation require current eligibility/profile conditions and cannot be created merely from Wallet/Identity/Names state;
+- deactivation/reactivation, restriction/suspension/ban, appeal, eligibility-loss, deletion, and post-deletion re-registration transitions are explicit;
+- lifecycle authority remains PuffBuddies-owned and separate from Wallet, Identity, Names, Messenger, Notifications, Pay, matches/blocks, sessions, clients, queues, and derived state;
+- deactivation, restriction, suspension, ban, and deletion revoke applicable ordinary participation even when stale client/session/cache/queue/payment/match state disagrees;
+- appeal, payment, wallet/name changes, client refresh, and dependency recovery cannot silently restore lifecycle permissions;
+- DELETION_COMPLETE cannot transition directly back to ACTIVE and later return requires a new registration lifecycle;
+- conflicting or unknown protected lifecycle state fails closed;
+- lifecycle state remains private/non-enumerable and transitions require protected auditability;
+- no lifecycle service, database, API, queue, worker, contract, fixed address, service ID, deployment, or live transition processing is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`551a72dce79056288def809e9b4ccbf2367eb873`
 
 ## Current main/base SHA
 
@@ -53,7 +63,17 @@ PR #526 remains open on the cumulative PB-0 branch. Current-main merge-candidate
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37382561715` — **PASS**
+- job: `112007901982` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37382564473` — **PASS**
+- job: `112007912140` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -75,11 +95,13 @@ PB-0.12 defines policy/state-machine semantics only. Exact schemas, endpoints, t
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.12 is formally COMPLETE.
+None for PB-0.12.
 
 ## Completion state
 
-**PB-0.12 — PENDING QUALIFICATION**
+**PB-0.12 — COMPLETE**
+
+All canonical PB-0.12 exit criteria are satisfied on exact implementation SHA `551a72dce79056288def809e9b4ccbf2367eb873`.
 
 ## Next canonical roadmap step
 

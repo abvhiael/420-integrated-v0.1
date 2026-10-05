@@ -664,3 +664,211 @@ PR #523 remains open and mergeable. Final current-main reconciliation remains a 
 **TOWN-AUDIT-5 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-6 — Service integrations**.
+
+
+## TOWN-AUDIT-6 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 + Level 2 shared-service integration milestone**  
+Qualified implementation/test/workflow SHA: `881e42803f008793480fd0723467317fa1a411f7`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA Town and affected-Search qualifications.
+
+### Implementation completed
+
+TOWN-AUDIT-6 adds the repository-side service integration boundary for 420Town while preserving the GEN-SVC trust model and frozen Genesis-application classification.
+
+Implemented scope includes:
+
+- `town/integrations` as the application-owned service-integration package;
+- canonical 420Identity active-profile/controller reads with exact profile-ID matching and fail-closed dependency behavior;
+- no Town-side Identity mint/edit/revoke/inference authority;
+- repository `sdk/storage420` use through the canonical Resource Protocol service boundary;
+- idempotent Storage upload preparation and Town content-anchor construction;
+- Storage retrieval with object/manifest identity checks and payload SHA-256 verification;
+- explicit provider-substitution and payload-tampering rejection;
+- 420Search source/domain extension for `420Town:public` → `public_town`;
+- explicit Search `public_application` classification for Town, preventing Town from being mislabeled as public on-chain state and preventing that classification from widening unrelated Search sources;
+- PUBLIC-only, active Town search projection; restricted/private Town material remains inadmissible;
+- non-canonical, rebuildable Search results with Town provenance;
+- 420Notifications handoff through an explicit selected subscription;
+- active, unmuted, operational-consent validation before notification feed insertion;
+- non-authoritative notification items with provenance preserved;
+- canonical 420Messenger authorization reads for endpoint activity, conversation activity, conversation participation and block state;
+- encrypted replaceable off-chain transport carrying ciphertext only;
+- fail-closed Messenger authority outages before transport invocation;
+- canonical Messenger envelope commitment after transport so Town does not create a parallel messaging history;
+- optional Registry/service discovery with exact requested service-ID and active-binding checks;
+- existing optional Town Rewards adapter retained without becoming Town core authority;
+- canonical Town config advancement through `SERVICE_INTEGRATION_BASELINE`;
+- machine-readable integration invariants under `config/420town-integrations-v1.json`;
+- app documentation/environment bindings and dedicated integration verifier;
+- Town CI ownership of directly affected Search, Storage and Notifications Go packages.
+
+### Primary files changed
+
+TOWN-AUDIT-6 materially changed or added:
+
+- `town/integrations/integrations.go`;
+- `town/integrations/integrations_test.go`;
+- `config/420town-integrations-v1.json`;
+- `config/420town-genesis.json`;
+- `scripts/verify-420town-integrations.py`;
+- `scripts/verify-420town-moderation.py` (retained-verifier phase-label decoupling only);
+- `town/.env.example`;
+- `town/README.md`;
+- `docs/apps/town/integrations.md`;
+- `docs/apps/town/index.md`;
+- `.github/workflows/420town-audit.yml`;
+- `search/architecture/profile.go`;
+- `search/architecture/profile_test.go`;
+- `search/privacy/admission.go`;
+- `search/privacy/admission_test.go`;
+- `search/closeout/closeout_test.go`.
+
+### Canonical exit criteria satisfied
+
+1. **420Identity** — Town consumes canonical identity/profile state via a narrow read boundary and fails closed when the authority cannot be read; Town gains no identity-mutation authority.
+2. **420Storage** — Town keeps high-volume bodies off-chain, uses the repository Storage SDK/Resource Protocol boundary, verifies object identity and SHA-256 payload integrity, and cannot let provider failure/substitution rewrite Town authority.
+3. **420Search** — only explicit PUBLIC, active Town application material reaches the exact `420Town:public` / `public_town` allowlist; Search remains derived, rebuildable and non-canonical; restricted/private/encrypted material remains excluded.
+4. **420Notifications** — Town does not implicitly choose recipients; the selected subscription must exist, remain unmuted and allow operational delivery; emitted feed items remain non-authoritative and provenance-bound.
+5. **Encrypted/replaceable messaging transport** — canonical Messenger endpoint/conversation/participant/block state is checked before transport; ciphertext-only transport is replaceable; canonical envelope commitment prevents a Town-side shadow message history.
+6. **Optional 420Rewards** — the existing rewards adapter remains optional, and Town core readiness does not depend on Rewards availability.
+7. **Registry/service discovery** — discovery is optional, exact-service-ID-bound and active-binding-only; no catalog promotion occurs.
+8. **Frozen Genesis catalog boundary** — 420Town remains a GEN-SVC replaceable application and is not inserted into the frozen Genesis application catalog.
+
+### Exact-head Town qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37285287913`  
+Run number: `93`  
+Result: **PASS**  
+Qualified implementation SHA: `881e42803f008793480fd0723467317fa1a411f7`
+
+Jobs:
+
+- `town-skeleton` / job `111682925075` — **PASS**;
+- `town-contracts` / job `111682925338` — **PASS**.
+
+Passing exact-head Town checks:
+
+- exact implementation SHA assertion in both jobs — PASS;
+- canonical Town audit classification verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- Town moderation-state verifier — PASS;
+- Town service-integration verifier — PASS;
+- `go test ./town/...` — PASS;
+- directly affected shared dependency tests for Search architecture/privacy/result, `sdk/storage420`, Notifications feed/security/subscriptions — PASS;
+- focused Town Solidity build — PASS;
+- retained Town-focused Foundry inventory via `test/Town*.t.sol` — PASS;
+- cross-dApp Rewards hardening — PASS.
+
+### Exact-head affected Search qualification evidence
+
+TOWN-AUDIT-6 materially changes Search's admitted source/domain/classification model, so the affected Search qualification is retained as Level 2 evidence rather than treated as incidental CI.
+
+GitHub Actions workflow: **420Search audit qualification**  
+Run ID: `37285288233`  
+Run number: `43`  
+Result: **PASS**  
+Qualified implementation SHA: `881e42803f008793480fd0723467317fa1a411f7`
+
+Passing Search checks:
+
+- exact qualification head — PASS;
+- canonical Search repository verifier — PASS;
+- Search Go formatting — PASS;
+- `go test ./search/... -count=1` — PASS;
+- `go vet ./search/...` — PASS;
+- Search runtime/smoke/live-validation binaries — PASS;
+- production Search container build — PASS;
+- direct-RPC and dangerous-authority-drift rejection — PASS.
+
+### Diagnosed pre-qualification failures
+
+Intermediate candidates were rejected rather than counted as completion evidence:
+
+1. Candidate `91d17d3c7703b784d3932136d765c5c48ce9ad0b` failed the retained Search closeout test because that test hard-coded 13 Search domains. TOWN-AUDIT-6 intentionally adds the 14th domain, `public_town`. The test was strengthened to require 14 domains and explicitly require `DomainPublicTown`; no Search privacy/authority assertion was removed.
+2. Candidate `452b1a3ebde76f5a10f3165017aca4662a77ebac` reached a Town retained-verifier failure because the TOWN-AUDIT-5 moderation verifier still required the obsolete phase label `MODERATION_BASELINE`, while the canonical Town phase had correctly advanced to `SERVICE_INTEGRATION_BASELINE`.
+3. Candidate `1a56dc8be1b91064157977c1378aff52dade9bcf` still failed the same retained moderation phase-label assertion because the first attempted edit did not match the verifier's actual `require(..., errors)` source form.
+4. The exact stale assertion was then removed at `881e42803f008793480fd0723467317fa1a411f7`. All substantive TOWN-AUDIT-5 moderation vocabulary, authority, appeal, provenance, content-gate and prohibited-authority checks remain intact.
+
+Only `881e42803f008793480fd0723467317fa1a411f7` is authoritative qualification evidence for TOWN-AUDIT-6.
+
+### Security/adversarial/invariant result
+
+The qualified integration suite directly proves:
+
+- mismatched/inactive Identity profiles fail closed rather than creating local identity authority;
+- Identity/RPC dependency failure cannot silently authorize a Town action;
+- Storage provider/object substitution is rejected;
+- Storage payload tampering is detected by SHA-256 verification;
+- restricted Town visibility classes do not leak into Search;
+- Town must use `public_application` classification and cannot masquerade as public on-chain state;
+- the Town Search classification cannot be reused to widen unrelated Search sources;
+- Search ranking/sponsorship remains non-canonical;
+- Notifications require a real selected subscription and reject muted/non-operational delivery state;
+- notification feed records remain non-authoritative;
+- Messenger endpoint/conversation/participant/block authority is consulted before transport;
+- Messenger authority outages fail closed before any ciphertext is handed to transport;
+- blocked relationships prevent Town messaging;
+- encrypted transport remains replaceable and is followed by canonical envelope commitment;
+- invalid/mismatched Registry/service discovery bindings fail closed;
+- service failure does not grant Town ownership, membership, role, permission, subscription, entitlement, treasury, identity, message-history or other protocol authority;
+- Town remains outside the frozen Genesis app catalog.
+
+### Level 2 milestone status
+
+TOWN-AUDIT-6 is a **Level 2 shared-service integration milestone** in addition to the ordinary Level 1 Town qualification because it materially composes multiple shared services and changes the Search source-admission contract.
+
+The Level 2 scope is intentionally targeted:
+
+- full accumulated Town Go/integration behavior;
+- Town-specific verifier inventory;
+- retained Town Solidity/Rewards regression inventory;
+- directly affected Search repository qualification;
+- directly affected Storage/Notifications package tests.
+
+This is sufficient for the milestone without substituting a ceremonial repository-wide Level 3 run.
+
+### Intentionally deferred Level 3 scope
+
+Level 3 remains intentionally deferred to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.
+
+Deferred work includes:
+
+- reconciliation of PR #523 to then-current `main`;
+- resolution of any branch/main merge conflicts;
+- canonical repository-wide full Solidity inventory ownership/reconciliation;
+- Genesis/address-authority qualification where actually applicable;
+- 420 Integrated/global qualification;
+- Docs/global reconciliation;
+- API/SDK/indexer/recovery qualification;
+- frontend qualification;
+- final static/security/deployment/config closeout.
+
+At this closeout, current `main` has advanced to `2d3141e787c7c25bdea2dddd81b9a42a82637621`, while PR #523 retains historical base `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`. GitHub currently reports the PR as not mergeable against the advanced main. That is **not** a blocker to TOWN-AUDIT-6's exact-SHA repository qualification; it is explicit deferred Level 3 reconciliation work unless a later Town step requires earlier current-main integration.
+
+### Limitations and blockers
+
+TOWN-AUDIT-6 intentionally does **not** claim:
+
+- live deployed Identity/Storage/Search/Notifications/Messenger endpoints;
+- RPC-confirmed live Identity or Messenger reads;
+- live Registry service discovery;
+- production Storage provider qualification;
+- signed/public API or SDK completion;
+- indexer/recovery surfaces;
+- user-facing web application workflows;
+- full security-hardening phase;
+- live testnet qualification;
+- production/genesis-facing service release.
+
+Those remain later canonical Town roadmap steps. There are **no blockers to TOWN-AUDIT-6 completion itself**.
+
+### Completion state
+
+**TOWN-AUDIT-6 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-7 — API, SDK, indexer and recovery surfaces**.

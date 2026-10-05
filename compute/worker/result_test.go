@@ -306,7 +306,7 @@ func TestResultCommitmentConflictingDurableAttemptFailsClosed(t *testing.T) {
 	}
 }
 
-func TestResultCommitmentDoesNotRequireUnexpiredLeaseAfterSuccessfulExit(t *testing.T) {
+func TestResultCommitmentRejectsMutatedCanonicalAuthorizationSnapshot(t *testing.T) {
 	runner := &inputCapturingRunner{}
 	cfg := lifecycleConfig(t)
 	artifact := writeLifecycleArtifact(t, cfg, []byte("work"))

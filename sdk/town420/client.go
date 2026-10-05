@@ -371,3 +371,4 @@ func decodeHTTPError(resp *http.Response) error {
 
 func invalid(detail string) error {
 	return &Error{Kind: ErrorInvalidRequest, Detail: detail}
+}

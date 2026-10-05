@@ -130,10 +130,57 @@ func NewWorkloadSecurityGuard(config Config, policy MaliciousWorkloadPolicy) (*W
 	if err := os.Chmod(root, 0o700); err != nil {
 		return nil, err
 	}
-	return &WorkloadSecurityGuard{
+	guard := &WorkloadSecurityGuard{
 		config: config, root: root, policy: policy, now: time.Now,
 		state: make(map[WorkloadSecurityKey]quarantineEntry),
-	}, nil
+	}
+	if err := guard.recoverState(); err != nil {
+		return nil, err
+	}
+	return guard, nil
+}
+
+func (g *WorkloadSecurityGuard) recoverState() error {
+	entries, err := os.ReadDir(g.root)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+		path := filepath.Join(g.root, entry.Name())
+		info, err := os.Lstat(path)
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0o077 != 0 {
+			return ErrInvalidMaliciousWorkloadPolicy
+		}
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		var incident SecurityIncident
+		if err := json.Unmarshal(raw, &incident); err != nil {
+			return err
+		}
+		if incident.SchemaVersion != SecurityIncidentSchemaV1 || incident.Authoritative ||
+			!digestImagePattern.MatchString(incident.Image) ||
+			!sha256HexPattern.MatchString(incident.CommandSHA256) {
+			return ErrInvalidMaliciousWorkloadPolicy
+		}
+		key := WorkloadSecurityKey{Image: incident.Image, CommandSHA256: incident.CommandSHA256}
+		current := g.state[key]
+		if incident.ViolationCount > current.Count {
+			current.Count = incident.ViolationCount
+		}
+		if incident.QuarantinedUntil.After(current.Until) {
+			current.Until = incident.QuarantinedUntil
+		}
+		g.state[key] = current
+	}
+	return nil
 }
 
 func (g *WorkloadSecurityGuard) Preflight(auth ExecutionAuthorization, request SandboxRequest) error {

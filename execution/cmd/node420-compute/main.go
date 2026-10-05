@@ -12,6 +12,14 @@ import (
 	"github.com/420integrated/420-integrated/compute/worker"
 )
 
+type stringListFlag []string
+
+func (f *stringListFlag) String() string { return fmt.Sprint([]string(*f)) }
+func (f *stringListFlag) Set(value string) error {
+	*f = append(*f, value)
+	return nil
+}
+
 type standbyService struct{}
 
 func (standbyService) Name() string { return "cmp-3.1-standby" }
@@ -33,6 +41,21 @@ func main() {
 	check := flag.Bool("check", false, "validate CMP-3.1 daemon configuration and exit")
 	discover := flag.Bool("discover", false, "print CMP-3.2 local hardware/software discovery JSON and exit")
 	benchmark := flag.Bool("benchmark", false, "run CMP-3.3 local benchmark and print self-reported capability evidence JSON")
+
+	resourceDefaults := worker.DefaultLocalResourcePolicy()
+	cpuPercent := flag.Float64("cpu-percent", resourceDefaults.CPUPercent, "CMP-3.11 maximum local CPU percentage")
+	gpuPercent := flag.Float64("gpu-percent", resourceDefaults.GPUPercent, "CMP-3.11 maximum GPU percentage; execution requires a qualified GPU share enforcer")
+	idleOnly := flag.Bool("idle-only", resourceDefaults.IdleOnly, "CMP-3.11 run work only while host is idle")
+	idleCPUThreshold := flag.Float64("idle-cpu-threshold-percent", resourceDefaults.IdleCPUThresholdPercent, "CMP-3.11 maximum CPU utilization considered idle")
+	minIdle := flag.Duration("min-idle", resourceDefaults.MinIdleDuration, "CMP-3.11 minimum continuous idle duration")
+	maxCPUTemp := flag.Float64("max-cpu-temp-c", resourceDefaults.MaxCPUTemperatureC, "CMP-3.11 CPU thermal ceiling in Celsius; 0 disables")
+	maxGPUTemp := flag.Float64("max-gpu-temp-c", resourceDefaults.MaxGPUTemperatureC, "CMP-3.11 GPU thermal ceiling in Celsius; 0 disables")
+	bandwidthBPS := flag.Uint64("bandwidth-bytes-per-second", resourceDefaults.BandwidthBytesPerSecond, "CMP-3.11 aggregate worker I/O byte-rate ceiling; 0 disables")
+	bandwidthBurst := flag.Uint64("bandwidth-burst-bytes", resourceDefaults.BandwidthBurstBytes, "CMP-3.11 byte-rate burst allowance; must pair with bandwidth rate")
+	resourceTimezone := flag.String("resource-timezone", resourceDefaults.TimeZone, "CMP-3.11 IANA timezone for schedule windows")
+	resourcePoll := flag.Duration("resource-poll", resourceDefaults.TelemetryPollInterval, "CMP-3.11 host telemetry polling interval")
+	var resourceWindows stringListFlag
+	flag.Var(&resourceWindows, "resource-window", "CMP-3.11 repeatable weekly window DDD@HH:MM-HH:MM, e.g. Mon@18:00-23:00")
 	flag.Parse()
 
 	if *discover && *benchmark {
@@ -70,6 +93,31 @@ func main() {
 		return
 	}
 
+	resourcePolicy := worker.DefaultLocalResourcePolicy()
+	resourcePolicy.CPUPercent = *cpuPercent
+	resourcePolicy.GPUPercent = *gpuPercent
+	resourcePolicy.IdleOnly = *idleOnly
+	resourcePolicy.IdleCPUThresholdPercent = *idleCPUThreshold
+	resourcePolicy.MinIdleDuration = *minIdle
+	resourcePolicy.MaxCPUTemperatureC = *maxCPUTemp
+	resourcePolicy.MaxGPUTemperatureC = *maxGPUTemp
+	resourcePolicy.BandwidthBytesPerSecond = *bandwidthBPS
+	resourcePolicy.BandwidthBurstBytes = *bandwidthBurst
+	resourcePolicy.TimeZone = *resourceTimezone
+	resourcePolicy.TelemetryPollInterval = *resourcePoll
+	for _, raw := range resourceWindows {
+		window, err := worker.ParseScheduleWindow(raw)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "node420-compute:", err)
+			os.Exit(2)
+		}
+		resourcePolicy.Schedule = append(resourcePolicy.Schedule, window)
+	}
+	if err := resourcePolicy.Validate(); err != nil {
+		fmt.Fprintln(os.Stderr, "node420-compute:", err)
+		os.Exit(2)
+	}
+
 	cfg := worker.Config{
 		Identity: worker.Identity{
 			ChainID:    *chainID,
@@ -87,7 +135,9 @@ func main() {
 		os.Exit(2)
 	}
 	if *check {
-		fmt.Printf("node420-compute: configuration valid for chain %d worker %s\n", cfg.Identity.ChainID, cfg.Identity.WorkerID)
+		fmt.Printf("node420-compute: configuration valid for chain %d worker %s; resource policy valid cpu=%.2f%% gpu=%.2f%% idleOnly=%t bandwidth=%d B/s windows=%d\n",
+			cfg.Identity.ChainID, cfg.Identity.WorkerID, resourcePolicy.CPUPercent, resourcePolicy.GPUPercent,
+			resourcePolicy.IdleOnly, resourcePolicy.BandwidthBytesPerSecond, len(resourcePolicy.Schedule))
 		return
 	}
 

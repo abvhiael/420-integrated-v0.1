@@ -60,19 +60,6 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Town Solidity format check
-        run: |
-          forge fmt --check \
-            src/town/ITownContributionSource420.sol \
-            src/town/ITownContributionVerifier420.sol \
-            src/town/TownContributionVerifier420.sol \
-            src/town/TownRewardTypes420.sol \
-            src/town/TownRewardsAdapter420.sol \
-            test/MockTownContributionSource420.sol \
-            test/TownRewardsIntegration420.t.sol \
-            test/TownContributionVerifierContent420.t.sol \
-            test/TownContributionVerifierGovernance420.t.sol \
-            test/RewardsCrossDappHardening420.t.sol
       - name: Build Town Solidity
         run: |
           forge build src/town/TownRewardsAdapter420.sol

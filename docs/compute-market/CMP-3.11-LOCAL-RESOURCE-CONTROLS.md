@@ -1,6 +1,6 @@
 # CMP-3.11 — Local resource controls
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `56893c5b814d14138eaafec71f1b784d4b110189`.**
 
 ## Canonical definition
 
@@ -155,6 +155,17 @@ Tests cover:
 - real downloader bandwidth integration;
 - result/evidence uploader bandwidth integration;
 - Linux CPU/thermal/GPU telemetry fixtures without host command execution.
+
+## Qualification evidence
+
+- Implementation/spec/workflow SHA: `56893c5b814d14138eaafec71f1b784d4b110189`
+- Compute Worker Fast Qualification: **#272**
+- Run ID: `37262445914`
+- Job ID: `111612318856`
+- Evidence anchor: `0f63e91ae9406cdf0a5d27d7c6211fa64d7ced4b`
+- Durable evidence: [CMP-3.11 qualification evidence](CMP-3.11-QUALIFICATION-EVIDENCE.md)
+- Level 2: not required; Integration #87 skipped as expected and is not counted as passing evidence.
+- Level 3: deferred to CMP-3.14.
 
 ## Qualification model
 

@@ -9,6 +9,8 @@ ROAD = ROOT / "docs/puffbuddies/PUFFBUDDIES-ROADMAP.md"
 EVIDENCE_01 = ROOT / "docs/puffbuddies/PB-0.1-QUALIFICATION.md"
 SCOPE = ROOT / "docs/puffbuddies/PB-0.2-MVP-SCOPE.md"
 EVIDENCE_02 = ROOT / "docs/puffbuddies/PB-0.2-QUALIFICATION.md"
+BOUNDARY = ROOT / "docs/puffbuddies/PB-0.3-BLOCKCHAIN-OFFCHAIN-BOUNDARY.md"
+EVIDENCE_03 = ROOT / "docs/puffbuddies/PB-0.3-QUALIFICATION.md"
 
 errors = []
 
@@ -16,7 +18,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -28,6 +30,8 @@ road = ROAD.read_text(encoding="utf-8")
 evidence_01 = EVIDENCE_01.read_text(encoding="utf-8")
 scope = SCOPE.read_text(encoding="utf-8")
 evidence_02 = EVIDENCE_02.read_text(encoding="utf-8")
+boundary = BOUNDARY.read_text(encoding="utf-8")
+evidence_03 = EVIDENCE_03.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -86,6 +90,8 @@ for token in [
     "**Dependencies:** PB-0.1 must remain COMPLETE",
     "**Exit criteria:**",
     "### PB-0.3 — Blockchain/off-chain boundary",
+    "PB-BOUNDARY-001 through PB-BOUNDARY-018",
+    "**Milestone relationship:** PB-0.3 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -184,8 +190,82 @@ for token in [
 ]:
     need(token in evidence_02, f"PB-0.2 evidence record missing token: {token}")
 
+# PB-0.3 — blockchain/off-chain boundary
+for token in [
+    "# PuffBuddies PB-0.3 blockchain/off-chain boundary",
+    "## Trust zones",
+    "### Zone A — Public-chain authority",
+    "### Zone B — Private PuffBuddies application state",
+    "### Zone C — Encrypted communication state",
+    "### Zone D — Minimal-disclosure attestations and commitments",
+    "## Canonical state classification",
+    "## State matrix",
+    "## Public-chain leakage prohibitions",
+    "## Wallet and identity separation",
+    "## Indexer, Explorer, Search, and analytics boundary",
+    "## Security consequences",
+    "## PB-0.3 completion boundary",
+    "Likes and passes must not be written to public chain state",
+    "match graph",
+    "Block relationships must not be public blockchain records",
+    "Precise coordinates",
+    "Private message content",
+    "Sexual, romantic, gender, cannabis, lifestyle",
+    "wallet address or 420Name",
+    "Hashing does not automatically make sensitive state safe",
+    "Off-chain does not mean unauthenticated",
+]:
+    need(token in boundary, f"PB-0.3 boundary missing token: {token}")
+
+boundary_ids = re.findall(r"^### (PB-BOUNDARY-\d{3})\b", boundary, flags=re.MULTILINE)
+need(boundary_ids == [f"PB-BOUNDARY-{i:03d}" for i in range(1, 19)], f"PB-BOUNDARY sequence drift: {boundary_ids}")
+need(len(boundary_ids) == len(set(boundary_ids)), "duplicate PB-BOUNDARY identifier")
+
+for prohibited in [
+    "Liked(userA,userB)",
+    "Matched(userA,userB)",
+    'target account in a public "block" transaction event',
+    "encoding discovery filters in calldata",
+    "publishing exact geohashes",
+    "message conversation IDs whose participants can be publicly resolved",
+    "payment memo fields to identify a match",
+]:
+    need(prohibited in boundary, f"PB-0.3 missing public-leakage prohibition example: {prohibited}")
+
+need("may use public-chain authority" in boundary, "PB-0.3 must distinguish permitted from required on-chain use")
+need("must not be placed on public chain solely because an attestation is needed" in boundary,
+     "PB-0.3 minimum-disclosure attestation boundary drift")
+need("must not, by itself, provide a canonical public mechanism to enumerate or discover" in boundary,
+     "PB-0.3 wallet/profile unlinkability drift")
+need("must not encode who a user liked, matched, blocked, reported, messaged" in boundary,
+     "PB-0.3 payment privacy boundary drift")
+
+for forbidden_boundary_claim in [
+    "PuffBuddies contract is deployed",
+    "PuffBuddies service ID is",
+    "PuffBuddies fixed address",
+    "PuffBuddies storage is implemented",
+    "420Messenger integration is live",
+]:
+    need(forbidden_boundary_claim not in boundary, f"PB-0.3 unsupported implementation/live claim: {forbidden_boundary_claim}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", boundary) is None, "PB-0.3 must not assign an on-chain address")
+need("420/service/puff" not in boundary.lower(), "PB-0.3 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.3 qualification evidence",
+    "**PB-0.3 — Blockchain/off-chain boundary**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-BOUNDARY-001 through PB-BOUNDARY-018",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.4 — Privacy invariants**",
+]:
+    need(token in evidence_03, f"PB-0.3 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.2", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
@@ -205,5 +285,16 @@ print(json.dumps({
         "claimsImplementation": False,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
+    },
+    "pb03": {
+        "boundaryInvariants": boundary_ids,
+        "publicChainZonesDefined": True,
+        "privateDatingStateOffChain": True,
+        "encryptedMessagingOffChain": True,
+        "minimumDisclosureAttestations": True,
+        "walletProfileUnlinkability": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
     },
 }, indent=2))

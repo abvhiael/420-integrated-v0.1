@@ -3,7 +3,7 @@
   "step": "CMP-3.14",
   "title": "Phase closeout",
   "canonical_definition": "Reconcile the complete accumulated CMP-3 node420 worker runtime against current main, run the required Level 3 qualification on one exact merge-candidate implementation SHA, preserve durable evidence, and prepare the handoff to CMP-4 — Scientific compute framework.",
-  "status": "LEVEL_3_QUALIFICATION_PENDING",
+  "status": "COMPLETE",
   "reconciliation": {
     "main_sha": "b338b9c9c140957b0ea8619b0b20bfed415f2c6d",
     "github_test_merge_sha": "c72d4795e178b66a1d4ae4737af8033f475a736a",
@@ -13,8 +13,19 @@
   "repository_closeout_candidate": true,
   "live_release": false,
   "qualified_prerequisites": [
-    "CMP-3.1","CMP-3.2","CMP-3.3","CMP-3.4","CMP-3.5","CMP-3.6","CMP-3.7",
-    "CMP-3.8","CMP-3.9","CMP-3.10","CMP-3.11","CMP-3.12","CMP-3.13"
+    "CMP-3.1",
+    "CMP-3.2",
+    "CMP-3.3",
+    "CMP-3.4",
+    "CMP-3.5",
+    "CMP-3.6",
+    "CMP-3.7",
+    "CMP-3.8",
+    "CMP-3.9",
+    "CMP-3.10",
+    "CMP-3.11",
+    "CMP-3.12",
+    "CMP-3.13"
   ],
   "prerequisite_evidence": [
     "docs/compute-market/CMP-3.1-QUALIFICATION-EVIDENCE.md",
@@ -93,5 +104,86 @@
     "Apple notarization and Authenticode signing are not repository closeout claims",
     "production GPU backend availability and live worker fleet operation remain later operational scope"
   ],
-  "next_canonical_step": "CMP-4 — Scientific compute framework"
+  "next_canonical_step": "CMP-4 — Scientific compute framework",
+  "qualification": {
+    "level": 3,
+    "implementation_sha": "0fcb699e6270bc863538eacb08ba204ce2f41b6c",
+    "base_main_sha": "b338b9c9c140957b0ea8619b0b20bfed415f2c6d",
+    "branch": "cmp-3.1-worker-daemon-20261004",
+    "pr": 512,
+    "exact_sha": true,
+    "solidity_contracts": {
+      "run_number": 4863,
+      "run_id": 37273098217,
+      "jobs": [
+        111644262701,
+        111644262485,
+        111644262537,
+        111644262619
+      ],
+      "result": "SUCCESS",
+      "inventory": "four balanced PR shards"
+    },
+    "genesis_address_authority": {
+      "run_number": 1568,
+      "run_id": 37273098100,
+      "job_id": 111644121523,
+      "result": "SUCCESS"
+    },
+    "integrated_global": {
+      "run_number": 6463,
+      "run_id": 37273098239,
+      "jobs": [
+        111644194546,
+        111644194816,
+        111644194873,
+        111644194945
+      ],
+      "result": "SUCCESS"
+    },
+    "docs_global": {
+      "run_number": 5410,
+      "run_id": 37273098189,
+      "job_id": 111644121723,
+      "result": "SUCCESS"
+    },
+    "retained_compute_market": {
+      "run_number": 383,
+      "run_id": 37273098241,
+      "job_id": 111644185941,
+      "result": "SUCCESS"
+    },
+    "worker_fast": {
+      "run_number": 358,
+      "run_id": 37273098188,
+      "job_id": 111644131840,
+      "result": "SUCCESS"
+    },
+    "worker_integration": {
+      "run_number": 132,
+      "run_id": 37273098207,
+      "job_id": 111644121861,
+      "result": "SUCCESS"
+    },
+    "node420_release_gate": {
+      "run_number": 502,
+      "run_id": 37273098147,
+      "job_id": 111644121682,
+      "result": "SUCCESS"
+    },
+    "indexer": {
+      "run_number": 2368,
+      "run_id": 37273098090,
+      "job_id": 111644261075,
+      "result": "SUCCESS"
+    },
+    "package_artifact": {
+      "id": 11328847910,
+      "name": "node420-compute-packages-0fcb699e6270bc863538eacb08ba204ce2f41b6c",
+      "digest": "sha256:90525b8e031ac4fee22f2e234252bcd68391b46753170e7676e3cb8ed6751ddf",
+      "size_bytes": 8981935
+    }
+  },
+  "completion_state": "COMPLETE",
+  "remaining_repository_blockers": []
 }

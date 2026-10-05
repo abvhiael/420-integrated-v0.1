@@ -1,6 +1,6 @@
 # CMP-3.14 — Phase closeout
 
-Status: **RECONCILIATION COMPLETE; LEVEL 3 QUALIFICATION PENDING.**
+Status: **COMPLETE — Level 3 exact-head qualified.**
 
 ## Canonical definition
 
@@ -73,8 +73,13 @@ The CMP-3.14 closeout marker deliberately forces the otherwise Compute-scoped PR
 
 ## Completion
 
-CMP-3.14 may be marked **COMPLETE** only after every applicable Level 3 owner passes the same exact implementation SHA and durable evidence records the run/job results.
+CMP-3.14 is **COMPLETE**. Every applicable Level 3 owner passed the same exact implementation SHA `0fcb699e6270bc863538eacb08ba204ce2f41b6c`. Durable run/job evidence is recorded in `CMP-3.14-QUALIFICATION-EVIDENCE.md`.
 
-After successful closeout, the next canonical phase is:
+The next canonical phase is:
 
 **CMP-4 — Scientific compute framework**
+
+
+## Qualification evidence
+
+Durable exact-SHA closeout evidence: [CMP-3.14 qualification](CMP-3.14-QUALIFICATION-EVIDENCE.md).

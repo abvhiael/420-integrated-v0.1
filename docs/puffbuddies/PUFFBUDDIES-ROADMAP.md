@@ -491,7 +491,48 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.12 — User lifecycle
 
-Define canonical PuffBuddies account/application lifecycle states and transitions.
+**Purpose:** define canonical PuffBuddies account/application lifecycle states, transition authorities, revocation effects, failure behavior, and re-entry rules.
+
+**Canonical requirements:**
+
+1. Record PB-LIFE-001 through PB-LIFE-040.
+2. Define canonical states UNREGISTERED, ELIGIBILITY_PENDING, ELIGIBILITY_FAILED, PROFILE_INCOMPLETE, ACTIVE, DEACTIVATED, RESTRICTED, SUSPENDED, BANNED, DELETE_REQUESTED, DELETION_IN_PROGRESS, DELETION_COMPLETE, RETAINED_EVIDENCE_ONLY, and APPEAL_REVIEW.
+3. Define entry, activation, deactivation/reactivation, restriction/suspension/ban, appeal, eligibility-loss, deletion, and post-deletion re-registration transitions.
+4. Keep PuffBuddies lifecycle authority separate from Wallet, Identity, Names, Messenger, Notifications, Pay, relationship state, sessions, clients, queues, and derived state.
+5. Require eligibility and profile-completeness gating before ACTIVE.
+6. Require deactivation, restriction, suspension, ban, and deletion states to revoke applicable ordinary participation even when stale clients/sessions/caches/queues/payment/match state disagree.
+7. Prohibit appeal, payment, wallet/name changes, client refresh, or dependency recovery from silently restoring lifecycle permissions.
+8. Require DELETION_COMPLETE to re-enter through a new registration lifecycle rather than direct restoration to ACTIVE.
+9. Require conflicting/unknown protected lifecycle state to fail closed and lifecycle state itself to remain private/non-enumerable.
+10. Require protected transition auditability without falsely claiming lifecycle services, databases, APIs, queues, workers, contracts, addresses, service IDs, deployments, or live processing.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.12-USER-LIFECYCLE.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.12-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.12 is not treated as a Level 2 integration milestone because it defines lifecycle policy/state-machine semantics only and introduces no executable lifecycle authority or cross-component integration.
+
+**Dependencies:** PB-0.1 through PB-0.11 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.12 user-lifecycle document exists;
+- PB-LIFE-001 through PB-LIFE-040 exist exactly once and in sequence;
+- all required lifecycle states and transition classes are explicit;
+- lifecycle authority and dependency/non-authority boundaries are explicit;
+- stale authorization cannot survive lifecycle revocation;
+- direct post-deletion restoration is prohibited;
+- conflicting/unknown protected lifecycle state fails closed;
+- lifecycle privacy and protected auditability are explicit;
+- no lifecycle-service/database/API/queue/worker/contract/address/service-ID/deployment/live-processing implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.12 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.13 — Matching principles
 

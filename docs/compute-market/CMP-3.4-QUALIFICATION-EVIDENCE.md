@@ -11,6 +11,8 @@ Status: **COMPLETE**
 
 ## Qualified implementation
 
+- Evidence anchor SHA: `618df14e25f7f5a567d785f4f13d8fa1263e7ec9` (creation commit for this durable evidence record)
+
 - Implementation SHA: `a3ad2c5c8d70b428d61c1b70f546ec5edbeedcaf`
 - Current `main` at closeout: `3d3c01dd8029a3b5c586c77f0f6084f4a16b64ac`
 - Merge base: `2280fb6f9915b849560d9d4d5a95d999c4adc669`

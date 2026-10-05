@@ -197,7 +197,11 @@ func (p *Projection) Service(serviceID string) []VersionRecord {
 	return out
 }
 
-func (p *Projection) FinalizedBlock() uint64 { p.mu.RLock(); defer p.mu.RUnlock(); return p.finalized }
+func (p *Projection) FinalizedBlock() uint64 {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.finalized
+}
 
 func Sync(ctx context.Context, source Source, projection *Projection) error {
 	if source == nil || projection == nil {

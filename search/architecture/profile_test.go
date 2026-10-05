@@ -25,19 +25,19 @@ func TestGenesisProfileFreezesResolverAndDiscoveryModes(t *testing.T) {
 func TestGenesisProfileContainsRequiredDomains(t *testing.T) {
 	p := GenesisProfile()
 	required := map[ResultDomain]bool{
-		DomainBlock: true,
-		DomainTransaction: true,
-		DomainAddress: true,
-		DomainContract: true,
-		DomainService: true,
-		DomainName: true,
+		DomainBlock:          true,
+		DomainTransaction:    true,
+		DomainAddress:        true,
+		DomainContract:       true,
+		DomainService:        true,
+		DomainName:           true,
 		DomainPublicIdentity: true,
-		DomainAsset: true,
-		DomainValidator: true,
-		DomainMarketListing: true,
-		DomainRightsRecord: true,
-		DomainPublicCommons: true,
-		DomainPublicPulse: true,
+		DomainAsset:          true,
+		DomainValidator:      true,
+		DomainMarketListing:  true,
+		DomainRightsRecord:   true,
+		DomainPublicCommons:  true,
+		DomainPublicPulse:    true,
 	}
 	for _, domain := range p.Domains {
 		delete(required, domain)
@@ -50,11 +50,11 @@ func TestGenesisProfileContainsRequiredDomains(t *testing.T) {
 func TestGenesisProfilePrivacyExclusionsAreExplicit(t *testing.T) {
 	p := GenesisProfile()
 	required := map[PrivacyExclusion]bool{
-		ExcludePrivateMessenger: true,
-		ExcludePrivateCommons: true,
-		ExcludePrivateIdentity: true,
+		ExcludePrivateMessenger:  true,
+		ExcludePrivateCommons:    true,
+		ExcludePrivateIdentity:   true,
 		ExcludeEncryptedResource: true,
-		ExcludeRawAttention: true,
+		ExcludeRawAttention:      true,
 	}
 	for _, exclusion := range p.PrivacyExclusions {
 		delete(required, exclusion)

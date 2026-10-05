@@ -14,15 +14,15 @@ import (
 const EngineVersion = "420-search-sponsorship-v1"
 
 type Campaign struct {
-	ID            string
+	ID             string
 	TargetResultID string
-	Label         string
-	Priority      uint32
-	StartsAt      time.Time
-	EndsAt        time.Time
-	Domains       []architecture.ResultDomain
-	QueryTerms    []string
-	Active        bool
+	Label          string
+	Priority       uint32
+	StartsAt       time.Time
+	EndsAt         time.Time
+	Domains        []architecture.ResultDomain
+	QueryTerms     []string
+	Active         bool
 }
 
 type Placement struct {
@@ -33,7 +33,7 @@ type Placement struct {
 }
 
 type Set struct {
-	Sponsored []Placement          `json:"sponsored"`
+	Sponsored []Placement           `json:"sponsored"`
 	Organic   []searchresult.Result `json:"organic"`
 }
 
@@ -89,18 +89,18 @@ func Apply(plan query.Plan, ranked []searchresult.Result, campaigns []Campaign, 
 		sponsored := cloneResult(candidate)
 		sponsored.Sponsorship = searchresult.Sponsorship{
 			Sponsored: true,
-			Label: label,
-			Campaign: campaignID,
+			Label:     label,
+			Campaign:  campaignID,
 			Canonical: false,
 		}
 		if err := sponsored.Validate(); err != nil {
 			return Set{}, err
 		}
 		eligible = append(eligible, Placement{
-			Result: sponsored,
+			Result:   sponsored,
 			Campaign: campaignID,
 			Priority: campaign.Priority,
-			Engine: EngineVersion,
+			Engine:   EngineVersion,
 		})
 		seenTarget[candidate.ID] = struct{}{}
 	}

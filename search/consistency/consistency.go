@@ -18,9 +18,9 @@ const (
 )
 
 type SnapshotState struct {
-	Search    pagination.Snapshot `json:"search"`
-	Upstream  pagination.Snapshot `json:"upstream"`
-	MaxLag    uint64              `json:"maxLag"`
+	Search   pagination.Snapshot `json:"search"`
+	Upstream pagination.Snapshot `json:"upstream"`
+	MaxLag   uint64              `json:"maxLag"`
 }
 
 type Assessment struct {

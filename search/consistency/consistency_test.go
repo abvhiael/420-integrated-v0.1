@@ -12,10 +12,10 @@ import (
 
 func TestAssessSnapshotClassifiesFreshness(t *testing.T) {
 	cases := []struct {
-		name string
+		name  string
 		state SnapshotState
-		want Freshness
-		lag uint64
+		want  Freshness
+		lag   uint64
 	}{
 		{"current", SnapshotState{Search: pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}, Upstream: pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}, MaxLag: 5}, FreshnessCurrent, 0},
 		{"lagging", SnapshotState{Search: pagination.Snapshot{IndexedHeight: 98, FinalizedHeight: 90}, Upstream: pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}, MaxLag: 5}, FreshnessLagging, 2},
@@ -24,8 +24,12 @@ func TestAssessSnapshotClassifiesFreshness(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			got, err := AssessSnapshot(tc.state)
-			if err != nil { t.Fatal(err) }
-			if got.Freshness != tc.want || got.Lag != tc.lag { t.Fatalf("got %#v", got) }
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got.Freshness != tc.want || got.Lag != tc.lag {
+				t.Fatalf("got %#v", got)
+			}
 		})
 	}
 }
@@ -35,23 +39,33 @@ func TestAssessSnapshotRejectsImpossibleRelationships(t *testing.T) {
 		{Search: pagination.Snapshot{IndexedHeight: 101, FinalizedHeight: 90}, Upstream: pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}},
 		{Search: pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 91}, Upstream: pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}},
 	} {
-		if _, err := AssessSnapshot(state); err == nil { t.Fatal("expected snapshot rejection") }
+		if _, err := AssessSnapshot(state); err == nil {
+			t.Fatal("expected snapshot rejection")
+		}
 	}
 }
 
 func TestValidateResultAtSnapshotEnforcesFinalityAndHeight(t *testing.T) {
 	snapshot := pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}
 	good := testResult(t, "a", 95, "0xaaa", searchresult.FinalitySafe)
-	if err := ValidateResultAtSnapshot(good, snapshot); err != nil { t.Fatal(err) }
+	if err := ValidateResultAtSnapshot(good, snapshot); err != nil {
+		t.Fatal(err)
+	}
 
 	bad := testResult(t, "b", 91, "0xbbb", searchresult.FinalityFinalized)
-	if err := ValidateResultAtSnapshot(bad, snapshot); err == nil { t.Fatal("expected finalized-above-snapshot rejection") }
+	if err := ValidateResultAtSnapshot(bad, snapshot); err == nil {
+		t.Fatal("expected finalized-above-snapshot rejection")
+	}
 
 	bad = testResult(t, "c", 80, "0xccc", searchresult.FinalityHead)
-	if err := ValidateResultAtSnapshot(bad, snapshot); err == nil { t.Fatal("expected finalized-range head rejection") }
+	if err := ValidateResultAtSnapshot(bad, snapshot); err == nil {
+		t.Fatal("expected finalized-range head rejection")
+	}
 
 	bad = testResult(t, "d", 101, "0xddd", searchresult.FinalitySafe)
-	if err := ValidateResultAtSnapshot(bad, snapshot); err == nil { t.Fatal("expected future block rejection") }
+	if err := ValidateResultAtSnapshot(bad, snapshot); err == nil {
+		t.Fatal("expected future block rejection")
+	}
 }
 
 func TestReconcileAllowsHeadReorgButReportsIt(t *testing.T) {
@@ -61,8 +75,12 @@ func TestReconcileAllowsHeadReorgButReportsIt(t *testing.T) {
 	after := before
 	after.Provenance.BlockHash = "0xbbb"
 	report, err := Reconcile([]searchresult.Result{before}, []searchresult.Result{after}, prevSnap, currSnap)
-	if err != nil { t.Fatal(err) }
-	if len(report.ReorgedIDs) != 1 || report.ReorgedIDs[0] != before.ID { t.Fatalf("report=%#v", report) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.ReorgedIDs) != 1 || report.ReorgedIDs[0] != before.ID {
+		t.Fatalf("report=%#v", report)
+	}
 }
 
 func TestReconcileAllowsNonFinalizedDisappearance(t *testing.T) {
@@ -70,8 +88,12 @@ func TestReconcileAllowsNonFinalizedDisappearance(t *testing.T) {
 	currSnap := pagination.Snapshot{IndexedHeight: 101, FinalizedHeight: 90}
 	before := testResult(t, "gone", 99, "0xaaa", searchresult.FinalityHead)
 	report, err := Reconcile([]searchresult.Result{before}, nil, prevSnap, currSnap)
-	if err != nil { t.Fatal(err) }
-	if len(report.ReorgedIDs) != 1 { t.Fatalf("report=%#v", report) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.ReorgedIDs) != 1 {
+		t.Fatalf("report=%#v", report)
+	}
 }
 
 func TestReconcileRejectsFinalizedDisappearanceAndRewrite(t *testing.T) {
@@ -90,11 +112,17 @@ func TestReconcileRejectsFinalizedDisappearanceAndRewrite(t *testing.T) {
 
 func TestReconcileRejectsSnapshotRegressionAndDuplicateIDs(t *testing.T) {
 	prevSnap := pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 90}
-	if _, err := Reconcile(nil, nil, prevSnap, pagination.Snapshot{IndexedHeight: 99, FinalizedHeight: 90}); err == nil { t.Fatal("expected indexed regression rejection") }
-	if _, err := Reconcile(nil, nil, prevSnap, pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 89}); err == nil { t.Fatal("expected finalized regression rejection") }
+	if _, err := Reconcile(nil, nil, prevSnap, pagination.Snapshot{IndexedHeight: 99, FinalizedHeight: 90}); err == nil {
+		t.Fatal("expected indexed regression rejection")
+	}
+	if _, err := Reconcile(nil, nil, prevSnap, pagination.Snapshot{IndexedHeight: 100, FinalizedHeight: 89}); err == nil {
+		t.Fatal("expected finalized regression rejection")
+	}
 
 	r := testResult(t, "dup", 95, "0xaaa", searchresult.FinalitySafe)
-	if _, err := Reconcile([]searchresult.Result{r, r}, nil, prevSnap, prevSnap); err == nil { t.Fatal("expected duplicate id rejection") }
+	if _, err := Reconcile([]searchresult.Result{r, r}, nil, prevSnap, prevSnap); err == nil {
+		t.Fatal("expected duplicate id rejection")
+	}
 }
 
 func TestReconcileSeparatesPresentationUpdateFromReorg(t *testing.T) {
@@ -103,8 +131,12 @@ func TestReconcileSeparatesPresentationUpdateFromReorg(t *testing.T) {
 	after := before
 	after.Presentation.Snippet = "updated non-canonical presentation"
 	report, err := Reconcile([]searchresult.Result{before}, []searchresult.Result{after}, snap, snap)
-	if err != nil { t.Fatal(err) }
-	if len(report.ReorgedIDs) != 0 || len(report.UpdatedIDs) != 1 || report.UpdatedIDs[0] != before.ID { t.Fatalf("report=%#v", report) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.ReorgedIDs) != 0 || len(report.UpdatedIDs) != 1 || report.UpdatedIDs[0] != before.ID {
+		t.Fatalf("report=%#v", report)
+	}
 }
 
 func testResult(t *testing.T, key string, block uint64, blockHash string, finality searchresult.Finality) searchresult.Result {
@@ -116,19 +148,21 @@ func testResult(t *testing.T, key string, block uint64, blockHash string, finali
 		key,
 		architecture.SearchModeResolver,
 		searchresult.Provenance{
-			Source: architecture.SourceIndexer,
-			Authority: "qualified 420Indexer projection",
-			ChainID: 420,
-			BlockNumber: &block,
-			BlockHash: blockHash,
+			Source:          architecture.SourceIndexer,
+			Authority:       "qualified 420Indexer projection",
+			ChainID:         420,
+			BlockNumber:     &block,
+			BlockHash:       blockHash,
 			TransactionHash: "0xtx" + key,
-			Finality: finality,
-			IndexedAt: time.Unix(1_700_000_000, 0),
-			IndexedHeight: &indexed,
+			Finality:        finality,
+			IndexedAt:       time.Unix(1_700_000_000, 0),
+			IndexedHeight:   &indexed,
 			FinalizedHeight: &finalized,
 		},
 		searchresult.Presentation{Title: "tx " + key, CanonicalURL: "/tx/" + key},
 	)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	return result
 }

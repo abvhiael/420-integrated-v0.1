@@ -34,26 +34,40 @@ type ServiceSummary struct {
 
 func (c *Client) Services(ctx context.Context) ([]ServiceSummary, error) {
 	var out []ServiceSummary
-	if err := c.getData(ctx, "/v1/services?chainId="+strconv.FormatUint(c.requiredChainID, 10), &out); err != nil { return nil, err }
+	if err := c.getData(ctx, "/v1/services?chainId="+strconv.FormatUint(c.requiredChainID, 10), &out); err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
 func (c *Client) Service(ctx context.Context, serviceID string) (ServiceSummary, error) {
 	serviceID = strings.TrimSpace(serviceID)
-	if serviceID == "" { return ServiceSummary{}, errors.New("service id required") }
+	if serviceID == "" {
+		return ServiceSummary{}, errors.New("service id required")
+	}
 	var out ServiceSummary
 	path := "/v1/services/" + url.PathEscape(serviceID) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
-	if err := c.getData(ctx, path, &out); err != nil { return ServiceSummary{}, err }
-	if !strings.EqualFold(out.ServiceID, serviceID) { return ServiceSummary{}, errors.New("registry service id mismatch") }
+	if err := c.getData(ctx, path, &out); err != nil {
+		return ServiceSummary{}, err
+	}
+	if !strings.EqualFold(out.ServiceID, serviceID) {
+		return ServiceSummary{}, errors.New("registry service id mismatch")
+	}
 	return out, nil
 }
 
 func (c *Client) ServiceVersion(ctx context.Context, serviceID string, version uint32) (ServiceVersion, error) {
 	serviceID = strings.TrimSpace(serviceID)
-	if serviceID == "" || version == 0 { return ServiceVersion{}, errors.New("service id and non-zero version required") }
+	if serviceID == "" || version == 0 {
+		return ServiceVersion{}, errors.New("service id and non-zero version required")
+	}
 	var out ServiceVersion
 	path := "/v1/services/" + url.PathEscape(serviceID) + "/versions/" + strconv.FormatUint(uint64(version), 10) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
-	if err := c.getData(ctx, path, &out); err != nil { return ServiceVersion{}, err }
-	if !strings.EqualFold(out.ServiceID, serviceID) || out.Version != version { return ServiceVersion{}, errors.New("registry service version mismatch") }
+	if err := c.getData(ctx, path, &out); err != nil {
+		return ServiceVersion{}, err
+	}
+	if !strings.EqualFold(out.ServiceID, serviceID) || out.Version != version {
+		return ServiceVersion{}, errors.New("registry service version mismatch")
+	}
 	return out, nil
 }

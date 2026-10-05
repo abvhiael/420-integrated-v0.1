@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	APIVersion        = "420-search-http-v1"
-	BasePath          = "/v1"
-	DefaultSearchSize = 25
+	APIVersion         = "420-search-http-v1"
+	BasePath           = "/v1"
+	DefaultSearchSize  = 25
 	DefaultSuggestSize = 10
-	MaxSuggestSize    = 20
-	MaxQueryBytes     = 512
-	MaxCursorBytes    = 4096
+	MaxSuggestSize     = 20
+	MaxQueryBytes      = 512
+	MaxCursorBytes     = 4096
 )
 
 type SearchRequest struct {
@@ -32,10 +32,10 @@ type SearchRequest struct {
 }
 
 type SearchResponse struct {
-	Results     []searchresult.Result    `json:"results"`
-	Sponsored   []sponsorship.Placement `json:"sponsored,omitempty"`
-	Snapshot    pagination.Snapshot      `json:"snapshot"`
-	NextCursor  *string                  `json:"nextCursor"`
+	Results    []searchresult.Result   `json:"results"`
+	Sponsored  []sponsorship.Placement `json:"sponsored,omitempty"`
+	Snapshot   pagination.Snapshot     `json:"snapshot"`
+	NextCursor *string                 `json:"nextCursor"`
 }
 
 type SuggestRequest struct {
@@ -197,14 +197,14 @@ func (h *Handler) handleCapabilities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"api": APIVersion,
-		"querySchema": query.SchemaVersion,
-		"cursorSchema": pagination.CursorSchema,
-		"maxQueryBytes": MaxQueryBytes,
-		"maxCursorBytes": MaxCursorBytes,
+		"api":              APIVersion,
+		"querySchema":      query.SchemaVersion,
+		"cursorSchema":     pagination.CursorSchema,
+		"maxQueryBytes":    MaxQueryBytes,
+		"maxCursorBytes":   MaxCursorBytes,
 		"maxSearchResults": pagination.MaxPageSize,
-		"maxSuggestions": MaxSuggestSize,
-		"endpoints": []string{"search", "suggest", "resolve", "capabilities", "health", "readiness", "status"},
+		"maxSuggestions":   MaxSuggestSize,
+		"endpoints":        []string{"search", "suggest", "resolve", "capabilities", "health", "readiness", "status"},
 	})
 }
 

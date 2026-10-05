@@ -316,7 +316,49 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.8 — Ecosystem dependencies
 
-Define the exact narrow roles of 420Wallet, 420Identity, 420Names, 420Messenger, 420Notifications, 420Pay, 420Registry, 420AppStore, analytics, and any other approved dependency.
+**Purpose:** define exact narrow authority/capability roles for approved 420Integrated dependencies without allowing any integration to inherit PuffBuddies profile, consent, relationship, safety, privacy, or lifecycle authority outside its canonical domain.
+
+**Canonical requirements:**
+
+1. Record PB-DEP-001 through PB-DEP-024.
+2. Define exact narrow roles for 420Wallet, 420Identity, 420Names, 420Messenger, 420Notifications, 420Pay, 420Registry, 420AppStore, and 420Analytics.
+3. Define derived/non-canonical roles for 420Indexer, 420Explorer, 420Search, and bounded 420Verify use.
+4. Keep Wallet limited to account/signing/session authority and prohibit wallet connection from implying PuffBuddies membership, eligibility, consent, match, or safety state.
+5. Keep Identity limited to canonical identity-profile/credential lifecycle and minimum-disclosure eligibility evidence; it must not automatically establish legal identity, wallet ownership, consent, or match authority.
+6. Keep Names limited to current .420 presentation/resolution and prohibit treating names as identity, membership, eligibility, or reputation proof.
+7. Keep Messenger authoritative only for its messaging-coordination domain while PuffBuddies owns the dating/social authorization handed to Messenger.
+8. Keep Notifications non-canonical and delivery-only; keep Pay limited to payment/entitlement evidence; prohibit either from creating consent, eligibility, or safety overrides.
+9. Keep Registry authoritative for service identity/version/active state and AppStore as a Registry-backed non-authoritative catalogue/presentation surface.
+10. Keep Analytics and Indexer/Explorer/Search rebuildable/derived and prohibit protected PuffBuddies payloads or private-member enumeration.
+11. Prohibit authority inheritance among dependencies and require dependency failure/staleness to preserve the owning canonical authority.
+12. Define an integration decision rule requiring minimum data exchange, freshness/revocation behavior, privacy classification, authority owner, discovery/version checking, and fail-closed behavior before later runtime integration.
+
+**Affected repository components:**
+
+- docs/puffbuddies/PB-0.8-ECOSYSTEM-DEPENDENCIES.md
+- docs/puffbuddies/PUFFBUDDIES-ROADMAP.md
+- scripts/verify-puffbuddies-pb0.py
+- docs/puffbuddies/PB-0.8-QUALIFICATION.md
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.8 is not a Level 2 integration milestone; it defines dependency contracts without implementing cross-component runtime wiring.
+
+**Dependencies:** PB-0.1 through PB-0.7 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.8 ecosystem-dependencies document exists;
+- PB-DEP-001 through PB-DEP-024 exist exactly once and in sequence;
+- every named canonical dependency has an explicit allowed role and explicit non-authority boundary;
+- derived services remain subordinate to canonical protocol state;
+- Messenger cannot manufacture PuffBuddies consent, Notifications cannot create authorization, Pay cannot create consent/eligibility, and Registry/AppStore/Analytics cannot acquire ambient PuffBuddies authority;
+- authority inheritance across dependencies is explicitly prohibited;
+- dependency failure/freshness and integration-decision rules are documented;
+- no integration client, contract, fixed address, service ID, deployment, or live wiring is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.8 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.9 — State ownership
 

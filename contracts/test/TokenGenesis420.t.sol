@@ -82,8 +82,7 @@ contract TokenGenesis420Test {
 
     function testFixedCannotMint() public {
         vm.prank(ALICE);
-        address t =
-            factory.createERC20{ value: 42 ether }(
+        address t = factory.createERC20{ value: 42 ether }(
             TokenIds420.ERC20_FIXED, "Fixed", "FIX", 100 ether, 0, bytes32("three")
         );
         vm.prank(ALICE);

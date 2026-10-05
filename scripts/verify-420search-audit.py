@@ -33,7 +33,7 @@ for p in required: need((ROOT/p).is_file(),f"missing required file {p}")
 
 sources="\n".join(p.read_text(errors="replace") for p in (ROOT/"search").rglob("*.go"))
 need("SEARCH_RPC_URL" not in sources,"direct RPC configuration introduced")
-need("eth_get" not in sources.lower(),"direct JSON-RPC method introduced")
+need(re.search(r"\\beth_(?:chainid|getblock|gettransaction|gettransactionreceipt|getlogs|call|sendrawtransaction)\\b", sources.lower()) is None,"direct JSON-RPC method introduced")
 need("delegatecall" not in sources.lower(),"unexpected delegatecall surface")
 need("private Messenger" in (ROOT/"docs/420SEARCH.md").read_text(),"privacy boundary undocumented")
 

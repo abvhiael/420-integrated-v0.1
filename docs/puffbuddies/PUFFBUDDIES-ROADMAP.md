@@ -228,7 +228,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
 - durable PB-0.5 evidence records exact run/job evidence and base SHA.
 
-### PB-0.6 — Adult eligibility policy
+### PB-0.6 — Adult eligibility policy — COMPLETE
 
 **Purpose:** define the canonical adult-eligibility floor, minimum-disclosure eligibility interface, policy conclusions, revocation/staleness/reverification rules, and dependency contract for later canonical identity/attestation integration.
 

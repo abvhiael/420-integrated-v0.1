@@ -35,11 +35,24 @@ No moderation runtime, classifier, operator console, evidence database, contract
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-SAFETY-001 through PB-SAFETY-040 exist exactly once and in sequence;
+- required report classes cover harassment/threats, stalking/doxxing/location abuse, impersonation, minor/adult-eligibility concerns, sexual exploitation, fraud/extortion, hate/severe discriminatory abuse, spam/bot/platform manipulation, block/ban evasion, serious dangerous/unlawful conduct, cannabis-related coercion/unsafe transactions, and other/policy-unclear concerns;
+- policy-level moderation states RECEIVED, TRIAGED, REVIEWING, RESTRICTED_PENDING_REVIEW, ACTIONED, NO_ACTION, APPEALED, and CLOSED are defined;
+- independent immediate block authority and report/block separation are explicit;
+- report count cannot establish guilt;
+- moderation may restrict but cannot manufacture interpersonal consent;
+- reporter identity, evidence, moderation notes, risk signals, and case history remain private;
+- stale queues/clients/caches/integrations cannot preserve authorization after canonical safety revocation;
+- premium/payment/status cannot purchase safety exceptions;
+- least-privilege moderation access, auditability, evidence integrity, and automation limits are defined;
+- moderation history cannot become a public reputation/social-credit/dating-ranking score;
+- standard, high-priority, emergency/external-authority, and cross-service escalation boundaries are explicit;
+- appeal/restoration cannot force unblock, rematch, conversation restoration, or renewed contact;
+- no moderation runtime, classifier, operator console, evidence database, contract, fixed address, service ID, deployment, or live enforcement is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`447565b5436476003c8bd4fbe1ff970282ea4b03`
 
 ## Current main/base SHA
 
@@ -51,7 +64,17 @@ PR #526 remains open on the cumulative PB-0 branch. Current-main merge-candidate
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37286529298` — **PASS**
+- job: `111686634443` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37286534203` — **PASS**
+- job: `111686650086` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -73,11 +96,13 @@ PB-0.10 defines safety/moderation policy principles only. Exact tooling, schemas
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.10 is formally COMPLETE.
+None for PB-0.10.
 
 ## Completion state
 
-**PB-0.10 — PENDING QUALIFICATION**
+**PB-0.10 — COMPLETE**
+
+All canonical PB-0.10 exit criteria are satisfied on exact implementation SHA `447565b5436476003c8bd4fbe1ff970282ea4b03`.
 
 ## Next canonical roadmap step
 

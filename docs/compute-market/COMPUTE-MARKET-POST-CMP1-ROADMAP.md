@@ -446,6 +446,11 @@ Packaging does not claim native runtime certification, code signing/notarization
 Durable evidence: [CMP-3.13 qualification](CMP-3.13-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.13 Windows/Linux/macOS packaging](CMP-3.13-WINDOWS-LINUX-MACOS-PACKAGING.md). Fast #344 / run `37269147888` / job `111632222887` passed the exact implementation/spec/workflow SHA; package artifact ID `11327388973`; evidence anchor `32b4e5a55dd71a54ff948f8360746592b17a864f`.
 
 ## CMP-3.14 — Phase closeout
+**Status: Level 3 comprehensive qualification in progress.**
+
+Reconcile the complete accumulated CMP-3 node420 worker runtime against current `main`, establish one exact merge-candidate implementation SHA, run the canonical Level 3 owners once, preserve durable exact-SHA evidence, and hand off to CMP-4 only after every applicable closeout gate passes.
+
+Closeout inventory/evidence: [CMP-3.14 phase closeout](CMP-3.14-PHASE-CLOSEOUT.md).
 
 ---
 
@@ -670,7 +675,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.13 COMPLETE; CMP-3.14 phase closeout next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.13 COMPLETE; CMP-3.14 Level 3 comprehensive qualification in progress |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

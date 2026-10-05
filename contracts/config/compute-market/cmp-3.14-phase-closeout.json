@@ -1,0 +1,97 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-3.14.PhaseCloseout.v1",
+  "step": "CMP-3.14",
+  "title": "Phase closeout",
+  "canonical_definition": "Reconcile the complete accumulated CMP-3 node420 worker runtime against current main, run the required Level 3 qualification on one exact merge-candidate implementation SHA, preserve durable evidence, and prepare the handoff to CMP-4 — Scientific compute framework.",
+  "status": "LEVEL_3_QUALIFICATION_PENDING",
+  "reconciliation": {
+    "main_sha": "b338b9c9c140957b0ea8619b0b20bfed415f2c6d",
+    "github_test_merge_sha": "c72d4795e178b66a1d4ae4737af8033f475a736a",
+    "reconciled_anchor_sha": "c62b01be3dfed2618e8b0bbedf8c8e73e5fd02b1",
+    "behind_main": 0
+  },
+  "repository_closeout_candidate": true,
+  "live_release": false,
+  "qualified_prerequisites": [
+    "CMP-3.1","CMP-3.2","CMP-3.3","CMP-3.4","CMP-3.5","CMP-3.6","CMP-3.7",
+    "CMP-3.8","CMP-3.9","CMP-3.10","CMP-3.11","CMP-3.12","CMP-3.13"
+  ],
+  "prerequisite_evidence": [
+    "docs/compute-market/CMP-3.1-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.2-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.3-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.4-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.5-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.6-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.7-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.8-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.9-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.10-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.11-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.12-QUALIFICATION-EVIDENCE.md",
+    "docs/compute-market/CMP-3.13-QUALIFICATION-EVIDENCE.md"
+  ],
+  "phase_sources": [
+    "compute/worker",
+    "execution/cmd/node420-compute",
+    "packaging/node420-compute"
+  ],
+  "phase_verifiers": [
+    "scripts/verify-cmp-3-1-worker-daemon.py",
+    "scripts/verify-cmp-3-2-hardware-software-discovery.py",
+    "scripts/verify-cmp-3-3-benchmarking-capability-evidence.py",
+    "scripts/verify-cmp-3-4-secure-workload-sandbox.py",
+    "scripts/verify-cmp-3-5-content-addressed-work-unit-download.py",
+    "scripts/verify-cmp-3-6-execution-lifecycle.py",
+    "scripts/verify-cmp-3-7-checkpointing-resume.py",
+    "scripts/verify-cmp-3-8-result-commitment.py",
+    "scripts/verify-cmp-3-9-execution-key-signed-receipt.py",
+    "scripts/verify-cmp-3-10-result-evidence-upload.py",
+    "scripts/verify-cmp-3-11-local-resource-controls.py",
+    "scripts/verify-cmp-3-12-malicious-workload-protections.py",
+    "scripts/verify-cmp-3-13-packaging.py"
+  ],
+  "authority_boundaries": [
+    "node420-compute remains an off-chain worker runtime and gains no canonical job, verifier, settlement, governance, wallet or bridge authority",
+    "execution-key receipts are attribution evidence rather than correctness or payment authority",
+    "result and evidence upload success is delivery evidence rather than canonical result-state authority",
+    "local resource controls and malicious-workload quarantine remain operator-local and non-authoritative",
+    "cross-platform packaging is structural build evidence and does not claim native Windows/macOS runtime qualification, signing, notarization or live deployment"
+  ],
+  "level_3_required": {
+    "solidity_full_inventory": true,
+    "genesis_address_authority": true,
+    "integrated_global": true,
+    "docs_global": true,
+    "retained_compute_market_suite": true,
+    "worker_fast_suite": true,
+    "worker_integration_suite": true,
+    "node420_release_gate": true,
+    "phase_config_verification": true,
+    "adversarial_invariant_security": true,
+    "deployment_config_verification": true
+  },
+  "ci_ownership": {
+    "solidity_full_inventory": "Solidity Contracts / four balanced PR shards",
+    "genesis_address_authority": "Genesis Address Authority / no duplicate full Foundry",
+    "global_runtime": "420 Integrated Qualification",
+    "docs": "420Docs Qualification",
+    "retained_compute_market": "Compute Market Qualification",
+    "worker_fast": "Compute Worker Fast Qualification",
+    "worker_integration": "Compute Worker Integration Qualification",
+    "node420_release": "node420 Release Gate"
+  },
+  "non_applicable_direct_clients": {
+    "420-indexer": "CMP-3 adds the off-chain worker runtime and no indexer schema, ingestion, contract-discovery or event-consumer surface",
+    "420-rpc": "no CMP-3 RPC API, method, schema or backend surface changed or introduced",
+    "420Search": "no CMP-3 Search consumer or indexing surface changed or introduced",
+    "frontend/backend": "no CMP-3 user-facing application/backend service surface is implemented in this phase; human-facing Compute UI remains CMP-8"
+  },
+  "live_blockers": [
+    "public testnet worker deployment and funded-chain execution evidence remain CMP-9 scope",
+    "native Windows/macOS workload-runtime qualification remains external/native-host evidence",
+    "Apple notarization and Authenticode signing are not repository closeout claims",
+    "production GPU backend availability and live worker fleet operation remain later operational scope"
+  ],
+  "next_canonical_step": "CMP-4 — Scientific compute framework"
+}

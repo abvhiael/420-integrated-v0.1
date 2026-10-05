@@ -35,21 +35,15 @@ The repository contains the intended implementation layers:
 - `appstore/web`: embedded dependency-free Genesis frontend;
 - `appstore/cmd/appstore420`: production executable entrypoint.
 
-The pieces exist, and APPSTORE-AUDIT-2 through APPSTORE-AUDIT-4 now wire canonical source ingestion, catalogue lifecycle and retained ApplicationView composition. The public API/frontend/abuse-control service composition described by APPSTORE-7 through APPSTORE-9 remains unfinished.
+The pieces exist, and APPSTORE-AUDIT-2 through APPSTORE-AUDIT-5 now wire canonical source ingestion, catalogue lifecycle, retained ApplicationView composition, the discovery API, embedded frontend, abuse controls and dependency-aware public service composition. APPSTORE-AUDIT-6 qualifies that repository-side composition; live public-testnet evidence remains outstanding.
 
 ## Critical finding: production runtime is incomplete
 
-`appstore/cmd/appstore420/main.go` performs only the APPSTORE-1 startup network check and serves `runtime.Service.Handler()`. That handler exposes only `/healthz` and `/readyz`.
+`appstore/cmd/appstore420/main.go` now performs the APPSTORE-1 network qualification, APPSTORE-2 finalized Registry ingestion, APPSTORE-3 catalogue bootstrap/refresh, APPSTORE-AUDIT-4 ApplicationView composition and APPSTORE-AUDIT-5 public service composition before serving the dependency-aware public handler.
 
 The APPSTORE-AUDIT-2 remediation now creates a concrete 420Indexer-backed `registry.Source`, binds it to the configured chain/frozen ProtocolRegistry address, filters the projection to the Indexer finalized boundary, validates the resulting snapshot through APPSTORE-2 projection rules, and runs the initial synchronization before the process starts serving.
 
-The production executable still does **not**:
-
-1. restore/rebuild and persist the APPSTORE-3 catalogue as part of runtime lifecycle;
-2. compose canonical records with APPSTORE-4 curation, APPSTORE-5 security provenance and APPSTORE-6 Wallet handoff into `api.ApplicationView` values;
-3. mount the APPSTORE-7 `/v1/apps*` discovery API;
-4. mount the APPSTORE-9 embedded frontend;
-5. connect the APPSTORE-8 limiter/dependency assessment to the public request path.
+The production executable now performs the repository-side APPSTORE-2 through APPSTORE-9 composition required by this remediation. Remaining incompleteness is operational rather than missing repository wiring: live public-testnet backend/frontend endpoints, live Registry/RPC/Verify behavior, restart/rebuild and browser/Wallet evidence still require APPSTORE-AUDIT-7.
 
 Therefore the historical readiness statement `implementation_status: QUALIFIED` overstated the current executable state. This audit changes the current readiness status to `PARTIAL` while preserving old run IDs only as historical provenance.
 
@@ -83,10 +77,10 @@ The prior rating range check accepted IEEE NaN because ordinary range comparison
 | Curation/ranking | APPSTORE-4 | noncanonical package plus production ApplicationView composition input wired | policy/composition tests | present | COMPLETE (local) | live/operator input qualification later |
 | Security provenance | APPSTORE-5 | evidence package integrated into ApplicationView composition | evidence/composition tests | present | COMPLETE (local) | live provenance-source qualification later |
 | Wallet handoff | APPSTORE-6 | handoff and requested-scope inputs integrated into canonical-bound ApplicationView composition | handoff/composition tests | present | COMPLETE (local) | live Wallet qualification later |
-| Discovery API | APPSTORE-7 | handler package present | API tests | present | PARTIAL | mount in production executable |
-| Privacy/abuse/failure policy | APPSTORE-8 | validators/limiter/dependency assessment present | hardening tests | present | PARTIAL | wire limiter/dependency state into public service |
-| Genesis frontend | APPSTORE-9 | embedded static UI present | web tests | present | PARTIAL | mount in production executable and qualify real endpoint |
-| Exact-head closeout | APPSTORE-10 | historical evidence only; dedicated audit workflow added here | race/vet/build/evidence workflow | docs present | PARTIAL | obtain green exact-head audit run; later live-testnet evidence |
+| Discovery API | APPSTORE-7 | dynamic `/v1/apps*` handler mounted in production public service | API/public-service tests | present | COMPLETE (repository) | live testnet qualification later |
+| Privacy/abuse/failure policy | APPSTORE-8 | validators, limiter and dependency-aware BLOCKED/DEGRADED behavior wired in production | hardening/public-service tests | present | COMPLETE (repository) | live outage/degraded qualification later |
+| Genesis frontend | APPSTORE-9 | embedded static UI mounted at `/` under production handler | web/public-service tests | present | COMPLETE (repository) | qualify real endpoint on testnet |
+| Exact-head repository qualification | APPSTORE-10 / audit remediation | exact-head AppStore and Docs repository gates pass on accumulated implementation | race/vet/build/verifier + Docs qualification | docs present | COMPLETE (pre-testnet repository gate) | final reconciled Level 3 closeout remains later |
 | AppStore-specific contracts | Genesis config | none required | n/a | explicit | NOT APPLICABLE | none |
 | Live testnet backend/frontend | readiness | no deployed URLs | no live E2E evidence | placeholder/pending | BLOCKED | requires testnet deployment/infrastructure |
 | Production deployment | APPSTORE-10/readiness | no production config/evidence | none | incomplete operational evidence | BLOCKED | follows runtime completion + testnet qualification |
@@ -103,13 +97,13 @@ A dedicated AppStore audit verifier and workflow are added because the generic q
 
 ## Readiness determination at this audit stage
 
-- CODE COMPLETE: **NO** — APPSTORE-AUDIT-5 public runtime composition is implemented but exact-head qualification and later audit/testnet closeout remain pending.
-- BUILD COMPLETE: **pending exact-head workflow**.
+- CODE COMPLETE: **YES for repository-side pre-testnet scope**; live deployment evidence remains outstanding.
+- BUILD COMPLETE: **YES for APPSTORE-AUDIT-6 exact-head repository qualification**.
 - CONTRACT COMPLETE: **YES / NOT APPLICABLE for AppStore-owned contracts**.
-- TEST COMPLETE: **NO** — repository-level tests are being strengthened, but live integration and testnet E2E remain absent.
-- DOCUMENTATION COMPLETE: **NO** — production runtime/deployment/operator procedure must be updated after the source/wiring decision.
-- INTEGRATION COMPLETE: **NO** — repository-side source/lifecycle/ApplicationView/public-service wiring is implemented, but repository qualification and live-testnet integration remain pending.
-- SECURITY QUALIFIED: **NO** — local hardening is improved, but the final composed service and live dependency behavior are not yet qualified.
+- TEST COMPLETE: **YES for repository-side AppStore qualification; NO for live testnet E2E**.
+- DOCUMENTATION COMPLETE: **YES for the current repository gate; live deployment/operator evidence remains APPSTORE-AUDIT-7/8 work**.
+- INTEGRATION COMPLETE: **YES for repository-side composition; NO for live-testnet integration**.
+- SECURITY QUALIFIED: **YES for repository-local/adversarial scope; NO for live dependency/testnet behavior**.
 - TESTNET READY: **NO**.
 - GENESIS READY: **NO** as an operable AppStore service, despite the contract-free canonical definition being frozen.
 - PRODUCTION READY: **NO**.
@@ -120,7 +114,7 @@ A dedicated AppStore audit verifier and workflow are added because the generic q
 
 The audit has established the canonical AppStore definition, inspected the implemented packages and production entrypoint, reconciled historical qualification claims against current repository behavior, repaired the bounded local security defects identified during inspection, and recorded a requirement matrix and remediation roadmap.
 
-The final audit determination is that **420AppStore is not presently complete or release-ready as an operable Genesis application**. Its contract-free authority model and most component packages are implemented, but the production composition path is incomplete: the executable now binds and synchronizes a concrete finalized Registry catalogue source, but it does not yet bind catalogue lifecycle, ApplicationView composition, discovery API, embedded frontend, abuse/dependency controls, and live deployment evidence into one qualified service.
+The final audit determination at APPSTORE-AUDIT-6 is that **420AppStore is repository-qualified for the pre-testnet stage but is not yet release-ready as a live Genesis application**. The contract-free authority model, production source/lifecycle/ApplicationView/public-service composition, discovery API, frontend, abuse controls and dependency behavior are implemented and exact-head qualified. Live deployment/testnet evidence remains intentionally unclaimed.
 
 Historical APPSTORE-9/10 evidence remains provenance only and must not be used to override this current determination. Live-testnet and production claims remain blocked until the remediation roadmap is completed and requalified.
 
@@ -131,7 +125,7 @@ Historical APPSTORE-9/10 evidence remains provenance only and must not be used t
 3. **APPSTORE-AUDIT-3 — runtime catalogue lifecycle.** **COMPLETE — Level 1 + Level 2 lifecycle milestone.** Source sync, deterministic restore/rebuild/persistence, crash-safe atomic replacement, finalized-staleness/conflict protection, periodic refresh, and append-only non-canonical presentation history are wired and qualified at exact implementation SHA `6ea9a46ef889e8ebcc8888a100efaac9013f1e84`.
 4. **APPSTORE-AUDIT-4 — ApplicationView composition.** **COMPLETE — Level 1 + Level 2 composition milestone.** Canonical latest-version records are composed with strict optional curation/security/Wallet/link inputs, retained atomically, and rebuilt after finalized catalogue refresh without allowing presentation sources to select or rewrite canonical Registry fields. Exact implementation SHA `0a2abad993d6ea508919a461b2a2ba7dfe761282` passed AppStore Audit Qualification run `37256398366`, job `111594309071`.
 5. **APPSTORE-AUDIT-5 — public service composition.** **COMPLETE — Level 1 + Level 2 public-service milestone.** Health/readiness, dynamic `/v1/apps*`, embedded frontend, in-memory anonymous abuse limiting and dependency-aware blocked/degraded behavior are mounted under one production handler. Exact implementation SHA `65ac599806ce4cf910e7f8154f564498d7cb707b` passed AppStore Audit Qualification run `37257635038`, job `111598019149`.
-6. **APPSTORE-AUDIT-6 — repository qualification.** Run formatting, race tests, vet, production build, documentation qualification, and requirement-specific exact-head checks.
+6. **APPSTORE-AUDIT-6 — repository qualification.** **COMPLETE — Level 1 + Level 2 repository milestone.** Formatting, race tests, vet, production build, AppStore verifier and full 420Docs qualification passed on exact SHA `94d81b40d251fe425ae89cbacffa8cf766fcbb97`.
 7. **APPSTORE-AUDIT-7 — live testnet qualification.** Deploy backend/frontend, populate real URLs, exercise canonical Registry ingestion, restart/rebuild, Wallet handoff, outage/degraded cases, privacy boundaries and browser/API behavior against the live testnet.
 8. **APPSTORE-AUDIT-8 — Genesis/production closeout.** Record exact deployment/configuration evidence, monitoring/recovery procedure, final security review and production-domain configuration, then requalify the exact release head.
 
@@ -219,3 +213,21 @@ Do not mark 420AppStore COMPLETE until APPSTORE-AUDIT-1 through APPSTORE-AUDIT-8
 - **Level 3 intentionally deferred:** latest-main reconciliation, canonical full Solidity inventory, Genesis/address-authority qualification, 420 Integrated/global qualification, Docs/global reconciliation, deployment/config verification and live-testnet qualification remain app-phase closeout work.
 - **Remaining blockers outside APPSTORE-AUDIT-5:** APPSTORE-AUDIT-6 repository qualification; public testnet backend/frontend URLs and live dependency qualification; later Genesis/production closeout.
 - **Next canonical remediation step:** APPSTORE-AUDIT-6 — repository qualification.
+
+
+## APPSTORE-AUDIT-6 durable qualification evidence
+
+- **Roadmap step:** APPSTORE-AUDIT-6 — repository qualification.
+- **Completion state:** COMPLETE.
+- **Qualification level:** Level 1 plus Level 2 pre-testnet repository milestone.
+- **Implementation SHA:** `94d81b40d251fe425ae89cbacffa8cf766fcbb97`.
+- **Qualification base/main observed:** `e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da`. Latest-main reconciliation is intentionally deferred to Level 3 app-phase closeout.
+- **AppStore repository gate:** `420AppStore Audit Qualification` run `37258566421`, job `111600724647` — PASS on the exact implementation SHA. Exact-head verification, retained step formatting gates, branch formatting, `go test -race ./appstore/...`, `go vet ./appstore/...`, production build and AppStore audit verifier all passed.
+- **Documentation gate:** `420Docs Qualification` run `37258566434`, job `111600709511` — PASS on the same exact implementation SHA, including front matter/versioning, links, orphan navigation, required coverage, generated-reference integration/freshness, publication contracts, workflow self-tests and the retained documentation qualification stages.
+- **Repository defects discovered and repaired during qualification:** the Docs gate first exposed four governed but unreachable AI/Arbitration pages; `mkdocs.yml` navigation was repaired without changing page semantics. It then exposed a generated Indexer reference gap after new AI routes had entered `420-indexer/src/api-contract.ts`; `scripts/reference_indexer_renderer.py` was extended with exact query/path parameter references for every AI route and the generated Indexer page was refreshed to deterministic output.
+- **Superseded Docs failures:** run `37257793470` identified the orphan-navigation defect; run `37258418199` then advanced to and identified the missing `ai-providers` generated-reference parameter mapping; run `37258520061` confirmed the renderer mapping but rejected the committed generated page as byte-for-byte stale. All are superseded by the successful exact-SHA Docs run.
+- **Requirement-specific exit criteria:** formatting PASS; race suite PASS; vet PASS; production build PASS; AppStore requirement verifier PASS; full documentation qualification PASS; exact-head identity PASS for both required workflows.
+- **Milestone status:** APPSTORE-AUDIT-6 is the pre-testnet repository milestone. It qualifies accumulated repository-side AppStore implementation and documentation before live testnet work, without converting the step into Level 3.
+- **Level 3 intentionally deferred:** branch reconciliation with latest `main`, canonical full Solidity inventory, Genesis/address-authority qualification, 420 Integrated/global qualification, final Docs/global reconciliation on the reconciled merge candidate, deployment/config verification and final release-head qualification.
+- **Remaining blocker:** APPSTORE-AUDIT-7 live public-testnet qualification requires real backend/frontend URLs and live Registry/RPC/Verify/Wallet/browser/restart/outage evidence. No live evidence has been fabricated.
+- **Next canonical remediation step:** APPSTORE-AUDIT-7 — live testnet qualification.

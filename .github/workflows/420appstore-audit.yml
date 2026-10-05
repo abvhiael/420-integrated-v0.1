@@ -56,7 +56,8 @@ jobs:
             appstore/catalog/lifecycle.go \
             appstore/catalog/lifecycle_test.go \
             appstore/catalog/presentation_history.go \
-            appstore/catalog/presentation_history_test.go)"
+            appstore/catalog/presentation_history_test.go \
+            appstore/closeout/closeout_test.go)"
           test -z "$unformatted" || { echo "$unformatted"; exit 1; }
       - name: APPSTORE-AUDIT-2 formatting
         run: |

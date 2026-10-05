@@ -1,6 +1,13 @@
 name: PuffBuddies PB-0 Qualification
 
 on:
+  push:
+    branches:
+      - "puffbuddies-pb0-foundation-20261004"
+    paths:
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb0.py"
+      - ".github/workflows/puffbuddies-pb0.yml"
   pull_request:
     paths:
       - "docs/puffbuddies/**"

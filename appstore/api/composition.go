@@ -9,6 +9,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/420integrated/420-integrated/appstore/catalog"
 	"github.com/420integrated/420-integrated/appstore/curation"
@@ -44,6 +45,36 @@ type ViewInput struct {
 type CompositionInputs struct {
 	SchemaVersion int         `json:"schemaVersion"`
 	Applications  []ViewInput `json:"applications,omitempty"`
+}
+
+type ViewSet struct {
+	mu    sync.RWMutex
+	views []ApplicationView
+}
+
+func NewViewSet() *ViewSet { return &ViewSet{} }
+
+func (s *ViewSet) Rebuild(doc catalog.Document, chainID uint64, inputs CompositionInputs) error {
+	if s == nil {
+		return ErrInvalidCompositionInputs
+	}
+	views, err := ComposeApplications(doc, chainID, inputs)
+	if err != nil {
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.views = append([]ApplicationView(nil), views...)
+	return nil
+}
+
+func (s *ViewSet) Snapshot() []ApplicationView {
+	if s == nil {
+		return nil
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return append([]ApplicationView(nil), s.views...)
 }
 
 // LoadCompositionInputs reads optional operator-controlled, non-canonical view

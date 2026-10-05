@@ -368,6 +368,12 @@ Durable evidence: [CMP-3.4 qualification](CMP-3.4-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.5 — Content-addressed work-unit download
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+The worker now retrieves immutable HTTPS work-unit artifacts into private content-addressed state, streams through exact-size bounds and SHA-256 verification, rejects redirects and malformed/mutable sources, revalidates cached content before reuse, and atomically publishes only verified bytes. Download does not authorize or execute work.
+
+Durable design/exit criteria: [CMP-3.5 content-addressed work-unit download](CMP-3.5-CONTENT-ADDRESSED-WORK-UNIT-DOWNLOAD.md).
+
 
 ## CMP-3.6 — Execution lifecycle
 

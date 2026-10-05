@@ -104,6 +104,7 @@ for token in [
     "TestMaliciousWorkloadPreflightBindsCanonicalImageAndCommand",
     "TestMaliciousWorkloadPreflightEnforcesCommandBoundsAndDenyDigests",
     "TestSecurityGuardQuarantinesRepeatedAbuseAndPersistsAcrossRestart",
+    "TestSecurityGuardRecoveryUsesLatestPostExpiryIncidentState",
     "TestSecurityIncidentEvidenceIsPrivateNonAuthoritativeAndPayloadFree",
     "TestSecurityGuardFailsClosedOnTamperedIncidentState",
     "TestProtectedExecutionLifecycleRejectsDeniedWorkloadBeforeSandbox",

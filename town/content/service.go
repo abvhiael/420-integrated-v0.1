@@ -121,6 +121,8 @@ type ViewerContext struct {
 type RiskProfile struct {
 	Assurance        AssuranceTier
 	AccountCreatedAt time.Time
+	DeviceKey        string
+	NetworkKey       string
 }
 
 type CommunityAuthority interface {
@@ -140,6 +142,10 @@ type Policy struct {
 	VerifiedWriteLimit           int
 	UnverifiedVoteLimit          int
 	VerifiedVoteLimit            int
+	DeviceWriteLimit             int
+	DeviceVoteLimit              int
+	NetworkWriteLimit            int
+	NetworkVoteLimit             int
 	CommunityWriteLimit          int
 }
 
@@ -152,6 +158,10 @@ func DefaultPolicy() Policy {
 		VerifiedWriteLimit:     20,
 		UnverifiedVoteLimit:    15,
 		VerifiedVoteLimit:      60,
+		DeviceWriteLimit:       40,
+		DeviceVoteLimit:        120,
+		NetworkWriteLimit:      80,
+		NetworkVoteLimit:       240,
 		CommunityWriteLimit:    120,
 	}
 }
@@ -186,9 +196,11 @@ type Service struct {
 	votes         map[string]Vote
 
 	idempotency   map[string]idempotencyRecord
-	actorWrites   map[string]rateBucket
+	actorWrites     map[string]rateBucket
+	deviceWrites    map[string]rateBucket
+	networkWrites   map[string]rateBucket
 	communityWrites map[string]rateBucket
-	fingerprints  map[string]fingerprintRecord
+	fingerprints    map[string]fingerprintRecord
 }
 
 func NewService(authority CommunityAuthority, risk RiskProvider, policy Policy) (*Service, error) {
@@ -198,6 +210,8 @@ func NewService(authority CommunityAuthority, risk RiskProvider, policy Policy) 
 	if policy.Window <= 0 || policy.DuplicateWindow <= 0 || policy.FullLimitMinAccountAge < 0 ||
 		policy.UnverifiedWriteLimit <= 0 || policy.VerifiedWriteLimit <= 0 ||
 		policy.UnverifiedVoteLimit <= 0 || policy.VerifiedVoteLimit <= 0 ||
+		policy.DeviceWriteLimit <= 0 || policy.DeviceVoteLimit <= 0 ||
+		policy.NetworkWriteLimit <= 0 || policy.NetworkVoteLimit <= 0 ||
 		policy.CommunityWriteLimit <= 0 {
 		return nil, ErrInvalidInput
 	}
@@ -214,6 +228,8 @@ func NewService(authority CommunityAuthority, risk RiskProvider, policy Policy) 
 		votes:            make(map[string]Vote),
 		idempotency:      make(map[string]idempotencyRecord),
 		actorWrites:      make(map[string]rateBucket),
+		deviceWrites:     make(map[string]rateBucket),
+		networkWrites:    make(map[string]rateBucket),
 		communityWrites:  make(map[string]rateBucket),
 		fingerprints:     make(map[string]fingerprintRecord),
 	}, nil
@@ -827,37 +843,59 @@ func (s *Service) consume(actor, communityID model.ObjectID, class string, now t
 		!profile.AccountCreatedAt.IsZero() &&
 		now.Sub(profile.AccountCreatedAt) >= s.policy.FullLimitMinAccountAge
 
-	limit := s.policy.UnverifiedWriteLimit
+	actorLimit := s.policy.UnverifiedWriteLimit
+	deviceLimit := s.policy.DeviceWriteLimit
+	networkLimit := s.policy.NetworkWriteLimit
 	if class == "vote" {
-		limit = s.policy.UnverifiedVoteLimit
+		actorLimit = s.policy.UnverifiedVoteLimit
+		deviceLimit = s.policy.DeviceVoteLimit
+		networkLimit = s.policy.NetworkVoteLimit
 		if full {
-			limit = s.policy.VerifiedVoteLimit
+			actorLimit = s.policy.VerifiedVoteLimit
 		}
 	} else if full {
-		limit = s.policy.VerifiedWriteLimit
+		actorLimit = s.policy.VerifiedWriteLimit
 	}
 
-	actorKey := fmt.Sprintf("%s|%s", actor, class)
-	bucket := s.actorWrites[actorKey]
-	if bucket.WindowStart.IsZero() || now.Sub(bucket.WindowStart) >= s.policy.Window {
-		bucket = rateBucket{WindowStart: now}
+	type scopedBucket struct {
+		store *map[string]rateBucket
+		key   string
+		limit int
 	}
-	if bucket.Count >= limit {
-		return ErrRateLimited
+	scopes := []scopedBucket{
+		{store: &s.actorWrites, key: fmt.Sprintf("%s|%s", actor, class), limit: actorLimit},
+		{store: &s.communityWrites, key: fmt.Sprintf("%s|%s", communityID, class), limit: s.policy.CommunityWriteLimit},
 	}
-	bucket.Count++
-	s.actorWrites[actorKey] = bucket
+	if profile.DeviceKey != "" {
+		scopes = append(scopes, scopedBucket{
+			store: &s.deviceWrites,
+			key: fmt.Sprintf("%s|%s", profile.DeviceKey, class),
+			limit: deviceLimit,
+		})
+	}
+	if profile.NetworkKey != "" {
+		scopes = append(scopes, scopedBucket{
+			store: &s.networkWrites,
+			key: fmt.Sprintf("%s|%s", profile.NetworkKey, class),
+			limit: networkLimit,
+		})
+	}
 
-	communityKey := string(communityID)
-	cb := s.communityWrites[communityKey]
-	if cb.WindowStart.IsZero() || now.Sub(cb.WindowStart) >= s.policy.Window {
-		cb = rateBucket{WindowStart: now}
+	next := make([]rateBucket, len(scopes))
+	for i, scope := range scopes {
+		bucket := (*scope.store)[scope.key]
+		if bucket.WindowStart.IsZero() || now.Sub(bucket.WindowStart) >= s.policy.Window {
+			bucket = rateBucket{WindowStart: now}
+		}
+		if bucket.Count >= scope.limit {
+			return ErrRateLimited
+		}
+		bucket.Count++
+		next[i] = bucket
 	}
-	if cb.Count >= s.policy.CommunityWriteLimit {
-		return ErrRateLimited
+	for i, scope := range scopes {
+		(*scope.store)[scope.key] = next[i]
 	}
-	cb.Count++
-	s.communityWrites[communityKey] = cb
 	return nil
 }
 

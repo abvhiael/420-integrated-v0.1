@@ -176,6 +176,16 @@ contract TokenAudit420Test {
         token.permit(holder, BOB, 1, deadline, v, r, s);
     }
 
+    function testVotesProfileRejectsSupplyAboveCheckpointWidth() public {
+        vm.prank(ALICE);
+        vm.expectRevert(ERC20Template420.VoteOverflow.selector);
+        factory.createERC20{value: 42 ether}(
+            TokenIds420.ERC20_VOTES, "Too Large", "BIG", uint256(type(uint208).max) + 1, 0, bytes32("votes-overflow")
+        );
+        require(factory.creatorNonce(ALICE) == 0, "overflow deployment changed nonce");
+        require(factory.deploymentCount() == 0, "overflow deployment recorded provenance");
+    }
+
     function testVotesTrackDelegatedBalancesAndHistoricalBlock() public {
         ERC20Template420 token = _create(TokenIds420.ERC20_VOTES, 100 ether, 0, bytes32("votes"));
         vm.prank(ALICE);

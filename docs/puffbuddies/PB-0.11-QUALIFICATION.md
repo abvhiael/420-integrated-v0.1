@@ -38,11 +38,26 @@ No database, deletion worker, retention scheduler, backup implementation, API, c
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-DATA-001 through PB-DATA-036 exist exactly once and in sequence;
+- deactivation is explicitly distinct from deletion and cannot be presented as erasure;
+- accepted deletion immediately revokes ordinary PuffBuddies participation even while asynchronous cleanup remains pending;
+- PuffBuddies-owned profile/media, preferences, relationship state, precise location, sessions/tokens, notifications, discovery/search, analytics, logs, caches, backups, and derived artifacts are covered by deletion/lifecycle policy;
+- payment status cannot block deletion and interpersonal approval is not required;
+- Messenger/participant copies and independently-owned 420Integrated canonical state are explicitly outside PuffBuddies erasure authority;
+- retention exceptions require explicit safety/moderation/legal/security/accounting purpose, minimum fields, least privilege, bounded duration/review, and eventual deletion/anonymization;
+- backup retention is bounded and restored deleted data must re-enter deletion processing before ordinary reuse;
+- logs, analytics, caches, indexes, embeddings/features/thumbnails, and other derived artifacts cannot become deletion bypasses;
+- stable hashes, wallet addresses, deterministic identifiers, or similarly correlatable identifiers are not sufficient to claim irreversible anonymization;
+- moderation/safety evidence may outlive ordinary profile deletion only for a narrow protected purpose and cannot recreate ordinary participation/public reputation;
+- processor/dependency lifecycle contracts are required before private data is shared;
+- immutable public-chain erasure limitations are explicit and later architecture must minimize deletion-sensitive on-chain data;
+- completed deletion does not silently restore prior relationships, preferences, entitlements, matches, or consent on re-registration;
+- deletion completion semantics are honest about known backup/external/immutable exceptions;
+- no database, deletion worker, retention scheduler, API, contract, fixed address, service ID, deployment, or live erasure workflow is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`77af9d6151770835b8dab64f93ab711c76b9e9aa`
 
 ## Current main/base SHA
 
@@ -54,7 +69,17 @@ PR #526 remains open on the cumulative PB-0 branch. Current-main merge-candidate
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37381680551` — **PASS**
+- job: `112004964163` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37381683623` — **PASS**
+- job: `112004978130` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -76,11 +101,13 @@ PB-0.11 defines policy semantics only. Exact schemas, storage engines, deletion 
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.11 is formally COMPLETE.
+None for PB-0.11.
 
 ## Completion state
 
-**PB-0.11 — PENDING QUALIFICATION**
+**PB-0.11 — COMPLETE**
+
+All canonical PB-0.11 exit criteria are satisfied on exact implementation SHA `77af9d6151770835b8dab64f93ab711c76b9e9aa`.
 
 ## Next canonical roadmap step
 

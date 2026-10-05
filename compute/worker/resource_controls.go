@@ -7,6 +7,8 @@ import (
 	"io"
 	"math"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -307,6 +309,56 @@ func (c *LocalResourceController) check(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func ParseScheduleWindow(value string) (ScheduleWindow, error) {
+	parts := strings.Split(value, "@")
+	if len(parts) != 2 {
+		return ScheduleWindow{}, fmt.Errorf("%w: schedule must use DDD@HH:MM-HH:MM", ErrInvalidLocalResourcePolicy)
+	}
+	weekdays := map[string]time.Weekday{
+		"sun": time.Sunday, "mon": time.Monday, "tue": time.Tuesday, "wed": time.Wednesday,
+		"thu": time.Thursday, "fri": time.Friday, "sat": time.Saturday,
+	}
+	weekday, ok := weekdays[strings.ToLower(strings.TrimSpace(parts[0]))]
+	if !ok {
+		return ScheduleWindow{}, fmt.Errorf("%w: invalid schedule weekday", ErrInvalidLocalResourcePolicy)
+	}
+	rangeParts := strings.Split(parts[1], "-")
+	if len(rangeParts) != 2 {
+		return ScheduleWindow{}, fmt.Errorf("%w: schedule time range required", ErrInvalidLocalResourcePolicy)
+	}
+	parseMinute := func(raw string, allow24 bool) (uint16, error) {
+		hm := strings.Split(strings.TrimSpace(raw), ":")
+		if len(hm) != 2 {
+			return 0, fmt.Errorf("HH:MM required")
+		}
+		hour, err := strconv.Atoi(hm[0])
+		if err != nil {
+			return 0, err
+		}
+		minute, err := strconv.Atoi(hm[1])
+		if err != nil {
+			return 0, err
+		}
+		if minute < 0 || minute > 59 || hour < 0 || hour > 24 || (hour == 24 && (!allow24 || minute != 0)) {
+			return 0, fmt.Errorf("time out of bounds")
+		}
+		return uint16(hour*60 + minute), nil
+	}
+	start, err := parseMinute(rangeParts[0], false)
+	if err != nil {
+		return ScheduleWindow{}, fmt.Errorf("%w: invalid schedule start: %v", ErrInvalidLocalResourcePolicy, err)
+	}
+	end, err := parseMinute(rangeParts[1], true)
+	if err != nil {
+		return ScheduleWindow{}, fmt.Errorf("%w: invalid schedule end: %v", ErrInvalidLocalResourcePolicy, err)
+	}
+	window := ScheduleWindow{Weekday: weekday, StartMinute: start, EndMinute: end}
+	if window.StartMinute >= window.EndMinute {
+		return ScheduleWindow{}, fmt.Errorf("%w: schedule start must precede end", ErrInvalidLocalResourcePolicy)
+	}
+	return window, nil
 }
 
 func scheduleAllows(policy LocalResourcePolicy, now time.Time) bool {

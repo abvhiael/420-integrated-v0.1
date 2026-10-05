@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/420integrated/420-integrated/appstore/architecture"
@@ -37,10 +38,14 @@ func TestCatalogueRebuildIsDeterministic(t *testing.T) {
 	}
 	snapshot := appregistry.Snapshot{ChainID: 420, RegistryAddress: "0x4200000000000000000000000000000000000001", FinalizedBlock: 11, Versions: records}
 	first, err := catalog.RebuildFromSnapshot(snapshot)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	snapshot.Versions[0], snapshot.Versions[1] = snapshot.Versions[1], snapshot.Versions[0]
 	second, err := catalog.RebuildFromSnapshot(snapshot)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if !reflect.DeepEqual(first, second) {
 		t.Fatalf("rebuild depends on source ordering:\nfirst=%#v\nsecond=%#v", first, second)
 	}
@@ -49,22 +54,44 @@ func TestCatalogueRebuildIsDeterministic(t *testing.T) {
 func TestReadinessEvidenceDeclaresCurrentAuditBlockers(t *testing.T) {
 	path := filepath.Join("..", "..", "testnet", "public-services", "appstore", "readiness.json")
 	raw, err := os.ReadFile(path)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	var doc struct {
-		ImplementationStatus string `json:"implementation_status"`
-		DeploymentStatus string `json:"deployment_status"`
-		InvariantCoverage []string `json:"invariant_coverage"`
-		CurrentAudit struct {
-			Status string `json:"status"`
+		ImplementationStatus string   `json:"implementation_status"`
+		DeploymentStatus     string   `json:"deployment_status"`
+		InvariantCoverage    []string `json:"invariant_coverage"`
+		CurrentAudit         struct {
+			Status   string   `json:"status"`
 			Blockers []string `json:"blockers"`
 		} `json:"current_audit"`
 	}
-	if err := json.Unmarshal(raw, &doc); err != nil { t.Fatal(err) }
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		t.Fatal(err)
+	}
 	if doc.ImplementationStatus != "PARTIAL" || doc.DeploymentStatus != "PENDING_PUBLIC_TESTNET" {
 		t.Fatalf("unexpected readiness status: %#v", doc)
 	}
-	if doc.CurrentAudit.Status != "REMEDIATION_REQUIRED" || len(doc.CurrentAudit.Blockers) < 5 {
-		t.Fatalf("current audit blockers missing: %#v", doc.CurrentAudit)
+	if doc.CurrentAudit.Status != "REMEDIATION_REQUIRED" {
+		t.Fatalf("current audit status missing: %#v", doc.CurrentAudit)
+	}
+	required := []string{"discovery API", "embedded frontend", "ApplicationView", "public testnet"}
+	for _, phrase := range required {
+		found := false
+		for _, blocker := range doc.CurrentAudit.Blockers {
+			if strings.Contains(strings.ToLower(blocker), strings.ToLower(phrase)) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("current audit blocker %q missing: %#v", phrase, doc.CurrentAudit)
+		}
+	}
+	for _, blocker := range doc.CurrentAudit.Blockers {
+		if strings.Contains(strings.ToLower(blocker), "catalogue lifecycle") {
+			t.Fatalf("resolved catalogue lifecycle blocker retained: %q", blocker)
+		}
 	}
 	if !reflect.DeepEqual(doc.InvariantCoverage, architecture.Invariants) {
 		t.Fatalf("readiness invariant coverage mismatch: got %v want %v", doc.InvariantCoverage, architecture.Invariants)

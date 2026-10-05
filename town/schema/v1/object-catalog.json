@@ -1,0 +1,57 @@
+{
+  "schema": "420-town-object-catalog-v1",
+  "namespace": "420Town",
+  "version": "v1",
+  "id_policy": "OPAQUE_STABLE_IDS",
+  "timestamp_policy": "RFC3339_UTC",
+  "required_metadata": [
+    "id",
+    "kind",
+    "namespace",
+    "version",
+    "created_at",
+    "updated_at",
+    "visibility",
+    "source"
+  ],
+  "visibility": [
+    "PUBLIC",
+    "UNLISTED",
+    "FOLLOWERS",
+    "COMMUNITY_ONLY",
+    "PURCHASERS_OR_BACKERS",
+    "PRIVATE",
+    "ORGANIZATION_MEMBERS",
+    "MODERATORS",
+    "ADMINS"
+  ],
+  "objects": [
+    {"kind":"Community","fields":["owner_identity_id","title"]},
+    {"kind":"Membership","fields":["community_id","identity_id","state"]},
+    {"kind":"RoleBinding","fields":["community_id","identity_id","role_id"]},
+    {"kind":"PermissionGrant","fields":["community_id","subject_id","permission"]},
+    {"kind":"Subscription","fields":["community_id","subscriber_id","state"]},
+    {"kind":"Entitlement","fields":["community_id","beneficiary_id","entitlement_type","state"]},
+    {"kind":"TreasuryRef","fields":["community_id","authority_id"]},
+    {"kind":"Post","fields":["community_id","author_id","content_ref"]},
+    {"kind":"Thread","fields":["community_id","root_post_id"]},
+    {"kind":"Comment","fields":["community_id","parent_id","author_id","content_ref"]},
+    {"kind":"Vote","fields":["community_id","target_id","voter_id","value"]},
+    {"kind":"ModerationAction","fields":["community_id","target_id","moderator_id","action","reason"]}
+  ],
+  "boundary": {
+    "authority_bearing_state": [
+      "Membership",
+      "RoleBinding",
+      "PermissionGrant",
+      "Subscription",
+      "Entitlement",
+      "TreasuryRef"
+    ],
+    "off_chain_body_defaults": [
+      "Post.content_ref",
+      "Comment.content_ref"
+    ],
+    "projection_authority": false
+  }
+}

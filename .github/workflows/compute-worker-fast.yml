@@ -61,3 +61,6 @@ jobs:
 
       - name: Verify CMP-3.2 hardware/software discovery
         run: python scripts/verify-cmp-3-2-hardware-software-discovery.py
+
+      - name: Verify CMP-3.3 benchmarking and capability evidence
+        run: python scripts/verify-cmp-3-3-benchmarking-capability-evidence.py

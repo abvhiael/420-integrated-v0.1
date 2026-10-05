@@ -32,14 +32,39 @@ func main() {
 	shutdownTimeout := flag.Duration("shutdown-timeout", defaults.ShutdownTimeout, "bounded graceful-shutdown timeout")
 	check := flag.Bool("check", false, "validate CMP-3.1 daemon configuration and exit")
 	discover := flag.Bool("discover", false, "print CMP-3.2 local hardware/software discovery JSON and exit")
+	benchmark := flag.Bool("benchmark", false, "run CMP-3.3 local benchmark and print self-reported capability evidence JSON")
 	flag.Parse()
 
+	if *discover && *benchmark {
+		fmt.Fprintln(os.Stderr, "node420-compute: --discover and --benchmark are mutually exclusive")
+		os.Exit(2)
+	}
 	if *discover {
 		snapshot := worker.DiscoverHost()
 		encoder := json.NewEncoder(os.Stdout)
 		encoder.SetIndent("", "  ")
 		if err := encoder.Encode(snapshot); err != nil {
 			fmt.Fprintln(os.Stderr, "node420-compute: encode discovery:", err)
+			os.Exit(1)
+		}
+		return
+	}
+	if *benchmark {
+		discovery := worker.DiscoverHost()
+		result, err := worker.RunBenchmark(worker.DefaultBenchmarkConfig())
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "node420-compute: benchmark:", err)
+			os.Exit(1)
+		}
+		evidence, err := worker.BuildCapabilityEvidence(discovery, result)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "node420-compute: capability evidence:", err)
+			os.Exit(1)
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.SetIndent("", "  ")
+		if err := encoder.Encode(evidence); err != nil {
+			fmt.Fprintln(os.Stderr, "node420-compute: encode capability evidence:", err)
 			os.Exit(1)
 		}
 		return

@@ -75,7 +75,7 @@ func TestReadinessEvidenceDeclaresCurrentAuditBlockers(t *testing.T) {
 	if doc.CurrentAudit.Status != "REMEDIATION_REQUIRED" {
 		t.Fatalf("current audit status missing: %#v", doc.CurrentAudit)
 	}
-	required := []string{"discovery API", "embedded frontend", "public testnet"}
+	required := []string{"repository qualification", "public testnet"}
 	for _, phrase := range required {
 		found := false
 		for _, blocker := range doc.CurrentAudit.Blockers {
@@ -90,7 +90,7 @@ func TestReadinessEvidenceDeclaresCurrentAuditBlockers(t *testing.T) {
 	}
 	for _, blocker := range doc.CurrentAudit.Blockers {
 		lower := strings.ToLower(blocker)
-		if strings.Contains(lower, "catalogue lifecycle") || strings.Contains(lower, "applicationview") {
+		if strings.Contains(lower, "catalogue lifecycle") || strings.Contains(lower, "applicationview") || strings.Contains(lower, "discovery api") || strings.Contains(lower, "embedded frontend") {
 			t.Fatalf("resolved audit blocker retained: %q", blocker)
 		}
 	}

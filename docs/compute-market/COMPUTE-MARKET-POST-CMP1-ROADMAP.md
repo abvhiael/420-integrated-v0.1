@@ -437,13 +437,13 @@ The implementation deliberately does not invent antivirus/EDR, content scanning,
 Durable evidence: [CMP-3.12 qualification](CMP-3.12-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.12 malicious workload protections](CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md). Fast #313 / run `37264388818` / job `111618008159` passed the exact implementation/spec/workflow SHA; evidence anchor `279c78a240f5a7223341bf4461978792812b44b3`.
 
 ## CMP-3.13 — Windows/Linux/macOS packaging
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `6a5e82bbaa2fd9073c8d6f3415f2460048f115ca`.**
 
 The worker now has deterministic Windows/Linux/macOS packages for amd64 and arm64, exact version/source-commit identity, CGO-disabled cross-builds, per-package metadata, SHA-256 manifests, safe argument-file launchers, explicit platform state directories, Linux systemd material, macOS launchd material, and Windows limited-user startup-task material.
 
 Packaging does not claim native runtime certification, code signing/notarization, live worker deployment, or Level 3 merge-candidate readiness.
 
-Exit criteria and implementation boundary: [CMP-3.13 Windows/Linux/macOS packaging](CMP-3.13-WINDOWS-LINUX-MACOS-PACKAGING.md).
+Durable evidence: [CMP-3.13 qualification](CMP-3.13-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.13 Windows/Linux/macOS packaging](CMP-3.13-WINDOWS-LINUX-MACOS-PACKAGING.md). Fast #344 / run `37269147888` / job `111632222887` passed the exact implementation/spec/workflow SHA; package artifact ID `11327388973`; evidence anchor `32b4e5a55dd71a54ff948f8360746592b17a864f`.
 
 ## CMP-3.14 — Phase closeout
 
@@ -670,7 +670,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.12 COMPLETE; CMP-3.13 Windows/Linux/macOS packaging next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.13 COMPLETE; CMP-3.14 phase closeout next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

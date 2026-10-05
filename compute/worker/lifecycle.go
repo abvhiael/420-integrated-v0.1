@@ -317,7 +317,9 @@ func (l *ExecutionLifecycle) validatePlan(auth ExecutionAuthorization, plan Exec
 	if !strings.EqualFold(auth.AuthorizationRef, plan.AuthorizationRef) {
 		return fmt.Errorf("%w: authorization reference mismatch", ErrInvalidExecutionAuthorization)
 	}
-	if plan.Artifact.SHA256 != auth.WorkUnitSHA256 || plan.Artifact.SizeBytes != auth.WorkUnitSize {
+	if plan.Artifact.SchemaVersion != WorkUnitDownloadSchemaV1 ||
+		plan.Artifact.SHA256 != auth.WorkUnitSHA256 ||
+		plan.Artifact.SizeBytes != auth.WorkUnitSize {
 		return fmt.Errorf("%w: work-unit commitment mismatch", ErrInvalidExecutionAuthorization)
 	}
 	if plan.Sandbox.Image != auth.SandboxImage {
@@ -429,7 +431,7 @@ func (l *ExecutionLifecycle) readRecord(path string) (ExecutionRecord, error) {
 	if err != nil {
 		return ExecutionRecord{}, err
 	}
-	if !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
+	if !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0o077 != 0 {
 		return ExecutionRecord{}, fmt.Errorf("%w: invalid attempt record file", ErrInvalidExecutionAuthorization)
 	}
 	payload, err := os.ReadFile(path)
@@ -442,6 +444,13 @@ func (l *ExecutionLifecycle) readRecord(path string) (ExecutionRecord, error) {
 	}
 	if record.SchemaVersion != ExecutionRecordSchemaV1 {
 		return ExecutionRecord{}, fmt.Errorf("%w: invalid attempt record schema", ErrInvalidExecutionAuthorization)
+	}
+	if err := validateBytes32("attempt ref", record.AttemptRef); err != nil {
+		return ExecutionRecord{}, fmt.Errorf("%w: invalid attempt record identity", ErrInvalidExecutionAuthorization)
+	}
+	expectedName := strings.ToLower(strings.TrimPrefix(record.AttemptRef, "0x")) + ".json"
+	if filepath.Base(path) != expectedName {
+		return ExecutionRecord{}, fmt.Errorf("%w: attempt record filename mismatch", ErrInvalidExecutionAuthorization)
 	}
 	return record, nil
 }

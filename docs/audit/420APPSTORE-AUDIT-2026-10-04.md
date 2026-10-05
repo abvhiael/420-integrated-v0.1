@@ -126,8 +126,8 @@ Historical APPSTORE-9/10 evidence remains provenance only and must not be used t
 4. **APPSTORE-AUDIT-4 — ApplicationView composition.** **COMPLETE — Level 1 + Level 2 composition milestone.** Canonical latest-version records are composed with strict optional curation/security/Wallet/link inputs, retained atomically, and rebuilt after finalized catalogue refresh without allowing presentation sources to select or rewrite canonical Registry fields. Exact implementation SHA `0a2abad993d6ea508919a461b2a2ba7dfe761282` passed AppStore Audit Qualification run `37256398366`, job `111594309071`.
 5. **APPSTORE-AUDIT-5 — public service composition.** **COMPLETE — Level 1 + Level 2 public-service milestone.** Health/readiness, dynamic `/v1/apps*`, embedded frontend, in-memory anonymous abuse limiting and dependency-aware blocked/degraded behavior are mounted under one production handler. Exact implementation SHA `65ac599806ce4cf910e7f8154f564498d7cb707b` passed AppStore Audit Qualification run `37257635038`, job `111598019149`.
 6. **APPSTORE-AUDIT-6 — repository qualification.** **COMPLETE — Level 1 + Level 2 repository milestone.** Formatting, race tests, vet, production build, AppStore verifier and full 420Docs qualification passed on exact SHA `94d81b40d251fe425ae89cbacffa8cf766fcbb97`.
-7. **APPSTORE-AUDIT-7 — live testnet qualification.** Deploy backend/frontend, populate real URLs, exercise canonical Registry ingestion, restart/rebuild, Wallet handoff, outage/degraded cases, privacy boundaries and browser/API behavior against the live testnet.
-8. **APPSTORE-AUDIT-8 — Genesis/production closeout.** Record exact deployment/configuration evidence, monitoring/recovery procedure, final security review and production-domain configuration, then requalify the exact release head.
+7. **APPSTORE-AUDIT-7 — live testnet qualification.** **TESTNET HANDOFF / BLOCKED ON LIVE PUBLIC TESTNET.** Canonical obligations are recorded in `docs/ROADMAP.md`; deploy backend/frontend, populate real URLs, exercise canonical Registry ingestion, restart/rebuild, Wallet handoff, outage/degraded cases, privacy boundaries and browser/API behavior against the live testnet.
+8. **APPSTORE-AUDIT-8 — Genesis/production closeout.** **HANDED OFF AFTER APPSTORE-AUDIT-7.** Record exact deployment/configuration evidence, monitoring/recovery procedure, final security review and production-domain configuration, then perform the applicable Level-3 release closeout on the exact live-qualified candidate.
 
 Do not mark 420AppStore COMPLETE until APPSTORE-AUDIT-1 through APPSTORE-AUDIT-8 are satisfied or a later repository-authoritative decision explicitly narrows the canonical scope.
 
@@ -231,3 +231,8 @@ Do not mark 420AppStore COMPLETE until APPSTORE-AUDIT-1 through APPSTORE-AUDIT-8
 - **Level 3 intentionally deferred:** branch reconciliation with latest `main`, canonical full Solidity inventory, Genesis/address-authority qualification, 420 Integrated/global qualification, final Docs/global reconciliation on the reconciled merge candidate, deployment/config verification and final release-head qualification.
 - **Remaining blocker:** APPSTORE-AUDIT-7 live public-testnet qualification requires real backend/frontend URLs and live Registry/RPC/Verify/Wallet/browser/restart/outage evidence. No live evidence has been fabricated.
 - **Next canonical remediation step:** APPSTORE-AUDIT-7 — live testnet qualification.
+
+
+## Testnet roadmap handoff
+
+Repository-local APPSTORE-AUDIT remediation through APPSTORE-AUDIT-6 is complete. The unfinished APPSTORE-AUDIT-7 live public-testnet qualification and APPSTORE-AUDIT-8 Genesis/production closeout are now tracked under the canonical testnet handoff in `docs/ROADMAP.md`. This branch does not claim live backend/frontend URLs, live dependency health, live Wallet/Verify/Indexer behavior, or production readiness.

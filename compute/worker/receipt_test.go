@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"errors"
+	"math/big"
 	"os"
 	"strings"
 	"testing"
@@ -75,7 +76,8 @@ func signedReceiptFixture(t *testing.T) (*ReceiptStore, ResultMaterial, *Secp256
 }
 
 func TestEthereumPrimitivesKnownVectors(t *testing.T) {
-	if got := hex.EncodeToString(keccak256(nil)[:]); got != "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470" {
+	empty := keccak256(nil)
+	if got := hex.EncodeToString(empty[:]); got != "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470" {
 		t.Fatalf("keccak-256 empty=%s", got)
 	}
 	key := receiptKeyOne(t)

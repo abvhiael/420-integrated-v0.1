@@ -30,15 +30,16 @@ decision = load("config/genesis-applications.json")
 mapping = load("contracts/config/genesis-dapp-contract-map.json")
 if decision.get("status") != "FROZEN":
     errors.append("genesis application decision not frozen")
-if len(decision.get("apps", [])) != 20:
-    errors.append("expected 20 entries including testnet faucet")
+if len(decision.get("apps", [])) != 21:
+    errors.append("expected 21 frozen public surfaces including testnet-only faucet")
 
 mapped = {x["dapp"]: x for x in mapping.get("apps", [])}
 for app in decision.get("apps", []):
     name = app["name"]
-    if name not in mapped:
+    map_name = "420 Civic" if name == "420 Governance" else name
+    if map_name not in mapped:
         errors.append("missing dapp map: " + name)
-    elif app.get("contracts_required") and not mapped[name].get("contracts"):
+    elif app.get("contracts_required") and not mapped[map_name].get("contracts"):
         errors.append("missing contracts for " + name)
 
 required_files = [
@@ -86,7 +87,7 @@ if explorer:
         errors.append("explorer authority invariant missing")
     if not indexing.get("tracksHeadSafeFinalizedSeparately") or not indexing.get("rebuildableFromChain") or not indexing.get("databaseIsNonCanonical"):
         errors.append("explorer indexing invariant missing")
-    if sources.get("protocolDiscovery") != "420Registry / ProtocolRegistry":
+    if sources.get("protocolDiscovery") != "420Indexer Registry-backed service/version projection":
         errors.append("explorer registry discovery binding missing")
     require_invariants(explorer, ["EXP-INV-001", "EXP-INV-004", "EXP-INV-005", "EXP-INV-008", "EXP-INV-009"], "explorer")
 

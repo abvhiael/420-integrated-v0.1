@@ -16,18 +16,18 @@ import (
 
 func validIndexerVersion(version uint32, activated uint64) decoder.ServiceVersion {
 	return decoder.ServiceVersion{
-		ServiceID: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-		Version: version,
+		ServiceID:      "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		Version:        version,
 		Implementation: impl1,
-		CodeHash: h1,
-		MetadataHash: h2,
-		ComponentType: 2,
-		ManifestHash: h3,
+		CodeHash:       h1,
+		MetadataHash:   h2,
+		ComponentType:  2,
+		ManifestHash:   h3,
 		DependencyRoot: h4,
-		InterfaceHash: h1,
+		InterfaceHash:  h1,
 		ActivatedBlock: activated,
-		ActivatedHash: h3,
-		Active: true,
+		ActivatedHash:  h3,
+		Active:         true,
 	}
 }
 
@@ -51,15 +51,19 @@ func TestIndexerSourceBuildsFinalizedSnapshot(t *testing.T) {
 	v1 := validIndexerVersion(1, 10)
 	v2 := validIndexerVersion(2, 21)
 	server := indexerServer(t,
-		indexerapi.HealthResponse{Health:model.Health{ChainID:420,FinalizedHeight:finalized}},
-		indexerapi.ReadResponse[[]decoder.ServiceSummary]{Data:[]decoder.ServiceSummary{{ServiceID:v1.ServiceID,Versions:[]decoder.ServiceVersion{v1,v2}}}},
+		indexerapi.HealthResponse{Health: model.Health{ChainID: 420, FinalizedHeight: finalized}},
+		indexerapi.ReadResponse[[]decoder.ServiceSummary]{Data: []decoder.ServiceSummary{{ServiceID: v1.ServiceID, Versions: []decoder.ServiceVersion{v1, v2}}}},
 	)
 	defer server.Close()
 
 	src, err := NewIndexerSource(server.URL, 420, decoder.ProtocolRegistryCanonicalAddress420, time.Second)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	snapshot, err := src.Snapshot(context.Background())
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if snapshot.FinalizedBlock != finalized || len(snapshot.Versions) != 1 || snapshot.Versions[0].Version != 1 {
 		t.Fatalf("unexpected snapshot: %#v", snapshot)
 	}
@@ -70,13 +74,15 @@ func TestIndexerSourceIgnoresUnfinalizedDeprecation(t *testing.T) {
 	v.Active = false
 	v.DeprecatedBlock = 25
 	server := indexerServer(t,
-		indexerapi.HealthResponse{Health:model.Health{ChainID:420,FinalizedHeight:20}},
-		indexerapi.ReadResponse[[]decoder.ServiceSummary]{Data:[]decoder.ServiceSummary{{ServiceID:v.ServiceID,Versions:[]decoder.ServiceVersion{v}}}},
+		indexerapi.HealthResponse{Health: model.Health{ChainID: 420, FinalizedHeight: 20}},
+		indexerapi.ReadResponse[[]decoder.ServiceSummary]{Data: []decoder.ServiceSummary{{ServiceID: v.ServiceID, Versions: []decoder.ServiceVersion{v}}}},
 	)
 	defer server.Close()
 	src, _ := NewIndexerSource(server.URL, 420, decoder.ProtocolRegistryCanonicalAddress420, time.Second)
 	snapshot, err := src.Snapshot(context.Background())
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(snapshot.Versions) != 1 || !snapshot.Versions[0].Active {
 		t.Fatalf("unfinalized deprecation leaked into finalized snapshot: %#v", snapshot.Versions)
 	}
@@ -84,7 +90,7 @@ func TestIndexerSourceIgnoresUnfinalizedDeprecation(t *testing.T) {
 
 func TestIndexerSourceRejectsAuthorityClaimWrongChainAndRegistry(t *testing.T) {
 	server := indexerServer(t,
-		indexerapi.HealthResponse{Health:model.Health{ChainID:420,FinalizedHeight:20},CanonicalAuthority:true},
+		indexerapi.HealthResponse{Health: model.Health{ChainID: 420, FinalizedHeight: 20}, CanonicalAuthority: true},
 		indexerapi.ReadResponse[[]decoder.ServiceSummary]{},
 	)
 	defer server.Close()
@@ -94,7 +100,7 @@ func TestIndexerSourceRejectsAuthorityClaimWrongChainAndRegistry(t *testing.T) {
 	}
 
 	server2 := indexerServer(t,
-		indexerapi.HealthResponse{Health:model.Health{ChainID:421,FinalizedHeight:20}},
+		indexerapi.HealthResponse{Health: model.Health{ChainID: 421, FinalizedHeight: 20}},
 		indexerapi.ReadResponse[[]decoder.ServiceSummary]{},
 	)
 	defer server2.Close()
@@ -112,8 +118,8 @@ func TestIndexerSourceRejectsMalformedCanonicalRecordAndHTTPFailure(t *testing.T
 	bad := validIndexerVersion(1, 10)
 	bad.CodeHash = "0x1234"
 	server := indexerServer(t,
-		indexerapi.HealthResponse{Health:model.Health{ChainID:420,FinalizedHeight:20}},
-		indexerapi.ReadResponse[[]decoder.ServiceSummary]{Data:[]decoder.ServiceSummary{{ServiceID:bad.ServiceID,Versions:[]decoder.ServiceVersion{bad}}}},
+		indexerapi.HealthResponse{Health: model.Health{ChainID: 420, FinalizedHeight: 20}},
+		indexerapi.ReadResponse[[]decoder.ServiceSummary]{Data: []decoder.ServiceSummary{{ServiceID: bad.ServiceID, Versions: []decoder.ServiceVersion{bad}}}},
 	)
 	defer server.Close()
 	src, _ := NewIndexerSource(server.URL, 420, decoder.ProtocolRegistryCanonicalAddress420, time.Second)
@@ -121,7 +127,9 @@ func TestIndexerSourceRejectsMalformedCanonicalRecordAndHTTPFailure(t *testing.T
 		t.Fatal("expected malformed canonical record rejection")
 	}
 
-	fail := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request){ http.Error(w, "down", http.StatusServiceUnavailable) }))
+	fail := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "down", http.StatusServiceUnavailable)
+	}))
 	defer fail.Close()
 	srcFail, _ := NewIndexerSource(fail.URL, 420, decoder.ProtocolRegistryCanonicalAddress420, time.Second)
 	if _, err := srcFail.Snapshot(context.Background()); err == nil {

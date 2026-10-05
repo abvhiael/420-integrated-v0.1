@@ -85,3 +85,6 @@ jobs:
 
       - name: Verify CMP-3.5 content-addressed work-unit download
         run: python scripts/verify-cmp-3-5-content-addressed-work-unit-download.py
+
+      - name: Verify CMP-3.6 execution lifecycle
+        run: python scripts/verify-cmp-3-6-execution-lifecycle.py

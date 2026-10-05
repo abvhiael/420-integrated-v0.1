@@ -11,8 +11,8 @@ import (
 
 	appstoreapi "github.com/420integrated/420-integrated/appstore/api"
 	"github.com/420integrated/420-integrated/appstore/hardening"
-	"github.com/420integrated/420-integrated/appstore/security"
 	appstoreruntime "github.com/420integrated/420-integrated/appstore/runtime"
+	"github.com/420integrated/420-integrated/appstore/security"
 	appstoreweb "github.com/420integrated/420-integrated/appstore/web"
 )
 

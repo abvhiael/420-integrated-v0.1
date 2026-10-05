@@ -87,7 +87,6 @@ Errors use:
 - logs: optional `address` filter.
 - asset transfers: optional `assetKey`, `address`, and unsigned `beforeBlock`.
 - protocol events: optional `protocol` and `objectKey`.
-- AI collection routes use the standard opaque `cursor`, `limit`, and `direction` page controls; AI detail routes take their declared path identifier.
 - search: required non-empty `q`; optional `limit` uses the same `1..200` validation.
 - all chain-scoped routes require decimal unsigned `chainId`.
 

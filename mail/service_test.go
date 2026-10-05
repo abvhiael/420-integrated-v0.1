@@ -66,7 +66,7 @@ func testService() (*Service, *testNotify) {
 func TestSendInboxReadAndIdempotency(t *testing.T) {
 	s, n := testService()
 	ctx := context.Background()
-	req := SendRequest{IdempotencyKey: "k1", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "private body", Source: "420/service/reefer-review/v1"}
+	req := SendRequest{IdempotencyKey: "k1", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "private body", Source: ServiceID}
 	first, err := s.Send(ctx, "alice.420", req)
 	if err != nil {
 		t.Fatal(err)
@@ -107,7 +107,7 @@ func TestSendInboxReadAndIdempotency(t *testing.T) {
 func TestAuthorizationAndPolicyFailures(t *testing.T) {
 	ctx := context.Background()
 	s, _ := testService()
-	req := SendRequest{IdempotencyKey: "k1", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "y", Source: "test"}
+	req := SendRequest{IdempotencyKey: "k1", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "y", Source: ServiceID}
 	if _, err := s.Send(ctx, "mallory.420", req); !errors.Is(err, ErrUnauthorized) {
 		t.Fatalf("want unauthorized, got %v", err)
 	}
@@ -120,7 +120,7 @@ func TestAuthorizationAndPolicyFailures(t *testing.T) {
 func TestIdempotencyConflict(t *testing.T) {
 	ctx := context.Background()
 	s, _ := testService()
-	req := SendRequest{IdempotencyKey: "same", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "one", Source: "test"}
+	req := SendRequest{IdempotencyKey: "same", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "one", Source: ServiceID}
 	if _, err := s.Send(ctx, "alice.420", req); err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func TestIdempotencyConflict(t *testing.T) {
 func TestSenderCannotMarkReadOrForeignRead(t *testing.T) {
 	ctx := context.Background()
 	s, _ := testService()
-	req := SendRequest{IdempotencyKey: "k", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "body", Source: "test"}
+	req := SendRequest{IdempotencyKey: "k", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "body", Source: ServiceID}
 	msg, err := s.Send(ctx, "alice.420", req)
 	if err != nil {
 		t.Fatal(err)
@@ -150,12 +150,12 @@ func TestBoundsAndCursor(t *testing.T) {
 	ctx := context.Background()
 	s, _ := testService()
 	big := make([]byte, MaxBodyBytes+1)
-	req := SendRequest{IdempotencyKey: "big", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: string(big), Source: "test"}
+	req := SendRequest{IdempotencyKey: "big", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: string(big), Source: ServiceID}
 	if _, err := s.Send(ctx, "alice.420", req); !errors.Is(err, ErrInvalidInput) {
 		t.Fatalf("oversize accepted: %v", err)
 	}
 	for i := 0; i < 3; i++ {
-		r := SendRequest{IdempotencyKey: fmt.Sprintf("%d", i), Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "b", Source: "test"}
+		r := SendRequest{IdempotencyKey: fmt.Sprintf("%d", i), Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "b", Source: ServiceID}
 		if _, err := s.Send(ctx, "alice.420", r); err != nil {
 			t.Fatal(err)
 		}
@@ -173,5 +173,14 @@ func TestBoundsAndCursor(t *testing.T) {
 	}
 	if len(p2.Items) != 1 {
 		t.Fatalf("second page len=%d", len(p2.Items))
+	}
+}
+
+func TestRejectsSpoofedSource(t *testing.T) {
+	ctx := context.Background()
+	s, _ := testService()
+	req := SendRequest{IdempotencyKey: "source", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "body", Source: "420/service/reefer-review/v1"}
+	if _, err := s.Send(ctx, "alice.420", req); !errors.Is(err, ErrInvalidInput) {
+		t.Fatalf("spoofed source accepted: %v", err)
 	}
 }

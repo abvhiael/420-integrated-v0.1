@@ -62,7 +62,7 @@ A scientific-work-unit builder MUST resolve authoritative values rather than tru
 | Scientific field | Canonical source / rule |
 | --- | --- |
 | `unitId` | CMP-0.3 derivation from accepted job/manifest/partition/replica state. |
-| `researchProjectCommitment` | For CMP-4.1, a required immutable nonzero commitment. CMP-4.2 will define the authoritative Research Project Registry and validity lookup. |
+| `researchProjectCommitment` | Exact `ComputeResearchProjectRegistry420` project-revision commitment. New scientific work validates the current ACTIVE accepting revision with `isCurrentAcceptable` before freezing that exact commitment. |
 | `manifestHash` | Canonical accepted job/request manifest commitment. |
 | `executableContainerCommitment` | Exact accepted signed-manifest executable/container/runtime commitment; must resolve to immutable bytes/profile semantics. |
 | `datasetInputCommitment` | Must equal the accepted canonical job/request input commitment. CMP-4.4 will add dataset-manifest semantics without changing this binding requirement. |
@@ -121,7 +121,7 @@ Where a CMP-1.4.8 route is used, its workload/profile/schema/protocol/adapter-co
 
 CMP-4.1 freezes the interface points required by later canonical steps:
 
-- **CMP-4.2 Research Project Registry:** resolves `researchProjectCommitment`;
+- **CMP-4.2 Research Project Registry:** now resolves `researchProjectCommitment` to an exact revisioned project commitment and current new-work admission state;
 - **CMP-4.3 Researcher / institution identity:** authenticates project actors without changing job authority;
 - **CMP-4.4 Dataset manifests:** defines richer dataset lineage/access metadata behind `datasetInputCommitment`;
 - **CMP-4.5 Reproducible execution environments:** formalizes environment reconstruction behind `executableContainerCommitment`;
@@ -150,7 +150,6 @@ No Level 2 milestone is required at CMP-4.1. The first scientific-framework inte
 
 ## 9. Intentionally deferred
 
-- live Research Project Registry and project validity — CMP-4.2;
 - researcher/institution identity — CMP-4.3;
 - dataset manifest registry/access implementation — CMP-4.4;
 - reproducible environment registry/reconstruction — CMP-4.5;

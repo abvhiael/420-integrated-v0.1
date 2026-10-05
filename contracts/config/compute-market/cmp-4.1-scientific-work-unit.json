@@ -89,7 +89,7 @@
   },
   "canonical_sources": {
     "unitId": "CMP-0.3 canonical deterministic work-unit identity",
-    "researchProjectCommitment": "required immutable commitment; authoritative registry deferred to CMP-4.2",
+    "researchProjectCommitment": "ComputeResearchProjectRegistry420 exact project revision commitment; new work validates isCurrentAcceptable before binding",
     "manifestHash": "ComputeJobRegistry420 accepted manifestHash",
     "executableContainerCommitment": "accepted CMP-0.4 signed manifest executable/container/runtime semantics",
     "datasetInputCommitment": "ComputeJobRegistry420 inputCommitment / canonical request input",
@@ -137,7 +137,6 @@
     "affected Compute Market Level 1 workflow passes exact implementation SHA"
   ],
   "intentionally_deferred": [
-    "CMP-4.2 project registry",
     "CMP-4.3 researcher/institution identity",
     "CMP-4.4 dataset manifests",
     "CMP-4.5 reproducible environments",
@@ -149,5 +148,9 @@
     "CMP-6 reward pools",
     "CMP-9.13 live scientific demonstration"
   ],
-  "next_canonical_step": "CMP-4.2 — Research Project Registry"
+  "next_canonical_step": "CMP-4.2 — Research Project Registry",
+  "cmp_4_2_integration": {
+    "registry": "contracts/src/compute/ComputeResearchProjectRegistry420.sol",
+    "rule": "researchProjectCommitment is an exact registry-derived project revision commitment; only a current ACTIVE accepting revision may admit new scientific work"
+  }
 }

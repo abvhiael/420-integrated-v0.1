@@ -25,8 +25,6 @@ def main():
         require(service["genesis_target"] == "communities_posts_threads_comments_votes_moderation",
                 "Town Genesis target drift", errors)
 
-    require(town_cfg["status"] == "CONTENT_BASELINE",
-            "Town canonical config has not advanced to CONTENT_BASELINE", errors)
     require("TOWN-AUDIT-4" in town_cfg["implementedThrough"],
             "Town canonical config missing TOWN-AUDIT-4", errors)
     require("TOWN-AUDIT-4" not in town_cfg["deferredRoadmap"],

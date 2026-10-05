@@ -38,11 +38,23 @@ No dependency integration client, contract, fixed address, service ID, deploymen
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-DEP-001 through PB-DEP-024 exist exactly once and in sequence;
+- exact narrow roles are defined for 420Wallet, 420Identity, 420Names, 420Messenger, 420Notifications, 420Pay, 420Registry, 420AppStore, and 420Analytics;
+- derived/non-canonical roles are defined for 420Indexer, 420Explorer, 420Search, and bounded 420Verify use;
+- Wallet connection cannot imply PuffBuddies membership, eligibility, consent, match, or safety state;
+- Identity/Names remain bounded to their canonical identity/credential and presentation/resolution domains;
+- Messenger cannot manufacture PuffBuddies consent and Messenger-native block state can only add a deny condition;
+- Notifications cannot create authorization and Pay cannot create consent, eligibility, block bypass, or private-person access;
+- Registry remains service-discovery/version authority while AppStore remains a non-authoritative catalogue/presentation surface;
+- Analytics/Indexer/Explorer/Search remain derived and subordinate to canonical source authority;
+- protected PuffBuddies payloads are excluded from Analytics and public derived-service enumeration;
+- authority inheritance across dependencies is explicitly prohibited;
+- dependency failure/freshness behavior and an integration-decision rule are documented;
+- no dependency integration client, contract, fixed address, service ID, deployment, or live wiring is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`d164f35692908f853390c032437bdcfa602c2794`
 
 ## Current main/base SHA
 
@@ -54,7 +66,17 @@ PR #526 remains on a historical base and requires later accumulated-branch recon
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37284727955` — **PASS**
+- job: `111680798582` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37284733063` — **PASS**
+- job: `111680814559` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -76,11 +98,13 @@ PB-0.8 defines dependency roles and authority boundaries. Exact APIs, service ID
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.8 is formally COMPLETE.
+None for PB-0.8.
 
 ## Completion state
 
-**PB-0.8 — PENDING QUALIFICATION**
+**PB-0.8 — COMPLETE**
+
+All canonical PB-0.8 exit criteria are satisfied on exact implementation SHA `d164f35692908f853390c032437bdcfa602c2794`.
 
 ## Next canonical roadmap step
 

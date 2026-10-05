@@ -3,6 +3,7 @@ package moderation
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -295,6 +296,9 @@ func (s *Service) Moderate(actor model.ObjectID, req ModerateRequest) (Record,er
 	}
 	s.cases[c.ID]=c
 	s.appendRecord(r)
+	if req.Action == ActionRestore {
+		delete(s.targetCase, targetKey(c.CommunityID, c.TargetKind, c.TargetID))
+	}
 	s.remember(actor,req.Action,req.IdempotencyKey,fp,r.ID)
 	return r,nil
 }
@@ -481,10 +485,12 @@ func validID(id model.ObjectID)bool{return id.Valid()}
 func validTargetKind(k TargetKind)bool{return k==TargetPost||k==TargetComment||k==TargetUser}
 func validModeratorAction(a Action)bool{return a==ActionHide||a==ActionSuspend||a==ActionModeratorDecision||a==ActionRestore||a==ActionLock}
 func validReason(r Reason)bool{return strings.TrimSpace(string(r))!=""&&len(r)<=128}
+var sha256Pattern = regexp.MustCompile("^[a-f0-9]{64}$")
+
 func validBody(ref,hash string)bool{
 	ref=strings.TrimSpace(ref);hash=strings.TrimSpace(hash)
 	if ref==""&&hash==""{return true}
-	return ref!=""&&hash!=""&&len(ref)<=2048&&len(hash)==64
+	return ref!=""&&hash!=""&&len(ref)<=2048&&sha256Pattern.MatchString(hash)
 }
 func validKey(k string)bool{return k!=""&&len(k)<=128&&strings.TrimSpace(k)==k}
 func targetKey(c model.ObjectID,k TargetKind,id model.ObjectID)string{return fmt.Sprintf("%s|%s|%s",c,k,id)}

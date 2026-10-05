@@ -108,6 +108,7 @@ for token in [
     "TestSecurityIncidentEvidenceIsPrivateNonAuthoritativeAndPayloadFree",
     "TestSecurityGuardFailsClosedOnTamperedIncidentState",
     "TestProtectedExecutionLifecycleRejectsDeniedWorkloadBeforeSandbox",
+    "TestProtectedExecutionLifecycleResumeRejectsDeniedWorkloadBeforeCheckpointAccess",
     "TestProtectedExecutionLifecycleObservesSandboxAbuse",
     "TestSandboxIncludesMaliciousWorkloadHardeningFlags",
 ]:

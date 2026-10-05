@@ -232,3 +232,115 @@ For the scope of TOWN-AUDIT-2, configuration drift and authority-classification 
 **TOWN-AUDIT-2 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-3 — Authoritative community state**.
+
+
+## TOWN-AUDIT-3 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 + Level 2 authority milestone qualification**  
+Qualified implementation/test SHA: `5f8f4a3ad21ad2a1180b2c6af81a2794cffeffb2`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA qualification.
+
+### Implementation completed
+
+TOWN-AUDIT-3 establishes the authoritative on-chain community state surface for 420Town through `TownAuthority420` and aligns the canonical config/schema/docs/test surfaces to that authority model.
+
+Implemented scope includes:
+
+- community creation, metadata commitment and ownership transfer;
+- owner-as-active-member invariant;
+- membership states `NONE`, `ACTIVE`, `LEFT`, `REMOVED`;
+- controlled rejoin/reinstatement semantics;
+- fixed community-scoped MEMBER/MODERATOR/ADMIN roles;
+- default-deny Town permissions with owner-controlled role-permission configuration;
+- owner-only ADMIN assignment/revocation to prevent privilege self-escalation;
+- privileged-role clearing on leave/removal to prevent stale-role resurrection;
+- explicit revisioned subscription lifecycle;
+- explicit revisioned entitlement lifecycle;
+- immediate effective expiry plus explicit expiry materialization;
+- reference-only treasury authority binding with paired authority ID/address validation;
+- no Town deposit/withdrawal/transfer/custody path and no parallel Town balance ledger;
+- authority mutation events with community/actor/revision provenance;
+- machine-readable invariant inventory in `config/420town-authority-v1.json`;
+- canonical config advancement to `AUTHORITY_BASELINE`;
+- aligned Go model and schema vocabulary;
+- app documentation for the authority/trust boundary;
+- CI ownership for authoritative-state verification and retained Town integration regressions.
+
+### Explicit authority boundary
+
+Town authority is not delegated to Search, 420Indexer, message transport, frontend, Storage gateways, Notifications or rewards. Those systems may project, transport or react to Town state but cannot widen, replace or override the authoritative community state represented by `TownAuthority420`.
+
+Treasury handling is intentionally reference-only. Town binds the external authority identifier and treasury address but does not claim settlement, custody or accounting ownership beyond that binding.
+
+### Exit criteria satisfied
+
+1. Communities are implemented as authoritative application state.
+2. Membership lifecycle is explicit and tested, including owner safety and removal/reinstatement behavior.
+3. Roles are community-scoped and tested against cross-community leakage.
+4. Permissions are default deny and tested against self-escalation.
+5. Subscriptions and entitlements have explicit revisioned lifecycle behavior and expiry semantics.
+6. Treasury authority binding is implemented without creating a competing custody/balance ledger.
+7. Authority events exist and event provenance is directly tested.
+8. Explicit invariants are machine-readable and verifier-enforced.
+9. Search, Indexer, transport, UI and rewards remain non-authoritative.
+
+### Qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37267431040`  
+Run number: `28`  
+Result: **PASS**  
+Qualified SHA: `5f8f4a3ad21ad2a1180b2c6af81a2794cffeffb2`
+
+Passing exact-head checks:
+
+- exact implementation SHA assertion in both Town jobs;
+- canonical Town audit classification verifier;
+- Town product-skeleton verifier;
+- Town authoritative-state verifier;
+- `go test ./town/...`;
+- Town Solidity build including `TownAuthority420`;
+- retained full Town-focused Foundry inventory via `forge test --match-path "test/Town*.t.sol" -vvv`;
+- cross-dApp rewards hardening via `test/RewardsCrossDappHardening420.t.sol`.
+
+The immediately prior exact-head run on `8cabe21cdce020b08515c83b49969c7ae375fec3` failed six focused tests. Investigation showed all six failures were test-harness defects: one-shot `vm.prank(OWNER)` calls were consumed by intervening public constant getter calls before the protected action. The tests were corrected to resolve constants before applying the prank. No Town authorization semantics were weakened. The corrected exact-head run above passed fully and is the authoritative evidence for this closeout.
+
+### Security/adversarial/invariant result
+
+The qualified suite directly exercises and passes the core TOWN-AUDIT-3 adversarial properties:
+
+- unknown permission fails closed;
+- non-owner/non-authorized actors cannot manage members, roles, subscriptions, entitlements or treasury references;
+- ADMIN cannot self-grant additional role permissions;
+- ADMIN cannot grant ADMIN to another member;
+- role/permission state is community-scoped and cannot cross community boundaries;
+- leaving/removal clears privileged roles and later rejoin does not resurrect them;
+- removed members cannot self-rejoin;
+- owners cannot leave or be removed while owner;
+- ownership transfer requires an active member successor;
+- active subscription/entitlement replay is rejected by lifecycle state;
+- nonmembers cannot receive active subscriptions or entitlements;
+- expiry is effective at the deadline and can be durably materialized;
+- treasury authority/address must be paired;
+- Town rejects plain value transfer and exposes no custody primitive;
+- authority mutation events bind scope/actor/revision as applicable;
+- optional Town rewards behavior remains independently hardened and default-deny.
+
+### Milestone qualification and deferred scope
+
+TOWN-AUDIT-3 is treated as a **Level 2 milestone** because it introduces the core authoritative community lifecycle and authorization surface. Level 2 was satisfied by the retained Town-wide focused Foundry inventory plus cross-dApp rewards hardening on the same exact implementation SHA, in addition to the step-specific authority verifier and Go checks.
+
+Level 3 remains intentionally deferred to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**. Full repository Solidity inventory ownership, Genesis/address authority, repository/global suites, complete deployment/config reconciliation and final reconciliation to then-current `main` are not claimed by this step.
+
+Current `main` at evidence closeout: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`.
+
+PR #523 remains open. Its historical base is `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`, and it currently reports diverged/non-mergeable against current `main`. That repository-integration debt is explicitly retained for the required Level 3 closeout unless a later Town step materially requires earlier reconciliation.
+
+Live testnet is not a blocker for TOWN-AUDIT-3.
+
+### Completion state
+
+**TOWN-AUDIT-3 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-4 — Content, threads, comments and votes**.

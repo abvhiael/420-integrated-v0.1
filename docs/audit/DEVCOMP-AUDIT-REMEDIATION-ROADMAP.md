@@ -14,17 +14,22 @@ Retain exact 10% ceiling, exact-amount routing, replay protection, no-custody fo
 ## DEVCOMP-AUDIT-4 — authorization boundary — COMPLETE
 Retain source-contract + application scope + amount-aware `CapabilityRegistry420` authorization. No local allowlist or owner bypass.
 
-## DEVCOMP-AUDIT-5 — dedicated exact-head repository qualification — IN PROGRESS
-Run `Dev Compensation Vault Audit Qualification` against the exact final PR head. Required:
-- focused formatting/build;
-- `DevelopmentCompensationVault420.t.sol`;
-- `DevelopmentCompensationGenesis420.t.sol`;
-- hardening-profile rerun;
-- forbidden primitive scan;
-- targeted Slither high-severity gate.
-Record exact SHA, run ID and job IDs. Do not count path-skipped generic Solidity jobs as passing evidence.
+## DEVCOMP-AUDIT-5 — dedicated exact-head repository qualification — COMPLETE
+Exact qualified implementation head: `7a9185b48818f3c994e44a822e440f36d2ccd711`.
 
-## DEVCOMP-AUDIT-6 — deployment package and binding — BLOCKED ON DEPLOYMENT ENVIRONMENT
+`Dev Compensation Vault Audit Qualification` run `37255599638` (#6) completed SUCCESS:
+- `contract-core` job `111591871859` — PASS;
+- focused formatting/build — PASS;
+- `DevelopmentCompensationVault420.t.sol` — PASS;
+- `DevelopmentCompensationGenesis420.t.sol` — PASS;
+- `security` job `111591872012` — PASS;
+- hardening-profile rerun — PASS;
+- forbidden primitive scan — PASS;
+- targeted Slither high-severity gate — PASS.
+
+Repository-side DEVCOMP audit remediation is complete through DEVCOMP-AUDIT-5. Remaining DEVCOMP-AUDIT-6 through DEVCOMP-AUDIT-9 are explicitly transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`; repository CI or synthetic evidence must not be promoted to completion of those live phases.
+
+## DEVCOMP-AUDIT-6 — deployment package and binding — TESTNET HANDOFF / BLOCKED ON DEPLOYMENT ENVIRONMENT
 Once the production-equivalent testnet is live:
 1. select the exact qualified release commit;
 2. deploy against the canonical `CapabilityRegistry420`;
@@ -35,7 +40,7 @@ Once the production-equivalent testnet is live:
 7. establish narrowly scoped source-application capability grants;
 8. prove unauthorized, revoked, wrong-scope and over-limit calls fail closed.
 
-## DEVCOMP-AUDIT-7 — live routing qualification — BLOCKED ON AUDIT-6
+## DEVCOMP-AUDIT-7 — live routing qualification — TESTNET HANDOFF / BLOCKED ON AUDIT-6
 Exercise native $420 and approved ERC-20 contribution paths from real authorized fee-bearing applications. Record transaction hashes and prove:
 - exact policy reference;
 - exact split math;
@@ -46,8 +51,8 @@ Exercise native $420 and approved ERC-20 contribution paths from real authorized
 - rollback on rejected transfer/beneficiary failure;
 - event visibility to Explorer/Analytics/indexing infrastructure.
 
-## DEVCOMP-AUDIT-8 — Genesis closeout — BLOCKED ON AUDIT-6/7
+## DEVCOMP-AUDIT-8 — Genesis closeout — TESTNET/RELEASE HANDOFF / BLOCKED ON AUDIT-6/7
 Reconcile deployment manifests, Registry descriptors, address authority, operator runbook, rollback/migration procedure and exact-head/live evidence. Only then mark Genesis ready.
 
-## DEVCOMP-AUDIT-9 — production release qualification — BLOCKED ON GENESIS CLOSEOUT
+## DEVCOMP-AUDIT-9 — production release qualification — RELEASE HANDOFF / BLOCKED ON GENESIS CLOSEOUT
 Confirm production chain bindings, beneficiary operational controls, source grants, monitoring/alerting, incident response and migration procedure. Production readiness must be a separate decision from repository/testnet qualification.

@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/420integrated/420-integrated/appstore/curation"
+	"github.com/420integrated/420-integrated/appstore/hardening"
 )
 
 const PresentationHistorySchemaVersion = 1
@@ -45,6 +46,13 @@ func (s *PresentationHistoryStore) Append(metadata curation.Metadata) (Presentat
 
 	normalized, err := curation.Normalize(metadata)
 	if err != nil {
+		return PresentationRevision{}, err
+	}
+	if err := hardening.ValidateMetadata(hardening.Metadata{
+		Description:  normalized.Description,
+		Screenshots:  normalized.Screenshots,
+		Presentation: normalized.Presentation,
+	}); err != nil {
 		return PresentationRevision{}, err
 	}
 	doc, err := s.loadUnlocked()
@@ -108,6 +116,13 @@ func (s *PresentationHistoryStore) loadUnlocked() (PresentationHistoryDocument, 
 	for i, entry := range doc.Revisions {
 		normalized, err := curation.Normalize(entry.Metadata)
 		if err != nil || !strings.EqualFold(entry.ServiceID, normalized.ServiceID) {
+			return PresentationHistoryDocument{}, ErrPresentationHistoryCorrupt
+		}
+		if err := hardening.ValidateMetadata(hardening.Metadata{
+			Description:  normalized.Description,
+			Screenshots:  normalized.Screenshots,
+			Presentation: normalized.Presentation,
+		}); err != nil {
 			return PresentationHistoryDocument{}, ErrPresentationHistoryCorrupt
 		}
 		id := strings.ToLower(strings.TrimSpace(entry.ServiceID))

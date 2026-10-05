@@ -75,3 +75,5 @@ Blocked until the approved testnet and deployment infrastructure are live. Retai
 - Exact repository qualification head: `8133318b4958eceb197dc2aa9c7026eeb46c2ac2`.
 - Exact-head qualification: 420Messenger Audit Qualification run `37274317403` (#26), contract-core `111647872131` PASS, security `111647872463` PASS.
 - **MESSENGER-AUDIT-7/8 testnet handoff recorded** in `docs/ROADMAP.md`; no live-testnet, Genesis-ready or production-ready claim is made by this repository closeout.
+
+- Final pre-merge reconciliation base: `b5703dd932f28129a7898fafc579e084e5619b2f`; exact-head requalification required on the resulting candidate.

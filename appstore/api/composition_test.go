@@ -264,3 +264,57 @@ func TestLoadCompositionInputsRejectsUnknownAuthorityFieldsAndTrailingJSON(t *te
 		t.Fatalf("expected trailing JSON rejection, got %v", err)
 	}
 }
+
+
+func TestViewSetRebuildIsAtomicAndSnapshotIsolated(t *testing.T) {
+	doc := compositionDocument(compositionRecord("420/service/demo/v1", 1, "0x1111111111111111111111111111111111111111", true, 10))
+	set := NewViewSet()
+	good := CompositionInputs{
+		SchemaVersion: CompositionInputsSchemaVersion,
+		Applications: []ViewInput{{
+			ServiceID: "420/service/demo/v1",
+			Curation: curation.Metadata{
+				ServiceID:    "420/service/demo/v1",
+				Categories:   []string{"tools"},
+				Presentation: map[string]string{"theme": "dark"},
+			},
+			Wallet: WalletInput{AppURL: "https://demo.example/app"},
+		}},
+	}
+	if err := set.Rebuild(doc, 420, good); err != nil {
+		t.Fatal(err)
+	}
+	first := set.Snapshot()
+	first[0].Listing.Curation.Categories[0] = "mutated"
+	first[0].Listing.Curation.Presentation["theme"] = "mutated"
+	first[0].Wallet.Permissions = append(first[0].Wallet.Permissions, wallet.Permission{Name: "mutated"})
+
+	second := set.Snapshot()
+	if second[0].Listing.Curation.Categories[0] != "tools" || second[0].Listing.Curation.Presentation["theme"] != "dark" || len(second[0].Wallet.Permissions) != 0 {
+		t.Fatalf("snapshot mutation leaked into retained state: %#v", second[0])
+	}
+
+	bad := CompositionInputs{
+		SchemaVersion: CompositionInputsSchemaVersion,
+		Applications: []ViewInput{{
+			ServiceID: "420/service/demo/v1",
+			Links:     Links{Verify: "https://localhost/private"},
+		}},
+	}
+	if err := set.Rebuild(doc, 420, bad); err == nil {
+		t.Fatal("expected rejected rebuild")
+	}
+	after := set.Snapshot()
+	if len(after) != 1 || after[0].Listing.Curation.Categories[0] != "tools" {
+		t.Fatalf("failed rebuild replaced prior view state: %#v", after)
+	}
+}
+
+func TestComposeApplicationsRejectsTamperedCanonicalDocument(t *testing.T) {
+	doc := compositionDocument(compositionRecord("420/service/demo/v1", 1, "0x1111111111111111111111111111111111111111", true, 10))
+	doc.Versions[0].BlockHash = "0x1234"
+	_, err := ComposeApplications(doc, 420, CompositionInputs{SchemaVersion: CompositionInputsSchemaVersion})
+	if !errors.Is(err, ErrInvalidCompositionInputs) {
+		t.Fatalf("expected tampered canonical document rejection, got %v", err)
+	}
+}

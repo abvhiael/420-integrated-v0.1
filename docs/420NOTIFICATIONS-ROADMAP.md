@@ -124,6 +124,17 @@ Delivery terminal-state handling was hardened for final qualification: delivered
 
 GEN-10.7 repository implementation is therefore **complete and merged**.
 
+### Audit remediation status
+
+- **NOTIFICATIONS-AUDIT-1 — repository audit remediation + exact-head qualification — COMPLETE.** App-local operator guidance, dedicated exact-head CI, repository-grounded audit documentation and shared Genesis-verifier reconciliation are complete. Qualified implementation head: `e7b79b5548712dd3a21b012b8cbca43cac762856`; 420Notifications Audit Qualification run `37250630264` (#3) — PASS.
+- **NOTIFICATIONS-AUDIT-2 — production-equivalent testnet deployment — BLOCKED ON LIVE TESTNET/INFRASTRUCTURE.**
+- **NOTIFICATIONS-AUDIT-3 — live provider/delivery qualification — BLOCKED ON AUDIT-2 / PROVIDER CREDENTIALS.**
+- **NOTIFICATIONS-AUDIT-4 — replay/reorg/restart/failure qualification — BLOCKED ON AUDIT-2.**
+- **NOTIFICATIONS-AUDIT-5 — public endpoint/operational closeout — BLOCKED ON INFRASTRUCTURE/DNS.**
+- **NOTIFICATIONS-AUDIT-6 — final security + Genesis/production closeout — BLOCKED ON LIVE DEPLOYMENT AND EXTERNAL/HUMAN REVIEW.**
+
+Repository-local audit remediation is closed. Remaining audit work is live/testnet/operations work and must not be inferred complete from repository CI.
+
 ### Post-closeout operational work
 
 Live/public-testnet deployment remains separate from repository implementation closeout. `testnet/public-services/notifications/readiness.json` still uses placeholder backend/frontend URLs and pending deployment state. Remaining operational work is to deploy `notifications420`, bind it to the qualified live 420Indexer, configure real in-app/web/push providers, exercise live delivery/dedup/replay/reorg/restart/failure behavior, retain exact-release evidence, and replace placeholder readiness URLs/status only after those services actually exist.

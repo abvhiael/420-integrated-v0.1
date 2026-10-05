@@ -267,9 +267,9 @@ func VerifyCapabilityEvidence(discovery HostDiscovery, evidence CapabilityEviden
 	if err != nil {
 		return err
 	}
-	if expected.SourceCommitment != evidence.SourceCommitment
-		|| expected.BenchmarkCommitment != evidence.BenchmarkCommitment
-		|| expected.EvidenceHash != evidence.EvidenceHash {
+	if expected.SourceCommitment != evidence.SourceCommitment ||
+		expected.BenchmarkCommitment != evidence.BenchmarkCommitment ||
+		expected.EvidenceHash != evidence.EvidenceHash {
 		return fmt.Errorf("%w: capability evidence commitment mismatch", ErrInvalidBenchmark)
 	}
 	return nil

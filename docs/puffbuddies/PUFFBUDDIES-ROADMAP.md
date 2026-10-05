@@ -447,7 +447,47 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.11 — Data lifecycle/deletion
 
-Define deactivate/delete semantics, retention boundaries, backups, moderation evidence, and irreversible public-chain limitations.
+**Purpose:** define canonical deactivation/delete semantics, retention-purpose boundaries, backup/restore behavior, moderation-evidence exceptions, dependency/participant deletion limits, and irreversible public-chain limitations.
+
+**Canonical requirements:**
+
+1. Record PB-DATA-001 through PB-DATA-036.
+2. Distinguish deactivation from deletion and prohibit presenting deactivation as erasure.
+3. Require deletion acceptance to revoke ordinary PuffBuddies participation immediately even if asynchronous cleanup remains pending.
+4. Define PuffBuddies-scoped deletion targets across profile/media, preferences, relationship state, precise location, sessions/tokens, notifications, discovery/search, analytics, logs, caches, backups, and derived artifacts.
+5. Define message-participant/420Messenger and 420Integrated dependency ownership boundaries so PuffBuddies does not promise erasure of data it does not canonically own.
+6. Require explicit narrow purposes for safety/moderation/legal/security/accounting retention, minimum fields, least privilege, bounded duration/review, and eventual deletion/anonymization.
+7. Require backup retention bounds and reapplication of deletion after restore.
+8. Prohibit analytics/log/cache/derived-data and deterministic-hash pseudo-anonymization from becoming deletion bypasses.
+9. Explicitly document immutable public-chain limitations and require later architecture to minimize deletion-sensitive on-chain data.
+10. Define honest deletion-completion semantics, deletion audit minimization, and re-registration behavior that does not silently restore prior relationships/consent.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.11-DATA-LIFECYCLE-DELETION.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.11-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.11 is not a Level 2 integration milestone; it defines lifecycle/retention policy without executable storage or cross-component runtime integration.
+
+**Dependencies:** PB-0.1 through PB-0.10 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.11 data-lifecycle/deletion document exists;
+- PB-DATA-001 through PB-DATA-036 exist exactly once and in sequence;
+- deactivation, deletion, retention, backup, moderation-evidence, dependency, public-chain, and completion semantics are explicit;
+- ordinary participation is revoked once deletion begins;
+- retained exceptions remain narrow, purpose-limited, least-privilege, bounded, and non-public;
+- backups/restores and derived copies cannot silently resurrect deleted active state;
+- immutable/public/external records are not falsely promised as erasable;
+- no database/deletion-worker/retention-scheduler/API/contract/address/service-ID/deployment/live-erasure implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.11 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.12 — User lifecycle
 

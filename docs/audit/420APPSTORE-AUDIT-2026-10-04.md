@@ -103,12 +103,12 @@ A dedicated AppStore audit verifier and workflow are added because the generic q
 
 ## Readiness determination at this audit stage
 
-- CODE COMPLETE: **NO** — production composition/wiring is missing.
+- CODE COMPLETE: **NO** — APPSTORE-AUDIT-5 public runtime composition is implemented but exact-head qualification and later audit/testnet closeout remain pending.
 - BUILD COMPLETE: **pending exact-head workflow**.
 - CONTRACT COMPLETE: **YES / NOT APPLICABLE for AppStore-owned contracts**.
 - TEST COMPLETE: **NO** — repository-level tests are being strengthened, but live integration and testnet E2E remain absent.
 - DOCUMENTATION COMPLETE: **NO** — production runtime/deployment/operator procedure must be updated after the source/wiring decision.
-- INTEGRATION COMPLETE: **NO** — Registry source wiring is implemented, but catalogue lifecycle/composition and API/frontend runtime wiring remain incomplete.
+- INTEGRATION COMPLETE: **NO** — repository-side source/lifecycle/ApplicationView/public-service wiring is implemented, but repository qualification and live-testnet integration remain pending.
 - SECURITY QUALIFIED: **NO** — local hardening is improved, but the final composed service and live dependency behavior are not yet qualified.
 - TESTNET READY: **NO**.
 - GENESIS READY: **NO** as an operable AppStore service, despite the contract-free canonical definition being frozen.
@@ -130,7 +130,7 @@ Historical APPSTORE-9/10 evidence remains provenance only and must not be used t
 2. **APPSTORE-AUDIT-2 — production canonical source.** **COMPLETE — Level 1.** Production uses the explicitly qualified 420Indexer-backed finalized ProtocolRegistry projection, with chain/Registry/finality/authority-claim and malformed/upstream-failure checks. Exact implementation SHA `03071f147041efe2d0bcd9df151a75c54f5c467c` passed AppStore Audit Qualification run `37252857689`, job `111583875589`.
 3. **APPSTORE-AUDIT-3 — runtime catalogue lifecycle.** **COMPLETE — Level 1 + Level 2 lifecycle milestone.** Source sync, deterministic restore/rebuild/persistence, crash-safe atomic replacement, finalized-staleness/conflict protection, periodic refresh, and append-only non-canonical presentation history are wired and qualified at exact implementation SHA `6ea9a46ef889e8ebcc8888a100efaac9013f1e84`.
 4. **APPSTORE-AUDIT-4 — ApplicationView composition.** **COMPLETE — Level 1 + Level 2 composition milestone.** Canonical latest-version records are composed with strict optional curation/security/Wallet/link inputs, retained atomically, and rebuilt after finalized catalogue refresh without allowing presentation sources to select or rewrite canonical Registry fields. Exact implementation SHA `0a2abad993d6ea508919a461b2a2ba7dfe761282` passed AppStore Audit Qualification run `37256398366`, job `111594309071`.
-5. **APPSTORE-AUDIT-5 — public service composition.** Mount health/readiness, `/v1/apps*`, embedded frontend, abuse controls and dependency-state behavior under one production handler; readiness must represent the composed application, not only Registry bytecode reachability.
+5. **APPSTORE-AUDIT-5 — public service composition.** **IMPLEMENTED; Level 1 qualification pending exact-head CI.** Health/readiness, dynamic `/v1/apps*`, embedded frontend, in-memory anonymous abuse limiting and dependency-aware blocked/degraded behavior are mounted under one production handler; readiness now represents the composed application rather than only Registry bytecode reachability.
 6. **APPSTORE-AUDIT-6 — repository qualification.** Run formatting, race tests, vet, production build, documentation qualification, and requirement-specific exact-head checks.
 7. **APPSTORE-AUDIT-7 — live testnet qualification.** Deploy backend/frontend, populate real URLs, exercise canonical Registry ingestion, restart/rebuild, Wallet handoff, outage/degraded cases, privacy boundaries and browser/API behavior against the live testnet.
 8. **APPSTORE-AUDIT-8 — Genesis/production closeout.** Record exact deployment/configuration evidence, monitoring/recovery procedure, final security review and production-domain configuration, then requalify the exact release head.

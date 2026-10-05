@@ -201,6 +201,30 @@ func TestIdleOnlyTracksContinuousLowUtilizationWhenProbeHasNoIdleClock(t *testin
 	}
 }
 
+func TestControlledExecutionLifecycleAutomaticallyAppliesCPUQuota(t *testing.T) {
+	runner := &inputCapturingRunner{}
+	lifecycle, _, _, _ := resultFixture(t, runner)
+	policy := DefaultLocalResourcePolicy()
+	policy.CPUPercent = 50
+	controller, err := NewLocalResourceController(policy, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewControlledExecutionLifecycle(lifecycle, controller); err != nil {
+		t.Fatal(err)
+	}
+	want := float64(RuntimeLogicalCPUs()) * 0.5
+	if want < 0.01 {
+		want = 0.01
+	}
+	if want > 64 {
+		want = 64
+	}
+	if lifecycle.sandbox.policy.CPUs != want {
+		t.Fatalf("controlled sandbox CPUs=%v want=%v", lifecycle.sandbox.policy.CPUs, want)
+	}
+}
+
 func TestScheduleControlsUseConfiguredTimezone(t *testing.T) {
 	policy := DefaultLocalResourcePolicy()
 	policy.TimeZone = "UTC"

@@ -16,7 +16,7 @@ version: v1
 
 It is **not** part of the frozen Genesis application catalog. Its service identifier, `420/service/town/v1`, belongs to the GEN-SVC composition registry and must not be represented as a frozen Genesis application ID without a later explicit catalog decision.
 
-## Implemented through TOWN-AUDIT-5
+## Implemented through TOWN-AUDIT-6
 
 The repository now contains:
 
@@ -43,13 +43,21 @@ The repository now contains:
 - community-scoped suspension;
 - append-only report/appeal/decision/restore provenance;
 - content-gate enforcement preventing hidden/locked/suspended alternate-path bypass;
-- exact-SHA Town CI and app-specific regression qualification.
+- exact-SHA Town CI and app-specific regression qualification;
+- canonical Identity active-profile fail-closed reads;
+- 420Storage/Resource Protocol upload preparation and SHA-256-verified retrieval;
+- PUBLIC-only non-canonical 420Search projection through `420Town:public` / `public_town`;
+- provenance-bound 420Notifications handoff with explicit subscription selection;
+- canonical 420Messenger authorization checks before replaceable encrypted transport;
+- optional Registry service discovery with exact active service-ID matching;
+- retained optional Town Rewards integration.
 
 Detailed models:
 
 - authority/trust boundary: `docs/apps/town/authority.md`
 - content lifecycle/abuse boundary: `docs/apps/town/content.md`
 - moderation/appeal lifecycle: `docs/apps/town/moderation.md`
+- service integrations: `docs/apps/town/integrations.md`
 
 ## Trust boundary
 
@@ -61,4 +69,4 @@ Post/comment body bytes remain off-chain by default.
 
 ## Remaining roadmap work
 
-Service integrations, API/SDK/indexer/recovery, the user-facing web application, broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps.
+API/SDK/indexer/recovery, the user-facing web application, broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps. Live external endpoints are not inferred from repository-local integration qualification.

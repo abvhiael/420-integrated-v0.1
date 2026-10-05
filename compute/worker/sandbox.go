@@ -58,13 +58,14 @@ type SandboxResult struct {
 }
 
 type CommandRunner interface {
-	Run(context.Context, string, []string, io.Writer, io.Writer) error
+	Run(context.Context, string, []string, io.Reader, io.Writer, io.Writer) error
 }
 
 type OSCommandRunner struct{}
 
-func (OSCommandRunner) Run(ctx context.Context, name string, args []string, stdout, stderr io.Writer) error {
+func (OSCommandRunner) Run(ctx context.Context, name string, args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Stdin = stdin
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	return cmd.Run()
@@ -149,6 +150,10 @@ func NewSandbox(policy SandboxPolicy, runner CommandRunner) (*Sandbox, error) {
 }
 
 func (s *Sandbox) Run(parent context.Context, request SandboxRequest) (SandboxResult, error) {
+	return s.RunWithInput(parent, request, nil)
+}
+
+func (s *Sandbox) RunWithInput(parent context.Context, request SandboxRequest, input io.Reader) (SandboxResult, error) {
 	if err := ValidateSandboxRequest(request); err != nil {
 		return SandboxResult{}, err
 	}
@@ -160,10 +165,10 @@ func (s *Sandbox) Run(parent context.Context, request SandboxRequest) (SandboxRe
 	ctx, cancel := context.WithTimeout(parent, s.policy.Timeout)
 	defer cancel()
 
-	args := s.runArgs(name, request)
+	args := s.runArgs(name, request, input != nil)
 	output := newLimitedBuffer(s.policy.MaxOutputBytes)
 	started := time.Now()
-	runErr := s.runner.Run(ctx, s.policy.Engine, args, output, output)
+	runErr := s.runner.Run(ctx, s.policy.Engine, args, input, output, output)
 	duration := time.Since(started)
 
 	result := SandboxResult{
@@ -180,7 +185,7 @@ func (s *Sandbox) Run(parent context.Context, request SandboxRequest) (SandboxRe
 	if ctx.Err() != nil {
 		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cleanupCancel()
-		_ = s.runner.Run(cleanupCtx, s.policy.Engine, []string{"rm", "-f", name}, io.Discard, io.Discard)
+		_ = s.runner.Run(cleanupCtx, s.policy.Engine, []string{"rm", "-f", name}, nil, io.Discard, io.Discard)
 		return result, fmt.Errorf("sandbox execution: %w", ctx.Err())
 	}
 	if runErr != nil {
@@ -189,7 +194,7 @@ func (s *Sandbox) Run(parent context.Context, request SandboxRequest) (SandboxRe
 	return result, nil
 }
 
-func (s *Sandbox) runArgs(name string, request SandboxRequest) []string {
+func (s *Sandbox) runArgs(name string, request SandboxRequest, interactive bool) []string {
 	p := s.policy
 	args := []string{
 		"run",
@@ -204,6 +209,9 @@ func (s *Sandbox) runArgs(name string, request SandboxRequest) []string {
 		"--cpus", strconv.FormatFloat(p.CPUs, 'f', -1, 64),
 		"--user", p.User,
 		"--tmpfs", "/tmp:rw,noexec,nosuid,nodev,size=" + strconv.FormatUint(p.TempBytes, 10),
+	}
+	if interactive {
+		args = append(args, "--interactive")
 	}
 	args = append(args, request.Image)
 	args = append(args, request.Command...)

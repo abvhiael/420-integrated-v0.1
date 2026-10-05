@@ -96,6 +96,8 @@ type ExecutionRecord struct {
 	ExitCode             int                   `json:"exitCode,omitempty"`
 	TimedOut             bool                  `json:"timedOut,omitempty"`
 	OutputTruncated      bool                  `json:"outputTruncated,omitempty"`
+	StdoutSHA256         string                `json:"stdoutSha256,omitempty"`
+	StdoutBytes          uint64                `json:"stdoutBytes,omitempty"`
 	ResumeCheckpointCommitment string          `json:"resumeCheckpointCommitment,omitempty"`
 	StartedAt            time.Time             `json:"startedAt,omitempty"`
 	EndedAt              time.Time             `json:"endedAt,omitempty"`
@@ -276,6 +278,8 @@ func (l *ExecutionLifecycle) Execute(ctx context.Context, plan ExecutionPlan) (E
 	record.ExitCode = sandboxResult.ExitCode
 	record.TimedOut = sandboxResult.TimedOut
 	record.OutputTruncated = sandboxResult.OutputTruncated
+	record.StdoutSHA256 = sandboxResult.StdoutSHA256
+	record.StdoutBytes = sandboxResult.StdoutBytes
 
 	switch {
 	case errors.Is(runCtx.Err(), context.DeadlineExceeded):

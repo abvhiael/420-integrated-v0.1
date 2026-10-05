@@ -14,6 +14,7 @@ type Classification string
 
 const (
 	ClassPublicOnChain         Classification = "public_onchain"
+	ClassPublicApplication     Classification = "public_application"
 	ClassPrivateMessenger      Classification = "private_messenger"
 	ClassPrivateCommons        Classification = "private_commons"
 	ClassPrivateIdentity       Classification = "private_identity"
@@ -53,7 +54,7 @@ func Admit(candidate Candidate) error {
 	switch candidate.Classification {
 	case ClassPrivateMessenger, ClassPrivateCommons, ClassPrivateIdentity, ClassEncryptedResource, ClassRawAttentionTelemetry:
 		return fmt.Errorf("search privacy exclusion: %s", candidate.Classification)
-	case ClassPublicOnChain:
+	case ClassPublicOnChain, ClassPublicApplication:
 	default:
 		return errors.New("unsupported privacy classification")
 	}

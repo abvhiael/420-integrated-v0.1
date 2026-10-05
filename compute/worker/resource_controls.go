@@ -194,10 +194,12 @@ func (l *ResourceLease) Release() error {
 }
 
 type LocalResourceController struct {
-	policy LocalResourcePolicy
-	probe  HostResourceProbe
-	gpu    GPUShareEnforcer
-	now    func() time.Time
+	policy    LocalResourcePolicy
+	probe     HostResourceProbe
+	gpu       GPUShareEnforcer
+	now       func() time.Time
+	idleMu    sync.Mutex
+	idleSince time.Time
 }
 
 func NewLocalResourceController(policy LocalResourcePolicy, probe HostResourceProbe, gpu GPUShareEnforcer) (*LocalResourceController, error) {
@@ -279,12 +281,26 @@ func (c *LocalResourceController) check(ctx context.Context) error {
 		return fmt.Errorf("%w: logical CPU count unavailable", ErrLocalResourceUnavailable)
 	}
 	if c.policy.IdleOnly {
-		if !snapshot.IdleKnown || !snapshot.CPUUtilizationKnown {
+		if !snapshot.CPUUtilizationKnown {
 			return fmt.Errorf("%w: idle telemetry unavailable", ErrLocalResourceUnavailable)
 		}
-		if snapshot.IdleDuration < c.policy.MinIdleDuration ||
-			snapshot.CPUUtilizationPercent > c.policy.IdleCPUThresholdPercent {
+		if snapshot.CPUUtilizationPercent > c.policy.IdleCPUThresholdPercent {
+			c.idleMu.Lock()
+			c.idleSince = time.Time{}
+			c.idleMu.Unlock()
 			return fmt.Errorf("%w: host is not idle", ErrLocalResourceUnavailable)
+		}
+		idleDuration := snapshot.IdleDuration
+		if !snapshot.IdleKnown {
+			c.idleMu.Lock()
+			if c.idleSince.IsZero() {
+				c.idleSince = now
+			}
+			idleDuration = now.Sub(c.idleSince)
+			c.idleMu.Unlock()
+		}
+		if idleDuration < c.policy.MinIdleDuration {
+			return fmt.Errorf("%w: minimum idle duration not reached", ErrLocalResourceUnavailable)
 		}
 	}
 	if c.policy.MaxCPUTemperatureC > 0 {

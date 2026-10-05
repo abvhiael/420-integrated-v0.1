@@ -72,7 +72,7 @@ for preimage in [
 for token in [
  "type IdentityAdapter struct","RequireActiveProfile","storage420.NewClient" if False else "storage420.Client",
  "PrepareContent","RetrieveContent","privacy.Admit","architecture.SourceTown","architecture.DomainPublicTown",
- "NotificationFeedSink","Authoritative:false","type MessengerAdapter struct","SendEncrypted",
+ "NotificationFeedSink","AllowsOperational","Authoritative:false","type MessengerAdapter struct","SendEncrypted","CommitEnvelope",
  "EndpointActive","ConversationActive","ConversationParticipant","Blocked","ResolveService"
 ]:
     need(token in src,f"missing integration implementation token: {token}")
@@ -83,6 +83,8 @@ for token in [
 ]:
     need(token in search_profile,f"Search Town source/domain missing: {token}")
 need("architecture.SourceTown:     {architecture.DomainPublicTown: {}}" in search_privacy,"Search privacy allowlist missing exact Town source/domain")
+need('ClassPublicApplication     Classification = "public_application"' in search_privacy,"Search public application classification missing")
+need("privacy.ClassPublicApplication" in src,"Town Search projection must use public application classification")
 
 for token in [
  "TestIdentityRequiresExactActiveCanonicalProfile",
@@ -101,7 +103,7 @@ for token in [
  "Verify Town service integrations",
  "scripts/verify-420town-integrations.py",
  "Test affected Town service dependencies",
- "go test ./search/architecture ./search/privacy ./search/result ./sdk/storage420 ./notifications/feed ./notifications/security",
+ "go test ./search/architecture ./search/privacy ./search/result ./sdk/storage420 ./notifications/feed ./notifications/security ./notifications/subscriptions",
 ]:
     need(token in workflow,f"Town workflow missing integration gate: {token}")
 

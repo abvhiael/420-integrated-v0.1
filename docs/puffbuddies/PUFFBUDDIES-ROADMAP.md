@@ -98,7 +98,46 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.3 — Blockchain/off-chain boundary
 
-Define which PuffBuddies state may use public chain authority and which state must remain private/off-chain/encrypted.
+**Purpose:** define which PuffBuddies state may use public-chain authority and which state must remain private/off-chain, encrypted, or represented only through minimum-disclosure attestations/commitments.
+
+**Canonical requirements:**
+
+1. Define four canonical zones: public-chain authority, private application state, encrypted communication state, and minimum-disclosure attestations/commitments.
+2. Record PB-BOUNDARY-001 through PB-BOUNDARY-018.
+3. Explicitly keep profile content/media, dating and lifestyle preferences, likes, passes, matches, unmatches, blocks, reports/moderation evidence, precise location, private messages, and relationship graph state off public chain.
+4. Permit only narrowly-scoped public protocol/config/registration/payment/entitlement/eligibility/verification conclusions where later architecture demonstrates a concrete need and minimum disclosure.
+5. Preserve wallet-to-profile unlinkability: public wallet or 420Name knowledge must not create a canonical public mechanism to enumerate PuffBuddies membership.
+6. Prohibit side-channel leakage through contract events/logs, calldata, deterministic hashes, metadata, payment payloads, Indexer, Explorer, Search, and analytics.
+7. State that hashing sensitive state does not automatically make public-chain persistence privacy-safe.
+8. State that off-chain classification does not weaken security: private state still requires authentication, authorization, encryption, integrity protection, auditability, and later threat-model controls.
+9. Do not assign contracts, service IDs, fixed addresses, deployment topology, storage implementation, or false live integrations in PB-0.3.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.3-BLOCKCHAIN-OFFCHAIN-BOUNDARY.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.3-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.3 is not a Level 2 integration milestone; it defines authority/data-placement rules without introducing executable shared integration.
+
+**Dependencies:** PB-0.1 and PB-0.2 must remain COMPLETE and their canonical identity/scope invariants must remain intact.
+
+**Exit criteria:**
+
+- one canonical PB-0.3 boundary document exists;
+- PB-BOUNDARY-001 through PB-BOUNDARY-018 exist exactly once and in sequence;
+- public/private/encrypted/attestation zones are explicit;
+- all sensitive MVP state classes are explicitly classified off public chain;
+- allowed public categories are minimum-disclosure and purpose-limited;
+- public side-channel leakage is prohibited;
+- wallet/profile unlinkability remains explicit;
+- no PuffBuddies contract, service ID, fixed address, deployment, storage implementation, or live integration is falsely claimed;
+- the cumulative app-scoped verifier passes;
+- the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
+- durable PB-0.3 evidence records exact run/job evidence and base SHA.
 
 ### PB-0.4 — Privacy invariants
 

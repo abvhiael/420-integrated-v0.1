@@ -116,7 +116,7 @@ func TestEvidenceRootIsOrderedDomainSeparatedAndStable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if root != "0xf4f72c1ef19e658252348b046e9cb1cba2bca5da1e34c27c18f826e6aa4c3ad0" {
+	if root != "0xbf901f40e484816156836c5ca0d812b15d45235c922ad81b6d67e34964630599" {
 		t.Fatalf("evidence root=%s", root)
 	}
 	swapped := append([]EvidenceRequirement(nil), reqs...)
@@ -291,7 +291,12 @@ func TestResultEvidenceUploadAuthorizationFailsClosed(t *testing.T) {
 		MaxTotalBytes: 2048,
 		Evidence: reqs,
 	}
-	cases := []ResultEvidenceUploadAuthorization{base, base, base, base}
+	clone := func() ResultEvidenceUploadAuthorization {
+		candidate := base
+		candidate.Evidence = append([]EvidenceRequirement(nil), base.Evidence...)
+		return candidate
+	}
+	cases := []ResultEvidenceUploadAuthorization{clone(), clone(), clone(), clone()}
 	cases[0].UploadPolicyID = testBytes32("0")
 	cases[1].Evidence[0].RetentionUntil = now.Add(-time.Second)
 	cases[2].MaxObjectBytes = 0

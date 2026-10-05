@@ -133,3 +133,6 @@ jobs:
 
       - name: Verify CMP-3.11 local resource controls
         run: python scripts/verify-cmp-3-11-local-resource-controls.py
+
+      - name: Verify CMP-3.12 malicious workload protections
+        run: python scripts/verify-cmp-3-12-malicious-workload-protections.py

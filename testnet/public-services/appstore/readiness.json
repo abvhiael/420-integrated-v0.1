@@ -72,18 +72,23 @@
     "docs_run": 35157767548,
     "integrated_run": 35157767517,
     "latest_main_reconciled_for_appstore_9": "b1433ba00f7ac0ce9303da476d33879739bafcef",
-    "note": "Historical APPSTORE-9 evidence retained for provenance only. The 2026-10-04 repository audit found unresolved production runtime wiring; do not treat these run IDs as current-head completion evidence."
+    "note": "Historical APPSTORE-9 evidence retained for provenance only. Current audit remediation evidence is recorded separately and must be exact-head qualified."
   },
   "current_audit": {
     "status": "REMEDIATION_REQUIRED",
-    "audited_against_main": "bec8fb5b43f48c3df8862eee93d9a33769cec5e7",
+    "audited_against_main": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+    "completed_steps": [
+      "APPSTORE-AUDIT-1"
+    ],
+    "in_progress_step": "APPSTORE-AUDIT-2",
+    "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
+      "production entrypoint does not yet restore/rebuild and persist the APPSTORE-3 catalogue lifecycle",
       "production entrypoint serves health/readiness only and does not mount the APPSTORE-7 discovery API",
       "production entrypoint does not mount the APPSTORE-9 embedded frontend",
-      "no production Registry Source is wired to construct canonical snapshots for the APPSTORE-2 projection",
       "no production composition path builds ApplicationView records from canonical projection plus curation/security/wallet provenance",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "Historical APPSTORE-9 qualification evidence is retained below for provenance but does not qualify the current audited repository head."
+    "note": "APPSTORE-AUDIT-2 wires a concrete finalized Registry source; overall implementation remains PARTIAL until later remediation steps compose persistence, views, API/frontend and live deployment."
   }
 }

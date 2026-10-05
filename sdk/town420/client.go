@@ -68,10 +68,10 @@ func NewWithHTTPClient(baseURL string,hc *http.Client,token string,retry RetryPo
 }
 
 type ListPostsResult struct {
-	Canonical bool
-	Items []projection.PostDocument
-	NextCursor string
-	Generation uint64
+	Canonical bool `json:"canonical"`
+	Items []projection.PostDocument `json:"items"`
+	NextCursor string `json:"next_cursor"`
+	Generation uint64 `json:"generation"`
 }
 
 type CreatePostRequest struct {

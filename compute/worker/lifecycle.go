@@ -96,6 +96,7 @@ type ExecutionRecord struct {
 	ExitCode             int                   `json:"exitCode,omitempty"`
 	TimedOut             bool                  `json:"timedOut,omitempty"`
 	OutputTruncated      bool                  `json:"outputTruncated,omitempty"`
+	ResumeCheckpointCommitment string          `json:"resumeCheckpointCommitment,omitempty"`
 	StartedAt            time.Time             `json:"startedAt,omitempty"`
 	EndedAt              time.Time             `json:"endedAt,omitempty"`
 	Transitions          []ExecutionTransition `json:"transitions"`
@@ -393,6 +394,7 @@ func (l *ExecutionLifecycle) Resume(
 
 	record.Status = ExecutionResuming
 	record.EndedAt = time.Time{}
+	record.ResumeCheckpointCommitment = checkpoint.Metadata.CheckpointCommitment
 	record.Transitions = append(record.Transitions, ExecutionTransition{
 		Status: ExecutionResuming, At: now, Code: fmt.Sprintf("checkpoint-%d", checkpoint.Metadata.Sequence),
 	})

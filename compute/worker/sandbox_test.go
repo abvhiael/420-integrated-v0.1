@@ -202,3 +202,28 @@ func containsSequence(haystack, needle []string) bool {
 	}
 	return false
 }
+
+
+func TestSandboxHashesCompleteStdoutBeyondDiagnosticCapture(t *testing.T) {
+	payload := strings.Repeat("z", 4096)
+	runner := &fakeCommandRunner{write: payload}
+	policy := DefaultSandboxPolicy("docker")
+	policy.MaxOutputBytes = 1024
+	sandbox, err := NewSandbox(policy, runner)
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := sandbox.Run(context.Background(), sandboxRequestFixture())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.StdoutBytes != uint64(len(payload)) {
+		t.Fatalf("stdout bytes=%d want=%d", result.StdoutBytes, len(payload))
+	}
+	if result.StdoutSHA256 != digestBytes([]byte(payload)) {
+		t.Fatalf("stdout digest=%q", result.StdoutSHA256)
+	}
+	if len(result.Output) != 1024 || !result.OutputTruncated {
+		t.Fatalf("diagnostic capture not bounded: len=%d truncated=%v", len(result.Output), result.OutputTruncated)
+	}
+}

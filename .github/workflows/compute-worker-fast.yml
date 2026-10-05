@@ -82,3 +82,6 @@ jobs:
 
       - name: Verify CMP-3.4 secure workload sandbox
         run: python scripts/verify-cmp-3-4-secure-workload-sandbox.py
+
+      - name: Verify CMP-3.5 content-addressed work-unit download
+        run: python scripts/verify-cmp-3-5-content-addressed-work-unit-download.py

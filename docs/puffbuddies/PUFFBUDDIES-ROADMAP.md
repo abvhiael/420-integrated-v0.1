@@ -445,7 +445,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.10 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.11 — Data lifecycle/deletion
+### PB-0.11 — Data lifecycle/deletion — COMPLETE
 
 **Purpose:** define canonical deactivation/delete semantics, retention-purpose boundaries, backup/restore behavior, moderation-evidence exceptions, dependency/participant deletion limits, and irreversible public-chain limitations.
 

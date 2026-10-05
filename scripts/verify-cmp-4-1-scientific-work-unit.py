@@ -57,7 +57,7 @@ def main():
       "docs/compute-market/CMP-0.3-DETERMINISTIC-WORK-UNIT-IDENTITY.md":["unitId = keccak256","UNIT_DOMAIN_V1"],
       "docs/compute-market/CMP-0.4-SIGNED-EXECUTION-MANIFEST.md":["executableDigest","inputCommitment","outputSchemaHash"],
       "contracts/src/compute/ComputeJobRegistry420.sol":["bytes32 manifestHash","bytes32 inputCommitment","bytes32 outputSchemaCommitment","bytes32 fundingRef","bytes32 verificationPolicyCommitment","uint64 deadline"],
-      "contracts/src/compute/ComputeMatch420.sol":["bytes32 resourceClass","bytes32 verificationPolicyCommitment","uint64 executionDeadline"],
+      "contracts/src/compute/ComputeMatch420.sol":["bytes32 computeClass","bytes32 verificationPolicyCommitment","uint64 executionDeadline"],
       "docs/compute-market/CMP-1.4.8-SCIENTIFIC-PROBABILISTIC-VERIFICATION.md":["sample-plan commitment","INCONCLUSIVE","PASS","FAIL"],
       ".github/workflows/compute-market.yml":["python scripts/verify-cmp-4-1-scientific-work-unit.py","python scripts/test-cmp-4-1-scientific-work-unit.py"],
     }

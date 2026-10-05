@@ -1,7 +1,7 @@
 {
   "schema": "420-town-genesis-v1",
   "phase": "TOWN-AUDIT",
-  "status": "AUTHORITY_BASELINE",
+  "status": "CONTENT_BASELINE",
   "serviceId": "420/service/town/v1",
   "name": "420Town Community Boards",
   "role": "GENESIS_FACING_UPDATE",
@@ -15,6 +15,8 @@
   },
   "authorityContract": "TownAuthority420",
   "authorityConfig": "config/420town-authority-v1.json",
+  "contentConfig": "config/420town-content-v1.json",
+  "contentPackage": "town/content",
   "dependencies": {
     "identity": "420 Identity",
     "search": "420 Search",
@@ -35,6 +37,10 @@
       "TreasuryRef"
     ],
     "replaceableClasses": [
+      "Post",
+      "Thread",
+      "Comment",
+      "Vote",
       "SearchProjection",
       "NotificationDelivery",
       "StorageGateway",
@@ -42,15 +48,16 @@
       "Frontend",
       "RewardsProjection"
     ],
-    "treasuryCustody": false
+    "treasuryCustody": false,
+    "contentBodiesOnChain": false
   },
   "implementedThrough": [
     "TOWN-AUDIT-1",
     "TOWN-AUDIT-2",
-    "TOWN-AUDIT-3"
+    "TOWN-AUDIT-3",
+    "TOWN-AUDIT-4"
   ],
   "deferredRoadmap": [
-    "TOWN-AUDIT-4",
     "TOWN-AUDIT-5",
     "TOWN-AUDIT-6",
     "TOWN-AUDIT-7",

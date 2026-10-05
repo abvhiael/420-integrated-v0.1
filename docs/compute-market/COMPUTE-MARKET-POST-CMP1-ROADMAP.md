@@ -417,7 +417,7 @@ CMP-3.10 does not invent a general ComputeMarket HTTP endpoint, 420Storage agree
 Durable evidence: [CMP-3.10 qualification](CMP-3.10-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.10 result/evidence upload](CMP-3.10-RESULT-EVIDENCE-UPLOAD.md). Fast #233 / run `37261236505` / job `111608720907` passed the exact implementation/spec SHA; evidence anchor `8a72024fc27543f7754b624be2cada39d4b13849`.
 
 ## CMP-3.11 — Local resource controls
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `56893c5b814d14138eaafec71f1b784d4b110189`.**
 
 CPU/GPU percentage, idle-only mode, thermal ceilings, bandwidth and schedule controls.
 
@@ -425,7 +425,7 @@ The worker now provides a versioned operator-local resource policy; automatic ha
 
 GPU percentage never becomes advisory: GPU work is rejected unless a qualified platform-specific share enforcer is supplied. CMP-3.11 does not weaken CMP-3.4 isolation or gain canonical job/correctness/payment authority.
 
-Exit criteria and implementation boundary: [CMP-3.11 local resource controls](CMP-3.11-LOCAL-RESOURCE-CONTROLS.md).
+Durable evidence: [CMP-3.11 qualification](CMP-3.11-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.11 local resource controls](CMP-3.11-LOCAL-RESOURCE-CONTROLS.md). Fast #272 / run `37262445914` / job `111612318856` passed the exact implementation/spec/workflow SHA; evidence anchor `0f63e91ae9406cdf0a5d27d7c6211fa64d7ced4b`.
 
 ## CMP-3.12 — Malicious workload protections
 
@@ -656,7 +656,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.10 COMPLETE; CMP-3.11 local resource controls next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.11 COMPLETE; CMP-3.12 malicious workload protections next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

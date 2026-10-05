@@ -25,6 +25,8 @@ STATE = ROOT / "docs/puffbuddies/PB-0.9-STATE-OWNERSHIP.md"
 EVIDENCE_09 = ROOT / "docs/puffbuddies/PB-0.9-QUALIFICATION.md"
 SAFETY = ROOT / "docs/puffbuddies/PB-0.10-SAFETY-MODERATION-PRINCIPLES.md"
 EVIDENCE_10 = ROOT / "docs/puffbuddies/PB-0.10-QUALIFICATION.md"
+DATA = ROOT / "docs/puffbuddies/PB-0.11-DATA-LIFECYCLE-DELETION.md"
+EVIDENCE_11 = ROOT / "docs/puffbuddies/PB-0.11-QUALIFICATION.md"
 
 errors = []
 
@@ -32,7 +34,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -60,6 +62,8 @@ state = STATE.read_text(encoding="utf-8")
 evidence_09 = EVIDENCE_09.read_text(encoding="utf-8")
 safety = SAFETY.read_text(encoding="utf-8")
 evidence_10 = EVIDENCE_10.read_text(encoding="utf-8")
+data = DATA.read_text(encoding="utf-8")
+evidence_11 = EVIDENCE_11.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -141,6 +145,9 @@ for token in [
     "### PB-0.10 — Safety/moderation principles",
     "PB-SAFETY-001 through PB-SAFETY-040",
     "**Milestone relationship:** PB-0.10 is not a Level 2 integration milestone",
+    "### PB-0.11 — Data lifecycle/deletion",
+    "PB-DATA-001 through PB-DATA-036",
+    "**Milestone relationship:** PB-0.11 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -981,13 +988,121 @@ for token in [
 ]:
     need(token in evidence_10, f"PB-0.10 evidence record missing token: {token}")
 
+# PB-0.11 — data lifecycle and deletion
+for token in [
+    "# PuffBuddies PB-0.11 data lifecycle and deletion",
+    "## Lifecycle principles",
+    "## Canonical data-lifecycle invariants",
+    "## Lifecycle state model",
+    "## Retention decision rule",
+    "## Deletion-surface checklist",
+    "## PB-0.11 completion boundary",
+    "Deactivation is not deletion",
+    "Deactivation revokes ordinary participation authority",
+    "Deactivation does not imply ecosystem-account deletion",
+    "Deletion is PuffBuddies-scoped",
+    "Delete request immediately closes ordinary participation",
+    "Deletion must not be blocked by payment status",
+    "Deletion must not require interpersonal consent",
+    "Profile and preference data are deletion targets",
+    "Private relationship state is a deletion target subject to safety/audit exceptions",
+    "Precise location data requires aggressive minimization",
+    "Message-content deletion is bounded by participant and Messenger authority",
+    "Notification data follows source lifecycle",
+    "Session and access state is revoked on deletion",
+    "Cached copies cannot preserve deleted authority",
+    "Search and discovery removal follows deletion",
+    "Analytics cannot become a deletion bypass",
+    "Backups are not ordinary active storage",
+    "Backup retention must be bounded",
+    "Logs require purpose and minimization",
+    "Derived data inherits source privacy",
+    "De-identification must resist practical relinking",
+    "Moderation evidence may outlive ordinary profile deletion only for a narrow purpose",
+    "Safety retention cannot recreate ordinary participation",
+    "Retained evidence remains least-privilege",
+    "Ban-evasion controls may retain minimum necessary identifiers",
+    "Legal/regulatory retention requires explicit authority",
+    "Retention expiry requires deletion or reauthorization",
+    "Processor/dependency copies require lifecycle contracts",
+    "Ecosystem canonical state remains independently owned",
+    "Public-chain immutability is an explicit limitation",
+    "Public-chain use must minimize future deletion conflict",
+    "Deletion cannot rely on encrypt-and-forget alone without policy",
+    "Account identifiers must not be silently recycled",
+    "Re-registration is a new lifecycle decision",
+    "Deletion completion must have honest semantics",
+    "Deletion evidence must not recreate deleted private state",
+]:
+    need(token in data, f"PB-0.11 lifecycle document missing token: {token}")
+
+data_ids = re.findall(r"^### (PB-DATA-\d{3})\b", data, flags=re.MULTILINE)
+need(data_ids == [f"PB-DATA-{i:03d}" for i in range(1, 37)], f"PB-DATA sequence drift: {data_ids}")
+need(len(data_ids) == len(set(data_ids)), "duplicate PB-DATA identifier")
+
+for guarantee in [
+    "Deactivation and deletion are distinct actions",
+    "A deletion request must immediately stop ordinary participation before asynchronous cleanup can finish",
+    "Backups, caches, indexes, analytics, logs, derived copies, and external processors must preserve the same deletion/privacy semantics as the source data",
+    "PuffBuddies must never promise erasure of public-chain records that the protocol cannot actually erase",
+    "Deleted data restored from backup must re-enter deletion processing before it can return to ordinary application use",
+    "Replacing a user identifier with a stable hash, wallet address, profile ID, deterministic token, or other reversible/correlatable identifier is not sufficient",
+    "PuffBuddies deletion must not falsely claim to erase them",
+    "Completed deletion does not guarantee restoration of prior profile, matches, preferences, premium state, or interpersonal consent",
+    "The product must not claim \"everything everywhere is erased\" when known external/immutable/backup exceptions remain",
+]:
+    need(guarantee in data, f"PB-0.11 missing lifecycle guarantee: {guarantee}")
+
+for state_token in [
+    "ACTIVE",
+    "DEACTIVATED",
+    "DELETE_REQUESTED",
+    "DELETION_IN_PROGRESS",
+    "DELETION_COMPLETE",
+]:
+    need(state_token in data, f"PB-0.11 lifecycle state model missing: {state_token}")
+
+for retention in [
+    "data class",
+    "canonical owner",
+    "minimum fields retained",
+    "duration or review/expiry condition",
+    "deletion/anonymization trigger",
+    "backup/replica/processor handling",
+    "whether the retained form can be practically relinked to the user",
+]:
+    need(retention in data, f"PB-0.11 retention decision rule missing: {retention}")
+
+for forbidden in [
+    "PuffBuddies deletion worker is implemented",
+    "PuffBuddies retention scheduler is deployed",
+    "PuffBuddies database deletion is live",
+    "PuffBuddies deletion service ID is",
+]:
+    need(forbidden not in data, f"PB-0.11 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", data) is None, "PB-0.11 must not assign an on-chain address")
+need("420/service/puff" not in data.lower(), "PB-0.11 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.11 qualification evidence",
+    "**PB-0.11 — Data lifecycle/deletion**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-DATA-001 through PB-DATA-036",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.12 — User lifecycle**",
+]:
+    need(token in evidence_11, f"PB-0.11 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.10", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.11", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.10",
+    "step": "PB-0.11",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1110,6 +1225,22 @@ print(json.dumps({
         "staleAuthorizationFailsClosed": True,
         "escalationBoundariesDefined": True,
         "appealsDoNotRestoreConsent": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb11": {
+        "dataInvariants": data_ids,
+        "deactivationDistinctFromDeletion": True,
+        "deletionRevokesParticipationImmediately": True,
+        "retentionPurposeBounded": True,
+        "backupsBounded": True,
+        "restoreReappliesDeletion": True,
+        "derivedCopiesFollowLifecycle": True,
+        "moderationRetentionNarrow": True,
+        "dependenciesRemainIndependent": True,
+        "immutableChainLimitationExplicit": True,
+        "honestDeletionCompletion": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

@@ -422,9 +422,14 @@ type ControlledExecutionLifecycle struct {
 }
 
 func NewControlledExecutionLifecycle(inner *ExecutionLifecycle, controller *LocalResourceController) (*ControlledExecutionLifecycle, error) {
-	if inner == nil || controller == nil {
-		return nil, fmt.Errorf("%w: lifecycle and controller required", ErrInvalidLocalResourcePolicy)
+	if inner == nil || inner.sandbox == nil || controller == nil {
+		return nil, fmt.Errorf("%w: lifecycle, sandbox and controller required", ErrInvalidLocalResourcePolicy)
 	}
+	controlledPolicy, err := ApplyLocalResourcePolicy(inner.sandbox.policy, controller.policy, RuntimeLogicalCPUs())
+	if err != nil {
+		return nil, err
+	}
+	inner.sandbox.policy = controlledPolicy
 	return &ControlledExecutionLifecycle{inner: inner, controller: controller}, nil
 }
 

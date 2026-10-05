@@ -42,6 +42,7 @@ var (
 	ErrIdempotencyConflict = errors.New("idempotency conflict")
 	ErrRateLimited         = errors.New("rate limited")
 	ErrDuplicateContent    = errors.New("duplicate content")
+	ErrModerationDenied    = errors.New("moderation denied")
 )
 
 type ContentAnchor struct {
@@ -134,6 +135,11 @@ type RiskProvider interface {
 	Profile(actorID model.ObjectID) (RiskProfile, bool)
 }
 
+type ModerationGate interface {
+	CanRead(communityID, viewerID, authorID model.ObjectID, kind string, targetID model.ObjectID) bool
+	CanWrite(communityID, actorID model.ObjectID, kind string, targetID model.ObjectID) bool
+}
+
 type Policy struct {
 	Window                       time.Duration
 	DuplicateWindow              time.Duration
@@ -183,9 +189,10 @@ type fingerprintRecord struct {
 type Service struct {
 	mu sync.RWMutex
 
-	authority CommunityAuthority
-	risk      RiskProvider
-	policy    Policy
+	authority  CommunityAuthority
+	risk       RiskProvider
+	moderation ModerationGate
+	policy     Policy
 	now       func() time.Time
 
 	posts         map[model.ObjectID]Post
@@ -203,8 +210,8 @@ type Service struct {
 	fingerprints    map[string]fingerprintRecord
 }
 
-func NewService(authority CommunityAuthority, risk RiskProvider, policy Policy) (*Service, error) {
-	if authority == nil || risk == nil {
+func NewService(authority CommunityAuthority, risk RiskProvider, moderation ModerationGate, policy Policy) (*Service, error) {
+	if authority == nil || risk == nil || moderation == nil {
 		return nil, ErrInvalidInput
 	}
 	if policy.Window <= 0 || policy.DuplicateWindow <= 0 || policy.FullLimitMinAccountAge < 0 ||
@@ -218,6 +225,7 @@ func NewService(authority CommunityAuthority, risk RiskProvider, policy Policy) 
 	return &Service{
 		authority:        authority,
 		risk:             risk,
+		moderation:       moderation,
 		policy:           policy,
 		now:              func() time.Time { return time.Now().UTC() },
 		posts:            make(map[model.ObjectID]Post),
@@ -259,6 +267,9 @@ func (s *Service) CreatePost(actor model.ObjectID, req CreatePostRequest) (Post,
 	}
 	if !s.authority.IsActiveMember(req.CommunityID, actor) {
 		return Post{}, ErrUnauthorized
+	}
+	if !s.moderation.CanWrite(req.CommunityID, actor, "USER", actor) {
+		return Post{}, ErrModerationDenied
 	}
 	fp := fmt.Sprintf("post|%s|%s|%s|%s", req.ID, req.CommunityID, req.Anchor.SHA256, req.Visibility)
 	if id, ok, err := s.idempotent(actor, "create-post", req.IdempotencyKey, fp); ok || err != nil {
@@ -310,6 +321,9 @@ func (s *Service) RevisePost(actor model.ObjectID, req RevisePostRequest) (Post,
 	if p.AuthorID != actor {
 		return Post{}, ErrUnauthorized
 	}
+	if !s.moderation.CanWrite(p.CommunityID, actor, string(TargetPost), p.ID) {
+		return Post{}, ErrModerationDenied
+	}
 	fp := fmt.Sprintf("revise-post|%s|%s", req.PostID, req.Anchor.SHA256)
 	if id, hit, err := s.idempotent(actor, "revise-post", req.IdempotencyKey, fp); hit || err != nil {
 		if err != nil {
@@ -359,6 +373,9 @@ func (s *Service) TombstonePost(actor, postID model.ObjectID, idempotencyKey str
 	if p.Status == StatusTombstoned {
 		return Post{}, ErrTombstoned
 	}
+	if !s.moderation.CanWrite(p.CommunityID, actor, string(TargetPost), p.ID) {
+		return Post{}, ErrModerationDenied
+	}
 	now := s.now().UTC()
 	if err := s.consume(actor, p.CommunityID, "write", now); err != nil {
 		return Post{}, err
@@ -405,6 +422,9 @@ func (s *Service) CreateThread(actor model.ObjectID, req CreateThreadRequest) (T
 	}
 	if root.AuthorID != actor {
 		return Thread{}, ErrUnauthorized
+	}
+	if !s.moderation.CanWrite(root.CommunityID, actor, string(TargetPost), root.ID) {
+		return Thread{}, ErrModerationDenied
 	}
 	fp := fmt.Sprintf("thread|%s|%s", req.ID, req.RootPostID)
 	if id, hit, err := s.idempotent(actor, "create-thread", req.IdempotencyKey, fp); hit || err != nil {
@@ -467,8 +487,12 @@ func (s *Service) CreateComment(actor model.ObjectID, req CreateCommentRequest) 
 	}
 	viewer := req.Viewer
 	viewer.ActorID = actor
-	if !s.canViewLocked(th.CommunityID, root.AuthorID, root.Visibility, viewer) {
+	if !s.canViewLocked(th.CommunityID, root.AuthorID, root.Visibility, viewer) ||
+		!s.moderation.CanRead(th.CommunityID, actor, root.AuthorID, string(TargetPost), root.ID) {
 		return Comment{}, ErrVisibilityDenied
+	}
+	if !s.moderation.CanWrite(th.CommunityID, actor, string(TargetPost), root.ID) {
+		return Comment{}, ErrModerationDenied
 	}
 	if req.ParentID.Valid() {
 		parent, exists := s.comments[req.ParentID]
@@ -480,6 +504,10 @@ func (s *Service) CreateComment(actor model.ObjectID, req CreateCommentRequest) 
 		}
 		if parent.Status != StatusActive {
 			return Comment{}, ErrTombstoned
+		}
+		if !s.moderation.CanRead(parent.CommunityID, actor, parent.AuthorID, string(TargetComment), parent.ID) ||
+			!s.moderation.CanWrite(parent.CommunityID, actor, string(TargetComment), parent.ID) {
+			return Comment{}, ErrModerationDenied
 		}
 	}
 	fp := fmt.Sprintf("comment|%s|%s|%s|%s", req.ID, req.ThreadID, req.ParentID, req.Anchor.SHA256)
@@ -533,6 +561,9 @@ func (s *Service) ReviseComment(actor model.ObjectID, req ReviseCommentRequest) 
 	if c.AuthorID != actor {
 		return Comment{}, ErrUnauthorized
 	}
+	if !s.moderation.CanWrite(c.CommunityID, actor, string(TargetComment), c.ID) {
+		return Comment{}, ErrModerationDenied
+	}
 	fp := fmt.Sprintf("revise-comment|%s|%s", c.ID, req.Anchor.SHA256)
 	if id, hit, err := s.idempotent(actor, "revise-comment", req.IdempotencyKey, fp); hit || err != nil {
 		if err != nil {
@@ -582,6 +613,9 @@ func (s *Service) TombstoneComment(actor, commentID model.ObjectID, idempotencyK
 	if c.Status == StatusTombstoned {
 		return Comment{}, ErrTombstoned
 	}
+	if !s.moderation.CanWrite(c.CommunityID, actor, string(TargetComment), c.ID) {
+		return Comment{}, ErrModerationDenied
+	}
 	now := s.now().UTC()
 	if err := s.consume(actor, c.CommunityID, "write", now); err != nil {
 		return Comment{}, err
@@ -627,8 +661,12 @@ func (s *Service) SetVote(actor model.ObjectID, req SetVoteRequest) (Vote, error
 	}
 	viewer := req.Viewer
 	viewer.ActorID = actor
-	if !s.canViewLocked(communityID, authorID, visibility, viewer) {
+	if !s.canViewLocked(communityID, authorID, visibility, viewer) ||
+		!s.moderation.CanRead(communityID, actor, authorID, string(req.TargetKind), req.TargetID) {
 		return Vote{}, ErrVisibilityDenied
+	}
+	if !s.moderation.CanWrite(communityID, actor, string(req.TargetKind), req.TargetID) {
+		return Vote{}, ErrModerationDenied
 	}
 	fp := fmt.Sprintf("vote|%s|%s|%d", req.TargetKind, req.TargetID, req.Value)
 	if _, hit, err := s.idempotent(actor, "set-vote", req.IdempotencyKey, fp); hit || err != nil {
@@ -678,6 +716,9 @@ func (s *Service) ClearVote(actor model.ObjectID, kind TargetKind, targetID mode
 		}
 		return s.votes[voteKey(kind, targetID, actor)], nil
 	}
+	if !s.moderation.CanWrite(communityID, actor, string(kind), targetID) {
+		return Vote{}, ErrModerationDenied
+	}
 	key := voteKey(kind, targetID, actor)
 	v, ok := s.votes[key]
 	if !ok || !v.Active {
@@ -702,7 +743,8 @@ func (s *Service) GetPost(viewer ViewerContext, id model.ObjectID) (Post, error)
 	if !ok {
 		return Post{}, ErrNotFound
 	}
-	if !s.canViewLocked(p.CommunityID, p.AuthorID, p.Visibility, viewer) {
+	if !s.canViewLocked(p.CommunityID, p.AuthorID, p.Visibility, viewer) ||
+		!s.moderation.CanRead(p.CommunityID, viewer.ActorID, p.AuthorID, string(TargetPost), p.ID) {
 		return Post{}, ErrVisibilityDenied
 	}
 	return p, nil
@@ -716,7 +758,8 @@ func (s *Service) GetThread(viewer ViewerContext, id model.ObjectID) (Thread, Po
 		return Thread{}, Post{}, ErrNotFound
 	}
 	root := s.posts[th.RootPostID]
-	if !s.canViewLocked(th.CommunityID, root.AuthorID, root.Visibility, viewer) {
+	if !s.canViewLocked(th.CommunityID, root.AuthorID, root.Visibility, viewer) ||
+		!s.moderation.CanRead(th.CommunityID, viewer.ActorID, root.AuthorID, string(TargetPost), root.ID) {
 		return Thread{}, Post{}, ErrVisibilityDenied
 	}
 	return th, root, nil
@@ -729,7 +772,8 @@ func (s *Service) GetComment(viewer ViewerContext, id model.ObjectID) (Comment, 
 	if !ok {
 		return Comment{}, ErrNotFound
 	}
-	if !s.canViewLocked(c.CommunityID, c.AuthorID, c.Visibility, viewer) {
+	if !s.canViewLocked(c.CommunityID, c.AuthorID, c.Visibility, viewer) ||
+		!s.moderation.CanRead(c.CommunityID, viewer.ActorID, c.AuthorID, string(TargetComment), c.ID) {
 		return Comment{}, ErrVisibilityDenied
 	}
 	return c, nil
@@ -742,7 +786,8 @@ func (s *Service) PostRevisions(viewer ViewerContext, postID model.ObjectID) ([]
 	if !ok {
 		return nil, ErrNotFound
 	}
-	if !s.canViewLocked(p.CommunityID, p.AuthorID, p.Visibility, viewer) {
+	if !s.canViewLocked(p.CommunityID, p.AuthorID, p.Visibility, viewer) ||
+		!s.moderation.CanRead(p.CommunityID, viewer.ActorID, p.AuthorID, string(TargetPost), p.ID) {
 		return nil, ErrVisibilityDenied
 	}
 	out := append([]PostRevision(nil), s.postRevisions[postID]...)
@@ -756,7 +801,8 @@ func (s *Service) CommentRevisions(viewer ViewerContext, commentID model.ObjectI
 	if !ok {
 		return nil, ErrNotFound
 	}
-	if !s.canViewLocked(c.CommunityID, c.AuthorID, c.Visibility, viewer) {
+	if !s.canViewLocked(c.CommunityID, c.AuthorID, c.Visibility, viewer) ||
+		!s.moderation.CanRead(c.CommunityID, viewer.ActorID, c.AuthorID, string(TargetComment), c.ID) {
 		return nil, ErrVisibilityDenied
 	}
 	out := append([]CommentRevision(nil), s.commentRevs[commentID]...)
@@ -813,6 +859,27 @@ func (s *Service) targetMetadata(kind TargetKind, id model.ObjectID) (model.Obje
 		return c.CommunityID, c.AuthorID, c.Visibility, c.Status, nil
 	default:
 		return "", "", "", "", ErrInvalidInput
+	}
+}
+
+func (s *Service) TargetCommunity(kind string, id model.ObjectID) (model.ObjectID, model.ObjectID, bool) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	switch TargetKind(kind) {
+	case TargetPost:
+		p, ok := s.posts[id]
+		if !ok {
+			return "", "", false
+		}
+		return p.CommunityID, p.AuthorID, true
+	case TargetComment:
+		c, ok := s.comments[id]
+		if !ok {
+			return "", "", false
+		}
+		return c.CommunityID, c.AuthorID, true
+	default:
+		return "", "", false
 	}
 }
 

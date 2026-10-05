@@ -1,0 +1,156 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.1.ScientificWorkUnit.v1",
+  "step": "CMP-4.1",
+  "title": "Scientific Work Unit specification",
+  "canonical_definition": {
+    "purpose": "make scientific/research workloads first-class while keeping the market general-purpose",
+    "required_bindings": [
+      "research project",
+      "executable/container commitment",
+      "dataset/input commitment",
+      "parameters",
+      "resource class",
+      "output schema",
+      "verification strategy",
+      "deadline",
+      "reward/funding reference"
+    ]
+  },
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_main_sha": "b5703dd932f28129a7898fafc579e084e5619b2f",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "commitment": {
+    "domain": "420Integrated.ComputeMarket.ScientificWorkUnit.v1",
+    "schema_version": 1,
+    "encoding": "abi.encode",
+    "hash": "keccak256",
+    "ordered_fields": [
+      [
+        "domain",
+        "bytes32"
+      ],
+      [
+        "schemaVersion",
+        "uint32"
+      ],
+      [
+        "chainId",
+        "uint256"
+      ],
+      [
+        "unitId",
+        "bytes32"
+      ],
+      [
+        "researchProjectCommitment",
+        "bytes32"
+      ],
+      [
+        "manifestHash",
+        "bytes32"
+      ],
+      [
+        "executableContainerCommitment",
+        "bytes32"
+      ],
+      [
+        "datasetInputCommitment",
+        "bytes32"
+      ],
+      [
+        "parametersCommitment",
+        "bytes32"
+      ],
+      [
+        "resourceClass",
+        "bytes32"
+      ],
+      [
+        "outputSchemaCommitment",
+        "bytes32"
+      ],
+      [
+        "verificationStrategyCommitment",
+        "bytes32"
+      ],
+      [
+        "deadline",
+        "uint64"
+      ],
+      [
+        "fundingRef",
+        "bytes32"
+      ]
+    ]
+  },
+  "canonical_sources": {
+    "unitId": "CMP-0.3 canonical deterministic work-unit identity",
+    "researchProjectCommitment": "ComputeResearchProjectRegistry420 exact project revision commitment; new work validates isCurrentAcceptable before binding",
+    "manifestHash": "ComputeJobRegistry420 accepted manifestHash",
+    "executableContainerCommitment": "accepted CMP-0.4 signed manifest executable/container/runtime semantics",
+    "datasetInputCommitment": "ComputeJobRegistry420 inputCommitment / canonical request input",
+    "parametersCommitment": "versioned canonical parameter encoding",
+    "resourceClass": "accepted ComputeRequestRegistry420/ComputeMatch420 resource class",
+    "outputSchemaCommitment": "ComputeJobRegistry420 outputSchemaCommitment",
+    "verificationStrategyCommitment": "frozen ComputeJobRegistry420 verificationPolicyCommitment; CMP-1.4.8 route where applicable",
+    "deadline": "effective accepted execution deadline, never later than canonical job/request deadline",
+    "fundingRef": "ComputeJobRegistry420 canonical fundingRef"
+  },
+  "authority_boundaries": [
+    "scientific binding creates no lifecycle, requester, payer, worker, verifier, scheduler, Vault, settlement, stake/slash, governance, bridge, wallet or validator authority",
+    "scientific commitment is not correctness evidence, payment entitlement or reward authorization",
+    "fundingRef must come from canonical funded-job evidence and cannot be self-reported",
+    "dataset/input commitment does not grant data-access authority",
+    "verification strategy is frozen before execution and cannot be worker-selected after result",
+    "executable/container commitment does not weaken CMP-3 sandbox, content-addressing, malicious-workload or resource-control requirements"
+  ],
+  "negative_cases": [
+    "zero or unsupported schema version",
+    "zero chain ID",
+    "zero unitId or required commitment",
+    "cross-chain replay",
+    "cross-unit reuse",
+    "research project substitution",
+    "manifest drift",
+    "executable/container drift",
+    "dataset/input mismatch",
+    "unversioned parameter reinterpretation",
+    "resource-class mismatch",
+    "output-schema mismatch",
+    "verification-policy drift or post-result selection",
+    "deadline widening",
+    "fabricated or unrelated fundingRef",
+    "scientific commitment treated as authorization/correctness/settlement/reward/slash evidence"
+  ],
+  "exit_criteria": [
+    "all nine canonical roadmap bindings are explicit",
+    "commitment is domain-separated, versioned, chain-bound and unit-bound",
+    "all duplicate fields map to one canonical source of truth",
+    "scientific metadata cannot become alternate authority",
+    "negative/boundary/replay/deadline/funding/policy rules fail closed",
+    "CMP-1.4.8 scientific verification remains distinct and compatible",
+    "machine-readable config and mechanical verifier/test are committed",
+    "affected Compute Market Level 1 workflow passes exact implementation SHA"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.3 researcher/institution identity",
+    "CMP-4.4 dataset manifests",
+    "CMP-4.5 reproducible environments",
+    "CMP-4.6 result provenance",
+    "CMP-4.7 metadata/lineage",
+    "CMP-4.8 publication/retention",
+    "CMP-4.9 dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-6 reward pools",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.2 — Research Project Registry",
+  "cmp_4_2_integration": {
+    "registry": "contracts/src/compute/ComputeResearchProjectRegistry420.sol",
+    "rule": "researchProjectCommitment is an exact registry-derived project revision commitment; only a current ACTIVE accepting revision may admit new scientific work"
+  }
+}

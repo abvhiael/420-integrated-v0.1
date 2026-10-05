@@ -77,7 +77,13 @@ def validate_static(errors):
     builder = (ROOT / "scripts/build-cmp-3-13-packages.py").read_text()
     main = (ROOT / "execution/cmd/node420-compute/main.go").read_text()
     linux_service = (ROOT / "packaging/node420-compute/linux/node420-compute.service").read_text()
+    linux_install = (ROOT / "packaging/node420-compute/linux/install.sh").read_text()
+    linux_launcher = (ROOT / "packaging/node420-compute/linux/run-node420-compute.sh").read_text()
     darwin_plist = (ROOT / "packaging/node420-compute/darwin/org.420integrated.node420-compute.plist").read_text()
+    darwin_install = (ROOT / "packaging/node420-compute/darwin/install.sh").read_text()
+    darwin_launcher = (ROOT / "packaging/node420-compute/darwin/run-node420-compute.sh").read_text()
+    windows_install = (ROOT / "packaging/node420-compute/windows/install.ps1").read_text()
+    windows_launcher = (ROOT / "packaging/node420-compute/windows/run-node420-compute.ps1").read_text()
     windows_task = (ROOT / "packaging/node420-compute/windows/register-startup-task.ps1").read_text()
     args_template = (ROOT / "packaging/node420-compute/common/worker.args.example").read_text()
     workflow = (ROOT / ".github/workflows/compute-worker-fast.yml").read_text()
@@ -109,18 +115,44 @@ def validate_static(errors):
             errors.append(f"Linux service hardening/config missing: {token}")
     if "User=root" in linux_service:
         errors.append("Linux service must not run as root")
+    for token in ["useradd --system", "worker.args.example", "systemctl daemon-reload"]:
+        if token not in linux_install:
+            errors.append(f"Linux installer missing safe install behavior: {token}")
+    for forbidden in ["systemctl enable", "systemctl start", "systemctl restart", "worker.args\""]:
+        if forbidden in linux_install:
+            errors.append(f"Linux installer must not auto-start/create active placeholder config: {forbidden}")
+    for forbidden in ["eval ", "bash -c", "sh -c"]:
+        if forbidden in linux_launcher:
+            errors.append(f"Linux launcher must not evaluate argument file as shell: {forbidden}")
 
     for token in ["<key>UserName</key>", "<string>node420compute</string>", "<key>RunAtLoad</key>", "<key>WorkingDirectory</key>"]:
         if token not in darwin_plist:
             errors.append(f"macOS launchd template missing: {token}")
     if "<string>root</string>" in darwin_plist:
         errors.append("macOS launchd template must not run as root")
+    for token in ['id "$USER_NAME"', "worker.args.example"]:
+        if token not in darwin_install:
+            errors.append(f"macOS installer missing dedicated-user/config behavior: {token}")
+    for forbidden in ["launchctl bootstrap", "launchctl load", "dscl . -create"]:
+        if forbidden in darwin_install:
+            errors.append(f"macOS installer must not auto-start or silently create service identity: {forbidden}")
+    for forbidden in ["eval ", "bash -c", "sh -c"]:
+        if forbidden in darwin_launcher:
+            errors.append(f"macOS launcher must not evaluate argument file as shell: {forbidden}")
 
     for token in ['[Parameter(Mandatory = $true)]', "New-ScheduledTaskTrigger -AtStartup", "-LogonType S4U", "-RunLevel Limited"]:
         if token not in windows_task:
             errors.append(f"Windows startup task template missing: {token}")
     if "-RunLevel Highest" in windows_task or "-UserId SYSTEM" in windows_task:
         errors.append("Windows startup task must not silently elevate to SYSTEM/highest")
+    for token in ["WindowsBuiltInRole]::Administrator", "worker.args.example"]:
+        if token not in windows_install:
+            errors.append(f"Windows installer missing explicit install/config behavior: {token}")
+    if "Register-ScheduledTask" in windows_install:
+        errors.append("Windows installer must not auto-register/start the worker")
+    for forbidden in ["Invoke-Expression", "iex ", "Start-Process powershell"]:
+        if forbidden in windows_launcher:
+            errors.append(f"Windows launcher must not evaluate argument file as code: {forbidden}")
 
     if "@STATE_DIR@" not in args_template:
         errors.append("common worker args template lost platform state-directory placeholder")

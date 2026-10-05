@@ -13,13 +13,26 @@ Status: COMPLETE
 
 ## TOWN-AUDIT-2 — Repository inventory and product skeleton
 
-Status: OPEN
+Status: COMPLETE
 
 - create canonical Town application directories;
 - define package/build ownership;
 - add app README, environment template and configuration;
 - define stable Town object schemas and IDs;
 - add CI ownership/gates.
+
+Durable qualification evidence:
+
+- qualification level: Level 1 — per-roadmap-step fast qualification;
+- qualified implementation/CI SHA: `df311795f073cde6b58c9d113ab27b12eeb7f154`;
+- 420Town audit workflow: run `37261221863` — PASS;
+- Town skeleton exact-SHA assertion, canonical audit verifier, skeleton verifier and `go test ./town/...` — PASS;
+- Town Solidity exact-SHA assertion, focused Town build/tests and cross-dApp rewards hardening — PASS;
+- current main at evidence closeout: `b3cfd359db5ac84aff6213119475ea3dc770642d`;
+- PR #523 base remains `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`; branch reconciliation is intentionally deferred to the Level 3 app-phase closeout unless a later step materially requires it;
+- Level 2: not required for this repository/package skeleton step;
+- Level 3 repository-wide qualification: intentionally deferred to TOWN-AUDIT-10/app-phase closeout;
+- next canonical roadmap step: TOWN-AUDIT-3 — Authoritative community state.
 
 ## TOWN-AUDIT-3 — Authoritative community state
 

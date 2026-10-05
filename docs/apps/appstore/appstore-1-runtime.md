@@ -15,6 +15,7 @@ The service is configured through:
 
 - `APPSTORE_CHAIN_ID` — expected chain ID; defaults to `420`;
 - `APPSTORE_RPC_URL` — canonical RPC endpoint;
+- `APPSTORE_INDEXER_URL` — 420Indexer read API used by the production APPSTORE-2 Registry source;
 - `APPSTORE_REGISTRY_ADDRESS` — canonical Registry/ProtocolRegistry deployment used for startup qualification;
 - `APPSTORE_CATALOGUE_STORE` — path reserved for non-canonical catalogue persistence introduced in later phases;
 - `APPSTORE_LISTEN_ADDR` — HTTP listen address; defaults to `:8426`.
@@ -30,7 +31,7 @@ Before accepting traffic, the service checks canonical chain state through RPC:
 
 A wrong chain, unavailable RPC, malformed RPC response or missing Registry deployment leaves the service unready and causes startup to fail closed.
 
-These checks establish only that the service is attached to the intended network and Registry deployment. APPSTORE-1 does not yet ingest Registry entries or build catalogue records; that begins in APPSTORE-2.
+These checks establish that the service is attached to the intended network and Registry deployment. The production entrypoint then performs the APPSTORE-2 finalized Registry-source synchronization before accepting traffic; catalogue persistence/composition remains an APPSTORE-3+ responsibility.
 
 ## Health and readiness
 

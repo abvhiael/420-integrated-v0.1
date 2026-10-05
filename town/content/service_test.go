@@ -620,3 +620,101 @@ func TestVoteRateLimitIsSeparateAndEnforced(t *testing.T) {
 		t.Fatalf("expected vote rate limit, got %v", err)
 	}
 }
+
+func TestDeviceAndNetworkScopesLimitMultiIdentitySwarm(t *testing.T) {
+	auth := newFakeAuthority()
+	for _, actor := range []model.ObjectID{alice, bob, mod} {
+		auth.addMember(community, actor)
+	}
+	now := time.Date(2026, 10, 5, 8, 0, 0, 0, time.UTC)
+	risk := &fakeRisk{profiles: map[model.ObjectID]RiskProfile{
+		alice: {
+			Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour),
+			DeviceKey: "device-a", NetworkKey: "network-shared",
+		},
+		bob: {
+			Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour),
+			DeviceKey: "device-b", NetworkKey: "network-shared",
+		},
+		mod: {
+			Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour),
+			DeviceKey: "device-c", NetworkKey: "network-shared",
+		},
+	}}
+	policy := DefaultPolicy()
+	policy.NetworkWriteLimit = 2
+	policy.DeviceWriteLimit = 10
+	policy.CommunityWriteLimit = 100
+	policy.VerifiedWriteLimit = 20
+
+	svc, err := NewService(auth, risk, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc.SetClockForTest(func() time.Time { return now })
+
+	for i, actor := range []model.ObjectID{alice, bob} {
+		_, err := svc.CreatePost(actor, CreatePostRequest{
+			ID: model.ObjectID("network-post-" + string(rune('a'+i))),
+			CommunityID: community,
+			Anchor: anchor("network-body-" + string(rune('a'+i))),
+			Visibility: model.VisibilityPublic,
+			IdempotencyKey: "network-key-" + string(rune('a'+i)),
+		})
+		if err != nil {
+			t.Fatalf("unexpected pre-limit network write: %v", err)
+		}
+	}
+
+	_, err = svc.CreatePost(mod, CreatePostRequest{
+		ID: "network-over", CommunityID: community, Anchor: anchor("network-over"),
+		Visibility: model.VisibilityPublic, IdempotencyKey: "network-over-key",
+	})
+	if !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("expected shared-network Sybil throttle, got %v", err)
+	}
+}
+
+func TestDeviceScopeLimitsOneDeviceAcrossMultipleIdentities(t *testing.T) {
+	auth := newFakeAuthority()
+	for _, actor := range []model.ObjectID{alice, bob} {
+		auth.addMember(community, actor)
+	}
+	now := time.Date(2026, 10, 5, 9, 0, 0, 0, time.UTC)
+	risk := &fakeRisk{profiles: map[model.ObjectID]RiskProfile{
+		alice: {
+			Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour),
+			DeviceKey: "device-shared", NetworkKey: "network-a",
+		},
+		bob: {
+			Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour),
+			DeviceKey: "device-shared", NetworkKey: "network-b",
+		},
+	}}
+	policy := DefaultPolicy()
+	policy.DeviceWriteLimit = 1
+	policy.NetworkWriteLimit = 100
+	policy.CommunityWriteLimit = 100
+	policy.VerifiedWriteLimit = 20
+
+	svc, err := NewService(auth, risk, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc.SetClockForTest(func() time.Time { return now })
+
+	_, err = svc.CreatePost(alice, CreatePostRequest{
+		ID: "device-first", CommunityID: community, Anchor: anchor("device-first"),
+		Visibility: model.VisibilityPublic, IdempotencyKey: "device-first-key",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = svc.CreatePost(bob, CreatePostRequest{
+		ID: "device-second", CommunityID: community, Anchor: anchor("device-second"),
+		Visibility: model.VisibilityPublic, IdempotencyKey: "device-second-key",
+	})
+	if !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("expected shared-device throttle, got %v", err)
+	}
+}

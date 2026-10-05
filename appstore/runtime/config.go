@@ -10,6 +10,7 @@ import (
 type Config struct {
 	ChainID         uint64
 	RPCURL          string
+	IndexerURL      string
 	RegistryAddress string
 	CatalogueStore  string
 	ListenAddr      string
@@ -20,6 +21,9 @@ func (c Config) Validate() error {
 		return errors.New("chain id must be non-zero")
 	}
 	if err := requireURL("rpc url", c.RPCURL); err != nil {
+		return err
+	}
+	if err := requireURL("indexer url", c.IndexerURL); err != nil {
 		return err
 	}
 	if !validAddress(c.RegistryAddress) {

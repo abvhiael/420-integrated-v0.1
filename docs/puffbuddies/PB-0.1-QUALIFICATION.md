@@ -36,11 +36,25 @@ No contracts, service IDs, Genesis/frozen addresses, runtime services, client ap
 
 ## Qualification status
 
-Implementation SHA: **PENDING EXACT-HEAD QUALIFICATION**
+Implementation SHA: `09480abc05f82d631a19ebe0c8f8c0279f34a41e`
 
 Base/main SHA at step start: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`
 
 Workflow: **PuffBuddies PB-0 Qualification**
+
+- run: `37269942311` — **PASS**
+- job: `111634608735` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- `python3 scripts/verify-puffbuddies-pb0.py` — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+420Docs Qualification:
+
+- run: `37269942327` — **PASS**
+- job: `111634609071` — **PASS**
+- exact-head checkout/SHA verification — **PASS**
+- documentation qualification — **PASS**
 
 Required checks:
 
@@ -58,9 +72,17 @@ Not required. PB-0.1 is not an integration milestone.
 
 Repository-wide Solidity inventory, Genesis/address-authority qualification, 420 Integrated/global qualification, Docs/global reconciliation, shared client/service qualification, deployment/config verification, and final security closeout remain deferred to the applicable accumulated PuffBuddies phase boundary.
 
+## Completion state
+
+**PB-0.1 — COMPLETE**
+
+All PB-0.1 exit criteria are satisfied on exact implementation SHA `09480abc05f82d631a19ebe0c8f8c0279f34a41e`.
+
+This closeout update is evidence-only. It changes no executable source, tests, workflows, dependencies, configuration, generated/runtime artifacts, interfaces, deployment state, or substantive requirements, so it does not create a new implementation SHA requiring recursive Level 1 qualification.
+
 ## Blockers
 
-Exact-head Level 1 CI must pass before PB-0.1 is formally complete.
+None for PB-0.1.
 
 ## Next canonical roadmap step
 

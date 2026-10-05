@@ -8,3 +8,12 @@ Stable requirement IDs for the complete repository audit. IDs must not be renumb
 4. **SEARCH-AUDIT-4 — durable repository closeout** — retain exact SHA/workflow evidence, complete requirement matrix and formal repository readiness determination.
 5. **SEARCH-AUDIT-5 — production-equivalent public testnet qualification** — **BLOCKED until an approved live 420Indexer/testnet deployment and Search endpoint exist.** Run `searchsmoke` and `searchlivevalidate`, seeded probes for all required domains, restart/rebuild/reorg/freshness/wrong-chain/failure drills, and retain exact release/deployment evidence.
 6. **SEARCH-AUDIT-6 — Genesis/production closeout** — after SEARCH-AUDIT-5, bind final public URLs/configuration, operations/monitoring/rate-limit/rollback evidence, final cross-app live integration and exact-release qualification; separately declare Genesis and production readiness.
+
+## Current audit status
+
+- **SEARCH-AUDIT-1 — COMPLETE.**
+- **SEARCH-AUDIT-2 — COMPLETE.** Repository implementation/build/test/security qualification passed on exact implementation SHA `34b1f64b90443ef6808eaa37391b9fe57f4b316e` in 420Search audit qualification run #12 (`37255163213`).
+- **SEARCH-AUDIT-3 — COMPLETE.** Integration/readiness reconciliation passed at Level 1 on exact implementation SHA `e013430252106c533e9bc5c54b3339cbdea98681` in 420Search audit qualification run #14 (`37255553537`), job `111591724193`. Search is recorded as a repository-qualified 420Indexer v1 consumer while live Search/Indexer binding remains explicitly deferred to SEARCH-AUDIT-5.
+- **SEARCH-AUDIT-4 — NEXT.**
+- **SEARCH-AUDIT-5 — BLOCKED / DEFERRED TO LIVE TESTNET.**
+- **SEARCH-AUDIT-6 — DEFERRED UNTIL SEARCH-AUDIT-5.**

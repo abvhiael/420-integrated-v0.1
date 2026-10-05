@@ -376,11 +376,11 @@ Durable evidence: [CMP-3.5 qualification](CMP-3.5-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.6 — Execution lifecycle
-**Status: IMPLEMENTED / Level 1 + Level 2 qualification pending.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `612d9e9401ab05b7d4864be751f942a8d384a162`.**
 
 The worker now resolves exact canonical attempt authorization, revalidates the content-addressed work unit immediately before execution, streams it into the CMP-3.4 sandbox without host mounts, persists restart-safe observational execution states, distinguishes cancellation/failure/expiry/interruption, and rejects exact-attempt replay. CMP-3.6 is the first worker-runtime convergence milestone and therefore adds a dedicated app-focused Level 2 integration workflow.
 
-Durable design/exit criteria: [CMP-3.6 execution lifecycle](CMP-3.6-EXECUTION-LIFECYCLE.md).
+Durable evidence: [CMP-3.6 qualification](CMP-3.6-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.6 execution lifecycle](CMP-3.6-EXECUTION-LIFECYCLE.md). Level 1 Compute Worker Fast Qualification #115 / run `37255444231` and Level 2 Compute Worker Integration Qualification #5 / run `37255444265` both passed on the exact implementation SHA; evidence anchor `27ea5df459f398ffa56ac4ecca864bf392b99262`.
 
 
 ## CMP-3.7 — Checkpointing/resume
@@ -623,7 +623,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.5 COMPLETE; CMP-3.6 execution lifecycle next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.6 COMPLETE; CMP-3.7 checkpointing/resume next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

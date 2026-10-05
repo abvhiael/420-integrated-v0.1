@@ -384,11 +384,11 @@ Durable evidence: [CMP-3.6 qualification](CMP-3.6-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.7 — Checkpointing/resume
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `c438a029a652fdeed42ef94b877e50b804842689`.**
 
 The worker now persists private, monotonically sequenced, authorization-bound checkpoints and can explicitly resume only the same still-authorized interrupted attempt. Resume re-resolves canonical authorization, rehashes both the original CMP-3.5 work unit and the latest checkpoint, frames them through a versioned bounded stdin protocol, and re-enters only through the CMP-3.4 sandbox. Terminal/live attempts cannot be reopened.
 
-Durable design/exit criteria: [CMP-3.7 checkpointing/resume](CMP-3.7-CHECKPOINTING-RESUME.md).
+Durable evidence: [CMP-3.7 qualification](CMP-3.7-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.7 checkpointing/resume](CMP-3.7-CHECKPOINTING-RESUME.md). Compute Worker Fast Qualification #143 / run `37256445519` passed on the exact implementation SHA; evidence anchor `1971279df16ad20af1761766f67f116ceb61b866`.
 
 
 ## CMP-3.8 — Result commitment
@@ -629,7 +629,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.6 COMPLETE; CMP-3.7 checkpointing/resume next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.7 COMPLETE; CMP-3.8 result commitment next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

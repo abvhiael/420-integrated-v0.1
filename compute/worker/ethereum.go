@@ -61,6 +61,13 @@ func (k *Secp256k1ExecutionKey) Address() string {
 	return k.address
 }
 
+func (k *Secp256k1ExecutionKey) VerifyDigest(digest [32]byte, signature []byte) bool {
+	if k == nil {
+		return false
+	}
+	return verifySecp256k1Signature(k.pub, digest, signature)
+}
+
 func (k *Secp256k1ExecutionKey) SignDigest(digest [32]byte) ([]byte, error) {
 	if k == nil || k.d == nil {
 		return nil, ErrInvalidExecutionKey

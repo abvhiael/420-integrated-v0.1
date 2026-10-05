@@ -145,17 +145,17 @@ Misconfigured deployed beneficiary, over-broad Capability Registry grants, wrong
 
 ## Readiness state
 
-- CODE COMPLETE: **YES**, subject to exact-head CI closeout.
-- BUILD COMPLETE: **NO** until the dedicated final-head workflow is recorded successful.
+- CODE COMPLETE: **YES** at repository level.
+- BUILD COMPLETE: **YES** on exact qualified implementation head `7a9185b48818f3c994e44a822e440f36d2ccd711`.
 - CONTRACT COMPLETE: **YES** at repository level.
-- TEST COMPLETE: **NO** until the dedicated final-head workflow passes; live deployment tests remain separate.
+- TEST COMPLETE: **YES** for repository scope; live deployment tests remain separate.
 - DOCUMENTATION COMPLETE: **YES** for repository/pre-testnet scope.
 - INTEGRATION COMPLETE: **NO** — live Capability Registry grants and Protocol Registry publication are absent.
-- SECURITY QUALIFIED: **NO** until the dedicated hardening/Slither jobs pass on the exact final head.
-- TESTNET READY: **YES TO DEPLOY** once repository qualification passes; **not live-testnet qualified**.
+- SECURITY QUALIFIED: **YES** for repository scope on dedicated run `37255599638`; live operational security remains separate.
+- TESTNET READY: **YES TO DEPLOY**; **not live-testnet qualified**.
 - GENESIS READY: **NO** — deployment binding, beneficiary, grants, Registry publication and live evidence remain.
 - PRODUCTION READY: **NO** — Genesis/live operational evidence remains.
 
 ## Final determination
 
-The Dev Compensation Vault is a real and substantially implemented Genesis protocol component, not a shell. The audit found and repaired a policy-binding defect and a dedicated-CI ownership gap. It must not yet be called Genesis/production ready because the repository contains no live deployment binding, immutable beneficiary evidence, live capability grants or Registry publication evidence.
+The Dev Compensation Vault is a real and substantially implemented Genesis protocol component, not a shell. The audit found and repaired a policy-binding defect and a dedicated-CI ownership gap. Repository-side remediation through DEVCOMP-AUDIT-5 is complete and exact-head qualified by run `37255599638` on implementation head `7a9185b48818f3c994e44a822e440f36d2ccd711`. Unfinished DEVCOMP-AUDIT-6 through DEVCOMP-AUDIT-9 are transferred to the canonical testnet/release roadmap in `docs/ROADMAP.md`. The vault must not yet be called Genesis/production ready because the repository contains no live deployment binding, immutable beneficiary evidence, live capability grants or Registry publication evidence.

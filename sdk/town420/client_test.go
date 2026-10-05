@@ -25,7 +25,7 @@ func TestClientListAndGet(t *testing.T){
 		w.Header().Set("Content-Type","application/json")
 		switch r.URL.Path{
 		case "/v1/communities/community:1/posts":
-			_ = json.NewEncoder(w).Encode(map[string]any{"canonical":false,"items":[]any{},"next_cursor":"","generation":2})
+			_ = json.NewEncoder(w).Encode(map[string]any{"canonical":false,"items":[]any{},"next_cursor":"cursor-2","generation":2})
 		case "/v1/posts/post:1":
 			_ = json.NewEncoder(w).Encode(content.Post{ID:"post:1",CommunityID:"community:1",AuthorID:"actor:alice",Visibility:model.VisibilityPublic,Revision:1,Status:content.StatusActive})
 		default:http.NotFound(w,r)
@@ -36,7 +36,7 @@ func TestClientListAndGet(t *testing.T){
 	if err!=nil{t.Fatal(err)}
 	page,err:=c.ListPublicPosts(context.Background(),"community:1","",20)
 	if err!=nil{t.Fatal(err)}
-	if page.Canonical || page.Generation!=2{t.Fatalf("page=%+v",page)}
+	if page.Canonical || page.Generation!=2 || page.NextCursor!="cursor-2"{t.Fatalf("page=%+v",page)}
 	p,err:=c.GetPost(context.Background(),"post:1")
 	if err!=nil || p.ID!="post:1"{t.Fatalf("post=%+v err=%v",p,err)}
 }

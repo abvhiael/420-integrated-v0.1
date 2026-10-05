@@ -604,7 +604,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | forthcoming |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.3 COMPLETE; CMP-3.4 secure workload sandbox next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

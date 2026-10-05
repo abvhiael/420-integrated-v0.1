@@ -35,11 +35,11 @@ type WalletInput struct {
 }
 
 type ViewInput struct {
-	ServiceID string            `json:"serviceId"`
-	Curation  curation.Metadata `json:"curation,omitempty"`
+	ServiceID string              `json:"serviceId"`
+	Curation  curation.Metadata   `json:"curation,omitempty"`
 	Evidence  []security.Evidence `json:"evidence,omitempty"`
-	Wallet    WalletInput       `json:"wallet,omitempty"`
-	Links     Links             `json:"links,omitempty"`
+	Wallet    WalletInput         `json:"wallet,omitempty"`
+	Links     Links               `json:"links,omitempty"`
 }
 
 type CompositionInputs struct {
@@ -235,7 +235,6 @@ func validateComposedApplicationView(view ApplicationView) error {
 	_, err := New([]ApplicationView{view})
 	return err
 }
-
 
 func cloneApplicationViews(in []ApplicationView) []ApplicationView {
 	out := make([]ApplicationView, len(in))

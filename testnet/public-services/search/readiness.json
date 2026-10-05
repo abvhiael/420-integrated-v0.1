@@ -2,7 +2,7 @@
   "schema": "420-testnet-search-readiness-v1",
   "service": "420Search",
   "repository": {
-    "implementation_status": "QUALIFICATION_CANDIDATE",
+    "implementation_status": "REPOSITORY_QUALIFIED",
     "contracts_required": false,
     "canonical_state_authority": false,
     "runtime": "./search/cmd/search420",
@@ -10,7 +10,9 @@
     "smoke_validator": "./search/cmd/searchsmoke",
     "live_validator": "./search/cmd/searchlivevalidate",
     "direct_rpc": false,
-    "data_source": "420Indexer"
+    "data_source": "420Indexer",
+    "integration_status": "INDEXER_V1_CONSUMER_REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING",
+    "qualification_level": "SEARCH_AUDIT_LEVEL_1"
   },
   "backend": {
     "url": "REPLACE",

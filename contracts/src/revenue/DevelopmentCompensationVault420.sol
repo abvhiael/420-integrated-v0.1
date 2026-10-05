@@ -28,6 +28,7 @@ contract DevelopmentCompensationVault420 is I420System {
 
     error ZeroAddress();
     error InvalidIdentifier();
+    error InvalidPolicyReference();
     error InvalidRevenueAmount();
     error InvalidCompensationBps();
     error IncorrectContributionAmount();
@@ -165,6 +166,7 @@ contract DevelopmentCompensationVault420 is I420System {
         if (sourceApplicationId == bytes32(0) || revenueRef == bytes32(0) || policyRef == bytes32(0)) {
             revert InvalidIdentifier();
         }
+        if (policyRef != policyId) revert InvalidPolicyReference();
     }
 
     function _requireAuthorized(address source, bytes32 sourceApplicationId, uint256 amount) private view {

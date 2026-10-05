@@ -1,0 +1,65 @@
+name: 420Search audit qualification
+
+on:
+  pull_request:
+    paths:
+      - 'search/**'
+      - 'contracts/config/420search-genesis.json'
+      - 'testnet/public-services/search/readiness.json'
+      - 'testnet/public-services/indexer/readiness.json'
+      - 'docs/420SEARCH*'
+      - 'docs/audit/420SEARCH-*'
+      - 'scripts/verify-420search-audit.py'
+      - '.github/workflows/420search-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 420search-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Verify canonical Search model
+        run: python3 scripts/verify-420search-audit.py
+      - name: Formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(find search -name '*.go' -type f -print)"
+          test -n "$files"
+          test -z "$(gofmt -l $files)"
+      - name: Search unit and integration tests
+        run: go test ./search/... -count=1
+      - name: Go vet
+        run: go vet ./search/...
+      - name: Build runtime and qualification binaries
+        run: |
+          go build ./search/cmd/search420
+          go build ./search/cmd/searchsmoke
+          go build ./search/cmd/searchlivevalidate
+      - name: Build production container
+        run: docker build -f search/deploy/Dockerfile -t 420search:audit .
+      - name: Reject direct RPC and dangerous authority drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE 'SEARCH_RPC_URL|eth_(chainId|getBlock|call|sendRawTransaction)|delegatecall|selfdestruct|tx\.origin' search --include='*.go'; then
+            echo 'Forbidden direct-RPC or authority primitive found in 420Search' >&2
+            exit 1
+          fi

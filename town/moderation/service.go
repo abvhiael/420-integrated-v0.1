@@ -168,7 +168,16 @@ func (s *Service) Report(actor model.ObjectID, req OpenCaseRequest) (Record, err
 	if !s.authority.IsActiveMember(req.CommunityID, actor) {
 		return Record{}, ErrUnauthorized
 	}
-	communityID, affectedID, ok := s.resolveTarget(req.TargetKind, req.TargetID)
+	var communityID model.ObjectID
+	var affectedID model.ObjectID
+	var ok bool
+	if req.TargetKind == TargetUser {
+		communityID = req.CommunityID
+		affectedID = req.TargetID
+		ok = s.authority.IsActiveMember(req.CommunityID, req.TargetID)
+	} else {
+		communityID, affectedID, ok = s.resolveTarget(req.TargetKind, req.TargetID)
+	}
 	if !ok || communityID != req.CommunityID {
 		return Record{}, ErrNotFound
 	}

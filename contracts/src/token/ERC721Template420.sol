@@ -157,7 +157,9 @@ contract ERC721Template420 {
         uint256 id
     ) external {
         address o = ownerOf(id);
-        if (msg.sender != o && msg.sender != getApproved[id] && !isApprovedForAll[o][msg.sender]) revert Unauthorized();
+        if (msg.sender != o && msg.sender != getApproved[id] && !isApprovedForAll[o][msg.sender]) {
+            revert Unauthorized();
+        }
         delete getApproved[id];
         delete _ownerOf[id];
         unchecked {

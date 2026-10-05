@@ -73,7 +73,6 @@ func TestWorkUnitDownloadVerifiesDigestAndAtomicallyStoresPrivateFile(t *testing
 			t.Error("purpose request header missing")
 		}
 		w.Header().Set("Content-Type", "application/octet-stream")
-		w.Header().Set("Content-Length", "28")
 		_, _ = w.Write(payload)
 	}))
 

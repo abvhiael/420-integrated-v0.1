@@ -25,6 +25,21 @@
     "MODERATORS",
     "ADMINS"
   ],
+  "authority_v1": {
+    "contract": "TownAuthority420",
+    "membership_states": ["NONE","ACTIVE","LEFT","REMOVED"],
+    "subscription_states": ["NONE","ACTIVE","CANCELLED","EXPIRED"],
+    "entitlement_states": ["NONE","ACTIVE","REVOKED","EXPIRED"],
+    "roles": ["MEMBER","MODERATOR","ADMIN"],
+    "permissions": [
+      "MANAGE_MEMBERS",
+      "MANAGE_ROLES",
+      "MANAGE_SUBSCRIPTIONS",
+      "MANAGE_ENTITLEMENTS",
+      "MANAGE_TREASURY"
+    ],
+    "treasury_mode": "REFERENCE_ONLY"
+  },
   "objects": [
     {"kind":"Community","fields":["owner_identity_id","title"]},
     {"kind":"Membership","fields":["community_id","identity_id","state"]},
@@ -41,6 +56,7 @@
   ],
   "boundary": {
     "authority_bearing_state": [
+      "Community",
       "Membership",
       "RoleBinding",
       "PermissionGrant",

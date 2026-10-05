@@ -40,13 +40,16 @@ contract TownAuthorityAccess420Test {
     }
 
     function testOwnerCanGrantBoundedRolePermissionAndAdminCanAct() public {
-        vm.prank(OWNER);
-        town.assignRole(COMMUNITY, town.ROLE_ADMIN(), ADMIN);
+        bytes32 adminRole = town.ROLE_ADMIN();
+        bytes32 manageMembers = town.PERMISSION_MANAGE_MEMBERS();
 
         vm.prank(OWNER);
-        town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), town.PERMISSION_MANAGE_MEMBERS(), true);
+        town.assignRole(COMMUNITY, adminRole, ADMIN);
 
-        require(town.hasPermission(COMMUNITY, ADMIN, town.PERMISSION_MANAGE_MEMBERS()), "admin permission");
+        vm.prank(OWNER);
+        town.setRolePermission(COMMUNITY, adminRole, manageMembers, true);
+
+        require(town.hasPermission(COMMUNITY, ADMIN, manageMembers), "admin permission");
 
         vm.prank(ADMIN);
         town.removeMember(COMMUNITY, USER);
@@ -55,19 +58,22 @@ contract TownAuthorityAccess420Test {
     }
 
     function testAdminCannotSelfEscalateRolePermissionsOrGrantAdmin() public {
+        bytes32 adminRole = town.ROLE_ADMIN();
+        bytes32 manageRoles = town.PERMISSION_MANAGE_ROLES();
+
         vm.prank(OWNER);
-        town.assignRole(COMMUNITY, town.ROLE_ADMIN(), ADMIN);
+        town.assignRole(COMMUNITY, adminRole, ADMIN);
 
         vm.prank(ADMIN);
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
-        town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), town.PERMISSION_MANAGE_ROLES(), true);
+        town.setRolePermission(COMMUNITY, adminRole, manageRoles, true);
 
         vm.prank(OWNER);
-        town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), town.PERMISSION_MANAGE_ROLES(), true);
+        town.setRolePermission(COMMUNITY, adminRole, manageRoles, true);
 
         vm.prank(ADMIN);
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
-        town.assignRole(COMMUNITY, town.ROLE_ADMIN(), MOD);
+        town.assignRole(COMMUNITY, adminRole, MOD);
     }
 
     function testScopedRoleCannotCrossCommunity() public {
@@ -75,29 +81,35 @@ contract TownAuthorityAccess420Test {
         vm.prank(OWNER);
         town.createCommunity(other, keccak256("other-meta"), bytes32(0), address(0));
 
-        vm.prank(OWNER);
-        town.assignRole(COMMUNITY, town.ROLE_ADMIN(), ADMIN);
-        vm.prank(OWNER);
-        town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), town.PERMISSION_MANAGE_MEMBERS(), true);
+        bytes32 adminRole = town.ROLE_ADMIN();
+        bytes32 manageMembers = town.PERMISSION_MANAGE_MEMBERS();
 
-        require(town.hasPermission(COMMUNITY, ADMIN, town.PERMISSION_MANAGE_MEMBERS()), "permission in scope");
-        require(!town.hasPermission(other, ADMIN, town.PERMISSION_MANAGE_MEMBERS()), "no cross-scope permission");
+        vm.prank(OWNER);
+        town.assignRole(COMMUNITY, adminRole, ADMIN);
+        vm.prank(OWNER);
+        town.setRolePermission(COMMUNITY, adminRole, manageMembers, true);
+
+        require(town.hasPermission(COMMUNITY, ADMIN, manageMembers), "permission in scope");
+        require(!town.hasPermission(other, ADMIN, manageMembers), "no cross-scope permission");
     }
 
     function testLeavingClearsPrivilegedRolesAndRejoinDoesNotRestoreThem() public {
+        bytes32 moderatorRole = town.ROLE_MODERATOR();
+        bytes32 manageMembers = town.PERMISSION_MANAGE_MEMBERS();
+
         vm.prank(OWNER);
-        town.assignRole(COMMUNITY, town.ROLE_MODERATOR(), MOD);
+        town.assignRole(COMMUNITY, moderatorRole, MOD);
         vm.prank(OWNER);
-        town.setRolePermission(COMMUNITY, town.ROLE_MODERATOR(), town.PERMISSION_MANAGE_MEMBERS(), true);
-        require(town.hasPermission(COMMUNITY, MOD, town.PERMISSION_MANAGE_MEMBERS()), "moderator permission");
+        town.setRolePermission(COMMUNITY, moderatorRole, manageMembers, true);
+        require(town.hasPermission(COMMUNITY, MOD, manageMembers), "moderator permission");
 
         vm.prank(MOD);
         town.leaveCommunity(COMMUNITY);
-        require(!town.hasRole(COMMUNITY, town.ROLE_MODERATOR(), MOD), "role cleared on leave");
+        require(!town.hasRole(COMMUNITY, moderatorRole, MOD), "role cleared on leave");
 
         vm.prank(MOD);
         town.joinCommunity(COMMUNITY);
-        require(!town.hasPermission(COMMUNITY, MOD, town.PERMISSION_MANAGE_MEMBERS()), "role not resurrected");
+        require(!town.hasPermission(COMMUNITY, MOD, manageMembers), "role not resurrected");
     }
 
     function testUnknownPermissionFailsClosed() public view {

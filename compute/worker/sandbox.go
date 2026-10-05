@@ -22,32 +22,7 @@ const (
 )
 
 var (
-	ErrInvalidSandbox = errors.New("invalid compute worker sandbox request")
-	digestImagePattern = regexp.MustCompile(`^(?:[a-zA-Z0-9._/:~-]+@)?sha256:[0-9a-f]{64}package worker
-
-import (
-	"bytes"
-	"context"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
-	"fmt"
-	"io"
-	"os/exec"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
-)
-
-const (
-	SandboxSchemaV1        = "420-compute-worker-sandbox-v1"
-	DefaultSandboxUser     = "65532:65532"
-	DefaultSandboxMaxBytes = 64 << 10
-)
-
-var (
-	ErrInvalidSandbox = errors.New("invalid compute worker sandbox request")
+	ErrInvalidSandbox  = errors.New("invalid compute worker sandbox request")
 	digestImagePattern = regexp.MustCompile("^(?:[a-zA-Z0-9._/:~-]+@)?sha256:[0-9a-f]{64}$")
 )
 
@@ -72,14 +47,14 @@ type SandboxRequest struct {
 }
 
 type SandboxResult struct {
-	SchemaVersion string        `json:"schemaVersion"`
-	Engine        string        `json:"engine"`
-	ContainerName string        `json:"containerName"`
-	ExitCode      int           `json:"exitCode"`
-	Duration      time.Duration `json:"duration"`
-	TimedOut      bool          `json:"timedOut"`
-	Output        string        `json:"output"`
-	OutputTruncated bool        `json:"outputTruncated"`
+	SchemaVersion   string        `json:"schemaVersion"`
+	Engine          string        `json:"engine"`
+	ContainerName   string        `json:"containerName"`
+	ExitCode        int           `json:"exitCode"`
+	Duration        time.Duration `json:"duration"`
+	TimedOut        bool          `json:"timedOut"`
+	Output          string        `json:"output"`
+	OutputTruncated bool          `json:"outputTruncated"`
 }
 
 type CommandRunner interface {
@@ -280,5 +255,10 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 	return original, nil
 }
 
-func (b *limitedBuffer) String() string { return b.buffer.String() }
-func (b *limitedBuffer) Truncated() bool { return b.truncated }
+func (b *limitedBuffer) String() string {
+	return b.buffer.String()
+}
+
+func (b *limitedBuffer) Truncated() bool {
+	return b.truncated
+}

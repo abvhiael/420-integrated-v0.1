@@ -34,11 +34,20 @@ No database implementation, API, contract, fixed address, service ID, deployment
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-STATE-001 through PB-STATE-040 exist exactly once and in sequence;
+- all major PuffBuddies state classes have one explicit canonical authority owner;
+- 420Wallet, 420Identity, 420Names, 420Messenger, 420Notifications, 420Pay, 420Registry, 420AppStore and derived-service ownership remains bounded to each dependency's canonical domain;
+- raw eligibility evidence ownership is separated from the PuffBuddies-specific eligibility decision;
+- payment settlement ownership is separated from PuffBuddies premium-entitlement policy ownership;
+- PuffBuddies relationship authorization is separated from Messenger coordination and Messenger-native deny state;
+- PuffBuddies profile, preference, relationship, block, moderation, lifecycle, deletion and precise-location state remain PuffBuddies-owned private state;
+- caches, projections, clients, notifications, analytics and derived services are explicitly non-authoritative where appropriate;
+- conflict resolution returns to canonical authority with freshness/revocation/finality checks and fail-closed behavior;
+- no database/API/runtime implementation, contract, fixed address, service ID, deployment or live wiring is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`13eda7b6b29a8008e84a3ca02b777f015e4fef15`
 
 ## Current main/base SHA
 
@@ -50,7 +59,19 @@ PR #526 remains open on the cumulative PB-0 branch; current-main reconciliation 
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37285815246` — **PASS**
+- job: `111684317429` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37285821394` — **PASS**
+- job: `111684337142` (`pb0-fast`) — **PASS**
+
+Superseded candidate `d6f340da60656e7220b073dae01e53985b5a8aea` failed because two ownership guarantees were semantically present but not stated in the exact wording enforced by the verifier. The canonical state-ownership text was clarified without weakening the verifier or ownership model.
 
 ## Security/adversarial/invariant scope
 
@@ -72,11 +93,13 @@ PB-0.9 defines authority ownership, not exact schemas, storage engines, APIs, re
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.9 is formally COMPLETE.
+None for PB-0.9.
 
 ## Completion state
 
-**PB-0.9 — PENDING QUALIFICATION**
+**PB-0.9 — COMPLETE**
+
+All canonical PB-0.9 exit criteria are satisfied on exact implementation SHA `13eda7b6b29a8008e84a3ca02b777f015e4fef15`.
 
 ## Next canonical roadmap step
 

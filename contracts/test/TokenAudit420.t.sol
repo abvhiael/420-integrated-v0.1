@@ -179,7 +179,7 @@ contract TokenAudit420Test {
     function testVotesProfileRejectsSupplyAboveCheckpointWidth() public {
         vm.prank(ALICE);
         vm.expectRevert(ERC20Template420.VoteOverflow.selector);
-        factory.createERC20{value: 42 ether}(
+        factory.createERC20{ value: 42 ether }(
             TokenIds420.ERC20_VOTES, "Too Large", "BIG", uint256(type(uint208).max) + 1, 0, bytes32("votes-overflow")
         );
         require(factory.creatorNonce(ALICE) == 0, "overflow deployment changed nonce");

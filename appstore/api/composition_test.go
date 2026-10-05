@@ -265,7 +265,6 @@ func TestLoadCompositionInputsRejectsUnknownAuthorityFieldsAndTrailingJSON(t *te
 	}
 }
 
-
 func TestViewSetRebuildIsAtomicAndSnapshotIsolated(t *testing.T) {
 	doc := compositionDocument(compositionRecord("420/service/demo/v1", 1, "0x1111111111111111111111111111111111111111", true, 10))
 	set := NewViewSet()

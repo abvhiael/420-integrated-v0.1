@@ -146,6 +146,61 @@ func TestApplyLocalResourcePolicySetsSandboxCPUQuota(t *testing.T) {
 	}
 }
 
+func TestParseScheduleWindow(t *testing.T) {
+	window, err := ParseScheduleWindow("Mon@18:30-23:00")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if window.Weekday != time.Monday || window.StartMinute != 18*60+30 || window.EndMinute != 23*60 {
+		t.Fatalf("parsed window=%+v", window)
+	}
+	for _, raw := range []string{"", "Monday@18:00-19:00", "Mon@24:00-24:00", "Mon@20:00-19:00", "Mon@bad"} {
+		if _, err := ParseScheduleWindow(raw); err == nil {
+			t.Fatalf("invalid schedule %q accepted", raw)
+		}
+	}
+}
+
+func TestIdleOnlyTracksContinuousLowUtilizationWhenProbeHasNoIdleClock(t *testing.T) {
+	policy := DefaultLocalResourcePolicy()
+	policy.IdleOnly = true
+	policy.IdleCPUThresholdPercent = 10
+	policy.MinIdleDuration = time.Minute
+	probe := &resourceProbeStub{snapshot: HostResourceSnapshot{
+		LogicalCPUs: 4, CPUUtilizationKnown: true, CPUUtilizationPercent: 5,
+	}}
+	controller, err := NewLocalResourceController(policy, probe, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Date(2026, 10, 5, 12, 0, 0, 0, time.UTC)
+	controller.now = func() time.Time { return now }
+	if _, err := controller.Acquire(context.Background()); err == nil {
+		t.Fatal("first low-utilization sample incorrectly satisfied minimum idle duration")
+	}
+	now = now.Add(61 * time.Second)
+	lease, err := controller.Acquire(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := lease.Release(); err != nil {
+		t.Fatal(err)
+	}
+	busy := probe.snapshot
+	busy.CPUUtilizationPercent = 50
+	probe.set(busy)
+	if _, err := controller.Acquire(context.Background()); err == nil {
+		t.Fatal("busy sample did not reset idle eligibility")
+	}
+	now = now.Add(61 * time.Second)
+	quiet := busy
+	quiet.CPUUtilizationPercent = 5
+	probe.set(quiet)
+	if _, err := controller.Acquire(context.Background()); err == nil {
+		t.Fatal("idle timer was not reset after host became busy")
+	}
+}
+
 func TestScheduleControlsUseConfiguredTimezone(t *testing.T) {
 	policy := DefaultLocalResourcePolicy()
 	policy.TimeZone = "UTC"

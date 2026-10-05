@@ -12,6 +12,7 @@ import (
 	"github.com/420integrated/420-integrated/notifications/feed"
 	"github.com/420integrated/420-integrated/search/architecture"
 	storage420 "github.com/420integrated/420-integrated/sdk/storage420"
+	"github.com/420integrated/420-integrated/town/content"
 	"github.com/420integrated/420-integrated/town/model"
 )
 
@@ -88,12 +89,10 @@ func TestStorageRejectsProviderSubstitutionAndPayloadTampering(t *testing.T){
 	if _,_,err:=a.PrepareContent(context.Background(),objectFixture(),digest,"idem-1",storage420.UploadPreconditions{});!errors.Is(err,ErrDependencyMismatch){t.Fatalf("got %v",err)}
 	client=storage420.NewClient(storageTransportFake{payload:[]byte("tampered")});client.Retry.MaxAttempts=1
 	a.Client=client
-	anchor:=struct{Ref,SHA256 string}{storageRef(objectFixture()),digest}
-	_,err:=a.RetrieveContent(context.Background(),structToAnchor(anchor),objectFixture(),storage420.ReadAccess{Mode:storage420.AccessPublic})
+	anchor:=content.ContentAnchor{Ref:storageRef(objectFixture()),SHA256:digest}
+	_,err:=a.RetrieveContent(context.Background(),anchor,objectFixture(),storage420.ReadAccess{Mode:storage420.AccessPublic})
 	if !errors.Is(err,ErrIntegrity){t.Fatalf("got %v",err)}
 }
-
-func structToAnchor(v struct{Ref,SHA256 string}) (a struct{Ref,SHA256 string}) { return v }
 
 func TestSearchProjectsOnlyExplicitPublicTownMaterial(t *testing.T){
 	now:=time.Unix(1700000000,0).UTC()

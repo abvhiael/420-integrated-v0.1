@@ -182,7 +182,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
 - durable PB-0.4 evidence records exact run/job evidence and base SHA.
 
-### PB-0.5 — Consent invariants
+### PB-0.5 — Consent invariants — COMPLETE
 
 **Purpose:** define stable consent/authorization guarantees for mutual matching, messaging access, unmatch, block supremacy, revocation, premium/payment boundaries, administrative authority, and stale-authorization failure behavior.
 

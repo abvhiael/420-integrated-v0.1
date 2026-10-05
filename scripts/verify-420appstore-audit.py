@@ -33,6 +33,11 @@ required = [
     "appstore/api/composition.go",
     "appstore/api/composition_test.go",
     "appstore/web/web.go",
+    "appstore/publicservice/service.go",
+    "appstore/publicservice/service_test.go",
+    "appstore/publicservice/dependencies.go",
+    "appstore/publicservice/probe.go",
+    "appstore/publicservice/probe_test.go",
     "appstore/cmd/appstore420/main.go",
     "appstore/cmd/appstore420/main_test.go",
     "appstore/closeout/closeout_test.go",
@@ -71,18 +76,14 @@ if readiness_path.is_file():
         errors.append("current audit remediation status missing")
     if audit.get("registry_source") != "420Indexer-backed finalized ProtocolRegistry projection":
         errors.append("APPSTORE-AUDIT-2 Registry source decision missing")
-    for phrase in ("discovery API", "embedded frontend", "public testnet"):
+    for phrase in ("repository qualification", "public testnet"):
         if not any(phrase.lower() in str(b).lower() for b in blockers):
             errors.append(f"readiness evidence missing blocker: {phrase}")
 
 main = (ROOT / "appstore/cmd/appstore420/main.go").read_text()
-for token in ("APPSTORE_INDEXER_URL", "APPSTORE_VIEW_INPUTS", "NewIndexerSource", "appstorecatalog.Open", "NewLifecycle", "lifecycle.Bootstrap", "NewViewSet", "rebuildApplicationViews", "runCatalogueComposition"):
+for token in ("APPSTORE_INDEXER_URL", "APPSTORE_VIEW_INPUTS", "APPSTORE_VERIFY_URL", "NewIndexerSource", "appstorecatalog.Open", "NewLifecycle", "lifecycle.Bootstrap", "NewViewSet", "rebuildApplicationViews", "runCatalogueComposition", "appstorepublic.New", "publicService.Handler"):
     if token not in main:
         errors.append(f"APPSTORE-AUDIT-2 production source wiring missing: {token}")
-if 'Handler: service.Handler()' not in main:
-    errors.append("audit assumption changed: production handler wiring must be re-audited")
-if '"github.com/420integrated/420-integrated/appstore/web"' in main:
-    errors.append("runtime frontend wiring changed without updating audit readiness evidence")
 
 source = (ROOT / "appstore/registry/indexer_source.go").read_text()
 for token in ("FinalizedHeight", "CanonicalAuthority", "ProtocolRegistryCanonicalAddress420", "projection.Rebuild"):
@@ -102,6 +103,11 @@ for token in ("ComposeApplications", "LoadCompositionInputs", "DisallowUnknownFi
     if token not in composition:
         errors.append(f"APPSTORE-AUDIT-4 composition invariant missing: {token}")
 
+public_service = (ROOT / "appstore/publicservice/service.go").read_text()
+for token in ("ModeBlocked", "CanServeCanonical", "CanBrowse", "withoutVerificationEvidence", "StatusTooManyRequests", "appstoreweb.Handler", "appstoreapi.New"):
+    if token not in public_service:
+        errors.append(f"APPSTORE-AUDIT-5 public service invariant missing: {token}")
+
 registry = (ROOT / "appstore/registry/sync.go").read_text()
 if "stageVersions" not in registry:
     errors.append("atomic registry staging helper missing")
@@ -117,4 +123,5 @@ print("Canonical boundary: contract-free / non-canonical")
 print("APPSTORE-AUDIT-2 source: 420Indexer-backed finalized ProtocolRegistry projection")
 print("APPSTORE-AUDIT-3 lifecycle: persistent restore/rebuild/refresh/history wired")
 print("APPSTORE-AUDIT-4 composition: canonical-bound ApplicationView state wired")
+print("APPSTORE-AUDIT-5 public service: API/frontend/abuse/dependency composition wired")
 print("Current readiness: PARTIAL / remediation required / public testnet pending")

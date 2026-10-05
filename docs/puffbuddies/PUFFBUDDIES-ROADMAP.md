@@ -403,7 +403,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.9 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.10 — Safety/moderation principles
+### PB-0.10 — Safety/moderation principles — COMPLETE
 
 **Purpose:** define canonical report classes, policy-level moderation states, stable safety invariants, and escalation boundaries while preserving privacy, consent, state ownership, and dependency authority.
 

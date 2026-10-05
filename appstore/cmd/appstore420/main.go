@@ -17,14 +17,22 @@ import (
 
 func main() {
 	cfg, err := loadConfig(os.Getenv)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	probe := appstoreruntime.NewRPCProbe(cfg)
 	service, err := appstoreruntime.NewService(cfg, probe)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	source, err := appstoreregistry.NewIndexerSource(cfg.IndexerURL, cfg.ChainID, cfg.RegistryAddress, 10*time.Second)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 	projection, err := appstoreregistry.NewProjection(cfg.ChainID, cfg.RegistryAddress)
-	if err != nil { fatal(err) }
+	if err != nil {
+		fatal(err)
+	}
 
 	qualifyCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	if err := service.Qualify(qualifyCtx); err != nil {
@@ -45,11 +53,15 @@ func main() {
 
 	select {
 	case err := <-errCh:
-		if err != nil && err != http.ErrServerClosed { fatal(err) }
+		if err != nil && err != http.ErrServerClosed {
+			fatal(err)
+		}
 	case <-ctx.Done():
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil { fatal(err) }
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			fatal(err)
+		}
 	}
 }
 
@@ -57,19 +69,25 @@ func loadConfig(getenv func(string) string) (appstoreruntime.Config, error) {
 	chainID := uint64(420)
 	if raw := strings.TrimSpace(getenv("APPSTORE_CHAIN_ID")); raw != "" {
 		v, err := strconv.ParseUint(raw, 10, 64)
-		if err != nil || v == 0 { return appstoreruntime.Config{}, fmt.Errorf("APPSTORE_CHAIN_ID must be a non-zero uint64") }
+		if err != nil || v == 0 {
+			return appstoreruntime.Config{}, fmt.Errorf("APPSTORE_CHAIN_ID must be a non-zero uint64")
+		}
 		chainID = v
 	}
 	cfg := appstoreruntime.Config{
-		ChainID: chainID,
-		RPCURL: strings.TrimSpace(getenv("APPSTORE_RPC_URL")),
-		IndexerURL: strings.TrimSpace(getenv("APPSTORE_INDEXER_URL")),
+		ChainID:         chainID,
+		RPCURL:          strings.TrimSpace(getenv("APPSTORE_RPC_URL")),
+		IndexerURL:      strings.TrimSpace(getenv("APPSTORE_INDEXER_URL")),
 		RegistryAddress: strings.TrimSpace(getenv("APPSTORE_REGISTRY_ADDRESS")),
-		CatalogueStore: strings.TrimSpace(getenv("APPSTORE_CATALOGUE_STORE")),
-		ListenAddr: strings.TrimSpace(getenv("APPSTORE_LISTEN_ADDR")),
+		CatalogueStore:  strings.TrimSpace(getenv("APPSTORE_CATALOGUE_STORE")),
+		ListenAddr:      strings.TrimSpace(getenv("APPSTORE_LISTEN_ADDR")),
 	}
-	if cfg.ListenAddr == "" { cfg.ListenAddr = ":8426" }
-	if err := cfg.Validate(); err != nil { return appstoreruntime.Config{}, err }
+	if cfg.ListenAddr == "" {
+		cfg.ListenAddr = ":8426"
+	}
+	if err := cfg.Validate(); err != nil {
+		return appstoreruntime.Config{}, err
+	}
 	return cfg, nil
 }
 

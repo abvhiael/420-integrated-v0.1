@@ -359,8 +359,50 @@ CMP-3.14 owns complete current-main reconciliation and Level 3 app-phase closeou
 
 Commits after the exact qualified implementation/spec/workflow SHA modify only durable evidence/status bookkeeping. They change no executable source, tests, workflows, dependencies, configuration, interfaces, deployment state, generated/runtime artifacts or substantive requirements. They therefore reference the exact qualified SHA without recursive Level 1 qualification.
 
+## Post-closeout exact-head confirmation
+
+After the original implementation qualification and evidence-only closeout, the branch advanced only through documentation/evidence commits:
+
+- original qualified implementation/spec/workflow SHA: `691d6296756281bc8424c17d4ad8597bf0a034b6`;
+- later evidence-only HEAD confirmed: `cd00caca2c80b44c2b1e80520f7955e471968fdb`;
+- diff from the original qualified SHA to that confirmation SHA changes only:
+  - `docs/compute-market/CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md`;
+  - `docs/compute-market/CMP-3.12-QUALIFICATION-EVIDENCE.md`;
+  - `docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md`.
+
+No executable source, tests, workflows, dependencies, configuration, interfaces, deployment state or generated/runtime artifacts changed in those four commits.
+
+Even though recursive qualification was not required by the evidence-only rule, the evidence-only HEAD itself subsequently passed the complete required fast suite:
+
+- Compute Worker Fast Qualification **#321**;
+- run ID: `37265054068`;
+- job ID: `111619987237`;
+- exact checked SHA: `cd00caca2c80b44c2b1e80520f7955e471968fdb`;
+- result: **SUCCESS**.
+
+That exact-head confirmation again passed worker tests, command tests, Go vet/build, real Docker sandbox/checkpoint/result regressions, all CMP-3.1–CMP-3.11 retained verifiers, and the CMP-3.12 malicious-workload verifier.
+
+Compute Worker Integration Qualification **#110** on the same evidence-only HEAD completed **SKIPPED** because no Level 2 milestone label was present. That skip remains expected and is not counted as passing evidence.
+
+Current-main refresh at post-closeout confirmation:
+
+- current `main`: `5367722febee6e5df18b1c0c45a142c59ea9f905`;
+- branch divergence: **206 ahead / 306 behind**;
+- merge base remains `2280fb6f9915b849560d9d4d5a95d999c4adc669`;
+- CMP-0.4 signed execution manifest blob remains identical between current main and branch;
+- system trust-boundary model blob remains identical between current main and branch.
+
+Therefore no controlling CMP-3.12 dependency drift was introduced by newer main history; accumulated reconciliation remains CMP-3.14 Level 3 work.
+
+420Docs Qualification **#5335** on `cd00caca...` failed only at the unchanged pre-existing Arbitration orphan-navigation check for:
+
+- `docs/apps/arbitration/deployment-operations.md`;
+- `docs/apps/arbitration/threat-model.md`.
+
+CMP-3.12 documentation passed the preceding documentation checks, including internal links. This broad failure remains unrelated to the CMP-3.12 Level 1 gate.
+
 ## Formal status
 
-**CMP-3.12 — Malicious workload protections: COMPLETE.**
+**CMP-3.12 — Malicious workload protections: COMPLETE, with post-closeout exact-head confirmation on `cd00caca2c80b44c2b1e80520f7955e471968fdb`.**
 
 Next canonical step: **CMP-3.13 — Windows/Linux/macOS packaging**.

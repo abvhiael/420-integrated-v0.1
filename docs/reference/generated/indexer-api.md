@@ -31,6 +31,20 @@ version: current
 | `/v1/assets/transfers` | `GET` | `chain` | true | `chainId, assetKey?, address?, beforeBlock?, cursor?, limit?, direction?` | paged normalized asset transfers |
 | `/v1/protocols/events` | `GET` | `chain` | true | `chainId, protocol?, objectKey?, cursor?, limit?, direction?` | paged typed protocol events |
 | `/v1/protocols/:protocol/objects/:key` | `GET` | `chain` | false | `chainId; path: protocol, key` | latest typed protocol object state |
+| `/v1/ai/providers` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged non-authoritative AI provider projection |
+| `/v1/ai/providers/:providerId` | `GET` | `chain` | false | `chainId; path: providerId` | AI provider projection by id |
+| `/v1/ai/models` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged non-authoritative AI model projection |
+| `/v1/ai/models/:modelId` | `GET` | `chain` | false | `chainId; path: modelId` | AI model projection by id |
+| `/v1/ai/model-versions` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged AI model-version projection |
+| `/v1/ai/model-versions/:modelVersionId` | `GET` | `chain` | false | `chainId; path: modelVersionId` | AI model-version projection by id |
+| `/v1/ai/deployments` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged AI deployment projection |
+| `/v1/ai/deployments/:deploymentId` | `GET` | `chain` | false | `chainId; path: deploymentId` | AI deployment projection by id |
+| `/v1/ai/jobs` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged AI/CMP job projection |
+| `/v1/ai/jobs/:jobId` | `GET` | `chain` | false | `chainId; path: jobId` | AI/CMP job projection by id |
+| `/v1/ai/policies` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged AI policy projection |
+| `/v1/ai/policies/:policyId` | `GET` | `chain` | false | `chainId; path: policyId` | AI policy projection by id |
+| `/v1/ai/reputation` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged AI Trust-evidence counters |
+| `/v1/ai/reputation/:providerId` | `GET` | `chain` | false | `chainId; path: providerId` | AI Trust-evidence counters by provider |
 | `/v1/search` | `GET` | `chain` | false | `chainId, q, limit?` | bounded deterministic index search |
 
 ## Envelopes
@@ -73,6 +87,7 @@ Errors use:
 - logs: optional `address` filter.
 - asset transfers: optional `assetKey`, `address`, and unsigned `beforeBlock`.
 - protocol events: optional `protocol` and `objectKey`.
+- AI collection routes use the standard opaque `cursor`, `limit`, and `direction` page controls; AI detail routes take their declared path identifier.
 - search: required non-empty `q`; optional `limit` uses the same `1..200` validation.
 - all chain-scoped routes require decimal unsigned `chainId`.
 

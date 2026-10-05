@@ -18,42 +18,42 @@ const (
 type ResultDomain string
 
 const (
-	DomainBlock            ResultDomain = "block"
-	DomainTransaction      ResultDomain = "transaction"
-	DomainAddress          ResultDomain = "address"
-	DomainContract         ResultDomain = "contract"
-	DomainService          ResultDomain = "service"
-	DomainName             ResultDomain = "name"
-	DomainPublicIdentity   ResultDomain = "public_identity"
-	DomainAsset            ResultDomain = "asset"
-	DomainValidator        ResultDomain = "validator"
-	DomainMarketListing    ResultDomain = "market_listing"
-	DomainRightsRecord     ResultDomain = "rights_record"
-	DomainPublicCommons    ResultDomain = "public_commons"
-	DomainPublicPulse      ResultDomain = "public_pulse"
+	DomainBlock          ResultDomain = "block"
+	DomainTransaction    ResultDomain = "transaction"
+	DomainAddress        ResultDomain = "address"
+	DomainContract       ResultDomain = "contract"
+	DomainService        ResultDomain = "service"
+	DomainName           ResultDomain = "name"
+	DomainPublicIdentity ResultDomain = "public_identity"
+	DomainAsset          ResultDomain = "asset"
+	DomainValidator      ResultDomain = "validator"
+	DomainMarketListing  ResultDomain = "market_listing"
+	DomainRightsRecord   ResultDomain = "rights_record"
+	DomainPublicCommons  ResultDomain = "public_commons"
+	DomainPublicPulse    ResultDomain = "public_pulse"
 )
 
 type SourceBoundary string
 
 const (
-	SourceIndexer      SourceBoundary = "420Indexer"
-	SourceRegistry     SourceBoundary = "420Registry"
-	SourceNames        SourceBoundary = "420Names"
-	SourceIdentity     SourceBoundary = "420Identity:public"
-	SourceMarket       SourceBoundary = "420Market:public"
-	SourceRights       SourceBoundary = "420Rights:public"
-	SourceCommons      SourceBoundary = "420Commons:public"
-	SourcePulse        SourceBoundary = "420Pulse:public"
+	SourceIndexer  SourceBoundary = "420Indexer"
+	SourceRegistry SourceBoundary = "420Registry"
+	SourceNames    SourceBoundary = "420Names"
+	SourceIdentity SourceBoundary = "420Identity:public"
+	SourceMarket   SourceBoundary = "420Market:public"
+	SourceRights   SourceBoundary = "420Rights:public"
+	SourceCommons  SourceBoundary = "420Commons:public"
+	SourcePulse    SourceBoundary = "420Pulse:public"
 )
 
 type PrivacyExclusion string
 
 const (
-	ExcludePrivateMessenger PrivacyExclusion = "private_messenger"
-	ExcludePrivateCommons   PrivacyExclusion = "private_commons"
-	ExcludePrivateIdentity  PrivacyExclusion = "private_identity"
+	ExcludePrivateMessenger  PrivacyExclusion = "private_messenger"
+	ExcludePrivateCommons    PrivacyExclusion = "private_commons"
+	ExcludePrivateIdentity   PrivacyExclusion = "private_identity"
 	ExcludeEncryptedResource PrivacyExclusion = "encrypted_resource_payload"
-	ExcludeRawAttention     PrivacyExclusion = "raw_attention_telemetry"
+	ExcludeRawAttention      PrivacyExclusion = "raw_attention_telemetry"
 )
 
 var GenesisDomains = []ResultDomain{

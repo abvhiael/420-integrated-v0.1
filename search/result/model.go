@@ -23,26 +23,26 @@ const (
 )
 
 type Provenance struct {
-	Source        architecture.SourceBoundary `json:"source"`
-	Authority     string                      `json:"authority"`
-	ChainID       uint64                      `json:"chainId,omitempty"`
-	BlockNumber   *uint64                     `json:"blockNumber,omitempty"`
-	BlockHash     string                      `json:"blockHash,omitempty"`
-	TransactionHash string                    `json:"transactionHash,omitempty"`
-	LogIndex      *uint64                     `json:"logIndex,omitempty"`
-	Finality      Finality                    `json:"finality"`
-	IndexedAt     time.Time                   `json:"indexedAt"`
-	IndexedHeight *uint64                     `json:"indexedHeight,omitempty"`
-	FinalizedHeight *uint64                   `json:"finalizedHeight,omitempty"`
+	Source          architecture.SourceBoundary `json:"source"`
+	Authority       string                      `json:"authority"`
+	ChainID         uint64                      `json:"chainId,omitempty"`
+	BlockNumber     *uint64                     `json:"blockNumber,omitempty"`
+	BlockHash       string                      `json:"blockHash,omitempty"`
+	TransactionHash string                      `json:"transactionHash,omitempty"`
+	LogIndex        *uint64                     `json:"logIndex,omitempty"`
+	Finality        Finality                    `json:"finality"`
+	IndexedAt       time.Time                   `json:"indexedAt"`
+	IndexedHeight   *uint64                     `json:"indexedHeight,omitempty"`
+	FinalizedHeight *uint64                     `json:"finalizedHeight,omitempty"`
 }
 
 type Presentation struct {
-	Title       string   `json:"title"`
-	Subtitle    string   `json:"subtitle,omitempty"`
-	Snippet     string   `json:"snippet,omitempty"`
-	Category    string   `json:"category,omitempty"`
-	CanonicalURL string  `json:"canonicalUrl"`
-	Tags        []string `json:"tags,omitempty"`
+	Title        string   `json:"title"`
+	Subtitle     string   `json:"subtitle,omitempty"`
+	Snippet      string   `json:"snippet,omitempty"`
+	Category     string   `json:"category,omitempty"`
+	CanonicalURL string   `json:"canonicalUrl"`
+	Tags         []string `json:"tags,omitempty"`
 }
 
 type Ranking struct {
@@ -83,38 +83,68 @@ func StableID(domain architecture.ResultDomain, source architecture.SourceBounda
 
 func New(domain architecture.ResultDomain, sourceKey string, mode architecture.SearchMode, provenance Provenance, presentation Presentation) (Result, error) {
 	id, err := StableID(domain, provenance.Source, sourceKey)
-	if err != nil { return Result{}, err }
-	if provenance.Authority == "" { return Result{}, errors.New("source authority required") }
-	if provenance.Finality == "" { provenance.Finality = FinalityUnknown }
-	if provenance.IndexedAt.IsZero() { return Result{}, errors.New("indexedAt required") }
-	if strings.TrimSpace(presentation.Title) == "" { return Result{}, errors.New("title required") }
-	if strings.TrimSpace(presentation.CanonicalURL) == "" { return Result{}, errors.New("canonical URL required") }
+	if err != nil {
+		return Result{}, err
+	}
+	if provenance.Authority == "" {
+		return Result{}, errors.New("source authority required")
+	}
+	if provenance.Finality == "" {
+		provenance.Finality = FinalityUnknown
+	}
+	if provenance.IndexedAt.IsZero() {
+		return Result{}, errors.New("indexedAt required")
+	}
+	if strings.TrimSpace(presentation.Title) == "" {
+		return Result{}, errors.New("title required")
+	}
+	if strings.TrimSpace(presentation.CanonicalURL) == "" {
+		return Result{}, errors.New("canonical URL required")
+	}
 	if mode != architecture.SearchModeResolver && mode != architecture.SearchModeDiscovery {
 		return Result{}, errors.New("invalid search mode")
 	}
 	return Result{
-		Schema: SchemaVersion,
-		ID: id,
-		Domain: domain,
-		SourceKey: sourceKey,
-		Mode: mode,
-		Provenance: provenance,
+		Schema:       SchemaVersion,
+		ID:           id,
+		Domain:       domain,
+		SourceKey:    sourceKey,
+		Mode:         mode,
+		Provenance:   provenance,
 		Presentation: presentation,
-		Ranking: Ranking{Ranker: "unranked", Canonical: false},
-		Sponsorship: Sponsorship{Sponsored: false, Canonical: false},
+		Ranking:      Ranking{Ranker: "unranked", Canonical: false},
+		Sponsorship:  Sponsorship{Sponsored: false, Canonical: false},
 	}, nil
 }
 
 func (r Result) Validate() error {
-	if r.Schema != SchemaVersion { return errors.New("unsupported result schema") }
+	if r.Schema != SchemaVersion {
+		return errors.New("unsupported result schema")
+	}
 	expected, err := StableID(r.Domain, r.Provenance.Source, r.SourceKey)
-	if err != nil { return err }
-	if r.ID != expected { return errors.New("unstable or forged result id") }
-	if r.Provenance.Authority == "" { return errors.New("source authority required") }
-	if r.Provenance.IndexedAt.IsZero() { return errors.New("indexedAt required") }
-	if r.Presentation.Title == "" || r.Presentation.CanonicalURL == "" { return errors.New("presentation identity incomplete") }
-	if r.Ranking.Canonical { return errors.New("ranking must remain non-canonical") }
-	if r.Sponsorship.Canonical { return errors.New("sponsorship must remain non-canonical") }
-	if r.Sponsorship.Sponsored && strings.TrimSpace(r.Sponsorship.Label) == "" { return errors.New("sponsored result must be explicitly labeled") }
+	if err != nil {
+		return err
+	}
+	if r.ID != expected {
+		return errors.New("unstable or forged result id")
+	}
+	if r.Provenance.Authority == "" {
+		return errors.New("source authority required")
+	}
+	if r.Provenance.IndexedAt.IsZero() {
+		return errors.New("indexedAt required")
+	}
+	if r.Presentation.Title == "" || r.Presentation.CanonicalURL == "" {
+		return errors.New("presentation identity incomplete")
+	}
+	if r.Ranking.Canonical {
+		return errors.New("ranking must remain non-canonical")
+	}
+	if r.Sponsorship.Canonical {
+		return errors.New("sponsorship must remain non-canonical")
+	}
+	if r.Sponsorship.Sponsored && strings.TrimSpace(r.Sponsorship.Label) == "" {
+		return errors.New("sponsored result must be explicitly labeled")
+	}
 	return nil
 }

@@ -28,22 +28,36 @@ type ChainDiscovery struct {
 }
 
 func NewChainDiscovery(reader ChainReader) (*ChainDiscovery, error) {
-	if reader == nil { return nil, errors.New("chain reader required") }
+	if reader == nil {
+		return nil, errors.New("chain reader required")
+	}
 	return &ChainDiscovery{reader: reader, now: time.Now}, nil
 }
 
 func (d *ChainDiscovery) Resolve(ctx context.Context, term string) ([]searchresult.Result, error) {
 	term = strings.TrimSpace(term)
-	if term == "" { return nil, errors.New("search term required") }
-	if err := d.reader.Qualified(ctx); err != nil { return nil, err }
+	if term == "" {
+		return nil, errors.New("search term required")
+	}
+	if err := d.reader.Qualified(ctx); err != nil {
+		return nil, err
+	}
 	status, err := d.reader.Status(ctx)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	indexedHeight, err := parseOptionalUint(status.IndexedHead)
-	if err != nil { return nil, fmt.Errorf("invalid indexed head: %w", err) }
+	if err != nil {
+		return nil, fmt.Errorf("invalid indexed head: %w", err)
+	}
 	safeHeight, err := parseOptionalUint(status.Finality.SafeHead)
-	if err != nil { return nil, fmt.Errorf("invalid safe head: %w", err) }
+	if err != nil {
+		return nil, fmt.Errorf("invalid safe head: %w", err)
+	}
 	matches, err := d.reader.Search(ctx, term, 20)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	out := make([]searchresult.Result, 0, len(matches))
 	for _, match := range matches {
 		var r searchresult.Result
@@ -57,7 +71,9 @@ func (d *ChainDiscovery) Resolve(ctx context.Context, term string) ([]searchresu
 		default:
 			continue
 		}
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 		out = append(out, r)
 	}
 	return out, nil
@@ -65,9 +81,13 @@ func (d *ChainDiscovery) Resolve(ctx context.Context, term string) ([]searchresu
 
 func (d *ChainDiscovery) blockResult(ctx context.Context, match indexerclient.SearchResult, indexedHeight, safeHeight *uint64) (searchresult.Result, error) {
 	block, err := d.reader.Block(ctx, match.Key)
-	if err != nil { return searchresult.Result{}, err }
+	if err != nil {
+		return searchresult.Result{}, err
+	}
 	number, err := strconv.ParseUint(block.Number, 10, 64)
-	if err != nil { return searchresult.Result{}, errors.New("invalid block number") }
+	if err != nil {
+		return searchresult.Result{}, errors.New("invalid block number")
+	}
 	return searchresult.New(
 		architecture.DomainBlock,
 		block.Number,
@@ -79,9 +99,13 @@ func (d *ChainDiscovery) blockResult(ctx context.Context, match indexerclient.Se
 
 func (d *ChainDiscovery) transactionResult(ctx context.Context, match indexerclient.SearchResult, indexedHeight, safeHeight *uint64) (searchresult.Result, error) {
 	tx, err := d.reader.Transaction(ctx, match.Key)
-	if err != nil { return searchresult.Result{}, err }
+	if err != nil {
+		return searchresult.Result{}, err
+	}
 	blockNumber, err := strconv.ParseUint(tx.BlockNumber, 10, 64)
-	if err != nil { return searchresult.Result{}, errors.New("invalid transaction block number") }
+	if err != nil {
+		return searchresult.Result{}, errors.New("invalid transaction block number")
+	}
 	return searchresult.New(
 		architecture.DomainTransaction,
 		tx.Hash,
@@ -93,7 +117,9 @@ func (d *ChainDiscovery) transactionResult(ctx context.Context, match indexercli
 
 func (d *ChainDiscovery) addressResult(ctx context.Context, match indexerclient.SearchResult, indexedHeight, safeHeight *uint64) (searchresult.Result, error) {
 	address, err := d.reader.Address(ctx, match.Key)
-	if err != nil { return searchresult.Result{}, err }
+	if err != nil {
+		return searchresult.Result{}, err
+	}
 	domain := architecture.DomainAddress
 	category := "address"
 	title := "Address " + address.Address
@@ -116,25 +142,31 @@ func (d *ChainDiscovery) addressResult(ctx context.Context, match indexerclient.
 func provenance(chain string, blockNumber *uint64, blockHash, txHash string, indexedHeight, safeHeight *uint64, indexedAt time.Time) searchresult.Provenance {
 	chainID, _ := strconv.ParseUint(chain, 10, 64)
 	finality := searchresult.FinalityHead
-	if blockNumber != nil && safeHeight != nil && *blockNumber <= *safeHeight { finality = searchresult.FinalitySafe }
+	if blockNumber != nil && safeHeight != nil && *blockNumber <= *safeHeight {
+		finality = searchresult.FinalitySafe
+	}
 	return searchresult.Provenance{
-		Source: architecture.SourceIndexer,
-		Authority: "420Indexer projection of canonical chain state",
-		ChainID: chainID,
-		BlockNumber: blockNumber,
-		BlockHash: blockHash,
+		Source:          architecture.SourceIndexer,
+		Authority:       "420Indexer projection of canonical chain state",
+		ChainID:         chainID,
+		BlockNumber:     blockNumber,
+		BlockHash:       blockHash,
 		TransactionHash: txHash,
-		Finality: finality,
-		IndexedAt: indexedAt,
-		IndexedHeight: indexedHeight,
+		Finality:        finality,
+		IndexedAt:       indexedAt,
+		IndexedHeight:   indexedHeight,
 		FinalizedHeight: nil,
 	}
 }
 
 func parseOptionalUint(value string) (*uint64, error) {
 	value = strings.TrimSpace(value)
-	if value == "" { return nil, nil }
+	if value == "" {
+		return nil, nil
+	}
 	parsed, err := strconv.ParseUint(value, 10, 64)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &parsed, nil
 }

@@ -39,9 +39,14 @@ func TestGenesisManifestFreezesAllDomainsAndPrivacyExclusions(t *testing.T) {
 	} {
 		found := false
 		for _, got := range m.PrivacyExclusions {
-			if got == forbidden { found = true; break }
+			if got == forbidden {
+				found = true
+				break
+			}
 		}
-		if !found { t.Fatalf("missing privacy exclusion %q", forbidden) }
+		if !found {
+			t.Fatalf("missing privacy exclusion %q", forbidden)
+		}
 	}
 }
 
@@ -52,7 +57,9 @@ func TestGenesisManifestFreezesInvariantSet(t *testing.T) {
 	}
 	for i, id := range m.InvariantIDs {
 		want := architecture.InvariantIDs[i]
-		if id != want { t.Fatalf("invariant[%d]=%q want=%q", i, id, want) }
+		if id != want {
+			t.Fatalf("invariant[%d]=%q want=%q", i, id, want)
+		}
 	}
 }
 

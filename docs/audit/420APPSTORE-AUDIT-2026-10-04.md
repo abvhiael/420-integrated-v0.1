@@ -236,3 +236,8 @@ Do not mark 420AppStore COMPLETE until APPSTORE-AUDIT-1 through APPSTORE-AUDIT-8
 ## Testnet roadmap handoff
 
 Repository-local APPSTORE-AUDIT remediation through APPSTORE-AUDIT-6 is complete. The unfinished APPSTORE-AUDIT-7 live public-testnet qualification and APPSTORE-AUDIT-8 Genesis/production closeout are now tracked under the canonical testnet handoff in `docs/ROADMAP.md`. This branch does not claim live backend/frontend URLs, live dependency health, live Wallet/Verify/Indexer behavior, or production readiness.
+
+
+## Final reconciliation and merge handoff
+
+The audit/remediation branch has been reconciled with the current `main` history before merge. Unfinished APPSTORE-AUDIT-7 live public-testnet qualification and APPSTORE-AUDIT-8 Genesis/production closeout remain explicitly deferred to the canonical testnet handoff in `docs/ROADMAP.md`. The final merge candidate must pass exact-head 420AppStore Audit Qualification and 420Docs Qualification before PR #514 is merged; no live-testnet readiness claim is made by this repository merge.

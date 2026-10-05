@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "../src/system/SystemAccess.sol";
-
 import "../src/token/TokenIds420.sol";
 import "../src/token/TokenTemplateRegistry420.sol";
 import "../src/token/TokenFactory420.sol";
@@ -11,29 +9,57 @@ import "../src/token/ERC721Template420.sol";
 import "../src/token/ERC1155Template420.sol";
 
 interface VmTokenAudit420 {
-    function deal(address who, uint256 amount) external;
-    function prank(address who) external;
-    function expectRevert(bytes4 selector) external;
-    function warp(uint256 timestamp) external;
-    function roll(uint256 blockNumber) external;
-    function addr(uint256 privateKey) external returns (address);
-    function sign(uint256 privateKey, bytes32 digest) external returns (uint8 v, bytes32 r, bytes32 s);
+    function deal(
+        address who,
+        uint256 amount
+    ) external;
+    function prank(
+        address who
+    ) external;
+    function expectRevert(
+        bytes4 selector
+    ) external;
+    function warp(
+        uint256 timestamp
+    ) external;
+    function roll(
+        uint256 blockNumber
+    ) external;
+    function addr(
+        uint256 privateKey
+    ) external returns (address);
+    function sign(
+        uint256 privateKey,
+        bytes32 digest
+    ) external returns (uint8 v, bytes32 r, bytes32 s);
 }
 
 contract TokenAuditTreasury420 {
     bytes32 public immutable vaultId;
     uint256 public totalDeposited;
     bool public rejectDeposits;
-    constructor(bytes32 vaultId_) { vaultId = vaultId_; }
-    function setRejectDeposits(bool reject_) external { rejectDeposits = reject_; }
+
+    constructor(
+        bytes32 vaultId_
+    ) {
+        vaultId = vaultId_;
+    }
+
+    function setRejectDeposits(
+        bool reject_
+    ) external {
+        rejectDeposits = reject_;
+    }
+
     function depositNative() external payable {
         if (rejectDeposits) revert("rejected");
         totalDeposited += msg.value;
     }
 }
 
-contract RejectERC721Receiver420 {}
-contract RejectERC1155Receiver420 {}
+contract RejectERC721Receiver420 { }
+
+contract RejectERC1155Receiver420 { }
 
 contract TokenAudit420Test {
     VmTokenAudit420 constant vm = VmTokenAudit420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -52,9 +78,14 @@ contract TokenAudit420Test {
         vm.deal(ALICE, 1000 ether);
     }
 
-    function _create(bytes32 id, uint256 supply, uint256 cap_, bytes32 salt) private returns (ERC20Template420 t) {
+    function _create(
+        bytes32 id,
+        uint256 supply,
+        uint256 cap_,
+        bytes32 salt
+    ) private returns (ERC20Template420 t) {
         vm.prank(ALICE);
-        t = ERC20Template420(factory.createERC20{value: 42 ether}(id, "Audit", "AUD", supply, cap_, salt));
+        t = ERC20Template420(factory.createERC20{ value: 42 ether }(id, "Audit", "AUD", supply, cap_, salt));
     }
 
     function testTemplateCatalogFrozenAndGovernanceOnlyDisable() public {
@@ -78,23 +109,23 @@ contract TokenAudit420Test {
         registry.setEnabled(TokenIds420.ERC20_FIXED, false);
         vm.prank(ALICE);
         vm.expectRevert(TokenFactory420.TemplateDisabled.selector);
-        factory.createERC20{value: 42 ether}(TokenIds420.ERC20_FIXED, "x", "x", 1, 0, bytes32("disabled"));
+        factory.createERC20{ value: 42 ether }(TokenIds420.ERC20_FIXED, "x", "x", 1, 0, bytes32("disabled"));
     }
 
     function testUnknownAndCrossStandardTemplateIdsFailClosed() public {
         vm.prank(ALICE);
         vm.expectRevert(TokenFactory420.TemplateDisabled.selector);
-        factory.createERC20{value: 42 ether}(keccak256("unknown"), "x", "x", 1, 0, bytes32("unknown"));
+        factory.createERC20{ value: 42 ether }(keccak256("unknown"), "x", "x", 1, 0, bytes32("unknown"));
         vm.prank(ALICE);
         vm.expectRevert(TokenFactory420.InvalidTemplate.selector);
-        factory.createERC20{value: 42 ether}(TokenIds420.ERC721_COLLECTION, "x", "x", 1, 0, bytes32("wrong-standard"));
+        factory.createERC20{ value: 42 ether }(TokenIds420.ERC721_COLLECTION, "x", "x", 1, 0, bytes32("wrong-standard"));
     }
 
     function testTreasuryFailureRollsBackNonceAndDeploymentRecord() public {
         treasury.setRejectDeposits(true);
         vm.prank(ALICE);
         vm.expectRevert(TokenFactory420.TreasuryDepositFailed.selector);
-        factory.createERC20{value: 42 ether}(TokenIds420.ERC20_FIXED, "x", "x", 1, 0, bytes32("rollback"));
+        factory.createERC20{ value: 42 ether }(TokenIds420.ERC20_FIXED, "x", "x", 1, 0, bytes32("rollback"));
         require(factory.creatorNonce(ALICE) == 0, "nonce survived revert");
         require(factory.deploymentCount() == 0, "deployment survived revert");
         require(address(factory).balance == 0, "fee stranded");
@@ -107,7 +138,9 @@ contract TokenAudit420Test {
         TokenFactory420.Deployment memory d = factory.deployment(0);
         require(d.token == address(first) && d.creator == ALICE, "creator provenance");
         require(d.templateId == TokenIds420.ERC20_FIXED && d.templateVersion == 1, "template provenance");
-        require(d.configHash == keccak256(abi.encode("Audit", "AUD", uint256(7 ether), uint256(0))), "config provenance");
+        require(
+            d.configHash == keccak256(abi.encode("Audit", "AUD", uint256(7 ether), uint256(0))), "config provenance"
+        );
         require(factory.isFactoryDeployment(address(first)), "factory provenance");
         require(address(factory).balance == 0 && treasury.totalDeposited() == 84 ether, "fee routing");
     }
@@ -116,15 +149,21 @@ contract TokenAudit420Test {
         address holder = vm.addr(HOLDER_PK);
         vm.deal(holder, 100 ether);
         vm.prank(holder);
-        ERC20Template420 token = ERC20Template420(factory.createERC20{value: 42 ether}(
-            TokenIds420.ERC20_PERMIT, "Permit", "PMT", 100 ether, 0, bytes32("permit")
-        ));
+        ERC20Template420 token = ERC20Template420(
+            factory.createERC20{ value: 42 ether }(
+                TokenIds420.ERC20_PERMIT, "Permit", "PMT", 100 ether, 0, bytes32("permit")
+            )
+        );
         uint256 deadline = block.timestamp + 1000;
-        bytes32 typehash = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-        bytes32 digest = keccak256(abi.encodePacked(
-            "\x19\x01", token.DOMAIN_SEPARATOR(),
-            keccak256(abi.encode(typehash, holder, BOB, uint256(5 ether), uint256(0), deadline))
-        ));
+        bytes32 typehash =
+            keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+        bytes32 digest = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                token.DOMAIN_SEPARATOR(),
+                keccak256(abi.encode(typehash, holder, BOB, uint256(5 ether), uint256(0), deadline))
+            )
+        );
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(HOLDER_PK, digest);
         token.permit(holder, BOB, 5 ether, deadline, v, r, s);
         require(token.allowance(holder, BOB) == 5 ether && token.nonces(holder) == 1, "permit failed");
@@ -168,7 +207,8 @@ contract TokenAudit420Test {
 
     function testSafeNFTAndMultiTokenTransfersRejectIncompatibleContracts() public {
         vm.prank(ALICE);
-        ERC721Template420 nft = ERC721Template420(factory.createERC721{value: 42 ether}("NFT", "NFT", "ipfs://", bytes32("721")));
+        ERC721Template420 nft =
+            ERC721Template420(factory.createERC721{ value: 42 ether }("NFT", "NFT", "ipfs://", bytes32("721")));
         vm.prank(ALICE);
         nft.mint(ALICE, 1);
         RejectERC721Receiver420 bad721 = new RejectERC721Receiver420();
@@ -177,7 +217,8 @@ contract TokenAudit420Test {
         nft.safeTransferFrom(ALICE, address(bad721), 1);
 
         vm.prank(ALICE);
-        ERC1155Template420 multi = ERC1155Template420(factory.createERC1155{value: 42 ether}("ipfs://{id}", bytes32("1155")));
+        ERC1155Template420 multi =
+            ERC1155Template420(factory.createERC1155{ value: 42 ether }("ipfs://{id}", bytes32("1155")));
         vm.prank(ALICE);
         multi.mint(ALICE, 1, 2, "");
         RejectERC1155Receiver420 bad1155 = new RejectERC1155Receiver420();

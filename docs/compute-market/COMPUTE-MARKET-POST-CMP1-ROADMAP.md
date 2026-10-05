@@ -408,6 +408,13 @@ Durable evidence: [CMP-3.9 qualification](CMP-3.9-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.10 — Result/evidence upload
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+The worker now implements a provider-neutral, content-addressed off-chain upload boundary for exact CMP-3.8 result material, CMP-3.9 signed receipts, a versioned evidence manifest, and every evidence object required by accepted policy. The worker validates the complete ordered evidence set, exact size/SHA-256 digests, privacy/access/retention/provenance bindings, byte ceilings, deterministic object idempotency and transport receipt identity before recording a non-authoritative upload completion.
+
+CMP-3.10 does not invent a general ComputeMarket HTTP endpoint, 420Storage agreement/capacity authority, 420AI dependency, correctness verdict, canonical `RESULT_COMMITTED`, or payment/settlement authority.
+
+Exit criteria and implementation boundary: [CMP-3.10 result/evidence upload](CMP-3.10-RESULT-EVIDENCE-UPLOAD.md).
 
 ## CMP-3.11 — Local resource controls
 CPU/GPU percentage, idle-only mode, thermal ceilings, bandwidth and schedule controls.

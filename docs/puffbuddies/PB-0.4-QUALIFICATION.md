@@ -35,11 +35,20 @@ No contract, address, service ID, database/storage implementation, client implem
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-PRIV-001 through PB-PRIV-020 exist exactly once and in sequence;
+- adult eligibility evidence is minimized and birth/identity source data remains private;
+- precise location, likes/passes, matches, messages, preferences, wallet/profile linkage, reports, and protected safety state have explicit privacy guarantees;
+- PuffBuddies deletion/deactivation remains independent from unrelated 420Integrated identity/wallet state;
+- metadata, logs, notifications, identifiers, analytics, backups, caches, indexes, derived data, and retention preserve privacy semantics;
+- deterministic unsalted hashes and predictable commitments are rejected as sufficient protection for sensitive data;
+- public/unauthenticated PuffBuddies member enumeration is prohibited;
+- least-privilege access is required for services, moderators, operators, support, and administrators;
+- inference/correlation threats and a minimum-disclosure decision rule are documented;
+- no contract, fixed address, service ID, runtime storage/client implementation, deployment, or live integration is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`bd3ae792824ab9a14cdc4f865e2612f2f80a39fe`
 
 ## Base/main SHA
 
@@ -49,7 +58,19 @@ Pending exact-head qualification.
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head pull-request qualification:
+- run: `37274508565` — **PASS**
+- job: `111648475631` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head push qualification:
+- run: `37274504526` — **PASS**
+- job: `111648463375` (`pb0-fast`) — **PASS**
+
+The unrelated governance branch-push workflow failure is outside PuffBuddies PB-0.4 ownership and is not treated as PB-0.4 evidence.
 
 ## Security/adversarial/invariant scope
 
@@ -80,11 +101,13 @@ PB-0.4 defines privacy guarantees, not the exact technology used to realize them
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.4 is formally COMPLETE.
+None for PB-0.4.
 
 ## Completion state
 
-**PB-0.4 — PENDING QUALIFICATION**
+**PB-0.4 — COMPLETE**
+
+All canonical PB-0.4 exit criteria are satisfied on exact implementation SHA `bd3ae792824ab9a14cdc4f865e2612f2f80a39fe`.
 
 ## Next canonical roadmap step
 

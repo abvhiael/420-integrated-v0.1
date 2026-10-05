@@ -13,7 +13,8 @@ Current packages:
 - `town/model` — versioned Town object vocabulary and opaque ID envelope;
 - `town/config` — canonical service identity and direct dependency declarations;
 - `town/content` — posts, threads, comments/replies, votes, visibility, revisions, tombstones, idempotency and abuse controls;
-- `town/schema/v1` — machine-readable object/schema, authority and content vocabulary.
+- `town/moderation` — reports, hide/lock/suspend enforcement, block/mute, appeals, decisions, restoration and audit provenance;
+- `town/schema/v1` — machine-readable object/schema, authority, content and moderation vocabulary.
 
 Town-specific Solidity lives under `contracts/src/town`.
 
@@ -55,6 +56,18 @@ Every content mutation requires an idempotency key. Reusing the same key for a d
 
 The abuse baseline includes per-identity, trusted-device, trusted-network, vote and aggregate-community limits, duplicate body-digest detection, and lower limits for unknown/unverified/young identities. Risk signals affect throttling only and never become identity authority.
 
+## Moderation and appeals
+
+TOWN-AUDIT-5 implements the shared GEN-SVC moderation actions:
+
+`REPORT, HIDE, BLOCK, MUTE, SUSPEND, APPEAL, MODERATOR_DECISION, RESTORE, LOCK`.
+
+Community moderators and admins are domain-scoped. Block/mute are user-scoped. Suspension is Town/community scoped. Appeals preserve prior decision provenance and restoration releases enforcement without rewriting history.
+
+The content service requires a moderation gate, so hide/lock/suspension cannot be bypassed through alternate read, edit, vote, thread, reply or revision-history paths.
+
+Moderation never gains asset, treasury/payment, protocol identity, wallet, Rights, Governance, Registry or Arbitration authority.
+
 ## Build and qualification
 
 From repository root:
@@ -64,6 +77,7 @@ go test ./town/...
 python3 scripts/verify-420town-skeleton.py
 python3 scripts/verify-420town-authority.py
 python3 scripts/verify-420town-content.py
+python3 scripts/verify-420town-moderation.py
 python3 scripts/verify-420town-audit.py
 ```
 
@@ -78,7 +92,8 @@ Canonical application configuration:
 - `config/420town-genesis.json`
 - `config/420town-authority-v1.json`
 - `config/420town-content-v1.json`
+- `config/420town-moderation-v1.json`
 
 ## Current limitations
 
-TOWN-AUDIT-4 does not implement moderation/appeals, production Identity/Search/Notifications/Storage adapters, public API/SDK/indexer/recovery, frontend workflows, live testnet deployment or production operations. Those remain later canonical roadmap steps.
+TOWN-AUDIT-5 does not implement production Identity/Search/Notifications/Storage adapters, public API/SDK/indexer/recovery, frontend workflows, live testnet deployment or production operations. Those remain later canonical roadmap steps.

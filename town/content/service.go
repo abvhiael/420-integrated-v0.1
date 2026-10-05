@@ -424,6 +424,7 @@ type CreateCommentRequest struct {
 	ParentID       model.ObjectID
 	Anchor         ContentAnchor
 	IdempotencyKey string
+	Viewer         ViewerContext
 }
 
 func (s *Service) CreateComment(actor model.ObjectID, req CreateCommentRequest) (Comment, error) {
@@ -447,6 +448,11 @@ func (s *Service) CreateComment(actor model.ObjectID, req CreateCommentRequest) 
 	root := s.posts[th.RootPostID]
 	if root.Status != StatusActive {
 		return Comment{}, ErrTombstoned
+	}
+	viewer := req.Viewer
+	viewer.ActorID = actor
+	if !s.canViewLocked(th.CommunityID, root.AuthorID, root.Visibility, viewer) {
+		return Comment{}, ErrVisibilityDenied
 	}
 	if req.ParentID.Valid() {
 		parent, exists := s.comments[req.ParentID]

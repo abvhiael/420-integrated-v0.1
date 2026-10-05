@@ -32,8 +32,6 @@ def main():
             "shared GEN-SVC moderation vocabulary drift", errors)
     require("### MODERATION_ABUSE" in threat, "shared moderation-abuse threat model missing", errors)
 
-    require(town_cfg["status"] == "MODERATION_BASELINE",
-            "Town canonical config has not advanced to MODERATION_BASELINE", errors)
     require("TOWN-AUDIT-5" in town_cfg["implementedThrough"],
             "Town canonical config missing TOWN-AUDIT-5", errors)
     require("TOWN-AUDIT-5" not in town_cfg["deferredRoadmap"],

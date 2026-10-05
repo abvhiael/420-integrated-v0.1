@@ -1,6 +1,6 @@
 # CMP-3.10 — Result/evidence upload
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `356f8d77f3b4b6997f9f9d75e612a36d1a32a43f`.**
 
 ## Canonical definition
 
@@ -193,6 +193,17 @@ Tests cover:
 - object/total byte ceilings;
 - cancellation before transport;
 - no correctness/canonical-state authority escalation.
+
+## Qualification evidence
+
+- Implementation/spec SHA: `356f8d77f3b4b6997f9f9d75e612a36d1a32a43f`
+- Compute Worker Fast Qualification: **#233**
+- Run ID: `37261236505`
+- Job ID: `111608720907`
+- Evidence anchor: `8a72024fc27543f7754b624be2cada39d4b13849`
+- Durable evidence: [CMP-3.10 qualification evidence](CMP-3.10-QUALIFICATION-EVIDENCE.md)
+- Level 2: not required; Integration #69 skipped as expected with no milestone label and is not counted as passing evidence.
+- Level 3: deferred to CMP-3.14.
 
 ## Qualification level
 

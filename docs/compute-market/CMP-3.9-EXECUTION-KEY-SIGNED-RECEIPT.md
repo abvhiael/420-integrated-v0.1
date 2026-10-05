@@ -1,6 +1,6 @@
 # CMP-3.9 — Execution-key signed receipt
 
-Status: **IMPLEMENTED / LEVEL 1 + LEVEL 2 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 + Level 2 exact-head qualified on `ae2a3a8243a1c969857b8b06161badbcc2b0c3d7`.**
 
 ## Canonical definition
 
@@ -130,6 +130,18 @@ CMP-3.9 does not call `commitResult` or `recordResult`. Submission/transport rem
 ## Adversarial coverage
 
 Tests cover known Keccak/secp256k1 vectors; deterministic low-s signatures; exact 29-word ABI layout; pinned ReceiptV1 and EIP-712 vectors; pinned current contract-result digest/signature; exact result/attempt/worker binding; profile-defined output commitment; source-drift and wrong-key rejection; tampering; cross-chain/cross-registry separation; idempotency; conflicting second receipt; zero critical bindings; uint256 overflow; private persistence; no key/raw-data persistence; and no correctness/canonical-state escalation.
+
+## Qualification evidence
+
+- Implementation/spec SHA: `ae2a3a8243a1c969857b8b06161badbcc2b0c3d7`
+- Level 1 Compute Worker Fast Qualification: **#211**
+- Level 1 run ID: `37259468746`
+- Level 1 job ID: `111603436703`
+- Level 2 Compute Worker Integration Qualification: **#59**
+- Level 2 run ID: `37259517488`
+- Level 2 job ID: `111603579940`
+- Evidence anchor: `3f836d35caf7206d0b3cc6620c59f496547b4c72`
+- Durable evidence: [CMP-3.9 qualification evidence](CMP-3.9-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification level and milestone
 

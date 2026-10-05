@@ -184,7 +184,49 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.5 — Consent invariants
 
-Define mutual-consent, block-supremacy, unmatch, and no-purchased-access invariants.
+**Purpose:** define stable consent/authorization guarantees for mutual matching, messaging access, unmatch, block supremacy, revocation, premium/payment boundaries, administrative authority, and stale-authorization failure behavior.
+
+**Canonical requirements:**
+
+1. Record PB-CONSENT-001 through PB-CONSENT-020.
+2. Require a currently valid mutual match or explicitly equivalent reciprocal-consent mechanism before ordinary private messaging.
+3. Make clear that likes, profile views, inactivity, payments, subscriptions, boosts, tokens, badges, reputation, or administrative actions are not themselves messaging consent.
+4. Make unmatch unilateral and immediately revoking for match-dependent authorization.
+5. Make block supremacy explicit over prior likes, matches, conversations, cached authorization, invitations, premium/payment state, boosts, recommendation state, and prior ordinary interaction consent.
+6. Prohibit purchased access, tokenized consent, paid block bypass, paid unmatched messaging, paid private-data access, and payment-based match creation.
+7. Prohibit administrators, moderators, operators, governance actors, smart contracts, automation, and recommendation systems from manufacturing mutual interpersonal consent.
+8. Define consent as revocable, action-scoped, and current-state authoritative; stale authorization must fail closed.
+9. Ensure deactivation/deletion/suspension/ineligibility can revoke active ordinary interaction authorization under later lifecycle rules.
+10. Define canonical failure-path classes for later tests, including stale caches, queued delivery after block, retries, premium state after block, forced-match attempts, and one-sided messaging attempts.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.5-CONSENT-INVARIANTS.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.5-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.5 is not a Level 2 integration milestone; it adds canonical consent requirements without introducing executable shared integration.
+
+**Dependencies:** PB-0.1 through PB-0.4 must remain COMPLETE and their identity, scope, data-boundary, and privacy invariants must remain intact.
+
+**Exit criteria:**
+
+- one canonical PB-0.5 consent-invariants document exists;
+- PB-CONSENT-001 through PB-CONSENT-020 exist exactly once and in sequence;
+- mutual/reciprocal authorization is required before ordinary private messaging;
+- one-sided likes and public/product signals do not create messaging authority;
+- unmatch is unilateral and revoking;
+- block supremacy is explicit;
+- payment/token/subscription/admin state cannot create or restore consent;
+- consent is revocable, action-scoped, current-state authoritative, and stale authorization fails closed;
+- canonical failure-path classes are documented;
+- no matching engine, messaging runtime, payment runtime, contract, fixed address, service ID, deployment, or live integration is falsely claimed;
+- the cumulative app-scoped verifier passes;
+- the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
+- durable PB-0.5 evidence records exact run/job evidence and base SHA.
 
 ### PB-0.6 — Adult eligibility policy
 

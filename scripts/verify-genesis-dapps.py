@@ -211,11 +211,12 @@ for label, value in [
 
 factory_path = root / "contracts/src/token/TokenFactory420.sol"
 factory = factory_path.read_text() if factory_path.exists() else ""
-if "CREATION_FEE = 42 ether" not in factory or "msg.value!=CREATION_FEE" not in factory:
+factory_compact = "".join(factory.split())
+if "CREATION_FEE=42ether" not in factory_compact or "msg.value!=CREATION_FEE" not in factory_compact:
     errors.append("token exact-fee invariant missing")
-if "COMMUNITY_TOKEN_REVENUE_VAULT" not in factory or "communityTreasuryVault.depositNative{value:CREATION_FEE}" not in factory:
+if "COMMUNITY_TOKEN_REVENUE_VAULT" not in factory or "communityTreasuryVault.depositNative{value:CREATION_FEE}" not in factory_compact:
     errors.append("token community treasury deposit invariant missing")
-if "new ERC20Template420" not in factory or "new ERC721Template420" not in factory or "new ERC1155Template420" not in factory:
+if "newERC20Template420" not in factory_compact or "newERC721Template420" not in factory_compact or "newERC1155Template420" not in factory_compact:
     errors.append("token frozen factory deployment paths missing")
 
 stake = (root / "contracts/src/apps/Stake420.sol").read_text()

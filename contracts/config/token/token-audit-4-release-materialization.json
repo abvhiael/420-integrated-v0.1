@@ -1,0 +1,60 @@
+{
+  "schema": "420-token-audit-4-release-materialization-v1",
+  "status": "REPOSITORY_CANDIDATE_NOT_LIVE_DEPLOYMENT",
+  "service": {
+    "name": "420Token",
+    "serviceId": "420/service/token/v1",
+    "componentIdPreimage": "420/component/token/v1",
+    "version": 1,
+    "implementation": "TokenFactory420",
+    "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "publicationApi": "ProtocolRegistry.publishRegisteredService",
+    "componentRegistrationApi": "ProtocolRegistry.registerComponent"
+  },
+  "fixedAuthorities": {
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "protocolRegistry": "0x0000000000000000000000000000000000000434"
+  },
+  "deploymentOrder": [
+    {
+      "order": 1,
+      "component": "community Treasury Vault",
+      "requirement": "use the deployed and registered AssetVault420 whose vaultId equals 420/treasury/vault/token-creation-community-revenue/v1; this record does not invent its live address"
+    },
+    {
+      "order": 2,
+      "component": "TokenTemplateRegistry420",
+      "constructor": ["GovernanceTimelock"],
+      "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "order": 3,
+      "component": "TokenFactory420",
+      "constructor": ["TokenTemplateRegistry420", "community Treasury Vault"],
+      "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS"
+    },
+    {
+      "order": 4,
+      "component": "ProtocolRegistry publication",
+      "requirements": [
+        "register 420/component/token/v1 to the verified TokenFactory420",
+        "publish 420/service/token/v1 to the same verified TokenFactory420",
+        "bind runtime code hash, manifest hash, interface hash and dependency root"
+      ]
+    }
+  ],
+  "dependencyCommitment": [
+    "TokenTemplateRegistry420 address and runtime code hash",
+    "community Treasury Vault address and runtime code hash",
+    "community Treasury Vault canonical vaultId",
+    "TokenFactory420 address and runtime code hash"
+  ],
+  "forbidden": [
+    "fixed TokenFactory420 Genesis address",
+    "historical 0x0455 candidate as active authority",
+    "unregistered or spoofed live Treasury Vault accepted solely because it returns the expected vaultId",
+    "hard-coded Wallet Token deployment address",
+    "DevelopmentCompensationVault420 as the Token V1 creation-fee destination"
+  ],
+  "liveEvidenceOwner": "TOKEN-AUDIT-8"
+}

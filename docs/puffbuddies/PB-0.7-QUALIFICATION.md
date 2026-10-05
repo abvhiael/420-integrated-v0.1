@@ -35,11 +35,20 @@ No runtime security control, service integration, contract, fixed address, servi
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-THREAT-001 through PB-THREAT-040 exist exactly once and in sequence;
+- protected assets are explicitly identified;
+- actor classes include ordinary/malicious/Sybil/compromised users, operators, services, clients, integrations, public-chain/network observers, breach adversaries, and bots;
+- trust boundaries are defined for clients, operators, 420Identity, 420Messenger, 420Notifications, 420Pay, public chain, Search/Indexer/Explorer, and private data;
+- canonical abuse cases cover location triangulation, relationship-graph reconstruction, wallet correlation, block/ban bypass, post-revocation messaging, eligibility bypass, scraping/enumeration, impersonation, moderation abuse, insider misuse, metadata leakage, deletion remanence, credential compromise, rate/resource abuse, dependency compromise, and replay/stale state;
+- one canonical authority owner per decision class is required;
+- safety/consent/eligibility uncertainty fails closed;
+- external dependencies are capability-limited;
+- later security-control expectations and residual-risk acceptance criteria are documented;
+- no runtime security implementation, contract, fixed address, service ID, deployment, or live integration is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`1c281449650694393a78b448074b6225581ad824`
 
 ## Current main/base SHA
 
@@ -51,7 +60,17 @@ PR #526 remains on historical base and requires later accumulated-branch reconci
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37283701536` — **PASS**
+- job: `111677481109` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37283706089` — **PASS**
+- job: `111677496643` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -73,11 +92,13 @@ PB-0.7 defines threat assumptions and required control classes. Exact implementa
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.7 is formally COMPLETE.
+None for PB-0.7.
 
 ## Completion state
 
-**PB-0.7 — PENDING QUALIFICATION**
+**PB-0.7 — COMPLETE**
+
+All canonical PB-0.7 exit criteria are satisfied on exact implementation SHA `1c281449650694393a78b448074b6225581ad824`.
 
 ## Next canonical roadmap step
 

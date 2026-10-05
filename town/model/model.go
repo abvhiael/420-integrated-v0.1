@@ -74,6 +74,20 @@ const (
 	PermissionManageTreasury      PermissionID = "MANAGE_TREASURY"
 )
 
+type ModerationActionName string
+
+const (
+	ModerationReport            ModerationActionName = "REPORT"
+	ModerationHide              ModerationActionName = "HIDE"
+	ModerationBlock             ModerationActionName = "BLOCK"
+	ModerationMute              ModerationActionName = "MUTE"
+	ModerationSuspend           ModerationActionName = "SUSPEND"
+	ModerationAppeal            ModerationActionName = "APPEAL"
+	ModerationModeratorDecision ModerationActionName = "MODERATOR_DECISION"
+	ModerationRestore           ModerationActionName = "RESTORE"
+	ModerationLock              ModerationActionName = "LOCK"
+)
+
 type Visibility string
 
 const (
@@ -181,6 +195,6 @@ type ModerationAction struct {
 	CommunityID ObjectID `json:"community_id"`
 	TargetID    ObjectID `json:"target_id"`
 	ModeratorID ObjectID `json:"moderator_id"`
-	Action      string   `json:"action"`
+	Action      ModerationActionName `json:"action"`
 	Reason      string   `json:"reason,omitempty"`
 }

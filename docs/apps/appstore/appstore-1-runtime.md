@@ -17,7 +17,8 @@ The service is configured through:
 - `APPSTORE_RPC_URL` — canonical RPC endpoint;
 - `APPSTORE_INDEXER_URL` — 420Indexer read API used by the production APPSTORE-2 Registry source;
 - `APPSTORE_REGISTRY_ADDRESS` — canonical Registry/ProtocolRegistry deployment used for startup qualification;
-- `APPSTORE_CATALOGUE_STORE` — path reserved for non-canonical catalogue persistence introduced in later phases;
+- `APPSTORE_CATALOGUE_STORE` — path for the non-canonical finalized catalogue projection;
+- `APPSTORE_VIEW_INPUTS` — optional strict JSON file containing non-canonical curation, security-evidence, Wallet-request and provenance-link inputs used by APPSTORE-AUDIT-4 composition;
 - `APPSTORE_LISTEN_ADDR` — HTTP listen address; defaults to `:8426`.
 
 Invalid or incomplete configuration fails startup.
@@ -31,7 +32,7 @@ Before accepting traffic, the service checks canonical chain state through RPC:
 
 A wrong chain, unavailable RPC, malformed RPC response or missing Registry deployment leaves the service unready and causes startup to fail closed.
 
-These checks establish that the service is attached to the intended network and Registry deployment. The production entrypoint then performs the APPSTORE-2 finalized Registry-source synchronization before accepting traffic; catalogue persistence/composition remains an APPSTORE-3+ responsibility.
+These checks establish that the service is attached to the intended network and Registry deployment. The production entrypoint then performs APPSTORE-3 catalogue bootstrap and APPSTORE-AUDIT-4 `ApplicationView` composition before accepting traffic. During runtime, each successful finalized catalogue refresh is followed by a fail-closed rebuild of the retained view set.
 
 ## Health and readiness
 

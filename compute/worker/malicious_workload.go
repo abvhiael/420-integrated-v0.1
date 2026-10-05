@@ -29,7 +29,7 @@ type MaliciousWorkloadPolicy struct {
 	SchemaVersion              string
 	MaxCommandBytes            int
 	MaxArgumentBytes           int
-	MaxConsecutiveViolations   uint32
+	MaxViolations   uint32
 	QuarantineDuration         time.Duration
 	DenyImageDigests           map[string]bool
 	DenyCommandSHA256          map[string]bool
@@ -43,7 +43,7 @@ func DefaultMaliciousWorkloadPolicy() MaliciousWorkloadPolicy {
 		SchemaVersion:              MaliciousWorkloadPolicySchemaV1,
 		MaxCommandBytes:            DefaultMaxCommandBytes,
 		MaxArgumentBytes:           DefaultMaxArgumentBytes,
-		MaxConsecutiveViolations:   3,
+		MaxViolations:   3,
 		QuarantineDuration:         30 * time.Minute,
 		DenyImageDigests:           map[string]bool{},
 		DenyCommandSHA256:          map[string]bool{},
@@ -61,7 +61,7 @@ func (p MaliciousWorkloadPolicy) Validate() error {
 		p.MaxArgumentBytes <= 0 || p.MaxArgumentBytes > p.MaxCommandBytes {
 		return fmt.Errorf("%w: invalid command bounds", ErrInvalidMaliciousWorkloadPolicy)
 	}
-	if p.MaxConsecutiveViolations == 0 || p.MaxConsecutiveViolations > 100 {
+	if p.MaxViolations == 0 || p.MaxViolations > 100 {
 		return fmt.Errorf("%w: invalid violation threshold", ErrInvalidMaliciousWorkloadPolicy)
 	}
 	if p.QuarantineDuration <= 0 || p.QuarantineDuration > 30*24*time.Hour {
@@ -254,15 +254,12 @@ func (g *WorkloadSecurityGuard) Observe(auth ExecutionAuthorization, request San
 	g.mu.Lock()
 	entry := g.state[key]
 	if reason == "" {
-		entry.Count = 0
-		entry.Until = time.Time{}
-		g.state[key] = entry
 		g.mu.Unlock()
 		return nil
 	}
 	entry.Count++
 	now := g.now().UTC()
-	if entry.Count >= g.policy.MaxConsecutiveViolations {
+	if entry.Count >= g.policy.MaxViolations {
 		entry.Until = now.Add(g.policy.QuarantineDuration)
 	}
 	g.state[key] = entry

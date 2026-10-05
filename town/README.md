@@ -53,7 +53,7 @@ Comments inherit the root post visibility so replies cannot widen a thread. Unkn
 
 Every content mutation requires an idempotency key. Reusing the same key for a different payload is rejected.
 
-The abuse baseline includes per-identity limits, vote limits, aggregate community limits, duplicate body-digest detection, and lower limits for unknown/unverified/young identities. Risk signals affect throttling only and never become identity authority.
+The abuse baseline includes per-identity, trusted-device, trusted-network, vote and aggregate-community limits, duplicate body-digest detection, and lower limits for unknown/unverified/young identities. Risk signals affect throttling only and never become identity authority.
 
 ## Build and qualification
 

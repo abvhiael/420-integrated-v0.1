@@ -88,6 +88,8 @@ for token in [
     need(token in search_profile,f"Search Town source/domain missing: {token}")
 need("architecture.SourceTown:     {architecture.DomainPublicTown: {}}" in search_privacy,"Search privacy allowlist missing exact Town source/domain")
 need('ClassPublicApplication     Classification = "public_application"' in search_privacy,"Search public application classification missing")
+need("Town application projection cannot be classified as public on-chain state" in search_privacy,"Town Search classification boundary missing")
+need("public application classification is not admitted for this source" in search_privacy,"public application classification widened beyond Town")
 need("privacy.ClassPublicApplication" in src,"Town Search projection must use public application classification")
 
 for token in [

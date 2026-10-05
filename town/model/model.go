@@ -34,6 +34,46 @@ const (
 	KindModerationAction ObjectKind = "ModerationAction"
 )
 
+type MembershipState string
+const (
+	MembershipNone    MembershipState = "NONE"
+	MembershipActive  MembershipState = "ACTIVE"
+	MembershipLeft    MembershipState = "LEFT"
+	MembershipRemoved MembershipState = "REMOVED"
+)
+
+type SubscriptionState string
+const (
+	SubscriptionNone      SubscriptionState = "NONE"
+	SubscriptionActive    SubscriptionState = "ACTIVE"
+	SubscriptionCancelled SubscriptionState = "CANCELLED"
+	SubscriptionExpired   SubscriptionState = "EXPIRED"
+)
+
+type EntitlementState string
+const (
+	EntitlementNone    EntitlementState = "NONE"
+	EntitlementActive  EntitlementState = "ACTIVE"
+	EntitlementRevoked EntitlementState = "REVOKED"
+	EntitlementExpired EntitlementState = "EXPIRED"
+)
+
+type RoleID string
+const (
+	RoleMember    RoleID = "MEMBER"
+	RoleModerator RoleID = "MODERATOR"
+	RoleAdmin     RoleID = "ADMIN"
+)
+
+type PermissionID string
+const (
+	PermissionManageMembers       PermissionID = "MANAGE_MEMBERS"
+	PermissionManageRoles         PermissionID = "MANAGE_ROLES"
+	PermissionManageSubscriptions PermissionID = "MANAGE_SUBSCRIPTIONS"
+	PermissionManageEntitlements  PermissionID = "MANAGE_ENTITLEMENTS"
+	PermissionManageTreasury      PermissionID = "MANAGE_TREASURY"
+)
+
 type Visibility string
 
 const (
@@ -67,38 +107,38 @@ type Community struct {
 
 type Membership struct {
 	Envelope
-	CommunityID ObjectID `json:"community_id"`
-	IdentityID  ObjectID `json:"identity_id"`
-	State       string   `json:"state"`
+	CommunityID ObjectID        `json:"community_id"`
+	IdentityID  ObjectID        `json:"identity_id"`
+	State       MembershipState `json:"state"`
 }
 
 type RoleBinding struct {
 	Envelope
 	CommunityID ObjectID `json:"community_id"`
 	IdentityID  ObjectID `json:"identity_id"`
-	RoleID      string   `json:"role_id"`
+	RoleID      RoleID   `json:"role_id"`
 }
 
 type PermissionGrant struct {
 	Envelope
-	CommunityID ObjectID `json:"community_id"`
-	SubjectID   ObjectID `json:"subject_id"`
-	Permission  string   `json:"permission"`
+	CommunityID ObjectID     `json:"community_id"`
+	SubjectID   ObjectID     `json:"subject_id"`
+	Permission  PermissionID `json:"permission"`
 }
 
 type Subscription struct {
 	Envelope
-	CommunityID ObjectID `json:"community_id"`
-	Subscriber  ObjectID `json:"subscriber_id"`
-	State       string   `json:"state"`
+	CommunityID ObjectID          `json:"community_id"`
+	Subscriber  ObjectID          `json:"subscriber_id"`
+	State       SubscriptionState `json:"state"`
 }
 
 type Entitlement struct {
 	Envelope
-	CommunityID ObjectID `json:"community_id"`
-	Beneficiary ObjectID `json:"beneficiary_id"`
-	Type        string   `json:"entitlement_type"`
-	State       string   `json:"state"`
+	CommunityID ObjectID         `json:"community_id"`
+	Beneficiary ObjectID         `json:"beneficiary_id"`
+	Type        string           `json:"entitlement_type"`
+	State       EntitlementState `json:"state"`
 }
 
 type TreasuryRef struct {

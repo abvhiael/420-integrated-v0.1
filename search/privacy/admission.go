@@ -54,7 +54,14 @@ func Admit(candidate Candidate) error {
 	switch candidate.Classification {
 	case ClassPrivateMessenger, ClassPrivateCommons, ClassPrivateIdentity, ClassEncryptedResource, ClassRawAttentionTelemetry:
 		return fmt.Errorf("search privacy exclusion: %s", candidate.Classification)
-	case ClassPublicOnChain, ClassPublicApplication:
+	case ClassPublicOnChain:
+		if candidate.Source == architecture.SourceTown {
+			return errors.New("Town application projection cannot be classified as public on-chain state")
+		}
+	case ClassPublicApplication:
+		if candidate.Source != architecture.SourceTown {
+			return errors.New("public application classification is not admitted for this source")
+		}
 	default:
 		return errors.New("unsupported privacy classification")
 	}

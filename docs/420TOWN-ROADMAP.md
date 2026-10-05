@@ -36,19 +36,38 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-3 — Authoritative community state
 
-Status: OPEN
+Status: COMPLETE
 
-Implement and test:
+Implemented and tested:
 
 - communities;
 - membership lifecycle;
 - scoped roles;
 - permissions;
 - subscriptions and entitlements;
-- community treasury authority/accounting where canonical design requires it;
-- events and explicit invariants.
+- reference-only community treasury authority binding, without Town custody or a parallel balance ledger;
+- authority events and explicit invariants.
 
-Authority must not be delegated to Search, Indexer, transport, UI, or rewards.
+Authority remains independent of Search, Indexer, transport, UI, Storage gateways, Notifications and rewards.
+
+Durable qualification evidence:
+
+- qualification level: Level 1 + Level 2 authority milestone qualification;
+- qualified implementation/test SHA: `5f8f4a3ad21ad2a1180b2c6af81a2794cffeffb2`;
+- 420Town audit workflow run `37267431040` — PASS;
+- exact-SHA assertions — PASS;
+- canonical Town audit verifier — PASS;
+- Town skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- `go test ./town/...` — PASS;
+- focused Town Solidity build — PASS;
+- full retained `test/Town*.t.sol` Foundry inventory — PASS;
+- cross-dApp rewards hardening — PASS;
+- prior harness-only failure was diagnosed and fixed without weakening Town authorization semantics;
+- current main at evidence closeout: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`;
+- PR #523 remains open and currently diverged/non-mergeable against current main; reconciliation is intentionally deferred to the required Level 3 app-phase closeout unless a later Town step materially requires earlier reconciliation;
+- Level 3 repository-wide qualification remains deferred to TOWN-AUDIT-10;
+- next canonical roadmap step: TOWN-AUDIT-4 — Content, threads, comments and votes.
 
 ## TOWN-AUDIT-4 — Content, threads, comments and votes
 

@@ -19,6 +19,8 @@ ELIG = ROOT / "docs/puffbuddies/PB-0.6-ADULT-ELIGIBILITY-POLICY.md"
 EVIDENCE_06 = ROOT / "docs/puffbuddies/PB-0.6-QUALIFICATION.md"
 THREAT = ROOT / "docs/puffbuddies/PB-0.7-THREAT-TRUST-MODEL.md"
 EVIDENCE_07 = ROOT / "docs/puffbuddies/PB-0.7-QUALIFICATION.md"
+DEPS = ROOT / "docs/puffbuddies/PB-0.8-ECOSYSTEM-DEPENDENCIES.md"
+EVIDENCE_08 = ROOT / "docs/puffbuddies/PB-0.8-QUALIFICATION.md"
 
 errors = []
 
@@ -26,7 +28,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -48,6 +50,8 @@ elig = ELIG.read_text(encoding="utf-8")
 evidence_06 = EVIDENCE_06.read_text(encoding="utf-8")
 threat = THREAT.read_text(encoding="utf-8")
 evidence_07 = EVIDENCE_07.read_text(encoding="utf-8")
+deps = DEPS.read_text(encoding="utf-8")
+evidence_08 = EVIDENCE_08.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -120,6 +124,9 @@ for token in [
     "### PB-0.7 — Threat/trust model",
     "PB-THREAT-001 through PB-THREAT-040",
     "**Milestone relationship:** PB-0.7 is not a Level 2 integration milestone",
+    "### PB-0.8 — Ecosystem dependencies",
+    "PB-DEP-001 through PB-DEP-024",
+    "**Milestone relationship:** PB-0.8 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -653,13 +660,114 @@ for token in [
 ]:
     need(token in evidence_07, f"PB-0.7 evidence record missing token: {token}")
 
+# PB-0.8 — ecosystem dependencies
+for token in [
+    "# PuffBuddies PB-0.8 ecosystem dependencies",
+    "## Governing integration rule",
+    "## Canonical dependency roles",
+    "## Dependency matrix",
+    "## Integration decision rule",
+    "## PB-0.8 completion boundary",
+    "420Wallet owns wallet authentication/signing surfaces",
+    "420Wallet is not PuffBuddies profile or relationship authority",
+    "420Identity owns canonical identity-profile and credential lifecycle",
+    "420Identity does not automatically prove legal identity or PuffBuddies authorization",
+    "420Names owns .420 presentation-name ownership and resolution",
+    "420Names is not identity proof or dating membership proof",
+    "420Messenger owns canonical private-messaging coordination state",
+    "PuffBuddies owns the dating/social authorization handed to Messenger",
+    "420Notifications is a non-canonical delivery/presentation dependency",
+    "Notification failure cannot broaden access",
+    "420Pay owns canonical payment/settlement and approved entitlement evidence",
+    "420Pay cannot purchase interpersonal authority",
+    "420Registry owns canonical service identity/version discovery",
+    "Registry publication does not grant application authority",
+    "420AppStore is discovery/presentation, not canonical protocol authority",
+    "AppStore cannot mutate Registry truth",
+    "420Analytics is derived and non-canonical",
+    "Analytics must not ingest protected PuffBuddies payloads",
+    "420Indexer is a rebuildable observation/projection dependency",
+    "Explorer and Search are derived public discovery surfaces only",
+    "420Verify may verify protocol/deployment evidence, not interpersonal identity by default",
+    "Dependencies do not inherit each other's authority",
+    "Dependency failure must preserve the owning authority",
+    "PuffBuddies-specific private state remains PuffBuddies-owned unless explicitly delegated",
+]:
+    need(token in deps, f"PB-0.8 dependency document missing token: {token}")
+
+dep_ids = re.findall(r"^### (PB-DEP-\d{3})\b", deps, flags=re.MULTILINE)
+need(dep_ids == [f"PB-DEP-{i:03d}" for i in range(1, 25)], f"PB-DEP sequence drift: {dep_ids}")
+need(len(dep_ids) == len(set(dep_ids)), "duplicate PB-DEP identifier")
+
+for guarantee in [
+    "PuffBuddies must not receive private signing keys",
+    "Wallet connection must not itself establish PuffBuddies membership",
+    "PuffBuddies adult-eligibility integration should consume a minimum-disclosure policy conclusion",
+    "A .420 name does not prove legal identity",
+    "Messenger must consume current PuffBuddies authorization rather than manufacture a match",
+    "A Messenger-native block is an additional deny condition",
+    "Notification delivery, retries, acknowledgement, or provider state must not become authority",
+    "A successful payment is not consent from another user",
+    "A service being registered does not grant custody, signing, spending, governance, profile, consent, match, safety, or execution authority",
+    "AppStore catalogue state as a replacement for ProtocolRegistry",
+    "Analytics outputs are rebuildable derived data",
+    "Indexer is not canonical authority",
+    "No dependency output becomes authority in another dependency's domain",
+]:
+    need(guarantee in deps, f"PB-0.8 missing dependency authority guarantee: {guarantee}")
+
+for protected in [
+    "private message content",
+    "precise location",
+    "private preferences",
+    "match graph",
+    "block graph",
+    "report evidence",
+    "raw identity evidence",
+]:
+    need(protected in deps, f"PB-0.8 analytics/privacy boundary missing protected payload: {protected}")
+
+for decision in [
+    "the exact canonical authority owned by the dependency",
+    "the minimum data PuffBuddies sends",
+    "freshness/finality/revocation requirements",
+    "whether compromise can broaden PuffBuddies authority",
+    "how the dependency is discovered/version-checked",
+    "how the integration is disabled or failed closed",
+]:
+    need(decision in deps, f"PB-0.8 integration decision rule missing: {decision}")
+
+for forbidden in [
+    "PuffBuddies Wallet integration is live",
+    "PuffBuddies Messenger integration is live",
+    "PuffBuddies Pay integration is live",
+    "PuffBuddies Registry service ID is",
+    "PuffBuddies AppStore integration is deployed",
+]:
+    need(forbidden not in deps, f"PB-0.8 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", deps) is None, "PB-0.8 must not assign an on-chain address")
+need("420/service/puff" not in deps.lower(), "PB-0.8 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.8 qualification evidence",
+    "**PB-0.8 — Ecosystem dependencies**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-DEP-001 through PB-DEP-024",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.9 — State ownership**",
+]:
+    need(token in evidence_08, f"PB-0.8 evidence record missing token: {token}")
+
 if errors:
     print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.7",
+    "step": "PB-0.8",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -734,6 +842,23 @@ print(json.dumps({
         "failClosed": True,
         "capabilityLimitedDependencies": True,
         "residualRiskRuleDefined": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb08": {
+        "dependencyInvariants": dep_ids,
+        "walletBounded": True,
+        "identityBounded": True,
+        "namesBounded": True,
+        "messengerConsentExternal": True,
+        "notificationsNonCanonical": True,
+        "payCannotPurchaseConsent": True,
+        "registryDiscoveryOnly": True,
+        "appStoreNonCanonical": True,
+        "analyticsNonCanonical": True,
+        "derivedServicesSubordinate": True,
+        "noAuthorityInheritance": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

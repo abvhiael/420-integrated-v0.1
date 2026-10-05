@@ -41,19 +41,19 @@ The pieces exist, but the production executable does not compose them into the a
 
 `appstore/cmd/appstore420/main.go` performs only the APPSTORE-1 startup network check and serves `runtime.Service.Handler()`. That handler exposes only `/healthz` and `/readyz`.
 
-The production executable does **not**:
+The APPSTORE-AUDIT-2 remediation now creates a concrete 420Indexer-backed `registry.Source`, binds it to the configured chain/frozen ProtocolRegistry address, filters the projection to the Indexer finalized boundary, validates the resulting snapshot through APPSTORE-2 projection rules, and runs the initial synchronization before the process starts serving.
 
-1. create or run a concrete `registry.Source`;
-2. ingest a canonical Registry snapshot into the APPSTORE-2 projection;
-3. restore/rebuild and persist the APPSTORE-3 catalogue as part of runtime lifecycle;
-4. compose canonical records with APPSTORE-4 curation, APPSTORE-5 security provenance and APPSTORE-6 Wallet handoff into `api.ApplicationView` values;
-5. mount the APPSTORE-7 `/v1/apps*` discovery API;
-6. mount the APPSTORE-9 embedded frontend;
-7. connect the APPSTORE-8 limiter/dependency assessment to the public request path.
+The production executable still does **not**:
+
+1. restore/rebuild and persist the APPSTORE-3 catalogue as part of runtime lifecycle;
+2. compose canonical records with APPSTORE-4 curation, APPSTORE-5 security provenance and APPSTORE-6 Wallet handoff into `api.ApplicationView` values;
+3. mount the APPSTORE-7 `/v1/apps*` discovery API;
+4. mount the APPSTORE-9 embedded frontend;
+5. connect the APPSTORE-8 limiter/dependency assessment to the public request path.
 
 Therefore the historical readiness statement `implementation_status: QUALIFIED` overstated the current executable state. This audit changes the current readiness status to `PARTIAL` while preserving old run IDs only as historical provenance.
 
-This gap is not repaired by inventing a Registry reader or catalogue metadata source. The canonical docs explicitly permit multiple canonical source implementations, but the repository does not freeze which production source must be used. That decision and implementation must be made explicitly.
+APPSTORE-AUDIT-2 makes that previously-open source decision explicitly: production uses the repository's 420Indexer Registry projection as a non-authoritative observation source, constrained to the Indexer finalized boundary and cross-bound to the frozen ProtocolRegistry deployment. ProtocolRegistry/chain state remain canonical.
 
 ## Security findings repaired in this audit
 
@@ -78,7 +78,7 @@ The prior rating range check accepted IEEE NaN because ordinary range comparison
 | Contract-free/non-canonical authority | Genesis config; APPSTORE-0 | architecture boundary present | boundary/closeout tests | present | COMPLETE | none |
 | APP-INV-001..013 | Genesis config | enumerated | closeout coverage | present | COMPLETE | keep exact-head qualification |
 | Startup chain/network qualification | APPSTORE-1 | RPC chain ID + Registry bytecode probe | runtime tests | present | COMPLETE | live network qualification still required |
-| Canonical Registry ingestion | APPSTORE-2 | projection + Source interface, no concrete production Source | unit tests | present | PARTIAL | select and wire concrete canonical source |
+| Canonical Registry ingestion | APPSTORE-2 | projection + concrete finalized 420Indexer-backed production Source wired at startup | source/projection/adversarial tests | present | COMPLETE (local) | live testnet qualification deferred to APPSTORE-AUDIT-7 |
 | Deterministic projection/persistence | APPSTORE-3 | store/rebuild/restore present; concurrency repaired | store/registry/race tests | present | COMPLETE | integrate into production lifecycle |
 | Curation/ranking | APPSTORE-4 | package present; noncanonical boundaries enforced | policy tests | present | COMPLETE | wire metadata source/runtime composition |
 | Security provenance | APPSTORE-5 | evidence package present | evidence tests | present | COMPLETE | wire live provenance inputs |
@@ -108,7 +108,7 @@ A dedicated AppStore audit verifier and workflow are added because the generic q
 - CONTRACT COMPLETE: **YES / NOT APPLICABLE for AppStore-owned contracts**.
 - TEST COMPLETE: **NO** — repository-level tests are being strengthened, but live integration and testnet E2E remain absent.
 - DOCUMENTATION COMPLETE: **NO** — production runtime/deployment/operator procedure must be updated after the source/wiring decision.
-- INTEGRATION COMPLETE: **NO** — Registry source, catalogue composition, API/frontend runtime wiring remain incomplete.
+- INTEGRATION COMPLETE: **NO** — Registry source wiring is implemented, but catalogue lifecycle/composition and API/frontend runtime wiring remain incomplete.
 - SECURITY QUALIFIED: **NO** — local hardening is improved, but the final composed service and live dependency behavior are not yet qualified.
 - TESTNET READY: **NO**.
 - GENESIS READY: **NO** as an operable AppStore service, despite the contract-free canonical definition being frozen.
@@ -120,14 +120,14 @@ A dedicated AppStore audit verifier and workflow are added because the generic q
 
 The audit has established the canonical AppStore definition, inspected the implemented packages and production entrypoint, reconciled historical qualification claims against current repository behavior, repaired the bounded local security defects identified during inspection, and recorded a requirement matrix and remediation roadmap.
 
-The final audit determination is that **420AppStore is not presently complete or release-ready as an operable Genesis application**. Its contract-free authority model and most component packages are implemented, but the production composition path is incomplete: the executable does not yet bind a concrete Registry catalogue source, catalogue lifecycle, ApplicationView composition, discovery API, embedded frontend, abuse/dependency controls, and live deployment evidence into one qualified service.
+The final audit determination is that **420AppStore is not presently complete or release-ready as an operable Genesis application**. Its contract-free authority model and most component packages are implemented, but the production composition path is incomplete: the executable now binds and synchronizes a concrete finalized Registry catalogue source, but it does not yet bind catalogue lifecycle, ApplicationView composition, discovery API, embedded frontend, abuse/dependency controls, and live deployment evidence into one qualified service.
 
 Historical APPSTORE-9/10 evidence remains provenance only and must not be used to override this current determination. Live-testnet and production claims remain blocked until the remediation roadmap is completed and requalified.
 
 ## Remediation roadmap
 
 1. **APPSTORE-AUDIT-1 — durable audit baseline and local hardening.** Preserve this report, truthful readiness state, race-safe Registry projection, deep-link hardening, finite rating validation, and exact-head audit workflow.
-2. **APPSTORE-AUDIT-2 — production canonical source.** Select the repository-supported production source path (direct ProtocolRegistry RPC reader or an explicitly qualified canonical Indexer projection), implement it, and prove chain/Registry/finality/reorg semantics.
+2. **APPSTORE-AUDIT-2 — production canonical source.** **IMPLEMENTED; Level 1 qualification pending exact-head CI.** Production uses the explicitly qualified 420Indexer-backed finalized ProtocolRegistry projection, with chain/Registry/finality/authority-claim and malformed/upstream-failure checks.
 3. **APPSTORE-AUDIT-3 — runtime catalogue lifecycle.** Wire source sync, deterministic store restore/rebuild, interruption recovery, and stale-state handling into `appstore420`.
 4. **APPSTORE-AUDIT-4 — ApplicationView composition.** Define and wire curation/security/Wallet/link inputs without allowing any presentation source to override canonical Registry fields.
 5. **APPSTORE-AUDIT-5 — public service composition.** Mount health/readiness, `/v1/apps*`, embedded frontend, abuse controls and dependency-state behavior under one production handler; readiness must represent the composed application, not only Registry bytecode reachability.

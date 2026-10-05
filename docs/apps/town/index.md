@@ -35,7 +35,7 @@ The repository now contains:
 - tombstone deletion preserving IDs and digests while clearing body references;
 - visibility checks that fail closed and inherit thread scope for comments;
 - required idempotency keys with conflicting replay rejection;
-- duplicate-content, per-identity, vote and aggregate-community abuse controls;
+- duplicate-content, per-identity, trusted-device, trusted-network, vote and aggregate-community abuse controls;
 - lower throttling limits for unknown/unverified/young identities;
 - exact-SHA Town CI and app-specific regression qualification.
 

@@ -124,3 +124,6 @@ jobs:
 
       - name: Verify CMP-3.8 result commitment
         run: python scripts/verify-cmp-3-8-result-commitment.py
+
+      - name: Verify CMP-3.9 execution-key signed receipt
+        run: python scripts/verify-cmp-3-9-execution-key-signed-receipt.py

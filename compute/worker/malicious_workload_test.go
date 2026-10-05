@@ -249,6 +249,26 @@ func TestProtectedExecutionLifecycleRejectsDeniedWorkloadBeforeSandbox(t *testin
 	}
 }
 
+func TestProtectedExecutionLifecycleResumeRejectsDeniedWorkloadBeforeCheckpointAccess(t *testing.T) {
+	lifecycle, plan, _, _, runner := maliciousFixture(t)
+	policy := DefaultMaliciousWorkloadPolicy()
+	policy.DenyImageDigests = map[string]bool{plan.Sandbox.Image: true}
+	guard, err := NewWorkloadSecurityGuard(lifecycle.config, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	protected, err := NewProtectedExecutionLifecycle(lifecycle, guard)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := protected.Resume(context.Background(), plan, nil); !errors.Is(err, ErrMaliciousWorkloadRejected) {
+		t.Fatalf("denied resume workload reached checkpoint/lifecycle: %v", err)
+	}
+	if runner.input != "" {
+		t.Fatal("denied resume workload reached sandbox")
+	}
+}
+
 func TestProtectedExecutionLifecycleObservesSandboxAbuse(t *testing.T) {
 	runner := &fakeCommandRunner{write: strings.Repeat("x", 4096)}
 	cfg := lifecycleConfig(t)

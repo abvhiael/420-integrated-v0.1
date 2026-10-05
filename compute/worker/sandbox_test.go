@@ -27,7 +27,7 @@ func (r *fakeCommandRunner) Run(ctx context.Context, name string, args []string,
 	if r.write != "" {
 		_, _ = io.WriteString(stdout, r.write)
 	}
-	if r.block {
+	if r.block && len(r.calls) == 1 {
 		<-ctx.Done()
 		return ctx.Err()
 	}

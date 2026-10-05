@@ -167,12 +167,12 @@ The canonical roadmap, architecture/infrastructure docs and standard app manual 
 ## Readiness state
 
 - CODE COMPLETE: **YES** for the canonical repository implementation.
-- BUILD COMPLETE: **YES**, subject to exact-head audit CI on this branch.
+- BUILD COMPLETE: **YES** for repository scope; exact-head qualification passed on implementation head `e7b79b5548712dd3a21b012b8cbca43cac762856` in 420Notifications Audit Qualification run `37250630264` (#3).
 - CONTRACT COMPLETE: **YES / NOT APPLICABLE** — no Notifications-specific contract is required; service ID integration exists.
-- TEST COMPLETE: **YES** for repository-local requirements after exact-head audit CI; live operational qualification remains separate.
+- TEST COMPLETE: **YES** for repository-local requirements; unit/integration, race, vet, executable build and Genesis verifier all passed on the qualified implementation head. Live operational qualification remains separate.
 - DOCUMENTATION COMPLETE: **YES** for repository/build/integration/deployment guidance after this audit.
 - INTEGRATION COMPLETE: **NO** for live endpoints/provider topology. Repository integration boundaries are complete.
-- SECURITY QUALIFIED: **YES** for repository-local scoped hardening after exact-head audit CI; **NO** for live production-equivalent deployment.
+- SECURITY QUALIFIED: **YES** for repository-local scoped hardening; **NO** for live production-equivalent deployment.
 - TESTNET READY: **NO** until the official public testnet and real 420Indexer/provider topology are available and qualified.
 - GENESIS READY: **NO** as an operational deployment claim until production-equivalent testnet evidence exists. No Genesis contract work is pending.
 - PRODUCTION READY: **NO**.
@@ -186,9 +186,23 @@ The canonical roadmap, architecture/infrastructure docs and standard app manual 
 5. retained exact-release endpoint/configuration/provider evidence;
 6. live security/operations review before Genesis/production-ready claims.
 
+## Durable NOTIFICATIONS-AUDIT-1 closeout evidence
+
+**NOTIFICATIONS-AUDIT-1 — COMPLETE.**
+
+Repository remediation consists of the app-local `notifications/README.md`, dedicated `420Notifications Audit Qualification` workflow, this audit record, and reconciliation of `scripts/verify-genesis-dapps.py` with the current frozen Genesis application catalog, Governance/Civic implementation alias, Explorer discovery binding, current Analytics schema and the complete `NOTIFY-INV-001` through `NOTIFY-INV-014` invariant set.
+
+Qualified implementation head: `e7b79b5548712dd3a21b012b8cbca43cac762856`.
+
+420Notifications Audit Qualification run `37250630264` (#3): **PASS**.
+
+The exact-head job passed checkout/SHA verification, `go test -count=1 ./notifications/...`, `go test -race -count=1 ./notifications/...`, `go vet ./notifications/...`, `go build ./notifications/cmd/notifications420`, and `python3 scripts/verify-genesis-dapps.py`.
+
+This closes all repository-local work in NOTIFICATIONS-AUDIT-1. The documentation/bookkeeping closeout commit must itself pass the same exact-head workflow before merge; that requalification confirms the durable record did not invalidate the qualified state.
+
 ## Remediation roadmap
 
-1. **NOTIFICATIONS-AUDIT-1 — repository audit remediation + exact-head qualification.** Add app-local README/operator guidance, dedicated exact-head CI and this audit record; qualify tests/race/vet/build/Genesis verifier on the exact final PR head. **Repository work.**
+1. **NOTIFICATIONS-AUDIT-1 — repository audit remediation + exact-head qualification — COMPLETE.** App-local README/operator guidance, dedicated exact-head CI, repository-grounded audit record and shared Genesis-verifier reconciliation are complete. Implementation qualification passed at `e7b79b5548712dd3a21b012b8cbca43cac762856` in run `37250630264` (#3). **No repository-local work remains in AUDIT-1.**
 2. **NOTIFICATIONS-AUDIT-2 — production-equivalent testnet deployment.** Deploy `notifications420` against the official chain-420 testnet and qualified public 420Indexer; replace readiness placeholders only with real endpoints. **Blocked on testnet/infrastructure.**
 3. **NOTIFICATIONS-AUDIT-3 — live provider/delivery qualification.** Configure real provider adapters/endpoints and prove subscription privacy, deduplication, retry/backoff, rate limiting, dead-letter behavior and provider failure isolation. **Blocked on testnet/provider credentials.**
 4. **NOTIFICATIONS-AUDIT-4 — replay/reorg/restart/failure qualification.** Exercise canonical event replay, checkpoint resume, retraction/supersession/finality, restart recovery, Indexer outage/wrong-chain behavior and duplicate-suppression against the deployed topology. **Blocked on testnet.**

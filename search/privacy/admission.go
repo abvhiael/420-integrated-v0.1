@@ -13,12 +13,12 @@ const AdmissionVersion = "420-search-privacy-admission-v1"
 type Classification string
 
 const (
-	ClassPublicOnChain          Classification = "public_onchain"
-	ClassPrivateMessenger       Classification = "private_messenger"
-	ClassPrivateCommons         Classification = "private_commons"
-	ClassPrivateIdentity        Classification = "private_identity"
-	ClassEncryptedResource      Classification = "encrypted_resource_payload"
-	ClassRawAttentionTelemetry  Classification = "raw_attention_telemetry"
+	ClassPublicOnChain         Classification = "public_onchain"
+	ClassPrivateMessenger      Classification = "private_messenger"
+	ClassPrivateCommons        Classification = "private_commons"
+	ClassPrivateIdentity       Classification = "private_identity"
+	ClassEncryptedResource     Classification = "encrypted_resource_payload"
+	ClassRawAttentionTelemetry Classification = "raw_attention_telemetry"
 )
 
 type Candidate struct {
@@ -33,12 +33,12 @@ var allowedSourceDomains = map[architecture.SourceBoundary]map[architecture.Resu
 		architecture.DomainBlock: {}, architecture.DomainTransaction: {}, architecture.DomainAddress: {}, architecture.DomainContract: {},
 	},
 	architecture.SourceRegistry: {architecture.DomainService: {}},
-	architecture.SourceNames: {architecture.DomainName: {}},
+	architecture.SourceNames:    {architecture.DomainName: {}},
 	architecture.SourceIdentity: {architecture.DomainPublicIdentity: {}},
-	architecture.SourceMarket: {architecture.DomainMarketListing: {}},
-	architecture.SourceRights: {architecture.DomainRightsRecord: {}},
-	architecture.SourceCommons: {architecture.DomainPublicCommons: {}},
-	architecture.SourcePulse: {architecture.DomainPublicPulse: {}},
+	architecture.SourceMarket:   {architecture.DomainMarketListing: {}},
+	architecture.SourceRights:   {architecture.DomainRightsRecord: {}},
+	architecture.SourceCommons:  {architecture.DomainPublicCommons: {}},
+	architecture.SourcePulse:    {architecture.DomainPublicPulse: {}},
 }
 
 // Admit is the Search source-admission boundary for privacy-sensitive material.

@@ -8,22 +8,113 @@ import (
 	"strings"
 )
 
-type AuthenticateFunc func(*http.Request) (string,error)
-type HTTPHandler struct { Service *Service; Authenticate AuthenticateFunc }
+type AuthenticateFunc func(*http.Request) (string, error)
 
-func (h HTTPHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
-	if h.Service==nil||h.Authenticate==nil{writeError(w,http.StatusServiceUnavailable,"SERVICE_UNAVAILABLE","mail service unavailable");return}
-	actor,err:=h.Authenticate(r);if err!=nil||strings.TrimSpace(actor)==""{writeError(w,http.StatusUnauthorized,"UNAUTHORIZED","authentication required");return}
+type HTTPHandler struct {
+	Service      *Service
+	Authenticate AuthenticateFunc
+}
+
+func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.Service == nil || h.Authenticate == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail service unavailable")
+		return
+	}
+	actor, err := h.Authenticate(r)
+	if err != nil || strings.TrimSpace(actor) == "" {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
 	switch {
-	case r.Method==http.MethodPost&&r.URL.Path=="/v1/messages":h.send(w,r,actor)
-	case r.Method==http.MethodGet&&r.URL.Path=="/v1/inbox":h.inbox(w,r,actor)
-	case strings.HasPrefix(r.URL.Path,"/v1/messages/"):h.message(w,r,actor)
-	default:writeError(w,http.StatusNotFound,"NOT_FOUND","route not found")
+	case r.Method == http.MethodPost && r.URL.Path == "/v1/messages":
+		h.send(w, r, actor)
+	case r.Method == http.MethodGet && r.URL.Path == "/v1/inbox":
+		h.inbox(w, r, actor)
+	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
+		h.message(w, r, actor)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
 	}
 }
-func (h HTTPHandler) send(w http.ResponseWriter,r *http.Request,actor string){defer r.Body.Close();dec:=json.NewDecoder(http.MaxBytesReader(w,r.Body,MaxBodyBytes+4096));dec.DisallowUnknownFields();var req SendRequest;if err:=dec.Decode(&req);err!=nil{writeError(w,http.StatusBadRequest,"INVALID_REQUEST","invalid JSON request");return};msg,err:=h.Service.Send(r.Context(),actor,req);if err!=nil{writeServiceError(w,err);return};writeJSON(w,http.StatusCreated,msg)}
-func (h HTTPHandler) inbox(w http.ResponseWriter,r *http.Request,actor string){limit:=DefaultPageSize;if raw:=r.URL.Query().Get("limit");raw!=""{if n,err:=strconv.Atoi(raw);err==nil{limit=n}};page,err:=h.Service.Inbox(r.Context(),actor,r.URL.Query().Get("cursor"),limit);if err!=nil{writeServiceError(w,err);return};writeJSON(w,http.StatusOK,page)}
-func (h HTTPHandler) message(w http.ResponseWriter,r *http.Request,actor string){rest:=strings.TrimPrefix(r.URL.Path,"/v1/messages/");parts:=strings.Split(strings.Trim(rest,"/"),"/");if len(parts)==1&&r.Method==http.MethodGet{body,msg,err:=h.Service.ReadBody(r.Context(),actor,parts[0]);if err!=nil{writeServiceError(w,err);return};writeJSON(w,http.StatusOK,struct{Message Message `json:"message"`;Body string `json:"body"`}{Message:msg,Body:string(body)});return};if len(parts)==2&&parts[1]=="read"&&r.Method==http.MethodPost{msg,err:=h.Service.MarkRead(r.Context(),actor,parts[0]);if err!=nil{writeServiceError(w,err);return};writeJSON(w,http.StatusOK,msg);return};writeError(w,http.StatusNotFound,"NOT_FOUND","route not found")}
-func writeServiceError(w http.ResponseWriter,err error){switch{case errors.Is(err,ErrUnauthorized):writeError(w,http.StatusForbidden,"FORBIDDEN",err.Error());case errors.Is(err,ErrInvalidInput),errors.Is(err,ErrIdempotencyConflict):writeError(w,http.StatusBadRequest,"INVALID_REQUEST",err.Error());case errors.Is(err,ErrNotFound):writeError(w,http.StatusNotFound,"NOT_FOUND",err.Error());default:writeError(w,http.StatusBadGateway,"DEPENDENCY_FAILURE","mail dependency failed")}}
-func writeError(w http.ResponseWriter,status int,code,message string){writeJSON(w,status,map[string]string{"code":code,"message":message})}
-func writeJSON(w http.ResponseWriter,status int,v any){w.Header().Set("Content-Type","application/json");w.WriteHeader(status);_=json.NewEncoder(w).Encode(v)}
+
+func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) {
+	defer r.Body.Close()
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxBodyBytes+4096))
+	dec.DisallowUnknownFields()
+	var req SendRequest
+	if err := dec.Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+		return
+	}
+	msg, err := h.Service.Send(r.Context(), actor, req)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, msg)
+}
+
+func (h HTTPHandler) inbox(w http.ResponseWriter, r *http.Request, actor string) {
+	limit := DefaultPageSize
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			limit = n
+		}
+	}
+	page, err := h.Service.Inbox(r.Context(), actor, r.URL.Query().Get("cursor"), limit)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
+}
+
+func (h HTTPHandler) message(w http.ResponseWriter, r *http.Request, actor string) {
+	rest := strings.TrimPrefix(r.URL.Path, "/v1/messages/")
+	parts := strings.Split(strings.Trim(rest, "/"), "/")
+	if len(parts) == 1 && r.Method == http.MethodGet {
+		body, msg, err := h.Service.ReadBody(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, struct {
+			Message Message `json:"message"`
+			Body    string  `json:"body"`
+		}{Message: msg, Body: string(body)})
+		return
+	}
+	if len(parts) == 2 && parts[1] == "read" && r.Method == http.MethodPost {
+		msg, err := h.Service.MarkRead(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, msg)
+		return
+	}
+	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func writeServiceError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrUnauthorized):
+		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
+	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+	case errors.Is(err, ErrNotFound):
+		writeError(w, http.StatusNotFound, "NOT_FOUND", err.Error())
+	default:
+		writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "mail dependency failed")
+	}
+}
+
+func writeError(w http.ResponseWriter, status int, code, message string) {
+	writeJSON(w, status, map[string]string{"code": code, "message": message})
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(v)
+}

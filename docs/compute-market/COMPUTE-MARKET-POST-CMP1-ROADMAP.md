@@ -400,11 +400,11 @@ Durable evidence: [CMP-3.8 qualification](CMP-3.8-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.9 — Execution-key signed receipt
-**Status: IMPLEMENTED / Level 1 + Level 2 qualification pending.**
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `ae2a3a8243a1c969857b8b06161badbcc2b0c3d7`.**
 
 The worker now freezes the canonical CMP-0.9 ReceiptV1 tuple, resolves accepted receipt context through a fail-closed canonical authority interface, signs the EIP-712 receipt with the execution key, and separately produces the existing worker-evidence contract-compatible result authorization signature. Receipt signing remains attribution only: no correctness, canonical result-state, upload, payment or settlement authority is introduced.
 
-Durable design/exit criteria: [CMP-3.9 execution-key signed receipt](CMP-3.9-EXECUTION-KEY-SIGNED-RECEIPT.md).
+Durable evidence: [CMP-3.9 qualification](CMP-3.9-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.9 execution-key signed receipt](CMP-3.9-EXECUTION-KEY-SIGNED-RECEIPT.md). Level 1 Fast #211 / run `37259468746` and Level 2 Integration #59 / run `37259517488` both passed the exact implementation/spec SHA; evidence anchor `3f836d35caf7206d0b3cc6620c59f496547b4c72`.
 
 
 ## CMP-3.10 — Result/evidence upload
@@ -641,7 +641,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.8 COMPLETE; CMP-3.9 execution-key signed receipt next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.9 COMPLETE; CMP-3.10 result/evidence upload next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

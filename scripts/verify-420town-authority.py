@@ -67,6 +67,7 @@ def main():
         "contracts/test/TownAuthorityAccess420.t.sol",
         "contracts/test/TownAuthorityEntitlements420.t.sol",
         "contracts/test/TownAuthorityTreasury420.t.sol",
+        "contracts/test/TownAuthorityEvents420.t.sol",
         "docs/apps/town/authority.md",
     ]:
         require((ROOT / path).is_file(), f"missing authority artifact: {path}", errors)

@@ -23,6 +23,8 @@ DEPS = ROOT / "docs/puffbuddies/PB-0.8-ECOSYSTEM-DEPENDENCIES.md"
 EVIDENCE_08 = ROOT / "docs/puffbuddies/PB-0.8-QUALIFICATION.md"
 STATE = ROOT / "docs/puffbuddies/PB-0.9-STATE-OWNERSHIP.md"
 EVIDENCE_09 = ROOT / "docs/puffbuddies/PB-0.9-QUALIFICATION.md"
+SAFETY = ROOT / "docs/puffbuddies/PB-0.10-SAFETY-MODERATION-PRINCIPLES.md"
+EVIDENCE_10 = ROOT / "docs/puffbuddies/PB-0.10-QUALIFICATION.md"
 
 errors = []
 
@@ -30,7 +32,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -56,6 +58,8 @@ deps = DEPS.read_text(encoding="utf-8")
 evidence_08 = EVIDENCE_08.read_text(encoding="utf-8")
 state = STATE.read_text(encoding="utf-8")
 evidence_09 = EVIDENCE_09.read_text(encoding="utf-8")
+safety = SAFETY.read_text(encoding="utf-8")
+evidence_10 = EVIDENCE_10.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -134,6 +138,9 @@ for token in [
     "### PB-0.9 — State ownership",
     "PB-STATE-001 through PB-STATE-040",
     "**Milestone relationship:** PB-0.9 is not a Level 2 integration milestone",
+    "### PB-0.10 — Safety/moderation principles",
+    "PB-SAFETY-001 through PB-SAFETY-040",
+    "**Milestone relationship:** PB-0.10 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -870,13 +877,117 @@ for token in [
 ]:
     need(token in evidence_09, f"PB-0.9 evidence record missing token: {token}")
 
+# PB-0.10 — safety and moderation principles
+for token in [
+    "# PuffBuddies PB-0.10 safety and moderation principles",
+    "## Safety principles",
+    "## Canonical report classes",
+    "## Canonical moderation states",
+    "## Canonical safety invariants",
+    "## Escalation boundaries",
+    "## Safety action classes",
+    "## Appeals and restoration principles",
+    "## PB-0.10 completion boundary",
+    "Harassment, threats, and abusive conduct",
+    "Stalking, doxxing, and location-safety abuse",
+    "Impersonation, deceptive identity, and catfishing",
+    "Minor / adult-eligibility concern",
+    "Sexual exploitation and non-consensual sexual content",
+    "Fraud, scam, financial coercion, and extortion",
+    "Hate, targeted dehumanization, and severe discriminatory abuse",
+    "Spam, botting, scraping, and platform manipulation",
+    "Block/ban evasion and unauthorized contact",
+    "Dangerous or unlawful conduct requiring special review",
+    "Cannabis-related coercion or unsafe transactional conduct",
+    "Other / policy-unclear safety concern",
+    "RECEIVED",
+    "TRIAGED",
+    "REVIEWING",
+    "RESTRICTED_PENDING_REVIEW",
+    "ACTIONED",
+    "NO_ACTION",
+    "APPEALED",
+    "CLOSED",
+    "Block is immediate and independent",
+    "Report and block are separate authorities",
+    "Report count is not guilt",
+    "Safety action may restrict but never compel consent",
+    "Reporter identity and evidence remain private",
+    "No retaliation enablement",
+    "Safety actions override convenience and monetization",
+    "Stale authorization fails closed after safety action",
+    "Safety actions are scoped and auditable",
+    "Moderator access follows least privilege",
+    "Payments and status cannot buy safety exceptions",
+    "Safety state remains private and non-enumerable",
+    "Automated systems cannot be sole irreversible adjudicator by default",
+    "Evidence integrity matters",
+    "Safety outcomes do not create public reputation scores",
+    "Account compromise is considered in moderation",
+    "Standard moderation escalation",
+    "High-priority safety escalation",
+    "Emergency / external-authority boundary",
+    "Cross-service escalation is capability-limited",
+]:
+    need(token in safety, f"PB-0.10 safety document missing token: {token}")
+
+safety_ids = re.findall(r"^### (PB-SAFETY-\d{3})\b", safety, flags=re.MULTILINE)
+need(safety_ids == [f"PB-SAFETY-{i:03d}" for i in range(1, 41)], f"PB-SAFETY sequence drift: {safety_ids}")
+need(len(safety_ids) == len(set(safety_ids)), "duplicate PB-SAFETY identifier")
+
+for guarantee in [
+    "A user may block without waiting for moderation review",
+    "Block effectiveness must not depend on reporter proof",
+    "Number of reports, popularity, reputation, payment status, or engagement score must not be treated as conclusive proof of misconduct",
+    "They must not force a like, match, unblock, rematch, message, profile disclosure, or interpersonal contact",
+    "Reporter linkage, report content, evidence, moderation notes, internal risk signals, and case history are private safety state",
+    "Current block, suspension, ban, eligibility hold, or communication restriction outranks premium entitlement",
+    "must not preserve interaction authority after canonical PuffBuddies safety state revokes it",
+    "must not bypass a block, suspension, ban, eligibility hold, report handling, or evidence rule",
+    "must not silently become a public desirability, trust, social-credit, or dating-ranking score",
+    "PuffBuddies moderation is not itself emergency response or law enforcement",
+    "A cross-service safety request must not grant PuffBuddies or moderators ambient authority",
+]:
+    need(guarantee in safety, f"PB-0.10 missing safety guarantee: {guarantee}")
+
+for appeal in [
+    "must not gain access to reporter identity",
+    "restoration must explicitly re-evaluate current block, eligibility, lifecycle, Messenger, and other deny states",
+    "does not force another user to unblock, rematch, restore a conversation, or resume contact",
+    "does not create a restoration entitlement to another person",
+]:
+    need(appeal in safety, f"PB-0.10 appeal/restoration boundary missing: {appeal}")
+
+for forbidden in [
+    "PuffBuddies moderation runtime is implemented",
+    "PuffBuddies moderation console is deployed",
+    "PuffBuddies safety classifier is live",
+    "PuffBuddies moderation service ID is",
+]:
+    need(forbidden not in safety, f"PB-0.10 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", safety) is None, "PB-0.10 must not assign an on-chain address")
+need("420/service/puff" not in safety.lower(), "PB-0.10 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.10 qualification evidence",
+    "**PB-0.10 — Safety/moderation principles**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-SAFETY-001 through PB-SAFETY-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.11 — Data lifecycle/deletion**",
+]:
+    need(token in evidence_10, f"PB-0.10 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.9", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.10", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.9",
+    "step": "PB-0.10",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -981,6 +1092,24 @@ print(json.dumps({
         "messengerSeparatedFromRelationshipAuthority": True,
         "conflictsResolveToCanonical": True,
         "staleCopiesFailClosed": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb10": {
+        "safetyInvariants": safety_ids,
+        "reportClassesDefined": True,
+        "moderationStatesDefined": True,
+        "blockIndependent": True,
+        "reportBlockSeparated": True,
+        "reportCountNotGuilt": True,
+        "noPurchasedSafetyException": True,
+        "noManufacturedConsent": True,
+        "privateModerationState": True,
+        "leastPrivilege": True,
+        "staleAuthorizationFailsClosed": True,
+        "escalationBoundariesDefined": True,
+        "appealsDoNotRestoreConsent": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

@@ -225,6 +225,20 @@ ComputeMarket returns/binds:
 
 420AI may not broaden the user's compute or payment authorization during adaptation.
 
+
+### AI-AUDIT-4 current ComputeMarket integration decision
+
+The mature adapter binds directly to the current ComputeMarket component graph and does not create a parallel AI marketplace.
+
+- The **signed CMP request** must be owned by the AI requester and may narrow, but never enlarge, the AI request's maximum spend or deadline.
+- AI workload class and input commitment map exactly into the CMP request. The model-version schema becomes the CMP output-schema commitment.
+- Privacy policy, verification profile, model version, compute-requirement identity, deployment constraint, workload, input/output commitments, narrowed spend ceiling and narrowed deadline are bound into the deterministic AI-to-CMP manifest commitment.
+- The selected AI deployment constrains the exact accepted CMP offer. The AI provider's `computeProviderRef` must equal the accepted CMP provider identity.
+- The **accepted priced match** freezes the CMP resource, payer, canonical provider-derived beneficiary and accepted amount. None may exceed or contradict the earlier AI/CMP request binding.
+- The canonical CMP result commitment is copied unchanged into the AI job. AI stores a deterministic commitment to the CMP assignment/result evidence tuple rather than inventing a second result.
+- AI verification advances only after a matching **verified entitlement** binds the same request, match, result commitment, verifier, payer, provider, resource, beneficiary and accepted economic ceiling.
+- Canonical CMP settlement and payer-refund references are observed and retained by the adapter. Compatibility escrow/custody state reconciliation remains **AI-AUDIT-5**, so AI-AUDIT-4 does not fabricate transfers or bypass 420Vault/CMP settlement authority.
+
 ## Pricing
 
 AI service pricing and raw compute pricing are distinct layers.
@@ -337,7 +351,6 @@ AIIds420.sol
 AIAuthorization420.sol
 AIPolicyRegistry420.sol
 AIModelRegistry420.sol
-AIModelVersionRegistry420.sol
 AIModelDeploymentRegistry420.sol
 AIRequestRegistry420.sol
 AIResultRegistry420.sol
@@ -347,6 +360,17 @@ IAI420.sol
 ```
 
 Legacy predeploy contracts remain at their frozen identities as hardened implementations/facades where required.
+
+
+### AI-AUDIT-3 single-authority implementation decision
+
+The mature V1 module graph preserves one writable authority for each canonical object.
+
+- **AIModelRegistry owns canonical model and model-version state.** A standalone `AIModelVersionRegistry420` is intentionally absent because a second writable registry would split model-version authority.
+- **AIRequestRegistry420 is a read-through view over AIJobManager.** It does not duplicate request lifecycle state.
+- **AIResultRegistry420 is a read-through view over AIJobManager.** It exposes committed result state without a second result mutation path.
+- **AIComputeAdapter420** binds the canonical ComputeRouter graph identity and snapshots the AI request constraints, but does not advance the AI job lifecycle in AI-AUDIT-3. Validation against current Compute request/match/job economics and narrowing is **AI-AUDIT-4**.
+- **AIRouter420** is immutable read/discovery only. User-authorizing writes stay on the owning module so router calls cannot obscure `msg.sender`.
 
 ## Frozen V1 invariants
 
@@ -382,6 +406,62 @@ Legacy predeploy contracts remain at their frozen identities as hardened impleme
 - **AI-INV-030:** AIReputationRegistry does not become a mutable universal provider score; authenticated evidence migrates/integrates with 420Trust.
 - **AI-INV-031:** legacy AIJobEscrow cannot preserve arbitrary-recipient governance release authority in the mature implementation.
 - **AI-INV-032:** job/result/settlement history is reconstructable from canonical chain state plus committed open specifications/manifests.
+
+### AI-AUDIT-6 off-chain runtime boundary
+
+The provider runtime is implemented under `services/420ai-provider` and follows the frozen V1 authority model:
+
+- canonical RPC/Registry/CMP state is re-read before execution and before any retry;
+- signed execution manifests and receipts are domain-separated and job/assignment/provider/resource scoped;
+- private payloads remain off-chain, encrypted at rest with bounded retention and assignment-scoped authenticated data;
+- retry behavior is finite and receipt submission is idempotent against a stable receipt identity;
+- restart recovery reconciles from canonical state outward and never treats the local queue as protocol truth;
+- operational logs redact private payloads, prompts, documents, tokens, secrets, credentials and raw byte buffers;
+- the runtime gains no custody, settlement, governance, validator, identity or arbitrary lifecycle authority.
+
+### AI-AUDIT-7 read API / indexer boundary
+
+420AI uses the shared 420Indexer v1 public read surface rather than creating a second authoritative AI database. Current AI event descriptors cover provider, model, model-version, deployment, job, escrow and policy event families and remain deployment-address agnostic until canonical Registry/deployment configuration binds contract identities.
+
+AI read state is reconstructed from the canonical typed protocol-event journal in block/transaction/log order. The shared Indexer owns canonical ancestry, reorg rollback and replay. AI-specific projections therefore remain rebuildable caches: every returned AI object carries `authoritative: false`, while Registry, ComputeMarket, Vault and AI contracts remain the protocol authority.
+
+The AI read schema is versioned as `420-ai-read-v1`. Collection endpoints use the shared bounded opaque keyset cursor semantics and every query is chain scoped; deployments may additionally pin an expected AI chain ID and fail closed on mismatch.
+
+Public AI projections are allowlisted to IDs, addresses, hashes/commitments, lifecycle/economic values and provenance. Descriptor generation rejects private-payload field classes and the reducer rejects contaminated event rows. Plaintext prompts, documents, datasets, access tokens, credentials, private keys and raw input/output bytes are never part of the public AI read model.
+
+Job projections preserve current AI-to-CMP correlation identifiers such as `computeRequestId`, `computeJobId` and provider references, but neither the indexer nor its HTTP API may create or reinterpret canonical execution, verification, settlement or dispute authority.
+
+### AI-AUDIT-8 user-facing client boundary
+
+The canonical browser client lives under `ai/web` and is a thin requester-facing application over the existing AI protocol and shared 420Indexer read surface.
+
+The client may:
+- discover model, version, deployment, policy and request state through the non-authoritative `420-ai-read-v1` API;
+- connect an injected EIP-1193 wallet and validate the configured target chain;
+- prepare and submit requester-authorized `AIJobManager` calls such as request creation, cancellation and dispute opening;
+- display Vault/funding, ComputeMarket correlation and result lifecycle state from indexed protocol evidence; and
+- track wallet transaction simulation, submission, confirmation, revert, drop and reorg outcomes.
+
+The client must not:
+- store provider credentials, privileged secrets, private keys or API tokens in browser runtime configuration;
+- treat indexer projections as protocol authority;
+- send plaintext private AI input to public indexer routes or calldata; or
+- fabricate a direct funding flow. `AIJobEscrow.fund` remains intentionally disabled and funding is bound through the canonical Vault/settlement adapter path.
+
+The committed runtime configuration remains fail-closed until AI-AUDIT-9 materializes live network/read-service values and enables transaction feature flags.
+
+
+### AI-AUDIT-9 deployment and Genesis materialization boundary
+
+The five legacy AI compatibility identities remain direct Genesis predeploys at `0x042f` through `0x0433`. Their runtime must be materialized from the exact qualified compiler/source state with GovernanceTimelock `0x0429` embedded as the immutable governance authority; those addresses are never reassigned to mature V1 modules.
+
+The mature V1 modules are Registry-resolved and have no implied fixed Genesis address. AI-AUDIT-9 freezes explicit component-ID preimages under `420/component/ai/.../v1`, stages every AI component as `SUSPENDED`, applies and verifies the one-shot Compute/Vault/settlement/Trust bindings, then activates the graph and publishes canonical service ID `420/service/ai/v1` to `AIRouter420`.
+
+ProtocolRegistry publication records discovery identity and runtime code hash only. It does not create custody, provider authority, settlement authority, compute authority or upgrade power.
+
+Repository materialization is not live-chain evidence. Registry-resolved production addresses, deployment/publication transactions, evidence blocks, network manifest values, DNS/API origins and real provider endpoints remain unset until the production-equivalent deployment step. The browser remains fail-closed while those live values are absent.
+
+Rollback for Registry-resolved modules means governance-controlled suspension/deprecation plus a newly qualified replacement deployment. Frozen predeploy identities are not moved or repurposed, and recovery may never fabricate or rewrite canonical CMP/Vault settlement, refund or dispute history.
 
 ## Implementation order
 

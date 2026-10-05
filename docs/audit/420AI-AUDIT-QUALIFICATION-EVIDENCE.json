@@ -1,0 +1,652 @@
+{
+  "schema": "420ai-audit-qualification-evidence-v1",
+  "application": "420AI",
+  "audit_date": "2026-10-02",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "authoritative_main_baseline": "b58b09a17e641a42b81d832bad913a83c7caada9",
+  "audit_branch": "audit/420ai-complete-20261002",
+  "pull_request": 491,
+  "qualification_binding": {
+    "rule": "The authoritative exact-head qualification SHA is the head_sha recorded by the successful 420AI Audit Qualification GitHub Actions run for this branch. Do not reuse a run from an earlier branch head.",
+    "workflow": "420AI Audit Qualification",
+    "workflow_path": ".github/workflows/420ai-audit.yml",
+    "required_jobs": [
+      "audit-state",
+      "genesis-compatibility",
+      "v1-modules",
+      "compute-integration",
+      "custody-settlement",
+      "provider-runtime",
+      "ai-read-api",
+      "ai-client",
+      "focused-ai-contracts",
+      "deployment-materialization",
+      "pretestnet-qualification",
+      "pretestnet-security"
+    ]
+  },
+  "step_qualifications": {
+    "AI-AUDIT-1": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "85ce7bb8e59c5f78b629ddc44a1c407f84e9318b",
+      "workflow_run": 37079442111
+    },
+    "AI-AUDIT-2": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "a524c83a576fabafec466e469a51fc8522d23035",
+      "workflow_run": 37085984181,
+      "jobs": {
+        "audit-state": 111096280240,
+        "genesis-compatibility": 111096280351,
+        "focused-ai-contracts": 111096280301
+      },
+      "test_results": {
+        "AICompatibility420.t.sol": "8 passed; 0 failed; 0 skipped",
+        "AIHardening420.t.sol": "5 passed; 0 failed; 0 skipped",
+        "AIMature420.t.sol": "6 passed; 0 failed; 0 skipped",
+        "AIModelRegistryHardening420.t.sol": "6 passed; 0 failed; 0 skipped",
+        "AIModelTrainingRights420.t.sol": "5 passed; 0 failed; 0 skipped",
+        "AIRewardsIntegration420.t.sol": "7 passed; 0 failed; 0 skipped"
+      },
+      "deferred": {
+        "level_2": "No Level 2 milestone qualification required for this isolated compatibility-layer step.",
+        "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global and Docs/global closeout remain deferred to AI-AUDIT-10/phase closeout as defined by the audit model.",
+        "live": "Genesis materialization, ProtocolRegistry publication, current ComputeMarket integration and production-equivalent testnet evidence remain later roadmap work."
+      }
+    },
+    "AI-AUDIT-3": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "b04ead697a90f325f952ba41ca50bdbda57d4258",
+      "base_sha": "b58b09a17e641a42b81d832bad913a83c7caada9",
+      "workflow_run": 37090313576,
+      "jobs": {
+        "focused-ai-contracts": 111109054477,
+        "v1-modules": 111109054604,
+        "audit-state": 111109054647,
+        "genesis-compatibility": 111109054652
+      },
+      "implementation_summary": [
+        "Implemented AIAuthorization420, AIPolicyRegistry420, AIModelDeploymentRegistry420, AIRequestRegistry420, AIResultRegistry420, AIComputeAdapter420, AIRouter420 and IAI420.",
+        "Extended AIIds420 for mature component/action/workload identities.",
+        "Preserved AIModelRegistry as the single writable model/model-version authority and removed stale AIModelVersionRegistry420 from the canonical dApp map.",
+        "Kept AIRequestRegistry420 and AIResultRegistry420 as read-through views over AIJobManager.",
+        "Kept AIComputeAdapter420 fail-closed at the current ComputeRouter graph boundary; current Compute request/match/job/economic integration remains AI-AUDIT-4."
+      ],
+      "files_changed": [
+        "contracts/src/ai/AIIds420.sol",
+        "contracts/src/ai/AIAuthorization420.sol",
+        "contracts/src/ai/AIPolicyRegistry420.sol",
+        "contracts/src/ai/AIModelDeploymentRegistry420.sol",
+        "contracts/src/ai/AIRequestRegistry420.sol",
+        "contracts/src/ai/AIResultRegistry420.sol",
+        "contracts/src/ai/AIComputeAdapter420.sol",
+        "contracts/src/ai/AIRouter420.sol",
+        "contracts/src/ai/IAI420.sol",
+        "contracts/test/AIV1Modules420.t.sol",
+        "scripts/verify-420ai-v1-modules.py",
+        "scripts/verify-420ai-audit-state.py",
+        ".github/workflows/420ai-audit.yml",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "docs/420-AI-V1-ARCHITECTURE.md"
+      ],
+      "requirements_satisfied": [
+        "All eight architecture-named AI-AUDIT-3 V1 modules are present.",
+        "No independently writable AIModelVersionRegistry420 exists.",
+        "Genesis dApp map and architecture documentation reflect the single-authority model/version design.",
+        "Request and result registries create no duplicate mutable lifecycle authority.",
+        "AI router is immutable read/discovery only.",
+        "Compute adapter cannot advance legacy AI lifecycle before current ComputeMarket validation."
+      ],
+      "test_results": {
+        "workflow": "success",
+        "focused_ai_contracts": "success",
+        "retained_ai_suites": "all passed",
+        "v1_modules": "success",
+        "audit_state": "success",
+        "genesis_compatibility": "success"
+      },
+      "security_adversarial_invariant_results": [
+        "Authorization adapter fails closed for unknown actions and unavailable capability grants.",
+        "Policy revisions preserve immutable historical snapshots.",
+        "Deployment lifecycle enforces provider/model operational state and terminal retirement semantics.",
+        "Read-through request/result modules expose AIJobManager state without duplicate mutation paths.",
+        "Compute binding snapshots immutable AI constraints and does not advance job lifecycle.",
+        "Retained compatibility, hardening, model rights and rewards suites remain green."
+      ],
+      "milestone_status": "AI-AUDIT-3 ordinary step complete; no Level 2 milestone required at this boundary.",
+      "deferred": {
+        "level_2": "Not required for AI-AUDIT-3. Broader retained app integration remains reserved for a meaningful cross-component milestone.",
+        "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global, Docs/global and other comprehensive closeout checks remain deferred to complete 420AI audit-phase closeout.",
+        "later_steps": "Current ComputeMarket request/match/worker/verifier/economic binding is AI-AUDIT-4; custody/settlement/disputes are AI-AUDIT-5; deployment/materialization and live testnet qualification remain later roadmap work."
+      },
+      "limitations": [
+        "AIComputeAdapter420 deliberately stops at canonical ComputeRouter graph binding in this step.",
+        "No production-equivalent testnet evidence is claimed."
+      ],
+      "blockers": [],
+      "next_step": "AI-AUDIT-4 — current ComputeMarket integration"
+    },
+    "AI-AUDIT-4": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 + Level 2 app-integration milestone",
+      "implementation_sha": "3108fa8f17c1e9482c6506cc39ea64e56fd8727f",
+      "qualification_base_sha": "b58b09a17e641a42b81d832bad913a83c7caada9",
+      "current_main_at_closeout": "edfd0752e825fc5379700851358e8398efb0b9c5",
+      "workflow_run": 37093230900,
+      "jobs": {
+        "compute-integration": 111117818705,
+        "genesis-compatibility": 111117818829,
+        "focused-ai-contracts": 111117818837,
+        "v1-modules": 111117818860,
+        "audit-state": 111117818885
+      },
+      "implementation_summary": [
+        "Reworked AIComputeAdapter420 from AI-AUDIT-3 graph-only binding into a narrow adapter over the current ComputeMarket signed-request, canonical job, accepted priced-match, provider, verified-entitlement, settlement and refund evidence authorities.",
+        "Bound AI request semantics to a deterministic AI-to-CMP manifest containing model version, compute requirement, privacy policy, verification profile, workload, input/output commitments, narrowed spend ceiling and narrowed deadline.",
+        "Bound deployment and AI-provider identities to the exact accepted CMP offer and compute-provider identity through AIProviderRegistry.computeProviderRef.",
+        "Bound accepted CMP resource, payer, canonical provider-derived beneficiary and accepted price, rejecting broadened or contradictory terms.",
+        "Synchronized canonical CMP running/result/verified evidence into the constrained AIJobManager lifecycle without creating duplicate compute economics or result authority.",
+        "Observed canonical CMP settlement and refund references while intentionally deferring compatibility escrow/custody reconciliation to AI-AUDIT-5."
+      ],
+      "files_changed": [
+        "contracts/src/ai/AIComputeAdapter420.sol",
+        "contracts/test/AIComputeIntegration420.t.sol",
+        "contracts/test/AIV1Modules420.t.sol",
+        "scripts/verify-420ai-compute-integration.py",
+        "scripts/verify-420ai-v1-modules.py",
+        ".github/workflows/420ai-audit.yml",
+        "docs/420-AI-V1-ARCHITECTURE.md"
+      ],
+      "requirements_satisfied": [
+        "AI requests bind to current CMP signed request and canonical job evidence.",
+        "Adaptation narrows and cannot broaden requester-authorized spend or deadline.",
+        "Privacy policy, verification profile, compute requirement, deployment/provider constraint, workload and input/output commitments are cryptographically included in the deterministic adaptation manifest.",
+        "Accepted CMP provider/resource identity must match the bound AI deployment/provider relation.",
+        "Accepted price is bounded by the narrowed request maximum; payer and provider-derived beneficiary are frozen from current CMP evidence.",
+        "Canonical CMP result commitment and verification reference are bound without fabricating an alternate result.",
+        "Verified entitlement must match request, match, result, verifier, payer, provider, resource, beneficiary and accepted economic ceiling.",
+        "Canonical settlement and original-payer refund references are bound as evidence.",
+        "Targeted end-to-end AI -> CMP -> verified entitlement/settlement and failed-job refund evidence tests are committed."
+      ],
+      "ci_results": {
+        "workflow": "420AI Audit Qualification",
+        "workflow_run": 37093230900,
+        "result": "success",
+        "exact_head": true,
+        "jobs": {
+          "compute-integration": "PASS",
+          "genesis-compatibility": "PASS",
+          "focused-ai-contracts": "PASS",
+          "v1-modules": "PASS",
+          "audit-state": "PASS"
+        },
+        "contract_build": "PASS",
+        "focused_ai_contract_suites": "PASS"
+      },
+      "security_adversarial_invariant_results": [
+        "Broadened spend or contradictory manifest binding fails closed.",
+        "Wrong accepted provider or beneficiary fails closed.",
+        "AI adapter status progression rejects unrelated terminal CMP enum values rather than relying on enum ordering.",
+        "Provider, resource, payer, beneficiary and accepted price are derived from accepted canonical CMP evidence.",
+        "Result commitment and verified entitlement evidence must remain cross-consistent.",
+        "Refund evidence is accepted only from the bound canonical CMP job and settlement adapter.",
+        "Retained AI compatibility, hardening, model-rights, mature V1 and rewards suites remain green."
+      ],
+      "milestone_status": "AI-AUDIT-4 is a meaningful cross-component AI/ComputeMarket integration boundary. The exact-head 420AI Audit Qualification included the targeted compute-integration verifier plus the broader retained focused AI contract suite, satisfying Level 2 app-focused integration coverage without invoking unrelated repository-wide Level 3 closeout.",
+      "deferred": {
+        "level_3": "Full repository Solidity inventory, Genesis/address-authority closeout, 420 Integrated/global qualification, Docs/global reconciliation and other complete app-phase checks remain deferred to Level 3 closeout.",
+        "custody_and_disputes": "Compatibility AI escrow/custody reconciliation, one-time payout/refund synchronization, dispute holds/resolution and related non-confiscatory behavior remain AI-AUDIT-5.",
+        "live": "Live deployment, ProtocolRegistry publication and production-equivalent testnet evidence remain AI-AUDIT-9 through AI-AUDIT-11."
+      },
+      "limitations": [
+        "This step validates and binds current CMP evidence; it does not create or replace CMP economics, Vault custody, verification or settlement authority.",
+        "AIJobEscrow compatibility-state reconciliation to already-executed CMP settlement/refund remains deliberately deferred to AI-AUDIT-5.",
+        "The audit branch was qualified against PR base b58b09a17e641a42b81d832bad913a83c7caada9; current main advanced to edfd0752e825fc5379700851358e8398efb0b9c5 after qualification. Reconciliation with current main is not part of this evidence-only closeout and remains required at the appropriate later milestone/Level 3 boundary."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_step": "AI-AUDIT-5 — custody, settlement and disputes"
+    },
+    "AI-AUDIT-6": {
+      "status": "COMPLETE",
+      "qualification_level": 1,
+      "implementation_sha": "0a70e753256e3d3c8cead2894ee9924c72d1b570",
+      "qualification_base_sha": "b58b09a17e641a42b81d832bad913a83c7caada9",
+      "current_main_at_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
+      "workflow_run": 37099378185,
+      "jobs": {
+        "focused-ai-contracts": 111135768844,
+        "v1-modules": 111135768883,
+        "provider-runtime": 111135768935,
+        "audit-state": 111135768966,
+        "compute-integration": 111135768976,
+        "genesis-compatibility": 111135768981
+      },
+      "implementation_summary": [
+        "Added a runnable dependency-light off-chain provider runtime under services/420ai-provider instead of reviving stale provider code.",
+        "Kept protocol authority in canonical RPC/Registry/ComputeMarket state through a narrow injected canonical client; local queues and health state are explicitly non-authoritative.",
+        "Added domain-separated provider-signed execution manifests and receipts binding chain, ComputeMarket graph, AI/CMP request and job identities, assignment, provider/resource, model/workload, privacy/verification references, input commitment, canonical manifest hash, runtime identity, result commitment and bounded timing.",
+        "Added AES-256-GCM private-payload storage with assignment-scoped authenticated data, maximum retention, expiry deletion and no plaintext persistence in runtime workflow state.",
+        "Added bounded retry and stable receipt-derived idempotency with canonical-state reconciliation after transient failures or lost RPC responses.",
+        "Added replay-safe restart recovery: durable nonsecret signed manifest/receipt state can resume pending submission without re-decrypting or re-executing; interrupted execution requires an explicit re-execution path after canonical revalidation.",
+        "Added redacted observability and non-authoritative health reporting."
+      ],
+      "files_changed": [
+        "services/420ai-provider/package.json",
+        "services/420ai-provider/config.example.json",
+        "services/420ai-provider/README.md",
+        "services/420ai-provider/src/canonical-json.js",
+        "services/420ai-provider/src/private-payload-store.js",
+        "services/420ai-provider/src/retry.js",
+        "services/420ai-provider/src/state-store.js",
+        "services/420ai-provider/src/observability.js",
+        "services/420ai-provider/src/runtime.js",
+        "services/420ai-provider/src/index.js",
+        "services/420ai-provider/test/provider-runtime.test.js",
+        "scripts/verify-420ai-provider-runtime.py",
+        ".github/workflows/420ai-audit.yml",
+        "docs/420-AI-V1-ARCHITECTURE.md",
+        "docs/architecture/infrastructure/420ai-compute-infrastructure.md"
+      ],
+      "requirements_satisfied": [
+        "A runnable off-chain 420AI provider service now exists and is built against the current repository's injected RPC/Registry/CMP service boundary rather than stale provider implementation assumptions.",
+        "Execution is refused on wrong chain, wrong ComputeMarket graph, wrong provider, unapproved resource, expired deadline or mismatched private-input commitment.",
+        "Execution manifests and receipts are provider-signed, domain-separated and scope-bound.",
+        "Private payloads are encrypted at rest with AES-256-GCM, assignment-scoped authenticated data and bounded retention/expiry.",
+        "Receipt submission uses bounded retry, stable idempotency identity and canonical-state reconciliation before duplicate submission.",
+        "Non-transient submission failures are not blindly retried.",
+        "Restart recovery trusts canonical state, reconciles already-committed results, preserves pending receipt submission without rerunning inference and requires explicit re-execution for interrupted workloads.",
+        "Operational logs recursively redact private payload, prompt, token, secret, credential and raw byte fields.",
+        "Health reporting is operational only and never claims protocol authority.",
+        "The runtime does not create custody, settlement, verifier, governance, validator, identity or arbitrary lifecycle authority."
+      ],
+      "ci_results": {
+        "workflow": "420AI Audit Qualification",
+        "workflow_run": 37099378185,
+        "result": "success",
+        "exact_head": true,
+        "jobs": {
+          "focused-ai-contracts": "PASS",
+          "v1-modules": "PASS",
+          "provider-runtime": "PASS",
+          "audit-state": "PASS",
+          "compute-integration": "PASS",
+          "genesis-compatibility": "PASS"
+        },
+        "provider_runtime_tests": "14 passed; 0 failed; 0 skipped",
+        "provider_runtime_verifier": "PASS",
+        "contract_build": "PASS",
+        "focused_ai_contract_suites": "PASS"
+      },
+      "security_adversarial_invariant_results": [
+        "Signed execution-object tampering fails verification.",
+        "Private payload ciphertext does not contain plaintext, wrong authenticated scope is rejected and expired payloads are deleted.",
+        "Local replay returns the same submitted receipt state without a second execution or second canonical submission.",
+        "Transient submission failures retry only within bounded attempts/deadline; non-transient failures do not retry.",
+        "A lost RPC response after canonical success reconciles from canonical state instead of submitting a duplicate receipt.",
+        "Pending signed receipt state survives restart and resumes without private-payload decryption or workload re-execution.",
+        "Interrupted execution cannot silently rerun; an explicit retryExecution path is required after canonical revalidation.",
+        "Wrong chain, ComputeMarket graph, provider, resource, deadline and input commitment fail before successful execution/submission.",
+        "Terminal canonical jobs remain terminal during restart recovery.",
+        "Observability redacts private payloads, prompts, tokens, secrets, credentials and raw buffers."
+      ],
+      "milestone_status": "AI-AUDIT-6 is a service-scoped runtime step. Level 1 app-specific qualification is sufficient at this boundary; no separate Level 2 milestone is required because no new broader app integration milestone beyond the already-qualified AI/CMP boundary was introduced.",
+      "deferred": {
+        "level_2": "Not required for AI-AUDIT-6. Broader cross-component milestone coverage remains tied to the canonical integration milestones.",
+        "level_3": "Repository-wide Solidity, Genesis/address-authority, 420 Integrated/global, Docs/global, full service/client inventory and release closeout remain deferred to AI-AUDIT-10/complete app-phase closeout.",
+        "custody_and_disputes": "AI-AUDIT-5 remains outstanding and is not satisfied by this provider-runtime step.",
+        "read_api": "Indexer/read-model implementation remains AI-AUDIT-7.",
+        "live": "Deployment/materialization, ProtocolRegistry publication and production-equivalent testnet evidence remain AI-AUDIT-9 through AI-AUDIT-11."
+      },
+      "limitations": [
+        "The provider runtime consumes a narrow injected canonical client following repository service conventions; live RPC/Registry endpoint materialization and deployment configuration are later deployment steps.",
+        "The provider-signed off-chain receipt is provenance evidence. Current on-chain CMP receipt/result authority remains the canonical authorized worker/receipt path and is not replaced by the service signature.",
+        "The audit branch was qualified against PR base b58b09a17e641a42b81d832bad913a83c7caada9; current main advanced to d37d751dfa232b20c8158d55c20c13cc1d7a10ef after qualification. Reconciliation with current main is not part of this evidence-only closeout."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_step": "AI-AUDIT-7 — read API / indexer"
+    },
+    "AI-AUDIT-8": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 plus retained Level 2 app-integration milestone",
+      "implementation_sha": "b49543dc5c5227ed5d9eff3d0d4383af3f1ec1ad",
+      "current_main_at_implementation_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef",
+      "files_changed": [
+        ".github/workflows/420ai-audit.yml",
+        "ai/web/README.md",
+        "ai/web/app.js",
+        "ai/web/core/abi.js",
+        "ai/web/core/config.js",
+        "ai/web/core/controller.js",
+        "ai/web/core/read-api.js",
+        "ai/web/core/transactions.js",
+        "ai/web/core/wallet.js",
+        "ai/web/index.html",
+        "ai/web/package.json",
+        "ai/web/runtime-config.example.json",
+        "ai/web/runtime-config.json",
+        "ai/web/scripts/check.mjs",
+        "ai/web/security-headers.json",
+        "ai/web/styles.css",
+        "ai/web/test/abi.test.js",
+        "ai/web/test/config.test.js",
+        "ai/web/test/controller.test.js",
+        "ai/web/test/read-api.test.js",
+        "ai/web/test/transactions.test.js",
+        "ai/web/test/wallet.test.js",
+        "docs/420-AI-V1-ARCHITECTURE.md",
+        "docs/apps/ai/developer/api.md",
+        "scripts/verify-420ai-client.py"
+      ],
+      "requirements_satisfied": [
+        "Actual user-facing 420AI browser application exists under ai/web.",
+        "Injected EIP-1193 wallet connection is implemented with target-chain validation and authority invalidation on account/chain/disconnect changes.",
+        "Model, model-version, deployment, policy and AI job discovery is implemented against the chain-scoped 420-ai-read-v1 API.",
+        "Requester-authorized createRequest, cancel and openDispute calldata is generated from canonical AIJobManager interfaces and wallet transactions are simulated before submission.",
+        "Funding and settlement state is displayed from indexed canonical evidence; the browser does not fabricate direct AI escrow funding because AIJobEscrow.fund is disabled.",
+        "Transaction lifecycle distinguishes submitted, included, confirmed, reverted, reorged, dropped and timeout/error behavior and stale reviewed intent is cleared after failures.",
+        "Private input plaintext is converted locally to a commitment and is not included in public calldata, runtime config, indexed projections or browser persistence.",
+        "Runtime configuration rejects privileged secret/API credential fields and credential-bearing URLs.",
+        "Responsive CSS, skip navigation, labels, focus styling and aria-live status surfaces are present.",
+        "Committed runtime configuration is fail-closed until AI-AUDIT-9 materializes live network/read-service values; production-origin/config shape and restrictive browser security headers are present."
+      ],
+      "local_targeted_results": {
+        "environment": "Node 22 local container reconstruction of exact committed client modules and final app.js",
+        "command": "npm run build",
+        "structural_check": "PASS",
+        "tests": "16 passed; 0 failed; 0 skipped",
+        "app_js_syntax": "PASS"
+      },
+      "ci_results": {
+        "required_workflow": "420AI Audit Qualification",
+        "expected_jobs": [
+          "ai-client",
+          "ai-read-api",
+          "provider-runtime",
+          "compute-integration",
+          "v1-modules",
+          "audit-state",
+          "genesis-compatibility",
+          "focused-ai-contracts"
+        ],
+        "exact_head_run": 37173980718,
+        "exact_head_sha": "12cd213186b107210470aa0fc3fef68d7a7798c4",
+        "result": "success",
+        "jobs": {
+          "genesis-compatibility": 111352636871,
+          "compute-integration": 111352636979,
+          "ai-read-api": 111352636986,
+          "provider-runtime": 111352636995,
+          "audit-state": 111352637016,
+          "focused-ai-contracts": 111352637017,
+          "v1-modules": 111352637043,
+          "ai-client": 111352637063
+        }
+      },
+      "security_adversarial_results": [
+        "Wrong network is rejected before wallet authority is established.",
+        "Wallet account/chain/disconnect events invalidate local authority and pending review.",
+        "Runtime config rejects secret/credential/API-key/private-key/password-style fields and credential-bearing URLs.",
+        "Private input plaintext is absent from reviewed transaction data; only its bytes32 commitment is retained.",
+        "Indexed/review data is rendered with textContent/DOM nodes rather than innerHTML.",
+        "Reverted, reorged and dropped transaction states fail closed and never report success.",
+        "Unmaterialized runtime keeps create/cancel/dispute feature flags disabled."
+      ],
+      "milestone_status": "COMPLETE — user wallet/client, AI read/indexer, provider runtime and retained AI contract/integration qualification all passed on the same exact reconciled head.",
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "next_step": "AI-AUDIT-9 — deployment and Genesis materialization",
+      "qualified_reconciled_sha": "12cd213186b107210470aa0fc3fef68d7a7798c4",
+      "durable_evidence": "docs/audit/420AI-AUDIT-8-QUALIFICATION.md"
+    },
+    "AI-AUDIT-7": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head app-specific qualification",
+      "implementation_sha": "12cd213186b107210470aa0fc3fef68d7a7798c4",
+      "required_workflow": "420AI Audit Qualification",
+      "exact_head_run": 37173980718,
+      "exact_head_result": "success",
+      "job": {
+        "name": "ai-read-api",
+        "id": 111352636986,
+        "result": "success"
+      },
+      "retained_jobs": [
+        {
+          "name": "genesis-compatibility",
+          "id": 111352636871,
+          "result": "success"
+        },
+        {
+          "name": "compute-integration",
+          "id": 111352636979,
+          "result": "success"
+        },
+        {
+          "name": "provider-runtime",
+          "id": 111352636995,
+          "result": "success"
+        },
+        {
+          "name": "audit-state",
+          "id": 111352637016,
+          "result": "success"
+        },
+        {
+          "name": "focused-ai-contracts",
+          "id": 111352637017,
+          "result": "success"
+        },
+        {
+          "name": "v1-modules",
+          "id": 111352637043,
+          "result": "success"
+        },
+        {
+          "name": "ai-client",
+          "id": 111352637063,
+          "result": "success"
+        }
+      ],
+      "requirements_satisfied": [
+        "Versioned AI provider/model/deployment/policy/job read API is implemented.",
+        "Indexer projections are chain-scoped, pagination-bounded and reorg/replay safe.",
+        "Private payload plaintext is excluded from indexed/public read models.",
+        "Compiled descriptor manifest is packaged into the distribution build.",
+        "Exact-head AI read/indexer build, tests and boundary verifier passed."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-7-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-8 — user-facing AI client"
+    },
+    "AI-AUDIT-5": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head app-specific qualification",
+      "implementation_sha": "7b0aef02bd2064bfb97fec9e57d0b7c613bc5a05",
+      "required_workflow": "420AI Audit Qualification",
+      "exact_head_run": 37176098018,
+      "exact_head_result": "success",
+      "jobs": {
+        "audit-state": 111358922074,
+        "provider-runtime": 111358922220,
+        "genesis-compatibility": 111358922222,
+        "custody-settlement": 111358922262,
+        "compute-integration": 111358922277,
+        "focused-ai-contracts": 111358922278,
+        "ai-read-api": 111358922280,
+        "v1-modules": 111358922292,
+        "ai-client": 111358922304
+      },
+      "requirements_satisfied": [
+        "No unrestricted standalone AI custody path exists.",
+        "Canonical funding is payer-segregated and bounded by the requester-authorized maximum spend.",
+        "Provider beneficiary is derived from canonical accepted CMP provider/settlement evidence and frozen before claimability.",
+        "Settlement is one-time and mirrors only canonical entitlement settlement evidence.",
+        "Unused funded value remains recoverable through the canonical payer residual path.",
+        "Cancellation, expiry and failure refunds remain bound to the canonical payer.",
+        "Active disputes hold provider release and final resolution controls disposition.",
+        "Slashing remains limited to objective finalized evidence; subjective AI quality disagreement does not create slash authority.",
+        "Emergency behavior remains non-confiscatory because AI owns no alternate transfer primitive."
+      ],
+      "ci_results": {
+        "workflow": "420AI Audit Qualification",
+        "workflow_run": 37176098018,
+        "result": "success",
+        "exact_head": true,
+        "jobs": {
+          "audit-state": "PASS",
+          "provider-runtime": "PASS",
+          "genesis-compatibility": "PASS",
+          "custody-settlement": "PASS",
+          "compute-integration": "PASS",
+          "focused-ai-contracts": "PASS",
+          "ai-read-api": "PASS",
+          "v1-modules": "PASS",
+          "ai-client": "PASS"
+        },
+        "retained_economic_suites": [
+          "AICustodySettlement420.t.sol",
+          "AIComputeIntegration420.t.sol",
+          "ComputeEscrowFunding420.t.sol",
+          "ComputeVerifiedEntitlement420.t.sol",
+          "ComputeVerifierDisputeSlashEvidence420.t.sol",
+          "ComputeStakeSlashAuthorization420.t.sol"
+        ],
+        "boundary_verifier": "scripts/verify-420ai-custody-settlement.py — PASS"
+      },
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-5-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-9 — deployment and Genesis materialization"
+    },
+    "AI-AUDIT-9": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head app-specific qualification",
+      "implementation_sha": "ed7ab3af91d54b36d3ca6595eaf1363e07f09a55",
+      "current_main_at_closeout": "e22a744d8fbcff20f2b2108a1117ee3abe9dc437",
+      "workflow_run": 37228805812,
+      "jobs": {
+        "compute-integration": 111513925933,
+        "v1-modules": 111513926031,
+        "genesis-compatibility": 111513926092,
+        "deployment-materialization": 111513926105,
+        "audit-state": 111513926111,
+        "custody-settlement": 111513926116,
+        "provider-runtime": 111513926160,
+        "ai-client": 111513926207,
+        "focused-ai-contracts": 111513926214,
+        "ai-read-api": 111513926264
+      },
+      "requirements_satisfied": [
+        "Frozen AI compatibility predeploy runtime is materialized and verified at the canonical 0x042f through 0x0433 identities in deterministic repository qualification.",
+        "Registry-resolved mature AI V1 modules are deployed in the materialization harness and runtime code hashes are verified.",
+        "Canonical AI component ID preimages are defined and published through ProtocolRegistry using the staged SUSPENDED-to-ACTIVE lifecycle.",
+        "The canonical 420/service/ai/v1 service is published to AIRouter420 after wiring verification.",
+        "Governance-only one-shot adapter bindings and unauthorized rebinding rejection are qualified.",
+        "Deployment/admin handoff, smoke tests, rollback/recovery, monitoring and DNS/API dependency boundaries are documented.",
+        "Live network fields remain intentionally unset rather than fabricated before production-equivalent testnet deployment."
+      ],
+      "limitations": [
+        "This is repository deployment/materialization readiness, not live-chain deployment evidence.",
+        "Live addresses for Registry-resolved modules, transaction hashes, block evidence, DNS/API origins and provider/runtime logs remain AI-AUDIT-11 work."
+      ],
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-9-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-10 — exact-head pre-testnet qualification"
+    },
+    "AI-AUDIT-10": {
+      "status": "COMPLETE",
+      "qualification_level": "Level 1 exact-head qualification + retained Level 2 pre-testnet app-integration milestone",
+      "implementation_sha": "b54ad6b39f3f438d6f39beb5dfdbde1963d752a4",
+      "current_main_at_closeout": "2280fb6f9915b849560d9d4d5a95d999c4adc669",
+      "workflow_run": 37241370775,
+      "jobs": {
+        "genesis-compatibility": 111550602138,
+        "ai-client": 111550602161,
+        "v1-modules": 111550602185,
+        "custody-settlement": 111550602230,
+        "focused-ai-contracts": 111550602252,
+        "audit-state": 111550602253,
+        "ai-read-api": 111550602257,
+        "deployment-materialization": 111550602264,
+        "provider-runtime": 111550602266,
+        "pretestnet-security": 111550602275,
+        "compute-integration": 111550602278,
+        "pretestnet-qualification": 111550602291
+      },
+      "requirements_satisfied": [
+        "Clean documented Foundry build completed from forge clean.",
+        "Focused AI Foundry inventory passed.",
+        "Required ComputeMarket and Vault integration suites passed.",
+        "Required Registry and Identity integration suites passed.",
+        "Targeted AI static/security analysis passed, including forbidden-primitive scan and Slither high-severity gate.",
+        "AI audit/docs/boundary verifiers passed.",
+        "420AI browser application build/tests passed.",
+        "420AI provider build/tests passed.",
+        "420Indexer AI read API build/tests passed.",
+        "Final repository-drift check passed."
+      ],
+      "security_adversarial_invariant_results": [
+        "AI hardening Foundry inventory passed.",
+        "No forbidden tx.origin, selfdestruct or delegatecall primitive was found in AI sources.",
+        "Targeted Slither gate reported no high-severity AI finding.",
+        "Retained custody, settlement, ComputeMarket, Registry and Identity integration regressions passed."
+      ],
+      "milestone_status": "Pre-testnet repository qualification COMPLETE; production-equivalent testnet qualification remains AI-AUDIT-11.",
+      "intentionally_deferred": {
+        "level_3": "Final complete app-phase repository-wide closeout is not duplicated here; canonical broad CI ownership remains deferred to the applicable release/phase closeout.",
+        "live": "Live deployment addresses, transaction hashes, evidence blocks, Registry publication transactions, DNS/API endpoints, provider logs and recovery drills remain AI-AUDIT-11."
+      },
+      "blockers": [],
+      "completion_state": "COMPLETE",
+      "durable_evidence": "docs/audit/420AI-AUDIT-10-QUALIFICATION.md",
+      "next_step": "AI-AUDIT-11 — production-equivalent testnet qualification",
+      "reconciliation_note": "Reconciled against current main, preserving mainline Rights/indexer and Arbitration/Genesis authority changes while retaining AI namespace/dApp-map additions; exact reconciled head requalified 12/12 green before merge."
+    }
+  },
+  "scope": {
+    "claim": "repository-state audit through qualified AI deployment and Genesis materialization readiness",
+    "does_not_claim": [
+      "420AI code completeness",
+      "420AI Genesis readiness",
+      "420AI production readiness",
+      "live testnet deployment",
+      "live ProtocolRegistry publication"
+    ]
+  },
+  "canonical_findings": {
+    "fixed_genesis_compatibility_addresses_preserved": true,
+    "mature_v1_contract_inventory_complete": true,
+    "provider_runtime_present": true,
+    "read_api_present": true,
+    "production_web_client_present": true,
+    "production_equivalent_testnet_evidence_present": false,
+    "historical_recovery_pr_348_merged": false,
+    "current_compute_market_integration_complete": true,
+    "custody_settlement_disputes_complete": true,
+    "deployment_materialization_ready": true,
+    "pretestnet_exact_head_qualification_complete": true
+  },
+  "readiness": {
+    "code_complete": true,
+    "build_complete": true,
+    "contract_complete": true,
+    "test_complete": true,
+    "documentation_complete": true,
+    "integration_complete": true,
+    "security_qualified": true,
+    "testnet_ready": true,
+    "genesis_ready": false,
+    "production_ready": false
+  },
+  "roadmap": "docs/audit/420AI-AUDIT-REMEDIATION-ROADMAP.md",
+  "report": "docs/audit/420AI-COMPLETE-AUDIT-20261002.md",
+  "current_main_at_ai_audit_4_closeout": "edfd0752e825fc5379700851358e8398efb0b9c5",
+  "current_main_at_ai_audit_6_closeout": "d37d751dfa232b20c8158d55c20c13cc1d7a10ef"
+}

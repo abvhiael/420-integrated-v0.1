@@ -364,12 +364,12 @@
         "AIIds420.sol",
         "AIAuthorization420.sol",
         "AIPolicyRegistry420.sol",
-        "AIModelVersionRegistry420.sol",
         "AIModelDeploymentRegistry420.sol",
         "AIRequestRegistry420.sol",
         "AIResultRegistry420.sol",
         "AIComputeAdapter420.sol",
-        "AIRouter420.sol"
+        "AIRouter420.sol",
+        "IAI420.sol"
       ]
     },
     {

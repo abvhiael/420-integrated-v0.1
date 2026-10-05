@@ -1,0 +1,14 @@
+{
+  "schema":"420-mail-service-v1",
+  "version":1,
+  "serviceId":"420/service/mail/v1",
+  "name":"420Mail",
+  "authority":"REPLACEABLE_COMMUNICATION_SERVICE",
+  "genesisTarget":"identity_addressed_ecosystem_inbox",
+  "contracts":[],
+  "onChainMailState":false,
+  "dependencies":["420 Identity","420 Messenger","420 Storage","420 Notifications"],
+  "privacy":{"messageBodiesOnChain":false,"publicIndexing":false,"defaultVisibility":"PRIVATE","bodyStorage":"PRIVATE_OFF_CHAIN_REFERENCE"},
+  "featureFlags":{"mail.external_smtp":false},
+  "api":{"versionPrefix":"/v1","pagination":"cursor","timestamps":"RFC3339_UTC","idempotentSend":true}
+}

@@ -6,6 +6,7 @@ on:
       - "config/420town-genesis.json"
       - "config/420town-authority-v1.json"
       - "config/420town-content-v1.json"
+      - "config/420town-moderation-v1.json"
       - "config/genesis-applications.json"
       - "config/genesis-consumer-services.json"
       - "contracts/src/town/**"
@@ -19,6 +20,7 @@ on:
       - "scripts/verify-420town-skeleton.py"
       - "scripts/verify-420town-authority.py"
       - "scripts/verify-420town-content.py"
+      - "scripts/verify-420town-moderation.py"
       - ".github/workflows/420town-audit.yml"
   workflow_dispatch:
 
@@ -52,6 +54,8 @@ jobs:
         run: python3 scripts/verify-420town-authority.py
       - name: Verify Town content state
         run: python3 scripts/verify-420town-content.py
+      - name: Verify Town moderation state
+        run: python3 scripts/verify-420town-moderation.py
       - name: Build and test Town Go packages
         run: go test ./town/...
 

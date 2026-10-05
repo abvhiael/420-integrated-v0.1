@@ -1,0 +1,26 @@
+[Unit]
+Description=420Integrated node420 compute worker
+After=network-online.target docker.service podman.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=node420compute
+Group=node420compute
+WorkingDirectory=/var/lib/420integrated/node420-compute
+ExecStart=/opt/420integrated/node420-compute/run-node420-compute.sh /etc/420integrated/node420-compute/worker.args
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictSUIDSGID=true
+ReadWritePaths=/var/lib/420integrated/node420-compute
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,155 @@
+name: Compute Worker Fast Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'compute/worker/**'
+      - 'execution/cmd/node420-compute/**'
+      - 'scripts/verify-cmp-3-*.py'
+      - 'docs/compute-market/CMP-3*.md'
+      - 'docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md'
+      - '.github/workflows/compute-worker-fast.yml'
+      - 'Makefile'
+  push:
+    paths:
+      - 'compute/worker/**'
+      - 'execution/cmd/node420-compute/**'
+      - 'scripts/verify-cmp-3-*.py'
+      - 'docs/compute-market/CMP-3*.md'
+      - 'docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md'
+      - '.github/workflows/compute-worker-fast.yml'
+      - 'Makefile'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: compute-worker-fast-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  fast-qualification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        shell: bash
+        run: |
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          echo "expected=$expected"
+          echo "actual=$actual"
+          test "$actual" = "$expected"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Test worker runtime
+        run: |
+          go test ./compute/worker
+          go test ./execution/cmd/node420-compute
+          go vet ./compute/worker ./execution/cmd/node420-compute
+          go build ./execution/cmd/node420-compute
+
+      - name: Build local CMP-3.4 sandbox probe image
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_dir="$(mktemp -d)"
+          CGO_ENABLED=0 go build -o "$probe_dir/probe" ./compute/worker/testdata/sandboxprobe
+          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$probe_dir/Dockerfile"
+          docker build --network=none -t cmp-sandbox-probe:ci "$probe_dir"
+          image_id="$(docker image inspect --format '{{.Id}}' cmp-sandbox-probe:ci)"
+          test -n "$image_id"
+          echo "CMP_SANDBOX_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
+
+      - name: Test real Docker sandbox isolation
+        run: go test ./compute/worker -run '^TestSandboxDockerIntegration$' -count=1
+
+      - name: Build local CMP-3.7 checkpoint resume probe image
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_dir="$(mktemp -d)"
+          CGO_ENABLED=0 go build -o "$probe_dir/probe" ./compute/worker/testdata/checkpointprobe
+          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$probe_dir/Dockerfile"
+          docker build --network=none -t cmp-checkpoint-probe:ci "$probe_dir"
+          image_id="$(docker image inspect --format '{{.Id}}' cmp-checkpoint-probe:ci)"
+          test -n "$image_id"
+          echo "CMP_CHECKPOINT_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
+
+      - name: Test real Docker checkpoint resume
+        run: go test ./compute/worker -run '^TestCheckpointResumeDockerIntegration$' -count=1
+
+      - name: Build local CMP-3.8 result commitment probe image
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_dir="$(mktemp -d)"
+          CGO_ENABLED=0 go build -o "$probe_dir/probe" ./compute/worker/testdata/resultprobe
+          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$probe_dir/Dockerfile"
+          docker build --network=none -t cmp-result-probe:ci "$probe_dir"
+          image_id="$(docker image inspect --format '{{.Id}}' cmp-result-probe:ci)"
+          test -n "$image_id"
+          echo "CMP_RESULT_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
+
+      - name: Test real Docker result commitment
+        run: go test ./compute/worker -run '^TestResultCommitmentDockerIntegration$' -count=1
+
+      - name: Verify CMP-3.1 daemon regression
+        run: python scripts/verify-cmp-3-1-worker-daemon.py
+
+      - name: Verify CMP-3.2 hardware/software discovery
+        run: python scripts/verify-cmp-3-2-hardware-software-discovery.py
+
+      - name: Verify CMP-3.3 benchmarking and capability evidence
+        run: python scripts/verify-cmp-3-3-benchmarking-capability-evidence.py
+
+      - name: Verify CMP-3.4 secure workload sandbox
+        run: python scripts/verify-cmp-3-4-secure-workload-sandbox.py
+
+      - name: Verify CMP-3.5 content-addressed work-unit download
+        run: python scripts/verify-cmp-3-5-content-addressed-work-unit-download.py
+
+      - name: Verify CMP-3.6 execution lifecycle
+        run: python scripts/verify-cmp-3-6-execution-lifecycle.py
+
+      - name: Verify CMP-3.7 checkpointing and resume
+        run: python scripts/verify-cmp-3-7-checkpointing-resume.py
+
+      - name: Verify CMP-3.8 result commitment
+        run: python scripts/verify-cmp-3-8-result-commitment.py
+
+      - name: Verify CMP-3.9 execution-key signed receipt
+        run: python scripts/verify-cmp-3-9-execution-key-signed-receipt.py
+
+      - name: Verify CMP-3.10 result/evidence upload
+        run: python scripts/verify-cmp-3-10-result-evidence-upload.py
+
+      - name: Verify CMP-3.11 local resource controls
+        run: python scripts/verify-cmp-3-11-local-resource-controls.py
+
+      - name: Verify CMP-3.12 malicious workload protections
+        run: python scripts/verify-cmp-3-12-malicious-workload-protections.py
+
+      - name: Build CMP-3.13 platform packages
+        run: python scripts/build-cmp-3-13-packages.py --output dist/node420-compute
+
+      - name: Verify CMP-3.13 Windows/Linux/macOS packaging
+        run: python scripts/verify-cmp-3-13-packaging.py --dist dist/node420-compute
+
+      - name: Upload CMP-3.13 package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: node420-compute-packages-${{ github.event.pull_request.head.sha || github.sha }}
+          path: dist/node420-compute/
+          if-no-files-found: error

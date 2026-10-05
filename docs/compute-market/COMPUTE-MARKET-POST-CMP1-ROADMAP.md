@@ -335,32 +335,115 @@ Durable closeout evidence is recorded only after all required Level 3 owners pas
 Purpose: allow ordinary machines to become secure compute workers.
 
 ## CMP-3.1 — Worker daemon
+**Status: COMPLETE — Level 1 exact-head qualified on `01badf4cb9302841a00905fdfadda44224bfdd3e`.**
+
+Dedicated `node420-compute` process-lifecycle foundation with fail-closed canonical identity configuration, private state directory, explicit lifecycle states, sibling failure containment and bounded graceful shutdown. Workload execution remains disabled and later CMP-3 functionality remains deferred.
+
+Durable evidence and exit criteria: [CMP-3.1 worker daemon](CMP-3.1-WORKER-DAEMON.md). Compute Market Qualification #213 / run `37240782332` passed on the exact implementation SHA.
 
 ## CMP-3.2 — Hardware/software discovery
+**Status: COMPLETE — Level 1 exact-head qualified on `a111b1d63083ccffa8a5afacd9529728ce0a2eab`.**
+
+Local, read-only host discovery now reports a versioned non-authoritative worker snapshot covering portable OS/architecture/logical CPU/runtime data, richer Linux CPU/memory/graphics identifiers, and allowlisted relevant software presence without executing discovered tools or collecting sensitive host/network/credential identifiers. Benchmarking and capability evidence remain deferred to CMP-3.3.
+
+Durable evidence: [CMP-3.2 qualification](CMP-3.2-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.2 hardware/software discovery](CMP-3.2-HARDWARE-SOFTWARE-DISCOVERY.md). Compute Worker Fast Qualification #13 / run `37243425378` passed on the exact implementation SHA; evidence anchor `822877d010f38cc16d2fb15b529b11fd765f6ef7`.
+
 
 ## CMP-3.3 — Benchmarking and capability evidence
+**Status: COMPLETE — Level 1 exact-head qualified on `0f7a5a1c3bf40308f4ab029594454f3ab7ff8795`.**
+
+Bounded provider-neutral CPU/memory benchmarking now produces versioned, content-addressed self-reported capability evidence bound to the exact CMP-3.2 discovery snapshot. The evidence is explicitly non-authoritative, independently unattested, and not job-result correctness evidence; trusted eligibility remains owned by the canonical independent attestation/provenance path.
+
+Durable evidence: [CMP-3.3 qualification](CMP-3.3-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.3 benchmarking and capability evidence](CMP-3.3-BENCHMARKING-CAPABILITY-EVIDENCE.md). Compute Worker Fast Qualification #35 / run `37250495294` passed on the exact implementation SHA; evidence anchor `5910c6f9100b5d2e02159861a5bac94561149d9b`.
+
 
 ## CMP-3.4 — Secure workload sandbox
+**Status: COMPLETE — Level 1 exact-head qualified on `a3ad2c5c8d70b428d61c1b70f546ec5edbeedcaf`.**
+
 Container, microVM, WASM or equivalent isolation. Customer workloads must not execute unrestricted on the host.
 
+A digest-pinned OCI sandbox backend now enforces non-root execution, read-only rootfs, dropped capabilities, no-new-privileges, disabled networking, bounded CPU/memory/PIDs/tmpfs/runtime/output, no host mounts/devices/namespaces, and forced cleanup on timeout. The Level 1 workflow includes a real local Docker/scratch probe that validates the isolation controls from inside the container.
+
+Durable evidence: [CMP-3.4 qualification](CMP-3.4-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.4 secure workload sandbox](CMP-3.4-SECURE-WORKLOAD-SANDBOX.md). Compute Worker Fast Qualification #64 / run `37251256261` passed on the exact implementation SHA; evidence anchor `618df14e25f7f5a567d785f4f13d8fa1263e7ec9`.
+
+
 ## CMP-3.5 — Content-addressed work-unit download
+**Status: COMPLETE — Level 1 exact-head qualified on `14f178762534d23a5519782960735eb98a4a6ac7`.**
+
+The worker now retrieves immutable HTTPS work-unit artifacts into private content-addressed state, streams through exact-size bounds and SHA-256 verification, rejects redirects and malformed/mutable sources, revalidates cached content before reuse, and atomically publishes only verified bytes. Download does not authorize or execute work.
+
+Durable evidence: [CMP-3.5 qualification](CMP-3.5-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.5 content-addressed work-unit download](CMP-3.5-CONTENT-ADDRESSED-WORK-UNIT-DOWNLOAD.md). Compute Worker Fast Qualification #83 / run `37252325225` passed on the exact implementation SHA; evidence anchor `81919b68dc76923e7d87d452b887949e370b0fe4`.
+
 
 ## CMP-3.6 — Execution lifecycle
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `612d9e9401ab05b7d4864be751f942a8d384a162`.**
+
+The worker now resolves exact canonical attempt authorization, revalidates the content-addressed work unit immediately before execution, streams it into the CMP-3.4 sandbox without host mounts, persists restart-safe observational execution states, distinguishes cancellation/failure/expiry/interruption, and rejects exact-attempt replay. CMP-3.6 is the first worker-runtime convergence milestone and therefore adds a dedicated app-focused Level 2 integration workflow.
+
+Durable evidence: [CMP-3.6 qualification](CMP-3.6-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.6 execution lifecycle](CMP-3.6-EXECUTION-LIFECYCLE.md). Level 1 Compute Worker Fast Qualification #115 / run `37255444231` and Level 2 Compute Worker Integration Qualification #5 / run `37255444265` both passed on the exact implementation SHA; evidence anchor `27ea5df459f398ffa56ac4ecca864bf392b99262`.
+
 
 ## CMP-3.7 — Checkpointing/resume
+**Status: COMPLETE — Level 1 exact-head qualified on `c438a029a652fdeed42ef94b877e50b804842689`.**
+
+The worker now persists private, monotonically sequenced, authorization-bound checkpoints and can explicitly resume only the same still-authorized interrupted attempt. Resume re-resolves canonical authorization, rehashes both the original CMP-3.5 work unit and the latest checkpoint, frames them through a versioned bounded stdin protocol, and re-enters only through the CMP-3.4 sandbox. Terminal/live attempts cannot be reopened.
+
+Durable evidence: [CMP-3.7 qualification](CMP-3.7-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.7 checkpointing/resume](CMP-3.7-CHECKPOINTING-RESUME.md). Compute Worker Fast Qualification #143 / run `37256445519` passed on the exact implementation SHA; evidence anchor `1971279df16ad20af1761766f67f116ceb61b866`.
+
 
 ## CMP-3.8 — Result commitment
+**Status: COMPLETE — Level 1 exact-head qualified on `05a4a5f835657c0860cd78685bd274ed66134e35`.**
+
+The worker now hashes complete sandbox stdout independently of bounded diagnostic capture, persists the full stdout SHA-256/byte count in the durable execution record, and creates private deterministic unsigned result material bound to the exact authorization/attempt/work-unit/execution context. The material exposes a bytes32-compatible base content hash; CMP-3.9 must still apply the accepted profile-defined receipt output-commitment rule before signing/submission. CMP-3.8 does not create a receipt, signature, canonical RESULT_COMMITTED transition, correctness claim, or payment authority.
+
+Durable evidence: [CMP-3.8 qualification](CMP-3.8-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.8 result commitment](CMP-3.8-RESULT-COMMITMENT.md). Compute Worker Fast Qualification #187 / run `37257986490` passed on the exact implementation/spec SHA; evidence anchor `31e1343625b6bd56d8ea059a7460d1c63c5eb587`.
+
 
 ## CMP-3.9 — Execution-key signed receipt
+**Status: COMPLETE — Level 1 + Level 2 exact-head qualified on `ae2a3a8243a1c969857b8b06161badbcc2b0c3d7`.**
+
+The worker now freezes the canonical CMP-0.9 ReceiptV1 tuple, resolves accepted receipt context through a fail-closed canonical authority interface, signs the EIP-712 receipt with the execution key, and separately produces the existing worker-evidence contract-compatible result authorization signature. Receipt signing remains attribution only: no correctness, canonical result-state, upload, payment or settlement authority is introduced.
+
+Durable evidence: [CMP-3.9 qualification](CMP-3.9-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.9 execution-key signed receipt](CMP-3.9-EXECUTION-KEY-SIGNED-RECEIPT.md). Level 1 Fast #211 / run `37259468746` and Level 2 Integration #59 / run `37259517488` both passed the exact implementation/spec SHA; evidence anchor `3f836d35caf7206d0b3cc6620c59f496547b4c72`.
+
 
 ## CMP-3.10 — Result/evidence upload
+**Status: COMPLETE — Level 1 exact-head qualified on `356f8d77f3b4b6997f9f9d75e612a36d1a32a43f`.**
+
+The worker now implements a provider-neutral, content-addressed off-chain upload boundary for exact CMP-3.8 result material, CMP-3.9 signed receipts, a versioned evidence manifest, and every evidence object required by accepted policy. The worker validates the complete ordered evidence set, exact size/SHA-256 digests, privacy/access/retention/provenance bindings, byte ceilings, deterministic object idempotency and transport receipt identity before recording a non-authoritative upload completion.
+
+CMP-3.10 does not invent a general ComputeMarket HTTP endpoint, 420Storage agreement/capacity authority, 420AI dependency, correctness verdict, canonical `RESULT_COMMITTED`, or payment/settlement authority.
+
+Durable evidence: [CMP-3.10 qualification](CMP-3.10-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.10 result/evidence upload](CMP-3.10-RESULT-EVIDENCE-UPLOAD.md). Fast #233 / run `37261236505` / job `111608720907` passed the exact implementation/spec SHA; evidence anchor `8a72024fc27543f7754b624be2cada39d4b13849`.
 
 ## CMP-3.11 — Local resource controls
+**Status: COMPLETE — Level 1 exact-head qualified on `56893c5b814d14138eaafec71f1b784d4b110189`.**
+
 CPU/GPU percentage, idle-only mode, thermal ceilings, bandwidth and schedule controls.
 
+The worker now provides a versioned operator-local resource policy; automatic hard CPU quota application to the OCI sandbox; fail-closed GPU-share enforcement contracts; timezone-aware weekly schedules; continuous idle/thermal monitoring capable of cancelling active execution leases; deterministic bandwidth shaping wired into work-unit downloads and result/evidence uploads; concrete Linux /proc/sysfs telemetry; and strict node420-compute operator flags.
+
+GPU percentage never becomes advisory: GPU work is rejected unless a qualified platform-specific share enforcer is supplied. CMP-3.11 does not weaken CMP-3.4 isolation or gain canonical job/correctness/payment authority.
+
+Durable evidence: [CMP-3.11 qualification](CMP-3.11-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.11 local resource controls](CMP-3.11-LOCAL-RESOURCE-CONTROLS.md). Fast #272 / run `37262445914` / job `111612318856` passed the exact implementation/spec/workflow SHA; evidence anchor `0f63e91ae9406cdf0a5d27d7c6211fa64d7ced4b`.
+
 ## CMP-3.12 — Malicious workload protections
+**Status: COMPLETE — Level 1 exact-head qualified on `691d6296756281bc8424c17d4ad8597bf0a034b6`.**
+
+The worker now adds digest-bound malicious-workload admission and containment on top of the existing sandbox/resource limits: bounded canonical argv, immutable image/command deny policy, cumulative local violation tracking, restart-safe quarantine, private non-authoritative incident evidence, protected fresh/resume execution wrappers, and additional OCI IPC/core-dump/file-descriptor hardening.
+
+The implementation deliberately does not invent antivirus/EDR, content scanning, image-signature infrastructure, canonical slashing or correctness authority where the repository defines none.
+
+Durable evidence: [CMP-3.12 qualification](CMP-3.12-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.12 malicious workload protections](CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md). Fast #313 / run `37264388818` / job `111618008159` passed the exact implementation/spec/workflow SHA; evidence anchor `279c78a240f5a7223341bf4461978792812b44b3`.
 
 ## CMP-3.13 — Windows/Linux/macOS packaging
+**Status: COMPLETE — Level 1 exact-head qualified on `6a5e82bbaa2fd9073c8d6f3415f2460048f115ca`.**
+
+The worker now has deterministic Windows/Linux/macOS packages for amd64 and arm64, exact version/source-commit identity, CGO-disabled cross-builds, per-package metadata, SHA-256 manifests, safe argument-file launchers, explicit platform state directories, Linux systemd material, macOS launchd material, and Windows limited-user startup-task material.
+
+Packaging does not claim native runtime certification, code signing/notarization, live worker deployment, or Level 3 merge-candidate readiness.
+
+Durable evidence: [CMP-3.13 qualification](CMP-3.13-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.13 Windows/Linux/macOS packaging](CMP-3.13-WINDOWS-LINUX-MACOS-PACKAGING.md). Fast #344 / run `37269147888` / job `111632222887` passed the exact implementation/spec/workflow SHA; package artifact ID `11327388973`; evidence anchor `32b4e5a55dd71a54ff948f8360746592b17a864f`.
 
 ## CMP-3.14 — Phase closeout
 
@@ -587,7 +670,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | forthcoming |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.13 COMPLETE; CMP-3.14 phase closeout next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

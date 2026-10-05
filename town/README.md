@@ -15,6 +15,9 @@ Current packages:
 - `town/content` — posts, threads, comments/replies, votes, visibility, revisions, tombstones, idempotency and abuse controls;
 - `town/moderation` — reports, hide/lock/suspend enforcement, block/mute, appeals, decisions, restoration and audit provenance;
 - `town/integrations` — Identity, Storage, Search, Notifications, Messenger transport and Registry discovery adapters;
+- `town/api` — authenticated `/v1` transport with validation, idempotency, pagination and observability;
+- `town/projection` — rebuildable/reorg-safe derived public read model;
+- `town/recovery` — atomic projection checkpoint persistence and restore;
 - `town/schema/v1` — machine-readable object/schema, authority, content and moderation vocabulary.
 
 Town-specific Solidity lives under `contracts/src/town`.
@@ -80,6 +83,7 @@ python3 scripts/verify-420town-authority.py
 python3 scripts/verify-420town-content.py
 python3 scripts/verify-420town-moderation.py
 python3 scripts/verify-420town-integrations.py
+python3 scripts/verify-420town-api.py
 python3 scripts/verify-420town-audit.py
 ```
 
@@ -96,6 +100,7 @@ Canonical application configuration:
 - `config/420town-content-v1.json`
 - `config/420town-moderation-v1.json`
 - `config/420town-integrations-v1.json`
+- `config/420town-api-v1.json`
 
 ## Service integrations
 
@@ -103,6 +108,12 @@ TOWN-AUDIT-6 implements the repository-side integration baseline for 420Identity
 
 See `docs/apps/town/integrations.md`.
 
+## API, SDK, projection and recovery
+
+TOWN-AUDIT-7 implements the repository-side `/v1` API, typed Go SDK, derived public projection/indexer surface, generation-bound cursor pagination, bounded retries, API observability and atomic interruption-recovery snapshots.
+
+See `docs/apps/town/api.md`.
+
 ## Current limitations
 
-TOWN-AUDIT-6 does not claim live deployed service endpoints or RPC-confirmed Identity/Messenger reads. Public API/SDK/indexer/recovery, frontend workflows, broader security hardening, live testnet deployment and production operations remain later canonical roadmap steps.
+TOWN-AUDIT-7 does not claim live deployed endpoints, production persistence, live chain reorg observation or deployed authentication infrastructure. Frontend workflows, broader security hardening, live testnet deployment and production operations remain later canonical roadmap steps.

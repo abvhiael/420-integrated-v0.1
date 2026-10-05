@@ -147,3 +147,88 @@ The repository cannot yet qualify Town-specific controls for membership privileg
 420Town is **not complete**. The repository currently contains a useful and security-conscious optional rewards integration plus shared architecture/service-registry definitions, but not the canonical community application described by those definitions.
 
 The remediation sequence is tracked in `docs/420TOWN-ROADMAP.md`.
+
+
+## TOWN-AUDIT-2 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 — per-roadmap-step fast qualification**  
+Qualified implementation/CI SHA: `df311795f073cde6b58c9d113ab27b12eeb7f154`  
+Evidence closeout follows the already-passing exact-SHA implementation qualification and changes documentation only.
+
+### Implementation completed
+
+TOWN-AUDIT-2 established the repository-owned Town product skeleton without pulling TOWN-AUDIT-3 lifecycle semantics forward:
+
+- canonical application root under `town/`;
+- package/build ownership under the repository root Go module;
+- `town/README.md` and `docs/apps/town/index.md`;
+- secret-free `town/.env.example`;
+- canonical `config/420town-genesis.json`;
+- versioned `town/schema/v1/object-catalog.json`;
+- Go-owned Town model/config packages and direct tests;
+- opaque stable object-ID policy and shared visibility vocabulary;
+- Town skeleton drift verifier;
+- app-specific CI ownership with exact-SHA assertions;
+- retained focused Solidity/rewards qualification for the pre-existing optional Town rewards path.
+
+Implementation files changed between the pre-step head `e94e21a7dd1be9ca345b6cf0949a6f34b46518ae` and qualified implementation SHA:
+
+- `.github/workflows/420town-audit.yml`;
+- `config/420town-genesis.json`;
+- `docs/apps/town/index.md`;
+- `scripts/verify-420town-skeleton.py`;
+- `town/.env.example`;
+- `town/README.md`;
+- `town/config/config.go`;
+- `town/config/config_test.go`;
+- `town/model/model.go`;
+- `town/model/model_test.go`;
+- `town/schema/v1/object-catalog.json`.
+
+### Exit criteria satisfied
+
+1. Canonical Town application directories exist and have explicit ownership.
+2. Package/build ownership is defined under `github.com/420integrated/420-integrated`.
+3. App README, environment template and canonical configuration exist.
+4. Stable versioned Town object vocabulary and opaque stable ID policy exist.
+5. CI ownership/gates exist and assert the exact implementation SHA.
+
+No TOWN-AUDIT-3 authoritative community lifecycle, authorization, treasury or entitlement behavior is claimed by this closeout.
+
+### Level 1 qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37261221863`  
+Result: **PASS**  
+Qualified SHA: `df311795f073cde6b58c9d113ab27b12eeb7f154`
+
+Passing retained checks include:
+
+- exact implementation SHA assertion;
+- canonical Town audit verifier;
+- Town product skeleton verifier;
+- `go test ./town/...`;
+- focused Town Solidity build;
+- focused Town Foundry tests using `test/Town*.t.sol`;
+- cross-dApp rewards hardening using `test/RewardsCrossDappHardening420.t.sol`.
+
+The immediately prior exact SHA `d25d8c168758b38758bb1064b260d5211d8c7f91` also passed 420Town audit run `37260761902`. The later SHA `df311795f073cde6b58c9d113ab27b12eeb7f154` changed CI command consolidation and was therefore separately requalified; its passing run is authoritative for this closeout.
+
+### Security/adversarial/invariant result
+
+For the scope of TOWN-AUDIT-2, configuration drift and authority-classification substitution fail closed through the skeleton verifier/config tests, opaque IDs are not parsed into application authority, and the retained optional rewards path passed its focused and cross-dApp hardening suites. Broader Town authority/security properties belong to later canonical steps and are not claimed complete here.
+
+### Milestone and deferred qualification
+
+- Level 2: **not required**; TOWN-AUDIT-2 is a repository/product skeleton step and not an app integration milestone.
+- Level 3: **intentionally deferred** to TOWN-AUDIT-10 / complete app-phase closeout. Full repository Solidity inventory, Genesis/address authority, 420 Integrated/global, Docs/global, broad clients/services and final deployment/config reconciliation are not required to close this ordinary Level 1 step.
+- Current main at closeout: `b3cfd359db5ac84aff6213119475ea3dc770642d`.
+- PR #523 base SHA remains `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`; reconciliation with then-current `main` is deferred to the required Level 3 closeout unless a later Town step materially requires earlier reconciliation.
+- Live testnet is not a blocker for TOWN-AUDIT-2.
+
+### Completion state
+
+**TOWN-AUDIT-2 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-3 — Authoritative community state**.

@@ -28,7 +28,7 @@ It provides typed methods for public post listing, post reads, post creation, th
 
 Remote non-loopback endpoints require HTTPS. Writes require a bearer token and an idempotency key.
 
-Retry policy is bounded:
+The SDK uses a bounded retry policy:
 
 - 1–5 attempts;
 - maximum delay 2 seconds;
@@ -42,7 +42,7 @@ Retry policy is bounded:
 
 Blocks are applied with explicit height/hash/parent linkage. Chain gaps and parent mismatches fail closed. A replacement block at an existing height removes orphaned derived state and rebuilds from retained blocks.
 
-Public list cursors bind to a projection generation. Reorg/rebuild changes the generation, causing stale cursors to fail rather than silently paginate across different canonical histories.
+Public list cursors use a generation-bound opaque cursor model tied to the current projection generation. Reorg/rebuild changes the generation, causing stale cursors to fail rather than silently paginate across different canonical histories.
 
 Only active PUBLIC post documents are exposed through the public list surface.
 

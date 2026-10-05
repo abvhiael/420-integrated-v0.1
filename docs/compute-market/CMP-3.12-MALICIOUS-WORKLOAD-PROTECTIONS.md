@@ -1,6 +1,6 @@
 # CMP-3.12 — Malicious workload protections
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `691d6296756281bc8424c17d4ad8597bf0a034b6`.**
 
 ## Canonical definition
 
@@ -176,6 +176,17 @@ CMP-3.12 does not claim:
 - platform packaging.
 
 Those capabilities require separately specified implementations and qualification if later adopted.
+
+## Qualification evidence
+
+- Implementation/spec/workflow SHA: `691d6296756281bc8424c17d4ad8597bf0a034b6`
+- Compute Worker Fast Qualification: **#313**
+- Run ID: `37264388818`
+- Job ID: `111618008159`
+- Evidence anchor: `279c78a240f5a7223341bf4461978792812b44b3`
+- Durable evidence: [CMP-3.12 qualification evidence](CMP-3.12-QUALIFICATION-EVIDENCE.md)
+- Level 2: not required; Integration #106 skipped as expected and is not counted as passing evidence.
+- Level 3: deferred to CMP-3.14.
 
 ## Qualification model
 

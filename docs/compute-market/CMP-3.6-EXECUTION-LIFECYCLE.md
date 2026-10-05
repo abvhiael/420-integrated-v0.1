@@ -1,6 +1,6 @@
 # CMP-3.6 — Execution lifecycle
 
-Status: **IMPLEMENTED / LEVEL 1 + LEVEL 2 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 + Level 2 exact-head qualified on `612d9e9401ab05b7d4864be751f942a8d384a162`.**
 
 ## Canonical definition
 
@@ -119,6 +119,20 @@ They do not persist:
 - duplicate live attempt -> in-progress rejection.
 
 No failure path mutates canonical protocol state by itself.
+
+## Qualification evidence
+
+- Implementation SHA: `612d9e9401ab05b7d4864be751f942a8d384a162`
+- Level 1 — Compute Worker Fast Qualification **#115**
+  - run ID: `37255444231`
+  - job ID: `111591383323`
+  - result: **SUCCESS**
+- Level 2 — Compute Worker Integration Qualification **#5**
+  - run ID: `37255444265`
+  - job ID: `111591383281`
+  - result: **SUCCESS**
+- Durable evidence anchor: `27ea5df459f398ffa56ac4ecca864bf392b99262`
+- Evidence record: [CMP-3.6 qualification evidence](CMP-3.6-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

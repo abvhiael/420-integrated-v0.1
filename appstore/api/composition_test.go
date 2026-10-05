@@ -47,8 +47,8 @@ func TestComposeApplicationsUsesLatestCanonicalVersion(t *testing.T) {
 		Applications: []ViewInput{{
 			ServiceID: "420/service/demo/v1",
 			Curation: curation.Metadata{
-				ServiceID:  "420/service/demo/v1",
-				Categories: []string{"Tools"},
+				ServiceID:   "420/service/demo/v1",
+				Categories:  []string{"Tools"},
 				Description: "demo",
 			},
 			Evidence: []security.Evidence{{
@@ -60,7 +60,7 @@ func TestComposeApplicationsUsesLatestCanonicalVersion(t *testing.T) {
 				ObservedAt: 99,
 			}},
 			Wallet: WalletInput{
-				AppURL: "https://demo.example/app",
+				AppURL:      "https://demo.example/app",
 				Permissions: []wallet.Permission{{Name: "connect", HighRisk: false}},
 			},
 			Links: Links{Explorer: "https://explorer.example/demo"},

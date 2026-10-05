@@ -1,0 +1,120 @@
+name: 420Token audit qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/token/**'
+      - 'contracts/test/Token*.t.sol'
+      - 'contracts/config/420token-genesis.json'
+      - 'contracts/config/token/**'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'docs/420TOKEN.md'
+      - 'docs/apps/token/**'
+      - 'docs/audit/420TOKEN-*'
+      - 'scripts/verify-420token-audit.py'
+      - 'wallet/web/core/token-*.js'
+      - 'wallet/web/test/token-*.test.js'
+      - 'testnet/public-services/token/readiness.json'
+      - '.github/workflows/420token-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: token-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Check Token formatting
+        working-directory: contracts
+        run: forge fmt --check src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol
+      - name: Build Token graph
+        working-directory: contracts
+        run: forge build src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol --sizes
+      - name: Verify Token repository contract
+        run: python3 scripts/verify-420token-audit.py
+      - name: Verify shared Genesis dApp and address authority
+        run: |
+          python3 scripts/verify-genesis-dapps.py
+          python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
+          python3 scripts/test-reg-audit-4-genesis-address-namespace.py
+      - name: Run Wallet Token runtime qualification
+        run: node --test wallet/web/test/token-runtime.test.js
+      - name: Run Token Foundry qualification
+        working-directory: contracts
+        run: forge test --match-path 'test/Token*.t.sol' -vvv
+      - name: Reject dangerous Token primitives
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/token; then
+            echo 'Forbidden primitive found in 420Token sources' >&2
+            exit 1
+          fi
+
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: hardening
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Run Token hardening suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Token*.t.sol' -vvv
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+      - name: Targeted Token Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > TokenAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/token/TokenIds420.sol";
+          import "./src/token/TokenTemplateRegistry420.sol";
+          import "./src/token/TokenFactory420.sol";
+          import "./src/token/ERC20Template420.sol";
+          import "./src/token/ERC721Template420.sol";
+          import "./src/token/ERC1155Template420.sol";
+          SOL
+          set +e
+          slither TokenAuditSlitherTarget.sol --json /tmp/token-slither.json >/tmp/token-slither.txt 2>&1
+          set -e
+          rm -f TokenAuditSlitherTarget.sol
+          python - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('/tmp/token-slither.json')
+          if not p.exists(): raise SystemExit(pathlib.Path('/tmp/token-slither.txt').read_text(errors='replace'))
+          report=json.loads(p.read_text())
+          if report.get('success') is not True: raise SystemExit(report.get('error') or 'Slither analysis failed')
+          findings=[]
+          for d in report.get('results',{}).get('detectors',[]):
+              src=[e for e in d.get('elements',[]) if e.get('source_mapping',{}).get('filename_relative','').startswith('src/token/')]
+              if src: findings.append((d.get('impact'),d.get('check'),d.get('description')))
+          print(json.dumps(findings,indent=2))
+          if any(x[0]=='High' for x in findings): raise SystemExit('High-severity Slither finding in Token source')
+          PY

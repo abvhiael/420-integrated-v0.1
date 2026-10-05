@@ -71,7 +71,7 @@ contract RevenueSourceHarness420 {
 contract DevelopmentCompensationVault420Test {
     VmDevelopmentCompensation420 private constant vm = VmDevelopmentCompensation420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant APP_ID = keccak256("420/app/test-revenue-source/v1");
-    bytes32 private constant POLICY_REF = keccak256("policy/ref/v1");
+    bytes32 private constant POLICY_REF = DevelopmentCompensationIds420.POLICY_APPLICATION_REVENUE_V1;
 
     MockCapabilityRegistryDevelopmentComp420 private caps;
     DevelopmentCompensationVault420 private vault;
@@ -95,7 +95,7 @@ contract DevelopmentCompensationVault420Test {
         require(vault.beneficiaryId() == DevelopmentCompensationIds420.BENEFICIARY_420_INTEGRATED_LABS, "beneficiary id");
     }
 
-    function testRejectsAboveTenPercent() public {
+    function testRejectsWrongPolicyReference() public {\n        uint256 gross = 100 ether;\n        uint256 share = 10 ether;\n        token.mint(address(source), share);\n        source.approveToken(address(token), share);\n        (bool ok,) = address(source).call(\n            abi.encodeWithSelector(\n                source.sendToken.selector,\n                address(token),\n                APP_ID,\n                keccak256("wrong-policy"),\n                keccak256("420/REVENUE/POLICY/WRONG/V1"),\n                gross,\n                uint16(1_000)\n            )\n        );\n        require(!ok, "wrong policy accepted");\n        require(token.balanceOf(beneficiary) == 0, "wrong policy moved funds");\n    }\n\n    function testRejectsZeroBpsAndZeroRevenue() public {\n        (bool zeroBps,) = address(vault).call(\n            abi.encodeWithSelector(vault.expectedCompensation.selector, 100 ether, uint16(0))\n        );\n        require(!zeroBps, "zero bps accepted");\n        (bool zeroRevenue,) = address(vault).call(\n            abi.encodeWithSelector(vault.expectedCompensation.selector, 0, uint16(1_000))\n        );\n        require(!zeroRevenue, "zero revenue accepted");\n    }\n\n    function testRejectsAboveTenPercent() public {
         (bool ok,) = address(vault).call(
             abi.encodeWithSelector(vault.expectedCompensation.selector, 1_000 ether, uint16(1_001))
         );

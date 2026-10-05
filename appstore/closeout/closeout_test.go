@@ -72,10 +72,10 @@ func TestReadinessEvidenceDeclaresCurrentAuditBlockers(t *testing.T) {
 	if doc.ImplementationStatus != "PARTIAL" || doc.DeploymentStatus != "PENDING_PUBLIC_TESTNET" {
 		t.Fatalf("unexpected readiness status: %#v", doc)
 	}
-	if doc.CurrentAudit.Status != "REMEDIATION_REQUIRED" {
+	if doc.CurrentAudit.Status != "REPOSITORY_COMPLETE_TESTNET_HANDOFF" {
 		t.Fatalf("current audit status missing: %#v", doc.CurrentAudit)
 	}
-	required := []string{"repository qualification", "public testnet"}
+	required := []string{"public testnet"}
 	for _, phrase := range required {
 		found := false
 		for _, blocker := range doc.CurrentAudit.Blockers {

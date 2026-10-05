@@ -115,18 +115,43 @@ func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (Res
 	if s == nil || s.authority == nil {
 		return ResultMaterial{}, ErrInvalidResultMaterial
 	}
-	record := outcome.Record
+	candidate := outcome.Record
+	if candidate.SchemaVersion != ExecutionRecordSchemaV1 ||
+		candidate.Status != ExecutionExited ||
+		candidate.AttemptRef == "" ||
+		candidate.AuthorizationRef == "" {
+		return ResultMaterial{}, fmt.Errorf("%w: execution is not a successful exited attempt", ErrInvalidResultMaterial)
+	}
+	recordPath := filepath.Join(s.config.StateDir, "attempts", strings.ToLower(strings.TrimPrefix(candidate.AttemptRef, "0x"))+".json")
+	recordPath, err := filepath.Abs(filepath.Clean(recordPath))
+	if err != nil {
+		return ResultMaterial{}, err
+	}
+	info, err := os.Lstat(recordPath)
+	if err != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0o077 != 0 {
+		return ResultMaterial{}, fmt.Errorf("%w: durable execution record missing", ErrInvalidResultMaterial)
+	}
+	payload, err := os.ReadFile(recordPath)
+	if err != nil {
+		return ResultMaterial{}, err
+	}
+	var record ExecutionRecord
+	if err := json.Unmarshal(payload, &record); err != nil {
+		return ResultMaterial{}, err
+	}
 	if record.SchemaVersion != ExecutionRecordSchemaV1 ||
 		record.Status != ExecutionExited ||
 		record.ExitCode != 0 ||
 		record.TimedOut ||
-		record.AttemptRef == "" ||
-		record.AuthorizationRef == "" {
-		return ResultMaterial{}, fmt.Errorf("%w: execution is not a successful exited attempt", ErrInvalidResultMaterial)
+		record.AttemptRef != candidate.AttemptRef ||
+		record.AuthorizationRef != candidate.AuthorizationRef ||
+		!sha256HexPattern.MatchString(record.StdoutSHA256) {
+		return ResultMaterial{}, fmt.Errorf("%w: durable execution is not a successful committed attempt", ErrInvalidResultMaterial)
 	}
 	if outcome.Sandbox.SchemaVersion != SandboxSchemaV1 ||
-		!sha256HexPattern.MatchString(outcome.Sandbox.StdoutSHA256) {
-		return ResultMaterial{}, fmt.Errorf("%w: complete stdout commitment missing", ErrInvalidResultMaterial)
+		outcome.Sandbox.StdoutSHA256 != record.StdoutSHA256 ||
+		outcome.Sandbox.StdoutBytes != record.StdoutBytes {
+		return ResultMaterial{}, fmt.Errorf("%w: in-memory sandbox output does not match durable record", ErrInvalidResultMaterial)
 	}
 	if record.StartedAt.IsZero() || record.EndedAt.IsZero() || record.EndedAt.Before(record.StartedAt) {
 		return ResultMaterial{}, fmt.Errorf("%w: execution timestamps invalid", ErrInvalidResultMaterial)
@@ -180,8 +205,8 @@ func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (Res
 		SandboxImage: auth.SandboxImage,
 		CommandSHA256: auth.CommandSHA256,
 		ResumeCheckpointCommitment: record.ResumeCheckpointCommitment,
-		OutputSHA256: outcome.Sandbox.StdoutSHA256,
-		OutputBytes: outcome.Sandbox.StdoutBytes,
+		OutputSHA256: record.StdoutSHA256,
+		OutputBytes: record.StdoutBytes,
 		ExitCode: record.ExitCode,
 		ExecutionStartedAt: record.StartedAt.UTC(),
 		ExecutionEndedAt: record.EndedAt.UTC(),

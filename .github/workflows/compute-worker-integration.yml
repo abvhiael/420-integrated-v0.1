@@ -2,10 +2,7 @@ name: Compute Worker Integration Qualification
 
 on:
   pull_request:
-    paths:
-      - 'compute/worker/**'
-      - '.github/workflows/compute-worker-integration.yml'
-  push:
+    types: [opened, synchronize, reopened, labeled]
     paths:
       - 'compute/worker/**'
       - '.github/workflows/compute-worker-integration.yml'
@@ -15,6 +12,7 @@ permissions:
 
 jobs:
   integration:
+    if: contains(github.event.pull_request.labels.*.name, 'cmp-worker-level2')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact qualification head

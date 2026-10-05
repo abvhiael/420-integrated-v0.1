@@ -1,0 +1,92 @@
+{
+  "schema": "420-town-integrations-v1",
+  "serviceId": "420/service/town/v1",
+  "status": "SERVICE_INTEGRATION_BASELINE",
+  "dependencies": {
+    "identity": {
+      "name": "420 Identity",
+      "serviceId": "420/service/identity/v1",
+      "class": "AUTHORITATIVE_CANONICAL_READ",
+      "binding": "Identity420 profile activity/controller",
+      "failureMode": "FAIL_CLOSED_FOR_IDENTITY_BOUND_ACTIONS",
+      "mayMutateIdentity": false
+    },
+    "storage": {
+      "name": "420 Storage",
+      "serviceId": "420/service/resource-protocol/v1",
+      "class": "REPLACEABLE_RESOURCE_SERVICE",
+      "client": "sdk/storage420",
+      "bodyPolicy": "OFF_CHAIN",
+      "integrity": "SHA256",
+      "failureMode": "FAIL_OPERATION_WITHOUT_REWRITING_TOWN_AUTHORITY"
+    },
+    "search": {
+      "name": "420 Search",
+      "serviceId": "420/service/search/v1",
+      "class": "REBUILDABLE_DERIVED_SERVICE",
+      "source": "420Town:public",
+      "domain": "public_town",
+      "visibility": "PUBLIC_ONLY",
+      "canonicalAuthority": false
+    },
+    "notifications": {
+      "name": "420 Notifications",
+      "serviceId": "420/service/notifications/v1",
+      "class": "REPLACEABLE_NON_AUTHORITATIVE_SERVICE",
+      "recipientSelection": "NOTIFICATIONS_OWNS_SUBSCRIPTION_AND_CONSENT",
+      "townRequiresExplicitSubscriptionHandoff": true,
+      "canonicalAuthority": false
+    },
+    "messenger": {
+      "name": "420 Messenger",
+      "serviceId": "420/service/messenger/v1",
+      "class": "CANONICAL_AUTHORIZATION_PLUS_REPLACEABLE_ENCRYPTED_TRANSPORT",
+      "requiredOnlyForMessagingWorkflows": true,
+      "canonicalState": [
+        "endpoint activity",
+        "conversation activity",
+        "participant membership",
+        "block relationships"
+      ],
+      "transport": "OFF_CHAIN_ENCRYPTED_REPLACEABLE",
+      "plaintextAllowed": false,
+      "transportFailureMayRewriteTownAuthority": false
+    },
+    "rewards": {
+      "name": "420 Rewards",
+      "class": "OPTIONAL_EXISTING_ADAPTER",
+      "contracts": [
+        "contracts/src/town/TownRewardsAdapter420.sol",
+        "contracts/src/town/TownContributionVerifier420.sol"
+      ],
+      "requiredForTownCore": false
+    }
+  },
+  "registryDiscovery": {
+    "mode": "OPTIONAL_CANONICAL_DISCOVERY",
+    "serviceId": "420/service/protocol-registry/v1",
+    "bindingMustMatchRequestedServiceId": true,
+    "bindingMustBeActive": true,
+    "promotesTownToFrozenGenesisApplication": false
+  },
+  "invariants": [
+    "TOWN-INT-001_IDENTITY_READS_ARE_CANONICAL_AND_FAIL_CLOSED",
+    "TOWN-INT-002_TOWN_CANNOT_MUTATE_IDENTITY420",
+    "TOWN-INT-003_CONTENT_BODIES_REMAIN_OFF_CHAIN",
+    "TOWN-INT-004_STORAGE_RETRIEVAL_VERIFIES_SHA256",
+    "TOWN-INT-005_STORAGE_PROVIDER_SUBSTITUTION_CANNOT_REWRITE_TOWN_AUTHORITY",
+    "TOWN-INT-006_SEARCH_ONLY_RECEIVES_EXPLICIT_PUBLIC_ACTIVE_TOWN_MATERIAL",
+    "TOWN-INT-007_SEARCH_PROJECTION_IS_NON_CANONICAL_AND_REBUILDABLE",
+    "TOWN-INT-008_PRIVATE_OR_RESTRICTED_TOWN_CONTENT_IS_NOT_SEARCH_ADMISSIBLE",
+    "TOWN-INT-009_NOTIFICATIONS_DO_NOT_SELECT_RECIPIENTS_OR_BYPASS_CONSENT",
+    "TOWN-INT-010_NOTIFICATION_ITEMS_REMAIN_NON_AUTHORITATIVE_AND_PROVENANCE_BOUND",
+    "TOWN-INT-011_MESSAGING_REQUIRES_CANONICAL_ENDPOINT_CONVERSATION_PARTICIPANT_AND_BLOCK_STATE",
+    "TOWN-INT-012_MESSAGING_TRANSPORT_IS_ENCRYPTED_OFF_CHAIN_AND_REPLACEABLE",
+    "TOWN-INT-013_MESSENGER_AUTHORITY_OUTAGE_FAILS_CLOSED_BEFORE_TRANSPORT",
+    "TOWN-INT-014_TRANSPORT_FAILURE_CANNOT_REWRITE_MEMBERSHIP_ROLES_OR_ENTITLEMENTS",
+    "TOWN-INT-015_REWARDS_REMAIN_OPTIONAL_AND_NON_AUTHORITATIVE",
+    "TOWN-INT-016_REGISTRY_DISCOVERY_MUST_MATCH_REQUESTED_ACTIVE_SERVICE_ID",
+    "TOWN-INT-017_TOWN_REMAINS_OUTSIDE_FROZEN_GENESIS_APPLICATION_CATALOG",
+    "TOWN-INT-018_DEPENDENCY_FAILURES_DO_NOT_CREATE_LOCAL_PROTOCOL_AUTHORITY"
+  ]
+}

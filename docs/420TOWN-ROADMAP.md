@@ -159,18 +159,35 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-6 — Service integrations
 
-Status: OPEN
+Status: COMPLETE
 
-Qualify real integrations with:
+Qualified repository-side integrations with:
 
-1. 420Identity;
-2. 420Storage;
-3. 420Search;
-4. 420Notifications;
-5. encrypted/replaceable messaging transport where Town workflows require it;
-6. optional 420Rewards adapter already present.
+1. **420Identity** — active canonical profile/controller reads fail closed; Town does not create, mutate, revoke or infer Identity credentials;
+2. **420Storage / Resource Protocol** — high-volume Town bodies remain off-chain; upload preparation uses the repository `sdk/storage420` client and retrieval verifies SHA-256 integrity against the Town content anchor;
+3. **420Search** — only explicit PUBLIC, active Town application material is admitted through the exact `420Town:public` → `public_town` source/domain pair; Search remains rebuildable and non-canonical;
+4. **420Notifications** — handoff requires an explicitly selected active, unmuted subscription with operational consent; feed items remain provenance-bound and non-authoritative;
+5. **420Messenger / encrypted replaceable transport** — canonical endpoint, conversation, participant, block and envelope-commit state is required; authority outages fail closed before transport and Town carries ciphertext only;
+6. **420Rewards** — the existing Town rewards adapter remains optional and non-authoritative.
 
-Add Registry/service discovery only to the extent supported by the canonical service architecture; do not promote Town into the frozen Genesis app catalog without an explicit catalog decision.
+Registry/service discovery is optional and bounded to exact active canonical service-ID resolution. TOWN-AUDIT-6 does **not** promote Town into the frozen Genesis application catalog.
+
+Durable qualification evidence:
+
+- qualification level: **Level 1 + Level 2 shared-service integration milestone**;
+- qualified implementation/test/workflow SHA: `881e42803f008793480fd0723467317fa1a411f7`;
+- 420Town audit workflow run `37285287913` / run `93` — PASS;
+- `town-skeleton` job `111682925075` — PASS;
+- `town-contracts` job `111682925338` — PASS;
+- exact-SHA assertions — PASS in both Town jobs;
+- Town audit/skeleton/authority/content/moderation/service-integration verifiers — PASS;
+- `go test ./town/...` — PASS;
+- affected Search/Storage/Notifications dependency tests — PASS;
+- focused Town Solidity build and `test/Town*.t.sol` inventory — PASS;
+- cross-dApp Rewards hardening — PASS;
+- directly affected 420Search audit qualification run `37285288233` / run `43` — PASS, including Search verifier, formatting, `go test ./search/...`, `go vet`, runtime builds, production container build and authority-drift rejection;
+- Level 3 remains intentionally deferred to TOWN-AUDIT-10;
+- next canonical roadmap step: **TOWN-AUDIT-7 — API, SDK, indexer and recovery surfaces**.
 
 ## TOWN-AUDIT-7 — API, SDK, indexer and recovery
 

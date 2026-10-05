@@ -19,6 +19,8 @@ required = [
     "appstore/runtime/service.go",
     "appstore/runtime/rpc_probe.go",
     "appstore/registry/sync.go",
+    "appstore/registry/indexer_source.go",
+    "appstore/registry/indexer_source_test.go",
     "appstore/catalog/store.go",
     "appstore/curation/policy.go",
     "appstore/security/evidence.go",
@@ -28,6 +30,7 @@ required = [
     "appstore/cmd/appstore420/main.go",
     "appstore/closeout/closeout_test.go",
     "docs/420APPSTORE-ROADMAP.md",
+    "docs/apps/appstore/appstore-2-registry-sync.md",
     "docs/apps/appstore/appstore-10-closeout.md",
 ]
 for path in required:
@@ -59,15 +62,25 @@ if readiness_path.is_file():
     blockers = audit.get("blockers", [])
     if audit.get("status") != "REMEDIATION_REQUIRED":
         errors.append("current audit remediation status missing")
-    for phrase in ("discovery API", "embedded frontend", "Registry Source", "ApplicationView", "public testnet"):
+    if audit.get("registry_source") != "420Indexer-backed finalized ProtocolRegistry projection":
+        errors.append("APPSTORE-AUDIT-2 Registry source decision missing")
+    for phrase in ("catalogue lifecycle", "discovery API", "embedded frontend", "ApplicationView", "public testnet"):
         if not any(phrase.lower() in str(b).lower() for b in blockers):
             errors.append(f"readiness evidence missing blocker: {phrase}")
 
 main = (ROOT / "appstore/cmd/appstore420/main.go").read_text()
+for token in ("APPSTORE_INDEXER_URL", "NewIndexerSource", "appstoreregistry.Sync"):
+    if token not in main:
+        errors.append(f"APPSTORE-AUDIT-2 production source wiring missing: {token}")
 if 'Handler: service.Handler()' not in main:
     errors.append("audit assumption changed: production handler wiring must be re-audited")
 if '"github.com/420integrated/420-integrated/appstore/api"' in main or '"github.com/420integrated/420-integrated/appstore/web"' in main:
-    errors.append("runtime wiring changed without updating audit readiness evidence")
+    errors.append("runtime public service wiring changed without updating audit readiness evidence")
+
+source = (ROOT / "appstore/registry/indexer_source.go").read_text()
+for token in ("FinalizedHeight", "CanonicalAuthority", "ProtocolRegistryCanonicalAddress420", "projection.Rebuild"):
+    if token not in source:
+        errors.append(f"APPSTORE-AUDIT-2 source invariant missing: {token}")
 
 wallet = (ROOT / "appstore/wallet/handoff.go").read_text()
 if "hardening.ValidatePublicURL" not in wallet:
@@ -89,4 +102,5 @@ if errors:
 
 print("420AppStore audit qualification PASS")
 print("Canonical boundary: contract-free / non-canonical")
+print("APPSTORE-AUDIT-2 source: 420Indexer-backed finalized ProtocolRegistry projection")
 print("Current readiness: PARTIAL / remediation required / public testnet pending")

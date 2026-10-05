@@ -14,6 +14,8 @@ import (
 
 	appstoreapi "github.com/420integrated/420-integrated/appstore/api"
 	appstorecatalog "github.com/420integrated/420-integrated/appstore/catalog"
+	"github.com/420integrated/420-integrated/appstore/hardening"
+	appstorepublic "github.com/420integrated/420-integrated/appstore/publicservice"
 	appstoreregistry "github.com/420integrated/420-integrated/appstore/registry"
 	appstoreruntime "github.com/420integrated/420-integrated/appstore/runtime"
 )
@@ -43,6 +45,14 @@ func main() {
 		fatal(err)
 	}
 	views := appstoreapi.NewViewSet()
+	dependencies := appstorepublic.NewDependencyState(hardening.Dependencies{
+		Registry: true,
+		RPC:      true,
+		Search:   true,
+		Verify:   false,
+		Store:    false,
+	})
+	verifyClient := &http.Client{Timeout: 5 * time.Second}
 
 	qualifyCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	if err := service.Qualify(qualifyCtx); err != nil {
@@ -57,15 +67,27 @@ func main() {
 		cancel()
 		fatal(err)
 	}
+	dependencies.Set(hardening.Dependencies{
+		Registry: true,
+		RPC:      true,
+		Search:   true,
+		Verify:   appstorepublic.ProbeReady(qualifyCtx, verifyClient, cfg.VerifyURL),
+		Store:    true,
+	})
+	publicService, err := appstorepublic.New(service, views, dependencies, appstorepublic.Config{})
+	if err != nil {
+		cancel()
+		fatal(err)
+	}
 	cancel()
 
-	server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(), ReadHeaderTimeout: 5 * time.Second}
+	server := &http.Server{Addr: cfg.ListenAddr, Handler: publicService.Handler(), ReadHeaderTimeout: 5 * time.Second}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	errCh := make(chan error, 2)
 	go func() { errCh <- server.ListenAndServe() }()
 	go func() {
-		if err := runCatalogueComposition(ctx, cfg, lifecycle, views, catalogueRefreshInterval); err != nil {
+		if err := runCatalogueComposition(ctx, cfg, lifecycle, views, dependencies, verifyClient, catalogueRefreshInterval); err != nil {
 			errCh <- fmt.Errorf("catalogue/ApplicationView lifecycle: %w", err)
 		}
 	}()
@@ -87,7 +109,7 @@ func main() {
 	}
 }
 
-func runCatalogueComposition(ctx context.Context, cfg appstoreruntime.Config, lifecycle *appstorecatalog.Lifecycle, views *appstoreapi.ViewSet, interval time.Duration) error {
+func runCatalogueComposition(ctx context.Context, cfg appstoreruntime.Config, lifecycle *appstorecatalog.Lifecycle, views *appstoreapi.ViewSet, dependencies *appstorepublic.DependencyState, verifyClient *http.Client, interval time.Duration) error {
 	if interval <= 0 {
 		return errors.New("catalogue refresh interval must be positive")
 	}
@@ -104,6 +126,13 @@ func runCatalogueComposition(ctx context.Context, cfg appstoreruntime.Config, li
 			if err := rebuildApplicationViews(cfg, lifecycle, views); err != nil {
 				return err
 			}
+			dependencies.Set(hardening.Dependencies{
+				Registry: true,
+				RPC:      true,
+				Search:   true,
+				Verify:   appstorepublic.ProbeReady(ctx, verifyClient, cfg.VerifyURL),
+				Store:    true,
+			})
 		}
 	}
 }
@@ -139,6 +168,7 @@ func loadConfig(getenv func(string) string) (appstoreruntime.Config, error) {
 		RegistryAddress: strings.TrimSpace(getenv("APPSTORE_REGISTRY_ADDRESS")),
 		CatalogueStore:  strings.TrimSpace(getenv("APPSTORE_CATALOGUE_STORE")),
 		ViewInputs:      strings.TrimSpace(getenv("APPSTORE_VIEW_INPUTS")),
+		VerifyURL:       strings.TrimSpace(getenv("APPSTORE_VERIFY_URL")),
 		ListenAddr:      strings.TrimSpace(getenv("APPSTORE_LISTEN_ADDR")),
 	}
 	if cfg.ListenAddr == "" {

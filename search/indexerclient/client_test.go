@@ -99,3 +99,27 @@ func TestProtocolObjectUsesPublicIndexerBoundary(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if obj.Protocol != "420Registry" || obj.ObjectKey != "service:foo" { t.Fatalf("unexpected object: %+v", obj) }
 }
+
+
+func TestFutureIndexerTimestampFailsClosed(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writeData(t, w, map[string]any{"chainId":"420","indexedHead":"100","indexedHeadHash":"0xabc","indexedHeadTimestamp":"2000001000","authoritative":false,"finality":map[string]any{"mode":"head","confirmations":nil,"safeHead":"100"},"lag":nil})
+	}))
+	defer s.Close()
+	c, _ := NewWithHTTPClient(s.URL, 420, time.Minute, s.Client())
+	c.now = func() time.Time { return time.Unix(2_000_000_000, 0) }
+	_, err := c.Status(context.Background())
+	if !errors.Is(err, ErrIndexerStale) { t.Fatalf("expected future timestamp failure, got %v", err) }
+}
+
+func TestInvalidFinalityOrderingFailsClosed(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writeData(t, w, map[string]any{"chainId":"420","indexedHead":"100","indexedHeadHash":"0xabc","indexedHeadTimestamp":"2000000000","authoritative":false,"finality":map[string]any{"mode":"confirmations","confirmations":"12","safeHead":"101"},"lag":nil})
+	}))
+	defer s.Close()
+	c, _ := NewWithHTTPClient(s.URL, 420, time.Minute, s.Client())
+	c.now = func() time.Time { return time.Unix(2_000_000_001, 0) }
+	if _, err := c.Status(context.Background()); err == nil {
+		t.Fatal("expected invalid finality ordering rejection")
+	}
+}

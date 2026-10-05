@@ -65,9 +65,6 @@ jobs:
           forge build src/town/TownRewardsAdapter420.sol
           forge build src/town/TownContributionVerifier420.sol
       - name: Town focused tests
-        run: |
-          forge test --match-contract TownRewardsIntegration420Test -vvv
-          forge test --match-contract TownContributionVerifierContent420Test -vvv
-          forge test --match-contract TownContributionVerifierGovernance420Test -vvv
+        run: forge test --match-path "test/Town*.t.sol" -vvv
       - name: Cross-dApp rewards hardening
-        run: forge test --match-contract RewardsCrossDappHardening420Test -vvv
+        run: forge test --match-path "test/RewardsCrossDappHardening420.t.sol" -vvv

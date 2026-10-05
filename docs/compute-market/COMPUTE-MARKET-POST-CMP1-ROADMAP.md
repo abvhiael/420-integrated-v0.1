@@ -358,13 +358,13 @@ Durable evidence: [CMP-3.3 qualification](CMP-3.3-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.4 — Secure workload sandbox
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `a3ad2c5c8d70b428d61c1b70f546ec5edbeedcaf`.**
 
 Container, microVM, WASM or equivalent isolation. Customer workloads must not execute unrestricted on the host.
 
 A digest-pinned OCI sandbox backend now enforces non-root execution, read-only rootfs, dropped capabilities, no-new-privileges, disabled networking, bounded CPU/memory/PIDs/tmpfs/runtime/output, no host mounts/devices/namespaces, and forced cleanup on timeout. The Level 1 workflow includes a real local Docker/scratch probe that validates the isolation controls from inside the container.
 
-Durable design/exit criteria: [CMP-3.4 secure workload sandbox](CMP-3.4-SECURE-WORKLOAD-SANDBOX.md).
+Durable evidence: [CMP-3.4 qualification](CMP-3.4-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.4 secure workload sandbox](CMP-3.4-SECURE-WORKLOAD-SANDBOX.md). Compute Worker Fast Qualification #64 / run `37251256261` passed on the exact implementation SHA; evidence anchor `618df14e25f7f5a567d785f4f13d8fa1263e7ec9`.
 
 
 ## CMP-3.5 — Content-addressed work-unit download
@@ -611,7 +611,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.3 COMPLETE; CMP-3.4 secure workload sandbox next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.4 COMPLETE; CMP-3.5 content-addressed work-unit download next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

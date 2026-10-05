@@ -13,6 +13,7 @@ import (
 
 	"github.com/420integrated/420-integrated/notifications/feed"
 	notificationsecurity "github.com/420integrated/420-integrated/notifications/security"
+	"github.com/420integrated/420-integrated/notifications/subscriptions"
 	"github.com/420integrated/420-integrated/search/architecture"
 	"github.com/420integrated/420-integrated/search/privacy"
 	searchresult "github.com/420integrated/420-integrated/search/result"
@@ -121,7 +122,7 @@ func SearchResult(doc PublicDocument) (searchresult.Result, error) {
 	}
 	candidate:=privacy.Candidate{
 		Source: architecture.SourceTown, Domain: architecture.DomainPublicTown,
-		Classification: privacy.ClassPublicOnChain, Public: true,
+		Classification: privacy.ClassPublicApplication, Public: true,
 	}
 	if err:=privacy.Admit(candidate);err!=nil{return searchresult.Result{},err}
 	path:="/town/communities/"+url.PathEscape(string(doc.CommunityID))
@@ -156,14 +157,20 @@ type NotificationCandidate struct {
 // NotificationFeedSink is an explicit handoff into the qualified 420Notifications
 // feed store after recipient/subscription consent has already been selected by
 // the notifications service. Town never chooses a recipient implicitly.
-type NotificationFeedSink struct{ Store *feed.Store }
+type NotificationFeedSink struct{
+	Store *feed.Store
+	Subscriptions *subscriptions.Store
+}
 
 func (s NotificationFeedSink) Submit(ctx context.Context, n NotificationCandidate) (feed.Item,error) {
 	if err:=ctx.Err();err!=nil{return feed.Item{},err}
-	if s.Store==nil || strings.TrimSpace(n.ID)=="" || strings.TrimSpace(n.EventID)=="" ||
+	if s.Store==nil || s.Subscriptions==nil || strings.TrimSpace(n.ID)=="" || strings.TrimSpace(n.EventID)=="" ||
 		strings.TrimSpace(n.SubscriptionID)=="" || strings.TrimSpace(n.Title)=="" || n.CreatedAt.IsZero() {
 		return feed.Item{},ErrInvalidIntegration
 	}
+	sub,err:=s.Subscriptions.Get(n.SubscriptionID)
+	if err!=nil{return feed.Item{},ErrUnauthorizedIntegration}
+	if !sub.AllowsOperational(){return feed.Item{},ErrUnauthorizedIntegration}
 	item:=feed.Item{
 		ID:n.ID,EventID:n.EventID,SubscriptionID:n.SubscriptionID,Title:n.Title,Body:n.Body,
 		Provenance:n.Provenance,CreatedAt:n.CreatedAt.UTC(),UpdatedAt:n.CreatedAt.UTC(),
@@ -177,6 +184,7 @@ type MessengerAuthority interface {
 	ConversationActive(context.Context, string) (bool,error)
 	ConversationParticipant(context.Context, string, model.ObjectID) (bool,error)
 	Blocked(context.Context, model.ObjectID, model.ObjectID) (bool,error)
+	CommitEnvelope(context.Context, EncryptedEnvelope) (CanonicalEnvelopeReceipt,error)
 }
 
 type EncryptedTransport interface {
@@ -193,9 +201,15 @@ type EncryptedEnvelope struct {
 	Ciphertext []byte
 }
 
+type CanonicalEnvelopeReceipt struct {
+	MessageID string
+	CommittedAt time.Time
+}
+
 type TransportReceipt struct {
 	ProviderID string
 	TransportMessageID string
+	CanonicalMessageID string
 	AcceptedAt time.Time
 }
 
@@ -234,6 +248,10 @@ func (a MessengerAdapter) Send(ctx context.Context, e EncryptedEnvelope) (Transp
 	if strings.TrimSpace(r.ProviderID)=="" || strings.TrimSpace(r.TransportMessageID)=="" || r.AcceptedAt.IsZero(){
 		return TransportReceipt{},ErrDependencyMismatch
 	}
+	canonical,err:=a.Authority.CommitEnvelope(ctx,e)
+	if err!=nil{return TransportReceipt{},fmt.Errorf("%w: messenger envelope commit: %v",ErrDependencyUnavailable,err)}
+	if strings.TrimSpace(canonical.MessageID)=="" || canonical.CommittedAt.IsZero(){return TransportReceipt{},ErrDependencyMismatch}
+	r.CanonicalMessageID=canonical.MessageID
 	return r,nil
 }
 

@@ -360,7 +360,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.8 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.9 — State ownership
+### PB-0.9 — State ownership — COMPLETE
 
 **Purpose:** define one canonical authority owner for every PuffBuddies state class and distinguish canonical authority from operational storage, caches, projections, delivery state, client state, analytics, and other derived copies.
 

@@ -1,6 +1,6 @@
 {
   "schema": "420-testnet-appstore-readiness-v1",
-  "implementation_status": "QUALIFIED",
+  "implementation_status": "PARTIAL",
   "deployment_status": "PENDING_PUBLIC_TESTNET",
   "invariant_coverage": [
     "APP-INV-001",
@@ -19,7 +19,7 @@
   ],
   "backend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "CODE_QUALIFIED_DEPLOYMENT_PENDING",
+    "status": "PARTIAL_RUNTIME_WIRING",
     "required_checks": [
       "resolves canonical application/service identity and version through 420Registry",
       "preserves chain ID and network identity",
@@ -33,7 +33,7 @@
   },
   "frontend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "CODE_QUALIFIED_DEPLOYMENT_PENDING",
+    "status": "CODE_PRESENT_RUNTIME_WIRING_PENDING",
     "required_views": [
       "browse and categories",
       "search",
@@ -72,6 +72,18 @@
     "docs_run": 35157767548,
     "integrated_run": 35157767517,
     "latest_main_reconciled_for_appstore_9": "b1433ba00f7ac0ce9303da476d33879739bafcef",
-    "note": "APPSTORE-10 closeout must requalify its own exact final head before phase merge; public URLs remain intentionally unset until deployment."
+    "note": "Historical APPSTORE-9 evidence retained for provenance only. The 2026-10-04 repository audit found unresolved production runtime wiring; do not treat these run IDs as current-head completion evidence."
+  },
+  "current_audit": {
+    "status": "REMEDIATION_REQUIRED",
+    "audited_against_main": "bec8fb5b43f48c3df8862eee93d9a33769cec5e7",
+    "blockers": [
+      "production entrypoint serves health/readiness only and does not mount the APPSTORE-7 discovery API",
+      "production entrypoint does not mount the APPSTORE-9 embedded frontend",
+      "no production Registry Source is wired to construct canonical snapshots for the APPSTORE-2 projection",
+      "no production composition path builds ApplicationView records from canonical projection plus curation/security/wallet provenance",
+      "public testnet backend/frontend URLs and live dependency qualification remain pending"
+    ],
+    "note": "Historical APPSTORE-9 qualification evidence is retained below for provenance but does not qualify the current audited repository head."
   }
 }

@@ -7,6 +7,8 @@ import (
     "sort"
     "strconv"
     "strings"
+
+    "github.com/420integrated/420-integrated/appstore/hardening"
 )
 
 var (
@@ -57,8 +59,12 @@ func Build(req Request) (Presentation, error) {
     if req.ChainID == 0 || strings.TrimSpace(req.ServiceID) == "" {
         return Presentation{}, ErrInvalidHandoff
     }
-    app, err := url.Parse(strings.TrimSpace(req.AppURL))
-    if err != nil || app.Scheme == "" || app.Host == "" || (app.Scheme != "https" && app.Scheme != "http") {
+    rawAppURL := strings.TrimSpace(req.AppURL)
+    if err := hardening.ValidatePublicURL(rawAppURL); err != nil {
+        return Presentation{}, ErrInvalidHandoff
+    }
+    app, err := url.Parse(rawAppURL)
+    if err != nil {
         return Presentation{}, ErrInvalidHandoff
     }
     if req.Signature != "" || req.PrivateKey != "" || req.GrantCapability || req.ApproveTokenSpend || req.AutoConfirm {

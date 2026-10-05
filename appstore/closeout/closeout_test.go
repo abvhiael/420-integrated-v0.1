@@ -46,7 +46,7 @@ func TestCatalogueRebuildIsDeterministic(t *testing.T) {
 	}
 }
 
-func TestReadinessEvidenceDeclaresCodeQualifiedDeploymentPending(t *testing.T) {
+func TestReadinessEvidenceDeclaresCurrentAuditBlockers(t *testing.T) {
 	path := filepath.Join("..", "..", "testnet", "public-services", "appstore", "readiness.json")
 	raw, err := os.ReadFile(path)
 	if err != nil { t.Fatal(err) }
@@ -54,10 +54,17 @@ func TestReadinessEvidenceDeclaresCodeQualifiedDeploymentPending(t *testing.T) {
 		ImplementationStatus string `json:"implementation_status"`
 		DeploymentStatus string `json:"deployment_status"`
 		InvariantCoverage []string `json:"invariant_coverage"`
+		CurrentAudit struct {
+			Status string `json:"status"`
+			Blockers []string `json:"blockers"`
+		} `json:"current_audit"`
 	}
 	if err := json.Unmarshal(raw, &doc); err != nil { t.Fatal(err) }
-	if doc.ImplementationStatus != "QUALIFIED" || doc.DeploymentStatus != "PENDING_PUBLIC_TESTNET" {
+	if doc.ImplementationStatus != "PARTIAL" || doc.DeploymentStatus != "PENDING_PUBLIC_TESTNET" {
 		t.Fatalf("unexpected readiness status: %#v", doc)
+	}
+	if doc.CurrentAudit.Status != "REMEDIATION_REQUIRED" || len(doc.CurrentAudit.Blockers) < 5 {
+		t.Fatalf("current audit blockers missing: %#v", doc.CurrentAudit)
 	}
 	if !reflect.DeepEqual(doc.InvariantCoverage, architecture.Invariants) {
 		t.Fatalf("readiness invariant coverage mismatch: got %v want %v", doc.InvariantCoverage, architecture.Invariants)

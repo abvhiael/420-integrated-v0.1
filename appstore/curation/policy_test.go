@@ -2,6 +2,7 @@ package curation
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	appregistry "github.com/420integrated/420-integrated/appstore/registry"
@@ -41,7 +42,7 @@ func TestComposeRejectsServiceMismatch(t *testing.T) {
 }
 
 func TestRatingValidation(t *testing.T) {
-	for _, rating := range []RatingSummary{{Average: -1, Count: 1}, {Average: 5.1, Count: 1}, {Average: 4, Count: 0}} {
+	for _, rating := range []RatingSummary{{Average: -1, Count: 1}, {Average: 5.1, Count: 1}, {Average: 4, Count: 0}, {Average: math.NaN(), Count: 1}, {Average: math.Inf(1), Count: 1}, {Average: math.Inf(-1), Count: 1}} {
 		if _, err := Normalize(Metadata{ServiceID: "420/service/demo/v1", Rating: rating}); !errors.Is(err, ErrInvalidCuration) { t.Fatalf("expected invalid rating %#v, got %v", rating, err) }
 	}
 }

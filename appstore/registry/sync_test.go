@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 )
 
@@ -73,6 +74,35 @@ func TestRebuildProducesSameCanonicalProjection(t *testing.T) {
 	if err := p.Apply(Snapshot{ChainID:420, RegistryAddress:registryAddr, FinalizedBlock:10, Versions:[]VersionRecord{one}}); err != nil { t.Fatal(err) }
 	if err := p.Rebuild(Snapshot{ChainID:420, RegistryAddress:registryAddr, FinalizedBlock:12, Versions:[]VersionRecord{one,two}}); err != nil { t.Fatal(err) }
 	if got := p.Service("420/service/example/v1"); len(got) != 2 || got[1].Implementation != impl2 { t.Fatalf("unexpected rebuild: %#v", got) }
+}
+
+func TestRebuildRejectsFinalityRegressionWithoutDestroyingProjection(t *testing.T) {
+	p, _ := NewProjection(420, registryAddr)
+	one := record(1, impl1, h3, 10)
+	if err := p.Apply(Snapshot{ChainID:420, RegistryAddress:registryAddr, FinalizedBlock:10, Versions:[]VersionRecord{one}}); err != nil { t.Fatal(err) }
+	err := p.Rebuild(Snapshot{ChainID:420, RegistryAddress:registryAddr, FinalizedBlock:9, Versions:[]VersionRecord{one}})
+	if !errors.Is(err, ErrInvalidCanonicalRecord) { t.Fatalf("expected finality regression rejection, got %v", err) }
+	if got := p.Service("420/service/example/v1"); len(got) != 1 || got[0].Version != 1 { t.Fatalf("rejected rebuild destroyed projection: %#v", got) }
+	if p.FinalizedBlock() != 10 { t.Fatalf("finalized block regressed to %d", p.FinalizedBlock()) }
+}
+
+func TestConcurrentReplayAndReadsAreRaceSafe(t *testing.T) {
+	p, _ := NewProjection(420, registryAddr)
+	s := Snapshot{ChainID:420, RegistryAddress:registryAddr, FinalizedBlock:10, Versions:[]VersionRecord{record(1, impl1, h3, 10)}}
+	if err := p.Apply(s); err != nil { t.Fatal(err) }
+	var wg sync.WaitGroup
+	for i := 0; i < 16; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 50; j++ {
+				if err := p.Apply(s); err != nil { t.Errorf("apply: %v", err); return }
+				_, _ = p.Version("420/service/example/v1", 1)
+				_ = p.FinalizedBlock()
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 func TestSyncPropagatesCanonicalSourceFailure(t *testing.T) {

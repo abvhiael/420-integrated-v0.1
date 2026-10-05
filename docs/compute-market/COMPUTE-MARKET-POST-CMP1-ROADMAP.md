@@ -428,6 +428,13 @@ GPU percentage never becomes advisory: GPU work is rejected unless a qualified p
 Durable evidence: [CMP-3.11 qualification](CMP-3.11-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.11 local resource controls](CMP-3.11-LOCAL-RESOURCE-CONTROLS.md). Fast #272 / run `37262445914` / job `111612318856` passed the exact implementation/spec/workflow SHA; evidence anchor `0f63e91ae9406cdf0a5d27d7c6211fa64d7ced4b`.
 
 ## CMP-3.12 — Malicious workload protections
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+The worker now adds digest-bound malicious-workload admission and containment on top of the existing sandbox/resource limits: bounded canonical argv, immutable image/command deny policy, cumulative local violation tracking, restart-safe quarantine, private non-authoritative incident evidence, protected fresh/resume execution wrappers, and additional OCI IPC/core-dump/file-descriptor hardening.
+
+The implementation deliberately does not invent antivirus/EDR, content scanning, image-signature infrastructure, canonical slashing or correctness authority where the repository defines none.
+
+Exit criteria and implementation boundary: [CMP-3.12 malicious workload protections](CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md).
 
 ## CMP-3.13 — Windows/Linux/macOS packaging
 

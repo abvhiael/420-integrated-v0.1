@@ -13,6 +13,8 @@ BOUNDARY = ROOT / "docs/puffbuddies/PB-0.3-BLOCKCHAIN-OFFCHAIN-BOUNDARY.md"
 EVIDENCE_03 = ROOT / "docs/puffbuddies/PB-0.3-QUALIFICATION.md"
 PRIVACY = ROOT / "docs/puffbuddies/PB-0.4-PRIVACY-INVARIANTS.md"
 EVIDENCE_04 = ROOT / "docs/puffbuddies/PB-0.4-QUALIFICATION.md"
+CONSENT = ROOT / "docs/puffbuddies/PB-0.5-CONSENT-INVARIANTS.md"
+EVIDENCE_05 = ROOT / "docs/puffbuddies/PB-0.5-QUALIFICATION.md"
 
 errors = []
 
@@ -20,7 +22,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -36,6 +38,8 @@ boundary = BOUNDARY.read_text(encoding="utf-8")
 evidence_03 = EVIDENCE_03.read_text(encoding="utf-8")
 privacy = PRIVACY.read_text(encoding="utf-8")
 evidence_04 = EVIDENCE_04.read_text(encoding="utf-8")
+consent = CONSENT.read_text(encoding="utf-8")
+evidence_05 = EVIDENCE_05.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -99,6 +103,9 @@ for token in [
     "### PB-0.4 — Privacy invariants",
     "PB-PRIV-001 through PB-PRIV-020",
     "**Milestone relationship:** PB-0.4 is not a Level 2 integration milestone",
+    "### PB-0.5 — Consent invariants",
+    "PB-CONSENT-001 through PB-CONSENT-020",
+    "**Milestone relationship:** PB-0.5 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -367,13 +374,104 @@ for token in [
 ]:
     need(token in evidence_04, f"PB-0.4 evidence record missing token: {token}")
 
+# PB-0.5 — consent invariants
+for token in [
+    "# PuffBuddies PB-0.5 consent invariants",
+    "## Consent principles",
+    "## Canonical consent invariants",
+    "## Consent state implications",
+    "## Failure-path expectations",
+    "## PB-0.5 completion boundary",
+    "Mutual match before ordinary private messaging",
+    "Likes do not equal messaging consent",
+    "Mutual matches require independent reciprocal intent",
+    "Unmatch is unilateral and immediate",
+    "Block supremacy",
+    "Consent is revocable",
+    "Stale authorization must fail closed",
+    "Payment cannot create consent",
+    "Premium features may enhance tools, not access to people",
+    "Administrative roles cannot fabricate romantic/social consent",
+    "Moderation authority may restrict, not compel",
+    "Consent is scoped to the specific action",
+    "Discovery visibility is not messaging consent",
+    "Match consent does not waive privacy",
+    "Consent does not survive account-ineligible states by default",
+    "Safety revocation outranks convenience and delivery",
+    "No consent from inactivity or silence",
+    "No consent inference from economic or reputation signals",
+    "Consent changes must be auditable without becoming public relationship records",
+]:
+    need(token in consent, f"PB-0.5 consent invariant document missing token: {token}")
+
+consent_ids = re.findall(r"^### (PB-CONSENT-\d{3})\b", consent, flags=re.MULTILINE)
+need(consent_ids == [f"PB-CONSENT-{i:03d}" for i in range(1, 21)], f"PB-CONSENT sequence drift: {consent_ids}")
+need(len(consent_ids) == len(set(consent_ids)), "duplicate PB-CONSENT identifier")
+
+for guarantee in [
+    "requires a currently valid mutual match",
+    "must not by itself create ordinary private messaging authority",
+    "Either participant may unmatch without approval",
+    "A block overrides:",
+    "No payment, subscription, $420 transfer",
+    "must not create a mutual match or private relationship authorization on behalf of two users",
+    "Where authorization freshness is uncertain",
+    "must not be interpreted as positive consent",
+]:
+    need(guarantee in consent, f"PB-0.5 missing consent guarantee: {guarantee}")
+
+for failure_path in [
+    "stale cache says matched after authoritative unmatch",
+    "queued message attempts delivery after block",
+    "premium entitlement remains active after block",
+    "retry worker replays a pre-block interaction",
+    "one-sided like attempts to open a conversation",
+    "admin/support attempts to force a match",
+    "payment tries to unlock unmatched messaging",
+    "deleted/deactivated user remains in a cached interaction list",
+]:
+    need(failure_path in consent, f"PB-0.5 missing failure-path class: {failure_path}")
+
+need("No later feature may silently route around a current block" in consent,
+     "PB-0.5 block supremacy drift")
+need("They must not convert another person's private profile, attention, communication, location, preferences, or safety boundaries into a purchasable entitlement" in consent,
+     "PB-0.5 purchased-access boundary drift")
+need("Prior authorization must not be treated as permanent" in consent,
+     "PB-0.5 revocability drift")
+need("Auditability must not create a public match/block/unmatch graph" in consent,
+     "PB-0.5 audit/privacy boundary drift")
+
+for forbidden_consent_claim in [
+    "PuffBuddies matching engine is implemented",
+    "PuffBuddies messaging runtime is implemented",
+    "PuffBuddies payment runtime is implemented",
+    "PuffBuddies consent contract is deployed",
+    "420Messenger consent integration is live",
+]:
+    need(forbidden_consent_claim not in consent, f"PB-0.5 unsupported implementation/live claim: {forbidden_consent_claim}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", consent) is None, "PB-0.5 must not assign an on-chain address")
+need("420/service/puff" not in consent.lower(), "PB-0.5 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.5 qualification evidence",
+    "**PB-0.5 — Consent invariants**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-CONSENT-001 through PB-CONSENT-020",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.6 — Adult eligibility policy**",
+]:
+    need(token in evidence_05, f"PB-0.5 evidence record missing token: {token}")
+
 if errors:
     print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.4",
+    "step": "PB-0.5",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -409,6 +507,19 @@ print(json.dumps({
         "metadataProtected": True,
         "leastPrivilege": True,
         "inferenceThreatsCovered": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb05": {
+        "consentInvariants": consent_ids,
+        "mutualMatchRequired": True,
+        "unmatchUnilateral": True,
+        "blockSupremacy": True,
+        "revocable": True,
+        "noPurchasedAccess": True,
+        "noAdministrativeFabrication": True,
+        "staleAuthorizationFailsClosed": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

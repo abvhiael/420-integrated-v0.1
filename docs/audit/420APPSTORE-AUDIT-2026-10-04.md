@@ -127,7 +127,7 @@ Historical APPSTORE-9/10 evidence remains provenance only and must not be used t
 ## Remediation roadmap
 
 1. **APPSTORE-AUDIT-1 — durable audit baseline and local hardening.** Preserve this report, truthful readiness state, race-safe Registry projection, deep-link hardening, finite rating validation, and exact-head audit workflow.
-2. **APPSTORE-AUDIT-2 — production canonical source.** **IMPLEMENTED; Level 1 qualification pending exact-head CI.** Production uses the explicitly qualified 420Indexer-backed finalized ProtocolRegistry projection, with chain/Registry/finality/authority-claim and malformed/upstream-failure checks.
+2. **APPSTORE-AUDIT-2 — production canonical source.** **COMPLETE — Level 1.** Production uses the explicitly qualified 420Indexer-backed finalized ProtocolRegistry projection, with chain/Registry/finality/authority-claim and malformed/upstream-failure checks. Exact implementation SHA `03071f147041efe2d0bcd9df151a75c54f5c467c` passed AppStore Audit Qualification run `37252857689`, job `111583875589`.
 3. **APPSTORE-AUDIT-3 — runtime catalogue lifecycle.** Wire source sync, deterministic store restore/rebuild, interruption recovery, and stale-state handling into `appstore420`.
 4. **APPSTORE-AUDIT-4 — ApplicationView composition.** Define and wire curation/security/Wallet/link inputs without allowing any presentation source to override canonical Registry fields.
 5. **APPSTORE-AUDIT-5 — public service composition.** Mount health/readiness, `/v1/apps*`, embedded frontend, abuse controls and dependency-state behavior under one production handler; readiness must represent the composed application, not only Registry bytecode reachability.
@@ -136,3 +136,21 @@ Historical APPSTORE-9/10 evidence remains provenance only and must not be used t
 8. **APPSTORE-AUDIT-8 — Genesis/production closeout.** Record exact deployment/configuration evidence, monitoring/recovery procedure, final security review and production-domain configuration, then requalify the exact release head.
 
 Do not mark 420AppStore COMPLETE until APPSTORE-AUDIT-1 through APPSTORE-AUDIT-8 are satisfied or a later repository-authoritative decision explicitly narrows the canonical scope.
+
+## APPSTORE-AUDIT-2 durable qualification evidence
+
+- **Roadmap step:** APPSTORE-AUDIT-2 — production canonical source.
+- **Completion state:** COMPLETE.
+- **Qualification level:** Level 1 — app-scoped fast qualification.
+- **Implementation SHA:** `03071f147041efe2d0bcd9df151a75c54f5c467c`.
+- **Qualification base/main observed:** `f6a426fc386b21f871b1805e00a57b1dad2bf902`; PR #514 remains intentionally unreconciled at this ordinary-step boundary because complete main reconciliation is reserved for Level 3 phase closeout.
+- **Production source decision:** 420Indexer-backed finalized ProtocolRegistry projection. 420Indexer remains non-authoritative; ProtocolRegistry and chain state remain canonical.
+- **Implementation:** added `appstore/registry/indexer_source.go`; required `APPSTORE_INDEXER_URL`; wired source construction, projection construction and initial fail-closed `registry.Sync` into `appstore/cmd/appstore420` after RPC chain/Registry qualification and before serving traffic.
+- **Finality/reorg semantics:** source accepts only the configured chain and frozen ProtocolRegistry address, rejects Indexer authority claims, filters service versions to the Indexer finalized boundary, restores pre-finalization active state when a deprecation is not yet finalized, and validates the complete snapshot through `Projection.Rebuild` before publication to the caller.
+- **Adversarial/failure coverage:** wrong chain, wrong Registry address, spoofed canonical-authority response, unfinalized version, unfinalized deprecation, malformed canonical record, upstream HTTP failure, projection conflict/version-gap/finality regression and concurrent replay/read coverage.
+- **Required Level 1 CI:** `420AppStore Audit Qualification` run `37252857689`, exact-head job `111583875589` — PASS. Exact-head verification PASS; APPSTORE-AUDIT-2 formatting PASS; `go test -race ./appstore/...` PASS; `go vet ./appstore/...` PASS; `go build ./appstore/cmd/appstore420` PASS; `python3 scripts/verify-420appstore-audit.py` PASS.
+- **Prior failed evidence:** run `37252437550` is superseded. It correctly exposed a stale runtime test fixture requiring the new Indexer URL; the new Registry source package itself passed under race. The fixture and step-scoped formatting were repaired before the successful exact-head run.
+- **Level 2:** not required for this step. No shared Indexer/Registry implementation or interface was modified; AppStore only consumes the existing qualified read surface. Broader AppStore integration is retained for the later composition milestone.
+- **Level 3 intentionally deferred:** latest-main reconciliation, canonical full Solidity inventory, Genesis/address-authority, 420 Integrated/global, Docs/global, full deployment/config and live-testnet qualification remain phase-closeout work and were not redundantly executed here.
+- **Remaining blockers outside APPSTORE-AUDIT-2:** APPSTORE-3 catalogue lifecycle; ApplicationView composition; public API/frontend composition; abuse/dependency-state wiring; live public-testnet evidence.
+- **Next canonical remediation step:** APPSTORE-AUDIT-3 — runtime catalogue lifecycle.

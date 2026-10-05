@@ -66,6 +66,8 @@ required_files = [
     "contracts/config/420appstore-genesis.json", "docs/420APPSTORE.md", "testnet/public-services/appstore/readiness.json", "contracts/test/AppStoreGenesis420.t.sol",
     "contracts/config/420verify-genesis.json", "docs/420VERIFY.md", "testnet/public-services/verify/readiness.json", "contracts/test/VerifyGenesis420.t.sol",
     "contracts/config/420notifications-genesis.json", "docs/420NOTIFICATIONS.md", "testnet/public-services/notifications/readiness.json", "contracts/test/NotificationsGenesis420.t.sol",
+    "contracts/config/420messenger-genesis.json", "docs/420MESSENGER.md", "testnet/public-services/messenger/readiness.json", "contracts/test/MessengerGenesis420.t.sol",
+    "contracts/src/messenger/MessengerIds420.sol", "contracts/src/messenger/MessengerAuthorization420.sol", "contracts/src/messenger/MessengerEndpointRegistry420.sol", "contracts/src/messenger/MessengerBlockRegistry420.sol", "contracts/src/messenger/MessengerConversationRegistry420.sol", "contracts/src/messenger/MessengerEnvelopeRegistry420.sol", "contracts/src/messenger/MessengerReceiptRegistry420.sol", "contracts/src/messenger/MessengerRouter420.sol",
     "contracts/config/420arbitration-genesis.json", "docs/420ARBITRATION.md",
     "contracts/src/arbitration/ArbitrationIds420.sol", "contracts/src/arbitration/ArbitrationPolicyRegistry420.sol", "contracts/src/arbitration/ArbitrationCaseRegistry420.sol", "contracts/src/arbitration/ArbitrationRulingRegistry420.sol",
     "contracts/config/420token-genesis.json", "docs/420TOKEN.md", "testnet/public-services/token/readiness.json",
@@ -176,6 +178,29 @@ if notifications:
         errors.append("notifications canonicality update taxonomy missing")
     require_invariants(notifications, [f"NOTIFY-INV-{i:03d}" for i in range(1, 15)], "notifications")
 
+messenger = load("contracts/config/420messenger-genesis.json")
+if messenger:
+    if messenger.get("schema") != "420-messenger-genesis-v1" or messenger.get("version") != 1:
+        errors.append("messenger Genesis schema/version drifted")
+    require_invariants(messenger, [f"MSG-INV-{i:03d}" for i in range(1, 13)], "messenger")
+    privacy = messenger.get("privacy_boundary", "")
+    for token in ("Plaintext", "ciphertext", "private keys", "decryption keys"):
+        if token not in privacy:
+            errors.append("messenger privacy boundary incomplete: " + token)
+    messenger_map = mapped.get("420 Messenger", {})
+    expected_messenger_contracts = {
+        "MessengerIds420.sol",
+        "MessengerAuthorization420.sol",
+        "MessengerEndpointRegistry420.sol",
+        "MessengerBlockRegistry420.sol",
+        "MessengerConversationRegistry420.sol",
+        "MessengerEnvelopeRegistry420.sol",
+        "MessengerReceiptRegistry420.sol",
+        "MessengerRouter420.sol",
+    }
+    if set(messenger_map.get("contracts", [])) != expected_messenger_contracts:
+        errors.append("messenger Genesis contract inventory drifted")
+
 arbitration = load("contracts/config/420arbitration-genesis.json")
 if arbitration:
     model = arbitration.get("model", {})
@@ -203,6 +228,7 @@ for label, value in [
     ("appstore", 'APPSTORE = keccak256("420/service/appstore/v1")'),
     ("verify", 'VERIFY = keccak256("420/service/verify/v1")'),
     ("notifications", 'NOTIFICATIONS = keccak256("420/service/notifications/v1")'),
+    ("messenger", 'MESSENGER = keccak256("420/service/messenger/v1")'),
     ("arbitration", 'ARBITRATION = keccak256("420/service/arbitration/v1")'),
     ("token", 'TOKEN = keccak256("420/service/token/v1")'),
 ]:

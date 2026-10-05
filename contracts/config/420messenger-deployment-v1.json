@@ -1,0 +1,34 @@
+{
+  "schema": "420-messenger-deployment-v1",
+  "version": 1,
+  "addressPolicy": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+  "serviceId": "420/service/messenger/v1",
+  "contracts": [
+    {"name":"MessengerAuthorization420","constructor":["CapabilityRegistry420"]},
+    {"name":"MessengerEndpointRegistry420","constructor":["MessengerAuthorization420"]},
+    {"name":"MessengerBlockRegistry420","constructor":["MessengerAuthorization420"]},
+    {"name":"MessengerConversationRegistry420","constructor":["MessengerAuthorization420","MessengerEndpointRegistry420","MessengerBlockRegistry420"]},
+    {"name":"MessengerEnvelopeRegistry420","constructor":["MessengerAuthorization420","MessengerConversationRegistry420","MessengerBlockRegistry420"]},
+    {"name":"MessengerReceiptRegistry420","constructor":["MessengerAuthorization420","MessengerConversationRegistry420","MessengerEnvelopeRegistry420"]},
+    {"name":"MessengerRouter420","constructor":["MessengerEndpointRegistry420","MessengerBlockRegistry420","MessengerConversationRegistry420"]}
+  ],
+  "registryPublication": {
+    "implementation": "MessengerRouter420",
+    "requiresCodeHash": true,
+    "requiresManifestHash": true,
+    "requiresDependencyRoot": true,
+    "requiresInterfaceHash": true
+  },
+  "postDeployChecks": [
+    "all constructor dependencies equal the deployed Messenger graph",
+    "all seven deployed contracts report protocolVersion() == 1 where I420System applies",
+    "all I420System Messenger contracts report their expected systemName()",
+    "ProtocolRegistry resolves 420/service/messenger/v1 to the verified MessengerRouter420",
+    "MessengerRouter420 is listed as REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS in genesis-address-namespace.json",
+    "representative endpoint, request, accept, send, receipt, block and terminal-close flows pass",
+    "unauthorized, wrong-scope, replay, invalid-sequence and blocked-peer probes fail closed"
+  ],
+  "secrets": [],
+  "upgradeability": "none declared in V1 Messenger contracts",
+  "adminHandoff": "no Messenger-local owner/admin role; CapabilityRegistry and ProtocolRegistry retain their independently governed authorities"
+}

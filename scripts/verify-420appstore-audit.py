@@ -72,11 +72,11 @@ if readiness_path.is_file():
         errors.append("public-testnet deployment status drifted")
     audit = readiness.get("current_audit", {})
     blockers = audit.get("blockers", [])
-    if audit.get("status") != "REMEDIATION_REQUIRED":
-        errors.append("current audit remediation status missing")
+    if audit.get("status") != "REPOSITORY_COMPLETE_TESTNET_HANDOFF":
+        errors.append("current audit testnet-handoff status missing")
     if audit.get("registry_source") != "420Indexer-backed finalized ProtocolRegistry projection":
         errors.append("APPSTORE-AUDIT-2 Registry source decision missing")
-    for phrase in ("repository qualification", "public testnet"):
+    for phrase in ("public testnet",):
         if not any(phrase.lower() in str(b).lower() for b in blockers):
             errors.append(f"readiness evidence missing blocker: {phrase}")
 
@@ -124,4 +124,4 @@ print("APPSTORE-AUDIT-2 source: 420Indexer-backed finalized ProtocolRegistry pro
 print("APPSTORE-AUDIT-3 lifecycle: persistent restore/rebuild/refresh/history wired")
 print("APPSTORE-AUDIT-4 composition: canonical-bound ApplicationView state wired")
 print("APPSTORE-AUDIT-5 public service: API/frontend/abuse/dependency composition wired")
-print("Current readiness: PARTIAL / remediation required / public testnet pending")
+print("Current readiness: PARTIAL / repository complete / public testnet handoff pending")

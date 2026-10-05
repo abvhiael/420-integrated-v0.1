@@ -105,7 +105,9 @@ contract ERC721Template420 {
         if (to == address(0)) revert ZeroAddress();
         address o = ownerOf(id);
         if (o != from) revert Unauthorized();
-        if (msg.sender != o && msg.sender != getApproved[id] && !isApprovedForAll[o][msg.sender]) revert Unauthorized();
+        if (msg.sender != o && msg.sender != getApproved[id] && !isApprovedForAll[o][msg.sender]) {
+            revert Unauthorized();
+        }
         delete getApproved[id];
         unchecked {
             _balanceOf[from]--;

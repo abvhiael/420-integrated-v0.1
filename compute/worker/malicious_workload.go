@@ -145,6 +145,7 @@ func (g *WorkloadSecurityGuard) recoverState() error {
 	if err != nil {
 		return err
 	}
+	latest := make(map[WorkloadSecurityKey]SecurityIncident)
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
 			continue
@@ -166,19 +167,18 @@ func (g *WorkloadSecurityGuard) recoverState() error {
 			return err
 		}
 		if incident.SchemaVersion != SecurityIncidentSchemaV1 || incident.Authoritative ||
+			incident.ObservedAt.IsZero() ||
 			!digestImagePattern.MatchString(incident.Image) ||
 			!sha256HexPattern.MatchString(incident.CommandSHA256) {
 			return ErrInvalidMaliciousWorkloadPolicy
 		}
 		key := WorkloadSecurityKey{Image: incident.Image, CommandSHA256: incident.CommandSHA256}
-		current := g.state[key]
-		if incident.ViolationCount > current.Count {
-			current.Count = incident.ViolationCount
+		if current, ok := latest[key]; !ok || incident.ObservedAt.After(current.ObservedAt) {
+			latest[key] = incident
 		}
-		if incident.QuarantinedUntil.After(current.Until) {
-			current.Until = incident.QuarantinedUntil
-		}
-		g.state[key] = current
+	}
+	for key, incident := range latest {
+		g.state[key] = quarantineEntry{Count: incident.ViolationCount, Until: incident.QuarantinedUntil}
 	}
 	return nil
 }

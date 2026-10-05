@@ -436,6 +436,8 @@ func (l *ExecutionLifecycle) Resume(
 	record.ExitCode = sandboxResult.ExitCode
 	record.TimedOut = sandboxResult.TimedOut
 	record.OutputTruncated = sandboxResult.OutputTruncated
+	record.StdoutSHA256 = sandboxResult.StdoutSHA256
+	record.StdoutBytes = sandboxResult.StdoutBytes
 
 	switch {
 	case errors.Is(runCtx.Err(), context.DeadlineExceeded):

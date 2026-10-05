@@ -141,7 +141,46 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.4 — Privacy invariants
 
-Define stable privacy invariants for eligibility, location, likes, matches, messages, preferences, wallet correlation, deletion, and minimal disclosure.
+**Purpose:** define stable privacy guarantees that every later PuffBuddies implementation, integration, client, service, storage layer, moderation tool, analytics path, and release must preserve.
+
+**Canonical requirements:**
+
+1. Record PB-PRIV-001 through PB-PRIV-020.
+2. Cover minimum disclosure and purpose limitation.
+3. Keep eligibility source evidence, precise location, likes/passes, matches, messages, discovery/preferences, wallet/profile linkage, safety actions, and protected moderation state private.
+4. Preserve PuffBuddies deletion/deactivation independence from unrelated 420Wallet/420Identity/420Names state.
+5. Protect metadata, logs, analytics, notifications, identifiers, hashes/commitments, backups, caches, indexes, derived data, and retention paths from recreating private relationship state.
+6. Prohibit public wallet-to-profile enumeration and unauthenticated public member enumeration.
+7. Require least-privilege access for services, moderators, operators, support, and administrators.
+8. Address inference/correlation attacks, including location triangulation, timing correlation, predictable identifiers, response differences, and stale derived copies.
+9. Define a minimum-disclosure decision rule for later data sharing/persistence.
+10. Preserve PB-0.1 through PB-0.3 and do not claim runtime integrations or implementations that do not exist.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.4-PRIVACY-INVARIANTS.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.4-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.4 is not a Level 2 integration milestone; it adds canonical privacy requirements without introducing executable shared integration.
+
+**Dependencies:** PB-0.1, PB-0.2, and PB-0.3 must remain COMPLETE and their identity, MVP-scope, and blockchain/off-chain boundary invariants must remain intact.
+
+**Exit criteria:**
+
+- one canonical PB-0.4 privacy-invariants document exists;
+- PB-PRIV-001 through PB-PRIV-020 exist exactly once and in sequence;
+- eligibility, location, likes/passes, matches, messages, preferences, wallet correlation, deletion independence, and minimum disclosure are explicitly covered;
+- metadata, identifiers, hashes, notifications, analytics, enumeration, least privilege, backups/derived data, and retention are explicitly covered;
+- inference/correlation threats are documented;
+- privacy expectations are defined across major PuffBuddies/420Integrated surfaces without false integration claims;
+- no contract, fixed address, service ID, storage implementation, deployment, or live integration is falsely claimed;
+- the cumulative app-scoped verifier passes;
+- the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
+- durable PB-0.4 evidence records exact run/job evidence and base SHA.
 
 ### PB-0.5 — Consent invariants
 

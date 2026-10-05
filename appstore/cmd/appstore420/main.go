@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	appstoreapi "github.com/420integrated/420-integrated/appstore/api"
 	appstorecatalog "github.com/420integrated/420-integrated/appstore/catalog"
 	appstoreregistry "github.com/420integrated/420-integrated/appstore/registry"
 	appstoreruntime "github.com/420integrated/420-integrated/appstore/runtime"
@@ -40,6 +42,7 @@ func main() {
 	if err != nil {
 		fatal(err)
 	}
+	views := appstoreapi.NewViewSet()
 
 	qualifyCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	if err := service.Qualify(qualifyCtx); err != nil {
@@ -47,6 +50,10 @@ func main() {
 		fatal(err)
 	}
 	if err := lifecycle.Bootstrap(qualifyCtx); err != nil {
+		cancel()
+		fatal(err)
+	}
+	if err := rebuildApplicationViews(cfg, lifecycle, views); err != nil {
 		cancel()
 		fatal(err)
 	}
@@ -58,14 +65,14 @@ func main() {
 	errCh := make(chan error, 2)
 	go func() { errCh <- server.ListenAndServe() }()
 	go func() {
-		if err := lifecycle.Run(ctx, catalogueRefreshInterval); err != nil {
-			errCh <- fmt.Errorf("catalogue lifecycle: %w", err)
+		if err := runCatalogueComposition(ctx, cfg, lifecycle, views, catalogueRefreshInterval); err != nil {
+			errCh <- fmt.Errorf("catalogue/ApplicationView lifecycle: %w", err)
 		}
 	}()
 
 	select {
 	case err := <-errCh:
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			_ = server.Shutdown(shutdownCtx)
 			cancel()
@@ -78,6 +85,42 @@ func main() {
 			fatal(err)
 		}
 	}
+}
+
+func runCatalogueComposition(ctx context.Context, cfg appstoreruntime.Config, lifecycle *appstorecatalog.Lifecycle, views *appstoreapi.ViewSet, interval time.Duration) error {
+	if interval <= 0 {
+		return errors.New("catalogue refresh interval must be positive")
+	}
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			if err := lifecycle.Refresh(ctx); err != nil {
+				return err
+			}
+			if err := rebuildApplicationViews(cfg, lifecycle, views); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func rebuildApplicationViews(cfg appstoreruntime.Config, lifecycle *appstorecatalog.Lifecycle, views *appstoreapi.ViewSet) error {
+	doc, ok := lifecycle.Snapshot()
+	if !ok {
+		return errors.New("catalogue lifecycle is not ready")
+	}
+	inputs, err := appstoreapi.LoadCompositionInputs(cfg.ViewInputs)
+	if err != nil {
+		return err
+	}
+	if err := views.Rebuild(doc, cfg.ChainID, inputs); err != nil {
+		return err
+	}
+	return nil
 }
 
 func loadConfig(getenv func(string) string) (appstoreruntime.Config, error) {
@@ -95,6 +138,7 @@ func loadConfig(getenv func(string) string) (appstoreruntime.Config, error) {
 		IndexerURL:      strings.TrimSpace(getenv("APPSTORE_INDEXER_URL")),
 		RegistryAddress: strings.TrimSpace(getenv("APPSTORE_REGISTRY_ADDRESS")),
 		CatalogueStore:  strings.TrimSpace(getenv("APPSTORE_CATALOGUE_STORE")),
+		ViewInputs:      strings.TrimSpace(getenv("APPSTORE_VIEW_INPUTS")),
 		ListenAddr:      strings.TrimSpace(getenv("APPSTORE_LISTEN_ADDR")),
 	}
 	if cfg.ListenAddr == "" {

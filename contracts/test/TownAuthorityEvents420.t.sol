@@ -90,23 +90,26 @@ contract TownAuthorityEvents420Test {
     }
 
     function testRoleEventsBindCommunityRolePermissionAndActor() public {
+        bytes32 moderatorRole = town.ROLE_MODERATOR();
+        bytes32 manageMembers = town.PERMISSION_MANAGE_MEMBERS();
+
         vm.expectEmit(true, true, true, true);
         emit RolePermissionChanged(
             COMMUNITY,
-            town.ROLE_MODERATOR(),
-            town.PERMISSION_MANAGE_MEMBERS(),
+            moderatorRole,
+            manageMembers,
             true
         );
         vm.prank(OWNER);
-        town.setRolePermission(COMMUNITY, town.ROLE_MODERATOR(), town.PERMISSION_MANAGE_MEMBERS(), true);
+        town.setRolePermission(COMMUNITY, moderatorRole, manageMembers, true);
 
         vm.prank(USER);
         town.joinCommunity(COMMUNITY);
 
         vm.expectEmit(true, true, true, true);
-        emit RoleAssignmentChanged(COMMUNITY, town.ROLE_MODERATOR(), USER, true, OWNER);
+        emit RoleAssignmentChanged(COMMUNITY, moderatorRole, USER, true, OWNER);
         vm.prank(OWNER);
-        town.assignRole(COMMUNITY, town.ROLE_MODERATOR(), USER);
+        town.assignRole(COMMUNITY, moderatorRole, USER);
     }
 
     function testSubscriptionAndEntitlementEventsAreRevisioned() public {

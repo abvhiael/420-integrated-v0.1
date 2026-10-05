@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/420integrated/420-integrated/appstore/catalog"
 	"github.com/420integrated/420-integrated/appstore/curation"
 	"github.com/420integrated/420-integrated/appstore/hardening"
+	appregistry "github.com/420integrated/420-integrated/appstore/registry"
 	"github.com/420integrated/420-integrated/appstore/security"
 	"github.com/420integrated/420-integrated/appstore/wallet"
 )
@@ -62,7 +64,8 @@ func LoadCompositionInputs(path string) (CompositionInputs, error) {
 	if err := dec.Decode(&inputs); err != nil {
 		return CompositionInputs{}, fmt.Errorf("%w: %v", ErrInvalidCompositionInputs, err)
 	}
-	if dec.More() {
+	var trailing any
+	if err := dec.Decode(&trailing); err != io.EOF {
 		return CompositionInputs{}, ErrInvalidCompositionInputs
 	}
 	if inputs.SchemaVersion != CompositionInputsSchemaVersion {
@@ -191,24 +194,7 @@ func ComposeApplications(doc catalog.Document, chainID uint64, inputs Compositio
 }
 
 type catalogVersion struct {
-	record catalogVersionRecord
-}
-
-// catalogVersionRecord aliases the concrete registry record without allowing
-// composition code to invent a second canonical model.
-type catalogVersionRecord = struct {
-	ServiceID      string `json:"serviceId"`
-	Version        uint32 `json:"version"`
-	Implementation string `json:"implementation"`
-	CodeHash       string `json:"codeHash"`
-	MetadataHash   string `json:"metadataHash"`
-	ComponentType  uint8  `json:"componentType"`
-	ManifestHash   string `json:"manifestHash"`
-	DependencyRoot string `json:"dependencyRoot"`
-	InterfaceHash  string `json:"interfaceHash"`
-	Active         bool   `json:"active"`
-	BlockNumber    uint64 `json:"blockNumber"`
-	BlockHash      string `json:"blockHash"`
+	record appregistry.VersionRecord
 }
 
 func validateComposedApplicationView(view ApplicationView) error {

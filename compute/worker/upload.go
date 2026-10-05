@@ -153,6 +153,7 @@ type ResultEvidenceUploader struct {
 	receipts  *ReceiptStore
 	authority CanonicalResultEvidenceUploadAuthority
 	transport ResultEvidenceTransport
+	bandwidth *ByteRateLimiter
 	now       func() time.Time
 	mu        sync.Mutex
 }
@@ -186,6 +187,22 @@ func NewResultEvidenceUploader(
 		results: results, receipts: receipts,
 		authority: authority, transport: transport, now: time.Now,
 	}, nil
+}
+
+func NewResultEvidenceUploaderWithBandwidth(
+	config Config,
+	results *ResultStore,
+	receipts *ReceiptStore,
+	authority CanonicalResultEvidenceUploadAuthority,
+	transport ResultEvidenceTransport,
+	bandwidth *ByteRateLimiter,
+) (*ResultEvidenceUploader, error) {
+	uploader, err := NewResultEvidenceUploader(config, results, receipts, authority, transport)
+	if err != nil {
+		return nil, err
+	}
+	uploader.bandwidth = bandwidth
+	return uploader, nil
 }
 
 func ValidateResultEvidenceUploadAuthorization(auth ResultEvidenceUploadAuthorization, now time.Time) error {
@@ -522,6 +539,9 @@ func (u *ResultEvidenceUploader) uploadObject(
 		ReceiptNonce: signed.Receipt.ReceiptNonce,
 		UploadPolicyID: auth.UploadPolicyID,
 		Object: desc,
+	}
+	if u.bandwidth != nil {
+		reader = u.bandwidth.WrapReader(ctx, reader)
 	}
 	receipt, err := u.transport.Upload(ctx, request, reader)
 	if err != nil {

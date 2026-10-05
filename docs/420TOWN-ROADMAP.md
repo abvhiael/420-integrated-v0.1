@@ -116,13 +116,46 @@ High-volume content bodies remain off-chain by default.
 
 ## TOWN-AUDIT-5 — Moderation and appeals
 
-Status: OPEN
+Status: COMPLETE
 
-Implement the shared GEN-SVC moderation vocabulary:
+Implemented the shared GEN-SVC moderation vocabulary:
 
 `REPORT, HIDE, BLOCK, MUTE, SUSPEND, APPEAL, MODERATOR_DECISION, RESTORE, LOCK`.
 
-Test domain-scoped moderator authority, escalation boundaries, appeals, provenance, alternate-path bypass and restoration semantics.
+Qualified behavior includes:
+
+- community/domain-scoped MODERATOR and ADMIN authority;
+- ordinary-member privilege denial and cross-community escalation prevention;
+- user-scoped BLOCK and MUTE;
+- community/Town-scoped SUSPEND;
+- affected-subject-only APPEAL;
+- append-only case/decision provenance with parent-record linkage and monotonic versions;
+- MODERATOR_DECISION only from appealed state;
+- RESTORE preserving prior case history while releasing active enforcement;
+- mandatory moderation gating across Town content reads, histories, edits, thread/reply paths and votes;
+- alternate-path bypass prevention for HIDE, LOCK and SUSPEND;
+- content/user target provenance validation;
+- lowercase SHA-256 evidence validation;
+- idempotent moderation writes with conflicting replay rejection;
+- explicit prohibition on asset, wallet, payment, rights, protocol-identity or other protocol-authority mutation.
+
+Durable qualification evidence:
+
+- qualification level: Level 1 + Level 2 moderation/content integration milestone;
+- qualified implementation/test/workflow SHA: `04fb48b8aca4bf65cf606a139d10b7b8a2129288`;
+- 420Town audit workflow run `37274475535` / run `69` — PASS;
+- `town-skeleton` job `111648430690` — PASS;
+- `town-contracts` job `111648430382` — PASS;
+- exact-SHA assertions — PASS in both Town jobs;
+- canonical Town audit, skeleton, authority, content and moderation verifiers — PASS;
+- `go test ./town/...` — PASS;
+- focused Town Solidity build — PASS;
+- retained `test/Town*.t.sol` Foundry inventory — PASS;
+- cross-dApp rewards hardening — PASS;
+- current main at closeout: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`;
+- PR #523 remains open and mergeable; final current-main reconciliation remains deferred to Level 3 unless a later Town dependency requires it earlier;
+- Level 3 remains intentionally deferred to TOWN-AUDIT-10;
+- next canonical roadmap step: TOWN-AUDIT-6 — Service integrations.
 
 ## TOWN-AUDIT-6 — Service integrations
 

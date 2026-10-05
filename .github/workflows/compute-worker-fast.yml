@@ -56,6 +56,38 @@ jobs:
           go vet ./compute/worker ./execution/cmd/node420-compute
           go build ./execution/cmd/node420-compute
 
+      - name: Build local CMP-3.4 sandbox probe image
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_dir="$(mktemp -d)"
+          CGO_ENABLED=0 go build -o "$probe_dir/probe" ./compute/worker/testdata/sandboxprobe
+          cat > "$probe_dir/Dockerfile" <<'EOF'
+          FROM scratch
+          COPY probe /probe
+          USER 65532:65532
+          ENTRYPOINT ["/probe"]
+          EOF
+          docker build --network=none -t cmp-sandbox-probe:ci "$probe_dir"
+          image_id="$(docker image inspect --format '{{.Id}}' cmp-sandbox-probe:ci)"
+          test -n "$image_id"
+          echo "CMP_SANDBOX_INTEGRATION_IMAGE=$image_id" >> "$GITHUB_ENV"
+
+      - name: Test real Docker sandbox isolation
+        run: go test ./compute/worker -run '^TestSandboxDockerIntegration
+      - name: Verify CMP-3.1 daemon regression
+        run: python scripts/verify-cmp-3-1-worker-daemon.py
+
+      - name: Verify CMP-3.2 hardware/software discovery
+        run: python scripts/verify-cmp-3-2-hardware-software-discovery.py
+
+      - name: Verify CMP-3.3 benchmarking and capability evidence
+        run: python scripts/verify-cmp-3-3-benchmarking-capability-evidence.py
+
+      - name: Verify CMP-3.4 secure workload sandbox
+        run: python scripts/verify-cmp-3-4-secure-workload-sandbox.py
+ -count=1
+
       - name: Verify CMP-3.1 daemon regression
         run: python scripts/verify-cmp-3-1-worker-daemon.py
 

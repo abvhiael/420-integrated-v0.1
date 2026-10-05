@@ -11,6 +11,8 @@ Status: **COMPLETE**
 
 ## Qualified implementation
 
+- Evidence anchor SHA: `5910c6f9100b5d2e02159861a5bac94561149d9b` (creation commit for this durable evidence record)
+
 - Implementation SHA: `0f7a5a1c3bf40308f4ab029594454f3ab7ff8795`
 - Current `main` at qualification: `7a20e806635cc4eab784118628c2505f74632b75`
 - Audit branch: `cmp-3.1-worker-daemon-20261004`

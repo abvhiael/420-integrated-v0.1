@@ -16,7 +16,7 @@ version: v1
 
 It is **not** part of the frozen Genesis application catalog. Its service identifier, `420/service/town/v1`, belongs to the GEN-SVC composition registry and must not be represented as a frozen Genesis application ID without a later explicit catalog decision.
 
-## Implemented through TOWN-AUDIT-6
+## Implemented through TOWN-AUDIT-7
 
 The repository now contains:
 
@@ -50,7 +50,13 @@ The repository now contains:
 - provenance-bound 420Notifications handoff with explicit subscription selection;
 - canonical 420Messenger authorization checks before replaceable encrypted transport;
 - optional Registry service discovery with exact active service-ID matching;
-- retained optional Town Rewards integration.
+- retained optional Town Rewards integration;
+- authenticated `/v1` API with strict validation and mutation idempotency;
+- typed `sdk/town420` client with HTTPS enforcement and bounded retries;
+- generation-bound cursor pagination for public derived reads;
+- rebuildable/reorg-safe `town/projection` state;
+- atomic `town/recovery` interruption checkpoints;
+- API request/error/auth/mutation/latency observability.
 
 Detailed models:
 
@@ -58,6 +64,7 @@ Detailed models:
 - content lifecycle/abuse boundary: `docs/apps/town/content.md`
 - moderation/appeal lifecycle: `docs/apps/town/moderation.md`
 - service integrations: `docs/apps/town/integrations.md`
+- API/SDK/projection/recovery: `docs/apps/town/api.md`
 
 ## Trust boundary
 
@@ -69,4 +76,4 @@ Post/comment body bytes remain off-chain by default.
 
 ## Remaining roadmap work
 
-API/SDK/indexer/recovery, the user-facing web application, broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps. Live external endpoints are not inferred from repository-local integration qualification.
+The user-facing web application, broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps. Live external endpoints and live reorg/recovery behavior are not inferred from repository-local qualification.

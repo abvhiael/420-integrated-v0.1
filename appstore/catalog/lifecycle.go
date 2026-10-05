@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	appregistry "github.com/420integrated/420-integrated/appstore/registry"
 )
@@ -84,6 +85,24 @@ func (l *Lifecycle) Bootstrap(ctx context.Context) error {
 	}
 	l.swap(fresh, projection)
 	return nil
+}
+
+func (l *Lifecycle) Run(ctx context.Context, interval time.Duration) error {
+	if interval <= 0 {
+		return ErrInvalidStore
+	}
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			if err := l.Refresh(ctx); err != nil {
+				return err
+			}
+		}
+	}
 }
 
 func (l *Lifecycle) Refresh(ctx context.Context) error {

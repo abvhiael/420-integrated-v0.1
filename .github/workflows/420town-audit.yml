@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "config/420town-genesis.json"
+      - "config/420town-authority-v1.json"
       - "config/genesis-applications.json"
       - "config/genesis-consumer-services.json"
       - "contracts/src/town/**"
@@ -15,6 +16,7 @@ on:
       - "docs/genesis-services/**"
       - "scripts/verify-420town-audit.py"
       - "scripts/verify-420town-skeleton.py"
+      - "scripts/verify-420town-authority.py"
       - ".github/workflows/420town-audit.yml"
   workflow_dispatch:
 
@@ -40,6 +42,8 @@ jobs:
         run: python3 scripts/verify-420town-audit.py
       - name: Verify Town product skeleton
         run: python3 scripts/verify-420town-skeleton.py
+      - name: Verify Town authoritative state
+        run: python3 scripts/verify-420town-authority.py
       - name: Build and test Town Go packages
         run: go test ./town/...
 
@@ -62,6 +66,7 @@ jobs:
           version: stable
       - name: Build Town Solidity
         run: |
+          forge build src/town/TownAuthority420.sol
           forge build src/town/TownRewardsAdapter420.sol
           forge build src/town/TownContributionVerifier420.sol
       - name: Town focused tests

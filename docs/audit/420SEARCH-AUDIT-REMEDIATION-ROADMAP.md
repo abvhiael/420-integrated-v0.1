@@ -14,6 +14,6 @@ Stable requirement IDs for the complete repository audit. IDs must not be renumb
 - **SEARCH-AUDIT-1 — COMPLETE.**
 - **SEARCH-AUDIT-2 — COMPLETE.** Repository implementation/build/test/security qualification passed on exact implementation SHA `34b1f64b90443ef6808eaa37391b9fe57f4b316e` in 420Search audit qualification run #12 (`37255163213`).
 - **SEARCH-AUDIT-3 — COMPLETE.** Integration/readiness reconciliation passed at Level 1 on exact implementation SHA `e013430252106c533e9bc5c54b3339cbdea98681` in 420Search audit qualification run #14 (`37255553537`), job `111591724193`. Search is recorded as a repository-qualified 420Indexer v1 consumer while live Search/Indexer binding remains explicitly deferred to SEARCH-AUDIT-5.
-- **SEARCH-AUDIT-4 — NEXT.**
-- **SEARCH-AUDIT-5 — BLOCKED / DEFERRED TO LIVE TESTNET.**
+- **SEARCH-AUDIT-4 — COMPLETE.** Durable repository closeout retained in `docs/audit/420SEARCH-COMPLETE-AUDIT-20261004.md`; qualified implementation SHA `e013430252106c533e9bc5c54b3339cbdea98681`, evidence-head revalidation SHA `724b7e19acb24d6409401932aea58f8f2b0f1027`, A4 closeout evidence commit `ee955ed2dd86b319d40133caac507da5f2278fab`.
+- **SEARCH-AUDIT-5 — NEXT / BLOCKED ON LIVE TESTNET.** Requires approved production-equivalent testnet, qualified live 420Indexer endpoint and public 420Search endpoint.
 - **SEARCH-AUDIT-6 — DEFERRED UNTIL SEARCH-AUDIT-5.**

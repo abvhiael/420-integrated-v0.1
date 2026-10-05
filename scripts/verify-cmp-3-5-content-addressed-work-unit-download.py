@@ -36,7 +36,8 @@ for token in [
     "parsed.User != nil",
     'parsed.Fragment != ""',
     "sha256HexPattern",
-    "io.LimitReader(response.Body, int64(source.SizeBytes)+1)",
+    "io.LimitReader(",
+    "int64(source.SizeBytes)+1",
     "io.MultiWriter(tmp, hasher)",
     "hex.EncodeToString(hasher.Sum(nil))",
     "os.Rename(tmpName, finalPath)",
@@ -47,6 +48,15 @@ for token in [
 ]:
     if token not in s:
         errors.append(f"missing CMP-3.5 implementation token: {token}")
+
+if (
+    "io.LimitReader(response.Body, int64(source.SizeBytes)+1)" not in s
+    and not (
+        "body = d.bandwidth.WrapReader(ctx, body)" in s
+        and "io.LimitReader(body, int64(source.SizeBytes)+1)" in s
+    )
+):
+    errors.append("CMP-3.5 size bound no longer applies to the response body path")
 
 for token in [
     "http.ErrUseLastResponse",

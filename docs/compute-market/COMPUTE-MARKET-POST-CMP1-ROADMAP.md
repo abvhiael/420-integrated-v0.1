@@ -350,11 +350,11 @@ Durable evidence: [CMP-3.2 qualification](CMP-3.2-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.3 — Benchmarking and capability evidence
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `0f7a5a1c3bf40308f4ab029594454f3ab7ff8795`.**
 
 Bounded provider-neutral CPU/memory benchmarking now produces versioned, content-addressed self-reported capability evidence bound to the exact CMP-3.2 discovery snapshot. The evidence is explicitly non-authoritative, independently unattested, and not job-result correctness evidence; trusted eligibility remains owned by the canonical independent attestation/provenance path.
 
-Durable design/exit criteria: [CMP-3.3 benchmarking and capability evidence](CMP-3.3-BENCHMARKING-CAPABILITY-EVIDENCE.md).
+Durable evidence: [CMP-3.3 qualification](CMP-3.3-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.3 benchmarking and capability evidence](CMP-3.3-BENCHMARKING-CAPABILITY-EVIDENCE.md). Compute Worker Fast Qualification #35 / run `37250495294` passed on the exact implementation SHA; evidence anchor `5910c6f9100b5d2e02159861a5bac94561149d9b`.
 
 
 ## CMP-3.4 — Secure workload sandbox

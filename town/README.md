@@ -14,6 +14,7 @@ Current packages:
 - `town/config` — canonical service identity and direct dependency declarations;
 - `town/content` — posts, threads, comments/replies, votes, visibility, revisions, tombstones, idempotency and abuse controls;
 - `town/moderation` — reports, hide/lock/suspend enforcement, block/mute, appeals, decisions, restoration and audit provenance;
+- `town/integrations` — Identity, Storage, Search, Notifications, Messenger transport and Registry discovery adapters;
 - `town/schema/v1` — machine-readable object/schema, authority, content and moderation vocabulary.
 
 Town-specific Solidity lives under `contracts/src/town`.
@@ -78,6 +79,7 @@ python3 scripts/verify-420town-skeleton.py
 python3 scripts/verify-420town-authority.py
 python3 scripts/verify-420town-content.py
 python3 scripts/verify-420town-moderation.py
+python3 scripts/verify-420town-integrations.py
 python3 scripts/verify-420town-audit.py
 ```
 
@@ -93,7 +95,14 @@ Canonical application configuration:
 - `config/420town-authority-v1.json`
 - `config/420town-content-v1.json`
 - `config/420town-moderation-v1.json`
+- `config/420town-integrations-v1.json`
+
+## Service integrations
+
+TOWN-AUDIT-6 implements the repository-side integration baseline for 420Identity, 420Storage/Resource Protocol, 420Search, 420Notifications and conditional 420Messenger transport. Search receives only explicit PUBLIC Town projections; notification handoff remains subscription/consent-bound; Storage retrieval verifies SHA-256 content integrity; Messenger authorization fails closed before replaceable encrypted transport; optional Town Rewards remains non-authoritative.
+
+See `docs/apps/town/integrations.md`.
 
 ## Current limitations
 
-TOWN-AUDIT-5 does not implement production Identity/Search/Notifications/Storage adapters, public API/SDK/indexer/recovery, frontend workflows, live testnet deployment or production operations. Those remain later canonical roadmap steps.
+TOWN-AUDIT-6 does not claim live deployed service endpoints or RPC-confirmed Identity/Messenger reads. Public API/SDK/indexer/recovery, frontend workflows, broader security hardening, live testnet deployment and production operations remain later canonical roadmap steps.

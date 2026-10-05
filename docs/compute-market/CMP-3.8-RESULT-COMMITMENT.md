@@ -23,12 +23,14 @@ CMP-3.8 therefore creates the worker-side **unsigned result commitment material*
 
 Its execution digest binds the accepted job/request/manifest/assignment/worker/attempt snapshot plus `receiptHash` and `outputHash`.
 
-CMP-3.8 exposes the complete sandbox stdout digest in two equivalent forms:
+CMP-3.8 exposes the complete sandbox stdout content digest in two equivalent local forms:
 
 - `outputSha256`: lowercase 64-hex SHA-256;
 - `outputHash`: bytes32-compatible `0x` + the same SHA-256.
 
-CMP-3.9 can therefore bind/sign this exact `outputHash` without reinterpreting or rehashing result bytes.
+This is a **profile-neutral base content commitment**, not a universal assertion that every accepted verification profile uses raw-output SHA-256 as its canonical receipt `outputCommitment`.
+
+CMP-0.9 explicitly requires a legitimately empty output to have a **profile-defined** nonzero empty-output commitment and binds verification to the accepted output schema/profile. Therefore CMP-3.9 must resolve the accepted receipt/output profile and may use CMP-3.8's `outputHash` directly only when that frozen profile defines raw stdout SHA-256 as the canonical output commitment. Otherwise the profile-specific adapter must derive the canonical receipt output commitment from the exact CMP-3.8-bound result bytes/evidence without changing the underlying result material.
 
 CMP-3.8's local `resultCommitment` is deliberately **not** the final on-chain worker-adapter result commitment, because the final contract commitment also includes the receipt hash that does not exist until CMP-3.9.
 
@@ -87,7 +89,7 @@ Each record binds:
 - command SHA-256;
 - optional resume checkpoint commitment;
 - complete stdout SHA-256;
-- bytes32-compatible output hash;
+- bytes32-compatible SHA-256 content hash;
 - complete stdout byte count;
 - zero exit code;
 - execution start/end timestamps;
@@ -162,7 +164,7 @@ The integration test proves:
 3. `StdoutSHA256` matches the full stdout bytes;
 4. the hash does not collapse to the truncated capture;
 5. result material uses the complete stdout digest/length;
-6. `outputHash` is the bytes32-compatible form of the same digest;
+6. local `outputHash` is the bytes32-compatible form of the same base content digest and is not silently promoted to a profile-defined canonical receipt output commitment;
 7. result material remains unsigned/non-authoritative/non-correctness/noncanonical.
 
 ## Security/adversarial requirements
@@ -195,7 +197,7 @@ CMP-3.8 is complete when one exact implementation SHA proves:
 8. execution start/end are within immutable deadline/lease;
 9. result material binds exact canonical authorization/execution/job/unit/root-assignment/attempt/nonce/worker/resource/manifest/constraint/work-unit/image/command state;
 10. resumed result material binds the exact CMP-3.7 checkpoint commitment;
-11. `outputHash` is exactly bytes32-compatible `0x + outputSha256`;
+11. local `outputHash` is exactly bytes32-compatible `0x + outputSha256`, while profile-specific canonical receipt output commitment remains deferred;
 12. result material is deterministic and independently verifiable;
 13. exact duplicate result creation is idempotent;
 14. conflicting second result for one attempt fails closed;

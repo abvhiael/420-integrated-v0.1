@@ -1,7 +1,7 @@
 {
   "schema": "420-town-genesis-v1",
   "phase": "TOWN-AUDIT",
-  "status": "CONTENT_BASELINE",
+  "status": "MODERATION_BASELINE",
   "serviceId": "420/service/town/v1",
   "name": "420Town Community Boards",
   "role": "GENESIS_FACING_UPDATE",
@@ -46,7 +46,9 @@
       "StorageGateway",
       "MessageTransport",
       "Frontend",
-      "RewardsProjection"
+      "RewardsProjection",
+      "ModerationCase",
+      "ModerationAction"
     ],
     "treasuryCustody": false,
     "contentBodiesOnChain": false
@@ -55,10 +57,10 @@
     "TOWN-AUDIT-1",
     "TOWN-AUDIT-2",
     "TOWN-AUDIT-3",
-    "TOWN-AUDIT-4"
+    "TOWN-AUDIT-4",
+    "TOWN-AUDIT-5"
   ],
   "deferredRoadmap": [
-    "TOWN-AUDIT-5",
     "TOWN-AUDIT-6",
     "TOWN-AUDIT-7",
     "TOWN-AUDIT-8",
@@ -66,5 +68,7 @@
     "TOWN-AUDIT-10",
     "TOWN-AUDIT-11",
     "TOWN-AUDIT-12"
-  ]
+  ],
+  "moderationConfig": "config/420town-moderation-v1.json",
+  "moderationPackage": "town/moderation"
 }

@@ -44,7 +44,11 @@ Exact replay of an already-ingested canonical version is idempotent.
 
 `Rebuild` discards only the local projection and reconstructs it from the supplied canonical snapshot. It never writes to `ProtocolRegistry`, never changes registration status, and never grants application legitimacy.
 
-The source abstraction is intentionally replaceable. A direct RPC reader, 420Indexer-backed canonical projection, or independent client may provide the snapshot so long as the same chain/Registry provenance and version history are preserved.
+The source abstraction remains replaceable, but the production source selected by APPSTORE-AUDIT-2 is the **420Indexer-backed finalized ProtocolRegistry projection** in `appstore/registry/indexer_source.go`. It reads Indexer health plus `/v1/services`, rejects any response claiming canonical authority, requires the configured ProtocolRegistry address to match the frozen Indexer Registry projection address, filters out versions activated above the Indexer finalized boundary, and ignores deprecations that are not yet finalized. The complete constructed snapshot is revalidated through `Projection.Rebuild` before use.
+
+This is safe for registration-profile fields because `ProtocolRegistry.publishRegisteredService` emits `ServiceVersionPublished` and `ServiceRegistrationProfilePublished` in the same transaction/block; filtering by the version activation block therefore excludes an unfinalized registration profile for that version. Legacy publication paths without a registration profile retain `componentType == 0` and empty profile commitments.
+
+420Indexer is a rebuildable observation/projection dependency, not authority. ProtocolRegistry and chain state remain canonical. The startup RPC probe independently checks chain identity and Registry deployment before the Indexer-backed snapshot is accepted.
 
 ## Authority boundary
 

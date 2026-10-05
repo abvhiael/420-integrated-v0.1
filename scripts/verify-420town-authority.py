@@ -11,6 +11,8 @@ def require(condition, message, errors):
 def main():
     errors = []
     cfg = json.loads((ROOT / "config/420town-authority-v1.json").read_text())
+    town_cfg = json.loads((ROOT / "config/420town-genesis.json").read_text())
+    catalog = json.loads((ROOT / "town/schema/v1/object-catalog.json").read_text())
     services = json.loads((ROOT / "config/genesis-consumer-services.json").read_text())
     architecture = (ROOT / "docs/architecture/genesis-architecture.md").read_text()
     dependency_map = (ROOT / "docs/architecture/dependency-map.md").read_text()
@@ -26,10 +28,24 @@ def main():
     require("separates on-chain membership, roles, permissions, subscriptions, treasuries, and entitlements" in dependency_map,
             "dependency map no longer preserves Town authority/transport boundary", errors)
 
+    require(town_cfg["status"] == "AUTHORITY_BASELINE", "Town canonical config has not advanced to authority baseline", errors)
+    require("TOWN-AUDIT-3" in town_cfg["implementedThrough"], "Town canonical config missing TOWN-AUDIT-3", errors)
+    require("TOWN-AUDIT-3" not in town_cfg["deferredRoadmap"], "Town canonical config still defers TOWN-AUDIT-3", errors)
+    require(town_cfg["authorityContract"] == "TownAuthority420", "Town canonical authority contract drift", errors)
+    require(town_cfg["authorityBoundary"]["treasuryCustody"] is False, "Town canonical config must not claim treasury custody", errors)
+
     require(cfg["authorityContract"] == "TownAuthority420", "authority contract config drift", errors)
     require(cfg["treasuryModel"]["mode"] == "REFERENCE_ONLY", "Town treasury must remain reference-only", errors)
     require(cfg["treasuryModel"]["custody"] is False, "Town must not claim treasury custody", errors)
     require(len(cfg["invariants"]) >= 13, "Town authority invariant inventory incomplete", errors)
+
+    authority_catalog = catalog.get("authority_v1", {})
+    require(authority_catalog.get("contract") == "TownAuthority420", "schema catalog authority contract drift", errors)
+    require(authority_catalog.get("treasury_mode") == "REFERENCE_ONLY", "schema catalog treasury mode drift", errors)
+    require(set(authority_catalog.get("membership_states", [])) == {"NONE","ACTIVE","LEFT","REMOVED"},
+            "schema catalog membership states drift", errors)
+    require(set(authority_catalog.get("roles", [])) == {"MEMBER","MODERATOR","ADMIN"},
+            "schema catalog role vocabulary drift", errors)
 
     for token in [
         "PERMISSION_MANAGE_MEMBERS",
@@ -51,8 +67,9 @@ def main():
         "contracts/test/TownAuthorityAccess420.t.sol",
         "contracts/test/TownAuthorityEntitlements420.t.sol",
         "contracts/test/TownAuthorityTreasury420.t.sol",
+        "docs/apps/town/authority.md",
     ]:
-        require((ROOT / path).is_file(), f"missing authority test: {path}", errors)
+        require((ROOT / path).is_file(), f"missing authority artifact: {path}", errors)
 
     if errors:
         print("420Town authority verifier FAILED")

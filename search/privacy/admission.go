@@ -39,6 +39,7 @@ var allowedSourceDomains = map[architecture.SourceBoundary]map[architecture.Resu
 	architecture.SourceRights:   {architecture.DomainRightsRecord: {}},
 	architecture.SourceCommons:  {architecture.DomainPublicCommons: {}},
 	architecture.SourcePulse:    {architecture.DomainPublicPulse: {}},
+	architecture.SourceTown:     {architecture.DomainPublicTown: {}},
 }
 
 // Admit is the Search source-admission boundary for privacy-sensitive material.

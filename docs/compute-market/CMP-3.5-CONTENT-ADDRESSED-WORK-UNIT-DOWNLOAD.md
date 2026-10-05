@@ -1,6 +1,6 @@
 # CMP-3.5 — Content-addressed work-unit download
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE — Level 1 exact-head qualified on `14f178762534d23a5519782960735eb98a4a6ac7`.**
 
 ## Canonical definition
 
@@ -160,6 +160,16 @@ CMP-3.5 is complete when one exact implementation SHA proves all of the followin
 15. the downloader does not execute downloaded bytes or cross into CMP-3.6 lifecycle authority;
 16. CMP-3.1 through CMP-3.4 regressions remain green;
 17. targeted Go tests, vet, build and CMP-3.5 verifier pass on the same exact SHA.
+
+## Qualification evidence
+
+- Implementation SHA: `14f178762534d23a5519782960735eb98a4a6ac7`
+- Compute Worker Fast Qualification: **#83**
+- Run ID: `37252325225`
+- Job ID: `111582322633`
+- Result: **SUCCESS**
+- Durable evidence anchor: `81919b68dc76923e7d87d452b887949e370b0fe4`
+- Evidence record: [CMP-3.5 qualification evidence](CMP-3.5-QUALIFICATION-EVIDENCE.md)
 
 ## Qualification model
 

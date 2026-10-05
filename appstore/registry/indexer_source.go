@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrIndexerAuthorityClaim = errors.New("420Indexer registry source claimed canonical authority")
+	ErrIndexerAuthorityClaim   = errors.New("420Indexer registry source claimed canonical authority")
 	ErrIndexerRegistryMismatch = errors.New("420Indexer Registry projection address does not match configured ProtocolRegistry")
 )
 
@@ -32,10 +32,10 @@ var (
 // Deprecations above the finalized boundary are ignored when reconstructing the
 // finalized active state.
 type IndexerSource struct {
-	baseURL string
-	chainID uint64
+	baseURL         string
+	chainID         uint64
 	registryAddress string
-	http *http.Client
+	http            *http.Client
 }
 
 func NewIndexerSource(baseURL string, chainID uint64, registryAddress string, timeout time.Duration) (*IndexerSource, error) {
@@ -51,19 +51,25 @@ func NewIndexerSource(baseURL string, chainID uint64, registryAddress string, ti
 	if !strings.EqualFold(registryAddress, decoder.ProtocolRegistryCanonicalAddress420) {
 		return nil, ErrIndexerRegistryMismatch
 	}
-	if timeout <= 0 { timeout = 10 * time.Second }
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
 	return &IndexerSource{
-		baseURL: baseURL,
-		chainID: chainID,
+		baseURL:         baseURL,
+		chainID:         chainID,
 		registryAddress: registryAddress,
-		http: &http.Client{Timeout: timeout},
+		http:            &http.Client{Timeout: timeout},
 	}, nil
 }
 
 func newIndexerSourceWithHTTPClient(baseURL string, chainID uint64, registryAddress string, hc *http.Client) (*IndexerSource, error) {
 	src, err := NewIndexerSource(baseURL, chainID, registryAddress, 10*time.Second)
-	if err != nil { return nil, err }
-	if hc == nil { return nil, errors.New("http client required") }
+	if err != nil {
+		return nil, err
+	}
+	if hc == nil {
+		return nil, errors.New("http client required")
+	}
 	src.http = hc
 	return src, nil
 }
@@ -99,31 +105,32 @@ func (s *IndexerSource) Snapshot(ctx context.Context) (Snapshot, error) {
 				active = true
 			}
 			versions = append(versions, VersionRecord{
-				ServiceID: version.ServiceID,
-				Version: version.Version,
+				ServiceID:      version.ServiceID,
+				Version:        version.Version,
 				Implementation: version.Implementation,
-				CodeHash: version.CodeHash,
-				MetadataHash: version.MetadataHash,
-				ComponentType: version.ComponentType,
-				ManifestHash: version.ManifestHash,
+				CodeHash:       version.CodeHash,
+				MetadataHash:   version.MetadataHash,
+				ComponentType:  version.ComponentType,
+				ManifestHash:   version.ManifestHash,
 				DependencyRoot: version.DependencyRoot,
-				InterfaceHash: version.InterfaceHash,
-				Active: active,
-				BlockNumber: version.ActivatedBlock,
-				BlockHash: version.ActivatedHash,
+				InterfaceHash:  version.InterfaceHash,
+				Active:         active,
+				BlockNumber:    version.ActivatedBlock,
+				BlockHash:      version.ActivatedHash,
 			})
 		}
 	}
 
 	snapshot := Snapshot{
-		ChainID: s.chainID,
+		ChainID:         s.chainID,
 		RegistryAddress: s.registryAddress,
-		FinalizedBlock: health.Health.FinalizedHeight,
-		Versions: versions,
+		FinalizedBlock:  health.Health.FinalizedHeight,
+		Versions:        versions,
 	}
-	// Validate the complete source result before returning it to callers.
 	projection, err := NewProjection(s.chainID, s.registryAddress)
-	if err != nil { return Snapshot{}, err }
+	if err != nil {
+		return Snapshot{}, err
+	}
 	if err := projection.Rebuild(snapshot); err != nil {
 		return Snapshot{}, fmt.Errorf("validate 420Indexer Registry snapshot: %w", err)
 	}
@@ -132,14 +139,22 @@ func (s *IndexerSource) Snapshot(ctx context.Context) (Snapshot, error) {
 
 func (s *IndexerSource) get(ctx context.Context, path string, out any) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.baseURL+path, nil)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	resp, err := s.http.Do(req)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		var body struct{ Error string `json:"error"` }
+		var body struct {
+			Error string `json:"error"`
+		}
 		_ = json.NewDecoder(resp.Body).Decode(&body)
-		if body.Error == "" { body.Error = resp.Status }
+		if body.Error == "" {
+			body.Error = resp.Status
+		}
 		return fmt.Errorf("420Indexer read failed: %s", body.Error)
 	}
 	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {

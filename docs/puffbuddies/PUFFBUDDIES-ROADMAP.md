@@ -96,7 +96,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
 - durable PB-0.2 evidence records exact run/job evidence and base SHA.
 
-### PB-0.3 — Blockchain/off-chain boundary
+### PB-0.3 — Blockchain/off-chain boundary — COMPLETE
 
 **Purpose:** define which PuffBuddies state may use public-chain authority and which state must remain private/off-chain, encrypted, or represented only through minimum-disclosure attestations/commitments.
 

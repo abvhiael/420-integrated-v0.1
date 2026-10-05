@@ -23,7 +23,7 @@ import (
 
 const (
 	IdentityServiceID      = "420/service/identity/v1"
-	StorageServiceID       = "420/service/storage/v1"
+	StorageServiceID       = "420/service/resource-protocol/v1"
 	SearchServiceID        = "420/service/search/v1"
 	NotificationsServiceID = "420/service/notifications/v1"
 	MessengerServiceID     = "420/service/messenger/v1"

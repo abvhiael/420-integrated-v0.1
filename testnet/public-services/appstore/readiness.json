@@ -19,7 +19,7 @@
   ],
   "backend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "PUBLIC_RUNTIME_COMPOSED_QUALIFICATION_PENDING",
+    "status": "PUBLIC_RUNTIME_COMPOSED",
     "required_checks": [
       "resolves canonical application/service identity and version through 420Registry",
       "preserves chain ID and network identity",
@@ -33,7 +33,7 @@
   },
   "frontend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "RUNTIME_MOUNTED_QUALIFICATION_PENDING",
+    "status": "RUNTIME_MOUNTED",
     "required_views": [
       "browse and categories",
       "search",
@@ -110,6 +110,19 @@
         37256272006
       ],
       "note": "Evidence-only closeout metadata. The retained AppStore workflow's full race-enabled ./appstore/... suite, vet, production build and verifier also serve the ApplicationView integration milestone; Level 3 remains deferred."
+    },
+    "appstore_audit_5": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_PUBLIC_SERVICE_MILESTONE",
+      "implementation_sha": "65ac599806ce4cf910e7f8154f564498d7cb707b",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37257635038,
+      "job_id": 111598019149,
+      "conclusion": "PASS",
+      "main_observed": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
+      "superseded_runs": [
+        37257475522
+      ],
+      "note": "Evidence-only closeout metadata. The retained AppStore race suite, vet, production build and verifier supply the app-level public-service integration milestone; Level 3 remains deferred."
     }
   },
   "current_audit": {
@@ -119,15 +132,15 @@
       "APPSTORE-AUDIT-1",
       "APPSTORE-AUDIT-2",
       "APPSTORE-AUDIT-3",
-      "APPSTORE-AUDIT-4"
+      "APPSTORE-AUDIT-4",
+      "APPSTORE-AUDIT-5"
     ],
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
       "APPSTORE-AUDIT-6 repository qualification remains pending after public service composition",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-5 now mounts health/readiness, the dynamic /v1/apps* discovery API and embedded frontend under one production handler with anonymous in-memory abuse limiting and dependency-aware BLOCKED/DEGRADED behavior. Exact-head Level 1 qualification is pending.",
-    "next_step": "APPSTORE-AUDIT-5",
-    "in_progress_step": "APPSTORE-AUDIT-5"
+    "note": "APPSTORE-AUDIT-5 is repository-complete and exact-head qualified: production mounts health/readiness, dynamic /v1/apps* and the embedded frontend under one dependency-aware, abuse-limited handler. Overall AppStore remains PARTIAL pending APPSTORE-AUDIT-6 repository qualification and later live testnet/Genesis closeout.",
+    "next_step": "APPSTORE-AUDIT-6"
   }
 }

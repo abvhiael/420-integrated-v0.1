@@ -53,7 +53,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
 - durable qualification evidence records the tested implementation SHA and current base SHA.
 
-### PB-0.2 — MVP scope
+### PB-0.2 — MVP scope — COMPLETE
 
 **Purpose:** define and freeze the canonical first-release capability boundary and explicit post-MVP deferrals without prematurely defining later implementation mechanics.
 

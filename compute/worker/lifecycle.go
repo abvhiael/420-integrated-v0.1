@@ -213,16 +213,16 @@ func (l *ExecutionLifecycle) Execute(ctx context.Context, plan ExecutionPlan) (E
 		return ExecutionOutcome{}, err
 	}
 
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
 	recordPath := l.recordPath(auth.AttemptRef)
+	l.mu.Lock()
 	if existing, err := l.readRecord(recordPath); err == nil {
+		l.mu.Unlock()
 		if existing.Status == ExecutionPrepared || existing.Status == ExecutionRunning {
 			return ExecutionOutcome{}, ErrAttemptInProgress
 		}
 		return ExecutionOutcome{Record: existing}, ErrAttemptReplay
 	} else if !errors.Is(err, os.ErrNotExist) {
+		l.mu.Unlock()
 		return ExecutionOutcome{}, err
 	}
 
@@ -231,27 +231,35 @@ func (l *ExecutionLifecycle) Execute(ctx context.Context, plan ExecutionPlan) (E
 		record := l.newRecord(auth, ExecutionExpired, now, "authorization-expired")
 		record.EndedAt = now
 		if err := l.persistRecord(recordPath, record); err != nil {
+			l.mu.Unlock()
 			return ExecutionOutcome{}, err
 		}
+		l.mu.Unlock()
 		return ExecutionOutcome{Record: record}, fmt.Errorf("%w: authorization expired", ErrInvalidExecutionAuthorization)
 	}
 
 	artifact, err := l.openVerifiedArtifact(auth, plan.Artifact)
 	if err != nil {
+		l.mu.Unlock()
 		return ExecutionOutcome{}, err
 	}
-	defer artifact.Close()
 
 	record := l.newRecord(auth, ExecutionPrepared, now, "")
 	if err := l.persistRecord(recordPath, record); err != nil {
+		_ = artifact.Close()
+		l.mu.Unlock()
 		return ExecutionOutcome{}, err
 	}
 	record.Status = ExecutionRunning
 	record.StartedAt = l.now().UTC()
 	record.Transitions = append(record.Transitions, ExecutionTransition{Status: ExecutionRunning, At: record.StartedAt})
 	if err := l.persistRecord(recordPath, record); err != nil {
+		_ = artifact.Close()
+		l.mu.Unlock()
 		return ExecutionOutcome{}, err
 	}
+	l.mu.Unlock()
+	defer artifact.Close()
 
 	executionDeadline := auth.Deadline
 	if auth.LeaseExpiresAt.Before(executionDeadline) {

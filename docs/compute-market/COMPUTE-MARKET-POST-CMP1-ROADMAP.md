@@ -437,6 +437,13 @@ The implementation deliberately does not invent antivirus/EDR, content scanning,
 Durable evidence: [CMP-3.12 qualification](CMP-3.12-QUALIFICATION-EVIDENCE.md). Exit criteria and implementation boundary: [CMP-3.12 malicious workload protections](CMP-3.12-MALICIOUS-WORKLOAD-PROTECTIONS.md). Fast #313 / run `37264388818` / job `111618008159` passed the exact implementation/spec/workflow SHA; evidence anchor `279c78a240f5a7223341bf4461978792812b44b3`.
 
 ## CMP-3.13 — Windows/Linux/macOS packaging
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+The worker now has deterministic Windows/Linux/macOS packages for amd64 and arm64, exact version/source-commit identity, CGO-disabled cross-builds, per-package metadata, SHA-256 manifests, safe argument-file launchers, explicit platform state directories, Linux systemd material, macOS launchd material, and Windows limited-user startup-task material.
+
+Packaging does not claim native runtime certification, code signing/notarization, live worker deployment, or Level 3 merge-candidate readiness.
+
+Exit criteria and implementation boundary: [CMP-3.13 Windows/Linux/macOS packaging](CMP-3.13-WINDOWS-LINUX-MACOS-PACKAGING.md).
 
 ## CMP-3.14 — Phase closeout
 

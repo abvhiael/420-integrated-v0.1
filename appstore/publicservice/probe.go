@@ -2,7 +2,6 @@ package publicservice
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,4 +31,3 @@ func ProbeReady(ctx context.Context, client *http.Client, baseURL string) bool {
 	return resp.StatusCode >= 200 && resp.StatusCode < 300
 }
 
-var _ = errors.New

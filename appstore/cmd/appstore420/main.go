@@ -11,9 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	appstorecatalog "github.com/420integrated/420-integrated/appstore/catalog"
 	appstoreregistry "github.com/420integrated/420-integrated/appstore/registry"
 	appstoreruntime "github.com/420integrated/420-integrated/appstore/runtime"
 )
+
+const catalogueRefreshInterval = 30 * time.Second
 
 func main() {
 	cfg, err := loadConfig(os.Getenv)
@@ -29,7 +32,11 @@ func main() {
 	if err != nil {
 		fatal(err)
 	}
-	projection, err := appstoreregistry.NewProjection(cfg.ChainID, cfg.RegistryAddress)
+	store, err := appstorecatalog.Open(cfg.CatalogueStore)
+	if err != nil {
+		fatal(err)
+	}
+	lifecycle, err := appstorecatalog.NewLifecycle(store, source, cfg.ChainID, cfg.RegistryAddress)
 	if err != nil {
 		fatal(err)
 	}
@@ -39,7 +46,7 @@ func main() {
 		cancel()
 		fatal(err)
 	}
-	if err := appstoreregistry.Sync(qualifyCtx, source, projection); err != nil {
+	if err := lifecycle.Bootstrap(qualifyCtx); err != nil {
 		cancel()
 		fatal(err)
 	}
@@ -48,12 +55,20 @@ func main() {
 	server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(), ReadHeaderTimeout: 5 * time.Second}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	errCh := make(chan error, 1)
+	errCh := make(chan error, 2)
 	go func() { errCh <- server.ListenAndServe() }()
+	go func() {
+		if err := lifecycle.Run(ctx, catalogueRefreshInterval); err != nil {
+			errCh <- fmt.Errorf("catalogue lifecycle: %w", err)
+		}
+	}()
 
 	select {
 	case err := <-errCh:
 		if err != nil && err != http.ErrServerClosed {
+			shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			_ = server.Shutdown(shutdownCtx)
+			cancel()
 			fatal(err)
 		}
 	case <-ctx.Done():

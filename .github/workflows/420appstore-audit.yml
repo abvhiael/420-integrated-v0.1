@@ -48,6 +48,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
+      - name: APPSTORE-AUDIT-2 formatting
+        run: |
+          unformatted="$(gofmt -l \
+            appstore/cmd/appstore420/main.go \
+            appstore/runtime/config.go \
+            appstore/runtime/service_test.go \
+            appstore/registry/indexer_source.go \
+            appstore/registry/indexer_source_test.go)"
+          test -z "$unformatted" || { echo "$unformatted"; exit 1; }
       - name: Formatting
         continue-on-error: true
         env:

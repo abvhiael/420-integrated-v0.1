@@ -31,6 +31,7 @@ const (
 	DomainRightsRecord   ResultDomain = "rights_record"
 	DomainPublicCommons  ResultDomain = "public_commons"
 	DomainPublicPulse    ResultDomain = "public_pulse"
+	DomainPublicTown     ResultDomain = "public_town"
 )
 
 type SourceBoundary string
@@ -44,6 +45,7 @@ const (
 	SourceRights   SourceBoundary = "420Rights:public"
 	SourceCommons  SourceBoundary = "420Commons:public"
 	SourcePulse    SourceBoundary = "420Pulse:public"
+	SourceTown     SourceBoundary = "420Town:public"
 )
 
 type PrivacyExclusion string
@@ -70,6 +72,7 @@ var GenesisDomains = []ResultDomain{
 	DomainRightsRecord,
 	DomainPublicCommons,
 	DomainPublicPulse,
+	DomainPublicTown,
 }
 
 var PrivacyExclusions = []PrivacyExclusion{

@@ -30,4 +30,3 @@ func ProbeReady(ctx context.Context, client *http.Client, baseURL string) bool {
 	defer resp.Body.Close()
 	return resp.StatusCode >= 200 && resp.StatusCode < 300
 }
-

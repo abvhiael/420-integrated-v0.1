@@ -154,8 +154,10 @@ func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (Res
 		outcome.Sandbox.StdoutBytes != record.StdoutBytes {
 		return ResultMaterial{}, fmt.Errorf("%w: in-memory sandbox output does not match durable record", ErrInvalidResultMaterial)
 	}
-	if record.StartedAt.IsZero() || record.EndedAt.IsZero() || record.EndedAt.Before(record.StartedAt) {
-		return ResultMaterial{}, fmt.Errorf("%w: execution timestamps invalid", ErrInvalidResultMaterial)
+	if record.StartedAt.IsZero() || record.EndedAt.IsZero() || record.EndedAt.Before(record.StartedAt) ||
+		record.StartedAt.After(auth.LeaseExpiresAt) || record.StartedAt.After(auth.Deadline) ||
+		record.EndedAt.After(auth.LeaseExpiresAt) || record.EndedAt.After(auth.Deadline) {
+		return ResultMaterial{}, fmt.Errorf("%w: execution timestamps invalid or outside authorization window", ErrInvalidResultMaterial)
 	}
 	auth, err := s.authority.ResolveExecutionAuthorization(ctx, record.AuthorizationRef)
 	if err != nil {
@@ -332,7 +334,11 @@ func VerifyResultMaterial(auth ExecutionAuthorization, material ResultMaterial) 
 		material.CommandSHA256 != auth.CommandSHA256 ||
 		material.ExecutionStartedAt.IsZero() ||
 		material.ExecutionEndedAt.IsZero() ||
-		material.ExecutionEndedAt.Before(material.ExecutionStartedAt) {
+		material.ExecutionEndedAt.Before(material.ExecutionStartedAt) ||
+		material.ExecutionStartedAt.After(auth.LeaseExpiresAt) ||
+		material.ExecutionStartedAt.After(auth.Deadline) ||
+		material.ExecutionEndedAt.After(auth.LeaseExpiresAt) ||
+		material.ExecutionEndedAt.After(auth.Deadline) {
 		return fmt.Errorf("%w: result binding mismatch", ErrInvalidResultMaterial)
 	}
 	preimage := resultMaterialPreimage{

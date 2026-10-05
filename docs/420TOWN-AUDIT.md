@@ -344,3 +344,152 @@ Live testnet is not a blocker for TOWN-AUDIT-3.
 **TOWN-AUDIT-3 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-4 — Content, threads, comments and votes**.
+
+
+## TOWN-AUDIT-4 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 — per-roadmap-step fast qualification**  
+Qualified implementation/test/workflow SHA: `f5f01eae23bbc04f02ac7e9f2ab648c465a86813`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA qualification.
+
+### Implementation completed
+
+TOWN-AUDIT-4 adds the first complete 420Town content-state layer under `town/content` while preserving the GEN-SVC boundary that high-volume post/comment bodies remain off-chain by default.
+
+Implemented scope includes:
+
+- stable posts bound to community, original author, content reference, SHA-256 digest, visibility, lifecycle status and revision;
+- one thread per active root post, bound to the root author/community;
+- comments and replies bound to thread/community with cross-thread/cross-community parent rejection;
+- root-post visibility inheritance for comments so replies cannot widen a thread;
+- canonical GEN-SVC visibility scopes with unknown values rejected/denied fail-closed;
+- trusted relationship-context hooks for FOLLOWERS, PURCHASERS_OR_BACKERS and ORGANIZATION_MEMBERS;
+- append-only post/comment revision history;
+- tombstone deletion preserving stable object IDs and content digests while clearing body references;
+- root-post tombstones propagating thread tombstone state;
+- one canonical revisioned vote record per voter/target with set/change/clear lifecycle;
+- vote eligibility requiring active community membership and target visibility;
+- required idempotency keys for mutating writes;
+- same-key/different-payload replay rejection;
+- duplicate-content fingerprint throttling by author/community/content digest;
+- per-identity write and vote limits;
+- aggregate per-community write limits;
+- trusted-device and trusted-network rate scopes to constrain multi-identity/Sybil swarms;
+- lower limits for unknown, unverified or young identities;
+- higher limits only for established verified identities;
+- atomic rate-bucket charging so rejected aggregate requests do not partially consume another scope;
+- machine-readable content policy/invariants in `config/420town-content-v1.json`;
+- canonical Town config advancement to `CONTENT_BASELINE` and implementation through TOWN-AUDIT-4;
+- Town schema catalogue alignment for content lifecycle, digests, revisions, tombstones and votes;
+- Town content documentation and app overview updates;
+- app-specific content verifier and exact-head CI ownership.
+
+### Files changed for TOWN-AUDIT-4
+
+Primary implementation/config/test/docs/workflow changes include:
+
+- `town/content/service.go`;
+- `town/content/service_test.go`;
+- `config/420town-content-v1.json`;
+- `config/420town-genesis.json`;
+- `town/schema/v1/object-catalog.json`;
+- `scripts/verify-420town-content.py`;
+- `scripts/verify-420town-authority.py`;
+- `docs/apps/town/content.md`;
+- `docs/apps/town/index.md`;
+- `town/README.md`;
+- `.github/workflows/420town-audit.yml`.
+
+### Exit criteria satisfied
+
+1. **Posts** — implemented with stable IDs, author/community binding, off-chain references, SHA-256 digests, visibility, revisions and tombstones.
+2. **Threads** — implemented as one stable thread per active root post with root-author ownership checks and tombstone propagation.
+3. **Comments/replies** — implemented with thread/community integrity, parent linkage, tombstone rejection and inherited root visibility.
+4. **Votes/reactions** — canonical lightweight vote records implemented for posts/comments with values `-1`/`1`, revisioned updates and clear semantics.
+5. **Content hashes/references** — SHA-256 lowercase-hex digest plus bounded off-chain reference; Town stores no post/comment body bytes.
+6. **Visibility rules** — all nine canonical GEN-SVC visibility scopes retained; unknown scopes fail closed; Town membership/role scopes use TOWN-AUDIT-3 authority; external relationship scopes require trusted adapter context.
+7. **Deletion/tombstone semantics** — stable IDs/digests/history preserved; body references cleared; tombstoned parents/root threads reject new descendants.
+8. **Idempotent/replay-safe writes** — mutating writes require idempotency keys; exact retry returns original result; same key with a changed payload is rejected.
+9. **Spam/Sybil/rate-abuse controls** — duplicate digest detection, per-identity, trusted-device, trusted-network, vote and community aggregate rate windows, plus lower unknown/unverified/young identity limits are implemented and tested.
+10. **Off-chain body boundary** — high-volume post/comment bodies remain off-chain by default and the verifier rejects body-payload storage primitives in the Town content service.
+
+### Level 1 qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37270292839`  
+Run number: `47`  
+Result: **PASS**  
+Qualified SHA: `f5f01eae23bbc04f02ac7e9f2ab648c465a86813`
+
+Passing exact-head checks:
+
+- exact implementation SHA assertion — PASS in `town-skeleton`;
+- exact implementation SHA assertion — PASS in `town-contracts`;
+- canonical Town audit classification verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- `go test ./town/...` — PASS;
+- focused Town Solidity build — PASS;
+- retained Town-focused Foundry suite via `forge test --match-path "test/Town*.t.sol" -vvv` — PASS;
+- cross-dApp rewards hardening via `test/RewardsCrossDappHardening420.t.sol` — PASS.
+
+The final qualified head includes the app-specific workflow concurrency rule that cancels superseded Town audit runs while preserving all required checks on the newest exact PR head. Earlier queued/cancelled runs are not counted as passing evidence.
+
+A small final verifier correction removed a stale requirement that `config/420town-genesis.json.status` equal the old `AUTHORITY_BASELINE` phase label. The authority verifier still validates the authority contract/config/invariants; it no longer falsely fails solely because the canonical Town phase advanced to `CONTENT_BASELINE`. This did not weaken authority semantics, and the final exact head was fully requalified after that correction.
+
+### Security/adversarial/invariant result
+
+The qualified TOWN-AUDIT-4 tests and verifier cover the required adversarial/boundary properties, including:
+
+- nonmembers cannot create content or vote;
+- a non-author cannot create a thread around another author’s root post;
+- replies cannot cross thread/community boundaries;
+- tombstoned parents/root threads reject new descendants;
+- comments cannot independently widen root visibility;
+- a user who cannot view the root cannot comment or vote on it;
+- missing trusted relationship context fails closed for follower/backer/organization visibility;
+- unknown visibility is rejected/denied;
+- historical post/comment revisions remain append-only;
+- tombstones preserve IDs/digests but remove body references;
+- exact idempotent retries do not duplicate writes;
+- idempotency-key reuse for a different payload is rejected;
+- duplicate content fingerprints are rejected inside the configured window;
+- unknown risk profiles receive unverified limits;
+- young/unverified identities receive lower write/vote limits than established verified identities;
+- aggregate community write limits constrain multi-identity floods;
+- shared trusted-device and trusted-network keys constrain Sybil swarms;
+- vote throttling is independently enforced;
+- one voter/target maps to one canonical revisioned vote record;
+- Town content state remains replaceable application state and does not acquire Identity, payment, treasury, governance, moderation, Search/Indexer, UI or rewards authority.
+
+### Milestone status and intentionally deferred qualification
+
+- Level 2: **not required for TOWN-AUDIT-4**. This is an ordinary app-scoped content implementation step. The major authority/lifecycle milestone was TOWN-AUDIT-3 and was already qualified at Level 2. No new shared authoritative dependency was introduced here.
+- Level 3: **intentionally deferred** to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification** / complete app-phase closeout.
+- Repository-wide Solidity, Genesis/address authority, 420 Integrated/global, Docs/global, full client/service/Indexer/Search/RPC/frontend/backend, static/deployment/config and final current-main reconciliation are not required to close this ordinary Level 1 step unless a later dependency makes them directly applicable.
+- A repository-wide Solidity workflow happened to pass on the final implementation SHA, but it is not used as the canonical completion gate for this Level 1 step because the canonical TOWN-AUDIT-4 owner is the app-specific 420Town workflow.
+
+### Limitations and blockers
+
+TOWN-AUDIT-4 intentionally does **not** claim completion of:
+
+- moderation reports/hide/restore/appeal workflows;
+- Identity/Storage/Search/Notifications production adapters;
+- signed public API/SDK/webhook surfaces;
+- durable external persistence/recovery/indexer tooling;
+- user-facing frontend workflows;
+- live testnet or production deployment/operations.
+
+Those belong to later canonical Town roadmap steps. There are **no blockers to TOWN-AUDIT-4 completion**.
+
+Current `main` at closeout: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`.  
+PR #523 historical base SHA: `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`.  
+PR #523 remains open and mergeable. Final reconciliation to then-current `main` remains a Level 3 responsibility unless a later Town step materially requires earlier reconciliation.
+
+### Completion state
+
+**TOWN-AUDIT-4 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-5 — Moderation and appeals**.

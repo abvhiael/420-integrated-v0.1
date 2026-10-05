@@ -21,6 +21,8 @@ THREAT = ROOT / "docs/puffbuddies/PB-0.7-THREAT-TRUST-MODEL.md"
 EVIDENCE_07 = ROOT / "docs/puffbuddies/PB-0.7-QUALIFICATION.md"
 DEPS = ROOT / "docs/puffbuddies/PB-0.8-ECOSYSTEM-DEPENDENCIES.md"
 EVIDENCE_08 = ROOT / "docs/puffbuddies/PB-0.8-QUALIFICATION.md"
+STATE = ROOT / "docs/puffbuddies/PB-0.9-STATE-OWNERSHIP.md"
+EVIDENCE_09 = ROOT / "docs/puffbuddies/PB-0.9-QUALIFICATION.md"
 
 errors = []
 
@@ -28,7 +30,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -52,6 +54,8 @@ threat = THREAT.read_text(encoding="utf-8")
 evidence_07 = EVIDENCE_07.read_text(encoding="utf-8")
 deps = DEPS.read_text(encoding="utf-8")
 evidence_08 = EVIDENCE_08.read_text(encoding="utf-8")
+state = STATE.read_text(encoding="utf-8")
+evidence_09 = EVIDENCE_09.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -127,6 +131,9 @@ for token in [
     "### PB-0.8 — Ecosystem dependencies",
     "PB-DEP-001 through PB-DEP-024",
     "**Milestone relationship:** PB-0.8 is not a Level 2 integration milestone",
+    "### PB-0.9 — State ownership",
+    "PB-STATE-001 through PB-STATE-040",
+    "**Milestone relationship:** PB-0.9 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -761,13 +768,115 @@ for token in [
 ]:
     need(token in evidence_08, f"PB-0.8 evidence record missing token: {token}")
 
+# PB-0.9 — state ownership
+for token in [
+    "# PuffBuddies PB-0.9 state ownership",
+    "## Ownership principles",
+    "## Canonical state ownership",
+    "## Canonical ownership matrix",
+    "## Conflict-resolution rule",
+    "## PB-0.9 completion boundary",
+    "Wallet/account-control state",
+    "PuffBuddies application membership state",
+    "Adult eligibility evidence source state",
+    "PuffBuddies eligibility decision state",
+    "PuffBuddies profile state",
+    "Discovery preference state",
+    "Precise location state",
+    "Discovery candidate/result state",
+    "Like state",
+    "Pass state",
+    "Match state",
+    "Unmatch state",
+    "PuffBuddies block state",
+    "Messenger-native block state",
+    "Conversation authorization state",
+    "Message coordination/envelope state",
+    "Message plaintext/content state",
+    "Notification event intent state",
+    "Notification delivery/presentation state",
+    "Report state",
+    "Moderation evidence and case-history state",
+    "Suspension/ban state",
+    "Account activation/deactivation state",
+    "PuffBuddies deletion state",
+    "Identity profile/credential state",
+    ".420 name state",
+    "Service identity/version state",
+    "AppStore catalogue/presentation state",
+    "Payment settlement state",
+    "PuffBuddies premium entitlement state",
+    "Public chain/protocol observation state",
+    "Indexer projection state",
+    "Search/Explorer presentation state",
+    "PuffBuddies analytics event/aggregate state",
+    "420Analytics outputs",
+    "Client/UI state",
+    "Session/access-token state",
+    "Rate-limit/anti-abuse operational state",
+    "Configuration/policy-version state",
+    "Audit/security evidence state",
+]:
+    need(token in state, f"PB-0.9 state-ownership document missing token: {token}")
+
+state_ids = re.findall(r"^### (PB-STATE-\d{3})\b", state, flags=re.MULTILINE)
+need(state_ids == [f"PB-STATE-{i:03d}" for i in range(1, 41)], f"PB-STATE sequence drift: {state_ids}")
+need(len(state_ids) == len(set(state_ids)), "duplicate PB-STATE identifier")
+
+for guarantee in [
+    "Every security-relevant state class must have one canonical authority owner",
+    "A cache, projection, index, analytics view, notification, client copy, or payment record does not become canonical",
+    "Conflicts resolve in favor of the canonical authority",
+    "PuffBuddies consumes only the minimum approved eligibility conclusion",
+    "Messenger conversations, notification events, payment state, AppStore state, or cached client state must not manufacture or restore a match",
+    "A Messenger-native block is an additional deny condition",
+    "The effective permission to send a PuffBuddies matched-user message is the intersection of both authorities",
+    "Deletion does not delete unrelated 420Wallet, 420Identity, or 420Names state",
+    "Entitlement never owns consent, block, eligibility, or another user's private-data access",
+    "Indexer is not canonical authority",
+    "Security-sensitive actions must recheck authoritative server/protocol state",
+]:
+    need(guarantee in state, f"PB-0.9 missing ownership guarantee: {guarantee}")
+
+for conflict in [
+    "identify the canonical owner of the state class",
+    "reject stale or unauthorized derived copies",
+    "re-resolve current canonical state",
+    "apply revocation/finality/freshness rules",
+    "fail closed where the protected decision remains uncertain",
+]:
+    need(conflict in state, f"PB-0.9 conflict-resolution rule missing: {conflict}")
+
+for forbidden in [
+    "PuffBuddies database is implemented",
+    "PuffBuddies state API is deployed",
+    "PuffBuddies state contract is deployed",
+    "PuffBuddies state service ID is",
+]:
+    need(forbidden not in state, f"PB-0.9 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", state) is None, "PB-0.9 must not assign an on-chain address")
+need("420/service/puff" not in state.lower(), "PB-0.9 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.9 qualification evidence",
+    "**PB-0.9 — State ownership**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-STATE-001 through PB-STATE-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.10 — Safety and moderation principles**",
+]:
+    need(token in evidence_09, f"PB-0.9 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.9", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.8",
+    "step": "PB-0.9",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -859,6 +968,19 @@ print(json.dumps({
         "analyticsNonCanonical": True,
         "derivedServicesSubordinate": True,
         "noAuthorityInheritance": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb09": {
+        "stateInvariants": state_ids,
+        "singleCanonicalOwnerPerClass": True,
+        "derivedCopiesNonCanonical": True,
+        "eligibilityEvidenceSeparatedFromDecision": True,
+        "paymentSeparatedFromEntitlement": True,
+        "messengerSeparatedFromRelationshipAuthority": True,
+        "conflictsResolveToCanonical": True,
+        "staleCopiesFailClosed": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

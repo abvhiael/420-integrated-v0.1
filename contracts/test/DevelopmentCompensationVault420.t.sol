@@ -183,8 +183,8 @@ contract DevelopmentCompensationVault420Test {
     }
 
     function testRejectsAboveTenPercent() public {
-        (bool ok,) = address(vault)
-            .call(abi.encodeWithSelector(vault.expectedCompensation.selector, 1_000 ether, uint16(1_001)));
+        (bool ok,) =
+            address(vault).call(abi.encodeWithSelector(vault.expectedCompensation.selector, 1_000 ether, uint16(1_001)));
         require(!ok, "must reject >10 percent");
     }
 

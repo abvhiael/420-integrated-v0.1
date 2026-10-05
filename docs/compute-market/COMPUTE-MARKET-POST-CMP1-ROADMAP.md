@@ -368,11 +368,11 @@ Durable evidence: [CMP-3.4 qualification](CMP-3.4-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.5 — Content-addressed work-unit download
-**Status: IMPLEMENTED / Level 1 qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `14f178762534d23a5519782960735eb98a4a6ac7`.**
 
 The worker now retrieves immutable HTTPS work-unit artifacts into private content-addressed state, streams through exact-size bounds and SHA-256 verification, rejects redirects and malformed/mutable sources, revalidates cached content before reuse, and atomically publishes only verified bytes. Download does not authorize or execute work.
 
-Durable design/exit criteria: [CMP-3.5 content-addressed work-unit download](CMP-3.5-CONTENT-ADDRESSED-WORK-UNIT-DOWNLOAD.md).
+Durable evidence: [CMP-3.5 qualification](CMP-3.5-QUALIFICATION-EVIDENCE.md). Exit criteria: [CMP-3.5 content-addressed work-unit download](CMP-3.5-CONTENT-ADDRESSED-WORK-UNIT-DOWNLOAD.md). Compute Worker Fast Qualification #83 / run `37252325225` passed on the exact implementation SHA; evidence anchor `81919b68dc76923e7d87d452b887949e370b0fe4`.
 
 
 ## CMP-3.6 — Execution lifecycle
@@ -617,7 +617,7 @@ Production target flow:
 | CMP-1.4 VerifierRegistry | repository-qualified through CMP-1.4.12 |
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
-| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.4 COMPLETE; CMP-3.5 content-addressed work-unit download next |
+| CMP-3 node420 worker runtime | CMP-3.1–CMP-3.5 COMPLETE; CMP-3.6 execution lifecycle next |
 | CMP-4 scientific compute framework | forthcoming |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |

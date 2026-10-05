@@ -11,6 +11,8 @@ SCOPE = ROOT / "docs/puffbuddies/PB-0.2-MVP-SCOPE.md"
 EVIDENCE_02 = ROOT / "docs/puffbuddies/PB-0.2-QUALIFICATION.md"
 BOUNDARY = ROOT / "docs/puffbuddies/PB-0.3-BLOCKCHAIN-OFFCHAIN-BOUNDARY.md"
 EVIDENCE_03 = ROOT / "docs/puffbuddies/PB-0.3-QUALIFICATION.md"
+PRIVACY = ROOT / "docs/puffbuddies/PB-0.4-PRIVACY-INVARIANTS.md"
+EVIDENCE_04 = ROOT / "docs/puffbuddies/PB-0.4-QUALIFICATION.md"
 
 errors = []
 
@@ -18,7 +20,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -32,6 +34,8 @@ scope = SCOPE.read_text(encoding="utf-8")
 evidence_02 = EVIDENCE_02.read_text(encoding="utf-8")
 boundary = BOUNDARY.read_text(encoding="utf-8")
 evidence_03 = EVIDENCE_03.read_text(encoding="utf-8")
+privacy = PRIVACY.read_text(encoding="utf-8")
+evidence_04 = EVIDENCE_04.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -92,6 +96,9 @@ for token in [
     "### PB-0.3 — Blockchain/off-chain boundary",
     "PB-BOUNDARY-001 through PB-BOUNDARY-018",
     "**Milestone relationship:** PB-0.3 is not a Level 2 integration milestone",
+    "### PB-0.4 — Privacy invariants",
+    "PB-PRIV-001 through PB-PRIV-020",
+    "**Milestone relationship:** PB-0.4 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -264,13 +271,109 @@ for token in [
 ]:
     need(token in evidence_03, f"PB-0.3 evidence record missing token: {token}")
 
+# PB-0.4 — privacy invariants
+for token in [
+    "# PuffBuddies PB-0.4 privacy invariants",
+    "## Privacy principles",
+    "## Canonical privacy invariants",
+    "## Privacy inference threats",
+    "## Privacy by surface",
+    "## Data disclosure decision rule",
+    "## PB-0.4 completion boundary",
+    "Adult eligibility without public birth data",
+    "Precise location confidentiality",
+    "Like and pass confidentiality",
+    "Match confidentiality",
+    "Message confidentiality",
+    "Preference confidentiality",
+    "Wallet/profile unlinkability",
+    "PuffBuddies deletion independence",
+    "Minimum disclosure by default",
+    "No privacy downgrade through metadata",
+    "No hidden public correlation identifier",
+    "No deterministic sensitive-data confirmation",
+    "Private safety actions",
+    "Notification privacy",
+    "Analytics minimization",
+    "Search and discovery cannot become public enumeration",
+    "Access follows least privilege",
+    "Backups and derived data preserve privacy semantics",
+    "Retention must have a stated purpose",
+    "No privacy sale or consent bypass",
+]:
+    need(token in privacy, f"PB-0.4 privacy invariant document missing token: {token}")
+
+privacy_ids = re.findall(r"^### (PB-PRIV-\d{3})\b", privacy, flags=re.MULTILINE)
+need(privacy_ids == [f"PB-PRIV-{i:03d}" for i in range(1, 21)], f"PB-PRIV sequence drift: {privacy_ids}")
+need(len(privacy_ids) == len(set(privacy_ids)), "duplicate PB-PRIV identifier")
+
+for sensitive in [
+    "date of birth",
+    "Exact coordinates",
+    "like or pass history",
+    "match graph",
+    "Private message content",
+    "Sexual, romantic, gender",
+    "public wallet address",
+    "delete or deactivate PuffBuddies participation",
+    "minimum data required",
+    "metadata as well as primary content",
+]:
+    need(sensitive in privacy, f"PB-0.4 missing sensitive-data guarantee: {sensitive}")
+
+for inference in [
+    "triangulate location",
+    "infer conversation partners",
+    "correlating payment timestamps",
+    "predictable profile IDs",
+    "response-time differences",
+    "notification timing",
+    "stale caches, indexes, analytics, or backups",
+]:
+    need(inference in privacy, f"PB-0.4 missing inference/correlation threat: {inference}")
+
+need("Client-side hiding is not a privacy boundary" in privacy,
+     "PB-0.4 must require server-side privacy enforcement")
+need("must not create a stable public identifier" in privacy,
+     "PB-0.4 public correlation identifier boundary drift")
+need("must not be protected solely by deterministic unsalted hashes" in privacy,
+     "PB-0.4 deterministic hash privacy boundary drift")
+need("must not receive unrestricted access to all PuffBuddies private data" in privacy,
+     "PB-0.4 least-privilege operator boundary drift")
+need("If the purpose can be satisfied with less disclosure, the less-disclosing design is canonical" in privacy,
+     "PB-0.4 minimum-disclosure decision rule drift")
+
+for forbidden_privacy_claim in [
+    "PuffBuddies privacy storage is implemented",
+    "PuffBuddies database is deployed",
+    "PuffBuddies encryption is live",
+    "420Messenger privacy integration is live",
+    "420Notifications privacy integration is live",
+]:
+    need(forbidden_privacy_claim not in privacy, f"PB-0.4 unsupported implementation/live claim: {forbidden_privacy_claim}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", privacy) is None, "PB-0.4 must not assign an on-chain address")
+need("420/service/puff" not in privacy.lower(), "PB-0.4 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.4 qualification evidence",
+    "**PB-0.4 — Privacy invariants**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-PRIV-001 through PB-PRIV-020",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.5 — Consent invariants**",
+]:
+    need(token in evidence_04, f"PB-0.4 evidence record missing token: {token}")
+
 if errors:
     print(json.dumps({"pass": False, "step": "PB-0.3", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.2",
+    "step": "PB-0.4",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -293,6 +396,19 @@ print(json.dumps({
         "encryptedMessagingOffChain": True,
         "minimumDisclosureAttestations": True,
         "walletProfileUnlinkability": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb04": {
+        "privacyInvariants": privacy_ids,
+        "minimumDisclosure": True,
+        "relationshipConfidentiality": True,
+        "walletProfileUnlinkability": True,
+        "deletionIndependence": True,
+        "metadataProtected": True,
+        "leastPrivilege": True,
+        "inferenceThreatsCovered": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

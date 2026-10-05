@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	appstoreregistry "github.com/420integrated/420-integrated/appstore/registry"
 	appstoreruntime "github.com/420integrated/420-integrated/appstore/runtime"
 )
 
@@ -20,9 +21,17 @@ func main() {
 	probe := appstoreruntime.NewRPCProbe(cfg)
 	service, err := appstoreruntime.NewService(cfg, probe)
 	if err != nil { fatal(err) }
+	source, err := appstoreregistry.NewIndexerSource(cfg.IndexerURL, cfg.ChainID, cfg.RegistryAddress, 10*time.Second)
+	if err != nil { fatal(err) }
+	projection, err := appstoreregistry.NewProjection(cfg.ChainID, cfg.RegistryAddress)
+	if err != nil { fatal(err) }
 
 	qualifyCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	if err := service.Qualify(qualifyCtx); err != nil {
+		cancel()
+		fatal(err)
+	}
+	if err := appstoreregistry.Sync(qualifyCtx, source, projection); err != nil {
 		cancel()
 		fatal(err)
 	}
@@ -54,6 +63,7 @@ func loadConfig(getenv func(string) string) (appstoreruntime.Config, error) {
 	cfg := appstoreruntime.Config{
 		ChainID: chainID,
 		RPCURL: strings.TrimSpace(getenv("APPSTORE_RPC_URL")),
+		IndexerURL: strings.TrimSpace(getenv("APPSTORE_INDEXER_URL")),
 		RegistryAddress: strings.TrimSpace(getenv("APPSTORE_REGISTRY_ADDRESS")),
 		CatalogueStore: strings.TrimSpace(getenv("APPSTORE_CATALOGUE_STORE")),
 		ListenAddr: strings.TrimSpace(getenv("APPSTORE_LISTEN_ADDR")),

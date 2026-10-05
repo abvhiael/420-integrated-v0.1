@@ -85,3 +85,24 @@ func TestAuthorityVocabularyMatchesTOWN3(t *testing.T) {
 		t.Fatal("permission vocabulary drift")
 	}
 }
+
+
+func TestCanonicalModerationVocabulary(t *testing.T) {
+	values := []ModerationActionName{
+		ModerationReport, ModerationHide, ModerationBlock, ModerationMute,
+		ModerationSuspend, ModerationAppeal, ModerationModeratorDecision,
+		ModerationRestore, ModerationLock,
+	}
+	want := []string{
+		"REPORT", "HIDE", "BLOCK", "MUTE", "SUSPEND",
+		"APPEAL", "MODERATOR_DECISION", "RESTORE", "LOCK",
+	}
+	if len(values) != len(want) {
+		t.Fatal("canonical moderation vocabulary length drift")
+	}
+	for i := range values {
+		if string(values[i]) != want[i] {
+			t.Fatalf("moderation action %d=%s want %s", i, values[i], want[i])
+		}
+	}
+}

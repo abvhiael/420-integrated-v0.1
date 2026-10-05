@@ -362,7 +362,46 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.9 — State ownership
 
-Define the canonical owner for every PuffBuddies state class.
+**Purpose:** define one canonical authority owner for every PuffBuddies state class and distinguish canonical authority from operational storage, caches, projections, delivery state, client state, analytics, and other derived copies.
+
+**Canonical requirements:**
+
+1. Record PB-STATE-001 through PB-STATE-040.
+2. Define canonical ownership for wallet/account control, PuffBuddies membership, eligibility evidence/decision, profile/preferences, precise location, discovery results, likes/passes/matches/unmatches, blocks, messaging, notifications, reports/moderation, lifecycle/deletion, identity, names, service discovery, payment/entitlement, chain observations, derived projections, analytics, client/session state, abuse-prevention state, configuration, and audit evidence.
+3. Preserve 420Wallet, 420Identity, 420Names, 420Messenger, 420Notifications, 420Pay, 420Registry, 420AppStore, 420Analytics, 420Indexer, 420Explorer, 420Search, and 420Verify boundaries established in PB-0.8.
+4. Require exactly one canonical owner for each protected decision/state class and prohibit caches, clients, projections, delivery receipts, analytics, or derived services from becoming canonical by duplication.
+5. Distinguish raw eligibility evidence ownership from the PuffBuddies-specific eligibility decision.
+6. Distinguish payment settlement ownership from PuffBuddies premium-entitlement policy ownership.
+7. Distinguish PuffBuddies relationship authorization from Messenger coordination and Messenger-native deny state.
+8. Make PuffBuddies block, safety, moderation, lifecycle, deletion, profile, preference, relationship, and precise-location state explicitly PuffBuddies-owned private state.
+9. Define conflict resolution in favor of the canonical authority with freshness/revocation checks and fail-closed behavior.
+10. Do not claim schemas, storage engines, APIs, contracts, addresses, service IDs, deployments, or live wiring in PB-0.9.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.9-STATE-OWNERSHIP.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.9-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.9 is not a Level 2 integration milestone; it freezes state authority boundaries without introducing executable shared integration.
+
+**Dependencies:** PB-0.1 through PB-0.8 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.9 state-ownership document exists;
+- PB-STATE-001 through PB-STATE-040 exist exactly once and in sequence;
+- all major PuffBuddies state classes have one explicit canonical authority owner;
+- external ecosystem state owners remain bounded to their canonical domains;
+- caches/projections/clients/analytics/delivery state are explicitly non-authoritative where appropriate;
+- ownership conflict resolution, freshness/revocation, and fail-closed behavior are explicit;
+- no database/API/contract/address/service-ID/deployment/live-wiring implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.9 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.10 — Safety/moderation principles
 

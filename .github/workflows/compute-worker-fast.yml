@@ -23,6 +23,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: compute-worker-fast-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   fast-qualification:
     runs-on: ubuntu-latest

@@ -56,6 +56,16 @@ func main() {
 	resourcePoll := flag.Duration("resource-poll", resourceDefaults.TelemetryPollInterval, "CMP-3.11 host telemetry polling interval")
 	var resourceWindows stringListFlag
 	flag.Var(&resourceWindows, "resource-window", "CMP-3.11 repeatable weekly window DDD@HH:MM-HH:MM, e.g. Mon@18:00-23:00")
+
+	securityDefaults := worker.DefaultMaliciousWorkloadPolicy()
+	maxCommandBytes := flag.Int("max-command-bytes", securityDefaults.MaxCommandBytes, "CMP-3.12 maximum canonical argv bytes")
+	maxArgumentBytes := flag.Int("max-argument-bytes", securityDefaults.MaxArgumentBytes, "CMP-3.12 maximum single argv element bytes")
+	maxViolations := flag.Uint("max-workload-violations", uint(securityDefaults.MaxViolations), "CMP-3.12 local violation count before quarantine")
+	quarantineDuration := flag.Duration("workload-quarantine", securityDefaults.QuarantineDuration, "CMP-3.12 local quarantine duration")
+	var denyImages stringListFlag
+	var denyCommands stringListFlag
+	flag.Var(&denyImages, "deny-image", "CMP-3.12 repeatable immutable image digest deny entry")
+	flag.Var(&denyCommands, "deny-command-sha256", "CMP-3.12 repeatable canonical command SHA-256 deny entry")
 	flag.Parse()
 
 	if *discover && *benchmark {
@@ -118,6 +128,24 @@ func main() {
 		os.Exit(2)
 	}
 
+	securityPolicy := worker.DefaultMaliciousWorkloadPolicy()
+	securityPolicy.MaxCommandBytes = *maxCommandBytes
+	securityPolicy.MaxArgumentBytes = *maxArgumentBytes
+	securityPolicy.MaxViolations = uint32(*maxViolations)
+	securityPolicy.QuarantineDuration = *quarantineDuration
+	securityPolicy.DenyImageDigests = map[string]bool{}
+	for _, digest := range denyImages {
+		securityPolicy.DenyImageDigests[digest] = true
+	}
+	securityPolicy.DenyCommandSHA256 = map[string]bool{}
+	for _, digest := range denyCommands {
+		securityPolicy.DenyCommandSHA256[digest] = true
+	}
+	if err := securityPolicy.Validate(); err != nil {
+		fmt.Fprintln(os.Stderr, "node420-compute:", err)
+		os.Exit(2)
+	}
+
 	cfg := worker.Config{
 		Identity: worker.Identity{
 			ChainID:    *chainID,
@@ -135,9 +163,11 @@ func main() {
 		os.Exit(2)
 	}
 	if *check {
-		fmt.Printf("node420-compute: configuration valid for chain %d worker %s; resource policy valid cpu=%.2f%% gpu=%.2f%% idleOnly=%t bandwidth=%d B/s windows=%d\n",
+		fmt.Printf("node420-compute: configuration valid for chain %d worker %s; resource policy valid cpu=%.2f%% gpu=%.2f%% idleOnly=%t bandwidth=%d B/s windows=%d; security policy valid maxCommandBytes=%d maxArgumentBytes=%d maxViolations=%d quarantine=%s denyImages=%d denyCommands=%d\n",
 			cfg.Identity.ChainID, cfg.Identity.WorkerID, resourcePolicy.CPUPercent, resourcePolicy.GPUPercent,
-			resourcePolicy.IdleOnly, resourcePolicy.BandwidthBytesPerSecond, len(resourcePolicy.Schedule))
+			resourcePolicy.IdleOnly, resourcePolicy.BandwidthBytesPerSecond, len(resourcePolicy.Schedule),
+			securityPolicy.MaxCommandBytes, securityPolicy.MaxArgumentBytes, securityPolicy.MaxViolations,
+			securityPolicy.QuarantineDuration, len(securityPolicy.DenyImageDigests), len(securityPolicy.DenyCommandSHA256))
 		return
 	}
 

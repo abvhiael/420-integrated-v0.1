@@ -40,6 +40,19 @@ type CheckpointMetadata struct {
 	PayloadSHA256           string    `json:"payloadSha256"`
 	SizeBytes               uint64    `json:"sizeBytes"`
 	CreatedAt               time.Time `json:"createdAt"`
+	CheckpointCommitment    string    `json:"checkpointCommitment"`
+}
+
+type checkpointPreimage struct {
+	SchemaVersion           string    `json:"schemaVersion"`
+	AuthorizationCommitment string    `json:"authorizationCommitment"`
+	AttemptRef              string    `json:"attemptRef"`
+	AttemptNonce            uint64    `json:"attemptNonce"`
+	WorkUnitSHA256          string    `json:"workUnitSha256"`
+	Sequence                uint64    `json:"sequence"`
+	PayloadSHA256           string    `json:"payloadSha256"`
+	SizeBytes               uint64    `json:"sizeBytes"`
+	CreatedAt               time.Time `json:"createdAt"`
 }
 
 type Checkpoint struct {
@@ -161,6 +174,7 @@ func (s *CheckpointStore) Save(
 		_ = os.Remove(tmpName)
 		return Checkpoint{}, err
 	}
+	createdAt := s.now().UTC()
 	meta := CheckpointMetadata{
 		SchemaVersion: CheckpointSchemaV1,
 		AuthorizationRef: auth.AuthorizationRef,
@@ -171,8 +185,24 @@ func (s *CheckpointStore) Save(
 		Sequence: sequence,
 		PayloadSHA256: hex.EncodeToString(hasher.Sum(nil)),
 		SizeBytes: uint64(written),
-		CreatedAt: s.now().UTC(),
+		CreatedAt: createdAt,
 	}
+	checkpointCommitment, err := commitment(checkpointPreimage{
+		SchemaVersion: meta.SchemaVersion,
+		AuthorizationCommitment: meta.AuthorizationCommitment,
+		AttemptRef: meta.AttemptRef,
+		AttemptNonce: meta.AttemptNonce,
+		WorkUnitSHA256: meta.WorkUnitSHA256,
+		Sequence: meta.Sequence,
+		PayloadSHA256: meta.PayloadSHA256,
+		SizeBytes: meta.SizeBytes,
+		CreatedAt: meta.CreatedAt,
+	})
+	if err != nil {
+		_ = os.Remove(tmpName)
+		return Checkpoint{}, err
+	}
+	meta.CheckpointCommitment = checkpointCommitment
 
 	payloadPath := filepath.Join(attemptDir, checkpointPayloadName(sequence))
 	metaPath := filepath.Join(attemptDir, checkpointMetadataName(sequence))
@@ -302,8 +332,23 @@ func (s *CheckpointStore) validateMetadata(auth ExecutionAuthorization, meta Che
 		!strings.EqualFold(meta.AttemptRef, auth.AttemptRef) ||
 		meta.AttemptNonce != auth.AttemptNonce ||
 		meta.WorkUnitSHA256 != auth.WorkUnitSHA256 ||
-		!sha256HexPattern.MatchString(meta.PayloadSHA256) {
+		!sha256HexPattern.MatchString(meta.PayloadSHA256) ||
+		meta.CheckpointCommitment == "" {
 		return fmt.Errorf("%w: checkpoint authorization binding mismatch", ErrInvalidCheckpoint)
+	}
+	expectedCommitment, err := commitment(checkpointPreimage{
+		SchemaVersion: meta.SchemaVersion,
+		AuthorizationCommitment: meta.AuthorizationCommitment,
+		AttemptRef: meta.AttemptRef,
+		AttemptNonce: meta.AttemptNonce,
+		WorkUnitSHA256: meta.WorkUnitSHA256,
+		Sequence: meta.Sequence,
+		PayloadSHA256: meta.PayloadSHA256,
+		SizeBytes: meta.SizeBytes,
+		CreatedAt: meta.CreatedAt,
+	})
+	if err != nil || expectedCommitment != meta.CheckpointCommitment {
+		return fmt.Errorf("%w: checkpoint commitment mismatch", ErrInvalidCheckpoint)
 	}
 	return nil
 }

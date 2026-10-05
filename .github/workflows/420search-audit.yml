@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: 420search-audit-${{ github.event.pull_request.number || github.ref }}
@@ -35,19 +35,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
-      - name: Normalize Search Go formatting
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          find search -name '*.go' -type f -print0 | xargs -0 gofmt -w
-          if ! git diff --quiet -- search; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add search
-            git commit -m "style(search): normalize Go formatting"
-            git push origin HEAD:${{ github.head_ref }}
-          fi
       - name: Verify canonical Search model
         run: python3 scripts/verify-420search-audit.py
       - name: Formatting

@@ -460,6 +460,10 @@ Purpose: make scientific/research workloads first-class while keeping the market
 
 ## CMP-4.1 — Scientific Work Unit specification
 
+**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+
+Specification and machine-readable contract: [CMP-4.1 scientific work unit](CMP-4.1-SCIENTIFIC-WORK-UNIT-SPECIFICATION.md).
+
 Each work unit should bind:
 
 - research project;
@@ -676,7 +680,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | forthcoming |
+| CMP-4 scientific compute framework | CMP-4.1 implemented; Level 1 qualification pending |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

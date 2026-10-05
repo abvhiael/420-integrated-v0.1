@@ -195,6 +195,12 @@ jobs:
       - name: Verify CMP-2.8 phase closeout inventory
         run: python scripts/verify-cmp-2-8-phase-closeout.py
 
+      - name: Verify CMP-4.1 scientific work-unit specification
+        run: python scripts/verify-cmp-4-1-scientific-work-unit.py
+
+      - name: Test CMP-4.1 scientific work-unit boundaries
+        run: python scripts/test-cmp-4-1-scientific-work-unit.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

@@ -22,7 +22,7 @@ type fakeCommandRunner struct {
 	block bool
 }
 
-func (r *fakeCommandRunner) Run(ctx context.Context, name string, args []string, stdout, stderr io.Writer) error {
+func (r *fakeCommandRunner) Run(ctx context.Context, name string, args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 	r.calls = append(r.calls, runnerCall{name: name, args: append([]string(nil), args...)})
 	if r.write != "" {
 		_, _ = io.WriteString(stdout, r.write)

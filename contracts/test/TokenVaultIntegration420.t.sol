@@ -13,14 +13,33 @@ import "../src/vault/VaultAccounting420.sol";
 import "../src/vault/AssetVault420.sol";
 
 interface VmTokenVault420 {
-    function deal(address who, uint256 amount) external;
-    function prank(address who) external;
+    function deal(
+        address who,
+        uint256 amount
+    ) external;
+    function prank(
+        address who
+    ) external;
 }
 
 contract MockCapabilityRegistryTokenVault420 is ICapabilityRegistry420 {
     mapping(bytes32 => CapabilityGrant) private _grants;
-    function grant(bytes32 grantId) external view returns (CapabilityGrant memory) { return _grants[grantId]; }
-    function isAuthorized(address, bytes32, bytes32, bytes32, uint256) external pure returns (bool) { return false; }
+
+    function grant(
+        bytes32 grantId
+    ) external view returns (CapabilityGrant memory) {
+        return _grants[grantId];
+    }
+
+    function isAuthorized(
+        address,
+        bytes32,
+        bytes32,
+        bytes32,
+        uint256
+    ) external pure returns (bool) {
+        return false;
+    }
 }
 
 contract TokenVaultIntegration420Test {
@@ -41,10 +60,13 @@ contract TokenVaultIntegration420Test {
         policies.setPolicy(AUTH_POLICY, VaultIds420.POLICY_AUTHORIZATION, keccak256("auth-v1"), bytes32(0), true);
         policies.setPolicy(ASSET_POLICY, VaultIds420.POLICY_ASSET, keccak256("asset-v1"), bytes32(0), true);
         policies.setPolicy(RELEASE_POLICY, VaultIds420.POLICY_RELEASE, keccak256("release-v1"), bytes32(0), true);
-        policies.setPolicy(ACCOUNTING_POLICY, VaultIds420.POLICY_ACCOUNTING, keccak256("accounting-v1"), bytes32(0), true);
+        policies.setPolicy(
+            ACCOUNTING_POLICY, VaultIds420.POLICY_ACCOUNTING, keccak256("accounting-v1"), bytes32(0), true
+        );
 
         bytes32 vaultId = TokenIds420.COMMUNITY_TOKEN_REVENUE_VAULT;
-        AssetVault420 vault = new AssetVault420(vaultId, address(vaultRegistry), address(auth), address(accounting), address(this));
+        AssetVault420 vault =
+            new AssetVault420(vaultId, address(vaultRegistry), address(auth), address(accounting), address(this));
         vaultRegistry.registerVault(
             vaultId,
             address(vault),
@@ -63,7 +85,7 @@ contract TokenVaultIntegration420Test {
 
         vm.deal(ALICE, 100 ether);
         vm.prank(ALICE);
-        address token = factory.createERC20{value: 42 ether}(
+        address token = factory.createERC20{ value: 42 ether }(
             TokenIds420.ERC20_FIXED, "Real Vault", "RV", 100 ether, 0, bytes32("real-vault")
         );
 

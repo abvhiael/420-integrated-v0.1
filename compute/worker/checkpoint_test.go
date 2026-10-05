@@ -46,6 +46,9 @@ func TestCheckpointStorePersistsContentAddressedPrivateState(t *testing.T) {
 	if checkpoint.Metadata.PayloadSHA256 != digestBytes(payload) {
 		t.Fatalf("payload digest=%q", checkpoint.Metadata.PayloadSHA256)
 	}
+	if len(checkpoint.Metadata.CheckpointCommitment) != 66 || !strings.HasPrefix(checkpoint.Metadata.CheckpointCommitment, "0x") {
+		t.Fatalf("checkpoint commitment=%q", checkpoint.Metadata.CheckpointCommitment)
+	}
 	info, err := os.Stat(checkpoint.Path)
 	if err != nil {
 		t.Fatal(err)

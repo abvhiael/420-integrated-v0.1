@@ -1,6 +1,6 @@
 # 420Token audit remediation roadmap
 
-Status: **ACTIVE**
+Status: **REPOSITORY AUDIT COMPLETE — TOKEN-AUDIT-8/9 DEFERRED TO LIVE TESTNET/GENESIS**
 Audit baseline: `main@f6a426fc386b21f871b1805e00a57b1dad2bf902`
 Historical implementation: PR #36, merged as `5dfb7dfecc0e14df0f7745f374395a4c7bba04d8`
 
@@ -42,11 +42,12 @@ This audit preserves the frozen Genesis definition in `config/genesis-applicatio
 - Explicitly distinguish deployment provenance from endorsement/listing/liquidity/legal or investment status.
 - Record that the Development Compensation Vault is **not** part of Token V1 fee routing; the canonical Token exception routes the full creation fee to the community Treasury Vault.
 
-## TOKEN-AUDIT-7 — repository exact-head closeout
-- Reconcile against then-current `main`.
-- Run Token audit qualification, retained Solidity contracts, Genesis/address-authority, 420 Integrated and 420Docs gates as applicable against one exact implementation head.
-- Record exact SHA, run/job IDs, residual accepted risks and all repository-complete statuses.
-- Do not promote a documentation-only head using results from an earlier implementation SHA.
+## TOKEN-AUDIT-7 — repository exact-head closeout — **COMPLETE**
+- Final current-main reconciliation head: `c0a82e5a7d281d5922b7d69baebd5ed57eea29af`, reconciled to `main@5367722febee6e5df18b1c0c45a142c59ea9f905` with behind=0.
+- Immediately preceding exact implementation head `f0c3cf1d922bf7279f001cf1934b3c62e4509859` passed all required Level-3 owners: 420Token audit #32, Solidity Contracts #4813 (all four PR shards), 420 Integrated #6420, 420Docs #5314, Genesis Address Authority #1519 and Wallet Web #1608.
+- The final three-main-commit reconciliation changed only `appstore/web/static/app.css`, `appstore/web/static/index.html` and `appstore/web/static/logo.svg`. Exact-head change-scope qualification proved zero 420Token contract/config/test/documentation/workflow/Wallet-token changes between the fully green Token head and `c0a82e5a...`.
+- Per the closeout rule for unrelated-main-only reconciliation, Token tests were not repeated because no 420Token app code or integration surface changed.
+- Repository-side CODE/BUILD/CONTRACT/TEST/DOCUMENTATION/INTEGRATION qualification is complete. Live deployment/security-boundary proof remains TOKEN-AUDIT-8; Genesis/production remains TOKEN-AUDIT-9.
 
 ## TOKEN-AUDIT-8 — production-equivalent testnet qualification
 **BLOCKED until the approved production-equivalent 420Integrated testnet and its real Vault/Registry/Wallet infrastructure exist.**

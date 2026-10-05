@@ -46,6 +46,7 @@ type ResultMaterial struct {
 	CommandSHA256              string    `json:"commandSha256"`
 	ResumeCheckpointCommitment string    `json:"resumeCheckpointCommitment,omitempty"`
 	OutputSHA256               string    `json:"outputSha256"`
+	OutputHash                 string    `json:"outputHash"`
 	OutputBytes                uint64    `json:"outputBytes"`
 	ExitCode                   int       `json:"exitCode"`
 	ExecutionStartedAt         time.Time `json:"executionStartedAt"`
@@ -80,6 +81,7 @@ type resultMaterialPreimage struct {
 	CommandSHA256              string    `json:"commandSha256"`
 	ResumeCheckpointCommitment string    `json:"resumeCheckpointCommitment,omitempty"`
 	OutputSHA256               string    `json:"outputSha256"`
+	OutputHash                 string    `json:"outputHash"`
 	OutputBytes                uint64    `json:"outputBytes"`
 	ExitCode                   int       `json:"exitCode"`
 	ExecutionStartedAt         time.Time `json:"executionStartedAt"`
@@ -209,6 +211,7 @@ func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (Res
 		CommandSHA256: auth.CommandSHA256,
 		ResumeCheckpointCommitment: record.ResumeCheckpointCommitment,
 		OutputSHA256: record.StdoutSHA256,
+		OutputHash: "0x" + record.StdoutSHA256,
 		OutputBytes: record.StdoutBytes,
 		ExitCode: record.ExitCode,
 		ExecutionStartedAt: record.StartedAt.UTC(),
@@ -242,6 +245,7 @@ func (s *ResultStore) Commit(ctx context.Context, outcome ExecutionOutcome) (Res
 		CommandSHA256: preimage.CommandSHA256,
 		ResumeCheckpointCommitment: preimage.ResumeCheckpointCommitment,
 		OutputSHA256: preimage.OutputSHA256,
+		OutputHash: preimage.OutputHash,
 		OutputBytes: preimage.OutputBytes,
 		ExitCode: preimage.ExitCode,
 		ExecutionStartedAt: preimage.ExecutionStartedAt,
@@ -303,7 +307,8 @@ func VerifyResultMaterial(auth ExecutionAuthorization, material ResultMaterial) 
 		material.ResultCorrectnessEvidence ||
 		material.CanonicalResultCommitted ||
 		material.ExitCode != 0 ||
-		!sha256HexPattern.MatchString(material.OutputSHA256) {
+		!sha256HexPattern.MatchString(material.OutputSHA256) ||
+		material.OutputHash != "0x"+material.OutputSHA256 {
 		return ErrInvalidResultMaterial
 	}
 	authCommitment, err := commitment(auth)
@@ -364,6 +369,7 @@ func VerifyResultMaterial(auth ExecutionAuthorization, material ResultMaterial) 
 		CommandSHA256: material.CommandSHA256,
 		ResumeCheckpointCommitment: material.ResumeCheckpointCommitment,
 		OutputSHA256: material.OutputSHA256,
+		OutputHash: material.OutputHash,
 		OutputBytes: material.OutputBytes,
 		ExitCode: material.ExitCode,
 		ExecutionStartedAt: material.ExecutionStartedAt,

@@ -130,3 +130,6 @@ jobs:
 
       - name: Verify CMP-3.10 result/evidence upload
         run: python scripts/verify-cmp-3-10-result-evidence-upload.py
+
+      - name: Verify CMP-3.11 local resource controls
+        run: python scripts/verify-cmp-3-11-local-resource-controls.py

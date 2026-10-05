@@ -42,11 +42,11 @@ type Source interface {
 }
 
 type Projection struct {
-	mu       sync.RWMutex
-	chainID  uint64
-	registry string
+	mu        sync.RWMutex
+	chainID   uint64
+	registry  string
 	finalized uint64
-	byKey    map[string]VersionRecord
+	byKey     map[string]VersionRecord
 }
 
 func NewProjection(chainID uint64, registryAddress string) (*Projection, error) {
@@ -62,17 +62,25 @@ func key(serviceID string, version uint32) string {
 }
 
 func validAddress(v string) bool {
-	if len(v) != 42 || !strings.HasPrefix(v, "0x") { return false }
+	if len(v) != 42 || !strings.HasPrefix(v, "0x") {
+		return false
+	}
 	for _, r := range v[2:] {
-		if !(r >= '0' && r <= '9') && !(r >= 'a' && r <= 'f') && !(r >= 'A' && r <= 'F') { return false }
+		if !(r >= '0' && r <= '9') && !(r >= 'a' && r <= 'f') && !(r >= 'A' && r <= 'F') {
+			return false
+		}
 	}
 	return true
 }
 
 func validHash(v string) bool {
-	if len(v) != 66 || !strings.HasPrefix(v, "0x") { return false }
+	if len(v) != 66 || !strings.HasPrefix(v, "0x") {
+		return false
+	}
 	for _, r := range v[2:] {
-		if !(r >= '0' && r <= '9') && !(r >= 'a' && r <= 'f') && !(r >= 'A' && r <= 'F') { return false }
+		if !(r >= '0' && r <= '9') && !(r >= 'a' && r <= 'f') && !(r >= 'A' && r <= 'F') {
+			return false
+		}
 	}
 	return true
 }
@@ -96,7 +104,9 @@ func sameCanonical(a, b VersionRecord) bool {
 func sortedVersions(records []VersionRecord) []VersionRecord {
 	versions := append([]VersionRecord(nil), records...)
 	sort.Slice(versions, func(i, j int) bool {
-		if strings.EqualFold(versions[i].ServiceID, versions[j].ServiceID) { return versions[i].Version < versions[j].Version }
+		if strings.EqualFold(versions[i].ServiceID, versions[j].ServiceID) {
+			return versions[i].Version < versions[j].Version
+		}
 		return strings.ToLower(versions[i].ServiceID) < strings.ToLower(versions[j].ServiceID)
 	})
 	return versions
@@ -104,16 +114,24 @@ func sortedVersions(records []VersionRecord) []VersionRecord {
 
 func stageVersions(base map[string]VersionRecord, versions []VersionRecord) (map[string]VersionRecord, error) {
 	staged := make(map[string]VersionRecord, len(base)+len(versions))
-	for k, v := range base { staged[k] = v }
+	for k, v := range base {
+		staged[k] = v
+	}
 	for _, record := range sortedVersions(versions) {
-		if err := validateRecord(record); err != nil { return nil, err }
+		if err := validateRecord(record); err != nil {
+			return nil, err
+		}
 		k := key(record.ServiceID, record.Version)
 		if existing, ok := staged[k]; ok {
-			if !sameCanonical(existing, record) { return nil, ErrConflictingCanonical }
+			if !sameCanonical(existing, record) {
+				return nil, ErrConflictingCanonical
+			}
 			continue
 		}
 		if record.Version > 1 {
-			if _, ok := staged[key(record.ServiceID, record.Version-1)]; !ok { return nil, ErrVersionGap }
+			if _, ok := staged[key(record.ServiceID, record.Version-1)]; !ok {
+				return nil, ErrVersionGap
+			}
 		}
 		staged[k] = record
 	}
@@ -131,7 +149,9 @@ func (p *Projection) Apply(snapshot Snapshot) error {
 		return ErrInvalidCanonicalRecord
 	}
 	staged, err := stageVersions(p.byKey, snapshot.Versions)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	p.byKey = staged
 	p.finalized = snapshot.FinalizedBlock
 	return nil
@@ -142,7 +162,9 @@ func (p *Projection) Rebuild(snapshot Snapshot) error {
 		return ErrInvalidCanonicalRecord
 	}
 	staged, err := stageVersions(nil, snapshot.Versions)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -155,16 +177,22 @@ func (p *Projection) Rebuild(snapshot Snapshot) error {
 }
 
 func (p *Projection) Version(serviceID string, version uint32) (VersionRecord, bool) {
-	p.mu.RLock(); defer p.mu.RUnlock()
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	record, ok := p.byKey[key(serviceID, version)]
 	return record, ok
 }
 
 func (p *Projection) Service(serviceID string) []VersionRecord {
-	p.mu.RLock(); defer p.mu.RUnlock()
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	id := strings.ToLower(strings.TrimSpace(serviceID))
 	out := make([]VersionRecord, 0)
-	for _, record := range p.byKey { if strings.ToLower(record.ServiceID) == id { out = append(out, record) } }
+	for _, record := range p.byKey {
+		if strings.ToLower(record.ServiceID) == id {
+			out = append(out, record)
+		}
+	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Version < out[j].Version })
 	return out
 }
@@ -172,9 +200,15 @@ func (p *Projection) Service(serviceID string) []VersionRecord {
 func (p *Projection) FinalizedBlock() uint64 { p.mu.RLock(); defer p.mu.RUnlock(); return p.finalized }
 
 func Sync(ctx context.Context, source Source, projection *Projection) error {
-	if source == nil || projection == nil { return errors.New("registry source and projection are required") }
+	if source == nil || projection == nil {
+		return errors.New("registry source and projection are required")
+	}
 	snapshot, err := source.Snapshot(ctx)
-	if err != nil { return fmt.Errorf("read canonical registry snapshot: %w", err) }
-	if err := projection.Apply(snapshot); err != nil { return fmt.Errorf("apply canonical registry snapshot: %w", err) }
+	if err != nil {
+		return fmt.Errorf("read canonical registry snapshot: %w", err)
+	}
+	if err := projection.Apply(snapshot); err != nil {
+		return fmt.Errorf("apply canonical registry snapshot: %w", err)
+	}
 	return nil
 }

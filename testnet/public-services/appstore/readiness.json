@@ -82,6 +82,20 @@
       "conclusion": "PASS",
       "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
       "note": "Evidence-only closeout metadata; Level 2 not required for this ordinary source-wiring step and Level 3 remains deferred to app-phase closeout."
+    },
+    "appstore_audit_3": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_LIFECYCLE_MILESTONE",
+      "implementation_sha": "6ea9a46ef889e8ebcc8888a100efaac9013f1e84",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37255518380,
+      "job_id": 111591611187,
+      "conclusion": "PASS",
+      "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+      "superseded_runs": [
+        37255246790,
+        37255402153
+      ],
+      "note": "Evidence-only closeout metadata. Full AppStore race suite/vet/build/verifier serves the Level 2 lifecycle milestone without duplicate equivalent CI; Level 3 remains deferred."
     }
   },
   "current_audit": {
@@ -89,7 +103,8 @@
     "audited_against_main": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
     "completed_steps": [
       "APPSTORE-AUDIT-1",
-      "APPSTORE-AUDIT-2"
+      "APPSTORE-AUDIT-2",
+      "APPSTORE-AUDIT-3"
     ],
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
@@ -98,8 +113,7 @@
       "no production composition path builds ApplicationView records from canonical projection plus curation/security/wallet provenance",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-2 wires the finalized Registry source. APPSTORE-AUDIT-3 now wires deterministic catalogue restore/rebuild/persistence/refresh and append-only presentation history; qualification is pending exact-head Level 1 CI.",
-    "next_step": "APPSTORE-AUDIT-3",
-    "in_progress_step": "APPSTORE-AUDIT-3"
+    "note": "APPSTORE-AUDIT-3 is repository-complete and exact-head qualified: deterministic catalogue restore/rebuild/persist/refresh, interruption/stale-state handling and append-only presentation history are implemented. Overall AppStore remains PARTIAL pending ApplicationView/public-service composition and live testnet evidence.",
+    "next_step": "APPSTORE-AUDIT-4"
   }
 }

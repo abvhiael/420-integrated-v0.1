@@ -55,7 +55,46 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.2 — MVP scope
 
-Define the canonical first-release feature boundary and explicit post-MVP deferrals.
+**Purpose:** define and freeze the canonical first-release capability boundary and explicit post-MVP deferrals without prematurely defining later implementation mechanics.
+
+**Canonical requirements:**
+
+1. Define one complete MVP user journey from eligibility through profile, discovery, like/pass, mutual match, private communication, safety controls, and account exit.
+2. Require PB-MVP-001 through PB-MVP-015.
+3. Require PB-SCOPE-001 through PB-SCOPE-008.
+4. Make blocking, reporting, unmatching, deactivation, deletion, eligibility enforcement, and core matched-user messaging part of the MVP rather than premium/post-launch cleanup.
+5. Define the first complete MVP client surface as the web application.
+6. Explicitly defer native mobile, rich synchronous media, group/event experiences, AI/advanced matchmaking, premium monetization, advanced verification/reputation, and social/community expansion unless later promoted by canonical roadmap change.
+7. Distinguish deferred features from behavior incompatible with the canonical product identity, including purchased consent, block bypass, unmatched unsolicited messaging, public wallet/profile enumeration, public relationship/preference/cannabis registries, wallet-wealth desirability ranking, and administrator-manufactured consent.
+8. Preserve PB-0.1 invariants and make clear that scope inclusion does not assert implementation, deployment, integration, or release readiness.
+9. Leave detailed privacy, authority, lifecycle, storage, matching, safety, integration, API, deployment, and qualification mechanics to their later canonical roadmap owners.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.2-MVP-SCOPE.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.2-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.2 is not a Level 2 integration milestone; it introduces no shared authority or runtime component.
+
+**Dependencies:** PB-0.1 must remain COMPLETE and its PB-ID invariants must remain intact.
+
+**Exit criteria:**
+
+- one canonical PB-0.2 MVP scope document exists;
+- PB-MVP-001 through PB-MVP-015 exist exactly once and in sequence;
+- PB-SCOPE-001 through PB-SCOPE-008 exist exactly once and in sequence;
+- the complete core user journey is represented;
+- MVP, post-MVP deferrals, and incompatible/excluded behaviors are clearly separated;
+- launch-critical safety/account-exit features remain in MVP;
+- web-first MVP and post-MVP native clients are explicit;
+- no PuffBuddies contract, service ID, fixed address, deployment, client implementation, or live integration is falsely claimed;
+- the app-scoped verifier passes;
+- the exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
+- durable PB-0.2 evidence records exact run/job evidence and base SHA.
 
 ### PB-0.3 — Blockchain/off-chain boundary
 

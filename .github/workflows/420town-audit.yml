@@ -22,6 +22,10 @@ on:
       - ".github/workflows/420town-audit.yml"
   workflow_dispatch:
 
+concurrency:
+  group: 420town-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   town-skeleton:
     runs-on: ubuntu-latest

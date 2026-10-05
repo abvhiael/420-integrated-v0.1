@@ -5,17 +5,33 @@ import "../src/revenue/DevelopmentCompensationVault420.sol";
 import "../src/revenue/DevelopmentCompensationIds420.sol";
 
 interface VmDevelopmentCompensation420 {
-    function deal(address account, uint256 newBalance) external;
+    function deal(
+        address account,
+        uint256 newBalance
+    ) external;
 }
 
 contract MockCapabilityRegistryDevelopmentComp420 is ICapabilityRegistry420 {
     address public allowedPrincipal;
     bool public enabled = true;
 
-    function setAllowedPrincipal(address principal) external { allowedPrincipal = principal; }
-    function setEnabled(bool enabled_) external { enabled = enabled_; }
+    function setAllowedPrincipal(
+        address principal
+    ) external {
+        allowedPrincipal = principal;
+    }
 
-    function grant(bytes32) external pure override returns (CapabilityGrant memory g) { return g; }
+    function setEnabled(
+        bool enabled_
+    ) external {
+        enabled = enabled_;
+    }
+
+    function grant(
+        bytes32
+    ) external pure override returns (CapabilityGrant memory g) {
+        return g;
+    }
 
     function isAuthorized(
         address principal,
@@ -37,9 +53,26 @@ contract MockRevenueToken420 {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
-    function mint(address to, uint256 amount) external { balanceOf[to] += amount; }
-    function approve(address spender, uint256 amount) external returns (bool) { allowance[msg.sender][spender] = amount; return true; }
-    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+    function mint(
+        address to,
+        uint256 amount
+    ) external {
+        balanceOf[to] += amount;
+    }
+
+    function approve(
+        address spender,
+        uint256 amount
+    ) external returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        return true;
+    }
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool) {
         uint256 a = allowance[from][msg.sender];
         if (a < amount || balanceOf[from] < amount) return false;
         allowance[from][msg.sender] = a - amount;
@@ -51,25 +84,47 @@ contract MockRevenueToken420 {
 
 contract RevenueSourceHarness420 {
     DevelopmentCompensationVault420 public immutable vault;
-    constructor(address vault_) { vault = DevelopmentCompensationVault420(payable(vault_)); }
 
-    receive() external payable {}
+    constructor(
+        address vault_
+    ) {
+        vault = DevelopmentCompensationVault420(payable(vault_));
+    }
 
-    function approveToken(address token, uint256 amount) external {
+    receive() external payable { }
+
+    function approveToken(
+        address token,
+        uint256 amount
+    ) external {
         MockRevenueToken420(token).approve(address(vault), amount);
     }
 
-    function sendNative(bytes32 appId, bytes32 revenueRef, bytes32 policyRef, uint256 gross, uint16 bps) external payable {
-        vault.contributeNative{value: msg.value}(appId, revenueRef, policyRef, gross, bps);
+    function sendNative(
+        bytes32 appId,
+        bytes32 revenueRef,
+        bytes32 policyRef,
+        uint256 gross,
+        uint16 bps
+    ) external payable {
+        vault.contributeNative{ value: msg.value }(appId, revenueRef, policyRef, gross, bps);
     }
 
-    function sendToken(address token, bytes32 appId, bytes32 revenueRef, bytes32 policyRef, uint256 gross, uint16 bps) external {
+    function sendToken(
+        address token,
+        bytes32 appId,
+        bytes32 revenueRef,
+        bytes32 policyRef,
+        uint256 gross,
+        uint16 bps
+    ) external {
         vault.contributeToken(token, appId, revenueRef, policyRef, gross, bps);
     }
 }
 
 contract DevelopmentCompensationVault420Test {
-    VmDevelopmentCompensation420 private constant vm = VmDevelopmentCompensation420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    VmDevelopmentCompensation420 private constant vm =
+        VmDevelopmentCompensation420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant APP_ID = keccak256("420/app/test-revenue-source/v1");
     bytes32 private constant POLICY_REF = DevelopmentCompensationIds420.POLICY_APPLICATION_REVENUE_V1;
 
@@ -92,7 +147,9 @@ contract DevelopmentCompensationVault420Test {
         require(vault.expectedCompensation(1_000 ether, 1_000) == 100 ether, "10 percent math");
         require(vault.MAX_COMPENSATION_BPS() == 1_000, "policy ceiling");
         require(vault.beneficiary() == beneficiary, "beneficiary");
-        require(vault.beneficiaryId() == DevelopmentCompensationIds420.BENEFICIARY_420_INTEGRATED_LABS, "beneficiary id");
+        require(
+            vault.beneficiaryId() == DevelopmentCompensationIds420.BENEFICIARY_420_INTEGRATED_LABS, "beneficiary id"
+        );
     }
 
     function testRejectsWrongPolicyReference() public {
@@ -100,36 +157,34 @@ contract DevelopmentCompensationVault420Test {
         uint256 share = 10 ether;
         token.mint(address(source), share);
         source.approveToken(address(token), share);
-        (bool ok,) = address(source).call(
-            abi.encodeWithSelector(
-                source.sendToken.selector,
-                address(token),
-                APP_ID,
-                keccak256("wrong-policy"),
-                keccak256("420/REVENUE/POLICY/WRONG/V1"),
-                gross,
-                uint16(1_000)
-            )
-        );
+        (bool ok,) = address(source)
+            .call(
+                abi.encodeWithSelector(
+                    source.sendToken.selector,
+                    address(token),
+                    APP_ID,
+                    keccak256("wrong-policy"),
+                    keccak256("420/REVENUE/POLICY/WRONG/V1"),
+                    gross,
+                    uint16(1_000)
+                )
+            );
         require(!ok, "wrong policy accepted");
         require(token.balanceOf(beneficiary) == 0, "wrong policy moved funds");
     }
 
     function testRejectsZeroBpsAndZeroRevenue() public {
-        (bool zeroBps,) = address(vault).call(
-            abi.encodeWithSelector(vault.expectedCompensation.selector, 100 ether, uint16(0))
-        );
+        (bool zeroBps,) =
+            address(vault).call(abi.encodeWithSelector(vault.expectedCompensation.selector, 100 ether, uint16(0)));
         require(!zeroBps, "zero bps accepted");
-        (bool zeroRevenue,) = address(vault).call(
-            abi.encodeWithSelector(vault.expectedCompensation.selector, 0, uint16(1_000))
-        );
+        (bool zeroRevenue,) =
+            address(vault).call(abi.encodeWithSelector(vault.expectedCompensation.selector, 0, uint16(1_000)));
         require(!zeroRevenue, "zero revenue accepted");
     }
 
     function testRejectsAboveTenPercent() public {
-        (bool ok,) = address(vault).call(
-            abi.encodeWithSelector(vault.expectedCompensation.selector, 1_000 ether, uint16(1_001))
-        );
+        (bool ok,) = address(vault)
+            .call(abi.encodeWithSelector(vault.expectedCompensation.selector, 1_000 ether, uint16(1_001)));
         require(!ok, "must reject >10 percent");
     }
 
@@ -142,7 +197,9 @@ contract DevelopmentCompensationVault420Test {
         source.sendToken(address(token), APP_ID, revenueRef, POLICY_REF, gross, 1_000);
         require(token.balanceOf(beneficiary) == share, "beneficiary token amount");
         require(token.balanceOf(address(vault)) == 0, "vault token custody");
-        require(vault.consumedRevenueContribution(vault.contributionId(address(source), APP_ID, revenueRef)), "consumed ref");
+        require(
+            vault.consumedRevenueContribution(vault.contributionId(address(source), APP_ID, revenueRef)), "consumed ref"
+        );
     }
 
     function testRejectsUnauthorizedSource() public {
@@ -151,9 +208,18 @@ contract DevelopmentCompensationVault420Test {
         uint256 share = 10 ether;
         token.mint(address(source), share);
         source.approveToken(address(token), share);
-        (bool ok,) = address(source).call(
-            abi.encodeWithSelector(source.sendToken.selector, address(token), APP_ID, keccak256("unauthorized"), POLICY_REF, gross, uint16(1_000))
-        );
+        (bool ok,) = address(source)
+            .call(
+                abi.encodeWithSelector(
+                    source.sendToken.selector,
+                    address(token),
+                    APP_ID,
+                    keccak256("unauthorized"),
+                    POLICY_REF,
+                    gross,
+                    uint16(1_000)
+                )
+            );
         require(!ok, "unauthorized source accepted");
     }
 
@@ -164,16 +230,19 @@ contract DevelopmentCompensationVault420Test {
         token.mint(address(source), share * 2);
         source.approveToken(address(token), share * 2);
         source.sendToken(address(token), APP_ID, revenueRef, POLICY_REF, gross, 1_000);
-        (bool ok,) = address(source).call(
-            abi.encodeWithSelector(source.sendToken.selector, address(token), APP_ID, revenueRef, POLICY_REF, gross, uint16(1_000))
-        );
+        (bool ok,) = address(source)
+            .call(
+                abi.encodeWithSelector(
+                    source.sendToken.selector, address(token), APP_ID, revenueRef, POLICY_REF, gross, uint16(1_000)
+                )
+            );
         require(!ok, "replay accepted");
         require(token.balanceOf(beneficiary) == share, "replay changed beneficiary balance");
     }
 
     function testDirectNativeDepositDisabled() public {
         vm.deal(address(this), 1);
-        (bool ok,) = address(vault).call{value: 1}("");
+        (bool ok,) = address(vault).call{ value: 1 }("");
         require(!ok, "direct deposit accepted");
     }
 
@@ -182,7 +251,7 @@ contract DevelopmentCompensationVault420Test {
         uint256 share = 10 ether;
         vm.deal(address(this), share);
         uint256 beforeBeneficiary = beneficiary.balance;
-        source.sendNative{value: share}(APP_ID, keccak256("native-revenue-1"), POLICY_REF, gross, 1_000);
+        source.sendNative{ value: share }(APP_ID, keccak256("native-revenue-1"), POLICY_REF, gross, 1_000);
         require(beneficiary.balance == beforeBeneficiary + share, "beneficiary native amount");
         require(address(vault).balance == 0, "vault native custody");
     }

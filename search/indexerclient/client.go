@@ -118,9 +118,17 @@ func (c *Client) Status(ctx context.Context) (Status, error) {
 	if out.ChainID != strconv.FormatUint(c.requiredChainID, 10) { return out, ErrWrongChain }
 	if out.Authoritative { return out, ErrIndexerAuthoritative }
 	if out.IndexedHead == "" || out.IndexedHeadTimestamp == "" { return out, ErrIndexerNotReady }
+	indexed, err := strconv.ParseUint(out.IndexedHead, 10, 64)
+	if err != nil { return out, errors.New("420Indexer indexed head invalid") }
+	if strings.TrimSpace(out.Finality.SafeHead) != "" {
+		safe, err := strconv.ParseUint(out.Finality.SafeHead, 10, 64)
+		if err != nil { return out, errors.New("420Indexer safe head invalid") }
+		if safe > indexed { return out, errors.New("420Indexer finality ordering invalid") }
+	}
 	unix, err := strconv.ParseInt(out.IndexedHeadTimestamp, 10, 64)
 	if err != nil || unix < 0 { return out, errors.New("420Indexer status timestamp invalid") }
-	if age := c.now().Sub(time.Unix(unix, 0)); age > c.staleAfter { return out, ErrIndexerStale }
+	age := c.now().Sub(time.Unix(unix, 0))
+	if age > c.staleAfter || age < -c.staleAfter { return out, ErrIndexerStale }
 	return out, nil
 }
 

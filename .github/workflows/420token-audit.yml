@@ -44,16 +44,9 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Materialize Token formatting
+      - name: Check Token formatting
         working-directory: contracts
-        run: |
-          forge fmt src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol
-          for f in src/token/*.sol test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol; do
-            echo "FORMAT420_BEGIN:$f"
-            base64 -w0 "$f"
-            echo
-            echo "FORMAT420_END:$f"
-          done
+        run: forge fmt --check src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol
       - name: Build Token graph
         working-directory: contracts
         run: forge build src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol --sizes

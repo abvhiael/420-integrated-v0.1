@@ -230,7 +230,49 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.6 — Adult eligibility policy
 
-Define the exact eligibility interface and its dependency on canonical identity/attestation authority.
+**Purpose:** define the canonical adult-eligibility floor, minimum-disclosure eligibility interface, policy conclusions, revocation/staleness/reverification rules, and dependency contract for later canonical identity/attestation integration.
+
+**Canonical requirements:**
+
+1. Establish 18+ as the PuffBuddies adult floor; jurisdiction-specific policy may tighten but never lower it.
+2. Define ELIGIBLE, INELIGIBLE, and UNKNOWN, with UNKNOWN failing closed for ordinary participation.
+3. Record PB-ELIG-001 through PB-ELIG-020.
+4. Prefer an eligibility conclusion over raw DOB, legal identity, government ID, or precise residence.
+5. Define expiry, revocation, staleness, reverification, issuer failure, and policy-version reevaluation semantics.
+6. Make eligibility necessary but not sufficient: suspension, ban, deletion, deactivation, block, and consent rules remain authoritative.
+7. Prohibit payment, token ownership, subscription, reputation, admin convenience, or self-assertion from substituting for authoritative proof where required.
+8. Preserve wallet/profile unlinkability and minimum disclosure.
+9. Require later canonical identity/attestation integration to define issuer/verifier, subject binding, policy binding, revocation, freshness, replay resistance, and failure behavior.
+10. Define adversarial/failure classes for later implementation testing without claiming identity integration exists.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.6-ADULT-ELIGIBILITY-POLICY.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.6-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.6 is not a Level 2 integration milestone; it defines a policy/interface contract without introducing executable shared integration.
+
+**Dependencies:** PB-0.1 through PB-0.5 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.6 policy document exists;
+- 18+ floor is explicit and cannot be weakened by jurisdiction policy;
+- ELIGIBLE/INELIGIBLE/UNKNOWN semantics exist with UNKNOWN fail-closed;
+- PB-ELIG-001 through PB-ELIG-020 exist exactly once and in sequence;
+- minimum-disclosure eligibility consumption is explicit;
+- expiry/revocation/staleness/reverification/policy-version behavior is explicit;
+- eligibility cannot override consent/safety/lifecycle restrictions;
+- payment/token/admin/self-assertion bypass is prohibited;
+- canonical identity/attestation dependency requirements and adversarial cases are documented;
+- no identity contract, fixed address, service ID, provider integration, deployment, or live verification is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.6 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.7 — Threat/trust model
 

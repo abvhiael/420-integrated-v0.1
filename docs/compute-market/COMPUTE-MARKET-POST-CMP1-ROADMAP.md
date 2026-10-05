@@ -384,6 +384,12 @@ Durable evidence: [CMP-3.6 qualification](CMP-3.6-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.7 — Checkpointing/resume
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+The worker now persists private, monotonically sequenced, authorization-bound checkpoints and can explicitly resume only the same still-authorized interrupted attempt. Resume re-resolves canonical authorization, rehashes both the original CMP-3.5 work unit and the latest checkpoint, frames them through a versioned bounded stdin protocol, and re-enters only through the CMP-3.4 sandbox. Terminal/live attempts cannot be reopened.
+
+Durable design/exit criteria: [CMP-3.7 checkpointing/resume](CMP-3.7-CHECKPOINTING-RESUME.md).
+
 
 ## CMP-3.8 — Result commitment
 

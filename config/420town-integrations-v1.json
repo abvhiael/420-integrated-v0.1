@@ -27,7 +27,8 @@
       "source": "420Town:public",
       "domain": "public_town",
       "visibility": "PUBLIC_ONLY",
-      "canonicalAuthority": false
+      "canonicalAuthority": false,
+      "classification": "PUBLIC_APPLICATION"
     },
     "notifications": {
       "name": "420 Notifications",
@@ -35,7 +36,8 @@
       "class": "REPLACEABLE_NON_AUTHORITATIVE_SERVICE",
       "recipientSelection": "NOTIFICATIONS_OWNS_SUBSCRIPTION_AND_CONSENT",
       "townRequiresExplicitSubscriptionHandoff": true,
-      "canonicalAuthority": false
+      "canonicalAuthority": false,
+      "consentCheck": "ACTIVE_NOT_MUTED_OPERATIONAL_CONSENT"
     },
     "messenger": {
       "name": "420 Messenger",
@@ -46,11 +48,13 @@
         "endpoint activity",
         "conversation activity",
         "participant membership",
-        "block relationships"
+        "block relationships",
+        "envelope commitments"
       ],
       "transport": "OFF_CHAIN_ENCRYPTED_REPLACEABLE",
       "plaintextAllowed": false,
-      "transportFailureMayRewriteTownAuthority": false
+      "transportFailureMayRewriteTownAuthority": false,
+      "commitOrder": "ENCRYPTED_TRANSPORT_THEN_CANONICAL_ENVELOPE_COMMIT"
     },
     "rewards": {
       "name": "420 Rewards",

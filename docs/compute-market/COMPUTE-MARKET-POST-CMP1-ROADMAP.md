@@ -392,6 +392,12 @@ Durable evidence: [CMP-3.7 qualification](CMP-3.7-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.8 — Result commitment
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+The worker now hashes complete sandbox stdout independently of bounded diagnostic capture, persists the full stdout SHA-256/byte count in the durable execution record, and creates private deterministic unsigned result material bound to the exact authorization/attempt/work-unit/execution context. The material exposes a bytes32-compatible output hash for CMP-3.9 but does not create a receipt, signature, canonical RESULT_COMMITTED transition, correctness claim, or payment authority.
+
+Durable design/exit criteria: [CMP-3.8 result commitment](CMP-3.8-RESULT-COMMITMENT.md).
+
 
 ## CMP-3.9 — Execution-key signed receipt
 

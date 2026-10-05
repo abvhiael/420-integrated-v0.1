@@ -96,7 +96,7 @@ func TestQualifiedPublicSourcesAreAdmitted(t *testing.T) {
 		{Source: architecture.SourceRights, Domain: architecture.DomainRightsRecord, Classification: ClassPublicOnChain, Public: true},
 		{Source: architecture.SourceCommons, Domain: architecture.DomainPublicCommons, Classification: ClassPublicOnChain, Public: true},
 		{Source: architecture.SourcePulse, Domain: architecture.DomainPublicPulse, Classification: ClassPublicOnChain, Public: true},
-		{Source: architecture.SourceTown, Domain: architecture.DomainPublicTown, Classification: ClassPublicOnChain, Public: true},
+		{Source: architecture.SourceTown, Domain: architecture.DomainPublicTown, Classification: ClassPublicApplication, Public: true},
 	}
 	for _, candidate := range tests {
 		if err := Admit(candidate); err != nil {

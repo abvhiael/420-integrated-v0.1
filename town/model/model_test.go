@@ -60,3 +60,28 @@ func TestCanonicalVisibilityVocabulary(t *testing.T) {
 		t.Fatal("canonical visibility vocabulary changed")
 	}
 }
+
+func TestAuthorityVocabularyMatchesTOWN3(t *testing.T) {
+	if MembershipActive != "ACTIVE" || MembershipRemoved != "REMOVED" {
+		t.Fatal("membership lifecycle drift")
+	}
+	if SubscriptionCancelled != "CANCELLED" || SubscriptionExpired != "EXPIRED" {
+		t.Fatal("subscription lifecycle drift")
+	}
+	if EntitlementRevoked != "REVOKED" || EntitlementExpired != "EXPIRED" {
+		t.Fatal("entitlement lifecycle drift")
+	}
+	if RoleAdmin != "ADMIN" || RoleModerator != "MODERATOR" || RoleMember != "MEMBER" {
+		t.Fatal("role vocabulary drift")
+	}
+	permissions := []PermissionID{
+		PermissionManageMembers,
+		PermissionManageRoles,
+		PermissionManageSubscriptions,
+		PermissionManageEntitlements,
+		PermissionManageTreasury,
+	}
+	if len(permissions) != 5 {
+		t.Fatal("permission vocabulary drift")
+	}
+}

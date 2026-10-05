@@ -358,7 +358,14 @@ Durable evidence: [CMP-3.3 qualification](CMP-3.3-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.4 — Secure workload sandbox
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
 Container, microVM, WASM or equivalent isolation. Customer workloads must not execute unrestricted on the host.
+
+A digest-pinned OCI sandbox backend now enforces non-root execution, read-only rootfs, dropped capabilities, no-new-privileges, disabled networking, bounded CPU/memory/PIDs/tmpfs/runtime/output, no host mounts/devices/namespaces, and forced cleanup on timeout. The Level 1 workflow includes a real local Docker/scratch probe that validates the isolation controls from inside the container.
+
+Durable design/exit criteria: [CMP-3.4 secure workload sandbox](CMP-3.4-SECURE-WORKLOAD-SANDBOX.md).
+
 
 ## CMP-3.5 — Content-addressed work-unit download
 

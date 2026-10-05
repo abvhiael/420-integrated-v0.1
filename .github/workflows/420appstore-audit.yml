@@ -54,6 +54,7 @@ jobs:
             appstore/api/composition.go \
             appstore/api/composition_test.go \
             appstore/cmd/appstore420/main.go \
+            appstore/cmd/appstore420/main_test.go \
             appstore/runtime/config.go \
             appstore/closeout/closeout_test.go)"
           test -z "$unformatted" || { echo "$unformatted"; exit 1; }

@@ -10,6 +10,7 @@ import (
 
 	notificationsecurity "github.com/420integrated/420-integrated/notifications/security"
 	"github.com/420integrated/420-integrated/notifications/feed"
+	"github.com/420integrated/420-integrated/notifications/subscriptions"
 	"github.com/420integrated/420-integrated/search/architecture"
 	storage420 "github.com/420integrated/420-integrated/sdk/storage420"
 	"github.com/420integrated/420-integrated/town/content"
@@ -35,6 +36,10 @@ func(f messengerAuthorityFake)EndpointActive(context.Context,model.ObjectID)(boo
 func(f messengerAuthorityFake)ConversationActive(context.Context,string)(bool,error){return f.active,f.err}
 func(f messengerAuthorityFake)ConversationParticipant(context.Context,string,model.ObjectID)(bool,error){return f.participant,f.err}
 func(f messengerAuthorityFake)Blocked(context.Context,model.ObjectID,model.ObjectID)(bool,error){return f.blocked,f.err}
+func(f messengerAuthorityFake)CommitEnvelope(context.Context,EncryptedEnvelope)(CanonicalEnvelopeReceipt,error){
+	if f.err!=nil{return CanonicalEnvelopeReceipt{},f.err}
+	return CanonicalEnvelopeReceipt{MessageID:"canonical-msg-1",CommittedAt:time.Unix(1700000001,0).UTC()},nil
+}
 
 type transportFake struct{ got EncryptedEnvelope; err error }
 func(f *transportFake)SendEncrypted(_ context.Context,e EncryptedEnvelope)(TransportReceipt,error){
@@ -108,15 +113,21 @@ func TestSearchProjectsOnlyExplicitPublicTownMaterial(t *testing.T){
 }
 
 func TestNotificationHandoffRemainsNonAuthoritativeAndProvenanceBound(t *testing.T){
-	store:=feed.NewStore();sink:=NotificationFeedSink{Store:store}
+	store:=feed.NewStore();subs:=subscriptions.NewStore()
+	_,err:=subs.Create(subscriptions.Subscription{ID:"sub-1",Filters:subscriptions.Filters{Sources:[]string{TownServiceID}},MinimumSeverity:subscriptions.SeverityInfo,Channels:[]subscriptions.Channel{subscriptions.ChannelInApp},Active:true,OperationalConsent:true})
+	if err!=nil{t.Fatal(err)}
+	sink:=NotificationFeedSink{Store:store,Subscriptions:subs}
 	now:=time.Unix(1700000000,0).UTC()
 	p:=notificationsecurity.Provenance{ChainID:"420",BlockNumber:"10",BlockHash:"0xabc",TransactionHash:"0xdef",LogIndex:1,SourceID:TownServiceID,OriginURL:"https://town.example/post/1"}
 	item,err:=sink.Submit(context.Background(),NotificationCandidate{ID:"notice-1",EventID:"post:1",SubscriptionID:"sub-1",Title:"reply",Provenance:p,CreatedAt:now})
 	if err!=nil{t.Fatal(err)}
 	if item.Authoritative || item.DeliveryStatus!=feed.DeliveryPending{t.Fatalf("unsafe notification %+v",item)}
-	if _,err:=NotificationFeedSink{Store:store}.Submit(context.Background(),NotificationCandidate{ID:"notice-2",EventID:"post:2",SubscriptionID:"",Title:"reply",Provenance:p,CreatedAt:now});err==nil{
+	if _,err:=sink.Submit(context.Background(),NotificationCandidate{ID:"notice-2",EventID:"post:2",SubscriptionID:"",Title:"reply",Provenance:p,CreatedAt:now});err==nil{
 		t.Fatal("notification without explicit subscription selection must fail")
 	}
+	muted,_:=subs.SetMuted("sub-1",true)
+	if !muted.Muted{t.Fatal("expected muted subscription")}
+	if _,err:=sink.Submit(context.Background(),NotificationCandidate{ID:"notice-3",EventID:"post:3",SubscriptionID:"sub-1",Title:"reply",Provenance:p,CreatedAt:now});!errors.Is(err,ErrUnauthorizedIntegration){t.Fatalf("muted subscription got %v",err)}
 }
 
 func envelopeFixture()EncryptedEnvelope{
@@ -133,7 +144,7 @@ func TestMessengerRequiresCanonicalAuthorizationAndReplaceableEncryptedTransport
 	a:=MessengerAdapter{Authority:messengerAuthorityFake{active:true,participant:true},Transport:tx}
 	r,err:=a.Send(context.Background(),envelopeFixture())
 	if err!=nil{t.Fatal(err)}
-	if r.ProviderID!="replaceable-1" || len(tx.got.Ciphertext)==0{t.Fatalf("bad receipt %+v",r)}
+	if r.ProviderID!="replaceable-1" || r.CanonicalMessageID!="canonical-msg-1" || len(tx.got.Ciphertext)==0{t.Fatalf("bad receipt %+v",r)}
 	a.Authority=messengerAuthorityFake{active:true,participant:true,blocked:true}
 	if _,err:=a.Send(context.Background(),envelopeFixture());!errors.Is(err,ErrUnauthorizedIntegration){t.Fatalf("blocked send got %v",err)}
 }

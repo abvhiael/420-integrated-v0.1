@@ -16,23 +16,6 @@ on:
       - "scripts/verify-420town-audit.py"
       - "scripts/verify-420town-skeleton.py"
       - ".github/workflows/420town-audit.yml"
-  push:
-    branches:
-      - "audit/420town-*"
-    paths:
-      - "config/420town-genesis.json"
-      - "config/genesis-applications.json"
-      - "config/genesis-consumer-services.json"
-      - "contracts/src/town/**"
-      - "contracts/test/Town*"
-      - "town/**"
-      - "docs/apps/town/**"
-      - "docs/420TOWN-*"
-      - "docs/architecture/**"
-      - "docs/genesis-services/**"
-      - "scripts/verify-420town-audit.py"
-      - "scripts/verify-420town-skeleton.py"
-      - ".github/workflows/420town-audit.yml"
   workflow_dispatch:
 
 jobs:
@@ -40,6 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-go@v5
         with:
           go-version: "1.23.x"
@@ -61,6 +50,13 @@ jobs:
         working-directory: contracts
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        working-directory: .
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable

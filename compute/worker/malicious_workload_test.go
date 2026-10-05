@@ -31,7 +31,7 @@ func TestMaliciousWorkloadPolicyValidation(t *testing.T) {
 	cases := []MaliciousWorkloadPolicy{base, base, base, base, base}
 	cases[0].MaxCommandBytes = 0
 	cases[1].MaxArgumentBytes = base.MaxCommandBytes + 1
-	cases[2].MaxConsecutiveViolations = 0
+	cases[2].MaxViolations = 0
 	cases[3].QuarantineDuration = 0
 	cases[4].DenyCommandSHA256 = map[string]bool{"ABC": true}
 	for i, candidate := range cases {
@@ -99,7 +99,7 @@ func TestMaliciousWorkloadPreflightEnforcesCommandBoundsAndDenyDigests(t *testin
 func TestSecurityGuardQuarantinesRepeatedAbuseAndPersistsAcrossRestart(t *testing.T) {
 	lifecycle, plan, auth, _, _ := maliciousFixture(t)
 	policy := DefaultMaliciousWorkloadPolicy()
-	policy.MaxConsecutiveViolations = 2
+	policy.MaxViolations = 2
 	policy.QuarantineDuration = time.Hour
 	guard, err := NewWorkloadSecurityGuard(lifecycle.config, policy)
 	if err != nil {
@@ -129,33 +129,6 @@ func TestSecurityGuardQuarantinesRepeatedAbuseAndPersistsAcrossRestart(t *testin
 	restarted.now = func() time.Time { return now }
 	if err := restarted.Preflight(auth, plan.Sandbox); !errors.Is(err, ErrWorkloadQuarantined) {
 		t.Fatalf("restart lost quarantine state: %v", err)
-	}
-}
-
-func TestSecurityGuardSuccessfulOutcomeResetsViolationCounter(t *testing.T) {
-	lifecycle, plan, auth, _, _ := maliciousFixture(t)
-	policy := DefaultMaliciousWorkloadPolicy()
-	policy.MaxConsecutiveViolations = 2
-	guard, err := NewWorkloadSecurityGuard(lifecycle.config, policy)
-	if err != nil {
-		t.Fatal(err)
-	}
-	bad := ExecutionOutcome{
-		Record: ExecutionRecord{Status: ExecutionFailed, TimedOut: true},
-		Sandbox: SandboxResult{TimedOut: true},
-	}
-	if err := guard.Observe(auth, plan.Sandbox, bad, errors.New("timeout")); err != nil {
-		t.Fatal(err)
-	}
-	good := ExecutionOutcome{Record: ExecutionRecord{Status: ExecutionExited}}
-	if err := guard.Observe(auth, plan.Sandbox, good, nil); err != nil {
-		t.Fatal(err)
-	}
-	if err := guard.Observe(auth, plan.Sandbox, bad, errors.New("timeout")); err != nil {
-		t.Fatal(err)
-	}
-	if err := guard.Preflight(auth, plan.Sandbox); err != nil {
-		t.Fatalf("nonconsecutive violations caused quarantine: %v", err)
 	}
 }
 
@@ -250,7 +223,7 @@ func TestProtectedExecutionLifecycleObservesSandboxAbuse(t *testing.T) {
 		t.Fatal(err)
 	}
 	policy := DefaultMaliciousWorkloadPolicy()
-	policy.MaxConsecutiveViolations = 1
+	policy.MaxViolations = 1
 	guard, err := NewWorkloadSecurityGuard(cfg, policy)
 	if err != nil {
 		t.Fatal(err)

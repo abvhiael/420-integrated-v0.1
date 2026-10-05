@@ -144,7 +144,7 @@
     }
   },
   "current_audit": {
-    "status": "REMEDIATION_REQUIRED",
+    "status": "REPOSITORY_COMPLETE_TESTNET_HANDOFF",
     "audited_against_main": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
     "completed_steps": [
       "APPSTORE-AUDIT-1",
@@ -156,9 +156,9 @@
     ],
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
-      "public testnet backend/frontend URLs and live dependency qualification remain pending"
+      "APPSTORE-AUDIT-7 requires the approved live public testnet and real backend/frontend/dependency endpoints"
     ],
-    "note": "APPSTORE-AUDIT-6 is COMPLETE: AppStore repository qualification and full 420Docs qualification pass on exact SHA 94d81b40d251fe425ae89cbacffa8cf766fcbb97. Repository-side implementation is qualified; overall AppStore remains PARTIAL because live public-testnet qualification and final Genesis/production closeout are still outstanding.",
+    "note": "APPSTORE-AUDIT-1 through APPSTORE-AUDIT-6 are repository-complete. Unfinished APPSTORE-AUDIT-7 live public-testnet qualification and APPSTORE-AUDIT-8 Genesis/production closeout are handed off to the canonical testnet work roadmap in docs/ROADMAP.md. No live testnet evidence is claimed here.",
     "next_step": "APPSTORE-AUDIT-7"
   }
 }

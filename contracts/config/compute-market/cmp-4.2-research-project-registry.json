@@ -1,0 +1,107 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.2.ResearchProjectRegistry.v1",
+  "step": "CMP-4.2",
+  "title": "Research Project Registry",
+  "canonical_definition": "Research Project Registry",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_main_sha": "4840e9a3e1c89d8c6a9e241ea387166f33202697",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeResearchProjectRegistry420.sol",
+    "test": "contracts/test/ComputeResearchProjectRegistry420.t.sol",
+    "doc": "docs/compute-market/CMP-4.2-RESEARCH-PROJECT-REGISTRY.md",
+    "verifier": "scripts/verify-cmp-4-2-research-project-registry.py"
+  },
+  "identity": {
+    "domain": "420/COMPUTE/RESEARCH_PROJECT/V1",
+    "derivation": "keccak256(abi.encode(PROJECT_DOMAIN, block.chainid, address(registry), owner, uint64(nonce)))",
+    "caller_supplied_id": false,
+    "failed_create_consumes_nonce": false
+  },
+  "revision_commitment": {
+    "domain": "420/COMPUTE/RESEARCH_PROJECT_COMMITMENT/V1",
+    "fields": [
+      "chainId",
+      "registry",
+      "projectId",
+      "owner",
+      "researchDomain",
+      "definitionCommitment",
+      "predecessorCommitment",
+      "revision",
+      "acceptingNewWork",
+      "status"
+    ],
+    "append_only_history": true
+  },
+  "authority": {
+    "register": "caller registers a project owned by caller",
+    "revise": "recorded owner only, exact current revision",
+    "set_new_work_acceptance": "recorded owner only, exact current revision",
+    "retire": "recorded owner only, exact current revision, terminal",
+    "owner_transfer": false,
+    "researcher_identity_claimed": false
+  },
+  "admission": [
+    "project exists",
+    "status ACTIVE",
+    "acceptingNewWork true",
+    "revision exactly current",
+    "exact nonzero current registry commitment"
+  ],
+  "authority_boundaries": [
+    "no job lifecycle authority",
+    "no dataset-access authority",
+    "no worker/scheduler/verifier authority",
+    "no funding/custody/settlement/reward authority",
+    "no stake/slash/dispute authority",
+    "no governance/bridge/wallet/validator authority",
+    "no claim that project owner address is a verified researcher or institution"
+  ],
+  "negative_cases": [
+    "zero research domain",
+    "zero definition commitment",
+    "failed creation nonce consumption",
+    "outsider revision",
+    "outsider pause/resume",
+    "outsider retirement",
+    "stale revision",
+    "no-op acceptance mutation",
+    "cross-project commitment replay",
+    "stale commitment replay",
+    "retired project revision",
+    "retired project resume",
+    "duplicate retirement"
+  ],
+  "cmp_4_1_integration": "researchProjectCommitment is exact ComputeResearchProjectRegistry420 project revision commitment; new work checks isCurrentAcceptable before binding",
+  "exit_criteria": [
+    "canonical domain-separated chain/registry-bound project IDs",
+    "nonzero research-domain and project-definition commitments",
+    "owner-only exact-revision mutation",
+    "append-only immutable revision history with predecessor links",
+    "revisioned pause/resume of new-work admission",
+    "terminal retirement with historical readability",
+    "exact current project commitment validation for new scientific work",
+    "cross-project/stale-revision replay fails closed",
+    "no unrelated protocol authority is introduced",
+    "dedicated tests and mechanical verifier committed",
+    "affected Compute Market Level 1 workflow passes exact implementation SHA"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.3 researcher/institution identity",
+    "CMP-4.4 dataset manifests",
+    "CMP-4.5 reproducible execution environments",
+    "CMP-4.6 result provenance",
+    "CMP-4.7 metadata/lineage",
+    "CMP-4.8 publication/retention",
+    "CMP-4.9 dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-6 rewards",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.3 — Researcher / institution identity"
+}

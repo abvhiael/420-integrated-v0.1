@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
 	"io"
 	"os/exec"
 	"regexp"
@@ -55,6 +57,8 @@ type SandboxResult struct {
 	TimedOut        bool          `json:"timedOut"`
 	Output          string        `json:"output"`
 	OutputTruncated bool          `json:"outputTruncated"`
+	StdoutSHA256    string        `json:"stdoutSha256"`
+	StdoutBytes     uint64        `json:"stdoutBytes"`
 }
 
 type CommandRunner interface {
@@ -167,8 +171,9 @@ func (s *Sandbox) RunWithInput(parent context.Context, request SandboxRequest, i
 
 	args := s.runArgs(name, request, input != nil)
 	output := newLimitedBuffer(s.policy.MaxOutputBytes)
+	stdout := newHashingWriter(output)
 	started := time.Now()
-	runErr := s.runner.Run(ctx, s.policy.Engine, args, input, output, output)
+	runErr := s.runner.Run(ctx, s.policy.Engine, args, input, stdout, output)
 	duration := time.Since(started)
 
 	result := SandboxResult{
@@ -180,6 +185,8 @@ func (s *Sandbox) RunWithInput(parent context.Context, request SandboxRequest, i
 		TimedOut:        errors.Is(ctx.Err(), context.DeadlineExceeded),
 		Output:          output.String(),
 		OutputTruncated: output.Truncated(),
+		StdoutSHA256:    stdout.SHA256(),
+		StdoutBytes:     stdout.Bytes(),
 	}
 
 	if ctx.Err() != nil {
@@ -269,4 +276,35 @@ func (b *limitedBuffer) String() string {
 
 func (b *limitedBuffer) Truncated() bool {
 	return b.truncated
+}
+
+
+type hashingWriter struct {
+	writer io.Writer
+	hash   hash.Hash
+	bytes  uint64
+}
+
+func newHashingWriter(writer io.Writer) *hashingWriter {
+	return &hashingWriter{writer: writer, hash: sha256.New()}
+}
+
+func (w *hashingWriter) Write(p []byte) (int, error) {
+	if len(p) == 0 {
+		return 0, nil
+	}
+	if _, err := w.hash.Write(p); err != nil {
+		return 0, err
+	}
+	n, err := w.writer.Write(p)
+	w.bytes += uint64(n)
+	return n, err
+}
+
+func (w *hashingWriter) SHA256() string {
+	return hex.EncodeToString(w.hash.Sum(nil))
+}
+
+func (w *hashingWriter) Bytes() uint64 {
+	return w.bytes
 }

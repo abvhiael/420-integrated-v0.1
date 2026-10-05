@@ -39,11 +39,19 @@ No 420Identity integration, credential implementation, identity contract, fixed 
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- canonical 18+ floor is defined and jurisdiction may only tighten it;
+- ELIGIBLE / INELIGIBLE / UNKNOWN semantics are defined with UNKNOWN fail-closed;
+- PB-ELIG-001 through PB-ELIG-020 exist exactly once and in sequence;
+- minimum-disclosure eligibility consumption is required;
+- expiry, revocation, staleness, reverification, issuer failure, subject binding, and policy-version reevaluation are defined;
+- eligibility remains necessary but not sufficient for participation;
+- payment/token/admin/self-assertion bypass is prohibited where authoritative proof is required;
+- canonical identity/attestation dependency requirements and adversarial cases are documented;
+- no identity contract, fixed address, service ID, provider integration, deployment, or live verification is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`68727e274fdafdf9f5c6af1b1b8757265792fb5c`
 
 ## Current main/base SHA
 
@@ -55,7 +63,14 @@ PR #526 remains based on its historical base `b338b9c9c140957b0ea8619b0b20bfed41
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+- push run `37283181907` — **PASS**
+- push job `111675808842` — **PASS**
+- PR run `37283187508` — **PASS**
+- PR job `111675827553` — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental runtime/contract implementation rejection — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -87,13 +102,15 @@ PB-0.6 does not choose or implement credential formats, proof systems, issuer ke
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.6 is formally COMPLETE.
+None for PB-0.6.
 
-The accumulated PR branch must later be reconciled with current `main` before merge/Level 3 closeout; that is not a PB-0.6 Level 1 completion blocker because the intervening main changes do not modify PuffBuddies PB-0.6 dependencies.
+The accumulated PR branch still requires later reconciliation with current `main` before merge/Level 3 closeout; that is not a PB-0.6 Level 1 completion blocker.
 
 ## Completion state
 
-**PB-0.6 — PENDING QUALIFICATION**
+**PB-0.6 — COMPLETE**
+
+All canonical PB-0.6 exit criteria are satisfied on exact implementation SHA `68727e274fdafdf9f5c6af1b1b8757265792fb5c`.
 
 ## Next canonical roadmap step
 

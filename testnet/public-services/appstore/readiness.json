@@ -123,24 +123,42 @@
         37257475522
       ],
       "note": "Evidence-only closeout metadata. The retained AppStore race suite, vet, production build and verifier supply the app-level public-service integration milestone; Level 3 remains deferred."
+    },
+    "appstore_audit_6": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_REPOSITORY_MILESTONE",
+      "implementation_sha": "94d81b40d251fe425ae89cbacffa8cf766fcbb97",
+      "appstore_workflow": "420AppStore Audit Qualification",
+      "appstore_run_id": 37258566421,
+      "appstore_job_id": 111600724647,
+      "docs_workflow": "420Docs Qualification",
+      "docs_run_id": 37258566434,
+      "docs_job_id": 111600709511,
+      "conclusion": "PASS",
+      "main_observed": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
+      "superseded_docs_runs": [
+        37257793470,
+        37258418199,
+        37258520061
+      ],
+      "note": "Repository qualification milestone. AppStore formatting/race/vet/build/verifier and full 420Docs qualification passed on the same exact SHA. Level 3 remains deferred to final app-phase closeout."
     }
   },
   "current_audit": {
     "status": "REMEDIATION_REQUIRED",
-    "audited_against_main": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+    "audited_against_main": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
     "completed_steps": [
       "APPSTORE-AUDIT-1",
       "APPSTORE-AUDIT-2",
       "APPSTORE-AUDIT-3",
       "APPSTORE-AUDIT-4",
-      "APPSTORE-AUDIT-5"
+      "APPSTORE-AUDIT-5",
+      "APPSTORE-AUDIT-6"
     ],
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
-      "APPSTORE-AUDIT-6 repository qualification remains pending after public service composition",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-5 is repository-complete and exact-head qualified: production mounts health/readiness, dynamic /v1/apps* and the embedded frontend under one dependency-aware, abuse-limited handler. Overall AppStore remains PARTIAL pending APPSTORE-AUDIT-6 repository qualification and later live testnet/Genesis closeout.",
-    "next_step": "APPSTORE-AUDIT-6"
+    "note": "APPSTORE-AUDIT-6 is COMPLETE: AppStore repository qualification and full 420Docs qualification pass on exact SHA 94d81b40d251fe425ae89cbacffa8cf766fcbb97. Repository-side implementation is qualified; overall AppStore remains PARTIAL because live public-testnet qualification and final Genesis/production closeout are still outstanding.",
+    "next_step": "APPSTORE-AUDIT-7"
   }
 }

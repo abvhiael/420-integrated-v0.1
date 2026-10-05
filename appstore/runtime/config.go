@@ -13,6 +13,7 @@ type Config struct {
 	IndexerURL      string
 	RegistryAddress string
 	CatalogueStore  string
+	ViewInputs      string
 	ListenAddr      string
 }
 

@@ -120,7 +120,7 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 	if actor == "" || req.Sender == "" || req.Recipient == "" || actor != req.Sender {
 		return Message{}, ErrUnauthorized
 	}
-	if req.IdempotencyKey == "" || req.Subject == "" || req.Body == "" || req.Source == "" || len([]byte(req.Subject)) > MaxSubjectBytes || len([]byte(req.Body)) > MaxBodyBytes {
+	if req.IdempotencyKey == "" || req.Subject == "" || req.Body == "" || req.Source != ServiceID || len([]byte(req.Subject)) > MaxSubjectBytes || len([]byte(req.Body)) > MaxBodyBytes {
 		return Message{}, ErrInvalidInput
 	}
 	if s.Identities == nil || s.Messenger == nil || s.Blobs == nil || s.Store == nil {

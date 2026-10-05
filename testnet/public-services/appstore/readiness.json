@@ -72,15 +72,25 @@
     "docs_run": 35157767548,
     "integrated_run": 35157767517,
     "latest_main_reconciled_for_appstore_9": "b1433ba00f7ac0ce9303da476d33879739bafcef",
-    "note": "Historical APPSTORE-9 evidence retained for provenance only. Current audit remediation evidence is recorded separately and must be exact-head qualified."
+    "note": "Historical APPSTORE-9 evidence retained for provenance only. Current audit remediation evidence is recorded separately and must be exact-head qualified.",
+    "appstore_audit_2": {
+      "qualification_level": "LEVEL_1",
+      "implementation_sha": "03071f147041efe2d0bcd9df151a75c54f5c467c",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37252857689,
+      "job_id": 111583875589,
+      "conclusion": "PASS",
+      "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+      "note": "Evidence-only closeout metadata; Level 2 not required for this ordinary source-wiring step and Level 3 remains deferred to app-phase closeout."
+    }
   },
   "current_audit": {
     "status": "REMEDIATION_REQUIRED",
     "audited_against_main": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
     "completed_steps": [
-      "APPSTORE-AUDIT-1"
+      "APPSTORE-AUDIT-1",
+      "APPSTORE-AUDIT-2"
     ],
-    "in_progress_step": "APPSTORE-AUDIT-2",
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
       "production entrypoint does not yet restore/rebuild and persist the APPSTORE-3 catalogue lifecycle",
@@ -89,6 +99,7 @@
       "no production composition path builds ApplicationView records from canonical projection plus curation/security/wallet provenance",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-2 wires a concrete finalized Registry source; overall implementation remains PARTIAL until later remediation steps compose persistence, views, API/frontend and live deployment."
+    "note": "APPSTORE-AUDIT-2 wires a concrete finalized Registry source; overall implementation remains PARTIAL until later remediation steps compose persistence, views, API/frontend and live deployment.",
+    "next_step": "APPSTORE-AUDIT-3"
   }
 }

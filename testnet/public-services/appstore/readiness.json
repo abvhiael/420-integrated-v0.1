@@ -110,10 +110,10 @@
     "blockers": [
       "production entrypoint serves health/readiness only and does not mount the APPSTORE-7 discovery API",
       "production entrypoint does not mount the APPSTORE-9 embedded frontend",
-      "no production composition path builds ApplicationView records from canonical projection plus curation/security/wallet provenance",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-3 is repository-complete and exact-head qualified: deterministic catalogue restore/rebuild/persist/refresh, interruption/stale-state handling and append-only presentation history are implemented. Overall AppStore remains PARTIAL pending ApplicationView/public-service composition and live testnet evidence.",
-    "next_step": "APPSTORE-AUDIT-4"
+    "note": "APPSTORE-AUDIT-4 now defines and wires fail-closed ApplicationView composition from finalized canonical catalogue records plus optional non-canonical curation/security/Wallet/link inputs. Exact-head Level 1 qualification is pending; public API/frontend composition and live testnet evidence remain outstanding.",
+    "next_step": "APPSTORE-AUDIT-4",
+    "in_progress_step": "APPSTORE-AUDIT-4"
   }
 }

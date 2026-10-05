@@ -276,7 +276,43 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.7 — Threat/trust model
 
-Define actors, trust boundaries, abuse cases, and authority owners.
+**Purpose:** define canonical protected assets, actor classes, trust boundaries, abuse cases, authority-ownership rules, fail-closed assumptions, required security-control classes, and residual-risk acceptance criteria.
+
+**Canonical requirements:**
+
+1. Record PB-THREAT-001 through PB-THREAT-040.
+2. Identify protected assets including identity/eligibility evidence, profiles/media, preferences, relationship state, precise location, messages, wallet unlinkability, moderation evidence, sessions/secrets, entitlement context, deletion intent, and safety audit trails.
+3. Define ordinary/malicious/Sybil/compromised-user, operator, service, client, dependency, public-chain, network, breach, and bot adversary classes.
+4. Define trust boundaries for client/server, 420Identity, 420Messenger, 420Notifications, 420Pay, public chain, Search/Indexer/Explorer, and privileged human access.
+5. Cover canonical abuse cases including triangulation, graph reconstruction, wallet correlation, block/ban bypass, post-revocation delivery, eligibility bypass, scraping/enumeration, impersonation, moderation abuse, insider misuse, metadata leakage, deletion remanence, credential compromise, resource abuse, dependency compromise, and replay/stale state.
+6. Require one canonical authority owner per critical decision class and prohibit conflict resolution that silently broadens access.
+7. Require safety/consent/eligibility uncertainty to fail closed.
+8. Require external services to be capability-limited and privileged access to be least-privilege/auditable.
+9. Define later security-control expectations and residual-risk acceptance rules.
+10. Preserve PB-0.1 through PB-0.6 without falsely claiming runtime security controls or integrations exist.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.7-THREAT-TRUST-MODEL.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.7-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.7 is not a Level 2 integration milestone; it defines threat and trust requirements without introducing executable shared integration.
+
+**Dependencies:** PB-0.1 through PB-0.6 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.7 threat/trust document exists;
+- PB-THREAT-001 through PB-THREAT-040 exist exactly once and in sequence;
+- protected assets, actor classes, trust boundaries, abuse cases, authority-ownership, fail-closed behavior, security-control expectations, and residual-risk rules are explicit;
+- no runtime security control, contract, fixed address, service ID, deployment, or live integration is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.7 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.8 — Ecosystem dependencies
 

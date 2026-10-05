@@ -400,6 +400,12 @@ Durable evidence: [CMP-3.8 qualification](CMP-3.8-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.9 — Execution-key signed receipt
+**Status: IMPLEMENTED / Level 1 + Level 2 qualification pending.**
+
+The worker now freezes the canonical CMP-0.9 ReceiptV1 tuple, resolves accepted receipt context through a fail-closed canonical authority interface, signs the EIP-712 receipt with the execution key, and separately produces the existing worker-evidence contract-compatible result authorization signature. Receipt signing remains attribution only: no correctness, canonical result-state, upload, payment or settlement authority is introduced.
+
+Durable design/exit criteria: [CMP-3.9 execution-key signed receipt](CMP-3.9-EXECUTION-KEY-SIGNED-RECEIPT.md).
+
 
 ## CMP-3.10 — Result/evidence upload
 

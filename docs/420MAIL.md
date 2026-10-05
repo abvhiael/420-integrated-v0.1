@@ -21,7 +21,7 @@ Provide a private ecosystem inbox addressed by 420Identity references. Genesis s
 - Mail metadata is application state, not consensus.
 - Message bodies remain off-chain and are excluded from public indexing.
 - Wallet private keys are never handled by 420Mail.
-- Retriable send uses a sender-scoped idempotency key; conflicting reuse fails closed.
+- Retriable send uses a sender-scoped idempotency key; conflicting reuse fails closed. Ordinary user-authenticated sends must use the canonical `420/service/mail/v1` source, preventing callers from impersonating another ecosystem application. Signed application-generated mail requires a separately qualified source-authorization path.
 - Visibility is `PRIVATE`.
 
 ## API and client
@@ -41,7 +41,7 @@ The HTTP handler requires an injected authentication function and does not trust
 
 ## Security
 
-Applicable shared threats include SPAM, SYBIL, MESSAGING_ABUSE, INDEX_POISONING and WEBHOOK_REPLAY where adapters use callbacks. Repository controls include actor/sender binding, identity resolution, Messenger policy checks before persistence, private body references, input bounds, idempotency conflict detection, recipient-only read acknowledgement, no public list/search route, injected authentication and bounded pagination.
+Applicable shared threats include SPAM, SYBIL, MESSAGING_ABUSE, INDEX_POISONING and WEBHOOK_REPLAY where adapters use callbacks. Repository controls include actor/sender binding, canonical-source enforcement for the user send path, identity resolution, Messenger policy checks before persistence, private body references, input bounds, idempotency conflict detection, recipient-only read acknowledgement, no public list/search route, injected authentication and bounded pagination.
 
 Deployment still requires rate limits, abuse/report operations, attachment policy/scanning if attachments are added, encrypted private storage, secret handling, observability, backup/recovery, retention policy, provider failure behavior and live privacy testing.
 

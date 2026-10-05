@@ -1,6 +1,6 @@
 # 420AI audit remediation roadmap
 
-Status: **ACTIVE**
+Status: **REPOSITORY REMEDIATION COMPLETE / TESTNET HANDOFF ACTIVE**
 Audit baseline: `main@b58b09a17e641a42b81d832bad913a83c7caada9`
 
 This roadmap preserves the frozen 420AI V1 architecture. It does not redefine 420AI around the subset of files currently present.
@@ -83,12 +83,13 @@ Implement the architecture-named modules that are still absent from current `mai
 - **Repository-side status: COMPLETE. Level 1 exact-head qualification plus the retained pre-testnet app-integration milestone passed at implementation SHA `b54ad6b39f3f438d6f39beb5dfdbde1963d752a4` in 420AI Audit Qualification run `37241370775`. All 12 required jobs passed, including `pretestnet-qualification` job `111550602291` and `pretestnet-security` job `111550602275`. Durable evidence: `docs/audit/420AI-AUDIT-10-QUALIFICATION.md`. AI-AUDIT-11 remains BLOCKED until the production-equivalent testnet and provider infrastructure are live.**
 
 ## AI-AUDIT-11 — production-equivalent testnet qualification
-**BLOCKED until the production-equivalent 420Integrated testnet and required provider infrastructure are live.**
+**TESTNET HANDOFF / BLOCKED until the production-equivalent 420Integrated testnet and required provider infrastructure are live. Canonical live-testnet obligations are also recorded in `docs/ROADMAP.md` under the 420AI testnet handoff.**
 - Deploy exact release candidate.
 - Exercise real wallet -> AI request -> CMP match -> provider execution -> receipt -> verification -> settlement/refund paths.
 - Record tx hashes, deployed addresses, code hashes, Registry publication evidence, provider/runtime logs and recovery drills.
 
 ## AI-AUDIT-12 — Genesis / production release gate
+**BLOCKED until AI-AUDIT-11 is complete. This is post-testnet closeout work and remains on the testnet/release handoff path rather than repository remediation.**
 - Governance/operations acceptance where required.
 - Production secrets, monitoring, incident response, backups and operator runbooks.
 - Final exact-head evidence proving no unresolved HIGH/CRITICAL issue and no undocumented dependency.

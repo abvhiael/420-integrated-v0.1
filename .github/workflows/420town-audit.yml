@@ -67,7 +67,7 @@ jobs:
       - name: Build and test Town Go packages
         run: go test ./town/...
       - name: Test affected Town service dependencies
-        run: go test ./search/architecture ./search/privacy ./search/result ./sdk/storage420 ./notifications/feed ./notifications/security
+        run: go test ./search/architecture ./search/privacy ./search/result ./sdk/storage420 ./notifications/feed ./notifications/security ./notifications/subscriptions
 
   town-contracts:
     runs-on: ubuntu-latest

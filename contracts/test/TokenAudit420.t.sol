@@ -181,9 +181,10 @@ contract TokenAudit420Test {
         token.permit(holder, BOB, 5 ether, deadline, v, r, s);
         vm.expectRevert(ERC20Template420.InvalidSignature.selector);
         token.permit(holder, BOB, 1, deadline, 29, r, s);
-        vm.warp(deadline + 1);
+        vm.warp(10_000);
+        uint256 expiredDeadline = 9_999;
         vm.expectRevert(ERC20Template420.Expired.selector);
-        token.permit(holder, BOB, 1, deadline, v, r, s);
+        token.permit(holder, BOB, 1, expiredDeadline, v, r, s);
     }
 
     function testVotesProfileRejectsSupplyAboveCheckpointWidth() public {
@@ -198,11 +199,12 @@ contract TokenAudit420Test {
 
     function testVotesTrackDelegatedBalancesAndHistoricalBlock() public {
         ERC20Template420 token = _create(TokenIds420.ERC20_VOTES, 100 ether, 0, bytes32("votes"));
+        vm.roll(100);
         vm.prank(ALICE);
         token.delegate(ALICE);
-        uint256 snapshotBlock = block.number;
+        uint256 snapshotBlock = 100;
         require(token.getVotes(ALICE) == 100 ether, "initial votes");
-        vm.roll(snapshotBlock + 1);
+        vm.roll(101);
         vm.prank(BOB);
         token.delegate(BOB);
         vm.prank(ALICE);

@@ -4,7 +4,8 @@
 
 Repository: `abvhiael/420-integrated-v0.1`  
 Audit branch: `audit/420search-complete-20261004`  
-Baseline `main`: `bec8fb5b43f48c3df8862eee93d9a33769cec5e7`  
+Original audit baseline `main`: `bec8fb5b43f48c3df8862eee93d9a33769cec5e7`  
+SEARCH-AUDIT-4 inspected `main`: `f6a426fc386b21f871b1805e00a57b1dad2bf902`  
 Original complete implementation: PR #201, merged as `a38b5694985fb3804ce9a500058e2c170718b697`; reconciliation PR #279 was merged before closeout.
 
 Repository evidence establishes 420Search as a Genesis user-facing discovery application with **no Search-owned smart contract and no canonical protocol state**. It consumes the qualified 420Indexer public API, preserves provenance/freshness/finality context, exposes resolver and discovery modes, provides an embedded web UI and versioned HTTP API, and excludes protected/private data.
@@ -137,3 +138,69 @@ The branch was four commits behind current main when this step was qualified, bu
 - PRODUCTION READY: **NO**
 
 Next canonical roadmap step: **SEARCH-AUDIT-4 — durable repository closeout**.
+
+## SEARCH-AUDIT-4 — durable repository closeout
+
+**Status: COMPLETE**  
+**Qualification level: Level 1 — repository-scope evidence/closeout for the current audit phase**
+
+### Canonical exit criteria
+
+SEARCH-AUDIT-4 requires the audit to retain exact qualification evidence, complete the requirement matrix, and make a formal repository-readiness determination without falsely promoting live testnet, Genesis, or production readiness.
+
+All exit criteria are satisfied:
+
+1. **Exact implementation qualification retained — COMPLETE.**
+   - Qualified implementation SHA: `e013430252106c533e9bc5c54b3339cbdea98681`
+   - Workflow: **420Search audit qualification**
+   - Run: **#14 / 37255553537**
+   - Job: **111591724193**
+   - Exact-head assertion, verifier, gofmt, Search tests, vet, all three binaries, production Docker build, and authority-drift guard all passed.
+2. **Evidence-head revalidation retained — COMPLETE.**
+   - Evidence HEAD before this A4 bookkeeping: `724b7e19acb24d6409401932aea58f8f2b0f1027`
+   - Workflow run: **#15 / 37255740969**
+   - Job: **111592294331**
+   - All Search audit qualification steps passed again.
+3. **Requirement matrix complete — COMPLETE.**
+   - Every repository-scope Search requirement is classified as COMPLETE, COMPLETE AT REPOSITORY SCOPE, NOT APPLICABLE, or explicitly BLOCKED by live-testnet/operations prerequisites assigned to SEARCH-AUDIT-5/6.
+4. **Integration/readiness state durable — COMPLETE.**
+   - Search repository status: `REPOSITORY_QUALIFIED`
+   - Indexer integration status: `INDEXER_V1_CONSUMER_REPOSITORY_QUALIFIED_LIVE_BINDING_PENDING`
+   - 420Indexer consumer gate: `QUALIFIED_INDEXER_API_CONSUMER_EXACT_HEAD`
+   - Live Search/Indexer binding is not claimed.
+5. **Security/authority boundary retained — COMPLETE.**
+   - Search remains contract-free, non-canonical, non-custodial, direct-RPC-free, and fail-closed on unqualified Indexer state.
+6. **Current-main impact assessed — COMPLETE.**
+   - Current main inspected: `f6a426fc386b21f871b1805e00a57b1dad2bf902`
+   - Audit branch was four commits behind at A4 review.
+   - Divergence was limited to unrelated `docs/ROADMAP.md` and 420AI audit documentation; no Search, Indexer, shared interface, deployment, test, workflow, or runtime dependency changed.
+   - Reconciliation is therefore not required for this Level 1 evidence-only step and remains mandatory at the eventual Level 3 app-phase closeout.
+7. **Deferred work correctly bounded — COMPLETE.**
+   - SEARCH-AUDIT-5 owns production-equivalent public testnet qualification.
+   - SEARCH-AUDIT-6 owns Genesis/production closeout after A5.
+   - No Level 2 milestone is introduced by this evidence-only step.
+   - Level 3 repository-wide qualification is intentionally deferred to the complete app-phase closeout.
+
+### Formal repository readiness determination
+
+As of SEARCH-AUDIT-4:
+
+- **Repository audit phase (SEARCH-AUDIT-1 through SEARCH-AUDIT-4): COMPLETE**
+- **Code complete at repository scope: YES**
+- **Build/container complete at repository scope: YES**
+- **Unit/integration/static qualification complete at repository scope: YES**
+- **420Indexer consumer integration qualified at repository scope: YES**
+- **Search security/authority boundary qualified at repository scope: YES**
+- **Repository documentation/evidence complete for this phase: YES**
+- **Deployment candidate: YES**
+- **Live-testnet qualified: NO**
+- **Genesis ready: NO**
+- **Production ready: NO**
+
+The remaining NO states are not repository defects. They are explicit external/live qualification gates requiring an approved production-equivalent testnet, qualified live 420Indexer and public 420Search endpoints, seeded domain probes, restart/rebuild/reorg/failure drills, retained deployment evidence, and final operations/monitoring/rate-limit/rollback qualification.
+
+### Milestone and next step
+
+SEARCH-AUDIT-4 closes the repository-only portion of the 420Search audit. No Level 2 run is required because the step changes evidence only and introduces no new shared authority, lifecycle, interface, dependency, or executable behavior.
+
+The next canonical roadmap step is **SEARCH-AUDIT-5 — production-equivalent public testnet qualification**, which remains **BLOCKED until an approved live 420Indexer/testnet deployment and Search endpoint exist**.

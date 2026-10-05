@@ -5,20 +5,62 @@
   "bodyStorage": "OFF_CHAIN_BY_DEFAULT",
   "objects": {
     "Post": {
-      "status": ["ACTIVE", "TOMBSTONED"],
-      "required": ["id", "community_id", "author_id", "content_ref", "content_sha256", "visibility", "revision"]
+      "status": [
+        "ACTIVE",
+        "TOMBSTONED"
+      ],
+      "required": [
+        "id",
+        "community_id",
+        "author_id",
+        "content_ref",
+        "content_sha256",
+        "visibility",
+        "revision"
+      ]
     },
     "Thread": {
-      "status": ["ACTIVE", "TOMBSTONED"],
-      "required": ["id", "community_id", "root_post_id", "author_id"]
+      "status": [
+        "ACTIVE",
+        "TOMBSTONED"
+      ],
+      "required": [
+        "id",
+        "community_id",
+        "root_post_id",
+        "author_id"
+      ]
     },
     "Comment": {
-      "status": ["ACTIVE", "TOMBSTONED"],
-      "required": ["id", "community_id", "thread_id", "parent_id", "author_id", "content_ref", "content_sha256", "visibility", "revision"]
+      "status": [
+        "ACTIVE",
+        "TOMBSTONED"
+      ],
+      "required": [
+        "id",
+        "community_id",
+        "thread_id",
+        "parent_id",
+        "author_id",
+        "content_ref",
+        "content_sha256",
+        "visibility",
+        "revision"
+      ]
     },
     "Vote": {
-      "values": [-1, 1],
-      "required": ["target_kind", "target_id", "voter_id", "value", "active", "revision"]
+      "values": [
+        -1,
+        1
+      ],
+      "required": [
+        "target_kind",
+        "target_id",
+        "voter_id",
+        "value",
+        "active",
+        "revision"
+      ]
     }
   },
   "contentAnchor": {
@@ -67,7 +109,12 @@
     "communityWriteLimit": 120,
     "unknownRiskProfile": "UNVERIFIED_LIMITS",
     "duplicateFingerprint": "AUTHOR_COMMUNITY_CONTENT_SHA256",
-    "voteUniqueness": "ONE_CANONICAL_RECORD_PER_VOTER_TARGET"
+    "voteUniqueness": "ONE_CANONICAL_RECORD_PER_VOTER_TARGET",
+    "deviceWriteLimit": 40,
+    "deviceVoteLimit": 120,
+    "networkWriteLimit": 80,
+    "networkVoteLimit": 240,
+    "deviceNetworkContext": "TRUSTED_SERVER_SIDE_RISK_CONTEXT"
   },
   "invariants": [
     "TOWN-CONTENT-001_HIGH_VOLUME_BODIES_REMAIN_OFF_CHAIN",
@@ -84,8 +131,9 @@
     "TOWN-CONTENT-012_DUPLICATE_CONTENT_FINGERPRINTS_ARE_THROTTLED",
     "TOWN-CONTENT-013_UNKNOWN_OR_LOW_ASSURANCE_IDENTITIES_RECEIVE_LOWER_RATE_LIMITS",
     "TOWN-CONTENT-014_COMMUNITY_AGGREGATE_WRITE_RATE_IS_BOUNDED",
-    "TOWN-CONTENT-015_ONE_CANONICAL_VOTE_RECORD_EXISTS_PER_VOTER_TARGET",
-    "TOWN-CONTENT-016_VOTES_REQUIRE_ACTIVE_MEMBERSHIP_AND_TARGET_VISIBILITY",
-    "TOWN-CONTENT-017_SEARCH_INDEXERS_UI_AND_REWARDS_DO_NOT_GAIN_CONTENT_AUTHORITY"
+    "TOWN-CONTENT-015_DEVICE_AND_NETWORK_RATE_SCOPES_BOUND_SYBIL_SWARMS",
+    "TOWN-CONTENT-016_ONE_CANONICAL_VOTE_RECORD_EXISTS_PER_VOTER_TARGET",
+    "TOWN-CONTENT-017_VOTES_REQUIRE_ACTIVE_MEMBERSHIP_AND_TARGET_VISIBILITY",
+    "TOWN-CONTENT-018_SEARCH_INDEXERS_UI_AND_REWARDS_DO_NOT_GAIN_CONTENT_AUTHORITY"
   ]
 }

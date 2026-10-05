@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import "../src/system/SystemAccess.sol";
 import "../src/token/TokenIds420.sol";
 import "../src/token/TokenTemplateRegistry420.sol";
 import "../src/token/TokenFactory420.sol";
@@ -119,6 +120,15 @@ contract TokenAudit420Test {
         vm.prank(ALICE);
         vm.expectRevert(TokenFactory420.InvalidTemplate.selector);
         factory.createERC20{ value: 42 ether }(TokenIds420.ERC721_COLLECTION, "x", "x", 1, 0, bytes32("wrong-standard"));
+    }
+
+    function testExactFeeRejectsUnderAndOverPayment() public {
+        vm.prank(ALICE);
+        vm.expectRevert(TokenFactory420.IncorrectFee.selector);
+        factory.createERC20{ value: 41 ether }(TokenIds420.ERC20_FIXED, "x", "x", 1, 0, bytes32("under"));
+        vm.prank(ALICE);
+        vm.expectRevert(TokenFactory420.IncorrectFee.selector);
+        factory.createERC20{ value: 43 ether }(TokenIds420.ERC20_FIXED, "x", "x", 1, 0, bytes32("over"));
     }
 
     function testTreasuryFailureRollsBackNonceAndDeploymentRecord() public {

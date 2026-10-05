@@ -23,7 +23,32 @@ const (
 
 var (
 	ErrInvalidSandbox = errors.New("invalid compute worker sandbox request")
-	digestImagePattern = regexp.MustCompile(`^[a-zA-Z0-9._/:~-]+@sha256:[0-9a-f]{64}$`)
+	digestImagePattern = regexp.MustCompile(`^(?:[a-zA-Z0-9._/:~-]+@)?sha256:[0-9a-f]{64}package worker
+
+import (
+	"bytes"
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"io"
+	"os/exec"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const (
+	SandboxSchemaV1        = "420-compute-worker-sandbox-v1"
+	DefaultSandboxUser     = "65532:65532"
+	DefaultSandboxMaxBytes = 64 << 10
+)
+
+var (
+	ErrInvalidSandbox = errors.New("invalid compute worker sandbox request")
+	digestImagePattern = )
 )
 
 type SandboxPolicy struct {
@@ -125,7 +150,7 @@ func (p SandboxPolicy) Validate() error {
 
 func ValidateSandboxRequest(request SandboxRequest) error {
 	if !digestImagePattern.MatchString(request.Image) {
-		return fmt.Errorf("%w: image must be pinned by lowercase sha256 digest", ErrInvalidSandbox)
+		return fmt.Errorf("%w: image must be pinned by lowercase sha256 digest or immutable image ID", ErrInvalidSandbox)
 	}
 	if len(request.Command) == 0 || len(request.Command) > 128 {
 		return fmt.Errorf("%w: command argument count invalid", ErrInvalidSandbox)

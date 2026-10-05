@@ -14,6 +14,7 @@ type Config struct {
 	RegistryAddress string
 	CatalogueStore  string
 	ViewInputs      string
+	VerifyURL       string
 	ListenAddr      string
 }
 
@@ -26,6 +27,11 @@ func (c Config) Validate() error {
 	}
 	if err := requireURL("indexer url", c.IndexerURL); err != nil {
 		return err
+	}
+	if strings.TrimSpace(c.VerifyURL) != "" {
+		if err := requireURL("verify url", c.VerifyURL); err != nil {
+			return err
+		}
 	}
 	if !validAddress(c.RegistryAddress) {
 		return errors.New("registry address must be a 20-byte hex address")

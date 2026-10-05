@@ -22,6 +22,20 @@ Browse/search ordering, category membership, featured placement, sponsorship, ra
 
 The API rejects application views whose security evidence refers to a different service/version than the canonical listing. This prevents cross-app provenance from being silently attached to a result.
 
+## Runtime composition
+
+`appstore/api/composition.go` is the production composition boundary used before the public handler is mounted in APPSTORE-AUDIT-5.
+
+- the finalized APPSTORE-3 catalogue supplies service identity, latest version, implementation and all Registry provenance;
+- optional operator input supplies only curation metadata, sourced security evidence, Wallet request metadata and Registry/Explorer/Verify/direct links;
+- operator JSON is decoded with unknown-field rejection so hidden authority-bearing Wallet fields cannot be ignored;
+- unknown or duplicate service IDs fail closed rather than manufacturing catalogue legitimacy;
+- curation service-ID mismatches and canonical-field override attempts fail closed;
+- security evidence is rebound to the canonical service/latest version and still passes APPSTORE-5 claim/provenance validation;
+- Wallet chain ID and service ID are constructed from the canonical runtime/catalogue rather than accepted from operator input;
+- Wallet/direct URL disagreement, unsafe/private URLs, private launch/install fields and confirmation-bypass requests fail closed;
+- the retained view set swaps atomically only after the entire replacement composition validates.
+
 ## Direct interaction and outage boundary
 
 Detail responses preserve links to Registry, Explorer, Verify and the application's direct URL, plus the APPSTORE-6 Wallet handoff presentation. AppStore therefore remains a discovery layer: an AppStore outage or delisting does not create a protocol-level block on direct Registry, Explorer, Wallet, RPC or application interaction.

@@ -46,6 +46,7 @@ var (
 	ErrInvalidTransition = errors.New("invalid transition")
 	ErrAlreadyExists    = errors.New("already exists")
 	ErrIdempotencyConflict = errors.New("idempotency conflict")
+	ErrUnavailable        = errors.New("moderation dependency unavailable")
 )
 
 type CommunityAuthority interface {
@@ -119,13 +120,12 @@ type Service struct {
 	idempotency map[string]idempotencyRecord
 }
 
-func NewService(authority CommunityAuthority, content ContentResolver) (*Service, error) {
-	if authority == nil || content == nil {
+func NewService(authority CommunityAuthority) (*Service, error) {
+	if authority == nil {
 		return nil, ErrInvalidInput
 	}
 	return &Service{
 		authority: authority,
-		content: content,
 		now: func() time.Time { return time.Now().UTC() },
 		cases: make(map[model.ObjectID]Case),
 		records: make(map[model.ObjectID]Record),
@@ -144,6 +144,16 @@ func (s *Service) SetClockForTest(now func() time.Time) {
 	s.now = now
 }
 
+func (s *Service) SetContentResolver(content ContentResolver) error {
+	if content == nil {
+		return ErrInvalidInput
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.content = content
+	return nil
+}
+
 type OpenCaseRequest struct {
 	RecordID       model.ObjectID
 	CaseID         model.ObjectID
@@ -157,9 +167,6 @@ type OpenCaseRequest struct {
 }
 
 func (s *Service) Report(actor model.ObjectID, req OpenCaseRequest) (Record, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	if !validID(actor) || !validID(req.RecordID) || !validID(req.CaseID) || !validID(req.CommunityID) ||
 		!validTargetKind(req.TargetKind) || !validID(req.TargetID) || !validReason(req.Reason) ||
 		!validBody(req.BodyRef, req.BodySHA256) || !validKey(req.IdempotencyKey) {
@@ -176,11 +183,21 @@ func (s *Service) Report(actor model.ObjectID, req OpenCaseRequest) (Record, err
 		affectedID = req.TargetID
 		ok = s.authority.IsActiveMember(req.CommunityID, req.TargetID)
 	} else {
-		communityID, affectedID, ok = s.resolveTarget(req.TargetKind, req.TargetID)
+		s.mu.RLock()
+		content := s.content
+		s.mu.RUnlock()
+		if content == nil {
+			return Record{}, ErrUnavailable
+		}
+		communityID, affectedID, ok = content.TargetCommunity(req.TargetKind, req.TargetID)
 	}
 	if !ok || communityID != req.CommunityID {
 		return Record{}, ErrNotFound
 	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	fp := fmt.Sprintf("report|%s|%s|%s|%s|%s", req.CaseID, req.CommunityID, req.TargetKind, req.TargetID, req.Reason)
 	if r, hit, err := s.idempotent(actor, ActionReport, req.IdempotencyKey, fp); hit || err != nil {
 		return r, err
@@ -378,22 +395,28 @@ func (s *Service) Records(caseID model.ObjectID)[]Record{
 	return out
 }
 
-func (s *Service) CanRead(communityID,viewerID,authorID model.ObjectID,kind TargetKind,targetID model.ObjectID) bool {
+func (s *Service) CanRead(communityID,viewerID,authorID model.ObjectID,kind string,targetID model.ObjectID) bool {
 	s.mu.RLock();defer s.mu.RUnlock()
-	if s.blocked[relationshipKey{Actor:authorID,Target:viewerID}] || s.blocked[relationshipKey{Actor:viewerID,Target:authorID}] {
+	if s.blocked[relationshipKey{Actor:authorID,Target:viewerID}] || s.blocked[relationshipKey{Actor:viewerID,Target:authorID}] ||
+		s.muted[relationshipKey{Actor:viewerID,Target:authorID}] {
 		return false
 	}
-	if caseID,ok:=s.targetCase[targetKey(communityID,kind,targetID)];ok{
+	targetKind:=TargetKind(kind)
+	if !validTargetKind(targetKind) || targetKind==TargetUser { return false }
+	if caseID,ok:=s.targetCase[targetKey(communityID,targetKind,targetID)];ok{
 		c:=s.cases[caseID]
 		if c.Hidden && viewerID!=authorID && !s.isModeratorLocked(communityID,viewerID){return false}
 	}
 	return true
 }
 
-func (s *Service) CanWrite(communityID,actorID model.ObjectID,kind TargetKind,targetID model.ObjectID) bool {
+func (s *Service) CanWrite(communityID,actorID model.ObjectID,kind string,targetID model.ObjectID) bool {
 	s.mu.RLock();defer s.mu.RUnlock()
 	if s.suspended[userScopeKey(communityID,actorID)]{return false}
-	if caseID,ok:=s.targetCase[targetKey(communityID,kind,targetID)];ok{
+	targetKind:=TargetKind(kind)
+	if targetKind==TargetUser { return true }
+	if !validTargetKind(targetKind) { return false }
+	if caseID,ok:=s.targetCase[targetKey(communityID,targetKind,targetID)];ok{
 		c:=s.cases[caseID]
 		if c.Locked || c.Hidden {return false}
 	}

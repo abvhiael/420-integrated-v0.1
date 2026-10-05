@@ -1,17 +1,34 @@
 {
-  "schema":"420-mail-readiness-v1",
-  "application":"420Mail",
-  "serviceId":"420/service/mail/v1",
-  "implementation_status":"REPOSITORY_BASELINE_IMPLEMENTED",
-  "deployment_status":"PENDING_PUBLIC_TESTNET",
-  "liveTestnetEvidence":false,
-  "genesisCatalogPromoted":false,
-  "genesisCloseout":false,
-  "productionReady":false,
-  "contractsRequired":false,
-  "current_audit":{
-    "branch":"420mail-audit-remediation-20261005",
-    "completed":["MAIL-AUDIT-1 canonical definition and gap inventory","MAIL-AUDIT-2 repository service baseline","MAIL-AUDIT-3 private-body/idempotency/authorization tests","MAIL-AUDIT-4 HTTP and typed client baseline","MAIL-AUDIT-5 thin UI baseline","MAIL-AUDIT-6 documentation and static verifier"],
-    "blockers":["real 420Identity authentication/resolution adapter is not yet wired to a deployed service","real 420Messenger block/messaging policy adapter is not yet wired to a deployed service","real 420Storage private encrypted blob provider is not yet selected and qualified","real 420Notifications delivery adapter is not yet wired and qualified","no public-testnet deployment, live privacy/recovery/load evidence, or operator monitoring evidence exists","420Mail is not in the frozen config/genesis-applications.json catalog; promotion requires an explicit catalog decision"]
+  "schema": "420-mail-readiness-v1",
+  "application": "420Mail",
+  "serviceId": "420/service/mail/v1",
+  "implementation_status": "REPOSITORY_BASELINE_IMPLEMENTED",
+  "deployment_status": "PENDING_PUBLIC_TESTNET",
+  "liveTestnetEvidence": false,
+  "genesisCatalogPromoted": false,
+  "genesisCloseout": false,
+  "productionReady": false,
+  "contractsRequired": false,
+  "current_audit": {
+    "branch": "420mail-audit-remediation-20261005",
+    "completed": [
+      "MAIL-AUDIT-1 canonical definition and gap inventory",
+      "MAIL-AUDIT-2 repository service baseline",
+      "MAIL-AUDIT-3 private-body/idempotency/authorization tests",
+      "MAIL-AUDIT-4 HTTP and typed client baseline",
+      "MAIL-AUDIT-5 thin UI baseline",
+      "MAIL-AUDIT-6 documentation and static verifier"
+    ],
+    "blockers": [
+      "real 420Identity authentication/resolution adapter is not yet wired to a deployed service",
+      "real 420Messenger block/messaging policy adapter is not yet wired to a deployed service",
+      "real 420Storage private encrypted blob provider is not yet selected and qualified",
+      "real 420Notifications delivery adapter is not yet wired and qualified",
+      "no public-testnet deployment, live privacy/recovery/load evidence, or operator monitoring evidence exists",
+      "420Mail is not in the frozen config/genesis-applications.json catalog; promotion requires an explicit catalog decision"
+    ],
+    "next_step": "MAIL-AUDIT-7",
+    "note": "MAIL-AUDIT-1 through MAIL-AUDIT-6 are repository-complete and exact-head qualified. Unfinished MAIL-AUDIT-7 through MAIL-AUDIT-10 are handed off to the canonical testnet work roadmap in docs/ROADMAP.md. No live testnet, Genesis, or production completion is claimed.",
+    "testnet_roadmap": "docs/ROADMAP.md"
   }
 }

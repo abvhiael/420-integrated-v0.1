@@ -36,7 +36,9 @@ type Store struct {
 
 func Open(path string) (*Store, error) {
 	path = strings.TrimSpace(path)
-	if path == "" { return nil, ErrInvalidStore }
+	if path == "" {
+		return nil, ErrInvalidStore
+	}
 	return &Store{path: path}, nil
 }
 
@@ -61,50 +63,157 @@ func sortVersions(versions []appregistry.VersionRecord) {
 	})
 }
 
+func validateDocument(doc Document) error {
+	if doc.SchemaVersion != SchemaVersion {
+		return ErrUnsupportedSchema
+	}
+	if doc.ChainID == 0 || strings.TrimSpace(doc.RegistryAddress) == "" {
+		return ErrInvalidStore
+	}
+	if _, err := RestoreProjection(doc); err != nil {
+		if errors.Is(err, ErrUnsupportedSchema) {
+			return err
+		}
+		return ErrStoreCorrupt
+	}
+	return nil
+}
+
 func (s *Store) Save(doc Document) error {
-	s.mu.Lock(); defer s.mu.Unlock()
-	if doc.SchemaVersion != SchemaVersion || doc.ChainID == 0 || strings.TrimSpace(doc.RegistryAddress) == "" { return ErrInvalidStore }
-	sortVersions(doc.Versions)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if err := validateDocument(doc); err != nil {
+		return err
+	}
+	versions := append([]appregistry.VersionRecord(nil), doc.Versions...)
+	for i := range versions {
+		versions[i] = canonicalizeVersion(versions[i])
+	}
+	sortVersions(versions)
+	doc.Versions = versions
+	doc.RegistryAddress = strings.ToLower(strings.TrimSpace(doc.RegistryAddress))
+
 	payload, err := json.MarshalIndent(doc, "", "  ")
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	payload = append(payload, '\n')
-	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil { return fmt.Errorf("create catalogue directory: %w", err) }
-	tmp := s.path + ".tmp"
-	if err := os.WriteFile(tmp, payload, 0o600); err != nil { return fmt.Errorf("write catalogue temp file: %w", err) }
-	if err := os.Rename(tmp, s.path); err != nil { _ = os.Remove(tmp); return fmt.Errorf("replace catalogue file: %w", err) }
+	if err := writeAtomic(s.path, payload); err != nil {
+		return fmt.Errorf("persist catalogue file: %w", err)
+	}
 	return nil
 }
 
 func (s *Store) Load() (Document, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	payload, err := os.ReadFile(s.path)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) { return Document{}, os.ErrNotExist }
+		if errors.Is(err, os.ErrNotExist) {
+			return Document{}, os.ErrNotExist
+		}
 		return Document{}, fmt.Errorf("read catalogue file: %w", err)
 	}
 	var doc Document
-	if err := json.Unmarshal(payload, &doc); err != nil { return Document{}, ErrStoreCorrupt }
-	if doc.SchemaVersion != SchemaVersion { return Document{}, ErrUnsupportedSchema }
-	if doc.ChainID == 0 || strings.TrimSpace(doc.RegistryAddress) == "" { return Document{}, ErrStoreCorrupt }
+	if err := json.Unmarshal(payload, &doc); err != nil {
+		return Document{}, ErrStoreCorrupt
+	}
+	if doc.SchemaVersion != SchemaVersion {
+		return Document{}, ErrUnsupportedSchema
+	}
+	if doc.ChainID == 0 || strings.TrimSpace(doc.RegistryAddress) == "" {
+		return Document{}, ErrStoreCorrupt
+	}
+	if _, err := RestoreProjection(doc); err != nil {
+		return Document{}, ErrStoreCorrupt
+	}
 	return doc, nil
 }
 
 func RebuildFromSnapshot(snapshot appregistry.Snapshot) (Document, error) {
 	projection, err := appregistry.NewProjection(snapshot.ChainID, snapshot.RegistryAddress)
-	if err != nil { return Document{}, err }
-	if err := projection.Rebuild(snapshot); err != nil { return Document{}, err }
+	if err != nil {
+		return Document{}, err
+	}
+	if err := projection.Rebuild(snapshot); err != nil {
+		return Document{}, err
+	}
 	versions := make([]appregistry.VersionRecord, len(snapshot.Versions))
 	for i, record := range snapshot.Versions {
 		versions[i] = canonicalizeVersion(record)
 	}
 	sortVersions(versions)
-	return Document{SchemaVersion: SchemaVersion, ChainID: snapshot.ChainID, RegistryAddress: strings.ToLower(strings.TrimSpace(snapshot.RegistryAddress)), FinalizedBlock: projection.FinalizedBlock(), Versions: versions}, nil
+	return Document{
+		SchemaVersion:   SchemaVersion,
+		ChainID:         snapshot.ChainID,
+		RegistryAddress: strings.ToLower(strings.TrimSpace(snapshot.RegistryAddress)),
+		FinalizedBlock:  projection.FinalizedBlock(),
+		Versions:        versions,
+	}, nil
 }
 
 func RestoreProjection(doc Document) (*appregistry.Projection, error) {
-	if doc.SchemaVersion != SchemaVersion { return nil, ErrUnsupportedSchema }
+	if doc.SchemaVersion != SchemaVersion {
+		return nil, ErrUnsupportedSchema
+	}
 	projection, err := appregistry.NewProjection(doc.ChainID, doc.RegistryAddress)
-	if err != nil { return nil, err }
-	if err := projection.Rebuild(appregistry.Snapshot{ChainID: doc.ChainID, RegistryAddress: doc.RegistryAddress, FinalizedBlock: doc.FinalizedBlock, Versions: doc.Versions}); err != nil { return nil, ErrStoreCorrupt }
+	if err != nil {
+		return nil, err
+	}
+	if err := projection.Rebuild(appregistry.Snapshot{
+		ChainID:         doc.ChainID,
+		RegistryAddress: doc.RegistryAddress,
+		FinalizedBlock:  doc.FinalizedBlock,
+		Versions:        doc.Versions,
+	}); err != nil {
+		return nil, ErrStoreCorrupt
+	}
 	return projection, nil
+}
+
+func writeAtomic(path string, payload []byte) error {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("create catalogue directory: %w", err)
+	}
+	file, err := os.CreateTemp(dir, "."+filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return fmt.Errorf("create catalogue temp file: %w", err)
+	}
+	tmp := file.Name()
+	cleanup := func() {
+		_ = file.Close()
+		_ = os.Remove(tmp)
+	}
+	if err := file.Chmod(0o600); err != nil {
+		cleanup()
+		return fmt.Errorf("chmod catalogue temp file: %w", err)
+	}
+	if _, err := file.Write(payload); err != nil {
+		cleanup()
+		return fmt.Errorf("write catalogue temp file: %w", err)
+	}
+	if err := file.Sync(); err != nil {
+		cleanup()
+		return fmt.Errorf("sync catalogue temp file: %w", err)
+	}
+	if err := file.Close(); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("close catalogue temp file: %w", err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		_ = os.Remove(tmp)
+		return fmt.Errorf("replace catalogue file: %w", err)
+	}
+	dirHandle, err := os.Open(dir)
+	if err != nil {
+		return fmt.Errorf("open catalogue directory for sync: %w", err)
+	}
+	defer dirHandle.Close()
+	if err := dirHandle.Sync(); err != nil {
+		return fmt.Errorf("sync catalogue directory: %w", err)
+	}
+	return nil
 }

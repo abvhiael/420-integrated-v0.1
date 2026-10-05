@@ -1,0 +1,118 @@
+name: 420AppStore Audit Qualification
+
+on:
+  push:
+    branches:
+      - 'appstore-remediation-*'
+    paths:
+      - 'appstore/**'
+      - 'contracts/config/420appstore-genesis.json'
+      - 'testnet/public-services/appstore/**'
+      - 'docs/420APPSTORE-ROADMAP.md'
+      - 'docs/apps/appstore/**'
+      - 'docs/audit/420APPSTORE-AUDIT-*.md'
+      - 'scripts/verify-420appstore-audit.py'
+      - '.github/workflows/420appstore-audit.yml'
+  pull_request:
+    paths:
+      - 'appstore/**'
+      - 'contracts/config/420appstore-genesis.json'
+      - 'testnet/public-services/appstore/**'
+      - 'docs/420APPSTORE-ROADMAP.md'
+      - 'docs/apps/appstore/**'
+      - 'docs/audit/420APPSTORE-AUDIT-*.md'
+      - 'scripts/verify-420appstore-audit.py'
+      - '.github/workflows/420appstore-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-head:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: APPSTORE-AUDIT-5 formatting
+        run: |
+          unformatted="$(gofmt -l \
+            appstore/publicservice/service.go \
+            appstore/publicservice/service_test.go \
+            appstore/publicservice/dependencies.go \
+            appstore/publicservice/probe.go \
+            appstore/publicservice/probe_test.go \
+            appstore/cmd/appstore420/main.go \
+            appstore/runtime/config.go \
+            appstore/runtime/service.go \
+            appstore/runtime/service_test.go \
+            appstore/closeout/closeout_test.go)"
+          test -z "$unformatted" || { echo "$unformatted"; exit 1; }
+      - name: APPSTORE-AUDIT-4 formatting
+        run: |
+          unformatted="$(gofmt -l \
+            appstore/api/composition.go \
+            appstore/api/composition_test.go \
+            appstore/cmd/appstore420/main.go \
+            appstore/cmd/appstore420/main_test.go \
+            appstore/runtime/config.go \
+            appstore/closeout/closeout_test.go)"
+          test -z "$unformatted" || { echo "$unformatted"; exit 1; }
+      - name: APPSTORE-AUDIT-3 formatting
+        run: |
+          unformatted="$(gofmt -l \
+            appstore/cmd/appstore420/main.go \
+            appstore/catalog/store.go \
+            appstore/catalog/lifecycle.go \
+            appstore/catalog/lifecycle_test.go \
+            appstore/catalog/presentation_history.go \
+            appstore/catalog/presentation_history_test.go \
+            appstore/closeout/closeout_test.go)"
+          test -z "$unformatted" || { echo "$unformatted"; exit 1; }
+      - name: APPSTORE-AUDIT-2 formatting
+        run: |
+          unformatted="$(gofmt -l \
+            appstore/cmd/appstore420/main.go \
+            appstore/runtime/config.go \
+            appstore/runtime/service_test.go \
+            appstore/registry/indexer_source.go \
+            appstore/registry/indexer_source_test.go)"
+          test -z "$unformatted" || { echo "$unformatted"; exit 1; }
+      - name: Formatting
+        continue-on-error: true
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          BASE="$PR_BASE_SHA"
+          if [ -z "$BASE" ]; then BASE="$PUSH_BEFORE_SHA"; fi
+          changed="$(git diff --name-only "$BASE"..HEAD -- 'appstore/**/*.go' 'appstore/*.go')"
+          if [ -z "$changed" ]; then exit 0; fi
+          unformatted="$(gofmt -l $changed)"
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted AppStore files:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - name: AppStore unit and race qualification
+        run: go test -race ./appstore/...
+      - name: AppStore vet
+        run: go vet ./appstore/...
+      - name: Production entrypoint build
+        run: go build ./appstore/cmd/appstore420
+      - name: Audit evidence qualification
+        run: python3 scripts/verify-420appstore-audit.py

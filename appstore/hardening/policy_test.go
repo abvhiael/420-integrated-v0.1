@@ -31,7 +31,12 @@ func TestValidatePublicURLRejectsHostileSchemesAndLocalTargets(t *testing.T) {
 		"http://example.test/app",
 		"https://localhost/admin",
 		"https://127.0.0.1/internal",
+		"https://10.0.0.1/internal",
+		"https://172.16.0.1/internal",
+		"https://192.168.1.1/internal",
+		"https://169.254.169.254/latest/meta-data",
 		"https://service.local/private",
+		"https://foo.localhost/private",
 		"https://user:pass@example.test/app",
 	}
 	for _, raw := range bad {

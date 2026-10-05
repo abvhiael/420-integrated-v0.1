@@ -2,6 +2,7 @@ package curation
 
 import (
 	"errors"
+	"math"
 	"sort"
 	"strings"
 
@@ -51,7 +52,7 @@ func (m Metadata) Validate() error {
 	if strings.TrimSpace(m.ServiceID) == "" { return ErrInvalidCuration }
 	if m.Sponsored && strings.TrimSpace(m.SponsorLabel) == "" { return ErrSponsorLabelMissing }
 	if !m.Sponsored && strings.TrimSpace(m.SponsorLabel) != "" { return ErrInvalidCuration }
-	if m.Rating.Average < 0 || m.Rating.Average > 5 { return ErrInvalidCuration }
+	if math.IsNaN(m.Rating.Average) || math.IsInf(m.Rating.Average, 0) || m.Rating.Average < 0 || m.Rating.Average > 5 { return ErrInvalidCuration }
 	if m.Rating.Count == 0 && m.Rating.Average != 0 { return ErrInvalidCuration }
 	for _, category := range m.Categories { if strings.TrimSpace(category) == "" { return ErrInvalidCuration } }
 	for key := range m.Presentation {

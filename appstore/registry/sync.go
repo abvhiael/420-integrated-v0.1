@@ -93,43 +93,65 @@ func sameCanonical(a, b VersionRecord) bool {
 	return strings.EqualFold(a.ServiceID, b.ServiceID) && a.Version == b.Version && strings.EqualFold(a.Implementation, b.Implementation) && strings.EqualFold(a.CodeHash, b.CodeHash) && strings.EqualFold(a.MetadataHash, b.MetadataHash) && a.ComponentType == b.ComponentType && strings.EqualFold(a.ManifestHash, b.ManifestHash) && strings.EqualFold(a.DependencyRoot, b.DependencyRoot) && strings.EqualFold(a.InterfaceHash, b.InterfaceHash) && a.Active == b.Active && a.BlockNumber == b.BlockNumber && strings.EqualFold(a.BlockHash, b.BlockHash)
 }
 
-func (p *Projection) Apply(snapshot Snapshot) error {
-	if snapshot.ChainID != p.chainID || !strings.EqualFold(snapshot.RegistryAddress, p.registry) || snapshot.FinalizedBlock < p.finalized {
-		return ErrInvalidCanonicalRecord
-	}
-	versions := append([]VersionRecord(nil), snapshot.Versions...)
+func sortedVersions(records []VersionRecord) []VersionRecord {
+	versions := append([]VersionRecord(nil), records...)
 	sort.Slice(versions, func(i, j int) bool {
 		if strings.EqualFold(versions[i].ServiceID, versions[j].ServiceID) { return versions[i].Version < versions[j].Version }
 		return strings.ToLower(versions[i].ServiceID) < strings.ToLower(versions[j].ServiceID)
 	})
+	return versions
+}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	staged := make(map[string]VersionRecord, len(p.byKey)+len(versions))
-	for k, v := range p.byKey { staged[k] = v }
-	for _, record := range versions {
-		if err := validateRecord(record); err != nil { return err }
+func stageVersions(base map[string]VersionRecord, versions []VersionRecord) (map[string]VersionRecord, error) {
+	staged := make(map[string]VersionRecord, len(base)+len(versions))
+	for k, v := range base { staged[k] = v }
+	for _, record := range sortedVersions(versions) {
+		if err := validateRecord(record); err != nil { return nil, err }
 		k := key(record.ServiceID, record.Version)
 		if existing, ok := staged[k]; ok {
-			if !sameCanonical(existing, record) { return ErrConflictingCanonical }
+			if !sameCanonical(existing, record) { return nil, ErrConflictingCanonical }
 			continue
 		}
 		if record.Version > 1 {
-			if _, ok := staged[key(record.ServiceID, record.Version-1)]; !ok { return ErrVersionGap }
+			if _, ok := staged[key(record.ServiceID, record.Version-1)]; !ok { return nil, ErrVersionGap }
 		}
 		staged[k] = record
 	}
+	return staged, nil
+}
+
+func (p *Projection) Apply(snapshot Snapshot) error {
+	if snapshot.ChainID != p.chainID || !strings.EqualFold(snapshot.RegistryAddress, p.registry) {
+		return ErrInvalidCanonicalRecord
+	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if snapshot.FinalizedBlock < p.finalized {
+		return ErrInvalidCanonicalRecord
+	}
+	staged, err := stageVersions(p.byKey, snapshot.Versions)
+	if err != nil { return err }
 	p.byKey = staged
 	p.finalized = snapshot.FinalizedBlock
 	return nil
 }
 
 func (p *Projection) Rebuild(snapshot Snapshot) error {
+	if snapshot.ChainID != p.chainID || !strings.EqualFold(snapshot.RegistryAddress, p.registry) {
+		return ErrInvalidCanonicalRecord
+	}
+	staged, err := stageVersions(nil, snapshot.Versions)
+	if err != nil { return err }
+
 	p.mu.Lock()
-	p.byKey = make(map[string]VersionRecord)
-	p.finalized = 0
-	p.mu.Unlock()
-	return p.Apply(snapshot)
+	defer p.mu.Unlock()
+	if snapshot.FinalizedBlock < p.finalized {
+		return ErrInvalidCanonicalRecord
+	}
+	p.byKey = staged
+	p.finalized = snapshot.FinalizedBlock
+	return nil
 }
 
 func (p *Projection) Version(serviceID string, version uint32) (VersionRecord, bool) {

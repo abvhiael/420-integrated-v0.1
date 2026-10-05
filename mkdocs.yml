@@ -323,6 +323,8 @@ nav:
               - Permissions: apps/arbitration/permissions.md
               - Fees: apps/arbitration/fees.md
               - Security & Privacy: apps/arbitration/security.md
+              - Threat Model: apps/arbitration/threat-model.md
+              - Deployment & Operations: apps/arbitration/deployment-operations.md
               - Troubleshooting: apps/arbitration/troubleshooting.md
               - FAQ: apps/arbitration/faq.md
               - Developer Integration:
@@ -346,6 +348,8 @@ nav:
               - Permissions: apps/ai/permissions.md
               - Fees & Settlement: apps/ai/fees.md
               - Security & Privacy: apps/ai/security.md
+              - Deployment & Operations: apps/ai/deployment-operations.md
+              - Pre-Testnet Qualification: apps/ai/pretestnet-qualification.md
               - Troubleshooting: apps/ai/troubleshooting.md
               - FAQ: apps/ai/faq.md
               - Developer Integration:

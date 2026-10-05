@@ -48,6 +48,8 @@ func (s *Service) Qualify(ctx context.Context) error {
 	return nil
 }
 
+func (s *Service) Ready() bool { return s != nil && s.ready.Load() }
+
 func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {

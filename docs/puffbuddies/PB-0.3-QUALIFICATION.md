@@ -35,11 +35,19 @@ No contract, service ID, fixed address, deployment, storage implementation, mess
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- four canonical trust zones are defined;
+- PB-BOUNDARY-001 through PB-BOUNDARY-018 exist exactly once and in sequence;
+- profiles/media, preferences, likes, passes, matches, unmatches, blocks, reports, moderation evidence, precise location, and messages are explicitly off public chain;
+- public-chain use is restricted to purpose-limited minimum-disclosure authority/registration/config/payment/entitlement/eligibility/verification cases;
+- wallet/profile unlinkability is explicit;
+- events, calldata, deterministic hashes, metadata, payment payloads, Indexer, Explorer, Search, and analytics are prohibited from leaking private dating state;
+- hashing alone is explicitly rejected as sufficient privacy protection;
+- off-chain state still requires authentication, authorization, encryption, integrity, and later threat-model controls;
+- no PuffBuddies contract, service ID, fixed address, deployment, storage implementation, or live integration is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`504debc20d59610b230d94f903c2f871f52007d7`
 
 ## Base/main SHA
 
@@ -49,7 +57,19 @@ Pending exact-head qualification.
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head pull-request qualification:
+- run: `37273527146` — **PASS**
+- job: `111645446081` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head push qualification:
+- run: `37273524473` — **PASS**
+- job: `111645436744` (`pb0-fast`) — **PASS**
+
+The unrelated governance branch-push workflow failure is outside PuffBuddies PB-0.3 ownership and is not treated as PB-0.3 evidence.
 
 ## Security/adversarial/invariant scope
 
@@ -91,11 +111,13 @@ Those remain owned by PB-0.4 and later canonical steps.
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.3 is formally COMPLETE.
+None for PB-0.3.
 
 ## Completion state
 
-**PB-0.3 — PENDING QUALIFICATION**
+**PB-0.3 — COMPLETE**
+
+All canonical PB-0.3 exit criteria are satisfied on exact implementation SHA `504debc20d59610b230d94f903c2f871f52007d7`.
 
 ## Next canonical roadmap step
 

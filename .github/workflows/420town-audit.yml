@@ -8,11 +8,13 @@ on:
       - "config/420town-content-v1.json"
       - "config/420town-moderation-v1.json"
       - "config/420town-integrations-v1.json"
+      - "config/420town-api-v1.json"
       - "config/genesis-applications.json"
       - "config/genesis-consumer-services.json"
       - "contracts/src/town/**"
       - "contracts/test/Town*"
       - "town/**"
+      - "sdk/town420/**"
       - "search/architecture/profile.go"
       - "search/architecture/profile_test.go"
       - "search/privacy/admission.go"
@@ -27,6 +29,7 @@ on:
       - "scripts/verify-420town-content.py"
       - "scripts/verify-420town-moderation.py"
       - "scripts/verify-420town-integrations.py"
+      - "scripts/verify-420town-api.py"
       - ".github/workflows/420town-audit.yml"
   workflow_dispatch:
 
@@ -64,8 +67,23 @@ jobs:
         run: python3 scripts/verify-420town-moderation.py
       - name: Verify Town service integrations
         run: python3 scripts/verify-420town-integrations.py
+      - name: Verify Town API SDK projection and recovery
+        run: python3 scripts/verify-420town-api.py
+      - name: Format Town delivery surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(find town sdk/town420 -name '*.go' -type f -print)"
+          test -n "$files"
+          bad="$(gofmt -l $files)"
+          if [ -n "$bad" ]; then
+            printf 'gofmt required:\n%s\n' "$bad"
+            exit 1
+          fi
       - name: Build and test Town Go packages
-        run: go test ./town/...
+        run: go test ./town/... ./sdk/town420
+      - name: Vet Town delivery surfaces
+        run: go vet ./town/... ./sdk/town420
       - name: Test affected Town service dependencies
         run: go test ./search/architecture ./search/privacy ./search/result ./sdk/storage420 ./notifications/feed ./notifications/security ./notifications/subscriptions
 

@@ -2,6 +2,7 @@ package hardening
 
 import (
 	"errors"
+	"net"
 	"net/url"
 	"strings"
 	"sync"
@@ -9,18 +10,18 @@ import (
 )
 
 var (
-	ErrPrivateData        = errors.New("private appstore data is not permitted")
+	ErrPrivateData       = errors.New("private appstore data is not permitted")
 	ErrOversizedMetadata = errors.New("appstore metadata exceeds genesis limits")
-	ErrUnsafeURL          = errors.New("unsafe appstore URL")
-	ErrDependencyState    = errors.New("invalid appstore dependency state")
+	ErrUnsafeURL         = errors.New("unsafe appstore URL")
+	ErrDependencyState   = errors.New("invalid appstore dependency state")
 )
 
 const (
-	MaxDescriptionBytes = 8 * 1024
-	MaxPresentationKeys = 64
+	MaxDescriptionBytes       = 8 * 1024
+	MaxPresentationKeys       = 64
 	MaxPresentationValueBytes = 4 * 1024
-	MaxScreenshots = 12
-	MaxURLBytes = 2048
+	MaxScreenshots            = 12
+	MaxURLBytes               = 2048
 )
 
 var forbiddenPrivateFields = []string{
@@ -83,8 +84,13 @@ func ValidatePublicURL(raw string) error {
 		return ErrUnsafeURL
 	}
 	host := strings.ToLower(u.Hostname())
-	if host == "localhost" || host == "127.0.0.1" || host == "::1" || strings.HasSuffix(host, ".local") {
+	if host == "localhost" || strings.HasSuffix(host, ".localhost") || strings.HasSuffix(host, ".local") {
 		return ErrUnsafeURL
+	}
+	if ip := net.ParseIP(host); ip != nil {
+		if ip.IsLoopback() || ip.IsPrivate() || ip.IsUnspecified() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsMulticast() {
+			return ErrUnsafeURL
+		}
 	}
 	return nil
 }
@@ -106,21 +112,31 @@ const (
 )
 
 type DependencyAssessment struct {
-	Mode       Mode     `json:"mode"`
-	Unavailable []string `json:"unavailable,omitempty"`
-	CanBrowse  bool     `json:"canBrowse"`
-	CanServeCanonical bool `json:"canServeCanonical"`
-	CanVerify  bool     `json:"canVerify"`
-	Disclaimer string   `json:"disclaimer"`
+	Mode              Mode     `json:"mode"`
+	Unavailable       []string `json:"unavailable,omitempty"`
+	CanBrowse         bool     `json:"canBrowse"`
+	CanServeCanonical bool     `json:"canServeCanonical"`
+	CanVerify         bool     `json:"canVerify"`
+	Disclaimer        string   `json:"disclaimer"`
 }
 
 func AssessDependencies(d Dependencies) DependencyAssessment {
 	missing := make([]string, 0, 5)
-	if !d.Registry { missing = append(missing, "registry") }
-	if !d.RPC { missing = append(missing, "rpc") }
-	if !d.Search { missing = append(missing, "search") }
-	if !d.Verify { missing = append(missing, "verify") }
-	if !d.Store { missing = append(missing, "store") }
+	if !d.Registry {
+		missing = append(missing, "registry")
+	}
+	if !d.RPC {
+		missing = append(missing, "rpc")
+	}
+	if !d.Search {
+		missing = append(missing, "search")
+	}
+	if !d.Verify {
+		missing = append(missing, "verify")
+	}
+	if !d.Store {
+		missing = append(missing, "store")
+	}
 
 	if !d.Registry || !d.RPC {
 		return DependencyAssessment{
@@ -143,9 +159,9 @@ func AssessDependencies(d Dependencies) DependencyAssessment {
 // discovery API. It never uses wallet/account identifiers and therefore does
 // not create public installation or launch history.
 type Limiter struct {
-	mu sync.Mutex
-	limit int
-	window time.Duration
+	mu      sync.Mutex
+	limit   int
+	window  time.Duration
 	entries map[string]entry
 }
 
@@ -155,14 +171,20 @@ type entry struct {
 }
 
 func NewLimiter(limit int, window time.Duration) *Limiter {
-	if limit < 1 { limit = 1 }
-	if window <= 0 { window = time.Minute }
+	if limit < 1 {
+		limit = 1
+	}
+	if window <= 0 {
+		window = time.Minute
+	}
 	return &Limiter{limit: limit, window: window, entries: map[string]entry{}}
 }
 
 func (l *Limiter) Allow(key string, now time.Time) bool {
 	key = strings.TrimSpace(key)
-	if key == "" { return false }
+	if key == "" {
+		return false
+	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	e := l.entries[key]
@@ -170,7 +192,9 @@ func (l *Limiter) Allow(key string, now time.Time) bool {
 		l.entries[key] = entry{start: now, count: 1}
 		return true
 	}
-	if e.count >= l.limit { return false }
+	if e.count >= l.limit {
+		return false
+	}
 	e.count++
 	l.entries[key] = e
 	return true

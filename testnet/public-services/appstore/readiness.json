@@ -1,6 +1,6 @@
 {
   "schema": "420-testnet-appstore-readiness-v1",
-  "implementation_status": "QUALIFIED",
+  "implementation_status": "PARTIAL",
   "deployment_status": "PENDING_PUBLIC_TESTNET",
   "invariant_coverage": [
     "APP-INV-001",
@@ -19,7 +19,7 @@
   ],
   "backend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "CODE_QUALIFIED_DEPLOYMENT_PENDING",
+    "status": "PUBLIC_RUNTIME_COMPOSED",
     "required_checks": [
       "resolves canonical application/service identity and version through 420Registry",
       "preserves chain ID and network identity",
@@ -33,7 +33,7 @@
   },
   "frontend": {
     "url": "REPLACE_AT_PUBLIC_TESTNET_DEPLOYMENT",
-    "status": "CODE_QUALIFIED_DEPLOYMENT_PENDING",
+    "status": "RUNTIME_MOUNTED",
     "required_views": [
       "browse and categories",
       "search",
@@ -72,6 +72,93 @@
     "docs_run": 35157767548,
     "integrated_run": 35157767517,
     "latest_main_reconciled_for_appstore_9": "b1433ba00f7ac0ce9303da476d33879739bafcef",
-    "note": "APPSTORE-10 closeout must requalify its own exact final head before phase merge; public URLs remain intentionally unset until deployment."
+    "note": "Historical APPSTORE-9 evidence retained for provenance only. Current audit remediation evidence is recorded separately and must be exact-head qualified.",
+    "appstore_audit_2": {
+      "qualification_level": "LEVEL_1",
+      "implementation_sha": "03071f147041efe2d0bcd9df151a75c54f5c467c",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37252857689,
+      "job_id": 111583875589,
+      "conclusion": "PASS",
+      "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+      "note": "Evidence-only closeout metadata; Level 2 not required for this ordinary source-wiring step and Level 3 remains deferred to app-phase closeout."
+    },
+    "appstore_audit_3": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_LIFECYCLE_MILESTONE",
+      "implementation_sha": "6ea9a46ef889e8ebcc8888a100efaac9013f1e84",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37255518380,
+      "job_id": 111591611187,
+      "conclusion": "PASS",
+      "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+      "superseded_runs": [
+        37255246790,
+        37255402153
+      ],
+      "note": "Evidence-only closeout metadata. Full AppStore race suite/vet/build/verifier serves the Level 2 lifecycle milestone without duplicate equivalent CI; Level 3 remains deferred."
+    },
+    "appstore_audit_4": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_COMPOSITION_MILESTONE",
+      "implementation_sha": "0a2abad993d6ea508919a461b2a2ba7dfe761282",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37256398366,
+      "job_id": 111594309071,
+      "conclusion": "PASS",
+      "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+      "superseded_runs": [
+        37256187273,
+        37256272006
+      ],
+      "note": "Evidence-only closeout metadata. The retained AppStore workflow's full race-enabled ./appstore/... suite, vet, production build and verifier also serve the ApplicationView integration milestone; Level 3 remains deferred."
+    },
+    "appstore_audit_5": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_PUBLIC_SERVICE_MILESTONE",
+      "implementation_sha": "65ac599806ce4cf910e7f8154f564498d7cb707b",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37257635038,
+      "job_id": 111598019149,
+      "conclusion": "PASS",
+      "main_observed": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
+      "superseded_runs": [
+        37257475522
+      ],
+      "note": "Evidence-only closeout metadata. The retained AppStore race suite, vet, production build and verifier supply the app-level public-service integration milestone; Level 3 remains deferred."
+    },
+    "appstore_audit_6": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_REPOSITORY_MILESTONE",
+      "implementation_sha": "94d81b40d251fe425ae89cbacffa8cf766fcbb97",
+      "appstore_workflow": "420AppStore Audit Qualification",
+      "appstore_run_id": 37258566421,
+      "appstore_job_id": 111600724647,
+      "docs_workflow": "420Docs Qualification",
+      "docs_run_id": 37258566434,
+      "docs_job_id": 111600709511,
+      "conclusion": "PASS",
+      "main_observed": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
+      "superseded_docs_runs": [
+        37257793470,
+        37258418199,
+        37258520061
+      ],
+      "note": "Repository qualification milestone. AppStore formatting/race/vet/build/verifier and full 420Docs qualification passed on the same exact SHA. Level 3 remains deferred to final app-phase closeout."
+    }
+  },
+  "current_audit": {
+    "status": "REPOSITORY_COMPLETE_TESTNET_HANDOFF",
+    "audited_against_main": "e0c8d4b22bdfd0a75e90198404bcb00b5e04d5da",
+    "completed_steps": [
+      "APPSTORE-AUDIT-1",
+      "APPSTORE-AUDIT-2",
+      "APPSTORE-AUDIT-3",
+      "APPSTORE-AUDIT-4",
+      "APPSTORE-AUDIT-5",
+      "APPSTORE-AUDIT-6"
+    ],
+    "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
+    "blockers": [
+      "APPSTORE-AUDIT-7 requires the approved live public testnet and real backend/frontend/dependency endpoints"
+    ],
+    "note": "APPSTORE-AUDIT-1 through APPSTORE-AUDIT-6 are repository-complete. Unfinished APPSTORE-AUDIT-7 live public-testnet qualification and APPSTORE-AUDIT-8 Genesis/production closeout are handed off to the canonical testnet work roadmap in docs/ROADMAP.md. No live testnet evidence is claimed here.",
+    "next_step": "APPSTORE-AUDIT-7"
   }
 }

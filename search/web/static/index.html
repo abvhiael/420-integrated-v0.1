@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>420Search</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="420Search home"><span class="brand-mark">420</span><span>Search</span></a>
+    <a class="brand" href="/" aria-label="420Search home"><img class="brand-logo" src="/logo.svg" alt="" aria-hidden="true"><span class="brand-title">420Search</span></a>
     <form id="global-search" class="search" role="search">
       <label class="sr-only" for="search-input">Search 420 Integrated</label>
       <input id="search-input" name="q" autocomplete="off" spellcheck="false" placeholder="search blocks, txs, names, services, assets, validators…">
@@ -29,7 +30,7 @@
     <main class="content" id="app" tabindex="-1">
       <section class="hero">
         <p class="eyebrow">420 Integrated · public discovery</p>
-        <h1>420Search</h1>
+        <div class="hero-title"><img class="hero-logo" src="/logo.svg" alt="420Search logo"><h1>420Search</h1></div>
         <p>Find public chain, protocol, application, name, identity, asset, validator & ecosystem records through one qualified discovery surface.</p>
       </section>
 

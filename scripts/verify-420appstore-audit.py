@@ -22,6 +22,10 @@ required = [
     "appstore/registry/indexer_source.go",
     "appstore/registry/indexer_source_test.go",
     "appstore/catalog/store.go",
+    "appstore/catalog/lifecycle.go",
+    "appstore/catalog/lifecycle_test.go",
+    "appstore/catalog/presentation_history.go",
+    "appstore/catalog/presentation_history_test.go",
     "appstore/curation/policy.go",
     "appstore/security/evidence.go",
     "appstore/wallet/handoff.go",
@@ -64,12 +68,12 @@ if readiness_path.is_file():
         errors.append("current audit remediation status missing")
     if audit.get("registry_source") != "420Indexer-backed finalized ProtocolRegistry projection":
         errors.append("APPSTORE-AUDIT-2 Registry source decision missing")
-    for phrase in ("catalogue lifecycle", "discovery API", "embedded frontend", "ApplicationView", "public testnet"):
+    for phrase in ("discovery API", "embedded frontend", "ApplicationView", "public testnet"):
         if not any(phrase.lower() in str(b).lower() for b in blockers):
             errors.append(f"readiness evidence missing blocker: {phrase}")
 
 main = (ROOT / "appstore/cmd/appstore420/main.go").read_text()
-for token in ("APPSTORE_INDEXER_URL", "NewIndexerSource", "appstoreregistry.Sync"):
+for token in ("APPSTORE_INDEXER_URL", "NewIndexerSource", "appstorecatalog.Open", "NewLifecycle", "lifecycle.Bootstrap", "lifecycle.Run"):
     if token not in main:
         errors.append(f"APPSTORE-AUDIT-2 production source wiring missing: {token}")
 if 'Handler: service.Handler()' not in main:
@@ -103,4 +107,5 @@ if errors:
 print("420AppStore audit qualification PASS")
 print("Canonical boundary: contract-free / non-canonical")
 print("APPSTORE-AUDIT-2 source: 420Indexer-backed finalized ProtocolRegistry projection")
+print("APPSTORE-AUDIT-3 lifecycle: persistent restore/rebuild/refresh/history wired")
 print("Current readiness: PARTIAL / remediation required / public testnet pending")

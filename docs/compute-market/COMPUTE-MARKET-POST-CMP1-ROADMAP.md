@@ -376,6 +376,12 @@ Durable evidence: [CMP-3.5 qualification](CMP-3.5-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.6 — Execution lifecycle
+**Status: IMPLEMENTED / Level 1 + Level 2 qualification pending.**
+
+The worker now resolves exact canonical attempt authorization, revalidates the content-addressed work unit immediately before execution, streams it into the CMP-3.4 sandbox without host mounts, persists restart-safe observational execution states, distinguishes cancellation/failure/expiry/interruption, and rejects exact-attempt replay. CMP-3.6 is the first worker-runtime convergence milestone and therefore adds a dedicated app-focused Level 2 integration workflow.
+
+Durable design/exit criteria: [CMP-3.6 execution lifecycle](CMP-3.6-EXECUTION-LIFECYCLE.md).
+
 
 ## CMP-3.7 — Checkpointing/resume
 

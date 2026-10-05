@@ -96,6 +96,20 @@
         37255402153
       ],
       "note": "Evidence-only closeout metadata. Full AppStore race suite/vet/build/verifier serves the Level 2 lifecycle milestone without duplicate equivalent CI; Level 3 remains deferred."
+    },
+    "appstore_audit_4": {
+      "qualification_level": "LEVEL_1_PLUS_LEVEL_2_COMPOSITION_MILESTONE",
+      "implementation_sha": "0a2abad993d6ea508919a461b2a2ba7dfe761282",
+      "workflow": "420AppStore Audit Qualification",
+      "run_id": 37256398366,
+      "job_id": 111594309071,
+      "conclusion": "PASS",
+      "main_observed": "f6a426fc386b21f871b1805e00a57b1dad2bf902",
+      "superseded_runs": [
+        37256187273,
+        37256272006
+      ],
+      "note": "Evidence-only closeout metadata. The retained AppStore workflow's full race-enabled ./appstore/... suite, vet, production build and verifier also serve the ApplicationView integration milestone; Level 3 remains deferred."
     }
   },
   "current_audit": {
@@ -104,7 +118,8 @@
     "completed_steps": [
       "APPSTORE-AUDIT-1",
       "APPSTORE-AUDIT-2",
-      "APPSTORE-AUDIT-3"
+      "APPSTORE-AUDIT-3",
+      "APPSTORE-AUDIT-4"
     ],
     "registry_source": "420Indexer-backed finalized ProtocolRegistry projection",
     "blockers": [
@@ -112,8 +127,7 @@
       "production entrypoint does not mount the APPSTORE-9 embedded frontend",
       "public testnet backend/frontend URLs and live dependency qualification remain pending"
     ],
-    "note": "APPSTORE-AUDIT-4 now defines and wires fail-closed ApplicationView composition from finalized canonical catalogue records plus optional non-canonical curation/security/Wallet/link inputs. Exact-head Level 1 qualification is pending; public API/frontend composition and live testnet evidence remain outstanding.",
-    "next_step": "APPSTORE-AUDIT-4",
-    "in_progress_step": "APPSTORE-AUDIT-4"
+    "note": "APPSTORE-AUDIT-4 is repository-complete and exact-head qualified: finalized canonical catalogue records are composed with strict optional curation/security/Wallet/link inputs into an atomic retained ApplicationView set. Overall AppStore remains PARTIAL pending public API/frontend/abuse/dependency composition and live testnet evidence.",
+    "next_step": "APPSTORE-AUDIT-5"
   }
 }

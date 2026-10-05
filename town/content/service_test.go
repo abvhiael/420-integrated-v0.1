@@ -47,6 +47,16 @@ type fakeRisk struct {
 	profiles map[model.ObjectID]RiskProfile
 }
 
+type allowAllModeration struct{}
+
+func (allowAllModeration) CanRead(communityID, viewerID, authorID model.ObjectID, kind string, targetID model.ObjectID) bool {
+	return true
+}
+
+func (allowAllModeration) CanWrite(communityID, actorID model.ObjectID, kind string, targetID model.ObjectID) bool {
+	return true
+}
+
 func (f *fakeRisk) Profile(actorID model.ObjectID) (RiskProfile, bool) {
 	p, ok := f.profiles[actorID]
 	return p, ok
@@ -90,7 +100,7 @@ func newTestService(t *testing.T) (*Service, *fakeAuthority, *fakeRisk, *time.Ti
 		admin: {Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour)},
 	}}
 	policy := DefaultPolicy()
-	svc, err := NewService(auth, risk, policy)
+	svc, err := NewService(auth, risk, allowAllModeration{}, policy)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -545,7 +555,7 @@ func TestCommunityAggregateWriteLimitBlocksSwarm(t *testing.T) {
 	policy := DefaultPolicy()
 	policy.CommunityWriteLimit = 2
 	policy.VerifiedWriteLimit = 20
-	svc, err := NewService(auth, risk, policy)
+	svc, err := NewService(auth, risk, allowAllModeration{}, policy)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -584,7 +594,7 @@ func TestVoteRateLimitIsSeparateAndEnforced(t *testing.T) {
 	policy := DefaultPolicy()
 	policy.UnverifiedVoteLimit = 2
 	policy.CommunityWriteLimit = 100
-	svc, err := NewService(auth, risk, policy)
+	svc, err := NewService(auth, risk, allowAllModeration{}, policy)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -647,7 +657,7 @@ func TestDeviceAndNetworkScopesLimitMultiIdentitySwarm(t *testing.T) {
 	policy.CommunityWriteLimit = 100
 	policy.VerifiedWriteLimit = 20
 
-	svc, err := NewService(auth, risk, policy)
+	svc, err := NewService(auth, risk, allowAllModeration{}, policy)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -697,7 +707,7 @@ func TestDeviceScopeLimitsOneDeviceAcrossMultipleIdentities(t *testing.T) {
 	policy.CommunityWriteLimit = 100
 	policy.VerifiedWriteLimit = 20
 
-	svc, err := NewService(auth, risk, policy)
+	svc, err := NewService(auth, risk, allowAllModeration{}, policy)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -64,7 +64,7 @@ func (s *ViewSet) Rebuild(doc catalog.Document, chainID uint64, inputs Compositi
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.views = append([]ApplicationView(nil), views...)
+	s.views = cloneApplicationViews(views)
 	return nil
 }
 
@@ -74,7 +74,7 @@ func (s *ViewSet) Snapshot() []ApplicationView {
 	}
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return append([]ApplicationView(nil), s.views...)
+	return cloneApplicationViews(s.views)
 }
 
 // LoadCompositionInputs reads optional operator-controlled, non-canonical view
@@ -115,6 +115,9 @@ func ComposeApplications(doc catalog.Document, chainID uint64, inputs Compositio
 	}
 	if inputs.SchemaVersion != CompositionInputsSchemaVersion {
 		return nil, ErrInvalidCompositionInputs
+	}
+	if _, err := catalog.RestoreProjection(doc); err != nil {
+		return nil, fmt.Errorf("%w: canonical catalogue validation failed: %v", ErrInvalidCompositionInputs, err)
 	}
 
 	latest := make(map[string]catalogVersion)
@@ -231,4 +234,26 @@ type catalogVersion struct {
 func validateComposedApplicationView(view ApplicationView) error {
 	_, err := New([]ApplicationView{view})
 	return err
+}
+
+
+func cloneApplicationViews(in []ApplicationView) []ApplicationView {
+	out := make([]ApplicationView, len(in))
+	for i, view := range in {
+		out[i] = view
+		out[i].Listing.Curation.Categories = append([]string(nil), view.Listing.Curation.Categories...)
+		out[i].Listing.Curation.Screenshots = append([]string(nil), view.Listing.Curation.Screenshots...)
+		if view.Listing.Curation.Presentation != nil {
+			out[i].Listing.Curation.Presentation = make(map[string]string, len(view.Listing.Curation.Presentation))
+			for k, v := range view.Listing.Curation.Presentation {
+				out[i].Listing.Curation.Presentation[k] = v
+			}
+		}
+		out[i].Security.Evidence = append([]security.Evidence(nil), view.Security.Evidence...)
+		out[i].Security.Warnings = append([]security.Evidence(nil), view.Security.Warnings...)
+		out[i].Wallet.Permissions = append([]wallet.Permission(nil), view.Wallet.Permissions...)
+		out[i].Wallet.Capabilities = append([]wallet.CapabilityScope(nil), view.Wallet.Capabilities...)
+		out[i].Wallet.HighRiskActions = append([]string(nil), view.Wallet.HighRiskActions...)
+	}
+	return out
 }

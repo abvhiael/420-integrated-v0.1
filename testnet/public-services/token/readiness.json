@@ -17,5 +17,9 @@
   "status": "REPOSITORY_QUALIFIED_TESTNET_PENDING",
   "repositoryQualified": true,
   "liveTestnetQualified": false,
-  "nextRoadmapStep": "TOKEN-AUDIT-8"
+  "nextRoadmapStep": "TOKEN-AUDIT-8",
+  "blockers": [
+    "TOKEN-AUDIT-8 requires the approved production-equivalent 420Integrated testnet and real Vault/Registry/Wallet infrastructure"
+  ],
+  "note": "TOKEN-AUDIT-1 through TOKEN-AUDIT-7 are repository-complete and formally qualified. Unfinished TOKEN-AUDIT-8 live production-equivalent testnet qualification and TOKEN-AUDIT-9 Genesis/production closeout are handed off to the canonical testnet work roadmap in docs/ROADMAP.md. No live testnet evidence is claimed here."
 }

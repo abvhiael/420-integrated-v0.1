@@ -233,7 +233,15 @@ func TestCommentsCannotWidenRootVisibility(t *testing.T) {
 	svc, _, _, _ := newTestService(t)
 	root := createPost(t, svc, alice, "post-private-thread", model.VisibilityAdmins, "root-admin", "admin-only")
 	th := createThread(t, svc, alice, "thread-private", root.ID, "thread-admin")
-	c, err := svc.CreateComment(bob, CreateCommentRequest{
+
+	_, err := svc.CreateComment(bob, CreateCommentRequest{
+		ID: "comment-admin-denied", ThreadID: th.ID, Anchor: anchor("reply-admin-denied"), IdempotencyKey: "comment-admin-denied-key",
+	})
+	if !errors.Is(err, ErrVisibilityDenied) {
+		t.Fatalf("expected comment write visibility denial, got %v", err)
+	}
+
+	c, err := svc.CreateComment(admin, CreateCommentRequest{
 		ID: "comment-admin", ThreadID: th.ID, Anchor: anchor("reply-admin"), IdempotencyKey: "comment-admin-key",
 	})
 	if err != nil {
@@ -243,7 +251,31 @@ func TestCommentsCannotWidenRootVisibility(t *testing.T) {
 		t.Fatal("comment widened thread visibility")
 	}
 	if _, err := svc.GetComment(ViewerContext{ActorID: bob}, c.ID); !errors.Is(err, ErrVisibilityDenied) {
-		t.Fatalf("expected commenter without admin role to be visibility denied on inherited admin scope, got %v", err)
+		t.Fatalf("expected non-admin read denial on inherited admin scope, got %v", err)
+	}
+}
+
+func TestFollowerScopedCommentRequiresTrustedRelationshipContext(t *testing.T) {
+	svc, _, _, _ := newTestService(t)
+	root := createPost(t, svc, alice, "post-followers", model.VisibilityFollowers, "root-followers", "followers-only")
+	th := createThread(t, svc, alice, "thread-followers", root.ID, "thread-followers-key")
+
+	_, err := svc.CreateComment(bob, CreateCommentRequest{
+		ID: "comment-follower-denied", ThreadID: th.ID, Anchor: anchor("follower-denied"), IdempotencyKey: "follower-denied-key",
+	})
+	if !errors.Is(err, ErrVisibilityDenied) {
+		t.Fatalf("missing relationship context must fail closed, got %v", err)
+	}
+
+	c, err := svc.CreateComment(bob, CreateCommentRequest{
+		ID: "comment-follower-ok", ThreadID: th.ID, Anchor: anchor("follower-ok"), IdempotencyKey: "follower-ok-key",
+		Viewer: ViewerContext{FollowsAuthor: true},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Visibility != model.VisibilityFollowers {
+		t.Fatal("follower comment did not inherit root visibility")
 	}
 }
 
@@ -496,5 +528,95 @@ func TestInvalidContentAnchorAndUnknownVisibilityFailClosed(t *testing.T) {
 	})
 	if !errors.Is(err, ErrInvalidInput) {
 		t.Fatalf("expected unknown visibility rejection, got %v", err)
+	}
+}
+
+func TestCommunityAggregateWriteLimitBlocksSwarm(t *testing.T) {
+	auth := newFakeAuthority()
+	for _, actor := range []model.ObjectID{alice, bob, mod} {
+		auth.addMember(community, actor)
+	}
+	now := time.Date(2026, 10, 5, 6, 0, 0, 0, time.UTC)
+	risk := &fakeRisk{profiles: map[model.ObjectID]RiskProfile{
+		alice: {Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour)},
+		bob:   {Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour)},
+		mod:   {Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour)},
+	}}
+	policy := DefaultPolicy()
+	policy.CommunityWriteLimit = 2
+	policy.VerifiedWriteLimit = 20
+	svc, err := NewService(auth, risk, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc.SetClockForTest(func() time.Time { return now })
+
+	for i, actor := range []model.ObjectID{alice, bob} {
+		_, err := svc.CreatePost(actor, CreatePostRequest{
+			ID: model.ObjectID("swarm-post-" + string(rune('a'+i))),
+			CommunityID: community,
+			Anchor: anchor("swarm-body-" + string(rune('a'+i))),
+			Visibility: model.VisibilityPublic,
+			IdempotencyKey: "swarm-key-" + string(rune('a'+i)),
+		})
+		if err != nil {
+			t.Fatalf("unexpected pre-limit error: %v", err)
+		}
+	}
+	_, err = svc.CreatePost(mod, CreatePostRequest{
+		ID: "swarm-over", CommunityID: community, Anchor: anchor("swarm-over"),
+		Visibility: model.VisibilityPublic, IdempotencyKey: "swarm-over-key",
+	})
+	if !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("expected aggregate community rate limit, got %v", err)
+	}
+}
+
+func TestVoteRateLimitIsSeparateAndEnforced(t *testing.T) {
+	auth := newFakeAuthority()
+	auth.addMember(community, alice)
+	auth.addMember(community, bob)
+	now := time.Date(2026, 10, 5, 7, 0, 0, 0, time.UTC)
+	risk := &fakeRisk{profiles: map[model.ObjectID]RiskProfile{
+		alice: {Assurance: AssuranceVerified, AccountCreatedAt: now.Add(-7 * 24 * time.Hour)},
+		bob:   {Assurance: AssuranceUnverified, AccountCreatedAt: now.Add(-time.Hour)},
+	}}
+	policy := DefaultPolicy()
+	policy.UnverifiedVoteLimit = 2
+	policy.CommunityWriteLimit = 100
+	svc, err := NewService(auth, risk, policy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	svc.SetClockForTest(func() time.Time { return now })
+
+	var posts []Post
+	for i := 0; i < 3; i++ {
+		p, err := svc.CreatePost(alice, CreatePostRequest{
+			ID: model.ObjectID("vote-rate-post-" + string(rune('a'+i))),
+			CommunityID: community,
+			Anchor: anchor("vote-rate-body-" + string(rune('a'+i))),
+			Visibility: model.VisibilityPublic,
+			IdempotencyKey: "vote-rate-create-" + string(rune('a'+i)),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		posts = append(posts, p)
+	}
+	for i := 0; i < 2; i++ {
+		_, err := svc.SetVote(bob, SetVoteRequest{
+			TargetKind: TargetPost, TargetID: posts[i].ID, Value: 1,
+			IdempotencyKey: "vote-rate-" + string(rune('a'+i)),
+		})
+		if err != nil {
+			t.Fatalf("unexpected pre-limit vote error: %v", err)
+		}
+	}
+	_, err = svc.SetVote(bob, SetVoteRequest{
+		TargetKind: TargetPost, TargetID: posts[2].ID, Value: 1, IdempotencyKey: "vote-rate-over",
+	})
+	if !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("expected vote rate limit, got %v", err)
 	}
 }

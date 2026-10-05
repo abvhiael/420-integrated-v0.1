@@ -317,8 +317,10 @@ func TestWorkUnitDownloaderUsesConfiguredBandwidthLimiter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	client := server.Client()
+	client.Timeout = time.Minute
 	downloader, err := NewWorkUnitDownloaderWithBandwidth(
-		t.TempDir(), server.Client(), nil, 1024, limiter,
+		t.TempDir(), client, nil, 1024, limiter,
 	)
 	if err != nil {
 		t.Fatal(err)

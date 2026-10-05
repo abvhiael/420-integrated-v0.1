@@ -250,6 +250,7 @@ contract ERC20Template420 {
         if (to == address(0)) revert ZeroAddress();
         uint256 next = totalSupply + amount;
         if (cap != 0 && next > cap) revert CapExceeded();
+        if (votesEnabled && next > type(uint208).max) revert VoteOverflow();
         totalSupply = next;
         balanceOf[to] += amount;
         emit Transfer(address(0), to, amount);

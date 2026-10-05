@@ -340,9 +340,17 @@ Running Level 2 immediately before CMP-3.14 would duplicate app-wide integration
 
 Automatically triggered broad workflows are not CMP-3.13 Level 1 owners.
 
-At exact-head closeout review, several broad workflows were queued/in progress because of monorepo PR trigger behavior. They are not promoted to CMP-3.13 passing evidence.
+420Docs Qualification **#5376** on the evidence-only closeout head failed. Exact job-log inspection showed:
 
-Any broad failure must be diagnosed if it is caused by CMP-3.13, but broad repository qualification is not substituted for the app-specific exact-head package gate.
+- CMP-3.13 documentation passed version metadata and registry/routing checks;
+- CMP-3.13 documentation passed internal-links validation as part of 901 checked links;
+- the only failure was the unchanged pre-existing Arbitration orphan-navigation debt:
+  - `docs/apps/arbitration/deployment-operations.md`;
+  - `docs/apps/arbitration/threat-model.md`.
+
+That broad failure is unrelated to CMP-3.13 and is not promoted to or substituted for Level 1 package evidence.
+
+Other automatically triggered broad workflows may remain queued/in progress because of monorepo PR trigger behavior. They are not CMP-3.13 gates and are not promoted to passing evidence.
 
 ## Security and release truth
 

@@ -274,7 +274,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.6 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.7 — Threat/trust model
+### PB-0.7 — Threat/trust model — COMPLETE
 
 **Purpose:** define canonical protected assets, actor classes, trust boundaries, abuse cases, authority-ownership rules, fail-closed assumptions, required security-control classes, and residual-risk acceptance criteria.
 

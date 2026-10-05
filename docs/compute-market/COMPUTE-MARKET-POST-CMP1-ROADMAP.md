@@ -350,6 +350,12 @@ Durable evidence: [CMP-3.2 qualification](CMP-3.2-QUALIFICATION-EVIDENCE.md). Ex
 
 
 ## CMP-3.3 — Benchmarking and capability evidence
+**Status: IMPLEMENTED / Level 1 qualification pending.**
+
+Bounded provider-neutral CPU/memory benchmarking now produces versioned, content-addressed self-reported capability evidence bound to the exact CMP-3.2 discovery snapshot. The evidence is explicitly non-authoritative, independently unattested, and not job-result correctness evidence; trusted eligibility remains owned by the canonical independent attestation/provenance path.
+
+Durable design/exit criteria: [CMP-3.3 benchmarking and capability evidence](CMP-3.3-BENCHMARKING-CAPABILITY-EVIDENCE.md).
+
 
 ## CMP-3.4 — Secure workload sandbox
 Container, microVM, WASM or equivalent isolation. Customer workloads must not execute unrestricted on the host.

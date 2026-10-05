@@ -493,3 +493,174 @@ PR #523 remains open and mergeable. Final reconciliation to then-current `main` 
 **TOWN-AUDIT-4 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-5 — Moderation and appeals**.
+
+
+## TOWN-AUDIT-5 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 + Level 2 moderation/content integration milestone**  
+Qualified implementation/test/workflow SHA: `04fb48b8aca4bf65cf606a139d10b7b8a2129288`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA qualification.
+
+### Implementation completed
+
+TOWN-AUDIT-5 adds the complete shared GEN-SVC moderation/appeal lifecycle to 420Town and integrates moderation as a mandatory gate across the accumulated TOWN-AUDIT-4 content paths.
+
+Implemented scope includes:
+
+- canonical moderation actions `REPORT`, `HIDE`, `BLOCK`, `MUTE`, `SUSPEND`, `APPEAL`, `MODERATOR_DECISION`, `RESTORE`, `LOCK`;
+- replaceable off-chain moderation cases and append-only moderation records;
+- post, comment and user moderation targets;
+- active-community-membership requirement for reports;
+- active MODERATOR/ADMIN requirement for privileged moderation actions;
+- strict community/domain scoping of moderator/admin capability;
+- user-scoped BLOCK/MUTE relationship state;
+- community/Town-scoped user SUSPEND state;
+- affected-subject-only appeal authorization;
+- MODERATOR_DECISION transition restricted to an APPEALED case;
+- append-only parent-record provenance, previous/result state, actor, affected subject and monotonic case version;
+- bounded optional moderation evidence reference plus lowercase SHA-256 digest validation;
+- idempotent moderation writes with exact retry and changed-payload replay rejection;
+- RESTORE semantics that clear HIDE/LOCK/SUSPEND enforcement without rewriting prior records;
+- active target-case release on restoration so a later independent report can open a new case;
+- mandatory moderation gate passed into the Town content service at construction;
+- fail-closed moderation dependency behavior until a content resolver is attached;
+- moderation enforcement on post creation, edits, deletion, thread creation, comments/replies, comment edits/deletion, voting, vote clearing, content reads and revision-history reads;
+- alternate-path bypass prevention for hidden, locked and suspended content/users;
+- hidden-content review access retained for the affected author and in-domain moderator/admin;
+- LOCK preserving read access while blocking interactions;
+- model/schema/config/docs/verifier/CI alignment for the moderation baseline;
+- canonical Town phase advancement to `MODERATION_BASELINE` and implementation through TOWN-AUDIT-5.
+
+### Files changed for TOWN-AUDIT-5
+
+Primary implementation/config/test/docs/workflow changes include:
+
+- `town/moderation/service.go`;
+- `town/moderation/service_test.go`;
+- `town/content/service.go`;
+- `town/content/service_test.go`;
+- `town/model/model.go`;
+- `town/model/model_test.go`;
+- `config/420town-moderation-v1.json`;
+- `config/420town-genesis.json`;
+- `town/schema/v1/object-catalog.json`;
+- `scripts/verify-420town-moderation.py`;
+- `scripts/verify-420town-content.py`;
+- `docs/apps/town/moderation.md`;
+- `docs/apps/town/index.md`;
+- `town/README.md`;
+- `.github/workflows/420town-audit.yml`.
+
+### Canonical exit criteria satisfied
+
+1. **Shared GEN-SVC vocabulary** — all nine canonical moderation actions are retained exactly in config, model, service and verifier surfaces.
+2. **Domain-scoped moderator authority** — privileged moderation requires active MODERATOR or ADMIN status in the target community; the same role in another community confers no capability.
+3. **Escalation boundaries** — ordinary members cannot HIDE/LOCK/SUSPEND/RESTORE/decide cases; moderation cannot transfer assets, mutate payments/treasury, revoke protocol identity, alter ownership/rights or execute wallet/protocol actions.
+4. **Appeals** — only the affected subject can appeal an eligible adverse case state; unrelated reporter/users cannot appeal on their behalf.
+5. **Provenance** — report, moderation action, appeal, decision and restoration are append-only records with parent linkage, previous/result state, actor/affected subject, version and timestamp/evidence provenance.
+6. **Alternate-path bypass** — HIDE/LOCK/SUSPEND enforcement is consulted by all accumulated content read/write/history/vote/thread/reply routes rather than by one UI path only.
+7. **Restoration semantics** — RESTORE clears active HIDE/LOCK/SUSPEND enforcement, preserves prior decision history, re-enables allowed content paths and permits a later independent case without rewriting the restored case.
+
+### Exact-head qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37274475535`  
+Run number: `69`  
+Result: **PASS**  
+Qualified implementation SHA: `04fb48b8aca4bf65cf606a139d10b7b8a2129288`
+
+Jobs:
+
+- `town-skeleton` / job `111648430690` — **PASS**;
+- `town-contracts` / job `111648430382` — **PASS**.
+
+Passing exact-head checks:
+
+- exact implementation SHA assertion in both jobs — PASS;
+- canonical Town audit classification verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- Town moderation-state verifier — PASS;
+- `go test ./town/...` — PASS;
+- focused Town Solidity build — PASS;
+- retained Town-focused Foundry inventory via `forge test --match-path "test/Town*.t.sol" -vvv` — PASS;
+- cross-dApp rewards hardening via `test/RewardsCrossDappHardening420.t.sol` — PASS.
+
+### Diagnosed pre-qualification failures
+
+Two earlier exact-head attempts were rejected rather than treated as evidence:
+
+1. At implementation SHA `1bae503eccaedcc060317b9087e69fdee614b920`, the retained content verifier failed because it still required the old phase label `CONTENT_BASELINE`. The canonical Town config had correctly advanced to `MODERATION_BASELINE`. The verifier was corrected to validate TOWN-AUDIT-4 implementation/deferred state rather than freeze an obsolete phase label. No content invariant was weakened.
+2. At SHA `a2266b1876966a4840598c8dd3bba5e98289699f`, all Town verifiers passed but `go test ./town/...` found a compile-time adapter mismatch: an internal moderation helper still passed `TargetKind` directly after the content-resolver interface had intentionally been decoupled to `string`. The adapter was fixed with an explicit conversion. No moderation semantics or assertions were weakened.
+
+The resulting exact SHA `04fb48b8aca4bf65cf606a139d10b7b8a2129288` was then qualified from scratch by the full app-specific workflow and is the only authoritative implementation evidence for this closeout.
+
+### Security/adversarial/invariant result
+
+The qualified moderation/content integration suite directly proves:
+
+- cross-community moderator privilege cannot be used against another community;
+- ordinary community members cannot invoke privileged moderator transitions;
+- HIDE blocks ordinary reads, history reads, votes, edits and thread creation through alternate paths;
+- the hidden-content author and in-domain moderator/admin retain review access;
+- LOCK preserves ordinary read access but blocks voting/thread interaction;
+- RESTORE re-enables the previously allowed paths;
+- only the affected identity can appeal;
+- report → HIDE → APPEAL → MODERATOR_DECISION → RESTORE preserves an ordered append-only provenance chain and monotonically increasing versions;
+- SUSPEND blocks writes only in the affected community and does not leak into a different Town community;
+- suspended users can appeal and be restored through the same provenance-preserving lifecycle;
+- BLOCK and MUTE are user-scoped and do not affect unrelated viewers;
+- UNBLOCK/UNMUTE restore the relationship-scoped access behavior;
+- exact moderation retries are idempotent and changed-payload key reuse fails closed;
+- restored targets may later receive a new independent report without rewriting the historical restored case;
+- malformed moderation evidence digests fail closed;
+- content reporting requires valid target/community provenance;
+- missing moderation/content dependency context fails closed rather than allowing bypass;
+- moderation state remains replaceable application state and acquires no wallet, asset, payment, treasury, rights, protocol identity or other protocol authority.
+
+### Milestone status
+
+TOWN-AUDIT-5 is treated as a **Level 2 app integration milestone** in addition to its Level 1 step qualification because it introduces a new moderation lifecycle and makes that lifecycle a mandatory cross-component dependency of all accumulated Town content paths.
+
+The Level 2 evidence remains app-focused as required: the same exact implementation SHA revalidated the complete Town Go package suite, all Town-specific verifiers, the retained Town Foundry suite and cross-dApp rewards hardening. No ceremonial repository-wide closeout was required.
+
+### Intentionally deferred Level 3 scope
+
+Level 3 remains intentionally deferred to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification** / complete app-phase closeout.
+
+The following are not required to close TOWN-AUDIT-5 and remain deferred unless a later Town dependency makes them directly applicable sooner:
+
+- final reconciliation to then-current `main`;
+- canonical repository-wide full Solidity inventory ownership/reconciliation;
+- Genesis/address-authority qualification;
+- 420 Integrated/global qualification;
+- Docs/global reconciliation;
+- full client/service/Indexer/Search/RPC/frontend/backend qualification;
+- final static/security/deployment/config production qualification.
+
+A broad repository workflow may run incidentally because of repository trigger policy, but it is not substituted for the canonical Town Level 1/2 evidence and skipped/unrelated global checks are not counted as passing Town evidence.
+
+### Limitations and blockers
+
+TOWN-AUDIT-5 intentionally does **not** claim completion of:
+
+- production Identity/Storage/Search/Notifications/encrypted-transport adapters;
+- signed public API/SDK/webhook/indexer/recovery surfaces;
+- user-facing web application workflows;
+- final security-hardening phase;
+- live testnet qualification;
+- production/genesis-facing service release.
+
+Those remain later canonical Town roadmap steps. There are **no blockers to TOWN-AUDIT-5 completion**.
+
+Current `main` at closeout: `b338b9c9c140957b0ea8619b0b20bfed415f2c6d`.  
+PR #523 historical base SHA: `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`.  
+PR #523 remains open and mergeable. Final current-main reconciliation remains a Level 3 responsibility unless a later Town step materially requires it earlier.
+
+### Completion state
+
+**TOWN-AUDIT-5 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-6 — Service integrations**.

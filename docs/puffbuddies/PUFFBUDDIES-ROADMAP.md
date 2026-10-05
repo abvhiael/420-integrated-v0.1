@@ -314,7 +314,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.7 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.8 — Ecosystem dependencies
+### PB-0.8 — Ecosystem dependencies — COMPLETE
 
 **Purpose:** define exact narrow authority/capability roles for approved 420Integrated dependencies without allowing any integration to inherit PuffBuddies profile, consent, relationship, safety, privacy, or lifecycle authority outside its canonical domain.
 

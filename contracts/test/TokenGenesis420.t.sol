@@ -59,8 +59,7 @@ contract TokenGenesis420Test {
     function testFeeIsExactly42AndDepositedToCommunityTreasury() public {
         uint256 beforeBal = address(treasury).balance;
         vm.prank(ALICE);
-        address t =
-            factory.createERC20{ value: 42 ether }(
+        address t = factory.createERC20{ value: 42 ether }(
             TokenIds420.ERC20_FIXED, "Alice", "ALC", 1_000 ether, 0, bytes32("one")
         );
         require(t != address(0), "no token");

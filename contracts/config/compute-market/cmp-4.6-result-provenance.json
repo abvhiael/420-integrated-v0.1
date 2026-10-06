@@ -3,7 +3,7 @@
   "step": "CMP-4.6",
   "title": "Result provenance",
   "canonical_definition": "Result provenance",
-  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "status": "COMPLETE",
   "base_main_sha": "f32a9c322e085634e47f20b84861338811198454",
   "qualification": {
     "level": 1,
@@ -65,5 +65,6 @@
     "CMP-8 Compute UI",
     "CMP-9.13 live scientific demonstration"
   ],
-  "next_canonical_step": "CMP-4.7 — Scientific metadata and lineage"
+  "next_canonical_step": "CMP-4.7 — Scientific metadata and lineage",
+  "completion_state": "COMPLETE"
 }

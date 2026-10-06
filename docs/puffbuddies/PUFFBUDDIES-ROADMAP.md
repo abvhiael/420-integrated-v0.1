@@ -1278,7 +1278,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** executable authority separation; minimum-disclosure projection; replay/source/time/revocation failures fail closed; identity material and wallet linkage remain private/absent; retained regressions and exact-head PB-2 fast workflow pass; durable evidence recorded.
 
-### PB-2.2 — Adult eligibility state model
+### PB-2.2 — Adult eligibility state model — COMPLETE
 
 **Purpose:** implement current private adult-eligibility state over time, including fail-closed UNKNOWN, expiry, revocation, provider failure, policy-version reevaluation and authoritative reverification.
 

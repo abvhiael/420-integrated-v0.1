@@ -1342,7 +1342,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** eligibility state round-trips through canonical private persistence; sequence/time/policy/subject invariants survive reload; stale sequence/time/repository-version updates fail closed; UNKNOWN/ELIGIBLE persistence invariants pass; forbidden identity/proof material remains absent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.6 — Revocation & expiry handling
+### PB-2.6 — Revocation & expiry handling — COMPLETE
 
 **Purpose:** turn authoritative adult-eligibility revocation and bounded expiry into durable PB-2 state transitions that invalidate stale derived authority immediately without exposing raw identity/proof material.
 

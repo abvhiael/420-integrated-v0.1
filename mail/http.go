@@ -160,7 +160,7 @@ func (h HTTPHandler) discordDeliver(w http.ResponseWriter, r *http.Request, acto
 		return
 	}
 	if r.Method != http.MethodPost {
-		writeError(w, http.StatusMethodAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
 		return
 	}
 	var req DiscordDeliveryRequest

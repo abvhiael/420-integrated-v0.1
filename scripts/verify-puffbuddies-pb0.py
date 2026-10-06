@@ -31,6 +31,8 @@ LIFE = ROOT / "docs/puffbuddies/PB-0.12-USER-LIFECYCLE.md"
 EVIDENCE_12 = ROOT / "docs/puffbuddies/PB-0.12-QUALIFICATION.md"
 MATCHING = ROOT / "docs/puffbuddies/PB-0.13-MATCHING-PRINCIPLES.md"
 EVIDENCE_13 = ROOT / "docs/puffbuddies/PB-0.13-QUALIFICATION.md"
+CANNABIS = ROOT / "docs/puffbuddies/PB-0.14-CANNABIS-TAXONOMY.md"
+EVIDENCE_14 = ROOT / "docs/puffbuddies/PB-0.14-QUALIFICATION.md"
 
 errors = []
 
@@ -38,7 +40,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -72,6 +74,8 @@ life = LIFE.read_text(encoding="utf-8")
 evidence_12 = EVIDENCE_12.read_text(encoding="utf-8")
 matching = MATCHING.read_text(encoding="utf-8")
 evidence_13 = EVIDENCE_13.read_text(encoding="utf-8")
+cannabis = CANNABIS.read_text(encoding="utf-8")
+evidence_14 = EVIDENCE_14.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -162,6 +166,9 @@ for token in [
     "### PB-0.13 — Matching principles",
     "PB-MATCH-001 through PB-MATCH-040",
     "**Milestone relationship:** PB-0.13 is not a Level 2 integration milestone",
+    "### PB-0.14 — Cannabis taxonomy",
+    "PB-CANNABIS-001 through PB-CANNABIS-040",
+    "**Milestone relationship:** PB-0.14 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1331,13 +1338,125 @@ for token in [
 ]:
     need(token in evidence_13, f"PB-0.13 evidence record missing token: {token}")
 
+# PB-0.14 — cannabis taxonomy
+for token in [
+    "# PuffBuddies PB-0.14 cannabis taxonomy",
+    "## Taxonomy principles",
+    "## Canonical cannabis-compatibility vocabulary",
+    "## Privacy and identity boundaries",
+    "## Matching and consent boundaries",
+    "## Economic and tokenization boundaries",
+    "## Safety, legality, and health boundaries",
+    "## Taxonomy field decision rule",
+    "## PB-0.14 completion boundary",
+    "Use-status vocabulary",
+    "NON_USER is first-class",
+    "Frequency is approximate self-description",
+    "PREFER_NOT_TO_SAY is supported",
+    "Method vocabulary is multi-select and optional",
+    "No method implies consent",
+    "Social-context vocabulary",
+    "Environment-boundary vocabulary",
+    "Partner-compatibility vocabulary",
+    "Cannabis interest vocabulary is distinct from use",
+    "Cultivation interest is not production authority",
+    "Knowledge/enthusiasm is not expertise credential",
+    "Cannabis fields are private by default",
+    "Wallet ownership must not reveal cannabis identity",
+    "420Identity must not become a public cannabis registry",
+    "420Names must not encode cannabis profile state",
+    "Registry/AppStore/Search/Explorer must not enumerate cannabis profiles",
+    "Analytics cannot become a shadow cannabis registry",
+    "Deterministic hashes do not make cannabis identity public-safe",
+    "Cannabis fields follow deletion and lifecycle rules",
+    "Cannabis compatibility may influence ranking only as private user preference",
+    "Cannabis compatibility is not a hard universal desirability score",
+    "Non-use must remain matchable",
+    "Cannabis fields cannot override hard exclusions",
+    "Cannabis similarity does not create consent",
+    "Cannabis mismatch does not justify harassment",
+    "Consumption boundaries outrank compatibility",
+    "Recommendation systems must not infer hidden substance-use traits by default",
+    "Token holdings do not prove cannabis use",
+    "Cannabis identity must not be tokenized",
+    "Payment cannot alter another user's cannabis boundaries",
+    "Cannabis compatibility must not become a marketplace entitlement",
+    "Cannabis compatibility is not legal advice",
+    "Cannabis compatibility is not medical advice",
+    "Cannabis compatibility is not impairment evidence",
+    "Coercion is prohibited",
+    "Unauthorized commerce is out of scope",
+    "Minor-oriented cannabis matching is prohibited",
+    "Safety reporting may reference cannabis context without public identity",
+    "Taxonomy extensions require bounded review",
+]:
+    need(token in cannabis, f"PB-0.14 cannabis taxonomy missing token: {token}")
+
+cannabis_ids = re.findall(r"^### (PB-CANNABIS-\d{3})\b", cannabis, flags=re.MULTILINE)
+need(cannabis_ids == [f"PB-CANNABIS-{i:03d}" for i in range(1, 41)], f"PB-CANNABIS sequence drift: {cannabis_ids}")
+need(len(cannabis_ids) == len(set(cannabis_ids)), "duplicate PB-CANNABIS identifier")
+
+for guarantee in [
+    "Cannabis use is optional; non-use is a valid first-class state",
+    "Cannabis compatibility never creates consent to consume, purchase, sell, transport, share, or use cannabis",
+    "Economic/token state must not create or certify cannabis identity",
+    "NON_USER must not be treated as lower-quality, less compatible in general, or ineligible merely for non-use",
+    "Declining disclosure must not become a public negative signal or automatic safety/reputation penalty",
+    "Cannabis fields are private PuffBuddies state",
+    "A wallet address, signature, balance, token holding, transaction history, or connected-account state must not by itself reveal or infer a PuffBuddies cannabis profile",
+    "Holding $420 or any token/NFT does not prove cannabis use",
+    "PuffBuddies must not require or issue transferable tokens/NFTs whose ownership is the canonical proof",
+    "Shared use status, method, strain interest, lifestyle, or compatibility score does not create a like, match, messaging permission, or consent to consume together",
+    "Use status/frequency alone must not be treated as proof that a user is currently impaired",
+]:
+    need(guarantee in cannabis, f"PB-0.14 missing cannabis boundary guarantee: {guarantee}")
+
+for decision in [
+    "canonical field name",
+    "user-facing meaning",
+    "whether it is use, interest, method, context, preference, or boundary",
+    "whether it is single-select, multi-select, optional, or free-form",
+    "privacy classification",
+    "visibility/disclosure rules",
+    "matching/ranking purpose",
+    "prohibited inferences",
+    "retention/deletion behavior",
+    "safety/legal/health caveats",
+    "whether economic/token state can influence it",
+    "whether it can be represented publicly",
+]:
+    need(decision in cannabis, f"PB-0.14 taxonomy decision rule missing: {decision}")
+
+for forbidden in [
+    "PuffBuddies cannabis profile is implemented",
+    "PuffBuddies cannabis registry is live",
+    "PuffBuddies cannabis NFT is deployed",
+    "PuffBuddies cannabis service ID is",
+]:
+    need(forbidden not in cannabis, f"PB-0.14 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", cannabis) is None, "PB-0.14 must not assign an on-chain address")
+need("420/service/puff" not in cannabis.lower(), "PB-0.14 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.14 qualification evidence",
+    "**PB-0.14 — Cannabis taxonomy**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-CANNABIS-001 through PB-CANNABIS-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.15 — Visibility model**",
+]:
+    need(token in evidence_14, f"PB-0.14 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.13", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.14", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.13",
+    "step": "PB-0.14",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1508,6 +1627,21 @@ print(json.dumps({
         "oneSidedLikeNotMessagingConsent": True,
         "mutualMatchRequiresReciprocalIntent": True,
         "adminAlgorithmCannotFabricateConsent": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb14": {
+        "cannabisInvariants": cannabis_ids,
+        "nonUseFirstClass": True,
+        "preferNotToSaySupported": True,
+        "privateByDefault": True,
+        "notPublicIdentity": True,
+        "notTokenizedIdentity": True,
+        "notMedicalLegalImpairmentProof": True,
+        "noMarketplaceEntitlement": True,
+        "noCoercion": True,
+        "matchingConsentBoundariesPreserved": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

@@ -56,7 +56,7 @@ CMP-4.5 is Level 1. Required: affected Compute build, dedicated environment test
 
 ## Intentionally deferred
 
-CMP-4.6 result provenance; CMP-4.7 scientific metadata/lineage; CMP-4.8 publication/retention; CMP-4.9 dashboard; CMP-4.10 Level 3 closeout; CMP-7 SDK/API/indexer; CMP-8 UI; CMP-9.13 live scientific demonstration.
+CMP-4.7 scientific metadata/lineage; CMP-4.8 publication/retention; CMP-4.9 dashboard; CMP-4.10 Level 3 closeout; CMP-7 SDK/API/indexer; CMP-8 UI; CMP-9.13 live scientific demonstration.
 
 ## Qualification evidence
 

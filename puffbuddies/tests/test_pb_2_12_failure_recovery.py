@@ -2,6 +2,7 @@ import pathlib,sys,unittest
 ROOT=pathlib.Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 
 from puffbuddies.domain.eligibility_authorization import *
+from puffbuddies.domain.authorization import AuthorizationContext,PrincipalKind
 from puffbuddies.domain.eligibility_persistence import *
 from puffbuddies.domain.eligibility_privacy import *
 from puffbuddies.domain.eligibility_revocation import *

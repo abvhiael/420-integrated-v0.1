@@ -65,8 +65,8 @@ type SecurityAlert struct {
 }
 
 type SecurityState struct {
-	Identity           string          `json:"identity"`
-	AuthorizationEpoch uint64          `json:"authorization_epoch"`
+	Identity           string           `json:"identity"`
+	AuthorizationEpoch uint64           `json:"authorization_epoch"`
 	Passkeys           []PasskeySummary `json:"passkeys"`
 	Devices            []DeviceSummary  `json:"devices"`
 	Recovery           RecoverySummary  `json:"recovery"`

@@ -53,7 +53,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 8,
+    "schemaVersion": 9,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -401,9 +401,31 @@
     "rawClientSecretInput": false,
     "credentialPersistence": "DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY",
     "mailMetadataCredentialPersistence": false,
-    "sync": false,
+    "sync": true,
     "delivery": false,
     "webhook": false,
+    "walletVerification": false
+  },
+  "discordSync": {
+    "enabled": true,
+    "provider": "discord",
+    "connectorCapability": "PULL",
+    "authenticatedOwnerOnly": true,
+    "connectionBinding": "DISCORD_LINK_CONNECTION_ID",
+    "messageSource": "discord",
+    "recipientFolder": "INBOX",
+    "bodyStorage": "PRIVATE_OFF_CHAIN_REFERENCE",
+    "externalIdempotency": "OWNER_CONNECTION_MESSAGE_ID",
+    "cursorPersistence": "DURABLE_OWNER_CONNECTION_CURSOR",
+    "restartRecovery": true,
+    "orderedImport": "CREATED_AT_ASC_MESSAGE_ID_ASC",
+    "rulesEngineApplied": true,
+    "trustControlsApplied": true,
+    "spamProtectionApplied": true,
+    "mutedAndQuarantinedSuppressNotification": true,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false,
+    "delivery": false,
     "walletVerification": false
   }
 }

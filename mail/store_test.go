@@ -267,7 +267,7 @@ func TestDurableStoreRebuildsMailboxIndex(t *testing.T) {
 		Messages:      map[string]Message{msg.ID: msg},
 		ByIdem:        map[string]string{"alice.420\x00index": msg.ID},
 		Mailbox:       map[string]MailboxState{mailboxKey("bob.420", msg.ID): state},
-		MailboxIndex:  map[string][]string{"stale": {"bad"}},
+		MailboxIndex:  map[string][]string{"stale": []string{"bad"}},
 		Fingerprints:  map[string]string{msg.ID: msg.Fingerprint},
 		IdempotencyKeys: map[string]string{msg.ID: msg.IdempotencyKey},
 	}

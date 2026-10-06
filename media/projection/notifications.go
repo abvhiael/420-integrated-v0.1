@@ -108,15 +108,16 @@ func (n *Notifications) Notify(
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	out := make([]Notification, 0)
+	matched := false
 	for _, sub := range n.subscriptions {
 		if sub.Muted || sub.Topic != topic || severity < sub.MinimumSeverity ||
 			finalityRank(result.Provenance.Finality) < finalityRank(sub.MinimumFinality) ||
 			(promotional && !sub.PromotionalOptIn) {
 			continue
 		}
+		matched = true
 		id := notificationID(sub.UserRef, topic, result, false)
-		if existing, ok := n.delivered[id]; ok {
-			out = append(out, existing)
+		if _, ok := n.delivered[id]; ok {
 			continue
 		}
 		item := Notification{
@@ -130,7 +131,7 @@ func (n *Notifications) Notify(
 		n.delivered[id] = item
 		out = append(out, item)
 	}
-	if len(out) == 0 {
+	if len(out) == 0 && !matched {
 		return nil, ErrNotSubscribed
 	}
 	return out, nil
@@ -149,8 +150,7 @@ func (n *Notifications) RetractBlock(blockHash string) []Notification {
 			continue
 		}
 		retractID := "retract_" + id
-		if existing, ok := n.delivered[retractID]; ok {
-			out = append(out, existing)
+		if _, ok := n.delivered[retractID]; ok {
 			continue
 		}
 		retraction := delivered

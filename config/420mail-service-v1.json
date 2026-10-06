@@ -1,14 +1,51 @@
 {
-  "schema":"420-mail-service-v1",
-  "version":1,
-  "serviceId":"420/service/mail/v1",
-  "name":"420Mail",
-  "authority":"REPLACEABLE_COMMUNICATION_SERVICE",
-  "genesisTarget":"identity_addressed_ecosystem_inbox",
-  "contracts":[],
-  "onChainMailState":false,
-  "dependencies":["420 Identity","420 Messenger","420 Storage","420 Notifications"],
-  "privacy":{"messageBodiesOnChain":false,"publicIndexing":false,"defaultVisibility":"PRIVATE","bodyStorage":"PRIVATE_OFF_CHAIN_REFERENCE"},
-  "featureFlags":{"mail.external_smtp":false},
-  "api":{"versionPrefix":"/v1","pagination":"cursor","timestamps":"RFC3339_UTC","idempotentSend":true}
+  "schema": "420-mail-service-v1",
+  "version": 1,
+  "serviceId": "420/service/mail/v1",
+  "name": "420Mail",
+  "authority": "REPLACEABLE_COMMUNICATION_SERVICE",
+  "genesisTarget": "identity_addressed_ecosystem_inbox",
+  "contracts": [],
+  "onChainMailState": false,
+  "dependencies": [
+    "420 Identity",
+    "420 Messenger",
+    "420 Storage",
+    "420 Notifications"
+  ],
+  "privacy": {
+    "messageBodiesOnChain": false,
+    "publicIndexing": false,
+    "defaultVisibility": "PRIVATE",
+    "bodyStorage": "PRIVATE_OFF_CHAIN_REFERENCE"
+  },
+  "featureFlags": {
+    "mail.external_smtp": false
+  },
+  "api": {
+    "versionPrefix": "/v1",
+    "pagination": "cursor",
+    "timestamps": "RFC3339_UTC",
+    "idempotentSend": true
+  },
+  "mailbox": {
+    "systemFolders": [
+      "INBOX",
+      "SENT",
+      "OUTBOX",
+      "DRAFTS",
+      "ARCHIVE",
+      "JUNK",
+      "TRASH"
+    ],
+    "deliveredRecipientFolder": "INBOX",
+    "deliveredSenderFolder": "SENT",
+    "reservedForDedicatedSteps": {
+      "DRAFTS": "MAIL-2.9",
+      "OUTBOX": "MAIL-2.10"
+    },
+    "ownerScopedState": true,
+    "permanentDeleteRequiresTrash": true,
+    "messageBodiesOnChain": false
+  }
 }

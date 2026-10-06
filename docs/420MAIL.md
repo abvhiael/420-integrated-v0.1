@@ -188,6 +188,84 @@ API additions:
 - `GET /v1/trust/settings`
 - `PUT /v1/trust/settings`
 
+## Spam, Junk & Phishing Protection
+
+MAIL-2.7 adds repository-level defenses for spam, junk delivery and phishing while preserving private-mail and ecosystem authority boundaries.
+
+### Reputation and abuse state
+
+420Mail keeps **owner-scoped sender reputation**. A recipient's abuse decisions affect that recipient's future handling of the sender; they do not become protocol identity authority or a public global reputation score.
+
+Recipients may report a delivered message as:
+
+- `SPAM`
+- `PHISHING`
+
+A report is idempotent per owner/message. Reusing the same report returns the existing record; trying to relabel the same report as another abuse class fails closed. A sender cannot report their own Sent copy as recipient abuse.
+
+Spam reports add one recipient-local risk point; phishing reports add two. A user-approved false-positive release subtracts one effective point, bounded at zero. Reputation metadata records delivery/quarantine/report counts but never stores the private message body.
+
+### Duplicate/fingerprint defense
+
+Accepted deliveries record a normalized cryptographic content fingerprint derived from subject and body. The fingerprint itself is stored; the body is not.
+
+The fourth repeated delivery of the same normalized content from a sender becomes a spam signal. Explicitly trusted sender/application entries from MAIL-2.6 bypass spam-reputation and duplicate-content signals, but **do not bypass phishing detection**.
+
+This is deterministic duplicate-content protection, not a complete sender/network rate-limiter. Broader rate-limit and operational abuse controls remain in MAIL-2.35.
+
+### Phishing defense
+
+MAIL-2.7 implements conservative deterministic link/lure signals:
+
+- URL user-info tricks such as `trusted.example@evil.example`;
+- IP-literal links;
+- punycode hostnames;
+- insecure `http://` links;
+- credential/wallet/urgency lures when a link is present.
+
+A phishing score at or above the configured threshold is quarantined even when the sender is trusted, because a trusted identity may itself be compromised.
+
+The current thin UI renders message bodies with DOM `textContent`, not HTML injection, so repository-baseline message content cannot create active HTML/script links.
+
+### Quarantine semantics
+
+Automatic spam/phishing quarantine:
+
+- materializes the recipient copy in **JUNK**;
+- records a durable quarantine reason/score record;
+- mutes the recipient copy;
+- suppresses the recipient notification;
+- overrides MAIL-2.5 mailbox rules that would otherwise move the message out of Junk.
+
+A quarantined message cannot be moved to Inbox/Archive through the generic mailbox-move API. The recipient must explicitly release it through the quarantine review path. Moving a quarantined item to Trash remains allowed.
+
+Explicit release:
+
+- moves a Junk quarantine back to Inbox;
+- clears the quarantine mute;
+- records a false-positive reputation credit;
+- marks the quarantine record released rather than deleting its audit history.
+
+Reporting an already-trashed message does not resurrect it from Trash.
+
+### Durability and privacy
+
+Spam-protection metadata is part of durable store schema v5:
+
+- sender reputation;
+- abuse reports;
+- quarantine records;
+- duplicate-content fingerprint counts.
+
+Existing v4 stores migrate to v5 with initialized protection maps. Private body plaintext remains exclusively in the private blob provider and is not written into Mail metadata, quarantine records, reputation state, public 420Search, or on-chain state.
+
+API additions:
+
+- `POST /v1/messages/{id}/abuse`
+- `GET /v1/quarantine`
+- `POST /v1/quarantine/{id}/release`
+- `GET /v1/reputation/{sender}`
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.
@@ -196,7 +274,7 @@ API additions:
 
 Applicable shared threats include SPAM, SYBIL, MESSAGING_ABUSE, INDEX_POISONING and WEBHOOK_REPLAY where adapters use callbacks. Repository controls include actor/sender binding, canonical-source enforcement for the user send path, identity resolution, Messenger policy checks before persistence, private body references, input bounds, idempotency conflict detection, recipient-only read acknowledgement, no public list/search route, injected authentication and bounded pagination.
 
-Deployment still requires rate limits, abuse/report operations, attachment policy/scanning if attachments are added, encrypted private body storage, secret handling, observability, backup/restore operations, retention policy, provider failure behavior and live privacy testing. MAIL-2.2 qualifies repository durability/restart semantics; it does not claim production backup/disaster-recovery operations.
+Deployment still requires network/device rate limits, moderation/operator abuse workflows, attachment policy/scanning if attachments are added, encrypted private body storage, secret handling, observability, backup/restore operations, retention policy, provider failure behavior and live privacy testing. MAIL-2.2 qualifies repository durability/restart semantics; it does not claim production backup/disaster-recovery operations.
 
 ## Build and test
 
@@ -223,4 +301,4 @@ No Solidity build is required because the canonical service has no Mail-owned co
 
 ## Current limitations
 
-The repository baseline does not prove deployed Identity, Messenger, Storage or Notifications integration; provider encryption/key custody; public-testnet operation; production observability; SMTP; attachments; spam operations; or disaster recovery. Those remain release gates.
+The repository baseline does not prove deployed Identity, Messenger, Storage or Notifications integration; provider encryption/key custody; public-testnet operation; production observability; SMTP; attachments; production network/device spam throttling or moderation operations; or disaster recovery. Those remain release gates.

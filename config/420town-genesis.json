@@ -1,7 +1,7 @@
 {
   "schema": "420-town-genesis-v1",
   "phase": "TOWN-AUDIT",
-  "status": "WEB_APPLICATION_BASELINE",
+  "status": "REPOSITORY_COMPLETE_PRE_TESTNET",
   "serviceId": "420/service/town/v1",
   "name": "420Town Community Boards",
   "role": "GENESIS_FACING_UPDATE",
@@ -61,11 +61,11 @@
     "TOWN-AUDIT-5",
     "TOWN-AUDIT-6",
     "TOWN-AUDIT-7",
-    "TOWN-AUDIT-8"
+    "TOWN-AUDIT-8",
+    "TOWN-AUDIT-9",
+    "TOWN-AUDIT-10"
   ],
   "deferredRoadmap": [
-    "TOWN-AUDIT-9",
-    "TOWN-AUDIT-10",
     "TOWN-AUDIT-11",
     "TOWN-AUDIT-12"
   ],
@@ -79,5 +79,7 @@
   "recoveryPackage": "town/recovery",
   "sdkPackage": "sdk/town420",
   "webConfig": "config/420town-web-v1.json",
-  "webRoot": "town/web"
+  "webRoot": "town/web",
+  "securityConfig": "config/420town-security-v1.json",
+  "documentationRoot": "docs/apps/town"
 }

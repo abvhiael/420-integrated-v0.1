@@ -582,5 +582,30 @@
     "rawCredentialInput": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "telegramAccountLinking": {
+    "enabled": true,
+    "provider": "telegram",
+    "connectorCapability": "LINK",
+    "authority": "TELEGRAM_LINK_AUTHORITY",
+    "authorizationRef": "OPAQUE_EXTERNAL_AUTHORIZATION_REFERENCE",
+    "accountHintAuthoritative": false,
+    "userIdFormat": "POSITIVE_DECIMAL_IDENTIFIER",
+    "verifiedAccountRequired": true,
+    "nonCustodialRequired": true,
+    "unlinkSupported": true,
+    "pull": false,
+    "push": false,
+    "webhook": false,
+    "walletVerification": false,
+    "rawBotTokenInput": false,
+    "rawAccessTokenInput": false,
+    "rawRefreshTokenInput": false,
+    "rawClientSecretInput": false,
+    "phoneNumberCredentialInput": false,
+    "verificationCodeInput": false,
+    "providerCredentialPersistence": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

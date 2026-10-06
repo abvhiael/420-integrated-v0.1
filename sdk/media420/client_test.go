@@ -8,6 +8,7 @@ import (
 	"time"
 
 	mediaapi "github.com/420integrated/420-integrated/media/api"
+	mediasecurity "github.com/420integrated/420-integrated/media/security"
 )
 
 type backendFake struct {
@@ -212,4 +213,39 @@ func TestSigningIntentRejectsRequestedNetworkMismatchBeforeTransport(t *testing.
 	if err == nil {
 		t.Fatal("expected request network mismatch")
 	}
+}
+
+
+type tokenProvider string
+
+func (p tokenProvider) Token(context.Context) (string, error) { return string(p), nil }
+
+func TestClientAttachesEphemeralSessionToken(t *testing.T) {
+	var seen string
+	rt := roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		seen = req.Header.Get("Authorization")
+		body := `{"version":"v1","data":{"items":[],"next_cursor":""},"rate_limit":{"limit":120,"remaining":119,"reset_at":"2026-10-06T20:31:00Z"}}`
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header: http.Header{"Content-Type":[]string{"application/json"}},
+			Body: io.NopCloser(strings.NewReader(body)),
+			Request: req,
+		}, nil
+	})
+	client, err := New(Config{
+		BaseURL: "https://media.example.invalid",
+		HTTPClient: &http.Client{Transport: rt},
+		ExpectedChainID: 420,
+		ExpectedNetwork: "testnet",
+		Session: tokenProvider("session-token"),
+	})
+	if err != nil { t.Fatal(err) }
+	if _, err := client.Assets(context.Background(), "", 10); err != nil { t.Fatal(err) }
+	if seen != "Bearer session-token" { t.Fatalf("authorization=%q", seen) }
+}
+
+func TestModerationTypesRemainPartOfTypedSDKSurface(t *testing.T) {
+	_ = mediasecurity.Report{ID:"report-1", ReporterRef:"CREATOR", TargetKind:"MediaAsset", TargetID:"asset-1", Reason:"abuse"}
+	_ = mediasecurity.Decision{ID:"decision-1", ReportID:"report-1", ModeratorRef:"MODERATOR", Action:mediasecurity.ActionHide, Reason:"review"}
+	_ = mediasecurity.Appeal{ID:"appeal-1", DecisionID:"decision-1", AppellantRef:"CREATOR", Reason:"licensed"}
 }

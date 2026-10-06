@@ -33,6 +33,8 @@ MATCHING = ROOT / "docs/puffbuddies/PB-0.13-MATCHING-PRINCIPLES.md"
 EVIDENCE_13 = ROOT / "docs/puffbuddies/PB-0.13-QUALIFICATION.md"
 CANNABIS = ROOT / "docs/puffbuddies/PB-0.14-CANNABIS-TAXONOMY.md"
 EVIDENCE_14 = ROOT / "docs/puffbuddies/PB-0.14-QUALIFICATION.md"
+VISIBILITY = ROOT / "docs/puffbuddies/PB-0.15-VISIBILITY-MODEL.md"
+EVIDENCE_15 = ROOT / "docs/puffbuddies/PB-0.15-QUALIFICATION.md"
 
 errors = []
 
@@ -40,7 +42,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -76,6 +78,8 @@ matching = MATCHING.read_text(encoding="utf-8")
 evidence_13 = EVIDENCE_13.read_text(encoding="utf-8")
 cannabis = CANNABIS.read_text(encoding="utf-8")
 evidence_14 = EVIDENCE_14.read_text(encoding="utf-8")
+visibility = VISIBILITY.read_text(encoding="utf-8")
+evidence_15 = EVIDENCE_15.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -169,6 +173,9 @@ for token in [
     "### PB-0.14 — Cannabis taxonomy",
     "PB-CANNABIS-001 through PB-CANNABIS-040",
     "**Milestone relationship:** PB-0.14 is not a Level 2 integration milestone",
+    "### PB-0.15 — Visibility model",
+    "PB-VIS-001 through PB-VIS-040",
+    "**Milestone relationship:** PB-0.15 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1450,13 +1457,122 @@ for token in [
 ]:
     need(token in evidence_14, f"PB-0.14 evidence record missing token: {token}")
 
+# PB-0.15 — visibility model
+for token in [
+    "# PuffBuddies PB-0.15 visibility model",
+    "## Visibility principles",
+    "## Canonical visibility invariants",
+    "## Canonical field audience rules",
+    "## Visibility interaction invariants",
+    "## Field-classification decision rule",
+    "## PB-0.15 completion boundary",
+    "PRIVATE_SELF audience",
+    "DISCOVERABLE audience",
+    "MATCHED audience",
+    "PARTICIPANT_ONLY audience",
+    "MODERATOR_ONLY audience",
+    "SERVICE_MINIMUM audience",
+    "AGGREGATE_ONLY audience",
+    "PUBLIC_EXPLICIT audience",
+    "NEVER_PUBLIC audience",
+    "Default deny for undefined audience",
+    "Membership is not publicly enumerable",
+    "Core profile presentation may be DISCOVERABLE",
+    "Discovery preferences are PRIVATE_SELF",
+    "Cannabis use/preferences are private by default",
+    "Precise location is NEVER_PUBLIC",
+    "Coarse location may be DISCOVERABLE",
+    "Likes and passes are private intent",
+    "Match state is PARTICIPANT_ONLY",
+    "Blocks are PRIVATE_SELF / MODERATOR_ONLY",
+    "Reports and moderation evidence are MODERATOR_ONLY",
+    "Messages are PARTICIPANT_ONLY",
+    "Eligibility source evidence is NEVER_PUBLIC",
+    "Eligibility conclusion is SERVICE_MINIMUM",
+    "Wallet/account linkage is NEVER_PUBLIC by default",
+    "Payment details are not profile visibility",
+    "Lifecycle state is private",
+    "Safety status is not a public badge",
+    "Internal ranking scores are NEVER_PUBLIC",
+    "Session/security data is NEVER_PUBLIC",
+    "Audit evidence is protected",
+    "Block revokes discovery/matched visibility",
+    "Lifecycle revocation removes ordinary visibility",
+    "Unmatch revokes MATCHED-only fields",
+    "Deletion removes active visibility",
+    "Visibility changes invalidate stale copies",
+    "Client hiding is not authorization",
+    "Notification surfaces receive minimum presentation data",
+    "Search/Explorer cannot turn DISCOVERABLE into public",
+    "Economic state cannot buy visibility into another user",
+    "Visibility changes must be auditable without publishing them",
+]:
+    need(token in visibility, f"PB-0.15 visibility document missing token: {token}")
+
+vis_ids = re.findall(r"^### (PB-VIS-\d{3})\b", visibility, flags=re.MULTILINE)
+need(vis_ids == [f"PB-VIS-{i:03d}" for i in range(1, 41)], f"PB-VIS sequence drift: {vis_ids}")
+need(len(vis_ids) == len(set(vis_ids)), "duplicate PB-VIS identifier")
+
+for guarantee in [
+    "DISCOVERABLE does not imply unauthenticated, public, Search, Explorer, wallet, or chain visibility",
+    "A prior match, stale cache, or archived conversation does not preserve MATCHED visibility after canonical revocation",
+    "PUBLIC_EXPLICIT does not authorize public disclosure of fields classified NEVER_PUBLIC",
+    "A PuffBuddies field without an explicit visibility classification must not be exposed",
+    "The match graph is NEVER_PUBLIC",
+    "The blocked person must not receive private block metadata beyond the minimum behavior necessary to enforce the deny state",
+    "Backend/service authorization must prevent unauthorized field disclosure",
+    "must not ingest or expose private PuffBuddies DISCOVERABLE/MATCHED data merely because it is visible inside the app",
+    "cannot unlock PRIVATE_SELF, MATCHED, PARTICIPANT_ONLY, MODERATOR_ONLY, or NEVER_PUBLIC fields belonging to another user",
+]:
+    need(guarantee in visibility, f"PB-0.15 missing visibility guarantee: {guarantee}")
+
+for decision in [
+    "canonical field name",
+    "canonical owner",
+    "default audience",
+    "allowed audience transitions",
+    "who may change visibility",
+    "discovery/match/participant implications",
+    "block/safety/lifecycle/deletion overrides",
+    "service-minimum disclosure needs",
+    "public-enumeration risk",
+    "inference/correlation risk",
+    "retention/deletion behavior",
+    "stale-cache invalidation behavior",
+    "audit requirements",
+]:
+    need(decision in visibility, f"PB-0.15 field-classification rule missing: {decision}")
+
+for forbidden in [
+    "PuffBuddies ACL engine is implemented",
+    "PuffBuddies visibility API is deployed",
+    "PuffBuddies profile schema is live",
+    "PuffBuddies visibility service ID is",
+]:
+    need(forbidden not in visibility, f"PB-0.15 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", visibility) is None, "PB-0.15 must not assign an on-chain address")
+need("420/service/puff" not in visibility.lower(), "PB-0.15 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.15 qualification evidence",
+    "**PB-0.15 — Visibility model**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-VIS-001 through PB-VIS-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.16 — Non-goals reconciliation**",
+]:
+    need(token in evidence_15, f"PB-0.15 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.14", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.15", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.14",
+    "step": "PB-0.15",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1642,6 +1758,20 @@ print(json.dumps({
         "noMarketplaceEntitlement": True,
         "noCoercion": True,
         "matchingConsentBoundariesPreserved": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb15": {
+        "visibilityInvariants": vis_ids,
+        "audiencesDefined": True,
+        "discoverableNotPublic": True,
+        "fieldAudiencesDefined": True,
+        "staleVisibilityRevoked": True,
+        "clientHidingNotAuthorization": True,
+        "searchExplorerCannotPromote": True,
+        "economicStateCannotBuyVisibility": True,
+        "privateAndAuditable": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

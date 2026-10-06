@@ -36,6 +36,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.customFolders(w, r, actor)
 	case r.URL.Path == "/v1/organization/bulk":
 		h.bulkOrganization(w, r, actor)
+	case r.URL.Path == "/v1/search":
+		h.search(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
 		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
@@ -199,6 +201,27 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 		return
 	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func (h HTTPHandler) search(w http.ResponseWriter, r *http.Request, actor string) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	defer r.Body.Close()
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32<<10))
+	dec.DisallowUnknownFields()
+	var req SearchRequest
+	if err := dec.Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+		return
+	}
+	out, err := h.Service.SearchMailbox(r.Context(), actor, req)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h HTTPHandler) bulkOrganization(w http.ResponseWriter, r *http.Request, actor string) {

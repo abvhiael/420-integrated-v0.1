@@ -1374,6 +1374,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** current/policy-compatible/unexpired eligibility enables existing authorization only where all other PB-1.5 conditions permit; expired/revoked/ineligible/unknown/policy-stale state fails closed; subject/time mismatches reject binding; lifecycle/block/relationship/service/moderator boundaries remain intact; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.8 — Discovery/matching eligibility enforcement
+
+**Purpose:** enforce current adult eligibility as a hard prerequisite for discovery and matching actions, using PB-2.7 authorization binding and PB-1.9 stale-derived-state invalidation without inventing the later PB-3 matching engine.
+
+**Canonical requirements:** both viewer/requester and candidate/target must be current ELIGIBLE ordinary ACTIVE participants; relevant blocks/lifecycle denials outrank discovery visibility and ranking; candidate DISCOVERABLE visibility cannot override either-side ineligibility; matching-action eligibility requires both sides current but cannot manufacture reciprocal consent or relationship state; discovery requires current DISCOVERY generation for both sides; matching requires current MATCHING generation for both sides; stale generation after revocation/expiry fails immediately; UNKNOWN/EXPIRED/REVOKED/INELIGIBLE and nonparticipating lifecycle fail closed; payment/premium/token/admin/algorithm/ranking cannot bypass the hard gate; no matching/recommendation engine, public people-search, API/contract/deployment/live service is introduced; PB-2.9 messaging remains separate.
+
+**Affected components:** `puffbuddies/domain/discovery_matching_eligibility.py`, PB-2.8 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.5, PB-0.6, PB-0.12, PB-0.13, PB-1.5, PB-1.9, and PB-2.1 through PB-2.7 COMPLETE.
+
+**Exit criteria:** either-side eligibility/lifecycle/block failures exclude discovery/matching; current eligibility and current derived generations pass; stale generation on either side fails; gate cannot create reciprocal match/consent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

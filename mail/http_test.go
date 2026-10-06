@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func testHTTPHandler(t *testing.T) (HTTPHandler, *Service, string) {

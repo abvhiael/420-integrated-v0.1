@@ -141,7 +141,7 @@ func normalizeDiscordAccount(account DiscordAccount) DiscordAccount {
 
 func validateDiscordAccount(account DiscordAccount) error {
 	if !validDiscordSnowflake(account.UserID) || account.Username == "" || len([]byte(account.Username)) > 128 || len([]byte(account.GlobalName)) > 128 ||
-		!account.Verified || !account.NonCustodial || account.LinkedAt.IsZero() || !containsString(account.Scopes, "identify") {
+		!account.Verified || !account.NonCustodial || account.LinkedAt.IsZero() || !discordHasScope(account.Scopes, "identify") {
 		return ErrDiscordInvalidResult
 	}
 	seen := map[string]bool{}
@@ -176,7 +176,7 @@ func discordUserIDFromConnectionID(connectionID string) (string, bool) {
 	return userID, validDiscordSnowflake(userID)
 }
 
-func containsString(values []string, want string) bool {
+func discordHasScope(values []string, want string) bool {
 	for _, value := range values {
 		if value == want {
 			return true

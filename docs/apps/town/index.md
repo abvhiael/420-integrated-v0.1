@@ -5,7 +5,7 @@ audience:
   - user
   - developer
   - operator
-category: app
+category: application
 status: development
 version: v1
 ---

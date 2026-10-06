@@ -232,6 +232,9 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 			result = existing
 			return nil
 		}
+		if err := applyIncomingRules(data, req.Recipient, msg, req.Body, &recipientState, now); err != nil {
+			return err
+		}
 		data.Messages[id] = msg
 		data.ByIdem[idemKey] = id
 		data.Mailbox[mailboxKey(req.Sender, id)] = senderState

@@ -18,6 +18,7 @@ type HTTPHandler struct {
 	Security      *SecurityService
 	WalletActions *WalletActionService
 	Connectors    *ConnectorService
+	DiscordSync   *DiscordSyncService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +76,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.walletActions(w, r, actor)
 	case r.URL.Path == "/v1/connectors/providers" || r.URL.Path == "/v1/connectors/link" || r.URL.Path == "/v1/connectors/unlink" || r.URL.Path == "/v1/connectors/pull" || r.URL.Path == "/v1/connectors/push":
 		h.connectors(w, r, actor)
+	case r.URL.Path == "/v1/connectors/discord/sync":
+		h.discordSync(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -146,6 +149,36 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) discordSync(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.DiscordSync == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "discord sync unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req struct {
+		ConnectionID string `json:"connection_id"`
+	}
+	if !decodeStrictJSON(w, r, 4096, &req) {
+		return
+	}
+	out, err := h.DiscordSync.Sync(r.Context(), actor, req.ConnectionID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrDiscordSyncConflict):
+			writeError(w, http.StatusConflict, "DISCORD_SYNC_CONFLICT", err.Error())
+		case errors.Is(err, ErrDiscordInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "discord sync authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h HTTPHandler) connectors(w http.ResponseWriter, r *http.Request, actor string) {

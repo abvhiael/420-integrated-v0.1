@@ -461,3 +461,16 @@ func (c Client) AcknowledgeSecurityAlert(ctx context.Context, id string) (mail.S
 	err := c.do(ctx, http.MethodPost, "/v1/security/alerts/"+url.PathEscape(id)+"/ack", nil, &out)
 	return out, err
 }
+
+
+func (c Client) PrepareWalletAction(ctx context.Context, req mail.WalletActionRequest) (mail.WalletHandoff, error) {
+	var out mail.WalletHandoff
+	err := c.do(ctx, http.MethodPost, "/v1/wallet/actions", req, &out)
+	return out, err
+}
+
+func (c Client) VerifyWalletEvidence(ctx context.Context, req mail.WalletVerificationRequest) (mail.WalletVerification, error) {
+	var out mail.WalletVerification
+	err := c.do(ctx, http.MethodPost, "/v1/wallet/verifications", req, &out)
+	return out, err
+}

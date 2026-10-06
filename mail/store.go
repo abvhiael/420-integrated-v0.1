@@ -41,16 +41,16 @@ type storeData struct {
 }
 
 type diskStoreData struct {
-	SchemaVersion       int                        `json:"schema_version"`
-	Messages            map[string]Message         `json:"messages"`
-	ByIdem              map[string]string          `json:"idempotency"`
-	Mailbox             map[string]MailboxState    `json:"mailbox"`
-	MailboxIndex        map[string][]string        `json:"mailbox_index"`
-	Labels              map[string]LabelDefinition `json:"labels,omitempty"`
-	CustomFolders       map[string]CustomFolder    `json:"custom_folders,omitempty"`
-	LabelIndex          map[string][]string        `json:"label_index,omitempty"`
-	CustomFolderIndex   map[string][]string        `json:"custom_folder_index,omitempty"`
-	Rules               map[string]MailRule        `json:"rules,omitempty"`
+	SchemaVersion       int                         `json:"schema_version"`
+	Messages            map[string]Message          `json:"messages"`
+	ByIdem              map[string]string           `json:"idempotency"`
+	Mailbox             map[string]MailboxState     `json:"mailbox"`
+	MailboxIndex        map[string][]string         `json:"mailbox_index"`
+	Labels              map[string]LabelDefinition  `json:"labels,omitempty"`
+	CustomFolders       map[string]CustomFolder     `json:"custom_folders,omitempty"`
+	LabelIndex          map[string][]string         `json:"label_index,omitempty"`
+	CustomFolderIndex   map[string][]string         `json:"custom_folder_index,omitempty"`
+	Rules               map[string]MailRule         `json:"rules,omitempty"`
 	TrustEntries        map[string]TrustEntry       `json:"trust_entries,omitempty"`
 	TrustSettings       map[string]TrustSettings    `json:"trust_settings,omitempty"`
 	Reputation          map[string]SenderReputation `json:"reputation,omitempty"`
@@ -58,7 +58,7 @@ type diskStoreData struct {
 	Quarantine          map[string]QuarantineRecord `json:"quarantine,omitempty"`
 	ContentFingerprints map[string]uint64           `json:"content_fingerprints,omitempty"`
 	Fingerprints        map[string]string           `json:"fingerprints,omitempty"`
-	IdempotencyKeys   map[string]string          `json:"idempotency_keys,omitempty"`
+	IdempotencyKeys     map[string]string           `json:"idempotency_keys,omitempty"`
 }
 
 type MailStore interface {

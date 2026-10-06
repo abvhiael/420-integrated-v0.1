@@ -171,6 +171,45 @@ func TestMailSendEmitsSignalNotificationThroughExistingNotificationPath(t *testi
 	}
 }
 
+func TestSignalTransportFailureDoesNotRollbackMailAndDuplicateSendDoesNotRenotify(t *testing.T) {
+	primary := &testNotify{}
+	authority := &signalNotificationAuthorityStub{err: errors.New("signal unavailable")}
+	sink := NewSignalNotificationSink(primary, NewSignalNotificationService(authority))
+	svc := NewService(
+		testIDs{"alice.420": true, "bob.420": true},
+		testPolicy{},
+		&testBlobs{},
+		sink,
+		NewMemoryStore(),
+	)
+	svc.Now = func() time.Time { return time.Unix(1700000000, 0).UTC() }
+	req := SendRequest{
+		IdempotencyKey: "signal-failure-send-1",
+		Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "private body", Source: ServiceID,
+	}
+	first, err := svc.Send(context.Background(), "alice.420", req)
+	if err != nil {
+		t.Fatalf("Signal outage rolled back Mail send: %v", err)
+	}
+	second, err := svc.Send(context.Background(), "alice.420", req)
+	if err != nil {
+		t.Fatalf("idempotent replay failed: %v", err)
+	}
+	if first.ID != second.ID {
+		t.Fatal("idempotent replay created a second Mail message")
+	}
+	if primary.Count() != 1 || authority.calls != 1 {
+		t.Fatalf("duplicate notification emitted: primary=%d signal=%d", primary.Count(), authority.calls)
+	}
+	page, err := svc.Inbox(context.Background(), "bob.420", "", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Items) != 1 || page.Items[0].ID != first.ID {
+		t.Fatalf("Mail delivery missing after Signal outage: %+v", page.Items)
+	}
+}
+
 func TestSignalNotificationAuthorityFailureDoesNotCreateFallbackPayload(t *testing.T) {
 	dep := errors.New("signal transport unavailable")
 	authority := &signalNotificationAuthorityStub{err: dep}

@@ -95,6 +95,38 @@ func TestDiscordSyncIsIdempotentAndCursorAdvances(t *testing.T) {
 	}
 }
 
+func TestDiscordSyncReplayDoesNotResurrectPermanentlyDeletedMessage(t *testing.T) {
+	msg := validDiscordInboundMessage()
+	authority := &discordFullAuthorityStub{page: DiscordSyncPage{Messages: []DiscordInboundMessage{msg}, NextCursor: "cursor-1"}}
+	syncer, mailSvc := discordSyncHarness(t, NewMemoryStore(), authority)
+	first, err := syncer.Sync(context.Background(), "alice.420", "discord:123456789012345678")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first.Imported) != 1 {
+		t.Fatalf("first import count=%d", len(first.Imported))
+	}
+	id := first.Imported[0].Message.ID
+	trash := FolderTrash
+	if _, err := mailSvc.UpdateMailbox(context.Background(), "alice.420", id, MailboxUpdate{Folder: &trash}); err != nil {
+		t.Fatal(err)
+	}
+	if err := mailSvc.PermanentlyDelete(context.Background(), "alice.420", id); err != nil {
+		t.Fatal(err)
+	}
+	authority.page = DiscordSyncPage{Messages: []DiscordInboundMessage{msg}, NextCursor: "cursor-2"}
+	replay, err := syncer.Sync(context.Background(), "alice.420", "discord:123456789012345678")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(replay.Imported) != 0 {
+		t.Fatalf("deleted message resurrected: %+v", replay.Imported)
+	}
+	if _, err := mailSvc.GetMailboxState(context.Background(), "alice.420", id); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("deleted mailbox state became visible again: %v", err)
+	}
+}
+
 func TestDiscordSyncRejectsExternalIDMutation(t *testing.T) {
 	msg := validDiscordInboundMessage()
 	authority := &discordFullAuthorityStub{page: DiscordSyncPage{Messages: []DiscordInboundMessage{msg}}}

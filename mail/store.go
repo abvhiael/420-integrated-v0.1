@@ -228,7 +228,7 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		msg.IdempotencyKey = disk.IdempotencyKeys[id]
 		data.Messages[id] = msg
 	}
-	if data.SchemaVersion == 0 {
+	if data.SchemaVersion < DurableStoreSchemaVersion {
 		data.SchemaVersion = DurableStoreSchemaVersion
 		migrated = true
 	}

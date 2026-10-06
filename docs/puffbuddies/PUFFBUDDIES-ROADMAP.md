@@ -1602,6 +1602,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** all four bounded indicator classes work with source binding; owner visibility and in-app presentation fail closed; expiry/revocation remove indicators; verification cannot create eligibility/consent/lifecycle/safety authority; no public/scored reputation exists; safety/economic data cannot become reputation input; private persistence/concurrency works without raw evidence; retained app regressions and exact-head PB-9 fast qualification pass; durable evidence recorded.
 
+### PB-10 — Payments and premium entitlements — COMPLETE
+
+**Purpose:** implement PuffBuddies premium-entitlement policy over current canonical 420Pay settlement evidence while preserving the absolute separation between economic state and interpersonal consent, eligibility, lifecycle, block/safety authority and protected-user data.
+
+**Canonical requirements:** 420Pay owns settlement/accounting truth while PuffBuddies owns feature-entitlement conclusions; only exact current SETTLED evidence for the approved invoice/merchant/asset/amount and transient payer binding may grant entitlement; SUBMITTED/INCLUDED/CERTIFIED/FINALIZED/FAILED/REFUNDED/PARTIALLY_REFUNDED cannot grant; refunds/partial refunds, policy change and expiry revoke; profile→payer/wallet/payment/receipt linkage is transient and never persisted; Pay outages/missing/stale/future evidence fail closed; promoted features are advanced filters, liked-you, incognito controls, profile customization, undo/rewind and cosmetic convenience, with subscriptions allowed to bundle them; entitlement only makes a feature available and never supplies underlying relationship/profile/data authorization; payment/premium cannot like, match, unblock, rematch, message unmatched users, unsuspend, unban, reactivate, cancel deletion, bypass safety/eligibility/visibility/block, buy private-person data, authorize cannabis commerce, or become dating desirability/reputation; free/core matching, matched messaging, block, report, unmatch, deactivation and deletion remain non-premium; growth/ranking/location products remain deferred pending explicit mechanics; no payment contract/date marketplace/fixed Pay address/new service ID/provider credential/production billing backend/live deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/premium_entitlements.py`, private `entitlement` schema, PB-1 schema inventory, existing authorization/lifecycle/safety boundaries, canonical 420Pay lifecycle as read-only dependency, PB-10 targeted/integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head targeted qualification **plus Level 2 retained app integration**, because PB-10 introduces the material 420Pay→PuffBuddies entitlement authority boundary. Direct dependency verification uses `scripts/verify-420pay-audit.py`; Level 2 remains app-focused.
+
+**Level-3 boundary:** full Solidity/Genesis/420 Integrated/Docs-global/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.10, PB-0.12, PB-0.13, PB-0.14, PB-0.16; PB-1 persistence; PB-2/PB-5/PB-8 authorization/lifecycle/safety; **PB-9 — Verification and reputation — COMPLETE**; canonical 420Pay repository implementation.
+
+**Exit criteria:** exact SETTLED evidence grants only approved bounded feature entitlements; non-settled/refunded/mismatched/stale evidence fails/revokes; policy/lifetime expiry revokes; private persistence has no payment/wallet linkage; lifecycle/block/consent/safety remain supreme; no purchased protected access exists; canonical Pay verifier passes unchanged; Level-1 targeted, retained PuffBuddies regressions and Level-2 payment-integration checks pass on one exact SHA; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

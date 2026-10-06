@@ -4,7 +4,7 @@ from puffbuddies.persistence.schema import *
 
 class PB13SchemaTests(unittest.TestCase):
  def test_required_private_state_classes_exist(self):
-  self.assertEqual(set(TABLES),{"profile","eligibility_projection","preferences","visibility","verification","relationship","safety","lifecycle","location","cannabis","matching_input"})
+  self.assertEqual(set(TABLES),{"profile","eligibility_projection","preferences","visibility","verification","entitlement","relationship","safety","lifecycle","location","cannabis","matching_input"})
  def test_no_public_or_external_authority_tables(self):
   self.assertFalse(PUBLIC_TABLES);self.assertFalse(EXTERNAL_CANONICAL_TABLES)
   self.assertTrue(all(t.owner=="puffbuddies" for t in TABLES.values()))
@@ -19,8 +19,14 @@ class PB13SchemaTests(unittest.TestCase):
  def test_safety_retention_requires_purpose(self):
   s=TABLES["safety"];self.assertEqual(s.delete_class,DeleteClass.PURPOSE_LIMITED_RETENTION);self.assertIn("retention_reason",s.fields)
  def test_ordinary_private_state_is_deletable(self):
-  for n in ("profile","eligibility_projection","preferences","visibility","verification","relationship","lifecycle","location","cannabis","matching_input"):
+  for n in ("profile","eligibility_projection","preferences","visibility","verification","entitlement","relationship","lifecycle","location","cannabis","matching_input"):
    self.assertEqual(TABLES[n].delete_class,DeleteClass.ORDINARY_DELETE)
+ def test_entitlement_is_private_and_excludes_payment_or_interpersonal_authority(self):
+  e=TABLES["entitlement"]
+  self.assertEqual(e.sensitivity,Sensitivity.PRIVATE)
+  for field in ("payment_ref","invoice_ref","payer_ref","wallet_address","receipt_hash","settlement_amount",
+                "block_override","messaging_authorized","private_profile_access"):
+   self.assertIn(field,e.forbidden_fields);self.assertNotIn(field,e.fields)
  def test_verification_is_private_and_excludes_raw_or_scored_material(self):
   v=TABLES["verification"]
   self.assertEqual(v.sensitivity,Sensitivity.HIGHLY_SENSITIVE)

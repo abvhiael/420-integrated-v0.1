@@ -87,7 +87,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          files="$(find town/api town/integrations town/projection town/recovery sdk/town420 -name '*.go' -type f -print)"
+          files="$(find town/api town/projection town/recovery sdk/town420 -name '*.go' -type f -print)"
           test -n "$files"
           bad="$(gofmt -l $files)"
           if [ -n "$bad" ]; then

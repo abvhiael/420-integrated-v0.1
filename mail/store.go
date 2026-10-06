@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 7
+const DurableStoreSchemaVersion = 8
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -41,6 +41,7 @@ type storeData struct {
 	ConversationStates  map[string]ConversationState
 	ConversationIndex   map[string][]string
 	Drafts              map[string]Draft
+	Deliveries          map[string]Delivery
 }
 
 type diskStoreData struct {
@@ -63,6 +64,7 @@ type diskStoreData struct {
 	ConversationStates  map[string]ConversationState `json:"conversation_states,omitempty"`
 	ConversationIndex   map[string][]string          `json:"conversation_index,omitempty"`
 	Drafts              map[string]Draft             `json:"drafts,omitempty"`
+	Deliveries          map[string]Delivery          `json:"deliveries,omitempty"`
 	Fingerprints        map[string]string            `json:"fingerprints,omitempty"`
 	IdempotencyKeys     map[string]string            `json:"idempotency_keys,omitempty"`
 }
@@ -247,6 +249,7 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		ConversationStates:  disk.ConversationStates,
 		ConversationIndex:   disk.ConversationIndex,
 		Drafts:              disk.Drafts,
+		Deliveries:          disk.Deliveries,
 	}
 	normalizeStoreData(&data)
 	if disk.SchemaVersion < 6 {
@@ -305,6 +308,7 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		ConversationStates:  data.ConversationStates,
 		ConversationIndex:   data.ConversationIndex,
 		Drafts:              data.Drafts,
+		Deliveries:          data.Deliveries,
 		Fingerprints:        map[string]string{},
 		IdempotencyKeys:     map[string]string{},
 	}
@@ -387,6 +391,7 @@ func newStoreData() storeData {
 		ConversationStates:  map[string]ConversationState{},
 		ConversationIndex:   map[string][]string{},
 		Drafts:              map[string]Draft{},
+		Deliveries:          map[string]Delivery{},
 	}
 }
 
@@ -448,6 +453,9 @@ func normalizeStoreData(data *storeData) {
 	if data.Drafts == nil {
 		data.Drafts = map[string]Draft{}
 	}
+	if data.Deliveries == nil {
+		data.Deliveries = map[string]Delivery{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -471,6 +479,7 @@ func cloneStoreData(src storeData) storeData {
 		ConversationStates:  make(map[string]ConversationState, len(src.ConversationStates)),
 		ConversationIndex:   make(map[string][]string, len(src.ConversationIndex)),
 		Drafts:              make(map[string]Draft, len(src.Drafts)),
+		Deliveries:          make(map[string]Delivery, len(src.Deliveries)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -527,6 +536,9 @@ func cloneStoreData(src storeData) storeData {
 	}
 	for k, v := range src.Drafts {
 		dst.Drafts[k] = v
+	}
+	for k, v := range src.Deliveries {
+		dst.Deliveries[k] = v
 	}
 	return dst
 }
@@ -646,6 +658,9 @@ func validateStoreData(data *storeData) error {
 	}
 	if err := validateDraftData(data); err != nil {
 		return fmt.Errorf("invalid draft data: %w", err)
+	}
+	if err := validateDeliveryData(data); err != nil {
+		return fmt.Errorf("invalid delivery data: %w", err)
 	}
 	return nil
 }

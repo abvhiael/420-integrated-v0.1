@@ -1644,6 +1644,53 @@ Still disabled:
 
 Idempotency is mandatory and is passed through to the external Telegram authority. Provider failure is returned to the caller without fabricating success or altering canonical Mail state.
 
+## MAIL-2.26 Unified Integrations Inbox
+
+MAIL-2.26 adds a single authenticated Inbox view for messages imported from supported external integrations.
+
+### Canonical view model
+
+The unified integrations inbox is a **derived view over canonical Mail mailbox state**. It does not create a second message store, duplicate message bodies, or maintain a parallel read/archive/delete lifecycle.
+
+Current supported inbound integration sources are:
+
+- `discord`;
+- `telegram`.
+
+A message appears only when its canonical mailbox state for the authenticated owner is:
+
+- folder `INBOX`;
+- not permanently deleted.
+
+Native 420Mail messages, archived messages, junk, trash, deleted records, and another user's mailbox records are not included.
+
+The returned item preserves the full canonical `Message` plus `MailboxState`, so existing read/star/pin/mute/version state remains authoritative.
+
+### Ordering and pagination
+
+Items are ordered deterministically by:
+
+1. message `created_at` descending;
+2. message ID ascending as the tie-breaker.
+
+Pagination uses the existing opaque Mail cursor format and occurs **after** the integrations-only filter is applied.
+
+### API and client
+
+Authenticated endpoint:
+
+- `GET /v1/integrations/inbox?cursor=...&limit=...`
+
+Typed client:
+
+- `IntegrationsInbox`
+
+### Scope containment
+
+MAIL-2.26 deliberately does not add provider-specific query filters. Integration-specific filtering remains MAIL-2.28.
+
+The unified view does not expose private message bodies inline. Existing authenticated message-read APIs remain responsible for body access.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

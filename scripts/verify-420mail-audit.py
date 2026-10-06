@@ -375,9 +375,9 @@ for token in ["TelegramDeliveryAuthority","ConnectorCapabilityPush","DeliverTele
     if token not in telegram_link_src: errors.append("MAIL-2.25 Telegram adapter delivery invariant missing: "+token)
 for token in ["TelegramSyncAuthority","ConnectorCapabilityPull","PullTelegram","TelegramSyncItemKind"]:
     if token not in telegram_link_src: errors.append("MAIL-2.24 Telegram adapter sync invariant missing: "+token)
-for forbidden in ["ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
+for forbidden in ["ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
     descriptor_block=telegram_link_src[telegram_link_src.find("func (a *TelegramConnectorAdapter) Descriptor"):telegram_link_src.find("func (a *TelegramConnectorAdapter) Link")]
-    if forbidden in descriptor_block: errors.append("MAIL-2.23 Telegram descriptor pulled later capability forward: "+forbidden)
+    if forbidden in descriptor_block: errors.append("MAIL-2.25 Telegram descriptor pulled later capability forward: "+forbidden)
 if "ConnectorCapabilityWalletVerify" not in discord_src: errors.append("MAIL-2.18 Discord connector wallet capability missing")
 for token in ["DiscordDeliveryAuthority","ConnectorCapabilityPush","DeliverDiscord","DiscordDeliveryKind"]:
     if token not in discord_src: errors.append("MAIL-2.17 Discord adapter delivery invariant missing: "+token)

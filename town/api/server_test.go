@@ -318,13 +318,13 @@ type moderationFake struct {
 func (m *moderationFake) Report(actor model.ObjectID, req moderation.OpenCaseRequest) (moderation.Record, error) {
 	m.report = req
 	return moderation.Record{
-		ID:           req.RecordID,
-		CaseID:       req.CaseID,
-		CommunityID:  req.CommunityID,
-		TargetKind:   req.TargetKind,
-		TargetID:     req.TargetID,
-		ActorID:      actor,
-		Action:       moderation.ActionReport,
+		ID:          req.RecordID,
+		CaseID:      req.CaseID,
+		CommunityID: req.CommunityID,
+		TargetKind:  req.TargetKind,
+		TargetID:    req.TargetID,
+		ActorID:     actor,
+		Action:      moderation.ActionReport,
 	}, nil
 }
 

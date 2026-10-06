@@ -127,6 +127,10 @@ func TestSignalForwardIncludesSubjectButNotImplicitSenderMetadata(t *testing.T) 
 
 func TestSignalShareRejectsDeletedMailboxCopy(t *testing.T) {
 	mail, svc, authority, msg := signalShareHarness(t)
+	trash := FolderTrash
+	if _, err := mail.UpdateMailbox(context.Background(), "bob.420", msg.ID, MailboxUpdate{Folder: &trash}); err != nil {
+		t.Fatal(err)
+	}
 	if err := mail.PermanentlyDelete(context.Background(), "bob.420", msg.ID); err != nil {
 		t.Fatal(err)
 	}

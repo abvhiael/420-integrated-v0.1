@@ -2,7 +2,9 @@ package mail
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -223,10 +225,33 @@ func TestDurableOrganizationSurvivesRestartAndSchemaOneMigration(t *testing.T) {
 		t.Fatalf("organization did not survive restart: %+v", state)
 	}
 
-	if err := restarted.Store.Update(ctx, func(data *storeData) error {
-		data.SchemaVersion = 1
+	legacyPath := filepath.Join(t.TempDir(), "legacy-v1.json")
+	legacy := diskStoreData{
+		SchemaVersion:   1,
+		Messages:        map[string]Message{},
+		ByIdem:          map[string]string{},
+		Mailbox:         map[string]MailboxState{},
+		MailboxIndex:    map[string][]string{},
+		Fingerprints:    map[string]string{},
+		IdempotencyKeys: map[string]string{},
+	}
+	raw, err := json.Marshal(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(legacyPath, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	migrated, err := OpenDurableStore(legacyPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := migrated.View(ctx, func(data *storeData) error {
+		if data.SchemaVersion != DurableStoreSchemaVersion || data.Labels == nil || data.CustomFolders == nil || data.LabelIndex == nil || data.CustomFolderIndex == nil {
+			t.Fatalf("v1 migration incomplete: %+v", data)
+		}
 		return nil
-	}); err == nil {
-		t.Fatal("store transaction unexpectedly allowed schema downgrade")
+	}); err != nil {
+		t.Fatal(err)
 	}
 }

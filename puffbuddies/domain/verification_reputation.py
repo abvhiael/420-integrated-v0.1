@@ -233,6 +233,8 @@ def decode_indicator(values: Mapping[str, object], *, profile_id: ProfileId, kin
     }
     if set(values) != expected or values.get("profile_id") != str(profile_id) or values.get("kind") != kind.value:
         raise VerificationDenied("canonical verification indicator required")
+    if not isinstance(values.get("user_visible"), bool):
+        raise VerificationDenied("canonical boolean visibility required")
     try:
         return VerificationIndicator(
             profile_id,
@@ -242,7 +244,7 @@ def decode_indicator(values: Mapping[str, object], *, profile_id: ProfileId, kin
             VerificationState(str(values["state"])),
             int(values["issued_at_epoch"]),
             None if values["expires_at_epoch"] is None else int(values["expires_at_epoch"]),
-            bool(values["user_visible"]),
+            values["user_visible"],
             int(values["version"]),
         )
     except (ValueError, TypeError) as exc:

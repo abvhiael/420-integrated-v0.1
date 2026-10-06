@@ -118,6 +118,10 @@ func (a *DiscordConnectorAdapter) Unlink(ctx context.Context, actor, connectionI
 }
 
 func (a *DiscordConnectorAdapter) Pull(ctx context.Context, actor string, req ConnectorPullRequest) (ConnectorPullResult, error) {
+	syncAuthority, ok := a.Authority.(DiscordSyncAuthority)
+	if !ok {
+		return ConnectorPullResult{}, ErrConnectorUnsupported
+	}
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return ConnectorPullResult{}, ErrUnauthorized
@@ -128,10 +132,6 @@ func (a *DiscordConnectorAdapter) Pull(ctx context.Context, actor string, req Co
 	userID, ok := discordUserIDFromConnectionID(strings.TrimSpace(req.ConnectionID))
 	if !ok {
 		return ConnectorPullResult{}, ErrInvalidInput
-	}
-	syncAuthority, ok := a.Authority.(DiscordSyncAuthority)
-	if !ok {
-		return ConnectorPullResult{}, ErrConnectorUnsupported
 	}
 	cursor := strings.TrimSpace(req.Cursor)
 	if len([]byte(cursor)) > MaxDiscordSyncCursorBytes {

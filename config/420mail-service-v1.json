@@ -51,7 +51,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 2,
+    "schemaVersion": 3,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -102,5 +102,39 @@
     "maxScanItems": 500,
     "maxPageSize": 100,
     "permanentlyDeletedExcluded": true
+  },
+  "rulesEngine": {
+    "enabled": true,
+    "ownerScoped": true,
+    "appliesTo": "INCOMING_RECIPIENT_COPY",
+    "conditions": [
+      "sender_equals",
+      "content_contains",
+      "source_equals"
+    ],
+    "conditionsCombine": "AND",
+    "actions": [
+      "folder",
+      "add_labels",
+      "custom_folder",
+      "mark_read",
+      "starred",
+      "pinned",
+      "muted",
+      "stop_processing"
+    ],
+    "allowedActionFolders": [
+      "INBOX",
+      "ARCHIVE",
+      "JUNK",
+      "TRASH"
+    ],
+    "maxRulesPerUser": 100,
+    "maxRuleNameBytes": 80,
+    "maxContentMatchBytes": 256,
+    "maxActionLabels": 20,
+    "deterministicPriority": true,
+    "atomicWithDelivery": true,
+    "publicIndexing": false
   }
 }

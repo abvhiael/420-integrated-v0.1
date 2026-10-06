@@ -678,7 +678,6 @@ func TestHTTPDraftAuthorizationAndStrictJSON(t *testing.T) {
 	}
 }
 
-
 func TestHTTPOutboxDeliveryLifecycle(t *testing.T) {
 	s, _ := testService()
 	h := HTTPHandler{

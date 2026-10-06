@@ -3,8 +3,7 @@ title: 420Town operator and administrator guide
 component: town
 audience:
   - operator
-  - administrator
-category: app
+category: application
 status: development
 version: v1
 ---

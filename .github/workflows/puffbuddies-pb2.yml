@@ -44,6 +44,8 @@ jobs:
         run: python3 -m unittest puffbuddies.tests.test_pb_2_6_revocation_expiry_handling -v
       - name: PB-2.7 targeted authorization integration
         run: python3 -m unittest puffbuddies.tests.test_pb_2_7_authorization_integration -v
+      - name: PB-2.8 targeted discovery matching eligibility
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_8_discovery_matching_eligibility -v
       - name: Retained PuffBuddies regressions
         run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
       - name: Identity privacy and public-chain negative gate

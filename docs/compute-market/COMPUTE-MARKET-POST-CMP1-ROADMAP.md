@@ -502,6 +502,12 @@ Project-bound revisioned execution-environment commitments freeze artifact, runt
 
 ## CMP-4.6 — Result provenance
 
+**Status: IMPLEMENTED — Level 1 + Level 2 exact-head qualification pending.**
+
+Immutable scientific result provenance links the exact CMP-4.1 scientific work-unit commitment to canonical result-bearing attempt, worker result, receipt-bound execution evidence, output schema, verifier and canonical verification decision without creating a second correctness or settlement authority. Specification: [CMP-4.6 result provenance](CMP-4.6-RESULT-PROVENANCE.md).
+
+CMP-4.6 is the first CMP-4 app-integration milestone because project/dataset/environment/scientific-unit semantics converge with canonical worker result and verifier state here.
+
 ## CMP-4.7 — Scientific metadata and lineage
 
 ## CMP-4.8 — Publication / retention policy
@@ -696,7 +702,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | CMP-4.5 COMPLETE at Level 1; CMP-4.6 next |
+| CMP-4 scientific compute framework | CMP-4.5 COMPLETE; CMP-4.6 implemented, Level 1 + first CMP-4 Level 2 qualification pending |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

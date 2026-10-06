@@ -59,6 +59,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.inbox(w, r, actor)
 	case r.Method == http.MethodGet && r.URL.Path == "/v1/integrations/inbox":
 		h.integrationsInbox(w, r, actor)
+	case r.Method == http.MethodGet && r.URL.Path == "/v1/integrations/identity":
+		h.crossPlatformIdentity(w, r, actor)
 	case r.URL.Path == "/v1/labels" || strings.HasPrefix(r.URL.Path, "/v1/labels/"):
 		h.labels(w, r, actor)
 	case r.URL.Path == "/v1/custom-folders" || strings.HasPrefix(r.URL.Path, "/v1/custom-folders/"):
@@ -745,6 +747,15 @@ func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) 
 		return
 	}
 	writeJSON(w, http.StatusCreated, msg)
+}
+
+func (h HTTPHandler) crossPlatformIdentity(w http.ResponseWriter, r *http.Request, actor string) {
+	out, err := h.Service.CrossPlatformIdentity(r.Context(), actor)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h HTTPHandler) integrationsInbox(w http.ResponseWriter, r *http.Request, actor string) {

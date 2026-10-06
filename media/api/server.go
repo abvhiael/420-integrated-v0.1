@@ -372,7 +372,7 @@ func statusForCode(code ErrorCode) int {
 func (s *Server) fail(w http.ResponseWriter, status int, code ErrorCode, message string) {
 	s.writeRaw(w, status, mustJSON(ErrorEnvelope{
 		Version: Version,
-		Error: APIError{Code: code, Message: strings.TrimSpace(message)},
+		Error:   APIError{Code: code, Message: strings.TrimSpace(message)},
 	}))
 }
 
@@ -438,9 +438,9 @@ func readBody(r *http.Request) ([]byte, error) {
 
 type requestError struct{ err error }
 
-func (e requestError) Error() string             { return e.err.Error() }
-func (e requestError) Unwrap() error             { return e.err }
-func (e requestError) APIErrorCode() ErrorCode   { return CodeInvalidRequest }
+func (e requestError) Error() string           { return e.err.Error() }
+func (e requestError) Unwrap() error           { return e.err }
+func (e requestError) APIErrorCode() ErrorCode { return CodeInvalidRequest }
 
 func decodeStrict(body []byte, target any) error {
 	decoder := json.NewDecoder(bytes.NewReader(body))

@@ -534,7 +534,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.12 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.13 — Matching principles
+### PB-0.13 — Matching principles — COMPLETE
 
 **Purpose:** define allowed matching inputs, hard exclusions, ranking constraints, match-formation consent boundaries, and prohibited economic influence.
 

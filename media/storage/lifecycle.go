@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 
@@ -119,7 +118,7 @@ func (c Coordinator) Prepare(ctx context.Context, asset Asset, idempotencyKey st
 }
 
 func (c Coordinator) Ingest(ctx context.Context, asset Asset, plan storage420.UploadPlan, body io.Reader) (Asset, error) {
-	if c.Ingestor == nil || body == nil || asset.State != StatePrepared || !samePlan(asset, plan) {
+	if c.Ingestor == nil || body == nil || asset.State != StatePrepared || asset.Revision == ^uint32(0) || !samePlan(asset, plan) {
 		return Asset{}, ErrInvalidAsset
 	}
 	receipt, err := c.Ingestor.Ingest(ctx, plan, body)
@@ -140,7 +139,7 @@ func (c Coordinator) Ingest(ctx context.Context, asset Asset, plan storage420.Up
 }
 
 func (c Coordinator) ConfirmCanonical(ctx context.Context, asset Asset) (Asset, error) {
-	if c.Manifests == nil || asset.State != StateUploaded || !validObject(asset.Object) {
+	if c.Manifests == nil || asset.State != StateUploaded || asset.Revision == ^uint32(0) || !validObject(asset.Object) {
 		return Asset{}, ErrInvalidAsset
 	}
 	manifest, err := c.Manifests.Manifest(ctx, asset.Object.ManifestID)
@@ -176,7 +175,7 @@ func (c Coordinator) ConfirmCanonical(ctx context.Context, asset Asset) (Asset, 
 }
 
 func (c Coordinator) Delete(ctx context.Context, asset Asset) (Asset, error) {
-	if asset.State == StateDeleted || asset.State == StateDraft || !validAssetIdentity(asset) {
+	if asset.State == StateDeleted || asset.State == StateDraft || asset.Revision == ^uint32(0) || !validAssetIdentity(asset) {
 		return Asset{}, ErrInvalidAsset
 	}
 	if c.Deleter == nil {
@@ -234,7 +233,7 @@ func validDraft(a Asset) bool {
 
 func validAssetIdentity(a Asset) bool {
 	return strings.TrimSpace(a.ID) != "" && strings.TrimSpace(a.OwnerRef) != "" &&
-		strings.TrimSpace(a.ProvenanceRef) != "" && a.Revision > 0
+		strings.TrimSpace(a.ProvenanceRef) != "" && a.Revision > 0 && a.Revision < ^uint32(0)
 }
 
 func validObject(o storage420.ObjectRef) bool {
@@ -263,9 +262,4 @@ func samePlan(a Asset, p storage420.UploadPlan) bool {
 		a.ServiceID == p.ServiceID && sameObject(a.Object, p.Object)
 }
 
-func nextRevision(v uint32) uint32 {
-	if v == ^uint32(0) {
-		panic(fmt.Sprintf("%v: revision exhausted", ErrInvalidAsset))
-	}
-	return v + 1
-}
+func nextRevision(v uint32) uint32 { return v + 1 }

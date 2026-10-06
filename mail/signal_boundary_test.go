@@ -6,15 +6,15 @@ import (
 	"testing"
 )
 
-func TestCanonicalSignalIntegrationBoundaryAllowsNotificationsOnly(t *testing.T) {
+func TestCanonicalSignalIntegrationBoundaryAllowsNotificationsShareAndForwardOnly(t *testing.T) {
 	b := CanonicalSignalIntegrationBoundary()
 	if err := validateSignalIntegrationBoundary(b); err != nil {
 		t.Fatal(err)
 	}
-	if b.Provider != SignalProvider || b.Status != "NOTIFICATIONS_ONLY" || !b.OutboundNotifications {
+	if b.Provider != SignalProvider || b.Status != "SHARE_FORWARD_ENABLED" || !b.OutboundNotifications || !b.ShareAndForward {
 		t.Fatalf("unexpected boundary: %+v", b)
 	}
-	if b.AccountLinking || b.ShareAndForward || b.InboundSync ||
+	if b.AccountLinking || b.InboundSync ||
 		b.WebhookIngestion || b.DeepSync || b.PublicIndexing || b.MessageBodiesOnChain ||
 		b.ProviderRegistrationAllowed || b.MailStoresProviderSecrets || b.MailOwnsSignalIdentity {
 		t.Fatalf("Signal boundary enabled unsupported capability: %+v", b)
@@ -29,7 +29,7 @@ func TestSignalBoundaryRejectsCapabilityPromotion(t *testing.T) {
 	cases := []func(*SignalIntegrationBoundary){
 		func(b *SignalIntegrationBoundary) { b.AccountLinking = true },
 		func(b *SignalIntegrationBoundary) { b.OutboundNotifications = false },
-		func(b *SignalIntegrationBoundary) { b.ShareAndForward = true },
+		func(b *SignalIntegrationBoundary) { b.ShareAndForward = false },
 		func(b *SignalIntegrationBoundary) { b.InboundSync = true },
 		func(b *SignalIntegrationBoundary) { b.WebhookIngestion = true },
 		func(b *SignalIntegrationBoundary) { b.DeepSync = true },

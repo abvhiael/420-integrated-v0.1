@@ -47,6 +47,7 @@ contract MediaSettlement420 is SystemAccess, I420System {
     error InvalidStateTransition();
     error InvalidRecipient();
     error SettlementTermsMismatch();
+    error InvalidDependency();
 
     event JobMarketBound(address indexed jobMarket);
     event VaultAdapterBound(address indexed adapter);
@@ -64,6 +65,7 @@ contract MediaSettlement420 is SystemAccess, I420System {
     function bindJobMarket(address jobMarket_) external onlyGovernance {
         if (jobMarketBound) revert AdapterAlreadyBound();
         if (jobMarket_ == address(0)) revert ZeroAddress();
+        if (jobMarket_.code.length == 0) revert InvalidDependency();
         jobMarket = jobMarket_;
         jobMarketBound = true;
         emit JobMarketBound(jobMarket_);

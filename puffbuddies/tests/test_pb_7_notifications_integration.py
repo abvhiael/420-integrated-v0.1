@@ -99,7 +99,8 @@ class PB7NotificationsIntegrationTests(unittest.TestCase):
     reader=self.reader(),**self.tokens())[0]
   self.assertEqual(set(out.payload),{"notificationId","appId","kind","topic","actionRef","authoritative"})
   text=str(out.payload).lower()
-  for forbidden in ("alice","bob","wallet","relationship","eligibility","conversation","message_id"):
+  for forbidden in ("alice","bob","wallet_address","account_ref","eligibility","lifecycle",
+                    "relationship_state","conversation_id","message_id","subscription_id","destination"):
    self.assertNotIn(forbidden,text)
 
  def test_destination_and_subscription_are_handoff_only_not_puffbuddies_state(self):

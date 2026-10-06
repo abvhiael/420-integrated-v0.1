@@ -17,9 +17,10 @@ import (
 )
 
 type Server struct {
-	Backend Backend
-	Idem    IdempotencyStore
-	Now     func() time.Time
+	Backend  Backend
+	Idem     IdempotencyStore
+	Now      func() time.Time
+	Security *SecurityConfig
 }
 
 func NewServer(backend Backend) (*Server, error) {
@@ -45,7 +46,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/notifications/subscriptions", s.handleCreateSubscription)
 	mux.HandleFunc("DELETE /v1/notifications/subscriptions/{id}", s.handleDeleteSubscription)
 	mux.HandleFunc("POST /v1/signing/intents", s.handleSigningIntent)
-	return s.common(mux)
+	mux.HandleFunc("POST /v1/moderation/reports", s.handleModerationReport)
+	mux.HandleFunc("POST /v1/moderation/reports/{id}/decisions", s.handleModerationDecision)
+	mux.HandleFunc("POST /v1/moderation/decisions/{id}/appeals", s.handleModerationAppeal)
+	return s.common(s.securityMiddleware(mux))
 }
 
 func (s *Server) common(next http.Handler) http.Handler {
@@ -136,6 +140,9 @@ func (s *Server) handlePrepareUpload(w http.ResponseWriter, r *http.Request) {
 		if err := mediasecurity.DefaultContentPolicy().Validate(req.MimeType, req.SizeBytes); err != nil {
 			return nil, requestError{err: err}
 		}
+		if err := requireActorMatch(ctx, req.OwnerRef); err != nil {
+			return nil, codedSecurityError{code: CodeForbidden, err: err}
+		}
 		return s.Backend.PrepareUpload(ctx, req, key)
 	})
 }
@@ -148,6 +155,9 @@ func (s *Server) handleCreateLivestream(w http.ResponseWriter, r *http.Request) 
 		}
 		if err := validateLivestreamEndpoint(req.Protocol, req.Endpoint); err != nil {
 			return nil, requestError{err: err}
+		}
+		if err := requireActorMatch(ctx, req.Controller); err != nil {
+			return nil, codedSecurityError{code: CodeForbidden, err: err}
 		}
 		item, err := s.Backend.CreateLivestream(ctx, req, key)
 		return normalizeLivestream(item), err
@@ -188,6 +198,9 @@ func (s *Server) livestreamAction(w http.ResponseWriter, r *http.Request, start 
 		if err := decodeStrict(body, &req); err != nil {
 			return nil, err
 		}
+		if err := requireActorMatch(ctx, req.Controller); err != nil {
+			return nil, codedSecurityError{code: CodeForbidden, err: err}
+		}
 		var item Livestream
 		var err error
 		if start {
@@ -221,6 +234,9 @@ func (s *Server) handleCreateSubscription(w http.ResponseWriter, r *http.Request
 		if err := decodeStrict(body, &req); err != nil {
 			return nil, err
 		}
+		if err := requireActorMatch(ctx, req.UserRef); err != nil {
+			return nil, codedSecurityError{code: CodeForbidden, err: err}
+		}
 		item, err := s.Backend.CreateSubscription(ctx, req, key)
 		if err != nil {
 			return nil, err
@@ -239,6 +255,9 @@ func (s *Server) handleDeleteSubscription(w http.ResponseWriter, r *http.Request
 		return
 	}
 	s.writeIdempotent(w, r, http.StatusOK, func(ctx context.Context, key string, _ []byte) (any, error) {
+		if err := requireActorMatch(ctx, userRef); err != nil {
+			return nil, codedSecurityError{code: CodeForbidden, err: err}
+		}
 		if err := s.Backend.DeleteSubscription(ctx, id, userRef); err != nil {
 			return nil, err
 		}
@@ -251,6 +270,9 @@ func (s *Server) handleSigningIntent(w http.ResponseWriter, r *http.Request) {
 		var req SigningIntentRequest
 		if err := decodeStrict(body, &req); err != nil {
 			return nil, err
+		}
+		if err := requireActorMatch(ctx, req.Wallet); err != nil {
+			return nil, codedSecurityError{code: CodeForbidden, err: err}
 		}
 		intent, err := s.Backend.PrepareSigningIntent(ctx, req, key)
 		if err != nil {

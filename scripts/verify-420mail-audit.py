@@ -130,6 +130,14 @@ if profile_path.is_file():
     if verification.get("canonicalEvidenceRequired") is not True or verification.get("submissionAckIsCompletion") is not False or verification.get("finalizedSeparateFromVerified") is not True: errors.append("MAIL-2.13 canonical verification boundary drifted")
     if wallet.get("privateKeyInput") is not False or wallet.get("seedPhraseInput") is not False or wallet.get("passkeyPrivateMaterialInput") is not False: errors.append("MAIL-2.13 wallet secret-input boundary drifted")
     if wallet.get("credentialPersistence") is not False or wallet.get("actionPersistence") is not False or wallet.get("verificationEvidencePersistence") is not False or wallet.get("publicIndexing") is not False or wallet.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.13 wallet persistence/privacy boundary drifted")
+    connectors=profile.get("externalIntegrations",{})
+    if connectors.get("enabled") is not True or connectors.get("architecture")!="PROVIDER_NEUTRAL_CONNECTOR_REGISTRY" or connectors.get("providerSpecificLogicInCore") is not False: errors.append("MAIL-2.14 connector architecture drifted")
+    if connectors.get("capabilities")!=["LINK","PULL","PUSH","WEBHOOK","WALLET_VERIFY"]: errors.append("MAIL-2.14 connector capability inventory drifted")
+    if connectors.get("ownerScopedConnections") is not True or connectors.get("authorizationInput")!="OPAQUE_SECURE_BROKER_REFERENCE_ONLY": errors.append("MAIL-2.14 connector authorization boundary drifted")
+    if connectors.get("rawAccessTokenInput") is not False or connectors.get("rawRefreshTokenInput") is not False or connectors.get("rawClientSecretInput") is not False: errors.append("MAIL-2.14 connector raw-secret boundary drifted")
+    if connectors.get("webhookAuthentication")!="ADAPTER_VERIFIES_TRANSPORT_HEADERS_AND_PAYLOAD" or connectors.get("webhookSessionAuth") is not False: errors.append("MAIL-2.14 webhook authority boundary drifted")
+    if connectors.get("pullCursorOpaque") is not True or connectors.get("pushIdempotencyRequired") is not True or connectors.get("providerIsolation") is not True or connectors.get("capabilityDeclarationRequired") is not True: errors.append("MAIL-2.14 connector lifecycle boundary drifted")
+    if connectors.get("credentialPersistence")!="CONNECTOR_ADAPTER_OR_SECURE_BROKER_ONLY" or connectors.get("mailMetadataCredentialPersistence") is not False or connectors.get("publicIndexing") is not False or connectors.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.14 connector persistence/privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -240,6 +248,13 @@ for token in ['"/v1/wallet/actions"','"/v1/wallet/verifications"',"*WalletAction
     if token not in http: errors.append("MAIL-2.13 HTTP wallet surface missing: "+token)
 for token in ["PrepareWalletAction","VerifyWalletEvidence"]:
     if token not in client: errors.append("MAIL-2.13 client wallet surface missing: "+token)
+connector_src=(ROOT/"mail/integrations.go").read_text() if (ROOT/"mail/integrations.go").is_file() else ""
+for token in ["ConnectorRegistry","ConnectorService","ConnectorAdapter","ConnectorDescriptor","ConnectorCapabilityLink","ConnectorCapabilityPull","ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify","ConnectorLinkRequest","ConnectorConnection","ConnectorPullRequest","ConnectorPushRequest","ConnectorWebhookRequest","ErrConnectorNotFound","ErrConnectorUnsupported","ErrConnectorInvalidResult","ErrConnectorConflict"]:
+    if token not in connector_src: errors.append("MAIL-2.14 connector invariant missing: "+token)
+for token in ['"/v1/connectors/providers"','"/v1/connectors/link"','"/v1/connectors/unlink"','"/v1/connectors/pull"','"/v1/connectors/push"','"/v1/connectors/webhooks/"',"*ConnectorService"]:
+    if token not in http: errors.append("MAIL-2.14 HTTP connector surface missing: "+token)
+for token in ["ConnectorProviders","LinkConnector","UnlinkConnector","PullConnector","PushConnector"]:
+    if token not in client: errors.append("MAIL-2.14 client connector surface missing: "+token)
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
@@ -249,6 +264,8 @@ for token in ["/v1/security","data-security-action","__420_SECURITY__","loadSecu
     if token not in web: errors.append("MAIL-2.12 thin UI security behavior missing: "+token)
 for token in ["/v1/wallet/actions","/v1/wallet/verifications","data-wallet-action","__420_WALLET_ACTIONS__","requires_wallet_approval","non_custodial"]:
     if token not in web: errors.append("MAIL-2.13 thin UI wallet behavior missing: "+token)
+for token in ["/v1/connectors/providers","/v1/connectors/link","__420_CONNECTORS__","authorization_ref","loadConnectors","linkConnector"]:
+    if token not in web: errors.append("MAIL-2.14 thin UI connector behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -276,4 +293,5 @@ print("MAIL-2.10 outbox and delivery queue: qualified by app-scoped checks")
 print("MAIL-2.11 email-as-a-wallet onboarding: qualified by app-scoped checks")
 print("MAIL-2.12 passkey-first security: qualified by app-scoped checks")
 print("MAIL-2.13 wallet functions inside mail: qualified by app-scoped checks")
+print("MAIL-2.14 external integrations framework: qualified by app-scoped checks")
 

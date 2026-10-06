@@ -184,3 +184,244 @@ func TestRejectsSpoofedSource(t *testing.T) {
 		t.Fatalf("spoofed source accepted: %v", err)
 	}
 }
+
+
+func TestMailboxInitialStates(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "states", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sender, err := s.GetMailboxState(ctx, "alice.420", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sender.Folder != FolderSent || sender.ReadAt == nil {
+		t.Fatalf("unexpected sender mailbox state: %+v", sender)
+	}
+	recipient, err := s.GetMailboxState(ctx, "bob.420", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if recipient.Folder != FolderInbox || recipient.ReadAt != nil {
+		t.Fatalf("unexpected recipient mailbox state: %+v", recipient)
+	}
+}
+
+func TestRecipientMailboxLifecycle(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "lifecycle", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive := FolderArchive
+	state, err := s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Folder: &archive})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderArchive || state.PreviousFolder != FolderInbox || state.ArchivedAt == nil {
+		t.Fatalf("archive transition missing evidence: %+v", state)
+	}
+	inbox, err := s.Inbox(ctx, "bob.420", "", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(inbox.Items) != 0 {
+		t.Fatalf("archived message remained in inbox: %+v", inbox.Items)
+	}
+	junk := FolderJunk
+	state, err = s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Folder: &junk})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderJunk || state.JunkedAt == nil {
+		t.Fatalf("junk transition missing evidence: %+v", state)
+	}
+	trash := FolderTrash
+	state, err = s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Folder: &trash})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderTrash || state.PreviousFolder != FolderJunk || state.TrashedAt == nil {
+		t.Fatalf("trash transition missing evidence: %+v", state)
+	}
+	if _, err := s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Folder: &archive}); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("trash bypass should fail, got %v", err)
+	}
+	state, err = s.RestoreFromTrash(ctx, "bob.420", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderJunk {
+		t.Fatalf("restore did not return to prior folder: %+v", state)
+	}
+}
+
+func TestSenderMailboxLifecycleIsRestricted(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "sender-life", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	inbox := FolderInbox
+	if _, err := s.UpdateMailbox(ctx, "alice.420", msg.ID, MailboxUpdate{Folder: &inbox}); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("sender moved sent mail into inbox: %v", err)
+	}
+	junk := FolderJunk
+	if _, err := s.UpdateMailbox(ctx, "alice.420", msg.ID, MailboxUpdate{Folder: &junk}); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("sender moved sent mail into junk: %v", err)
+	}
+	archive := FolderArchive
+	if _, err := s.UpdateMailbox(ctx, "alice.420", msg.ID, MailboxUpdate{Folder: &archive}); err != nil {
+		t.Fatal(err)
+	}
+	trash := FolderTrash
+	if _, err := s.UpdateMailbox(ctx, "alice.420", msg.ID, MailboxUpdate{Folder: &trash}); err != nil {
+		t.Fatal(err)
+	}
+	state, err := s.RestoreFromTrash(ctx, "alice.420", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderArchive {
+		t.Fatalf("sender restore did not return to archive: %+v", state)
+	}
+}
+
+func TestDraftsAndOutboxAreReservedForLaterLifecycleSteps(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "reserved", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, folder := range []MailboxFolder{FolderDrafts, FolderOutbox} {
+		f := folder
+		if _, err := s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Folder: &f}); !errors.Is(err, ErrInvalidTransition) {
+			t.Fatalf("recipient moved delivered mail to reserved %s: %v", folder, err)
+		}
+		if _, err := s.UpdateMailbox(ctx, "alice.420", msg.ID, MailboxUpdate{Folder: &f}); !errors.Is(err, ErrInvalidTransition) {
+			t.Fatalf("sender moved delivered mail to reserved %s: %v", folder, err)
+		}
+	}
+	for _, folder := range []MailboxFolder{FolderDrafts, FolderOutbox} {
+		page, err := s.Mailbox(ctx, "alice.420", folder, "", 10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(page.Items) != 0 {
+			t.Fatalf("reserved %s unexpectedly populated: %+v", folder, page.Items)
+		}
+	}
+}
+
+func TestMailboxFlagsAndUnreadPreserveDeliveryReceipt(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "flags", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	yes := true
+	state, err := s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Read: &yes, Starred: &yes, Pinned: &yes, Muted: &yes})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.ReadAt == nil || !state.Starred || !state.Pinned || !state.Muted {
+		t.Fatalf("mailbox flags not applied: %+v", state)
+	}
+	s.Store.mu.RLock()
+	firstReceipt := s.Store.messages[msg.ID].ReadAt
+	s.Store.mu.RUnlock()
+	if firstReceipt == nil {
+		t.Fatal("recipient read did not establish message read receipt")
+	}
+	state, err = s.MarkUnread(ctx, "bob.420", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.ReadAt != nil {
+		t.Fatalf("mailbox unread failed: %+v", state)
+	}
+	s.Store.mu.RLock()
+	receiptAfterUnread := s.Store.messages[msg.ID].ReadAt
+	s.Store.mu.RUnlock()
+	if receiptAfterUnread == nil || !receiptAfterUnread.Equal(*firstReceipt) {
+		t.Fatal("marking mailbox unread erased immutable first-read receipt")
+	}
+	if _, err := s.MarkUnread(ctx, "alice.420", msg.ID); !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("sender changed recipient read state: %v", err)
+	}
+}
+
+func TestPermanentDeleteIsTrashOnlyAndOwnerScoped(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "delete", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PermanentlyDelete(ctx, "bob.420", msg.ID); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("permanent delete outside trash should fail: %v", err)
+	}
+	trash := FolderTrash
+	if _, err := s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Folder: &trash}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PermanentlyDelete(ctx, "bob.420", msg.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.GetMailboxState(ctx, "bob.420", msg.ID); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("deleted mailbox state remained visible: %v", err)
+	}
+	if _, _, err := s.ReadBody(ctx, "bob.420", msg.ID); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("deleted recipient retained body access: %v", err)
+	}
+	if _, _, err := s.ReadBody(ctx, "alice.420", msg.ID); err != nil {
+		t.Fatalf("recipient deletion affected sender copy: %v", err)
+	}
+}
+
+func TestForeignPrincipalCannotObserveOrMutateMailboxState(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "foreign-state", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.GetMailboxState(ctx, "mallory.420", msg.ID); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("foreign principal observed mailbox state: %v", err)
+	}
+	archive := FolderArchive
+	if _, err := s.UpdateMailbox(ctx, "mallory.420", msg.ID, MailboxUpdate{Folder: &archive}); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("foreign principal mutated mailbox state: %v", err)
+	}
+}
+
+func TestMailboxFolderPagination(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	for i := 0; i < 3; i++ {
+		_, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: fmt.Sprintf("mailbox-%d", i), Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	p1, err := s.Mailbox(ctx, "bob.420", FolderInbox, "", 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(p1.Items) != 2 || p1.NextCursor == "" {
+		t.Fatalf("mailbox first page invalid: %+v", p1)
+	}
+	p2, err := s.Mailbox(ctx, "bob.420", FolderInbox, p1.NextCursor, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(p2.Items) != 1 || p2.NextCursor != "" {
+		t.Fatalf("mailbox second page invalid: %+v", p2)
+	}
+}

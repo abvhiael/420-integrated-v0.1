@@ -191,6 +191,12 @@ if profile_path.is_file():
     if signal_deep.get("missingEvidence")!=["SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT","STABLE_INBOUND_SYNC_TRANSPORT","ACCOUNT_OR_DEVICE_BINDING_AUTHORITY","REPLAY_AND_CURSOR_SEMANTICS","PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT"]: errors.append("MAIL-2.22 Signal deep-sync missing-evidence inventory drifted")
     if signal_deep.get("inboundSync") is not False or signal_deep.get("webhookIngestion") is not False or signal_deep.get("providerRegistrationAllowed") is not False: errors.append("MAIL-2.22 Signal deep-sync operational capability drifted")
     if signal_deep.get("rawCredentialInput") is not False or signal_deep.get("publicIndexing") is not False or signal_deep.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.22 Signal deep-sync privacy boundary drifted")
+    telegram=profile.get("telegramAccountLinking",{})
+    if telegram.get("enabled") is not True or telegram.get("provider")!="telegram" or telegram.get("connectorCapability")!="LINK": errors.append("MAIL-2.23 Telegram link capability drifted")
+    if telegram.get("authority")!="TELEGRAM_LINK_AUTHORITY" or telegram.get("authorizationRef")!="OPAQUE_EXTERNAL_AUTHORIZATION_REFERENCE" or telegram.get("accountHintAuthoritative") is not False: errors.append("MAIL-2.23 Telegram authority/reference drifted")
+    if telegram.get("userIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram.get("verifiedAccountRequired") is not True or telegram.get("nonCustodialRequired") is not True or telegram.get("unlinkSupported") is not True: errors.append("MAIL-2.23 Telegram account invariant drifted")
+    if any(telegram.get(k) is not False for k in ["pull","push","webhook","walletVerification"]): errors.append("MAIL-2.23 pulled later Telegram capabilities forward")
+    if any(telegram.get(k) is not False for k in ["rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.23 Telegram credential/privacy boundary drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
     if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
@@ -323,6 +329,7 @@ signal_boundary_src=(ROOT/"mail/signal_boundary.go").read_text() if (ROOT/"mail/
 signal_notifications_src=(ROOT/"mail/signal_notifications.go").read_text() if (ROOT/"mail/signal_notifications.go").is_file() else ""
 signal_share_src=(ROOT/"mail/signal_share.go").read_text() if (ROOT/"mail/signal_share.go").is_file() else ""
 signal_deep_sync_gate_src=(ROOT/"mail/signal_deep_sync_gate.go").read_text() if (ROOT/"mail/signal_deep_sync_gate.go").is_file() else ""
+telegram_link_src=(ROOT/"mail/telegram_link.go").read_text() if (ROOT/"mail/telegram_link.go").is_file() else ""
 for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
     if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
 for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
@@ -339,6 +346,11 @@ for token in ["SignalShareMode","SignalShareModeShare","SignalShareModeForward",
     if token not in signal_share_src: errors.append("MAIL-2.21 Signal share invariant missing: "+token)
 for token in ["SignalDeepSyncStatus","CanonicalSignalDeepSyncStatus","validateSignalDeepSyncStatus","CONDITION_UNSATISFIED","STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED","SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT","STABLE_INBOUND_SYNC_TRANSPORT","ACCOUNT_OR_DEVICE_BINDING_AUTHORITY","REPLAY_AND_CURSOR_SEMANTICS","PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT"]:
     if token not in signal_deep_sync_gate_src: errors.append("MAIL-2.22 Signal deep-sync gate invariant missing: "+token)
+for token in ["TelegramProvider","TelegramAccount","TelegramLinkAuthority","TelegramConnectorAdapter","NewTelegramConnectorService","ConnectorCapabilityLink","validTelegramUserID","telegramUserIDFromConnectionID","telegramDisplayName","ErrTelegramInvalidResult"]:
+    if token not in telegram_link_src: errors.append("MAIL-2.23 Telegram link invariant missing: "+token)
+for forbidden in ["ConnectorCapabilityPull","ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
+    descriptor_block=telegram_link_src[telegram_link_src.find("func (a *TelegramConnectorAdapter) Descriptor"):telegram_link_src.find("func (a *TelegramConnectorAdapter) Link")]
+    if forbidden in descriptor_block: errors.append("MAIL-2.23 Telegram descriptor pulled later capability forward: "+forbidden)
 if "ConnectorCapabilityWalletVerify" not in discord_src: errors.append("MAIL-2.18 Discord connector wallet capability missing")
 for token in ["DiscordDeliveryAuthority","ConnectorCapabilityPush","DeliverDiscord","DiscordDeliveryKind"]:
     if token not in discord_src: errors.append("MAIL-2.17 Discord adapter delivery invariant missing: "+token)
@@ -358,6 +370,8 @@ if '"/v1/connectors/signal/share"' not in http or "*SignalShareService" not in h
 if "ShareToSignal" not in client: errors.append("MAIL-2.21 client Signal share surface missing")
 if '"/v1/connectors/signal/deep-sync/status"' not in http: errors.append("MAIL-2.22 HTTP Signal deep-sync status surface missing")
 if "SignalDeepSyncStatus" not in client: errors.append("MAIL-2.22 client Signal deep-sync status surface missing")
+for token in ["LinkConnector","UnlinkConnector"]:
+    if token not in client: errors.append("MAIL-2.23 client Telegram link surface missing: "+token)
 for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
     pass
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
@@ -371,6 +385,8 @@ for token in ["/v1/wallet/actions","/v1/wallet/verifications","data-wallet-actio
     if token not in web: errors.append("MAIL-2.13 thin UI wallet behavior missing: "+token)
 for token in ["/v1/connectors/providers","/v1/connectors/link","__420_CONNECTORS__","authorization_ref","loadConnectors","linkConnector"]:
     if token not in web: errors.append("MAIL-2.14 thin UI connector behavior missing: "+token)
+for token in ["LINK","linkConnector","authorization_ref"]:
+    if token not in web: errors.append("MAIL-2.23 provider-neutral Telegram link UI behavior missing: "+token)
 for token in ["/v1/connectors/discord/sync","syncDiscord","Sync Discord","connectionId"]:
     if token not in web: errors.append("MAIL-2.16 thin UI Discord sync behavior missing: "+token)
 for token in ["/v1/connectors/discord/deliver","deliverDiscord","Send to Discord","delivery","idempotency_key"]:
@@ -417,4 +433,5 @@ print("MAIL-2.19 Signal integration boundary: qualified by app-scoped checks")
 print("MAIL-2.20 420Mail to Signal notifications: qualified by app-scoped checks")
 print("MAIL-2.21 Signal share and forward: qualified by app-scoped checks")
 print("MAIL-2.22 Signal deep sync: condition unsatisfied and gate qualified by app-scoped checks")
+print("MAIL-2.23 Telegram account linking: qualified by app-scoped checks")
 

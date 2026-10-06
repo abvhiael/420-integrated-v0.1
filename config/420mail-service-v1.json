@@ -382,5 +382,28 @@
     "mailMetadataCredentialPersistence": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "discordAccountLinking": {
+    "enabled": true,
+    "provider": "discord",
+    "connectorCapability": "LINK",
+    "authorization": "OPAQUE_SECURE_BROKER_REFERENCE",
+    "requiredScopes": [
+      "identify"
+    ],
+    "verifiedProviderIdentityRequired": true,
+    "externalAccountId": "DISCORD_SNOWFLAKE",
+    "ownerBinding": "AUTHENTICATED_420MAIL_IDENTITY",
+    "unlinkSupported": true,
+    "nonCustodial": true,
+    "rawAccessTokenInput": false,
+    "rawRefreshTokenInput": false,
+    "rawClientSecretInput": false,
+    "credentialPersistence": "DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY",
+    "mailMetadataCredentialPersistence": false,
+    "sync": false,
+    "delivery": false,
+    "webhook": false,
+    "walletVerification": false
   }
 }

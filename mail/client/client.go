@@ -353,3 +353,40 @@ func (c Client) SaveDraft(ctx context.Context, draftID string, req mail.DraftSav
 func (c Client) DiscardDraft(ctx context.Context, draftID string, expectedVersion uint32) error {
 	return c.do(ctx, http.MethodDelete, "/v1/drafts/"+url.PathEscape(draftID)+"?expected_version="+strconv.FormatUint(uint64(expectedVersion), 10), nil, nil)
 }
+
+
+func (c Client) QueueDelivery(ctx context.Context, req mail.SendRequest) (mail.Delivery, error) {
+	var out mail.Delivery
+	err := c.do(ctx, http.MethodPost, "/v1/outbox", req, &out)
+	return out, err
+}
+
+func (c Client) ListOutbox(ctx context.Context) ([]mail.Delivery, error) {
+	var out []mail.Delivery
+	err := c.do(ctx, http.MethodGet, "/v1/outbox", nil, &out)
+	return out, err
+}
+
+func (c Client) GetDelivery(ctx context.Context, id string) (mail.Delivery, error) {
+	var out mail.Delivery
+	err := c.do(ctx, http.MethodGet, "/v1/outbox/"+url.PathEscape(id), nil, &out)
+	return out, err
+}
+
+func (c Client) ProcessDelivery(ctx context.Context, id string) (mail.Delivery, error) {
+	var out mail.Delivery
+	err := c.do(ctx, http.MethodPost, "/v1/outbox/"+url.PathEscape(id)+"/process", nil, &out)
+	return out, err
+}
+
+func (c Client) RetryDelivery(ctx context.Context, id string) (mail.Delivery, error) {
+	var out mail.Delivery
+	err := c.do(ctx, http.MethodPost, "/v1/outbox/"+url.PathEscape(id)+"/retry", nil, &out)
+	return out, err
+}
+
+func (c Client) CancelDelivery(ctx context.Context, id string) (mail.Delivery, error) {
+	var out mail.Delivery
+	err := c.do(ctx, http.MethodPost, "/v1/outbox/"+url.PathEscape(id)+"/cancel", nil, &out)
+	return out, err
+}

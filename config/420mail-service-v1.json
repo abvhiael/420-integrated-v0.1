@@ -40,12 +40,14 @@
     ],
     "deliveredRecipientFolder": "INBOX",
     "deliveredSenderFolder": "SENT",
-    "reservedForDedicatedSteps": {
-      "OUTBOX": "MAIL-2.10"
-    },
+    "reservedForDedicatedSteps": {},
     "ownerScopedState": true,
     "permanentDeleteRequiresTrash": true,
-    "messageBodiesOnChain": false
+    "messageBodiesOnChain": false,
+    "systemManagedFolders": [
+      "OUTBOX",
+      "DRAFTS"
+    ]
   },
   "metadataStore": {
     "requiredForDeployment": true,

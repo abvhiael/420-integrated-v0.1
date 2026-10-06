@@ -53,12 +53,15 @@ contract ComputeResearchIdentity420Test {
 
         registry = new ComputeResearchIdentity420(IComputeResearchIdentitySource420(address(identity)));
 
+        bytes32 researcherType = registry.RESEARCHER_CREDENTIAL_TYPE();
+        bytes32 institutionType = registry.INSTITUTION_CREDENTIAL_TYPE();
+
         vm.prank(ISSUER);
         identity.issueCredential(
             ALICE_CREDENTIAL,
             RESEARCHER_ISSUER,
             ALICE_PROFILE,
-            registry.RESEARCHER_CREDENTIAL_TYPE(),
+            researcherType,
             keccak256("alice-researcher-claim"),
             0
         );
@@ -67,7 +70,7 @@ contract ComputeResearchIdentity420Test {
             ORG_CREDENTIAL,
             INSTITUTION_ISSUER,
             ORG_PROFILE,
-            registry.INSTITUTION_CREDENTIAL_TYPE(),
+            institutionType,
             keccak256("org-institution-claim"),
             0
         );
@@ -109,12 +112,13 @@ contract ComputeResearchIdentity420Test {
 
     function testInstitutionRequiresCredentialedInstitutionCredential() public {
         bytes32 weak = keccak256("weak-institution-credential");
+        bytes32 institutionType = registry.INSTITUTION_CREDENTIAL_TYPE();
         vm.prank(ISSUER);
         identity.issueCredential(
             weak,
             RESEARCHER_ISSUER,
             ORG_PROFILE,
-            registry.INSTITUTION_CREDENTIAL_TYPE(),
+            institutionType,
             keccak256("weak"),
             0
         );

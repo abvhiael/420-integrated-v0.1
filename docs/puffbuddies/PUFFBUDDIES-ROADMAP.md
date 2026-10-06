@@ -536,7 +536,48 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.13 — Matching principles
 
-Define allowed matching inputs, hard exclusions, ranking constraints, and prohibited economic influence.
+**Purpose:** define allowed matching inputs, hard exclusions, ranking constraints, match-formation consent boundaries, and prohibited economic influence.
+
+**Canonical requirements:**
+
+1. Record PB-MATCH-001 through PB-MATCH-040.
+2. Define allowed matching inputs including mode, explicit private preferences, adult age-range compatibility, explicit gender/orientation compatibility, cannabis compatibility, lifestyle/relationship preferences, coarse proximity, bounded activity freshness, canonical profile completeness, and bounded verification indicators.
+3. Define hard exclusions for current blocks, non-participating lifecycle states, eligibility failure/unknown, visibility denial, scoped safety restrictions, deletion state, economic bypass attempts, self-match, stale-rematch state, and unknown protected authority.
+4. Define ranking as derived/non-canonical and subordinate to current consent, block, safety, lifecycle, eligibility, visibility, and privacy authority.
+5. Require current authoritative security-relevant inputs and reject stale ranking output after revocation.
+6. Minimize sensitive inference and prohibit unrelated security/payment/identity data from silently becoming dating desirability inputs.
+7. Prohibit public or purchasable desirability/reputation scores derived from wealth, token holdings, payments, report/block counts, moderation history, or unrelated ecosystem data.
+8. Require experiments/engagement optimization to preserve all hard exclusions and user controls.
+9. Preserve one-sided likes as non-messaging consent and require independent reciprocal authorized intent for mutual match formation.
+10. Prohibit payment, premium, token, staking, sponsorship, boost, administrator, moderator, algorithm, AI, or automation from manufacturing/restoring interpersonal consent.
+11. Define an allowed-input decision rule covering source, purpose, privacy, freshness, user control, deletion, economic influence, and failure behavior.
+12. Do not claim a matching engine, recommendation model/service, feature store, database, API, contract, address, service ID, deployment, or live ranking implementation in PB-0.13.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.13-MATCHING-PRINCIPLES.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.13-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.13 is not a Level 2 integration milestone; it defines matching/ranking policy only and introduces no executable matching engine or shared runtime integration.
+
+**Dependencies:** PB-0.1 through PB-0.12 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.13 matching-principles document exists;
+- PB-MATCH-001 through PB-MATCH-040 exist exactly once and in sequence;
+- allowed inputs, hard exclusions, ranking constraints, and prohibited economic influence are explicit;
+- reciprocal user intent remains the only ordinary match-formation authority;
+- stale ranking and economic/admin/algorithmic paths cannot bypass block, consent, safety, lifecycle, eligibility, or visibility;
+- private ranking signals cannot become public desirability/social-credit state;
+- no matching-engine/recommendation-model/service/feature-store/database/API/contract/address/service-ID/deployment/live-ranking implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.13 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.14 — Cannabis taxonomy
 

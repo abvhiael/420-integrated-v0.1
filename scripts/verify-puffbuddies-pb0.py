@@ -41,6 +41,8 @@ STRUCTURE = ROOT / "docs/puffbuddies/PB-0.17-REPOSITORY-STRUCTURE.md"
 EVIDENCE_17 = ROOT / "docs/puffbuddies/PB-0.17-QUALIFICATION.md"
 DOCINV = ROOT / "docs/puffbuddies/PB-0.18-DOCUMENTATION-INVARIANT-TESTS.md"
 EVIDENCE_18 = ROOT / "docs/puffbuddies/PB-0.18-QUALIFICATION.md"
+MASTER_ROADMAP = ROOT / "docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md"
+EVIDENCE_19 = ROOT / "docs/puffbuddies/PB-0.19-QUALIFICATION.md"
 
 errors = []
 
@@ -48,7 +50,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17, DOCINV, EVIDENCE_18):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17, DOCINV, EVIDENCE_18, MASTER_ROADMAP, EVIDENCE_19):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -92,6 +94,8 @@ structure = STRUCTURE.read_text(encoding="utf-8")
 evidence_17 = EVIDENCE_17.read_text(encoding="utf-8")
 docinv = DOCINV.read_text(encoding="utf-8")
 evidence_18 = EVIDENCE_18.read_text(encoding="utf-8")
+master_roadmap = MASTER_ROADMAP.read_text(encoding="utf-8")
+evidence_19 = EVIDENCE_19.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -197,6 +201,9 @@ for token in [
     "### PB-0.18 — Documentation/invariant tests",
     "PB-DOCINV-001 through PB-DOCINV-020",
     "**Milestone relationship:** PB-0.18 is not a Level 2 integration milestone",
+    "### PB-0.19 — Master implementation roadmap",
+    "PB-ROADMAP-001 through PB-ROADMAP-024",
+    "**Milestone relationship:** PB-0.19 defines future Level 2 milestone boundaries but is not itself a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1790,13 +1797,92 @@ for i,value in enumerate(canonical,1):
 for token in ["# PB-0.18 qualification evidence","**PB-0.18 — Documentation/invariant tests**","**Level 1 — per-roadmap-step fast qualification**","PB-DOCINV-001 through PB-DOCINV-020","PuffBuddies PB-0 Qualification","## Security/adversarial/invariant results","## Intentionally deferred checks","**PB-0.19 — Master implementation roadmap**"]:
     need(token in evidence_18,f"PB-0.18 evidence missing token: {token}")
 
+# PB-0.19 — master implementation roadmap
+for token in [
+    "# PuffBuddies PB-0.19 master implementation roadmap",
+    "## Canonical roadmap invariants",
+    "## Canonical implementation phases",
+    "## Cross-phase release gates",
+    "## Change control",
+    "## PB-0.19 completion boundary",
+    "PB-0.20 must formally close PB-0 before PB-1 implementation begins",
+    "### PB-1 — Domain model and private persistence",
+    "### PB-2 — Eligibility, account, profile, and visibility",
+    "### PB-3 — Discovery and matching",
+    "### PB-4 — Messaging authorization and notifications",
+    "### PB-5 — Safety, moderation, block, report, and appeals",
+    "### PB-6 — Deletion, retention, derived-state invalidation, and recovery",
+    "### PB-7 — Web MVP and baseline user experience",
+    "### PB-8 — Bounded ecosystem integration hardening",
+    "### PB-9 — Testnet and operational readiness",
+    "### PB-10 — Release candidate",
+    "### PB-11 — Launch readiness and launch",
+    "Level 2 milestone A",
+    "Level 2 milestone B",
+    "Level 2 milestone C",
+    "Level 2 milestone D",
+    "Level 2 milestone E",
+    "Solidity Contracts owns the full repository Foundry inventory",
+    "Genesis Address Authority owns address/namespace/predeploy/frozen-address/manifest authority",
+]:
+    need(token in master_roadmap, f"PB-0.19 master roadmap missing token: {token}")
+
+roadmap_ids = re.findall(r"^### (PB-ROADMAP-\d{3})\b", master_roadmap, flags=re.MULTILINE)
+need(roadmap_ids == [f"PB-ROADMAP-{i:03d}" for i in range(1,25)], f"PB-ROADMAP sequence drift: {roadmap_ids}")
+need(len(roadmap_ids)==len(set(roadmap_ids)),"duplicate PB-ROADMAP identifier")
+
+phase_ids = re.findall(r"^### (PB-\d+) —", master_roadmap, flags=re.MULTILINE)
+need(phase_ids == [f"PB-{i}" for i in range(1,12)], f"PB-1-through-launch phase order drift: {phase_ids}")
+
+for guarantee in [
+    "adult eligibility satisfying PB-0.6 and PB-0.12",
+    "Cannabis compatibility remains first-class while cannabis consumption remains unnecessary",
+    "must not make PuffBuddies membership or relationship graphs publicly enumerable",
+    "cannot create another user's interpersonal consent",
+    "ordinary private dating/social messaging requires the current canonical mutual authorization",
+    "must invalidate stale downstream authorization and fail closed",
+    "PuffBuddies remains canonical owner for its relationship, lifecycle, and safety state",
+    "cannot become canonical relationship/consent/lifecycle/safety authority",
+    "must honor current deletion and revocation semantics",
+    "client hiding alone is insufficient",
+    "Hard exclusions precede ranking",
+    "Baseline safety/account-exit capabilities remain non-premium",
+    "Reserved PB-0.17 paths remain architecture locations rather than evidence of implementation/deployment",
+]:
+    need(guarantee in master_roadmap, f"PB-0.19 missing release-gating guarantee: {guarantee}")
+
+for forbidden in [
+    "PB-1 is implemented",
+    "PB-2 is implemented",
+    "PuffBuddies testnet is deployed",
+    "PuffBuddies production is deployed",
+    "PuffBuddies service ID is",
+    "PuffBuddies contract address is",
+]:
+    need(forbidden not in master_roadmap, f"PB-0.19 unsupported future-state claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", master_roadmap) is None, "PB-0.19 must not assign an on-chain address")
+need("420/service/puff" not in master_roadmap.lower(), "PB-0.19 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.19 qualification evidence",
+    "**PB-0.19 — Master implementation roadmap**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-ROADMAP-001 through PB-ROADMAP-024",
+    "PuffBuddies PB-0 Qualification",
+    "## Security/adversarial/invariant results",
+    "## Intentionally deferred checks",
+    "**PB-0.20 — PB-0 qualification and formal closeout**",
+]:
+    need(token in evidence_19, f"PB-0.19 evidence missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.18", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.19", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.18",
+    "step": "PB-0.19",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -2035,5 +2121,17 @@ print(json.dumps({
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,
+    },
+    "pb19": {
+        "roadmapInvariants": roadmap_ids,
+        "orderedPhases": phase_ids,
+        "pb0AuthorityMapped": True,
+        "level2MilestonesDefined": True,
+        "level3OwnershipDefined": True,
+        "testnetPrerequisitesExplicit": True,
+        "launchOperationalGatesDefined": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsFutureImplementation": False,
     }
 }, indent=2))

@@ -1,6 +1,6 @@
 # CMP-4.5 — Reproducible execution environments
 
-Status: **IMPLEMENTED — LEVEL 1 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 EXACT-HEAD QUALIFIED ON `31fc4fd39b283fd3a49eef514c55863551646da6`.**
 
 CMP-4.5 makes the scientific execution environment behind CMP-4.1 `executableContainerCommitment` canonical and revisioned without creating a second worker runtime. CMP-0.4 remains signed-manifest authority; CMP-3 remains execution/sandbox authority.
 
@@ -57,6 +57,20 @@ CMP-4.5 is Level 1. Required: affected Compute build, dedicated environment test
 ## Intentionally deferred
 
 CMP-4.6 result provenance; CMP-4.7 scientific metadata/lineage; CMP-4.8 publication/retention; CMP-4.9 dashboard; CMP-4.10 Level 3 closeout; CMP-7 SDK/API/indexer; CMP-8 UI; CMP-9.13 live scientific demonstration.
+
+## Qualification evidence
+
+- qualified implementation/closeout SHA: `31fc4fd39b283fd3a49eef514c55863551646da6`;
+- Compute Market Qualification: **#408** / run `37411714045` / job `112101374538` — **SUCCESS**;
+- exact-head checkout and verification — PASS;
+- Compute Market build — PASS;
+- retained `Compute*.t.sol` suite — PASS;
+- CMP-4.1–CMP-4.4 retained verifiers — PASS;
+- CMP-4.5 mechanical verifier — PASS;
+- Level 2: not required for this ordinary step;
+- Level 3: deferred to CMP-4.10.
+
+Durable evidence: [CMP-4.5 qualification evidence](CMP-4.5-QUALIFICATION-EVIDENCE.md).
 
 ## Next canonical step
 

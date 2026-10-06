@@ -1,6 +1,6 @@
 # CMP-5.5 — External proof/credit adapters
 
-Status: **IMPLEMENTATION COMPLETE — LEVEL 1 + SECOND CMP-5 LEVEL 2 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 + SECOND CMP-5 LEVEL 2 EXACT-HEAD QUALIFIED ON `41b3f7e9c84226c8b294f2b7a5af730c928ece61`.**
 
 Canonical roadmap step: **CMP-5.5 — External proof/credit adapters**.
 
@@ -77,7 +77,9 @@ Repository-wide Level 3 remains reserved for CMP-5.8.
 
 ## Exit criteria
 
-CMP-5.5 is complete when one exact implementation SHA satisfies all machine-readable exit criteria and the Level 1 + retained app-focused Level 2 qualification passes.
+All machine-readable CMP-5.5 exit criteria passed on exact implementation SHA `41b3f7e9c84226c8b294f2b7a5af730c928ece61`.
+
+Durable evidence: [CMP-5.5 qualification](CMP-5.5-QUALIFICATION-EVIDENCE.md).
 
 ## Next canonical step
 

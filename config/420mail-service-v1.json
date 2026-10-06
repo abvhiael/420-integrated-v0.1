@@ -51,7 +51,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 5,
+    "schemaVersion": 6,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -59,7 +59,8 @@
     "secondaryIndexes": [
       "owner_folder",
       "owner_label",
-      "owner_custom_folder"
+      "owner_custom_folder",
+      "owner_conversation"
     ],
     "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
     "sharedStorageRequiredForMultiInstance": true,
@@ -192,5 +193,22 @@
     "oneAbuseReportPerOwnerMessage": true,
     "publicIndexing": false,
     "messageBodiesPersisted": false
+  },
+  "conversations": {
+    "enabled": true,
+    "replyModel": "PARENT_MESSAGE_BOUND",
+    "deterministicRootConversationId": true,
+    "ownerScoped": true,
+    "participantView": true,
+    "orderedMessages": "CREATED_AT_ASC_ID_ASC",
+    "orderedConversations": "LATEST_AT_DESC_ID_ASC",
+    "maxMessagesPerConversation": 1000,
+    "threadArchive": true,
+    "threadMute": true,
+    "archivedFutureRepliesFolder": "ARCHIVE",
+    "mutedFutureRepliesSuppressNotification": true,
+    "arbitraryConversationInjectionRejected": true,
+    "deletedParentReplyRejected": true,
+    "publicIndexing": false
   }
 }

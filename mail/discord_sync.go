@@ -195,9 +195,16 @@ func (s *DiscordSyncService) materialize(ctx context.Context, actor, connectionI
 		if existing.Fingerprint != fp {
 			return MailboxItem{}, false, ErrDiscordSyncConflict
 		}
-		state, err := s.Mail.GetMailboxState(ctx, actor, existingID)
-		if err != nil {
+		var state MailboxState
+		var ok bool
+		if err := s.Mail.Store.View(ctx, func(data *storeData) error {
+			state, ok = data.Mailbox[mailboxKey(actor, existingID)]
+			return nil
+		}); err != nil {
 			return MailboxItem{}, false, err
+		}
+		if !ok {
+			return MailboxItem{}, false, ErrDiscordSyncConflict
 		}
 		return MailboxItem{Message: existing, State: state}, false, nil
 	}

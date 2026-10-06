@@ -37,7 +37,7 @@ def main():
         "testCrossProjectAndRevisionReplayFailAdmission"
       ],
       "docs/compute-market/CMP-4.2-RESEARCH-PROJECT-REGISTRY.md":[
-        "# CMP-4.2 — Research Project Registry","owner-only","isCurrentAcceptable",
+        "# CMP-4.2 — Research Project Registry","only that recorded project owner may revise","isCurrentAcceptable",
         "CMP-4.3 — Researcher / institution identity"
       ],
       "docs/compute-market/CMP-4.1-SCIENTIFIC-WORK-UNIT-SPECIFICATION.md":[

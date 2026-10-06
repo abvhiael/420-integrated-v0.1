@@ -249,3 +249,32 @@ func (c Client) UpdateRule(ctx context.Context, id string, input mail.RuleInput)
 func (c Client) DeleteRule(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodDelete, "/v1/rules/"+url.PathEscape(id), nil, nil)
 }
+
+
+func (c Client) ListTrustEntries(ctx context.Context) ([]mail.TrustEntry, error) {
+	var out []mail.TrustEntry
+	err := c.do(ctx, http.MethodGet, "/v1/trust/entries", nil, &out)
+	return out, err
+}
+
+func (c Client) PutTrustEntry(ctx context.Context, input mail.TrustEntryInput) (mail.TrustEntry, error) {
+	var out mail.TrustEntry
+	err := c.do(ctx, http.MethodPut, "/v1/trust/entries", input, &out)
+	return out, err
+}
+
+func (c Client) DeleteTrustEntry(ctx context.Context, id string) error {
+	return c.do(ctx, http.MethodDelete, "/v1/trust/entries/"+url.PathEscape(id), nil, nil)
+}
+
+func (c Client) GetTrustSettings(ctx context.Context) (mail.TrustSettings, error) {
+	var out mail.TrustSettings
+	err := c.do(ctx, http.MethodGet, "/v1/trust/settings", nil, &out)
+	return out, err
+}
+
+func (c Client) UpdateTrustSettings(ctx context.Context, requireTrusted bool) (mail.TrustSettings, error) {
+	var out mail.TrustSettings
+	err := c.do(ctx, http.MethodPut, "/v1/trust/settings", mail.TrustSettingsInput{RequireTrusted: requireTrusted}, &out)
+	return out, err
+}

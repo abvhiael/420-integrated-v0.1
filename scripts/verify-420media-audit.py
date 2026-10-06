@@ -24,6 +24,7 @@ roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-4",
     "MEDIA-AUDIT-5",
     "MEDIA-AUDIT-6",
+    "MEDIA-AUDIT-7",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -59,6 +60,13 @@ identity_rights = need("docs/420-MEDIA-IDENTITY-RIGHTS.md", [
     "RightsRouter420.canUse",
     "Level 1 app-scoped fast qualification",
 ])
+pay_compute = need("docs/420-MEDIA-PAY-COMPUTE.md", [
+    "MEDIA-AUDIT-7",
+    "MediaPayComputeAdapter420",
+    "settledAmounts",
+    "componentGraphHash",
+    "Level 1 app-scoped fast qualification",
+])
 
 svc = json.loads(need("config/genesis-consumer-services.json"))
 media = next((x for x in svc["services"] if x["id"] == "420/service/media/v1"), None)
@@ -82,6 +90,8 @@ for path in [
     "contracts/src/media/MediaJobMarket420.sol",
     "contracts/src/media/MediaSettlement420.sol",
     "contracts/src/media/MediaIds420.sol",
+    "contracts/src/media/MediaPayComputeAdapter420.sol",
+    "contracts/test/MediaPhase1PayCompute420.t.sol",
     "contracts/test/MediaPhase1Protocol420.t.sol",
     "contracts/test/MediaPhase1Hardening420.t.sol",
     "cmd/420media-node/main.go",

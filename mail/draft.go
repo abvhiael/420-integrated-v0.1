@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -236,24 +237,47 @@ func (s *Service) ListDrafts(ctx context.Context, actor string) ([]Draft, error)
 }
 
 func (s *Service) DiscardDraft(ctx context.Context, actor, id string, expectedVersion uint32) error {
-	actor=strings.TrimSpace(actor)
-	id=strings.TrimSpace(id)
-	if actor=="" { return ErrUnauthorized }
-	if id=="" || expectedVersion==0 { return ErrInvalidInput }
-	deleter,ok:=s.Blobs.(PrivateBlobDeleteStore)
-	if !ok { return ErrDraftDeleteUnavailable }
-	var ref string
-	if err:=s.Store.Update(ctx,func(data *storeData) error{
-		key:=draftKey(actor,id)
-		draft,ok:=data.Drafts[key]
-		if !ok { return ErrNotFound }
-		if draft.Version!=expectedVersion { return ErrDraftConflict }
-		ref=draft.BodyRef
-		delete(data.Drafts,key)
+	actor = strings.TrimSpace(actor)
+	id = strings.TrimSpace(id)
+	if actor == "" {
+		return ErrUnauthorized
+	}
+	if id == "" || expectedVersion == 0 {
+		return ErrInvalidInput
+	}
+	deleter, ok := s.Blobs.(PrivateBlobDeleteStore)
+	if !ok {
+		return ErrDraftDeleteUnavailable
+	}
+	var removed Draft
+	if err := s.Store.Update(ctx, func(data *storeData) error {
+		key := draftKey(actor, id)
+		draft, ok := data.Drafts[key]
+		if !ok {
+			return ErrNotFound
+		}
+		if draft.Version != expectedVersion {
+			return ErrDraftConflict
+		}
+		removed = draft
+		delete(data.Drafts, key)
 		return nil
-	});err!=nil{return err}
-	if err:=deleter.DeletePrivate(ctx,actor,ref);err!=nil{
+	}); err != nil {
 		return err
+	}
+	if err := deleter.DeletePrivate(ctx, actor, removed.BodyRef); err != nil {
+		rollbackErr := s.Store.Update(ctx, func(data *storeData) error {
+			key := draftKey(actor, id)
+			if _, exists := data.Drafts[key]; exists {
+				return ErrDraftConflict
+			}
+			data.Drafts[key] = removed
+			return nil
+		})
+		if rollbackErr != nil {
+			return fmt.Errorf("%w: blob delete failed: %v; metadata rollback failed: %v", ErrDraftDeleteUnavailable, err, rollbackErr)
+		}
+		return fmt.Errorf("%w: %v", ErrDraftDeleteUnavailable, err)
 	}
 	return nil
 }

@@ -1,6 +1,6 @@
 # CMP-5.1 — Folding@home adapter
 
-Status: **IMPLEMENTATION COMPLETE — LEVEL 1 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — Level 1 exact-head qualified on `aa8ebaeb243946b679766fb6d023f39acec42dc2`.**
 
 Canonical roadmap step: **CMP-5.1 — Folding@home adapter**.
 
@@ -102,6 +102,12 @@ No Level 2 milestone is required at CMP-5.1. Level 2 is deferred until multiple 
 ## Exit criteria
 
 CMP-5.1 is complete when one exact implementation SHA proves the implementation/configuration above, the dedicated negative/boundary tests, mechanical verifier and Compute Market Level 1 workflow all pass.
+
+## Qualification evidence
+
+Compute Market Qualification **#443** / run `37515056292` / job `112445946047` passed on exact implementation SHA `aa8ebaeb243946b679766fb6d023f39acec42dc2`, including exact-head verification, affected Compute contract build, retained `Compute*.t.sol` regressions, verifier-script compilation and the CMP-5.1 mechanical verifier.
+
+Durable evidence: [CMP-5.1 qualification](CMP-5.1-QUALIFICATION-EVIDENCE.md).
 
 ## Next canonical step
 

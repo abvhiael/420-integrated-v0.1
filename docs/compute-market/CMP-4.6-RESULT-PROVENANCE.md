@@ -1,6 +1,6 @@
 # CMP-4.6 — Result provenance
 
-Status: **IMPLEMENTED — LEVEL 1 + LEVEL 2 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 + FIRST CMP-4 LEVEL 2 EXACT-HEAD QUALIFIED ON `01824d6488a14d74d86ea6f1c6c8a4ecbd45d878`.**
 
 Canonical roadmap step: **CMP-4.6 — Result provenance**.
 
@@ -114,6 +114,23 @@ No repository-wide Level 3 inventory is required. Level 3 remains CMP-4.10.
 - user-facing Compute application — CMP-8;
 - live scientific workload demonstration — CMP-9.13.
 
-## 10. Next canonical step
+## 10. Qualification evidence
+
+- qualified implementation/closeout SHA: `01824d6488a14d74d86ea6f1c6c8a4ecbd45d878`;
+- qualification base/main at run time: `f32a9c322e085634e47f20b84861338811198454`;
+- Compute Market Qualification: **#418** / run `37418605649` / job `112122702586` — **SUCCESS**;
+- exact-head checkout and SHA verification — PASS;
+- Compute Market contracts build — PASS;
+- retained `Compute*.t.sol` suite — PASS;
+- verification-script compilation — PASS;
+- retained CMP-4.1–CMP-4.5 verifiers — PASS;
+- CMP-4.6 result-provenance verifier — PASS;
+- Level 1 — PASS;
+- first CMP-4 Level 2 integration milestone — PASS;
+- Level 3 — deferred to CMP-4.10.
+
+Durable evidence: [CMP-4.6 qualification evidence](CMP-4.6-QUALIFICATION-EVIDENCE.md).
+
+## 11. Next canonical step
 
 **CMP-4.7 — Scientific metadata and lineage**

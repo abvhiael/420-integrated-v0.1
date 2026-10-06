@@ -131,7 +131,7 @@ func TestPrivateSearchPagination(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		if _, err := s.Send(ctx, "alice.420", SendRequest{
 			IdempotencyKey: "page-search-" + string(rune('a'+i)),
-			Sender: "alice.420", Recipient: "bob.420", Subject: "Searchable", Body: "body", Source: ServiceID,
+			Sender:         "alice.420", Recipient: "bob.420", Subject: "Searchable", Body: "body", Source: ServiceID,
 		}); err != nil {
 			t.Fatal(err)
 		}

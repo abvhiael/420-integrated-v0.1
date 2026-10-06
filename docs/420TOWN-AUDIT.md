@@ -1455,3 +1455,5 @@ PR #523 remains open and unmerged.
 **TOWN-AUDIT-9 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.
+
+<!-- TOWN-AUDIT-10 reconciliation refresh -->

@@ -40,9 +40,9 @@ type ErrorEnvelope struct {
 }
 
 type Envelope[T any] struct {
-	Version    string        `json:"version"`
-	Data       T             `json:"data"`
-	RateLimit  RateLimitMeta `json:"rate_limit"`
+	Version   string        `json:"version"`
+	Data      T             `json:"data"`
+	RateLimit RateLimitMeta `json:"rate_limit"`
 }
 
 type RateLimitMeta struct {
@@ -83,9 +83,9 @@ type Asset struct {
 }
 
 type UploadPreconditions struct {
-	AgreementID            string `json:"agreement_id"`
-	CapacityReservationID  string `json:"capacity_reservation_id"`
-	CommitmentID           string `json:"commitment_id"`
+	AgreementID           string `json:"agreement_id"`
+	CapacityReservationID string `json:"capacity_reservation_id"`
+	CommitmentID          string `json:"commitment_id"`
 }
 
 type PrepareUploadRequest struct {
@@ -129,14 +129,14 @@ type Livestream struct {
 }
 
 type CreateLivestreamRequest struct {
-	ID            string `json:"id"`
-	Controller    string `json:"controller"`
-	ProfileID     string `json:"profile_id,omitempty"`
-	Protocol      string `json:"protocol"`
-	Direction     string `json:"direction"`
-	Endpoint      string `json:"endpoint"`
-	CredentialRef string `json:"credential_ref,omitempty"`
-	StreamRef     string `json:"stream_ref"`
+	ID                 string `json:"id"`
+	Controller         string `json:"controller"`
+	ProfileID          string `json:"profile_id,omitempty"`
+	Protocol           string `json:"protocol"`
+	Direction          string `json:"direction"`
+	Endpoint           string `json:"endpoint"`
+	CredentialRef      string `json:"credential_ref,omitempty"`
+	StreamRef          string `json:"stream_ref"`
 	MaxDurationSeconds uint32 `json:"max_duration_seconds,omitempty"`
 }
 
@@ -202,17 +202,17 @@ type SigningIntent struct {
 }
 
 type Capabilities struct {
-	ServiceID       string            `json:"service_id"`
-	APIVersion      string            `json:"api_version"`
-	Compatibility  int               `json:"compatibility_major"`
-	Canonical      bool              `json:"canonical"`
-	Features       map[string]bool   `json:"features"`
-	Resources      []string          `json:"resources"`
-	WalletSigning  string            `json:"wallet_signing"`
-	Pagination     string            `json:"pagination"`
-	Timestamps     string            `json:"timestamps"`
-	MaxPageLimit   int               `json:"max_page_limit"`
-	Errors         []ErrorCode       `json:"error_codes"`
+	ServiceID     string          `json:"service_id"`
+	APIVersion    string          `json:"api_version"`
+	Compatibility int             `json:"compatibility_major"`
+	Canonical     bool            `json:"canonical"`
+	Features      map[string]bool `json:"features"`
+	Resources     []string        `json:"resources"`
+	WalletSigning string          `json:"wallet_signing"`
+	Pagination    string          `json:"pagination"`
+	Timestamps    string          `json:"timestamps"`
+	MaxPageLimit  int             `json:"max_page_limit"`
+	Errors        []ErrorCode     `json:"error_codes"`
 }
 
 type Compatibility struct {

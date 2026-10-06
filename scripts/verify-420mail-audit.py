@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -54,6 +54,12 @@ if profile_path.is_file():
     if search.get("bodySearch")!="ON_DEMAND_PRIVATE_BLOB": errors.append("MAIL-2.4 body-search boundary drifted")
     if search.get("maxQueryBytes")!=256 or search.get("maxScanItems")!=500 or search.get("maxPageSize")!=100: errors.append("MAIL-2.4 search bounds drifted")
     if search.get("permanentlyDeletedExcluded") is not True: errors.append("MAIL-2.4 deleted-mail search policy drifted")
+    rules=profile.get("rulesEngine",{})
+    if rules.get("enabled") is not True or rules.get("ownerScoped") is not True or rules.get("appliesTo")!="INCOMING_RECIPIENT_COPY": errors.append("MAIL-2.5 rule scope drifted")
+    if rules.get("conditions")!=["sender_equals","content_contains","source_equals"] or rules.get("conditionsCombine")!="AND": errors.append("MAIL-2.5 rule conditions drifted")
+    if rules.get("allowedActionFolders")!=["INBOX","ARCHIVE","JUNK","TRASH"]: errors.append("MAIL-2.5 rule folder authority drifted")
+    if rules.get("maxRulesPerUser")!=100 or rules.get("maxRuleNameBytes")!=80 or rules.get("maxContentMatchBytes")!=256 or rules.get("maxActionLabels")!=20: errors.append("MAIL-2.5 rule bounds drifted")
+    if rules.get("atomicWithDelivery") is not True or rules.get("publicIndexing") is not False: errors.append("MAIL-2.5 rule delivery/privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -88,6 +94,14 @@ for token in ["SearchRequest","SearchResult","SearchMailbox","MaxSearchQueryByte
     if token not in search_src: errors.append("MAIL-2.4 private search invariant missing: "+token)
 for token in ['"/v1/search"',"SearchMailbox"]:
     if token not in http: errors.append("MAIL-2.4 HTTP/client search surface missing: "+token)
+rules_src=(ROOT/"mail/rules.go").read_text() if (ROOT/"mail/rules.go").is_file() else ""
+for token in ["RuleCondition","RuleAction","MailRule","RuleInput","CreateRule","UpdateRule","DeleteRule","applyIncomingRules","ruleMatches","StopProcessing","MaxUserRules","ErrRuleConflict"]:
+    if token not in rules_src: errors.append("MAIL-2.5 rules invariant missing: "+token)
+for token in ['"/v1/rules"',"CreateRule","UpdateRule","DeleteRule"]:
+    if token not in http: errors.append("MAIL-2.5 HTTP rules surface missing: "+token)
+client=(ROOT/"mail/client/client.go").read_text() if (ROOT/"mail/client/client.go").is_file() else ""
+for token in ["ListRules","CreateRule","UpdateRule","DeleteRule"]:
+    if token not in client: errors.append("MAIL-2.5 client rules surface missing: "+token)
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)
@@ -102,4 +116,5 @@ print("MAIL-2.1 mailbox state model: qualified by app-scoped checks")
 print("MAIL-2.2 durable mail storage: qualified by app-scoped checks")
 print("MAIL-2.3 labels and custom folders: qualified by app-scoped checks")
 print("MAIL-2.4 private mail search: qualified by app-scoped checks")
+print("MAIL-2.5 user filters and rules engine: qualified by app-scoped checks")
 

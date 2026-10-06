@@ -102,7 +102,7 @@ Level 2 is not required again at CMP-4.7. Level 3 remains CMP-4.10.
 
 ## Intentionally deferred
 
-- publication / retention policy — CMP-4.8;
+- CMP-4.8 now owns publication and retention policy over canonical CMP-4.7 lineage records;
 - research dashboard — CMP-4.9;
 - comprehensive Level 3 scientific-framework closeout — CMP-4.10;
 - SDK/API/indexer expansion — CMP-7;

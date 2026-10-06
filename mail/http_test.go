@@ -326,7 +326,7 @@ func TestHTTPRulesRejectInvalidTargetsAndUnknownFields(t *testing.T) {
 	}
 
 	req := httptest.NewRequest(http.MethodPost, "/v1/rules", bytes.NewBufferString(`{"name":"x","condition":{"sender_equals":"alice.420"},"action":{"starred":true},"unexpected":1}`))
-	req.Header.Set("Authorization", "bob.420")
+	req.Header.Set("X-Test-Actor", "bob.420")
 	recorder := httptest.NewRecorder()
 	h.ServeHTTP(recorder, req)
 	if recorder.Code != http.StatusBadRequest {

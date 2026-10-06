@@ -22,32 +22,32 @@ var (
 )
 
 type RuleCondition struct {
-	SenderEquals   string `json:"sender_equals,omitempty"`
+	SenderEquals    string `json:"sender_equals,omitempty"`
 	ContentContains string `json:"content_contains,omitempty"`
-	SourceEquals   string `json:"source_equals,omitempty"`
+	SourceEquals    string `json:"source_equals,omitempty"`
 }
 
 type RuleAction struct {
-	Folder          *MailboxFolder `json:"folder,omitempty"`
-	AddLabelIDs     []string       `json:"add_label_ids,omitempty"`
-	CustomFolderID  *string        `json:"custom_folder_id,omitempty"`
-	MarkRead        *bool          `json:"mark_read,omitempty"`
-	Starred         *bool          `json:"starred,omitempty"`
-	Pinned          *bool          `json:"pinned,omitempty"`
-	Muted           *bool          `json:"muted,omitempty"`
-	StopProcessing  bool           `json:"stop_processing,omitempty"`
+	Folder         *MailboxFolder `json:"folder,omitempty"`
+	AddLabelIDs    []string       `json:"add_label_ids,omitempty"`
+	CustomFolderID *string        `json:"custom_folder_id,omitempty"`
+	MarkRead       *bool          `json:"mark_read,omitempty"`
+	Starred        *bool          `json:"starred,omitempty"`
+	Pinned         *bool          `json:"pinned,omitempty"`
+	Muted          *bool          `json:"muted,omitempty"`
+	StopProcessing bool           `json:"stop_processing,omitempty"`
 }
 
 type MailRule struct {
-	ID         string        `json:"id"`
-	Owner      string        `json:"owner"`
-	Name       string        `json:"name"`
-	Enabled    bool          `json:"enabled"`
-	Priority   int           `json:"priority"`
-	Condition  RuleCondition `json:"condition"`
-	Action     RuleAction    `json:"action"`
-	CreatedAt  time.Time     `json:"created_at"`
-	UpdatedAt  time.Time     `json:"updated_at"`
+	ID        string        `json:"id"`
+	Owner     string        `json:"owner"`
+	Name      string        `json:"name"`
+	Enabled   bool          `json:"enabled"`
+	Priority  int           `json:"priority"`
+	Condition RuleCondition `json:"condition"`
+	Action    RuleAction    `json:"action"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
 }
 
 type RuleInput struct {

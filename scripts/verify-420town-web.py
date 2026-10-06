@@ -38,9 +38,11 @@ need(cfg.get("content",{}).get("idempotencyRequired") is True,"web content idemp
 auth=cfg.get("authority",{})
 need(auth.get("source")=="TownAuthority420","web authority source drift")
 need(auth.get("walletRequired") is True and auth.get("networkValidation") is True and auth.get("targetPinning") is True,"authority execution gates weakened")
+need(auth.get("communityKeyModel")=="EXPLICIT_BYTES32","authority community key model drift")
+need(auth.get("inferFromApplicationObjectId") is False,"web must not infer authority key from application ObjectID")
 need(set(["community","membership","subscription","entitlement"]).issubset(set(auth.get("reads",[]))),"authority read state inventory incomplete")
 need(set(["createCommunity","joinCommunity","leaveCommunity","removeMember","assignRole","activateSubscription","grantEntitlement"]).issubset(set(auth.get("writes",[]))),"authority write inventory incomplete")
-need(len(cfg.get("invariants",[]))>=14,"Town web invariant inventory incomplete")
+need(len(cfg.get("invariants",[]))>=15,"Town web invariant inventory incomplete")
 
 need(runtime.get("schema")=="420-town-web-runtime-v1","runtime config schema drift")
 need(runtime.get("site",{}).get("productionOrigin")=="https://town.420integrated.org","runtime production origin drift")
@@ -50,11 +52,11 @@ for token in ["apikey","privatekey","credential","secret","password","authorizat
 need(runtime.get("features",{}).get("authorityTransactions") is False,"repository production config must fail closed until network/authority materialized")
 need(runtime_example.get("features",{}).get("authorityTransactions") is True,"runtime example must demonstrate authority transaction materialization")
 
-for token in ["discover-form","join-community","leave-community","post-form","thread-form","comment-form","report-form","moderate-form","appeal-form","admin-form","access-form","aria-live","transaction-status"]:
+for token in ["discover-form","authority-community-key","join-community","leave-community","post-form","thread-form","comment-form","report-form","moderate-form","appeal-form","admin-form","access-form","aria-live","transaction-status"]:
     need(token in html,f"Town web missing UI surface {token}")
 for token in ["@media","focus-visible","prefers-reduced-motion"]:
     need(token in styles,f"Town web accessibility/responsive stylesheet missing {token}")
-for token in ["discoverCommunities","service.feed","service.createPost","service.createThread","service.createComment","service.vote","service.report","service.moderate","service.appeal","readSubscription","readEntitlement","encodeJoin","encodeLeave","encodeCreate","encodeRemoveMember","encodeAssignRole"]:
+for token in ["authorityKey","discoverCommunities","service.feed","service.createPost","service.createThread","service.createComment","service.vote","service.report","service.moderate","service.appeal","readSubscription","readEntitlement","encodeJoin","encodeLeave","encodeCreate","encodeRemoveMember","encodeAssignRole"]:
     need(token in app,f"Town web controller missing {token}")
 need("localStorage" not in app and "sessionStorage" not in app,"Town web must not persist session token")
 need("innerHTML" not in app,"Town web dynamic rendering must avoid innerHTML")

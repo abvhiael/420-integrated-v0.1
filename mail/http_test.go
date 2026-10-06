@@ -249,7 +249,6 @@ func TestHTTPPrivateSearchRejectsInvalidInput(t *testing.T) {
 	}
 }
 
-
 func TestHTTPRulesCRUDAndDeliveryApplication(t *testing.T) {
 	h, s, _ := testHTTPHandler(t)
 	archive := FolderArchive

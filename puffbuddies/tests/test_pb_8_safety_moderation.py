@@ -82,6 +82,17 @@ class PB8SafetyTests(unittest.TestCase):
   pair=PairRelationship(ProfileId("alice"),ProfileId("bob"),RelationshipState.BLOCKED,2)
   self.assertEqual(pair.state,RelationshipState.BLOCKED)
 
+ def test_appeal_adjudication_requires_appeals_or_senior_authority(self):
+  c=advance_case(self.case(),target=ModerationState.TRIAGED,actor_id="t",role=ModeratorRole.TRIAGE)
+  c=advance_case(c,target=ModerationState.REVIEWING,actor_id="m",role=ModeratorRole.MODERATOR)
+  c=apply_action(c,self.profile(),action=SafetyAction.WARNING,actor_id="m",
+   role=ModeratorRole.MODERATOR,current_generation=2,human_reviewed=True).case
+  c=request_appeal(c,subject_profile_id=ProfileId("bob"))
+  with self.assertRaises(SafetyDenied):
+   no_action(c,actor_id="ordinary",role=ModeratorRole.MODERATOR)
+  resolved=no_action(c,actor_id="appeals",role=ModeratorRole.APPEALS)
+  self.assertEqual(resolved.state,ModerationState.NO_ACTION)
+
  def test_no_action_does_not_remove_independent_block(self):
   c=advance_case(self.case(),target=ModerationState.TRIAGED,actor_id="t",role=ModeratorRole.TRIAGE)
   resolved=no_action(c,actor_id="m",role=ModeratorRole.MODERATOR)

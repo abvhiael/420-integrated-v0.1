@@ -1454,6 +1454,24 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** authoritative outage fails closed; stale/conflicting replicas and stale restores are rejected; optimistic concurrency protects newer eligibility state; partial failure is not publishable success; rollback uses known-good state; recovered state remains policy/expiry constrained; raw identity/proof and privacy leakage remain rejected; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records results.
 
+### PB-2.13 — PB-2 Integration Milestone — Level 2
+
+**Purpose:** qualify PB-2.1 through PB-2.12 as one accumulated PuffBuddies integration boundary before phase closeout.
+
+**Canonical requirements:** authoritative verification and privacy-preserving proof paths converge on the canonical minimum-disclosure eligibility state; persisted eligibility reload preserves sequence/time/policy authority; full eligibility records bind into authorization; current two-party eligibility gates discovery/matching and current MATCHED + eligibility gates messaging; revocation/expiry/policy drift fail closed and invalidate stale derived discovery/matching/messaging authority; restore cannot resurrect pre-revocation eligibility; lifecycle/block/relationship restrictions remain independently restrictive; PB-2 privacy/anti-oracle guarantees survive integrated flows; retained PB-2.11 adversarial and PB-2.12 failure/recovery coverage remains green; the complete retained PuffBuddies test inventory plus dedicated PB-2.13 integration suite and public-chain/raw-identity negative gate must pass on one exact implementation SHA.
+
+**Qualification level:** Level 2 — app integration milestone qualification.
+
+**Current-main inspection:** current `main` advanced from PR base `23ebff000a471bfbc4439894f797f3b17a530867` to `721a7f358e802bce91835851721eb93c4340f501`. The entire divergence is Compute Market/contracts/global-CI material with no PuffBuddies files or shared PuffBuddies authority overlap, so no ceremonial Level-2 reconciliation commit is required.
+
+**Level-3 boundary:** canonical full Solidity, Genesis/address-authority, 420 Integrated/global, Geth/fault/soak, repository-wide Docs/global reconciliation, deployment/config verification and unrelated app qualification remain **PB-2.14 — PB-2 Phase Closeout — Level 3** where applicable.
+
+**Affected components:** `puffbuddies/tests/test_pb_2_13_integration.py`, PB-2 workflow, canonical milestone definition/evidence.
+
+**Dependencies:** PB-2.1 through PB-2.12 COMPLETE; retained PB-0/PB-1 foundations.
+
+**Exit criteria:** all accumulated integration requirements pass; complete retained PuffBuddies inventory and dedicated PB-2.13 integration suite pass on one exact SHA; privacy/public-chain negative gate passes; main divergence is documented as reconciled or non-overlapping; durable Level-2 evidence is recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

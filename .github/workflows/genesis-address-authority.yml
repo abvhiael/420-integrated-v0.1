@@ -19,6 +19,7 @@ on:
       - '.github/workflows/genesis-address-authority.yml'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
+      - 'docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md'
   pull_request:
     paths:
       - 'contracts/config/**'

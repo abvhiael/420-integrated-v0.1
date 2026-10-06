@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -48,6 +48,12 @@ if profile_path.is_file():
     if org.get("userLabels") is not True or org.get("customFolders") is not True or org.get("bulkAssignment") is not True: errors.append("MAIL-2.3 organization capability drifted")
     if org.get("systemLabels")!=["STARRED","PINNED","MUTED","UNREAD"]: errors.append("MAIL-2.3 system labels drifted")
     if org.get("ownerScoped") is not True or org.get("systemLabelsImmutable") is not True: errors.append("MAIL-2.3 organization authorization drifted")
+    search=profile.get("privateSearch",{})
+    if search.get("enabled") is not True or search.get("ownerScoped") is not True: errors.append("MAIL-2.4 private search capability drifted")
+    if search.get("publicIndexing") is not False or search.get("public420SearchIntegration") is not False: errors.append("MAIL-2.4 exposed private mail to public search")
+    if search.get("bodySearch")!="ON_DEMAND_PRIVATE_BLOB": errors.append("MAIL-2.4 body-search boundary drifted")
+    if search.get("maxQueryBytes")!=256 or search.get("maxScanItems")!=500 or search.get("maxPageSize")!=100: errors.append("MAIL-2.4 search bounds drifted")
+    if search.get("permanentlyDeletedExcluded") is not True: errors.append("MAIL-2.4 deleted-mail search policy drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -77,6 +83,11 @@ for token in ["LabelDefinition","CustomFolder","BulkOrganizationRequest","Create
     if token not in organization: errors.append("MAIL-2.3 organization invariant missing: "+token)
 for token in ['"/v1/labels"','"/v1/custom-folders"','"/v1/organization/bulk"','"organization"']:
     if token not in http: errors.append("MAIL-2.3 HTTP route missing: "+token)
+search_src=(ROOT/"mail/search.go").read_text() if (ROOT/"mail/search.go").is_file() else ""
+for token in ["SearchRequest","SearchResult","SearchMailbox","MaxSearchQueryBytes","MaxSearchScanItems","Blobs.GetPrivate","state.Owner != actor","state.DeletedAt != nil"]:
+    if token not in search_src: errors.append("MAIL-2.4 private search invariant missing: "+token)
+for token in ['"/v1/search"',"SearchMailbox"]:
+    if token not in http: errors.append("MAIL-2.4 HTTP/client search surface missing: "+token)
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)
@@ -90,4 +101,5 @@ print("Genesis catalog promoted: false")
 print("MAIL-2.1 mailbox state model: qualified by app-scoped checks")
 print("MAIL-2.2 durable mail storage: qualified by app-scoped checks")
 print("MAIL-2.3 labels and custom folders: qualified by app-scoped checks")
+print("MAIL-2.4 private mail search: qualified by app-scoped checks")
 

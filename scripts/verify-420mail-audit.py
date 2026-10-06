@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/spam.go","mail/spam_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -40,7 +40,7 @@ if profile_path.is_file():
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
     store=profile.get("metadataStore",{})
     if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
-    if store.get("schemaVersion")!=4 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("schemaVersion")!=5 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
     if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder"]: errors.append("Mail durable store index drifted")
     if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
     if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
@@ -67,6 +67,15 @@ if profile_path.is_file():
     if trust.get("requireTrustedMode") is not True or trust.get("identityApplicationBlockPrecedence")!="ABSOLUTE": errors.append("MAIL-2.6 allow/block precedence drifted")
     if trust.get("trustedIdentityApplicationBypassesPhraseBlock") is not True or trust.get("muteSuppressesNotification") is not True or trust.get("muteMarksRecipientCopy") is not True: errors.append("MAIL-2.6 trust behavior drifted")
     if trust.get("idempotentReplayPreserved") is not True or trust.get("atomicDeliveryRecheck") is not True or trust.get("publicIndexing") is not False: errors.append("MAIL-2.6 trust safety/privacy drifted")
+    spam=profile.get("spamProtection",{})
+    if spam.get("enabled") is not True or spam.get("ownerScopedReputation") is not True: errors.append("MAIL-2.7 spam protection scope drifted")
+    if spam.get("reputationInputs")!=["spam_reports","phishing_reports","false_positive_releases"]: errors.append("MAIL-2.7 reputation inputs drifted")
+    if spam.get("duplicateFingerprintDetection") is not True or spam.get("duplicateThreshold")!=4: errors.append("MAIL-2.7 duplicate defense drifted")
+    if spam.get("phishingHeuristics")!=["url_userinfo","ip_literal_link","punycode_link","insecure_http_link","credential_or_urgency_lure_with_link"] or spam.get("phishingQuarantineScore")!=3: errors.append("MAIL-2.7 phishing defense drifted")
+    if spam.get("automaticQuarantineFolder")!="JUNK" or spam.get("quarantineMutesRecipientCopy") is not True or spam.get("quarantineSuppressesNotification") is not True: errors.append("MAIL-2.7 quarantine semantics drifted")
+    if spam.get("explicitReleaseRequiredForInboxRestore") is not True or spam.get("trustedIdentityApplicationBypassesSpamSignals") is not True or spam.get("trustedIdentityApplicationBypassesPhishing") is not False: errors.append("MAIL-2.7 trust/quarantine precedence drifted")
+    if spam.get("abuseReportKinds")!=["SPAM","PHISHING"] or spam.get("oneAbuseReportPerOwnerMessage") is not True: errors.append("MAIL-2.7 abuse-report semantics drifted")
+    if spam.get("publicIndexing") is not False or spam.get("messageBodiesPersisted") is not False: errors.append("MAIL-2.7 spam privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -118,6 +127,18 @@ for token in ["ListTrustEntries","PutTrustEntry","DeleteTrustEntry","GetTrustSet
     if token not in client: errors.append("MAIL-2.6 client trust surface missing: "+token)
 for token in ["evaluateTrustPolicy","recipientMuted","!recipientMuted"]:
     if token not in service: errors.append("MAIL-2.6 delivery trust integration missing: "+token)
+spam_src=(ROOT/"mail/spam.go").read_text() if (ROOT/"mail/spam.go").is_file() else ""
+for token in ["SenderReputation","AbuseReport","QuarantineRecord","ReportAbuse","ReleaseQuarantine","evaluateSpamProtection","recordDeliveryProtection","phishingSignals","spamFingerprint","ErrQuarantineReview","AbuseSpam","AbusePhishing","DuplicateSpamThreshold","PhishingQuarantineScore"]:
+    if token not in spam_src: errors.append("MAIL-2.7 spam-protection invariant missing: "+token)
+for token in ['"/v1/quarantine"','"/v1/reputation/"','"abuse"',"ReportAbuse","ReleaseQuarantine"]:
+    if token not in http: errors.append("MAIL-2.7 HTTP protection surface missing: "+token)
+for token in ["ListQuarantine","ReleaseQuarantine","ReportAbuse","GetSenderReputation"]:
+    if token not in client: errors.append("MAIL-2.7 client protection surface missing: "+token)
+for token in ["evaluateSpamProtection","recordDeliveryProtection","protection.Quarantine","FolderJunk"]:
+    if token not in service: errors.append("MAIL-2.7 delivery protection integration missing: "+token)
+web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
+if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
+
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)
@@ -134,4 +155,5 @@ print("MAIL-2.3 labels and custom folders: qualified by app-scoped checks")
 print("MAIL-2.4 private mail search: qualified by app-scoped checks")
 print("MAIL-2.5 user filters and rules engine: qualified by app-scoped checks")
 print("MAIL-2.6 blocklists allowlists and trust controls: qualified by app-scoped checks")
+print("MAIL-2.7 spam junk and phishing protection: qualified by app-scoped checks")
 

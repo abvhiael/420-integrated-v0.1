@@ -26,7 +26,7 @@ func TestIdentityAwareLivestreamControllerFlow(t *testing.T) {
 	svc := serviceFixture(t, driver, streamAuthority, FixedFeatureGate{Livestreaming: true})
 	actorAuth := &actorAuthorizerFake{}
 	actor := authority.Actor{
-		Wallet: "0x1111111111111111111111111111111111111111",
+		Wallet:    "0x1111111111111111111111111111111111111111",
 		ProfileID: streamRef(9),
 	}
 	created, err := svc.CreateForActor(context.Background(), actorAuth, actor, sessionSpec())

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -207,5 +208,44 @@ func TestHTTPOrganizationOwnershipAndSystemLabelProtection(t *testing.T) {
 	rec = performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/organization", "bob.420", OrganizationUpdate{AddLabelIDs: []string{aliceLabel.ID}})
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("cross-owner label assignment status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+
+func TestHTTPPrivateSearch(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/search", "bob.420", SearchRequest{Query: "hello"})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("search status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var out SearchResult
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Items) != 1 || out.Items[0].Message.ID != id {
+		t.Fatalf("search payload mismatch: %+v", out)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/search", "mallory.420", SearchRequest{Query: "hello"})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("foreign search status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Items) != 0 {
+		t.Fatalf("foreign search leaked mailbox data: %+v", out)
+	}
+}
+
+func TestHTTPPrivateSearchRejectsInvalidInput(t *testing.T) {
+	h, _, _ := testHTTPHandler(t)
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/search", "bob.420", SearchRequest{Query: strings.Repeat("x", MaxSearchQueryBytes+1)})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("oversized search status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/search", "bob.420", nil)
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("search method status=%d body=%s", rec.Code, rec.Body.String())
 	}
 }

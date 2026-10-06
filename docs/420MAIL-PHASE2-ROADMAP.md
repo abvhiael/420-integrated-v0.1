@@ -54,11 +54,11 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 ## Milestones
 
 - **Mailbox foundation milestone:** MAIL-2.1 through MAIL-2.10 — **COMPLETE, Level 2 PASS** on qualified implementation SHA `a8b646134893a9c07a35e1cc998d8d397c449059`; durable evidence: `docs/audit/420MAIL-MAILBOX-FOUNDATION-MILESTONE-QUALIFICATION.md`.
-- **Wallet-native identity milestone:** MAIL-2.11 through MAIL-2.14.
+- **Wallet-native identity milestone:** MAIL-2.11 through MAIL-2.14 — **COMPLETE, Level 2 PASS** on qualified implementation SHA `aa299b706ff2739e9e010f1140c435af3fdd0218`; durable evidence: `docs/audit/420MAIL-WALLET-NATIVE-IDENTITY-MILESTONE-QUALIFICATION.md`.
 - **External bridge milestone:** MAIL-2.15 through MAIL-2.29.
 - **Product/security milestone:** MAIL-2.30 through MAIL-2.35.
 - **Phase closeout:** MAIL-2.36 through MAIL-2.40, with Level 3 only at the applicable complete app-phase closeout.
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model** through **MAIL-2.13 — Wallet Functions Inside Mail** are COMPLETE at Level 1. The **Mailbox Foundation milestone (MAIL-2.1–MAIL-2.10)** remains COMPLETE at Level 2. The **Wallet-native identity milestone (MAIL-2.11–MAIL-2.14)** is in progress; retained Level 2 qualification is due at MAIL-2.14 unless an earlier material shared-dependency change requires it. Durable evidence: `docs/audit/420MAIL-MAIL-2.11-QUALIFICATION.md`, `docs/audit/420MAIL-MAIL-2.12-QUALIFICATION.md`, and `docs/audit/420MAIL-MAIL-2.13-QUALIFICATION.md`. **MAIL-2.14 — External Integrations Framework** is the active canonical Phase 2 step.
+**MAIL-2.1 — Mailbox State Model** through **MAIL-2.14 — External Integrations Framework** are COMPLETE at Level 1. The **Mailbox Foundation milestone (MAIL-2.1–MAIL-2.10)** remains COMPLETE at Level 2. The **Wallet-native identity milestone (MAIL-2.11–MAIL-2.14)** is COMPLETE at Level 2 on qualified implementation SHA `aa299b706ff2739e9e010f1140c435af3fdd0218`; durable milestone evidence: `docs/audit/420MAIL-WALLET-NATIVE-IDENTITY-MILESTONE-QUALIFICATION.md`. Step evidence: `docs/audit/420MAIL-MAIL-2.11-QUALIFICATION.md`, `docs/audit/420MAIL-MAIL-2.12-QUALIFICATION.md`, `docs/audit/420MAIL-MAIL-2.13-QUALIFICATION.md`, and `docs/audit/420MAIL-MAIL-2.14-QUALIFICATION.md`. **MAIL-2.15 — Discord Account Linking** is the active canonical Phase 2 step.

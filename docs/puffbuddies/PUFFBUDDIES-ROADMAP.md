@@ -822,7 +822,58 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.19 — Master implementation roadmap
 
-Reconcile PB-1 through launch against the complete PB-0 architecture.
+**Purpose:** reconcile PB-1 through launch against the complete PB-0 architecture and establish the canonical implementation order without claiming that future runtime phases are already implemented.
+
+**Canonical requirements:**
+
+1. Record PB-ROADMAP-001 through PB-ROADMAP-024.
+2. Define ordered implementation phases from PB-1 through launch.
+3. Map every future phase back to the PB-0 authority/invariant families it must preserve.
+4. Keep adult eligibility, privacy, consent, lifecycle, safety, matching, cannabis, visibility, deletion, dependency, and non-goal constraints release-gating.
+5. Preserve PuffBuddies ownership of relationship/lifecycle/safety authority and bounded dependency authority.
+6. Keep public-chain use minimal and prevent public membership/relationship/cannabis/safety leakage.
+7. Require mutual authorized intent before ordinary private messaging and preserve block/unmatch/revocation supremacy.
+8. Require deletion-aware caches, indexes, analytics, notifications, workers, and derived services.
+9. Keep Search/Explorer/Indexer/Analytics and other derived surfaces non-canonical.
+10. Keep PB-0.17 repository paths reserved until their implementation phases actually create them.
+11. Separate baseline safety/account-exit capabilities from premium/convenience features.
+12. Keep post-MVP deferrals distinct from categorical PB-0.16 prohibitions.
+13. Define phase-specific implementation, testing, security, integration, documentation, and evidence gates.
+14. Define app-specific Level 2 milestones at meaningful convergence points without renumbering canonical phases.
+15. Reserve Level 3 comprehensive current-main reconciliation for complete phase closeout/release boundaries.
+16. Require exact-SHA evidence for implementation-bearing phases.
+17. Require dependency adapters to fail closed on stale/revoked authority.
+18. Require private-state migration/backfill/restore paths to preserve deletion, visibility, consent, and lifecycle revocation.
+19. Require launch readiness to include operational privacy/safety/deletion/incident/rollback controls, not merely feature completion.
+20. Prevent roadmap items from silently manufacturing fixed addresses, service IDs, deployments, or integrations before their canonical authority exists.
+21. Define testnet/external prerequisites explicitly where future qualification cannot be completed repository-only.
+22. Define change control for future roadmap edits against PB-0 invariants.
+23. Make PB-0.20 the PB-0 phase closeout gate before PB-1 implementation begins.
+24. Record durable exact-SHA Level 1 qualification evidence for PB-0.19.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.19-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.19 defines future Level 2 milestone boundaries but is not itself a Level 2 integration milestone because it introduces no runtime/shared integration behavior.
+
+**Dependencies:** PB-0.1 through PB-0.18 must remain COMPLETE and machine-verifiable.
+
+**Exit criteria:**
+
+- PB-ROADMAP-001 through PB-ROADMAP-024 exist exactly once and in sequence;
+- ordered PB-1-through-launch phases are defined with PB-0 authority mappings;
+- implementation/test/security/integration/docs/evidence gates are defined for future phases;
+- Level 2 milestone boundaries and Level 3 closeout ownership are explicit;
+- PB-0 prohibitions and release-gating invariants cannot be silently weakened by future roadmap work;
+- no future runtime/deployment/address/service-ID state is falsely claimed;
+- exact-head app-scoped PB-0.19 qualification passes;
+- durable evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.20 — PB-0 qualification and formal closeout
 

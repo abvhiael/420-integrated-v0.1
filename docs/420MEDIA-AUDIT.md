@@ -138,7 +138,7 @@ Indexer: **PARTIAL**. The audit branch now includes an app-scoped operator capab
 
 Upload: **COMPLETE (Level 1)** on the audit branch. Media now owns a 420Storage-backed video asset lifecycle with exact object/precondition binding, ingest receipt validation, canonical sealed/retrievable manifest gating, derivative linkage, visibility/privacy handling, delete fail-closed semantics and retry recovery. Bong Goggles remains separate.
 
-Livestreaming: **IMPLEMENTED / pending Level 2 exact-head qualification** on the audit branch. Media now owns create/start/stop/status flows over the existing gateway, canonical `MediaStreamRegistry420` controller reads, feature-flag enforcement, bounded credential/session inputs, durable desired-state persistence, bounded reconnect semantics and restart recovery. Public `/v1` API/UI remain later roadmap work.
+Livestreaming: **COMPLETE (Level 2 milestone)** on the audit branch. Media now owns create/start/stop/status flows over the existing gateway, canonical `MediaStreamRegistry420` controller reads, feature-flag enforcement, bounded credential/session inputs, durable desired-state persistence, bounded reconnect semantics and restart recovery. Public `/v1` API/UI remain later roadmap work.
 
 ## Builds and tests
 
@@ -153,6 +153,8 @@ The audit branch adds a dedicated exact-head Media audit workflow and repository
 MEDIA-AUDIT-3 qualification evidence: `docs/audit/420MEDIA-AUDIT-3-QUALIFICATION.md`, implementation SHA `e0d938cd78a92a6c28ff88c641c9f3b332ffba20`, workflow run `37497230251` PASS.
 
 MEDIA-AUDIT-4 qualification evidence: `docs/audit/420MEDIA-AUDIT-4-QUALIFICATION.md`, implementation SHA `14f87ce68fe9d7a0cc81654e2d86b915a08a285f`, workflow run `37500397201` PASS.
+
+MEDIA-AUDIT-5 qualification evidence: `docs/audit/420MEDIA-AUDIT-5-QUALIFICATION.md`, implementation SHA `6833ed362214f453bfe0fb224424e7f09c7eb1f9`, workflow run `37503557911` PASS (Level 2).
 
 ## Documentation audit
 
@@ -185,7 +187,7 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | live transport primitives | Phase 2 | WHIP/WHEP + RTMP/SRT abstractions | Go tests | Phase2 docs | PARTIAL | complete service/API/session composition |
 | operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + replay recovery + control-plane boundary on audit branch | Go discovery/control-plane tests + exact-head Media gate | Phase 3.1 discovery doc + qualification evidence | COMPLETE (Level 1) | later orchestration remains separate |
 | video uploads | GEN-SVC Media target | 420Storage v1 prepare/ingest + canonical manifest-gated Media asset lifecycle | Media Storage lifecycle tests + exact-head Media gate | Storage lifecycle doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
-| basic livestreaming | GEN-SVC + feature flag | create/start/stop/status service + canonical controller reader + feature gate + durable recovery/reconnect on audit branch | Media livestream/livegateway tests + accumulated Media suite | Livestream service doc | IMPLEMENTED / pending Level 2 qualification | qualify exact accumulated Media head |
+| basic livestreaming | GEN-SVC + feature flag | create/start/stop/status service + canonical controller reader + feature gate + durable recovery/reconnect on audit branch | Media livestream/livegateway tests + accumulated Level 2 Media suite | Livestream service doc + qualification evidence | COMPLETE (Level 2) | retain milestone regressions |
 | Identity integration | GEN-SVC registry | none | none | none | MISSING | implement scoped identity/profile boundary |
 | Rights integration | GEN-SVC registry | provenance ref only, no Rights binding | none | none | MISSING | implement Rights/provenance validation |
 | Storage integration | GEN-SVC registry | complete Storage object identity, canonical manifest readiness, derivative linkage, privacy/delete/retry semantics on audit branch | Media Storage lifecycle tests + exact-head Media gate | Storage lifecycle doc + qualification evidence | COMPLETE (Level 1) | retain canonical Storage authority; live deployment deferred |
@@ -195,7 +197,7 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | Compute integration | GEN-SVC registry | opaque provider ref only | limited | Phase1 doc | PARTIAL | canonical Compute Market coordination |
 | /v1 API | GEN-SVC-0.6 | absent | none | none | MISSING | implement typed stable API |
 | typed client/SDK | GEN-SVC-0.7 | absent | none | none | MISSING | implement Media SDK |
-| feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed for create/start/recovery; stop/status remain available for safe shutdown/inspection | GEN-SVC validator + Media livestream tests | GEN-SVC + Livestream docs | IMPLEMENTED / pending Level 2 qualification | UI enforcement remains MEDIA-AUDIT-10 |
+| feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed for create/start/recovery; stop/status remain available for safe shutdown/inspection | GEN-SVC validator + Media livestream tests + Level 2 Media gate | GEN-SVC + Livestream docs + qualification evidence | COMPLETE for service runtime (Level 2) | UI enforcement remains MEDIA-AUDIT-10 |
 | threat model application | GEN-SVC-0.9 | shared model only | no Media-specific suite | shared docs | PARTIAL | Media abuse/privacy/rights threat tests |
 | shared fixtures | GEN-SVC-0.10 | not used by Media | none | shared docs | MISSING | adopt canonical personas/journeys |
 | frontend | user-facing Genesis target | absent | none | none | MISSING | implement |

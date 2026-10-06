@@ -262,11 +262,12 @@ contract ComputeDatasetManifestRegistry420Test {
 
     function testCrossDatasetAndCommitmentReplayFailsClosed() public {
         bytes32 first = _register();
+        bytes32 projectCommitment = projects.currentCommitment(projectId);
         vm.prank(OWNER);
         bytes32 second = datasets.registerDataset(
             projectId,
             1,
-            projects.currentCommitment(projectId),
+            projectCommitment,
             CONTENT_A,
             SCHEMA_A,
             ACCESS_A,

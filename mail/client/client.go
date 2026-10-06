@@ -277,3 +277,28 @@ func (c Client) UpdateTrustSettings(ctx context.Context, requireTrusted bool) (m
 	err := c.do(ctx, http.MethodPut, "/v1/trust/settings", mail.TrustSettingsInput{RequireTrusted: requireTrusted}, &out)
 	return out, err
 }
+
+
+func (c Client) ListQuarantine(ctx context.Context) ([]mail.QuarantineRecord, error) {
+	var out []mail.QuarantineRecord
+	err := c.do(ctx, http.MethodGet, "/v1/quarantine", nil, &out)
+	return out, err
+}
+
+func (c Client) ReleaseQuarantine(ctx context.Context, messageID string) (mail.MailboxState, error) {
+	var out mail.MailboxState
+	err := c.do(ctx, http.MethodPost, "/v1/quarantine/"+url.PathEscape(messageID)+"/release", nil, &out)
+	return out, err
+}
+
+func (c Client) ReportAbuse(ctx context.Context, messageID string, kind mail.AbuseKind) (mail.AbuseReport, error) {
+	var out mail.AbuseReport
+	err := c.do(ctx, http.MethodPost, "/v1/messages/"+url.PathEscape(messageID)+"/abuse", mail.AbuseReportInput{Kind: kind}, &out)
+	return out, err
+}
+
+func (c Client) GetSenderReputation(ctx context.Context, sender string) (mail.SenderReputation, error) {
+	var out mail.SenderReputation
+	err := c.do(ctx, http.MethodGet, "/v1/reputation/"+url.PathEscape(sender), nil, &out)
+	return out, err
+}

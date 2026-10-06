@@ -1618,7 +1618,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** exact SETTLED evidence grants only approved bounded feature entitlements; non-settled/refunded/mismatched/stale evidence fails/revokes; policy/lifetime expiry revokes; private persistence has no payment/wallet linkage; lifecycle/block/consent/safety remain supreme; no purchased protected access exists; canonical Pay verifier passes unchanged; Level-1 targeted, retained PuffBuddies regressions and Level-2 payment-integration checks pass on one exact SHA; durable evidence recorded.
 
-### PB-11 — Web application
+### PB-11 — Web application — COMPLETE
 
 **Purpose:** implement the first complete user-facing PuffBuddies client as the canonical web-first MVP surface required by PB-0.2, while preserving the browser/client as presentation-only state.
 

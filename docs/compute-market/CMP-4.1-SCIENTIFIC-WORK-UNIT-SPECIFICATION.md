@@ -126,7 +126,7 @@ CMP-4.1 freezes the interface points required by later canonical steps:
 - **CMP-4.4 Dataset manifests:** now binds `datasetInputCommitment` to an exact current project-bound dataset manifest while leaving raw bytes and access authorization off-chain;
 - **CMP-4.5 Reproducible execution environments:** now resolves `executableContainerCommitment` to an exact current project-bound environment revision while CMP-0.4/CMP-3 retain execution authority;
 - **CMP-4.6 Result provenance:** now links the exact scientific unit to the canonical result-bearing attempt, receipt-bound execution evidence and verification decision through `ComputeScientificResultProvenance420`;
-- **CMP-4.7 Scientific metadata and lineage:** links derived units/results;
+- **CMP-4.7 Scientific metadata and lineage:** now attaches project-authenticated metadata commitments and parent-first derivation edges to exact CMP-4.6 provenance records;
 - **CMP-4.8 Publication / retention policy:** defines disclosure/retention semantics;
 - **CMP-4.9 Research dashboard:** consumes these records;
 - **CMP-4.10 Phase closeout:** performs the accumulated Level 3 qualification.
@@ -151,7 +151,7 @@ No Level 2 milestone is required at CMP-4.1. The first scientific-framework inte
 ## 9. Intentionally deferred
 
 - researcher/institution identity — CMP-4.3;
-- scientific metadata and lineage — CMP-4.7;
+
 - publication/retention enforcement — CMP-4.8;
 - dashboard/API/indexer user surfaces — later CMP-4.9/CMP-7/CMP-8;
 - research reward pools and sponsor economics — CMP-6;

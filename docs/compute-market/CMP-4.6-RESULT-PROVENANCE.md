@@ -106,7 +106,7 @@ No repository-wide Level 3 inventory is required. Level 3 remains CMP-4.10.
 
 ## 9. Intentionally deferred
 
-- scientific metadata and lineage — CMP-4.7;
+- CMP-4.7 now owns scientific metadata and lineage through project-authenticated metadata commitments and parent-provenance edges;
 - publication / retention policy — CMP-4.8;
 - research dashboard — CMP-4.9;
 - comprehensive scientific-framework closeout — CMP-4.10;

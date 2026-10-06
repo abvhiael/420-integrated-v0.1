@@ -510,6 +510,12 @@ CMP-4.6 is the first CMP-4 app-integration milestone because project/dataset/env
 
 ## CMP-4.7 — Scientific metadata and lineage
 
+**Status: CLOSEOUT CANDIDATE — Level 1 exact-head qualification pending.**
+
+Project-authenticated metadata commitments and parent-first provenance edges bind scientific interpretation and derivation lineage to exact canonical CMP-4.6 result provenance without placing raw research metadata on chain or creating correctness/access/economic authority. Specification: [CMP-4.7 scientific metadata and lineage](CMP-4.7-SCIENTIFIC-METADATA-LINEAGE.md).
+
+CMP-4.7 is an ordinary Level 1 step. CMP-4.6 remains the most recent CMP-4 Level 2 integration milestone.
+
 ## CMP-4.8 — Publication / retention policy
 
 ## CMP-4.9 — Research dashboard
@@ -702,7 +708,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | CMP-4.5–CMP-4.6 COMPLETE; CMP-4.6 is the first CMP-4 Level 2 integration milestone; CMP-4.7 next |
+| CMP-4 scientific compute framework | CMP-4.5–CMP-4.6 COMPLETE; CMP-4.7 closeout candidate, Level 1 qualification pending |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

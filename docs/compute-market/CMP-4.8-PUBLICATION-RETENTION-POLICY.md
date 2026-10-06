@@ -122,7 +122,7 @@ Level 2 is not required again at CMP-4.8. Level 3 remains CMP-4.10.
 
 ## Intentionally deferred
 
-- research dashboard — CMP-4.9;
+- CMP-4.9 now owns the research dashboard/read-model composition over canonical CMP-4.2/4.6/4.7/4.8 state;
 - comprehensive Level 3 scientific-framework closeout — CMP-4.10;
 - SDK/API/indexer expansion — CMP-7;
 - Compute UI — CMP-8;

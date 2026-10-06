@@ -526,6 +526,12 @@ CMP-4.8 is an ordinary Level 1 step. CMP-4.6 remains the most recent CMP-4 Level
 
 ## CMP-4.9 — Research dashboard
 
+**Status: CLOSEOUT CANDIDATE — Level 1 + second CMP-4 Level 2 exact-head qualification pending.**
+
+A versioned read-only canonical research dashboard now composes exact CMP-4.2 project state, CMP-4.6 result provenance, CMP-4.7 metadata/lineage and CMP-4.8 publication policy without creating parallel authority or premature CMP-8 UI. Specification: [CMP-4.9 research dashboard](CMP-4.9-RESEARCH-DASHBOARD.md).
+
+CMP-4.9 is the second CMP-4 app-integration milestone because the complete scientific-framework graph converges into one canonical consumer surface before phase closeout.
+
 ## CMP-4.10 — Phase closeout
 
 ---
@@ -714,7 +720,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | CMP-4.5–CMP-4.8 COMPLETE; CMP-4.6 remains the first CMP-4 Level 2 milestone; CMP-4.9 next |
+| CMP-4 scientific compute framework | CMP-4.5–CMP-4.8 COMPLETE; CMP-4.9 closeout candidate, Level 1 + second CMP-4 Level 2 qualification pending |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

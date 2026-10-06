@@ -35,6 +35,9 @@ on:
       - 'contracts/config/compute-market/cmp-3.14-phase-closeout.json'
       - 'docs/compute-market/CMP-3.14-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-3-14-closeout.py'
+      - 'contracts/config/compute-market/cmp-4.10-phase-closeout.json'
+      - 'docs/compute-market/CMP-4.10-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-4-10-closeout.py'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
   pull_request:
@@ -68,6 +71,9 @@ on:
       - 'contracts/config/compute-market/cmp-3.14-phase-closeout.json'
       - 'docs/compute-market/CMP-3.14-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-3-14-closeout.py'
+      - 'contracts/config/compute-market/cmp-4.10-phase-closeout.json'
+      - 'docs/compute-market/CMP-4.10-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-4-10-closeout.py'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
 
 concurrency:

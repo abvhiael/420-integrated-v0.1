@@ -812,5 +812,24 @@
     "newSettingsAuthority": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "connectorIsolation": {
+    "enabled": true,
+    "registryDescriptorSnapshot": true,
+    "postRegistrationCapabilityMutationRejected": true,
+    "postRegistrationProviderMutationRejected": true,
+    "descriptorCopiesReturned": true,
+    "adapterPanicContained": true,
+    "webhookHeaderMapCopied": true,
+    "capabilityCheckedBeforeAdapterCall": true,
+    "providerResultBindingRequired": true,
+    "identityResultBindingRequired": true,
+    "connectionResultBindingRequired": true,
+    "unsupportedCapabilityFailsClosed": true,
+    "providerFailureHasNoFallback": true,
+    "rawProviderCredentialPersistence": false,
+    "crossProviderAuthorityEscalation": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

@@ -32,6 +32,7 @@ var (
 	ErrConnectorUnsupported   = errors.New("mail: connector capability unsupported")
 	ErrConnectorInvalidResult = errors.New("mail: invalid connector result")
 	ErrConnectorConflict      = errors.New("mail: connector conflict")
+	ErrConnectorIsolated      = errors.New("mail: connector isolated failure")
 )
 
 type ConnectorDescriptor struct {
@@ -117,13 +118,18 @@ type ConnectorAdapter interface {
 	VerifyWebhook(context.Context, ConnectorWebhookRequest) (ConnectorWebhookResult, error)
 }
 
+type connectorRegistration struct {
+	adapter    ConnectorAdapter
+	descriptor ConnectorDescriptor
+}
+
 type ConnectorRegistry struct {
-	mu       sync.RWMutex
-	adapters map[string]ConnectorAdapter
+	mu            sync.RWMutex
+	registrations map[string]connectorRegistration
 }
 
 func NewConnectorRegistry(adapters ...ConnectorAdapter) (*ConnectorRegistry, error) {
-	r := &ConnectorRegistry{adapters: map[string]ConnectorAdapter{}}
+	r := &ConnectorRegistry{registrations: map[string]connectorRegistration{}}
 	for _, adapter := range adapters {
 		if err := r.Register(adapter); err != nil {
 			return nil, err
@@ -142,10 +148,10 @@ func (r *ConnectorRegistry) Register(adapter ConnectorAdapter) error {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if _, exists := r.adapters[d.Provider]; exists {
+	if _, exists := r.registrations[d.Provider]; exists {
 		return ErrConnectorConflict
 	}
-	r.adapters[d.Provider] = adapter
+	r.registrations[d.Provider] = connectorRegistration{adapter: adapter, descriptor: cloneConnectorDescriptor(d)}
 	return nil
 }
 
@@ -155,9 +161,9 @@ func (r *ConnectorRegistry) Descriptors() []ConnectorDescriptor {
 	}
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	out := make([]ConnectorDescriptor, 0, len(r.adapters))
-	for _, adapter := range r.adapters {
-		out = append(out, normalizeConnectorDescriptor(adapter.Descriptor()))
+	out := make([]ConnectorDescriptor, 0, len(r.registrations))
+	for _, registration := range r.registrations {
+		out = append(out, cloneConnectorDescriptor(registration.descriptor))
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Provider < out[j].Provider })
 	return out
@@ -169,16 +175,16 @@ func (r *ConnectorRegistry) adapter(provider string, capability ConnectorCapabil
 	}
 	provider = normalizeProvider(provider)
 	r.mu.RLock()
-	adapter, ok := r.adapters[provider]
+	registration, ok := r.registrations[provider]
 	r.mu.RUnlock()
 	if !ok {
 		return nil, ConnectorDescriptor{}, ErrConnectorNotFound
 	}
-	d := normalizeConnectorDescriptor(adapter.Descriptor())
+	d := cloneConnectorDescriptor(registration.descriptor)
 	if !connectorHasCapability(d, capability) {
 		return nil, d, ErrConnectorUnsupported
 	}
-	return adapter, d, nil
+	return registration.adapter, d, nil
 }
 
 type ConnectorService struct {
@@ -211,7 +217,7 @@ func (s *ConnectorService) Link(ctx context.Context, actor string, req Connector
 	if err != nil {
 		return ConnectorConnection{}, err
 	}
-	out, err := adapter.Link(ctx, actor, req)
+	out, err := isolatedConnectorLink(adapter, ctx, actor, req)
 	if err != nil {
 		return ConnectorConnection{}, fmt.Errorf("mail: connector link: %w", err)
 	}
@@ -236,7 +242,7 @@ func (s *ConnectorService) Unlink(ctx context.Context, actor, provider, connecti
 	if err != nil {
 		return err
 	}
-	if err := adapter.Unlink(ctx, actor, connectionID); err != nil {
+	if err := isolatedConnectorUnlink(adapter, ctx, actor, provider, connectionID); err != nil {
 		return fmt.Errorf("mail: connector unlink: %w", err)
 	}
 	return nil
@@ -257,7 +263,7 @@ func (s *ConnectorService) Pull(ctx context.Context, actor string, req Connector
 	if err != nil {
 		return ConnectorPullResult{}, err
 	}
-	out, err := adapter.Pull(ctx, actor, req)
+	out, err := isolatedConnectorPull(adapter, ctx, actor, req)
 	if err != nil {
 		return ConnectorPullResult{}, fmt.Errorf("mail: connector pull: %w", err)
 	}
@@ -291,7 +297,7 @@ func (s *ConnectorService) Push(ctx context.Context, actor string, req Connector
 	if err != nil {
 		return ConnectorPushResult{}, err
 	}
-	out, err := adapter.Push(ctx, actor, req)
+	out, err := isolatedConnectorPush(adapter, ctx, actor, req)
 	if err != nil {
 		return ConnectorPushResult{}, fmt.Errorf("mail: connector push: %w", err)
 	}
@@ -314,7 +320,8 @@ func (s *ConnectorService) VerifyWebhook(ctx context.Context, req ConnectorWebho
 	if err != nil {
 		return ConnectorWebhookResult{}, err
 	}
-	out, err := adapter.VerifyWebhook(ctx, req)
+	req.Headers = cloneStringMap(req.Headers)
+	out, err := isolatedConnectorWebhook(adapter, ctx, req)
 	if err != nil {
 		return ConnectorWebhookResult{}, fmt.Errorf("mail: connector webhook: %w", err)
 	}
@@ -328,6 +335,71 @@ func (s *ConnectorService) VerifyWebhook(ctx context.Context, req ConnectorWebho
 		return ConnectorWebhookResult{}, err
 	}
 	return out, nil
+}
+
+func cloneConnectorDescriptor(d ConnectorDescriptor) ConnectorDescriptor {
+	d.Capabilities = append([]ConnectorCapability(nil), d.Capabilities...)
+	return d
+}
+
+func cloneStringMap(in map[string]string) map[string]string {
+	if in == nil {
+		return nil
+	}
+	out := make(map[string]string, len(in))
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
+}
+
+func connectorPanicError(provider string, recovered any) error {
+	return fmt.Errorf("%w: provider=%s panic=%v", ErrConnectorIsolated, normalizeProvider(provider), recovered)
+}
+
+func isolatedConnectorLink(adapter ConnectorAdapter, ctx context.Context, actor string, req ConnectorLinkRequest) (out ConnectorConnection, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = connectorPanicError(req.Provider, recovered)
+		}
+	}()
+	return adapter.Link(ctx, actor, req)
+}
+
+func isolatedConnectorUnlink(adapter ConnectorAdapter, ctx context.Context, actor, provider, connectionID string) (err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = connectorPanicError(provider, recovered)
+		}
+	}()
+	return adapter.Unlink(ctx, actor, connectionID)
+}
+
+func isolatedConnectorPull(adapter ConnectorAdapter, ctx context.Context, actor string, req ConnectorPullRequest) (out ConnectorPullResult, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = connectorPanicError(req.Provider, recovered)
+		}
+	}()
+	return adapter.Pull(ctx, actor, req)
+}
+
+func isolatedConnectorPush(adapter ConnectorAdapter, ctx context.Context, actor string, req ConnectorPushRequest) (out ConnectorPushResult, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = connectorPanicError(req.Provider, recovered)
+		}
+	}()
+	return adapter.Push(ctx, actor, req)
+}
+
+func isolatedConnectorWebhook(adapter ConnectorAdapter, ctx context.Context, req ConnectorWebhookRequest) (out ConnectorWebhookResult, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = connectorPanicError(req.Provider, recovered)
+		}
+	}()
+	return adapter.VerifyWebhook(ctx, req)
 }
 
 func normalizeProvider(provider string) string {

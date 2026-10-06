@@ -248,6 +248,9 @@ if profile_path.is_file():
     if mail_settings.get("trustKinds")!=["IDENTITY","PHRASE","APPLICATION"] or mail_settings.get("trustDispositions")!=["BLOCK","ALLOW","MUTE"]: errors.append("MAIL-2.31 trust settings authority drifted")
     if any(mail_settings.get(k) is not True for k in ["securityUsesExistingHandoff","integrationsUseExistingHandoff","walletUsesExistingHandoff","systemLabelsImmutable"]): errors.append("MAIL-2.31 settings handoff/system-label drifted")
     if any(mail_settings.get(k) is not False for k in ["providerCredentialsAccepted","walletSecretsAccepted","newSettingsAuthority","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.31 settings secret/privacy drifted")
+    connector_isolation=profile.get("connectorIsolation",{})
+    if connector_isolation.get("enabled") is not True or any(connector_isolation.get(k) is not True for k in ["registryDescriptorSnapshot","postRegistrationCapabilityMutationRejected","postRegistrationProviderMutationRejected","descriptorCopiesReturned","adapterPanicContained","webhookHeaderMapCopied","capabilityCheckedBeforeAdapterCall","providerResultBindingRequired","identityResultBindingRequired","connectionResultBindingRequired","unsupportedCapabilityFailsClosed","providerFailureHasNoFallback"]): errors.append("MAIL-2.32 connector isolation contract drifted")
+    if any(connector_isolation.get(k) is not False for k in ["rawProviderCredentialPersistence","crossProviderAuthorityEscalation","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.32 connector isolation privacy/authority drifted")
     if desktop_ui.get("newBackendAuthority") is not False or desktop_ui.get("publicIndexing") is not False or desktop_ui.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.30 desktop authority/privacy drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
@@ -369,6 +372,10 @@ for token in ["PrepareWalletAction","VerifyWalletEvidence"]:
 connector_src=(ROOT/"mail/integrations.go").read_text() if (ROOT/"mail/integrations.go").is_file() else ""
 for token in ["ConnectorRegistry","ConnectorService","ConnectorAdapter","ConnectorDescriptor","ConnectorCapabilityLink","ConnectorCapabilityPull","ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify","ConnectorLinkRequest","ConnectorConnection","ConnectorPullRequest","ConnectorPushRequest","ConnectorWebhookRequest","ErrConnectorNotFound","ErrConnectorUnsupported","ErrConnectorInvalidResult","ErrConnectorConflict"]:
     if token not in connector_src: errors.append("MAIL-2.14 connector invariant missing: "+token)
+for token in ["connectorRegistration","cloneConnectorDescriptor","cloneStringMap","ErrConnectorIsolated","isolatedConnectorLink","isolatedConnectorUnlink","isolatedConnectorPull","isolatedConnectorPush","isolatedConnectorWebhook","connectorPanicError"]:
+    if token not in connector_src: errors.append("MAIL-2.32 connector isolation invariant missing: "+token)
+if "adapter.Descriptor()" in connector_src[connector_src.find("func (r *ConnectorRegistry) Descriptors"):connector_src.find("type ConnectorService")]:
+    errors.append("MAIL-2.32 registry still re-reads mutable adapter descriptors after registration")
 for token in ['"/v1/connectors/providers"','"/v1/connectors/link"','"/v1/connectors/unlink"','"/v1/connectors/pull"','"/v1/connectors/push"','"/v1/connectors/webhooks/"',"*ConnectorService"]:
     if token not in http: errors.append("MAIL-2.14 HTTP connector surface missing: "+token)
 for token in ["ConnectorProviders","LinkConnector","UnlinkConnector","PullConnector","PushConnector"]:
@@ -546,4 +553,5 @@ print("MAIL-2.28 integration-specific filters: qualified by app-scoped checks")
 print("MAIL-2.29 unified notification routing: qualified by app-scoped checks")
 print("MAIL-2.30 full desktop mail UI: qualified by app-scoped checks")
 print("MAIL-2.31 mail settings center: qualified by app-scoped checks")
+print("MAIL-2.32 connector isolation: qualified by app-scoped checks")
 

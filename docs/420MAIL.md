@@ -1932,6 +1932,46 @@ Security, connector, and Wallet controls link to the already-qualified handoff s
 
 MAIL-2.31 is the second ordinary step in the documented Product/security milestone (MAIL-2.30 through MAIL-2.35). No Level 2 boundary is reached by this step alone.
 
+
+## MAIL-2.32 Connector Isolation
+
+MAIL-2.32 hardens the provider-neutral connector boundary so one connector adapter cannot mutate another provider's authority, escalate its own admitted capabilities after registration, mutate caller-owned webhook metadata, or crash the Mail process through an adapter panic.
+
+### Immutable registration authority
+
+Connector provider identity and capability authority are now snapshotted when an adapter is registered.
+
+After registration, later changes to an adapter's `Descriptor()` result cannot:
+
+- rename the registered provider;
+- add capabilities;
+- remove/reorder the registry's canonical capability record;
+- alter the descriptor returned to callers.
+
+The registry returns defensive descriptor copies.
+
+### Failure containment
+
+All connector adapter execution paths are invoked through panic-containment wrappers.
+
+A provider adapter panic is converted to `ErrConnectorIsolated` and remains a provider-scoped failure instead of escaping into the Mail service process.
+
+Ordinary provider errors remain wrapped and observable; no fallback to another provider is introduced.
+
+### Webhook input isolation
+
+Webhook header maps are copied before entering an adapter so an adapter cannot mutate caller-owned request metadata.
+
+The existing strict result checks remain authoritative for provider, identity, connection, verification, item, and acceptance bindings.
+
+### Existing boundaries retained
+
+MAIL-2.32 does not create provider credentials, store raw provider secrets, add cross-provider routing, or expand any connector's capabilities.
+
+Discord, Telegram, and Signal retain their separately-qualified capability inventories and integration boundaries.
+
+Because ConnectorService is shared by multiple Mail integration paths, the exact retained Mail suite also serves as shared-dependency integration revalidation for this change. The Product/security milestone itself remains in progress through MAIL-2.35.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

@@ -12,11 +12,12 @@ import (
 
 type authorityFake struct {
 	controller string
+	retired    bool
 	err        error
 }
 
-func (f *authorityFake) Controller(context.Context, [32]byte) (string, error) {
-	return f.controller, f.err
+func (f *authorityFake) Snapshot(context.Context, [32]byte) (StreamSnapshot, error) {
+	return StreamSnapshot{Controller: f.controller, Retired: f.retired}, f.err
 }
 
 type driverFake struct {

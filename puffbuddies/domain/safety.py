@@ -152,9 +152,12 @@ def impose_pending_restriction(case:SafetyCase,profile:ProfileRecord,*,actor_id:
 
 def apply_action(case:SafetyCase,profile:ProfileRecord,*,action:SafetyAction,actor_id:str,
                  role:ModeratorRole,current_generation:int,human_reviewed:bool)->SafetyCaseMutation:
-    _require_role(role,{ModeratorRole.MODERATOR,ModeratorRole.SENIOR_MODERATOR})
     if case.state not in {ModerationState.REVIEWING,ModerationState.RESTRICTED_PENDING_REVIEW,ModerationState.APPEALED}:
         raise SafetyDenied("case not ready for action")
+    if case.state == ModerationState.APPEALED:
+        _require_role(role,{ModeratorRole.APPEALS,ModeratorRole.SENIOR_MODERATOR})
+    else:
+        _require_role(role,{ModeratorRole.MODERATOR,ModeratorRole.SENIOR_MODERATOR})
     if not human_reviewed:
         raise SafetyDenied("irreversible/final moderation action requires human review")
     target_lifecycle=profile.lifecycle
@@ -178,7 +181,10 @@ def no_action(case:SafetyCase,*,actor_id:str,role:ModeratorRole)->SafetyCase:
     if case.state not in {ModerationState.TRIAGED,ModerationState.REVIEWING,
                           ModerationState.RESTRICTED_PENDING_REVIEW,ModerationState.APPEALED}:
         raise SafetyDenied("case cannot resolve NO_ACTION")
-    _require_role(role,{ModeratorRole.MODERATOR,ModeratorRole.SENIOR_MODERATOR,ModeratorRole.APPEALS})
+    if case.state == ModerationState.APPEALED:
+        _require_role(role,{ModeratorRole.APPEALS,ModeratorRole.SENIOR_MODERATOR})
+    else:
+        _require_role(role,{ModeratorRole.MODERATOR,ModeratorRole.SENIOR_MODERATOR})
     return replace(case,state=ModerationState.NO_ACTION,action=SafetyAction.NONE,
                    moderator_actor_id=actor_id,version=case.version+1)
 

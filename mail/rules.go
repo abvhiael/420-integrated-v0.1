@@ -97,7 +97,7 @@ func (s *Service) CreateRule(ctx context.Context, actor string, input RuleInput)
 		}
 		out = MailRule{
 			ID: deterministicRuleID(actor, input.Name), Owner: actor, Name: input.Name,
-			Enabled: enabled, Priority: input.Priority, Condition: input.Condition, Action: input.Action,
+			Enabled: enabled, Priority: input.Priority, Condition: input.Condition, Action: cloneRuleAction(input.Action),
 			CreatedAt: now, UpdatedAt: now,
 		}
 		data.Rules[ruleKey(actor, out.ID)] = out
@@ -136,7 +136,7 @@ func (s *Service) UpdateRule(ctx context.Context, actor, id string, input RuleIn
 		current.Enabled = enabled
 		current.Priority = input.Priority
 		current.Condition = input.Condition
-		current.Action = input.Action
+		current.Action = cloneRuleAction(input.Action)
 		current.UpdatedAt = s.Now().UTC()
 		data.Rules[key] = current
 		out = current
@@ -223,6 +223,9 @@ func applyRuleAction(data *storeData, owner string, action RuleAction, state *Ma
 			state.LabelIDs = append(state.LabelIDs, labelID)
 		}
 	}
+	if len(state.LabelIDs) > MaxLabelsPerMessage {
+		return ErrInvalidInput
+	}
 	sort.Strings(state.LabelIDs)
 	if action.CustomFolderID != nil {
 		target := strings.TrimSpace(*action.CustomFolderID)
@@ -263,7 +266,7 @@ func validateRuleInput(data *storeData, owner string, input RuleInput) error {
 	if condition.SenderEquals == "" && condition.ContentContains == "" && condition.SourceEquals == "" {
 		return ErrInvalidInput
 	}
-	if len([]byte(condition.ContentContains)) > MaxRuleContentMatchBytes {
+	if len([]byte(condition.ContentContains)) > MaxRuleContentMatchBytes || len([]byte(condition.SenderEquals)) > MaxRuleContentMatchBytes || len([]byte(condition.SourceEquals)) > MaxRuleContentMatchBytes {
 		return ErrInvalidInput
 	}
 	action := input.Action
@@ -342,6 +345,10 @@ func cleanupRulesAfterLabelDelete(data *storeData, owner, labelID string) {
 			continue
 		}
 		rule.Action.AddLabelIDs = removeString(rule.Action.AddLabelIDs, labelID)
+		if !ruleActionHasEffect(rule.Action) {
+			delete(data.Rules, key)
+			continue
+		}
 		data.Rules[key] = rule
 	}
 }
@@ -351,10 +358,47 @@ func cleanupRulesAfterCustomFolderDelete(data *storeData, owner, folderID string
 		if rule.Owner != owner || rule.Action.CustomFolderID == nil || *rule.Action.CustomFolderID != folderID {
 			continue
 		}
-		empty := ""
-		rule.Action.CustomFolderID = &empty
+		rule.Action.CustomFolderID = nil
+		if !ruleActionHasEffect(rule.Action) {
+			delete(data.Rules, key)
+			continue
+		}
 		data.Rules[key] = rule
 	}
+}
+
+func ruleActionHasEffect(action RuleAction) bool {
+	return action.Folder != nil || len(action.AddLabelIDs) > 0 || action.CustomFolderID != nil || action.MarkRead != nil || action.Starred != nil || action.Pinned != nil || action.Muted != nil
+}
+
+func cloneRuleAction(action RuleAction) RuleAction {
+	out := action
+	out.AddLabelIDs = append([]string(nil), action.AddLabelIDs...)
+	if action.Folder != nil {
+		v := *action.Folder
+		out.Folder = &v
+	}
+	if action.CustomFolderID != nil {
+		v := *action.CustomFolderID
+		out.CustomFolderID = &v
+	}
+	if action.MarkRead != nil {
+		v := *action.MarkRead
+		out.MarkRead = &v
+	}
+	if action.Starred != nil {
+		v := *action.Starred
+		out.Starred = &v
+	}
+	if action.Pinned != nil {
+		v := *action.Pinned
+		out.Pinned = &v
+	}
+	if action.Muted != nil {
+		v := *action.Muted
+		out.Muted = &v
+	}
+	return out
 }
 
 func ruleFolderAllowed(folder MailboxFolder) bool {

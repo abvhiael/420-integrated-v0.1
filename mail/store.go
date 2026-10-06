@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 8
+const DurableStoreSchemaVersion = 9
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -42,6 +42,7 @@ type storeData struct {
 	ConversationIndex   map[string][]string
 	Drafts              map[string]Draft
 	Deliveries          map[string]Delivery
+	DiscordSync         map[string]DiscordSyncState
 }
 
 type diskStoreData struct {
@@ -65,6 +66,7 @@ type diskStoreData struct {
 	ConversationIndex   map[string][]string          `json:"conversation_index,omitempty"`
 	Drafts              map[string]Draft             `json:"drafts,omitempty"`
 	Deliveries          map[string]Delivery          `json:"deliveries,omitempty"`
+	DiscordSync         map[string]DiscordSyncState  `json:"discord_sync,omitempty"`
 	Fingerprints        map[string]string            `json:"fingerprints,omitempty"`
 	IdempotencyKeys     map[string]string            `json:"idempotency_keys,omitempty"`
 }
@@ -250,6 +252,7 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		ConversationIndex:   disk.ConversationIndex,
 		Drafts:              disk.Drafts,
 		Deliveries:          disk.Deliveries,
+		DiscordSync:         disk.DiscordSync,
 	}
 	normalizeStoreData(&data)
 	if disk.SchemaVersion < 6 {
@@ -309,6 +312,7 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		ConversationIndex:   data.ConversationIndex,
 		Drafts:              data.Drafts,
 		Deliveries:          data.Deliveries,
+		DiscordSync:         data.DiscordSync,
 		Fingerprints:        map[string]string{},
 		IdempotencyKeys:     map[string]string{},
 	}
@@ -392,6 +396,7 @@ func newStoreData() storeData {
 		ConversationIndex:   map[string][]string{},
 		Drafts:              map[string]Draft{},
 		Deliveries:          map[string]Delivery{},
+		DiscordSync:         map[string]DiscordSyncState{},
 	}
 }
 
@@ -456,6 +461,9 @@ func normalizeStoreData(data *storeData) {
 	if data.Deliveries == nil {
 		data.Deliveries = map[string]Delivery{}
 	}
+	if data.DiscordSync == nil {
+		data.DiscordSync = map[string]DiscordSyncState{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -480,6 +488,7 @@ func cloneStoreData(src storeData) storeData {
 		ConversationIndex:   make(map[string][]string, len(src.ConversationIndex)),
 		Drafts:              make(map[string]Draft, len(src.Drafts)),
 		Deliveries:          make(map[string]Delivery, len(src.Deliveries)),
+		DiscordSync:         make(map[string]DiscordSyncState, len(src.DiscordSync)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -539,6 +548,9 @@ func cloneStoreData(src storeData) storeData {
 	}
 	for k, v := range src.Deliveries {
 		dst.Deliveries[k] = v
+	}
+	for k, v := range src.DiscordSync {
+		dst.DiscordSync[k] = v
 	}
 	return dst
 }
@@ -661,6 +673,9 @@ func validateStoreData(data *storeData) error {
 	}
 	if err := validateDeliveryData(data); err != nil {
 		return fmt.Errorf("invalid delivery data: %w", err)
+	}
+	if err := validateDiscordSyncData(data); err != nil {
+		return fmt.Errorf("invalid discord sync data: %w", err)
 	}
 	return nil
 }

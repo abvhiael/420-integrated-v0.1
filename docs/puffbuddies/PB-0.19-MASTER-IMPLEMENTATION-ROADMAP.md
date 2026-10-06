@@ -82,7 +82,7 @@ A roadmap change must identify affected PB-0 invariants, authority changes, priv
 
 ## Current phase-number authority
 
-The implementation-phase numbering below is the original PB-0.19 planning map and is retained as historical scope guidance. The current numbered phase authority is `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md` under **Post-PB-0 phase names** and any detailed step committed there. Where numbering conflicts, the current roadmap controls. In particular, current **PB-3 — Profiles** carries forward the profile/editing/media/mode/visibility/lifecycle-control portion of the legacy PB-2 planning scope; legacy PB-3 discovery/matching scope remains deferred to the current later discovery/matching phases. This reconciliation changes numbering authority only and does not weaken any PB-0 invariant or silently claim implementation.
+The implementation-phase numbering below is the original PB-0.19 planning map and is retained as historical scope guidance. The current numbered phase authority is `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md` under **Post-PB-0 phase names** and any detailed step committed there. Where numbering conflicts, the current roadmap controls. In particular, current **PB-3 — Profiles** carries forward the profile/editing/media/mode/visibility/lifecycle-control portion of the legacy PB-2 planning scope; legacy PB-3 discovery/matching scope is split across current **PB-4 — Discovery** and **PB-5 — Likes and matching**; PB-4 carries only discovery/recommendation behavior and PB-5 owns likes, passes, reciprocal consent and match formation. This reconciliation changes numbering authority only and does not weaken any PB-0 invariant or silently claim implementation.
 
 ## Canonical implementation phases
 

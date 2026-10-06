@@ -1554,6 +1554,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** matched PB pair can request Messenger conversation only when canonical endpoint/block state allows it; accept/send recheck current PB + Messenger authority; unmatch/revocation/stale generation denies despite active conversation; native Messenger block denies without mutating PB match state; authority outage fails closed; profile/account binding remains transient; Messenger verifier passes unchanged; PB-6 Level-1 tests, retained PuffBuddies regressions and PB-5/PB-6 Level-2 integration pass on one exact SHA; durable evidence recorded.
 
+### PB-7 — 420Notifications integration
+
+**Purpose:** integrate private PuffBuddies operational notification intents with canonical 420Notifications subscription/delivery authority without making notification state authoritative for PuffBuddies relationships, messaging, safety, lifecycle, or protocol truth.
+
+**Canonical requirements:** current PuffBuddies matched-user authorization and MESSAGING_AUTH generation are rechecked before handoff; current MESSAGE_AVAILABLE additionally requires a current affirmative PB-6 Messenger handoff; only already-implemented MATCHED relationship and MESSAGE_AVAILABLE operational kinds are in PB-7 scope; recipient must be a current pair participant; 420Notifications selects the explicit subscription; active/unmuted/operational-consent and source/topic/event/minimum-severity filters are Notifications-owned deny controls; promotional consent cannot substitute for operational consent; source label `puffbuddies` is only a private filter value and not a Registry service ID; channels/destinations are Notifications-owned transient data; PuffBuddies persists no profile→subscription/endpoint/push/device mapping; payloads are minimum-disclosure/non-authoritative and omit profile/match/eligibility/wallet/conversation/message/private-preference state; Notifications feed/history/read/retry/dedup/rate-limit/provider/dead-letter state remains Notifications-owned; outage fails closed for notification handoff but cannot block or rewrite the underlying PuffBuddies/Messenger operation; no public graph, Search/Explorer/Indexer publication, contract/address/deployment/provider credential or production endpoint is introduced; PB-8 remains Safety and moderation owner.
+
+**Affected components:** `puffbuddies/domain/notifications_integration.py`, PB-2.9 messaging authorization, PB-5 match authority, PB-6 Messenger handoff conclusion, canonical Notifications subscription/service interfaces as read-only dependencies, PB-7 targeted/integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head PB-7 qualification **plus Level 2 retained app integration** at the accumulated PB-5/PB-6/PB-7 relationship→Messenger→Notifications boundary. Direct dependency checks cover affected Notifications architecture/subscription/feed/security packages and Genesis service-boundary verification.
+
+**Level-3 boundary:** canonical full Solidity/Genesis/420 Integrated/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.11; PB-2.9; PB-5; **PB-6 — 420Messenger integration — COMPLETE**; canonical 420Notifications repository implementation.
+
+**Exit criteria:** current match notification handoff requires explicit selected subscription; message notification additionally requires current PB-6 authorization; current PB authorization/generation is rechecked; muted/inactive/no-operational-consent/filter/severity state safely suppresses; promotional consent cannot broaden delivery; Notifications outage fails closed without changing underlying authority; payload is minimum-disclosure/non-authoritative; PuffBuddies persists no subscription/destination linkage; affected Notifications dependency checks pass unchanged; PB-7 Level-1 targeted/retained regressions and PB-5/PB-6/PB-7 Level-2 integration pass on one exact SHA; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

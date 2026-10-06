@@ -578,6 +578,10 @@ Normalize externally supplied proof and credit records against exact adapter/sys
 
 ## CMP-5.6 — Double-reward prevention
 
+**Status: implementation complete; Level 1 + third CMP-5 Level 2 exact-head qualification pending.**
+
+Add one-time canonical external-work consumption so alternate proof/credit records, reward references, evidence, or source wrappers cannot manufacture a second 420 reward opportunity for the same canonical external work. Governance-authorized, code-hash-pinned consumers prevent permissionless claim burning. CMP-5.7 remains the external-truth/canonical-work mapping owner; CMP-6 remains reward-economics/settlement owner. Specification: [CMP-5.6 Double-reward prevention](CMP-5.6-DOUBLE-REWARD-PREVENTION.md).
+
 ## CMP-5.7 — External-result attestation
 
 ## CMP-5.8 — Phase closeout
@@ -745,7 +749,7 @@ Production target flow:
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
-| CMP-5 external compute adapters | CMP-5.1–CMP-5.5 COMPLETE; CMP-5.5 is the second CMP-5 Level 2 milestone; CMP-5.6 next |
+| CMP-5 external compute adapters | CMP-5.1–CMP-5.5 COMPLETE; CMP-5.6 implementation complete — Level 1 + third CMP-5 Level 2 qualification pending |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |

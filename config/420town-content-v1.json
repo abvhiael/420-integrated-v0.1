@@ -1,0 +1,139 @@
+{
+  "schema": "420-town-content-v1",
+  "serviceId": "420/service/town/v1",
+  "stateClass": "REPLACEABLE_OFF_CHAIN_APPLICATION_STATE",
+  "bodyStorage": "OFF_CHAIN_BY_DEFAULT",
+  "objects": {
+    "Post": {
+      "status": [
+        "ACTIVE",
+        "TOMBSTONED"
+      ],
+      "required": [
+        "id",
+        "community_id",
+        "author_id",
+        "content_ref",
+        "content_sha256",
+        "visibility",
+        "revision"
+      ]
+    },
+    "Thread": {
+      "status": [
+        "ACTIVE",
+        "TOMBSTONED"
+      ],
+      "required": [
+        "id",
+        "community_id",
+        "root_post_id",
+        "author_id"
+      ]
+    },
+    "Comment": {
+      "status": [
+        "ACTIVE",
+        "TOMBSTONED"
+      ],
+      "required": [
+        "id",
+        "community_id",
+        "thread_id",
+        "parent_id",
+        "author_id",
+        "content_ref",
+        "content_sha256",
+        "visibility",
+        "revision"
+      ]
+    },
+    "Vote": {
+      "values": [
+        -1,
+        1
+      ],
+      "required": [
+        "target_kind",
+        "target_id",
+        "voter_id",
+        "value",
+        "active",
+        "revision"
+      ]
+    }
+  },
+  "contentAnchor": {
+    "referenceMaxLength": 2048,
+    "digestAlgorithm": "SHA-256",
+    "digestEncoding": "LOWERCASE_HEX",
+    "bodyBytesStoredByTown": false
+  },
+  "visibility": {
+    "canonicalScopes": [
+      "PUBLIC",
+      "UNLISTED",
+      "FOLLOWERS",
+      "COMMUNITY_ONLY",
+      "PURCHASERS_OR_BACKERS",
+      "PRIVATE",
+      "ORGANIZATION_MEMBERS",
+      "MODERATORS",
+      "ADMINS"
+    ],
+    "unknownScope": "DENY",
+    "externalRelationshipContext": "TRUSTED_ADAPTER_ONLY",
+    "commentsInheritRootPostVisibility": true
+  },
+  "writes": {
+    "idempotencyKeyRequired": true,
+    "idempotencyKeyMaxLength": 128,
+    "reusedKeyDifferentPayload": "REJECT",
+    "historicalRevisions": "APPEND_ONLY"
+  },
+  "deletion": {
+    "mode": "TOMBSTONE",
+    "clearContentReference": true,
+    "preserveContentDigest": true,
+    "preserveStableObjectId": true,
+    "rootPostTombstonesThread": true
+  },
+  "abuseControls": {
+    "rateWindowSeconds": 60,
+    "duplicateWindowSeconds": 600,
+    "fullLimitMinAccountAgeSeconds": 86400,
+    "unverifiedWriteLimit": 5,
+    "verifiedWriteLimit": 20,
+    "unverifiedVoteLimit": 15,
+    "verifiedVoteLimit": 60,
+    "communityWriteLimit": 120,
+    "unknownRiskProfile": "UNVERIFIED_LIMITS",
+    "duplicateFingerprint": "AUTHOR_COMMUNITY_CONTENT_SHA256",
+    "voteUniqueness": "ONE_CANONICAL_RECORD_PER_VOTER_TARGET",
+    "deviceWriteLimit": 40,
+    "deviceVoteLimit": 120,
+    "networkWriteLimit": 80,
+    "networkVoteLimit": 240,
+    "deviceNetworkContext": "TRUSTED_SERVER_SIDE_RISK_CONTEXT"
+  },
+  "invariants": [
+    "TOWN-CONTENT-001_HIGH_VOLUME_BODIES_REMAIN_OFF_CHAIN",
+    "TOWN-CONTENT-002_CONTENT_IDS_ARE_STABLE_AND_NEVER_REASSIGNED",
+    "TOWN-CONTENT-003_WRITES_REQUIRE_ACTIVE_COMMUNITY_MEMBERSHIP",
+    "TOWN-CONTENT-004_THREAD_ROOT_MUST_BE_ACTIVE_AND_OWNED_BY_THREAD_CREATOR",
+    "TOWN-CONTENT-005_REPLIES_CANNOT_CROSS_THREAD_OR_COMMUNITY_BOUNDARIES",
+    "TOWN-CONTENT-006_COMMENTS_INHERIT_ROOT_VISIBILITY_AND_CANNOT_WIDEN_IT",
+    "TOWN-CONTENT-007_UNKNOWN_VISIBILITY_FAILS_CLOSED",
+    "TOWN-CONTENT-008_TOMBSTONES_PRESERVE_ID_AND_DIGEST_BUT_CLEAR_BODY_REFERENCE",
+    "TOWN-CONTENT-009_REVISIONS_ARE_APPEND_ONLY",
+    "TOWN-CONTENT-010_MUTATING_WRITES_REQUIRE_IDEMPOTENCY_KEYS",
+    "TOWN-CONTENT-011_IDEMPOTENCY_KEY_REUSE_WITH_DIFFERENT_PAYLOAD_IS_REJECTED",
+    "TOWN-CONTENT-012_DUPLICATE_CONTENT_FINGERPRINTS_ARE_THROTTLED",
+    "TOWN-CONTENT-013_UNKNOWN_OR_LOW_ASSURANCE_IDENTITIES_RECEIVE_LOWER_RATE_LIMITS",
+    "TOWN-CONTENT-014_COMMUNITY_AGGREGATE_WRITE_RATE_IS_BOUNDED",
+    "TOWN-CONTENT-015_DEVICE_AND_NETWORK_RATE_SCOPES_BOUND_SYBIL_SWARMS",
+    "TOWN-CONTENT-016_ONE_CANONICAL_VOTE_RECORD_EXISTS_PER_VOTER_TARGET",
+    "TOWN-CONTENT-017_VOTES_REQUIRE_ACTIVE_MEMBERSHIP_AND_TARGET_VISIBILITY",
+    "TOWN-CONTENT-018_SEARCH_INDEXERS_UI_AND_REWARDS_DO_NOT_GAIN_CONTENT_AUTHORITY"
+  ]
+}

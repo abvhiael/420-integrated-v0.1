@@ -1,0 +1,8 @@
+{
+  "schema":"420-town-web-runtime-v1",
+  "site":{"name":"420Town","productionOrigin":"https://town.420integrated.org"},
+  "network":{"chainId":"0x1a4","explorerUrl":"https://explorer.example"},
+  "services":{"townApiBaseUrl":"https://town-api.example","searchApiBaseUrl":"https://search.example"},
+  "contracts":{"townAuthority":"0x0000000000000000000000000000000000000001"},
+  "features":{"authorityTransactions":true,"moderation":true,"subscriptions":true,"entitlements":true}
+}

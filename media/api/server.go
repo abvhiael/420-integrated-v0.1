@@ -400,7 +400,7 @@ func (s *Server) writeRaw(w http.ResponseWriter, status int, payload []byte) {
 	w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(meta.Remaining))
 	w.Header().Set("X-RateLimit-Reset", meta.ResetAt.Format(time.RFC3339))
 	w.WriteHeader(status)
-	_, _ = w.Write(append(append([]byte(nil), payload...), '\\n'))
+	_, _ = w.Write(append(append([]byte(nil), payload...), '\n'))
 }
 
 func (s *Server) rateLimit() RateLimitMeta {

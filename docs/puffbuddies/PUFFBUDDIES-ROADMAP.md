@@ -1650,7 +1650,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** iOS/Android project/source checks pass; shared mobile behavior/security tests pass; device-bound session/stale-state/resume/privacy gates pass; repository mobile bundle build passes; retained PB-11 web qualification and complete PuffBuddies regressions pass on the same SHA; PB-0 owner stays green; exact-SHA evidence is recorded; device/store/live API/push/distribution gates remain explicitly deferred.
 
-### PB-13 — 420Integrated cross-app integration
+### PB-13 — 420Integrated cross-app integration — COMPLETE
 
 **Purpose:** harden the accumulated PuffBuddies dependency surface across approved 420Integrated services without transferring PuffBuddies profile, eligibility-decision, relationship, consent, safety, lifecycle, deletion, visibility or premium/private-access authority.
 

@@ -19,8 +19,9 @@ type HTTPHandler struct {
 	WalletActions   *WalletActionService
 	Connectors      *ConnectorService
 	DiscordSync     *DiscordSyncService
-	TelegramSync    *TelegramSyncService
-	DiscordDelivery *DiscordDeliveryService
+	TelegramSync     *TelegramSyncService
+	DiscordDelivery  *DiscordDeliveryService
+	TelegramDelivery *TelegramDeliveryService
 	DiscordWallet   *DiscordWalletVerificationService
 	SignalShare     *SignalShareService
 }
@@ -86,6 +87,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.telegramSync(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/deliver":
 		h.discordDeliver(w, r, actor)
+	case r.URL.Path == "/v1/connectors/telegram/deliver":
+		h.telegramDeliver(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/wallet/challenge" || r.URL.Path == "/v1/connectors/discord/wallet/verify":
 		h.discordWallet(w, r, actor)
 	case r.URL.Path == "/v1/connectors/signal/boundary":
@@ -272,6 +275,34 @@ func writeDiscordWalletError(w http.ResponseWriter, err error) {
 	default:
 		writeConnectorError(w, err)
 	}
+}
+
+func (h HTTPHandler) telegramDeliver(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.TelegramDelivery == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "telegram delivery unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req TelegramDeliveryRequest
+	if !decodeStrictJSON(w, r, MaxTelegramDeliveryContentBytes+8192, &req) {
+		return
+	}
+	out, err := h.TelegramDelivery.Deliver(r.Context(), actor, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrTelegramDeliveryConflict):
+			writeError(w, http.StatusConflict, "TELEGRAM_DELIVERY_CONFLICT", err.Error())
+		case errors.Is(err, ErrTelegramInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "telegram delivery authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h HTTPHandler) discordDeliver(w http.ResponseWriter, r *http.Request, actor string) {

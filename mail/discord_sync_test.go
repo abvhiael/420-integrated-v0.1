@@ -212,12 +212,16 @@ func TestDiscordSyncQuarantinesProtectedIdentityImpersonation(t *testing.T) {
 	authority := &discordFullAuthorityStub{page: DiscordSyncPage{Messages: []DiscordInboundMessage{msg}}}
 	syncer, mailSvc := discordSyncHarness(t, NewMemoryStore(), authority)
 	out, err := syncer.Sync(context.Background(), "alice.420", "discord:123456789012345678")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(out.Imported) != 1 || out.Imported[0].State.Folder != FolderJunk || !out.Imported[0].State.Muted {
 		t.Fatalf("Discord impersonation was not quarantined: %+v", out.Imported)
 	}
 	records, err := mailSvc.ListQuarantine(context.Background(), "alice.420")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(records) != 1 || !containsString(records[0].Reasons, "EXTERNAL_PROTECTED_IDENTITY_CLAIM") {
 		t.Fatalf("Discord impersonation evidence missing: %+v", records)
 	}

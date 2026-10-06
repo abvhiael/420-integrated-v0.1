@@ -276,12 +276,16 @@ func TestTelegramSyncQuarantinesConfusableProtectedIdentityImpersonation(t *test
 	authority := &telegramFullAuthorityStub{page: TelegramSyncPage{Messages: []TelegramInboundMessage{msg}}}
 	syncer, mailSvc := telegramSyncHarness(t, NewMemoryStore(), authority)
 	out, err := syncer.Sync(context.Background(), "alice.420", "telegram:1234567890")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(out.Imported) != 1 || out.Imported[0].State.Folder != FolderJunk || !out.Imported[0].State.Muted {
 		t.Fatalf("Telegram confusable impersonation was not quarantined: %+v", out.Imported)
 	}
 	records, err := mailSvc.ListQuarantine(context.Background(), "alice.420")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(records) != 1 || !containsString(records[0].Reasons, "CONFUSABLE_PROTECTED_IDENTITY_CLAIM") {
 		t.Fatalf("Telegram confusable impersonation evidence missing: %+v", records)
 	}

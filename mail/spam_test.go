@@ -367,14 +367,18 @@ func TestProtectedEcosystemDomainLookalikesAreQuarantined(t *testing.T) {
 	ctx := context.Background()
 	msg, err := s.Send(ctx, "alice.420", SendRequest{
 		IdempotencyKey: "lookalike-domain",
-		Sender: "alice.420", Recipient: "bob.420",
+		Sender:         "alice.420", Recipient: "bob.420",
 		Subject: "Security notice",
-		Body: "Review at https://420integrated-login.example/verify",
-		Source: ServiceID,
+		Body:    "Review at https://420integrated-login.example/verify",
+		Source:  ServiceID,
 	})
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	state, err := s.GetMailboxState(ctx, "bob.420", msg.ID)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if state.Folder != FolderJunk || !state.Muted {
 		t.Fatalf("lookalike ecosystem domain not quarantined: %+v", state)
 	}
@@ -382,7 +386,9 @@ func TestProtectedEcosystemDomainLookalikesAreQuarantined(t *testing.T) {
 		t.Fatalf("lookalike-domain phishing emitted notification: %d", notify.Count())
 	}
 	records, err := s.ListQuarantine(ctx, "bob.420")
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(records) != 1 || !containsString(records[0].Reasons, "LOOKALIKE_ECOSYSTEM_DOMAIN") {
 		t.Fatalf("lookalike-domain reason missing: %+v", records)
 	}

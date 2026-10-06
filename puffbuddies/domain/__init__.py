@@ -1,0 +1,1 @@
+"""PuffBuddies canonical domain package."""

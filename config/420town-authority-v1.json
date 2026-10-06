@@ -1,0 +1,57 @@
+{
+  "schema": "420-town-authority-v1",
+  "serviceId": "420/service/town/v1",
+  "authorityContract": "TownAuthority420",
+  "authorityClass": "APPLICATION_SCOPED_ON_CHAIN",
+  "scope": [
+    "COMMUNITY_OWNERSHIP",
+    "MEMBERSHIP_LIFECYCLE",
+    "SCOPED_ROLES",
+    "ROLE_PERMISSIONS",
+    "SUBSCRIPTIONS",
+    "ENTITLEMENTS",
+    "TREASURY_REFERENCE"
+  ],
+  "membershipStates": ["NONE", "ACTIVE", "LEFT", "REMOVED"],
+  "subscriptionStates": ["NONE", "ACTIVE", "CANCELLED", "EXPIRED"],
+  "entitlementStates": ["NONE", "ACTIVE", "REVOKED", "EXPIRED"],
+  "roles": ["MEMBER", "MODERATOR", "ADMIN"],
+  "permissions": [
+    "MANAGE_MEMBERS",
+    "MANAGE_ROLES",
+    "MANAGE_SUBSCRIPTIONS",
+    "MANAGE_ENTITLEMENTS",
+    "MANAGE_TREASURY"
+  ],
+  "invariants": [
+    "TOWN-AUTH-001_OWNER_IS_ALWAYS_ACTIVE_MEMBER",
+    "TOWN-AUTH-002_OWNER_CANNOT_LEAVE_OR_BE_REMOVED",
+    "TOWN-AUTH-003_PRIVILEGE_IS_COMMUNITY_SCOPED",
+    "TOWN-AUTH-004_UNKNOWN_PERMISSION_FAILS_CLOSED",
+    "TOWN-AUTH-005_ADMIN_ROLE_ASSIGNMENT_IS_OWNER_ONLY",
+    "TOWN-AUTH-006_ROLE_PERMISSION_MUTATION_IS_OWNER_ONLY",
+    "TOWN-AUTH-007_LEAVE_OR_REMOVAL_REVOKES_PRIVILEGED_ROLES",
+    "TOWN-AUTH-008_REMOVED_MEMBER_CANNOT_SELF_REJOIN",
+    "TOWN-AUTH-009_SUBSCRIPTIONS_AND_ENTITLEMENTS_ARE_EXPLICIT_REVISIONED_LIFECYCLES",
+    "TOWN-AUTH-010_NONMEMBERS_CANNOT_RECEIVE_ACTIVE_SUBSCRIPTIONS_OR_ENTITLEMENTS",
+    "TOWN-AUTH-011_TREASURY_REFERENCE_REQUIRES_PAIRED_AUTHORITY_AND_ADDRESS",
+    "TOWN-AUTH-012_TOWN_HAS_NO_TREASURY_CUSTODY_OR_BALANCE_LEDGER",
+    "TOWN-AUTH-013_SEARCH_INDEXER_TRANSPORT_UI_AND_REWARDS_ARE_NOT_AUTHORITY"
+  ],
+  "treasuryModel": {
+    "mode": "REFERENCE_ONLY",
+    "custody": false,
+    "parallelBalanceLedger": false,
+    "binding": ["treasuryAuthorityId", "treasury"],
+    "reason": "420Town is a replaceable application service and must not acquire settlement/custody authority."
+  },
+  "nonAuthorityDependencies": [
+    "420 Search",
+    "420 Notifications",
+    "420 Storage",
+    "420Rewards",
+    "420Indexer",
+    "frontend",
+    "message transport"
+  ]
+}

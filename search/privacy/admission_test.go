@@ -96,10 +96,32 @@ func TestQualifiedPublicSourcesAreAdmitted(t *testing.T) {
 		{Source: architecture.SourceRights, Domain: architecture.DomainRightsRecord, Classification: ClassPublicOnChain, Public: true},
 		{Source: architecture.SourceCommons, Domain: architecture.DomainPublicCommons, Classification: ClassPublicOnChain, Public: true},
 		{Source: architecture.SourcePulse, Domain: architecture.DomainPublicPulse, Classification: ClassPublicOnChain, Public: true},
+		{Source: architecture.SourceTown, Domain: architecture.DomainPublicTown, Classification: ClassPublicApplication, Public: true},
 	}
 	for _, candidate := range tests {
 		if err := Admit(candidate); err != nil {
 			t.Fatalf("expected admission for %#v: %v", candidate, err)
 		}
+	}
+}
+
+func TestTownPublicApplicationClassificationIsExact(t *testing.T) {
+	if err := Admit(Candidate{
+		Source: architecture.SourceTown, Domain: architecture.DomainPublicTown,
+		Classification: ClassPublicApplication, Public: true,
+	}); err != nil {
+		t.Fatalf("Town public application projection rejected: %v", err)
+	}
+	if err := Admit(Candidate{
+		Source: architecture.SourceTown, Domain: architecture.DomainPublicTown,
+		Classification: ClassPublicOnChain, Public: true,
+	}); err == nil {
+		t.Fatal("Town must not be mislabeled as public on-chain state")
+	}
+	if err := Admit(Candidate{
+		Source: architecture.SourceIdentity, Domain: architecture.DomainPublicIdentity,
+		Classification: ClassPublicApplication, Public: true,
+	}); err == nil {
+		t.Fatal("public application classification must not widen unrelated Search sources")
 	}
 }

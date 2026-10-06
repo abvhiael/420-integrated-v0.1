@@ -195,8 +195,12 @@ PB-12 does **not** claim unavailable external/device evidence:
 
 Those are live/device/distribution gates for later release/testnet phases, not fabricated repository evidence.
 
-## Repository-wide Docs workflow
-The broad 420Docs workflow auto-triggered from documentation changes. It is not required for PB-12 Level-1/Level-2 completion under the phase policy and is not counted as PASS unless it completes successfully.
+## Supplementary 420Docs evidence
+The broad 420Docs workflow auto-triggered from documentation changes. It was not required for PB-12 Level-1/Level-2 completion under the phase policy, but it also completed successfully on the exact qualified implementation SHA:
+- run: `37537334436` — **SUCCESS**
+- job: `112521562973` (`qualify`) — **SUCCESS**
+
+This is retained as supplementary evidence only; PB-12 did not depend on repository-wide Docs qualification.
 
 ## Milestone status
 **PB-11/PB-12 client-parity integration milestone COMPLETE at Level 2.**

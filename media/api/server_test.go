@@ -19,8 +19,8 @@ type testBackend struct {
 func (b *testBackend) ListAssets(context.Context, string, int) (Page[Asset], error) {
 	return Page[Asset]{Items: []Asset{{
 		ID: "asset-1", OwnerRef: "wallet-1", State: "READY", Visibility: "PUBLIC",
-		CreatedAt: time.Date(2026, 10, 6, 12, 0, 0, 0, time.FixedZone("x", -6*3600)),
-		UpdatedAt: time.Date(2026, 10, 6, 12, 1, 0, 0, time.FixedZone("x", -6*3600)),
+		CreatedAt:  time.Date(2026, 10, 6, 12, 0, 0, 0, time.FixedZone("x", -6*3600)),
+		UpdatedAt:  time.Date(2026, 10, 6, 12, 1, 0, 0, time.FixedZone("x", -6*3600)),
 		Provenance: Provenance{Source: "420Indexer", Authority: "420Media", ObservedAt: time.Date(2026, 10, 6, 12, 2, 0, 0, time.FixedZone("x", -6*3600))},
 	}}, NextCursor: "cursor-2"}, nil
 }
@@ -63,10 +63,10 @@ func (b *testBackend) Capabilities(context.Context) (Capabilities, error) {
 	return Capabilities{
 		ServiceID: ServiceID, APIVersion: Version, Compatibility: CompatibilityMajor,
 		Canonical: false, Features: map[string]bool{"media.livestreaming": true},
-		Resources: []string{"assets", "livestreams", "search", "notifications", "signing_intents"},
+		Resources:     []string{"assets", "livestreams", "search", "notifications", "signing_intents"},
 		WalletSigning: "external_handoff", Pagination: "cursor", Timestamps: "RFC3339 UTC",
 		MaxPageLimit: MaxPageLimit,
-		Errors: []ErrorCode{CodeInvalidRequest, CodeNotFound, CodeConflict, CodeUnavailable},
+		Errors:       []ErrorCode{CodeInvalidRequest, CodeNotFound, CodeConflict, CodeUnavailable},
 	}, nil
 }
 func (b *testBackend) Compatibility(context.Context) (Compatibility, error) {
@@ -213,10 +213,12 @@ func TestSigningIntentMatchesExactWalletChainNetworkAndPayload(t *testing.T) {
 }
 
 type codedFailure struct{ code ErrorCode }
-func (e codedFailure) Error() string { return "coded failure" }
+
+func (e codedFailure) Error() string           { return "coded failure" }
 func (e codedFailure) APIErrorCode() ErrorCode { return e.code }
 
 type failingBackend struct{ testBackend }
+
 func (b *failingBackend) GetAsset(context.Context, string) (Asset, error) {
 	return Asset{}, codedFailure{code: CodeNotFound}
 }

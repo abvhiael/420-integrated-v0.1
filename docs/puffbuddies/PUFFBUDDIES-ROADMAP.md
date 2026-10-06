@@ -1504,7 +1504,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** eligible profile creation/edit/save works through canonical private persistence; completeness gates activation; visibility is explicit/versioned/server-authorized/fail-closed; profile/visibility changes invalidate stale derived state; lifecycle pause/reactivation/delete initiation respect current authority; privacy/public-chain/wallet-enumeration negatives hold; retained PuffBuddies regressions and exact-head PB-3 fast qualification pass; durable evidence recorded.
 
-### PB-4 — Discovery engine
+### PB-4 — Discovery engine — COMPLETE
 
 **Purpose:** implement the private PuffBuddies discovery engine over the current PB-2 eligibility/generation gate and PB-3 profile/visibility authority. Hard exclusions run before ranking; ranking remains derived/non-canonical and cannot create consent.
 

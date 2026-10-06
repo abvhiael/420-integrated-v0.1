@@ -518,9 +518,9 @@ CMP-4.7 is an ordinary Level 1 step. CMP-4.6 remains the most recent CMP-4 Level
 
 ## CMP-4.8 — Publication / retention policy
 
-**Status: CLOSEOUT CANDIDATE — Level 1 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `fae498b72b2693f4264df3f208ebbe6a1e1d44bf`.**
 
-Versioned project-authorized publication/access/retention commitments now bind exact CMP-4.7 lineage records with explicit PRIVATE/RESTRICTED/PUBLIC semantics, embargo and retention windows, append-only policy history, and fail-closed canonicality. Raw scientific bytes remain off-chain. Specification: [CMP-4.8 publication / retention policy](CMP-4.8-PUBLICATION-RETENTION-POLICY.md).
+Versioned project-authorized publication/access/retention commitments now bind exact CMP-4.7 lineage records with explicit PRIVATE/RESTRICTED/PUBLIC semantics, embargo and retention windows, append-only policy history, and fail-closed canonicality. Raw scientific bytes remain off-chain. Specification: [CMP-4.8 publication / retention policy](CMP-4.8-PUBLICATION-RETENTION-POLICY.md). Durable evidence: [CMP-4.8 qualification](CMP-4.8-QUALIFICATION-EVIDENCE.md).
 
 CMP-4.8 is an ordinary Level 1 step. CMP-4.6 remains the most recent CMP-4 Level 2 integration milestone.
 
@@ -714,7 +714,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | CMP-4.5–CMP-4.7 COMPLETE; CMP-4.8 closeout candidate, Level 1 qualification pending |
+| CMP-4 scientific compute framework | CMP-4.5–CMP-4.8 COMPLETE; CMP-4.6 remains the first CMP-4 Level 2 milestone; CMP-4.9 next |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

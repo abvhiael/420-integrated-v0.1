@@ -1,6 +1,6 @@
 # CMP-4.8 — Publication / retention policy
 
-Status: **CLOSEOUT CANDIDATE — LEVEL 1 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 EXACT-HEAD QUALIFIED ON `fae498b72b2693f4264df3f208ebbe6a1e1d44bf`.**
 
 Canonical roadmap step: **CMP-4.8 — Publication / retention policy**.
 
@@ -127,6 +127,26 @@ Level 2 is not required again at CMP-4.8. Level 3 remains CMP-4.10.
 - SDK/API/indexer expansion — CMP-7;
 - Compute UI — CMP-8;
 - public/testnet storage enforcement and scientific demonstration — CMP-9.
+
+## Qualification evidence
+
+- qualified implementation/closeout SHA: `fae498b72b2693f4264df3f208ebbe6a1e1d44bf`;
+- branch reconciliation base carried into CMP-4.8: `f5fe16414893a1e4bd4f3db22eb36b685a2030f5`;
+- current `main` at evidence closeout: `23ebff000a471bfbc4439894f797f3b17a530867`;
+- later `main` movement contains no Compute/CMP-4 surface changes and is deferred to CMP-4.10 Level 3 reconciliation;
+- Compute Market Qualification: **#425** / run `37496866215` / job `112383527372` — **SUCCESS**;
+- exact-head checkout and SHA verification — PASS;
+- Compute Market contracts build — PASS;
+- retained `Compute*.t.sol` suite — PASS;
+- verifier-script compilation — PASS;
+- CMP-4.1–CMP-4.7 retained compatibility verifiers — PASS;
+- CMP-4.8 publication/retention verifier — PASS;
+- Level 2 — not required again at this ordinary step;
+- Level 3 — deferred to CMP-4.10.
+
+The first CMP-4.8 qualification attempt at `786bb7a75b2e436b5c3545fd2eccaf75c8d711d0` passed the complete retained Solidity suite (**516 passed, 0 failed, 0 skipped**) and all earlier CMP-4 verifiers, but the CMP-4.8 mechanical verifier failed on a documentation-token mismatch. The verifier wording was aligned to the already-correct specification semantics, producing the exact qualified SHA above.
+
+Durable evidence: [CMP-4.8 qualification evidence](CMP-4.8-QUALIFICATION-EVIDENCE.md).
 
 ## Next canonical step
 

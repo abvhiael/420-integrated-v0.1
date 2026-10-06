@@ -274,8 +274,7 @@ func TestRetiredCanonicalStreamCannotStartOrRecoverButCanStop(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	started, err := svc.Start(ctx, "0xabc", created.ID)
-	if err != nil {
+	if _, err := svc.Start(ctx, "0xabc", created.ID); err != nil {
 		t.Fatal(err)
 	}
 	authority.retired = true

@@ -145,57 +145,55 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 		}
 		return candidates[i].Message.CreatedAt.After(candidates[j].Message.CreatedAt)
 	})
-	if len(candidates) > MaxSearchScanItems {
-		candidates = candidates[:MaxSearchScanItems]
+
+	if offset >= len(candidates) {
+		return SearchResult{Items: []MailboxItem{}}, nil
 	}
 
 	query := strings.ToLower(req.Query)
-	results := make([]MailboxItem, 0, len(candidates))
-	for _, item := range candidates {
-		if query == "" {
-			results = append(results, item)
-			continue
+	results := make([]MailboxItem, 0, req.Limit)
+	scanned := 0
+	nextOffset := offset
+	for nextOffset < len(candidates) && scanned < MaxSearchScanItems && len(results) < req.Limit {
+		item := candidates[nextOffset]
+		nextOffset++
+		scanned++
+
+		matched := query == ""
+		if !matched {
+			metaParts := []string{
+				item.Message.Sender,
+				item.Message.Recipient,
+				item.Message.Subject,
+				item.Message.Source,
+				string(item.State.Folder),
+			}
+			for _, labelID := range item.State.LabelIDs {
+				metaParts = append(metaParts, labelNames[labelID])
+			}
+			if item.State.CustomFolderID != "" {
+				metaParts = append(metaParts, customFolderNames[item.State.CustomFolderID])
+			}
+			matched = strings.Contains(strings.ToLower(strings.Join(metaParts, "\n")), query)
 		}
-		metaParts := []string{
-			item.Message.Sender,
-			item.Message.Recipient,
-			item.Message.Subject,
-			item.Message.Source,
-			string(item.State.Folder),
+		if !matched {
+			if s.Blobs == nil {
+				return SearchResult{}, errors.New("mail: private body storage unavailable for search")
+			}
+			body, err := s.Blobs.GetPrivate(ctx, actor, item.Message.BodyRef)
+			if err != nil {
+				return SearchResult{}, err
+			}
+			matched = strings.Contains(strings.ToLower(string(body)), query)
 		}
-		for _, labelID := range item.State.LabelIDs {
-			metaParts = append(metaParts, labelNames[labelID])
-		}
-		if item.State.CustomFolderID != "" {
-			metaParts = append(metaParts, customFolderNames[item.State.CustomFolderID])
-		}
-		meta := strings.ToLower(strings.Join(metaParts, "\n"))
-		if strings.Contains(meta, query) {
-			results = append(results, item)
-			continue
-		}
-		if s.Blobs == nil {
-			return SearchResult{}, errors.New("mail: private body storage unavailable for search")
-		}
-		body, err := s.Blobs.GetPrivate(ctx, actor, item.Message.BodyRef)
-		if err != nil {
-			return SearchResult{}, err
-		}
-		if strings.Contains(strings.ToLower(string(body)), query) {
+		if matched {
 			results = append(results, item)
 		}
 	}
 
-	if offset >= len(results) {
-		return SearchResult{Items: []MailboxItem{}, Scanned: len(candidates)}, nil
-	}
-	end := offset + req.Limit
-	if end > len(results) {
-		end = len(results)
-	}
-	out := SearchResult{Items: append([]MailboxItem(nil), results[offset:end]...), Scanned: len(candidates)}
-	if end < len(results) {
-		out.NextCursor = encodeCursor(end)
+	out := SearchResult{Items: results, Scanned: scanned}
+	if nextOffset < len(candidates) {
+		out.NextCursor = encodeCursor(nextOffset)
 	}
 	return out, nil
 }

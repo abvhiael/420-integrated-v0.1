@@ -481,5 +481,29 @@
     "verificationEvidencePersistence": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "signalIntegrationBoundary": {
+    "enabled": true,
+    "provider": "signal",
+    "status": "BOUNDARY_ONLY",
+    "architecture": "EXTERNAL_SIGNAL_TRANSPORT_ADAPTER",
+    "transportAuthority": "SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY",
+    "providerRegistrationAllowed": false,
+    "mailOwnsSignalIdentity": false,
+    "mailStoresProviderSecrets": false,
+    "accountLinking": false,
+    "outboundNotifications": false,
+    "shareAndForward": false,
+    "inboundSync": false,
+    "webhookIngestion": false,
+    "deepSync": false,
+    "deepSyncCondition": "STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED",
+    "rawAccessTokenInput": false,
+    "rawRefreshTokenInput": false,
+    "rawClientSecretInput": false,
+    "phoneNumberCredentialInput": false,
+    "verificationCodeInput": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

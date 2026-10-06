@@ -48,9 +48,15 @@ func TestOnboardingMethodsDelegateToCanonicalAuthority(t *testing.T) {
 		method OnboardingMethod
 		call   func(*OnboardingService) (OnboardingResult, error)
 	}{
-		{"google", OnboardingGoogle, func(s *OnboardingService) (OnboardingResult, error) { return s.Google(context.Background(), GoogleOnboardingRequest{IDToken: "google-id-token"}) }},
-		{"apple", OnboardingApple, func(s *OnboardingService) (OnboardingResult, error) { return s.Apple(context.Background(), AppleOnboardingRequest{IDToken: "apple-id-token"}) }},
-		{"passkey", OnboardingPasskey, func(s *OnboardingService) (OnboardingResult, error) { return s.Passkey(context.Background(), PasskeyOnboardingRequest{Assertion: "webauthn-assertion"}) }},
+		{"google", OnboardingGoogle, func(s *OnboardingService) (OnboardingResult, error) {
+			return s.Google(context.Background(), GoogleOnboardingRequest{IDToken: "google-id-token"})
+		}},
+		{"apple", OnboardingApple, func(s *OnboardingService) (OnboardingResult, error) {
+			return s.Apple(context.Background(), AppleOnboardingRequest{IDToken: "apple-id-token"})
+		}},
+		{"passkey", OnboardingPasskey, func(s *OnboardingService) (OnboardingResult, error) {
+			return s.Passkey(context.Background(), PasskeyOnboardingRequest{Assertion: "webauthn-assertion"})
+		}},
 		{"wallet", OnboardingExistingWallet, func(s *OnboardingService) (OnboardingResult, error) {
 			return s.ExistingWallet(context.Background(), WalletOnboardingRequest{
 				Address: "0x1111111111111111111111111111111111111111", Challenge: "nonce-bound-challenge", Signature: "0xsigned",
@@ -79,10 +85,18 @@ func TestOnboardingMethodsDelegateToCanonicalAuthority(t *testing.T) {
 func TestOnboardingRejectsInvalidOrCustodialAuthorityResults(t *testing.T) {
 	now := time.Unix(1700000000, 0).UTC()
 	cases := []OnboardingResult{
-		func() OnboardingResult { r := validOnboardingResult(OnboardingGoogle); r.NonCustodial = false; return r }(),
+		func() OnboardingResult {
+			r := validOnboardingResult(OnboardingGoogle)
+			r.NonCustodial = false
+			return r
+		}(),
 		func() OnboardingResult { r := validOnboardingResult(OnboardingGoogle); r.WalletAddress = ""; return r }(),
 		func() OnboardingResult { r := validOnboardingResult(OnboardingGoogle); r.SessionToken = ""; return r }(),
-		func() OnboardingResult { r := validOnboardingResult(OnboardingGoogle); r.SessionExpiresAt = now; return r }(),
+		func() OnboardingResult {
+			r := validOnboardingResult(OnboardingGoogle)
+			r.SessionExpiresAt = now
+			return r
+		}(),
 		func() OnboardingResult { r := validOnboardingResult(OnboardingApple); return r }(),
 	}
 	for i, result := range cases {

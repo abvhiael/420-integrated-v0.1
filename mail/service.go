@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -135,28 +134,29 @@ type MailboxPage struct {
 	NextCursor string        `json:"next_cursor,omitempty"`
 }
 
-type MemoryStore struct {
-	mu       sync.RWMutex
-	messages map[string]Message
-	byIdem   map[string]string
-	mailbox  map[string]MailboxState
-}
-
-func NewMemoryStore() *MemoryStore {
-	return &MemoryStore{messages: map[string]Message{}, byIdem: map[string]string{}, mailbox: map[string]MailboxState{}}
-}
-
 type Service struct {
 	Identities IdentityDirectory
 	Messenger  MessengerPolicy
 	Blobs      PrivateBlobStore
 	Notify     NotificationSink
-	Store      *MemoryStore
+	Store      MailStore
 	Now        func() time.Time
 }
 
 func NewService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink) *Service {
-	return &Service{Identities: ids, Messenger: messenger, Blobs: blobs, Notify: notify, Store: NewMemoryStore(), Now: func() time.Time { return time.Now().UTC() }}
+	return NewServiceWithStore(ids, messenger, blobs, notify, NewMemoryStore())
+}
+
+func NewServiceWithStore(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, store MailStore) *Service {
+	return &Service{Identities: ids, Messenger: messenger, Blobs: blobs, Notify: notify, Store: store, Now: func() time.Time { return time.Now().UTC() }}
+}
+
+func NewDurableService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, path string) (*Service, error) {
+	store, err := OpenDurableStore(path)
+	if err != nil {
+		return nil, err
+	}
+	return NewServiceWithStore(ids, messenger, blobs, notify, store), nil
 }
 
 func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Message, error) {
@@ -187,16 +187,23 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 
 	fp := requestFingerprint(req)
 	idemKey := req.Sender + "\x00" + req.IdempotencyKey
-	s.Store.mu.RLock()
-	if id, ok := s.Store.byIdem[idemKey]; ok {
-		existing := s.Store.messages[id]
-		s.Store.mu.RUnlock()
+	var existing Message
+	var found bool
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		if id, ok := data.ByIdem[idemKey]; ok {
+			existing = data.Messages[id]
+			found = true
+		}
+		return nil
+	}); err != nil {
+		return Message{}, fmt.Errorf("mail: read metadata store: %w", err)
+	}
+	if found {
 		if existing.Fingerprint != fp {
 			return Message{}, ErrIdempotencyConflict
 		}
 		return existing, nil
 	}
-	s.Store.mu.RUnlock()
 
 	ref, digest, err := s.Blobs.PutPrivate(ctx, req.Recipient, []byte(req.Body))
 	if err != nil {
@@ -212,24 +219,31 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 	senderState := MailboxState{MessageID: id, Owner: req.Sender, Folder: FolderSent, ReadAt: &senderReadAt, UpdatedAt: now, Version: 1}
 	recipientState := MailboxState{MessageID: id, Owner: req.Recipient, Folder: FolderInbox, UpdatedAt: now, Version: 1}
 
-	s.Store.mu.Lock()
-	if existingID, ok := s.Store.byIdem[idemKey]; ok {
-		existing := s.Store.messages[existingID]
-		s.Store.mu.Unlock()
-		if existing.Fingerprint != fp {
-			return Message{}, ErrIdempotencyConflict
+	result := msg
+	created := false
+	if err := s.Store.Update(ctx, func(data *storeData) error {
+		if existingID, ok := data.ByIdem[idemKey]; ok {
+			existing := data.Messages[existingID]
+			if existing.Fingerprint != fp {
+				return ErrIdempotencyConflict
+			}
+			result = existing
+			return nil
 		}
-		return existing, nil
+		data.Messages[id] = msg
+		data.ByIdem[idemKey] = id
+		data.Mailbox[mailboxKey(req.Sender, id)] = senderState
+		data.Mailbox[mailboxKey(req.Recipient, id)] = recipientState
+		result = msg
+		created = true
+		return nil
+	}); err != nil {
+		return Message{}, err
 	}
-	s.Store.messages[id] = msg
-	s.Store.byIdem[idemKey] = id
-	s.Store.mailbox[mailboxKey(req.Sender, id)] = senderState
-	s.Store.mailbox[mailboxKey(req.Recipient, id)] = recipientState
-	s.Store.mu.Unlock()
-	if s.Notify != nil {
+	if created && s.Notify != nil {
 		_ = s.Notify.NotifyMail(ctx, Notification{MessageID: id, Recipient: req.Recipient, Sender: req.Sender, Source: req.Source})
 	}
-	return msg, nil
+	return result, nil
 }
 
 func (s *Service) Inbox(ctx context.Context, actor, cursor string, limit int) (Page, error) {
@@ -245,7 +259,6 @@ func (s *Service) Inbox(ctx context.Context, actor, cursor string, limit int) (P
 }
 
 func (s *Service) Mailbox(ctx context.Context, actor string, folder MailboxFolder, cursor string, limit int) (MailboxPage, error) {
-	_ = ctx
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return MailboxPage{}, ErrUnauthorized
@@ -263,19 +276,24 @@ func (s *Service) Mailbox(ctx context.Context, actor string, folder MailboxFolde
 	if err != nil {
 		return MailboxPage{}, ErrInvalidInput
 	}
-	s.Store.mu.RLock()
 	items := make([]MailboxItem, 0)
-	for _, state := range s.Store.mailbox {
-		if state.Owner != actor || state.Folder != folder || state.DeletedAt != nil {
-			continue
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		keys := data.MailboxIndex[mailboxIndexKey(actor, folder)]
+		for _, key := range keys {
+			state, ok := data.Mailbox[key]
+			if !ok || state.DeletedAt != nil {
+				continue
+			}
+			msg, ok := data.Messages[state.MessageID]
+			if !ok {
+				continue
+			}
+			items = append(items, MailboxItem{Message: msg, State: state})
 		}
-		msg, ok := s.Store.messages[state.MessageID]
-		if !ok {
-			continue
-		}
-		items = append(items, MailboxItem{Message: msg, State: state})
+		return nil
+	}); err != nil {
+		return MailboxPage{}, err
 	}
-	s.Store.mu.RUnlock()
 	sort.Slice(items, func(i, j int) bool {
 		if items[i].Message.CreatedAt.Equal(items[j].Message.CreatedAt) {
 			return items[i].Message.ID < items[j].Message.ID
@@ -297,14 +315,18 @@ func (s *Service) Mailbox(ctx context.Context, actor string, folder MailboxFolde
 }
 
 func (s *Service) GetMailboxState(ctx context.Context, actor, id string) (MailboxState, error) {
-	_ = ctx
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return MailboxState{}, ErrUnauthorized
 	}
-	s.Store.mu.RLock()
-	state, ok := s.Store.mailbox[mailboxKey(actor, id)]
-	s.Store.mu.RUnlock()
+	var state MailboxState
+	var ok bool
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		state, ok = data.Mailbox[mailboxKey(actor, id)]
+		return nil
+	}); err != nil {
+		return MailboxState{}, err
+	}
 	if !ok || state.DeletedAt != nil {
 		return MailboxState{}, ErrNotFound
 	}
@@ -312,143 +334,150 @@ func (s *Service) GetMailboxState(ctx context.Context, actor, id string) (Mailbo
 }
 
 func (s *Service) UpdateMailbox(ctx context.Context, actor, id string, update MailboxUpdate) (MailboxState, error) {
-	_ = ctx
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return MailboxState{}, ErrUnauthorized
 	}
-	s.Store.mu.Lock()
-	defer s.Store.mu.Unlock()
-	key := mailboxKey(actor, id)
-	state, ok := s.Store.mailbox[key]
-	if !ok || state.DeletedAt != nil {
-		return MailboxState{}, ErrNotFound
-	}
-	msg, ok := s.Store.messages[id]
-	if !ok {
-		return MailboxState{}, ErrNotFound
-	}
-	now := s.Now().UTC()
-	if update.Folder != nil {
-		target := *update.Folder
-		if state.Folder == FolderTrash && target != FolderTrash {
-			return MailboxState{}, ErrInvalidTransition
+	var result MailboxState
+	if err := s.Store.Update(ctx, func(data *storeData) error {
+		key := mailboxKey(actor, id)
+		state, ok := data.Mailbox[key]
+		if !ok || state.DeletedAt != nil {
+			return ErrNotFound
 		}
-		if !canMoveMailbox(actor, msg, state.Folder, target) {
-			return MailboxState{}, ErrInvalidTransition
+		msg, ok := data.Messages[id]
+		if !ok {
+			return ErrNotFound
 		}
-		if target != state.Folder {
-			state.PreviousFolder = state.Folder
-			state.Folder = target
-			switch target {
-			case FolderArchive:
-				t := now
-				state.ArchivedAt = &t
-			case FolderJunk:
-				t := now
-				state.JunkedAt = &t
-			case FolderTrash:
-				t := now
-				state.TrashedAt = &t
+		now := s.Now().UTC()
+		if update.Folder != nil {
+			target := *update.Folder
+			if state.Folder == FolderTrash && target != FolderTrash {
+				return ErrInvalidTransition
+			}
+			if !canMoveMailbox(actor, msg, state.Folder, target) {
+				return ErrInvalidTransition
+			}
+			if target != state.Folder {
+				state.PreviousFolder = state.Folder
+				state.Folder = target
+				switch target {
+				case FolderArchive:
+					t := now
+					state.ArchivedAt = &t
+				case FolderJunk:
+					t := now
+					state.JunkedAt = &t
+				case FolderTrash:
+					t := now
+					state.TrashedAt = &t
+				}
 			}
 		}
-	}
-	if update.Read != nil {
-		if actor != msg.Recipient {
-			return MailboxState{}, ErrUnauthorized
-		}
-		if *update.Read {
-			if state.ReadAt == nil {
-				t := now
-				state.ReadAt = &t
+		if update.Read != nil {
+			if actor != msg.Recipient {
+				return ErrUnauthorized
 			}
-			if msg.ReadAt == nil {
-				t := now
-				msg.ReadAt = &t
-				msg.UpdatedAt = now
-				msg.Version++
-				s.Store.messages[id] = msg
+			if *update.Read {
+				if state.ReadAt == nil {
+					t := now
+					state.ReadAt = &t
+				}
+				if msg.ReadAt == nil {
+					t := now
+					msg.ReadAt = &t
+					msg.UpdatedAt = now
+					msg.Version++
+					data.Messages[id] = msg
+				}
+			} else {
+				state.ReadAt = nil
 			}
-		} else {
-			state.ReadAt = nil
 		}
+		if update.Starred != nil {
+			state.Starred = *update.Starred
+		}
+		if update.Pinned != nil {
+			state.Pinned = *update.Pinned
+		}
+		if update.Muted != nil {
+			state.Muted = *update.Muted
+		}
+		state.UpdatedAt = now
+		state.Version++
+		data.Mailbox[key] = state
+		result = state
+		return nil
+	}); err != nil {
+		return MailboxState{}, err
 	}
-	if update.Starred != nil {
-		state.Starred = *update.Starred
-	}
-	if update.Pinned != nil {
-		state.Pinned = *update.Pinned
-	}
-	if update.Muted != nil {
-		state.Muted = *update.Muted
-	}
-	state.UpdatedAt = now
-	state.Version++
-	s.Store.mailbox[key] = state
-	return state, nil
+	return result, nil
 }
 
 func (s *Service) RestoreFromTrash(ctx context.Context, actor, id string) (MailboxState, error) {
-	_ = ctx
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return MailboxState{}, ErrUnauthorized
 	}
-	s.Store.mu.Lock()
-	defer s.Store.mu.Unlock()
-	key := mailboxKey(actor, id)
-	state, ok := s.Store.mailbox[key]
-	if !ok || state.DeletedAt != nil {
-		return MailboxState{}, ErrNotFound
-	}
-	msg, ok := s.Store.messages[id]
-	if !ok {
-		return MailboxState{}, ErrNotFound
-	}
-	if state.Folder != FolderTrash {
-		return MailboxState{}, ErrInvalidTransition
-	}
-	target := state.PreviousFolder
-	if target == "" || target == FolderTrash || target == FolderDrafts || target == FolderOutbox || !canMoveMailbox(actor, msg, FolderTrash, target) {
-		if actor == msg.Recipient {
-			target = FolderInbox
-		} else if actor == msg.Sender {
-			target = FolderSent
-		} else {
-			return MailboxState{}, ErrUnauthorized
+	var result MailboxState
+	if err := s.Store.Update(ctx, func(data *storeData) error {
+		key := mailboxKey(actor, id)
+		state, ok := data.Mailbox[key]
+		if !ok || state.DeletedAt != nil {
+			return ErrNotFound
 		}
+		msg, ok := data.Messages[id]
+		if !ok {
+			return ErrNotFound
+		}
+		if state.Folder != FolderTrash {
+			return ErrInvalidTransition
+		}
+		target := state.PreviousFolder
+		if target == "" || target == FolderTrash || target == FolderDrafts || target == FolderOutbox || !canMoveMailbox(actor, msg, FolderTrash, target) {
+			if actor == msg.Recipient {
+				target = FolderInbox
+			} else if actor == msg.Sender {
+				target = FolderSent
+			} else {
+				return ErrUnauthorized
+			}
+		}
+		now := s.Now().UTC()
+		state.Folder = target
+		state.PreviousFolder = FolderTrash
+		state.UpdatedAt = now
+		state.Version++
+		data.Mailbox[key] = state
+		result = state
+		return nil
+	}); err != nil {
+		return MailboxState{}, err
 	}
-	now := s.Now().UTC()
-	state.Folder = target
-	state.PreviousFolder = FolderTrash
-	state.UpdatedAt = now
-	state.Version++
-	s.Store.mailbox[key] = state
-	return state, nil
+	return result, nil
 }
 
 func (s *Service) PermanentlyDelete(ctx context.Context, actor, id string) error {
-	_ = ctx
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return ErrUnauthorized
 	}
-	s.Store.mu.Lock()
-	defer s.Store.mu.Unlock()
-	key := mailboxKey(actor, id)
-	state, ok := s.Store.mailbox[key]
-	if !ok || state.DeletedAt != nil {
-		return ErrNotFound
-	}
-	if state.Folder != FolderTrash {
-		return ErrInvalidTransition
-	}
-	now := s.Now().UTC()
-	state.DeletedAt = &now
-	state.UpdatedAt = now
-	state.Version++
-	s.Store.mailbox[key] = state
-	return nil
+	return s.Store.Update(ctx, func(data *storeData) error {
+		key := mailboxKey(actor, id)
+		state, ok := data.Mailbox[key]
+		if !ok || state.DeletedAt != nil {
+			return ErrNotFound
+		}
+		if state.Folder != FolderTrash {
+			return ErrInvalidTransition
+		}
+		now := s.Now().UTC()
+		state.DeletedAt = &now
+		state.UpdatedAt = now
+		state.Version++
+		data.Mailbox[key] = state
+		return nil
+	})
 }
 
 func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Message, error) {
@@ -456,11 +485,18 @@ func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Messa
 	if actor == "" {
 		return nil, Message{}, ErrUnauthorized
 	}
-	s.Store.mu.RLock()
-	msg, ok := s.Store.messages[id]
-	state, owns := s.Store.mailbox[mailboxKey(actor, id)]
-	s.Store.mu.RUnlock()
-	if !ok {
+	var msg Message
+	var msgOK bool
+	var state MailboxState
+	var owns bool
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		msg, msgOK = data.Messages[id]
+		state, owns = data.Mailbox[mailboxKey(actor, id)]
+		return nil
+	}); err != nil {
+		return nil, Message{}, err
+	}
+	if !msgOK {
 		return nil, Message{}, ErrNotFound
 	}
 	if msg.Recipient != actor && msg.Sender != actor {
@@ -481,9 +517,14 @@ func (s *Service) MarkRead(ctx context.Context, actor, id string) (Message, erro
 	if _, err := s.UpdateMailbox(ctx, actor, id, MailboxUpdate{Read: &read}); err != nil {
 		return Message{}, err
 	}
-	s.Store.mu.RLock()
-	msg, ok := s.Store.messages[id]
-	s.Store.mu.RUnlock()
+	var msg Message
+	var ok bool
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		msg, ok = data.Messages[id]
+		return nil
+	}); err != nil {
+		return Message{}, err
+	}
 	if !ok {
 		return Message{}, ErrNotFound
 	}

@@ -245,12 +245,12 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		if err != nil {
 			return err
 		}
+		if err := applyIncomingRules(data, req.Recipient, msg, req.Body, &recipientState, now); err != nil {
+			return err
+		}
 		if decision.Muted {
 			recipientState.Muted = true
 			recipientMuted = true
-		}
-		if err := applyIncomingRules(data, req.Recipient, msg, req.Body, &recipientState, now); err != nil {
-			return err
 		}
 		data.Messages[id] = msg
 		data.ByIdem[idemKey] = id

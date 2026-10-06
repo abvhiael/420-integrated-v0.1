@@ -228,7 +228,6 @@ func (c Client) SearchMailbox(ctx context.Context, req mail.SearchRequest) (mail
 	return out, err
 }
 
-
 func (c Client) ListRules(ctx context.Context) ([]mail.MailRule, error) {
 	var out []mail.MailRule
 	err := c.do(ctx, http.MethodGet, "/v1/rules", nil, &out)

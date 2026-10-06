@@ -155,6 +155,39 @@ API additions:
 - `PUT /v1/rules/{id}`
 - `DELETE /v1/rules/{id}`
 
+## Blocklists, Allowlists & Trust Controls
+
+MAIL-2.6 adds durable owner-scoped trust policy for identities, phrases, and application/source identifiers.
+
+Each trust entry has one disposition:
+
+- `BLOCK` — reject a new incoming delivery that matches the entry;
+- `ALLOW` — mark matching mail trusted for allowlist policy and permit a trusted identity/application to bypass phrase blocks;
+- `MUTE` — keep delivery but suppress the recipient notification and mark the recipient mailbox copy muted.
+
+Trust evaluation is deterministic:
+
+1. an explicit blocked sender identity or blocked application/source rejects the new delivery;
+2. an explicitly allowed sender identity or application marks the delivery trusted;
+3. blocked phrases reject only when the sender/application is not already trusted;
+4. allowed phrases may satisfy optional allowlist-only mode;
+5. matching mute entries suppress notification;
+6. when `require_trusted` is enabled, mail with no matching ALLOW entry is rejected.
+
+A recipient's trust policy is checked before private-body storage for a new logical send and checked again inside the durable delivery transaction. The second check prevents a concurrent trust-policy change from being bypassed. A sender-scoped idempotent replay of a delivery already committed before a later block still returns the existing logical message rather than retroactively failing.
+
+Identity/application/phrase values are normalized case-insensitively. Each owner may keep up to 250 trust entries. Rules and trust controls are separate: MAIL-2.5 organizes accepted mail; MAIL-2.6 may reject it before delivery. Trust mute has final precedence over a mailbox rule attempting to unmute the same incoming copy.
+
+Trust entries/settings are durable application metadata in store schema v4 and are never published to public 420Search or on-chain state.
+
+API additions:
+
+- `GET /v1/trust/entries`
+- `PUT /v1/trust/entries`
+- `DELETE /v1/trust/entries/{id}`
+- `GET /v1/trust/settings`
+- `PUT /v1/trust/settings`
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.

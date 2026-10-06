@@ -56,14 +56,14 @@ func (r *EthereumIdentityReader) call(ctx context.Context, to, data string) (str
 }
 
 type EthereumRightsReader struct {
-	rpc              ethadapter.RPC
-	assets           string
-	claims           string
-	router           string
-	subjectSelector  string
-	claimSelector    string
+	rpc               ethadapter.RPC
+	assets            string
+	claims            string
+	router            string
+	subjectSelector   string
+	claimSelector     string
 	effectiveSelector string
-	canUseSelector   string
+	canUseSelector    string
 }
 
 func NewEthereumRightsReader(
@@ -85,14 +85,14 @@ func NewEthereumRightsReader(
 		return nil, ErrInvalidRights
 	}
 	return &EthereumRightsReader{
-		rpc: rpc,
-		assets: strings.ToLower(assets),
-		claims: strings.ToLower(claims),
-		router: strings.ToLower(router),
-		subjectSelector: strings.ToLower(subjectSelector),
-		claimSelector: strings.ToLower(claimSelector),
+		rpc:               rpc,
+		assets:            strings.ToLower(assets),
+		claims:            strings.ToLower(claims),
+		router:            strings.ToLower(router),
+		subjectSelector:   strings.ToLower(subjectSelector),
+		claimSelector:     strings.ToLower(claimSelector),
 		effectiveSelector: strings.ToLower(effectiveSelector),
-		canUseSelector: strings.ToLower(canUseSelector),
+		canUseSelector:    strings.ToLower(canUseSelector),
 	}, nil
 }
 

@@ -1488,7 +1488,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** one reconciled exact merge-candidate SHA is established; Solidity Contracts full inventory PASS; Genesis/address-authority PASS; 420 Integrated/global PASS including Geth/fault/soak; complete retained PuffBuddies/PB-2 suite PASS; 420Docs/global PASS; applicable privacy/adversarial/invariant/failure/static/deployment/config checks PASS; roadmap/evidence/address/deployment claims reconciled; no remaining PB-2 implementation blocker; durable Level-3 evidence records every owner/run/job and exact SHA; PB-2 may then be formally marked COMPLETE and the next canonical phase is PB-3 — Profiles.
 
-### PB-3 — Profiles
+### PB-3 — Profiles — COMPLETE
 
 **Purpose:** implement the canonical private PuffBuddies profile boundary for eligible users: profile creation/editing, Dating/Buddy/Both mode, bounded profile text/prompts, opaque media metadata, explicit field-level visibility, canonical completeness, activation/reactivation, deactivation/delete initiation, private persistence, and stale-derived invalidation.
 

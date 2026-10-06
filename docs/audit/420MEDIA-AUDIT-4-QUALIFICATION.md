@@ -12,6 +12,8 @@ Qualification level: **Level 1 — app-scoped fast qualification**
 
 - implementation SHA: `14f87ce68fe9d7a0cc81654e2d86b915a08a285f`
 - base/main SHA: `d86a3810d2901dc1082b65dc9061896c46e1911d`
+- current main after qualification evidence update: `23ebff000a471bfbc4439894f797f3b17a530867`
+- post-qualification main divergence review: 12 commits; changes are PuffBuddies/global qualification-workflow only and do not touch Media, `sdk/storage420`, Storage execution/contracts, or this step's dependencies; no Level 1 requalification is required.
 - audit branch: `audit/420media-complete-20261006`
 - active PR: **#536**
 

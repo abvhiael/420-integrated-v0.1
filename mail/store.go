@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 3
+const DurableStoreSchemaVersion = 4
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -32,6 +32,8 @@ type storeData struct {
 	LabelIndex        map[string][]string
 	CustomFolderIndex map[string][]string
 	Rules             map[string]MailRule
+	TrustEntries      map[string]TrustEntry
+	TrustSettings     map[string]TrustSettings
 }
 
 type diskStoreData struct {
@@ -45,6 +47,8 @@ type diskStoreData struct {
 	LabelIndex        map[string][]string        `json:"label_index,omitempty"`
 	CustomFolderIndex map[string][]string        `json:"custom_folder_index,omitempty"`
 	Rules             map[string]MailRule        `json:"rules,omitempty"`
+	TrustEntries      map[string]TrustEntry       `json:"trust_entries,omitempty"`
+	TrustSettings     map[string]TrustSettings    `json:"trust_settings,omitempty"`
 	Fingerprints      map[string]string          `json:"fingerprints,omitempty"`
 	IdempotencyKeys   map[string]string          `json:"idempotency_keys,omitempty"`
 }
@@ -220,6 +224,8 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		LabelIndex:        disk.LabelIndex,
 		CustomFolderIndex: disk.CustomFolderIndex,
 		Rules:             disk.Rules,
+		TrustEntries:      disk.TrustEntries,
+		TrustSettings:     disk.TrustSettings,
 	}
 	normalizeStoreData(&data)
 	for id, fp := range disk.Fingerprints {
@@ -261,6 +267,8 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		LabelIndex:        data.LabelIndex,
 		CustomFolderIndex: data.CustomFolderIndex,
 		Rules:             data.Rules,
+		TrustEntries:      data.TrustEntries,
+		TrustSettings:     data.TrustSettings,
 		Fingerprints:      map[string]string{},
 		IdempotencyKeys:   map[string]string{},
 	}
@@ -334,6 +342,8 @@ func newStoreData() storeData {
 		LabelIndex:        map[string][]string{},
 		CustomFolderIndex: map[string][]string{},
 		Rules:             map[string]MailRule{},
+		TrustEntries:      map[string]TrustEntry{},
+		TrustSettings:     map[string]TrustSettings{},
 	}
 }
 
@@ -368,6 +378,12 @@ func normalizeStoreData(data *storeData) {
 	if data.Rules == nil {
 		data.Rules = map[string]MailRule{}
 	}
+	if data.TrustEntries == nil {
+		data.TrustEntries = map[string]TrustEntry{}
+	}
+	if data.TrustSettings == nil {
+		data.TrustSettings = map[string]TrustSettings{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -382,6 +398,8 @@ func cloneStoreData(src storeData) storeData {
 		LabelIndex:        make(map[string][]string, len(src.LabelIndex)),
 		CustomFolderIndex: make(map[string][]string, len(src.CustomFolderIndex)),
 		Rules:             make(map[string]MailRule, len(src.Rules)),
+		TrustEntries:      make(map[string]TrustEntry, len(src.TrustEntries)),
+		TrustSettings:     make(map[string]TrustSettings, len(src.TrustSettings)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -410,6 +428,12 @@ func cloneStoreData(src storeData) storeData {
 	for k, v := range src.Rules {
 		v.Action = cloneRuleAction(v.Action)
 		dst.Rules[k] = v
+	}
+	for k, v := range src.TrustEntries {
+		dst.TrustEntries[k] = v
+	}
+	for k, v := range src.TrustSettings {
+		dst.TrustSettings[k] = v
 	}
 	return dst
 }
@@ -500,6 +524,9 @@ func validateStoreData(data *storeData) error {
 		if err := validateStoredRule(data, key, rule); err != nil {
 			return fmt.Errorf("invalid mail rule %q: %w", key, err)
 		}
+	}
+	if err := validateTrustData(data); err != nil {
+		return fmt.Errorf("invalid trust data: %w", err)
 	}
 	return nil
 }

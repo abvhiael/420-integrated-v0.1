@@ -1,0 +1,60 @@
+{
+  "schema": "420-town-security-v1",
+  "serviceId": "420/service/town/v1",
+  "roadmapStep": "TOWN-AUDIT-9",
+  "status": "SECURITY_HARDENING_BASELINE",
+  "controls": {
+    "membershipRolePrivilegeEscalation": "TESTED",
+    "unauthorizedModeration": "TESTED",
+    "visibilityLeakage": "TESTED",
+    "replayDuplicateWrites": "TESTED",
+    "spamSybilGriefingDos": "TESTED",
+    "indexSearchPoisoning": "TESTED",
+    "storagePointerSubstitution": "TESTED",
+    "messageConfidentialityMetadata": "TESTED",
+    "alternatePathPermissionBypass": "TESTED",
+    "signedActionDomainSeparationNonces": "NOT_APPLICABLE_NO_SIGNED_ACTION_SURFACE",
+    "treasuryAccountingConservation": "NOT_APPLICABLE_REFERENCE_ONLY_NO_CUSTODY",
+    "reentrancyExternalCallValueMovement": "NOT_APPLICABLE_NO_VALUE_MOVEMENT",
+    "webhookReplay": "NOT_APPLICABLE_WEBHOOKS_DISABLED"
+  },
+  "acceptedDesignRisks": [
+    {
+      "id": "TOWN-RISK-001",
+      "risk": "Repository API authentication uses an injected Authenticator and includes a static-token implementation for tests; production authentication infrastructure is not materialized.",
+      "disposition": "ACCEPTED_PRE_PRODUCTION_BLOCKER",
+      "requiredBefore": "production/testnet release"
+    },
+    {
+      "id": "TOWN-RISK-002",
+      "risk": "Encrypted Messenger transport is replaceable and transport acceptance can occur before the canonical envelope commit completes.",
+      "disposition": "ACCEPTED_RETRY_IDEMPOTENCY_DEPENDENCY",
+      "requiredBefore": "production release"
+    },
+    {
+      "id": "TOWN-RISK-003",
+      "risk": "Live chain/network/contract bindings are intentionally unmaterialized in repository production web config.",
+      "disposition": "ACCEPTED_FAIL_CLOSED_TESTNET_BLOCKER",
+      "requiredBefore": "live testnet qualification"
+    }
+  ],
+  "unresolvedVulnerabilities": [],
+  "invariants": [
+    "TOWN-SEC-001_NON_OWNER_CANNOT_MUTATE_AUTHORITY",
+    "TOWN-SEC-002_ROLE_AUTHORITY_IS_COMMUNITY_SCOPED",
+    "TOWN-SEC-003_PRIVILEGED_ROLES_DO_NOT_RESURRECT_AFTER_REMOVAL",
+    "TOWN-SEC-004_UNKNOWN_PERMISSIONS_FAIL_CLOSED",
+    "TOWN-SEC-005_MODERATION_AUTHORITY_IS_COMMUNITY_SCOPED",
+    "TOWN-SEC-006_MODERATION_ALTERNATE_PATHS_CANNOT_BYPASS_ENFORCEMENT",
+    "TOWN-SEC-007_NON_PUBLIC_CONTENT_NEVER_ENTERS_PUBLIC_SEARCH",
+    "TOWN-SEC-008_STORAGE_OBJECT_AND_DIGEST_SUBSTITUTION_FAILS_CLOSED",
+    "TOWN-SEC-009_MUTATIONS_REQUIRE_AUTH_AND_IDEMPOTENCY",
+    "TOWN-SEC-010_REQUEST_BODY_AND_IDEMPOTENCY_KEY_ARE_BOUNDED",
+    "TOWN-SEC-011_CONTENT_AND_VOTE_RATE_LIMITS_BOUND_SWARMS",
+    "TOWN-SEC-012_MESSENGER_REQUIRES_CANONICAL_AUTHORITY_BEFORE_TRANSPORT",
+    "TOWN-SEC-013_MESSENGER_ENVELOPE_HAS_NO_PLAINTEXT_FIELD",
+    "TOWN-SEC-014_WEBHOOKS_STAY_DISABLED_WITHOUT_SIGNED_REPLAY_PROTECTION",
+    "TOWN-SEC-015_TREASURY_IS_REFERENCE_ONLY_AND_HAS_NO_VALUE_CUSTODY",
+    "TOWN-SEC-016_BROWSER_AUTHORITY_TRANSACTIONS_PIN_CHAIN_TARGET_AND_ZERO_VALUE"
+  ]
+}

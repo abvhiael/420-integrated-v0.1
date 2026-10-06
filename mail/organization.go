@@ -313,11 +313,95 @@ func (s *Service) BulkUpdateOrganization(ctx context.Context, actor string, req 
 }
 
 func (s *Service) MessagesByLabel(ctx context.Context, actor, labelID string, cursor string, limit int) (MailboxPage, error) {
+	actor = strings.TrimSpace(actor)
+	labelID = strings.TrimSpace(labelID)
+	if actor == "" {
+		return MailboxPage{}, ErrUnauthorized
+	}
+	if _, err := s.EnsureSystemLabels(ctx, actor); err != nil {
+		return MailboxPage{}, err
+	}
+	var definition LabelDefinition
+	var ok bool
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		definition, ok = data.Labels[organizationKey(actor, labelID)]
+		return nil
+	}); err != nil {
+		return MailboxPage{}, err
+	}
+	if !ok {
+		return MailboxPage{}, ErrNotFound
+	}
+	if definition.System {
+		return s.systemLabelPage(ctx, actor, definition.Name, cursor, limit)
+	}
 	return s.organizationPage(ctx, actor, organizationIndexKey(actor, labelID), true, cursor, limit)
 }
 
 func (s *Service) MessagesByCustomFolder(ctx context.Context, actor, folderID string, cursor string, limit int) (MailboxPage, error) {
 	return s.organizationPage(ctx, actor, organizationIndexKey(actor, folderID), false, cursor, limit)
+}
+
+func (s *Service) systemLabelPage(ctx context.Context, actor, name, cursor string, limit int) (MailboxPage, error) {
+	if limit <= 0 {
+		limit = DefaultPageSize
+	}
+	if limit > MaxPageSize {
+		limit = MaxPageSize
+	}
+	offset, err := decodeCursor(cursor)
+	if err != nil {
+		return MailboxPage{}, ErrInvalidInput
+	}
+	items := []MailboxItem{}
+	err = s.Store.View(ctx, func(data *storeData) error {
+		for _, state := range data.Mailbox {
+			if state.Owner != actor || state.DeletedAt != nil || !matchesSystemLabel(state, name) {
+				continue
+			}
+			msg, ok := data.Messages[state.MessageID]
+			if ok {
+				items = append(items, MailboxItem{Message: msg, State: state})
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return MailboxPage{}, err
+	}
+	sort.Slice(items, func(i, j int) bool {
+		if items[i].Message.CreatedAt.Equal(items[j].Message.CreatedAt) {
+			return items[i].Message.ID < items[j].Message.ID
+		}
+		return items[i].Message.CreatedAt.After(items[j].Message.CreatedAt)
+	})
+	if offset >= len(items) {
+		return MailboxPage{Items: []MailboxItem{}}, nil
+	}
+	end := offset + limit
+	if end > len(items) {
+		end = len(items)
+	}
+	page := MailboxPage{Items: append([]MailboxItem(nil), items[offset:end]...)}
+	if end < len(items) {
+		page.NextCursor = encodeCursor(end)
+	}
+	return page, nil
+}
+
+func matchesSystemLabel(state MailboxState, name string) bool {
+	switch strings.ToUpper(name) {
+	case "STARRED":
+		return state.Starred
+	case "PINNED":
+		return state.Pinned
+	case "MUTED":
+		return state.Muted
+	case "UNREAD":
+		return state.ReadAt == nil
+	default:
+		return false
+	}
 }
 
 func (s *Service) organizationPage(ctx context.Context, actor, indexKey string, label bool, cursor string, limit int) (MailboxPage, error) {

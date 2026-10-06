@@ -82,6 +82,24 @@ func TestOnboardingMethodsDelegateToCanonicalAuthority(t *testing.T) {
 	}
 }
 
+func TestOnboardingNormalizesAuthorityResult(t *testing.T) {
+	now := time.Unix(1700000000, 0).UTC()
+	result := validOnboardingResult(OnboardingGoogle)
+	result.Identity = "  alice.420  "
+	result.WalletAddress = "  0x1111111111111111111111111111111111111111  "
+	result.SessionToken = "  session-token  "
+	authority := &onboardingAuthorityStub{result: result}
+	svc := NewOnboardingService(authority)
+	svc.Now = func() time.Time { return now }
+	got, err := svc.Google(context.Background(), GoogleOnboardingRequest{IDToken: "token"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Identity != "alice.420" || got.WalletAddress != "0x1111111111111111111111111111111111111111" || got.SessionToken != "session-token" {
+		t.Fatalf("result not normalized: %+v", got)
+	}
+}
+
 func TestOnboardingRejectsInvalidOrCustodialAuthorityResults(t *testing.T) {
 	now := time.Unix(1700000000, 0).UTC()
 	cases := []OnboardingResult{

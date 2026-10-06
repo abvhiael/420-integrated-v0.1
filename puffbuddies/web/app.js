@@ -76,6 +76,13 @@ async function openMessenger(profileId){
   location.assign(url.href);
 }
 
+async function loadVerification(){
+  const data=await guarded(()=>api.verification(),"profile-output");if(!data)return;
+  clientState.applyAuthorityGeneration(generationOf(data));
+  const root=$("verification-badges");root.replaceChildren();
+  for(const label of data.indicators||[]){const span=document.createElement("span");span.className="chip";span.textContent=safeText(label);root.append(span)}
+}
+
 async function loadDiscovery(){
   const data=await guarded(()=>api.discovery(),"entry-output");if(!data)return;
   clientState.cacheDiscovery(data.items||[],generationOf(data));
@@ -110,6 +117,7 @@ $("check-eligibility").addEventListener("click",()=>guarded(async()=>{
 $("load-profile").addEventListener("click",()=>guarded(async()=>{
   const data=await api.profile();clientState.applyAuthorityGeneration(generationOf(data));clientState.profile=data.profile||null;
   setOutput("profile-output",clientState.profile?"Profile loaded.":"No profile returned.");
+  await loadVerification();
 },"profile-output"));
 
 $("profile-form").addEventListener("submit",(ev)=>{ev.preventDefault();guarded(async()=>{
@@ -117,6 +125,13 @@ $("profile-form").addEventListener("submit",(ev)=>{ev.preventDefault();guarded(a
   const out=await api.saveProfile(data);clientState.applyAuthorityGeneration(generationOf(out));
   setOutput("profile-output","Profile saved after server authorization.");
 },"profile-output")});
+
+$("upload-media").addEventListener("click",()=>guarded(async()=>{
+  const file=$("profile-media").files?.[0];
+  if(!file) throw new Error("Choose a JPEG, PNG or WebP profile photo first.");
+  const data=await api.uploadMedia(file);clientState.applyAuthorityGeneration(generationOf(data));
+  $("profile-media").value="";setOutput("profile-output","Profile photo uploaded after server authorization.");
+},"profile-output"));
 
 $("refresh-discovery").addEventListener("click",loadDiscovery);
 $("refresh-matches").addEventListener("click",loadMatches);
@@ -149,9 +164,3 @@ $("refresh-premium").addEventListener("click",()=>guarded(async()=>{
   if(!root.children.length)root.textContent="No active premium features.";
 },"premium-list"));
 
-guarded(async()=>{
-  if(!api)return;
-  const data=await api.verification();clientState.applyAuthorityGeneration(generationOf(data));
-  const root=$("verification-badges");root.replaceChildren();
-  for(const label of data.indicators||[]){const span=document.createElement("span");span.className="chip";span.textContent=safeText(label);root.append(span)}
-},"profile-output");

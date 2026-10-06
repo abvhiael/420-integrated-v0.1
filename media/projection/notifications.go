@@ -124,9 +124,9 @@ func (n *Notifications) Notify(
 			ID: id, UserRef: sub.UserRef, Topic: topic, Channel: sub.Channel,
 			Severity: severity, SourceResultID: result.ID,
 			SourceBlockHash: result.Provenance.BlockHash,
-			SourceTxHash: result.Provenance.TransactionHash,
-			SourceLogIndex: *result.Provenance.LogIndex,
-			Finality: result.Provenance.Finality, CreatedAt: n.now().UTC(),
+			SourceTxHash:    result.Provenance.TransactionHash,
+			SourceLogIndex:  *result.Provenance.LogIndex,
+			Finality:        result.Provenance.Finality, CreatedAt: n.now().UTC(),
 		}
 		n.delivered[id] = item
 		out = append(out, item)

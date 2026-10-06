@@ -146,7 +146,7 @@ They must not imply professional, medical, legal, laboratory, budtender, or safe
 
 ### PB-CANNABIS-013 — Cannabis fields are private by default
 
-Cannabis-use status, methods, frequency, contexts, preferences, and boundaries are private PuffBuddies state.
+Cannabis fields are private PuffBuddies state. Cannabis-use status, methods, frequency, contexts, preferences, and boundaries are private by default.
 
 They must not be written to public chain state by default.
 

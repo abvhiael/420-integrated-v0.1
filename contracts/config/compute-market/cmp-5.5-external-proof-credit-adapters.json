@@ -1,0 +1,50 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-5.5.ExternalProofCreditAdapters.v1",
+  "step": "CMP-5.5",
+  "title": "External proof/credit adapters",
+  "canonical_definition": "External proof/credit adapters",
+  "status": "COMPLETE",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": true,
+    "milestone": "second CMP-5 integration milestone — external adapter families converge into shared proof/credit normalization",
+    "level_3_deferred_to": "CMP-5.8 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeExternalProofCreditAdapter420.sol",
+    "test": "contracts/test/ComputeExternalProofCreditAdapter420.t.sol",
+    "doc": "docs/compute-market/CMP-5.5-EXTERNAL-PROOF-CREDIT-ADAPTERS.md",
+    "verifier": "scripts/verify-cmp-5-5-external-proof-credit-adapters.py"
+  },
+  "authority_boundaries": {
+    "external_truth_attestation": false,
+    "credential_validation": false,
+    "canonical_verifier_authority": false,
+    "reward_authority": false,
+    "vault_or_settlement_authority": false,
+    "stake_or_slash_authority": false,
+    "double_reward_prevention": false,
+    "external_issuer_registry_authority": false
+  },
+  "exit_criteria": [
+    "proof and credit records bind exact external adapter system and contribution identities",
+    "proof identifiers bind scheme issuer and proof commitment while record commitments bind timing expiry and evidence",
+    "credit identifiers bind scheme issuer and unit while record commitments bind amount observation time and evidence",
+    "missing source proof credit or evidence bindings fail closed",
+    "proof expiry before observation and zero observation times fail closed while explicit non-expiring proofs are supported",
+    "zero external credit amount fails closed",
+    "all four existing external adapter families produce mutually distinct source bindings for the same contribution commitment",
+    "normalization creates no external truth reward settlement stake slash issuer-registry or duplicate-prevention authority",
+    "CMP-5.6 double-reward prevention and CMP-5.7 external-result attestation remain explicitly deferred",
+    "dedicated tests mechanical verifier retained CMP-5 regressions and exact-head Compute Market qualification pass"
+  ],
+  "intentionally_deferred": [
+    "CMP-5.6 Double-reward prevention",
+    "CMP-5.7 External-result attestation",
+    "CMP-5.8 Level 3 phase closeout",
+    "CMP-6 useful-computation rewards",
+    "live external issuer registry integration",
+    "provider-specific proof verification or credit authority"
+  ],
+  "next_canonical_step": "CMP-5.6 — Double-reward prevention"
+}

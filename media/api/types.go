@@ -77,6 +77,7 @@ type Asset struct {
 	Revision      uint32     `json:"version"`
 	ProvenanceRef string     `json:"provenance_ref"`
 	DerivativeOf  string     `json:"derivative_of,omitempty"`
+	PlaybackURL   string     `json:"playback_url,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at"`
 	Provenance    Provenance `json:"provenance"`

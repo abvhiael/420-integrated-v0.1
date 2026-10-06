@@ -1634,6 +1634,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** complete core web MVP surface exists; same-origin fail-closed client/API boundary works; cache revocation and memory-only session semantics pass; accessibility/privacy/static checks pass; web build passes; retained PuffBuddies regressions and Level-2 integration pass on one exact SHA; PB-0 structure/authority verification stays green; durable evidence is recorded; deployment/live API/testnet readiness remain explicitly deferred.
 
+### PB-12 — Mobile applications
+
+**Purpose:** implement repository-side native PuffBuddies clients for iOS and Android after the qualified PB-11 web MVP, while preserving server/domain authority and all privacy, consent, safety, lifecycle, deletion, visibility and non-goal invariants.
+
+**Canonical requirements:** both native project/source trees must exist; both expose the PB-11-equivalent eligibility/profile/media/discovery/like-pass/matches/Messenger-entry/notifications/safety/settings/verification/premium surface; shared mobile state is presentation/cache only; API endpoints are injected HTTPS only; runtime config remains repository-qualified-not-deployed; derived cache is memory-only and invalidated on authority-generation advance/resume/protected denial/sign-out; iOS uses device-bound Keychain session storage; Android uses AndroidKeyStore AES-GCM with unlocked-device requirement; no wallet/private signing authority or raw provider credential is introduced; profile media is bounded to JPEG/PNG/WebP opaque device references; no precise-location permission; Android cleartext disabled; verified HTTPS app links only; push registration is opaque/non-authoritative; baseline safety/account-exit is non-premium; premium/verification remain bounded presentation/feature availability; no client force-match/unblock/admin-consent path; bundle/application identifiers are stable; generated artifacts are non-canonical; no signed device/store/live API/push/distribution claim is made.
+
+**Affected components:** `puffbuddies/mobile/`, PB-0.17 structural authorization, PB-12 workflow, current roadmap/master reconciliation and durable evidence.
+
+**Qualification:** Level 1 exact-head mobile qualification **plus Level 2 PB-11/PB-12 client-parity integration milestone**. Level 2 runs PB-12 mobile qualification, retained PB-11 web qualification, complete retained PuffBuddies Python regressions and PB-0 structure/authority verification on the same SHA.
+
+**Level-3 boundary:** full Solidity/Genesis/global/Docs/Geth/fault/soak/deployment qualification remains deferred to complete app-phase closeout and later live release phases.
+
+**Dependencies:** PB-0.2 through PB-0.17 as applicable; PB-1 through **PB-11 — Web application — COMPLETE**.
+
+**Exit criteria:** iOS/Android project/source checks pass; shared mobile behavior/security tests pass; device-bound session/stale-state/resume/privacy gates pass; repository mobile bundle build passes; retained PB-11 web qualification and complete PuffBuddies regressions pass on the same SHA; PB-0 owner stays green; exact-SHA evidence is recorded; device/store/live API/push/distribution gates remain explicitly deferred.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

@@ -218,7 +218,6 @@ func TestSigningIntentRejectsRequestedNetworkMismatchBeforeTransport(t *testing.
 	}
 }
 
-
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
 func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
@@ -234,25 +233,31 @@ func TestClientAttachesEphemeralSessionToken(t *testing.T) {
 		body := `{"version":"v1","data":{"items":[],"next_cursor":""},"rate_limit":{"limit":120,"remaining":119,"reset_at":"2026-10-06T20:31:00Z"}}`
 		return &http.Response{
 			StatusCode: http.StatusOK,
-			Header: http.Header{"Content-Type":[]string{"application/json"}},
-			Body: io.NopCloser(strings.NewReader(body)),
-			Request: req,
+			Header:     http.Header{"Content-Type": []string{"application/json"}},
+			Body:       io.NopCloser(strings.NewReader(body)),
+			Request:    req,
 		}, nil
 	})
 	client, err := New(Config{
-		BaseURL: "https://media.example.invalid",
-		HTTPClient: &http.Client{Transport: rt},
+		BaseURL:         "https://media.example.invalid",
+		HTTPClient:      &http.Client{Transport: rt},
 		ExpectedChainID: 420,
 		ExpectedNetwork: "testnet",
-		Session: tokenProvider("session-token"),
+		Session:         tokenProvider("session-token"),
 	})
-	if err != nil { t.Fatal(err) }
-	if _, err := client.Assets(context.Background(), "", 10); err != nil { t.Fatal(err) }
-	if seen != "Bearer session-token" { t.Fatalf("authorization=%q", seen) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := client.Assets(context.Background(), "", 10); err != nil {
+		t.Fatal(err)
+	}
+	if seen != "Bearer session-token" {
+		t.Fatalf("authorization=%q", seen)
+	}
 }
 
 func TestModerationTypesRemainPartOfTypedSDKSurface(t *testing.T) {
-	_ = mediasecurity.Report{ID:"report-1", ReporterRef:"CREATOR", TargetKind:"MediaAsset", TargetID:"asset-1", Reason:"abuse"}
-	_ = mediasecurity.Decision{ID:"decision-1", ReportID:"report-1", ModeratorRef:"MODERATOR", Action:mediasecurity.ActionHide, Reason:"review"}
-	_ = mediasecurity.Appeal{ID:"appeal-1", DecisionID:"decision-1", AppellantRef:"CREATOR", Reason:"licensed"}
+	_ = mediasecurity.Report{ID: "report-1", ReporterRef: "CREATOR", TargetKind: "MediaAsset", TargetID: "asset-1", Reason: "abuse"}
+	_ = mediasecurity.Decision{ID: "decision-1", ReportID: "report-1", ModeratorRef: "MODERATOR", Action: mediasecurity.ActionHide, Reason: "review"}
+	_ = mediasecurity.Appeal{ID: "appeal-1", DecisionID: "decision-1", AppellantRef: "CREATOR", Reason: "licensed"}
 }

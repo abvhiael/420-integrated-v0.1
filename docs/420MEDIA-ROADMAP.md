@@ -21,6 +21,8 @@ Turn the existing gateway primitives into the Genesis-enabled `media.livestreami
 
 This is a major application milestone and should receive Level 2 cross-component qualification.
 
+**Status: COMPLETE (Level 2).** Exact implementation SHA `6833ed362214f453bfe0fb224424e7f09c7eb1f9`; qualification run `37503557911`. Durable evidence: `docs/audit/420MEDIA-AUDIT-5-QUALIFICATION.md`.
+
 ## MEDIA-AUDIT-6 — Identity, Rights and ownership/provenance integration
 Bind creator/controller actions to scoped 420Identity/Wallet authorization and authoritative 420Rights/provenance checks where rights-bearing publication or reuse requires them. Preserve pseudonymous/optional Identity semantics and avoid making Media an identity or rights authority.
 

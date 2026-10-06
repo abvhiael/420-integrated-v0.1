@@ -1,0 +1,48 @@
+name: PuffBuddies PB-9 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb9.yml"
+  push:
+    branches: ["puffbuddies-pb9-verification-reputation-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb9.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb9-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-9 targeted verification and reputation
+        run: python3 -m unittest puffbuddies.tests.test_pb_9_verification_reputation -v
+      - name: PB-9 retained integration checks
+        run: python3 -m unittest puffbuddies.tests.test_pb_9_integration -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Verify PB-0 verification and reputation authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Verification privacy and anti-score negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(reputation_score|trust_score|desirability_score|social_credit|report_count|block_count|moderation_score|risk_score|wallet_balance|token_balance|staking_balance|payment_volume|premium_status)[[:space:]]*[:=]' puffbuddies/domain/verification_reputation.py
+          ! grep -RIE '(proof_bytes|credential_payload|government_id_image|biometric_template|wallet_address|date_of_birth)[[:space:]]*[:=]' puffbuddies/domain/verification_reputation.py
+          ! grep -RIE '420Verify' puffbuddies/domain/verification_reputation.py | grep -vE '(not accepted|not interpersonal|intentionally not accepted)'

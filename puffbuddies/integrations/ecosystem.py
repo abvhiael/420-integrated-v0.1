@@ -63,7 +63,7 @@ CONTRACTS = {
     "420Identity": IntegrationContract(
         "420Identity", DependencyClass.CANONICAL_CAPABILITY, SERVICE_IDS["420Identity"],
         frozenset({"credential_lifecycle", "minimum_disclosure_eligibility_evidence"}),
-        _ALL_PROTECTED - frozenset({"eligibility_decision"}),
+        _ALL_PROTECTED,
     ),
     "420Names": IntegrationContract(
         "420Names", DependencyClass.CANONICAL_CAPABILITY, SERVICE_IDS["420Names"],
@@ -73,7 +73,7 @@ CONTRACTS = {
     "420Messenger": IntegrationContract(
         "420Messenger", DependencyClass.CANONICAL_CAPABILITY, SERVICE_IDS["420Messenger"],
         frozenset({"conversation_state", "messenger_native_block", "endpoint_state", "delivery_receipt"}),
-        _ALL_PROTECTED - frozenset({"messaging_authorization"}),
+        _ALL_PROTECTED,
     ),
     "420Notifications": IntegrationContract(
         "420Notifications", DependencyClass.CANONICAL_CAPABILITY, SERVICE_IDS["420Notifications"],

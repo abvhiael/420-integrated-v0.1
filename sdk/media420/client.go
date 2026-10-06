@@ -64,7 +64,7 @@ func New(config Config) (*Client, error) {
 		baseURL: base, http: hc,
 		expectedChainID: config.ExpectedChainID,
 		expectedNetwork: strings.TrimSpace(config.ExpectedNetwork),
-		session: config.Session,
+		session:         config.Session,
 	}, nil
 }
 

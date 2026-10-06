@@ -15,7 +15,7 @@ def need(path: str, needles=()):
 audit = need("docs/420MEDIA-AUDIT.md", [
     "420/service/media/v1",
     "video_uploads_basic_livestreaming",
-    "CODE COMPLETE: **NO**",
+    "CODE COMPLETE: **YES for repository audit scope / pending Level 3 exact-head qualification**",
 ])
 roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-1",

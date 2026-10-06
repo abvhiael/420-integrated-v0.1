@@ -57,6 +57,16 @@ func (b *testBlobs) GetPrivate(_ context.Context, _ string, ref string) ([]byte,
 	return append([]byte(nil), v...), nil
 }
 
+func (b *testBlobs) DeletePrivate(_ context.Context, _ string, ref string) error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if _, ok := b.data[ref]; !ok {
+		return errors.New("missing blob")
+	}
+	delete(b.data, ref)
+	return nil
+}
+
 type testNotify struct {
 	mu    sync.Mutex
 	count int

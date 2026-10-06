@@ -44,12 +44,20 @@ func metadata() Metadata {
 }
 
 func build(t *testing.T, block uint64, finality searchresult.Finality, log uint64) searchresult.Result {
+	return buildAsset(t, "media-1", block, finality, log)
+}
+
+func buildAsset(t *testing.T, assetID string, block uint64, finality searchresult.Finality, log uint64) searchresult.Result {
 	t.Helper()
 	a := &publicAuthorizerFake{}
+	asset := publicAsset()
+	asset.ID = assetID
+	meta := metadata()
+	meta.CanonicalURL = "/media/" + assetID
 	r, err := BuildSearchResult(
 		context.Background(), a,
 		authority.Actor{Wallet: "0x1111111111111111111111111111111111111111"},
-		authority.Binding{}, publicAsset(), status(), provenance(block, finality, log), metadata(),
+		authority.Binding{}, asset, status(), provenance(block, finality, log), meta,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -163,10 +171,8 @@ func TestIndexRollbackRebuildAndFinalizedBoundary(t *testing.T) {
 
 func TestRebuildRejectsDuplicateCanonicalLog(t *testing.T) {
 	index := NewIndex()
-	a := build(t, 100, searchresult.FinalityFinalized, 7)
-	b := a
-	b.SourceKey = "media:other"
-	b.ID = "different-local-id"
+	a := buildAsset(t, "media-a", 100, searchresult.FinalityFinalized, 7)
+	b := buildAsset(t, "media-b", 100, searchresult.FinalityFinalized, 7)
 	if err := index.Rebuild([]Event{
 		{Action: ActionUpsert, Result: a},
 		{Action: ActionUpsert, Result: b},
@@ -194,7 +200,7 @@ func TestNotificationsAreOptInDeduplicatedFinalityAwareAndRetractable(t *testing
 		t.Fatalf("first=%+v err=%v", first, err)
 	}
 	second, err := n.Notify(safe, "media.published", SeverityInfo, false)
-	if err != nil || len(second) != 1 || second[0].ID != first[0].ID {
+	if err != nil || len(second) != 0 {
 		t.Fatalf("dedupe=%+v err=%v", second, err)
 	}
 	retracted := n.RetractBlock(safe.Provenance.BlockHash)

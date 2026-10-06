@@ -16,7 +16,11 @@
       "GET /v1/posts/{post}",
       "POST /v1/posts/{post}/threads",
       "POST /v1/threads/{thread}/comments",
-      "POST /v1/posts/{post}/votes"
+      "POST /v1/posts/{post}/votes",
+      "POST /v1/moderation/reports",
+      "GET /v1/moderation/cases/{case}",
+      "POST /v1/moderation/cases/{case}/actions",
+      "POST /v1/moderation/cases/{case}/appeals"
     ]
   },
   "sdk": {
@@ -27,7 +31,12 @@
     "writeIdempotencyRequired": true,
     "maxRetryAttempts": 5,
     "maxRetryDelayMs": 2000,
-    "retryableStatusCodes": [429, 502, 503, 504]
+    "retryableStatusCodes": [
+      429,
+      502,
+      503,
+      504
+    ]
   },
   "projection": {
     "package": "town/projection",

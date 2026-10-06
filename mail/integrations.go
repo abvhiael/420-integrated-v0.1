@@ -79,10 +79,10 @@ type ConnectorPullResult struct {
 }
 
 type ConnectorPushRequest struct {
-	Provider     string `json:"provider"`
-	ConnectionID string `json:"connection_id"`
-	Kind         string `json:"kind"`
-	Payload      string `json:"payload"`
+	Provider       string `json:"provider"`
+	ConnectionID   string `json:"connection_id"`
+	Kind           string `json:"kind"`
+	Payload        string `json:"payload"`
 	IdempotencyKey string `json:"idempotency_key"`
 }
 
@@ -95,17 +95,17 @@ type ConnectorPushResult struct {
 }
 
 type ConnectorWebhookRequest struct {
-	Provider string `json:"provider"`
+	Provider string            `json:"provider"`
 	Headers  map[string]string `json:"-"`
-	Payload  string `json:"payload"`
+	Payload  string            `json:"payload"`
 }
 
 type ConnectorWebhookResult struct {
-	Provider   string          `json:"provider"`
-	Identity   string          `json:"identity"`
-	ConnectionID string        `json:"connection_id"`
-	Items      []ConnectorItem `json:"items"`
-	Verified   bool            `json:"verified"`
+	Provider     string          `json:"provider"`
+	Identity     string          `json:"identity"`
+	ConnectionID string          `json:"connection_id"`
+	Items        []ConnectorItem `json:"items"`
+	Verified     bool            `json:"verified"`
 }
 
 type ConnectorAdapter interface {

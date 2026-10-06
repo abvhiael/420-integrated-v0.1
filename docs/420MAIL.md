@@ -934,6 +934,75 @@ It does **not** add:
 
 Those remain later roadmap steps.
 
+## MAIL-2.17 420Mail → Discord Delivery
+
+MAIL-2.17 adds authenticated outbound delivery from 420Mail into Discord through the provider-neutral connector `PUSH` capability.
+
+### Authority and connection boundary
+
+Outbound delivery requires:
+- the authenticated 420Mail identity;
+- an existing linked Discord connection ID in canonical `discord:{snowflake}` form;
+- a Discord connector authority implementing `DiscordDeliveryAuthority`.
+
+The Discord adapter advertises `PUSH` only when that authority is present. A link-only or sync-only Discord adapter continues to fail push requests as unsupported.
+
+Mail never accepts or persists raw Discord access tokens, refresh tokens, client secrets, bot tokens, or provider signing material. Credential use remains inside the Discord delivery authority / secure broker boundary.
+
+### Delivery request
+
+The dedicated Mail API accepts:
+- linked `connection_id`;
+- destination Discord `channel_id` snowflake;
+- message `content` up to 2000 bytes;
+- optional `reply_to_message_id` Discord snowflake;
+- required caller idempotency key.
+
+The request is normalized and validated before provider authority execution.
+
+### Provider handoff and result validation
+
+Mail delegates the normalized request to `DiscordDeliveryAuthority.DeliverDiscord` with:
+- authenticated Mail actor;
+- linked Discord user snowflake derived from the connection ID;
+- idempotency key;
+- normalized delivery message.
+
+The provider result must contain:
+- valid Discord message snowflake;
+- the exact requested Discord channel ID;
+- non-zero accepted timestamp.
+
+The generic connector service then independently verifies provider/connection/external-ID/accepted-state invariants.
+
+### Idempotency
+
+MAIL-2.17 uses the connector framework's required push idempotency key and passes the exact key through to the Discord delivery authority. Provider retries must therefore use the same key rather than generate a second external message.
+
+No second Mail-side outbound queue is introduced in this step; MAIL-2.10 remains the canonical internal Mail delivery queue, while Discord provider retry/idempotency is owned by the external connector authority.
+
+### API and client
+
+Authenticated endpoint:
+- `POST /v1/connectors/discord/deliver`
+
+Typed Go client:
+- `DeliverDiscord`
+
+The thin UI surfaces **Send to Discord** only when the configured Discord connector declares `PUSH`. The deployment shell supplies a normalized linked connection/destination/content request, while Mail generates the per-action idempotency key.
+
+### Scope boundary
+
+MAIL-2.17 does **not** add:
+- Discord wallet verification;
+- Discord webhook ingestion;
+- raw Discord credential handling;
+- public indexing of outbound message content;
+- on-chain Discord message bodies;
+- a second provider-specific persistence/queue system.
+
+Discord wallet verification remains MAIL-2.18.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

@@ -50,11 +50,11 @@ for token in ["apikey","privatekey","credential","secret","password","authorizat
 need(runtime.get("features",{}).get("authorityTransactions") is False,"repository production config must fail closed until network/authority materialized")
 need(runtime_example.get("features",{}).get("authorityTransactions") is True,"runtime example must demonstrate authority transaction materialization")
 
-for token in ["discover-form","join-community","leave-community","post-form","thread-form","comment-form","report-form","moderate-form","admin-form","access-form","aria-live","transaction-status"]:
+for token in ["discover-form","join-community","leave-community","post-form","thread-form","comment-form","report-form","moderate-form","appeal-form","admin-form","access-form","aria-live","transaction-status"]:
     need(token in html,f"Town web missing UI surface {token}")
 for token in ["@media","focus-visible","prefers-reduced-motion"]:
     need(token in styles,f"Town web accessibility/responsive stylesheet missing {token}")
-for token in ["discoverCommunities","service.feed","service.createPost","service.createThread","service.createComment","service.vote","service.report","service.moderate","readSubscription","readEntitlement","encodeJoin","encodeLeave","encodeCreate","encodeRemoveMember","encodeAssignRole"]:
+for token in ["discoverCommunities","service.feed","service.createPost","service.createThread","service.createComment","service.vote","service.report","service.moderate","service.appeal","readSubscription","readEntitlement","encodeJoin","encodeLeave","encodeCreate","encodeRemoveMember","encodeAssignRole"]:
     need(token in app,f"Town web controller missing {token}")
 need("localStorage" not in app and "sessionStorage" not in app,"Town web must not persist session token")
 need("innerHTML" not in app,"Town web dynamic rendering must avoid innerHTML")

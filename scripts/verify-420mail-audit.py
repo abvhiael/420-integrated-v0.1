@@ -138,6 +138,13 @@ if profile_path.is_file():
     if connectors.get("webhookAuthentication")!="ADAPTER_VERIFIES_TRANSPORT_HEADERS_AND_PAYLOAD" or connectors.get("webhookSessionAuth") is not False: errors.append("MAIL-2.14 webhook authority boundary drifted")
     if connectors.get("pullCursorOpaque") is not True or connectors.get("pushIdempotencyRequired") is not True or connectors.get("providerIsolation") is not True or connectors.get("capabilityDeclarationRequired") is not True: errors.append("MAIL-2.14 connector lifecycle boundary drifted")
     if connectors.get("credentialPersistence")!="CONNECTOR_ADAPTER_OR_SECURE_BROKER_ONLY" or connectors.get("mailMetadataCredentialPersistence") is not False or connectors.get("publicIndexing") is not False or connectors.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.14 connector persistence/privacy boundary drifted")
+    discord=profile.get("discordAccountLinking",{})
+    if discord.get("enabled") is not True or discord.get("provider")!="discord" or discord.get("connectorCapability")!="LINK": errors.append("MAIL-2.15 Discord connector boundary drifted")
+    if discord.get("authorization")!="OPAQUE_SECURE_BROKER_REFERENCE" or discord.get("requiredScopes")!=["identify"] or discord.get("verifiedProviderIdentityRequired") is not True: errors.append("MAIL-2.15 Discord authorization drifted")
+    if discord.get("externalAccountId")!="DISCORD_SNOWFLAKE" or discord.get("ownerBinding")!="AUTHENTICATED_420MAIL_IDENTITY" or discord.get("unlinkSupported") is not True or discord.get("nonCustodial") is not True: errors.append("MAIL-2.15 Discord identity binding drifted")
+    if discord.get("rawAccessTokenInput") is not False or discord.get("rawRefreshTokenInput") is not False or discord.get("rawClientSecretInput") is not False: errors.append("MAIL-2.15 Discord raw-secret boundary drifted")
+    if discord.get("credentialPersistence")!="DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY" or discord.get("mailMetadataCredentialPersistence") is not False: errors.append("MAIL-2.15 Discord credential persistence drifted")
+    if discord.get("sync") is not False or discord.get("delivery") is not False or discord.get("webhook") is not False or discord.get("walletVerification") is not False: errors.append("MAIL-2.15 pulled later Discord capabilities forward")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -255,6 +262,11 @@ for token in ['"/v1/connectors/providers"','"/v1/connectors/link"','"/v1/connect
     if token not in http: errors.append("MAIL-2.14 HTTP connector surface missing: "+token)
 for token in ["ConnectorProviders","LinkConnector","UnlinkConnector","PullConnector","PushConnector"]:
     if token not in client: errors.append("MAIL-2.14 client connector surface missing: "+token)
+discord_src=(ROOT/"mail/discord_link.go").read_text() if (ROOT/"mail/discord_link.go").is_file() else ""
+for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
+    if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
+for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
+    pass
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
@@ -294,4 +306,5 @@ print("MAIL-2.11 email-as-a-wallet onboarding: qualified by app-scoped checks")
 print("MAIL-2.12 passkey-first security: qualified by app-scoped checks")
 print("MAIL-2.13 wallet functions inside mail: qualified by app-scoped checks")
 print("MAIL-2.14 external integrations framework: qualified by app-scoped checks")
+print("MAIL-2.15 Discord account linking: qualified by app-scoped checks")
 

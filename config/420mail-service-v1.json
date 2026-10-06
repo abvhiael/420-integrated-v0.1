@@ -701,5 +701,37 @@
     "privateBodiesInline": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "crossPlatformVerifiedIdentity": {
+    "enabled": true,
+    "endpoint": "/v1/integrations/identity",
+    "authenticatedOwnerOnly": true,
+    "rootIdentity": "420MAIL_IDENTITY",
+    "evidenceSources": {
+      "discord": [
+        "PROVIDER_AUTHORITY_VERIFIED",
+        "WALLET_VERIFIED"
+      ],
+      "telegram": [
+        "PROVIDER_AUTHORITY_VERIFIED"
+      ]
+    },
+    "assurancePrecedence": [
+      "WALLET_VERIFIED",
+      "PROVIDER_AUTHORITY_VERIFIED"
+    ],
+    "walletProofProvider": "discord",
+    "telegramWalletVerification": false,
+    "signalIncluded": false,
+    "signalExclusionReason": "DEEP_SYNC_CONDITION_UNSATISFIED",
+    "durableEvidenceOnly": true,
+    "unverifiedStatesExcluded": true,
+    "foreignOwnerStatesExcluded": true,
+    "deterministicOrdering": "PROVIDER_ASC_CONNECTION_ID_ASC",
+    "rawCredentialInput": false,
+    "privateKeyInput": false,
+    "seedPhraseInput": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

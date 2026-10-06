@@ -45,7 +45,7 @@ func NewDiscordConnectorService(authority DiscordLinkAuthority) (*ConnectorServi
 }
 
 func (a *DiscordConnectorAdapter) Descriptor() ConnectorDescriptor {
-	capabilities := []ConnectorCapability{ConnectorCapabilityLink}
+	capabilities := []ConnectorCapability{ConnectorCapabilityLink, ConnectorCapabilityWalletVerify}
 	if _, ok := a.Authority.(DiscordSyncAuthority); ok {
 		capabilities = append(capabilities, ConnectorCapabilityPull)
 	}

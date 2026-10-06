@@ -26,13 +26,13 @@ func (s *telegramFullAuthorityStub) PullTelegram(_ context.Context, actor, userI
 
 func validTelegramInboundMessage() TelegramInboundMessage {
 	return TelegramInboundMessage{
-		MessageID: "42",
-		AuthorID: "2234567890",
+		MessageID:      "42",
+		AuthorID:       "2234567890",
 		AuthorUsername: "bob",
-		ChatID: "-1001234567890",
-		ChatTitle: "420 Friends",
-		Content: "hello from telegram",
-		CreatedAt: time.Unix(1700000700, 0).UTC(),
+		ChatID:         "-1001234567890",
+		ChatTitle:      "420 Friends",
+		Content:        "hello from telegram",
+		CreatedAt:      time.Unix(1700000700, 0).UTC(),
 	}
 }
 
@@ -51,7 +51,7 @@ func TestTelegramSyncMaterializesPrivateInboxMessage(t *testing.T) {
 	msg := validTelegramInboundMessage()
 	authority := &telegramFullAuthorityStub{
 		telegramLinkAuthorityStub: telegramLinkAuthorityStub{account: validTelegramAccount()},
-		page: TelegramSyncPage{Messages: []TelegramInboundMessage{msg}, NextCursor: "cursor-1"},
+		page:                      TelegramSyncPage{Messages: []TelegramInboundMessage{msg}, NextCursor: "cursor-1"},
 	}
 	syncer, mailSvc := telegramSyncHarness(t, NewMemoryStore(), authority)
 	out, err := syncer.Sync(context.Background(), "alice.420", "telegram:1234567890")
@@ -159,9 +159,9 @@ func TestTelegramSyncValidatesProviderMessageShapeBeforeMaterialization(t *testi
 		raw, _ := json.Marshal(msg)
 		adapter := testConnectorAdapter(TelegramProvider, ConnectorCapabilityPull)
 		adapter.pull = ConnectorPullResult{
-			Provider: TelegramProvider,
+			Provider:     TelegramProvider,
 			ConnectionID: "telegram:1234567890",
-			Items: []ConnectorItem{{ExternalID: msg.MessageID, OccurredAt: msg.CreatedAt, Kind: TelegramSyncItemKind, Payload: string(raw)}},
+			Items:        []ConnectorItem{{ExternalID: msg.MessageID, OccurredAt: msg.CreatedAt, Kind: TelegramSyncItemKind, Payload: string(raw)}},
 		}
 		reg, _ := NewConnectorRegistry(adapter)
 		mailSvc := NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore())

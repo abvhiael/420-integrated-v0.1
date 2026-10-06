@@ -437,14 +437,20 @@ func readBody(r *http.Request) ([]byte, error) {
 	return body, nil
 }
 
+type requestError struct{ err error }
+
+func (e requestError) Error() string { return e.err.Error() }
+func (e requestError) Unwrap() error { return e.err }
+func (e requestError) APIErrorCode() ErrorCode { return CodeInvalidRequest }
+
 func decodeStrict(body []byte, target any) error {
 	decoder := json.NewDecoder(bytes.NewReader(body))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(target); err != nil {
-		return err
+		return requestError{err: err}
 	}
 	if decoder.Decode(&struct{}{}) != io.EOF {
-		return errors.New("request must contain one JSON object")
+		return requestError{err: errors.New("request must contain one JSON object")}
 	}
 	return nil
 }

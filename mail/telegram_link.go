@@ -49,6 +49,9 @@ func (a *TelegramConnectorAdapter) Descriptor() ConnectorDescriptor {
 	if _, ok := a.Authority.(TelegramSyncAuthority); ok {
 		capabilities = append(capabilities, ConnectorCapabilityPull)
 	}
+	if _, ok := a.Authority.(TelegramDeliveryAuthority); ok {
+		capabilities = append(capabilities, ConnectorCapabilityPush)
+	}
 	return ConnectorDescriptor{
 		Provider:     TelegramProvider,
 		DisplayName:  "Telegram",
@@ -163,8 +166,46 @@ func (a *TelegramConnectorAdapter) Pull(ctx context.Context, actor string, req C
 	}, nil
 }
 
-func (a *TelegramConnectorAdapter) Push(context.Context, string, ConnectorPushRequest) (ConnectorPushResult, error) {
-	return ConnectorPushResult{}, ErrConnectorUnsupported
+func (a *TelegramConnectorAdapter) Push(ctx context.Context, actor string, req ConnectorPushRequest) (ConnectorPushResult, error) {
+	deliveryAuthority, ok := a.Authority.(TelegramDeliveryAuthority)
+	if !ok {
+		return ConnectorPushResult{}, ErrConnectorUnsupported
+	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return ConnectorPushResult{}, ErrUnauthorized
+	}
+	if normalizeProvider(req.Provider) != TelegramProvider || strings.TrimSpace(req.Kind) != TelegramDeliveryKind {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	userID, ok := telegramUserIDFromConnectionID(strings.TrimSpace(req.ConnectionID))
+	if !ok {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	idem := strings.TrimSpace(req.IdempotencyKey)
+	if idem == "" || len([]byte(idem)) > 256 {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	var message TelegramDeliveryMessage
+	if err := json.Unmarshal([]byte(req.Payload), &message); err != nil {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	if err := validateTelegramDeliveryMessage(message); err != nil {
+		return ConnectorPushResult{}, err
+	}
+	receipt, err := deliveryAuthority.DeliverTelegram(ctx, actor, userID, idem, message)
+	if err != nil {
+		return ConnectorPushResult{}, fmt.Errorf("mail: telegram delivery authority: %w", err)
+	}
+	receipt.MessageID = strings.TrimSpace(receipt.MessageID)
+	receipt.ChatID = strings.TrimSpace(receipt.ChatID)
+	if !validTelegramPositiveID(receipt.MessageID) || receipt.ChatID != strings.TrimSpace(message.ChatID) || receipt.AcceptedAt.IsZero() {
+		return ConnectorPushResult{}, ErrTelegramInvalidResult
+	}
+	return ConnectorPushResult{
+		Provider: TelegramProvider, ConnectionID: req.ConnectionID, ExternalID: receipt.MessageID,
+		AcceptedAt: receipt.AcceptedAt.UTC(), Accepted: true,
+	}, nil
 }
 
 func (a *TelegramConnectorAdapter) VerifyWebhook(context.Context, ConnectorWebhookRequest) (ConnectorWebhookResult, error) {

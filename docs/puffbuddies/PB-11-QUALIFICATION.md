@@ -208,8 +208,12 @@ PB-11 produces a reproducible static build from:
 
 Generated `dist/` output remains non-canonical and is not committed.
 
-## Repository-wide Docs workflow
-The broad 420Docs workflow auto-triggered from app-local documentation changes. It is not required for PB-11 Level-1/Level-2 completion under the phase-based policy and is not counted as PASS unless it completes successfully.
+## Supplementary 420Docs evidence
+The broad 420Docs workflow auto-triggered from app-local documentation changes. It was not required for PB-11 Level-1/Level-2 completion under the phase-based policy, but it also completed successfully on the exact qualified implementation SHA:
+- run: `37536013354` — **SUCCESS**
+- job: `112516974750` (`qualify`) — **SUCCESS**
+
+This is retained as supplementary evidence only; PB-11 did not depend on repository-wide Docs qualification.
 
 ## Milestone status
 **PB-11 web-MVP integration milestone COMPLETE at Level 2.**

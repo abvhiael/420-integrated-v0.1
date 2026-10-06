@@ -1310,7 +1310,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** request/response interface compiles; source/subject/policy/nonce/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/wallet fields absent; validated results reuse PB-2.1/PB-2.2 authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.4 — Privacy-preserving eligibility proofs
+### PB-2.4 — Privacy-preserving eligibility proofs — COMPLETE
 
 **Purpose:** implement a privacy-preserving adult-eligibility proof-consumption boundary that reveals only the minimum verified conclusion needed by PuffBuddies while keeping raw identity and raw cryptographic proof material outside the app domain.
 

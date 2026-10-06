@@ -20,6 +20,7 @@ audit = need("docs/420MEDIA-AUDIT.md", [
 roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-1",
     "MEDIA-AUDIT-2",
+    "MEDIA-AUDIT-3",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -63,6 +64,12 @@ for path in [
     "scripts/420media-anvil-integration.sh",
     "docs/420-MEDIA-PHASE-1-PROTOCOL.md",
     "docs/420-MEDIA-PHASE-2-NODE.md",
+    "docs/420-MEDIA-PHASE-3-OPERATOR-DISCOVERY.md",
+    "media/discovery/types.go",
+    "media/discovery/source.go",
+    "media/discovery/selector.go",
+    "media/discovery/ethereum.go",
+    "media/controlplane/discovery.go",
 ]:
     assert (ROOT / path).exists(), f"missing existing Media baseline file {path}"
 

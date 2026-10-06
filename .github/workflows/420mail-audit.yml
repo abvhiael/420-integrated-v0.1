@@ -26,7 +26,12 @@ jobs:
       - name: Exact head
         run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
       - name: Go format
-        run: test -z "$(gofmt -l mail)"
+        run: |
+          files="$(gofmt -l mail)"
+          if [ -n "$files" ]; then
+            printf '%s\n' "$files"
+            exit 1
+          fi
       - name: Go test
         run: go test ./mail/...
       - name: Go race test

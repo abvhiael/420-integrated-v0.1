@@ -402,7 +402,7 @@
     "credentialPersistence": "DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY",
     "mailMetadataCredentialPersistence": false,
     "sync": true,
-    "delivery": false,
+    "delivery": true,
     "webhook": false,
     "walletVerification": false
   },
@@ -426,6 +426,26 @@
     "publicIndexing": false,
     "messageBodiesOnChain": false,
     "delivery": false,
+    "walletVerification": false
+  },
+  "discordDelivery": {
+    "enabled": true,
+    "provider": "discord",
+    "connectorCapability": "PUSH",
+    "authenticatedOwnerOnly": true,
+    "connectionBinding": "DISCORD_LINK_CONNECTION_ID",
+    "destination": "DISCORD_CHANNEL_SNOWFLAKE",
+    "maxContentBytes": 2000,
+    "replyTarget": "OPTIONAL_DISCORD_MESSAGE_SNOWFLAKE",
+    "idempotency": "REQUIRED_CALLER_KEY_PASSED_TO_PROVIDER_AUTHORITY",
+    "providerAuthority": "DISCORD_DELIVERY_AUTHORITY",
+    "rawAccessTokenInput": false,
+    "rawRefreshTokenInput": false,
+    "rawClientSecretInput": false,
+    "credentialPersistence": "DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY",
+    "mailMetadataCredentialPersistence": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false,
     "walletVerification": false
   }
 }

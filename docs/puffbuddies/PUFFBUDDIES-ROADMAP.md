@@ -624,7 +624,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.14 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.15 — Visibility model
+### PB-0.15 — Visibility model — COMPLETE
 
 **Purpose:** define canonical field audiences and disclosure boundaries for private, discoverable, matched, participant-only, moderator-only, service-minimum, aggregate-only, explicitly public, and never-public PuffBuddies data.
 

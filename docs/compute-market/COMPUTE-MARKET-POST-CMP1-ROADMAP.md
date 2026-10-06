@@ -460,6 +460,10 @@ Purpose: make scientific/research workloads first-class while keeping the market
 
 ## CMP-4.1 — Scientific Work Unit specification
 
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
+
+Specification and machine-readable contract: [CMP-4.1 scientific work unit](CMP-4.1-SCIENTIFIC-WORK-UNIT-SPECIFICATION.md). Durable evidence: [CMP-4.1 qualification](CMP-4.1-QUALIFICATION-EVIDENCE.md).
+
 Each work unit should bind:
 
 - research project;
@@ -474,21 +478,65 @@ Each work unit should bind:
 
 ## CMP-4.2 — Research Project Registry
 
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
+
+Owner-controlled, revisioned project identity/commitment and new-work admission registry. Durable specification: [CMP-4.2 Research Project Registry](CMP-4.2-RESEARCH-PROJECT-REGISTRY.md). Durable evidence: [CMP-4.2 qualification](CMP-4.2-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-4.3 — Researcher / institution identity
+
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
+
+Compute-scoped role binding to canonical `Identity420` profiles and credentials, with dynamic credential/profile validity, role-specific assurance, append-only revisions and controller-transfer recovery semantics. Specification: [CMP-4.3 researcher / institution identity](CMP-4.3-RESEARCHER-INSTITUTION-IDENTITY.md). Durable evidence: [CMP-4.3 qualification](CMP-4.3-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-4.4 — Dataset manifests
 
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
+
+Revisioned, project-bound dataset manifests bind the canonical scientific input commitment to schema, access-policy, provenance, partition/layout and size commitments without placing raw datasets or access credentials on chain. Specification: [CMP-4.4 dataset manifests](CMP-4.4-DATASET-MANIFESTS.md). Durable evidence: [CMP-4.4 qualification](CMP-4.4-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-4.5 — Reproducible execution environments
+
+**Status: COMPLETE — Level 1 exact-head qualified on `31fc4fd39b283fd3a49eef514c55863551646da6`.**
+
+Project-bound revisioned execution-environment commitments freeze artifact, runtime, dependency, command, platform, sandbox and reproducibility semantics behind the scientific work-unit executable/container binding. Specification: [CMP-4.5 reproducible execution environments](CMP-4.5-REPRODUCIBLE-EXECUTION-ENVIRONMENTS.md). Durable evidence: [CMP-4.5 qualification](CMP-4.5-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-4.6 — Result provenance
 
+**Status: COMPLETE — Level 1 + first CMP-4 Level 2 exact-head qualified on `01824d6488a14d74d86ea6f1c6c8a4ecbd45d878`.**
+
+Immutable scientific result provenance links the exact CMP-4.1 scientific work-unit commitment to canonical result-bearing attempt, worker result, receipt-bound execution evidence, output schema, verifier and canonical verification decision without creating a second correctness or settlement authority. Specification: [CMP-4.6 result provenance](CMP-4.6-RESULT-PROVENANCE.md). Durable evidence: [CMP-4.6 qualification](CMP-4.6-QUALIFICATION-EVIDENCE.md).
+
+CMP-4.6 is the first CMP-4 app-integration milestone because project/dataset/environment/scientific-unit semantics converge with canonical worker result and verifier state here.
+
 ## CMP-4.7 — Scientific metadata and lineage
+
+**Status: COMPLETE — Level 1 exact-head qualified on `f7389d8c9755721058a073a1ad19747ca95c4572`.**
+
+Project-authenticated metadata commitments and parent-first provenance edges bind scientific interpretation and derivation lineage to exact canonical CMP-4.6 result provenance without placing raw research metadata on chain or creating correctness/access/economic authority. Specification: [CMP-4.7 scientific metadata and lineage](CMP-4.7-SCIENTIFIC-METADATA-LINEAGE.md). Durable evidence: [CMP-4.7 qualification](CMP-4.7-QUALIFICATION-EVIDENCE.md).
+
+CMP-4.7 is an ordinary Level 1 step. CMP-4.6 remains the most recent CMP-4 Level 2 integration milestone.
 
 ## CMP-4.8 — Publication / retention policy
 
+**Status: COMPLETE — Level 1 exact-head qualified on `fae498b72b2693f4264df3f208ebbe6a1e1d44bf`.**
+
+Versioned project-authorized publication/access/retention commitments now bind exact CMP-4.7 lineage records with explicit PRIVATE/RESTRICTED/PUBLIC semantics, embargo and retention windows, append-only policy history, and fail-closed canonicality. Raw scientific bytes remain off-chain. Specification: [CMP-4.8 publication / retention policy](CMP-4.8-PUBLICATION-RETENTION-POLICY.md). Durable evidence: [CMP-4.8 qualification](CMP-4.8-QUALIFICATION-EVIDENCE.md).
+
+CMP-4.8 is an ordinary Level 1 step. CMP-4.6 remains the most recent CMP-4 Level 2 integration milestone.
+
 ## CMP-4.9 — Research dashboard
 
+**Status: COMPLETE — Level 1 + second CMP-4 Level 2 exact-head qualified on `12186148274f643dfe4b1d07b194d3fffd3aa23b`.**
+
+A versioned read-only canonical research dashboard now composes exact CMP-4.2 project state, CMP-4.6 result provenance, CMP-4.7 metadata/lineage and CMP-4.8 publication policy without creating parallel authority or premature CMP-8 UI. Specification: [CMP-4.9 research dashboard](CMP-4.9-RESEARCH-DASHBOARD.md). Durable evidence: [CMP-4.9 qualification](CMP-4.9-QUALIFICATION-EVIDENCE.md). Compute Market Qualification #427 / run `37501862650` passed on the exact implementation SHA.
+
+CMP-4.9 is the second CMP-4 app-integration milestone because the complete scientific-framework graph converges into one canonical consumer surface before phase closeout.
+
 ## CMP-4.10 — Phase closeout
+
+**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+
+Reconcile the complete accumulated CMP-4 scientific framework against current `main`, force the canonical four-shard Solidity inventory, independently verify Genesis/address authority without duplicate Foundry execution, run global/Docs and retained Compute qualification, and preserve one exact merge-candidate SHA as phase-closeout evidence. Closeout definition: [CMP-4.10 phase closeout](CMP-4.10-PHASE-CLOSEOUT.md).
 
 ---
 
@@ -676,7 +724,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | forthcoming |
+| CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

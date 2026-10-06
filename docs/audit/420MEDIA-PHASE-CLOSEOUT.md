@@ -2,7 +2,7 @@
 
 Roadmap step: **MEDIA-AUDIT-11 — Security, abuse, moderation and repository closeout**
 
-Status: **CANDIDATE — NOT COMPLETE**
+Status: **COMPLETE — LEVEL 3 QUALIFIED**
 
 This file is the canonical Level-3 trigger for the 420Media repository audit phase.
 
@@ -82,6 +82,14 @@ MEDIA-AUDIT-11 does not invent:
 
 Those remain MEDIA-AUDIT-12/13 work.
 
-## Completion invariant
+## Completion evidence
 
-**Do not change this status to COMPLETE until every required Level-3 owner is green on one reconciled exact implementation SHA and durable qualification evidence records the run/job identifiers.**
+The completion invariant is satisfied on exact implementation SHA `f0c68a0e5150111b97cebbcc0b8cb38e853314c2`.
+
+All required Level-3 owners are green on that SHA and the run/job identifiers are durably recorded in:
+
+`docs/audit/420MEDIA-AUDIT-11-QUALIFICATION.md`
+
+Current `main` at the final strict closeout decision, `87f18a9809fe4f80040bfaa42c52e2509166d97f`, is already an ancestor of the qualified candidate, so no additional reconciliation commit was required.
+
+Documentation/evidence-only closeout commits inherit the qualified implementation SHA. Any later substantive or executable/test/workflow/dependency/configuration/interface/generated-runtime/deployment-state change requires a new exact candidate.

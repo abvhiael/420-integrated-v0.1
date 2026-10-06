@@ -126,7 +126,11 @@ PASS for:
 - public score/payment/wallet/message-field negative checks.
 
 ## Repository-wide Docs workflow
-A broad 420Docs workflow was automatically triggered by repository path policy. It is not required PB-8 Level-1/Level-2 evidence because PB-8 changes app-local roadmap/master documentation rather than shared Docs tooling or a global documentation dependency. It is not counted as PASS unless completed successfully; PB-8 completion does not depend on ceremonial repository-wide Docs qualification.
+A broad 420Docs workflow was automatically triggered by repository path policy. It was not required PB-8 Level-1/Level-2 evidence because PB-8 changes app-local roadmap/master documentation rather than shared Docs tooling or a global documentation dependency, but it also completed successfully on the exact qualified implementation SHA:
+- run: `37532661571` — **SUCCESS**
+- job: `112505668119` (`qualify`) — **SUCCESS**
+
+This is retained as supplementary evidence; PB-8 did not depend on ceremonial repository-wide Docs qualification.
 
 ## Milestone status
 **PB-8 safety/lifecycle override integration milestone COMPLETE at Level 2.**

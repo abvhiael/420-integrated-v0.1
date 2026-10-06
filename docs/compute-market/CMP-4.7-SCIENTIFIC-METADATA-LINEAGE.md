@@ -50,7 +50,7 @@ A derived result:
 - requires parents to be strictly sorted and unique;
 - rejects self-parenting.
 
-Parent-first registration creates an append-only topological order, so cycles cannot be introduced through later records.
+The parent-first registration rule creates an append-only topological order, so cycles cannot be introduced through later records.
 
 Cross-project derivation is permitted when the child project's authorized publisher references already-canonical parent provenance. CMP-4.7 records the relationship; it does not grant access to parent datasets or outputs.
 

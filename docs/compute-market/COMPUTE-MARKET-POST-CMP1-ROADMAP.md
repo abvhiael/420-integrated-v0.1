@@ -572,6 +572,10 @@ Normalize institution/gateway/scheduler/account/project/workload/allocation/resu
 
 ## CMP-5.5 — External proof/credit adapters
 
+**Status: implementation complete; Level 1 + second CMP-5 Level 2 exact-head qualification pending.**
+
+Normalize externally supplied proof and credit records against exact adapter/system/contribution identities, preserving provider-neutral scheme/issuer/unit semantics without claiming external truth, reward eligibility or duplicate protection. CMP-5.5 is the second CMP-5 Level 2 milestone because the accumulated external adapter families now converge into one shared proof/credit normalization layer. CMP-5.6 owns duplicate-reward prevention and CMP-5.7 owns external-result attestation. Specification: [CMP-5.5 External proof/credit adapters](CMP-5.5-EXTERNAL-PROOF-CREDIT-ADAPTERS.md).
+
 ## CMP-5.6 — Double-reward prevention
 
 ## CMP-5.7 — External-result attestation

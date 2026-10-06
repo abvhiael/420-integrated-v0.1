@@ -1,0 +1,63 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.7.ScientificMetadataLineage.v1",
+  "step": "CMP-4.7",
+  "title": "Scientific metadata and lineage",
+  "canonical_definition": "Scientific metadata and lineage",
+  "status": "COMPLETE",
+  "completion_state": "COMPLETE",
+  "base_main_sha": "f5fe16414893a1e4bd4f3db22eb36b685a2030f5",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "previous_level_2_milestone": "CMP-4.6 — Result provenance",
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeScientificMetadataLineage420.sol",
+    "test": "contracts/test/ComputeScientificMetadataLineage420.t.sol",
+    "doc": "docs/compute-market/CMP-4.7-SCIENTIFIC-METADATA-LINEAGE.md",
+    "verifier": "scripts/verify-cmp-4-7-scientific-metadata-lineage.py"
+  },
+  "authority": {
+    "publisher": "owner of exact historical CMP-4.2 project revision embedded in scientific work unit",
+    "provenance_source": "CMP-4.6 ComputeScientificResultProvenance420",
+    "result_source": "CMP-4.6 ComputeScientificResultSource420"
+  },
+  "metadata": [
+    "metadataSchemaCommitment",
+    "metadataCommitment",
+    "relationCommitment",
+    "parentSetCommitment",
+    "parentCount"
+  ],
+  "lineage_rules": [
+    "root has zero parents and zero relation commitment",
+    "derived result has 1..32 strictly sorted unique parent provenance IDs",
+    "every parent provenance must be canonical and already have lineage metadata",
+    "self-parenting rejected",
+    "parent-first registration makes lineage append-only and acyclic"
+  ],
+  "exit_criteria": [
+    "metadata binds exact canonical CMP-4.6 provenance and CMP-4.1 scientific work-unit commitment",
+    "publisher is authenticated as owner of exact historical CMP-4.2 project revision",
+    "scientific binding witness is reconstructed and substitution fails closed",
+    "metadata schema and content commitments are nonzero and raw metadata remains off-chain",
+    "root and derived relation semantics are explicit and fail closed",
+    "parent provenance IDs are bounded sorted unique nonzero and not self",
+    "every parent is canonical and already lineage-registered",
+    "lineage identity is domain/chain/registry/project/provenance/publisher bound",
+    "duplicate identical registration is idempotent and conflicting registration fails",
+    "canonical source drift invalidates isCanonical",
+    "metadata/lineage creates no correctness/access/publication/economic/governance authority",
+    "dedicated tests and mechanical verifier pass exact-head Level 1 qualification"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.8 publication / retention policy",
+    "CMP-4.9 research dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-7 SDK/API/indexer expansion",
+    "CMP-8 Compute UI",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.8 — Publication / retention policy"
+}

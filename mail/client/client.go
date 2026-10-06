@@ -462,7 +462,6 @@ func (c Client) AcknowledgeSecurityAlert(ctx context.Context, id string) (mail.S
 	return out, err
 }
 
-
 func (c Client) PrepareWalletAction(ctx context.Context, req mail.WalletActionRequest) (mail.WalletHandoff, error) {
 	var out mail.WalletHandoff
 	err := c.do(ctx, http.MethodPost, "/v1/wallet/actions", req, &out)

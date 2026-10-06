@@ -41,6 +41,8 @@ Implement public-only Media discovery/projection into 420Search and opt-in prove
 ## MEDIA-AUDIT-9 — Stable /v1 API and typed SDK
 Implement the GEN-SVC API contract: versioned routes, cursor pagination, RFC3339 UTC timestamps, stable IDs/errors, idempotency, provenance, compatibility/capability discovery, Wallet signing handoff and a typed Media client/SDK.
 
+**Status: COMPLETE (Level 1).** Exact implementation SHA `79e102e596a4e07b683fc15305c87c3ab4212aac`; qualification run `37520504975`. Durable evidence: `docs/audit/420MEDIA-AUDIT-9-QUALIFICATION.md`.
+
 ## MEDIA-AUDIT-10 — User-facing 420Media application
 Implement the Media frontend for upload/library/playback/livestream workflows with Wallet/network validation, loading/empty/error/transaction states, safe recovery, accessibility basics, responsive behavior and feature availability. Do not claim a domain until deployment exists.
 

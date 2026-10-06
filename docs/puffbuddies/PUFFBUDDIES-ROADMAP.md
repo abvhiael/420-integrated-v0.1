@@ -820,7 +820,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head app-scoped workflow passes;
 - durable PB-0.18 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.19 — Master implementation roadmap
+### PB-0.19 — Master implementation roadmap — COMPLETE
 
 **Purpose:** reconcile PB-1 through launch against the complete PB-0 architecture and establish the canonical implementation order without claiming that future runtime phases are already implemented.
 

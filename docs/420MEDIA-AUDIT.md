@@ -71,8 +71,6 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 ### Missing for the canonical Genesis service target
 
 - user-facing 420Media frontend;
-- public `/v1` Media API;
-- typed Media service SDK/client satisfying GEN-SVC-0.7;
 - Registry/service-discovery publication/deployment profile;
 - user authorization/session model;
 - upload/livestream moderation and abuse handling;
@@ -126,7 +124,7 @@ No critical source-level fund-custody vulnerability was identified in this audit
 
 Frontend: **MISSING** for 420Media itself.
 
-Backend/API: **MISSING** as a stable public Media service. The Go code is an operator runtime/library and CLI, not a GEN-SVC `/v1` application API.
+Backend/API: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. `media/api` now exposes a stable `/v1` HTTP contract for capabilities/compatibility, assets, upload preparation, livestream control/status, Search, Notifications subscriptions and external Wallet signing intents. Deployment composition remains later roadmap work.
 
 Indexer: **COMPLETE (Level 1)** for Media public asset projection. The audit branch now has a rebuildable, reorg-aware public Media projection cache that consumes qualified Indexer provenance/finality and emits existing 420Search result contracts. Operator discovery remains a separate app-scoped event accelerator. Live Indexer/Search service binding remains release-stage work.
 
@@ -139,6 +137,8 @@ Identity/Rights: **COMPLETE (Level 1)** on the audit branch. Wallet-only pseudon
 Pay/Compute: **COMPLETE (Level 1)** on the audit branch. Pay-backed jobs now bind exact canonical payer/merchant/amount/receipt/refund evidence; Compute-backed jobs bind the canonical component graph, funded job, accepted match, provider/resource/operator/beneficiary and verified entitlement/refund state. Media remains non-custodial and records canonical earned settlement amounts separately from funding ceilings.
 
 Search/Notifications: **COMPLETE (Level 1)** on the audit branch. Only READY+PUBLIC+Rights-authorized assets can become Search results; projections preserve qualified Indexer provenance/finality and support deterministic rollback/rebuild. Notifications are opt-in, minimum-finality scoped, deduplicated, separately promotional-consented and reorg-retractable without becoming canonical authority.
+
+API/SDK: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. Stable `/v1` routes now use opaque cursor pagination, RFC3339 UTC timestamps, machine error codes, bounded strict JSON, replay-safe idempotency, provenance, capability/compatibility discovery and external Wallet signing intents. `sdk/media420` provides typed discovery/client methods with HTTPS and chain/network compatibility enforcement.
 
 ## Builds and tests
 
@@ -201,8 +201,8 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | Notifications integration | GEN-SVC registry | private opt-in topic/channel/severity/finality subscriptions with deterministic dedupe, promotional-consent separation and reorg retractions | Media notification/projection tests + exact-head Media gate | Media projections doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage; live provider delivery deferred |
 | Pay integration | GEN-SVC registry | canonical PaymentRegistry payer/merchant/amount/receipt/refund binding through Media adapter | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | Compute integration | GEN-SVC registry | canonical graph/job/funding/match/provider/beneficiary/entitlement/refund binding; exact earned-amount accounting | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
-| /v1 API | GEN-SVC-0.6 | absent | none | none | MISSING | implement typed stable API |
-| typed client/SDK | GEN-SVC-0.7 | absent | none | none | MISSING | implement Media SDK |
+| /v1 API | GEN-SVC-0.6 | stable versioned HTTP contract with cursor pagination, UTC timestamps, stable errors, provenance, rate metadata, idempotent writes and signing intents | Media API tests + retained Media gate | API/SDK contract doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head; deployment deferred |
+| typed client/SDK | GEN-SVC-0.7 | `sdk/media420` typed client with service discovery, validation, compatibility/chain/network enforcement, idempotency and external Wallet signer handoff | Media SDK tests + retained Media gate | API/SDK contract doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head |
 | feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed for create/start/recovery; stop/status remain available for safe shutdown/inspection | GEN-SVC validator + Media livestream tests + Level 2 Media gate | GEN-SVC + Livestream docs + qualification evidence | COMPLETE for service runtime (Level 2) | UI enforcement remains MEDIA-AUDIT-10 |
 | threat model application | GEN-SVC-0.9 | shared model only | no Media-specific suite | shared docs | PARTIAL | Media abuse/privacy/rights threat tests |
 | shared fixtures | GEN-SVC-0.10 | not used by Media | none | shared docs | MISSING | adopt canonical personas/journeys |

@@ -61,4 +61,4 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model**, **MAIL-2.2 — Durable Mail Storage**, **MAIL-2.3 — Labels & Custom Folders**, **MAIL-2.4 — Private Mail Search**, **MAIL-2.5 — User Filters & Rules Engine**, **MAIL-2.6 — Blocklists, Allowlists & Trust Controls**, **MAIL-2.7 — Spam, Junk & Phishing Protection**, and **MAIL-2.8 — Threads & Conversations** are COMPLETE at Level 1. **MAIL-2.9 — Drafts System** is the active canonical Phase 2 step.
+**MAIL-2.1 — Mailbox State Model**, **MAIL-2.2 — Durable Mail Storage**, **MAIL-2.3 — Labels & Custom Folders**, **MAIL-2.4 — Private Mail Search**, **MAIL-2.5 — User Filters & Rules Engine**, **MAIL-2.6 — Blocklists, Allowlists & Trust Controls**, **MAIL-2.7 — Spam, Junk & Phishing Protection**, **MAIL-2.8 — Threads & Conversations**, and **MAIL-2.9 — Drafts System** are COMPLETE at Level 1. **MAIL-2.10 — Outbox & Delivery Queue** is the active canonical Phase 2 step.

@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -38,12 +38,18 @@ if profile_path.is_file():
     if mailbox.get("reservedForDedicatedSteps")!={"DRAFTS":"MAIL-2.9","OUTBOX":"MAIL-2.10"}: errors.append("Mail reserved Drafts/Outbox ownership drifted")
     if mailbox.get("ownerScopedState") is not True or mailbox.get("permanentDeleteRequiresTrash") is not True: errors.append("Mail mailbox ownership/delete policy drifted")
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
+    store=profile.get("metadataStore",{})
+    if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
+    if store.get("schemaVersion")!=1 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("secondaryIndexes")!=["owner_folder"]: errors.append("Mail durable store index drifted")
+    if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
+    if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
         if readiness.get(key) is not False: errors.append(f"readiness overclaims {key}")
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
-for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
+for token in ['ServiceID       = "420/service/mail/v1"',,"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 if "Authenticate AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
@@ -67,3 +73,10 @@ print("External SMTP default: false")
 print("Live testnet evidence: false")
 print("Genesis catalog promoted: false")
 print("MAIL-2.1 mailbox state model: qualified by app-scoped checks")
+print("MAIL-2.2 durable mail storage: qualified by app-scoped checks")
+
+store=(ROOT/"mail/store.go").read_text() if (ROOT/"mail/store.go").is_file() else ""
+for token in ["type MailStore interface","OpenDurableStore","DurableStoreSchemaVersion","syscall.Flock","os.Rename","tmp.Sync","dirFile.Sync","rebuildMailboxIndex","validateStoreData","ErrStoreCorrupt","ErrStoreSchemaTooNew"]:
+    if token not in store: errors.append("MAIL-2.2 durable store invariant missing: "+token)
+for token in ["NewDurableService","Store.Update","Store.View"]:
+    if token not in service: errors.append("MAIL-2.2 service storage integration missing: "+token)

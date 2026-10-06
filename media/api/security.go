@@ -80,11 +80,11 @@ func protectedCapability(method, path string) (string, bool) {
 	if method == http.MethodPost && path == "/v1/moderation/reports" {
 		return "media.report", true
 	}
-	if method == http.MethodPost && strings.Contains(path, "/decisions") {
-		return "media.moderate", true
-	}
 	if method == http.MethodPost && strings.Contains(path, "/appeals") {
 		return "media.appeal", true
+	}
+	if method == http.MethodPost && strings.Contains(path, "/decisions") {
+		return "media.moderate", true
 	}
 	return "", false
 }

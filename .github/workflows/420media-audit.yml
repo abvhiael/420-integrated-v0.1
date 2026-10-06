@@ -45,7 +45,7 @@ jobs:
         run: python3 scripts/verify-420media-audit.py
       - name: Report Media Go formatting drift
         run: |
-          bad="$(gofmt -l media/authority media/storage media/livestream media/projection media/node/livegateway/gateway.go media/node/livegateway/drivers.go media/node/livegateway/recovery_test.go)"
+          bad="$(gofmt -l media/authority media/storage media/livestream media/projection media/api sdk/media420 media/node/livegateway/gateway.go media/node/livegateway/drivers.go media/node/livegateway/recovery_test.go)"
           if [ -n "$bad" ]; then
             printf 'gofmt required for Media audit packages:\n%s\n' "$bad"
             exit 1
@@ -54,10 +54,12 @@ jobs:
         run: python3 scripts/validate-gen-svc-0.py
       - name: Test Media Go packages
         run: go test ./media/... ./cmd/420media-node
+      - name: Test Media typed SDK
+        run: go test ./sdk/media420 -count=1
       - name: Test Search projection contract dependencies
         run: go test ./search/architecture ./search/result -count=1
-      - name: Vet Media Go packages
-        run: go vet ./media/... ./cmd/420media-node
+      - name: Vet Media Go packages and SDK
+        run: go vet ./media/... ./cmd/420media-node ./sdk/media420
       - name: Build Media contracts
         working-directory: contracts
         run: forge build src/media

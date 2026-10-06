@@ -35,6 +35,8 @@ CANNABIS = ROOT / "docs/puffbuddies/PB-0.14-CANNABIS-TAXONOMY.md"
 EVIDENCE_14 = ROOT / "docs/puffbuddies/PB-0.14-QUALIFICATION.md"
 VISIBILITY = ROOT / "docs/puffbuddies/PB-0.15-VISIBILITY-MODEL.md"
 EVIDENCE_15 = ROOT / "docs/puffbuddies/PB-0.15-QUALIFICATION.md"
+NONGOALS = ROOT / "docs/puffbuddies/PB-0.16-NON-GOALS-RECONCILIATION.md"
+EVIDENCE_16 = ROOT / "docs/puffbuddies/PB-0.16-QUALIFICATION.md"
 
 errors = []
 
@@ -42,7 +44,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -80,6 +82,8 @@ cannabis = CANNABIS.read_text(encoding="utf-8")
 evidence_14 = EVIDENCE_14.read_text(encoding="utf-8")
 visibility = VISIBILITY.read_text(encoding="utf-8")
 evidence_15 = EVIDENCE_15.read_text(encoding="utf-8")
+nongoals = NONGOALS.read_text(encoding="utf-8")
+evidence_16 = EVIDENCE_16.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -176,6 +180,9 @@ for token in [
     "### PB-0.15 — Visibility model",
     "PB-VIS-001 through PB-VIS-040",
     "**Milestone relationship:** PB-0.15 is not a Level 2 integration milestone",
+    "### PB-0.16 — Non-goals reconciliation",
+    "PB-NONGOAL-001 through PB-NONGOAL-040",
+    "**Milestone relationship:** PB-0.16 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1566,13 +1573,115 @@ for token in [
 ]:
     need(token in evidence_15, f"PB-0.15 evidence record missing token: {token}")
 
+# PB-0.16 — non-goals reconciliation
+for token in [
+    "# PuffBuddies PB-0.16 non-goals reconciliation",
+    "## Reconciliation principles",
+    "## Canonical reconciled non-goals",
+    "## Deferred but not prohibited",
+    "## Reconciliation matrix",
+    "## Non-goal change-control rule",
+    "## PB-0.16 completion boundary",
+    "No public relationship graph",
+    "No public cannabis-use registry",
+    "No public sexual/romantic preference registry",
+    "No wallet-to-dating-profile public directory",
+    "No everything-on-chain dating system",
+    "No NFT/tokenized dating identity",
+    "No purchased consent",
+    "No pay-to-message unmatched strangers",
+    "No paid block bypass",
+    "No administrator-manufactured mutual consent",
+    "No algorithm/AI-manufactured consent",
+    "No escrow marketplace for dates",
+    "No cannabis marketplace entitlement",
+    "No gambling/wagering/prediction dating product",
+    "No wallet-wealth dating ranking",
+    "No public social-credit/desirability score",
+    "No moderation-derived public reputation",
+    "No public precise-location discovery",
+    "No public-member search engine",
+    "No public match-history/profile archive",
+    "No sale of protected visibility",
+    "No premium safety/consent bypass",
+    "No hidden inferred sensitive profile as a product goal",
+    "No public lifecycle/suspension/ban registry",
+    "No public safety/report registry",
+    "No replacement for emergency/law-enforcement/crisis services",
+    "No medical cannabis authority",
+    "No legal cannabis authority",
+    "No impairment determination from cannabis profile",
+    "No minor participation",
+    "No identity-provider takeover of PuffBuddies consent",
+    "No Messenger takeover of dating authority",
+    "No payment-system takeover of relationship authority",
+    "No Registry/AppStore authority expansion",
+    "No derived-service authority promotion",
+    "No privacy downgrade through hashing/commitments",
+    "No deletion theater",
+    "No stale-state resurrection",
+    "No client-only privacy/security boundary",
+    "No implied implementation from PB-0 documentation",
+]:
+    need(token in nongoals, f"PB-0.16 non-goals document missing token: {token}")
+
+nongoal_ids = re.findall(r"^### (PB-NONGOAL-\d{3})\b", nongoals, flags=re.MULTILINE)
+need(nongoal_ids == [f"PB-NONGOAL-{i:03d}" for i in range(1, 41)], f"PB-NONGOAL sequence drift: {nongoal_ids}")
+need(len(nongoal_ids) == len(set(nongoal_ids)), "duplicate PB-NONGOAL identifier")
+
+for guarantee in [
+    "A deferred feature is not automatically a prohibited non-goal",
+    "A prohibited non-goal cannot be reintroduced merely by renaming it as premium, experimental, AI-assisted, tokenized, administrative, or cross-app functionality",
+    "Economic, blockchain, moderation, identity, or ranking systems cannot manufacture interpersonal authority that PuffBuddies does not canonically own",
+    "A deferred feature becoming later in-scope requires an explicit canonical roadmap/architecture definition",
+    "Silent erosion of a non-goal through implementation is not canonical",
+]:
+    need(guarantee in nongoals, f"PB-0.16 missing reconciliation guarantee: {guarantee}")
+
+for change_req in [
+    "which PB-NONGOAL invariant is affected",
+    "which earlier PB-0 invariant(s) are affected",
+    "why the behavior is necessary",
+    "privacy, consent, safety, lifecycle, deletion, and authority consequences",
+    "whether the proposal changes product identity",
+    "whether the change requires a canonical roadmap revision",
+    "new adversarial/negative tests",
+    "migration/compatibility implications",
+    "whether public-chain or public-index exposure changes",
+    "whether the proposal introduces economic influence over another user's rights",
+]:
+    need(change_req in nongoals, f"PB-0.16 change-control rule missing: {change_req}")
+
+for forbidden in [
+    "PuffBuddies non-goal runtime is implemented",
+    "PuffBuddies non-goal service is deployed",
+    "PuffBuddies non-goal contract is live",
+    "PuffBuddies non-goal service ID is",
+]:
+    need(forbidden not in nongoals, f"PB-0.16 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", nongoals) is None, "PB-0.16 must not assign an on-chain address")
+need("420/service/puff" not in nongoals.lower(), "PB-0.16 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.16 qualification evidence",
+    "**PB-0.16 — Non-goals reconciliation**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-NONGOAL-001 through PB-NONGOAL-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.17 — Repository structure**",
+]:
+    need(token in evidence_16, f"PB-0.16 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.15", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.16", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.15",
+    "step": "PB-0.16",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1772,6 +1881,19 @@ print(json.dumps({
         "searchExplorerCannotPromote": True,
         "economicStateCannotBuyVisibility": True,
         "privateAndAuditable": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb16": {
+        "nonGoalInvariants": nongoal_ids,
+        "reconcilesPb01ThroughPb15": True,
+        "deferredSeparatedFromProhibited": True,
+        "economicAdminAlgorithmicBypassProhibited": True,
+        "dependencyAuthorityPreserved": True,
+        "deletionHonestyPreserved": True,
+        "staleStateResurrectionProhibited": True,
+        "changeControlDefined": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

@@ -45,7 +45,7 @@ type SenderReputation struct {
 	Deliveries      uint64    `json:"deliveries"`
 	Quarantines     uint64    `json:"quarantines"`
 	SpamReports     uint64    `json:"spam_reports"`
-	PhishingReports uint64   `json:"phishing_reports"`
+	PhishingReports uint64    `json:"phishing_reports"`
 	FalsePositives  uint64    `json:"false_positives"`
 	RiskScore       int       `json:"risk_score"`
 	UpdatedAt       time.Time `json:"updated_at"`
@@ -67,7 +67,7 @@ type QuarantineRecord struct {
 	Status        QuarantineStatus `json:"status"`
 	Reasons       []string         `json:"reasons"`
 	SpamScore     int              `json:"spam_score"`
-	PhishingScore int             `json:"phishing_score"`
+	PhishingScore int              `json:"phishing_score"`
 	CreatedAt     time.Time        `json:"created_at"`
 	UpdatedAt     time.Time        `json:"updated_at"`
 	ReleasedAt    *time.Time       `json:"released_at,omitempty"`

@@ -124,7 +124,7 @@ No critical source-level fund-custody vulnerability was identified in this audit
 
 Frontend: **MISSING** for 420Media itself.
 
-Backend/API: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. `media/api` now exposes a stable `/v1` HTTP contract for capabilities/compatibility, assets, upload preparation, livestream control/status, Search, Notifications subscriptions and external Wallet signing intents. Deployment composition remains later roadmap work.
+Backend/API: **COMPLETE (Level 1)** on the audit branch. `media/api` now exposes a stable `/v1` HTTP contract for capabilities/compatibility, assets, upload preparation, livestream control/status, Search, Notifications subscriptions and external Wallet signing intents. Deployment composition remains later roadmap work.
 
 Indexer: **COMPLETE (Level 1)** for Media public asset projection. The audit branch now has a rebuildable, reorg-aware public Media projection cache that consumes qualified Indexer provenance/finality and emits existing 420Search result contracts. Operator discovery remains a separate app-scoped event accelerator. Live Indexer/Search service binding remains release-stage work.
 
@@ -138,7 +138,7 @@ Pay/Compute: **COMPLETE (Level 1)** on the audit branch. Pay-backed jobs now bin
 
 Search/Notifications: **COMPLETE (Level 1)** on the audit branch. Only READY+PUBLIC+Rights-authorized assets can become Search results; projections preserve qualified Indexer provenance/finality and support deterministic rollback/rebuild. Notifications are opt-in, minimum-finality scoped, deduplicated, separately promotional-consented and reorg-retractable without becoming canonical authority.
 
-API/SDK: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. Stable `/v1` routes now use opaque cursor pagination, RFC3339 UTC timestamps, machine error codes, bounded strict JSON, replay-safe idempotency, provenance, capability/compatibility discovery and external Wallet signing intents. `sdk/media420` provides typed discovery/client methods with HTTPS and chain/network compatibility enforcement.
+API/SDK: **COMPLETE (Level 1)** on the audit branch. Stable `/v1` routes now use opaque cursor pagination, RFC3339 UTC timestamps, machine error codes, bounded strict JSON, replay-safe idempotency, provenance, capability/compatibility discovery and external Wallet signing intents. `sdk/media420` provides typed discovery/client methods with HTTPS and chain/network compatibility enforcement.
 
 ## Builds and tests
 
@@ -161,6 +161,8 @@ MEDIA-AUDIT-6 qualification evidence: `docs/audit/420MEDIA-AUDIT-6-QUALIFICATION
 MEDIA-AUDIT-7 qualification evidence: `docs/audit/420MEDIA-AUDIT-7-QUALIFICATION.md`, implementation SHA `a0aeb709b10a155fe7959781a9994a15368a9b4a`, workflow run `37511396911` PASS (Level 1).
 
 MEDIA-AUDIT-8 qualification evidence: `docs/audit/420MEDIA-AUDIT-8-QUALIFICATION.md`, implementation SHA `acbb99e2485c9565598eb723ee1f97492478a52d`, workflow run `37515368608` PASS (Level 1).
+
+MEDIA-AUDIT-9 qualification evidence: `docs/audit/420MEDIA-AUDIT-9-QUALIFICATION.md`, implementation SHA `79e102e596a4e07b683fc15305c87c3ab4212aac`, workflow run `37520504975` PASS (Level 1).
 
 ## Documentation audit
 
@@ -201,8 +203,8 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | Notifications integration | GEN-SVC registry | private opt-in topic/channel/severity/finality subscriptions with deterministic dedupe, promotional-consent separation and reorg retractions | Media notification/projection tests + exact-head Media gate | Media projections doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage; live provider delivery deferred |
 | Pay integration | GEN-SVC registry | canonical PaymentRegistry payer/merchant/amount/receipt/refund binding through Media adapter | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | Compute integration | GEN-SVC registry | canonical graph/job/funding/match/provider/beneficiary/entitlement/refund binding; exact earned-amount accounting | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
-| /v1 API | GEN-SVC-0.6 | stable versioned HTTP contract with cursor pagination, UTC timestamps, stable errors, provenance, rate metadata, idempotent writes and signing intents | Media API tests + retained Media gate | API/SDK contract doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head; deployment deferred |
-| typed client/SDK | GEN-SVC-0.7 | `sdk/media420` typed client with service discovery, validation, compatibility/chain/network enforcement, idempotency and external Wallet signer handoff | Media SDK tests + retained Media gate | API/SDK contract doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head |
+| /v1 API | GEN-SVC-0.6 | stable versioned HTTP contract with cursor pagination, UTC timestamps, stable errors, provenance, rate metadata, idempotent writes and signing intents | Media API tests + retained exact-head Media gate | API/SDK contract doc + qualification evidence | COMPLETE (Level 1) | deployment deferred |
+| typed client/SDK | GEN-SVC-0.7 | `sdk/media420` typed client with service discovery, validation, compatibility/chain/network enforcement, idempotency and external Wallet signer handoff | Media SDK tests + retained exact-head Media gate | API/SDK contract doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed for create/start/recovery; stop/status remain available for safe shutdown/inspection | GEN-SVC validator + Media livestream tests + Level 2 Media gate | GEN-SVC + Livestream docs + qualification evidence | COMPLETE for service runtime (Level 2) | UI enforcement remains MEDIA-AUDIT-10 |
 | threat model application | GEN-SVC-0.9 | shared model only | no Media-specific suite | shared docs | PARTIAL | Media abuse/privacy/rights threat tests |
 | shared fixtures | GEN-SVC-0.10 | not used by Media | none | shared docs | MISSING | adopt canonical personas/journeys |

@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	MaxTrustEntries        = 250
-	MaxTrustValueBytes     = 256
+	MaxTrustEntries    = 250
+	MaxTrustValueBytes = 256
 )
 
 type TrustKind string

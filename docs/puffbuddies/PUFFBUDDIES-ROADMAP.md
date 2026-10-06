@@ -768,7 +768,57 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.18 — Documentation/invariant tests
 
-Extend machine-verifiable PB-0 documentation and invariant qualification.
+**Purpose:** extend machine-verifiable PB-0 documentation and invariant qualification so the accumulated PB-0 foundation is checked as one coherent authority set rather than only as isolated documents.
+
+**Canonical requirements:**
+
+1. Record PB-DOCINV-001 through PB-DOCINV-020.
+2. Define and verify the complete PB-0.1 through PB-0.17 canonical/evidence inventory.
+3. Prevent silent omission of any completed PB-0 step from machine qualification.
+4. Verify invariant identifiers are globally unique across canonical PB-0 source documents.
+5. Verify every invariant family retains its exact expected count and sequence.
+6. Verify roadmap completion continuity through PB-0.17.
+7. Verify PB-0.1 through PB-0.17 evidence identifies its step and COMPLETE state.
+8. Cross-check adult-only identity, Dating/Buddy/Both, optional cannabis compatibility, and wallet/profile unlinkability.
+9. Cross-check mutual messaging consent, revocability, block supremacy, and no purchased/admin/algorithmic consent.
+10. Cross-check private/off-chain sensitive state, discoverable-not-public, and client-hiding-not-authorization rules.
+11. Cross-check PuffBuddies canonical relationship/lifecycle/safety ownership and bounded dependencies.
+12. Cross-check stale-authorization failure, deactivation/deletion distinction, and deletion-aware derived-state invalidation.
+13. Cross-check hard exclusions before ranking, one-sided-like limits, and cannabis authority limits.
+14. Cross-check reconciled non-goals including public registries, paid bypasses, public scoring, stale resurrection, and client-only privacy.
+15. Cross-check PB-0.17 reserved paths remain non-runtime architecture locations.
+16. Reject fixed PuffBuddies on-chain addresses and invented PuffBuddies service IDs in canonical PB-0 documents.
+17. Add adversarial mutation tests proving representative canonical drift fails verification.
+18. Keep qualification exact-head, app-scoped, and cumulative.
+19. Preserve PB-0.1 through PB-0.17 semantics without weakening earlier checks.
+20. Record durable exact-SHA Level 1 evidence.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.18-DOCUMENTATION-INVARIANT-TESTS.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `scripts/test-puffbuddies-pb0-invariants.py`
+- `.github/workflows/puffbuddies-pb0.yml`
+- `docs/puffbuddies/PB-0.18-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.18 is not a Level 2 integration milestone; it hardens accumulated PB-0 documentation/invariant qualification without introducing runtime or shared integration behavior.
+
+**Dependencies:** PB-0.1 through PB-0.17 must remain COMPLETE and machine-verifiable.
+
+**Exit criteria:**
+
+- PB-DOCINV-001 through PB-DOCINV-020 exist exactly once and in sequence;
+- complete PB-0.1 through PB-0.17 canonical/evidence inventory is machine-checked;
+- global invariant-ID uniqueness and exact family sequences are machine-checked;
+- roadmap/evidence continuity through PB-0.17 is machine-checked;
+- cross-step identity/privacy/consent/authority/lifecycle/matching/cannabis/visibility/non-goal/structure invariants are machine-checked;
+- representative adversarial mutations are proven to fail qualification;
+- no fixed address/service ID/runtime implementation is introduced or claimed;
+- exact-head app-scoped workflow passes;
+- durable PB-0.18 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.19 — Master implementation roadmap
 

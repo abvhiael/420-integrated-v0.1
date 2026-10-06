@@ -1590,6 +1590,60 @@ The thin UI shows **Sync Telegram** only when the provider descriptor advertises
 
 Telegram message bodies remain private/off-chain and are not exposed to public 420Search.
 
+## MAIL-2.25 420Mail → Telegram Delivery
+
+MAIL-2.25 adds authenticated outbound Telegram delivery through the provider-neutral `PUSH` connector capability.
+
+### Authority boundary
+
+`TelegramConnectorAdapter` advertises `PUSH` only when its configured authority implements `TelegramDeliveryAuthority`.
+
+The delivery authority receives:
+- authenticated 420Mail actor;
+- Telegram user ID derived from the canonical `telegram:{user-id}` connection;
+- caller idempotency key;
+- validated Telegram delivery message.
+
+420Mail does not accept or persist Telegram provider credentials.
+
+### Delivery model
+
+A delivery request contains:
+- canonical Telegram connection ID;
+- signed-decimal Telegram chat ID;
+- non-empty content bounded to 4096 bytes;
+- optional positive-decimal reply-to message ID;
+- required idempotency key.
+
+The provider receipt must contain:
+- positive-decimal Telegram message ID;
+- the exact requested chat ID;
+- non-zero accepted timestamp.
+
+Malformed or contradictory receipts fail closed.
+
+### API, client, and UI
+
+Authenticated endpoint:
+- `POST /v1/connectors/telegram/deliver`
+
+Typed client:
+- `DeliverTelegram`
+
+The thin UI exposes **Send to Telegram** only when the Telegram descriptor advertises `PUSH`. A deployment connector adapter provides the linked connection ID, destination chat, message content, and optional reply target; raw Telegram credentials never enter Mail.
+
+### Capability containment
+
+MAIL-2.25 preserves qualified Telegram `LINK` and `PULL` behavior while adding `PUSH`.
+
+Still disabled:
+- Telegram webhook ingestion;
+- Telegram wallet verification.
+
+### Failure and replay boundary
+
+Idempotency is mandatory and is passed through to the external Telegram authority. Provider failure is returned to the caller without fabricating success or altering canonical Mail state.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

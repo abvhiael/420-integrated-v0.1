@@ -16,27 +16,27 @@ import (
 const DurableStoreSchemaVersion = 1
 
 var (
-	ErrStoreCorrupt        = errors.New("mail: durable store corrupt")
-	ErrStoreSchemaTooNew   = errors.New("mail: durable store schema newer than supported")
-	ErrStoreTransaction    = errors.New("mail: durable store transaction failed")
+	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
+	ErrStoreSchemaTooNew = errors.New("mail: durable store schema newer than supported")
+	ErrStoreTransaction  = errors.New("mail: durable store transaction failed")
 )
 
 type storeData struct {
-	SchemaVersion   int
-	Messages        map[string]Message
-	ByIdem          map[string]string
-	Mailbox         map[string]MailboxState
-	MailboxIndex    map[string][]string
+	SchemaVersion int
+	Messages      map[string]Message
+	ByIdem        map[string]string
+	Mailbox       map[string]MailboxState
+	MailboxIndex  map[string][]string
 }
 
 type diskStoreData struct {
-	SchemaVersion   int                       `json:"schema_version"`
-	Messages        map[string]Message        `json:"messages"`
-	ByIdem          map[string]string         `json:"idempotency"`
-	Mailbox         map[string]MailboxState   `json:"mailbox"`
-	MailboxIndex    map[string][]string       `json:"mailbox_index"`
-	Fingerprints    map[string]string         `json:"fingerprints,omitempty"`
-	IdempotencyKeys map[string]string         `json:"idempotency_keys,omitempty"`
+	SchemaVersion   int                     `json:"schema_version"`
+	Messages        map[string]Message      `json:"messages"`
+	ByIdem          map[string]string       `json:"idempotency"`
+	Mailbox         map[string]MailboxState `json:"mailbox"`
+	MailboxIndex    map[string][]string     `json:"mailbox_index"`
+	Fingerprints    map[string]string       `json:"fingerprints,omitempty"`
+	IdempotencyKeys map[string]string       `json:"idempotency_keys,omitempty"`
 }
 
 type MailStore interface {

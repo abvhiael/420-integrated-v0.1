@@ -1845,9 +1845,9 @@ for guarantee in [
     "cannot become canonical relationship/consent/lifecycle/safety authority",
     "must honor current deletion and revocation semantics",
     "client hiding alone is insufficient",
-    "Hard exclusions precede ranking",
+    "hard exclusions, coarse-location privacy controls",
     "Baseline safety/account-exit capabilities remain non-premium",
-    "Reserved PB-0.17 paths remain architecture locations rather than evidence of implementation/deployment",
+    "PB-0.17 repository locations become real implementation surfaces only when a later phase creates and qualifies them",
 ]:
     need(guarantee in master_roadmap, f"PB-0.19 missing release-gating guarantee: {guarantee}")
 

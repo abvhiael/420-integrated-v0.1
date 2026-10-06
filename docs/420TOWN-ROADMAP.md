@@ -324,24 +324,58 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-10 — Documentation and exact-head repository qualification
 
-Status: OPEN
+Status: COMPLETE
 
-Create/complete:
+Completed repository-closeout scope:
 
-- app README;
-- architecture/component map;
-- state machines;
-- roles/permissions;
-- API/events/errors;
-- configuration/environment;
-- build/test/deploy;
-- security/threat model;
-- integration guide;
-- user guide;
-- operator/admin guide;
-- known limitations.
+- app README and phase status reconciled;
+- architecture/component map completed;
+- state machines and authority boundaries documented;
+- roles/permissions documented;
+- API/events/errors documented;
+- configuration/environment reference completed;
+- build/test/deploy guidance completed;
+- security/threat-model documentation reconciled;
+- integration guide completed;
+- user guide completed;
+- operator/admin guide completed;
+- known limitations completed;
+- Town documentation published in canonical MkDocs navigation;
+- dedicated documentation/phase-closeout verifier added;
+- canonical Town repository manifest advanced through TOWN-AUDIT-10.
 
-Then qualify the exact audit HEAD with all applicable repository gates and durable evidence.
+Authoritative Level 3 qualification evidence:
+
+- fully-qualified Level 3 SHA: `e008ffa39aec30ee31c4eebf77fd204a3a65b795`;
+- 420Town audit run `37408349062` / run `195` — PASS;
+- `town-skeleton` job `112091227085` — PASS;
+- `town-contracts` job `112091227170` — PASS;
+- Solidity Contracts run `37408349053` / run `5023` — PASS;
+- canonical Solidity shard 0 `112091125075` — PASS;
+- canonical Solidity shard 1 `112091125034` — PASS;
+- canonical Solidity shard 2 `112091125020` — PASS;
+- canonical Solidity shard 3 `112091125097` — PASS;
+- Genesis Address Authority run `37408349056` / run `1785` — PASS;
+- 420Docs Qualification run `37408349020` / run `5720` — PASS;
+- directly affected 420Search qualification run `37408349141` / run `145` — PASS;
+- 420 Integrated Qualification run `37408349005` / run `6481` — PASS;
+- Geth, offline-core, production dependencies, fault matrix and soak coverage — PASS.
+
+Final reconciliation:
+
+- current main incorporated: `f32a9c322e085634e47f20b84861338811198454`;
+- final reconciled audit-branch head: `d919525658c3077b7e6b52364f4b208f4b18c9c3`;
+- reconciliation delta contains no Town executable code, Town config, Town app-doc set, or directly relevant shared-service implementation changes;
+- qualification therefore inherits from the authoritative fully-qualified Level 3 SHA;
+- no repeat Town/Foundry/Geth/Docs/Search/global run is required for this documentation/unrelated-main reconciliation;
+- later automatically-triggered CI is incidental and not closeout evidence;
+- PR #523 remains open and unmerged.
+
+Repository phase result:
+
+- **TOWN-AUDIT-10 COMPLETE**;
+- 420Town repository-side pre-testnet phase is complete;
+- next canonical roadmap step: **TOWN-AUDIT-11 — Live testnet qualification**.
 
 ## TOWN-AUDIT-11 — Live testnet qualification
 

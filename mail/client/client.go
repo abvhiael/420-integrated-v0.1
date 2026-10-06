@@ -473,3 +473,33 @@ func (c Client) VerifyWalletEvidence(ctx context.Context, req mail.WalletVerific
 	err := c.do(ctx, http.MethodPost, "/v1/wallet/verifications", req, &out)
 	return out, err
 }
+
+
+func (c Client) ConnectorProviders(ctx context.Context) ([]mail.ConnectorDescriptor, error) {
+	var out []mail.ConnectorDescriptor
+	err := c.do(ctx, http.MethodGet, "/v1/connectors/providers", nil, &out)
+	return out, err
+}
+
+func (c Client) LinkConnector(ctx context.Context, req mail.ConnectorLinkRequest) (mail.ConnectorConnection, error) {
+	var out mail.ConnectorConnection
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/link", req, &out)
+	return out, err
+}
+
+func (c Client) UnlinkConnector(ctx context.Context, provider, connectionID string) error {
+	req := map[string]string{"provider": provider, "connection_id": connectionID}
+	return c.do(ctx, http.MethodPost, "/v1/connectors/unlink", req, nil)
+}
+
+func (c Client) PullConnector(ctx context.Context, req mail.ConnectorPullRequest) (mail.ConnectorPullResult, error) {
+	var out mail.ConnectorPullResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/pull", req, &out)
+	return out, err
+}
+
+func (c Client) PushConnector(ctx context.Context, req mail.ConnectorPushRequest) (mail.ConnectorPushResult, error) {
+	var out mail.ConnectorPushResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/push", req, &out)
+	return out, err
+}

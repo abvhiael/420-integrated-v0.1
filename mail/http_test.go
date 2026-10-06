@@ -333,3 +333,74 @@ func TestHTTPRulesRejectInvalidTargetsAndUnknownFields(t *testing.T) {
 		t.Fatalf("unknown rule field status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 }
+
+
+func TestHTTPTrustControlsCRUDSettingsAndBlockedSend(t *testing.T) {
+	h, _, _ := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodPut, "/v1/trust/entries", "bob.420", TrustEntryInput{
+		Kind: TrustIdentity, Value: "alice.420", Disposition: TrustBlock,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("put trust entry status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var entry TrustEntry
+	if err := json.Unmarshal(rec.Body.Bytes(), &entry); err != nil {
+		t.Fatal(err)
+	}
+	if entry.ID == "" || entry.Owner != "bob.420" || entry.Disposition != TrustBlock {
+		t.Fatalf("unexpected trust entry: %+v", entry)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/trust/entries", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list trust entries status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var entries []TrustEntry
+	if err := json.Unmarshal(rec.Body.Bytes(), &entries); err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].ID != entry.ID {
+		t.Fatalf("unexpected trust listing: %+v", entries)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPut, "/v1/trust/settings", "bob.420", TrustSettingsInput{RequireTrusted: true})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("update trust settings status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var settings TrustSettings
+	if err := json.Unmarshal(rec.Body.Bytes(), &settings); err != nil {
+		t.Fatal(err)
+	}
+	if !settings.RequireTrusted || settings.Owner != "bob.420" {
+		t.Fatalf("unexpected trust settings: %+v", settings)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/messages", "alice.420", SendRequest{
+		IdempotencyKey: "http-trust-block", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "hello", Body: "body", Source: ServiceID,
+	})
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("blocked HTTP send status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodDelete, "/v1/trust/entries/"+entry.ID, "alice.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign trust delete status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodDelete, "/v1/trust/entries/"+entry.ID, "bob.420", nil)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("trust delete status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPTrustControlsRejectUnknownFields(t *testing.T) {
+	h, _, _ := testHTTPHandler(t)
+	req := httptest.NewRequest(http.MethodPut, "/v1/trust/entries", bytes.NewBufferString(`{"kind":"IDENTITY","value":"alice.420","disposition":"BLOCK","unexpected":1}`))
+	req.Header.Set("X-Test-Actor", "bob.420")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unknown trust field status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}

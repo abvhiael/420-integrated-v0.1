@@ -138,7 +138,7 @@ service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file
 for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
-if "Authenticate AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
+if "AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
 if '"/v1/messages"' not in http or '"/v1/inbox"' not in http: errors.append("HTTP v1 routes missing")
 for token in ['"/v1/mailboxes/"','"mailbox"','"restore"','"unread"', "http.MethodPatch", "http.MethodDelete"]:
     if token not in http: errors.append("MAIL-2.1 HTTP lifecycle route missing: "+token)

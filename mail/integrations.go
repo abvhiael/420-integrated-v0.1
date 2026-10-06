@@ -96,7 +96,7 @@ type ConnectorPushResult struct {
 
 type ConnectorWebhookRequest struct {
 	Provider string `json:"provider"`
-	Headers  map[string]string `json:"headers,omitempty"`
+	Headers  map[string]string `json:"-"`
 	Payload  string `json:"payload"`
 }
 

@@ -321,3 +321,20 @@ func deterministicDiscordConversationID(owner, connectionID, channelID string) s
 	sum := sha256.Sum256([]byte("420/MAIL/DISCORD/CONVERSATION/V1\x00" + owner + "\x00" + connectionID + "\x00" + channelID))
 	return "conv_discord_" + hex.EncodeToString(sum[:16])
 }
+
+
+func validateDiscordSyncData(data *storeData) error {
+	for key, state := range data.DiscordSync {
+		if state.Owner == "" || state.ConnectionID == "" || state.Version == 0 || state.LastSyncAt.IsZero() ||
+			len([]byte(state.Cursor)) > MaxDiscordSyncCursorBytes {
+			return ErrDiscordInvalidResult
+		}
+		if _, ok := discordUserIDFromConnectionID(state.ConnectionID); !ok {
+			return ErrDiscordInvalidResult
+		}
+		if key != discordSyncStateKey(state.Owner, state.ConnectionID) {
+			return ErrDiscordSyncConflict
+		}
+	}
+	return nil
+}

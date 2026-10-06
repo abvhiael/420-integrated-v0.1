@@ -484,7 +484,6 @@ func TestHTTPSpamProtectionAuthorizationAndValidation(t *testing.T) {
 	}
 }
 
-
 func TestHTTPConversationReplyAndStateRoutes(t *testing.T) {
 	h, _, id := testHTTPHandler(t)
 

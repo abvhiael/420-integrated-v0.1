@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	mediasecurity "github.com/420integrated/420-integrated/media/security"
 )
 
 type Server struct {
@@ -131,6 +133,9 @@ func (s *Server) handlePrepareUpload(w http.ResponseWriter, r *http.Request) {
 		if err := decodeStrict(body, &req); err != nil {
 			return nil, err
 		}
+		if err := mediasecurity.DefaultContentPolicy().Validate(req.MimeType, req.SizeBytes); err != nil {
+			return nil, requestError{err: err}
+		}
 		return s.Backend.PrepareUpload(ctx, req, key)
 	})
 }
@@ -140,6 +145,9 @@ func (s *Server) handleCreateLivestream(w http.ResponseWriter, r *http.Request) 
 		var req CreateLivestreamRequest
 		if err := decodeStrict(body, &req); err != nil {
 			return nil, err
+		}
+		if err := validateLivestreamEndpoint(req.Protocol, req.Endpoint); err != nil {
+			return nil, requestError{err: err}
 		}
 		item, err := s.Backend.CreateLivestream(ctx, req, key)
 		return normalizeLivestream(item), err
@@ -495,4 +503,20 @@ func normalizeLivestream(item Livestream) Livestream {
 	item.UpdatedAt = utc(item.UpdatedAt)
 	item.Provenance = normalizeProvenance(item.Provenance)
 	return item
+}
+
+
+func validateLivestreamEndpoint(protocol, endpoint string) error {
+	switch strings.ToUpper(strings.TrimSpace(protocol)) {
+	case "WHIP", "WHEP":
+		return mediasecurity.ValidateOutboundEndpoint(endpoint, "https")
+	case "RTMP":
+		return mediasecurity.ValidateOutboundEndpoint(endpoint, "rtmps")
+	case "SRT":
+		return mediasecurity.ValidateOutboundEndpoint(endpoint, "srt")
+	case "WEBRTC":
+		return mediasecurity.ValidateOutboundEndpoint(endpoint, "webrtc")
+	default:
+		return mediasecurity.ErrInvalidEndpoint
+	}
 }

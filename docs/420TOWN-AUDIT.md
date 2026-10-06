@@ -1456,4 +1456,121 @@ PR #523 remains open and unmerged.
 
 Next canonical roadmap step: **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.
 
-<!-- TOWN-AUDIT-10 reconciliation refresh -->
+
+
+## TOWN-AUDIT-10 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 3 app-phase repository closeout**  
+Authoritative fully-qualified Level 3 SHA: `e008ffa39aec30ee31c4eebf77fd204a3a65b795`  
+Final reconciled audit-branch head: `d919525658c3077b7e6b52364f4b208f4b18c9c3`  
+Current `main` incorporated by reconciliation: `f32a9c322e085634e47f20b84861338811198454`
+
+### Documentation and repository-closeout scope
+
+TOWN-AUDIT-10 completes the repository-side pre-testnet phase for 420Town.
+
+The closeout adds and/or reconciles:
+
+- canonical Town README phase status;
+- architecture/component map;
+- authority and state-machine documentation;
+- user guide;
+- developer guide;
+- operator/admin guide;
+- configuration/deployment reference;
+- known-limitations reference;
+- security/threat-model cross-links;
+- API/events/errors and integration references;
+- MkDocs publication/navigation for the Town documentation set;
+- machine-verifiable documentation/phase-closeout checks;
+- repository manifest status through TOWN-AUDIT-10;
+- final Level 3 repository qualification evidence.
+
+### Authoritative Level 3 qualification evidence
+
+The authoritative fully-qualified candidate is `e008ffa39aec30ee31c4eebf77fd204a3a65b795`.
+
+All required Level 3 owners completed successfully on that exact SHA:
+
+- **420Town audit** — run `37408349062` / run `195` — **PASS**
+  - `town-skeleton` job `112091227085` — **PASS**
+  - `town-contracts` job `112091227170` — **PASS**
+- **Solidity Contracts** — run `37408349053` / run `5023` — **PASS**
+  - shard 0 job `112091125075` — **PASS**
+  - shard 1 job `112091125034` — **PASS**
+  - shard 2 job `112091125020` — **PASS**
+  - shard 3 job `112091125097` — **PASS**
+  - generic unsharded `foundry` job was intentionally skipped by PR classification and is not counted as passing evidence
+- **Genesis Address Authority** — run `37408349056` / run `1785` — **PASS**
+  - `cross-manifest-authority` job `112090891193` — **PASS**
+- **420Docs Qualification** — run `37408349020` / run `5720` — **PASS**
+  - `qualify` job `112090890098` — **PASS**
+- **420Search audit qualification** — run `37408349141` / run `145` — **PASS**
+  - `qualify` job `112090929037` — **PASS**
+- **420 Integrated Qualification** — run `37408349005` / run `6481` — **PASS**
+  - `geth-engine` job `112090954502` — **PASS**
+  - `fault-matrix` job `112090954589` — **PASS**
+  - `offline-core` job `112090954608` — **PASS**
+  - `production-dependencies` job `112090954609` — **PASS**
+
+This is the single authoritative Level 3 qualification set for TOWN-AUDIT-10.
+
+### Final reconciliation and qualification inheritance
+
+After the full Level 3 pass on `e008ffa39aec30ee31c4eebf77fd204a3a65b795`, `main` advanced.
+
+The audit branch was reconciled to current `main` and now includes `f32a9c322e085634e47f20b84861338811198454` at reconciled head `d919525658c3077b7e6b52364f4b208f4b18c9c3`.
+
+The reconciliation delta from the fully-qualified Level 3 SHA to the reconciled head was inspected before closeout.
+
+It contains:
+
+- unrelated mainline application/documentation work;
+- global qualification-workflow evolution;
+- a documentation-only Town audit reconciliation marker.
+
+It does **not** contain changes to:
+
+- `town/**`;
+- `sdk/town420/**`;
+- `contracts/src/town/**`;
+- `contracts/test/Town*.t.sol`;
+- `contracts/test/RewardsCrossDappHardening420.t.sol`;
+- `config/420town*.json`;
+- `scripts/verify-420town*.py`;
+- `docs/apps/town/**`;
+- Town-touched Search/Storage/Identity/Notifications/Messenger implementation surfaces.
+
+Accordingly, no Town executable behavior, Town configuration contract, Town app documentation set, or directly relevant shared-service implementation changed after the fully-qualified Level 3 SHA.
+
+Per the repository qualification model, this reconciliation inherits the existing Level 3 Town qualification. Re-running Town tests, Foundry shards, Geth, Docs, Search, or the global qualification suite is **not required evidence** for this closeout.
+
+Any later automatically-triggered runs on the reconciled/documentation-only heads are incidental CI activity and are not substituted for, nor required by, the authoritative Level 3 evidence above.
+
+### Release-stage result
+
+The repository-side 420Town phase is now complete through TOWN-AUDIT-10.
+
+This closeout does **not** claim:
+
+- live testnet deployment;
+- live Town/Search endpoints;
+- materialized testnet chain/contract bindings;
+- production-equivalent authentication;
+- live Registry/service discovery bindings;
+- live wallet receipts;
+- live reorg/restart/recovery evidence;
+- production/genesis-facing service release.
+
+Those remain TOWN-AUDIT-11 and TOWN-AUDIT-12.
+
+### Completion state
+
+**TOWN-AUDIT-10 — COMPLETE.**
+
+420Town is repository-complete for the pre-testnet phase.
+
+Next canonical roadmap step: **TOWN-AUDIT-11 — Live testnet qualification**.
+
+PR #523 remains open and unmerged.

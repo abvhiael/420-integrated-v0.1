@@ -64,6 +64,9 @@ func (c Client) do(ctx context.Context, method, path string, in, out any) error 
 		_ = json.NewDecoder(io.LimitReader(resp.Body, 64<<10)).Decode(&e)
 		return fmt.Errorf("420mail client: http %d: %s", resp.StatusCode, e["code"])
 	}
+	if out == nil || resp.StatusCode == http.StatusNoContent {
+		return nil
+	}
 	return json.NewDecoder(io.LimitReader(resp.Body, 2<<20)).Decode(out)
 }
 
@@ -139,6 +142,5 @@ func (c Client) RestoreFromTrash(ctx context.Context, id string) (mail.MailboxSt
 }
 
 func (c Client) PermanentlyDelete(ctx context.Context, id string) error {
-	var ignored any
-	return c.do(ctx, http.MethodDelete, "/v1/messages/"+url.PathEscape(id), nil, &ignored)
+	return c.do(ctx, http.MethodDelete, "/v1/messages/"+url.PathEscape(id), nil, nil)
 }

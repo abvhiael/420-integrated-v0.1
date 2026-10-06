@@ -16,42 +16,49 @@ type Direction string
 
 type SessionState string
 
-const (
-	MaxEndpointBytes      = 4096
-	MaxCredentialRefBytes = 256
-	MaxSessionDuration    = 24 * time.Hour
-)
+const MaxEndpointBytes = 4096
 
-const (
-	ProtocolWHIP   Protocol = "whip"
-	ProtocolWHEP   Protocol = "whep"
-	ProtocolWebRTC Protocol = "webrtc"
-	ProtocolSRT    Protocol = "srt"
-	ProtocolRTMP   Protocol = "rtmp"
-)
+const MaxCredentialRefBytes = 256
 
-const (
-	DirectionIngress Direction = "ingress"
-	DirectionEgress  Direction = "egress"
-)
+const MaxSessionDuration = 24 * time.Hour
 
-const (
-	StateCreated  SessionState = "created"
-	StateStarting SessionState = "starting"
-	StateActive   SessionState = "active"
-	StateStopping SessionState = "stopping"
-	StateClosed   SessionState = "closed"
-	StateFailed   SessionState = "failed"
-)
+const ProtocolWHIP Protocol = "whip"
 
-var (
-	ErrUnsupportedProtocol = errors.New("420media livegateway: unsupported protocol")
-	ErrInvalidEndpoint     = errors.New("420media livegateway: invalid endpoint")
-	ErrInvalidTransition   = errors.New("420media livegateway: invalid session transition")
-	ErrSessionExists       = errors.New("420media livegateway: session exists")
-	ErrSessionNotFound     = errors.New("420media livegateway: session not found")
-	ErrSecretInEndpoint    = errors.New("420media livegateway: credentials must not be embedded in endpoint")
-)
+const ProtocolWHEP Protocol = "whep"
+
+const ProtocolWebRTC Protocol = "webrtc"
+
+const ProtocolSRT Protocol = "srt"
+
+const ProtocolRTMP Protocol = "rtmp"
+
+const DirectionIngress Direction = "ingress"
+
+const DirectionEgress Direction = "egress"
+
+const StateCreated SessionState = "created"
+
+const StateStarting SessionState = "starting"
+
+const StateActive SessionState = "active"
+
+const StateStopping SessionState = "stopping"
+
+const StateClosed SessionState = "closed"
+
+const StateFailed SessionState = "failed"
+
+var ErrUnsupportedProtocol = errors.New("420media livegateway: unsupported protocol")
+
+var ErrInvalidEndpoint = errors.New("420media livegateway: invalid endpoint")
+
+var ErrInvalidTransition = errors.New("420media livegateway: invalid session transition")
+
+var ErrSessionExists = errors.New("420media livegateway: session exists")
+
+var ErrSessionNotFound = errors.New("420media livegateway: session not found")
+
+var ErrSecretInEndpoint = errors.New("420media livegateway: credentials must not be embedded in endpoint")
 
 // CredentialRef is an opaque operator-local reference. Secret material is resolved only
 // inside a transport driver and is never represented in chain-facing job state.
@@ -100,9 +107,9 @@ func New(drivers map[Protocol]Driver) (*Registry, error) {
 		}
 	}
 	return &Registry{
-		drivers: drivers,
+		drivers:  drivers,
 		sessions: make(map[string]Session),
-		now: time.Now,
+		now:      time.Now,
 	}, nil
 }
 

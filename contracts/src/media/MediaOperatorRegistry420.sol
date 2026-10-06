@@ -39,6 +39,7 @@ contract MediaOperatorRegistry420 is SystemAccess, I420System {
     error CapabilityAlreadySet();
     error CapabilityNotSet();
     error RegistryAlreadyBound();
+    error InvalidDependency();
 
     event CapabilityRegistryBound(address indexed registry);
     event OperatorRegistered(bytes32 indexed operatorId, address indexed operatorAccount, address indexed settlementAccount, bytes32 computeProviderRef, bytes32 stakeRef);
@@ -55,6 +56,7 @@ contract MediaOperatorRegistry420 is SystemAccess, I420System {
     function bindCapabilityRegistry(address registry_) external onlyGovernance {
         if (capabilityRegistryBound) revert RegistryAlreadyBound();
         if (registry_ == address(0)) revert ZeroAddress();
+        if (registry_.code.length == 0) revert InvalidDependency();
         capabilityRegistry = registry_;
         capabilityRegistryBound = true;
         emit CapabilityRegistryBound(registry_);

@@ -36,6 +36,8 @@ Replace opaque/legacy compatibility assumptions with explicit canonical Pay sett
 ## MEDIA-AUDIT-8 — Search, Notifications and indexing projections
 Implement public-only Media discovery/projection into 420Search and opt-in provenance-preserving 420Notifications. Add finality/reorg/rebuild/privacy-negative tests. Search and Notifications remain non-authoritative projections/delivery layers.
 
+**Status: COMPLETE (Level 1).** Exact implementation SHA `acbb99e2485c9565598eb723ee1f97492478a52d`; qualification run `37515368608`. Durable evidence: `docs/audit/420MEDIA-AUDIT-8-QUALIFICATION.md`.
+
 ## MEDIA-AUDIT-9 — Stable /v1 API and typed SDK
 Implement the GEN-SVC API contract: versioned routes, cursor pagination, RFC3339 UTC timestamps, stable IDs/errors, idempotency, provenance, compatibility/capability discovery, Wallet signing handoff and a typed Media client/SDK.
 

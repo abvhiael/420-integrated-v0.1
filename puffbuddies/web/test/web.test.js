@@ -45,6 +45,17 @@ test("API denial does not become successful client authority",async()=>{
   await assert.rejects(()=>api.matches(),e=>e instanceof ApiError && e.status===403);
 });
 
+test("profile media handoff is bounded to supported image types and size",async()=>{
+  const calls=[];
+  const fetchImpl=async(url,opts)=>{calls.push({url,opts});return {ok:true,status:200,json:async()=>({authorityGeneration:2,mediaRef:"opaque"})}};
+  const api=createApiClient({apiBase:"/api/puffbuddies/v1",tokenProvider:()=>"t",fetchImpl});
+  const file=new Blob(["img"],{type:"image/jpeg"});
+  await api.uploadMedia(file);
+  assert.equal(calls[0].url,"/api/puffbuddies/v1/profile/media");
+  assert.equal(calls[0].opts.credentials,"same-origin");
+  await assert.rejects(()=>api.uploadMedia(new Blob(["x"],{type:"text/plain"})),/unsupported profile media type/);
+});
+
 test("core web MVP and baseline safety controls are always present",()=>{
   const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
   for(const id of ["entry","profile","discovery","matches","notifications","safety","settings"]){
@@ -81,7 +92,7 @@ test("browser source contains no persistent-authority storage primitive",()=>{
 
 test("API action surface delegates protected decisions to server endpoints",()=>{
   const source=fs.readFileSync(path.join(root,"api-client.js"),"utf8");
-  for(const route of ["/eligibility","/profile","/discovery","/relationships/action","/matches",
+  for(const route of ["/eligibility","/profile","/profile/media","/discovery","/relationships/action","/matches",
     "/messenger/entry","/notifications","/safety/action","/profile/visibility","/lifecycle",
     "/deletion/status","/verification","/premium/entitlements"]) assert.ok(source.includes(route),route);
 });

@@ -58,6 +58,7 @@ func validateSignalIntegrationBoundary(boundary SignalIntegrationBoundary) error
 		boundary.MailStoresProviderSecrets ||
 		boundary.MailOwnsSignalIdentity ||
 		boundary.AccountLinking ||
+		!boundary.OutboundNotifications ||
 		boundary.ShareAndForward ||
 		boundary.InboundSync ||
 		boundary.WebhookIngestion ||

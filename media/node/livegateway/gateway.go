@@ -151,7 +151,7 @@ func (r *Registry) Restart(ctx context.Context, id string) (Session, error) {
 		r.mu.Unlock()
 		return Session{}, ErrSessionNotFound
 	}
-	if session.State != StateFailed {
+	if session.State != StateFailed && session.State != StateClosed {
 		r.mu.Unlock()
 		return Session{}, ErrInvalidTransition
 	}

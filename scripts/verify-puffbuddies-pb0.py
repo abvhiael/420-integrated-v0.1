@@ -39,6 +39,8 @@ NONGOALS = ROOT / "docs/puffbuddies/PB-0.16-NON-GOALS-RECONCILIATION.md"
 EVIDENCE_16 = ROOT / "docs/puffbuddies/PB-0.16-QUALIFICATION.md"
 STRUCTURE = ROOT / "docs/puffbuddies/PB-0.17-REPOSITORY-STRUCTURE.md"
 EVIDENCE_17 = ROOT / "docs/puffbuddies/PB-0.17-QUALIFICATION.md"
+DOCINV = ROOT / "docs/puffbuddies/PB-0.18-DOCUMENTATION-INVARIANT-TESTS.md"
+EVIDENCE_18 = ROOT / "docs/puffbuddies/PB-0.18-QUALIFICATION.md"
 
 errors = []
 
@@ -46,7 +48,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17, DOCINV, EVIDENCE_18):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -88,6 +90,8 @@ nongoals = NONGOALS.read_text(encoding="utf-8")
 evidence_16 = EVIDENCE_16.read_text(encoding="utf-8")
 structure = STRUCTURE.read_text(encoding="utf-8")
 evidence_17 = EVIDENCE_17.read_text(encoding="utf-8")
+docinv = DOCINV.read_text(encoding="utf-8")
+evidence_18 = EVIDENCE_18.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -190,6 +194,9 @@ for token in [
     "### PB-0.17 — Repository structure",
     "PB-STRUCT-001 through PB-STRUCT-020",
     "**Milestone relationship:** PB-0.17 is not a Level 2 integration milestone",
+    "### PB-0.18 — Documentation/invariant tests",
+    "PB-DOCINV-001 through PB-DOCINV-020",
+    "**Milestone relationship:** PB-0.18 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1742,13 +1749,54 @@ for token in [
 ]:
     need(token in evidence_17, f"PB-0.17 evidence record missing token: {token}")
 
+# PB-0.18 — documentation/invariant tests
+for token in ["# PuffBuddies PB-0.18 documentation/invariant tests","## Canonical test inventory","## Canonical documentation/invariant-test invariants","## Cross-step invariant matrix","## Adversarial mutation contract","## PB-0.18 completion boundary"]:
+    need(token in docinv, f"PB-0.18 document missing token: {token}")
+docinv_ids=re.findall(r"^### (PB-DOCINV-\d{3})\b",docinv,flags=re.MULTILINE)
+need(docinv_ids==[f"PB-DOCINV-{i:03d}" for i in range(1,21)],f"PB-DOCINV sequence drift: {docinv_ids}")
+families=[identity_ids,mvp_ids,scope_ids,boundary_ids,privacy_ids,consent_ids,elig_ids,threat_ids,dep_ids,state_ids,safety_ids,data_ids,life_ids,match_ids,cannabis_ids,vis_ids,nongoal_ids,struct_ids,docinv_ids]
+all_ids=[x for family in families for x in family]
+need(len(all_ids)==len(set(all_ids)),"PB-0 invariant identifiers are not globally unique")
+for step in range(1,18):
+    pos=road.find(f"### PB-0.{step} —")
+    need(pos>=0,f"roadmap missing PB-0.{step}")
+    if pos>=0:
+        line=road[pos:road.find("\n",pos)]
+        need("— COMPLETE" in line,f"roadmap completion continuity broken at PB-0.{step}")
+records=[evidence_01,evidence_02,evidence_03,evidence_04,evidence_05,evidence_06,evidence_07,evidence_08,evidence_09,evidence_10,evidence_11,evidence_12,evidence_13,evidence_14,evidence_15,evidence_16,evidence_17]
+for step,record in enumerate(records,1):
+    need(f"**PB-0.{step} —" in record,f"PB-0.{step} evidence does not identify its step")
+    need("COMPLETE" in record,f"PB-0.{step} evidence does not record COMPLETE")
+cross=[
+("adult identity","adult dating and social discovery" in app),
+("modes",all(x in app for x in ("Dating","Buddy","Both"))),
+("wallet unlinkability","wallet ownership or wallet address alone must not publicly reveal" in app),
+("mutual messaging","ordinary private dating/social communication requires reciprocal authorized interest" in consent),
+("block supremacy","blocking overrides prior relationship or payment state" in consent),
+("private offchain","Sensitive dating, relationship, preference, location, safety, and communication state remains private/off-chain" in boundary),
+("discoverable not public","Discoverable is not public" in visibility),
+("client hiding","Client hiding is not authorization" in visibility),
+("single owner","single canonical owner" in state.lower()),
+("deactivation deletion","Deactivation is distinct from deletion" in data),
+("one sided like","one-sided like" in matching.lower() and "messaging consent" in matching.lower()),
+("stale resurrection","No stale-state resurrection" in nongoals),
+("reserved path","A path named in PB-0.17 is a reserved architecture location only" in structure),
+]
+for name,ok in cross: need(ok,f"PB-0.18 cross-step invariant failed: {name}")
+canonical=[app,scope,boundary,privacy,consent,elig,threat,deps,state,safety,data,life,matching,cannabis,visibility,nongoals,structure,docinv]
+for i,value in enumerate(canonical,1):
+    need(re.search(r"0x[a-fA-F0-9]{40}",value) is None,f"PB-0.18 canonical document {i} assigns address")
+    need("420/service/puff" not in value.lower(),f"PB-0.18 canonical document {i} invents service ID")
+for token in ["# PB-0.18 qualification evidence","**PB-0.18 — Documentation/invariant tests**","**Level 1 — per-roadmap-step fast qualification**","PB-DOCINV-001 through PB-DOCINV-020","PuffBuddies PB-0 Qualification","## Security/adversarial/invariant results","## Intentionally deferred checks","**PB-0.19 — Master implementation roadmap**"]:
+    need(token in evidence_18,f"PB-0.18 evidence missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.17", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.18", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.17",
+    "step": "PB-0.18",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1976,5 +2024,16 @@ print(json.dumps({
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,
-    },
+    },,
+    "pb18": {
+        "documentationInvariantIds": docinv_ids,
+        "globalInvariantIdsUnique": True,
+        "roadmapContinuityThroughPb017": True,
+        "evidenceContinuityThroughPb017": True,
+        "crossStepInvariantsChecked": True,
+        "adversarialMutationHarnessRequired": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    }
 }, indent=2))

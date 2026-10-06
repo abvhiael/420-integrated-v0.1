@@ -1554,7 +1554,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** matched PB pair can request Messenger conversation only when canonical endpoint/block state allows it; accept/send recheck current PB + Messenger authority; unmatch/revocation/stale generation denies despite active conversation; native Messenger block denies without mutating PB match state; authority outage fails closed; profile/account binding remains transient; Messenger verifier passes unchanged; PB-6 Level-1 tests, retained PuffBuddies regressions and PB-5/PB-6 Level-2 integration pass on one exact SHA; durable evidence recorded.
 
-### PB-7 — 420Notifications integration
+### PB-7 — 420Notifications integration — COMPLETE
 
 **Purpose:** integrate private PuffBuddies operational notification intents with canonical 420Notifications subscription/delivery authority without making notification state authoritative for PuffBuddies relationships, messaging, safety, lifecycle, or protocol truth.
 

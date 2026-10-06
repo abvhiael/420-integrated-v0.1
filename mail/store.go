@@ -408,7 +408,7 @@ func cloneStoreData(src storeData) storeData {
 		dst.CustomFolderIndex[k] = append([]string(nil), v...)
 	}
 	for k, v := range src.Rules {
-		v.Action.AddLabelIDs = append([]string(nil), v.Action.AddLabelIDs...)
+		v.Action = cloneRuleAction(v.Action)
 		dst.Rules[k] = v
 	}
 	return dst

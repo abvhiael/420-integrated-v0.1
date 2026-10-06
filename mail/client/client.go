@@ -144,7 +144,6 @@ func (c Client) PermanentlyDelete(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodDelete, "/v1/messages/"+url.PathEscape(id), nil, nil)
 }
 
-
 func (c Client) ListLabels(ctx context.Context) ([]mail.LabelDefinition, error) {
 	var out []mail.LabelDefinition
 	err := c.do(ctx, http.MethodGet, "/v1/labels", nil, &out)
@@ -191,10 +190,16 @@ func (c Client) BulkUpdateOrganization(ctx context.Context, req mail.BulkOrganiz
 
 func (c Client) MessagesByLabel(ctx context.Context, labelID, cursor string, limit int) (mail.MailboxPage, error) {
 	q := url.Values{}
-	if cursor != "" { q.Set("cursor", cursor) }
-	if limit > 0 { q.Set("limit", strconv.Itoa(limit)) }
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
 	path := "/v1/labels/" + url.PathEscape(labelID) + "/messages"
-	if encoded := q.Encode(); encoded != "" { path += "?" + encoded }
+	if encoded := q.Encode(); encoded != "" {
+		path += "?" + encoded
+	}
 	var out mail.MailboxPage
 	err := c.do(ctx, http.MethodGet, path, nil, &out)
 	return out, err
@@ -202,10 +207,16 @@ func (c Client) MessagesByLabel(ctx context.Context, labelID, cursor string, lim
 
 func (c Client) MessagesByCustomFolder(ctx context.Context, folderID, cursor string, limit int) (mail.MailboxPage, error) {
 	q := url.Values{}
-	if cursor != "" { q.Set("cursor", cursor) }
-	if limit > 0 { q.Set("limit", strconv.Itoa(limit)) }
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
 	path := "/v1/custom-folders/" + url.PathEscape(folderID) + "/messages"
-	if encoded := q.Encode(); encoded != "" { path += "?" + encoded }
+	if encoded := q.Encode(); encoded != "" {
+		path += "?" + encoded
+	}
 	var out mail.MailboxPage
 	err := c.do(ctx, http.MethodGet, path, nil, &out)
 	return out, err

@@ -48,7 +48,6 @@ jobs:
           bad="$(gofmt -l media/authority media/storage media/livestream media/projection media/api sdk/media420 media/node/livegateway/gateway.go media/node/livegateway/drivers.go media/node/livegateway/recovery_test.go)"
           if [ -n "$bad" ]; then
             printf 'gofmt required for Media audit packages:\n%s\n' "$bad"
-            gofmt -d $bad
             exit 1
           fi
       - name: Validate GEN-SVC feature contract

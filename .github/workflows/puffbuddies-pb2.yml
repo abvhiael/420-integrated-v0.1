@@ -1,0 +1,67 @@
+name: PuffBuddies PB-2 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb2.yml"
+  push:
+    branches: ["puffbuddies-pb2-eligibility-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb2-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-2.1 targeted identity and eligibility boundaries
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_1_identity_boundaries -v
+      - name: PB-2.2 targeted adult eligibility state model
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_2_adult_eligibility_state -v
+      - name: PB-2.3 targeted age verification interface
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_3_age_verification_interface -v
+      - name: PB-2.4 targeted privacy-preserving eligibility proofs
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_4_privacy_preserving_eligibility_proofs -v
+      - name: PB-2.5 targeted eligibility persistence lifecycle
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_5_eligibility_persistence_lifecycle -v
+      - name: PB-2.6 targeted revocation and expiry handling
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_6_revocation_expiry_handling -v
+      - name: PB-2.7 targeted authorization integration
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_7_authorization_integration -v
+      - name: PB-2.8 targeted discovery matching eligibility
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_8_discovery_matching_eligibility -v
+      - name: PB-2.9 targeted messaging eligibility
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_9_messaging_eligibility -v
+      - name: PB-2.10 targeted privacy leakage hardening
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_10_eligibility_privacy -v
+      - name: PB-2.11 adversarial identity eligibility qualification
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_11_adversarial_identity_eligibility -v
+      - name: PB-2.12 failure recovery qualification
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_12_failure_recovery -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-2.13 retained integration milestone
+        if: ${{ hashFiles('puffbuddies/tests/test_pb_2_13_integration.py') != '' }}
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_13_integration -v
+      - name: Identity privacy and public-chain negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(government_id_image|raw_identity_document|date_of_birth|wallet_address)[[:space:]]*[:=]' puffbuddies/domain/identity.py

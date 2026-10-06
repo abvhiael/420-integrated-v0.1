@@ -34,7 +34,7 @@ TABLES={
 "profile":TableSpec("profile","puffbuddies",Sensitivity.PRIVATE,DeleteClass.ORDINARY_DELETE,
  frozenset({"profile_id","mode","lifecycle","display_fields","media_refs","visibility_version"}),COMMON_FORBIDDEN),
 "eligibility_projection":TableSpec("eligibility_projection","puffbuddies",Sensitivity.HIGHLY_SENSITIVE,DeleteClass.ORDINARY_DELETE,
- frozenset({"profile_id","decision","source_version","expires_at","policy_version"}),COMMON_FORBIDDEN|frozenset({"raw_identity_evidence"})),
+ frozenset({"profile_id","decision","source_version","expires_at","policy_version","sequence","checked_at_epoch"}),COMMON_FORBIDDEN|frozenset({"raw_identity_evidence","raw_proof","proof_bytes","credential_payload"})),
 "preferences":TableSpec("preferences","puffbuddies",Sensitivity.HIGHLY_SENSITIVE,DeleteClass.ORDINARY_DELETE,
  frozenset({"profile_id","discovery_modes","distance_band","compatibility","visibility_version"}),COMMON_FORBIDDEN),
 "visibility":TableSpec("visibility","puffbuddies",Sensitivity.PRIVATE,DeleteClass.ORDINARY_DELETE,

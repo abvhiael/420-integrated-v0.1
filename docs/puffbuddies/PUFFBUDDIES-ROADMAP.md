@@ -1570,6 +1570,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** current match notification handoff requires explicit selected subscription; message notification additionally requires current PB-6 authorization; current PB authorization/generation is rechecked; muted/inactive/no-operational-consent/filter/severity state safely suppresses; promotional consent cannot broaden delivery; Notifications outage fails closed without changing underlying authority; payload is minimum-disclosure/non-authoritative; PuffBuddies persists no subscription/destination linkage; affected Notifications dependency checks pass unchanged; PB-7 Level-1 targeted/retained regressions and PB-5/PB-6/PB-7 Level-2 integration pass on one exact SHA; durable evidence recorded.
 
+### PB-8 — Safety and moderation — COMPLETE
+
+**Purpose:** implement private PuffBuddies safety cases, report/evidence-integrity boundaries, immediate independent block authority, moderation actions, restriction/suspension/ban lifecycle enforcement, appeals, least-privilege review, protected persistence, auditability, and stale-state invalidation without public reputation.
+
+**Canonical requirements:** all twelve PB-0.10 report classes and all eight moderation states are explicit; report receipt/report count is not guilt; block is immediate, unilateral, user-owned, independent of reporting, and invalidates both participants' derived interaction authority while advancing pair consent epoch; reports do not silently block and blocks do not require reports; temporary/final safety actions use canonical RESTRICTED/SUSPENDED/BANNED lifecycle authority and ALL_DERIVED invalidation; final moderation action requires explicit human review; moderators cannot manufacture consent, unblock, rematch, reopen conversations, or force contact; appeal is subject-owned and does not itself restore lifecycle/contact; appeal adjudication is least-privilege; NO_ACTION leaves independent block intact; reporter/evidence/moderation history stays protected; PB-8 persists only evidence integrity metadata (SHA-256 + opaque ref), not raw report/message evidence; purpose-limited retention and optimistic concurrency apply; payment/premium/token/ranking/reputation/admin favoritism are not safety bypass inputs; safety state is private/non-enumerable and cannot become public reputation; stale clients/Messenger/Notifications/caches cannot preserve authority after safety revocation; cross-service enforcement remains capability-limited; no emergency/legal workflow, classifier, operator console, evidence DB engine, contract/address/service ID/deployment/live-enforcement claim is invented.
+
+**Affected components:** `puffbuddies/domain/safety.py`, protected safety schema, PB-1 lifecycle/relationship/invalidation primitives, PB-5 pair state, accumulated messaging/notification authorization, PB-8 targeted/integration tests/workflow, canonical definition/evidence, PB-0.19 scope reconciliation.
+
+**Qualification:** Level 1 exact-head PB-8 qualification **plus Level 2 retained app integration**, because PB-8 introduces the canonical safety/lifecycle authority that overrides the accumulated PB-4 through PB-7 interaction stack.
+
+**Level-3 boundary:** canonical full Solidity/Genesis/420 Integrated/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.9, PB-0.10, PB-0.11, PB-0.12, PB-0.15; PB-1 lifecycle/relationship/invalidation/persistence; PB-5; **PB-7 — 420Notifications integration — COMPLETE**.
+
+**Exit criteria:** all report/moderation states exist; report/block separation holds; immediate block invalidates discovery/matching/messaging authority; protected evidence/persistence boundaries and concurrency hold; least-privilege + human-review controls hold; restriction/suspension/ban invalidate stale participation; appeal cannot restore interpersonal consent; retained integration proves safety override of accumulated interaction authority; privacy/public-reputation negative gates pass; exact-head Level-1 + Level-2 app qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

@@ -117,6 +117,10 @@ Integrate bounded 420Messenger/420Notifications capabilities after canonical Puf
 **Required gates:** matched/unmatched authorization; unmatch/block/revocation races; stale Messenger capability rejection; notification privacy; dependency failure behavior.
 **Level 2 milestone B:** accumulated discovery/match/messaging/notification integration.
 
+### Current mapping for legacy safety scope
+
+The legacy PB-0.19 **PB-5 — Safety, moderation, block, report, and appeals** planning block predates the current phase reservation. Its implementation scope is carried forward by current **PB-8 — Safety and moderation**. This is a numbering/scope reconciliation only: PB-8 must preserve every PB-0.10/PB-0.11/PB-0.12 safety, privacy, retention, appeal and lifecycle invariant and does not claim live moderation infrastructure.
+
 ### PB-5 — Safety, moderation, block, report, and appeals
 Implement private safety cases, report evidence boundaries, block/unmatch behavior, moderation actions, restriction/suspension/ban handling, appeal workflow, least-privilege moderation access, and auditability without public reputation.
 

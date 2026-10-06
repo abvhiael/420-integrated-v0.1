@@ -46,11 +46,11 @@ const (
 
 var (
 	ErrUnsupportedProtocol = errors.New("420media livegateway: unsupported protocol")
-	ErrInvalidEndpoint      = errors.New("420media livegateway: invalid endpoint")
-	ErrInvalidTransition    = errors.New("420media livegateway: invalid session transition")
-	ErrSessionExists        = errors.New("420media livegateway: session exists")
-	ErrSessionNotFound      = errors.New("420media livegateway: session not found")
-	ErrSecretInEndpoint     = errors.New("420media livegateway: credentials must not be embedded in endpoint")
+	ErrInvalidEndpoint     = errors.New("420media livegateway: invalid endpoint")
+	ErrInvalidTransition   = errors.New("420media livegateway: invalid session transition")
+	ErrSessionExists       = errors.New("420media livegateway: session exists")
+	ErrSessionNotFound     = errors.New("420media livegateway: session not found")
+	ErrSecretInEndpoint    = errors.New("420media livegateway: credentials must not be embedded in endpoint")
 )
 
 // CredentialRef is an opaque operator-local reference. Secret material is resolved only

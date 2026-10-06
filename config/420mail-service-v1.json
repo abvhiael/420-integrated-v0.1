@@ -321,5 +321,39 @@
     "sessionSecretPersistence": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "walletFunctions": {
+    "enabled": true,
+    "authority": "CANONICAL_WALLET_SMARTACCOUNT_ADAPTER",
+    "authenticatedOwnerOnly": true,
+    "actions": [
+      "TRANSACTION",
+      "MESSAGE_SIGNATURE"
+    ],
+    "prepareIntentOnly": true,
+    "signing": "WALLET_ONLY",
+    "submission": "WALLET_ONLY",
+    "simulation": "WALLET_ONLY",
+    "chainValidation": "AUTHORITY_REQUIRED",
+    "authorizationEpoch": "AUTHORITY_REQUIRED",
+    "explicitWalletApprovalRequired": true,
+    "verification": {
+      "kinds": [
+        "TRANSACTION",
+        "SIGNATURE"
+      ],
+      "authority": "CANONICAL_WALLET_RPC_IDENTITY_ADAPTER",
+      "canonicalEvidenceRequired": true,
+      "submissionAckIsCompletion": false,
+      "finalizedSeparateFromVerified": true
+    },
+    "privateKeyInput": false,
+    "seedPhraseInput": false,
+    "passkeyPrivateMaterialInput": false,
+    "credentialPersistence": false,
+    "actionPersistence": false,
+    "verificationEvidencePersistence": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

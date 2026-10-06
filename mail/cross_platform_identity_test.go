@@ -28,14 +28,14 @@ func seedCrossPlatformIdentity(t *testing.T, store MailStore) {
 			HandoffID: "handoff-wallet", Owner: "alice.420", ConnectionID: "discord:123456789012345678",
 			DiscordUserID: "123456789012345678", ChainID: 1, Account: "0x1111111111111111111111111111111111111111",
 			PayloadDigest: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-			ExpiresAt: time.Unix(1700001800, 0).UTC(), Verified: true,
+			ExpiresAt:     time.Unix(1700001800, 0).UTC(), Verified: true,
 			VerifiedAt: time.Unix(1700001400, 0).UTC(), Version: 2,
 		}
 		data.DiscordWalletVerifications["handoff-unverified"] = DiscordWalletVerificationState{
 			HandoffID: "handoff-unverified", Owner: "alice.420", ConnectionID: "discord:323456789012345678",
 			DiscordUserID: "323456789012345678", ChainID: 1, Account: "0x2222222222222222222222222222222222222222",
 			PayloadDigest: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-			ExpiresAt: time.Unix(1700001900, 0).UTC(), Verified: false, Version: 1,
+			ExpiresAt:     time.Unix(1700001900, 0).UTC(), Verified: false, Version: 1,
 		}
 		return nil
 	})

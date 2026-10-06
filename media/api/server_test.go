@@ -21,7 +21,7 @@ func (b *testBackend) ListAssets(context.Context, string, int) (Page[Asset], err
 		ID: "asset-1", OwnerRef: "wallet-1", State: "READY", Visibility: "PUBLIC",
 		PlaybackURL: "https://cdn.example.invalid/asset-1.mp4",
 		CreatedAt:   time.Date(2026, 10, 6, 12, 0, 0, 0, time.FixedZone("x", -6*3600)),
-		UpdatedAt:   time.Date(2026, 10, 6, 12, 1, 0, 0, 0, time.FixedZone("x", -6*3600)),
+		UpdatedAt:   time.Date(2026, 10, 6, 12, 1, 0, 0, time.FixedZone("x", -6*3600)),
 		Provenance:  Provenance{Source: "420Indexer", Authority: "420Media", ObservedAt: time.Date(2026, 10, 6, 12, 2, 0, 0, time.FixedZone("x", -6*3600))},
 	}}, NextCursor: "cursor-2"}, nil
 }

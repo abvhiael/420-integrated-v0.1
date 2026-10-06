@@ -713,7 +713,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.16 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.17 — Repository structure
+### PB-0.17 — Repository structure — COMPLETE
 
 **Purpose:** freeze the intended PuffBuddies repository layout and ownership boundaries before implementation expands, without falsely creating or claiming runtime implementation during PB-0.
 

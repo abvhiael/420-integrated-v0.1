@@ -12,6 +12,10 @@
 
 `39ff0740c6cbc11193280493838e82ca8c27bcb5`
 
+## Reconciliation base SHA
+
+`11b65333563b84af7b5d0b35841509f985df1`
+
 ## Final current-main reconciliation
 
 - qualified reconciliation base: `11b65333563b84af7b5ed5d0b35841509f985df1`

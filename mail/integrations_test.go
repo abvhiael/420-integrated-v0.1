@@ -8,13 +8,13 @@ import (
 )
 
 type connectorAdapterStub struct {
-	desc      ConnectorDescriptor
+	desc       ConnectorDescriptor
 	connection ConnectorConnection
-	pull      ConnectorPullResult
-	push      ConnectorPushResult
-	webhook   ConnectorWebhookResult
-	err       error
-	calls     []string
+	pull       ConnectorPullResult
+	push       ConnectorPushResult
+	webhook    ConnectorWebhookResult
+	err        error
+	calls      []string
 }
 
 func (s *connectorAdapterStub) Descriptor() ConnectorDescriptor { return s.desc }
@@ -42,14 +42,14 @@ func (s *connectorAdapterStub) VerifyWebhook(context.Context, ConnectorWebhookRe
 func testConnectorAdapter(provider string, caps ...ConnectorCapability) *connectorAdapterStub {
 	now := time.Unix(1700000000, 0).UTC()
 	return &connectorAdapterStub{
-		desc: ConnectorDescriptor{Provider: provider, DisplayName: "Test "+provider, Capabilities: caps},
+		desc: ConnectorDescriptor{Provider: provider, DisplayName: "Test " + provider, Capabilities: caps},
 		connection: ConnectorConnection{
 			ID: "conn-1", Provider: provider, Identity: "alice.420", ExternalID: "external-1",
 			LinkedAt: now, UpdatedAt: now, Active: true, NonCustodial: true,
 		},
 		pull: ConnectorPullResult{
 			Provider: provider, ConnectionID: "conn-1",
-			Items: []ConnectorItem{{ExternalID: "msg-1", OccurredAt: now, Kind: "MESSAGE", Payload: "opaque-provider-payload"}},
+			Items:      []ConnectorItem{{ExternalID: "msg-1", OccurredAt: now, Kind: "MESSAGE", Payload: "opaque-provider-payload"}},
 			NextCursor: "next-1",
 		},
 		push: ConnectorPushResult{

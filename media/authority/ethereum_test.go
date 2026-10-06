@@ -98,7 +98,7 @@ func TestEthereumRightsReaderChecksSubjectRightAndExactLicenseUse(t *testing.T) 
 			uintWord(1), uintWord(0), uintWord(1), uintWord(1), [32]byte{},
 		),
 		router + "|" + effectiveSelector: encodeWords(uintWord(1)),
-		router + "|" + canUseSelector: encodeWords(uintWord(1)),
+		router + "|" + canUseSelector:    encodeWords(uintWord(1)),
 	}}
 	reader, err := NewEthereumRightsReader(
 		rpc, assets, claims, router,

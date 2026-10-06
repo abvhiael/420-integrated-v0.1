@@ -108,7 +108,8 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		var syntaxErr *json.SyntaxError
-		if errors.As(err, &syntaxErr) || strings.Contains(err.Error(), "json: unknown field") || errors.Is(err, io.EOF) {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &syntaxErr) || errors.As(err, &maxBytesErr) || strings.Contains(err.Error(), "json: unknown field") || errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
 			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
 			return
 		}

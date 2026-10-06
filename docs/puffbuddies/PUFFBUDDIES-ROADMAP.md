@@ -1310,6 +1310,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** request/response interface compiles; source/subject/policy/nonce/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/wallet fields absent; validated results reuse PB-2.1/PB-2.2 authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.4 — Privacy-preserving eligibility proofs
+
+**Purpose:** implement a privacy-preserving adult-eligibility proof-consumption boundary that reveals only the minimum verified conclusion needed by PuffBuddies while keeping raw identity and raw cryptographic proof material outside the app domain.
+
+**Canonical requirements:** domain-separate challenges to PuffBuddies/adult-eligibility; bind private profile, current policy, strong nonce, audience, predicate and request time; accept only 420Identity-approved verifier output with source/version and scheme identifier; reject subject/policy/nonce/audience/predicate/verifier/time/freshness defects; make revocation/expiry override positive results; preserve UNKNOWN fail-closed behavior; exclude DOB/legal identity/government ID/biometrics/wallet linkage/claim hashes/exact address/precise location/raw proof bytes/credential payloads; feed PB-2.1/PB-2.2 authority rather than bypassing it; introduce no invented production ZK scheme, direct Identity420 proof API, verifier contract, fixed address/service ID, deployment, or public membership registry.
+
+**Affected components:** `puffbuddies/domain/eligibility_proofs.py`, PB-2.4 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the documented Level 2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.6, PB-0.8, PB-2.1 COMPLETE, PB-2.2 COMPLETE, PB-2.3 COMPLETE.
+
+**Exit criteria:** proof boundary compiles; subject/policy/nonce/audience/predicate/verifier/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/raw proof fields remain absent; validated proof results feed existing eligibility state authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

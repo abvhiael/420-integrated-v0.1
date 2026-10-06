@@ -106,6 +106,20 @@ if profile_path.is_file():
     if onboarding.get("custodialSigning") is not False or onboarding.get("privateKeyInput") is not False or onboarding.get("seedPhraseInput") is not False or onboarding.get("passkeyPrivateMaterialInput") is not False: errors.append("MAIL-2.11 custodial boundary drifted")
     if onboarding.get("credentialPersistence") is not False or onboarding.get("publicIndexing") is not False or onboarding.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.11 onboarding privacy boundary drifted")
     if "420 Wallet" not in profile.get("dependencies",[]): errors.append("MAIL-2.11 Wallet dependency missing")
+    security=profile.get("passkeyFirstSecurity",{})
+    if security.get("enabled") is not True or security.get("authority")!="CANONICAL_WALLET_IDENTITY_SECURITY_ADAPTER" or security.get("authenticatedOwnerOnly") is not True: errors.append("MAIL-2.12 security authority boundary drifted")
+    passkeys=security.get("passkeys",{})
+    if passkeys.get("enabled") is not True or passkeys.get("enrollment") is not True or passkeys.get("revocation") is not True: errors.append("MAIL-2.12 passkey capability drifted")
+    if passkeys.get("authorizationEpochBound") is not True or passkeys.get("staleEpochActiveRejected") is not True or passkeys.get("privateMaterialInput") is not False: errors.append("MAIL-2.12 passkey epoch/private-material boundary drifted")
+    devices=security.get("devices",{})
+    if devices.get("enrollment") is not True or devices.get("revocation") is not True or devices.get("lostDeviceResponse")!="REVOKE_BOUND_AUTHORIZATION_THROUGH_WALLET_AUTHORITY": errors.append("MAIL-2.12 device security drifted")
+    recovery=security.get("recovery",{})
+    if recovery.get("model")!="SMARTACCOUNT420_TIMELOCKED" or recovery.get("actions")!=["SET_AUTHORITY","PROPOSE","CANCEL","FINALIZE"] or recovery.get("localTimelockOverride") is not False or recovery.get("signingAuthority")!="WALLET_ONLY": errors.append("MAIL-2.12 recovery authority drifted")
+    sessions=security.get("sessions",{})
+    if sessions.get("listing") is not True or sessions.get("revocation") is not True or sessions.get("authorizationEpochBound") is not True or sessions.get("staleEpochActiveRejected") is not True: errors.append("MAIL-2.12 session security drifted")
+    alerts=security.get("alerts",{})
+    if alerts.get("listing") is not True or alerts.get("acknowledgement") is not True or alerts.get("authority")!="WALLET_IDENTITY_SECURITY_AUTHORITY": errors.append("MAIL-2.12 security alerts drifted")
+    if security.get("securityStatePersistence")!="CANONICAL_AUTHORITY_ONLY" or security.get("credentialPersistence") is not False or security.get("sessionSecretPersistence") is not False or security.get("publicIndexing") is not False or security.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.12 security persistence/privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -202,11 +216,20 @@ for token in ['"/v1/onboarding/google"','"/v1/onboarding/apple"','"/v1/onboardin
     if token not in http: errors.append("MAIL-2.11 HTTP onboarding surface missing: "+token)
 for token in ["GoogleOnboarding","AppleOnboarding","PasskeyOnboarding","ExistingWalletOnboarding"]:
     if token not in client: errors.append("MAIL-2.11 client onboarding surface missing: "+token)
+security_src=(ROOT/"mail/security.go").read_text() if (ROOT/"mail/security.go").is_file() else ""
+for token in ["SecurityAuthority","SecurityService","SecurityState","PasskeySummary","DeviceSummary","SessionSummary","RecoverySummary","SecurityAlert","EnrollPasskey","RevokePasskey","EnrollDevice","RevokeDevice","RecoverySetAuthority","RecoveryPropose","RecoveryCancel","RecoveryFinalize","RevokeSession","AcknowledgeAlert","ErrSecurityInvalidResult","AuthorizationEpoch"]:
+    if token not in security_src: errors.append("MAIL-2.12 security invariant missing: "+token)
+for token in ['"/v1/security"','"/v1/security/passkeys"','"/v1/security/devices"','"/v1/security/recovery"','"/v1/security/sessions/"','"/v1/security/alerts/"',"*SecurityService"]:
+    if token not in http: errors.append("MAIL-2.12 HTTP security surface missing: "+token)
+for token in ["SecurityState","EnrollPasskey","RevokePasskey","EnrollDevice","RevokeDevice","Recovery","RevokeSession","AcknowledgeSecurityAlert"]:
+    if token not in client: errors.append("MAIL-2.12 client security surface missing: "+token)
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
 for token in ["/v1/onboarding/","data-onboard","__420_ONBOARDING__","mailSession","non_custodial","session_token"]:
     if token not in web: errors.append("MAIL-2.11 thin UI onboarding behavior missing: "+token)
+for token in ["/v1/security","data-security-action","__420_SECURITY__","loadSecurity","revokeSecurity","authorization_epoch"]:
+    if token not in web: errors.append("MAIL-2.12 thin UI security behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -232,4 +255,5 @@ print("MAIL-2.8 threads and conversations: qualified by app-scoped checks")
 print("MAIL-2.9 drafts system: qualified by app-scoped checks")
 print("MAIL-2.10 outbox and delivery queue: qualified by app-scoped checks")
 print("MAIL-2.11 email-as-a-wallet onboarding: qualified by app-scoped checks")
+print("MAIL-2.12 passkey-first security: qualified by app-scoped checks")
 

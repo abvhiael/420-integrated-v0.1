@@ -191,19 +191,42 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-7 — API, SDK, indexer and recovery
 
-Status: OPEN
+Status: COMPLETE
 
-Implement:
+Implemented and qualified:
 
-- `/v1` service API;
-- typed client/SDK;
-- authorization and validation;
-- cursor pagination;
-- idempotency;
-- replay-protected signed webhooks if used;
-- reorg/rebuild-safe derived projections;
-- interruption recovery;
-- observability and bounded retry behavior.
+- `/v1` service API under `town/api`;
+- typed Go client/SDK under `sdk/town420`;
+- authenticated mutation transport with strict request validation and direct reuse of Town content authorization;
+- bounded opaque generation-bound cursor pagination for public derived projections;
+- required mutation idempotency keys from API through SDK retries;
+- no webhook delivery surface enabled in this step; configuration explicitly keeps webhooks disabled until signed replay protection exists;
+- rebuildable, non-canonical, reorg-safe Town post projections under `town/projection`;
+- deterministic chain-gap/parent-mismatch rejection and orphan replacement on reorg;
+- interruption recovery with bounded, schema-validated, atomically replaced `0600` recovery snapshots under `town/recovery`;
+- API observability for requests, errors, auth failures, mutations and aggregate latency;
+- SDK HTTPS enforcement, typed errors and bounded retry behavior capped at five attempts / two-second maximum retry delay;
+- retryable statuses limited to 429/502/503/504 plus transport failures, with non-retryable conflicts returned immediately;
+- exact idempotency-key reuse across retried writes;
+- machine-readable TOWN-AUDIT-7 API/SDK/projection/recovery invariants and dedicated verifier/CI ownership.
+
+Durable qualification evidence:
+
+- qualification level: **Level 1 + Level 2 API/SDK/projection/recovery integration milestone**;
+- qualified implementation/test/workflow SHA: `05e9bda4db92edabb2c9d97d211b63ec3c1374c1`;
+- 420Town audit workflow run `37384027542` / run `124` — PASS;
+- `town-skeleton` job `112013015935` — PASS;
+- `town-contracts` job `112013016398` — PASS;
+- exact-SHA assertions — PASS in both jobs;
+- all accumulated Town audit/skeleton/authority/content/moderation/integration/API verifiers — PASS;
+- TOWN-AUDIT-7 gofmt gate — PASS;
+- `go test ./town/... ./sdk/town420` — PASS;
+- `go vet ./town/... ./sdk/town420` — PASS;
+- directly affected retained service-dependency tests — PASS;
+- focused Town Solidity build and `test/Town*.t.sol` regressions — PASS;
+- cross-dApp Rewards hardening — PASS;
+- Level 3 remains intentionally deferred to TOWN-AUDIT-10;
+- next canonical roadmap step: **TOWN-AUDIT-8 — User-facing web application**.
 
 ## TOWN-AUDIT-8 — User-facing web application
 

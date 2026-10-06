@@ -81,6 +81,11 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Current PB-12 mobile-applications scope
+
+Current **PB-12 — Mobile applications** explicitly promotes the iOS and Android clients that PB-0.2 deferred behind the web-first MVP. PB-12 preserves the PB-11 client/domain authority model while adding only bounded native device capabilities: device-bound session storage, lifecycle resume/revalidation, media handoff, OS notification-registration handoff and verified app/universal links. Device/store signing, live push credentials, live API binding and distribution remain later external/release gates.
+
+
 ### Current PB-10 payments/premium scope
 
 Current **PB-10 — Payments and premium entitlements** promotes the premium/monetization work explicitly deferred by PB-0.2 while preserving PB-0.5/PB-0.7/PB-0.8/PB-0.9/PB-0.12/PB-0.16: canonical settlement remains 420Pay-owned, PuffBuddies owns only product feature entitlement, and no economic state can create or restore consent, bypass block/safety/lifecycle, buy protected private-person data, or become dating desirability/reputation. PB-10 implements the entitlement policy boundary; PB-11 later owns web-client mechanics.

@@ -248,3 +248,89 @@ func TestHTTPPrivateSearchRejectsInvalidInput(t *testing.T) {
 		t.Fatalf("search method status=%d body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+
+func TestHTTPRulesCRUDAndDeliveryApplication(t *testing.T) {
+	h, s, _ := testHTTPHandler(t)
+	archive := FolderArchive
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/rules", "bob.420", RuleInput{
+		Name:      "Alice archive",
+		Condition: RuleCondition{SenderEquals: "alice.420"},
+		Action:    RuleAction{Folder: &archive, Starred: boolPtr(true)},
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create rule status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var rule MailRule
+	if err := json.Unmarshal(rec.Body.Bytes(), &rule); err != nil {
+		t.Fatal(err)
+	}
+	if rule.ID == "" || rule.Owner != "bob.420" || !rule.Enabled {
+		t.Fatalf("unexpected created rule: %+v", rule)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/rules", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list rules status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var listed []MailRule
+	if err := json.Unmarshal(rec.Body.Bytes(), &listed); err != nil {
+		t.Fatal(err)
+	}
+	if len(listed) != 1 || listed[0].ID != rule.ID {
+		t.Fatalf("unexpected rules listing: %+v", listed)
+	}
+
+	msg, err := s.Send(context.Background(), "alice.420", SendRequest{
+		IdempotencyKey: "http-rule-send", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "hello", Body: "body", Source: ServiceID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	state, err := s.GetMailboxState(context.Background(), "bob.420", msg.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderArchive || !state.Starred {
+		t.Fatalf("HTTP-created rule did not execute: %+v", state)
+	}
+
+	disabled := false
+	rec = performMailRequest(t, h, http.MethodPut, "/v1/rules/"+rule.ID, "bob.420", RuleInput{
+		Name: "Alice archive disabled", Enabled: &disabled,
+		Condition: RuleCondition{SenderEquals: "alice.420"},
+		Action:    RuleAction{Folder: &archive},
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("update rule status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodDelete, "/v1/rules/"+rule.ID, "alice.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign rule delete status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodDelete, "/v1/rules/"+rule.ID, "bob.420", nil)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("delete rule status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPRulesRejectInvalidTargetsAndUnknownFields(t *testing.T) {
+	h, _, _ := testHTTPHandler(t)
+	sent := FolderSent
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/rules", "bob.420", RuleInput{
+		Name: "bad folder", Condition: RuleCondition{SenderEquals: "alice.420"}, Action: RuleAction{Folder: &sent},
+	})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("forbidden rule folder status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/rules", bytes.NewBufferString(`{"name":"x","condition":{"sender_equals":"alice.420"},"action":{"starred":true},"unexpected":1}`))
+	req.Header.Set("Authorization", "bob.420")
+	recorder := httptest.NewRecorder()
+	h.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("unknown rule field status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}

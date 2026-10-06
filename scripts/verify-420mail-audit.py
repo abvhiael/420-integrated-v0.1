@@ -159,11 +159,12 @@ if profile_path.is_file():
     dwallet=profile.get("discordWalletVerification",{})
     if dwallet.get("enabled") is not True or dwallet.get("provider")!="discord" or dwallet.get("connectorCapability")!="WALLET_VERIFY": errors.append("MAIL-2.18 Discord wallet capability drifted")
     signal=profile.get("signalIntegrationBoundary",{})
-    if signal.get("enabled") is not True or signal.get("provider")!="signal" or signal.get("status")!="NOTIFICATIONS_ONLY": errors.append("MAIL-2.20 Signal boundary identity/status drifted")
+    if signal.get("enabled") is not True or signal.get("provider")!="signal" or signal.get("status")!="SHARE_FORWARD_ENABLED": errors.append("MAIL-2.21 Signal boundary identity/status drifted")
     if signal.get("architecture")!="EXTERNAL_SIGNAL_TRANSPORT_ADAPTER" or signal.get("transportAuthority")!="SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY": errors.append("MAIL-2.19 Signal transport authority drifted")
     if signal.get("providerRegistrationAllowed") is not False or signal.get("mailOwnsSignalIdentity") is not False or signal.get("mailStoresProviderSecrets") is not False: errors.append("MAIL-2.19 Signal ownership/registration boundary drifted")
     if signal.get("outboundNotifications") is not True: errors.append("MAIL-2.20 Signal notifications not enabled")
-    if any(signal.get(k) is not False for k in ["accountLinking","shareAndForward","inboundSync","webhookIngestion","deepSync"]): errors.append("MAIL-2.20 pulled later Signal capabilities forward")
+    if signal.get("shareAndForward") is not True: errors.append("MAIL-2.21 Signal share/forward not enabled")
+    if any(signal.get(k) is not False for k in ["accountLinking","inboundSync","webhookIngestion","deepSync"]): errors.append("MAIL-2.21 pulled later Signal capabilities forward")
     if signal.get("deepSyncCondition")!="STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED": errors.append("MAIL-2.19 Signal deep-sync gate drifted")
     if any(signal.get(k) is not False for k in ["rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.19 Signal secret/privacy boundary drifted")
     signal_notifications=profile.get("signalNotifications",{})
@@ -174,7 +175,16 @@ if profile_path.is_file():
     if signal_notifications.get("idempotencyDomain")!="420/MAIL/SIGNAL/NOTIFICATION/V1" or signal_notifications.get("deterministicRecipientMessageBinding") is not True: errors.append("MAIL-2.20 Signal notification idempotency drifted")
     if signal_notifications.get("preserves420Notifications") is not True or signal_notifications.get("consentSuppressionAllowed") is not True or signal_notifications.get("failureBlocksMailDelivery") is not False: errors.append("MAIL-2.20 Signal notification fanout/failure drifted")
     if signal_notifications.get("accountLinkingRequired") is not False or signal_notifications.get("providerRegistrationAllowed") is not False: errors.append("MAIL-2.20 Signal notification boundary drifted")
-    if any(signal_notifications.get(k) is not False for k in ["shareAndForward","inboundSync","webhookIngestion","deepSync","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.20 pulled later Signal/privacy capabilities forward")
+    if signal_notifications.get("shareAndForward") is not True: errors.append("MAIL-2.21 Signal notification/share boundary drifted")
+    if any(signal_notifications.get(k) is not False for k in ["inboundSync","webhookIngestion","deepSync","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.21 pulled later Signal/privacy capabilities forward")
+    signal_share=profile.get("signalShareAndForward",{})
+    if signal_share.get("enabled") is not True or signal_share.get("provider")!="signal" or signal_share.get("transportAuthority")!="SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY": errors.append("MAIL-2.21 Signal share authority drifted")
+    if signal_share.get("sourceAuthorization")!="AUTHENTICATED_OWNER_LIVE_MAILBOX_COPY" or signal_share.get("destinationResolution")!="OPAQUE_DESTINATION_REFERENCE_EXTERNAL_AUTHORITY": errors.append("MAIL-2.21 Signal share authorization/destination drifted")
+    if signal_share.get("supportedModes")!=["SHARE","FORWARD"] or signal_share.get("shareIncludesSubject") is not False or signal_share.get("forwardIncludesSubject") is not True or signal_share.get("includesBody") is not True: errors.append("MAIL-2.21 Signal share payload semantics drifted")
+    if signal_share.get("includesSender") is not False or signal_share.get("includesSourceApplication") is not False or signal_share.get("optionalNote") is not True or signal_share.get("maxNoteBytes")!=2048 or signal_share.get("maxDestinationRefBytes")!=512: errors.append("MAIL-2.21 Signal share metadata/bounds drifted")
+    if signal_share.get("idempotencyRequired") is not True or signal_share.get("providerCredentialInput") is not False or signal_share.get("phoneNumberCredentialInput") is not False: errors.append("MAIL-2.21 Signal share idempotency/credential drifted")
+    if signal_share.get("accountLinkingRequired") is not False or signal_share.get("providerRegistrationAllowed") is not False: errors.append("MAIL-2.21 Signal share connector boundary drifted")
+    if any(signal_share.get(k) is not False for k in ["inboundSync","webhookIngestion","deepSync","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.21 pulled Signal sync/privacy capabilities forward")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
     if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
@@ -305,6 +315,7 @@ discord_delivery_src=(ROOT/"mail/discord_delivery.go").read_text() if (ROOT/"mai
 discord_wallet_src=(ROOT/"mail/discord_wallet.go").read_text() if (ROOT/"mail/discord_wallet.go").is_file() else ""
 signal_boundary_src=(ROOT/"mail/signal_boundary.go").read_text() if (ROOT/"mail/signal_boundary.go").is_file() else ""
 signal_notifications_src=(ROOT/"mail/signal_notifications.go").read_text() if (ROOT/"mail/signal_notifications.go").is_file() else ""
+signal_share_src=(ROOT/"mail/signal_share.go").read_text() if (ROOT/"mail/signal_share.go").is_file() else ""
 for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
     if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
 for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
@@ -313,10 +324,12 @@ for token in ["DiscordDeliveryKind","DiscordDeliveryMessage","DiscordDeliveryRec
     if token not in discord_delivery_src: errors.append("MAIL-2.17 Discord delivery invariant missing: "+token)
 for token in ["DiscordWalletChallengeRequest","DiscordWalletChallenge","DiscordWalletVerificationRequest","DiscordWalletVerification","DiscordWalletVerificationState","DiscordWalletVerificationService","NewDiscordWalletVerificationService","discordWalletChallengeDigest","validateDiscordWalletVerificationData","ErrDiscordWalletConflict"]:
     if token not in discord_wallet_src: errors.append("MAIL-2.18 Discord wallet invariant missing: "+token)
-for token in ["SignalProvider","SignalIntegrationBoundary","CanonicalSignalIntegrationBoundary","validateSignalIntegrationBoundary","NOTIFICATIONS_ONLY","STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED"]:
-    if token not in signal_boundary_src: errors.append("MAIL-2.20 Signal boundary invariant missing: "+token)
+for token in ["SignalProvider","SignalIntegrationBoundary","CanonicalSignalIntegrationBoundary","validateSignalIntegrationBoundary","SHARE_FORWARD_ENABLED","STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED"]:
+    if token not in signal_boundary_src: errors.append("MAIL-2.21 Signal boundary invariant missing: "+token)
 for token in ["SignalNotificationKind","SignalNotificationRequest","SignalNotificationReceipt","SignalNotificationAuthority","SignalNotificationService","SignalNotificationSink","NewSignalNotificationService","NewSignalNotificationSink","signalNotificationIdempotencyKey","ErrSignalNotificationInvalidResult"]:
     if token not in signal_notifications_src: errors.append("MAIL-2.20 Signal notification invariant missing: "+token)
+for token in ["SignalShareMode","SignalShareModeShare","SignalShareModeForward","SignalShareRequest","SignalSharePayload","SignalShareReceipt","SignalShareAuthority","SignalShareService","NewSignalShareService","ErrSignalShareInvalidResult"]:
+    if token not in signal_share_src: errors.append("MAIL-2.21 Signal share invariant missing: "+token)
 if "ConnectorCapabilityWalletVerify" not in discord_src: errors.append("MAIL-2.18 Discord connector wallet capability missing")
 for token in ["DiscordDeliveryAuthority","ConnectorCapabilityPush","DeliverDiscord","DiscordDeliveryKind"]:
     if token not in discord_src: errors.append("MAIL-2.17 Discord adapter delivery invariant missing: "+token)
@@ -332,6 +345,8 @@ for token in ['"/v1/connectors/discord/wallet/challenge"','"/v1/connectors/disco
     if token not in http: errors.append("MAIL-2.18 HTTP Discord wallet surface missing: "+token)
 if '"/v1/connectors/signal/boundary"' not in http: errors.append("MAIL-2.19 HTTP Signal boundary surface missing")
 if "SignalIntegrationBoundary" not in client: errors.append("MAIL-2.19 client Signal boundary surface missing")
+if '"/v1/connectors/signal/share"' not in http or "*SignalShareService" not in http: errors.append("MAIL-2.21 HTTP Signal share surface missing")
+if "ShareToSignal" not in client: errors.append("MAIL-2.21 client Signal share surface missing")
 for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
     pass
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
@@ -351,8 +366,8 @@ for token in ["/v1/connectors/discord/deliver","deliverDiscord","Send to Discord
     if token not in web: errors.append("MAIL-2.17 thin UI Discord delivery behavior missing: "+token)
 for token in ["/v1/connectors/discord/wallet/challenge","/v1/connectors/discord/wallet/verify","verifyDiscordWallet","Verify Discord wallet","discordVerification","WALLET_VERIFY"]:
     if token not in web: errors.append("MAIL-2.18 thin UI Discord wallet behavior missing: "+token)
-for token in ["/v1/connectors/signal/boundary","loadSignalBoundary","Signal boundary","NOTIFICATIONS_ONLY","notifications enabled"]:
-    if token not in web: errors.append("MAIL-2.20 thin UI Signal notification boundary behavior missing: "+token)
+for token in ["/v1/connectors/signal/boundary","loadSignalBoundary","Signal boundary","SHARE_FORWARD_ENABLED","notifications + explicit share/forward enabled","/v1/connectors/signal/share","shareSignal","Share to Signal","Forward to Signal"]:
+    if token not in web: errors.append("MAIL-2.21 thin UI Signal share behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -387,4 +402,5 @@ print("MAIL-2.17 420Mail to Discord delivery: qualified by app-scoped checks")
 print("MAIL-2.18 Discord wallet verification: qualified by app-scoped checks")
 print("MAIL-2.19 Signal integration boundary: qualified by app-scoped checks")
 print("MAIL-2.20 420Mail to Signal notifications: qualified by app-scoped checks")
+print("MAIL-2.21 Signal share and forward: qualified by app-scoped checks")
 

@@ -413,3 +413,52 @@ func (c Client) ExistingWalletOnboarding(ctx context.Context, req mail.WalletOnb
 	err := c.do(ctx, http.MethodPost, "/v1/onboarding/wallet", req, &out)
 	return out, err
 }
+
+
+func (c Client) SecurityState(ctx context.Context) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodGet, "/v1/security", nil, &out)
+	return out, err
+}
+
+func (c Client) EnrollPasskey(ctx context.Context, req mail.PasskeyEnrollmentRequest) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/passkeys", req, &out)
+	return out, err
+}
+
+func (c Client) RevokePasskey(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodDelete, "/v1/security/passkeys/"+url.PathEscape(id), nil, &out)
+	return out, err
+}
+
+func (c Client) EnrollDevice(ctx context.Context, req mail.DeviceEnrollmentRequest) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/devices", req, &out)
+	return out, err
+}
+
+func (c Client) RevokeDevice(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodDelete, "/v1/security/devices/"+url.PathEscape(id), nil, &out)
+	return out, err
+}
+
+func (c Client) Recovery(ctx context.Context, req mail.RecoveryRequest) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/recovery", req, &out)
+	return out, err
+}
+
+func (c Client) RevokeSession(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/sessions/"+url.PathEscape(id)+"/revoke", nil, &out)
+	return out, err
+}
+
+func (c Client) AcknowledgeSecurityAlert(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/alerts/"+url.PathEscape(id)+"/ack", nil, &out)
+	return out, err
+}

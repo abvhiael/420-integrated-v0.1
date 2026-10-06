@@ -255,3 +255,48 @@ func TestDurableOrganizationSurvivesRestartAndSchemaOneMigration(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+
+func TestSystemLabelViewsReflectMailboxState(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "system-view", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	labels, err := s.ListLabels(ctx, "bob.420")
+	if err != nil {
+		t.Fatal(err)
+	}
+	byName := map[string]string{}
+	for _, label := range labels {
+		byName[label.Name] = label.ID
+	}
+	unread, err := s.MessagesByLabel(ctx, "bob.420", byName["UNREAD"], "", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(unread.Items) != 1 || unread.Items[0].Message.ID != msg.ID {
+		t.Fatalf("unread system label missing message: %+v", unread)
+	}
+	yes := true
+	if _, err := s.UpdateMailbox(ctx, "bob.420", msg.ID, MailboxUpdate{Read: &yes, Starred: &yes, Pinned: &yes, Muted: &yes}); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"STARRED", "PINNED", "MUTED"} {
+		page, err := s.MessagesByLabel(ctx, "bob.420", byName[name], "", 10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(page.Items) != 1 || page.Items[0].Message.ID != msg.ID {
+			t.Fatalf("%s system label missing message: %+v", name, page)
+		}
+	}
+	unread, err = s.MessagesByLabel(ctx, "bob.420", byName["UNREAD"], "", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(unread.Items) != 0 {
+		t.Fatalf("read message remained in UNREAD system label: %+v", unread)
+	}
+}

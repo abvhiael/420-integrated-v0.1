@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "contracts/src/media/**"
-      - "contracts/test/MediaPhase1Protocol420.t.sol"
+      - "contracts/test/MediaPhase1*420.t.sol"
       - "media/**"
       - "cmd/420media-node/**"
       - "config/genesis-consumer-services.json"
@@ -58,6 +58,6 @@ jobs:
         run: forge build src/media
       - name: Test Media Phase 1 protocol
         working-directory: contracts
-        run: forge test --match-path "test/MediaPhase1Protocol420.t.sol" -vvv
+        run: forge test --match-path "test/MediaPhase1*420.t.sol" -vvv
       - name: Run Media Anvil integration
         run: bash ./scripts/420media-anvil-integration.sh

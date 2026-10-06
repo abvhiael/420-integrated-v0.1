@@ -1358,6 +1358,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** current-source revocation advances to REVOKED; expiry-at-bound advances to EXPIRED; stale source/sequence/time fails closed; pre-expiry/noneligible state does not spuriously expire; each real transition invalidates all derived surfaces and advances generation; result persists/reloads; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.7 — Authorization integration
+
+**Purpose:** bind the full current PB-2 eligibility record into PB-1.5 server-side authorization so a stale/injected bare ELIGIBLE flag cannot bypass policy, expiry, subject, lifecycle, relationship, block/safety or purpose-limited authority.
+
+**Canonical requirements:** require record/profile/context subject binding and current policy version; reject authorization time before eligibility checked time; policy mismatch becomes UNKNOWN; only current ELIGIBLE with future bounded expiry becomes effective ELIGIBLE; expired/revoked/ineligible/unknown remain fail-closed; feed effective eligibility into existing PB-1.5 authorization rather than duplicating it; preserve lifecycle/block/relationship and service/moderator denials; retain only minimum audit binding metadata; introduce no API/session/contract/public registry/deployment/live provider; do not pre-empt PB-2.8 discovery/matching or PB-2.9 messaging enforcement.
+
+**Affected components:** `puffbuddies/domain/eligibility_authorization.py`, PB-2.7 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.12, PB-1.5, and PB-2.1 through PB-2.6 COMPLETE.
+
+**Exit criteria:** current/policy-compatible/unexpired eligibility enables existing authorization only where all other PB-1.5 conditions permit; expired/revoked/ineligible/unknown/policy-stale state fails closed; subject/time mismatches reject binding; lifecycle/block/relationship/service/moderator boundaries remain intact; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

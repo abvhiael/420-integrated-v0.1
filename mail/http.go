@@ -21,6 +21,7 @@ type HTTPHandler struct {
 	DiscordSync     *DiscordSyncService
 	DiscordDelivery *DiscordDeliveryService
 	DiscordWallet   *DiscordWalletVerificationService
+	SignalShare     *SignalShareService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +87,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.discordWallet(w, r, actor)
 	case r.URL.Path == "/v1/connectors/signal/boundary":
 		h.signalBoundary(w, r, actor)
+	case r.URL.Path == "/v1/connectors/signal/share":
+		h.signalShare(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -157,6 +160,31 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) signalShare(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.SignalShare == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "signal share unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req SignalShareRequest
+	if !decodeStrictJSON(w, r, MaxBodyBytes+MaxSignalShareNoteBytes+8192, &req) {
+		return
+	}
+	out, err := h.SignalShare.Deliver(r.Context(), actor, req)
+	if err != nil {
+		if errors.Is(err, ErrSignalShareInvalidResult) {
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "signal share authority returned an invalid result")
+			return
+		}
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h HTTPHandler) signalBoundary(w http.ResponseWriter, r *http.Request, actor string) {

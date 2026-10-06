@@ -326,7 +326,6 @@ func (c Client) UpdateConversation(ctx context.Context, conversationID string, u
 	return out, err
 }
 
-
 func (c Client) CreateDraft(ctx context.Context, req mail.DraftCreateRequest) (mail.DraftView, error) {
 	var out mail.DraftView
 	err := c.do(ctx, http.MethodPost, "/v1/drafts", req, &out)

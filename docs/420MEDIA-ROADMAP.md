@@ -31,6 +31,8 @@ Bind creator/controller actions to scoped 420Identity/Wallet authorization and a
 ## MEDIA-AUDIT-7 — Pay and Compute integration
 Replace opaque/legacy compatibility assumptions with explicit canonical Pay settlement and Compute Market coordination boundaries where applicable. Preserve non-custodial accounting, canonical beneficiary binding, idempotency and refund/failure behavior.
 
+**Status: COMPLETE (Level 1).** Exact implementation SHA `a0aeb709b10a155fe7959781a9994a15368a9b4a`; qualification run `37511396911`. Durable evidence: `docs/audit/420MEDIA-AUDIT-7-QUALIFICATION.md`.
+
 ## MEDIA-AUDIT-8 — Search, Notifications and indexing projections
 Implement public-only Media discovery/projection into 420Search and opt-in provenance-preserving 420Notifications. Add finality/reorg/rebuild/privacy-negative tests. Search and Notifications remain non-authoritative projections/delivery layers.
 

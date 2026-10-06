@@ -1438,7 +1438,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** cross-step adversarial coverage passes across subject/replay/source/policy/freshness/revocation/outage/economic/admin/consent/stale-derived/privacy-oracle cases; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records all attack classes.
 
-### PB-2.12 — Failure & recovery qualification
+### PB-2.12 — Failure & recovery qualification — COMPLETE
 
 **Purpose:** qualify accumulated PB-2 eligibility state under storage/dependency failure, stale/conflicting replicas, restore/rollback, optimistic concurrency and recovery while preserving fail-closed authorization, revocation and privacy semantics.
 

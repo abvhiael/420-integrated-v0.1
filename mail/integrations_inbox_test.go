@@ -2,7 +2,10 @@ package mail
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -116,5 +119,70 @@ func TestIntegrationInboxSourcesAreExplicitAndBounded(t *testing.T) {
 		if isIntegrationInboxSource(source) {
 			t.Fatalf("unsupported/future integration source accepted: %q", source)
 		}
+	}
+}
+
+
+func TestHTTPIntegrationsInbox(t *testing.T) {
+	store := NewMemoryStore()
+	seedIntegrationInbox(t, store)
+	h := HTTPHandler{
+		Service: NewService(nil, nil, nil, nil, store),
+		Authenticate: func(r *http.Request) (string, error) {
+			return r.Header.Get("X-Test-Actor"), nil
+		},
+	}
+	req := httptest.NewRequest(http.MethodGet, "/v1/integrations/inbox?limit=1", nil)
+	req.Header.Set("X-Test-Actor", "alice.420")
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var out IntegrationsInboxPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Items) != 1 || out.Items[0].Message.ID != "discord-1" || out.NextCursor == "" {
+		t.Fatalf("unexpected response: %+v", out)
+	}
+}
+
+func TestHTTPIntegrationsInboxRequiresAuthentication(t *testing.T) {
+	h := HTTPHandler{
+		Service: NewService(nil, nil, nil, nil, NewMemoryStore()),
+		Authenticate: func(r *http.Request) (string, error) {
+			return r.Header.Get("X-Test-Actor"), nil
+		},
+	}
+	req := httptest.NewRequest(http.MethodGet, "/v1/integrations/inbox", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPIntegrationsInboxDoesNotExposeSourceFilterYet(t *testing.T) {
+	store := NewMemoryStore()
+	seedIntegrationInbox(t, store)
+	h := HTTPHandler{
+		Service: NewService(nil, nil, nil, nil, store),
+		Authenticate: func(r *http.Request) (string, error) {
+			return "alice.420", nil
+		},
+	}
+	req := httptest.NewRequest(http.MethodGet, "/v1/integrations/inbox?source=discord", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var out IntegrationsInboxPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Items) != 2 {
+		t.Fatalf("MAIL-2.28 source filtering was pulled forward: %+v", out.Items)
 	}
 }

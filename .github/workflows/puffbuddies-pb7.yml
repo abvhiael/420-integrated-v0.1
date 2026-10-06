@@ -1,0 +1,49 @@
+name: PuffBuddies PB-7 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb7.yml"
+  push:
+    branches: ["puffbuddies-pb7-notifications-integration-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb7.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-7 Level 1 targeted Notifications integration
+        run: python3 -m unittest puffbuddies.tests.test_pb_7_notifications_integration -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-7 Level 2 PB-5/PB-6/PB-7 integration milestone
+        run: python3 -m unittest puffbuddies.tests.test_pb_7_integration -v
+      - name: Test affected 420Notifications dependency packages
+        run: go test ./notifications/architecture ./notifications/subscriptions ./notifications/feed ./notifications/security
+      - name: Verify Notifications Genesis service boundary
+        run: python3 scripts/verify-genesis-dapps.py
+      - name: Notifications privacy and authority negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(wallet_address|push_token|device_id|public_profile|public_match_graph|conversation_id|message_body|ciphertext)[[:space:]]*[:=]' puffbuddies/domain/notifications_integration.py
+          ! grep -RIE '(enqueue|retry|dead_letter|mark_read|provider_health|rate_limit)' puffbuddies/domain/notifications_integration.py

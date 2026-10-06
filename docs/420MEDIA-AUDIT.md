@@ -73,8 +73,6 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 - user-facing 420Media frontend;
 - public `/v1` Media API;
 - typed Media service SDK/client satisfying GEN-SVC-0.7;
-- video-upload workflow bound to 420Storage;
-- content/media asset model aligned to shared GEN-SVC objects;
 - Identity/profile ownership integration;
 - Rights/provenance/license integration;
 - Search projection/index integration;
@@ -123,7 +121,7 @@ No critical source-level fund-custody vulnerability was identified in this audit
 |---|---|---|
 | 420 Identity | no Media-owned integration found | MISSING |
 | 420 Rights | no Media-owned integration found | MISSING |
-| 420 Storage | no canonical Media upload/service integration found | MISSING |
+| 420 Storage | Media-owned upload lifecycle uses 420Storage v1 prepare/ingest evidence and canonical manifest readiness checks; Storage remains authoritative | IMPLEMENTED / pending exact-head qualification |
 | 420 Search | no Media projection/search integration found | MISSING |
 | 420 Notifications | no Media notification integration found | MISSING |
 | 420 Pay | Phase 1 abstract settlement adapters only; no current canonical app/service binding | PARTIAL |
@@ -140,7 +138,7 @@ Backend/API: **MISSING** as a stable public Media service. The Go code is an ope
 
 Indexer: **PARTIAL**. The audit branch now includes an app-scoped operator capability event projection used only as a discovery accelerator with mandatory canonical registry revalidation. There is still no general public Media projection/indexer service satisfying the full Genesis application contract.
 
-Upload: **MISSING** as a first-class Media application workflow. Bong Goggles has separate storage/media delivery work but cannot be silently reclassified as the 420Media application.
+Upload: **IMPLEMENTED / pending exact-head qualification** on the audit branch. Media now owns a 420Storage-backed video asset lifecycle with exact object/precondition binding, ingest receipt validation, canonical sealed/retrievable manifest gating, derivative linkage, visibility/privacy handling, delete fail-closed semantics and retry recovery. Bong Goggles remains separate.
 
 Livestreaming: **PARTIAL**. Transport coordination primitives exist, but there is no complete user/session/API/UI/service composition that proves the Genesis-enabled `media.livestreaming` feature.
 
@@ -186,11 +184,11 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | operator processing | Phase 2 | FFmpeg/GStreamer profile runtime | Go tests | Phase2 docs | COMPLETE | production engine qualification |
 | live transport primitives | Phase 2 | WHIP/WHEP + RTMP/SRT abstractions | Go tests | Phase2 docs | PARTIAL | complete service/API/session composition |
 | operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + replay recovery + control-plane boundary on audit branch | Go discovery/control-plane tests + exact-head Media gate | Phase 3.1 discovery doc + qualification evidence | COMPLETE (Level 1) | later orchestration remains separate |
-| video uploads | GEN-SVC Media target | no Media application workflow | none | none | MISSING | Storage-backed upload phase |
+| video uploads | GEN-SVC Media target | 420Storage v1 prepare/ingest + canonical manifest-gated Media asset lifecycle | Media Storage lifecycle tests | Storage lifecycle doc | IMPLEMENTED / pending exact-head qualification | qualify current audit head |
 | basic livestreaming | GEN-SVC + feature flag | primitives only | component tests | older Phase2 docs | PARTIAL | user/API/UI/session/integration phase |
 | Identity integration | GEN-SVC registry | none | none | none | MISSING | implement scoped identity/profile boundary |
 | Rights integration | GEN-SVC registry | provenance ref only, no Rights binding | none | none | MISSING | implement Rights/provenance validation |
-| Storage integration | GEN-SVC registry | no Media-owned canonical integration | none | none | MISSING | implement upload/object/derivative binding |
+| Storage integration | GEN-SVC registry | complete Storage object identity, canonical manifest readiness, derivative linkage, privacy/delete/retry semantics on audit branch | Media Storage lifecycle tests | Storage lifecycle doc | IMPLEMENTED / pending exact-head qualification | retain canonical Storage authority; live deployment deferred |
 | Search integration | GEN-SVC registry | none | none | none | MISSING | public-only Media projection |
 | Notifications integration | GEN-SVC registry | none | none | none | MISSING | opt-in event delivery |
 | Pay integration | GEN-SVC registry | abstract settlement adapters | Phase1 tests | Phase1 doc | PARTIAL | canonical Pay adapter and failure qualification |

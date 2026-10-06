@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -401,5 +402,85 @@ func TestHTTPTrustControlsRejectUnknownFields(t *testing.T) {
 	h.ServeHTTP(rec, req)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("unknown trust field status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+
+func TestHTTPSpamProtectionRoutes(t *testing.T) {
+	h, s, id := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/abuse", "bob.420", AbuseReportInput{Kind: AbuseSpam})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("report abuse status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var report AbuseReport
+	if err := json.Unmarshal(rec.Body.Bytes(), &report); err != nil {
+		t.Fatal(err)
+	}
+	if report.MessageID != id || report.Owner != "bob.420" || report.Kind != AbuseSpam {
+		t.Fatalf("unexpected report: %+v", report)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/quarantine", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list quarantine status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var records []QuarantineRecord
+	if err := json.Unmarshal(rec.Body.Bytes(), &records); err != nil {
+		t.Fatal(err)
+	}
+	if len(records) != 1 || records[0].MessageID != id {
+		t.Fatalf("unexpected quarantine list: %+v", records)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/reputation/alice.420", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("reputation status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var rep SenderReputation
+	if err := json.Unmarshal(rec.Body.Bytes(), &rep); err != nil {
+		t.Fatal(err)
+	}
+	if rep.SpamReports != 1 || rep.Owner != "bob.420" {
+		t.Fatalf("unexpected reputation: %+v", rep)
+	}
+
+	inbox := FolderInbox
+	if _, err := s.UpdateMailbox(context.Background(), "bob.420", id, MailboxUpdate{Folder: &inbox}); !errors.Is(err, ErrQuarantineReview) {
+		t.Fatalf("service quarantine gate missing: %v", err)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/quarantine/"+id+"/release", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("release quarantine status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var state MailboxState
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderInbox || state.Muted {
+		t.Fatalf("unexpected released state: %+v", state)
+	}
+}
+
+func TestHTTPSpamProtectionAuthorizationAndValidation(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/abuse", "alice.420", AbuseReportInput{Kind: AbuseSpam})
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("sender abuse-report status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/abuse", "bob.420", AbuseReportInput{Kind: AbuseKind("OTHER")})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("invalid abuse kind status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/messages/"+id+"/abuse", bytes.NewBufferString(`{"kind":"SPAM","unexpected":true}`))
+	req.Header.Set("X-Test-Actor", "bob.420")
+	recorder := httptest.NewRecorder()
+	h.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("unknown abuse field status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 }

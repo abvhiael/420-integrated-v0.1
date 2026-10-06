@@ -16,7 +16,7 @@ version: v1
 
 It is **not** part of the frozen Genesis application catalog. Its service identifier, `420/service/town/v1`, belongs to the GEN-SVC composition registry and must not be represented as a frozen Genesis application ID without a later explicit catalog decision.
 
-## Implemented through TOWN-AUDIT-8
+## Implemented through TOWN-AUDIT-10
 
 The repository now contains:
 
@@ -83,4 +83,4 @@ Post/comment body bytes remain off-chain by default.
 
 ## Remaining roadmap work
 
-Broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps. Live external endpoints, deployed wallet/network bindings and live reorg/recovery behavior are not inferred from repository-local qualification.
+TOWN-AUDIT-9 security hardening is repository-complete. TOWN-AUDIT-10 performs the exact-head Level 3 repository closeout. Live testnet qualification and production release remain TOWN-AUDIT-11 and TOWN-AUDIT-12 respectively. Live external endpoints, deployed wallet/network bindings and live reorg/recovery behavior are not inferred from repository-local qualification.

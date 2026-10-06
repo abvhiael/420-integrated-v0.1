@@ -41,7 +41,7 @@ if profile_path.is_file():
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
     store=profile.get("metadataStore",{})
     if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
-    if store.get("schemaVersion")!=9 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("schemaVersion")!=10 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
     if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder","owner_conversation","owner_draft"]: errors.append("Mail durable store index drifted")
     if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
     if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
@@ -156,7 +156,15 @@ if profile_path.is_file():
     if ddelivery.get("maxContentBytes")!=2000 or ddelivery.get("replyTarget")!="OPTIONAL_DISCORD_MESSAGE_SNOWFLAKE" or ddelivery.get("idempotency")!="REQUIRED_CALLER_KEY_PASSED_TO_PROVIDER_AUTHORITY": errors.append("MAIL-2.17 Discord delivery payload/idempotency drifted")
     if ddelivery.get("providerAuthority")!="DISCORD_DELIVERY_AUTHORITY" or ddelivery.get("rawAccessTokenInput") is not False or ddelivery.get("rawRefreshTokenInput") is not False or ddelivery.get("rawClientSecretInput") is not False: errors.append("MAIL-2.17 Discord delivery authority/secret boundary drifted")
     if ddelivery.get("credentialPersistence")!="DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY" or ddelivery.get("mailMetadataCredentialPersistence") is not False or ddelivery.get("publicIndexing") is not False or ddelivery.get("messageBodiesOnChain") is not False or ddelivery.get("walletVerification") is not False: errors.append("MAIL-2.17 Discord delivery privacy/scope drifted")
-    if discord.get("webhook") is not False or discord.get("walletVerification") is not False: errors.append("MAIL-2.15 pulled later Discord webhook/verification capabilities forward")
+    dwallet=profile.get("discordWalletVerification",{})
+    if dwallet.get("enabled") is not True or dwallet.get("provider")!="discord" or dwallet.get("connectorCapability")!="WALLET_VERIFY": errors.append("MAIL-2.18 Discord wallet capability drifted")
+    if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
+    if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
+    if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
+    if dwallet.get("durableChallengeState") is not True or dwallet.get("restartRecovery") is not True or dwallet.get("canonicalEvidenceRequired") is not True or dwallet.get("nonCustodialRequired") is not True or dwallet.get("replaySafeAfterSuccess") is not True: errors.append("MAIL-2.18 Discord wallet lifecycle drifted")
+    if dwallet.get("crossIdentityRejected") is not True or dwallet.get("crossConnectionRejected") is not True or dwallet.get("accountSubstitutionRejected") is not True: errors.append("MAIL-2.18 Discord wallet isolation drifted")
+    if dwallet.get("privateKeyInput") is not False or dwallet.get("seedPhraseInput") is not False or dwallet.get("passkeyPrivateMaterialInput") is not False or dwallet.get("providerCredentialInput") is not False or dwallet.get("verificationEvidencePersistence") is not False or dwallet.get("publicIndexing") is not False or dwallet.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.18 Discord wallet secret/privacy drifted")
+    if discord.get("webhook") is not False: errors.append("MAIL-2.15 pulled Discord webhook capability forward")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -244,7 +252,7 @@ for token in ['"/v1/outbox"',"QueueDelivery","ProcessDelivery","RetryDelivery","
     if token not in http: errors.append("MAIL-2.10 HTTP outbox surface missing: "+token)
 for token in ["QueueDelivery","ListOutbox","GetDelivery","ProcessDelivery","RetryDelivery","CancelDelivery"]:
     if token not in client: errors.append("MAIL-2.10 client outbox surface missing: "+token)
-for token in ["Deliveries","validateDeliveryData","DiscordSync","validateDiscordSyncData","DurableStoreSchemaVersion = 9"]:
+for token in ["Deliveries","validateDeliveryData","DiscordSync","validateDiscordSyncData","DiscordWalletVerifications","validateDiscordWalletVerificationData","DurableStoreSchemaVersion = 10"]:
     if token not in store: errors.append("MAIL-2.10 durable queue storage missing: "+token)
 onboarding_src=(ROOT/"mail/onboarding.go").read_text() if (ROOT/"mail/onboarding.go").is_file() else ""
 for token in ["OnboardingGoogle","OnboardingApple","OnboardingPasskey","OnboardingExistingWallet","OnboardingAuthority","OnboardingService","GoogleOnboardingRequest","AppleOnboardingRequest","PasskeyOnboardingRequest","WalletOnboardingRequest","SessionToken","NonCustodial","ErrOnboardingInvalidResult","validWalletAddress"]:
@@ -277,12 +285,16 @@ for token in ["ConnectorProviders","LinkConnector","UnlinkConnector","PullConnec
 discord_src=(ROOT/"mail/discord_link.go").read_text() if (ROOT/"mail/discord_link.go").is_file() else ""
 discord_sync_src=(ROOT/"mail/discord_sync.go").read_text() if (ROOT/"mail/discord_sync.go").is_file() else ""
 discord_delivery_src=(ROOT/"mail/discord_delivery.go").read_text() if (ROOT/"mail/discord_delivery.go").is_file() else ""
+discord_wallet_src=(ROOT/"mail/discord_wallet.go").read_text() if (ROOT/"mail/discord_wallet.go").is_file() else ""
 for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
     if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
 for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
     if token not in discord_sync_src: errors.append("MAIL-2.16 Discord sync invariant missing: "+token)
 for token in ["DiscordDeliveryKind","DiscordDeliveryMessage","DiscordDeliveryReceipt","DiscordDeliveryAuthority","DiscordDeliveryRequest","DiscordDeliveryResult","DiscordDeliveryService","NewDiscordDeliveryService","MaxDiscordDeliveryContentBytes","validateDiscordDeliveryMessage"]:
     if token not in discord_delivery_src: errors.append("MAIL-2.17 Discord delivery invariant missing: "+token)
+for token in ["DiscordWalletChallengeRequest","DiscordWalletChallenge","DiscordWalletVerificationRequest","DiscordWalletVerification","DiscordWalletVerificationState","DiscordWalletVerificationService","NewDiscordWalletVerificationService","discordWalletChallengeDigest","validateDiscordWalletVerificationData","ErrDiscordWalletConflict"]:
+    if token not in discord_wallet_src: errors.append("MAIL-2.18 Discord wallet invariant missing: "+token)
+if "ConnectorCapabilityWalletVerify" not in discord_src: errors.append("MAIL-2.18 Discord connector wallet capability missing")
 for token in ["DiscordDeliveryAuthority","ConnectorCapabilityPush","DeliverDiscord","DiscordDeliveryKind"]:
     if token not in discord_src: errors.append("MAIL-2.17 Discord adapter delivery invariant missing: "+token)
 for token in ['"/v1/connectors/discord/sync"',"*DiscordSyncService"]:
@@ -291,6 +303,10 @@ if "SyncDiscord" not in client: errors.append("MAIL-2.16 client Discord sync sur
 for token in ['"/v1/connectors/discord/deliver"',"*DiscordDeliveryService"]:
     if token not in http: errors.append("MAIL-2.17 HTTP Discord delivery surface missing: "+token)
 if "DeliverDiscord" not in client: errors.append("MAIL-2.17 client Discord delivery surface missing")
+for token in ["PrepareDiscordWalletVerification","VerifyDiscordWallet"]:
+    if token not in client: errors.append("MAIL-2.18 client Discord wallet surface missing: "+token)
+for token in ['"/v1/connectors/discord/wallet/challenge"','"/v1/connectors/discord/wallet/verify"',"*DiscordWalletVerificationService"]:
+    if token not in http: errors.append("MAIL-2.18 HTTP Discord wallet surface missing: "+token)
 for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
     pass
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
@@ -308,6 +324,8 @@ for token in ["/v1/connectors/discord/sync","syncDiscord","Sync Discord","connec
     if token not in web: errors.append("MAIL-2.16 thin UI Discord sync behavior missing: "+token)
 for token in ["/v1/connectors/discord/deliver","deliverDiscord","Send to Discord","delivery","idempotency_key"]:
     if token not in web: errors.append("MAIL-2.17 thin UI Discord delivery behavior missing: "+token)
+for token in ["/v1/connectors/discord/wallet/challenge","/v1/connectors/discord/wallet/verify","verifyDiscordWallet","Verify Discord wallet","discordVerification","WALLET_VERIFY"]:
+    if token not in web: errors.append("MAIL-2.18 thin UI Discord wallet behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -339,4 +357,5 @@ print("MAIL-2.14 external integrations framework: qualified by app-scoped checks
 print("MAIL-2.15 Discord account linking: qualified by app-scoped checks")
 print("MAIL-2.16 Discord to 420Mail sync: qualified by app-scoped checks")
 print("MAIL-2.17 420Mail to Discord delivery: qualified by app-scoped checks")
+print("MAIL-2.18 Discord wallet verification: qualified by app-scoped checks")
 

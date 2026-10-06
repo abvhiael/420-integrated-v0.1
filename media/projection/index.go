@@ -69,12 +69,19 @@ func (i *Index) apply(event Event) error {
 	current, exists := i.entries[event.Result.ID]
 	if exists && current.Result.Provenance.BlockNumber != nil {
 		currentBlock := *current.Result.Provenance.BlockNumber
-		if currentBlock <= previousFinalized &&
-			(strings.ToLower(current.Result.Provenance.BlockHash) != strings.ToLower(event.Result.Provenance.BlockHash) ||
-				current.Result.Provenance.TransactionHash != event.Result.Provenance.TransactionHash ||
-				current.Result.Provenance.LogIndex == nil || event.Result.Provenance.LogIndex == nil ||
-				*current.Result.Provenance.LogIndex != *event.Result.Provenance.LogIndex) {
-			return ErrFinalizedConflict
+		if currentBlock <= previousFinalized && block <= previousFinalized {
+			if current.Result.Provenance.LogIndex == nil || event.Result.Provenance.LogIndex == nil {
+				return ErrFinalizedConflict
+			}
+			currentLog := *current.Result.Provenance.LogIndex
+			incomingLog := *event.Result.Provenance.LogIndex
+			backward := block < currentBlock || (block == currentBlock && incomingLog < currentLog)
+			samePositionRewrite := block == currentBlock && incomingLog == currentLog &&
+				(strings.ToLower(current.Result.Provenance.BlockHash) != strings.ToLower(event.Result.Provenance.BlockHash) ||
+					strings.ToLower(current.Result.Provenance.TransactionHash) != strings.ToLower(event.Result.Provenance.TransactionHash))
+			if backward || samePositionRewrite {
+				return ErrFinalizedConflict
+			}
 		}
 	}
 	if event.Result.Provenance.Finality == searchresult.FinalityFinalized && block > i.finalizedHeight {

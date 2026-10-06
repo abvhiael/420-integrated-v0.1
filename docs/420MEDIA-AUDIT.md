@@ -70,12 +70,12 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 
 ### Missing for the canonical Genesis service target
 
-- Registry/service-discovery publication/deployment profile;
-- user authorization/session model;
-- upload/livestream moderation and abuse handling;
-- application observability/runbook and deployment manifests;
-- production web/domain configuration;
-- Genesis acceptance record tied to an exact release/deployment lineage.
+- live Registry/service-discovery publication and runtime-address evidence;
+- production-equivalent session issuer/revocation integration;
+- live scanner/quarantine, secret-manager and egress-policy evidence;
+- production web/API domain materialization;
+- production observability/backups/rollback evidence;
+- Genesis acceptance record tied to an exact qualified deployment lineage.
 
 ### Reconciled historical work
 
@@ -115,9 +115,9 @@ No critical source-level fund-custody vulnerability was identified in this audit
 | 420 Notifications | opt-in topic/channel/severity/finality subscriptions with deterministic dedupe and reorg retractions; delivery remains non-canonical | COMPLETE (Level 1) |
 | 420 Pay | canonical PaymentRegistry-backed Media funding/settlement/refund observation through `MediaPayComputeAdapter420`; Media remains non-custodial | COMPLETE (Level 1) |
 | 420 Compute Protocol | canonical Compute graph/job/funding/match/provider/entitlement/refund binding; legacy provider ref accepted only when cross-checked against canonical provider state | COMPLETE (Level 1) |
-| Protocol/Service Registry | no Media release publication/discovery profile found | MISSING |
+| Protocol/Service Registry | canonical service ID/discovery boundary plus fail-closed deployment/security profile defined; live publication remains MEDIA-AUDIT-12/13 | COMPLETE for repository closeout / LIVE DEFERRED |
 | Wallet | user-facing injected-wallet connect/network validation, account/network invalidation and external signing boundary in `media/web`; private keys remain outside Media | COMPLETE (Level 2 milestone) |
-| Explorer/Indexer | events are indexable, but no Media-specific production projection qualification found | PARTIAL |
+| Explorer/Indexer | rebuildable Media projection with provenance/finality/reorg qualification retained; live production binding remains deployment-stage evidence | COMPLETE for repository closeout / LIVE DEFERRED |
 
 ## Application-layer audit
 
@@ -138,6 +138,8 @@ Pay/Compute: **COMPLETE (Level 1)** on the audit branch. Pay-backed jobs now bin
 Search/Notifications: **COMPLETE (Level 1)** on the audit branch. Only READY+PUBLIC+Rights-authorized assets can become Search results; projections preserve qualified Indexer provenance/finality and support deterministic rollback/rebuild. Notifications are opt-in, minimum-finality scoped, deduplicated, separately promotional-consented and reorg-retractable without becoming canonical authority.
 
 API/SDK: **COMPLETE (Level 1)** on the audit branch. Stable `/v1` routes now use opaque cursor pagination, RFC3339 UTC timestamps, machine error codes, bounded strict JSON, replay-safe idempotency, provenance, capability/compatibility discovery and external Wallet signing intents. `sdk/media420` provides typed discovery/client methods with HTTPS and chain/network compatibility enforcement.
+
+Security/abuse/moderation: **IMPLEMENTED / pending Level 3 exact-head qualification**. Media now has verified expiring session/capability boundaries for authority-bearing writes, actor-substitution rejection, SSRF/private-network and plaintext live-endpoint rejection, bounded media metadata, scanner/quarantine abstraction, request/report rate limiting, HMAC webhook expiry/replay protection, canonical GEN-SVC fixture personas/journeys, scoped report/decision/appeal handling, process/egress/secret security policy, and operator-compromise/recovery guidance. Moderation remains application-scoped and cannot mutate canonical ownership, Rights, Wallet, Pay or Compute authority.
 
 Web application: **COMPLETE (Level 2 milestone)** on the audit branch. The first user-facing 420Media surface composes the qualified upload, library/playback, livestream, Wallet/network and feature-capability boundaries with explicit loading/empty/error/action states and safe recovery.
 
@@ -208,32 +210,30 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | Compute integration | GEN-SVC registry | canonical graph/job/funding/match/provider/beneficiary/entitlement/refund binding; exact earned-amount accounting | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | /v1 API | GEN-SVC-0.6 | stable versioned HTTP contract with cursor pagination, UTC timestamps, stable errors, provenance, rate metadata, idempotent writes and signing intents | Media API tests + retained exact-head Media gate | API/SDK contract doc + qualification evidence | COMPLETE (Level 1) | deployment deferred |
 | typed client/SDK | GEN-SVC-0.7 | `sdk/media420` typed client with service discovery, validation, compatibility/chain/network enforcement, idempotency and external Wallet signer handoff | Media SDK tests + retained exact-head Media gate | API/SDK contract doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
-| feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed for create/start/recovery; stop/status remain available for safe shutdown/inspection | GEN-SVC validator + Media livestream tests + Level 2 Media gate | GEN-SVC + Livestream docs + qualification evidence | COMPLETE for service runtime (Level 2) | UI enforcement remains MEDIA-AUDIT-10 |
-| threat model application | GEN-SVC-0.9 | shared model only | no Media-specific suite | shared docs | PARTIAL | Media abuse/privacy/rights threat tests |
-| shared fixtures | GEN-SVC-0.10 | not used by Media | none | shared docs | MISSING | adopt canonical personas/journeys |
-| frontend | user-facing Genesis target | absent | none | none | MISSING | implement |
-| deployment/Registry profile | release readiness | absent | none | none | MISSING | materialize after service architecture closes |
-| live testnet evidence | release readiness | absent | none | none | BLOCKED | production-equivalent testnet |
-| Genesis catalog promotion | frozen catalog policy | not promoted | n/a | registry policy | BLOCKED | explicit catalog/governance decision if required |
-| production operations | release readiness | absent | none | none | BLOCKED | live infra, secrets, monitoring, recovery, security closeout |
+| feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed across service and user-facing app | GEN-SVC validator + Media livestream/web tests + retained Level 2 gate | GEN-SVC + Livestream/Web docs + qualification evidence | COMPLETE (Level 2 retained) | live flag publication deferred |
+| threat model application | GEN-SVC-0.9 | Media-specific sessions, SSRF/egress, resource bounds, scanner/quarantine, webhook replay, moderation/appeal, operator/process/secret controls | Media security/API/livestream tests + race/static/verifier gates | Media security/operator/deployment guides | IMPLEMENTED / pending Level 3 qualification | qualify exact merge candidate |
+| shared fixtures | GEN-SVC-0.10 | `media/fixtures` adopts USER/CREATOR/MODERATOR and SVC-JOURNEY-001/008/009/010 | Media security fixture regression | shared fixture contract + developer guide | IMPLEMENTED / pending Level 3 qualification | qualify exact merge candidate |
+| frontend | user-facing Genesis target | responsive upload/library/playback/livestream app with Wallet/network/capability/recovery/accessibility boundaries | Media web structural/unit/build qualification | Media user/web docs | COMPLETE (Level 2 retained) | live origin deferred |
+| deployment/Registry profile | release readiness | fail-closed `media/deploy/security-profile.json`, secure API composition and service ID/discovery requirements | Media security closeout verifier | deployment/operator guides | IMPLEMENTED / pending Level 3 qualification | live Registry/runtime materialization deferred |
+| live testnet evidence | release readiness | repository candidate only | none live | known limitations | BLOCKED BY MEDIA-AUDIT-12 | production-equivalent testnet |
+| Genesis catalog promotion | frozen catalog policy | not promoted | n/a | registry policy | BLOCKED BY MEDIA-AUDIT-13 | explicit catalog/governance decision if required |
+| production operations | release readiness | repository security/operations profile, monitoring/recovery/runbook complete; live infrastructure unresolved | verifier + retained application suites | operator/security/deployment guides | REPOSITORY READY / LIVE DEFERRED | prove live infra, secrets, monitoring and recovery in MEDIA-AUDIT-12/13 |
 
 ## Readiness
 
-- CODE COMPLETE: **NO** — Genesis service/API/UI/upload/integration layers are missing.
-- BUILD COMPLETE: **NO** — existing components can be built/tested, but required production components do not exist.
-- CONTRACT COMPLETE: **YES for Phase 1 protocol scope / NO for application release qualification** — no new contract is inferred, but deployment/integration qualification is missing.
-- TEST COMPLETE: **NO** — product and cross-app tests are missing.
-- DOCUMENTATION COMPLETE: **NO** — product/user/operator/deployment docs remain dependent on missing implementation.
-- INTEGRATION COMPLETE: **NO** — required GEN-SVC dependencies are mostly absent.
-- SECURITY QUALIFIED: **NO** — only the existing protocol/runtime subset has repository-level controls.
-- TESTNET READY: **NO** — no complete Media release candidate exists.
-- GENESIS READY: **NO** — canonical Genesis target is not implemented end to end.
-- PRODUCTION READY: **NO** — deployment, operations, security and live evidence are absent.
+- CODE COMPLETE: **YES for repository audit scope / pending Level 3 exact-head qualification**.
+- BUILD COMPLETE: **PENDING LEVEL 3** — all retained app builds exist; final merge-candidate owners must pass.
+- CONTRACT COMPLETE: **YES for repository audit scope** — Phase 1 and all application integration boundaries are represented; live deployment identity remains later-roadmap evidence.
+- TEST COMPLETE: **PENDING LEVEL 3** — targeted Level 1/2 evidence is retained; comprehensive closeout is not yet green.
+- DOCUMENTATION COMPLETE: **YES for repository audit scope / pending Docs global qualification** — user, developer, operator, moderation, security, deployment and limitations guides are present and in canonical navigation.
+- INTEGRATION COMPLETE: **YES for repository audit scope / pending Level 3** — Identity, Rights, Storage, Search, Notifications, Pay, Compute, Wallet and service/API/web boundaries are implemented.
+- SECURITY QUALIFIED: **PENDING LEVEL 3** — controls are implemented; exact merge-candidate security/race/static/global owners must pass.
+- TESTNET READY: **NO** — owned by MEDIA-AUDIT-12.
+- GENESIS READY: **NO** — owned by MEDIA-AUDIT-13 and any explicit catalog/governance decision.
+- PRODUCTION READY: **NO** — live deployment, secrets, scanner, egress, monitoring and recovery evidence remain later-roadmap gates.
 
 ## Final determination
 
-420Media is **not complete** on current `main`.
+420Media is **IMPLEMENTATION COMPLETE FOR THE REPOSITORY AUDIT PHASE, PENDING MEDIA-AUDIT-11 LEVEL 3 EXACT-HEAD QUALIFICATION**.
 
-The Phase 1 protocol is a strong repository implementation and the Phase 2 node contains substantial, testable operator-runtime primitives. Those facts do not satisfy the newer Genesis consumer-service contract. The missing Media application/service layer and required integrations are release-blocking.
-
-Proceed in stable dependency order using `docs/420MEDIA-ROADMAP.md`.
+No repository-closeout requirement is intentionally moved to testnet. Live infrastructure and Genesis-acceptance evidence remain explicitly assigned to MEDIA-AUDIT-12/13.

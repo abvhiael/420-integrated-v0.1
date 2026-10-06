@@ -37,11 +37,21 @@ No profile schema, ACL engine, API, database, client implementation, contract, f
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-VIS-001 through PB-VIS-040 exist exactly once and in sequence;
+- PRIVATE_SELF, DISCOVERABLE, MATCHED, PARTICIPANT_ONLY, MODERATOR_ONLY, SERVICE_MINIMUM, AGGREGATE_ONLY, PUBLIC_EXPLICIT, and NEVER_PUBLIC audiences are defined;
+- DISCOVERABLE is explicitly limited to authorized in-app discovery and is not equivalent to unauthenticated/public internet/public protocol visibility;
+- canonical audiences are defined for membership, profile presentation, preferences, cannabis data, precise/coarse location, likes/passes, matches, blocks, reports/moderation, messages, identity evidence, eligibility conclusions, wallet linkage, payments, lifecycle/safety state, ranking state, sessions/security data, and audit evidence;
+- block, lifecycle restriction, unmatch, and deletion revoke stale broader visibility;
+- caches, clients, queues, notifications, indexes, analytics, Search/Explorer, and derived views must preserve source visibility restrictions;
+- client-side hiding alone is not authorization; backend/service authorization is required;
+- public Search/Explorer/wallet/unauthenticated services cannot promote in-app DISCOVERABLE/MATCHED data into public visibility;
+- payment, premium, token holdings, staking, sponsorship, boosts, and promotions cannot purchase another user's protected field visibility;
+- the field-classification decision rule covers ownership, audience, transitions, override authorities, service-minimum needs, enumeration/inference risk, retention/deletion, stale-copy invalidation, and audit;
+- no profile schema, ACL engine, API, database, client implementation, contract, fixed address, service ID, deployment, or live visibility enforcement is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`d332cb36c2f7f5aea07c344c32158466ff5030c9`
 
 ## Current main/base SHA
 
@@ -53,7 +63,17 @@ PR #526 remains open on the cumulative PB-0 branch. Current-main merge-candidate
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37396121426` — **PASS**
+- job: `112052375158` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37396124304` — **PASS**
+- job: `112052386014` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -75,11 +95,13 @@ PB-0.15 defines policy only. Exact field schemas, per-field UI controls, ACL imp
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.15 is formally COMPLETE.
+None for PB-0.15.
 
 ## Completion state
 
-**PB-0.15 — PENDING QUALIFICATION**
+**PB-0.15 — COMPLETE**
+
+All canonical PB-0.15 exit criteria are satisfied on exact implementation SHA `d332cb36c2f7f5aea07c344c32158466ff5030c9`.
 
 ## Next canonical roadmap step
 

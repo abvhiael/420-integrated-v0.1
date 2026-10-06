@@ -1,6 +1,6 @@
 # CMP-4.7 — Scientific metadata and lineage
 
-Status: **CLOSEOUT CANDIDATE — LEVEL 1 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 EXACT-HEAD QUALIFIED ON `f7389d8c9755721058a073a1ad19747ca95c4572`.**
 
 Canonical roadmap step: **CMP-4.7 — Scientific metadata and lineage**.
 
@@ -108,6 +108,22 @@ Level 2 is not required again at CMP-4.7. Level 3 remains CMP-4.10.
 - SDK/API/indexer expansion — CMP-7;
 - Compute UI — CMP-8;
 - live scientific workload demonstration — CMP-9.13.
+
+## Qualification evidence
+
+- qualified implementation/closeout SHA: `f7389d8c9755721058a073a1ad19747ca95c4572`;
+- reconciliation base before CMP-4.7: `f5fe16414893a1e4bd4f3db22eb36b685a2030f5`;
+- Compute Market Qualification: **#422** / run `37424157830` / job `112139897608` — **SUCCESS**;
+- exact-head checkout and SHA verification — PASS;
+- affected Compute contracts build — PASS;
+- retained `Compute*.t.sol` suite — PASS;
+- verifier-script compilation — PASS;
+- CMP-4.1–CMP-4.6 retained compatibility verifiers — PASS;
+- CMP-4.7 scientific metadata/lineage verifier — PASS;
+- Level 2 — not required again at this ordinary step;
+- Level 3 — deferred to CMP-4.10.
+
+Durable evidence: [CMP-4.7 qualification evidence](CMP-4.7-QUALIFICATION-EVIDENCE.md).
 
 ## Next canonical step
 

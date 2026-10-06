@@ -1294,7 +1294,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** UNKNOWN fail closed; eligibility/expiry/revocation/provider-failure/policy-change/reverification semantics pass; stale replay/time rollback fail; eligibility invalidates all derived authority; ELIGIBLE cannot override lifecycle restrictions; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.3 — Age-verification interface
+### PB-2.3 — Age-verification interface — COMPLETE
 
 **Purpose:** define a minimum-disclosure PuffBuddies consumer interface for approved 420Identity verification output without inventing a conflicting direct production Identity420 API.
 

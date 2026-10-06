@@ -1504,12 +1504,12 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 var httpPrivateMetadataKeys = map[string]struct{}{
-	"body_ref": {},
-	"body_digest": {},
-	"staging_body_ref": {},
+	"body_ref":            {},
+	"body_digest":         {},
+	"staging_body_ref":    {},
 	"staging_body_digest": {},
 	"request_fingerprint": {},
-	"idempotency_key": {},
+	"idempotency_key":     {},
 }
 
 func sanitizeHTTPJSON(v any) (any, error) {

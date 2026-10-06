@@ -57,9 +57,9 @@ type PrivateBlobStore interface {
 }
 
 type PrivateBlobSecurityProfile struct {
-	EncryptedAtRest   bool
+	EncryptedAtRest    bool
 	ExternalKeyCustody bool
-	OwnerScopedAccess bool
+	OwnerScopedAccess  bool
 }
 
 type PrivateBlobSecurityProvider interface {

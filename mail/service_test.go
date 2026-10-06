@@ -6,10 +6,10 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"sync"
-	"testing"
 	"path/filepath"
 	"strings"
+	"sync"
+	"testing"
 	"time"
 )
 

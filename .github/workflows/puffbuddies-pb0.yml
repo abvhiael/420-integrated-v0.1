@@ -40,6 +40,9 @@ jobs:
       - name: Verify PB-0 canonical foundation
         run: python3 scripts/verify-puffbuddies-pb0.py
 
+      - name: Run PB-0 documentation invariant mutation tests
+        run: python3 scripts/test-puffbuddies-pb0-invariants.py
+
       - name: Reject accidental PuffBuddies implementation in PB-0.1
         shell: bash
         run: |

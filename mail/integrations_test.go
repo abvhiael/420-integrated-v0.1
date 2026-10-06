@@ -314,8 +314,8 @@ func TestConnectorItemCountIsBounded(t *testing.T) {
 		items[i] = ConnectorItem{
 			ExternalID: fmt.Sprintf("item-%d", i),
 			OccurredAt: time.Unix(1700000000+int64(i), 0).UTC(),
-			Kind: "MESSAGE",
-			Payload: "x",
+			Kind:       "MESSAGE",
+			Payload:    "x",
 		}
 	}
 	if err := validateConnectorItems(items); !errors.Is(err, ErrConnectorInvalidResult) {

@@ -527,7 +527,7 @@ func TestOutboundAbuseControlsRateLimitAndIdempotentReplay(t *testing.T) {
 	for i := 0; i < MaxOutboundMessagesPerMinute; i++ {
 		msg, err := s.Send(ctx, "alice.420", SendRequest{
 			IdempotencyKey: fmt.Sprintf("abuse-rate-%d", i),
-			Sender: "alice.420", Recipient: "bob.420",
+			Sender:         "alice.420", Recipient: "bob.420",
 			Subject: "ordinary", Body: fmt.Sprintf("body-%d", i), Source: ServiceID,
 		})
 		if err != nil {

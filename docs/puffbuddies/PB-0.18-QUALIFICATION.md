@@ -27,7 +27,9 @@ PB-DOCINV-001 through PB-DOCINV-020 define accumulated inventory, global uniquen
 
 ## Tests/checks/verifiers run
 
-- cumulative PB-0 verifier through PB-0.18 — **PASS**\n- adversarial documentation mutation suite (clean fixture + 8 mutations) — **PASS**\n- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+- cumulative PB-0 verifier through PB-0.18 — **PASS**
+- adversarial documentation mutation suite (clean fixture + 8 mutations) — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
 
 ## Implementation SHA
 
@@ -45,7 +47,17 @@ PR #526 remains open. Level 3 current-main merge-candidate reconciliation remain
 
 ## CI workflow/run/job evidence
 
-Workflow: **PuffBuddies PB-0 Qualification**\n\n- run: `37403269465` — **PASS**\n- job: `112075010080` (`pb0-fast`) — **PASS**\n- exact-head checkout — **PASS**\n- exact-head SHA verification — **PASS**\n- cumulative PB-0 verifier — **PASS**\n- PB-0 adversarial mutation tests — **PASS**\n- accidental runtime rejection — **PASS**\n\nEarlier failed runs `37403126338` and `37403173098` are superseded and are not passing evidence; they exposed verifier harness defects that were diagnosed and corrected before this exact-head pass.
+Workflow: **PuffBuddies PB-0 Qualification**
+
+- run: `37403269465` — **PASS**
+- job: `112075010080` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- PB-0 adversarial mutation tests — **PASS**
+- accidental runtime rejection — **PASS**
+
+Earlier failed runs `37403126338` and `37403173098` are superseded and are not passing evidence; they exposed verifier harness defects that were diagnosed and corrected before this exact-head pass.
 
 ## Security/adversarial/invariant results
 
@@ -69,7 +81,9 @@ None.
 
 ## Completion state
 
-**PB-0.18 — COMPLETE**\n\nAll PB-0.18 exit criteria are satisfied on exact implementation SHA `d2a1ee022f0b8232c089ff62fc732a89855341fc`.
+**PB-0.18 — COMPLETE**
+
+All PB-0.18 exit criteria are satisfied on exact implementation SHA `d2a1ee022f0b8232c089ff62fc732a89855341fc`.
 
 ## Next canonical roadmap step
 

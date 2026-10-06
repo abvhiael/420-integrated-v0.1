@@ -27,15 +27,15 @@ PB-DOCINV-001 through PB-DOCINV-020 define accumulated inventory, global uniquen
 
 ## Tests/checks/verifiers run
 
-Pending exact-head Level 1 qualification.
+- cumulative PB-0 verifier through PB-0.18 — **PASS**\n- adversarial documentation mutation suite (clean fixture + 8 mutations) — **PASS**\n- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
 
 ## Implementation SHA
 
-Pending exact-head Level 1 qualification.
+`d2a1ee022f0b8232c089ff62fc732a89855341fc`
 
 ## Evidence SHA
 
-Pending evidence-only closeout.
+This evidence/status closeout is documentation-only and references the qualified implementation SHA above.
 
 ## Current main/base SHA
 
@@ -45,11 +45,11 @@ PR #526 remains open. Level 3 current-main merge-candidate reconciliation remain
 
 ## CI workflow/run/job evidence
 
-Pending exact-head **PuffBuddies PB-0 Qualification** results.
+Workflow: **PuffBuddies PB-0 Qualification**\n\n- run: `37403269465` — **PASS**\n- job: `112075010080` (`pb0-fast`) — **PASS**\n- exact-head checkout — **PASS**\n- exact-head SHA verification — **PASS**\n- cumulative PB-0 verifier — **PASS**\n- PB-0 adversarial mutation tests — **PASS**\n- accidental runtime rejection — **PASS**\n\nEarlier failed runs `37403126338` and `37403173098` are superseded and are not passing evidence; they exposed verifier harness defects that were diagnosed and corrected before this exact-head pass.
 
 ## Security/adversarial/invariant results
 
-Pending cumulative verifier and adversarial mutation suite.
+**PASS.** The clean accumulated PB-0 fixture passes. Eight independent mutations covering invariant-ID drift, adult-floor drift, messaging-consent drift, block-supremacy drift, invented fixed address, invented service ID, repository-structure ID drift, and roadmap completion drift are each required to fail and did so.
 
 ## Milestone status
 
@@ -65,11 +65,11 @@ PB-0.18 verifies documentation authority, not future runtime implementation.
 
 ## Blockers
 
-Pending exact-head Level 1 qualification.
+None.
 
 ## Completion state
 
-PB-0.18 is pending exact-head qualification.
+**PB-0.18 — COMPLETE**\n\nAll PB-0.18 exit criteria are satisfied on exact implementation SHA `d2a1ee022f0b8232c089ff62fc732a89855341fc`.
 
 ## Next canonical roadmap step
 

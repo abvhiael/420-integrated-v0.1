@@ -677,3 +677,55 @@ func TestHTTPDraftAuthorizationAndStrictJSON(t *testing.T) {
 		t.Fatalf("unknown draft field status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 }
+
+
+func TestHTTPOutboxDeliveryLifecycle(t *testing.T) {
+	s, _ := testService()
+	h := HTTPHandler{
+		Service: s,
+		Authenticate: func(r *http.Request) (string, error) {
+			return r.Header.Get("X-Test-Actor"), nil
+		},
+	}
+	req := SendRequest{IdempotencyKey: "http-outbox", Sender: "alice.420", Recipient: "bob.420", Subject: "queued", Body: "private body", Source: ServiceID}
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/outbox", "alice.420", req)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("queue status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var queued Delivery
+	if err := json.Unmarshal(rec.Body.Bytes(), &queued); err != nil {
+		t.Fatal(err)
+	}
+	if queued.Status != DeliveryQueued {
+		t.Fatalf("queue state=%s", queued.Status)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/outbox", "alice.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var items []Delivery
+	if err := json.Unmarshal(rec.Body.Bytes(), &items); err != nil {
+		t.Fatal(err)
+	}
+	if len(items) != 1 || items[0].ID != queued.ID {
+		t.Fatalf("unexpected outbox payload: %+v", items)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/outbox/"+queued.ID+"/process", "alice.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("process status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var delivered Delivery
+	if err := json.Unmarshal(rec.Body.Bytes(), &delivered); err != nil {
+		t.Fatal(err)
+	}
+	if delivered.Status != DeliveryDelivered {
+		t.Fatalf("delivery status=%s", delivered.Status)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/outbox/"+queued.ID, "bob.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign outbox read status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}

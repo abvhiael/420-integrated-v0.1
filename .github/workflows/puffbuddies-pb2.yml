@@ -32,6 +32,8 @@ jobs:
         run: python3 -m compileall -q puffbuddies
       - name: PB-2.1 targeted identity and eligibility boundaries
         run: python3 -m unittest puffbuddies.tests.test_pb_2_1_identity_boundaries -v
+      - name: PB-2.2 targeted adult eligibility state model
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_2_adult_eligibility_state -v
       - name: Retained PuffBuddies regressions
         run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
       - name: Identity privacy and public-chain negative gate

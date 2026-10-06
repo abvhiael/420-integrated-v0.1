@@ -30,6 +30,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.send(w, r, actor)
 	case r.Method == http.MethodGet && r.URL.Path == "/v1/inbox":
 		h.inbox(w, r, actor)
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
+		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
 		h.message(w, r, actor)
 	default:
@@ -69,6 +71,22 @@ func (h HTTPHandler) inbox(w http.ResponseWriter, r *http.Request, actor string)
 	writeJSON(w, http.StatusOK, page)
 }
 
+func (h HTTPHandler) mailbox(w http.ResponseWriter, r *http.Request, actor string) {
+	folder := MailboxFolder(strings.ToUpper(strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/mailboxes/"), "/")))
+	limit := DefaultPageSize
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			limit = n
+		}
+	}
+	page, err := h.Service.Mailbox(r.Context(), actor, folder, r.URL.Query().Get("cursor"), limit)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
+}
+
 func (h HTTPHandler) message(w http.ResponseWriter, r *http.Request, actor string) {
 	rest := strings.TrimPrefix(r.URL.Path, "/v1/messages/")
 	parts := strings.Split(strings.Trim(rest, "/"), "/")
@@ -93,6 +111,58 @@ func (h HTTPHandler) message(w http.ResponseWriter, r *http.Request, actor strin
 		writeJSON(w, http.StatusOK, msg)
 		return
 	}
+	if len(parts) == 2 && parts[1] == "unread" && r.Method == http.MethodPost {
+		state, err := h.Service.MarkUnread(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if len(parts) == 2 && parts[1] == "mailbox" && r.Method == http.MethodGet {
+		state, err := h.Service.GetMailboxState(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if len(parts) == 2 && parts[1] == "mailbox" && r.Method == http.MethodPatch {
+		defer r.Body.Close()
+		dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10))
+		dec.DisallowUnknownFields()
+		var update MailboxUpdate
+		if err := dec.Decode(&update); err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		state, err := h.Service.UpdateMailbox(r.Context(), actor, parts[0], update)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if len(parts) == 2 && parts[1] == "restore" && r.Method == http.MethodPost {
+		state, err := h.Service.RestoreFromTrash(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if len(parts) == 1 && r.Method == http.MethodDelete {
+		if err := h.Service.PermanentlyDelete(r.Context(), actor, parts[0]); err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
 }
 
@@ -102,6 +172,8 @@ func writeServiceError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+	case errors.Is(err, ErrInvalidTransition):
+		writeError(w, http.StatusConflict, "INVALID_TRANSITION", err.Error())
 	case errors.Is(err, ErrNotFound):
 		writeError(w, http.StatusNotFound, "NOT_FOUND", err.Error())
 	default:

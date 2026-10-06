@@ -527,7 +527,6 @@ func normalizeLivestream(item Livestream) Livestream {
 	return item
 }
 
-
 func validateLivestreamEndpoint(protocol, endpoint string) error {
 	switch strings.ToUpper(strings.TrimSpace(protocol)) {
 	case "WHIP", "WHEP":

@@ -110,6 +110,7 @@ type UploadPlan struct {
 	ProviderID string     `json:"provider_id"`
 	NodeID     string     `json:"node_id"`
 	ServiceID  string     `json:"service_id"`
+	Endpoint   string     `json:"endpoint,omitempty"`
 	ExpiresAt  time.Time  `json:"expires_at"`
 	Provenance Provenance `json:"provenance"`
 }

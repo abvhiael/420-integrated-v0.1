@@ -89,7 +89,7 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 			labelName = label.Name
 		}
 		if req.CustomFolderID != "" {
-			folder, ok := data.CustomFolders[organizationKey(actor, req.CustomFolderID)]
+			_, ok := data.CustomFolders[organizationKey(actor, req.CustomFolderID)]
 			if !ok {
 				return ErrNotFound
 			}

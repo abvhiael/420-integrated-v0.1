@@ -3,7 +3,10 @@ package media420
 import (
 	"context"
 	"errors"
+	"io"
+	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -215,6 +218,10 @@ func TestSigningIntentRejectsRequestedNetworkMismatchBeforeTransport(t *testing.
 	}
 }
 
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
 
 type tokenProvider string
 

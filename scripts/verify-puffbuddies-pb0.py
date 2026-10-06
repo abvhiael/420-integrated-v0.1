@@ -43,6 +43,8 @@ DOCINV = ROOT / "docs/puffbuddies/PB-0.18-DOCUMENTATION-INVARIANT-TESTS.md"
 EVIDENCE_18 = ROOT / "docs/puffbuddies/PB-0.18-QUALIFICATION.md"
 MASTER_ROADMAP = ROOT / "docs/puffbuddies/PB-0.19-MASTER-IMPLEMENTATION-ROADMAP.md"
 EVIDENCE_19 = ROOT / "docs/puffbuddies/PB-0.19-QUALIFICATION.md"
+CLOSEOUT = ROOT / "docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md"
+EVIDENCE_20 = ROOT / "docs/puffbuddies/PB-0.20-QUALIFICATION.md"
 
 errors = []
 
@@ -50,7 +52,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17, DOCINV, EVIDENCE_18, MASTER_ROADMAP, EVIDENCE_19):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17, DOCINV, EVIDENCE_18, MASTER_ROADMAP, EVIDENCE_19, CLOSEOUT, EVIDENCE_20):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -96,6 +98,8 @@ docinv = DOCINV.read_text(encoding="utf-8")
 evidence_18 = EVIDENCE_18.read_text(encoding="utf-8")
 master_roadmap = MASTER_ROADMAP.read_text(encoding="utf-8")
 evidence_19 = EVIDENCE_19.read_text(encoding="utf-8")
+closeout = CLOSEOUT.read_text(encoding="utf-8")
+evidence_20 = EVIDENCE_20.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -1876,14 +1880,27 @@ for token in [
 ]:
     need(token in evidence_19, f"PB-0.19 evidence missing token: {token}")
 
+# PB-0.20 — phase closeout
+for token in ["# PuffBuddies PB-0.20 phase closeout","## Closeout invariants","## Level 3 evidence matrix","## Exact-SHA rule","## Formal closeout boundary","Solidity Contracts is the sole canonical owner","Genesis Address Authority separately owns","Skipped, cancelled, missing, stale, superseded, or untriggered required checks are never passing evidence","PB-1 — Domain model and private persistence"]:
+    need(token in closeout, f"PB-0.20 closeout missing token: {token}")
+close_ids=re.findall(r"^### (PB-CLOSE-\d{3})\b",closeout,flags=re.MULTILINE)
+need(close_ids==[f"PB-CLOSE-{i:03d}" for i in range(1,21)],f"PB-CLOSE sequence drift: {close_ids}")
+for step in range(1,20):
+    pos=road.find(f"### PB-0.{step} —")
+    need(pos>=0 and "— COMPLETE" in road[pos:road.find("\n",pos)],f"PB-0.{step} not COMPLETE before PB-0.20")
+need(re.search(r"0x[a-fA-F0-9]{40}",closeout) is None,"PB-0.20 closeout assigns fixed address")
+need("420/service/puff" not in closeout.lower(),"PB-0.20 closeout invents service ID")
+for token in ["# PB-0.20 qualification evidence","**Level 3 — complete app-phase closeout qualification**","## Reconciliation base SHA","## Exact merge-candidate implementation SHA","## Level 3 evidence matrix","## Evidence rules","**PB-1 — Domain model and private persistence**"]:
+    need(token in evidence_20,f"PB-0.20 evidence missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.19", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.20", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.19",
-    "qualificationLevel": 1,
+    "step": "PB-0.20",
+    "qualificationLevel": 3,
     "pb01": {
         "canonicalName": "PuffBuddies",
         "identityInvariants": identity_ids,
@@ -2133,5 +2150,16 @@ print(json.dumps({
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsFutureImplementation": False,
+    },
+    "pb20": {
+        "closeoutInvariants": close_ids,
+        "priorStepsComplete": True,
+        "currentMainReconciliationRequired": True,
+        "singleExactCandidateRequired": True,
+        "canonicalSolidityOwnerDefined": True,
+        "genesisAuthorityOwnerDefined": True,
+        "duplicateFoundryProhibited": True,
+        "falseGreenProhibited": True,
+        "pb1NextAfterCloseout": True,
     }
 }, indent=2))

@@ -77,7 +77,7 @@ func (n *testNotify) Count() int {
 
 func testService() (*Service, *testNotify) {
 	n := &testNotify{}
-	s := NewService(testIDs{"alice.420": true, "bob.420": true}, testPolicy{}, &testBlobs{}, n)
+	s := NewService(testIDs{"alice.420": true, "bob.420": true}, testPolicy{}, &testBlobs{}, n, NewMemoryStore())
 	s.Now = func() time.Time { return time.Unix(1700000000, 0).UTC() }
 	return s, n
 }

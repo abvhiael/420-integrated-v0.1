@@ -26,6 +26,7 @@ roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-6",
     "MEDIA-AUDIT-7",
     "MEDIA-AUDIT-8",
+    "MEDIA-AUDIT-9",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -73,6 +74,14 @@ projections = need("docs/420-MEDIA-PROJECTIONS.md", [
     "READY + PUBLIC",
     "420Indexer",
     "PromotionalOptIn",
+    "Level 1 app-scoped fast qualification",
+])
+api_sdk = need("docs/420-MEDIA-API-SDK.md", [
+    "MEDIA-AUDIT-9",
+    "/v1",
+    "Idempotency-Key",
+    "420/MEDIA/API/SIGNING/V1",
+    "sdk/media420",
     "Level 1 app-scoped fast qualification",
 ])
 
@@ -137,11 +146,18 @@ for path in [
     "media/projection/index.go",
     "media/projection/notifications.go",
     "media/projection/projection_test.go",
+    "media/api/types.go",
+    "media/api/backend.go",
+    "media/api/idempotency.go",
+    "media/api/server.go",
+    "media/api/server_test.go",
+    "sdk/media420/errors.go",
+    "sdk/media420/client.go",
+    "sdk/media420/discovery.go",
+    "sdk/media420/client_test.go",
 ]:
     assert (ROOT / path).exists(), f"missing existing Media baseline file {path}"
 
 assert not (ROOT / "media/web").exists(), "Media web now exists; update audit classification"
-assert not (ROOT / "media/api").exists(), "Media API now exists; update audit classification"
-assert not (ROOT / "sdk/media420").exists(), "Media SDK now exists; update audit classification"
 
 print("420Media audit baseline: PASS")

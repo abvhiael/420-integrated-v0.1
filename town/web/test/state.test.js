@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {ViewState,resultState,transactionState,idempotencyKey} from '../core/state.js';
+test('explicit empty ready and transaction states are deterministic',()=>{assert.equal(resultState([]),ViewState.EMPTY);assert.equal(resultState([1]),ViewState.READY);assert.equal(transactionState({pending:true}).state,ViewState.TRANSACTION);assert.equal(transactionState({error:'x'}).state,ViewState.ERROR);});
+test('idempotency keys use secure randomness',()=>{const old=globalThis.crypto;globalThis.crypto={getRandomValues:a=>{a.fill(7);return a;}};try{assert.match(idempotencyKey('post'),/^post-[0-9a-f]{32}$/);}finally{globalThis.crypto=old;}});

@@ -143,12 +143,12 @@ type Service struct {
 	Now        func() time.Time
 }
 
-func NewService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink) *Service {
-	return NewServiceWithStore(ids, messenger, blobs, notify, NewMemoryStore())
+func NewService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, store MailStore) *Service {
+	return &Service{Identities: ids, Messenger: messenger, Blobs: blobs, Notify: notify, Store: store, Now: func() time.Time { return time.Now().UTC() }}
 }
 
 func NewServiceWithStore(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, store MailStore) *Service {
-	return &Service{Identities: ids, Messenger: messenger, Blobs: blobs, Notify: notify, Store: store, Now: func() time.Time { return time.Now().UTC() }}
+	return NewService(ids, messenger, blobs, notify, store)
 }
 
 func NewDurableService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, path string) (*Service, error) {
@@ -156,7 +156,7 @@ func NewDurableService(ids IdentityDirectory, messenger MessengerPolicy, blobs P
 	if err != nil {
 		return nil, err
 	}
-	return NewServiceWithStore(ids, messenger, blobs, notify, store), nil
+	return NewService(ids, messenger, blobs, notify, store), nil
 }
 
 func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Message, error) {

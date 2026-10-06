@@ -3,7 +3,7 @@ android {
     namespace = "org.fourtwenty.puffbuddies"
     compileSdk = 35
     defaultConfig {
-        applicationId = "org.420integrated.puffbuddies"
+        applicationId = "org.fourtwenty.puffbuddies"
         minSdk = 34
         targetSdk = 35
         versionCode = 1

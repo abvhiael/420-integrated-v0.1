@@ -796,6 +796,72 @@ MAIL-2.14 provides architecture only. It intentionally does **not** claim:
 
 Those belong to MAIL-2.15 and later steps and production-equivalent testnet/security qualification.
 
+## MAIL-2.15 Discord Account Linking
+
+MAIL-2.15 introduces the first concrete provider adapter on top of the provider-neutral MAIL-2.14 connector framework.
+
+The scope is intentionally limited to **Discord account linking and unlinking**. Discord message sync, Discord delivery, Discord wallet verification, and Discord webhook ingestion remain owned by MAIL-2.16 through MAIL-2.18.
+
+### Authority boundary
+
+420Mail does not exchange Discord OAuth codes directly and does not accept raw Discord access tokens, refresh tokens, client secrets, or provider passwords.
+
+The Discord connector receives only an opaque secure-broker authorization reference from the generic connector link request. A deployment-provided `DiscordLinkAuthority` is responsible for the actual Discord OAuth/broker exchange, replay protection, provider token lifecycle, and authoritative Discord identity lookup.
+
+### Accepted Discord account result
+
+The authority result is accepted only when:
+
+- the Discord user ID is a valid numeric snowflake;
+- a username is present;
+- the granted scopes include `identify`;
+- scopes are normalized and non-duplicated;
+- the provider identity has been verified;
+- the result is explicitly non-custodial;
+- a link timestamp is present.
+
+The resulting Mail connector connection is owner-bound to the authenticated 420Mail identity and uses:
+
+- provider: `discord`;
+- connection ID: `discord:{snowflake}`;
+- external ID: the Discord snowflake;
+- display name: Discord global display name when present, otherwise username.
+
+### Unlinking
+
+Unlinking requires the authenticated Mail identity and a valid Discord connection ID. The provider-specific authority performs the actual credential/account unlink operation.
+
+Mail core does not locally retain Discord OAuth credentials.
+
+### Capability boundary
+
+The MAIL-2.15 Discord adapter declares only:
+
+- `LINK`
+
+It explicitly returns unsupported for:
+
+- pull/sync;
+- push/delivery;
+- webhook ingestion;
+- wallet verification.
+
+This prevents later Discord roadmap functionality from being silently implemented or claimed during account-linking qualification.
+
+### Construction
+
+`NewDiscordConnectorService(authority)` creates a connector service with the Discord link-only adapter registered through the same provider-neutral registry used by MAIL-2.14.
+
+The existing generic connector API and UI are reused:
+
+- `GET /v1/connectors/providers`
+- `POST /v1/connectors/link`
+- `POST /v1/connectors/unlink`
+
+No Discord-specific HTTP route is required because the provider-neutral framework already carries the provider selector and opaque authorization reference.
+
+MAIL-2.15 repository completion does not claim live Discord OAuth credentials, redirect URI configuration, production token rotation/revocation, public-testnet account linking, or provider availability. Those remain deployment/testnet/security qualification gates.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

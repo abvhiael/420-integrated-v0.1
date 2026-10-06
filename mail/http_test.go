@@ -334,7 +334,6 @@ func TestHTTPRulesRejectInvalidTargetsAndUnknownFields(t *testing.T) {
 	}
 }
 
-
 func TestHTTPTrustControlsCRUDSettingsAndBlockedSend(t *testing.T) {
 	h, _, _ := testHTTPHandler(t)
 

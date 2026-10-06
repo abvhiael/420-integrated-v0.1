@@ -534,7 +534,6 @@ func (c Client) SignalIntegrationBoundary(ctx context.Context) (mail.SignalInteg
 	return out, err
 }
 
-
 func (c Client) ShareToSignal(ctx context.Context, req mail.SignalShareRequest) (mail.SignalShareReceipt, error) {
 	var out mail.SignalShareReceipt
 	err := c.do(ctx, http.MethodPost, "/v1/connectors/signal/share", req, &out)

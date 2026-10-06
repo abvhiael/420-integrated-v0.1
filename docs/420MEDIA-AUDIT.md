@@ -116,12 +116,12 @@ No critical source-level fund-custody vulnerability was identified in this audit
 | 420 Pay | canonical PaymentRegistry-backed Media funding/settlement/refund observation through `MediaPayComputeAdapter420`; Media remains non-custodial | COMPLETE (Level 1) |
 | 420 Compute Protocol | canonical Compute graph/job/funding/match/provider/entitlement/refund binding; legacy provider ref accepted only when cross-checked against canonical provider state | COMPLETE (Level 1) |
 | Protocol/Service Registry | no Media release publication/discovery profile found | MISSING |
-| Wallet | user-facing injected-wallet connect/network validation, account/network invalidation and external signing boundary in `media/web`; private keys remain outside Media | IMPLEMENTED / pending Level 2 qualification |
+| Wallet | user-facing injected-wallet connect/network validation, account/network invalidation and external signing boundary in `media/web`; private keys remain outside Media | COMPLETE (Level 2 milestone) |
 | Explorer/Indexer | events are indexable, but no Media-specific production projection qualification found | PARTIAL |
 
 ## Application-layer audit
 
-Frontend: **IMPLEMENTED / pending Level 2 exact-head qualification** on the audit branch. `media/web` now provides upload preparation/transport recovery, library states, safe playback, basic livestream create/start/stop/status, Wallet/network validation, feature availability, responsive/accessibility basics and fail-closed unresolved runtime configuration. No production domain is claimed.
+Frontend: **COMPLETE (Level 2 milestone)** on the audit branch. `media/web` now provides upload preparation/transport recovery, library states, safe playback, basic livestream create/start/stop/status, Wallet/network validation, feature availability, responsive/accessibility basics and fail-closed unresolved runtime configuration. No production domain is claimed.
 
 Backend/API: **COMPLETE (Level 1)** on the audit branch. `media/api` now exposes a stable `/v1` HTTP contract for capabilities/compatibility, assets, upload preparation, livestream control/status, Search, Notifications subscriptions and external Wallet signing intents. Deployment composition remains later roadmap work.
 
@@ -139,7 +139,7 @@ Search/Notifications: **COMPLETE (Level 1)** on the audit branch. Only READY+PUB
 
 API/SDK: **COMPLETE (Level 1)** on the audit branch. Stable `/v1` routes now use opaque cursor pagination, RFC3339 UTC timestamps, machine error codes, bounded strict JSON, replay-safe idempotency, provenance, capability/compatibility discovery and external Wallet signing intents. `sdk/media420` provides typed discovery/client methods with HTTPS and chain/network compatibility enforcement.
 
-Web application: **IMPLEMENTED / pending Level 2 exact-head qualification** on the audit branch. The first user-facing 420Media surface composes the qualified upload, library/playback, livestream, Wallet/network and feature-capability boundaries with explicit loading/empty/error/action states and safe recovery.
+Web application: **COMPLETE (Level 2 milestone)** on the audit branch. The first user-facing 420Media surface composes the qualified upload, library/playback, livestream, Wallet/network and feature-capability boundaries with explicit loading/empty/error/action states and safe recovery.
 
 ## Builds and tests
 
@@ -164,6 +164,8 @@ MEDIA-AUDIT-7 qualification evidence: `docs/audit/420MEDIA-AUDIT-7-QUALIFICATION
 MEDIA-AUDIT-8 qualification evidence: `docs/audit/420MEDIA-AUDIT-8-QUALIFICATION.md`, implementation SHA `acbb99e2485c9565598eb723ee1f97492478a52d`, workflow run `37515368608` PASS (Level 1).
 
 MEDIA-AUDIT-9 qualification evidence: `docs/audit/420MEDIA-AUDIT-9-QUALIFICATION.md`, implementation SHA `79e102e596a4e07b683fc15305c87c3ab4212aac`, workflow run `37520504975` PASS (Level 1).
+
+MEDIA-AUDIT-10 qualification evidence: `docs/audit/420MEDIA-AUDIT-10-QUALIFICATION.md`, implementation SHA `f7e72653a057b227df256e9546cd2b309b692274`, workflow run `37525218135` PASS (Level 2 milestone).
 
 ## Documentation audit
 

@@ -211,7 +211,6 @@ func TestHTTPOrganizationOwnershipAndSystemLabelProtection(t *testing.T) {
 	}
 }
 
-
 func TestHTTPPrivateSearch(t *testing.T) {
 	h, _, id := testHTTPHandler(t)
 	rec := performMailRequest(t, h, http.MethodPost, "/v1/search", "bob.420", SearchRequest{Query: "hello"})

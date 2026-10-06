@@ -264,3 +264,32 @@ func TestStopPersistsDesiredFalseBeforeTransportFailure(t *testing.T) {
 		t.Fatalf("status=%+v err=%v", status, err)
 	}
 }
+
+
+func TestRetiredCanonicalStreamCannotStartOrRecoverButCanStop(t *testing.T) {
+	ctx := context.Background()
+	driver := &driverFake{}
+	authority := &authorityFake{controller: "0xabc"}
+	svc := serviceFixture(t, driver, authority, FixedFeatureGate{Livestreaming: true})
+	created, err := svc.Create(ctx, "0xabc", sessionSpec())
+	if err != nil {
+		t.Fatal(err)
+	}
+	started, err := svc.Start(ctx, "0xabc", created.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	authority.retired = true
+
+	if _, err := svc.Start(ctx, "0xabc", created.ID); !errors.Is(err, ErrUnauthorized) {
+		t.Fatalf("retired start err=%v", err)
+	}
+	status, err := svc.Status(ctx, "0xabc", created.ID)
+	if err != nil || status.State != livegateway.StateActive {
+		t.Fatalf("retired status=%+v err=%v", status, err)
+	}
+	stopped, err := svc.Stop(ctx, "0xabc", created.ID)
+	if err != nil || stopped.State != livegateway.StateClosed {
+		t.Fatalf("retired stop=%+v err=%v", stopped, err)
+	}
+}

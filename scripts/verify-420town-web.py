@@ -79,7 +79,7 @@ for path in [
     need((ROOT/path).exists(),f"Town web test missing {path}")
 
 for token in [
- "config/420town-web-v1.json","town/web/**","scripts/verify-420town-web.py",
+ "config/420town-web-v1.json","town/**","scripts/verify-420town-web.py",
  "Verify Town web application","npm run qualify","working-directory: town/web"
 ]:
     need(token in workflow,f"Town workflow missing web gate {token}")

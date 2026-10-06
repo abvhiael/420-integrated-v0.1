@@ -70,7 +70,6 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 
 ### Missing for the canonical Genesis service target
 
-- user-facing 420Media frontend;
 - Registry/service-discovery publication/deployment profile;
 - user authorization/session model;
 - upload/livestream moderation and abuse handling;
@@ -117,12 +116,12 @@ No critical source-level fund-custody vulnerability was identified in this audit
 | 420 Pay | canonical PaymentRegistry-backed Media funding/settlement/refund observation through `MediaPayComputeAdapter420`; Media remains non-custodial | COMPLETE (Level 1) |
 | 420 Compute Protocol | canonical Compute graph/job/funding/match/provider/entitlement/refund binding; legacy provider ref accepted only when cross-checked against canonical provider state | COMPLETE (Level 1) |
 | Protocol/Service Registry | no Media release publication/discovery profile found | MISSING |
-| Wallet | no user-facing Media wallet workflow found | MISSING |
+| Wallet | user-facing injected-wallet connect/network validation, account/network invalidation and external signing boundary in `media/web`; private keys remain outside Media | IMPLEMENTED / pending Level 2 qualification |
 | Explorer/Indexer | events are indexable, but no Media-specific production projection qualification found | PARTIAL |
 
 ## Application-layer audit
 
-Frontend: **MISSING** for 420Media itself.
+Frontend: **IMPLEMENTED / pending Level 2 exact-head qualification** on the audit branch. `media/web` now provides upload preparation/transport recovery, library states, safe playback, basic livestream create/start/stop/status, Wallet/network validation, feature availability, responsive/accessibility basics and fail-closed unresolved runtime configuration. No production domain is claimed.
 
 Backend/API: **COMPLETE (Level 1)** on the audit branch. `media/api` now exposes a stable `/v1` HTTP contract for capabilities/compatibility, assets, upload preparation, livestream control/status, Search, Notifications subscriptions and external Wallet signing intents. Deployment composition remains later roadmap work.
 
@@ -139,6 +138,8 @@ Pay/Compute: **COMPLETE (Level 1)** on the audit branch. Pay-backed jobs now bin
 Search/Notifications: **COMPLETE (Level 1)** on the audit branch. Only READY+PUBLIC+Rights-authorized assets can become Search results; projections preserve qualified Indexer provenance/finality and support deterministic rollback/rebuild. Notifications are opt-in, minimum-finality scoped, deduplicated, separately promotional-consented and reorg-retractable without becoming canonical authority.
 
 API/SDK: **COMPLETE (Level 1)** on the audit branch. Stable `/v1` routes now use opaque cursor pagination, RFC3339 UTC timestamps, machine error codes, bounded strict JSON, replay-safe idempotency, provenance, capability/compatibility discovery and external Wallet signing intents. `sdk/media420` provides typed discovery/client methods with HTTPS and chain/network compatibility enforcement.
+
+Web application: **IMPLEMENTED / pending Level 2 exact-head qualification** on the audit branch. The first user-facing 420Media surface composes the qualified upload, library/playback, livestream, Wallet/network and feature-capability boundaries with explicit loading/empty/error/action states and safe recovery.
 
 ## Builds and tests
 

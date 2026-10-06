@@ -5,6 +5,8 @@ import "../src/town/TownAuthority420.sol";
 
 interface VmTownSecurityHardening420 {
     function prank(address) external;
+    function startPrank(address) external;
+    function stopPrank() external;
     function expectRevert(bytes4) external;
 }
 
@@ -40,17 +42,18 @@ contract TownSecurityHardening420Test {
     function testFuzzNonOwnerCannotMutateAuthority(address attacker, bytes32 arbitraryPermission) public {
         if (attacker == OWNER) return;
 
+        vm.startPrank(attacker);
+
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
-        vm.prank(attacker);
         town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), arbitraryPermission, true);
 
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
-        vm.prank(attacker);
         town.setTreasuryReference(COMMUNITY, TREASURY_AUTHORITY, TREASURY);
 
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
-        vm.prank(attacker);
         town.removeMember(COMMUNITY, USER);
+
+        vm.stopPrank();
     }
 
     function testFuzzRoleAuthorityCannotCrossCommunity(bytes32 otherCommunity) public {

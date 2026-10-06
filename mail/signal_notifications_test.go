@@ -155,7 +155,7 @@ func TestMailSendEmitsSignalNotificationThroughExistingNotificationPath(t *testi
 	svc.Now = func() time.Time { return time.Unix(1700000000, 0).UTC() }
 	req := SendRequest{
 		IdempotencyKey: "signal-notify-send-1",
-		Sender: "alice.420", Recipient: "bob.420", Subject: "private subject",
+		Sender:         "alice.420", Recipient: "bob.420", Subject: "private subject",
 		Body: "private body", Source: ServiceID,
 	}
 	if _, err := svc.Send(context.Background(), "alice.420", req); err != nil {
@@ -185,7 +185,7 @@ func TestSignalTransportFailureDoesNotRollbackMailAndDuplicateSendDoesNotRenotif
 	svc.Now = func() time.Time { return time.Unix(1700000000, 0).UTC() }
 	req := SendRequest{
 		IdempotencyKey: "signal-failure-send-1",
-		Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "private body", Source: ServiceID,
+		Sender:         "alice.420", Recipient: "bob.420", Subject: "hello", Body: "private body", Source: ServiceID,
 	}
 	first, err := svc.Send(context.Background(), "alice.420", req)
 	if err != nil {

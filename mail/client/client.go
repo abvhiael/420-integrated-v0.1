@@ -503,7 +503,6 @@ func (c Client) PushConnector(ctx context.Context, req mail.ConnectorPushRequest
 	return out, err
 }
 
-
 func (c Client) SyncDiscord(ctx context.Context, connectionID string) (mail.DiscordSyncResult, error) {
 	var out mail.DiscordSyncResult
 	req := map[string]string{"connection_id": connectionID}

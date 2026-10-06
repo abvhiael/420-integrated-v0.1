@@ -390,7 +390,6 @@ func (c Client) CancelDelivery(ctx context.Context, id string) (mail.Delivery, e
 	return out, err
 }
 
-
 func (c Client) GoogleOnboarding(ctx context.Context, req mail.GoogleOnboardingRequest) (mail.OnboardingResult, error) {
 	var out mail.OnboardingResult
 	err := c.do(ctx, http.MethodPost, "/v1/onboarding/google", req, &out)

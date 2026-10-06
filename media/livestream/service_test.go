@@ -293,7 +293,6 @@ func TestRetiredCanonicalStreamCannotStartOrRecoverButCanStop(t *testing.T) {
 	}
 }
 
-
 func TestCreateRejectsSSRFAndPlaintextLivestreamEndpoints(t *testing.T) {
 	driver := &driverFake{}
 	authority := &authorityFake{controller: "0xabc"}

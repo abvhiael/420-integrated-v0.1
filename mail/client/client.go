@@ -278,7 +278,6 @@ func (c Client) UpdateTrustSettings(ctx context.Context, requireTrusted bool) (m
 	return out, err
 }
 
-
 func (c Client) ListQuarantine(ctx context.Context) ([]mail.QuarantineRecord, error) {
 	var out []mail.QuarantineRecord
 	err := c.do(ctx, http.MethodGet, "/v1/quarantine", nil, &out)

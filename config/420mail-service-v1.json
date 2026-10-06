@@ -50,7 +50,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 7,
+    "schemaVersion": 8,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -60,7 +60,8 @@
       "owner_label",
       "owner_custom_folder",
       "owner_conversation",
-      "owner_draft"
+      "owner_draft",
+      "owner_outbox"
     ],
     "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
     "sharedStorageRequiredForMultiInstance": true,
@@ -226,6 +227,28 @@
     "maxDraftsPerUser": 500,
     "maxAutosaveKeyBytes": 128,
     "listOrdering": "UPDATED_AT_DESC_ID_ASC",
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
+  },
+  "deliveryQueue": {
+    "enabled": true,
+    "ownerScoped": true,
+    "lifecycle": [
+      "QUEUED",
+      "SENDING",
+      "RETRYING",
+      "DELIVERED",
+      "FAILED",
+      "CANCELLED"
+    ],
+    "bodyStorage": "PRIVATE_ENCRYPTED_STAGING_BLOB",
+    "senderMailboxFolder": "OUTBOX",
+    "deliveredSenderFolder": "SENT",
+    "deliveredRecipientFolder": "INBOX",
+    "maxAttempts": 3,
+    "maxActiveItemsPerSender": 1000,
+    "deterministicIdempotency": true,
+    "crashRecovery": "SENDING_REPROCESS_SAFE",
     "publicIndexing": false,
     "messageBodiesOnChain": false
   }

@@ -27,7 +27,9 @@ class PB8IntegrationTests(unittest.TestCase):
   pair=PairRelationship(ProfileId("alice"),ProfileId("bob"),RelationshipState.MATCHED,2)
   self.assertTrue(ordinary_messaging_allowed(MessagingEligibilityPair(self.bound("alice","bob",pair),self.bound("bob","alice",pair))))
   blocked=block_pair(pair,actor_profile_id=ProfileId("alice"),left_current_generation=3,right_current_generation=3).pair
-  self.assertFalse(ordinary_messaging_allowed(MessagingEligibilityPair(self.bound("alice","bob",blocked),self.bound("bob","alice",blocked))))
+  left=self.bound("alice","bob",blocked);right=self.bound("bob","alice",blocked)
+  self.assertTrue(left.context.blocked);self.assertTrue(right.context.blocked)
+  self.assertFalse(ordinary_messaging_allowed(MessagingEligibilityPair(left,right)))
 
  def test_suspension_defeats_old_match_without_changing_other_users_block_choice(self):
   pair=PairRelationship(ProfileId("alice"),ProfileId("bob"),RelationshipState.MATCHED,2)

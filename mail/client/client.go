@@ -503,6 +503,12 @@ func (c Client) PushConnector(ctx context.Context, req mail.ConnectorPushRequest
 	return out, err
 }
 
+func (c Client) DeliverTelegram(ctx context.Context, req mail.TelegramDeliveryRequest) (mail.TelegramDeliveryResult, error) {
+	var out mail.TelegramDeliveryResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/telegram/deliver", req, &out)
+	return out, err
+}
+
 func (c Client) SyncTelegram(ctx context.Context, connectionID string) (mail.TelegramSyncResult, error) {
 	var out mail.TelegramSyncResult
 	req := map[string]string{"connection_id": connectionID}

@@ -1176,6 +1176,103 @@ The endpoint is informational and read-only. It does not authorize Signal transp
 
 MAIL-2.20 may add **420Mail → Signal Notifications** only after satisfying this boundary. MAIL-2.21 may separately add **Signal Share & Forward**. MAIL-2.22 remains conditional on the stable-surface gate above.
 
+## MAIL-2.20 420Mail → Signal Notifications
+
+MAIL-2.20 adds privacy-minimized outbound Signal notification delivery on top of the MAIL-2.19 boundary.
+
+Signal remains an external notification transport only. It is still not registered as a generic operational connector, does not own Mail identity, and does not gain share/forward or synchronization behavior.
+
+### Notification path
+
+420Mail already emits a non-authoritative `Notification` after successful recipient mailbox materialization when the recipient copy is not muted/quarantined.
+
+MAIL-2.20 adds `SignalNotificationSink`, which can wrap the existing 420Notifications sink and fan the same eligible new-mail event to an external Signal notification authority.
+
+The existing 420Notifications sink is preserved and remains independent. Signal delivery is supplementary and non-authoritative.
+
+### Privacy-minimized payload
+
+The Signal authority receives only:
+
+- deterministic event ID derived from the Mail message ID;
+- recipient 420Mail identity;
+- notification kind `NEW_MAIL`;
+- fixed title `New 420Mail message`;
+- deterministic idempotency key bound to recipient + message ID.
+
+The Signal notification request intentionally does **not** contain:
+
+- Mail body;
+- subject;
+- sender identity;
+- source application;
+- wallet data;
+- Signal credentials.
+
+Recipient-to-Signal destination resolution, Signal consent/opt-in evaluation, and all provider credentials remain inside the external Signal notification authority / secure broker boundary.
+
+### Consent suppression
+
+The Signal authority may return a valid suppressed result when the recipient has not opted in or is otherwise ineligible for Signal notifications.
+
+A suppressed result carries no delivery ID or delivery timestamp.
+
+### Delivery receipt
+
+An accepted result must contain:
+
+- non-empty external delivery ID;
+- non-zero accepted timestamp;
+- `accepted=true`;
+- `suppressed=false`.
+
+Malformed or contradictory provider results fail closed.
+
+### Idempotency
+
+Signal notification idempotency uses the domain:
+
+`420/MAIL/SIGNAL/NOTIFICATION/V1`
+
+and deterministically binds the Mail recipient identity and Mail message ID.
+
+Mail's existing send idempotency means an identical replay of the same successfully-created Mail message does not emit a second notification event.
+
+### Failure semantics
+
+Signal notification delivery is best-effort relative to canonical Mail delivery.
+
+A Signal transport outage does not roll back or invalidate an already-successful Mail send. The existing 420Notifications path remains available independently.
+
+### Boundary advancement
+
+The canonical Signal boundary now reports:
+
+- status: `NOTIFICATIONS_ONLY`;
+- `outbound_notifications=true`.
+
+The following remain disabled:
+
+- Signal account linking;
+- share/forward;
+- inbound sync;
+- webhook ingestion;
+- deep sync;
+- provider registration inside the generic connector registry.
+
+Deep sync remains gated by `STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED`.
+
+### Scope boundary
+
+MAIL-2.20 does **not** implement:
+
+- MAIL-2.21 Signal Share & Forward;
+- MAIL-2.22 Signal Deep Sync;
+- Signal inbox materialization;
+- raw Signal credential handling;
+- public indexing of Signal notification data;
+- on-chain Signal message content.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

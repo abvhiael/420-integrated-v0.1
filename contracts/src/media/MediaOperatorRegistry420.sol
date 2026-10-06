@@ -157,6 +157,10 @@ contract MediaOperatorRegistry420 is SystemAccess, I420System {
         return _get(operatorId).settlementAccount;
     }
 
+    function computeProviderRefOf(bytes32 operatorId) external view returns (bytes32) {
+        return _get(operatorId).computeProviderRef;
+    }
+
     function _operator(bytes32 operatorId) private view returns (Operator storage op) {
         op = _get(operatorId);
         if (msg.sender != op.operatorAccount) revert NotOperator();

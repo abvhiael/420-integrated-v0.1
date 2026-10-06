@@ -46,6 +46,8 @@ Implement the GEN-SVC API contract: versioned routes, cursor pagination, RFC3339
 ## MEDIA-AUDIT-10 — User-facing 420Media application
 Implement the Media frontend for upload/library/playback/livestream workflows with Wallet/network validation, loading/empty/error/transaction states, safe recovery, accessibility basics, responsive behavior and feature availability. Do not claim a domain until deployment exists.
 
+**Status: COMPLETE (Level 2 milestone).** Exact implementation SHA `f7e72653a057b227df256e9546cd2b309b692274`; qualification run `37525218135`. Durable evidence: `docs/audit/420MEDIA-AUDIT-10-QUALIFICATION.md`.
+
 ## MEDIA-AUDIT-11 — Security, abuse, moderation and repository closeout
 Apply the shared GEN-SVC threat model specifically to Media: content/rights abuse, stream-key leakage, SSRF/endpoint abuse, parser/codec/process isolation, resource exhaustion, webhook/replay concerns, moderation/report boundaries, malicious media and operator compromise. Complete docs, deployment configuration, operator/user/developer guides and Level 3 exact-head repository qualification.
 

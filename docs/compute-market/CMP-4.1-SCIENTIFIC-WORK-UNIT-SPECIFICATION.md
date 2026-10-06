@@ -65,7 +65,7 @@ A scientific-work-unit builder MUST resolve authoritative values rather than tru
 | `researchProjectCommitment` | Exact `ComputeResearchProjectRegistry420` project-revision commitment. New scientific work validates the current ACTIVE accepting revision with `isCurrentAcceptable` before freezing that exact commitment. |
 | `manifestHash` | Canonical accepted job/request manifest commitment. |
 | `executableContainerCommitment` | Exact accepted signed-manifest executable/container/runtime commitment; must resolve to immutable bytes/profile semantics. |
-| `datasetInputCommitment` | Must equal the accepted canonical job/request input commitment. CMP-4.4 will add dataset-manifest semantics without changing this binding requirement. |
+| `datasetInputCommitment` | Must equal the accepted canonical job/request input commitment. For dataset-backed scientific work, CMP-4.4 additionally requires an exact current `ComputeDatasetManifestRegistry420` manifest whose `contentCommitment` equals this input commitment and whose `isCurrentUsable` admission check succeeds. |
 | `parametersCommitment` | Hash of an explicit versioned parameter encoding. Display metadata or mutable JSON URLs are not authoritative parameters. |
 | `resourceClass` | Accepted request/match resource class; a scheduler cannot substitute another class. |
 | `outputSchemaCommitment` | Accepted job output schema commitment. |
@@ -123,7 +123,7 @@ CMP-4.1 freezes the interface points required by later canonical steps:
 
 - **CMP-4.2 Research Project Registry:** now resolves `researchProjectCommitment` to an exact revisioned project commitment and current new-work admission state;
 - **CMP-4.3 Researcher / institution identity:** authenticates project actors without changing job authority;
-- **CMP-4.4 Dataset manifests:** defines richer dataset lineage/access metadata behind `datasetInputCommitment`;
+- **CMP-4.4 Dataset manifests:** now binds `datasetInputCommitment` to an exact current project-bound dataset manifest while leaving raw bytes and access authorization off-chain;
 - **CMP-4.5 Reproducible execution environments:** formalizes environment reconstruction behind `executableContainerCommitment`;
 - **CMP-4.6 Result provenance:** links committed outputs and receipts to scientific units;
 - **CMP-4.7 Scientific metadata and lineage:** links derived units/results;
@@ -151,7 +151,6 @@ No Level 2 milestone is required at CMP-4.1. The first scientific-framework inte
 ## 9. Intentionally deferred
 
 - researcher/institution identity — CMP-4.3;
-- dataset manifest registry/access implementation — CMP-4.4;
 - reproducible environment registry/reconstruction — CMP-4.5;
 - scientific result provenance and lineage — CMP-4.6/CMP-4.7;
 - publication/retention enforcement — CMP-4.8;

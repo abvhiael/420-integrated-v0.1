@@ -483,9 +483,51 @@ Authenticated API additions:
 
 Typed Go client methods mirror these operations.
 
+## MAIL-2.11 Email-as-a-Wallet Onboarding
+
+MAIL-2.11 adds four onboarding entry paths without giving 420Mail custody or signing authority:
+
+- Google identity onboarding;
+- Apple identity onboarding;
+- passkey onboarding;
+- existing-wallet onboarding.
+
+The Mail service does **not** verify provider tokens, WebAuthn assertions, wallet signatures, or wallet ownership itself. Those security-sensitive decisions remain delegated to an injected canonical Wallet/420Identity onboarding authority. That authority is responsible for provider validation, subject/email verification where applicable, wallet/identity binding, nonce/challenge freshness, signature/WebAuthn verification, replay prevention, and issuing the ordinary Wallet/Identity session used by the deployment authentication layer.
+
+420Mail accepts only the minimum opaque proof material needed to hand off each ceremony:
+
+- Google: an opaque provider ID token;
+- Apple: an opaque provider ID token;
+- passkey: an opaque WebAuthn assertion envelope;
+- existing wallet: wallet address, canonical authority challenge, and signature.
+
+Mail never accepts a private key, seed phrase, recovery secret, authenticator private key, or passkey private material. JSON input is strict, so unrecognized secret-bearing fields are rejected before the canonical authority adapter is called.
+
+A successful onboarding result is accepted only when it is:
+
+- explicitly marked non-custodial;
+- bound to a canonical 420 identity;
+- bound to an EVM wallet address;
+- accompanied by a non-empty Wallet/Identity session token;
+- accompanied by a future session-expiry timestamp;
+- tagged with the exact onboarding method that was invoked.
+
+A malformed, custodial, unbound, expired, or method-mismatched authority result fails closed. Mail does not persist onboarding provider credentials, passkey assertions, wallet challenges/signatures, or returned session tokens in its durable metadata store, public 420Search, or on-chain state.
+
+Public pre-session API additions:
+
+- `POST /v1/onboarding/google`
+- `POST /v1/onboarding/apple`
+- `POST /v1/onboarding/passkey`
+- `POST /v1/onboarding/wallet`
+
+The typed Go client mirrors all four methods. The thin web UI exposes the same four choices through a deployment-provided `window.__420_ONBOARDING__` adapter. That adapter performs the actual Google/Apple/passkey/existing-wallet ceremony through canonical Wallet/Identity code. The returned Mail session is held in browser memory only and attached to later API requests; it is not written to local storage.
+
+MAIL-2.11 does not claim live Google/Apple credentials, a production WebAuthn RP ID, a deployed Wallet/Identity session issuer, or public-testnet onboarding. Those remain deployment/testnet evidence gates and must be qualified against the actual provider/runtime in the live MAIL-AUDIT path.
+
 ## Thin UI
 
-`mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.
+`mail/web/index.html` provides onboarding, inbox, read, compose and draft surfaces. Onboarding invokes a deployment-provided Wallet/Identity ceremony adapter and keeps the returned session in browser memory only. This is repository UI evidence, not live provider/deployment evidence.
 
 ## Security
 

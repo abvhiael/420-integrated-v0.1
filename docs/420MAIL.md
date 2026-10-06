@@ -32,8 +32,34 @@ Stable prefix: `/v1`.
 - `GET /v1/inbox?cursor=&limit=`
 - `GET /v1/messages/{id}`
 - `POST /v1/messages/{id}/read`
+- `POST /v1/messages/{id}/unread`
+- `GET /v1/mailboxes/{INBOX|SENT|OUTBOX|DRAFTS|ARCHIVE|JUNK|TRASH}?cursor=&limit=`
+- `GET /v1/messages/{id}/mailbox`
+- `PATCH /v1/messages/{id}/mailbox`
+- `POST /v1/messages/{id}/restore`
+- `DELETE /v1/messages/{id}` (permanent owner-scoped deletion after Trash)
 
 The HTTP handler requires an injected authentication function and does not trust a user-supplied sender header as identity proof. `mail/client` is the typed Go client.
+
+
+## Phase 2 mailbox state model
+
+The canonical Phase 2 roadmap is `docs/420MAIL-PHASE2-ROADMAP.md`. MAIL-2.1 defines owner-scoped mailbox state separately from shared message metadata/body storage.
+
+System folders are `INBOX`, `SENT`, `OUTBOX`, `DRAFTS`, `ARCHIVE`, `JUNK`, and `TRASH`.
+
+- A successfully delivered message creates `INBOX` state for the recipient and `SENT` state for the sender.
+- Recipient mailbox moves are restricted to Inbox/Archive/Junk/Trash lifecycle transitions.
+- Sender mailbox moves are restricted to Sent/Archive/Trash lifecycle transitions.
+- `DRAFTS` and `OUTBOX` are defined now but are reserved for MAIL-2.9 and MAIL-2.10; delivered messages cannot be manually moved into them.
+- Trash restoration returns to the immediately previous legal folder, with Inbox/Sent fallback only if prior state is unusable.
+- Permanent deletion is owner-scoped, requires Trash first, hides the message and body from that owner, and does not delete the counterparty's independent mailbox copy.
+- Mailbox read/unread is owner-view state. The message-level `ReadAt` remains a first-read delivery receipt and is not erased when the recipient marks a message unread.
+- Starred, pinned, and muted are owner-scoped mailbox flags.
+- Archive/Junk/Trash/permanent-delete timestamps and state versions are retained in mailbox state.
+- Message bodies remain private/off-chain. MAIL-2.1 adds no on-chain mail authority.
+
+MAIL-2.1 intentionally keeps the existing in-memory repository store; durable transactional persistence, restart recovery, migrations, and multi-instance state are MAIL-2.2.
 
 ## Thin UI
 

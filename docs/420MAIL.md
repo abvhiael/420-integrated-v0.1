@@ -525,9 +525,92 @@ The typed Go client mirrors all four methods. The thin web UI exposes the same f
 
 MAIL-2.11 does not claim live Google/Apple credentials, a production WebAuthn RP ID, a deployed Wallet/Identity session issuer, or public-testnet onboarding. Those remain deployment/testnet evidence gates and must be qualified against the actual provider/runtime in the live MAIL-AUDIT path.
 
+## MAIL-2.12 Passkey-First Security
+
+MAIL-2.12 adds an authenticated Mail security-management surface for passkeys, devices, canonical recovery, session revocation, and security alerts without making 420Mail a wallet, signer, recovery authority, or credential store.
+
+### Canonical authority boundary
+
+420Mail delegates every security-sensitive read or mutation to an injected Wallet/420Identity `SecurityAuthority`.
+
+Mail does not:
+
+- mint or hold passkey private material;
+- store wallet private keys, seed phrases, recovery secrets, or session signing secrets;
+- create a parallel device/session registry;
+- override SmartAccount420 authorization epochs;
+- shorten, bypass, or locally finalize canonical recovery timelocks;
+- manufacture account/session authority when Wallet/Identity is unavailable.
+
+The returned security state is accepted only when it belongs to the authenticated Mail identity and satisfies canonical shape and epoch invariants.
+
+### Passkeys and authorization epochs
+
+Mail exposes passkey enrollment and revocation handoffs.
+
+Enrollment accepts only a bounded **public attestation/assertion envelope** plus non-secret device metadata. Private passkey material must remain inside the platform authenticator/qualified Wallet flow.
+
+Each passkey summary carries the Wallet authorization epoch used for the binding. A passkey from a future epoch is invalid. A passkey from an older epoch may be shown only as **inactive** review/history state; stale-epoch passkeys marked active are rejected by Mail rather than silently trusted.
+
+### Device enrollment and lost-device response
+
+Mail exposes device enrollment and device revocation through the canonical security authority.
+
+The device proof is opaque to Mail. The Wallet/Identity authority remains responsible for proving possession, binding the device, deciding whether additional authorization is required, and invalidating dependent authority when a device is lost or revoked.
+
+Mail does not persist its own device registry.
+
+### Recovery
+
+The security surface supports the canonical SmartAccount420 recovery action classes:
+
+- `SET_AUTHORITY`
+- `PROPOSE`
+- `CANCEL`
+- `FINALIZE`
+
+Recovery requests are validated for account/address shape before delegation, but Mail never signs or authorizes the underlying recovery transition.
+
+The Wallet authority must preserve canonical recovery rules, including the SmartAccount timelock, owner cancellation window, current/pending authority state, simulation/approval policy, and post-confirmation canonical-state re-read. Mail has no local recovery timer and cannot claim that recovery is executable or final before canonical Wallet/SmartAccount state says so.
+
+### Sessions
+
+Mail exposes canonical session listings through the security snapshot and provides session revocation.
+
+Session summaries are authorization-epoch bound. A future-epoch session is invalid. An older-epoch session may be shown only when inactive; a stale session marked active is rejected.
+
+Disconnecting the Mail UI is not treated as canonical session revocation. Revocation must pass through Wallet/Identity authority.
+
+### Security alerts
+
+Mail exposes owner-scoped Wallet/Identity security alerts and acknowledgement.
+
+Alerts are treated as security-authority projections. Mail does not create a second canonical incident ledger and does not publish alerts to public 420Search, Explorer, analytics, or on-chain state.
+
+### Authenticated API
+
+- `GET /v1/security` — current canonical security projection;
+- `POST /v1/security/passkeys` — enroll a passkey through Wallet/Identity authority;
+- `DELETE /v1/security/passkeys/{id}` — revoke a passkey;
+- `POST /v1/security/devices` — enroll a device;
+- `DELETE /v1/security/devices/{id}` — revoke a device;
+- `POST /v1/security/recovery` — request one canonical recovery action;
+- `POST /v1/security/sessions/{id}/revoke` — revoke a canonical session;
+- `POST /v1/security/alerts/{id}/ack` — acknowledge a security alert.
+
+Typed Go client methods mirror all of these operations.
+
+### Thin UI handoff
+
+The Mail UI can render passkeys, devices, sessions, recovery state, and alerts returned by `GET /v1/security`. It exposes direct revoke/acknowledge actions and delegates passkey/device/recovery ceremonies to a deployment-provided `window.__420_SECURITY__` adapter.
+
+That browser adapter is responsible for invoking the qualified Wallet/WebAuthn/device/recovery ceremony. Mail receives only the bounded public proof/request material required by the backend authority adapter.
+
+MAIL-2.12 repository completion does not claim live WebAuthn RP configuration, real hardware-authenticator behavior, deployed Wallet session/recovery authority, live notification delivery, or public-testnet security operations. Those remain live deployment/testnet qualification gates.
+
 ## Thin UI
 
-`mail/web/index.html` provides onboarding, inbox, read, compose and draft surfaces. Onboarding invokes a deployment-provided Wallet/Identity ceremony adapter and keeps the returned session in browser memory only. This is repository UI evidence, not live provider/deployment evidence.
+`mail/web/index.html` provides onboarding, security management, inbox, read, compose and draft surfaces. Onboarding invokes a deployment-provided Wallet/Identity ceremony adapter and keeps the returned session in browser memory only. Security management renders canonical Wallet/Identity projections, performs direct revoke/acknowledge calls, and delegates passkey/device/recovery ceremonies through a deployment-provided security adapter. This is repository UI evidence, not live provider/deployment evidence.
 
 ## Security
 

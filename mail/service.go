@@ -89,6 +89,8 @@ type MailboxState struct {
 	Owner          string        `json:"owner"`
 	Folder         MailboxFolder `json:"folder"`
 	PreviousFolder MailboxFolder `json:"previous_folder,omitempty"`
+	LabelIDs       []string      `json:"label_ids,omitempty"`
+	CustomFolderID string        `json:"custom_folder_id,omitempty"`
 	ReadAt         *time.Time    `json:"read_at,omitempty"`
 	Starred        bool          `json:"starred"`
 	Pinned         bool          `json:"pinned"`

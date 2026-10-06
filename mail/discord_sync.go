@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	DiscordSyncItemKind = "DISCORD_MESSAGE"
-	MaxDiscordUsernameBytes = 128
+	DiscordSyncItemKind        = "DISCORD_MESSAGE"
+	MaxDiscordUsernameBytes    = 128
 	MaxDiscordChannelNameBytes = 128
-	MaxDiscordSyncCursorBytes = 64 << 10
+	MaxDiscordSyncCursorBytes  = 64 << 10
 )
 
 var ErrDiscordSyncConflict = errors.New("mail: discord sync conflict")
@@ -49,10 +49,10 @@ type DiscordSyncState struct {
 }
 
 type DiscordSyncResult struct {
-	ConnectionID string          `json:"connection_id"`
-	Imported     []MailboxItem   `json:"imported"`
-	NextCursor   string          `json:"next_cursor,omitempty"`
-	SyncedAt     time.Time       `json:"synced_at"`
+	ConnectionID string        `json:"connection_id"`
+	Imported     []MailboxItem `json:"imported"`
+	NextCursor   string        `json:"next_cursor,omitempty"`
+	SyncedAt     time.Time     `json:"synced_at"`
 }
 
 type DiscordSyncService struct {
@@ -321,7 +321,6 @@ func deterministicDiscordConversationID(owner, connectionID, channelID string) s
 	sum := sha256.Sum256([]byte("420/MAIL/DISCORD/CONVERSATION/V1\x00" + owner + "\x00" + connectionID + "\x00" + channelID))
 	return "conv_discord_" + hex.EncodeToString(sum[:16])
 }
-
 
 func validateDiscordSyncData(data *storeData) error {
 	for key, state := range data.DiscordSync {

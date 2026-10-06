@@ -153,8 +153,8 @@ contract MediaPhase1Hardening420Test {
         hostile.resolve(settlement, JOB_ID, false, keccak256("refund-resolution"));
         hostile.setReverts(false, false, true);
 
-        vm.prank(PAYOUT);
         vm.expectRevert(HostileMediaJob420.HostileCallback.selector);
+        vm.prank(PAYOUT);
         settlement.refund(JOB_ID);
 
         (,,,,,,, MediaSettlement420.SettlementState state) = settlement.settlements(JOB_ID);

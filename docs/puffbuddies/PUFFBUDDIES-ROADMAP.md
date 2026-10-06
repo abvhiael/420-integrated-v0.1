@@ -1602,7 +1602,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** all four bounded indicator classes work with source binding; owner visibility and in-app presentation fail closed; expiry/revocation remove indicators; verification cannot create eligibility/consent/lifecycle/safety authority; no public/scored reputation exists; safety/economic data cannot become reputation input; private persistence/concurrency works without raw evidence; retained app regressions and exact-head PB-9 fast qualification pass; durable evidence recorded.
 
-### PB-10 — Payments and premium entitlements
+### PB-10 — Payments and premium entitlements — COMPLETE
 
 **Purpose:** implement PuffBuddies premium-entitlement policy over current canonical 420Pay settlement evidence while preserving the absolute separation between economic state and interpersonal consent, eligibility, lifecycle, block/safety authority and protected-user data.
 

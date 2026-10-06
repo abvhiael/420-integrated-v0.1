@@ -140,6 +140,7 @@ func (s *Service) DeleteLabel(ctx context.Context, actor, labelID string) error 
 			return ErrSystemLabelImmutable
 		}
 		delete(data.Labels, key)
+		cleanupRulesAfterLabelDelete(data, actor, labelID)
 		for mailboxKey, state := range data.Mailbox {
 			if state.Owner != actor || state.DeletedAt != nil {
 				continue
@@ -221,6 +222,7 @@ func (s *Service) DeleteCustomFolder(ctx context.Context, actor, folderID string
 			return ErrNotFound
 		}
 		delete(data.CustomFolders, key)
+		cleanupRulesAfterCustomFolderDelete(data, actor, folderID)
 		now := s.Now().UTC()
 		for mailboxKey, state := range data.Mailbox {
 			if state.Owner == actor && state.CustomFolderID == folderID && state.DeletedAt == nil {

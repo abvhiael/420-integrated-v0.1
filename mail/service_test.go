@@ -185,7 +185,6 @@ func TestRejectsSpoofedSource(t *testing.T) {
 	}
 }
 
-
 func TestMailboxInitialStates(t *testing.T) {
 	s, _ := testService()
 	ctx := context.Background()

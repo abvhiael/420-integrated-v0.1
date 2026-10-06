@@ -431,11 +431,9 @@ The repository baseline enforces:
 
 ### Durability and migration
 
-MAIL-2.9 advances durable metadata schema to v7.
+MAIL-2.9 introduced durable draft metadata in schema v7. MAIL-2.10 advances the durable metadata schema to v8 so outbox delivery records survive restart while body plaintext remains outside the durable Mail JSON file.
 
-Schema v7 persists the owner-scoped draft metadata map while keeping body plaintext outside the durable Mail JSON file.
-
-Existing v6 stores migrate to v7 with an initialized empty draft map. Draft metadata and body references survive Mail service restart; body recovery continues through the private blob provider.
+Existing v7 stores migrate to v8 with an initialized delivery queue map; older supported schemas continue through the existing migration path. Draft metadata and body references survive Mail service restart; body recovery continues through the private blob provider.
 
 API additions:
 
@@ -446,6 +444,44 @@ API additions:
 - `DELETE /v1/drafts/{id}?expected_version=N`
 
 Typed client methods mirror all five operations.
+
+## MAIL-2.10 outbox and delivery queue
+
+MAIL-2.10 turns the previously reserved `OUTBOX` mailbox class into an owner-scoped delivery queue while preserving the qualified synchronous `POST /v1/messages` path for compatibility.
+
+Queued delivery lifecycle states are:
+
+- `QUEUED`;
+- `SENDING`;
+- `RETRYING`;
+- `DELIVERED`;
+- `FAILED`;
+- `CANCELLED`.
+
+A queued message is materialized in the authenticated sender's `OUTBOX` immediately. The private body is staged through the private blob provider; plaintext is not written into durable Mail metadata, public 420Search, or on-chain state.
+
+Processing a queued item reuses the canonical send path. Successful delivery atomically converges the message to sender `SENT` plus recipient delivery state and records `DELIVERED` evidence on the queue item. A crash after send commit but before queue-finalization is safe to reprocess because canonical send idempotency prevents duplicate message materialization or notification.
+
+Retryable dependency failures move the item to `RETRYING` until the bounded attempt ceiling is reached. Terminal or exhausted delivery moves to `FAILED`. A queued, retrying, or failed item can be cancelled; a sending or delivered item cannot be cancelled through this surface.
+
+Repository baseline bounds:
+
+- maximum three processing attempts per queue item;
+- maximum 1000 active queued/sending/retrying/failed items per sender;
+- deterministic sender/idempotency-derived message identity;
+- owner-only list/get/process/retry/cancel operations;
+- durable restart recovery in metadata schema v8.
+
+Authenticated API additions:
+
+- `POST /v1/outbox` — queue a delivery;
+- `GET /v1/outbox` — list the authenticated owner's queue history;
+- `GET /v1/outbox/{id}` — inspect one queue item;
+- `POST /v1/outbox/{id}/process` — process or resume one queued item;
+- `POST /v1/outbox/{id}/retry` — move an eligible failed item back to retrying;
+- `POST /v1/outbox/{id}/cancel` — cancel an eligible item.
+
+Typed Go client methods mirror these operations.
 
 ## Thin UI
 

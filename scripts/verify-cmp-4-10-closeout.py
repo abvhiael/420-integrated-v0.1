@@ -31,8 +31,10 @@ road=ROADMAP.read_text()
 for i in range(1,10):
     pos=road.find(f"## CMP-4.{i} —")
     if pos<0 or "COMPLETE" not in road[pos:pos+700]: fail(f"roadmap prerequisite CMP-4.{i} not COMPLETE")
-if "## CMP-4.10 — Phase closeout" not in road or "LEVEL 3 CLOSEOUT CANDIDATE" not in road:
-    fail("roadmap closeout candidate state drift")
+if "## CMP-4.10 — Phase closeout" not in road:
+    fail("roadmap closeout heading missing")
+if "LEVEL 3 CLOSEOUT CANDIDATE" not in road and "COMPLETE — Level 3 exact-head qualified" not in road:
+    fail("roadmap closeout state drift")
 
 fw=FOUNDRY.read_text()
 for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-4.10-phase-closeout.json","qualify-foundry-shard.sh"):

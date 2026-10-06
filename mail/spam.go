@@ -175,23 +175,27 @@ func (s *Service) ReportAbuse(ctx context.Context, actor, messageID string, kind
 		case AbusePhishing:
 			rep.PhishingReports++
 		}
+		reasons := []string{"USER_REPORTED_" + string(kind)}
+		qKey := quarantineKey(actor, messageID)
+		existingQuarantine, hadQuarantine := data.Quarantine[qKey]
+		if !hadQuarantine || existingQuarantine.Status != QuarantineActive {
+			rep.Quarantines++
+		}
 		rep.RiskScore = reputationRisk(rep)
 		rep.UpdatedAt = now
 		data.Reputation[reputationKey(actor, msg.Sender)] = rep
 
-		reasons := []string{"USER_REPORTED_" + string(kind)}
-		qKey := quarantineKey(actor, messageID)
-		if existing, ok := data.Quarantine[qKey]; ok {
-			reasons = mergeReasons(existing.Reasons, reasons...)
+		if hadQuarantine {
+			reasons = mergeReasons(existingQuarantine.Reasons, reasons...)
 		}
 		record := QuarantineRecord{
 			Owner: actor, MessageID: messageID, Sender: msg.Sender, Status: QuarantineActive,
 			Reasons: reasons, CreatedAt: now, UpdatedAt: now,
 		}
-		if existing, ok := data.Quarantine[qKey]; ok {
-			record.CreatedAt = existing.CreatedAt
-			record.SpamScore = existing.SpamScore
-			record.PhishingScore = existing.PhishingScore
+		if hadQuarantine {
+			record.CreatedAt = existingQuarantine.CreatedAt
+			record.SpamScore = existingQuarantine.SpamScore
+			record.PhishingScore = existingQuarantine.PhishingScore
 		}
 		if kind == AbuseSpam && record.SpamScore < SpamReputationThreshold {
 			record.SpamScore = SpamReputationThreshold
@@ -201,7 +205,7 @@ func (s *Service) ReportAbuse(ctx context.Context, actor, messageID string, kind
 		}
 		data.Quarantine[qKey] = record
 
-		if state.Folder != FolderJunk {
+		if state.Folder != FolderJunk && state.Folder != FolderTrash {
 			state.PreviousFolder = state.Folder
 			state.Folder = FolderJunk
 			t := now

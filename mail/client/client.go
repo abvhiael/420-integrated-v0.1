@@ -325,3 +325,32 @@ func (c Client) UpdateConversation(ctx context.Context, conversationID string, u
 	err := c.do(ctx, http.MethodPatch, "/v1/conversations/"+url.PathEscape(conversationID), update, &out)
 	return out, err
 }
+
+
+func (c Client) CreateDraft(ctx context.Context, req mail.DraftCreateRequest) (mail.DraftView, error) {
+	var out mail.DraftView
+	err := c.do(ctx, http.MethodPost, "/v1/drafts", req, &out)
+	return out, err
+}
+
+func (c Client) ListDrafts(ctx context.Context) ([]mail.Draft, error) {
+	var out []mail.Draft
+	err := c.do(ctx, http.MethodGet, "/v1/drafts", nil, &out)
+	return out, err
+}
+
+func (c Client) GetDraft(ctx context.Context, draftID string) (mail.DraftView, error) {
+	var out mail.DraftView
+	err := c.do(ctx, http.MethodGet, "/v1/drafts/"+url.PathEscape(draftID), nil, &out)
+	return out, err
+}
+
+func (c Client) SaveDraft(ctx context.Context, draftID string, req mail.DraftSaveRequest) (mail.DraftView, error) {
+	var out mail.DraftView
+	err := c.do(ctx, http.MethodPut, "/v1/drafts/"+url.PathEscape(draftID), req, &out)
+	return out, err
+}
+
+func (c Client) DiscardDraft(ctx context.Context, draftID string, expectedVersion uint32) error {
+	return c.do(ctx, http.MethodDelete, "/v1/drafts/"+url.PathEscape(draftID)+"?expected_version="+strconv.FormatUint(uint64(expectedVersion), 10), nil, nil)
+}

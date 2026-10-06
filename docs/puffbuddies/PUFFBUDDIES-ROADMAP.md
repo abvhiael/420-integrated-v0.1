@@ -1504,6 +1504,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** eligible profile creation/edit/save works through canonical private persistence; completeness gates activation; visibility is explicit/versioned/server-authorized/fail-closed; profile/visibility changes invalidate stale derived state; lifecycle pause/reactivation/delete initiation respect current authority; privacy/public-chain/wallet-enumeration negatives hold; retained PuffBuddies regressions and exact-head PB-3 fast qualification pass; durable evidence recorded.
 
+### PB-4 — Discovery engine
+
+**Purpose:** implement the private PuffBuddies discovery engine over the current PB-2 eligibility/generation gate and PB-3 profile/visibility authority. Hard exclusions run before ranking; ranking remains derived/non-canonical and cannot create consent.
+
+**Canonical requirements:** both viewer and candidate must pass current eligibility/lifecycle/block/generation gates; self-discovery and incomplete profiles are excluded; Dating/Buddy/Both compatibility is mutual; discovery preferences remain private; proximity is consumed only as a coarse bounded band and is never returned as precise distance; cannabis compatibility uses explicit private user choices without coercion; missing/stale visibility fails closed; only DISCOVERABLE PB-3 presentation is returned; block/lifecycle/eligibility/deletion/restriction/stale authority outrank ranking; ranking uses only allowed explicit signals and excludes wealth/payment/token/moderation/raw-identity/precise-location/inferred-sensitive traits; ranking failure safely degrades after the same hard exclusions; results are bounded private application views and cannot create likes, passes, matches, messaging permission or notifications; no public profile/Search/Explorer/wallet enumeration, production recommendation service, ML model, feature store, API, contract, address/service ID, deployment or production database is introduced.
+
+**Affected components:** `puffbuddies/domain/discovery.py`, existing PB-2 discovery eligibility/generation gate, PB-3 profile/visibility state, private preferences persistence, PB-4 targeted tests/workflow, PB-0.19 reconciliation, canonical definition/evidence.
+
+**Qualification level:** Level 1 — ordinary app-scoped roadmap-step qualification.
+
+**Milestone relationship:** PB-4 alone does not trigger Level 2. The meaningful accumulated discovery/matching boundary is after **PB-5 — Likes and matching** converges with discovery. Level 3 remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.14, PB-0.15; PB-2; **PB-3 — Profiles — COMPLETE**.
+
+**Exit criteria:** hard exclusions precede ranking; current eligibility/lifecycle/block/generation/profile/visibility authority is enforced; mutual mode/private preference/coarse-proximity/cannabis compatibility works without sensitive inference or precise-location disclosure; stale/unknown authority fails closed; ranking is deterministic/non-canonical and safely degrades; results contain only authorized discovery presentation and create no relationship/messaging consent; preferences persist privately with optimistic concurrency; public-chain/Search/Explorer/wallet enumeration remains absent; retained PuffBuddies regressions and exact-head PB-4 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

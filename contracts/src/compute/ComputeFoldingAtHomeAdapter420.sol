@@ -2,12 +2,13 @@
 pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
+import "./IComputeExternalContributionAdapter420.sol";
 
 /// @notice CMP-5.1 normalization adapter for Folding-at-home contribution records.
 /// @dev This contract is deliberately stateless and non-authoritative. It commits externally supplied
 /// Folding-at-home record material into stable 420Integrated identities; it does not attest that the
 /// external record is true, query Folding-at-home, grant rewards, settle funds, or prevent duplicates.
-contract ComputeFoldingAtHomeAdapter420 is I420System {
+contract ComputeFoldingAtHomeAdapter420 is I420System, IComputeExternalContributionAdapter420 {
     bytes32 public constant ADAPTER_KIND =
         keccak256("420/CMP/EXTERNAL_ADAPTER/FOLDING_AT_HOME/V1");
     bytes32 public constant EXTERNAL_SYSTEM_ID =
@@ -40,6 +41,14 @@ contract ComputeFoldingAtHomeAdapter420 is I420System {
 
     function protocolVersion() external pure returns (uint32) {
         return 1;
+    }
+
+    function adapterKind() external pure returns (bytes32) {
+        return ADAPTER_KIND;
+    }
+
+    function externalSystemId() external pure returns (bytes32) {
+        return EXTERNAL_SYSTEM_ID;
     }
 
     function protocolCommitment() public pure returns (bytes32) {

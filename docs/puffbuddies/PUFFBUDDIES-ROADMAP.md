@@ -1520,7 +1520,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** hard exclusions precede ranking; current eligibility/lifecycle/block/generation/profile/visibility authority is enforced; mutual mode/private preference/coarse-proximity/cannabis compatibility works without sensitive inference or precise-location disclosure; stale/unknown authority fails closed; ranking is deterministic/non-canonical and safely degrades; results contain only authorized discovery presentation and create no relationship/messaging consent; preferences persist privately with optimistic concurrency; public-chain/Search/Explorer/wallet enumeration remains absent; retained PuffBuddies regressions and exact-head PB-4 fast qualification pass; durable evidence recorded.
 
-### PB-5 — Likes and matching
+### PB-5 — Likes and matching — COMPLETE
 
 **Purpose:** implement private directional LIKE/PASS intent and reciprocal PuffBuddies match formation over the current PB-4 discovery boundary while preserving PB-0.5 consent, PB-0.13 match-formation rules, block supremacy, current-state authority, and stale-state rejection.
 

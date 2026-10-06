@@ -460,9 +460,9 @@ Purpose: make scientific/research workloads first-class while keeping the market
 
 ## CMP-4.1 — Scientific Work Unit specification
 
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
 
-Specification and machine-readable contract: [CMP-4.1 scientific work unit](CMP-4.1-SCIENTIFIC-WORK-UNIT-SPECIFICATION.md).
+Specification and machine-readable contract: [CMP-4.1 scientific work unit](CMP-4.1-SCIENTIFIC-WORK-UNIT-SPECIFICATION.md). Durable evidence: [CMP-4.1 qualification](CMP-4.1-QUALIFICATION-EVIDENCE.md).
 
 Each work unit should bind:
 
@@ -478,21 +478,21 @@ Each work unit should bind:
 
 ## CMP-4.2 — Research Project Registry
 
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
 
-Owner-controlled, revisioned project identity/commitment and new-work admission registry. Durable specification: [CMP-4.2 Research Project Registry](CMP-4.2-RESEARCH-PROJECT-REGISTRY.md).
+Owner-controlled, revisioned project identity/commitment and new-work admission registry. Durable specification: [CMP-4.2 Research Project Registry](CMP-4.2-RESEARCH-PROJECT-REGISTRY.md). Durable evidence: [CMP-4.2 qualification](CMP-4.2-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-4.3 — Researcher / institution identity
 
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
 
-Compute-scoped role binding to canonical `Identity420` profiles and credentials, with dynamic credential/profile validity, role-specific assurance, append-only revisions and controller-transfer recovery semantics. Specification: [CMP-4.3 researcher / institution identity](CMP-4.3-RESEARCHER-INSTITUTION-IDENTITY.md).
+Compute-scoped role binding to canonical `Identity420` profiles and credentials, with dynamic credential/profile validity, role-specific assurance, append-only revisions and controller-transfer recovery semantics. Specification: [CMP-4.3 researcher / institution identity](CMP-4.3-RESEARCHER-INSTITUTION-IDENTITY.md). Durable evidence: [CMP-4.3 qualification](CMP-4.3-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-4.4 — Dataset manifests
 
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
 
-Revisioned, project-bound dataset manifests bind the canonical scientific input commitment to schema, access-policy, provenance, partition/layout and size commitments without placing raw datasets or access credentials on chain. Specification: [CMP-4.4 dataset manifests](CMP-4.4-DATASET-MANIFESTS.md).
+Revisioned, project-bound dataset manifests bind the canonical scientific input commitment to schema, access-policy, provenance, partition/layout and size commitments without placing raw datasets or access credentials on chain. Specification: [CMP-4.4 dataset manifests](CMP-4.4-DATASET-MANIFESTS.md). Durable evidence: [CMP-4.4 qualification](CMP-4.4-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-4.5 — Reproducible execution environments
 
@@ -533,6 +533,10 @@ A versioned read-only canonical research dashboard now composes exact CMP-4.2 pr
 CMP-4.9 is the second CMP-4 app-integration milestone because the complete scientific-framework graph converges into one canonical consumer surface before phase closeout.
 
 ## CMP-4.10 — Phase closeout
+
+**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+
+Reconcile the complete accumulated CMP-4 scientific framework against current `main`, force the canonical four-shard Solidity inventory, independently verify Genesis/address authority without duplicate Foundry execution, run global/Docs and retained Compute qualification, and preserve one exact merge-candidate SHA as phase-closeout evidence. Closeout definition: [CMP-4.10 phase closeout](CMP-4.10-PHASE-CLOSEOUT.md).
 
 ---
 

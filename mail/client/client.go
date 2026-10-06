@@ -474,7 +474,6 @@ func (c Client) VerifyWalletEvidence(ctx context.Context, req mail.WalletVerific
 	return out, err
 }
 
-
 func (c Client) ConnectorProviders(ctx context.Context) ([]mail.ConnectorDescriptor, error) {
 	var out []mail.ConnectorDescriptor
 	err := c.do(ctx, http.MethodGet, "/v1/connectors/providers", nil, &out)

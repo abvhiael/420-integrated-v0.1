@@ -1586,6 +1586,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** all report/moderation states exist; report/block separation holds; immediate block invalidates discovery/matching/messaging authority; protected evidence/persistence boundaries and concurrency hold; least-privilege + human-review controls hold; restriction/suspension/ban invalidate stale participation; appeal cannot restore interpersonal consent; retained integration proves safety override of accumulated interaction authority; privacy/public-reputation negative gates pass; exact-head Level-1 + Level-2 app qualification pass; durable evidence recorded.
 
+### PB-9 — Verification and reputation — COMPLETE
+
+**Purpose:** implement bounded private verification indicators and non-scored user-controlled reputation presentation while preserving PuffBuddies privacy, consent, safety, state-ownership, and anti-public-score invariants.
+
+**Canonical requirements:** supported indicator kinds are account control, approved identity credential, .420 name control, and private photo/liveness verification; each kind is rigidly bound to its canonical source authority; 420Verify is not interpersonal identity/reputation authority; indicators are private by default and only the profile owner may opt current positive indicators into PRIVATE_SELF/DISCOVERABLE/MATCHED presentation; PUBLIC_EXPLICIT is rejected; presentation emits only generic positive labels; expired/revoked/future-issued indicators fail closed; only the owning source may revoke; changes invalidate derived presentation/discovery state; matching may consume only a bounded set of current user-visible indicator kinds with no score/weight/order; verification never creates eligibility, lifecycle, match, messaging, safety, visibility, payment, or consent authority; report/block/moderation/risk history and economic/popularity state are excluded from reputation inputs; no universal trust/desirability/social-credit score exists; no raw proof/credential/DOB/government-ID/biometric/wallet data is persisted; persistence is private/off-chain with optimistic concurrency; arbitrary cross-app reputation aggregation/portable credentials remain deferred absent canonical issuer authority; no contract/address/service ID/public registry/external reputation API/deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/verification_reputation.py`, private `verification` schema, PB-3/PB-4 presentation/discovery boundaries, PB-0.8/PB-0.9/PB-0.13 authority constraints, PB-9 targeted/integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head app-scoped qualification. No new Level-2 milestone is triggered because PB-9 consumes already-defined authority domains and does not add a new shared service/lifecycle authority.
+
+**Level-3 boundary:** full Solidity/Genesis/420 Integrated/Docs-global/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.5, PB-0.8, PB-0.9, PB-0.10, PB-0.13, PB-0.15, PB-0.16; PB-1 persistence/invalidation; PB-2 identity/eligibility separation; PB-3/PB-4; **PB-8 — Safety and moderation — COMPLETE**.
+
+**Exit criteria:** all four bounded indicator classes work with source binding; owner visibility and in-app presentation fail closed; expiry/revocation remove indicators; verification cannot create eligibility/consent/lifecycle/safety authority; no public/scored reputation exists; safety/economic data cannot become reputation input; private persistence/concurrency works without raw evidence; retained app regressions and exact-head PB-9 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

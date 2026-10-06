@@ -8,6 +8,7 @@
   "contracts": [],
   "onChainMailState": false,
   "dependencies": [
+    "420 Wallet",
     "420 Identity",
     "420 Messenger",
     "420 Storage",
@@ -250,6 +251,29 @@
     "maxActiveItemsPerSender": 1000,
     "deterministicIdempotency": true,
     "crashRecovery": "SENDING_REPROCESS_SAFE",
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
+  },
+  "onboarding": {
+    "enabled": true,
+    "methods": [
+      "GOOGLE",
+      "APPLE",
+      "PASSKEY",
+      "EXISTING_WALLET"
+    ],
+    "authority": "CANONICAL_WALLET_IDENTITY_ADAPTER",
+    "publicEntryPoint": true,
+    "sessionIssuer": "WALLET_IDENTITY_AUTHORITY",
+    "sessionStorage": "EPHEMERAL_CLIENT_MEMORY",
+    "identityBindingRequired": true,
+    "walletBindingRequired": true,
+    "replayProtection": "AUTHORITY_ADAPTER_REQUIRED",
+    "custodialSigning": false,
+    "privateKeyInput": false,
+    "seedPhraseInput": false,
+    "passkeyPrivateMaterialInput": false,
+    "credentialPersistence": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
   }

@@ -1634,7 +1634,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** complete core web MVP surface exists; same-origin fail-closed client/API boundary works; cache revocation and memory-only session semantics pass; accessibility/privacy/static checks pass; web build passes; retained PuffBuddies regressions and Level-2 integration pass on one exact SHA; PB-0 structure/authority verification stays green; durable evidence is recorded; deployment/live API/testnet readiness remain explicitly deferred.
 
-### PB-12 — Mobile applications
+### PB-12 — Mobile applications — COMPLETE
 
 **Purpose:** implement repository-side native PuffBuddies clients for iOS and Android after the qualified PB-11 web MVP, while preserving server/domain authority and all privacy, consent, safety, lifecycle, deletion, visibility and non-goal invariants.
 

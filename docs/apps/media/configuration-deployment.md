@@ -46,6 +46,8 @@ Do not commit secrets into repository JSON.
 
 ## API deployment
 
+A **secure Media API composition** is mandatory for any deployed authority-bearing ingress.
+
 Deployed authority-bearing Media writes must use `api.NewSecureServer`.
 
 The internal `api.NewServer` constructor is not approved as a production ingress because it does not require a session verifier.

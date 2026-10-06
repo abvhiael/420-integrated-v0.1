@@ -42,6 +42,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.rules(w, r, actor)
 	case r.URL.Path == "/v1/trust/entries" || strings.HasPrefix(r.URL.Path, "/v1/trust/entries/") || r.URL.Path == "/v1/trust/settings":
 		h.trust(w, r, actor)
+	case r.URL.Path == "/v1/quarantine" || strings.HasPrefix(r.URL.Path, "/v1/quarantine/") || strings.HasPrefix(r.URL.Path, "/v1/reputation/"):
+		h.protection(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
 		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
@@ -202,6 +204,56 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 			return
 		}
 		writeJSON(w, http.StatusOK, page)
+		return
+	}
+	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func (h HTTPHandler) protection(w http.ResponseWriter, r *http.Request, actor string) {
+	if r.URL.Path == "/v1/quarantine" {
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		records, err := h.Service.ListQuarantine(r.Context(), actor)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, records)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/quarantine/") {
+		rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/quarantine/"), "/")
+		parts := strings.Split(rest, "/")
+		if len(parts) == 2 && parts[1] == "release" && r.Method == http.MethodPost {
+			state, err := h.Service.ReleaseQuarantine(r.Context(), actor, parts[0])
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, state)
+			return
+		}
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/reputation/") {
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		sender := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/reputation/"), "/")
+		if sender == "" || strings.Contains(sender, "/") {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		rep, err := h.Service.GetSenderReputation(r.Context(), actor, sender)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, rep)
 		return
 	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
@@ -412,6 +464,23 @@ func (h HTTPHandler) message(w http.ResponseWriter, r *http.Request, actor strin
 		}{Message: msg, Body: string(body)})
 		return
 	}
+	if len(parts) == 2 && parts[1] == "abuse" && r.Method == http.MethodPost {
+		defer r.Body.Close()
+		dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8<<10))
+		dec.DisallowUnknownFields()
+		var input AbuseReportInput
+		if err := dec.Decode(&input); err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		report, err := h.Service.ReportAbuse(r.Context(), actor, parts[0], input.Kind)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusCreated, report)
+		return
+	}
 	if len(parts) == 2 && parts[1] == "read" && r.Method == http.MethodPost {
 		msg, err := h.Service.MarkRead(r.Context(), actor, parts[0])
 		if err != nil {
@@ -499,7 +568,7 @@ func writeServiceError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
-	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict):
+	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict), errors.Is(err, ErrAbuseReportConflict), errors.Is(err, ErrQuarantineReview):
 		writeError(w, http.StatusConflict, "CONFLICT", err.Error())
 	case errors.Is(err, ErrNotFound):
 		writeError(w, http.StatusNotFound, "NOT_FOUND", err.Error())

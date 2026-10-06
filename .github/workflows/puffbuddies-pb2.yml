@@ -1,0 +1,42 @@
+name: PuffBuddies PB-2 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb2.yml"
+  push:
+    branches: ["puffbuddies-pb2-eligibility-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb2.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb2-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-2.1 targeted identity and eligibility boundaries
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_1_identity_boundaries -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Identity privacy and public-chain negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(government_id_image|raw_identity_document|date_of_birth|wallet_address)[[:space:]]*[:=]' puffbuddies/domain/identity.py

@@ -4,11 +4,11 @@
   "title": "Researcher / institution identity",
   "canonical_definition": "Researcher / institution identity",
   "status": "IMPLEMENTED_QUALIFICATION_PENDING",
-  "base_main_sha": "f5a0d703ca015962e49e95d075ff582d833a7c33",
+  "base_main_sha": "ea9994669564d0795e2bcc4a38beea0b01bef274",
   "qualification": {
     "level": 1,
     "level_2_required_now": false,
-    "level_3_deferred_to": "CMP-4.10 \u2014 Phase closeout"
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
   },
   "canonical_identity_source": {
     "contract": "Identity420",
@@ -75,5 +75,5 @@
     "CMP-6 rewards",
     "CMP-9.13 live scientific demonstration"
   ],
-  "next_canonical_step": "CMP-4.4 \u2014 Dataset manifests"
+  "next_canonical_step": "CMP-4.4 — Dataset manifests"
 }

@@ -4,7 +4,7 @@ component: town
 audience:
   - developer
   - operator
-category: app
+category: application
 status: development
 version: v1
 ---

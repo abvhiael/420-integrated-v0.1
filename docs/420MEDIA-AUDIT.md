@@ -75,8 +75,6 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 - typed Media service SDK/client satisfying GEN-SVC-0.7;
 - Search projection/index integration;
 - Notifications integration;
-- Pay integration beyond the older abstract vault/payout adapter boundary;
-- canonical Compute Market integration;
 - Registry/service-discovery publication/deployment profile;
 - user authorization/session model;
 - upload/livestream moderation and abuse handling;
@@ -120,8 +118,8 @@ No critical source-level fund-custody vulnerability was identified in this audit
 | 420 Storage | Media-owned upload lifecycle uses 420Storage v1 prepare/ingest evidence and canonical manifest readiness checks; Storage remains authoritative | COMPLETE (Level 1) |
 | 420 Search | no Media projection/search integration found | MISSING |
 | 420 Notifications | no Media notification integration found | MISSING |
-| 420 Pay | Phase 1 abstract settlement adapters only; no current canonical app/service binding | PARTIAL |
-| 420 Compute Protocol | opaque compatibility reference only | PARTIAL |
+| 420 Pay | canonical PaymentRegistry-backed Media funding/settlement/refund observation through `MediaPayComputeAdapter420`; Media remains non-custodial | IMPLEMENTED / pending Level 1 qualification |
+| 420 Compute Protocol | canonical Compute graph/job/funding/match/provider/entitlement/refund binding; legacy provider ref accepted only when cross-checked against canonical provider state | IMPLEMENTED / pending Level 1 qualification |
 | Protocol/Service Registry | no Media release publication/discovery profile found | MISSING |
 | Wallet | no user-facing Media wallet workflow found | MISSING |
 | Explorer/Indexer | events are indexable, but no Media-specific production projection qualification found | PARTIAL |
@@ -139,6 +137,8 @@ Upload: **COMPLETE (Level 1)** on the audit branch. Media now owns a 420Storage-
 Livestreaming: **COMPLETE (Level 2 milestone)** on the audit branch. Media now owns create/start/stop/status flows over the existing gateway, canonical `MediaStreamRegistry420` controller reads, feature-flag enforcement, bounded credential/session inputs, durable desired-state persistence, bounded reconnect semantics and restart recovery. Public `/v1` API/UI remain later roadmap work.
 
 Identity/Rights: **COMPLETE (Level 1)** on the audit branch. Wallet-only pseudonymous actors remain valid; supplied Identity profiles must be active and wallet-controlled. Public projection and derivative reuse now require live canonical Rights subject/provenance/right/holder or license authorization rather than trusting local Media references.
+
+Pay/Compute: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. Pay-backed jobs now bind exact canonical payer/merchant/amount/receipt/refund evidence; Compute-backed jobs bind the canonical component graph, funded job, accepted match, provider/resource/operator/beneficiary and verified entitlement/refund state. Media remains non-custodial and records canonical earned settlement amounts separately from funding ceilings.
 
 ## Builds and tests
 
@@ -184,7 +184,7 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | SLA policies/evidence | Phase 1 protocol | contract + node telemetry | unit coverage exists | Phase1/2 docs | COMPLETE | live reporter/security qualification |
 | stream canonical identity | Phase 1 protocol | contract present | Phase1 tests | Phase1 doc | COMPLETE | bind final app ownership/rights model |
 | media job lifecycle | Phase 1 protocol | contract + Go runner | Solidity/Go/Anvil | Phase1/2 docs | COMPLETE | expand adversarial/property tests |
-| non-custodial settlement | Phase 1 protocol | abstract adapters | Phase1/Anvil | Phase1 doc | PARTIAL | bind canonical Pay/settlement deployment |
+| non-custodial settlement | Phase 1 protocol + MEDIA-AUDIT-7 | canonical Pay/Compute observation adapter + exact terminal settlement/refund evidence; no Media custody | Phase1 + Pay/Compute focused suite + Anvil | Phase1 + Pay/Compute docs | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head; live deployment deferred |
 | operator processing | Phase 2 | FFmpeg/GStreamer profile runtime | Go tests | Phase2 docs | COMPLETE | production engine qualification |
 | live transport primitives | Phase 2 | WHIP/WHEP + RTMP/SRT abstractions | Go tests | Phase2 docs | PARTIAL | complete service/API/session composition |
 | operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + replay recovery + control-plane boundary on audit branch | Go discovery/control-plane tests + exact-head Media gate | Phase 3.1 discovery doc + qualification evidence | COMPLETE (Level 1) | later orchestration remains separate |
@@ -195,8 +195,8 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | Storage integration | GEN-SVC registry | complete Storage object identity, canonical manifest readiness, derivative linkage, privacy/delete/retry semantics on audit branch | Media Storage lifecycle tests + exact-head Media gate | Storage lifecycle doc + qualification evidence | COMPLETE (Level 1) | retain canonical Storage authority; live deployment deferred |
 | Search integration | GEN-SVC registry | none | none | none | MISSING | public-only Media projection |
 | Notifications integration | GEN-SVC registry | none | none | none | MISSING | opt-in event delivery |
-| Pay integration | GEN-SVC registry | abstract settlement adapters | Phase1 tests | Phase1 doc | PARTIAL | canonical Pay adapter and failure qualification |
-| Compute integration | GEN-SVC registry | opaque provider ref only | limited | Phase1 doc | PARTIAL | canonical Compute Market coordination |
+| Pay integration | GEN-SVC registry | canonical PaymentRegistry payer/merchant/amount/receipt/refund binding through Media adapter | Pay/Compute focused Foundry + retained Media gate | Pay/Compute integration doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head |
+| Compute integration | GEN-SVC registry | canonical graph/job/funding/match/provider/beneficiary/entitlement/refund binding; exact earned-amount accounting | Pay/Compute focused Foundry + retained Media gate | Pay/Compute integration doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head |
 | /v1 API | GEN-SVC-0.6 | absent | none | none | MISSING | implement typed stable API |
 | typed client/SDK | GEN-SVC-0.7 | absent | none | none | MISSING | implement Media SDK |
 | feature flags | GEN-SVC-0.8 | `media.livestreaming` enforced fail-closed for create/start/recovery; stop/status remain available for safe shutdown/inspection | GEN-SVC validator + Media livestream tests + Level 2 Media gate | GEN-SVC + Livestream docs + qualification evidence | COMPLETE for service runtime (Level 2) | UI enforcement remains MEDIA-AUDIT-10 |

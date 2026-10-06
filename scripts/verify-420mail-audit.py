@@ -268,13 +268,13 @@ if readiness_path.is_file():
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
         if readiness.get(key) is not False: errors.append(f"readiness overclaims {key}")
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
+http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 for token in ["PrivateBlobSecurityProfile","PrivateBlobSecurityProvider","validatePrivateBlobSecurity","putPrivateVerified","getPrivateVerified","privateBodyDigest","ErrPrivateBlobIntegrity","ErrPrivateBlobSecurity"]:
     if token not in service: errors.append("MAIL-2.33 private blob security invariant missing: "+token)
 for token in ["sanitizeHTTPJSON","stripPrivateHTTPMetadata","httpPrivateMetadataKeys",'"body_ref"','"body_digest"','"staging_body_ref"','"staging_body_digest"','"request_fingerprint"','"idempotency_key"']:
     if token not in http: errors.append("MAIL-2.33 HTTP leakage control missing: "+token)
-http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 if "AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
 if '"/v1/messages"' not in http or '"/v1/inbox"' not in http: errors.append("HTTP v1 routes missing")
 for token in ['"/v1/mailboxes/"','"mailbox"','"restore"','"unread"', "http.MethodPatch", "http.MethodDelete"]:

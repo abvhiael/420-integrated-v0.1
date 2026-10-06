@@ -50,13 +50,13 @@ func validDiscordDeliveryRequest() DiscordDeliveryRequest {
 	}
 }
 
-func TestDiscordDescriptorAddsPushOnlyWithDeliveryAuthority(t *testing.T) {
+func TestDiscordDescriptorAddsPushWithDeliveryAuthority(t *testing.T) {
 	d := NewDiscordConnectorAdapter(validDiscordDeliveryAuthority()).Descriptor()
-	if !connectorHasCapability(d, ConnectorCapabilityLink) || !connectorHasCapability(d, ConnectorCapabilityPush) {
-		t.Fatalf("delivery authority capabilities missing: %+v", d.Capabilities)
+	if !connectorHasCapability(d, ConnectorCapabilityLink) || !connectorHasCapability(d, ConnectorCapabilityPush) || !connectorHasCapability(d, ConnectorCapabilityWalletVerify) {
+		t.Fatalf("Discord delivery/wallet capabilities missing: %+v", d.Capabilities)
 	}
-	if connectorHasCapability(d, ConnectorCapabilityWalletVerify) || connectorHasCapability(d, ConnectorCapabilityWebhook) {
-		t.Fatalf("later Discord capabilities pulled forward: %+v", d.Capabilities)
+	if connectorHasCapability(d, ConnectorCapabilityWebhook) {
+		t.Fatalf("unconfigured Discord webhook capability advertised: %+v", d.Capabilities)
 	}
 }
 

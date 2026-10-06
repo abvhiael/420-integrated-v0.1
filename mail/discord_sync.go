@@ -209,7 +209,7 @@ func (s *DiscordSyncService) materialize(ctx context.Context, actor, connectionI
 		return MailboxItem{Message: existing, State: state}, false, nil
 	}
 
-	bodyRef, digest, err := s.Mail.Blobs.PutPrivate(ctx, actor, []byte(external.Content))
+	bodyRef, digest, err := putPrivateVerified(ctx, s.Mail.Blobs, actor, []byte(external.Content))
 	if err != nil {
 		return MailboxItem{}, false, fmt.Errorf("discord sync private body storage: %w", err)
 	}
@@ -250,6 +250,7 @@ func (s *DiscordSyncService) materialize(ctx context.Context, actor, connectionI
 			return err
 		}
 		protection := evaluateSpamProtection(data, actor, msg, external.Content, decision)
+		protection = applyExternalImpersonationSignals(protection, DiscordProvider, external.AuthorUsername)
 		if err := applyIncomingRules(data, actor, msg, external.Content, &state, now); err != nil {
 			return err
 		}

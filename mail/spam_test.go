@@ -361,3 +361,60 @@ func TestSpamProtectionDurableRestartAndV4Migration(t *testing.T) {
 		t.Fatal("spam-protection metadata persisted private message body plaintext")
 	}
 }
+
+func TestProtectedEcosystemDomainLookalikesAreQuarantined(t *testing.T) {
+	s, notify := testService()
+	ctx := context.Background()
+	msg, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "lookalike-domain",
+		Sender: "alice.420", Recipient: "bob.420",
+		Subject: "Security notice",
+		Body: "Review at https://420integrated-login.example/verify",
+		Source: ServiceID,
+	})
+	if err != nil { t.Fatal(err) }
+	state, err := s.GetMailboxState(ctx, "bob.420", msg.ID)
+	if err != nil { t.Fatal(err) }
+	if state.Folder != FolderJunk || !state.Muted {
+		t.Fatalf("lookalike ecosystem domain not quarantined: %+v", state)
+	}
+	if notify.Count() != 0 {
+		t.Fatalf("lookalike-domain phishing emitted notification: %d", notify.Count())
+	}
+	records, err := s.ListQuarantine(ctx, "bob.420")
+	if err != nil { t.Fatal(err) }
+	if len(records) != 1 || !containsString(records[0].Reasons, "LOOKALIKE_ECOSYSTEM_DOMAIN") {
+		t.Fatalf("lookalike-domain reason missing: %+v", records)
+	}
+}
+
+func TestOfficialEcosystemDomainDoesNotTriggerLookalikeSignal(t *testing.T) {
+	score, reasons := phishingSignals("hello", "Visit https://420integrated.org/security", nil)
+	if score != 0 || containsString(reasons, "LOOKALIKE_ECOSYSTEM_DOMAIN") {
+		t.Fatalf("official ecosystem domain treated as lookalike: score=%d reasons=%v", score, reasons)
+	}
+	score, reasons = phishingSignals("hello", "Visit https://mail.420integrated.org/security", nil)
+	if score != 0 || containsString(reasons, "LOOKALIKE_ECOSYSTEM_DOMAIN") {
+		t.Fatalf("official ecosystem subdomain treated as lookalike: score=%d reasons=%v", score, reasons)
+	}
+}
+
+func TestExternalProtectedIdentityImpersonationSignals(t *testing.T) {
+	base := spamDecision{}
+	got := applyExternalImpersonationSignals(base, DiscordProvider, "420Mail")
+	if !got.Quarantine || got.PhishingScore < PhishingQuarantineScore || !containsString(got.Reasons, "EXTERNAL_PROTECTED_IDENTITY_CLAIM") {
+		t.Fatalf("external protected identity claim not quarantined: %+v", got)
+	}
+	confusable := applyExternalImpersonationSignals(base, TelegramProvider, "420Mаil") // Cyrillic a.
+	if !confusable.Quarantine || !containsString(confusable.Reasons, "CONFUSABLE_PROTECTED_IDENTITY_CLAIM") {
+		t.Fatalf("confusable protected identity claim not detected: %+v", confusable)
+	}
+	safe := applyExternalImpersonationSignals(base, DiscordProvider, "ordinary_user")
+	if safe.Quarantine || safe.PhishingScore != 0 || len(safe.Reasons) != 0 {
+		t.Fatalf("ordinary external display over-triggered: %+v", safe)
+	}
+	native := applyExternalImpersonationSignals(base, ServiceID, "420Mail")
+	if native.Quarantine || native.PhishingScore != 0 {
+		t.Fatalf("native canonical sender path incorrectly treated as external impersonation: %+v", native)
+	}
+}

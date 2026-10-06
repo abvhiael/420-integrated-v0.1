@@ -209,7 +209,7 @@ func (s *TelegramSyncService) materialize(ctx context.Context, actor, connection
 		return MailboxItem{Message: existing, State: state}, false, nil
 	}
 
-	bodyRef, digest, err := s.Mail.Blobs.PutPrivate(ctx, actor, []byte(external.Content))
+	bodyRef, digest, err := putPrivateVerified(ctx, s.Mail.Blobs, actor, []byte(external.Content))
 	if err != nil {
 		return MailboxItem{}, false, fmt.Errorf("telegram sync private body storage: %w", err)
 	}
@@ -252,6 +252,7 @@ func (s *TelegramSyncService) materialize(ctx context.Context, actor, connection
 			return err
 		}
 		protection := evaluateSpamProtection(data, actor, msg, external.Content, decision)
+		protection = applyExternalImpersonationSignals(protection, TelegramProvider, external.AuthorUsername)
 		if err := applyIncomingRules(data, actor, msg, external.Content, &state, now); err != nil {
 			return err
 		}

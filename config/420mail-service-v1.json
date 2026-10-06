@@ -849,5 +849,22 @@
     "providerSecretsInMailMetadata": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "phishingImpersonationProtection": {
+    "enabled": true,
+    "protectedIdentitySkeletons": ["420integrated","420mail","420wallet","420identity","420support","420security","420admin"],
+    "externalDisplayNameProviders": ["discord","telegram"],
+    "protectedExternalDisplayClaimQuarantined": true,
+    "confusableProtectedDisplayClaimDetected": true,
+    "ecosystemDomainLookalikeDetection": true,
+    "officialDomain": "420integrated.org",
+    "officialSubdomainsAllowed": true,
+    "lookalikeDomainQuarantineScore": 3,
+    "canonicalNativeSenderAuthorityPreserved": true,
+    "trustedSenderBypassesImpersonation": false,
+    "quarantineFolder": "JUNK",
+    "quarantineSuppressesNotification": true,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

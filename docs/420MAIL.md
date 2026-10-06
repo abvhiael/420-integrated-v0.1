@@ -2010,6 +2010,55 @@ Private message body plaintext is still returned only by explicitly authorized m
 
 No public indexing or on-chain message-body storage is introduced.
 
+
+## MAIL-2.34 Phishing & Impersonation Protection
+
+MAIL-2.34 extends the existing MAIL-2.7 spam/phishing layer with provider-aware impersonation controls without weakening canonical 420Identity sender authority.
+
+### Canonical native sender boundary
+
+Native 420Mail messages continue to derive sender identity from the authenticated Mail actor plus Identity resolution. Display-name heuristics do not replace or downgrade that authority.
+
+### External display-name impersonation
+
+Discord and Telegram imports have immutable provider IDs but mutable usernames/display names. Those external display fields are therefore treated as untrusted presentation metadata.
+
+External usernames that normalize to protected ecosystem identities are quarantined, including:
+
+- 420Integrated;
+- 420Mail;
+- 420Wallet;
+- 420Identity;
+- 420Support;
+- 420Security;
+- 420Admin.
+
+Common Unicode confusables are skeletonized before comparison so lookalike names such as a Cyrillic-character variant of `420Mail` cannot evade the protected-name rule.
+
+A matching external claim contributes at least the phishing quarantine threshold and produces explicit quarantine evidence. Trusted-sender state does not bypass impersonation protection.
+
+### Ecosystem-domain lookalikes
+
+URLs are checked for protected ecosystem lookalikes. The canonical domain `420integrated.org` and its true subdomains are allowed.
+
+Hosts that use protected ecosystem identity strings outside that domain, including confusable variants, add the phishing quarantine threshold and the reason `LOOKALIKE_ECOSYSTEM_DOMAIN`.
+
+### Quarantine behavior
+
+Impersonation findings use the existing owner-scoped quarantine path:
+
+- destination: Junk;
+- recipient copy muted;
+- notification suppressed;
+- explicit recipient review/release required;
+- no sender-global blacklist is created solely from an automatic impersonation signal.
+
+### MAIL-2.33 invariant preservation
+
+Discord and Telegram imports now use `putPrivateVerified` rather than directly calling the blob provider, preserving MAIL-2.33 write-integrity verification on external message materialization.
+
+No new public index, provider credential store, wallet authority, or on-chain message content is introduced.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

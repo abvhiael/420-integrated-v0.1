@@ -255,6 +255,11 @@ if profile_path.is_file():
     if leakage.get("enabled") is not True or any(leakage.get(k) is not True for k in ["durableBlobSecurityAttestationRequired","encryptedAtRestRequired","externalKeyCustodyRequired","ownerScopedBlobAccessRequired","sha256ContentIntegrityRequired","verifyDigestOnWrite","verifyDigestOnRead"]): errors.append("MAIL-2.33 encryption/integrity contract drifted")
     if leakage.get("httpRedactedFields")!=["body_ref","body_digest","staging_body_ref","staging_body_digest","request_fingerprint","idempotency_key"]: errors.append("MAIL-2.33 HTTP redaction inventory drifted")
     if any(leakage.get(k) is not False for k in ["privateBodyPlaintextInMetadata","privateBodyPlaintextInSearchResults","privateStorageLocatorInHTTP","privateStorageDigestInHTTP","providerSecretsInMailMetadata","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.33 leakage/privacy boundary drifted")
+    impersonation=profile.get("phishingImpersonationProtection",{})
+    if impersonation.get("enabled") is not True or impersonation.get("protectedIdentitySkeletons")!=["420integrated","420mail","420wallet","420identity","420support","420security","420admin"]: errors.append("MAIL-2.34 protected identity inventory drifted")
+    if impersonation.get("externalDisplayNameProviders")!=["discord","telegram"] or impersonation.get("officialDomain")!="420integrated.org" or impersonation.get("lookalikeDomainQuarantineScore")!=3: errors.append("MAIL-2.34 provider/domain policy drifted")
+    if any(impersonation.get(k) is not True for k in ["protectedExternalDisplayClaimQuarantined","confusableProtectedDisplayClaimDetected","ecosystemDomainLookalikeDetection","officialSubdomainsAllowed","canonicalNativeSenderAuthorityPreserved","quarantineSuppressesNotification"]): errors.append("MAIL-2.34 impersonation controls drifted")
+    if impersonation.get("trustedSenderBypassesImpersonation") is not False or impersonation.get("quarantineFolder")!="JUNK" or impersonation.get("publicIndexing") is not False or impersonation.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.34 impersonation quarantine/privacy drifted")
     if desktop_ui.get("newBackendAuthority") is not False or desktop_ui.get("publicIndexing") is not False or desktop_ui.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.30 desktop authority/privacy drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
@@ -321,6 +326,14 @@ for token in ["evaluateTrustPolicy","recipientMuted","!recipientMuted"]:
 spam_src=(ROOT/"mail/spam.go").read_text() if (ROOT/"mail/spam.go").is_file() else ""
 for token in ["SenderReputation","AbuseReport","QuarantineRecord","ReportAbuse","ReleaseQuarantine","evaluateSpamProtection","recordDeliveryProtection","phishingSignals","spamFingerprint","ErrQuarantineReview","AbuseSpam","AbusePhishing","DuplicateSpamThreshold","PhishingQuarantineScore"]:
     if token not in spam_src: errors.append("MAIL-2.7 spam-protection invariant missing: "+token)
+for token in ["applyExternalImpersonationSignals","protectedIdentitySkeletons","impersonationSkeleton","asciiIdentitySkeleton","isProtectedDomainLookalike","EXTERNAL_PROTECTED_IDENTITY_CLAIM","CONFUSABLE_PROTECTED_IDENTITY_CLAIM","LOOKALIKE_ECOSYSTEM_DOMAIN"]:
+    if token not in spam_src: errors.append("MAIL-2.34 impersonation invariant missing: "+token)
+discord_sync_src=(ROOT/"mail/discord_sync.go").read_text() if (ROOT/"mail/discord_sync.go").is_file() else ""
+telegram_sync_src=(ROOT/"mail/telegram_sync.go").read_text() if (ROOT/"mail/telegram_sync.go").is_file() else ""
+for token in ["applyExternalImpersonationSignals(protection, DiscordProvider, external.AuthorUsername)","putPrivateVerified"]:
+    if token not in discord_sync_src: errors.append("MAIL-2.34 Discord impersonation/integrity integration missing: "+token)
+for token in ["applyExternalImpersonationSignals(protection, TelegramProvider, external.AuthorUsername)","putPrivateVerified"]:
+    if token not in telegram_sync_src: errors.append("MAIL-2.34 Telegram impersonation/integrity integration missing: "+token)
 for token in ['"/v1/quarantine"','"/v1/reputation/"','"abuse"',"ReportAbuse","ReleaseQuarantine"]:
     if token not in http: errors.append("MAIL-2.7 HTTP protection surface missing: "+token)
 for token in ["ListQuarantine","ReleaseQuarantine","ReportAbuse","GetSenderReputation"]:
@@ -563,4 +576,5 @@ print("MAIL-2.30 full desktop mail UI: qualified by app-scoped checks")
 print("MAIL-2.31 mail settings center: qualified by app-scoped checks")
 print("MAIL-2.32 connector isolation: qualified by app-scoped checks")
 print("MAIL-2.33 encryption and leakage controls: qualified by app-scoped checks")
+print("MAIL-2.34 phishing and impersonation protection: qualified by app-scoped checks")
 

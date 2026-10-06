@@ -157,7 +157,7 @@ func TestWalletSigningIsExternalHandoffOnly(t *testing.T) {
 	client := newClientFor(t, ts.URL)
 	signer := &signerFake{}
 	req := mediaapi.SigningIntentRequest{
-		Wallet: "0x1111111111111111111111111111111111111111",
+		Wallet:  "0x1111111111111111111111111111111111111111",
 		ChainID: 420, Network: "testnet", Action: "publish",
 		ResourceID: "asset-1", PayloadHash: "0xabc",
 	}

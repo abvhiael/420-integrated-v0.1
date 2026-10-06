@@ -78,6 +78,7 @@ contract ComputeExternalContributionAdapters420Test {
         ComputeFoldingAtHomeAdapter420 folding = new ComputeFoldingAtHomeAdapter420();
         ComputeBoincAdapter420 boinc = new ComputeBoincAdapter420();
         ComputeResearchClusterAdapter420 cluster = new ComputeResearchClusterAdapter420();
+        ComputeUniversityHpcGateway420 hpc = new ComputeUniversityHpcGateway420();
 
         require(
             address(folding) != address(boinc)

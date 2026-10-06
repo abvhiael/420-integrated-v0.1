@@ -1,0 +1,141 @@
+package mail
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func testHTTPHandler(t *testing.T) (HTTPHandler, *Service, string) {
+	t.Helper()
+	s, _ := testService()
+	msg, err := s.Send(context.Background(), "alice.420", SendRequest{
+		IdempotencyKey: "http-state",
+		Sender:         "alice.420",
+		Recipient:      "bob.420",
+		Subject:        "hello",
+		Body:           "body",
+		Source:         ServiceID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := HTTPHandler{
+		Service: s,
+		Authenticate: func(r *http.Request) (string, error) {
+			return r.Header.Get("X-Test-Actor"), nil
+		},
+	}
+	return h, s, msg.ID
+}
+
+func performMailRequest(t *testing.T, h HTTPHandler, method, path, actor string, body any) *httptest.ResponseRecorder {
+	t.Helper()
+	var raw []byte
+	if body != nil {
+		var err error
+		raw, err = json.Marshal(body)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	req := httptest.NewRequest(method, path, bytes.NewReader(raw))
+	req.Header.Set("X-Test-Actor", actor)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	return rec
+}
+
+func TestHTTPMailboxLifecycleRoutes(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodGet, "/v1/mailboxes/INBOX", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("inbox status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var page MailboxPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Items) != 1 || page.Items[0].State.Folder != FolderInbox {
+		t.Fatalf("unexpected inbox payload: %+v", page)
+	}
+
+	archive := FolderArchive
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/mailbox", "bob.420", MailboxUpdate{Folder: &archive})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("archive status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	trash := FolderTrash
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/mailbox", "bob.420", MailboxUpdate{Folder: &trash})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("trash status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodDelete, "/v1/messages/"+id, "bob.420", nil)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("delete status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/messages/"+id+"/mailbox", "bob.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("deleted state remained visible: status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPRestoreAndInvalidTransition(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+
+	drafts := FolderDrafts
+	rec := performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/mailbox", "bob.420", MailboxUpdate{Folder: &drafts})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("reserved-folder transition status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	trash := FolderTrash
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/mailbox", "bob.420", MailboxUpdate{Folder: &trash})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("trash status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/restore", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("restore status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var state MailboxState
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatal(err)
+	}
+	if state.Folder != FolderInbox {
+		t.Fatalf("restore folder=%s", state.Folder)
+	}
+}
+
+func TestHTTPUnreadAndFlags(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+	yes := true
+
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/read", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("read status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/mailbox", "bob.420", MailboxUpdate{Starred: &yes, Pinned: &yes, Muted: &yes})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("flags status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/unread", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unread status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPMailboxRequiresOwnership(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+	rec := performMailRequest(t, h, http.MethodGet, "/v1/messages/"+id+"/mailbox", "mallory.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign mailbox state leaked: status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}

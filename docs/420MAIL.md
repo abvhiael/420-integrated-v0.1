@@ -1003,6 +1003,106 @@ MAIL-2.17 does **not** add:
 
 Discord wallet verification remains MAIL-2.18.
 
+## MAIL-2.18 Discord Wallet Verification
+
+MAIL-2.18 binds a linked Discord identity to a canonically verified wallet account without granting Discord or 420Mail signing authority.
+
+### Authority boundary
+
+Discord wallet verification reuses the already-qualified MAIL-2.13 Wallet verification boundary.
+
+- Discord supplies only the linked external identity.
+- 420Mail constructs and persists a bounded verification challenge.
+- 420 Wallet/Identity remains the sole message-signature preparation and canonical verification authority.
+- Discord never becomes a wallet verifier.
+- 420Mail never receives a private key, seed phrase, passkey private material, or provider credential.
+
+### Challenge binding
+
+An authenticated user requests a challenge with:
+
+- linked Discord connection ID;
+- chain ID;
+- wallet account;
+- expiry.
+
+The challenge digest is domain-separated with:
+
+`420/MAIL/DISCORD/WALLET-VERIFY/V1`
+
+and binds:
+
+- authenticated 420Mail identity;
+- Discord connection ID;
+- Discord user snowflake;
+- chain ID;
+- wallet account;
+- expiry.
+
+The digest is passed to the canonical Wallet action service as a `MESSAGE_SIGNATURE` handoff. The wallet handoff must remain non-custodial and require explicit Wallet approval.
+
+Challenge lifetime is bounded to at most ten minutes.
+
+### Durable verification state
+
+Non-secret challenge metadata is persisted in Mail durable storage schema v10:
+
+- wallet handoff ID;
+- Mail owner;
+- Discord connection/user;
+- chain;
+- wallet account;
+- challenge digest;
+- expiry;
+- verified state/timestamp;
+- version.
+
+Raw signature evidence is **not** persisted.
+
+Durable challenge state prevents restart from detaching a Wallet proof from the Discord identity it was issued for.
+
+### Canonical verification
+
+Verification requires:
+
+- the same authenticated Mail identity;
+- the same Discord connection ID;
+- the original wallet handoff ID;
+- opaque evidence for canonical Wallet verification.
+
+The existing Wallet verification service must return a canonical, verified, non-custodial `SIGNATURE` result for the same handoff and wallet account.
+
+Cross-user, cross-Discord-connection, account-substitution, expired-challenge, non-canonical, or malformed results fail closed.
+
+Once successfully verified, later identical verification requests return the durable verified binding without asking the Wallet authority to verify the same proof again.
+
+### API and client
+
+Authenticated endpoints:
+
+- `POST /v1/connectors/discord/wallet/challenge`
+- `POST /v1/connectors/discord/wallet/verify`
+
+Typed client methods:
+
+- `PrepareDiscordWalletVerification`
+- `VerifyDiscordWallet`
+
+The Discord connector now advertises `WALLET_VERIFY`. The thin UI shows **Verify Discord wallet** only when that capability is present. The deployment shell provides the linked connection/chain/account selection and invokes the qualified Wallet UX to obtain canonical signature evidence.
+
+### Scope boundary
+
+MAIL-2.18 does not:
+
+- grant Discord transaction/signing authority;
+- make Discord evidence canonical by itself;
+- persist raw wallet verification evidence;
+- expose verification bindings to public 420Search;
+- place Discord or wallet proof material on-chain;
+- implement Signal or Telegram integrations.
+
+Those remain outside this roadmap step.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

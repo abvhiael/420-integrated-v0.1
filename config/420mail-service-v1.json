@@ -1,14 +1,256 @@
 {
-  "schema":"420-mail-service-v1",
-  "version":1,
-  "serviceId":"420/service/mail/v1",
-  "name":"420Mail",
-  "authority":"REPLACEABLE_COMMUNICATION_SERVICE",
-  "genesisTarget":"identity_addressed_ecosystem_inbox",
-  "contracts":[],
-  "onChainMailState":false,
-  "dependencies":["420 Identity","420 Messenger","420 Storage","420 Notifications"],
-  "privacy":{"messageBodiesOnChain":false,"publicIndexing":false,"defaultVisibility":"PRIVATE","bodyStorage":"PRIVATE_OFF_CHAIN_REFERENCE"},
-  "featureFlags":{"mail.external_smtp":false},
-  "api":{"versionPrefix":"/v1","pagination":"cursor","timestamps":"RFC3339_UTC","idempotentSend":true}
+  "schema": "420-mail-service-v1",
+  "version": 1,
+  "serviceId": "420/service/mail/v1",
+  "name": "420Mail",
+  "authority": "REPLACEABLE_COMMUNICATION_SERVICE",
+  "genesisTarget": "identity_addressed_ecosystem_inbox",
+  "contracts": [],
+  "onChainMailState": false,
+  "dependencies": [
+    "420 Identity",
+    "420 Messenger",
+    "420 Storage",
+    "420 Notifications"
+  ],
+  "privacy": {
+    "messageBodiesOnChain": false,
+    "publicIndexing": false,
+    "defaultVisibility": "PRIVATE",
+    "bodyStorage": "PRIVATE_OFF_CHAIN_REFERENCE"
+  },
+  "featureFlags": {
+    "mail.external_smtp": false
+  },
+  "api": {
+    "versionPrefix": "/v1",
+    "pagination": "cursor",
+    "timestamps": "RFC3339_UTC",
+    "idempotentSend": true
+  },
+  "mailbox": {
+    "systemFolders": [
+      "INBOX",
+      "SENT",
+      "OUTBOX",
+      "DRAFTS",
+      "ARCHIVE",
+      "JUNK",
+      "TRASH"
+    ],
+    "deliveredRecipientFolder": "INBOX",
+    "deliveredSenderFolder": "SENT",
+    "reservedForDedicatedSteps": {},
+    "ownerScopedState": true,
+    "permanentDeleteRequiresTrash": true,
+    "messageBodiesOnChain": false,
+    "systemManagedFolders": [
+      "OUTBOX",
+      "DRAFTS"
+    ]
+  },
+  "metadataStore": {
+    "requiredForDeployment": true,
+    "interface": "MailStore",
+    "schemaVersion": 8,
+    "implementation": "ATOMIC_FILE_V1",
+    "atomicTransactions": true,
+    "restartRecovery": true,
+    "migrations": true,
+    "secondaryIndexes": [
+      "owner_folder",
+      "owner_label",
+      "owner_custom_folder",
+      "owner_conversation",
+      "owner_draft"
+    ],
+    "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
+    "sharedStorageRequiredForMultiInstance": true,
+    "filePermissions": "0600",
+    "messageBodiesPersisted": false
+  },
+  "organization": {
+    "userLabels": true,
+    "customFolders": true,
+    "bulkAssignment": true,
+    "systemLabels": [
+      "STARRED",
+      "PINNED",
+      "MUTED",
+      "UNREAD"
+    ],
+    "maxUserLabels": 100,
+    "maxCustomFolders": 50,
+    "maxLabelsPerMessage": 20,
+    "maxBulkItems": 100,
+    "ownerScoped": true,
+    "systemLabelsImmutable": true
+  },
+  "privateSearch": {
+    "enabled": true,
+    "ownerScoped": true,
+    "publicIndexing": false,
+    "public420SearchIntegration": false,
+    "metadataFields": [
+      "sender",
+      "recipient",
+      "subject",
+      "source",
+      "system_folder",
+      "label_name",
+      "custom_folder_name"
+    ],
+    "bodySearch": "ON_DEMAND_PRIVATE_BLOB",
+    "maxQueryBytes": 256,
+    "maxScanItems": 500,
+    "maxPageSize": 100,
+    "permanentlyDeletedExcluded": true
+  },
+  "rulesEngine": {
+    "enabled": true,
+    "ownerScoped": true,
+    "appliesTo": "INCOMING_RECIPIENT_COPY",
+    "conditions": [
+      "sender_equals",
+      "content_contains",
+      "source_equals"
+    ],
+    "conditionsCombine": "AND",
+    "actions": [
+      "folder",
+      "add_labels",
+      "custom_folder",
+      "mark_read",
+      "starred",
+      "pinned",
+      "muted",
+      "stop_processing"
+    ],
+    "allowedActionFolders": [
+      "INBOX",
+      "ARCHIVE",
+      "JUNK",
+      "TRASH"
+    ],
+    "maxRulesPerUser": 100,
+    "maxRuleNameBytes": 80,
+    "maxContentMatchBytes": 256,
+    "maxActionLabels": 20,
+    "deterministicPriority": true,
+    "atomicWithDelivery": true,
+    "publicIndexing": false
+  },
+  "trustControls": {
+    "enabled": true,
+    "ownerScoped": true,
+    "entryKinds": [
+      "IDENTITY",
+      "PHRASE",
+      "APPLICATION"
+    ],
+    "dispositions": [
+      "BLOCK",
+      "ALLOW",
+      "MUTE"
+    ],
+    "maxEntriesPerUser": 250,
+    "maxValueBytes": 256,
+    "requireTrustedMode": true,
+    "identityApplicationBlockPrecedence": "ABSOLUTE",
+    "trustedIdentityApplicationBypassesPhraseBlock": true,
+    "muteSuppressesNotification": true,
+    "muteMarksRecipientCopy": true,
+    "idempotentReplayPreserved": true,
+    "atomicDeliveryRecheck": true,
+    "publicIndexing": false
+  },
+  "spamProtection": {
+    "enabled": true,
+    "ownerScopedReputation": true,
+    "reputationInputs": [
+      "spam_reports",
+      "phishing_reports",
+      "false_positive_releases"
+    ],
+    "duplicateFingerprintDetection": true,
+    "duplicateThreshold": 4,
+    "phishingHeuristics": [
+      "url_userinfo",
+      "ip_literal_link",
+      "punycode_link",
+      "insecure_http_link",
+      "credential_or_urgency_lure_with_link"
+    ],
+    "phishingQuarantineScore": 3,
+    "automaticQuarantineFolder": "JUNK",
+    "quarantineMutesRecipientCopy": true,
+    "quarantineSuppressesNotification": true,
+    "explicitReleaseRequiredForInboxRestore": true,
+    "trustedIdentityApplicationBypassesSpamSignals": true,
+    "trustedIdentityApplicationBypassesPhishing": false,
+    "abuseReportKinds": [
+      "SPAM",
+      "PHISHING"
+    ],
+    "oneAbuseReportPerOwnerMessage": true,
+    "publicIndexing": false,
+    "messageBodiesPersisted": false
+  },
+  "conversations": {
+    "enabled": true,
+    "replyModel": "PARENT_MESSAGE_BOUND",
+    "deterministicRootConversationId": true,
+    "ownerScoped": true,
+    "participantView": true,
+    "orderedMessages": "CREATED_AT_ASC_ID_ASC",
+    "orderedConversations": "LATEST_AT_DESC_ID_ASC",
+    "maxMessagesPerConversation": 1000,
+    "threadArchive": true,
+    "threadMute": true,
+    "archivedFutureRepliesFolder": "ARCHIVE",
+    "mutedFutureRepliesSuppressNotification": true,
+    "arbitraryConversationInjectionRejected": true,
+    "deletedParentReplyRejected": true,
+    "publicIndexing": false
+  },
+  "drafts": {
+    "enabled": true,
+    "ownerScoped": true,
+    "bodyStorage": "PRIVATE_ENCRYPTED_BLOB_PROVIDER",
+    "autosave": true,
+    "recovery": true,
+    "edit": true,
+    "discard": true,
+    "discardDeletesPrivateBlob": true,
+    "multiDevice": "OPTIMISTIC_VERSIONED",
+    "staleWrite": "REJECT_CONFLICT",
+    "deterministicIdFromOwnerAutosaveKey": true,
+    "maxDraftsPerUser": 500,
+    "maxAutosaveKeyBytes": 128,
+    "listOrdering": "UPDATED_AT_DESC_ID_ASC",
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
+  },
+  "deliveryQueue": {
+    "enabled": true,
+    "ownerScoped": true,
+    "lifecycle": [
+      "QUEUED",
+      "SENDING",
+      "RETRYING",
+      "DELIVERED",
+      "FAILED",
+      "CANCELLED"
+    ],
+    "bodyStorage": "PRIVATE_ENCRYPTED_STAGING_BLOB",
+    "senderMailboxFolder": "OUTBOX",
+    "deliveredSenderFolder": "SENT",
+    "deliveredRecipientFolder": "INBOX",
+    "maxAttempts": 3,
+    "maxActiveItemsPerSender": 1000,
+    "deterministicIdempotency": true,
+    "crashRecovery": "SENDING_REPROCESS_SAFE",
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
+  }
 }

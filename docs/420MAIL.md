@@ -683,7 +683,120 @@ Authenticated routes:
 
 Typed Go client methods mirror both routes.
 
-### Thin UI
+### MAIL-2.14 External Integrations Framework
+
+MAIL-2.14 adds a provider-neutral connector architecture that later Discord, Signal, Telegram, and other integration steps can use without placing provider-specific behavior inside the 420Mail core.
+
+### Provider registry and capability model
+
+Connectors register a normalized provider identifier, display name, and explicit capability set. Core recognizes only generic capability classes:
+
+- `LINK`
+- `PULL`
+- `PUSH`
+- `WEBHOOK`
+- `WALLET_VERIFY`
+
+A provider may expose only the capabilities it actually implements. Unsupported operations fail before an adapter is invoked. Duplicate providers, malformed identifiers, and duplicate/unknown capabilities are rejected.
+
+The registry is deterministic and provider-neutral; it does not hard-code Discord, Signal, Telegram, OAuth vendors, webhook signatures, message schemas, or provider URLs.
+
+### Account linking boundary
+
+User-driven connector operations remain authenticated to the current Mail identity.
+
+Linking receives:
+
+- provider identifier;
+- an opaque secure-broker authorization reference;
+- optional non-secret account hint.
+
+The Mail API does **not** accept raw access tokens, refresh tokens, client secrets, wallet private keys, or provider passwords as supported link fields. Provider credentials and refresh behavior belong to the adapter or qualified secure credential broker.
+
+A successful connector link is accepted only when it:
+
+- belongs to the authenticated Mail identity;
+- belongs to the requested provider;
+- has a connection ID and external account ID;
+- is active;
+- is explicitly non-custodial;
+- has canonical link/update timestamps.
+
+Mail core does not persist provider credentials.
+
+### Pull and push handoffs
+
+`PULL` adapters receive provider, connection ID, and an opaque cursor. Returned provider/connection identity must match the request and every returned item must have an external ID, kind, timestamp, and bounded payload.
+
+`PUSH` adapters receive provider, connection ID, kind, bounded payload, and an explicit idempotency key. Push success must return the same provider/connection, an external ID, acceptance timestamp, and `accepted=true`.
+
+The framework does not define Discord/Signal/Telegram message semantics. Those are introduced only by their later roadmap steps.
+
+### Webhook boundary
+
+External provider webhooks use a public pre-session transport route because provider servers do not possess a Mail user session.
+
+Webhook authentication is still mandatory, but it belongs to the connector adapter. Mail supplies:
+
+- the provider selected from the URL path;
+- the raw bounded payload;
+- the **actual HTTP transport headers** observed by the Mail service.
+
+Webhook verification headers cannot be supplied through the JSON model because the framework does not deserialize provider webhook payloads into a Mail-owned authentication structure. The adapter must verify provider-specific signature/timestamp/replay rules before returning `verified=true`, owner identity, connection ID, and normalized connector items.
+
+Mail rejects unverified, provider-mismatched, unbound, malformed, or oversized webhook results.
+
+### Provider isolation
+
+Connector results are validated against the provider and authenticated identity that initiated the operation.
+
+A connector cannot:
+
+- return a different provider and have Mail accept it;
+- link a connection to a different Mail identity;
+- bypass its declared capability set;
+- cause Mail core to treat provider credentials as mailbox metadata;
+- widen Mail authority into provider credential custody;
+- publish private integration payloads to public 420Search or on-chain state.
+
+Adapter dependency failures fail closed. There is no generic fallback that impersonates a provider or silently switches connectors.
+
+### API
+
+Authenticated owner routes:
+
+- `GET /v1/connectors/providers`
+- `POST /v1/connectors/link`
+- `POST /v1/connectors/unlink`
+- `POST /v1/connectors/pull`
+- `POST /v1/connectors/push`
+
+Public provider transport route:
+
+- `POST /v1/connectors/webhooks/{provider}`
+
+The public webhook route is not an authorization bypass: the provider adapter must authenticate the transport evidence and bind the result to a specific Mail identity/connection before the result is accepted.
+
+Typed Go client methods cover provider discovery and authenticated link/unlink/pull/push operations. Provider webhook transport is intentionally not presented as an authenticated user client operation.
+
+### Scope boundary
+
+MAIL-2.14 provides architecture only. It intentionally does **not** claim:
+
+- Discord OAuth/account linking;
+- Discord message ingestion or delivery;
+- Discord wallet verification;
+- Signal integration;
+- Telegram integration;
+- unified cross-provider inbox behavior;
+- cross-platform identity;
+- production provider credentials;
+- live webhook signatures/replay behavior;
+- provider rate-limit/retry production evidence.
+
+Those belong to MAIL-2.15 and later steps and production-equivalent testnet/security qualification.
+
+## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.
 
@@ -699,7 +812,7 @@ MAIL-2.12 repository completion does not claim live WebAuthn RP configuration, r
 
 ## Thin UI
 
-`mail/web/index.html` provides onboarding, security management, wallet-action handoffs, inbox, read, compose and draft surfaces. Wallet actions prepare bounded non-custodial intents and verification handoffs through deployment-provided Wallet adapters; the Mail UI never signs or submits. This is repository UI evidence, not live provider/deployment evidence.
+`mail/web/index.html` provides onboarding, security management, wallet-action handoffs, connector discovery/link handoffs, inbox, read, compose and draft surfaces. Connector UI is provider-neutral and delegates provider-specific authorization to deployment adapters; Mail never accepts raw provider secrets as normal UI fields. This is repository UI evidence, not live provider/deployment evidence.
 
 ## Security
 

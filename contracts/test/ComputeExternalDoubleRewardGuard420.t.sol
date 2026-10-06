@@ -4,6 +4,14 @@ pragma solidity ^0.8.24;
 import "../src/compute/ComputeExternalDoubleRewardGuard420.sol";
 
 contract ExternalRewardConsumerHarness420 {
+    function setConsumer(
+        ComputeExternalDoubleRewardGuard420 guard,
+        address target,
+        bool active
+    ) external {
+        guard.setConsumer(target, active);
+    }
+
     function consume(
         ComputeExternalDoubleRewardGuard420 guard,
         ComputeExternalProofCreditAdapter420.ExternalSource calldata source,
@@ -281,6 +289,17 @@ contract ComputeExternalDoubleRewardGuard420Test {
         require(!badSource, "invalid source accepted");
     }
 
+    function testOnlyGovernanceCanAuthorizeOrRevokeConsumers() public {
+        (bool ok,) = address(otherConsumer).call(
+            abi.encodeCall(
+                otherConsumer.setConsumer,
+                (guard, address(otherConsumer), true)
+            )
+        );
+        require(!ok, "outsider authorized consumer");
+        require(guard.consumerCodeHash(address(otherConsumer)) == bytes32(0), "authorization mutated");
+    }
+
     function testCannotAuthorizeEOAOrZeroCodeConsumer() public {
         (bool ok,) = address(guard).call(
             abi.encodeCall(guard.setConsumer, (address(0xBEEF), true))
@@ -288,3 +307,4 @@ contract ComputeExternalDoubleRewardGuard420Test {
         require(!ok, "EOA consumer authorized");
     }
 }
+

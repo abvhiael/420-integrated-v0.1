@@ -80,6 +80,10 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 ### PB-ROADMAP-024 — Roadmap changes require reconciliation
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
+## Current phase-number authority
+
+The implementation-phase numbering below is the original PB-0.19 planning map and is retained as historical scope guidance. The current numbered phase authority is `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md` under **Post-PB-0 phase names** and any detailed step committed there. Where numbering conflicts, the current roadmap controls. In particular, current **PB-3 — Profiles** carries forward the profile/editing/media/mode/visibility/lifecycle-control portion of the legacy PB-2 planning scope; legacy PB-3 discovery/matching scope is split across current **PB-4 — Discovery** and **PB-5 — Likes and matching**; PB-4 carries only discovery/recommendation behavior and PB-5 owns likes, passes, reciprocal consent and match formation. This reconciliation changes numbering authority only and does not weaken any PB-0 invariant or silently claim implementation.
+
 ## Canonical implementation phases
 
 ### PB-1 — Domain model and private persistence
@@ -102,12 +106,20 @@ Implement candidate eligibility filtering, hard exclusions, coarse-location priv
 **PB-0 authorities:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.14, PB-0.15.
 **Required gates:** exclusion-before-ranking tests; stale-cache/replay tests; reciprocal-intent tests; location inference/adversarial tests; sensitive-inference review.
 
+### Current split for legacy messaging/notifications scope
+
+The legacy PB-0.19 **PB-4 — Messaging authorization and notifications** planning block predates the current phase reservation. Its scope is now split by the current canonical roadmap: **PB-6 — 420Messenger integration** owns Messenger authorization/coordination handoff, while **PB-7 — 420Notifications integration** owns notification delivery handoff. This is a numbering/scope reconciliation only; it does not transfer PuffBuddies consent/relationship authority to Messenger or Notifications and does not claim live integration before the corresponding current phase is qualified.
+
 ### PB-4 — Messaging authorization and notifications
 Integrate bounded 420Messenger/420Notifications capabilities after canonical PuffBuddies match authorization. Enforce current mutual authorization on conversation entry and delivery-trigger decisions.
 
 **PB-0 authorities:** PB-0.5, PB-0.8, PB-0.9, PB-0.13.
 **Required gates:** matched/unmatched authorization; unmatch/block/revocation races; stale Messenger capability rejection; notification privacy; dependency failure behavior.
 **Level 2 milestone B:** accumulated discovery/match/messaging/notification integration.
+
+### Current mapping for legacy safety scope
+
+The legacy PB-0.19 **PB-5 — Safety, moderation, block, report, and appeals** planning block predates the current phase reservation. Its implementation scope is carried forward by current **PB-8 — Safety and moderation**. This is a numbering/scope reconciliation only: PB-8 must preserve every PB-0.10/PB-0.11/PB-0.12 safety, privacy, retention, appeal and lifecycle invariant and does not claim live moderation infrastructure.
 
 ### PB-5 — Safety, moderation, block, report, and appeals
 Implement private safety cases, report evidence boundaries, block/unmatch behavior, moderation actions, restriction/suspension/ban handling, appeal workflow, least-privilege moderation access, and auditability without public reputation.

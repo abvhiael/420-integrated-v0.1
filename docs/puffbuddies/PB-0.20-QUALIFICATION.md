@@ -8,9 +8,13 @@
 
 **Level 3 — complete app-phase closeout qualification**
 
-## Qualified implementation SHA
+## Exact merge-candidate implementation SHA
 
 `39ff0740c6cbc11193280493838e82ca8c27bcb5`
+
+## Reconciliation base SHA
+
+`11b65333563b84af7b5d0b35841509f985df1`
 
 ## Final current-main reconciliation
 
@@ -61,4 +65,4 @@ Skipped, cancelled, missing, stale, superseded, or untriggered required checks a
 
 ## Next canonical phase
 
-**PB-1 — Architecture and privacy implementation model.**
+**PB-1 — Domain model and private persistence**

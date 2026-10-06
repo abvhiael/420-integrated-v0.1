@@ -1,0 +1,50 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.9.ResearchDashboard.v1",
+  "step": "CMP-4.9",
+  "title": "Research dashboard",
+  "canonical_definition": "Research dashboard",
+  "status": "COMPLETE",
+  "completion_state": "COMPLETE",
+  "base_main_sha": "23ebff000a471bfbc4439894f797f3b17a530867",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": true,
+    "milestone": "second CMP-4 scientific-framework consumer convergence",
+    "previous_level_2_milestone": "CMP-4.6 — Result provenance",
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeResearchDashboard420.sol",
+    "test": "contracts/test/ComputeResearchDashboard420.t.sol",
+    "doc": "docs/compute-market/CMP-4.9-RESEARCH-DASHBOARD.md",
+    "verifier": "scripts/verify-cmp-4-9-research-dashboard.py"
+  },
+  "components": [
+    "CMP-4.2 Research Project Registry",
+    "CMP-4.6 Result provenance",
+    "CMP-4.6 canonical result source",
+    "CMP-4.7 Scientific metadata and lineage",
+    "CMP-4.8 Publication / retention policy"
+  ],
+  "exit_criteria": [
+    "dashboard binds one exact versioned CMP-4.2/4.6/4.7/4.8 component graph",
+    "current and historical project views expose exact canonical commitments without parallel state",
+    "research result query reconstructs and validates exact CMP-4.1 scientific work-unit commitment",
+    "project revision/commitment substitution fails closed",
+    "environment parameters and resource witness substitution fail closed",
+    "result evidence output verifier and verification references must match canonical CMP-4.6 state",
+    "noncanonical CMP-4.6 provenance fails closed",
+    "noncanonical CMP-4.7 lineage fails closed",
+    "CMP-4.8 policy status is explicit and missing policy is never treated as publication authorization",
+    "direct parent lineage reads require canonical lineage",
+    "dashboard is read-only and creates no project result publication storage economic or governance authority",
+    "dedicated tests verifier and retained Compute suite pass exact-head Level 1 plus Level 2 qualification"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.10 Level 3 phase closeout",
+    "CMP-7 indexed enumeration API and historical analytics",
+    "CMP-8 human-facing 420Compute UI",
+    "CMP-9 live scientific/testnet evidence"
+  ],
+  "next_canonical_step": "CMP-4.10 — Phase closeout"
+}

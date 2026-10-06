@@ -1,0 +1,48 @@
+name: PuffBuddies PB-8 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb8.yml"
+  push:
+    branches: ["puffbuddies-pb8-safety-moderation-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb8.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-8 Level 1 targeted safety and moderation
+        run: python3 -m unittest puffbuddies.tests.test_pb_8_safety_moderation -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-8 Level 2 accumulated safety-override integration
+        run: python3 -m unittest puffbuddies.tests.test_pb_8_integration -v
+      - name: Verify PB-0 safety and lifecycle authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Safety privacy and public-reputation negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(wallet_address|payment_status|premium_status|token_balance|staking_balance|public_score|public_reputation|report_count|risk_score)[[:space:]]*[:=]' puffbuddies/domain/safety.py
+          ! grep -RIE '(raw_report|raw_evidence|message_body|private_message)[[:space:]]*[:=]' puffbuddies/domain/safety.py
+          ! grep -RIE '(force_match|force_unblock|force_rematch|public_case|law_enforcement_submit)[[:space:]]*\(' puffbuddies/domain/safety.py

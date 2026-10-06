@@ -1,0 +1,61 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.8.PublicationRetentionPolicy.v1",
+  "step": "CMP-4.8",
+  "title": "Publication / retention policy",
+  "canonical_definition": "Publication / retention policy",
+  "status": "COMPLETE",
+  "completion_state": "COMPLETE",
+  "base_main_sha": "d86a3810d2901dc1082b65dc9061896c46e1911d",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "previous_level_2_milestone": "CMP-4.6 — Result provenance",
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeScientificPublicationRetention420.sol",
+    "test": "contracts/test/ComputeScientificPublicationRetention420.t.sol",
+    "doc": "docs/compute-market/CMP-4.8-PUBLICATION-RETENTION-POLICY.md",
+    "verifier": "scripts/verify-cmp-4-8-publication-retention.py"
+  },
+  "publication_modes": [
+    "PRIVATE",
+    "RESTRICTED",
+    "PUBLIC"
+  ],
+  "policy_fields": [
+    "lineageId",
+    "publisher",
+    "visibility",
+    "accessPolicyCommitment",
+    "retentionPolicyCommitment",
+    "publicationManifestCommitment",
+    "predecessorCommitment",
+    "notBefore",
+    "retainUntil",
+    "revision",
+    "active"
+  ],
+  "exit_criteria": [
+    "policy identity is chain/registry/lineage/provenance/scientific-unit/publisher bound",
+    "only the project-authenticated CMP-4.7 publisher can create or revise policy",
+    "one deterministic current policy exists per lineage with append-only revision history",
+    "PRIVATE RESTRICTED and PUBLIC modes have explicit fail-closed field semantics",
+    "access and retention policy commitments are always nonzero",
+    "RESTRICTED/PUBLIC require an exact publication-manifest commitment",
+    "optional embargo and finite-or-indefinite retention windows are validated",
+    "current publication authorization fails closed for private inactive embargoed expired or noncanonical lineage",
+    "stale no-op duplicate and unauthorized mutations fail closed",
+    "raw metadata/results/evidence remain off-chain and no mutable URL is canonicalized",
+    "policy creates no storage deletion access correctness economic or governance authority",
+    "dedicated tests and mechanical verifier pass exact-head Level 1 qualification"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.9 research dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-7 SDK/API/indexer expansion",
+    "CMP-8 Compute UI",
+    "CMP-9 public/testnet storage enforcement and scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.9 — Research dashboard"
+}

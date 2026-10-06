@@ -120,10 +120,18 @@ func (s *OnboardingService) finish(ctx context.Context, method OnboardingMethod,
 	if err != nil {
 		return OnboardingResult{}, fmt.Errorf("mail: onboarding authority: %w", err)
 	}
+	out = normalizeOnboardingResult(out)
 	if err := s.validateResult(method, out); err != nil {
 		return OnboardingResult{}, err
 	}
 	return out, nil
+}
+
+func normalizeOnboardingResult(out OnboardingResult) OnboardingResult {
+	out.Identity = strings.TrimSpace(out.Identity)
+	out.WalletAddress = strings.TrimSpace(out.WalletAddress)
+	out.SessionToken = strings.TrimSpace(out.SessionToken)
+	return out
 }
 
 func (s *OnboardingService) validateResult(method OnboardingMethod, out OnboardingResult) error {
@@ -131,9 +139,6 @@ func (s *OnboardingService) validateResult(method OnboardingMethod, out Onboardi
 	if s.Now != nil {
 		now = s.Now().UTC()
 	}
-	out.Identity = strings.TrimSpace(out.Identity)
-	out.WalletAddress = strings.TrimSpace(out.WalletAddress)
-	out.SessionToken = strings.TrimSpace(out.SessionToken)
 	if out.Method != method || out.Identity == "" || !validWalletAddress(out.WalletAddress) || out.SessionToken == "" || !out.NonCustodial || !out.SessionExpiresAt.After(now) {
 		return ErrOnboardingInvalidResult
 	}

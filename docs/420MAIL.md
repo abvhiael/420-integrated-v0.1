@@ -1861,6 +1861,39 @@ The router does not:
 
 MAIL-2.29 completes the External bridge milestone. The retained full Mail package/race/vet/static-verifier run on the exact PR merge candidate serves as the Level-2 app integration qualification when all checks pass.
 
+
+## MAIL-2.30 Full Desktop Mail UI
+
+MAIL-2.30 replaces the accumulated thin vertical demonstration page with a functional desktop mail shell over already-qualified 420Mail APIs.
+
+### Desktop shell
+
+The UI now provides a three-pane desktop layout: a persistent mailbox/navigation sidebar, message/search/results list, and reading pane with mailbox actions. Responsive breakpoints retain the same functionality on narrower displays without introducing a separate backend or state model.
+
+### Mailbox and organization surfaces
+
+The desktop shell exposes Inbox, Sent, Drafts, Outbox, Archive, Junk, and Trash together with unread/starred smart views, private mailbox search, labels, custom folders, conversations, and the unified integrations inbox. All views read authenticated owner-scoped endpoints and do not create a parallel mailbox store.
+
+### Reader and lifecycle actions
+
+The reading pane exposes read/mark-unread, star/unstar, archive, Junk, Trash, Trash restore, permanent delete, reply composition, and explicit Signal share/forward. Private message bodies continue to render with DOM `textContent`, never as active HTML.
+
+### Compose, drafts, and outbox
+
+Compose retains canonical Mail source binding and client-generated idempotency keys. Draft autosave/recovery/discard keeps the qualified optimistic version contract. The desktop Outbox view exposes qualified queue state and permitted process/retry/cancel actions without bypassing the canonical delivery service.
+
+### Existing ecosystem handoffs
+
+Onboarding, passkey/security, Wallet actions, verified cross-platform identity, Discord, Telegram, and Signal handoffs remain available from desktop dialogs. The UI does not accept raw provider secrets or private signing material and adds no provider authority.
+
+### MAIL-2.31 boundary
+
+MAIL-2.30 is a product-surface step, not a settings-policy step. A consolidated user settings center remains explicitly deferred to **MAIL-2.31 — Mail Settings Center**. MAIL-2.30 does not invent a preferences schema, settings backend, or new settings authority.
+
+### Qualification boundary
+
+MAIL-2.30 changes only the repository web UI, its static/config contract, tests, and documentation. It does not require Level 2 because the documented Product/security milestone spans MAIL-2.30 through MAIL-2.35. Level 3 remains deferred to complete app-phase closeout.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

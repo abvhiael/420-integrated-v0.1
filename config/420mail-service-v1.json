@@ -764,5 +764,27 @@
     "privateMessageBodyIncluded": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "desktopMailUI": {
+    "enabled": true,
+    "entrypoint": "mail/web/index.html",
+    "layout": "THREE_PANE_DESKTOP_WITH_RESPONSIVE_FALLBACK",
+    "mailboxes": ["INBOX","SENT","DRAFTS","OUTBOX","ARCHIVE","JUNK","TRASH"],
+    "smartViews": ["UNREAD","STARRED","CONVERSATIONS","INTEGRATIONS"],
+    "privateSearch": true,
+    "labels": true,
+    "customFolders": true,
+    "draftAutosave": true,
+    "outboxLifecycle": true,
+    "mailboxActions": ["READ","UNREAD","STAR","UNSTAR","ARCHIVE","JUNK","TRASH","RESTORE","PERMANENT_DELETE"],
+    "messageBodyRendering": "INERT_TEXT_CONTENT",
+    "externalIntegrationsSurface": true,
+    "securityHandoffSurface": true,
+    "walletHandoffSurface": true,
+    "settingsCenter": false,
+    "settingsCenterDeferredTo": "MAIL-2.31",
+    "newBackendAuthority": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

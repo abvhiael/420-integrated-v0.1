@@ -235,6 +235,12 @@ if profile_path.is_file():
     if any(notification_routing.get(k) is not True for k in ["attemptAllQualifiedRoutes","routeFailureIsolation","mutedRecipientSuppressesAllRoutes","quarantineSuppressesAllRoutes"]): errors.append("MAIL-2.29 notification fanout/suppression drifted")
     if any(notification_routing.get(k) is not False for k in ["failureBlocksMailDelivery","idempotentMailReplayRenotifies","discordNotificationTransport","telegramNotificationTransport","signalDeepSyncRequired","privateMessageBodyIncluded","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.29 notification scope/privacy drifted")
     if notification_routing.get("discordTelegramReason")!="EXPLICIT_MESSAGE_DELIVERY_IS_NOT_NOTIFICATION_ROUTING": errors.append("MAIL-2.29 Discord/Telegram notification boundary drifted")
+    desktop_ui=profile.get("desktopMailUI",{})
+    if desktop_ui.get("enabled") is not True or desktop_ui.get("entrypoint")!="mail/web/index.html" or desktop_ui.get("layout")!="THREE_PANE_DESKTOP_WITH_RESPONSIVE_FALLBACK": errors.append("MAIL-2.30 desktop shell config drifted")
+    if desktop_ui.get("mailboxes")!=["INBOX","SENT","DRAFTS","OUTBOX","ARCHIVE","JUNK","TRASH"]: errors.append("MAIL-2.30 desktop mailbox coverage drifted")
+    if desktop_ui.get("smartViews")!=["UNREAD","STARRED","CONVERSATIONS","INTEGRATIONS"] or any(desktop_ui.get(k) is not True for k in ["privateSearch","labels","customFolders","draftAutosave","outboxLifecycle","externalIntegrationsSurface","securityHandoffSurface","walletHandoffSurface"]): errors.append("MAIL-2.30 desktop feature coverage drifted")
+    if desktop_ui.get("messageBodyRendering")!="INERT_TEXT_CONTENT" or desktop_ui.get("settingsCenter") is not False or desktop_ui.get("settingsCenterDeferredTo")!="MAIL-2.31": errors.append("MAIL-2.30 desktop privacy/settings boundary drifted")
+    if desktop_ui.get("newBackendAuthority") is not False or desktop_ui.get("publicIndexing") is not False or desktop_ui.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.30 desktop authority/privacy drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
     if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
@@ -482,6 +488,10 @@ for token in ["/v1/connectors/signal/deep-sync/status","CONDITION_UNSATISFIED","
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
+for token in ['id="desktop-mail-ui"','data-folder="INBOX"','data-folder="SENT"','data-view="drafts"','data-view="outbox"','data-folder="ARCHIVE"','data-folder="JUNK"','data-folder="TRASH"','data-search-view="unread"','data-search-view="starred"','data-view="conversations"','data-view="integrations"',"loadMailbox","searchMailbox","loadLabelsAndFolders","loadOutbox","loadConversations","updateCurrentMailbox","restoreCurrent","deleteCurrent","grid-template-columns:240px minmax(320px,420px) minmax(420px,1fr)"]:
+    if token not in web: errors.append("MAIL-2.30 full desktop UI invariant missing: "+token)
+for forbidden in ["body.innerHTML=d.body","reader.innerHTML=d.body","document.write(d.body)"]:
+    if forbidden in web: errors.append("MAIL-2.30 private message body reaches active HTML sink: "+forbidden)
 
 if errors:
     print("420Mail audit qualification FAILED")
@@ -522,4 +532,5 @@ print("MAIL-2.26 unified integrations inbox: qualified by app-scoped checks")
 print("MAIL-2.27 cross-platform verified identity: qualified by app-scoped checks")
 print("MAIL-2.28 integration-specific filters: qualified by app-scoped checks")
 print("MAIL-2.29 unified notification routing: qualified by app-scoped checks")
+print("MAIL-2.30 full desktop mail UI: qualified by app-scoped checks")
 

@@ -268,11 +268,10 @@ contract MediaPhase1PayCompute420Test {
         _setComputeAccepted(60 ether, 60 ether);
 
         adapter.bindComputeFunding(mediaJob, COMPUTE_JOB_ID, GRAPH);
-        (, bytes32 ref, bytes32 graph, bytes32 providerId, bytes32 resourceId,, address beneficiary, uint256 ceiling,) =
-            adapter.binding(mediaJob);
-        require(ref == COMPUTE_JOB_ID && graph == GRAPH, "compute binding ref");
-        require(providerId == PROVIDER_ID && resourceId == RESOURCE_ID, "compute identity");
-        require(beneficiary == BENEFICIARY && ceiling == 60 ether, "compute economics");
+        MediaPayComputeAdapter420.Binding memory b = adapter.binding(mediaJob);
+        require(b.externalRef == COMPUTE_JOB_ID && b.graphHash == GRAPH, "compute binding ref");
+        require(b.providerId == PROVIDER_ID && b.resourceId == RESOURCE_ID, "compute identity");
+        require(b.beneficiary == BENEFICIARY && b.fundedCeiling == 60 ether, "compute economics");
 
         bytes32 other = keccak256("compute-graph-fail");
         _createAndAccept(other);

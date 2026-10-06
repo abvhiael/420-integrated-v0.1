@@ -581,7 +581,48 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.14 — Cannabis taxonomy
 
-Define canonical cannabis-compatibility vocabulary without turning those fields into public/tokenized identity.
+**Purpose:** define canonical cannabis-compatibility vocabulary and semantic boundaries without turning cannabis-related fields into public, tokenized, medical, legal, marketplace, or reputation identity.
+
+**Canonical requirements:**
+
+1. Record PB-CANNABIS-001 through PB-CANNABIS-040.
+2. Define optional private vocabulary for use status/frequency, methods, social context, environment boundaries, partner compatibility, cannabis interests, and optional knowledge/enthusiasm.
+3. Treat NON_USER and PREFER_NOT_TO_SAY as valid first-class states and prohibit coercive assumptions about consumption.
+4. Keep cannabis fields private by default and subordinate to PB-0.4 privacy, PB-0.11 deletion, PB-0.12 lifecycle, and PB-0.13 matching rules.
+5. Prevent Wallet, 420Identity, 420Names, Registry, AppStore, Search, Explorer, Analytics, public chain, deterministic hashes, tokens, NFTs, payments, staking, or transaction history from becoming cannabis identity authority.
+6. Prohibit cannabis similarity from creating consent and prohibit cannabis fields from bypassing block, safety, lifecycle, eligibility, visibility, or deletion.
+7. Prohibit public/purchasable cannabis desirability or reputation scoring.
+8. Prohibit medical, legal, impairment, or professional-expertise conclusions from ordinary cannabis taxonomy fields.
+9. Prohibit cannabis-related coercion and unauthorized marketplace/brokering semantics.
+10. Define a taxonomy-extension decision rule covering purpose, type, privacy, visibility, matching use, prohibited inference, retention/deletion, safety/legal/health ambiguity, economic influence, and public representation.
+11. Do not claim profile implementation, matching implementation, token/NFT credential, public registry, API, database, contract, address, service ID, deployment, or live taxonomy in PB-0.14.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.14-CANNABIS-TAXONOMY.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.14-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.14 is not a Level 2 integration milestone; it defines vocabulary/data semantics only and introduces no executable matching/profile/shared runtime integration.
+
+**Dependencies:** PB-0.1 through PB-0.13 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.14 cannabis-taxonomy document exists;
+- PB-CANNABIS-001 through PB-CANNABIS-040 exist exactly once and in sequence;
+- required vocabulary and first-class non-use/non-disclosure states are explicit;
+- privacy/public/token/economic/identity boundaries are explicit;
+- matching/consent/safety/lifecycle/deletion boundaries are preserved;
+- medical/legal/impairment/coercion/unauthorized-marketplace misuse is prohibited;
+- the extension decision rule is explicit;
+- no profile/matching/token-NFT/public-registry/API/database/contract/address/service-ID/deployment/live-taxonomy implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.14 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.15 — Visibility model
 

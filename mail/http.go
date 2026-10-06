@@ -3,6 +3,7 @@ package mail
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,11 +12,37 @@ import (
 type AuthenticateFunc func(*http.Request) (string, error)
 
 type HTTPHandler struct {
-	Service      *Service
-	Authenticate AuthenticateFunc
+	Service          *Service
+	Authenticate     AuthenticateFunc
+	Onboarding       *OnboardingService
+	Security         *SecurityService
+	WalletActions    *WalletActionService
+	Connectors       *ConnectorService
+	DiscordSync      *DiscordSyncService
+	TelegramSync     *TelegramSyncService
+	DiscordDelivery  *DiscordDeliveryService
+	TelegramDelivery *TelegramDeliveryService
+	DiscordWallet    *DiscordWalletVerificationService
+	SignalShare      *SignalShareService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/v1/onboarding/") {
+		if h.Onboarding == nil {
+			writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail onboarding unavailable")
+			return
+		}
+		h.onboarding(w, r)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/connectors/webhooks/") {
+		if h.Connectors == nil {
+			writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail connectors unavailable")
+			return
+		}
+		h.connectorWebhook(w, r)
+		return
+	}
 	if h.Service == nil || h.Authenticate == nil {
 		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail service unavailable")
 		return
@@ -30,6 +57,10 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.send(w, r, actor)
 	case r.Method == http.MethodGet && r.URL.Path == "/v1/inbox":
 		h.inbox(w, r, actor)
+	case r.Method == http.MethodGet && r.URL.Path == "/v1/integrations/inbox":
+		h.integrationsInbox(w, r, actor)
+	case r.Method == http.MethodGet && r.URL.Path == "/v1/integrations/identity":
+		h.crossPlatformIdentity(w, r, actor)
 	case r.URL.Path == "/v1/labels" || strings.HasPrefix(r.URL.Path, "/v1/labels/"):
 		h.labels(w, r, actor)
 	case r.URL.Path == "/v1/custom-folders" || strings.HasPrefix(r.URL.Path, "/v1/custom-folders/"):
@@ -48,6 +79,28 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.conversations(w, r, actor)
 	case r.URL.Path == "/v1/outbox" || strings.HasPrefix(r.URL.Path, "/v1/outbox/"):
 		h.outbox(w, r, actor)
+	case r.URL.Path == "/v1/security" || strings.HasPrefix(r.URL.Path, "/v1/security/"):
+		h.security(w, r, actor)
+	case r.URL.Path == "/v1/wallet/actions" || r.URL.Path == "/v1/wallet/verifications":
+		h.walletActions(w, r, actor)
+	case r.URL.Path == "/v1/connectors/providers" || r.URL.Path == "/v1/connectors/link" || r.URL.Path == "/v1/connectors/unlink" || r.URL.Path == "/v1/connectors/pull" || r.URL.Path == "/v1/connectors/push":
+		h.connectors(w, r, actor)
+	case r.URL.Path == "/v1/connectors/discord/sync":
+		h.discordSync(w, r, actor)
+	case r.URL.Path == "/v1/connectors/telegram/sync":
+		h.telegramSync(w, r, actor)
+	case r.URL.Path == "/v1/connectors/discord/deliver":
+		h.discordDeliver(w, r, actor)
+	case r.URL.Path == "/v1/connectors/telegram/deliver":
+		h.telegramDeliver(w, r, actor)
+	case r.URL.Path == "/v1/connectors/discord/wallet/challenge" || r.URL.Path == "/v1/connectors/discord/wallet/verify":
+		h.discordWallet(w, r, actor)
+	case r.URL.Path == "/v1/connectors/signal/boundary":
+		h.signalBoundary(w, r, actor)
+	case r.URL.Path == "/v1/connectors/signal/share":
+		h.signalShare(w, r, actor)
+	case r.URL.Path == "/v1/connectors/signal/deep-sync/status":
+		h.signalDeepSyncStatus(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -57,6 +110,626 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
 	}
+}
+
+func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	defer r.Body.Close()
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxOnboardingCredentialBytes+4096))
+	dec.DisallowUnknownFields()
+	var (
+		result OnboardingResult
+		err    error
+	)
+	switch r.URL.Path {
+	case "/v1/onboarding/google":
+		var req GoogleOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.Google(r.Context(), req)
+		}
+	case "/v1/onboarding/apple":
+		var req AppleOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.Apple(r.Context(), req)
+		}
+	case "/v1/onboarding/passkey":
+		var req PasskeyOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.Passkey(r.Context(), req)
+		}
+	case "/v1/onboarding/wallet":
+		var req WalletOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.ExistingWallet(r.Context(), req)
+		}
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	if err != nil {
+		var syntaxErr *json.SyntaxError
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &syntaxErr) || errors.As(err, &maxBytesErr) || strings.Contains(err.Error(), "json: unknown field") || errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		if errors.Is(err, ErrInvalidInput) {
+			writeServiceError(w, err)
+			return
+		}
+		if errors.Is(err, ErrOnboardingInvalidResult) {
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet/identity onboarding authority returned an invalid result")
+			return
+		}
+		if strings.Contains(err.Error(), "invalid JSON") {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) signalDeepSyncStatus(w http.ResponseWriter, r *http.Request, actor string) {
+	if strings.TrimSpace(actor) == "" {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	status := CanonicalSignalDeepSyncStatus()
+	if err := validateSignalDeepSyncStatus(status); err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "signal deep-sync gate invalid")
+		return
+	}
+	writeJSON(w, http.StatusOK, status)
+}
+
+func (h HTTPHandler) signalShare(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.SignalShare == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "signal share unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req SignalShareRequest
+	if !decodeStrictJSON(w, r, MaxBodyBytes+MaxSignalShareNoteBytes+8192, &req) {
+		return
+	}
+	out, err := h.SignalShare.Deliver(r.Context(), actor, req)
+	if err != nil {
+		if errors.Is(err, ErrSignalShareInvalidResult) {
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "signal share authority returned an invalid result")
+			return
+		}
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) signalBoundary(w http.ResponseWriter, r *http.Request, actor string) {
+	if strings.TrimSpace(actor) == "" {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	boundary := CanonicalSignalIntegrationBoundary()
+	if err := validateSignalIntegrationBoundary(boundary); err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "signal integration boundary invalid")
+		return
+	}
+	writeJSON(w, http.StatusOK, boundary)
+}
+
+func (h HTTPHandler) discordWallet(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.DiscordWallet == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "discord wallet verification unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	switch r.URL.Path {
+	case "/v1/connectors/discord/wallet/challenge":
+		var req DiscordWalletChallengeRequest
+		if !decodeStrictJSON(w, r, MaxWalletVerificationBytes+4096, &req) {
+			return
+		}
+		out, err := h.DiscordWallet.Challenge(r.Context(), actor, req)
+		if err != nil {
+			writeDiscordWalletError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/connectors/discord/wallet/verify":
+		var req DiscordWalletVerificationRequest
+		if !decodeStrictJSON(w, r, MaxWalletVerificationBytes+4096, &req) {
+			return
+		}
+		out, err := h.DiscordWallet.Verify(r.Context(), actor, req)
+		if err != nil {
+			writeDiscordWalletError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+	}
+}
+
+func writeDiscordWalletError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrDiscordWalletConflict):
+		writeError(w, http.StatusConflict, "DISCORD_WALLET_CONFLICT", err.Error())
+	case errors.Is(err, ErrWalletInvalidResult):
+		writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet verification authority returned an invalid result")
+	default:
+		writeConnectorError(w, err)
+	}
+}
+
+func (h HTTPHandler) telegramDeliver(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.TelegramDelivery == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "telegram delivery unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req TelegramDeliveryRequest
+	if !decodeStrictJSON(w, r, MaxTelegramDeliveryContentBytes+8192, &req) {
+		return
+	}
+	out, err := h.TelegramDelivery.Deliver(r.Context(), actor, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrTelegramDeliveryConflict):
+			writeError(w, http.StatusConflict, "TELEGRAM_DELIVERY_CONFLICT", err.Error())
+		case errors.Is(err, ErrTelegramInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "telegram delivery authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) discordDeliver(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.DiscordDelivery == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "discord delivery unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req DiscordDeliveryRequest
+	if !decodeStrictJSON(w, r, MaxDiscordDeliveryContentBytes+8192, &req) {
+		return
+	}
+	out, err := h.DiscordDelivery.Deliver(r.Context(), actor, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrDiscordDeliveryConflict):
+			writeError(w, http.StatusConflict, "DISCORD_DELIVERY_CONFLICT", err.Error())
+		case errors.Is(err, ErrDiscordInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "discord delivery authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) telegramSync(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.TelegramSync == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "telegram sync unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req struct {
+		ConnectionID string `json:"connection_id"`
+	}
+	if !decodeStrictJSON(w, r, 4096, &req) {
+		return
+	}
+	out, err := h.TelegramSync.Sync(r.Context(), actor, req.ConnectionID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrTelegramSyncConflict):
+			writeError(w, http.StatusConflict, "TELEGRAM_SYNC_CONFLICT", err.Error())
+		case errors.Is(err, ErrTelegramInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "telegram sync authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) discordSync(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.DiscordSync == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "discord sync unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req struct {
+		ConnectionID string `json:"connection_id"`
+	}
+	if !decodeStrictJSON(w, r, 4096, &req) {
+		return
+	}
+	out, err := h.DiscordSync.Sync(r.Context(), actor, req.ConnectionID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrDiscordSyncConflict):
+			writeError(w, http.StatusConflict, "DISCORD_SYNC_CONFLICT", err.Error())
+		case errors.Is(err, ErrDiscordInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "discord sync authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) connectors(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.Connectors == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail connectors unavailable")
+		return
+	}
+	switch r.URL.Path {
+	case "/v1/connectors/providers":
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		writeJSON(w, http.StatusOK, h.Connectors.Providers())
+	case "/v1/connectors/link":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req ConnectorLinkRequest
+		if !decodeStrictJSON(w, r, MaxConnectorOpaqueBytes+4096, &req) {
+			return
+		}
+		out, err := h.Connectors.Link(r.Context(), actor, req)
+		if err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/connectors/unlink":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req struct {
+			Provider     string `json:"provider"`
+			ConnectionID string `json:"connection_id"`
+		}
+		if !decodeStrictJSON(w, r, 4096, &req) {
+			return
+		}
+		if err := h.Connectors.Unlink(r.Context(), actor, req.Provider, req.ConnectionID); err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	case "/v1/connectors/pull":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req ConnectorPullRequest
+		if !decodeStrictJSON(w, r, MaxConnectorOpaqueBytes+4096, &req) {
+			return
+		}
+		out, err := h.Connectors.Pull(r.Context(), actor, req)
+		if err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/connectors/push":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req ConnectorPushRequest
+		if !decodeStrictJSON(w, r, MaxConnectorPayloadBytes+8192, &req) {
+			return
+		}
+		out, err := h.Connectors.Push(r.Context(), actor, req)
+		if err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+	}
+}
+
+func (h HTTPHandler) connectorWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	provider := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/connectors/webhooks/"), "/")
+	if provider == "" || strings.Contains(provider, "/") {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	defer r.Body.Close()
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, MaxConnectorPayloadBytes))
+	if err != nil || len(body) == 0 {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid connector webhook")
+		return
+	}
+	headers := make(map[string]string, len(r.Header))
+	for key, values := range r.Header {
+		if len(values) > 0 {
+			headers[strings.ToLower(key)] = values[0]
+		}
+	}
+	out, err := h.Connectors.VerifyWebhook(r.Context(), ConnectorWebhookRequest{
+		Provider: provider,
+		Headers:  headers,
+		Payload:  string(body),
+	})
+	if err != nil {
+		writeConnectorError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func writeConnectorError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrInvalidInput):
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+	case errors.Is(err, ErrUnauthorized):
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", err.Error())
+	case errors.Is(err, ErrConnectorNotFound):
+		writeError(w, http.StatusNotFound, "CONNECTOR_NOT_FOUND", err.Error())
+	case errors.Is(err, ErrConnectorUnsupported):
+		writeError(w, http.StatusConflict, "CONNECTOR_UNSUPPORTED", err.Error())
+	case errors.Is(err, ErrConnectorConflict):
+		writeError(w, http.StatusConflict, "CONNECTOR_CONFLICT", err.Error())
+	case errors.Is(err, ErrConnectorInvalidResult):
+		writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "connector authority returned an invalid result")
+	default:
+		writeServiceError(w, err)
+	}
+}
+
+func (h HTTPHandler) walletActions(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.WalletActions == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail wallet actions unavailable")
+		return
+	}
+	switch r.URL.Path {
+	case "/v1/wallet/actions":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req WalletActionRequest
+		if !decodeStrictJSON(w, r, MaxWalletCalldataBytes+8192, &req) {
+			return
+		}
+		out, err := h.WalletActions.Prepare(r.Context(), actor, req)
+		if err != nil {
+			if errors.Is(err, ErrWalletInvalidResult) {
+				writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet action authority returned an invalid result")
+				return
+			}
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/wallet/verifications":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req WalletVerificationRequest
+		if !decodeStrictJSON(w, r, MaxWalletVerificationBytes+4096, &req) {
+			return
+		}
+		out, err := h.WalletActions.Verify(r.Context(), actor, req)
+		if err != nil {
+			if errors.Is(err, ErrWalletInvalidResult) {
+				writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet verification authority returned an invalid result")
+				return
+			}
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+	}
+}
+
+func (h HTTPHandler) security(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.Security == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail security unavailable")
+		return
+	}
+	if r.URL.Path == "/v1/security" {
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		state, err := h.Security.Snapshot(r.Context(), actor)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if r.URL.Path == "/v1/security/passkeys" {
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req PasskeyEnrollmentRequest
+		if !decodeStrictJSON(w, r, MaxSecurityProofBytes+4096, &req) {
+			return
+		}
+		state, err := h.Security.EnrollPasskey(r.Context(), actor, req)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/passkeys/") {
+		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/passkeys/"), "/")
+		if id == "" || strings.Contains(id, "/") {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		if r.Method != http.MethodDelete {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		state, err := h.Security.RevokePasskey(r.Context(), actor, id)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if r.URL.Path == "/v1/security/devices" {
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req DeviceEnrollmentRequest
+		if !decodeStrictJSON(w, r, MaxSecurityProofBytes+4096, &req) {
+			return
+		}
+		state, err := h.Security.EnrollDevice(r.Context(), actor, req)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/devices/") {
+		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/devices/"), "/")
+		if id == "" || strings.Contains(id, "/") {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		if r.Method != http.MethodDelete {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		state, err := h.Security.RevokeDevice(r.Context(), actor, id)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if r.URL.Path == "/v1/security/recovery" {
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req RecoveryRequest
+		if !decodeStrictJSON(w, r, 16<<10, &req) {
+			return
+		}
+		state, err := h.Security.Recovery(r.Context(), actor, req)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/sessions/") {
+		rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/sessions/"), "/")
+		parts := strings.Split(rest, "/")
+		if len(parts) != 2 || parts[0] == "" || parts[1] != "revoke" || r.Method != http.MethodPost {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		state, err := h.Security.RevokeSession(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/alerts/") {
+		rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/alerts/"), "/")
+		parts := strings.Split(rest, "/")
+		if len(parts) != 2 || parts[0] == "" || parts[1] != "ack" || r.Method != http.MethodPost {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		state, err := h.Security.AcknowledgeAlert(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func decodeStrictJSON(w http.ResponseWriter, r *http.Request, limit int64, out any) bool {
+	defer r.Body.Close()
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, limit))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(out); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+		return false
+	}
+	var extra any
+	if err := dec.Decode(&extra); !errors.Is(err, io.EOF) {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+		return false
+	}
+	return true
 }
 
 func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) {
@@ -74,6 +747,30 @@ func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) 
 		return
 	}
 	writeJSON(w, http.StatusCreated, msg)
+}
+
+func (h HTTPHandler) crossPlatformIdentity(w http.ResponseWriter, r *http.Request, actor string) {
+	out, err := h.Service.CrossPlatformIdentity(r.Context(), actor)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) integrationsInbox(w http.ResponseWriter, r *http.Request, actor string) {
+	limit := DefaultPageSize
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			limit = n
+		}
+	}
+	page, err := h.Service.IntegrationsInbox(r.Context(), actor, r.URL.Query().Get("cursor"), limit)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
 }
 
 func (h HTTPHandler) inbox(w http.ResponseWriter, r *http.Request, actor string) {

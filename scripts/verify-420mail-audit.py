@@ -41,7 +41,7 @@ if profile_path.is_file():
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
     store=profile.get("metadataStore",{})
     if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
-    if store.get("schemaVersion")!=8 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("schemaVersion")!=11 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
     if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder","owner_conversation","owner_draft"]: errors.append("Mail durable store index drifted")
     if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
     if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
@@ -97,6 +97,143 @@ if profile_path.is_file():
     if delivery.get("maxAttempts")!=3 or delivery.get("maxActiveItemsPerSender")!=1000: errors.append("MAIL-2.10 retry/capacity bounds drifted")
     if delivery.get("deterministicIdempotency") is not True or delivery.get("crashRecovery")!="SENDING_REPROCESS_SAFE": errors.append("MAIL-2.10 queue safety drifted")
     if delivery.get("publicIndexing") is not False or delivery.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.10 privacy boundary drifted")
+    onboarding=profile.get("onboarding",{})
+    if onboarding.get("enabled") is not True: errors.append("MAIL-2.11 onboarding capability drifted")
+    if onboarding.get("methods")!=["GOOGLE","APPLE","PASSKEY","EXISTING_WALLET"]: errors.append("MAIL-2.11 onboarding methods drifted")
+    if onboarding.get("authority")!="CANONICAL_WALLET_IDENTITY_ADAPTER" or onboarding.get("sessionIssuer")!="WALLET_IDENTITY_AUTHORITY": errors.append("MAIL-2.11 Wallet/Identity authority boundary drifted")
+    if onboarding.get("publicEntryPoint") is not True or onboarding.get("identityBindingRequired") is not True or onboarding.get("walletBindingRequired") is not True: errors.append("MAIL-2.11 onboarding binding drifted")
+    if onboarding.get("replayProtection")!="AUTHORITY_ADAPTER_REQUIRED": errors.append("MAIL-2.11 replay-protection boundary drifted")
+    if onboarding.get("custodialSigning") is not False or onboarding.get("privateKeyInput") is not False or onboarding.get("seedPhraseInput") is not False or onboarding.get("passkeyPrivateMaterialInput") is not False: errors.append("MAIL-2.11 custodial boundary drifted")
+    if onboarding.get("credentialPersistence") is not False or onboarding.get("publicIndexing") is not False or onboarding.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.11 onboarding privacy boundary drifted")
+    if "420 Wallet" not in profile.get("dependencies",[]): errors.append("MAIL-2.11 Wallet dependency missing")
+    security=profile.get("passkeyFirstSecurity",{})
+    if security.get("enabled") is not True or security.get("authority")!="CANONICAL_WALLET_IDENTITY_SECURITY_ADAPTER" or security.get("authenticatedOwnerOnly") is not True: errors.append("MAIL-2.12 security authority boundary drifted")
+    passkeys=security.get("passkeys",{})
+    if passkeys.get("enabled") is not True or passkeys.get("enrollment") is not True or passkeys.get("revocation") is not True: errors.append("MAIL-2.12 passkey capability drifted")
+    if passkeys.get("authorizationEpochBound") is not True or passkeys.get("staleEpochActiveRejected") is not True or passkeys.get("privateMaterialInput") is not False: errors.append("MAIL-2.12 passkey epoch/private-material boundary drifted")
+    devices=security.get("devices",{})
+    if devices.get("enrollment") is not True or devices.get("revocation") is not True or devices.get("lostDeviceResponse")!="REVOKE_BOUND_AUTHORIZATION_THROUGH_WALLET_AUTHORITY": errors.append("MAIL-2.12 device security drifted")
+    recovery=security.get("recovery",{})
+    if recovery.get("model")!="SMARTACCOUNT420_TIMELOCKED" or recovery.get("actions")!=["SET_AUTHORITY","PROPOSE","CANCEL","FINALIZE"] or recovery.get("localTimelockOverride") is not False or recovery.get("signingAuthority")!="WALLET_ONLY": errors.append("MAIL-2.12 recovery authority drifted")
+    sessions=security.get("sessions",{})
+    if sessions.get("listing") is not True or sessions.get("revocation") is not True or sessions.get("authorizationEpochBound") is not True or sessions.get("staleEpochActiveRejected") is not True: errors.append("MAIL-2.12 session security drifted")
+    alerts=security.get("alerts",{})
+    if alerts.get("listing") is not True or alerts.get("acknowledgement") is not True or alerts.get("authority")!="WALLET_IDENTITY_SECURITY_AUTHORITY": errors.append("MAIL-2.12 security alerts drifted")
+    if security.get("securityStatePersistence")!="CANONICAL_AUTHORITY_ONLY" or security.get("credentialPersistence") is not False or security.get("sessionSecretPersistence") is not False or security.get("publicIndexing") is not False or security.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.12 security persistence/privacy boundary drifted")
+    wallet=profile.get("walletFunctions",{})
+    if wallet.get("enabled") is not True or wallet.get("authority")!="CANONICAL_WALLET_SMARTACCOUNT_ADAPTER" or wallet.get("authenticatedOwnerOnly") is not True: errors.append("MAIL-2.13 wallet authority boundary drifted")
+    if wallet.get("actions")!=["TRANSACTION","MESSAGE_SIGNATURE"] or wallet.get("prepareIntentOnly") is not True: errors.append("MAIL-2.13 wallet action inventory drifted")
+    if wallet.get("signing")!="WALLET_ONLY" or wallet.get("submission")!="WALLET_ONLY" or wallet.get("simulation")!="WALLET_ONLY": errors.append("MAIL-2.13 wallet signing/submission boundary drifted")
+    if wallet.get("chainValidation")!="AUTHORITY_REQUIRED" or wallet.get("authorizationEpoch")!="AUTHORITY_REQUIRED" or wallet.get("explicitWalletApprovalRequired") is not True: errors.append("MAIL-2.13 wallet authorization boundary drifted")
+    verification=wallet.get("verification",{})
+    if verification.get("kinds")!=["TRANSACTION","SIGNATURE"] or verification.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.13 verification inventory drifted")
+    if verification.get("canonicalEvidenceRequired") is not True or verification.get("submissionAckIsCompletion") is not False or verification.get("finalizedSeparateFromVerified") is not True: errors.append("MAIL-2.13 canonical verification boundary drifted")
+    if wallet.get("privateKeyInput") is not False or wallet.get("seedPhraseInput") is not False or wallet.get("passkeyPrivateMaterialInput") is not False: errors.append("MAIL-2.13 wallet secret-input boundary drifted")
+    if wallet.get("credentialPersistence") is not False or wallet.get("actionPersistence") is not False or wallet.get("verificationEvidencePersistence") is not False or wallet.get("publicIndexing") is not False or wallet.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.13 wallet persistence/privacy boundary drifted")
+    connectors=profile.get("externalIntegrations",{})
+    if connectors.get("enabled") is not True or connectors.get("architecture")!="PROVIDER_NEUTRAL_CONNECTOR_REGISTRY" or connectors.get("providerSpecificLogicInCore") is not False: errors.append("MAIL-2.14 connector architecture drifted")
+    if connectors.get("capabilities")!=["LINK","PULL","PUSH","WEBHOOK","WALLET_VERIFY"]: errors.append("MAIL-2.14 connector capability inventory drifted")
+    if connectors.get("ownerScopedConnections") is not True or connectors.get("authorizationInput")!="OPAQUE_SECURE_BROKER_REFERENCE_ONLY": errors.append("MAIL-2.14 connector authorization boundary drifted")
+    if connectors.get("rawAccessTokenInput") is not False or connectors.get("rawRefreshTokenInput") is not False or connectors.get("rawClientSecretInput") is not False: errors.append("MAIL-2.14 connector raw-secret boundary drifted")
+    if connectors.get("webhookAuthentication")!="ADAPTER_VERIFIES_TRANSPORT_HEADERS_AND_PAYLOAD" or connectors.get("webhookSessionAuth") is not False: errors.append("MAIL-2.14 webhook authority boundary drifted")
+    if connectors.get("pullCursorOpaque") is not True or connectors.get("pushIdempotencyRequired") is not True or connectors.get("providerIsolation") is not True or connectors.get("capabilityDeclarationRequired") is not True: errors.append("MAIL-2.14 connector lifecycle boundary drifted")
+    if connectors.get("credentialPersistence")!="CONNECTOR_ADAPTER_OR_SECURE_BROKER_ONLY" or connectors.get("mailMetadataCredentialPersistence") is not False or connectors.get("publicIndexing") is not False or connectors.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.14 connector persistence/privacy boundary drifted")
+    discord=profile.get("discordAccountLinking",{})
+    if discord.get("enabled") is not True or discord.get("provider")!="discord" or discord.get("connectorCapability")!="LINK": errors.append("MAIL-2.15 Discord connector boundary drifted")
+    if discord.get("authorization")!="OPAQUE_SECURE_BROKER_REFERENCE" or discord.get("requiredScopes")!=["identify"] or discord.get("verifiedProviderIdentityRequired") is not True: errors.append("MAIL-2.15 Discord authorization drifted")
+    if discord.get("externalAccountId")!="DISCORD_SNOWFLAKE" or discord.get("ownerBinding")!="AUTHENTICATED_420MAIL_IDENTITY" or discord.get("unlinkSupported") is not True or discord.get("nonCustodial") is not True: errors.append("MAIL-2.15 Discord identity binding drifted")
+    if discord.get("rawAccessTokenInput") is not False or discord.get("rawRefreshTokenInput") is not False or discord.get("rawClientSecretInput") is not False: errors.append("MAIL-2.15 Discord raw-secret boundary drifted")
+    if discord.get("credentialPersistence")!="DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY" or discord.get("mailMetadataCredentialPersistence") is not False: errors.append("MAIL-2.15 Discord credential persistence drifted")
+    dsync=profile.get("discordSync",{})
+    if dsync.get("enabled") is not True or dsync.get("provider")!="discord" or dsync.get("connectorCapability")!="PULL": errors.append("MAIL-2.16 Discord sync capability drifted")
+    if dsync.get("authenticatedOwnerOnly") is not True or dsync.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dsync.get("messageSource")!="discord" or dsync.get("recipientFolder")!="INBOX": errors.append("MAIL-2.16 Discord sync owner/materialization drifted")
+    if dsync.get("bodyStorage")!="PRIVATE_OFF_CHAIN_REFERENCE" or dsync.get("externalIdempotency")!="OWNER_CONNECTION_MESSAGE_ID" or dsync.get("cursorPersistence")!="DURABLE_OWNER_CONNECTION_CURSOR" or dsync.get("restartRecovery") is not True: errors.append("MAIL-2.16 Discord sync durability drifted")
+    if dsync.get("orderedImport")!="CREATED_AT_ASC_MESSAGE_ID_ASC" or dsync.get("rulesEngineApplied") is not True or dsync.get("trustControlsApplied") is not True or dsync.get("spamProtectionApplied") is not True or dsync.get("mutedAndQuarantinedSuppressNotification") is not True: errors.append("MAIL-2.16 Discord sync mailbox protection drifted")
+    if dsync.get("publicIndexing") is not False or dsync.get("messageBodiesOnChain") is not False or dsync.get("delivery") is not False or dsync.get("walletVerification") is not False: errors.append("MAIL-2.16 Discord sync privacy/scope drifted")
+    ddelivery=profile.get("discordDelivery",{})
+    if ddelivery.get("enabled") is not True or ddelivery.get("provider")!="discord" or ddelivery.get("connectorCapability")!="PUSH": errors.append("MAIL-2.17 Discord delivery capability drifted")
+    if ddelivery.get("authenticatedOwnerOnly") is not True or ddelivery.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or ddelivery.get("destination")!="DISCORD_CHANNEL_SNOWFLAKE": errors.append("MAIL-2.17 Discord delivery owner/destination drifted")
+    if ddelivery.get("maxContentBytes")!=2000 or ddelivery.get("replyTarget")!="OPTIONAL_DISCORD_MESSAGE_SNOWFLAKE" or ddelivery.get("idempotency")!="REQUIRED_CALLER_KEY_PASSED_TO_PROVIDER_AUTHORITY": errors.append("MAIL-2.17 Discord delivery payload/idempotency drifted")
+    if ddelivery.get("providerAuthority")!="DISCORD_DELIVERY_AUTHORITY" or ddelivery.get("rawAccessTokenInput") is not False or ddelivery.get("rawRefreshTokenInput") is not False or ddelivery.get("rawClientSecretInput") is not False: errors.append("MAIL-2.17 Discord delivery authority/secret boundary drifted")
+    if ddelivery.get("credentialPersistence")!="DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY" or ddelivery.get("mailMetadataCredentialPersistence") is not False or ddelivery.get("publicIndexing") is not False or ddelivery.get("messageBodiesOnChain") is not False or ddelivery.get("walletVerification") is not False: errors.append("MAIL-2.17 Discord delivery privacy/scope drifted")
+    dwallet=profile.get("discordWalletVerification",{})
+    if dwallet.get("enabled") is not True or dwallet.get("provider")!="discord" or dwallet.get("connectorCapability")!="WALLET_VERIFY": errors.append("MAIL-2.18 Discord wallet capability drifted")
+    signal=profile.get("signalIntegrationBoundary",{})
+    if signal.get("enabled") is not True or signal.get("provider")!="signal" or signal.get("status")!="SHARE_FORWARD_ENABLED": errors.append("MAIL-2.21 Signal boundary identity/status drifted")
+    if signal.get("architecture")!="EXTERNAL_SIGNAL_TRANSPORT_ADAPTER" or signal.get("transportAuthority")!="SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY": errors.append("MAIL-2.19 Signal transport authority drifted")
+    if signal.get("providerRegistrationAllowed") is not False or signal.get("mailOwnsSignalIdentity") is not False or signal.get("mailStoresProviderSecrets") is not False: errors.append("MAIL-2.19 Signal ownership/registration boundary drifted")
+    if signal.get("outboundNotifications") is not True: errors.append("MAIL-2.20 Signal notifications not enabled")
+    if signal.get("shareAndForward") is not True: errors.append("MAIL-2.21 Signal share/forward not enabled")
+    if any(signal.get(k) is not False for k in ["accountLinking","inboundSync","webhookIngestion","deepSync"]): errors.append("MAIL-2.21 pulled later Signal capabilities forward")
+    if signal.get("deepSyncCondition")!="STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED": errors.append("MAIL-2.19 Signal deep-sync gate drifted")
+    if any(signal.get(k) is not False for k in ["rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.19 Signal secret/privacy boundary drifted")
+    signal_notifications=profile.get("signalNotifications",{})
+    if signal_notifications.get("enabled") is not True or signal_notifications.get("provider")!="signal" or signal_notifications.get("transportAuthority")!="SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY": errors.append("MAIL-2.20 Signal notification authority drifted")
+    if signal_notifications.get("recipientResolution")!="EXTERNAL_SIGNAL_NOTIFICATION_AUTHORITY" or signal_notifications.get("consentResolution")!="EXTERNAL_SIGNAL_NOTIFICATION_AUTHORITY" or signal_notifications.get("sourceEvent")!="MAIL_NOTIFICATION_SINK": errors.append("MAIL-2.20 Signal notification resolution/source drifted")
+    if signal_notifications.get("notificationKind")!="NEW_MAIL" or signal_notifications.get("payloadPolicy")!="MINIMAL_METADATA_ONLY" or signal_notifications.get("title")!="New 420Mail message": errors.append("MAIL-2.20 Signal notification payload drifted")
+    if any(signal_notifications.get(k) is not False for k in ["includesMessageBody","includesSubject","includesSender","includesSource"]): errors.append("MAIL-2.20 Signal notification metadata leakage drifted")
+    if signal_notifications.get("idempotencyDomain")!="420/MAIL/SIGNAL/NOTIFICATION/V1" or signal_notifications.get("deterministicRecipientMessageBinding") is not True: errors.append("MAIL-2.20 Signal notification idempotency drifted")
+    if signal_notifications.get("preserves420Notifications") is not True or signal_notifications.get("consentSuppressionAllowed") is not True or signal_notifications.get("failureBlocksMailDelivery") is not False: errors.append("MAIL-2.20 Signal notification fanout/failure drifted")
+    if signal_notifications.get("accountLinkingRequired") is not False or signal_notifications.get("providerRegistrationAllowed") is not False: errors.append("MAIL-2.20 Signal notification boundary drifted")
+    if signal_notifications.get("shareAndForward") is not True: errors.append("MAIL-2.21 Signal notification/share boundary drifted")
+    if any(signal_notifications.get(k) is not False for k in ["inboundSync","webhookIngestion","deepSync","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.21 pulled later Signal/privacy capabilities forward")
+    signal_share=profile.get("signalShareAndForward",{})
+    if signal_share.get("enabled") is not True or signal_share.get("provider")!="signal" or signal_share.get("transportAuthority")!="SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY": errors.append("MAIL-2.21 Signal share authority drifted")
+    if signal_share.get("sourceAuthorization")!="AUTHENTICATED_OWNER_LIVE_MAILBOX_COPY" or signal_share.get("destinationResolution")!="OPAQUE_DESTINATION_REFERENCE_EXTERNAL_AUTHORITY": errors.append("MAIL-2.21 Signal share authorization/destination drifted")
+    if signal_share.get("supportedModes")!=["SHARE","FORWARD"] or signal_share.get("shareIncludesSubject") is not False or signal_share.get("forwardIncludesSubject") is not True or signal_share.get("includesBody") is not True: errors.append("MAIL-2.21 Signal share payload semantics drifted")
+    if signal_share.get("includesSender") is not False or signal_share.get("includesSourceApplication") is not False or signal_share.get("optionalNote") is not True or signal_share.get("maxNoteBytes")!=2048 or signal_share.get("maxDestinationRefBytes")!=512: errors.append("MAIL-2.21 Signal share metadata/bounds drifted")
+    if signal_share.get("idempotencyRequired") is not True or signal_share.get("providerCredentialInput") is not False or signal_share.get("phoneNumberCredentialInput") is not False: errors.append("MAIL-2.21 Signal share idempotency/credential drifted")
+    if signal_share.get("accountLinkingRequired") is not False or signal_share.get("providerRegistrationAllowed") is not False: errors.append("MAIL-2.21 Signal share connector boundary drifted")
+    if any(signal_share.get(k) is not False for k in ["inboundSync","webhookIngestion","deepSync","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.21 pulled Signal sync/privacy capabilities forward")
+    signal_deep=profile.get("signalDeepSync",{})
+    if signal_deep.get("enabled") is not False or signal_deep.get("provider")!="signal" or signal_deep.get("status")!="CONDITION_UNSATISFIED": errors.append("MAIL-2.22 Signal deep-sync gate status drifted")
+    if signal_deep.get("condition")!="STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED" or signal_deep.get("supportedSurfaceFound") is not False: errors.append("MAIL-2.22 Signal deep-sync condition drifted")
+    if signal_deep.get("missingEvidence")!=["SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT","STABLE_INBOUND_SYNC_TRANSPORT","ACCOUNT_OR_DEVICE_BINDING_AUTHORITY","REPLAY_AND_CURSOR_SEMANTICS","PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT"]: errors.append("MAIL-2.22 Signal deep-sync missing-evidence inventory drifted")
+    if signal_deep.get("inboundSync") is not False or signal_deep.get("webhookIngestion") is not False or signal_deep.get("providerRegistrationAllowed") is not False: errors.append("MAIL-2.22 Signal deep-sync operational capability drifted")
+    if signal_deep.get("rawCredentialInput") is not False or signal_deep.get("publicIndexing") is not False or signal_deep.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.22 Signal deep-sync privacy boundary drifted")
+    telegram=profile.get("telegramAccountLinking",{})
+    if telegram.get("enabled") is not True or telegram.get("provider")!="telegram" or telegram.get("connectorCapability")!="LINK": errors.append("MAIL-2.23 Telegram link capability drifted")
+    if telegram.get("authority")!="TELEGRAM_LINK_AUTHORITY" or telegram.get("authorizationRef")!="OPAQUE_EXTERNAL_AUTHORIZATION_REFERENCE" or telegram.get("accountHintAuthoritative") is not False: errors.append("MAIL-2.23 Telegram authority/reference drifted")
+    if telegram.get("userIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram.get("verifiedAccountRequired") is not True or telegram.get("nonCustodialRequired") is not True or telegram.get("unlinkSupported") is not True: errors.append("MAIL-2.23 Telegram account invariant drifted")
+    if telegram.get("pull") is not True: errors.append("MAIL-2.24 Telegram PULL capability not enabled")
+    if telegram.get("push") is not True: errors.append("MAIL-2.25 Telegram PUSH capability not enabled")
+    if any(telegram.get(k) is not False for k in ["webhook","walletVerification"]): errors.append("MAIL-2.25 pulled later Telegram capabilities forward")
+    if any(telegram.get(k) is not False for k in ["rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.23 Telegram credential/privacy boundary drifted")
+    telegram_sync=profile.get("telegramSync",{})
+    if telegram.get("pull") is not True: errors.append("MAIL-2.24 Telegram PULL capability not enabled")
+    if telegram_sync.get("enabled") is not True or telegram_sync.get("provider")!="telegram" or telegram_sync.get("connectorCapability")!="PULL" or telegram_sync.get("authority")!="TELEGRAM_SYNC_AUTHORITY": errors.append("MAIL-2.24 Telegram sync authority/capability drifted")
+    if telegram_sync.get("requiresLinkedTelegramAccount") is not True or telegram_sync.get("connectionIdFormat")!="telegram:{user-id}": errors.append("MAIL-2.24 Telegram sync connection boundary drifted")
+    if telegram_sync.get("cursorStorage")!="DURABLE_MAIL_STORE_SCHEMA_V11" or telegram_sync.get("restartRecovery") is not True or telegram_sync.get("cursorBoundTo")!=["MAIL_IDENTITY","TELEGRAM_CONNECTION_ID"] or telegram_sync.get("maxCursorBytes")!=65536: errors.append("MAIL-2.24 Telegram cursor durability drifted")
+    if telegram_sync.get("itemKind")!="TELEGRAM_MESSAGE" or telegram_sync.get("messageIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram_sync.get("authorIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram_sync.get("chatIdFormat")!="SIGNED_DECIMAL_IDENTIFIER": errors.append("MAIL-2.24 Telegram item identity drifted")
+    if telegram_sync.get("privateBodyStorage") is not True or telegram_sync.get("mailboxMaterialization")!="RECIPIENT_INBOX" or telegram_sync.get("source")!="telegram" or telegram_sync.get("visibility")!="PRIVATE": errors.append("MAIL-2.24 Telegram materialization/privacy drifted")
+    if any(telegram_sync.get(k) is not True for k in ["deterministicMessageId","deterministicConversationId","idempotentReplay","mutationConflictRejected","permanentDeleteReplayDoesNotResurrect","trustRulesApplied","spamProtectionApplied","notificationsApplied"]): errors.append("MAIL-2.24 Telegram replay/policy invariant drifted")
+    if telegram_sync.get("push") is not True: errors.append("MAIL-2.25 Telegram sync/delivery capability drifted")
+    if any(telegram_sync.get(k) is not False for k in ["webhook","walletVerification","rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.25 pulled later Telegram/privacy capabilities forward")
+    telegram_delivery=profile.get("telegramDelivery",{})
+    if telegram_delivery.get("enabled") is not True or telegram_delivery.get("provider")!="telegram" or telegram_delivery.get("connectorCapability")!="PUSH" or telegram_delivery.get("authority")!="TELEGRAM_DELIVERY_AUTHORITY": errors.append("MAIL-2.25 Telegram delivery authority/capability drifted")
+    if telegram_delivery.get("requiresLinkedTelegramAccount") is not True or telegram_delivery.get("connectionIdFormat")!="telegram:{user-id}" or telegram_delivery.get("chatIdFormat")!="SIGNED_DECIMAL_IDENTIFIER": errors.append("MAIL-2.25 Telegram delivery connection/chat drifted")
+    if telegram_delivery.get("maxContentBytes")!=4096 or telegram_delivery.get("idempotencyRequired") is not True or telegram_delivery.get("receiptMessageIdRequired") is not True or telegram_delivery.get("receiptChatMatchRequired") is not True or telegram_delivery.get("acceptedTimestampRequired") is not True: errors.append("MAIL-2.25 Telegram delivery receipt/idempotency drifted")
+    if any(telegram_delivery.get(k) is not False for k in ["webhook","walletVerification","rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.25 Telegram delivery credential/privacy drifted")
+    unified_inbox=profile.get("unifiedIntegrationsInbox",{})
+    if unified_inbox.get("enabled") is not True or unified_inbox.get("endpoint")!="/v1/integrations/inbox" or unified_inbox.get("authenticatedOwnerOnly") is not True: errors.append("MAIL-2.26 unified integrations inbox access drifted")
+    if unified_inbox.get("canonicalMailboxView") is not True or unified_inbox.get("duplicateStore") is not False or unified_inbox.get("folder")!="INBOX": errors.append("MAIL-2.26 unified inbox canonical-state drifted")
+    if unified_inbox.get("sources")!=["discord","telegram"] or unified_inbox.get("preserveMailboxState") is not True: errors.append("MAIL-2.26 unified inbox source/state drifted")
+    if any(unified_inbox.get(k) is not False for k in ["includeDeleted","includeArchived","includeJunk","includeNative420Mail","sourceFilter","privateBodiesInline","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.26 unified inbox scope/privacy drifted")
+    if unified_inbox.get("deterministicOrdering")!="CREATED_AT_DESC_MESSAGE_ID_ASC" or unified_inbox.get("cursorPagination") is not True or unified_inbox.get("integrationSpecificFiltersDeferredTo")!="MAIL-2.28": errors.append("MAIL-2.26 unified inbox ordering/filter boundary drifted")
+    cross_identity=profile.get("crossPlatformVerifiedIdentity",{})
+    if cross_identity.get("enabled") is not True or cross_identity.get("endpoint")!="/v1/integrations/identity" or cross_identity.get("authenticatedOwnerOnly") is not True or cross_identity.get("rootIdentity")!="420MAIL_IDENTITY": errors.append("MAIL-2.27 cross-platform identity access/root drifted")
+    if cross_identity.get("evidenceSources")!={"discord":["PROVIDER_AUTHORITY_VERIFIED","WALLET_VERIFIED"],"telegram":["PROVIDER_AUTHORITY_VERIFIED"]}: errors.append("MAIL-2.27 cross-platform identity evidence drifted")
+    if cross_identity.get("assurancePrecedence")!=["WALLET_VERIFIED","PROVIDER_AUTHORITY_VERIFIED"] or cross_identity.get("walletProofProvider")!="discord": errors.append("MAIL-2.27 assurance precedence drifted")
+    if cross_identity.get("telegramWalletVerification") is not False or cross_identity.get("signalIncluded") is not False or cross_identity.get("signalExclusionReason")!="DEEP_SYNC_CONDITION_UNSATISFIED": errors.append("MAIL-2.27 provider verification boundary drifted")
+    if any(cross_identity.get(k) is not True for k in ["durableEvidenceOnly","unverifiedStatesExcluded","foreignOwnerStatesExcluded"]): errors.append("MAIL-2.27 evidence isolation drifted")
+    if cross_identity.get("deterministicOrdering")!="PROVIDER_ASC_CONNECTION_ID_ASC" or any(cross_identity.get(k) is not False for k in ["rawCredentialInput","privateKeyInput","seedPhraseInput","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.27 privacy/ordering drifted")
+    if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
+    if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
+    if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
+    if dwallet.get("durableChallengeState") is not True or dwallet.get("restartRecovery") is not True or dwallet.get("canonicalEvidenceRequired") is not True or dwallet.get("nonCustodialRequired") is not True or dwallet.get("replaySafeAfterSuccess") is not True: errors.append("MAIL-2.18 Discord wallet lifecycle drifted")
+    if dwallet.get("crossIdentityRejected") is not True or dwallet.get("crossConnectionRejected") is not True or dwallet.get("accountSubstitutionRejected") is not True: errors.append("MAIL-2.18 Discord wallet isolation drifted")
+    if dwallet.get("privateKeyInput") is not False or dwallet.get("seedPhraseInput") is not False or dwallet.get("passkeyPrivateMaterialInput") is not False or dwallet.get("providerCredentialInput") is not False or dwallet.get("verificationEvidencePersistence") is not False or dwallet.get("publicIndexing") is not False or dwallet.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.18 Discord wallet secret/privacy drifted")
+    if discord.get("webhook") is not False: errors.append("MAIL-2.15 pulled Discord webhook capability forward")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -105,7 +242,7 @@ service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file
 for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
-if "Authenticate AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
+if "AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
 if '"/v1/messages"' not in http or '"/v1/inbox"' not in http: errors.append("HTTP v1 routes missing")
 for token in ['"/v1/mailboxes/"','"mailbox"','"restore"','"unread"', "http.MethodPatch", "http.MethodDelete"]:
     if token not in http: errors.append("MAIL-2.1 HTTP lifecycle route missing: "+token)
@@ -184,11 +321,146 @@ for token in ['"/v1/outbox"',"QueueDelivery","ProcessDelivery","RetryDelivery","
     if token not in http: errors.append("MAIL-2.10 HTTP outbox surface missing: "+token)
 for token in ["QueueDelivery","ListOutbox","GetDelivery","ProcessDelivery","RetryDelivery","CancelDelivery"]:
     if token not in client: errors.append("MAIL-2.10 client outbox surface missing: "+token)
-for token in ["Deliveries","validateDeliveryData","DurableStoreSchemaVersion = 8"]:
+for token in ["Deliveries","validateDeliveryData","DiscordSync","validateDiscordSyncData","TelegramSync","validateTelegramSyncData","DiscordWalletVerifications","validateDiscordWalletVerificationData","DurableStoreSchemaVersion = 11"]:
     if token not in store: errors.append("MAIL-2.10 durable queue storage missing: "+token)
+onboarding_src=(ROOT/"mail/onboarding.go").read_text() if (ROOT/"mail/onboarding.go").is_file() else ""
+for token in ["OnboardingGoogle","OnboardingApple","OnboardingPasskey","OnboardingExistingWallet","OnboardingAuthority","OnboardingService","GoogleOnboardingRequest","AppleOnboardingRequest","PasskeyOnboardingRequest","WalletOnboardingRequest","SessionToken","NonCustodial","ErrOnboardingInvalidResult","validWalletAddress"]:
+    if token not in onboarding_src: errors.append("MAIL-2.11 onboarding invariant missing: "+token)
+for token in ['"/v1/onboarding/google"','"/v1/onboarding/apple"','"/v1/onboarding/passkey"','"/v1/onboarding/wallet"',"*OnboardingService"]:
+    if token not in http: errors.append("MAIL-2.11 HTTP onboarding surface missing: "+token)
+for token in ["GoogleOnboarding","AppleOnboarding","PasskeyOnboarding","ExistingWalletOnboarding"]:
+    if token not in client: errors.append("MAIL-2.11 client onboarding surface missing: "+token)
+security_src=(ROOT/"mail/security.go").read_text() if (ROOT/"mail/security.go").is_file() else ""
+for token in ["SecurityAuthority","SecurityService","SecurityState","PasskeySummary","DeviceSummary","SessionSummary","RecoverySummary","SecurityAlert","EnrollPasskey","RevokePasskey","EnrollDevice","RevokeDevice","RecoverySetAuthority","RecoveryPropose","RecoveryCancel","RecoveryFinalize","RevokeSession","AcknowledgeAlert","ErrSecurityInvalidResult","AuthorizationEpoch"]:
+    if token not in security_src: errors.append("MAIL-2.12 security invariant missing: "+token)
+for token in ['"/v1/security"','"/v1/security/passkeys"','"/v1/security/devices"','"/v1/security/recovery"','"/v1/security/sessions/"','"/v1/security/alerts/"',"*SecurityService"]:
+    if token not in http: errors.append("MAIL-2.12 HTTP security surface missing: "+token)
+for token in ["SecurityState","EnrollPasskey","RevokePasskey","EnrollDevice","RevokeDevice","Recovery","RevokeSession","AcknowledgeSecurityAlert"]:
+    if token not in client: errors.append("MAIL-2.12 client security surface missing: "+token)
+wallet_src=(ROOT/"mail/wallet_actions.go").read_text() if (ROOT/"mail/wallet_actions.go").is_file() else ""
+for token in ["WalletActionTransaction","WalletActionMessageSignature","WalletVerifyTransaction","WalletVerifySignature","WalletActionAuthority","WalletActionService","WalletActionRequest","WalletHandoff","WalletVerificationRequest","WalletVerification","PrepareWalletAction","VerifyWalletEvidence","RequiresApproval","NonCustodial","Canonical","Finalized","ErrWalletInvalidResult"]:
+    if token not in wallet_src: errors.append("MAIL-2.13 wallet handoff invariant missing: "+token)
+for token in ['"/v1/wallet/actions"','"/v1/wallet/verifications"',"*WalletActionService"]:
+    if token not in http: errors.append("MAIL-2.13 HTTP wallet surface missing: "+token)
+for token in ["PrepareWalletAction","VerifyWalletEvidence"]:
+    if token not in client: errors.append("MAIL-2.13 client wallet surface missing: "+token)
+connector_src=(ROOT/"mail/integrations.go").read_text() if (ROOT/"mail/integrations.go").is_file() else ""
+for token in ["ConnectorRegistry","ConnectorService","ConnectorAdapter","ConnectorDescriptor","ConnectorCapabilityLink","ConnectorCapabilityPull","ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify","ConnectorLinkRequest","ConnectorConnection","ConnectorPullRequest","ConnectorPushRequest","ConnectorWebhookRequest","ErrConnectorNotFound","ErrConnectorUnsupported","ErrConnectorInvalidResult","ErrConnectorConflict"]:
+    if token not in connector_src: errors.append("MAIL-2.14 connector invariant missing: "+token)
+for token in ['"/v1/connectors/providers"','"/v1/connectors/link"','"/v1/connectors/unlink"','"/v1/connectors/pull"','"/v1/connectors/push"','"/v1/connectors/webhooks/"',"*ConnectorService"]:
+    if token not in http: errors.append("MAIL-2.14 HTTP connector surface missing: "+token)
+for token in ["ConnectorProviders","LinkConnector","UnlinkConnector","PullConnector","PushConnector"]:
+    if token not in client: errors.append("MAIL-2.14 client connector surface missing: "+token)
+discord_src=(ROOT/"mail/discord_link.go").read_text() if (ROOT/"mail/discord_link.go").is_file() else ""
+discord_sync_src=(ROOT/"mail/discord_sync.go").read_text() if (ROOT/"mail/discord_sync.go").is_file() else ""
+discord_delivery_src=(ROOT/"mail/discord_delivery.go").read_text() if (ROOT/"mail/discord_delivery.go").is_file() else ""
+discord_wallet_src=(ROOT/"mail/discord_wallet.go").read_text() if (ROOT/"mail/discord_wallet.go").is_file() else ""
+signal_boundary_src=(ROOT/"mail/signal_boundary.go").read_text() if (ROOT/"mail/signal_boundary.go").is_file() else ""
+signal_notifications_src=(ROOT/"mail/signal_notifications.go").read_text() if (ROOT/"mail/signal_notifications.go").is_file() else ""
+signal_share_src=(ROOT/"mail/signal_share.go").read_text() if (ROOT/"mail/signal_share.go").is_file() else ""
+signal_deep_sync_gate_src=(ROOT/"mail/signal_deep_sync_gate.go").read_text() if (ROOT/"mail/signal_deep_sync_gate.go").is_file() else ""
+telegram_link_src=(ROOT/"mail/telegram_link.go").read_text() if (ROOT/"mail/telegram_link.go").is_file() else ""
+telegram_sync_src=(ROOT/"mail/telegram_sync.go").read_text() if (ROOT/"mail/telegram_sync.go").is_file() else ""
+telegram_delivery_src=(ROOT/"mail/telegram_delivery.go").read_text() if (ROOT/"mail/telegram_delivery.go").is_file() else ""
+integrations_inbox_src=(ROOT/"mail/integrations_inbox.go").read_text() if (ROOT/"mail/integrations_inbox.go").is_file() else ""
+cross_platform_identity_src=(ROOT/"mail/cross_platform_identity.go").read_text() if (ROOT/"mail/cross_platform_identity.go").is_file() else ""
+for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
+    if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
+for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
+    if token not in discord_sync_src: errors.append("MAIL-2.16 Discord sync invariant missing: "+token)
+for token in ["DiscordDeliveryKind","DiscordDeliveryMessage","DiscordDeliveryReceipt","DiscordDeliveryAuthority","DiscordDeliveryRequest","DiscordDeliveryResult","DiscordDeliveryService","NewDiscordDeliveryService","MaxDiscordDeliveryContentBytes","validateDiscordDeliveryMessage"]:
+    if token not in discord_delivery_src: errors.append("MAIL-2.17 Discord delivery invariant missing: "+token)
+for token in ["DiscordWalletChallengeRequest","DiscordWalletChallenge","DiscordWalletVerificationRequest","DiscordWalletVerification","DiscordWalletVerificationState","DiscordWalletVerificationService","NewDiscordWalletVerificationService","discordWalletChallengeDigest","validateDiscordWalletVerificationData","ErrDiscordWalletConflict"]:
+    if token not in discord_wallet_src: errors.append("MAIL-2.18 Discord wallet invariant missing: "+token)
+for token in ["SignalProvider","SignalIntegrationBoundary","CanonicalSignalIntegrationBoundary","validateSignalIntegrationBoundary","SHARE_FORWARD_ENABLED","STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED"]:
+    if token not in signal_boundary_src: errors.append("MAIL-2.21 Signal boundary invariant missing: "+token)
+for token in ["SignalNotificationKind","SignalNotificationRequest","SignalNotificationReceipt","SignalNotificationAuthority","SignalNotificationService","SignalNotificationSink","NewSignalNotificationService","NewSignalNotificationSink","signalNotificationIdempotencyKey","ErrSignalNotificationInvalidResult"]:
+    if token not in signal_notifications_src: errors.append("MAIL-2.20 Signal notification invariant missing: "+token)
+for token in ["SignalShareMode","SignalShareModeShare","SignalShareModeForward","SignalShareRequest","SignalSharePayload","SignalShareReceipt","SignalShareAuthority","SignalShareService","NewSignalShareService","ErrSignalShareInvalidResult"]:
+    if token not in signal_share_src: errors.append("MAIL-2.21 Signal share invariant missing: "+token)
+for token in ["SignalDeepSyncStatus","CanonicalSignalDeepSyncStatus","validateSignalDeepSyncStatus","CONDITION_UNSATISFIED","STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED","SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT","STABLE_INBOUND_SYNC_TRANSPORT","ACCOUNT_OR_DEVICE_BINDING_AUTHORITY","REPLAY_AND_CURSOR_SEMANTICS","PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT"]:
+    if token not in signal_deep_sync_gate_src: errors.append("MAIL-2.22 Signal deep-sync gate invariant missing: "+token)
+for token in ["TelegramProvider","TelegramAccount","TelegramLinkAuthority","TelegramConnectorAdapter","NewTelegramConnectorService","ConnectorCapabilityLink","validTelegramUserID","telegramUserIDFromConnectionID","telegramDisplayName","ErrTelegramInvalidResult"]:
+    if token not in telegram_link_src: errors.append("MAIL-2.23 Telegram link invariant missing: "+token)
+for token in ["TelegramInboundMessage","TelegramSyncPage","TelegramSyncAuthority","TelegramSyncState","TelegramSyncResult","TelegramSyncService","NewTelegramSyncService","TelegramSyncItemKind","ErrTelegramSyncConflict","telegramSyncFingerprint","deterministicTelegramConversationID","validateTelegramSyncData","validTelegramChatID"]:
+    if token not in telegram_sync_src: errors.append("MAIL-2.24 Telegram sync invariant missing: "+token)
+for token in ["TelegramDeliveryKind","TelegramDeliveryMessage","TelegramDeliveryReceipt","TelegramDeliveryAuthority","TelegramDeliveryRequest","TelegramDeliveryResult","TelegramDeliveryService","NewTelegramDeliveryService","MaxTelegramDeliveryContentBytes","validateTelegramDeliveryMessage"]:
+    if token not in telegram_delivery_src: errors.append("MAIL-2.25 Telegram delivery invariant missing: "+token)
+for token in ["IntegrationsInboxPage","IntegrationsInbox","isIntegrationInboxSource","FolderInbox","DiscordProvider","TelegramProvider","decodeCursor","encodeCursor"]:
+    if token not in integrations_inbox_src: errors.append("MAIL-2.26 unified integrations inbox invariant missing: "+token)
+for token in ["VerifiedIdentityAssurance","VerifiedIdentityProviderAuthority","VerifiedIdentityWallet","VerifiedPlatformIdentity","CrossPlatformVerifiedIdentity","CrossPlatformIdentity","DiscordWalletVerifications","DiscordSync","TelegramSync"]:
+    if token not in cross_platform_identity_src: errors.append("MAIL-2.27 cross-platform identity invariant missing: "+token)
+for token in ["TelegramDeliveryAuthority","ConnectorCapabilityPush","DeliverTelegram","TelegramDeliveryKind"]:
+    if token not in telegram_link_src: errors.append("MAIL-2.25 Telegram adapter delivery invariant missing: "+token)
+for token in ["TelegramSyncAuthority","ConnectorCapabilityPull","PullTelegram","TelegramSyncItemKind"]:
+    if token not in telegram_link_src: errors.append("MAIL-2.24 Telegram adapter sync invariant missing: "+token)
+for forbidden in ["ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
+    descriptor_block=telegram_link_src[telegram_link_src.find("func (a *TelegramConnectorAdapter) Descriptor"):telegram_link_src.find("func (a *TelegramConnectorAdapter) Link")]
+    if forbidden in descriptor_block: errors.append("MAIL-2.25 Telegram descriptor pulled later capability forward: "+forbidden)
+if "ConnectorCapabilityWalletVerify" not in discord_src: errors.append("MAIL-2.18 Discord connector wallet capability missing")
+for token in ["DiscordDeliveryAuthority","ConnectorCapabilityPush","DeliverDiscord","DiscordDeliveryKind"]:
+    if token not in discord_src: errors.append("MAIL-2.17 Discord adapter delivery invariant missing: "+token)
+for token in ['"/v1/connectors/discord/sync"',"*DiscordSyncService"]:
+    if token not in http: errors.append("MAIL-2.16 HTTP Discord sync surface missing: "+token)
+if "SyncDiscord" not in client: errors.append("MAIL-2.16 client Discord sync surface missing")
+for token in ['"/v1/connectors/discord/deliver"',"*DiscordDeliveryService"]:
+    if token not in http: errors.append("MAIL-2.17 HTTP Discord delivery surface missing: "+token)
+if "DeliverDiscord" not in client: errors.append("MAIL-2.17 client Discord delivery surface missing")
+for token in ["PrepareDiscordWalletVerification","VerifyDiscordWallet"]:
+    if token not in client: errors.append("MAIL-2.18 client Discord wallet surface missing: "+token)
+for token in ['"/v1/connectors/discord/wallet/challenge"','"/v1/connectors/discord/wallet/verify"',"*DiscordWalletVerificationService"]:
+    if token not in http: errors.append("MAIL-2.18 HTTP Discord wallet surface missing: "+token)
+if '"/v1/connectors/signal/boundary"' not in http: errors.append("MAIL-2.19 HTTP Signal boundary surface missing")
+if "SignalIntegrationBoundary" not in client: errors.append("MAIL-2.19 client Signal boundary surface missing")
+if '"/v1/connectors/signal/share"' not in http or "*SignalShareService" not in http: errors.append("MAIL-2.21 HTTP Signal share surface missing")
+if "ShareToSignal" not in client: errors.append("MAIL-2.21 client Signal share surface missing")
+if '"/v1/connectors/signal/deep-sync/status"' not in http: errors.append("MAIL-2.22 HTTP Signal deep-sync status surface missing")
+if "SignalDeepSyncStatus" not in client: errors.append("MAIL-2.22 client Signal deep-sync status surface missing")
+for token in ['"/v1/connectors/telegram/sync"',"*TelegramSyncService"]:
+    if token not in http: errors.append("MAIL-2.24 HTTP Telegram sync surface missing: "+token)
+if "SyncTelegram" not in client: errors.append("MAIL-2.24 client Telegram sync surface missing")
+for token in ['"/v1/connectors/telegram/deliver"',"*TelegramDeliveryService"]:
+    if token not in http: errors.append("MAIL-2.25 HTTP Telegram delivery surface missing: "+token)
+if "DeliverTelegram" not in client: errors.append("MAIL-2.25 client Telegram delivery surface missing")
+if '"/v1/integrations/inbox"' not in http: errors.append("MAIL-2.26 HTTP unified integrations inbox surface missing")
+if "IntegrationsInbox" not in client: errors.append("MAIL-2.26 client unified integrations inbox surface missing")
+if '"/v1/integrations/identity"' not in http: errors.append("MAIL-2.27 HTTP cross-platform identity surface missing")
+if "CrossPlatformIdentity" not in client: errors.append("MAIL-2.27 client cross-platform identity surface missing")
+for token in ["LinkConnector","UnlinkConnector"]:
+    if token not in client: errors.append("MAIL-2.23 client Telegram link surface missing: "+token)
+for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
+    pass
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
+for token in ["/v1/onboarding/","data-onboard","__420_ONBOARDING__","mailSession","non_custodial","session_token"]:
+    if token not in web: errors.append("MAIL-2.11 thin UI onboarding behavior missing: "+token)
+for token in ["/v1/security","data-security-action","__420_SECURITY__","loadSecurity","revokeSecurity","authorization_epoch"]:
+    if token not in web: errors.append("MAIL-2.12 thin UI security behavior missing: "+token)
+for token in ["/v1/wallet/actions","/v1/wallet/verifications","data-wallet-action","__420_WALLET_ACTIONS__","requires_wallet_approval","non_custodial"]:
+    if token not in web: errors.append("MAIL-2.13 thin UI wallet behavior missing: "+token)
+for token in ["/v1/connectors/providers","/v1/connectors/link","__420_CONNECTORS__","authorization_ref","loadConnectors","linkConnector"]:
+    if token not in web: errors.append("MAIL-2.14 thin UI connector behavior missing: "+token)
+for token in ["LINK","linkConnector","authorization_ref"]:
+    if token not in web: errors.append("MAIL-2.23 provider-neutral Telegram link UI behavior missing: "+token)
+for token in ["/v1/connectors/telegram/sync","syncTelegram","Sync Telegram","connectionId"]:
+    if token not in web: errors.append("MAIL-2.24 thin UI Telegram sync behavior missing: "+token)
+for token in ["/v1/connectors/telegram/deliver","deliverTelegram","Send to Telegram","chat_id"]:
+    if token not in web: errors.append("MAIL-2.25 thin UI Telegram delivery behavior missing: "+token)
+for token in ["/v1/integrations/inbox","loadIntegrationsInbox","Refresh integrations inbox","integrations-inbox"]:
+    if token not in web: errors.append("MAIL-2.26 thin UI unified integrations inbox behavior missing: "+token)
+for token in ["/v1/integrations/identity","loadVerifiedIdentity","Refresh verified identity","verified-identity"]:
+    if token not in web: errors.append("MAIL-2.27 thin UI verified identity behavior missing: "+token)
+for token in ["/v1/connectors/discord/sync","syncDiscord","Sync Discord","connectionId"]:
+    if token not in web: errors.append("MAIL-2.16 thin UI Discord sync behavior missing: "+token)
+for token in ["/v1/connectors/discord/deliver","deliverDiscord","Send to Discord","delivery","idempotency_key"]:
+    if token not in web: errors.append("MAIL-2.17 thin UI Discord delivery behavior missing: "+token)
+for token in ["/v1/connectors/discord/wallet/challenge","/v1/connectors/discord/wallet/verify","verifyDiscordWallet","Verify Discord wallet","discordVerification","WALLET_VERIFY"]:
+    if token not in web: errors.append("MAIL-2.18 thin UI Discord wallet behavior missing: "+token)
+for token in ["/v1/connectors/signal/boundary","loadSignalBoundary","Signal boundary","SHARE_FORWARD_ENABLED","notifications + explicit share/forward enabled","/v1/connectors/signal/share","shareSignal","Share to Signal","Forward to Signal"]:
+    if token not in web: errors.append("MAIL-2.21 thin UI Signal share behavior missing: "+token)
+for token in ["/v1/connectors/signal/deep-sync/status","CONDITION_UNSATISFIED","supported_surface_found","deep sync"]:
+    if token not in web: errors.append("MAIL-2.22 thin UI Signal deep-sync gate behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -213,4 +485,21 @@ print("MAIL-2.7 spam junk and phishing protection: qualified by app-scoped check
 print("MAIL-2.8 threads and conversations: qualified by app-scoped checks")
 print("MAIL-2.9 drafts system: qualified by app-scoped checks")
 print("MAIL-2.10 outbox and delivery queue: qualified by app-scoped checks")
+print("MAIL-2.11 email-as-a-wallet onboarding: qualified by app-scoped checks")
+print("MAIL-2.12 passkey-first security: qualified by app-scoped checks")
+print("MAIL-2.13 wallet functions inside mail: qualified by app-scoped checks")
+print("MAIL-2.14 external integrations framework: qualified by app-scoped checks")
+print("MAIL-2.15 Discord account linking: qualified by app-scoped checks")
+print("MAIL-2.16 Discord to 420Mail sync: qualified by app-scoped checks")
+print("MAIL-2.17 420Mail to Discord delivery: qualified by app-scoped checks")
+print("MAIL-2.18 Discord wallet verification: qualified by app-scoped checks")
+print("MAIL-2.19 Signal integration boundary: qualified by app-scoped checks")
+print("MAIL-2.20 420Mail to Signal notifications: qualified by app-scoped checks")
+print("MAIL-2.21 Signal share and forward: qualified by app-scoped checks")
+print("MAIL-2.22 Signal deep sync: condition unsatisfied and gate qualified by app-scoped checks")
+print("MAIL-2.23 Telegram account linking: qualified by app-scoped checks")
+print("MAIL-2.24 Telegram to 420Mail sync: qualified by app-scoped checks")
+print("MAIL-2.25 420Mail to Telegram delivery: qualified by app-scoped checks")
+print("MAIL-2.26 unified integrations inbox: qualified by app-scoped checks")
+print("MAIL-2.27 cross-platform verified identity: qualified by app-scoped checks")
 

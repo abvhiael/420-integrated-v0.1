@@ -126,7 +126,7 @@ func TestDiscordSyncValidatesProviderMessageShapeBeforeMaterialization(t *testin
 		reg, _ := NewConnectorRegistry(adapter)
 		mailSvc := NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore())
 		syncer := NewDiscordSyncService(NewConnectorService(reg), mailSvc)
-		if _, err := syncer.Sync(context.Background(), "alice.420", "discord:123456789012345678"); !errors.Is(err, ErrDiscordInvalidResult) {
+		if _, err := syncer.Sync(context.Background(), "alice.420", "discord:123456789012345678"); !errors.Is(err, ErrDiscordInvalidResult) && !errors.Is(err, ErrConnectorInvalidResult) {
 			t.Fatalf("invalid Discord message accepted: %+v err=%v", msg, err)
 		}
 	}

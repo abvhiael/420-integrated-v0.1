@@ -76,6 +76,23 @@ func (c Client) Send(ctx context.Context, req mail.SendRequest) (mail.Message, e
 	return out, err
 }
 
+func (c Client) IntegrationsInbox(ctx context.Context, cursor string, limit int) (mail.IntegrationsInboxPage, error) {
+	q := url.Values{}
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
+	path := "/v1/integrations/inbox"
+	if encoded := q.Encode(); encoded != "" {
+		path += "?" + encoded
+	}
+	var out mail.IntegrationsInboxPage
+	err := c.do(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
 func (c Client) Inbox(ctx context.Context, cursor string, limit int) (mail.Page, error) {
 	q := url.Values{}
 	if cursor != "" {

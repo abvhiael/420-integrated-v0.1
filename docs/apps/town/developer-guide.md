@@ -3,7 +3,7 @@ title: 420Town developer guide
 component: town
 audience:
   - developer
-category: app
+category: application
 status: development
 version: v1
 ---

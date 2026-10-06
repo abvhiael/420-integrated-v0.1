@@ -1,0 +1,22 @@
+# node420-compute arguments: one exact argument per non-comment line.
+# Copy this file to a private platform configuration path and replace every placeholder.
+--chain-id
+420
+--provider-id
+0xREPLACE_PROVIDER_BYTES32
+--node-id
+0xREPLACE_NODE_BYTES32
+--resource-id
+0xREPLACE_RESOURCE_BYTES32
+--worker-id
+0xREPLACE_WORKER_BYTES32
+--state-dir
+@STATE_DIR@
+--cpu-percent
+100
+--gpu-percent
+0
+--max-workload-violations
+3
+--workload-quarantine
+30m

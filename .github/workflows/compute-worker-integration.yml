@@ -1,0 +1,66 @@
+name: Compute Worker Integration Qualification
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - 'compute/worker/**'
+      - '.github/workflows/compute-worker-integration.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    if: contains(github.event.pull_request.labels.*.name, 'cmp-worker-level2')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        shell: bash
+        run: |
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          actual="$(git rev-parse HEAD)"
+          echo "expected=$expected"
+          echo "actual=$actual"
+          test "$actual" = "$expected"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build real CMP-3 integration images
+        shell: bash
+        run: |
+          set -euo pipefail
+          sandbox_dir="$(mktemp -d)"
+          lifecycle_dir="$(mktemp -d)"
+
+          CGO_ENABLED=0 go build -o "$sandbox_dir/probe" ./compute/worker/testdata/sandboxprobe
+          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$sandbox_dir/Dockerfile"
+          docker build --network=none -t cmp-sandbox-probe:integration "$sandbox_dir"
+          sandbox_id="$(docker image inspect --format '{{.Id}}' cmp-sandbox-probe:integration)"
+          test -n "$sandbox_id"
+          echo "CMP_SANDBOX_INTEGRATION_IMAGE=$sandbox_id" >> "$GITHUB_ENV"
+
+          CGO_ENABLED=0 go build -o "$lifecycle_dir/probe" ./compute/worker/testdata/lifecycleprobe
+          printf '%s\n'             'FROM scratch'             'COPY probe /probe'             'USER 65532:65532'             'ENTRYPOINT ["/probe"]' > "$lifecycle_dir/Dockerfile"
+          docker build --network=none -t cmp-lifecycle-probe:integration "$lifecycle_dir"
+          lifecycle_id="$(docker image inspect --format '{{.Id}}' cmp-lifecycle-probe:integration)"
+          test -n "$lifecycle_id"
+          echo "CMP_LIFECYCLE_INTEGRATION_IMAGE=$lifecycle_id" >> "$GITHUB_ENV"
+
+      - name: Run retained worker integration suite
+        run: go test ./compute/worker -count=1
+
+      - name: Test node420-compute package
+        run: go test ./execution/cmd/node420-compute
+
+      - name: Vet and build worker runtime
+        run: |
+          go vet ./compute/worker ./execution/cmd/node420-compute
+          go build ./execution/cmd/node420-compute

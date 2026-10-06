@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.420integrated.node420-compute</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/libexec/420integrated/node420-compute/run-node420-compute.sh</string>
+    <string>/Library/Application Support/420Integrated/node420-compute/worker.args</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Library/Application Support/420Integrated/node420-compute</string>
+  <key>UserName</key>
+  <string>node420compute</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>StandardOutPath</key>
+  <string>/Library/Logs/420Integrated/node420-compute.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Library/Logs/420Integrated/node420-compute.err.log</string>
+</dict>
+</plist>

@@ -1,0 +1,14 @@
+{
+  "schema":"420-media-web-runtime-v1",
+  "site":{"name":"420Media","productionOrigin":null},
+  "network":{"name":"420 Integrated","chainId":null,"network":null,"explorerUrl":null},
+  "registry":{"serviceId":"420/service/media/v1"},
+  "api":{"baseUrl":null},
+  "features":{"upload":true,"library":true,"playback":true,"livestreaming":true},
+  "execution":{
+    "status":"DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED",
+    "requireWalletChainMatch":true,
+    "requireCapabilityDiscovery":true,
+    "requireHTTPS":true
+  }
+}

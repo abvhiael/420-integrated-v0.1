@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+const MaxResolvedCredentialBytes = 4096
+
 var (
 	ErrNegotiationFailed = errors.New("420media livegateway: negotiation failed")
 	ErrMissingCredential = errors.New("420media livegateway: missing credential")
@@ -64,7 +66,7 @@ func (d *WebRTCDriver) Start(ctx context.Context, spec SessionSpec) error {
 			return ErrMissingCredential
 		}
 		token, err := d.credentials.Resolve(ctx, spec.CredentialRef)
-		if err != nil || token == "" {
+		if err != nil || token == "" || len(token) > MaxResolvedCredentialBytes {
 			return ErrMissingCredential
 		}
 		req.Header.Set("Authorization", "Bearer "+token)

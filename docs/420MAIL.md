@@ -90,7 +90,7 @@ MAIL-2.3 adds owner-scoped organization metadata without changing delivery folde
 - Users may create up to 100 labels and 50 custom folders.
 - Label and custom-folder names are normalized and case-insensitively unique per owner.
 - System folder names cannot be reused as custom-folder names.
-- System labels `STARRED`, `PINNED`, `MUTED`, and `UNREAD` are created per owner and are immutable.
+- System labels `STARRED`, `PINNED`, `MUTED`, and `UNREAD` are created per owner, are immutable, and expose live virtual views derived from each owner's mailbox flags/read state rather than accepting manual assignment.
 - A mailbox copy may hold up to 20 user labels and at most one custom folder assignment.
 - Bulk organization updates are transactional for up to 100 message IDs: any missing/unauthorized message or invalid label/folder aborts the whole update.
 - Label/custom-folder definitions and message assignments persist in the durable store and survive restart.

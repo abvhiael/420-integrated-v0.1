@@ -3,6 +3,7 @@ package mail
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -149,5 +150,47 @@ func TestPrivateSearchPagination(t *testing.T) {
 	}
 	if len(p2.Items) != 1 || p2.NextCursor != "" {
 		t.Fatalf("second search page invalid: %+v", p2)
+	}
+}
+
+
+func TestPrivateSearchScanBoundHasContinuation(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	base := time.Unix(1700000000, 0).UTC()
+	var tick int64
+	s.Now = func() time.Time {
+		t := base.Add(time.Duration(tick) * time.Second)
+		tick++
+		return t
+	}
+	target, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "deep-target", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "deep needle", Body: "target body", Source: ServiceID,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < MaxSearchScanItems; i++ {
+		if _, err := s.Send(ctx, "alice.420", SendRequest{
+			IdempotencyKey: fmt.Sprintf("noise-%03d", i),
+			Sender: "alice.420", Recipient: "bob.420", Subject: "noise", Body: "noise", Source: ServiceID,
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	first, err := s.SearchMailbox(ctx, "bob.420", SearchRequest{Query: "deep needle", Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first.Items) != 0 || first.NextCursor == "" || first.Scanned != MaxSearchScanItems {
+		t.Fatalf("first bounded scan did not expose continuation: %+v", first)
+	}
+	second, err := s.SearchMailbox(ctx, "bob.420", SearchRequest{Query: "deep needle", Cursor: first.NextCursor, Limit: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second.Items) != 1 || second.Items[0].Message.ID != target.ID {
+		t.Fatalf("continued search did not find older match: %+v", second)
 	}
 }

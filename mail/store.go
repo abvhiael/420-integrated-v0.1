@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 4
+const DurableStoreSchemaVersion = 5
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -32,8 +32,12 @@ type storeData struct {
 	LabelIndex        map[string][]string
 	CustomFolderIndex map[string][]string
 	Rules             map[string]MailRule
-	TrustEntries      map[string]TrustEntry
-	TrustSettings     map[string]TrustSettings
+	TrustEntries        map[string]TrustEntry
+	TrustSettings       map[string]TrustSettings
+	Reputation          map[string]SenderReputation
+	AbuseReports        map[string]AbuseReport
+	Quarantine          map[string]QuarantineRecord
+	ContentFingerprints map[string]uint64
 }
 
 type diskStoreData struct {
@@ -224,8 +228,12 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		LabelIndex:        disk.LabelIndex,
 		CustomFolderIndex: disk.CustomFolderIndex,
 		Rules:             disk.Rules,
-		TrustEntries:      disk.TrustEntries,
-		TrustSettings:     disk.TrustSettings,
+		TrustEntries:        disk.TrustEntries,
+		TrustSettings:       disk.TrustSettings,
+		Reputation:          disk.Reputation,
+		AbuseReports:        disk.AbuseReports,
+		Quarantine:          disk.Quarantine,
+		ContentFingerprints: disk.ContentFingerprints,
 	}
 	normalizeStoreData(&data)
 	for id, fp := range disk.Fingerprints {
@@ -267,9 +275,13 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		LabelIndex:        data.LabelIndex,
 		CustomFolderIndex: data.CustomFolderIndex,
 		Rules:             data.Rules,
-		TrustEntries:      data.TrustEntries,
-		TrustSettings:     data.TrustSettings,
-		Fingerprints:      map[string]string{},
+		TrustEntries:        data.TrustEntries,
+		TrustSettings:       data.TrustSettings,
+		Reputation:          data.Reputation,
+		AbuseReports:        data.AbuseReports,
+		Quarantine:          data.Quarantine,
+		ContentFingerprints: data.ContentFingerprints,
+		Fingerprints:        map[string]string{},
 		IdempotencyKeys:   map[string]string{},
 	}
 	for id, msg := range data.Messages {
@@ -342,8 +354,12 @@ func newStoreData() storeData {
 		LabelIndex:        map[string][]string{},
 		CustomFolderIndex: map[string][]string{},
 		Rules:             map[string]MailRule{},
-		TrustEntries:      map[string]TrustEntry{},
-		TrustSettings:     map[string]TrustSettings{},
+		TrustEntries:        map[string]TrustEntry{},
+		TrustSettings:       map[string]TrustSettings{},
+		Reputation:          map[string]SenderReputation{},
+		AbuseReports:        map[string]AbuseReport{},
+		Quarantine:          map[string]QuarantineRecord{},
+		ContentFingerprints: map[string]uint64{},
 	}
 }
 
@@ -384,6 +400,18 @@ func normalizeStoreData(data *storeData) {
 	if data.TrustSettings == nil {
 		data.TrustSettings = map[string]TrustSettings{}
 	}
+	if data.Reputation == nil {
+		data.Reputation = map[string]SenderReputation{}
+	}
+	if data.AbuseReports == nil {
+		data.AbuseReports = map[string]AbuseReport{}
+	}
+	if data.Quarantine == nil {
+		data.Quarantine = map[string]QuarantineRecord{}
+	}
+	if data.ContentFingerprints == nil {
+		data.ContentFingerprints = map[string]uint64{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -398,8 +426,12 @@ func cloneStoreData(src storeData) storeData {
 		LabelIndex:        make(map[string][]string, len(src.LabelIndex)),
 		CustomFolderIndex: make(map[string][]string, len(src.CustomFolderIndex)),
 		Rules:             make(map[string]MailRule, len(src.Rules)),
-		TrustEntries:      make(map[string]TrustEntry, len(src.TrustEntries)),
-		TrustSettings:     make(map[string]TrustSettings, len(src.TrustSettings)),
+		TrustEntries:        make(map[string]TrustEntry, len(src.TrustEntries)),
+		TrustSettings:       make(map[string]TrustSettings, len(src.TrustSettings)),
+		Reputation:          make(map[string]SenderReputation, len(src.Reputation)),
+		AbuseReports:        make(map[string]AbuseReport, len(src.AbuseReports)),
+		Quarantine:          make(map[string]QuarantineRecord, len(src.Quarantine)),
+		ContentFingerprints: make(map[string]uint64, len(src.ContentFingerprints)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -434,6 +466,19 @@ func cloneStoreData(src storeData) storeData {
 	}
 	for k, v := range src.TrustSettings {
 		dst.TrustSettings[k] = v
+	}
+	for k, v := range src.Reputation {
+		dst.Reputation[k] = v
+	}
+	for k, v := range src.AbuseReports {
+		dst.AbuseReports[k] = v
+	}
+	for k, v := range src.Quarantine {
+		v.Reasons = append([]string(nil), v.Reasons...)
+		dst.Quarantine[k] = v
+	}
+	for k, v := range src.ContentFingerprints {
+		dst.ContentFingerprints[k] = v
 	}
 	return dst
 }
@@ -527,6 +572,9 @@ func validateStoreData(data *storeData) error {
 	}
 	if err := validateTrustData(data); err != nil {
 		return fmt.Errorf("invalid trust data: %w", err)
+	}
+	if err := validateSpamData(data); err != nil {
+		return fmt.Errorf("invalid spam-protection data: %w", err)
 	}
 	return nil
 }

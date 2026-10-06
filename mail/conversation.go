@@ -261,6 +261,9 @@ func resolveConversation(data *storeData, actor string, req SendRequest, message
 	if requested != "" && requested != parent.ConversationID {
 		return "", ErrInvalidInput
 	}
+	if len(data.ConversationIndex[conversationIndexKey(actor, parent.ConversationID)]) >= MaxConversationMessages {
+		return "", ErrInvalidInput
+	}
 	return parent.ConversationID, nil
 }
 

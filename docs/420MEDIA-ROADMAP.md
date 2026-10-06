@@ -51,6 +51,8 @@ Implement the Media frontend for upload/library/playback/livestream workflows wi
 ## MEDIA-AUDIT-11 — Security, abuse, moderation and repository closeout
 Apply the shared GEN-SVC threat model specifically to Media: content/rights abuse, stream-key leakage, SSRF/endpoint abuse, parser/codec/process isolation, resource exhaustion, webhook/replay concerns, moderation/report boundaries, malicious media and operator compromise. Complete docs, deployment configuration, operator/user/developer guides and Level 3 exact-head repository qualification.
 
+**Candidate status: IMPLEMENTED / Level 3 qualification pending.** Repository security, moderation, session, abuse, deployment-profile and documentation requirements are implemented. The step remains open until the reconciled exact merge-candidate passes the canonical Solidity, Genesis/address-authority, 420 Integrated, 420Docs and retained Media qualification owners.
+
 ## MEDIA-AUDIT-12 — Production-equivalent public-testnet qualification
 Deploy one exact release lineage with real required dependencies. Retain chain/network/genesis identity, exact SHA, contract/service addresses or Registry records, runtime hashes where applicable, live upload and livestream journeys, Pay/Compute/Storage/Identity/Rights/Search/Notifications evidence, reorg/restart/recovery, abuse/rate-limit/secret handling, monitoring and rollback evidence.
 

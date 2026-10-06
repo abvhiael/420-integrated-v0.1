@@ -428,3 +428,34 @@ func TestDurableStoreMigratesV2RulesSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+
+func TestRuleResponsesCannotMutateStoredState(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	archive := FolderArchive
+	created, err := s.CreateRule(ctx, "bob.420", RuleInput{
+		Name: "isolated", Condition: RuleCondition{SenderEquals: "alice.420"}, Action: RuleAction{Folder: &archive},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive = FolderJunk
+	*created.Action.Folder = FolderTrash
+
+	first, err := s.ListRules(ctx, "bob.420")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first) != 1 || first[0].Action.Folder == nil || *first[0].Action.Folder != FolderArchive {
+		t.Fatalf("caller mutation leaked into stored rule: %+v", first)
+	}
+	*first[0].Action.Folder = FolderJunk
+	second, err := s.ListRules(ctx, "bob.420")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second) != 1 || second[0].Action.Folder == nil || *second[0].Action.Folder != FolderArchive {
+		t.Fatalf("listed rule mutation leaked back into store: %+v", second)
+	}
+}

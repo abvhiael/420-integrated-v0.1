@@ -46,6 +46,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.protection(w, r, actor)
 	case r.URL.Path == "/v1/conversations" || strings.HasPrefix(r.URL.Path, "/v1/conversations/"):
 		h.conversations(w, r, actor)
+	case r.URL.Path == "/v1/outbox" || strings.HasPrefix(r.URL.Path, "/v1/outbox/"):
+		h.outbox(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -211,6 +213,73 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 		return
 	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func (h HTTPHandler) outbox(w http.ResponseWriter, r *http.Request, actor string) {
+	if r.URL.Path == "/v1/outbox" {
+		switch r.Method {
+		case http.MethodGet:
+			items, err := h.Service.ListOutbox(r.Context(), actor)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, items)
+		case http.MethodPost:
+			defer r.Body.Close()
+			dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxBodyBytes+4096))
+			dec.DisallowUnknownFields()
+			var req SendRequest
+			if err := dec.Decode(&req); err != nil {
+				writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+				return
+			}
+			delivery, err := h.Service.QueueDelivery(r.Context(), actor, req)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusCreated, delivery)
+		default:
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		}
+		return
+	}
+	rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/outbox/"), "/")
+	parts := strings.Split(rest, "/")
+	if len(parts) == 1 && r.Method == http.MethodGet {
+		delivery, err := h.Service.GetDelivery(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, delivery)
+		return
+	}
+	if len(parts) != 2 || r.Method != http.MethodPost {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	var (
+		delivery Delivery
+		err      error
+	)
+	switch parts[1] {
+	case "process":
+		delivery, err = h.Service.ProcessDelivery(r.Context(), actor, parts[0])
+	case "retry":
+		delivery, err = h.Service.RetryDelivery(r.Context(), actor, parts[0])
+	case "cancel":
+		delivery, err = h.Service.CancelDelivery(r.Context(), actor, parts[0])
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, delivery)
 }
 
 func (h HTTPHandler) drafts(w http.ResponseWriter, r *http.Request, actor string) {
@@ -711,7 +780,7 @@ func writeServiceError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
-	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict), errors.Is(err, ErrAbuseReportConflict), errors.Is(err, ErrQuarantineReview), errors.Is(err, ErrDraftConflict):
+	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict), errors.Is(err, ErrAbuseReportConflict), errors.Is(err, ErrQuarantineReview), errors.Is(err, ErrDraftConflict), errors.Is(err, ErrDeliveryConflict), errors.Is(err, ErrOutboxFull):
 		writeError(w, http.StatusConflict, "CONFLICT", err.Error())
 	case errors.Is(err, ErrDraftDeleteUnavailable):
 		writeError(w, http.StatusServiceUnavailable, "DRAFT_DELETE_UNAVAILABLE", err.Error())

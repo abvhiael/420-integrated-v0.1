@@ -35,6 +35,14 @@ func NewDiscordConnectorAdapter(authority DiscordLinkAuthority) *DiscordConnecto
 	return &DiscordConnectorAdapter{Authority: authority}
 }
 
+func NewDiscordConnectorService(authority DiscordLinkAuthority) (*ConnectorService, error) {
+	registry, err := NewConnectorRegistry(NewDiscordConnectorAdapter(authority))
+	if err != nil {
+		return nil, err
+	}
+	return NewConnectorService(registry), nil
+}
+
 func (a *DiscordConnectorAdapter) Descriptor() ConnectorDescriptor {
 	return ConnectorDescriptor{
 		Provider:     DiscordProvider,

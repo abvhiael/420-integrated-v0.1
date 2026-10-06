@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 10
+const DurableStoreSchemaVersion = 11
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -43,6 +43,7 @@ type storeData struct {
 	Drafts                     map[string]Draft
 	Deliveries                 map[string]Delivery
 	DiscordSync                map[string]DiscordSyncState
+	TelegramSync               map[string]TelegramSyncState
 	DiscordWalletVerifications map[string]DiscordWalletVerificationState
 }
 
@@ -68,6 +69,7 @@ type diskStoreData struct {
 	Drafts                     map[string]Draft                          `json:"drafts,omitempty"`
 	Deliveries                 map[string]Delivery                       `json:"deliveries,omitempty"`
 	DiscordSync                map[string]DiscordSyncState               `json:"discord_sync,omitempty"`
+	TelegramSync               map[string]TelegramSyncState              `json:"telegram_sync,omitempty"`
 	DiscordWalletVerifications map[string]DiscordWalletVerificationState `json:"discord_wallet_verifications,omitempty"`
 	Fingerprints               map[string]string                         `json:"fingerprints,omitempty"`
 	IdempotencyKeys            map[string]string                         `json:"idempotency_keys,omitempty"`
@@ -255,6 +257,7 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		Drafts:                     disk.Drafts,
 		Deliveries:                 disk.Deliveries,
 		DiscordSync:                disk.DiscordSync,
+		TelegramSync:               disk.TelegramSync,
 		DiscordWalletVerifications: disk.DiscordWalletVerifications,
 	}
 	normalizeStoreData(&data)
@@ -316,6 +319,7 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		Drafts:                     data.Drafts,
 		Deliveries:                 data.Deliveries,
 		DiscordSync:                data.DiscordSync,
+		TelegramSync:               data.TelegramSync,
 		DiscordWalletVerifications: data.DiscordWalletVerifications,
 		Fingerprints:               map[string]string{},
 		IdempotencyKeys:            map[string]string{},
@@ -401,6 +405,7 @@ func newStoreData() storeData {
 		Drafts:                     map[string]Draft{},
 		Deliveries:                 map[string]Delivery{},
 		DiscordSync:                map[string]DiscordSyncState{},
+		TelegramSync:               map[string]TelegramSyncState{},
 		DiscordWalletVerifications: map[string]DiscordWalletVerificationState{},
 	}
 }
@@ -469,6 +474,9 @@ func normalizeStoreData(data *storeData) {
 	if data.DiscordSync == nil {
 		data.DiscordSync = map[string]DiscordSyncState{}
 	}
+	if data.TelegramSync == nil {
+		data.TelegramSync = map[string]TelegramSyncState{}
+	}
 	if data.DiscordWalletVerifications == nil {
 		data.DiscordWalletVerifications = map[string]DiscordWalletVerificationState{}
 	}
@@ -497,6 +505,7 @@ func cloneStoreData(src storeData) storeData {
 		Drafts:                     make(map[string]Draft, len(src.Drafts)),
 		Deliveries:                 make(map[string]Delivery, len(src.Deliveries)),
 		DiscordSync:                make(map[string]DiscordSyncState, len(src.DiscordSync)),
+		TelegramSync:               make(map[string]TelegramSyncState, len(src.TelegramSync)),
 		DiscordWalletVerifications: make(map[string]DiscordWalletVerificationState, len(src.DiscordWalletVerifications)),
 	}
 	for k, v := range src.Messages {
@@ -560,6 +569,9 @@ func cloneStoreData(src storeData) storeData {
 	}
 	for k, v := range src.DiscordSync {
 		dst.DiscordSync[k] = v
+	}
+	for k, v := range src.TelegramSync {
+		dst.TelegramSync[k] = v
 	}
 	for k, v := range src.DiscordWalletVerifications {
 		dst.DiscordWalletVerifications[k] = v
@@ -688,6 +700,9 @@ func validateStoreData(data *storeData) error {
 	}
 	if err := validateDiscordSyncData(data); err != nil {
 		return fmt.Errorf("invalid discord sync data: %w", err)
+	}
+	if err := validateTelegramSyncData(data); err != nil {
+		return fmt.Errorf("invalid telegram sync data: %w", err)
 	}
 	if err := validateDiscordWalletVerificationData(data); err != nil {
 		return fmt.Errorf("invalid discord wallet verification data: %w", err)

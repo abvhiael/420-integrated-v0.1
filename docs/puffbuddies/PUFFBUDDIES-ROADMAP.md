@@ -673,7 +673,45 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.16 — Non-goals reconciliation
 
-Reconcile the complete PB-0 non-goal set against accumulated architecture.
+**Purpose:** reconcile the complete PB-0 non-goal set against accumulated architecture through PB-0.15 and distinguish canonical prohibited behavior from features that are merely deferred.
+
+**Canonical requirements:**
+
+1. Record PB-NONGOAL-001 through PB-NONGOAL-040.
+2. Reconcile PB-0.1 through PB-0.15 into one canonical negative-requirement set.
+3. Preserve prohibitions on public relationship/cannabis/preference registries, wallet-to-profile enumeration, everything-on-chain sensitive dating state, tokenized dating/cannabis identity, purchased/admin/algorithmic consent, pay-to-message, block bypass, date escrow/marketplace behavior, wagering, wealth/desirability scoring, public precise location, public safety/lifecycle state, and public member enumeration.
+4. Preserve ecosystem authority boundaries so Wallet, Identity, Names, Messenger, Pay, Registry, AppStore, Indexer, Explorer, Search, Analytics, clients, caches, and notifications cannot silently inherit PuffBuddies relationship/lifecycle/safety authority.
+5. Preserve deletion honesty, stale-state revocation, and server-side authorization boundaries.
+6. Distinguish PB-0.2 post-MVP deferrals from canonical prohibitions.
+7. Require any future revision to a non-goal to use explicit canonical change control rather than silent implementation drift.
+8. Prohibit economic, premium, experimental, AI-assisted, tokenized, administrative, or cross-app relabeling from bypassing an existing non-goal.
+9. Do not claim runtime features, contracts, services, APIs, databases, addresses, service IDs, deployments, or live implementation in PB-0.16.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.16-NON-GOALS-RECONCILIATION.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.16-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.16 is not a Level 2 integration milestone; it reconciles documentation/policy boundaries only and introduces no executable shared integration.
+
+**Dependencies:** PB-0.1 through PB-0.15 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.16 non-goals-reconciliation document exists;
+- PB-NONGOAL-001 through PB-NONGOAL-040 exist exactly once and in sequence;
+- prohibited non-goals are clearly separated from merely deferred features;
+- accumulated privacy, consent, eligibility, safety, lifecycle, deletion, matching, cannabis, visibility, and dependency-authority boundaries remain preserved;
+- economic/admin/algorithmic/dependency relabeling cannot bypass canonical non-goals;
+- explicit non-goal change control is documented;
+- no runtime-feature/contract/service/API/database/address/service-ID/deployment/live-implementation claim is falsely introduced;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.16 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.17 — Repository structure
 

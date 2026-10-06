@@ -1,0 +1,45 @@
+name: PuffBuddies PB-5 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb5.yml"
+  push:
+    branches: ["puffbuddies-pb5-likes-matching-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb5.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-5 Level 1 targeted likes and matching
+        run: python3 -m unittest puffbuddies.tests.test_pb_5_likes_matching -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-5 Level 2 PB-4/PB-5 integration milestone
+        run: python3 -m unittest puffbuddies.tests.test_pb_5_integration -v
+      - name: Consent and public-relationship negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(wallet_balance|token_balance|staking_balance|payment_status|premium_status|report_count|block_count)[[:space:]]*[:=]' puffbuddies/domain/matching.py
+          ! grep -RIE '(public_match_graph|public_relationship|send_message|notify|admin_force_match)' puffbuddies/domain/matching.py

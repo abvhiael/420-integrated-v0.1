@@ -30,6 +30,9 @@ contract MediaSettlement420 is SystemAccess, I420System {
     }
 
     mapping(bytes32 => Settlement) public settlements;
+    mapping(bytes32 => uint256) public settledAmounts;
+    mapping(bytes32 => bytes32) public canonicalSettlementRefs;
+    mapping(bytes32 => bytes32) public canonicalRefundRefs;
 
     address public jobMarket;
     address public vaultAdapter;
@@ -55,7 +58,14 @@ contract MediaSettlement420 is SystemAccess, I420System {
     event FundingConfirmed(bytes32 indexed jobId, address indexed payer, bytes32 indexed operatorId, address beneficiary, uint256 amount, bytes32 vaultRef, bytes32 fundingRef);
     event ResolutionBound(bytes32 indexed jobId, bytes32 indexed resolutionRef, bool claimable);
     event Released(bytes32 indexed jobId, address indexed beneficiary, uint256 amount);
+    event CanonicalReleaseObserved(
+        bytes32 indexed jobId,
+        address indexed beneficiary,
+        uint256 amount,
+        bytes32 indexed settlementRef
+    );
     event Refunded(bytes32 indexed jobId, address indexed payer, uint256 amount);
+    event CanonicalRefundObserved(bytes32 indexed jobId, address indexed payer, uint256 amount, bytes32 indexed refundRef);
 
     constructor(address timelock_) SystemAccess(timelock_) {}
 
@@ -144,11 +154,45 @@ contract MediaSettlement420 is SystemAccess, I420System {
         IMediaJobSettlement420(jobMarket).confirmSettlement(jobId);
     }
 
+    function releaseCanonical(
+        bytes32 jobId,
+        address beneficiary,
+        uint256 settledAmount,
+        bytes32 settlementRef
+    ) external onlyPayoutAdapter {
+        Settlement storage s = _get(jobId);
+        if (
+            s.state != SettlementState.CLAIMABLE || beneficiary != s.beneficiary
+                || settledAmount == 0 || settledAmount > s.amount || settlementRef == bytes32(0)
+                || canonicalSettlementRefs[jobId] != bytes32(0)
+        ) revert InvalidSettlement();
+        settledAmounts[jobId] = settledAmount;
+        canonicalSettlementRefs[jobId] = settlementRef;
+        s.state = SettlementState.CLOSED;
+        emit CanonicalReleaseObserved(jobId, beneficiary, settledAmount, settlementRef);
+        IMediaJobSettlement420(jobMarket).confirmSettlement(jobId);
+    }
+
     function refund(bytes32 jobId) external onlyPayoutAdapter {
         Settlement storage s = _get(jobId);
         if (s.state != SettlementState.REFUNDABLE) revert InvalidStateTransition();
         s.state = SettlementState.CLOSED;
         emit Refunded(jobId, s.payer, s.amount);
+        IMediaJobSettlement420(jobMarket).confirmRefund(jobId);
+    }
+
+    function refundCanonical(bytes32 jobId, bytes32 refundRef, uint256 refundedAmount)
+        external
+        onlyPayoutAdapter
+    {
+        Settlement storage s = _get(jobId);
+        if (
+            s.state != SettlementState.REFUNDABLE || refundRef == bytes32(0)
+                || refundedAmount < s.amount || canonicalRefundRefs[jobId] != bytes32(0)
+        ) revert InvalidSettlement();
+        canonicalRefundRefs[jobId] = refundRef;
+        s.state = SettlementState.CLOSED;
+        emit CanonicalRefundObserved(jobId, s.payer, s.amount, refundRef);
         IMediaJobSettlement420(jobMarket).confirmRefund(jobId);
     }
 

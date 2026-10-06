@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/spam.go","mail/spam_test.go","mail/conversation.go","mail/conversation_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/spam.go","mail/spam_test.go","mail/conversation.go","mail/conversation_test.go","mail/draft.go","mail/draft_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -35,13 +35,13 @@ if profile_path.is_file():
     mailbox=profile.get("mailbox",{})
     if mailbox.get("systemFolders")!=["INBOX","SENT","OUTBOX","DRAFTS","ARCHIVE","JUNK","TRASH"]: errors.append("Mail mailbox folder inventory drifted")
     if mailbox.get("deliveredRecipientFolder")!="INBOX" or mailbox.get("deliveredSenderFolder")!="SENT": errors.append("Mail delivered-folder defaults drifted")
-    if mailbox.get("reservedForDedicatedSteps")!={"DRAFTS":"MAIL-2.9","OUTBOX":"MAIL-2.10"}: errors.append("Mail reserved Drafts/Outbox ownership drifted")
+    if mailbox.get("reservedForDedicatedSteps")!={"OUTBOX":"MAIL-2.10"}: errors.append("Mail reserved Outbox ownership drifted")
     if mailbox.get("ownerScopedState") is not True or mailbox.get("permanentDeleteRequiresTrash") is not True: errors.append("Mail mailbox ownership/delete policy drifted")
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
     store=profile.get("metadataStore",{})
     if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
-    if store.get("schemaVersion")!=6 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
-    if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder","owner_conversation"]: errors.append("Mail durable store index drifted")
+    if store.get("schemaVersion")!=7 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder","owner_conversation","owner_draft"]: errors.append("Mail durable store index drifted")
     if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
     if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
     org=profile.get("organization",{})
@@ -83,6 +83,12 @@ if profile_path.is_file():
     if conversations.get("maxMessagesPerConversation")!=1000 or conversations.get("threadArchive") is not True or conversations.get("threadMute") is not True: errors.append("MAIL-2.8 thread state drifted")
     if conversations.get("archivedFutureRepliesFolder")!="ARCHIVE" or conversations.get("mutedFutureRepliesSuppressNotification") is not True: errors.append("MAIL-2.8 thread delivery behavior drifted")
     if conversations.get("arbitraryConversationInjectionRejected") is not True or conversations.get("deletedParentReplyRejected") is not True or conversations.get("publicIndexing") is not False: errors.append("MAIL-2.8 conversation safety/privacy drifted")
+    drafts=profile.get("drafts",{})
+    if drafts.get("enabled") is not True or drafts.get("ownerScoped") is not True or drafts.get("autosave") is not True or drafts.get("recovery") is not True or drafts.get("edit") is not True or drafts.get("discard") is not True: errors.append("MAIL-2.9 draft capability drifted")
+    if drafts.get("bodyStorage")!="PRIVATE_ENCRYPTED_BLOB_PROVIDER" or drafts.get("discardDeletesPrivateBlob") is not True: errors.append("MAIL-2.9 draft private-storage boundary drifted")
+    if drafts.get("multiDevice")!="OPTIMISTIC_VERSIONED" or drafts.get("staleWrite")!="REJECT_CONFLICT" or drafts.get("deterministicIdFromOwnerAutosaveKey") is not True: errors.append("MAIL-2.9 multi-device semantics drifted")
+    if drafts.get("maxDraftsPerUser")!=500 or drafts.get("maxAutosaveKeyBytes")!=128 or drafts.get("listOrdering")!="UPDATED_AT_DESC_ID_ASC": errors.append("MAIL-2.9 draft bounds/order drifted")
+    if drafts.get("publicIndexing") is not False or drafts.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.9 draft privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -154,8 +160,20 @@ for token in ["ReplyTo","resolveConversation","ConversationStates","threadState.
     if token not in service: errors.append("MAIL-2.8 service conversation integration missing: "+token)
 for token in ["ConversationStates","ConversationIndex","conversationIndexKey","validateConversationData"]:
     if token not in store: errors.append("MAIL-2.8 durable conversation storage missing: "+token)
-
+draft_src=(ROOT/"mail/draft.go").read_text() if (ROOT/"mail/draft.go").is_file() else ""
+for token in ["Draft","DraftView","DraftCreateRequest","DraftSaveRequest","CreateDraft","SaveDraft","GetDraft","ListDrafts","DiscardDraft","ErrDraftConflict","PrivateBlobDeleteStore","deterministicDraftID","validateDraftData","MaxDraftsPerUser"]:
+    if token not in draft_src: errors.append("MAIL-2.9 draft invariant missing: "+token)
+for token in ['"/v1/drafts"',"CreateDraft","SaveDraft","GetDraft","ListDrafts","DiscardDraft"]:
+    if token not in http: errors.append("MAIL-2.9 HTTP draft surface missing: "+token)
+for token in ["CreateDraft","SaveDraft","GetDraft","ListDrafts","DiscardDraft"]:
+    if token not in client: errors.append("MAIL-2.9 client draft surface missing: "+token)
+for token in ["Drafts","validateDraftData"]:
+    if token not in store: errors.append("MAIL-2.9 durable draft storage missing: "+token)
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
+for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
+    if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
+
+
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
 
 if errors:
@@ -176,4 +194,5 @@ print("MAIL-2.5 user filters and rules engine: qualified by app-scoped checks")
 print("MAIL-2.6 blocklists allowlists and trust controls: qualified by app-scoped checks")
 print("MAIL-2.7 spam junk and phishing protection: qualified by app-scoped checks")
 print("MAIL-2.8 threads and conversations: qualified by app-scoped checks")
+print("MAIL-2.9 drafts system: qualified by app-scoped checks")
 

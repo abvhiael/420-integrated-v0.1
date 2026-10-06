@@ -62,7 +62,8 @@ jobs:
           # Force the canonical four-shard repository inventory even though the
           # changed surface is otherwise Compute-scoped.
           if grep -Fxq 'contracts/config/compute-market/cmp-2.8-phase-closeout.json' "$scope_files" || \
-             grep -Fxq 'contracts/config/compute-market/cmp-3.14-phase-closeout.json' "$scope_files"; then
+             grep -Fxq 'contracts/config/compute-market/cmp-3.14-phase-closeout.json' "$scope_files" || \
+             grep -Fxq 'contracts/config/compute-market/cmp-4.10-phase-closeout.json' "$scope_files"; then
             compute_only=false
           fi
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"

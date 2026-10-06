@@ -44,6 +44,22 @@ const info=read("ios/PuffBuddies/Info.plist");
 if(!info.includes("NSCameraUsageDescription")||!info.includes("NSPhotoLibraryUsageDescription"))errors.push("iOS media privacy descriptions required");
 if(/NSLocationAlways|NSLocationWhenInUse/.test(info))errors.push("native exact-location permission is not authorized");
 
+
+const iosProject=read("ios/project.yml");
+const androidBuild=read("android/app/build.gradle.kts");
+if(!iosProject.includes("PRODUCT_BUNDLE_IDENTIFIER: org.fourtwenty.puffbuddies"))errors.push("stable iOS bundle identifier required");
+if(!androidBuild.includes('applicationId = "org.fourtwenty.puffbuddies"'))errors.push("stable Android application id required");
+
+const forbiddenArtifacts=[".jks",".keystore",".p12",".mobileprovision",".apk",".aab",".ipa","google-services.json","GoogleService-Info.plist"];
+const walk=(dir)=>{
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+    const full=path.join(dir,entry.name);
+    if(entry.isDirectory()){if(entry.name!=="dist")walk(full);}
+    else if(forbiddenArtifacts.some(s=>entry.name.endsWith(s)||entry.name===s))errors.push(`forbidden committed mobile secret/artifact: ${path.relative(root,full)}`);
+  }
+};
+walk(root);
+
 const native=[read("ios/PuffBuddies/AuthorityPolicy.swift"),read("ios/PuffBuddies/NativeBridge.swift"),
  read("android/app/src/main/java/org/fourtwenty/puffbuddies/PuffBuddiesAuthorityPolicy.kt"),
  read("android/app/src/main/java/org/fourtwenty/puffbuddies/MainActivity.kt")].join("\n");

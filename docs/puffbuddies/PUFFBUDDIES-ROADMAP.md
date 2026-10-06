@@ -1252,6 +1252,16 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** accumulated PB-1 compile passes; complete retained PB-1 test inventory passes; dedicated cross-component PB-1.13 integration suite passes; privacy/public-chain negative gate passes; exact milestone implementation SHA is verified; no unresolved PB/shared-authority conflict with current main; durable milestone evidence is recorded.
 
+### PB-1.14 — PB-1 Phase Closeout
+
+**Purpose:** reconcile the complete accumulated PB-1 domain/private-persistence phase with current `main`, verify every PB-1 exit criterion, run one exact Level 3 comprehensive qualification of the merge candidate, record durable closeout evidence, and formally close PB-1 before PB-2.
+
+**Qualification level:** **Level 3 — complete app-phase closeout qualification.**
+
+**Required closeout coverage:** canonical Solidity full inventory once; Genesis/address-authority verification without duplicate Foundry; 420 Integrated/global qualification; Docs/global reconciliation; retained PB-1 and PB-1.13 integration suites; applicable security/adversarial/invariant/static/config checks; exact-SHA reconciliation and evidence.
+
+**Exit criteria:** PB-1.1 through PB-1.13 COMPLETE; candidate reconciled to current main; all required Level-3 canonical owners PASS on the same exact implementation SHA; no skipped/missing required check counted as green; roadmap/evidence reconciled; limitations/live-testnet deferrals explicit; durable closeout evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

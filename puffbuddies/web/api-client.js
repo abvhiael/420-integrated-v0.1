@@ -35,6 +35,21 @@ export function createApiClient({apiBase,tokenProvider,fetchImpl=globalThis.fetc
     session:()=>request("/session"),
     eligibility:()=>request("/eligibility"),
     profile:()=>request("/profile"),
+    uploadMedia:async(file)=>{
+      if(!(file instanceof Blob)) throw new Error("profile media file required");
+      if(file.size<=0 || file.size>10*1024*1024) throw new Error("profile media must be 1..10MiB");
+      if(!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("unsupported profile media type");
+      const token=String(tokenProvider?.()||"");
+      const headers={}; if(token) headers.Authorization=`Bearer ${token}`;
+      const form=new FormData();form.set("media",file);
+      let response;
+      try{response=await fetchImpl(apiBase+"/profile/media",{method:"POST",headers,credentials:"same-origin",cache:"no-store",redirect:"error",body:form})}
+      catch(error){throw new ApiError("PuffBuddies media API unavailable",0)}
+      if(!response?.ok) throw new ApiError("PuffBuddies media upload denied",response?.status||0);
+      const data=await response.json();
+      if(!data || typeof data!=="object") throw new ApiError("Invalid media response",502);
+      return data;
+    },
     saveProfile:(profile)=>request("/profile",{method:"PUT",body:{profile}}),
     discovery:()=>request("/discovery"),
     relationshipAction:(profileId,action)=>request("/relationships/action",{method:"POST",body:{profileId,action}}),

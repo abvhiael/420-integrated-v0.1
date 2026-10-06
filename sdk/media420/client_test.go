@@ -205,7 +205,7 @@ func TestSigningIntentRejectsRequestedNetworkMismatchBeforeTransport(t *testing.
 	defer ts.Close()
 	client := newClientFor(t, ts.URL)
 	_, err := client.SigningIntent(context.Background(), mediaapi.SigningIntentRequest{
-		Wallet: "0x1111111111111111111111111111111111111111",
+		Wallet:  "0x1111111111111111111111111111111111111111",
 		ChainID: 420, Network: "mainnet", Action: "publish",
 		ResourceID: "asset-1", PayloadHash: "0xabc",
 	}, "sign-2")

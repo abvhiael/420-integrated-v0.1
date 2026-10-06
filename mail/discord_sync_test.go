@@ -34,9 +34,9 @@ func validDiscordInboundMessage() DiscordInboundMessage {
 
 func discordSyncHarness(t *testing.T, store MailStore, authority *discordFullAuthorityStub) (*DiscordSyncService, *Service) {
 	t.Helper()
-	blobs := &blobStub{}
-	notify := &notifyStub{}
-	mailSvc := NewService(&identityStub{}, &messengerStub{}, blobs, notify, store)
+	blobs := &testBlobs{}
+	notify := &testNotify{}
+	mailSvc := NewService(testIDs{"alice.420": true}, testPolicy{}, blobs, notify, store)
 	mailSvc.Now = func() time.Time { return time.Unix(1700000200, 0).UTC() }
 	connectors, err := NewDiscordConnectorService(authority)
 	if err != nil {
@@ -124,7 +124,7 @@ func TestDiscordSyncValidatesProviderMessageShapeBeforeMaterialization(t *testin
 		adapter := testConnectorAdapter(DiscordProvider, ConnectorCapabilityPull)
 		adapter.pull = ConnectorPullResult{Provider: DiscordProvider, ConnectionID: "discord:123456789012345678", Items: []ConnectorItem{{ExternalID: msg.MessageID, OccurredAt: msg.CreatedAt, Kind: DiscordSyncItemKind, Payload: string(raw)}}}
 		reg, _ := NewConnectorRegistry(adapter)
-		mailSvc := NewService(&identityStub{}, &messengerStub{}, &blobStub{}, &notifyStub{}, NewMemoryStore())
+		mailSvc := NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore())
 		syncer := NewDiscordSyncService(NewConnectorService(reg), mailSvc)
 		if _, err := syncer.Sync(context.Background(), "alice.420", "discord:123456789012345678"); !errors.Is(err, ErrDiscordInvalidResult) {
 			t.Fatalf("invalid Discord message accepted: %+v err=%v", msg, err)

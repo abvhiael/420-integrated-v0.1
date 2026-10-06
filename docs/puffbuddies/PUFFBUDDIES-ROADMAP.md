@@ -626,7 +626,50 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.15 — Visibility model
 
-Define private, discoverable, matched, moderator-only, and other field audiences.
+**Purpose:** define canonical field audiences and disclosure boundaries for private, discoverable, matched, participant-only, moderator-only, service-minimum, aggregate-only, explicitly public, and never-public PuffBuddies data.
+
+**Canonical requirements:**
+
+1. Record PB-VIS-001 through PB-VIS-040.
+2. Define PRIVATE_SELF, DISCOVERABLE, MATCHED, PARTICIPANT_ONLY, MODERATOR_ONLY, SERVICE_MINIMUM, AGGREGATE_ONLY, PUBLIC_EXPLICIT, and NEVER_PUBLIC audiences.
+3. Explicitly distinguish in-app DISCOVERABLE visibility from unauthenticated/public internet/public-protocol visibility.
+4. Define canonical audience treatment for membership, ordinary profile presentation, discovery preferences, cannabis fields, precise/coarse location, likes/passes, matches, blocks, reports/moderation, messages, identity evidence, eligibility conclusions, wallet/profile linkage, payment/accounting data, lifecycle/safety state, internal ranking, sessions/security data, and audit evidence.
+5. Require field-level visibility to remain subordinate to block, consent, safety, lifecycle, eligibility, visibility, and deletion authority.
+6. Require block, unmatch, deactivation/restriction/suspension/ban, and deletion to revoke stale broader audiences.
+7. Require caches, clients, queues, notifications, indexes, analytics, search/explorer, and derived services to preserve source visibility classifications.
+8. Require server/service authorization; client-side hiding alone is not a privacy boundary.
+9. Prohibit payments, premium, token holdings, staking, sponsorship, boosts, or promotions from purchasing another user's protected field visibility.
+10. Define a field-classification decision rule covering ownership, default audience, allowed audience changes, override authorities, service-minimum needs, public-enumeration/inference risk, retention/deletion, stale-copy invalidation, and audit.
+11. Do not claim a profile schema, ACL engine, API, database, client implementation, contract, address, service ID, deployment, or live visibility enforcement in PB-0.15.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.15-VISIBILITY-MODEL.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.15-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.15 is not a Level 2 integration milestone; it defines field audience policy only and introduces no executable ACL/profile/shared runtime integration.
+
+**Dependencies:** PB-0.1 through PB-0.14 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.15 visibility-model document exists;
+- PB-VIS-001 through PB-VIS-040 exist exactly once and in sequence;
+- all canonical audiences are explicit;
+- in-app discoverability is explicitly not equivalent to public visibility;
+- field-specific audience classifications cover all major sensitive PuffBuddies data classes;
+- stale/derived/client copies cannot preserve visibility after canonical revocation;
+- Search/Explorer/public services cannot promote private in-app fields to public;
+- client-side hiding alone cannot satisfy protected visibility;
+- economic state cannot purchase another user's protected visibility;
+- no profile-schema/ACL/API/database/client/contract/address/service-ID/deployment/live-visibility implementation is falsely claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes;
+- durable PB-0.15 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.16 — Non-goals reconciliation
 

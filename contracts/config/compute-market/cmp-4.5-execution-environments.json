@@ -40,7 +40,6 @@
     "affected Compute Market Level 1 qualification passes exact implementation SHA"
   ],
   "intentionally_deferred": [
-    "CMP-4.6 result provenance",
     "CMP-4.7 scientific metadata and lineage",
     "CMP-4.8 publication / retention policy",
     "CMP-4.9 research dashboard",

@@ -59,7 +59,29 @@ System folders are `INBOX`, `SENT`, `OUTBOX`, `DRAFTS`, `ARCHIVE`, `JUNK`, and `
 - Archive/Junk/Trash/permanent-delete timestamps and state versions are retained in mailbox state.
 - Message bodies remain private/off-chain. MAIL-2.1 adds no on-chain mail authority.
 
-MAIL-2.1 intentionally keeps the existing in-memory repository store; durable transactional persistence, restart recovery, migrations, and multi-instance state are MAIL-2.2.
+MAIL-2.2 replaces the repository-only in-memory metadata path with a durable transactional store implementation for production-equivalent Mail runtime composition.
+
+### Durable metadata store
+
+`mail/store.go` provides a provider-neutral `MailStore` transaction interface plus:
+
+- `OpenDurableStore(path)` for an atomic file-backed durable store;
+- schema versioning and forward-version rejection;
+- schema-zero migration initialization;
+- durable message metadata, mailbox state, sender-scoped idempotency evidence, and owner/folder secondary indexes;
+- atomic temp-file + fsync + rename commits;
+- 0600 state/lock-file permissions;
+- process-local serialization plus OS advisory file locking so multiple Mail processes sharing the same durable path observe one transactional state;
+- index rebuild/validation on load;
+- fail-closed corrupt-store handling;
+- transaction rollback when a callback fails;
+- restart recovery and immediate cross-instance visibility.
+
+`NewDurableService(..., path)` is the durable service constructor. `NewService(...)` retains an in-memory store only for tests/development compatibility; deployed Mail must use a durable `MailStore`.
+
+Distributed idempotency is enforced by rechecking the sender-scoped idempotency key inside the exclusive durable transaction before commit. Multiple instances sharing the same transactional store cannot commit two logical messages for the same sender/key. Conflicting payload reuse fails closed with `ErrIdempotencyConflict`.
+
+The built-in file implementation requires all cooperating instances to share a filesystem with correct advisory-lock and atomic-rename semantics. A database-backed `MailStore` may replace it later without changing service semantics.
 
 ## Thin UI
 
@@ -69,12 +91,13 @@ MAIL-2.1 intentionally keeps the existing in-memory repository store; durable tr
 
 Applicable shared threats include SPAM, SYBIL, MESSAGING_ABUSE, INDEX_POISONING and WEBHOOK_REPLAY where adapters use callbacks. Repository controls include actor/sender binding, canonical-source enforcement for the user send path, identity resolution, Messenger policy checks before persistence, private body references, input bounds, idempotency conflict detection, recipient-only read acknowledgement, no public list/search route, injected authentication and bounded pagination.
 
-Deployment still requires rate limits, abuse/report operations, attachment policy/scanning if attachments are added, encrypted private storage, secret handling, observability, backup/recovery, retention policy, provider failure behavior and live privacy testing.
+Deployment still requires rate limits, abuse/report operations, attachment policy/scanning if attachments are added, encrypted private body storage, secret handling, observability, backup/restore operations, retention policy, provider failure behavior and live privacy testing. MAIL-2.2 qualifies repository durability/restart semantics; it does not claim production backup/disaster-recovery operations.
 
 ## Build and test
 
 ```bash
 go test ./mail/...
+go test -race ./mail/...
 go vet ./mail/...
 python3 scripts/verify-420mail-audit.py
 ```

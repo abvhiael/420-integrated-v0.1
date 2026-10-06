@@ -124,6 +124,37 @@ MAIL-2.4 adds authenticated, owner-scoped mailbox search without publishing Mail
 - Search returns mailbox/message metadata; it does not return body plaintext in the search result payload.
 - No 420Search/public-index publication is introduced by MAIL-2.4.
 
+## User Filters & Rules Engine
+
+MAIL-2.5 adds durable, owner-scoped rules that automatically organize an incoming recipient mailbox copy inside the same transaction that materializes delivery.
+
+Conditions are ANDed when more than one is supplied:
+
+- `sender_equals` — exact identity-address comparison;
+- `content_contains` — case-insensitive substring match across subject and the private body supplied during delivery;
+- `source_equals` — exact source-service comparison.
+
+Supported automated actions are:
+
+- move the recipient copy to Inbox, Archive, Junk, or Trash;
+- add owner-scoped user labels;
+- assign or clear an owner-scoped custom folder;
+- mark the owner copy read/unread without creating a false message-level human read receipt;
+- set starred, pinned, or muted owner-view flags;
+- stop processing lower-priority rules after the current rule.
+
+Rules are evaluated deterministically by ascending priority, then creation time/ID. Disabled rules do not execute. Multiple enabled matching rules compose unless `stop_processing` is set.
+
+Rule definitions are durable application metadata in store schema v3. Rule names are normalized and case-insensitively unique per owner. Each owner may create up to 100 rules; match strings and rule actions are bounded. Rule actions cannot target another owner's labels/folders or the Sent/Drafts/Outbox lifecycle classes. Deleting an organization target removes that target from dependent rules and deletes a rule if it would otherwise have no mailbox action.
+
+The delivery path evaluates recipient rules using the already-authorized private send payload before committing the recipient mailbox state. Rule execution does not publish body text, rule conditions, or rule results to public 420Search or on-chain state.
+
+API additions:
+
+- `GET|POST /v1/rules`
+- `PUT /v1/rules/{id}`
+- `DELETE /v1/rules/{id}`
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.

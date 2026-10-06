@@ -56,6 +56,9 @@ jobs:
         run: python3 -m unittest puffbuddies.tests.test_pb_2_12_failure_recovery -v
       - name: Retained PuffBuddies regressions
         run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-2.13 retained integration milestone
+        if: ${{ hashFiles('puffbuddies/tests/test_pb_2_13_integration.py') != '' }}
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_13_integration -v
       - name: Identity privacy and public-chain negative gate
         shell: bash
         run: |

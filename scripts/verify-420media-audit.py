@@ -25,6 +25,7 @@ roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-5",
     "MEDIA-AUDIT-6",
     "MEDIA-AUDIT-7",
+    "MEDIA-AUDIT-8",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -65,6 +66,13 @@ pay_compute = need("docs/420-MEDIA-PAY-COMPUTE.md", [
     "MediaPayComputeAdapter420",
     "settledAmounts",
     "componentGraphHash",
+    "Level 1 app-scoped fast qualification",
+])
+projections = need("docs/420-MEDIA-PROJECTIONS.md", [
+    "MEDIA-AUDIT-8",
+    "READY + PUBLIC",
+    "420Indexer",
+    "PromotionalOptIn",
     "Level 1 app-scoped fast qualification",
 ])
 
@@ -125,6 +133,10 @@ for path in [
     "media/storage/rights_test.go",
     "media/livestream/identity.go",
     "media/livestream/identity_test.go",
+    "media/projection/search.go",
+    "media/projection/index.go",
+    "media/projection/notifications.go",
+    "media/projection/projection_test.go",
 ]:
     assert (ROOT / path).exists(), f"missing existing Media baseline file {path}"
 

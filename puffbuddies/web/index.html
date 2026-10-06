@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>PuffBuddies</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="topbar">
+  <div>
+    <strong>PuffBuddies</strong>
+    <span class="muted">adult dating & buddy discovery</span>
+  </div>
+  <div class="session-row">
+    <label>Session token
+      <input id="session-token" type="password" autocomplete="off" aria-describedby="session-help">
+    </label>
+    <button id="connect-session" type="button">Use session</button>
+    <button id="clear-session" type="button">Sign out</button>
+  </div>
+  <small id="session-help">Held in memory only. The web client does not write session tokens to local storage.</small>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <div>
+      <h1 id="hero-title">Consent-first discovery.</h1>
+      <p>Eligibility, matches, safety, visibility and lifecycle decisions are revalidated by PuffBuddies authority. Browser state is presentation only.</p>
+      <div id="runtime-status" class="status" role="status" aria-live="polite">Loading repository runtime configuration…</div>
+    </div>
+  </section>
+
+  <nav aria-label="PuffBuddies sections" class="section-nav">
+    <a href="#entry">Entry</a><a href="#profile">Profile</a><a href="#discovery">Discovery</a>
+    <a href="#matches">Matches</a><a href="#notifications">Notifications</a><a href="#safety">Safety</a>
+    <a href="#settings">Settings</a><a href="#premium">Premium</a>
+  </nav>
+
+  <section id="entry" aria-labelledby="entry-title">
+    <h2 id="entry-title">Eligibility & account entry</h2>
+    <p>The client can display current eligibility but cannot self-assert or override it.</p>
+    <div class="toolbar">
+      <button id="check-session" type="button">Check session</button>
+      <button id="check-eligibility" type="button">Check eligibility</button>
+    </div>
+    <div id="entry-output" class="panel" aria-live="polite"></div>
+  </section>
+
+  <section id="profile" aria-labelledby="profile-title">
+    <h2 id="profile-title">Profile</h2>
+    <form id="profile-form">
+      <div class="grid two">
+        <label>Display name<input name="displayName" maxlength="80" required></label>
+        <label>Intent
+          <select name="intent" required>
+            <option value="DATING">Dating</option>
+            <option value="BUDDY">Buddy</option>
+            <option value="BOTH">Both</option>
+          </select>
+        </label>
+        <label>About<textarea name="about" maxlength="1200"></textarea></label>
+        <label>Prompt<textarea name="prompt" maxlength="500"></textarea></label>
+        <label>Coarse area<input name="coarseArea" maxlength="120" aria-describedby="location-help"></label>
+        <label>Discovery distance
+          <select name="distanceBand"><option>LOCAL</option><option>REGIONAL</option><option>WIDE</option></select>
+        </label>
+      </div>
+      <small id="location-help">Use only coarse discovery area. Exact address/GPS is not a public web profile field.</small>
+      <div class="toolbar">
+        <button type="button" id="load-profile">Load profile</button>
+        <button type="submit">Save profile</button>
+      </div>
+    </form>
+    <div id="verification-badges" class="chips" aria-live="polite"></div>
+    <div id="profile-output" class="panel" aria-live="polite"></div>
+  </section>
+
+  <section id="discovery" aria-labelledby="discovery-title">
+    <h2 id="discovery-title">Discovery</h2>
+    <p>Hard exclusions—eligibility, lifecycle, block, safety, visibility and preferences—must be applied before cards reach this client.</p>
+    <button id="refresh-discovery" type="button">Refresh discovery</button>
+    <div id="discovery-cards" class="grid cards" aria-live="polite"></div>
+  </section>
+
+  <section id="matches" aria-labelledby="matches-title">
+    <h2 id="matches-title">Matches & messaging</h2>
+    <button id="refresh-matches" type="button">Refresh matches</button>
+    <div id="match-list" class="grid cards" aria-live="polite"></div>
+    <p class="muted">Messaging entry is available only for a current authorized match. 420Messenger remains canonical for its conversation state.</p>
+  </section>
+
+  <section id="notifications" aria-labelledby="notifications-title">
+    <h2 id="notifications-title">Notifications</h2>
+    <button id="refresh-notifications" type="button">Refresh notifications</button>
+    <div id="notification-list" class="panel" aria-live="polite"></div>
+  </section>
+
+  <section id="safety" aria-labelledby="safety-title">
+    <h2 id="safety-title">Safety controls</h2>
+    <p>Block, report and unmatch are baseline controls and never require premium.</p>
+    <form id="safety-form">
+      <div class="grid two">
+        <label>Profile ID<input name="profileId" required autocomplete="off"></label>
+        <label>Action
+          <select name="action">
+            <option value="BLOCK">Block</option>
+            <option value="REPORT">Report</option>
+            <option value="UNMATCH">Unmatch</option>
+          </select>
+        </label>
+        <label>Report category / note<textarea name="details" maxlength="600"></textarea></label>
+      </div>
+      <button type="submit">Apply safety action</button>
+    </form>
+    <div id="safety-output" class="panel" aria-live="assertive"></div>
+  </section>
+
+  <section id="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">Visibility, lifecycle & deletion</h2>
+    <div class="grid two">
+      <form id="visibility-form">
+        <h3>Profile visibility</h3>
+        <label>Visibility
+          <select name="visibility"><option>DISCOVERABLE</option><option>HIDDEN</option></select>
+        </label>
+        <button>Update visibility</button>
+      </form>
+      <form id="lifecycle-form">
+        <h3>Participation</h3>
+        <label>Action
+          <select name="action"><option value="DEACTIVATE">Deactivate</option><option value="REACTIVATE">Reactivate</option><option value="DELETE_REQUEST">Request deletion</option></select>
+        </label>
+        <button>Apply lifecycle action</button>
+      </form>
+    </div>
+    <button id="check-deletion" type="button">Check deletion status</button>
+    <div id="settings-output" class="panel" aria-live="polite"></div>
+  </section>
+
+  <section id="premium" aria-labelledby="premium-title">
+    <h2 id="premium-title">Premium feature availability</h2>
+    <p>Premium can expose convenience features only. It cannot create consent, matches, messages, safety exceptions or protected-data access.</p>
+    <button id="refresh-premium" type="button">Refresh entitlements</button>
+    <div id="premium-list" class="chips" aria-live="polite"></div>
+  </section>
+</main>
+
+<footer>
+  <small>Repository-qualified web client. Deployment, live API binding and production readiness are qualified in later phases.</small>
+</footer>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

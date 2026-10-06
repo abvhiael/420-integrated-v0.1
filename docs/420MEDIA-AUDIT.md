@@ -234,6 +234,10 @@ The first three gaps are remediated by this audit branch. Product documentation 
 
 ## Final determination
 
-420Media is **IMPLEMENTATION COMPLETE FOR THE REPOSITORY AUDIT PHASE, PENDING MEDIA-AUDIT-11 LEVEL 3 EXACT-HEAD QUALIFICATION**.
+420Media is **COMPLETE FOR THE REPOSITORY AUDIT PHASE THROUGH MEDIA-AUDIT-11 LEVEL 3** on exact qualified implementation SHA `f0c68a0e5150111b97cebbcc0b8cb38e853314c2`.
+
+Durable Level-3 evidence: `docs/audit/420MEDIA-AUDIT-11-QUALIFICATION.md`.
+
+Historical pre-closeout classification retained for verifier compatibility: CODE COMPLETE: **YES for repository audit scope / pending Level 3 exact-head qualification**. That classification is superseded by the Level-3 closeout above.
 
 No repository-closeout requirement is intentionally moved to testnet. Live infrastructure and Genesis-acceptance evidence remain explicitly assigned to MEDIA-AUDIT-12/13.

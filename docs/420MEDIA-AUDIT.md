@@ -115,8 +115,8 @@ No critical source-level fund-custody vulnerability was identified in this audit
 
 | Dependency | Current state | Status |
 |---|---|---|
-| 420 Identity | optional profile/controller reader + Media actor guard on audit branch; wallet-only pseudonymous operation preserved | IMPLEMENTED / pending Level 1 qualification |
-| 420 Rights | canonical subject/provenance/right/license reads + publication/reuse guard on audit branch; Rights remains authoritative | IMPLEMENTED / pending Level 1 qualification |
+| 420 Identity | optional profile/controller reader + Media actor guard; wallet-only pseudonymous operation preserved | COMPLETE (Level 1) |
+| 420 Rights | canonical subject/provenance/right/license reads + publication/reuse guard; Rights remains authoritative | COMPLETE (Level 1) |
 | 420 Storage | Media-owned upload lifecycle uses 420Storage v1 prepare/ingest evidence and canonical manifest readiness checks; Storage remains authoritative | COMPLETE (Level 1) |
 | 420 Search | no Media projection/search integration found | MISSING |
 | 420 Notifications | no Media notification integration found | MISSING |
@@ -138,7 +138,7 @@ Upload: **COMPLETE (Level 1)** on the audit branch. Media now owns a 420Storage-
 
 Livestreaming: **COMPLETE (Level 2 milestone)** on the audit branch. Media now owns create/start/stop/status flows over the existing gateway, canonical `MediaStreamRegistry420` controller reads, feature-flag enforcement, bounded credential/session inputs, durable desired-state persistence, bounded reconnect semantics and restart recovery. Public `/v1` API/UI remain later roadmap work.
 
-Identity/Rights: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. Wallet-only pseudonymous actors remain valid; supplied Identity profiles must be active and wallet-controlled. Public projection and derivative reuse now require live canonical Rights subject/provenance/right/holder or license authorization rather than trusting local Media references.
+Identity/Rights: **COMPLETE (Level 1)** on the audit branch. Wallet-only pseudonymous actors remain valid; supplied Identity profiles must be active and wallet-controlled. Public projection and derivative reuse now require live canonical Rights subject/provenance/right/holder or license authorization rather than trusting local Media references.
 
 ## Builds and tests
 
@@ -155,6 +155,8 @@ MEDIA-AUDIT-3 qualification evidence: `docs/audit/420MEDIA-AUDIT-3-QUALIFICATION
 MEDIA-AUDIT-4 qualification evidence: `docs/audit/420MEDIA-AUDIT-4-QUALIFICATION.md`, implementation SHA `14f87ce68fe9d7a0cc81654e2d86b915a08a285f`, workflow run `37500397201` PASS.
 
 MEDIA-AUDIT-5 qualification evidence: `docs/audit/420MEDIA-AUDIT-5-QUALIFICATION.md`, implementation SHA `6833ed362214f453bfe0fb224424e7f09c7eb1f9`, workflow run `37503557911` PASS (Level 2).
+
+MEDIA-AUDIT-6 qualification evidence: `docs/audit/420MEDIA-AUDIT-6-QUALIFICATION.md`, implementation SHA `70376d2b1d41659d7d654e41faa5e9d3c992fd66`, workflow run `37507801987` PASS (Level 1).
 
 ## Documentation audit
 
@@ -188,8 +190,8 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + replay recovery + control-plane boundary on audit branch | Go discovery/control-plane tests + exact-head Media gate | Phase 3.1 discovery doc + qualification evidence | COMPLETE (Level 1) | later orchestration remains separate |
 | video uploads | GEN-SVC Media target | 420Storage v1 prepare/ingest + canonical manifest-gated Media asset lifecycle | Media Storage lifecycle tests + exact-head Media gate | Storage lifecycle doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | basic livestreaming | GEN-SVC + feature flag | create/start/stop/status service + canonical controller reader + feature gate + durable recovery/reconnect on audit branch | Media livestream/livegateway tests + accumulated Level 2 Media suite | Livestream service doc + qualification evidence | COMPLETE (Level 2) | retain milestone regressions |
-| Identity integration | GEN-SVC registry | wallet-first actor guard with optional active profile/controller validation + Identity-aware livestream helpers | Media authority/livestream tests | Identity/Rights integration doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head |
-| Rights integration | GEN-SVC registry | canonical Rights subject/provenance/right/holder/license checks for public projection and derivative reuse | Media authority/storage tests | Identity/Rights integration doc | IMPLEMENTED / pending Level 1 qualification | qualify exact Media head |
+| Identity integration | GEN-SVC registry | wallet-first actor guard with optional active profile/controller validation + Identity-aware livestream helpers | Media authority/livestream tests + exact-head Media gate | Identity/Rights integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
+| Rights integration | GEN-SVC registry | canonical Rights subject/provenance/right/holder/license checks for public projection and derivative reuse | Media authority/storage tests + exact-head Media gate | Identity/Rights integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | Storage integration | GEN-SVC registry | complete Storage object identity, canonical manifest readiness, derivative linkage, privacy/delete/retry semantics on audit branch | Media Storage lifecycle tests + exact-head Media gate | Storage lifecycle doc + qualification evidence | COMPLETE (Level 1) | retain canonical Storage authority; live deployment deferred |
 | Search integration | GEN-SVC registry | none | none | none | MISSING | public-only Media projection |
 | Notifications integration | GEN-SVC registry | none | none | none | MISSING | opt-in event delivery |

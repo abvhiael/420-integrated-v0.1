@@ -1358,7 +1358,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** current-source revocation advances to REVOKED; expiry-at-bound advances to EXPIRED; stale source/sequence/time fails closed; pre-expiry/noneligible state does not spuriously expire; each real transition invalidates all derived surfaces and advances generation; result persists/reloads; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.7 — Authorization integration
+### PB-2.7 — Authorization integration — COMPLETE
 
 **Purpose:** bind the full current PB-2 eligibility record into PB-1.5 server-side authorization so a stale/injected bare ELIGIBLE flag cannot bypass policy, expiry, subject, lifecycle, relationship, block/safety or purpose-limited authority.
 

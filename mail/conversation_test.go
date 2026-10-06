@@ -303,8 +303,8 @@ func TestConversationV5MigrationBackfillsRootThreadsAndPersistsState(t *testing.
 	}
 	legacy := diskStoreData{
 		SchemaVersion: 5,
-		Messages: map[string]Message{id: msg},
-		ByIdem: map[string]string{"alice.420\x00legacy-thread": id},
+		Messages:      map[string]Message{id: msg},
+		ByIdem:        map[string]string{"alice.420\x00legacy-thread": id},
 		Mailbox: map[string]MailboxState{
 			mailboxKey("alice.420", id): {MessageID: id, Owner: "alice.420", Folder: FolderSent, UpdatedAt: now, Version: 1},
 			mailboxKey("bob.420", id):   {MessageID: id, Owner: "bob.420", Folder: FolderInbox, UpdatedAt: now, Version: 1},

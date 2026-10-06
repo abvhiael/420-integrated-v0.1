@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+// MAIL-2.7 thresholds are deterministic repository policy; later operational
+// rate limiting remains owned by the dedicated abuse-controls roadmap step.
 const (
 	MaxQuarantineReasons      = 8
 	MaxFingerprintCount       = 1000000

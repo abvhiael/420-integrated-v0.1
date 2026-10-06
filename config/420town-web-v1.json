@@ -1,0 +1,29 @@
+{
+  "schema":"420-town-web-v1",
+  "serviceId":"420/service/town/v1",
+  "status":"WEB_APPLICATION_BASELINE",
+  "root":"town/web",
+  "productionOrigin":"https://town.420integrated.org",
+  "discovery":{"source":"420Search","domain":"public_town","authoritative":false},
+  "content":{"source":"420Town /v1 API","mutations":["post","thread","comment","vote","moderation"],"idempotencyRequired":true},
+  "authority":{"source":"TownAuthority420","transport":"EIP-1193","walletRequired":true,"networkValidation":true,"targetPinning":true,"reads":["community","membership","subscription","entitlement"],"writes":["createCommunity","joinCommunity","leaveCommunity","removeMember","assignRole","activateSubscription","grantEntitlement"]},
+  "states":["loading","empty","error","transaction","ready"],
+  "accessibility":{"semanticMain":true,"liveRegions":true,"focusVisible":true,"reducedMotion":true,"responsive":true},
+  "configuration":{"runtimeFile":"town/web/runtime-config.json","exampleFile":"town/web/runtime-config.example.json","secretsAllowed":false,"productionMayBeUnmaterialized":true},
+  "invariants":[
+    "TOWN-WEB-001_SEARCH_DISCOVERY_IS_NON_AUTHORITATIVE",
+    "TOWN-WEB-002_CONTENT_MUTATIONS_USE_TOWN_V1_API",
+    "TOWN-WEB-003_AUTHORITY_WRITES_REQUIRE_CONNECTED_WALLET",
+    "TOWN-WEB-004_AUTHORITY_WRITES_REQUIRE_EXPECTED_CHAIN",
+    "TOWN-WEB-005_AUTHORITY_WRITES_PIN_TOWN_AUTHORITY_TARGET",
+    "TOWN-WEB-006_MEMBERSHIP_SUBSCRIPTION_ENTITLEMENT_STATE_READS_TOWN_AUTHORITY",
+    "TOWN-WEB-007_MODERATION_UI_USES_AUTHENTICATED_IDEMPOTENT_API",
+    "TOWN-WEB-008_SESSION_API_TOKEN_IS_MEMORY_ONLY",
+    "TOWN-WEB-009_RUNTIME_CONFIG_CONTAINS_NO_PRIVILEGED_SECRETS",
+    "TOWN-WEB-010_LOADING_EMPTY_ERROR_TRANSACTION_STATES_ARE_EXPLICIT",
+    "TOWN-WEB-011_ACCESSIBILITY_LIVE_REGIONS_AND_FOCUS_STYLES_PRESENT",
+    "TOWN-WEB-012_RESPONSIVE_LAYOUT_PRESENT",
+    "TOWN-WEB-013_DYNAMIC_INDEXED_DATA_AVOIDS_INNERHTML",
+    "TOWN-WEB-014_PRODUCTION_AUTHORITY_ACTIONS_FAIL_CLOSED_WHEN_CONFIG_UNMATERIALIZED"
+  ]
+}

@@ -1515,6 +1515,81 @@ The thin UI already renders any provider advertising `LINK`. A deployment shell 
 
 No Telegram-specific route or raw credential form is introduced.
 
+## MAIL-2.24 Telegram → 420Mail Sync
+
+MAIL-2.24 adds authenticated inbound Telegram synchronization through the provider-neutral `PULL` connector capability introduced by MAIL-2.14 and the Telegram account binding from MAIL-2.23.
+
+### Authority and capability boundary
+
+`TelegramConnectorAdapter` advertises `PULL` only when its configured authority implements `TelegramSyncAuthority`.
+
+The sync authority receives:
+- authenticated 420Mail actor;
+- Telegram user ID derived from the canonical `telegram:{user-id}` connection;
+- durable opaque cursor.
+
+The authority returns a bounded `TelegramSyncPage` containing normalized Telegram messages and the next opaque cursor.
+
+MAIL-2.24 does not enable Telegram `PUSH`, webhook ingestion, or wallet verification. Those remain later roadmap work.
+
+### Telegram message model
+
+Each inbound item binds:
+- positive decimal Telegram message ID;
+- positive decimal Telegram author user ID;
+- signed decimal chat ID (allowing Telegram group/supergroup identifiers);
+- optional bounded author username;
+- optional bounded chat title;
+- private message content;
+- non-zero provider timestamp.
+
+The connector item external ID and timestamp must exactly match the decoded Telegram message.
+
+### Private mailbox materialization
+
+New Telegram messages materialize as private recipient Inbox entries:
+- sender: `telegram:{author-id}`;
+- recipient: authenticated 420Mail identity;
+- source: `telegram`;
+- visibility: `PRIVATE`;
+- private body stored only through the Mail private blob store;
+- deterministic message ID;
+- deterministic conversation ID bound to Mail owner + Telegram connection + chat ID.
+
+Subject prefers `Telegram · {chat title}`, then `Telegram · @{author username}`, otherwise `Telegram`.
+
+Existing trust controls, filters/rules, spam/phishing protection, thread archive/mute state, and Mail notification behavior are applied before/after materialization exactly as for other inbound Mail sources.
+
+### Durable cursor and replay behavior
+
+Durable Mail store schema advances to **v11** and persists Telegram cursor state keyed by:
+- Mail owner;
+- Telegram connection ID.
+
+Cursor state survives restart and records last sync time/version.
+
+Replay of an identical Telegram item is idempotent. A reused external identity with mutated content or metadata fails closed with `ErrTelegramSyncConflict`.
+
+A permanently deleted imported message is not resurrected by provider replay.
+
+Provider/dependency failures do not advance the durable cursor.
+
+### API, client, and UI
+
+Authenticated sync endpoint:
+- `POST /v1/connectors/telegram/sync`
+
+Typed client:
+- `SyncTelegram`
+
+The thin UI shows **Sync Telegram** only when the provider descriptor advertises `PULL`. The deployment shell supplies the canonical linked Telegram connection ID; it does not supply raw provider credentials.
+
+### Credential/privacy boundary
+
+420Mail does not accept or persist Telegram bot tokens, access/refresh tokens, client secrets, phone-number credentials, verification codes, or provider signing/device material.
+
+Telegram message bodies remain private/off-chain and are not exposed to public 420Search.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

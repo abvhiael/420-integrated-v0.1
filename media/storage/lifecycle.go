@@ -10,11 +10,11 @@ import (
 )
 
 var (
-	ErrInvalidAsset        = errors.New("420media storage: invalid asset")
-	ErrDependencyMismatch  = errors.New("420media storage: dependency mismatch")
-	ErrCanonicalNotReady   = errors.New("420media storage: canonical manifest not ready")
-	ErrDeleteUnsupported   = errors.New("420media storage: canonical-aware delete unsupported")
-	ErrAccessDenied        = errors.New("420media storage: access denied")
+	ErrInvalidAsset       = errors.New("420media storage: invalid asset")
+	ErrDependencyMismatch = errors.New("420media storage: dependency mismatch")
+	ErrCanonicalNotReady  = errors.New("420media storage: canonical manifest not ready")
+	ErrDeleteUnsupported  = errors.New("420media storage: canonical-aware delete unsupported")
+	ErrAccessDenied       = errors.New("420media storage: access denied")
 )
 
 type Visibility string
@@ -34,11 +34,11 @@ const (
 type State string
 
 const (
-	StateDraft         State = "DRAFT"
-	StatePrepared      State = "PREPARED"
-	StateUploaded      State = "UPLOADED"
-	StateReady         State = "READY"
-	StateDeleted       State = "DELETED"
+	StateDraft    State = "DRAFT"
+	StatePrepared State = "PREPARED"
+	StateUploaded State = "UPLOADED"
+	StateReady    State = "READY"
+	StateDeleted  State = "DELETED"
 )
 
 type Asset struct {
@@ -123,7 +123,6 @@ func (c Coordinator) Ingest(ctx context.Context, asset Asset, plan storage420.Up
 	}
 	receipt, err := c.Ingestor.Ingest(ctx, plan, body)
 	if err != nil {
-		// Preserve PREPARED state so the exact idempotent plan can be retried.
 		return asset, err
 	}
 	if receipt.Version != storage420.APIVersion || receipt.UploadID != plan.UploadID ||
@@ -144,7 +143,6 @@ func (c Coordinator) ConfirmCanonical(ctx context.Context, asset Asset) (Asset, 
 	}
 	manifest, err := c.Manifests.Manifest(ctx, asset.Object.ManifestID)
 	if err != nil {
-		// Canonical read outages do not destroy a valid upload receipt; retry later.
 		return asset, err
 	}
 	if manifest.Version != storage420.APIVersion || manifest.ManifestID != asset.Object.ManifestID ||

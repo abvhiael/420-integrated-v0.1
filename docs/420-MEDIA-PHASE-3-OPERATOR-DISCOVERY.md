@@ -1,5 +1,7 @@
 # 420Media Phase 3.1 — Operator Discovery and Provider Selection
 
+Roadmap step: **MEDIA-AUDIT-3 — Operator discovery and service control plane**
+
 ## Purpose
 
 Phase 3.1 turns the Phase 1 operator registry and Phase 2 operator runtime into a discoverable service network without adding expensive on-chain operator enumeration.

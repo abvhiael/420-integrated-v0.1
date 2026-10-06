@@ -61,4 +61,4 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model**, **MAIL-2.2 — Durable Mail Storage**, and **MAIL-2.3 — Labels & Custom Folders** are COMPLETE at Level 1. **MAIL-2.4 — Private Mail Search** is the active canonical Phase 2 step.
+**MAIL-2.1 — Mailbox State Model**, **MAIL-2.2 — Durable Mail Storage**, **MAIL-2.3 — Labels & Custom Folders**, and **MAIL-2.4 — Private Mail Search** are COMPLETE at Level 1. **MAIL-2.5 — User Filters & Rules Engine** is the active canonical Phase 2 step.

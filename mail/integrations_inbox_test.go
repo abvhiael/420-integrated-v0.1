@@ -122,7 +122,6 @@ func TestIntegrationInboxSourcesAreExplicitAndBounded(t *testing.T) {
 	}
 }
 
-
 func TestHTTPIntegrationsInbox(t *testing.T) {
 	store := NewMemoryStore()
 	seedIntegrationInbox(t, store)

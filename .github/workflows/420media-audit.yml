@@ -11,7 +11,9 @@ on:
       - "config/genesis-applications.json"
       - "docs/420-MEDIA-*"
       - "docs/420MEDIA-*"
+      - "docs/apps/media/**"
       - "scripts/420media-anvil-integration.sh"
+      - "scripts/verify-420media-security-closeout.py"
       - "scripts/verify-420media-audit.py"
       - ".github/workflows/420media-audit.yml"
   workflow_dispatch:
@@ -48,13 +50,15 @@ jobs:
         run: python3 scripts/verify-420media-audit.py
       - name: Report Media Go formatting drift
         run: |
-          bad="$(gofmt -l media/authority media/storage media/livestream media/projection media/api sdk/media420 media/node/livegateway/gateway.go media/node/livegateway/drivers.go media/node/livegateway/recovery_test.go)"
+          bad="$(gofmt -l media/authority media/storage media/livestream media/projection media/api media/security media/fixtures sdk/media420 media/node/livegateway/gateway.go media/node/livegateway/drivers.go media/node/livegateway/recovery_test.go)"
           if [ -n "$bad" ]; then
             printf 'gofmt required for Media audit packages:\n%s\n' "$bad"
             exit 1
           fi
       - name: Validate GEN-SVC feature contract
         run: python3 scripts/validate-gen-svc-0.py
+      - name: Verify Media security closeout
+        run: python3 scripts/verify-420media-security-closeout.py
       - name: Test Media Go packages
         run: go test ./media/... ./cmd/420media-node
       - name: Test Media typed SDK
@@ -63,6 +67,8 @@ jobs:
         run: go test ./search/architecture ./search/result -count=1
       - name: Vet Media Go packages and SDK
         run: go vet ./media/... ./cmd/420media-node ./sdk/media420
+      - name: Race-test Media application and SDK
+        run: go test -race ./media/... ./sdk/media420
       - name: Qualify Media web application
         run: npm --prefix media/web run qualify
       - name: Build Media contracts

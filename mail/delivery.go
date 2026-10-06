@@ -38,7 +38,7 @@ type Delivery struct {
 	ReplyTo            string         `json:"reply_to,omitempty"`
 	StagingBodyRef     string         `json:"staging_body_ref,omitempty"`
 	StagingBodyDigest  string         `json:"staging_body_digest,omitempty"`
-	RequestFingerprint string         `json:"-"`
+	RequestFingerprint string         `json:"request_fingerprint"`
 	Status             DeliveryStatus `json:"status"`
 	Attempts           uint32         `json:"attempts"`
 	LastError          string         `json:"last_error,omitempty"`

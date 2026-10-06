@@ -515,3 +515,16 @@ func (c Client) DeliverDiscord(ctx context.Context, req mail.DiscordDeliveryRequ
 	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/deliver", req, &out)
 	return out, err
 }
+
+
+func (c Client) PrepareDiscordWalletVerification(ctx context.Context, req mail.DiscordWalletChallengeRequest) (mail.DiscordWalletChallenge, error) {
+	var out mail.DiscordWalletChallenge
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/wallet/challenge", req, &out)
+	return out, err
+}
+
+func (c Client) VerifyDiscordWallet(ctx context.Context, req mail.DiscordWalletVerificationRequest) (mail.DiscordWalletVerification, error) {
+	var out mail.DiscordWalletVerification
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/wallet/verify", req, &out)
+	return out, err
+}

@@ -1066,3 +1066,277 @@ PR #523 remains open and mergeable. Current-main reconciliation remains intentio
 **TOWN-AUDIT-7 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-8 — User-facing web application**.
+
+
+## TOWN-AUDIT-8 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 + Level 2 frontend/application integration milestone**  
+Qualified implementation/test/workflow SHA: `2927dd56138618879f164d5337b360f8092810b6`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA 420Town qualification.
+
+### Implementation completed
+
+TOWN-AUDIT-8 adds the repository-side user-facing 420Town browser application without moving authority into the browser.
+
+Implemented scope includes:
+
+- `town/web` dependency-free ESM browser application;
+- public community discovery through 420Search using the exact `public_town` domain;
+- non-authoritative Search discovery presentation;
+- community feed reads through the versioned Town `/v1` API;
+- post creation;
+- thread creation;
+- comment/reply creation;
+- post voting;
+- authenticated/idempotent report workflow;
+- authenticated/idempotent moderator action workflow;
+- authenticated/idempotent moderation appeal workflow;
+- canonical community, membership, subscription and entitlement reads through `eth_call` against configured `TownAuthority420`;
+- community creation, join, leave, member removal, role assignment, subscription activation and entitlement-grant transaction encoding;
+- EIP-1193 wallet connection;
+- expected-chain validation;
+- exact transaction target pinning to configured `TownAuthority420`;
+- zero-value authority transactions only;
+- wallet invalidation on account/chain/disconnect events;
+- explicit canonical authority community `bytes32` key input for existing-community authority actions;
+- no inferred hash/mapping from opaque Town application `ObjectID` to canonical contract community key;
+- in-memory-only API session token;
+- cryptographically random browser idempotency keys;
+- runtime config validation with HTTPS requirements for non-loopback services;
+- repository production runtime config that intentionally fails closed until live chain/contract/service bindings are materialized;
+- loading, empty, ready, error and transaction UI states;
+- semantic labels, responsive layout, visible keyboard focus, live regions and reduced-motion handling;
+- dynamic feed/discovery rendering through DOM APIs rather than dynamic `innerHTML`;
+- browser security-header contract;
+- machine-readable `config/420town-web-v1.json`;
+- dedicated `scripts/verify-420town-web.py`;
+- browser structural qualification and Node unit tests;
+- Town CI ownership of Node 22 frontend qualification;
+- authenticated Town moderation API transport required by the browser;
+- canonical Town phase advancement through `WEB_APPLICATION_BASELINE` / TOWN-AUDIT-8.
+
+### Primary files changed
+
+TOWN-AUDIT-8 materially changed or added:
+
+- `town/web/package.json`;
+- `town/web/index.html`;
+- `town/web/styles.css`;
+- `town/web/app.js`;
+- `town/web/runtime-config.json`;
+- `town/web/runtime-config.example.json`;
+- `town/web/security-headers.json`;
+- `town/web/core/config.js`;
+- `town/web/core/abi.js`;
+- `town/web/core/wallet.js`;
+- `town/web/core/authority.js`;
+- `town/web/core/service.js`;
+- `town/web/core/state.js`;
+- `town/web/test/config.test.js`;
+- `town/web/test/wallet.test.js`;
+- `town/web/test/abi.test.js`;
+- `town/web/test/authority.test.js`;
+- `town/web/test/state.test.js`;
+- `town/web/test/service.test.js`;
+- `town/web/scripts/check.mjs`;
+- `town/api/server.go`;
+- `town/api/server_test.go`;
+- `config/420town-web-v1.json`;
+- `config/420town-api-v1.json`;
+- `config/420town-genesis.json`;
+- `scripts/verify-420town-web.py`;
+- `scripts/verify-420town-api.py` (retained verifier phase-label decoupling only);
+- `.github/workflows/420town-audit.yml`;
+- `docs/apps/town/web.md`;
+- `docs/apps/town/index.md`;
+- `town/README.md`.
+
+### Original exit criteria satisfied
+
+1. **Community discovery** — implemented through 420Search `public_town`; Search remains non-authoritative.
+2. **Create/join/leave flows** — implemented as wallet-reviewed `TownAuthority420` calls with chain and target validation.
+3. **Community feed** — implemented through the Town `/v1` public projection endpoint.
+4. **Post/thread/comment workflows** — implemented through authenticated/idempotent Town API writes.
+5. **Voting** — implemented through the Town API with idempotency.
+6. **Moderation/admin surfaces** — report, moderation action and appeal use authenticated/idempotent Town API routes; member removal and role assignment use canonical authority transactions.
+7. **Subscription/entitlement states** — canonical reads use `TownAuthority420`; activation/grant actions use authority transactions.
+8. **Wallet/network validation** — authority writes fail closed without wallet, on wrong network, without materialized authority address, with unexpected target, or with invalid calldata.
+9. **Loading/empty/error/transaction states** — represented explicitly in application state and live UI surfaces.
+10. **Accessibility/responsive basics** — semantic form labels, `aria-live`, visible focus, reduced-motion handling and responsive layout are structurally qualified.
+11. **Production configuration without committed secrets** — runtime config forbids secret-like browser fields, rejects embedded URL credentials, requires HTTPS for remote services and keeps authority transactions disabled until live bindings are materialized.
+
+### Authority-boundary correction
+
+During implementation review, an important ambiguity was identified: repository evidence does not define a canonical conversion from opaque Town application `ObjectID` values to the `bytes32` community key used by `TownAuthority420`.
+
+The browser therefore does **not** hash or otherwise infer the contract key from the application object ID.
+
+For existing communities, authority-bearing reads and writes require the explicit canonical `bytes32` authority community key. Community creation derives the new canonical key from the user-selected creation seed and exposes that exact key for subsequent authority actions.
+
+This preserves the canonical authority boundary and avoids silently creating an undocumented identity mapping in the UI.
+
+### Moderation transport completion
+
+TOWN-AUDIT-8 required real moderation/admin workflows rather than dead frontend controls.
+
+The Town API therefore gained thin authenticated/idempotent routes over the already-qualified moderation service:
+
+- `POST /v1/moderation/reports`;
+- `GET /v1/moderation/cases/{case}`;
+- `POST /v1/moderation/cases/{case}/actions`;
+- `POST /v1/moderation/cases/{case}/appeals`.
+
+These routes delegate to existing `Report`, `Moderate`, `Case` and `Appeal` semantics and fail closed if no moderation backend is configured.
+
+They do not create a second moderation authority.
+
+### Exact-head qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37395614325`  
+Run number: `162`  
+Result: **PASS**  
+Qualified implementation SHA: `2927dd56138618879f164d5337b360f8092810b6`
+
+Jobs:
+
+- `town-skeleton` / job `112050754078` — **PASS**;
+- `town-contracts` / job `112050754021` — **PASS**.
+
+Passing exact-head checks:
+
+- exact implementation SHA assertion in both jobs — PASS;
+- canonical Town audit classification verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- Town moderation-state verifier — PASS;
+- Town service-integration verifier — PASS;
+- Town API/SDK/projection/recovery verifier — PASS;
+- Town web-application verifier — PASS;
+- Town browser structural qualification — PASS;
+- Town Node browser unit suite — **13 tests PASS / 0 fail / 0 skipped**;
+- gofmt gate for Town delivery surfaces — PASS;
+- `go test ./town/... ./sdk/town420` — PASS;
+- `go vet ./town/... ./sdk/town420` — PASS;
+- directly affected retained Search/Storage/Notifications dependency tests — PASS;
+- focused Town Solidity build — PASS;
+- retained Town-focused Foundry inventory via `test/Town*.t.sol` — PASS;
+- cross-dApp Rewards hardening — PASS.
+
+### Rejected intermediate candidate
+
+Candidate `c902e23be112acf4081bc22bd888d17e5cdb0d39` was **not** accepted as completion evidence.
+
+420Town audit run `37395066047` reached:
+
+- all Town verifiers — PASS;
+- Town web verifier — PASS;
+- Town browser structural qualification — PASS;
+- all 13 Town browser Node tests — PASS;
+
+but failed the retained **Format Town delivery surfaces** gate because the newly added moderation API transport in:
+
+- `town/api/server.go`;
+- `town/api/server_test.go`
+
+required `gofmt`.
+
+The contract job from that run was subsequently cancelled by newer branch commits and is not counted as evidence.
+
+Formatting was corrected without weakening behavior or tests. The resulting exact candidate `2927dd56138618879f164d5337b360f8092810b6` passed the full Town workflow.
+
+Only the final SHA is authoritative qualification evidence.
+
+### Browser/security/adversarial result
+
+The qualified TOWN-AUDIT-8 suite directly proves:
+
+- production browser runtime config contains no committed privileged secrets;
+- secret-like runtime configuration keys are rejected;
+- embedded URL credentials are rejected;
+- remote HTTP service endpoints are rejected in favor of HTTPS;
+- authority transactions remain disabled while production chain/contract bindings are unresolved;
+- missing wallet fails closed;
+- wrong network fails closed;
+- unresolved TownAuthority420 fails closed;
+- unexpected transaction target fails closed;
+- wallet-reviewed transaction fields pin `from`, `to`, calldata and zero value;
+- wallet account/chain/disconnect events invalidate the browser authority session;
+- authority calldata encoders produce stable fixed-word calls;
+- canonical membership/subscription/entitlement results are decoded from `eth_call`;
+- Search discovery is explicitly constrained to `public_town`;
+- content/moderation mutations carry API authentication and idempotency headers;
+- session API token is not persisted to localStorage/sessionStorage;
+- browser idempotency keys use secure randomness;
+- dynamic indexed data does not use dynamic `innerHTML`;
+- loading/empty/error/transaction/ready states are explicit;
+- accessibility/responsive structural requirements are present;
+- moderation routes reject unauthenticated requests and fail closed without a moderation backend;
+- existing-community authority actions require an explicit canonical contract key rather than an inferred application-ID mapping.
+
+### Level 2 milestone status
+
+TOWN-AUDIT-8 is treated as a **Level 2 frontend/application integration milestone** in addition to ordinary Level 1 step qualification.
+
+The browser composes:
+
+- 420Search discovery;
+- Town `/v1` content and moderation;
+- canonical `TownAuthority420` reads/writes;
+- the accumulated authority/content/moderation/service-integration/API layers.
+
+The retained app-level qualification therefore includes:
+
+- all accumulated Town verifiers;
+- browser structural and unit qualification;
+- full Town Go + SDK tests/vet;
+- directly affected shared service dependency tests;
+- retained Town Solidity inventory;
+- cross-dApp Rewards hardening.
+
+No repository-wide Level 3 run is substituted for this targeted integration milestone.
+
+### Intentionally deferred Level 3 scope
+
+Level 3 remains intentionally deferred to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.
+
+Deferred scope includes:
+
+- reconciliation of the accumulated Town branch to then-current `main`;
+- full repository Solidity inventory under the Solidity owner;
+- Genesis/address-authority qualification where actually applicable;
+- 420 Integrated/global qualification where applicable;
+- Docs/global reconciliation;
+- final security-hardening evidence after TOWN-AUDIT-9;
+- final deployment/configuration closeout.
+
+### Limitations and blockers
+
+TOWN-AUDIT-8 intentionally does **not** claim:
+
+- live `town.420integrated.org` deployment;
+- live Town/Search API endpoints;
+- a materialized production chain ID;
+- a live deployed TownAuthority420 address;
+- live wallet transaction receipts;
+- live subscription/entitlement state;
+- production authentication infrastructure;
+- TOWN-AUDIT-9 fuzz/property/static-analysis hardening;
+- live testnet qualification;
+- production/genesis-facing service release.
+
+Those remain later roadmap responsibilities.
+
+Current `main` at closeout: `f5a0d703ca015962e49e95d075ff582d833a7c33`.  
+PR #523 historical base SHA: `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`.  
+PR #523 remains open and mergeable.
+
+There are **no blockers to TOWN-AUDIT-8 completion itself**.
+
+### Completion state
+
+**TOWN-AUDIT-8 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-9 — Security hardening**.

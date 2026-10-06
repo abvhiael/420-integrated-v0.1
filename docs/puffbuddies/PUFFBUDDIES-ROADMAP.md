@@ -1618,6 +1618,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** exact SETTLED evidence grants only approved bounded feature entitlements; non-settled/refunded/mismatched/stale evidence fails/revokes; policy/lifetime expiry revokes; private persistence has no payment/wallet linkage; lifecycle/block/consent/safety remain supreme; no purchased protected access exists; canonical Pay verifier passes unchanged; Level-1 targeted, retained PuffBuddies regressions and Level-2 payment-integration checks pass on one exact SHA; durable evidence recorded.
 
+### PB-11 — Web application
+
+**Purpose:** implement the first complete user-facing PuffBuddies client as the canonical web-first MVP surface required by PB-0.2, while preserving the browser/client as presentation-only state.
+
+**Canonical requirements:** implement PB-MVP-001 through PB-MVP-015 across eligibility entry, profile editing/media, discovery, like/pass, current matches, matched Messenger entry, notifications, unmatch/block/report, visibility/lifecycle/deletion controls, PB-9 verification presentation and PB-10 premium availability; all protected actions delegate to same-origin PuffBuddies API authority; browser state is non-canonical, memory-only and generation-invalidated; stale/lower generations fail closed; protected authorization failures clear derived caches; session tokens remain memory-only; profile location is coarse only; media upload is bounded and server-authorized; safety/account-exit controls remain baseline/non-premium; verification/premium never create relationship/safety authority; UI must satisfy basic semantic/accessibility/responsive gates; runtime config must explicitly remain repository-qualified-not-deployed; no public member search, wallet/profile enumeration, public match/safety/reputation graph, exact location, client force-match/block-bypass path, production API binding or live deployment claim is introduced.
+
+**Affected components:** `puffbuddies/web/` presentation/runtime/test/build surface, PB-11 workflow, canonical definition/evidence and PB-0.19 scope reconciliation.
+
+**Qualification:** Level 1 exact-head web-client qualification **plus Level 2 app-focused web-MVP integration**, because PB-11 is the first user-facing convergence of PB-1 through PB-10. Level 2 remains app-specific.
+
+**Level-3 boundary:** repository-wide Solidity/Genesis/global/Docs/Geth/fault/soak/deployment qualification remains deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0.2 through PB-0.17 as applicable; PB-1 through **PB-10 — Payments and premium entitlements — COMPLETE**.
+
+**Exit criteria:** complete core web MVP surface exists; same-origin fail-closed client/API boundary works; cache revocation and memory-only session semantics pass; accessibility/privacy/static checks pass; web build passes; retained PuffBuddies regressions and Level-2 integration pass on one exact SHA; PB-0 structure/authority verification stays green; durable evidence is recorded; deployment/live API/testnet readiness remain explicitly deferred.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

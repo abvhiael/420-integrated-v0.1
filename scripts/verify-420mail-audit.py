@@ -279,6 +279,7 @@ if readiness_path.is_file():
         if readiness.get(key) is not False: errors.append(f"readiness overclaims {key}")
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
+connector_src=(ROOT/"mail/integrations.go").read_text() if (ROOT/"mail/integrations.go").is_file() else ""
 for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","putPrivateVerified",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 for token in ["PrivateBlobSecurityProfile","PrivateBlobSecurityProvider","validatePrivateBlobSecurity","putPrivateVerified","getPrivateVerified","privateBodyDigest","ErrPrivateBlobIntegrity","ErrPrivateBlobSecurity"]:
@@ -401,7 +402,6 @@ for token in ['"/v1/wallet/actions"','"/v1/wallet/verifications"',"*WalletAction
     if token not in http: errors.append("MAIL-2.13 HTTP wallet surface missing: "+token)
 for token in ["PrepareWalletAction","VerifyWalletEvidence"]:
     if token not in client: errors.append("MAIL-2.13 client wallet surface missing: "+token)
-connector_src=(ROOT/"mail/integrations.go").read_text() if (ROOT/"mail/integrations.go").is_file() else ""
 for token in ["ConnectorRegistry","ConnectorService","ConnectorAdapter","ConnectorDescriptor","ConnectorCapabilityLink","ConnectorCapabilityPull","ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify","ConnectorLinkRequest","ConnectorConnection","ConnectorPullRequest","ConnectorPushRequest","ConnectorWebhookRequest","ErrConnectorNotFound","ErrConnectorUnsupported","ErrConnectorInvalidResult","ErrConnectorConflict"]:
     if token not in connector_src: errors.append("MAIL-2.14 connector invariant missing: "+token)
 for token in ["connectorRegistration","cloneConnectorDescriptor","cloneStringMap","ErrConnectorIsolated","isolatedConnectorLink","isolatedConnectorUnlink","isolatedConnectorPull","isolatedConnectorPush","isolatedConnectorWebhook","connectorPanicError"]:

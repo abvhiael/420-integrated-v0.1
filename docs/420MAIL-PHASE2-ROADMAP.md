@@ -61,4 +61,4 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model** is COMPLETE at Level 1. **MAIL-2.2 — Durable Mail Storage** is the active canonical Phase 2 step. MAIL-2.3 must not be treated as started until MAIL-2.2 satisfies its own Level 1 requirements for persistent transactional storage, indexes, migrations, restart recovery, and distributed idempotency.
+**MAIL-2.1 — Mailbox State Model** is COMPLETE at Level 1. **MAIL-2.2 — Durable Mail Storage** is COMPLETE at Level 1. **MAIL-2.3 — Labels & Custom Folders** is the active canonical Phase 2 step.

@@ -24,8 +24,18 @@ func TestGenesisManifestQualifies(t *testing.T) {
 
 func TestGenesisManifestFreezesAllDomainsAndPrivacyExclusions(t *testing.T) {
 	m := GenesisManifest()
-	if len(m.GenesisDomains) != 13 {
-		t.Fatalf("genesis domains=%d want=13", len(m.GenesisDomains))
+	if len(m.GenesisDomains) != 14 {
+		t.Fatalf("genesis domains=%d want=14", len(m.GenesisDomains))
+	}
+	foundTown := false
+	for _, got := range m.GenesisDomains {
+		if got == architecture.DomainPublicTown {
+			foundTown = true
+			break
+		}
+	}
+	if !foundTown {
+		t.Fatal("missing public Town discovery domain")
 	}
 	if len(m.PrivacyExclusions) != 5 {
 		t.Fatalf("privacy exclusions=%d want=5", len(m.PrivacyExclusions))

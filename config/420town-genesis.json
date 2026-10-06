@@ -1,0 +1,85 @@
+{
+  "schema": "420-town-genesis-v1",
+  "phase": "TOWN-AUDIT",
+  "status": "REPOSITORY_COMPLETE_PRE_TESTNET",
+  "serviceId": "420/service/town/v1",
+  "name": "420Town Community Boards",
+  "role": "GENESIS_FACING_UPDATE",
+  "genesisTarget": "communities_posts_threads_comments_votes_moderation",
+  "authority": "REPLACEABLE_APPLICATION",
+  "frozenGenesisApplication": false,
+  "package": {
+    "goModule": "github.com/420integrated/420-integrated",
+    "root": "town",
+    "schemaCatalog": "town/schema/v1/object-catalog.json"
+  },
+  "authorityContract": "TownAuthority420",
+  "authorityConfig": "config/420town-authority-v1.json",
+  "contentConfig": "config/420town-content-v1.json",
+  "contentPackage": "town/content",
+  "dependencies": {
+    "identity": "420 Identity",
+    "search": "420 Search",
+    "notifications": "420 Notifications",
+    "storage": "420 Storage"
+  },
+  "objectIdPolicy": "OPAQUE_STABLE_IDS",
+  "timestampPolicy": "RFC3339_UTC",
+  "contentBodyPolicy": "OFF_CHAIN_BY_DEFAULT",
+  "authorityBoundary": {
+    "authoritativeClasses": [
+      "Community",
+      "Membership",
+      "RoleBinding",
+      "PermissionGrant",
+      "Subscription",
+      "Entitlement",
+      "TreasuryRef"
+    ],
+    "replaceableClasses": [
+      "Post",
+      "Thread",
+      "Comment",
+      "Vote",
+      "SearchProjection",
+      "NotificationDelivery",
+      "StorageGateway",
+      "MessageTransport",
+      "Frontend",
+      "RewardsProjection",
+      "ModerationCase",
+      "ModerationAction"
+    ],
+    "treasuryCustody": false,
+    "contentBodiesOnChain": false
+  },
+  "implementedThrough": [
+    "TOWN-AUDIT-1",
+    "TOWN-AUDIT-2",
+    "TOWN-AUDIT-3",
+    "TOWN-AUDIT-4",
+    "TOWN-AUDIT-5",
+    "TOWN-AUDIT-6",
+    "TOWN-AUDIT-7",
+    "TOWN-AUDIT-8",
+    "TOWN-AUDIT-9",
+    "TOWN-AUDIT-10"
+  ],
+  "deferredRoadmap": [
+    "TOWN-AUDIT-11",
+    "TOWN-AUDIT-12"
+  ],
+  "moderationConfig": "config/420town-moderation-v1.json",
+  "moderationPackage": "town/moderation",
+  "integrationsConfig": "config/420town-integrations-v1.json",
+  "integrationsPackage": "town/integrations",
+  "apiConfig": "config/420town-api-v1.json",
+  "apiPackage": "town/api",
+  "projectionPackage": "town/projection",
+  "recoveryPackage": "town/recovery",
+  "sdkPackage": "sdk/town420",
+  "webConfig": "config/420town-web-v1.json",
+  "webRoot": "town/web",
+  "securityConfig": "config/420town-security-v1.json",
+  "documentationRoot": "docs/apps/town"
+}

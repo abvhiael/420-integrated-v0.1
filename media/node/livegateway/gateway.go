@@ -17,6 +17,12 @@ type Direction string
 type SessionState string
 
 const (
+	MaxEndpointBytes = 4096
+	MaxCredentialRefBytes = 256
+	MaxSessionDuration = 24 * time.Hour
+)
+
+const (
 	ProtocolWHIP Protocol = "whip"
 	ProtocolWHEP Protocol = "whep"
 	ProtocolWebRTC Protocol = "webrtc"
@@ -101,7 +107,7 @@ func New(drivers map[Protocol]Driver) (*Registry, error) {
 }
 
 func (r *Registry) Start(ctx context.Context, spec SessionSpec) (Session, error) {
-	if err := validateSpec(spec); err != nil {
+	if err := ValidateSpec(spec); err != nil {
 		return Session{}, err
 	}
 	driver, ok := r.drivers[spec.Protocol]
@@ -134,6 +140,46 @@ func (r *Registry) Start(ctx context.Context, spec SessionSpec) (Session, error)
 	active.State = StateActive
 	active.StartedAt = r.now()
 	r.sessions[spec.ID] = active
+	r.mu.Unlock()
+	return active, nil
+}
+
+func (r *Registry) Restart(ctx context.Context, id string) (Session, error) {
+	r.mu.Lock()
+	session, ok := r.sessions[id]
+	if !ok {
+		r.mu.Unlock()
+		return Session{}, ErrSessionNotFound
+	}
+	if session.State != StateFailed {
+		r.mu.Unlock()
+		return Session{}, ErrInvalidTransition
+	}
+	driver := r.drivers[session.Spec.Protocol]
+	session.State = StateStarting
+	session.LastError = ""
+	session.EndedAt = time.Time{}
+	r.sessions[id] = session
+	r.mu.Unlock()
+
+	if err := driver.Start(ctx, session.Spec); err != nil {
+		r.mu.Lock()
+		failed := r.sessions[id]
+		failed.State = StateFailed
+		failed.LastError = err.Error()
+		failed.EndedAt = r.now()
+		r.sessions[id] = failed
+		r.mu.Unlock()
+		return failed, err
+	}
+
+	r.mu.Lock()
+	active := r.sessions[id]
+	active.State = StateActive
+	active.StartedAt = r.now()
+	active.EndedAt = time.Time{}
+	active.LastError = ""
+	r.sessions[id] = active
 	r.mu.Unlock()
 	return active, nil
 }
@@ -181,14 +227,17 @@ func (r *Registry) Get(id string) (Session, bool) {
 	return session, ok
 }
 
-func validateSpec(spec SessionSpec) error {
+func ValidateSpec(spec SessionSpec) error {
 	if spec.ID == "" || spec.StreamRef == ([32]byte{}) || !supported(spec.Protocol) {
 		return ErrUnsupportedProtocol
 	}
 	if spec.Direction != DirectionIngress && spec.Direction != DirectionEgress {
 		return ErrInvalidEndpoint
 	}
-	if spec.MaxDuration < 0 {
+	if spec.MaxDuration < 0 || spec.MaxDuration > MaxSessionDuration {
+		return ErrInvalidEndpoint
+	}
+	if len(spec.Endpoint) == 0 || len(spec.Endpoint) > MaxEndpointBytes || len(spec.CredentialRef) > MaxCredentialRefBytes {
 		return ErrInvalidEndpoint
 	}
 	u, err := url.Parse(spec.Endpoint)

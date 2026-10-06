@@ -405,7 +405,6 @@ func TestHTTPTrustControlsRejectUnknownFields(t *testing.T) {
 	}
 }
 
-
 func TestHTTPSpamProtectionRoutes(t *testing.T) {
 	h, s, id := testHTTPHandler(t)
 

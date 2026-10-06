@@ -527,3 +527,10 @@ func (c Client) VerifyDiscordWallet(ctx context.Context, req mail.DiscordWalletV
 	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/wallet/verify", req, &out)
 	return out, err
 }
+
+
+func (c Client) SignalIntegrationBoundary(ctx context.Context) (mail.SignalIntegrationBoundary, error) {
+	var out mail.SignalIntegrationBoundary
+	err := c.do(ctx, http.MethodGet, "/v1/connectors/signal/boundary", nil, &out)
+	return out, err
+}

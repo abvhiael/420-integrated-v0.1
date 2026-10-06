@@ -11,8 +11,8 @@ import (
 
 type discordFullAuthorityStub struct {
 	discordLinkAuthorityStub
-	page   DiscordSyncPage
-	pulls  []string
+	page  DiscordSyncPage
+	pulls []string
 }
 
 func (s *discordFullAuthorityStub) PullDiscord(_ context.Context, actor, userID, cursor string) (DiscordSyncPage, error) {

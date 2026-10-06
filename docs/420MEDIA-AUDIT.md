@@ -22,7 +22,7 @@ The on-chain Phase 1 protocol coordinates media operators, capabilities, stream 
 - audit branch: `audit/420media-complete-20261006`
 - historical merged protocol PR: #56
 - historical merged node PR: #60
-- historical Phase 3 discovery PR: #86 — OPEN, not authoritative for current `main`
+- historical Phase 3 discovery PR: #86 — OPEN; its Phase 3.1 discovery/control-plane subset has been reconciled into the audit branch, while unrelated later orchestration/recovery changes remain non-authoritative
 
 ## Implemented architecture
 
@@ -90,9 +90,9 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 - production web/domain configuration;
 - Genesis acceptance record tied to an exact release/deployment lineage.
 
-### Stale/orphaned work
+### Reconciled historical work
 
-PR #86 contains Phase 3 operator discovery work but remains open and its implementation is not present on current `main`. It is therefore not counted as implemented. It should be reconciled or superseded by the audit roadmap before reuse.
+PR #86 remains open and is not authoritative as a branch. MEDIA-AUDIT-3 selectively reconciles only its Phase 3.1 operator-discovery/control-plane foundation onto the current audit branch. Later stream orchestration, assigned-job contract changes, failover/recovery and geographic-resilience work from PR #86 are intentionally not imported by this step.
 
 ## Smart-contract security review
 
@@ -138,7 +138,7 @@ Frontend: **MISSING** for 420Media itself.
 
 Backend/API: **MISSING** as a stable public Media service. The Go code is an operator runtime/library and CLI, not a GEN-SVC `/v1` application API.
 
-Indexer: **MISSING/PARTIAL**. Event discovery exists inside the node adapter for Media jobs, but there is no canonical public Media projection/indexer service satisfying the Genesis application contract.
+Indexer: **PARTIAL**. The audit branch now includes an app-scoped operator capability event projection used only as a discovery accelerator with mandatory canonical registry revalidation. There is still no general public Media projection/indexer service satisfying the full Genesis application contract.
 
 Upload: **MISSING** as a first-class Media application workflow. Bong Goggles has separate storage/media delivery work but cannot be silently reclassified as the 420Media application.
 
@@ -183,7 +183,7 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | non-custodial settlement | Phase 1 protocol | abstract adapters | Phase1/Anvil | Phase1 doc | PARTIAL | bind canonical Pay/settlement deployment |
 | operator processing | Phase 2 | FFmpeg/GStreamer profile runtime | Go tests | Phase2 docs | COMPLETE | production engine qualification |
 | live transport primitives | Phase 2 | WHIP/WHEP + RTMP/SRT abstractions | Go tests | Phase2 docs | PARTIAL | complete service/API/session composition |
-| operator discovery | PR #86 only | absent from main | non-authoritative PR tests | PR docs only | MISSING | reimplement/reconcile against current architecture |
+| operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + control-plane boundary on audit branch | Go discovery/control-plane tests | Phase 3.1 discovery doc | IMPLEMENTED / pending exact-head qualification | qualify current audit head; later orchestration remains separate |
 | video uploads | GEN-SVC Media target | no Media application workflow | none | none | MISSING | Storage-backed upload phase |
 | basic livestreaming | GEN-SVC + feature flag | primitives only | component tests | older Phase2 docs | PARTIAL | user/API/UI/session/integration phase |
 | Identity integration | GEN-SVC registry | none | none | none | MISSING | implement scoped identity/profile boundary |

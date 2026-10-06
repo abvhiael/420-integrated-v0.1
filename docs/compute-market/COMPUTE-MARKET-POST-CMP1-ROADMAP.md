@@ -560,9 +560,9 @@ Normalize BOINC project/application/work-unit/participant/host/assignment/result
 
 ## CMP-5.3 — Research-cluster adapter
 
-**Status: implementation complete; Level 1 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 exact-head qualified on `a2c7c1eee735f86ecc555d8de265805359c57fdb`.**
 
-Normalize research-cluster identity/scheduler/project/workload/submitter/allocation/result/lifecycle/resource/evidence material behind the existing provider-neutral external-adapter identity surface. Optional node-set identity is supported without weakening mandatory bindings. CMP-5.2 remains the first CMP-5 Level 2 integration milestone; CMP-5.3 is an ordinary Level 1 extension. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.3 Research-cluster adapter](CMP-5.3-RESEARCH-CLUSTER-ADAPTER.md).
+Normalize research-cluster identity/scheduler/project/workload/submitter/allocation/result/lifecycle/resource/evidence material behind the existing provider-neutral external-adapter identity surface. Optional node-set identity is supported without weakening mandatory bindings. CMP-5.2 remains the first CMP-5 Level 2 integration milestone; CMP-5.3 is an ordinary Level 1 extension. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.3 Research-cluster adapter](CMP-5.3-RESEARCH-CLUSTER-ADAPTER.md). Durable evidence: [CMP-5.3 qualification](CMP-5.3-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-5.4 — University/HPC gateway
 

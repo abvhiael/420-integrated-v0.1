@@ -1,6 +1,6 @@
 # CMP-4.3 — Researcher / institution identity
 
-Status: **IMPLEMENTED — LEVEL 1 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
 
 Canonical roadmap step: **CMP-4.3 — Researcher / institution identity**.
 
@@ -144,3 +144,8 @@ The existing `Identity420` contract/interface is consumed read-only and is not m
 ## 10. Next canonical step
 
 **CMP-4.4 — Dataset manifests**
+
+
+## Qualification evidence
+
+Retained exact-head qualification evidence: [CMP-4.3 qualification](CMP-4.3-QUALIFICATION-EVIDENCE.md). Compute Market Qualification **#400** / run `37405254531` passed on exact SHA `8e4199c7d1e8b883a3518167a4093dae4899598a`, including exact-head verification, Compute contract build, the retained `Compute*.t.sol` suite, verification-script compilation, and the CMP-4.3 verifier.

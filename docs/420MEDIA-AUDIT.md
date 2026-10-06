@@ -116,8 +116,8 @@ No critical source-level fund-custody vulnerability was identified in this audit
 | 420 Identity | optional profile/controller reader + Media actor guard; wallet-only pseudonymous operation preserved | COMPLETE (Level 1) |
 | 420 Rights | canonical subject/provenance/right/license reads + publication/reuse guard; Rights remains authoritative | COMPLETE (Level 1) |
 | 420 Storage | Media-owned upload lifecycle uses 420Storage v1 prepare/ingest evidence and canonical manifest readiness checks; Storage remains authoritative | COMPLETE (Level 1) |
-| 420 Search | public-only Media asset projections using the existing Search result schema with qualified Indexer provenance/finality and rebuild/reorg handling | IMPLEMENTED / pending Level 1 qualification |
-| 420 Notifications | opt-in topic/channel/severity/finality subscriptions with deterministic dedupe and reorg retractions; delivery remains non-canonical | IMPLEMENTED / pending Level 1 qualification |
+| 420 Search | public-only Media asset projections using the existing Search result schema with qualified Indexer provenance/finality and rebuild/reorg handling | COMPLETE (Level 1) |
+| 420 Notifications | opt-in topic/channel/severity/finality subscriptions with deterministic dedupe and reorg retractions; delivery remains non-canonical | COMPLETE (Level 1) |
 | 420 Pay | canonical PaymentRegistry-backed Media funding/settlement/refund observation through `MediaPayComputeAdapter420`; Media remains non-custodial | COMPLETE (Level 1) |
 | 420 Compute Protocol | canonical Compute graph/job/funding/match/provider/entitlement/refund binding; legacy provider ref accepted only when cross-checked against canonical provider state | COMPLETE (Level 1) |
 | Protocol/Service Registry | no Media release publication/discovery profile found | MISSING |
@@ -130,7 +130,7 @@ Frontend: **MISSING** for 420Media itself.
 
 Backend/API: **MISSING** as a stable public Media service. The Go code is an operator runtime/library and CLI, not a GEN-SVC `/v1` application API.
 
-Indexer: **IMPLEMENTED / pending Level 1 qualification** for Media public asset projection. The audit branch now has a rebuildable, reorg-aware public Media projection cache that consumes qualified Indexer provenance/finality and emits existing 420Search result contracts. Operator discovery remains a separate app-scoped event accelerator. Live Indexer/Search service binding remains release-stage work.
+Indexer: **COMPLETE (Level 1)** for Media public asset projection. The audit branch now has a rebuildable, reorg-aware public Media projection cache that consumes qualified Indexer provenance/finality and emits existing 420Search result contracts. Operator discovery remains a separate app-scoped event accelerator. Live Indexer/Search service binding remains release-stage work.
 
 Upload: **COMPLETE (Level 1)** on the audit branch. Media now owns a 420Storage-backed video asset lifecycle with exact object/precondition binding, ingest receipt validation, canonical sealed/retrievable manifest gating, derivative linkage, visibility/privacy handling, delete fail-closed semantics and retry recovery. Bong Goggles remains separate.
 
@@ -140,7 +140,7 @@ Identity/Rights: **COMPLETE (Level 1)** on the audit branch. Wallet-only pseudon
 
 Pay/Compute: **COMPLETE (Level 1)** on the audit branch. Pay-backed jobs now bind exact canonical payer/merchant/amount/receipt/refund evidence; Compute-backed jobs bind the canonical component graph, funded job, accepted match, provider/resource/operator/beneficiary and verified entitlement/refund state. Media remains non-custodial and records canonical earned settlement amounts separately from funding ceilings.
 
-Search/Notifications: **IMPLEMENTED / pending Level 1 exact-head qualification** on the audit branch. Only READY+PUBLIC+Rights-authorized assets can become Search results; projections preserve qualified Indexer provenance/finality and support deterministic rollback/rebuild. Notifications are opt-in, minimum-finality scoped, deduplicated, separately promotional-consented and reorg-retractable without becoming canonical authority.
+Search/Notifications: **COMPLETE (Level 1)** on the audit branch. Only READY+PUBLIC+Rights-authorized assets can become Search results; projections preserve qualified Indexer provenance/finality and support deterministic rollback/rebuild. Notifications are opt-in, minimum-finality scoped, deduplicated, separately promotional-consented and reorg-retractable without becoming canonical authority.
 
 ## Builds and tests
 
@@ -161,6 +161,8 @@ MEDIA-AUDIT-5 qualification evidence: `docs/audit/420MEDIA-AUDIT-5-QUALIFICATION
 MEDIA-AUDIT-6 qualification evidence: `docs/audit/420MEDIA-AUDIT-6-QUALIFICATION.md`, implementation SHA `70376d2b1d41659d7d654e41faa5e9d3c992fd66`, workflow run `37507801987` PASS (Level 1).
 
 MEDIA-AUDIT-7 qualification evidence: `docs/audit/420MEDIA-AUDIT-7-QUALIFICATION.md`, implementation SHA `a0aeb709b10a155fe7959781a9994a15368a9b4a`, workflow run `37511396911` PASS (Level 1).
+
+MEDIA-AUDIT-8 qualification evidence: `docs/audit/420MEDIA-AUDIT-8-QUALIFICATION.md`, implementation SHA `acbb99e2485c9565598eb723ee1f97492478a52d`, workflow run `37515368608` PASS (Level 1).
 
 ## Documentation audit
 

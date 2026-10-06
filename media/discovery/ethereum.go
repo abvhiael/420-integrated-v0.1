@@ -52,6 +52,14 @@ func (e *EthereumDiscovery) OperatorIDs(ctx context.Context, capabilityID [32]by
 	if err := e.cfg.RPC.Call(ctx, "eth_getLogs", params, &logs); err != nil {
 		return nil, err
 	}
+	for _, log := range logs {
+		if _, err := parseQuantity(log.BlockNumber); err != nil {
+			return nil, ErrMalformedChainData
+		}
+		if _, err := parseQuantity(log.LogIndex); err != nil {
+			return nil, ErrMalformedChainData
+		}
+	}
 	sort.SliceStable(logs, func(i, j int) bool {
 		bi, _ := parseQuantity(logs[i].BlockNumber)
 		bj, _ := parseQuantity(logs[j].BlockNumber)

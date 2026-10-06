@@ -671,7 +671,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.15 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.16 — Non-goals reconciliation
+### PB-0.16 — Non-goals reconciliation — COMPLETE
 
 **Purpose:** reconcile the complete PB-0 non-goal set against accumulated architecture through PB-0.15 and distinguish canonical prohibited behavior from features that are merely deferred.
 

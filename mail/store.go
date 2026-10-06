@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 1
+const DurableStoreSchemaVersion = 2
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -22,21 +22,29 @@ var (
 )
 
 type storeData struct {
-	SchemaVersion int
-	Messages      map[string]Message
-	ByIdem        map[string]string
-	Mailbox       map[string]MailboxState
-	MailboxIndex  map[string][]string
+	SchemaVersion     int
+	Messages          map[string]Message
+	ByIdem            map[string]string
+	Mailbox           map[string]MailboxState
+	MailboxIndex      map[string][]string
+	Labels            map[string]LabelDefinition
+	CustomFolders     map[string]CustomFolder
+	LabelIndex        map[string][]string
+	CustomFolderIndex map[string][]string
 }
 
 type diskStoreData struct {
-	SchemaVersion   int                     `json:"schema_version"`
-	Messages        map[string]Message      `json:"messages"`
-	ByIdem          map[string]string       `json:"idempotency"`
-	Mailbox         map[string]MailboxState `json:"mailbox"`
-	MailboxIndex    map[string][]string     `json:"mailbox_index"`
-	Fingerprints    map[string]string       `json:"fingerprints,omitempty"`
-	IdempotencyKeys map[string]string       `json:"idempotency_keys,omitempty"`
+	SchemaVersion     int                         `json:"schema_version"`
+	Messages          map[string]Message          `json:"messages"`
+	ByIdem            map[string]string           `json:"idempotency"`
+	Mailbox           map[string]MailboxState     `json:"mailbox"`
+	MailboxIndex      map[string][]string         `json:"mailbox_index"`
+	Labels            map[string]LabelDefinition `json:"labels,omitempty"`
+	CustomFolders     map[string]CustomFolder     `json:"custom_folders,omitempty"`
+	LabelIndex        map[string][]string         `json:"label_index,omitempty"`
+	CustomFolderIndex map[string][]string         `json:"custom_folder_index,omitempty"`
+	Fingerprints      map[string]string           `json:"fingerprints,omitempty"`
+	IdempotencyKeys   map[string]string           `json:"idempotency_keys,omitempty"`
 }
 
 type MailStore interface {
@@ -203,8 +211,12 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		SchemaVersion: disk.SchemaVersion,
 		Messages:      disk.Messages,
 		ByIdem:        disk.ByIdem,
-		Mailbox:       disk.Mailbox,
-		MailboxIndex:  disk.MailboxIndex,
+		Mailbox:           disk.Mailbox,
+		MailboxIndex:      disk.MailboxIndex,
+		Labels:            disk.Labels,
+		CustomFolders:     disk.CustomFolders,
+		LabelIndex:        disk.LabelIndex,
+		CustomFolderIndex: disk.CustomFolderIndex,
 	}
 	normalizeStoreData(&data)
 	for id, fp := range disk.Fingerprints {
@@ -239,10 +251,14 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		SchemaVersion:   DurableStoreSchemaVersion,
 		Messages:        data.Messages,
 		ByIdem:          data.ByIdem,
-		Mailbox:         data.Mailbox,
-		MailboxIndex:    data.MailboxIndex,
-		Fingerprints:    map[string]string{},
-		IdempotencyKeys: map[string]string{},
+		Mailbox:           data.Mailbox,
+		MailboxIndex:      data.MailboxIndex,
+		Labels:            data.Labels,
+		CustomFolders:     data.CustomFolders,
+		LabelIndex:        data.LabelIndex,
+		CustomFolderIndex: data.CustomFolderIndex,
+		Fingerprints:      map[string]string{},
+		IdempotencyKeys:   map[string]string{},
 	}
 	for id, msg := range data.Messages {
 		if msg.Fingerprint != "" {
@@ -307,8 +323,12 @@ func newStoreData() storeData {
 		SchemaVersion: DurableStoreSchemaVersion,
 		Messages:      map[string]Message{},
 		ByIdem:        map[string]string{},
-		Mailbox:       map[string]MailboxState{},
-		MailboxIndex:  map[string][]string{},
+		Mailbox:           map[string]MailboxState{},
+		MailboxIndex:      map[string][]string{},
+		Labels:            map[string]LabelDefinition{},
+		CustomFolders:     map[string]CustomFolder{},
+		LabelIndex:        map[string][]string{},
+		CustomFolderIndex: map[string][]string{},
 	}
 }
 
@@ -328,6 +348,18 @@ func normalizeStoreData(data *storeData) {
 	if data.MailboxIndex == nil {
 		data.MailboxIndex = map[string][]string{}
 	}
+	if data.Labels == nil {
+		data.Labels = map[string]LabelDefinition{}
+	}
+	if data.CustomFolders == nil {
+		data.CustomFolders = map[string]CustomFolder{}
+	}
+	if data.LabelIndex == nil {
+		data.LabelIndex = map[string][]string{}
+	}
+	if data.CustomFolderIndex == nil {
+		data.CustomFolderIndex = map[string][]string{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -335,8 +367,12 @@ func cloneStoreData(src storeData) storeData {
 		SchemaVersion: src.SchemaVersion,
 		Messages:      make(map[string]Message, len(src.Messages)),
 		ByIdem:        make(map[string]string, len(src.ByIdem)),
-		Mailbox:       make(map[string]MailboxState, len(src.Mailbox)),
-		MailboxIndex:  make(map[string][]string, len(src.MailboxIndex)),
+		Mailbox:           make(map[string]MailboxState, len(src.Mailbox)),
+		MailboxIndex:      make(map[string][]string, len(src.MailboxIndex)),
+		Labels:            make(map[string]LabelDefinition, len(src.Labels)),
+		CustomFolders:     make(map[string]CustomFolder, len(src.CustomFolders)),
+		LabelIndex:        make(map[string][]string, len(src.LabelIndex)),
+		CustomFolderIndex: make(map[string][]string, len(src.CustomFolderIndex)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -350,6 +386,18 @@ func cloneStoreData(src storeData) storeData {
 	for k, v := range src.MailboxIndex {
 		dst.MailboxIndex[k] = append([]string(nil), v...)
 	}
+	for k, v := range src.Labels {
+		dst.Labels[k] = v
+	}
+	for k, v := range src.CustomFolders {
+		dst.CustomFolders[k] = v
+	}
+	for k, v := range src.LabelIndex {
+		dst.LabelIndex[k] = append([]string(nil), v...)
+	}
+	for k, v := range src.CustomFolderIndex {
+		dst.CustomFolderIndex[k] = append([]string(nil), v...)
+	}
 	return dst
 }
 
@@ -359,15 +407,29 @@ func mailboxIndexKey(owner string, folder MailboxFolder) string {
 
 func rebuildMailboxIndex(data *storeData) {
 	data.MailboxIndex = map[string][]string{}
+	data.LabelIndex = map[string][]string{}
+	data.CustomFolderIndex = map[string][]string{}
 	for key, state := range data.Mailbox {
 		if state.DeletedAt != nil {
 			continue
 		}
 		idx := mailboxIndexKey(state.Owner, state.Folder)
 		data.MailboxIndex[idx] = append(data.MailboxIndex[idx], key)
+		for _, labelID := range state.LabelIDs {
+			data.LabelIndex[organizationIndexKey(state.Owner, labelID)] = append(data.LabelIndex[organizationIndexKey(state.Owner, labelID)], key)
+		}
+		if state.CustomFolderID != "" {
+			data.CustomFolderIndex[organizationIndexKey(state.Owner, state.CustomFolderID)] = append(data.CustomFolderIndex[organizationIndexKey(state.Owner, state.CustomFolderID)], key)
+		}
 	}
 	for idx := range data.MailboxIndex {
 		sort.Strings(data.MailboxIndex[idx])
+	}
+	for idx := range data.LabelIndex {
+		sort.Strings(data.LabelIndex[idx])
+	}
+	for idx := range data.CustomFolderIndex {
+		sort.Strings(data.CustomFolderIndex[idx])
 	}
 }
 
@@ -397,6 +459,28 @@ func validateStoreData(data *storeData) error {
 		}
 		if !isMailboxFolder(state.Folder) {
 			return fmt.Errorf("mailbox %q has invalid folder %q", key, state.Folder)
+		}
+		for _, labelID := range state.LabelIDs {
+			label, ok := data.Labels[organizationKey(state.Owner, labelID)]
+			if !ok || label.Owner != state.Owner {
+				return fmt.Errorf("mailbox %q references unknown label %q", key, labelID)
+			}
+		}
+		if state.CustomFolderID != "" {
+			folder, ok := data.CustomFolders[organizationKey(state.Owner, state.CustomFolderID)]
+			if !ok || folder.Owner != state.Owner {
+				return fmt.Errorf("mailbox %q references unknown custom folder %q", key, state.CustomFolderID)
+			}
+		}
+	}
+	for key, label := range data.Labels {
+		if key != organizationKey(label.Owner, label.ID) || label.Owner == "" || label.ID == "" || label.Name == "" {
+			return fmt.Errorf("invalid label record %q", key)
+		}
+	}
+	for key, folder := range data.CustomFolders {
+		if key != organizationKey(folder.Owner, folder.ID) || folder.Owner == "" || folder.ID == "" || folder.Name == "" {
+			return fmt.Errorf("invalid custom folder record %q", key)
 		}
 	}
 	return nil

@@ -377,65 +377,184 @@ func (s *Server) handlePostVote(w http.ResponseWriter, r *http.Request) {
 
 
 func (s *Server) requireModeration(w http.ResponseWriter) (ModerationBackend, bool) {
-	if s.moderation == nil { s.fail(w, http.StatusServiceUnavailable, "moderation service unavailable"); return nil, false }
+	if s.moderation == nil {
+		s.fail(w, http.StatusServiceUnavailable, "moderation service unavailable")
+		return nil, false
+	}
 	return s.moderation, true
 }
 
 func (s *Server) handleReport(w http.ResponseWriter, r *http.Request) {
-	actor,ok:=s.requireActor(w,r); if !ok{return}
-	key,ok:=s.idempotency(w,r); if !ok{return}
-	backend,ok:=s.requireModeration(w); if !ok{return}
-	var body struct{RecordID,CaseID,CommunityID,TargetKind,TargetID,Reason,BodyRef,BodySHA256 string}
-	if !s.decode(w,r,&body){return}
-	record,err:=backend.Report(actor,moderation.OpenCaseRequest{
-		RecordID:model.ObjectID(body.RecordID),CaseID:model.ObjectID(body.CaseID),CommunityID:model.ObjectID(body.CommunityID),
-		TargetKind:moderation.TargetKind(body.TargetKind),TargetID:model.ObjectID(body.TargetID),Reason:moderation.Reason(body.Reason),
-		BodyRef:body.BodyRef,BodySHA256:body.BodySHA256,IdempotencyKey:key,
+	actor, ok := s.requireActor(w, r)
+	if !ok {
+		return
+	}
+	key, ok := s.idempotency(w, r)
+	if !ok {
+		return
+	}
+	backend, ok := s.requireModeration(w)
+	if !ok {
+		return
+	}
+	var body struct {
+		RecordID   string
+		CaseID     string
+		CommunityID string
+		TargetKind string
+		TargetID   string
+		Reason     string
+		BodyRef    string
+		BodySHA256 string
+	}
+	if !s.decode(w, r, &body) {
+		return
+	}
+	record, err := backend.Report(actor, moderation.OpenCaseRequest{
+		RecordID:       model.ObjectID(body.RecordID),
+		CaseID:         model.ObjectID(body.CaseID),
+		CommunityID:    model.ObjectID(body.CommunityID),
+		TargetKind:     moderation.TargetKind(body.TargetKind),
+		TargetID:       model.ObjectID(body.TargetID),
+		Reason:         moderation.Reason(body.Reason),
+		BodyRef:        body.BodyRef,
+		BodySHA256:     body.BodySHA256,
+		IdempotencyKey: key,
 	})
-	if err!=nil{s.moderationError(w,err);return}
-	s.mutations.Add(1);writeJSON(w,http.StatusCreated,record)
+	if err != nil {
+		s.moderationError(w, err)
+		return
+	}
+	s.mutations.Add(1)
+	writeJSON(w, http.StatusCreated, record)
 }
 
-func (s *Server) handleModerationCase(w http.ResponseWriter,r *http.Request){
-	_,ok:=s.requireActor(w,r);if !ok{return}
-	backend,ok:=s.requireModeration(w);if !ok{return}
-	id:=model.ObjectID(r.PathValue("case"));if !id.Valid(){s.fail(w,http.StatusBadRequest,"invalid case id");return}
-	c,found:=backend.Case(id);if !found{s.fail(w,http.StatusNotFound,"moderation case not found");return}
-	writeJSON(w,http.StatusOK,c)
+func (s *Server) handleModerationCase(w http.ResponseWriter, r *http.Request) {
+	_, ok := s.requireActor(w, r)
+	if !ok {
+		return
+	}
+	backend, ok := s.requireModeration(w)
+	if !ok {
+		return
+	}
+	id := model.ObjectID(r.PathValue("case"))
+	if !id.Valid() {
+		s.fail(w, http.StatusBadRequest, "invalid case id")
+		return
+	}
+	c, found := backend.Case(id)
+	if !found {
+		s.fail(w, http.StatusNotFound, "moderation case not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, c)
 }
 
-func (s *Server) handleModerationAction(w http.ResponseWriter,r *http.Request){
-	actor,ok:=s.requireActor(w,r);if !ok{return}
-	key,ok:=s.idempotency(w,r);if !ok{return}
-	backend,ok:=s.requireModeration(w);if !ok{return}
-	caseID:=model.ObjectID(r.PathValue("case"));if !caseID.Valid(){s.fail(w,http.StatusBadRequest,"invalid case id");return}
-	var body struct{RecordID,Action,Reason,BodyRef,BodySHA256 string}
-	if !s.decode(w,r,&body){return}
-	record,err:=backend.Moderate(actor,moderation.ModerateRequest{RecordID:model.ObjectID(body.RecordID),CaseID:caseID,Action:moderation.Action(body.Action),Reason:moderation.Reason(body.Reason),BodyRef:body.BodyRef,BodySHA256:body.BodySHA256,IdempotencyKey:key})
-	if err!=nil{s.moderationError(w,err);return}
-	s.mutations.Add(1);writeJSON(w,http.StatusOK,record)
+func (s *Server) handleModerationAction(w http.ResponseWriter, r *http.Request) {
+	actor, ok := s.requireActor(w, r)
+	if !ok {
+		return
+	}
+	key, ok := s.idempotency(w, r)
+	if !ok {
+		return
+	}
+	backend, ok := s.requireModeration(w)
+	if !ok {
+		return
+	}
+	caseID := model.ObjectID(r.PathValue("case"))
+	if !caseID.Valid() {
+		s.fail(w, http.StatusBadRequest, "invalid case id")
+		return
+	}
+	var body struct {
+		RecordID   string
+		Action     string
+		Reason     string
+		BodyRef    string
+		BodySHA256 string
+	}
+	if !s.decode(w, r, &body) {
+		return
+	}
+	record, err := backend.Moderate(actor, moderation.ModerateRequest{
+		RecordID:       model.ObjectID(body.RecordID),
+		CaseID:         caseID,
+		Action:         moderation.Action(body.Action),
+		Reason:         moderation.Reason(body.Reason),
+		BodyRef:        body.BodyRef,
+		BodySHA256:     body.BodySHA256,
+		IdempotencyKey: key,
+	})
+	if err != nil {
+		s.moderationError(w, err)
+		return
+	}
+	s.mutations.Add(1)
+	writeJSON(w, http.StatusOK, record)
 }
 
-func (s *Server) handleAppeal(w http.ResponseWriter,r *http.Request){
-	actor,ok:=s.requireActor(w,r);if !ok{return}
-	key,ok:=s.idempotency(w,r);if !ok{return}
-	backend,ok:=s.requireModeration(w);if !ok{return}
-	caseID:=model.ObjectID(r.PathValue("case"));if !caseID.Valid(){s.fail(w,http.StatusBadRequest,"invalid case id");return}
-	var body struct{RecordID,Reason,BodyRef,BodySHA256 string}
-	if !s.decode(w,r,&body){return}
-	record,err:=backend.Appeal(actor,moderation.AppealRequest{RecordID:model.ObjectID(body.RecordID),CaseID:caseID,Reason:moderation.Reason(body.Reason),BodyRef:body.BodyRef,BodySHA256:body.BodySHA256,IdempotencyKey:key})
-	if err!=nil{s.moderationError(w,err);return}
-	s.mutations.Add(1);writeJSON(w,http.StatusOK,record)
+func (s *Server) handleAppeal(w http.ResponseWriter, r *http.Request) {
+	actor, ok := s.requireActor(w, r)
+	if !ok {
+		return
+	}
+	key, ok := s.idempotency(w, r)
+	if !ok {
+		return
+	}
+	backend, ok := s.requireModeration(w)
+	if !ok {
+		return
+	}
+	caseID := model.ObjectID(r.PathValue("case"))
+	if !caseID.Valid() {
+		s.fail(w, http.StatusBadRequest, "invalid case id")
+		return
+	}
+	var body struct {
+		RecordID   string
+		Reason     string
+		BodyRef    string
+		BodySHA256 string
+	}
+	if !s.decode(w, r, &body) {
+		return
+	}
+	record, err := backend.Appeal(actor, moderation.AppealRequest{
+		RecordID:       model.ObjectID(body.RecordID),
+		CaseID:         caseID,
+		Reason:         moderation.Reason(body.Reason),
+		BodyRef:        body.BodyRef,
+		BodySHA256:     body.BodySHA256,
+		IdempotencyKey: key,
+	})
+	if err != nil {
+		s.moderationError(w, err)
+		return
+	}
+	s.mutations.Add(1)
+	writeJSON(w, http.StatusOK, record)
 }
 
-func (s *Server) moderationError(w http.ResponseWriter,err error){
-	switch{
-	case errors.Is(err,moderation.ErrInvalidInput):s.fail(w,http.StatusBadRequest,err.Error())
-	case errors.Is(err,moderation.ErrUnauthorized):s.fail(w,http.StatusForbidden,err.Error())
-	case errors.Is(err,moderation.ErrNotFound):s.fail(w,http.StatusNotFound,err.Error())
-	case errors.Is(err,moderation.ErrUnavailable):s.fail(w,http.StatusServiceUnavailable,err.Error())
-	case errors.Is(err,moderation.ErrAlreadyExists),errors.Is(err,moderation.ErrInvalidTransition),errors.Is(err,moderation.ErrIdempotencyConflict):s.fail(w,http.StatusConflict,err.Error())
-	default:s.fail(w,http.StatusInternalServerError,"Town moderation service error")
+func (s *Server) moderationError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, moderation.ErrInvalidInput):
+		s.fail(w, http.StatusBadRequest, err.Error())
+	case errors.Is(err, moderation.ErrUnauthorized):
+		s.fail(w, http.StatusForbidden, err.Error())
+	case errors.Is(err, moderation.ErrNotFound):
+		s.fail(w, http.StatusNotFound, err.Error())
+	case errors.Is(err, moderation.ErrUnavailable):
+		s.fail(w, http.StatusServiceUnavailable, err.Error())
+	case errors.Is(err, moderation.ErrAlreadyExists),
+		errors.Is(err, moderation.ErrInvalidTransition),
+		errors.Is(err, moderation.ErrIdempotencyConflict):
+		s.fail(w, http.StatusConflict, err.Error())
+	default:
+		s.fail(w, http.StatusInternalServerError, "Town moderation service error")
 	}
 }
 

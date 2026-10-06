@@ -86,6 +86,9 @@ python3 scripts/verify-420town-moderation.py
 python3 scripts/verify-420town-integrations.py
 python3 scripts/verify-420town-api.py
 python3 scripts/verify-420town-audit.py
+python3 scripts/verify-420town-web.py
+python3 scripts/verify-420town-security.py
+python3 scripts/verify-420town-docs.py
 ```
 
 Focused Solidity and retained Town integration tests are owned by the dedicated 420Town audit workflow.
@@ -122,6 +125,19 @@ TOWN-AUDIT-8 implements the browser application under `town/web`. Search discove
 
 See `docs/apps/town/web.md`.
 
+## Documentation and phase-closeout status
+
+TOWN-AUDIT-9 security hardening and TOWN-AUDIT-10 repository/documentation closeout are implemented in the repository. The documentation set includes:
+
+- `docs/apps/town/architecture.md`
+- `docs/apps/town/user-guide.md`
+- `docs/apps/town/developer-guide.md`
+- `docs/apps/town/operator-guide.md`
+- `docs/apps/town/configuration-deployment.md`
+- `docs/apps/town/known-limitations.md`
+
+Repository completion remains distinct from live qualification.
+
 ## Current limitations
 
-TOWN-AUDIT-8 does not claim live deployed endpoints, materialized production wallet/network bindings, production persistence or live chain reorg observation. Broader security hardening, live testnet deployment and production operations remain later canonical roadmap steps.
+TOWN-AUDIT-10 does not claim live deployed endpoints, materialized production wallet/network bindings, production persistence, live chain reorg observation, production authentication, or production operations. Those remain TOWN-AUDIT-11/12 responsibilities. See `docs/apps/town/known-limitations.md`.

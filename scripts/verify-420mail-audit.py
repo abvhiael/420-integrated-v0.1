@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/spam.go","mail/spam_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/spam.go","mail/spam_test.go","mail/conversation.go","mail/conversation_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -40,8 +40,8 @@ if profile_path.is_file():
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
     store=profile.get("metadataStore",{})
     if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
-    if store.get("schemaVersion")!=5 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
-    if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder"]: errors.append("Mail durable store index drifted")
+    if store.get("schemaVersion")!=6 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder","owner_conversation"]: errors.append("Mail durable store index drifted")
     if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
     if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
     org=profile.get("organization",{})
@@ -76,6 +76,13 @@ if profile_path.is_file():
     if spam.get("explicitReleaseRequiredForInboxRestore") is not True or spam.get("trustedIdentityApplicationBypassesSpamSignals") is not True or spam.get("trustedIdentityApplicationBypassesPhishing") is not False: errors.append("MAIL-2.7 trust/quarantine precedence drifted")
     if spam.get("abuseReportKinds")!=["SPAM","PHISHING"] or spam.get("oneAbuseReportPerOwnerMessage") is not True: errors.append("MAIL-2.7 abuse-report semantics drifted")
     if spam.get("publicIndexing") is not False or spam.get("messageBodiesPersisted") is not False: errors.append("MAIL-2.7 spam privacy boundary drifted")
+    conversations=profile.get("conversations",{})
+    if conversations.get("enabled") is not True or conversations.get("ownerScoped") is not True or conversations.get("participantView") is not True: errors.append("MAIL-2.8 conversation scope drifted")
+    if conversations.get("replyModel")!="PARENT_MESSAGE_BOUND" or conversations.get("deterministicRootConversationId") is not True: errors.append("MAIL-2.8 reply identity drifted")
+    if conversations.get("orderedMessages")!="CREATED_AT_ASC_ID_ASC" or conversations.get("orderedConversations")!="LATEST_AT_DESC_ID_ASC": errors.append("MAIL-2.8 ordering drifted")
+    if conversations.get("maxMessagesPerConversation")!=1000 or conversations.get("threadArchive") is not True or conversations.get("threadMute") is not True: errors.append("MAIL-2.8 thread state drifted")
+    if conversations.get("archivedFutureRepliesFolder")!="ARCHIVE" or conversations.get("mutedFutureRepliesSuppressNotification") is not True: errors.append("MAIL-2.8 thread delivery behavior drifted")
+    if conversations.get("arbitraryConversationInjectionRejected") is not True or conversations.get("deletedParentReplyRejected") is not True or conversations.get("publicIndexing") is not False: errors.append("MAIL-2.8 conversation safety/privacy drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -136,6 +143,18 @@ for token in ["ListQuarantine","ReleaseQuarantine","ReportAbuse","GetSenderReput
     if token not in client: errors.append("MAIL-2.7 client protection surface missing: "+token)
 for token in ["evaluateSpamProtection","recordDeliveryProtection","protection.Quarantine","FolderJunk"]:
     if token not in service: errors.append("MAIL-2.7 delivery protection integration missing: "+token)
+conversation_src=(ROOT/"mail/conversation.go").read_text() if (ROOT/"mail/conversation.go").is_file() else ""
+for token in ["ConversationState","ConversationSummary","ConversationView","ReplyRequest","Reply","ListConversations","GetConversation","UpdateConversation","resolveConversation","deterministicConversationID","conversationIndexKey","validateConversationData","MaxConversationMessages"]:
+    if token not in conversation_src: errors.append("MAIL-2.8 conversation invariant missing: "+token)
+for token in ['"/v1/conversations"','"reply"',"ListConversations","GetConversation","UpdateConversation"]:
+    if token not in http: errors.append("MAIL-2.8 HTTP conversation surface missing: "+token)
+for token in ["Reply","ListConversations","GetConversation","UpdateConversation"]:
+    if token not in client: errors.append("MAIL-2.8 client conversation surface missing: "+token)
+for token in ["ReplyTo","resolveConversation","ConversationStates","threadState.Archived","threadState.Muted"]:
+    if token not in service: errors.append("MAIL-2.8 service conversation integration missing: "+token)
+for token in ["ConversationStates","ConversationIndex","conversationIndexKey","validateConversationData"]:
+    if token not in store: errors.append("MAIL-2.8 durable conversation storage missing: "+token)
+
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
 
@@ -156,4 +175,5 @@ print("MAIL-2.4 private mail search: qualified by app-scoped checks")
 print("MAIL-2.5 user filters and rules engine: qualified by app-scoped checks")
 print("MAIL-2.6 blocklists allowlists and trust controls: qualified by app-scoped checks")
 print("MAIL-2.7 spam junk and phishing protection: qualified by app-scoped checks")
+print("MAIL-2.8 threads and conversations: qualified by app-scoped checks")
 

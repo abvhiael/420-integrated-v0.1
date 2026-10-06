@@ -1406,7 +1406,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** mutual MATCHED + both-side current eligibility/lifecycle passes; either-side ineligibility/lifecycle/block/unmatch fails; stale MESSAGING_AUTH generation on either side fails; Messenger-native deny can only deny; gate cannot create match/consent or carry message payload; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.10 — Privacy & information-leakage hardening
+### PB-2.10 — Privacy & information-leakage hardening — COMPLETE
 
 **Purpose:** harden accumulated PB-2 eligibility/authorization state against direct and inferential disclosure through public, generic derived, error/reason, discovery/matching or messaging surfaces while composing the already-qualified PB-1.10 privacy boundary.
 

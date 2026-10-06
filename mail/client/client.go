@@ -99,7 +99,6 @@ func (c Client) MarkRead(ctx context.Context, id string) (mail.Message, error) {
 	return out, err
 }
 
-
 func (c Client) Mailbox(ctx context.Context, folder mail.MailboxFolder, cursor string, limit int) (mail.MailboxPage, error) {
 	q := url.Values{}
 	if cursor != "" {

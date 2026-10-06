@@ -1390,7 +1390,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** either-side eligibility/lifecycle/block failures exclude discovery/matching; current eligibility and current derived generations pass; stale generation on either side fails; gate cannot create reciprocal match/consent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.9 — Messaging eligibility enforcement
+### PB-2.9 — Messaging eligibility enforcement — COMPLETE
 
 **Purpose:** require both participants' current adult eligibility and reciprocal PuffBuddies match authorization before ordinary matched-user messaging can be treated as allowed, while preserving the 420Messenger authority boundary.
 

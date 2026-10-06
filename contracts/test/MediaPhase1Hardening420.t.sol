@@ -60,8 +60,11 @@ contract MediaPhase1Hardening420Test {
         VmMediaHardening420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address constant EOA = address(0xBAD);
+    address constant PAYER = address(0xA11CE);
+    address constant BENEFICIARY = address(0xBEEF);
     address constant VAULT = address(0xA017);
     address constant PAYOUT = address(0x5E771E);
+    bytes32 constant HOSTILE_OPERATOR_ID = keccak256("hostile-operator");
     bytes32 constant JOB_ID = keccak256("hardening-job");
 
     function testCapabilityRegistryBindingRejectsCodeLessAddress() public {
@@ -97,9 +100,9 @@ contract MediaPhase1Hardening420Test {
         vm.expectRevert(HostileMediaJob420.HostileCallback.selector);
         settlement.confirmVaultFunding(
             JOB_ID,
-            hostile.payer(),
-            hostile.operatorId(),
-            hostile.beneficiary(),
+            PAYER,
+            HOSTILE_OPERATOR_ID,
+            BENEFICIARY,
             keccak256("vault"),
             keccak256("funding"),
             42 ether
@@ -117,7 +120,7 @@ contract MediaPhase1Hardening420Test {
 
         vm.prank(PAYOUT);
         vm.expectRevert(HostileMediaJob420.HostileCallback.selector);
-        settlement.release(JOB_ID, hostile.beneficiary());
+        settlement.release(JOB_ID, BENEFICIARY);
 
         (,,,,,,, MediaSettlement420.SettlementState state) = settlement.settlements(JOB_ID);
         require(state == MediaSettlement420.SettlementState.CLAIMABLE, "release callback leaked closed state");
@@ -129,9 +132,9 @@ contract MediaPhase1Hardening420Test {
         vm.expectRevert(MediaSettlement420.NotVaultAdapter.selector);
         settlement.confirmVaultFunding(
             JOB_ID,
-            hostile.payer(),
-            hostile.operatorId(),
-            hostile.beneficiary(),
+            PAYER,
+            HOSTILE_OPERATOR_ID,
+            BENEFICIARY,
             keccak256("vault"),
             keccak256("funding"),
             1 ether
@@ -141,7 +144,7 @@ contract MediaPhase1Hardening420Test {
         hostile.resolve(settlement, JOB_ID, true, keccak256("resolution"));
 
         vm.expectRevert(MediaSettlement420.NotPayoutAdapter.selector);
-        settlement.release(JOB_ID, hostile.beneficiary());
+        settlement.release(JOB_ID, BENEFICIARY);
     }
 
     function testHostileRefundCallbackRollsBackClosedState() public {
@@ -179,9 +182,9 @@ contract MediaPhase1Hardening420Test {
         vm.prank(VAULT);
         settlement.confirmVaultFunding(
             JOB_ID,
-            hostile.payer(),
-            hostile.operatorId(),
-            hostile.beneficiary(),
+            PAYER,
+            HOSTILE_OPERATOR_ID,
+            BENEFICIARY,
             keccak256("vault"),
             keccak256("funding"),
             amount

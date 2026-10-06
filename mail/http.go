@@ -40,6 +40,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.search(w, r, actor)
 	case r.URL.Path == "/v1/rules" || strings.HasPrefix(r.URL.Path, "/v1/rules/"):
 		h.rules(w, r, actor)
+	case r.URL.Path == "/v1/trust/entries" || strings.HasPrefix(r.URL.Path, "/v1/trust/entries/") || r.URL.Path == "/v1/trust/settings":
+		h.trust(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
 		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
@@ -203,6 +205,82 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 		return
 	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func (h HTTPHandler) trust(w http.ResponseWriter, r *http.Request, actor string) {
+	if r.URL.Path == "/v1/trust/settings" {
+		switch r.Method {
+		case http.MethodGet:
+			settings, err := h.Service.GetTrustSettings(r.Context(), actor)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, settings)
+		case http.MethodPut:
+			defer r.Body.Close()
+			dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10))
+			dec.DisallowUnknownFields()
+			var input TrustSettingsInput
+			if err := dec.Decode(&input); err != nil {
+				writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+				return
+			}
+			settings, err := h.Service.UpdateTrustSettings(r.Context(), actor, input.RequireTrusted)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, settings)
+		default:
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		}
+		return
+	}
+
+	rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/trust/entries"), "/")
+	if rest == "" {
+		switch r.Method {
+		case http.MethodGet:
+			entries, err := h.Service.ListTrustEntries(r.Context(), actor)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, entries)
+		case http.MethodPut:
+			defer r.Body.Close()
+			dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16<<10))
+			dec.DisallowUnknownFields()
+			var input TrustEntryInput
+			if err := dec.Decode(&input); err != nil {
+				writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+				return
+			}
+			entry, err := h.Service.PutTrustEntry(r.Context(), actor, input.Kind, input.Value, input.Disposition)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, entry)
+		default:
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		}
+		return
+	}
+	if strings.Contains(rest, "/") {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	if r.Method != http.MethodDelete {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	if err := h.Service.DeleteTrustEntry(r.Context(), actor, rest); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h HTTPHandler) rules(w http.ResponseWriter, r *http.Request, actor string) {
@@ -417,7 +495,7 @@ func (h HTTPHandler) message(w http.ResponseWriter, r *http.Request, actor strin
 
 func writeServiceError(w http.ResponseWriter, err error) {
 	switch {
-	case errors.Is(err, ErrUnauthorized):
+	case errors.Is(err, ErrUnauthorized), errors.Is(err, ErrTrustRejected):
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())

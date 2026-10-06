@@ -89,6 +89,13 @@ if profile_path.is_file():
     if drafts.get("multiDevice")!="OPTIMISTIC_VERSIONED" or drafts.get("staleWrite")!="REJECT_CONFLICT" or drafts.get("deterministicIdFromOwnerAutosaveKey") is not True: errors.append("MAIL-2.9 multi-device semantics drifted")
     if drafts.get("maxDraftsPerUser")!=500 or drafts.get("maxAutosaveKeyBytes")!=128 or drafts.get("listOrdering")!="UPDATED_AT_DESC_ID_ASC": errors.append("MAIL-2.9 draft bounds/order drifted")
     if drafts.get("publicIndexing") is not False or drafts.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.9 draft privacy boundary drifted")
+    delivery=profile.get("deliveryQueue",{})
+    if delivery.get("enabled") is not True or delivery.get("ownerScoped") is not True: errors.append("MAIL-2.10 delivery queue scope drifted")
+    if delivery.get("lifecycle")!=["QUEUED","SENDING","RETRYING","DELIVERED","FAILED","CANCELLED"]: errors.append("MAIL-2.10 lifecycle drifted")
+    if delivery.get("senderMailboxFolder")!="OUTBOX" or delivery.get("deliveredSenderFolder")!="SENT" or delivery.get("deliveredRecipientFolder")!="INBOX": errors.append("MAIL-2.10 mailbox lifecycle drifted")
+    if delivery.get("maxAttempts")!=3 or delivery.get("maxActiveItemsPerSender")!=1000: errors.append("MAIL-2.10 retry/capacity bounds drifted")
+    if delivery.get("deterministicIdempotency") is not True or delivery.get("crashRecovery")!="SENDING_REPROCESS_SAFE": errors.append("MAIL-2.10 queue safety drifted")
+    if delivery.get("publicIndexing") is not False or delivery.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.10 privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -169,6 +176,15 @@ for token in ["CreateDraft","SaveDraft","GetDraft","ListDrafts","DiscardDraft"]:
     if token not in client: errors.append("MAIL-2.9 client draft surface missing: "+token)
 for token in ["Drafts","validateDraftData"]:
     if token not in store: errors.append("MAIL-2.9 durable draft storage missing: "+token)
+delivery_src=(ROOT/"mail/delivery.go").read_text() if (ROOT/"mail/delivery.go").is_file() else ""
+for token in ["Delivery","DeliveryQueued","DeliverySending","DeliveryRetrying","DeliveryDelivered","DeliveryFailed","DeliveryCancelled","QueueDelivery","ProcessDelivery","RetryDelivery","CancelDelivery","ListOutbox","GetDelivery","MaxDeliveryAttempts","validateDeliveryData"]:
+    if token not in delivery_src: errors.append("MAIL-2.10 delivery queue invariant missing: "+token)
+for token in ['"/v1/outbox"',"QueueDelivery","ProcessDelivery","RetryDelivery","CancelDelivery"]:
+    if token not in http: errors.append("MAIL-2.10 HTTP outbox surface missing: "+token)
+for token in ["QueueDelivery","ListOutbox","GetDelivery","ProcessDelivery","RetryDelivery","CancelDelivery"]:
+    if token not in client: errors.append("MAIL-2.10 client outbox surface missing: "+token)
+for token in ["Deliveries","validateDeliveryData","DurableStoreSchemaVersion = 8"]:
+    if token not in store: errors.append("MAIL-2.10 durable queue storage missing: "+token)
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
@@ -195,4 +211,5 @@ print("MAIL-2.6 blocklists allowlists and trust controls: qualified by app-scope
 print("MAIL-2.7 spam junk and phishing protection: qualified by app-scoped checks")
 print("MAIL-2.8 threads and conversations: qualified by app-scoped checks")
 print("MAIL-2.9 drafts system: qualified by app-scoped checks")
+print("MAIL-2.10 outbox and delivery queue: qualified by app-scoped checks")
 

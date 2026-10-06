@@ -1422,6 +1422,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** PB-2 internal eligibility/authorization metadata is rejected from external/derived payloads; externally consumable authorization conclusion is boolean-only; denial reason is uniform; public eligibility/authorization probes are prohibited; retained PB-1.10 and PuffBuddies regressions pass; exact-head PB-2 fast qualification passes; durable evidence recorded.
 
+### PB-2.11 — Adversarial identity/eligibility qualification
+
+**Purpose:** qualify the accumulated PB-2.1 through PB-2.10 identity/eligibility boundary as a single adversarial attack surface using the canonical PB-0.6/PB-0.7 failure classes.
+
+**Canonical requirements:** reject self-asserted/untrusted eligibility; reject cross-subject, nonce, audience, predicate, policy and stale/future proof/verification replay; reject stale sequence/time; force UNKNOWN on policy drift or authority unavailability; ensure revocation/expiry invalidate stale downstream authority; prevent expired/revoked/policy-stale state from rebinding as current eligibility; prevent payment/premium/token/admin/moderator/Messenger state from manufacturing eligibility or consent; preserve block/unmatch/lifecycle supremacy; require current derived generations for discovery/matching/messaging; preserve PB-2.10 anti-oracle/privacy protections; keep raw DOB/identity/proof/wallet linkage out of ordinary authorization surfaces.
+
+**Affected components:** PB-2.11 adversarial test suite, PB-2 workflow, canonical definition/evidence. No production-domain semantic change is required unless the adversarial suite exposes a genuine gap.
+
+**Qualification level:** Level 1 adversarial roadmap-step qualification.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the documented Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.6, PB-0.7, PB-1.9, PB-1.10, and PB-2.1 through PB-2.10 COMPLETE.
+
+**Exit criteria:** cross-step adversarial coverage passes across subject/replay/source/policy/freshness/revocation/outage/economic/admin/consent/stale-derived/privacy-oracle cases; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records all attack classes.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

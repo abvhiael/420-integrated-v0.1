@@ -872,3 +872,197 @@ Those remain later canonical Town roadmap steps. There are **no blockers to TOWN
 **TOWN-AUDIT-6 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-7 — API, SDK, indexer and recovery surfaces**.
+
+
+## TOWN-AUDIT-7 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 + Level 2 API/SDK/projection/recovery integration milestone**  
+Qualified implementation/test/workflow SHA: `05e9bda4db92edabb2c9d97d211b63ec3c1374c1`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA 420Town qualification.
+
+### Implementation completed
+
+TOWN-AUDIT-7 adds the repository-side delivery, derived-read-model and interruption-recovery surfaces required by the canonical Town roadmap without creating parallel application authority.
+
+Implemented scope includes:
+
+- `town/api` HTTP service under the `/v1` namespace;
+- authenticated mutation transport using a pluggable Authenticator and bearer-token baseline implementation;
+- strict mutation validation with bounded request bodies and unknown-field rejection;
+- required `Idempotency-Key` on Town mutations;
+- direct reuse of the already-qualified Town content service for authoritative post reads and mutation behavior;
+- public community post listing served from a derived, non-canonical projection only;
+- `town/projection` block/event projection state with deterministic height/hash/parent linkage;
+- chain-gap and parent-mismatch fail-closed behavior;
+- replacement-block reorg handling that removes orphaned derived state and rebuilds from retained blocks;
+- generation-bound opaque cursors that fail closed after reorg/rebuild rather than paginating across different histories;
+- PUBLIC-only active post enumeration through the projection;
+- `town/recovery` schema-validated interruption recovery snapshots;
+- bounded recovery snapshot size;
+- temporary-file + sync + atomic rename persistence and restrictive `0600` file mode;
+- restore-time revalidation through projection invariants;
+- `sdk/town420` typed Go client;
+- HTTPS requirement for non-loopback SDK endpoints;
+- typed client errors;
+- bearer-token requirement for mutation methods;
+- bounded retry policy limited to one through five attempts and no more than a two-second retry delay;
+- retryable HTTP statuses limited to 429/502/503/504 plus transport failures;
+- exact idempotency-key reuse across retried mutation attempts;
+- immediate return of non-retryable conflicts;
+- API request/error/auth-failure/mutation/aggregate-latency observability and derived checkpoint reporting;
+- machine-readable `config/420town-api-v1.json` contract and invariant inventory;
+- explicit webhook state `enabled: false`; no unsigned webhook surface exists. If webhooks are enabled later, signed replay protection remains mandatory before qualification;
+- `scripts/verify-420town-api.py` and exact-SHA CI ownership;
+- canonical Town phase advancement through `API_SDK_INDEXER_RECOVERY_BASELINE` / TOWN-AUDIT-7.
+
+### Primary files changed
+
+TOWN-AUDIT-7 materially changed or added:
+
+- `town/api/server.go`;
+- `town/api/server_test.go`;
+- `town/projection/store.go`;
+- `town/projection/store_test.go`;
+- `town/recovery/file.go`;
+- `town/recovery/file_test.go`;
+- `sdk/town420/client.go`;
+- `sdk/town420/client_test.go`;
+- `sdk/town420/errors.go`;
+- `config/420town-api-v1.json`;
+- `config/420town-genesis.json`;
+- `scripts/verify-420town-api.py`;
+- `scripts/verify-420town-integrations.py` (retained verifier phase-label decoupling only);
+- `.github/workflows/420town-audit.yml`;
+- `docs/apps/town/api.md`;
+- `docs/apps/town/index.md`;
+- `town/README.md`.
+
+### Original exit criteria satisfied
+
+1. **`/v1` service API** — implemented under `town/api` with health, public post listing, post read, post creation, thread creation, comment creation and post voting routes.
+2. **Typed client/SDK** — implemented at `sdk/town420` with typed request/response methods and typed error mapping.
+3. **Authorization and validation** — mutations require authenticated actors; direct reads route through Town content authorization; malformed/oversized/unknown-field request bodies fail closed.
+4. **Cursor pagination** — public projection listings use opaque generation-bound cursors with bounded limits and stale-cursor rejection after rebuild/reorg.
+5. **Idempotency** — API mutations require `Idempotency-Key`; SDK mutation retries reuse the exact same key; existing content-service conflict semantics remain authoritative.
+6. **Replay-protected signed webhooks if used** — no Town webhook delivery surface is enabled in TOWN-AUDIT-7. Configuration explicitly forbids enabling webhooks before signed replay protection exists, so there is no unsigned webhook path to qualify.
+7. **Reorg/rebuild-safe derived projections** — projection state is explicitly non-canonical/rebuildable, validates parent/height relationships, supports replacement-block reorgs and removes orphaned derived state.
+8. **Interruption recovery** — projection snapshots persist atomically and restore into a fresh store while revalidating schema and chain/event invariants.
+9. **Observability and bounded retry behavior** — API counters/checkpoint visibility are present; SDK retries are bounded by attempt count, delay and status class.
+
+### Exact-head qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37384027542`  
+Run number: `124`  
+Result: **PASS**  
+Qualified implementation SHA: `05e9bda4db92edabb2c9d97d211b63ec3c1374c1`
+
+Jobs:
+
+- `town-skeleton` / job `112013015935` — **PASS**;
+- `town-contracts` / job `112013016398` — **PASS**.
+
+Passing exact-head checks:
+
+- exact implementation SHA assertion in both jobs — PASS;
+- canonical Town audit classification verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- Town moderation-state verifier — PASS;
+- Town service-integration verifier — PASS;
+- Town API/SDK/projection/recovery verifier — PASS;
+- gofmt gate for Town API/projection/recovery + Town SDK — PASS;
+- `go test ./town/... ./sdk/town420` — PASS;
+- `go vet ./town/... ./sdk/town420` — PASS;
+- directly affected retained Search/Storage/Notifications dependency tests — PASS;
+- focused Town Solidity build — PASS;
+- retained Town-focused Foundry inventory via `test/Town*.t.sol` — PASS;
+- cross-dApp Rewards hardening — PASS.
+
+Other repository workflows triggered by repository policy on the same SHA are not substituted for Town qualification and are not required as Level 1 evidence for this step.
+
+### Security/adversarial/invariant result
+
+The qualified TOWN-AUDIT-7 suite directly proves:
+
+- unauthenticated mutation requests fail closed;
+- invalid/unknown bearer tokens fail closed;
+- mutation requests without idempotency keys fail closed;
+- unknown JSON fields and malformed multi-value request bodies fail closed;
+- request body size is bounded;
+- backend authorization/rate/conflict errors map without widening Town capability;
+- public projection listing exposes only active PUBLIC Town posts;
+- malformed or out-of-range pagination inputs fail closed;
+- projection chain gaps and wrong-parent blocks are rejected;
+- replacement-block reorg removes orphaned derived state;
+- stale cursors fail after projection-generation changes;
+- duplicate projection event IDs are rejected;
+- recovery snapshot round-trip preserves derived state;
+- broken recovery chains and unsupported/trailing recovery payloads are rejected;
+- recovery files use restrictive permissions and atomic replacement;
+- non-loopback plaintext HTTP SDK endpoints are rejected;
+- invalid/unbounded retry policy is rejected;
+- retried mutations preserve bearer authentication and the exact idempotency key;
+- non-retryable idempotency conflicts are not retried;
+- retryable-rate-limit behavior stops at the configured retry budget;
+- API observability remains non-canonical and does not become application authority;
+- no webhook path is exposed without signed replay protection.
+
+### Level 2 milestone status
+
+TOWN-AUDIT-7 is treated as a **Level 2 app integration milestone** in addition to its Level 1 step qualification because it introduces the first complete transport + SDK + derived projection + recovery lifecycle over the accumulated Town authority/content/moderation/service-integration work.
+
+The retained Level 2 scope remains app-focused:
+
+- all accumulated Town Go packages;
+- Town-specific verifier inventory;
+- Town SDK;
+- formatting/vet for the new delivery surfaces;
+- directly affected shared service dependency tests;
+- retained Town Solidity inventory;
+- cross-dApp Rewards hardening.
+
+No repository-wide Level 3 closeout was required for this milestone.
+
+### Intentionally deferred Level 3 scope
+
+Level 3 remains intentionally deferred to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.
+
+Deferred checks include:
+
+- final reconciliation of the accumulated Town branch to then-current `main`;
+- canonical full repository Solidity inventory under the Solidity Contracts owner;
+- Genesis/address-authority qualification without duplicating the full Foundry inventory;
+- 420 Integrated/global qualification where applicable;
+- Docs/global reconciliation;
+- final frontend qualification after TOWN-AUDIT-8;
+- final focused security/fuzz/property/static qualification after TOWN-AUDIT-9;
+- deployment/configuration closeout.
+
+### Limitations and blockers
+
+TOWN-AUDIT-7 intentionally does **not** claim:
+
+- a user-facing Town web application;
+- live deployed API endpoints;
+- live authentication infrastructure;
+- live persistent production databases;
+- live chain reorg/restart observation;
+- live webhook delivery;
+- full TOWN-AUDIT-9 security-hardening/fuzz/property coverage;
+- live testnet qualification;
+- production/genesis-facing service release.
+
+Those remain later canonical roadmap steps. There are **no blockers to TOWN-AUDIT-7 completion itself**.
+
+Current `main` at closeout: `2d3141e787c7c25bdea2dddd81b9a42a82637621`.  
+PR #523 historical base SHA: `b301bd27bee7f412589c36b7a8cdbcad6f69a7e8`.  
+PR #523 remains open and mergeable. Current-main reconciliation remains intentionally deferred to Level 3 unless a later Town step materially requires it earlier.
+
+### Completion state
+
+**TOWN-AUDIT-7 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-8 — User-facing web application**.

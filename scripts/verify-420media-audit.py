@@ -23,6 +23,7 @@ roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-3",
     "MEDIA-AUDIT-4",
     "MEDIA-AUDIT-5",
+    "MEDIA-AUDIT-6",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -50,6 +51,13 @@ livestream = need("docs/420-MEDIA-LIVESTREAM-SERVICE.md", [
     "desired_live",
     "Level 2 milestone",
     "MediaStreamRegistry420",
+])
+identity_rights = need("docs/420-MEDIA-IDENTITY-RIGHTS.md", [
+    "MEDIA-AUDIT-6",
+    "optional Identity",
+    "AuthorizePublicProjection",
+    "RightsRouter420.canUse",
+    "Level 1 app-scoped fast qualification",
 ])
 
 svc = json.loads(need("config/genesis-consumer-services.json"))
@@ -99,6 +107,14 @@ for path in [
     "media/livestream/service_test.go",
     "media/livestream/ethereum_authority_test.go",
     "media/node/livegateway/recovery_test.go",
+    "media/authority/guard.go",
+    "media/authority/ethereum.go",
+    "media/authority/guard_test.go",
+    "media/authority/ethereum_test.go",
+    "media/storage/rights.go",
+    "media/storage/rights_test.go",
+    "media/livestream/identity.go",
+    "media/livestream/identity_test.go",
 ]:
     assert (ROOT / path).exists(), f"missing existing Media baseline file {path}"
 

@@ -97,6 +97,15 @@ if profile_path.is_file():
     if delivery.get("maxAttempts")!=3 or delivery.get("maxActiveItemsPerSender")!=1000: errors.append("MAIL-2.10 retry/capacity bounds drifted")
     if delivery.get("deterministicIdempotency") is not True or delivery.get("crashRecovery")!="SENDING_REPROCESS_SAFE": errors.append("MAIL-2.10 queue safety drifted")
     if delivery.get("publicIndexing") is not False or delivery.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.10 privacy boundary drifted")
+    onboarding=profile.get("onboarding",{})
+    if onboarding.get("enabled") is not True: errors.append("MAIL-2.11 onboarding capability drifted")
+    if onboarding.get("methods")!=["GOOGLE","APPLE","PASSKEY","EXISTING_WALLET"]: errors.append("MAIL-2.11 onboarding methods drifted")
+    if onboarding.get("authority")!="CANONICAL_WALLET_IDENTITY_ADAPTER" or onboarding.get("sessionIssuer")!="WALLET_IDENTITY_AUTHORITY": errors.append("MAIL-2.11 Wallet/Identity authority boundary drifted")
+    if onboarding.get("publicEntryPoint") is not True or onboarding.get("identityBindingRequired") is not True or onboarding.get("walletBindingRequired") is not True: errors.append("MAIL-2.11 onboarding binding drifted")
+    if onboarding.get("replayProtection")!="AUTHORITY_ADAPTER_REQUIRED": errors.append("MAIL-2.11 replay-protection boundary drifted")
+    if onboarding.get("custodialSigning") is not False or onboarding.get("privateKeyInput") is not False or onboarding.get("seedPhraseInput") is not False or onboarding.get("passkeyPrivateMaterialInput") is not False: errors.append("MAIL-2.11 custodial boundary drifted")
+    if onboarding.get("credentialPersistence") is not False or onboarding.get("publicIndexing") is not False or onboarding.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.11 onboarding privacy boundary drifted")
+    if "420 Wallet" not in profile.get("dependencies",[]): errors.append("MAIL-2.11 Wallet dependency missing")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -186,9 +195,18 @@ for token in ["QueueDelivery","ListOutbox","GetDelivery","ProcessDelivery","Retr
     if token not in client: errors.append("MAIL-2.10 client outbox surface missing: "+token)
 for token in ["Deliveries","validateDeliveryData","DurableStoreSchemaVersion = 8"]:
     if token not in store: errors.append("MAIL-2.10 durable queue storage missing: "+token)
+onboarding_src=(ROOT/"mail/onboarding.go").read_text() if (ROOT/"mail/onboarding.go").is_file() else ""
+for token in ["OnboardingGoogle","OnboardingApple","OnboardingPasskey","OnboardingExistingWallet","OnboardingAuthority","OnboardingService","GoogleOnboardingRequest","AppleOnboardingRequest","PasskeyOnboardingRequest","WalletOnboardingRequest","SessionToken","NonCustodial","ErrOnboardingInvalidResult","validWalletAddress"]:
+    if token not in onboarding_src: errors.append("MAIL-2.11 onboarding invariant missing: "+token)
+for token in ['"/v1/onboarding/google"','"/v1/onboarding/apple"','"/v1/onboarding/passkey"','"/v1/onboarding/wallet"',"Onboarding *OnboardingService"]:
+    if token not in http: errors.append("MAIL-2.11 HTTP onboarding surface missing: "+token)
+for token in ["GoogleOnboarding","AppleOnboarding","PasskeyOnboarding","ExistingWalletOnboarding"]:
+    if token not in client: errors.append("MAIL-2.11 client onboarding surface missing: "+token)
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
+for token in ["/v1/onboarding/","data-onboard","__420_ONBOARDING__","mailSession","non_custodial","session_token"]:
+    if token not in web: errors.append("MAIL-2.11 thin UI onboarding behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -213,4 +231,5 @@ print("MAIL-2.7 spam junk and phishing protection: qualified by app-scoped check
 print("MAIL-2.8 threads and conversations: qualified by app-scoped checks")
 print("MAIL-2.9 drafts system: qualified by app-scoped checks")
 print("MAIL-2.10 outbox and delivery queue: qualified by app-scoped checks")
+print("MAIL-2.11 email-as-a-wallet onboarding: qualified by app-scoped checks")
 

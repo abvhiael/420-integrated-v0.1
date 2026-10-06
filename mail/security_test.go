@@ -177,6 +177,8 @@ func TestSecurityServiceFailsClosedOnStaleFutureEpochOrForeignIdentity(t *testin
 		func(s *SecurityState) { s.Identity = "mallory.420" },
 		func(s *SecurityState) { s.Passkeys[0].AuthorizationEpoch = 8 },
 		func(s *SecurityState) { s.Sessions[0].AuthorizationEpoch = 8 },
+		func(s *SecurityState) { s.Passkeys[0].AuthorizationEpoch = 6 },
+		func(s *SecurityState) { s.Sessions[0].AuthorizationEpoch = 6 },
 		func(s *SecurityState) { s.Passkeys[0].DeviceID = "missing-device" },
 		func(s *SecurityState) { s.Recovery.Authority = "invalid" },
 	} {

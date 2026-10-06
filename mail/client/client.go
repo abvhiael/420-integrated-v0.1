@@ -143,3 +143,70 @@ func (c Client) RestoreFromTrash(ctx context.Context, id string) (mail.MailboxSt
 func (c Client) PermanentlyDelete(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodDelete, "/v1/messages/"+url.PathEscape(id), nil, nil)
 }
+
+
+func (c Client) ListLabels(ctx context.Context) ([]mail.LabelDefinition, error) {
+	var out []mail.LabelDefinition
+	err := c.do(ctx, http.MethodGet, "/v1/labels", nil, &out)
+	return out, err
+}
+
+func (c Client) CreateLabel(ctx context.Context, name string) (mail.LabelDefinition, error) {
+	var out mail.LabelDefinition
+	err := c.do(ctx, http.MethodPost, "/v1/labels", map[string]string{"name": name}, &out)
+	return out, err
+}
+
+func (c Client) DeleteLabel(ctx context.Context, id string) error {
+	return c.do(ctx, http.MethodDelete, "/v1/labels/"+url.PathEscape(id), nil, nil)
+}
+
+func (c Client) ListCustomFolders(ctx context.Context) ([]mail.CustomFolder, error) {
+	var out []mail.CustomFolder
+	err := c.do(ctx, http.MethodGet, "/v1/custom-folders", nil, &out)
+	return out, err
+}
+
+func (c Client) CreateCustomFolder(ctx context.Context, name string) (mail.CustomFolder, error) {
+	var out mail.CustomFolder
+	err := c.do(ctx, http.MethodPost, "/v1/custom-folders", map[string]string{"name": name}, &out)
+	return out, err
+}
+
+func (c Client) DeleteCustomFolder(ctx context.Context, id string) error {
+	return c.do(ctx, http.MethodDelete, "/v1/custom-folders/"+url.PathEscape(id), nil, nil)
+}
+
+func (c Client) UpdateOrganization(ctx context.Context, messageID string, update mail.OrganizationUpdate) (mail.MailboxState, error) {
+	var out mail.MailboxState
+	err := c.do(ctx, http.MethodPatch, "/v1/messages/"+url.PathEscape(messageID)+"/organization", update, &out)
+	return out, err
+}
+
+func (c Client) BulkUpdateOrganization(ctx context.Context, req mail.BulkOrganizationRequest) (mail.BulkOrganizationResult, error) {
+	var out mail.BulkOrganizationResult
+	err := c.do(ctx, http.MethodPatch, "/v1/organization/bulk", req, &out)
+	return out, err
+}
+
+func (c Client) MessagesByLabel(ctx context.Context, labelID, cursor string, limit int) (mail.MailboxPage, error) {
+	q := url.Values{}
+	if cursor != "" { q.Set("cursor", cursor) }
+	if limit > 0 { q.Set("limit", strconv.Itoa(limit)) }
+	path := "/v1/labels/" + url.PathEscape(labelID) + "/messages"
+	if encoded := q.Encode(); encoded != "" { path += "?" + encoded }
+	var out mail.MailboxPage
+	err := c.do(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
+func (c Client) MessagesByCustomFolder(ctx context.Context, folderID, cursor string, limit int) (mail.MailboxPage, error) {
+	q := url.Values{}
+	if cursor != "" { q.Set("cursor", cursor) }
+	if limit > 0 { q.Set("limit", strconv.Itoa(limit)) }
+	path := "/v1/custom-folders/" + url.PathEscape(folderID) + "/messages"
+	if encoded := q.Encode(); encoded != "" { path += "?" + encoded }
+	var out mail.MailboxPage
+	err := c.do(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}

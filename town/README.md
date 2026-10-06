@@ -18,6 +18,7 @@ Current packages:
 - `town/api` — authenticated `/v1` transport with validation, idempotency, pagination and observability;
 - `town/projection` — rebuildable/reorg-safe derived public read model;
 - `town/recovery` — atomic projection checkpoint persistence and restore;
+- `town/web` — user-facing browser app for discovery, content, moderation and authority-bearing workflows;
 - `town/schema/v1` — machine-readable object/schema, authority, content and moderation vocabulary.
 
 Town-specific Solidity lives under `contracts/src/town`.
@@ -101,6 +102,7 @@ Canonical application configuration:
 - `config/420town-moderation-v1.json`
 - `config/420town-integrations-v1.json`
 - `config/420town-api-v1.json`
+- `config/420town-web-v1.json`
 
 ## Service integrations
 
@@ -114,6 +116,12 @@ TOWN-AUDIT-7 implements the repository-side `/v1` API, typed Go SDK, derived pub
 
 See `docs/apps/town/api.md`.
 
+## User-facing web application
+
+TOWN-AUDIT-8 implements the browser application under `town/web`. Search discovery remains non-authoritative; content/moderation uses the Town `/v1` API; membership, roles, subscriptions and entitlements remain canonical in `TownAuthority420`. Authority-bearing writes require an EIP-1193 wallet, expected-network match and exact TownAuthority420 target pinning.
+
+See `docs/apps/town/web.md`.
+
 ## Current limitations
 
-TOWN-AUDIT-7 does not claim live deployed endpoints, production persistence, live chain reorg observation or deployed authentication infrastructure. Frontend workflows, broader security hardening, live testnet deployment and production operations remain later canonical roadmap steps.
+TOWN-AUDIT-8 does not claim live deployed endpoints, materialized production wallet/network bindings, production persistence or live chain reorg observation. Broader security hardening, live testnet deployment and production operations remain later canonical roadmap steps.

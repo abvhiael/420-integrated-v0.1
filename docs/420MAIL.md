@@ -83,6 +83,32 @@ Distributed idempotency is enforced by rechecking the sender-scoped idempotency 
 
 The built-in file implementation requires all cooperating instances to share a filesystem with correct advisory-lock and atomic-rename semantics. A database-backed `MailStore` may replace it later without changing service semantics.
 
+## Labels and custom folders
+
+MAIL-2.3 adds owner-scoped organization metadata without changing delivery folders or private body storage.
+
+- Users may create up to 100 labels and 50 custom folders.
+- Label and custom-folder names are normalized and case-insensitively unique per owner.
+- System folder names cannot be reused as custom-folder names.
+- System labels `STARRED`, `PINNED`, `MUTED`, and `UNREAD` are created per owner and are immutable.
+- A mailbox copy may hold up to 20 user labels and at most one custom folder assignment.
+- Bulk organization updates are transactional for up to 100 message IDs: any missing/unauthorized message or invalid label/folder aborts the whole update.
+- Label/custom-folder definitions and message assignments persist in the durable store and survive restart.
+- Owner/label and owner/custom-folder secondary indexes support direct organization views without exposing private mail to public search.
+- Deleting a user label or custom folder removes only that owner's organizational metadata/assignments; it does not delete the message or the counterparty's mailbox state.
+- Labels/custom folders remain off-chain application metadata.
+
+API additions:
+
+- `GET|POST /v1/labels`
+- `DELETE /v1/labels/{id}`
+- `GET /v1/labels/{id}/messages`
+- `GET|POST /v1/custom-folders`
+- `DELETE /v1/custom-folders/{id}`
+- `GET /v1/custom-folders/{id}/messages`
+- `PATCH /v1/messages/{id}/organization`
+- `PATCH /v1/organization/bulk`
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.

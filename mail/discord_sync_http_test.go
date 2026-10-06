@@ -11,7 +11,7 @@ import (
 func discordSyncHTTPHandler(t *testing.T, authority *discordFullAuthorityStub) HTTPHandler {
 	t.Helper()
 	store := NewMemoryStore()
-	mailSvc := NewService(&identityStub{}, &messengerStub{}, &blobStub{}, &notifyStub{}, store)
+	mailSvc := NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, store)
 	connectors, err := NewDiscordConnectorService(authority)
 	if err != nil {
 		t.Fatal(err)

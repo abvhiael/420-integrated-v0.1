@@ -1326,6 +1326,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** proof boundary compiles; subject/policy/nonce/audience/predicate/verifier/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/raw proof fields remain absent; validated proof results feed existing eligibility state authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.5 — Eligibility persistence & lifecycle
+
+**Purpose:** persist the current canonical adult-eligibility state privately so replay/time/policy/source authority survives repository reloads without persisting raw identity or proof evidence.
+
+**Canonical requirements:** persist profile binding, decision, source version, policy version, expiry where applicable, monotonic sequence and checked time in the existing private eligibility projection; reject stale sequence/time and stale repository-version writes; decode wrong-table/subject/schema/malformed state fail closed; keep UNKNOWN without expiry authority and require bounded future expiry for ELIGIBLE; require current policy compatibility; persist no DOB/legal identity/government ID/wallet linkage/biometrics/location/claim/raw identity/raw proof/credential payload; remain storage-neutral/private/off-chain; do not pre-empt PB-2.6 revocation/expiry event handling.
+
+**Affected components:** `puffbuddies/persistence/schema.py`, `puffbuddies/domain/eligibility_persistence.py`, PB-2.5 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.11, PB-0.12, PB-1.3, PB-1.4, PB-1.8, and PB-2.1 through PB-2.4 COMPLETE.
+
+**Exit criteria:** eligibility state round-trips through canonical private persistence; sequence/time/policy/subject invariants survive reload; stale sequence/time/repository-version updates fail closed; UNKNOWN/ELIGIBLE persistence invariants pass; forbidden identity/proof material remains absent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

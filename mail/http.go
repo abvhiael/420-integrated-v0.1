@@ -57,6 +57,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.send(w, r, actor)
 	case r.Method == http.MethodGet && r.URL.Path == "/v1/inbox":
 		h.inbox(w, r, actor)
+	case r.Method == http.MethodGet && r.URL.Path == "/v1/integrations/inbox":
+		h.integrationsInbox(w, r, actor)
 	case r.URL.Path == "/v1/labels" || strings.HasPrefix(r.URL.Path, "/v1/labels/"):
 		h.labels(w, r, actor)
 	case r.URL.Path == "/v1/custom-folders" || strings.HasPrefix(r.URL.Path, "/v1/custom-folders/"):
@@ -743,6 +745,21 @@ func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) 
 		return
 	}
 	writeJSON(w, http.StatusCreated, msg)
+}
+
+func (h HTTPHandler) integrationsInbox(w http.ResponseWriter, r *http.Request, actor string) {
+	limit := DefaultPageSize
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			limit = n
+		}
+	}
+	page, err := h.Service.IntegrationsInbox(r.Context(), actor, r.URL.Query().Get("cursor"), limit)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
 }
 
 func (h HTTPHandler) inbox(w http.ResponseWriter, r *http.Request, actor string) {

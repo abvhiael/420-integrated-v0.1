@@ -1273,6 +1273,112 @@ MAIL-2.20 does **not** implement:
 - public indexing of Signal notification data;
 - on-chain Signal message content.
 
+## MAIL-2.21 Signal Share & Forward
+
+MAIL-2.21 adds explicit user-initiated sharing and forwarding of an existing 420Mail message to Signal while preserving the external Signal transport boundary.
+
+### Authorization boundary
+
+Signal export requires:
+
+- an authenticated 420Mail actor;
+- a live mailbox copy owned by that actor;
+- the source Mail message ID;
+- an opaque Signal destination reference supplied by the deployment Signal adapter;
+- explicit mode `SHARE` or `FORWARD`;
+- a caller idempotency key.
+
+The implementation reuses the canonical `ReadBody` authorization path. A foreign, permanently deleted, or otherwise unavailable mailbox copy cannot be exported and never reaches the Signal authority.
+
+### Share vs forward semantics
+
+`SHARE` sends:
+
+- the Mail body;
+- optional user note;
+- no Mail subject.
+
+`FORWARD` sends:
+
+- the Mail body;
+- Mail subject;
+- optional user note.
+
+Neither mode automatically adds the original sender identity or source application metadata.
+
+The source message ID is retained as provider-facing provenance/idempotency context but does not become a public index entry.
+
+### Signal authority boundary
+
+420Mail passes the authorized content to `SignalShareAuthority`.
+
+The external Signal authority / secure broker remains responsible for:
+
+- resolving the opaque destination reference;
+- Signal recipient/contact selection;
+- Signal transport credentials;
+- provider retry/delivery behavior;
+- provider-side idempotency semantics.
+
+420Mail does not accept:
+
+- Signal phone-number credentials;
+- Signal registration/verification codes;
+- access or refresh tokens;
+- client secrets;
+- device/provider signing material.
+
+### Result validation
+
+A successful share/forward requires:
+
+- `accepted=true`;
+- non-empty external delivery ID;
+- non-zero accepted timestamp.
+
+Incomplete or rejected provider responses fail closed.
+
+### API and client
+
+Authenticated endpoint:
+
+- `POST /v1/connectors/signal/share`
+
+Typed client:
+
+- `ShareToSignal`
+
+The thin UI exposes **Share to Signal** and **Forward to Signal** only as explicit actions on a message the user has opened. The deployment shell supplies only the opaque destination reference and optional note.
+
+### Boundary advancement
+
+The canonical Signal boundary now reports:
+
+- status: `SHARE_FORWARD_ENABLED`;
+- `outbound_notifications=true`;
+- `share_and_forward=true`.
+
+Still disabled:
+
+- Signal account linking;
+- provider registration as a generic connector;
+- inbound sync;
+- webhook ingestion;
+- deep sync.
+
+Deep sync remains gated by `STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED`.
+
+### Scope boundary
+
+MAIL-2.21 does **not** implement:
+
+- automatic Signal forwarding;
+- Signal inbox materialization;
+- Signal webhook ingestion;
+- MAIL-2.22 Signal Deep Sync;
+- public indexing of shared Mail content;
+- on-chain Signal message bodies.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

@@ -354,7 +354,6 @@ func (c Client) DiscardDraft(ctx context.Context, draftID string, expectedVersio
 	return c.do(ctx, http.MethodDelete, "/v1/drafts/"+url.PathEscape(draftID)+"?expected_version="+strconv.FormatUint(uint64(expectedVersion), 10), nil, nil)
 }
 
-
 func (c Client) QueueDelivery(ctx context.Context, req mail.SendRequest) (mail.Delivery, error) {
 	var out mail.Delivery
 	err := c.do(ctx, http.MethodPost, "/v1/outbox", req, &out)

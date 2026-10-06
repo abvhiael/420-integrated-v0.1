@@ -7,7 +7,8 @@ def main():
     cfg=json.loads((ROOT/"contracts/config/compute-market/cmp-4.5-execution-environments.json").read_text())
     if cfg.get("step")!="CMP-4.5": errors.append("step drift")
     if cfg.get("canonical_definition")!="Reproducible execution environments": errors.append("definition drift")
-    if cfg.get("status")!="IMPLEMENTED_QUALIFICATION_PENDING": errors.append("status drift")
+    if cfg.get("status")!="COMPLETE": errors.append("status drift")
+    if cfg.get("completion_state")!="COMPLETE": errors.append("completion state drift")
     if cfg.get("next_canonical_step")!="CMP-4.6 — Result provenance": errors.append("next step drift")
     if len(cfg.get("exit_criteria",[]))!=12: errors.append("exit criteria drift")
     required={

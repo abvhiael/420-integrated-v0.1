@@ -34,8 +34,8 @@ func validTelegramDeliveryAuthority() *telegramDeliveryAuthorityStub {
 	return &telegramDeliveryAuthorityStub{
 		telegramLinkAuthorityStub: telegramLinkAuthorityStub{account: validTelegramAccount()},
 		receipt: TelegramDeliveryReceipt{
-			MessageID: "84",
-			ChatID: "-1001234567890",
+			MessageID:  "84",
+			ChatID:     "-1001234567890",
 			AcceptedAt: time.Unix(1700000900, 0).UTC(),
 		},
 	}
@@ -43,9 +43,9 @@ func validTelegramDeliveryAuthority() *telegramDeliveryAuthorityStub {
 
 func validTelegramDeliveryRequest() TelegramDeliveryRequest {
 	return TelegramDeliveryRequest{
-		ConnectionID: "telegram:1234567890",
-		ChatID: "-1001234567890",
-		Content: "hello telegram",
+		ConnectionID:   "telegram:1234567890",
+		ChatID:         "-1001234567890",
+		Content:        "hello telegram",
 		IdempotencyKey: "telegram-delivery-1",
 	}
 }
@@ -161,10 +161,10 @@ func telegramDeliveryHTTPHandler(t *testing.T, authority *telegramDeliveryAuthor
 		t.Fatal(err)
 	}
 	return HTTPHandler{
-		Service: NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore()),
-		Connectors: connectors,
+		Service:          NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore()),
+		Connectors:       connectors,
 		TelegramDelivery: NewTelegramDeliveryService(connectors),
-		Authenticate: func(r *http.Request) (string, error) { return r.Header.Get("X-Test-Actor"), nil },
+		Authenticate:     func(r *http.Request) (string, error) { return r.Header.Get("X-Test-Actor"), nil },
 	}
 }
 

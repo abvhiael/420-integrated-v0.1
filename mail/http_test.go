@@ -571,7 +571,6 @@ func TestHTTPConversationAuthorizationAndStrictJSON(t *testing.T) {
 	}
 }
 
-
 func TestHTTPDraftLifecycleAndOptimisticConcurrency(t *testing.T) {
 	h, _, _ := testHTTPHandler(t)
 

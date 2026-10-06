@@ -266,6 +266,101 @@ API additions:
 - `POST /v1/quarantine/{id}/release`
 - `GET /v1/reputation/{sender}`
 
+## Threads & Conversations
+
+MAIL-2.8 adds durable, owner-scoped conversation semantics on top of the existing private-message model.
+
+### Conversation identity and replies
+
+Every root message receives a deterministic conversation ID derived from its canonical message ID. Clients cannot attach an arbitrary conversation ID to a new root message.
+
+Replies are parent-message bound. A reply:
+
+- names a parent message through `reply_to`;
+- inherits the parent's conversation ID;
+- requires the replying actor to own a non-deleted mailbox copy of the parent;
+- requires the reply recipient to be the other participant in the parent message;
+- rejects a caller-supplied conversation ID that differs from the parent's canonical conversation ID;
+- rejects replies to a permanently deleted parent mailbox copy.
+
+The typed convenience route `POST /v1/messages/{id}/reply` infers the other participant from the parent. The lower-level send surface also enforces the same reply/conversation invariants.
+
+Conversation membership remains private application metadata and does not create protocol identity or wallet authority.
+
+### Participant and thread views
+
+Conversation views are owner-scoped. An actor may list only conversations represented by their own non-deleted mailbox copies.
+
+Each summary exposes:
+
+- the canonical conversation ID;
+- sorted participant identities;
+- owner-visible message count;
+- the latest owner-visible message timestamp;
+- owner-specific archived/muted thread state.
+
+Conversation detail returns owner-visible messages in deterministic chronological order:
+
+1. `created_at` ascending;
+2. message ID ascending as the tie-breaker.
+
+Conversation-list ordering is deterministic:
+
+1. latest message timestamp descending;
+2. conversation ID ascending as the tie-breaker.
+
+Permanently deleted owner copies disappear from that owner's conversation index/view without deleting the other participant's copy.
+
+### Thread archive
+
+Archive state is owner-scoped.
+
+Archiving a conversation:
+
+- marks the conversation archived;
+- moves the owner's recipient-side Inbox copies in that conversation to Archive;
+- leaves Sent copies in Sent;
+- causes future non-quarantined Inbox deliveries in that conversation to materialize in Archive.
+
+Unarchiving clears the thread archive state and restores recipient copies that were archived from Inbox back to Inbox.
+
+Quarantine remains stronger than thread archive: MAIL-2.7 phishing/spam quarantine continues to force suspicious mail to Junk rather than allowing thread archive to bypass quarantine.
+
+### Thread mute
+
+Mute state is owner-scoped and durable.
+
+When a future message arrives in a muted conversation:
+
+- the recipient mailbox copy is marked muted;
+- the ordinary Mail notification is suppressed.
+
+Muting a thread does not block delivery and does not change the sender's authority. It is distinct from MAIL-2.6 identity/application/phrase trust controls and MAIL-2.7 quarantine.
+
+### Durability and migration
+
+MAIL-2.8 advances the durable metadata schema to v6.
+
+Schema v6 persists:
+
+- owner/conversation state;
+- the owner/conversation secondary index;
+- canonical message `conversation_id`;
+- optional `reply_to` parent linkage.
+
+Existing v5 messages that predate canonical thread IDs are migrated as independent root conversations using a deterministic ID derived from their existing message ID. This preserves prior mail rather than silently grouping unrelated historical messages.
+
+Conversation indexes are rebuilt transactionally from authoritative mailbox/message state. Conversation growth is bounded to 1000 owner-visible messages per thread in the repository baseline.
+
+Private message bodies remain outside conversation metadata and continue to reside only behind the private blob-store boundary.
+
+API additions:
+
+- `POST /v1/messages/{id}/reply`
+- `GET /v1/conversations`
+- `GET /v1/conversations/{conversation_id}`
+- `PATCH /v1/conversations/{conversation_id}`
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.

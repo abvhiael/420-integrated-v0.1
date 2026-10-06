@@ -32,11 +32,11 @@ type DiscordDeliveryAuthority interface {
 }
 
 type DiscordDeliveryRequest struct {
-	ConnectionID   string `json:"connection_id"`
-	ChannelID      string `json:"channel_id"`
-	Content        string `json:"content"`
+	ConnectionID     string `json:"connection_id"`
+	ChannelID        string `json:"channel_id"`
+	Content          string `json:"content"`
 	ReplyToMessageID string `json:"reply_to_message_id,omitempty"`
-	IdempotencyKey string `json:"idempotency_key"`
+	IdempotencyKey   string `json:"idempotency_key"`
 }
 
 type DiscordDeliveryResult struct {

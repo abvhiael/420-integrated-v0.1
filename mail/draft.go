@@ -293,7 +293,11 @@ func draftKey(owner, id string) string { return owner + "\x00" + id }
 
 func draftCount(data *storeData, owner string) int {
 	n := 0
-	for _, draft := range data.Drafts { if draft.Owner==owner { n++ } }
+	for _, draft := range data.Drafts {
+		if draft.Owner == owner {
+			n++
+		}
+	}
 	return n
 }
 

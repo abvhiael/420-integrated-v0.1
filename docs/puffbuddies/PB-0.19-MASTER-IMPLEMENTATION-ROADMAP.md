@@ -106,6 +106,10 @@ Implement candidate eligibility filtering, hard exclusions, coarse-location priv
 **PB-0 authorities:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.14, PB-0.15.
 **Required gates:** exclusion-before-ranking tests; stale-cache/replay tests; reciprocal-intent tests; location inference/adversarial tests; sensitive-inference review.
 
+### Current split for legacy messaging/notifications scope
+
+The legacy PB-0.19 **PB-4 — Messaging authorization and notifications** planning block predates the current phase reservation. Its scope is now split by the current canonical roadmap: **PB-6 — 420Messenger integration** owns Messenger authorization/coordination handoff, while **PB-7 — 420Notifications integration** owns notification delivery handoff. This is a numbering/scope reconciliation only; it does not transfer PuffBuddies consent/relationship authority to Messenger or Notifications and does not claim live integration before the corresponding current phase is qualified.
+
 ### PB-4 — Messaging authorization and notifications
 Integrate bounded 420Messenger/420Notifications capabilities after canonical PuffBuddies match authorization. Enforce current mutual authorization on conversation entry and delivery-trigger decisions.
 

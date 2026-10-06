@@ -516,7 +516,6 @@ func (c Client) DeliverDiscord(ctx context.Context, req mail.DiscordDeliveryRequ
 	return out, err
 }
 
-
 func (c Client) PrepareDiscordWalletVerification(ctx context.Context, req mail.DiscordWalletChallengeRequest) (mail.DiscordWalletChallenge, error) {
 	var out mail.DiscordWalletChallenge
 	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/wallet/challenge", req, &out)

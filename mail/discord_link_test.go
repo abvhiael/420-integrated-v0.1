@@ -39,6 +39,17 @@ func validDiscordAccount() DiscordAccount {
 	}
 }
 
+func TestDiscordConnectorServiceConstructorRegistersDiscord(t *testing.T) {
+	svc, err := NewDiscordConnectorService(&discordLinkAuthorityStub{account: validDiscordAccount()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	providers := svc.Providers()
+	if len(providers) != 1 || providers[0].Provider != DiscordProvider {
+		t.Fatalf("discord provider not registered: %+v", providers)
+	}
+}
+
 func TestDiscordConnectorDescriptorIsLinkOnly(t *testing.T) {
 	d := NewDiscordConnectorAdapter(nil).Descriptor()
 	if d.Provider != DiscordProvider || d.DisplayName != "Discord" {

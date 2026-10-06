@@ -2107,6 +2107,33 @@ MAIL-2.35 preserves:
 
 No public indexing or on-chain message body storage is introduced.
 
+
+## MAIL-2.36 Repository Qualification
+
+MAIL-2.36 is the repository-consistency gate for the accumulated 420Mail Phase 2 implementation. It is **not** the complete Level-3 phase closeout and does not claim live-testnet, Genesis-catalog, deployed-operations, or production readiness.
+
+The Mail qualification verifier now explicitly checks:
+
+- canonical 420Mail service identity and dependency registration in `config/genesis-consumer-services.json`;
+- continued absence of 420Mail from the frozen `config/genesis-applications.json` catalog unless a later explicit catalog decision changes that state;
+- `mail.external_smtp=false`;
+- readiness identity, contracts-required boundary, public-testnet pending state, and preserved live/testnet blockers;
+- the canonical Phase 2 closeout sequence MAIL-2.36 through MAIL-2.40;
+- the global MAIL-AUDIT live-testnet handoff in `docs/ROADMAP.md`;
+- exact-head, full Mail test, race, vet, and static-verifier commands in the dedicated workflow;
+- workflow path-trigger coverage for Mail source, profile, consumer registry, frozen application catalog, Mail docs/roadmap, verifier, and readiness evidence.
+
+Repository qualification deliberately preserves:
+
+- `liveTestnetEvidence=false`;
+- `genesisCatalogPromoted=false`;
+- `genesisCloseout=false`;
+- `productionReady=false`.
+
+Those claims belong only to the later canonical steps that actually produce the required live/deployed evidence.
+
+MAIL-2.36 therefore qualifies internal repository completeness and consistency while keeping MAIL-2.37–MAIL-2.40 gates explicit and unclaimed.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

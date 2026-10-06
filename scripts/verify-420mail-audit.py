@@ -277,6 +277,33 @@ if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
         if readiness.get(key) is not False: errors.append(f"readiness overclaims {key}")
+    if readiness.get("schema")!="420-mail-readiness-v1" or readiness.get("application")!="420Mail" or readiness.get("serviceId")!="420/service/mail/v1":
+        errors.append("MAIL-2.36 readiness identity drifted")
+    if readiness.get("contractsRequired") is not False or readiness.get("deployment_status")!="PENDING_PUBLIC_TESTNET":
+        errors.append("MAIL-2.36 readiness deployment boundary drifted")
+    audit=readiness.get("current_audit",{})
+    if audit.get("testnet_roadmap")!="docs/ROADMAP.md" or audit.get("next_step")!="MAIL-AUDIT-7":
+        errors.append("MAIL-2.36 readiness handoff drifted")
+    blockers=audit.get("blockers",[])
+    for required in ["real 420Identity authentication/resolution adapter is not yet wired to a deployed service","real 420Messenger block/messaging policy adapter is not yet wired to a deployed service","real 420Storage private encrypted blob provider is not yet selected and qualified","real 420Notifications delivery adapter is not yet wired and qualified","420Mail is not in the frozen config/genesis-applications.json catalog; promotion requires an explicit catalog decision"]:
+        if required not in blockers: errors.append("MAIL-2.36 readiness blocker missing: "+required)
+roadmap_path=require("docs/420MAIL-PHASE2-ROADMAP.md")
+global_roadmap_path=require("docs/ROADMAP.md")
+workflow_path=require(".github/workflows/420mail-audit.yml")
+if roadmap_path.is_file():
+    phase2_roadmap=roadmap_path.read_text()
+    for token in ["MAIL-2.36 — Repository Qualification","MAIL-2.37 — Live Testnet Integration","MAIL-2.38 — Security & Operations Qualification","MAIL-2.39 — Genesis Catalog Decision","MAIL-2.40 — Production Release","Phase closeout"]:
+        if token not in phase2_roadmap: errors.append("MAIL-2.36 phase-closeout roadmap definition missing: "+token)
+if global_roadmap_path.is_file():
+    global_roadmap=global_roadmap_path.read_text()
+    for token in ["420Mail — MAIL-AUDIT testnet handoff","MAIL-AUDIT-7 through MAIL-AUDIT-10","mail.external_smtp=false"]:
+        if token not in global_roadmap: errors.append("MAIL-2.36 global testnet handoff missing: "+token)
+if workflow_path.is_file():
+    mail_workflow=workflow_path.read_text()
+    for token in ["go test ./mail/...","go test -race ./mail/...","go vet ./mail/...","python3 scripts/verify-420mail-audit.py","test \"$(git rev-parse HEAD)\" = \"${GITHUB_SHA}\""]:
+        if token not in mail_workflow: errors.append("MAIL-2.36 qualification workflow invariant missing: "+token)
+    for path_token in ["mail/**","config/420mail-service-v1.json","config/genesis-consumer-services.json","config/genesis-applications.json","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","scripts/verify-420mail-audit.py","testnet/public-services/mail/readiness.json"]:
+        if path_token not in mail_workflow: errors.append("MAIL-2.36 workflow trigger coverage missing: "+path_token)
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 connector_src=(ROOT/"mail/integrations.go").read_text() if (ROOT/"mail/integrations.go").is_file() else ""
@@ -589,4 +616,5 @@ print("MAIL-2.32 connector isolation: qualified by app-scoped checks")
 print("MAIL-2.33 encryption and leakage controls: qualified by app-scoped checks")
 print("MAIL-2.34 phishing and impersonation protection: qualified by app-scoped checks")
 print("MAIL-2.35 abuse controls: qualified by app-scoped checks")
+print("MAIL-2.36 repository qualification: qualified by exact-head app repository checks")
 

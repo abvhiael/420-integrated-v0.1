@@ -26,14 +26,14 @@ type SignalIntegrationBoundary struct {
 func CanonicalSignalIntegrationBoundary() SignalIntegrationBoundary {
 	return SignalIntegrationBoundary{
 		Provider:                    SignalProvider,
-		Status:                      "NOTIFICATIONS_ONLY",
+		Status:                      "SHARE_FORWARD_ENABLED",
 		Architecture:                "EXTERNAL_SIGNAL_TRANSPORT_ADAPTER",
 		TransportAuthority:          "SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY",
 		MailStoresProviderSecrets:   false,
 		MailOwnsSignalIdentity:      false,
 		AccountLinking:              false,
 		OutboundNotifications:       true,
-		ShareAndForward:             false,
+		ShareAndForward:             true,
 		InboundSync:                 false,
 		WebhookIngestion:            false,
 		DeepSync:                    false,
@@ -51,7 +51,7 @@ func validateSignalIntegrationBoundary(boundary SignalIntegrationBoundary) error
 	boundary.TransportAuthority = strings.TrimSpace(boundary.TransportAuthority)
 	boundary.DeepSyncCondition = strings.TrimSpace(boundary.DeepSyncCondition)
 	if boundary.Provider != SignalProvider ||
-		boundary.Status != "NOTIFICATIONS_ONLY" ||
+		boundary.Status != "SHARE_FORWARD_ENABLED" ||
 		boundary.Architecture != "EXTERNAL_SIGNAL_TRANSPORT_ADAPTER" ||
 		boundary.TransportAuthority != "SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY" ||
 		boundary.DeepSyncCondition != "STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED" ||
@@ -59,7 +59,7 @@ func validateSignalIntegrationBoundary(boundary SignalIntegrationBoundary) error
 		boundary.MailOwnsSignalIdentity ||
 		boundary.AccountLinking ||
 		!boundary.OutboundNotifications ||
-		boundary.ShareAndForward ||
+		!boundary.ShareAndForward ||
 		boundary.InboundSync ||
 		boundary.WebhookIngestion ||
 		boundary.DeepSync ||

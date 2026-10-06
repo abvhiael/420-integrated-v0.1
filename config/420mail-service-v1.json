@@ -60,8 +60,7 @@
       "owner_label",
       "owner_custom_folder",
       "owner_conversation",
-      "owner_draft",
-      "owner_outbox"
+      "owner_draft"
     ],
     "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
     "sharedStorageRequiredForMultiInstance": true,

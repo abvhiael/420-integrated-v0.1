@@ -1422,7 +1422,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** PB-2 internal eligibility/authorization metadata is rejected from external/derived payloads; externally consumable authorization conclusion is boolean-only; denial reason is uniform; public eligibility/authorization probes are prohibited; retained PB-1.10 and PuffBuddies regressions pass; exact-head PB-2 fast qualification passes; durable evidence recorded.
 
-### PB-2.11 — Adversarial identity/eligibility qualification
+### PB-2.11 — Adversarial identity/eligibility qualification — COMPLETE
 
 **Purpose:** qualify the accumulated PB-2.1 through PB-2.10 identity/eligibility boundary as a single adversarial attack surface using the canonical PB-0.6/PB-0.7 failure classes.
 

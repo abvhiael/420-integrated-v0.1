@@ -90,7 +90,7 @@ func TestRulesOnlyMutateRecipientMailboxCopy(t *testing.T) {
 	ctx := context.Background()
 	junk := FolderJunk
 	if _, err := s.CreateRule(ctx, "bob.420", RuleInput{
-		Name: "Alice to junk",
+		Name:      "Alice to junk",
 		Condition: RuleCondition{SenderEquals: "alice.420"},
 		Action:    RuleAction{Folder: &junk},
 	}); err != nil {
@@ -392,7 +392,6 @@ func TestRuleIdempotentResendDoesNotReapplyActions(t *testing.T) {
 		t.Fatalf("idempotent replay reapplied rules: before=%+v after=%+v", before, after)
 	}
 }
-
 
 func TestDurableStoreMigratesV2RulesSchema(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "legacy-v2.json")

@@ -30,30 +30,30 @@ const (
 )
 
 type Report struct {
-	ID          string
-	ReporterRef string
-	TargetKind  string
-	TargetID    string
-	Reason      string
-	EvidenceRef string
-	CreatedAt   time.Time
+	ID          string    `json:"id"`
+	ReporterRef string    `json:"reporter_ref"`
+	TargetKind  string    `json:"target_kind"`
+	TargetID    string    `json:"target_id"`
+	Reason      string    `json:"reason"`
+	EvidenceRef string    `json:"evidence_ref,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type Decision struct {
-	ID           string
-	ReportID     string
-	ModeratorRef string
-	Action       ModerationAction
-	Reason       string
-	CreatedAt    time.Time
+	ID           string           `json:"id"`
+	ReportID     string           `json:"report_id"`
+	ModeratorRef string           `json:"moderator_ref"`
+	Action       ModerationAction `json:"action"`
+	Reason       string           `json:"reason"`
+	CreatedAt    time.Time        `json:"created_at"`
 }
 
 type Appeal struct {
-	ID           string
-	DecisionID   string
-	AppellantRef string
-	Reason       string
-	CreatedAt    time.Time
+	ID           string    `json:"id"`
+	DecisionID   string    `json:"decision_id"`
+	AppellantRef string    `json:"appellant_ref"`
+	Reason       string    `json:"reason"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type ModeratorAuthorizer interface {

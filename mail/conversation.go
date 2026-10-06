@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// MaxConversationMessages bounds owner-visible thread growth in the repository baseline.
 const MaxConversationMessages = 1000
 
 type ConversationState struct {

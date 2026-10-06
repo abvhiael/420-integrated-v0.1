@@ -12,6 +12,7 @@ on:
       - "docs/audit/420VERIFY-PHASE-CLOSEOUT.md"
       - "docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md"
       - "docs/puffbuddies/PB-1.14-PHASE-CLOSEOUT.md"
+      - "docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md"
   pull_request:
     paths:
       - "contracts/**"
@@ -20,6 +21,7 @@ on:
       - "docs/audit/420VERIFY-PHASE-CLOSEOUT.md"
       - "docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md"
       - "docs/puffbuddies/PB-1.14-PHASE-CLOSEOUT.md"
+      - "docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md"
   workflow_dispatch:
 
 concurrency:

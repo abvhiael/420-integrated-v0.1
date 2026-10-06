@@ -8,7 +8,9 @@
 
 - Status: **COMPLETE**
 - Qualification level: **Level 1 — app-scoped step qualification**
-- Qualified implementation SHA: `954d422740142e874ed47bda1083cade6fb9d996`
+- Qualified feature SHA: `954d422740142e874ed47bda1083cade6fb9d996`
+- Exact tested PR merge-candidate SHA: `e2d791fc058a08c47ce9e4022b6ef70ae7e1cea1`
+- Tested `main` parent: `ba7b9c2067877bf1ec9093f251928089420350b5`
 - Audit branch: `mail-2-11-email-wallet-onboarding-20261006`
 - PR: #537
 
@@ -118,7 +120,8 @@ Workflow: **420Mail Audit Qualification**
 
 - Run: **37524981622** (#398)
 - Job: **112479585487**
-- Exact qualified SHA: `954d422740142e874ed47bda1083cade6fb9d996`
+- Qualified feature SHA: `954d422740142e874ed47bda1083cade6fb9d996`
+- Exact tested PR merge candidate: `e2d791fc058a08c47ce9e4022b6ef70ae7e1cea1`
 
 Results:
 
@@ -156,7 +159,7 @@ That unrelated movement does not invalidate the exact-SHA Level-1 result above. 
 
 ## Evidence inheritance
 
-This evidence file and companion roadmap/PR bookkeeping are documentation/evidence-only and inherit qualification from exact implementation SHA `954d422740142e874ed47bda1083cade6fb9d996` without recursive requalification.
+This evidence file and companion roadmap/PR bookkeeping are documentation/evidence-only and inherit qualification from exact tested PR merge-candidate SHA `e2d791fc058a08c47ce9e4022b6ef70ae7e1cea1` (feature parent `954d422740142e874ed47bda1083cade6fb9d996`) without recursive requalification.
 
 ## Next canonical step
 

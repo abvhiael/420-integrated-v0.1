@@ -1812,6 +1812,55 @@ The thin UI exposes an All integrations / Discord / Telegram selector and sends 
 
 MAIL-2.28 does not add new connectors, Signal deep sync, Telegram wallet verification, provider credentials, private-body indexing, or new automatic delivery/routing behavior. Unified notification routing remains MAIL-2.29.
 
+
+## MAIL-2.29 Unified Notification Routing
+
+MAIL-2.29 replaces the Signal-specific fanout implementation with one deterministic notification router over the notification transports that are actually qualified in the repository.
+
+### Qualified routes
+
+The unified router currently contains exactly:
+
+1. `420notifications` — the canonical injected `NotificationSink`;
+2. `signal` — the MAIL-2.20 privacy-minimized Signal notification authority.
+
+Discord and Telegram are deliberately not promoted to notification transports. Their qualified PUSH surfaces are explicit message-delivery operations that require caller-selected provider destinations; the repository has no qualified automatic notification recipient/destination-resolution authority for either provider.
+
+### Routing semantics
+
+A canonical Mail notification event is emitted only after the Mail delivery path has applied recipient trust/rules/spam/conversation mute state.
+
+For one event the router:
+
+- validates the message/recipient binding before fanout;
+- attempts each configured qualified route once in deterministic order;
+- does not stop later routes when an earlier route fails;
+- preserves all route errors for observability;
+- remains non-transactional with Mail delivery, so notification transport failure does not roll back a delivered message;
+- relies on the canonical Mail idempotency path so replay of an already-created message does not emit a second notification event.
+
+Muted or quarantined recipient copies continue to suppress the notification sink before the router is invoked.
+
+### Privacy and authority boundary
+
+The router receives the existing bounded `Notification` event and never receives a private message body or subject.
+
+Signal continues to reduce that event further to its existing minimal payload and deterministic recipient/message idempotency key.
+
+The router does not:
+
+- create provider credentials;
+- infer Discord channels or Telegram chats;
+- turn explicit Discord/Telegram message delivery into background notifications;
+- require Signal deep sync;
+- expose Mail content to public indexing or on-chain storage.
+
+### Compatibility
+
+`NewSignalNotificationSink` remains available for existing deployment composition, but now delegates to `UnifiedNotificationRouter`. This preserves the qualified 420Notifications + Signal behavior while making the routing policy explicit and extensible only through future separately-qualified transports.
+
+MAIL-2.29 completes the External bridge milestone. The retained full Mail package/race/vet/static-verifier run on the exact PR merge candidate serves as the Level-2 app integration qualification when all checks pass.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

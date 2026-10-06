@@ -79,25 +79,25 @@ func (s *SignalNotificationService) Notify(ctx context.Context, n Notification) 
 type SignalNotificationSink struct {
 	Primary NotificationSink
 	Signal  *SignalNotificationService
+	Router  *UnifiedNotificationRouter
 }
 
 func NewSignalNotificationSink(primary NotificationSink, signal *SignalNotificationService) *SignalNotificationSink {
-	return &SignalNotificationSink{Primary: primary, Signal: signal}
+	return &SignalNotificationSink{
+		Primary: primary,
+		Signal:  signal,
+		Router:  NewUnifiedNotificationRouter(primary, signal),
+	}
 }
 
 func (s *SignalNotificationSink) NotifyMail(ctx context.Context, n Notification) error {
-	var primaryErr error
-	if s != nil && s.Primary != nil {
-		primaryErr = s.Primary.NotifyMail(ctx, n)
+	if s == nil {
+		return nil
 	}
-	var signalErr error
-	if s != nil && s.Signal != nil {
-		_, signalErr = s.Signal.Notify(ctx, n)
+	if s.Router != nil {
+		return s.Router.NotifyMail(ctx, n)
 	}
-	if primaryErr != nil {
-		return primaryErr
-	}
-	return signalErr
+	return NewUnifiedNotificationRouter(s.Primary, s.Signal).NotifyMail(ctx, n)
 }
 
 func signalNotificationIdempotencyKey(recipient, messageID string) string {

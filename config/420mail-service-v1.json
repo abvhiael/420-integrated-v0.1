@@ -739,5 +739,30 @@
     "seedPhraseInput": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "unifiedNotificationRouting": {
+    "enabled": true,
+    "sourceEvent": "MAIL_NOTIFICATION_SINK",
+    "qualifiedRoutes": [
+      "420notifications",
+      "signal"
+    ],
+    "deterministicOrder": [
+      "420notifications",
+      "signal"
+    ],
+    "attemptAllQualifiedRoutes": true,
+    "routeFailureIsolation": true,
+    "failureBlocksMailDelivery": false,
+    "idempotentMailReplayRenotifies": false,
+    "mutedRecipientSuppressesAllRoutes": true,
+    "quarantineSuppressesAllRoutes": true,
+    "discordNotificationTransport": false,
+    "telegramNotificationTransport": false,
+    "discordTelegramReason": "EXPLICIT_MESSAGE_DELIVERY_IS_NOT_NOTIFICATION_ROUTING",
+    "signalDeepSyncRequired": false,
+    "privateMessageBodyIncluded": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

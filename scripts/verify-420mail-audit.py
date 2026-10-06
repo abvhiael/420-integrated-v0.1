@@ -229,6 +229,12 @@ if profile_path.is_file():
     if cross_identity.get("telegramWalletVerification") is not False or cross_identity.get("signalIncluded") is not False or cross_identity.get("signalExclusionReason")!="DEEP_SYNC_CONDITION_UNSATISFIED": errors.append("MAIL-2.27 provider verification boundary drifted")
     if any(cross_identity.get(k) is not True for k in ["durableEvidenceOnly","unverifiedStatesExcluded","foreignOwnerStatesExcluded"]): errors.append("MAIL-2.27 evidence isolation drifted")
     if cross_identity.get("deterministicOrdering")!="PROVIDER_ASC_CONNECTION_ID_ASC" or any(cross_identity.get(k) is not False for k in ["rawCredentialInput","privateKeyInput","seedPhraseInput","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.27 privacy/ordering drifted")
+    notification_routing=profile.get("unifiedNotificationRouting",{})
+    if notification_routing.get("enabled") is not True or notification_routing.get("sourceEvent")!="MAIL_NOTIFICATION_SINK": errors.append("MAIL-2.29 unified notification router source drifted")
+    if notification_routing.get("qualifiedRoutes")!=["420notifications","signal"] or notification_routing.get("deterministicOrder")!=["420notifications","signal"]: errors.append("MAIL-2.29 qualified notification routes/order drifted")
+    if any(notification_routing.get(k) is not True for k in ["attemptAllQualifiedRoutes","routeFailureIsolation","mutedRecipientSuppressesAllRoutes","quarantineSuppressesAllRoutes"]): errors.append("MAIL-2.29 notification fanout/suppression drifted")
+    if any(notification_routing.get(k) is not False for k in ["failureBlocksMailDelivery","idempotentMailReplayRenotifies","discordNotificationTransport","telegramNotificationTransport","signalDeepSyncRequired","privateMessageBodyIncluded","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.29 notification scope/privacy drifted")
+    if notification_routing.get("discordTelegramReason")!="EXPLICIT_MESSAGE_DELIVERY_IS_NOT_NOTIFICATION_ROUTING": errors.append("MAIL-2.29 Discord/Telegram notification boundary drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
     if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
@@ -366,6 +372,7 @@ telegram_sync_src=(ROOT/"mail/telegram_sync.go").read_text() if (ROOT/"mail/tele
 telegram_delivery_src=(ROOT/"mail/telegram_delivery.go").read_text() if (ROOT/"mail/telegram_delivery.go").is_file() else ""
 integrations_inbox_src=(ROOT/"mail/integrations_inbox.go").read_text() if (ROOT/"mail/integrations_inbox.go").is_file() else ""
 cross_platform_identity_src=(ROOT/"mail/cross_platform_identity.go").read_text() if (ROOT/"mail/cross_platform_identity.go").is_file() else ""
+notification_routing_src=(ROOT/"mail/notification_routing.go").read_text() if (ROOT/"mail/notification_routing.go").is_file() else ""
 for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
     if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
 for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
@@ -394,6 +401,10 @@ for token in ["IntegrationInboxFilter","IntegrationsInboxFiltered","normalizeInt
     if token not in integrations_inbox_src: errors.append("MAIL-2.28 integration-specific filter invariant missing: "+token)
 for token in ["VerifiedIdentityAssurance","VerifiedIdentityProviderAuthority","VerifiedIdentityWallet","VerifiedPlatformIdentity","CrossPlatformVerifiedIdentity","CrossPlatformIdentity","DiscordWalletVerifications","DiscordSync","TelegramSync"]:
     if token not in cross_platform_identity_src: errors.append("MAIL-2.27 cross-platform identity invariant missing: "+token)
+for token in ["UnifiedNotificationRouter","NewUnifiedNotificationRouter","NotificationRoute420Notifications","NotificationRouteSignal","NotificationRoutingError","attempt", "Routes"]:
+    if token not in notification_routing_src: errors.append("MAIL-2.29 unified notification routing invariant missing: "+token)
+for token in ["UnifiedNotificationRouter","NewUnifiedNotificationRouter"]:
+    if token not in signal_notifications_src: errors.append("MAIL-2.29 Signal compatibility router integration missing: "+token)
 for token in ["TelegramDeliveryAuthority","ConnectorCapabilityPush","DeliverTelegram","TelegramDeliveryKind"]:
     if token not in telegram_link_src: errors.append("MAIL-2.25 Telegram adapter delivery invariant missing: "+token)
 for token in ["TelegramSyncAuthority","ConnectorCapabilityPull","PullTelegram","TelegramSyncItemKind"]:
@@ -510,4 +521,5 @@ print("MAIL-2.25 420Mail to Telegram delivery: qualified by app-scoped checks")
 print("MAIL-2.26 unified integrations inbox: qualified by app-scoped checks")
 print("MAIL-2.27 cross-platform verified identity: qualified by app-scoped checks")
 print("MAIL-2.28 integration-specific filters: qualified by app-scoped checks")
+print("MAIL-2.29 unified notification routing: qualified by app-scoped checks")
 

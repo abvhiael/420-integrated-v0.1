@@ -62,6 +62,46 @@ func TestEthereumIndexReconstructsLatestCapabilityState(t *testing.T) {
 	if len(ids) != 1 || ids[0] != opB { t.Fatalf("ids=%v", ids) }
 }
 
+func TestEthereumIndexReplayRecoversFromChangedCanonicalLogView(t *testing.T) {
+	capID := id32(2)
+	opA := id32(1)
+	opB := id32(3)
+	call := 0
+	rpc := &fakeRPC{fn: func(method string, _ any, result any) error {
+		if method != "eth_getLogs" { t.Fatalf("method=%s", method) }
+		call++
+		logs := result.(*[]rpcLog)
+		if call == 1 {
+			*logs = []rpcLog{{BlockNumber:"0x8", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opA), hex32(capID)}, Data:encodeWords(wordUint(1), wordUint(1))}}
+		} else {
+			*logs = []rpcLog{
+				{BlockNumber:"0x8", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opA), hex32(capID)}, Data:encodeWords(wordUint(0), wordUint(2))},
+				{BlockNumber:"0x8", LogIndex:"0x1", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opB), hex32(capID)}, Data:encodeWords(wordUint(1), wordUint(1))},
+			}
+		}
+		return nil
+	}}
+	d, _ := NewEthereumDiscovery(config(rpc))
+	ids, err := d.OperatorIDs(context.Background(), capID)
+	if err != nil { t.Fatal(err) }
+	if len(ids) != 1 || ids[0] != opA { t.Fatalf("first replay ids=%v", ids) }
+	ids, err = d.OperatorIDs(context.Background(), capID)
+	if err != nil { t.Fatal(err) }
+	if len(ids) != 1 || ids[0] != opB { t.Fatalf("replayed canonical view ids=%v", ids) }
+}
+
+func TestEthereumIndexRejectsMalformedOrderingQuantity(t *testing.T) {
+	capID := id32(2)
+	opID := id32(1)
+	rpc := &fakeRPC{fn: func(_ string, _ any, result any) error {
+		logs := result.(*[]rpcLog)
+		*logs = []rpcLog{{BlockNumber:"garbage", LogIndex:"0x0", Topics:[]string{config(nil).CapabilityChangedTopic, hex32(opID), hex32(capID)}, Data:encodeWords(wordUint(1), wordUint(1))}}
+		return nil
+	}}
+	d, _ := NewEthereumDiscovery(config(rpc))
+	if _, err := d.OperatorIDs(context.Background(), capID); !errors.Is(err, ErrMalformedChainData) { t.Fatalf("err=%v", err) }
+}
+
 func TestEthereumIndexRejectsRemovedOrMalformedLogs(t *testing.T) {
 	capID := id32(2)
 	opID := id32(1)

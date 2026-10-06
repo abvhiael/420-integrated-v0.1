@@ -510,7 +510,6 @@ func (c Client) SyncDiscord(ctx context.Context, connectionID string) (mail.Disc
 	return out, err
 }
 
-
 func (c Client) DeliverDiscord(ctx context.Context, req mail.DiscordDeliveryRequest) (mail.DiscordDeliveryResult, error) {
 	var out mail.DiscordDeliveryResult
 	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/deliver", req, &out)

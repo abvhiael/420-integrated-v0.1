@@ -50,6 +50,8 @@ jobs:
         run: python3 -m unittest puffbuddies.tests.test_pb_2_9_messaging_eligibility -v
       - name: PB-2.10 targeted privacy leakage hardening
         run: python3 -m unittest puffbuddies.tests.test_pb_2_10_eligibility_privacy -v
+      - name: PB-2.11 adversarial identity eligibility qualification
+        run: python3 -m unittest puffbuddies.tests.test_pb_2_11_adversarial_identity_eligibility -v
       - name: Retained PuffBuddies regressions
         run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
       - name: Identity privacy and public-chain negative gate

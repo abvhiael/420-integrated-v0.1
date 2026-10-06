@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ErrDraftConflict = errors.New("mail: draft version conflict")
+	ErrDraftConflict          = errors.New("mail: draft version conflict")
 	ErrDraftDeleteUnavailable = errors.New("mail: private draft deletion unavailable")
 )
 
@@ -109,9 +109,9 @@ func (s *Service) CreateDraft(ctx context.Context, actor string, req DraftCreate
 		return DraftView{}, errors.New("mail: storage returned incomplete draft evidence")
 	}
 	now := s.Now().UTC()
-	draft := Draft{ID:id, Owner:actor, Recipient:req.Recipient, Subject:req.Subject, BodyRef:ref, BodyDigest:digest, ConversationID:req.ConversationID, ReplyTo:req.ReplyTo, Source:req.Source, CreatedAt:now, UpdatedAt:now, Version:1}
+	draft := Draft{ID: id, Owner: actor, Recipient: req.Recipient, Subject: req.Subject, BodyRef: ref, BodyDigest: digest, ConversationID: req.ConversationID, ReplyTo: req.ReplyTo, Source: req.Source, CreatedAt: now, UpdatedAt: now, Version: 1}
 	if err := s.Store.Update(ctx, func(data *storeData) error {
-		key := draftKey(actor,id)
+		key := draftKey(actor, id)
 		if existing, ok := data.Drafts[key]; ok {
 			draft = existing
 			return nil
@@ -124,7 +124,7 @@ func (s *Service) CreateDraft(ctx context.Context, actor string, req DraftCreate
 	}); err != nil {
 		return DraftView{}, err
 	}
-	return DraftView{Draft:draft, Body:req.Body}, nil
+	return DraftView{Draft: draft, Body: req.Body}, nil
 }
 
 func (s *Service) SaveDraft(ctx context.Context, actor, id string, req DraftSaveRequest) (DraftView, error) {
@@ -144,7 +144,7 @@ func (s *Service) SaveDraft(ctx context.Context, actor, id string, req DraftSave
 	var current Draft
 	var ok bool
 	if err := s.Store.View(ctx, func(data *storeData) error {
-		current, ok = data.Drafts[draftKey(actor,id)]
+		current, ok = data.Drafts[draftKey(actor, id)]
 		return nil
 	}); err != nil {
 		return DraftView{}, err
@@ -165,7 +165,7 @@ func (s *Service) SaveDraft(ctx context.Context, actor, id string, req DraftSave
 	now := s.Now().UTC()
 	var updated Draft
 	if err := s.Store.Update(ctx, func(data *storeData) error {
-		key := draftKey(actor,id)
+		key := draftKey(actor, id)
 		draft, ok := data.Drafts[key]
 		if !ok {
 			return ErrNotFound
@@ -173,22 +173,22 @@ func (s *Service) SaveDraft(ctx context.Context, actor, id string, req DraftSave
 		if draft.Version != req.ExpectedVersion {
 			return ErrDraftConflict
 		}
-		draft.Recipient=req.Recipient
-		draft.Subject=req.Subject
-		draft.BodyRef=ref
-		draft.BodyDigest=digest
-		draft.ConversationID=req.ConversationID
-		draft.ReplyTo=req.ReplyTo
-		draft.Source=req.Source
-		draft.UpdatedAt=now
+		draft.Recipient = req.Recipient
+		draft.Subject = req.Subject
+		draft.BodyRef = ref
+		draft.BodyDigest = digest
+		draft.ConversationID = req.ConversationID
+		draft.ReplyTo = req.ReplyTo
+		draft.Source = req.Source
+		draft.UpdatedAt = now
 		draft.Version++
-		data.Drafts[key]=draft
-		updated=draft
+		data.Drafts[key] = draft
+		updated = draft
 		return nil
 	}); err != nil {
 		return DraftView{}, err
 	}
-	return DraftView{Draft:updated, Body:req.Body}, nil
+	return DraftView{Draft: updated, Body: req.Body}, nil
 }
 
 func (s *Service) GetDraft(ctx context.Context, actor, id string) (DraftView, error) {
@@ -200,7 +200,7 @@ func (s *Service) GetDraft(ctx context.Context, actor, id string) (DraftView, er
 	var draft Draft
 	var ok bool
 	if err := s.Store.View(ctx, func(data *storeData) error {
-		draft,ok=data.Drafts[draftKey(actor,id)]
+		draft, ok = data.Drafts[draftKey(actor, id)]
 		return nil
 	}); err != nil {
 		return DraftView{}, err
@@ -212,7 +212,7 @@ func (s *Service) GetDraft(ctx context.Context, actor, id string) (DraftView, er
 	if err != nil {
 		return DraftView{}, err
 	}
-	return DraftView{Draft:draft, Body:string(body)}, nil
+	return DraftView{Draft: draft, Body: string(body)}, nil
 }
 
 func (s *Service) ListDrafts(ctx context.Context, actor string) ([]Draft, error) {
@@ -220,20 +220,22 @@ func (s *Service) ListDrafts(ctx context.Context, actor string) ([]Draft, error)
 	if actor == "" {
 		return nil, ErrUnauthorized
 	}
-	out:=[]Draft{}
-	err:=s.Store.View(ctx,func(data *storeData) error{
-		for _,draft:=range data.Drafts {
-			if draft.Owner==actor {
-				out=append(out,draft)
+	out := []Draft{}
+	err := s.Store.View(ctx, func(data *storeData) error {
+		for _, draft := range data.Drafts {
+			if draft.Owner == actor {
+				out = append(out, draft)
 			}
 		}
 		return nil
 	})
-	sort.Slice(out,func(i,j int) bool{
-		if out[i].UpdatedAt.Equal(out[j].UpdatedAt){return out[i].ID<out[j].ID}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].UpdatedAt.Equal(out[j].UpdatedAt) {
+			return out[i].ID < out[j].ID
+		}
 		return out[i].UpdatedAt.After(out[j].UpdatedAt)
 	})
-	return out,err
+	return out, err
 }
 
 func (s *Service) DiscardDraft(ctx context.Context, actor, id string, expectedVersion uint32) error {
@@ -283,21 +285,21 @@ func (s *Service) DiscardDraft(ctx context.Context, actor, id string, expectedVe
 }
 
 func deterministicDraftID(owner, autosaveKey string) string {
-	sum:=sha256.Sum256([]byte("420/MAIL/DRAFT/V1\x00"+owner+"\x00"+autosaveKey))
-	return "draft_"+hex.EncodeToString(sum[:16])
+	sum := sha256.Sum256([]byte("420/MAIL/DRAFT/V1\x00" + owner + "\x00" + autosaveKey))
+	return "draft_" + hex.EncodeToString(sum[:16])
 }
 
-func draftKey(owner,id string) string { return owner+"\x00"+id }
+func draftKey(owner, id string) string { return owner + "\x00" + id }
 
 func draftCount(data *storeData, owner string) int {
-	n:=0
-	for _,draft:=range data.Drafts { if draft.Owner==owner { n++ } }
+	n := 0
+	for _, draft := range data.Drafts { if draft.Owner==owner { n++ } }
 	return n
 }
 
 func validateDraftData(data *storeData) error {
-	for key,draft:=range data.Drafts {
-		if key!=draftKey(draft.Owner,draft.ID) || draft.Owner=="" || draft.ID=="" || draft.Source!=ServiceID || draft.Version==0 || draft.BodyRef=="" || draft.BodyDigest=="" {
+	for key, draft := range data.Drafts {
+		if key != draftKey(draft.Owner, draft.ID) || draft.Owner == "" || draft.ID == "" || draft.Source != ServiceID || draft.Version == 0 || draft.BodyRef == "" || draft.BodyDigest == "" {
 			return ErrInvalidInput
 		}
 	}

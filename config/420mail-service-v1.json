@@ -51,7 +51,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 6,
+    "schemaVersion": 7,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -60,7 +60,8 @@
       "owner_folder",
       "owner_label",
       "owner_custom_folder",
-      "owner_conversation"
+      "owner_conversation",
+      "owner_draft"
     ],
     "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
     "sharedStorageRequiredForMultiInstance": true,
@@ -210,5 +211,23 @@
     "arbitraryConversationInjectionRejected": true,
     "deletedParentReplyRejected": true,
     "publicIndexing": false
+  },
+  "drafts": {
+    "enabled": true,
+    "ownerScoped": true,
+    "bodyStorage": "PRIVATE_ENCRYPTED_BLOB_PROVIDER",
+    "autosave": true,
+    "recovery": true,
+    "edit": true,
+    "discard": true,
+    "discardDeletesPrivateBlob": true,
+    "multiDevice": "OPTIMISTIC_VERSIONED",
+    "staleWrite": "REJECT_CONFLICT",
+    "deterministicIdFromOwnerAutosaveKey": true,
+    "maxDraftsPerUser": 500,
+    "maxAutosaveKeyBytes": 128,
+    "listOrdering": "UPDATED_AT_DESC_ID_ASC",
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

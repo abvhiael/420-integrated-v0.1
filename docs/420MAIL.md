@@ -1103,6 +1103,79 @@ MAIL-2.18 does not:
 
 Those remain outside this roadmap step.
 
+## MAIL-2.19 Signal Integration Boundary
+
+MAIL-2.19 establishes the architectural and security boundary for later Signal-related roadmap steps. It does **not** claim a supported Signal messaging transport.
+
+### Boundary status
+
+The canonical boundary reports:
+
+- provider: `signal`
+- status: `BOUNDARY_ONLY`
+- architecture: `EXTERNAL_SIGNAL_TRANSPORT_ADAPTER`
+- transport authority: `SIGNAL_CLIENT_OR_SECURE_BROKER_ONLY`
+
+Signal is intentionally **not** registered as an operational connector during MAIL-2.19 because no stable Signal capability is introduced by this step.
+
+### Credential and identity boundary
+
+420Mail does not:
+
+- own or create the user's Signal identity;
+- persist Signal provider credentials;
+- accept raw access tokens, refresh tokens, client secrets, Signal registration credentials, phone-number credentials, or verification codes;
+- impersonate a Signal client;
+- silently bootstrap an unofficial Signal transport.
+
+Any later Signal capability must execute through an external Signal transport adapter, supported client surface, or secure broker boundary and must be qualified in its own roadmap step.
+
+### Capabilities intentionally disabled at this boundary
+
+MAIL-2.19 keeps all operational Signal features disabled:
+
+- account linking;
+- outbound notifications;
+- share/forward;
+- inbound synchronization;
+- webhook ingestion;
+- deep sync;
+- provider registration inside the connector registry.
+
+This prevents the boundary step from silently implementing MAIL-2.20, MAIL-2.21, or MAIL-2.22.
+
+### Deep-sync condition
+
+Signal deep sync remains explicitly conditional on:
+
+`STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED`
+
+MAIL-2.22 may only enable deep synchronization if repository/live integration evidence establishes a stable supported surface. The existence of a third-party or unofficial transport alone is not promoted into canonical support by MAIL-2.19.
+
+### Privacy boundary
+
+Signal boundary metadata is non-secret and contains no message content.
+
+- Signal message bodies are not placed on-chain.
+- Signal data is not exposed to public 420Search.
+- No Signal inbox state is materialized by this step.
+
+### API and client
+
+Authenticated read-only boundary endpoint:
+
+- `GET /v1/connectors/signal/boundary`
+
+Typed Go client:
+
+- `SignalIntegrationBoundary`
+
+The endpoint is informational and read-only. It does not authorize Signal transport operations.
+
+### Next-step containment
+
+MAIL-2.20 may add **420Mail → Signal Notifications** only after satisfying this boundary. MAIL-2.21 may separately add **Signal Share & Forward**. MAIL-2.22 remains conditional on the stable-surface gate above.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

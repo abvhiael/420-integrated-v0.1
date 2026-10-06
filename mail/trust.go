@@ -46,6 +46,16 @@ type TrustSettings struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+type TrustEntryInput struct {
+	Kind        TrustKind        `json:"kind"`
+	Value       string           `json:"value"`
+	Disposition TrustDisposition `json:"disposition"`
+}
+
+type TrustSettingsInput struct {
+	RequireTrusted bool `json:"require_trusted"`
+}
+
 type TrustDecision struct {
 	Trusted bool
 	Muted   bool

@@ -1488,6 +1488,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** one reconciled exact merge-candidate SHA is established; Solidity Contracts full inventory PASS; Genesis/address-authority PASS; 420 Integrated/global PASS including Geth/fault/soak; complete retained PuffBuddies/PB-2 suite PASS; 420Docs/global PASS; applicable privacy/adversarial/invariant/failure/static/deployment/config checks PASS; roadmap/evidence/address/deployment claims reconciled; no remaining PB-2 implementation blocker; durable Level-3 evidence records every owner/run/job and exact SHA; PB-2 may then be formally marked COMPLETE and the next canonical phase is PB-3 — Profiles.
 
+### PB-3 — Profiles
+
+**Purpose:** implement the canonical private PuffBuddies profile boundary for eligible users: profile creation/editing, Dating/Buddy/Both mode, bounded profile text/prompts, opaque media metadata, explicit field-level visibility, canonical completeness, activation/reactivation, deactivation/delete initiation, private persistence, and stale-derived invalidation.
+
+**Canonical requirements:** profile authority remains PuffBuddies-owned and private/off-chain; creation requires current ELIGIBLE + PROFILE_INCOMPLETE; owner-only edits; bounded closed display-field registry; opaque bounded media references only; nonempty display name + at least one media reference defines profile completeness; PB-3 profile audiences are PRIVATE_SELF/DISCOVERABLE/MATCHED only; no public profile surface or wallet/profile enumeration; stale/missing visibility policy fails closed; profile/visibility changes invalidate derived authority; profile completeness plus current eligibility gates activation/reactivation; deactivation and deletion initiation use canonical lifecycle transitions; protected lifecycle states reject edits; storage uses existing private profile/visibility tables with optimistic concurrency; no discovery engine, likes/matching, Messenger transport, web/mobile UI, production media store, database, API, contract, address, service ID or deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/profiles.py`, `puffbuddies/tests/test_pb_3_profiles.py`, `.github/workflows/puffbuddies-pb3.yml`, profile/visibility persistence, lifecycle/authorization/invalidation primitives, PB-0.19 reconciliation, canonical definition/evidence.
+
+**Qualification level:** Level 1 — ordinary app-scoped roadmap-step qualification.
+
+**Milestone relationship:** no Level-2 milestone is triggered by PB-3 alone; broader retained integration belongs at a later documented accumulated boundary. Level-3 remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.9, PB-0.11, PB-0.12, PB-0.15; PB-1 foundations; PB-2 COMPLETE.
+
+**Exit criteria:** eligible profile creation/edit/save works through canonical private persistence; completeness gates activation; visibility is explicit/versioned/server-authorized/fail-closed; profile/visibility changes invalidate stale derived state; lifecycle pause/reactivation/delete initiation respect current authority; privacy/public-chain/wallet-enumeration negatives hold; retained PuffBuddies regressions and exact-head PB-3 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

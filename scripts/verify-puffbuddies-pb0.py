@@ -2024,7 +2024,7 @@ print(json.dumps({
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,
-    },,
+    },
     "pb18": {
         "documentationInvariantIds": docinv_ids,
         "globalInvariantIdsUnique": True,

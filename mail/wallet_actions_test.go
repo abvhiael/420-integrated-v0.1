@@ -47,7 +47,7 @@ func validSignatureRequest() WalletActionRequest {
 	return WalletActionRequest{
 		Kind: WalletActionMessageSignature, ChainID: 420, Account: "0x1111111111111111111111111111111111111111",
 		PayloadDigest: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-		Explanation: "Verify account control for this Mail action", ExpiresAt: walletTestNow().Add(5 * time.Minute),
+		Explanation:   "Verify account control for this Mail action", ExpiresAt: walletTestNow().Add(5 * time.Minute),
 	}
 }
 
@@ -86,7 +86,9 @@ func TestWalletActionServiceRejectsMalformedOrOverbroadIntent(t *testing.T) {
 		func(r *WalletActionRequest) { r.ValueWei = "00" },
 		func(r *WalletActionRequest) { r.Calldata = "0x123" },
 		func(r *WalletActionRequest) { r.ExpiresAt = walletTestNow() },
-		func(r *WalletActionRequest) { r.PayloadDigest = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+		func(r *WalletActionRequest) {
+			r.PayloadDigest = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+		},
 	}
 	for _, mutate := range cases {
 		req := base
@@ -162,7 +164,7 @@ func TestWalletActionServiceRejectsNonCanonicalVerification(t *testing.T) {
 	base := WalletVerification{
 		HandoffID: "handoff-1", Kind: WalletVerifyTransaction, Identity: "alice.420", ChainID: 420,
 		Account: "0x1111111111111111111111111111111111111111", Verified: true, Canonical: true,
-		TxHash: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		TxHash:     "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 		VerifiedAt: walletTestNow(), NonCustodial: true,
 	}
 	for _, mutate := range []func(*WalletVerification){

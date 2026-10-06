@@ -75,3 +75,41 @@ func TestDesktopMailUIRetainsResponsiveDesktopShell(t *testing.T) {
 		}
 	}
 }
+
+func TestMailSettingsCenterUsesQualifiedOwnerScopedAPIs(t *testing.T) {
+	raw, err := os.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ui := string(raw)
+	required := []string{
+		"id=\"settings-overlay\"",
+		"id=\"settings-open\"",
+		"loadSettingsCenter",
+		"/v1/trust/settings",
+		"/v1/trust/entries",
+		"/v1/rules",
+		"/v1/labels",
+		"/v1/custom-folders",
+		"saveTrustSettings",
+		"putTrustEntry",
+		"createRuleFromSettings",
+		"toggleRule",
+		"deleteRule",
+		"deleteSettingLabel",
+		"deleteSettingFolder",
+		"id=\"settings-security-open\"",
+		"id=\"settings-integrations-open\"",
+		"id=\"settings-wallet-open\"",
+	}
+	for _, token := range required {
+		if !strings.Contains(ui, token) {
+			t.Fatalf("settings center missing %q", token)
+		}
+	}
+	for _, forbidden := range []string{"private_key", "seed_phrase", "access_token", "refresh_token", "client_secret"} {
+		if strings.Contains(ui, "name=\""+forbidden+"\"") {
+			t.Fatalf("settings center exposes forbidden secret field %q", forbidden)
+		}
+	}
+}

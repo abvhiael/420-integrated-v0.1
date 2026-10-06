@@ -1894,6 +1894,44 @@ MAIL-2.30 is a product-surface step, not a settings-policy step. A consolidated 
 
 MAIL-2.30 changes only the repository web UI, its static/config contract, tests, and documentation. It does not require Level 2 because the documented Product/security milestone spans MAIL-2.30 through MAIL-2.35. Level 3 remains deferred to complete app-phase closeout.
 
+
+## MAIL-2.31 Mail Settings Center
+
+MAIL-2.31 consolidates already-qualified owner settings into one authenticated desktop settings surface. It does not introduce a parallel settings database or a new policy authority.
+
+### Settings domains
+
+The center manages:
+
+- trust policy (`require_trusted`);
+- trust entries for identity, application, and phrase with allow/block/mute dispositions;
+- user Mail rules and enabled state;
+- user labels;
+- custom folders;
+- navigation to existing security/session controls;
+- navigation to existing external integration controls;
+- navigation to existing non-custodial Wallet handoffs.
+
+### Authority and validation
+
+All settings mutations use the existing authenticated owner-scoped Mail endpoints and service validation.
+
+Rules remain bounded by MAIL-2.5 conditions/actions, priorities, folder authority, label/folder ownership, and rule count/input bounds.
+
+Trust remains bounded by MAIL-2.6 kind/disposition inventories, owner scope, normalization, precedence, and entry limits.
+
+System labels remain immutable. Custom labels/folders continue to use their existing naming, count, cleanup, and reserved-name validation.
+
+### Secret and custody boundary
+
+The settings center has no fields for wallet private keys, seed phrases, provider access/refresh tokens, client secrets, bot tokens, verification codes, or phone-number credentials.
+
+Security, connector, and Wallet controls link to the already-qualified handoff surfaces rather than duplicating those authorities inside settings.
+
+### Product/security milestone
+
+MAIL-2.31 is the second ordinary step in the documented Product/security milestone (MAIL-2.30 through MAIL-2.35). No Level 2 boundary is reached by this step alone.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

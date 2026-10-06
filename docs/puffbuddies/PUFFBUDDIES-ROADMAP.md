@@ -1262,6 +1262,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** PB-1.1 through PB-1.13 COMPLETE; candidate reconciled to current main; all required Level-3 canonical owners PASS on the same exact implementation SHA; no skipped/missing required check counted as green; roadmap/evidence reconciled; limitations/live-testnet deferrals explicit; durable closeout evidence recorded.
 
+### PB-2.1 — Identity model & boundaries
+
+**Purpose:** establish the minimum-disclosure identity/adult-eligibility authority boundary for PB-2 before registration, profile and visibility behavior is added.
+
+**Canonical requirements:** consume only profile-bound adult-eligibility assertions from 420Identity; keep raw identity/DOB/legal-name/biometric/document/wallet-link material outside PB canonical state; keep PuffBuddies authoritative for its local eligibility/participation decision; reject untrusted, cross-profile, malformed, future, expired and revoked authority; preserve ELIGIBLE + ACTIVE participation gating and non-enumerable membership; introduce no production adapter/API/deployment/public-chain identity.
+
+**Affected components:** `puffbuddies/domain/identity.py`, PB-2.1 targeted tests, PB-2 workflow, PB-2.1 canonical document/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2 milestone A; milestone A remains the accumulated PB-1/PB-2 account/profile/private-state integration boundary.
+
+**Dependencies:** PB-1 COMPLETE and PB-0.19 PB-2 authority.
+
+**Exit criteria:** executable authority separation; minimum-disclosure projection; replay/source/time/revocation failures fail closed; identity material and wallet linkage remain private/absent; retained regressions and exact-head PB-2 fast workflow pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

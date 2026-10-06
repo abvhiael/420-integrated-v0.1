@@ -194,24 +194,35 @@ func TestConnectorServiceDependencyFailureHasNoFallback(t *testing.T) {
 
 type mutableDescriptorAdapter struct {
 	*connectorAdapterStub
-	current ConnectorDescriptor
-	panicOn string
+	current     ConnectorDescriptor
+	panicOn     string
 	seenHeaders map[string]string
 }
 
 func (a *mutableDescriptorAdapter) Descriptor() ConnectorDescriptor { return a.current }
+
 func (a *mutableDescriptorAdapter) Pull(ctx context.Context, actor string, req ConnectorPullRequest) (ConnectorPullResult, error) {
-	if a.panicOn == "pull" { panic("provider pull panic") }
+	if a.panicOn == "pull" {
+		panic("provider pull panic")
+	}
 	return a.connectorAdapterStub.Pull(ctx, actor, req)
 }
+
 func (a *mutableDescriptorAdapter) Push(ctx context.Context, actor string, req ConnectorPushRequest) (ConnectorPushResult, error) {
-	if a.panicOn == "push" { panic("provider push panic") }
+	if a.panicOn == "push" {
+		panic("provider push panic")
+	}
 	return a.connectorAdapterStub.Push(ctx, actor, req)
 }
+
 func (a *mutableDescriptorAdapter) VerifyWebhook(ctx context.Context, req ConnectorWebhookRequest) (ConnectorWebhookResult, error) {
-	if a.panicOn == "webhook" { panic("provider webhook panic") }
+	if a.panicOn == "webhook" {
+		panic("provider webhook panic")
+	}
 	a.seenHeaders = req.Headers
-	if req.Headers != nil { req.Headers["X-Mutated-By-Adapter"] = "yes" }
+	if req.Headers != nil {
+		req.Headers["X-Mutated-By-Adapter"] = "yes"
+	}
 	return a.connectorAdapterStub.VerifyWebhook(ctx, req)
 }
 
@@ -219,14 +230,18 @@ func TestConnectorRegistryFreezesDescriptorAtRegistration(t *testing.T) {
 	base := testConnectorAdapter("example", ConnectorCapabilityLink)
 	adapter := &mutableDescriptorAdapter{connectorAdapterStub: base, current: base.desc}
 	reg, err := NewConnectorRegistry(adapter)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	adapter.current = ConnectorDescriptor{Provider: "other", DisplayName: "Mutated", Capabilities: []ConnectorCapability{ConnectorCapabilityPush}}
 	got := reg.Descriptors()
 	if len(got) != 1 || got[0].Provider != "example" || got[0].DisplayName != "Test example" || len(got[0].Capabilities) != 1 || got[0].Capabilities[0] != ConnectorCapabilityLink {
 		t.Fatalf("registered descriptor drifted with adapter mutation: %+v", got)
 	}
-	if _, err := NewConnectorService(reg).Push(context.Background(), "alice.420", ConnectorPushRequest{Provider:"example",ConnectionID:"conn-1",Kind:"MESSAGE",Payload:"x",IdempotencyKey:"i"}); !errors.Is(err, ErrConnectorUnsupported) {
+	if _, err := NewConnectorService(reg).Push(context.Background(), "alice.420", ConnectorPushRequest{
+		Provider: "example", ConnectionID: "conn-1", Kind: "MESSAGE", Payload: "x", IdempotencyKey: "i",
+	}); !errors.Is(err, ErrConnectorUnsupported) {
 		t.Fatalf("post-registration capability escalation accepted: %v", err)
 	}
 }
@@ -234,7 +249,9 @@ func TestConnectorRegistryFreezesDescriptorAtRegistration(t *testing.T) {
 func TestConnectorRegistryDescriptorCopiesCannotMutateAuthority(t *testing.T) {
 	adapter := testConnectorAdapter("example", ConnectorCapabilityLink)
 	reg, err := NewConnectorRegistry(adapter)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	first := reg.Descriptors()
 	first[0].Provider = "other"
 	first[0].Capabilities[0] = ConnectorCapabilityPush
@@ -245,20 +262,24 @@ func TestConnectorRegistryDescriptorCopiesCannotMutateAuthority(t *testing.T) {
 }
 
 func TestConnectorAdapterPanicsAreContained(t *testing.T) {
-	for _, op := range []string{"pull","push","webhook"} {
+	for _, op := range []string{"pull", "push", "webhook"} {
 		base := testConnectorAdapter("example", ConnectorCapabilityPull, ConnectorCapabilityPush, ConnectorCapabilityWebhook)
-		adapter := &mutableDescriptorAdapter{connectorAdapterStub:base,current:base.desc,panicOn:op}
+		adapter := &mutableDescriptorAdapter{connectorAdapterStub: base, current: base.desc, panicOn: op}
 		reg, err := NewConnectorRegistry(adapter)
-		if err != nil { t.Fatal(err) }
+		if err != nil {
+			t.Fatal(err)
+		}
 		svc := NewConnectorService(reg)
 		var callErr error
 		switch op {
 		case "pull":
-			_, callErr = svc.Pull(context.Background(), "alice.420", ConnectorPullRequest{Provider:"example",ConnectionID:"conn-1"})
+			_, callErr = svc.Pull(context.Background(), "alice.420", ConnectorPullRequest{Provider: "example", ConnectionID: "conn-1"})
 		case "push":
-			_, callErr = svc.Push(context.Background(), "alice.420", ConnectorPushRequest{Provider:"example",ConnectionID:"conn-1",Kind:"MESSAGE",Payload:"x",IdempotencyKey:"i"})
+			_, callErr = svc.Push(context.Background(), "alice.420", ConnectorPushRequest{
+				Provider: "example", ConnectionID: "conn-1", Kind: "MESSAGE", Payload: "x", IdempotencyKey: "i",
+			})
 		case "webhook":
-			_, callErr = svc.VerifyWebhook(context.Background(), ConnectorWebhookRequest{Provider:"example",Payload:"signed"})
+			_, callErr = svc.VerifyWebhook(context.Background(), ConnectorWebhookRequest{Provider: "example", Payload: "signed"})
 		}
 		if !errors.Is(callErr, ErrConnectorIsolated) {
 			t.Fatalf("%s panic escaped isolation: %v", op, callErr)
@@ -268,11 +289,15 @@ func TestConnectorAdapterPanicsAreContained(t *testing.T) {
 
 func TestConnectorWebhookHeadersAreIsolatedFromAdapterMutation(t *testing.T) {
 	base := testConnectorAdapter("example", ConnectorCapabilityWebhook)
-	adapter := &mutableDescriptorAdapter{connectorAdapterStub:base,current:base.desc}
+	adapter := &mutableDescriptorAdapter{connectorAdapterStub: base, current: base.desc}
 	reg, err := NewConnectorRegistry(adapter)
-	if err != nil { t.Fatal(err) }
-	headers := map[string]string{"X-Signature":"original"}
-	if _, err := NewConnectorService(reg).VerifyWebhook(context.Background(), ConnectorWebhookRequest{Provider:"example",Headers:headers,Payload:"signed"}); err != nil {
+	if err != nil {
+		t.Fatal(err)
+	}
+	headers := map[string]string{"X-Signature": "original"}
+	if _, err := NewConnectorService(reg).VerifyWebhook(context.Background(), ConnectorWebhookRequest{
+		Provider: "example", Headers: headers, Payload: "signed",
+	}); err != nil {
 		t.Fatal(err)
 	}
 	if _, exists := headers["X-Mutated-By-Adapter"]; exists {

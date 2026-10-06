@@ -1,6 +1,6 @@
 # CMP-4.9 — Research dashboard
 
-Status: **CLOSEOUT CANDIDATE — LEVEL 1 + SECOND CMP-4 LEVEL 2 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — Level 1 + second CMP-4 Level 2 exact-head qualified on `12186148274f643dfe4b1d07b194d3fffd3aa23b`.**
 
 Canonical roadmap step: **CMP-4.9 — Research dashboard**.
 
@@ -132,6 +132,12 @@ Repository-wide Level 3 remains exclusively CMP-4.10.
 - human-facing 420Compute UI — CMP-8;
 - public/testnet scientific workload and live data — CMP-9;
 - comprehensive current-main reconciliation and Level 3 scientific-framework closeout — CMP-4.10.
+
+## Qualification evidence
+
+Durable exact-head qualification evidence: [CMP-4.9 qualification](CMP-4.9-QUALIFICATION-EVIDENCE.md).
+
+Compute Market Qualification **#427** / run `37501862650` passed on exact SHA `12186148274f643dfe4b1d07b194d3fffd3aa23b`, including the retained full Compute Market Solidity suite and CMP-4.1 through CMP-4.9 verifiers. This is the second CMP-4 Level 2 integration milestone. Repository-wide Level 3 remains exclusively CMP-4.10.
 
 ## Next canonical step
 

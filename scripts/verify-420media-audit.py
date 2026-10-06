@@ -30,6 +30,12 @@ deployment = need("docs/420-MEDIA-PHASE-1-DEPLOYMENT-GRAPH.md", [
     "MEDIA-AUDIT-7",
     "code-less",
 ])
+discovery = need("docs/420-MEDIA-PHASE-3-OPERATOR-DISCOVERY.md", [
+    "MEDIA-AUDIT-3",
+    "Service-network control plane",
+    "Reorg and recovery model",
+    "canonical registry state",
+])
 
 svc = json.loads(need("config/genesis-consumer-services.json"))
 media = next((x for x in svc["services"] if x["id"] == "420/service/media/v1"), None)

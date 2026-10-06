@@ -51,17 +51,36 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
     "migrations": true,
     "secondaryIndexes": [
-      "owner_folder"
+      "owner_folder",
+      "owner_label",
+      "owner_custom_folder"
     ],
     "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
     "sharedStorageRequiredForMultiInstance": true,
     "filePermissions": "0600",
     "messageBodiesPersisted": false
+  },
+  "organization": {
+    "userLabels": true,
+    "customFolders": true,
+    "bulkAssignment": true,
+    "systemLabels": [
+      "STARRED",
+      "PINNED",
+      "MUTED",
+      "UNREAD"
+    ],
+    "maxUserLabels": 100,
+    "maxCustomFolders": 50,
+    "maxLabelsPerMessage": 20,
+    "maxBulkItems": 100,
+    "ownerScoped": true,
+    "systemLabelsImmutable": true
   }
 }

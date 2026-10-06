@@ -29,6 +29,8 @@ DATA = ROOT / "docs/puffbuddies/PB-0.11-DATA-LIFECYCLE-DELETION.md"
 EVIDENCE_11 = ROOT / "docs/puffbuddies/PB-0.11-QUALIFICATION.md"
 LIFE = ROOT / "docs/puffbuddies/PB-0.12-USER-LIFECYCLE.md"
 EVIDENCE_12 = ROOT / "docs/puffbuddies/PB-0.12-QUALIFICATION.md"
+MATCHING = ROOT / "docs/puffbuddies/PB-0.13-MATCHING-PRINCIPLES.md"
+EVIDENCE_13 = ROOT / "docs/puffbuddies/PB-0.13-QUALIFICATION.md"
 
 errors = []
 
@@ -36,7 +38,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -68,6 +70,8 @@ data = DATA.read_text(encoding="utf-8")
 evidence_11 = EVIDENCE_11.read_text(encoding="utf-8")
 life = LIFE.read_text(encoding="utf-8")
 evidence_12 = EVIDENCE_12.read_text(encoding="utf-8")
+matching = MATCHING.read_text(encoding="utf-8")
+evidence_13 = EVIDENCE_13.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -155,6 +159,9 @@ for token in [
     "### PB-0.12 — User lifecycle",
     "PB-LIFE-001 through PB-LIFE-040",
     "**Milestone relationship:** PB-0.12 is not treated as a Level 2 integration milestone",
+    "### PB-0.13 — Matching principles",
+    "PB-MATCH-001 through PB-MATCH-040",
+    "**Milestone relationship:** PB-0.13 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1215,13 +1222,122 @@ for token in [
 ]:
     need(token in evidence_12, f"PB-0.12 evidence record missing token: {token}")
 
+# PB-0.13 — matching principles
+for token in [
+    "# PuffBuddies PB-0.13 matching principles",
+    "## Matching principles",
+    "## Allowed matching inputs",
+    "## Hard exclusions",
+    "## Ranking constraints",
+    "## Match formation and economic influence",
+    "## Allowed-input decision rule",
+    "## PB-0.13 completion boundary",
+    "Explicit user mode is allowed",
+    "Explicit discovery preferences are allowed",
+    "Age-range compatibility may be used after eligibility",
+    "Gender/orientation compatibility may use explicit private preferences",
+    "Cannabis compatibility may be used",
+    "Lifestyle and relationship preferences may be used",
+    "Coarse proximity may be used",
+    "Activity freshness may be used narrowly",
+    "Profile completeness may be used only within lifecycle policy",
+    "User-controlled verification indicators may be used narrowly",
+    "Current block is a hard exclusion",
+    "Ineligible lifecycle state is a hard exclusion",
+    "Adult-eligibility failure is a hard exclusion",
+    "Visibility denial is a hard exclusion",
+    "Safety restriction is a hard exclusion within its scope",
+    "Deletion state is a hard exclusion",
+    "Existing deny state cannot be bypassed by alternate economic path",
+    "Self-matching is excluded",
+    "Canonical pair state must prevent stale rematch",
+    "Unknown protected authority fails closed",
+    "Ranking is non-canonical",
+    "Ranking cannot manufacture a match",
+    "Ranking must respect action-scoped consent",
+    "Ranking inputs require current authoritative source state",
+    "Stale ranking output cannot preserve authorization",
+    "Ranking should minimize sensitive inference",
+    "Ranking must be purpose-limited",
+    "Ranking must not expose private scores",
+    "Ranking experiments cannot weaken invariants",
+    "Engagement optimization is subordinate to user control",
+    "Ranking must preserve mode compatibility",
+    "Ranking must not rely on exact wealth or token value",
+    "Ranking must not use payment to alter another user's consent surface",
+    "Ranking must not convert moderation history into desirability",
+    "Ranking must be reproducibly policy-bounded",
+    "Ranking failure must degrade safely",
+    "Like remains unilateral intent only",
+    "Mutual match requires reciprocal authorized intent",
+    "Economic influence cannot create or restore consent",
+    "Administrative and algorithmic systems cannot fabricate consent",
+]:
+    need(token in matching, f"PB-0.13 matching document missing token: {token}")
+
+match_ids = re.findall(r"^### (PB-MATCH-\d{3})\b", matching, flags=re.MULTILINE)
+need(match_ids == [f"PB-MATCH-{i:03d}" for i in range(1, 41)], f"PB-MATCH sequence drift: {match_ids}")
+need(len(match_ids) == len(set(match_ids)), "duplicate PB-MATCH identifier")
+
+for guarantee in [
+    "A mutual match requires independent reciprocal user intent under PB-0.5",
+    "Hard safety, lifecycle, eligibility, block, and visibility exclusions outrank ranking",
+    "Money, token holdings, payment status, staking, or premium purchase cannot buy another person's match or consent",
+    "Derived scores are non-canonical and must never become public social-credit or desirability scores",
+    "No ranking score, payment, boost, or stale cache may override the block",
+    "A mutual match must come from independent authorized user intent",
+    "must not bypass block, consent, eligibility, safety, lifecycle, visibility, or privacy rules",
+    "Wallet balance, token holdings, NFT value, stake, transaction history, payment volume, or portfolio value must not be used as ordinary dating desirability inputs",
+    "It must not force placement into a specific other user's feed, bypass that user's filters/blocks, or compel reciprocal visibility",
+    "A one-sided like may contribute to match formation but does not itself authorize ordinary private messaging",
+]:
+    need(guarantee in matching, f"PB-0.13 missing matching guarantee: {guarantee}")
+
+for decision in [
+    "the input's canonical source",
+    "whether it is user-declared, derived, or authoritative",
+    "the product purpose",
+    "privacy classification",
+    "freshness/revocation requirements",
+    "whether it can expose or infer sensitive data",
+    "whether it can affect hard exclusions",
+    "whether the user can control or correct it where appropriate",
+    "retention/deletion behavior",
+    "whether economic influence can alter it",
+    "how failure/staleness behaves",
+]:
+    need(decision in matching, f"PB-0.13 allowed-input decision rule missing: {decision}")
+
+for forbidden in [
+    "PuffBuddies matching engine is implemented",
+    "PuffBuddies recommendation service is live",
+    "PuffBuddies ranking model is deployed",
+    "PuffBuddies matching service ID is",
+]:
+    need(forbidden not in matching, f"PB-0.13 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", matching) is None, "PB-0.13 must not assign an on-chain address")
+need("420/service/puff" not in matching.lower(), "PB-0.13 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.13 qualification evidence",
+    "**PB-0.13 — Matching principles**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-MATCH-001 through PB-MATCH-040",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.14 — Cannabis taxonomy**",
+]:
+    need(token in evidence_13, f"PB-0.13 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.12", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.13", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.12",
+    "step": "PB-0.13",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1377,6 +1493,21 @@ print(json.dumps({
         "staleAuthorizationInvalidated": True,
         "unknownLifecycleFailsClosed": True,
         "privateAndAuditable": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb13": {
+        "matchingInvariants": match_ids,
+        "allowedInputsDefined": True,
+        "hardExclusionsDefined": True,
+        "rankingNonCanonical": True,
+        "staleRankingRevoked": True,
+        "sensitiveInferenceMinimized": True,
+        "economicInfluenceCannotCreateConsent": True,
+        "oneSidedLikeNotMessagingConsent": True,
+        "mutualMatchRequiresReciprocalIntent": True,
+        "adminAlgorithmCannotFabricateConsent": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,
         "claimsImplementation": False,

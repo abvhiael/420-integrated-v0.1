@@ -95,13 +95,13 @@ func (s *Service) CreateDraft(ctx context.Context, actor string, req DraftCreate
 		return DraftView{}, err
 	}
 	if found {
-		body, err := s.Blobs.GetPrivate(ctx, actor, existing.BodyRef)
+		body, err := getPrivateVerified(ctx, s.Blobs, actor, existing.BodyRef, existing.BodyDigest)
 		if err != nil {
 			return DraftView{}, err
 		}
 		return DraftView{Draft: existing, Body: string(body)}, nil
 	}
-	ref, digest, err := s.Blobs.PutPrivate(ctx, actor, []byte(req.Body))
+	ref, digest, err := putPrivateVerified(ctx, s.Blobs, actor, []byte(req.Body))
 	if err != nil || ref == "" || digest == "" {
 		if err != nil {
 			return DraftView{}, err
@@ -155,7 +155,7 @@ func (s *Service) SaveDraft(ctx context.Context, actor, id string, req DraftSave
 	if current.Version != req.ExpectedVersion {
 		return DraftView{}, ErrDraftConflict
 	}
-	ref, digest, err := s.Blobs.PutPrivate(ctx, actor, []byte(req.Body))
+	ref, digest, err := putPrivateVerified(ctx, s.Blobs, actor, []byte(req.Body))
 	if err != nil || ref == "" || digest == "" {
 		if err != nil {
 			return DraftView{}, err
@@ -208,7 +208,7 @@ func (s *Service) GetDraft(ctx context.Context, actor, id string) (DraftView, er
 	if !ok {
 		return DraftView{}, ErrNotFound
 	}
-	body, err := s.Blobs.GetPrivate(ctx, actor, draft.BodyRef)
+	body, err := getPrivateVerified(ctx, s.Blobs, actor, draft.BodyRef, draft.BodyDigest)
 	if err != nil {
 		return DraftView{}, err
 	}

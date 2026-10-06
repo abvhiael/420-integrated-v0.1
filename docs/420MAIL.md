@@ -1972,6 +1972,44 @@ Discord, Telegram, and Signal retain their separately-qualified capability inven
 
 Because ConnectorService is shared by multiple Mail integration paths, the exact retained Mail suite also serves as shared-dependency integration revalidation for this change. The Product/security milestone itself remains in progress through MAIL-2.35.
 
+
+## MAIL-2.33 Encryption & Leakage Controls
+
+MAIL-2.33 converts previously documented private-storage expectations into enforceable runtime and API boundaries.
+
+### Durable private-blob security
+
+`NewDurableService` now requires the configured private blob provider to attest encryption at rest, external/qualified key custody, and owner-scoped private access. Missing or false security properties fail durable composition with `ErrPrivateBlobSecurity`.
+
+Explicit test/development composition through `NewService(..., NewMemoryStore())` remains available without treating in-memory fixtures as production encryption evidence.
+
+### Content integrity
+
+Private blob writes are content-bound to SHA-256 evidence. Mail verifies that the provider-returned digest matches the plaintext supplied for storage.
+
+Private blob reads verify retrieved plaintext against the durable expected digest before use by message reads, private search, draft recovery/edit flows, and Outbox delivery processing. Digest mismatch fails closed with `ErrPrivateBlobIntegrity`.
+
+### HTTP leakage controls
+
+The HTTP JSON boundary recursively strips internal/private storage evidence fields from responses:
+
+- `body_ref`;
+- `body_digest`;
+- `staging_body_ref`;
+- `staging_body_digest`;
+- `request_fingerprint`;
+- `idempotency_key`.
+
+These values remain internal where required for persistence, restart recovery, idempotency, and integrity checks, but are not emitted through Mail HTTP responses.
+
+Private message body plaintext is still returned only by explicitly authorized message/draft read surfaces and is not embedded into list/search/integration metadata responses.
+
+### Key and custody boundary
+
+420Mail does not gain private encryption-key custody. Encryption and key management remain a private-storage-provider responsibility. MAIL-2.33 verifies provider security posture at durable composition rather than implementing a second Mail-owned encryption layer.
+
+No public indexing or on-chain message-body storage is introduced.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

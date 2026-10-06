@@ -34,11 +34,13 @@ const (
 )
 
 var (
-	ErrUnauthorized        = errors.New("mail: unauthorized")
-	ErrInvalidInput        = errors.New("mail: invalid input")
-	ErrInvalidTransition   = errors.New("mail: invalid mailbox transition")
-	ErrNotFound            = errors.New("mail: message not found")
-	ErrIdempotencyConflict = errors.New("mail: idempotency key reused with different request")
+	ErrUnauthorized         = errors.New("mail: unauthorized")
+	ErrInvalidInput         = errors.New("mail: invalid input")
+	ErrInvalidTransition    = errors.New("mail: invalid mailbox transition")
+	ErrNotFound             = errors.New("mail: message not found")
+	ErrIdempotencyConflict  = errors.New("mail: idempotency key reused with different request")
+	ErrPrivateBlobIntegrity = errors.New("mail: private blob integrity failure")
+	ErrPrivateBlobSecurity  = errors.New("mail: private blob security requirements unsatisfied")
 )
 
 type IdentityDirectory interface {
@@ -52,6 +54,16 @@ type MessengerPolicy interface {
 type PrivateBlobStore interface {
 	PutPrivate(context.Context, string, []byte) (ref string, digest string, err error)
 	GetPrivate(context.Context, string, string) ([]byte, error)
+}
+
+type PrivateBlobSecurityProfile struct {
+	EncryptedAtRest   bool
+	ExternalKeyCustody bool
+	OwnerScopedAccess bool
+}
+
+type PrivateBlobSecurityProvider interface {
+	PrivateBlobSecurity() PrivateBlobSecurityProfile
 }
 
 type NotificationSink interface {
@@ -156,11 +168,55 @@ func NewServiceWithStore(ids IdentityDirectory, messenger MessengerPolicy, blobs
 }
 
 func NewDurableService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, path string) (*Service, error) {
+	if err := validatePrivateBlobSecurity(blobs); err != nil {
+		return nil, err
+	}
 	store, err := OpenDurableStore(path)
 	if err != nil {
 		return nil, err
 	}
 	return NewService(ids, messenger, blobs, notify, store), nil
+}
+
+func validatePrivateBlobSecurity(blobs PrivateBlobStore) error {
+	security, ok := blobs.(PrivateBlobSecurityProvider)
+	if !ok {
+		return ErrPrivateBlobSecurity
+	}
+	profile := security.PrivateBlobSecurity()
+	if !profile.EncryptedAtRest || !profile.ExternalKeyCustody || !profile.OwnerScopedAccess {
+		return ErrPrivateBlobSecurity
+	}
+	return nil
+}
+
+func privateBodyDigest(body []byte) string {
+	sum := sha256.Sum256(body)
+	return hex.EncodeToString(sum[:])
+}
+
+func putPrivateVerified(ctx context.Context, blobs PrivateBlobStore, owner string, body []byte) (string, string, error) {
+	ref, digest, err := blobs.PutPrivate(ctx, owner, body)
+	if err != nil {
+		return "", "", err
+	}
+	ref = strings.TrimSpace(ref)
+	digest = strings.ToLower(strings.TrimSpace(digest))
+	if ref == "" || digest == "" || digest != privateBodyDigest(body) {
+		return "", "", ErrPrivateBlobIntegrity
+	}
+	return ref, digest, nil
+}
+
+func getPrivateVerified(ctx context.Context, blobs PrivateBlobStore, owner, ref, expectedDigest string) ([]byte, error) {
+	body, err := blobs.GetPrivate(ctx, owner, ref)
+	if err != nil {
+		return nil, err
+	}
+	if strings.ToLower(strings.TrimSpace(expectedDigest)) != privateBodyDigest(body) {
+		return nil, ErrPrivateBlobIntegrity
+	}
+	return body, nil
 }
 
 func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Message, error) {
@@ -226,7 +282,7 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return Message{}, err
 	}
 
-	ref, digest, err := s.Blobs.PutPrivate(ctx, req.Recipient, []byte(req.Body))
+	ref, digest, err := putPrivateVerified(ctx, s.Blobs, req.Recipient, []byte(req.Body))
 	if err != nil {
 		return Message{}, fmt.Errorf("private body storage: %w", err)
 	}
@@ -570,7 +626,7 @@ func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Messa
 	if !owns || state.DeletedAt != nil {
 		return nil, Message{}, ErrNotFound
 	}
-	body, err := s.Blobs.GetPrivate(ctx, actor, msg.BodyRef)
+	body, err := getPrivateVerified(ctx, s.Blobs, actor, msg.BodyRef, msg.BodyDigest)
 	if err != nil {
 		return nil, Message{}, err
 	}

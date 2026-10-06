@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -459,5 +461,58 @@ func TestMailboxFolderPagination(t *testing.T) {
 	}
 	if len(p2.Items) != 1 || p2.NextCursor != "" {
 		t.Fatalf("mailbox second page invalid: %+v", p2)
+	}
+}
+
+type insecureBlobStore struct{ testBlobs }
+
+func (b *insecureBlobStore) PrivateBlobSecurity() PrivateBlobSecurityProfile {
+	return PrivateBlobSecurityProfile{EncryptedAtRest: false, ExternalKeyCustody: true, OwnerScopedAccess: true}
+}
+
+type secureBlobStore struct{ testBlobs }
+
+func (b *secureBlobStore) PrivateBlobSecurity() PrivateBlobSecurityProfile {
+	return PrivateBlobSecurityProfile{EncryptedAtRest: true, ExternalKeyCustody: true, OwnerScopedAccess: true}
+}
+
+type corruptDigestBlobStore struct{ testBlobs }
+
+func (b *corruptDigestBlobStore) PutPrivate(ctx context.Context, owner string, body []byte) (string, string, error) {
+	ref, _, err := b.testBlobs.PutPrivate(ctx, owner, body)
+	return ref, strings.Repeat("0", 64), err
+}
+
+func TestDurableServiceRequiresPrivateBlobSecurityProfile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mail.json")
+	if _, err := NewDurableService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, path); !errors.Is(err, ErrPrivateBlobSecurity) {
+		t.Fatalf("durable service accepted blob store without security profile: %v", err)
+	}
+	if _, err := NewDurableService(testIDs{"alice.420": true}, testPolicy{}, &insecureBlobStore{}, &testNotify{}, path); !errors.Is(err, ErrPrivateBlobSecurity) {
+		t.Fatalf("durable service accepted insecure blob profile: %v", err)
+	}
+	if _, err := NewDurableService(testIDs{"alice.420": true}, testPolicy{}, &secureBlobStore{}, &testNotify{}, path); err != nil {
+		t.Fatalf("durable service rejected secure blob profile: %v", err)
+	}
+}
+
+func TestPrivateBlobDigestIsVerifiedOnWriteAndRead(t *testing.T) {
+	ctx := context.Background()
+	s := NewService(testIDs{"alice.420": true, "bob.420": true}, testPolicy{}, &corruptDigestBlobStore{}, &testNotify{}, NewMemoryStore())
+	if _, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "digest-write", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "private body", Source: ServiceID}); !errors.Is(err, ErrPrivateBlobIntegrity) {
+		t.Fatalf("corrupt storage digest accepted: %v", err)
+	}
+
+	blobs := &testBlobs{}
+	s = NewService(testIDs{"alice.420": true, "bob.420": true}, testPolicy{}, blobs, &testNotify{}, NewMemoryStore())
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "digest-read", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "private body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	blobs.mu.Lock()
+	blobs.data[msg.BodyRef] = []byte("tampered body")
+	blobs.mu.Unlock()
+	if _, _, err := s.ReadBody(ctx, "bob.420", msg.ID); !errors.Is(err, ErrPrivateBlobIntegrity) {
+		t.Fatalf("tampered private blob accepted: %v", err)
 	}
 }

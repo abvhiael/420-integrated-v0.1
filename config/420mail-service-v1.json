@@ -831,5 +831,23 @@
     "crossProviderAuthorityEscalation": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "encryptionLeakageControls": {
+    "enabled": true,
+    "durableBlobSecurityAttestationRequired": true,
+    "encryptedAtRestRequired": true,
+    "externalKeyCustodyRequired": true,
+    "ownerScopedBlobAccessRequired": true,
+    "sha256ContentIntegrityRequired": true,
+    "verifyDigestOnWrite": true,
+    "verifyDigestOnRead": true,
+    "httpRedactedFields": ["body_ref","body_digest","staging_body_ref","staging_body_digest","request_fingerprint","idempotency_key"],
+    "privateBodyPlaintextInMetadata": false,
+    "privateBodyPlaintextInSearchResults": false,
+    "privateStorageLocatorInHTTP": false,
+    "privateStorageDigestInHTTP": false,
+    "providerSecretsInMailMetadata": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

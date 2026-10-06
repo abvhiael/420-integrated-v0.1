@@ -1493,7 +1493,50 @@ func writeError(w http.ResponseWriter, status int, code, message string) {
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
+	safe, err := sanitizeHTTPJSON(v)
+	if err != nil {
+		http.Error(w, "response encoding failed", http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v)
+	_ = json.NewEncoder(w).Encode(safe)
+}
+
+var httpPrivateMetadataKeys = map[string]struct{}{
+	"body_ref": {},
+	"body_digest": {},
+	"staging_body_ref": {},
+	"staging_body_digest": {},
+	"request_fingerprint": {},
+	"idempotency_key": {},
+}
+
+func sanitizeHTTPJSON(v any) (any, error) {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var out any
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return nil, err
+	}
+	stripPrivateHTTPMetadata(out)
+	return out, nil
+}
+
+func stripPrivateHTTPMetadata(v any) {
+	switch value := v.(type) {
+	case map[string]any:
+		for key := range httpPrivateMetadataKeys {
+			delete(value, key)
+		}
+		for _, child := range value {
+			stripPrivateHTTPMetadata(child)
+		}
+	case []any:
+		for _, child := range value {
+			stripPrivateHTTPMetadata(child)
+		}
+	}
 }

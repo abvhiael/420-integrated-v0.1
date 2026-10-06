@@ -105,7 +105,7 @@ func (s *Service) QueueDelivery(ctx context.Context, actor string, req SendReque
 		return existing, nil
 	}
 
-	ref, digest, err := s.Blobs.PutPrivate(ctx, actor, []byte(req.Body))
+	ref, digest, err := putPrivateVerified(ctx, s.Blobs, actor, []byte(req.Body))
 	if err != nil {
 		return Delivery{}, err
 	}
@@ -236,7 +236,7 @@ func (s *Service) ProcessDelivery(ctx context.Context, actor, id string) (Delive
 		return Delivery{}, err
 	}
 
-	body, err := s.Blobs.GetPrivate(ctx, actor, delivery.StagingBodyRef)
+	body, err := getPrivateVerified(ctx, s.Blobs, actor, delivery.StagingBodyRef, delivery.StagingBodyDigest)
 	if err != nil {
 		return s.recordDeliveryFailure(ctx, delivery, err)
 	}

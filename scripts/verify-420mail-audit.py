@@ -251,6 +251,10 @@ if profile_path.is_file():
     connector_isolation=profile.get("connectorIsolation",{})
     if connector_isolation.get("enabled") is not True or any(connector_isolation.get(k) is not True for k in ["registryDescriptorSnapshot","postRegistrationCapabilityMutationRejected","postRegistrationProviderMutationRejected","descriptorCopiesReturned","adapterPanicContained","webhookHeaderMapCopied","capabilityCheckedBeforeAdapterCall","providerResultBindingRequired","identityResultBindingRequired","connectionResultBindingRequired","unsupportedCapabilityFailsClosed","providerFailureHasNoFallback"]): errors.append("MAIL-2.32 connector isolation contract drifted")
     if any(connector_isolation.get(k) is not False for k in ["rawProviderCredentialPersistence","crossProviderAuthorityEscalation","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.32 connector isolation privacy/authority drifted")
+    leakage=profile.get("encryptionLeakageControls",{})
+    if leakage.get("enabled") is not True or any(leakage.get(k) is not True for k in ["durableBlobSecurityAttestationRequired","encryptedAtRestRequired","externalKeyCustodyRequired","ownerScopedBlobAccessRequired","sha256ContentIntegrityRequired","verifyDigestOnWrite","verifyDigestOnRead"]): errors.append("MAIL-2.33 encryption/integrity contract drifted")
+    if leakage.get("httpRedactedFields")!=["body_ref","body_digest","staging_body_ref","staging_body_digest","request_fingerprint","idempotency_key"]: errors.append("MAIL-2.33 HTTP redaction inventory drifted")
+    if any(leakage.get(k) is not False for k in ["privateBodyPlaintextInMetadata","privateBodyPlaintextInSearchResults","privateStorageLocatorInHTTP","privateStorageDigestInHTTP","providerSecretsInMailMetadata","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.33 leakage/privacy boundary drifted")
     if desktop_ui.get("newBackendAuthority") is not False or desktop_ui.get("publicIndexing") is not False or desktop_ui.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.30 desktop authority/privacy drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
@@ -266,6 +270,10 @@ if readiness_path.is_file():
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
 for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
+for token in ["PrivateBlobSecurityProfile","PrivateBlobSecurityProvider","validatePrivateBlobSecurity","putPrivateVerified","getPrivateVerified","privateBodyDigest","ErrPrivateBlobIntegrity","ErrPrivateBlobSecurity"]:
+    if token not in service: errors.append("MAIL-2.33 private blob security invariant missing: "+token)
+for token in ["sanitizeHTTPJSON","stripPrivateHTTPMetadata","httpPrivateMetadataKeys",'"body_ref"','"body_digest"','"staging_body_ref"','"staging_body_digest"','"request_fingerprint"','"idempotency_key"']:
+    if token not in http: errors.append("MAIL-2.33 HTTP leakage control missing: "+token)
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 if "AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
 if '"/v1/messages"' not in http or '"/v1/inbox"' not in http: errors.append("HTTP v1 routes missing")
@@ -289,7 +297,7 @@ for token in ["LabelDefinition","CustomFolder","BulkOrganizationRequest","Create
 for token in ['"/v1/labels"','"/v1/custom-folders"','"/v1/organization/bulk"','"organization"']:
     if token not in http: errors.append("MAIL-2.3 HTTP route missing: "+token)
 search_src=(ROOT/"mail/search.go").read_text() if (ROOT/"mail/search.go").is_file() else ""
-for token in ["SearchRequest","SearchResult","SearchMailbox","MaxSearchQueryBytes","MaxSearchScanItems","Blobs.GetPrivate","state.Owner != actor","state.DeletedAt != nil"]:
+for token in ["SearchRequest","SearchResult","SearchMailbox","MaxSearchQueryBytes","MaxSearchScanItems","getPrivateVerified","state.Owner != actor","state.DeletedAt != nil"]:
     if token not in search_src: errors.append("MAIL-2.4 private search invariant missing: "+token)
 for token in ['"/v1/search"',"SearchMailbox"]:
     if token not in http: errors.append("MAIL-2.4 HTTP/client search surface missing: "+token)
@@ -554,4 +562,5 @@ print("MAIL-2.29 unified notification routing: qualified by app-scoped checks")
 print("MAIL-2.30 full desktop mail UI: qualified by app-scoped checks")
 print("MAIL-2.31 mail settings center: qualified by app-scoped checks")
 print("MAIL-2.32 connector isolation: qualified by app-scoped checks")
+print("MAIL-2.33 encryption and leakage controls: qualified by app-scoped checks")
 

@@ -877,7 +877,59 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.20 — PB-0 qualification and formal closeout
 
-Run the accumulated PB-0 milestone qualification, reconcile durable evidence, and formally close the canonical-foundation phase.
+**Purpose:** run the accumulated PB-0 phase-closeout qualification against one current-main-reconciled merge-candidate implementation SHA, reconcile durable evidence, and formally close the canonical-foundation phase.
+
+**Canonical requirements:**
+
+1. Record PB-CLOSE-001 through PB-CLOSE-020.
+2. Require PB-0.1 through PB-0.19 COMPLETE before closeout.
+3. Reconcile the accumulated branch with current `main` before establishing the merge candidate.
+4. Bind all required Level 3 evidence to one exact merge-candidate implementation SHA.
+5. Run the retained PuffBuddies PB-0 cumulative verifier and adversarial mutation suite.
+6. Confirm PB-0 remains foundation-only and has not introduced accidental runtime/deployment/address/service-ID authority.
+7. Run canonical full repository Solidity qualification once where applicable.
+8. Run Genesis/address-authority qualification separately without duplicating the Solidity Foundry inventory.
+9. Run 420 Integrated/global qualification where applicable.
+10. Run Docs/global reconciliation/qualification.
+11. Run affected client/service/Indexer/Search/RPC/frontend/backend qualification only where the accumulated PB-0 delta materially affects those surfaces.
+12. Reconcile roadmap, qualification evidence, architecture, non-goals, repository structure, and master implementation roadmap.
+13. Verify privacy, consent, adult eligibility, lifecycle, deletion, safety, matching, cannabis, visibility, dependency, and authority invariants remain coherent.
+14. Verify no skipped, cancelled, missing, stale, or superseded required check is counted as PASS.
+15. Distinguish non-applicable runtime/deployment suites from missing required checks.
+16. Record reconciliation base SHA, exact merge-candidate SHA, workflow/run/job evidence, and any live/testnet/external blockers.
+17. Preserve canonical CI ownership: Solidity owns full Foundry; Genesis owns address/namespace/predeploy/frozen-address/manifest authority.
+18. Do not perform ceremonial duplicate expensive inventories.
+19. Formally close PB-0 only after every applicable Level 3 gate passes on the same exact merge-candidate SHA.
+20. Make PB-1 the next canonical implementation phase only after PB-0 formal closeout.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.20-PHASE-CLOSEOUT.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.20-QUALIFICATION.md`
+
+**Qualification level:** Level 3 — complete app-phase closeout qualification.
+
+**Milestone relationship:** PB-0.20 is the complete PB-0 canonical-foundation phase boundary. It subsumes the accumulated app milestone check and requires current-main reconciliation plus all applicable Level 3 owners against one exact merge-candidate SHA.
+
+**Dependencies:** PB-0.1 through PB-0.19 COMPLETE; current-main reconciliation; exact merge-candidate qualification.
+
+**Exit criteria:**
+
+- PB-CLOSE-001 through PB-CLOSE-020 exist exactly once and in sequence;
+- branch is reconciled with current `main` and reconciliation base is recorded;
+- one exact merge-candidate implementation SHA is established;
+- retained PuffBuddies cumulative/adversarial qualification passes;
+- canonical Solidity full-inventory qualification passes where applicable;
+- Genesis/address-authority qualification passes separately without duplicate full Foundry work;
+- 420 Integrated/global and Docs/global qualification pass where applicable;
+- all materially affected client/service/Indexer/Search/RPC/frontend/backend suites pass, or are explicitly evidenced non-applicable;
+- security/adversarial/invariant/static/deployment/config coverage is reconciled and any non-applicable runtime categories are explicitly justified;
+- no required skipped/cancelled/missing/stale check is counted as green;
+- durable closeout evidence records exact-SHA results and blockers;
+- PB-0 is formally COMPLETE and PB-1 is identified as the next canonical phase.
+
 
 ## Post-PB-0 phase names
 

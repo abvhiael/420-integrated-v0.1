@@ -100,6 +100,23 @@ Future implementation must keep secrets and protected user/safety data out of Gi
 
 Generated build/test outputs remain reproducible artifacts rather than canonical source unless an explicit repository-wide rule requires a particular generated artifact committed.
 
+## PB-12 mobile implementation area authorization
+
+Current **PB-12 — Mobile applications** authorizes a new app-scoped implementation area at `puffbuddies/mobile/` under PB-STRUCT-017.
+
+- **Owner:** PuffBuddies client presentation/runtime.
+- **Purpose:** repository source for the iOS and Android PuffBuddies clients plus shared mobile client logic.
+- **Authority granted:** presentation, device-local secure session handling, lifecycle resume/revalidation, bounded media handoff, OS notification registration handoff, and verified app-link routing.
+- **Authority denied:** relationship creation, consent manufacture, block override, lifecycle/safety adjudication, eligibility assertion, payment truth, Messenger conversation authority, Notifications authority, or any server/domain canonical decision.
+- **Data classes:** device-bound session token in native secure storage; transient in-memory derived profile/discovery/match/notification/premium presentation; opaque device/media references only.
+- **Dependency direction:** `mobile -> authenticated PuffBuddies API -> canonical domain interfaces`; no domain dependency on mobile presentation code.
+- **Privacy impact:** no precise-location permission, wallet-address persistence, raw eligibility evidence, moderation evidence, private-message store, public match graph, or canonical relationship cache is introduced.
+- **Revocation behavior:** resume, authority-generation change, protected denial, sign-out, and current safety/lifecycle state invalidate or clear derived client state.
+- **Deployment implication:** repository implementation does not assert signed device builds, push-provider credentials, App Store/Play Store distribution, live API binding, testnet or production readiness.
+- **Qualification owner:** PB-12 app-specific mobile workflow plus directly affected PB-0 structure/authority verification.
+
+This authorization materializes a new client path after PB-0; it does not retroactively change PB-0.17 into runtime implementation evidence.
+
 ## Structure change-control rule
 
 Any later structural change that creates a new top-level PuffBuddies area or changes an ownership boundary must document purpose/owner, data classes, authority granted/denied, dependency direction, privacy/consent/safety/lifecycle/deletion effects, stale-state behavior, public exposure changes, test ownership, deployment implications, and affected PB-0 invariants.

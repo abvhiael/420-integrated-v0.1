@@ -276,5 +276,50 @@
     "credentialPersistence": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "passkeyFirstSecurity": {
+    "enabled": true,
+    "authority": "CANONICAL_WALLET_IDENTITY_SECURITY_ADAPTER",
+    "authenticatedOwnerOnly": true,
+    "passkeys": {
+      "enabled": true,
+      "enrollment": true,
+      "revocation": true,
+      "authorizationEpochBound": true,
+      "staleEpochActiveRejected": true,
+      "privateMaterialInput": false
+    },
+    "devices": {
+      "enrollment": true,
+      "revocation": true,
+      "lostDeviceResponse": "REVOKE_BOUND_AUTHORIZATION_THROUGH_WALLET_AUTHORITY"
+    },
+    "recovery": {
+      "model": "SMARTACCOUNT420_TIMELOCKED",
+      "actions": [
+        "SET_AUTHORITY",
+        "PROPOSE",
+        "CANCEL",
+        "FINALIZE"
+      ],
+      "localTimelockOverride": false,
+      "signingAuthority": "WALLET_ONLY"
+    },
+    "sessions": {
+      "listing": true,
+      "revocation": true,
+      "authorizationEpochBound": true,
+      "staleEpochActiveRejected": true
+    },
+    "alerts": {
+      "listing": true,
+      "acknowledgement": true,
+      "authority": "WALLET_IDENTITY_SECURITY_AUTHORITY"
+    },
+    "securityStatePersistence": "CANONICAL_AUTHORITY_ONLY",
+    "credentialPersistence": false,
+    "sessionSecretPersistence": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

@@ -212,7 +212,7 @@ func trustDispositionFor(data *storeData, owner string, kind TrustKind, value st
 }
 
 func phraseTrustDispositions(data *storeData, owner, content string) []TrustDisposition {
-	content = strings.ToLower(content)
+	content = strings.ToLower(strings.Join(strings.Fields(content), " "))
 	out := make([]TrustDisposition, 0)
 	for _, entry := range data.TrustEntries {
 		if entry.Owner != owner || entry.Kind != TrustPhrase || entry.Value == "" {

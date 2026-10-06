@@ -78,4 +78,6 @@ Any substantive source, test, workflow, dependency, configuration, interface, de
 
 ## Formal closeout boundary
 
-PB-0 is complete only after the exact reconciled merge candidate satisfies the Level 3 evidence matrix. PB-1 implementation must not be represented as begun by this closeout.
+PB-0 is **COMPLETE**. The qualified Level 3 implementation SHA is `39ff0740c6cbc11193280493838e82ca8c27bcb5`. Final reconciliation head `f4bad391954a939256c9230092edf05eb3263040` incorporates current-main commit `53f5603520e02a492184a41801de0ad09af59b35`, whose sole intervening change is the unrelated Compute Market verifier `scripts/verify-cmp-3-14-closeout.py`. That reconciliation changes no PuffBuddies implementation, test, workflow, dependency, interface, deployment/configuration, contract, address authority, or PB-0 requirement, so it inherits the qualified PB-0 evidence without ceremonial requalification. Automatically triggered reruns on the reconciliation head are redundant and are not closeout evidence.
+
+The next canonical phase is **PB-1 — Architecture and privacy implementation model**. PB-1 implementation is not represented as begun by this closeout.

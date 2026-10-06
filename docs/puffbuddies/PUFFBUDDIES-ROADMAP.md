@@ -875,7 +875,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head app-scoped PB-0.19 qualification passes;
 - durable evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.20 — PB-0 qualification and formal closeout
+### PB-0.20 — PB-0 qualification and formal closeout — COMPLETE
 
 **Purpose:** run the accumulated PB-0 phase-closeout qualification against one current-main-reconciled merge-candidate implementation SHA, reconcile durable evidence, and formally close the canonical-foundation phase.
 

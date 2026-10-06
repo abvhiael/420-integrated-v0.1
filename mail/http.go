@@ -16,6 +16,7 @@ type HTTPHandler struct {
 	Authenticate AuthenticateFunc
 	Onboarding   *OnboardingService
 	Security     *SecurityService
+	WalletActions *WalletActionService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +62,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.outbox(w, r, actor)
 	case r.URL.Path == "/v1/security" || strings.HasPrefix(r.URL.Path, "/v1/security/"):
 		h.security(w, r, actor)
+	case r.URL.Path == "/v1/wallet/actions" || r.URL.Path == "/v1/wallet/verifications":
+		h.walletActions(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -132,6 +135,55 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) walletActions(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.WalletActions == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail wallet actions unavailable")
+		return
+	}
+	switch r.URL.Path {
+	case "/v1/wallet/actions":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req WalletActionRequest
+		if !decodeStrictJSON(w, r, MaxWalletCalldataBytes+8192, &req) {
+			return
+		}
+		out, err := h.WalletActions.Prepare(r.Context(), actor, req)
+		if err != nil {
+			if errors.Is(err, ErrWalletInvalidResult) {
+				writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet action authority returned an invalid result")
+				return
+			}
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/wallet/verifications":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req WalletVerificationRequest
+		if !decodeStrictJSON(w, r, MaxWalletVerificationBytes+4096, &req) {
+			return
+		}
+		out, err := h.WalletActions.Verify(r.Context(), actor, req)
+		if err != nil {
+			if errors.Is(err, ErrWalletInvalidResult) {
+				writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet verification authority returned an invalid result")
+				return
+			}
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+	}
 }
 
 func (h HTTPHandler) security(w http.ResponseWriter, r *http.Request, actor string) {

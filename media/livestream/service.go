@@ -403,7 +403,6 @@ func normalizeController(v string) string {
 	return strings.ToLower(strings.TrimSpace(v))
 }
 
-
 func validateSecureEndpoint(spec livegateway.SessionSpec) error {
 	switch spec.Protocol {
 	case livegateway.ProtocolWHIP, livegateway.ProtocolWHEP:

@@ -263,12 +263,12 @@ func TestDurableStoreRebuildsMailboxIndex(t *testing.T) {
 	}
 	state := MailboxState{MessageID: msg.ID, Owner: "bob.420", Folder: FolderInbox, UpdatedAt: msg.UpdatedAt, Version: 1}
 	disk := diskStoreData{
-		SchemaVersion: DurableStoreSchemaVersion,
-		Messages:      map[string]Message{msg.ID: msg},
-		ByIdem:        map[string]string{"alice.420\x00index": msg.ID},
-		Mailbox:       map[string]MailboxState{mailboxKey("bob.420", msg.ID): state},
-		MailboxIndex:  map[string][]string{"stale": []string{"bad"}},
-		Fingerprints:  map[string]string{msg.ID: msg.Fingerprint},
+		SchemaVersion:   DurableStoreSchemaVersion,
+		Messages:        map[string]Message{msg.ID: msg},
+		ByIdem:          map[string]string{"alice.420\x00index": msg.ID},
+		Mailbox:         map[string]MailboxState{mailboxKey("bob.420", msg.ID): state},
+		MailboxIndex:    map[string][]string{"stale": []string{"bad"}},
+		Fingerprints:    map[string]string{msg.ID: msg.Fingerprint},
 		IdempotencyKeys: map[string]string{msg.ID: msg.IdempotencyKey},
 	}
 	raw, err := json.Marshal(disk)

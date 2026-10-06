@@ -61,11 +61,11 @@ func BuildSearchResult(
 	if authorizer == nil {
 		return searchresult.Result{}, ErrInvalidProjection
 	}
-	if err := mediastorage.AuthorizePublicProjection(ctx, authorizer, actor, asset, binding); err != nil {
-		return searchresult.Result{}, err
-	}
 	if !mediastorage.CanProjectPublic(asset) {
 		return searchresult.Result{}, ErrNotPublic
+	}
+	if err := authorizer.AuthorizePublication(ctx, actor, binding); err != nil {
+		return searchresult.Result{}, err
 	}
 	if !status.Qualified || status.ChainID == 0 || status.IndexedHeight == 0 {
 		return searchresult.Result{}, ErrUnqualifiedSource

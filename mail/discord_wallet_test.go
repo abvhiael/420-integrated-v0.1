@@ -167,7 +167,9 @@ func TestDiscordWalletChallengeRejectsMalformedOrOverlongTTL(t *testing.T) {
 		func(r *DiscordWalletChallengeRequest) { r.ChainID = 0 },
 		func(r *DiscordWalletChallengeRequest) { r.Account = "bad" },
 		func(r *DiscordWalletChallengeRequest) { r.ExpiresAt = walletTestNow() },
-		func(r *DiscordWalletChallengeRequest) { r.ExpiresAt = walletTestNow().Add(MaxDiscordWalletChallengeTTL + time.Second) },
+		func(r *DiscordWalletChallengeRequest) {
+			r.ExpiresAt = walletTestNow().Add(MaxDiscordWalletChallengeTTL + time.Second)
+		},
 	}
 	for _, mutate := range cases {
 		req := base
@@ -243,7 +245,7 @@ func discordWalletHTTPHandler(t *testing.T, authority WalletActionAuthority) HTT
 		Service:       NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, store),
 		WalletActions: wallet,
 		DiscordWallet: discordWallet,
-		Authenticate: func(r *http.Request) (string, error) { return r.Header.Get("X-Test-Actor"), nil },
+		Authenticate:  func(r *http.Request) (string, error) { return r.Header.Get("X-Test-Actor"), nil },
 	}
 }
 

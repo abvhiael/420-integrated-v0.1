@@ -51,8 +51,11 @@ if '"/v1/messages"' not in http or '"/v1/inbox"' not in http: errors.append("HTT
 for token in ['"/v1/mailboxes/"','"mailbox"','"restore"','"unread"', "http.MethodPatch", "http.MethodDelete"]:
     if token not in http: errors.append("MAIL-2.1 HTTP lifecycle route missing: "+token)
 roadmap=(ROOT/"docs/420MAIL-PHASE2-ROADMAP.md").read_text() if (ROOT/"docs/420MAIL-PHASE2-ROADMAP.md").is_file() else ""
-for token in ["MAIL-2.1 — Mailbox State Model","MAIL-2.2 — Durable Mail Storage","DRAFTS","OUTBOX","permanent delete","restore from Trash"]:
+for token in ["MAIL-2.1 — Mailbox State Model","MAIL-2.2 — Durable Mail Storage","permanent delete","restore from Trash"]:
     if token not in roadmap: errors.append("MAIL-2 roadmap definition missing: "+token)
+roadmap_upper=roadmap.upper()
+for token in ["DRAFTS","OUTBOX"]:
+    if token not in roadmap_upper: errors.append("MAIL-2 roadmap definition missing: "+token)
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)

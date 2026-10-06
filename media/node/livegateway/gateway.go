@@ -17,17 +17,17 @@ type Direction string
 type SessionState string
 
 const (
-	MaxEndpointBytes = 4096
+	MaxEndpointBytes      = 4096
 	MaxCredentialRefBytes = 256
-	MaxSessionDuration = 24 * time.Hour
+	MaxSessionDuration    = 24 * time.Hour
 )
 
 const (
-	ProtocolWHIP Protocol = "whip"
-	ProtocolWHEP Protocol = "whep"
+	ProtocolWHIP   Protocol = "whip"
+	ProtocolWHEP   Protocol = "whep"
 	ProtocolWebRTC Protocol = "webrtc"
-	ProtocolSRT Protocol = "srt"
-	ProtocolRTMP Protocol = "rtmp"
+	ProtocolSRT    Protocol = "srt"
+	ProtocolRTMP   Protocol = "rtmp"
 )
 
 const (
@@ -36,21 +36,21 @@ const (
 )
 
 const (
-	StateCreated SessionState = "created"
+	StateCreated  SessionState = "created"
 	StateStarting SessionState = "starting"
-	StateActive SessionState = "active"
+	StateActive   SessionState = "active"
 	StateStopping SessionState = "stopping"
-	StateClosed SessionState = "closed"
-	StateFailed SessionState = "failed"
+	StateClosed   SessionState = "closed"
+	StateFailed   SessionState = "failed"
 )
 
 var (
 	ErrUnsupportedProtocol = errors.New("420media livegateway: unsupported protocol")
-	ErrInvalidEndpoint = errors.New("420media livegateway: invalid endpoint")
-	ErrInvalidTransition = errors.New("420media livegateway: invalid session transition")
-	ErrSessionExists = errors.New("420media livegateway: session exists")
-	ErrSessionNotFound = errors.New("420media livegateway: session not found")
-	ErrSecretInEndpoint = errors.New("420media livegateway: credentials must not be embedded in endpoint")
+	ErrInvalidEndpoint      = errors.New("420media livegateway: invalid endpoint")
+	ErrInvalidTransition    = errors.New("420media livegateway: invalid session transition")
+	ErrSessionExists        = errors.New("420media livegateway: session exists")
+	ErrSessionNotFound      = errors.New("420media livegateway: session not found")
+	ErrSecretInEndpoint     = errors.New("420media livegateway: credentials must not be embedded in endpoint")
 )
 
 // CredentialRef is an opaque operator-local reference. Secret material is resolved only

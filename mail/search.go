@@ -66,7 +66,7 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 		return SearchResult{}, ErrInvalidInput
 	}
 
-	var labelName, customFolderName string
+	var labelName string
 	labelNames := map[string]string{}
 	customFolderNames := map[string]string{}
 	candidates := make([]MailboxItem, 0)
@@ -93,7 +93,6 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 			if !ok {
 				return ErrNotFound
 			}
-			customFolderName = folder.Name
 		}
 		for _, state := range data.Mailbox {
 			if state.Owner != actor || state.DeletedAt != nil {

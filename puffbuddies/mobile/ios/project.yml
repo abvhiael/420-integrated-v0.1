@@ -1,0 +1,20 @@
+name: PuffBuddies
+options:
+  minimumXcodeGenVersion: 2.38.0
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: org.420integrated.puffbuddies
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+targets:
+  PuffBuddies:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: [PuffBuddies]
+    info:
+      path: PuffBuddies/Info.plist
+    entitlements:
+      path: PuffBuddies/PuffBuddies.entitlements
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"

@@ -302,7 +302,6 @@ func (c Client) GetSenderReputation(ctx context.Context, sender string) (mail.Se
 	return out, err
 }
 
-
 func (c Client) Reply(ctx context.Context, parentMessageID string, req mail.ReplyRequest) (mail.Message, error) {
 	var out mail.Message
 	err := c.do(ctx, http.MethodPost, "/v1/messages/"+url.PathEscape(parentMessageID)+"/reply", req, &out)

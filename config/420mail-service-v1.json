@@ -355,5 +355,32 @@
     "verificationEvidencePersistence": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "externalIntegrations": {
+    "enabled": true,
+    "architecture": "PROVIDER_NEUTRAL_CONNECTOR_REGISTRY",
+    "providerSpecificLogicInCore": false,
+    "capabilities": [
+      "LINK",
+      "PULL",
+      "PUSH",
+      "WEBHOOK",
+      "WALLET_VERIFY"
+    ],
+    "ownerScopedConnections": true,
+    "authorizationInput": "OPAQUE_SECURE_BROKER_REFERENCE_ONLY",
+    "rawAccessTokenInput": false,
+    "rawRefreshTokenInput": false,
+    "rawClientSecretInput": false,
+    "webhookAuthentication": "ADAPTER_VERIFIES_TRANSPORT_HEADERS_AND_PAYLOAD",
+    "webhookSessionAuth": false,
+    "pullCursorOpaque": true,
+    "pushIdempotencyRequired": true,
+    "providerIsolation": true,
+    "capabilityDeclarationRequired": true,
+    "credentialPersistence": "CONNECTOR_ADAPTER_OR_SECURE_BROKER_ONLY",
+    "mailMetadataCredentialPersistence": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

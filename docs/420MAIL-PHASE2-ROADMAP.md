@@ -53,7 +53,7 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 
 ## Milestones
 
-- **Mailbox foundation milestone:** MAIL-2.1 through MAIL-2.10. Run retained Mail integration qualification at the end of MAIL-2.10 unless an earlier shared-dependency change makes it necessary.
+- **Mailbox foundation milestone:** MAIL-2.1 through MAIL-2.10 — **COMPLETE, Level 2 PASS** on qualified implementation SHA `a8b646134893a9c07a35e1cc998d8d397c449059`; durable evidence: `docs/audit/420MAIL-MAILBOX-FOUNDATION-MILESTONE-QUALIFICATION.md`.
 - **Wallet-native identity milestone:** MAIL-2.11 through MAIL-2.14.
 - **External bridge milestone:** MAIL-2.15 through MAIL-2.29.
 - **Product/security milestone:** MAIL-2.30 through MAIL-2.35.
@@ -61,4 +61,4 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model**, **MAIL-2.2 — Durable Mail Storage**, **MAIL-2.3 — Labels & Custom Folders**, **MAIL-2.4 — Private Mail Search**, **MAIL-2.5 — User Filters & Rules Engine**, **MAIL-2.6 — Blocklists, Allowlists & Trust Controls**, **MAIL-2.7 — Spam, Junk & Phishing Protection**, **MAIL-2.8 — Threads & Conversations**, and **MAIL-2.9 — Drafts System** are COMPLETE at Level 1. **MAIL-2.10 — Outbox & Delivery Queue** is the active canonical Phase 2 step.
+**MAIL-2.1 — Mailbox State Model** through **MAIL-2.10 — Outbox & Delivery Queue** are COMPLETE at Level 1. The **Mailbox Foundation milestone (MAIL-2.1–MAIL-2.10)** is COMPLETE at Level 2. **MAIL-2.11 — Email-as-a-Wallet Onboarding** is the active canonical Phase 2 step.

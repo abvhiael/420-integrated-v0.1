@@ -15,7 +15,7 @@ class PB210EligibilityPrivacyTests(unittest.TestCase):
 
  def test_pb2_internal_metadata_cannot_enter_external_payload(self):
   for key in PB2_PRIVATE_KEYS:
-   with self.assertRaises(LeakageDenied,key):
+   with self.assertRaises(LeakageDenied):
     assert_pb2_external_payload_minimal({key:"x"})
 
  def test_source_policy_sequence_and_expiry_are_private(self):

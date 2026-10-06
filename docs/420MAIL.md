@@ -361,6 +361,92 @@ API additions:
 - `GET /v1/conversations/{conversation_id}`
 - `PATCH /v1/conversations/{conversation_id}`
 
+## Drafts System
+
+MAIL-2.9 adds private, durable draft autosave/recovery/edit/discard semantics without turning drafts into sent mail or public searchable content.
+
+### Private body storage
+
+Draft bodies are never written into the Mail metadata store, public 420Search, or on-chain state. The repository stores only the draft metadata plus a private blob reference/digest. Deployment requires the configured private blob provider to provide the encryption/key-custody guarantees declared for 420 Storage.
+
+Draft metadata includes:
+
+- owner;
+- optional recipient;
+- optional subject;
+- private body reference/digest;
+- optional conversation/reply context;
+- canonical Mail source;
+- created/updated timestamps;
+- optimistic revision number.
+
+### Autosave and recovery
+
+A device creates a draft with an owner-scoped `autosave_key`. The draft ID is deterministically derived from the owner plus that autosave key, so retrying the same creation request recovers the already-created draft rather than creating duplicate autosave records.
+
+Recovery surfaces are:
+
+- `GET /v1/drafts` — list the authenticated owner's drafts, newest autosave first;
+- `GET /v1/drafts/{id}` — recover one draft and its private body.
+
+A foreign identity cannot recover, edit, list or discard another owner's draft even if it learns a draft ID.
+
+### Edit/autosave and multi-device behavior
+
+Each saved draft has a monotonically increasing `version`.
+
+`PUT /v1/drafts/{id}` requires `expected_version`. The save succeeds only when the supplied revision equals the current canonical revision.
+
+This creates explicit multi-device optimistic concurrency:
+
+1. two devices may recover the same revision;
+2. the first successful autosave increments the revision;
+3. a stale device cannot silently overwrite the newer canonical draft;
+4. stale saves fail with a draft conflict;
+5. the stale device must recover the latest revision and consciously reapply/merge its local edits.
+
+The repository does not silently merge private draft text because doing so could corrupt user content or conceal a real cross-device conflict.
+
+### Discard
+
+`DELETE /v1/drafts/{id}?expected_version=N` is version-checked just like autosave.
+
+Discard requires a private blob provider implementing the deletion capability. Successful discard removes both:
+
+- canonical draft metadata;
+- the referenced private draft blob.
+
+If private-blob deletion fails after metadata removal, Mail attempts an immediate metadata rollback and returns a service-unavailable draft-delete error rather than falsely claiming successful discard.
+
+A stale device cannot discard a newer revision.
+
+### Bounds and ordering
+
+The repository baseline enforces:
+
+- at most 500 drafts per owner;
+- at most 128 bytes per autosave key;
+- existing Mail subject/body size bounds;
+- deterministic draft ordering by `updated_at` descending then draft ID ascending.
+
+### Durability and migration
+
+MAIL-2.9 advances durable metadata schema to v7.
+
+Schema v7 persists the owner-scoped draft metadata map while keeping body plaintext outside the durable Mail JSON file.
+
+Existing v6 stores migrate to v7 with an initialized empty draft map. Draft metadata and body references survive Mail service restart; body recovery continues through the private blob provider.
+
+API additions:
+
+- `POST /v1/drafts`
+- `GET /v1/drafts`
+- `GET /v1/drafts/{id}`
+- `PUT /v1/drafts/{id}`
+- `DELETE /v1/drafts/{id}?expected_version=N`
+
+Typed client methods mirror all five operations.
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.

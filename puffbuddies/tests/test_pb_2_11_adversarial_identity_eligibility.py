@@ -113,11 +113,11 @@ class PB211AdversarialIdentityEligibilityQualificationTests(unittest.TestCase):
                                                messenger_native_denied=True))
 
  def test_block_and_unmatch_override_current_eligibility(self):
-  viewer=self.bound("viewer","candidate",relationship=RelationshipState.NONE)
-  candidate=self.bound("candidate","viewer")
-  self.assertFalse(match_intent_allowed(DiscoveryMatchingPair(viewer,candidate)))
+  unmatched=self.bound("left","right",relationship=RelationshipState.UNMATCHED)
+  peer=self.bound("right","left")
+  self.assertFalse(ordinary_messaging_allowed(MessagingEligibilityPair(unmatched,peer)))
   blocked=self.bound("left","right",blocked=True)
-  self.assertFalse(ordinary_messaging_allowed(MessagingEligibilityPair(blocked,self.bound("right","left"))))
+  self.assertFalse(ordinary_messaging_allowed(MessagingEligibilityPair(blocked,peer)))
 
  def test_uniform_denial_and_no_public_probe_prevent_state_oracle(self):
   self.assertEqual(uniform_denial_code(),"NOT_AUTHORIZED")

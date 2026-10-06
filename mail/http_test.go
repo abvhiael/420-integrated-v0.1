@@ -485,7 +485,8 @@ func TestHTTPSpamProtectionAuthorizationAndValidation(t *testing.T) {
 }
 
 func TestHTTPConversationReplyAndStateRoutes(t *testing.T) {
-	h, _, id := testHTTPHandler(t)
+	h, s, id := testHTTPHandler(t)
+	s.Now = func() time.Time { return time.Unix(1700000060, 0).UTC() }
 
 	rec := performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/reply", "bob.420", ReplyRequest{
 		IdempotencyKey: "http-thread-reply",

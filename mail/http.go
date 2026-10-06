@@ -38,6 +38,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.bulkOrganization(w, r, actor)
 	case r.URL.Path == "/v1/search":
 		h.search(w, r, actor)
+	case r.URL.Path == "/v1/rules" || strings.HasPrefix(r.URL.Path, "/v1/rules/"):
+		h.rules(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
 		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
@@ -203,6 +205,68 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
 }
 
+func (h HTTPHandler) rules(w http.ResponseWriter, r *http.Request, actor string) {
+	rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/rules"), "/")
+	if rest == "" {
+		switch r.Method {
+		case http.MethodGet:
+			rules, err := h.Service.ListRules(r.Context(), actor)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, rules)
+		case http.MethodPost:
+			defer r.Body.Close()
+			dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32<<10))
+			dec.DisallowUnknownFields()
+			var input RuleInput
+			if err := dec.Decode(&input); err != nil {
+				writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+				return
+			}
+			rule, err := h.Service.CreateRule(r.Context(), actor, input)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusCreated, rule)
+		default:
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		}
+		return
+	}
+	if strings.Contains(rest, "/") {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	switch r.Method {
+	case http.MethodPut:
+		defer r.Body.Close()
+		dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 32<<10))
+		dec.DisallowUnknownFields()
+		var input RuleInput
+		if err := dec.Decode(&input); err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		rule, err := h.Service.UpdateRule(r.Context(), actor, rest, input)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, rule)
+	case http.MethodDelete:
+		if err := h.Service.DeleteRule(r.Context(), actor, rest); err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+	}
+}
+
 func (h HTTPHandler) search(w http.ResponseWriter, r *http.Request, actor string) {
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
@@ -357,7 +421,7 @@ func writeServiceError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
-	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable):
+	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict):
 		writeError(w, http.StatusConflict, "CONFLICT", err.Error())
 	case errors.Is(err, ErrNotFound):
 		writeError(w, http.StatusNotFound, "NOT_FOUND", err.Error())

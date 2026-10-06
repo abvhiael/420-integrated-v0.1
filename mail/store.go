@@ -571,6 +571,15 @@ func validateStoreData(data *storeData) error {
 		if msg.Fingerprint == "" || msg.IdempotencyKey == "" {
 			return fmt.Errorf("message %q missing durable idempotency evidence", id)
 		}
+		if msg.ConversationID == "" {
+			return fmt.Errorf("message %q missing conversation id", id)
+		}
+		if msg.ReplyTo != "" {
+			parent, ok := data.Messages[msg.ReplyTo]
+			if !ok || parent.ConversationID != msg.ConversationID {
+				return fmt.Errorf("message %q has invalid reply parent %q", id, msg.ReplyTo)
+			}
+		}
 	}
 	for key, state := range data.Mailbox {
 		msg, ok := data.Messages[state.MessageID]

@@ -1538,6 +1538,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** unilateral LIKE/PASS persists privately; one-sided LIKE cannot match/message; reciprocal current likes can form a current match; PASS/absent reciprocal intent prevents match; current discovery/eligibility/lifecycle/block/generation authority is rechecked at match time; admin/service/economic fabrication fails; unmatch is unilateral and revokes messaging while advancing consent epoch; stale likes cannot rematch; fresh new-epoch likes can rematch only through two new user actions; optimistic concurrency/private persistence passes; public relationship graph remains absent; PB-5 Level-1 targeted qualification passes; PB-4/PB-5 retained Level-2 integration passes on the same exact SHA; durable evidence records both levels.
 
+### PB-6 — 420Messenger integration
+
+**Purpose:** integrate current PuffBuddies matched-user messaging authorization with canonical 420Messenger endpoint/block/conversation authority without transferring canonical state ownership in either direction.
+
+**Canonical requirements:** current PB-2.9/PB-5 messaging authorization is rechecked for every protected Messenger handoff; transient private profile→Messenger account bindings are operation-scoped only and never persisted/published; exact pair/account binding is required; new conversation requests require both Messenger endpoints active and no native block; acceptance requires REQUESTED state, exact participants and non-requester acceptance; send requires ACTIVE state, exact participants, no native block, and current PuffBuddies MESSAGING_AUTH generation; active Messenger conversation cannot resurrect authorization after unmatch/block/eligibility/lifecycle/stale-generation revocation; Messenger authority outages fail closed; Messenger-native block is additive deny only and cannot mutate PuffBuddies match authority; PuffBuddies does not maintain a parallel canonical Messenger history; best-effort close handoff after PB revocation may coordinate closure but close failure cannot restore PB authorization; minimum-disclosure decisions contain no profile/account linkage or message metadata; plaintext/ciphertext/attachments/keys/envelope bodies/receipt state remain Messenger/off-chain owned; no public message/relationship graph, Search/Explorer/Indexer publication, contract/address/deployment/capability/service-ID modification or Notifications integration is introduced.
+
+**Affected components:** `puffbuddies/domain/messenger_integration.py`, PB-2.9 messaging eligibility, PB-5 match state, canonical Messenger V1 read-only interfaces/manifests, PB-6 targeted/integration tests/workflow, PB-0.19 scope reconciliation, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head PuffBuddies PB-6 qualification **plus Level 2 retained app integration** because PB-6 introduces a material cross-app authority dependency. Direct dependency verification uses the canonical `scripts/verify-420messenger-audit.py` verifier. Level 2 remains app-focused.
+
+**Level-3 boundary:** full Solidity/Genesis/420 Integrated/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.10, PB-0.11; PB-2.9; **PB-5 — Likes and matching — COMPLETE**; canonical 420Messenger V1.
+
+**Exit criteria:** matched PB pair can request Messenger conversation only when canonical endpoint/block state allows it; accept/send recheck current PB + Messenger authority; unmatch/revocation/stale generation denies despite active conversation; native Messenger block denies without mutating PB match state; authority outage fails closed; profile/account binding remains transient; Messenger verifier passes unchanged; PB-6 Level-1 tests, retained PuffBuddies regressions and PB-5/PB-6 Level-2 integration pass on one exact SHA; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

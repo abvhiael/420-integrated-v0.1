@@ -109,6 +109,21 @@ API additions:
 - `PATCH /v1/messages/{id}/organization`
 - `PATCH /v1/organization/bulk`
 
+## Private Mail Search
+
+MAIL-2.4 adds authenticated, owner-scoped mailbox search without publishing Mail content or search indexes to 420Search.
+
+- `POST /v1/search` accepts a bounded `SearchRequest`.
+- Search is scoped strictly to mailbox copies owned by the authenticated actor.
+- Permanently deleted mailbox copies are excluded.
+- Metadata search covers sender, recipient, subject, source, system folder, assigned label names, and assigned custom-folder names.
+- Private message bodies are searched on demand through the configured `PrivateBlobStore`; body plaintext is not copied into the durable metadata store or any public index.
+- Search can filter by system folder, label, custom folder, sender, recipient, source, unread/read state, starred state, and date bounds.
+- Queries are limited to 256 bytes, candidate scans are bounded to 500 owner-visible mailbox items, and result pages remain capped at 100.
+- Unknown/foreign label or custom-folder identifiers fail closed rather than widening the search.
+- Search returns mailbox/message metadata; it does not return body plaintext in the search result payload.
+- No 420Search/public-index publication is introduced by MAIL-2.4.
+
 ## Thin UI
 
 `mail/web/index.html` provides inbox, read and compose surfaces. It assumes the deployment shell establishes the authenticated 420Identity. This is repository UI evidence, not deployment evidence.

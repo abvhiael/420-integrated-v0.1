@@ -143,7 +143,6 @@ This is the first point where project, scientific-input and dataset-manifest sem
 
 ## 9. Intentionally deferred
 
-- reproducible execution environments — CMP-4.5;
 - result provenance — CMP-4.6;
 - scientific metadata and lineage — CMP-4.7;
 - publication / retention policy — CMP-4.8;

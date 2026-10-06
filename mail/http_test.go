@@ -483,3 +483,89 @@ func TestHTTPSpamProtectionAuthorizationAndValidation(t *testing.T) {
 		t.Fatalf("unknown abuse field status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 }
+
+
+func TestHTTPConversationReplyAndStateRoutes(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/reply", "bob.420", ReplyRequest{
+		IdempotencyKey: "http-thread-reply",
+		Subject:        "re",
+		Body:           "reply body",
+		Source:         ServiceID,
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("reply status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var reply Message
+	if err := json.Unmarshal(rec.Body.Bytes(), &reply); err != nil {
+		t.Fatal(err)
+	}
+	if reply.ReplyTo != id || reply.ConversationID == "" {
+		t.Fatalf("reply metadata=%+v", reply)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/conversations", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("conversation list status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var list []ConversationSummary
+	if err := json.Unmarshal(rec.Body.Bytes(), &list); err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 1 || list[0].ID != reply.ConversationID || list[0].MessageCount != 2 {
+		t.Fatalf("conversation list=%+v", list)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/conversations/"+reply.ConversationID, "alice.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("conversation view status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var view ConversationView
+	if err := json.Unmarshal(rec.Body.Bytes(), &view); err != nil {
+		t.Fatal(err)
+	}
+	if len(view.Items) != 2 || view.Items[0].Message.ID != id || view.Items[1].Message.ID != reply.ID {
+		t.Fatalf("conversation view order=%+v", view.Items)
+	}
+
+	yes := true
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/conversations/"+reply.ConversationID, "bob.420", ConversationUpdate{Archived: &yes, Muted: &yes})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("conversation update status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var state ConversationState
+	if err := json.Unmarshal(rec.Body.Bytes(), &state); err != nil {
+		t.Fatal(err)
+	}
+	if !state.Archived || !state.Muted {
+		t.Fatalf("conversation state=%+v", state)
+	}
+}
+
+func TestHTTPConversationAuthorizationAndStrictJSON(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodGet, "/v1/conversations", "", nil)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated conversation list=%d", rec.Code)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/messages/"+id+"/reply", "mallory.420", ReplyRequest{
+		IdempotencyKey: "foreign-http-reply",
+		Subject:        "re",
+		Body:           "x",
+		Source:         ServiceID,
+	})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign reply status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/messages/"+id+"/reply", bytes.NewBufferString(`{"idempotency_key":"bad","subject":"x","body":"x","source":"420/service/mail/v1","unexpected":true}`))
+	req.Header.Set("X-Test-Actor", "bob.420")
+	recorder := httptest.NewRecorder()
+	h.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("reply unknown field status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}

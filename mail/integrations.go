@@ -15,6 +15,7 @@ const (
 	MaxConnectorIDBytes       = 128
 	MaxConnectorOpaqueBytes   = 64 << 10
 	MaxConnectorPayloadBytes  = 1 << 20
+	MaxConnectorItems         = 500
 )
 
 type ConnectorCapability string
@@ -465,6 +466,9 @@ func validateConnectorConnection(actor, provider string, c ConnectorConnection) 
 }
 
 func validateConnectorItems(items []ConnectorItem) error {
+	if len(items) > MaxConnectorItems {
+		return ErrConnectorInvalidResult
+	}
 	for _, item := range items {
 		if strings.TrimSpace(item.ExternalID) == "" || item.OccurredAt.IsZero() || strings.TrimSpace(item.Kind) == "" || len([]byte(item.Payload)) > MaxConnectorPayloadBytes {
 			return ErrConnectorInvalidResult

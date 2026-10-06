@@ -866,5 +866,21 @@
     "quarantineSuppressesNotification": true,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "abuseControls": {
+    "enabled": true,
+    "nativeSenderMessagesPerMinute": 60,
+    "nativeSenderDistinctRecipientsPerHour": 25,
+    "idempotentReplayConsumesAdditionalQuota": false,
+    "transactionalRecheckBeforeMetadataCommit": true,
+    "rateLimitHTTPStatus": 429,
+    "connectorMaxItemsPerResult": 500,
+    "connectorPullAndWebhookItemBound": true,
+    "existingOwnerScopedReputationPreserved": true,
+    "existingOneReportPerOwnerMessagePreserved": true,
+    "existingQuarantineReviewPreserved": true,
+    "globalSenderBlacklistFromAutomaticSignal": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

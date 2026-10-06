@@ -260,6 +260,11 @@ if profile_path.is_file():
     if impersonation.get("externalDisplayNameProviders")!=["discord","telegram"] or impersonation.get("officialDomain")!="420integrated.org" or impersonation.get("lookalikeDomainQuarantineScore")!=3: errors.append("MAIL-2.34 provider/domain policy drifted")
     if any(impersonation.get(k) is not True for k in ["protectedExternalDisplayClaimQuarantined","confusableProtectedDisplayClaimDetected","ecosystemDomainLookalikeDetection","officialSubdomainsAllowed","canonicalNativeSenderAuthorityPreserved","quarantineSuppressesNotification"]): errors.append("MAIL-2.34 impersonation controls drifted")
     if impersonation.get("trustedSenderBypassesImpersonation") is not False or impersonation.get("quarantineFolder")!="JUNK" or impersonation.get("publicIndexing") is not False or impersonation.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.34 impersonation quarantine/privacy drifted")
+    abuse_controls=profile.get("abuseControls",{})
+    if abuse_controls.get("enabled") is not True or abuse_controls.get("nativeSenderMessagesPerMinute")!=60 or abuse_controls.get("nativeSenderDistinctRecipientsPerHour")!=25: errors.append("MAIL-2.35 native abuse-rate policy drifted")
+    if abuse_controls.get("connectorMaxItemsPerResult")!=500 or abuse_controls.get("rateLimitHTTPStatus")!=429: errors.append("MAIL-2.35 connector/HTTP abuse policy drifted")
+    if any(abuse_controls.get(k) is not True for k in ["transactionalRecheckBeforeMetadataCommit","connectorPullAndWebhookItemBound","existingOwnerScopedReputationPreserved","existingOneReportPerOwnerMessagePreserved","existingQuarantineReviewPreserved"]): errors.append("MAIL-2.35 abuse-control behavior drifted")
+    if any(abuse_controls.get(k) is not False for k in ["idempotentReplayConsumesAdditionalQuota","globalSenderBlacklistFromAutomaticSignal","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.35 abuse-control safety/privacy drifted")
     if desktop_ui.get("newBackendAuthority") is not False or desktop_ui.get("publicIndexing") is not False or desktop_ui.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.30 desktop authority/privacy drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
@@ -278,6 +283,12 @@ for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","Idempote
     if token not in service: errors.append("mail service invariant missing: "+token)
 for token in ["PrivateBlobSecurityProfile","PrivateBlobSecurityProvider","validatePrivateBlobSecurity","putPrivateVerified","getPrivateVerified","privateBodyDigest","ErrPrivateBlobIntegrity","ErrPrivateBlobSecurity"]:
     if token not in service: errors.append("MAIL-2.33 private blob security invariant missing: "+token)
+for token in ["MaxOutboundMessagesPerMinute","MaxDistinctRecipientsPerHour","checkOutboundAbuseControls","ErrAbuseRateLimited"]:
+    if token not in service: errors.append("MAIL-2.35 native abuse-control invariant missing: "+token)
+for token in ["MaxConnectorItems","len(items) > MaxConnectorItems"]:
+    if token not in connector_src: errors.append("MAIL-2.35 connector batch abuse-control invariant missing: "+token)
+for token in ["http.StatusTooManyRequests",'"RATE_LIMITED"',"ErrAbuseRateLimited"]:
+    if token not in http: errors.append("MAIL-2.35 HTTP rate-limit surface missing: "+token)
 for token in ["sanitizeHTTPJSON","stripPrivateHTTPMetadata","httpPrivateMetadataKeys",'"body_ref"','"body_digest"','"staging_body_ref"','"staging_body_digest"','"request_fingerprint"','"idempotency_key"']:
     if token not in http: errors.append("MAIL-2.33 HTTP leakage control missing: "+token)
 if "AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
@@ -577,4 +588,5 @@ print("MAIL-2.31 mail settings center: qualified by app-scoped checks")
 print("MAIL-2.32 connector isolation: qualified by app-scoped checks")
 print("MAIL-2.33 encryption and leakage controls: qualified by app-scoped checks")
 print("MAIL-2.34 phishing and impersonation protection: qualified by app-scoped checks")
+print("MAIL-2.35 abuse controls: qualified by app-scoped checks")
 

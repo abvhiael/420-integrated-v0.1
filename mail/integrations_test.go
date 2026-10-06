@@ -307,3 +307,21 @@ func TestConnectorWebhookHeadersAreIsolatedFromAdapterMutation(t *testing.T) {
 		t.Fatalf("isolated header copy not delivered: %+v", adapter.seenHeaders)
 	}
 }
+
+func TestConnectorItemCountIsBounded(t *testing.T) {
+	items := make([]ConnectorItem, MaxConnectorItems+1)
+	for i := range items {
+		items[i] = ConnectorItem{
+			ExternalID: fmt.Sprintf("item-%d", i),
+			OccurredAt: time.Unix(1700000000+int64(i), 0).UTC(),
+			Kind: "MESSAGE",
+			Payload: "x",
+		}
+	}
+	if err := validateConnectorItems(items); !errors.Is(err, ErrConnectorInvalidResult) {
+		t.Fatalf("oversized connector result accepted: %v", err)
+	}
+	if err := validateConnectorItems(items[:MaxConnectorItems]); err != nil {
+		t.Fatalf("bounded connector result rejected: %v", err)
+	}
+}

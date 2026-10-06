@@ -1477,6 +1477,8 @@ func writeServiceError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+	case errors.Is(err, ErrAbuseRateLimited):
+		writeError(w, http.StatusTooManyRequests, "RATE_LIMITED", err.Error())
 	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict), errors.Is(err, ErrAbuseReportConflict), errors.Is(err, ErrQuarantineReview), errors.Is(err, ErrDraftConflict), errors.Is(err, ErrDeliveryConflict), errors.Is(err, ErrOutboxFull):
 		writeError(w, http.StatusConflict, "CONFLICT", err.Error())
 	case errors.Is(err, ErrDraftDeleteUnavailable):

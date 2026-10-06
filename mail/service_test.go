@@ -516,3 +516,78 @@ func TestPrivateBlobDigestIsVerifiedOnWriteAndRead(t *testing.T) {
 		t.Fatalf("tampered private blob accepted: %v", err)
 	}
 }
+
+func TestOutboundAbuseControlsRateLimitAndIdempotentReplay(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	now := time.Unix(1700010000, 0).UTC()
+	s.Now = func() time.Time { return now }
+
+	var first Message
+	for i := 0; i < MaxOutboundMessagesPerMinute; i++ {
+		msg, err := s.Send(ctx, "alice.420", SendRequest{
+			IdempotencyKey: fmt.Sprintf("abuse-rate-%d", i),
+			Sender: "alice.420", Recipient: "bob.420",
+			Subject: "ordinary", Body: fmt.Sprintf("body-%d", i), Source: ServiceID,
+		})
+		if err != nil {
+			t.Fatalf("send %d: %v", i, err)
+		}
+		if i == 0 {
+			first = msg
+		}
+	}
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "abuse-rate-over", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "ordinary", Body: "over", Source: ServiceID,
+	}); !errors.Is(err, ErrAbuseRateLimited) {
+		t.Fatalf("rate limit not enforced: %v", err)
+	}
+	replay, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "abuse-rate-0", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "ordinary", Body: "body-0", Source: ServiceID,
+	})
+	if err != nil || replay.ID != first.ID {
+		t.Fatalf("idempotent replay was throttled: msg=%+v err=%v", replay, err)
+	}
+	now = now.Add(time.Minute + time.Second)
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "abuse-rate-reset", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "ordinary", Body: "after-window", Source: ServiceID,
+	}); err != nil {
+		t.Fatalf("rate window did not reset: %v", err)
+	}
+}
+
+func TestOutboundAbuseControlsDistinctRecipientFanout(t *testing.T) {
+	ids := testIDs{"alice.420": true}
+	for i := 0; i <= MaxDistinctRecipientsPerHour; i++ {
+		ids[fmt.Sprintf("recipient-%d.420", i)] = true
+	}
+	s := NewService(ids, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore())
+	ctx := context.Background()
+	now := time.Unix(1700020000, 0).UTC()
+	s.Now = func() time.Time { return now }
+
+	for i := 0; i < MaxDistinctRecipientsPerHour; i++ {
+		recipient := fmt.Sprintf("recipient-%d.420", i)
+		if _, err := s.Send(ctx, "alice.420", SendRequest{
+			IdempotencyKey: fmt.Sprintf("fanout-%d", i), Sender: "alice.420", Recipient: recipient,
+			Subject: "ordinary", Body: "ordinary", Source: ServiceID,
+		}); err != nil {
+			t.Fatalf("fanout %d: %v", i, err)
+		}
+	}
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "fanout-over", Sender: "alice.420", Recipient: fmt.Sprintf("recipient-%d.420", MaxDistinctRecipientsPerHour),
+		Subject: "ordinary", Body: "ordinary", Source: ServiceID,
+	}); !errors.Is(err, ErrAbuseRateLimited) {
+		t.Fatalf("distinct-recipient fanout limit not enforced: %v", err)
+	}
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "fanout-existing", Sender: "alice.420", Recipient: "recipient-0.420",
+		Subject: "ordinary", Body: "ordinary again", Source: ServiceID,
+	}); err != nil {
+		t.Fatalf("existing recipient incorrectly blocked by fanout limit: %v", err)
+	}
+}

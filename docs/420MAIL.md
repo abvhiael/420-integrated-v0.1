@@ -2059,6 +2059,54 @@ Discord and Telegram imports now use `putPrivateVerified` rather than directly c
 
 No new public index, provider credential store, wallet authority, or on-chain message content is introduced.
 
+
+## MAIL-2.35 Abuse Controls
+
+MAIL-2.35 closes the rate/fan-out abuse gap explicitly deferred by MAIL-2.7 and bounds external connector batch amplification.
+
+### Native sender rate controls
+
+Canonical native Mail sends are bounded by repository policy to:
+
+- 60 successfully materialized messages per sender per rolling minute;
+- 25 distinct recipients per sender per rolling hour.
+
+The limits are derived from durable message metadata, so restart does not reset abuse history.
+
+Idempotent replay is checked before abuse accounting and returns the already-materialized message without consuming additional quota.
+
+The abuse condition is checked before private-body storage and is rechecked transactionally immediately before metadata commit so concurrent sends cannot exceed the committed Mail limit.
+
+A rejected send returns `ErrAbuseRateLimited`, mapped by HTTP to status 429 and code `RATE_LIMITED`.
+
+### Recipient fan-out
+
+The fan-out limit restricts new recipients, not continued legitimate conversation with a recipient already contacted inside the rolling hour.
+
+This avoids converting the anti-bulk-abuse control into a per-message cap for an existing conversation.
+
+### Connector batch amplification
+
+Provider-neutral connector Pull/Webhook results are capped at 500 items per result.
+
+Results above that bound fail closed as `ErrConnectorInvalidResult`; no partial import occurs through the connector service.
+
+Provider payload-size limits and MAIL-2.32 isolation remain unchanged.
+
+### Existing abuse model retained
+
+MAIL-2.35 preserves:
+
+- owner-scoped sender reputation;
+- one abuse report per owner/message;
+- spam/phishing report classification;
+- explicit quarantine release;
+- false-positive reputation correction;
+- MAIL-2.34 impersonation quarantine;
+- no automatic global sender blacklist.
+
+No public indexing or on-chain message body storage is introduced.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

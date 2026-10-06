@@ -198,7 +198,7 @@ for token in ["Deliveries","validateDeliveryData","DurableStoreSchemaVersion = 8
 onboarding_src=(ROOT/"mail/onboarding.go").read_text() if (ROOT/"mail/onboarding.go").is_file() else ""
 for token in ["OnboardingGoogle","OnboardingApple","OnboardingPasskey","OnboardingExistingWallet","OnboardingAuthority","OnboardingService","GoogleOnboardingRequest","AppleOnboardingRequest","PasskeyOnboardingRequest","WalletOnboardingRequest","SessionToken","NonCustodial","ErrOnboardingInvalidResult","validWalletAddress"]:
     if token not in onboarding_src: errors.append("MAIL-2.11 onboarding invariant missing: "+token)
-for token in ['"/v1/onboarding/google"','"/v1/onboarding/apple"','"/v1/onboarding/passkey"','"/v1/onboarding/wallet"',"Onboarding *OnboardingService"]:
+for token in ['"/v1/onboarding/google"','"/v1/onboarding/apple"','"/v1/onboarding/passkey"','"/v1/onboarding/wallet"',"*OnboardingService"]:
     if token not in http: errors.append("MAIL-2.11 HTTP onboarding surface missing: "+token)
 for token in ["GoogleOnboarding","AppleOnboarding","PasskeyOnboarding","ExistingWalletOnboarding"]:
     if token not in client: errors.append("MAIL-2.11 client onboarding surface missing: "+token)

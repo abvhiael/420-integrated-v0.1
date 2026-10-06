@@ -1,0 +1,53 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.5.ExecutionEnvironment.v1",
+  "step": "CMP-4.5",
+  "title": "Reproducible execution environments",
+  "canonical_definition": "Reproducible execution environments",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_main_sha": "53f5603520e02a492184a41801de0ad09af59b35",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeExecutionEnvironmentRegistry420.sol",
+    "test": "contracts/test/ComputeExecutionEnvironmentRegistry420.t.sol",
+    "doc": "docs/compute-market/CMP-4.5-REPRODUCIBLE-EXECUTION-ENVIRONMENTS.md",
+    "verifier": "scripts/verify-cmp-4-5-execution-environments.py"
+  },
+  "project_binding": {
+    "source": "ComputeResearchProjectRegistry420",
+    "register_requires_current_acceptable_project": true,
+    "revision_drift_fails_new_work": true
+  },
+  "cmp_4_1_integration": {
+    "rule": "executableContainerCommitment is the exact current reproducible execution-environment revision commitment for scientific work",
+    "admission": "isCurrentReproducible(environmentId, revision, executableContainerCommitment)"
+  },
+  "exit_criteria": [
+    "canonical chain/registry/project/controller-bound environment IDs",
+    "nonzero artifact/runtime/dependency/command/platform/sandbox/reproducibility commitments",
+    "exact current CMP-4.2 project binding required for new work",
+    "CMP-4.1 executableContainerCommitment resolves to exact environment revision commitment",
+    "project-owner-only exact-revision mutation",
+    "append-only predecessor-linked environment history",
+    "project drift and environment deactivation fail closed",
+    "cross-environment/stale replay fails closed",
+    "CMP-0.4 signed manifest and CMP-3 runtime/sandbox remain canonical execution owners",
+    "environment identity creates no execution/correctness/access/economic authority",
+    "dedicated tests and mechanical verifier committed",
+    "affected Compute Market Level 1 qualification passes exact implementation SHA"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.6 result provenance",
+    "CMP-4.7 scientific metadata and lineage",
+    "CMP-4.8 publication / retention policy",
+    "CMP-4.9 research dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-7 SDK/API/indexer expansion",
+    "CMP-8 Compute UI",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.6 — Result provenance"
+}

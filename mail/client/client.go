@@ -540,7 +540,6 @@ func (c Client) ShareToSignal(ctx context.Context, req mail.SignalShareRequest) 
 	return out, err
 }
 
-
 func (c Client) SignalDeepSyncStatus(ctx context.Context) (mail.SignalDeepSyncStatus, error) {
 	var out mail.SignalDeepSyncStatus
 	err := c.do(ctx, http.MethodGet, "/v1/connectors/signal/deep-sync/status", nil, &out)

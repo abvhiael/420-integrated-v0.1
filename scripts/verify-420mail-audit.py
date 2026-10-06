@@ -120,6 +120,16 @@ if profile_path.is_file():
     alerts=security.get("alerts",{})
     if alerts.get("listing") is not True or alerts.get("acknowledgement") is not True or alerts.get("authority")!="WALLET_IDENTITY_SECURITY_AUTHORITY": errors.append("MAIL-2.12 security alerts drifted")
     if security.get("securityStatePersistence")!="CANONICAL_AUTHORITY_ONLY" or security.get("credentialPersistence") is not False or security.get("sessionSecretPersistence") is not False or security.get("publicIndexing") is not False or security.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.12 security persistence/privacy boundary drifted")
+    wallet=profile.get("walletFunctions",{})
+    if wallet.get("enabled") is not True or wallet.get("authority")!="CANONICAL_WALLET_SMARTACCOUNT_ADAPTER" or wallet.get("authenticatedOwnerOnly") is not True: errors.append("MAIL-2.13 wallet authority boundary drifted")
+    if wallet.get("actions")!=["TRANSACTION","MESSAGE_SIGNATURE"] or wallet.get("prepareIntentOnly") is not True: errors.append("MAIL-2.13 wallet action inventory drifted")
+    if wallet.get("signing")!="WALLET_ONLY" or wallet.get("submission")!="WALLET_ONLY" or wallet.get("simulation")!="WALLET_ONLY": errors.append("MAIL-2.13 wallet signing/submission boundary drifted")
+    if wallet.get("chainValidation")!="AUTHORITY_REQUIRED" or wallet.get("authorizationEpoch")!="AUTHORITY_REQUIRED" or wallet.get("explicitWalletApprovalRequired") is not True: errors.append("MAIL-2.13 wallet authorization boundary drifted")
+    verification=wallet.get("verification",{})
+    if verification.get("kinds")!=["TRANSACTION","SIGNATURE"] or verification.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.13 verification inventory drifted")
+    if verification.get("canonicalEvidenceRequired") is not True or verification.get("submissionAckIsCompletion") is not False or verification.get("finalizedSeparateFromVerified") is not True: errors.append("MAIL-2.13 canonical verification boundary drifted")
+    if wallet.get("privateKeyInput") is not False or wallet.get("seedPhraseInput") is not False or wallet.get("passkeyPrivateMaterialInput") is not False: errors.append("MAIL-2.13 wallet secret-input boundary drifted")
+    if wallet.get("credentialPersistence") is not False or wallet.get("actionPersistence") is not False or wallet.get("verificationEvidencePersistence") is not False or wallet.get("publicIndexing") is not False or wallet.get("messageBodiesOnChain") is not False: errors.append("MAIL-2.13 wallet persistence/privacy boundary drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -223,6 +233,13 @@ for token in ['"/v1/security"','"/v1/security/passkeys"','"/v1/security/devices"
     if token not in http: errors.append("MAIL-2.12 HTTP security surface missing: "+token)
 for token in ["SecurityState","EnrollPasskey","RevokePasskey","EnrollDevice","RevokeDevice","Recovery","RevokeSession","AcknowledgeSecurityAlert"]:
     if token not in client: errors.append("MAIL-2.12 client security surface missing: "+token)
+wallet_src=(ROOT/"mail/wallet_actions.go").read_text() if (ROOT/"mail/wallet_actions.go").is_file() else ""
+for token in ["WalletActionTransaction","WalletActionMessageSignature","WalletVerifyTransaction","WalletVerifySignature","WalletActionAuthority","WalletActionService","WalletActionRequest","WalletHandoff","WalletVerificationRequest","WalletVerification","PrepareWalletAction","VerifyWalletEvidence","RequiresApproval","NonCustodial","Canonical","Finalized","ErrWalletInvalidResult"]:
+    if token not in wallet_src: errors.append("MAIL-2.13 wallet handoff invariant missing: "+token)
+for token in ['"/v1/wallet/actions"','"/v1/wallet/verifications"',"*WalletActionService"]:
+    if token not in http: errors.append("MAIL-2.13 HTTP wallet surface missing: "+token)
+for token in ["PrepareWalletAction","VerifyWalletEvidence"]:
+    if token not in client: errors.append("MAIL-2.13 client wallet surface missing: "+token)
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
 for token in ["/v1/drafts","autosaveDraft","recoverDraft","discardDraft","expected_version"]:
     if token not in web: errors.append("MAIL-2.9 thin UI draft behavior missing: "+token)
@@ -230,6 +247,8 @@ for token in ["/v1/onboarding/","data-onboard","__420_ONBOARDING__","mailSession
     if token not in web: errors.append("MAIL-2.11 thin UI onboarding behavior missing: "+token)
 for token in ["/v1/security","data-security-action","__420_SECURITY__","loadSecurity","revokeSecurity","authorization_epoch"]:
     if token not in web: errors.append("MAIL-2.12 thin UI security behavior missing: "+token)
+for token in ["/v1/wallet/actions","/v1/wallet/verifications","data-wallet-action","__420_WALLET_ACTIONS__","requires_wallet_approval","non_custodial"]:
+    if token not in web: errors.append("MAIL-2.13 thin UI wallet behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -256,4 +275,5 @@ print("MAIL-2.9 drafts system: qualified by app-scoped checks")
 print("MAIL-2.10 outbox and delivery queue: qualified by app-scoped checks")
 print("MAIL-2.11 email-as-a-wallet onboarding: qualified by app-scoped checks")
 print("MAIL-2.12 passkey-first security: qualified by app-scoped checks")
+print("MAIL-2.13 wallet functions inside mail: qualified by app-scoped checks")
 

@@ -19,6 +19,7 @@ type HTTPHandler struct {
 	WalletActions *WalletActionService
 	Connectors    *ConnectorService
 	DiscordSync   *DiscordSyncService
+	DiscordDelivery *DiscordDeliveryService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +79,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.connectors(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/sync":
 		h.discordSync(w, r, actor)
+	case r.URL.Path == "/v1/connectors/discord/deliver":
+		h.discordDeliver(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -149,6 +152,34 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) discordDeliver(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.DiscordDelivery == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "discord delivery unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req DiscordDeliveryRequest
+	if !decodeStrictJSON(w, r, MaxDiscordDeliveryContentBytes+8192, &req) {
+		return
+	}
+	out, err := h.DiscordDelivery.Deliver(r.Context(), actor, req)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrDiscordDeliveryConflict):
+			writeError(w, http.StatusConflict, "DISCORD_DELIVERY_CONFLICT", err.Error())
+		case errors.Is(err, ErrDiscordInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "discord delivery authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
 }
 
 func (h HTTPHandler) discordSync(w http.ResponseWriter, r *http.Request, actor string) {

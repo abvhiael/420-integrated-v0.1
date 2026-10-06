@@ -548,6 +548,10 @@ Potential adapters, where technically and administratively permitted:
 
 ## CMP-5.1 — Folding@home adapter
 
+**Status: implementation complete; Level 1 exact-head qualification pending.**
+
+Normalize Folding@home project/work-unit/donor/assignment/result/credit/evidence material into stable domain-separated 420Integrated commitments without claiming external truth, reward entitlement, settlement authority or duplicate protection. External-result attestation remains CMP-5.7 and double-reward prevention remains CMP-5.6. Specification: [CMP-5.1 Folding@home adapter](CMP-5.1-FOLDING-AT-HOME-ADAPTER.md).
+
 ## CMP-5.2 — BOINC adapter
 
 ## CMP-5.3 — Research-cluster adapter
@@ -725,7 +729,7 @@ Production target flow:
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
-| CMP-5 external compute adapters | forthcoming |
+| CMP-5 external compute adapters | CMP-5.1 implementation complete; Level 1 qualification pending |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |

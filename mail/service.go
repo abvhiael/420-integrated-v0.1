@@ -73,6 +73,7 @@ type Message struct {
 	BodyRef        string     `json:"body_ref,omitempty"`
 	BodyDigest     string     `json:"body_digest"`
 	ConversationID string     `json:"conversation_id,omitempty"`
+	ReplyTo        string     `json:"reply_to,omitempty"`
 	CreatedAt      time.Time  `json:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at"`
 	ReadAt         *time.Time `json:"read_at,omitempty"`
@@ -115,6 +116,7 @@ type SendRequest struct {
 	Subject        string `json:"subject"`
 	Body           string `json:"body"`
 	ConversationID string `json:"conversation_id,omitempty"`
+	ReplyTo        string `json:"reply_to,omitempty"`
 	Source         string `json:"source"`
 }
 
@@ -168,6 +170,8 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 	req.Subject = strings.TrimSpace(req.Subject)
 	req.Source = strings.TrimSpace(req.Source)
 	req.IdempotencyKey = strings.TrimSpace(req.IdempotencyKey)
+	req.ConversationID = strings.TrimSpace(req.ConversationID)
+	req.ReplyTo = strings.TrimSpace(req.ReplyTo)
 	if actor == "" || req.Sender == "" || req.Recipient == "" || actor != req.Sender {
 		return Message{}, ErrUnauthorized
 	}
@@ -207,9 +211,16 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return existing, nil
 	}
 
-	preview := Message{Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, Source: req.Source}
+	id := deterministicMessageID(req.Sender, req.Recipient, req.IdempotencyKey)
+	var conversationID string
 	if err := s.Store.View(ctx, func(data *storeData) error {
-		_, err := evaluateTrustPolicy(data, req.Recipient, preview, req.Body)
+		var err error
+		conversationID, err = resolveConversation(data, actor, req, id)
+		if err != nil {
+			return err
+		}
+		preview := Message{ID: id, Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, ConversationID: conversationID, ReplyTo: req.ReplyTo, Source: req.Source}
+		_, err = evaluateTrustPolicy(data, req.Recipient, preview, req.Body)
 		return err
 	}); err != nil {
 		return Message{}, err
@@ -223,8 +234,7 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return Message{}, errors.New("mail: storage returned incomplete body evidence")
 	}
 	now := s.Now().UTC()
-	id := deterministicMessageID(req.Sender, req.Recipient, req.IdempotencyKey)
-	msg := Message{ID: id, Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, BodyRef: ref, BodyDigest: digest, ConversationID: strings.TrimSpace(req.ConversationID), CreatedAt: now, UpdatedAt: now, Status: "DELIVERED", Visibility: "PRIVATE", Source: req.Source, Version: 1, Fingerprint: fp, IdempotencyKey: req.IdempotencyKey}
+	msg := Message{ID: id, Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, BodyRef: ref, BodyDigest: digest, ConversationID: conversationID, ReplyTo: req.ReplyTo, CreatedAt: now, UpdatedAt: now, Status: "DELIVERED", Visibility: "PRIVATE", Source: req.Source, Version: 1, Fingerprint: fp, IdempotencyKey: req.IdempotencyKey}
 	senderReadAt := now
 	senderState := MailboxState{MessageID: id, Owner: req.Sender, Folder: FolderSent, ReadAt: &senderReadAt, UpdatedAt: now, Version: 1}
 	recipientState := MailboxState{MessageID: id, Owner: req.Recipient, Folder: FolderInbox, UpdatedAt: now, Version: 1}
@@ -241,6 +251,13 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 			result = existing
 			return nil
 		}
+		resolvedConversationID, err := resolveConversation(data, actor, req, id)
+		if err != nil {
+			return err
+		}
+		if resolvedConversationID != msg.ConversationID {
+			return ErrInvalidInput
+		}
 		decision, err := evaluateTrustPolicy(data, req.Recipient, msg, req.Body)
 		if err != nil {
 			return err
@@ -248,6 +265,17 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		protection := evaluateSpamProtection(data, req.Recipient, msg, req.Body, decision)
 		if err := applyIncomingRules(data, req.Recipient, msg, req.Body, &recipientState, now); err != nil {
 			return err
+		}
+		threadState := data.ConversationStates[conversationStateKey(req.Recipient, msg.ConversationID)]
+		if threadState.Archived && recipientState.Folder == FolderInbox {
+			recipientState.PreviousFolder = FolderInbox
+			recipientState.Folder = FolderArchive
+			t := now
+			recipientState.ArchivedAt = &t
+		}
+		if threadState.Muted {
+			recipientState.Muted = true
+			recipientMuted = true
 		}
 		if protection.Quarantine {
 			if recipientState.Folder != FolderJunk {

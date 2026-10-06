@@ -123,6 +123,41 @@ contract MediaPhase1Hardening420Test {
         require(state == MediaSettlement420.SettlementState.CLAIMABLE, "release callback leaked closed state");
     }
 
+    function testUnauthorizedAdaptersRemainRejected() public {
+        (MediaSettlement420 settlement, HostileMediaJob420 hostile) = _fixture();
+
+        vm.expectRevert(MediaSettlement420.NotVaultAdapter.selector);
+        settlement.confirmVaultFunding(
+            JOB_ID,
+            hostile.payer(),
+            hostile.operatorId(),
+            hostile.beneficiary(),
+            keccak256("vault"),
+            keccak256("funding"),
+            1 ether
+        );
+
+        _fund(settlement, hostile, 1 ether);
+        hostile.resolve(settlement, JOB_ID, true, keccak256("resolution"));
+
+        vm.expectRevert(MediaSettlement420.NotPayoutAdapter.selector);
+        settlement.release(JOB_ID, hostile.beneficiary());
+    }
+
+    function testHostileRefundCallbackRollsBackClosedState() public {
+        (MediaSettlement420 settlement, HostileMediaJob420 hostile) = _fixture();
+        _fund(settlement, hostile, 42 ether);
+        hostile.resolve(settlement, JOB_ID, false, keccak256("refund-resolution"));
+        hostile.setReverts(false, false, true);
+
+        vm.prank(PAYOUT);
+        vm.expectRevert(HostileMediaJob420.HostileCallback.selector);
+        settlement.refund(JOB_ID);
+
+        (,,,,,,, MediaSettlement420.SettlementState state) = settlement.settlements(JOB_ID);
+        require(state == MediaSettlement420.SettlementState.REFUNDABLE, "refund callback leaked closed state");
+    }
+
     function testFuzzFundingWithinBoundPreservesExactAmount(uint96 seed) public {
         (MediaSettlement420 settlement, HostileMediaJob420 hostile) = _fixture();
         uint256 amount = (uint256(seed) % hostile.maxSpend()) + 1;

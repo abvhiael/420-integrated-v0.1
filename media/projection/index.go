@@ -54,30 +54,31 @@ func (i *Index) apply(event Event) error {
 	if err := event.Result.Validate(); err != nil {
 		return err
 	}
-	if event.Result.Provenance.Source.String() == "" {
+	if event.Result.Provenance.Source == "" {
 		return ErrInvalidProjection
 	}
 	if event.Result.Provenance.BlockNumber == nil {
 		return ErrInvalidProjection
 	}
 	block := *event.Result.Provenance.BlockNumber
-	if block < i.finalizedHeight {
+	previousFinalized := i.finalizedHeight
+	if block < previousFinalized {
 		return ErrFinalizedConflict
-	}
-	if event.Result.Provenance.Finality == searchresult.FinalityFinalized && block > i.finalizedHeight {
-		i.finalizedHeight = block
 	}
 
 	current, exists := i.entries[event.Result.ID]
 	if exists && current.Result.Provenance.BlockNumber != nil {
 		currentBlock := *current.Result.Provenance.BlockNumber
-		if currentBlock <= i.finalizedHeight &&
+		if currentBlock <= previousFinalized &&
 			(strings.ToLower(current.Result.Provenance.BlockHash) != strings.ToLower(event.Result.Provenance.BlockHash) ||
 				current.Result.Provenance.TransactionHash != event.Result.Provenance.TransactionHash ||
 				current.Result.Provenance.LogIndex == nil || event.Result.Provenance.LogIndex == nil ||
 				*current.Result.Provenance.LogIndex != *event.Result.Provenance.LogIndex) {
 			return ErrFinalizedConflict
 		}
+	}
+	if event.Result.Provenance.Finality == searchresult.FinalityFinalized && block > i.finalizedHeight {
+		i.finalizedHeight = block
 	}
 	if event.Action == ActionDelete {
 		delete(i.entries, event.Result.ID)
@@ -131,7 +132,7 @@ func (i *Index) Rebuild(events []Event) error {
 		if event.Result.Provenance.BlockNumber == nil || event.Result.Provenance.LogIndex == nil {
 			return ErrRebuildOrder
 		}
-		key := fmt.Sprintf("%020d:%020d:%s", *event.Result.Provenance.BlockNumber, *event.Result.Provenance.LogIndex, event.Result.ID)
+		key := fmt.Sprintf("%020d:%020d", *event.Result.Provenance.BlockNumber, *event.Result.Provenance.LogIndex)
 		if key == previous {
 			return ErrRebuildOrder
 		}

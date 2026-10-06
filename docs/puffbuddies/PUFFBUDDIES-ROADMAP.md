@@ -1438,6 +1438,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** cross-step adversarial coverage passes across subject/replay/source/policy/freshness/revocation/outage/economic/admin/consent/stale-derived/privacy-oracle cases; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records all attack classes.
 
+### PB-2.12 — Failure & recovery qualification
+
+**Purpose:** qualify accumulated PB-2 eligibility state under storage/dependency failure, stale/conflicting replicas, restore/rollback, optimistic concurrency and recovery while preserving fail-closed authorization, revocation and privacy semantics.
+
+**Canonical requirements:** authoritative eligibility-store outage fails closed; stale/conflicting replicas cannot replace newer eligibility; restore snapshots older than the current revocation generation are rejected; current-generation restores still reject conflicting records; optimistic concurrency prevents stale overwrite; partial operation failure must not be published as successful derived authorization; the qualification adapter is not falsely treated as transactional; rollback uses a complete known-good before-image; recovered state still obeys current policy/expiry/authorization; recovery cannot introduce raw identity/proof/wallet linkage or leak PB-2 private metadata; deletion/revocation generation supremacy and replay/time monotonicity remain intact; no production database/backup/replication/deployment is invented.
+
+**Affected components:** PB-2.12 failure/recovery test suite, PB-2 workflow, canonical definition/evidence. No production-domain semantic change is required unless qualification exposes a genuine defect.
+
+**Qualification level:** Level 1 failure/recovery roadmap-step qualification.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the documented Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.7, PB-0.11, PB-1.9, PB-1.12, and PB-2.5 through PB-2.11 COMPLETE.
+
+**Exit criteria:** authoritative outage fails closed; stale/conflicting replicas and stale restores are rejected; optimistic concurrency protects newer eligibility state; partial failure is not publishable success; rollback uses known-good state; recovered state remains policy/expiry constrained; raw identity/proof and privacy leakage remain rejected; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records results.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

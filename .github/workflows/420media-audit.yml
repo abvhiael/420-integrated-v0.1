@@ -41,7 +41,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: false
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable

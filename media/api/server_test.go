@@ -19,6 +19,7 @@ type testBackend struct {
 func (b *testBackend) ListAssets(context.Context, string, int) (Page[Asset], error) {
 	return Page[Asset]{Items: []Asset{{
 		ID: "asset-1", OwnerRef: "wallet-1", State: "READY", Visibility: "PUBLIC",
+		PlaybackURL: "https://cdn.example.invalid/asset-1.mp4",
 		CreatedAt:  time.Date(2026, 10, 6, 12, 0, 0, 0, time.FixedZone("x", -6*3600)),
 		UpdatedAt:  time.Date(2026, 10, 6, 12, 1, 0, 0, time.FixedZone("x", -6*3600)),
 		Provenance: Provenance{Source: "420Indexer", Authority: "420Media", ObservedAt: time.Date(2026, 10, 6, 12, 2, 0, 0, time.FixedZone("x", -6*3600))},
@@ -30,7 +31,7 @@ func (b *testBackend) GetAsset(context.Context, string) (Asset, error) {
 }
 func (b *testBackend) PrepareUpload(_ context.Context, req PrepareUploadRequest, _ string) (UploadPlan, error) {
 	b.prepareCalls++
-	return UploadPlan{Asset: Asset{ID: req.ID, OwnerRef: req.OwnerRef, State: "PREPARED", Visibility: req.Visibility}, UploadID: "upload-1", ProviderID: "provider-1", NodeID: "node-1", ServiceID: "storage-1", ExpiresAt: time.Date(2026, 10, 7, 0, 0, 0, 0, time.UTC)}, nil
+	return UploadPlan{Asset: Asset{ID: req.ID, OwnerRef: req.OwnerRef, State: "PREPARED", Visibility: req.Visibility}, UploadID: "upload-1", ProviderID: "provider-1", NodeID: "node-1", ServiceID: "storage-1", Endpoint: "https://storage.example.invalid/upload-1", ExpiresAt: time.Date(2026, 10, 7, 0, 0, 0, 0, time.UTC)}, nil
 }
 func (b *testBackend) CreateLivestream(_ context.Context, req CreateLivestreamRequest, _ string) (Livestream, error) {
 	return Livestream{ID: req.ID, Controller: req.Controller, Status: "created", CreatedAt: time.Now(), UpdatedAt: time.Now()}, nil
@@ -107,6 +108,9 @@ func TestCapabilitiesAndPaginationContract(t *testing.T) {
 	}
 	if env.Version != Version || env.Data.NextCursor != "cursor-2" || len(env.Data.Items) != 1 {
 		t.Fatalf("env=%+v", env)
+	}
+	if env.Data.Items[0].PlaybackURL != "https://cdn.example.invalid/asset-1.mp4" {
+		t.Fatalf("playback url=%q", env.Data.Items[0].PlaybackURL)
 	}
 	if env.Data.Items[0].CreatedAt.Location() != time.UTC || env.Data.Items[0].Provenance.ObservedAt.Location() != time.UTC {
 		t.Fatalf("timestamps not normalized: %+v", env.Data.Items[0])

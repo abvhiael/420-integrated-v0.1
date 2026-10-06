@@ -19,6 +19,7 @@ type HTTPHandler struct {
 	WalletActions   *WalletActionService
 	Connectors      *ConnectorService
 	DiscordSync     *DiscordSyncService
+	TelegramSync    *TelegramSyncService
 	DiscordDelivery *DiscordDeliveryService
 	DiscordWallet   *DiscordWalletVerificationService
 	SignalShare     *SignalShareService
@@ -81,6 +82,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.connectors(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/sync":
 		h.discordSync(w, r, actor)
+	case r.URL.Path == "/v1/connectors/telegram/sync":
+		h.telegramSync(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/deliver":
 		h.discordDeliver(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/wallet/challenge" || r.URL.Path == "/v1/connectors/discord/wallet/verify":
@@ -291,6 +294,36 @@ func (h HTTPHandler) discordDeliver(w http.ResponseWriter, r *http.Request, acto
 			writeError(w, http.StatusConflict, "DISCORD_DELIVERY_CONFLICT", err.Error())
 		case errors.Is(err, ErrDiscordInvalidResult):
 			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "discord delivery authority returned an invalid result")
+		default:
+			writeConnectorError(w, err)
+		}
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func (h HTTPHandler) telegramSync(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.TelegramSync == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "telegram sync unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	var req struct {
+		ConnectionID string `json:"connection_id"`
+	}
+	if !decodeStrictJSON(w, r, 4096, &req) {
+		return
+	}
+	out, err := h.TelegramSync.Sync(r.Context(), actor, req.ConnectionID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrTelegramSyncConflict):
+			writeError(w, http.StatusConflict, "TELEGRAM_SYNC_CONFLICT", err.Error())
+		case errors.Is(err, ErrTelegramInvalidResult):
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "telegram sync authority returned an invalid result")
 		default:
 			writeConnectorError(w, err)
 		}

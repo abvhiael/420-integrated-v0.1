@@ -150,8 +150,12 @@ PASS for:
 - dependency-to-PuffBuddies authority transfer;
 - cross-app private-access broadening.
 
-## Repository-wide Docs workflow
-A broad 420Docs workflow auto-triggered from app-local documentation changes. It is not required PB-13 Level-1/Level-2 evidence under the phase policy and is not counted as PASS unless it completes successfully.
+## Supplementary 420Docs evidence
+A broad 420Docs workflow auto-triggered from app-local documentation changes. It was not required PB-13 Level-1/Level-2 evidence under the phase policy, but it also completed successfully on the exact qualified implementation SHA:
+- run: `37548587156` — **SUCCESS**
+- job: `112558436293` (`qualify`) — **SUCCESS**
+
+This is retained as supplementary evidence only; PB-13 did not depend on repository-wide Docs qualification.
 
 ## Milestone status
 **Level 2 milestone D — complete retained PuffBuddies integration suite — COMPLETE.**

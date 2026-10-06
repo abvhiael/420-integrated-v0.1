@@ -1406,6 +1406,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** mutual MATCHED + both-side current eligibility/lifecycle passes; either-side ineligibility/lifecycle/block/unmatch fails; stale MESSAGING_AUTH generation on either side fails; Messenger-native deny can only deny; gate cannot create match/consent or carry message payload; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.10 — Privacy & information-leakage hardening
+
+**Purpose:** harden accumulated PB-2 eligibility/authorization state against direct and inferential disclosure through public, generic derived, error/reason, discovery/matching or messaging surfaces while composing the already-qualified PB-1.10 privacy boundary.
+
+**Canonical requirements:** reject eligibility decision/source/policy/sequence/time/expiry/revocation metadata from public or generic derived payloads; reject profile/subject/actor/relationship/block/lifecycle/match/conversation identifiers and Messenger deny metadata; preserve raw identity/proof/DOB/wallet-link prohibitions; expose only minimum boolean authorization conclusions where needed; use uniform denial behavior so expired/revoked/ineligible/policy-stale/blocked/unmatched/suspended/unknown states are not distinguishable by reason code; prohibit public eligibility lookup and authorization probing; retain PB-1.10 protected-category checks; do not create a membership oracle, public match graph, Search/Indexer/Explorer projection, analytics feed or chain event; do not weaken authorization/replay/revocation/generation/lifecycle controls.
+
+**Affected components:** `puffbuddies/domain/eligibility_privacy.py`, PB-2.10 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.7, PB-1.10, and PB-2.1 through PB-2.9 COMPLETE.
+
+**Exit criteria:** PB-2 internal eligibility/authorization metadata is rejected from external/derived payloads; externally consumable authorization conclusion is boolean-only; denial reason is uniform; public eligibility/authorization probes are prohibited; retained PB-1.10 and PuffBuddies regressions pass; exact-head PB-2 fast qualification passes; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

@@ -12,15 +12,15 @@ import (
 
 const (
 	MaxOrganizationNameBytes = 64
-	MaxUserLabels             = 100
-	MaxCustomFolders          = 50
-	MaxLabelsPerMessage       = 20
-	MaxBulkOrganizationItems  = 100
+	MaxUserLabels            = 100
+	MaxCustomFolders         = 50
+	MaxLabelsPerMessage      = 20
+	MaxBulkOrganizationItems = 100
 )
 
 var (
 	ErrOrganizationConflict = errors.New("mail: organization name already exists")
-	ErrSystemLabelImmutable  = errors.New("mail: system label is immutable")
+	ErrSystemLabelImmutable = errors.New("mail: system label is immutable")
 )
 
 type LabelDefinition struct {
@@ -41,7 +41,7 @@ type CustomFolder struct {
 }
 
 type OrganizationUpdate struct {
-	AddLabelIDs   []string `json:"add_label_ids,omitempty"`
+	AddLabelIDs    []string `json:"add_label_ids,omitempty"`
 	RemoveLabelIDs []string `json:"remove_label_ids,omitempty"`
 	CustomFolderID *string  `json:"custom_folder_id,omitempty"`
 }

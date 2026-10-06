@@ -7,24 +7,24 @@ type Persona struct {
 
 var (
 	User = Persona{
-		Name: "USER",
+		Name:   "USER",
 		Wallet: "0x1000000000000000000000000000000000000001",
 	}
 	Creator = Persona{
-		Name: "CREATOR",
+		Name:   "CREATOR",
 		Wallet: "0x1000000000000000000000000000000000000002",
 	}
 	Moderator = Persona{
-		Name: "MODERATOR",
+		Name:   "MODERATOR",
 		Wallet: "0x1000000000000000000000000000000000000003",
 	}
 )
 
 const (
-	JourneyCreatorPublishesMedia      = "SVC-JOURNEY-001"
-	JourneyScheduledLivestream        = "SVC-JOURNEY-008"
-	JourneyPrivateAbsentFromSearch    = "SVC-JOURNEY-009"
-	JourneyProjectionRebuild          = "SVC-JOURNEY-010"
+	JourneyCreatorPublishesMedia   = "SVC-JOURNEY-001"
+	JourneyScheduledLivestream     = "SVC-JOURNEY-008"
+	JourneyPrivateAbsentFromSearch = "SVC-JOURNEY-009"
+	JourneyProjectionRebuild       = "SVC-JOURNEY-010"
 
 	MediaAssetID = "fixture-media-asset-001"
 	StreamID     = "fixture-media-stream-001"
@@ -43,12 +43,12 @@ type MediaJourney struct {
 
 func CanonicalMediaJourney() MediaJourney {
 	return MediaJourney{
-		Creator: Creator,
-		Follower: User,
+		Creator:   Creator,
+		Follower:  User,
 		Moderator: Moderator,
-		AssetID: MediaAssetID,
-		StreamID: StreamID,
-		ReportID: ReportID,
+		AssetID:   MediaAssetID,
+		StreamID:  StreamID,
+		ReportID:  ReportID,
 		Journeys: []string{
 			JourneyCreatorPublishesMedia,
 			JourneyScheduledLivestream,

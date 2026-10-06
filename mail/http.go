@@ -15,6 +15,7 @@ type HTTPHandler struct {
 	Service      *Service
 	Authenticate AuthenticateFunc
 	Onboarding   *OnboardingService
+	Security     *SecurityService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +59,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.conversations(w, r, actor)
 	case r.URL.Path == "/v1/outbox" || strings.HasPrefix(r.URL.Path, "/v1/outbox/"):
 		h.outbox(w, r, actor)
+	case r.URL.Path == "/v1/security" || strings.HasPrefix(r.URL.Path, "/v1/security/"):
+		h.security(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -129,6 +132,160 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) security(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.Security == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail security unavailable")
+		return
+	}
+	if r.URL.Path == "/v1/security" {
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		state, err := h.Security.Snapshot(r.Context(), actor)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if r.URL.Path == "/v1/security/passkeys" {
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req PasskeyEnrollmentRequest
+		if !decodeStrictJSON(w, r, MaxSecurityProofBytes+4096, &req) {
+			return
+		}
+		state, err := h.Security.EnrollPasskey(r.Context(), actor, req)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/passkeys/") {
+		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/passkeys/"), "/")
+		if id == "" || strings.Contains(id, "/") {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		if r.Method != http.MethodDelete {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		state, err := h.Security.RevokePasskey(r.Context(), actor, id)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if r.URL.Path == "/v1/security/devices" {
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req DeviceEnrollmentRequest
+		if !decodeStrictJSON(w, r, MaxSecurityProofBytes+4096, &req) {
+			return
+		}
+		state, err := h.Security.EnrollDevice(r.Context(), actor, req)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/devices/") {
+		id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/devices/"), "/")
+		if id == "" || strings.Contains(id, "/") {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		if r.Method != http.MethodDelete {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		state, err := h.Security.RevokeDevice(r.Context(), actor, id)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if r.URL.Path == "/v1/security/recovery" {
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req RecoveryRequest
+		if !decodeStrictJSON(w, r, 16<<10, &req) {
+			return
+		}
+		state, err := h.Security.Recovery(r.Context(), actor, req)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/sessions/") {
+		rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/sessions/"), "/")
+		parts := strings.Split(rest, "/")
+		if len(parts) != 2 || parts[0] == "" || parts[1] != "revoke" || r.Method != http.MethodPost {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		state, err := h.Security.RevokeSession(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/security/alerts/") {
+		rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/security/alerts/"), "/")
+		parts := strings.Split(rest, "/")
+		if len(parts) != 2 || parts[0] == "" || parts[1] != "ack" || r.Method != http.MethodPost {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+			return
+		}
+		state, err := h.Security.AcknowledgeAlert(r.Context(), actor, parts[0])
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+		return
+	}
+	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func decodeStrictJSON(w http.ResponseWriter, r *http.Request, limit int64, out any) bool {
+	defer r.Body.Close()
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, limit))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(out); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+		return false
+	}
+	var extra any
+	if err := dec.Decode(&extra); !errors.Is(err, io.EOF) {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+		return false
+	}
+	return true
 }
 
 func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) {

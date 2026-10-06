@@ -51,7 +51,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 3,
+    "schemaVersion": 4,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -135,6 +135,30 @@
     "maxActionLabels": 20,
     "deterministicPriority": true,
     "atomicWithDelivery": true,
+    "publicIndexing": false
+  },
+  "trustControls": {
+    "enabled": true,
+    "ownerScoped": true,
+    "entryKinds": [
+      "IDENTITY",
+      "PHRASE",
+      "APPLICATION"
+    ],
+    "dispositions": [
+      "BLOCK",
+      "ALLOW",
+      "MUTE"
+    ],
+    "maxEntriesPerUser": 250,
+    "maxValueBytes": 256,
+    "requireTrustedMode": true,
+    "identityApplicationBlockPrecedence": "ABSOLUTE",
+    "trustedIdentityApplicationBypassesPhraseBlock": true,
+    "muteSuppressesNotification": true,
+    "muteMarksRecipientCopy": true,
+    "idempotentReplayPreserved": true,
+    "atomicDeliveryRecheck": true,
     "publicIndexing": false
   }
 }

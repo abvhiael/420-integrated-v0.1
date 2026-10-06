@@ -63,15 +63,15 @@ contract ComputeExternalProofCreditAdapter420Test {
         ComputeExternalProofCreditAdapter420.ExternalSource memory base = _source();
         bytes32 expected = adapter.sourceBinding(base);
 
-        ComputeExternalProofCreditAdapter420.ExternalSource memory changed = base;
+        ComputeExternalProofCreditAdapter420.ExternalSource memory changed = _source();
         changed.adapterKind = keccak256("other-adapter");
         require(adapter.sourceBinding(changed) != expected, "adapter substitution");
 
-        changed = base;
+        changed = _source();
         changed.externalSystemId = keccak256("other-system");
         require(adapter.sourceBinding(changed) != expected, "system substitution");
 
-        changed = base;
+        changed = _source();
         changed.contributionId = keccak256("other-contribution");
         require(adapter.sourceBinding(changed) != expected, "contribution substitution");
     }
@@ -81,28 +81,28 @@ contract ComputeExternalProofCreditAdapter420Test {
         bytes32 expectedId = adapter.proofId(base);
         bytes32 expectedRecord = adapter.proofRecordCommitment(base);
 
-        ComputeExternalProofCreditAdapter420.ProofRecord memory changed = base;
+        ComputeExternalProofCreditAdapter420.ProofRecord memory changed = _proof();
         changed.proofSchemeCommitment = keccak256("other-scheme");
         require(adapter.proofId(changed) != expectedId, "scheme not identity-bound");
 
-        changed = base;
+        changed = _proof();
         changed.issuerIdentityCommitment = keccak256("other-issuer");
         require(adapter.proofId(changed) != expectedId, "issuer not identity-bound");
 
-        changed = base;
+        changed = _proof();
         changed.proofCommitment = keccak256("other-proof");
         require(adapter.proofId(changed) != expectedId, "proof not identity-bound");
 
-        changed = base;
+        changed = _proof();
         changed.observedAt += 1;
         require(adapter.proofId(changed) == expectedId, "time changed proof id");
         require(adapter.proofRecordCommitment(changed) != expectedRecord, "time not bound");
 
-        changed = base;
+        changed = _proof();
         changed.expiresAt += 1;
         require(adapter.proofRecordCommitment(changed) != expectedRecord, "expiry not bound");
 
-        changed = base;
+        changed = _proof();
         changed.evidenceCommitment = keccak256("other-evidence");
         require(adapter.proofRecordCommitment(changed) != expectedRecord, "evidence not bound");
     }
@@ -112,28 +112,28 @@ contract ComputeExternalProofCreditAdapter420Test {
         bytes32 expectedId = adapter.creditId(base);
         bytes32 expectedRecord = adapter.creditRecordCommitment(base);
 
-        ComputeExternalProofCreditAdapter420.CreditRecord memory changed = base;
+        ComputeExternalProofCreditAdapter420.CreditRecord memory changed = _credit();
         changed.creditSchemeCommitment = keccak256("other-scheme");
         require(adapter.creditId(changed) != expectedId, "scheme not identity-bound");
 
-        changed = base;
+        changed = _credit();
         changed.issuerIdentityCommitment = keccak256("other-issuer");
         require(adapter.creditId(changed) != expectedId, "issuer not identity-bound");
 
-        changed = base;
+        changed = _credit();
         changed.creditUnitCommitment = keccak256("gpu-seconds");
         require(adapter.creditId(changed) != expectedId, "unit not identity-bound");
 
-        changed = base;
+        changed = _credit();
         changed.creditAmount += 1;
         require(adapter.creditId(changed) == expectedId, "amount changed credit id");
         require(adapter.creditRecordCommitment(changed) != expectedRecord, "amount not bound");
 
-        changed = base;
+        changed = _credit();
         changed.observedAt += 1;
         require(adapter.creditRecordCommitment(changed) != expectedRecord, "time not bound");
 
-        changed = base;
+        changed = _credit();
         changed.evidenceCommitment = keccak256("other-evidence");
         require(adapter.creditRecordCommitment(changed) != expectedRecord, "evidence not bound");
     }

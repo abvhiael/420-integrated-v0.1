@@ -195,7 +195,8 @@ if profile_path.is_file():
     if telegram.get("enabled") is not True or telegram.get("provider")!="telegram" or telegram.get("connectorCapability")!="LINK": errors.append("MAIL-2.23 Telegram link capability drifted")
     if telegram.get("authority")!="TELEGRAM_LINK_AUTHORITY" or telegram.get("authorizationRef")!="OPAQUE_EXTERNAL_AUTHORIZATION_REFERENCE" or telegram.get("accountHintAuthoritative") is not False: errors.append("MAIL-2.23 Telegram authority/reference drifted")
     if telegram.get("userIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram.get("verifiedAccountRequired") is not True or telegram.get("nonCustodialRequired") is not True or telegram.get("unlinkSupported") is not True: errors.append("MAIL-2.23 Telegram account invariant drifted")
-    if any(telegram.get(k) is not False for k in ["pull","push","webhook","walletVerification"]): errors.append("MAIL-2.23 pulled later Telegram capabilities forward")
+    if telegram.get("pull") is not True: errors.append("MAIL-2.24 Telegram PULL capability not enabled")
+    if any(telegram.get(k) is not False for k in ["push","webhook","walletVerification"]): errors.append("MAIL-2.24 pulled later Telegram capabilities forward")
     if any(telegram.get(k) is not False for k in ["rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.23 Telegram credential/privacy boundary drifted")
     telegram_sync=profile.get("telegramSync",{})
     if telegram.get("pull") is not True: errors.append("MAIL-2.24 Telegram PULL capability not enabled")
@@ -362,7 +363,7 @@ for token in ["TelegramInboundMessage","TelegramSyncPage","TelegramSyncAuthority
     if token not in telegram_sync_src: errors.append("MAIL-2.24 Telegram sync invariant missing: "+token)
 for token in ["TelegramSyncAuthority","ConnectorCapabilityPull","PullTelegram","TelegramSyncItemKind"]:
     if token not in telegram_link_src: errors.append("MAIL-2.24 Telegram adapter sync invariant missing: "+token)
-for forbidden in ["ConnectorCapabilityPull","ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
+for forbidden in ["ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
     descriptor_block=telegram_link_src[telegram_link_src.find("func (a *TelegramConnectorAdapter) Descriptor"):telegram_link_src.find("func (a *TelegramConnectorAdapter) Link")]
     if forbidden in descriptor_block: errors.append("MAIL-2.23 Telegram descriptor pulled later capability forward: "+forbidden)
 if "ConnectorCapabilityWalletVerify" not in discord_src: errors.append("MAIL-2.18 Discord connector wallet capability missing")

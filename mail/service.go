@@ -187,6 +187,14 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return Message{}, fmt.Errorf("messenger policy: %w", err)
 	}
 
+	preview := Message{Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, Source: req.Source}
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		_, err := evaluateTrustPolicy(data, req.Recipient, preview, req.Body)
+		return err
+	}); err != nil {
+		return Message{}, err
+	}
+
 	fp := requestFingerprint(req)
 	idemKey := req.Sender + "\x00" + req.IdempotencyKey
 	var existing Message
@@ -223,6 +231,7 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 
 	result := msg
 	created := false
+	recipientMuted := false
 	if err := s.Store.Update(ctx, func(data *storeData) error {
 		if existingID, ok := data.ByIdem[idemKey]; ok {
 			existing := data.Messages[existingID]
@@ -231,6 +240,14 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 			}
 			result = existing
 			return nil
+		}
+		decision, err := evaluateTrustPolicy(data, req.Recipient, msg, req.Body)
+		if err != nil {
+			return err
+		}
+		if decision.Muted {
+			recipientState.Muted = true
+			recipientMuted = true
 		}
 		if err := applyIncomingRules(data, req.Recipient, msg, req.Body, &recipientState, now); err != nil {
 			return err
@@ -245,7 +262,7 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 	}); err != nil {
 		return Message{}, err
 	}
-	if created && s.Notify != nil {
+	if created && !recipientMuted && s.Notify != nil {
 		_ = s.Notify.NotifyMail(ctx, Notification{MessageID: id, Recipient: req.Recipient, Sender: req.Sender, Source: req.Source})
 	}
 	return result, nil

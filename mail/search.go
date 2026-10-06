@@ -67,8 +67,20 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 	}
 
 	var labelName, customFolderName string
+	labelNames := map[string]string{}
+	customFolderNames := map[string]string{}
 	candidates := make([]MailboxItem, 0)
 	if err := s.Store.View(ctx, func(data *storeData) error {
+		for _, label := range data.Labels {
+			if label.Owner == actor {
+				labelNames[label.ID] = label.Name
+			}
+		}
+		for _, folder := range data.CustomFolders {
+			if folder.Owner == actor {
+				customFolderNames[folder.ID] = folder.Name
+			}
+		}
 		if req.LabelID != "" {
 			label, ok := data.Labels[organizationKey(actor, req.LabelID)]
 			if !ok {
@@ -145,15 +157,20 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 			results = append(results, item)
 			continue
 		}
-		meta := strings.ToLower(strings.Join([]string{
+		metaParts := []string{
 			item.Message.Sender,
 			item.Message.Recipient,
 			item.Message.Subject,
 			item.Message.Source,
 			string(item.State.Folder),
-			labelName,
-			customFolderName,
-		}, "\n"))
+		}
+		for _, labelID := range item.State.LabelIDs {
+			metaParts = append(metaParts, labelNames[labelID])
+		}
+		if item.State.CustomFolderID != "" {
+			metaParts = append(metaParts, customFolderNames[item.State.CustomFolderID])
+		}
+		meta := strings.ToLower(strings.Join(metaParts, "\n"))
 		if strings.Contains(meta, query) {
 			results = append(results, item)
 			continue

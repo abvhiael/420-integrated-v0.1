@@ -266,6 +266,7 @@ func TestDurableStoreRebuildsMailboxIndex(t *testing.T) {
 		Subject:        "indexed",
 		BodyRef:        "private:bob:ref",
 		BodyDigest:     "digest",
+		ConversationID: deterministicConversationID("mail_index"),
 		CreatedAt:      time.Unix(1700000000, 0).UTC(),
 		UpdatedAt:      time.Unix(1700000000, 0).UTC(),
 		Status:         "DELIVERED",

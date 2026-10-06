@@ -6,6 +6,8 @@ Roadmap step: **MEDIA-AUDIT-10 — User-facing 420Media application**
 
 MEDIA-AUDIT-10 delivers the first repository-qualified end-user 420Media application.
 
+Canonical user-facing workflow scope: **upload/library/playback/livestream**.
+
 The application composes previously-qualified Media service boundaries without becoming protocol authority:
 
 - 420Storage remains authoritative for canonical media availability;

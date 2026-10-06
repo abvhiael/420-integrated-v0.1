@@ -11,19 +11,19 @@ import (
 )
 
 const (
-	FeatureLivestreaming = "media.livestreaming"
+	FeatureLivestreaming          = "media.livestreaming"
 	DefaultMaxReconnectAttempts uint32 = 3
 )
 
 var (
-	ErrInvalidRequest      = errors.New("420media livestream: invalid request")
-	ErrFeatureDisabled     = errors.New("420media livestream: feature disabled")
-	ErrUnauthorized        = errors.New("420media livestream: unauthorized controller")
-	ErrSessionExists       = errors.New("420media livestream: session exists")
-	ErrSessionNotFound     = errors.New("420media livestream: session not found")
-	ErrPersistence         = errors.New("420media livestream: persistence failure")
-	ErrRecoveryExhausted   = errors.New("420media livestream: reconnect attempts exhausted")
-	ErrGatewayState        = errors.New("420media livestream: gateway state unavailable")
+	ErrInvalidRequest    = errors.New("420media livestream: invalid request")
+	ErrFeatureDisabled   = errors.New("420media livestream: feature disabled")
+	ErrUnauthorized      = errors.New("420media livestream: unauthorized controller")
+	ErrSessionExists     = errors.New("420media livestream: session exists")
+	ErrSessionNotFound   = errors.New("420media livestream: session not found")
+	ErrPersistence       = errors.New("420media livestream: persistence failure")
+	ErrRecoveryExhausted = errors.New("420media livestream: reconnect attempts exhausted")
+	ErrGatewayState      = errors.New("420media livestream: gateway state unavailable")
 )
 
 type FeatureGate interface {
@@ -55,9 +55,9 @@ type Gateway interface {
 }
 
 type Record struct {
-	ID                string                  `json:"id"`
-	Controller        string                  `json:"controller"`
-	Spec              livegateway.SessionSpec `json:"spec"`
+	ID                string                   `json:"id"`
+	Controller        string                   `json:"controller"`
+	Spec              livegateway.SessionSpec  `json:"spec"`
 	State             livegateway.SessionState `json:"state"`
 	DesiredLive       bool                    `json:"desired_live"`
 	ReconnectAttempts uint32                  `json:"reconnect_attempts"`

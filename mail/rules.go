@@ -95,12 +95,17 @@ func (s *Service) CreateRule(ctx context.Context, actor string, input RuleInput)
 		if input.Enabled != nil {
 			enabled = *input.Enabled
 		}
-		out = MailRule{
+		stored := MailRule{
 			ID: deterministicRuleID(actor, input.Name), Owner: actor, Name: input.Name,
 			Enabled: enabled, Priority: input.Priority, Condition: input.Condition, Action: cloneRuleAction(input.Action),
 			CreatedAt: now, UpdatedAt: now,
 		}
-		data.Rules[ruleKey(actor, out.ID)] = out
+		key := ruleKey(actor, stored.ID)
+		if _, exists := data.Rules[key]; exists {
+			return ErrRuleConflict
+		}
+		data.Rules[key] = stored
+		out = cloneMailRule(stored)
 		return nil
 	})
 	return out, err
@@ -139,7 +144,7 @@ func (s *Service) UpdateRule(ctx context.Context, actor, id string, input RuleIn
 		current.Action = cloneRuleAction(input.Action)
 		current.UpdatedAt = s.Now().UTC()
 		data.Rules[key] = current
-		out = current
+		out = cloneMailRule(current)
 		return nil
 	})
 	return out, err
@@ -314,7 +319,7 @@ func rulesForOwner(data *storeData, owner string) []MailRule {
 	out := make([]MailRule, 0)
 	for _, rule := range data.Rules {
 		if rule.Owner == owner {
-			out = append(out, rule)
+			out = append(out, cloneMailRule(rule))
 		}
 	}
 	sort.Slice(out, func(i, j int) bool {
@@ -369,6 +374,12 @@ func cleanupRulesAfterCustomFolderDelete(data *storeData, owner, folderID string
 
 func ruleActionHasEffect(action RuleAction) bool {
 	return action.Folder != nil || len(action.AddLabelIDs) > 0 || action.CustomFolderID != nil || action.MarkRead != nil || action.Starred != nil || action.Pinned != nil || action.Muted != nil
+}
+
+func cloneMailRule(rule MailRule) MailRule {
+	out := rule
+	out.Action = cloneRuleAction(rule.Action)
+	return out
 }
 
 func cloneRuleAction(action RuleAction) RuleAction {

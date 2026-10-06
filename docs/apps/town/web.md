@@ -11,7 +11,7 @@ The browser is never Town authority.
 - Community ownership, membership, roles, subscriptions and entitlements are read from and written to canonical `TownAuthority420`.
 - Authority-bearing writes are sent only through an EIP-1193 wallet after wallet, chain and contract-target validation.
 
-The web app must not infer canonical membership, role, subscription or entitlement state from Search, cached feed data or presentation state.
+The web app must not infer canonical membership, role, subscription or entitlement state from Search, cached feed data or presentation state. The repository does not define a canonical mapping from opaque Town application `ObjectID` values to the `bytes32` community key used by `TownAuthority420`; therefore existing-community authority actions require an explicit canonical `bytes32` authority key instead of hashing the application ID.
 
 ## Implemented workflows
 

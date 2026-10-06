@@ -51,7 +51,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 4,
+    "schemaVersion": 5,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -160,5 +160,37 @@
     "idempotentReplayPreserved": true,
     "atomicDeliveryRecheck": true,
     "publicIndexing": false
+  },
+  "spamProtection": {
+    "enabled": true,
+    "ownerScopedReputation": true,
+    "reputationInputs": [
+      "spam_reports",
+      "phishing_reports",
+      "false_positive_releases"
+    ],
+    "duplicateFingerprintDetection": true,
+    "duplicateThreshold": 4,
+    "phishingHeuristics": [
+      "url_userinfo",
+      "ip_literal_link",
+      "punycode_link",
+      "insecure_http_link",
+      "credential_or_urgency_lure_with_link"
+    ],
+    "phishingQuarantineScore": 3,
+    "automaticQuarantineFolder": "JUNK",
+    "quarantineMutesRecipientCopy": true,
+    "quarantineSuppressesNotification": true,
+    "explicitReleaseRequiredForInboxRestore": true,
+    "trustedIdentityApplicationBypassesSpamSignals": true,
+    "trustedIdentityApplicationBypassesPhishing": false,
+    "abuseReportKinds": [
+      "SPAM",
+      "PHISHING"
+    ],
+    "oneAbuseReportPerOwnerMessage": true,
+    "publicIndexing": false,
+    "messageBodiesPersisted": false
   }
 }

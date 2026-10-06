@@ -34,17 +34,17 @@ type storeData struct {
 }
 
 type diskStoreData struct {
-	SchemaVersion     int                         `json:"schema_version"`
-	Messages          map[string]Message          `json:"messages"`
-	ByIdem            map[string]string           `json:"idempotency"`
-	Mailbox           map[string]MailboxState     `json:"mailbox"`
-	MailboxIndex      map[string][]string         `json:"mailbox_index"`
+	SchemaVersion     int                        `json:"schema_version"`
+	Messages          map[string]Message         `json:"messages"`
+	ByIdem            map[string]string          `json:"idempotency"`
+	Mailbox           map[string]MailboxState    `json:"mailbox"`
+	MailboxIndex      map[string][]string        `json:"mailbox_index"`
 	Labels            map[string]LabelDefinition `json:"labels,omitempty"`
-	CustomFolders     map[string]CustomFolder     `json:"custom_folders,omitempty"`
-	LabelIndex        map[string][]string         `json:"label_index,omitempty"`
-	CustomFolderIndex map[string][]string         `json:"custom_folder_index,omitempty"`
-	Fingerprints      map[string]string           `json:"fingerprints,omitempty"`
-	IdempotencyKeys   map[string]string           `json:"idempotency_keys,omitempty"`
+	CustomFolders     map[string]CustomFolder    `json:"custom_folders,omitempty"`
+	LabelIndex        map[string][]string        `json:"label_index,omitempty"`
+	CustomFolderIndex map[string][]string        `json:"custom_folder_index,omitempty"`
+	Fingerprints      map[string]string          `json:"fingerprints,omitempty"`
+	IdempotencyKeys   map[string]string          `json:"idempotency_keys,omitempty"`
 }
 
 type MailStore interface {
@@ -208,9 +208,9 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 	}
 	migrated := disk.SchemaVersion < DurableStoreSchemaVersion
 	data := storeData{
-		SchemaVersion: disk.SchemaVersion,
-		Messages:      disk.Messages,
-		ByIdem:        disk.ByIdem,
+		SchemaVersion:     disk.SchemaVersion,
+		Messages:          disk.Messages,
+		ByIdem:            disk.ByIdem,
 		Mailbox:           disk.Mailbox,
 		MailboxIndex:      disk.MailboxIndex,
 		Labels:            disk.Labels,
@@ -248,9 +248,9 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 	}
 
 	disk := diskStoreData{
-		SchemaVersion:   DurableStoreSchemaVersion,
-		Messages:        data.Messages,
-		ByIdem:          data.ByIdem,
+		SchemaVersion:     DurableStoreSchemaVersion,
+		Messages:          data.Messages,
+		ByIdem:            data.ByIdem,
 		Mailbox:           data.Mailbox,
 		MailboxIndex:      data.MailboxIndex,
 		Labels:            data.Labels,
@@ -320,9 +320,9 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 
 func newStoreData() storeData {
 	return storeData{
-		SchemaVersion: DurableStoreSchemaVersion,
-		Messages:      map[string]Message{},
-		ByIdem:        map[string]string{},
+		SchemaVersion:     DurableStoreSchemaVersion,
+		Messages:          map[string]Message{},
+		ByIdem:            map[string]string{},
 		Mailbox:           map[string]MailboxState{},
 		MailboxIndex:      map[string][]string{},
 		Labels:            map[string]LabelDefinition{},
@@ -364,9 +364,9 @@ func normalizeStoreData(data *storeData) {
 
 func cloneStoreData(src storeData) storeData {
 	dst := storeData{
-		SchemaVersion: src.SchemaVersion,
-		Messages:      make(map[string]Message, len(src.Messages)),
-		ByIdem:        make(map[string]string, len(src.ByIdem)),
+		SchemaVersion:     src.SchemaVersion,
+		Messages:          make(map[string]Message, len(src.Messages)),
+		ByIdem:            make(map[string]string, len(src.ByIdem)),
 		Mailbox:           make(map[string]MailboxState, len(src.Mailbox)),
 		MailboxIndex:      make(map[string][]string, len(src.MailboxIndex)),
 		Labels:            make(map[string]LabelDefinition, len(src.Labels)),

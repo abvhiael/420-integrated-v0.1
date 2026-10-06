@@ -766,7 +766,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
 - durable PB-0.17 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.18 — Documentation/invariant tests
+### PB-0.18 — Documentation/invariant tests — COMPLETE
 
 **Purpose:** extend machine-verifiable PB-0 documentation and invariant qualification so the accumulated PB-0 foundation is checked as one coherent authority set rather than only as isolated documents.
 

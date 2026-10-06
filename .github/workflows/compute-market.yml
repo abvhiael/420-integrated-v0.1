@@ -204,6 +204,9 @@ jobs:
       - name: Verify CMP-4.2 Research Project Registry
         run: python scripts/verify-cmp-4-2-research-project-registry.py
 
+      - name: Verify CMP-4.3 researcher / institution identity
+        run: python scripts/verify-cmp-4-3-research-identity.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

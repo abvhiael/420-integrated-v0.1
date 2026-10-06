@@ -1,0 +1,79 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.3.ResearchIdentity.v1",
+  "step": "CMP-4.3",
+  "title": "Researcher / institution identity",
+  "canonical_definition": "Researcher / institution identity",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_main_sha": "f5a0d703ca015962e49e95d075ff582d833a7c33",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_3_deferred_to": "CMP-4.10 \u2014 Phase closeout"
+  },
+  "canonical_identity_source": {
+    "contract": "Identity420",
+    "protocol_version": 3,
+    "source_authority": [
+      "profile controller",
+      "profile active state",
+      "issuer/trust class",
+      "credential lifecycle"
+    ],
+    "compute_layer_mutates_identity420": false
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeResearchIdentity420.sol",
+    "test": "contracts/test/ComputeResearchIdentity420.t.sol",
+    "doc": "docs/compute-market/CMP-4.3-RESEARCHER-INSTITUTION-IDENTITY.md",
+    "verifier": "scripts/verify-cmp-4-3-research-identity.py"
+  },
+  "roles": {
+    "RESEARCHER": {
+      "credential_type": "420/COMPUTE/RESEARCHER_CREDENTIAL/V1",
+      "minimum_assurance": "ATTESTED"
+    },
+    "INSTITUTION": {
+      "credential_type": "420/COMPUTE/INSTITUTION_CREDENTIAL/V1",
+      "minimum_assurance": "CREDENTIALED"
+    }
+  },
+  "identity": {
+    "domain": "420/COMPUTE/RESEARCH_IDENTITY_BINDING/V1",
+    "derivation": "keccak256(abi.encode(BINDING_DOMAIN, block.chainid, address(registry), profileId, role))",
+    "caller_supplied_id": false,
+    "controller_bound_into_commitment": false,
+    "reason": "Identity420 controller transfer/recovery changes current authority without rewriting historical binding identity"
+  },
+  "authority": {
+    "register": "current active Identity420 profile controller only",
+    "revise": "current active Identity420 profile controller, exact revision",
+    "set_active": "current active Identity420 profile controller, exact revision",
+    "delegation_and_recovery": "shared account/Identity controller layer; no competing compute-local delegation system"
+  },
+  "exit_criteria": [
+    "Identity420 remains the sole canonical profile/issuer/credential authority",
+    "domain-separated chain/registry/profile/role-bound compute identity IDs",
+    "researcher role requires exact researcher credential type and ATTESTED-or-higher assurance",
+    "institution role requires exact institution credential type and CREDENTIALED-or-higher assurance",
+    "current credential/profile lifecycle is rechecked fail-closed",
+    "current profile controller exclusively authorizes binding mutation",
+    "Identity420 controller recovery changes current actor authority without rewriting historical commitments",
+    "append-only exact-revision binding history with predecessor commitments",
+    "stale revision, cross-binding replay, wrong subject/type and weak assurance fail closed",
+    "no unrelated project/job/funding/verifier/settlement/governance authority is introduced",
+    "dedicated tests and mechanical verifier committed",
+    "affected Compute Market Level 1 workflow passes exact implementation SHA"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.4 dataset manifests",
+    "CMP-4.5 reproducible execution environments",
+    "CMP-4.6 result provenance",
+    "CMP-4.7 scientific metadata and lineage",
+    "CMP-4.8 publication / retention policy",
+    "CMP-4.9 research dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-6 rewards",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.4 \u2014 Dataset manifests"
+}

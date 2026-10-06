@@ -36,7 +36,7 @@ func CanonicalSignalDeepSyncStatus() SignalDeepSyncStatus {
 			"PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT",
 		},
 		InboundSync:          false,
-		WebhookIngestion:    false,
+		WebhookIngestion:     false,
 		ProviderRegistration: false,
 	}
 }
@@ -57,10 +57,10 @@ func validateSignalDeepSyncStatus(status SignalDeepSyncStatus) error {
 		return ErrConnectorInvalidResult
 	}
 	required := map[string]bool{
-		"SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT":   false,
-		"STABLE_INBOUND_SYNC_TRANSPORT":             false,
-		"ACCOUNT_OR_DEVICE_BINDING_AUTHORITY":       false,
-		"REPLAY_AND_CURSOR_SEMANTICS":               false,
+		"SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT":    false,
+		"STABLE_INBOUND_SYNC_TRANSPORT":              false,
+		"ACCOUNT_OR_DEVICE_BINDING_AUTHORITY":        false,
+		"REPLAY_AND_CURSOR_SEMANTICS":                false,
 		"PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT": false,
 	}
 	for _, item := range status.MissingEvidence {

@@ -84,6 +84,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.discordDeliver(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/wallet/challenge" || r.URL.Path == "/v1/connectors/discord/wallet/verify":
 		h.discordWallet(w, r, actor)
+	case r.URL.Path == "/v1/connectors/signal/boundary":
+		h.signalBoundary(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -155,6 +157,23 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) signalBoundary(w http.ResponseWriter, r *http.Request, actor string) {
+	if strings.TrimSpace(actor) == "" {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	boundary := CanonicalSignalIntegrationBoundary()
+	if err := validateSignalIntegrationBoundary(boundary); err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "signal integration boundary invalid")
+		return
+	}
+	writeJSON(w, http.StatusOK, boundary)
 }
 
 func (h HTTPHandler) discordWallet(w http.ResponseWriter, r *http.Request, actor string) {

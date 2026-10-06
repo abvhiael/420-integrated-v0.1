@@ -28,6 +28,7 @@ roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-8",
     "MEDIA-AUDIT-9",
     "MEDIA-AUDIT-10",
+    "MEDIA-AUDIT-11",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -91,6 +92,12 @@ web_app = need("docs/420-MEDIA-WEB-APPLICATION.md", [
     "Level 2 app-integration milestone",
     "production origin",
     "prefers-reduced-motion",
+])
+security_closeout = need("docs/apps/media/security.md", [
+    "MEDIA-SEC-001",
+    "SSRF / endpoint abuse",
+    "Malicious media",
+    "Operator compromise",
 ])
 
 svc = json.loads(need("config/genesis-consumer-services.json"))
@@ -176,6 +183,16 @@ for path in [
     "media/web/scripts/check.mjs",
     "media/web/scripts/build.mjs",
     "media/web/test/web.test.js",
+    "media/security/policy.go",
+    "media/security/session.go",
+    "media/security/webhook.go",
+    "media/security/moderation.go",
+    "media/security/security_test.go",
+    "media/api/security.go",
+    "media/api/security_test.go",
+    "media/fixtures/fixtures.go",
+    "media/deploy/security-profile.json",
+    "scripts/verify-420media-security-closeout.py",
 ]:
     assert (ROOT / path).exists(), f"missing existing Media baseline file {path}"
 

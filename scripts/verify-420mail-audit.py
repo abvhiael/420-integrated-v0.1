@@ -150,7 +150,13 @@ if profile_path.is_file():
     if dsync.get("bodyStorage")!="PRIVATE_OFF_CHAIN_REFERENCE" or dsync.get("externalIdempotency")!="OWNER_CONNECTION_MESSAGE_ID" or dsync.get("cursorPersistence")!="DURABLE_OWNER_CONNECTION_CURSOR" or dsync.get("restartRecovery") is not True: errors.append("MAIL-2.16 Discord sync durability drifted")
     if dsync.get("orderedImport")!="CREATED_AT_ASC_MESSAGE_ID_ASC" or dsync.get("rulesEngineApplied") is not True or dsync.get("trustControlsApplied") is not True or dsync.get("spamProtectionApplied") is not True or dsync.get("mutedAndQuarantinedSuppressNotification") is not True: errors.append("MAIL-2.16 Discord sync mailbox protection drifted")
     if dsync.get("publicIndexing") is not False or dsync.get("messageBodiesOnChain") is not False or dsync.get("delivery") is not False or dsync.get("walletVerification") is not False: errors.append("MAIL-2.16 Discord sync privacy/scope drifted")
-    if discord.get("delivery") is not False or discord.get("webhook") is not False or discord.get("walletVerification") is not False: errors.append("MAIL-2.15 pulled later Discord outbound/verification capabilities forward")
+    ddelivery=profile.get("discordDelivery",{})
+    if ddelivery.get("enabled") is not True or ddelivery.get("provider")!="discord" or ddelivery.get("connectorCapability")!="PUSH": errors.append("MAIL-2.17 Discord delivery capability drifted")
+    if ddelivery.get("authenticatedOwnerOnly") is not True or ddelivery.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or ddelivery.get("destination")!="DISCORD_CHANNEL_SNOWFLAKE": errors.append("MAIL-2.17 Discord delivery owner/destination drifted")
+    if ddelivery.get("maxContentBytes")!=2000 or ddelivery.get("replyTarget")!="OPTIONAL_DISCORD_MESSAGE_SNOWFLAKE" or ddelivery.get("idempotency")!="REQUIRED_CALLER_KEY_PASSED_TO_PROVIDER_AUTHORITY": errors.append("MAIL-2.17 Discord delivery payload/idempotency drifted")
+    if ddelivery.get("providerAuthority")!="DISCORD_DELIVERY_AUTHORITY" or ddelivery.get("rawAccessTokenInput") is not False or ddelivery.get("rawRefreshTokenInput") is not False or ddelivery.get("rawClientSecretInput") is not False: errors.append("MAIL-2.17 Discord delivery authority/secret boundary drifted")
+    if ddelivery.get("credentialPersistence")!="DISCORD_AUTHORITY_OR_SECURE_BROKER_ONLY" or ddelivery.get("mailMetadataCredentialPersistence") is not False or ddelivery.get("publicIndexing") is not False or ddelivery.get("messageBodiesOnChain") is not False or ddelivery.get("walletVerification") is not False: errors.append("MAIL-2.17 Discord delivery privacy/scope drifted")
+    if discord.get("webhook") is not False or discord.get("walletVerification") is not False: errors.append("MAIL-2.15 pulled later Discord webhook/verification capabilities forward")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -270,13 +276,21 @@ for token in ["ConnectorProviders","LinkConnector","UnlinkConnector","PullConnec
     if token not in client: errors.append("MAIL-2.14 client connector surface missing: "+token)
 discord_src=(ROOT/"mail/discord_link.go").read_text() if (ROOT/"mail/discord_link.go").is_file() else ""
 discord_sync_src=(ROOT/"mail/discord_sync.go").read_text() if (ROOT/"mail/discord_sync.go").is_file() else ""
+discord_delivery_src=(ROOT/"mail/discord_delivery.go").read_text() if (ROOT/"mail/discord_delivery.go").is_file() else ""
 for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
     if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
 for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
     if token not in discord_sync_src: errors.append("MAIL-2.16 Discord sync invariant missing: "+token)
+for token in ["DiscordDeliveryKind","DiscordDeliveryMessage","DiscordDeliveryReceipt","DiscordDeliveryAuthority","DiscordDeliveryRequest","DiscordDeliveryResult","DiscordDeliveryService","NewDiscordDeliveryService","MaxDiscordDeliveryContentBytes","validateDiscordDeliveryMessage"]:
+    if token not in discord_delivery_src: errors.append("MAIL-2.17 Discord delivery invariant missing: "+token)
+for token in ["DiscordDeliveryAuthority","ConnectorCapabilityPush","DeliverDiscord","DiscordDeliveryKind"]:
+    if token not in discord_src: errors.append("MAIL-2.17 Discord adapter delivery invariant missing: "+token)
 for token in ['"/v1/connectors/discord/sync"',"*DiscordSyncService"]:
     if token not in http: errors.append("MAIL-2.16 HTTP Discord sync surface missing: "+token)
 if "SyncDiscord" not in client: errors.append("MAIL-2.16 client Discord sync surface missing")
+for token in ['"/v1/connectors/discord/deliver"',"*DiscordDeliveryService"]:
+    if token not in http: errors.append("MAIL-2.17 HTTP Discord delivery surface missing: "+token)
+if "DeliverDiscord" not in client: errors.append("MAIL-2.17 client Discord delivery surface missing")
 for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
     pass
 web=(ROOT/"mail/web/index.html").read_text() if (ROOT/"mail/web/index.html").is_file() else ""
@@ -292,6 +306,8 @@ for token in ["/v1/connectors/providers","/v1/connectors/link","__420_CONNECTORS
     if token not in web: errors.append("MAIL-2.14 thin UI connector behavior missing: "+token)
 for token in ["/v1/connectors/discord/sync","syncDiscord","Sync Discord","connectionId"]:
     if token not in web: errors.append("MAIL-2.16 thin UI Discord sync behavior missing: "+token)
+for token in ["/v1/connectors/discord/deliver","deliverDiscord","Send to Discord","delivery","idempotency_key"]:
+    if token not in web: errors.append("MAIL-2.17 thin UI Discord delivery behavior missing: "+token)
 
 
 if "body.textContent=d.body" not in web: errors.append("MAIL-2.7 thin UI no longer renders private body as inert text")
@@ -322,4 +338,5 @@ print("MAIL-2.13 wallet functions inside mail: qualified by app-scoped checks")
 print("MAIL-2.14 external integrations framework: qualified by app-scoped checks")
 print("MAIL-2.15 Discord account linking: qualified by app-scoped checks")
 print("MAIL-2.16 Discord to 420Mail sync: qualified by app-scoped checks")
+print("MAIL-2.17 420Mail to Discord delivery: qualified by app-scoped checks")
 

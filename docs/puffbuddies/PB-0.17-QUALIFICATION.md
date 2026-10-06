@@ -31,7 +31,7 @@ PB-STRUCT-001 through PB-STRUCT-020 exist exactly once and in sequence; intended
 
 ## Implementation SHA
 
-Pending exact-head Level 1 qualification.
+`f6454308ee9eb5f4eeda58cf65e5d30356e7f685`
 
 ## Current main/base SHA
 
@@ -41,7 +41,17 @@ PR #526 remains open. Current-main merge-candidate reconciliation remains deferr
 
 ## CI evidence
 
-Pending exact-head **PuffBuddies PB-0 Qualification** push and pull-request results.
+Workflow: **PuffBuddies PB-0 Qualification**
+
+Exact-head pull-request qualification:
+- run: `37402761545` — **PASS**
+- job: `112073411856` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier through PB-0.17 — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+The connector-visible commit workflow evidence is the pull-request-triggered exact-head run. No skipped, cancelled, missing, or unrelated check is counted as PB-0.17 passing evidence.
 
 ## Security/adversarial/invariant scope
 
@@ -61,11 +71,13 @@ PB-0.17 reserves future implementation locations but intentionally does not crea
 
 ## Blockers
 
-Pending exact-head Level 1 qualification.
+None.
 
 ## Completion state
 
-PB-0.17 is pending exact-head qualification.
+**PB-0.17 — COMPLETE**
+
+All PB-0.17 exit criteria are satisfied on exact implementation SHA `f6454308ee9eb5f4eeda58cf65e5d30356e7f685`.
 
 ## Next canonical roadmap step
 

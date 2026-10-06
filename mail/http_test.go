@@ -570,3 +570,111 @@ func TestHTTPConversationAuthorizationAndStrictJSON(t *testing.T) {
 		t.Fatalf("reply unknown field status=%d body=%s", recorder.Code, recorder.Body.String())
 	}
 }
+
+
+func TestHTTPDraftLifecycleAndOptimisticConcurrency(t *testing.T) {
+	h, _, _ := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/drafts", "alice.420", DraftCreateRequest{
+		AutosaveKey: "http-draft",
+		Recipient:   "bob.420",
+		Subject:     "hello",
+		Body:        "draft body",
+		Source:      ServiceID,
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create draft status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var created DraftView
+	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
+		t.Fatal(err)
+	}
+	if created.Draft.Version != 1 || created.Body != "draft body" {
+		t.Fatalf("created draft=%+v", created)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/drafts", "alice.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list drafts status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var list []Draft
+	if err := json.Unmarshal(rec.Body.Bytes(), &list); err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 1 || list[0].ID != created.Draft.ID {
+		t.Fatalf("draft list=%+v", list)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPut, "/v1/drafts/"+created.Draft.ID, "alice.420", DraftSaveRequest{
+		ExpectedVersion: 1,
+		Recipient:       "bob.420",
+		Subject:         "edited",
+		Body:            "edited body",
+		Source:          ServiceID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("save draft status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var saved DraftView
+	if err := json.Unmarshal(rec.Body.Bytes(), &saved); err != nil {
+		t.Fatal(err)
+	}
+	if saved.Draft.Version != 2 || saved.Body != "edited body" {
+		t.Fatalf("saved draft=%+v", saved)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPut, "/v1/drafts/"+created.Draft.ID, "alice.420", DraftSaveRequest{
+		ExpectedVersion: 1,
+		Subject:         "stale",
+		Body:            "stale body",
+		Source:          ServiceID,
+	})
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("stale draft status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/drafts/"+created.Draft.ID, "alice.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("get draft status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodDelete, "/v1/drafts/"+created.Draft.ID+"?expected_version=2", "alice.420", nil)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("discard draft status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/drafts/"+created.Draft.ID, "alice.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("discarded draft get status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPDraftAuthorizationAndStrictJSON(t *testing.T) {
+	h, _, _ := testHTTPHandler(t)
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/drafts", "", DraftCreateRequest{AutosaveKey: "x", Source: ServiceID})
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("unauthenticated draft create=%d", rec.Code)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/drafts", "alice.420", DraftCreateRequest{
+		AutosaveKey: "owner-only", Body: "secret", Source: ServiceID,
+	})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var created DraftView
+	if err := json.Unmarshal(rec.Body.Bytes(), &created); err != nil {
+		t.Fatal(err)
+	}
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/drafts/"+created.Draft.ID, "bob.420", nil)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("foreign draft read=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/v1/drafts", bytes.NewBufferString(`{"autosave_key":"bad","source":"420/service/mail/v1","unexpected":true}`))
+	req.Header.Set("X-Test-Actor", "alice.420")
+	recorder := httptest.NewRecorder()
+	h.ServeHTTP(recorder, req)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("unknown draft field status=%d body=%s", recorder.Code, recorder.Body.String())
+	}
+}

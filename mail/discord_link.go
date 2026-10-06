@@ -49,6 +49,9 @@ func (a *DiscordConnectorAdapter) Descriptor() ConnectorDescriptor {
 	if _, ok := a.Authority.(DiscordSyncAuthority); ok {
 		capabilities = append(capabilities, ConnectorCapabilityPull)
 	}
+	if _, ok := a.Authority.(DiscordDeliveryAuthority); ok {
+		capabilities = append(capabilities, ConnectorCapabilityPush)
+	}
 	return ConnectorDescriptor{
 		Provider:     DiscordProvider,
 		DisplayName:  "Discord",
@@ -166,8 +169,46 @@ func (a *DiscordConnectorAdapter) Pull(ctx context.Context, actor string, req Co
 	}, nil
 }
 
-func (a *DiscordConnectorAdapter) Push(context.Context, string, ConnectorPushRequest) (ConnectorPushResult, error) {
-	return ConnectorPushResult{}, ErrConnectorUnsupported
+func (a *DiscordConnectorAdapter) Push(ctx context.Context, actor string, req ConnectorPushRequest) (ConnectorPushResult, error) {
+	deliveryAuthority, ok := a.Authority.(DiscordDeliveryAuthority)
+	if !ok {
+		return ConnectorPushResult{}, ErrConnectorUnsupported
+	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return ConnectorPushResult{}, ErrUnauthorized
+	}
+	if normalizeProvider(req.Provider) != DiscordProvider || strings.TrimSpace(req.Kind) != DiscordDeliveryKind {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	userID, ok := discordUserIDFromConnectionID(strings.TrimSpace(req.ConnectionID))
+	if !ok {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	idem := strings.TrimSpace(req.IdempotencyKey)
+	if idem == "" || len([]byte(idem)) > 256 {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	var message DiscordDeliveryMessage
+	if err := json.Unmarshal([]byte(req.Payload), &message); err != nil {
+		return ConnectorPushResult{}, ErrInvalidInput
+	}
+	if err := validateDiscordDeliveryMessage(message); err != nil {
+		return ConnectorPushResult{}, err
+	}
+	receipt, err := deliveryAuthority.DeliverDiscord(ctx, actor, userID, idem, message)
+	if err != nil {
+		return ConnectorPushResult{}, fmt.Errorf("mail: discord delivery authority: %w", err)
+	}
+	receipt.MessageID = strings.TrimSpace(receipt.MessageID)
+	receipt.ChannelID = strings.TrimSpace(receipt.ChannelID)
+	if !validDiscordSnowflake(receipt.MessageID) || receipt.ChannelID != strings.TrimSpace(message.ChannelID) || receipt.AcceptedAt.IsZero() {
+		return ConnectorPushResult{}, ErrDiscordInvalidResult
+	}
+	return ConnectorPushResult{
+		Provider: DiscordProvider, ConnectionID: req.ConnectionID, ExternalID: receipt.MessageID,
+		AcceptedAt: receipt.AcceptedAt.UTC(), Accepted: true,
+	}, nil
 }
 
 func (a *DiscordConnectorAdapter) VerifyWebhook(context.Context, ConnectorWebhookRequest) (ConnectorWebhookResult, error) {

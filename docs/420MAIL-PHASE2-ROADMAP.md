@@ -61,4 +61,4 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model** through **MAIL-2.10 — Outbox & Delivery Queue** are COMPLETE at Level 1. The **Mailbox Foundation milestone (MAIL-2.1–MAIL-2.10)** is COMPLETE at Level 2. **MAIL-2.11 — Email-as-a-Wallet Onboarding** is the active canonical Phase 2 step.
+**MAIL-2.1 — Mailbox State Model** through **MAIL-2.11 — Email-as-a-Wallet Onboarding** are COMPLETE at Level 1. The **Mailbox Foundation milestone (MAIL-2.1–MAIL-2.10)** remains COMPLETE at Level 2. The **Wallet-native identity milestone (MAIL-2.11–MAIL-2.14)** is in progress; retained Level 2 qualification is not due until MAIL-2.14 unless an earlier material shared-dependency change requires it. Durable MAIL-2.11 evidence: `docs/audit/420MAIL-MAIL-2.11-QUALIFICATION.md`. **MAIL-2.12 — Passkey-First Security** is the active canonical Phase 2 step.

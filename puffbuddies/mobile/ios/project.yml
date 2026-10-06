@@ -3,7 +3,7 @@ options:
   minimumXcodeGenVersion: 2.38.0
 settings:
   base:
-    PRODUCT_BUNDLE_IDENTIFIER: org.420integrated.puffbuddies
+    PRODUCT_BUNDLE_IDENTIFIER: org.fourtwenty.puffbuddies
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
 targets:
   PuffBuddies:

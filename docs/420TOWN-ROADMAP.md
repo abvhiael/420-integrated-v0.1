@@ -272,25 +272,55 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-9 — Security hardening
 
-Status: OPEN
+Status: COMPLETE
 
-Perform focused unit/integration/fuzz/property testing for:
+Implemented and qualified:
 
-- membership/role privilege escalation;
-- unauthorized moderation;
-- visibility leakage;
-- replay and duplicate writes;
-- signed-action domain separation/nonces;
-- treasury/accounting conservation;
-- reentrancy/external-call behavior if value moves;
-- spam/Sybil/griefing/DoS;
-- index/search poisoning;
-- storage pointer substitution;
-- webhook replay;
-- message confidentiality and metadata leakage;
-- alternate-path permission bypass.
+- membership/role privilege-escalation resistance;
+- unauthorized moderation denial;
+- visibility-leakage prevention;
+- replay/duplicate-write and idempotency enforcement;
+- spam/Sybil/griefing/DoS request-boundary controls;
+- Search/index poisoning rejection;
+- Storage pointer/digest substitution rejection;
+- Messenger ciphertext-only transport and malformed-envelope rejection;
+- alternate-path permission-bypass resistance;
+- Foundry fuzz/property coverage for authority mutation and cross-community isolation;
+- privileged-role non-resurrection after removal/re-add;
+- reference-only/non-payable Town treasury behavior;
+- API oversized-request, malformed-auth and idempotency-bound tests;
+- machine-readable security baseline, dedicated verifier and security documentation.
 
-Record accepted design risks separately from unresolved vulnerabilities.
+Explicit non-applicable surfaces:
+
+- signed-action domain separation/nonces — `NOT_APPLICABLE_NO_SIGNED_ACTION_SURFACE`;
+- treasury/accounting conservation — `NOT_APPLICABLE_REFERENCE_ONLY_NO_CUSTODY`;
+- reentrancy/value-movement hardening — `NOT_APPLICABLE_NO_VALUE_MOVEMENT`;
+- webhook replay — `NOT_APPLICABLE_WEBHOOKS_DISABLED`.
+
+Accepted design risks are recorded separately from unresolved vulnerabilities in `config/420town-security-v1.json`. The qualified repository baseline has an explicit empty unresolved-vulnerability list; live testnet and production security remain later gates.
+
+Durable qualification evidence:
+
+- qualification level: **Level 1 + Level 2 security-hardening milestone**;
+- qualified implementation/test/workflow SHA: `06eb9e367e3a971596057d340b10164246737243`;
+- 420Town audit workflow run `37404518997` / run `175` — PASS;
+- `town-contracts` job `112078979128` — PASS;
+- `town-skeleton` job `112078979377` — PASS;
+- exact-SHA assertions — PASS in both jobs;
+- all accumulated Town verifiers including the new security-hardening verifier — PASS;
+- Town web qualification — PASS;
+- gofmt — PASS;
+- `go test ./town/... ./sdk/town420` — PASS;
+- `go vet ./town/... ./sdk/town420` — PASS;
+- directly affected retained shared-service dependency tests — PASS;
+- Town Solidity build — PASS;
+- retained `test/Town*.t.sol` Foundry inventory including the new security tests — PASS;
+- cross-dApp Rewards hardening — PASS;
+- Level 3 remains intentionally deferred to TOWN-AUDIT-10;
+- current main at evidence closeout: `ea9994669564d0795e2bcc4a38beea0b01bef274`;
+- PR #523 remains open and unmerged;
+- next canonical roadmap step: **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.
 
 ## TOWN-AUDIT-10 — Documentation and exact-head repository qualification
 

@@ -76,7 +76,7 @@ func TestPublicationRequiresExactCanonicalProvenanceEffectiveRightAndHolder(t *t
 	binding := Binding{SubjectID: word(1), ProvenanceHash: word(2), RightID: word(3)}
 	rights := &rightsFake{
 		subject: RightsSubject{Controller: walletA, ProvenanceHash: binding.ProvenanceHash},
-		right: Right{SubjectID: binding.SubjectID, Holder: walletA, Effective: true},
+		right:   Right{SubjectID: binding.SubjectID, Holder: walletA, Effective: true},
 	}
 	g := Guard{Rights: rights}
 	actor := Actor{Wallet: walletA}
@@ -112,8 +112,8 @@ func TestReuseRequiresExactLicenseActorScopeAndLiveRight(t *testing.T) {
 	}
 	rights := &rightsFake{
 		subject: RightsSubject{Controller: walletB, ProvenanceHash: binding.ProvenanceHash},
-		right: Right{SubjectID: binding.SubjectID, Holder: walletB, Effective: true},
-		canUse: true,
+		right:   Right{SubjectID: binding.SubjectID, Holder: walletB, Effective: true},
+		canUse:  true,
 	}
 	g := Guard{Rights: rights}
 	if err := g.AuthorizeReuse(context.Background(), Actor{Wallet: walletA}, binding); err != nil {

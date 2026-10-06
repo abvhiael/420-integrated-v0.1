@@ -245,8 +245,19 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		if err != nil {
 			return err
 		}
+		protection := evaluateSpamProtection(data, req.Recipient, msg, req.Body, decision)
 		if err := applyIncomingRules(data, req.Recipient, msg, req.Body, &recipientState, now); err != nil {
 			return err
+		}
+		if protection.Quarantine {
+			if recipientState.Folder != FolderJunk {
+				recipientState.PreviousFolder = recipientState.Folder
+			}
+			recipientState.Folder = FolderJunk
+			t := now
+			recipientState.JunkedAt = &t
+			recipientState.Muted = true
+			recipientMuted = true
 		}
 		if decision.Muted {
 			recipientState.Muted = true
@@ -256,6 +267,7 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		data.ByIdem[idemKey] = id
 		data.Mailbox[mailboxKey(req.Sender, id)] = senderState
 		data.Mailbox[mailboxKey(req.Recipient, id)] = recipientState
+		recordDeliveryProtection(data, req.Recipient, msg, req.Body, protection, now)
 		result = msg
 		created = true
 		return nil
@@ -374,6 +386,9 @@ func (s *Service) UpdateMailbox(ctx context.Context, actor, id string, update Ma
 		now := s.Now().UTC()
 		if update.Folder != nil {
 			target := *update.Folder
+			if quarantine, ok := data.Quarantine[quarantineKey(actor, id)]; ok && quarantine.Status == QuarantineActive && target != FolderJunk && target != FolderTrash {
+				return ErrQuarantineReview
+			}
 			if state.Folder == FolderTrash && target != FolderTrash {
 				return ErrInvalidTransition
 			}

@@ -1390,6 +1390,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** either-side eligibility/lifecycle/block failures exclude discovery/matching; current eligibility and current derived generations pass; stale generation on either side fails; gate cannot create reciprocal match/consent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.9 — Messaging eligibility enforcement
+
+**Purpose:** require both participants' current adult eligibility and reciprocal PuffBuddies match authorization before ordinary matched-user messaging can be treated as allowed, while preserving the 420Messenger authority boundary.
+
+**Canonical requirements:** both participants must be current effective ELIGIBLE ordinary ACTIVE users; both sides must carry current MATCHED relationship authorization; block/unmatch/ineligibility/nonparticipating lifecycle on either side revokes messaging; both sides require current PB-1.9 MESSAGING_AUTH derived generation; stale generation after revocation/expiry/unmatch/block/lifecycle/deletion fails immediately; Messenger-native deny may additionally deny but can never grant PuffBuddies authority; stale conversation/delivery state, payment/premium/token/admin/moderator/recommendation/notification state cannot manufacture consent; gate consumes but does not create match state; no message payload/conversation graph/raw identity/wallet/public match graph; no Messenger transport/API/client/store/worker/contract/deployment/live integration is introduced; later PB-4 Messenger/Notifications integration remains separate.
+
+**Affected components:** `puffbuddies/domain/messaging_eligibility.py`, PB-2.9 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.5, PB-0.7, PB-0.8, PB-0.12, PB-1.5, PB-1.9, and PB-2.1 through PB-2.8 COMPLETE.
+
+**Exit criteria:** mutual MATCHED + both-side current eligibility/lifecycle passes; either-side ineligibility/lifecycle/block/unmatch fails; stale MESSAGING_AUTH generation on either side fails; Messenger-native deny can only deny; gate cannot create match/consent or carry message payload; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

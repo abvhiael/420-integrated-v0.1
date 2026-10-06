@@ -38,6 +38,10 @@ jobs:
         with:
           go-version: "1.23.x"
           cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: false
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
@@ -60,6 +64,8 @@ jobs:
         run: go test ./search/architecture ./search/result -count=1
       - name: Vet Media Go packages and SDK
         run: go vet ./media/... ./cmd/420media-node ./sdk/media420
+      - name: Qualify Media web application
+        run: npm --prefix media/web run qualify
       - name: Build Media contracts
         working-directory: contracts
         run: forge build src/media

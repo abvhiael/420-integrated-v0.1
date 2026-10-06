@@ -331,6 +331,9 @@ func (s *Service) UpdateMailbox(ctx context.Context, actor, id string, update Ma
 	now := s.Now().UTC()
 	if update.Folder != nil {
 		target := *update.Folder
+		if state.Folder == FolderTrash && target != FolderTrash {
+			return MailboxState{}, ErrInvalidTransition
+		}
 		if !canMoveMailbox(actor, msg, state.Folder, target) {
 			return MailboxState{}, ErrInvalidTransition
 		}
@@ -457,11 +460,14 @@ func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Messa
 	msg, ok := s.Store.messages[id]
 	state, owns := s.Store.mailbox[mailboxKey(actor, id)]
 	s.Store.mu.RUnlock()
-	if !ok || !owns || state.DeletedAt != nil {
+	if !ok {
 		return nil, Message{}, ErrNotFound
 	}
 	if msg.Recipient != actor && msg.Sender != actor {
 		return nil, Message{}, ErrUnauthorized
+	}
+	if !owns || state.DeletedAt != nil {
+		return nil, Message{}, ErrNotFound
 	}
 	body, err := s.Blobs.GetPrivate(ctx, actor, msg.BodyRef)
 	if err != nil {

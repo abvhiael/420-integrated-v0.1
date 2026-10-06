@@ -250,7 +250,6 @@ func (c Client) DeleteRule(ctx context.Context, id string) error {
 	return c.do(ctx, http.MethodDelete, "/v1/rules/"+url.PathEscape(id), nil, nil)
 }
 
-
 func (c Client) ListTrustEntries(ctx context.Context) ([]mail.TrustEntry, error) {
 	var out []mail.TrustEntry
 	err := c.do(ctx, http.MethodGet, "/v1/trust/entries", nil, &out)

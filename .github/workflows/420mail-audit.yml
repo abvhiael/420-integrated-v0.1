@@ -8,6 +8,7 @@ on:
       - 'config/genesis-consumer-services.json'
       - 'config/genesis-applications.json'
       - 'docs/420MAIL.md'
+      - 'docs/420MAIL-PHASE2-ROADMAP.md'
       - 'docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md'
       - 'scripts/verify-420mail-audit.py'
       - 'testnet/public-services/mail/readiness.json'
@@ -25,9 +26,17 @@ jobs:
       - name: Exact head
         run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
       - name: Go format
-        run: test -z "$(gofmt -l mail)"
+        run: |
+          files="$(gofmt -l mail)"
+          if [ -n "$files" ]; then
+            printf '%s\n' "$files"
+            gofmt -d $files || true
+            exit 1
+          fi
       - name: Go test
         run: go test ./mail/...
+      - name: Go race test
+        run: go test -race ./mail/...
       - name: Go vet
         run: go vet ./mail/...
       - name: Static audit verifier

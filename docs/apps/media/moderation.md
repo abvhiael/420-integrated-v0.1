@@ -2,7 +2,7 @@
 title: 420Media Moderation and Appeals
 audience:
   - user
-  - moderator
+  - operator
   - operator
 category: reference
 status: current

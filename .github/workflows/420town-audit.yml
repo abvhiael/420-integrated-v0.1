@@ -9,6 +9,7 @@ on:
       - "config/420town-moderation-v1.json"
       - "config/420town-integrations-v1.json"
       - "config/420town-api-v1.json"
+      - "config/420town-web-v1.json"
       - "config/genesis-applications.json"
       - "config/genesis-consumer-services.json"
       - "contracts/src/town/**"
@@ -30,6 +31,7 @@ on:
       - "scripts/verify-420town-moderation.py"
       - "scripts/verify-420town-integrations.py"
       - "scripts/verify-420town-api.py"
+      - "scripts/verify-420town-web.py"
       - ".github/workflows/420town-audit.yml"
   workflow_dispatch:
 
@@ -55,6 +57,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Verify canonical Town audit classification
         run: python3 scripts/verify-420town-audit.py
       - name: Verify Town product skeleton
@@ -69,6 +74,11 @@ jobs:
         run: python3 scripts/verify-420town-integrations.py
       - name: Verify Town API SDK projection and recovery
         run: python3 scripts/verify-420town-api.py
+      - name: Verify Town web application
+        run: python3 scripts/verify-420town-web.py
+      - name: Qualify Town web application
+        working-directory: town/web
+        run: npm run qualify
       - name: Format Town delivery surfaces
         shell: bash
         run: |

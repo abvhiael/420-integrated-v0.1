@@ -265,7 +265,6 @@ func TestStopPersistsDesiredFalseBeforeTransportFailure(t *testing.T) {
 	}
 }
 
-
 func TestRetiredCanonicalStreamCannotStartOrRecoverButCanStop(t *testing.T) {
 	ctx := context.Background()
 	driver := &driverFake{}

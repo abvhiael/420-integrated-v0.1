@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/media/node/livegateway"
+	mediasecurity "github.com/420integrated/420-integrated/media/security"
 )
 
 const (
@@ -92,6 +93,9 @@ func (s Service) Create(ctx context.Context, caller string, spec livegateway.Ses
 		return Record{}, err
 	}
 	if err := livegateway.ValidateSpec(spec); err != nil {
+		return Record{}, err
+	}
+	if err := validateSecureEndpoint(spec); err != nil {
 		return Record{}, err
 	}
 	controller, err := s.requireController(ctx, caller, spec.StreamRef, false)
@@ -397,4 +401,20 @@ func (s Service) now() time.Time {
 
 func normalizeController(v string) string {
 	return strings.ToLower(strings.TrimSpace(v))
+}
+
+
+func validateSecureEndpoint(spec livegateway.SessionSpec) error {
+	switch spec.Protocol {
+	case livegateway.ProtocolWHIP, livegateway.ProtocolWHEP:
+		return mediasecurity.ValidateOutboundEndpoint(spec.Endpoint, "https")
+	case livegateway.ProtocolRTMP:
+		return mediasecurity.ValidateOutboundEndpoint(spec.Endpoint, "rtmps")
+	case livegateway.ProtocolSRT:
+		return mediasecurity.ValidateOutboundEndpoint(spec.Endpoint, "srt")
+	case livegateway.ProtocolWebRTC:
+		return mediasecurity.ValidateOutboundEndpoint(spec.Endpoint, "webrtc")
+	default:
+		return mediasecurity.ErrInvalidEndpoint
+	}
 }

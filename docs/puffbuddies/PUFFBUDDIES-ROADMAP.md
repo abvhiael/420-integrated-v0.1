@@ -1520,6 +1520,24 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** hard exclusions precede ranking; current eligibility/lifecycle/block/generation/profile/visibility authority is enforced; mutual mode/private preference/coarse-proximity/cannabis compatibility works without sensitive inference or precise-location disclosure; stale/unknown authority fails closed; ranking is deterministic/non-canonical and safely degrades; results contain only authorized discovery presentation and create no relationship/messaging consent; preferences persist privately with optimistic concurrency; public-chain/Search/Explorer/wallet enumeration remains absent; retained PuffBuddies regressions and exact-head PB-4 fast qualification pass; durable evidence recorded.
 
+### PB-5 — Likes and matching
+
+**Purpose:** implement private directional LIKE/PASS intent and reciprocal PuffBuddies match formation over the current PB-4 discovery boundary while preserving PB-0.5 consent, PB-0.13 match-formation rules, block supremacy, current-state authority, and stale-state rejection.
+
+**Canonical requirements:** LIKE/PASS intent is directional private user state; one-sided LIKE never creates match or messaging consent; PASS is not consent; reciprocal match requires two independent current LIKE intents for opposite directions of the same canonical pair; current PB-2/PB-4 eligibility/lifecycle/block/generation/discovery authority is revalidated at match time; admin/moderator/service/algorithm/payment/premium/token/staking/reputation state cannot fabricate LIKE or MATCHED authority; canonical pair identity is deterministic/order-independent; self-like/self-match is prohibited; pair state carries a monotonic consent epoch; intents are valid only for the current epoch; unmatch is unilateral/immediate, transitions MATCHED→UNMATCHED, advances epoch, and invalidates messaging/matching authority; stale pre-unmatch likes cannot rematch; later rematch requires fresh reciprocal likes in the new epoch; relationship changes emit canonical invalidation; messaging becomes eligible only after current MATCHED pair binding; persistence reuses the private relationship table with optimistic concurrency; no public relationship graph, wallet/payment fields, contract, API, service ID, deployment, Messenger transport, or notification transport is introduced.
+
+**Persistence model:** directional intent keys use `intent:<actor>><target>` with LIKED/PASSED state and logical version = consent epoch; canonical pair keys use `pair:<sorted-left>|<sorted-right>` with NONE/MATCHED/UNMATCHED/(later safety-owned BLOCKED) state and logical version = consent epoch. Repository record versioning remains the separate optimistic-concurrency mechanism.
+
+**Affected components:** `puffbuddies/domain/matching.py`, existing PB-1 relationship state machine/private relationship table, PB-2 eligibility/messaging authorization and invalidation, PB-4 discovery, PB-5 targeted and integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head app-scoped PB-5 qualification **plus Level 2 retained PuffBuddies integration** at the documented PB-4/PB-5 discovery/matching boundary.
+
+**Level-3 boundary:** repository-wide Solidity/Genesis/420 Integrated/Geth/fault/soak/global deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.15; PB-1 relationship/invalidation/persistence foundations; PB-2; **PB-4 — Discovery engine — COMPLETE**.
+
+**Exit criteria:** unilateral LIKE/PASS persists privately; one-sided LIKE cannot match/message; reciprocal current likes can form a current match; PASS/absent reciprocal intent prevents match; current discovery/eligibility/lifecycle/block/generation authority is rechecked at match time; admin/service/economic fabrication fails; unmatch is unilateral and revokes messaging while advancing consent epoch; stale likes cannot rematch; fresh new-epoch likes can rematch only through two new user actions; optimistic concurrency/private persistence passes; public relationship graph remains absent; PB-5 Level-1 targeted qualification passes; PB-4/PB-5 retained Level-2 integration passes on the same exact SHA; durable evidence records both levels.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

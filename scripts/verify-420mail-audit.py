@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/store.go","mail/store_test.go","mail/organization.go","mail/organization_test.go","mail/search.go","mail/search_test.go","mail/rules.go","mail/rules_test.go","mail/trust.go","mail/trust_test.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -40,7 +40,7 @@ if profile_path.is_file():
     if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
     store=profile.get("metadataStore",{})
     if store.get("requiredForDeployment") is not True: errors.append("Mail durable metadata store not required for deployment")
-    if store.get("schemaVersion")!=3 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
+    if store.get("schemaVersion")!=4 or store.get("atomicTransactions") is not True or store.get("restartRecovery") is not True or store.get("migrations") is not True: errors.append("Mail durable store capability drifted")
     if store.get("secondaryIndexes")!=["owner_folder","owner_label","owner_custom_folder"]: errors.append("Mail durable store index drifted")
     if store.get("distributedIdempotency")!="SENDER_SCOPED_TRANSACTIONAL": errors.append("Mail distributed idempotency policy drifted")
     if store.get("messageBodiesPersisted") is not False: errors.append("Mail metadata store must not persist message bodies")
@@ -60,6 +60,13 @@ if profile_path.is_file():
     if rules.get("allowedActionFolders")!=["INBOX","ARCHIVE","JUNK","TRASH"]: errors.append("MAIL-2.5 rule folder authority drifted")
     if rules.get("maxRulesPerUser")!=100 or rules.get("maxRuleNameBytes")!=80 or rules.get("maxContentMatchBytes")!=256 or rules.get("maxActionLabels")!=20: errors.append("MAIL-2.5 rule bounds drifted")
     if rules.get("atomicWithDelivery") is not True or rules.get("publicIndexing") is not False: errors.append("MAIL-2.5 rule delivery/privacy boundary drifted")
+    trust=profile.get("trustControls",{})
+    if trust.get("enabled") is not True or trust.get("ownerScoped") is not True: errors.append("MAIL-2.6 trust-control scope drifted")
+    if trust.get("entryKinds")!=["IDENTITY","PHRASE","APPLICATION"] or trust.get("dispositions")!=["BLOCK","ALLOW","MUTE"]: errors.append("MAIL-2.6 trust inventory drifted")
+    if trust.get("maxEntriesPerUser")!=250 or trust.get("maxValueBytes")!=256: errors.append("MAIL-2.6 trust bounds drifted")
+    if trust.get("requireTrustedMode") is not True or trust.get("identityApplicationBlockPrecedence")!="ABSOLUTE": errors.append("MAIL-2.6 allow/block precedence drifted")
+    if trust.get("trustedIdentityApplicationBypassesPhraseBlock") is not True or trust.get("muteSuppressesNotification") is not True or trust.get("muteMarksRecipientCopy") is not True: errors.append("MAIL-2.6 trust behavior drifted")
+    if trust.get("idempotentReplayPreserved") is not True or trust.get("atomicDeliveryRecheck") is not True or trust.get("publicIndexing") is not False: errors.append("MAIL-2.6 trust safety/privacy drifted")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
@@ -102,6 +109,15 @@ for token in ['"/v1/rules"',"CreateRule","UpdateRule","DeleteRule"]:
 client=(ROOT/"mail/client/client.go").read_text() if (ROOT/"mail/client/client.go").is_file() else ""
 for token in ["ListRules","CreateRule","UpdateRule","DeleteRule"]:
     if token not in client: errors.append("MAIL-2.5 client rules surface missing: "+token)
+trust_src=(ROOT/"mail/trust.go").read_text() if (ROOT/"mail/trust.go").is_file() else ""
+for token in ["TrustIdentity","TrustPhrase","TrustApplication","TrustBlock","TrustAllow","TrustMute","TrustSettings","PutTrustEntry","DeleteTrustEntry","UpdateTrustSettings","evaluateTrustPolicy","ErrTrustRejected","MaxTrustEntries"]:
+    if token not in trust_src: errors.append("MAIL-2.6 trust invariant missing: "+token)
+for token in ['"/v1/trust/entries"','"/v1/trust/settings"',"PutTrustEntry","UpdateTrustSettings"]:
+    if token not in http: errors.append("MAIL-2.6 HTTP trust surface missing: "+token)
+for token in ["ListTrustEntries","PutTrustEntry","DeleteTrustEntry","GetTrustSettings","UpdateTrustSettings"]:
+    if token not in client: errors.append("MAIL-2.6 client trust surface missing: "+token)
+for token in ["evaluateTrustPolicy","recipientMuted","!recipientMuted"]:
+    if token not in service: errors.append("MAIL-2.6 delivery trust integration missing: "+token)
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)
@@ -117,4 +133,5 @@ print("MAIL-2.2 durable mail storage: qualified by app-scoped checks")
 print("MAIL-2.3 labels and custom folders: qualified by app-scoped checks")
 print("MAIL-2.4 private mail search: qualified by app-scoped checks")
 print("MAIL-2.5 user filters and rules engine: qualified by app-scoped checks")
+print("MAIL-2.6 blocklists allowlists and trust controls: qualified by app-scoped checks")
 

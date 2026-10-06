@@ -8,6 +8,7 @@ on:
       - 'config/genesis-consumer-services.json'
       - 'config/genesis-applications.json'
       - 'docs/420MAIL.md'
+      - 'docs/420MAIL-PHASE2-ROADMAP.md'
       - 'docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md'
       - 'scripts/verify-420mail-audit.py'
       - 'testnet/public-services/mail/readiness.json'
@@ -28,6 +29,8 @@ jobs:
         run: test -z "$(gofmt -l mail)"
       - name: Go test
         run: go test ./mail/...
+      - name: Go race test
+        run: go test -race ./mail/...
       - name: Go vet
         run: go vet ./mail/...
       - name: Static audit verifier

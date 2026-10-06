@@ -27,6 +27,7 @@ roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-7",
     "MEDIA-AUDIT-8",
     "MEDIA-AUDIT-9",
+    "MEDIA-AUDIT-10",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
 ])
@@ -83,6 +84,13 @@ api_sdk = need("docs/420-MEDIA-API-SDK.md", [
     "420/MEDIA/API/SIGNING/V1",
     "sdk/media420",
     "Level 1 app-scoped fast qualification",
+])
+web_app = need("docs/420-MEDIA-WEB-APPLICATION.md", [
+    "MEDIA-AUDIT-10",
+    "upload/library/playback/livestream",
+    "Level 2 app-integration milestone",
+    "production origin",
+    "prefers-reduced-motion",
 ])
 
 svc = json.loads(need("config/genesis-consumer-services.json"))
@@ -155,9 +163,21 @@ for path in [
     "sdk/media420/client.go",
     "sdk/media420/discovery.go",
     "sdk/media420/client_test.go",
+    "media/web/package.json",
+    "media/web/index.html",
+    "media/web/styles.css",
+    "media/web/app.js",
+    "media/web/runtime-config.json",
+    "media/web/security-headers.json",
+    "media/web/core/config.js",
+    "media/web/core/service.js",
+    "media/web/core/wallet.js",
+    "media/web/core/state.js",
+    "media/web/scripts/check.mjs",
+    "media/web/scripts/build.mjs",
+    "media/web/test/web.test.js",
 ]:
     assert (ROOT / path).exists(), f"missing existing Media baseline file {path}"
 
-assert not (ROOT / "media/web").exists(), "Media web now exists; update audit classification"
 
 print("420Media audit baseline: PASS")

@@ -502,3 +502,11 @@ func (c Client) PushConnector(ctx context.Context, req mail.ConnectorPushRequest
 	err := c.do(ctx, http.MethodPost, "/v1/connectors/push", req, &out)
 	return out, err
 }
+
+
+func (c Client) SyncDiscord(ctx context.Context, connectionID string) (mail.DiscordSyncResult, error) {
+	var out mail.DiscordSyncResult
+	req := map[string]string{"connection_id": connectionID}
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/sync", req, &out)
+	return out, err
+}

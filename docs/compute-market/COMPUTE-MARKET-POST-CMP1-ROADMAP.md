@@ -572,9 +572,9 @@ Normalize institution/gateway/scheduler/account/project/workload/allocation/resu
 
 ## CMP-5.5 — External proof/credit adapters
 
-**Status: implementation complete; Level 1 + second CMP-5 Level 2 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 + second CMP-5 Level 2 exact-head qualified on `41b3f7e9c84226c8b294f2b7a5af730c928ece61`.**
 
-Normalize externally supplied proof and credit records against exact adapter/system/contribution identities, preserving provider-neutral scheme/issuer/unit semantics without claiming external truth, reward eligibility or duplicate protection. CMP-5.5 is the second CMP-5 Level 2 milestone because the accumulated external adapter families now converge into one shared proof/credit normalization layer. CMP-5.6 owns duplicate-reward prevention and CMP-5.7 owns external-result attestation. Specification: [CMP-5.5 External proof/credit adapters](CMP-5.5-EXTERNAL-PROOF-CREDIT-ADAPTERS.md).
+Normalize externally supplied proof and credit records against exact adapter/system/contribution identities, preserving provider-neutral scheme/issuer/unit semantics without claiming external truth, reward eligibility or duplicate protection. CMP-5.5 is the second CMP-5 Level 2 milestone because the accumulated external adapter families now converge into one shared proof/credit normalization layer. CMP-5.6 owns duplicate-reward prevention and CMP-5.7 owns external-result attestation. Specification: [CMP-5.5 External proof/credit adapters](CMP-5.5-EXTERNAL-PROOF-CREDIT-ADAPTERS.md). Durable evidence: [CMP-5.5 qualification](CMP-5.5-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-5.6 — Double-reward prevention
 
@@ -745,7 +745,7 @@ Production target flow:
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
-| CMP-5 external compute adapters | CMP-5.1 COMPLETE; CMP-5.2 COMPLETE — first CMP-5 Level 2 milestone qualified; CMP-5.3 next |
+| CMP-5 external compute adapters | CMP-5.1–CMP-5.5 COMPLETE; CMP-5.5 is the second CMP-5 Level 2 milestone; CMP-5.6 next |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |

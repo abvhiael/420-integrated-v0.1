@@ -162,8 +162,8 @@ func discordDeliveryHTTPHandler(t *testing.T, authority *discordDeliveryAuthorit
 		t.Fatal(err)
 	}
 	return HTTPHandler{
-		Service:          NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore()),
-		Connectors:       connectors,
+		Service:         NewService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore()),
+		Connectors:      connectors,
 		DiscordDelivery: NewDiscordDeliveryService(connectors),
 		Authenticate: func(r *http.Request) (string, error) {
 			return r.Header.Get("X-Test-Actor"), nil

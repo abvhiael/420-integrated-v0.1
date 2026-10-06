@@ -3,6 +3,7 @@ package mail
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,9 +14,18 @@ type AuthenticateFunc func(*http.Request) (string, error)
 type HTTPHandler struct {
 	Service      *Service
 	Authenticate AuthenticateFunc
+	Onboarding   *OnboardingService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/v1/onboarding/") {
+		if h.Onboarding == nil {
+			writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail onboarding unavailable")
+			return
+		}
+		h.onboarding(w, r)
+		return
+	}
 	if h.Service == nil || h.Authenticate == nil {
 		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail service unavailable")
 		return
@@ -57,6 +67,67 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
 	}
+}
+
+func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	defer r.Body.Close()
+	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxOnboardingCredentialBytes+4096))
+	dec.DisallowUnknownFields()
+	var (
+		result OnboardingResult
+		err    error
+	)
+	switch r.URL.Path {
+	case "/v1/onboarding/google":
+		var req GoogleOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.Google(r.Context(), req)
+		}
+	case "/v1/onboarding/apple":
+		var req AppleOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.Apple(r.Context(), req)
+		}
+	case "/v1/onboarding/passkey":
+		var req PasskeyOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.Passkey(r.Context(), req)
+		}
+	case "/v1/onboarding/wallet":
+		var req WalletOnboardingRequest
+		if err = dec.Decode(&req); err == nil {
+			result, err = h.Onboarding.ExistingWallet(r.Context(), req)
+		}
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	if err != nil {
+		var syntaxErr *json.SyntaxError
+		if errors.As(err, &syntaxErr) || strings.Contains(err.Error(), "json: unknown field") || errors.Is(err, io.EOF) {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		if errors.Is(err, ErrInvalidInput) {
+			writeServiceError(w, err)
+			return
+		}
+		if errors.Is(err, ErrOnboardingInvalidResult) {
+			writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet/identity onboarding authority returned an invalid result")
+			return
+		}
+		if strings.Contains(err.Error(), "invalid JSON") {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		writeServiceError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
 }
 
 func (h HTTPHandler) send(w http.ResponseWriter, r *http.Request, actor string) {

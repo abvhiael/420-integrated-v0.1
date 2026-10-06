@@ -42,10 +42,11 @@ contract TownSecurityHardening420Test {
     function testFuzzNonOwnerCannotMutateAuthority(address attacker, bytes32 arbitraryPermission) public {
         if (attacker == OWNER) return;
 
+        bytes32 adminRole = town.ROLE_ADMIN();
         vm.startPrank(attacker);
 
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
-        town.setRolePermission(COMMUNITY, town.ROLE_ADMIN(), arbitraryPermission, true);
+        town.setRolePermission(COMMUNITY, adminRole, arbitraryPermission, true);
 
         vm.expectRevert(TownAuthority420.Unauthorized.selector);
         town.setTreasuryReference(COMMUNITY, TREASURY_AUTHORITY, TREASURY);

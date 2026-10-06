@@ -1,7 +1,7 @@
 import pathlib,sys,unittest
 ROOT=pathlib.Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 from puffbuddies.domain.authorization import AuthorizationContext,PrincipalKind
-from puffbuddies.domain.invalidation import DerivedSurface,affected,derived_usable
+from puffbuddies.domain.invalidation import ALL_DERIVED,DerivedSurface,affected,derived_usable
 from puffbuddies.domain.profiles import *
 from puffbuddies.domain.types import *
 from puffbuddies.persistence.revocation import DerivedAuthorityToken

@@ -26,6 +26,8 @@ This is a major application milestone and should receive Level 2 cross-component
 ## MEDIA-AUDIT-6 — Identity, Rights and ownership/provenance integration
 Bind creator/controller actions to scoped 420Identity/Wallet authorization and authoritative 420Rights/provenance checks where rights-bearing publication or reuse requires them. Preserve pseudonymous/optional Identity semantics and avoid making Media an identity or rights authority.
 
+**Status: COMPLETE (Level 1).** Exact implementation SHA `70376d2b1d41659d7d654e41faa5e9d3c992fd66`; qualification run `37507801987`. Durable evidence: `docs/audit/420MEDIA-AUDIT-6-QUALIFICATION.md`.
+
 ## MEDIA-AUDIT-7 — Pay and Compute integration
 Replace opaque/legacy compatibility assumptions with explicit canonical Pay settlement and Compute Market coordination boundaries where applicable. Preserve non-custodial accounting, canonical beneficiary binding, idempotency and refund/failure behavior.
 

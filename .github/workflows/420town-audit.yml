@@ -1,0 +1,133 @@
+name: 420Town audit
+
+on:
+  pull_request:
+    paths:
+      - "config/420town-genesis.json"
+      - "config/420town-authority-v1.json"
+      - "config/420town-content-v1.json"
+      - "config/420town-moderation-v1.json"
+      - "config/420town-integrations-v1.json"
+      - "config/420town-api-v1.json"
+      - "config/420town-web-v1.json"
+      - "config/420town-security-v1.json"
+      - "config/genesis-applications.json"
+      - "config/genesis-consumer-services.json"
+      - "contracts/src/town/**"
+      - "contracts/test/Town*"
+      - "town/**"
+      - "sdk/town420/**"
+      - "search/architecture/profile.go"
+      - "search/architecture/profile_test.go"
+      - "search/privacy/admission.go"
+      - "search/privacy/admission_test.go"
+      - "docs/apps/town/**"
+      - "docs/420TOWN-*"
+      - "docs/architecture/**"
+      - "docs/genesis-services/**"
+      - "scripts/verify-420town-audit.py"
+      - "scripts/verify-420town-skeleton.py"
+      - "scripts/verify-420town-authority.py"
+      - "scripts/verify-420town-content.py"
+      - "scripts/verify-420town-moderation.py"
+      - "scripts/verify-420town-integrations.py"
+      - "scripts/verify-420town-api.py"
+      - "scripts/verify-420town-web.py"
+      - "scripts/verify-420town-security.py"
+      - "scripts/verify-420town-docs.py"
+      - ".github/workflows/420town-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: 420town-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  town-skeleton:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23.x"
+          cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify canonical Town audit classification
+        run: python3 scripts/verify-420town-audit.py
+      - name: Verify Town product skeleton
+        run: python3 scripts/verify-420town-skeleton.py
+      - name: Verify Town authoritative state
+        run: python3 scripts/verify-420town-authority.py
+      - name: Verify Town content state
+        run: python3 scripts/verify-420town-content.py
+      - name: Verify Town moderation state
+        run: python3 scripts/verify-420town-moderation.py
+      - name: Verify Town service integrations
+        run: python3 scripts/verify-420town-integrations.py
+      - name: Verify Town API SDK projection and recovery
+        run: python3 scripts/verify-420town-api.py
+      - name: Verify Town web application
+        run: python3 scripts/verify-420town-web.py
+      - name: Verify Town security hardening
+        run: python3 scripts/verify-420town-security.py
+      - name: Verify Town documentation and phase closeout
+        run: python3 scripts/verify-420town-docs.py
+      - name: Qualify Town web application
+        working-directory: town/web
+        run: npm run qualify
+      - name: Format Town delivery surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(find town/api town/projection town/recovery sdk/town420 -name '*.go' -type f -print)"
+          test -n "$files"
+          bad="$(gofmt -l $files)"
+          if [ -n "$bad" ]; then
+            printf 'gofmt required:\n%s\n' "$bad"
+            gofmt -d $bad
+            exit 1
+          fi
+      - name: Build and test Town Go packages
+        run: go test ./town/... ./sdk/town420
+      - name: Vet Town delivery surfaces
+        run: go vet ./town/... ./sdk/town420
+      - name: Test affected Town service dependencies
+        run: go test ./search/architecture ./search/privacy ./search/result ./sdk/storage420 ./notifications/feed ./notifications/security ./notifications/subscriptions
+
+  town-contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        working-directory: .
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build Town Solidity
+        run: |
+          forge build src/town/TownAuthority420.sol
+          forge build src/town/TownRewardsAdapter420.sol
+          forge build src/town/TownContributionVerifier420.sol
+      - name: Town focused tests
+        run: forge test --match-path "test/Town*.t.sol" -vvv
+      - name: Cross-dApp rewards hardening
+        run: forge test --match-path "test/RewardsCrossDappHardening420.t.sol" -vvv

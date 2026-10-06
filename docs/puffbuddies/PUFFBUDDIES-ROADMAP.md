@@ -1262,6 +1262,282 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** PB-1.1 through PB-1.13 COMPLETE; candidate reconciled to current main; all required Level-3 canonical owners PASS on the same exact implementation SHA; no skipped/missing required check counted as green; roadmap/evidence reconciled; limitations/live-testnet deferrals explicit; durable closeout evidence recorded.
 
+### PB-2.1 — Identity model & boundaries — COMPLETE
+
+**Purpose:** establish the minimum-disclosure identity/adult-eligibility authority boundary for PB-2 before registration, profile and visibility behavior is added.
+
+**Canonical requirements:** consume only profile-bound adult-eligibility assertions from 420Identity; keep raw identity/DOB/legal-name/biometric/document/wallet-link material outside PB canonical state; keep PuffBuddies authoritative for its local eligibility/participation decision; reject untrusted, cross-profile, malformed, future, expired and revoked authority; preserve ELIGIBLE + ACTIVE participation gating and non-enumerable membership; introduce no production adapter/API/deployment/public-chain identity.
+
+**Affected components:** `puffbuddies/domain/identity.py`, PB-2.1 targeted tests, PB-2 workflow, PB-2.1 canonical document/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2 milestone A; milestone A remains the accumulated PB-1/PB-2 account/profile/private-state integration boundary.
+
+**Dependencies:** PB-1 COMPLETE and PB-0.19 PB-2 authority.
+
+**Exit criteria:** executable authority separation; minimum-disclosure projection; replay/source/time/revocation failures fail closed; identity material and wallet linkage remain private/absent; retained regressions and exact-head PB-2 fast workflow pass; durable evidence recorded.
+
+### PB-2.2 — Adult eligibility state model — COMPLETE
+
+**Purpose:** implement current private adult-eligibility state over time, including fail-closed UNKNOWN, expiry, revocation, provider failure, policy-version reevaluation and authoritative reverification.
+
+**Canonical requirements:** start UNKNOWN; model ELIGIBLE/INELIGIBLE/EXPIRED/REVOKED without raw identity evidence; bind accepted decisions to source version/current policy/monotonic sequence/time; reject replay/time rollback; expire authority; map provider failure to UNKNOWN; require reevaluation after policy change; require fresh higher-sequence authority for reverification; keep non-ELIGIBLE states nonparticipating; preserve lifecycle/safety/consent supremacy and all-derived invalidation; introduce no live identity/deployment/public-registry authority.
+
+**Affected components:** `puffbuddies/domain/eligibility_state.py`, PB-2.2 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2 milestone A; the accumulated PB-1/PB-2 account/profile/private-state integration milestone remains deferred.
+
+**Dependencies:** PB-0.6, PB-1 eligibility/authorization/invalidation foundations, PB-2.1 COMPLETE.
+
+**Exit criteria:** UNKNOWN fail closed; eligibility/expiry/revocation/provider-failure/policy-change/reverification semantics pass; stale replay/time rollback fail; eligibility invalidates all derived authority; ELIGIBLE cannot override lifecycle restrictions; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.3 — Age-verification interface — COMPLETE
+
+**Purpose:** define a minimum-disclosure PuffBuddies consumer interface for approved 420Identity verification output without inventing a conflicting direct production Identity420 API.
+
+**Canonical requirements:** request binds private profile, current policy, strong nonce and request time; response binds subject/policy/nonce/trusted source/source version, ELIGIBLE/INELIGIBLE/UNKNOWN decision, checked time, expiry and revocation; reject source/subject/policy/nonce/time/freshness/expiry defects; preserve UNKNOWN fail-closed behavior; reuse PB-2.1/PB-2.2 boundaries; exclude raw identity/wallet/location evidence; grant no lifecycle/relationship/consent authority; introduce no live provider/deployment/public-registry claim.
+
+**Affected components:** `puffbuddies/domain/age_verification.py`, PB-2.3 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2 milestone A; no live/shared dependency implementation is introduced.
+
+**Dependencies:** PB-0.6, canonical 420Identity architecture, PB-2.1 COMPLETE, PB-2.2 COMPLETE.
+
+**Exit criteria:** request/response interface compiles; source/subject/policy/nonce/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/wallet fields absent; validated results reuse PB-2.1/PB-2.2 authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.4 — Privacy-preserving eligibility proofs — COMPLETE
+
+**Purpose:** implement a privacy-preserving adult-eligibility proof-consumption boundary that reveals only the minimum verified conclusion needed by PuffBuddies while keeping raw identity and raw cryptographic proof material outside the app domain.
+
+**Canonical requirements:** domain-separate challenges to PuffBuddies/adult-eligibility; bind private profile, current policy, strong nonce, audience, predicate and request time; accept only 420Identity-approved verifier output with source/version and scheme identifier; reject subject/policy/nonce/audience/predicate/verifier/time/freshness defects; make revocation/expiry override positive results; preserve UNKNOWN fail-closed behavior; exclude DOB/legal identity/government ID/biometrics/wallet linkage/claim hashes/exact address/precise location/raw proof bytes/credential payloads; feed PB-2.1/PB-2.2 authority rather than bypassing it; introduce no invented production ZK scheme, direct Identity420 proof API, verifier contract, fixed address/service ID, deployment, or public membership registry.
+
+**Affected components:** `puffbuddies/domain/eligibility_proofs.py`, PB-2.4 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the documented Level 2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.6, PB-0.8, PB-2.1 COMPLETE, PB-2.2 COMPLETE, PB-2.3 COMPLETE.
+
+**Exit criteria:** proof boundary compiles; subject/policy/nonce/audience/predicate/verifier/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/raw proof fields remain absent; validated proof results feed existing eligibility state authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.5 — Eligibility persistence & lifecycle — COMPLETE
+
+**Purpose:** persist the current canonical adult-eligibility state privately so replay/time/policy/source authority survives repository reloads without persisting raw identity or proof evidence.
+
+**Canonical requirements:** persist profile binding, decision, source version, policy version, expiry where applicable, monotonic sequence and checked time in the existing private eligibility projection; reject stale sequence/time and stale repository-version writes; decode wrong-table/subject/schema/malformed state fail closed; keep UNKNOWN without expiry authority and require bounded future expiry for ELIGIBLE; require current policy compatibility; persist no DOB/legal identity/government ID/wallet linkage/biometrics/location/claim/raw identity/raw proof/credential payload; remain storage-neutral/private/off-chain; do not pre-empt PB-2.6 revocation/expiry event handling.
+
+**Affected components:** `puffbuddies/persistence/schema.py`, `puffbuddies/domain/eligibility_persistence.py`, PB-2.5 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.11, PB-0.12, PB-1.3, PB-1.4, PB-1.8, and PB-2.1 through PB-2.4 COMPLETE.
+
+**Exit criteria:** eligibility state round-trips through canonical private persistence; sequence/time/policy/subject invariants survive reload; stale sequence/time/repository-version updates fail closed; UNKNOWN/ELIGIBLE persistence invariants pass; forbidden identity/proof material remains absent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.6 — Revocation & expiry handling — COMPLETE
+
+**Purpose:** turn authoritative adult-eligibility revocation and bounded expiry into durable PB-2 state transitions that invalidate stale derived authority immediately without exposing raw identity/proof material.
+
+**Canonical requirements:** bind revocation to the current source version; require advancing event sequence and nondecreasing time; reject stale/replayed/source-mismatched/UNKNOWN revocation; transition valid current state to REVOKED; expire only current ELIGIBLE state at/after its bounded expiry and advance sequence/time; do not repeatedly expire noneligible terminal states; treat every real revocation/expiry as a canonical ELIGIBILITY change that advances PB revocation generation and invalidates all PB-1.9 derived surfaces; persist REVOKED/EXPIRED state through PB-2.5 optimistic concurrency; introduce no raw identity/proof/public membership state or live provider/poller/webhook/deployment claim; do not pre-empt PB-2.7/2.8/2.9 enforcement steps.
+
+**Affected components:** `puffbuddies/domain/eligibility_revocation.py`, PB-2.6 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.12, PB-1.8, PB-1.9, and PB-2.1 through PB-2.5 COMPLETE.
+
+**Exit criteria:** current-source revocation advances to REVOKED; expiry-at-bound advances to EXPIRED; stale source/sequence/time fails closed; pre-expiry/noneligible state does not spuriously expire; each real transition invalidates all derived surfaces and advances generation; result persists/reloads; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.7 — Authorization integration — COMPLETE
+
+**Purpose:** bind the full current PB-2 eligibility record into PB-1.5 server-side authorization so a stale/injected bare ELIGIBLE flag cannot bypass policy, expiry, subject, lifecycle, relationship, block/safety or purpose-limited authority.
+
+**Canonical requirements:** require record/profile/context subject binding and current policy version; reject authorization time before eligibility checked time; policy mismatch becomes UNKNOWN; only current ELIGIBLE with future bounded expiry becomes effective ELIGIBLE; expired/revoked/ineligible/unknown remain fail-closed; feed effective eligibility into existing PB-1.5 authorization rather than duplicating it; preserve lifecycle/block/relationship and service/moderator denials; retain only minimum audit binding metadata; introduce no API/session/contract/public registry/deployment/live provider; do not pre-empt PB-2.8 discovery/matching or PB-2.9 messaging enforcement.
+
+**Affected components:** `puffbuddies/domain/eligibility_authorization.py`, PB-2.7 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.12, PB-1.5, and PB-2.1 through PB-2.6 COMPLETE.
+
+**Exit criteria:** current/policy-compatible/unexpired eligibility enables existing authorization only where all other PB-1.5 conditions permit; expired/revoked/ineligible/unknown/policy-stale state fails closed; subject/time mismatches reject binding; lifecycle/block/relationship/service/moderator boundaries remain intact; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.8 — Discovery/matching eligibility enforcement — COMPLETE
+
+**Purpose:** enforce current adult eligibility as a hard prerequisite for discovery and matching actions, using PB-2.7 authorization binding and PB-1.9 stale-derived-state invalidation without inventing the later PB-3 matching engine.
+
+**Canonical requirements:** both viewer/requester and candidate/target must be current ELIGIBLE ordinary ACTIVE participants; relevant blocks/lifecycle denials outrank discovery visibility and ranking; candidate DISCOVERABLE visibility cannot override either-side ineligibility; matching-action eligibility requires both sides current but cannot manufacture reciprocal consent or relationship state; discovery requires current DISCOVERY generation for both sides; matching requires current MATCHING generation for both sides; stale generation after revocation/expiry fails immediately; UNKNOWN/EXPIRED/REVOKED/INELIGIBLE and nonparticipating lifecycle fail closed; payment/premium/token/admin/algorithm/ranking cannot bypass the hard gate; no matching/recommendation engine, public people-search, API/contract/deployment/live service is introduced; PB-2.9 messaging remains separate.
+
+**Affected components:** `puffbuddies/domain/discovery_matching_eligibility.py`, PB-2.8 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.5, PB-0.6, PB-0.12, PB-0.13, PB-1.5, PB-1.9, and PB-2.1 through PB-2.7 COMPLETE.
+
+**Exit criteria:** either-side eligibility/lifecycle/block failures exclude discovery/matching; current eligibility and current derived generations pass; stale generation on either side fails; gate cannot create reciprocal match/consent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.9 — Messaging eligibility enforcement — COMPLETE
+
+**Purpose:** require both participants' current adult eligibility and reciprocal PuffBuddies match authorization before ordinary matched-user messaging can be treated as allowed, while preserving the 420Messenger authority boundary.
+
+**Canonical requirements:** both participants must be current effective ELIGIBLE ordinary ACTIVE users; both sides must carry current MATCHED relationship authorization; block/unmatch/ineligibility/nonparticipating lifecycle on either side revokes messaging; both sides require current PB-1.9 MESSAGING_AUTH derived generation; stale generation after revocation/expiry/unmatch/block/lifecycle/deletion fails immediately; Messenger-native deny may additionally deny but can never grant PuffBuddies authority; stale conversation/delivery state, payment/premium/token/admin/moderator/recommendation/notification state cannot manufacture consent; gate consumes but does not create match state; no message payload/conversation graph/raw identity/wallet/public match graph; no Messenger transport/API/client/store/worker/contract/deployment/live integration is introduced; later PB-4 Messenger/Notifications integration remains separate.
+
+**Affected components:** `puffbuddies/domain/messaging_eligibility.py`, PB-2.9 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.5, PB-0.7, PB-0.8, PB-0.12, PB-1.5, PB-1.9, and PB-2.1 through PB-2.8 COMPLETE.
+
+**Exit criteria:** mutual MATCHED + both-side current eligibility/lifecycle passes; either-side ineligibility/lifecycle/block/unmatch fails; stale MESSAGING_AUTH generation on either side fails; Messenger-native deny can only deny; gate cannot create match/consent or carry message payload; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
+### PB-2.10 — Privacy & information-leakage hardening — COMPLETE
+
+**Purpose:** harden accumulated PB-2 eligibility/authorization state against direct and inferential disclosure through public, generic derived, error/reason, discovery/matching or messaging surfaces while composing the already-qualified PB-1.10 privacy boundary.
+
+**Canonical requirements:** reject eligibility decision/source/policy/sequence/time/expiry/revocation metadata from public or generic derived payloads; reject profile/subject/actor/relationship/block/lifecycle/match/conversation identifiers and Messenger deny metadata; preserve raw identity/proof/DOB/wallet-link prohibitions; expose only minimum boolean authorization conclusions where needed; use uniform denial behavior so expired/revoked/ineligible/policy-stale/blocked/unmatched/suspended/unknown states are not distinguishable by reason code; prohibit public eligibility lookup and authorization probing; retain PB-1.10 protected-category checks; do not create a membership oracle, public match graph, Search/Indexer/Explorer projection, analytics feed or chain event; do not weaken authorization/replay/revocation/generation/lifecycle controls.
+
+**Affected components:** `puffbuddies/domain/eligibility_privacy.py`, PB-2.10 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.7, PB-1.10, and PB-2.1 through PB-2.9 COMPLETE.
+
+**Exit criteria:** PB-2 internal eligibility/authorization metadata is rejected from external/derived payloads; externally consumable authorization conclusion is boolean-only; denial reason is uniform; public eligibility/authorization probes are prohibited; retained PB-1.10 and PuffBuddies regressions pass; exact-head PB-2 fast qualification passes; durable evidence recorded.
+
+### PB-2.11 — Adversarial identity/eligibility qualification — COMPLETE
+
+**Purpose:** qualify the accumulated PB-2.1 through PB-2.10 identity/eligibility boundary as a single adversarial attack surface using the canonical PB-0.6/PB-0.7 failure classes.
+
+**Canonical requirements:** reject self-asserted/untrusted eligibility; reject cross-subject, nonce, audience, predicate, policy and stale/future proof/verification replay; reject stale sequence/time; force UNKNOWN on policy drift or authority unavailability; ensure revocation/expiry invalidate stale downstream authority; prevent expired/revoked/policy-stale state from rebinding as current eligibility; prevent payment/premium/token/admin/moderator/Messenger state from manufacturing eligibility or consent; preserve block/unmatch/lifecycle supremacy; require current derived generations for discovery/matching/messaging; preserve PB-2.10 anti-oracle/privacy protections; keep raw DOB/identity/proof/wallet linkage out of ordinary authorization surfaces.
+
+**Affected components:** PB-2.11 adversarial test suite, PB-2 workflow, canonical definition/evidence. No production-domain semantic change is required unless the adversarial suite exposes a genuine gap.
+
+**Qualification level:** Level 1 adversarial roadmap-step qualification.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the documented Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.6, PB-0.7, PB-1.9, PB-1.10, and PB-2.1 through PB-2.10 COMPLETE.
+
+**Exit criteria:** cross-step adversarial coverage passes across subject/replay/source/policy/freshness/revocation/outage/economic/admin/consent/stale-derived/privacy-oracle cases; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records all attack classes.
+
+### PB-2.12 — Failure & recovery qualification — COMPLETE
+
+**Purpose:** qualify accumulated PB-2 eligibility state under storage/dependency failure, stale/conflicting replicas, restore/rollback, optimistic concurrency and recovery while preserving fail-closed authorization, revocation and privacy semantics.
+
+**Canonical requirements:** authoritative eligibility-store outage fails closed; stale/conflicting replicas cannot replace newer eligibility; restore snapshots older than the current revocation generation are rejected; current-generation restores still reject conflicting records; optimistic concurrency prevents stale overwrite; partial operation failure must not be published as successful derived authorization; the qualification adapter is not falsely treated as transactional; rollback uses a complete known-good before-image; recovered state still obeys current policy/expiry/authorization; recovery cannot introduce raw identity/proof/wallet linkage or leak PB-2 private metadata; deletion/revocation generation supremacy and replay/time monotonicity remain intact; no production database/backup/replication/deployment is invented.
+
+**Affected components:** PB-2.12 failure/recovery test suite, PB-2 workflow, canonical definition/evidence. No production-domain semantic change is required unless qualification exposes a genuine defect.
+
+**Qualification level:** Level 1 failure/recovery roadmap-step qualification.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the documented Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.7, PB-0.11, PB-1.9, PB-1.12, and PB-2.5 through PB-2.11 COMPLETE.
+
+**Exit criteria:** authoritative outage fails closed; stale/conflicting replicas and stale restores are rejected; optimistic concurrency protects newer eligibility state; partial failure is not publishable success; rollback uses known-good state; recovered state remains policy/expiry constrained; raw identity/proof and privacy leakage remain rejected; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records results.
+
+### PB-2.13 — PB-2 Integration Milestone — Level 2 — COMPLETE
+
+**Purpose:** qualify PB-2.1 through PB-2.12 as one accumulated PuffBuddies integration boundary before phase closeout.
+
+**Canonical requirements:** authoritative verification and privacy-preserving proof paths converge on the canonical minimum-disclosure eligibility state; persisted eligibility reload preserves sequence/time/policy authority; full eligibility records bind into authorization; current two-party eligibility gates discovery/matching and current MATCHED + eligibility gates messaging; revocation/expiry/policy drift fail closed and invalidate stale derived discovery/matching/messaging authority; restore cannot resurrect pre-revocation eligibility; lifecycle/block/relationship restrictions remain independently restrictive; PB-2 privacy/anti-oracle guarantees survive integrated flows; retained PB-2.11 adversarial and PB-2.12 failure/recovery coverage remains green; the complete retained PuffBuddies test inventory plus dedicated PB-2.13 integration suite and public-chain/raw-identity negative gate must pass on one exact implementation SHA.
+
+**Qualification level:** Level 2 — app integration milestone qualification.
+
+**Current-main inspection:** current `main` advanced from PR base `23ebff000a471bfbc4439894f797f3b17a530867` to `721a7f358e802bce91835851721eb93c4340f501`. The entire divergence is Compute Market/contracts/global-CI material with no PuffBuddies files or shared PuffBuddies authority overlap, so no ceremonial Level-2 reconciliation commit is required.
+
+**Level-3 boundary:** canonical full Solidity, Genesis/address-authority, 420 Integrated/global, Geth/fault/soak, repository-wide Docs/global reconciliation, deployment/config verification and unrelated app qualification remain **PB-2.14 — PB-2 Phase Closeout — Level 3** where applicable.
+
+**Affected components:** `puffbuddies/tests/test_pb_2_13_integration.py`, PB-2 workflow, canonical milestone definition/evidence.
+
+**Dependencies:** PB-2.1 through PB-2.12 COMPLETE; retained PB-0/PB-1 foundations.
+
+**Exit criteria:** all accumulated integration requirements pass; complete retained PuffBuddies inventory and dedicated PB-2.13 integration suite pass on one exact SHA; privacy/public-chain negative gate passes; main divergence is documented as reconciled or non-overlapping; durable Level-2 evidence is recorded.
+
+### PB-2.14 — PB-2 Phase Closeout — Level 3 — COMPLETE
+
+**Purpose:** reconcile the complete accumulated PB-2 phase with current `main`, establish one exact merge-candidate implementation SHA, run the required comprehensive Level-3 qualification owners once against that SHA, reconcile durable PB-2 evidence/roadmap/deployment/address claims, and formally close PB-2 before advancing to PB-3.
+
+**Canonical requirements:** the PB-2 branch must be reconciled with then-current `main`; the resulting merge-candidate SHA must contain all PB-2.1 through PB-2.13 qualified work plus current-main state; **Solidity Contracts** must run the canonical full repository Foundry inventory exactly once using the runner-aware four-shard PR inventory; **Genesis Address Authority** must separately verify address/namespace/collision/predeploy/frozen-address/manifest authority without duplicating the full Foundry inventory; **420 Integrated Qualification** must run retained global Go/build/production-dependency/Geth/fault/soak qualification; **420Docs Qualification** must run repository documentation/global reconciliation; **PuffBuddies PB-2 Qualification** must run the complete retained PuffBuddies inventory including PB-2.13; privacy/adversarial/failure-recovery/static/public-chain/deployment-claim boundaries must remain green; PB-2 must introduce no unjustified frozen address, contract, production deployment or live-provider claim; every required owner must qualify the same exact merge-candidate implementation SHA; missing/skipped/cancelled/stale required evidence is not PASS; only evidence-only bookkeeping may follow the qualified SHA without recursive qualification.
+
+**CI ownership:** canonical Solidity inventory is owned only by **Solidity Contracts**. Genesis owns only canonical address/namespace/predeploy authority checks and must not repeat Foundry. PuffBuddies PB-2 owns app tests. 420 Integrated owns global node/Geth/fault/soak. 420Docs owns global documentation reconciliation.
+
+**Closeout marker:** `docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md` is the durable Level-3 classification marker that triggers the canonical repository-wide owners.
+
+**Qualification level:** Level 3 — complete app-phase closeout qualification.
+
+**Dependencies:** PB-2.1 through PB-2.12 COMPLETE; **PB-2.13 — PB-2 Integration Milestone — Level 2 — COMPLETE**; current-main reconciliation.
+
+**Exit criteria:** one reconciled exact merge-candidate SHA is established; Solidity Contracts full inventory PASS; Genesis/address-authority PASS; 420 Integrated/global PASS including Geth/fault/soak; complete retained PuffBuddies/PB-2 suite PASS; 420Docs/global PASS; applicable privacy/adversarial/invariant/failure/static/deployment/config checks PASS; roadmap/evidence/address/deployment claims reconciled; no remaining PB-2 implementation blocker; durable Level-3 evidence records every owner/run/job and exact SHA; PB-2 may then be formally marked COMPLETE and the next canonical phase is PB-3 — Profiles.
+
+### PB-3 — Profiles — COMPLETE
+
+**Purpose:** implement the canonical private PuffBuddies profile boundary for eligible users: profile creation/editing, Dating/Buddy/Both mode, bounded profile text/prompts, opaque media metadata, explicit field-level visibility, canonical completeness, activation/reactivation, deactivation/delete initiation, private persistence, and stale-derived invalidation.
+
+**Canonical requirements:** profile authority remains PuffBuddies-owned and private/off-chain; creation requires current ELIGIBLE + PROFILE_INCOMPLETE; owner-only edits; bounded closed display-field registry; opaque bounded media references only; nonempty display name + at least one media reference defines profile completeness; PB-3 profile audiences are PRIVATE_SELF/DISCOVERABLE/MATCHED only; no public profile surface or wallet/profile enumeration; stale/missing visibility policy fails closed; profile/visibility changes invalidate derived authority; profile completeness plus current eligibility gates activation/reactivation; deactivation and deletion initiation use canonical lifecycle transitions; protected lifecycle states reject edits; storage uses existing private profile/visibility tables with optimistic concurrency; no discovery engine, likes/matching, Messenger transport, web/mobile UI, production media store, database, API, contract, address, service ID or deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/profiles.py`, `puffbuddies/tests/test_pb_3_profiles.py`, `.github/workflows/puffbuddies-pb3.yml`, profile/visibility persistence, lifecycle/authorization/invalidation primitives, PB-0.19 reconciliation, canonical definition/evidence.
+
+**Qualification level:** Level 1 — ordinary app-scoped roadmap-step qualification.
+
+**Milestone relationship:** no Level-2 milestone is triggered by PB-3 alone; broader retained integration belongs at a later documented accumulated boundary. Level-3 remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.9, PB-0.11, PB-0.12, PB-0.15; PB-1 foundations; PB-2 COMPLETE.
+
+**Exit criteria:** eligible profile creation/edit/save works through canonical private persistence; completeness gates activation; visibility is explicit/versioned/server-authorized/fail-closed; profile/visibility changes invalidate stale derived state; lifecycle pause/reactivation/delete initiation respect current authority; privacy/public-chain/wallet-enumeration negatives hold; retained PuffBuddies regressions and exact-head PB-3 fast qualification pass; durable evidence recorded.
+
+### PB-4 — Discovery engine — COMPLETE
+
+**Purpose:** implement the private PuffBuddies discovery engine over the current PB-2 eligibility/generation gate and PB-3 profile/visibility authority. Hard exclusions run before ranking; ranking remains derived/non-canonical and cannot create consent.
+
+**Canonical requirements:** both viewer and candidate must pass current eligibility/lifecycle/block/generation gates; self-discovery and incomplete profiles are excluded; Dating/Buddy/Both compatibility is mutual; discovery preferences remain private; proximity is consumed only as a coarse bounded band and is never returned as precise distance; cannabis compatibility uses explicit private user choices without coercion; missing/stale visibility fails closed; only DISCOVERABLE PB-3 presentation is returned; block/lifecycle/eligibility/deletion/restriction/stale authority outrank ranking; ranking uses only allowed explicit signals and excludes wealth/payment/token/moderation/raw-identity/precise-location/inferred-sensitive traits; ranking failure safely degrades after the same hard exclusions; results are bounded private application views and cannot create likes, passes, matches, messaging permission or notifications; no public profile/Search/Explorer/wallet enumeration, production recommendation service, ML model, feature store, API, contract, address/service ID, deployment or production database is introduced.
+
+**Affected components:** `puffbuddies/domain/discovery.py`, existing PB-2 discovery eligibility/generation gate, PB-3 profile/visibility state, private preferences persistence, PB-4 targeted tests/workflow, PB-0.19 reconciliation, canonical definition/evidence.
+
+**Qualification level:** Level 1 — ordinary app-scoped roadmap-step qualification.
+
+**Milestone relationship:** PB-4 alone does not trigger Level 2. The meaningful accumulated discovery/matching boundary is after **PB-5 — Likes and matching** converges with discovery. Level 3 remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.14, PB-0.15; PB-2; **PB-3 — Profiles — COMPLETE**.
+
+**Exit criteria:** hard exclusions precede ranking; current eligibility/lifecycle/block/generation/profile/visibility authority is enforced; mutual mode/private preference/coarse-proximity/cannabis compatibility works without sensitive inference or precise-location disclosure; stale/unknown authority fails closed; ranking is deterministic/non-canonical and safely degrades; results contain only authorized discovery presentation and create no relationship/messaging consent; preferences persist privately with optimistic concurrency; public-chain/Search/Explorer/wallet enumeration remains absent; retained PuffBuddies regressions and exact-head PB-4 fast qualification pass; durable evidence recorded.
+
+### PB-5 — Likes and matching — COMPLETE
+
+**Purpose:** implement private directional LIKE/PASS intent and reciprocal PuffBuddies match formation over the current PB-4 discovery boundary while preserving PB-0.5 consent, PB-0.13 match-formation rules, block supremacy, current-state authority, and stale-state rejection.
+
+**Canonical requirements:** LIKE/PASS intent is directional private user state; one-sided LIKE never creates match or messaging consent; PASS is not consent; reciprocal match requires two independent current LIKE intents for opposite directions of the same canonical pair; current PB-2/PB-4 eligibility/lifecycle/block/generation/discovery authority is revalidated at match time; admin/moderator/service/algorithm/payment/premium/token/staking/reputation state cannot fabricate LIKE or MATCHED authority; canonical pair identity is deterministic/order-independent; self-like/self-match is prohibited; pair state carries a monotonic consent epoch; intents are valid only for the current epoch; unmatch is unilateral/immediate, transitions MATCHED→UNMATCHED, advances epoch, and invalidates messaging/matching authority; stale pre-unmatch likes cannot rematch; later rematch requires fresh reciprocal likes in the new epoch; relationship changes emit canonical invalidation; messaging becomes eligible only after current MATCHED pair binding; persistence reuses the private relationship table with optimistic concurrency; no public relationship graph, wallet/payment fields, contract, API, service ID, deployment, Messenger transport, or notification transport is introduced.
+
+**Persistence model:** directional intent keys use `intent:<actor>><target>` with LIKED/PASSED state and logical version = consent epoch; canonical pair keys use `pair:<sorted-left>|<sorted-right>` with NONE/MATCHED/UNMATCHED/(later safety-owned BLOCKED) state and logical version = consent epoch. Repository record versioning remains the separate optimistic-concurrency mechanism.
+
+**Affected components:** `puffbuddies/domain/matching.py`, existing PB-1 relationship state machine/private relationship table, PB-2 eligibility/messaging authorization and invalidation, PB-4 discovery, PB-5 targeted and integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head app-scoped PB-5 qualification **plus Level 2 retained PuffBuddies integration** at the documented PB-4/PB-5 discovery/matching boundary.
+
+**Level-3 boundary:** repository-wide Solidity/Genesis/420 Integrated/Geth/fault/soak/global deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.15; PB-1 relationship/invalidation/persistence foundations; PB-2; **PB-4 — Discovery engine — COMPLETE**.
+
+**Exit criteria:** unilateral LIKE/PASS persists privately; one-sided LIKE cannot match/message; reciprocal current likes can form a current match; PASS/absent reciprocal intent prevents match; current discovery/eligibility/lifecycle/block/generation authority is rechecked at match time; admin/service/economic fabrication fails; unmatch is unilateral and revokes messaging while advancing consent epoch; stale likes cannot rematch; fresh new-epoch likes can rematch only through two new user actions; optimistic concurrency/private persistence passes; public relationship graph remains absent; PB-5 Level-1 targeted qualification passes; PB-4/PB-5 retained Level-2 integration passes on the same exact SHA; durable evidence records both levels.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

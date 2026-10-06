@@ -180,6 +180,6 @@ type codedSecurityError struct {
 	err  error
 }
 
-func (e codedSecurityError) Error() string { return e.err.Error() }
-func (e codedSecurityError) Unwrap() error { return e.err }
+func (e codedSecurityError) Error() string           { return e.err.Error() }
+func (e codedSecurityError) Unwrap() error           { return e.err }
 func (e codedSecurityError) APIErrorCode() ErrorCode { return e.code }

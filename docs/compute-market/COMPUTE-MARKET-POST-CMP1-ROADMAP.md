@@ -554,7 +554,7 @@ Normalize Folding@home project/work-unit/donor/assignment/result/credit/evidence
 
 ## CMP-5.2 — BOINC adapter
 
-**Status: implementation complete; Level 1 + first CMP-5 Level 2 exact-head qualification pending.**
+**Status: COMPLETE — Level 1 + first CMP-5 Level 2 exact-head qualified on `f463deb41f5e9de396a81d5ffbe0fc205c72f5a0`.**
 
 Normalize BOINC project/application/work-unit/participant/host/assignment/result/timing/credit/evidence material behind the shared provider-neutral external-adapter identity surface. CMP-5.2 is the first CMP-5 Level 2 integration milestone because the Folding-at-home and BOINC adapter families now converge under one narrow interface while remaining domain-separated. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.2 BOINC adapter](CMP-5.2-BOINC-ADAPTER.md).
 
@@ -733,7 +733,7 @@ Production target flow:
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
-| CMP-5 external compute adapters | CMP-5.1 COMPLETE; CMP-5.2 implementation complete — Level 1 + first Level 2 qualification pending |
+| CMP-5 external compute adapters | CMP-5.1 COMPLETE; CMP-5.2 COMPLETE — first CMP-5 Level 2 milestone qualified; CMP-5.3 next |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |

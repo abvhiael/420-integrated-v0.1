@@ -1,6 +1,6 @@
 # CMP-5.2 — BOINC adapter
 
-Status: **IMPLEMENTATION COMPLETE — LEVEL 1 + FIRST CMP-5 LEVEL 2 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 + FIRST CMP-5 LEVEL 2 EXACT-HEAD QUALIFIED ON `f463deb41f5e9de396a81d5ffbe0fc205c72f5a0`.**
 
 Canonical roadmap step: **CMP-5.2 — BOINC adapter**.
 
@@ -97,3 +97,21 @@ CMP-5.2 is complete when one exact implementation SHA satisfies every machine-re
 ## Next canonical step
 
 **CMP-5.3 — Research-cluster adapter**
+
+
+## Qualification evidence
+
+- exact implementation SHA: `f463deb41f5e9de396a81d5ffbe0fc205c72f5a0`;
+- base/main SHA: `721a7f358e802bce91835851721eb93c4340f501`;
+- Compute Market Qualification #446 / run `37518847675` / job `112459253007` — **SUCCESS**;
+- exact-head verification — PASS;
+- Compute Market build — PASS;
+- retained `Compute*.t.sol` suite — PASS;
+- verification-script compilation — PASS;
+- CMP-5.1 verifier — PASS;
+- CMP-5.2 verifier — PASS;
+- first CMP-5 Level 2 retained app-integration milestone — PASS;
+- Solidity Contracts #5173 compute-fast / run `37518847861` / job `112459015467` — **SUCCESS**;
+- full repository Foundry inventory — correctly deferred to CMP-5.8 Level 3.
+
+Durable evidence: [CMP-5.2 qualification evidence](CMP-5.2-QUALIFICATION-EVIDENCE.md).

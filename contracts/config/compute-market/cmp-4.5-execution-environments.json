@@ -3,7 +3,7 @@
   "step": "CMP-4.5",
   "title": "Reproducible execution environments",
   "canonical_definition": "Reproducible execution environments",
-  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "status": "COMPLETE",
   "base_main_sha": "53f5603520e02a492184a41801de0ad09af59b35",
   "qualification": {
     "level": 1,
@@ -49,5 +49,6 @@
     "CMP-8 Compute UI",
     "CMP-9.13 live scientific demonstration"
   ],
-  "next_canonical_step": "CMP-4.6 — Result provenance"
+  "next_canonical_step": "CMP-4.6 — Result provenance",
+  "completion_state": "COMPLETE"
 }

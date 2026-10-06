@@ -414,7 +414,6 @@ func (c Client) ExistingWalletOnboarding(ctx context.Context, req mail.WalletOnb
 	return out, err
 }
 
-
 func (c Client) SecurityState(ctx context.Context) (mail.SecurityState, error) {
 	var out mail.SecurityState
 	err := c.do(ctx, http.MethodGet, "/v1/security", nil, &out)

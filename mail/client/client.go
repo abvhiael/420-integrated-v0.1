@@ -301,3 +301,28 @@ func (c Client) GetSenderReputation(ctx context.Context, sender string) (mail.Se
 	err := c.do(ctx, http.MethodGet, "/v1/reputation/"+url.PathEscape(sender), nil, &out)
 	return out, err
 }
+
+
+func (c Client) Reply(ctx context.Context, parentMessageID string, req mail.ReplyRequest) (mail.Message, error) {
+	var out mail.Message
+	err := c.do(ctx, http.MethodPost, "/v1/messages/"+url.PathEscape(parentMessageID)+"/reply", req, &out)
+	return out, err
+}
+
+func (c Client) ListConversations(ctx context.Context) ([]mail.ConversationSummary, error) {
+	var out []mail.ConversationSummary
+	err := c.do(ctx, http.MethodGet, "/v1/conversations", nil, &out)
+	return out, err
+}
+
+func (c Client) GetConversation(ctx context.Context, conversationID string) (mail.ConversationView, error) {
+	var out mail.ConversationView
+	err := c.do(ctx, http.MethodGet, "/v1/conversations/"+url.PathEscape(conversationID), nil, &out)
+	return out, err
+}
+
+func (c Client) UpdateConversation(ctx context.Context, conversationID string, update mail.ConversationUpdate) (mail.ConversationState, error) {
+	var out mail.ConversationState
+	err := c.do(ctx, http.MethodPatch, "/v1/conversations/"+url.PathEscape(conversationID), update, &out)
+	return out, err
+}

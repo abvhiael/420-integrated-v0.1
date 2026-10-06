@@ -1326,7 +1326,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** proof boundary compiles; subject/policy/nonce/audience/predicate/verifier/time/freshness/expiry/revocation checks pass; UNKNOWN fails closed; raw identity/raw proof fields remain absent; validated proof results feed existing eligibility state authority; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.5 — Eligibility persistence & lifecycle
+### PB-2.5 — Eligibility persistence & lifecycle — COMPLETE
 
 **Purpose:** persist the current canonical adult-eligibility state privately so replay/time/policy/source authority survives repository reloads without persisting raw identity or proof evidence.
 

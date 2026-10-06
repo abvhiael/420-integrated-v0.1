@@ -13,6 +13,7 @@ import (
 	"time"
 
 	mediaapi "github.com/420integrated/420-integrated/media/api"
+	mediasecurity "github.com/420integrated/420-integrated/media/security"
 )
 
 const APIVersion = mediaapi.Version
@@ -22,6 +23,11 @@ type Client struct {
 	http            *http.Client
 	expectedChainID uint64
 	expectedNetwork string
+	session         SessionTokenProvider
+}
+
+type SessionTokenProvider interface {
+	Token(context.Context) (string, error)
 }
 
 type Config struct {
@@ -30,6 +36,7 @@ type Config struct {
 	Timeout         time.Duration
 	ExpectedChainID uint64
 	ExpectedNetwork string
+	Session         SessionTokenProvider
 }
 
 func New(config Config) (*Client, error) {
@@ -57,6 +64,7 @@ func New(config Config) (*Client, error) {
 		baseURL: base, http: hc,
 		expectedChainID: config.ExpectedChainID,
 		expectedNetwork: strings.TrimSpace(config.ExpectedNetwork),
+		session: config.Session,
 	}, nil
 }
 
@@ -238,6 +246,55 @@ func (c *Client) DeleteSubscription(
 	return c.write(ctx, http.MethodDelete, path, nil, idempotencyKey, &out)
 }
 
+func (c *Client) ReportMedia(
+	ctx context.Context,
+	report mediasecurity.Report,
+	idempotencyKey string,
+) (mediasecurity.Report, error) {
+	var out mediasecurity.Report
+	if err := c.ensureCompatibility(ctx); err != nil {
+		return out, err
+	}
+	err := c.write(ctx, http.MethodPost, "/v1/moderation/reports", report, idempotencyKey, &out)
+	return out, err
+}
+
+func (c *Client) DecideReport(
+	ctx context.Context,
+	reportID string,
+	decision mediasecurity.Decision,
+	idempotencyKey string,
+) (mediasecurity.Decision, error) {
+	var out mediasecurity.Decision
+	reportID = strings.TrimSpace(reportID)
+	if reportID == "" {
+		return out, invalid("report id is required")
+	}
+	if err := c.ensureCompatibility(ctx); err != nil {
+		return out, err
+	}
+	err := c.write(ctx, http.MethodPost, "/v1/moderation/reports/"+url.PathEscape(reportID)+"/decisions", decision, idempotencyKey, &out)
+	return out, err
+}
+
+func (c *Client) AppealDecision(
+	ctx context.Context,
+	decisionID string,
+	appeal mediasecurity.Appeal,
+	idempotencyKey string,
+) (mediasecurity.Appeal, error) {
+	var out mediasecurity.Appeal
+	decisionID = strings.TrimSpace(decisionID)
+	if decisionID == "" {
+		return out, invalid("decision id is required")
+	}
+	if err := c.ensureCompatibility(ctx); err != nil {
+		return out, err
+	}
+	err := c.write(ctx, http.MethodPost, "/v1/moderation/decisions/"+url.PathEscape(decisionID)+"/appeals", appeal, idempotencyKey, &out)
+	return out, err
+}
+
 func (c *Client) SigningIntent(
 	ctx context.Context,
 	req mediaapi.SigningIntentRequest,
@@ -350,6 +407,16 @@ func (c *Client) do(
 	}
 	if idempotencyKey != "" {
 		req.Header.Set("Idempotency-Key", idempotencyKey)
+	}
+	if c.session != nil {
+		token, err := c.session.Token(ctx)
+		if err != nil {
+			return &Error{Kind: ErrorUnauthorized, Detail: "session token unavailable", Err: err}
+		}
+		token = strings.TrimSpace(token)
+		if token != "" {
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
 	}
 	resp, err := c.http.Do(req)
 	if err != nil {

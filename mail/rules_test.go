@@ -429,7 +429,6 @@ func TestDurableStoreMigratesV2RulesSchema(t *testing.T) {
 	}
 }
 
-
 func TestRuleResponsesCannotMutateStoredState(t *testing.T) {
 	s, _ := testService()
 	ctx := context.Background()

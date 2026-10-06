@@ -38,8 +38,13 @@ func (g FixedFeatureGate) Enabled(_ context.Context, key string) (bool, error) {
 	return key == FeatureLivestreaming && g.Livestreaming, nil
 }
 
+type StreamSnapshot struct {
+	Controller string
+	Retired    bool
+}
+
 type StreamAuthority interface {
-	Controller(context.Context, [32]byte) (string, error)
+	Snapshot(context.Context, [32]byte) (StreamSnapshot, error)
 }
 
 type Gateway interface {
@@ -89,7 +94,7 @@ func (s Service) Create(ctx context.Context, caller string, spec livegateway.Ses
 	if err := livegateway.ValidateSpec(spec); err != nil {
 		return Record{}, err
 	}
-	controller, err := s.requireController(ctx, caller, spec.StreamRef)
+	controller, err := s.requireController(ctx, caller, spec.StreamRef, false)
 	if err != nil {
 		return Record{}, err
 	}
@@ -115,7 +120,7 @@ func (s Service) Start(ctx context.Context, caller, id string) (Record, error) {
 	if err := s.requireEnabled(ctx); err != nil {
 		return Record{}, err
 	}
-	record, err := s.loadAuthorized(ctx, caller, id)
+	record, err := s.loadAuthorized(ctx, caller, id, false)
 	if err != nil {
 		return Record{}, err
 	}
@@ -145,7 +150,7 @@ func (s Service) Stop(ctx context.Context, caller, id string) (Record, error) {
 	if err := s.ready(); err != nil {
 		return Record{}, err
 	}
-	record, err := s.loadAuthorized(ctx, caller, id)
+	record, err := s.loadAuthorized(ctx, caller, id, true)
 	if err != nil {
 		return Record{}, err
 	}
@@ -194,7 +199,7 @@ func (s Service) Status(ctx context.Context, caller, id string) (Record, error) 
 	if err := s.ready(); err != nil {
 		return Record{}, err
 	}
-	return s.loadAuthorized(ctx, caller, id)
+	return s.loadAuthorized(ctx, caller, id, true)
 }
 
 func (s Service) Recover(ctx context.Context) ([]Record, error) {
@@ -214,7 +219,7 @@ func (s Service) Recover(ctx context.Context) ([]Record, error) {
 		if !record.DesiredLive {
 			continue
 		}
-		controller, authErr := s.Authority.Controller(ctx, record.Spec.StreamRef)
+		snapshot, authErr := s.Authority.Snapshot(ctx, record.Spec.StreamRef)
 		if authErr != nil {
 			record.State = livegateway.StateFailed
 			record.LastError = authErr.Error()
@@ -226,7 +231,7 @@ func (s Service) Recover(ctx context.Context) ([]Record, error) {
 			}
 			continue
 		}
-		if normalizeController(controller) == "" || normalizeController(controller) != normalizeController(record.Controller) {
+		if snapshot.Retired || normalizeController(snapshot.Controller) == "" || normalizeController(snapshot.Controller) != normalizeController(record.Controller) {
 			record.DesiredLive = false
 			record.State = livegateway.StateFailed
 			record.LastError = ErrUnauthorized.Error()
@@ -313,7 +318,7 @@ func (s Service) recordGatewayState(ctx context.Context, record Record, session 
 	return record, nil
 }
 
-func (s Service) loadAuthorized(ctx context.Context, caller, id string) (Record, error) {
+func (s Service) loadAuthorized(ctx context.Context, caller, id string, allowRetired bool) (Record, error) {
 	if strings.TrimSpace(id) == "" {
 		return Record{}, ErrInvalidRequest
 	}
@@ -324,7 +329,7 @@ func (s Service) loadAuthorized(ctx context.Context, caller, id string) (Record,
 	if !ok {
 		return Record{}, ErrSessionNotFound
 	}
-	controller, err := s.requireController(ctx, caller, record.Spec.StreamRef)
+	controller, err := s.requireController(ctx, caller, record.Spec.StreamRef, allowRetired)
 	if err != nil {
 		return Record{}, err
 	}
@@ -334,18 +339,21 @@ func (s Service) loadAuthorized(ctx context.Context, caller, id string) (Record,
 	return record, nil
 }
 
-func (s Service) requireController(ctx context.Context, caller string, streamRef [32]byte) (string, error) {
+func (s Service) requireController(ctx context.Context, caller string, streamRef [32]byte, allowRetired bool) (string, error) {
 	if strings.TrimSpace(caller) == "" || streamRef == ([32]byte{}) {
 		return "", ErrInvalidRequest
 	}
-	controller, err := s.Authority.Controller(ctx, streamRef)
+	snapshot, err := s.Authority.Snapshot(ctx, streamRef)
 	if err != nil {
 		return "", err
 	}
-	if normalizeController(controller) == "" || normalizeController(controller) != normalizeController(caller) {
+	if snapshot.Retired && !allowRetired {
 		return "", ErrUnauthorized
 	}
-	return controller, nil
+	if normalizeController(snapshot.Controller) == "" || normalizeController(snapshot.Controller) != normalizeController(caller) {
+		return "", ErrUnauthorized
+	}
+	return snapshot.Controller, nil
 }
 
 func (s Service) requireEnabled(ctx context.Context) error {

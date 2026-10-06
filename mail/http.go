@@ -89,6 +89,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.signalBoundary(w, r, actor)
 	case r.URL.Path == "/v1/connectors/signal/share":
 		h.signalShare(w, r, actor)
+	case r.URL.Path == "/v1/connectors/signal/deep-sync/status":
+		h.signalDeepSyncStatus(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -160,6 +162,23 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) signalDeepSyncStatus(w http.ResponseWriter, r *http.Request, actor string) {
+	if strings.TrimSpace(actor) == "" {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	status := CanonicalSignalDeepSyncStatus()
+	if err := validateSignalDeepSyncStatus(status); err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "signal deep-sync gate invalid")
+		return
+	}
+	writeJSON(w, http.StatusOK, status)
 }
 
 func (h HTTPHandler) signalShare(w http.ResponseWriter, r *http.Request, actor string) {

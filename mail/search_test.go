@@ -153,7 +153,6 @@ func TestPrivateSearchPagination(t *testing.T) {
 	}
 }
 
-
 func TestPrivateSearchScanBoundHasContinuation(t *testing.T) {
 	s, _ := testService()
 	ctx := context.Background()
@@ -174,7 +173,7 @@ func TestPrivateSearchScanBoundHasContinuation(t *testing.T) {
 	for i := 0; i < MaxSearchScanItems; i++ {
 		if _, err := s.Send(ctx, "alice.420", SendRequest{
 			IdempotencyKey: fmt.Sprintf("noise-%03d", i),
-			Sender: "alice.420", Recipient: "bob.420", Subject: "noise", Body: "noise", Source: ServiceID,
+			Sender:         "alice.420", Recipient: "bob.420", Subject: "noise", Body: "noise", Source: ServiceID,
 		}); err != nil {
 			t.Fatal(err)
 		}

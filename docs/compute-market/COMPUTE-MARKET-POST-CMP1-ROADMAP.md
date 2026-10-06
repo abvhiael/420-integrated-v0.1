@@ -566,6 +566,10 @@ Normalize research-cluster identity/scheduler/project/workload/submitter/allocat
 
 ## CMP-5.4 — University/HPC gateway
 
+**Status: implementation complete; Level 1 exact-head qualification pending.**
+
+Normalize institution/gateway/scheduler/account/project/workload/allocation/result/lifecycle/resource/accounting/evidence material behind the existing provider-neutral adapter identity surface. Queue/partition identity is optional. CMP-5.2 remains the most recent Level 2 milestone; CMP-5.4 is an ordinary Level 1 extension. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.4 University/HPC gateway](CMP-5.4-UNIVERSITY-HPC-GATEWAY.md).
+
 ## CMP-5.5 — External proof/credit adapters
 
 ## CMP-5.6 — Double-reward prevention

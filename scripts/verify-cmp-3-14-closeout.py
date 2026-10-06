@@ -20,7 +20,14 @@ for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,QUAL,FAST,INTEGRATION):
 d=json.loads(LEDGER.read_text())
 definition="Reconcile the complete accumulated CMP-3 node420 worker runtime against current main, run the required Level 3 qualification on one exact merge-candidate implementation SHA, preserve durable evidence, and prepare the handoff to CMP-4 — Scientific compute framework."
 if d.get("step")!="CMP-3.14" or d.get("canonical_definition")!=definition: fail("step/definition drift")
-if d.get("status")!="LEVEL_3_QUALIFICATION_PENDING": fail("ledger must remain qualification-pending until durable exact-SHA evidence")
+if d.get("status")!="COMPLETE": fail("ledger closeout status must be COMPLETE after durable exact-SHA qualification")
+if d.get("completion_state")!="COMPLETE": fail("completion state drift")
+q=d.get("qualification",{})
+if q.get("level")!=3 or q.get("exact_sha") is not True: fail("durable exact-SHA Level 3 evidence missing")
+if q.get("implementation_sha")!="0fcb699e6270bc863538eacb08ba204ce2f41b6c": fail("qualified implementation SHA drift")
+for owner in ("solidity_contracts","genesis_address_authority","integrated_global","docs_global","retained_compute_market","worker_fast","worker_integration","node420_release_gate"):
+    if q.get(owner,{}).get("result")!="SUCCESS":
+        fail(f"durable Level 3 evidence missing SUCCESS for {owner}")
 if d.get("repository_closeout_candidate") is not True or d.get("live_release") is not False: fail("repository/live flags drift")
 rec=d.get("reconciliation",{})
 if rec.get("main_sha")!="b338b9c9c140957b0ea8619b0b20bfed415f2c6d" or rec.get("github_test_merge_sha")!="c72d4795e178b66a1d4ae4737af8033f475a736a" or rec.get("reconciled_anchor_sha")!="c62b01be3dfed2618e8b0bbedf8c8e73e5fd02b1" or rec.get("behind_main")!=0:
@@ -45,8 +52,8 @@ road=ROADMAP.read_text()
 for i in range(1,14):
     pos=road.find(f"## CMP-3.{i} —")
     if pos<0 or "COMPLETE" not in road[pos:pos+600]: fail(f"roadmap prerequisite CMP-3.{i} not COMPLETE")
-if "## CMP-3.14 — Phase closeout" not in road or "Level 3 comprehensive qualification in progress" not in road:
-    fail("roadmap closeout state drift")
+if "## CMP-3.14 — Phase closeout" not in road or "Status: COMPLETE — Level 3 exact-head qualified" not in road:
+    fail("roadmap completed closeout state drift")
 fw=FOUNDRY.read_text()
 for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-3.14-phase-closeout.json","qualify-foundry-shard.sh"):
     if token not in fw: fail(f"full Foundry ownership/trigger missing {token}")
@@ -67,4 +74,4 @@ for token in ("cmp-worker-level2","Run retained worker integration suite","go te
 close=CLOSEOUT.read_text()
 for heading in ("## Canonical definition","## Reconciliation baseline","## Phase inventory","## Authority and security boundaries","## Client/service reconciliation","## Repository qualification versus live deployment","## Level 3 qualification gate","## Full Solidity ownership","## Completion"):
     if heading not in close: fail(f"missing heading {heading}")
-print("CMP-3.14 phase closeout inventory/reconciliation: READY FOR LEVEL 3")
+print("CMP-3.14 phase closeout inventory/reconciliation: COMPLETE — LEVEL 3 EVIDENCE VERIFIED")

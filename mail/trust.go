@@ -231,7 +231,7 @@ func normalizeTrustValue(kind TrustKind, value string) string {
 	case TrustIdentity, TrustApplication:
 		return strings.ToLower(value)
 	case TrustPhrase:
-		return strings.Join(strings.Fields(value), " ")
+		return strings.ToLower(strings.Join(strings.Fields(value), " "))
 	default:
 		return value
 	}
@@ -265,8 +265,13 @@ func deterministicTrustEntryID(owner string, kind TrustKind, value string) strin
 }
 
 func validateTrustData(data *storeData) error {
+	counts := map[string]int{}
 	for key, entry := range data.TrustEntries {
-		if key != trustEntryKey(entry.Owner, entry.Kind, entry.Value) || entry.Owner == "" || entry.ID == "" || entry.Value == "" || !validTrustKind(entry.Kind) || !validTrustDisposition(entry.Disposition) {
+		if key != trustEntryKey(entry.Owner, entry.Kind, entry.Value) || entry.Owner == "" || entry.ID != deterministicTrustEntryID(entry.Owner, entry.Kind, entry.Value) || entry.Value == "" || len([]byte(entry.Value)) > MaxTrustValueBytes || !validTrustKind(entry.Kind) || !validTrustDisposition(entry.Disposition) {
+			return ErrInvalidInput
+		}
+		counts[entry.Owner]++
+		if counts[entry.Owner] > MaxTrustEntries {
 			return ErrInvalidInput
 		}
 	}

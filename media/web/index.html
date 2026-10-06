@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>420Media</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <div>
+    <p class="eyebrow">420 Integrated</p>
+    <h1>420Media</h1>
+    <p class="muted">Video uploads, library playback & basic livestreaming.</p>
+  </div>
+  <div class="header-actions">
+    <span id="runtime-state" class="pill" data-state="loading">Runtime unresolved</span>
+    <button id="connect-wallet" type="button">Connect wallet</button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="notice" aria-labelledby="runtime-title">
+    <div>
+      <p class="eyebrow">Authority boundary</p>
+      <h2 id="runtime-title">Media is a replaceable application</h2>
+      <p>420Storage, Identity, Rights, Pay, Compute & chain state remain authoritative. This interface never stores wallet private keys.</p>
+    </div>
+    <div id="global-status" class="status" role="status" aria-live="polite">Loading runtime configuration…</div>
+  </section>
+
+  <section aria-labelledby="library-title">
+    <div class="section-head">
+      <div><p class="eyebrow">Library</p><h2 id="library-title">Your media</h2></div>
+      <div class="button-row"><button id="refresh-library" type="button">Refresh</button><button id="load-more" type="button" hidden>Load more</button></div>
+    </div>
+    <div id="library-loading" class="state-panel" role="status" aria-live="polite" hidden>Loading media library…</div>
+    <div id="library-error" class="state-panel error" role="alert" hidden></div>
+    <div id="library-empty" class="state-panel" hidden>No media assets are available yet.</div>
+    <div id="library-grid" class="media-grid" aria-live="polite"></div>
+  </section>
+
+  <section id="playback-panel" aria-labelledby="playback-title">
+    <div class="section-head"><div><p class="eyebrow">Playback</p><h2 id="playback-title">Selected media</h2></div><span id="playback-state" class="pill">No asset selected</span></div>
+    <div class="playback-layout">
+      <video id="player" controls preload="metadata" playsinline aria-describedby="playback-help"></video>
+      <div class="detail-card">
+        <strong id="playback-name">Choose an asset from your library.</strong>
+        <p id="playback-help" class="muted">Playback is enabled only for a safe URL supplied by the qualified Media service.</p>
+        <dl>
+          <div><dt>Status</dt><dd id="playback-status">—</dd></div>
+          <div><dt>Visibility</dt><dd id="playback-visibility">—</dd></div>
+          <div><dt>Provenance</dt><dd id="playback-provenance">—</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="upload-panel" aria-labelledby="upload-title">
+    <div class="section-head"><div><p class="eyebrow">Upload</p><h2 id="upload-title">Prepare & upload video</h2></div><span id="upload-feature" class="pill">Checking feature…</span></div>
+    <form id="upload-form" class="form-grid">
+      <label class="wide">Video file<input id="upload-file" name="file" type="file" accept="video/*" required></label>
+      <label>Visibility<select id="upload-visibility" name="visibility"><option>PRIVATE</option><option>UNLISTED</option><option>PUBLIC</option></select></label>
+      <label>Agreement ID<input id="upload-agreement" name="agreementId" autocomplete="off" required></label>
+      <label>Capacity reservation ID<input id="upload-capacity" name="capacityReservationId" autocomplete="off" required></label>
+      <label class="wide">Asset ID override <span class="muted">(optional)</span><input id="upload-id" name="assetId" autocomplete="off"></label>
+      <button id="prepare-upload" class="primary" type="submit">Prepare & upload</button>
+      <button id="retry-upload" type="button" hidden>Retry upload transport</button>
+    </form>
+    <div id="upload-progress" class="status" role="status" aria-live="polite" data-state="idle">Select a video to begin.</div>
+    <div id="upload-plan" class="detail-card" hidden>
+      <p><strong>Prepared upload</strong></p>
+      <dl>
+        <div><dt>Upload ID</dt><dd id="plan-upload-id">—</dd></div>
+        <div><dt>Provider</dt><dd id="plan-provider">—</dd></div>
+        <div><dt>Node</dt><dd id="plan-node">—</dd></div>
+        <div><dt>Service</dt><dd id="plan-service">—</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section id="livestream-panel" aria-labelledby="live-title">
+    <div class="section-head"><div><p class="eyebrow">Livestream</p><h2 id="live-title">Basic live session</h2></div><span id="live-feature" class="pill">Checking feature…</span></div>
+    <form id="live-create-form" class="form-grid">
+      <label>Session ID<input id="live-id" name="id" autocomplete="off" required></label>
+      <label>Protocol<select id="live-protocol" name="protocol"><option value="WHIP">WHIP</option><option value="WHEP">WHEP</option><option value="RTMP">RTMP</option><option value="SRT">SRT</option></select></label>
+      <label>Direction<select id="live-direction" name="direction"><option value="INGEST">INGEST</option><option value="EGRESS">EGRESS</option></select></label>
+      <label class="wide">Endpoint<input id="live-endpoint" name="endpoint" type="url" autocomplete="off" placeholder="https://…" required></label>
+      <label>Credential reference<input id="live-credential" name="credentialRef" autocomplete="off"></label>
+      <label>Stream reference<input id="live-stream-ref" name="streamRef" autocomplete="off" required></label>
+      <label>Maximum duration (seconds)<input id="live-duration" name="maxDuration" type="number" min="0" max="86400" value="3600"></label>
+      <button id="create-live" class="primary" type="submit">Create session</button>
+    </form>
+    <div class="button-row live-actions">
+      <button id="refresh-live" type="button">Refresh status</button>
+      <button id="start-live" type="button">Start</button>
+      <button id="stop-live" type="button">Stop</button>
+    </div>
+    <div id="live-status" class="status" role="status" aria-live="polite" data-state="idle">No livestream selected.</div>
+    <dl class="detail-card">
+      <div><dt>Controller</dt><dd id="live-controller">—</dd></div>
+      <div><dt>Status</dt><dd id="live-state">—</dd></div>
+      <div><dt>Desired live</dt><dd id="live-desired">—</dd></div>
+      <div><dt>Reconnect attempts</dt><dd id="live-reconnects">—</dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="session-title">
+    <div class="section-head"><div><p class="eyebrow">Wallet & execution</p><h2 id="session-title">Session state</h2></div></div>
+    <div class="state-grid">
+      <div class="detail-card"><small>Wallet</small><strong id="wallet-account">Not connected</strong></div>
+      <div class="detail-card"><small>Network</small><strong id="wallet-network">Unresolved</strong></div>
+      <div class="detail-card"><small>Capabilities</small><strong id="capability-state">Not loaded</strong></div>
+    </div>
+    <div id="transaction-state" class="status" role="status" aria-live="polite" data-state="idle">No transaction or signing action pending.</div>
+  </section>
+</main>
+<footer><strong>420Media</strong><span class="muted">Repository-qualified application surface. Production origin is not claimed until deployment evidence exists.</span></footer>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

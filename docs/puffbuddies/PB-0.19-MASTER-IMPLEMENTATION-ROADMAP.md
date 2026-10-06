@@ -144,6 +144,10 @@ Implement deletion workers, retention policy, cache/index/recommendation invalid
 **Required gates:** deletion propagation; restore/backfill/reindex adversarial tests; stale-state resurrection rejection; dependency-boundary tests; retention-purpose tests.
 **Level 2 milestone C:** accumulated lifecycle/safety/deletion integration.
 
+### Current PB-11 web-application mapping
+
+The legacy PB-0.19 **PB-7 — Web MVP and baseline user experience** scope is implemented by current **PB-11 — Web application**. Current PB-11 carries the complete web-first MVP client requirement, while current PB-14 remains the later backend/API-hardening owner and PB-17+ remain live-environment/release owners. This mapping changes numbering only and does not promote the legacy PB-11 launch-readiness meaning into current PB-11.
+
 ### PB-7 — Web MVP and baseline user experience
 Implement the web-first MVP across eligibility, account/profile, discovery, matching, matched messaging entry, notifications, safety controls, lifecycle controls, and deletion status. Baseline safety/account-exit capabilities remain non-premium.
 

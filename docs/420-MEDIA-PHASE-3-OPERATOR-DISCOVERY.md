@@ -36,6 +36,20 @@ The adapter performs:
 
 The event index can contain stale IDs after a reorg or historical state transition without creating a safety issue because every candidate is still revalidated against current canonical registry state. Malformed chain data or RPC failures fail the discovery pass closed.
 
+### Reorg and recovery model
+
+The concrete Ethereum adapter does not persist an authoritative operator set. Each discovery pass replays the canonical `OperatorCapabilityChanged` log view from the configured `FromBlock` through the node's current canonical head, reconstructs the latest enabled state, and then revalidates every surviving ID with canonical `eth_call` reads.
+
+This gives the current Phase 3.1 boundary a simple recovery rule:
+
+- a later canonical log view replaces the previous discovery result rather than merging with cached authority;
+- removed logs are rejected fail-closed;
+- malformed block/log ordering quantities are rejected before replay;
+- stale IDs remaining after a historical transition cannot become selectable because canonical revalidation still controls eligibility;
+- a canonical read failure returns no partial provider set.
+
+A future persistent index may optimize replay, but it must preserve these same semantics and must be able to rewind/rebuild across reorgs without becoming an authority source.
+
 ## Service-network control plane
 
 `media/controlplane/discovery.go` is the Phase 3.1 service boundary consumed by later orchestration code. Callers submit capability, budget, latency, geography, capacity, reliability and result-limit constraints; the control plane delegates selection to the deterministic discovery selector and returns a bounded `ProviderView`.
@@ -79,6 +93,8 @@ The default score emphasizes reliability first, then price, latency and capacity
 - **MEDIA-DISCOVERY-INV-015:** The service-network control plane cannot broaden eligibility beyond the selector constraints supplied by the caller.
 - **MEDIA-DISCOVERY-INV-016:** Control-plane provider responses exclude metadata payloads, endpoints, credentials and raw media references.
 - **MEDIA-DISCOVERY-INV-017:** Canonical discovery failures propagate through the control plane; partial provider responses are never synthesized after a failed discovery pass.
+- **MEDIA-DISCOVERY-INV-018:** Every discovery pass is recoverable from a changed canonical log view without retaining stale authoritative index state.
+- **MEDIA-DISCOVERY-INV-019:** Malformed block/log ordering data fails closed before event replay.
 
 ## Phase 3.1 completion boundary
 

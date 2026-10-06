@@ -33,11 +33,19 @@ No runtime feature, contract, service, API, database, address, service ID, deplo
 
 ## Requirements satisfied
 
-Pending exact-head qualification.
+- PB-NONGOAL-001 through PB-NONGOAL-040 exist exactly once and in sequence;
+- PB-0.1 through PB-0.15 non-goals are reconciled into one canonical negative-requirement set;
+- prohibited non-goals are clearly separated from features that PB-0.2 merely defers;
+- public relationship/cannabis/preference registries, wallet-to-profile enumeration, everything-on-chain sensitive dating state, tokenized dating/cannabis identity, purchased/admin/algorithmic consent, pay-to-message, block bypass, date-marketplace/escrow behavior, wagering, wealth/desirability scoring, public precise location, public safety/lifecycle state, and public member enumeration remain prohibited;
+- Wallet, Identity, Names, Messenger, Pay, Registry, AppStore, Indexer, Explorer, Search, Analytics, clients, caches, and Notifications remain bounded to their canonical authorities;
+- deletion honesty, stale-state revocation, and server-side authorization boundaries are preserved;
+- economic, premium, experimental, AI-assisted, tokenized, administrative, and cross-app relabeling cannot bypass an existing non-goal;
+- explicit non-goal change control is defined;
+- no runtime feature, contract, service, API, database, fixed address, service ID, deployment, or live implementation is claimed.
 
 ## Implementation SHA
 
-**PENDING EXACT-HEAD QUALIFICATION**
+`a35c646d6ab304eda8c4abf7ef6cafa071de81c8`
 
 ## Current main/base SHA
 
@@ -49,7 +57,17 @@ PR #526 remains open on the cumulative PB-0 branch. Current-main merge-candidate
 
 Workflow: **PuffBuddies PB-0 Qualification**
 
-Pending exact-head run.
+Exact-head push qualification:
+- run: `37401982015` — **PASS**
+- job: `112070993404` (`pb0-fast`) — **PASS**
+- exact-head checkout — **PASS**
+- exact-head SHA verification — **PASS**
+- cumulative PB-0 verifier — **PASS**
+- accidental PuffBuddies runtime/contract implementation rejection — **PASS**
+
+Exact-head pull-request qualification:
+- run: `37401987279` — **PASS**
+- job: `112071009530` (`pb0-fast`) — **PASS**
 
 ## Security/adversarial/invariant scope
 
@@ -71,11 +89,13 @@ PB-0.16 reconciles PB-0 non-goals only. It does not decide whether any deferred 
 
 ## Blockers
 
-Exact-head Level 1 qualification must pass before PB-0.16 is formally COMPLETE.
+None for PB-0.16.
 
 ## Completion state
 
-**PB-0.16 — PENDING QUALIFICATION**
+**PB-0.16 — COMPLETE**
+
+All canonical PB-0.16 exit criteria are satisfied on exact implementation SHA `a35c646d6ab304eda8c4abf7ef6cafa071de81c8`.
 
 ## Next canonical roadmap step
 

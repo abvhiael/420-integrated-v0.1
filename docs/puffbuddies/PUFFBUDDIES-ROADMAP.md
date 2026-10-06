@@ -1472,6 +1472,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** all accumulated integration requirements pass; complete retained PuffBuddies inventory and dedicated PB-2.13 integration suite pass on one exact SHA; privacy/public-chain negative gate passes; main divergence is documented as reconciled or non-overlapping; durable Level-2 evidence is recorded.
 
+### PB-2.14 — PB-2 Phase Closeout — Level 3
+
+**Purpose:** reconcile the complete accumulated PB-2 phase with current `main`, establish one exact merge-candidate implementation SHA, run the required comprehensive Level-3 qualification owners once against that SHA, reconcile durable PB-2 evidence/roadmap/deployment/address claims, and formally close PB-2 before advancing to PB-3.
+
+**Canonical requirements:** the PB-2 branch must be reconciled with then-current `main`; the resulting merge-candidate SHA must contain all PB-2.1 through PB-2.13 qualified work plus current-main state; **Solidity Contracts** must run the canonical full repository Foundry inventory exactly once using the runner-aware four-shard PR inventory; **Genesis Address Authority** must separately verify address/namespace/collision/predeploy/frozen-address/manifest authority without duplicating the full Foundry inventory; **420 Integrated Qualification** must run retained global Go/build/production-dependency/Geth/fault/soak qualification; **420Docs Qualification** must run repository documentation/global reconciliation; **PuffBuddies PB-2 Qualification** must run the complete retained PuffBuddies inventory including PB-2.13; privacy/adversarial/failure-recovery/static/public-chain/deployment-claim boundaries must remain green; PB-2 must introduce no unjustified frozen address, contract, production deployment or live-provider claim; every required owner must qualify the same exact merge-candidate implementation SHA; missing/skipped/cancelled/stale required evidence is not PASS; only evidence-only bookkeeping may follow the qualified SHA without recursive qualification.
+
+**CI ownership:** canonical Solidity inventory is owned only by **Solidity Contracts**. Genesis owns only canonical address/namespace/predeploy authority checks and must not repeat Foundry. PuffBuddies PB-2 owns app tests. 420 Integrated owns global node/Geth/fault/soak. 420Docs owns global documentation reconciliation.
+
+**Closeout marker:** `docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md` is the durable Level-3 classification marker that triggers the canonical repository-wide owners.
+
+**Qualification level:** Level 3 — complete app-phase closeout qualification.
+
+**Dependencies:** PB-2.1 through PB-2.12 COMPLETE; **PB-2.13 — PB-2 Integration Milestone — Level 2 — COMPLETE**; current-main reconciliation.
+
+**Exit criteria:** one reconciled exact merge-candidate SHA is established; Solidity Contracts full inventory PASS; Genesis/address-authority PASS; 420 Integrated/global PASS including Geth/fault/soak; complete retained PuffBuddies/PB-2 suite PASS; 420Docs/global PASS; applicable privacy/adversarial/invariant/failure/static/deployment/config checks PASS; roadmap/evidence/address/deployment claims reconciled; no remaining PB-2 implementation blocker; durable Level-3 evidence records every owner/run/job and exact SHA; PB-2 may then be formally marked COMPLETE and the next canonical phase is PB-3 — Profiles.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

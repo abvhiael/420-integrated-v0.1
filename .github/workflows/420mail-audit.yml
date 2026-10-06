@@ -30,6 +30,7 @@ jobs:
           files="$(gofmt -l mail)"
           if [ -n "$files" ]; then
             printf '%s\n' "$files"
+            gofmt -d $files || true
             exit 1
           fi
       - name: Go test

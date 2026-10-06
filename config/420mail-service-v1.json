@@ -82,5 +82,25 @@
     "maxBulkItems": 100,
     "ownerScoped": true,
     "systemLabelsImmutable": true
+  },
+  "privateSearch": {
+    "enabled": true,
+    "ownerScoped": true,
+    "publicIndexing": false,
+    "public420SearchIntegration": false,
+    "metadataFields": [
+      "sender",
+      "recipient",
+      "subject",
+      "source",
+      "system_folder",
+      "label_name",
+      "custom_folder_name"
+    ],
+    "bodySearch": "ON_DEMAND_PRIVATE_BLOB",
+    "maxQueryBytes": 256,
+    "maxScanItems": 500,
+    "maxPageSize": 100,
+    "permanentlyDeletedExcluded": true
   }
 }

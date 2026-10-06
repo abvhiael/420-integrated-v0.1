@@ -579,7 +579,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 - exact-head PuffBuddies PB-0 workflow passes;
 - durable PB-0.13 evidence records exact run/job evidence and current-main/base state.
 
-### PB-0.14 — Cannabis taxonomy
+### PB-0.14 — Cannabis taxonomy — COMPLETE
 
 **Purpose:** define canonical cannabis-compatibility vocabulary and semantic boundaries without turning cannabis-related fields into public, tokenized, medical, legal, marketplace, or reputation identity.
 

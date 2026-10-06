@@ -53,7 +53,7 @@
   "metadataStore": {
     "requiredForDeployment": true,
     "interface": "MailStore",
-    "schemaVersion": 9,
+    "schemaVersion": 10,
     "implementation": "ATOMIC_FILE_V1",
     "atomicTransactions": true,
     "restartRecovery": true,
@@ -404,7 +404,7 @@
     "sync": true,
     "delivery": true,
     "webhook": false,
-    "walletVerification": false
+    "walletVerification": true
   },
   "discordSync": {
     "enabled": true,
@@ -447,5 +447,39 @@
     "publicIndexing": false,
     "messageBodiesOnChain": false,
     "walletVerification": false
+  },
+  "discordWalletVerification": {
+    "enabled": true,
+    "provider": "discord",
+    "connectorCapability": "WALLET_VERIFY",
+    "authenticatedOwnerOnly": true,
+    "connectionBinding": "DISCORD_LINK_CONNECTION_ID",
+    "authority": "CANONICAL_WALLET_RPC_IDENTITY_ADAPTER",
+    "challengeKind": "MESSAGE_SIGNATURE",
+    "challengeDomain": "420/MAIL/DISCORD/WALLET-VERIFY/V1",
+    "challengeBindings": [
+      "MAIL_IDENTITY",
+      "DISCORD_CONNECTION",
+      "DISCORD_USER_ID",
+      "CHAIN_ID",
+      "WALLET_ACCOUNT",
+      "EXPIRY"
+    ],
+    "maxChallengeTtlSeconds": 600,
+    "durableChallengeState": true,
+    "restartRecovery": true,
+    "canonicalEvidenceRequired": true,
+    "nonCustodialRequired": true,
+    "replaySafeAfterSuccess": true,
+    "crossIdentityRejected": true,
+    "crossConnectionRejected": true,
+    "accountSubstitutionRejected": true,
+    "privateKeyInput": false,
+    "seedPhraseInput": false,
+    "passkeyPrivateMaterialInput": false,
+    "providerCredentialInput": false,
+    "verificationEvidencePersistence": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

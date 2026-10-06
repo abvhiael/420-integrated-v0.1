@@ -389,3 +389,28 @@ func (c Client) CancelDelivery(ctx context.Context, id string) (mail.Delivery, e
 	err := c.do(ctx, http.MethodPost, "/v1/outbox/"+url.PathEscape(id)+"/cancel", nil, &out)
 	return out, err
 }
+
+
+func (c Client) GoogleOnboarding(ctx context.Context, req mail.GoogleOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/google", req, &out)
+	return out, err
+}
+
+func (c Client) AppleOnboarding(ctx context.Context, req mail.AppleOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/apple", req, &out)
+	return out, err
+}
+
+func (c Client) PasskeyOnboarding(ctx context.Context, req mail.PasskeyOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/passkey", req, &out)
+	return out, err
+}
+
+func (c Client) ExistingWalletOnboarding(ctx context.Context, req mail.WalletOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/wallet", req, &out)
+	return out, err
+}

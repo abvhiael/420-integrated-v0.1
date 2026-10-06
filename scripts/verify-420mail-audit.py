@@ -401,7 +401,7 @@ for token in ["IntegrationInboxFilter","IntegrationsInboxFiltered","normalizeInt
     if token not in integrations_inbox_src: errors.append("MAIL-2.28 integration-specific filter invariant missing: "+token)
 for token in ["VerifiedIdentityAssurance","VerifiedIdentityProviderAuthority","VerifiedIdentityWallet","VerifiedPlatformIdentity","CrossPlatformVerifiedIdentity","CrossPlatformIdentity","DiscordWalletVerifications","DiscordSync","TelegramSync"]:
     if token not in cross_platform_identity_src: errors.append("MAIL-2.27 cross-platform identity invariant missing: "+token)
-for token in ["UnifiedNotificationRouter","NewUnifiedNotificationRouter","NotificationRoute420Notifications","NotificationRouteSignal","NotificationRoutingError","attempt", "Routes"]:
+for token in ["UnifiedNotificationRouter","NewUnifiedNotificationRouter","NotificationRoute420Notifications","NotificationRouteSignal","NotificationRoutingError","route.NotifyMail","Routes"]:
     if token not in notification_routing_src: errors.append("MAIL-2.29 unified notification routing invariant missing: "+token)
 for token in ["UnifiedNotificationRouter","NewUnifiedNotificationRouter"]:
     if token not in signal_notifications_src: errors.append("MAIL-2.29 Signal compatibility router integration missing: "+token)

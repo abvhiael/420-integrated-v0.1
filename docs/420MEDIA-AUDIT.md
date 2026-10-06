@@ -73,8 +73,6 @@ The current CLI is operational tooling, not a user-facing 420Media application.
 - user-facing 420Media frontend;
 - public `/v1` Media API;
 - typed Media service SDK/client satisfying GEN-SVC-0.7;
-- Search projection/index integration;
-- Notifications integration;
 - Registry/service-discovery publication/deployment profile;
 - user authorization/session model;
 - upload/livestream moderation and abuse handling;
@@ -199,8 +197,8 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | Identity integration | GEN-SVC registry | wallet-first actor guard with optional active profile/controller validation + Identity-aware livestream helpers | Media authority/livestream tests + exact-head Media gate | Identity/Rights integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | Rights integration | GEN-SVC registry | canonical Rights subject/provenance/right/holder/license checks for public projection and derivative reuse | Media authority/storage tests + exact-head Media gate | Identity/Rights integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | Storage integration | GEN-SVC registry | complete Storage object identity, canonical manifest readiness, derivative linkage, privacy/delete/retry semantics on audit branch | Media Storage lifecycle tests + exact-head Media gate | Storage lifecycle doc + qualification evidence | COMPLETE (Level 1) | retain canonical Storage authority; live deployment deferred |
-| Search integration | GEN-SVC registry | none | none | none | MISSING | public-only Media projection |
-| Notifications integration | GEN-SVC registry | none | none | none | MISSING | opt-in event delivery |
+| Search integration | GEN-SVC registry | READY+PUBLIC+Rights-authorized Media assets mapped to existing Search asset results with qualified Indexer provenance/finality and deterministic rollback/rebuild | Media projection/rebuild/privacy tests + Search architecture/result dependency tests + exact-head Media gate | Media projections doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage; live endpoint binding deferred |
+| Notifications integration | GEN-SVC registry | private opt-in topic/channel/severity/finality subscriptions with deterministic dedupe, promotional-consent separation and reorg retractions | Media notification/projection tests + exact-head Media gate | Media projections doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage; live provider delivery deferred |
 | Pay integration | GEN-SVC registry | canonical PaymentRegistry payer/merchant/amount/receipt/refund binding through Media adapter | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | Compute integration | GEN-SVC registry | canonical graph/job/funding/match/provider/beneficiary/entitlement/refund binding; exact earned-amount accounting | Pay/Compute focused Foundry + retained exact-head Media gate | Pay/Compute integration doc + qualification evidence | COMPLETE (Level 1) | retain regression coverage |
 | /v1 API | GEN-SVC-0.6 | absent | none | none | MISSING | implement typed stable API |

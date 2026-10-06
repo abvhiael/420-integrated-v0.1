@@ -197,8 +197,20 @@ func TestTelegramSyncStoreMigratesV10ToV11(t *testing.T) {
 	if err := json.Unmarshal(raw, &disk); err != nil {
 		t.Fatal(err)
 	}
-	if disk.SchemaVersion != 11 || disk.TelegramSync == nil {
-		t.Fatalf("persisted v11 migration incomplete: schema=%d telegram=%v", disk.SchemaVersion, disk.TelegramSync)
+	if disk.SchemaVersion != 11 {
+		t.Fatalf("persisted v11 migration incomplete: schema=%d", disk.SchemaVersion)
+	}
+	reopened, err := OpenDurableStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := reopened.View(context.Background(), func(data *storeData) error {
+		if data.SchemaVersion != 11 || data.TelegramSync == nil {
+			t.Fatalf("reopened v11 normalization incomplete: schema=%d telegram=%v", data.SchemaVersion, data.TelegramSync)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }
 

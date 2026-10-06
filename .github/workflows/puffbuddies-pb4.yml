@@ -1,0 +1,43 @@
+name: PuffBuddies PB-4 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb4.yml"
+  push:
+    branches: ["puffbuddies-pb4-discovery-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb4.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb4-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-4 targeted discovery engine
+        run: python3 -m unittest puffbuddies.tests.test_pb_4_discovery -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Discovery privacy and public-chain negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(latitude|longitude|raw_gps|exact_address|wallet_balance|token_balance|staking_balance|payment_volume|report_count|block_count)[[:space:]]*[:=]' puffbuddies/domain/discovery.py
+          ! grep -RIE '(create_match|relationship_transition|send_message|notify)' puffbuddies/domain/discovery.py

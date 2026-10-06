@@ -43,7 +43,7 @@ func secureServerFixture(t *testing.T) *httptest.Server {
 	sessions := sessionMap{
 		"creator": {
 			SessionID: "creator-session", Actor: "CREATOR",
-			Wallet: "0x1111111111111111111111111111111111111111",
+			Wallet:  "0x1111111111111111111111111111111111111111",
 			ChainID: 420, Network: "testnet", ExpiresAt: now.Add(time.Hour),
 			Capabilities: map[string]bool{
 				"media.upload": true, "media.livestream": true, "media.notifications": true,
@@ -52,7 +52,7 @@ func secureServerFixture(t *testing.T) *httptest.Server {
 		},
 		"moderator": {
 			SessionID: "moderator-session", Actor: "MODERATOR",
-			Wallet: "0x2222222222222222222222222222222222222222",
+			Wallet:  "0x2222222222222222222222222222222222222222",
 			ChainID: 420, Network: "testnet", ExpiresAt: now.Add(time.Hour),
 			Capabilities: map[string]bool{"media.moderate": true},
 		},

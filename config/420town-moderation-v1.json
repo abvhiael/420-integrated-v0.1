@@ -1,0 +1,67 @@
+{
+  "schema": "420-town-moderation-v1",
+  "serviceId": "420/service/town/v1",
+  "stateClass": "REPLACEABLE_OFF_CHAIN_APPLICATION_STATE",
+  "actions": [
+    "REPORT",
+    "HIDE",
+    "BLOCK",
+    "MUTE",
+    "SUSPEND",
+    "APPEAL",
+    "MODERATOR_DECISION",
+    "RESTORE",
+    "LOCK"
+  ],
+  "states": ["OPEN","HIDDEN","LOCKED","SUSPENDED","APPEALED","RESOLVED","RESTORED"],
+  "targetKinds": ["POST","COMMENT","USER"],
+  "authority": {
+    "moderatorRoles": ["MODERATOR","ADMIN"],
+    "communityScoped": true,
+    "blockMuteUserScoped": true,
+    "suspensionScope": "COMMUNITY_APPLICATION_SCOPE",
+    "protocolAuthority": false,
+    "assetAuthority": false,
+    "walletAuthority": false,
+    "identityRevocationAuthority": false
+  },
+  "appeals": {
+    "affectedSubjectOnly": true,
+    "preservePriorDecisionHistory": true,
+    "decisionAction": "MODERATOR_DECISION",
+    "restorationAction": "RESTORE"
+  },
+  "provenance": {
+    "appendOnlyCaseLog": true,
+    "parentRecordRequiredAfterInitialReport": true,
+    "versionMonotonic": true,
+    "evidenceDigest": "SHA-256_LOWERCASE_HEX"
+  },
+  "integration": {
+    "contentGateRequired": true,
+    "hiddenBlocksPublicRead": true,
+    "lockedBlocksInteraction": true,
+    "suspendedBlocksCommunityWrites": true,
+    "moderatorsRetainReviewAccess": true,
+    "affectedAuthorRetainsOwnHiddenContentAccess": true
+  },
+  "invariants": [
+    "TOWN-MOD-001_CANONICAL_ACTION_VOCABULARY_COMPLETE",
+    "TOWN-MOD-002_MODERATOR_AUTHORITY_IS_COMMUNITY_SCOPED",
+    "TOWN-MOD-003_BLOCK_AND_MUTE_ARE_USER_SCOPED",
+    "TOWN-MOD-004_SUSPENSION_IS_COMMUNITY_APPLICATION_SCOPED",
+    "TOWN-MOD-005_PRIVILEGED_ACTIONS_REQUIRE_MODERATOR_OR_ADMIN_ROLE",
+    "TOWN-MOD-006_REPORTS_REQUIRE_ACTIVE_COMMUNITY_MEMBERSHIP",
+    "TOWN-MOD-007_MODERATION_TARGET_PROVENANCE_MATCHES_COMMUNITY",
+    "TOWN-MOD-008_APPEALS_ARE_FILED_BY_AFFECTED_SUBJECT",
+    "TOWN-MOD-009_APPEALS_PRESERVE_PRIOR_DECISION_HISTORY",
+    "TOWN-MOD-010_MODERATOR_DECISION_REQUIRES_APPEALED_STATE",
+    "TOWN-MOD-011_RESTORE_RELEASES_ACTIVE_ENFORCEMENT_WITHOUT_REWRITING_HISTORY",
+    "TOWN-MOD-012_HIDE_CANNOT_BE_BYPASSED_BY_READ_VOTE_HISTORY_OR_THREAD_PATHS",
+    "TOWN-MOD-013_LOCK_PRESERVES_READ_BUT_BLOCKS_INTERACTION",
+    "TOWN-MOD-014_SUSPENSION_CANNOT_BE_BYPASSED_BY_CONTENT_CREATE_PATHS",
+    "TOWN-MOD-015_MODERATION_EVIDENCE_DIGESTS_FAIL_CLOSED",
+    "TOWN-MOD-016_MODERATION_IDEMPOTENCY_CONFLICTS_FAIL_CLOSED",
+    "TOWN-MOD-017_MODERATION_NEVER_MUTATES_OWNERSHIP_PAYMENT_RIGHTS_IDENTITY_OR_WALLET_STATE"
+  ]
+}

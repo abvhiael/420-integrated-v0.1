@@ -69,6 +69,21 @@ nav:
                   - Events & Reorgs: apps/search/developer/events.md
                   - Errors: apps/search/developer/errors.md
                   - Examples: apps/search/developer/examples.md
+          - 420 Town:
+              - Overview: apps/town/index.md
+              - User Guide: apps/town/user-guide.md
+              - Architecture & Components: apps/town/architecture.md
+              - Authority Model: apps/town/authority.md
+              - Content Model: apps/town/content.md
+              - Moderation & Appeals: apps/town/moderation.md
+              - Service Integrations: apps/town/integrations.md
+              - API, SDK & Recovery: apps/town/api.md
+              - Web Application: apps/town/web.md
+              - Security & Threat Model: apps/town/security.md
+              - Developer Guide: apps/town/developer-guide.md
+              - Operator Guide: apps/town/operator-guide.md
+              - Configuration & Deployment: apps/town/configuration-deployment.md
+              - Known Limitations: apps/town/known-limitations.md
           - 420 Analytics:
               - Overview: apps/analytics/index.md
               - Getting Started: apps/analytics/getting-started.md

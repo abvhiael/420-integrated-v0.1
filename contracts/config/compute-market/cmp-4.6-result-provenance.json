@@ -1,0 +1,70 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.6.ResultProvenance.v1",
+  "step": "CMP-4.6",
+  "title": "Result provenance",
+  "canonical_definition": "Result provenance",
+  "status": "COMPLETE",
+  "base_main_sha": "f32a9c322e085634e47f20b84861338811198454",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": true,
+    "level_2_milestone": "first CMP-4 scientific-framework convergence",
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeScientificResultProvenance420.sol",
+    "test": "contracts/test/ComputeScientificResultProvenance420.t.sol",
+    "doc": "docs/compute-market/CMP-4.6-RESULT-PROVENANCE.md",
+    "verifier": "scripts/verify-cmp-4-6-result-provenance.py"
+  },
+  "canonical_sources": [
+    "ComputeJobRegistry420",
+    "ComputeJobWorkerSnapshotEvidence420.verdictContext",
+    "CMP-4.1 ScientificWorkUnitV1"
+  ],
+  "provenance_fields": [
+    "jobId",
+    "unitId",
+    "scientificWorkUnitCommitment",
+    "attemptRef",
+    "attempt",
+    "worker",
+    "resultCommitment",
+    "executionEvidenceCommitment",
+    "verifier",
+    "verificationRef",
+    "outputSchemaCommitment",
+    "recordedAt"
+  ],
+  "authority_boundaries": [
+    "read-only source adapter does not own result or verifier state",
+    "provenance requires canonical verification but does not decide correctness",
+    "no raw result, receipt, secret, dataset or credential bytes are stored",
+    "no job lifecycle, worker selection, funding, settlement, reward, slash or governance authority"
+  ],
+  "exit_criteria": [
+    "canonical source adapter binds JobRegistry result state to worker verdictContext",
+    "CMP-4.1 scientific work-unit commitment is reconstructed from canonical/frozen inputs",
+    "result-bearing attempt, worker, result and receipt-bound execution evidence are immutable provenance inputs",
+    "nonzero canonical verifier and verification decision are required before recording",
+    "provenance identity is domain/chain/registry/source/job/unit bound",
+    "byte-identical duplicate provenance is idempotent and conflicting provenance fails closed",
+    "cross-unit scientific commitment replay and altered binding fail closed",
+    "canonical source drift makes isCanonical fail closed",
+    "raw outputs/receipts/private evidence remain off-chain",
+    "provenance creates no correctness/access/economic/governance authority",
+    "dedicated tests and mechanical verifier committed",
+    "Level 1 plus retained Compute Market Level 2 integration pass exact implementation SHA"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.7 scientific metadata and lineage",
+    "CMP-4.8 publication / retention policy",
+    "CMP-4.9 research dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-7 SDK/API/indexer expansion",
+    "CMP-8 Compute UI",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.7 — Scientific metadata and lineage",
+  "completion_state": "COMPLETE"
+}

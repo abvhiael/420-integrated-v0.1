@@ -1,0 +1,52 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.10.PhaseCloseout.v1",
+  "step": "CMP-4.10",
+  "title": "Phase closeout",
+  "canonical_definition": "Reconcile the complete accumulated CMP-4 scientific compute framework against current main, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification once, preserve durable evidence, and hand off to CMP-5 — External distributed-compute adapters.",
+  "status": "QUALIFICATION_PENDING",
+  "reconciliation": {
+    "main_sha": "23ebff000a471bfbc4439894f797f3b17a530867",
+    "reconciled_anchor_sha": "21024d2da887d9d64dff7dd947f773d95ea54e69",
+    "behind_main": 0
+  },
+  "qualified_prerequisites": [
+    "CMP-4.1",
+    "CMP-4.2",
+    "CMP-4.3",
+    "CMP-4.4",
+    "CMP-4.5",
+    "CMP-4.6",
+    "CMP-4.7",
+    "CMP-4.8",
+    "CMP-4.9"
+  ],
+  "level_3_required": {
+    "solidity_full_inventory": true,
+    "genesis_address_authority": true,
+    "integrated_global": true,
+    "docs_global": true,
+    "retained_compute_market_suite": true,
+    "phase_config_verification": true,
+    "adversarial_invariant_security": true,
+    "deployment_config_verification": true
+  },
+  "ci_ownership": {
+    "solidity_full_inventory": "Solidity Contracts / four balanced PR shards",
+    "genesis_address_authority": "Genesis Address Authority / no duplicate full Foundry",
+    "global_runtime": "420 Integrated Qualification",
+    "docs": "420Docs Qualification",
+    "retained_compute_market": "Compute Market Qualification"
+  },
+  "non_applicable_direct_clients": {
+    "420-indexer": "CMP-4 introduces no indexer schema, ingestion, discovery or event-consumer implementation; indexed enumeration remains CMP-7.",
+    "420-rpc": "CMP-4 introduces no RPC method, schema or backend surface.",
+    "420Search": "CMP-4 introduces no Search consumer/indexing implementation.",
+    "frontend/backend": "CMP-4.9 is a read-only contract consumer surface, not the human-facing CMP-8 application."
+  },
+  "live_blockers": [
+    "public/testnet scientific workload demonstration remains CMP-9 scope",
+    "live dataset/result storage and retrieval remain later operational scope",
+    "external adapter integration remains CMP-5 scope"
+  ],
+  "next_canonical_step": "CMP-5 — External distributed-compute adapters"
+}

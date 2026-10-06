@@ -1,0 +1,83 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-4.4.DatasetManifest.v1",
+  "step": "CMP-4.4",
+  "title": "Dataset manifests",
+  "canonical_definition": "Dataset manifests",
+  "status": "IMPLEMENTED_QUALIFICATION_PENDING",
+  "base_main_sha": "ea9994669564d0795e2bcc4a38beea0b01bef274",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_3_deferred_to": "CMP-4.10 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeDatasetManifestRegistry420.sol",
+    "test": "contracts/test/ComputeDatasetManifestRegistry420.t.sol",
+    "doc": "docs/compute-market/CMP-4.4-DATASET-MANIFESTS.md",
+    "verifier": "scripts/verify-cmp-4-4-dataset-manifests.py"
+  },
+  "identity": {
+    "domain": "420/COMPUTE/DATASET_MANIFEST/V1",
+    "derivation": "keccak256(abi.encode(DATASET_DOMAIN, block.chainid, address(registry), projectId, controller, nonce))",
+    "caller_supplied_id": false,
+    "failed_create_consumes_nonce": false
+  },
+  "project_binding": {
+    "source": "ComputeResearchProjectRegistry420",
+    "register_requires_current_acceptable_project": true,
+    "revision_drift_fails_new_work": true,
+    "explicit_manifest_refresh_required": true
+  },
+  "manifest_fields": [
+    "controller",
+    "projectId",
+    "projectRevision",
+    "projectCommitment",
+    "contentCommitment",
+    "schemaCommitment",
+    "accessPolicyCommitment",
+    "provenanceCommitment",
+    "partitionCommitment",
+    "byteLength",
+    "predecessorCommitment",
+    "revision",
+    "active"
+  ],
+  "cmp_4_1_integration": {
+    "rule": "datasetInputCommitment remains the canonical accepted job/request input commitment",
+    "manifest_rule": "datasetInputCommitment must equal the current usable manifest contentCommitment",
+    "admission": "isCurrentUsable(datasetId, manifestRevision, exactManifestCommitment, datasetInputCommitment)"
+  },
+  "privacy_and_authority": [
+    "raw dataset bytes remain off-chain",
+    "retrieval locators and credentials remain off-chain",
+    "manifest validity is not a dataset access grant",
+    "access policy is committed metadata, not access capability",
+    "no job lifecycle, worker, verifier, funding, settlement, reward, slash or governance authority"
+  ],
+  "exit_criteria": [
+    "canonical chain/registry/project/controller-bound dataset IDs",
+    "nonzero content/schema/access/provenance/partition commitments and positive byte length",
+    "exact current CMP-4.2 project binding required for new work",
+    "datasetInputCommitment remains canonical job input and equals manifest content commitment",
+    "project-owner-only exact-revision mutation",
+    "append-only predecessor-linked manifest history",
+    "project drift and dataset deactivation fail closed",
+    "cross-dataset/stale/wrong-input replay fails closed",
+    "raw data, locators, credentials and access grants remain outside canonical state",
+    "manifest validity creates no unrelated protocol authority",
+    "dedicated tests and mechanical verifier committed",
+    "affected Compute Market Level 1 qualification passes exact implementation SHA"
+  ],
+  "intentionally_deferred": [
+    "CMP-4.6 result provenance",
+    "CMP-4.7 scientific metadata and lineage",
+    "CMP-4.8 publication / retention policy",
+    "CMP-4.9 research dashboard",
+    "CMP-4.10 Level 3 closeout",
+    "CMP-7 SDK/API/indexer expansion",
+    "CMP-8 Compute UI",
+    "CMP-9.13 live scientific demonstration"
+  ],
+  "next_canonical_step": "CMP-4.5 — Reproducible execution environments"
+}

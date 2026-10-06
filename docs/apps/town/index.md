@@ -16,7 +16,7 @@ version: v1
 
 It is **not** part of the frozen Genesis application catalog. Its service identifier, `420/service/town/v1`, belongs to the GEN-SVC composition registry and must not be represented as a frozen Genesis application ID without a later explicit catalog decision.
 
-## Implemented through TOWN-AUDIT-7
+## Implemented through TOWN-AUDIT-8
 
 The repository now contains:
 
@@ -56,7 +56,13 @@ The repository now contains:
 - generation-bound cursor pagination for public derived reads;
 - rebuildable/reorg-safe `town/projection` state;
 - atomic `town/recovery` interruption checkpoints;
-- API request/error/auth/mutation/latency observability.
+- API request/error/auth/mutation/latency observability;
+- user-facing browser application under `town/web`;
+- public Town community discovery through 420Search;
+- feed, post, thread, comment, voting and moderation workflows;
+- canonical TownAuthority420 membership/subscription/entitlement reads;
+- wallet/network/target-gated create/join/leave/admin/subscription/entitlement transactions;
+- explicit loading/empty/error/transaction states and responsive/accessibility basics.
 
 Detailed models:
 
@@ -65,6 +71,7 @@ Detailed models:
 - moderation/appeal lifecycle: `docs/apps/town/moderation.md`
 - service integrations: `docs/apps/town/integrations.md`
 - API/SDK/projection/recovery: `docs/apps/town/api.md`
+- user-facing web application: `docs/apps/town/web.md`
 
 ## Trust boundary
 
@@ -76,4 +83,4 @@ Post/comment body bytes remain off-chain by default.
 
 ## Remaining roadmap work
 
-The user-facing web application, broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps. Live external endpoints and live reorg/recovery behavior are not inferred from repository-local qualification.
+Broader security hardening, complete app-phase qualification, live testnet qualification and production release remain open in later TOWN-AUDIT steps. Live external endpoints, deployed wallet/network bindings and live reorg/recovery behavior are not inferred from repository-local qualification.

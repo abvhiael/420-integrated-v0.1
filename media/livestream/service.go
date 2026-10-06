@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	FeatureLivestreaming          = "media.livestreaming"
+	FeatureLivestreaming               = "media.livestreaming"
 	DefaultMaxReconnectAttempts uint32 = 3
 )
 
@@ -59,13 +59,13 @@ type Record struct {
 	Controller        string                   `json:"controller"`
 	Spec              livegateway.SessionSpec  `json:"spec"`
 	State             livegateway.SessionState `json:"state"`
-	DesiredLive       bool                    `json:"desired_live"`
-	ReconnectAttempts uint32                  `json:"reconnect_attempts"`
-	LastError         string                  `json:"last_error,omitempty"`
-	CreatedAt         time.Time               `json:"created_at"`
-	UpdatedAt         time.Time               `json:"updated_at"`
-	StartedAt         time.Time               `json:"started_at,omitempty"`
-	EndedAt           time.Time               `json:"ended_at,omitempty"`
+	DesiredLive       bool                     `json:"desired_live"`
+	ReconnectAttempts uint32                   `json:"reconnect_attempts"`
+	LastError         string                   `json:"last_error,omitempty"`
+	CreatedAt         time.Time                `json:"created_at"`
+	UpdatedAt         time.Time                `json:"updated_at"`
+	StartedAt         time.Time                `json:"started_at,omitempty"`
+	EndedAt           time.Time                `json:"ended_at,omitempty"`
 }
 
 type Store interface {

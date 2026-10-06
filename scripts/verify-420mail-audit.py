@@ -49,7 +49,7 @@ if readiness_path.is_file():
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
         if readiness.get(key) is not False: errors.append(f"readiness overclaims {key}")
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
-for token in ['ServiceID       = "420/service/mail/v1"',,"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
+for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 if "Authenticate AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
@@ -62,6 +62,12 @@ for token in ["MAIL-2.1 — Mailbox State Model","MAIL-2.2 — Durable Mail Stor
 roadmap_upper=roadmap.upper()
 for token in ["DRAFTS","OUTBOX"]:
     if token not in roadmap_upper: errors.append("MAIL-2 roadmap definition missing: "+token)
+store=(ROOT/"mail/store.go").read_text() if (ROOT/"mail/store.go").is_file() else ""
+for token in ["type MailStore interface","OpenDurableStore","DurableStoreSchemaVersion","syscall.Flock","os.Rename","tmp.Sync","dirFile.Sync","rebuildMailboxIndex","validateStoreData","ErrStoreCorrupt","ErrStoreSchemaTooNew"]:
+    if token not in store: errors.append("MAIL-2.2 durable store invariant missing: "+token)
+for token in ["NewDurableService","Store.Update","Store.View"]:
+    if token not in service: errors.append("MAIL-2.2 service storage integration missing: "+token)
+
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)
@@ -75,8 +81,3 @@ print("Genesis catalog promoted: false")
 print("MAIL-2.1 mailbox state model: qualified by app-scoped checks")
 print("MAIL-2.2 durable mail storage: qualified by app-scoped checks")
 
-store=(ROOT/"mail/store.go").read_text() if (ROOT/"mail/store.go").is_file() else ""
-for token in ["type MailStore interface","OpenDurableStore","DurableStoreSchemaVersion","syscall.Flock","os.Rename","tmp.Sync","dirFile.Sync","rebuildMailboxIndex","validateStoreData","ErrStoreCorrupt","ErrStoreSchemaTooNew"]:
-    if token not in store: errors.append("MAIL-2.2 durable store invariant missing: "+token)
-for token in ["NewDurableService","Store.Update","Store.View"]:
-    if token not in service: errors.append("MAIL-2.2 service storage integration missing: "+token)

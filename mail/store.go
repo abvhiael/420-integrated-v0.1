@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 5
+const DurableStoreSchemaVersion = 6
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -38,6 +38,8 @@ type storeData struct {
 	AbuseReports        map[string]AbuseReport
 	Quarantine          map[string]QuarantineRecord
 	ContentFingerprints map[string]uint64
+	ConversationStates  map[string]ConversationState
+	ConversationIndex   map[string][]string
 }
 
 type diskStoreData struct {
@@ -57,6 +59,8 @@ type diskStoreData struct {
 	AbuseReports        map[string]AbuseReport      `json:"abuse_reports,omitempty"`
 	Quarantine          map[string]QuarantineRecord `json:"quarantine,omitempty"`
 	ContentFingerprints map[string]uint64           `json:"content_fingerprints,omitempty"`
+	ConversationStates  map[string]ConversationState `json:"conversation_states,omitempty"`
+	ConversationIndex   map[string][]string          `json:"conversation_index,omitempty"`
 	Fingerprints        map[string]string           `json:"fingerprints,omitempty"`
 	IdempotencyKeys     map[string]string           `json:"idempotency_keys,omitempty"`
 }
@@ -238,8 +242,18 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		AbuseReports:        disk.AbuseReports,
 		Quarantine:          disk.Quarantine,
 		ContentFingerprints: disk.ContentFingerprints,
+		ConversationStates:  disk.ConversationStates,
+		ConversationIndex:   disk.ConversationIndex,
 	}
 	normalizeStoreData(&data)
+	if disk.SchemaVersion < 6 {
+		for id, msg := range data.Messages {
+			if msg.ConversationID == "" {
+				msg.ConversationID = deterministicConversationID(id)
+				data.Messages[id] = msg
+			}
+		}
+	}
 	for id, fp := range disk.Fingerprints {
 		msg, ok := data.Messages[id]
 		if !ok {
@@ -285,6 +299,8 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		AbuseReports:        data.AbuseReports,
 		Quarantine:          data.Quarantine,
 		ContentFingerprints: data.ContentFingerprints,
+		ConversationStates:  data.ConversationStates,
+		ConversationIndex:   data.ConversationIndex,
 		Fingerprints:        map[string]string{},
 		IdempotencyKeys:     map[string]string{},
 	}
@@ -364,6 +380,8 @@ func newStoreData() storeData {
 		AbuseReports:        map[string]AbuseReport{},
 		Quarantine:          map[string]QuarantineRecord{},
 		ContentFingerprints: map[string]uint64{},
+		ConversationStates:  map[string]ConversationState{},
+		ConversationIndex:   map[string][]string{},
 	}
 }
 
@@ -416,6 +434,12 @@ func normalizeStoreData(data *storeData) {
 	if data.ContentFingerprints == nil {
 		data.ContentFingerprints = map[string]uint64{}
 	}
+	if data.ConversationStates == nil {
+		data.ConversationStates = map[string]ConversationState{}
+	}
+	if data.ConversationIndex == nil {
+		data.ConversationIndex = map[string][]string{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -436,6 +460,8 @@ func cloneStoreData(src storeData) storeData {
 		AbuseReports:        make(map[string]AbuseReport, len(src.AbuseReports)),
 		Quarantine:          make(map[string]QuarantineRecord, len(src.Quarantine)),
 		ContentFingerprints: make(map[string]uint64, len(src.ContentFingerprints)),
+		ConversationStates:  make(map[string]ConversationState, len(src.ConversationStates)),
+		ConversationIndex:   make(map[string][]string, len(src.ConversationIndex)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -484,6 +510,12 @@ func cloneStoreData(src storeData) storeData {
 	for k, v := range src.ContentFingerprints {
 		dst.ContentFingerprints[k] = v
 	}
+	for k, v := range src.ConversationStates {
+		dst.ConversationStates[k] = v
+	}
+	for k, v := range src.ConversationIndex {
+		dst.ConversationIndex[k] = append([]string(nil), v...)
+	}
 	return dst
 }
 
@@ -495,6 +527,7 @@ func rebuildMailboxIndex(data *storeData) {
 	data.MailboxIndex = map[string][]string{}
 	data.LabelIndex = map[string][]string{}
 	data.CustomFolderIndex = map[string][]string{}
+	data.ConversationIndex = map[string][]string{}
 	for key, state := range data.Mailbox {
 		if state.DeletedAt != nil {
 			continue
@@ -507,6 +540,10 @@ func rebuildMailboxIndex(data *storeData) {
 		if state.CustomFolderID != "" {
 			data.CustomFolderIndex[organizationIndexKey(state.Owner, state.CustomFolderID)] = append(data.CustomFolderIndex[organizationIndexKey(state.Owner, state.CustomFolderID)], key)
 		}
+		if msg, ok := data.Messages[state.MessageID]; ok && msg.ConversationID != "" {
+			cidx := conversationIndexKey(state.Owner, msg.ConversationID)
+			data.ConversationIndex[cidx] = append(data.ConversationIndex[cidx], state.MessageID)
+		}
 	}
 	for idx := range data.MailboxIndex {
 		sort.Strings(data.MailboxIndex[idx])
@@ -516,6 +553,9 @@ func rebuildMailboxIndex(data *storeData) {
 	}
 	for idx := range data.CustomFolderIndex {
 		sort.Strings(data.CustomFolderIndex[idx])
+	}
+	for idx := range data.ConversationIndex {
+		sort.Strings(data.ConversationIndex[idx])
 	}
 }
 
@@ -579,6 +619,9 @@ func validateStoreData(data *storeData) error {
 	}
 	if err := validateSpamData(data); err != nil {
 		return fmt.Errorf("invalid spam-protection data: %w", err)
+	}
+	if err := validateConversationData(data); err != nil {
+		return fmt.Errorf("invalid conversation data: %w", err)
 	}
 	return nil
 }

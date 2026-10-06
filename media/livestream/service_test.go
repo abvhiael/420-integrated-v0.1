@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/media/node/livegateway"
+	mediasecurity "github.com/420integrated/420-integrated/media/security"
 )
 
 type authorityFake struct {
@@ -289,5 +290,32 @@ func TestRetiredCanonicalStreamCannotStartOrRecoverButCanStop(t *testing.T) {
 	stopped, err := svc.Stop(ctx, "0xabc", created.ID)
 	if err != nil || stopped.State != livegateway.StateClosed {
 		t.Fatalf("retired stop=%+v err=%v", stopped, err)
+	}
+}
+
+
+func TestCreateRejectsSSRFAndPlaintextLivestreamEndpoints(t *testing.T) {
+	driver := &driverFake{}
+	authority := &authorityFake{controller: "0xabc"}
+	svc := serviceFixture(t, driver, authority, FixedFeatureGate{Livestreaming: true})
+	ctx := context.Background()
+
+	private := sessionSpec()
+	private.Endpoint = "https://127.0.0.1/whip"
+	if _, err := svc.Create(ctx, "0xabc", private); !errors.Is(err, mediasecurity.ErrUnsafeEndpoint) {
+		t.Fatalf("private endpoint err=%v", err)
+	}
+
+	plain := sessionSpec()
+	plain.Endpoint = "http://edge.example/whip"
+	if _, err := svc.Create(ctx, "0xabc", plain); !errors.Is(err, mediasecurity.ErrInvalidEndpoint) {
+		t.Fatalf("plaintext endpoint err=%v", err)
+	}
+
+	rtmp := sessionSpec()
+	rtmp.Protocol = livegateway.ProtocolRTMP
+	rtmp.Endpoint = "rtmp://edge.example/live"
+	if _, err := svc.Create(ctx, "0xabc", rtmp); !errors.Is(err, mediasecurity.ErrInvalidEndpoint) {
+		t.Fatalf("plaintext RTMP err=%v", err)
 	}
 }

@@ -19,8 +19,15 @@ audit = need("docs/420MEDIA-AUDIT.md", [
 ])
 roadmap = need("docs/420MEDIA-ROADMAP.md", [
     "MEDIA-AUDIT-1",
+    "MEDIA-AUDIT-2",
     "MEDIA-AUDIT-13",
     "Production-equivalent public-testnet qualification",
+])
+deployment = need("docs/420-MEDIA-PHASE-1-DEPLOYMENT-GRAPH.md", [
+    "MEDIA-AUDIT-2",
+    "Canonical deployment order",
+    "MEDIA-AUDIT-7",
+    "code-less",
 ])
 
 svc = json.loads(need("config/genesis-consumer-services.json"))
@@ -46,6 +53,7 @@ for path in [
     "contracts/src/media/MediaSettlement420.sol",
     "contracts/src/media/MediaIds420.sol",
     "contracts/test/MediaPhase1Protocol420.t.sol",
+    "contracts/test/MediaPhase1Hardening420.t.sol",
     "cmd/420media-node/main.go",
     "media/node/runner.go",
     "media/node/ethadapter/adapter.go",

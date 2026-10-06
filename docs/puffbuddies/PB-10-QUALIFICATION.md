@@ -162,6 +162,13 @@ PASS for:
 - interpersonal-authority fields in entitlement state;
 - wealth/token/stake/payment-history desirability leakage.
 
+## Supplementary 420Docs evidence
+A broad 420Docs workflow auto-triggered from the app-local documentation changes. It was not required for PB-10 Level-1/Level-2 qualification under the phase policy, but it also completed successfully on the exact qualified implementation SHA:
+- run: `37534631470` — **SUCCESS**
+- run number: `6429`
+
+This is retained as supplementary evidence only; PB-10 did not depend on repository-wide Docs qualification.
+
 ## Milestone status
 **420Pay → PuffBuddies premium-entitlement integration milestone COMPLETE at Level 2.**
 

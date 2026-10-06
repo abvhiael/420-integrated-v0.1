@@ -14,6 +14,7 @@ type Classification string
 
 const (
 	ClassPublicOnChain         Classification = "public_onchain"
+	ClassPublicApplication     Classification = "public_application"
 	ClassPrivateMessenger      Classification = "private_messenger"
 	ClassPrivateCommons        Classification = "private_commons"
 	ClassPrivateIdentity       Classification = "private_identity"
@@ -39,6 +40,7 @@ var allowedSourceDomains = map[architecture.SourceBoundary]map[architecture.Resu
 	architecture.SourceRights:   {architecture.DomainRightsRecord: {}},
 	architecture.SourceCommons:  {architecture.DomainPublicCommons: {}},
 	architecture.SourcePulse:    {architecture.DomainPublicPulse: {}},
+	architecture.SourceTown:     {architecture.DomainPublicTown: {}},
 }
 
 // Admit is the Search source-admission boundary for privacy-sensitive material.
@@ -53,6 +55,13 @@ func Admit(candidate Candidate) error {
 	case ClassPrivateMessenger, ClassPrivateCommons, ClassPrivateIdentity, ClassEncryptedResource, ClassRawAttentionTelemetry:
 		return fmt.Errorf("search privacy exclusion: %s", candidate.Classification)
 	case ClassPublicOnChain:
+		if candidate.Source == architecture.SourceTown {
+			return errors.New("Town application projection cannot be classified as public on-chain state")
+		}
+	case ClassPublicApplication:
+		if candidate.Source != architecture.SourceTown {
+			return errors.New("public application classification is not admitted for this source")
+		}
 	default:
 		return errors.New("unsupported privacy classification")
 	}

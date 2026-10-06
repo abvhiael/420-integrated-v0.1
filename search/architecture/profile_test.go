@@ -38,6 +38,7 @@ func TestGenesisProfileContainsRequiredDomains(t *testing.T) {
 		DomainRightsRecord:   true,
 		DomainPublicCommons:  true,
 		DomainPublicPulse:    true,
+		DomainPublicTown:     true,
 	}
 	for _, domain := range p.Domains {
 		delete(required, domain)

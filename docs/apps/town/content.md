@@ -7,7 +7,7 @@ audience:
   - architect
 category: application
 status: development
-version: v1
+version: current
 ---
 
 # 420Town content, threads, comments and votes

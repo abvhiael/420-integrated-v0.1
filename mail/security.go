@@ -306,12 +306,18 @@ func validateSecurityState(actor string, state SecurityState) error {
 		if passkey.ID == "" || passkey.CreatedAt.IsZero() || passkey.AuthorizationEpoch > state.AuthorizationEpoch {
 			return ErrSecurityInvalidResult
 		}
+		if passkey.Active && passkey.AuthorizationEpoch != state.AuthorizationEpoch {
+			return ErrSecurityInvalidResult
+		}
 		if passkey.DeviceID != "" && !deviceIDs[passkey.DeviceID] {
 			return ErrSecurityInvalidResult
 		}
 	}
 	for _, session := range state.Sessions {
 		if session.ID == "" || session.ExpiresAt.IsZero() || session.AuthorizationEpoch > state.AuthorizationEpoch {
+			return ErrSecurityInvalidResult
+		}
+		if session.Active && session.AuthorizationEpoch != state.AuthorizationEpoch {
 			return ErrSecurityInvalidResult
 		}
 		if session.DeviceID != "" && !deviceIDs[session.DeviceID] {

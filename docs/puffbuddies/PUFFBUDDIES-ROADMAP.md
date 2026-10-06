@@ -1262,7 +1262,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** PB-1.1 through PB-1.13 COMPLETE; candidate reconciled to current main; all required Level-3 canonical owners PASS on the same exact implementation SHA; no skipped/missing required check counted as green; roadmap/evidence reconciled; limitations/live-testnet deferrals explicit; durable closeout evidence recorded.
 
-### PB-2.1 — Identity model & boundaries
+### PB-2.1 — Identity model & boundaries — COMPLETE
 
 **Purpose:** establish the minimum-disclosure identity/adult-eligibility authority boundary for PB-2 before registration, profile and visibility behavior is added.
 

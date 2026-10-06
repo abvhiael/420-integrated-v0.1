@@ -308,59 +308,127 @@ func TestProjectionErrorsMapToBadRequest(t *testing.T) {
 	}
 }
 
+
 type moderationFake struct {
 	report moderation.OpenCaseRequest
 	action moderation.ModerateRequest
 	appeal moderation.AppealRequest
 }
 
-func (m *moderationFake) Report(actor model.ObjectID, req moderation.OpenCaseRequest) (moderation.Record,error) {
-	m.report=req
-	return moderation.Record{ID:req.RecordID,CaseID:req.CaseID,CommunityID:req.CommunityID,TargetKind:req.TargetKind,TargetID:req.TargetID,ActorID:actor,Action:moderation.ActionReport},nil
+func (m *moderationFake) Report(actor model.ObjectID, req moderation.OpenCaseRequest) (moderation.Record, error) {
+	m.report = req
+	return moderation.Record{
+		ID:           req.RecordID,
+		CaseID:       req.CaseID,
+		CommunityID:  req.CommunityID,
+		TargetKind:   req.TargetKind,
+		TargetID:     req.TargetID,
+		ActorID:      actor,
+		Action:       moderation.ActionReport,
+	}, nil
 }
-func (m *moderationFake) Moderate(actor model.ObjectID, req moderation.ModerateRequest) (moderation.Record,error) {
-	m.action=req
-	return moderation.Record{ID:req.RecordID,CaseID:req.CaseID,ActorID:actor,Action:req.Action},nil
+
+func (m *moderationFake) Moderate(actor model.ObjectID, req moderation.ModerateRequest) (moderation.Record, error) {
+	m.action = req
+	return moderation.Record{
+		ID:      req.RecordID,
+		CaseID:  req.CaseID,
+		ActorID: actor,
+		Action:  req.Action,
+	}, nil
 }
-func (m *moderationFake) Appeal(actor model.ObjectID, req moderation.AppealRequest) (moderation.Record,error) {
-	m.appeal=req
-	return moderation.Record{ID:req.RecordID,CaseID:req.CaseID,ActorID:actor,Action:moderation.ActionAppeal},nil
+
+func (m *moderationFake) Appeal(actor model.ObjectID, req moderation.AppealRequest) (moderation.Record, error) {
+	m.appeal = req
+	return moderation.Record{
+		ID:      req.RecordID,
+		CaseID:  req.CaseID,
+		ActorID: actor,
+		Action:  moderation.ActionAppeal,
+	}, nil
 }
-func (m *moderationFake) Case(id model.ObjectID) (moderation.Case,bool) {
-	if id=="missing" { return moderation.Case{},false }
-	return moderation.Case{ID:id,CommunityID:"community:1",TargetKind:moderation.TargetPost,TargetID:"post:1",AffectedID:"actor:bob",State:moderation.StateOpen,Version:1},true
+
+func (m *moderationFake) Case(id model.ObjectID) (moderation.Case, bool) {
+	if id == "missing" {
+		return moderation.Case{}, false
+	}
+	return moderation.Case{
+		ID:          id,
+		CommunityID: "community:1",
+		TargetKind:  moderation.TargetPost,
+		TargetID:    "post:1",
+		AffectedID:  "actor:bob",
+		State:       moderation.StateOpen,
+		Version:     1,
+	}, true
 }
 
 func TestModerationRoutesRequireAuthIdempotencyAndDelegate(t *testing.T) {
-	server,_,_:=apiFixture(t)
-	mod:=&moderationFake{}
+	server, _, _ := apiFixture(t)
+	mod := &moderationFake{}
 	server.SetModerationBackend(mod)
 
-	req:=httptest.NewRequest(http.MethodPost,"/v1/moderation/reports",bytes.NewBufferString(`{"RecordID":"record:1","CaseID":"case:1","CommunityID":"community:1","TargetKind":"POST","TargetID":"post:1","Reason":"SPAM","BodyRef":"","BodySHA256":""}`))
-	res:=httptest.NewRecorder();server.Handler().ServeHTTP(res,req)
-	if res.Code!=http.StatusUnauthorized { t.Fatalf("unauth code=%d",res.Code) }
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/v1/moderation/reports",
+		bytes.NewBufferString(`{"RecordID":"record:1","CaseID":"case:1","CommunityID":"community:1","TargetKind":"POST","TargetID":"post:1","Reason":"SPAM","BodyRef":"","BodySHA256":""}`),
+	)
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusUnauthorized {
+		t.Fatalf("unauth code=%d", res.Code)
+	}
 
-	req=httptest.NewRequest(http.MethodPost,"/v1/moderation/reports",bytes.NewBufferString(`{"RecordID":"record:1","CaseID":"case:1","CommunityID":"community:1","TargetKind":"POST","TargetID":"post:1","Reason":"SPAM","BodyRef":"","BodySHA256":""}`))
-	req.Header.Set("Authorization","Bearer good");req.Header.Set("Idempotency-Key","report-1")
-	res=httptest.NewRecorder();server.Handler().ServeHTTP(res,req)
-	if res.Code!=http.StatusCreated { t.Fatalf("report code=%d body=%s",res.Code,res.Body.String()) }
-	if mod.report.CaseID!="case:1" || mod.report.IdempotencyKey!="report-1" { t.Fatalf("report=%+v",mod.report) }
+	req = httptest.NewRequest(
+		http.MethodPost,
+		"/v1/moderation/reports",
+		bytes.NewBufferString(`{"RecordID":"record:1","CaseID":"case:1","CommunityID":"community:1","TargetKind":"POST","TargetID":"post:1","Reason":"SPAM","BodyRef":"","BodySHA256":""}`),
+	)
+	req.Header.Set("Authorization", "Bearer good")
+	req.Header.Set("Idempotency-Key", "report-1")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("report code=%d body=%s", res.Code, res.Body.String())
+	}
+	if mod.report.CaseID != "case:1" || mod.report.IdempotencyKey != "report-1" {
+		t.Fatalf("report=%+v", mod.report)
+	}
 
-	req=httptest.NewRequest(http.MethodPost,"/v1/moderation/cases/case:1/actions",bytes.NewBufferString(`{"RecordID":"record:2","Action":"HIDE","Reason":"SPAM","BodyRef":"","BodySHA256":""}`))
-	req.Header.Set("Authorization","Bearer good");req.Header.Set("Idempotency-Key","action-1")
-	res=httptest.NewRecorder();server.Handler().ServeHTTP(res,req)
-	if res.Code!=http.StatusOK || mod.action.Action!=moderation.ActionHide { t.Fatalf("action code=%d action=%+v",res.Code,mod.action) }
+	req = httptest.NewRequest(
+		http.MethodPost,
+		"/v1/moderation/cases/case:1/actions",
+		bytes.NewBufferString(`{"RecordID":"record:2","Action":"HIDE","Reason":"SPAM","BodyRef":"","BodySHA256":""}`),
+	)
+	req.Header.Set("Authorization", "Bearer good")
+	req.Header.Set("Idempotency-Key", "action-1")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusOK || mod.action.Action != moderation.ActionHide {
+		t.Fatalf("action code=%d action=%+v", res.Code, mod.action)
+	}
 
-	req=httptest.NewRequest(http.MethodGet,"/v1/moderation/cases/case:1",nil)
-	req.Header.Set("Authorization","Bearer good")
-	res=httptest.NewRecorder();server.Handler().ServeHTTP(res,req)
-	if res.Code!=http.StatusOK { t.Fatalf("case code=%d",res.Code) }
+	req = httptest.NewRequest(http.MethodGet, "/v1/moderation/cases/case:1", nil)
+	req.Header.Set("Authorization", "Bearer good")
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusOK {
+		t.Fatalf("case code=%d", res.Code)
+	}
 }
 
 func TestModerationRoutesFailClosedWithoutBackend(t *testing.T) {
-	server,_,_:=apiFixture(t)
-	req:=httptest.NewRequest(http.MethodPost,"/v1/moderation/reports",bytes.NewBufferString(`{"RecordID":"record:1","CaseID":"case:1","CommunityID":"community:1","TargetKind":"POST","TargetID":"post:1","Reason":"SPAM"}`))
-	req.Header.Set("Authorization","Bearer good");req.Header.Set("Idempotency-Key","report-1")
-	res:=httptest.NewRecorder();server.Handler().ServeHTTP(res,req)
-	if res.Code!=http.StatusServiceUnavailable { t.Fatalf("code=%d",res.Code) }
+	server, _, _ := apiFixture(t)
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/v1/moderation/reports",
+		bytes.NewBufferString(`{"RecordID":"record:1","CaseID":"case:1","CommunityID":"community:1","TargetKind":"POST","TargetID":"post:1","Reason":"SPAM"}`),
+	)
+	req.Header.Set("Authorization", "Bearer good")
+	req.Header.Set("Idempotency-Key", "report-1")
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusServiceUnavailable {
+		t.Fatalf("code=%d", res.Code)
+	}
 }

@@ -72,6 +72,12 @@ Detailed models:
 - service integrations: `docs/apps/town/integrations.md`
 - API/SDK/projection/recovery: `docs/apps/town/api.md`
 - user-facing web application: `docs/apps/town/web.md`
+- architecture/component map: `docs/apps/town/architecture.md`
+- end-user guide: `docs/apps/town/user-guide.md`
+- developer guide: `docs/apps/town/developer-guide.md`
+- operator/admin guide: `docs/apps/town/operator-guide.md`
+- configuration/deployment reference: `docs/apps/town/configuration-deployment.md`
+- known limitations: `docs/apps/town/known-limitations.md`
 
 ## Trust boundary
 

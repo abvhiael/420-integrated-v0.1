@@ -50,13 +50,16 @@ func TestDiscordConnectorServiceConstructorRegistersDiscord(t *testing.T) {
 	}
 }
 
-func TestDiscordConnectorDescriptorIsLinkOnly(t *testing.T) {
+func TestDiscordConnectorDescriptorAdvertisesLinkAndWalletVerification(t *testing.T) {
 	d := NewDiscordConnectorAdapter(nil).Descriptor()
 	if d.Provider != DiscordProvider || d.DisplayName != "Discord" {
 		t.Fatalf("unexpected descriptor: %+v", d)
 	}
-	if len(d.Capabilities) != 1 || d.Capabilities[0] != ConnectorCapabilityLink {
-		t.Fatalf("MAIL-2.15 must not pull later Discord capabilities forward: %+v", d.Capabilities)
+	if !connectorHasCapability(d, ConnectorCapabilityLink) || !connectorHasCapability(d, ConnectorCapabilityWalletVerify) {
+		t.Fatalf("Discord link/wallet verification capabilities missing: %+v", d.Capabilities)
+	}
+	if connectorHasCapability(d, ConnectorCapabilityPull) || connectorHasCapability(d, ConnectorCapabilityPush) || connectorHasCapability(d, ConnectorCapabilityWebhook) {
+		t.Fatalf("unconfigured Discord transport capabilities advertised: %+v", d.Capabilities)
 	}
 }
 

@@ -1538,7 +1538,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** unilateral LIKE/PASS persists privately; one-sided LIKE cannot match/message; reciprocal current likes can form a current match; PASS/absent reciprocal intent prevents match; current discovery/eligibility/lifecycle/block/generation authority is rechecked at match time; admin/service/economic fabrication fails; unmatch is unilateral and revokes messaging while advancing consent epoch; stale likes cannot rematch; fresh new-epoch likes can rematch only through two new user actions; optimistic concurrency/private persistence passes; public relationship graph remains absent; PB-5 Level-1 targeted qualification passes; PB-4/PB-5 retained Level-2 integration passes on the same exact SHA; durable evidence records both levels.
 
-### PB-6 — 420Messenger integration
+### PB-6 — 420Messenger integration — COMPLETE
 
 **Purpose:** integrate current PuffBuddies matched-user messaging authorization with canonical 420Messenger endpoint/block/conversation authority without transferring canonical state ownership in either direction.
 

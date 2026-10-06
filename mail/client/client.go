@@ -76,6 +76,12 @@ func (c Client) Send(ctx context.Context, req mail.SendRequest) (mail.Message, e
 	return out, err
 }
 
+func (c Client) CrossPlatformIdentity(ctx context.Context) (mail.CrossPlatformVerifiedIdentity, error) {
+	var out mail.CrossPlatformVerifiedIdentity
+	err := c.do(ctx, http.MethodGet, "/v1/integrations/identity", nil, &out)
+	return out, err
+}
+
 func (c Client) IntegrationsInbox(ctx context.Context, cursor string, limit int) (mail.IntegrationsInboxPage, error) {
 	q := url.Values{}
 	if cursor != "" {

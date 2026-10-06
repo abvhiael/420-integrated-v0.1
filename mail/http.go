@@ -44,6 +44,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.trust(w, r, actor)
 	case r.URL.Path == "/v1/quarantine" || strings.HasPrefix(r.URL.Path, "/v1/quarantine/") || strings.HasPrefix(r.URL.Path, "/v1/reputation/"):
 		h.protection(w, r, actor)
+	case r.URL.Path == "/v1/conversations" || strings.HasPrefix(r.URL.Path, "/v1/conversations/"):
+		h.conversations(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
 		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
@@ -207,6 +209,53 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 		return
 	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func (h HTTPHandler) conversations(w http.ResponseWriter, r *http.Request, actor string) {
+	if r.URL.Path == "/v1/conversations" {
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		items, err := h.Service.ListConversations(r.Context(), actor)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, items)
+		return
+	}
+	id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/conversations/"), "/")
+	if id == "" || strings.Contains(id, "/") {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	switch r.Method {
+	case http.MethodGet:
+		view, err := h.Service.GetConversation(r.Context(), actor, id)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, view)
+	case http.MethodPatch:
+		defer r.Body.Close()
+		dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 8<<10))
+		dec.DisallowUnknownFields()
+		var update ConversationUpdate
+		if err := dec.Decode(&update); err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		state, err := h.Service.UpdateConversation(r.Context(), actor, id, update)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, state)
+	default:
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+	}
 }
 
 func (h HTTPHandler) protection(w http.ResponseWriter, r *http.Request, actor string) {
@@ -462,6 +511,23 @@ func (h HTTPHandler) message(w http.ResponseWriter, r *http.Request, actor strin
 			Message Message `json:"message"`
 			Body    string  `json:"body"`
 		}{Message: msg, Body: string(body)})
+		return
+	}
+	if len(parts) == 2 && parts[1] == "reply" && r.Method == http.MethodPost {
+		defer r.Body.Close()
+		dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxBodyBytes+4096))
+		dec.DisallowUnknownFields()
+		var input ReplyRequest
+		if err := dec.Decode(&input); err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		msg, err := h.Service.Reply(r.Context(), actor, parts[0], input)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusCreated, msg)
 		return
 	}
 	if len(parts) == 2 && parts[1] == "abuse" && r.Method == http.MethodPost {

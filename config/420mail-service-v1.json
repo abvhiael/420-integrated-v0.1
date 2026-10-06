@@ -562,5 +562,25 @@
     "deepSync": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false
+  },
+  "signalDeepSync": {
+    "enabled": false,
+    "provider": "signal",
+    "status": "CONDITION_UNSATISFIED",
+    "condition": "STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED",
+    "supportedSurfaceFound": false,
+    "missingEvidence": [
+      "SUPPORTED_SIGNAL_API_OR_CLIENT_CONTRACT",
+      "STABLE_INBOUND_SYNC_TRANSPORT",
+      "ACCOUNT_OR_DEVICE_BINDING_AUTHORITY",
+      "REPLAY_AND_CURSOR_SEMANTICS",
+      "PROVIDER_LIFECYCLE_AND_RATE_LIMIT_CONTRACT"
+    ],
+    "inboundSync": false,
+    "webhookIngestion": false,
+    "providerRegistrationAllowed": false,
+    "rawCredentialInput": false,
+    "publicIndexing": false,
+    "messageBodiesOnChain": false
   }
 }

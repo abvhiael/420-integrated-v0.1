@@ -256,7 +256,6 @@ func TestDurableOrganizationSurvivesRestartAndSchemaOneMigration(t *testing.T) {
 	}
 }
 
-
 func TestSystemLabelViewsReflectMailboxState(t *testing.T) {
 	s, _ := testService()
 	ctx := context.Background()

@@ -1650,6 +1650,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** iOS/Android project/source checks pass; shared mobile behavior/security tests pass; device-bound session/stale-state/resume/privacy gates pass; repository mobile bundle build passes; retained PB-11 web qualification and complete PuffBuddies regressions pass on the same SHA; PB-0 owner stays green; exact-SHA evidence is recorded; device/store/live API/push/distribution gates remain explicitly deferred.
 
+### PB-13 — 420Integrated cross-app integration
+
+**Purpose:** harden the accumulated PuffBuddies dependency surface across approved 420Integrated services without transferring PuffBuddies profile, eligibility-decision, relationship, consent, safety, lifecycle, deletion, visibility or premium/private-access authority.
+
+**Canonical requirements:** cover Wallet, Identity, Names, Messenger, Notifications, Pay, Registry, AppStore, Analytics, Indexer, Explorer, Search and Verify; Registry-backed dependencies must match exact ServiceIds420 IDs and current active/non-deprecated/right-chain/fresh state; Indexer remains derived infrastructure without fabricated service identity; dependency capabilities are allowlisted; every protected PuffBuddies decision remains PuffBuddies-owned; AppStore cannot rewrite Registry identity/version/active state; Analytics accepts privacy-safe aggregates only; Indexer/Explorer/Search remain fresh/right-chain/non-canonical; Verify remains deployment/source-build evidence only; authority inheritance and dependency conflict fail closed; dependency failure/staleness cannot broaden access; existing PB-2/PB-6/PB-7/PB-9/PB-10 narrow integrations remain intact; no PuffBuddies service ID, contract, fixed address, provider credential, production endpoint, deployment or live-wiring claim is introduced.
+
+**Affected components:** `puffbuddies/integrations/ecosystem.py`, PB-13 targeted/retained integration tests, PB-13 workflow, canonical definition/evidence and PB-0.19 scope reconciliation.
+
+**Qualification:** Level 1 exact-head dependency/interface/privacy/failure qualification **plus Level 2 milestone D — complete retained PuffBuddies integration suite**, as explicitly defined by the legacy bounded-ecosystem-hardening roadmap.
+
+**Level-3 boundary:** canonical full Solidity/Genesis/420 Integrated/Docs/Geth/fault/soak/deployment closeout remains deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.7, PB-0.8, PB-0.9, PB-0.16; PB-2, PB-6, PB-7, PB-9, PB-10; **PB-12 — Mobile applications — COMPLETE**.
+
+**Exit criteria:** exact dependency inventory and canonical service-ID bindings exist; stale/inactive/deprecated/wrong-chain inputs fail closed; authority inheritance/conflicts fail closed; Registry/AppStore/Analytics/derived/Verify boundaries pass; applicable repository verifiers pass; complete retained PuffBuddies suite passes on one exact SHA; durable evidence is recorded; Level-3/live deployment remains deferred.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

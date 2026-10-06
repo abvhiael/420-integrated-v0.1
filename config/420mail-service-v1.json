@@ -47,5 +47,21 @@
     "ownerScopedState": true,
     "permanentDeleteRequiresTrash": true,
     "messageBodiesOnChain": false
+  },
+  "metadataStore": {
+    "requiredForDeployment": true,
+    "interface": "MailStore",
+    "schemaVersion": 1,
+    "implementation": "ATOMIC_FILE_V1",
+    "atomicTransactions": true,
+    "restartRecovery": true,
+    "migrations": true,
+    "secondaryIndexes": [
+      "owner_folder"
+    ],
+    "distributedIdempotency": "SENDER_SCOPED_TRANSACTIONAL",
+    "sharedStorageRequiredForMultiInstance": true,
+    "filePermissions": "0600",
+    "messageBodiesPersisted": false
   }
 }

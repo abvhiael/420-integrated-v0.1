@@ -1454,7 +1454,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** authoritative outage fails closed; stale/conflicting replicas and stale restores are rejected; optimistic concurrency protects newer eligibility state; partial failure is not publishable success; rollback uses known-good state; recovered state remains policy/expiry constrained; raw identity/proof and privacy leakage remain rejected; retained PB-2 and PuffBuddies regressions remain green; exact-head PB-2 fast qualification passes; durable evidence records results.
 
-### PB-2.13 — PB-2 Integration Milestone — Level 2
+### PB-2.13 — PB-2 Integration Milestone — Level 2 — COMPLETE
 
 **Purpose:** qualify PB-2.1 through PB-2.12 as one accumulated PuffBuddies integration boundary before phase closeout.
 

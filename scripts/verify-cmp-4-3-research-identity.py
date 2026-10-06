@@ -39,7 +39,7 @@ def main():
       ],
       "docs/compute-market/CMP-4.3-RESEARCHER-INSTITUTION-IDENTITY.md":[
         "# CMP-4.3 — Researcher / institution identity",
-        "Identity420 remains the canonical profile, issuer, credential and controller authority",
+        "canonical profile, issuer, credential and controller authority",
         "controller transfer",
         "CMP-4.4 — Dataset manifests"
       ],

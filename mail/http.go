@@ -46,6 +46,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.protection(w, r, actor)
 	case r.URL.Path == "/v1/conversations" || strings.HasPrefix(r.URL.Path, "/v1/conversations/"):
 		h.conversations(w, r, actor)
+	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
+		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
 		h.mailbox(w, r, actor)
 	case strings.HasPrefix(r.URL.Path, "/v1/messages/"):
@@ -209,6 +211,81 @@ func (h HTTPHandler) customFolders(w http.ResponseWriter, r *http.Request, actor
 		return
 	}
 	writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+}
+
+func (h HTTPHandler) drafts(w http.ResponseWriter, r *http.Request, actor string) {
+	if r.URL.Path == "/v1/drafts" {
+		switch r.Method {
+		case http.MethodGet:
+			items, err := h.Service.ListDrafts(r.Context(), actor)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusOK, items)
+		case http.MethodPost:
+			defer r.Body.Close()
+			dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxBodyBytes+8192))
+			dec.DisallowUnknownFields()
+			var input DraftCreateRequest
+			if err := dec.Decode(&input); err != nil {
+				writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+				return
+			}
+			view, err := h.Service.CreateDraft(r.Context(), actor, input)
+			if err != nil {
+				writeServiceError(w, err)
+				return
+			}
+			writeJSON(w, http.StatusCreated, view)
+		default:
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		}
+		return
+	}
+	id := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/drafts/"), "/")
+	if id == "" || strings.Contains(id, "/") {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	switch r.Method {
+	case http.MethodGet:
+		view, err := h.Service.GetDraft(r.Context(), actor, id)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, view)
+	case http.MethodPut:
+		defer r.Body.Close()
+		dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, MaxBodyBytes+8192))
+		dec.DisallowUnknownFields()
+		var input DraftSaveRequest
+		if err := dec.Decode(&input); err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid JSON request")
+			return
+		}
+		view, err := h.Service.SaveDraft(r.Context(), actor, id, input)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, view)
+	case http.MethodDelete:
+		raw := r.URL.Query().Get("expected_version")
+		version, err := strconv.ParseUint(raw, 10, 32)
+		if err != nil || version == 0 {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "expected_version is required")
+			return
+		}
+		if err := h.Service.DiscardDraft(r.Context(), actor, id, uint32(version)); err != nil {
+			writeServiceError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+	}
 }
 
 func (h HTTPHandler) conversations(w http.ResponseWriter, r *http.Request, actor string) {
@@ -634,8 +711,10 @@ func writeServiceError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusForbidden, "FORBIDDEN", err.Error())
 	case errors.Is(err, ErrInvalidInput), errors.Is(err, ErrIdempotencyConflict):
 		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
-	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict), errors.Is(err, ErrAbuseReportConflict), errors.Is(err, ErrQuarantineReview):
+	case errors.Is(err, ErrInvalidTransition), errors.Is(err, ErrOrganizationConflict), errors.Is(err, ErrSystemLabelImmutable), errors.Is(err, ErrRuleConflict), errors.Is(err, ErrAbuseReportConflict), errors.Is(err, ErrQuarantineReview), errors.Is(err, ErrDraftConflict):
 		writeError(w, http.StatusConflict, "CONFLICT", err.Error())
+	case errors.Is(err, ErrDraftDeleteUnavailable):
+		writeError(w, http.StatusServiceUnavailable, "DRAFT_DELETE_UNAVAILABLE", err.Error())
 	case errors.Is(err, ErrNotFound):
 		writeError(w, http.StatusNotFound, "NOT_FOUND", err.Error())
 	default:

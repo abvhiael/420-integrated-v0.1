@@ -81,6 +81,11 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Current PB-10 payments/premium scope
+
+Current **PB-10 — Payments and premium entitlements** promotes the premium/monetization work explicitly deferred by PB-0.2 while preserving PB-0.5/PB-0.7/PB-0.8/PB-0.9/PB-0.12/PB-0.16: canonical settlement remains 420Pay-owned, PuffBuddies owns only product feature entitlement, and no economic state can create or restore consent, bypass block/safety/lifecycle, buy protected private-person data, or become dating desirability/reputation. PB-10 implements the entitlement policy boundary; PB-11 later owns web-client mechanics.
+
+
 ### Current PB-9 verification/reputation scope
 
 Current **PB-9 — Verification and reputation** promotes the advanced verification/reputation work explicitly deferred by PB-0.2, but remains constrained by PB-0.8/PB-0.9/PB-0.10/PB-0.13: bounded verification indicators may be presented narrowly; 420Verify is not interpersonal identity/reputation authority; safety/report history and economic state cannot become public reputation; and no universal desirability/trust/social-credit score is permitted. Cross-app reputation aggregation and portable external dating credentials remain deferred until a canonical issuer/verification authority exists.

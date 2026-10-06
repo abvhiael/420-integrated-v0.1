@@ -600,7 +600,96 @@ Alerts are treated as security-authority projections. Mail does not create a sec
 
 Typed Go client methods mirror all of these operations.
 
-### Thin UI handoff
+### MAIL-2.13 Wallet Functions Inside Mail
+
+MAIL-2.13 adds non-custodial wallet-aware actions and verification handoffs while preserving 420 Wallet / SmartAccount420 as the only authorization, signing, simulation, and submission boundary.
+
+420Mail may prepare a bounded intent, show the resulting Wallet handoff, and later ask canonical Wallet/RPC/Identity verification authority to confirm evidence. It does **not** sign, submit, hold signing secrets, create reusable wallet authority, or promote a Wallet submission acknowledgement into proof of canonical execution.
+
+### Supported wallet-aware intent classes
+
+The repository surface supports two generic intent classes:
+
+- `TRANSACTION` — a bounded chain/account/target/value/calldata intent for qualified Wallet simulation, review, authorization, signing and submission.
+- `MESSAGE_SIGNATURE` — a bounded chain/account/payload-digest intent for Wallet-reviewed message-signature authorization or account-control verification.
+
+Mail deliberately does not invent protocol-specific contract semantics in this step. Higher-level applications may supply already-resolved canonical targets/calldata through their owning protocol integration, but Mail itself is not a contract-address authority.
+
+### Transaction handoff rules
+
+A transaction intent must bind:
+
+- chain ID;
+- wallet/Smart Account address;
+- exact target address;
+- unsigned decimal native value;
+- exact calldata;
+- human-readable explanation;
+- explicit expiry.
+
+The injected canonical wallet adapter must return the same bound fields, an authorization epoch, a handoff ID, `non_custodial=true`, and `requires_wallet_approval=true`.
+
+Mail rejects a handoff if the authority mutates chain, account, target, value, calldata, explanation, or expiry; omits explicit Wallet approval; or returns a custodial result.
+
+Wallet remains responsible for:
+
+- network verification;
+- canonical account discovery;
+- live owner/EntryPoint/capability/session/authorization-epoch checks;
+- simulation;
+- user review;
+- signing method;
+- nonce/UserOperation construction;
+- submission;
+- retry policy.
+
+### Message-signature handoff rules
+
+A message-signature intent binds chain ID, account, a fixed 32-byte digest, explanation, and expiry.
+
+Raw private keys, seed phrases, passkey private material, or signing secrets are never accepted.
+
+The Mail service does not claim that every message signature proves ownership for every protocol. Verification semantics remain owned by the injected canonical Wallet/Identity verification adapter.
+
+### Verification handoffs
+
+`POST /v1/wallet/verifications` accepts bounded evidence for either:
+
+- `TRANSACTION`
+- `SIGNATURE`
+
+The evidence payload is opaque to Mail and is interpreted by the canonical verification adapter.
+
+A result is accepted only when it:
+
+- belongs to the authenticated Mail identity;
+- matches the requested handoff ID and verification kind;
+- identifies a valid wallet account;
+- is explicitly `verified=true`;
+- is explicitly `canonical=true`;
+- is explicitly non-custodial;
+- contains a verification timestamp.
+
+Transaction verification additionally requires a chain ID and canonical transaction hash. `finalized` remains a separate result bit; canonical verification and finality are not collapsed.
+
+A Wallet/provider submission acknowledgement alone is not canonical completion and is rejected when the verification authority does not confirm canonical evidence.
+
+### API
+
+Authenticated routes:
+
+- `POST /v1/wallet/actions` — prepare a bounded Wallet action handoff;
+- `POST /v1/wallet/verifications` — verify canonical transaction/signature evidence.
+
+Typed Go client methods mirror both routes.
+
+### Thin UI
+
+The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.
+
+MAIL-2.13 repository completion does not claim live SmartAccount execution, production Wallet simulation, live transaction submission, live RPC receipt/finality verification, deployed protocol target discovery, or public-testnet wallet action evidence. Those remain live/testnet qualification gates.
+
+## Thin UI handoff
 
 The Mail UI can render passkeys, devices, sessions, recovery state, and alerts returned by `GET /v1/security`. It exposes direct revoke/acknowledge actions and delegates passkey/device/recovery ceremonies to a deployment-provided `window.__420_SECURITY__` adapter.
 
@@ -610,7 +699,7 @@ MAIL-2.12 repository completion does not claim live WebAuthn RP configuration, r
 
 ## Thin UI
 
-`mail/web/index.html` provides onboarding, security management, inbox, read, compose and draft surfaces. Onboarding invokes a deployment-provided Wallet/Identity ceremony adapter and keeps the returned session in browser memory only. Security management renders canonical Wallet/Identity projections, performs direct revoke/acknowledge calls, and delegates passkey/device/recovery ceremonies through a deployment-provided security adapter. This is repository UI evidence, not live provider/deployment evidence.
+`mail/web/index.html` provides onboarding, security management, wallet-action handoffs, inbox, read, compose and draft surfaces. Wallet actions prepare bounded non-custodial intents and verification handoffs through deployment-provided Wallet adapters; the Mail UI never signs or submits. This is repository UI evidence, not live provider/deployment evidence.
 
 ## Security
 

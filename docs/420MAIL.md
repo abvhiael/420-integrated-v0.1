@@ -1379,6 +1379,69 @@ MAIL-2.21 does **not** implement:
 - public indexing of shared Mail content;
 - on-chain Signal message bodies.
 
+## MAIL-2.22 Signal Deep Sync
+
+MAIL-2.22 is explicitly conditional on a stable supported Signal integration surface.
+
+Repository inspection found **no qualifying stable supported surface**. The repository contains no supported Signal API/client contract, no stable inbound-sync transport, no account/device binding authority for Signal sync, no committed replay/cursor contract, and no provider lifecycle/rate-limit contract suitable for canonical deep synchronization.
+
+Therefore MAIL-2.22 completes as a **qualified conditional gate outcome**, not as an enabled deep-sync implementation.
+
+### Canonical gate result
+
+- status: `CONDITION_UNSATISFIED`
+- enabled: `false`
+- condition: `STABLE_SUPPORTED_INTEGRATION_SURFACE_REQUIRED`
+- supported surface found: `false`
+- inbound sync: `false`
+- webhook ingestion: `false`
+- operational Signal provider registration: `false`
+
+Missing evidence inventory:
+
+- supported Signal API or client contract;
+- stable inbound-sync transport;
+- account/device binding authority;
+- replay and cursor semantics;
+- provider lifecycle and rate-limit contract.
+
+### Safety boundary
+
+MAIL-2.22 does not invent or silently promote an unofficial Signal transport.
+
+It preserves the qualified MAIL-2.19 through MAIL-2.21 capabilities:
+
+- Signal notifications;
+- explicit share/forward;
+- external Signal transport authority;
+- no Mail-owned Signal identity or credentials.
+
+It does **not** add:
+
+- Signal inbox materialization;
+- Signal polling;
+- Signal webhook ingestion;
+- Signal cursor persistence;
+- background Signal account/device ownership;
+- provider credential persistence;
+- deep sync.
+
+### API and client
+
+Authenticated read-only status endpoint:
+
+- `GET /v1/connectors/signal/deep-sync/status`
+
+Typed client:
+
+- `SignalDeepSyncStatus`
+
+The status endpoint exists so operators/UI can distinguish “not implemented because condition is unsatisfied” from an accidental missing route or disabled deployment.
+
+### Future re-entry condition
+
+A future implementation may only enable Signal deep sync after repository evidence establishes the required stable supported surface. That would be a new substantive implementation SHA and must be qualified under the applicable roadmap/audit phase before the gate may be changed.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

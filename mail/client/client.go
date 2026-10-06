@@ -227,3 +227,26 @@ func (c Client) SearchMailbox(ctx context.Context, req mail.SearchRequest) (mail
 	err := c.do(ctx, http.MethodPost, "/v1/search", req, &out)
 	return out, err
 }
+
+
+func (c Client) ListRules(ctx context.Context) ([]mail.MailRule, error) {
+	var out []mail.MailRule
+	err := c.do(ctx, http.MethodGet, "/v1/rules", nil, &out)
+	return out, err
+}
+
+func (c Client) CreateRule(ctx context.Context, input mail.RuleInput) (mail.MailRule, error) {
+	var out mail.MailRule
+	err := c.do(ctx, http.MethodPost, "/v1/rules", input, &out)
+	return out, err
+}
+
+func (c Client) UpdateRule(ctx context.Context, id string, input mail.RuleInput) (mail.MailRule, error) {
+	var out mail.MailRule
+	err := c.do(ctx, http.MethodPut, "/v1/rules/"+url.PathEscape(id), input, &out)
+	return out, err
+}
+
+func (c Client) DeleteRule(ctx context.Context, id string) error {
+	return c.do(ctx, http.MethodDelete, "/v1/rules/"+url.PathEscape(id), nil, nil)
+}

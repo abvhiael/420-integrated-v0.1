@@ -1570,7 +1570,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** current match notification handoff requires explicit selected subscription; message notification additionally requires current PB-6 authorization; current PB authorization/generation is rechecked; muted/inactive/no-operational-consent/filter/severity state safely suppresses; promotional consent cannot broaden delivery; Notifications outage fails closed without changing underlying authority; payload is minimum-disclosure/non-authoritative; PuffBuddies persists no subscription/destination linkage; affected Notifications dependency checks pass unchanged; PB-7 Level-1 targeted/retained regressions and PB-5/PB-6/PB-7 Level-2 integration pass on one exact SHA; durable evidence recorded.
 
-### PB-8 — Safety and moderation
+### PB-8 — Safety and moderation — COMPLETE
 
 **Purpose:** implement private PuffBuddies safety cases, report/evidence-integrity boundaries, immediate independent block authority, moderation actions, restriction/suspension/ban lifecycle enforcement, appeals, least-privilege review, protected persistence, auditability, and stale-state invalidation without public reputation.
 

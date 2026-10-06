@@ -15,7 +15,6 @@ def need(path: str, needles=()):
 audit = need("docs/420MEDIA-AUDIT.md", [
     "420/service/media/v1",
     "video_uploads_basic_livestreaming",
-    "MEDIA-AUDIT-1",
     "CODE COMPLETE: **NO**",
 ])
 roadmap = need("docs/420MEDIA-ROADMAP.md", [

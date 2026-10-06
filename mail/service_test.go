@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 )
@@ -28,9 +29,14 @@ func (p testPolicy) CanMessage(_ context.Context, _, _ string) error {
 	return nil
 }
 
-type testBlobs struct{ data map[string][]byte }
+type testBlobs struct {
+	mu   sync.Mutex
+	data map[string][]byte
+}
 
 func (b *testBlobs) PutPrivate(_ context.Context, owner string, body []byte) (string, string, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	if b.data == nil {
 		b.data = map[string][]byte{}
 	}
@@ -42,6 +48,8 @@ func (b *testBlobs) PutPrivate(_ context.Context, owner string, body []byte) (st
 }
 
 func (b *testBlobs) GetPrivate(_ context.Context, _ string, ref string) ([]byte, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	v, ok := b.data[ref]
 	if !ok {
 		return nil, errors.New("missing blob")
@@ -49,11 +57,22 @@ func (b *testBlobs) GetPrivate(_ context.Context, _ string, ref string) ([]byte,
 	return append([]byte(nil), v...), nil
 }
 
-type testNotify struct{ count int }
+type testNotify struct {
+	mu    sync.Mutex
+	count int
+}
 
 func (n *testNotify) NotifyMail(_ context.Context, _ Notification) error {
+	n.mu.Lock()
 	n.count++
+	n.mu.Unlock()
 	return nil
+}
+
+func (n *testNotify) Count() int {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	return n.count
 }
 
 func testService() (*Service, *testNotify) {
@@ -78,8 +97,8 @@ func TestSendInboxReadAndIdempotency(t *testing.T) {
 	if first.ID != second.ID {
 		t.Fatal("idempotent send created second message")
 	}
-	if n.count != 1 {
-		t.Fatalf("notification count=%d", n.count)
+	if n.Count() != 1 {
+		t.Fatalf("notification count=%d", n.Count())
 	}
 	page, err := s.Inbox(ctx, "bob.420", "", 10)
 	if err != nil {
@@ -332,9 +351,13 @@ func TestMailboxFlagsAndUnreadPreserveDeliveryReceipt(t *testing.T) {
 	if state.ReadAt == nil || !state.Starred || !state.Pinned || !state.Muted {
 		t.Fatalf("mailbox flags not applied: %+v", state)
 	}
-	s.Store.mu.RLock()
-	firstReceipt := s.Store.messages[msg.ID].ReadAt
-	s.Store.mu.RUnlock()
+	var firstReceipt *time.Time
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		firstReceipt = data.Messages[msg.ID].ReadAt
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if firstReceipt == nil {
 		t.Fatal("recipient read did not establish message read receipt")
 	}
@@ -345,9 +368,13 @@ func TestMailboxFlagsAndUnreadPreserveDeliveryReceipt(t *testing.T) {
 	if state.ReadAt != nil {
 		t.Fatalf("mailbox unread failed: %+v", state)
 	}
-	s.Store.mu.RLock()
-	receiptAfterUnread := s.Store.messages[msg.ID].ReadAt
-	s.Store.mu.RUnlock()
+	var receiptAfterUnread *time.Time
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		receiptAfterUnread = data.Messages[msg.ID].ReadAt
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
 	if receiptAfterUnread == nil || !receiptAfterUnread.Equal(*firstReceipt) {
 		t.Fatal("marking mailbox unread erased immutable first-read receipt")
 	}

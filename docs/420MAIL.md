@@ -119,7 +119,7 @@ MAIL-2.4 adds authenticated, owner-scoped mailbox search without publishing Mail
 - Metadata search covers sender, recipient, subject, source, system folder, assigned label names, and assigned custom-folder names.
 - Private message bodies are searched on demand through the configured `PrivateBlobStore`; body plaintext is not copied into the durable metadata store or any public index.
 - Search can filter by system folder, label, custom folder, sender, recipient, source, unread/read state, starred state, and date bounds.
-- Queries are limited to 256 bytes, candidate scans are bounded to 500 owner-visible mailbox items, and result pages remain capped at 100.
+- Queries are limited to 256 bytes, each request scans at most 500 owner-visible mailbox items, opaque continuation cursors make later mailbox segments searchable, and result pages remain capped at 100.
 - Unknown/foreign label or custom-folder identifiers fail closed rather than widening the search.
 - Search returns mailbox/message metadata; it does not return body plaintext in the search result payload.
 - No 420Search/public-index publication is introduced by MAIL-2.4.

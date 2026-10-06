@@ -1691,6 +1691,82 @@ MAIL-2.26 deliberately does not add provider-specific query filters. Integration
 
 The unified view does not expose private message bodies inline. Existing authenticated message-read APIs remain responsible for body access.
 
+## MAIL-2.27 Cross-Platform Verified Identity
+
+MAIL-2.27 adds an authenticated identity view that unifies durable verification evidence across currently qualified external integrations without flattening different proof strengths into a single false equivalence.
+
+### Root identity
+
+The authenticated 420Mail identity is the root identity for the response.
+
+The view does not create a new identity authority or replace canonical 420 Identity / Wallet verification.
+
+### Evidence sources
+
+Current durable evidence sources are:
+
+- Discord sync binding → `PROVIDER_AUTHORITY_VERIFIED`;
+- Discord canonical wallet verification → `WALLET_VERIFIED`;
+- Telegram sync binding → `PROVIDER_AUTHORITY_VERIFIED`.
+
+A successful sync binding is included only because it was produced by the already-qualified provider authority for that authenticated Mail owner and canonical provider connection.
+
+Unverified Discord wallet challenge state is never exposed as verified identity.
+
+### Assurance precedence
+
+For the same Discord connection, canonical wallet verification supersedes provider-authority evidence.
+
+`WALLET_VERIFIED` therefore carries:
+
+- verified chain ID;
+- verified wallet account;
+- wallet verification timestamp.
+
+`PROVIDER_AUTHORITY_VERIFIED` carries no wallet account or chain claim.
+
+Telegram currently remains provider-authority verified only. MAIL-2.27 does not invent Telegram wallet verification.
+
+### Owner isolation and provider scope
+
+Only durable records whose owner exactly matches the authenticated 420Mail identity are included.
+
+Currently supported providers:
+
+- Discord;
+- Telegram.
+
+Signal is excluded because MAIL-2.22 qualified its deep-sync condition as unsatisfied.
+
+### Ordering
+
+Accounts are ordered deterministically by:
+
+1. provider ascending;
+2. connection ID ascending.
+
+### API and client
+
+Authenticated endpoint:
+
+- `GET /v1/integrations/identity`
+
+Typed client:
+
+- `CrossPlatformIdentity`
+
+### Security/privacy boundary
+
+The identity view exposes verification metadata only.
+
+It does not expose:
+
+- provider credentials;
+- wallet private keys or seed phrases;
+- raw signature evidence;
+- private Mail message bodies;
+- public identity indexing.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

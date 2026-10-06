@@ -11,7 +11,15 @@ type IntegrationsInboxPage struct {
 	NextCursor string        `json:"next_cursor,omitempty"`
 }
 
+type IntegrationInboxFilter struct {
+	Source string `json:"source,omitempty"`
+}
+
 func (s *Service) IntegrationsInbox(ctx context.Context, actor, cursor string, limit int) (IntegrationsInboxPage, error) {
+	return s.IntegrationsInboxFiltered(ctx, actor, IntegrationInboxFilter{}, cursor, limit)
+}
+
+func (s *Service) IntegrationsInboxFiltered(ctx context.Context, actor string, filter IntegrationInboxFilter, cursor string, limit int) (IntegrationsInboxPage, error) {
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
 		return IntegrationsInboxPage{}, ErrUnauthorized
@@ -21,6 +29,10 @@ func (s *Service) IntegrationsInbox(ctx context.Context, actor, cursor string, l
 	}
 	if limit > MaxPageSize {
 		limit = MaxPageSize
+	}
+	filter, err := normalizeIntegrationInboxFilter(filter)
+	if err != nil {
+		return IntegrationsInboxPage{}, err
 	}
 	offset, err := decodeCursor(cursor)
 	if err != nil {
@@ -37,6 +49,9 @@ func (s *Service) IntegrationsInbox(ctx context.Context, actor, cursor string, l
 			}
 			msg, ok := data.Messages[state.MessageID]
 			if !ok || !isIntegrationInboxSource(msg.Source) {
+				continue
+			}
+			if filter.Source != "" && !strings.EqualFold(msg.Source, filter.Source) {
 				continue
 			}
 			items = append(items, MailboxItem{Message: msg, State: state})
@@ -73,4 +88,12 @@ func isIntegrationInboxSource(source string) bool {
 	default:
 		return false
 	}
+}
+
+func normalizeIntegrationInboxFilter(filter IntegrationInboxFilter) (IntegrationInboxFilter, error) {
+	filter.Source = strings.ToLower(strings.TrimSpace(filter.Source))
+	if filter.Source != "" && !isIntegrationInboxSource(filter.Source) {
+		return IntegrationInboxFilter{}, ErrInvalidInput
+	}
+	return filter, nil
 }

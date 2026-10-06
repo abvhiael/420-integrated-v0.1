@@ -218,8 +218,10 @@ if profile_path.is_file():
     if unified_inbox.get("enabled") is not True or unified_inbox.get("endpoint")!="/v1/integrations/inbox" or unified_inbox.get("authenticatedOwnerOnly") is not True: errors.append("MAIL-2.26 unified integrations inbox access drifted")
     if unified_inbox.get("canonicalMailboxView") is not True or unified_inbox.get("duplicateStore") is not False or unified_inbox.get("folder")!="INBOX": errors.append("MAIL-2.26 unified inbox canonical-state drifted")
     if unified_inbox.get("sources")!=["discord","telegram"] or unified_inbox.get("preserveMailboxState") is not True: errors.append("MAIL-2.26 unified inbox source/state drifted")
-    if any(unified_inbox.get(k) is not False for k in ["includeDeleted","includeArchived","includeJunk","includeNative420Mail","sourceFilter","privateBodiesInline","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.26 unified inbox scope/privacy drifted")
-    if unified_inbox.get("deterministicOrdering")!="CREATED_AT_DESC_MESSAGE_ID_ASC" or unified_inbox.get("cursorPagination") is not True or unified_inbox.get("integrationSpecificFiltersDeferredTo")!="MAIL-2.28": errors.append("MAIL-2.26 unified inbox ordering/filter boundary drifted")
+    if any(unified_inbox.get(k) is not False for k in ["includeDeleted","includeArchived","includeJunk","includeNative420Mail","privateBodiesInline","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.26 unified inbox scope/privacy drifted")
+    if unified_inbox.get("deterministicOrdering")!="CREATED_AT_DESC_MESSAGE_ID_ASC" or unified_inbox.get("cursorPagination") is not True: errors.append("MAIL-2.26 unified inbox ordering drifted")
+    if unified_inbox.get("sourceFilter") is not True or unified_inbox.get("sourceFilterParameter")!="source" or unified_inbox.get("sourceFilterValues")!=["discord","telegram"]: errors.append("MAIL-2.28 integration-specific source filter drifted")
+    if unified_inbox.get("filterBeforePagination") is not True or unified_inbox.get("unsupportedSourceRejected") is not True: errors.append("MAIL-2.28 integration filter pagination/validation drifted")
     cross_identity=profile.get("crossPlatformVerifiedIdentity",{})
     if cross_identity.get("enabled") is not True or cross_identity.get("endpoint")!="/v1/integrations/identity" or cross_identity.get("authenticatedOwnerOnly") is not True or cross_identity.get("rootIdentity")!="420MAIL_IDENTITY": errors.append("MAIL-2.27 cross-platform identity access/root drifted")
     if cross_identity.get("evidenceSources")!={"discord":["PROVIDER_AUTHORITY_VERIFIED","WALLET_VERIFIED"],"telegram":["PROVIDER_AUTHORITY_VERIFIED"]}: errors.append("MAIL-2.27 cross-platform identity evidence drifted")
@@ -388,6 +390,8 @@ for token in ["TelegramDeliveryKind","TelegramDeliveryMessage","TelegramDelivery
     if token not in telegram_delivery_src: errors.append("MAIL-2.25 Telegram delivery invariant missing: "+token)
 for token in ["IntegrationsInboxPage","IntegrationsInbox","isIntegrationInboxSource","FolderInbox","DiscordProvider","TelegramProvider","decodeCursor","encodeCursor"]:
     if token not in integrations_inbox_src: errors.append("MAIL-2.26 unified integrations inbox invariant missing: "+token)
+for token in ["IntegrationInboxFilter","IntegrationsInboxFiltered","normalizeIntegrationInboxFilter","filter.Source"]:
+    if token not in integrations_inbox_src: errors.append("MAIL-2.28 integration-specific filter invariant missing: "+token)
 for token in ["VerifiedIdentityAssurance","VerifiedIdentityProviderAuthority","VerifiedIdentityWallet","VerifiedPlatformIdentity","CrossPlatformVerifiedIdentity","CrossPlatformIdentity","DiscordWalletVerifications","DiscordSync","TelegramSync"]:
     if token not in cross_platform_identity_src: errors.append("MAIL-2.27 cross-platform identity invariant missing: "+token)
 for token in ["TelegramDeliveryAuthority","ConnectorCapabilityPush","DeliverTelegram","TelegramDeliveryKind"]:
@@ -424,6 +428,7 @@ for token in ['"/v1/connectors/telegram/deliver"',"*TelegramDeliveryService"]:
 if "DeliverTelegram" not in client: errors.append("MAIL-2.25 client Telegram delivery surface missing")
 if '"/v1/integrations/inbox"' not in http: errors.append("MAIL-2.26 HTTP unified integrations inbox surface missing")
 if "IntegrationsInbox" not in client: errors.append("MAIL-2.26 client unified integrations inbox surface missing")
+if "IntegrationsInboxFiltered" not in client or 'q.Set("source", source)' not in client: errors.append("MAIL-2.28 client integration filter surface missing")
 if '"/v1/integrations/identity"' not in http: errors.append("MAIL-2.27 HTTP cross-platform identity surface missing")
 if "CrossPlatformIdentity" not in client: errors.append("MAIL-2.27 client cross-platform identity surface missing")
 for token in ["LinkConnector","UnlinkConnector"]:
@@ -449,6 +454,8 @@ for token in ["/v1/connectors/telegram/deliver","deliverTelegram","Send to Teleg
     if token not in web: errors.append("MAIL-2.25 thin UI Telegram delivery behavior missing: "+token)
 for token in ["/v1/integrations/inbox","loadIntegrationsInbox","Refresh integrations inbox","integrations-inbox"]:
     if token not in web: errors.append("MAIL-2.26 thin UI unified integrations inbox behavior missing: "+token)
+for token in ["integrations-inbox-source","All integrations","Discord","Telegram","query.set('source',source)"]:
+    if token not in web: errors.append("MAIL-2.28 thin UI integration filter behavior missing: "+token)
 for token in ["/v1/integrations/identity","loadVerifiedIdentity","Refresh verified identity","verified-identity"]:
     if token not in web: errors.append("MAIL-2.27 thin UI verified identity behavior missing: "+token)
 for token in ["/v1/connectors/discord/sync","syncDiscord","Sync Discord","connectionId"]:
@@ -502,4 +509,5 @@ print("MAIL-2.24 Telegram to 420Mail sync: qualified by app-scoped checks")
 print("MAIL-2.25 420Mail to Telegram delivery: qualified by app-scoped checks")
 print("MAIL-2.26 unified integrations inbox: qualified by app-scoped checks")
 print("MAIL-2.27 cross-platform verified identity: qualified by app-scoped checks")
+print("MAIL-2.28 integration-specific filters: qualified by app-scoped checks")
 

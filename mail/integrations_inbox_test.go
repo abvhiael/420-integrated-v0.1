@@ -162,7 +162,30 @@ func TestHTTPIntegrationsInboxRequiresAuthentication(t *testing.T) {
 	}
 }
 
-func TestHTTPIntegrationsInboxDoesNotExposeSourceFilterYet(t *testing.T) {
+func TestIntegrationsInboxFiltersByQualifiedProviderBeforePagination(t *testing.T) {
+	store := NewMemoryStore()
+	seedIntegrationInbox(t, store)
+	svc := NewService(nil, nil, nil, nil, store)
+
+	page, err := svc.IntegrationsInboxFiltered(context.Background(), "alice.420", IntegrationInboxFilter{Source: " TELEGRAM "}, "", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(page.Items) != 1 || page.Items[0].Message.ID != "telegram-1" || page.NextCursor != "" {
+		t.Fatalf("unexpected provider-filtered page: %+v", page)
+	}
+}
+
+func TestIntegrationsInboxRejectsUnsupportedProviderFilter(t *testing.T) {
+	svc := NewService(nil, nil, nil, nil, NewMemoryStore())
+	for _, source := range []string{SignalProvider, ServiceID, "smtp", "discord-webhook"} {
+		if _, err := svc.IntegrationsInboxFiltered(context.Background(), "alice.420", IntegrationInboxFilter{Source: source}, "", 50); !errors.Is(err, ErrInvalidInput) {
+			t.Fatalf("unsupported source %q accepted: %v", source, err)
+		}
+	}
+}
+
+func TestHTTPIntegrationsInboxSourceFilter(t *testing.T) {
 	store := NewMemoryStore()
 	seedIntegrationInbox(t, store)
 	h := HTTPHandler{
@@ -181,7 +204,14 @@ func TestHTTPIntegrationsInboxDoesNotExposeSourceFilterYet(t *testing.T) {
 	if err := json.Unmarshal(rec.Body.Bytes(), &out); err != nil {
 		t.Fatal(err)
 	}
-	if len(out.Items) != 2 {
-		t.Fatalf("MAIL-2.28 source filtering was pulled forward: %+v", out.Items)
+	if len(out.Items) != 1 || out.Items[0].Message.ID != "discord-1" {
+		t.Fatalf("unexpected filtered response: %+v", out.Items)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/v1/integrations/inbox?source=signal", nil)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("unsupported source status=%d body=%s", rec.Code, rec.Body.String())
 	}
 }

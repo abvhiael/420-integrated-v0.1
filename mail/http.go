@@ -765,7 +765,7 @@ func (h HTTPHandler) integrationsInbox(w http.ResponseWriter, r *http.Request, a
 			limit = n
 		}
 	}
-	page, err := h.Service.IntegrationsInbox(r.Context(), actor, r.URL.Query().Get("cursor"), limit)
+	page, err := h.Service.IntegrationsInboxFiltered(r.Context(), actor, IntegrationInboxFilter{Source: r.URL.Query().Get("source")}, r.URL.Query().Get("cursor"), limit)
 	if err != nil {
 		writeServiceError(w, err)
 		return

@@ -83,7 +83,14 @@ func (c Client) CrossPlatformIdentity(ctx context.Context) (mail.CrossPlatformVe
 }
 
 func (c Client) IntegrationsInbox(ctx context.Context, cursor string, limit int) (mail.IntegrationsInboxPage, error) {
+	return c.IntegrationsInboxFiltered(ctx, "", cursor, limit)
+}
+
+func (c Client) IntegrationsInboxFiltered(ctx context.Context, source, cursor string, limit int) (mail.IntegrationsInboxPage, error) {
 	q := url.Values{}
+	if source != "" {
+		q.Set("source", source)
+	}
 	if cursor != "" {
 		q.Set("cursor", cursor)
 	}

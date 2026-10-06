@@ -696,8 +696,14 @@
     "includeNative420Mail": false,
     "deterministicOrdering": "CREATED_AT_DESC_MESSAGE_ID_ASC",
     "cursorPagination": true,
-    "sourceFilter": false,
-    "integrationSpecificFiltersDeferredTo": "MAIL-2.28",
+    "sourceFilter": true,
+    "sourceFilterParameter": "source",
+    "sourceFilterValues": [
+      "discord",
+      "telegram"
+    ],
+    "filterBeforePagination": true,
+    "unsupportedSourceRejected": true,
     "privateBodiesInline": false,
     "publicIndexing": false,
     "messageBodiesOnChain": false

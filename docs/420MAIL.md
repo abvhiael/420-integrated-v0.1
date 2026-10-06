@@ -1767,6 +1767,51 @@ It does not expose:
 - private Mail message bodies;
 - public identity indexing.
 
+
+## MAIL-2.28 Integration-Specific Filters
+
+MAIL-2.28 adds provider-specific filtering to the canonical unified integrations inbox without creating provider-specific mailbox state.
+
+### Filter model
+
+Authenticated callers may optionally pass:
+
+- `source=discord`;
+- `source=telegram`.
+
+An omitted source preserves the MAIL-2.26 unified view.
+
+The source value is normalized case-insensitively and must resolve to an already-qualified inbound integration source. Unsupported, native-Mail, future, or Signal values fail closed with `ErrInvalidInput`; Signal remains excluded because MAIL-2.22 deep sync is not enabled.
+
+### Canonical-state boundary
+
+Filtering is a derived read concern only. It does not:
+
+- create a second provider mailbox;
+- change message source metadata;
+- alter read/star/pin/mute/archive/delete state;
+- expose archived, junk, trash, deleted, native-Mail, or foreign-owner items;
+- expose private bodies inline.
+
+Filtering happens before pagination so cursors operate over the selected provider view rather than over discarded mixed-provider records.
+
+### API, client, and UI
+
+Endpoint:
+
+- `GET /v1/integrations/inbox?source=discord|telegram&cursor=...&limit=...`
+
+Typed client:
+
+- existing `IntegrationsInbox` remains backward-compatible for the unfiltered view;
+- `IntegrationsInboxFiltered` adds the optional provider selector.
+
+The thin UI exposes an All integrations / Discord / Telegram selector and sends only the bounded source identifier.
+
+### Scope containment
+
+MAIL-2.28 does not add new connectors, Signal deep sync, Telegram wallet verification, provider credentials, private-body indexing, or new automatic delivery/routing behavior. Unified notification routing remains MAIL-2.29.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

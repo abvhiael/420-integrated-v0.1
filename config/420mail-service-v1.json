@@ -41,7 +41,6 @@
     "deliveredRecipientFolder": "INBOX",
     "deliveredSenderFolder": "SENT",
     "reservedForDedicatedSteps": {
-      "DRAFTS": "MAIL-2.9",
       "OUTBOX": "MAIL-2.10"
     },
     "ownerScopedState": true,

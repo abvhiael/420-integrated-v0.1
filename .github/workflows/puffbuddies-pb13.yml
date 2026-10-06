@@ -1,0 +1,66 @@
+name: PuffBuddies PB-13 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb13.py"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb13.yml"
+  push:
+    branches: ["puffbuddies-pb13-cross-app-integration-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb13.py"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb13.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb13:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-13 Level 1 targeted cross-app integration
+        run: python3 -m unittest puffbuddies.tests.test_pb_13_cross_app_integration -v
+      - name: PB-13 canonical service identity verifier
+        run: python3 scripts/verify-puffbuddies-pb13.py
+      - name: PB-13 direct Genesis dApp/service verifier
+        run: python3 scripts/verify-genesis-dapps.py
+      - name: PB-13 direct Registry integration verifier
+        run: python3 scripts/verify-reg-audit-7-integration.py
+      - name: PB-13 retained Pay dependency verifier
+        run: python3 scripts/verify-420pay-audit.py
+      - name: PB-13 Level 2 retained cross-app milestone
+        run: python3 -m unittest puffbuddies.tests.test_pb_13_integration -v
+      - name: PB-13 Level 2 complete retained PuffBuddies integration
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-13 retained web client
+        working-directory: puffbuddies/web
+        run: npm run qualify
+      - name: PB-13 retained mobile clients
+        working-directory: puffbuddies/mobile
+        run: npm run qualify
+      - name: Verify PB-0 dependency and authority model
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Cross-app authority and privacy negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIE '(puffbuddies_service_id|420/service/puff|force_match|force_unblock|block_override|canonical_authority_claimed[[:space:]]*=[[:space:]]*True)' puffbuddies/integrations
+          ! grep -RIE '(private_message|precise_location|report_evidence|raw_identity_evidence|wallet_private_key)[[:space:]]*[:=]' puffbuddies/integrations
+          test ! -e contracts/src/puffbuddies

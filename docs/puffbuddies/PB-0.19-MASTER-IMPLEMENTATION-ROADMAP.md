@@ -159,6 +159,10 @@ Implement the web-first MVP across eligibility, account/profile, discovery, matc
 **PB-0 authorities:** all PB-0 product, privacy, consent, safety, lifecycle, matching, cannabis, visibility, and non-goal authorities.
 **Required gates:** build/lint/type; UI authorization boundaries; accessibility; end-to-end happy/negative paths; sensitive logging review; client cache revocation.
 
+### Current PB-13 cross-app integration mapping
+
+The legacy PB-0.19 **PB-8 — Bounded ecosystem integration hardening** scope is implemented by current **PB-13 — 420Integrated cross-app integration**. Current PB-13 retains the original dependency-contract/interface, stale/revoked capability, failure-injection, metadata/privacy and authority-conflict gates plus the documented **Level 2 milestone D** complete retained PuffBuddies integration suite. This is a numbering/scope reconciliation only and does not promote legacy testnet/release work into PB-13.
+
 ### PB-8 — Bounded ecosystem integration hardening
 Harden Wallet, Identity, Names, Messenger, Notifications, Pay where later approved, Registry/AppStore presentation, and derived Analytics/Search/Indexer/Explorer boundaries without transferring PuffBuddies authority.
 

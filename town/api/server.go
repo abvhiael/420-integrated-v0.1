@@ -375,7 +375,6 @@ func (s *Server) handlePostVote(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, vote)
 }
 
-
 func (s *Server) requireModeration(w http.ResponseWriter) (ModerationBackend, bool) {
 	if s.moderation == nil {
 		s.fail(w, http.StatusServiceUnavailable, "moderation service unavailable")
@@ -397,19 +396,21 @@ func (s *Server) handleReport(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+
 	var body struct {
-		RecordID   string
-		CaseID     string
+		RecordID    string
+		CaseID      string
 		CommunityID string
-		TargetKind string
-		TargetID   string
-		Reason     string
-		BodyRef    string
-		BodySHA256 string
+		TargetKind  string
+		TargetID    string
+		Reason      string
+		BodyRef     string
+		BodySHA256  string
 	}
 	if !s.decode(w, r, &body) {
 		return
 	}
+
 	record, err := backend.Report(actor, moderation.OpenCaseRequest{
 		RecordID:       model.ObjectID(body.RecordID),
 		CaseID:         model.ObjectID(body.CaseID),
@@ -469,6 +470,7 @@ func (s *Server) handleModerationAction(w http.ResponseWriter, r *http.Request) 
 		s.fail(w, http.StatusBadRequest, "invalid case id")
 		return
 	}
+
 	var body struct {
 		RecordID   string
 		Action     string
@@ -479,6 +481,7 @@ func (s *Server) handleModerationAction(w http.ResponseWriter, r *http.Request) 
 	if !s.decode(w, r, &body) {
 		return
 	}
+
 	record, err := backend.Moderate(actor, moderation.ModerateRequest{
 		RecordID:       model.ObjectID(body.RecordID),
 		CaseID:         caseID,
@@ -514,6 +517,7 @@ func (s *Server) handleAppeal(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, http.StatusBadRequest, "invalid case id")
 		return
 	}
+
 	var body struct {
 		RecordID   string
 		Reason     string
@@ -523,6 +527,7 @@ func (s *Server) handleAppeal(w http.ResponseWriter, r *http.Request) {
 	if !s.decode(w, r, &body) {
 		return
 	}
+
 	record, err := backend.Appeal(actor, moderation.AppealRequest{
 		RecordID:       model.ObjectID(body.RecordID),
 		CaseID:         caseID,

@@ -129,7 +129,7 @@ func TestHTTPWalletVerificationDoesNotAcceptTransportOnlyEvidence(t *testing.T) 
 		verify: WalletVerification{
 			HandoffID: "handoff-1", Kind: WalletVerifyTransaction, Identity: "alice.420", ChainID: 420,
 			Account: "0x1111111111111111111111111111111111111111", Verified: true, Canonical: false,
-			TxHash: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+			TxHash:     "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
 			VerifiedAt: walletTestNow(), NonCustodial: true,
 		},
 	}

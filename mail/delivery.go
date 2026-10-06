@@ -24,7 +24,7 @@ const (
 
 var (
 	ErrDeliveryConflict = errors.New("mail: delivery state conflict")
-	ErrOutboxFull        = errors.New("mail: outbox capacity exceeded")
+	ErrOutboxFull       = errors.New("mail: outbox capacity exceeded")
 )
 
 type Delivery struct {
@@ -242,13 +242,13 @@ func (s *Service) ProcessDelivery(ctx context.Context, actor, id string) (Delive
 	}
 	req := SendRequest{
 		IdempotencyKey: delivery.IdempotencyKey,
-		Sender: actor,
-		Recipient: delivery.Recipient,
-		Subject: delivery.Subject,
-		Body: string(body),
+		Sender:         actor,
+		Recipient:      delivery.Recipient,
+		Subject:        delivery.Subject,
+		Body:           string(body),
 		ConversationID: delivery.ConversationID,
-		ReplyTo: delivery.ReplyTo,
-		Source: delivery.Source,
+		ReplyTo:        delivery.ReplyTo,
+		Source:         delivery.Source,
 	}
 	if _, err := s.Send(ctx, actor, req); err != nil {
 		return s.recordDeliveryFailure(ctx, delivery, err)

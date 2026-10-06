@@ -16,11 +16,11 @@ import (
 // MAIL-2.7 thresholds are deterministic repository policy; later operational
 // rate limiting remains owned by the dedicated abuse-controls roadmap step.
 const (
-	MaxQuarantineReasons      = 8
-	MaxFingerprintCount       = 1000000
-	SpamReputationThreshold   = 3
-	DuplicateSpamThreshold    = 4
-	PhishingQuarantineScore   = 3
+	MaxQuarantineReasons    = 8
+	MaxFingerprintCount     = 1000000
+	SpamReputationThreshold = 3
+	DuplicateSpamThreshold  = 4
+	PhishingQuarantineScore = 3
 )
 
 type AbuseKind string
@@ -40,15 +40,15 @@ var (
 )
 
 type SenderReputation struct {
-	Owner          string    `json:"owner"`
-	Sender         string    `json:"sender"`
-	Deliveries     uint64    `json:"deliveries"`
-	Quarantines    uint64    `json:"quarantines"`
-	SpamReports    uint64    `json:"spam_reports"`
+	Owner           string    `json:"owner"`
+	Sender          string    `json:"sender"`
+	Deliveries      uint64    `json:"deliveries"`
+	Quarantines     uint64    `json:"quarantines"`
+	SpamReports     uint64    `json:"spam_reports"`
 	PhishingReports uint64   `json:"phishing_reports"`
-	FalsePositives uint64    `json:"false_positives"`
-	RiskScore      int       `json:"risk_score"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	FalsePositives  uint64    `json:"false_positives"`
+	RiskScore       int       `json:"risk_score"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type AbuseReport struct {
@@ -61,16 +61,16 @@ type AbuseReport struct {
 }
 
 type QuarantineRecord struct {
-	Owner        string           `json:"owner"`
-	MessageID    string           `json:"message_id"`
-	Sender       string           `json:"sender"`
-	Status       QuarantineStatus `json:"status"`
-	Reasons      []string         `json:"reasons"`
-	SpamScore    int              `json:"spam_score"`
+	Owner         string           `json:"owner"`
+	MessageID     string           `json:"message_id"`
+	Sender        string           `json:"sender"`
+	Status        QuarantineStatus `json:"status"`
+	Reasons       []string         `json:"reasons"`
+	SpamScore     int              `json:"spam_score"`
 	PhishingScore int             `json:"phishing_score"`
-	CreatedAt    time.Time        `json:"created_at"`
-	UpdatedAt    time.Time        `json:"updated_at"`
-	ReleasedAt   *time.Time       `json:"released_at,omitempty"`
+	CreatedAt     time.Time        `json:"created_at"`
+	UpdatedAt     time.Time        `json:"updated_at"`
+	ReleasedAt    *time.Time       `json:"released_at,omitempty"`
 }
 
 type AbuseReportInput struct {

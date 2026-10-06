@@ -20,6 +20,7 @@ type HTTPHandler struct {
 	Connectors      *ConnectorService
 	DiscordSync     *DiscordSyncService
 	DiscordDelivery *DiscordDeliveryService
+	DiscordWallet   *DiscordWalletVerificationService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +82,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.discordSync(w, r, actor)
 	case r.URL.Path == "/v1/connectors/discord/deliver":
 		h.discordDeliver(w, r, actor)
+	case r.URL.Path == "/v1/connectors/discord/wallet/challenge" || r.URL.Path == "/v1/connectors/discord/wallet/verify":
+		h.discordWallet(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -152,6 +155,54 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) discordWallet(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.DiscordWallet == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "discord wallet verification unavailable")
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	switch r.URL.Path {
+	case "/v1/connectors/discord/wallet/challenge":
+		var req DiscordWalletChallengeRequest
+		if !decodeStrictJSON(w, r, MaxWalletVerificationBytes+4096, &req) {
+			return
+		}
+		out, err := h.DiscordWallet.Challenge(r.Context(), actor, req)
+		if err != nil {
+			writeDiscordWalletError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/connectors/discord/wallet/verify":
+		var req DiscordWalletVerificationRequest
+		if !decodeStrictJSON(w, r, MaxWalletVerificationBytes+4096, &req) {
+			return
+		}
+		out, err := h.DiscordWallet.Verify(r.Context(), actor, req)
+		if err != nil {
+			writeDiscordWalletError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+	}
+}
+
+func writeDiscordWalletError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrDiscordWalletConflict):
+		writeError(w, http.StatusConflict, "DISCORD_WALLET_CONFLICT", err.Error())
+	case errors.Is(err, ErrWalletInvalidResult):
+		writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "wallet verification authority returned an invalid result")
+	default:
+		writeConnectorError(w, err)
+	}
 }
 
 func (h HTTPHandler) discordDeliver(w http.ResponseWriter, r *http.Request, actor string) {

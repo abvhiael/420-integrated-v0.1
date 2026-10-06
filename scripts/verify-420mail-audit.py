@@ -196,7 +196,8 @@ if profile_path.is_file():
     if telegram.get("authority")!="TELEGRAM_LINK_AUTHORITY" or telegram.get("authorizationRef")!="OPAQUE_EXTERNAL_AUTHORIZATION_REFERENCE" or telegram.get("accountHintAuthoritative") is not False: errors.append("MAIL-2.23 Telegram authority/reference drifted")
     if telegram.get("userIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram.get("verifiedAccountRequired") is not True or telegram.get("nonCustodialRequired") is not True or telegram.get("unlinkSupported") is not True: errors.append("MAIL-2.23 Telegram account invariant drifted")
     if telegram.get("pull") is not True: errors.append("MAIL-2.24 Telegram PULL capability not enabled")
-    if any(telegram.get(k) is not False for k in ["push","webhook","walletVerification"]): errors.append("MAIL-2.24 pulled later Telegram capabilities forward")
+    if telegram.get("push") is not True: errors.append("MAIL-2.25 Telegram PUSH capability not enabled")
+    if any(telegram.get(k) is not False for k in ["webhook","walletVerification"]): errors.append("MAIL-2.25 pulled later Telegram capabilities forward")
     if any(telegram.get(k) is not False for k in ["rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.23 Telegram credential/privacy boundary drifted")
     telegram_sync=profile.get("telegramSync",{})
     if telegram.get("pull") is not True: errors.append("MAIL-2.24 Telegram PULL capability not enabled")
@@ -206,7 +207,13 @@ if profile_path.is_file():
     if telegram_sync.get("itemKind")!="TELEGRAM_MESSAGE" or telegram_sync.get("messageIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram_sync.get("authorIdFormat")!="POSITIVE_DECIMAL_IDENTIFIER" or telegram_sync.get("chatIdFormat")!="SIGNED_DECIMAL_IDENTIFIER": errors.append("MAIL-2.24 Telegram item identity drifted")
     if telegram_sync.get("privateBodyStorage") is not True or telegram_sync.get("mailboxMaterialization")!="RECIPIENT_INBOX" or telegram_sync.get("source")!="telegram" or telegram_sync.get("visibility")!="PRIVATE": errors.append("MAIL-2.24 Telegram materialization/privacy drifted")
     if any(telegram_sync.get(k) is not True for k in ["deterministicMessageId","deterministicConversationId","idempotentReplay","mutationConflictRejected","permanentDeleteReplayDoesNotResurrect","trustRulesApplied","spamProtectionApplied","notificationsApplied"]): errors.append("MAIL-2.24 Telegram replay/policy invariant drifted")
-    if any(telegram_sync.get(k) is not False for k in ["push","webhook","walletVerification","rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.24 pulled later Telegram/privacy capabilities forward")
+    if telegram_sync.get("push") is not True: errors.append("MAIL-2.25 Telegram sync/delivery capability drifted")
+    if any(telegram_sync.get(k) is not False for k in ["webhook","walletVerification","rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.25 pulled later Telegram/privacy capabilities forward")
+    telegram_delivery=profile.get("telegramDelivery",{})
+    if telegram_delivery.get("enabled") is not True or telegram_delivery.get("provider")!="telegram" or telegram_delivery.get("connectorCapability")!="PUSH" or telegram_delivery.get("authority")!="TELEGRAM_DELIVERY_AUTHORITY": errors.append("MAIL-2.25 Telegram delivery authority/capability drifted")
+    if telegram_delivery.get("requiresLinkedTelegramAccount") is not True or telegram_delivery.get("connectionIdFormat")!="telegram:{user-id}" or telegram_delivery.get("chatIdFormat")!="SIGNED_DECIMAL_IDENTIFIER": errors.append("MAIL-2.25 Telegram delivery connection/chat drifted")
+    if telegram_delivery.get("maxContentBytes")!=4096 or telegram_delivery.get("idempotencyRequired") is not True or telegram_delivery.get("receiptMessageIdRequired") is not True or telegram_delivery.get("receiptChatMatchRequired") is not True or telegram_delivery.get("acceptedTimestampRequired") is not True: errors.append("MAIL-2.25 Telegram delivery receipt/idempotency drifted")
+    if any(telegram_delivery.get(k) is not False for k in ["webhook","walletVerification","rawBotTokenInput","rawAccessTokenInput","rawRefreshTokenInput","rawClientSecretInput","phoneNumberCredentialInput","verificationCodeInput","providerCredentialPersistence","publicIndexing","messageBodiesOnChain"]): errors.append("MAIL-2.25 Telegram delivery credential/privacy drifted")
     if dwallet.get("authenticatedOwnerOnly") is not True or dwallet.get("connectionBinding")!="DISCORD_LINK_CONNECTION_ID" or dwallet.get("authority")!="CANONICAL_WALLET_RPC_IDENTITY_ADAPTER": errors.append("MAIL-2.18 Discord wallet authority/binding drifted")
     if dwallet.get("challengeKind")!="MESSAGE_SIGNATURE" or dwallet.get("challengeDomain")!="420/MAIL/DISCORD/WALLET-VERIFY/V1" or dwallet.get("maxChallengeTtlSeconds")!=600: errors.append("MAIL-2.18 Discord wallet challenge drifted")
     if dwallet.get("challengeBindings")!=["MAIL_IDENTITY","DISCORD_CONNECTION","DISCORD_USER_ID","CHAIN_ID","WALLET_ACCOUNT","EXPIRY"]: errors.append("MAIL-2.18 Discord wallet challenge bindings drifted")
@@ -341,6 +348,7 @@ signal_share_src=(ROOT/"mail/signal_share.go").read_text() if (ROOT/"mail/signal
 signal_deep_sync_gate_src=(ROOT/"mail/signal_deep_sync_gate.go").read_text() if (ROOT/"mail/signal_deep_sync_gate.go").is_file() else ""
 telegram_link_src=(ROOT/"mail/telegram_link.go").read_text() if (ROOT/"mail/telegram_link.go").is_file() else ""
 telegram_sync_src=(ROOT/"mail/telegram_sync.go").read_text() if (ROOT/"mail/telegram_sync.go").is_file() else ""
+telegram_delivery_src=(ROOT/"mail/telegram_delivery.go").read_text() if (ROOT/"mail/telegram_delivery.go").is_file() else ""
 for token in ["DiscordProvider","DiscordAccount","DiscordLinkAuthority","DiscordConnectorAdapter","NewDiscordConnectorService","ConnectorCapabilityLink","validDiscordSnowflake","discordUserIDFromConnectionID","ErrDiscordInvalidResult"]:
     if token not in discord_src: errors.append("MAIL-2.15 Discord link invariant missing: "+token)
 for token in ["DiscordInboundMessage","DiscordSyncAuthority","DiscordSyncState","DiscordSyncResult","DiscordSyncService","NewDiscordSyncService","ErrDiscordSyncConflict","deterministicDiscordConversationID","discordSyncFingerprint","validateDiscordSyncData"]:
@@ -361,6 +369,10 @@ for token in ["TelegramProvider","TelegramAccount","TelegramLinkAuthority","Tele
     if token not in telegram_link_src: errors.append("MAIL-2.23 Telegram link invariant missing: "+token)
 for token in ["TelegramInboundMessage","TelegramSyncPage","TelegramSyncAuthority","TelegramSyncState","TelegramSyncResult","TelegramSyncService","NewTelegramSyncService","TelegramSyncItemKind","ErrTelegramSyncConflict","telegramSyncFingerprint","deterministicTelegramConversationID","validateTelegramSyncData","validTelegramChatID"]:
     if token not in telegram_sync_src: errors.append("MAIL-2.24 Telegram sync invariant missing: "+token)
+for token in ["TelegramDeliveryKind","TelegramDeliveryMessage","TelegramDeliveryReceipt","TelegramDeliveryAuthority","TelegramDeliveryRequest","TelegramDeliveryResult","TelegramDeliveryService","NewTelegramDeliveryService","MaxTelegramDeliveryContentBytes","validateTelegramDeliveryMessage"]:
+    if token not in telegram_delivery_src: errors.append("MAIL-2.25 Telegram delivery invariant missing: "+token)
+for token in ["TelegramDeliveryAuthority","ConnectorCapabilityPush","DeliverTelegram","TelegramDeliveryKind"]:
+    if token not in telegram_link_src: errors.append("MAIL-2.25 Telegram adapter delivery invariant missing: "+token)
 for token in ["TelegramSyncAuthority","ConnectorCapabilityPull","PullTelegram","TelegramSyncItemKind"]:
     if token not in telegram_link_src: errors.append("MAIL-2.24 Telegram adapter sync invariant missing: "+token)
 for forbidden in ["ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
@@ -388,6 +400,9 @@ if "SignalDeepSyncStatus" not in client: errors.append("MAIL-2.22 client Signal 
 for token in ['"/v1/connectors/telegram/sync"',"*TelegramSyncService"]:
     if token not in http: errors.append("MAIL-2.24 HTTP Telegram sync surface missing: "+token)
 if "SyncTelegram" not in client: errors.append("MAIL-2.24 client Telegram sync surface missing")
+for token in ['"/v1/connectors/telegram/deliver"',"*TelegramDeliveryService"]:
+    if token not in http: errors.append("MAIL-2.25 HTTP Telegram delivery surface missing: "+token)
+if "DeliverTelegram" not in client: errors.append("MAIL-2.25 client Telegram delivery surface missing")
 for token in ["LinkConnector","UnlinkConnector"]:
     if token not in client: errors.append("MAIL-2.23 client Telegram link surface missing: "+token)
 for forbidden in ["ConnectorCapabilityPull, ConnectorCapabilityPush","ConnectorCapabilityWebhook","ConnectorCapabilityWalletVerify"]:
@@ -407,6 +422,8 @@ for token in ["LINK","linkConnector","authorization_ref"]:
     if token not in web: errors.append("MAIL-2.23 provider-neutral Telegram link UI behavior missing: "+token)
 for token in ["/v1/connectors/telegram/sync","syncTelegram","Sync Telegram","connectionId"]:
     if token not in web: errors.append("MAIL-2.24 thin UI Telegram sync behavior missing: "+token)
+for token in ["/v1/connectors/telegram/deliver","deliverTelegram","Send to Telegram","chat_id"]:
+    if token not in web: errors.append("MAIL-2.25 thin UI Telegram delivery behavior missing: "+token)
 for token in ["/v1/connectors/discord/sync","syncDiscord","Sync Discord","connectionId"]:
     if token not in web: errors.append("MAIL-2.16 thin UI Discord sync behavior missing: "+token)
 for token in ["/v1/connectors/discord/deliver","deliverDiscord","Send to Discord","delivery","idempotency_key"]:
@@ -455,4 +472,5 @@ print("MAIL-2.21 Signal share and forward: qualified by app-scoped checks")
 print("MAIL-2.22 Signal deep sync: condition unsatisfied and gate qualified by app-scoped checks")
 print("MAIL-2.23 Telegram account linking: qualified by app-scoped checks")
 print("MAIL-2.24 Telegram to 420Mail sync: qualified by app-scoped checks")
+print("MAIL-2.25 420Mail to Telegram delivery: qualified by app-scoped checks")
 

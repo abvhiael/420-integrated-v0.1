@@ -1586,7 +1586,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** all report/moderation states exist; report/block separation holds; immediate block invalidates discovery/matching/messaging authority; protected evidence/persistence boundaries and concurrency hold; least-privilege + human-review controls hold; restriction/suspension/ban invalidate stale participation; appeal cannot restore interpersonal consent; retained integration proves safety override of accumulated interaction authority; privacy/public-reputation negative gates pass; exact-head Level-1 + Level-2 app qualification pass; durable evidence recorded.
 
-### PB-9 — Verification and reputation
+### PB-9 — Verification and reputation — COMPLETE
 
 **Purpose:** implement bounded private verification indicators and non-scored user-controlled reputation presentation while preserving PuffBuddies privacy, consent, safety, state-ownership, and anti-public-score invariants.
 

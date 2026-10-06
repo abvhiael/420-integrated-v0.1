@@ -140,7 +140,6 @@ func TestHTTPMailboxRequiresOwnership(t *testing.T) {
 	}
 }
 
-
 func TestHTTPLabelsCustomFoldersAndBulkOrganization(t *testing.T) {
 	h, _, id := testHTTPHandler(t)
 

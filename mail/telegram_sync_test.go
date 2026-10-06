@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -168,6 +169,36 @@ func TestTelegramSyncValidatesProviderMessageShapeBeforeMaterialization(t *testi
 		if _, err := syncer.Sync(context.Background(), "alice.420", "telegram:1234567890"); !errors.Is(err, ErrTelegramInvalidResult) && !errors.Is(err, ErrConnectorInvalidResult) {
 			t.Fatalf("invalid Telegram message accepted: %+v err=%v", msg, err)
 		}
+	}
+}
+
+func TestTelegramSyncStoreMigratesV10ToV11(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "legacy-v10.json")
+	if err := os.WriteFile(path, []byte("{\"schema_version\":10}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	store, err := OpenDurableStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.View(context.Background(), func(data *storeData) error {
+		if data.SchemaVersion != 11 || data.TelegramSync == nil {
+			t.Fatalf("v10->v11 Telegram sync migration incomplete: schema=%d telegram=%v", data.SchemaVersion, data.TelegramSync)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var disk diskStoreData
+	if err := json.Unmarshal(raw, &disk); err != nil {
+		t.Fatal(err)
+	}
+	if disk.SchemaVersion != 11 || disk.TelegramSync == nil {
+		t.Fatalf("persisted v11 migration incomplete: schema=%d telegram=%v", disk.SchemaVersion, disk.TelegramSync)
 	}
 }
 

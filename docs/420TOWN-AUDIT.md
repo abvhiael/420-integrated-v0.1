@@ -1072,7 +1072,7 @@ Next canonical roadmap step: **TOWN-AUDIT-8 — User-facing web application**.
 
 Status: **COMPLETE**  
 Qualification level: **Level 1 + Level 2 frontend/application integration milestone**  
-Qualified implementation/test/workflow SHA: `2927dd56138618879f164d5337b360f8092810b6`  
+Qualified implementation/test/workflow SHA: `ffa21756d0b900e5cfe517da832a9c892962083f`  
 Evidence closeout is documentation-only and follows the already-passing exact-SHA 420Town qualification.
 
 ### Implementation completed
@@ -1194,15 +1194,15 @@ They do not create a second moderation authority.
 ### Exact-head qualification evidence
 
 GitHub Actions workflow: **420Town audit**  
-Run ID: `37395614325`  
-Run number: `162`  
+Run ID: `37396803585`  
+Run number: `164`  
 Result: **PASS**  
-Qualified implementation SHA: `2927dd56138618879f164d5337b360f8092810b6`
+Qualified implementation SHA: `ffa21756d0b900e5cfe517da832a9c892962083f`
 
 Jobs:
 
-- `town-skeleton` / job `112050754078` — **PASS**;
-- `town-contracts` / job `112050754021` — **PASS**.
+- `town-skeleton` / job `112054679693` — **PASS**;
+- `town-contracts` / job `112054679367` — **PASS**.
 
 Passing exact-head checks:
 
@@ -1245,9 +1245,9 @@ required `gofmt`.
 
 The contract job from that run was subsequently cancelled by newer branch commits and is not counted as evidence.
 
-Formatting was corrected without weakening behavior or tests. The resulting exact candidate `2927dd56138618879f164d5337b360f8092810b6` passed the full Town workflow.
+Formatting was corrected without weakening behavior or tests. The implementation candidate `2927dd56138618879f164d5337b360f8092810b6` passed the full Town workflow and was followed only by documentation-only closeout commits. Those documentation commits were then themselves requalified on exact head `ffa21756d0b900e5cfe517da832a9c892962083f` in Town audit run `37396803585` / run `164`, with both Town jobs fully PASS.
 
-Only the final SHA is authoritative qualification evidence.
+Accordingly, `ffa21756d0b900e5cfe517da832a9c892962083f` is the authoritative final exact-head qualification evidence for TOWN-AUDIT-8.
 
 ### Browser/security/adversarial result
 

@@ -17,6 +17,7 @@ type HTTPHandler struct {
 	Onboarding    *OnboardingService
 	Security      *SecurityService
 	WalletActions *WalletActionService
+	Connectors    *ConnectorService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +27,14 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.onboarding(w, r)
+		return
+	}
+	if strings.HasPrefix(r.URL.Path, "/v1/connectors/webhooks/") {
+		if h.Connectors == nil {
+			writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail connectors unavailable")
+			return
+		}
+		h.connectorWebhook(w, r)
 		return
 	}
 	if h.Service == nil || h.Authenticate == nil {
@@ -64,6 +73,8 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.security(w, r, actor)
 	case r.URL.Path == "/v1/wallet/actions" || r.URL.Path == "/v1/wallet/verifications":
 		h.walletActions(w, r, actor)
+	case r.URL.Path == "/v1/connectors/providers" || r.URL.Path == "/v1/connectors/link" || r.URL.Path == "/v1/connectors/unlink" || r.URL.Path == "/v1/connectors/pull" || r.URL.Path == "/v1/connectors/push":
+		h.connectors(w, r, actor)
 	case r.URL.Path == "/v1/drafts" || strings.HasPrefix(r.URL.Path, "/v1/drafts/"):
 		h.drafts(w, r, actor)
 	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/mailboxes/"):
@@ -135,6 +146,138 @@ func (h HTTPHandler) onboarding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, result)
+}
+
+func (h HTTPHandler) connectors(w http.ResponseWriter, r *http.Request, actor string) {
+	if h.Connectors == nil {
+		writeError(w, http.StatusServiceUnavailable, "SERVICE_UNAVAILABLE", "mail connectors unavailable")
+		return
+	}
+	switch r.URL.Path {
+	case "/v1/connectors/providers":
+		if r.Method != http.MethodGet {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		writeJSON(w, http.StatusOK, h.Connectors.Providers())
+	case "/v1/connectors/link":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req ConnectorLinkRequest
+		if !decodeStrictJSON(w, r, MaxConnectorOpaqueBytes+4096, &req) {
+			return
+		}
+		out, err := h.Connectors.Link(r.Context(), actor, req)
+		if err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/connectors/unlink":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req struct {
+			Provider     string `json:"provider"`
+			ConnectionID string `json:"connection_id"`
+		}
+		if !decodeStrictJSON(w, r, 4096, &req) {
+			return
+		}
+		if err := h.Connectors.Unlink(r.Context(), actor, req.Provider, req.ConnectionID); err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	case "/v1/connectors/pull":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req ConnectorPullRequest
+		if !decodeStrictJSON(w, r, MaxConnectorOpaqueBytes+4096, &req) {
+			return
+		}
+		out, err := h.Connectors.Pull(r.Context(), actor, req)
+		if err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	case "/v1/connectors/push":
+		if r.Method != http.MethodPost {
+			writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+			return
+		}
+		var req ConnectorPushRequest
+		if !decodeStrictJSON(w, r, MaxConnectorPayloadBytes+8192, &req) {
+			return
+		}
+		out, err := h.Connectors.Push(r.Context(), actor, req)
+		if err != nil {
+			writeConnectorError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, out)
+	default:
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+	}
+}
+
+func (h HTTPHandler) connectorWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "method not allowed")
+		return
+	}
+	provider := strings.Trim(strings.TrimPrefix(r.URL.Path, "/v1/connectors/webhooks/"), "/")
+	if provider == "" || strings.Contains(provider, "/") {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "route not found")
+		return
+	}
+	defer r.Body.Close()
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, MaxConnectorPayloadBytes))
+	if err != nil || len(body) == 0 {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid connector webhook")
+		return
+	}
+	headers := make(map[string]string, len(r.Header))
+	for key, values := range r.Header {
+		if len(values) > 0 {
+			headers[strings.ToLower(key)] = values[0]
+		}
+	}
+	out, err := h.Connectors.VerifyWebhook(r.Context(), ConnectorWebhookRequest{
+		Provider: provider,
+		Headers:  headers,
+		Payload:  string(body),
+	})
+	if err != nil {
+		writeConnectorError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+func writeConnectorError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, ErrInvalidInput):
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", err.Error())
+	case errors.Is(err, ErrUnauthorized):
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", err.Error())
+	case errors.Is(err, ErrConnectorNotFound):
+		writeError(w, http.StatusNotFound, "CONNECTOR_NOT_FOUND", err.Error())
+	case errors.Is(err, ErrConnectorUnsupported):
+		writeError(w, http.StatusConflict, "CONNECTOR_UNSUPPORTED", err.Error())
+	case errors.Is(err, ErrConnectorConflict):
+		writeError(w, http.StatusConflict, "CONNECTOR_CONFLICT", err.Error())
+	case errors.Is(err, ErrConnectorInvalidResult):
+		writeError(w, http.StatusBadGateway, "DEPENDENCY_FAILURE", "connector authority returned an invalid result")
+	default:
+		writeServiceError(w, err)
+	}
 }
 
 func (h HTTPHandler) walletActions(w http.ResponseWriter, r *http.Request, actor string) {

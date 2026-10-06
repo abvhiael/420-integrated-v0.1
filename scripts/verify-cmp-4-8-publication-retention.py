@@ -45,7 +45,7 @@ def main():
       ],
       "docs/compute-market/CMP-4.8-PUBLICATION-RETENTION-POLICY.md":[
         "# CMP-4.8 — Publication / retention policy",
-        "cannot be recalled",
+        "public copies can be recalled",
         "CMP-4.9 — Research dashboard"
       ],
       "docs/compute-market/CMP-4.7-SCIENTIFIC-METADATA-LINEAGE.md":[

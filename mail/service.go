@@ -187,14 +187,6 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return Message{}, fmt.Errorf("messenger policy: %w", err)
 	}
 
-	preview := Message{Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, Source: req.Source}
-	if err := s.Store.View(ctx, func(data *storeData) error {
-		_, err := evaluateTrustPolicy(data, req.Recipient, preview, req.Body)
-		return err
-	}); err != nil {
-		return Message{}, err
-	}
-
 	fp := requestFingerprint(req)
 	idemKey := req.Sender + "\x00" + req.IdempotencyKey
 	var existing Message
@@ -213,6 +205,14 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 			return Message{}, ErrIdempotencyConflict
 		}
 		return existing, nil
+	}
+
+	preview := Message{Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, Source: req.Source}
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		_, err := evaluateTrustPolicy(data, req.Recipient, preview, req.Body)
+		return err
+	}); err != nil {
+		return Message{}, err
 	}
 
 	ref, digest, err := s.Blobs.PutPrivate(ctx, req.Recipient, []byte(req.Body))

@@ -254,10 +254,10 @@ Implemented and qualified:
 Durable qualification evidence:
 
 - qualification level: **Level 1 + Level 2 frontend/application integration milestone**;
-- qualified implementation/test/workflow SHA: `2927dd56138618879f164d5337b360f8092810b6`;
-- 420Town audit workflow run `37395614325` / run `162` — PASS;
-- `town-skeleton` job `112050754078` — PASS;
-- `town-contracts` job `112050754021` — PASS;
+- qualified implementation/test/workflow SHA: `ffa21756d0b900e5cfe517da832a9c892962083f`;
+- 420Town audit workflow run `37396803585` / run `164` — PASS;
+- `town-skeleton` job `112054679693` — PASS;
+- `town-contracts` job `112054679367` — PASS;
 - exact-SHA assertions — PASS in both jobs;
 - all accumulated Town audit/skeleton/authority/content/moderation/integration/API/web verifiers — PASS;
 - Town web structural qualification + all Node web tests — PASS;

@@ -308,7 +308,6 @@ func TestProjectionErrorsMapToBadRequest(t *testing.T) {
 	}
 }
 
-
 type moderationFake struct {
 	report moderation.OpenCaseRequest
 	action moderation.ModerateRequest

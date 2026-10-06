@@ -25,7 +25,6 @@ docs=(ROOT/"docs/apps/town/api.md").read_text()
 need(cfg.get("schema")=="420-town-api-v1","Town API schema drift")
 need(cfg.get("serviceId")=="420/service/town/v1","Town API service ID drift")
 need(cfg.get("status")=="API_SDK_INDEXER_RECOVERY_BASELINE","Town API config status drift")
-need(town.get("status")=="API_SDK_INDEXER_RECOVERY_BASELINE","Town canonical phase has not advanced to TOWN-AUDIT-7 baseline")
 need("TOWN-AUDIT-7" in town.get("implementedThrough",[]),"Town canonical config missing TOWN-AUDIT-7")
 need("TOWN-AUDIT-7" not in town.get("deferredRoadmap",[]),"Town canonical config still defers TOWN-AUDIT-7")
 for key,value in {

@@ -1,7 +1,7 @@
 import pathlib,sys,unittest
 ROOT=pathlib.Path(__file__).resolve().parents[2];sys.path.insert(0,str(ROOT))
 from puffbuddies.domain.verification_reputation import *
-from puffbuddies.domain.discovery import DiscoveryPreferencesRecord
+from puffbuddies.domain.discovery import DiscoveryPreferencesRecord,CoarseDistanceBand
 from puffbuddies.domain.types import *
 from puffbuddies.domain.safety import SafetyCase
 from puffbuddies.domain.authorization import AuthorizationContext,PrincipalKind
@@ -29,7 +29,7 @@ class PB9IntegrationTests(unittest.TestCase):
 
  def test_verification_does_not_change_private_discovery_preferences(self):
   prefs=DiscoveryPreferencesRecord(ProfileId("alice"),frozenset({IntentMode.DATING}),
-   2,None,1)
+   CoarseDistanceBand.REGIONAL,None,1)
   before=prefs
   verification_presentation([self.indicator()],profile_id=ProfileId("alice"),
    audience=VisibilityAudience.DISCOVERABLE,now_epoch=120)

@@ -496,6 +496,10 @@ Revisioned, project-bound dataset manifests bind the canonical scientific input 
 
 ## CMP-4.5 — Reproducible execution environments
 
+**Status: IMPLEMENTED — Level 1 exact-head qualification pending.**
+
+Project-bound revisioned execution-environment commitments freeze artifact, runtime, dependency, command, platform, sandbox and reproducibility semantics behind the scientific work-unit executable/container binding. Specification: [CMP-4.5 reproducible execution environments](CMP-4.5-REPRODUCIBLE-EXECUTION-ENVIRONMENTS.md).
+
 ## CMP-4.6 — Result provenance
 
 ## CMP-4.7 — Scientific metadata and lineage
@@ -692,7 +696,7 @@ Production target flow:
 | CMP-1.5 ComputeStake | current: CMP-1.5.13 Level 3 phase closeout; CMP-1.5.0–1.5.12 repository-qualified |
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
-| CMP-4 scientific compute framework | CMP-4.1–CMP-4.4 implemented; Level 1 qualification pending |
+| CMP-4 scientific compute framework | CMP-4.1–CMP-4.5 implemented; Level 1 qualification pending |
 | CMP-5 external compute adapters | forthcoming |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |

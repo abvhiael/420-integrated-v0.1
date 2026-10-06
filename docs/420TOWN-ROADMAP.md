@@ -230,21 +230,45 @@ Durable qualification evidence:
 
 ## TOWN-AUDIT-8 — User-facing web application
 
-Status: OPEN
+Status: COMPLETE
 
-Implement and qualify:
+Implemented and qualified:
 
-- community discovery;
-- create/join/leave flows;
-- community feed;
+- public community discovery through non-authoritative 420Search `public_town`;
+- create/join/leave authority-bearing flows through EIP-1193 + canonical `TownAuthority420`;
+- community feed from the versioned Town `/v1` API;
 - post/thread/comment workflows;
-- voting;
-- moderation/admin surfaces;
-- subscription/entitlement states;
-- wallet/network validation for authority-bearing actions;
-- loading/empty/error/transaction states;
-- accessibility and responsive basics;
-- production configuration without committed secrets.
+- post voting;
+- authenticated/idempotent report, moderation and appeal surfaces;
+- admin member removal and moderator/admin role assignment;
+- canonical membership, subscription and entitlement reads;
+- subscription activation and entitlement grants;
+- wallet presence, expected-network and exact `TownAuthority420` transaction-target validation;
+- explicit canonical authority community `bytes32` input for existing communities rather than inventing an application-ID mapping;
+- loading/empty/error/transaction/ready states;
+- semantic labels, live regions, visible focus, reduced-motion and responsive layout basics;
+- safe runtime configuration with no committed privileged secrets and fail-closed unmaterialized production authority bindings;
+- dynamic indexed content rendered without dynamic `innerHTML`;
+- dedicated web contract, verifier, structural check and Node unit qualification.
+
+Durable qualification evidence:
+
+- qualification level: **Level 1 + Level 2 frontend/application integration milestone**;
+- qualified implementation/test/workflow SHA: `2927dd56138618879f164d5337b360f8092810b6`;
+- 420Town audit workflow run `37395614325` / run `162` — PASS;
+- `town-skeleton` job `112050754078` — PASS;
+- `town-contracts` job `112050754021` — PASS;
+- exact-SHA assertions — PASS in both jobs;
+- all accumulated Town audit/skeleton/authority/content/moderation/integration/API/web verifiers — PASS;
+- Town web structural qualification + all Node web tests — PASS;
+- gofmt gate for Town delivery surfaces — PASS;
+- `go test ./town/... ./sdk/town420` — PASS;
+- `go vet ./town/... ./sdk/town420` — PASS;
+- directly affected retained Search/Storage/Notifications dependency tests — PASS;
+- focused Town Solidity build and `test/Town*.t.sol` regressions — PASS;
+- cross-dApp Rewards hardening — PASS;
+- Level 3 remains intentionally deferred to TOWN-AUDIT-10;
+- next canonical roadmap step: **TOWN-AUDIT-9 — Security hardening**.
 
 ## TOWN-AUDIT-9 — Security hardening
 

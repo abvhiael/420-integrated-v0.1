@@ -77,7 +77,7 @@ MAIL-2.2 replaces the repository-only in-memory metadata path with a durable tra
 - transaction rollback when a callback fails;
 - restart recovery and immediate cross-instance visibility.
 
-`NewDurableService(..., path)` is the durable service constructor. `NewService(...)` retains an in-memory store only for tests/development compatibility; deployed Mail must use a durable `MailStore`.
+`NewDurableService(..., path)` is the durable service constructor. `NewService(...)` requires the caller to select a `MailStore` explicitly; there is no implicit in-memory fallback. Tests/development may explicitly pass `NewMemoryStore()`, while deployed Mail must use a durable `MailStore`.
 
 Distributed idempotency is enforced by rechecking the sender-scoped idempotency key inside the exclusive durable transaction before commit. Multiple instances sharing the same transactional store cannot commit two logical messages for the same sender/key. Conflicting payload reuse fails closed with `ErrIdempotencyConflict`.
 

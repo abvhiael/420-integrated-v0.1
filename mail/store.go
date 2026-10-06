@@ -47,8 +47,8 @@ type diskStoreData struct {
 	LabelIndex        map[string][]string        `json:"label_index,omitempty"`
 	CustomFolderIndex map[string][]string        `json:"custom_folder_index,omitempty"`
 	Rules             map[string]MailRule        `json:"rules,omitempty"`
-	TrustEntries      map[string]TrustEntry       `json:"trust_entries,omitempty"`
-	TrustSettings     map[string]TrustSettings    `json:"trust_settings,omitempty"`
+	TrustEntries      map[string]TrustEntry      `json:"trust_entries,omitempty"`
+	TrustSettings     map[string]TrustSettings   `json:"trust_settings,omitempty"`
 	Fingerprints      map[string]string          `json:"fingerprints,omitempty"`
 	IdempotencyKeys   map[string]string          `json:"idempotency_keys,omitempty"`
 }

@@ -73,7 +73,7 @@ for token in ["NewDurableService","Store.Update","Store.View"]:
     if token not in service: errors.append("MAIL-2.2 service storage integration missing: "+token)
 
 organization=(ROOT/"mail/organization.go").read_text() if (ROOT/"mail/organization.go").is_file() else ""
-for token in ["LabelDefinition","CustomFolder","BulkOrganizationRequest","CreateLabel","CreateCustomFolder","BulkUpdateOrganization","MessagesByLabel","MessagesByCustomFolder","ErrSystemLabelImmutable","MaxBulkOrganizationItems"]:
+for token in ["LabelDefinition","CustomFolder","BulkOrganizationRequest","CreateLabel","CreateCustomFolder","BulkUpdateOrganization","MessagesByLabel","MessagesByCustomFolder","systemLabelPage","matchesSystemLabel","ErrSystemLabelImmutable","MaxBulkOrganizationItems"]:
     if token not in organization: errors.append("MAIL-2.3 organization invariant missing: "+token)
 for token in ['"/v1/labels"','"/v1/custom-folders"','"/v1/organization/bulk"','"organization"']:
     if token not in http: errors.append("MAIL-2.3 HTTP route missing: "+token)

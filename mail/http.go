@@ -12,10 +12,10 @@ import (
 type AuthenticateFunc func(*http.Request) (string, error)
 
 type HTTPHandler struct {
-	Service      *Service
-	Authenticate AuthenticateFunc
-	Onboarding   *OnboardingService
-	Security     *SecurityService
+	Service       *Service
+	Authenticate  AuthenticateFunc
+	Onboarding    *OnboardingService
+	Security      *SecurityService
 	WalletActions *WalletActionService
 }
 

@@ -95,3 +95,50 @@ func (c Client) MarkRead(ctx context.Context, id string) (mail.Message, error) {
 	err := c.do(ctx, http.MethodPost, "/v1/messages/"+url.PathEscape(id)+"/read", nil, &out)
 	return out, err
 }
+
+
+func (c Client) Mailbox(ctx context.Context, folder mail.MailboxFolder, cursor string, limit int) (mail.MailboxPage, error) {
+	q := url.Values{}
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
+	path := "/v1/mailboxes/" + url.PathEscape(string(folder))
+	if encoded := q.Encode(); encoded != "" {
+		path += "?" + encoded
+	}
+	var out mail.MailboxPage
+	err := c.do(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
+func (c Client) MailboxState(ctx context.Context, id string) (mail.MailboxState, error) {
+	var out mail.MailboxState
+	err := c.do(ctx, http.MethodGet, "/v1/messages/"+url.PathEscape(id)+"/mailbox", nil, &out)
+	return out, err
+}
+
+func (c Client) UpdateMailbox(ctx context.Context, id string, update mail.MailboxUpdate) (mail.MailboxState, error) {
+	var out mail.MailboxState
+	err := c.do(ctx, http.MethodPatch, "/v1/messages/"+url.PathEscape(id)+"/mailbox", update, &out)
+	return out, err
+}
+
+func (c Client) MarkUnread(ctx context.Context, id string) (mail.MailboxState, error) {
+	var out mail.MailboxState
+	err := c.do(ctx, http.MethodPost, "/v1/messages/"+url.PathEscape(id)+"/unread", nil, &out)
+	return out, err
+}
+
+func (c Client) RestoreFromTrash(ctx context.Context, id string) (mail.MailboxState, error) {
+	var out mail.MailboxState
+	err := c.do(ctx, http.MethodPost, "/v1/messages/"+url.PathEscape(id)+"/restore", nil, &out)
+	return out, err
+}
+
+func (c Client) PermanentlyDelete(ctx context.Context, id string) error {
+	var ignored any
+	return c.do(ctx, http.MethodDelete, "/v1/messages/"+url.PathEscape(id), nil, &ignored)
+}

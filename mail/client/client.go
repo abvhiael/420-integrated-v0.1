@@ -221,3 +221,10 @@ func (c Client) MessagesByCustomFolder(ctx context.Context, folderID, cursor str
 	err := c.do(ctx, http.MethodGet, path, nil, &out)
 	return out, err
 }
+
+
+func (c Client) SearchMailbox(ctx context.Context, req mail.SearchRequest) (mail.SearchResult, error) {
+	var out mail.SearchResult
+	err := c.do(ctx, http.MethodPost, "/v1/search", req, &out)
+	return out, err
+}

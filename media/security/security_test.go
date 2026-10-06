@@ -9,6 +9,8 @@ import (
 	"net"
 	"testing"
 	"time"
+
+	mediafixtures "github.com/420integrated/420-integrated/media/fixtures"
 )
 
 type resolverFake struct{ addrs []net.IPAddr }
@@ -209,12 +211,17 @@ func TestSessionBoundaryValidatesExpiryChainNetworkAndCapability(t *testing.T) {
 }
 
 func TestGENSVCMediaFixturePersonasAndJourneys(t *testing.T) {
-	personas := []string{"USER", "CREATOR", "MODERATOR"}
-	journeys := []string{"SVC-JOURNEY-001", "SVC-JOURNEY-008", "SVC-JOURNEY-009", "SVC-JOURNEY-010"}
-	if len(personas) != 3 || personas[1] != "CREATOR" {
-		t.Fatal("fixture persona mismatch")
+	fixture := mediafixtures.CanonicalMediaJourney()
+	if fixture.Creator.Name != "CREATOR" || fixture.Follower.Name != "USER" || fixture.Moderator.Name != "MODERATOR" {
+		t.Fatalf("personas=%+v", fixture)
 	}
-	if len(journeys) != 4 || journeys[0] != "SVC-JOURNEY-001" {
-		t.Fatal("fixture journey mismatch")
+	want := []string{"SVC-JOURNEY-001", "SVC-JOURNEY-008", "SVC-JOURNEY-009", "SVC-JOURNEY-010"}
+	if len(fixture.Journeys) != len(want) {
+		t.Fatalf("journeys=%v", fixture.Journeys)
+	}
+	for i := range want {
+		if fixture.Journeys[i] != want[i] {
+			t.Fatalf("journey[%d]=%q", i, fixture.Journeys[i])
+		}
 	}
 }

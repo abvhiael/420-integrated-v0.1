@@ -862,6 +862,78 @@ No Discord-specific HTTP route is required because the provider-neutral framewor
 
 MAIL-2.15 repository completion does not claim live Discord OAuth credentials, redirect URI configuration, production token rotation/revocation, public-testnet account linking, or provider availability. Those remain deployment/testnet/security qualification gates.
 
+## MAIL-2.16 Discord → 420Mail Sync
+
+MAIL-2.16 extends the linked Discord connector with inbound `PULL` capability and materializes verified Discord messages into the authenticated owner's private 420Mail mailbox.
+
+### Sync authority and connection binding
+
+Discord sync requires an existing Discord connection ID in the canonical `discord:{snowflake}` form and the authenticated 420Mail identity.
+
+The Discord adapter delegates provider access to `DiscordSyncAuthority`, which receives:
+
+- the authenticated 420Mail identity;
+- the linked Discord user snowflake;
+- the last durable opaque cursor.
+
+The authority returns a page of normalized Discord messages plus the next opaque cursor.
+
+### Message validation and materialization
+
+Each inbound Discord message must provide:
+
+- Discord message snowflake;
+- Discord author snowflake;
+- author username;
+- Discord channel snowflake;
+- optional channel display name;
+- bounded message content;
+- source creation timestamp.
+
+Messages are imported in deterministic `created_at ASC, message_id ASC` order.
+
+Each newly imported item becomes a private 420Mail recipient copy with:
+
+- sender `discord:{author-snowflake}`;
+- recipient = authenticated 420Mail identity;
+- source = `discord`;
+- folder initially `INBOX`;
+- private off-chain body reference/digest;
+- deterministic Discord-channel conversation ID;
+- external-message idempotency bound to owner + connection + Discord message ID.
+
+Existing trust controls, spam/phishing protection, incoming rules, conversation archive/mute state, quarantine behavior, and notification suppression are applied during materialization.
+
+### Idempotency and cursor durability
+
+Discord message IDs are treated as immutable external event identifiers. Replaying an identical external message is a no-op. Reusing the same Discord message ID with different content/author/channel/timestamp fails closed as a sync conflict instead of silently mutating already imported private mail.
+
+Per-owner/per-connection sync cursor state is persisted in Mail durable metadata schema v9. The cursor advances only after the pulled page has been validated and all new items have been materialized successfully. On restart, the next pull resumes from the persisted cursor.
+
+### API
+
+Authenticated endpoint:
+
+- `POST /v1/connectors/discord/sync`
+  - input: `connection_id`
+  - output: newly imported mailbox items, next cursor, sync timestamp.
+
+Typed Go client method: `SyncDiscord`.
+
+### Scope boundary
+
+MAIL-2.16 adds only inbound Discord → 420Mail synchronization.
+
+It does **not** add:
+- 420Mail → Discord delivery;
+- Discord webhook ingestion as a required sync path;
+- Discord wallet verification;
+- Discord outbound message composition;
+- public indexing of Discord content;
+- on-chain Discord message bodies.
+
+Those remain later roadmap steps.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

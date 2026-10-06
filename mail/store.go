@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 2
+const DurableStoreSchemaVersion = 3
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -31,6 +31,7 @@ type storeData struct {
 	CustomFolders     map[string]CustomFolder
 	LabelIndex        map[string][]string
 	CustomFolderIndex map[string][]string
+	Rules             map[string]MailRule
 }
 
 type diskStoreData struct {
@@ -43,6 +44,7 @@ type diskStoreData struct {
 	CustomFolders     map[string]CustomFolder    `json:"custom_folders,omitempty"`
 	LabelIndex        map[string][]string        `json:"label_index,omitempty"`
 	CustomFolderIndex map[string][]string        `json:"custom_folder_index,omitempty"`
+	Rules             map[string]MailRule        `json:"rules,omitempty"`
 	Fingerprints      map[string]string          `json:"fingerprints,omitempty"`
 	IdempotencyKeys   map[string]string          `json:"idempotency_keys,omitempty"`
 }
@@ -217,6 +219,7 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 		CustomFolders:     disk.CustomFolders,
 		LabelIndex:        disk.LabelIndex,
 		CustomFolderIndex: disk.CustomFolderIndex,
+		Rules:             disk.Rules,
 	}
 	normalizeStoreData(&data)
 	for id, fp := range disk.Fingerprints {
@@ -257,6 +260,7 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 		CustomFolders:     data.CustomFolders,
 		LabelIndex:        data.LabelIndex,
 		CustomFolderIndex: data.CustomFolderIndex,
+		Rules:             data.Rules,
 		Fingerprints:      map[string]string{},
 		IdempotencyKeys:   map[string]string{},
 	}
@@ -329,6 +333,7 @@ func newStoreData() storeData {
 		CustomFolders:     map[string]CustomFolder{},
 		LabelIndex:        map[string][]string{},
 		CustomFolderIndex: map[string][]string{},
+		Rules:             map[string]MailRule{},
 	}
 }
 
@@ -360,6 +365,9 @@ func normalizeStoreData(data *storeData) {
 	if data.CustomFolderIndex == nil {
 		data.CustomFolderIndex = map[string][]string{}
 	}
+	if data.Rules == nil {
+		data.Rules = map[string]MailRule{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
@@ -373,6 +381,7 @@ func cloneStoreData(src storeData) storeData {
 		CustomFolders:     make(map[string]CustomFolder, len(src.CustomFolders)),
 		LabelIndex:        make(map[string][]string, len(src.LabelIndex)),
 		CustomFolderIndex: make(map[string][]string, len(src.CustomFolderIndex)),
+		Rules:             make(map[string]MailRule, len(src.Rules)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -397,6 +406,10 @@ func cloneStoreData(src storeData) storeData {
 	}
 	for k, v := range src.CustomFolderIndex {
 		dst.CustomFolderIndex[k] = append([]string(nil), v...)
+	}
+	for k, v := range src.Rules {
+		v.Action.AddLabelIDs = append([]string(nil), v.Action.AddLabelIDs...)
+		dst.Rules[k] = v
 	}
 	return dst
 }
@@ -481,6 +494,11 @@ func validateStoreData(data *storeData) error {
 	for key, folder := range data.CustomFolders {
 		if key != organizationKey(folder.Owner, folder.ID) || folder.Owner == "" || folder.ID == "" || folder.Name == "" {
 			return fmt.Errorf("invalid custom folder record %q", key)
+		}
+	}
+	for key, rule := range data.Rules {
+		if err := validateStoredRule(data, key, rule); err != nil {
+			return fmt.Errorf("invalid mail rule %q: %w", key, err)
 		}
 	}
 	return nil

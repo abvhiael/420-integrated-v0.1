@@ -2,7 +2,9 @@ package mail
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -388,5 +390,42 @@ func TestRuleIdempotentResendDoesNotReapplyActions(t *testing.T) {
 	}
 	if again.ID != msg.ID || after.Version != before.Version {
 		t.Fatalf("idempotent replay reapplied rules: before=%+v after=%+v", before, after)
+	}
+}
+
+
+func TestDurableStoreMigratesV2RulesSchema(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "legacy-v2.json")
+	legacy := diskStoreData{
+		SchemaVersion:     2,
+		Messages:          map[string]Message{},
+		ByIdem:            map[string]string{},
+		Mailbox:           map[string]MailboxState{},
+		MailboxIndex:      map[string][]string{},
+		Labels:            map[string]LabelDefinition{},
+		CustomFolders:     map[string]CustomFolder{},
+		LabelIndex:        map[string][]string{},
+		CustomFolderIndex: map[string][]string{},
+		Fingerprints:      map[string]string{},
+		IdempotencyKeys:   map[string]string{},
+	}
+	raw, err := json.Marshal(legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	store, err := OpenDurableStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.View(context.Background(), func(data *storeData) error {
+		if data.SchemaVersion != DurableStoreSchemaVersion || data.Rules == nil {
+			t.Fatalf("v2->v3 migration incomplete: %+v", data)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
 	}
 }

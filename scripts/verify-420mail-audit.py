@@ -11,7 +11,7 @@ registry_path=require("config/genesis-consumer-services.json")
 frozen_path=require("config/genesis-applications.json")
 profile_path=require("config/420mail-service-v1.json")
 readiness_path=require("testnet/public-services/mail/readiness.json")
-for p in ["mail/service.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/web/index.html","docs/420MAIL.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
+for p in ["mail/service.go","mail/http.go","mail/client/client.go","mail/service_test.go","mail/http_test.go","mail/web/index.html","docs/420MAIL.md","docs/420MAIL-PHASE2-ROADMAP.md","docs/audit/420MAIL-AUDIT-REMEDIATION-ROADMAP.md"]: require(p)
 if registry_path.is_file():
     registry=json.loads(registry_path.read_text())
     entry=next((x for x in registry.get("services",[]) if x.get("id")=="420/service/mail/v1"),None)
@@ -32,16 +32,27 @@ if profile_path.is_file():
     if profile.get("serviceId")!="420/service/mail/v1": errors.append("Mail serviceId drifted")
     if profile.get("contracts")!=[] or profile.get("onChainMailState") is not False: errors.append("Mail invented on-chain authority")
     if profile.get("featureFlags",{}).get("mail.external_smtp") is not False: errors.append("Mail enabled external SMTP")
+    mailbox=profile.get("mailbox",{})
+    if mailbox.get("systemFolders")!=["INBOX","SENT","OUTBOX","DRAFTS","ARCHIVE","JUNK","TRASH"]: errors.append("Mail mailbox folder inventory drifted")
+    if mailbox.get("deliveredRecipientFolder")!="INBOX" or mailbox.get("deliveredSenderFolder")!="SENT": errors.append("Mail delivered-folder defaults drifted")
+    if mailbox.get("reservedForDedicatedSteps")!={"DRAFTS":"MAIL-2.9","OUTBOX":"MAIL-2.10"}: errors.append("Mail reserved Drafts/Outbox ownership drifted")
+    if mailbox.get("ownerScopedState") is not True or mailbox.get("permanentDeleteRequiresTrash") is not True: errors.append("Mail mailbox ownership/delete policy drifted")
+    if mailbox.get("messageBodiesOnChain") is not False: errors.append("Mail mailbox state moved bodies on-chain")
 if readiness_path.is_file():
     readiness=json.loads(readiness_path.read_text())
     for key in ("liveTestnetEvidence","genesisCatalogPromoted","genesisCloseout","productionReady"):
         if readiness.get(key) is not False: errors.append(f"readiness overclaims {key}")
 service=(ROOT/"mail/service.go").read_text() if (ROOT/"mail/service.go").is_file() else ""
-for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID"]:
+for token in ['ServiceID       = "420/service/mail/v1"',"MaxBodyBytes","IdempotencyKey","Messenger.CanMessage","Blobs.PutPrivate",'Visibility: "PRIVATE"',"ErrIdempotencyConflict", "req.Source != ServiceID","FolderInbox","FolderSent","FolderOutbox","FolderDrafts","FolderArchive","FolderJunk","FolderTrash","MailboxState","PreviousFolder","DeletedAt","PermanentlyDelete","RestoreFromTrash","canMoveMailbox"]:
     if token not in service: errors.append("mail service invariant missing: "+token)
 http=(ROOT/"mail/http.go").read_text() if (ROOT/"mail/http.go").is_file() else ""
 if "Authenticate AuthenticateFunc" not in http: errors.append("HTTP missing injected authentication")
 if '"/v1/messages"' not in http or '"/v1/inbox"' not in http: errors.append("HTTP v1 routes missing")
+for token in ['"/v1/mailboxes/"','"mailbox"','"restore"','"unread"', "http.MethodPatch", "http.MethodDelete"]:
+    if token not in http: errors.append("MAIL-2.1 HTTP lifecycle route missing: "+token)
+roadmap=(ROOT/"docs/420MAIL-PHASE2-ROADMAP.md").read_text() if (ROOT/"docs/420MAIL-PHASE2-ROADMAP.md").is_file() else ""
+for token in ["MAIL-2.1 — Mailbox State Model","MAIL-2.2 — Durable Mail Storage","DRAFTS","OUTBOX","permanent delete","restore from Trash"]:
+    if token not in roadmap: errors.append("MAIL-2 roadmap definition missing: "+token)
 if errors:
     print("420Mail audit qualification FAILED")
     for e in errors: print("- "+e)
@@ -52,3 +63,4 @@ print("Contracts required: false")
 print("External SMTP default: false")
 print("Live testnet evidence: false")
 print("Genesis catalog promoted: false")
+print("MAIL-2.1 mailbox state model: qualified by app-scoped checks")

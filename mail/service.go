@@ -22,9 +22,22 @@ const (
 	MaxPageSize     = 100
 )
 
+type MailboxFolder string
+
+const (
+	FolderInbox   MailboxFolder = "INBOX"
+	FolderSent    MailboxFolder = "SENT"
+	FolderOutbox  MailboxFolder = "OUTBOX"
+	FolderDrafts  MailboxFolder = "DRAFTS"
+	FolderArchive MailboxFolder = "ARCHIVE"
+	FolderJunk    MailboxFolder = "JUNK"
+	FolderTrash   MailboxFolder = "TRASH"
+)
+
 var (
 	ErrUnauthorized        = errors.New("mail: unauthorized")
 	ErrInvalidInput        = errors.New("mail: invalid input")
+	ErrInvalidTransition   = errors.New("mail: invalid mailbox transition")
 	ErrNotFound            = errors.New("mail: message not found")
 	ErrIdempotencyConflict = errors.New("mail: idempotency key reused with different request")
 )
@@ -72,6 +85,28 @@ type Message struct {
 	IdempotencyKey string     `json:"-"`
 }
 
+type MailboxState struct {
+	MessageID      string        `json:"message_id"`
+	Owner          string        `json:"owner"`
+	Folder         MailboxFolder `json:"folder"`
+	PreviousFolder MailboxFolder `json:"previous_folder,omitempty"`
+	ReadAt         *time.Time    `json:"read_at,omitempty"`
+	Starred        bool          `json:"starred"`
+	Pinned         bool          `json:"pinned"`
+	Muted          bool          `json:"muted"`
+	ArchivedAt     *time.Time    `json:"archived_at,omitempty"`
+	JunkedAt       *time.Time    `json:"junked_at,omitempty"`
+	TrashedAt      *time.Time    `json:"trashed_at,omitempty"`
+	DeletedAt      *time.Time    `json:"deleted_at,omitempty"`
+	UpdatedAt      time.Time     `json:"updated_at"`
+	Version        uint32        `json:"version"`
+}
+
+type MailboxItem struct {
+	Message Message      `json:"message"`
+	State   MailboxState `json:"state"`
+}
+
 type SendRequest struct {
 	IdempotencyKey string `json:"idempotency_key"`
 	Sender         string `json:"sender"`
@@ -82,19 +117,33 @@ type SendRequest struct {
 	Source         string `json:"source"`
 }
 
+type MailboxUpdate struct {
+	Folder  *MailboxFolder `json:"folder,omitempty"`
+	Read    *bool          `json:"read,omitempty"`
+	Starred *bool          `json:"starred,omitempty"`
+	Pinned  *bool          `json:"pinned,omitempty"`
+	Muted   *bool          `json:"muted,omitempty"`
+}
+
 type Page struct {
 	Items      []Message `json:"items"`
 	NextCursor string    `json:"next_cursor,omitempty"`
+}
+
+type MailboxPage struct {
+	Items      []MailboxItem `json:"items"`
+	NextCursor string        `json:"next_cursor,omitempty"`
 }
 
 type MemoryStore struct {
 	mu       sync.RWMutex
 	messages map[string]Message
 	byIdem   map[string]string
+	mailbox  map[string]MailboxState
 }
 
 func NewMemoryStore() *MemoryStore {
-	return &MemoryStore{messages: map[string]Message{}, byIdem: map[string]string{}}
+	return &MemoryStore{messages: map[string]Message{}, byIdem: map[string]string{}, mailbox: map[string]MailboxState{}}
 }
 
 type Service struct {
@@ -159,6 +208,9 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 	now := s.Now().UTC()
 	id := deterministicMessageID(req.Sender, req.Recipient, req.IdempotencyKey)
 	msg := Message{ID: id, Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, BodyRef: ref, BodyDigest: digest, ConversationID: strings.TrimSpace(req.ConversationID), CreatedAt: now, UpdatedAt: now, Status: "DELIVERED", Visibility: "PRIVATE", Source: req.Source, Version: 1, Fingerprint: fp, IdempotencyKey: req.IdempotencyKey}
+	senderReadAt := now
+	senderState := MailboxState{MessageID: id, Owner: req.Sender, Folder: FolderSent, ReadAt: &senderReadAt, UpdatedAt: now, Version: 1}
+	recipientState := MailboxState{MessageID: id, Owner: req.Recipient, Folder: FolderInbox, UpdatedAt: now, Version: 1}
 
 	s.Store.mu.Lock()
 	if existingID, ok := s.Store.byIdem[idemKey]; ok {
@@ -171,6 +223,8 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 	}
 	s.Store.messages[id] = msg
 	s.Store.byIdem[idemKey] = id
+	s.Store.mailbox[mailboxKey(req.Sender, id)] = senderState
+	s.Store.mailbox[mailboxKey(req.Recipient, id)] = recipientState
 	s.Store.mu.Unlock()
 	if s.Notify != nil {
 		_ = s.Notify.NotifyMail(ctx, Notification{MessageID: id, Recipient: req.Recipient, Sender: req.Sender, Source: req.Source})
@@ -179,10 +233,25 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 }
 
 func (s *Service) Inbox(ctx context.Context, actor, cursor string, limit int) (Page, error) {
+	page, err := s.Mailbox(ctx, actor, FolderInbox, cursor, limit)
+	if err != nil {
+		return Page{}, err
+	}
+	items := make([]Message, 0, len(page.Items))
+	for _, item := range page.Items {
+		items = append(items, item.Message)
+	}
+	return Page{Items: items, NextCursor: page.NextCursor}, nil
+}
+
+func (s *Service) Mailbox(ctx context.Context, actor string, folder MailboxFolder, cursor string, limit int) (MailboxPage, error) {
 	_ = ctx
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
-		return Page{}, ErrUnauthorized
+		return MailboxPage{}, ErrUnauthorized
+	}
+	if !isMailboxFolder(folder) {
+		return MailboxPage{}, ErrInvalidInput
 	}
 	if limit <= 0 {
 		limit = DefaultPageSize
@@ -192,34 +261,191 @@ func (s *Service) Inbox(ctx context.Context, actor, cursor string, limit int) (P
 	}
 	offset, err := decodeCursor(cursor)
 	if err != nil {
-		return Page{}, ErrInvalidInput
+		return MailboxPage{}, ErrInvalidInput
 	}
 	s.Store.mu.RLock()
-	items := make([]Message, 0)
-	for _, m := range s.Store.messages {
-		if m.Recipient == actor {
-			items = append(items, m)
+	items := make([]MailboxItem, 0)
+	for _, state := range s.Store.mailbox {
+		if state.Owner != actor || state.Folder != folder || state.DeletedAt != nil {
+			continue
 		}
+		msg, ok := s.Store.messages[state.MessageID]
+		if !ok {
+			continue
+		}
+		items = append(items, MailboxItem{Message: msg, State: state})
 	}
 	s.Store.mu.RUnlock()
 	sort.Slice(items, func(i, j int) bool {
-		if items[i].CreatedAt.Equal(items[j].CreatedAt) {
-			return items[i].ID < items[j].ID
+		if items[i].Message.CreatedAt.Equal(items[j].Message.CreatedAt) {
+			return items[i].Message.ID < items[j].Message.ID
 		}
-		return items[i].CreatedAt.After(items[j].CreatedAt)
+		return items[i].Message.CreatedAt.After(items[j].Message.CreatedAt)
 	})
 	if offset >= len(items) {
-		return Page{Items: []Message{}}, nil
+		return MailboxPage{Items: []MailboxItem{}}, nil
 	}
 	end := offset + limit
 	if end > len(items) {
 		end = len(items)
 	}
-	page := Page{Items: append([]Message(nil), items[offset:end]...)}
+	page := MailboxPage{Items: append([]MailboxItem(nil), items[offset:end]...)}
 	if end < len(items) {
 		page.NextCursor = encodeCursor(end)
 	}
 	return page, nil
+}
+
+func (s *Service) GetMailboxState(ctx context.Context, actor, id string) (MailboxState, error) {
+	_ = ctx
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return MailboxState{}, ErrUnauthorized
+	}
+	s.Store.mu.RLock()
+	state, ok := s.Store.mailbox[mailboxKey(actor, id)]
+	s.Store.mu.RUnlock()
+	if !ok || state.DeletedAt != nil {
+		return MailboxState{}, ErrNotFound
+	}
+	return state, nil
+}
+
+func (s *Service) UpdateMailbox(ctx context.Context, actor, id string, update MailboxUpdate) (MailboxState, error) {
+	_ = ctx
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return MailboxState{}, ErrUnauthorized
+	}
+	s.Store.mu.Lock()
+	defer s.Store.mu.Unlock()
+	key := mailboxKey(actor, id)
+	state, ok := s.Store.mailbox[key]
+	if !ok || state.DeletedAt != nil {
+		return MailboxState{}, ErrNotFound
+	}
+	msg, ok := s.Store.messages[id]
+	if !ok {
+		return MailboxState{}, ErrNotFound
+	}
+	now := s.Now().UTC()
+	if update.Folder != nil {
+		target := *update.Folder
+		if !canMoveMailbox(actor, msg, state.Folder, target) {
+			return MailboxState{}, ErrInvalidTransition
+		}
+		if target != state.Folder {
+			state.PreviousFolder = state.Folder
+			state.Folder = target
+			switch target {
+			case FolderArchive:
+				t := now
+				state.ArchivedAt = &t
+			case FolderJunk:
+				t := now
+				state.JunkedAt = &t
+			case FolderTrash:
+				t := now
+				state.TrashedAt = &t
+			}
+		}
+	}
+	if update.Read != nil {
+		if actor != msg.Recipient {
+			return MailboxState{}, ErrUnauthorized
+		}
+		if *update.Read {
+			if state.ReadAt == nil {
+				t := now
+				state.ReadAt = &t
+			}
+			if msg.ReadAt == nil {
+				t := now
+				msg.ReadAt = &t
+				msg.UpdatedAt = now
+				msg.Version++
+				s.Store.messages[id] = msg
+			}
+		} else {
+			state.ReadAt = nil
+		}
+	}
+	if update.Starred != nil {
+		state.Starred = *update.Starred
+	}
+	if update.Pinned != nil {
+		state.Pinned = *update.Pinned
+	}
+	if update.Muted != nil {
+		state.Muted = *update.Muted
+	}
+	state.UpdatedAt = now
+	state.Version++
+	s.Store.mailbox[key] = state
+	return state, nil
+}
+
+func (s *Service) RestoreFromTrash(ctx context.Context, actor, id string) (MailboxState, error) {
+	_ = ctx
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return MailboxState{}, ErrUnauthorized
+	}
+	s.Store.mu.Lock()
+	defer s.Store.mu.Unlock()
+	key := mailboxKey(actor, id)
+	state, ok := s.Store.mailbox[key]
+	if !ok || state.DeletedAt != nil {
+		return MailboxState{}, ErrNotFound
+	}
+	msg, ok := s.Store.messages[id]
+	if !ok {
+		return MailboxState{}, ErrNotFound
+	}
+	if state.Folder != FolderTrash {
+		return MailboxState{}, ErrInvalidTransition
+	}
+	target := state.PreviousFolder
+	if target == "" || target == FolderTrash || target == FolderDrafts || target == FolderOutbox || !canMoveMailbox(actor, msg, FolderTrash, target) {
+		if actor == msg.Recipient {
+			target = FolderInbox
+		} else if actor == msg.Sender {
+			target = FolderSent
+		} else {
+			return MailboxState{}, ErrUnauthorized
+		}
+	}
+	now := s.Now().UTC()
+	state.Folder = target
+	state.PreviousFolder = FolderTrash
+	state.UpdatedAt = now
+	state.Version++
+	s.Store.mailbox[key] = state
+	return state, nil
+}
+
+func (s *Service) PermanentlyDelete(ctx context.Context, actor, id string) error {
+	_ = ctx
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return ErrUnauthorized
+	}
+	s.Store.mu.Lock()
+	defer s.Store.mu.Unlock()
+	key := mailboxKey(actor, id)
+	state, ok := s.Store.mailbox[key]
+	if !ok || state.DeletedAt != nil {
+		return ErrNotFound
+	}
+	if state.Folder != FolderTrash {
+		return ErrInvalidTransition
+	}
+	now := s.Now().UTC()
+	state.DeletedAt = &now
+	state.UpdatedAt = now
+	state.Version++
+	s.Store.mailbox[key] = state
+	return nil
 }
 
 func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Message, error) {
@@ -229,8 +455,9 @@ func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Messa
 	}
 	s.Store.mu.RLock()
 	msg, ok := s.Store.messages[id]
+	state, owns := s.Store.mailbox[mailboxKey(actor, id)]
 	s.Store.mu.RUnlock()
-	if !ok {
+	if !ok || !owns || state.DeletedAt != nil {
 		return nil, Message{}, ErrNotFound
 	}
 	if msg.Recipient != actor && msg.Sender != actor {
@@ -244,27 +471,69 @@ func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Messa
 }
 
 func (s *Service) MarkRead(ctx context.Context, actor, id string) (Message, error) {
-	_ = ctx
-	actor = strings.TrimSpace(actor)
-	if actor == "" {
-		return Message{}, ErrUnauthorized
+	read := true
+	if _, err := s.UpdateMailbox(ctx, actor, id, MailboxUpdate{Read: &read}); err != nil {
+		return Message{}, err
 	}
-	s.Store.mu.Lock()
-	defer s.Store.mu.Unlock()
+	s.Store.mu.RLock()
 	msg, ok := s.Store.messages[id]
+	s.Store.mu.RUnlock()
 	if !ok {
 		return Message{}, ErrNotFound
 	}
-	if msg.Recipient != actor {
-		return Message{}, ErrUnauthorized
-	}
-	if msg.ReadAt == nil {
-		now := s.Now().UTC()
-		msg.ReadAt = &now
-		msg.UpdatedAt = now
-		s.Store.messages[id] = msg
-	}
 	return msg, nil
+}
+
+func (s *Service) MarkUnread(ctx context.Context, actor, id string) (MailboxState, error) {
+	read := false
+	return s.UpdateMailbox(ctx, actor, id, MailboxUpdate{Read: &read})
+}
+
+func mailboxKey(owner, id string) string {
+	return owner + "\x00" + id
+}
+
+func isMailboxFolder(folder MailboxFolder) bool {
+	switch folder {
+	case FolderInbox, FolderSent, FolderOutbox, FolderDrafts, FolderArchive, FolderJunk, FolderTrash:
+		return true
+	default:
+		return false
+	}
+}
+
+func canMoveMailbox(actor string, msg Message, from, to MailboxFolder) bool {
+	if !isMailboxFolder(to) || to == FolderDrafts || to == FolderOutbox || from == FolderDrafts || from == FolderOutbox {
+		return false
+	}
+	if from == FolderTrash {
+		if actor == msg.Recipient {
+			return to == FolderInbox || to == FolderArchive || to == FolderJunk
+		}
+		if actor == msg.Sender {
+			return to == FolderSent || to == FolderArchive
+		}
+		return false
+	}
+	if actor == msg.Recipient {
+		switch from {
+		case FolderInbox:
+			return to == FolderInbox || to == FolderArchive || to == FolderJunk || to == FolderTrash
+		case FolderArchive:
+			return to == FolderArchive || to == FolderInbox || to == FolderJunk || to == FolderTrash
+		case FolderJunk:
+			return to == FolderJunk || to == FolderInbox || to == FolderArchive || to == FolderTrash
+		}
+	}
+	if actor == msg.Sender {
+		switch from {
+		case FolderSent:
+			return to == FolderSent || to == FolderArchive || to == FolderTrash
+		case FolderArchive:
+			return to == FolderArchive || to == FolderSent || to == FolderTrash
+		}
+	}
+	return false
 }
 
 func deterministicMessageID(sender, recipient, idem string) string {

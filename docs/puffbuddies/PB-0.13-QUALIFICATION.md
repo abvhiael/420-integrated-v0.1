@@ -75,9 +75,9 @@ Required exact-head qualification:
 
 Duplicate push-event run:
 - run: `37393921483`
-- state at closeout: **PENDING / no job allocated**
+- final state: **CANCELLED / no job allocated**
 - head SHA: `f5fabe09cce660a475ea25699a40564575d4a44e`
-- this is not a distinct required coverage owner; the same app-specific workflow already completed successfully on the exact implementation SHA through the pull-request event.
+- this cancelled duplicate is not treated as passing evidence and is not a distinct required coverage owner; the same app-specific workflow completed successfully on the exact implementation SHA through the pull-request event, which provides the required Level 1 coverage.
 
 ## Security/adversarial/invariant scope
 

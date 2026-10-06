@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -61,6 +62,13 @@ func TestDurableStoreRestartRecoveryAndIndexes(t *testing.T) {
 	if again.ID != msg.ID {
 		t.Fatalf("restart idempotency changed message id: %s != %s", again.ID, msg.ID)
 	}
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(raw), "durable body") {
+		t.Fatal("durable metadata store persisted private message body plaintext")
+	}
 }
 
 func TestDurableStoreMultiInstanceVisibility(t *testing.T) {
@@ -100,6 +108,9 @@ func TestDurableStoreDistributedIdempotency(t *testing.T) {
 	blobs := &testBlobs{}
 	a := durableTestService(t, path, blobs)
 	b := durableTestService(t, path, blobs)
+	notify := &testNotify{}
+	a.Notify = notify
+	b.Notify = notify
 	req := SendRequest{IdempotencyKey: "distributed", Sender: "alice.420", Recipient: "bob.420", Subject: "hello", Body: "same body", Source: ServiceID}
 
 	start := make(chan struct{})
@@ -139,6 +150,9 @@ func TestDurableStoreDistributedIdempotency(t *testing.T) {
 	}
 	if len(page.Items) != 1 {
 		t.Fatalf("distributed idempotency committed %d inbox messages", len(page.Items))
+	}
+	if notify.Count() != 1 {
+		t.Fatalf("distributed idempotency emitted %d notifications, want 1", notify.Count())
 	}
 }
 

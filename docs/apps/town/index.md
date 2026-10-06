@@ -7,7 +7,7 @@ audience:
   - operator
 category: application
 status: development
-version: v1
+version: current
 ---
 
 # 420Town

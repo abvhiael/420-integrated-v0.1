@@ -12,18 +12,18 @@ import (
 type AuthenticateFunc func(*http.Request) (string, error)
 
 type HTTPHandler struct {
-	Service         *Service
-	Authenticate    AuthenticateFunc
-	Onboarding      *OnboardingService
-	Security        *SecurityService
-	WalletActions   *WalletActionService
-	Connectors      *ConnectorService
-	DiscordSync     *DiscordSyncService
+	Service          *Service
+	Authenticate     AuthenticateFunc
+	Onboarding       *OnboardingService
+	Security         *SecurityService
+	WalletActions    *WalletActionService
+	Connectors       *ConnectorService
+	DiscordSync      *DiscordSyncService
 	TelegramSync     *TelegramSyncService
 	DiscordDelivery  *DiscordDeliveryService
 	TelegramDelivery *TelegramDeliveryService
-	DiscordWallet   *DiscordWalletVerificationService
-	SignalShare     *SignalShareService
+	DiscordWallet    *DiscordWalletVerificationService
+	SignalShare      *SignalShareService
 }
 
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

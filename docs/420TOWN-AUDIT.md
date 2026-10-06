@@ -1340,3 +1340,118 @@ There are **no blockers to TOWN-AUDIT-8 completion itself**.
 **TOWN-AUDIT-8 — COMPLETE.**
 
 Next canonical roadmap step: **TOWN-AUDIT-9 — Security hardening**.
+
+
+## TOWN-AUDIT-9 durable closeout
+
+Status: **COMPLETE**  
+Qualification level: **Level 1 + Level 2 security-hardening milestone**  
+Qualified implementation/test/workflow SHA: `06eb9e367e3a971596057d340b10164246737243`  
+Evidence closeout is documentation-only and follows the already-passing exact-SHA 420Town qualification.
+
+### Security-hardening scope completed
+
+TOWN-AUDIT-9 adds repository-owned, machine-verifiable security-hardening coverage across the accumulated Town authority, API, integration and browser surfaces.
+
+Implemented and qualified coverage includes:
+
+- membership/role privilege-escalation resistance;
+- unauthorized moderation denial;
+- visibility-leakage prevention;
+- replay/duplicate-write and idempotency enforcement;
+- spam/Sybil/griefing/DoS request-boundary controls;
+- Search/index poisoning rejection;
+- Storage pointer/digest substitution rejection;
+- Messenger ciphertext-only transport shape and malformed-envelope rejection;
+- alternate-path permission-bypass resistance;
+- property/fuzz coverage for non-owner authority mutation denial and cross-community authority isolation;
+- privileged-role non-resurrection after removal/re-add;
+- reference-only, non-payable Town treasury surface;
+- oversized request rejection;
+- malformed bearer-auth rejection;
+- idempotency-key length enforcement;
+- dedicated machine-readable security baseline in `config/420town-security-v1.json`;
+- dedicated `scripts/verify-420town-security.py` verifier and Town CI ownership;
+- durable Town security/threat-model documentation in `docs/apps/town/security.md`.
+
+### Explicit non-applicable surfaces
+
+The security baseline records rather than silently skips surfaces that do not exist in the current Town implementation:
+
+- signed-action domain separation/nonces — **NOT_APPLICABLE_NO_SIGNED_ACTION_SURFACE**;
+- treasury/accounting conservation — **NOT_APPLICABLE_REFERENCE_ONLY_NO_CUSTODY**;
+- reentrancy/external-call value movement — **NOT_APPLICABLE_NO_VALUE_MOVEMENT**;
+- webhook replay — **NOT_APPLICABLE_WEBHOOKS_DISABLED**.
+
+These are not treated as passing tests for absent behavior; they are explicit architecture classifications enforced by the security verifier.
+
+### Accepted design risks
+
+The qualified security baseline records accepted design risks separately from unresolved vulnerabilities:
+
+1. production authentication is not yet materialized; repository qualification uses the injectable Authenticator/static-token test implementation and production/testnet release remains blocked until real auth is configured;
+2. encrypted Messenger transport acceptance can precede canonical envelope-commit confirmation, creating a production retry/idempotency dependency that must remain fail-safe operationally;
+3. live chain/network/contract bindings remain intentionally unmaterialized and fail closed until testnet deployment.
+
+The machine-readable unresolved-vulnerability list is explicit and empty for the qualified repository scope. This does **not** claim live-testnet or production security qualification.
+
+### Exact-head qualification evidence
+
+GitHub Actions workflow: **420Town audit**  
+Run ID: `37404518997`  
+Run number: `175`  
+Result: **PASS**  
+Qualified SHA: `06eb9e367e3a971596057d340b10164246737243`
+
+Jobs:
+
+- `town-contracts` / job `112078979128` — **PASS**;
+- `town-skeleton` / job `112078979377` — **PASS**.
+
+Passing exact-head checks include:
+
+- exact implementation SHA assertion in both jobs — PASS;
+- canonical Town audit-classification verifier — PASS;
+- Town product-skeleton verifier — PASS;
+- Town authoritative-state verifier — PASS;
+- Town content-state verifier — PASS;
+- Town moderation-state verifier — PASS;
+- Town service-integration verifier — PASS;
+- Town API/SDK/projection/recovery verifier — PASS;
+- Town web-application verifier — PASS;
+- **Town security-hardening verifier — PASS**;
+- Town web structural + Node qualification — PASS;
+- Town delivery-surface gofmt gate — PASS;
+- `go test ./town/... ./sdk/town420` — PASS;
+- `go vet ./town/... ./sdk/town420` — PASS;
+- directly affected retained Search/Storage/Notifications dependency tests — PASS;
+- Town Solidity build — PASS;
+- retained Town-focused Foundry inventory via `test/Town*.t.sol` — PASS;
+- cross-dApp Rewards hardening — PASS.
+
+The final focused Foundry suite includes the new TOWN-AUDIT-9 security-hardening tests and passed on the authoritative exact head.
+
+### Rejected intermediate candidates
+
+Earlier TOWN-AUDIT-9 candidates are not completion evidence:
+
+- `684b52d3393934af72478127874671cb21d1cd79` failed because the workflow temporarily widened the gofmt gate into pre-existing unrelated integration formatting debt;
+- `efc56ef46318b7f775f787275824515bb18e052c`, `c2b9c401567529969849de47374a5d5a9f11ce33` and `5427204b776aff02749fb6ed23f2431290beab8c` each exposed test-harness issues in the new Foundry fuzz test rather than Town authorization defects;
+- the final harness correction moved external getter evaluation outside the armed `expectRevert` window without weakening contract authorization semantics.
+
+Only exact-head run #175 on `06eb9e367e3a971596057d340b10164246737243` is authoritative for this closeout.
+
+### Milestone and deferred qualification
+
+TOWN-AUDIT-9 is treated as a **Level 2 security milestone** in addition to ordinary Level 1 step qualification because it spans authority, API, content/moderation, shared-service integrations and browser safety.
+
+Level 3 remains intentionally deferred to **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**. That final repository closeout will reconcile the accumulated Town branch to then-current `main` and run all applicable repository-level gates once, rather than duplicating them here.
+
+Current `main` at evidence closeout: `ea9994669564d0795e2bcc4a38beea0b01bef274`.  
+PR #523 remains open and unmerged.
+
+### Completion state
+
+**TOWN-AUDIT-9 — COMPLETE.**
+
+Next canonical roadmap step: **TOWN-AUDIT-10 — Documentation and exact-head repository qualification**.

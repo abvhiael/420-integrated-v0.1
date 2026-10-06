@@ -377,29 +377,14 @@ Repository phase result:
 - 420Town repository-side pre-testnet phase is complete;
 - next canonical roadmap step: **TOWN-AUDIT-11 — Live testnet qualification**.
 
-## TOWN-AUDIT-11 — Live testnet qualification
+## Post-repository handoff
 
-Status: BLOCKED — implementation prerequisite, then live testnet
+Repository-side TOWN-AUDIT work is complete through **TOWN-AUDIT-10**.
 
-After TOWN-AUDIT-2 through -10 are repository-complete:
+The remaining live-environment phases have been transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`:
 
-- deploy to live 420Integrated testnet;
-- configure real Registry/service discovery and dependencies;
-- verify Identity/Search/Notifications/Storage integration;
-- exercise real wallet/network flows;
-- validate reorg/restart/recovery behavior;
-- capture deployed addresses/endpoints/run IDs and smoke-test evidence.
+- **TOWN-AUDIT-11 — live production-equivalent testnet qualification**;
+- **TOWN-AUDIT-12 — production/genesis-facing service release**.
 
-## TOWN-AUDIT-12 — Production/genesis-facing service release
+Those phases require real deployment/environment evidence and must not be completed from repository CI, local fixtures or synthetic manifests.
 
-Status: BLOCKED — TOWN-AUDIT-11
-
-- production deployment configuration;
-- DNS/service endpoint publication if applicable;
-- secrets/credential provisioning;
-- monitoring/alerts/SLOs;
-- operational rollback/recovery;
-- final security/release review;
-- durable release evidence.
-
-420Town remains a GEN-SVC Genesis-facing replaceable service unless and until a separate explicit frozen application-catalog decision changes that classification.

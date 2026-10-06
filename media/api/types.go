@@ -104,13 +104,13 @@ type PrepareUploadRequest struct {
 }
 
 type UploadPlan struct {
-	Asset       Asset      `json:"asset"`
-	UploadID    string     `json:"upload_id"`
-	ProviderID  string     `json:"provider_id"`
-	NodeID      string     `json:"node_id"`
-	ServiceID   string     `json:"service_id"`
-	ExpiresAt   time.Time  `json:"expires_at"`
-	Provenance  Provenance `json:"provenance"`
+	Asset      Asset      `json:"asset"`
+	UploadID   string     `json:"upload_id"`
+	ProviderID string     `json:"provider_id"`
+	NodeID     string     `json:"node_id"`
+	ServiceID  string     `json:"service_id"`
+	ExpiresAt  time.Time  `json:"expires_at"`
+	Provenance Provenance `json:"provenance"`
 }
 
 type Livestream struct {
@@ -156,16 +156,16 @@ type SearchItem struct {
 }
 
 type Subscription struct {
-	ID                string    `json:"id"`
-	UserRef           string    `json:"user_ref"`
-	Topic             string    `json:"topic"`
-	Channel           string    `json:"channel"`
-	MinimumSeverity   uint8     `json:"minimum_severity"`
-	MinimumFinality   string    `json:"minimum_finality"`
-	PromotionalOptIn  bool      `json:"promotional_opt_in"`
-	Muted             bool      `json:"muted"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
+	ID               string    `json:"id"`
+	UserRef          string    `json:"user_ref"`
+	Topic            string    `json:"topic"`
+	Channel          string    `json:"channel"`
+	MinimumSeverity  uint8     `json:"minimum_severity"`
+	MinimumFinality  string    `json:"minimum_finality"`
+	PromotionalOptIn bool      `json:"promotional_opt_in"`
+	Muted            bool      `json:"muted"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 type CreateSubscriptionRequest struct {

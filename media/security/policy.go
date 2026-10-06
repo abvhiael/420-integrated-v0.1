@@ -11,13 +11,13 @@ import (
 )
 
 var (
-	ErrInvalidEndpoint      = errors.New("420media security: invalid outbound endpoint")
-	ErrUnsafeEndpoint       = errors.New("420media security: unsafe outbound endpoint")
-	ErrRateLimited          = errors.New("420media security: rate limited")
-	ErrInvalidMedia         = errors.New("420media security: invalid media metadata")
-	ErrScannerUnavailable   = errors.New("420media security: content scanner unavailable")
-	ErrContentQuarantined   = errors.New("420media security: content quarantined")
-	ErrContentRejected      = errors.New("420media security: content rejected")
+	ErrInvalidEndpoint    = errors.New("420media security: invalid outbound endpoint")
+	ErrUnsafeEndpoint     = errors.New("420media security: unsafe outbound endpoint")
+	ErrRateLimited        = errors.New("420media security: rate limited")
+	ErrInvalidMedia       = errors.New("420media security: invalid media metadata")
+	ErrScannerUnavailable = errors.New("420media security: content scanner unavailable")
+	ErrContentQuarantined = errors.New("420media security: content quarantined")
+	ErrContentRejected    = errors.New("420media security: content rejected")
 )
 
 type IPResolver interface {
@@ -138,11 +138,11 @@ func (p ContentPolicy) Validate(mime string, size uint64) error {
 }
 
 type Inspection struct {
-	AssetID    string
-	MimeType   string
-	SizeBytes  uint64
-	SHA256     string
-	SourceRef  string
+	AssetID   string
+	MimeType  string
+	SizeBytes uint64
+	SHA256    string
+	SourceRef string
 }
 
 type ScanVerdict string

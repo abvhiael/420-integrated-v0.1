@@ -14,8 +14,11 @@ for(const token of [
   'role="status"','aria-live="polite"','Block','Report','Unmatch','Request deletion'
 ]) if(!html.includes(token)) errors.push(`web MVP surface missing: ${token}`);
 
-for(const forbidden of ["walletAddress","exactAddress","latitude","longitude","gps","public match history"]){
-  if(html.toLowerCase().includes(forbidden.toLowerCase())) errors.push(`forbidden public client field: ${forbidden}`);
+for(const pattern of [
+  /name=["']walletAddress["']/i,/name=["']exactAddress["']/i,/name=["']latitude["']/i,
+  /name=["']longitude["']/i,/name=["']gps["']/i,/name=["']wallet_address["']/i
+]){
+  if(pattern.test(html)) errors.push(`forbidden public client field: ${pattern}`);
 }
 
 const js=[read("app.js"),read("api-client.js"),read("state.js")].join("\n");

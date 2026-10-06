@@ -37,6 +37,8 @@ VISIBILITY = ROOT / "docs/puffbuddies/PB-0.15-VISIBILITY-MODEL.md"
 EVIDENCE_15 = ROOT / "docs/puffbuddies/PB-0.15-QUALIFICATION.md"
 NONGOALS = ROOT / "docs/puffbuddies/PB-0.16-NON-GOALS-RECONCILIATION.md"
 EVIDENCE_16 = ROOT / "docs/puffbuddies/PB-0.16-QUALIFICATION.md"
+STRUCTURE = ROOT / "docs/puffbuddies/PB-0.17-REPOSITORY-STRUCTURE.md"
+EVIDENCE_17 = ROOT / "docs/puffbuddies/PB-0.17-QUALIFICATION.md"
 
 errors = []
 
@@ -44,7 +46,7 @@ def need(condition, message):
     if not condition:
         errors.append(message)
 
-for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16):
+for path in (APP, ROAD, EVIDENCE_01, SCOPE, EVIDENCE_02, BOUNDARY, EVIDENCE_03, PRIVACY, EVIDENCE_04, CONSENT, EVIDENCE_05, ELIG, EVIDENCE_06, THREAT, EVIDENCE_07, DEPS, EVIDENCE_08, STATE, EVIDENCE_09, SAFETY, EVIDENCE_10, DATA, EVIDENCE_11, LIFE, EVIDENCE_12, MATCHING, EVIDENCE_13, CANNABIS, EVIDENCE_14, VISIBILITY, EVIDENCE_15, NONGOALS, EVIDENCE_16, STRUCTURE, EVIDENCE_17):
     need(path.exists(), f"missing required PuffBuddies PB-0 file: {path.relative_to(ROOT)}")
 
 if errors:
@@ -84,6 +86,8 @@ visibility = VISIBILITY.read_text(encoding="utf-8")
 evidence_15 = EVIDENCE_15.read_text(encoding="utf-8")
 nongoals = NONGOALS.read_text(encoding="utf-8")
 evidence_16 = EVIDENCE_16.read_text(encoding="utf-8")
+structure = STRUCTURE.read_text(encoding="utf-8")
+evidence_17 = EVIDENCE_17.read_text(encoding="utf-8")
 
 # PB-0.1 — canonical app identity
 for token in [
@@ -183,6 +187,9 @@ for token in [
     "### PB-0.16 — Non-goals reconciliation",
     "PB-NONGOAL-001 through PB-NONGOAL-040",
     "**Milestone relationship:** PB-0.16 is not a Level 2 integration milestone",
+    "### PB-0.17 — Repository structure",
+    "PB-STRUCT-001 through PB-STRUCT-020",
+    "**Milestone relationship:** PB-0.17 is not a Level 2 integration milestone",
     "### PB-0.20 — PB-0 qualification and formal closeout",
 ]:
     need(token in road, f"canonical roadmap missing token: {token}")
@@ -1675,13 +1682,73 @@ for token in [
 ]:
     need(token in evidence_16, f"PB-0.16 evidence record missing token: {token}")
 
+# PB-0.17 — repository structure
+for token in [
+    "# PuffBuddies PB-0.17 repository structure",
+    "## Canonical layout",
+    "## Dependency direction",
+    "## Canonical structure invariants",
+    "## Source-control rules",
+    "## Structure change-control rule",
+    "## PB-0.17 completion boundary",
+    "puffbuddies/web/",
+    "puffbuddies/api/",
+    "puffbuddies/domain/",
+    "puffbuddies/storage/",
+    "puffbuddies/integrations/",
+    "puffbuddies/workers/",
+    "puffbuddies/tests/",
+    "contracts/src/puffbuddies/",
+    "Reserved does not mean implemented",
+    "No parallel deployment authority",
+]:
+    need(token in structure, f"PB-0.17 repository-structure document missing token: {token}")
+
+struct_ids = re.findall(r"^### (PB-STRUCT-\d{3})\b", structure, flags=re.MULTILINE)
+need(struct_ids == [f"PB-STRUCT-{i:03d}" for i in range(1, 21)], f"PB-STRUCT sequence drift: {struct_ids}")
+need(len(struct_ids) == len(set(struct_ids)), "duplicate PB-STRUCT identifier")
+
+for guarantee in [
+    "browser/client state is not canonical security or relationship authority",
+    "cannot expand a dependency's canonical authority",
+    "No repository area may create a shadow canonical owner",
+    "Credentials, signing material, production secrets",
+    "A path named in PB-0.17 is a reserved architecture location only",
+    "A directory move or adapter split cannot silently transfer canonical authority",
+]:
+    need(guarantee in structure, f"PB-0.17 missing structure guarantee: {guarantee}")
+
+for forbidden in [
+    "PuffBuddies web client is implemented",
+    "PuffBuddies API is deployed",
+    "PuffBuddies database is live",
+    "PuffBuddies contract is deployed",
+    "PuffBuddies service ID is",
+]:
+    need(forbidden not in structure, f"PB-0.17 unsupported implementation/live claim: {forbidden}")
+
+need(re.search(r"0x[a-fA-F0-9]{40}", structure) is None, "PB-0.17 must not assign an on-chain address")
+need("420/service/puff" not in structure.lower(), "PB-0.17 must not invent a PuffBuddies service ID")
+
+for token in [
+    "# PB-0.17 qualification evidence",
+    "**PB-0.17 — Repository structure**",
+    "**Level 1 — per-roadmap-step fast qualification**",
+    "PB-STRUCT-001 through PB-STRUCT-020",
+    "PuffBuddies PB-0 Qualification",
+    "## Milestone status",
+    "## Intentionally deferred checks",
+    "**PB-0.18 — Documentation/invariant tests**",
+]:
+    need(token in evidence_17, f"PB-0.17 evidence record missing token: {token}")
+
 if errors:
-    print(json.dumps({"pass": False, "step": "PB-0.16", "errors": errors}, indent=2))
+    print(json.dumps({"pass": False, "step": "PB-0.17", "errors": errors}, indent=2))
     raise SystemExit(1)
 
 print(json.dumps({
     "pass": True,
-    "step": "PB-0.16",
+    "step": "PB-0.17",
     "qualificationLevel": 1,
     "pb01": {
         "canonicalName": "PuffBuddies",
@@ -1893,6 +1960,18 @@ print(json.dumps({
         "dependencyAuthorityPreserved": True,
         "deletionHonestyPreserved": True,
         "staleStateResurrectionProhibited": True,
+        "changeControlDefined": True,
+        "assignsFixedAddress": False,
+        "inventsServiceId": False,
+        "claimsImplementation": False,
+    },
+    "pb17": {
+        "structureInvariants": struct_ids,
+        "reservedPathsNotImplementation": True,
+        "inwardDependencyDirection": True,
+        "singleCanonicalOwner": True,
+        "sourceControlRulesDefined": True,
+        "revocationCrossesBoundaries": True,
         "changeControlDefined": True,
         "assignsFixedAddress": False,
         "inventsServiceId": False,

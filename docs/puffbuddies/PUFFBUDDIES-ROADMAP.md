@@ -1342,6 +1342,22 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** eligibility state round-trips through canonical private persistence; sequence/time/policy/subject invariants survive reload; stale sequence/time/repository-version updates fail closed; UNKNOWN/ELIGIBLE persistence invariants pass; forbidden identity/proof material remains absent; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
+### PB-2.6 — Revocation & expiry handling
+
+**Purpose:** turn authoritative adult-eligibility revocation and bounded expiry into durable PB-2 state transitions that invalidate stale derived authority immediately without exposing raw identity/proof material.
+
+**Canonical requirements:** bind revocation to the current source version; require advancing event sequence and nondecreasing time; reject stale/replayed/source-mismatched/UNKNOWN revocation; transition valid current state to REVOKED; expire only current ELIGIBLE state at/after its bounded expiry and advance sequence/time; do not repeatedly expire noneligible terminal states; treat every real revocation/expiry as a canonical ELIGIBILITY change that advances PB revocation generation and invalidates all PB-1.9 derived surfaces; persist REVOKED/EXPIRED state through PB-2.5 optimistic concurrency; introduce no raw identity/proof/public membership state or live provider/poller/webhook/deployment claim; do not pre-empt PB-2.7/2.8/2.9 enforcement steps.
+
+**Affected components:** `puffbuddies/domain/eligibility_revocation.py`, PB-2.6 targeted tests, PB-2 workflow, canonical definition/evidence.
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** not Level 2; **PB-2.13 — PB-2 Integration Milestone** remains the Level-2 boundary and **PB-2.14 — PB-2 Phase Closeout** remains Level 3.
+
+**Dependencies:** PB-0.6, PB-0.12, PB-1.8, PB-1.9, and PB-2.1 through PB-2.5 COMPLETE.
+
+**Exit criteria:** current-source revocation advances to REVOKED; expiry-at-bound advances to EXPIRED; stale source/sequence/time fails closed; pre-expiry/noneligible state does not spuriously expire; each real transition invalidates all derived surfaces and advances generation; result persists/reloads; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

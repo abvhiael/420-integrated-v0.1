@@ -1,0 +1,43 @@
+name: PuffBuddies PB-1 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb1.yml"
+  push:
+    branches: ["puffbuddies-pb1-domain-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb1.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb1-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies domain
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-1 retained qualification tests
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-1.13 retained integration milestone
+        if: ${{ hashFiles('puffbuddies/tests/test_pb_1_13_integration.py') != '' }}
+        run: python3 -m unittest puffbuddies.tests.test_pb_1_13_integration -v
+      - name: No public-chain or secret material
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(BEGIN [A-Z ]*PRIVATE KEY|private[_ -]?key[[:space:]]*[:=][[:space:]]*[^,})[:space:]]|seed[_ -]?phrase[[:space:]]*[:=][[:space:]]*[^,})[:space:]]|mnemonic[[:space:]]*[:=][[:space:]]*[^,})[:space:]])' puffbuddies/ docs/puffbuddies/PB-1.1-DOMAIN-TYPES-BOUNDARIES.md

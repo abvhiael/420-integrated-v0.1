@@ -715,7 +715,56 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 ### PB-0.17 — Repository structure
 
-Freeze the intended PuffBuddies repository layout before implementation expands.
+**Purpose:** freeze the intended PuffBuddies repository layout and ownership boundaries before implementation expands, without falsely creating or claiming runtime implementation during PB-0.
+
+**Canonical requirements:**
+
+1. Record PB-STRUCT-001 through PB-STRUCT-020.
+2. Reserve `docs/puffbuddies/` for canonical product, architecture, roadmap, audit, qualification, and operational documentation.
+3. Reserve `puffbuddies/web/` for the web client and client-owned presentation/state only.
+4. Reserve `puffbuddies/api/` for the authenticated application API/edge boundary and transport adapters, not canonical relationship authority.
+5. Reserve `puffbuddies/domain/` for application-owned lifecycle, consent, matching, visibility, safety, and relationship policy/domain logic.
+6. Reserve `puffbuddies/storage/` for private persistence adapters, migrations, retention/deletion machinery, and cache invalidation.
+7. Reserve `puffbuddies/integrations/` for capability-limited adapters to bounded 420Integrated dependencies.
+8. Reserve `puffbuddies/workers/` for asynchronous jobs whose outputs remain subordinate to canonical PuffBuddies state.
+9. Reserve `puffbuddies/tests/` for app integration/adversarial qualification while allowing colocated unit tests under repository conventions.
+10. Reserve `contracts/src/puffbuddies/` only for a later explicitly justified minimum-disclosure on-chain component; PB-0.17 does not require or authorize one.
+11. Keep app scripts/workflows/configuration under existing repository conventions rather than creating parallel build/deployment authorities.
+12. Define inward dependency direction: clients/transports/adapters depend on canonical domain interfaces and cannot become PuffBuddies authority owners.
+13. Keep secrets, raw private user data, moderation evidence, production databases, generated credentials, and environment-specific sensitive state out of source control.
+14. Keep generated/cache/build artifacts non-canonical unless a later repository rule explicitly requires a committed artifact.
+15. Prohibit duplicate canonical state stores or shadow authorities across web, API, workers, integrations, derived services, or contracts.
+16. Require future new top-level PuffBuddies implementation areas to be justified against this structure and PB-0 ownership/privacy boundaries.
+17. Preserve PB-0.1 through PB-0.16 invariants and non-goals.
+18. Explicitly distinguish reserved future paths from implemented/live paths.
+19. Do not assign contracts, fixed/Genesis addresses, service IDs, deployment topology, databases, live endpoints, or production infrastructure in PB-0.17.
+20. Keep PB-0 qualification/evidence machinery app-scoped and cumulative.
+
+**Affected repository components:**
+
+- `docs/puffbuddies/PB-0.17-REPOSITORY-STRUCTURE.md`
+- `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md`
+- `scripts/verify-puffbuddies-pb0.py`
+- `docs/puffbuddies/PB-0.17-QUALIFICATION.md`
+
+**Qualification level:** Level 1.
+
+**Milestone relationship:** PB-0.17 is not a Level 2 integration milestone; it freezes repository ownership/layout authority without introducing executable shared integration.
+
+**Dependencies:** PB-0.1 through PB-0.16 must remain COMPLETE.
+
+**Exit criteria:**
+
+- one canonical PB-0.17 repository-structure document exists;
+- PB-STRUCT-001 through PB-STRUCT-020 exist exactly once and in sequence;
+- documentation, client, API, domain, storage, integration, worker, test, and optional-contract boundaries are explicit;
+- dependency direction and canonical ownership rules prohibit shadow authority;
+- reserved future paths are explicitly distinguished from implemented/live paths;
+- source-control exclusions for secrets/private data/generated state are explicit;
+- no runtime directory, contract, fixed address, service ID, deployment, database, endpoint, or live integration is falsely introduced or claimed;
+- cumulative app-scoped verifier passes;
+- exact-head PuffBuddies PB-0 workflow passes for the implementation SHA;
+- durable PB-0.17 evidence records exact run/job evidence and current-main/base state.
 
 ### PB-0.18 — Documentation/invariant tests
 

@@ -1,6 +1,6 @@
 # CMP-4.1 — Scientific Work Unit specification
 
-Status: **IMPLEMENTED — LEVEL 1 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — Level 1 exact-head qualified on `8e4199c7d1e8b883a3518167a4093dae4899598a`.**
 
 Canonical roadmap purpose: make scientific/research workloads first-class while keeping the Compute Market general-purpose.
 
@@ -161,3 +161,8 @@ No Level 2 milestone is required at CMP-4.1. The first scientific-framework inte
 ## 10. Next canonical step
 
 **CMP-4.2 — Research Project Registry**
+
+
+## Qualification evidence
+
+Retained exact-head qualification evidence: [CMP-4.1 qualification](CMP-4.1-QUALIFICATION-EVIDENCE.md). Compute Market Qualification **#400** / run `37405254531` passed on exact SHA `8e4199c7d1e8b883a3518167a4093dae4899598a`, including exact-head verification, Compute contract build, the retained `Compute*.t.sol` suite, verification-script compilation, and the CMP-4.1 verifier plus its dedicated boundary test.

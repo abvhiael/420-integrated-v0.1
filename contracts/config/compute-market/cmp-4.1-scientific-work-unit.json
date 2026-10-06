@@ -91,7 +91,7 @@
     "unitId": "CMP-0.3 canonical deterministic work-unit identity",
     "researchProjectCommitment": "ComputeResearchProjectRegistry420 exact project revision commitment; new work validates isCurrentAcceptable before binding",
     "manifestHash": "ComputeJobRegistry420 accepted manifestHash",
-    "executableContainerCommitment": "accepted CMP-0.4 signed manifest executable/container/runtime semantics",
+    "executableContainerCommitment": "exact current ComputeExecutionEnvironmentRegistry420 revision commitment for scientific work, corresponding to accepted CMP-0.4 artifact/runtime/command/security semantics and passing isCurrentReproducible before admission",
     "datasetInputCommitment": "accepted canonical job/request input commitment; for dataset-backed scientific work an exact current ComputeDatasetManifestRegistry420 manifest must have matching contentCommitment and pass isCurrentUsable",
     "parametersCommitment": "versioned canonical parameter encoding",
     "resourceClass": "accepted ComputeRequestRegistry420/ComputeMatch420 resource class",
@@ -138,7 +138,6 @@
   ],
   "intentionally_deferred": [
     "CMP-4.3 researcher/institution identity",
-    "CMP-4.5 reproducible environments",
     "CMP-4.6 result provenance",
     "CMP-4.7 metadata/lineage",
     "CMP-4.8 publication/retention",
@@ -155,5 +154,9 @@
   "cmp_4_4_integration": {
     "registry": "contracts/src/compute/ComputeDatasetManifestRegistry420.sol",
     "rule": "datasetInputCommitment remains the canonical accepted input commitment and must equal the exact current usable dataset manifest contentCommitment for dataset-backed scientific work"
+  },
+  "cmp_4_5_integration": {
+    "registry": "contracts/src/compute/ComputeExecutionEnvironmentRegistry420.sol",
+    "rule": "executableContainerCommitment is the exact current reproducible environment revision commitment for scientific work; CMP-0.4/CMP-3 retain execution authority"
   }
 }

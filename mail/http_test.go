@@ -139,3 +139,74 @@ func TestHTTPMailboxRequiresOwnership(t *testing.T) {
 		t.Fatalf("foreign mailbox state leaked: status=%d body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+
+func TestHTTPLabelsCustomFoldersAndBulkOrganization(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+
+	rec := performMailRequest(t, h, http.MethodPost, "/v1/labels", "bob.420", map[string]string{"name": "Receipts"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create label status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var label LabelDefinition
+	if err := json.Unmarshal(rec.Body.Bytes(), &label); err != nil {
+		t.Fatal(err)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPost, "/v1/custom-folders", "bob.420", map[string]string{"name": "Purchases"})
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create folder status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var folder CustomFolder
+	if err := json.Unmarshal(rec.Body.Bytes(), &folder); err != nil {
+		t.Fatal(err)
+	}
+
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/organization/bulk", "bob.420", BulkOrganizationRequest{
+		MessageIDs: []string{id}, AddLabelIDs: []string{label.ID}, CustomFolderID: &folder.ID,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("bulk organization status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/labels/"+label.ID+"/messages", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("label messages status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var byLabel MailboxPage
+	if err := json.Unmarshal(rec.Body.Bytes(), &byLabel); err != nil {
+		t.Fatal(err)
+	}
+	if len(byLabel.Items) != 1 || byLabel.Items[0].Message.ID != id {
+		t.Fatalf("unexpected label messages: %+v", byLabel)
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/custom-folders/"+folder.ID+"/messages", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("folder messages status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestHTTPOrganizationOwnershipAndSystemLabelProtection(t *testing.T) {
+	h, s, id := testHTTPHandler(t)
+	labels, err := s.ListLabels(context.Background(), "bob.420")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(labels) == 0 {
+		t.Fatal("system labels missing")
+	}
+	rec := performMailRequest(t, h, http.MethodDelete, "/v1/labels/"+labels[0].ID, "bob.420", nil)
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("system label delete status=%d body=%s", rec.Code, rec.Body.String())
+	}
+
+	aliceLabel, err := s.CreateLabel(context.Background(), "alice.420", "Alice only")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec = performMailRequest(t, h, http.MethodPatch, "/v1/messages/"+id+"/organization", "bob.420", OrganizationUpdate{AddLabelIDs: []string{aliceLabel.ID}})
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("cross-owner label assignment status=%d body=%s", rec.Code, rec.Body.String())
+	}
+}

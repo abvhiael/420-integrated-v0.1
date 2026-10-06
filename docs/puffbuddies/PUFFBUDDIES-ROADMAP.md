@@ -1374,7 +1374,7 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** current/policy-compatible/unexpired eligibility enables existing authorization only where all other PB-1.5 conditions permit; expired/revoked/ineligible/unknown/policy-stale state fails closed; subject/time mismatches reject binding; lifecycle/block/relationship/service/moderator boundaries remain intact; retained regressions and exact-head PB-2 fast qualification pass; durable evidence recorded.
 
-### PB-2.8 — Discovery/matching eligibility enforcement
+### PB-2.8 — Discovery/matching eligibility enforcement — COMPLETE
 
 **Purpose:** enforce current adult eligibility as a hard prerequisite for discovery and matching actions, using PB-2.7 authorization binding and PB-1.9 stale-derived-state invalidation without inventing the later PB-3 matching engine.
 

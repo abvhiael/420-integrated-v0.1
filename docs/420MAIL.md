@@ -1442,6 +1442,79 @@ The status endpoint exists so operators/UI can distinguish “not implemented be
 
 A future implementation may only enable Signal deep sync after repository evidence establishes the required stable supported surface. That would be a new substantive implementation SHA and must be qualified under the applicable roadmap/audit phase before the gate may be changed.
 
+## MAIL-2.23 Telegram Account Linking
+
+MAIL-2.23 adds Telegram account linking through the provider-neutral connector framework established by MAIL-2.14.
+
+### Authority boundary
+
+420Mail does not verify Telegram credentials itself.
+
+A deployment-provided `TelegramLinkAuthority` receives an opaque authorization reference and is responsible for validating the external Telegram authorization flow and returning a normalized Telegram account.
+
+The authority result must contain:
+
+- a positive decimal Telegram user identifier;
+- either a username or first name suitable for display;
+- `verified=true`;
+- `non_custodial=true`;
+- a non-zero link timestamp.
+
+420Mail never accepts or persists raw Telegram bot tokens, access tokens, refresh tokens, client secrets, phone-number credentials, verification codes, or device/provider signing material.
+
+### Connection model
+
+A successful link produces the canonical provider-neutral connection:
+
+- provider: `telegram`;
+- connection ID: `telegram:{user-id}`;
+- external ID: Telegram user ID;
+- identity: authenticated 420Mail actor;
+- active: true;
+- non-custodial: true.
+
+Display name prefers Telegram first/last name, then falls back to `@username`.
+
+The generic `account_hint` remains non-authoritative; the external Telegram authority result is canonical.
+
+### Unlink
+
+Unlinking requires:
+
+- authenticated Mail actor;
+- provider `telegram`;
+- valid `telegram:{user-id}` connection ID.
+
+The adapter extracts the Telegram user ID and delegates revocation/unlink cleanup to `TelegramLinkAuthority`.
+
+### Capability containment
+
+MAIL-2.23 advertises **only**:
+
+- `LINK`
+
+It deliberately does not enable:
+
+- `PULL` / Telegram → 420Mail sync;
+- `PUSH` / 420Mail → Telegram delivery;
+- webhook ingestion;
+- Telegram wallet verification.
+
+Those remain MAIL-2.24 and MAIL-2.25 or later roadmap work.
+
+### API, client, and UI
+
+Telegram linking reuses the existing provider-neutral surfaces:
+
+- `GET /v1/connectors/providers`;
+- `POST /v1/connectors/link`;
+- `POST /v1/connectors/unlink`;
+- typed `LinkConnector` / `UnlinkConnector` client methods.
+
+The thin UI already renders any provider advertising `LINK`. A deployment shell may provide `window.__420_CONNECTORS__.telegram.authorize()` returning only an opaque authorization reference and optional non-authoritative account hint.
+
+No Telegram-specific route or raw credential form is introduced.
+
 ## Thin UI
 
 The web UI delegates transaction/signature intent construction and verification-evidence acquisition to a deployment-provided `window.__420_WALLET_ACTIONS__` adapter. It displays the returned handoff for review but performs no local signing or submission.

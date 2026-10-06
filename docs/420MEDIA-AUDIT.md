@@ -154,6 +154,8 @@ Existing relevant build/test surfaces:
 
 The audit branch adds a dedicated exact-head Media audit workflow and repository verifier so future Media remediation cannot be declared complete without checking the canonical service definition and current source inventory.
 
+MEDIA-AUDIT-3 qualification evidence: `docs/audit/420MEDIA-AUDIT-3-QUALIFICATION.md`, implementation SHA `e0d938cd78a92a6c28ff88c641c9f3b332ffba20`, workflow run `37497230251` PASS.
+
 ## Documentation audit
 
 Present:
@@ -183,7 +185,7 @@ The first three gaps are remediated by this audit branch. Product documentation 
 | non-custodial settlement | Phase 1 protocol | abstract adapters | Phase1/Anvil | Phase1 doc | PARTIAL | bind canonical Pay/settlement deployment |
 | operator processing | Phase 2 | FFmpeg/GStreamer profile runtime | Go tests | Phase2 docs | COMPLETE | production engine qualification |
 | live transport primitives | Phase 2 | WHIP/WHEP + RTMP/SRT abstractions | Go tests | Phase2 docs | PARTIAL | complete service/API/session composition |
-| operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + control-plane boundary on audit branch | Go discovery/control-plane tests | Phase 3.1 discovery doc | IMPLEMENTED / pending exact-head qualification | qualify current audit head; later orchestration remains separate |
+| operator discovery | MEDIA-AUDIT-3 / reconciled PR #86 Phase 3.1 subset | event-log accelerator + canonical registry revalidation + deterministic selector + replay recovery + control-plane boundary on audit branch | Go discovery/control-plane tests + exact-head Media gate | Phase 3.1 discovery doc + qualification evidence | COMPLETE (Level 1) | later orchestration remains separate |
 | video uploads | GEN-SVC Media target | no Media application workflow | none | none | MISSING | Storage-backed upload phase |
 | basic livestreaming | GEN-SVC + feature flag | primitives only | component tests | older Phase2 docs | PARTIAL | user/API/UI/session/integration phase |
 | Identity integration | GEN-SVC registry | none | none | none | MISSING | implement scoped identity/profile boundary |

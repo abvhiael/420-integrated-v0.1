@@ -2,6 +2,7 @@ package mail
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -44,10 +45,14 @@ func NewTelegramConnectorService(authority TelegramLinkAuthority) (*ConnectorSer
 }
 
 func (a *TelegramConnectorAdapter) Descriptor() ConnectorDescriptor {
+	capabilities := []ConnectorCapability{ConnectorCapabilityLink}
+	if _, ok := a.Authority.(TelegramSyncAuthority); ok {
+		capabilities = append(capabilities, ConnectorCapabilityPull)
+	}
 	return ConnectorDescriptor{
 		Provider:     TelegramProvider,
 		DisplayName:  "Telegram",
-		Capabilities: []ConnectorCapability{ConnectorCapabilityLink},
+		Capabilities: capabilities,
 	}
 }
 
@@ -109,8 +114,53 @@ func (a *TelegramConnectorAdapter) Unlink(ctx context.Context, actor, connection
 	return nil
 }
 
-func (a *TelegramConnectorAdapter) Pull(context.Context, string, ConnectorPullRequest) (ConnectorPullResult, error) {
-	return ConnectorPullResult{}, ErrConnectorUnsupported
+func (a *TelegramConnectorAdapter) Pull(ctx context.Context, actor string, req ConnectorPullRequest) (ConnectorPullResult, error) {
+	syncAuthority, ok := a.Authority.(TelegramSyncAuthority)
+	if !ok {
+		return ConnectorPullResult{}, ErrConnectorUnsupported
+	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return ConnectorPullResult{}, ErrUnauthorized
+	}
+	if normalizeProvider(req.Provider) != TelegramProvider {
+		return ConnectorPullResult{}, ErrInvalidInput
+	}
+	userID, ok := telegramUserIDFromConnectionID(strings.TrimSpace(req.ConnectionID))
+	if !ok {
+		return ConnectorPullResult{}, ErrInvalidInput
+	}
+	cursor := strings.TrimSpace(req.Cursor)
+	if len([]byte(cursor)) > MaxTelegramSyncCursorBytes {
+		return ConnectorPullResult{}, ErrInvalidInput
+	}
+	page, err := syncAuthority.PullTelegram(ctx, actor, userID, cursor)
+	if err != nil {
+		return ConnectorPullResult{}, fmt.Errorf("mail: telegram sync authority: %w", err)
+	}
+	page.NextCursor = strings.TrimSpace(page.NextCursor)
+	if len([]byte(page.NextCursor)) > MaxTelegramSyncCursorBytes {
+		return ConnectorPullResult{}, ErrTelegramInvalidResult
+	}
+	items := make([]ConnectorItem, 0, len(page.Messages))
+	for _, message := range page.Messages {
+		if err := validateTelegramInboundMessage(message); err != nil {
+			return ConnectorPullResult{}, err
+		}
+		raw, err := json.Marshal(message)
+		if err != nil {
+			return ConnectorPullResult{}, fmt.Errorf("mail: encode telegram sync message: %w", err)
+		}
+		items = append(items, ConnectorItem{
+			ExternalID: message.MessageID,
+			OccurredAt: message.CreatedAt.UTC(),
+			Kind:       TelegramSyncItemKind,
+			Payload:    string(raw),
+		})
+	}
+	return ConnectorPullResult{
+		Provider: TelegramProvider, ConnectionID: req.ConnectionID, Items: items, NextCursor: page.NextCursor,
+	}, nil
 }
 
 func (a *TelegramConnectorAdapter) Push(context.Context, string, ConnectorPushRequest) (ConnectorPushResult, error) {

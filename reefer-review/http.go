@@ -37,7 +37,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 }
 
 func actorFromContext(ctx context.Context) string {
-	claims, ok := AuthenticatedSession(ctx)
+	claims, ok := authenticatedSession(ctx)
 	if !ok {
 		return ""
 	}
@@ -124,7 +124,7 @@ func (h HTTP) sessionMiddleware(next http.Handler) http.Handler {
 			writeJSON(w, http.StatusForbidden, map[string]string{"error": "CAPABILITY_DENIED"})
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(WithSessionClaims(r.Context(), claims)))
+		next.ServeHTTP(w, r.WithContext(withSessionClaims(r.Context(), claims)))
 	})
 }
 

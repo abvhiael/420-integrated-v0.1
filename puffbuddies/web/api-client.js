@@ -1,4 +1,5 @@
 const JSON_HEADERS={"Accept":"application/json","Content-Type":"application/json"};
+const mutationKey=()=>globalThis.crypto?.randomUUID?.()||`pb-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 export class ApiError extends Error {
   constructor(message,status=0){ super(message); this.name="ApiError"; this.status=status; }
@@ -15,6 +16,7 @@ export function createApiClient({apiBase,tokenProvider,fetchImpl=globalThis.fetc
     const token=String(tokenProvider?.()||"");
     const headers={...JSON_HEADERS};
     if(token) headers.Authorization=`Bearer ${token}`;
+    if(method!=="GET") headers["Idempotency-Key"]=mutationKey();
     let response;
     try{
       response=await fetchImpl(apiBase+path,{
@@ -40,7 +42,7 @@ export function createApiClient({apiBase,tokenProvider,fetchImpl=globalThis.fetc
       if(file.size<=0 || file.size>10*1024*1024) throw new Error("profile media must be 1..10MiB");
       if(!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("unsupported profile media type");
       const token=String(tokenProvider?.()||"");
-      const headers={}; if(token) headers.Authorization=`Bearer ${token}`;
+      const headers={}; if(token) headers.Authorization=`Bearer ${token}`; headers["Idempotency-Key"]=mutationKey();
       const form=new FormData();form.set("media",file);
       let response;
       try{response=await fetchImpl(apiBase+"/profile/media",{method:"POST",headers,credentials:"same-origin",cache:"no-store",redirect:"error",body:form})}

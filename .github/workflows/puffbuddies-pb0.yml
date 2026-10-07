@@ -50,7 +50,6 @@ jobs:
           forbidden=(
             "contracts/src/puffbuddies"
             "contracts/src/apps/PuffBuddies"
-            "puffbuddies/api"
             "puffbuddies/matching"
             "puffbuddies/profile"
           )

@@ -23,9 +23,9 @@ No dedicated smart contract is required by the canonical architecture: the appli
 | off-chain article body | GEN-SVC-0 boundary | owner-scoped Storage420 adapter + digest/ObjectRef integrity + auth-before-fetch | RR-5 unit/adversarial | README/RR-5 | COMPLETE AT REPOSITORY LEVEL | live deployed 420 Storage provider/key-custody qualification |
 | Identity boundary | dependency registry | verified Wallet/Identity session-verifier boundary + active-identity claim gate | session/adversarial HTTP tests | README/RR-4 | COMPLETE AT REPOSITORY LEVEL | live deployed verifier composition |
 | Rights/provenance | suite roadmap/threat model | structured 420 Rights provenance bound to digest/session chain/network/holder | RR-5 unit/adversarial | README/security/RR-5 | COMPLETE AT REPOSITORY LEVEL | live deployed Rights Registry/Router qualification |
-| Search | registry | public-only projection hook | warning path unit | README/security | PARTIAL | live Search adapter/rebuild/reorg qualification |
-| Notifications | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live delivery/opt-in/dedup |
-| 420Mail | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live signed internal delivery |
+| Search | registry | canonical Search result adapter + PUBLIC-only reconciliation + durable retry | RR-6 unit/adversarial | README/security/RR-6 | COMPLETE AT REPOSITORY LEVEL | live Search/Indexer endpoint and reorg qualification |
+| Notifications | registry/journey 006 | canonical service-targeted minimized/idempotent publication adapter + durable retry | RR-6 unit/adversarial | README/security/RR-6 | COMPLETE AT REPOSITORY LEVEL | live opt-in/provider/failover qualification |
+| 420Mail | registry/journey 006 | canonical Mail-source internal adapter + opt-in audience + recipient idempotency + durable retry | RR-6 unit/adversarial | README/security/RR-6 | COMPLETE AT REPOSITORY LEVEL | live authenticated sender/recipient delivery qualification |
 | permissions | GEN-SVC-0 | Bearer-session actor derivation + scoped author/publisher/moderator capabilities | negative/adversarial/session tests | security/RR-4 | COMPLETE AT REPOSITORY LEVEL | live capability/session issuer deployment |
 | moderation | GEN-SVC-0 | HIDE/RESTORE scoped actions | unit | security | PARTIAL | report/appeal/audit persistence |
 | /v1 API | GEN-SVC-0 | HTTP routes, stable errors, size bounds | HTTP | README | COMPLETE | deployed ingress qualification |

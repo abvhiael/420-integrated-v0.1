@@ -36,6 +36,7 @@ function clearSession() {
   state.sessionCapabilities = [];
   $("#session-state").textContent = "Not connected. Session credentials stay in memory and are never written to browser storage.";
   $("#session-connect").disabled = false;
+  $("#session-scope").disabled = false;
   $("#session-disconnect").disabled = true;
 }
 
@@ -46,9 +47,10 @@ async function connectWalletSession() {
     return;
   }
   try {
+    const requestedCapability = $("#session-scope").value;
     const session = await gateway.requestSession({
       audience: "420/service/reefer-review/v1",
-      capabilities: ["reefer.author", "reefer.publisher", "reefer.moderator"],
+      capabilities: [requestedCapability],
     });
     const token = typeof session?.token === "string" ? session.token.trim() : "";
     if (!token || /[\s,]/.test(token)) throw new Error("invalid session token");
@@ -59,6 +61,7 @@ async function connectWalletSession() {
       ? `Connected as ${state.sessionSubject}. Session is memory-only.`
       : "Verified Wallet session connected. Session is memory-only.";
     $("#session-connect").disabled = true;
+    $("#session-scope").disabled = true;
     $("#session-disconnect").disabled = false;
     setStatus("Verified ReeferReview session connected.");
     if (state.route === "editorial" || state.route === "moderation" || state.route === "article") refreshRoute();

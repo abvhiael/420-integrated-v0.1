@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node --experimental-strip-types --test test/*.test.ts",
     "check": "node --experimental-strip-types --check src/server.ts && node --check public/app.js",
+    "security": "node scripts/security-check.mjs",
     "start": "node --experimental-strip-types src/server.ts"
   },
   "engines": {

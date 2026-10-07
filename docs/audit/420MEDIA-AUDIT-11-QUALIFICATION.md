@@ -119,7 +119,7 @@ MEDIA-AUDIT-11 repository completion does **not** claim:
 - production monitoring/backups/rollback;
 - Genesis catalog promotion.
 
-Those remain **MEDIA-AUDIT-12** and **MEDIA-AUDIT-13**.
+Those live obligations are transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md` as **MEDIA-AUDIT-12** and **MEDIA-AUDIT-13**. Repository-side MEDIA-AUDIT remediation is closed through MEDIA-AUDIT-11.
 
 ## Final determination
 

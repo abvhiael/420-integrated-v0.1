@@ -1,0 +1,52 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-5.8.PhaseCloseout.v1",
+  "step": "CMP-5.8",
+  "title": "Phase closeout",
+  "canonical_definition": "Reconcile the complete accumulated CMP-5 external distributed-compute adapter phase against current main, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification once, preserve durable evidence, and hand off to CMP-6 — Useful-computation rewards.",
+  "status": "QUALIFICATION_PENDING",
+  "reconciliation": {
+    "main_sha": "f0f64ecfe28c4390b524baaf7382ef82808aaa17",
+    "reconciled_anchor_sha": "707c1e269695b7ce3dbfb2692eaf44c9af07f03f",
+    "behind_main": 0
+  },
+  "qualified_prerequisites": [
+    "CMP-5.1",
+    "CMP-5.2",
+    "CMP-5.3",
+    "CMP-5.4",
+    "CMP-5.5",
+    "CMP-5.6",
+    "CMP-5.7"
+  ],
+  "level_3_required": {
+    "solidity_full_inventory": true,
+    "genesis_address_authority": true,
+    "integrated_global": true,
+    "docs_global": true,
+    "retained_compute_market_suite": true,
+    "phase_config_verification": true,
+    "adversarial_invariant_security": true,
+    "deployment_config_verification": true
+  },
+  "ci_ownership": {
+    "solidity_full_inventory": "Solidity Contracts / four balanced PR shards",
+    "genesis_address_authority": "Genesis Address Authority / no duplicate full Foundry",
+    "global_runtime": "420 Integrated Qualification",
+    "docs": "420Docs Qualification",
+    "retained_compute_market": "Compute Market Qualification"
+  },
+  "non_applicable_direct_clients": {
+    "420-indexer": "CMP-5 introduces no new indexer schema, ingestion, discovery, or event-consumer implementation; indexed external-compute discovery remains CMP-7.",
+    "420-rpc": "CMP-5 introduces no RPC method, schema, or backend surface.",
+    "420Search": "CMP-5 introduces no Search consumer or indexing implementation.",
+    "frontend/backend": "CMP-5 introduces protocol adapters and attestation/consumption contracts, not the human-facing CMP-8 application.",
+    "@420/sdk": "CMP-5 introduces no SDK surface; direct SDK qualification is not applicable unless a later change modifies packages/420-sdk."
+  },
+  "live_blockers": [
+    "live external attester governance onboarding and ProtocolRegistry publication remain deployment/testnet scope",
+    "provider-specific external evidence-validation services remain operational/testnet scope",
+    "funded useful-computation reward economics and payout integration remain CMP-6 scope",
+    "public/testnet external-compute workload demonstration remains CMP-9 scope"
+  ],
+  "next_canonical_step": "CMP-6 — Useful-computation rewards"
+}

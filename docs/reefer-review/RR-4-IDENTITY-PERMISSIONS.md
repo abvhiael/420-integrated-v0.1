@@ -80,12 +80,14 @@ The web application requests a session from deployment-provided `window.ReeferRe
 
 The browser:
 
-- requests the ReeferReview audience and scoped capabilities;
+- requests the ReeferReview audience and exactly one user-selected capability scope at connection time;
 - keeps the resulting bearer token **memory-only**;
 - never writes it to localStorage or sessionStorage;
 - sends it only in `Authorization: Bearer`;
 - clears local session state on sign-out;
 - fails closed when a qualified Wallet gateway is unavailable.
+
+The user explicitly chooses Writer, Moderator, or Publisher scope before connection. ReeferReview never requests all privileged scopes by default. The Wallet/Identity gateway remains authoritative for whether the requested scope is actually granted.
 
 The global gateway is a deployment integration seam, not a browser-side authority implementation.
 

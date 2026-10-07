@@ -33,7 +33,7 @@ source=(ROOT/"reefer-review/service.go").read_text()
 for needle in ["Rights.Assert","VisibilityPublic","StatusPublished","BindIdempotency"]:
     req(needle in source,f"service missing {needle}")
 cmd=(ROOT/"cmd/reefer-review/main.go").read_text()
-req('mode!="development"' in cmd,"production executable must fail closed")
+req('mode != "development"' in cmd,"production executable must fail closed")
 req(not (ROOT/"contracts/src/reefer-review").exists(),"unexpected dedicated Reefer Review contract authority")
 if errors:
     for e in errors: print("ERROR:",e)

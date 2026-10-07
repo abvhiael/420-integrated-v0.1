@@ -1,6 +1,7 @@
 package reeferreview
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -11,8 +12,9 @@ import (
 )
 
 type HTTP struct {
-	Service Service
-	News    *NewsService
+	Service  Service
+	News     *NewsService
+	Security *SessionSecurity
 }
 
 func (h HTTP) Handler() http.Handler {
@@ -25,7 +27,7 @@ func (h HTTP) Handler() http.Handler {
 	mux.HandleFunc("/v1/news/sources", h.newsSources)
 	mux.HandleFunc("/v1/news/topics", h.newsTopics)
 	mux.HandleFunc("/v1/news/", h.newsItem)
-	return mux
+	return h.sessionMiddleware(mux)
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -34,10 +36,108 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-func actor(r *http.Request) string { return strings.TrimSpace(r.Header.Get("X-420-Actor")) }
+func actorFromContext(ctx context.Context) string {
+	claims, ok := AuthenticatedSession(ctx)
+	if !ok {
+		return ""
+	}
+	return claims.Subject
+}
+
+func bearerToken(header string) string {
+	const prefix = "Bearer "
+	if !strings.HasPrefix(header, prefix) {
+		return ""
+	}
+	token := strings.TrimSpace(strings.TrimPrefix(header, prefix))
+	if token == "" || strings.ContainsAny(token, " \t\r\n,") {
+		return ""
+	}
+	return token
+}
+
+func sessionRequirements(method, path string) ([]string, bool) {
+	if method == http.MethodPost && path == "/v1/publications" {
+		return []string{CapabilityAuthor, CapabilityPublisher}, true
+	}
+	if method == http.MethodGet && path == "/v1/editorial/publications" {
+		return []string{CapabilityAuthor, CapabilityPublisher, CapabilityModerator}, true
+	}
+	if strings.HasPrefix(path, "/v1/publications/") {
+		if method == http.MethodPut {
+			return []string{CapabilityAuthor, CapabilityPublisher}, true
+		}
+		switch {
+		case method == http.MethodPost && strings.HasSuffix(path, "/publish"):
+			return []string{CapabilityAuthor, CapabilityPublisher}, true
+		case method == http.MethodPost && strings.HasSuffix(path, "/moderate"):
+			return []string{CapabilityModerator, CapabilityPublisher}, true
+		case method == http.MethodPost && strings.HasSuffix(path, "/tombstone"):
+			return []string{CapabilityAuthor, CapabilityPublisher}, true
+		case method == http.MethodGet && strings.HasSuffix(path, "/revisions"):
+			return []string{CapabilityAuthor, CapabilityPublisher, CapabilityModerator}, true
+		case method == http.MethodGet && strings.HasSuffix(path, "/moderation"):
+			return []string{CapabilityAuthor, CapabilityPublisher, CapabilityModerator}, true
+		}
+	}
+	return nil, false
+}
+
+func (h HTTP) sessionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		required, protected := sessionRequirements(r.Method, r.URL.Path)
+		header := strings.TrimSpace(r.Header.Get("Authorization"))
+		if !protected && header == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if h.Security == nil {
+			if protected {
+				writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "SESSION_VERIFIER_UNAVAILABLE"})
+				return
+			}
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "INVALID_SESSION"})
+			return
+		}
+		token := bearerToken(header)
+		if token == "" {
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "SESSION_REQUIRED"})
+			return
+		}
+		claims, err := h.Security.Verify(r.Context(), token)
+		if err != nil {
+			code := "INVALID_SESSION"
+			switch {
+			case errors.Is(err, ErrSessionExpired):
+				code = "SESSION_EXPIRED"
+			case errors.Is(err, ErrSessionRevoked):
+				code = "SESSION_REVOKED"
+			case errors.Is(err, ErrSessionScope):
+				code = "SESSION_SCOPE"
+			case errors.Is(err, ErrSessionRequired):
+				code = "SESSION_REQUIRED"
+			}
+			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": code})
+			return
+		}
+		if protected && !HasAnyCapability(claims, required...) {
+			writeJSON(w, http.StatusForbidden, map[string]string{"error": "CAPABILITY_DENIED"})
+			return
+		}
+		next.ServeHTTP(w, r.WithContext(WithSessionClaims(r.Context(), claims)))
+	})
+}
 
 func (h HTTP) ready(w http.ResponseWriter, r *http.Request) {
 	if err := h.Service.validate(); err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "not_ready", "error": err.Error()})
+		return
+	}
+	if h.Security == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "not_ready", "error": "session verifier unavailable"})
+		return
+	}
+	if err := h.Security.Validate(); err != nil {
 		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"status": "not_ready", "error": err.Error()})
 		return
 	}
@@ -83,7 +183,7 @@ func (h HTTP) publications(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "BAD_JSON"})
 			return
 		}
-		p, err := h.Service.CreateDraft(r.Context(), actor(r), req)
+		p, err := h.Service.CreateDraft(r.Context(), actorFromContext(r.Context()), req)
 		h.respond(w, p, nil, err)
 	case http.MethodGet:
 		offset, limit, err := parsePage(r)
@@ -112,7 +212,7 @@ func (h HTTP) editorialPublications(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "BAD_CURSOR_OR_LIMIT"})
 		return
 	}
-	rows, total, err := h.Service.ListEditorial(r.Context(), actor(r), offset, limit)
+	rows, total, err := h.Service.ListEditorial(r.Context(), actorFromContext(r.Context()), offset, limit)
 	if err != nil {
 		h.respond(w, nil, nil, err)
 		return
@@ -132,7 +232,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 	if len(parts) == 1 {
 		switch r.Method {
 		case http.MethodGet:
-			p, b, err := h.Service.GetForActor(r.Context(), actor(r), id)
+			p, b, err := h.Service.GetForActor(r.Context(), actorFromContext(r.Context()), id)
 			if err != nil {
 				h.respond(w, nil, nil, err)
 				return
@@ -145,7 +245,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 				writeJSON(w, http.StatusBadRequest, map[string]string{"error": "BAD_JSON"})
 				return
 			}
-			p, warnings, err := h.Service.Update(r.Context(), actor(r), id, req)
+			p, warnings, err := h.Service.Update(r.Context(), actorFromContext(r.Context()), id, req)
 			h.respond(w, p, warnings, err)
 			return
 		default:
@@ -165,7 +265,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		p, warnings, err := h.Service.Publish(r.Context(), actor(r), id)
+		p, warnings, err := h.Service.Publish(r.Context(), actorFromContext(r.Context()), id)
 		h.respond(w, p, warnings, err)
 	case "moderate":
 		if r.Method != http.MethodPost {
@@ -177,7 +277,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "BAD_JSON"})
 			return
 		}
-		p, event, err := h.Service.Moderate(r.Context(), actor(r), id, req.Action, req.Reason)
+		p, event, err := h.Service.Moderate(r.Context(), actorFromContext(r.Context()), id, req.Action, req.Reason)
 		if err != nil {
 			h.respond(w, nil, nil, err)
 			return
@@ -195,7 +295,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		p, event, err := h.Service.Tombstone(r.Context(), actor(r), id, req.Reason)
+		p, event, err := h.Service.Tombstone(r.Context(), actorFromContext(r.Context()), id, req.Reason)
 		if err != nil {
 			h.respond(w, nil, nil, err)
 			return
@@ -206,7 +306,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		rows, err := h.Service.ListRevisions(r.Context(), actor(r), id)
+		rows, err := h.Service.ListRevisions(r.Context(), actorFromContext(r.Context()), id)
 		if err != nil {
 			h.respond(w, nil, nil, err)
 			return
@@ -217,7 +317,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		rows, err := h.Service.ListModerationHistory(r.Context(), actor(r), id)
+		rows, err := h.Service.ListModerationHistory(r.Context(), actorFromContext(r.Context()), id)
 		if err != nil {
 			h.respond(w, nil, nil, err)
 			return

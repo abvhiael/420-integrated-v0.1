@@ -127,6 +127,8 @@ Qualify:
 - stale/invalid manifests;
 - recovery after service restart.
 
+**Status: COMPLETE (Level 1).** Canonical media integration definition: `docs/DOOBTUBE-MEDIA-INTEGRATION.md`. Upload admission is scanner-gated and resource-bounded; transport/playback/livestream egress is DNS-aware and fail-closed; manifest and playback revisions are exact; processing uses static bounded profiles with provider/result verification; schema v2 persists only opaque livestream recovery state; restart recovery revalidates canonical controller authority and bounded reconnects.
+
 **Exit:** processing/delivery workflows satisfy DOOBTUBE-3 invariants with adversarial tests.
 
 ## DOOBTUBE-7 — User-facing web application

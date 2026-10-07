@@ -323,3 +323,19 @@ Known retained limitation: `indexed_blocks` records event-bearing blocks rather 
 This formal closeout is evidence-only. It changes no executable/test/workflow/dependency/configuration/generated-artifact/interface/deployment or substantive requirement state; therefore the exact implementation qualification on `6f1ae819ede4b011be53f894ebc4f132f1deabad` remains authoritative and no recursive substantive test rerun is required.
 
 Next canonical roadmap step: **HZ-AUDIT-7 — Public-testnet deployment.**
+
+
+## Post-HZ-AUDIT-6 testnet handoff
+
+Repository-side 420Hz audit work is complete through **HZ-AUDIT-6 — Indexer/reorg/rebuild integration**.
+
+All remaining canonical HZ audit phases are transferred to the shared testnet/release work roadmap in `docs/ROADMAP.md`:
+
+- **HZ-AUDIT-7 — Public-testnet deployment**;
+- **HZ-AUDIT-8 — Live E2E qualification**;
+- **HZ-AUDIT-9 — Operations/security closeout**;
+- **HZ-AUDIT-10 — Production release closeout**.
+
+This is an ownership/location handoff only. HZ-AUDIT-7 through HZ-AUDIT-10 remain **NOT COMPLETE** and must not be represented as testnet-qualified, production-ready or released until their live-environment evidence and applicable final qualification gates are satisfied.
+
+The repository-qualified implementation remains the pre-testnet source baseline. Final merge/reconciliation of PR #556 is separate from the live HZ-AUDIT-7 deployment gate.

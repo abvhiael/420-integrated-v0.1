@@ -1,0 +1,64 @@
+name: Reefer Review live testnet qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      manifest_path:
+        description: Official public-testnet network manifest
+        required: true
+        default: developer-hub/manifests/testnet.json
+      evidence_draft_path:
+        description: Reviewed REEFER-AUDIT-7 live evidence draft
+        required: true
+        default: docs/audit/REEFER-AUDIT-7-LIVE-EVIDENCE-DRAFT.json
+      timeout_seconds:
+        description: Health-probe timeout in seconds
+        required: true
+        default: '15'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+
+      - name: Verify official live inputs exist and are not templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "${{ inputs.manifest_path }}"
+          test "${{ inputs.manifest_path }}" != "developer-hub/manifests/local.example.json"
+          test -f "${{ inputs.evidence_draft_path }}"
+          test "${{ inputs.evidence_draft_path }}" != "docs/audit/REEFER-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json"
+          ! grep -qE 'REPLACE_|PLACEHOLDER' "${{ inputs.manifest_path }}"
+          ! grep -qE 'REPLACE_|PLACEHOLDER' "${{ inputs.evidence_draft_path }}"
+
+      - name: Run REEFER-AUDIT-7 production-equivalent verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/reefer-review
+          python3 scripts/qualify-reefer-review-testnet.py \
+            --manifest "${{ inputs.manifest_path }}" \
+            --evidenceDraft "${{ inputs.evidence_draft_path }}" \
+            --repositorySha "${{ github.sha }}" \
+            --timeoutSeconds "${{ inputs.timeout_seconds }}" \
+            --output artifacts/reefer-review/reefer-audit-7-live-testnet.json
+
+      - name: Upload REEFER-AUDIT-7 live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reefer-audit-7-live-testnet
+          path: artifacts/reefer-review/reefer-audit-7-live-testnet.json
+          if-no-files-found: warn

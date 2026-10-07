@@ -1,0 +1,78 @@
+name: Reefer Review REEFER-AUDIT-7
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/qualify-reefer-review-testnet.py'
+      - 'scripts/verify-reefer-audit-7-testnet-readiness.py'
+      - '.github/workflows/reefer-review-live-testnet.yml'
+      - '.github/workflows/reefer-review-audit-7.yml'
+      - 'docs/audit/REEFER-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json'
+      - 'docs/audit/REEFER-AUDIT-7-TESTNET-QUALIFICATION.md'
+      - 'docs/audit/REEFER-REVIEW-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'docs/audit/REEFER-REVIEW-QUALIFICATION.md'
+  workflow_dispatch:
+
+concurrency:
+  group: reefer-audit-7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Validate REEFER-AUDIT-7 Python
+        run: |
+          python3 -m py_compile scripts/qualify-reefer-review-testnet.py
+          python3 -m py_compile scripts/verify-reefer-audit-7-testnet-readiness.py
+
+      - name: Fail-closed REEFER-AUDIT-7 readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-reefer-audit-7-testnet-readiness.py | tee /tmp/reefer-audit-7-readiness.txt
+          grep -q 'REEFER_AUDIT_7_READINESS=BLOCKED_OFFICIAL_TESTNET_MANIFEST' /tmp/reefer-audit-7-readiness.txt
+          grep -q 'liveQualificationComplete=false' /tmp/reefer-audit-7-readiness.txt
+
+      - name: Hostile template cannot satisfy live qualification
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if python3 scripts/qualify-reefer-review-testnet.py \
+            --manifest developer-hub/manifests/local.example.json \
+            --evidenceDraft docs/audit/REEFER-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json \
+            --repositorySha "$EXPECTED_SHA" \
+            --output /tmp/should-not-exist.json; then
+            echo "local/template evidence unexpectedly qualified" >&2
+            exit 1
+          fi
+          test ! -f /tmp/should-not-exist.json
+
+      - name: Retain Reefer Review repository regressions
+        run: |
+          test -z "$(gofmt -l reefer-review cmd/reefer-review)"
+          go test ./reefer-review/... ./cmd/reefer-review/...
+          python3 scripts/verify-reefer-review-audit.py
+          python3 scripts/validate-gen-svc-0.py
+
+      - name: Ensure live workflow is manual and template contains no secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'workflow_dispatch' .github/workflows/reefer-review-live-testnet.yml
+          grep -q 'qualify-reefer-review-testnet.py' .github/workflows/reefer-review-live-testnet.yml
+          grep -q 'DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE' docs/audit/REEFER-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json
+          ! grep -R -nE '(PRIVATE_KEY|MNEMONIC|BEARER|PASSWORD|TOKEN=)' docs/audit/REEFER-AUDIT-7-LIVE-EVIDENCE-DRAFT.example.json

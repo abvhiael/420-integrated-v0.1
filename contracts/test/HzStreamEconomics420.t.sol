@@ -10,7 +10,10 @@ interface VmHzStreamEconomics420Test {
         address msgSender
     ) external;
 
-    function deal(address who, uint256 newBalance) external;
+    function deal(
+        address who,
+        uint256 newBalance
+    ) external;
 }
 
 contract MockHzStreamRecordings420 is IRouterRecordingRegistry420 {
@@ -118,13 +121,7 @@ contract HzStreamEconomics420Test {
             HzStreamEconomicsPlan420.originalSchedule().termsHash
         );
         _assertSchedule(
-            remix,
-            RecordingClass.REMIX,
-            1_000,
-            1_500,
-            7_250,
-            250,
-            HzStreamEconomicsPlan420.remixSchedule().termsHash
+            remix, RecordingClass.REMIX, 1_000, 1_500, 7_250, 250, HzStreamEconomicsPlan420.remixSchedule().termsHash
         );
 
         bytes32 originalExpected = keccak256(
@@ -162,7 +159,7 @@ contract HzStreamEconomics420Test {
     function testStreamRoutingPreservesCanonicalOriginalAndRemixSplits() public {
         _registerCanonicalSchedules();
 
-        router.route{value: 100 ether}(
+        router.route{ value: 100 ether }(
             RecordingId.wrap(ORIGINAL_ID), RevenueType.STREAM, keccak256("hz-audit-4/original")
         );
 
@@ -185,7 +182,7 @@ contract HzStreamEconomics420Test {
 
         require(
             vault.poolReceived(workKey) + vault.poolReceived(originalKey) + vault.poolReceived(remixKey)
-                + vault.treasuryReceived() == 200 ether,
+                    + vault.treasuryReceived() == 200 ether,
             "gross/conservation"
         );
     }
@@ -194,22 +191,22 @@ contract HzStreamEconomics420Test {
         RoyaltySchedule420 memory original = HzStreamEconomicsPlan420.originalSchedule();
 
         vm.prank(UNAUTHORIZED);
-        (bool unauthorized,) = address(schedules).call(
-            abi.encodeCall(
-                RoyaltyScheduleRegistry420.registerSchedule,
-                (RecordingClass.ORIGINAL, RevenueType.STREAM, original)
-            )
-        );
+        (bool unauthorized,) = address(schedules)
+            .call(
+                abi.encodeCall(
+                    RoyaltyScheduleRegistry420.registerSchedule, (RecordingClass.ORIGINAL, RevenueType.STREAM, original)
+                )
+            );
         require(!unauthorized, "unauthorized/register");
 
         schedules.registerSchedule(RecordingClass.ORIGINAL, RevenueType.STREAM, original);
 
-        (bool replay,) = address(schedules).call(
-            abi.encodeCall(
-                RoyaltyScheduleRegistry420.registerSchedule,
-                (RecordingClass.ORIGINAL, RevenueType.STREAM, original)
-            )
-        );
+        (bool replay,) = address(schedules)
+            .call(
+                abi.encodeCall(
+                    RoyaltyScheduleRegistry420.registerSchedule, (RecordingClass.ORIGINAL, RevenueType.STREAM, original)
+                )
+            );
         require(!replay, "duplicate/version-replay");
     }
 
@@ -231,11 +228,12 @@ contract HzStreamEconomics420Test {
 
         _registerCanonicalSchedules();
 
-        (bool found,) = address(schedules).call(
-            abi.encodeCall(
-                RoyaltyScheduleRegistry420.schedule, (RecordingClass.COVER, RevenueType.STREAM, uint32(1))
-            )
-        );
+        (bool found,) = address(schedules)
+            .call(
+                abi.encodeCall(
+                    RoyaltyScheduleRegistry420.schedule, (RecordingClass.COVER, RevenueType.STREAM, uint32(1))
+                )
+            );
         require(!found, "unsupported/schedule-exists");
     }
 
@@ -250,12 +248,13 @@ contract HzStreamEconomics420Test {
             termsHash: keccak256("invalid-total")
         });
 
-        (bool totalOk,) = address(schedules).call(
-            abi.encodeCall(
-                RoyaltyScheduleRegistry420.registerSchedule,
-                (RecordingClass.ORIGINAL, RevenueType.STREAM, invalidTotal)
-            )
-        );
+        (bool totalOk,) = address(schedules)
+            .call(
+                abi.encodeCall(
+                    RoyaltyScheduleRegistry420.registerSchedule,
+                    (RecordingClass.ORIGINAL, RevenueType.STREAM, invalidTotal)
+                )
+            );
         require(!totalOk, "invalid-total/accepted");
 
         RoyaltySchedule420 memory excessiveProtocol = RoyaltySchedule420({
@@ -268,12 +267,13 @@ contract HzStreamEconomics420Test {
             termsHash: keccak256("excessive-protocol")
         });
 
-        (bool feeOk,) = address(schedules).call(
-            abi.encodeCall(
-                RoyaltyScheduleRegistry420.registerSchedule,
-                (RecordingClass.REMIX, RevenueType.STREAM, excessiveProtocol)
-            )
-        );
+        (bool feeOk,) = address(schedules)
+            .call(
+                abi.encodeCall(
+                    RoyaltyScheduleRegistry420.registerSchedule,
+                    (RecordingClass.REMIX, RevenueType.STREAM, excessiveProtocol)
+                )
+            );
         require(!feeOk, "protocol-cap/accepted");
     }
 
@@ -308,5 +308,5 @@ contract HzStreamEconomics420Test {
         require(schedule_.protocolBps <= CreativeConstants420.MAX_PROTOCOL_FEE_BPS, "schedule/protocol-cap");
     }
 
-    receive() external payable {}
+    receive() external payable { }
 }

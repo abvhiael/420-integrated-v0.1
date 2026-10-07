@@ -26,11 +26,13 @@ if runtime_path.is_file():
     for key in ("consentManagement","rewardClaims","sponsorCampaignManagement"):
         if features.get(key) is not False: errors.append(key+" must default OFF before testnet")
 app=need("attention/web/app.js")
-if app.is_file():
-    text=app.read_text()
+html=need("attention/web/index.html")
+if app.is_file() and html.is_file():
+    app_text=app.read_text()
+    surface=app_text+"\n"+html.read_text()
     for token in ["set-global-consent","set-campaign-consent","claim-reward","create-campaign","fund-campaign","activate-campaign","pause-campaign","close-campaign","cancel-campaign","waitForAttentionTransaction"]:
-        if token not in text: errors.append("missing web workflow marker "+token)
-    if "innerHTML" in text: errors.append("unsafe innerHTML usage")
+        if token not in surface: errors.append("missing web workflow marker "+token)
+    if "innerHTML" in app_text: errors.append("unsafe innerHTML usage")
 wallet=need("attention/web/core/wallet.js")
 if wallet.is_file():
     text=wallet.read_text()

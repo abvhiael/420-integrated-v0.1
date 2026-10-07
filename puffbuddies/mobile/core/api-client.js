@@ -1,3 +1,4 @@
+const mutationKey=()=>globalThis.crypto?.randomUUID?.()||`pb-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 export class MobileApiError extends Error {
   constructor(message,status=0){super(message);this.name="MobileApiError";this.status=status;}
 }
@@ -14,6 +15,7 @@ export function createMobileApi({apiBase,sessionProvider,fetchImpl=globalThis.fe
     const token=String(await sessionProvider?.()||"");
     const headers={"Accept":"application/json","Content-Type":"application/json"};
     if(token)headers.Authorization=`Bearer ${token}`;
+    if(method!=="GET")headers["Idempotency-Key"]=mutationKey();
     let response;
     try{response=await fetchImpl(base+path,{method,headers,cache:"no-store",redirect:"error",body:body===undefined?undefined:JSON.stringify(body)});}
     catch{throw new MobileApiError("PuffBuddies API unavailable",0)}

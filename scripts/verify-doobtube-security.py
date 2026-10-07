@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """DOOBTUBE-9 app-scoped security/abuse/moderation verifier."""
 from pathlib import Path
+import re
 
 ROOT=Path(__file__).resolve().parents[1]
 

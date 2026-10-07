@@ -31,16 +31,16 @@ type rssChannel struct {
 	Items []rssItem `xml:"item"`
 }
 type rssItem struct {
-	Title       string         `xml:"title"`
-	Link        string         `xml:"link"`
-	GUID        string         `xml:"guid"`
-	Author      string         `xml:"author"`
-	Creator     string         `xml:"creator"`
-	Description string         `xml:"description"`
-	PubDate     string         `xml:"pubDate"`
-	Categories  []string       `xml:"category"`
-	Enclosure   rssEnclosure   `xml:"enclosure"`
-	Media       rssMedia       `xml:"content"`
+	Title       string       `xml:"title"`
+	Link        string       `xml:"link"`
+	GUID        string       `xml:"guid"`
+	Author      string       `xml:"author"`
+	Creator     string       `xml:"creator"`
+	Description string       `xml:"description"`
+	PubDate     string       `xml:"pubDate"`
+	Categories  []string     `xml:"category"`
+	Enclosure   rssEnclosure `xml:"enclosure"`
+	Media       rssMedia     `xml:"content"`
 }
 type rssEnclosure struct {
 	URL  string `xml:"url,attr"`
@@ -344,9 +344,9 @@ func normalizeNewsEntry(source NewsSource, entry RawNewsEntry, now time.Time) (E
 		Author: strings.TrimSpace(entry.Author), Summary: summary, ImageURL: image,
 		Categories: normalizeStringSlice(entry.Categories), Topics: classifyNewsTopics(entry),
 		Language: source.Language, FeedGUID: strings.TrimSpace(entry.GUID),
-		CanonicalURLHash: newsURLHash(canonical),
+		CanonicalURLHash:   newsURLHash(canonical),
 		ContentFingerprint: newsContentFingerprint(entry.Title, summary, entry.PublishedAt),
-		Attribution: source.Attribution, Status: status, PublishedAt: entry.PublishedAt,
+		Attribution:        source.Attribution, Status: status, PublishedAt: entry.PublishedAt,
 		DiscoveredAt: now, LastSeenAt: now,
 	}
 	return item, nil

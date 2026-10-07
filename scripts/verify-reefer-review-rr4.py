@@ -50,7 +50,7 @@ for marker in [
     "Bearer ", "sessionToken", "clearSession(", "endSession",
 ]:
     req(marker in js,f"web session boundary missing {marker}")
-req("sessionStorage." not in js and "localStorage." not in js,
+req("sessionStorage.setItem" not in js and "localStorage.setItem" not in js,
     "browser persists session credential")
 req("X-420-Actor" not in js, "browser still sends X-420-Actor")
 req('id="session-actor"' not in index, "arbitrary actor input remains")

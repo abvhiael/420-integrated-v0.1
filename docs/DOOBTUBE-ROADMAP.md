@@ -16,6 +16,8 @@ Required decisions:
 - whether any contracts are DoobTube-owned or all authority is delegated to existing protocols;
 - authority, trust, data, privacy, moderation and custody boundaries.
 
+**Status: COMPLETE (Level 1).** Canonical architecture: `docs/DOOBTUBE-ARCHITECTURE.md`. DoobTube is a replaceable user-facing application/client over `420/service/media/v1`; no second Media authority, Genesis catalog entry, consumer-service entry, frozen/reserved address or DoobTube-owned contract is created by this step.
+
 **Exit:** adopted architecture document with no unresolved contradiction against 420Media, Genesis application decisions or consumer-service policy.
 
 ## DOOBTUBE-1 — Product scope and canonical user workflows

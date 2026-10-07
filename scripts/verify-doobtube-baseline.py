@@ -34,9 +34,10 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
     "Next canonical roadmap step: DOOBTUBE-1 — Product scope and canonical user workflows",
 ])
 audit = need("docs/DOOBTUBE-AUDIT.md", [
-    "DoobTube has **no runtime implementation yet**",
-    "DOOBTUBE-0 now canonically specifies",
+    "Current remediation state: **DOOBTUBE-0 through DOOBTUBE-9 complete**",
+    "repository-qualified DoobTube V1 application/client through DOOBTUBE-9",
     "DOOBTUBE-0 through DOOBTUBE-9 are complete",
+    "SECURITY QUALIFIED: **YES for current app repository scope**",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -119,7 +120,7 @@ allowed_doobtube_files = {
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc" and "dist" not in p.parts}
-    assert observed == allowed_doobtube_files, f"unexpected DoobTube runtime files before DOOBTUBE-5: {sorted(observed ^ allowed_doobtube_files)}"
+    assert observed == allowed_doobtube_files, f"unexpected DoobTube runtime files outside qualified inventory: {sorted(observed ^ allowed_doobtube_files)}"
 assert not (ROOT / "contracts" / "src" / "doobtube").exists(), (
     "DoobTube contracts appeared despite DOOBTUBE-0's no-contract ownership decision"
 )

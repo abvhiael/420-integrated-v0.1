@@ -1707,7 +1707,9 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 
 
-### PB-16 — Security/privacy audit
+### PB-16 — Security/privacy audit — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-16-QUALIFICATION.md` (evidence commit `ad27be4a4211861432ffa420861d82aceabf919b`).
 
 **Purpose:** audit the accumulated repository-side PuffBuddies implementation through PB-15 against canonical privacy, consent, adult-eligibility, threat/trust, safety, data-lifecycle, visibility, state-ownership and non-goal invariants; remediate concrete findings; and record exact-SHA security/privacy evidence before closed testnet.
 

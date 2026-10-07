@@ -36,3 +36,21 @@ RR-3 adds repository-stage revision, restricted-read, tombstone and moderation-h
 - Moderation HIDE, RESTORE and TOMBSTONE actions persist actor, action, reason, from/to status and timestamp.
 - The browser continues to render external and editorial data through DOM text nodes rather than feed-provided HTML.
 - Production authentication, revocation, capability issuance and session expiry remain RR-4.
+
+
+## RR-4 Wallet / 420Identity session boundary
+
+RR-4 removes unsigned actor-header authority from the public HTTP surface.
+
+Protected editorial and moderation requests require a bearer credential verified by a deployment-supplied Wallet/420Identity session verifier. ReeferReview independently checks exact service audience, expected chain/network, session/wallet/subject shape, expiry, revocation and required capability before deriving the actor placed in request context.
+
+Capability scopes are deliberately separated:
+- `reefer.author` is ownership-bound;
+- `reefer.publisher` may exercise publisher/editorial authority;
+- `reefer.moderator` may moderate but cannot manufacture author ownership.
+
+Restricted viewer eligibility is not inferred from mere authentication. FOLLOWERS, COMMUNITY_ONLY and ORGANIZATION_MEMBERS reads require verifier-derived visibility grants unless publisher authority applies.
+
+The browser keeps bearer material memory-only and does not write session credentials to localStorage or sessionStorage. `X-420-Actor` is not sent or trusted.
+
+Live Wallet/Identity gateway deployment, session issuer configuration and production ingress remain later live/deployment qualification and are not claimed by RR-4.

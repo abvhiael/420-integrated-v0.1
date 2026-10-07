@@ -22,9 +22,9 @@ d=json.loads(LEDGER.read_text())
 if d.get("step")!="CMP-5.8" or d.get("status")!="QUALIFICATION_PENDING":
     fail("candidate ledger state drift")
 rec=d.get("reconciliation",{})
-if rec.get("main_sha")!="ea979e30e3c3b977c8b23aeaf346f53ae23ee23a":
+if rec.get("main_sha")!="f674fbed767efc126da253c66800e38d030dc1dd":
     fail("reconciliation main drift")
-if rec.get("reconciled_anchor_sha")!="4c9f7eb9dfbb1ea5d30626cbfea4048b47939731" or rec.get("behind_main")!=0:
+if rec.get("reconciled_anchor_sha")!="7c8999aeeb9542115a9b4d9ed925daee490caba0" or rec.get("behind_main")!=0:
     fail("reconciled anchor drift")
 if d.get("qualified_prerequisites")!=[f"CMP-5.{i}" for i in range(1,8)]:
     fail("prerequisite inventory drift")

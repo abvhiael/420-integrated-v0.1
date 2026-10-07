@@ -163,7 +163,7 @@ func TestRR6NotificationsAdapterPreservesProvenanceAndConsentSuppression(t *test
 	if err := adapter.Published(context.Background(), p); err != nil {
 		t.Fatal(err)
 	}
-	if authority.calls != 1 || authority.req.SourceService != ServiceID ||
+	if authority.calls != 1 || authority.req.TargetService != "420/service/notifications/v1" || authority.req.SourceService != ServiceID ||
 		authority.req.PublicationID != p.ID || authority.req.RightsClaim != p.RightsClaim ||
 		authority.req.ChainID != p.RightsProvenance.ChainID ||
 		authority.req.BlockHash != p.RightsProvenance.BlockHash ||

@@ -1,0 +1,14 @@
+{
+  "name": "@420integrated/attention-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test test/*.test.js",
+    "build": "node scripts/build.mjs",
+    "qualify": "npm run check && npm test && npm run build"
+  },
+  "dependencies": { "ethers": "^6.15.0" },
+  "engines": { "node": ">=22" }
+}

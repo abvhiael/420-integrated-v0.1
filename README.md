@@ -269,6 +269,12 @@ A decentralized media and streaming application exploring a Livepeer-like model 
 
 The design draws inspiration from systems and formats such as Livepeer, Streamplace, Daydream, Lot Radio and community television while integrating native 420 identity, wallet and application services.
 
+## DoobTube
+
+DoobTube is the replaceable user-facing video application/client over canonical 420Media. It provides public discovery/playback presentation, creator upload/library/livestream workflows, subscriptions, moderation presentation and a non-custodial Wallet-aware web experience without creating a second Media authority.
+
+Repository entry point: [`doobtube/README.md`](doobtube/README.md). DoobTube remains under audit/release qualification; local build or non-production deployment does not imply public-testnet, Genesis or production readiness.
+
 ## 420Hz
 
 A music-focused ecosystem for artists, listeners and communities, exploring publishing, streaming, discovery, artist identity, rights, fan relationships and native economic interaction between creators and audiences.

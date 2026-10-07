@@ -1,0 +1,11 @@
+{
+  "schema": "420-reefer-review-v1",
+  "service_id": "420/service/reefer-review/v1",
+  "name": "Reefer Review Publishing",
+  "role": "GENESIS_FACING_MVP",
+  "target": "editorial_news_plus_medium_style_publishing",
+  "authority": "REPLACEABLE_APPLICATION",
+  "dependencies": ["420 Identity","420 Rights","420 Storage","420 Search","420 Notifications","420Mail"],
+  "feature_flags": {"publishing.paid_external_newsletters": false},
+  "production": {"live_adapters_required": true, "fail_closed_without_live_adapters": true}
+}

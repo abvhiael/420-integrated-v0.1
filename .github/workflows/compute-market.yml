@@ -228,6 +228,30 @@ jobs:
       - name: Verify CMP-4.10 phase closeout inventory
         run: python scripts/verify-cmp-4-10-closeout.py
 
+      - name: Verify CMP-5.1 Folding@home adapter
+        run: python scripts/verify-cmp-5-1-folding-at-home-adapter.py
+
+      - name: Verify CMP-5.2 BOINC adapter
+        run: python scripts/verify-cmp-5-2-boinc-adapter.py
+
+      - name: Verify CMP-5.3 Research-cluster adapter
+        run: python scripts/verify-cmp-5-3-research-cluster-adapter.py
+
+      - name: Verify CMP-5.4 University/HPC gateway
+        run: python scripts/verify-cmp-5-4-university-hpc-gateway.py
+
+      - name: Verify CMP-5.5 External proof/credit adapters
+        run: python scripts/verify-cmp-5-5-external-proof-credit-adapters.py
+
+      - name: Verify CMP-5.6 Double-reward prevention
+        run: python scripts/verify-cmp-5-6-double-reward-prevention.py
+
+      - name: Verify CMP-5.7 External-result attestation
+        run: python scripts/verify-cmp-5-7-external-result-attestation.py
+
+      - name: Verify CMP-5.8 Phase closeout
+        run: python scripts/verify-cmp-5-8-closeout.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

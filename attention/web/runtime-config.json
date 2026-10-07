@@ -1,0 +1,42 @@
+{
+  "schema": "420-attention-web-runtime-v1",
+  "network": {
+    "name": "420 Integrated",
+    "chainId": null,
+    "rpcUrl": null,
+    "explorerUrl": null
+  },
+  "registry": {
+    "protocolRegistryAddress": "0x0000000000000000000000000000000000000434",
+    "attentionServiceId": "420/service/attention/v1",
+    "cannaseurServiceId": "420/service/cannaseur/v1",
+    "attentionTreasuryAddress": "0x0000000000000000000000000000000000000421",
+    "campaignRegistryAddress": "0x000000000000000000000000000000000000043b",
+    "attentionRouterAddress": null,
+    "consentRegistryAddress": null,
+    "proofRegistryAddress": null,
+    "rewardRegistryAddress": null
+  },
+  "api": {
+    "baseUrl": null,
+    "projectionSchema": "420-attention-projection-v1"
+  },
+  "transactions": {
+    "minConfirmations": 1,
+    "pollIntervalMs": 1500,
+    "timeoutMs": 120000
+  },
+  "features": {
+    "walletConnection": true,
+    "campaignDiscovery": true,
+    "consentManagement": false,
+    "rewardClaims": false,
+    "sponsorCampaignManagement": false
+  },
+  "execution": {
+    "status": "DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED",
+    "requireWalletChainMatch": true,
+    "requireCanonicalProjectionProvenance": true,
+    "requireReviewedTransaction": true
+  }
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reefer Review</title>
+  <link rel="icon" type="image/webp" href="./assets/favicon.webp">
+  <link rel="apple-touch-icon" href="./assets/reefer-review-logo.webp">
+  <meta name="theme-color" content="#082f24">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1210;--panel:#111b17;--line:#29483a;--text:#f3f7f4;--muted:#a9b8af;--green:#5fd38a;--green2:#bff5d0}
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:980px;margin:0 auto;padding:0 1.25rem 4rem;background:radial-gradient(circle at 50% 0,#173426 0,#0b1210 45%);color:var(--text)}
+    a{color:var(--green2)}
+    header{display:flex;align-items:center;gap:1rem;padding:1.25rem 0;border-bottom:1px solid var(--line)}
+    .header-logo{width:72px;height:72px;object-fit:contain;border-radius:16px;background:#fff}
+    .brand h1{margin:0;font-size:clamp(1.8rem,4vw,2.7rem);letter-spacing:.03em}
+    .brand p{margin:.2rem 0 0;color:var(--muted)}
+    .hero{text-align:center;padding:2.2rem 0 1.4rem}
+    .main-logo{display:block;width:min(420px,88vw);height:auto;margin:0 auto 1.3rem;border-radius:28px;background:#fff;box-shadow:0 20px 60px #0008}
+    .hero-copy{max-width:700px;margin:0 auto;color:#dfe9e3;font-size:1.05rem}
+    .notice{display:block;margin:1.2rem auto 0;max-width:760px;color:var(--muted);line-height:1.5}
+    section{margin-top:2rem}
+    .card{border:1px solid var(--line);border-radius:14px;padding:1rem;margin:1rem 0;background:var(--panel)}
+    input,textarea,select,button{font:inherit;padding:.78rem;margin:.35rem 0;width:100%;border-radius:10px;border:1px solid #385647;box-sizing:border-box;background:#0d1713;color:var(--text)}
+    button{cursor:pointer;background:#174b32;border-color:#347a53;font-weight:700}
+    button:hover{background:#1d5c3d}
+    small{color:var(--muted)}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere}
+  </style>
+</head>
+<body>
+  <header>
+    <img class="header-logo" src="./assets/reefer-review-logo.webp" alt="Reefer Review logo">
+    <div class="brand">
+      <h1>Reefer Review</h1>
+      <p>Independent publishing for the 420Integrated ecosystem.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="reefer-review-title">
+      <img class="main-logo" src="./assets/reefer-review-logo.webp" alt="Official Reefer Review logo">
+      <p id="reefer-review-title" class="hero-copy">Editorial news &amp; independent publishing for the 420Integrated ecosystem.</p>
+      <small class="notice">Repository MVP. Paid external newsletters are disabled. Production identity, rights, storage, search, notification &amp; mail adapters must be qualified before release.</small>
+    </section>
+
+    <section>
+      <h2>Published</h2>
+      <div id="feed"></div>
+    </section>
+
+    <section>
+      <h2>Draft</h2>
+      <input id="actor" placeholder="development actor, e.g. writer.420">
+      <input id="title" placeholder="title">
+      <textarea id="body" rows="8" placeholder="article"></textarea>
+      <select id="visibility">
+        <option>PUBLIC</option>
+        <option>UNLISTED</option>
+        <option>FOLLOWERS</option>
+        <option>PRIVATE</option>
+      </select>
+      <button id="save">Create draft</button>
+      <pre id="status"></pre>
+    </section>
+  </main>
+
+  <script>
+    async function feed(){const r=await fetch('/v1/publications?limit=20');const j=await r.json();document.querySelector('#feed').innerHTML=(j.items||[]).map(x=>'<article class="card"><h3>'+esc(x.title)+'</h3><small>'+esc(x.author)+'</small><p>'+esc(x.summary||'')+'</p></article>').join('')||'<p>No public articles yet.</p>'}
+    function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+    document.querySelector('#save').onclick=async()=>{const actor=document.querySelector('#actor').value;const payload={idempotency_key:crypto.randomUUID(),title:document.querySelector('#title').value,body:document.querySelector('#body').value,visibility:document.querySelector('#visibility').value};const r=await fetch('/v1/publications',{method:'POST',headers:{'content-type':'application/json','X-420-Actor':actor},body:JSON.stringify(payload)});document.querySelector('#status').textContent=JSON.stringify(await r.json(),null,2)}
+    feed()
+  </script>
+</body>
+</html>

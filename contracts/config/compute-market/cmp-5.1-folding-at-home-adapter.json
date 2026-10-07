@@ -1,0 +1,52 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-5.1.FoldingAtHomeAdapter.v1",
+  "step": "CMP-5.1",
+  "title": "Folding@home adapter",
+  "canonical_definition": "Folding@home adapter",
+  "status": "COMPLETE",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "level_2_milestone": "deferred until multiple external adapter families converge",
+    "level_3_deferred_to": "CMP-5.8 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeFoldingAtHomeAdapter420.sol",
+    "test": "contracts/test/ComputeFoldingAtHomeAdapter420.t.sol",
+    "doc": "docs/compute-market/CMP-5.1-FOLDING-AT-HOME-ADAPTER.md",
+    "verifier": "scripts/verify-cmp-5-1-folding-at-home-adapter.py"
+  },
+  "authority_boundaries": {
+    "queries_folding_at_home": false,
+    "external_truth_attestation": false,
+    "canonical_verifier_authority": false,
+    "reward_authority": false,
+    "vault_or_settlement_authority": false,
+    "stake_or_slash_authority": false,
+    "double_reward_prevention": false
+  },
+  "exit_criteria": [
+    "adapter exposes a stable versioned Folding@home protocol commitment",
+    "external contribution identity is domain-separated and binds project work-unit donor and assignment",
+    "normalized record commitment binds result team credit timestamps and external evidence commitment",
+    "required zero or malformed fields fail closed",
+    "completion time cannot precede assignment time and credited points must be positive",
+    "team identity may be absent without weakening the rest of the canonical record",
+    "adapter is stateless and cannot mutate Compute jobs verification funding settlement stake or rewards",
+    "external truth attestation remains explicitly deferred to CMP-5.7",
+    "double-reward prevention remains explicitly deferred to CMP-5.6",
+    "dedicated Solidity tests mechanical verifier and exact-head Compute Market Level 1 workflow pass"
+  ],
+  "intentionally_deferred": [
+    "CMP-5.2 BOINC adapter",
+    "CMP-5.3 research-cluster adapter",
+    "CMP-5.4 University/HPC gateway",
+    "CMP-5.5 external proof/credit adapters",
+    "CMP-5.6 double-reward prevention",
+    "CMP-5.7 external-result attestation",
+    "CMP-5.8 Level 3 phase closeout",
+    "CMP-6 useful-computation rewards",
+    "live Folding@home service/API integration or administrative approval"
+  ],
+  "next_canonical_step": "CMP-5.2 — BOINC adapter"
+}

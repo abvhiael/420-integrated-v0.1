@@ -194,3 +194,64 @@ test('HZ-AUDIT-6 rejects non-canonical block transaction log ordering before mut
     await integration.close();
   }
 });
+
+
+test('HZ-AUDIT-6 rolls back an invalid multi-event canonical batch atomically', async () => {
+  const integration = new HzIndexerIntegration420();
+  try {
+    await integration.applySchemas();
+    await integration.resetAll();
+
+    await assert.rejects(
+      integration.ingestCanonical([
+        event('atomic:1', 400, '0xatomic400', 0, 0, 'CREATOR_CREATED', {
+          creatorId: 400,
+          account: '0xatomic',
+          label: 'Atomic Artist',
+        }),
+        event('atomic:2', 401, '0xatomic401', 0, 0, 'RELEASE_PUBLISHED', {
+          releaseId: 999,
+          publishedAt: 4000,
+        }),
+      ]),
+      /canonical catalog lifecycle/,
+    );
+
+    const journal = await integration.base.pool.query(`SELECT count(*)::int AS count FROM event_journal`);
+    const creators = await integration.base.pool.query(`SELECT count(*)::int AS count FROM creator_profiles`);
+    assert.equal(journal.rows[0].count, 0, 'failed batch must not retain partial journal state');
+    assert.equal(creators.rows[0].count, 0, 'failed batch must not retain partial projection state');
+  } finally {
+    await integration.close();
+  }
+});
+
+test('HZ-AUDIT-6 idempotent replay can promote block finality without reprojecting the event', async () => {
+  const integration = new HzIndexerIntegration420();
+  try {
+    await integration.applySchemas();
+    await integration.resetAll();
+
+    const unfinalized = event('finality:1', 500, '0xfinality500', 0, 0, 'CREATOR_CREATED', {
+      creatorId: 500,
+      account: '0xfinality',
+      label: 'Finality Artist',
+    });
+    await integration.ingestCanonical([unfinalized]);
+
+    const finalized = { ...unfinalized, finalized: true };
+    await integration.ingestCanonical([finalized]);
+
+    const block = await integration.base.pool.query(
+      `SELECT finalized FROM indexed_blocks WHERE block_number=500`,
+    );
+    assert.equal(block.rows[0].finalized, true);
+
+    const creators = await integration.base.pool.query(
+      `SELECT count(*)::int AS count FROM creator_profiles WHERE creator_id=500`,
+    );
+    assert.equal(creators.rows[0].count, 1, 'finality promotion must not duplicate projection state');
+  } finally {
+    await integration.close();
+  }
+});

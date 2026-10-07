@@ -100,10 +100,10 @@ func TestRR4SessionValidationBoundaries(t *testing.T) {
 
 func TestRR4SessionAuthorizerScopesCapabilities(t *testing.T) {
 	p := Publication{Author: "writer.420", Status: StatusPublished, Visibility: VisibilityPrivate}
-	authorCtx := WithSessionClaims(context.Background(), rr4Claims("writer.420", CapabilityAuthor))
-	otherCtx := WithSessionClaims(context.Background(), rr4Claims("other.420", CapabilityAuthor))
-	pubCtx := WithSessionClaims(context.Background(), rr4Claims("publisher.420", CapabilityPublisher))
-	modCtx := WithSessionClaims(context.Background(), rr4Claims("moderator.420", CapabilityModerator))
+	authorCtx := withSessionClaims(context.Background(), rr4Claims("writer.420", CapabilityAuthor))
+	otherCtx := withSessionClaims(context.Background(), rr4Claims("other.420", CapabilityAuthor))
+	pubCtx := withSessionClaims(context.Background(), rr4Claims("publisher.420", CapabilityPublisher))
+	modCtx := withSessionClaims(context.Background(), rr4Claims("moderator.420", CapabilityModerator))
 	a := SessionAuthorizer{}
 	if ok, _ := a.CanEdit(authorCtx, "writer.420", p); !ok {
 		t.Fatal("author cannot edit own publication")
@@ -131,13 +131,13 @@ func TestRR4SessionAuthorizerScopesCapabilities(t *testing.T) {
 func TestRR4VisibilityGrantIsSessionDerived(t *testing.T) {
 	p := Publication{Author: "writer.420", Status: StatusPublished, Visibility: VisibilityCommunityOnly}
 	claims := rr4Claims("reader.420")
-	ctx := WithSessionClaims(context.Background(), claims)
+	ctx := withSessionClaims(context.Background(), claims)
 	ok, _ := (SessionAuthorizer{}).CanRead(ctx, "reader.420", p)
 	if ok {
 		t.Fatal("community content readable without verifier-provided visibility grant")
 	}
 	claims.VisibilityGrants = map[Visibility]bool{VisibilityCommunityOnly: true}
-	ctx = WithSessionClaims(context.Background(), claims)
+	ctx = withSessionClaims(context.Background(), claims)
 	ok, _ = (SessionAuthorizer{}).CanRead(ctx, "reader.420", p)
 	if !ok {
 		t.Fatal("verifier-provided community visibility grant rejected")

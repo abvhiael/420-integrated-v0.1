@@ -25,6 +25,36 @@ const post = async (baseUrl: string, path: string, body: unknown) =>
   });
 
 describe("Budtender web client host", () => {
+  it("reports liveness independently from readiness", async () => {
+    const operational = { ready: true, shuttingDown: false };
+    const server = createBudtenderWebServer(undefined, operational);
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("server address unavailable");
+    const baseUrl = `http://127.0.0.1:${address.port}`;
+    try {
+      const health = await fetch(baseUrl + "/healthz");
+      assert.equal(health.status, 200);
+      assert.equal((await health.json()).status, "ok");
+
+      const ready = await fetch(baseUrl + "/readyz");
+      assert.equal(ready.status, 200);
+      assert.equal((await ready.json()).status, "ready");
+
+      operational.ready = false;
+      const degraded = await fetch(baseUrl + "/readyz");
+      assert.equal(degraded.status, 503);
+      assert.equal((await degraded.json()).status, "not-ready");
+
+      const healthStillUp = await fetch(baseUrl + "/healthz");
+      assert.equal(healthStillUp.status, 200);
+    } finally {
+      server.close();
+      await once(server, "close");
+    }
+  });
+
   it("serves the responsive presentation shell", async () => {
     await withServer(async (baseUrl) => {
       const response = await fetch(baseUrl + "/");

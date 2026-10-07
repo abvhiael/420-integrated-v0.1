@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 and DOOBTUBE-1 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-2 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -214,6 +214,120 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 and DOOBTUBE-1 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-2 are complete" in audit
 
-print("DOOBTUBE-1 Level 1 product-scope verification: PASS")
+dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
+    "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
+    "Status: **ADOPTED**",
+    "420/service/protocol-registry/v1",
+    "420/service/media/v1",
+    "420/service/identity/v1",
+    "420/service/rights/v1",
+    "420/service/resource-protocol/v1",
+    "420/service/search/v1",
+    "420/service/notifications/v1",
+    "420/service/pay/v1",
+    "420/service/compute-market/v1",
+    "## 16. Authority matrix",
+    "## 18. Threat model for dependency boundaries",
+    "## 19. Failure and degraded-mode matrix",
+    "DT-DEP-INV-001",
+    "DT-DEP-INV-012",
+    "Next canonical roadmap step: DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture",
+])
+
+service_ids = need("contracts/src/libraries/ServiceIds420.sol", [
+    'PROTOCOL_REGISTRY = keccak256("420/service/protocol-registry/v1")',
+    'SEARCH = keccak256("420/service/search/v1")',
+    'NOTIFICATIONS = keccak256("420/service/notifications/v1")',
+    'IDENTITY = keccak256("420/service/identity/v1")',
+    'RESOURCE_PROTOCOL = keccak256("420/service/resource-protocol/v1")',
+    'RIGHTS = keccak256("420/service/rights/v1")',
+    'PAY = keccak256("420/service/pay/v1")',
+    'COMPUTE_MARKET = keccak256("420/service/compute-market/v1")',
+])
+
+# The canonical Media consumer-service graph must continue to own its qualified dependencies.
+expected_media_dependencies = {
+    "420 Identity",
+    "420 Rights",
+    "420 Storage",
+    "420 Search",
+    "420 Notifications",
+    "420 Pay",
+    "420 Compute Protocol",
+}
+assert set(media.get("depends_on", [])) == expected_media_dependencies, "canonical 420Media dependency graph drifted"
+
+# Required direct/optional dependencies and transitive Media dependencies must remain explicit.
+for phrase in [
+    "ProtocolRegistry / 420 Registry",
+    "420 Wallet / Smart Accounts",
+    "420Media",
+    "420Identity (optional)",
+    "420Rights",
+    "420Storage / Resource Protocol",
+    "420Search",
+    "420Notifications",
+    "420Pay",
+    "420 Compute Market",
+    "TRANSITIVE_MEDIA",
+    "NOT_ADOPTED_V1",
+]:
+    assert phrase in dependencies, f"dependency classification missing: {phrase!r}"
+
+# Required failure/degraded modes.
+for phrase in [
+    "READ_ONLY_STALE_PRESENTATION_ALLOWED / AUTHORITY_MUTATIONS_BLOCKED",
+    "PUBLIC_READ_ONLY",
+    "STALE_PUBLIC_PRESENTATION_ONLY",
+    "WALLET_ONLY_PSEUDONYMOUS",
+    "NON_PUBLIC / RIGHTS_REVALIDATION_REQUIRED",
+    "PLAYBACK_IF_ALREADY_AUTHORIZED / NO_NEW_STORAGE_MUTATIONS",
+    "DIRECT_REFERENCE_AND_CREATOR_WORKFLOWS_ONLY",
+    "MEDIA_FULL / NOTIFICATION_PREFERENCES_UNAVAILABLE",
+]:
+    assert phrase in dependencies, f"degraded mode missing: {phrase!r}"
+
+# Explicit V1 non-adoption prevents dependency creep.
+for phrase in [
+    "420 Names",
+    "420 Explorer",
+    "420 Analytics",
+    "420 Verify",
+    "420 Arbitration",
+    "420 AppStore",
+    "Governance",
+    "Treasury",
+    "Bridge",
+    "AI",
+    "Oracle Interface Layer",
+    "Stake",
+    "Token",
+    "Swap",
+    "Attention",
+    "Gaming Protocol",
+]:
+    assert phrase in dependencies, f"not-adopted dependency decision missing: {phrase!r}"
+
+# Trust and threat boundaries must remain explicit.
+for phrase in [
+    "browser/client state is hostile/non-authoritative input",
+    "Wallet connection is identity context, not blanket authorization",
+    "Registry discovery proves service binding, not user/content authority",
+    "Pay and Compute remain transitive through Media for V1",
+    "Malicious or stale service discovery",
+    "Actor substitution",
+    "Derived-state poisoning",
+    "Dependency downgrade/fail-open",
+    "Transitive-dependency bypass",
+    "Privacy leakage",
+    "Confused-deputy moderation",
+]:
+    assert phrase in dependencies, f"trust/threat boundary missing: {phrase!r}"
+
+assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
+assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-2 are complete" in audit
+
+print("DOOBTUBE-2 Level 1 dependency/trust verification: PASS")

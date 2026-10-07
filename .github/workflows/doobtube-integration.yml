@@ -3,17 +3,16 @@ name: DoobTube Level 2 integration
 on:
   pull_request:
     paths:
-      - "doobtube/**"
-      - "docs/DOOBTUBE-*"
-      - "docs/audit/DOOBTUBE-*"
-      - "scripts/verify-doobtube-baseline.py"
+      - "doobtube/integration/**"
+      - "doobtube/tests/test_doobtube_level2_integration.py"
+      - "docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md"
+      - "docs/audit/DOOBTUBE-8-QUALIFICATION.md"
       - "scripts/verify-doobtube-level2.py"
-      - ".github/workflows/doobtube-baseline.yml"
       - ".github/workflows/doobtube-integration.yml"
       - "config/genesis-consumer-services.json"
       - "contracts/src/libraries/ServiceIds420.sol"
-      - "media/**"
-      - "search/**"
+      - "media/api/**"
+      - "search/httpapi/**"
   workflow_dispatch:
 
 concurrency:

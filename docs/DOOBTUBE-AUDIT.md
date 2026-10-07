@@ -37,7 +37,6 @@ The only authoritative video-upload/basic-livestreaming application/service defi
 DOOBTUBE-0 now resolves the application identity, 420Media relationship, service/Registry disposition, Genesis disposition, contract-ownership default, and authority/trust/data/privacy/moderation/custody boundaries. The following later-phase properties remain **UNDEFINED / MISSING**:
 
 - service/runtime topology;
-- backend/API/indexer requirements;
 - deployment topology;
 - exact Registry/application listing metadata if later required;
 - implementation/build/test/deployment acceptance evidence.
@@ -170,6 +169,7 @@ Present after this remediation:
 - `docs/DOOBTUBE-PRODUCT-SCOPE.md`
 - `docs/DOOBTUBE-DEPENDENCIES-TRUST.md`
 - `docs/DOOBTUBE-DATA-LIFECYCLE.md`
+- `docs/DOOBTUBE-CONTRACTS-ADAPTERS.md`
 
 Still required before a code-complete declaration:
 
@@ -280,11 +280,11 @@ DoobTube is now canonically defined as a replaceable user-facing video applicati
 - created/updated by audit phase: name decision, architecture, V1 product scope, audit, roadmap, verifier, CI
 - obsolete/stale DoobTube files: none found
 
-### Smart contracts
-No DoobTube contract is canonically required or implemented.
+### Smart contracts and protocol adapters
+DOOBTUBE-4 confirms that no DoobTube-owned smart contract is required for V1. No Solidity, ABI, service ID, address, deployment graph, custody or settlement authority is introduced. The required external protocol bindings are implemented as a bounded executable adapter policy in `doobtube/integrations/ecosystem.py` with app-scoped negative tests.
 
 ### Application components
-Frontend, backend, APIs, workers, indexers, SDKs and deployment tooling: **MISSING for DoobTube**.
+Frontend, backend/API service control plane, workers, production index/feed composition and deployment tooling remain **MISSING for DoobTube**. The DOOBTUBE-4 protocol-adapter policy package is implemented but is not a live backend.
 
 ### Tests
 No DoobTube runtime test suites exist. Only the new structural baseline verifier is applicable at this stage.
@@ -310,10 +310,10 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 
 - CODE COMPLETE: **NO** — no DoobTube runtime implementation exists.
 - BUILD COMPLETE: **NO** — no DoobTube build exists.
-- CONTRACT COMPLETE: **NO for app phase** — DOOBTUBE-0 decides no app-owned contract is currently required, but later requirements and integration qualification are not complete.
+- CONTRACT COMPLETE: **YES for current V1 scope** — DOOBTUBE-4 confirms no DoobTube-owned contract is required and qualifies the external adapter bindings; later app runtime/integration qualification remains incomplete.
 - TEST COMPLETE: **NO** — no requirement-mapped DoobTube runtime tests exist.
 - DOCUMENTATION COMPLETE: **NO** — architecture, product, dependency/trust and data/lifecycle documentation exist, but developer/user/operator/deployment/security closeout docs remain later work.
-- INTEGRATION COMPLETE: **NO** — DOOBTUBE-2 freezes the dependency graph/trust model, but runtime adapters and end-to-end integration are not yet implemented.
+- INTEGRATION COMPLETE: **NO** — DOOBTUBE-4 implements repository-side adapter admission policy, but live/runtime adapters and end-to-end integration remain DOOBTUBE-5 through -8 work.
 - SECURITY QUALIFIED: **NO** — no DoobTube threat model or implementation qualification exists.
 - TESTNET READY: **NO** — no deployable DoobTube release candidate exists.
 - GENESIS READY: **NO** — no Genesis catalog/service decision or deployment exists.
@@ -325,4 +325,4 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 through DOOBTUBE-3 are complete. Next: DOOBTUBE-4 — Contracts and protocol adapters.**
+**DOOBTUBE-0 through DOOBTUBE-4 are complete. Next: DOOBTUBE-5 — Backend/API/indexing/service control plane.**

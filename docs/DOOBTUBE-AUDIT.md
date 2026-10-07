@@ -172,6 +172,7 @@ Present after this remediation:
 - `docs/DOOBTUBE-CONTRACTS-ADAPTERS.md`
 - `docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md`
 - `docs/DOOBTUBE-MEDIA-INTEGRATION.md`
+- `docs/DOOBTUBE-WEB-APPLICATION.md`
 
 Still required before a code-complete declaration:
 
@@ -286,7 +287,7 @@ DoobTube is now canonically defined as a replaceable user-facing video applicati
 DOOBTUBE-4 confirms that no DoobTube-owned smart contract is required for V1. No Solidity, ABI, service ID, address, deployment graph, custody or settlement authority is introduced. The required external protocol bindings are implemented as a bounded executable adapter policy in `doobtube/integrations/ecosystem.py` with app-scoped negative tests.
 
 ### Application components
-Frontend, production media infrastructure/deployment tooling and live dependency bindings remain **MISSING for DoobTube**. DOOBTUBE-6 now implements the repository-qualified upload/process/playback/livestream integration and adversarial security boundaries over qualified 420Media surfaces.
+Production infrastructure/deployment tooling and live dependency bindings remain **MISSING for DoobTube**. DOOBTUBE-7 now implements the production-intended static web client over the qualified DoobTube/Media surfaces with fail-closed runtime configuration.
 
 ### Tests
 No DoobTube runtime test suites exist. Only the new structural baseline verifier is applicable at this stage.
@@ -315,7 +316,7 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 - CONTRACT COMPLETE: **YES for current V1 scope** — DOOBTUBE-4 confirms no DoobTube-owned contract is required and qualifies the external adapter bindings; later app runtime/integration qualification remains incomplete.
 - TEST COMPLETE: **NO** — no requirement-mapped DoobTube runtime tests exist.
 - DOCUMENTATION COMPLETE: **NO** — architecture, product, dependency/trust and data/lifecycle documentation exist, but developer/user/operator/deployment/security closeout docs remain later work.
-- INTEGRATION COMPLETE: **NO** — DOOBTUBE-6 implements repository media integration over qualified Media boundaries, but the web client and retained Level 2 cross-app integration remain DOOBTUBE-7/-8.
+- INTEGRATION COMPLETE: **NO** — the web client composes qualified app/service fixtures, but the retained multi-dependency Level 2 ecosystem milestone remains DOOBTUBE-8.
 - SECURITY QUALIFIED: **NO** — no DoobTube threat model or implementation qualification exists.
 - TESTNET READY: **NO** — no deployable DoobTube release candidate exists.
 - GENESIS READY: **NO** — no Genesis catalog/service decision or deployment exists.
@@ -327,4 +328,4 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 through DOOBTUBE-6 are complete. Next: DOOBTUBE-7 — User-facing web application.**
+**DOOBTUBE-0 through DOOBTUBE-7 are complete. Next: DOOBTUBE-8 — Ecosystem integration milestone.**

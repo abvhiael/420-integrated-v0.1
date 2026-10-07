@@ -1,10 +1,14 @@
-name: Budtender Gaming Integration
+name: Budtender Qualification
 
 on:
   pull_request:
     paths:
+      - "src/budtender/**"
+      - "test/budtender/**"
       - "clients/budtender-access-v1/**"
       - "packages/420-gaming-sdk/**"
+      - "docs/budtender/**"
+      - "docs/gaming/420GP-12-BUDTENDER.md"
       - ".github/workflows/budtender-gaming.yml"
   workflow_dispatch:
 
@@ -12,7 +16,26 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Syntax-check Budtender TypeScript core
+        run: |
+          for file in src/budtender/*.ts test/budtender/*.spec.ts; do
+            node --experimental-strip-types --check "$file"
+          done
+      - name: Test Budtender BUD-1 through BUD-4 core
+        run: node --experimental-strip-types --test test/budtender/*.spec.ts
+
+  gaming-integration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +45,6 @@ jobs:
       - name: Test shared gaming SDK
         working-directory: packages/420-gaming-sdk
         run: npm test
-      - name: Test Budtender integration
+      - name: Test Budtender gaming integration
         working-directory: clients/budtender-access-v1
         run: npm test

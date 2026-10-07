@@ -38,7 +38,6 @@ DOOBTUBE-0 now resolves the application identity, 420Media relationship, service
 
 - service/runtime topology;
 - backend/API/indexer requirements;
-- storage/transcoding/streaming model;
 - deployment topology;
 - exact Registry/application listing metadata if later required;
 - implementation/build/test/deployment acceptance evidence.
@@ -170,6 +169,7 @@ Present after this remediation:
 - `docs/DOOBTUBE-ROADMAP.md`
 - `docs/DOOBTUBE-PRODUCT-SCOPE.md`
 - `docs/DOOBTUBE-DEPENDENCIES-TRUST.md`
+- `docs/DOOBTUBE-DATA-LIFECYCLE.md`
 
 Still required before a code-complete declaration:
 
@@ -296,10 +296,9 @@ No source-level DoobTube vulnerability was identified because there is no DoobTu
 Canonical name, architecture, audit, roadmap, V1 product/workflow scope, and dependency/trust-boundary documentation are present. Developer, final user, operator, deployment and implementation/security closeout documentation remain later roadmap work.
 
 ### Integration
-DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. Direct dependencies are Registry, Wallet/Smart Account authority, 420Media, optional Identity, Rights, Storage/Resource, Search and Notifications; Pay/Compute remain transitive through Media. Runtime adapters are not yet implemented.
+DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOOBTUBE-3 now freezes data ownership and lifecycle on top of those dependencies: DoobTube reuses 420Media MediaAsset/Stream lifecycle, 420Storage/Resource object authority, Media-owned Compute processing integration, and rebuildable Search projections. Runtime adapters are not yet implemented.
 
 ### Outstanding blockers
-1. **data/lifecycle architecture** — DOOBTUBE-3 schemas, ownership, idempotency and recovery;
 2. **code** — all DoobTube runtime/application implementation;
 4. **code/tests** — requirement-mapped unit/integration/security qualification;
 5. **infrastructure** — deployment/runtime/service topology;
@@ -313,7 +312,7 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. Dir
 - BUILD COMPLETE: **NO** — no DoobTube build exists.
 - CONTRACT COMPLETE: **NO for app phase** — DOOBTUBE-0 decides no app-owned contract is currently required, but later requirements and integration qualification are not complete.
 - TEST COMPLETE: **NO** — no requirement-mapped DoobTube runtime tests exist.
-- DOCUMENTATION COMPLETE: **NO** — only baseline governance/audit documentation exists.
+- DOCUMENTATION COMPLETE: **NO** — architecture, product, dependency/trust and data/lifecycle documentation exist, but developer/user/operator/deployment/security closeout docs remain later work.
 - INTEGRATION COMPLETE: **NO** — DOOBTUBE-2 freezes the dependency graph/trust model, but runtime adapters and end-to-end integration are not yet implemented.
 - SECURITY QUALIFIED: **NO** — no DoobTube threat model or implementation qualification exists.
 - TESTNET READY: **NO** — no deployable DoobTube release candidate exists.
@@ -326,4 +325,4 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. Dir
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 through DOOBTUBE-2 are complete. Next: DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture.**
+**DOOBTUBE-0 through DOOBTUBE-3 are complete. Next: DOOBTUBE-4 — Contracts and protocol adapters.**

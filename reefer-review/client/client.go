@@ -15,6 +15,7 @@ type Client struct {
 	BaseURL string
 	HTTP    *http.Client
 }
+
 type Publication map[string]any
 
 func (c Client) do(ctx context.Context, method, path, actor string, in any, out any) error {
@@ -56,24 +57,85 @@ func (c Client) do(ctx context.Context, method, path, actor string, in any, out 
 	}
 	return json.NewDecoder(io.LimitReader(resp.Body, 2<<20)).Decode(out)
 }
+
+func (c Client) Ready(ctx context.Context) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/readyz", "", nil, &out)
+	return out, err
+}
+
 func (c Client) CreateDraft(ctx context.Context, actor string, req any) (map[string]any, error) {
 	var out map[string]any
 	err := c.do(ctx, http.MethodPost, "/v1/publications", actor, req, &out)
 	return out, err
 }
+
+func (c Client) GetPublication(ctx context.Context, actor, id string) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/publications/"+url.PathEscape(id), actor, nil, &out)
+	return out, err
+}
+
+func (c Client) UpdatePublication(ctx context.Context, actor, id string, req any) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodPut, "/v1/publications/"+url.PathEscape(id), actor, req, &out)
+	return out, err
+}
+
 func (c Client) Publish(ctx context.Context, actor, id string) (map[string]any, error) {
 	var out map[string]any
 	err := c.do(ctx, http.MethodPost, "/v1/publications/"+url.PathEscape(id)+"/publish", actor, nil, &out)
 	return out, err
 }
+
+func (c Client) Moderate(ctx context.Context, actor, id, action, reason string) (map[string]any, error) {
+	var out map[string]any
+	req := map[string]string{"action": action, "reason": reason}
+	err := c.do(ctx, http.MethodPost, "/v1/publications/"+url.PathEscape(id)+"/moderate", actor, req, &out)
+	return out, err
+}
+
+func (c Client) Tombstone(ctx context.Context, actor, id, reason string) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodPost, "/v1/publications/"+url.PathEscape(id)+"/tombstone", actor, map[string]string{"reason": reason}, &out)
+	return out, err
+}
+
+func (c Client) Revisions(ctx context.Context, actor, id string) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/publications/"+url.PathEscape(id)+"/revisions", actor, nil, &out)
+	return out, err
+}
+
+func (c Client) ModerationHistory(ctx context.Context, actor, id string) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/publications/"+url.PathEscape(id)+"/moderation", actor, nil, &out)
+	return out, err
+}
+
 func (c Client) List(ctx context.Context, cursor string, limit int) (map[string]any, error) {
 	q := url.Values{}
 	if cursor != "" {
 		q.Set("cursor", cursor)
 	}
-	q.Set("limit", fmt.Sprint(limit))
+	if limit > 0 {
+		q.Set("limit", fmt.Sprint(limit))
+	}
 	var out map[string]any
 	err := c.do(ctx, http.MethodGet, "/v1/publications?"+q.Encode(), "", nil, &out)
+	return out, err
+}
+
+func (c Client) ListEditorial(ctx context.Context, actor, cursor string, limit int) (map[string]any, error) {
+	q := url.Values{}
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", fmt.Sprint(limit))
+	}
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/editorial/publications?"+q.Encode(), actor, nil, &out)
 	return out, err
 }
 

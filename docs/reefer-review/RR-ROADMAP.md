@@ -103,6 +103,11 @@ Repository implementation adds a scheduler, safe conditional fetch, versioned op
 ## RR-9 — Web UX & Deployment
 Production frontend/backend deployment configuration, API routing, security headers/rate limits, logs/metrics/alerts, backup/restore and browser E2E/accessibility/load qualification.
 
+Status: **PARTIAL / SECURITY HEADERS IMPLEMENTED; FULL DEPLOYMENT AND BROWSER QUALIFICATION BLOCKED**
+
+See `RR-9-WEB-UX-DEPLOYMENT.md` for precise incomplete gates. RR-9 app-scoped tests and a verifier have been introduced, but live routing, authenticated production dependencies, rate limits, monitoring/alerts, backup restore, browser E2E/accessibility/load evidence remain to be qualified. Do not declare COMPLETE on static/source evidence alone.
+
+
 ## RR-10 — Repository Level 3 Closeout
 Reconcile accumulated app work with current main and execute the complete app-phase Level 3 qualification once on the exact merge-candidate implementation SHA.
 

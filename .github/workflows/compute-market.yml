@@ -246,6 +246,9 @@ jobs:
       - name: Verify CMP-5.6 Double-reward prevention
         run: python scripts/verify-cmp-5-6-double-reward-prevention.py
 
+      - name: Verify CMP-5.7 External-result attestation
+        run: python scripts/verify-cmp-5-7-external-result-attestation.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

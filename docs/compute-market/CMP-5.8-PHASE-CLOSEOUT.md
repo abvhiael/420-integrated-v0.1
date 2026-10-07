@@ -1,6 +1,6 @@
 # CMP-5.8 — Phase closeout
 
-Status: **LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+Status: **COMPLETE — Level 3 exact-head phase closeout qualified.**
 
 ## Canonical definition
 
@@ -33,7 +33,7 @@ Documented CMP-5 Level 2 integration milestones are:
 4. **420Docs Qualification** owns global documentation and reconciliation.
 5. **Compute Market Qualification** owns the retained Compute contract suite and all retained CMP verifiers, including this closeout verifier.
 
-Missing, cancelled, stale, superseded, skipped-required, or untriggered Level 3 gates are not passing evidence.
+Missing, cancelled, stale, superseded, skipped-required, or untriggered Level 3 gates are not passing evidence. CMP-5.8 is COMPLETE only when all required Level 3 owners are green on the same exact candidate SHA and durable evidence records those results.
 
 ## Accumulated CMP-5 protocol surface
 

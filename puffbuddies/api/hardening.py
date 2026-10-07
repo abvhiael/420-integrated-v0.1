@@ -19,7 +19,6 @@ JSON_LIMIT = 64 * 1024
 MEDIA_LIMIT = 11 * 1024 * 1024
 TOKEN_LIMIT = 4096
 IDEMPOTENCY_RE = re.compile(r"^[A-Za-z0-9._:-]{16,128}$")
-REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9._:-]{8,96}$")
 
 
 class ApiDenied(PermissionError):
@@ -163,10 +162,10 @@ def _headers(values: Mapping[str, str]) -> dict[str, str]:
     return out
 
 
-def _request_id(headers: Mapping[str, str]) -> str:
-    candidate = headers.get("x-request-id", "")
-    if candidate and REQUEST_ID_RE.fullmatch(candidate):
-        return candidate
+def _request_id() -> str:
+    # Security/privacy audit: authoritative request correlation is server-generated.
+    # Client-supplied identifiers are deliberately ignored so private/sensitive text
+    # cannot be injected into protected audit metadata or used to create collisions.
     return "pb-" + secrets.token_hex(16)
 
 
@@ -251,7 +250,7 @@ class ApiTransport:
         route_id = "unresolved"
         try:
             headers = _headers(request.headers)
-            request_id = _request_id(headers)
+            request_id = _request_id()
             method = request.method.upper().strip()
             if self.require_https and request.scheme.lower() != "https":
                 raise ApiDenied("https required")

@@ -37,6 +37,8 @@ Define stable v1 requirements for:
 - deletion/retention/export;
 - accessibility and responsive UX.
 
+**Status: COMPLETE (Level 1).** Canonical V1 product definition: `docs/DOOBTUBE-PRODUCT-SCOPE.md`. The scope freezes anonymous public viewing, Wallet-gated creator/controller actions, optional Identity, creator/channel presentation without new authority, upload/library/playback, public discovery/Search, basic livestreaming, creator-update subscriptions, sharing, Rights/provenance, PRIVATE/UNLISTED/PUBLIC visibility, report/moderation/appeal, deletion/retention/export, and accessibility/responsive requirements. Comments/reactions and viewer monetization are explicit V1 non-goals.
+
 **Exit:** requirement IDs, non-goals, state machines and acceptance criteria are frozen.
 
 ## DOOBTUBE-2 — Dependency and trust-boundary freeze

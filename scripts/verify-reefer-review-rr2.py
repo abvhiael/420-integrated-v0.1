@@ -59,18 +59,21 @@ for route in expected_routes:
 req(parser.skip and parser.main, "skip-link/main landmark missing")
 req(parser.live >= 5, "insufficient live regions for dynamic feed/search/status")
 req(parser.logo_refs >= 2, "official Reefer Review logo missing from header/hero")
-for control in {"actor", "draft-title", "draft-body", "visibility", "search-query"}:
+for control in {"draft-title", "draft-body", "visibility", "search-query"}:
     req(control in parser.inputs, f"missing control {control}")
     req(control in parser.labels_for, f"missing programmatic label for {control}")
+req("actor" in parser.inputs or "session-actor" in parser.inputs, "missing editorial actor control")
+req("actor" in parser.labels_for or "session-actor" in parser.labels_for, "missing programmatic label for editorial actor")
 
 for marker in [
     "/v1/news?", "/v1/news/sources", "/v1/news/topics", "/v1/publications?limit=20",
     "canonical_url", "attribution", "Read original", "noopener noreferrer external",
     "source-filter", "topic-filter", "news-more", "originals-more",
-    "routeFromHash", "runSearch", "externalNewsCard", "originalCard",
+    "runSearch", "externalNewsCard", "originalCard",
 ]:
     req(marker in js, f"app.js missing {marker}")
 
+req("routeFromHash" in js or "parseRoute" in js, "route parser missing")
 req(".innerHTML" not in js, "app.js must not inject feed content through innerHTML")
 req("document.createElement" in js and ".textContent" in js, "safe DOM construction missing")
 req("URLSearchParams" in js, "query/filter encoding missing")

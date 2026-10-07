@@ -66,6 +66,9 @@ jobs:
       - name: Verify Budtender web security controls
         working-directory: clients/budtender-web-v1
         run: npm run security
+      - name: Verify Budtender deployment operations controls
+        working-directory: clients/budtender-web-v1
+        run: npm run ops
 
   gaming-integration:
     runs-on: ubuntu-latest

@@ -798,7 +798,7 @@ web_tests = need("doobtube/web/test/web.test.js", [
 
 # All original DOOBTUBE-7 categories must be concretely represented.
 for phrase in [
-    "canonical routes",
+    "Canonical user surfaces",
     "Wallet connection",
     "loading/empty/error/pending/success states",
     "retry/revalidation",

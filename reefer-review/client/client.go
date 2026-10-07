@@ -76,3 +76,43 @@ func (c Client) List(ctx context.Context, cursor string, limit int) (map[string]
 	err := c.do(ctx, http.MethodGet, "/v1/publications?"+q.Encode(), "", nil, &out)
 	return out, err
 }
+
+func (c Client) ListNews(ctx context.Context, cursor string, limit int, source, topic, query string) (map[string]any, error) {
+	q := url.Values{}
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", fmt.Sprint(limit))
+	}
+	if source != "" {
+		q.Set("source", source)
+	}
+	if topic != "" {
+		q.Set("topic", topic)
+	}
+	if query != "" {
+		q.Set("q", query)
+	}
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/news?"+q.Encode(), "", nil, &out)
+	return out, err
+}
+
+func (c Client) GetNews(ctx context.Context, id string) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/news/"+url.PathEscape(id), "", nil, &out)
+	return out, err
+}
+
+func (c Client) NewsSources(ctx context.Context) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/news/sources", "", nil, &out)
+	return out, err
+}
+
+func (c Client) NewsTopics(ctx context.Context) (map[string]any, error) {
+	var out map[string]any
+	err := c.do(ctx, http.MethodGet, "/v1/news/topics", "", nil, &out)
+	return out, err
+}

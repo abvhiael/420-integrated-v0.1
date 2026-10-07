@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type HTTP struct{ Service Service }
+type HTTP struct {\n\tService Service\n\tNews    *NewsService\n}
 
 func (h HTTP) Handler() http.Handler {
 	mux := http.NewServeMux()

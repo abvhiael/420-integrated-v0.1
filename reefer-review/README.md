@@ -60,3 +60,25 @@ REEFER_REVIEW_DEPLOYMENT_MODE=development go run ./cmd/reefer-review
 ```
 
 Any staging/production mode intentionally fails closed until live adapters are implemented and qualified.
+
+
+## Persistent cannabis newsfeed (RR-1)
+
+The repository now contains the RR-1 persistent external cannabis-news foundation.
+
+- External stories use a distinct `ExternalNewsItem` model; they are not rewritten as ReeferReview-authored Publications.
+- RSS 2.0 and Atom feeds are normalized into title/link/source/byline/summary/topic/provenance metadata.
+- Full third-party article bodies are not ingested. The canonical article URL remains the reader handoff.
+- `config/reefer-review-news-sources.json` is the reviewed source registry.
+- `FileNewsStore` persists normalized items across process restarts and uses atomic file replacement.
+- Canonical URL normalization, stable IDs, feed-GUID continuity and content fingerprints provide deduplication/replay resistance.
+- Deterministic cannabis relevance filtering rejects unrelated feed entries from the public news API.
+- Public news routes:
+  - `GET /v1/news`
+  - `GET /v1/news/{id}`
+  - `GET /v1/news/sources`
+  - `GET /v1/news/topics`
+- One-shot ingestion is performed by `go run ./cmd/reefer-news-sync`. Background scheduling remains RR-8 and is intentionally not claimed by RR-1.
+
+Development data defaults to `.reefer-review/news.json`. Override with `REEFER_REVIEW_NEWS_DB`.
+Override the source registry path with `REEFER_REVIEW_NEWS_SOURCES`.

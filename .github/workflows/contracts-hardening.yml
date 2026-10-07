@@ -7,6 +7,10 @@ on:
     paths:
       - "contracts/**"
       - ".github/workflows/contracts-hardening.yml"
+  pull_request:
+    paths:
+      - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
+      - ".github/workflows/contracts-hardening.yml"
   workflow_dispatch:
 
 concurrency:
@@ -22,7 +26,14 @@ jobs:
     env:
       FOUNDRY_PROFILE: hardening
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
       - name: Install Foundry with retry
         shell: bash
@@ -106,9 +117,9 @@ jobs:
           fi
           : > ../artifacts/hardening/dangerous-opcodes.txt
 
-      - name: Clean hardening build
+      - name: Hardening size build
         working-directory: contracts
-        run: forge clean && forge build --force --sizes 2>&1 | tee ../artifacts/hardening/build.txt
+        run: forge build --sizes 2>&1 | tee ../artifacts/hardening/build.txt
 
       - name: AI package fuzz campaign
         working-directory: contracts

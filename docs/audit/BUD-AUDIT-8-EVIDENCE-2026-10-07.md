@@ -20,6 +20,12 @@ Base `main` SHA at qualification:
 
 `c8e8b58d818611276f7a9bb2b8d2241004450d97`
 
+Current `main` observed at evidence closeout:
+
+`8d8e89058b6badb08156e16562b39d5ae8e526b4`
+
+At evidence closeout the audit branch is 80 commits ahead / 186 commits behind current `main`. Comparison of the 186 intervening `main` commits shows no change to Budtender source/tests, `clients/budtender-access-v1`, `clients/budtender-web-v1`, the shared Gaming SDK, Gaming client-hardening/cross-game packages, or Gaming Protocol contracts. Ordinary-step qualification therefore remains valid for the exact implementation SHA; reconciliation with current `main` remains intentionally deferred to Level 3.
+
 Audit branch:
 
 `audit/budtender-complete-20261007`

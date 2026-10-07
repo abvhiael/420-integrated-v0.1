@@ -203,6 +203,8 @@ CMP-6.7 is COMPLETE only when:
 - retained Compute Market Level-2 qualification passes on the exact implementation SHA;
 - durable repository evidence records the qualified implementation SHA.
 
+Durable evidence: [CMP-6.7 qualification](CMP-6.7-QUALIFICATION-EVIDENCE.md).
+
 Next canonical step:
 
 **CMP-6.8 — Phase closeout**

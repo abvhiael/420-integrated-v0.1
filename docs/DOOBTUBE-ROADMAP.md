@@ -88,6 +88,8 @@ Required where applicable:
 - events/errors;
 - adversarial/fuzz/invariant/property tests.
 
+**Status: COMPLETE (Level 1).** Canonical contract/adapter definition: `docs/DOOBTUBE-CONTRACTS-ADAPTERS.md`. DOOBTUBE-0 through -3 prove that V1 requires no DoobTube-owned Solidity contract, service ID, frozen address, deployment graph, custody or settlement authority. DOOBTUBE-4 therefore implements a contract-free executable adapter policy in `doobtube/integrations/ecosystem.py` with negative/boundary tests covering Registry, Media compatibility, Storage readiness, Search privacy/authority, Notifications consent/authority, direct Pay/Compute bypass and canonical-authority substitution.
+
 **Exit:** exact contract scope compiles and passes app-specific qualification. If no DoobTube-owned contracts are required, document that decision and qualify the external protocol bindings instead.
 
 ## DOOBTUBE-5 — Backend/API/indexing/service control plane

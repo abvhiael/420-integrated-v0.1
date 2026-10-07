@@ -87,6 +87,11 @@ RR-6 is a material cross-component milestone because it replaces the generic Sea
 ## RR-7 — Newsfeed Security
 SSRF/redirect/DNS-rebinding controls, parser hardening, sanitization, source allowlisting, fetch limits, copyright/attribution enforcement and adversarial ingestion tests.
 
+Status: **IMPLEMENTATION IN PROGRESS / LEVEL 1 QUALIFICATION PENDING**
+
+RR-7 security changes and adversarial tests are on the accumulated PR branch, along with a dedicated exact-head fast qualification workflow and `RR-7-NEWSFEED-SECURITY.md`. Do not mark COMPLETE until the RR-7 Level 1 workflow passes on the final implementation SHA and durable evidence is recorded. Level 2 is milestone-driven; Level 3 remains RR-10.
+
+
 ## RR-8 — Feed Operations
 Background polling scheduler, conditional GET, retry/backoff/circuit breaking, source health, checkpoints and operator source dashboard.
 

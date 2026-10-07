@@ -41,13 +41,13 @@ Do not renumber, collapse, or silently redefine these steps. Repository truth an
 - Define and implement only the non-canonical projection/API actually required by the user-facing client.
 - Preserve raw Attention telemetry and private audience data exclusions.
 - Include reorg/rebuild behavior, bounded retries/idempotency where applicable, and canonical-source provenance.
-- **Status: IMPLEMENTED; awaiting exact-head Level 1 service qualification and Level 2 Attention app-integration qualification.**
+- **Status: COMPLETE. Level 1 service qualification and Level 2 Attention app-integration qualification passed at implementation SHA `8c4c50017df038172ff26ca207c01d47c4c2d622` (workflow run `37572383181`).**
 
 ## ATTENTION-AUDIT-8 — Testnet deployment and integration qualification
 - Deploy fixed Genesis predeploys and registry-resolved Attention components in the production-equivalent testnet environment.
 - Verify exact addresses, storage initialization/bindings, service registration, Wallet capability integration, native 420 funding/accounting, Explorer/Indexer visibility, Notifications privacy boundary, and recovery behavior.
 - Publish readiness/deployment evidence tied to exact deployed bytecode and chain state.
-- **Status: BLOCKED on production-equivalent testnet and ATTENTION-AUDIT-7.**
+- **Status: NEXT / BLOCKED ON PRODUCTION-EQUIVALENT TESTNET. Repository prerequisites through ATTENTION-AUDIT-7 are complete.**
 
 ## ATTENTION-AUDIT-9 — Genesis closeout
 - Re-run exact-head repository qualification after all executable changes.

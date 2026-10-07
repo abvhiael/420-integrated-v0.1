@@ -95,6 +95,11 @@ RR-7 security changes and adversarial tests are on the accumulated PR branch, al
 ## RR-8 — Feed Operations
 Background polling scheduler, conditional GET, retry/backoff/circuit breaking, source health, checkpoints and operator source dashboard.
 
+Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+
+Repository implementation adds a scheduler, safe conditional fetch, versioned operational checkpoints, retry/backoff and circuit state, source-health readout, and focused tests. The exact-head `Reefer Review RR-8` workflow must pass before RR-8 can be declared COMPLETE. See `RR-8-FEED-OPERATIONS.md`. Level 3 remains RR-10.
+
+
 ## RR-9 — Web UX & Deployment
 Production frontend/backend deployment configuration, API routing, security headers/rate limits, logs/metrics/alerts, backup/restore and browser E2E/accessibility/load qualification.
 

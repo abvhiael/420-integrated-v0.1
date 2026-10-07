@@ -69,6 +69,18 @@ jobs:
       - name: RR-5 retained verifier
         run: python3 scripts/verify-reefer-review-rr5.py
 
+      - name: RR-6 retained verifier
+        run: python3 scripts/verify-reefer-review-rr6.py
+
+      - name: RR-6 Search schema dependency tests
+        run: go test ./search/architecture ./search/result
+
+      - name: RR-6 Notifications boundary dependency tests
+        run: go test ./notifications/architecture ./notifications/security
+
+      - name: RR-6 Mail contract dependency tests
+        run: go test ./mail ./mail/client
+
       - name: Canonical 420 Storage SDK dependency tests
         run: go test ./sdk/storage420
 

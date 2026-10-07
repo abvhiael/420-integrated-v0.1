@@ -1,0 +1,43 @@
+name: PuffBuddies PB-3 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb3.yml"
+  push:
+    branches: ["puffbuddies-pb3-profiles-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb3.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb3-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-3 targeted profiles
+        run: python3 -m unittest puffbuddies.tests.test_pb_3_profiles -v
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Profile privacy and public-chain negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(date_of_birth|government_id_image|wallet_address|public_wallet_link|public_profile_id)[[:space:]]*[:=]' puffbuddies/domain/profiles.py
+          ! grep -RIE 'PUBLIC_EXPLICIT' puffbuddies/domain/profiles.py | grep -v 'PROFILE_ALLOWED_AUDIENCES'

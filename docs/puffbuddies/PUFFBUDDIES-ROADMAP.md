@@ -1488,6 +1488,136 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** one reconciled exact merge-candidate SHA is established; Solidity Contracts full inventory PASS; Genesis/address-authority PASS; 420 Integrated/global PASS including Geth/fault/soak; complete retained PuffBuddies/PB-2 suite PASS; 420Docs/global PASS; applicable privacy/adversarial/invariant/failure/static/deployment/config checks PASS; roadmap/evidence/address/deployment claims reconciled; no remaining PB-2 implementation blocker; durable Level-3 evidence records every owner/run/job and exact SHA; PB-2 may then be formally marked COMPLETE and the next canonical phase is PB-3 — Profiles.
 
+### PB-3 — Profiles — COMPLETE
+
+**Purpose:** implement the canonical private PuffBuddies profile boundary for eligible users: profile creation/editing, Dating/Buddy/Both mode, bounded profile text/prompts, opaque media metadata, explicit field-level visibility, canonical completeness, activation/reactivation, deactivation/delete initiation, private persistence, and stale-derived invalidation.
+
+**Canonical requirements:** profile authority remains PuffBuddies-owned and private/off-chain; creation requires current ELIGIBLE + PROFILE_INCOMPLETE; owner-only edits; bounded closed display-field registry; opaque bounded media references only; nonempty display name + at least one media reference defines profile completeness; PB-3 profile audiences are PRIVATE_SELF/DISCOVERABLE/MATCHED only; no public profile surface or wallet/profile enumeration; stale/missing visibility policy fails closed; profile/visibility changes invalidate derived authority; profile completeness plus current eligibility gates activation/reactivation; deactivation and deletion initiation use canonical lifecycle transitions; protected lifecycle states reject edits; storage uses existing private profile/visibility tables with optimistic concurrency; no discovery engine, likes/matching, Messenger transport, web/mobile UI, production media store, database, API, contract, address, service ID or deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/profiles.py`, `puffbuddies/tests/test_pb_3_profiles.py`, `.github/workflows/puffbuddies-pb3.yml`, profile/visibility persistence, lifecycle/authorization/invalidation primitives, PB-0.19 reconciliation, canonical definition/evidence.
+
+**Qualification level:** Level 1 — ordinary app-scoped roadmap-step qualification.
+
+**Milestone relationship:** no Level-2 milestone is triggered by PB-3 alone; broader retained integration belongs at a later documented accumulated boundary. Level-3 remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.9, PB-0.11, PB-0.12, PB-0.15; PB-1 foundations; PB-2 COMPLETE.
+
+**Exit criteria:** eligible profile creation/edit/save works through canonical private persistence; completeness gates activation; visibility is explicit/versioned/server-authorized/fail-closed; profile/visibility changes invalidate stale derived state; lifecycle pause/reactivation/delete initiation respect current authority; privacy/public-chain/wallet-enumeration negatives hold; retained PuffBuddies regressions and exact-head PB-3 fast qualification pass; durable evidence recorded.
+
+### PB-4 — Discovery engine — COMPLETE
+
+**Purpose:** implement the private PuffBuddies discovery engine over the current PB-2 eligibility/generation gate and PB-3 profile/visibility authority. Hard exclusions run before ranking; ranking remains derived/non-canonical and cannot create consent.
+
+**Canonical requirements:** both viewer and candidate must pass current eligibility/lifecycle/block/generation gates; self-discovery and incomplete profiles are excluded; Dating/Buddy/Both compatibility is mutual; discovery preferences remain private; proximity is consumed only as a coarse bounded band and is never returned as precise distance; cannabis compatibility uses explicit private user choices without coercion; missing/stale visibility fails closed; only DISCOVERABLE PB-3 presentation is returned; block/lifecycle/eligibility/deletion/restriction/stale authority outrank ranking; ranking uses only allowed explicit signals and excludes wealth/payment/token/moderation/raw-identity/precise-location/inferred-sensitive traits; ranking failure safely degrades after the same hard exclusions; results are bounded private application views and cannot create likes, passes, matches, messaging permission or notifications; no public profile/Search/Explorer/wallet enumeration, production recommendation service, ML model, feature store, API, contract, address/service ID, deployment or production database is introduced.
+
+**Affected components:** `puffbuddies/domain/discovery.py`, existing PB-2 discovery eligibility/generation gate, PB-3 profile/visibility state, private preferences persistence, PB-4 targeted tests/workflow, PB-0.19 reconciliation, canonical definition/evidence.
+
+**Qualification level:** Level 1 — ordinary app-scoped roadmap-step qualification.
+
+**Milestone relationship:** PB-4 alone does not trigger Level 2. The meaningful accumulated discovery/matching boundary is after **PB-5 — Likes and matching** converges with discovery. Level 3 remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.14, PB-0.15; PB-2; **PB-3 — Profiles — COMPLETE**.
+
+**Exit criteria:** hard exclusions precede ranking; current eligibility/lifecycle/block/generation/profile/visibility authority is enforced; mutual mode/private preference/coarse-proximity/cannabis compatibility works without sensitive inference or precise-location disclosure; stale/unknown authority fails closed; ranking is deterministic/non-canonical and safely degrades; results contain only authorized discovery presentation and create no relationship/messaging consent; preferences persist privately with optimistic concurrency; public-chain/Search/Explorer/wallet enumeration remains absent; retained PuffBuddies regressions and exact-head PB-4 fast qualification pass; durable evidence recorded.
+
+### PB-5 — Likes and matching — COMPLETE
+
+**Purpose:** implement private directional LIKE/PASS intent and reciprocal PuffBuddies match formation over the current PB-4 discovery boundary while preserving PB-0.5 consent, PB-0.13 match-formation rules, block supremacy, current-state authority, and stale-state rejection.
+
+**Canonical requirements:** LIKE/PASS intent is directional private user state; one-sided LIKE never creates match or messaging consent; PASS is not consent; reciprocal match requires two independent current LIKE intents for opposite directions of the same canonical pair; current PB-2/PB-4 eligibility/lifecycle/block/generation/discovery authority is revalidated at match time; admin/moderator/service/algorithm/payment/premium/token/staking/reputation state cannot fabricate LIKE or MATCHED authority; canonical pair identity is deterministic/order-independent; self-like/self-match is prohibited; pair state carries a monotonic consent epoch; intents are valid only for the current epoch; unmatch is unilateral/immediate, transitions MATCHED→UNMATCHED, advances epoch, and invalidates messaging/matching authority; stale pre-unmatch likes cannot rematch; later rematch requires fresh reciprocal likes in the new epoch; relationship changes emit canonical invalidation; messaging becomes eligible only after current MATCHED pair binding; persistence reuses the private relationship table with optimistic concurrency; no public relationship graph, wallet/payment fields, contract, API, service ID, deployment, Messenger transport, or notification transport is introduced.
+
+**Persistence model:** directional intent keys use `intent:<actor>><target>` with LIKED/PASSED state and logical version = consent epoch; canonical pair keys use `pair:<sorted-left>|<sorted-right>` with NONE/MATCHED/UNMATCHED/(later safety-owned BLOCKED) state and logical version = consent epoch. Repository record versioning remains the separate optimistic-concurrency mechanism.
+
+**Affected components:** `puffbuddies/domain/matching.py`, existing PB-1 relationship state machine/private relationship table, PB-2 eligibility/messaging authorization and invalidation, PB-4 discovery, PB-5 targeted and integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head app-scoped PB-5 qualification **plus Level 2 retained PuffBuddies integration** at the documented PB-4/PB-5 discovery/matching boundary.
+
+**Level-3 boundary:** repository-wide Solidity/Genesis/420 Integrated/Geth/fault/soak/global deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.13, PB-0.15; PB-1 relationship/invalidation/persistence foundations; PB-2; **PB-4 — Discovery engine — COMPLETE**.
+
+**Exit criteria:** unilateral LIKE/PASS persists privately; one-sided LIKE cannot match/message; reciprocal current likes can form a current match; PASS/absent reciprocal intent prevents match; current discovery/eligibility/lifecycle/block/generation authority is rechecked at match time; admin/service/economic fabrication fails; unmatch is unilateral and revokes messaging while advancing consent epoch; stale likes cannot rematch; fresh new-epoch likes can rematch only through two new user actions; optimistic concurrency/private persistence passes; public relationship graph remains absent; PB-5 Level-1 targeted qualification passes; PB-4/PB-5 retained Level-2 integration passes on the same exact SHA; durable evidence records both levels.
+
+### PB-6 — 420Messenger integration — COMPLETE
+
+**Purpose:** integrate current PuffBuddies matched-user messaging authorization with canonical 420Messenger endpoint/block/conversation authority without transferring canonical state ownership in either direction.
+
+**Canonical requirements:** current PB-2.9/PB-5 messaging authorization is rechecked for every protected Messenger handoff; transient private profile→Messenger account bindings are operation-scoped only and never persisted/published; exact pair/account binding is required; new conversation requests require both Messenger endpoints active and no native block; acceptance requires REQUESTED state, exact participants and non-requester acceptance; send requires ACTIVE state, exact participants, no native block, and current PuffBuddies MESSAGING_AUTH generation; active Messenger conversation cannot resurrect authorization after unmatch/block/eligibility/lifecycle/stale-generation revocation; Messenger authority outages fail closed; Messenger-native block is additive deny only and cannot mutate PuffBuddies match authority; PuffBuddies does not maintain a parallel canonical Messenger history; best-effort close handoff after PB revocation may coordinate closure but close failure cannot restore PB authorization; minimum-disclosure decisions contain no profile/account linkage or message metadata; plaintext/ciphertext/attachments/keys/envelope bodies/receipt state remain Messenger/off-chain owned; no public message/relationship graph, Search/Explorer/Indexer publication, contract/address/deployment/capability/service-ID modification or Notifications integration is introduced.
+
+**Affected components:** `puffbuddies/domain/messenger_integration.py`, PB-2.9 messaging eligibility, PB-5 match state, canonical Messenger V1 read-only interfaces/manifests, PB-6 targeted/integration tests/workflow, PB-0.19 scope reconciliation, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head PuffBuddies PB-6 qualification **plus Level 2 retained app integration** because PB-6 introduces a material cross-app authority dependency. Direct dependency verification uses the canonical `scripts/verify-420messenger-audit.py` verifier. Level 2 remains app-focused.
+
+**Level-3 boundary:** full Solidity/Genesis/420 Integrated/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.10, PB-0.11; PB-2.9; **PB-5 — Likes and matching — COMPLETE**; canonical 420Messenger V1.
+
+**Exit criteria:** matched PB pair can request Messenger conversation only when canonical endpoint/block state allows it; accept/send recheck current PB + Messenger authority; unmatch/revocation/stale generation denies despite active conversation; native Messenger block denies without mutating PB match state; authority outage fails closed; profile/account binding remains transient; Messenger verifier passes unchanged; PB-6 Level-1 tests, retained PuffBuddies regressions and PB-5/PB-6 Level-2 integration pass on one exact SHA; durable evidence recorded.
+
+### PB-7 — 420Notifications integration — COMPLETE
+
+**Purpose:** integrate private PuffBuddies operational notification intents with canonical 420Notifications subscription/delivery authority without making notification state authoritative for PuffBuddies relationships, messaging, safety, lifecycle, or protocol truth.
+
+**Canonical requirements:** current PuffBuddies matched-user authorization and MESSAGING_AUTH generation are rechecked before handoff; current MESSAGE_AVAILABLE additionally requires a current affirmative PB-6 Messenger handoff; only already-implemented MATCHED relationship and MESSAGE_AVAILABLE operational kinds are in PB-7 scope; recipient must be a current pair participant; 420Notifications selects the explicit subscription; active/unmuted/operational-consent and source/topic/event/minimum-severity filters are Notifications-owned deny controls; promotional consent cannot substitute for operational consent; source label `puffbuddies` is only a private filter value and not a Registry service ID; channels/destinations are Notifications-owned transient data; PuffBuddies persists no profile→subscription/endpoint/push/device mapping; payloads are minimum-disclosure/non-authoritative and omit profile/match/eligibility/wallet/conversation/message/private-preference state; Notifications feed/history/read/retry/dedup/rate-limit/provider/dead-letter state remains Notifications-owned; outage fails closed for notification handoff but cannot block or rewrite the underlying PuffBuddies/Messenger operation; no public graph, Search/Explorer/Indexer publication, contract/address/deployment/provider credential or production endpoint is introduced; PB-8 remains Safety and moderation owner.
+
+**Affected components:** `puffbuddies/domain/notifications_integration.py`, PB-2.9 messaging authorization, PB-5 match authority, PB-6 Messenger handoff conclusion, canonical Notifications subscription/service interfaces as read-only dependencies, PB-7 targeted/integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head PB-7 qualification **plus Level 2 retained app integration** at the accumulated PB-5/PB-6/PB-7 relationship→Messenger→Notifications boundary. Direct dependency checks cover affected Notifications architecture/subscription/feed/security packages and Genesis service-boundary verification.
+
+**Level-3 boundary:** canonical full Solidity/Genesis/420 Integrated/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.11; PB-2.9; PB-5; **PB-6 — 420Messenger integration — COMPLETE**; canonical 420Notifications repository implementation.
+
+**Exit criteria:** current match notification handoff requires explicit selected subscription; message notification additionally requires current PB-6 authorization; current PB authorization/generation is rechecked; muted/inactive/no-operational-consent/filter/severity state safely suppresses; promotional consent cannot broaden delivery; Notifications outage fails closed without changing underlying authority; payload is minimum-disclosure/non-authoritative; PuffBuddies persists no subscription/destination linkage; affected Notifications dependency checks pass unchanged; PB-7 Level-1 targeted/retained regressions and PB-5/PB-6/PB-7 Level-2 integration pass on one exact SHA; durable evidence recorded.
+
+### PB-8 — Safety and moderation — COMPLETE
+
+**Purpose:** implement private PuffBuddies safety cases, report/evidence-integrity boundaries, immediate independent block authority, moderation actions, restriction/suspension/ban lifecycle enforcement, appeals, least-privilege review, protected persistence, auditability, and stale-state invalidation without public reputation.
+
+**Canonical requirements:** all twelve PB-0.10 report classes and all eight moderation states are explicit; report receipt/report count is not guilt; block is immediate, unilateral, user-owned, independent of reporting, and invalidates both participants' derived interaction authority while advancing pair consent epoch; reports do not silently block and blocks do not require reports; temporary/final safety actions use canonical RESTRICTED/SUSPENDED/BANNED lifecycle authority and ALL_DERIVED invalidation; final moderation action requires explicit human review; moderators cannot manufacture consent, unblock, rematch, reopen conversations, or force contact; appeal is subject-owned and does not itself restore lifecycle/contact; appeal adjudication is least-privilege; NO_ACTION leaves independent block intact; reporter/evidence/moderation history stays protected; PB-8 persists only evidence integrity metadata (SHA-256 + opaque ref), not raw report/message evidence; purpose-limited retention and optimistic concurrency apply; payment/premium/token/ranking/reputation/admin favoritism are not safety bypass inputs; safety state is private/non-enumerable and cannot become public reputation; stale clients/Messenger/Notifications/caches cannot preserve authority after safety revocation; cross-service enforcement remains capability-limited; no emergency/legal workflow, classifier, operator console, evidence DB engine, contract/address/service ID/deployment/live-enforcement claim is invented.
+
+**Affected components:** `puffbuddies/domain/safety.py`, protected safety schema, PB-1 lifecycle/relationship/invalidation primitives, PB-5 pair state, accumulated messaging/notification authorization, PB-8 targeted/integration tests/workflow, canonical definition/evidence, PB-0.19 scope reconciliation.
+
+**Qualification:** Level 1 exact-head PB-8 qualification **plus Level 2 retained app integration**, because PB-8 introduces the canonical safety/lifecycle authority that overrides the accumulated PB-4 through PB-7 interaction stack.
+
+**Level-3 boundary:** canonical full Solidity/Genesis/420 Integrated/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.4, PB-0.5, PB-0.7, PB-0.9, PB-0.10, PB-0.11, PB-0.12, PB-0.15; PB-1 lifecycle/relationship/invalidation/persistence; PB-5; **PB-7 — 420Notifications integration — COMPLETE**.
+
+**Exit criteria:** all report/moderation states exist; report/block separation holds; immediate block invalidates discovery/matching/messaging authority; protected evidence/persistence boundaries and concurrency hold; least-privilege + human-review controls hold; restriction/suspension/ban invalidate stale participation; appeal cannot restore interpersonal consent; retained integration proves safety override of accumulated interaction authority; privacy/public-reputation negative gates pass; exact-head Level-1 + Level-2 app qualification pass; durable evidence recorded.
+
+### PB-9 — Verification and reputation — COMPLETE
+
+**Purpose:** implement bounded private verification indicators and non-scored user-controlled reputation presentation while preserving PuffBuddies privacy, consent, safety, state-ownership, and anti-public-score invariants.
+
+**Canonical requirements:** supported indicator kinds are account control, approved identity credential, .420 name control, and private photo/liveness verification; each kind is rigidly bound to its canonical source authority; 420Verify is not interpersonal identity/reputation authority; indicators are private by default and only the profile owner may opt current positive indicators into PRIVATE_SELF/DISCOVERABLE/MATCHED presentation; PUBLIC_EXPLICIT is rejected; presentation emits only generic positive labels; expired/revoked/future-issued indicators fail closed; only the owning source may revoke; changes invalidate derived presentation/discovery state; matching may consume only a bounded set of current user-visible indicator kinds with no score/weight/order; verification never creates eligibility, lifecycle, match, messaging, safety, visibility, payment, or consent authority; report/block/moderation/risk history and economic/popularity state are excluded from reputation inputs; no universal trust/desirability/social-credit score exists; no raw proof/credential/DOB/government-ID/biometric/wallet data is persisted; persistence is private/off-chain with optimistic concurrency; arbitrary cross-app reputation aggregation/portable credentials remain deferred absent canonical issuer authority; no contract/address/service ID/public registry/external reputation API/deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/verification_reputation.py`, private `verification` schema, PB-3/PB-4 presentation/discovery boundaries, PB-0.8/PB-0.9/PB-0.13 authority constraints, PB-9 targeted/integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head app-scoped qualification. No new Level-2 milestone is triggered because PB-9 consumes already-defined authority domains and does not add a new shared service/lifecycle authority.
+
+**Level-3 boundary:** full Solidity/Genesis/420 Integrated/Docs-global/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.5, PB-0.8, PB-0.9, PB-0.10, PB-0.13, PB-0.15, PB-0.16; PB-1 persistence/invalidation; PB-2 identity/eligibility separation; PB-3/PB-4; **PB-8 — Safety and moderation — COMPLETE**.
+
+**Exit criteria:** all four bounded indicator classes work with source binding; owner visibility and in-app presentation fail closed; expiry/revocation remove indicators; verification cannot create eligibility/consent/lifecycle/safety authority; no public/scored reputation exists; safety/economic data cannot become reputation input; private persistence/concurrency works without raw evidence; retained app regressions and exact-head PB-9 fast qualification pass; durable evidence recorded.
+
+### PB-10 — Payments and premium entitlements — COMPLETE
+
+**Purpose:** implement PuffBuddies premium-entitlement policy over current canonical 420Pay settlement evidence while preserving the absolute separation between economic state and interpersonal consent, eligibility, lifecycle, block/safety authority and protected-user data.
+
+**Canonical requirements:** 420Pay owns settlement/accounting truth while PuffBuddies owns feature-entitlement conclusions; only exact current SETTLED evidence for the approved invoice/merchant/asset/amount and transient payer binding may grant entitlement; SUBMITTED/INCLUDED/CERTIFIED/FINALIZED/FAILED/REFUNDED/PARTIALLY_REFUNDED cannot grant; refunds/partial refunds, policy change and expiry revoke; profile→payer/wallet/payment/receipt linkage is transient and never persisted; Pay outages/missing/stale/future evidence fail closed; promoted features are advanced filters, liked-you, incognito controls, profile customization, undo/rewind and cosmetic convenience, with subscriptions allowed to bundle them; entitlement only makes a feature available and never supplies underlying relationship/profile/data authorization; payment/premium cannot like, match, unblock, rematch, message unmatched users, unsuspend, unban, reactivate, cancel deletion, bypass safety/eligibility/visibility/block, buy private-person data, authorize cannabis commerce, or become dating desirability/reputation; free/core matching, matched messaging, block, report, unmatch, deactivation and deletion remain non-premium; growth/ranking/location products remain deferred pending explicit mechanics; no payment contract/date marketplace/fixed Pay address/new service ID/provider credential/production billing backend/live deployment is introduced.
+
+**Affected components:** `puffbuddies/domain/premium_entitlements.py`, private `entitlement` schema, PB-1 schema inventory, existing authorization/lifecycle/safety boundaries, canonical 420Pay lifecycle as read-only dependency, PB-10 targeted/integration tests/workflow, canonical definition/evidence.
+
+**Qualification:** Level 1 exact-head targeted qualification **plus Level 2 retained app integration**, because PB-10 introduces the material 420Pay→PuffBuddies entitlement authority boundary. Direct dependency verification uses `scripts/verify-420pay-audit.py`; Level 2 remains app-focused.
+
+**Level-3 boundary:** full Solidity/Genesis/420 Integrated/Docs-global/Geth/fault/soak/deployment qualification remains deferred to the applicable app-phase closeout.
+
+**Dependencies:** PB-0.2, PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.10, PB-0.12, PB-0.13, PB-0.14, PB-0.16; PB-1 persistence; PB-2/PB-5/PB-8 authorization/lifecycle/safety; **PB-9 — Verification and reputation — COMPLETE**; canonical 420Pay repository implementation.
+
+**Exit criteria:** exact SETTLED evidence grants only approved bounded feature entitlements; non-settled/refunded/mismatched/stale evidence fails/revokes; policy/lifetime expiry revokes; private persistence has no payment/wallet linkage; lifecycle/block/consent/safety remain supreme; no purchased protected access exists; canonical Pay verifier passes unchanged; Level-1 targeted, retained PuffBuddies regressions and Level-2 payment-integration checks pass on one exact SHA; durable evidence recorded.
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

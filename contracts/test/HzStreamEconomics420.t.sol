@@ -171,9 +171,7 @@ contract HzStreamEconomics420Test {
         require(vault.poolReceived(originalKey) == 85 ether, "original/current");
         require(vault.treasuryReceived() == 2.5 ether, "original/protocol");
 
-        router.route{value: 100 ether}(
-            RecordingId.wrap(REMIX_ID), RevenueType.STREAM, keccak256("hz-audit-4/remix")
-        );
+        router.route{ value: 100 ether }(RecordingId.wrap(REMIX_ID), RevenueType.STREAM, keccak256("hz-audit-4/remix"));
 
         require(vault.poolReceived(workKey) == 22.5 ether, "combined/work");
         require(vault.poolReceived(originalKey) == 100 ether, "remix/source");

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS streaming_recording_allocations (
   recording_id NUMERIC(78,0) NOT NULL,
   play_count NUMERIC(78,0) NOT NULL CHECK (play_count > 0),
   qualified_ms NUMERIC(78,0) NOT NULL CHECK (qualified_ms > 0),
-  revenue NUMERIC(78,0) NOT NULL CHECK (revenue > 0),
+  revenue NUMERIC(78,0) NOT NULL CHECK (revenue >= 0),
   routed BOOLEAN NOT NULL DEFAULT FALSE,
   route_settlement_id TEXT,
   routed_block BIGINT,

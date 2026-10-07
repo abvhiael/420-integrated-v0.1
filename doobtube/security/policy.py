@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import re
+import threading
 from typing import Any, Callable, Mapping
 
 class SecurityDenied(PermissionError):
@@ -40,6 +41,7 @@ class AbuseGuard:
     ):
         self.policies=dict(policies or DEFAULT_POLICIES)
         self.now=now
+        self._lock=threading.Lock()
         self._windows: dict[tuple[str,str], tuple[datetime,int]]={}
 
     def require(self, actor: str, operation: str) -> None:
@@ -51,13 +53,14 @@ class AbuseGuard:
             raise SecurityDenied("operation has no abuse policy")
         now=self.now()
         key=(actor,operation)
-        start,used=self._windows.get(key,(now,0))
-        if now >= start + timedelta(seconds=policy.window_seconds):
-            start,used=now,0
-        if used >= policy.limit:
-            self._windows[key]=(start,used)
-            raise SecurityDenied("rate limited")
-        self._windows[key]=(start,used+1)
+        with self._lock:
+            start,used=self._windows.get(key,(now,0))
+            if now >= start + timedelta(seconds=policy.window_seconds):
+                start,used=now,0
+            if used >= policy.limit:
+                self._windows[key]=(start,used)
+                raise SecurityDenied("rate limited")
+            self._windows[key]=(start,used+1)
 
 SECRET_FIELD=re.compile(r"(private.?key|seed.?phrase|mnemonic|password|raw.?secret|authorization.?token|api.?key|stream.?key)",re.I)
 BEARER=re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._~+/=-]+")

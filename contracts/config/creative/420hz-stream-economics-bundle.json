@@ -1,0 +1,116 @@
+{
+  "schema": "420.hz.stream.economics.bundle.v1",
+  "roadmap_step": "HZ-AUDIT-4",
+  "status": "REPOSITORY_STREAM_ECONOMICS_READY_LIVE_EXECUTION_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "revenue_type": "STREAM",
+  "schedule_version": 1,
+  "effective_at": 0,
+  "effective_at_policy": "VERSION_1_IS_IMMEDIATELY_EFFECTIVE_ONCE_REGISTERED; ZERO_IS_AN_EXPLICIT_DETERMINISTIC_VALUE_NOT_A_PLACEHOLDER",
+  "terms_hash_policy": "keccak256(abi.encode(\"420.hz.stream.schedule.v1\",RecordingClass,RevenueType.STREAM,workBps,sourceBps,currentRecordingBps,protocolBps,version,effectiveAt))",
+  "canonical_basis": {
+    "hz4_pr": "#105",
+    "hz4_invariant": "STREAM routing preserves the existing canonical work/source/current/protocol split through RoyaltyRouter420 and RoyaltyVault420",
+    "decision10_reference": "contracts/script/Decision10DeploySeed420.s.sol",
+    "supported_class_policy": "Only RecordingClass values with explicit canonical split terms already retained by the audited kernel are initialized. No unsupported class inherits or invents STREAM economics."
+  },
+  "supported_recording_classes": [
+    {
+      "recording_class": "ORIGINAL",
+      "work_bps": 1250,
+      "source_bps": 0,
+      "current_recording_bps": 8500,
+      "protocol_bps": 250,
+      "version": 1,
+      "effective_at": 0,
+      "terms_hash_preimage": {
+        "domain": "420.hz.stream.schedule.v1",
+        "recording_class": "ORIGINAL",
+        "revenue_type": "STREAM",
+        "work_bps": 1250,
+        "source_bps": 0,
+        "current_recording_bps": 8500,
+        "protocol_bps": 250,
+        "version": 1,
+        "effective_at": 0
+      },
+      "canonical_split_source": "Decision10 ORIGINAL DIRECT_SALE/REMIX_LICENSE split"
+    },
+    {
+      "recording_class": "REMIX",
+      "work_bps": 1000,
+      "source_bps": 1500,
+      "current_recording_bps": 7250,
+      "protocol_bps": 250,
+      "version": 1,
+      "effective_at": 0,
+      "terms_hash_preimage": {
+        "domain": "420.hz.stream.schedule.v1",
+        "recording_class": "REMIX",
+        "revenue_type": "STREAM",
+        "work_bps": 1000,
+        "source_bps": 1500,
+        "current_recording_bps": 7250,
+        "protocol_bps": 250,
+        "version": 1,
+        "effective_at": 0
+      },
+      "canonical_split_source": "Decision10 REMIX DIRECT_SALE split"
+    }
+  ],
+  "unsupported_recording_classes_until_canonical_terms_exist": [
+    "COVER",
+    "STEM_REMIX",
+    "SAMPLE_DERIVATIVE",
+    "AI_DERIVATIVE",
+    "LIVE",
+    "ACOUSTIC",
+    "REMASTER",
+    "RADIO_EDIT",
+    "CLEAN_EDIT",
+    "SPATIAL",
+    "RESTORATION",
+    "OTHER"
+  ],
+  "governance_initialization": [
+    "RoyaltyScheduleRegistry420.registerSchedule(RecordingClass.ORIGINAL,RevenueType.STREAM,HzStreamEconomicsPlan420.originalSchedule())",
+    "RoyaltyScheduleRegistry420.registerSchedule(RecordingClass.REMIX,RevenueType.STREAM,HzStreamEconomicsPlan420.remixSchedule())"
+  ],
+  "routing_preconditions": [
+    "RoyaltyRouter420.setSettlementSource(StreamingRoyaltySettlement420,true) is already owned and retained by HZ-AUDIT-2/HZ-AUDIT-3",
+    "Recording royaltyScheduleVersion must equal 1 for these STREAM v1 schedules",
+    "StreamingRoyaltySettlement420 routes only RevenueType.STREAM with exact allocated value",
+    "RoyaltyRouter420 requires the schedule to exist and be effective before routing"
+  ],
+  "safety_invariants": [
+    "Every schedule sums to exactly 10000 basis points.",
+    "Protocol fee remains 250 bps and therefore does not exceed the 500 bps kernel cap.",
+    "ORIGINAL has zero source share because ORIGINAL recordings cannot have a parent recording.",
+    "REMIX preserves the canonical one-hop 1500 bps immediate-source share.",
+    "Schedule version 1 is immutable once registered; duplicate registration must fail.",
+    "Terms hashes commit the complete split, version, effective-at value, class and STREAM revenue type.",
+    "Unsupported RecordingClass values have no STREAM schedule and fail closed at RoyaltyScheduleRegistry420/RoyaltyRouter420 rather than receiving invented economics.",
+    "No local initialization result is promoted to live/testnet transaction evidence."
+  ],
+  "live_evidence": {
+    "required_in_step": "HZ-AUDIT-7",
+    "network": null,
+    "chain_id": null,
+    "royalty_schedule_registry": null,
+    "registration_transactions": [],
+    "registered_schedule_reads": [],
+    "stream_route_transactions": [],
+    "vault_balance_evidence": []
+  },
+  "exit_criteria": [
+    "supported STREAM RecordingClass inventory is explicit and repository-grounded",
+    "version 1 ORIGINAL and REMIX STREAM schedules preserve the canonical split terms",
+    "effective-at values are exact and deterministic",
+    "terms hashes commit every economic field and schedule identity field",
+    "governance-only registration and duplicate/version replay behavior are focused-tested",
+    "real RoyaltyRouter420 STREAM routing conserves exact gross value under both supported schedules",
+    "unsupported RecordingClass values fail closed without invented economics",
+    "Level 1 exact-head verifier/build/focused tests pass"
+  ]
+}

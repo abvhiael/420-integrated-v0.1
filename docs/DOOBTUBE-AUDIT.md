@@ -3,14 +3,14 @@
 Application: **DoobTube** (the application originally requested as `420Video`)
 Original audit base: `main` @ `43a3690422e934dcd1fe9da595df4a9dfed37a75`
 Audit branch: `audit/doobtube-baseline-20261006`
-Current remediation state: **DOOBTUBE-0 through DOOBTUBE-9 complete**
+Current remediation state: **DOOBTUBE-0 through DOOBTUBE-10 complete**
 Date: 2026-10-07
 
 ## Executive determination
 
 At the original audited `main` SHA, no canonical DoobTube/420Video application existed. The repository did contain the separate mature **420Media** service at `420/service/media/v1`.
 
-The remediation branch now contains a repository-qualified DoobTube V1 application/client through DOOBTUBE-9:
+The remediation branch now contains a repository-qualified DoobTube V1 application/client through DOOBTUBE-10:
 
 - canonical architecture and product scope;
 - dependency/trust and lifecycle definitions;
@@ -339,7 +339,7 @@ Readiness remains:
 | web application | COMPLETE |
 | Level 2 ecosystem integration | COMPLETE |
 | app security/abuse/moderation | COMPLETE |
-| consolidated docs/operator/deployment closeout | PENDING DOOBTUBE-10 |
+| consolidated docs/operator/deployment closeout | COMPLETE |
 | repository Level 3 exact-head closeout | PENDING DOOBTUBE-11 |
 | public-testnet qualification | PENDING DOOBTUBE-12 |
 | Genesis/production release | PENDING DOOBTUBE-13 |
@@ -358,8 +358,7 @@ Evidence-only commits may inherit an exact qualified implementation SHA only whe
 
 Repository blockers remaining before app-phase closeout:
 
-1. DOOBTUBE-10 documentation/deployment/operator closeout;
-2. DOOBTUBE-11 exact-head Level 3 repository closeout.
+1. DOOBTUBE-11 exact-head Level 3 repository closeout.
 
 External/live blockers after repository closeout:
 
@@ -374,8 +373,8 @@ External/live blockers after repository closeout:
 - CODE COMPLETE: **NO** — final repository-phase declaration is reserved for DOOBTUBE-11 after DOOBTUBE-10 closeout.
 - BUILD COMPLETE: **NO** — app builds pass, but final exact-head Level 3 build/deployment/config closeout remains.
 - CONTRACT COMPLETE: **YES for current V1 scope** — no DoobTube contract is required and external bindings are qualified.
-- TEST COMPLETE: **NO** — app suites pass through DOOBTUBE-9; final Level 3 repository qualification remains.
-- DOCUMENTATION COMPLETE: **NO** — DOOBTUBE-10 remains.
+- TEST COMPLETE: **NO** — app suites pass through DOOBTUBE-10; final Level 3 repository qualification remains.
+- DOCUMENTATION COMPLETE: **YES for repository app scope** — root/app README, reference, user/developer/operator, deployment/config, migration/recovery, troubleshooting, SLO and release-manifest documentation are complete; final global Docs reconciliation remains DOOBTUBE-11.
 - INTEGRATION COMPLETE: **YES for repository Level 2 scope** — live production-equivalent integration remains DOOBTUBE-12.
 - SECURITY QUALIFIED: **YES for current app repository scope** — final Level 3 security/static/deployment reconciliation remains DOOBTUBE-11.
 - TESTNET READY: **NO**.
@@ -386,6 +385,6 @@ External/live blockers after repository closeout:
 
 **DoobTube is NOT COMPLETE as a full repository/release phase.**
 
-The application implementation and app-scoped qualification are complete through DOOBTUBE-9. Remaining canonical repository work is documentation/operator closeout and the final exact-head Level 3 repository qualification, followed by separate public-testnet and production/Genesis phases.
+The application implementation, security, documentation and non-production operator closeout are complete through DOOBTUBE-10. Remaining canonical repository work is the final exact-head Level 3 repository qualification, followed by separate public-testnet and production/Genesis phases.
 
-**DOOBTUBE-0 through DOOBTUBE-9 are complete. Next: DOOBTUBE-10 — Documentation, deployment and operator closeout.**
+**DOOBTUBE-0 through DOOBTUBE-10 are complete. Next: DOOBTUBE-11 — Repository Level 3 exact-head closeout.**

@@ -110,4 +110,110 @@ for invariant in [
 ]:
     assert invariant in architecture, f"architecture invariant missing: {invariant!r}"
 
-print("DOOBTUBE-0 Level 1 architecture verification: PASS")
+product = need("docs/DOOBTUBE-PRODUCT-SCOPE.md", [
+    "Roadmap step: **DOOBTUBE-1 — Product scope and canonical user workflows**",
+    "Status: **ADOPTED**",
+    "DT-PROD-001",
+    "DT-ACCOUNT-001",
+    "DT-ACCOUNT-003",
+    "DT-CHANNEL-001",
+    "DT-MEDIA-001",
+    "DT-MEDIA-005",
+    "DT-PLAY-001",
+    "DT-DISC-001",
+    "DT-LIVE-001",
+    "DT-SUB-001",
+    "DT-SOCIAL-001",
+    "DT-SOCIAL-003",
+    "DT-MONEY-001",
+    "DT-RIGHTS-001",
+    "DT-PRIV-001",
+    "DT-MOD-001",
+    "DT-MOD-003",
+    "DT-DATA-001",
+    "DT-DATA-003",
+    "DT-UX-001",
+    "DT-UX-004",
+    "## 17. Canonical V1 routes / surfaces",
+    "## 18. Product state machines",
+    "## 19. V1 non-goals",
+    "## 20. Acceptance matrix",
+    "Next canonical roadmap step: DOOBTUBE-2 — Dependency and trust-boundary freeze",
+])
+
+# Canonical GEN-SVC vocabulary consumed by the V1 product definition must remain available.
+canonical_objects = set(svc.get("canonical_objects", []))
+for obj in {"MediaAsset", "Stream", "Subscription"}:
+    assert obj in canonical_objects, f"required canonical object disappeared: {obj}"
+visibility = set(svc.get("visibility_scopes", []))
+for v in {"PUBLIC", "UNLISTED", "PRIVATE"}:
+    assert v in visibility, f"required V1 visibility disappeared: {v}"
+moderation = set(svc.get("moderation_actions", []))
+for action in {"REPORT", "HIDE", "SUSPEND", "APPEAL", "MODERATOR_DECISION", "RESTORE", "LOCK"}:
+    assert action in moderation, f"required moderation vocabulary disappeared: {action}"
+
+# Every original DOOBTUBE-1 roadmap category must be explicitly decided.
+for category in [
+    "Account, Wallet and optional Identity",
+    "Creator/channel presentation model",
+    "Upload, publication and creator library",
+    "Playback",
+    "Discovery, feed and Search",
+    "Livestreaming",
+    "Creator subscriptions / following",
+    "Comments, reactions and sharing",
+    "Monetization",
+    "Rights and provenance",
+    "Privacy and visibility",
+    "Reporting, moderation and appeals",
+    "Delete, retention and export",
+    "Accessibility and responsive UX",
+]:
+    assert category in product, f"DOOBTUBE-1 category missing: {category!r}"
+
+# Explicit non-goals prevent accidental scope inflation before later architecture decisions.
+for required_non_goal in [
+    "comments or threaded discussion",
+    "likes/dislikes/reaction counters",
+    "creator paid subscriptions",
+    "pay-per-view",
+    "creator tipping/donations",
+    "advertising marketplace or revenue sharing",
+    "token-gated media",
+    "mandatory real-name/420Identity use",
+    "permanent/raw-media storage on-chain",
+    "mobile native apps in the initial V1",
+]:
+    assert required_non_goal in product, f"V1 non-goal missing: {required_non_goal!r}"
+
+for state_machine in [
+    "Session / authority state",
+    "Upload/publication state",
+    "Playback state",
+    "Livestream state",
+    "Subscription state",
+    "Report / moderation / appeal state",
+    "Delete state",
+]:
+    assert state_machine in product, f"state machine missing: {state_machine!r}"
+
+for phrase in [
+    "Public viewing without forced identity",
+    "Wallet only when authority is required",
+    "Identity remains optional",
+    "Canonical service state wins",
+    "Privacy is fail-closed",
+    "transport acceptance alone is never displayed as completed publication/readiness",
+    "Subscription state is a replaceable preference, not access entitlement",
+    "DoobTube never holds viewer or creator funds in V1",
+    "DoobTube presentation must never widen canonical visibility",
+    "Appeals preserve prior decision history",
+    "DoobTube does not promise erasure beyond authoritative service semantics",
+]:
+    assert phrase in product, f"product invariant missing: {phrase!r}"
+
+assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
+assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
+assert "DOOBTUBE-0 and DOOBTUBE-1 are complete" in audit
+
+print("DOOBTUBE-1 Level 1 product-scope verification: PASS")

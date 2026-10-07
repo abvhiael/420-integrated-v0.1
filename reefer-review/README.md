@@ -82,3 +82,29 @@ The repository now contains the RR-1 persistent external cannabis-news foundatio
 
 Development data defaults to `.reefer-review/news.json`. Override with `REEFER_REVIEW_NEWS_DB`.
 Override the source registry path with `REEFER_REVIEW_NEWS_SOURCES`.
+
+
+## Editorial publishing completion (RR-3)
+
+RR-3 completes the repository-stage editorial lifecycle:
+
+- browser article reader;
+- editorial workspace for draft creation, revision editing and publication;
+- immutable revision history;
+- fresh rights assertions for published revisions;
+- viewer-aware restricted reads;
+- explicit TOMBSTONED lifecycle;
+- moderation reasons and durable history;
+- moderation dashboard;
+- expanded Go client/API parity.
+
+The browser stores only the current repository-stage actor string in session storage and sends it through the existing `X-420-Actor` development boundary. This is not production authentication. RR-4 replaces it with qualified 420Identity/Wallet sessions and capabilities.
+
+New API surface:
+- `GET /v1/editorial/publications`
+- `PUT /v1/publications/{id}`
+- `POST /v1/publications/{id}/tombstone`
+- `GET /v1/publications/{id}/revisions`
+- `GET /v1/publications/{id}/moderation`
+
+`GET /v1/publications/{id}` is viewer-aware: anonymous readers receive only PUBLIC or UNLISTED published records; restricted, draft and hidden access requires the current repository-stage actor and authorization policy.

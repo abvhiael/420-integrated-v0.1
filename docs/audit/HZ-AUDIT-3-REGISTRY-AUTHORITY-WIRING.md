@@ -1,6 +1,6 @@
 # HZ-AUDIT-3 — Registry and authority wiring
 
-Status: IMPLEMENTED — Level 1 qualification required on the exact implementation head.
+Status: COMPLETE — Level 1 qualified on exact implementation SHA `6711c24f2cdc7c77dd9e1a5227367afba5eeb734`.
 
 ## Canonical purpose
 
@@ -167,6 +167,82 @@ HZ-AUDIT-3 is COMPLETE only when one exact implementation SHA passes:
 Level 2 is not automatically required for this ordinary step. HZ-AUDIT-3 introduces the first complete cross-HZ authority/discovery convergence, so it is a candidate milestone for a later retained HZ integration run if the audit roadmap adopts one; the ordinary step itself remains Level 1.
 
 Level 3 remains deferred to the single complete 420Hz audit-phase closeout.
+
+## Next canonical roadmap step
+
+**HZ-AUDIT-4 — STREAM economics initialization.**
+
+
+## Durable qualification evidence
+
+- Roadmap step: `HZ-AUDIT-3 — Registry and authority wiring`
+- Status: **COMPLETE**
+- Qualification level: **Level 1**
+- Qualified implementation SHA: `6711c24f2cdc7c77dd9e1a5227367afba5eeb734`
+- Audit branch: `feature/420hz-remediation-20261006`
+- Pull request: **#556**
+- Qualification merge-base/base SHA: `ff4440bfd7b69c0712ee3dd7c4b417cb049ae76d`
+- Current `main` observed at closeout: `ea76c951b683a2b75ad2e64902e6e99c3a0b06ea`
+- Current branch/main state at closeout: diverged; branch is 34 commits ahead and 72 commits behind current `main`.
+- PR #556 is currently reported non-mergeable against the advanced base. This does not invalidate HZ-AUDIT-3 exact-head qualification; reconciliation is intentionally deferred to the applicable milestone/Level-3 merge-candidate step unless an earlier HZ dependency requires it.
+
+### Level 1 results
+
+Exact-head qualification on `6711c24f2cdc7c77dd9e1a5227367afba5eeb734` completed successfully:
+
+- 420Hz Audit Qualification — run `37572409975`, job `112633753104` (`hz-audit-fast`) — **PASS**
+  - exact qualification-head checkout — PASS
+  - exact-head verification — PASS
+  - HZ-AUDIT-2 deployment-package verifier — PASS
+  - HZ-AUDIT-3 authority/Registry verifier — PASS
+  - affected Solidity format check — PASS
+  - consolidated deployment/authority build — PASS
+  - retained `HzDeploymentGraph420Test` regression — PASS
+  - focused `HzRegistryAuthority420Test` — PASS
+- Solidity Contracts — run `37572410139` — **PASS**
+  - PR classification job `112633851559` — PASS
+  - PR shard 0 job `112634021352` — PASS
+  - PR shard 1 job `112634021284` — PASS
+  - PR shard 2 job `112634021377` — PASS
+  - PR shard 3 job `112634021302` — PASS
+  - monolithic `foundry` job `112633852683` — expected SKIP under PR shard routing
+  - `compute-fast` job `112634022308` — expected SKIP as irrelevant to this PR shape
+- Supplementary exact-head workflows on the same SHA also passed:
+  - Genesis Address Authority `37572409979`
+  - 420Docs Qualification `37572409998`
+  - 420Registry REG-AUDIT-4 `37572409959`
+  - 420Indexer `37572409985`
+  - Creative Reference Indexer `37572409954`
+  - 420Oracle audit qualification `37572409991`
+
+The supplementary workflows are retained as corroborating evidence only and are not promoted into mandatory ordinary-step exit criteria beyond their actual changed-dependency relevance.
+
+### Exit criteria satisfied
+
+HZ-AUDIT-3 now has durable repository evidence that:
+
+1. the exact GovernanceTimelock-only HZ-1..HZ-4 wiring sequence is retained;
+2. playback and settlement submitter grants are explicit, nonzero and fail closed for unauthorized callers;
+3. the complete exact 20-module `CreativeProtocolRegistry420` inventory is retained and tested;
+4. the canonical HZ external component identity `420/component/hz/creative-protocol-registry/v1` is retained;
+5. the canonical HZ external service identity `420/service/hz/v1` is retained;
+6. non-Genesis extension-service approval is required before publication;
+7. component/service discovery binds the exact `CreativeProtocolRegistry420` root and deterministic module dependency commitment;
+8. zero submitters, unauthorized authority mutations, unapproved publication and version replay fail closed;
+9. no fixed Genesis HZ address or fabricated live/testnet Registry evidence was introduced;
+10. the exact implementation SHA passed the HZ verifier/build/regression/focused-test gate and canonical Solidity PR shards.
+
+### Milestone and phase qualification status
+
+Level 2: **not required for this ordinary roadmap step**. HZ-AUDIT-3 is a meaningful authority/discovery convergence point and remains eligible for a retained app-focused milestone run if the canonical audit later defines one, but no broad ceremonial rerun is required for this closeout.
+
+Level 3: **intentionally deferred** to the single complete 420Hz audit-phase closeout. Current-main reconciliation, the full repository Solidity inventory, canonical Genesis/address-authority closeout, global qualification, Docs/global reconciliation and complete merge-candidate qualification belong there unless an earlier canonical step materially requires them.
+
+Live governance execution, actual submitter operator identities, public-testnet deployed addresses/code hashes, Registry transaction receipts and live resolution evidence remain **HZ-AUDIT-7** obligations and are not claimed complete here.
+
+### Evidence-only closeout rule
+
+This COMPLETE bookkeeping changes documentation/evidence only. It does not modify executable source, tests, workflows, dependencies, configuration, generated/runtime artifacts, interfaces, deployment state or substantive requirements. Therefore the qualified implementation SHA remains `6711c24f2cdc7c77dd9e1a5227367afba5eeb734`; no recursive substantive test run is required for these evidence-only closeout commits.
 
 ## Next canonical roadmap step
 

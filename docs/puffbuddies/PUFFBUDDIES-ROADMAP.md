@@ -1687,7 +1687,9 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 
 
-### PB-15 — Qualification
+### PB-15 — Qualification — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-15-QUALIFICATION.md` (evidence commit `31807f090da6d93659513341bc641642232c9be5`).
 
 **Purpose:** freeze and qualify the complete accumulated repository-side PuffBuddies application through PB-14 as the final app-specific qualification milestone before the separate PB-16 security/privacy audit and later comprehensive app-phase closeout.
 

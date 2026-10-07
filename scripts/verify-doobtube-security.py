@@ -64,7 +64,7 @@ media_moderation=need("media/security/moderation.go",[
     "ErrModerationDenied","ErrRateLimited",
 ])
 media_webhook=need("media/security/webhook.go",[
-    "HMAC","ErrWebhookExpired","ErrWebhookReplay","MaxSkew","eventID",
+    "hmac.New","ErrWebhookExpired","ErrWebhookReplay","MaxSkew","eventID",
 ])
 media_api=need("media/api/security.go",[
     "securityMiddleware","protectedCapability","requireActorMatch",

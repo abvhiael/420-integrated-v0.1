@@ -28,7 +28,7 @@ for marker in [
     "CapabilityAuthor", "CapabilityPublisher", "CapabilityModerator",
     "SessionClaims", "SessionVerifier", "SessionSecurity",
     "ErrSessionExpired", "ErrSessionRevoked", "ErrSessionScope",
-    "Audience", "ChainID", "Network", "ExpiresAt", "Revoked", "Capabilities",
+    "Audience", "ChainID", "Network", "ExpiresAt", "Revoked", "IdentityActive", "Capabilities",
     "VisibilityGrants", "NewIdentityBoundHTTP", "SessionIdentity", "SessionAuthorizer",
 ]:
     req(marker in session,f"session authority missing {marker}")

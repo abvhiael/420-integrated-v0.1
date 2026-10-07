@@ -69,9 +69,11 @@ RR-4 is an authority milestone because it replaces the development actor boundar
 ## RR-5 — Durable Storage & Rights
 Persistent publication store, qualified 420 Storage, encryption/integrity, durable idempotency and live 420 Rights provenance.
 
-Status: **IMPLEMENTED / LEVEL 1 + STORAGE-RIGHTS MILESTONE LEVEL 2 QUALIFICATION PENDING**
+Status: **COMPLETE / LEVEL 1 PASS + STORAGE-RIGHTS MILESTONE LEVEL 2 PASS**
 
-RR-5 is a material shared-dependency milestone because it replaces development-only publication persistence/body storage/Rights evidence with repository-qualified durable metadata, a bounded 420 Storage integration contract, and structured 420 Rights provenance. Complete it only after the exact accumulated implementation SHA passes both the RR-5 Level 1 workflow and the retained ReeferReview Level 2 integration workflow.
+RR-5 is a material shared-dependency milestone because it replaces development-only publication persistence/body storage/Rights evidence with repository-qualified durable metadata, a bounded 420 Storage integration contract, and structured 420 Rights provenance. Its exit criteria are SATISFIED on exact implementation SHA `914329517c385a60f382216ce505313b1c6e3342`: Reefer Review RR-5 Level 1 run `37687046770` PASS and Reefer Review Level 2 Integration run `37687047515` PASS. Durable evidence is recorded in `RR-5-QUALIFICATION.md`. Level 3 remains deferred to RR-10.
+
+**Next canonical roadmap step:** RR-6 — Ecosystem Integrations.
 
 ## RR-6 — Ecosystem Integrations
 Live 420 Search, 420 Notifications and 420Mail adapters plus reconciliation/failure handling.

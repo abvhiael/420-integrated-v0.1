@@ -1,3 +1,6 @@
+import { ProductInventory, STARTER_CATALOG } from "./ProductInventory.ts";
+import { StoreProgression } from "./StoreProgression.ts";
+
 export type StarterProduct = "flower" | "preroll" | "edible";
 
 export interface ProductState {
@@ -24,23 +27,24 @@ export interface StoreSnapshot {
   upgrades: UpgradeState;
 }
 
-const STARTER_PRODUCTS: Record<StarterProduct, ProductState> = {
-  flower: { stock: 4, capacity: 6, basePrice: 20 },
-  preroll: { stock: 4, capacity: 6, basePrice: 10 },
-  edible: { stock: 4, capacity: 6, basePrice: 8 },
+const PRODUCT_IDS: Record<StarterProduct, string> = {
+  flower: "flower-house",
+  preroll: "preroll-house",
+  edible: "edible-house",
 };
 
-const MAX_UPGRADE_LEVEL = 5;
-
 export class BudtenderStore {
-  private cash = 0;
-  private products: Record<StarterProduct, ProductState> = structuredClone(STARTER_PRODUCTS);
-  private upgrades: UpgradeState = { shelfCapacity: 0, serviceSpeed: 0, saleValue: 0 };
-  private orders = new Map<string, CustomerOrder>();
+  private readonly inventory = new ProductInventory(STARTER_CATALOG);
+  private readonly progression = new StoreProgression();
+  private readonly orders = new Map<string, CustomerOrder>();
 
   createOrder(id: string, product: StarterProduct): CustomerOrder {
     if (!id || this.orders.has(id)) throw new Error("invalid or duplicate order id");
-    if (!(product in this.products)) throw new Error("unknown product");
+    const productId = PRODUCT_IDS[product];
+    if (!productId) throw new Error("unknown product");
+
+    const item = this.inventory.get(productId);
+    if (!item.unlocked) throw new Error("product locked");
 
     const order: CustomerOrder = { id, product, served: false };
     this.orders.set(id, order);
@@ -52,58 +56,79 @@ export class BudtenderStore {
     if (!order) throw new Error("unknown order");
     if (order.served) throw new Error("order already served");
 
-    const product = this.products[order.product];
-    if (product.stock <= 0) throw new Error("product unavailable");
+    const baseSale = this.inventory.consume(PRODUCT_IDS[order.product]);
+    const saleValueLevel = this.progression.snapshot().upgrades.saleValue;
+    const sale = Math.round(baseSale * (1 + saleValueLevel * 0.1));
 
-    product.stock -= 1;
+    this.progression.creditCash(sale);
     order.served = true;
-
-    const multiplier = 1 + this.upgrades.saleValue * 0.1;
-    const sale = Math.round(product.basePrice * multiplier);
-    this.cash += sale;
     return sale;
   }
 
-  restock(product: StarterProduct, units: number, unitCost: number): void {
+  restock(product: StarterProduct, units: number, unitCost?: number): void {
     if (!Number.isInteger(units) || units <= 0) throw new Error("invalid restock units");
-    if (!Number.isFinite(unitCost) || unitCost < 0) throw new Error("invalid unit cost");
 
-    const item = this.products[product];
-    if (!item) throw new Error("unknown product");
-    if (item.stock + units > item.capacity) throw new Error("restock exceeds capacity");
+    const productId = PRODUCT_IDS[product];
+    if (!productId) throw new Error("unknown product");
+    const item = this.inventory.get(productId);
+    const canonicalUnitCost = item.wholesaleUnitCost;
 
-    const cost = units * unitCost;
-    if (cost > this.cash) throw new Error("insufficient cash");
+    if (unitCost !== undefined && (!Number.isFinite(unitCost) || unitCost < 0)) {
+      throw new Error("invalid unit cost");
+    }
+    if (unitCost !== undefined && unitCost !== canonicalUnitCost) {
+      throw new Error("unit cost does not match canonical catalog");
+    }
 
-    this.cash -= cost;
-    item.stock += units;
+    const cost = units * canonicalUnitCost;
+    if (cost > this.progression.snapshot().cash) throw new Error("insufficient cash");
+
+    this.inventory.restock(productId, units);
+    this.progression.debitCash(cost);
   }
 
   grantStartingCash(amount: number): void {
-    if (!Number.isFinite(amount) || amount < 0) throw new Error("invalid starting cash");
-    this.cash += amount;
+    this.progression.creditCash(amount);
   }
 
   purchaseUpgrade(kind: keyof UpgradeState): void {
-    const current = this.upgrades[kind];
-    if (current >= MAX_UPGRADE_LEVEL) throw new Error("upgrade maxed");
+    const track =
+      kind === "serviceSpeed" ? "counterSpeed" :
+      kind === "shelfCapacity" ? "shelfCapacity" :
+      "saleValue";
 
-    const cost = 50 * (current + 1);
-    if (cost > this.cash) throw new Error("insufficient cash");
-
-    this.cash -= cost;
-    this.upgrades[kind] += 1;
+    this.progression.purchaseUpgrade(track);
 
     if (kind === "shelfCapacity") {
-      for (const item of Object.values(this.products)) item.capacity += 2;
+      for (const productId of Object.values(PRODUCT_IDS)) {
+        this.inventory.increaseCapacity(productId, 2);
+      }
     }
   }
 
   snapshot(): StoreSnapshot {
+    const progression = this.progression.snapshot();
     return {
-      cash: this.cash,
-      products: structuredClone(this.products),
-      upgrades: { ...this.upgrades },
+      cash: progression.cash,
+      products: {
+        flower: this.productSnapshot("flower"),
+        preroll: this.productSnapshot("preroll"),
+        edible: this.productSnapshot("edible"),
+      },
+      upgrades: {
+        shelfCapacity: progression.upgrades.shelfCapacity,
+        serviceSpeed: progression.upgrades.counterSpeed,
+        saleValue: progression.upgrades.saleValue,
+      },
+    };
+  }
+
+  private productSnapshot(product: StarterProduct): ProductState {
+    const item = this.inventory.get(PRODUCT_IDS[product]);
+    return {
+      stock: item.stock,
+      capacity: item.capacity,
+      basePrice: item.baseSalePrice,
     };
   }
 }

@@ -193,6 +193,7 @@ func ParseNewsFeed(b []byte) ([]RawNewsEntry, error) {
 		if err := xml.Unmarshal(b, &doc); err != nil {
 			return nil, err
 		}
+		if len(doc.Channel.Items) > 500 { return nil, fmt.Errorf("%w: too many feed entries", ErrInvalidInput) }
 		out := make([]RawNewsEntry, 0, len(doc.Channel.Items))
 		for _, item := range doc.Channel.Items {
 			author := strings.TrimSpace(item.Author)
@@ -219,6 +220,7 @@ func ParseNewsFeed(b []byte) ([]RawNewsEntry, error) {
 		if err := xml.Unmarshal(b, &doc); err != nil {
 			return nil, err
 		}
+		if len(doc.Entries) > 500 { return nil, fmt.Errorf("%w: too many feed entries", ErrInvalidInput) }
 		out := make([]RawNewsEntry, 0, len(doc.Entries))
 		for _, item := range doc.Entries {
 			link, image := "", ""
@@ -260,8 +262,8 @@ var tagPattern = regexp.MustCompile(`(?s)<[^>]*>`)
 var whitespacePattern = regexp.MustCompile(`\s+`)
 
 func cleanFeedText(value string) string {
-	value = tagPattern.ReplaceAllString(value, " ")
 	value = html.UnescapeString(value)
+	value = tagPattern.ReplaceAllString(value, " ")
 	value = whitespacePattern.ReplaceAllString(value, " ")
 	value = strings.TrimSpace(value)
 	const max = 1200

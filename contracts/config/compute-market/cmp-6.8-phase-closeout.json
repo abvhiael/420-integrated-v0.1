@@ -5,8 +5,8 @@
   "canonical_definition": "Reconcile the complete accumulated CMP-6 useful-computation reward phase against current main, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification once, preserve durable evidence, and hand off to CMP-7 — SDK, API, CLI and indexer.",
   "status": "COMPLETE",
   "reconciliation": {
-    "main_sha": "dff7c038160871436a5df81295ce71fd94e4ddfe",
-    "reconciled_anchor_sha": "b5d8423589db5607bc59be282b654ff9b40a88a5",
+    "main_sha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+    "reconciled_anchor_sha": "d39f62e1a5e0ac5b646d851abe9d0a17fbf1450d",
     "behind_main": 0
   },
   "qualified_prerequisites": [

@@ -91,8 +91,8 @@ No DoobTube Solidity namespace exists.
 | Security/abuse/moderation | COMPLETE for app repository scope |
 | User/developer/operator/release documentation | COMPLETE for repository scope |
 | Repository Level 3 closeout | COMPLETE — DOOBTUBE-11 |
-| Public testnet | PENDING/BLOCKED — DOOBTUBE-12 |
-| Genesis/production release | PENDING/BLOCKED — DOOBTUBE-13 |
+| Public testnet | TESTNET HANDOFF — DOOBTUBE-12 in `docs/ROADMAP.md` |
+| Genesis/production release | TESTNET/RELEASE HANDOFF — DOOBTUBE-13 in `docs/ROADMAP.md` |
 
 ## 4. Smart-contract and custody audit
 

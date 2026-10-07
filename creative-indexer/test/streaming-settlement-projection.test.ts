@@ -152,3 +152,59 @@ test('HZ-4.4 fails closed when allocation projections do not conserve settlement
     await base.close();
   }
 });
+
+
+test('HZ-4.4 preserves canonical zero-revenue rounding allocations', async () => {
+  const base = new CreativeIndexerStore();
+  const store = new StreamingSettlementProjectionStore420();
+  try {
+    await base.applySchema();
+    await store.applySchema();
+    await store.reset();
+    await base.reset();
+
+    const settlementId = '0xrounding';
+    await store.ingest([
+      event(201, 'SETTLEMENT_EPOCH_COMMITTED', {
+        settlementId,
+        playbackEpoch: 100,
+        playbackRoot: '0xplayback100',
+        revenueRoot: '0xrevenue100',
+        totalPlayCount: 2,
+        totalQualifiedMs: 2,
+        grossRevenue: 1,
+      }),
+      event(202, 'SETTLEMENT_EPOCH_FINALIZED', { settlementId, playbackEpoch: 100 }),
+      event(203, 'RECORDING_REVENUE_ALLOCATED', {
+        settlementId,
+        recordingId: 801,
+        playCount: 1,
+        qualifiedMs: 1,
+        revenue: 0,
+      }),
+      event(204, 'RECORDING_REVENUE_ALLOCATED', {
+        settlementId,
+        recordingId: 802,
+        playCount: 1,
+        qualifiedMs: 1,
+        revenue: 1,
+      }),
+      event(205, 'SETTLEMENT_ALLOCATED', {
+        settlementId,
+        playbackEpoch: 100,
+        allocationRoot: '0xroundingroot',
+        recordingCount: 2,
+        allocatedRevenue: 1,
+      }),
+    ]);
+
+    const allocations = await store.listRecordingAllocations(settlementId);
+    assert.equal(allocations[0]?.revenue, '0');
+    assert.equal(allocations[1]?.revenue, '1');
+    const overview = await store.getSettlementOverview(settlementId);
+    assert.equal(overview?.allocatedRevenue, '1');
+  } finally {
+    await store.close();
+    await base.close();
+  }
+});

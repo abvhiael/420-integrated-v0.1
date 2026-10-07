@@ -35,13 +35,13 @@ Do not renumber, collapse, or silently redefine these steps. Repository truth an
 - Implement the deployable 420 Attention / Cannaseur user-facing client defined by canonical docs.
 - Required workflows: Wallet/network connection, consent management, campaign inspection, sponsor campaign lifecycle/funding, proof/reward inspection, reward claiming, explicit transaction/error states, accessibility/responsive basics, and production configuration.
 - Do not substitute documentation pages for the application.
-- **Status: IMPLEMENTED; awaiting exact-head Level 1 qualification.**
+- **Status: COMPLETE. Level 1 qualified at implementation SHA `9babc92f5b1a5abdf7e9f0c2f956df170baa5546` (workflow run `37571023849`).**
 
 ## ATTENTION-AUDIT-7 — Indexer/API/service projection
 - Define and implement only the non-canonical projection/API actually required by the user-facing client.
 - Preserve raw Attention telemetry and private audience data exclusions.
 - Include reorg/rebuild behavior, bounded retries/idempotency where applicable, and canonical-source provenance.
-- **Status: READY after ATTENTION-AUDIT-6 qualification. Browser consumer contract is now defined; service implementation remains absent.**
+- **Status: NEXT. Browser consumer contract is qualified; service implementation remains absent.**
 
 ## ATTENTION-AUDIT-8 — Testnet deployment and integration qualification
 - Deploy fixed Genesis predeploys and registry-resolved Attention components in the production-equivalent testnet environment.

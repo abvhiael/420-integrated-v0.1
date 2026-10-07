@@ -9,6 +9,7 @@ Canonical RR-9 requires production frontend/backend configuration, API routing, 
 ## Repository controls delivered
 
 - Existing browser application retains semantic sections, skip-link, keyboard-accessible controls, feedback announcements and DOM `textContent` rendering.
+- API uses bounded direct-peer request throttling. Production ingress must additionally enforce distributed IP/request rate budgets.
 - API responses include no-store policy, no sniffing, framing denial, same-origin resource policy, restrictive CSP, no referrer and denied browser permissions.
 - Authentication remains the session/capability boundary established in RR-4. No permissive CORS has been enabled.
 - App-scoped tests protect those headers on normal and denied responses and check that unknown cross-origin preflights are not granted.
@@ -17,7 +18,7 @@ Canonical RR-9 requires production frontend/backend configuration, API routing, 
 ## Release-blocking work
 
 1. **Deployment/API routing:** Establish approved TLS termination and same-origin `/v1/*` routing to an independently qualified live backend. Provide real Identity/Wallet session verifier, Storage/Rights, Search, Notifications and Mail integration. Do not ship development `AllowIdentity`, `DevAuthorizer` or no-op adapters as production.
-2. **Rate limit and ingress controls:** Implement and verify source-aware per-client request budgets, body bounds and trusted reverse-proxy handling; coordinate with ingress. Do not trust arbitrary `X-Forwarded-For`.
+2. **Rate limit and ingress controls:** A bounded in-process direct-peer token bucket now returns 429 for excess calls and ignores untrusted `X-Forwarded-For`; deployment still requires production-aware reverse-proxy trust policy, distributed ingress enforcement, distinct route budgets, and verified body bounds.
 3. **Observability:** Bound and redact structured logs; publish health/latency/error metrics and actionable alerts. Never log Wallet tokens, private publication bodies or credentials.
 4. **Backups:** Document and test encrypted, owner-controlled backup and restore of publication metadata, feed checkpoints and integration outbox, with disaster recovery and consistency checks.
 5. **Browser qualification:** Run real browser E2E, WCAG accessibility and responsive mobile checks for anonymous, authenticated, forbidden and revoked-session paths. Exercise API/backend routing and secure cookies/session gateway.

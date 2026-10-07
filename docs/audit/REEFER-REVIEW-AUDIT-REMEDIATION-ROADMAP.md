@@ -20,9 +20,9 @@ No dedicated smart contract is required by the canonical architecture: the appli
 |---|---|---|---|---|---|---|
 | service identity/scope | consumer registry | config + package constant | static verifier | README | COMPLETE | live Registry publication if adopted |
 | Publication object | GEN-SVC-0 objects | model with opaque ID/timestamps/visibility/provenance | unit | README | COMPLETE | schema compatibility during live integration |
-| off-chain article body | GEN-SVC-0 boundary | blob interface + digest/reference | unit | README | PARTIAL | durable encrypted 420 Storage adapter |
+| off-chain article body | GEN-SVC-0 boundary | owner-scoped Storage420 adapter + digest/ObjectRef integrity + auth-before-fetch | RR-5 unit/adversarial | README/RR-5 | COMPLETE AT REPOSITORY LEVEL | live deployed 420 Storage provider/key-custody qualification |
 | Identity boundary | dependency registry | verified Wallet/Identity session-verifier boundary + active-identity claim gate | session/adversarial HTTP tests | README/RR-4 | COMPLETE AT REPOSITORY LEVEL | live deployed verifier composition |
-| Rights/provenance | suite roadmap/threat model | mandatory rights assertion before publish | unit | README/security | PARTIAL | live 420 Rights + chain provenance validation |
+| Rights/provenance | suite roadmap/threat model | structured 420 Rights provenance bound to digest/session chain/network/holder | RR-5 unit/adversarial | README/security/RR-5 | COMPLETE AT REPOSITORY LEVEL | live deployed Rights Registry/Router qualification |
 | Search | registry | public-only projection hook | warning path unit | README/security | PARTIAL | live Search adapter/rebuild/reorg qualification |
 | Notifications | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live delivery/opt-in/dedup |
 | 420Mail | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live signed internal delivery |
@@ -36,7 +36,7 @@ No dedicated smart contract is required by the canonical architecture: the appli
 | dedicated contracts | on/off-chain rule | none | N/A | architecture | NOT APPLICABLE | do not create parallel rights/identity authority |
 | deployment/runtime | release requirement | development executable; protected routes fail closed without verified-session composition; prod mode fails closed | compile/session tests | README/security | PARTIAL | live verifier + live adapters + public testnet |
 | Genesis catalog authorization | frozen catalog | absent by design | shared validator | roadmap | BLOCKED | explicit frozen-catalog decision |
-| production security/ops | threat model | repository controls only | unit/static | security | BLOCKED | rate limits, abuse ops, encryption, monitoring, recovery, load |
+| production security/ops | threat model | repository controls plus durable metadata and Storage security/integrity contract | unit/static | security | BLOCKED | live provider encryption/key custody, rate limits, monitoring, backup/restore, load |
 | independent review | release gate | none | none | self-audit only | BLOCKED | external review after freeze |
 
 ## Ordered remediation roadmap

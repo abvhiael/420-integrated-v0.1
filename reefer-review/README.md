@@ -28,12 +28,15 @@ Implemented and repository-qualified:
 - Bearer session enforcement with ReeferReview audience, chain/network, expiry and revocation checks;
 - scoped `reefer.author`, `reefer.publisher` and `reefer.moderator` capabilities;
 - memory-only browser session handling through the deployment Wallet authentication gateway;
-- typed Go client session-token provider with no `X-420-Actor` authentication.
+- typed Go client session-token provider with no `X-420-Actor` authentication;
+- durable publication/revision/moderation metadata store with durable idempotency;
+- owner-scoped 420 Storage adapter contract requiring encrypted-at-rest, external-key-custody and SHA-256 integrity guarantees;
+- structured 420 Rights provenance evidence bound to publication body digest and, when present, the verified Wallet session chain/network/holder.
 
 Not implemented or not yet qualified:
 - live deployed Wallet/420Identity verifier composition;
-- encrypted/durable 420 Storage adapter;
-- live 420 Rights adapter and chain provenance verification;
+- live deployed 420 Storage provider/endpoints and production key-custody evidence;
+- live deployed 420 Rights registry/router endpoint evidence;
 - deployed 420 Search/Notifications/420Mail integrations;
 - production ingress/rate limiting/observability/backups;
 - browser accessibility/mobile E2E;
@@ -129,3 +132,16 @@ ReeferReview protected editorial and moderation routes are authenticated with `A
 The browser requests credentials through `window.ReeferReviewWalletSession` and keeps the bearer token only in JavaScript memory. The typed Go client accepts a `SessionTokenProvider` and retrieves a token at request time. Neither layer mints or persists session credentials.
 
 Live deployment wiring remains a later deployment/live-integration gate.
+
+
+## RR-5 durable storage and Rights
+
+RR-5 introduces the repository-qualified durable publishing composition.
+
+Publication metadata, revision history, moderation history and idempotency bindings can be persisted through `DurableStore`, which uses a schema-versioned JSON representation, process/file locking, 0600 state/lock files, atomic temporary-file replacement, file sync and directory sync. Store corruption and unsupported future schemas fail closed.
+
+Article bodies remain outside the metadata store. `Storage420BlobAdapter` binds ReeferReview to the canonical `sdk/storage420.ObjectRef` identity while requiring a deployment provider to attest qualified 420 Storage, encryption at rest, external key custody, owner-scoped access and SHA-256 integrity. ReeferReview verifies body SHA-256 on write and read and checks the returned object size/root. Restricted records are authorized before their blob is fetched.
+
+Publishing through the RR-5 durable composition requires `RightsProvenanceProvider`. The stored provenance records the canonical `420/service/rights/v1` service identity, subject/right/claim references, holder wallet, evidence/provenance hashes, article digest, chain/network, Registry/Router references, block evidence and verification time. A verified RR-4 session additionally binds holder wallet and chain/network. Local Rights evidence never becomes external legal adjudication.
+
+Repository qualification does not invent or claim live 420 Storage or 420 Rights deployment addresses. Those live deployment/Registry/runtime identities remain later testnet/deployment gates.

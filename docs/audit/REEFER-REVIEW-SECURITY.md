@@ -18,7 +18,7 @@ Article integrity, author/publisher attribution, visibility, rights/provenance e
 - INDEX_POISONING: only PUBLIC + PUBLISHED records are projected; Search failures do not mutate canonical publication state.
 - WEBHOOK_REPLAY: this baseline exposes no webhook receiver. Future webhooks must be signed, expiring, replay-protected and idempotent.
 - MESSAGING_ABUSE: 420Mail hook is outbound application delivery only; live source authentication and recipient controls remain required.
-- private visibility leakage: public list and public item reads expose only PUBLIC/PUBLISHED content. Non-public author/editor reads are intentionally absent until viewer-aware Identity/session authorization is implemented.
+- private visibility leakage: public list and anonymous reads remain bounded to published PUBLIC/UNLISTED policy; restricted reads require the RR-4 verified session/visibility boundary. RR-5 authorizes metadata before fetching an owner-scoped private body.
 
 ## Accepted repository limitation
 The development executable still uses development-only non-live dependency adapters and intentionally refuses staging/production startup. RR-4 removed the unsigned `X-420-Actor` authentication path from the HTTP/browser/client boundary; protected routes now fail closed without the deployment-supplied verified-session composition. Live Wallet/Identity verifier deployment remains a later live/deployment gate.
@@ -54,3 +54,19 @@ Restricted viewer eligibility is not inferred from mere authentication. FOLLOWER
 The browser keeps bearer material memory-only and does not write session credentials to localStorage or sessionStorage. `X-420-Actor` is not sent or trusted.
 
 Live Wallet/Identity gateway deployment, session issuer configuration and production ingress remain later live/deployment qualification and are not claimed by RR-4.
+
+
+## RR-5 durable Storage / Rights boundary
+
+RR-5 separates durable application metadata from authoritative body storage and Rights provenance.
+
+- Publication, revision, moderation and idempotency metadata use the schema-versioned `DurableStore`; state writes use an exclusive file lock, temporary file, fsync, atomic rename, 0600 permissions and directory sync.
+- Corrupt JSON, inconsistent publication/revision linkage and unsupported future store schemas fail closed.
+- Article plaintext is not persisted in the metadata store.
+- The qualified RR-5 composition requires a 420 Storage provider security profile asserting encryption at rest, external key custody, owner-scoped access and SHA-256 integrity.
+- ReeferReview independently checks requested SHA-256 before upload and verifies canonical ObjectRef size/root on write and read.
+- Unauthorized restricted reads are rejected from publication metadata before any private blob retrieval.
+- Publishing and published revisions require structured 420 Rights provenance. Body-digest substitution, wrong holder wallet, wrong chain or wrong network fail closed when corresponding session evidence exists.
+- ReeferReview does not mint Rights claims, grant licenses, choose canonical Registry addresses or treat its local metadata as Rights authority.
+
+Live Storage provider encryption/key-custody proof, live Rights deployment/Registry resolution and production recovery remain later live/testnet/deployment gates.

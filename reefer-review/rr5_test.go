@@ -259,3 +259,27 @@ func (p *rr5BadRootProvider) PutPrivate(ctx context.Context, owner, digest strin
 	object.ShardRoot = "0000000000000000000000000000000000000000000000000000000000000000"
 	return object, nil
 }
+
+
+func TestRR5RightsProvenanceBindsSessionWalletChainAndNetwork(t *testing.T) {
+	claims := rr4Claims("writer.420", CapabilityAuthor)
+	ctx := withSessionClaims(context.Background(), claims)
+	digest := bodyDigest("body")
+
+	badWallet := rr5Rights{mutate: func(e *RightsProvenance) {
+		e.HolderWallet = "0x2222222222222222222222222222222222222222"
+	}}
+	if _, err := validateRightsProvenance(ctx, "writer.420", "pub", digest, badWallet); !errors.Is(err, ErrRightsProvenance) {
+		t.Fatalf("wrong holder wallet accepted: %v", err)
+	}
+
+	badChain := rr5Rights{mutate: func(e *RightsProvenance) { e.ChainID = claims.ChainID + 1 }}
+	if _, err := validateRightsProvenance(ctx, "writer.420", "pub", digest, badChain); !errors.Is(err, ErrRightsProvenance) {
+		t.Fatalf("wrong chain accepted: %v", err)
+	}
+
+	badNetwork := rr5Rights{mutate: func(e *RightsProvenance) { e.Network = "wrong-network" }}
+	if _, err := validateRightsProvenance(ctx, "writer.420", "pub", digest, badNetwork); !errors.Is(err, ErrRightsProvenance) {
+		t.Fatalf("wrong network accepted: %v", err)
+	}
+}

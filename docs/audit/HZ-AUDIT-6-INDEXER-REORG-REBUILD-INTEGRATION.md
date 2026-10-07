@@ -78,6 +78,9 @@ It:
 - destructively resets every HZ-derived projection;
 - replays the retained prefix;
 - replays the replacement canonical tail;
+- performs normal canonical batches and complete replacement/rebuild operations atomically in one PostgreSQL transaction;
+- rejects event-key replay if its original block/transaction/log provenance changes;
+- permits idempotent replay to promote block finality without duplicating projection state;
 - removes orphaned catalog/streaming state by reconstruction rather than ad-hoc row surgery;
 - rebuilds the complete HZ projection from the retained canonical journal;
 - computes a digest spanning base, catalog and HZ-4 streaming projection tables.
@@ -112,7 +115,9 @@ Protocol-specific ABI decoding/enrichment and deployed-address selection are env
 - exact full-projection digest reproduction after destructive rebuild;
 - idempotent replacement-tail replay;
 - finalized-block reorg refusal;
-- out-of-order block/transaction/log rejection before mutation.
+- out-of-order block/transaction/log rejection before mutation;
+- atomic rollback when a later event in a multi-event batch violates projection lifecycle rules;
+- finality promotion during idempotent replay without duplicate projection writes.
 
 `creative-indexer/test/rpc-log-source.test.ts` proves:
 
@@ -131,7 +136,8 @@ The complete Creative Reference Indexer suite remains required so legacy fixture
 - canonical EVM history remains authoritative;
 - PostgreSQL remains disposable and rebuildable;
 - finalized indexed blocks cannot be rolled back by the coordinator;
-- event batches are validated before mutation;
+- structural event-batch validation occurs before mutation;
+- canonical multi-event ingestion and reorg/rebuild replacement commit atomically;
 - reorg repair reconstructs derived state from canonical journal input;
 - orphaned post-fork rows are not retained;
 - removed RPC logs are not treated as canonical;

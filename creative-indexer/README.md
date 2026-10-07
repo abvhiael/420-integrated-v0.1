@@ -20,6 +20,8 @@ HZ-AUDIT-6 retains the deterministic Decision #10 fixture path while adding the 
 - canonical-tail replacement when an indexed event-bearing block hash changes;
 - fail-closed refusal to roll back finalized indexed blocks;
 - coordinated reset/replay across base, catalog and HZ-4 streaming projections;
+- atomic multi-event ingestion and atomic cross-projection reorg/rebuild replacement, so a later projection failure cannot leave a partially committed HZ view;
+- idempotent replay provenance checks plus finality promotion without duplicate projection writes;
 - a complete HZ projection digest that remains identical after journal rebuild; and
 - a JSON-RPC `eth_getLogs` source with canonical block-header verification and a protocol decoder/enrichment boundary.
 

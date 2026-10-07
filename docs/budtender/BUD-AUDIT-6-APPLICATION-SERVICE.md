@@ -1,6 +1,6 @@
 # BUD-AUDIT-6 — Application Service Layer
 
-Status: IMPLEMENTED — Level 1 exact-head qualification pending
+Status: COMPLETE — Level 1 exact-head qualified
 
 ## Authority and scope
 
@@ -101,8 +101,8 @@ BUD-AUDIT-6 is COMPLETE only when:
 5. offline evaluation is available without applying untrusted rewards;
 6. progression upgrades/expansions preserve BUD-3/BUD-4 invariants;
 7. application-service negative/authority/boundary tests pass;
-8. the exact implementation SHA passes directly applicable Budtender Level 1 qualification;
-9. durable repository evidence records implementation SHA, CI evidence, base SHA, limitations, deferred checks, and next roadmap step.
+8. the exact implementation SHA passes directly applicable Budtender Level 1 qualification (satisfied by `b80eb03b50526f470e3a8b778dc0329a27d95ef1`, Budtender Qualification run `37662949859`, all retained jobs PASS);
+9. durable repository evidence records implementation SHA, CI evidence, base SHA, limitations, deferred checks, and next roadmap step (recorded in `docs/audit/BUD-AUDIT-6-EVIDENCE-2026-10-07.md`).
 
 ## Known limitations
 

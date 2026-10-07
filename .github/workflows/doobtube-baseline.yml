@@ -34,5 +34,7 @@ jobs:
         run: python3 -m compileall -q doobtube
       - name: Test DoobTube protocol adapters
         run: python3 -m unittest -v doobtube.tests.test_doobtube_adapters
+      - name: Test DoobTube backend control plane
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_backend
       - name: Verify DoobTube audit baseline
         run: python3 scripts/verify-doobtube-baseline.py

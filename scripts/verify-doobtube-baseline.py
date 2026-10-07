@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-4 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-5 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -83,6 +83,12 @@ allowed_doobtube_files = {
     "doobtube/integrations/ecosystem.py",
     "doobtube/tests/__init__.py",
     "doobtube/tests/test_doobtube_adapters.py",
+    "doobtube/api/__init__.py",
+    "doobtube/api/errors.py",
+    "doobtube/api/types.py",
+    "doobtube/api/persistence.py",
+    "doobtube/api/service.py",
+    "doobtube/tests/test_doobtube_backend.py",
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"}
@@ -224,7 +230,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -338,7 +344,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -431,7 +437,7 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
 
 adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
     "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
@@ -511,6 +517,98 @@ assert "return False" in adapter_code, "DoobTube contract requirement must remai
 assert "return None" in adapter_code, "DoobTube service ID must remain absent"
 assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
 assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
 
-print("DOOBTUBE-4 Level 1 contract/adapter verification: PASS")
+backend_doc = need("docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md", [
+    "Roadmap step: **DOOBTUBE-5 — Backend/API/indexing/service control plane**",
+    "Status: **ADOPTED / IMPLEMENTED**",
+    "DT-API-001",
+    "DT-AUTH-001",
+    "DT-IDEMP-API-001",
+    "DT-PAGE-001",
+    "DT-PERSIST-001",
+    "DT-JOB-001",
+    "DT-INDEX-001",
+    "DT-RECOVERY-001",
+    "DT-SECRET-001",
+    "DT-OBS-001",
+    "DT-HEALTH-001",
+    "DT-API-INV-001",
+    "DT-API-INV-012",
+    "Next canonical roadmap step: DOOBTUBE-6 — Media processing, delivery and livestream integration",
+])
+backend_service = need("doobtube/api/service.py", [
+    "class RuntimeConfig",
+    "class Backend",
+    '"/v1/health"',
+    '"/v1/readiness"',
+    '"/v1/feed"',
+    '"/v1/preferences"',
+    '"/v1/control/rebuild"',
+    '"/v1/metrics"',
+    "def _idempotent",
+    "def apply_projection",
+    "def rebuild_projection",
+    "def run_due_jobs",
+    "raw secrets may not be stored in DoobTube runtime config",
+])
+backend_types = need("doobtube/api/types.py", [
+    'API_VERSION = "v1"',
+    "MAX_PAGE_LIMIT = 100",
+    "def encode_cursor",
+    "def decode_cursor",
+    "def rfc3339",
+    "class AuthContext",
+    "class ProjectionEvent",
+])
+backend_store = need("doobtube/api/persistence.py", [
+    "SCHEMA_VERSION = 1",
+    "CREATE TABLE IF NOT EXISTS idempotency",
+    "CREATE TABLE IF NOT EXISTS preferences",
+    "CREATE TABLE IF NOT EXISTS jobs",
+    "CREATE TABLE IF NOT EXISTS projection_blocks",
+    "CREATE TABLE IF NOT EXISTS feed_items",
+    "database schema is newer than runtime",
+])
+backend_tests = need("doobtube/tests/test_doobtube_backend.py", [
+    "test_health_and_dependency_aware_readiness",
+    "test_versioned_api_and_stable_errors",
+    "test_mutation_requires_wallet_chain_network_and_capability",
+    "test_idempotency_exact_replay_and_conflict",
+    "test_preferences_persist_across_restart",
+    "test_projection_public_only_pagination_and_opaque_cursor",
+    "test_finalized_history_conflict_fails_closed",
+    "test_nonfinalized_replacement_and_rebuild",
+    "test_rebuild_job_is_replay_safe",
+    "test_bounded_job_retry_terminal_failure",
+    "test_secrets_boundary_rejects_raw_secret",
+    "test_metrics_are_operator_protected",
+    "test_migration_version_is_durable",
+])
+
+# DOOBTUBE-5 canonical runtime requirements must remain present.
+for phrase in [
+    "versioned API",
+    "Authentication and authorization",
+    "Idempotency and replay",
+    "Pagination and timestamps",
+    "Stable errors",
+    "Persistence and migrations",
+    "Bounded retries and replay-safe jobs",
+    "Indexing / projection control plane",
+    "Recovery and rebuild",
+    "Secrets boundary",
+    "Observability",
+    "Health and readiness",
+]:
+    assert phrase in backend_doc, f"DOOBTUBE-5 requirement missing: {phrase!r}"
+
+# Control-plane routes stay versioned and bounded.
+for route in ["/v1/health","/v1/readiness","/v1/feed","/v1/preferences","/v1/control/rebuild","/v1/metrics"]:
+    assert route in backend_service, f"backend route missing: {route}"
+
+assert "**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition" in roadmap
+assert "docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
+
+print("DOOBTUBE-5 Level 1 backend/control-plane verification: PASS")

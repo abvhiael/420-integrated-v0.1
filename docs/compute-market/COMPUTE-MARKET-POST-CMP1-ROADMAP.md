@@ -601,23 +601,28 @@ CMP-5.8 formally closes the accumulated CMP-5 external distributed-compute adapt
 Purpose: provide application-layer incentives for verified useful compute. Compute rewards must not replace chain consensus.
 
 ## CMP-6.1 — Funding sources
-Researcher, university, grant, philanthropic, community and ecosystem-funded jobs/pools.
+**COMPLETE — Level 1 exact-head qualified.** Researcher, university, grant, philanthropic, community and ecosystem-funded jobs/pools. Durable evidence: [CMP-6.1 qualification](CMP-6.1-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.2 — Verification-gated rewards
+**COMPLETE — Level 1 + first CMP-6 Level 2 accumulated exact-head qualified.** Durable evidence: [CMP-6.2 qualification](CMP-6.2-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.3 — Contribution accounting
-Verified work units, CPU/GPU hours, project credit and other policy-defined metrics.
+**COMPLETE — Level 1 exact-head qualified.** Verified work units, CPU/GPU hours, project credit and other policy-defined metrics. Durable evidence: [CMP-6.3 qualification](CMP-6.3-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.4 — Research reward pools
-Examples: cancer research, protein folding, climate simulation, astronomy, drug discovery.
+**COMPLETE — Level 1 exact-head qualified.** Examples: cancer research, protein folding, climate simulation, astronomy, drug discovery. Durable evidence: [CMP-6.4 qualification](CMP-6.4-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.5 — Sponsor matching
+**COMPLETE — Level 1 + second CMP-6 Level 2 exact-head qualified.** Durable evidence: [CMP-6.5 qualification](CMP-6.5-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.6 — Anti-Sybil / anti-farming economics
+**COMPLETE — Level 1 exact-head qualified.** Durable evidence: [CMP-6.6 qualification](CMP-6.6-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.7 — Transparent reward accounting
+**COMPLETE — Level 1 + third/final CMP-6 Level 2 exact-head qualified.** Durable evidence: [CMP-6.7 qualification](CMP-6.7-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.8 — Phase closeout
+**LEVEL 3 CLOSEOUT CANDIDATE.** Reconcile the complete accumulated CMP-6 reward phase against current `main`, run canonical full Solidity once, Genesis/address authority separately without duplicate Foundry, global/Docs and retained Compute qualification, and preserve one exact merge-candidate SHA. Closeout definition: [CMP-6.8 phase closeout](CMP-6.8-PHASE-CLOSEOUT.md).
 
 ---
 

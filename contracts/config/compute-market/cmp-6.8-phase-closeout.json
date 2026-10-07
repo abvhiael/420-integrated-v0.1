@@ -1,0 +1,60 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-6.8.PhaseCloseout.v1",
+  "step": "CMP-6.8",
+  "title": "Phase closeout",
+  "canonical_definition": "Reconcile the complete accumulated CMP-6 useful-computation reward phase against current main, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification once, preserve durable evidence, and hand off to CMP-7 — SDK, API, CLI and indexer.",
+  "status": "COMPLETE",
+  "reconciliation": {
+    "main_sha": "dff7c038160871436a5df81295ce71fd94e4ddfe",
+    "reconciled_anchor_sha": "b5d8423589db5607bc59be282b654ff9b40a88a5",
+    "behind_main": 0
+  },
+  "qualified_prerequisites": [
+    "CMP-6.1",
+    "CMP-6.2",
+    "CMP-6.3",
+    "CMP-6.4",
+    "CMP-6.5",
+    "CMP-6.6",
+    "CMP-6.7"
+  ],
+  "level_2_milestones": [
+    "CMP-6.2 — Verification-gated rewards",
+    "CMP-6.5 — Sponsor matching",
+    "CMP-6.7 — Transparent reward accounting"
+  ],
+  "level_3_required": {
+    "solidity_full_inventory": true,
+    "genesis_address_authority": true,
+    "integrated_global": true,
+    "docs_global": true,
+    "retained_compute_market_suite": true,
+    "phase_config_verification": true,
+    "adversarial_invariant_security": true,
+    "deployment_config_verification": true,
+    "contract_hardening_static_analysis": true
+  },
+  "ci_ownership": {
+    "solidity_full_inventory": "Solidity Contracts / four balanced PR shards",
+    "genesis_address_authority": "Genesis Address Authority / no duplicate full Foundry",
+    "global_runtime": "420 Integrated Qualification",
+    "docs": "420Docs Qualification",
+    "retained_compute_market": "Compute Market Qualification",
+    "contract_hardening": "420 Genesis Contract Hardening / size, invariant and Slither high-severity gate"
+  },
+  "non_applicable_direct_clients": {
+    "420-indexer": "CMP-6 introduces no indexer schema or ingestion implementation; Compute indexer is CMP-7.6.",
+    "420-rpc": "CMP-6 introduces no RPC method or backend surface.",
+    "420Search": "CMP-6 introduces no Search consumer or indexing implementation.",
+    "frontend/backend": "CMP-6 is protocol reward economics/accounting; the human-facing 420Compute application remains CMP-8.",
+    "@420/sdk": "CMP-6 introduces no SDK surface; @420/compute-sdk is CMP-7.1.",
+    "CLI": "CMP-6 introduces no CLI commands; CLI is CMP-7.9."
+  },
+  "live_blockers": [
+    "CMP-6.7 records transparent reward accounting but intentionally does not create or release Vault payout obligations",
+    "live/testnet deployment, funded end-to-end payout execution and operational reward distribution remain external deployment/testnet work",
+    "SDK/API/CLI/indexer integration belongs to CMP-7",
+    "human-facing participation and earnings surfaces belong to CMP-8"
+  ],
+  "next_canonical_step": "CMP-7 — SDK, API, CLI and indexer"
+}

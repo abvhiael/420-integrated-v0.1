@@ -1,0 +1,81 @@
+{
+  "schema": "420.hz.indexer.reorg.rebuild.bundle.v1",
+  "roadmap_step": "HZ-AUDIT-6",
+  "status": "REPOSITORY_INDEXER_REORG_REBUILD_READY_LIVE_RPC_EVIDENCE_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "scope": "repository-side HZ canonical RPC ingestion metadata, reorg rollback, deterministic full projection rebuild and failure-path qualification",
+  "authoritative_source": "canonical EVM chain history and committed manifests",
+  "projection_role": "DISPOSABLE_NON_CANONICAL_POSTGRES_PROJECTION",
+  "implementation": {
+    "integration_coordinator": "creative-indexer/src/hz-indexer-integration.ts",
+    "rpc_log_source": "creative-indexer/src/rpc-log-source.ts",
+    "event_type": "creative-indexer/src/types.ts",
+    "base_store": "creative-indexer/src/store.ts",
+    "catalog_store": "creative-indexer/src/catalog-store.ts",
+    "streaming_store": "creative-indexer/src/streaming-settlement-store.ts",
+    "base_schema": "creative-indexer/sql/001_initial.sql"
+  },
+  "requirements": [
+    "retain block hash, parent hash, transaction index, transaction hash and log index ordering metadata",
+    "do not mark newly indexed blocks finalized unless the canonical source says they are finalized",
+    "detect a conflicting block hash at an already indexed event-bearing block",
+    "refuse canonical-tail replacement when the conflicting indexed block is finalized",
+    "preserve the canonical prefix below the fork block",
+    "destructively reset all HZ-derived PostgreSQL projections before replacement-tail replay",
+    "route retained canonical events to the correct base, catalog or streaming projector",
+    "drop orphaned post-fork events and derived projection state",
+    "replay replacement canonical events in deterministic block/transaction/log order",
+    "rebuild the complete HZ projection from the retained canonical event journal",
+    "produce the exact same complete projection digest after rebuild",
+    "reject duplicate event keys, multiple hashes for one supplied block and out-of-order event batches",
+    "support JSON-RPC eth_getLogs plus canonical block-header lookup through a decoder boundary",
+    "reject removed RPC logs and log/header block-hash disagreement",
+    "retain public-testnet endpoint, deployment address and receipt evidence for HZ-AUDIT-7"
+  ],
+  "tests": [
+    "creative-indexer/test/hz-indexer-reorg-rebuild.test.ts",
+    "creative-indexer/test/rpc-log-source.test.ts",
+    "creative-indexer/test/rebuild.test.ts",
+    "creative-indexer/test/catalog-projection.test.ts",
+    "creative-indexer/test/discovery-store.test.ts",
+    "creative-indexer/test/streaming-settlement-projection.test.ts"
+  ],
+  "security_invariants": [
+    "finalized indexed blocks are not rolled back",
+    "failed or invalid canonical batches mutate no projection state before validation",
+    "removed RPC logs are not accepted as canonical",
+    "RPC log block hashes must match fetched canonical headers",
+    "PostgreSQL remains rebuildable and non-authoritative",
+    "reorg rollback removes orphaned settlement/catalog projection state instead of preserving stale rows"
+  ],
+  "level_2": {
+    "required": false,
+    "reason": "HZ-AUDIT-5 immediately completed the documented retained 420Hz Level-2 milestone; HZ-AUDIT-6 directly qualifies its indexer integration surface at Level 1 without ceremonial repetition"
+  },
+  "live_evidence": {
+    "required_in_step": "HZ-AUDIT-7",
+    "rpc_url": null,
+    "network": null,
+    "chain_id": null,
+    "deployed_addresses": {},
+    "observed_blocks": [],
+    "observed_reorgs": [],
+    "production_rebuild_receipts": []
+  },
+  "limitations": [
+    "the RPC transport accepts a repository-supplied canonical log decoder/enricher; protocol-specific ABI decoding and deployed-address binding are environment wiring owned by HZ-AUDIT-7",
+    "indexed_blocks currently records event-bearing blocks rather than every empty chain block; canonical disagreement is detected at indexed event-bearing blocks",
+    "projection rebuild is intentionally destructive because chain history remains authoritative"
+  ],
+  "exit_criteria": [
+    "TypeScript build passes",
+    "complete creative-indexer test suite passes",
+    "HZ-AUDIT-6 static verifier passes",
+    "reorg replacement and full rebuild digest tests pass",
+    "finalized-fork and malformed-order negative tests pass",
+    "RPC ordering/finality and removed/hash-mismatch tests pass",
+    "no live/testnet evidence is fabricated"
+  ],
+  "next_step": "HZ-AUDIT-7"
+}

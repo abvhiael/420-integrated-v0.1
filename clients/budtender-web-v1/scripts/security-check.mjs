@@ -1,6 +1,9 @@
 import { readFile } from "node:fs/promises";
 
-const server = await readFile(new URL("../src/server.ts", import.meta.url), "utf8");
+const [server, runtimeConfig] = await Promise.all([
+  readFile(new URL("../src/server.ts", import.meta.url), "utf8"),
+  readFile(new URL("../src/runtime-config.ts", import.meta.url), "utf8"),
+]);
 
 const required = [
   "content-security-policy",
@@ -11,12 +14,21 @@ const required = [
   "cross-origin-resource-policy",
   "application/json required",
   "cross-origin mutation rejected",
-  'server.listen(port, "127.0.0.1"',
 ];
 
 for (const token of required) {
   if (!server.includes(token)) {
     throw new Error(`missing required Budtender web security control: ${token}`);
+  }
+}
+
+for (const token of [
+  'env.HOST ?? "127.0.0.1"',
+  "non-loopback HOST requires BUDTENDER_PUBLIC_ORIGIN",
+  "non-loopback deployment requires HTTPS BUDTENDER_PUBLIC_ORIGIN",
+]) {
+  if (!runtimeConfig.includes(token)) {
+    throw new Error(`missing required Budtender runtime security control: ${token}`);
   }
 }
 

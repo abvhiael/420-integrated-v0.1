@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { ProductInventory, STARTER_CATALOG } from "../../src/budtender/ProductInventory";
+import { ProductInventory, STARTER_CATALOG } from "../../src/budtender/ProductInventory.ts";
 
 describe("ProductInventory BUD-3", () => {
   it("loads the starter catalog deterministically", () => {

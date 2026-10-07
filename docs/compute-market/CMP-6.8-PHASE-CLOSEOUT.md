@@ -42,9 +42,9 @@ CMP-6 contains:
 2. **Genesis Address Authority** owns address, namespace, collision, predeploy, frozen-manifest and manifest-authority verification and must not duplicate full Foundry.
 3. **420 Integrated Qualification** owns global runtime/build/Geth/fault/soak qualification.
 4. **420Docs Qualification** owns global documentation/reconciliation.
-5. **Compute Market Qualification** owns the retained Compute suite and all CMP-6 verifiers including this closeout verifier.
+5. **Compute Market Qualification** owns the retained Compute suite and all CMP-6 verifiers including this closeout verifier.\n6. **420 Genesis Contract Hardening** owns production size checks, invariant campaigns and the Slither high-severity gate as distinct security/static-analysis coverage.
 
-Missing, cancelled, stale, superseded, skipped-required or untriggered gates are not passing evidence.
+Missing, cancelled, stale, superseded, skipped-required or untriggered gates are not passing evidence. Contract Hardening is required because Level 3 explicitly includes static/security analysis; its work is distinct from the canonical Solidity full-inventory owner.
 
 ## Security and economic invariants
 

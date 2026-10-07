@@ -55,11 +55,11 @@ type SessionSecurity struct {
 
 type sessionContextKey struct{}
 
-func WithSessionClaims(ctx context.Context, claims SessionClaims) context.Context {
+func withSessionClaims(ctx context.Context, claims SessionClaims) context.Context {
 	return context.WithValue(ctx, sessionContextKey{}, claims)
 }
 
-func AuthenticatedSession(ctx context.Context) (SessionClaims, bool) {
+func authenticatedSession(ctx context.Context) (SessionClaims, bool) {
 	claims, ok := ctx.Value(sessionContextKey{}).(SessionClaims)
 	return claims, ok
 }
@@ -147,7 +147,7 @@ func HasAnyCapability(claims SessionClaims, capabilities ...string) bool {
 type SessionIdentity struct{}
 
 func (SessionIdentity) Active(ctx context.Context, actor string) (bool, error) {
-	claims, ok := AuthenticatedSession(ctx)
+	claims, ok := authenticatedSession(ctx)
 	if !ok || claims.Revoked || !claims.IdentityActive || strings.TrimSpace(actor) == "" || claims.Subject != strings.TrimSpace(actor) {
 		return false, nil
 	}
@@ -160,7 +160,7 @@ func (SessionIdentity) Active(ctx context.Context, actor string) (bool, error) {
 type SessionAuthorizer struct{}
 
 func sessionForActor(ctx context.Context, actor string) (SessionClaims, bool) {
-	claims, ok := AuthenticatedSession(ctx)
+	claims, ok := authenticatedSession(ctx)
 	if !ok || claims.Subject != strings.TrimSpace(actor) || claims.Revoked {
 		return SessionClaims{}, false
 	}

@@ -3,6 +3,10 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, extname, join, normalize } from "node:path";
 import { BudtenderApplicationService } from "../../../src/budtender/BudtenderApplicationService.ts";
+import {
+  BudtenderGamingIntegration,
+  evaluateBudtenderAccess,
+} from "../../budtender-access-v1/src/access.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const MAX_BODY_BYTES = 16 * 1024;
@@ -63,6 +67,31 @@ export const createBudtenderWebServer = (
   try {
     if (url.pathname === "/api/state" && method === "GET") {
       return json(res, 200, application.snapshot());
+    }
+
+    if (url.pathname === "/api/gaming" && method === "GET") {
+      return json(res, 200, {
+        ...BudtenderGamingIntegration,
+        runtime: "deployment-pending",
+        authoritativeSessionState: false,
+      });
+    }
+
+    if (url.pathname === "/api/gaming/access" && method === "POST") {
+      const body = await readJson(req);
+      const before = application.snapshot();
+      const decision = evaluateBudtenderAccess({
+        feature: String(body.feature ?? ""),
+        registered: body.registered === true,
+        walletLinked: body.walletLinked === true,
+        walletConnected: body.walletConnected === true,
+      });
+      const after = application.snapshot();
+      return json(res, 200, {
+        decision,
+        gameStateUnchanged: JSON.stringify(before) === JSON.stringify(after),
+        authoritativeSessionState: false,
+      });
     }
 
     if (url.pathname === "/api/customers" && method === "POST") {

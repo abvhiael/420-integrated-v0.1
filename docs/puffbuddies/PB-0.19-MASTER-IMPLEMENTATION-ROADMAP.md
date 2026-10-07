@@ -81,6 +81,10 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Current PB-14 backend/API-hardening scope
+
+Current **PB-14 — Backend/API hardening** materializes the reserved `puffbuddies/api/` transport boundary required by PB-0.17 and already consumed contractually by PB-11/PB-12. PB-14 owns authenticated HTTP/edge hardening, strict route/body/session/origin/replay/rate-limit/audit/error controls and stale-authority rejection, while canonical relationship, consent, eligibility-decision, lifecycle, visibility, deletion, safety and premium/private-access decisions remain owned by the existing PuffBuddies domain/application layer. PB-14 is repository-qualified transport implementation only; live endpoint deployment remains PB-17+ work.
+
 ### Current PB-12 mobile-applications scope
 
 Current **PB-12 — Mobile applications** explicitly promotes the iOS and Android clients that PB-0.2 deferred behind the web-first MVP. PB-12 preserves the PB-11 client/domain authority model while adding only bounded native device capabilities: device-bound session storage, lifecycle resume/revalidation, media handoff, OS notification-registration handoff and verified app/universal links. Device/store signing, live push credentials, live API binding and distribution remain later external/release gates.

@@ -31,6 +31,7 @@ Repository: `abvhiael/420-integrated-v0.1`
 | Settlement projection | PR #105 | SQL/TS projection | projection tests | this audit | COMPLETE | exact-head CI |
 | Dedicated 420Hz frontend | no canonical committed requirement found | absent | none | limitation recorded | NOT APPLICABLE | future roadmap only if adopted |
 | Consolidated HZ-1..HZ-4 deploy/init architecture | HZ-AUDIT-2 | HzDeploymentGraph420 + HzConsolidatedDeploy420 + retained package | HzDeploymentGraph420.t.sol + verifier | HZ-AUDIT-2 architecture record | COMPLETE | Level 1 qualified on `967addaf33e311c72b3481f6300a8b4f25cd433e`; no further remediation |
+| Registry and authority wiring | HZ-AUDIT-3 | HzRegistryAuthorityPlan420 + retained authority/Registry bundle | HzRegistryAuthority420.t.sol + verifier | HZ-AUDIT-3 authority record | IMPLEMENTED / QUALIFICATION PENDING | exact-head Level 1 |
 | Live Registry/address bindings | release-readiness requirement | absent | none | gap recorded | BLOCKED | public testnet/deployment |
 | Live RPC/storage/indexer qualification | release-readiness requirement | local/reference only | repository CI only | gap recorded | BLOCKED | public testnet/infrastructure |
 
@@ -55,7 +56,7 @@ Indexer: Node.js >=22, TypeScript, PostgreSQL 16. The Creative Reference Indexer
 
 `contracts/script/Decision10DeploySeed420.s.sol` remains an HZ-1 deterministic development fixture. HZ-AUDIT-2 adds a separate consolidated HZ-1..HZ-4 constructor graph, deployment script, machine-readable deployment package, focused binding tests and exact-head fast qualification workflow. The deployment phase binds GovernanceTimelock and protocol treasury immutably and emits the complete HZ address manifest without impersonating governance or fabricating live evidence.
 
-Governance/Registry authority publication and submitter grants remain HZ-AUDIT-3. STREAM schedule terms remain HZ-AUDIT-4. Public-testnet network identity, deployed transaction/runtime evidence, live indexer/RPC configuration, monitoring and recovery remain later live qualification.
+HZ-AUDIT-3 now retains the exact GovernanceTimelock wiring sequence, runtime submitter-role semantics, complete 20-module CreativeProtocolRegistry inventory, and canonical external ProtocolRegistry component/service identities. Exact-head Level 1 qualification is required before this row becomes COMPLETE. Live governance/Registry execution and transaction evidence remain HZ-AUDIT-7. STREAM schedule terms remain HZ-AUDIT-4. Public-testnet network identity, deployed transaction/runtime evidence, live indexer/RPC configuration, monitoring and recovery remain later live qualification.
 
 420Hz must therefore distinguish repository qualification from live deployment readiness.
 

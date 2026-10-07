@@ -48,6 +48,14 @@
         <strong id="session-title">420 Wallet / 420Identity session</strong>
         <p id="session-state">Not connected. Session credentials stay in memory and are never written to localStorage or sessionStorage.</p>
       </div>
+      <label for="session-scope">
+        <span>Requested scope</span>
+        <select id="session-scope">
+          <option value="reefer.author">Writer</option>
+          <option value="reefer.moderator">Moderator</option>
+          <option value="reefer.publisher">Publisher</option>
+        </select>
+      </label>
       <button id="session-connect" type="button">Connect Wallet</button>
       <button id="session-disconnect" type="button" class="secondary" disabled>Sign out</button>
     </aside>

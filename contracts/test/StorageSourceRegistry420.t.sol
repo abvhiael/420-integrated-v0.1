@@ -137,7 +137,8 @@ contract StorageSourceRegistry420Test {
 
         vm.prank(ARTIST);
         registry.addSource(RECORDING, keccak256("replacement"), keccak256("replacement-locator"), keccak256("audio"), keccak256("replacement-proof"), 1);
-        require(registry.sourceIds(RECORDING).length == registry.MAX_CURRENT_SOURCES(), "current source set must stay bounded");
+        require(registry.currentSourceIds(RECORDING).length == registry.MAX_CURRENT_SOURCES(), "current source set must stay bounded");
+        require(registry.sourceIds(RECORDING).length == registry.MAX_CURRENT_SOURCES() + 1, "historical source ids must remain enumerable");
     }
 
 

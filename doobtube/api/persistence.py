@@ -9,7 +9,7 @@ import json
 import sqlite3
 from typing import Any, Iterator
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 class PersistenceError(RuntimeError):
@@ -102,7 +102,25 @@ class Store:
                 db.execute(
                     "INSERT INTO meta(k,v) VALUES('schema_version',?) "
                     "ON CONFLICT(k) DO UPDATE SET v=excluded.v",
-                    (str(SCHEMA_VERSION),),
+                    ("1",),
+                )
+                current = 1
+            if current < 2:
+                db.executescript("""
+                CREATE TABLE IF NOT EXISTS media_sessions (
+                    session_id TEXT PRIMARY KEY,
+                    spec_json TEXT NOT NULL,
+                    state TEXT NOT NULL,
+                    desired_live INTEGER NOT NULL,
+                    reconnect_attempts INTEGER NOT NULL,
+                    last_error TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+                """)
+                db.execute(
+                    "INSERT INTO meta(k,v) VALUES('schema_version',?) "
+                    "ON CONFLICT(k) DO UPDATE SET v=excluded.v",
+                    ("2",),
                 )
 
     @staticmethod
@@ -203,3 +221,44 @@ class Store:
 
     def clear_projection(self) -> None:
         self.db.execute("DELETE FROM projection_blocks")
+
+
+    def put_media_session(self, record) -> None:
+        from dataclasses import asdict
+        from datetime import datetime
+        spec = asdict(record.spec)
+        self.db.execute(
+            "INSERT INTO media_sessions(session_id,spec_json,state,desired_live,reconnect_attempts,last_error,updated_at) "
+            "VALUES(?,?,?,?,?,?,?) ON CONFLICT(session_id) DO UPDATE SET "
+            "spec_json=excluded.spec_json,state=excluded.state,desired_live=excluded.desired_live,"
+            "reconnect_attempts=excluded.reconnect_attempts,last_error=excluded.last_error,updated_at=excluded.updated_at",
+            (
+                record.spec.session_id, json.dumps(spec, sort_keys=True), record.state,
+                1 if record.desired_live else 0, record.reconnect_attempts,
+                record.last_error, record.updated_at.astimezone().isoformat(),
+            ),
+        )
+        self.db.commit()
+
+    def _media_record(self, row):
+        if row is None:
+            return None
+        from datetime import datetime
+        from doobtube.media.types import LivestreamRecord, LivestreamSpec
+        spec = LivestreamSpec(**json.loads(row["spec_json"]))
+        return LivestreamRecord(
+            spec=spec,
+            state=row["state"],
+            desired_live=bool(row["desired_live"]),
+            reconnect_attempts=int(row["reconnect_attempts"]),
+            last_error=row["last_error"],
+            updated_at=datetime.fromisoformat(row["updated_at"]),
+        )
+
+    def get_media_session(self, session_id: str):
+        row = self.db.execute("SELECT * FROM media_sessions WHERE session_id=?", (session_id,)).fetchone()
+        return self._media_record(row)
+
+    def list_media_sessions(self):
+        rows = self.db.execute("SELECT * FROM media_sessions ORDER BY session_id").fetchall()
+        return [self._media_record(row) for row in rows]

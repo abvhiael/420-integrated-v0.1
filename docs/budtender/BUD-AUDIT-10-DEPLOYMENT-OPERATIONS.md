@@ -1,6 +1,6 @@
 # BUD-AUDIT-10 — Deployment & Operations
 
-Status: IMPLEMENTED — Level 1 exact-head qualification pending
+Status: COMPLETE — Level 1 exact-head qualified
 
 ## Scope and authority
 
@@ -144,8 +144,8 @@ BUD-AUDIT-10 is COMPLETE only when:
 5. repository deployment manifest is present and truthful;
 6. operations verifier passes;
 7. BUD-AUDIT-9 security regressions remain green;
-8. exact-head Budtender Qualification passes;
-9. durable evidence records implementation/evidence SHA, current main/base, jobs/results, limitations, blockers, and next roadmap step;
+8. exact-head Budtender Qualification passes (satisfied by `8506349da6c700d9f5cbf9df1b9c528657447130`, run `37694891271`);
+9. durable evidence records implementation/evidence SHA, current main/base, jobs/results, limitations, blockers, and next roadmap step (recorded in `docs/audit/BUD-AUDIT-10-EVIDENCE-2026-10-07.md`);
 10. live deployment/testnet work remains explicitly deferred to BUD-AUDIT-11 rather than falsely marked complete.
 
 ## Next canonical roadmap step

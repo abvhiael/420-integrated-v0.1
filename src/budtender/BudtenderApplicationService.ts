@@ -36,8 +36,8 @@ export interface BudtenderApplicationSnapshot {
 }
 
 export class BudtenderApplicationService {
-  readonly #store = new BudtenderStore();
-  readonly #customers = new BudtenderCustomerSystem(this.#store);
+  #store = new BudtenderStore();
+  #customers = new BudtenderCustomerSystem(this.#store);
 
   arriveCustomer(command: CustomerArrivalCommand): void {
     this.#customers.addCustomer(

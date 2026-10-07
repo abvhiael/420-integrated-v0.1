@@ -120,6 +120,7 @@ export class StoreProgression {
 
   creditCash(amount: number): void {
     if (!Number.isSafeInteger(amount) || amount < 0) throw new Error("invalid cash credit");
+    if (!Number.isSafeInteger(this.cash + amount)) throw new Error("cash exceeds safe integer range");
     this.cash += amount;
   }
 

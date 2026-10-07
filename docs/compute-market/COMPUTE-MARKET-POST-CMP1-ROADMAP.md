@@ -534,7 +534,7 @@ CMP-4.9 is the second CMP-4 app-integration milestone because the complete scien
 
 ## CMP-4.10 — Phase closeout
 
-**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+**Status: COMPLETE — Level 3 exact-head phase closeout qualified.**
 
 Reconcile the complete accumulated CMP-4 scientific framework against current `main`, force the canonical four-shard Solidity inventory, independently verify Genesis/address authority without duplicate Foundry execution, run global/Docs and retained Compute qualification, and preserve one exact merge-candidate SHA as phase-closeout evidence. Closeout definition: [CMP-4.10 phase closeout](CMP-4.10-PHASE-CLOSEOUT.md).
 
@@ -592,7 +592,7 @@ Add trusted, revocable external-result attestation and the authoritative mapping
 
 **Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
 
-Reconcile the complete accumulated CMP-5 external distributed-compute adapter phase against current `main`, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification exactly once under canonical CI ownership, preserve durable evidence, and hand off to CMP-6. Closeout specification: [CMP-5.8 Phase closeout](CMP-5.8-PHASE-CLOSEOUT.md).
+CMP-5.8 formally closes the accumulated CMP-5 external distributed-compute adapter phase under Level 3 exact-head qualification. The phase is reconciled to current `main`, all canonical Level 3 owners are required green on one exact implementation SHA, and durable evidence records the qualification. Next canonical phase: **CMP-6 — Useful-computation rewards**. Closeout specification: [CMP-5.8 Phase closeout](CMP-5.8-PHASE-CLOSEOUT.md).
 
 ---
 

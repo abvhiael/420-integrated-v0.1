@@ -6,8 +6,10 @@ on:
       - "docs/DOOBTUBE-*"
       - "docs/audit/DOOBTUBE-*"
       - "scripts/verify-doobtube-baseline.py"
+      - "scripts/verify-doobtube-level2.py"
       - "doobtube/**"
       - ".github/workflows/doobtube-baseline.yml"
+      - ".github/workflows/doobtube-integration.yml"
       - "config/genesis-consumer-services.json"
       - "config/genesis-applications.json"
   workflow_dispatch:

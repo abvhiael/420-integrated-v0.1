@@ -144,7 +144,7 @@ func (s Service) putBody(ctx context.Context, owner, digest string, body []byte)
 func (s Service) getBody(ctx context.Context, p Publication) ([]byte, error) {
 	var (
 		body []byte
-		err error
+		err  error
 	)
 	if scoped, ok := s.Blobs.(OwnerScopedBlobStore); ok {
 		body, err = scoped.GetForOwner(ctx, p.Author, p.BodyRef)

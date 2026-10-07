@@ -62,8 +62,11 @@ req(parser.logo_refs >= 2, "official Reefer Review logo missing from header/hero
 for control in {"draft-title", "draft-body", "visibility", "search-query"}:
     req(control in parser.inputs, f"missing control {control}")
     req(control in parser.labels_for, f"missing programmatic label for {control}")
-req("actor" in parser.inputs or "session-actor" in parser.inputs, "missing editorial actor control")
-req("actor" in parser.labels_for or "session-actor" in parser.labels_for, "missing programmatic label for editorial actor")
+legacy_actor = "actor" in parser.inputs or "session-actor" in parser.inputs
+wallet_session = "session-connect" in parser.ids and "session-disconnect" in parser.ids
+req(legacy_actor or wallet_session, "missing editorial authentication/session controls")
+if legacy_actor:
+    req("actor" in parser.labels_for or "session-actor" in parser.labels_for, "missing programmatic label for editorial actor")
 
 for marker in [
     "/v1/news?", "/v1/news/sources", "/v1/news/topics", "/v1/publications?limit=20",

@@ -88,6 +88,8 @@ export class BudtenderStore {
       throw new Error("unit cost does not match canonical catalog");
     }
 
+    if (item.stock + units > item.capacity) throw new Error("restock exceeds capacity");
+
     const cost = units * canonicalUnitCost;
     if (!Number.isSafeInteger(cost)) throw new Error("restock cost exceeds safe integer range");
     if (cost > this.progression.snapshot().cash) throw new Error("insufficient cash");

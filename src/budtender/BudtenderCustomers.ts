@@ -31,8 +31,11 @@ export class BudtenderCustomerSystem {
   private customers = new Map<string, CustomerState>();
   private arrivalSequence = 0;
   private demandProfile: DemandProfile = "normal";
+  private readonly store: BudtenderStore;
 
-  constructor(private readonly store: BudtenderStore) {}
+  constructor(store: BudtenderStore) {
+    this.store = store;
+  }
 
   setDemandProfile(profile: DemandProfile): void {
     this.demandProfile = profile;

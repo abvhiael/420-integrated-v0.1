@@ -37,6 +37,7 @@ tests=need("doobtube/tests/test_doobtube_security.py",[
     "test_actor_operation_rate_limit_and_window_reset",
     "test_replay_same_key_does_not_consume_second_abuse_slot",
     "test_rebuild_spam_is_bounded",
+    "test_concurrent_abuse_limit_cannot_race_past_bound",
     "test_privacy_redactor_removes_tokens_secret_refs_url_credentials_and_query_secrets",
     "test_secret_like_persistence_fields_are_rejected",
     "test_job_error_persistence_redacts_sensitive_exception_text",

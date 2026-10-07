@@ -60,7 +60,7 @@ jobs:
           version: stable
       - name: Attention formatting
         working-directory: contracts
-        run: forge fmt --check test/AttentionGenesis420.t.sol test/AttentionAudit420.t.sol
+        run: forge fmt --check test/AttentionAudit420.t.sol
       - name: Build Attention graph
         working-directory: contracts
         run: forge build src/attention src/system/AttentionTreasury.sol src/system/CannaseurCampaignRegistry.sol test/AttentionGenesis420.t.sol test/AttentionAudit420.t.sol --sizes

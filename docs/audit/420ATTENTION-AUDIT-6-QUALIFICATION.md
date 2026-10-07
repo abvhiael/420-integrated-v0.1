@@ -1,6 +1,6 @@
 # ATTENTION-AUDIT-6 — User-facing application implementation
 
-Status: implementation candidate awaiting exact-head Level 1 CI qualification.
+Status: **COMPLETE — Level 1 qualified.**
 
 ## Canonical requirement
 
@@ -47,12 +47,19 @@ No Level 2 milestone is introduced by this step. Level 3 comprehensive qualifica
 
 ## Completion evidence
 
-Populate after CI:
-- implementation SHA: pending;
-- evidence SHA: may differ only for evidence-only bookkeeping;
+Qualified implementation:
+- implementation SHA: `9babc92f5b1a5abdf7e9f0c2f956df170baa5546`;
+- Level 1 workflow run: `37571023849`;
+- Level 1 job: `112629442899`;
+- exact-head checkout: PASS;
+- static/policy checks: PASS;
+- Node unit/negative tests: **12 passed, 0 failed, 0 skipped**;
+- production-candidate static build: PASS;
+- AUDIT-6 repository verifier: PASS;
+- evidence SHA: this and subsequent roadmap-only closeout commits are evidence-only and inherit the qualified implementation SHA;
 - base/main SHA: `f674fbed767efc126da253c66800e38d030dc1dd`;
 - branch: `audit/420attention-complete-20261006`;
 - PR: #557;
 - workflow: `420Attention AUDIT-6 Level 1`;
-- blockers: none repository-side if all required Level 1 checks pass;
+- blockers: **none for ATTENTION-AUDIT-6 repository-side completion**; live API/testnet materialization belongs to ATTENTION-AUDIT-7/8;
 - next canonical roadmap step: **ATTENTION-AUDIT-7 — Indexer/API/service projection**.

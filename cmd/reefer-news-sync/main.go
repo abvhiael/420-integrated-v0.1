@@ -30,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 	ingestor := reeferreview.NewsIngestor{
-		Store: store,
+		Store:   store,
 		Fetcher: reeferreview.FeedFetcher{HTTP: &http.Client{Timeout: 20 * time.Second}},
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)

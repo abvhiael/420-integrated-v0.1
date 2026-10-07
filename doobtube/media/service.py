@@ -6,6 +6,7 @@ from typing import Callable, Mapping
 import json
 
 from doobtube.api.persistence import Store
+from doobtube.security import redact_sensitive_text
 from .security import (
     ManifestRejected, MediaRejected, ProviderRejected, ScannerRejected,
     validate_endpoint, validate_livestream, validate_manifest, validate_profile,
@@ -116,7 +117,7 @@ class MediaIntegration:
         try:
             state=self.media.livestream_start(record.spec)
         except Exception as exc:
-            failed=LivestreamRecord(record.spec,"failed",True,record.reconnect_attempts+1,str(exc)[:500],self.now())
+            failed=LivestreamRecord(record.spec,"failed",True,record.reconnect_attempts+1,redact_sensitive_text(exc),self.now())
             self.store.put_media_session(failed)
             raise
         if state!="active":

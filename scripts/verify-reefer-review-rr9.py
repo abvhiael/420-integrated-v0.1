@@ -5,7 +5,8 @@ root=Path(__file__).resolve().parents[1]
 checks={
 "reefer-review/http.go":["securityResponseHeaders","sessionMiddleware"],
 "reefer-review/http_security.go":["X-Content-Type-Options","X-Frame-Options","Referrer-Policy","Content-Security-Policy","Cache-Control"],
-"reefer-review/http_security_test.go":["TestRR9SecurityHeadersOnPublicAndDeniedResponses","TestRR9NoImplicitCORSOptIn"],
+"reefer-review/http_rate_limit.go":["apiRateLimiter","Retry-After","StatusTooManyRequests","RemoteAddr"],
+"reefer-review/http_security_test.go":["TestRR9SecurityHeadersOnPublicAndDeniedResponses","TestRR9NoImplicitCORSOptIn","TestRR9RateLimitIgnoresSpoofedForwardedHeader"],
 "reefer-review/web/index.html":["skip-link","main-content","viewport"],
 "reefer-review/web/app.js":["textContent","replaceChildren"],
 "docs/reefer-review/RR-9-WEB-UX-DEPLOYMENT.md":["fail-closed","backup","browser","rate limit"],

@@ -65,6 +65,7 @@ The audit branch:
 - adds BUD-AUDIT-5 deterministic bounded offline progression with replay/rollback protections;
 - adds BUD-AUDIT-6 application service authority boundary over store/customer/progression/offline evaluation;
 - adds BUD-AUDIT-7 responsive user-facing browser client over the application service;
+- adds BUD-AUDIT-8 user-facing Gaming Protocol policy/status integration over the existing shared access client;
 - documents the actual current release boundary.
 
 ## File inventory
@@ -85,10 +86,11 @@ The audit branch:
 | Application service | `src/budtender/BudtenderApplicationService.ts` | COMPLETE | Authoritative command + detached snapshot boundary; exact-head Level 1 qualified |
 | User-facing web client | `clients/budtender-web-v1` | COMPLETE | Responsive presentation client over application service; exact-head Level 1 qualified |
 | BUD-AUDIT-7 spec | `docs/budtender/BUD-AUDIT-7-USER-FACING-CLIENT.md` | COMPLETE | Client requirements/invariants frozen and exact-head Level 1 qualified |
+| BUD-AUDIT-8 spec | `docs/budtender/BUD-AUDIT-8-GAMING-PROTOCOL-INTEGRATION.md` | IMPLEMENTED | Gaming Protocol integration requirements/invariants frozen; qualification pending |
 | BUD-AUDIT-6 spec | `docs/budtender/BUD-AUDIT-6-APPLICATION-SERVICE.md` | COMPLETE | Application-service requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | COMPLETE | Audit-phase requirements frozen and Level 1 exact-head qualification recorded |
 | Core unit tests | `test/budtender/*.spec.ts` | COMPLETE | Includes negative/boundary and cross-phase integration tests |
-| Gaming access client | `clients/budtender-access-v1` | COMPLETE | Shared SDK consumer; no parallel wallet authority |
+| Gaming access client | `clients/budtender-access-v1` | IMPLEMENTED | Shared SDK consumer; canonical integration metadata and app-facing policy wiring added; exact-head qualification pending |
 | Dedicated CI | `.github/workflows/budtender-gaming.yml` | COMPLETE | Exact-head core/access/contract-security qualification |
 | Budtender smart contracts | none | NOT APPLICABLE | Architecture requires game mechanics off-chain; shared protocol owns optional canonical state |
 | Mobile/presentation client | `clients/budtender-web-v1` | PARTIAL | Responsive user-facing browser client implemented; packaged native iOS/Android and production hosting are not yet provided |
@@ -209,6 +211,7 @@ The correct repository-grounded interpretation is:
 - BUD-AUDIT-5 offline progression boundary: complete and exact-head Level 1 qualified on `c619c3fecbbb17ae34303209b908e78844d48051`.
 - BUD-AUDIT-6 application service boundary: complete and exact-head Level 1 qualified on `b80eb03b50526f470e3a8b778dc0329a27d95ef1`.
 - BUD-AUDIT-7 user-facing client: complete and exact-head Level 1 qualified on `9961bf25b7ee7d0fb750cfdbb6676d7fdc01d1ec`.
+- BUD-AUDIT-8 Gaming Protocol integration: implemented; exact-head qualification pending.
 - Shared Gaming Protocol source integration: implemented.
 - Live Gaming Protocol deployment: pending.
 - User-facing browser client: implemented; full production/mobile release remains incomplete.

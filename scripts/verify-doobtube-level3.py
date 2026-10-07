@@ -43,7 +43,7 @@ gen=need(".github/workflows/genesis-address-authority.yml",[
     "name: Genesis Address Authority",
     "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md",
     "audit/doobtube-baseline-20261006",
-    "canonical address/namespace/predeploy authority qualification only",
+    "Genesis owns address/namespace/predeploy authority qualification only",
 ])
 for forbidden in ("forge test","qualify-foundry-shard.sh","forge build --force"):
     assert forbidden not in gen, f"Genesis duplicates Foundry owner: {forbidden}"

@@ -173,6 +173,7 @@ Present after this remediation:
 - `docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md`
 - `docs/DOOBTUBE-MEDIA-INTEGRATION.md`
 - `docs/DOOBTUBE-WEB-APPLICATION.md`
+- `docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md`
 
 Still required before a code-complete declaration:
 
@@ -316,7 +317,7 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 - CONTRACT COMPLETE: **YES for current V1 scope** — DOOBTUBE-4 confirms no DoobTube-owned contract is required and qualifies the external adapter bindings; later app runtime/integration qualification remains incomplete.
 - TEST COMPLETE: **NO** — no requirement-mapped DoobTube runtime tests exist.
 - DOCUMENTATION COMPLETE: **NO** — architecture, product, dependency/trust and data/lifecycle documentation exist, but developer/user/operator/deployment/security closeout docs remain later work.
-- INTEGRATION COMPLETE: **NO** — the web client composes qualified app/service fixtures, but the retained multi-dependency Level 2 ecosystem milestone remains DOOBTUBE-8.
+- INTEGRATION COMPLETE: **YES for repository Level 2 scope** — DOOBTUBE-8 revalidates the retained adopted dependency graph and accumulated app suites together on one exact SHA; production-equivalent live dependency evidence remains DOOBTUBE-12.
 - SECURITY QUALIFIED: **NO** — no DoobTube threat model or implementation qualification exists.
 - TESTNET READY: **NO** — no deployable DoobTube release candidate exists.
 - GENESIS READY: **NO** — no Genesis catalog/service decision or deployment exists.
@@ -328,4 +329,4 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 through DOOBTUBE-7 are complete. Next: DOOBTUBE-8 — Ecosystem integration milestone.**
+**DOOBTUBE-0 through DOOBTUBE-8 are complete. Next: DOOBTUBE-9 — Security, abuse and moderation qualification.**

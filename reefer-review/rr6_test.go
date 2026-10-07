@@ -370,7 +370,6 @@ func TestRR6SearchDeleteFailureSurvivesIgnoredModerationProjectionError(t *testi
 	}
 }
 
-
 func TestRR6IntegrationBundleRequiresCompleteDependencies(t *testing.T) {
 	search := &rr6ToggleSearch{}
 	notifications := &rr6ToggleNotifications{}

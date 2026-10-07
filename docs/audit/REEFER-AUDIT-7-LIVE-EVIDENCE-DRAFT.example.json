@@ -1,0 +1,127 @@
+{
+  "schema": "reefer-audit-7-live-evidence-draft-v1",
+  "phase": "REEFER-AUDIT-7",
+  "status": "DRAFT_REQUIRES_REAL_TESTNET_EVIDENCE",
+  "repositorySha": "REPLACE_EXACT_RELEASE_SHA",
+  "reeferReview": {
+    "serviceUrl": "REPLACE_HTTPS_REEFER_SERVICE_URL",
+    "readyUrl": "REPLACE_HTTPS_REEFER_READY_URL"
+  },
+  "dependencies": [
+    {
+      "name": "420 Identity",
+      "serviceId": "420/service/identity/v1",
+      "endpoint": "REPLACE_HTTPS_ENDPOINT",
+      "healthUrl": "REPLACE_HTTPS_HEALTH_URL",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "420 Rights",
+      "serviceId": "420/service/rights/v1",
+      "endpoint": "REPLACE_HTTPS_ENDPOINT",
+      "healthUrl": "REPLACE_HTTPS_HEALTH_URL",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "420 Storage",
+      "serviceId": "420/service/resource-protocol/v1",
+      "endpoint": "REPLACE_HTTPS_ENDPOINT",
+      "healthUrl": "REPLACE_HTTPS_HEALTH_URL",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "420 Search",
+      "serviceId": "420/service/search/v1",
+      "endpoint": "REPLACE_HTTPS_ENDPOINT",
+      "healthUrl": "REPLACE_HTTPS_HEALTH_URL",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "420 Notifications",
+      "serviceId": "420/service/notifications/v1",
+      "endpoint": "REPLACE_HTTPS_ENDPOINT",
+      "healthUrl": "REPLACE_HTTPS_HEALTH_URL",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "420Mail",
+      "serviceId": "420/service/mail/v1",
+      "endpoint": "REPLACE_HTTPS_ENDPOINT",
+      "healthUrl": "REPLACE_HTTPS_HEALTH_URL",
+      "status": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "journeys": [
+    {
+      "name": "identity_authorization",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "rights_assertion",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "storage_roundtrip",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "public_search_projection",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "notification_delivery",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "mail_delivery",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "private_visibility_negative",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "dependency_failure_recovery",
+      "status": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "name": "restart_idempotency",
+      "status": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "networkIdentity": {
+    "status": "NOT_RUN",
+    "evidence": []
+  },
+  "deploymentIdentity": {
+    "status": "NOT_RUN",
+    "evidence": []
+  },
+  "restartRecovery": {
+    "status": "NOT_RUN",
+    "evidence": []
+  },
+  "privacyBoundary": {
+    "status": "NOT_RUN",
+    "evidence": []
+  },
+  "notes": [
+    "Use only real non-secret public-testnet evidence tied to one exact release SHA.",
+    "Do not replace missing live evidence with local, synthetic, in-memory, CI-only, or placeholder data."
+  ]
+}

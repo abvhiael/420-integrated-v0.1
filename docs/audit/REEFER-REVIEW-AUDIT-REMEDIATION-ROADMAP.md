@@ -47,7 +47,7 @@ No dedicated smart contract is required by the canonical architecture: the appli
 4. **REEFER-AUDIT-4 — API and typed client contract:** COMPLETE at repository level.
 5. **REEFER-AUDIT-5 — thin UI and repository deployment baseline:** COMPLETE at repository level; live browser qualification remains BLOCKED on deployment.
 6. **REEFER-AUDIT-6 — documentation/static qualification and durable evidence:** COMPLETE at repository level; see `REEFER-REVIEW-QUALIFICATION.md`.
-7. **REEFER-AUDIT-7 — live dependency integration:** BLOCKED on deployed Identity, Rights, Storage, Search, Notifications and 420Mail plus production-equivalent public testnet.
+7. **REEFER-AUDIT-7 — live dependency integration:** **ACTIVE / LIVE-BLOCKED.** Repository-side fail-closed handoff/harness is implemented in `REEFER-AUDIT-7-TESTNET-QUALIFICATION.md`; canonical completion remains blocked on the official production-equivalent public testnet plus live Identity, Rights, Storage, Search, Notifications and 420Mail evidence.
 8. **REEFER-AUDIT-8 — deployed security/operations qualification:** BLOCKED on TLS ingress, rate limits, anti-spam/abuse operations, encrypted storage, retention, backups/recovery, monitoring, load/soak and accessibility evidence.
 9. **REEFER-AUDIT-9 — Genesis decision/release closeout:** BLOCKED on explicit catalog promotion if Genesis release remains intended, followed by exact deployed evidence.
 10. **REEFER-AUDIT-10 — production closeout:** BLOCKED on independent security review, production deployment, incident/recovery evidence and final exact-artifact qualification.

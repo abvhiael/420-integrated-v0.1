@@ -186,7 +186,6 @@ func TestNewsSourceRegistryRejectsInsecureFeed(t *testing.T) {
 
 func ptrTime(t time.Time) *time.Time { return &t }
 
-
 func TestRR7RejectsUnsafeFeedEndpoints(t *testing.T) {
 	for _, raw := range []string{
 		"https://127.0.0.1/feed", "https://10.2.3.4/rss", "https://169.254.169.254/latest",
@@ -227,7 +226,6 @@ func TestRR7OversizeFeedAndEntityPayloadFailClosed(t *testing.T) {
 		}
 	}
 }
-
 
 func TestRR7ParserEntryLimitAndSanitizedExcerpt(t *testing.T) {
 	var xml strings.Builder

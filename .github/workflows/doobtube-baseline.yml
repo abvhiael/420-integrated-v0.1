@@ -7,6 +7,7 @@ on:
       - "docs/audit/DOOBTUBE-*"
       - "scripts/verify-doobtube-baseline.py"
       - "scripts/verify-doobtube-level2.py"
+      - "scripts/verify-doobtube-security.py"
       - "doobtube/**"
       - ".github/workflows/doobtube-baseline.yml"
       - ".github/workflows/doobtube-integration.yml"
@@ -35,6 +36,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
       - name: Compile DoobTube adapter policy
         run: python3 -m compileall -q doobtube
       - name: Test DoobTube protocol adapters
@@ -43,7 +47,13 @@ jobs:
         run: python3 -m unittest -v doobtube.tests.test_doobtube_backend
       - name: Test DoobTube media integration
         run: python3 -m unittest -v doobtube.tests.test_doobtube_media
+      - name: Test DoobTube security abuse and privacy
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_security
+      - name: Test Media security dependency
+        run: go test ./media/security ./media/api
       - name: Qualify DoobTube web application
         run: npm --prefix doobtube/web run qualify
+      - name: Verify DoobTube security qualification
+        run: python3 scripts/verify-doobtube-security.py
       - name: Verify DoobTube audit baseline
         run: python3 scripts/verify-doobtube-baseline.py

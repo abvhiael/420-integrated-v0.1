@@ -149,6 +149,8 @@ CMP-6.4 is COMPLETE only when:
 - exact-head Compute Market qualification passes;
 - durable repository evidence records the qualified implementation SHA.
 
+Durable evidence: [CMP-6.4 qualification](CMP-6.4-QUALIFICATION-EVIDENCE.md).
+
 Next canonical step:
 
 **CMP-6.5 — Sponsor matching**

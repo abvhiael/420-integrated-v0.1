@@ -1,6 +1,6 @@
 # HZ-AUDIT-4 — STREAM economics initialization
 
-Status: IMPLEMENTED — Level 1 qualification required on the exact implementation head.
+Status: COMPLETE — Level 1 qualified on exact implementation SHA `4fbf1070c6f297735985cb150cadeb4ead463a23`.
 
 ## Canonical purpose
 
@@ -182,6 +182,85 @@ HZ-AUDIT-4 is COMPLETE only when one exact implementation SHA passes:
 Level 2 is not required for HZ-AUDIT-4 by itself. The more useful integration boundary is after HZ-AUDIT-5, when consolidated deployment, authority wiring, STREAM economics and deployment-smoke behavior have converged.
 
 Level 3 remains deferred to the single complete 420Hz audit-phase closeout.
+
+## Next canonical roadmap step
+
+**HZ-AUDIT-5 — Deployment smoke qualification.**
+
+
+## Durable qualification evidence
+
+- Roadmap step: `HZ-AUDIT-4 — STREAM economics initialization`
+- Status: **COMPLETE**
+- Qualification level: **Level 1**
+- Qualified implementation SHA: `4fbf1070c6f297735985cb150cadeb4ead463a23`
+- Audit branch: `feature/420hz-remediation-20261006`
+- Pull request: **#556**
+- Qualification merge-base/base SHA: `ff4440bfd7b69c0712ee3dd7c4b417cb049ae76d`
+- Current `main` observed at closeout: `5273dd9330c889c16327fb4f4be6e07bc02ce2bd`
+- Current branch/main state at closeout: diverged; branch is 46 commits ahead and 85 commits behind current `main`.
+- PR #556 is currently reported non-mergeable against the advanced base. This does not invalidate exact-head HZ-AUDIT-4 qualification; reconciliation remains deferred to the applicable later integration/Level-3 merge-candidate qualification unless HZ-AUDIT-5 materially requires earlier convergence.
+
+### Level 1 results
+
+Exact-head qualification on `4fbf1070c6f297735985cb150cadeb4ead463a23` completed successfully:
+
+- 420Hz Audit Qualification — run `37578726980`, job `112653340231` (`hz-audit-fast`) — **PASS**
+  - exact qualification-head checkout — PASS
+  - exact-head verification — PASS
+  - HZ-AUDIT-2 deployment-package verifier — PASS
+  - HZ-AUDIT-3 authority/Registry verifier — PASS
+  - HZ-AUDIT-4 STREAM-economics verifier — PASS
+  - affected Solidity format check — PASS
+  - consolidated deployment/economics build — PASS
+  - retained `HzDeploymentGraph420Test` regression — PASS
+  - retained `HzRegistryAuthority420Test` regression — PASS
+  - focused `HzStreamEconomics420Test` — PASS
+- Solidity Contracts — run `37578727087` — **PASS**
+  - classification `112653560223` — PASS
+  - shard 0 `112653607309` — PASS
+  - shard 1 `112653607344` — PASS
+  - shard 2 `112653607415` — PASS
+  - shard 3 `112653607371` — PASS
+  - monolithic `foundry` `112653561092` — expected SKIP under PR shard routing
+  - `compute-fast` `112653608926` — expected SKIP as irrelevant to this PR shape
+- Supplementary same-SHA workflows also passed:
+  - Genesis Address Authority `37578727045`
+  - 420Docs Qualification `37578727013`
+  - 420Registry REG-AUDIT-4 `37578726958`
+  - 420Indexer `37578727029`
+  - Creative Reference Indexer `37578727012`
+  - 420Oracle audit qualification `37578727001`
+
+The supplementary workflows are retained as corroborating evidence only and are not promoted into mandatory ordinary-step exit criteria beyond their actual changed-dependency relevance.
+
+### Exit criteria satisfied
+
+HZ-AUDIT-4 now has durable repository evidence that:
+
+1. the supported STREAM RecordingClass inventory is explicit and repository-grounded;
+2. ORIGINAL and REMIX STREAM version-1 schedules preserve the canonical Decision #10 split terms;
+3. each supported schedule totals exactly 10,000 bps and the protocol fee remains within the 500-bps kernel cap;
+4. `effectiveAt = 0` is retained as an explicit deterministic v1 activation rule rather than an unknown live placeholder;
+5. terms hashes commit the class, STREAM revenue type, all split fields, version and effective-at value;
+6. governance-only registration is enforced and duplicate schedule/version registration fails closed;
+7. unsupported RecordingClass values receive no invented STREAM economics and fail closed;
+8. real `RoyaltyRouter420` STREAM routing preserves the canonical Work/Source/Current/Protocol split;
+9. focused routing proves exact gross-value conservation and the REMIX one-hop source share;
+10. no local test result or repository configuration is promoted to live/testnet schedule-registration or payout evidence;
+11. the exact implementation SHA passed the HZ verifier/format/build/regression/focused-test gate and canonical Solidity PR shards.
+
+### Milestone and phase qualification status
+
+Level 2: **not required for this ordinary roadmap step**. The next meaningful retained app-integration boundary remains after HZ-AUDIT-5, when consolidated deployment, authority wiring, STREAM economics and deployment-smoke behavior have converged.
+
+Level 3: **intentionally deferred** to the single complete 420Hz audit-phase closeout.
+
+Live schedule-registration transactions, deployed Registry addresses, live schedule reads, STREAM routing receipts and RoyaltyVault balance evidence remain **HZ-AUDIT-7** obligations and are not claimed complete here.
+
+### Evidence-only closeout rule
+
+This COMPLETE bookkeeping changes documentation/evidence only. It does not modify executable source, tests, workflows, dependencies, configuration, generated/runtime artifacts, interfaces, deployment state or substantive requirements. Therefore the qualified implementation SHA remains `4fbf1070c6f297735985cb150cadeb4ead463a23`; no recursive substantive test run is required for these evidence-only closeout commits.
 
 ## Next canonical roadmap step
 

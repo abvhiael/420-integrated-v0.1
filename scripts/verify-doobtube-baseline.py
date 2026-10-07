@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-6 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-7 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -94,6 +94,22 @@ allowed_doobtube_files = {
     "doobtube/media/security.py",
     "doobtube/media/service.py",
     "doobtube/tests/test_doobtube_media.py",
+    "doobtube/web/package.json",
+    "doobtube/web/runtime-config.json",
+    "doobtube/web/runtime-config.example.json",
+    "doobtube/web/security-headers.json",
+    "doobtube/web/brand.svg",
+    "doobtube/web/styles.css",
+    "doobtube/web/index.html",
+    "doobtube/web/app.js",
+    "doobtube/web/core/config.js",
+    "doobtube/web/core/wallet.js",
+    "doobtube/web/core/routes.js",
+    "doobtube/web/core/state.js",
+    "doobtube/web/core/service.js",
+    "doobtube/web/scripts/build.mjs",
+    "doobtube/web/scripts/check.mjs",
+    "doobtube/web/test/web.test.js",
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"}
@@ -235,7 +251,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -349,7 +365,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -442,7 +458,7 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
 
 adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
     "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
@@ -522,7 +538,7 @@ assert "return False" in adapter_code, "DoobTube contract requirement must remai
 assert "return None" in adapter_code, "DoobTube service ID must remain absent"
 assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
 assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
 
 backend_doc = need("docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md", [
     "Roadmap step: **DOOBTUBE-5 — Backend/API/indexing/service control plane**",
@@ -615,7 +631,7 @@ for route in ["/v1/health","/v1/readiness","/v1/feed","/v1/preferences","/v1/con
 
 assert "**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition" in roadmap
 assert "docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
 
 media_doc = need("docs/DOOBTUBE-MEDIA-INTEGRATION.md", [
     "Roadmap step: **DOOBTUBE-6 — Media processing, delivery and livestream integration**",
@@ -723,6 +739,80 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical media integration definition" in roadmap
 assert "docs/DOOBTUBE-MEDIA-INTEGRATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
 
-print("DOOBTUBE-6 Level 1 media integration verification: PASS")
+web_doc = need("docs/DOOBTUBE-WEB-APPLICATION.md", [
+    "Roadmap step: **DOOBTUBE-7 — User-facing web application**",
+    "Status: **ADOPTED / IMPLEMENTED**",
+    "DT-WEB-001",
+    "DT-WEB-WALLET-001",
+    "DT-WEB-PLAY-001",
+    "DT-WEB-INV-001",
+    "DT-WEB-INV-014",
+    "Next canonical roadmap step: DOOBTUBE-8 — Ecosystem integration milestone",
+])
+web_index = need("doobtube/web/index.html", [
+    "DoobTube",
+    'data-view="home"',
+    'data-view="search"',
+    'data-view="watch"',
+    'data-view="creator"',
+    'data-view="library"',
+    'data-view="upload"',
+    'data-view="live"',
+    'data-view="subscriptions"',
+    'data-view="moderation"',
+    'data-view="data"',
+    'data-view="status"',
+    "aria-live",
+    "player",
+])
+web_app = need("doobtube/web/app.js", [
+    "loadFeed", "search", "loadAsset", "renderCreator", "loadLibrary",
+    "prepareUpload", "retryUpload", "createLive", "liveAction",
+    "subscribeCreator", "report", "appeal", "renderStatus",
+    "connectWallet", "safeMediaURL",
+])
+web_config = need("doobtube/web/runtime-config.json", [
+    '"schema":"doobtube-web-runtime-v1"',
+    '"serviceId":"420/service/media/v1"',
+    '"serviceId":"420/service/search/v1"',
+    '"serviceId":"420/service/notifications/v1"',
+    '"productionOrigin":null',
+    '"status":"DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED"',
+])
+web_check = need("doobtube/web/scripts/check.mjs", [
+    "authority-sensitive state must not be browser-persistent",
+    "dynamic innerHTML forbidden",
+    "DoobTube web structural check PASS",
+])
+web_tests = need("doobtube/web/test/web.test.js", [
+    "runtime config is fail-closed and canonical service IDs are exact",
+    "wallet connection blocks wrong network without blocking anonymous routes",
+    "canonical route set includes all V1 user surfaces",
+    "safe playback rejects script/credential URLs",
+    "fixture browser flow composes DoobTube feed and exact Media API routes",
+    "upload transport and mutation idempotency remain safe",
+    "retry state is memory-only and resets on authority invalidation",
+])
+
+# All original DOOBTUBE-7 categories must be concretely represented.
+for phrase in [
+    "canonical routes",
+    "Wallet connection",
+    "loading/empty/error/pending/success states",
+    "retry/revalidation",
+    "Safe media rendering",
+    "Accessibility",
+    "Responsive behavior",
+    "Branding / assets",
+    "Fail-closed runtime configuration",
+    "No private-key custody",
+]:
+    assert phrase.lower() in web_doc.lower(), f"DOOBTUBE-7 category missing: {phrase!r}"
+
+assert "**Status: COMPLETE (Level 1).** Canonical web definition" in roadmap
+assert "docs/DOOBTUBE-WEB-APPLICATION.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+
+print("DOOBTUBE-7 Level 1 web application verification: PASS")

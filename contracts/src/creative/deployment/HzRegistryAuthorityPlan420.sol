@@ -39,6 +39,34 @@ library HzRegistryAuthorityPlan420 {
     bytes32 internal constant STREAMING_REVENUE_ALLOCATOR = keccak256("STREAMING_REVENUE_ALLOCATOR");
     bytes32 internal constant STREAMING_ROYALTY_SETTLEMENT = keccak256("STREAMING_ROYALTY_SETTLEMENT");
 
+    function componentId() internal pure returns (bytes32) {
+        return COMPONENT_ID;
+    }
+
+    function serviceId() internal pure returns (bytes32) {
+        return SERVICE_ID;
+    }
+
+    function serviceDescriptorHash() internal pure returns (bytes32) {
+        return SERVICE_DESCRIPTOR_HASH;
+    }
+
+    function moduleManifestHash() internal pure returns (bytes32) {
+        return MODULE_MANIFEST_HASH;
+    }
+
+    function metadataHash() internal pure returns (bytes32) {
+        return METADATA_HASH;
+    }
+
+    function registryManifestHash() internal pure returns (bytes32) {
+        return REGISTRY_MANIFEST_HASH;
+    }
+
+    function interfaceHash() internal pure returns (bytes32) {
+        return INTERFACE_HASH;
+    }
+
     function dependencyRoot(
         HzDeploymentGraph420.Deployment memory d
     ) internal view returns (bytes32 root) {

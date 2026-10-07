@@ -56,10 +56,18 @@ export class BudtenderStore {
     if (!order) throw new Error("unknown order");
     if (order.served) throw new Error("order already served");
 
-    const baseSale = this.inventory.consume(PRODUCT_IDS[order.product]);
-    const saleValueLevel = this.progression.snapshot().upgrades.saleValue;
-    const sale = Math.round(baseSale * (1 + saleValueLevel * 0.1));
+    const productId = PRODUCT_IDS[order.product];
+    const item = this.inventory.get(productId);
+    if (item.stock <= 0) throw new Error("product unavailable");
 
+    const saleValueLevel = this.progression.snapshot().upgrades.saleValue;
+    const sale = Math.round(item.baseSalePrice * (1 + saleValueLevel * 0.1));
+    const currentCash = this.progression.snapshot().cash;
+    if (!Number.isSafeInteger(sale) || !Number.isSafeInteger(currentCash + sale)) {
+      throw new Error("sale exceeds safe integer range");
+    }
+
+    this.inventory.consume(productId);
     this.progression.creditCash(sale);
     order.served = true;
     return sale;
@@ -81,6 +89,7 @@ export class BudtenderStore {
     }
 
     const cost = units * canonicalUnitCost;
+    if (!Number.isSafeInteger(cost)) throw new Error("restock cost exceeds safe integer range");
     if (cost > this.progression.snapshot().cash) throw new Error("insufficient cash");
 
     this.inventory.restock(productId, units);

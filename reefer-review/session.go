@@ -39,6 +39,12 @@ type SessionVerifier interface {
 	Verify(context.Context, string) (SessionClaims, error)
 }
 
+type SessionVerifierFunc func(context.Context, string) (SessionClaims, error)
+
+func (f SessionVerifierFunc) Verify(ctx context.Context, token string) (SessionClaims, error) {
+	return f(ctx, token)
+}
+
 type SessionSecurity struct {
 	Verifier        SessionVerifier
 	ExpectedChainID uint64
@@ -223,4 +229,16 @@ func (SessionAuthorizer) CanRead(ctx context.Context, actor string, p Publicatio
 	default:
 		return false, nil
 	}
+}
+
+func NewIdentityBoundHTTP(service Service, news *NewsService, security SessionSecurity) (HTTP, error) {
+	if err := security.Validate(); err != nil {
+		return HTTP{}, err
+	}
+	service.Identity = SessionIdentity{}
+	service.Auth = SessionAuthorizer{}
+	if err := service.validate(); err != nil {
+		return HTTP{}, err
+	}
+	return HTTP{Service: service, News: news, Security: &security}, nil
 }

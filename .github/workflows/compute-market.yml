@@ -261,6 +261,9 @@ jobs:
       - name: Verify CMP-6.3 contribution accounting
         run: python scripts/verify-cmp-6-3-contribution-accounting.py
 
+      - name: Verify CMP-6.4 research reward pools
+        run: python scripts/verify-cmp-6-4-research-reward-pools.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

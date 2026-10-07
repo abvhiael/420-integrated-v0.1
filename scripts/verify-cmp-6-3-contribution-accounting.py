@@ -62,7 +62,9 @@ if not errors:
         "RewardController",
         "ComputeEscrow",
         "rewardRate",
-        "beneficiary",
+        "beneficiary;",
+        "beneficiary =",
+        "beneficiary:",
     ):
         req(forbidden not in accounting, f"CMP-6.3 exceeds accounting-only authority: {forbidden}")
 

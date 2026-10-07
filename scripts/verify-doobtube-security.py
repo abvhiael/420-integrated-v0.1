@@ -93,6 +93,6 @@ for path in ["doobtube/api/service.py","doobtube/media/service.py","doobtube/web
 road=read("docs/DOOBTUBE-ROADMAP.md")
 audit=read("docs/DOOBTUBE-AUDIT.md")
 assert "**Status: COMPLETE (Level 1).** Canonical security definition" in road
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert re.search(r"DOOBTUBE-0 through DOOBTUBE-(?:9|10|11|12|13) are complete", audit), "audit no longer records DOOBTUBE-9-or-later completion"
 
 print("DOOBTUBE-9 Level 1 security/abuse/moderation verification: PASS")

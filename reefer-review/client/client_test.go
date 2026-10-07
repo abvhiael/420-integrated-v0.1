@@ -35,15 +35,33 @@ func TestRR4ClientBearerSessionParity(t *testing.T) {
 
 	c := Client{BaseURL: server.URL, Session: tokenProvider("wallet-session")}
 	ctx := context.Background()
-	if _, err := c.Ready(ctx); err != nil { t.Fatal(err) }
-	if _, err := c.GetPublication(ctx, "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.UpdatePublication(ctx, "pub_1", map[string]any{"title":"A"}); err != nil { t.Fatal(err) }
-	if _, err := c.Publish(ctx, "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.Moderate(ctx, "pub_1", "HIDE", "policy"); err != nil { t.Fatal(err) }
-	if _, err := c.Tombstone(ctx, "pub_1", "withdraw"); err != nil { t.Fatal(err) }
-	if _, err := c.Revisions(ctx, "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.ModerationHistory(ctx, "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.ListEditorial(ctx, "", 20); err != nil { t.Fatal(err) }
+	if _, err := c.Ready(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.GetPublication(ctx, "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.UpdatePublication(ctx, "pub_1", map[string]any{"title": "A"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Publish(ctx, "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Moderate(ctx, "pub_1", "HIDE", "policy"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Tombstone(ctx, "pub_1", "withdraw"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Revisions(ctx, "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.ModerationHistory(ctx, "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.ListEditorial(ctx, "", 20); err != nil {
+		t.Fatal(err)
+	}
 
 	want := []string{
 		"GET /readyz",
@@ -67,16 +85,18 @@ func TestRR4ClientBearerSessionParity(t *testing.T) {
 }
 
 func TestRR4ClientProtectedMethodsFailWithoutSession(t *testing.T) {
-	c := Client{BaseURL:"https://example.invalid"}
-	_, err := c.CreateDraft(context.Background(), map[string]any{"title":"x"})
-	if err == nil || !strings.Contains(err.Error(),"verified session required") {
-		t.Fatalf("missing fail-closed session error: %v",err)
+	c := Client{BaseURL: "https://example.invalid"}
+	_, err := c.CreateDraft(context.Background(), map[string]any{"title": "x"})
+	if err == nil || !strings.Contains(err.Error(), "verified session required") {
+		t.Fatalf("missing fail-closed session error: %v", err)
 	}
 }
 
 func TestRR4ClientPropagatesSessionProviderError(t *testing.T) {
-	want:=errors.New("wallet unavailable")
-	c:=Client{BaseURL:"https://example.invalid",Session:SessionTokenProviderFunc(func(context.Context)(string,error){return "",want})}
-	_,err:=c.Publish(context.Background(),"pub_1")
-	if !errors.Is(err,want) {t.Fatalf("got %v want %v",err,want)}
+	want := errors.New("wallet unavailable")
+	c := Client{BaseURL: "https://example.invalid", Session: SessionTokenProviderFunc(func(context.Context) (string, error) { return "", want })}
+	_, err := c.Publish(context.Background(), "pub_1")
+	if !errors.Is(err, want) {
+		t.Fatalf("got %v want %v", err, want)
+	}
 }

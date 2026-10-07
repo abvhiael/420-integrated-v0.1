@@ -31,14 +31,16 @@
     "retained_compute_market_suite": true,
     "phase_config_verification": true,
     "adversarial_invariant_security": true,
-    "deployment_config_verification": true
+    "deployment_config_verification": true,
+    "contract_hardening_static_analysis": true
   },
   "ci_ownership": {
     "solidity_full_inventory": "Solidity Contracts / four balanced PR shards",
     "genesis_address_authority": "Genesis Address Authority / no duplicate full Foundry",
     "global_runtime": "420 Integrated Qualification",
     "docs": "420Docs Qualification",
-    "retained_compute_market": "Compute Market Qualification"
+    "retained_compute_market": "Compute Market Qualification",
+    "contract_hardening": "420 Genesis Contract Hardening / size, invariant and Slither high-severity gate"
   },
   "non_applicable_direct_clients": {
     "420-indexer": "CMP-6 introduces no indexer schema or ingestion implementation; Compute indexer is CMP-7.6.",

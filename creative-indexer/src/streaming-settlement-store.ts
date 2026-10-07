@@ -52,18 +52,32 @@ export class StreamingSettlementProjectionStore420 {
         await client.query('BEGIN');
         const inserted = await client.query(
           `INSERT INTO event_journal
-            (event_key, block_number, block_hash, tx_hash, log_index, module_key, event_type, payload)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
+            (event_key, block_number, block_hash, tx_index, tx_hash, log_index, module_key, event_type, payload)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
            ON CONFLICT (event_key) DO NOTHING
            RETURNING event_key`,
-          [event.eventKey, event.blockNumber, event.blockHash, event.txHash, event.logIndex, event.moduleKey, event.eventType, JSON.stringify(event.payload)],
+          [
+            event.eventKey,
+            event.blockNumber,
+            event.blockHash,
+            event.transactionIndex ?? 0,
+            event.txHash,
+            event.logIndex,
+            event.moduleKey,
+            event.eventType,
+            JSON.stringify(event.payload),
+          ],
         );
         if (inserted.rowCount === 1) {
           await client.query(
-            `INSERT INTO indexed_blocks(block_number, block_hash, canonical, finalized)
-             VALUES ($1,$2,true,true)
-             ON CONFLICT (block_number) DO UPDATE SET block_hash=EXCLUDED.block_hash, canonical=true, finalized=true`,
-            [event.blockNumber, event.blockHash],
+            `INSERT INTO indexed_blocks(block_number, block_hash, parent_hash, canonical, finalized)
+             VALUES ($1,$2,$3,true,$4)
+             ON CONFLICT (block_number) DO UPDATE SET
+               block_hash=EXCLUDED.block_hash,
+               parent_hash=EXCLUDED.parent_hash,
+               canonical=true,
+               finalized=EXCLUDED.finalized`,
+            [event.blockNumber, event.blockHash, event.parentHash ?? null, event.finalized ?? false],
           );
           await this.project(client, event);
         }

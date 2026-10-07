@@ -361,7 +361,7 @@ media_compute = need("docs/420-MEDIA-PAY-COMPUTE.md", [
     "MEDIA-ECON-INV-012",
 ])
 media_live = need("docs/420-MEDIA-LIVESTREAM-SERVICE.md", [
-    "MediaStreamRegistry420 remains authoritative for stream controller ownership",
+    "`MediaStreamRegistry420` remains authoritative for stream controller ownership.",
     "persist desired/live session state across process restart",
     "recover persisted desired-live sessions after restart",
     "Raw media, stream payloads and resolved credentials remain outside this service state",

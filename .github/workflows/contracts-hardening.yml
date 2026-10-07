@@ -119,7 +119,11 @@ jobs:
 
       - name: Hardening size build
         working-directory: contracts
-        run: forge build --sizes 2>&1 | tee ../artifacts/hardening/build.txt
+        # Size qualification applies to deployable production contracts. Tests and
+        # scripts are compiled by the dedicated campaigns below; including them in
+        # this build needlessly expands the via-IR graph and has repeatedly caused
+        # hosted-runner shutdowns before qualification can proceed.
+        run: forge build --sizes --skip test --skip script 2>&1 | tee ../artifacts/hardening/build.txt
 
       - name: AI package fuzz campaign
         working-directory: contracts

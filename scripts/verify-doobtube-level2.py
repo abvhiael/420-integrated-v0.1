@@ -64,7 +64,7 @@ for literal in [
 consumer=json.loads(read("config/genesis-consumer-services.json"))
 media=next(x for x in consumer["services"] if x["id"]=="420/service/media/v1")
 expected={"420 Identity","420 Rights","420 Storage","420 Search","420 Notifications","420 Pay","420 Compute Protocol"}
-assert set(media["dependencies"])==expected, "420Media dependency set drifted"
+assert set(media["depends_on"])==expected, "420Media dependency set drifted"
 
 media_types=need("media/api/types.go",[
     'Version            = "v1"',

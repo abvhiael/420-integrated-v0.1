@@ -5,8 +5,8 @@
   "canonical_definition": "Reconcile the complete accumulated CMP-5 external distributed-compute adapter phase against current main, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification once, preserve durable evidence, and hand off to CMP-6 — Useful-computation rewards.",
   "status": "QUALIFICATION_PENDING",
   "reconciliation": {
-    "main_sha": "f674fbed767efc126da253c66800e38d030dc1dd",
-    "reconciled_anchor_sha": "7c8999aeeb9542115a9b4d9ed925daee490caba0",
+    "main_sha": "ea76c951b683a2b75ad2e64902e6e99c3a0b06ea",
+    "reconciled_anchor_sha": "58d529c74d9c74db68b729e5f6c37e527d3652f2",
     "behind_main": 0
   },
   "qualified_prerequisites": [

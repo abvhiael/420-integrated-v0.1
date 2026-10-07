@@ -62,6 +62,16 @@ The UI exposes the currently implemented Budtender gameplay slice:
 
 The layout is responsive and touch-friendly.
 
+## Gaming Protocol integration
+
+BUD-AUDIT-8 wires the client to the existing `clients/budtender-access-v1` progressive-access policy without creating browser-owned wallet/session authority.
+
+The host exposes:
+- `GET /api/gaming` for canonical namespace/runtime/policy metadata;
+- `POST /api/gaming/access` for non-authoritative access-policy evaluation.
+
+These endpoints never mutate game state. Core management remains wallet-free, and the checked-in Gaming runtime is reported as deployment-pending until GP-15 live qualification.
+
 ## Current limitations
 
 State is in-memory. Restarting the host resets the game.

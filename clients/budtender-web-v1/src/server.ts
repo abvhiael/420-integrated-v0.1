@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, extname, join, normalize } from "node:path";
 import { BudtenderApplicationService } from "../../../src/budtender/BudtenderApplicationService.ts";
+import { loadBudtenderRuntimeConfig } from "./runtime-config.ts";
 import {
   BudtenderGamingIntegration,
   evaluateBudtenderAccess,
@@ -95,13 +96,30 @@ const staticPath = (urlPath: string): string | null => {
   return join(ROOT, normalized);
 };
 
+export interface BudtenderOperationalState {
+  ready: boolean;
+  shuttingDown: boolean;
+}
+
 export const createBudtenderWebServer = (
   application = new BudtenderApplicationService(),
+  operational: BudtenderOperationalState = { ready: true, shuttingDown: false },
 ) => createServer(async (req, res) => {
   const method = req.method ?? "GET";
   const url = new URL(req.url ?? "/", "http://localhost");
 
   try {
+    if (url.pathname === "/healthz" && method === "GET") {
+      return json(res, 200, { status: "ok", service: "budtender-web-v1" });
+    }
+
+    if (url.pathname === "/readyz" && method === "GET") {
+      return json(res, operational.ready && !operational.shuttingDown ? 200 : 503, {
+        status: operational.ready && !operational.shuttingDown ? "ready" : "not-ready",
+        service: "budtender-web-v1",
+      });
+    }
+
     if (url.pathname === "/api/state" && method === "GET") {
       return json(res, 200, application.snapshot());
     }
@@ -205,9 +223,30 @@ export const createBudtenderWebServer = (
 });
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const port = Number(process.env.PORT ?? 4207);
-  const server = createBudtenderWebServer();
-  server.listen(port, "127.0.0.1", () => {
-    process.stdout.write(`Budtender web client: http://127.0.0.1:${port}\n`);
+  const config = loadBudtenderRuntimeConfig();
+  const operational: BudtenderOperationalState = { ready: true, shuttingDown: false };
+  const server = createBudtenderWebServer(new BudtenderApplicationService(), operational);
+  let closing = false;
+
+  const shutdown = (signal: string): void => {
+    if (closing) return;
+    closing = true;
+    operational.ready = false;
+    operational.shuttingDown = true;
+    process.stdout.write(`Budtender shutdown requested: ${signal}\n`);
+    server.close((error) => {
+      if (error) {
+        process.stderr.write(`Budtender shutdown failed: ${error.message}\n`);
+        process.exitCode = 1;
+      }
+    });
+  };
+
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
+  process.once("SIGINT", () => shutdown("SIGINT"));
+
+  server.listen(config.port, config.host, () => {
+    const origin = config.publicOrigin ?? `http://${config.host}:${config.port}`;
+    process.stdout.write(`Budtender web client: ${origin}\n`);
   });
 }

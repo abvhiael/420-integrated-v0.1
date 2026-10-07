@@ -13,17 +13,54 @@ const MAX_BODY_BYTES = 16 * 1024;
 
 type Json = Record<string, unknown>;
 
+const SECURITY_HEADERS = Object.freeze({
+  "content-security-policy": "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'",
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
+  "referrer-policy": "no-referrer",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "cross-origin-resource-policy": "same-origin",
+});
+
+const responseHeaders = (extra: Record<string, string | number> = {}) => ({
+  ...SECURITY_HEADERS,
+  ...extra,
+});
+
 const json = (res: ServerResponse, status: number, body: unknown): void => {
   const payload = JSON.stringify(body);
-  res.writeHead(status, {
+  res.writeHead(status, responseHeaders({
     "content-type": "application/json; charset=utf-8",
     "content-length": Buffer.byteLength(payload),
     "cache-control": "no-store",
-  });
+  }));
   res.end(payload);
 };
 
+const assertSameOrigin = (req: IncomingMessage): void => {
+  const origin = req.headers.origin;
+  if (!origin) return;
+
+  const host = req.headers.host;
+  if (!host) throw new Error("host header required");
+
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    throw new Error("invalid origin");
+  }
+
+  if (originHost !== host) throw new Error("cross-origin mutation rejected");
+};
+
 const readJson = async (req: IncomingMessage): Promise<Json> => {
+  assertSameOrigin(req);
+  const contentType = req.headers["content-type"] ?? "";
+  if (!/^application\/json(?:\s*;|$)/i.test(contentType)) {
+    throw new Error("application/json required");
+  }
+
   const chunks: Buffer[] = [];
   let total = 0;
   for await (const chunk of req) {
@@ -152,11 +189,11 @@ export const createBudtenderWebServer = (
 
     try {
       const content = await readFile(path);
-      res.writeHead(200, {
+      res.writeHead(200, responseHeaders({
         "content-type": mime(path),
         "content-length": content.length,
         "cache-control": "no-store",
-      });
+      }));
       res.end(content);
     } catch {
       json(res, 404, { error: "not found" });

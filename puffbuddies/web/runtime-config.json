@@ -1,0 +1,8 @@
+{
+  "appId":"puffbuddies",
+  "apiBase":"/api/puffbuddies/v1",
+  "messengerEntry":"/messenger",
+  "deploymentStatus":"repository-qualified-not-deployed",
+  "authorityMode":"server-revalidated",
+  "cacheMode":"memory-only"
+}

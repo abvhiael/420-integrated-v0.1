@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-3 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-4 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -76,7 +76,17 @@ assert all(x["name"] not in {"DoobTube", "420Video"} for x in apps["apps"]), (
     "DoobTube/420Video was added to the frozen Genesis catalog without an explicit later catalog decision"
 )
 
-assert not (ROOT / "doobtube").exists(), "runtime appeared before DOOBTUBE-1+ implementation ownership"
+# DOOBTUBE-4 authorizes only the bounded adapter/test package; backend/web/runtime remain later steps.
+allowed_doobtube_files = {
+    "doobtube/__init__.py",
+    "doobtube/integrations/__init__.py",
+    "doobtube/integrations/ecosystem.py",
+    "doobtube/tests/__init__.py",
+    "doobtube/tests/test_doobtube_adapters.py",
+}
+if (ROOT / "doobtube").exists():
+    observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file()}
+    assert observed == allowed_doobtube_files, f"unexpected DoobTube runtime files before DOOBTUBE-5: {sorted(observed ^ allowed_doobtube_files)}"
 assert not (ROOT / "contracts" / "src" / "doobtube").exists(), (
     "DoobTube contracts appeared despite DOOBTUBE-0's no-contract ownership decision"
 )
@@ -214,7 +224,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-3 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -328,7 +338,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-3 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -421,6 +431,86 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-3 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
 
-print("DOOBTUBE-3 Level 1 data/lifecycle verification: PASS")
+adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
+    "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
+    "Status: **ADOPTED / IMPLEMENTED**",
+    "no DoobTube-owned smart contract is required for V1",
+    "doobtube/integrations/ecosystem.py",
+    "DT-ADAPT-REG-001",
+    "DT-ADAPT-MEDIA-001",
+    "DT-ADAPT-STORAGE-001",
+    "DT-ADAPT-SEARCH-001",
+    "DT-ADAPT-NOTIFY-001",
+    "DT-ADAPT-ECON-001",
+    "DT-ADAPT-INV-001",
+    "DT-ADAPT-INV-012",
+    "Next canonical roadmap step: DOOBTUBE-5 — Backend/API/indexing/service control plane",
+])
+adapter_code = need("doobtube/integrations/ecosystem.py", [
+    "class DependencyMode",
+    "DIRECT_REQUIRED",
+    "DIRECT_OPTIONAL",
+    "TRANSITIVE_MEDIA",
+    "420/service/protocol-registry/v1",
+    "420/service/wallet/v1",
+    "420/service/smart-accounts/v1",
+    "420/service/media/v1",
+    "420/service/identity/v1",
+    "420/service/rights/v1",
+    "420/service/resource-protocol/v1",
+    "420/service/search/v1",
+    "420/service/notifications/v1",
+    "420/service/pay/v1",
+    "420/service/compute-market/v1",
+    "def admit_registry_snapshot",
+    "def admit_media_compatibility",
+    "def admit_storage_ready",
+    "def admit_public_projection",
+    "def admit_notification_subscription",
+    "def assert_direct_call_allowed",
+    "def assert_no_shadow_authority",
+    "def doobtube_contracts_required",
+    "def doobtube_service_id",
+])
+adapter_tests = need("doobtube/tests/test_doobtube_adapters.py", [
+    "test_no_doobtube_contract_or_service_identity",
+    "test_registry_snapshot_rejects_wrong_id_chain_stale_inactive_and_deprecated",
+    "test_media_compatibility_is_fail_closed",
+    "test_storage_ready_requires_complete_live_canonical_state",
+    "test_search_projection_cannot_widen_visibility_or_authority",
+    "test_notifications_cannot_become_entitlement_or_wallet_authority",
+    "test_pay_and_compute_are_transitive_only",
+    "test_shadow_authority_fails_closed",
+])
+media_api = need("media/api/types.go", [
+    'ServiceID          = "420/service/media/v1"',
+    'SigningDomain      = "420/MEDIA/API/SIGNING/V1"',
+])
+
+# Repository canonical service-ID declarations used by the adapter must remain unchanged.
+for value in [
+    'PROTOCOL_REGISTRY = keccak256("420/service/protocol-registry/v1")',
+    'WALLET = keccak256("420/service/wallet/v1")',
+    'SMART_ACCOUNTS = keccak256("420/service/smart-accounts/v1")',
+    'IDENTITY = keccak256("420/service/identity/v1")',
+    'RESOURCE_PROTOCOL = keccak256("420/service/resource-protocol/v1")',
+    'RIGHTS = keccak256("420/service/rights/v1")',
+    'SEARCH = keccak256("420/service/search/v1")',
+    'NOTIFICATIONS = keccak256("420/service/notifications/v1")',
+    'PAY = keccak256("420/service/pay/v1")',
+    'COMPUTE_MARKET = keccak256("420/service/compute-market/v1")',
+]:
+    assert value in service_ids, f"canonical service ID drifted: {value}"
+
+# Contract-free V1 remains mandatory.
+assert not (ROOT / "contracts" / "src" / "doobtube").exists()
+assert not (ROOT / "contracts" / "src" / "video").exists()
+assert "return False" in adapter_code, "DoobTube contract requirement must remain false"
+assert "return None" in adapter_code, "DoobTube service ID must remain absent"
+assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
+assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-4 are complete" in audit
+
+print("DOOBTUBE-4 Level 1 contract/adapter verification: PASS")

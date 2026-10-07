@@ -124,12 +124,13 @@ func (s Service) CreateDraft(ctx context.Context, actor string, req CreateDraftR
 	if err := s.validate(); err != nil {
 		return Publication{}, err
 	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return Publication{}, ErrInvalidInput
+	}
 	var err error
 	actor, err = s.requireActiveActor(ctx, actor)
 	if err != nil {
-		if errors.Is(err, ErrUnauthorized) && strings.TrimSpace(actor) == "" {
-			return Publication{}, ErrInvalidInput
-		}
 		return Publication{}, err
 	}
 	req.Title = strings.TrimSpace(req.Title)
@@ -529,6 +530,9 @@ func (s Service) ListEditorial(ctx context.Context, actor string, offset, limit 
 }
 
 func (s Service) ListRevisions(ctx context.Context, actor, id string) ([]PublicationRevision, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
 	actor, err := s.requireActiveActor(ctx, actor)
 	if err != nil {
 		return nil, err
@@ -557,6 +561,9 @@ func (s Service) ListRevisions(ctx context.Context, actor, id string) ([]Publica
 }
 
 func (s Service) ListModerationHistory(ctx context.Context, actor, id string) ([]ModerationEvent, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
 	actor, err := s.requireActiveActor(ctx, actor)
 	if err != nil {
 		return nil, err

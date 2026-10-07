@@ -34,8 +34,8 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
     "Next canonical roadmap step: DOOBTUBE-1 — Product scope and canonical user workflows",
 ])
 audit = need("docs/DOOBTUBE-AUDIT.md", [
-    "Current remediation state: **DOOBTUBE-0 through DOOBTUBE-9 complete**",
-    "repository-qualified DoobTube V1 application/client through DOOBTUBE-9",
+    "Current remediation state: **DOOBTUBE-0 through DOOBTUBE-10 complete**",
+    "repository-qualified DoobTube V1 application/client through DOOBTUBE-10",
     "DOOBTUBE-0 through DOOBTUBE-10 are complete",
     "SECURITY QUALIFIED: **YES for current app repository scope**",
     "CODE COMPLETE: **NO**",

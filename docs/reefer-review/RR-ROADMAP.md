@@ -6,7 +6,7 @@ This roadmap extends the repository-qualified ReeferReview MVP without replacing
 
 **Purpose:** add a durable external cannabis-news foundation while preserving a strict distinction between third-party linked news and ReeferReview-authored Publications.
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
+Status: **COMPLETE / LEVEL 1 PASS**
 
 ### RR-1.1 — External news data model
 Distinct `ExternalNewsItem` records with source attribution, canonical URL, metadata, feed GUID, content fingerprint, topics, status and timestamps.
@@ -35,7 +35,7 @@ Deterministic cannabis relevance gate and topic classification before public fee
 ### RR-1.9 — Feed ingestion/restart/recovery tests
 Unit/integration coverage for RSS/Atom parsing, canonicalization, relevance, persistence across reopen, GUID deduplication, keyset cursor behavior, API admission and one-shot ingestion.
 
-**RR-1 exit criteria:** all nine requirements implemented; app-specific Level 1 workflow green on one exact implementation SHA; durable qualification evidence recorded. Level 2 is not required until the RR-2/RR-3 user-facing/editorial integration milestone. Level 3 remains deferred to complete app-phase closeout.
+**RR-1 exit criteria:** SATISFIED. All nine requirements are implemented and the app-specific Level 1 workflow passed on exact implementation SHA `26e5bbf50da09d745b1838e8d35694912cf3e55b`; durable evidence is recorded in `RR-1-QUALIFICATION.md`. Level 2 is not required until the RR-2/RR-3 user-facing/editorial integration milestone. Level 3 remains deferred to complete app-phase closeout.\n\n**Next canonical roadmap step:** RR-2 — User-Facing News App.
 
 ## RR-2 — User-Facing News App
 Persistent homepage newsfeed, Latest/Cannabis News/ReeferReview Originals/Topics/Search navigation, attribution/read-original handoff, filtering and responsive accessibility.

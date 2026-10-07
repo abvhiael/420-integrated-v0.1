@@ -30,18 +30,15 @@ DoobTube must therefore **not** be declared complete and must **not** silently r
 
 ### Result
 
-There is **no canonical DoobTube/420Video definition** on the audited main branch.
+There was **no canonical DoobTube/420Video definition** on the audited main branch. DOOBTUBE-0 now adopts the first canonical DoobTube architecture on the audit branch.
 
 The only authoritative video-upload/basic-livestreaming application/service definition found is 420Media. That does not establish DoobTube scope.
 
-Therefore the following DoobTube properties are currently **UNDEFINED / MISSING**:
+DOOBTUBE-0 now resolves the application identity, 420Media relationship, service/Registry disposition, Genesis disposition, contract-ownership default, and authority/trust/data/privacy/moderation/custody boundaries. The following later-phase properties remain **UNDEFINED / MISSING**:
 
-- purpose beyond the generic label "video application";
-- user-facing scope;
-- protocol responsibility;
-- trust and security model;
-- contracts, if any;
-- service topology;
+- detailed user-facing product scope;
+- exact later dependency graph and adopted interfaces;
+- service/runtime topology;
 - frontend routes and workflows;
 - backend/API/indexer requirements;
 - storage/transcoding/streaming model;
@@ -77,9 +74,9 @@ Therefore the following DoobTube properties are currently **UNDEFINED / MISSING*
 
 | Expected component | State | Evidence / boundary |
 |---|---|---|
-| Canonical application identity | PARTIAL | Name is now DoobTube; no adopted architecture/service identity yet |
+| Canonical application identity | COMPLETE | Name is DoobTube; `docs/DOOBTUBE-ARCHITECTURE.md` adopts the app/client architecture |
 | App-specific roadmap | MISSING at audit base | Created by this remediation branch |
-| Architecture/specification | MISSING | No canonical source exists |
+| Architecture/specification | COMPLETE for DOOBTUBE-0 | `docs/DOOBTUBE-ARCHITECTURE.md` |
 | Source directory | MISSING | No `doobtube/` or equivalent found |
 | Smart contracts | MISSING / NOT APPLICABLE pending architecture | 420Media contracts exist but are not DoobTube contracts |
 | Contract interfaces | MISSING / NOT APPLICABLE pending architecture | Same boundary |
@@ -122,17 +119,17 @@ Adjacent reusable 420Media contracts discovered:
 
 These are **420Media** components, not DoobTube components. Their existence does not prove DoobTube access control, storage layout, initialization, replay protection, settlement, pausing, upgradeability, dependency binding or invariants.
 
-DoobTube contract/security status: **BLOCKED on canonical architecture**.
+DoobTube contract responsibility is now explicit: **no DoobTube-owned smart contract is required by DOOBTUBE-0**. DOOBTUBE-4 may introduce one only if DOOBTUBE-1 through -3 prove a narrowly scoped unmet requirement.
 
 ## 5. 420Integrated integration audit
 
-No DoobTube integration contract exists.
+No DoobTube integration contract exists, and DOOBTUBE-0 intentionally creates none.
 
 Potentially relevant ecosystem dependencies cannot be promoted from "possible" to "required" until the architecture decision is adopted. In particular, the repository proves only that 420Media depends on Identity, Rights, Storage, Search, Notifications, Pay and Compute.
 
 For DoobTube, Registry, Identity, Names, Wallet, Pay, Token/native 420, Stake, Governance, Treasury, Bridge, AI, Compute, Notifications, Analytics, Verify, Rights, Arbitration, Storage, Oracle Interface Layer, Explorer/Indexer and any other dependency are currently **UNSPECIFIED**.
 
-No canonical DoobTube registry key, permissions, schemas, API contract, event-index contract, or dependency graph exists.
+DoobTube receives no new protocol/service Registry identity at DOOBTUBE-0; Media discovery remains `420/service/media/v1`. Exact later dependency bindings, schemas, API contracts and projections remain DOOBTUBE-2 through DOOBTUBE-5 work.
 
 ## 6. Application-layer audit
 
@@ -176,6 +173,7 @@ The adjacent 420Media security work must not be inherited implicitly.
 Present after this remediation:
 
 - `docs/DOOBTUBE-NAME-DECISION.md`
+- `docs/DOOBTUBE-ARCHITECTURE.md`
 - `docs/DOOBTUBE-AUDIT.md`
 - `docs/DOOBTUBE-ROADMAP.md`
 
@@ -233,11 +231,11 @@ There are no repository-canonical DoobTube feature requirements yet. The only ex
 | Requirement | Canonical source | Current implementation | Tests | Documentation | Status | Required remediation |
 |---|---|---|---|---|---|---|
 | Application is named DoobTube | Current audit directive; `docs/DOOBTUBE-NAME-DECISION.md` on audit branch | Naming record created | Baseline structural verifier | Name decision | COMPLETE | Merge/adopt with audit PR |
-| Independent canonical DoobTube scope exists | None on audited main | None | None | None | MISSING | Adopt product/architecture scope |
-| Relationship to 420Media is explicit | 420Media canonical docs establish Media as separate | No DoobTube relationship defined | None | Boundary recorded only | PARTIAL | Decide compose/reuse/replace/independent; replacement requires explicit canonical update |
-| Registry/service identity exists | None | None | None | None | MISSING | Define canonical service/application identity if required |
-| Genesis disposition is defined | `config/genesis-applications.json`, `config/genesis-consumer-services.json` contain no DoobTube | None | None | This audit records absence | MISSING | Explicit catalog/service decision |
-| Smart-contract responsibility is defined | None | None | None | None | BLOCKED | Architecture decision first |
+| Canonical DoobTube architecture exists | `docs/DOOBTUBE-ARCHITECTURE.md` | App/client architecture and authority boundary adopted | Structural verifier | Architecture doc | COMPLETE | Detailed product scope moves to DOOBTUBE-1 |
+| Relationship to 420Media is explicit | `docs/DOOBTUBE-ARCHITECTURE.md` | DoobTube consumes canonical 420Media; no rename/replacement/parallel authority | Structural verifier | Architecture doc | COMPLETE | None for DOOBTUBE-0 |
+| Registry/service identity decision exists | `docs/DOOBTUBE-ARCHITECTURE.md` | No new DoobTube protocol/service ID; resolve `420/service/media/v1` | Structural verifier | Architecture doc | COMPLETE | AppStore/listing metadata, if needed, is later non-authoritative work |
+| Genesis disposition is defined | Genesis catalogs + `docs/DOOBTUBE-ARCHITECTURE.md` | No new frozen app or consumer-service entry | Structural verifier | Architecture doc | COMPLETE | Future promotion requires explicit separate decision |
+| Smart-contract responsibility is defined | `docs/DOOBTUBE-ARCHITECTURE.md` | No DoobTube-owned contract required by DOOBTUBE-0 | Structural verifier | Architecture doc | COMPLETE | Revisit only if DOOBTUBE-1..3 prove necessity |
 | Frontend/workflows exist | None | None | None | None | MISSING | Implement after scope freeze |
 | Backend/API/indexer/workers exist | None | None | None | None | MISSING | Implement after architecture freeze |
 | 420Integrated dependencies are canonical | None | None | None | None | MISSING | Freeze dependency graph and trust boundaries |
@@ -309,8 +307,8 @@ Baseline audit/name/roadmap are introduced. Product, architecture, developer, us
 No DoobTube ecosystem integration is canonically defined. 420Media integrations must not be inherited by assumption.
 
 ### Outstanding blockers
-1. **governance/architecture decision** — canonical DoobTube scope and relation to 420Media;
-2. **protocol dependency decision** — dependency graph, authority and Registry identity;
+1. **product definition** — DOOBTUBE-1 canonical workflows and v1 feature requirements;
+2. **protocol dependency decision** — DOOBTUBE-2 exact dependency graph, interfaces and failure semantics;
 3. **code** — all DoobTube runtime/application implementation;
 4. **code/tests** — requirement-mapped unit/integration/security qualification;
 5. **infrastructure** — deployment/runtime/service topology;
@@ -322,10 +320,10 @@ No DoobTube ecosystem integration is canonically defined. 420Media integrations 
 
 - CODE COMPLETE: **NO** — no DoobTube runtime implementation exists.
 - BUILD COMPLETE: **NO** — no DoobTube build exists.
-- CONTRACT COMPLETE: **NO** — contract responsibility has not been decided.
+- CONTRACT COMPLETE: **NO for app phase** — DOOBTUBE-0 decides no app-owned contract is currently required, but later requirements and integration qualification are not complete.
 - TEST COMPLETE: **NO** — no requirement-mapped DoobTube runtime tests exist.
 - DOCUMENTATION COMPLETE: **NO** — only baseline governance/audit documentation exists.
-- INTEGRATION COMPLETE: **NO** — no canonical dependency graph or adapters exist.
+- INTEGRATION COMPLETE: **NO** — the Media relationship is canonical, but DOOBTUBE-2 has not frozen the complete dependency graph or adapters.
 - SECURITY QUALIFIED: **NO** — no DoobTube threat model or implementation qualification exists.
 - TESTNET READY: **NO** — no deployable DoobTube release candidate exists.
 - GENESIS READY: **NO** — no Genesis catalog/service decision or deployment exists.
@@ -335,6 +333,6 @@ No DoobTube ecosystem integration is canonically defined. 420Media integrations 
 
 **DoobTube is NOT COMPLETE.**
 
-The repository currently proves that DoobTube/420Video did not exist as a canonical application at the audited main HEAD. The only defensible work before feature development is to preserve the name decision, freeze the architecture/product boundary, and explicitly decide how DoobTube relates to 420Media.
+The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-Proceed using the stable numbered remediation roadmap in `docs/DOOBTUBE-ROADMAP.md`.
+**DOOBTUBE-0 is complete. Next: DOOBTUBE-1 — Product scope and canonical user workflows.**

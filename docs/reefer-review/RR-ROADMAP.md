@@ -78,6 +78,10 @@ RR-5 is a material shared-dependency milestone because it replaces development-o
 ## RR-6 — Ecosystem Integrations
 Live 420 Search, 420 Notifications and 420Mail adapters plus reconciliation/failure handling.
 
+Status: **IMPLEMENTED / LEVEL 1 + ECOSYSTEM-INTEGRATION LEVEL 2 QUALIFICATION PENDING**
+
+RR-6 is a material cross-component milestone because it replaces the generic Search/Notifications/Mail hooks with concrete repository integration contracts for all three shared services and adds durable outage reconciliation. Complete it only after the exact accumulated implementation SHA passes both the RR-6 Level 1 workflow and the retained ReeferReview Level 2 integration workflow.
+
 ## RR-7 — Newsfeed Security
 SSRF/redirect/DNS-rebinding controls, parser hardening, sanitization, source allowlisting, fetch limits, copyright/attribution enforcement and adversarial ingestion tests.
 

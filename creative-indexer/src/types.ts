@@ -60,8 +60,11 @@ export interface CanonicalEvent {
   eventKey: string;
   blockNumber: number;
   blockHash: string;
+  parentHash?: string;
+  transactionIndex?: number;
   txHash: string;
   logIndex: number;
+  finalized?: boolean;
   moduleKey: string;
   eventType: string;
   payload: Record<string, string | number | null>;

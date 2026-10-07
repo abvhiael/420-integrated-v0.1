@@ -1,6 +1,6 @@
 # DoobTube — application naming decision
 
-Status: **PROPOSED / audit branch baseline**
+Status: **ADOPTED — DOOBTUBE-0**
 Date: 2026-10-06
 Repository: `abvhiael/420-integrated-v0.1`
 
@@ -21,8 +21,8 @@ This naming decision does **not** by itself:
 
 At the branch base (`main` @ `43a3690422e934dcd1fe9da595df4a9dfed37a75`), no repository identifier, directory, contract namespace, service record, roadmap, PR, qualification record, or deployment record for `420Video` or `DoobTube` exists.
 
-The repository does contain the separate, already-canonical **420Media** service and application implementation. DoobTube must not silently appropriate, rename, or redefine that architecture. Any reuse or composition of 420Media by DoobTube requires an explicit canonical architecture decision and requirement mapping.
+The repository does contain the separate, already-canonical **420Media** service and application implementation. DoobTube must not silently appropriate, rename, or redefine that architecture. That architecture decision is now adopted in `docs/DOOBTUBE-ARCHITECTURE.md`: DoobTube is a replaceable user-facing application/client that consumes canonical 420Media rather than replacing or duplicating it.
 
 ## Next gate
 
-Before DoobTube feature implementation begins, complete the repository-grounded DoobTube audit baseline and adopt a canonical scope/architecture decision that explicitly resolves its relationship to 420Media and the Genesis consumer-service/application catalogs.
+DOOBTUBE-0 is complete. The next canonical roadmap step is **DOOBTUBE-1 — Product scope and canonical user workflows**.

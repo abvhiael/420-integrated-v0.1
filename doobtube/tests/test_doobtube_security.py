@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import os, tempfile, unittest
+from concurrent.futures import ThreadPoolExecutor
 
 from doobtube.api import AuthContext, Backend, Request, RuntimeConfig
 from doobtube.integration import EcosystemMilestone, EcosystemInput, IdentitySnapshot, RightsSnapshot, SearchSnapshot, IntegrationDenied
@@ -70,6 +71,18 @@ class DoobTubeSecurityTests(unittest.TestCase):
         self.assertEqual(first.status,202)
         second=self.backend.handle(self.req("POST","/v1/control/rebuild",headers={"Idempotency-Key":"r2"},auth=self.auth))
         self.assertEqual(second.status,429)
+
+    def test_concurrent_abuse_limit_cannot_race_past_bound(self):
+        guard=AbuseGuard({"preferences.write":AbusePolicy(5,60)},now=self.clock.now)
+        def attempt(_):
+            try:
+                guard.require("0xabc","preferences.write")
+                return True
+            except SecurityDenied:
+                return False
+        with ThreadPoolExecutor(max_workers=20) as pool:
+            results=list(pool.map(attempt,range(100)))
+        self.assertEqual(sum(results),5)
 
     def test_privacy_redactor_removes_tokens_secret_refs_url_credentials_and_query_secrets(self):
         raw="Bearer abc.def secret://stream/s1 https://user:pass@edge.example/x?token=abc&key=def"

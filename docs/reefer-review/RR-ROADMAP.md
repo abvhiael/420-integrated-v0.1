@@ -35,10 +35,18 @@ Deterministic cannabis relevance gate and topic classification before public fee
 ### RR-1.9 — Feed ingestion/restart/recovery tests
 Unit/integration coverage for RSS/Atom parsing, canonicalization, relevance, persistence across reopen, GUID deduplication, keyset cursor behavior, API admission and one-shot ingestion.
 
-**RR-1 exit criteria:** SATISFIED. All nine requirements are implemented and the app-specific Level 1 workflow passed on exact implementation SHA `26e5bbf50da09d745b1838e8d35694912cf3e55b`; durable evidence is recorded in `RR-1-QUALIFICATION.md`. Level 2 is not required until the RR-2/RR-3 user-facing/editorial integration milestone. Level 3 remains deferred to complete app-phase closeout.\n\n**Next canonical roadmap step:** RR-2 — User-Facing News App.
+**RR-1 exit criteria:** SATISFIED. All nine requirements are implemented and the app-specific Level 1 workflow passed on exact implementation SHA `26e5bbf50da09d745b1838e8d35694912cf3e55b`; durable evidence is recorded in `RR-1-QUALIFICATION.md`. Level 2 is not required until the RR-2/RR-3 user-facing/editorial integration milestone. Level 3 remains deferred to complete app-phase closeout.
+
+**Next canonical roadmap step:** RR-2 — User-Facing News App.
 
 ## RR-2 — User-Facing News App
 Persistent homepage newsfeed, Latest/Cannabis News/ReeferReview Originals/Topics/Search navigation, attribution/read-original handoff, filtering and responsive accessibility.
+
+Status: **COMPLETE / LEVEL 1 PASS**
+
+**RR-2 exit criteria:** SATISFIED. The user-facing news application is implemented and the app-specific Level 1 workflow passed on exact implementation SHA `37017d8157f180297b7771cea1d3c228cf527a30`; retained ReeferReview backend/audit and RR-1 verification also passed inside that exact-head workflow. Durable evidence is recorded in `RR-2-QUALIFICATION.md`. Level 2 remains deferred until the documented RR-2/RR-3 user-facing/editorial convergence after RR-3. Level 3 remains deferred to RR-10.
+
+**Next canonical roadmap step:** RR-3 — Editorial Publishing Completion.
 
 ## RR-3 — Editorial Publishing Completion
 Article reader, authenticated writer/publish workflow, revisions, tombstone lifecycle, restricted reads, moderation dashboard/history and API/client parity.

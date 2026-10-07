@@ -1,0 +1,68 @@
+{
+  "schema": "420.hz.deployment.smoke.bundle.v1",
+  "roadmap_step": "HZ-AUDIT-5",
+  "status": "REPOSITORY_DEPLOYMENT_SMOKE_READY_LIVE_TESTNET_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "scope": "local-EVM convergence smoke for HZ-AUDIT-2 deployment, HZ-AUDIT-3 authority/Registry wiring and HZ-AUDIT-4 STREAM economics",
+  "deployment_source": "contracts/src/creative/deployment/HzDeploymentGraph420.sol",
+  "deployment_script": "contracts/script/HzConsolidatedDeploy420.s.sol",
+  "smoke_test": "contracts/test/HzDeploymentSmoke420.t.sol",
+  "convergence_requirements": [
+    "materialize all 20 HZ-1 through HZ-4 contracts with nonzero runtime code",
+    "apply canonical GovernanceTimelock-only internal wiring",
+    "grant playback and settlement submitter roles",
+    "register the exact 20-module CreativeProtocolRegistry420 inventory",
+    "publish the canonical external ProtocolRegistry component and service identities",
+    "register ORIGINAL and REMIX RevenueType.STREAM version-1 schedules",
+    "create a CreatorProfile, Work and ORIGINAL Recording through the initialized graph",
+    "finalize rights splits and activate the Work and Recording",
+    "resolve the active HZ service back to the deployed CreativeProtocolRegistry420 root",
+    "prove uninitialized deployment state fails closed for Work activation and STREAM schedule lookup"
+  ],
+  "smoke_runtime_inputs": {
+    "governance": "local test harness authority only",
+    "protocol_treasury": "local nonzero test address only",
+    "playback_submitter": "local nonzero test address only",
+    "settlement_submitter": "local nonzero test address only"
+  },
+  "state_assertions": [
+    "all HZ contract runtime code lengths are nonzero",
+    "canonical authority dependencies are bound",
+    "LicenseRegistry420 and StreamingRoyaltySettlement420 are Router settlement sources",
+    "playback and settlement submitters are authorized",
+    "ProtocolRegistry active service resolves CreativeProtocolRegistry420 version 1",
+    "ORIGINAL and REMIX STREAM v1 terms hashes match HZ-AUDIT-4",
+    "activated ORIGINAL recording retains royaltyScheduleVersion 1"
+  ],
+  "failure_paths": [
+    "Work activation fails before rights wiring/finalization",
+    "STREAM schedule lookup fails before HZ-AUDIT-4 schedule registration"
+  ],
+  "level_2_milestone": {
+    "required": true,
+    "boundary": "post-HZ-AUDIT-5 convergence of deployment + authority/Registry + STREAM economics + smoke behavior",
+    "scope": "retained 420Hz app-focused integration only",
+    "repository_wide_level_3": false
+  },
+  "live_evidence": {
+    "required_in_step": "HZ-AUDIT-7",
+    "network": null,
+    "chain_id": null,
+    "deployment_transactions": [],
+    "deployed_addresses": {},
+    "runtime_code_hashes": {},
+    "governance_transactions": [],
+    "registry_transactions": [],
+    "schedule_registration_transactions": [],
+    "smoke_transactions": []
+  },
+  "exit_criteria": [
+    "focused local-EVM deployment smoke passes on the exact implementation SHA",
+    "HZ-AUDIT-2, HZ-AUDIT-3 and HZ-AUDIT-4 retained regressions remain green",
+    "all HZ-AUDIT-5 verifier checks pass",
+    "post-HZ-AUDIT-5 Level 2 app-focused integration qualification passes",
+    "directly applicable Solidity PR qualification passes",
+    "no live/testnet evidence is fabricated"
+  ]
+}

@@ -328,7 +328,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-2 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-3 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",

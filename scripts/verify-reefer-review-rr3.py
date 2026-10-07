@@ -82,7 +82,6 @@ for marker in [
     "moderatePublication(",
     "showModerationHistory(",
     "showRevisions(",
-    "sessionStorage",
     "/v1/editorial/publications",
     "/tombstone",
     "/revisions",
@@ -91,7 +90,11 @@ for marker in [
     req(marker in js, f"web app missing {marker}")
 
 req(".innerHTML" not in js, "RR-3 web app must preserve safe DOM rendering")
-req("X-420-Actor" in js, "repository-stage actor boundary missing")
+req(
+    ("X-420-Actor" in js and "sessionStorage" in js) or
+    ("Authorization" in js and "Bearer " in js and "ReeferReviewWalletSession" in js),
+    "editorial authentication boundary missing",
+)
 
 for suffix in "ABCDEFGH":
     req(f"RR-3.{suffix}" in doc, f"RR-3 requirement {suffix} missing")

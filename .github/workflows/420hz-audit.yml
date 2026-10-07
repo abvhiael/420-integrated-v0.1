@@ -8,17 +8,21 @@ on:
       - "contracts/test/HzDeploymentGraph420.t.sol"
       - "contracts/test/HzRegistryAuthority420.t.sol"
       - "contracts/test/HzStreamEconomics420.t.sol"
+      - "contracts/test/HzDeploymentSmoke420.t.sol"
       - "contracts/config/creative/420hz-deployment-package.json"
       - "contracts/config/creative/420hz-authority-registry-bundle.json"
       - "contracts/config/creative/420hz-stream-economics-bundle.json"
+      - "contracts/config/creative/420hz-deployment-smoke-bundle.json"
       - "creative-indexer/**"
       - "scripts/verify-420hz-audit-2-deployment.py"
       - "scripts/verify-420hz-audit-3-authority.py"
       - "scripts/verify-420hz-audit-4-stream-economics.py"
+      - "scripts/verify-420hz-audit-5-deployment-smoke.py"
       - "docs/audit/420HZ-REPOSITORY-AUDIT-20261006.md"
       - "docs/audit/HZ-AUDIT-2-CONSOLIDATED-DEPLOYMENT-ARCHITECTURE.md"
       - "docs/audit/HZ-AUDIT-3-REGISTRY-AUTHORITY-WIRING.md"
       - "docs/audit/HZ-AUDIT-4-STREAM-ECONOMICS-INITIALIZATION.md"
+      - "docs/audit/HZ-AUDIT-5-DEPLOYMENT-SMOKE-QUALIFICATION.md"
       - ".github/workflows/420hz-audit.yml"
   workflow_dispatch:
 
@@ -49,12 +53,15 @@ jobs:
       - name: Verify HZ-AUDIT-4 STREAM economics bundle
         run: python3 scripts/verify-420hz-audit-4-stream-economics.py
 
+      - name: Verify HZ-AUDIT-5 deployment smoke bundle
+        run: python3 scripts/verify-420hz-audit-5-deployment-smoke.py
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
       - name: Format check affected Solidity
         working-directory: contracts
-        run: forge fmt --check src/creative/deployment/HzDeploymentGraph420.sol src/creative/deployment/HzRegistryAuthorityPlan420.sol src/creative/economics/HzStreamEconomicsPlan420.sol script/HzConsolidatedDeploy420.s.sol test/HzDeploymentGraph420.t.sol test/HzRegistryAuthority420.t.sol test/HzStreamEconomics420.t.sol
+        run: forge fmt --check src/creative/deployment/HzDeploymentGraph420.sol src/creative/deployment/HzRegistryAuthorityPlan420.sol src/creative/economics/HzStreamEconomicsPlan420.sol script/HzConsolidatedDeploy420.s.sol test/HzDeploymentGraph420.t.sol test/HzRegistryAuthority420.t.sol test/HzStreamEconomics420.t.sol test/HzDeploymentSmoke420.t.sol
 
       - name: Build consolidated deployment graph
         working-directory: contracts
@@ -73,3 +80,52 @@ jobs:
       - name: Run HZ-AUDIT-4 focused STREAM economics tests
         working-directory: contracts
         run: forge test --match-contract HzStreamEconomics420Test -vvv
+
+      - name: Run HZ-AUDIT-5 focused deployment smoke tests
+        working-directory: contracts
+        run: forge test --match-contract HzDeploymentSmoke420Test -vvv
+
+  hz-audit-integration:
+    name: hz-audit-integration-level-2
+    needs: hz-audit-fast
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Run retained 420Hz integration suite
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(
+            test/CreativeKernel420.t.sol
+            test/CreativeKernelAcceptance420.t.sol
+            test/CatalogRegistry420.t.sol
+            test/CatalogMetadataRegistry420.t.sol
+            test/MediaManifestRegistry420.t.sol
+            test/StorageSourceRegistry420.t.sol
+            test/PlaybackResolver420.t.sol
+            test/PlaybackAccounting420.t.sol
+            test/StreamingSettlementEpoch420.t.sol
+            test/StreamingRevenueAllocator420.t.sol
+            test/StreamingRoyaltySettlement420.t.sol
+            test/HzDeploymentGraph420.t.sol
+            test/HzRegistryAuthority420.t.sol
+            test/HzStreamEconomics420.t.sol
+            test/HzDeploymentSmoke420.t.sol
+          )
+          for test_file in "${tests[@]}"; do
+            forge test --match-path "$test_file" -vvv
+          done

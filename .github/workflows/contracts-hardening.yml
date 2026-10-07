@@ -80,7 +80,7 @@ jobs:
         run: |
           mkdir -p ../artifacts/hardening
           {
-            echo "commit=${GITHUB_SHA}"
+            echo "commit=$(git rev-parse HEAD)"
             echo "foundry_profile=${FOUNDRY_PROFILE}"
             forge --version
             cast --version

@@ -134,4 +134,87 @@ describe("Budtender web client host", () => {
       assert.equal(state.store.cash, 0);
     });
   });
+
+  it("reports the canonical Gaming Protocol integration without inventing session authority", async () => {
+    await withServer(async (baseUrl) => {
+      const response = await fetch(baseUrl + "/api/gaming");
+      assert.equal(response.status, 200);
+      const gaming = await response.json();
+      assert.equal(gaming.gameId, "420/GAMING/GAME/BUDTENDER/V1");
+      assert.equal(gaming.runtime, "deployment-pending");
+      assert.equal(gaming.authoritativeSessionState, false);
+      assert.deepEqual(gaming.coreFeatures, ["core-management"]);
+      assert.ok(gaming.walletOptionalFeatures.includes("premium-decor"));
+      assert.ok(gaming.walletOptionalFeatures.includes("reward"));
+    });
+  });
+
+  it("evaluates progressive access without mutating gameplay state", async () => {
+    await withServer(async (baseUrl) => {
+      const before = await (await fetch(baseUrl + "/api/state")).json();
+
+      const guestCore = await post(baseUrl, "/api/gaming/access", {
+        feature: "core-management",
+        registered: false,
+        walletLinked: false,
+        walletConnected: false,
+      });
+      assert.equal(guestCore.status, 200);
+      const guestDecision = await guestCore.json();
+      assert.equal(guestDecision.decision.allowed, true);
+      assert.equal(guestDecision.gameStateUnchanged, true);
+      assert.equal(guestDecision.authoritativeSessionState, false);
+
+      const registeredPremium = await post(baseUrl, "/api/gaming/access", {
+        feature: "premium-decor",
+        registered: true,
+        walletLinked: false,
+        walletConnected: false,
+      });
+      assert.equal(registeredPremium.status, 200);
+      const premiumDecision = await registeredPremium.json();
+      assert.equal(premiumDecision.decision.allowed, false);
+      assert.equal(premiumDecision.decision.prompt, "link-wallet");
+      assert.equal(premiumDecision.gameStateUnchanged, true);
+
+      const after = await (await fetch(baseUrl + "/api/state")).json();
+      assert.deepEqual(after, before);
+    });
+  });
+
+  it("wallet-linked policy evaluation cannot change core management statistics", async () => {
+    await withServer(async (baseUrl) => {
+      const before = await (await fetch(baseUrl + "/api/state")).json();
+
+      const response = await post(baseUrl, "/api/gaming/access", {
+        feature: "premium-decor",
+        registered: true,
+        walletLinked: true,
+        walletConnected: true,
+      });
+      assert.equal(response.status, 200);
+      const result = await response.json();
+      assert.equal(result.decision.allowed, true);
+      assert.equal(result.gameStateUnchanged, true);
+
+      const after = await (await fetch(baseUrl + "/api/state")).json();
+      assert.equal(after.store.cash, before.store.cash);
+      assert.deepEqual(after.store.products, before.store.products);
+      assert.deepEqual(after.progression, before.progression);
+      assert.deepEqual(after.customers, before.customers);
+    });
+  });
+
+  it("unknown Gaming Protocol features fail closed", async () => {
+    await withServer(async (baseUrl) => {
+      const response = await post(baseUrl, "/api/gaming/access", {
+        feature: "sales-speed-boost",
+        registered: true,
+        walletLinked: true,
+        walletConnected: true,
+      });
+      assert.equal(response.status, 400);
+      assert.match((await response.json()).error, /Unsupported Budtender feature/);
+    });
+  });
 });

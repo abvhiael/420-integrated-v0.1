@@ -1728,6 +1728,17 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 **Exit criteria:** PB16-F1 is remediated; focused and retained security/privacy tests pass; complete app regressions and clients pass; PB-0/PB-13/PB-14/PB-15 verifiers pass; static privacy/security/deployment gates pass; durable exact-SHA evidence is recorded; no repository blocker remains for PB-16; PB-17 — Closed testnet is next.
 
 
+## Repository-to-testnet handoff
+
+Repository-side implementation, integration, qualification, and security/privacy audit work is complete through **PB-16**.
+
+All unfinished live-environment and release work for **PB-17 through PB-20** is now owned by:
+
+`docs/puffbuddies/PUFFBUDDIES-TESTNET-ROADMAP.md`
+
+PB-17 through PB-20 remain canonical phase names and are **not COMPLETE**. Moving them to the testnet roadmap changes work ownership/location only; it does not claim deployed testnet, mainnet, production, or launch readiness.
+
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:
@@ -1748,9 +1759,9 @@ The currently reserved phase sequence is:
 - PB-14 — Backend/API hardening
 - PB-15 — Qualification
 - PB-16 — Security/privacy audit
-- PB-17 — Closed testnet
-- PB-18 — Public testnet
-- PB-19 — Mainnet
-- PB-20 — Public launch
+- PB-17 — Closed testnet — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
+- PB-18 — Public testnet — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
+- PB-19 — Mainnet — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
+- PB-20 — Public launch — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
 
 These phase names reserve roadmap order only; they do not assert implementation or readiness.

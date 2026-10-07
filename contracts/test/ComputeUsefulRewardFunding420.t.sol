@@ -96,13 +96,11 @@ contract ComputeUsefulRewardFunding420Test {
         bytes32 jobRef = keccak256("job/cancer/001");
         bytes32 fundingRef = keccak256("researcher/grant/001");
 
+        uint8 sourceKind = funding.SOURCE_RESEARCHER();
+        uint8 targetKind = funding.TARGET_JOB();
         vm.prank(RESEARCHER);
-        bytes32 contributionId = funding.fund{value: 12 ether}(
-            funding.SOURCE_RESEARCHER(),
-            funding.TARGET_JOB(),
-            jobRef,
-            fundingRef
-        );
+        bytes32 contributionId =
+            funding.fund{value: 12 ether}(sourceKind, targetKind, jobRef, fundingRef);
 
         ComputeUsefulRewardFunding420.Contribution memory c =
             funding.contribution(contributionId);
@@ -128,13 +126,14 @@ contract ComputeUsefulRewardFunding420Test {
 
     function testAllCanonicalFundingSourceKindsAreAccepted() public {
         bytes32 poolRef = keccak256("pool/protein-folding");
+        uint8 targetKind = funding.TARGET_POOL();
         for (uint8 kind = 1; kind <= 6; kind++) {
             address contributor = address(uint160(0x1000 + kind));
             vm.deal(contributor, 2 ether);
             vm.prank(contributor);
             funding.fund{value: 1 ether}(
                 kind,
-                funding.TARGET_POOL(),
+                targetKind,
                 poolRef,
                 keccak256(abi.encode("source", kind))
             );
@@ -150,19 +149,22 @@ contract ComputeUsefulRewardFunding420Test {
 
     function testMultipleFundingSourcesCanConvergeOnOnePool() public {
         bytes32 poolRef = keccak256("pool/climate");
+        uint8 universitySource = funding.SOURCE_UNIVERSITY();
+        uint8 communitySource = funding.SOURCE_COMMUNITY();
+        uint8 targetKind = funding.TARGET_POOL();
 
         vm.prank(UNIVERSITY);
         funding.fund{value: 8 ether}(
-            funding.SOURCE_UNIVERSITY(),
-            funding.TARGET_POOL(),
+            universitySource,
+            targetKind,
             poolRef,
             keccak256("university/climate/1")
         );
 
         vm.prank(COMMUNITY);
         funding.fund{value: 3 ether}(
-            funding.SOURCE_COMMUNITY(),
-            funding.TARGET_POOL(),
+            communitySource,
+            targetKind,
             poolRef,
             keccak256("community/climate/1")
         );
@@ -176,11 +178,15 @@ contract ComputeUsefulRewardFunding420Test {
     function testReplayAndInvalidFundingFailClosed() public {
         bytes32 poolRef = keccak256("pool/astronomy");
         bytes32 fundingRef = keccak256("community/astronomy/1");
+        uint8 communitySource = funding.SOURCE_COMMUNITY();
+        uint8 researcherSource = funding.SOURCE_RESEARCHER();
+        uint8 targetPool = funding.TARGET_POOL();
+        uint8 targetJob = funding.TARGET_JOB();
 
         vm.prank(COMMUNITY);
         funding.fund{value: 4 ether}(
-            funding.SOURCE_COMMUNITY(),
-            funding.TARGET_POOL(),
+            communitySource,
+            targetPool,
             poolRef,
             fundingRef
         );
@@ -190,8 +196,8 @@ contract ComputeUsefulRewardFunding420Test {
             abi.encodeCall(
                 funding.fund,
                 (
-                    funding.SOURCE_COMMUNITY(),
-                    funding.TARGET_POOL(),
+                    communitySource,
+                    targetPool,
                     poolRef,
                     fundingRef
                 )
@@ -202,25 +208,27 @@ contract ComputeUsefulRewardFunding420Test {
 
         vm.prank(RESEARCHER);
         (ok,) = address(funding).call{value: 1 ether}(
-            abi.encodeCall(funding.fund, (uint8(0), funding.TARGET_JOB(), poolRef, keccak256("bad")))
+            abi.encodeCall(funding.fund, (uint8(0), targetJob, poolRef, keccak256("bad")))
         );
         require(!ok, "invalid source accepted");
 
         vm.prank(RESEARCHER);
         (ok,) = address(funding).call{value: 1 ether}(
-            abi.encodeCall(funding.fund, (funding.SOURCE_RESEARCHER(), uint8(3), poolRef, keccak256("bad-target")))
+            abi.encodeCall(funding.fund, (researcherSource, uint8(3), poolRef, keccak256("bad-target")))
         );
         require(!ok, "invalid target accepted");
     }
 
     function testZeroAmountAndZeroReferencesFailClosed() public {
+        uint8 researcherSource = funding.SOURCE_RESEARCHER();
+        uint8 targetJob = funding.TARGET_JOB();
         vm.prank(RESEARCHER);
         (bool ok,) = address(funding).call(
             abi.encodeCall(
                 funding.fund,
                 (
-                    funding.SOURCE_RESEARCHER(),
-                    funding.TARGET_JOB(),
+                    researcherSource,
+                    targetJob,
                     keccak256("job"),
                     keccak256("zero-amount")
                 )
@@ -233,8 +241,8 @@ contract ComputeUsefulRewardFunding420Test {
             abi.encodeCall(
                 funding.fund,
                 (
-                    funding.SOURCE_RESEARCHER(),
-                    funding.TARGET_JOB(),
+                    researcherSource,
+                    targetJob,
                     bytes32(0),
                     keccak256("zero-target")
                 )
@@ -247,8 +255,8 @@ contract ComputeUsefulRewardFunding420Test {
             abi.encodeCall(
                 funding.fund,
                 (
-                    funding.SOURCE_RESEARCHER(),
-                    funding.TARGET_JOB(),
+                    researcherSource,
+                    targetJob,
                     keccak256("job"),
                     bytes32(0)
                 )

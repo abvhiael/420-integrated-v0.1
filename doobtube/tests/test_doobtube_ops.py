@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import threading
+import socket
 import unittest
 
 from doobtube.ops.config import NonProductionConfig
@@ -42,13 +43,9 @@ class DoobTubeOpsTests(unittest.TestCase):
         root=Path("doobtube/web/dist")
         self.assertTrue((root/"index.html").exists(),"web build must exist before ops test")
         with tempfile.TemporaryDirectory() as td:
-            cfg=NonProductionConfig("127.0.0.1",0 or 8421,420,"development",str(Path(td)/"db.sqlite"),str(root))
-            # Pick an ephemeral port while preserving loopback-only semantics.
-            cfg=NonProductionConfig(cfg.host, 8421, cfg.chain_id,cfg.network,cfg.database_path,cfg.web_root)
-            try:
-                server=create_server(cfg)
-            except OSError:
-                self.skipTest("fixed local test port unavailable")
+            sock=socket.socket();sock.bind(("127.0.0.1",0));port=sock.getsockname()[1];sock.close()
+            cfg=NonProductionConfig("127.0.0.1",port,420,"development",str(Path(td)/"db.sqlite"),str(root))
+            server=create_server(cfg)
             thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
             try:
                 conn=http.client.HTTPConnection(cfg.host,cfg.port,timeout=3)

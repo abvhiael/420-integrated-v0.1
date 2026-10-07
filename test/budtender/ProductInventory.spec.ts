@@ -88,4 +88,22 @@ describe("ProductInventory BUD-3", () => {
       /wholesale cost exceeds/,
     );
   });
+  it("rejects product economics outside JavaScript safe-integer bounds", () => {
+    assert.throws(
+      () =>
+        new ProductInventory([
+          {
+            id: "unsafe-price",
+            name: "Unsafe Price",
+            category: "flower",
+            quality: "standard",
+            baseSalePrice: Number.MAX_SAFE_INTEGER + 1,
+            wholesaleUnitCost: 1,
+            baseDemand: 50,
+            capacity: 2,
+          },
+        ]),
+      /integer/,
+    );
+  });
 });

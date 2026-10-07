@@ -260,7 +260,6 @@ func (p *rr5BadRootProvider) PutPrivate(ctx context.Context, owner, digest strin
 	return object, nil
 }
 
-
 func TestRR5RightsProvenanceBindsSessionWalletChainAndNetwork(t *testing.T) {
 	claims := rr4Claims("writer.420", CapabilityAuthor)
 	ctx := withSessionClaims(context.Background(), claims)

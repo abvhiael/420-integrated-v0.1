@@ -42,6 +42,6 @@ export class AttentionProjection420{
     const a=lower(address),global=this.consentGlobal.get(a)??{enabled:false,revision:'0',policyHash:null,source:this.latest};const campaigns=[...this.consentCampaign.entries()].filter(([k])=>k.startsWith(a+':')).map(([,v])=>v);const proofs=[...this.proofs.values()].filter(v=>v.account===a);const rewards=[...this.rewards.values()].filter(v=>v.account===a);
     return {address:a,consent:{global,campaigns,summary:global.enabled?'Global consent enabled':'Global consent disabled'},proofs,rewards};
   }
-  listCampaigns(){return [...this.campaigns.values()].sort((a,b)=>BigInt(b.source.blockNumber)-BigInt(a.source.blockNumber));}
+  listCampaigns(){return [...this.campaigns.values()].sort((a,b)=>BigInt(a.source.blockNumber)<BigInt(b.source.blockNumber)?1:BigInt(a.source.blockNumber)>BigInt(b.source.blockNumber)?-1:0);}
 }
 export {STATES,REWARD};

@@ -64,6 +64,7 @@ The audit branch:
 - adds safe-integer/atomicity guards and boundary tests;
 - adds BUD-AUDIT-5 deterministic bounded offline progression with replay/rollback protections;
 - adds BUD-AUDIT-6 application service authority boundary over store/customer/progression/offline evaluation;
+- adds BUD-AUDIT-7 responsive user-facing browser client over the application service;
 - documents the actual current release boundary.
 
 ## File inventory
@@ -82,13 +83,15 @@ The audit branch:
 | Progression | `src/budtender/StoreProgression.ts` | COMPLETE | Canonical BUD-4 cash/upgrade/expansion state |
 | Offline progression | `src/budtender/OfflineProgression.ts` | COMPLETE | 24-hour bounded, replay-safe, chain-independent calculation; exact-head Level 1 qualified |
 | Application service | `src/budtender/BudtenderApplicationService.ts` | COMPLETE | Authoritative command + detached snapshot boundary; exact-head Level 1 qualified |
+| User-facing web client | `clients/budtender-web-v1` | IMPLEMENTED | Responsive presentation client over application service; exact-head Level 1 qualification pending |
+| BUD-AUDIT-7 spec | `docs/budtender/BUD-AUDIT-7-USER-FACING-CLIENT.md` | IMPLEMENTED | Client requirements/invariants frozen; qualification pending |
 | BUD-AUDIT-6 spec | `docs/budtender/BUD-AUDIT-6-APPLICATION-SERVICE.md` | COMPLETE | Application-service requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | COMPLETE | Audit-phase requirements frozen and Level 1 exact-head qualification recorded |
 | Core unit tests | `test/budtender/*.spec.ts` | COMPLETE | Includes negative/boundary and cross-phase integration tests |
 | Gaming access client | `clients/budtender-access-v1` | COMPLETE | Shared SDK consumer; no parallel wallet authority |
 | Dedicated CI | `.github/workflows/budtender-gaming.yml` | COMPLETE | Exact-head core/access/contract-security qualification |
 | Budtender smart contracts | none | NOT APPLICABLE | Architecture requires game mechanics off-chain; shared protocol owns optional canonical state |
-| Mobile/presentation client | none | MISSING | Named by BUD-0; no later canonical implementation phase exists |
+| Mobile/presentation client | `clients/budtender-web-v1` | PARTIAL | Responsive user-facing browser client implemented; packaged native iOS/Android and production hosting are not yet provided |
 | Guest save/persistence | none | MISSING | BUD-ARCH-010 requires versioned migration-aware saves before production |
 | Registered cloud save | none | MISSING | Architecture target; no implementation |
 | Budtender backend/API/indexer | none | NOT APPLICABLE | No BUD-0..4 requirement; no canonical service design |
@@ -131,7 +134,7 @@ Live deployment remains blocked because the testnet runtime has null chain ID, c
 The gameplay core is in-memory and single-process. It does not yet implement durable persistence, save migration, cloud synchronization, concurrency control or crash recovery. BUD-AUDIT-5 now provides a deterministic bounded offline-progression calculator, but no existing BUD-1..4 subsystem is canonically offline-capable and no durable save layer yet owns the trusted offline cursor/source state. This is acceptable for the current audit step, not for production exposure.
 
 ### Unresolved release risk
-Live Gaming Protocol operator/contract bindings are not deployed/qualified in the checked-in runtime. Production save/persistence and the user-facing client do not exist.
+Live Gaming Protocol operator/contract bindings are not deployed/qualified in the checked-in runtime. Production save/persistence, production hosting and packaged native mobile delivery remain unresolved.
 
 ## Integration classification
 
@@ -155,7 +158,7 @@ Live Gaming Protocol operator/contract bindings are not deployed/qualified in th
 | BUD-ARCH-006 registered cloud save without wallet | BUD-0 | Access policy permits registered/no-wallet | access tests | BUD-0/GP-12 | PARTIAL | Implement cloud-save persistence |
 | BUD-ARCH-007 wallet disconnect preserves progression | BUD-0 | Core independent of wallet | hostile access/shared tests | BUD-0/GP-16 | COMPLETE | Persistence-layer regression when added |
 | BUD-ARCH-008 bounded deterministic offline progression | BUD-0 / BUD-AUDIT-5 | `OfflineProgression` pure domain calculator; 24h bound; replay/rollback protections; current BUD-1..4 remain offline-inert | offline boundary/adversarial tests | BUD-0 / BUD-AUDIT-5 | COMPLETE | Qualified on implementation SHA `c619c3fecbbb17ae34303209b908e78844d48051`; persistence must later own trusted cursor/source state before production exposure |
-| BUD-ARCH-009 UI not authoritative | BUD-0 | Domain core separated; no UI exists | source inspection | BUD-0 | COMPLETE | Preserve when client is implemented |
+| BUD-ARCH-009 UI not authoritative | BUD-0 / BUD-AUDIT-7 | Browser client renders detached application snapshots and sends sanctioned commands only | web-client API/authority tests | BUD-0 / BUD-AUDIT-7 | IMPLEMENTED — QUALIFICATION PENDING | Exact-head Level 1 qualification |
 | BUD-ARCH-010 versioned/migration-aware saves | BUD-0 | No save format/migration | none | BUD-0 | MISSING | Implement before production |
 | BUD-INV-001 no negative inventory | BUD-1 | ProductInventory bounds | BUD-1/BUD-3 tests | BUD-1 | COMPLETE | None |
 | BUD-INV-002 order served once | BUD-1 | served flag | BUD-1/BUD-2 tests | BUD-1 | COMPLETE | None |
@@ -193,7 +196,7 @@ Live Gaming Protocol operator/contract bindings are not deployed/qualified in th
 | Privacy-scoped game reads/no wallet-wide enumeration | GP-12/GP-16 | shared SDK/query model | shared cross-game/hardening | GP-14/16 | COMPLETE | Live verification |
 | Shared protocol runtime resolved | GP-9/GP-15 | checked-in manifest unresolved | live harness exists | GP-15 | BLOCKED | Deploy testnet and populate verified runtime |
 | Budtender operator binding live | GP-15 | operator null | registry journey exists | GP-15 | BLOCKED | Supply/deploy operator and verify registry |
-| User-facing production client | BUD-0 presentation layer | absent | none | architecture only | MISSING | Specify and implement later phase |
+| User-facing production client | BUD-0 / BUD-AUDIT-7 | Responsive browser client implemented over application service | web-client host/API tests | BUD-AUDIT-7 | PARTIAL | Exact-head Level 1 qualification; packaged native delivery/production hosting remain later release work |
 | Durable versioned saves | BUD-0 persistence | absent | none | architecture only | MISSING | Specify/implement/migration-test |
 | Registered cloud save | BUD-0 persistence | absent | access gating only | architecture only | MISSING | Implement service and recovery tests |
 
@@ -205,9 +208,10 @@ The correct repository-grounded interpretation is:
 - BUD-1..BUD-4 deterministic simulation slice: implemented and remediated.
 - BUD-AUDIT-5 offline progression boundary: complete and exact-head Level 1 qualified on `c619c3fecbbb17ae34303209b908e78844d48051`.
 - BUD-AUDIT-6 application service boundary: complete and exact-head Level 1 qualified on `b80eb03b50526f470e3a8b778dc0329a27d95ef1`.
+- BUD-AUDIT-7 user-facing client: implemented; exact-head Level 1 qualification pending.
 - Shared Gaming Protocol source integration: implemented.
 - Live Gaming Protocol deployment: pending.
-- Full user-facing Budtender product: not implemented.
+- User-facing browser client: implemented; full production/mobile release remains incomplete.
 - Production release: not ready.
 
 A green repository test run does not change the missing persistence, mobile client or unresolved live deployment facts.

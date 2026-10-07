@@ -3,6 +3,7 @@ package reeferreview
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -40,6 +41,10 @@ func ValidateNewsSourceRegistry(registry NewsSourceRegistry) error {
 		ids[source.ID] = struct{}{}
 		feed, err := canonicalNewsURL(source.FeedURL)
 		if err != nil || !strings.HasPrefix(feed, "https://") {
+			return fmt.Errorf("%w: news source feed must use https", ErrInvalidInput)
+		}
+		parsedFeed, err := url.Parse(feed)
+		if err != nil || validateFeedEndpoint(parsedFeed) != nil {
 			return fmt.Errorf("%w: news source feed must use https", ErrInvalidInput)
 		}
 		home, err := canonicalNewsURL(source.HomeURL)

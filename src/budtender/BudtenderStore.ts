@@ -1,5 +1,6 @@
 import { ProductInventory, STARTER_CATALOG } from "./ProductInventory.ts";
 import { StoreProgression } from "./StoreProgression.ts";
+import type { ExpansionStage, ProgressionSnapshot, UpgradeTrack } from "./StoreProgression.ts";
 
 export type StarterProduct = "flower" | "preroll" | "edible";
 
@@ -108,13 +109,25 @@ export class BudtenderStore {
       kind === "shelfCapacity" ? "shelfCapacity" :
       "saleValue";
 
+    this.purchaseProgressionUpgrade(track);
+  }
+
+  purchaseProgressionUpgrade(track: UpgradeTrack): void {
     this.progression.purchaseUpgrade(track);
 
-    if (kind === "shelfCapacity") {
+    if (track === "shelfCapacity") {
       for (const productId of Object.values(PRODUCT_IDS)) {
         this.inventory.increaseCapacity(productId, 2);
       }
     }
+  }
+
+  unlockExpansion(stage: ExpansionStage): number {
+    return this.progression.unlockExpansion(stage);
+  }
+
+  progressionSnapshot(): ProgressionSnapshot {
+    return this.progression.snapshot();
   }
 
   snapshot(): StoreSnapshot {

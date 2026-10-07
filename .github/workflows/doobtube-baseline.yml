@@ -1,0 +1,33 @@
+name: DoobTube baseline audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/DOOBTUBE-*"
+      - "docs/audit/DOOBTUBE-*"
+      - "scripts/verify-doobtube-baseline.py"
+      - ".github/workflows/doobtube-baseline.yml"
+      - "config/genesis-consumer-services.json"
+      - "config/genesis-applications.json"
+  workflow_dispatch:
+
+concurrency:
+  group: doobtube-baseline-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify DoobTube audit baseline
+        run: python3 scripts/verify-doobtube-baseline.py

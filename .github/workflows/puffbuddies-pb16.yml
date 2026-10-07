@@ -61,6 +61,6 @@ jobs:
           set -euo pipefail
           test ! -e contracts/src/puffbuddies
           ! grep -RIE '(FORCE_MATCH|FORCE_UNBLOCK|ADMIN_MATCH|BLOCK_OVERRIDE|UNSUSPEND|UNBAN)' puffbuddies/api puffbuddies/integrations
-          ! grep -RIE '(private_key|mnemonic|seed_phrase|government_id|date_of_birth|production_secret|provider_secret)[[:space:]]*[:=][[:space:]]*["'"']' puffbuddies
+          ! grep -RIE "(private_key|mnemonic|seed_phrase|government_id|date_of_birth|production_secret|provider_secret)[[:space:]]*[:=][[:space:]]*[\"']" puffbuddies
           ! grep -RIE '(public_member_search|public_match_graph|public_block_graph|public_safety_graph|public_moderation_graph)[[:space:]]*[:=]' puffbuddies
           ! grep -RIE '"(deploymentStatus|distributionStatus)"[[:space:]]*:[[:space:]]*"(live|production|mainnet)"' puffbuddies

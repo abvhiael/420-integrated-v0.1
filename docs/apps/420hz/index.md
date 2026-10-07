@@ -2,7 +2,7 @@
 title: 420Hz architecture and release status
 audience: [user, developer, architect, operator]
 category: application
-status: active-development
+status: development
 version: current
 ---
 

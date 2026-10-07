@@ -8,6 +8,9 @@ import (
 	"html"
 	"io"
 	"net/http"
+	"net"
+	"net/netip"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -78,6 +81,61 @@ type atomCategory struct {
 	Term string `xml:"term,attr"`
 }
 
+
+func validateFeedEndpoint(u *url.URL) error {
+	if u == nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Fragment != "" {
+		return ErrInvalidInput
+	}
+	host := strings.TrimSuffix(strings.ToLower(u.Hostname()), ".")
+	if host == "" || strings.Contains(host, "%") || strings.HasSuffix(host, ".localhost") || host == "localhost" || strings.HasSuffix(host, ".local") {
+		return ErrInvalidInput
+	}
+	if ip, err := netip.ParseAddr(host); err == nil && !publicFeedIP(ip) {
+		return ErrInvalidInput
+	}
+	return nil
+}
+
+func publicFeedIP(ip netip.Addr) bool {
+	ip = ip.Unmap()
+	return ip.IsValid() && ip.IsGlobalUnicast() && !ip.IsPrivate() && !ip.IsLoopback() &&
+		!ip.IsLinkLocalUnicast() && !ip.IsLinkLocalMulticast() &&
+		!(ip.Is4() && (netip.MustParsePrefix("100.64.0.0/10").Contains(ip) ||
+			netip.MustParsePrefix("192.0.0.0/24").Contains(ip) ||
+			netip.MustParsePrefix("198.18.0.0/15").Contains(ip) ||
+			netip.MustParsePrefix("192.0.2.0/24").Contains(ip) ||
+			netip.MustParsePrefix("198.51.100.0/24").Contains(ip) ||
+			netip.MustParsePrefix("203.0.113.0/24").Contains(ip) ||
+			netip.MustParsePrefix("224.0.0.0/4").Contains(ip) ||
+			netip.MustParsePrefix("240.0.0.0/4").Contains(ip))) &&
+		!(ip.Is6() && (netip.MustParsePrefix("2001:db8::/32").Contains(ip) ||
+			netip.MustParsePrefix("2001::/23").Contains(ip)))
+}
+
+// The resolver result is checked at connection time, not merely before the request,
+// so a hostname rebinding to a loopback or private address is rejected.
+func secureNewsHTTPClient() *http.Client {
+	dialer := &net.Dialer{Timeout: 5 * time.Second}
+	transport := &http.Transport{
+		Proxy: nil,
+		DisableKeepAlives: true,
+		TLSHandshakeTimeout: 5 * time.Second,
+		ResponseHeaderTimeout: 10 * time.Second,
+	}
+	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+		host, port, err := net.SplitHostPort(address)
+		if err != nil { return nil, ErrInvalidInput }
+		ips, err := net.DefaultResolver.LookupNetIP(ctx, "ip", host)
+		if err != nil { return nil, err }
+		for _, ip := range ips {
+			if !publicFeedIP(ip) { continue }
+			return dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), port))
+		}
+		return nil, fmt.Errorf("%w: no permitted public feed address", ErrInvalidInput)
+	}
+	return &http.Client{Timeout: 15 * time.Second, Transport: transport}
+}
+
 func (f FeedFetcher) Fetch(ctx context.Context, source NewsSource) ([]RawNewsEntry, error) {
 	feedURL, err := canonicalNewsURL(source.FeedURL)
 	if err != nil || !strings.HasPrefix(feedURL, "https://") {
@@ -85,7 +143,7 @@ func (f FeedFetcher) Fetch(ctx context.Context, source NewsSource) ([]RawNewsEnt
 	}
 	hc := f.HTTP
 	if hc == nil {
-		hc = &http.Client{Timeout: 15 * time.Second}
+		hc = secureNewsHTTPClient()
 	}
 	max := f.MaxBytes
 	if max <= 0 {
@@ -97,7 +155,11 @@ func (f FeedFetcher) Fetch(ctx context.Context, source NewsSource) ([]RawNewsEnt
 	}
 	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9")
 	req.Header.Set("User-Agent", "420Integrated-ReeferReview/1.0")
-	resp, err := hc.Do(req)
+	if err := validateFeedEndpoint(req.URL); err != nil { return nil, err }
+	// Never accept a feed redirect: even HTTPS redirects may cross the allowlist or DNS boundary.
+	client := *hc
+	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

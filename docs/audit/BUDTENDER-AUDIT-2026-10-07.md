@@ -70,10 +70,10 @@ The audit branch:
 |---|---|---|---|
 | Architecture freeze | `docs/budtender/BUD-0-ARCHITECTURE.md` | COMPLETE | Canonical architecture and invariants |
 | BUD-0 checklist | `docs/budtender/BUD-0-CHECKLIST.md` | COMPLETE | Frozen architecture checklist |
-| BUD-1 spec/checklist | `docs/budtender/BUD-1*` | STALE | Implementation exists; status/closeout wording predates integrated audit |
-| BUD-2 spec | `docs/budtender/BUD-2-SPEC.md` | STALE | Implementation exists; status still says in progress |
-| BUD-3 spec | `docs/budtender/BUD-3-SPEC.md` | STALE | Implementation exists; status still says in progress |
-| BUD-4 spec | `docs/budtender/BUD-4-SPEC.md` | PARTIAL | Complete specification but no explicit status/closeout record |
+| BUD-1 spec/checklist | `docs/budtender/BUD-1*` | COMPLETE | Implementation status and exact-head merge-gate wording reconciled |
+| BUD-2 spec | `docs/budtender/BUD-2-SPEC.md` | COMPLETE | Implementation status reconciled; exact-head qualification remains merge gate |
+| BUD-3 spec | `docs/budtender/BUD-3-SPEC.md` | COMPLETE | Implementation status reconciled; exact-head qualification remains merge gate |
+| BUD-4 spec | `docs/budtender/BUD-4-SPEC.md` | COMPLETE | Implementation status added; exact-head qualification remains merge gate |
 | Store façade | `src/budtender/BudtenderStore.ts` | COMPLETE | Integrated BUD-1 façade after remediation |
 | Customer system | `src/budtender/BudtenderCustomers.ts` | COMPLETE | Deterministic tick lifecycle |
 | Product/inventory | `src/budtender/ProductInventory.ts` | COMPLETE | Canonical BUD-3 inventory/economics |

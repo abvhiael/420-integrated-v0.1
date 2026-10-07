@@ -1,0 +1,59 @@
+name: 420Attention AUDIT-6 Level 1
+
+on:
+  push:
+    branches:
+      - 'audit/420attention-*'
+    paths:
+      - 'attention/web/**'
+      - 'docs/apps/attention/**'
+      - 'docs/audit/420ATTENTION-AUDIT-6-QUALIFICATION.md'
+      - 'docs/audit/420ATTENTION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'scripts/verify-420attention-audit-6.py'
+      - '.github/workflows/420attention-audit-6.yml'
+  pull_request:
+    paths:
+      - 'attention/web/**'
+      - 'docs/apps/attention/**'
+      - 'docs/audit/420ATTENTION-AUDIT-6-QUALIFICATION.md'
+      - 'docs/audit/420ATTENTION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'scripts/verify-420attention-audit-6.py'
+      - '.github/workflows/420attention-audit-6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: attention/web/package.json
+      - name: Static and policy checks
+        working-directory: attention/web
+        run: npm run check
+      - name: Attention web unit and negative tests
+        working-directory: attention/web
+        run: npm test
+      - name: Production-candidate static build
+        working-directory: attention/web
+        run: npm run build
+      - name: AUDIT-6 repository verifier
+        run: python3 scripts/verify-420attention-audit-6.py

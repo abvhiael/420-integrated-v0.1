@@ -45,14 +45,11 @@
 
     <aside class="session-bar" aria-labelledby="session-title">
       <div>
-        <strong id="session-title">Repository-stage editorial session</strong>
-        <p>Uses the current development actor boundary. Production Wallet/420Identity sessions are RR-4 work.</p>
+        <strong id="session-title">420 Wallet / 420Identity session</strong>
+        <p id="session-state">Not connected. Session credentials stay in memory and are never written to localStorage or sessionStorage.</p>
       </div>
-      <label for="session-actor">
-        <span>Actor</span>
-        <input id="session-actor" autocomplete="off" placeholder="writer.420">
-      </label>
-      <button id="session-save" type="button" class="secondary">Use actor</button>
+      <button id="session-connect" type="button">Connect Wallet</button>
+      <button id="session-disconnect" type="button" class="secondary" disabled>Sign out</button>
     </aside>
 
     <aside class="filter-bar" aria-label="News filters">
@@ -130,7 +127,7 @@
         <div><p class="eyebrow">Editorial workspace</p><h2 id="editorial-title">Write &amp; publish</h2></div>
         <button id="editorial-refresh" class="secondary" type="button">Refresh workspace</button>
       </div>
-      <p class="section-note">The current repository-stage actor is checked by the backend Identity/Authorizer interfaces. Production Wallet/420Identity authentication remains RR-4.</p>
+      <p class="section-note">Protected editorial actions require a verified, unexpired 420 Wallet/420Identity session carrying a scoped ReeferReview author or publisher capability.</p>
 
       <div class="editorial-layout">
         <section class="workspace-panel" aria-labelledby="draft-heading">
@@ -187,7 +184,7 @@
         <div><p class="eyebrow">Moderation</p><h2 id="moderation-title">Moderation dashboard</h2></div>
         <button id="moderation-refresh" class="secondary" type="button">Refresh dashboard</button>
       </div>
-      <p class="section-note">Current development policy recognizes <code>moderator.420</code> and <code>publisher.420</code>. RR-4 replaces this with production capabilities.</p>
+      <p class="section-note">Moderation requires a verified session carrying the scoped <code>reefer.moderator</code> or <code>reefer.publisher</code> capability.</p>
       <div id="moderation-list" class="card-grid" aria-live="polite"></div>
       <section class="workspace-panel moderation-history" aria-labelledby="history-title">
         <h3 id="history-title">Moderation history</h3>

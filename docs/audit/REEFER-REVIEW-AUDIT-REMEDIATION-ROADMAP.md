@@ -42,11 +42,11 @@ No dedicated smart contract is required by the canonical architecture: the appli
 ## Ordered remediation roadmap
 
 1. **REEFER-AUDIT-1 — canonical definition and baseline inventory:** COMPLETE by this audit.
-2. **REEFER-AUDIT-2 — repository publishing service baseline:** COMPLETE when exact-head CI passes.
-3. **REEFER-AUDIT-3 — authorization, rights and moderation security baseline:** COMPLETE when exact-head CI passes.
-4. **REEFER-AUDIT-4 — API and typed client contract:** COMPLETE when exact-head CI passes.
-5. **REEFER-AUDIT-5 — thin UI and repository deployment baseline:** COMPLETE at repository level when exact-head CI passes; live browser qualification remains.
-6. **REEFER-AUDIT-6 — documentation/static qualification and durable evidence:** COMPLETE only after exact-head checks pass and evidence is committed.
+2. **REEFER-AUDIT-2 — repository publishing service baseline:** COMPLETE at repository level.
+3. **REEFER-AUDIT-3 — authorization, rights and moderation security baseline:** COMPLETE at repository level, including fail-closed public item reads.
+4. **REEFER-AUDIT-4 — API and typed client contract:** COMPLETE at repository level.
+5. **REEFER-AUDIT-5 — thin UI and repository deployment baseline:** COMPLETE at repository level; live browser qualification remains BLOCKED on deployment.
+6. **REEFER-AUDIT-6 — documentation/static qualification and durable evidence:** COMPLETE at repository level; see `REEFER-REVIEW-QUALIFICATION.md`.
 7. **REEFER-AUDIT-7 — live dependency integration:** BLOCKED on deployed Identity, Rights, Storage, Search, Notifications and 420Mail plus production-equivalent public testnet.
 8. **REEFER-AUDIT-8 — deployed security/operations qualification:** BLOCKED on TLS ingress, rate limits, anti-spam/abuse operations, encrypted storage, retention, backups/recovery, monitoring, load/soak and accessibility evidence.
 9. **REEFER-AUDIT-9 — Genesis decision/release closeout:** BLOCKED on explicit catalog promotion if Genesis release remains intended, followed by exact deployed evidence.

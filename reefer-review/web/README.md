@@ -30,3 +30,15 @@ RR-2 includes:
 - non-color-only external/original labels.
 
 Browser E2E and formal accessibility qualification remain RR-9 work.
+
+
+## RR-3 / RR-4 editorial and identity routes
+
+Additional hash routes:
+- `#article/{publicationID}` — article reader.
+- `#editorial` — authenticated write/edit/publish workspace.
+- `#moderation` — authenticated moderation workspace.
+
+RR-4 replaces the earlier development actor-entry control. Protected browser requests now use a deployment-provided `window.ReeferReviewWalletSession` gateway and `Authorization: Bearer` credentials. The token remains memory-only and is not written to localStorage or sessionStorage. If a qualified Wallet gateway is unavailable, protected actions fail closed.
+
+The browser does not mint sessions or infer author/moderator authority. The backend validates audience, network/chain, expiry, revocation, active Identity state and scoped capability.

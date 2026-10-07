@@ -99,7 +99,7 @@ allowed_doobtube_files = {
     "doobtube/web/runtime-config.json",
     "doobtube/web/runtime-config.example.json",
     "doobtube/web/security-headers.json",
-    "doobtube/web/brand.svg",
+    "doobtube/web/doobtube-logo.webp",
     "doobtube/web/styles.css",
     "doobtube/web/index.html",
     "doobtube/web/app.js",

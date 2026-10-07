@@ -1,7 +1,7 @@
 import fs from 'node:fs';import path from 'node:path';
 const root=path.resolve(import.meta.dirname,'..'),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
-for(const f of ['index.html','app.js','styles.css','runtime-config.json','brand.svg'])fs.copyFileSync(path.join(root,f),path.join(dist,f));
+for(const f of ['index.html','app.js','styles.css','runtime-config.json','doobtube-logo.webp'])fs.copyFileSync(path.join(root,f),path.join(dist,f));
 fs.cpSync(path.join(root,'core'),path.join(dist,'core'),{recursive:true});
 fs.copyFileSync(path.join(dist,'index.html'),path.join(dist,'404.html'));
 const headers=JSON.parse(fs.readFileSync(path.join(root,'security-headers.json'),'utf8')).headers;

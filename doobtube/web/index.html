@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>DoobTube</title>
-  <link rel="icon" href="./brand.svg" type="image/svg+xml">
+  <link rel="icon" href="./doobtube-logo.webp" type="image/webp">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="shell topbar">
-  <a class="brand" href="#/home" aria-label="DoobTube home"><img src="./brand.svg" alt="" width="54" height="54"><div><h1>DoobTube</h1><div class="muted">420Integrated video</div></div></a>
+  <a class="brand" href="#/home" aria-label="DoobTube home"><img class="brand-logo" src="./doobtube-logo.webp" alt="DoobTube"><div><h1 class="sr-only">DoobTube</h1><div class="muted">420Integrated video</div></div></a>
   <div class="actions"><span id="runtime-state" class="pill">Runtime unresolved</span><span id="wallet-state" class="pill">Wallet disconnected</span><button id="connect-wallet" type="button">Connect wallet</button></div>
 </header>
 <nav class="shell nav" aria-label="Primary">
@@ -22,7 +22,7 @@
 <main id="main" class="shell">
   <div id="global-status" class="status panel" role="status" aria-live="polite">Loading fail-closed runtime configuration…</div>
 
-  <section class="view panel" data-view="home" aria-labelledby="home-title"><h2 id="home-title">Public discovery</h2><p class="muted">Public viewing never requires a Wallet. Feed order is non-authoritative.</p><div id="feed-loading" class="status">Loading public feed…</div><div id="feed-error" class="status" role="alert" hidden></div><div id="feed-empty" class="empty" hidden>No eligible public video is available.</div><div id="feed-grid" class="grid"></div><button id="feed-more" type="button" hidden>Load more</button></section>
+  <section class="view panel home-view" data-view="home" aria-labelledby="home-title"><div class="hero-brand"><img class="hero-logo" src="./doobtube-logo.webp" alt="DoobTube"><div><h2 id="home-title">Public discovery</h2><p class="muted">Public viewing never requires a Wallet. Feed order is non-authoritative.</p></div></div><div id="feed-loading" class="status">Loading public feed…</div><div id="feed-error" class="status" role="alert" hidden></div><div id="feed-empty" class="empty" hidden>No eligible public video is available.</div><div id="feed-grid" class="grid"></div><button id="feed-more" type="button" hidden>Load more</button></section>
 
   <section class="view panel" data-view="search" aria-labelledby="search-title"><h2 id="search-title">Search public video</h2><form id="search-form" class="form"><label class="wide">Search query<input id="search-query" name="q" maxlength="160" required></label><button class="primary" type="submit">Search</button></form><div id="search-state" class="status" role="status" aria-live="polite">Enter a search query.</div><div id="search-results" class="grid"></div></section>
 
@@ -44,6 +44,6 @@
 
   <section class="view panel" data-view="status" aria-labelledby="status-title"><h2 id="status-title">Wallet / network / service status</h2><div id="status-grid" class="grid"></div><p class="muted">DoobTube never accepts private keys, seed phrases or mnemonics.</p></section>
 </main>
-<footer class="shell muted">DoobTube is a replaceable client over canonical 420Integrated services.</footer>
+<footer class="shell site-footer"><img class="footer-logo" src="./doobtube-logo.webp" alt="DoobTube"><p class="muted">DoobTube is a replaceable client over canonical 420Integrated services.</p></footer>
 <script type="module" src="./app.js"></script>
 </body></html>

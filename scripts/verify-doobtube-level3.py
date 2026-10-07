@@ -36,8 +36,7 @@ sol=need(".github/workflows/contracts-foundry.yml",[
     "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md",
     "audit/doobtube-baseline-20261006",
 ])
-assert "matrix:
-        shard: [0, 1, 2, 3]" in sol
+assert "matrix:\n        shard: [0, 1, 2, 3]" in sol
 assert "--force" not in sol.split("pr-shards:",1)[1].split("foundry:",1)[0]
 
 gen=need(".github/workflows/genesis-address-authority.yml",[

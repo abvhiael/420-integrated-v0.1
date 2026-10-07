@@ -1,4 +1,4 @@
-import { BudtenderStore, StarterProduct } from "./BudtenderStore";
+import { BudtenderStore, StarterProduct } from "./BudtenderStore.ts";
 
 export type CustomerArchetype = "regular" | "impatient" | "enthusiast" | "bargainHunter";
 export type CustomerStatus = "queued" | "served" | "abandoned";

@@ -4,19 +4,30 @@ pragma solidity ^0.8.24;
 import "../src/creative/deployment/HzDeploymentGraph420.sol";
 
 interface VmHzConsolidatedDeploy420 {
-    function envAddress(string calldata name) external returns (address);
+    function envAddress(
+        string calldata name
+    ) external returns (address);
     function startBroadcast() external;
     function stopBroadcast() external;
-    function serializeAddress(string calldata objectKey, string calldata valueKey, address value)
-        external
-        returns (string memory json);
-    function serializeString(string calldata objectKey, string calldata valueKey, string calldata value)
-        external
-        returns (string memory json);
-    function serializeUint(string calldata objectKey, string calldata valueKey, uint256 value)
-        external
-        returns (string memory json);
-    function writeJson(string calldata json, string calldata path) external;
+    function serializeAddress(
+        string calldata objectKey,
+        string calldata valueKey,
+        address value
+    ) external returns (string memory json);
+    function serializeString(
+        string calldata objectKey,
+        string calldata valueKey,
+        string calldata value
+    ) external returns (string memory json);
+    function serializeUint(
+        string calldata objectKey,
+        string calldata valueKey,
+        uint256 value
+    ) external returns (string memory json);
+    function writeJson(
+        string calldata json,
+        string calldata path
+    ) external;
 }
 
 /// @notice HZ-AUDIT-2 deploy phase for the complete HZ-1..HZ-4 constructor graph.
@@ -71,11 +82,8 @@ contract HzConsolidatedDeploy420 {
         vm.serializeAddress(key, "playbackAccounting", address(d.playbackAccounting));
         vm.serializeAddress(key, "streamingSettlementEpoch", address(d.streamingSettlementEpoch));
         vm.serializeAddress(key, "streamingRevenueAllocator", address(d.streamingRevenueAllocator));
-        string memory json = vm.serializeAddress(
-            key,
-            "streamingRoyaltySettlement",
-            address(d.streamingRoyaltySettlement)
-        );
+        string memory json =
+            vm.serializeAddress(key, "streamingRoyaltySettlement", address(d.streamingRoyaltySettlement));
         vm.writeJson(json, MANIFEST_PATH);
     }
 }

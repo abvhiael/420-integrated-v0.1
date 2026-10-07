@@ -74,6 +74,8 @@ Current repository layers above Decision #10 are:
 
 HZ-4 deliberately does not create a second royalty system. StreamingRoyaltySettlement420 must be explicitly allowlisted by RoyaltyRouter420 governance.
 
+HZ-AUDIT-4 STREAM economics retain version-1 `RevenueType.STREAM` schedules only for the RecordingClass values with canonical kernel split terms: ORIGINAL (12.5% Work / 0% Source / 85% Current Recording / 2.5% Protocol) and REMIX (10% Work / 15% immediate Source / 72.5% Current Recording / 2.5% Protocol). Both schedules use deterministic `effectiveAt = 0` and full-field terms-hash commitments. Other RecordingClass values intentionally have no STREAM schedule until explicit canonical economics are adopted.
+
 The Decision #10 deploy/seed script remains an HZ-1 development/reference harness; it is not a production deployment manifest for HZ-2/HZ-3/HZ-4. The consolidated HZ-AUDIT-2 deployment graph/package and HZ-AUDIT-3 authority/Registry bundle are the retained repository-side production architecture records.
 
 ## Deliberately deferred

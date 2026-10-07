@@ -273,6 +273,9 @@ jobs:
       - name: Verify CMP-6.7 transparent reward accounting
         run: python scripts/verify-cmp-6-7-transparent-reward-accounting.py
 
+      - name: Verify CMP-6.8 Phase closeout
+        run: python scripts/verify-cmp-6-8-closeout.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

@@ -29,7 +29,7 @@ The frozen public application inventory remains `config/genesis-applications.jso
 - [420 Names](names/index.md) — `.420` lease, forward/reverse resolution, transfer and expiry workflows.
 - [420 Identity](identity/index.md) — optional pseudonymous profiles, governed issuers and lifecycle-bound credentials.
 - [420 Swap](swap/index.md) — bounded canonical swap execution with explicit route, authorization, fee, minimum-output and safety semantics.
-- [420 Bridge](bridge/index.md) — verified, replay-protected cross-chain movement with explicit chain/asset/route/proof/risk boundaries.
+- [420 Bridge](bridge/index.md) — verified, replay-protected cross-chain movement surfaced through the canonical 420Exchange `/bridge` user route for the current release stage, with explicit chain/asset/route/proof/risk boundaries.
 - [420 Token](token/index.md) — governed-template ERC asset deployment with deterministic provenance and the exact 42 native `$420` creation fee.
 - [420 Stake](stake/index.md) — validator bond/lifecycle/reward visibility without public delegation or stake-weighted governance.
 - [420 Governance](governance/index.md) — frozen proposal rules/electorates, voting, timelock and exact committed execution.
@@ -63,7 +63,7 @@ Generated ABI/API/event/error reference belongs in DOC-10; application manuals e
 | 420 Identity | Genesis protocol + user app | [available](identity/index.md) | optional pseudonymous profiles, credentials and reputation |
 | 420 Arbitration | Genesis protocol + user app | [available](arbitration/index.md) | dispute cases, evidence commitments, rulings and bounded appeals |
 | 420 Swap | Genesis protocol + user app | [available](swap/index.md) | canonical exchange/swap user surface |
-| 420 Bridge | Genesis protocol + user app | [available](bridge/index.md) | verified, replay-protected cross-chain value movement |
+| 420 Bridge | Genesis protocol + user app | [available](bridge/index.md) | verified cross-chain movement; current canonical user surface is 420Exchange `/bridge` |
 | 420 Stake | Genesis protocol + user app | [available](stake/index.md) | validator bond, registration, lifecycle, rewards and withdrawals |
 | 420 Governance | Genesis protocol + user app | [available](governance/index.md) | proposals, houses, voting, treasury and timelock workflows |
 | 420 AI | Genesis protocol + user app | [available](ai/index.md) | provider/model/job/escrow/reputation AI-compute workflows |

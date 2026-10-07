@@ -42,7 +42,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
     constructor(address timelock_, address registry_, bytes32 genesisConfigHash_, address verifier_)
         GenesisResidentAccess420(timelock_, registry_, genesisConfigHash_)
     {
-        require(verifier_ != address(0) && verifier_.code.length != 0, "verifier");
+        if (verifier_ != address(0)) require(verifier_.code.length != 0, "verifier");
         verifier = verifier_;
     }
 
@@ -77,6 +77,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
+        require(verifier != address(0) && verifier.code.length != 0, "verifier");
         (depositId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyDeposit(proof);
         _checkReplay(depositId);
         require(!consumedDeposits[depositId], "replay");
@@ -95,6 +96,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.OUTBOUND
         );
+        require(verifier != address(0) && verifier.code.length != 0, "verifier");
         (withdrawalId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyWithdrawal(proof);
         _checkReplay(withdrawalId);
         require(!consumedWithdrawals[withdrawalId], "replay");

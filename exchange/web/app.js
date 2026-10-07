@@ -21,7 +21,7 @@ const state={
   detailSubjectId:sanitizeSubjectId(new URLSearchParams(window.location.search).get('subject')),
   detailWindow:'1h',detailHistory:null,swapQuote:null,swapIntent:null,
   swapLifecycle:new SwapLifecycle(),swapSlippageBps:100,orders:[],orderDraft:null,
-  bridgeRoutes:[],bridgeSettlements:[],bridgeIntent:null,bridgeRouteId:null,
+  bridgeRoutes:[],bridgeSettlements:[],bridgeIntent:null,bridgeRouteId:null,bridgeSource:'unavailable',bridgeProvenance:null,
   portfolioBalances:[],portfolioActivity:[],
   online:globalThis.navigator?.onLine!==false,reliabilityMessage:'',
 };
@@ -154,24 +154,40 @@ function captureOrderDraft(){
   state.orderDraft=buildLimitOrderDraft({maker:get('#order-maker').trim(),sellToken:get('#order-sell-token').trim(),buyToken:get('#order-buy-token').trim(),sellAmount:get('#order-sell-amount'),minTotalBuyAmount:get('#order-min-buy'),recipient:get('#order-recipient').trim(),primaryMarket:get('#order-primary-market').trim(),nonce:get('#order-nonce'),expiry:get('#order-expiry'),allowPartial:Boolean(document.querySelector('#order-partial')?.checked)});
 }
 async function loadBridgeData(){
+  if(state.config?.api?.baseUrl&&state.dataLayer){
+    const surface=await state.dataLayer.loadBridge();
+    state.bridgeRoutes=surface.routes.map(normalizeBridgeRoute);
+    state.bridgeSettlements=surface.settlements.map(normalizeSettlement);
+    state.bridgeProvenance=surface.provenance;
+    state.bridgeSource='api';
+    state.bridgeRouteId=state.bridgeRouteId??state.bridgeRoutes[0]?.routeId??null;
+    return;
+  }
   const [routesResponse,settlementsResponse]=await Promise.all([fetch('./fixtures/bridge-routes.json',{cache:'no-store'}),fetch('./fixtures/bridge-settlements.json',{cache:'no-store'})]);
   if(!routesResponse.ok||!settlementsResponse.ok)throw new Error('bridge fixtures unavailable');
-  state.bridgeRoutes=(await routesResponse.json()).map(normalizeBridgeRoute);state.bridgeSettlements=(await settlementsResponse.json()).map(normalizeSettlement);state.bridgeRouteId=state.bridgeRouteId??state.bridgeRoutes[0]?.routeId??null;
+  state.bridgeRoutes=(await routesResponse.json()).map(route=>normalizeBridgeRoute({...route,canonicality:'demo',freshness:'degraded',finality:'demo'}));
+  state.bridgeSettlements=(await settlementsResponse.json()).map(record=>normalizeSettlement({...record,canonicality:'demo',freshness:'degraded',finality:'demo'}));
+  state.bridgeProvenance={source:'repository-demo-fixtures',authoritative:false,rpcFallbackReady:false};
+  state.bridgeSource='demo';
+  state.bridgeRouteId=state.bridgeRouteId??state.bridgeRoutes[0]?.routeId??null;
 }
 function selectedBridgeRoute(){return state.bridgeRoutes.find(route=>route.routeId===state.bridgeRouteId)??state.bridgeRoutes[0]??null;}
 function renderBridge(fragment){
-  const route=selectedBridgeRoute();fragment.querySelector('#bridge-source').textContent='DEMO BRIDGE STATE · review only';
+  const route=selectedBridgeRoute();
+  fragment.querySelector('#bridge-source').textContent=state.bridgeSource==='api'
+    ?`420Indexer projection · ${state.bridgeProvenance?.freshness??'unknown'} · RPC fallback ${state.bridgeProvenance?.rpcFallbackReady?'ready':'unavailable'}`
+    :'DEMO BRIDGE STATE · review only';
   const select=fragment.querySelector('#bridge-route-select');select.replaceChildren(...state.bridgeRoutes.map(item=>{const option=document.createElement('option');option.value=item.routeId;option.textContent=`${item.sourceChain} → ${item.destinationChain} · ${item.routeId}`;return option;}));if(route)select.value=route.routeId;
   const gate=route?bridgeQualification(route):{ok:false,reason:'missing-route'};
-  const fields={'#bridge-route-id':route?.routeId??'—','#bridge-asset':route?.canonicalAsset??'—','#bridge-adapter':route?.adapterId??'—','#bridge-verifier':route?.verifierId??'—','#bridge-fee':formatNumber(route?.bridgeFee??null),'#bridge-availability':gate.ok?'Qualified route · execution locked':'Unavailable: '+gate.reason};
+  const fields={'#bridge-route-id':route?.routeId??'—','#bridge-asset':route?.canonicalAsset??'—','#bridge-adapter':route?.adapterId??'—','#bridge-verifier':route?.verifierId??'—','#bridge-fee':formatNumber(route?.bridgeFee??null),'#bridge-source-chain':route?.sourceChain??'—','#bridge-destination-chain':route?.destinationChain??'—','#bridge-route-limit':route?.routeLimit??'—','#bridge-asset-limit':route?.assetLimit??'—','#bridge-finality':route?.finality??'—','#bridge-freshness':route?.freshness??'—','#bridge-availability':gate.ok?(state.bridgeSource==='api'?'Qualified live projection · submission deployment-gated':'Qualified demo route · execution locked'):'Unavailable: '+gate.reason};
   for(const [selector,value]of Object.entries(fields))fragment.querySelector(selector).textContent=value;
   fragment.querySelector('#bridge-route-status').append(createStatusBadge(document,gate.ok?'routeHealthy':'routeUnhealthy'));
   fragment.querySelector('#bridge-settlement-status').append(createStatusBadge(document,route?.settlementHealthy?'settlementHealthy':'settlementUnhealthy'));
   fragment.querySelector('#bridge-review').addEventListener('click',()=>{try{state.bridgeIntent=buildBridgeIntent(route,{amount:fragment.querySelector('#bridge-amount').value,recipient:fragment.querySelector('#bridge-recipient').value.trim()});render();}catch(error){state.bootError=error;render();}});
   fragment.querySelector('#bridge-review-panel').hidden=!state.bridgeIntent;
-  if(state.bridgeIntent){const reviewFields={'#bridge-review-kind':state.bridgeIntent.kind,'#bridge-review-route':state.bridgeIntent.routeId,'#bridge-review-asset':state.bridgeIntent.canonicalAsset,'#bridge-review-recipient':state.bridgeIntent.recipient,'#bridge-review-amount':String(state.bridgeIntent.amount),'#bridge-review-fee':String(state.bridgeIntent.quotedBridgeFee)};for(const [selector,value]of Object.entries(reviewFields))fragment.querySelector(selector).textContent=value;}
-  const submit=fragment.querySelector('#bridge-submit');submit.disabled=true;submit.textContent='Review only · bridging unavailable';
-  fragment.querySelector('#bridge-settlements').replaceChildren(...state.bridgeSettlements.map(record=>{const tr=document.createElement('tr'),progress=settlementProgress(record);appendLabeledCells(tr,['Settlement','State','Progress','Attestation','Proof','Transaction','Guidance'],[record.settlementId,record.state,`${progress.percent}%`,record.attestationId??'—',record.proofId??'—',record.txHash??'—',record.state==='FAILED'?(record.retryable?'Retry after route revalidation':'Terminal'):'—']);return tr;}));
+  if(state.bridgeIntent){const reviewFields={'#bridge-review-kind':state.bridgeIntent.kind,'#bridge-review-route':state.bridgeIntent.routeId,'#bridge-review-asset':state.bridgeIntent.canonicalAsset,'#bridge-review-source':state.bridgeIntent.sourceChain,'#bridge-review-destination':state.bridgeIntent.destinationChain,'#bridge-review-adapter':state.bridgeIntent.adapterId,'#bridge-review-verifier':state.bridgeIntent.verifierId,'#bridge-review-recipient':state.bridgeIntent.recipient,'#bridge-review-amount':String(state.bridgeIntent.amount),'#bridge-review-fee':String(state.bridgeIntent.quotedBridgeFee),'#bridge-review-limits':`route ${state.bridgeIntent.routeLimit??'—'} · asset ${state.bridgeIntent.assetLimit??'—'}`,'#bridge-review-finality':state.bridgeIntent.finality,'#bridge-review-freshness':state.bridgeIntent.freshness};for(const [selector,value]of Object.entries(reviewFields))fragment.querySelector(selector).textContent=value;}
+  const submit=fragment.querySelector('#bridge-submit');submit.disabled=true;submit.textContent=state.bridgeSource==='api'?'Deployment gate blocks submission':'Review only · bridging unavailable';
+  fragment.querySelector('#bridge-settlements').replaceChildren(...state.bridgeSettlements.map(record=>{const tr=document.createElement('tr'),progress=settlementProgress(record);const guidance=record.canonicality==='reorged'||record.active===false?'Do not retry blindly · reconcile replacement/canonical RPC state':record.state==='FAILED'?(record.retryable?'Revalidate route, proof, replay identity and canonical state before retry':'Terminal · do not resubmit'):'—';appendLabeledCells(tr,['Settlement','State','Progress','Finality','Freshness','Transaction','Guidance'],[record.settlementId,record.state,`${progress.percent}%`,record.finality,record.freshness,record.txHash??'—',guidance]);return tr;}));
 }
 async function loadPortfolioData(){
   const [balancesResponse,activityResponse]=await Promise.all([fetch('./fixtures/portfolio-balances.json',{cache:'no-store'}),fetch('./fixtures/portfolio-activity.json',{cache:'no-store'})]);if(!balancesResponse.ok||!activityResponse.ok)throw new Error('portfolio fixtures unavailable');

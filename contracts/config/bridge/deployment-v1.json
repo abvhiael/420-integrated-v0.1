@@ -1,0 +1,306 @@
+{
+  "schema": "420-bridge-deployment-v1",
+  "step": "BRIDGE-AUDIT-6",
+  "status": "REPOSITORY_DEPLOYMENT_SPEC_COMPLETE_LIVE_DEPLOYMENT_PENDING_BRIDGE_AUDIT_9",
+  "authority": "Repository deployment/init/ProtocolRegistry publication authority; not live-chain deployment evidence.",
+  "compiler": {
+    "solidity": "0.8.24",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "foundryConfig": "contracts/foundry.toml"
+  },
+  "canonicalInputs": {
+    "governanceTimelock": {
+      "value": "0x0000000000000000000000000000000000000429",
+      "source": "contracts/config/system-addresses.json",
+      "status": "FROZEN"
+    },
+    "protocolRegistry": {
+      "value": "0x0000000000000000000000000000000000000434",
+      "source": "contracts/config/genesis-address-namespace.json",
+      "status": "FROZEN"
+    },
+    "genesisConfigHash": {
+      "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+      "source": "contracts/config/genesis-config-commitment.json",
+      "status": "FROZEN_V1"
+    },
+    "verifiedGateway": {
+      "value": "0x0000000000000000000000000000000000000438",
+      "source": "contracts/config/system-addresses.json",
+      "status": "FROZEN_GENESIS_PREDEPLOY"
+    },
+    "initialVerifiedGatewayVerifier": {
+      "value": "0x0000000000000000000000000000000000000000",
+      "status": "FAIL_CLOSED_DISABLED_AT_GENESIS",
+      "activationRule": "Governance must call setVerifier with a nonzero code-bearing qualified verifier before use."
+    }
+  },
+  "fixedPredeploys": [
+    {
+      "name": "VerifiedGateway420",
+      "source": "contracts/src/bridge/VerifiedGateway420.sol",
+      "address": "0x0000000000000000000000000000000000000438",
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash",
+        "initialVerifiedGatewayVerifier"
+      ],
+      "materialization": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
+      "lifecycle": "ACTIVE_COMPONENT_DISABLED_OPERATIONALLY_UNTIL_VERIFIER_AND_ASSETS_QUALIFY"
+    }
+  ],
+  "registryResolvedComponents": [
+    {
+      "name": "GatewayRouter420",
+      "source": "contracts/src/bridge/GatewayRouter420.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/GATEWAY_ROUTER"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:GatewayRouter420",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "BridgeRiskManager",
+      "source": "contracts/src/bridge/BridgeRiskManager.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/RISK_MANAGER"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:BridgeRiskManager",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "BridgeTransferRegistry",
+      "source": "contracts/src/bridge/BridgeTransferRegistry.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/TRANSFER_REGISTRY"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:BridgeTransferRegistry",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "BridgeAssetRegistry",
+      "source": "contracts/src/bridge/BridgeAssetRegistry.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/ASSET_REGISTRY"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:BridgeAssetRegistry",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "BridgeChainRegistry420",
+      "source": "contracts/src/bridge/BridgeChainRegistry420.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/CHAIN_REGISTRY"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:BridgeChainRegistry420",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "BridgeRouteRegistry",
+      "source": "contracts/src/bridge/BridgeRouteRegistry.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/ROUTE_REGISTRY"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:BridgeRouteRegistry",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "BridgeAccountingRegistry",
+      "source": "contracts/src/bridge/BridgeAccountingRegistry.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/ACCOUNTING_REGISTRY"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:BridgeAccountingRegistry",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    },
+    {
+      "name": "CADCBridgeIntegration",
+      "source": "contracts/src/bridge/CADCBridgeIntegration.sol",
+      "fixedAddress": null,
+      "constructor": [
+        "governanceTimelock",
+        "protocolRegistry",
+        "genesisConfigHash"
+      ],
+      "componentId": {
+        "algorithm": "keccak256(utf8)",
+        "preimage": "420/APP/420BRIDGE/CADC_INTEGRATION"
+      },
+      "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0
+      },
+      "lifecycle": "ACTIVE",
+      "addressSource": "DEPLOYMENT_OUTPUT:CADCBridgeIntegration",
+      "publication": "ProtocolRegistry.registerComponent after runtime-code verification"
+    }
+  ],
+  "verifiedGatewayRegistryPublication": {
+    "name": "VerifiedGateway420",
+    "componentId": {
+      "algorithm": "keccak256(utf8)",
+      "preimage": "420/APP/420BRIDGE/VERIFIED_GATEWAY"
+    },
+    "implementation": "0x0000000000000000000000000000000000000438",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    },
+    "lifecycle": "ACTIVE",
+    "publication": "ProtocolRegistry.registerComponent after genesis runtime-code verification"
+  },
+  "initializationSources": {
+    "chainIdentities": "contracts/config/bridge/chain-identities-v1.json",
+    "verificationPolicy": "contracts/config/bridge/verification-policy.json",
+    "launchCatalog": "contracts/config/bridge/launch-catalog-v12.5.1.json",
+    "riskLimits": "contracts/config/bridge/risk-limits.json"
+  },
+  "initializationOrder": [
+    "materialize VerifiedGateway420 at frozen 0x0438 with verifier=address(0)",
+    "deploy BridgeChainRegistry420, BridgeAssetRegistry, BridgeRouteRegistry, BridgeRiskManager, BridgeTransferRegistry, BridgeAccountingRegistry, GatewayRouter420 and CADCBridgeIntegration from the exact qualified source/compiler inputs",
+    "verify runtime code exists and record runtime code hashes for every deployment output",
+    "register VerifiedGateway420 and all registry-resolved Bridge components in ProtocolRegistry with version 1.0.0 and ACTIVE lifecycle",
+    "verify each ProtocolRegistry resolution, runtime code hash and protocolVersion",
+    "configure BridgeChainRegistry420 from chain-identities-v1.json; keep local 420 inactive until its canonical network fingerprint is frozen",
+    "configure BridgeAssetRegistry only from canonical asset identities; unqualified assets remain APPROVED_INACTIVE",
+    "configure GatewayRouter420 adapters only when adapterId() exactly matches the registered adapter ID and required production verifier dependencies exist",
+    "configure BridgeRouteRegistry routes from qualified chain/asset/adapter/verifier inputs; routes remain APPROVED_INACTIVE until both chain identities are active",
+    "configure BridgeRiskManager route and asset limits from risk-limits.json",
+    "trust only GatewayRouter420 in BridgeRiskManager and BridgeTransferRegistry; add lifecycle operators only by explicit governance decision",
+    "apply BridgeAccountingRegistry reconciliation evidence before enabling any asset movement; UNKNOWN accounting remains fail-closed",
+    "configure CADCBridgeIntegration only from issuer-approved code-bearing CADC/Endpoint/OFT contracts and keep inactive until qualification",
+    "install a code-bearing VerifiedGateway420 verifier by governance before approving gateway assets or enabling gateway movement",
+    "enable route directions last, after all preceding checks pass"
+  ],
+  "governancePostconditions": [
+    "all configuration mutations execute through GovernanceTimelock@0x0429 and canonical GovernanceAuthority checks",
+    "ProtocolRegistry remains the sole component-discovery authority at 0x0434",
+    "no Bridge component deployment grants custody/governance authority by registration alone",
+    "emergency/system-safety semantics remain enforced by each Bridge contract"
+  ],
+  "retiredAddressPolicy": {
+    "forbiddenAsAuthority": [
+      "0x000000000000000000000000000000000000043c",
+      "0x0000000000000000000000000000000000000443"
+    ],
+    "historicalCandidatesNotDeploymentEvidence": [
+      "0x000000000000000000000000000000000000043d",
+      "0x0000000000000000000000000000000000000440",
+      "0x0000000000000000000000000000000000000441",
+      "0x0000000000000000000000000000000000000442",
+      "0x0000000000000000000000000000000000000444"
+    ],
+    "rule": "Registry-resolved Bridge components use independently deployed addresses captured from verified deployment receipts; candidate/reservation addresses are not authority unless separately approved by a future atomic namespace decision."
+  },
+  "rollbackRecovery": [
+    "Before route activation, any failed verification invalidates the candidate deployment; do not patch an unverified address into Registry.",
+    "If a component runtime hash or constructor binding is wrong, deploy a corrected instance and publish only the corrected verified address.",
+    "If ProtocolRegistry publication is wrong, governance must correct/deprecate the erroneous component revision before route activation.",
+    "If adapter/verifier configuration is wrong, keep routes inactive; replace configuration through governance and re-run qualification.",
+    "If accounting is UNKNOWN or unhealthy, new movement remains blocked; recovery uses newer distinct reconciliation evidence and does not rewrite settled history.",
+    "If a source chain reorg invalidates a transfer, use the canonical lifecycle retry/reorg path; never create a second payout identity.",
+    "Live rollback/recovery transaction evidence is BRIDGE-AUDIT-9 scope."
+  ],
+  "blockersForLiveDeployment": [
+    "public 420 testnet chain/genesis fingerprint not yet frozen in BridgeChainRegistry420 authority",
+    "production adapter/verifier deployments and external gateway addresses require BRIDGE-AUDIT-7/9 qualification",
+    "live deployment addresses, receipts, runtime code hashes and ProtocolRegistry publication transactions do not exist yet"
+  ]
+}

@@ -285,6 +285,12 @@
           <div><span class="label">Adapter</span><strong id="bridge-adapter">—</strong></div>
           <div><span class="label">Verifier</span><strong id="bridge-verifier">—</strong></div>
           <div><span class="label">Bridge fee</span><strong id="bridge-fee">—</strong></div>
+          <div><span class="label">Source chain</span><strong id="bridge-source-chain">—</strong></div>
+          <div><span class="label">Destination chain</span><strong id="bridge-destination-chain">—</strong></div>
+          <div><span class="label">Route limit</span><strong id="bridge-route-limit">—</strong></div>
+          <div><span class="label">Asset limit</span><strong id="bridge-asset-limit">—</strong></div>
+          <div><span class="label">Finality</span><strong id="bridge-finality">—</strong></div>
+          <div><span class="label">Freshness</span><strong id="bridge-freshness">—</strong></div>
         </div>
 
         <div class="status-row bridge-health">
@@ -306,9 +312,16 @@
           <div><dt>Intent</dt><dd id="bridge-review-kind">—</dd></div>
           <div><dt>Route</dt><dd id="bridge-review-route">—</dd></div>
           <div><dt>Canonical asset</dt><dd id="bridge-review-asset">—</dd></div>
+          <div><dt>Source chain</dt><dd id="bridge-review-source">—</dd></div>
+          <div><dt>Destination chain</dt><dd id="bridge-review-destination">—</dd></div>
+          <div><dt>Adapter</dt><dd id="bridge-review-adapter">—</dd></div>
+          <div><dt>Verifier</dt><dd id="bridge-review-verifier">—</dd></div>
           <div><dt>Recipient</dt><dd id="bridge-review-recipient">—</dd></div>
           <div><dt>Amount</dt><dd id="bridge-review-amount">—</dd></div>
           <div><dt>Quoted bridge fee</dt><dd id="bridge-review-fee">—</dd></div>
+          <div><dt>Limits</dt><dd id="bridge-review-limits">—</dd></div>
+          <div><dt>Finality</dt><dd id="bridge-review-finality">—</dd></div>
+          <div><dt>Freshness</dt><dd id="bridge-review-freshness">—</dd></div>
         </dl>
         <p class="muted">Submission requires the reviewed bridge intent, current wallet account, configured Exchange network, and a still-qualified bridge route. Account or network changes invalidate this review.</p>
         <button id="bridge-submit" type="button" disabled>Wallet integration required · V14.10</button>
@@ -317,7 +330,7 @@
 
     <div class="table-wrap bridge-table-wrap" tabindex="0" role="region" aria-label="Scrollable bridge settlement table">
       <table class="exchange-table">
-        <thead><tr><th>Settlement</th><th>State</th><th>Progress</th><th>Attestation</th><th>Proof</th><th>Transaction</th><th>Guidance</th></tr></thead>
+        <thead><tr><th>Settlement</th><th>State</th><th>Progress</th><th>Finality</th><th>Freshness</th><th>Transaction</th><th>Guidance</th></tr></thead>
         <tbody id="bridge-settlements"></tbody>
       </table>
     </div>

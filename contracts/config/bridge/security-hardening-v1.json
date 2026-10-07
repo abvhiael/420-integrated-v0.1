@@ -1,0 +1,247 @@
+{
+  "schema": "420-bridge-security-hardening-v1",
+  "step": "BRIDGE-AUDIT-7",
+  "status": "REPOSITORY_SECURITY_HARDENING_READY_FOR_LEVEL1_QUALIFICATION",
+  "productionCore": [
+    "contracts/src/bridge/GatewayRouter420.sol",
+    "contracts/src/bridge/BridgeRiskManager.sol",
+    "contracts/src/bridge/BridgeTransferRegistry.sol",
+    "contracts/src/bridge/BridgeAssetRegistry.sol",
+    "contracts/src/bridge/BridgeChainRegistry420.sol",
+    "contracts/src/bridge/BridgeRouteRegistry.sol",
+    "contracts/src/bridge/BridgeAccountingRegistry.sol",
+    "contracts/src/bridge/VerifiedGateway420.sol",
+    "contracts/src/bridge/CADCBridgeIntegration.sol"
+  ],
+  "canonicalProductionAdapters": [
+    {
+      "name": "SolanaBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/SOLANA/MAINNET/V12.5.2",
+      "launchSlice": "V12.5.2",
+      "verifierInterface": "contracts/src/interfaces/ISolanaFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "SOLANA_MAINNET_GENESIS_HASH",
+        "p.finalized",
+        "p.genesisHash",
+        "p.slot",
+        "p.gatewayProgram"
+      ]
+    },
+    {
+      "name": "BnbBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/BNB/MAINNET/V12.5.3",
+      "launchSlice": "V12.5.3",
+      "verifierInterface": "contracts/src/interfaces/IBnbFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "BNB_MAINNET_CHAIN_ID",
+        "p.finalized",
+        "p.sourceChainId",
+        "p.blockHash"
+      ]
+    },
+    {
+      "name": "EthereumBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
+      "launchSlice": "V12.5.4",
+      "verifierInterface": "contracts/src/interfaces/IEthereumFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "ETHEREUM_MAINNET_CHAIN_ID",
+        "p.finalized",
+        "p.sourceChainId",
+        "p.receiptsRoot"
+      ]
+    },
+    {
+      "name": "DogecoinBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/DOGECOIN/MAINNET/V12.5.5",
+      "launchSlice": "V12.5.5",
+      "verifierInterface": "contracts/src/interfaces/IDogecoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "DOGE_MAINNET_GENESIS_HASH",
+        "DOGE_MAINNET_MESSAGE_START",
+        "p.finalized",
+        "p.genesisHash",
+        "p.messageStart"
+      ]
+    },
+    {
+      "name": "TronBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/TronBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/TRON/MAINNET/V12.5.7",
+      "launchSlice": "V12.5.7",
+      "verifierInterface": "contracts/src/interfaces/ITronFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "TRON_MAINNET_NETWORK_ID",
+        "p.solidified",
+        "p.executionSuccess",
+        "p.networkId"
+      ]
+    },
+    {
+      "name": "PotcoinBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/POTCOIN/MAINNET/V12.5.9",
+      "launchSlice": "V12.5.9",
+      "verifierInterface": "contracts/src/interfaces/IPotcoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "POT_MAINNET_NETWORK_ID",
+        "POT_LAST_POW_BLOCK",
+        "p.finalized",
+        "p.proofOfStake",
+        "p.networkId"
+      ]
+    },
+    {
+      "name": "DobbscoinBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/DOBBSCOIN/MAINNET/V12.5.10",
+      "launchSlice": "V12.5.10",
+      "verifierInterface": "contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "BOB_MAINNET_GENESIS_HASH",
+        "BOB_MAINNET_MESSAGE_START",
+        "MIN_CONFIRMATIONS",
+        "AUXPOW_ACTIVATION_HEIGHT",
+        "p.finalized",
+        "p.confirmations",
+        "p.auxPowValidated"
+      ]
+    },
+    {
+      "name": "CurecoinBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/CURECOIN/MAINNET/V12.5.11",
+      "launchSlice": "V12.5.11",
+      "verifierInterface": "contracts/src/interfaces/ICurecoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "CURE_MAINNET_GENESIS_HASH",
+        "CURE_MAINNET_MESSAGE_START",
+        "p.finalized",
+        "p.proofOfStake",
+        "p.genesisHash"
+      ]
+    },
+    {
+      "name": "PirateChainBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/PIRATE/MAINNET/V12.5.12",
+      "launchSlice": "V12.5.12",
+      "verifierInterface": "contracts/src/interfaces/IPirateChainFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "PIRATE_MAINNET_NETWORK_ID",
+        "MIN_DPOW_CONFIRMATIONS",
+        "p.finalized",
+        "p.equihashValidated",
+        "p.notarizationValidated",
+        "p.confirmations"
+      ]
+    },
+    {
+      "name": "LitecoinBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/LITECOIN/MAINNET/V12.5.13",
+      "launchSlice": "V12.5.13",
+      "verifierInterface": "contracts/src/interfaces/ILitecoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "LTC_MAINNET_GENESIS_HASH",
+        "LTC_MAINNET_MESSAGE_START",
+        "MIN_CONFIRMATIONS",
+        "p.finalized",
+        "p.scryptPowValidated",
+        "p.chainWorkValidated",
+        "p.confirmations"
+      ]
+    },
+    {
+      "name": "BitcoinBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/BITCOIN/MAINNET/V12.5.14",
+      "launchSlice": "V12.5.14",
+      "verifierInterface": "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "BTC_MAINNET_GENESIS_HASH",
+        "BTC_MAINNET_MESSAGE_START",
+        "MIN_CONFIRMATIONS",
+        "p.finalized",
+        "p.sha256dPowValidated",
+        "p.chainWorkValidated",
+        "p.confirmations"
+      ]
+    },
+    {
+      "name": "XrplBridgeAdapter420",
+      "path": "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol",
+      "domain": "420/BRIDGE/XRPL/MAINNET/V12.5.15",
+      "launchSlice": "V12.5.15",
+      "verifierInterface": "contracts/src/interfaces/IXrplFinalityVerifier420.sol",
+      "requiredFinalityProofMarkers": [
+        "p.validated",
+        "p.ledgerIndex",
+        "p.ledgerHash",
+        "p.transactionRoot"
+      ]
+    }
+  ],
+  "disabledLegacyScaffolds": [
+    {
+      "path": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+      "reason": "production verifier/outbound path intentionally not wired; must remain fail-closed"
+    },
+    {
+      "path": "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
+      "reason": "production verifier/outbound path intentionally not wired; must remain fail-closed"
+    },
+    {
+      "path": "contracts/src/bridge/adapters/ETHProofAdapter.sol",
+      "reason": "superseded by canonical EthereumBridgeAdapter420 proof/finality path; scaffold remains fail-closed"
+    },
+    {
+      "path": "contracts/src/bridge/adapters/BTCLightClientAdapter.sol",
+      "reason": "superseded by canonical BitcoinBridgeAdapter420 + IBitcoinFinalityVerifier420 path; scaffold remains fail-closed"
+    }
+  ],
+  "retainedSecuritySuites": [
+    "contracts/test/BridgeGenesisIntegration420.t.sol",
+    "contracts/test/BridgeRiskFuzz420.t.sol",
+    "contracts/test/BridgeInvariant420.t.sol",
+    "contracts/test/BridgeTransferLifecycle420.t.sol",
+    "contracts/test/NativeAdapterReplayDomainHardening420.t.sol",
+    "contracts/test/VerifierRotationHardening420.t.sol",
+    "contracts/test/EmergencyControlsHardening420.t.sol",
+    "contracts/test/MalformedProofRecipientFuzzHardening420.t.sol",
+    "contracts/test/DomainNonceRouterBypassHardening420.t.sol",
+    "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol",
+    "contracts/test/XrplBridgeAdapter420.t.sol"
+  ],
+  "securityInvariants": [
+    "route adapter binding is exact and cannot be substituted",
+    "chain identity and current route-chain binding fail closed",
+    "replay identity is adapter/domain separated and single-use",
+    "risk route/asset accounting remains bounded and transaction-atomic on downstream failure",
+    "terminal transfer states cannot reopen",
+    "retry and reorg transitions return only to the recorded allowed stage",
+    "accounting evidence observedAt is strictly monotonic and evidence hashes cannot replay",
+    "unhealthy accounting blocks new movement without rewriting balances/history",
+    "verifier rotation is governance-only and requires code-bearing verifier targets",
+    "direct adapter/router bypass attempts fail before replay/nonce mutation",
+    "malformed proof and recipient encodings fail before state consumption",
+    "legacy scaffold adapters remain fail-closed and are never launch authority"
+  ],
+  "acceptedDesignRisks": [
+    "External-chain verifier correctness ultimately depends on the configured proof/finality implementation and live chain data; production-equivalent proof validation remains BRIDGE-AUDIT-9.",
+    "Adapters are chain-specific and intentionally do not share replay storage; cross-adapter collision safety relies on unique canonical ADAPTER_ID domains plus adapter-local replay state.",
+    "Ethereum/Solana adapters currently carry additional directional emergency controls; native adapters rely on canonical GatewayRouter/SystemSafety plus governed verifier/binding controls.",
+    "A successful repository proof verifier test is not evidence of real external-chain settlement, confirmations, reorg handling or beneficiary payout."
+  ],
+  "unresolvedRepositoryDefects": [],
+  "deferredExternalEvidence": [
+    "real deployed verifier/runtime hashes",
+    "real external-chain proof/finality transactions",
+    "live reorg/retry drills",
+    "production credentials/provider operations"
+  ]
+}

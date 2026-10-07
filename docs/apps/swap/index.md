@@ -11,4 +11,4 @@ version: current
 
 Swap execution is subject to current asset/market/route eligibility, scoped authorization, amount limits, minimum-output protection, fee policy and safety controls. A Wallet connection, token listing or quote display is never sufficient authorization by itself.
 
-Use [Getting started](getting-started.md) before a first trade and [Developer integration](developer/index.md) for integration semantics.
+Use [Getting started](getting-started.md) before a first trade, [Deployment operations](deployment-operations.md) for deployment/rollback procedures, [Testnet qualification](testnet-qualification.md) for live qualification requirements, and [Developer integration](developer/index.md) for integration semantics.

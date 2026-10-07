@@ -36,6 +36,7 @@ type Publication struct {
 	BodyRef           string     `json:"body_ref"`
 	BodyDigest        string     `json:"body_digest"`
 	RightsClaim       string     `json:"rights_claim,omitempty"`
+	RightsProvenance *RightsProvenance `json:"rights_provenance,omitempty"`
 	Visibility        Visibility `json:"visibility"`
 	Status            Status     `json:"status"`
 	Source            string     `json:"source"`
@@ -55,7 +56,8 @@ type PublicationRevision struct {
 	Summary       string     `json:"summary,omitempty"`
 	BodyRef       string     `json:"body_ref"`
 	BodyDigest    string     `json:"body_digest"`
-	RightsClaim   string     `json:"rights_claim,omitempty"`
+	RightsClaim      string             `json:"rights_claim,omitempty"`
+	RightsProvenance *RightsProvenance `json:"rights_provenance,omitempty"`
 	Visibility    Visibility `json:"visibility"`
 	CreatedAt     time.Time  `json:"created_at"`
 }

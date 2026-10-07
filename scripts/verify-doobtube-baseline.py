@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-7 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-8 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -110,6 +110,9 @@ allowed_doobtube_files = {
     "doobtube/web/scripts/build.mjs",
     "doobtube/web/scripts/check.mjs",
     "doobtube/web/test/web.test.js",
+    "doobtube/integration/__init__.py",
+    "doobtube/integration/milestone.py",
+    "doobtube/tests/test_doobtube_level2_integration.py",
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc" and "dist" not in p.parts}
@@ -251,7 +254,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -365,7 +368,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -458,7 +461,7 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
 adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
     "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
@@ -538,7 +541,7 @@ assert "return False" in adapter_code, "DoobTube contract requirement must remai
 assert "return None" in adapter_code, "DoobTube service ID must remain absent"
 assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
 assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
 backend_doc = need("docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md", [
     "Roadmap step: **DOOBTUBE-5 — Backend/API/indexing/service control plane**",
@@ -631,7 +634,7 @@ for route in ["/v1/health","/v1/readiness","/v1/feed","/v1/preferences","/v1/con
 
 assert "**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition" in roadmap
 assert "docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
 media_doc = need("docs/DOOBTUBE-MEDIA-INTEGRATION.md", [
     "Roadmap step: **DOOBTUBE-6 — Media processing, delivery and livestream integration**",
@@ -739,7 +742,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical media integration definition" in roadmap
 assert "docs/DOOBTUBE-MEDIA-INTEGRATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
 web_doc = need("docs/DOOBTUBE-WEB-APPLICATION.md", [
     "Roadmap step: **DOOBTUBE-7 — User-facing web application**",
@@ -813,6 +816,50 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical web definition" in roadmap
 assert "docs/DOOBTUBE-WEB-APPLICATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-7 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 
-print("DOOBTUBE-7 Level 1 web application verification: PASS")
+integration_doc = need("docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md", [
+    "Roadmap step: **DOOBTUBE-8 — Ecosystem integration milestone**",
+    "Qualification level: **Level 2 — retained app integration milestone**",
+    "DT-INT-REG-001", "DT-INT-AUTH-001", "DT-INT-MEDIA-001",
+    "DT-INT-RIGHTS-001", "DT-INT-STORAGE-001", "DT-INT-SEARCH-001",
+    "DT-INT-NOTIFY-001", "DT-INT-INV-001", "DT-INT-INV-012",
+    "Next canonical roadmap step: DOOBTUBE-9 — Security, abuse and moderation qualification",
+])
+integration_module = need("doobtube/integration/milestone.py", [
+    "DIRECT_REQUIRED", "DIRECT_OPTIONAL", "TRANSITIVE_ONLY", "NOT_ADOPTED_V1",
+    "class EcosystemMilestone", "def qualify",
+    '"420Registry"', '"420Wallet"', '"420SmartAccounts"', '"420Media"',
+    '"420Rights"', '"420Storage"', '"420Search"', '"420Notifications"',
+    '"420Identity"', '"420Pay"', '"420Compute"',
+])
+integration_tests = need("doobtube/tests/test_doobtube_level2_integration.py", [
+    "test_full_adopted_stack_qualifies_together",
+    "test_optional_identity_can_degrade_to_wallet_only",
+    "test_registry_stale_wrong_chain_inactive_and_service_substitution_fail_closed",
+    "test_rights_revocation_or_provenance_identity_mismatch_blocks_public_flow",
+    "test_storage_unready_blocks_integrated_public_flow",
+    "test_search_cannot_widen_visibility_claim_authority_or_substitute_service",
+    "test_notifications_cannot_become_entitlement_marketing_or_wallet_authority",
+    "test_pay_compute_remain_media_transitive_and_unadopted_services_remain_non_authoritative",
+    "test_shadow_authority_transfer_fails_closed",
+])
+level2_verifier = need("scripts/verify-doobtube-level2.py", [
+    "DOOBTUBE-8 Level 2 ecosystem integration verification: PASS",
+    "420Media dependency set drifted",
+    "direct Pay route appeared",
+    "unadopted service became runtime dependency",
+])
+level2_workflow = need(".github/workflows/doobtube-integration.yml", [
+    "name: DoobTube Level 2 integration",
+    "Assert exact implementation SHA",
+    "Run Level 2 ecosystem integration suite",
+    "Retain web application qualification",
+    "Verify Level 2 ecosystem integration",
+])
+
+assert "**Status: COMPLETE (Level 2).** Canonical milestone definition" in roadmap
+assert "docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+
+print("DOOBTUBE-8 Level 2 milestone baseline verification: PASS")

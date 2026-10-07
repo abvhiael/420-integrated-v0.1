@@ -149,6 +149,8 @@ CMP-6.2 is COMPLETE only when:
 - retained Compute Market Level 2 qualification passes on the same exact implementation SHA;
 - durable repository evidence records the qualified SHA.
 
+Durable evidence: [CMP-6.2 qualification](CMP-6.2-QUALIFICATION-EVIDENCE.md).
+
 Next canonical step:
 
 **CMP-6.3 — Contribution accounting**

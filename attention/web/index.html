@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>420 Attention / Cannaseur</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div>
+    <span class="eyebrow">420 Integrated</span>
+    <h1>420 Attention / Cannaseur</h1>
+    <p>Opt-in sponsor-funded engagement with canonical consent, proofs, rewards & segregated liabilities.</p>
+  </div>
+  <div class="wallet-box">
+    <span id="runtime-state" class="pill">Runtime unresolved</span>
+    <button id="connect-wallet" type="button">Connect wallet</button>
+    <span id="wallet-state">Not connected</span>
+  </div>
+</header>
+<main id="main">
+  <section class="notice">
+    <strong>Consent first.</strong> Campaign media and raw behavioral telemetry are not canonical Attention state. Never provide Wallet keys, private browsing history or unrelated personal data to a sponsor or verifier.
+  </section>
+  <div id="status" role="status" aria-live="polite">Loading runtime configuration…</div>
+
+  <section>
+    <div class="section-head">
+      <div><span class="eyebrow">Discover</span><h2>Campaigns</h2></div>
+      <button id="refresh-campaigns" type="button">Refresh</button>
+    </div>
+    <div id="campaign-list" class="campaign-grid"></div>
+    <p id="campaign-empty" hidden>No campaigns are currently available from the configured projection.</p>
+  </section>
+
+  <section id="campaign-detail" hidden>
+    <div class="section-head">
+      <div><span class="eyebrow">Campaign detail</span><h2 id="campaign-id"></h2></div>
+      <span id="campaign-state" class="pill"></span>
+    </div>
+    <div class="facts">
+      <div><small>Sponsor</small><code id="campaign-sponsor"></code></div>
+      <div><small>Verifier</small><code id="campaign-verifier"></code></div>
+      <div><small>Declared budget</small><strong id="campaign-budget"></strong></div>
+      <div><small>Funded</small><strong id="campaign-funded"></strong></div>
+      <div><small>Reward / unit</small><strong id="campaign-rate"></strong></div>
+      <div><small>Per-account cap</small><strong id="campaign-cap"></strong></div>
+      <div><small>Reserved</small><strong id="campaign-reserved"></strong></div>
+      <div><small>Paid</small><strong id="campaign-paid"></strong></div>
+      <div><small>Window</small><span id="campaign-window"></span></div>
+    </div>
+    <details>
+      <summary>Canonical commitments</summary>
+      <dl>
+        <dt>Metadata</dt><dd><code id="campaign-metadata"></code></dd>
+        <dt>Audience policy</dt><dd><code id="campaign-policy"></code></dd>
+      </dl>
+    </details>
+  </section>
+
+  <section id="consent-panel">
+    <span class="eyebrow">Participant</span>
+    <h2>Consent</h2>
+    <p id="consent-state">Connect Wallet to inspect account-specific consent.</p>
+    <form id="global-consent-form" class="form-grid">
+      <label>Global consent
+        <select name="enabled"><option value="true">Enable</option><option value="false">Revoke</option></select>
+      </label>
+      <label>Policy commitment
+        <input name="policyHash" placeholder="0x… bytes32" autocomplete="off">
+      </label>
+      <button type="submit">Review global consent change</button>
+    </form>
+    <form id="campaign-consent-form" class="form-grid">
+      <label>Campaign ID<input name="campaignId" placeholder="0x… bytes32" autocomplete="off"></label>
+      <label>Campaign consent
+        <select name="enabled"><option value="true">Enable</option><option value="false">Revoke</option></select>
+      </label>
+      <label>Policy commitment<input name="policyHash" placeholder="0x… bytes32" autocomplete="off"></label>
+      <button type="submit">Review campaign consent change</button>
+    </form>
+  </section>
+
+  <section id="reward-panel">
+    <span class="eyebrow">Participant</span>
+    <h2>Proofs & rewards</h2>
+    <div class="lookup-row">
+      <label>Proof ID<input id="proof-id" placeholder="0x…"></label>
+      <button id="lookup-proof" type="button">Inspect proof</button>
+      <label>Reward ID<input id="reward-id" placeholder="0x…"></label>
+      <button id="lookup-reward" type="button">Inspect reward</button>
+    </div>
+    <pre id="proof-state">No proof selected.</pre>
+    <pre id="reward-state">No reward selected.</pre>
+    <button id="review-claim" type="button" disabled>Review reward claim</button>
+  </section>
+
+  <section id="sponsor-panel">
+    <span class="eyebrow">Sponsor</span>
+    <h2>Campaign management</h2>
+    <p>Campaign economics and audience-policy commitments are immutable after creation. Review all values before Wallet authorization.</p>
+    <form id="create-campaign-form" class="form-grid">
+      <label>Metadata hash<input name="metadataHash" placeholder="0x… bytes32"></label>
+      <label>Audience policy hash<input name="audiencePolicyHash" placeholder="0x… bytes32"></label>
+      <label>Verifier<input name="verifier" placeholder="0x… address"></label>
+      <label>Declared budget<input name="declaredBudget" inputmode="numeric" placeholder="wei"></label>
+      <label>Reward / unit<input name="rewardPerUnit" inputmode="numeric" placeholder="wei"></label>
+      <label>Per-account cap<input name="maxRewardPerAccount" inputmode="numeric" placeholder="wei"></label>
+      <label>Starts at<input name="startsAt" inputmode="numeric" placeholder="unix seconds"></label>
+      <label>Ends at<input name="endsAt" inputmode="numeric" placeholder="unix seconds"></label>
+      <button type="submit">Review campaign creation</button>
+    </form>
+    <div class="form-grid">
+      <label>Campaign ID<input id="sponsor-campaign-id" placeholder="0x… bytes32"></label>
+      <label>Funding amount<input id="funding-amount" inputmode="numeric" placeholder="wei"></label>
+      <button id="review-fund" type="button">Review funding</button>
+      <button data-lifecycle="activate-campaign" type="button">Review activate</button>
+      <button data-lifecycle="pause-campaign" type="button">Review pause</button>
+      <button data-lifecycle="close-campaign" type="button">Review close</button>
+      <button data-lifecycle="cancel-campaign" type="button">Review cancel</button>
+    </div>
+  </section>
+
+  <section id="transaction-review" class="review" hidden>
+    <div class="section-head"><h2>Transaction review</h2><button id="close-review" type="button">Close</button></div>
+    <p><strong id="review-kind"></strong> · <span id="review-summary"></span></p>
+    <dl>
+      <dt>Target</dt><dd><code id="review-target"></code></dd>
+      <dt>Value</dt><dd><code id="review-value"></code></dd>
+      <dt>Calldata</dt><dd><code id="review-data"></code></dd>
+      <dt>Source block</dt><dd><code id="review-block"></code></dd>
+    </dl>
+    <p id="review-gate">Not ready.</p>
+    <button id="submit-review" type="button" disabled>Send to Wallet</button>
+    <p>Transaction: <code id="tx-hash">—</code></p>
+    <p id="tx-state">No transaction submitted.</p>
+  </section>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

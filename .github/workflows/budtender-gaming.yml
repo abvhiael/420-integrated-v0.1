@@ -6,6 +6,7 @@ on:
       - "src/budtender/**"
       - "test/budtender/**"
       - "clients/budtender-access-v1/**"
+      - "clients/budtender-web-v1/**"
       - "packages/420-gaming-sdk/**"
       - "contracts/src/gaming/**"
       - "contracts/test/GamingProtocol420*.t.sol"
@@ -38,6 +39,26 @@ jobs:
           done
       - name: Test Budtender BUD-1 through BUD-4 core
         run: node --experimental-strip-types --test test/budtender/*.spec.ts
+
+  web-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Check Budtender web client
+        working-directory: clients/budtender-web-v1
+        run: npm run check
+      - name: Test Budtender web client
+        working-directory: clients/budtender-web-v1
+        run: npm test
 
   gaming-integration:
     runs-on: ubuntu-latest

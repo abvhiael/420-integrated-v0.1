@@ -72,6 +72,21 @@ The host exposes:
 
 These endpoints never mutate game state. Core management remains wallet-free, and the checked-in Gaming runtime is reported as deployment-pending until GP-15 live qualification.
 
+## Security posture
+
+BUD-AUDIT-9 hardens the repository-stage web host with:
+
+- same-origin enforcement for browser mutation requests;
+- mandatory `application/json` mutation bodies;
+- 16 KiB request-body cap;
+- fail-closed malformed/unknown requests;
+- Content-Security-Policy and anti-framing/content-sniffing/referrer/capability headers;
+- same-origin resource policy and no-store caching;
+- loopback-only default bind;
+- an app-scoped static security verifier for required controls and forbidden dynamic/shell execution surfaces.
+
+These controls complement, rather than replace, the domain-level economy/replay/offline/Gaming security boundaries.
+
 ## Current limitations
 
 State is in-memory. Restarting the host resets the game.

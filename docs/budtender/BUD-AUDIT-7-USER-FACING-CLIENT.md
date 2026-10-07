@@ -1,6 +1,6 @@
 # BUD-AUDIT-7 — User-Facing Budtender Client
 
-Status: IMPLEMENTED — Level 1 exact-head qualification pending
+Status: COMPLETE — Level 1 exact-head qualified
 
 ## Authority and scope
 
@@ -120,8 +120,8 @@ BUD-AUDIT-7 is COMPLETE only when:
 7. client host/browser syntax checks pass;
 8. client API/authority tests pass;
 9. complete Budtender regressions pass;
-10. the exact implementation SHA passes the app-specific Level 1 workflow;
-11. durable evidence records implementation SHA, CI evidence, base SHA, limitations, deferred checks, and next roadmap step.
+10. the exact implementation SHA passes the app-specific Level 1 workflow (satisfied by `9961bf25b7ee7d0fb750cfdbb6676d7fdc01d1ec`, Budtender Qualification run `37670777590`, all four jobs PASS);
+11. durable evidence records implementation SHA, CI evidence, base SHA, limitations, deferred checks, and next roadmap step (recorded in `docs/audit/BUD-AUDIT-7-EVIDENCE-2026-10-07.md`).
 
 ## Known limitations
 

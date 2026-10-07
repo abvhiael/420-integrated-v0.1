@@ -1,0 +1,143 @@
+name: 420Attention Audit Qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420attention-*'
+    paths:
+      - 'contracts/src/attention/**'
+      - 'contracts/src/system/AttentionTreasury.sol'
+      - 'contracts/src/system/CannaseurCampaignRegistry.sol'
+      - 'contracts/test/Attention*420.t.sol'
+      - 'contracts/config/420attention-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'docs/apps/attention/**'
+      - 'docs/audit/420ATTENTION*'
+      - 'docs/architecture/protocols/messenger-notifications-attention.md'
+      - 'scripts/verify-420attention-audit.py'
+      - '.github/workflows/420attention-audit.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/attention/**'
+      - 'contracts/src/system/AttentionTreasury.sol'
+      - 'contracts/src/system/CannaseurCampaignRegistry.sol'
+      - 'contracts/test/Attention*420.t.sol'
+      - 'contracts/config/420attention-genesis.json'
+      - 'contracts/config/genesis-dapp-contract-map.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'docs/apps/attention/**'
+      - 'docs/audit/420ATTENTION*'
+      - 'docs/architecture/protocols/messenger-notifications-attention.md'
+      - 'scripts/verify-420attention-audit.py'
+      - '.github/workflows/420attention-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Attention formatting
+        working-directory: contracts
+        run: forge fmt --check test/AttentionGenesis420.t.sol test/AttentionAudit420.t.sol
+      - name: Build Attention graph
+        working-directory: contracts
+        run: forge build src/attention src/system/AttentionTreasury.sol src/system/CannaseurCampaignRegistry.sol test/AttentionGenesis420.t.sol test/AttentionAudit420.t.sol --sizes
+      - name: Run focused Attention tests
+        working-directory: contracts
+        run: forge test --match-path 'test/Attention*420.t.sol' -vvv
+      - name: Shared Genesis verification
+        run: python3 scripts/verify-genesis-dapps.py
+      - name: Attention audit verification
+        run: python3 scripts/verify-420attention-audit.py
+      - name: Reject dangerous Attention primitives
+        run: |
+          set -euo pipefail
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/attention contracts/src/system/AttentionTreasury.sol contracts/src/system/CannaseurCampaignRegistry.sol; then
+            echo 'Forbidden primitive found in Attention sources' >&2
+            exit 1
+          fi
+
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Install Slither
+        run: python -m pip install --disable-pip-version-check slither-analyzer
+      - name: Targeted Attention Slither high-severity gate
+        working-directory: contracts
+        shell: bash
+        run: |
+          cat > AttentionAuditSlitherTarget.sol <<'SOL'
+          // SPDX-License-Identifier: GPL-3.0
+          pragma solidity ^0.8.24;
+          import "./src/system/AttentionTreasury.sol";
+          import "./src/system/CannaseurCampaignRegistry.sol";
+          import "./src/attention/AttentionIds420.sol";
+          import "./src/attention/AttentionAuthorization420.sol";
+          import "./src/attention/AttentionConsentRegistry420.sol";
+          import "./src/attention/AttentionProofRegistry420.sol";
+          import "./src/attention/AttentionRewardRegistry420.sol";
+          import "./src/attention/AttentionRouter420.sol";
+          SOL
+          set +e
+          slither AttentionAuditSlitherTarget.sol --json /tmp/420attention-slither.json >/tmp/420attention-slither.txt 2>&1
+          status=$?
+          set -e
+          rm -f AttentionAuditSlitherTarget.sol
+          python - <<'PY'
+          import json, pathlib
+          report_path = pathlib.Path("/tmp/420attention-slither.json")
+          log_path = pathlib.Path("/tmp/420attention-slither.txt")
+          if not report_path.exists():
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither did not produce JSON output")
+          report = json.loads(report_path.read_text())
+          if report.get("success") is not True:
+              print(log_path.read_text(errors="replace"))
+              raise SystemExit("Slither analysis failed")
+          high = []
+          for detector in report.get("results", {}).get("detectors", []):
+              scoped = [
+                  e for e in detector.get("elements", [])
+                  if e.get("source_mapping", {}).get("filename_relative", "").startswith(("src/attention/","src/system/AttentionTreasury.sol","src/system/CannaseurCampaignRegistry.sol"))
+              ]
+              if scoped and detector.get("impact") in {"High", "Critical"}:
+                  high.append((detector.get("check"), detector.get("impact")))
+          if high:
+              for finding in high:
+                  print(f"{finding[1]}: {finding[0]}")
+              raise SystemExit("High/Critical Attention Slither finding")
+          print("No High/Critical Attention Slither findings")
+          PY

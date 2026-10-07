@@ -8,9 +8,9 @@ Reconcile the complete accumulated CMP-5 external distributed-compute adapter ph
 
 ## Reconciliation baseline
 
-Current `main` reconciled: `ea979e30e3c3b977c8b23aeaf346f53ae23ee23a`.
+Current `main` reconciled: `f674fbed767efc126da253c66800e38d030dc1dd`.
 
-Reconciled branch anchor: `4c9f7eb9dfbb1ea5d30626cbfea4048b47939731`.
+Reconciled branch anchor: `7c8999aeeb9542115a9b4d9ed925daee490caba0`.
 
 The branch was 0 commits behind that main baseline at reconciliation. The final substantive closeout commit containing this inventory, verifier, workflow ownership wiring, and roadmap candidate state becomes the exact Level 3 merge-candidate implementation SHA.
 

@@ -1,0 +1,100 @@
+{
+  "schema": "420.hz.deployment.package.v1",
+  "roadmap_step": "HZ-AUDIT-2",
+  "scope": "consolidated HZ-1 through HZ-4 deployment architecture",
+  "genesis_classification": "FIRST_YEAR_FLAGSHIP_NOT_FROZEN_GENESIS_APP",
+  "address_model": "REGISTRY_RESOLVED_NO_FIXED_HZ_ADDRESSES",
+  "authority": {
+    "governance_timelock": "required_nonzero_runtime_input",
+    "protocol_treasury": "required_nonzero_runtime_input"
+  },
+  "deployment_order": [
+    "CreativeProtocolRegistry420",
+    "CreatorProfileRegistry420",
+    "WorkRegistry420",
+    "RecordingRegistry420",
+    "ContributorRegistry420",
+    "RightsRegistry420",
+    "AuthorizationRegistry420",
+    "LicenseRegistry420",
+    "RoyaltyScheduleRegistry420",
+    "RoyaltyVault420",
+    "RoyaltyRouter420",
+    "CatalogRegistry420",
+    "CatalogMetadataRegistry420",
+    "MediaManifestRegistry420",
+    "StorageSourceRegistry420",
+    "PlaybackResolver420",
+    "PlaybackAccounting420",
+    "StreamingSettlementEpoch420",
+    "StreamingRevenueAllocator420",
+    "StreamingRoyaltySettlement420"
+  ],
+  "governance_initialization": [
+    "WorkRegistry420.setRightsRegistry(RightsRegistry420)",
+    "RecordingRegistry420.configureDependencies(RightsRegistry420,AuthorizationRegistry420)",
+    "RightsRegistry420.setRoyaltyAccounting(RoyaltyVault420)",
+    "AuthorizationRegistry420.setLicenseRegistry(LicenseRegistry420)",
+    "LicenseRegistry420.setRoyaltyRouter(RoyaltyRouter420)",
+    "RoyaltyVault420.setRoyaltyRouter(RoyaltyRouter420)",
+    "RoyaltyRouter420.setSettlementSource(LicenseRegistry420,true)",
+    "RoyaltyRouter420.setSettlementSource(StreamingRoyaltySettlement420,true)"
+  ],
+  "authority_actions_owned_by_hz_audit_3": [
+    "PlaybackAccounting420.setSubmitter(playback_submitter,true)",
+    "StreamingSettlementEpoch420.setSubmitter(settlement_submitter,true)",
+    "register HZ modules in CreativeProtocolRegistry420",
+    "publish canonical external ProtocolRegistry service/component identities"
+  ],
+  "economics_actions_owned_by_hz_audit_4": [
+    "register versioned RevenueType.STREAM royalty schedules for every supported RecordingClass",
+    "retain exact schedule terms hashes and effective-at values"
+  ],
+  "manifest": {
+    "generated_path": "artifacts/contracts/420hz-deployment.json",
+    "generated_by": "contracts/script/HzConsolidatedDeploy420.s.sol",
+    "required_fields": [
+      "schema",
+      "chainId",
+      "governanceTimelock",
+      "protocolTreasury",
+      "creativeProtocolRegistry",
+      "creatorProfileRegistry",
+      "workRegistry",
+      "recordingRegistry",
+      "contributorRegistry",
+      "rightsRegistry",
+      "authorizationRegistry",
+      "licenseRegistry",
+      "royaltyScheduleRegistry",
+      "royaltyVault",
+      "royaltyRouter",
+      "catalogRegistry",
+      "catalogMetadataRegistry",
+      "mediaManifestRegistry",
+      "storageSourceRegistry",
+      "playbackResolver",
+      "playbackAccounting",
+      "streamingSettlementEpoch",
+      "streamingRevenueAllocator",
+      "streamingRoyaltySettlement"
+    ]
+  },
+  "live_evidence": {
+    "network": null,
+    "chain_id": null,
+    "deployment_transactions": [],
+    "deployed_addresses": {},
+    "runtime_code_hashes": {},
+    "governance_transactions": [],
+    "registry_transactions": []
+  },
+  "exit_criteria": [
+    "one retained deployment order spans every HZ-1 through HZ-4 contract",
+    "all immutable constructor dependencies are represented and focused-tested",
+    "governance-only initialization is explicit and cannot be silently executed by an unrelated deployer",
+    "deployment produces a machine-readable address manifest without secrets",
+    "later Registry/authority and STREAM-economics work remains explicitly owned by HZ-AUDIT-3 and HZ-AUDIT-4",
+    "no local or synthetic result is promoted to live testnet evidence"
+  ]
+}

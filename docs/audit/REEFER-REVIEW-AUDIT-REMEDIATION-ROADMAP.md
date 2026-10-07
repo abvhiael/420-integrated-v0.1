@@ -21,20 +21,20 @@ No dedicated smart contract is required by the canonical architecture: the appli
 | service identity/scope | consumer registry | config + package constant | static verifier | README | COMPLETE | live Registry publication if adopted |
 | Publication object | GEN-SVC-0 objects | model with opaque ID/timestamps/visibility/provenance | unit | README | COMPLETE | schema compatibility during live integration |
 | off-chain article body | GEN-SVC-0 boundary | blob interface + digest/reference | unit | README | PARTIAL | durable encrypted 420 Storage adapter |
-| Identity boundary | dependency registry | interface + active identity gate | auth negative unit | README | PARTIAL | Wallet/Identity session adapter |
+| Identity boundary | dependency registry | verified Wallet/Identity session-verifier boundary + active-identity claim gate | session/adversarial HTTP tests | README/RR-4 | COMPLETE AT REPOSITORY LEVEL | live deployed verifier composition |
 | Rights/provenance | suite roadmap/threat model | mandatory rights assertion before publish | unit | README/security | PARTIAL | live 420 Rights + chain provenance validation |
 | Search | registry | public-only projection hook | warning path unit | README/security | PARTIAL | live Search adapter/rebuild/reorg qualification |
 | Notifications | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live delivery/opt-in/dedup |
 | 420Mail | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live signed internal delivery |
-| permissions | GEN-SVC-0 | actor/author/publisher/moderator boundaries | negative unit | security | PARTIAL | production auth/capabilities |
+| permissions | GEN-SVC-0 | Bearer-session actor derivation + scoped author/publisher/moderator capabilities | negative/adversarial/session tests | security/RR-4 | COMPLETE AT REPOSITORY LEVEL | live capability/session issuer deployment |
 | moderation | GEN-SVC-0 | HIDE/RESTORE scoped actions | unit | security | PARTIAL | report/appeal/audit persistence |
 | /v1 API | GEN-SVC-0 | HTTP routes, stable errors, size bounds | HTTP | README | COMPLETE | deployed ingress qualification |
 | cursor pagination | GEN-SVC-0 | opaque cursor public feed | HTTP | README | COMPLETE | load qualification |
 | SDK/client | GEN-SVC-0 | typed Go client boundary | compile in CI | README | COMPLETE | compatibility tests against deployed service |
-| thin UI | app target | static repository UI | static verifier | README | PARTIAL | production routing, Wallet auth, E2E/a11y/mobile |
+| thin UI | app target | static repository UI + memory-only Wallet session gateway seam | static verifier + frontend syntax | README/RR-4 | PARTIAL | production routing/gateway deployment, E2E/a11y/mobile |
 | paid external newsletters | feature flag | absent and disabled | static verifier | README | COMPLETE | keep disabled unless explicit later decision |
 | dedicated contracts | on/off-chain rule | none | N/A | architecture | NOT APPLICABLE | do not create parallel rights/identity authority |
-| deployment/runtime | release requirement | development executable; prod fails closed | compile | README | PARTIAL | live adapters + public testnet |
+| deployment/runtime | release requirement | development executable; protected routes fail closed without verified-session composition; prod mode fails closed | compile/session tests | README/security | PARTIAL | live verifier + live adapters + public testnet |
 | Genesis catalog authorization | frozen catalog | absent by design | shared validator | roadmap | BLOCKED | explicit frozen-catalog decision |
 | production security/ops | threat model | repository controls only | unit/static | security | BLOCKED | rate limits, abuse ops, encryption, monitoring, recovery, load |
 | independent review | release gate | none | none | self-audit only | BLOCKED | external review after freeze |

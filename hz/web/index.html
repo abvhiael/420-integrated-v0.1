@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#082e23">
+  <title>420Hz — music on 420 Integrated</title>
+  <meta name="description" content="420Hz is the creator and listener music experience for the 420 Integrated ecosystem.">
+  <link rel="icon" type="image/svg+xml" href="/420hz-logo.svg">
+  <link rel="apple-touch-icon" href="/420hz-logo.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/runtime-config.js"></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="420Hz home">
+      <img class="brand-logo" src="/420hz-logo.svg" alt="" aria-hidden="true">
+      <span class="brand-copy">
+        <strong>420Hz</strong>
+        <small>music • nature • higher • you</small>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#discover">discover</a>
+      <a href="#artists">artists</a>
+      <a href="#streaming">streaming</a>
+      <a href="#creators">creators</a>
+    </nav>
+    <button id="walletButton" class="button ghost" type="button" disabled>connect wallet</button>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">artist-owned identity • transparent rights • native streaming economics</p>
+        <h1>music without the black box.</h1>
+        <p class="lede">420Hz is the music layer of 420 Integrated: artist profiles, releases, playback, discovery, rights, streaming settlements and royalty routing built around verifiable protocol state.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#discover">explore 420Hz</a>
+          <button id="publishButton" class="button secondary" type="button" disabled>publish music</button>
+        </div>
+        <div class="network-pill" id="networkPill" role="status" aria-live="polite">
+          <span class="dot"></span>
+          <span id="networkLabel">checking network status…</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-brand-panel">
+          <img class="hero-logo" src="/420hz-logo.svg" alt="420Hz — music, nature, higher, you">
+          <div class="brand-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="discover" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">discover</p>
+        <h2>one place for music, provenance & payouts.</h2>
+        <p>Live catalog data will appear here after the public testnet deployment. Until then, this site stays intentionally fail-closed instead of presenting fixture data as real releases.</p>
+      </div>
+
+      <div class="search-shell">
+        <label for="featureSearch">Explore 420Hz capabilities</label>
+        <input id="featureSearch" type="search" placeholder="search artists, releases, rights, streaming…" autocomplete="off">
+      </div>
+
+      <div id="featureGrid" class="card-grid">
+        <article class="feature-card" data-search="artist identity profiles creator">
+          <span class="card-index">01</span>
+          <h3>artist identity</h3>
+          <p>Creator profiles anchor public artistic identity without making the website the source of truth.</p>
+        </article>
+        <article class="feature-card" data-search="catalog albums releases tracks metadata discovery">
+          <span class="card-index">02</span>
+          <h3>catalog & releases</h3>
+          <p>Albums, releases, track ordering and presentation metadata project from canonical protocol history.</p>
+        </article>
+        <article class="feature-card" data-search="media storage playback audio streaming">
+          <span class="card-index">03</span>
+          <h3>playback</h3>
+          <p>Media manifests and storage sources resolve playback while preserving content-hash integrity.</p>
+        </article>
+        <article class="feature-card" data-search="rights contributors credits ownership splits">
+          <span class="card-index">04</span>
+          <h3>rights & credits</h3>
+          <p>Works, recordings, contributors and rights versions remain inspectable instead of hidden behind platform accounting.</p>
+        </article>
+        <article class="feature-card" data-search="streaming settlements royalties revenue payments economics">
+          <span class="card-index">05</span>
+          <h3>streaming economics</h3>
+          <p>Settlement epochs, allocation and STREAM royalty routing are explicit protocol surfaces.</p>
+        </article>
+        <article class="feature-card" data-search="indexer reorg rebuild provenance finality">
+          <span class="card-index">06</span>
+          <h3>rebuildable discovery</h3>
+          <p>The public catalog is a non-authoritative projection that can be rebuilt from canonical event history.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="artists" class="section split">
+      <div>
+        <p class="eyebrow">artists</p>
+        <h2>your work should know who made it.</h2>
+      </div>
+      <div class="copy-block">
+        <p>420Hz is designed around creator profiles, works, recordings, contributor credits and explicit rights versions. Artist pages will surface those relationships directly rather than flattening them into opaque platform metadata.</p>
+        <div class="empty-state">
+          <strong>live artist directory pending</strong>
+          <span>HZ-AUDIT-7 public-testnet deployment is the gate for real catalog data.</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="streaming" class="section dark-panel">
+      <div class="section-heading compact">
+        <p class="eyebrow">streaming</p>
+        <h2>play counts are not money until the accounting closes.</h2>
+      </div>
+      <div class="metrics">
+        <div><strong>ORIGINAL</strong><span>STREAM v1 economics defined</span></div>
+        <div><strong>REMIX</strong><span>STREAM v1 economics defined</span></div>
+        <div><strong>REBUILDABLE</strong><span>indexer projection</span></div>
+        <div><strong>FAIL-CLOSED</strong><span>pre-live environment</span></div>
+      </div>
+    </section>
+
+    <section id="creators" class="section split">
+      <div>
+        <p class="eyebrow">creator studio</p>
+        <h2>publish when the chain is ready.</h2>
+      </div>
+      <div class="copy-block">
+        <p>The creator studio will connect Wallet review, creator identity, work and recording registration, catalog publication, media manifests and STREAM economics against the verified deployment.</p>
+        <button id="creatorButton" class="button primary full" type="button" disabled>creator studio — testnet required</button>
+        <p class="fine-print">No transaction controls are enabled while the canonical testnet chain ID, deployment addresses and Registry bindings are unresolved.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <img class="footer-logo" src="/420hz-logo.svg" alt="420Hz">
+    <div class="footer-copy">
+      <p>420Hz is part of the 420 Integrated ecosystem.</p>
+      <p id="footerStatus" class="footer-status">pre-testnet repository build</p>
+    </div>
+  </footer>
+</body>
+</html>

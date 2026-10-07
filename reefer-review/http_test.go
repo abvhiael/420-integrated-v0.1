@@ -129,7 +129,7 @@ func TestRR4RevokedAndExpiredSessionsFailClosed(t *testing.T) {
 	revoked := rr4Claims("writer.420", CapabilityAuthor)
 	revoked.Revoked = true
 	h, err := NewIdentityBoundHTTP(testService(), nil, SessionSecurity{
-		Verifier: rr4SessionMap{"expired": expired, "revoked": revoked},
+		Verifier:        rr4SessionMap{"expired": expired, "revoked": revoked},
 		ExpectedChainID: 420, ExpectedNetwork: "testnet", Now: func() time.Time { return now },
 	})
 	if err != nil {

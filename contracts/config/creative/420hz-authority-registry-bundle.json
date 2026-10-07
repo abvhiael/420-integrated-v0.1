@@ -1,0 +1,112 @@
+{
+  "schema": "420.hz.authority.registry.bundle.v1",
+  "roadmap_step": "HZ-AUDIT-3",
+  "status": "REPOSITORY_AUTHORITY_REGISTRY_READY_LIVE_EXECUTION_DEFERRED",
+  "repository_ready": true,
+  "live_qualified": false,
+  "classification": "FIRST_YEAR_FLAGSHIP_NOT_FROZEN_GENESIS_APP",
+  "address_policy": {
+    "governance_timelock": "0x0000000000000000000000000000000000000429",
+    "protocol_registry": "0x0000000000000000000000000000000000000434",
+    "hz_fixed_genesis_address": false,
+    "hz_discovery_model": "PROTOCOL_REGISTRY_RESOLVED",
+    "create2_policy": "NOT_ADOPTED_DO_NOT_INVENT"
+  },
+  "runtime_authority_inputs": {
+    "playback_submitter": "REQUIRED_NONZERO_LIVE_OPERATOR_INPUT",
+    "settlement_submitter": "REQUIRED_NONZERO_LIVE_OPERATOR_INPUT",
+    "rule": "Submitter addresses are operational authorities selected for the target environment and must not be fabricated in repository evidence."
+  },
+  "internal_governance_wiring": [
+    "WorkRegistry420.setRightsRegistry(RightsRegistry420)",
+    "RecordingRegistry420.configureDependencies(RightsRegistry420,AuthorizationRegistry420)",
+    "RightsRegistry420.setRoyaltyAccounting(RoyaltyVault420)",
+    "AuthorizationRegistry420.setLicenseRegistry(LicenseRegistry420)",
+    "LicenseRegistry420.setRoyaltyRouter(RoyaltyRouter420)",
+    "RoyaltyVault420.setRoyaltyRouter(RoyaltyRouter420)",
+    "RoyaltyRouter420.setSettlementSource(LicenseRegistry420,true)",
+    "RoyaltyRouter420.setSettlementSource(StreamingRoyaltySettlement420,true)",
+    "PlaybackAccounting420.setSubmitter(playback_submitter,true)",
+    "StreamingSettlementEpoch420.setSubmitter(settlement_submitter,true)"
+  ],
+  "creative_protocol_modules": [
+    {"key_preimage":"CREATIVE_PROTOCOL_REGISTRY","implementation":"CreativeProtocolRegistry420","version":1},
+    {"key_preimage":"CREATOR_PROFILE_REGISTRY","implementation":"CreatorProfileRegistry420","version":1},
+    {"key_preimage":"WORK_REGISTRY","implementation":"WorkRegistry420","version":1},
+    {"key_preimage":"RECORDING_REGISTRY","implementation":"RecordingRegistry420","version":1},
+    {"key_preimage":"CONTRIBUTOR_REGISTRY","implementation":"ContributorRegistry420","version":1},
+    {"key_preimage":"RIGHTS_REGISTRY","implementation":"RightsRegistry420","version":1},
+    {"key_preimage":"AUTHORIZATION_REGISTRY","implementation":"AuthorizationRegistry420","version":1},
+    {"key_preimage":"LICENSE_REGISTRY","implementation":"LicenseRegistry420","version":1},
+    {"key_preimage":"ROYALTY_SCHEDULE_REGISTRY","implementation":"RoyaltyScheduleRegistry420","version":1},
+    {"key_preimage":"ROYALTY_VAULT","implementation":"RoyaltyVault420","version":1},
+    {"key_preimage":"ROYALTY_ROUTER","implementation":"RoyaltyRouter420","version":1},
+    {"key_preimage":"CATALOG_REGISTRY","implementation":"CatalogRegistry420","version":1},
+    {"key_preimage":"CATALOG_METADATA_REGISTRY","implementation":"CatalogMetadataRegistry420","version":1},
+    {"key_preimage":"MEDIA_MANIFEST_REGISTRY","implementation":"MediaManifestRegistry420","version":1},
+    {"key_preimage":"STORAGE_SOURCE_REGISTRY","implementation":"StorageSourceRegistry420","version":1},
+    {"key_preimage":"PLAYBACK_RESOLVER","implementation":"PlaybackResolver420","version":1},
+    {"key_preimage":"PLAYBACK_ACCOUNTING","implementation":"PlaybackAccounting420","version":1},
+    {"key_preimage":"STREAMING_SETTLEMENT_EPOCH","implementation":"StreamingSettlementEpoch420","version":1},
+    {"key_preimage":"STREAMING_REVENUE_ALLOCATOR","implementation":"StreamingRevenueAllocator420","version":1},
+    {"key_preimage":"STREAMING_ROYALTY_SETTLEMENT","implementation":"StreamingRoyaltySettlement420","version":1}
+  ],
+  "creative_protocol_module_manifest_hash_preimage": "420/HZ/AUDIT-3/MODULE-MANIFEST/V1",
+  "external_protocol_registry": {
+    "root_implementation": "CreativeProtocolRegistry420",
+    "component_id_preimage": "420/component/hz/creative-protocol-registry/v1",
+    "component_version": {"major":1,"minor":0,"patch":0},
+    "component_lifecycle": "ACTIVE",
+    "service_id_preimage": "420/service/hz/v1",
+    "service_descriptor_hash_preimage": "420/HZ/SERVICE/DESCRIPTOR/V1",
+    "service_requires_extension_approval": true,
+    "service_version": 1,
+    "service_active": true,
+    "component_type": "APPLICATION",
+    "metadata_hash_preimage": "420/HZ/RELEASE/METADATA/V1",
+    "manifest_hash_preimage": "420/HZ/AUDIT-3/REGISTRY-MANIFEST/V1",
+    "interface_hash_preimage": "420/HZ/CREATIVE_PROTOCOL_REGISTRY/INTERFACE/V1",
+    "dependency_root_policy": "iterative keccak256(abi.encode(prior,moduleKey,implementation,implementation.codehash)) over the exact 20-module ordered inventory",
+    "governance_sequence": [
+      "ProtocolRegistry.registerComponent(componentId,CreativeProtocolRegistry420,1.0.0,ACTIVE)",
+      "ProtocolRegistry.approveServiceId(serviceId,serviceDescriptorHash)",
+      "ProtocolRegistry.publishRegisteredService(serviceId,CreativeProtocolRegistry420,metadataHash,1,true,APPLICATION,manifestHash,dependencyRoot,interfaceHash)"
+    ]
+  },
+  "safety_invariants": [
+    "Every mutable authority action in this bundle is GovernanceTimelock-only.",
+    "Playback and settlement submitter identities must be nonzero live operator inputs and are not invented in repository evidence.",
+    "CreativeProtocolRegistry420 contains the complete exact 20-module HZ-1 through HZ-4 inventory.",
+    "All CreativeProtocolRegistry420 module registrations are version 1 and bind the same retained module manifest commitment.",
+    "The external ProtocolRegistry component and service identities resolve to the exact CreativeProtocolRegistry420 root implementation.",
+    "The non-Genesis HZ service ID must be governance-approved before publishRegisteredService succeeds.",
+    "The ProtocolRegistry registration profile commits nonzero manifest and interface hashes plus the exact dependency root.",
+    "420Hz receives no fixed Genesis address and is not added to the frozen Genesis application catalogue.",
+    "No private keys, signing secrets, fabricated live addresses, fabricated transaction hashes or fabricated Registry receipts are retained."
+  ],
+  "live_evidence": {
+    "required_in_step": "HZ-AUDIT-7",
+    "network": null,
+    "chain_id": null,
+    "governance_timelock": null,
+    "protocol_registry": null,
+    "playback_submitter": null,
+    "settlement_submitter": null,
+    "hz_contract_addresses": {},
+    "runtime_code_hashes": {},
+    "governance_transactions": [],
+    "module_registration_transactions": [],
+    "protocol_registry_transactions": [],
+    "registry_resolution_evidence": []
+  },
+  "exit_criteria": [
+    "exact governance-only internal wiring and submitter grant actions are retained",
+    "exact 20-module CreativeProtocolRegistry420 registration inventory is retained",
+    "canonical external ProtocolRegistry component/service identities and commitments are retained",
+    "extension service approval is required before HZ service publication",
+    "component and service resolution bind the exact CreativeProtocolRegistry420 root",
+    "unauthorized callers and invalid submitter identities fail closed in focused tests",
+    "no fixed Genesis HZ address or fabricated live evidence is introduced",
+    "Level 1 exact-head verifier/build/focused tests pass"
+  ]
+}

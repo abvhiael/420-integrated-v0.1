@@ -83,8 +83,8 @@ The audit branch:
 | Progression | `src/budtender/StoreProgression.ts` | COMPLETE | Canonical BUD-4 cash/upgrade/expansion state |
 | Offline progression | `src/budtender/OfflineProgression.ts` | COMPLETE | 24-hour bounded, replay-safe, chain-independent calculation; exact-head Level 1 qualified |
 | Application service | `src/budtender/BudtenderApplicationService.ts` | COMPLETE | Authoritative command + detached snapshot boundary; exact-head Level 1 qualified |
-| User-facing web client | `clients/budtender-web-v1` | IMPLEMENTED | Responsive presentation client over application service; exact-head Level 1 qualification pending |
-| BUD-AUDIT-7 spec | `docs/budtender/BUD-AUDIT-7-USER-FACING-CLIENT.md` | IMPLEMENTED | Client requirements/invariants frozen; qualification pending |
+| User-facing web client | `clients/budtender-web-v1` | COMPLETE | Responsive presentation client over application service; exact-head Level 1 qualified |
+| BUD-AUDIT-7 spec | `docs/budtender/BUD-AUDIT-7-USER-FACING-CLIENT.md` | COMPLETE | Client requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-6 spec | `docs/budtender/BUD-AUDIT-6-APPLICATION-SERVICE.md` | COMPLETE | Application-service requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | COMPLETE | Audit-phase requirements frozen and Level 1 exact-head qualification recorded |
 | Core unit tests | `test/budtender/*.spec.ts` | COMPLETE | Includes negative/boundary and cross-phase integration tests |
@@ -158,7 +158,7 @@ Live Gaming Protocol operator/contract bindings are not deployed/qualified in th
 | BUD-ARCH-006 registered cloud save without wallet | BUD-0 | Access policy permits registered/no-wallet | access tests | BUD-0/GP-12 | PARTIAL | Implement cloud-save persistence |
 | BUD-ARCH-007 wallet disconnect preserves progression | BUD-0 | Core independent of wallet | hostile access/shared tests | BUD-0/GP-16 | COMPLETE | Persistence-layer regression when added |
 | BUD-ARCH-008 bounded deterministic offline progression | BUD-0 / BUD-AUDIT-5 | `OfflineProgression` pure domain calculator; 24h bound; replay/rollback protections; current BUD-1..4 remain offline-inert | offline boundary/adversarial tests | BUD-0 / BUD-AUDIT-5 | COMPLETE | Qualified on implementation SHA `c619c3fecbbb17ae34303209b908e78844d48051`; persistence must later own trusted cursor/source state before production exposure |
-| BUD-ARCH-009 UI not authoritative | BUD-0 / BUD-AUDIT-7 | Browser client renders detached application snapshots and sends sanctioned commands only | web-client API/authority tests | BUD-0 / BUD-AUDIT-7 | IMPLEMENTED — QUALIFICATION PENDING | Exact-head Level 1 qualification |
+| BUD-ARCH-009 UI not authoritative | BUD-0 / BUD-AUDIT-7 | Browser client renders detached application snapshots and sends sanctioned commands only | web-client API/authority tests | BUD-0 / BUD-AUDIT-7 | COMPLETE | Qualified on `9961bf25b7ee7d0fb750cfdbb6676d7fdc01d1ec`, run `37670777590` |
 | BUD-ARCH-010 versioned/migration-aware saves | BUD-0 | No save format/migration | none | BUD-0 | MISSING | Implement before production |
 | BUD-INV-001 no negative inventory | BUD-1 | ProductInventory bounds | BUD-1/BUD-3 tests | BUD-1 | COMPLETE | None |
 | BUD-INV-002 order served once | BUD-1 | served flag | BUD-1/BUD-2 tests | BUD-1 | COMPLETE | None |
@@ -208,7 +208,7 @@ The correct repository-grounded interpretation is:
 - BUD-1..BUD-4 deterministic simulation slice: implemented and remediated.
 - BUD-AUDIT-5 offline progression boundary: complete and exact-head Level 1 qualified on `c619c3fecbbb17ae34303209b908e78844d48051`.
 - BUD-AUDIT-6 application service boundary: complete and exact-head Level 1 qualified on `b80eb03b50526f470e3a8b778dc0329a27d95ef1`.
-- BUD-AUDIT-7 user-facing client: implemented; exact-head Level 1 qualification pending.
+- BUD-AUDIT-7 user-facing client: complete and exact-head Level 1 qualified on `9961bf25b7ee7d0fb750cfdbb6676d7fdc01d1ec`.
 - Shared Gaming Protocol source integration: implemented.
 - Live Gaming Protocol deployment: pending.
 - User-facing browser client: implemented; full production/mobile release remains incomplete.

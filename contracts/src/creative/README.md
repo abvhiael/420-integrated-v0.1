@@ -74,8 +74,8 @@ Current repository layers above Decision #10 are:
 
 HZ-4 deliberately does not create a second royalty system. StreamingRoyaltySettlement420 must be explicitly allowlisted by RoyaltyRouter420 governance.
 
-The Decision #10 deploy/seed script remains an HZ-1 development/reference harness; it is not a production deployment manifest for HZ-2/HZ-3/HZ-4.
+The Decision #10 deploy/seed script remains an HZ-1 development/reference harness; it is not a production deployment manifest for HZ-2/HZ-3/HZ-4. The consolidated HZ-AUDIT-2 deployment graph/package and HZ-AUDIT-3 authority/Registry bundle are the retained repository-side production architecture records.
 
 ## Deliberately deferred
 
-The repository does not currently define later production layers for disputes, AI Studio/provider execution, Awards, extended creator/fan economy, DDEX/interop adapters, archival operators, or full governance migration. Public-testnet promotion also still requires a consolidated HZ-1..HZ-4 deployment manifest and live environment qualification.
+The repository does not currently define later production layers for disputes, AI Studio/provider execution, Awards, extended creator/fan economy, DDEX/interop adapters, archival operators, or full governance migration. Public-testnet promotion must execute the retained consolidated deployment and authority/Registry bundles in an approved environment, select nonzero playback/settlement operator identities, retain governance and Registry transaction/receipt evidence, verify deployed runtime identities, and complete the later live qualification steps. Repository fixtures and local EVM qualification are not live evidence.

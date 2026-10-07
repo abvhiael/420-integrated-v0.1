@@ -19,7 +19,7 @@ for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,DOCS,COMPUTE):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
-if d.get("step")!="CMP-5.8" or d.get("status")!="QUALIFICATION_PENDING":
+if d.get("step")!="CMP-5.8" or d.get("status")!="COMPLETE":
     fail("candidate ledger state drift")
 rec=d.get("reconciliation",{})
 if rec.get("main_sha")!="ea76c951b683a2b75ad2e64902e6e99c3a0b06ea":

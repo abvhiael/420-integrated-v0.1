@@ -36,18 +36,26 @@ func main() {
 	mode := strings.ToLower(strings.TrimSpace(os.Getenv("REEFER_REVIEW_FEED_MODE")))
 	if mode == "poll" || mode == "health" {
 		statePath := strings.TrimSpace(os.Getenv("REEFER_REVIEW_FEED_CHECKPOINT"))
-		if statePath == "" { statePath = ".reefer-review/feed-operations.json" }
+		if statePath == "" {
+			statePath = ".reefer-review/feed-operations.json"
+		}
 		operations := &reeferreview.FeedOperations{
 			Path: statePath, Sources: registry, Ingestor: ingestor,
 		}
 		if mode == "health" {
 			health, err := operations.Health(context.Background())
-			if err != nil { log.Fatal(err) }
-			if err := json.NewEncoder(os.Stdout).Encode(health); err != nil { log.Fatal(err) }
+			if err != nil {
+				log.Fatal(err)
+			}
+			if err := json.NewEncoder(os.Stdout).Encode(health); err != nil {
+				log.Fatal(err)
+			}
 			return
 		}
 		log.Print("RR-8 polling enabled; checkpoints and source health persisted")
-		if err := operations.Run(context.Background(), 30*time.Second); err != nil { log.Fatal(err) }
+		if err := operations.Run(context.Background(), 30*time.Second); err != nil {
+			log.Fatal(err)
+		}
 		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)

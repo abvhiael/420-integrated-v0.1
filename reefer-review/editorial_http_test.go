@@ -11,7 +11,7 @@ import (
 
 func TestRR3HTTPEditorialJourney(t *testing.T) {
 	s := testService()
-	h := HTTP{Service: s}.Handler()
+	h := rr4HTTP(t, s).Handler()
 	ctx := context.Background()
 	p, err := s.CreateDraft(ctx, "writer.420", CreateDraftRequest{
 		IdempotencyKey: "http-rr3", Title: "Draft", Summary: "sum", Body: "first", Visibility: VisibilityPrivate,
@@ -21,7 +21,7 @@ func TestRR3HTTPEditorialJourney(t *testing.T) {
 	}
 
 	req := httptest.NewRequest(http.MethodGet, "/v1/editorial/publications?limit=20", nil)
-	req.Header.Set("X-420-Actor", "writer.420")
+	req.Header.Set("Authorization", "Bearer writer")
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -31,7 +31,7 @@ func TestRR3HTTPEditorialJourney(t *testing.T) {
 	update := []byte(`{"title":"Edited","summary":"new","body":"second","visibility":"PUBLIC"}`)
 	req = httptest.NewRequest(http.MethodPut, "/v1/publications/"+p.ID, bytes.NewReader(update))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-420-Actor", "writer.420")
+	req.Header.Set("Authorization", "Bearer writer")
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -39,7 +39,7 @@ func TestRR3HTTPEditorialJourney(t *testing.T) {
 	}
 
 	req = httptest.NewRequest(http.MethodGet, "/v1/publications/"+p.ID+"/revisions", nil)
-	req.Header.Set("X-420-Actor", "writer.420")
+	req.Header.Set("Authorization", "Bearer writer")
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -54,7 +54,7 @@ func TestRR3HTTPEditorialJourney(t *testing.T) {
 	}
 
 	req = httptest.NewRequest(http.MethodPost, "/v1/publications/"+p.ID+"/publish", nil)
-	req.Header.Set("X-420-Actor", "writer.420")
+	req.Header.Set("Authorization", "Bearer writer")
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -69,9 +69,9 @@ func TestRR3HTTPEditorialJourney(t *testing.T) {
 	}
 }
 
-func TestRR3HTTPPrivateReadUsesActorBoundary(t *testing.T) {
+func TestRR3HTTPPrivateReadUsesSessionBoundary(t *testing.T) {
 	s := testService()
-	h := HTTP{Service: s}.Handler()
+	h := rr4HTTP(t, s).Handler()
 	p, _ := s.CreateDraft(context.Background(), "writer.420", CreateDraftRequest{
 		IdempotencyKey: "http-private", Title: "Private", Body: "secret", Visibility: VisibilityPrivate,
 	})
@@ -84,7 +84,7 @@ func TestRR3HTTPPrivateReadUsesActorBoundary(t *testing.T) {
 		t.Fatalf("anonymous private leak: %d", rr.Code)
 	}
 	req = httptest.NewRequest(http.MethodGet, "/v1/publications/"+p.ID, nil)
-	req.Header.Set("X-420-Actor", "writer.420")
+	req.Header.Set("Authorization", "Bearer writer")
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -94,7 +94,7 @@ func TestRR3HTTPPrivateReadUsesActorBoundary(t *testing.T) {
 
 func TestRR3HTTPModerationHistoryAndTombstone(t *testing.T) {
 	s := testService()
-	h := HTTP{Service: s}.Handler()
+	h := rr4HTTP(t, s).Handler()
 	p, _ := s.CreateDraft(context.Background(), "writer.420", CreateDraftRequest{
 		IdempotencyKey: "http-mod", Title: "Moderate", Body: "body", Visibility: VisibilityPublic,
 	})
@@ -102,7 +102,7 @@ func TestRR3HTTPModerationHistoryAndTombstone(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/v1/publications/"+p.ID+"/moderate", bytes.NewReader([]byte(`{"action":"HIDE","reason":"policy"}`)))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-420-Actor", "moderator.420")
+	req.Header.Set("Authorization", "Bearer moderator")
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -110,7 +110,7 @@ func TestRR3HTTPModerationHistoryAndTombstone(t *testing.T) {
 	}
 
 	req = httptest.NewRequest(http.MethodGet, "/v1/publications/"+p.ID+"/moderation", nil)
-	req.Header.Set("X-420-Actor", "moderator.420")
+	req.Header.Set("Authorization", "Bearer moderator")
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK || !bytes.Contains(rr.Body.Bytes(), []byte("policy")) {
@@ -119,7 +119,7 @@ func TestRR3HTTPModerationHistoryAndTombstone(t *testing.T) {
 
 	req = httptest.NewRequest(http.MethodPost, "/v1/publications/"+p.ID+"/tombstone", bytes.NewReader([]byte(`{"reason":"withdraw"}`)))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-420-Actor", "writer.420")
+	req.Header.Set("Authorization", "Bearer writer")
 	rr = httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -127,12 +127,12 @@ func TestRR3HTTPModerationHistoryAndTombstone(t *testing.T) {
 	}
 }
 
-func TestRR3HTTPEditorialListRequiresActor(t *testing.T) {
-	h := HTTP{Service: testService()}.Handler()
+func TestRR3HTTPEditorialListRequiresSession(t *testing.T) {
+	h := rr4HTTP(t, testService()).Handler()
 	req := httptest.NewRequest(http.MethodGet, "/v1/editorial/publications?limit=20", nil)
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("want 403, got %d %s", rr.Code, rr.Body.String())
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("want 401, got %d %s", rr.Code, rr.Body.String())
 	}
 }

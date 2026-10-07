@@ -1,0 +1,98 @@
+name: 420Attention AUDIT-7 Qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420attention-*'
+    paths:
+      - 'attention/service/**'
+      - 'attention/web/**'
+      - 'contracts/src/attention/**'
+      - 'contracts/src/system/AttentionTreasury.sol'
+      - 'contracts/src/system/CannaseurCampaignRegistry.sol'
+      - 'contracts/test/Attention*420.t.sol'
+      - 'docs/apps/attention/**'
+      - 'docs/audit/420ATTENTION-AUDIT-7-QUALIFICATION.md'
+      - 'docs/audit/420ATTENTION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'scripts/verify-420attention-audit-7.py'
+      - '.github/workflows/420attention-audit-7.yml'
+  pull_request:
+    paths:
+      - 'attention/service/**'
+      - 'attention/web/**'
+      - 'contracts/src/attention/**'
+      - 'contracts/src/system/AttentionTreasury.sol'
+      - 'contracts/src/system/CannaseurCampaignRegistry.sol'
+      - 'contracts/test/Attention*420.t.sol'
+      - 'docs/apps/attention/**'
+      - 'docs/audit/420ATTENTION-AUDIT-7-QUALIFICATION.md'
+      - 'docs/audit/420ATTENTION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'scripts/verify-420attention-audit-7.py'
+      - '.github/workflows/420attention-audit-7.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  service-level-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Attention service dependencies
+        working-directory: attention/service
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Service static and policy checks
+        working-directory: attention/service
+        run: npm run check
+      - name: Service unit adversarial privacy reorg retry tests
+        working-directory: attention/service
+        run: npm test
+      - name: Service production-candidate build
+        working-directory: attention/service
+        run: npm run build
+      - name: AUDIT-7 repository verifier
+        run: python3 scripts/verify-420attention-audit-7.py
+
+  app-integration-level-2:
+    needs: service-level-1
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained Attention browser qualification
+        working-directory: attention/web
+        run: npm run qualify
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Retained focused Attention contract suite
+        working-directory: contracts
+        run: forge test --match-path 'test/Attention*420.t.sol' -vvv
+      - name: Browser-service contract verifier
+        run: python3 scripts/verify-420attention-audit-7.py

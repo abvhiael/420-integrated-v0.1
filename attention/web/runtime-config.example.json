@@ -1,0 +1,42 @@
+{
+  "schema": "420-attention-web-runtime-v1",
+  "network": {
+    "name": "420 Integrated testnet",
+    "chainId": "0x1a4",
+    "rpcUrl": "https://rpc.example.invalid",
+    "explorerUrl": "https://explorer.example.invalid"
+  },
+  "registry": {
+    "protocolRegistryAddress": "0x0000000000000000000000000000000000000434",
+    "attentionServiceId": "420/service/attention/v1",
+    "cannaseurServiceId": "420/service/cannaseur/v1",
+    "attentionTreasuryAddress": "0x0000000000000000000000000000000000000421",
+    "campaignRegistryAddress": "0x000000000000000000000000000000000000043b",
+    "attentionRouterAddress": "0x0000000000000000000000000000000000001001",
+    "consentRegistryAddress": "0x0000000000000000000000000000000000001002",
+    "proofRegistryAddress": "0x0000000000000000000000000000000000001003",
+    "rewardRegistryAddress": "0x0000000000000000000000000000000000001004"
+  },
+  "api": {
+    "baseUrl": "https://attention-api.example.invalid",
+    "projectionSchema": "420-attention-projection-v1"
+  },
+  "transactions": {
+    "minConfirmations": 1,
+    "pollIntervalMs": 1500,
+    "timeoutMs": 120000
+  },
+  "features": {
+    "walletConnection": true,
+    "campaignDiscovery": true,
+    "consentManagement": true,
+    "rewardClaims": true,
+    "sponsorCampaignManagement": true
+  },
+  "execution": {
+    "status": "TESTNET_MATERIALIZED",
+    "requireWalletChainMatch": true,
+    "requireCanonicalProjectionProvenance": true,
+    "requireReviewedTransaction": true
+  }
+}

@@ -4,7 +4,9 @@ pragma solidity ^0.8.24;
 import "../src/creative/deployment/HzDeploymentGraph420.sol";
 
 interface VmHzDeployment420Test {
-    function prank(address msgSender) external;
+    function prank(
+        address msgSender
+    ) external;
 }
 
 contract HzDeploymentGraph420Test {
@@ -33,12 +35,16 @@ contract HzDeploymentGraph420Test {
         require(d.streamingSettlementEpoch.governanceTimelock() == GOVERNANCE, "settlement/governance");
 
         require(address(d.workRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "work/profiles");
-        require(address(d.recordingRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "recording/profiles");
+        require(
+            address(d.recordingRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "recording/profiles"
+        );
         require(address(d.recordingRegistry.works()) == address(d.workRegistry), "recording/works");
         require(address(d.rightsRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "rights/profiles");
         require(address(d.rightsRegistry.works()) == address(d.workRegistry), "rights/works");
         require(address(d.rightsRegistry.recordings()) == address(d.recordingRegistry), "rights/recordings");
-        require(address(d.authorizationRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "auth/profiles");
+        require(
+            address(d.authorizationRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "auth/profiles"
+        );
         require(address(d.authorizationRegistry.works()) == address(d.workRegistry), "auth/works");
         require(address(d.authorizationRegistry.recordings()) == address(d.recordingRegistry), "auth/recordings");
         require(address(d.licenseRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "license/profiles");
@@ -53,21 +59,25 @@ contract HzDeploymentGraph420Test {
 
         require(address(d.catalogRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "catalog/profiles");
         require(address(d.catalogRegistry.recordings()) == address(d.recordingRegistry), "catalog/recordings");
-        require(address(d.catalogMetadataRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "metadata/profiles");
+        require(
+            address(d.catalogMetadataRegistry.creatorProfiles()) == address(d.creatorProfileRegistry),
+            "metadata/profiles"
+        );
         require(address(d.catalogMetadataRegistry.catalog()) == address(d.catalogRegistry), "metadata/catalog");
 
         require(address(d.mediaManifestRegistry.recordings()) == address(d.recordingRegistry), "media/recordings");
-        require(address(d.mediaManifestRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "media/profiles");
+        require(
+            address(d.mediaManifestRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "media/profiles"
+        );
         require(address(d.storageSourceRegistry.recordings()) == address(d.recordingRegistry), "storage/recordings");
-        require(address(d.storageSourceRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "storage/profiles");
+        require(
+            address(d.storageSourceRegistry.creatorProfiles()) == address(d.creatorProfileRegistry), "storage/profiles"
+        );
         require(address(d.playbackResolver.mediaManifests()) == address(d.mediaManifestRegistry), "resolver/media");
         require(address(d.playbackResolver.storageSources()) == address(d.storageSourceRegistry), "resolver/storage");
         require(address(d.playbackAccounting.recordings()) == address(d.recordingRegistry), "playback/recordings");
 
-        require(
-            d.streamingSettlementEpoch.playbackAccounting() == address(d.playbackAccounting),
-            "settlement/playback"
-        );
+        require(d.streamingSettlementEpoch.playbackAccounting() == address(d.playbackAccounting), "settlement/playback");
         require(
             address(d.streamingRevenueAllocator.settlements()) == address(d.streamingSettlementEpoch),
             "allocator/settlement"
@@ -80,10 +90,7 @@ contract HzDeploymentGraph420Test {
             address(d.streamingRoyaltySettlement.allocator()) == address(d.streamingRevenueAllocator),
             "royalty/allocator"
         );
-        require(
-            address(d.streamingRoyaltySettlement.royaltyRouter()) == address(d.royaltyRouter),
-            "royalty/router"
-        );
+        require(address(d.streamingRoyaltySettlement.royaltyRouter()) == address(d.royaltyRouter), "royalty/router");
     }
 
     function testGovernanceInitializationIsExplicitAndAuthorityBound() public {
@@ -117,8 +124,7 @@ contract HzDeploymentGraph420Test {
         require(d.workRegistry.rightsRegistry() == address(d.rightsRegistry), "work/rights");
         require(d.recordingRegistry.rightsRegistry() == address(d.rightsRegistry), "recording/rights");
         require(
-            d.recordingRegistry.authorizationRegistry() == address(d.authorizationRegistry),
-            "recording/authorization"
+            d.recordingRegistry.authorizationRegistry() == address(d.authorizationRegistry), "recording/authorization"
         );
         require(d.rightsRegistry.royaltyAccounting() == address(d.royaltyVault), "rights/accounting");
         require(d.authorizationRegistry.licenseRegistry() == address(d.licenseRegistry), "auth/license");
@@ -131,18 +137,19 @@ contract HzDeploymentGraph420Test {
     }
 
     function testZeroAuthorityOrTreasuryFailsClosed() public {
-        (bool zeroGovernance,) = address(this).call(
-            abi.encodeWithSelector(this.deployForRevert.selector, address(0), TREASURY)
-        );
+        (bool zeroGovernance,) =
+            address(this).call(abi.encodeWithSelector(this.deployForRevert.selector, address(0), TREASURY));
         require(!zeroGovernance, "zero governance accepted");
 
-        (bool zeroTreasury,) = address(this).call(
-            abi.encodeWithSelector(this.deployForRevert.selector, GOVERNANCE, address(0))
-        );
+        (bool zeroTreasury,) =
+            address(this).call(abi.encodeWithSelector(this.deployForRevert.selector, GOVERNANCE, address(0)));
         require(!zeroTreasury, "zero treasury accepted");
     }
 
-    function deployForRevert(address governance, address treasury) external {
+    function deployForRevert(
+        address governance,
+        address treasury
+    ) external {
         HzDeploymentGraph420.deploy(governance, treasury);
     }
 }

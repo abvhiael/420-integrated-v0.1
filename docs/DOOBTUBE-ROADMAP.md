@@ -108,6 +108,8 @@ Implement the canonical runtime:
 - observability;
 - health/readiness.
 
+**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition: `docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md`. V1 now has a stdlib-only versioned `/v1` backend with Wallet/chain/capability admission, durable SQLite schema/migration, replay-safe idempotency, opaque pagination/RFC3339 timestamps/stable errors, bounded durable jobs, public-only reorg/finality-aware feed projection and deterministic rebuild, raw-secret rejection, protected metrics, and dependency-aware health/readiness.
+
 **Exit:** clean build and requirement-mapped service/integration tests pass.
 
 ## DOOBTUBE-6 — Media processing, delivery and livestream integration

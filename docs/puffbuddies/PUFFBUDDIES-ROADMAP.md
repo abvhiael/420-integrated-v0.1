@@ -1666,6 +1666,24 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** exact dependency inventory and canonical service-ID bindings exist; stale/inactive/deprecated/wrong-chain inputs fail closed; authority inheritance/conflicts fail closed; Registry/AppStore/Analytics/derived/Verify boundaries pass; applicable repository verifiers pass; complete retained PuffBuddies suite passes on one exact SHA; durable evidence is recorded; Level-3/live deployment remains deferred.
 
+
+### PB-14 — Backend/API hardening
+
+**Purpose:** materialize and harden the authenticated PuffBuddies API/edge transport reserved by PB-0.17 and consumed by PB-11/PB-12, while preserving canonical application/domain authority and privacy boundaries.
+
+**Canonical requirements:** implement the explicit `/api/puffbuddies/v1` route contract for all qualified client surfaces; enforce HTTPS/allowed-host/origin policy, bounded Bearer sessions with expiry/revocation, strict method/path allowlisting, no-store/security headers, bounded content types/body sizes, duplicate-key JSON rejection, Content-Length consistency, mutation idempotency/replay protection, route/session rate limiting, bounded request correlation, privacy-safe audit metadata, generic error mapping, stale authority-generation rejection, and fail-closed dependency behavior; retain PB-11/PB-12 client compatibility and PB-13 authority boundaries; no public member/relationship/safety enumeration, admin force-authority route, contract/address/service-ID invention, production hostname/credential/deployment or live endpoint claim is introduced.
+
+**Affected components:** `puffbuddies/api/`, PB-11/PB-12 API clients for mutation idempotency, PB-14 targeted/regression tests, verifier/workflow, canonical definition/evidence and PB-0.19 reconciliation.
+
+**Qualification:** Level 1 exact-head app-scoped backend/API hardening qualification. PB-13 already completed Level-2 milestone D; PB-14 does not create another shared authority owner and therefore does not trigger a redundant Level-2 milestone.
+
+**Level-3 boundary:** current-main reconciliation, full Solidity inventory, Genesis/address-authority, 420 Integrated/global, Docs/global, Geth/fault/soak and deployment/config qualification remain deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.11, PB-0.12, PB-0.15, PB-0.17; PB-1 through **PB-13 — 420Integrated cross-app integration — COMPLETE**.
+
+**Exit criteria:** canonical backend/API transport exists; every PB-11/PB-12 endpoint is explicitly routed; transport/session/body/replay/rate-limit/audit/error/stale-generation controls fail closed; retained web/mobile clients and complete PuffBuddies regressions pass; PB-0/PB-13 authority verifiers remain green; durable exact-SHA evidence is recorded; live deployment and Level-3 remain deferred.
+
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

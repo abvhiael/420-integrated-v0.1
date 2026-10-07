@@ -1,6 +1,6 @@
 # BUD-AUDIT-5 — Offline Progression
 
-Status: IMPLEMENTED — Level 1 exact-head qualification pending
+Status: COMPLETE — Level 1 exact-head qualified
 
 ## Authority and scope
 
@@ -78,8 +78,8 @@ BUD-AUDIT-5 is COMPLETE only when:
 2. all invariants above are covered by tests;
 3. current BUD-1 through BUD-4 systems remain offline-inert;
 4. no chain/wallet dependency is introduced;
-5. the exact implementation SHA passes the directly applicable Budtender Level 1 qualification;
-6. durable audit evidence records the implementation SHA, workflow evidence, base SHA, limitations, deferred checks, and next roadmap step.
+5. the exact implementation SHA passes the directly applicable Budtender Level 1 qualification (satisfied by `c619c3fecbbb17ae34303209b908e78844d48051`, Budtender Qualification run `37659072145`, core job PASS);
+6. durable audit evidence records the implementation SHA, workflow evidence, base SHA, limitations, deferred checks, and next roadmap step (recorded in `docs/audit/BUD-AUDIT-5-EVIDENCE-2026-10-07.md`).
 
 ## Known limitation / next dependency
 

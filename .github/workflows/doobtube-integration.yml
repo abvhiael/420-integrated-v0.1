@@ -1,6 +1,10 @@
 name: DoobTube Level 2 integration
 
 on:
+  pull_request:
+    paths:
+      - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
+      - ".github/workflows/doobtube-integration.yml"
   workflow_dispatch:
 
 concurrency:

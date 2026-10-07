@@ -25,8 +25,8 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
     "replaceable user-facing video application/client layer",
     "420/service/media/v1",
     "no new protocol/service Registry identity",
-    "not added to \`config/genesis-applications.json\`",
-    "not added to \`config/genesis-consumer-services.json\`",
+    "not added to `config/genesis-applications.json`",
+    "not added to `config/genesis-consumer-services.json`",
     "no DoobTube-owned smart contract requirement",
     "DoobTube is **non-custodial by architecture**",
     "DOOBTUBE-ARCH-001",
@@ -99,8 +99,8 @@ for text, source in [
         assert forbidden not in text, f"{source}: forbidden readiness claim {forbidden!r}"
 
 for invariant in [
-    "DoobTube does not replace or rename \`420Media\`",
-    "\`420/service/media/v1\` remains the canonical Media service identity",
+    "DoobTube does not replace or rename `420Media`",
+    "`420/service/media/v1` remains the canonical Media service identity",
     "DoobTube creates no second Media protocol/service authority",
     "DOOBTUBE-0 allocates no frozen/reserved address",
     "DOOBTUBE-0 requires no DoobTube-owned smart contract",

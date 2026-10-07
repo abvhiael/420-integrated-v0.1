@@ -16,36 +16,49 @@ type Direction string
 
 type SessionState string
 
-const (
-	ProtocolWHIP Protocol = "whip"
-	ProtocolWHEP Protocol = "whep"
-	ProtocolWebRTC Protocol = "webrtc"
-	ProtocolSRT Protocol = "srt"
-	ProtocolRTMP Protocol = "rtmp"
-)
+const MaxEndpointBytes = 4096
 
-const (
-	DirectionIngress Direction = "ingress"
-	DirectionEgress  Direction = "egress"
-)
+const MaxCredentialRefBytes = 256
 
-const (
-	StateCreated SessionState = "created"
-	StateStarting SessionState = "starting"
-	StateActive SessionState = "active"
-	StateStopping SessionState = "stopping"
-	StateClosed SessionState = "closed"
-	StateFailed SessionState = "failed"
-)
+const MaxSessionDuration = 24 * time.Hour
 
-var (
-	ErrUnsupportedProtocol = errors.New("420media livegateway: unsupported protocol")
-	ErrInvalidEndpoint = errors.New("420media livegateway: invalid endpoint")
-	ErrInvalidTransition = errors.New("420media livegateway: invalid session transition")
-	ErrSessionExists = errors.New("420media livegateway: session exists")
-	ErrSessionNotFound = errors.New("420media livegateway: session not found")
-	ErrSecretInEndpoint = errors.New("420media livegateway: credentials must not be embedded in endpoint")
-)
+const ProtocolWHIP Protocol = "whip"
+
+const ProtocolWHEP Protocol = "whep"
+
+const ProtocolWebRTC Protocol = "webrtc"
+
+const ProtocolSRT Protocol = "srt"
+
+const ProtocolRTMP Protocol = "rtmp"
+
+const DirectionIngress Direction = "ingress"
+
+const DirectionEgress Direction = "egress"
+
+const StateCreated SessionState = "created"
+
+const StateStarting SessionState = "starting"
+
+const StateActive SessionState = "active"
+
+const StateStopping SessionState = "stopping"
+
+const StateClosed SessionState = "closed"
+
+const StateFailed SessionState = "failed"
+
+var ErrUnsupportedProtocol = errors.New("420media livegateway: unsupported protocol")
+
+var ErrInvalidEndpoint = errors.New("420media livegateway: invalid endpoint")
+
+var ErrInvalidTransition = errors.New("420media livegateway: invalid session transition")
+
+var ErrSessionExists = errors.New("420media livegateway: session exists")
+
+var ErrSessionNotFound = errors.New("420media livegateway: session not found")
+
+var ErrSecretInEndpoint = errors.New("420media livegateway: credentials must not be embedded in endpoint")
 
 // CredentialRef is an opaque operator-local reference. Secret material is resolved only
 // inside a transport driver and is never represented in chain-facing job state.
@@ -94,14 +107,14 @@ func New(drivers map[Protocol]Driver) (*Registry, error) {
 		}
 	}
 	return &Registry{
-		drivers: drivers,
+		drivers:  drivers,
 		sessions: make(map[string]Session),
-		now: time.Now,
+		now:      time.Now,
 	}, nil
 }
 
 func (r *Registry) Start(ctx context.Context, spec SessionSpec) (Session, error) {
-	if err := validateSpec(spec); err != nil {
+	if err := ValidateSpec(spec); err != nil {
 		return Session{}, err
 	}
 	driver, ok := r.drivers[spec.Protocol]
@@ -134,6 +147,46 @@ func (r *Registry) Start(ctx context.Context, spec SessionSpec) (Session, error)
 	active.State = StateActive
 	active.StartedAt = r.now()
 	r.sessions[spec.ID] = active
+	r.mu.Unlock()
+	return active, nil
+}
+
+func (r *Registry) Restart(ctx context.Context, id string) (Session, error) {
+	r.mu.Lock()
+	session, ok := r.sessions[id]
+	if !ok {
+		r.mu.Unlock()
+		return Session{}, ErrSessionNotFound
+	}
+	if session.State != StateFailed && session.State != StateClosed {
+		r.mu.Unlock()
+		return Session{}, ErrInvalidTransition
+	}
+	driver := r.drivers[session.Spec.Protocol]
+	session.State = StateStarting
+	session.LastError = ""
+	session.EndedAt = time.Time{}
+	r.sessions[id] = session
+	r.mu.Unlock()
+
+	if err := driver.Start(ctx, session.Spec); err != nil {
+		r.mu.Lock()
+		failed := r.sessions[id]
+		failed.State = StateFailed
+		failed.LastError = err.Error()
+		failed.EndedAt = r.now()
+		r.sessions[id] = failed
+		r.mu.Unlock()
+		return failed, err
+	}
+
+	r.mu.Lock()
+	active := r.sessions[id]
+	active.State = StateActive
+	active.StartedAt = r.now()
+	active.EndedAt = time.Time{}
+	active.LastError = ""
+	r.sessions[id] = active
 	r.mu.Unlock()
 	return active, nil
 }
@@ -181,14 +234,17 @@ func (r *Registry) Get(id string) (Session, bool) {
 	return session, ok
 }
 
-func validateSpec(spec SessionSpec) error {
+func ValidateSpec(spec SessionSpec) error {
 	if spec.ID == "" || spec.StreamRef == ([32]byte{}) || !supported(spec.Protocol) {
 		return ErrUnsupportedProtocol
 	}
 	if spec.Direction != DirectionIngress && spec.Direction != DirectionEgress {
 		return ErrInvalidEndpoint
 	}
-	if spec.MaxDuration < 0 {
+	if spec.MaxDuration < 0 || spec.MaxDuration > MaxSessionDuration {
+		return ErrInvalidEndpoint
+	}
+	if len(spec.Endpoint) == 0 || len(spec.Endpoint) > MaxEndpointBytes || len(spec.CredentialRef) > MaxCredentialRefBytes {
 		return ErrInvalidEndpoint
 	}
 	u, err := url.Parse(spec.Endpoint)

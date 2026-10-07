@@ -267,7 +267,16 @@ def bind_pair_relationship(bound: BoundEligibilityAuthorization, pair: PairRelat
     subject=ProfileId(bound.context.subject_id)
     if subject not in {pair.left_profile_id,pair.right_profile_id}:
         raise MatchingDenied("authorization subject is not pair participant")
-    return replace(bound,context=replace(bound.context,relationship=pair.state))
+    # Canonical BLOCKED pair state must propagate to the generic authorization deny bit
+    # so discovery/matching/messaging consumers cannot disagree about block supremacy.
+    return replace(
+        bound,
+        context=replace(
+            bound.context,
+            relationship=pair.state,
+            blocked=(pair.state == RelationshipState.BLOCKED) or bound.context.blocked,
+        ),
+    )
 
 
 def encode_intent(intent: DirectedIntent) -> dict[str,object]:

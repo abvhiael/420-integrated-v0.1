@@ -180,7 +180,7 @@ func (s *Service) SearchMailbox(ctx context.Context, actor string, req SearchReq
 			if s.Blobs == nil {
 				return SearchResult{}, errors.New("mail: private body storage unavailable for search")
 			}
-			body, err := s.Blobs.GetPrivate(ctx, actor, item.Message.BodyRef)
+			body, err := getPrivateVerified(ctx, s.Blobs, actor, item.Message.BodyRef, item.Message.BodyDigest)
 			if err != nil {
 				return SearchResult{}, err
 			}

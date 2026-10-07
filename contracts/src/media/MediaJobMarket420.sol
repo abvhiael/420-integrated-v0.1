@@ -73,6 +73,7 @@ contract MediaJobMarket420 is SystemAccess, I420System {
     error InvalidSLA();
     error DependenciesAlreadyBound();
     error MissingAttestation();
+    error InvalidDependency();
 
     event DependenciesBound(address indexed operatorRegistry, address indexed slaRegistry, address indexed settlement);
     event JobCreated(bytes32 indexed jobId, address indexed requester, bytes32 indexed capabilityId, bytes32 streamId, bytes32 jobKind, bytes32 slaPolicyId, uint256 maxSpend, uint64 deadline);
@@ -90,6 +91,9 @@ contract MediaJobMarket420 is SystemAccess, I420System {
     function bindDependencies(address operatorRegistry_, address slaRegistry_, address settlement_) external onlyGovernance {
         if (dependenciesBound) revert DependenciesAlreadyBound();
         if (operatorRegistry_ == address(0) || slaRegistry_ == address(0) || settlement_ == address(0)) revert ZeroAddress();
+        if (operatorRegistry_.code.length == 0 || slaRegistry_.code.length == 0 || settlement_.code.length == 0) {
+            revert InvalidDependency();
+        }
         operatorRegistry = operatorRegistry_;
         slaRegistry = slaRegistry_;
         settlement = settlement_;

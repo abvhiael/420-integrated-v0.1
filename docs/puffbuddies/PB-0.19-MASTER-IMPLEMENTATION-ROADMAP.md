@@ -81,6 +81,16 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Current PB-10 payments/premium scope
+
+Current **PB-10 — Payments and premium entitlements** promotes the premium/monetization work explicitly deferred by PB-0.2 while preserving PB-0.5/PB-0.7/PB-0.8/PB-0.9/PB-0.12/PB-0.16: canonical settlement remains 420Pay-owned, PuffBuddies owns only product feature entitlement, and no economic state can create or restore consent, bypass block/safety/lifecycle, buy protected private-person data, or become dating desirability/reputation. PB-10 implements the entitlement policy boundary; PB-11 later owns web-client mechanics.
+
+
+### Current PB-9 verification/reputation scope
+
+Current **PB-9 — Verification and reputation** promotes the advanced verification/reputation work explicitly deferred by PB-0.2, but remains constrained by PB-0.8/PB-0.9/PB-0.10/PB-0.13: bounded verification indicators may be presented narrowly; 420Verify is not interpersonal identity/reputation authority; safety/report history and economic state cannot become public reputation; and no universal desirability/trust/social-credit score is permitted. Cross-app reputation aggregation and portable external dating credentials remain deferred until a canonical issuer/verification authority exists.
+
+
 
 The implementation-phase numbering below is the original PB-0.19 planning map and is retained as historical scope guidance. The current numbered phase authority is `docs/puffbuddies/PUFFBUDDIES-ROADMAP.md` under **Post-PB-0 phase names** and any detailed step committed there. Where numbering conflicts, the current roadmap controls. In particular, current **PB-3 — Profiles** carries forward the profile/editing/media/mode/visibility/lifecycle-control portion of the legacy PB-2 planning scope; legacy PB-3 discovery/matching scope is split across current **PB-4 — Discovery** and **PB-5 — Likes and matching**; PB-4 carries only discovery/recommendation behavior and PB-5 owns likes, passes, reciprocal consent and match formation. This reconciliation changes numbering authority only and does not weaken any PB-0 invariant or silently claim implementation.
 
@@ -116,6 +126,10 @@ Integrate bounded 420Messenger/420Notifications capabilities after canonical Puf
 **PB-0 authorities:** PB-0.5, PB-0.8, PB-0.9, PB-0.13.
 **Required gates:** matched/unmatched authorization; unmatch/block/revocation races; stale Messenger capability rejection; notification privacy; dependency failure behavior.
 **Level 2 milestone B:** accumulated discovery/match/messaging/notification integration.
+
+### Current mapping for legacy safety scope
+
+The legacy PB-0.19 **PB-5 — Safety, moderation, block, report, and appeals** planning block predates the current phase reservation. Its implementation scope is carried forward by current **PB-8 — Safety and moderation**. This is a numbering/scope reconciliation only: PB-8 must preserve every PB-0.10/PB-0.11/PB-0.12 safety, privacy, retention, appeal and lifecycle invariant and does not claim live moderation infrastructure.
 
 ### PB-5 — Safety, moderation, block, report, and appeals
 Implement private safety cases, report evidence boundaries, block/unmatch behavior, moderation actions, restriction/suspension/ban handling, appeal workflow, least-privilege moderation access, and auditability without public reputation.

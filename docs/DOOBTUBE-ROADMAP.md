@@ -237,6 +237,8 @@ Evidence must include:
 
 ## DOOBTUBE-12 — Production-equivalent public-testnet qualification
 
+**Status: TRANSFERRED TO `docs/ROADMAP.md` TESTNET HANDOFF / BLOCKED ON LIVE TESTNET.**
+
 Blocked until a deployable repository-qualified release and approved public testnet exist.
 
 Retain evidence for:
@@ -255,6 +257,8 @@ Retain evidence for:
 
 ## DOOBTUBE-13 — Genesis / production release
 
+**Status: TRANSFERRED TO `docs/ROADMAP.md` TESTNET/RELEASE HANDOFF / BLOCKED ON DOOBTUBE-12.**
+
 Resolve final Genesis catalog/service disposition and production deployment.
 
 Require:
@@ -269,3 +273,15 @@ Require:
 - separate readiness declarations.
 
 **Exit:** only after all earlier required phases are complete may Genesis-ready or production-ready be considered.
+
+
+## Post-repository handoff
+
+Repository-side DOOBTUBE work is complete through **DOOBTUBE-11**.
+
+The remaining live-environment phases have been transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`:
+
+- **DOOBTUBE-12 — production-equivalent public-testnet qualification**;
+- **DOOBTUBE-13 — Genesis / production release**.
+
+Those phases require real deployment/environment evidence and must not be completed from repository CI, loopback/local fixtures or synthetic manifests. This app-specific roadmap has no remaining repository-side implementation task before the testnet gate.

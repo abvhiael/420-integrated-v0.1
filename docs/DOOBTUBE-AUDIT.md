@@ -36,14 +36,11 @@ The only authoritative video-upload/basic-livestreaming application/service defi
 
 DOOBTUBE-0 now resolves the application identity, 420Media relationship, service/Registry disposition, Genesis disposition, contract-ownership default, and authority/trust/data/privacy/moderation/custody boundaries. The following later-phase properties remain **UNDEFINED / MISSING**:
 
-- detailed user-facing product scope;
 - exact later dependency graph and adopted interfaces;
 - service/runtime topology;
 - frontend routes and workflows;
 - backend/API/indexer requirements;
 - storage/transcoding/streaming model;
-- monetization model;
-- moderation model;
 - external dependencies;
 - exact 420Integrated integrations;
 - deployment topology;
@@ -179,8 +176,7 @@ Present after this remediation:
 
 Still required before a code-complete declaration:
 
-- canonical architecture overview and component map;
-- user workflow/product scope;
+- complete component/dependency map;
 - API/interface/event documentation as applicable;
 - state machine;
 - authorization/security model;
@@ -236,9 +232,9 @@ There are no repository-canonical DoobTube feature requirements yet. The only ex
 | Registry/service identity decision exists | `docs/DOOBTUBE-ARCHITECTURE.md` | No new DoobTube protocol/service ID; resolve `420/service/media/v1` | Structural verifier | Architecture doc | COMPLETE | AppStore/listing metadata, if needed, is later non-authoritative work |
 | Genesis disposition is defined | Genesis catalogs + `docs/DOOBTUBE-ARCHITECTURE.md` | No new frozen app or consumer-service entry | Structural verifier | Architecture doc | COMPLETE | Future promotion requires explicit separate decision |
 | Smart-contract responsibility is defined | `docs/DOOBTUBE-ARCHITECTURE.md` | No DoobTube-owned contract required by DOOBTUBE-0 | Structural verifier | Architecture doc | COMPLETE | Revisit only if DOOBTUBE-1..3 prove necessity |
-| Frontend/workflows exist | None | None | None | None | MISSING | Implement after scope freeze |
+| Frontend/workflows are canonically specified | `docs/DOOBTUBE-PRODUCT-SCOPE.md` | V1 workflow requirements/routes/state machines frozen; runtime not yet implemented | Structural verifier | Product scope | COMPLETE for DOOBTUBE-1 | Implement in later runtime/frontend steps |
 | Backend/API/indexer/workers exist | None | None | None | None | MISSING | Implement after architecture freeze |
-| 420Integrated dependencies are canonical | None | None | None | None | MISSING | Freeze dependency graph and trust boundaries |
+| Product dependency needs are identified | `docs/DOOBTUBE-PRODUCT-SCOPE.md` | Required product capabilities are frozen; exact owning dependencies/interfaces remain DOOBTUBE-2 | Structural verifier | Product scope | PARTIAL | DOOBTUBE-2 dependency/trust freeze |
 | Build is reproducible | None | No package | None | None | BLOCKED | Implementation/build instructions |
 | Security model/threat model exists | None | None | None | None | MISSING | Define before security qualification |
 | Tests prove requirements | None | None | None | None | BLOCKED | Requirements and implementation first |
@@ -301,14 +297,13 @@ No DoobTube runtime test suites exist. Only the new structural baseline verifier
 No source-level DoobTube vulnerability was identified because there is no DoobTube source surface. **SECURITY QUALIFIED remains NO**.
 
 ### Documentation
-Baseline audit/name/roadmap are introduced. Product, architecture, developer, user, operator, deployment and security documentation remain missing.
+Canonical name, architecture, audit, roadmap and V1 product/workflow scope are present. Developer, final user, operator, deployment and full security documentation remain later roadmap work.
 
 ### Integration
 No DoobTube ecosystem integration is canonically defined. 420Media integrations must not be inherited by assumption.
 
 ### Outstanding blockers
-1. **product definition** — DOOBTUBE-1 canonical workflows and v1 feature requirements;
-2. **protocol dependency decision** — DOOBTUBE-2 exact dependency graph, interfaces and failure semantics;
+1. **protocol dependency decision** — DOOBTUBE-2 exact dependency graph, interfaces and failure semantics;
 3. **code** — all DoobTube runtime/application implementation;
 4. **code/tests** — requirement-mapped unit/integration/security qualification;
 5. **infrastructure** — deployment/runtime/service topology;
@@ -335,4 +330,4 @@ No DoobTube ecosystem integration is canonically defined. 420Media integrations 
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 is complete. Next: DOOBTUBE-1 — Product scope and canonical user workflows.**
+**DOOBTUBE-0 and DOOBTUBE-1 are complete. Next: DOOBTUBE-2 — Dependency and trust-boundary freeze.**

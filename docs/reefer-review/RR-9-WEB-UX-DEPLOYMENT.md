@@ -4,7 +4,7 @@
 
 Canonical RR-9 requires production frontend/backend configuration, API routing, security headers/rate limits, logs/metrics/alerts, backup/restore and browser E2E/accessibility/load qualification.
 
-**PARTIAL / not qualified for production.** Current repository command `cmd/reefer-review/main.go` explicitly fails closed for non-development deployment modes; real session verifier, live dependencies and operator deployment configuration are not connected. Do not change this gate merely to obtain a green test.
+**PARTIAL / not qualified for production.** Production startup remains fail-closed until real dependency composition is qualified. Current repository command `cmd/reefer-review/main.go` explicitly fails closed for non-development deployment modes; real session verifier, live dependencies and operator deployment configuration are not connected. Do not change this gate merely to obtain a green test.
 
 ## Repository controls delivered
 

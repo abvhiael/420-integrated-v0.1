@@ -36,7 +36,15 @@ jobs:
           go-version: '1.23.x'
 
       - name: Go format
-        run: test -z "$(gofmt -l reefer-review cmd/reefer-review cmd/reefer-news-sync)"
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(gofmt -l reefer-review cmd/reefer-review cmd/reefer-news-sync)"
+          if [ -n "$files" ]; then
+            printf 'gofmt required for:\n%s\n' "$files" >&2
+            gofmt -d $files
+            exit 1
+          fi
 
       - name: RR-1 unit and integration tests
         run: go test ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/...

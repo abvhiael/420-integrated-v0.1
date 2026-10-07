@@ -19,8 +19,8 @@ const IntegrationOutboxSchemaVersion = 1
 type IntegrationOperationKind string
 
 const (
-	IntegrationSearchUpsert IntegrationOperationKind = "SEARCH_UPSERT"
-	IntegrationSearchDelete IntegrationOperationKind = "SEARCH_DELETE"
+	IntegrationSearchUpsert  IntegrationOperationKind = "SEARCH_UPSERT"
+	IntegrationSearchDelete  IntegrationOperationKind = "SEARCH_DELETE"
 	IntegrationNotifications IntegrationOperationKind = "NOTIFICATIONS"
 	IntegrationMail          IntegrationOperationKind = "MAIL"
 )

@@ -23,14 +23,30 @@ func TestRR3ClientEditorialParity(t *testing.T) {
 
 	c := Client{BaseURL: server.URL}
 	ctx := context.Background()
-	if _, err := c.Ready(ctx); err != nil { t.Fatal(err) }
-	if _, err := c.GetPublication(ctx, "writer.420", "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.UpdatePublication(ctx, "writer.420", "pub_1", map[string]any{"title":"A"}); err != nil { t.Fatal(err) }
-	if _, err := c.Moderate(ctx, "moderator.420", "pub_1", "HIDE", "policy"); err != nil { t.Fatal(err) }
-	if _, err := c.Tombstone(ctx, "writer.420", "pub_1", "withdraw"); err != nil { t.Fatal(err) }
-	if _, err := c.Revisions(ctx, "writer.420", "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.ModerationHistory(ctx, "moderator.420", "pub_1"); err != nil { t.Fatal(err) }
-	if _, err := c.ListEditorial(ctx, "writer.420", "", 20); err != nil { t.Fatal(err) }
+	if _, err := c.Ready(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.GetPublication(ctx, "writer.420", "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.UpdatePublication(ctx, "writer.420", "pub_1", map[string]any{"title": "A"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Moderate(ctx, "moderator.420", "pub_1", "HIDE", "policy"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Tombstone(ctx, "writer.420", "pub_1", "withdraw"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Revisions(ctx, "writer.420", "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.ModerationHistory(ctx, "moderator.420", "pub_1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.ListEditorial(ctx, "writer.420", "", 20); err != nil {
+		t.Fatal(err)
+	}
 
 	want := []string{
 		"GET /readyz",

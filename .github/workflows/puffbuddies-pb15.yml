@@ -1,0 +1,78 @@
+name: PuffBuddies PB-15 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb*.py"
+      - "scripts/verify-genesis-dapps.py"
+      - "scripts/verify-reg-audit-7-integration.py"
+      - "scripts/verify-420pay-audit.py"
+      - "scripts/verify-420messenger-audit.py"
+      - ".github/workflows/puffbuddies-pb15.yml"
+  push:
+    branches: ["puffbuddies-pb15-qualification-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb*.py"
+      - "scripts/verify-genesis-dapps.py"
+      - "scripts/verify-reg-audit-7-integration.py"
+      - "scripts/verify-420pay-audit.py"
+      - "scripts/verify-420messenger-audit.py"
+      - ".github/workflows/puffbuddies-pb15.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb15:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: PB-15 Level 1 qualification reconciliation
+        run: python3 scripts/verify-puffbuddies-pb15.py
+      - name: Compile complete PuffBuddies package
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-15 Level 2 complete retained PuffBuddies suite
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: PB-15 Level 2 retained web release build
+        working-directory: puffbuddies/web
+        run: npm test && npm run build
+      - name: PB-15 Level 2 retained mobile release bundle
+        working-directory: puffbuddies/mobile
+        run: npm test && npm run build
+      - name: Verify canonical PB-0 authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Verify retained PB-13 cross-app boundary
+        run: python3 scripts/verify-puffbuddies-pb13.py
+      - name: Verify retained PB-14 API hardening
+        run: python3 scripts/verify-puffbuddies-pb14.py
+      - name: Verify Genesis dApp service compatibility
+        run: python3 scripts/verify-genesis-dapps.py
+      - name: Verify Registry integration compatibility
+        run: python3 scripts/verify-reg-audit-7-integration.py
+      - name: Verify 420Pay compatibility
+        run: python3 scripts/verify-420pay-audit.py
+      - name: Verify 420Messenger compatibility
+        run: python3 scripts/verify-420messenger-audit.py
+      - name: Qualification privacy authority and deployment negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(FORCE_MATCH|FORCE_UNBLOCK|ADMIN_MATCH|BLOCK_OVERRIDE|UNSUSPEND|UNBAN)' puffbuddies/api puffbuddies/integrations
+          ! grep -RIE '(private_key|mnemonic|seed_phrase|government_id|date_of_birth|production_secret|provider_secret)[[:space:]]*[:=]' puffbuddies
+          ! grep -RIE '(public_member_search|public_match_graph|public_block_graph|public_safety_graph|public_moderation_graph)[[:space:]]*[:=]' puffbuddies
+          ! grep -RIE '(deploymentStatus|distributionStatus)[[:space:]]*[:=][[:space:]]*["'"']?(live|production|mainnet)' puffbuddies || true

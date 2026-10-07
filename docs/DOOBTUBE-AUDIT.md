@@ -36,12 +36,9 @@ The only authoritative video-upload/basic-livestreaming application/service defi
 
 DOOBTUBE-0 now resolves the application identity, 420Media relationship, service/Registry disposition, Genesis disposition, contract-ownership default, and authority/trust/data/privacy/moderation/custody boundaries. The following later-phase properties remain **UNDEFINED / MISSING**:
 
-- exact later dependency graph and adopted interfaces;
 - service/runtime topology;
 - backend/API/indexer requirements;
 - storage/transcoding/streaming model;
-- external dependencies;
-- exact 420Integrated integrations;
 - deployment topology;
 - exact Registry/application listing metadata if later required;
 - implementation/build/test/deployment acceptance evidence.
@@ -298,10 +295,9 @@ No source-level DoobTube vulnerability was identified because there is no DoobTu
 Canonical name, architecture, audit, roadmap and V1 product/workflow scope are present. Developer, final user, operator, deployment and full security documentation remain later roadmap work.
 
 ### Integration
-No DoobTube ecosystem integration is canonically defined. 420Media integrations must not be inherited by assumption.
+DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. Direct dependencies are Registry, Wallet/Smart Account authority, 420Media, optional Identity, Rights, Storage/Resource, Search and Notifications; Pay/Compute remain transitive through Media. Runtime adapters are not yet implemented.
 
 ### Outstanding blockers
-1. **protocol dependency decision** — DOOBTUBE-2 exact dependency graph, interfaces and failure semantics;
 3. **code** — all DoobTube runtime/application implementation;
 4. **code/tests** — requirement-mapped unit/integration/security qualification;
 5. **infrastructure** — deployment/runtime/service topology;
@@ -328,4 +324,4 @@ No DoobTube ecosystem integration is canonically defined. 420Media integrations 
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 and DOOBTUBE-1 are complete. Next: DOOBTUBE-2 — Dependency and trust-boundary freeze.**
+**DOOBTUBE-0 through DOOBTUBE-2 are complete. Next: DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture.**

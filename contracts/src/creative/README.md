@@ -64,6 +64,20 @@ forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig 
 
 The generated manifest contains public accounts, deployed contract addresses, Creator/Work/Recording/License/transfer IDs, contributor-credit IDs, settlement IDs, version numbers and expected economic state. It deliberately excludes all private keys. CI executes the same harness, validates the critical fixture fields and uploads the JSON as the `creative-kernel-v1-fixture` artifact.
 
-## Deliberately deferred from the kernel
+## 420Hz layers above the HZ-1 kernel
 
-The package does not yet implement the later production layers for disputes, streaming Merkle settlement, AI provider execution, Awards, creator economy, DDEX/interop adapters, archival operators, or full governance migration. Those modules attach to these stable kernel boundaries after the Decision #10 acceptance harness passes.
+Current repository layers above Decision #10 are:
+
+- HZ-2 catalog/presentation: creator-authorized releases, ordered active-recording tracklists, versioned content-addressed presentation metadata, and rebuildable public catalog/discovery projections.
+- HZ-3 media/playback: immutable media-manifest revisions, provider-neutral storage replicas, deterministic playback resolution, and replay-protected aggregate playback accounting.
+- HZ-4 settlement: governance-controlled settlement epochs, deterministic per-recording streaming allocation, exact-value STREAM royalty routing through the existing RoyaltyRouter420/RoyaltyVault420 stack, and a rebuildable streaming-settlement projection.
+
+HZ-4 deliberately does not create a second royalty system. StreamingRoyaltySettlement420 must be explicitly allowlisted by RoyaltyRouter420 governance.
+
+HZ-AUDIT-4 STREAM economics retain version-1 `RevenueType.STREAM` schedules only for the RecordingClass values with canonical kernel split terms: ORIGINAL (12.5% Work / 0% Source / 85% Current Recording / 2.5% Protocol) and REMIX (10% Work / 15% immediate Source / 72.5% Current Recording / 2.5% Protocol). Both schedules use deterministic `effectiveAt = 0` and full-field terms-hash commitments. Other RecordingClass values intentionally have no STREAM schedule until explicit canonical economics are adopted.
+
+The Decision #10 deploy/seed script remains an HZ-1 development/reference harness; it is not a production deployment manifest for HZ-2/HZ-3/HZ-4. The consolidated HZ-AUDIT-2 deployment graph/package and HZ-AUDIT-3 authority/Registry bundle are the retained repository-side production architecture records.
+
+## Deliberately deferred
+
+The repository does not currently define later production layers for disputes, AI Studio/provider execution, Awards, extended creator/fan economy, DDEX/interop adapters, archival operators, or full governance migration. Public-testnet promotion must execute the retained consolidated deployment and authority/Registry bundles in an approved environment, select nonzero playback/settlement operator identities, retain governance and Registry transaction/receipt evidence, verify deployed runtime identities, and complete the later live qualification steps. Repository fixtures and local EVM qualification are not live evidence.

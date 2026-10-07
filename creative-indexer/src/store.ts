@@ -35,23 +35,63 @@ export class CreativeIndexerStore {
       const client = await this.pool.connect();
       try {
         await client.query('BEGIN');
-        const inserted = await client.query(
-          `INSERT INTO event_journal
-            (event_key, block_number, block_hash, tx_hash, log_index, module_key, event_type, payload)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8::jsonb)
-           ON CONFLICT (event_key) DO NOTHING
-           RETURNING event_key`,
-          [event.eventKey, event.blockNumber, event.blockHash, event.txHash, event.logIndex, event.moduleKey, event.eventType, JSON.stringify(event.payload)],
+
+        const prior = await client.query(
+          `SELECT block_number,block_hash,tx_index,tx_hash,log_index
+           FROM event_journal WHERE event_key=$1`,
+          [event.eventKey],
         );
-        if (inserted.rowCount === 1) {
-          await client.query(
-            `INSERT INTO indexed_blocks(block_number, block_hash, canonical, finalized)
-             VALUES ($1,$2,true,true)
-             ON CONFLICT (block_number) DO UPDATE SET block_hash=EXCLUDED.block_hash, canonical=true, finalized=true`,
-            [event.blockNumber, event.blockHash],
-          );
-          await this.project(client, event);
+        if (prior.rowCount === 1) {
+          const row = prior.rows[0];
+          const sameProvenance =
+            Number(row.block_number) === event.blockNumber
+            && row.block_hash === event.blockHash
+            && Number(row.tx_index) === (event.transactionIndex ?? 0)
+            && row.tx_hash === event.txHash
+            && Number(row.log_index) === event.logIndex;
+          if (!sameProvenance) throw new Error(`event replay provenance mismatch: ${event.eventKey}`);
         }
+
+        const block = await client.query(
+          `INSERT INTO indexed_blocks(block_number, block_hash, parent_hash, canonical, finalized)
+           VALUES ($1,$2,$3,true,$4)
+           ON CONFLICT (block_number) DO UPDATE SET
+             parent_hash=COALESCE(indexed_blocks.parent_hash, EXCLUDED.parent_hash),
+             canonical=true,
+             finalized=indexed_blocks.finalized OR EXCLUDED.finalized
+           WHERE indexed_blocks.block_hash=EXCLUDED.block_hash
+             AND (
+               indexed_blocks.parent_hash IS NULL
+               OR EXCLUDED.parent_hash IS NULL
+               OR indexed_blocks.parent_hash=EXCLUDED.parent_hash
+             )
+           RETURNING block_number`,
+          [event.blockNumber, event.blockHash, event.parentHash ?? null, event.finalized ?? false],
+        );
+        if (block.rowCount !== 1) {
+          throw new Error(`indexed block provenance conflict at block ${event.blockNumber}`);
+        }
+
+        if (prior.rowCount === 0) {
+          await client.query(
+            `INSERT INTO event_journal
+              (event_key, block_number, block_hash, tx_index, tx_hash, log_index, module_key, event_type, payload)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`,
+            [
+              event.eventKey,
+              event.blockNumber,
+              event.blockHash,
+              event.transactionIndex ?? 0,
+              event.txHash,
+              event.logIndex,
+              event.moduleKey,
+              event.eventType,
+              JSON.stringify(event.payload),
+            ],
+          );
+          await this.projectCanonicalEvent(client, event);
+        }
+
         await client.query('COMMIT');
       } catch (error) {
         await client.query('ROLLBACK');
@@ -62,7 +102,7 @@ export class CreativeIndexerStore {
     }
   }
 
-  private async project(c: PoolClient, e: CanonicalEvent): Promise<void> {
+  async projectCanonicalEvent(c: PoolClient, e: CanonicalEvent): Promise<void> {
     const p = e.payload;
     switch (e.eventType) {
       case 'MODULE_REGISTERED':

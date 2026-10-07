@@ -53,12 +53,13 @@ Apply the shared GEN-SVC threat model specifically to Media: content/rights abus
 
 **Status: COMPLETE (Level 3 repository phase closeout).** Exact qualified implementation SHA `f0c68a0e5150111b97cebbcc0b8cb38e853314c2`. Canonical Level-3 owners are green on that SHA: 420Media audit `37534893490`, Solidity Contracts `37534893468`, Genesis Address Authority `37534893417`, 420 Integrated Qualification `37534893522`, 420Docs Qualification `37534893407`, and 420Media Anvil Integration `37534893508`. Durable evidence: `docs/audit/420MEDIA-AUDIT-11-QUALIFICATION.md`. Later live/testnet/Genesis gates remain MEDIA-AUDIT-12/13.
 
-## MEDIA-AUDIT-12 — Production-equivalent public-testnet qualification
-Deploy one exact release lineage with real required dependencies. Retain chain/network/genesis identity, exact SHA, contract/service addresses or Registry records, runtime hashes where applicable, live upload and livestream journeys, Pay/Compute/Storage/Identity/Rights/Search/Notifications evidence, reorg/restart/recovery, abuse/rate-limit/secret handling, monitoring and rollback evidence.
+## Repository audit roadmap closeout
 
-Repository-local simulation is not live-testnet completion evidence.
+Repository-side MEDIA-AUDIT work is complete through **MEDIA-AUDIT-11**.
 
-## MEDIA-AUDIT-13 — Genesis / production release
-Resolve whether 420Media requires explicit promotion into the frozen Genesis application catalog. Bind final production endpoints/configuration, Registry publication, admin/deployer handoff, secrets, monitoring/SLOs, backups/recovery, incident response, final security review and exact-release evidence.
+The remaining live-environment phases have been transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`:
 
-Final closeout must report CODE, BUILD, CONTRACT, TEST, DOCUMENTATION, INTEGRATION, SECURITY, TESTNET, GENESIS and PRODUCTION readiness separately.
+- **MEDIA-AUDIT-12 — production-equivalent public-testnet qualification**;
+- **MEDIA-AUDIT-13 — Genesis / production release**.
+
+These are no longer unfinished repository-audit remediation steps. They remain blocked on the real testnet/release environment and must not be inferred complete from repository CI, local Anvil, fixtures or synthetic evidence.

@@ -81,6 +81,10 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Current PB-16 security/privacy-audit scope
+
+Current **PB-16 — Security/privacy audit** is the dedicated app-scoped security/privacy review after PB-15 milestone E. It audits the accumulated implementation against PB-0 privacy, consent, threat/trust, safety, lifecycle, visibility and non-goal authorities, remediates concrete repository findings, and re-runs directly relevant retained app/client/authority gates. PB-16 is Level 1 audit qualification, not the comprehensive Level-3 repository closeout. Closed/public testnet remain PB-17/PB-18; final repository-wide reconciliation/qualification remains later closeout work.
+
 ### Current PB-15 qualification scope
 
 Current **PB-15 — Qualification** promotes the app-specific release-candidate qualification portion of the legacy PB-0.19 release-candidate boundary. It freezes and qualifies accumulated PB-1 through PB-14 behavior through one exact-head retained PuffBuddies suite, web/mobile release builds, dependency compatibility verification, security/adversarial/static gates and durable evidence reconciliation. This is **Level 2 milestone E**, not the comprehensive repository-wide Level-3 closeout. Under the current phase-based audit policy, final reconciliation with then-current `main`, canonical full Solidity/Genesis/global/Docs/Geth/deployment qualification and monolithic merge-candidate evidence remain later Level-3 work after the required pre-closeout roadmap phases.

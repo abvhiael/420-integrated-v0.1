@@ -7,7 +7,7 @@ Date: 2026-10-06
 
 ## Executive determination
 
-DoobTube is **not currently an implemented or canonically specified application in this repository**.
+DoobTube has **no runtime implementation yet**, but DOOBTUBE-0 now canonically specifies its application/client architecture in `docs/DOOBTUBE-ARCHITECTURE.md`.
 
 No `420Video` or `DoobTube` service ID, application-catalog entry, roadmap, architecture document, protocol specification, contract namespace, source directory, package, frontend, backend, API, indexer, SDK, deployment manifest, environment template, test suite, CI workflow, audit record, qualification evidence, deployment record, reserved/frozen address, Registry definition, PR, issue, or branch was found on the audited `main`.
 
@@ -280,7 +280,7 @@ Future implementation commits require their own exact-head build, unit/integrati
 **DoobTube**
 
 ### Architecture discovered
-No DoobTube architecture exists. The adjacent canonical 420Media architecture is a separate off-chain-heavy media service with on-chain operator/capability/stream/job/SLA/settlement primitives, Go runtime/API/SDK, web frontend, projections and local Anvil qualification.
+DoobTube is now canonically defined as a replaceable user-facing video application/client that consumes the existing `420/service/media/v1` authority. It creates no second Media service, frozen Genesis app, frozen/reserved address, or DoobTube-owned contract at DOOBTUBE-0. The adjacent canonical 420Media architecture remains the separate off-chain-heavy media service with on-chain operator/capability/stream/job/SLA/settlement primitives, Go runtime/API/SDK, web frontend, projections and local Anvil qualification.
 
 ### Files
 - expected DoobTube runtime files: undefined until architecture is adopted

@@ -25,7 +25,30 @@ Set `PORT` to use another local port.
 ```bash
 npm run check
 npm test
+npm run security
+npm run ops
 ```
+
+## Deployment and operations
+
+Default repository-stage operation remains loopback-only at `127.0.0.1:4207`.
+
+Runtime configuration:
+
+- `HOST`
+- `PORT`
+- `BUDTENDER_PUBLIC_ORIGIN`
+
+Any non-loopback bind requires an explicit HTTPS public origin.
+
+Operational probes:
+
+- `GET /healthz` — liveness
+- `GET /readyz` — readiness
+
+SIGTERM/SIGINT initiate graceful listener shutdown after readiness is withdrawn.
+
+See `docs/budtender/BUD-AUDIT-10-OPERATIONS-RUNBOOK.md`.
 
 ## Authority model
 

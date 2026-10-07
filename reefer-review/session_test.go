@@ -31,8 +31,9 @@ func rr4Claims(subject string, capabilities ...string) SessionClaims {
 		ChainID:      420,
 		Network:      "testnet",
 		IssuedAt:     now.Add(-time.Minute),
-		ExpiresAt:    now.Add(time.Hour),
-		Capabilities: caps,
+		ExpiresAt:      now.Add(time.Hour),
+		IdentityActive: true,
+		Capabilities:   caps,
 	}
 }
 
@@ -66,6 +67,7 @@ func TestRR4SessionValidationBoundaries(t *testing.T) {
 	}{
 		{"expired", func() SessionClaims { c := valid; c.ExpiresAt = now.Add(-time.Second); return c }(), ErrSessionExpired},
 		{"revoked", func() SessionClaims { c := valid; c.Revoked = true; return c }(), ErrSessionRevoked},
+		{"inactive-identity", func() SessionClaims { c := valid; c.IdentityActive = false; return c }(), ErrSessionScope},
 		{"wrong-audience", func() SessionClaims { c := valid; c.Audience = "other/service"; return c }(), ErrSessionInvalid},
 		{"wrong-chain", func() SessionClaims { c := valid; c.ChainID = 1; return c }(), ErrSessionScope},
 		{"wrong-network", func() SessionClaims { c := valid; c.Network = "mainnet"; return c }(), ErrSessionScope},

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS event_journal (
   event_key TEXT PRIMARY KEY,
   block_number BIGINT NOT NULL,
   block_hash TEXT NOT NULL,
+  tx_index INTEGER NOT NULL DEFAULT 0,
   tx_hash TEXT NOT NULL,
   log_index INTEGER NOT NULL,
   module_key TEXT NOT NULL,
@@ -19,6 +20,11 @@ CREATE TABLE IF NOT EXISTS event_journal (
   payload JSONB NOT NULL,
   UNIQUE (block_hash, tx_hash, log_index)
 );
+
+ALTER TABLE event_journal ADD COLUMN IF NOT EXISTS tx_index INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS event_journal_canonical_order_idx
+  ON event_journal (block_number, tx_index, log_index, event_key);
 
 CREATE TABLE IF NOT EXISTS protocol_modules (
   module_key TEXT PRIMARY KEY,

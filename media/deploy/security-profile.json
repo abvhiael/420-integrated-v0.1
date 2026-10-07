@@ -1,0 +1,86 @@
+{
+  "schema": "420-media-security-profile-v1",
+  "service_id": "420/service/media/v1",
+  "release_stage": "REPOSITORY_LEVEL3_CLOSEOUT",
+  "authority": "REPLACEABLE_APPLICATION",
+  "network": {
+    "chain_id": null,
+    "network": null,
+    "api_origin": null,
+    "web_origin": null,
+    "registry_record": null
+  },
+  "api": {
+    "secure_server_required": true,
+    "tls_required": true,
+    "verified_session_required_for_writes": true,
+    "session_expiry_required": true,
+    "chain_network_scope_required": true,
+    "capability_scope_required": true,
+    "max_request_bytes": 131072,
+    "max_page_limit": 200,
+    "idempotency_required_for_retriable_writes": true
+  },
+  "media": {
+    "max_upload_bytes": 8589934592,
+    "content_scanner_required": true,
+    "quarantine_before_ready": true,
+    "raw_media_off_chain": true,
+    "playback_url_non_authoritative": true
+  },
+  "outbound": {
+    "deny_loopback": true,
+    "deny_private_ranges": true,
+    "deny_link_local": true,
+    "deny_local_hostnames": true,
+    "dns_resolution_validation_required": true,
+    "egress_network_policy_required": true,
+    "whip_whep_schemes": ["https"],
+    "rtmp_schemes": ["rtmps"],
+    "srt_schemes": ["srt"]
+  },
+  "process_sandbox": {
+    "shell_execution_forbidden": true,
+    "static_operator_profiles_required": true,
+    "no_new_privileges": true,
+    "drop_all_linux_capabilities": true,
+    "read_only_root_filesystem": true,
+    "private_tmp": true,
+    "seccomp_required": true,
+    "pids_limit": 256,
+    "memory_max_bytes": 8589934592,
+    "cpu_quota_percent": 400,
+    "max_parallel_jobs": 4
+  },
+  "webhooks": {
+    "signed_hmac_sha256": true,
+    "timestamp_expiry_required": true,
+    "event_id_replay_cache_required": true,
+    "key_version_required": true,
+    "key_rotation_required": true
+  },
+  "moderation": {
+    "domain_scoped_moderator_capability": true,
+    "report_rate_limit_required": true,
+    "appeals_preserve_decision_history": true,
+    "may_change_application_visibility": true,
+    "may_mutate_protocol_ownership_rights_or_funds": false
+  },
+  "secrets": {
+    "stream_keys_in_chain_state": false,
+    "stream_keys_in_urls": false,
+    "opaque_credential_refs_only": true,
+    "secret_manager_required": true,
+    "signer_token_env_reference_only": true
+  },
+  "observability": {
+    "structured_security_events_required": true,
+    "rate_limit_metrics_required": true,
+    "scanner_quarantine_metrics_required": true,
+    "moderation_audit_metrics_required": true,
+    "stream_failure_metrics_required": true,
+    "operator_lease_loss_metrics_required": true,
+    "no_raw_media_or_secret_logging": true
+  },
+  "status": "FAIL_CLOSED_UNTIL_TESTNET_RUNTIME_MATERIALIZED"
+}

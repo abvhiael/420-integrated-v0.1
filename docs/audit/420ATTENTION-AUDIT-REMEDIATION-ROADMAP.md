@@ -41,7 +41,7 @@ Do not renumber, collapse, or silently redefine these steps. Repository truth an
 - Define and implement only the non-canonical projection/API actually required by the user-facing client.
 - Preserve raw Attention telemetry and private audience data exclusions.
 - Include reorg/rebuild behavior, bounded retries/idempotency where applicable, and canonical-source provenance.
-- **Status: NEXT. Browser consumer contract is qualified; service implementation remains absent.**
+- **Status: IMPLEMENTED; awaiting exact-head Level 1 service qualification and Level 2 Attention app-integration qualification.**
 
 ## ATTENTION-AUDIT-8 — Testnet deployment and integration qualification
 - Deploy fixed Genesis predeploys and registry-resolved Attention components in the production-equivalent testnet environment.

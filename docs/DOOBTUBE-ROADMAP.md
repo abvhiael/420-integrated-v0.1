@@ -165,6 +165,8 @@ Qualify:
 - moderation/arbitration where adopted;
 - Analytics/Verify/Explorer visibility where adopted.
 
+**Status: COMPLETE (Level 2).** Canonical milestone definition: `docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md`. A dedicated retained app-integration harness and CI workflow revalidate the accumulated Registry, Wallet/Smart Accounts, optional Identity, Media, Rights, Storage, Search, Notifications, Media-transitive Pay/Compute, app-scoped moderation, and explicit non-adoption of Arbitration/Analytics/Verify/Explorer together on one exact SHA.
+
 **Exit:** Level 2 app-integration qualification on one exact implementation SHA.
 
 ## DOOBTUBE-9 — Security, abuse and moderation qualification

@@ -1,0 +1,49 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-5.6.DoubleRewardPrevention.v1",
+  "step": "CMP-5.6",
+  "title": "Double-reward prevention",
+  "canonical_definition": "Double-reward prevention",
+  "status": "COMPLETE",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": true,
+    "milestone": "third CMP-5 integration milestone — shared one-time external reward-consumption authority",
+    "level_3_deferred_to": "CMP-5.8 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeExternalDoubleRewardGuard420.sol",
+    "test": "contracts/test/ComputeExternalDoubleRewardGuard420.t.sol",
+    "proof_credit_adapter": "contracts/src/compute/ComputeExternalProofCreditAdapter420.sol",
+    "doc": "docs/compute-market/CMP-5.6-DOUBLE-REWARD-PREVENTION.md",
+    "verifier": "scripts/verify-cmp-5-6-double-reward-prevention.py"
+  },
+  "authority_boundaries": {
+    "external_truth_attestation": false,
+    "reward_amount_authority": false,
+    "reward_eligibility_authority": false,
+    "vault_or_settlement_authority": false,
+    "stake_or_slash_authority": false,
+    "proof_verification_authority": false,
+    "credit_issuance_authority": false,
+    "claim_consumer_authorization_only": true
+  },
+  "exit_criteria": [
+    "one canonical external work commitment maps to one chain-scoped claim key independent of proof credit reward reference evidence or source wrapper",
+    "a canonical work claim can be consumed only once",
+    "alternate proof credit evidence and alternate reward references cannot create a second claim for the same canonical work",
+    "alternate external source wrappers cannot create a second claim for the same canonical work",
+    "unauthorized callers cannot front-run or burn claims",
+    "only governance may authorize or revoke consumers and authorized consumers must be deployed code with pinned runtime code hash",
+    "zero canonical work reward reference evidence and invalid external-source bindings fail closed",
+    "the guard records exact source binding consumer reward reference evidence and consumption time for auditability",
+    "the guard creates no external-truth reward-amount reward-eligibility settlement stake slash proof-verification or credit-issuance authority and CMP-5.7 remains the truth owner",
+    "dedicated adversarial tests mechanical verifier retained Compute regressions and exact-head Compute Market qualification pass"
+  ],
+  "intentionally_deferred": [
+    "CMP-5.7 External-result attestation and authoritative canonical-work mapping",
+    "CMP-5.8 Level 3 phase closeout",
+    "CMP-6 useful-computation reward economics and payout integration",
+    "live reward consumer deployment and ProtocolRegistry publication"
+  ],
+  "next_canonical_step": "CMP-5.7 — External-result attestation"
+}

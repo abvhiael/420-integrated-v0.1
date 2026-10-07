@@ -534,7 +534,7 @@ CMP-4.9 is the second CMP-4 app-integration milestone because the complete scien
 
 ## CMP-4.10 — Phase closeout
 
-**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+**Status: COMPLETE — Level 3 exact-head phase closeout qualified.**
 
 Reconcile the complete accumulated CMP-4 scientific framework against current `main`, force the canonical four-shard Solidity inventory, independently verify Genesis/address authority without duplicate Foundry execution, run global/Docs and retained Compute qualification, and preserve one exact merge-candidate SHA as phase-closeout evidence. Closeout definition: [CMP-4.10 phase closeout](CMP-4.10-PHASE-CLOSEOUT.md).
 
@@ -548,19 +548,51 @@ Potential adapters, where technically and administratively permitted:
 
 ## CMP-5.1 — Folding@home adapter
 
+**Status: COMPLETE — Level 1 exact-head qualified on `aa8ebaeb243946b679766fb6d023f39acec42dc2`.**
+
+Normalize Folding@home project/work-unit/donor/assignment/result/credit/evidence material into stable domain-separated 420Integrated commitments without claiming external truth, reward entitlement, settlement authority or duplicate protection. External-result attestation remains CMP-5.7 and double-reward prevention remains CMP-5.6. Specification: [CMP-5.1 Folding@home adapter](CMP-5.1-FOLDING-AT-HOME-ADAPTER.md). Durable evidence: [CMP-5.1 qualification](CMP-5.1-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-5.2 — BOINC adapter
+
+**Status: COMPLETE — Level 1 + first CMP-5 Level 2 exact-head qualified on `f463deb41f5e9de396a81d5ffbe0fc205c72f5a0`.**
+
+Normalize BOINC project/application/work-unit/participant/host/assignment/result/timing/credit/evidence material behind the shared provider-neutral external-adapter identity surface. CMP-5.2 is the first CMP-5 Level 2 integration milestone because the Folding-at-home and BOINC adapter families now converge under one narrow interface while remaining domain-separated. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.2 BOINC adapter](CMP-5.2-BOINC-ADAPTER.md).
 
 ## CMP-5.3 — Research-cluster adapter
 
+**Status: COMPLETE — Level 1 exact-head qualified on `a2c7c1eee735f86ecc555d8de265805359c57fdb`.**
+
+Normalize research-cluster identity/scheduler/project/workload/submitter/allocation/result/lifecycle/resource/evidence material behind the existing provider-neutral external-adapter identity surface. Optional node-set identity is supported without weakening mandatory bindings. CMP-5.2 remains the first CMP-5 Level 2 integration milestone; CMP-5.3 is an ordinary Level 1 extension. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.3 Research-cluster adapter](CMP-5.3-RESEARCH-CLUSTER-ADAPTER.md). Durable evidence: [CMP-5.3 qualification](CMP-5.3-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-5.4 — University/HPC gateway
+
+**Status: COMPLETE — Level 1 exact-head qualified on `e7cc08829b470c6048e2a06cef3f22411630d809`.**
+
+Normalize institution/gateway/scheduler/account/project/workload/allocation/result/lifecycle/resource/accounting/evidence material behind the existing provider-neutral adapter identity surface. Queue/partition identity is optional. CMP-5.2 remains the most recent Level 2 milestone; CMP-5.4 is an ordinary Level 1 extension. External truth remains CMP-5.7 and duplicate-reward protection remains CMP-5.6. Specification: [CMP-5.4 University/HPC gateway](CMP-5.4-UNIVERSITY-HPC-GATEWAY.md). Durable evidence: [CMP-5.4 qualification](CMP-5.4-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-5.5 — External proof/credit adapters
 
+**Status: COMPLETE — Level 1 + second CMP-5 Level 2 exact-head qualified on `41b3f7e9c84226c8b294f2b7a5af730c928ece61`.**
+
+Normalize externally supplied proof and credit records against exact adapter/system/contribution identities, preserving provider-neutral scheme/issuer/unit semantics without claiming external truth, reward eligibility or duplicate protection. CMP-5.5 is the second CMP-5 Level 2 milestone because the accumulated external adapter families now converge into one shared proof/credit normalization layer. CMP-5.6 owns duplicate-reward prevention and CMP-5.7 owns external-result attestation. Specification: [CMP-5.5 External proof/credit adapters](CMP-5.5-EXTERNAL-PROOF-CREDIT-ADAPTERS.md). Durable evidence: [CMP-5.5 qualification](CMP-5.5-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-5.6 — Double-reward prevention
+
+**Status: COMPLETE — Level 1 + third CMP-5 Level 2 exact-head qualified on `505eea3d3eeb8e23c9a6f3a958e6afbc84946b02`.**
+
+Add one-time canonical external-work consumption so alternate proof/credit records, reward references, evidence, or source wrappers cannot manufacture a second 420 reward opportunity for the same canonical external work. Governance-authorized, code-hash-pinned consumers prevent permissionless claim burning. CMP-5.7 remains the external-truth/canonical-work mapping owner; CMP-6 remains reward-economics/settlement owner. Specification: [CMP-5.6 Double-reward prevention](CMP-5.6-DOUBLE-REWARD-PREVENTION.md). Durable evidence: [CMP-5.6 qualification](CMP-5.6-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-5.7 — External-result attestation
 
+**Status: COMPLETE — Level 1 + fourth CMP-5 Level 2 exact-head qualified on `e04d6baa0e636a361ef7dd8d046f5a31ff2f72d4`.**
+
+Add trusted, revocable external-result attestation and the authoritative mapping from normalized external source/result/proof-or-credit evidence into one canonical external-work commitment. Conflicting remaps fail closed; equivalent source wrappers may converge on the same canonical work. CMP-5.6 remains one-time duplicate-consumption authority; CMP-6 remains reward-economics/settlement authority. Specification: [CMP-5.7 External-result attestation](CMP-5.7-EXTERNAL-RESULT-ATTESTATION.md). Durable evidence: [CMP-5.7 qualification](CMP-5.7-QUALIFICATION-EVIDENCE.md).
+
 ## CMP-5.8 — Phase closeout
+
+**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+
+CMP-5.8 formally closes the accumulated CMP-5 external distributed-compute adapter phase under Level 3 exact-head qualification. The phase is reconciled to current `main`, all canonical Level 3 owners are required green on one exact implementation SHA, and durable evidence records the qualification. Next canonical phase: **CMP-6 — Useful-computation rewards**. Closeout specification: [CMP-5.8 Phase closeout](CMP-5.8-PHASE-CLOSEOUT.md).
 
 ---
 
@@ -725,7 +757,7 @@ Production target flow:
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
-| CMP-5 external compute adapters | forthcoming |
+| CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.8 Level 3 closeout candidate — comprehensive exact-head qualification pending |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |

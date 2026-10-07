@@ -1,0 +1,53 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-5.4.UniversityHpcGateway.v1",
+  "step": "CMP-5.4",
+  "title": "University/HPC gateway",
+  "canonical_definition": "University/HPC gateway",
+  "status": "COMPLETE",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": false,
+    "previous_level_2_milestone": "CMP-5.2 — BOINC adapter",
+    "level_3_deferred_to": "CMP-5.8 — Phase closeout"
+  },
+  "implementation": {
+    "interface": "contracts/src/compute/IComputeExternalContributionAdapter420.sol",
+    "contract": "contracts/src/compute/ComputeUniversityHpcGateway420.sol",
+    "test": "contracts/test/ComputeUniversityHpcGateway420.t.sol",
+    "integration_test": "contracts/test/ComputeExternalContributionAdapters420.t.sol",
+    "doc": "docs/compute-market/CMP-5.4-UNIVERSITY-HPC-GATEWAY.md",
+    "verifier": "scripts/verify-cmp-5-4-university-hpc-gateway.py"
+  },
+  "authority_boundaries": {
+    "queries_hpc_scheduler": false,
+    "validates_institution_credentials": false,
+    "external_truth_attestation": false,
+    "canonical_verifier_authority": false,
+    "reward_authority": false,
+    "vault_or_settlement_authority": false,
+    "stake_or_slash_authority": false,
+    "double_reward_prevention": false
+  },
+  "exit_criteria": [
+    "gateway exposes stable versioned adapter system and protocol identities",
+    "contribution identity is domain-separated and binds institution gateway scheduler account project workload and allocation",
+    "normalized record binds optional queue or partition result lifecycle resource usage accounting and evidence",
+    "required zero bindings and impossible lifecycle ordering fail closed",
+    "optional queue or partition commitment is supported without weakening remaining bindings",
+    "gateway implements the existing provider-neutral external-adapter identity interface",
+    "all four external adapter families retain mutually distinct adapter system and protocol domains",
+    "gateway has no credential verification result verification reward settlement stake slash or duplicate-prevention authority",
+    "CMP-5.6 double-reward prevention and CMP-5.7 external-result attestation remain explicitly deferred",
+    "dedicated tests cross-adapter regression mechanical verifier and exact-head Compute Market Level 1 workflow pass"
+  ],
+  "intentionally_deferred": [
+    "CMP-5.5 External proof/credit adapters",
+    "CMP-5.6 Double-reward prevention",
+    "CMP-5.7 External-result attestation",
+    "CMP-5.8 Level 3 phase closeout",
+    "CMP-6 useful-computation rewards",
+    "live Slurm PBS LSF or vendor scheduler integration",
+    "institution-specific credentials federation accounting APIs and administrative approval"
+  ],
+  "next_canonical_step": "CMP-5.5 — External proof/credit adapters"
+}

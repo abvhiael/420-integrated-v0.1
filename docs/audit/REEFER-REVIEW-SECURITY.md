@@ -21,7 +21,7 @@ Article integrity, author/publisher attribution, visibility, rights/provenance e
 - private visibility leakage: public list and public item reads expose only PUBLIC/PUBLISHED content. Non-public author/editor reads are intentionally absent until viewer-aware Identity/session authorization is implemented.
 
 ## Accepted repository limitation
-The development executable uses explicit development adapters and the `X-420-Actor` harness header. It intentionally refuses staging/production startup. This is not production authentication and must never be placed behind public ingress unchanged.
+The development executable still uses development-only non-live dependency adapters and intentionally refuses staging/production startup. RR-4 removed the unsigned `X-420-Actor` authentication path from the HTTP/browser/client boundary; protected routes now fail closed without the deployment-supplied verified-session composition. Live Wallet/Identity verifier deployment remains a later live/deployment gate.
 
 
 ## RR-3 editorial lifecycle boundaries
@@ -35,7 +35,7 @@ RR-3 adds repository-stage revision, restricted-read, tombstone and moderation-h
 - Tombstoning removes Search projection best-effort and blocks article reads and later edits, but RR-3 does not claim cryptographic deletion or storage erasure.
 - Moderation HIDE, RESTORE and TOMBSTONE actions persist actor, action, reason, from/to status and timestamp.
 - The browser continues to render external and editorial data through DOM text nodes rather than feed-provided HTML.
-- Production authentication, revocation, capability issuance and session expiry remain RR-4.
+- RR-4 now supplies the repository-qualified verified-session, expiry/revocation and scoped-capability boundary. Live issuer/verifier deployment remains a later live/deployment gate.
 
 
 ## RR-4 Wallet / 420Identity session boundary

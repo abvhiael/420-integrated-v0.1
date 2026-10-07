@@ -181,6 +181,8 @@ CMP-6.3 is COMPLETE only when:
 - exact-head Compute Market qualification passes;
 - durable repository evidence records the implementation SHA.
 
+Durable evidence: [CMP-6.3 qualification](CMP-6.3-QUALIFICATION-EVIDENCE.md).
+
 Next canonical step:
 
 **CMP-6.4 — Research reward pools**

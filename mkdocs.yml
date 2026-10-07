@@ -84,6 +84,15 @@ nav:
               - Operator Guide: apps/town/operator-guide.md
               - Configuration & Deployment: apps/town/configuration-deployment.md
               - Known Limitations: apps/town/known-limitations.md
+          - 420 Media:
+              - Overview: apps/media/index.md
+              - User Guide: apps/media/user-guide.md
+              - Moderation & Appeals: apps/media/moderation.md
+              - Security & Threat Model: apps/media/security.md
+              - Developer Guide: apps/media/developer-guide.md
+              - Operator Guide: apps/media/operator-guide.md
+              - Configuration & Deployment: apps/media/configuration-deployment.md
+              - Known Limitations: apps/media/known-limitations.md
           - 420 Analytics:
               - Overview: apps/analytics/index.md
               - Getting Started: apps/analytics/getting-started.md

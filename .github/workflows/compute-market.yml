@@ -255,6 +255,9 @@ jobs:
       - name: Verify CMP-6.1 funding sources
         run: python scripts/verify-cmp-6-1-funding-sources.py
 
+      - name: Verify CMP-6.2 verification-gated rewards
+        run: python scripts/verify-cmp-6-2-verification-gated-rewards.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

@@ -24,7 +24,6 @@ const expansionOrder = [
 ];
 
 let state = null;
-let customerSequence = 1;
 
 const request = async (path, options = {}) => {
   const response = await fetch(path, {
@@ -161,7 +160,7 @@ $("#add-customer").addEventListener("click", () => { customerForm.hidden = !cust
 customerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const body = {
-    id: "web-" + customerSequence++,
+    id: "web-" + crypto.randomUUID(),
     product: $("#customer-product").value,
     archetype: $("#customer-archetype").value,
   };

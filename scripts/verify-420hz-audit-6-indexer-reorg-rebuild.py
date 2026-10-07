@@ -64,6 +64,9 @@ for token in [
     "resetAll",
     "rebuildFromJournal",
     "validateOrderedBatch",
+    "applyBatchAtomically",
+    "replaceAllAtomically",
+    "event replay provenance mismatch",
     "not ordered by block/transaction/log position",
     "BASE_EVENTS",
     "CATALOG_EVENTS",
@@ -90,6 +93,8 @@ for token in [
     "rejects non-canonical block transaction log ordering",
     "0xorphaned-settlement",
     "0xcanonical-settlement",
+    "rolls back an invalid multi-event canonical batch atomically",
+    "idempotent replay can promote block finality",
 ]:
     need(token in reorg_test, f"reorg test missing coverage: {token}")
 

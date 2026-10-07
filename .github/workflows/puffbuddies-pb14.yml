@@ -1,0 +1,58 @@
+name: PuffBuddies PB-14 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb14.py"
+      - ".github/workflows/puffbuddies-pb14.yml"
+  push:
+    branches: ["puffbuddies-pb14-backend-api-hardening-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb14.py"
+      - ".github/workflows/puffbuddies-pb14.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb14:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-14 Level 1 targeted backend API hardening
+        run: python3 -m unittest puffbuddies.tests.test_pb_14_backend_api_hardening -v
+      - name: Verify PB-14 hardening contract
+        run: python3 scripts/verify-puffbuddies-pb14.py
+      - name: Retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Retained PB-11 web client
+        working-directory: puffbuddies/web
+        run: npm test && npm run build
+      - name: Retained PB-12 mobile client
+        working-directory: puffbuddies/mobile
+        run: npm test && npm run build
+      - name: Verify PB-0 structure and authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Verify retained PB-13 cross-app boundary
+        run: python3 scripts/verify-puffbuddies-pb13.py
+      - name: API privacy and authority negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(FORCE_MATCH|FORCE_UNBLOCK|ADMIN_MATCH|BLOCK_OVERRIDE|UNSUSPEND|UNBAN)' puffbuddies/api
+          ! grep -RIE '(private_key|mnemonic|seed_phrase|government_id|date_of_birth|wallet_address)[[:space:]]*[:=]' puffbuddies/api
+          ! grep -RIE '(public_member_search|public_match_graph|public_block_graph|public_safety_graph)[[:space:]]*[:=]' puffbuddies/api

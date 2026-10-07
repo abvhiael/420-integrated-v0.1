@@ -64,6 +64,18 @@ forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig 
 
 The generated manifest contains public accounts, deployed contract addresses, Creator/Work/Recording/License/transfer IDs, contributor-credit IDs, settlement IDs, version numbers and expected economic state. It deliberately excludes all private keys. CI executes the same harness, validates the critical fixture fields and uploads the JSON as the `creative-kernel-v1-fixture` artifact.
 
-## Deliberately deferred from the kernel
+## 420Hz layers above the HZ-1 kernel
 
-The package does not yet implement the later production layers for disputes, streaming Merkle settlement, AI provider execution, Awards, creator economy, DDEX/interop adapters, archival operators, or full governance migration. Those modules attach to these stable kernel boundaries after the Decision #10 acceptance harness passes.
+Current repository layers above Decision #10 are:
+
+- HZ-2 catalog/presentation: creator-authorized releases, ordered active-recording tracklists, versioned content-addressed presentation metadata, and rebuildable public catalog/discovery projections.
+- HZ-3 media/playback: immutable media-manifest revisions, provider-neutral storage replicas, deterministic playback resolution, and replay-protected aggregate playback accounting.
+- HZ-4 settlement: governance-controlled settlement epochs, deterministic per-recording streaming allocation, exact-value STREAM royalty routing through the existing RoyaltyRouter420/RoyaltyVault420 stack, and a rebuildable streaming-settlement projection.
+
+HZ-4 deliberately does not create a second royalty system. StreamingRoyaltySettlement420 must be explicitly allowlisted by RoyaltyRouter420 governance.
+
+The Decision #10 deploy/seed script remains an HZ-1 development/reference harness; it is not a production deployment manifest for HZ-2/HZ-3/HZ-4.
+
+## Deliberately deferred
+
+The repository does not currently define later production layers for disputes, AI Studio/provider execution, Awards, extended creator/fan economy, DDEX/interop adapters, archival operators, or full governance migration. Public-testnet promotion also still requires a consolidated HZ-1..HZ-4 deployment manifest and live environment qualification.

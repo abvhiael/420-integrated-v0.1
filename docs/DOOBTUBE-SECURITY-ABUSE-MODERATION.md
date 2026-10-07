@@ -366,11 +366,15 @@ Default repository policy:
 - operator rebuild: 5 / 60 seconds;
 - operator metrics: 120 / 60 seconds.
 
-### DT-SEC-RATE-002 — Replay semantics
+### DT-SEC-RATE-002 — Concurrency safety
+
+Actor/operation abuse windows are protected by a process-local lock so concurrent requests cannot race past the configured bound.
+
+### DT-SEC-RATE-003 — Replay semantics
 
 Exact idempotent replay does not consume another mutation slot.
 
-### DT-SEC-RATE-003 — Existing resource bounds
+### DT-SEC-RATE-004 — Existing resource bounds
 
 Retained bounds include:
 
@@ -382,7 +386,7 @@ Retained bounds include:
 - livestream duration/reconnect attempts;
 - Media request/response size and pagination limits.
 
-### DT-SEC-RATE-004 — Deployment edge limits
+### DT-SEC-RATE-005 — Deployment edge limits
 
 Production edge/network rate limits remain mandatory operational evidence for DOOBTUBE-12/13.
 

@@ -174,6 +174,7 @@ Present after this remediation:
 - `docs/DOOBTUBE-MEDIA-INTEGRATION.md`
 - `docs/DOOBTUBE-WEB-APPLICATION.md`
 - `docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md`
+- `docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md`
 
 Still required before a code-complete declaration:
 
@@ -329,4 +330,4 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. DOO
 
 The repository proves that DoobTube/420Video did not exist as a canonical application at the original audited main HEAD. DOOBTUBE-0 now establishes its first canonical architecture without redefining 420Media or Genesis authority.
 
-**DOOBTUBE-0 through DOOBTUBE-8 are complete. Next: DOOBTUBE-9 — Security, abuse and moderation qualification.**
+**DOOBTUBE-0 through DOOBTUBE-9 are complete. Next: DOOBTUBE-10 — Documentation, deployment and operator closeout.**

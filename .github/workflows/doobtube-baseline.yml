@@ -9,6 +9,7 @@ on:
       - "scripts/verify-doobtube-level2.py"
       - "scripts/verify-doobtube-security.py"
       - "scripts/verify-doobtube-docs.py"
+      - "scripts/verify-doobtube-level3.py"
       - "doobtube/**"
       - ".github/workflows/doobtube-baseline.yml"
       - ".github/workflows/doobtube-integration.yml"
@@ -62,3 +63,5 @@ jobs:
         run: python3 scripts/verify-doobtube-docs.py
       - name: Verify DoobTube audit baseline
         run: python3 scripts/verify-doobtube-baseline.py
+      - name: Verify DoobTube Level 3 ownership wiring
+        run: python3 scripts/verify-doobtube-level3.py

@@ -1,0 +1,51 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-5.7.ExternalResultAttestation.v1",
+  "step": "CMP-5.7",
+  "title": "External-result attestation",
+  "canonical_definition": "External-result attestation",
+  "status": "COMPLETE",
+  "qualification": {
+    "level": 1,
+    "level_2_required_now": true,
+    "milestone": "fourth CMP-5 integration milestone — authoritative external-result to canonical-work mapping",
+    "level_3_deferred_to": "CMP-5.8 — Phase closeout"
+  },
+  "implementation": {
+    "contract": "contracts/src/compute/ComputeExternalResultAttestation420.sol",
+    "test": "contracts/test/ComputeExternalResultAttestation420.t.sol",
+    "proof_credit_adapter": "contracts/src/compute/ComputeExternalProofCreditAdapter420.sol",
+    "double_reward_guard": "contracts/src/compute/ComputeExternalDoubleRewardGuard420.sol",
+    "doc": "docs/compute-market/CMP-5.7-EXTERNAL-RESULT-ATTESTATION.md",
+    "verifier": "scripts/verify-cmp-5-7-external-result-attestation.py"
+  },
+  "authority_boundaries": {
+    "external_result_attestation": true,
+    "canonical_work_mapping": true,
+    "reward_amount_authority": false,
+    "reward_eligibility_authority": false,
+    "vault_or_settlement_authority": false,
+    "stake_or_slash_authority": false,
+    "proof_verification_authority": false,
+    "credit_issuance_authority": false,
+    "duplicate_consumption_authority": false
+  },
+  "exit_criteria": [
+    "trusted external attesters can bind normalized external source result and proof or credit evidence to one canonical external-work commitment",
+    "equivalent external source wrappers may map to the same canonical-work commitment",
+    "one previously bound source result or evidence identity cannot be remapped to a conflicting canonical-work commitment",
+    "identical attestation publication is idempotent and does not create a second attestation identity",
+    "untrusted callers cannot publish attestations and only governance may manage trusted-attester status",
+    "attester or governance revocation and governance trust withdrawal make attestations unusable for new resolution",
+    "zero or invalid source result canonical-work scheme evidence and invalid timing windows fail closed and at least one normalized proof or credit record commitment is required",
+    "acceptable attestations resolve exact canonical-work source result and evidence commitments for downstream CMP-5.6 consumption",
+    "the attestation layer grants no reward amount eligibility settlement stake slash proof-verification credit-issuance or duplicate-consumption authority",
+    "dedicated adversarial tests mechanical verifier retained Compute regressions and exact-head Compute Market qualification pass"
+  ],
+  "intentionally_deferred": [
+    "CMP-5.8 Level 3 phase closeout",
+    "CMP-6 useful-computation reward economics and payout integration",
+    "live external attester governance onboarding and ProtocolRegistry publication",
+    "provider-specific off-chain evidence validation services"
+  ],
+  "next_canonical_step": "CMP-5.8 — Phase closeout"
+}

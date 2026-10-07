@@ -81,6 +81,10 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Current PB-15 qualification scope
+
+Current **PB-15 — Qualification** promotes the app-specific release-candidate qualification portion of the legacy PB-0.19 release-candidate boundary. It freezes and qualifies accumulated PB-1 through PB-14 behavior through one exact-head retained PuffBuddies suite, web/mobile release builds, dependency compatibility verification, security/adversarial/static gates and durable evidence reconciliation. This is **Level 2 milestone E**, not the comprehensive repository-wide Level-3 closeout. Under the current phase-based audit policy, final reconciliation with then-current `main`, canonical full Solidity/Genesis/global/Docs/Geth/deployment qualification and monolithic merge-candidate evidence remain later Level-3 work after the required pre-closeout roadmap phases.
+
 ### Current PB-14 backend/API-hardening scope
 
 Current **PB-14 — Backend/API hardening** materializes the reserved `puffbuddies/api/` transport boundary required by PB-0.17 and already consumed contractually by PB-11/PB-12. PB-14 owns authenticated HTTP/edge hardening, strict route/body/session/origin/replay/rate-limit/audit/error controls and stale-authority rejection, while canonical relationship, consent, eligibility-decision, lifecycle, visibility, deletion, safety and premium/private-access decisions remain owned by the existing PuffBuddies domain/application layer. PB-14 is repository-qualified transport implementation only; live endpoint deployment remains PB-17+ work.

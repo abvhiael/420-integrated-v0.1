@@ -2,6 +2,8 @@
 
 Authority: complete repository-grounded audit initiated 2026-10-06 against current `main`.
 
+**Repository phase status: COMPLETE through ATTENTION-AUDIT-7. Remaining ATTENTION-AUDIT-8 and ATTENTION-AUDIT-9 live-environment work has been transferred to the canonical testnet/release work roadmap in `docs/ROADMAP.md`. This handoff does not claim testnet, Genesis or production readiness.**
+
 Do not renumber, collapse, or silently redefine these steps. Repository truth and frozen Genesis authority control closeout.
 
 ## ATTENTION-AUDIT-1 — Canonical definition and inventory
@@ -47,10 +49,10 @@ Do not renumber, collapse, or silently redefine these steps. Repository truth an
 - Deploy fixed Genesis predeploys and registry-resolved Attention components in the production-equivalent testnet environment.
 - Verify exact addresses, storage initialization/bindings, service registration, Wallet capability integration, native 420 funding/accounting, Explorer/Indexer visibility, Notifications privacy boundary, and recovery behavior.
 - Publish readiness/deployment evidence tied to exact deployed bytecode and chain state.
-- **Status: NEXT / BLOCKED ON PRODUCTION-EQUIVALENT TESTNET. Repository prerequisites through ATTENTION-AUDIT-7 are complete.**
+- **Status: TESTNET HANDOFF / BLOCKED ON PRODUCTION-EQUIVALENT TESTNET. Tracked canonically in `docs/ROADMAP.md`; repository prerequisites through ATTENTION-AUDIT-7 are complete.**
 
 ## ATTENTION-AUDIT-9 — Genesis closeout
 - Re-run exact-head repository qualification after all executable changes.
 - Verify testnet evidence, deployment order, constructor/storage-init arguments, authority transfers, smoke tests, monitoring, rollback/recovery, frontend production configuration, DNS/service discovery, and committed qualification evidence.
 - Mark Genesis-ready only when repository and live-environment evidence agree.
-- **Status: BLOCKED on ATTENTION-AUDIT-7 through ATTENTION-AUDIT-8.**
+- **Status: TESTNET/RELEASE HANDOFF. Tracked canonically in `docs/ROADMAP.md`; not eligible until ATTENTION-AUDIT-8 live qualification completes.**

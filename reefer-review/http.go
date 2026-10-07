@@ -9,13 +9,20 @@ import (
 	"strings"
 )
 
-type HTTP struct {\n\tService Service\n\tNews    *NewsService\n}
+type HTTP struct {
+	Service Service
+	News    *NewsService
+}
 
 func (h HTTP) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/readyz", h.ready)
 	mux.HandleFunc("/v1/publications", h.publications)
 	mux.HandleFunc("/v1/publications/", h.publication)
+	mux.HandleFunc("/v1/news", h.news)
+	mux.HandleFunc("/v1/news/sources", h.newsSources)
+	mux.HandleFunc("/v1/news/topics", h.newsTopics)
+	mux.HandleFunc("/v1/news/", h.newsItem)
 	return mux
 }
 

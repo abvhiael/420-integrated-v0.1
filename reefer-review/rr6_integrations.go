@@ -13,6 +13,7 @@ import (
 	"time"
 
 	mail420 "github.com/420integrated/420-integrated/mail"
+	notifyarch "github.com/420integrated/420-integrated/notifications/architecture"
 	searcharch "github.com/420integrated/420-integrated/search/architecture"
 	searchresult "github.com/420integrated/420-integrated/search/result"
 )
@@ -196,6 +197,7 @@ func (a Search420Adapter) Reconcile(ctx context.Context, store Store) (SearchRec
 }
 
 type NotificationPublishRequest struct {
+	TargetService  string
 	EventID        string
 	SourceService  string
 	PublicationID  string
@@ -238,6 +240,7 @@ func (a Notifications420Adapter) Published(ctx context.Context, p Publication) e
 		return err
 	}
 	req := NotificationPublishRequest{
+		TargetService:  notifyarch.ServiceID,
 		EventID:        fmt.Sprintf("reefer-review:%s:revision:%d", p.ID, p.Revision),
 		SourceService:  ServiceID,
 		PublicationID:  p.ID,

@@ -23,8 +23,15 @@ Implemented:
 - development-only thin web page;
 - production fail-closed executable.
 
+Implemented and repository-qualified:
+- deployment-supplied Wallet/420Identity verified-session boundary;
+- Bearer session enforcement with ReeferReview audience, chain/network, expiry and revocation checks;
+- scoped `reefer.author`, `reefer.publisher` and `reefer.moderator` capabilities;
+- memory-only browser session handling through the deployment Wallet authentication gateway;
+- typed Go client session-token provider with no `X-420-Actor` authentication.
+
 Not implemented or not yet qualified:
-- live Identity/Wallet session adapter;
+- live deployed Wallet/420Identity verifier composition;
 - encrypted/durable 420 Storage adapter;
 - live 420 Rights adapter and chain provenance verification;
 - deployed 420 Search/Notifications/420Mail integrations;
@@ -108,3 +115,12 @@ New API surface:
 - `GET /v1/publications/{id}/moderation`
 
 `GET /v1/publications/{id}` is viewer-aware: anonymous readers receive only PUBLIC or UNLISTED published records; restricted, draft and hidden access requires the current repository-stage actor and authorization policy.
+
+
+## RR-4 identity and permissions
+
+ReeferReview protected editorial and moderation routes are authenticated with `Authorization: Bearer <session>`. The service never accepts `X-420-Actor` as identity authority. A deployment-supplied trusted Wallet/420Identity verifier must return claims bound to `420/service/reefer-review/v1`, the configured chain/network, current expiry/revocation state and scoped capabilities.
+
+The browser requests credentials through `window.ReeferReviewWalletSession` and keeps the bearer token only in JavaScript memory. The typed Go client accepts a `SessionTokenProvider` and retrieves a token at request time. Neither layer mints or persists session credentials.
+
+Live deployment wiring remains a later deployment/live-integration gate.

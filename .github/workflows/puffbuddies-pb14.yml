@@ -7,6 +7,7 @@ on:
       - "docs/puffbuddies/**"
       - "scripts/verify-puffbuddies-pb14.py"
       - ".github/workflows/puffbuddies-pb14.yml"
+      - ".github/workflows/puffbuddies-pb0.yml"
   push:
     branches: ["puffbuddies-pb14-backend-api-hardening-20261006"]
     paths:
@@ -14,6 +15,7 @@ on:
       - "docs/puffbuddies/**"
       - "scripts/verify-puffbuddies-pb14.py"
       - ".github/workflows/puffbuddies-pb14.yml"
+      - ".github/workflows/puffbuddies-pb0.yml"
 
 permissions:
   contents: read

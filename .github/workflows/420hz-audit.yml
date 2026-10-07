@@ -1,0 +1,51 @@
+name: 420Hz Audit Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/creative/**"
+      - "contracts/script/HzConsolidatedDeploy420.s.sol"
+      - "contracts/test/HzDeploymentGraph420.t.sol"
+      - "contracts/config/creative/420hz-deployment-package.json"
+      - "creative-indexer/**"
+      - "scripts/verify-420hz-audit-2-deployment.py"
+      - "docs/audit/420HZ-REPOSITORY-AUDIT-20261006.md"
+      - "docs/audit/HZ-AUDIT-2-CONSOLIDATED-DEPLOYMENT-ARCHITECTURE.md"
+      - ".github/workflows/420hz-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hz-audit-fast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Verify HZ-AUDIT-2 deployment package
+        run: python3 scripts/verify-420hz-audit-2-deployment.py
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Format check affected Solidity
+        working-directory: contracts
+        run: forge fmt --check src/creative/deployment/HzDeploymentGraph420.sol script/HzConsolidatedDeploy420.s.sol test/HzDeploymentGraph420.t.sol
+
+      - name: Build consolidated deployment graph
+        working-directory: contracts
+        run: forge build src/creative/deployment/HzDeploymentGraph420.sol script/HzConsolidatedDeploy420.s.sol
+
+      - name: Run HZ-AUDIT-2 focused deployment tests
+        working-directory: contracts
+        run: forge test --match-contract HzDeploymentGraph420Test -vvv

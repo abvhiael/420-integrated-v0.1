@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0a0b0d">
+  <meta name="theme-color" content="#082e23">
   <title>420Hz — music on 420 Integrated</title>
   <meta name="description" content="420Hz is the creator and listener music experience for the 420 Integrated ecosystem.">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/420hz-logo.svg">
+  <link rel="apple-touch-icon" href="/420hz-logo.svg">
   <link rel="stylesheet" href="/styles.css">
   <script src="/runtime-config.js"></script>
   <script src="/app.js" defer></script>
@@ -16,10 +17,10 @@
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="420Hz home">
-      <span class="brand-mark" aria-hidden="true">420<span>Hz</span></span>
+      <img class="brand-logo" src="/420hz-logo.svg" alt="" aria-hidden="true">
       <span class="brand-copy">
         <strong>420Hz</strong>
-        <small>music on 420 Integrated</small>
+        <small>music • nature • higher • you</small>
       </span>
     </a>
     <nav class="nav" aria-label="Primary">
@@ -47,17 +48,10 @@
         </div>
       </div>
 
-      <div class="hero-visual" aria-label="420Hz waveform visual">
-        <div class="disc">
-          <div class="disc-ring ring-a"></div>
-          <div class="disc-ring ring-b"></div>
-          <div class="disc-ring ring-c"></div>
-          <div class="disc-label">420<span>Hz</span></div>
-        </div>
-        <div class="waveform" aria-hidden="true">
-          <i style="--h:28%"></i><i style="--h:64%"></i><i style="--h:42%"></i><i style="--h:88%"></i><i style="--h:55%"></i>
-          <i style="--h:100%"></i><i style="--h:73%"></i><i style="--h:36%"></i><i style="--h:81%"></i><i style="--h:49%"></i>
-          <i style="--h:92%"></i><i style="--h:58%"></i><i style="--h:31%"></i><i style="--h:69%"></i><i style="--h:44%"></i>
+      <div class="hero-visual">
+        <div class="hero-brand-panel">
+          <img class="hero-logo" src="/420hz-logo.svg" alt="420Hz — music, nature, higher, you">
+          <div class="brand-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
       </div>
     </section>
@@ -149,9 +143,11 @@
   </main>
 
   <footer>
-    <div class="brand-mark small">420<span>Hz</span></div>
-    <p>420Hz is part of the 420 Integrated ecosystem.</p>
-    <p id="footerStatus" class="footer-status">pre-testnet repository build</p>
+    <img class="footer-logo" src="/420hz-logo.svg" alt="420Hz">
+    <div class="footer-copy">
+      <p>420Hz is part of the 420 Integrated ecosystem.</p>
+      <p id="footerStatus" class="footer-status">pre-testnet repository build</p>
+    </div>
   </footer>
 </body>
 </html>

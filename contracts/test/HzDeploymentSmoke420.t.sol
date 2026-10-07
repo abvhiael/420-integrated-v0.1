@@ -27,36 +27,38 @@ contract HzDeploymentSmoke420Test {
         CreatorId creatorId =
             d.creatorProfileRegistry.createProfile(IdentityType.ARTIST_PROJECT, keccak256("hz-audit-5/creator"));
 
-        WorkId workId = d.workRegistry.registerWork(
-            creatorId,
-            WorkId.wrap(0),
-            keccak256("hz-audit-5/composition"),
-            keccak256("hz-audit-5/work-metadata"),
-            keccak256("hz-audit-5/work-provenance"),
-            ProvenanceClass.NATIVE_VERIFIED,
-            RightsStatus.RIGHTS_VERIFIED
-        );
+        WorkId workId = d.workRegistry
+            .registerWork(
+                creatorId,
+                WorkId.wrap(0),
+                keccak256("hz-audit-5/composition"),
+                keccak256("hz-audit-5/work-metadata"),
+                keccak256("hz-audit-5/work-provenance"),
+                ProvenanceClass.NATIVE_VERIFIED,
+                RightsStatus.RIGHTS_VERIFIED
+            );
         _finalizeSingleHolderSplit(d, CreativeAssetType.WORK, WorkId.unwrap(workId), creatorId);
         d.workRegistry.activateWork(workId);
 
-        RecordingId recordingId = d.recordingRegistry.registerRecording(
-            RecordingRegistration420({
-                registrantProfileId: creatorId,
-                workId: workId,
-                parentRecordingId: RecordingId.wrap(0),
-                supersedesRecordingId: RecordingId.wrap(0),
-                recordingClass: RecordingClass.ORIGINAL,
-                masterHash: keccak256("hz-audit-5/original-master"),
-                metadataHash: keccak256("hz-audit-5/original-metadata"),
-                provenanceHash: keccak256("hz-audit-5/original-provenance"),
-                mediaManifestHash: keccak256("hz-audit-5/media-manifest"),
-                authorizationManifestHash: bytes32(0),
-                provenanceClass: ProvenanceClass.NATIVE_VERIFIED,
-                rightsStatus: RightsStatus.RIGHTS_VERIFIED,
-                royaltyScheduleVersion: 1,
-                authorizationPolicyVersion: 1
-            })
-        );
+        RecordingId recordingId = d.recordingRegistry
+            .registerRecording(
+                RecordingRegistration420({
+                    registrantProfileId: creatorId,
+                    workId: workId,
+                    parentRecordingId: RecordingId.wrap(0),
+                    supersedesRecordingId: RecordingId.wrap(0),
+                    recordingClass: RecordingClass.ORIGINAL,
+                    masterHash: keccak256("hz-audit-5/original-master"),
+                    metadataHash: keccak256("hz-audit-5/original-metadata"),
+                    provenanceHash: keccak256("hz-audit-5/original-provenance"),
+                    mediaManifestHash: keccak256("hz-audit-5/media-manifest"),
+                    authorizationManifestHash: bytes32(0),
+                    provenanceClass: ProvenanceClass.NATIVE_VERIFIED,
+                    rightsStatus: RightsStatus.RIGHTS_VERIFIED,
+                    royaltyScheduleVersion: 1,
+                    authorizationPolicyVersion: 1
+                })
+            );
         _finalizeSingleHolderSplit(d, CreativeAssetType.RECORDING, RecordingId.unwrap(recordingId), creatorId);
         d.recordingRegistry.activateRecording(recordingId, LicenseId.wrap(0));
 
@@ -81,18 +83,18 @@ contract HzDeploymentSmoke420Test {
         CreatorId creatorId =
             d.creatorProfileRegistry.createProfile(IdentityType.ARTIST_PROJECT, keccak256("hz-audit-5/uninitialized"));
 
-        WorkId workId = d.workRegistry.registerWork(
-            creatorId,
-            WorkId.wrap(0),
-            keccak256("hz-audit-5/uninitialized-composition"),
-            bytes32(0),
-            keccak256("hz-audit-5/uninitialized-provenance"),
-            ProvenanceClass.NATIVE_VERIFIED,
-            RightsStatus.RIGHTS_VERIFIED
-        );
+        WorkId workId = d.workRegistry
+            .registerWork(
+                creatorId,
+                WorkId.wrap(0),
+                keccak256("hz-audit-5/uninitialized-composition"),
+                bytes32(0),
+                keccak256("hz-audit-5/uninitialized-provenance"),
+                ProvenanceClass.NATIVE_VERIFIED,
+                RightsStatus.RIGHTS_VERIFIED
+            );
 
-        (bool activationOk,) =
-            address(d.workRegistry).call(abi.encodeCall(WorkRegistry420.activateWork, (workId)));
+        (bool activationOk,) = address(d.workRegistry).call(abi.encodeCall(WorkRegistry420.activateWork, (workId)));
         require(!activationOk, "smoke/unwired-work-activated");
 
         (bool streamScheduleOk,) = address(d.royaltyScheduleRegistry)
@@ -122,19 +124,19 @@ contract HzDeploymentSmoke420Test {
     function _registerStreamEconomics(
         HzDeploymentGraph420.Deployment memory d
     ) private {
-        d.royaltyScheduleRegistry.registerSchedule(
-            RecordingClass.ORIGINAL, RevenueType.STREAM, HzStreamEconomicsPlan420.originalSchedule()
-        );
-        d.royaltyScheduleRegistry.registerSchedule(
-            RecordingClass.REMIX, RevenueType.STREAM, HzStreamEconomicsPlan420.remixSchedule()
-        );
+        d.royaltyScheduleRegistry
+            .registerSchedule(RecordingClass.ORIGINAL, RevenueType.STREAM, HzStreamEconomicsPlan420.originalSchedule());
+        d.royaltyScheduleRegistry
+            .registerSchedule(RecordingClass.REMIX, RevenueType.STREAM, HzStreamEconomicsPlan420.remixSchedule());
     }
 
     function _registerModules(
         HzDeploymentGraph420.Deployment memory d
     ) private {
         bytes32 manifest = HzRegistryAuthorityPlan420.moduleManifestHash();
-        _register(d.creativeProtocolRegistry, "CREATIVE_PROTOCOL_REGISTRY", address(d.creativeProtocolRegistry), manifest);
+        _register(
+            d.creativeProtocolRegistry, "CREATIVE_PROTOCOL_REGISTRY", address(d.creativeProtocolRegistry), manifest
+        );
         _register(d.creativeProtocolRegistry, "CREATOR_PROFILE_REGISTRY", address(d.creatorProfileRegistry), manifest);
         _register(d.creativeProtocolRegistry, "WORK_REGISTRY", address(d.workRegistry), manifest);
         _register(d.creativeProtocolRegistry, "RECORDING_REGISTRY", address(d.recordingRegistry), manifest);

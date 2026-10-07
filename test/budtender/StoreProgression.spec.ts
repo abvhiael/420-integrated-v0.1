@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { StoreProgression } from "../../src/budtender/StoreProgression";
+import { StoreProgression } from "../../src/budtender/StoreProgression.ts";
 
 describe("StoreProgression BUD-4", () => {
   it("purchases deterministic upgrades and escalates cost", () => {

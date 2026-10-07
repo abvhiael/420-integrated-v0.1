@@ -31,6 +31,7 @@ type SessionClaims struct {
 	IssuedAt         time.Time
 	ExpiresAt        time.Time
 	Revoked          bool
+	IdentityActive   bool
 	Capabilities     map[string]bool
 	VisibilityGrants map[Visibility]bool
 }
@@ -102,6 +103,9 @@ func (s SessionSecurity) Verify(ctx context.Context, token string) (SessionClaim
 	if claims.Revoked {
 		return SessionClaims{}, ErrSessionRevoked
 	}
+	if !claims.IdentityActive {
+		return SessionClaims{}, ErrSessionScope
+	}
 	if !claims.IssuedAt.IsZero() && claims.IssuedAt.After(now.Add(time.Minute)) {
 		return SessionClaims{}, ErrSessionInvalid
 	}
@@ -144,7 +148,7 @@ type SessionIdentity struct{}
 
 func (SessionIdentity) Active(ctx context.Context, actor string) (bool, error) {
 	claims, ok := AuthenticatedSession(ctx)
-	if !ok || claims.Revoked || strings.TrimSpace(actor) == "" || claims.Subject != strings.TrimSpace(actor) {
+	if !ok || claims.Revoked || !claims.IdentityActive || strings.TrimSpace(actor) == "" || claims.Subject != strings.TrimSpace(actor) {
 		return false, nil
 	}
 	if claims.ExpiresAt.IsZero() || !time.Now().UTC().Before(claims.ExpiresAt.UTC()) {

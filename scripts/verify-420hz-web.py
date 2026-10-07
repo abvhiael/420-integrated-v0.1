@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "hz" / "web"
@@ -15,7 +14,7 @@ required = [
     WEB / "styles.css",
     WEB / "app.js",
     WEB / "runtime-config.js",
-    WEB / "favicon.svg",
+    WEB / "420hz-logo.svg",
     WEB / "_headers",
     WEB / "CLOUDFLARE-DEPLOYMENT.md",
     ROOT / "docs" / "420HZ-WEB.md",
@@ -30,6 +29,7 @@ if not errors:
     runtime = (WEB / "runtime-config.js").read_text()
     headers = (WEB / "_headers").read_text()
     deploy = (WEB / "CLOUDFLARE-DEPLOYMENT.md").read_text()
+    logo = (WEB / "420hz-logo.svg").read_text()
 
     for token in ["420Hz", "discover", "artists", "streaming", "creator studio", "networkPill"]:
         need(token.lower() in html.lower(), f"missing user-facing section/token: {token}")
@@ -37,7 +37,14 @@ if not errors:
     need('href="/styles.css"' in html, "stylesheet path drift")
     need('src="/runtime-config.js"' in html, "runtime config path drift")
     need('src="/app.js"' in html, "app script path drift")
-    need('href="/favicon.svg"' in html, "favicon path drift")
+    need('href="/420hz-logo.svg"' in html, "official logo favicon path drift")
+    need(html.count('src="/420hz-logo.svg"') >= 3, "official logo must appear in header, hero and footer")
+    need("hero-logo" in html, "official logo missing from main website image")
+    need("brand-logo" in html, "official logo missing from header")
+    need("footer-logo" in html, "official logo missing from footer")
+
+    need("data:image/webp;base64," in logo, "official logo asset must embed the approved image")
+    need("420Hz official logo" in logo, "official logo accessibility metadata missing")
 
     need("https://hz.420integrated.org" in runtime, "production origin drift")
     need('liveEnabled: false' in runtime, "pre-testnet live gate must remain false")
@@ -57,7 +64,8 @@ if not errors:
     need("Root directory: repository root" in deploy, "Cloudflare root guidance drift")
     need("hz.420integrated.org" in deploy, "custom domain guidance missing")
 
-    need("#d8ff3e" in css, "420Hz accent identity drift")
+    for token in ["--gold:#d4af37", "--forest:#0b3d2e", "--electric:#08a9ff", ".hero-logo", ".brand-logo", ".footer-logo"]:
+        need(token in css, f"official 420Hz branding token missing: {token}")
     need("@media" in css, "responsive styling missing")
 
 print({
@@ -65,6 +73,7 @@ print({
     "site": "420Hz",
     "origin": "https://hz.420integrated.org",
     "live_enabled": False,
+    "official_logo": "hz/web/420hz-logo.svg",
     "errors": errors,
 })
 raise SystemExit(0 if not errors else 2)

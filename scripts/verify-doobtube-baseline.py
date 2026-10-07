@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 is complete",
+    "DOOBTUBE-0 and DOOBTUBE-1 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",

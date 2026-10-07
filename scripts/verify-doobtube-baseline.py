@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "Current remediation state: **DOOBTUBE-0 through DOOBTUBE-9 complete**",
     "repository-qualified DoobTube V1 application/client through DOOBTUBE-9",
-    "DOOBTUBE-0 through DOOBTUBE-9 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-10 are complete",
     "SECURITY QUALIFIED: **YES for current app repository scope**",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
@@ -117,6 +117,13 @@ allowed_doobtube_files = {
     "doobtube/security/__init__.py",
     "doobtube/security/policy.py",
     "doobtube/tests/test_doobtube_security.py",
+    "doobtube/README.md",
+    "doobtube/ops/__init__.py",
+    "doobtube/ops/config.py",
+    "doobtube/ops/server.py",
+    "doobtube/deploy/nonproduction.example.json",
+    "doobtube/release/manifest-v1.json",
+    "doobtube/tests/test_doobtube_ops.py",
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc" and "dist" not in p.parts}
@@ -258,7 +265,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -372,7 +379,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -465,7 +472,7 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
     "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
@@ -545,7 +552,7 @@ assert "return False" in adapter_code, "DoobTube contract requirement must remai
 assert "return None" in adapter_code, "DoobTube service ID must remain absent"
 assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
 assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 backend_doc = need("docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md", [
     "Roadmap step: **DOOBTUBE-5 — Backend/API/indexing/service control plane**",
@@ -638,7 +645,7 @@ for route in ["/v1/health","/v1/readiness","/v1/feed","/v1/preferences","/v1/con
 
 assert "**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition" in roadmap
 assert "docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 media_doc = need("docs/DOOBTUBE-MEDIA-INTEGRATION.md", [
     "Roadmap step: **DOOBTUBE-6 — Media processing, delivery and livestream integration**",
@@ -746,7 +753,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical media integration definition" in roadmap
 assert "docs/DOOBTUBE-MEDIA-INTEGRATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 web_doc = need("docs/DOOBTUBE-WEB-APPLICATION.md", [
     "Roadmap step: **DOOBTUBE-7 — User-facing web application**",
@@ -820,7 +827,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical web definition" in roadmap
 assert "docs/DOOBTUBE-WEB-APPLICATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 integration_doc = need("docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md", [
     "Roadmap step: **DOOBTUBE-8 — Ecosystem integration milestone**",
@@ -864,7 +871,7 @@ level2_workflow = need(".github/workflows/doobtube-integration.yml", [
 
 assert "**Status: COMPLETE (Level 2).** Canonical milestone definition" in roadmap
 assert "docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
 security_doc = need("docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md", [
     "Roadmap step: **DOOBTUBE-9 — Security, abuse and moderation qualification**",
@@ -897,6 +904,18 @@ security_verifier = need("scripts/verify-doobtube-security.py", [
 ])
 assert "**Status: COMPLETE (Level 1).** Canonical security definition" in roadmap
 assert "docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
 
-print("DOOBTUBE-9 Level 1 security baseline verification: PASS")
+docs_closeout = need("doobtube/README.md", [
+    "Clean build and qualification", "Non-production deployment",
+    "docs/DOOBTUBE-OPERATOR-GUIDE.md", "DOOBTUBE-11",
+])
+need("docs/DOOBTUBE-REFERENCE.md", ["Architecture/component map","Roles and permissions","Registry and service identities","Known limitations"])
+need("docs/DOOBTUBE-USER-GUIDE.md", ["Wallet connection","Upload","Reports and appeals"])
+need("docs/DOOBTUBE-DEVELOPER-GUIDE.md", ["Clean checkout qualification","Database migrations","Pull request qualification"])
+need("docs/DOOBTUBE-OPERATOR-GUIDE.md", ["Preflight","Configuration reference","Monitoring / SLOs","Troubleshooting","Release manifest"])
+need("doobtube/deploy/nonproduction.example.json", ['"schema":"doobtube-nonproduction-v1"','"production":false'])
+need("doobtube/release/manifest-v1.json", ['"schema":"doobtube-release-manifest-v1"','"source_sha":"MATERIALIZE_AT_RELEASE"'])
+assert "**Status: COMPLETE (Level 1).** Canonical documentation/operator definition" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-10 are complete" in audit
+print("DOOBTUBE-10 Level 1 documentation/operator baseline verification: PASS")

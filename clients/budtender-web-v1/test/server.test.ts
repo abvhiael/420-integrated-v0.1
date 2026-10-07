@@ -217,4 +217,75 @@ describe("Budtender web client host", () => {
       assert.match((await response.json()).error, /Unsupported Budtender feature/);
     });
   });
+
+  it("sends baseline browser security headers on static and API responses", async () => {
+    await withServer(async (baseUrl) => {
+      for (const path of ["/", "/api/state"]) {
+        const response = await fetch(baseUrl + path);
+        assert.equal(response.status, 200);
+        assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+        assert.equal(response.headers.get("x-frame-options"), "DENY");
+        assert.equal(response.headers.get("referrer-policy"), "no-referrer");
+        assert.equal(response.headers.get("cross-origin-resource-policy"), "same-origin");
+        assert.match(response.headers.get("content-security-policy") ?? "", /default-src 'self'/);
+        assert.match(response.headers.get("content-security-policy") ?? "", /frame-ancestors 'none'/);
+        assert.match(response.headers.get("permissions-policy") ?? "", /camera=\(\)/);
+      }
+    });
+  });
+
+  it("rejects non-JSON mutation requests before game state changes", async () => {
+    await withServer(async (baseUrl) => {
+      const response = await fetch(baseUrl + "/api/customers", {
+        method: "POST",
+        headers: { "content-type": "text/plain" },
+        body: JSON.stringify({ id: "csrf-attempt", product: "flower" }),
+      });
+      assert.equal(response.status, 400);
+      assert.match((await response.json()).error, /application\/json required/);
+
+      const state = await (await fetch(baseUrl + "/api/state")).json();
+      assert.deepEqual(state.customers.queue, []);
+      assert.equal(state.store.products.flower.stock, 4);
+      assert.equal(state.store.cash, 0);
+    });
+  });
+
+  it("rejects cross-origin JSON mutations before game state changes", async () => {
+    await withServer(async (baseUrl) => {
+      const response = await fetch(baseUrl + "/api/customers", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "origin": "https://hostile.example",
+        },
+        body: JSON.stringify({ id: "cross-origin-attempt", product: "flower" }),
+      });
+      assert.equal(response.status, 400);
+      assert.match((await response.json()).error, /cross-origin mutation rejected/);
+
+      const state = await (await fetch(baseUrl + "/api/state")).json();
+      assert.deepEqual(state.customers.queue, []);
+      assert.equal(state.store.cash, 0);
+    });
+  });
+
+  it("allows same-origin JSON mutation requests", async () => {
+    await withServer(async (baseUrl) => {
+      const origin = new URL(baseUrl).origin;
+      const response = await fetch(baseUrl + "/api/customers", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "origin": origin,
+        },
+        body: JSON.stringify({ id: "same-origin", product: "flower" }),
+      });
+      assert.equal(response.status, 201);
+
+      const state = await response.json();
+      assert.equal(state.customers.queue.length, 1);
+      assert.equal(state.customers.queue[0].id, "same-origin");
+    });
+  });
 });

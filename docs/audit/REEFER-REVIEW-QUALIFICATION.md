@@ -44,11 +44,10 @@ The exact implementation SHA passed:
 
 The repository therefore has everything needed to execute the live step later without weakening the app boundary or fabricating endpoint/deployment evidence.
 
-## Release blockers preserved
+## Testnet handoff
 
-- REEFER-AUDIT-7 live Identity/Rights/Storage/Search/Notifications/420Mail integration — BLOCKED on the missing official public-testnet manifest and deployed production-equivalent dependencies.
-- REEFER-AUDIT-8 deployed security/operations qualification — BLOCKED on TLS ingress, rate limiting, anti-abuse controls, encrypted durable storage, retention, monitoring, recovery, load/soak, browser accessibility/mobile evidence.
-- REEFER-AUDIT-9 Genesis closeout — BLOCKED because Reefer Review is not in the frozen `config/genesis-applications.json` catalog; explicit decision required if Genesis release is intended.
-- REEFER-AUDIT-10 production closeout — BLOCKED on independent security review, production deployment, incident/recovery evidence and exact deployed-artifact qualification.
+All unfinished work for REEFER-AUDIT-7 through REEFER-AUDIT-10 has been transferred to the canonical testnet work roadmap in `docs/ROADMAP.md`.
+
+The app-specific repository audit phase is therefore closed for handoff purposes. The transferred work remains live/testnet/Genesis/production-gated and is not being declared complete by this bookkeeping move.
 
 Green repository CI is not evidence of testnet, Genesis, or production readiness.

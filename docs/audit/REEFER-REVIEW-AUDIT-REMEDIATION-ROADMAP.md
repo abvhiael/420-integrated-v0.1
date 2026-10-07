@@ -47,9 +47,11 @@ No dedicated smart contract is required by the canonical architecture: the appli
 4. **REEFER-AUDIT-4 — API and typed client contract:** COMPLETE at repository level.
 5. **REEFER-AUDIT-5 — thin UI and repository deployment baseline:** COMPLETE at repository level; live browser qualification remains BLOCKED on deployment.
 6. **REEFER-AUDIT-6 — documentation/static qualification and durable evidence:** COMPLETE at repository level; see `REEFER-REVIEW-QUALIFICATION.md`.
-7. **REEFER-AUDIT-7 — live dependency integration:** **ACTIVE / LIVE-BLOCKED.** Repository-side live-integration handoff/harness is **COMPLETE and Level 1 qualified** on exact implementation SHA `3be49df1727510a342ecb2535890a5d3a9f2e861` (runs **37581684158** and **37581684069**). Canonical live completion remains blocked on the official production-equivalent public testnet plus live Identity, Rights, Storage, Search, Notifications and 420Mail evidence. See `REEFER-AUDIT-7-QUALIFICATION.md`.
-8. **REEFER-AUDIT-8 — deployed security/operations qualification:** BLOCKED on TLS ingress, rate limits, anti-spam/abuse operations, encrypted storage, retention, backups/recovery, monitoring, load/soak and accessibility evidence.
-9. **REEFER-AUDIT-9 — Genesis decision/release closeout:** BLOCKED on explicit catalog promotion if Genesis release remains intended, followed by exact deployed evidence.
-10. **REEFER-AUDIT-10 — production closeout:** BLOCKED on independent security review, production deployment, incident/recovery evidence and final exact-artifact qualification.
+7. **REEFER-AUDIT-7 — live dependency integration:** **TRANSFERRED TO `docs/ROADMAP.md` TESTNET HANDOFF.** Repository-side live-integration handoff/harness is COMPLETE and Level 1 qualified on exact implementation SHA `3be49df1727510a342ecb2535890a5d3a9f2e861`; live completion remains testnet-gated.
+8. **REEFER-AUDIT-8 — deployed security/operations qualification:** **TRANSFERRED TO `docs/ROADMAP.md` TESTNET HANDOFF.**
+9. **REEFER-AUDIT-9 — Genesis decision/release closeout:** **TRANSFERRED TO `docs/ROADMAP.md` TESTNET HANDOFF.**
+10. **REEFER-AUDIT-10 — production closeout:** **TRANSFERRED TO `docs/ROADMAP.md` TESTNET HANDOFF.**
+
+**Repository audit phase handoff:** all unfinished REEFER-AUDIT work now lives in the canonical testnet work roadmap. This app-specific audit roadmap has no remaining repository-side implementation task before the testnet gate.
 
 Green repository tests are necessary but not sufficient for testnet, Genesis or production readiness.

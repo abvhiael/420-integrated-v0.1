@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171714">
+  <title>Budtender</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">420Integrated</p>
+      <h1>Budtender</h1>
+      <p class="subtitle">run the shop. keep the line moving.</p>
+    </div>
+    <div class="cash-card" aria-live="polite">
+      <span>cash</span>
+      <strong id="cash">$0</strong>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="panel hero-panel">
+      <div><p class="eyebrow">store floor</p><h2>today's counter</h2><p id="status-line">loading store state…</p></div>
+      <button id="tick" class="secondary">advance queue</button>
+    </section>
+    <section class="panel">
+      <div class="section-head"><div><p class="eyebrow">inventory</p><h2>stock</h2></div></div>
+      <div id="inventory" class="cards" aria-live="polite"></div>
+    </section>
+    <section class="panel">
+      <div class="section-head"><div><p class="eyebrow">customers</p><h2>queue</h2></div><button id="add-customer">new customer</button></div>
+      <form id="customer-form" class="inline-form" hidden>
+        <label>product<select id="customer-product"><option value="flower">flower</option><option value="preroll">pre-roll</option><option value="edible">edible</option></select></label>
+        <label>archetype<select id="customer-archetype"><option value="regular">regular</option><option value="impatient">impatient</option><option value="enthusiast">enthusiast</option><option value="bargainHunter">bargain hunter</option></select></label>
+        <button type="submit">add to queue</button>
+      </form>
+      <div id="queue" class="stack" aria-live="polite"></div>
+    </section>
+    <section class="panel">
+      <div class="section-head"><div><p class="eyebrow">store upgrades</p><h2>progression</h2></div></div>
+      <div id="upgrades" class="cards"></div>
+    </section>
+    <section class="panel">
+      <div class="section-head"><div><p class="eyebrow">expansion</p><h2>district growth</h2></div></div>
+      <div id="expansions" class="stack"></div>
+    </section>
+    <section class="panel compact">
+      <div><p class="eyebrow">demand</p><h2>traffic profile</h2></div>
+      <select id="demand-profile" aria-label="Demand profile"><option value="normal">normal</option><option value="fourTwentyRush">4:20 rush</option></select>
+    </section>
+    <p id="error" class="error" role="alert" hidden></p>
+  </main>
+  <template id="inventory-card">
+    <article class="card inventory-card">
+      <div><h3 data-name></h3><p><span data-stock></span> / <span data-capacity></span> in stock</p></div>
+      <div class="row"><span data-price></span><button data-restock class="secondary">restock +1</button></div>
+    </article>
+  </template>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # BUD-AUDIT-8 — Gaming Protocol Integration
 
-Status: IMPLEMENTED — Level 1 + integration-milestone qualification pending
+Status: COMPLETE — Level 1 + Level 2 integration milestone qualified
 
 ## Authority and scope
 
@@ -158,9 +158,9 @@ BUD-AUDIT-8 is COMPLETE only when:
 6. no wallet-wide enumeration or parallel authority surface is introduced;
 7. the user-facing client exposes only non-authoritative Gaming policy/status;
 8. runtime state is truthfully reported as deployment-pending until GP-15 live qualification;
-9. exact-head Level 1 Budtender qualification passes;
-10. app-focused Level 2 integration coverage passes where required;
-11. durable repository evidence records implementation SHA, CI evidence, base SHA, limitations, deferred checks, and next roadmap step.
+9. exact-head Level 1 Budtender qualification passes (satisfied by `da029c1009bc7721573aa75057dd7a3017e0aa93`, Budtender Qualification run `37686660231`);
+10. app-focused Level 2 integration coverage passes where required (satisfied on the same SHA by Budtender `gaming-client-hardening` plus dedicated 420 Gaming Client Hardening run `37686660235`, Four-Game E2E run `37686660214`, and Cross-Game Qualification run `37686660223`);
+11. durable repository evidence records implementation SHA, CI evidence, base SHA, limitations, deferred checks, and next roadmap step (recorded in `docs/audit/BUD-AUDIT-8-EVIDENCE-2026-10-07.md`).
 
 ## Known limitations
 

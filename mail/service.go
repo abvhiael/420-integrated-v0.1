@@ -34,11 +34,14 @@ const (
 )
 
 var (
-	ErrUnauthorized        = errors.New("mail: unauthorized")
-	ErrInvalidInput        = errors.New("mail: invalid input")
-	ErrInvalidTransition   = errors.New("mail: invalid mailbox transition")
-	ErrNotFound            = errors.New("mail: message not found")
-	ErrIdempotencyConflict = errors.New("mail: idempotency key reused with different request")
+	ErrUnauthorized         = errors.New("mail: unauthorized")
+	ErrInvalidInput         = errors.New("mail: invalid input")
+	ErrInvalidTransition    = errors.New("mail: invalid mailbox transition")
+	ErrNotFound             = errors.New("mail: message not found")
+	ErrIdempotencyConflict  = errors.New("mail: idempotency key reused with different request")
+	ErrPrivateBlobIntegrity = errors.New("mail: private blob integrity failure")
+	ErrPrivateBlobSecurity  = errors.New("mail: private blob security requirements unsatisfied")
+	ErrAbuseRateLimited     = errors.New("mail: abuse control rate limit exceeded")
 )
 
 type IdentityDirectory interface {
@@ -52,6 +55,16 @@ type MessengerPolicy interface {
 type PrivateBlobStore interface {
 	PutPrivate(context.Context, string, []byte) (ref string, digest string, err error)
 	GetPrivate(context.Context, string, string) ([]byte, error)
+}
+
+type PrivateBlobSecurityProfile struct {
+	EncryptedAtRest    bool
+	ExternalKeyCustody bool
+	OwnerScopedAccess  bool
+}
+
+type PrivateBlobSecurityProvider interface {
+	PrivateBlobSecurity() PrivateBlobSecurityProfile
 }
 
 type NotificationSink interface {
@@ -156,11 +169,85 @@ func NewServiceWithStore(ids IdentityDirectory, messenger MessengerPolicy, blobs
 }
 
 func NewDurableService(ids IdentityDirectory, messenger MessengerPolicy, blobs PrivateBlobStore, notify NotificationSink, path string) (*Service, error) {
+	if err := validatePrivateBlobSecurity(blobs); err != nil {
+		return nil, err
+	}
 	store, err := OpenDurableStore(path)
 	if err != nil {
 		return nil, err
 	}
 	return NewService(ids, messenger, blobs, notify, store), nil
+}
+
+func validatePrivateBlobSecurity(blobs PrivateBlobStore) error {
+	security, ok := blobs.(PrivateBlobSecurityProvider)
+	if !ok {
+		return ErrPrivateBlobSecurity
+	}
+	profile := security.PrivateBlobSecurity()
+	if !profile.EncryptedAtRest || !profile.ExternalKeyCustody || !profile.OwnerScopedAccess {
+		return ErrPrivateBlobSecurity
+	}
+	return nil
+}
+
+func privateBodyDigest(body []byte) string {
+	sum := sha256.Sum256(body)
+	return hex.EncodeToString(sum[:])
+}
+
+func putPrivateVerified(ctx context.Context, blobs PrivateBlobStore, owner string, body []byte) (string, string, error) {
+	ref, digest, err := blobs.PutPrivate(ctx, owner, body)
+	if err != nil {
+		return "", "", err
+	}
+	ref = strings.TrimSpace(ref)
+	digest = strings.ToLower(strings.TrimSpace(digest))
+	if ref == "" || digest == "" || digest != privateBodyDigest(body) {
+		return "", "", ErrPrivateBlobIntegrity
+	}
+	return ref, digest, nil
+}
+
+func getPrivateVerified(ctx context.Context, blobs PrivateBlobStore, owner, ref, expectedDigest string) ([]byte, error) {
+	body, err := blobs.GetPrivate(ctx, owner, ref)
+	if err != nil {
+		return nil, err
+	}
+	if strings.ToLower(strings.TrimSpace(expectedDigest)) != privateBodyDigest(body) {
+		return nil, ErrPrivateBlobIntegrity
+	}
+	return body, nil
+}
+
+const (
+	MaxOutboundMessagesPerMinute = 60
+	MaxDistinctRecipientsPerHour = 25
+)
+
+func checkOutboundAbuseControls(data *storeData, sender, recipient string, now time.Time) error {
+	minuteCutoff := now.Add(-time.Minute)
+	hourCutoff := now.Add(-time.Hour)
+	messageCount := 0
+	recipients := map[string]struct{}{}
+	for _, msg := range data.Messages {
+		if msg.Sender != sender || msg.Source != ServiceID {
+			continue
+		}
+		if !msg.CreatedAt.Before(minuteCutoff) {
+			messageCount++
+		}
+		if !msg.CreatedAt.Before(hourCutoff) {
+			recipients[msg.Recipient] = struct{}{}
+		}
+	}
+	if messageCount >= MaxOutboundMessagesPerMinute {
+		return ErrAbuseRateLimited
+	}
+	if _, seen := recipients[recipient]; !seen && len(recipients) >= MaxDistinctRecipientsPerHour {
+		return ErrAbuseRateLimited
+	}
+	return nil
 }
 
 func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Message, error) {
@@ -211,6 +298,13 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return existing, nil
 	}
 
+	abuseNow := s.Now().UTC()
+	if err := s.Store.View(ctx, func(data *storeData) error {
+		return checkOutboundAbuseControls(data, req.Sender, req.Recipient, abuseNow)
+	}); err != nil {
+		return Message{}, err
+	}
+
 	id := deterministicMessageID(req.Sender, req.Recipient, req.IdempotencyKey)
 	var conversationID string
 	if err := s.Store.View(ctx, func(data *storeData) error {
@@ -226,14 +320,14 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		return Message{}, err
 	}
 
-	ref, digest, err := s.Blobs.PutPrivate(ctx, req.Recipient, []byte(req.Body))
+	ref, digest, err := putPrivateVerified(ctx, s.Blobs, req.Recipient, []byte(req.Body))
 	if err != nil {
 		return Message{}, fmt.Errorf("private body storage: %w", err)
 	}
 	if ref == "" || digest == "" {
 		return Message{}, errors.New("mail: storage returned incomplete body evidence")
 	}
-	now := s.Now().UTC()
+	now := abuseNow
 	msg := Message{ID: id, Sender: req.Sender, Recipient: req.Recipient, Subject: req.Subject, BodyRef: ref, BodyDigest: digest, ConversationID: conversationID, ReplyTo: req.ReplyTo, CreatedAt: now, UpdatedAt: now, Status: "DELIVERED", Visibility: "PRIVATE", Source: req.Source, Version: 1, Fingerprint: fp, IdempotencyKey: req.IdempotencyKey}
 	senderReadAt := now
 	senderState := MailboxState{MessageID: id, Owner: req.Sender, Folder: FolderSent, ReadAt: &senderReadAt, UpdatedAt: now, Version: 1}
@@ -257,6 +351,9 @@ func (s *Service) Send(ctx context.Context, actor string, req SendRequest) (Mess
 		}
 		if resolvedConversationID != msg.ConversationID {
 			return ErrInvalidInput
+		}
+		if err := checkOutboundAbuseControls(data, req.Sender, req.Recipient, now); err != nil {
+			return err
 		}
 		decision, err := evaluateTrustPolicy(data, req.Recipient, msg, req.Body)
 		if err != nil {
@@ -570,7 +667,7 @@ func (s *Service) ReadBody(ctx context.Context, actor, id string) ([]byte, Messa
 	if !owns || state.DeletedAt != nil {
 		return nil, Message{}, ErrNotFound
 	}
-	body, err := s.Blobs.GetPrivate(ctx, actor, msg.BodyRef)
+	body, err := getPrivateVerified(ctx, s.Blobs, actor, msg.BodyRef, msg.BodyDigest)
 	if err != nil {
 		return nil, Message{}, err
 	}

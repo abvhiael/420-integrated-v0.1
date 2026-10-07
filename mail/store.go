@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-const DurableStoreSchemaVersion = 8
+const DurableStoreSchemaVersion = 11
 
 var (
 	ErrStoreCorrupt      = errors.New("mail: durable store corrupt")
@@ -22,51 +22,57 @@ var (
 )
 
 type storeData struct {
-	SchemaVersion       int
-	Messages            map[string]Message
-	ByIdem              map[string]string
-	Mailbox             map[string]MailboxState
-	MailboxIndex        map[string][]string
-	Labels              map[string]LabelDefinition
-	CustomFolders       map[string]CustomFolder
-	LabelIndex          map[string][]string
-	CustomFolderIndex   map[string][]string
-	Rules               map[string]MailRule
-	TrustEntries        map[string]TrustEntry
-	TrustSettings       map[string]TrustSettings
-	Reputation          map[string]SenderReputation
-	AbuseReports        map[string]AbuseReport
-	Quarantine          map[string]QuarantineRecord
-	ContentFingerprints map[string]uint64
-	ConversationStates  map[string]ConversationState
-	ConversationIndex   map[string][]string
-	Drafts              map[string]Draft
-	Deliveries          map[string]Delivery
+	SchemaVersion              int
+	Messages                   map[string]Message
+	ByIdem                     map[string]string
+	Mailbox                    map[string]MailboxState
+	MailboxIndex               map[string][]string
+	Labels                     map[string]LabelDefinition
+	CustomFolders              map[string]CustomFolder
+	LabelIndex                 map[string][]string
+	CustomFolderIndex          map[string][]string
+	Rules                      map[string]MailRule
+	TrustEntries               map[string]TrustEntry
+	TrustSettings              map[string]TrustSettings
+	Reputation                 map[string]SenderReputation
+	AbuseReports               map[string]AbuseReport
+	Quarantine                 map[string]QuarantineRecord
+	ContentFingerprints        map[string]uint64
+	ConversationStates         map[string]ConversationState
+	ConversationIndex          map[string][]string
+	Drafts                     map[string]Draft
+	Deliveries                 map[string]Delivery
+	DiscordSync                map[string]DiscordSyncState
+	TelegramSync               map[string]TelegramSyncState
+	DiscordWalletVerifications map[string]DiscordWalletVerificationState
 }
 
 type diskStoreData struct {
-	SchemaVersion       int                          `json:"schema_version"`
-	Messages            map[string]Message           `json:"messages"`
-	ByIdem              map[string]string            `json:"idempotency"`
-	Mailbox             map[string]MailboxState      `json:"mailbox"`
-	MailboxIndex        map[string][]string          `json:"mailbox_index"`
-	Labels              map[string]LabelDefinition   `json:"labels,omitempty"`
-	CustomFolders       map[string]CustomFolder      `json:"custom_folders,omitempty"`
-	LabelIndex          map[string][]string          `json:"label_index,omitempty"`
-	CustomFolderIndex   map[string][]string          `json:"custom_folder_index,omitempty"`
-	Rules               map[string]MailRule          `json:"rules,omitempty"`
-	TrustEntries        map[string]TrustEntry        `json:"trust_entries,omitempty"`
-	TrustSettings       map[string]TrustSettings     `json:"trust_settings,omitempty"`
-	Reputation          map[string]SenderReputation  `json:"reputation,omitempty"`
-	AbuseReports        map[string]AbuseReport       `json:"abuse_reports,omitempty"`
-	Quarantine          map[string]QuarantineRecord  `json:"quarantine,omitempty"`
-	ContentFingerprints map[string]uint64            `json:"content_fingerprints,omitempty"`
-	ConversationStates  map[string]ConversationState `json:"conversation_states,omitempty"`
-	ConversationIndex   map[string][]string          `json:"conversation_index,omitempty"`
-	Drafts              map[string]Draft             `json:"drafts,omitempty"`
-	Deliveries          map[string]Delivery          `json:"deliveries,omitempty"`
-	Fingerprints        map[string]string            `json:"fingerprints,omitempty"`
-	IdempotencyKeys     map[string]string            `json:"idempotency_keys,omitempty"`
+	SchemaVersion              int                                       `json:"schema_version"`
+	Messages                   map[string]Message                        `json:"messages"`
+	ByIdem                     map[string]string                         `json:"idempotency"`
+	Mailbox                    map[string]MailboxState                   `json:"mailbox"`
+	MailboxIndex               map[string][]string                       `json:"mailbox_index"`
+	Labels                     map[string]LabelDefinition                `json:"labels,omitempty"`
+	CustomFolders              map[string]CustomFolder                   `json:"custom_folders,omitempty"`
+	LabelIndex                 map[string][]string                       `json:"label_index,omitempty"`
+	CustomFolderIndex          map[string][]string                       `json:"custom_folder_index,omitempty"`
+	Rules                      map[string]MailRule                       `json:"rules,omitempty"`
+	TrustEntries               map[string]TrustEntry                     `json:"trust_entries,omitempty"`
+	TrustSettings              map[string]TrustSettings                  `json:"trust_settings,omitempty"`
+	Reputation                 map[string]SenderReputation               `json:"reputation,omitempty"`
+	AbuseReports               map[string]AbuseReport                    `json:"abuse_reports,omitempty"`
+	Quarantine                 map[string]QuarantineRecord               `json:"quarantine,omitempty"`
+	ContentFingerprints        map[string]uint64                         `json:"content_fingerprints,omitempty"`
+	ConversationStates         map[string]ConversationState              `json:"conversation_states,omitempty"`
+	ConversationIndex          map[string][]string                       `json:"conversation_index,omitempty"`
+	Drafts                     map[string]Draft                          `json:"drafts,omitempty"`
+	Deliveries                 map[string]Delivery                       `json:"deliveries,omitempty"`
+	DiscordSync                map[string]DiscordSyncState               `json:"discord_sync,omitempty"`
+	TelegramSync               map[string]TelegramSyncState              `json:"telegram_sync,omitempty"`
+	DiscordWalletVerifications map[string]DiscordWalletVerificationState `json:"discord_wallet_verifications,omitempty"`
+	Fingerprints               map[string]string                         `json:"fingerprints,omitempty"`
+	IdempotencyKeys            map[string]string                         `json:"idempotency_keys,omitempty"`
 }
 
 type MailStore interface {
@@ -230,26 +236,29 @@ func (s *DurableStore) loadUnlocked() (storeData, bool, error) {
 	}
 	migrated := disk.SchemaVersion < DurableStoreSchemaVersion
 	data := storeData{
-		SchemaVersion:       disk.SchemaVersion,
-		Messages:            disk.Messages,
-		ByIdem:              disk.ByIdem,
-		Mailbox:             disk.Mailbox,
-		MailboxIndex:        disk.MailboxIndex,
-		Labels:              disk.Labels,
-		CustomFolders:       disk.CustomFolders,
-		LabelIndex:          disk.LabelIndex,
-		CustomFolderIndex:   disk.CustomFolderIndex,
-		Rules:               disk.Rules,
-		TrustEntries:        disk.TrustEntries,
-		TrustSettings:       disk.TrustSettings,
-		Reputation:          disk.Reputation,
-		AbuseReports:        disk.AbuseReports,
-		Quarantine:          disk.Quarantine,
-		ContentFingerprints: disk.ContentFingerprints,
-		ConversationStates:  disk.ConversationStates,
-		ConversationIndex:   disk.ConversationIndex,
-		Drafts:              disk.Drafts,
-		Deliveries:          disk.Deliveries,
+		SchemaVersion:              disk.SchemaVersion,
+		Messages:                   disk.Messages,
+		ByIdem:                     disk.ByIdem,
+		Mailbox:                    disk.Mailbox,
+		MailboxIndex:               disk.MailboxIndex,
+		Labels:                     disk.Labels,
+		CustomFolders:              disk.CustomFolders,
+		LabelIndex:                 disk.LabelIndex,
+		CustomFolderIndex:          disk.CustomFolderIndex,
+		Rules:                      disk.Rules,
+		TrustEntries:               disk.TrustEntries,
+		TrustSettings:              disk.TrustSettings,
+		Reputation:                 disk.Reputation,
+		AbuseReports:               disk.AbuseReports,
+		Quarantine:                 disk.Quarantine,
+		ContentFingerprints:        disk.ContentFingerprints,
+		ConversationStates:         disk.ConversationStates,
+		ConversationIndex:          disk.ConversationIndex,
+		Drafts:                     disk.Drafts,
+		Deliveries:                 disk.Deliveries,
+		DiscordSync:                disk.DiscordSync,
+		TelegramSync:               disk.TelegramSync,
+		DiscordWalletVerifications: disk.DiscordWalletVerifications,
 	}
 	normalizeStoreData(&data)
 	if disk.SchemaVersion < 6 {
@@ -289,28 +298,31 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 	}
 
 	disk := diskStoreData{
-		SchemaVersion:       DurableStoreSchemaVersion,
-		Messages:            data.Messages,
-		ByIdem:              data.ByIdem,
-		Mailbox:             data.Mailbox,
-		MailboxIndex:        data.MailboxIndex,
-		Labels:              data.Labels,
-		CustomFolders:       data.CustomFolders,
-		LabelIndex:          data.LabelIndex,
-		CustomFolderIndex:   data.CustomFolderIndex,
-		Rules:               data.Rules,
-		TrustEntries:        data.TrustEntries,
-		TrustSettings:       data.TrustSettings,
-		Reputation:          data.Reputation,
-		AbuseReports:        data.AbuseReports,
-		Quarantine:          data.Quarantine,
-		ContentFingerprints: data.ContentFingerprints,
-		ConversationStates:  data.ConversationStates,
-		ConversationIndex:   data.ConversationIndex,
-		Drafts:              data.Drafts,
-		Deliveries:          data.Deliveries,
-		Fingerprints:        map[string]string{},
-		IdempotencyKeys:     map[string]string{},
+		SchemaVersion:              DurableStoreSchemaVersion,
+		Messages:                   data.Messages,
+		ByIdem:                     data.ByIdem,
+		Mailbox:                    data.Mailbox,
+		MailboxIndex:               data.MailboxIndex,
+		Labels:                     data.Labels,
+		CustomFolders:              data.CustomFolders,
+		LabelIndex:                 data.LabelIndex,
+		CustomFolderIndex:          data.CustomFolderIndex,
+		Rules:                      data.Rules,
+		TrustEntries:               data.TrustEntries,
+		TrustSettings:              data.TrustSettings,
+		Reputation:                 data.Reputation,
+		AbuseReports:               data.AbuseReports,
+		Quarantine:                 data.Quarantine,
+		ContentFingerprints:        data.ContentFingerprints,
+		ConversationStates:         data.ConversationStates,
+		ConversationIndex:          data.ConversationIndex,
+		Drafts:                     data.Drafts,
+		Deliveries:                 data.Deliveries,
+		DiscordSync:                data.DiscordSync,
+		TelegramSync:               data.TelegramSync,
+		DiscordWalletVerifications: data.DiscordWalletVerifications,
+		Fingerprints:               map[string]string{},
+		IdempotencyKeys:            map[string]string{},
 	}
 	for id, msg := range data.Messages {
 		if msg.Fingerprint != "" {
@@ -372,26 +384,29 @@ func (s *DurableStore) writeUnlocked(data storeData) error {
 
 func newStoreData() storeData {
 	return storeData{
-		SchemaVersion:       DurableStoreSchemaVersion,
-		Messages:            map[string]Message{},
-		ByIdem:              map[string]string{},
-		Mailbox:             map[string]MailboxState{},
-		MailboxIndex:        map[string][]string{},
-		Labels:              map[string]LabelDefinition{},
-		CustomFolders:       map[string]CustomFolder{},
-		LabelIndex:          map[string][]string{},
-		CustomFolderIndex:   map[string][]string{},
-		Rules:               map[string]MailRule{},
-		TrustEntries:        map[string]TrustEntry{},
-		TrustSettings:       map[string]TrustSettings{},
-		Reputation:          map[string]SenderReputation{},
-		AbuseReports:        map[string]AbuseReport{},
-		Quarantine:          map[string]QuarantineRecord{},
-		ContentFingerprints: map[string]uint64{},
-		ConversationStates:  map[string]ConversationState{},
-		ConversationIndex:   map[string][]string{},
-		Drafts:              map[string]Draft{},
-		Deliveries:          map[string]Delivery{},
+		SchemaVersion:              DurableStoreSchemaVersion,
+		Messages:                   map[string]Message{},
+		ByIdem:                     map[string]string{},
+		Mailbox:                    map[string]MailboxState{},
+		MailboxIndex:               map[string][]string{},
+		Labels:                     map[string]LabelDefinition{},
+		CustomFolders:              map[string]CustomFolder{},
+		LabelIndex:                 map[string][]string{},
+		CustomFolderIndex:          map[string][]string{},
+		Rules:                      map[string]MailRule{},
+		TrustEntries:               map[string]TrustEntry{},
+		TrustSettings:              map[string]TrustSettings{},
+		Reputation:                 map[string]SenderReputation{},
+		AbuseReports:               map[string]AbuseReport{},
+		Quarantine:                 map[string]QuarantineRecord{},
+		ContentFingerprints:        map[string]uint64{},
+		ConversationStates:         map[string]ConversationState{},
+		ConversationIndex:          map[string][]string{},
+		Drafts:                     map[string]Draft{},
+		Deliveries:                 map[string]Delivery{},
+		DiscordSync:                map[string]DiscordSyncState{},
+		TelegramSync:               map[string]TelegramSyncState{},
+		DiscordWalletVerifications: map[string]DiscordWalletVerificationState{},
 	}
 }
 
@@ -456,30 +471,42 @@ func normalizeStoreData(data *storeData) {
 	if data.Deliveries == nil {
 		data.Deliveries = map[string]Delivery{}
 	}
+	if data.DiscordSync == nil {
+		data.DiscordSync = map[string]DiscordSyncState{}
+	}
+	if data.TelegramSync == nil {
+		data.TelegramSync = map[string]TelegramSyncState{}
+	}
+	if data.DiscordWalletVerifications == nil {
+		data.DiscordWalletVerifications = map[string]DiscordWalletVerificationState{}
+	}
 }
 
 func cloneStoreData(src storeData) storeData {
 	dst := storeData{
-		SchemaVersion:       src.SchemaVersion,
-		Messages:            make(map[string]Message, len(src.Messages)),
-		ByIdem:              make(map[string]string, len(src.ByIdem)),
-		Mailbox:             make(map[string]MailboxState, len(src.Mailbox)),
-		MailboxIndex:        make(map[string][]string, len(src.MailboxIndex)),
-		Labels:              make(map[string]LabelDefinition, len(src.Labels)),
-		CustomFolders:       make(map[string]CustomFolder, len(src.CustomFolders)),
-		LabelIndex:          make(map[string][]string, len(src.LabelIndex)),
-		CustomFolderIndex:   make(map[string][]string, len(src.CustomFolderIndex)),
-		Rules:               make(map[string]MailRule, len(src.Rules)),
-		TrustEntries:        make(map[string]TrustEntry, len(src.TrustEntries)),
-		TrustSettings:       make(map[string]TrustSettings, len(src.TrustSettings)),
-		Reputation:          make(map[string]SenderReputation, len(src.Reputation)),
-		AbuseReports:        make(map[string]AbuseReport, len(src.AbuseReports)),
-		Quarantine:          make(map[string]QuarantineRecord, len(src.Quarantine)),
-		ContentFingerprints: make(map[string]uint64, len(src.ContentFingerprints)),
-		ConversationStates:  make(map[string]ConversationState, len(src.ConversationStates)),
-		ConversationIndex:   make(map[string][]string, len(src.ConversationIndex)),
-		Drafts:              make(map[string]Draft, len(src.Drafts)),
-		Deliveries:          make(map[string]Delivery, len(src.Deliveries)),
+		SchemaVersion:              src.SchemaVersion,
+		Messages:                   make(map[string]Message, len(src.Messages)),
+		ByIdem:                     make(map[string]string, len(src.ByIdem)),
+		Mailbox:                    make(map[string]MailboxState, len(src.Mailbox)),
+		MailboxIndex:               make(map[string][]string, len(src.MailboxIndex)),
+		Labels:                     make(map[string]LabelDefinition, len(src.Labels)),
+		CustomFolders:              make(map[string]CustomFolder, len(src.CustomFolders)),
+		LabelIndex:                 make(map[string][]string, len(src.LabelIndex)),
+		CustomFolderIndex:          make(map[string][]string, len(src.CustomFolderIndex)),
+		Rules:                      make(map[string]MailRule, len(src.Rules)),
+		TrustEntries:               make(map[string]TrustEntry, len(src.TrustEntries)),
+		TrustSettings:              make(map[string]TrustSettings, len(src.TrustSettings)),
+		Reputation:                 make(map[string]SenderReputation, len(src.Reputation)),
+		AbuseReports:               make(map[string]AbuseReport, len(src.AbuseReports)),
+		Quarantine:                 make(map[string]QuarantineRecord, len(src.Quarantine)),
+		ContentFingerprints:        make(map[string]uint64, len(src.ContentFingerprints)),
+		ConversationStates:         make(map[string]ConversationState, len(src.ConversationStates)),
+		ConversationIndex:          make(map[string][]string, len(src.ConversationIndex)),
+		Drafts:                     make(map[string]Draft, len(src.Drafts)),
+		Deliveries:                 make(map[string]Delivery, len(src.Deliveries)),
+		DiscordSync:                make(map[string]DiscordSyncState, len(src.DiscordSync)),
+		TelegramSync:               make(map[string]TelegramSyncState, len(src.TelegramSync)),
+		DiscordWalletVerifications: make(map[string]DiscordWalletVerificationState, len(src.DiscordWalletVerifications)),
 	}
 	for k, v := range src.Messages {
 		dst.Messages[k] = v
@@ -539,6 +566,15 @@ func cloneStoreData(src storeData) storeData {
 	}
 	for k, v := range src.Deliveries {
 		dst.Deliveries[k] = v
+	}
+	for k, v := range src.DiscordSync {
+		dst.DiscordSync[k] = v
+	}
+	for k, v := range src.TelegramSync {
+		dst.TelegramSync[k] = v
+	}
+	for k, v := range src.DiscordWalletVerifications {
+		dst.DiscordWalletVerifications[k] = v
 	}
 	return dst
 }
@@ -661,6 +697,15 @@ func validateStoreData(data *storeData) error {
 	}
 	if err := validateDeliveryData(data); err != nil {
 		return fmt.Errorf("invalid delivery data: %w", err)
+	}
+	if err := validateDiscordSyncData(data); err != nil {
+		return fmt.Errorf("invalid discord sync data: %w", err)
+	}
+	if err := validateTelegramSyncData(data); err != nil {
+		return fmt.Errorf("invalid telegram sync data: %w", err)
+	}
+	if err := validateDiscordWalletVerificationData(data); err != nil {
+		return fmt.Errorf("invalid discord wallet verification data: %w", err)
 	}
 	return nil
 }

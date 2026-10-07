@@ -76,6 +76,36 @@ func (c Client) Send(ctx context.Context, req mail.SendRequest) (mail.Message, e
 	return out, err
 }
 
+func (c Client) CrossPlatformIdentity(ctx context.Context) (mail.CrossPlatformVerifiedIdentity, error) {
+	var out mail.CrossPlatformVerifiedIdentity
+	err := c.do(ctx, http.MethodGet, "/v1/integrations/identity", nil, &out)
+	return out, err
+}
+
+func (c Client) IntegrationsInbox(ctx context.Context, cursor string, limit int) (mail.IntegrationsInboxPage, error) {
+	return c.IntegrationsInboxFiltered(ctx, "", cursor, limit)
+}
+
+func (c Client) IntegrationsInboxFiltered(ctx context.Context, source, cursor string, limit int) (mail.IntegrationsInboxPage, error) {
+	q := url.Values{}
+	if source != "" {
+		q.Set("source", source)
+	}
+	if cursor != "" {
+		q.Set("cursor", cursor)
+	}
+	if limit > 0 {
+		q.Set("limit", strconv.Itoa(limit))
+	}
+	path := "/v1/integrations/inbox"
+	if encoded := q.Encode(); encoded != "" {
+		path += "?" + encoded
+	}
+	var out mail.IntegrationsInboxPage
+	err := c.do(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
 func (c Client) Inbox(ctx context.Context, cursor string, limit int) (mail.Page, error) {
 	q := url.Values{}
 	if cursor != "" {
@@ -387,5 +417,174 @@ func (c Client) RetryDelivery(ctx context.Context, id string) (mail.Delivery, er
 func (c Client) CancelDelivery(ctx context.Context, id string) (mail.Delivery, error) {
 	var out mail.Delivery
 	err := c.do(ctx, http.MethodPost, "/v1/outbox/"+url.PathEscape(id)+"/cancel", nil, &out)
+	return out, err
+}
+
+func (c Client) GoogleOnboarding(ctx context.Context, req mail.GoogleOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/google", req, &out)
+	return out, err
+}
+
+func (c Client) AppleOnboarding(ctx context.Context, req mail.AppleOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/apple", req, &out)
+	return out, err
+}
+
+func (c Client) PasskeyOnboarding(ctx context.Context, req mail.PasskeyOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/passkey", req, &out)
+	return out, err
+}
+
+func (c Client) ExistingWalletOnboarding(ctx context.Context, req mail.WalletOnboardingRequest) (mail.OnboardingResult, error) {
+	var out mail.OnboardingResult
+	err := c.do(ctx, http.MethodPost, "/v1/onboarding/wallet", req, &out)
+	return out, err
+}
+
+func (c Client) SecurityState(ctx context.Context) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodGet, "/v1/security", nil, &out)
+	return out, err
+}
+
+func (c Client) EnrollPasskey(ctx context.Context, req mail.PasskeyEnrollmentRequest) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/passkeys", req, &out)
+	return out, err
+}
+
+func (c Client) RevokePasskey(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodDelete, "/v1/security/passkeys/"+url.PathEscape(id), nil, &out)
+	return out, err
+}
+
+func (c Client) EnrollDevice(ctx context.Context, req mail.DeviceEnrollmentRequest) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/devices", req, &out)
+	return out, err
+}
+
+func (c Client) RevokeDevice(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodDelete, "/v1/security/devices/"+url.PathEscape(id), nil, &out)
+	return out, err
+}
+
+func (c Client) Recovery(ctx context.Context, req mail.RecoveryRequest) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/recovery", req, &out)
+	return out, err
+}
+
+func (c Client) RevokeSession(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/sessions/"+url.PathEscape(id)+"/revoke", nil, &out)
+	return out, err
+}
+
+func (c Client) AcknowledgeSecurityAlert(ctx context.Context, id string) (mail.SecurityState, error) {
+	var out mail.SecurityState
+	err := c.do(ctx, http.MethodPost, "/v1/security/alerts/"+url.PathEscape(id)+"/ack", nil, &out)
+	return out, err
+}
+
+func (c Client) PrepareWalletAction(ctx context.Context, req mail.WalletActionRequest) (mail.WalletHandoff, error) {
+	var out mail.WalletHandoff
+	err := c.do(ctx, http.MethodPost, "/v1/wallet/actions", req, &out)
+	return out, err
+}
+
+func (c Client) VerifyWalletEvidence(ctx context.Context, req mail.WalletVerificationRequest) (mail.WalletVerification, error) {
+	var out mail.WalletVerification
+	err := c.do(ctx, http.MethodPost, "/v1/wallet/verifications", req, &out)
+	return out, err
+}
+
+func (c Client) ConnectorProviders(ctx context.Context) ([]mail.ConnectorDescriptor, error) {
+	var out []mail.ConnectorDescriptor
+	err := c.do(ctx, http.MethodGet, "/v1/connectors/providers", nil, &out)
+	return out, err
+}
+
+func (c Client) LinkConnector(ctx context.Context, req mail.ConnectorLinkRequest) (mail.ConnectorConnection, error) {
+	var out mail.ConnectorConnection
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/link", req, &out)
+	return out, err
+}
+
+func (c Client) UnlinkConnector(ctx context.Context, provider, connectionID string) error {
+	req := map[string]string{"provider": provider, "connection_id": connectionID}
+	return c.do(ctx, http.MethodPost, "/v1/connectors/unlink", req, nil)
+}
+
+func (c Client) PullConnector(ctx context.Context, req mail.ConnectorPullRequest) (mail.ConnectorPullResult, error) {
+	var out mail.ConnectorPullResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/pull", req, &out)
+	return out, err
+}
+
+func (c Client) PushConnector(ctx context.Context, req mail.ConnectorPushRequest) (mail.ConnectorPushResult, error) {
+	var out mail.ConnectorPushResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/push", req, &out)
+	return out, err
+}
+
+func (c Client) DeliverTelegram(ctx context.Context, req mail.TelegramDeliveryRequest) (mail.TelegramDeliveryResult, error) {
+	var out mail.TelegramDeliveryResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/telegram/deliver", req, &out)
+	return out, err
+}
+
+func (c Client) SyncTelegram(ctx context.Context, connectionID string) (mail.TelegramSyncResult, error) {
+	var out mail.TelegramSyncResult
+	req := map[string]string{"connection_id": connectionID}
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/telegram/sync", req, &out)
+	return out, err
+}
+
+func (c Client) SyncDiscord(ctx context.Context, connectionID string) (mail.DiscordSyncResult, error) {
+	var out mail.DiscordSyncResult
+	req := map[string]string{"connection_id": connectionID}
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/sync", req, &out)
+	return out, err
+}
+
+func (c Client) DeliverDiscord(ctx context.Context, req mail.DiscordDeliveryRequest) (mail.DiscordDeliveryResult, error) {
+	var out mail.DiscordDeliveryResult
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/deliver", req, &out)
+	return out, err
+}
+
+func (c Client) PrepareDiscordWalletVerification(ctx context.Context, req mail.DiscordWalletChallengeRequest) (mail.DiscordWalletChallenge, error) {
+	var out mail.DiscordWalletChallenge
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/wallet/challenge", req, &out)
+	return out, err
+}
+
+func (c Client) VerifyDiscordWallet(ctx context.Context, req mail.DiscordWalletVerificationRequest) (mail.DiscordWalletVerification, error) {
+	var out mail.DiscordWalletVerification
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/discord/wallet/verify", req, &out)
+	return out, err
+}
+
+func (c Client) SignalIntegrationBoundary(ctx context.Context) (mail.SignalIntegrationBoundary, error) {
+	var out mail.SignalIntegrationBoundary
+	err := c.do(ctx, http.MethodGet, "/v1/connectors/signal/boundary", nil, &out)
+	return out, err
+}
+
+func (c Client) ShareToSignal(ctx context.Context, req mail.SignalShareRequest) (mail.SignalShareReceipt, error) {
+	var out mail.SignalShareReceipt
+	err := c.do(ctx, http.MethodPost, "/v1/connectors/signal/share", req, &out)
+	return out, err
+}
+
+func (c Client) SignalDeepSyncStatus(ctx context.Context) (mail.SignalDeepSyncStatus, error) {
+	var out mail.SignalDeepSyncStatus
+	err := c.do(ctx, http.MethodGet, "/v1/connectors/signal/deep-sync/status", nil, &out)
 	return out, err
 }

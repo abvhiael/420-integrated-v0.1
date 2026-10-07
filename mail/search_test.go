@@ -159,7 +159,7 @@ func TestPrivateSearchScanBoundHasContinuation(t *testing.T) {
 	base := time.Unix(1700000000, 0).UTC()
 	var tick int64
 	s.Now = func() time.Time {
-		t := base.Add(time.Duration(tick) * time.Second)
+		t := base.Add(time.Duration(tick) * 2 * time.Second)
 		tick++
 		return t
 	}

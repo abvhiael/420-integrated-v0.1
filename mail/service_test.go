@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -459,5 +461,133 @@ func TestMailboxFolderPagination(t *testing.T) {
 	}
 	if len(p2.Items) != 1 || p2.NextCursor != "" {
 		t.Fatalf("mailbox second page invalid: %+v", p2)
+	}
+}
+
+type insecureBlobStore struct{ testBlobs }
+
+func (b *insecureBlobStore) PrivateBlobSecurity() PrivateBlobSecurityProfile {
+	return PrivateBlobSecurityProfile{EncryptedAtRest: false, ExternalKeyCustody: true, OwnerScopedAccess: true}
+}
+
+type secureBlobStore struct{ testBlobs }
+
+func (b *secureBlobStore) PrivateBlobSecurity() PrivateBlobSecurityProfile {
+	return PrivateBlobSecurityProfile{EncryptedAtRest: true, ExternalKeyCustody: true, OwnerScopedAccess: true}
+}
+
+type corruptDigestBlobStore struct{ testBlobs }
+
+func (b *corruptDigestBlobStore) PutPrivate(ctx context.Context, owner string, body []byte) (string, string, error) {
+	ref, _, err := b.testBlobs.PutPrivate(ctx, owner, body)
+	return ref, strings.Repeat("0", 64), err
+}
+
+func TestDurableServiceRequiresPrivateBlobSecurityProfile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "mail.json")
+	if _, err := NewDurableService(testIDs{"alice.420": true}, testPolicy{}, &testBlobs{}, &testNotify{}, path); !errors.Is(err, ErrPrivateBlobSecurity) {
+		t.Fatalf("durable service accepted blob store without security profile: %v", err)
+	}
+	if _, err := NewDurableService(testIDs{"alice.420": true}, testPolicy{}, &insecureBlobStore{}, &testNotify{}, path); !errors.Is(err, ErrPrivateBlobSecurity) {
+		t.Fatalf("durable service accepted insecure blob profile: %v", err)
+	}
+	if _, err := NewDurableService(testIDs{"alice.420": true}, testPolicy{}, &secureBlobStore{}, &testNotify{}, path); err != nil {
+		t.Fatalf("durable service rejected secure blob profile: %v", err)
+	}
+}
+
+func TestPrivateBlobDigestIsVerifiedOnWriteAndRead(t *testing.T) {
+	ctx := context.Background()
+	s := NewService(testIDs{"alice.420": true, "bob.420": true}, testPolicy{}, &corruptDigestBlobStore{}, &testNotify{}, NewMemoryStore())
+	if _, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "digest-write", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "private body", Source: ServiceID}); !errors.Is(err, ErrPrivateBlobIntegrity) {
+		t.Fatalf("corrupt storage digest accepted: %v", err)
+	}
+
+	blobs := &testBlobs{}
+	s = NewService(testIDs{"alice.420": true, "bob.420": true}, testPolicy{}, blobs, &testNotify{}, NewMemoryStore())
+	msg, err := s.Send(ctx, "alice.420", SendRequest{IdempotencyKey: "digest-read", Sender: "alice.420", Recipient: "bob.420", Subject: "x", Body: "private body", Source: ServiceID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	blobs.mu.Lock()
+	blobs.data[msg.BodyRef] = []byte("tampered body")
+	blobs.mu.Unlock()
+	if _, _, err := s.ReadBody(ctx, "bob.420", msg.ID); !errors.Is(err, ErrPrivateBlobIntegrity) {
+		t.Fatalf("tampered private blob accepted: %v", err)
+	}
+}
+
+func TestOutboundAbuseControlsRateLimitAndIdempotentReplay(t *testing.T) {
+	s, _ := testService()
+	ctx := context.Background()
+	now := time.Unix(1700010000, 0).UTC()
+	s.Now = func() time.Time { return now }
+
+	var first Message
+	for i := 0; i < MaxOutboundMessagesPerMinute; i++ {
+		msg, err := s.Send(ctx, "alice.420", SendRequest{
+			IdempotencyKey: fmt.Sprintf("abuse-rate-%d", i),
+			Sender:         "alice.420", Recipient: "bob.420",
+			Subject: "ordinary", Body: fmt.Sprintf("body-%d", i), Source: ServiceID,
+		})
+		if err != nil {
+			t.Fatalf("send %d: %v", i, err)
+		}
+		if i == 0 {
+			first = msg
+		}
+	}
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "abuse-rate-over", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "ordinary", Body: "over", Source: ServiceID,
+	}); !errors.Is(err, ErrAbuseRateLimited) {
+		t.Fatalf("rate limit not enforced: %v", err)
+	}
+	replay, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "abuse-rate-0", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "ordinary", Body: "body-0", Source: ServiceID,
+	})
+	if err != nil || replay.ID != first.ID {
+		t.Fatalf("idempotent replay was throttled: msg=%+v err=%v", replay, err)
+	}
+	now = now.Add(time.Minute + time.Second)
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "abuse-rate-reset", Sender: "alice.420", Recipient: "bob.420",
+		Subject: "ordinary", Body: "after-window", Source: ServiceID,
+	}); err != nil {
+		t.Fatalf("rate window did not reset: %v", err)
+	}
+}
+
+func TestOutboundAbuseControlsDistinctRecipientFanout(t *testing.T) {
+	ids := testIDs{"alice.420": true}
+	for i := 0; i <= MaxDistinctRecipientsPerHour; i++ {
+		ids[fmt.Sprintf("recipient-%d.420", i)] = true
+	}
+	s := NewService(ids, testPolicy{}, &testBlobs{}, &testNotify{}, NewMemoryStore())
+	ctx := context.Background()
+	now := time.Unix(1700020000, 0).UTC()
+	s.Now = func() time.Time { return now }
+
+	for i := 0; i < MaxDistinctRecipientsPerHour; i++ {
+		recipient := fmt.Sprintf("recipient-%d.420", i)
+		if _, err := s.Send(ctx, "alice.420", SendRequest{
+			IdempotencyKey: fmt.Sprintf("fanout-%d", i), Sender: "alice.420", Recipient: recipient,
+			Subject: "ordinary", Body: "ordinary", Source: ServiceID,
+		}); err != nil {
+			t.Fatalf("fanout %d: %v", i, err)
+		}
+	}
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "fanout-over", Sender: "alice.420", Recipient: fmt.Sprintf("recipient-%d.420", MaxDistinctRecipientsPerHour),
+		Subject: "ordinary", Body: "ordinary", Source: ServiceID,
+	}); !errors.Is(err, ErrAbuseRateLimited) {
+		t.Fatalf("distinct-recipient fanout limit not enforced: %v", err)
+	}
+	if _, err := s.Send(ctx, "alice.420", SendRequest{
+		IdempotencyKey: "fanout-existing", Sender: "alice.420", Recipient: "recipient-0.420",
+		Subject: "ordinary", Body: "ordinary again", Source: ServiceID,
+	}); err != nil {
+		t.Fatalf("existing recipient incorrectly blocked by fanout limit: %v", err)
 	}
 }

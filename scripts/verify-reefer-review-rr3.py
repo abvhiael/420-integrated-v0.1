@@ -53,8 +53,9 @@ for marker in ["StatusTombstoned", "Rights.Assert", "CurrentRevisionID", "search
 for marker in ["AppendRevision", "AppendModerationEvent", "CanRead"]:
     req(marker in memory, f"memory/development policy missing {marker}")
 
-for route in ["/v1/editorial/publications", "/tombstone", "/revisions", "/moderation"]:
-    req(route in http, f"HTTP route missing {route}")
+req("/v1/editorial/publications" in http, "HTTP editorial listing route missing")
+for action in ['case "tombstone":', 'case "revisions":', 'case "moderation":']:
+    req(action in http, f"HTTP publication action missing {action}")
 req("http.MethodPut" in http, "publication update route missing")
 
 for method in ["Ready(", "GetPublication(", "UpdatePublication(", "Moderate(", "Tombstone(", "Revisions(", "ModerationHistory(", "ListEditorial("]:

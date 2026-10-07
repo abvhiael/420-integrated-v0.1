@@ -190,7 +190,9 @@ class DoobTubeBackendTests(unittest.TestCase):
 
     def test_migration_version_is_durable(self):
         row = self.backend.store.db.execute("SELECT v FROM meta WHERE k='schema_version'").fetchone()
-        self.assertEqual(row["v"], "1")
+        self.assertEqual(row["v"], "2")
+        tables = {r["name"] for r in self.backend.store.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        self.assertIn("media_sessions", tables)
 
     def test_unknown_preference_and_bad_cursor_fail_stably(self):
         out = self.backend.handle(self.req(

@@ -1,0 +1,21 @@
+{
+  "schema":"doobtube-web-runtime-v1",
+  "site":{"name":"DoobTube","productionOrigin":null},
+  "network":{"chainId":null,"network":null},
+  "services":{
+    "doobtube":{"baseUrl":null},
+    "media":{"serviceId":"420/service/media/v1","baseUrl":null},
+    "search":{"serviceId":"420/service/search/v1","baseUrl":null},
+    "notifications":{"serviceId":"420/service/notifications/v1","baseUrl":null}
+  },
+  "features":{
+    "feed":true,"search":true,"playback":true,"library":true,"upload":true,
+    "livestreaming":true,"subscriptions":true,"moderation":true,
+    "preferences":true,"delete":false,"export":false
+  },
+  "execution":{
+    "status":"DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED",
+    "requireWalletChainMatch":true,
+    "requireHTTPS":true
+  }
+}

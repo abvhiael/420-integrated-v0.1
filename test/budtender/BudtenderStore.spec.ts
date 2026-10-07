@@ -65,4 +65,13 @@ describe("BudtenderStore BUD-1", () => {
 
     assert.equal(store.serveOrder("order-1"), 22);
   });
+  it("fails atomically when a sale would overflow the safe-integer cash range", () => {
+    const store = new BudtenderStore();
+    store.grantStartingCash(Number.MAX_SAFE_INTEGER);
+    store.createOrder("overflow-sale", "flower");
+    const before = store.snapshot();
+
+    assert.throws(() => store.serveOrder("overflow-sale"), /safe integer range/);
+    assert.deepEqual(store.snapshot(), before);
+  });
 });

@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-2 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-3 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -214,7 +214,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-2 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-3 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -330,4 +330,97 @@ assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" i
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
 assert "DOOBTUBE-0 through DOOBTUBE-2 are complete" in audit
 
-print("DOOBTUBE-2 Level 1 dependency/trust verification: PASS")
+lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
+    "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
+    "Status: **ADOPTED**",
+    "DT-DATA-OBJ-001",
+    "DT-STORAGE-001",
+    "DT-INTEGRITY-001",
+    "DT-DERIV-001",
+    "DT-PLAYDATA-001",
+    "DT-PRIVDATA-001",
+    "DT-DELETE-001",
+    "DT-STREAM-001",
+    "DT-PROJ-001",
+    "DT-IDEMP-001",
+    "DT-REC-001",
+    "DT-LIFE-INV-001",
+    "DT-LIFE-INV-014",
+    "Next canonical roadmap step: DOOBTUBE-4 — Contracts and protocol adapters",
+])
+
+media_storage = need("docs/420-MEDIA-STORAGE-LIFECYCLE.md", [
+    "DRAFT", "PREPARED", "UPLOADED", "READY", "DELETED",
+    "object_id", "manifest_id", "shard_index", "shard_root", "size_bytes", "commitment_id",
+    "MEDIA-STORAGE-INV-001", "MEDIA-STORAGE-INV-014",
+])
+media_compute = need("docs/420-MEDIA-PAY-COMPUTE.md", [
+    "MediaPayComputeAdapter420",
+    "Compute Market owns canonical request/job/match/provider/funding/entitlement/settlement/refund state",
+    "Media owns only its application lifecycle and mirrors canonical external evidence into that lifecycle",
+    "MEDIA-ECON-INV-012",
+])
+media_live = need("docs/420-MEDIA-LIVESTREAM-SERVICE.md", [
+    "MediaStreamRegistry420 remains authoritative for stream controller ownership",
+    "persist desired/live session state across process restart",
+    "recover persisted desired-live sessions after restart",
+    "Raw media, stream payloads and resolved credentials remain outside this service state",
+])
+media_proj = need("docs/420-MEDIA-PROJECTIONS.md", [
+    "deterministic full rebuild",
+    "finalized history",
+    "public",
+])
+
+# Every original DOOBTUBE-3 category must be decided.
+for phrase in [
+    "MediaAsset",
+    "upload preparation",
+    "complete Storage object identity",
+    "Integrity and provenance",
+    "Transcodes, thumbnails, posters and previews",
+    "Playback locators and manifests",
+    "Visibility and privacy lifecycle",
+    "Delete and retention lifecycle",
+    "Livestream identity and session lifecycle",
+    "Processing-job lifecycle",
+    "Search/index/projection lifecycle",
+    "Persistence classes",
+    "Idempotency model",
+    "Recovery model",
+    "Schemas frozen by DOOBTUBE-3",
+]:
+    assert phrase in lifecycle, f"DOOBTUBE-3 category missing: {phrase!r}"
+
+# Exact Storage identity vocabulary must remain complete.
+for field in ["object_id","manifest_id","shard_index","shard_root","size_bytes","commitment_id"]:
+    assert field in lifecycle, f"Storage object identity field missing: {field}"
+
+# Adopted Media lifecycle must not drift.
+for state in ["DRAFT","PREPARED","UPLOADED","READY","DELETED"]:
+    assert state in lifecycle, f"asset lifecycle state missing: {state}"
+
+# Required lifecycle/recovery boundaries.
+for phrase in [
+    "UPLOADED is **not** canonical readiness",
+    "DoobTube does not directly schedule Compute providers in V1",
+    "Compute completion alone cannot make derivative output READY",
+    "A `playback_url` or manifest locator is non-authoritative transport/presentation metadata",
+    "A copied URL does not convert UNLISTED to PUBLIC",
+    "Delete failure cannot tombstone a still-live asset",
+    "A locally persisted controller is not sufficient",
+    "deterministically rebuildable",
+    "Provider failure must not cause DoobTube to silently rotate object identity",
+    "Asset remains UPLOADED",
+]:
+    assert phrase in lifecycle, f"lifecycle boundary missing: {phrase!r}"
+
+# Logical schemas required by the exit criterion.
+for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","ProcessingView","LivestreamView","ProjectionView"]:
+    assert schema in lifecycle, f"logical schema missing: {schema}"
+
+assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
+assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-3 are complete" in audit
+
+print("DOOBTUBE-3 Level 1 data/lifecycle verification: PASS")

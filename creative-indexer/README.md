@@ -6,7 +6,7 @@ The indexer is deliberately non-canonical: chain history and committed manifests
 
 ## Current milestone
 
-The first milestone consumes the deterministic Decision #10 fixture history and proves the database/projector boundaries before live RPC ingestion is added. It implements:
+HZ-AUDIT-6 retains the deterministic Decision #10 fixture path while adding the repository-side canonical RPC/reorg/rebuild integration boundary. It implements:
 
 - PostgreSQL canonical projection schema;
 - an idempotent raw event journal with block/transaction/log ordering fields;
@@ -14,9 +14,16 @@ The first milestone consumes the deterministic Decision #10 fixture history and 
 - Creator, Work, Recording, contributor-credit, rights-version/share, License, rights-transfer, settlement and royalty projections;
 - exact Decision #10 economic fixture verification;
 - deterministic SHA-256 canonical projection digest; and
-- destructive database reset + full replay producing the exact same digest.
+- destructive database reset + full replay producing the exact same digest;
+- retained block hash, parent hash, transaction index, transaction hash and log index ordering metadata;
+- explicit source-provided finality instead of marking every indexed block finalized;
+- canonical-tail replacement when an indexed event-bearing block hash changes;
+- fail-closed refusal to roll back finalized indexed blocks;
+- coordinated reset/replay across base, catalog and HZ-4 streaming projections;
+- a complete HZ projection digest that remains identical after journal rebuild; and
+- a JSON-RPC `eth_getLogs` source with canonical block-header verification and a protocol decoder/enrichment boundary.
 
-The next milestone replaces the normalized fixture-event source with live EVM RPC logs from a broadcast Decision #10 Anvil/devnet history and adds canonical-block/reorg rollback.
+Public-testnet RPC endpoint selection, deployed-address binding, protocol-specific production decoder/enrichment wiring, observed reorg receipts and live rebuild evidence remain HZ-AUDIT-7. The fixture source remains available as deterministic repository evidence rather than pretending to be live chain history.
 
 ## Run locally
 

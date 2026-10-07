@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-8 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-9 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -113,6 +113,9 @@ allowed_doobtube_files = {
     "doobtube/integration/__init__.py",
     "doobtube/integration/milestone.py",
     "doobtube/tests/test_doobtube_level2_integration.py",
+    "doobtube/security/__init__.py",
+    "doobtube/security/policy.py",
+    "doobtube/tests/test_doobtube_security.py",
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc" and "dist" not in p.parts}
@@ -254,7 +257,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -368,7 +371,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -461,7 +464,7 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
     "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
@@ -541,7 +544,7 @@ assert "return False" in adapter_code, "DoobTube contract requirement must remai
 assert "return None" in adapter_code, "DoobTube service ID must remain absent"
 assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
 assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 backend_doc = need("docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md", [
     "Roadmap step: **DOOBTUBE-5 — Backend/API/indexing/service control plane**",
@@ -634,7 +637,7 @@ for route in ["/v1/health","/v1/readiness","/v1/feed","/v1/preferences","/v1/con
 
 assert "**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition" in roadmap
 assert "docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 media_doc = need("docs/DOOBTUBE-MEDIA-INTEGRATION.md", [
     "Roadmap step: **DOOBTUBE-6 — Media processing, delivery and livestream integration**",
@@ -742,7 +745,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical media integration definition" in roadmap
 assert "docs/DOOBTUBE-MEDIA-INTEGRATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 web_doc = need("docs/DOOBTUBE-WEB-APPLICATION.md", [
     "Roadmap step: **DOOBTUBE-7 — User-facing web application**",
@@ -816,7 +819,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical web definition" in roadmap
 assert "docs/DOOBTUBE-WEB-APPLICATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
 integration_doc = need("docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md", [
     "Roadmap step: **DOOBTUBE-8 — Ecosystem integration milestone**",
@@ -860,6 +863,39 @@ level2_workflow = need(".github/workflows/doobtube-integration.yml", [
 
 assert "**Status: COMPLETE (Level 2).** Canonical milestone definition" in roadmap
 assert "docs/DOOBTUBE-ECOSYSTEM-INTEGRATION.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
 
-print("DOOBTUBE-8 Level 2 milestone baseline verification: PASS")
+security_doc = need("docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md", [
+    "Roadmap step: **DOOBTUBE-9 — Security, abuse and moderation qualification**",
+    "Qualification level: **Level 1 — app-scoped security qualification**",
+    "Broken access control", "Privilege escalation", "Signature / authorization replay",
+    "Nonce / domain mistakes", "Reentrancy / external-call risk",
+    "Accounting / custody / refund errors", "Front-running / MEV",
+    "Stale oracle / bridge risk", "Content-rights abuse", "Moderation abuse",
+    "Spam / Sybil behavior", "Malicious uploads", "Rate / resource exhaustion",
+    "Webhook replay", "Operator / provider compromise", "Secrets / logging / privacy leakage",
+    "DT-SEC-INV-001", "DT-SEC-INV-014",
+    "Next canonical roadmap step: DOOBTUBE-10 — Documentation, deployment and operator closeout",
+])
+security_policy = need("doobtube/security/policy.py", [
+    "class AbusePolicy", "class AbuseGuard", "def redact_sensitive_text",
+    "def assert_no_secret_fields", "preferences.write", "control.rebuild", "operator.metrics",
+])
+security_tests = need("doobtube/tests/test_doobtube_security.py", [
+    "test_broken_access_control_and_privilege_escalation_fail_closed",
+    "test_actor_operation_rate_limit_and_window_reset",
+    "test_replay_same_key_does_not_consume_second_abuse_slot",
+    "test_rebuild_spam_is_bounded",
+    "test_job_error_persistence_redacts_sensitive_exception_text",
+    "test_content_rights_abuse_cannot_publish_revoked_asset",
+])
+security_verifier = need("scripts/verify-doobtube-security.py", [
+    "DOOBTUBE-9 Level 1 security/abuse/moderation verification: PASS",
+    "media/security/session.go", "media/security/moderation.go",
+    "media/security/webhook.go", "media/security/policy.go",
+])
+assert "**Status: COMPLETE (Level 1).** Canonical security definition" in roadmap
+assert "docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-9 are complete" in audit
+
+print("DOOBTUBE-9 Level 1 security baseline verification: PASS")

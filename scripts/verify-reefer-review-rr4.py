@@ -56,8 +56,12 @@ req("sessionStorage.setItem" not in js and "localStorage.setItem" not in js,
     "browser persists session credential")
 req("X-420-Actor" not in js, "browser still sends X-420-Actor")
 req('id="session-actor"' not in index, "arbitrary actor input remains")
-req('id="session-connect"' in index and 'id="session-disconnect"' in index,
+req('id="session-connect"' in index and 'id="session-disconnect"' in index and 'id="session-scope"' in index,
     "Wallet session controls missing")
+req('for="session-scope"' in index, "session scope selector lacks programmatic label")
+req('capabilities: [requestedCapability]' in js, "browser must request one explicit capability scope")
+req('capabilities: ["reefer.author", "reefer.publisher", "reefer.moderator"]' not in js,
+    "browser must not request all privileged scopes by default")
 
 for marker in [
     "TestRR4SessionValidationBoundaries",

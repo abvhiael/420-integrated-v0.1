@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "../system/GenesisResidentAccess420.sol";
 import "./BridgeIds420.sol";
 
-/// @notice Canonical identity registry for external networks admitted to 420Bridge.
+/// @notice Canonical identity registry for the local 420 network and external networks admitted to 420Bridge.
 /// @dev `routeChainId` is the compact identifier stored in BridgeRouteRegistry. `networkId` binds that
 ///      identifier to a network-specific fingerprint (for example genesis hash/network magic/config hash).
 contract BridgeChainRegistry420 is GenesisResidentAccess420 {

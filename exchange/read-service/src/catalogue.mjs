@@ -22,11 +22,42 @@ export function validateCatalogue(input){
     assetId:req(raw.assetId,'assetId'),symbol:req(raw.symbol,'asset symbol'),qualification:STATES.has(raw.qualification)?raw.qualification:(()=>{throw new Error('invalid display qualification');})(),
     source:req(raw.source,'asset source'),
   }));
-  const routes=input.routes.map(raw=>Object.freeze({
-    routeId:req(raw.routeId,'routeId'),marketSubjectId:req(raw.marketSubjectId,'route marketSubjectId'),
-    qualification:STATES.has(raw.qualification)?raw.qualification:(()=>{throw new Error('invalid display qualification');})(),
-    source:req(raw.source,'route source'),
-  }));
+  const routes=input.routes.map(raw=>{
+    const bridge=raw.bridge===undefined||raw.bridge===null?null:Object.freeze({
+      exchangeAssetId:req(raw.bridge.exchangeAssetId,'bridge exchangeAssetId'),
+      localToken:req(raw.bridge.localToken,'bridge localToken'),
+      canonicalAsset:req(raw.bridge.canonicalAsset,'bridge canonicalAsset'),
+      sourceChain:req(raw.bridge.sourceChain,'bridge sourceChain'),
+      destinationChain:req(raw.bridge.destinationChain,'bridge destinationChain'),
+      sourceAssetId:req(raw.bridge.sourceAssetId,'bridge sourceAssetId'),
+      destinationAssetId:req(raw.bridge.destinationAssetId,'bridge destinationAssetId'),
+      adapterId:req(raw.bridge.adapterId,'bridge adapterId'),
+      adapterAddress:req(raw.bridge.adapterAddress,'bridge adapterAddress'),
+      verifierId:req(raw.bridge.verifierId,'bridge verifierId'),
+      provenanceHash:req(raw.bridge.provenanceHash,'bridge provenanceHash'),
+      verificationHash:req(raw.bridge.verificationHash,'bridge verificationHash'),
+      direction:raw.bridge.direction==='OUTBOUND'?'OUTBOUND':'INBOUND',
+      qualified:raw.bridge.qualified===true,
+      representationActive:raw.bridge.representationActive===true,
+      canonicalRepresentation:raw.bridge.canonicalRepresentation===true,
+      routeActive:raw.bridge.routeActive===true,
+      directionEnabled:raw.bridge.directionEnabled===true,
+      adapterLive:raw.bridge.adapterLive===true,
+      adapterMatches:raw.bridge.adapterMatches===true,
+      verifierConfigured:raw.bridge.verifierConfigured===true,
+      settlementHealthy:raw.bridge.settlementHealthy===true,
+      paused:raw.bridge.paused===true,
+      bridgeFee:Number(raw.bridge.bridgeFee??0),
+      routeLimit:raw.bridge.routeLimit??null,
+      assetLimit:raw.bridge.assetLimit??null,
+    });
+    if(bridge&&(!Number.isFinite(bridge.bridgeFee)||bridge.bridgeFee<0))throw new Error('invalid bridge fee');
+    return Object.freeze({
+      routeId:req(raw.routeId,'routeId'),marketSubjectId:req(raw.marketSubjectId,'route marketSubjectId'),
+      qualification:STATES.has(raw.qualification)?raw.qualification:(()=>{throw new Error('invalid display qualification');})(),
+      source:req(raw.source,'route source'),bridge,
+    });
+  });
   return Object.freeze({schema:input.schema,version:input.version,markets:Object.freeze(markets),assets:Object.freeze(assets),routes:Object.freeze(routes)});
 }
 export function loadCatalogue(file){return validateCatalogue(JSON.parse(fs.readFileSync(file,'utf8')));}

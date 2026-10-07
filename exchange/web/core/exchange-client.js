@@ -79,6 +79,27 @@ export function validateHistoryPage(page) {
   return page;
 }
 
+export function validateBridgeSurface(surface) {
+  requireObject(surface, 'bridge surface');
+  if (!Array.isArray(surface.routes) || !Array.isArray(surface.settlements)) {
+    throw new ExchangeApiError('MALFORMED_QUERY', 'bridge routes/settlements required');
+  }
+  requireObject(surface.provenance, 'bridge provenance');
+  if (surface.provenance.rpcFallbackReady !== true) {
+    throw new ExchangeApiError('MALFORMED_QUERY', 'bridge RPC fallback readiness required');
+  }
+  for (const route of surface.routes) {
+    requireId(route.routeId, 'bridge routeId');
+    requireId(route.sourceChain, 'bridge sourceChain');
+    requireId(route.destinationChain, 'bridge destinationChain');
+  }
+  for (const settlement of surface.settlements) {
+    requireId(settlement.settlementId, 'bridge settlementId');
+    requireId(settlement.routeId, 'bridge settlement routeId');
+  }
+  return surface;
+}
+
 export function validateStreamEvent(event) {
   requireObject(event, 'stream event');
   if (!Number.isInteger(event.sequence) || event.sequence <= 0) throw new ExchangeApiError('MALFORMED_QUERY', 'invalid stream sequence');
@@ -113,6 +134,17 @@ export class ExchangeClient {
       headers: { 'accept': 'application/json', 'x-420-client-schema': '14.0' },
     });
     return validateSnapshot((await decodeResponse(response)).snapshot);
+  }
+
+  async bridge() {
+    const response = await this.fetchImpl(`${this.baseUrl}/v13/bridge`, {
+      headers: { 'accept': 'application/json', 'x-420-client-schema': '14.0' },
+    });
+    const body = await decodeResponse(response);
+    if (body?.schema !== '420-exchange-bridge-response-v13.6') {
+      throw new ExchangeApiError('MALFORMED_QUERY', 'invalid bridge response schema');
+    }
+    return validateBridgeSurface(body);
   }
 
   async history({ kind, subjectId = null, activeOnly = true, cursor = '', limit = 50 } = {}) {

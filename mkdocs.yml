@@ -242,6 +242,8 @@ nav:
               - Deployment & Operations: apps/pay/deployment-operations.md
           - 420 Swap:
               - Overview: apps/swap/index.md
+              - Deployment Operations: apps/swap/deployment-operations.md
+              - Testnet Qualification: apps/swap/testnet-qualification.md
               - Getting Started: apps/swap/getting-started.md
               - User Guide: apps/swap/user-guide.md
               - Concepts: apps/swap/concepts.md
@@ -265,6 +267,7 @@ nav:
               - Reference: apps/treasury/reference.md
           - 420 Bridge:
               - Overview: apps/bridge/index.md
+              - Deployment Operations: apps/bridge/deployment-operations.md
               - Getting Started: apps/bridge/getting-started.md
               - User Guide: apps/bridge/user-guide.md
               - Concepts: apps/bridge/concepts.md

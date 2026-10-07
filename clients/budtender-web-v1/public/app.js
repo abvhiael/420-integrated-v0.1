@@ -171,7 +171,15 @@ demandProfile.addEventListener("change", () => mutate(() =>
 ));
 
 try {
-  state = await request("/api/state");
+  const [initialState, gaming] = await Promise.all([
+    request("/api/state"),
+    request("/api/gaming"),
+  ]);
+  state = initialState;
+  $("#gaming-status").textContent =
+    gaming.runtime === "deployment-pending"
+      ? "optional ecosystem features · live testnet pending"
+      : "optional ecosystem features";
   render();
 } catch (cause) {
   showError(cause instanceof Error ? cause.message : "unable to load Budtender");

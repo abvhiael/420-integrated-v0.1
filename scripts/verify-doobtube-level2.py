@@ -116,6 +116,6 @@ for path in ["doobtube/api/service.py","doobtube/media/service.py","doobtube/web
 
 road=read("docs/DOOBTUBE-ROADMAP.md")
 audit=read("docs/DOOBTUBE-AUDIT.md")
-assert "**Status: COMPLETE (Level 2).** Canonical ecosystem integration definition" in road
+assert "**Status: COMPLETE (Level 2).** Canonical milestone definition" in road
 assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
 print("DOOBTUBE-8 Level 2 ecosystem integration verification: PASS")

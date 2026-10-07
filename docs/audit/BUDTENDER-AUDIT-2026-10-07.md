@@ -88,7 +88,7 @@ The audit branch:
 | User-facing web client | `clients/budtender-web-v1` | COMPLETE | Responsive presentation client over application service; exact-head Level 1 qualified |
 | BUD-AUDIT-7 spec | `docs/budtender/BUD-AUDIT-7-USER-FACING-CLIENT.md` | COMPLETE | Client requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-8 spec | `docs/budtender/BUD-AUDIT-8-GAMING-PROTOCOL-INTEGRATION.md` | COMPLETE | Gaming Protocol integration requirements/invariants frozen; exact-head Level 1 + Level 2 qualified |
-| BUD-AUDIT-9 spec | `docs/budtender/BUD-AUDIT-9-SECURITY-CLOSEOUT.md` | IMPLEMENTED | Repository-stage security closeout requirements/invariants frozen; exact-head Level 1 qualification pending |
+| BUD-AUDIT-9 spec | `docs/budtender/BUD-AUDIT-9-SECURITY-CLOSEOUT.md` | COMPLETE | Repository-stage security closeout requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-6 spec | `docs/budtender/BUD-AUDIT-6-APPLICATION-SERVICE.md` | COMPLETE | Application-service requirements/invariants frozen and exact-head Level 1 qualified |
 | BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | COMPLETE | Audit-phase requirements frozen and Level 1 exact-head qualification recorded |
 | Core unit tests | `test/budtender/*.spec.ts` | COMPLETE | Includes negative/boundary and cross-phase integration tests |
@@ -214,7 +214,7 @@ The correct repository-grounded interpretation is:
 - BUD-AUDIT-6 application service boundary: complete and exact-head Level 1 qualified on `b80eb03b50526f470e3a8b778dc0329a27d95ef1`.
 - BUD-AUDIT-7 user-facing client: complete and exact-head Level 1 qualified on `9961bf25b7ee7d0fb750cfdbb6676d7fdc01d1ec`.
 - BUD-AUDIT-8 Gaming Protocol integration: complete and exact-head Level 1 + Level 2 qualified on `da029c1009bc7721573aa75057dd7a3017e0aa93`.
-- BUD-AUDIT-9 Security Closeout: implemented; exact-head Level 1 qualification pending.
+- BUD-AUDIT-9 Security Closeout: complete and exact-head Level 1 qualified on `24cd08e9fa759c7702fca8538d4596c25e5078a9`.
 - Shared Gaming Protocol source integration: implemented.
 - Live Gaming Protocol deployment: pending.
 - User-facing browser client: implemented; full production/mobile release remains incomplete.

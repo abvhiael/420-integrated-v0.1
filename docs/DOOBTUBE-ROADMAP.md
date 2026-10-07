@@ -145,6 +145,8 @@ Implement the production-intended web client:
 - fail-closed environment configuration;
 - no private-key custody.
 
+**Status: COMPLETE (Level 1).** Canonical web definition: `docs/DOOBTUBE-WEB-APPLICATION.md`. The dependency-free static V1 client implements all frozen user surfaces, anonymous public browsing, Wallet/network mutation gating, explicit loading/empty/error/pending states, safe playback/upload handling, upload/live retry/revalidation, creator subscriptions, report/appeal, honest delete/export unavailability, accessibility/responsive behavior, DoobTube branding, fail-closed secret-free runtime configuration and deterministic static build/browser fixtures.
+
 **Exit:** static build, frontend tests and browser-level integration against qualified service fixtures pass.
 
 ## DOOBTUBE-8 — Ecosystem integration milestone

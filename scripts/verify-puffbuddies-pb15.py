@@ -48,7 +48,7 @@ for script in [
     need((ROOT/script).is_file(),f"missing retained dependency verifier: {script}")
 
 need("Level 2 milestone E" in DOC,"PB-15 milestone classification missing")
-need("PB-16" in DOC and "Security/privacy audit" in DOC,"next canonical phase missing")
+need("PB-16" in DOC and "security/privacy audit" in DOC.lower(),"next canonical phase missing")
 need("Intentionally deferred Level 3" in DOC,"Level-3 boundary missing")
 need("does not perform the final monolithic reconciliation" in DOC,"current-main policy missing")
 need(not (ROOT/"contracts/src/puffbuddies").exists(),"unexpected PuffBuddies contract surface")

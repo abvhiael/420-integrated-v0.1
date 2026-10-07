@@ -145,3 +145,16 @@ Article bodies remain outside the metadata store. `Storage420BlobAdapter` binds 
 Publishing through the RR-5 durable composition requires `RightsProvenanceProvider`. The stored provenance records the canonical `420/service/rights/v1` service identity, subject/right/claim references, holder wallet, evidence/provenance hashes, article digest, chain/network, Registry/Router references, block evidence and verification time. A verified RR-4 session additionally binds holder wallet and chain/network. Local Rights evidence never becomes external legal adjudication.
 
 Repository qualification does not invent or claim live 420 Storage or 420 Rights deployment addresses. Those live deployment/Registry/runtime identities remain later testnet/deployment gates.
+
+
+## RR-6 ecosystem integrations
+
+RR-6 implements repository-side adapters for 420Search, 420Notifications and 420Mail while preserving their non-authoritative roles.
+
+- `Search420Adapter` emits the canonical `search/result` v1 schema for PUBLIC + PUBLISHED ReeferReview articles only, binds discovery to retained 420Rights provenance, never publishes article bodies/private Storage references, and supports deterministic reconciliation/deletion of ReeferReview-owned Search projections.
+- `Notifications420Adapter` targets `420/service/notifications/v1` through a deployment-supplied authority boundary. Requests carry minimized public publication/provenance metadata plus deterministic idempotency; consent suppression is a valid non-delivery result and malformed receipts fail closed.
+- `Mail420Adapter` uses the canonical 420Mail send contract, always uses `420/service/mail/v1` as the Mail transport source, requires a configured authenticated internal sender identity and opt-in recipient resolver, and uses recipient-bound deterministic idempotency. It does not enable external SMTP or paid external newsletters.
+- `IntegrationOutbox` persists failed Search/Notifications/Mail work with owner-only files, OS locking, atomic replacement and fsync. `IntegrationReconciler` retries pending operations without changing publication authority.
+- `NewEcosystemIntegrationBundle` installs queued adapters so dependency outages can degrade projections/delivery without rolling back canonical publication state.
+
+Repository qualification does not claim live service endpoints, deployment credentials, testnet Registry bindings or provider operation. Those remain REEFER-AUDIT-7+ live gates.

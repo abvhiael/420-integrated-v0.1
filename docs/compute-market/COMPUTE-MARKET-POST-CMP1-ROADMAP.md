@@ -590,6 +590,10 @@ Add trusted, revocable external-result attestation and the authoritative mapping
 
 ## CMP-5.8 — Phase closeout
 
+**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+
+Reconcile the complete accumulated CMP-5 external distributed-compute adapter phase against current `main`, establish one exact merge-candidate implementation SHA, run the required Level 3 qualification exactly once under canonical CI ownership, preserve durable evidence, and hand off to CMP-6. Closeout specification: [CMP-5.8 Phase closeout](CMP-5.8-PHASE-CLOSEOUT.md).
+
 ---
 
 # CMP-6 — Useful-computation rewards
@@ -753,7 +757,7 @@ Production target flow:
 | CMP-2 matching marketplace | CMP-2.1–CMP-2.7 COMPLETE; CMP-2.8 Level 3 comprehensive qualification in progress |
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
-| CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.7 is the fourth CMP-5 Level 2 milestone; CMP-5.8 Level 3 phase closeout next |
+| CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.8 Level 3 closeout candidate — comprehensive exact-head qualification pending |
 | CMP-6 useful-compute rewards | forthcoming |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |

@@ -1,0 +1,55 @@
+name: DoobTube Level 2 integration
+
+on:
+  pull_request:
+    paths:
+      - "doobtube/**"
+      - "docs/DOOBTUBE-*"
+      - "docs/audit/DOOBTUBE-*"
+      - "scripts/verify-doobtube-baseline.py"
+      - "scripts/verify-doobtube-level2.py"
+      - ".github/workflows/doobtube-baseline.yml"
+      - ".github/workflows/doobtube-integration.yml"
+      - "config/genesis-consumer-services.json"
+      - "contracts/src/libraries/ServiceIds420.sol"
+      - "media/**"
+      - "search/**"
+  workflow_dispatch:
+
+concurrency:
+  group: doobtube-level2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compile DoobTube package
+        run: python3 -m compileall -q doobtube
+      - name: Retain protocol adapter suite
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_adapters
+      - name: Retain backend control-plane suite
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_backend
+      - name: Retain media integration suite
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_media
+      - name: Run Level 2 ecosystem integration suite
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_level2_integration
+      - name: Retain web application qualification
+        run: npm --prefix doobtube/web run qualify
+      - name: Verify cumulative DoobTube baseline
+        run: python3 scripts/verify-doobtube-baseline.py
+      - name: Verify Level 2 ecosystem integration
+        run: python3 scripts/verify-doobtube-level2.py

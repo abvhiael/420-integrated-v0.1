@@ -1706,6 +1706,26 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 **Exit criteria:** exact-head PB-15 workflow passes; complete retained PuffBuddies suite and both client builds pass; PB-0/PB-13/PB-14 and retained dependency compatibility verifiers pass; evidence/roadmap reconciliation passes; privacy/authority/deployment negative gates pass; Level-2 milestone E is recorded on the same exact SHA; no repository blocker remains for PB-15; PB-16 remains the next canonical step.
 
 
+
+### PB-16 — Security/privacy audit
+
+**Purpose:** audit the accumulated repository-side PuffBuddies implementation through PB-15 against canonical privacy, consent, adult-eligibility, threat/trust, safety, data-lifecycle, visibility, state-ownership and non-goal invariants; remediate concrete findings; and record exact-SHA security/privacy evidence before closed testnet.
+
+**Canonical requirements:** review metadata leakage, public enumeration, location privacy, consent/block/messaging authority, eligibility, replay/stale state, moderation evidence, deletion/retention, dependency authority, payment non-consent, client/API trust, session/secret handling, rate/resource abuse, input/media validation, dangerous runtime execution and deployment-claim hygiene; remediate identified repository findings; run focused audit tests, complete retained PuffBuddies regressions, web/mobile builds and PB-0/PB-13/PB-14/PB-15 verifiers; reject secret/public-graph/force-authority/contract/live-deployment regressions; record residual live-environment risks honestly.
+
+**Audit finding:** PB16-F1 — PB-14 accepted client-controlled `X-Request-Id` into protected audit/response metadata. Remediation makes canonical request IDs server-generated only, preventing sensitive metadata injection and deliberate audit-correlation collisions.
+
+**Affected components:** PB-14 API request correlation, PB-16 audit tests/verifier/workflow, canonical definition/evidence and PB-0.19 reconciliation.
+
+**Qualification:** Level 1 exact-head app-scoped security/privacy audit. PB-15 already completed Level-2 milestone E; PB-16 does not create a redundant new Level-2 milestone.
+
+**Level-3 boundary:** final current-main reconciliation, canonical full Solidity inventory, Genesis address/namespace/predeploy/frozen-address/manifest authority, 420 Integrated/global, Docs/global, Geth/fault/soak and deployment/config closeout remain deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0 security/privacy/consent/lifecycle authorities; **PB-1 through PB-15 COMPLETE**.
+
+**Exit criteria:** PB16-F1 is remediated; focused and retained security/privacy tests pass; complete app regressions and clients pass; PB-0/PB-13/PB-14/PB-15 verifiers pass; static privacy/security/deployment gates pass; durable exact-SHA evidence is recorded; no repository blocker remains for PB-16; PB-17 — Closed testnet is next.
+
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

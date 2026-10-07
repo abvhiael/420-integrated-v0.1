@@ -1,6 +1,6 @@
 # HZ-AUDIT-2 — Consolidated deployment architecture
 
-Status: IMPLEMENTED — Level 1 qualification required on the exact implementation head.
+Status: COMPLETE — Level 1 qualified on exact implementation SHA `967addaf33e311c72b3481f6300a8b4f25cd433e`.
 
 ## Canonical purpose
 
@@ -108,3 +108,63 @@ HZ-AUDIT-2 is COMPLETE only when one exact implementation SHA passes:
 - directly-triggered canonical contract CI required by the repository's PR classification.
 
 Broad Level-2 retained application integration and all Level-3 repository-wide closeout suites are intentionally deferred. Live deployment, Registry publication and STREAM schedule initialization are not HZ-AUDIT-2 exit criteria.
+
+
+## Durable qualification evidence
+
+- Roadmap step: `HZ-AUDIT-2 — Consolidated deployment architecture`
+- Status: **COMPLETE**
+- Qualification level: **Level 1**
+- Qualified implementation SHA: `967addaf33e311c72b3481f6300a8b4f25cd433e`
+- Audit branch: `feature/420hz-remediation-20261006`
+- Pull request: **#556**
+- Qualification merge-base/base SHA: `ff4440bfd7b69c0712ee3dd7c4b417cb049ae76d`
+- Current `main` observed at closeout: `f674fbed767efc126da253c66800e38d030dc1dd`
+- Mainline movement after qualification is unrelated PuffBuddies work and does not change the exact HZ-AUDIT-2 implementation qualified here.
+
+### Level 1 results
+
+Exact-head qualification on `967addaf33e311c72b3481f6300a8b4f25cd433e` completed successfully:
+
+- 420Hz Audit Qualification — run `37567292712`, job `112617806286` (`hz-audit-fast`) — **PASS**
+  - exact qualification-head checkout — PASS
+  - exact-head verification — PASS
+  - HZ-AUDIT-2 deployment-package verifier — PASS
+  - affected Solidity format check — PASS
+  - consolidated deployment graph build — PASS
+  - `HzDeploymentGraph420Test` focused deployment tests — PASS
+- Solidity Contracts — run `37567292700` — **PASS**
+  - PR classification job `112617809772` — PASS
+  - PR shard 0 job `112618365019` — PASS
+  - PR shard 1 job `112618365059` — PASS
+  - PR shard 2 job `112618364965` — PASS
+  - PR shard 3 job `112618365052` — PASS
+  - monolithic `foundry` and `compute-fast` jobs were intentionally skipped by workflow classification and are not required duplicate gates for this PR shape.
+- Creative Reference Indexer — run `37567292824` — **PASS**
+- 420Docs Qualification — run `37567292754` — **PASS**
+
+### Exit criteria satisfied
+
+HZ-AUDIT-2 now has durable repository evidence that:
+
+1. the complete HZ-1..HZ-4 constructor/deployment graph is retained;
+2. GovernanceTimelock and protocol-treasury bindings fail closed when absent;
+3. privileged post-deployment initialization remains GovernanceTimelock-only;
+4. no fixed Genesis address map or fabricated live deployment evidence was introduced;
+5. HZ-AUDIT-3 retains Registry/authority/submitter ownership;
+6. HZ-AUDIT-4 retains STREAM economics initialization ownership;
+7. the exact implementation SHA passed the dedicated verifier/build/focused tests and canonical Solidity PR shards.
+
+### Milestone and phase qualification status
+
+No additional Level 2 milestone qualification is required for this ordinary audit step. Broad retained-app integration remains available for a genuine convergence milestone if one is defined.
+
+Level 3 is intentionally deferred to the single 420Hz audit-phase closeout. Repository-wide final closeout, live public-testnet deployment, Registry publication, runtime-address/code evidence, operational monitoring/recovery, and production release qualification are not HZ-AUDIT-2 criteria.
+
+### Evidence-only closeout rule
+
+This COMPLETE bookkeeping changes documentation/evidence only. It does not modify executable Solidity, tests, workflows, dependency state, configuration interfaces, deployment behavior, or substantive requirements. Therefore the qualified implementation SHA remains `967addaf33e311c72b3481f6300a8b4f25cd433e`; no recursive substantive test run is required for the evidence-only closeout commits.
+
+## Next canonical roadmap step
+
+**HZ-AUDIT-3 — Registry and authority wiring.**

@@ -11,7 +11,8 @@ The simulation core is authoritative for ordinary game state. The current integr
 - `ProductInventory.ts` — BUD-3 canonical starter catalog, inventory and product economics;
 - `StoreProgression.ts` — BUD-4 canonical internal cash, upgrade and expansion progression;
 - `OfflineProgression.ts` — BUD-AUDIT-5 deterministic bounded offline calculation boundary;
-- `BudtenderApplicationService.ts` — BUD-AUDIT-6 application-facing command/snapshot boundary over the current domain services.
+- `BudtenderApplicationService.ts` — BUD-AUDIT-6 application-facing command/snapshot boundary over the current domain services;
+- `clients/budtender-web-v1` — BUD-AUDIT-7 mobile-first responsive presentation client over the application service.
 
 `BudtenderStore` delegates inventory to `ProductInventory` and internal cash/upgrades to `StoreProgression`; it does not maintain a second independent economy.
 
@@ -31,6 +32,15 @@ node --experimental-strip-types --check src/budtender/BudtenderApplicationServic
 node --experimental-strip-types --test test/budtender/*.spec.ts
 ```
 
+User-facing web client:
+
+```bash
+cd clients/budtender-web-v1
+npm run check
+npm test
+npm start
+```
+
 Shared Gaming Protocol access tests:
 
 ```bash
@@ -48,9 +58,13 @@ BUD-AUDIT-5 adds a pure offline-progression calculator with a 24-hour accumulati
 
 BUD-AUDIT-6 adds `BudtenderApplicationService` as the presentation-facing boundary. It owns the store/customer domain instances privately, exposes sanctioned gameplay/progression commands, returns detached snapshots, does not expose test-only cash injection, and keeps offline evaluation non-mutating until trusted persistence exists.
 
+## User-facing client
+
+BUD-AUDIT-7 adds `clients/budtender-web-v1`, a responsive touch-friendly browser client hosted by Node 22. The browser renders detached `BudtenderApplicationService` snapshots and sends sanctioned commands only; it does not become authoritative for cash, inventory, settlement, upgrades, or progression.
+
 ## Current release boundary
 
-The repository does **not** currently contain a production Budtender mobile/presentation client, cloud-save service, app-specific backend/API/indexer, production deployment package, or save/migration implementation. Those layers are named by BUD-0 but no BUD-5+ canonical phase specification exists on current `main`.
+The repository now contains a user-facing responsive browser client, but does **not** yet contain a packaged native mobile client, cloud-save service, production deployment package, or save/migration implementation. Those layers are named by BUD-0 but no BUD-5+ canonical phase specification exists on current `main`.
 
 Do not infer those components from the architecture list. BUD-0 through BUD-4 are the currently specified gameplay implementation slices.
 

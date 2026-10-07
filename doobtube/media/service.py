@@ -98,7 +98,7 @@ class MediaIntegration:
         self.store.put_media_session(record)
         return record
 
-    def start_livestream(self, session_id: str, controller_ref: str) -> LivestreamRecord:
+    def start_livestream(self, session_id: str, controller_ref: str, *, recovery: bool=False) -> LivestreamRecord:
         record=self.store.get_media_session(session_id)
         if record is None:
             raise MediaRejected("livestream session not found")
@@ -107,7 +107,7 @@ class MediaIntegration:
         controller,retired=self.media.stream_controller(record.spec.stream_ref)
         if retired or controller.lower()!=controller_ref.lower():
             raise MediaRejected("canonical controller authorization changed")
-        if record.state=="active" and record.desired_live:
+        if record.state=="active" and record.desired_live and not recovery:
             return record
         if record.reconnect_attempts>=self.max_reconnect_attempts and record.state=="failed":
             raise MediaRejected("livestream recovery exhausted")
@@ -156,7 +156,7 @@ class MediaIntegration:
                 failed=LivestreamRecord(record.spec,"failed",False,record.reconnect_attempts,"recovery exhausted",self.now())
                 self.store.put_media_session(failed); out.append(failed); continue
             try:
-                out.append(self.start_livestream(record.spec.session_id,record.spec.controller_ref))
+                out.append(self.start_livestream(record.spec.session_id,record.spec.controller_ref,recovery=True))
             except Exception:
                 latest=self.store.get_media_session(record.spec.session_id)
                 if latest is not None: out.append(latest)

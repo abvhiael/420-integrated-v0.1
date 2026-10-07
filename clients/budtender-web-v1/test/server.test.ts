@@ -284,8 +284,8 @@ describe("Budtender web client host", () => {
       assert.equal(response.status, 201);
 
       const state = await response.json();
-      assert.equal(state.customers.queue.length, 1);
-      assert.equal(state.customers.queue[0].id, "same-origin");
+      assert.deepEqual(state.customers.queue, ["same-origin"]);
+      assert.equal(state.customers.customers[0].id, "same-origin");
     });
   });
 

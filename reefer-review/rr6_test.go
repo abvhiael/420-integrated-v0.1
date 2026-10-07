@@ -369,3 +369,23 @@ func TestRR6SearchDeleteFailureSurvivesIgnoredModerationProjectionError(t *testi
 		t.Fatalf("ignored Search delete failure was not recoverable: %+v err=%v", pending, err)
 	}
 }
+
+
+func TestRR6IntegrationBundleRequiresCompleteDependencies(t *testing.T) {
+	search := &rr6ToggleSearch{}
+	notifications := &rr6ToggleNotifications{}
+	mail := &rr6ToggleMail{}
+	if _, err := NewEcosystemIntegrationBundle("", search, notifications, mail); err == nil {
+		t.Fatal("empty outbox path accepted")
+	}
+	if _, err := NewEcosystemIntegrationBundle(t.TempDir()+"/outbox.json", nil, notifications, mail); !errors.Is(err, ErrIntegrationConfiguration) {
+		t.Fatalf("nil Search dependency accepted: %v", err)
+	}
+	bundle, err := NewEcosystemIntegrationBundle(t.TempDir()+"/outbox.json", search, notifications, mail)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bundle.Outbox == nil || bundle.Search == nil || bundle.Notifications == nil || bundle.Mail == nil || bundle.Reconciler.Outbox == nil {
+		t.Fatalf("incomplete RR-6 integration bundle: %+v", bundle)
+	}
+}

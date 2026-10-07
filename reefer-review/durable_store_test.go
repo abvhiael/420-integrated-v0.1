@@ -48,10 +48,10 @@ func TestRR5DurableStoreRejectsCorruptionAndFutureSchema(t *testing.T) {
 	future := filepath.Join(dir, "future.json")
 	raw, err := json.Marshal(map[string]any{
 		"schema_version": DurableStoreSchemaVersion + 1,
-		"publications": map[string]any{},
-		"idempotency": map[string]any{},
-		"revisions": map[string]any{},
-		"moderation": map[string]any{},
+		"publications":   map[string]any{},
+		"idempotency":    map[string]any{},
+		"revisions":      map[string]any{},
+		"moderation":     map[string]any{},
 	})
 	if err != nil {
 		t.Fatal(err)

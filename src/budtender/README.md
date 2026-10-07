@@ -10,7 +10,8 @@ The simulation core is authoritative for ordinary game state. The current integr
 - `BudtenderCustomers.ts` — BUD-2 deterministic customer lifecycle;
 - `ProductInventory.ts` — BUD-3 canonical starter catalog, inventory and product economics;
 - `StoreProgression.ts` — BUD-4 canonical internal cash, upgrade and expansion progression;
-- `OfflineProgression.ts` — BUD-AUDIT-5 deterministic bounded offline calculation boundary.
+- `OfflineProgression.ts` — BUD-AUDIT-5 deterministic bounded offline calculation boundary;
+- `BudtenderApplicationService.ts` — BUD-AUDIT-6 application-facing command/snapshot boundary over the current domain services.
 
 `BudtenderStore` delegates inventory to `ProductInventory` and internal cash/upgrades to `StoreProgression`; it does not maintain a second independent economy.
 
@@ -26,6 +27,7 @@ node --experimental-strip-types --check src/budtender/BudtenderCustomers.ts
 node --experimental-strip-types --check src/budtender/ProductInventory.ts
 node --experimental-strip-types --check src/budtender/StoreProgression.ts
 node --experimental-strip-types --check src/budtender/OfflineProgression.ts
+node --experimental-strip-types --check src/budtender/BudtenderApplicationService.ts
 node --experimental-strip-types --test test/budtender/*.spec.ts
 ```
 
@@ -41,6 +43,10 @@ The dedicated GitHub workflow also runs the shared Gaming SDK and Gaming Protoco
 ## Offline progression boundary
 
 BUD-AUDIT-5 adds a pure offline-progression calculator with a 24-hour accumulation bound, clock-rollback protection, replay-safe cursor advancement, complete-interval accounting, per-source cash caps, duplicate-source rejection, and safe-integer checks. Existing BUD-1 through BUD-4 systems remain offline-inert because none is currently canonically marked offline-capable. A future persistence/application layer must own trusted source state and the offline cursor before this is exposed to users.
+
+## Application service boundary
+
+BUD-AUDIT-6 adds `BudtenderApplicationService` as the presentation-facing boundary. It owns the store/customer domain instances privately, exposes sanctioned gameplay/progression commands, returns detached snapshots, does not expose test-only cash injection, and keeps offline evaluation non-mutating until trusted persistence exists.
 
 ## Current release boundary
 

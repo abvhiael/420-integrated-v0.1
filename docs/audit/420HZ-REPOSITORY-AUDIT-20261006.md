@@ -34,7 +34,7 @@ Repository: `abvhiael/420-integrated-v0.1`
 | Registry and authority wiring | HZ-AUDIT-3 | HzRegistryAuthorityPlan420 + retained authority/Registry bundle | HzRegistryAuthority420.t.sol + verifier | HZ-AUDIT-3 authority record | COMPLETE | Level 1 qualified on `6711c24f2cdc7c77dd9e1a5227367afba5eeb734`; no further repository-side remediation |
 | STREAM economics initialization | HZ-AUDIT-4 | HzStreamEconomicsPlan420 + retained STREAM economics bundle | HzStreamEconomics420.t.sol + verifier | HZ-AUDIT-4 economics record | COMPLETE | Level 1 qualified on `4fbf1070c6f297735985cb150cadeb4ead463a23`; no further repository-side remediation |
 | Deployment smoke qualification | HZ-AUDIT-5 | HzDeploymentGraph420 convergence + retained smoke bundle | HzDeploymentSmoke420.t.sol + verifier + Level-2 HZ integration suite | HZ-AUDIT-5 smoke record | COMPLETE | Level 1 + required post-step Level 2 qualified on `a6ffdef933c8086d944b59f492f7208405c0cbf8`; no further repository-side remediation |
-| Indexer/reorg/rebuild integration | HZ-AUDIT-6 | reorg-aware shared journal + HZ coordinator + RPC canonical log source | complete creative-indexer suite + HZ-AUDIT-6 verifier | HZ-AUDIT-6 indexer record | IMPLEMENTED / QUALIFICATION PENDING | exact-head Level 1; live endpoint/address/decoder evidence deferred HZ-AUDIT-7 |
+| Indexer/reorg/rebuild integration | HZ-AUDIT-6 | reorg-aware shared journal + HZ coordinator + RPC canonical log source | complete creative-indexer suite + HZ-AUDIT-6 verifier | HZ-AUDIT-6 indexer record | COMPLETE | Level 1 qualified on `6f1ae819ede4b011be53f894ebc4f132f1deabad`; live endpoint/address/decoder evidence deferred HZ-AUDIT-7 |
 | Live Registry/address bindings | release-readiness requirement | absent | none | gap recorded | BLOCKED | public testnet/deployment |
 | Live RPC/storage/indexer qualification | release-readiness requirement | local/reference only | repository CI only | gap recorded | BLOCKED | public testnet/infrastructure |
 
@@ -59,7 +59,7 @@ Indexer: Node.js >=22, TypeScript, PostgreSQL 16. The Creative Reference Indexer
 
 `contracts/script/Decision10DeploySeed420.s.sol` remains an HZ-1 deterministic development fixture. HZ-AUDIT-2 adds a separate consolidated HZ-1..HZ-4 constructor graph, deployment script, machine-readable deployment package, focused binding tests and exact-head fast qualification workflow. The deployment phase binds GovernanceTimelock and protocol treasury immutably and emits the complete HZ address manifest without impersonating governance or fabricating live evidence.
 
-HZ-AUDIT-3 is COMPLETE and exact-head Level 1 qualified on `6711c24f2cdc7c77dd9e1a5227367afba5eeb734`. The exact GovernanceTimelock wiring sequence, runtime submitter-role semantics, complete 20-module CreativeProtocolRegistry inventory, canonical external ProtocolRegistry component/service identities, fail-closed authority boundaries, and extension-service publication rules are retained and qualified. Live governance/Registry execution and transaction evidence remain HZ-AUDIT-7. HZ-AUDIT-4 is COMPLETE and exact-head Level 1 qualified on `4fbf1070c6f297735985cb150cadeb4ead463a23`. It retains repository-grounded STREAM v1 economics for the only RecordingClass values with canonical kernel split terms: ORIGINAL (1250/0/8500/250) and REMIX (1000/1500/7250/250), with deterministic effectiveAt=0, full-field terms-hash commitments, governance-only immutable registration, unsupported-class fail-closed behavior and real Router/Vault gross-conservation coverage. Public-testnet schedule registration/routing receipts and other live execution evidence remain HZ-AUDIT-7. HZ-AUDIT-5 is COMPLETE and exact-head Level 1 + required post-step Level 2 qualified on `a6ffdef933c8086d944b59f492f7208405c0cbf8`. It supplies the repository-local convergence smoke that materializes the 20-contract graph, applies HZ-AUDIT-3 authority/Registry wiring, applies HZ-AUDIT-4 STREAM v1 economics, proves a real CreatorProfile -> Work ACTIVE -> ORIGINAL Recording ACTIVE path plus fail-closed uninitialized behavior, and revalidates the retained 420Hz integration surface at the documented milestone. HZ-AUDIT-6 now adds repository-side canonical event ordering metadata, source-provided finality, cross-projection canonical-tail replacement, finalized-fork refusal, deterministic full HZ projection rebuild, and a JSON-RPC log-source boundary with canonical block-header verification. Exact-head Level 1 qualification is required before HZ-AUDIT-6 becomes COMPLETE. Public-testnet network identity, deployed transaction/runtime evidence, live indexer/RPC endpoint/address/decoder wiring, monitoring and recovery remain HZ-AUDIT-7 or later live qualification.
+HZ-AUDIT-3 is COMPLETE and exact-head Level 1 qualified on `6711c24f2cdc7c77dd9e1a5227367afba5eeb734`. The exact GovernanceTimelock wiring sequence, runtime submitter-role semantics, complete 20-module CreativeProtocolRegistry inventory, canonical external ProtocolRegistry component/service identities, fail-closed authority boundaries, and extension-service publication rules are retained and qualified. Live governance/Registry execution and transaction evidence remain HZ-AUDIT-7. HZ-AUDIT-4 is COMPLETE and exact-head Level 1 qualified on `4fbf1070c6f297735985cb150cadeb4ead463a23`. It retains repository-grounded STREAM v1 economics for the only RecordingClass values with canonical kernel split terms: ORIGINAL (1250/0/8500/250) and REMIX (1000/1500/7250/250), with deterministic effectiveAt=0, full-field terms-hash commitments, governance-only immutable registration, unsupported-class fail-closed behavior and real Router/Vault gross-conservation coverage. Public-testnet schedule registration/routing receipts and other live execution evidence remain HZ-AUDIT-7. HZ-AUDIT-5 is COMPLETE and exact-head Level 1 + required post-step Level 2 qualified on `a6ffdef933c8086d944b59f492f7208405c0cbf8`. It supplies the repository-local convergence smoke that materializes the 20-contract graph, applies HZ-AUDIT-3 authority/Registry wiring, applies HZ-AUDIT-4 STREAM v1 economics, proves a real CreatorProfile -> Work ACTIVE -> ORIGINAL Recording ACTIVE path plus fail-closed uninitialized behavior, and revalidates the retained 420Hz integration surface at the documented milestone. HZ-AUDIT-6 is COMPLETE and exact-head Level 1 qualified on `6f1ae819ede4b011be53f894ebc4f132f1deabad`. It adds repository-side canonical event ordering metadata, source-provided finality, atomic cross-projection canonical-tail replacement, finalized-fork refusal, deterministic full HZ projection rebuild, and a JSON-RPC log-source boundary with canonical block-header verification. Public-testnet network identity, deployed transaction/runtime evidence, live indexer/RPC endpoint/address/decoder wiring, monitoring and recovery remain HZ-AUDIT-7 or later live qualification.
 
 420Hz must therefore distinguish repository qualification from live deployment readiness.
 
@@ -263,3 +263,63 @@ Level 3: **intentionally deferred** to the single complete 420Hz audit-phase clo
 This formal closeout is evidence-only. It changes no executable/test/workflow/dependency/configuration/generated-artifact/interface/deployment or substantive requirement state; therefore the exact implementation qualification on `a6ffdef933c8086d944b59f492f7208405c0cbf8` remains authoritative and no recursive substantive test rerun is required.
 
 Next canonical roadmap step: **HZ-AUDIT-6 — Indexer/reorg/rebuild integration.**
+
+
+## HZ-AUDIT-6 formal closeout
+
+**HZ-AUDIT-6 — Indexer/reorg/rebuild integration: COMPLETE.**
+
+Qualification level: **Level 1**.
+
+Qualified implementation SHA: `6f1ae819ede4b011be53f894ebc4f132f1deabad`.
+
+Audit branch / PR: `feature/420hz-remediation-20261006` / PR **#556**.
+
+Qualification merge-base/base SHA: `ff4440bfd7b69c0712ee3dd7c4b417cb049ae76d`.
+
+Current `main` observed during durable closeout: `c8e8b58d818611276f7a9bb2b8d2241004450d97`. The audit branch is currently 82 commits ahead and 168 commits behind current `main`. PR #556 remains open and is currently reported mergeable. This does not replace the later Level-3 reconciliation requirement.
+
+Exact-head Level 1 evidence:
+
+- 420Hz Audit Qualification run `37664239176` / fast job `112939237464` — **PASS**
+  - exact-head checkout/verification — PASS
+  - HZ-AUDIT-2 verifier/regression — PASS
+  - HZ-AUDIT-3 verifier/regression — PASS
+  - HZ-AUDIT-4 verifier/regression — PASS
+  - HZ-AUDIT-5 verifier/regression — PASS
+  - HZ-AUDIT-6 verifier — PASS
+  - affected Solidity format/build — PASS
+- Creative Reference Indexer run `37664239300` / job `112939236369` — **PASS**
+  - exact-head checkout/verification — PASS
+  - Decision #10 fixture generation — PASS
+  - Node/dependency install — PASS
+  - TypeScript build — PASS
+  - complete serialized rebuild/reference projection test suite — PASS
+- Solidity Contracts run `37664239266` — **PASS**
+  - classification `112939243313` — PASS
+  - shard 0 `112947696935` — PASS
+  - shard 1 `112947696881` — PASS
+  - shard 2 `112947696969` — PASS
+  - shard 3 `112947696922` — PASS
+  - monolithic `foundry` `112939244718` — expected SKIP under PR sharding
+  - `compute-fast` `112947698937` — expected SKIP as irrelevant
+- Supplementary same-SHA workflows also passed:
+  - 420Registry REG-AUDIT-4 `37664239206`
+  - 420Indexer `37664239090`
+  - Genesis Address Authority `37664239179`
+  - 420Docs Qualification `37664239229`
+  - 420Oracle audit qualification `37664239292`
+
+Security/adversarial/failure-path qualification confirms non-finalized tail replacement, finalized-fork refusal, canonical prefix retention, orphaned projection removal, exact full-projection rebuild digest reproduction, malformed-order rejection, atomic rollback for invalid multi-event batches, replay-provenance enforcement, finality promotion without duplicate projection writes, removed-RPC-log rejection, and canonical block-header/hash agreement.
+
+Level 2: **not required for HZ-AUDIT-6**. The prior retained 420Hz Level-2 milestone was completed at HZ-AUDIT-5; the HZ-AUDIT-6 Level-2 job was therefore correctly skipped.
+
+Level 3: **intentionally deferred** to the single complete 420Hz audit-phase closeout.
+
+No live public-testnet RPC endpoint, deployed-address binding, production ABI decoder/enrichment wiring, observed-reorg receipt or production-equivalent rebuild evidence is claimed here. Those remain HZ-AUDIT-7 obligations.
+
+Known retained limitation: `indexed_blocks` records event-bearing blocks rather than every empty block. This is documented and carried into HZ-AUDIT-7 live qualification.
+
+This formal closeout is evidence-only. It changes no executable/test/workflow/dependency/configuration/generated-artifact/interface/deployment or substantive requirement state; therefore the exact implementation qualification on `6f1ae819ede4b011be53f894ebc4f132f1deabad` remains authoritative and no recursive substantive test rerun is required.
+
+Next canonical roadmap step: **HZ-AUDIT-7 — Public-testnet deployment.**

@@ -70,3 +70,21 @@ RR-5 separates durable application metadata from authoritative body storage and 
 - ReeferReview does not mint Rights claims, grant licenses, choose canonical Registry addresses or treat its local metadata as Rights authority.
 
 Live Storage provider encryption/key-custody proof, live Rights deployment/Registry resolution and production recovery remain later live/testnet/deployment gates.
+
+
+## RR-6 Search / Notifications / Mail integration boundary
+
+RR-6 treats all three shared services as non-canonical side effects of an already-authorized publication.
+
+- Search admission is exactly PUBLIC + PUBLISHED and requires retained 420Rights provenance matching the article digest.
+- Search results use the canonical 420Search result schema and a ReeferReview-owned source-key namespace; reconciliation may delete only ReeferReview article projections.
+- Search failure cannot roll back publication, moderation or Rights state.
+- Notifications requests target canonical `420/service/notifications/v1`, are idempotent and exclude article body bytes, Storage locators, sessions, bearer tokens and wallet secrets.
+- Notification consent suppression is accepted without fabricating delivery evidence; contradictory or incomplete receipts fail closed.
+- Internal 420Mail delivery uses canonical `420/service/mail/v1` source semantics rather than spoofing `420/service/reefer-review/v1` as Mail authority.
+- Mail recipients come from a deployment-supplied opt-in audience boundary; external SMTP and paid external newsletters remain disabled.
+- The durable integration outbox is non-authoritative recovery state. It is schema-versioned, locked, owner-only, atomically replaced and fsynced.
+- Search/Notifications/Mail outage leaves replayable pending work and may surface warnings, but cannot undo or widen the canonical ReeferReview publication.
+- A moderation-time Search delete failure is retained for later reconciliation even though canonical moderation intentionally does not fail on derived Search outage.
+
+Live endpoint authentication, provider credentials, public-testnet outage/recovery and production monitoring remain later deployment gates.

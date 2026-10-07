@@ -228,6 +228,17 @@ func (s Service) Get(ctx context.Context, id string) (Publication, []byte, error
 	return p, b, err
 }
 
+func (s Service) GetPublic(ctx context.Context, id string) (Publication, []byte, error) {
+	p, body, err := s.Get(ctx, id)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	if p.Status != StatusPublished || p.Visibility != VisibilityPublic {
+		return Publication{}, nil, ErrNotFound
+	}
+	return p, body, nil
+}
+
 func (s Service) List(ctx context.Context, offset, limit int) ([]Publication, int, error) {
 	if limit < 1 || limit > 100 {
 		return nil, 0, ErrInvalidInput

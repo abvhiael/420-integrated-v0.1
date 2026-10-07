@@ -91,7 +91,7 @@ func (h HTTP) publication(w http.ResponseWriter, r *http.Request) {
 	}
 	id := parts[0]
 	if len(parts) == 1 && r.Method == http.MethodGet {
-		p, b, err := h.Service.Get(r.Context(), id)
+		p, b, err := h.Service.GetPublic(r.Context(), id)
 		if err != nil {
 			h.respond(w, nil, nil, err)
 			return

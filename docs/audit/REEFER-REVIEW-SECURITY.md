@@ -18,7 +18,7 @@ Article integrity, author/publisher attribution, visibility, rights/provenance e
 - INDEX_POISONING: only PUBLIC + PUBLISHED records are projected; Search failures do not mutate canonical publication state.
 - WEBHOOK_REPLAY: this baseline exposes no webhook receiver. Future webhooks must be signed, expiring, replay-protected and idempotent.
 - MESSAGING_ABUSE: 420Mail hook is outbound application delivery only; live source authentication and recipient controls remain required.
-- private visibility leakage: public List filters to PUBLIC/PUBLISHED. Production reads must add viewer-aware checks before non-public body retrieval.
+- private visibility leakage: public list and public item reads expose only PUBLIC/PUBLISHED content. Non-public author/editor reads are intentionally absent until viewer-aware Identity/session authorization is implemented.
 
 ## Accepted repository limitation
 The development executable uses explicit development adapters and the `X-420-Actor` harness header. It intentionally refuses staging/production startup. This is not production authentication and must never be placed behind public ingress unchanged.

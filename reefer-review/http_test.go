@@ -2,6 +2,7 @@ package reeferreview
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -36,6 +37,54 @@ func TestHTTPJourney006Baseline(t *testing.T) {
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("list %d", rr.Code)
+	}
+}
+
+func TestHTTPPublicReadFailsClosedForDraftAndPrivateContent(t *testing.T) {
+	s := testService()
+	h := HTTP{Service: s}.Handler()
+
+	private, err := s.CreateDraft(context.Background(), "writer.420", CreateDraftRequest{
+		IdempotencyKey: "private-read",
+		Title:          "Private",
+		Body:           "secret",
+		Visibility:     VisibilityPrivate,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodGet, "/v1/publications/"+private.ID, nil)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("private draft leaked with status %d", rr.Code)
+	}
+
+	publicDraft, err := s.CreateDraft(context.Background(), "writer.420", CreateDraftRequest{
+		IdempotencyKey: "public-draft-read",
+		Title:          "Draft",
+		Body:           "not published",
+		Visibility:     VisibilityPublic,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req = httptest.NewRequest(http.MethodGet, "/v1/publications/"+publicDraft.ID, nil)
+	rr = httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusNotFound {
+		t.Fatalf("public draft leaked with status %d", rr.Code)
+	}
+
+	published, _, err := s.Publish(context.Background(), "writer.420", publicDraft.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req = httptest.NewRequest(http.MethodGet, "/v1/publications/"+published.ID, nil)
+	rr = httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("published public article unreadable: %d %s", rr.Code, rr.Body.String())
 	}
 }
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """DOOBTUBE-8 Level 2 retained integration verifier."""
 from pathlib import Path
+import re
 import json
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -117,5 +118,5 @@ for path in ["doobtube/api/service.py","doobtube/media/service.py","doobtube/web
 road=read("docs/DOOBTUBE-ROADMAP.md")
 audit=read("docs/DOOBTUBE-AUDIT.md")
 assert "**Status: COMPLETE (Level 2).** Canonical milestone definition" in road
-assert "DOOBTUBE-0 through DOOBTUBE-8 are complete" in audit
+assert re.search(r"DOOBTUBE-0 through DOOBTUBE-(?:8|9|10|11|12|13) are complete", audit), "audit no longer records DOOBTUBE-8-or-later completion"
 print("DOOBTUBE-8 Level 2 ecosystem integration verification: PASS")

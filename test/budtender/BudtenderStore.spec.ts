@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { BudtenderStore } from "../../src/budtender/BudtenderStore";
+import { BudtenderStore } from "../../src/budtender/BudtenderStore.ts";
 
 describe("BudtenderStore BUD-1", () => {
   it("serves a valid starter-product order exactly once", () => {

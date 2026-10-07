@@ -75,9 +75,14 @@
         "contracts/config/predeploy/ProtocolRegistry-predeploy-state.json",
         "contracts/config/predeploy/predeploy-plan.json",
         "contracts/config/deployment-manifest.json",
-        "docs/audit/REG-AUDIT-5-REGISTRY-PREDEPLOY-QUALIFICATION.md"
+        "docs/audit/REG-AUDIT-5-REGISTRY-PREDEPLOY-QUALIFICATION.md",
+        "docs/audit/REG-AUDIT-8-TESTNET-DEPLOYMENT-QUALIFICATION.md",
+        "docs/audit/REG-AUDIT-8-TESTNET-DEPLOYMENT-QUALIFICATION.json",
+        "docs/audit/templates/REG-AUDIT-8-live-evidence.template.json",
+        "scripts/verify-reg-audit-8-live.py",
+        ".github/workflows/registry-reg-audit-8-live.yml"
       ],
-      "requiredResolution": "REG-AUDIT-5 satisfies the pinned runtime artifact/code-hash and direct-Genesis predeploy-state portion: ProtocolRegistry runtime hash 0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330 is reproducibly generated from source blob 9ab3d53a68b6533978f41e0202e5268f1d615c19; governanceTimelock 0x0429 is compiler-reference materialized as an immutable; mutable constructor storage is empty with root 0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421. Blocker remains OPEN only for production-equivalent deployed evidence, which is REG-AUDIT-8."
+      "requiredResolution": "REG-AUDIT-5 satisfies the pinned runtime artifact/code-hash and direct-Genesis predeploy-state portion. REG-AUDIT-8 repository readiness now provides a fail-closed live evidence schema, verifier, workflow and operator runbook, but REG-BLK-003 remains OPEN until approved production-equivalent chain-420 testnet infrastructure is provisioned and immutable live evidence proves genesis/predeploy code, governance authority, strict publication, deprecation/history and derived-consumer recovery."
     },
     {
       "id": "REG-BLK-004",
@@ -271,6 +276,24 @@
       "finalCleanupQualifiedSha": "RECORDED_IN_PR_409_METADATA_AFTER_FINAL_EXACT_HEAD_QUALIFICATION",
       "nextStep": "REG-AUDIT-6",
       "exitCriteria": "reproducible Registry predeploy artifact tied to exact source SHA"
+    },
+    "REG-AUDIT-8": {
+      "title": "production-equivalent testnet deployment",
+      "status": "NOT_YET_COMPLETE_BLOCKED_ON_LIVE_TESTNET",
+      "record": "docs/audit/REG-AUDIT-8-TESTNET-DEPLOYMENT-QUALIFICATION.json",
+      "executionPrerequisite": "Official production-equivalent chain-420 testnet must be running with approved non-placeholder RPC/service endpoints and the reconciled Registry candidate materialized at the canonical address.",
+      "holdConditions": [
+        "testnet infrastructure is PLANNED or UNPROVISIONED",
+        "public endpoints are placeholders",
+        "no immutable live deployment/predeploy witness exists",
+        "no live governance/publication/deprecation/history evidence exists",
+        "no production-equivalent derived-consumer recovery evidence exists"
+      ],
+      "repositoryReadinessPolicy": "Repository-only CI, local simulation, synthetic fixtures, and readiness checks may prepare REG-AUDIT-8 but cannot satisfy its canonical live-deployment exit criterion.",
+      "blocker": "REG-BLK-003",
+      "exitCriteria": "testnet evidence is immutable and reproducible",
+      "nextStep": "REG-AUDIT-9",
+      "nextStepGate": "REG-AUDIT-9 MUST NOT BEGIN until REG-AUDIT-8 live qualification succeeds and immutable live evidence is committed."
     }
   }
 }

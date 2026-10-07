@@ -1,0 +1,37 @@
+name: 420Registry REG-AUDIT-8 Repository Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.*'
+      - 'docs/audit/REG-AUDIT-8-*'
+      - 'docs/audit/templates/REG-AUDIT-8-*'
+      - 'docs/operators/REG-AUDIT-8-*'
+      - 'scripts/verify-reg-audit-8-*'
+      - '.github/workflows/registry-reg-audit-8-*'
+      - 'testnet/services/endpoints.json'
+      - 'testnet/infrastructure/inventory.json'
+      - 'contracts/config/predeploy/ProtocolRegistry-predeploy-state.json'
+      - 'contracts/artifacts/ProtocolRegistry.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact readiness head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile REG-AUDIT-8 verifier scripts
+        run: python3 -m py_compile scripts/verify-reg-audit-8-repository-readiness.py scripts/verify-reg-audit-8-live.py
+      - name: Verify repository readiness and authoritative live blockers
+        run: python3 scripts/verify-reg-audit-8-repository-readiness.py

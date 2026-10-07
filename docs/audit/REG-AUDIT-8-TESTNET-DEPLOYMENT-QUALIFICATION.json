@@ -1,0 +1,63 @@
+{
+  "schema": "420-registry-reg-audit-8-qualification-v1",
+  "step": "REG-AUDIT-8",
+  "name": "production-equivalent testnet deployment",
+  "status": "NOT_YET_COMPLETE",
+  "canonicalExit": "testnet evidence is immutable and reproducible",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "mainAtStart": "522e98da236a12769bf34fcf0c95f19ff955a69c",
+  "satisfiedRepositoryPrerequisites": {
+    "reconciledRegistryCandidate": true,
+    "canonicalAddress": "0x0000000000000000000000000000000000000434",
+    "sourceBlobSha1": "9ab3d53a68b6533978f41e0202e5268f1d615c19",
+    "runtimeCodeHash": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "predeployStateQualifiedBy": "REG-AUDIT-5",
+    "integrationQualifiedBy": "REG-AUDIT-7"
+  },
+  "canonicalRequirements": {
+    "chainIdEnvironment": "BLOCKED_LIVE",
+    "exactSourceReleaseSha": "READY_TO_RECORD",
+    "finalRegistryAddress": "READY_TO_VERIFY",
+    "deploymentPredeployProof": "BLOCKED_LIVE",
+    "runtimeCodeHash": "BLOCKED_LIVE",
+    "initializedGovernanceAuthority": "BLOCKED_LIVE",
+    "smokeReadsStrictPublication": "BLOCKED_LIVE",
+    "deprecationHistoryBehavior": "BLOCKED_LIVE",
+    "recoveryRestartDerivedConsumers": "BLOCKED_LIVE"
+  },
+  "repositoryImplementation": [
+    "docs/audit/templates/REG-AUDIT-8-live-evidence.template.json",
+    "docs/operators/REG-AUDIT-8-TESTNET-RUNBOOK.md",
+    "scripts/verify-reg-audit-8-live.py",
+    "scripts/verify-reg-audit-8-repository-readiness.py",
+    ".github/workflows/registry-reg-audit-8-live.yml",
+    ".github/workflows/registry-reg-audit-8-readiness.yml"
+  ],
+  "externalBlockers": [
+    "testnet/services/endpoints.json contains placeholder public endpoints",
+    "testnet/infrastructure/inventory.json is PLANNED and all required nodes/services are UNPROVISIONED",
+    "developer-hub/manifests/testnet.json does not exist",
+    "no approved live chain-420 RPC/genesis witness is committed",
+    "no live ProtocolRegistry genesis code/proof, governance, strict-publication/deprecation or history witness is committed",
+    "no production-equivalent restart/outage/reorg/rebuild derived-consumer transcript is committed"
+  ],
+  "completionPolicy": "REG-AUDIT-8 MUST remain NOT_YET_COMPLETE until non-placeholder approved production-equivalent testnet infrastructure exists and the dedicated live workflow succeeds for one exact deployed release-candidate SHA. Synthetic/local/CI-only fixtures cannot satisfy this step.",
+  "nextCanonicalStep": "REG-AUDIT-9 — exact-head requalification and closeout",
+  "repositoryReadinessQualification": {
+    "status": "QUALIFIED_PENDING_EVIDENCE_HEAD_RERUN",
+    "substantiveSha": "a8db691c5d0c312ea5e98d775abb9e8732b46d32",
+    "baseMainSha": "522e98da236a12769bf34fcf0c95f19ff955a69c",
+    "behindMain": 0,
+    "runs": {
+      "regAudit8Readiness": 36756092248,
+      "regAudit4": 36756092066,
+      "regAudit3": 36756091988,
+      "regAudit1": 36756092204,
+      "docs": 36756092078,
+      "integrated": 36756092039
+    },
+    "finalEvidenceHead": "PENDING_RERUN",
+    "finalRuns": "PENDING_RERUN"
+  }
+}

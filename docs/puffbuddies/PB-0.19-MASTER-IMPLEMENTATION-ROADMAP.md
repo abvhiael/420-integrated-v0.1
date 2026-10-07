@@ -81,6 +81,10 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Post-PB-16 live-work ownership
+
+Repository-side PuffBuddies implementation/audit work is complete through PB-16. Current **PB-17 Closed testnet, PB-18 Public testnet, PB-19 Mainnet, and PB-20 Public launch** remain canonical, but their unfinished deployed/live/operational work is now tracked in `docs/puffbuddies/PUFFBUDDIES-TESTNET-ROADMAP.md`. This handoff does not mark those phases complete and does not weaken their external/testnet prerequisites or Level-3 release-closeout requirements.
+
 ### Current PB-16 security/privacy-audit scope
 
 Current **PB-16 — Security/privacy audit** is the dedicated app-scoped security/privacy review after PB-15 milestone E. It audits the accumulated implementation against PB-0 privacy, consent, threat/trust, safety, lifecycle, visibility and non-goal authorities, remediates concrete repository findings, and re-runs directly relevant retained app/client/authority gates. PB-16 is Level 1 audit qualification, not the comprehensive Level-3 repository closeout. Closed/public testnet remain PB-17/PB-18; final repository-wide reconciliation/qualification remains later closeout work.

@@ -1,6 +1,6 @@
 # ATTENTION-AUDIT-7 — Indexer/API/service projection
 
-Status: implementation candidate awaiting exact-head Level 1 + Level 2 app-integration qualification.
+Status: **COMPLETE — Level 1 service qualification and Level 2 Attention app-integration qualification passed.**
 
 ## Canonical requirement
 
@@ -79,11 +79,23 @@ Repository-wide Foundry, Genesis/address authority, 420 Integrated, Geth and glo
 
 ## Completion evidence
 
-Populate after CI:
-- implementation SHA: pending;
-- base/main: `f674fbed767efc126da253c66800e38d030dc1dd`;
+Qualified implementation:
+- implementation SHA: `8c4c50017df038172ff26ca207c01d47c4c2d622`;
+- base/main SHA: `f674fbed767efc126da253c66800e38d030dc1dd`;
 - branch: `audit/420attention-complete-20261006`;
 - PR: #557;
-- Level 1 workflow: `420Attention AUDIT-7 Qualification / service-level-1`;
-- Level 2 workflow: `420Attention AUDIT-7 Qualification / app-integration-level-2`;
+- workflow run: `37572383181`;
+- Level 1 job `112633667885` (`service-level-1`): PASS;
+- Level 2 job `112633891738` (`app-integration-level-2`): PASS;
+- service exact-head checkout: PASS;
+- service static/policy checks: PASS;
+- service unit/adversarial/privacy/reorg/retry suite: **12 passed, 0 failed, 0 skipped**;
+- service production-candidate build: PASS;
+- AUDIT-7 repository verifier: PASS;
+- retained ATTENTION-AUDIT-6 browser qualification: PASS;
+- retained focused `Attention*420.t.sol` contract suite: PASS;
+- browser/service contract verifier: PASS;
+- evidence SHA: this and subsequent roadmap-only closeout commits are evidence-only and inherit the qualified implementation SHA;
+- blockers for ATTENTION-AUDIT-7: none repository-side;
+- intentionally deferred: live Indexer/RPC endpoints, Registry-resolved component addresses and production-equivalent deployment evidence belong to ATTENTION-AUDIT-8;
 - next canonical roadmap step: **ATTENTION-AUDIT-8 — Testnet deployment and integration qualification**.

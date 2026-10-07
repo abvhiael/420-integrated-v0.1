@@ -7,7 +7,9 @@ import "../src/apps/ProtocolRegistry.sol";
 import "../src/interfaces/genesis/Types420.sol";
 
 interface VmHzAuthority420Test {
-    function prank(address msgSender) external;
+    function prank(
+        address msgSender
+    ) external;
 }
 
 contract HzRegistryAuthority420Test {
@@ -30,8 +32,7 @@ contract HzRegistryAuthority420Test {
         require(d.workRegistry.rightsRegistry() == address(d.rightsRegistry), "work/rights");
         require(d.recordingRegistry.rightsRegistry() == address(d.rightsRegistry), "recording/rights");
         require(
-            d.recordingRegistry.authorizationRegistry() == address(d.authorizationRegistry),
-            "recording/authorization"
+            d.recordingRegistry.authorizationRegistry() == address(d.authorizationRegistry), "recording/authorization"
         );
         require(d.rightsRegistry.royaltyAccounting() == address(d.royaltyVault), "rights/accounting");
         require(d.authorizationRegistry.licenseRegistry() == address(d.licenseRegistry), "authorization/license");
@@ -50,7 +51,10 @@ contract HzRegistryAuthority420Test {
         Types420.ContractRef memory component = registry.component(componentId);
         require(component.implementation == address(d.creativeProtocolRegistry), "component/root");
         require(component.runtimeCodeHash == address(d.creativeProtocolRegistry).codehash, "component/codehash");
-        require(component.version.major == 1 && component.version.minor == 0 && component.version.patch == 0, "component/version");
+        require(
+            component.version.major == 1 && component.version.minor == 0 && component.version.patch == 0,
+            "component/version"
+        );
         require(component.lifecycle == Types420.Lifecycle.ACTIVE, "component/lifecycle");
         require(registry.resolve(componentId) == address(d.creativeProtocolRegistry), "component/resolve");
 
@@ -74,52 +78,53 @@ contract HzRegistryAuthority420Test {
         ProtocolRegistry registry = new ProtocolRegistry(address(this));
 
         vm.prank(UNAUTHORIZED);
-        (bool submitterOk,) = address(d.playbackAccounting).call(
-            abi.encodeCall(PlaybackAccounting420.setSubmitter, (PLAYBACK_SUBMITTER, true))
-        );
+        (bool submitterOk,) = address(d.playbackAccounting)
+            .call(abi.encodeCall(PlaybackAccounting420.setSubmitter, (PLAYBACK_SUBMITTER, true)));
         require(!submitterOk, "unauthorized playback submitter");
 
         vm.prank(UNAUTHORIZED);
-        (bool settlementOk,) = address(d.streamingSettlementEpoch).call(
-            abi.encodeCall(StreamingSettlementEpoch420.setSubmitter, (SETTLEMENT_SUBMITTER, true))
-        );
+        (bool settlementOk,) = address(d.streamingSettlementEpoch)
+            .call(abi.encodeCall(StreamingSettlementEpoch420.setSubmitter, (SETTLEMENT_SUBMITTER, true)));
         require(!settlementOk, "unauthorized settlement submitter");
 
         vm.prank(UNAUTHORIZED);
-        (bool moduleOk,) = address(d.creativeProtocolRegistry).call(
-            abi.encodeCall(
-                CreativeProtocolRegistry420.registerModule,
-                (
-                    keccak256("CREATIVE_PROTOCOL_REGISTRY"),
-                    address(d.creativeProtocolRegistry),
-                    uint32(1),
-                    HzRegistryAuthorityPlan420.moduleManifestHash()
+        (bool moduleOk,) = address(d.creativeProtocolRegistry)
+            .call(
+                abi.encodeCall(
+                    CreativeProtocolRegistry420.registerModule,
+                    (
+                        keccak256("CREATIVE_PROTOCOL_REGISTRY"),
+                        address(d.creativeProtocolRegistry),
+                        uint32(1),
+                        HzRegistryAuthorityPlan420.moduleManifestHash()
+                    )
                 )
-            )
-        );
+            );
         require(!moduleOk, "unauthorized module registration");
 
         vm.prank(UNAUTHORIZED);
-        (bool componentOk,) = address(registry).call(
-            abi.encodeCall(
-                ProtocolRegistry.registerComponent,
-                (
-                    HzRegistryAuthorityPlan420.componentId(),
-                    address(d.creativeProtocolRegistry),
-                    Types420.Version({major: 1, minor: 0, patch: 0}),
-                    Types420.Lifecycle.ACTIVE
+        (bool componentOk,) = address(registry)
+            .call(
+                abi.encodeCall(
+                    ProtocolRegistry.registerComponent,
+                    (
+                        HzRegistryAuthorityPlan420.componentId(),
+                        address(d.creativeProtocolRegistry),
+                        Types420.Version({ major: 1, minor: 0, patch: 0 }),
+                        Types420.Lifecycle.ACTIVE
+                    )
                 )
-            )
-        );
+            );
         require(!componentOk, "unauthorized component registration");
 
         vm.prank(UNAUTHORIZED);
-        (bool approvalOk,) = address(registry).call(
-            abi.encodeCall(
-                ProtocolRegistry.approveServiceId,
-                (HzRegistryAuthorityPlan420.serviceId(), HzRegistryAuthorityPlan420.serviceDescriptorHash())
-            )
-        );
+        (bool approvalOk,) = address(registry)
+            .call(
+                abi.encodeCall(
+                    ProtocolRegistry.approveServiceId,
+                    (HzRegistryAuthorityPlan420.serviceId(), HzRegistryAuthorityPlan420.serviceDescriptorHash())
+                )
+            );
         require(!approvalOk, "unauthorized service approval");
     }
 
@@ -127,32 +132,31 @@ contract HzRegistryAuthority420Test {
         HzDeploymentGraph420.Deployment memory d = HzDeploymentGraph420.deploy(address(this), TREASURY);
         ProtocolRegistry registry = new ProtocolRegistry(address(this));
 
-        (bool zeroPlayback,) = address(d.playbackAccounting).call(
-            abi.encodeCall(PlaybackAccounting420.setSubmitter, (address(0), true))
-        );
+        (bool zeroPlayback,) =
+            address(d.playbackAccounting).call(abi.encodeCall(PlaybackAccounting420.setSubmitter, (address(0), true)));
         require(!zeroPlayback, "zero playback submitter");
 
-        (bool zeroSettlement,) = address(d.streamingSettlementEpoch).call(
-            abi.encodeCall(StreamingSettlementEpoch420.setSubmitter, (address(0), true))
-        );
+        (bool zeroSettlement,) = address(d.streamingSettlementEpoch)
+            .call(abi.encodeCall(StreamingSettlementEpoch420.setSubmitter, (address(0), true)));
         require(!zeroSettlement, "zero settlement submitter");
 
-        (bool unapproved,) = address(registry).call(
-            abi.encodeCall(
-                ProtocolRegistry.publishRegisteredService,
-                (
-                    HzRegistryAuthorityPlan420.serviceId(),
-                    address(d.creativeProtocolRegistry),
-                    HzRegistryAuthorityPlan420.metadataHash(),
-                    uint32(1),
-                    true,
-                    ProtocolRegistry.ComponentType.APPLICATION,
-                    HzRegistryAuthorityPlan420.registryManifestHash(),
-                    HzRegistryAuthorityPlan420.dependencyRoot(d),
-                    HzRegistryAuthorityPlan420.interfaceHash()
+        (bool unapproved,) = address(registry)
+            .call(
+                abi.encodeCall(
+                    ProtocolRegistry.publishRegisteredService,
+                    (
+                        HzRegistryAuthorityPlan420.serviceId(),
+                        address(d.creativeProtocolRegistry),
+                        HzRegistryAuthorityPlan420.metadataHash(),
+                        uint32(1),
+                        true,
+                        ProtocolRegistry.ComponentType.APPLICATION,
+                        HzRegistryAuthorityPlan420.registryManifestHash(),
+                        HzRegistryAuthorityPlan420.dependencyRoot(d),
+                        HzRegistryAuthorityPlan420.interfaceHash()
+                    )
                 )
-            )
-        );
+            );
         require(!unapproved, "unapproved extension service published");
 
         registry.approveServiceId(
@@ -170,22 +174,23 @@ contract HzRegistryAuthority420Test {
             HzRegistryAuthorityPlan420.interfaceHash()
         );
 
-        (bool replay,) = address(registry).call(
-            abi.encodeCall(
-                ProtocolRegistry.publishRegisteredService,
-                (
-                    HzRegistryAuthorityPlan420.serviceId(),
-                    address(d.creativeProtocolRegistry),
-                    HzRegistryAuthorityPlan420.metadataHash(),
-                    uint32(1),
-                    true,
-                    ProtocolRegistry.ComponentType.APPLICATION,
-                    HzRegistryAuthorityPlan420.registryManifestHash(),
-                    HzRegistryAuthorityPlan420.dependencyRoot(d),
-                    HzRegistryAuthorityPlan420.interfaceHash()
+        (bool replay,) = address(registry)
+            .call(
+                abi.encodeCall(
+                    ProtocolRegistry.publishRegisteredService,
+                    (
+                        HzRegistryAuthorityPlan420.serviceId(),
+                        address(d.creativeProtocolRegistry),
+                        HzRegistryAuthorityPlan420.metadataHash(),
+                        uint32(1),
+                        true,
+                        ProtocolRegistry.ComponentType.APPLICATION,
+                        HzRegistryAuthorityPlan420.registryManifestHash(),
+                        HzRegistryAuthorityPlan420.dependencyRoot(d),
+                        HzRegistryAuthorityPlan420.interfaceHash()
+                    )
                 )
-            )
-        );
+            );
         require(!replay, "service version replay accepted");
     }
 
@@ -208,7 +213,9 @@ contract HzRegistryAuthority420Test {
         HzDeploymentGraph420.Deployment memory d
     ) private {
         bytes32 manifest = HzRegistryAuthorityPlan420.moduleManifestHash();
-        _register(d.creativeProtocolRegistry, "CREATIVE_PROTOCOL_REGISTRY", address(d.creativeProtocolRegistry), manifest);
+        _register(
+            d.creativeProtocolRegistry, "CREATIVE_PROTOCOL_REGISTRY", address(d.creativeProtocolRegistry), manifest
+        );
         _register(d.creativeProtocolRegistry, "CREATOR_PROFILE_REGISTRY", address(d.creatorProfileRegistry), manifest);
         _register(d.creativeProtocolRegistry, "WORK_REGISTRY", address(d.workRegistry), manifest);
         _register(d.creativeProtocolRegistry, "RECORDING_REGISTRY", address(d.recordingRegistry), manifest);
@@ -225,9 +232,15 @@ contract HzRegistryAuthority420Test {
         _register(d.creativeProtocolRegistry, "STORAGE_SOURCE_REGISTRY", address(d.storageSourceRegistry), manifest);
         _register(d.creativeProtocolRegistry, "PLAYBACK_RESOLVER", address(d.playbackResolver), manifest);
         _register(d.creativeProtocolRegistry, "PLAYBACK_ACCOUNTING", address(d.playbackAccounting), manifest);
-        _register(d.creativeProtocolRegistry, "STREAMING_SETTLEMENT_EPOCH", address(d.streamingSettlementEpoch), manifest);
-        _register(d.creativeProtocolRegistry, "STREAMING_REVENUE_ALLOCATOR", address(d.streamingRevenueAllocator), manifest);
-        _register(d.creativeProtocolRegistry, "STREAMING_ROYALTY_SETTLEMENT", address(d.streamingRoyaltySettlement), manifest);
+        _register(
+            d.creativeProtocolRegistry, "STREAMING_SETTLEMENT_EPOCH", address(d.streamingSettlementEpoch), manifest
+        );
+        _register(
+            d.creativeProtocolRegistry, "STREAMING_REVENUE_ALLOCATOR", address(d.streamingRevenueAllocator), manifest
+        );
+        _register(
+            d.creativeProtocolRegistry, "STREAMING_ROYALTY_SETTLEMENT", address(d.streamingRoyaltySettlement), manifest
+        );
     }
 
     function _register(
@@ -246,7 +259,7 @@ contract HzRegistryAuthority420Test {
         registry.registerComponent(
             HzRegistryAuthorityPlan420.componentId(),
             address(d.creativeProtocolRegistry),
-            Types420.Version({major: 1, minor: 0, patch: 0}),
+            Types420.Version({ major: 1, minor: 0, patch: 0 }),
             Types420.Lifecycle.ACTIVE
         );
         registry.approveServiceId(
@@ -269,26 +282,40 @@ contract HzRegistryAuthority420Test {
         HzDeploymentGraph420.Deployment memory d
     ) private view {
         bytes32 manifest = HzRegistryAuthorityPlan420.moduleManifestHash();
-        _assertModule(d.creativeProtocolRegistry, "CREATIVE_PROTOCOL_REGISTRY", address(d.creativeProtocolRegistry), manifest);
-        _assertModule(d.creativeProtocolRegistry, "CREATOR_PROFILE_REGISTRY", address(d.creatorProfileRegistry), manifest);
+        _assertModule(
+            d.creativeProtocolRegistry, "CREATIVE_PROTOCOL_REGISTRY", address(d.creativeProtocolRegistry), manifest
+        );
+        _assertModule(
+            d.creativeProtocolRegistry, "CREATOR_PROFILE_REGISTRY", address(d.creatorProfileRegistry), manifest
+        );
         _assertModule(d.creativeProtocolRegistry, "WORK_REGISTRY", address(d.workRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "RECORDING_REGISTRY", address(d.recordingRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "CONTRIBUTOR_REGISTRY", address(d.contributorRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "RIGHTS_REGISTRY", address(d.rightsRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "AUTHORIZATION_REGISTRY", address(d.authorizationRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "LICENSE_REGISTRY", address(d.licenseRegistry), manifest);
-        _assertModule(d.creativeProtocolRegistry, "ROYALTY_SCHEDULE_REGISTRY", address(d.royaltyScheduleRegistry), manifest);
+        _assertModule(
+            d.creativeProtocolRegistry, "ROYALTY_SCHEDULE_REGISTRY", address(d.royaltyScheduleRegistry), manifest
+        );
         _assertModule(d.creativeProtocolRegistry, "ROYALTY_VAULT", address(d.royaltyVault), manifest);
         _assertModule(d.creativeProtocolRegistry, "ROYALTY_ROUTER", address(d.royaltyRouter), manifest);
         _assertModule(d.creativeProtocolRegistry, "CATALOG_REGISTRY", address(d.catalogRegistry), manifest);
-        _assertModule(d.creativeProtocolRegistry, "CATALOG_METADATA_REGISTRY", address(d.catalogMetadataRegistry), manifest);
+        _assertModule(
+            d.creativeProtocolRegistry, "CATALOG_METADATA_REGISTRY", address(d.catalogMetadataRegistry), manifest
+        );
         _assertModule(d.creativeProtocolRegistry, "MEDIA_MANIFEST_REGISTRY", address(d.mediaManifestRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "STORAGE_SOURCE_REGISTRY", address(d.storageSourceRegistry), manifest);
         _assertModule(d.creativeProtocolRegistry, "PLAYBACK_RESOLVER", address(d.playbackResolver), manifest);
         _assertModule(d.creativeProtocolRegistry, "PLAYBACK_ACCOUNTING", address(d.playbackAccounting), manifest);
-        _assertModule(d.creativeProtocolRegistry, "STREAMING_SETTLEMENT_EPOCH", address(d.streamingSettlementEpoch), manifest);
-        _assertModule(d.creativeProtocolRegistry, "STREAMING_REVENUE_ALLOCATOR", address(d.streamingRevenueAllocator), manifest);
-        _assertModule(d.creativeProtocolRegistry, "STREAMING_ROYALTY_SETTLEMENT", address(d.streamingRoyaltySettlement), manifest);
+        _assertModule(
+            d.creativeProtocolRegistry, "STREAMING_SETTLEMENT_EPOCH", address(d.streamingSettlementEpoch), manifest
+        );
+        _assertModule(
+            d.creativeProtocolRegistry, "STREAMING_REVENUE_ALLOCATOR", address(d.streamingRevenueAllocator), manifest
+        );
+        _assertModule(
+            d.creativeProtocolRegistry, "STREAMING_ROYALTY_SETTLEMENT", address(d.streamingRoyaltySettlement), manifest
+        );
     }
 
     function _assertModule(

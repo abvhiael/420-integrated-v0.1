@@ -48,6 +48,7 @@ on:
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
+      - 'docs/audit/420HZ-PHASE-CLOSEOUT.md'
   pull_request:
     paths:
       - 'consensus/**'
@@ -85,6 +86,7 @@ on:
       - 'scripts/verify-cmp-4-10-closeout.py'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
+      - 'docs/audit/420HZ-PHASE-CLOSEOUT.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

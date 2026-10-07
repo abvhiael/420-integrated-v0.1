@@ -49,6 +49,8 @@ Potential dependency categories include Registry, Wallet, Identity, Names, Right
 
 Do not adopt a dependency merely because it exists elsewhere.
 
+**Status: COMPLETE (Level 1).** Canonical dependency/trust definition: `docs/DOOBTUBE-DEPENDENCIES-TRUST.md`. Direct V1 dependencies are ProtocolRegistry, Wallet/SmartAccount authority, 420Media, optional 420Identity, 420Rights, 420Storage/Resource, 420Search and 420Notifications. 420Pay and Compute Market remain transitive through 420Media; unrelated ecosystem services are explicitly not adopted.
+
 **Exit:** dependency graph, authority matrix, threat model and failure/degraded-mode model are committed.
 
 ## DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture

@@ -91,6 +91,9 @@ func TestRR4SessionValidationBoundaries(t *testing.T) {
 	if _, err := security.Verify(context.Background(), "token"); err != nil {
 		t.Fatalf("valid session rejected: %v", err)
 	}
+	if _, err := security.Verify(context.Background(), "unknown"); !errors.Is(err, ErrSessionRequired) {
+		t.Fatalf("unknown token should fail closed, got %v", err)
+	}
 }
 
 func TestRR4SessionAuthorizerScopesCapabilities(t *testing.T) {

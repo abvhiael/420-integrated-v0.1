@@ -728,3 +728,26 @@ func TestHTTPOutboxDeliveryLifecycle(t *testing.T) {
 		t.Fatalf("foreign outbox read status=%d body=%s", rec.Code, rec.Body.String())
 	}
 }
+
+func TestHTTPResponsesRedactPrivateStorageEvidence(t *testing.T) {
+	h, _, id := testHTTPHandler(t)
+	rec := performMailRequest(t, h, http.MethodGet, "/v1/messages/"+id, "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("message status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	for _, forbidden := range []string{"body_ref", "body_digest", "staging_body_ref", "staging_body_digest", "request_fingerprint", "idempotency_key"} {
+		if strings.Contains(rec.Body.String(), forbidden) {
+			t.Fatalf("private storage metadata leaked in message response: %s", forbidden)
+		}
+	}
+
+	rec = performMailRequest(t, h, http.MethodGet, "/v1/inbox", "bob.420", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("inbox status=%d body=%s", rec.Code, rec.Body.String())
+	}
+	for _, forbidden := range []string{"body_ref", "body_digest"} {
+		if strings.Contains(rec.Body.String(), forbidden) {
+			t.Fatalf("private storage metadata leaked in inbox response: %s", forbidden)
+		}
+	}
+}

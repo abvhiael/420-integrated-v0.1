@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // MAIL-2.7 thresholds are deterministic repository policy; later operational
@@ -331,6 +332,10 @@ func phishingSignals(subject, body string, reasons []string) (int, []string) {
 			continue
 		}
 		host := strings.ToLower(u.Hostname())
+		if isProtectedDomainLookalike(host) {
+			score += PhishingQuarantineScore
+			reasons = append(reasons, "LOOKALIKE_ECOSYSTEM_DOMAIN")
+		}
 		if u.User != nil {
 			score += 3
 			reasons = append(reasons, "URL_USERINFO")
@@ -362,6 +367,87 @@ func phishingSignals(subject, body string, reasons []string) (int, []string) {
 		}
 	}
 	return score, reasons
+}
+
+var protectedIdentitySkeletons = map[string]struct{}{
+	"420integrated": {},
+	"420mail":       {},
+	"420wallet":     {},
+	"420identity":   {},
+	"420support":    {},
+	"420security":   {},
+	"420admin":      {},
+}
+
+func applyExternalImpersonationSignals(decision spamDecision, source, displayName string) spamDecision {
+	source = strings.ToLower(strings.TrimSpace(source))
+	if source != DiscordProvider && source != TelegramProvider {
+		return decision
+	}
+	skeleton := impersonationSkeleton(displayName)
+	if _, protected := protectedIdentitySkeletons[skeleton]; !protected {
+		return decision
+	}
+	decision.PhishingScore += PhishingQuarantineScore
+	decision.Reasons = append(decision.Reasons, "EXTERNAL_PROTECTED_IDENTITY_CLAIM")
+	if skeleton != asciiIdentitySkeleton(displayName) {
+		decision.Reasons = append(decision.Reasons, "CONFUSABLE_PROTECTED_IDENTITY_CLAIM")
+	}
+	decision.Quarantine = true
+	decision.Reasons = uniqueReasons(decision.Reasons)
+	return decision
+}
+
+func isProtectedDomainLookalike(host string) bool {
+	host = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(host), "."))
+	if host == "420integrated.org" || strings.HasSuffix(host, ".420integrated.org") {
+		return false
+	}
+	skeleton := impersonationSkeleton(host)
+	for _, protected := range []string{"420integratedorg", "420integrated", "420mail", "420wallet", "420identity"} {
+		if strings.Contains(skeleton, protected) {
+			return true
+		}
+	}
+	return false
+}
+
+func asciiIdentitySkeleton(value string) string {
+	var b strings.Builder
+	for _, r := range strings.ToLower(value) {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
+func impersonationSkeleton(value string) string {
+	var b strings.Builder
+	for _, r := range strings.ToLower(value) {
+		switch r {
+		case 'а', 'α':
+			r = 'a'
+		case 'е', 'ε':
+			r = 'e'
+		case 'і', 'ι', 'ı':
+			r = 'i'
+		case 'о', 'ο':
+			r = 'o'
+		case 'р', 'ρ':
+			r = 'p'
+		case 'с':
+			r = 'c'
+		case 'х', 'χ':
+			r = 'x'
+		case 'у':
+			r = 'y'
+		}
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }
 
 func reputationRisk(rep SenderReputation) int {

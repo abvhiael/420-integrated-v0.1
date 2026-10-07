@@ -1,8 +1,8 @@
 # 420Mail Phase 2 roadmap
 
-Status: **ACTIVE — repository feature expansion before live MAIL-AUDIT-7 qualification**
+Status: **REPOSITORY PHASE COMPLETE — remaining MAIL-2.37 through MAIL-2.40 handed off to testnet/Genesis/production roadmap**
 
-This roadmap extends the existing contract-free, private/off-chain 420Mail application without changing its canonical authority. It does not silently promote 420Mail into the frozen Genesis application catalog and does not replace MAIL-AUDIT-7 through MAIL-AUDIT-10.
+This roadmap records the completed repository-side 420Mail Phase 2 work without changing canonical authority. MAIL-2.1 through MAIL-2.36 are repository-complete. Unfinished MAIL-2.37 through MAIL-2.40 are handed off to the canonical testnet work roadmap in `docs/ROADMAP.md`, aligned respectively with MAIL-AUDIT-7 through MAIL-AUDIT-10. This handoff does not claim live-testnet, Genesis, security/operations, or production completion.
 
 ## Qualification model
 
@@ -46,19 +46,20 @@ Ordinary MAIL-2 steps use app-scoped Level 1 qualification. Broader retained Mai
 34. **MAIL-2.34 — Phishing & Impersonation Protection**
 35. **MAIL-2.35 — Abuse Controls**
 36. **MAIL-2.36 — Repository Qualification**
-37. **MAIL-2.37 — Live Testnet Integration**
-38. **MAIL-2.38 — Security & Operations Qualification**
-39. **MAIL-2.39 — Genesis Catalog Decision**
-40. **MAIL-2.40 — Production Release**
+37. **MAIL-2.37 — Live Testnet Integration** — **HANDED OFF to `docs/ROADMAP.md` testnet work; not repository-complete.**
+38. **MAIL-2.38 — Security & Operations Qualification** — **HANDED OFF to `docs/ROADMAP.md` testnet/operations work; not complete.**
+39. **MAIL-2.39 — Genesis Catalog Decision** — **HANDED OFF to `docs/ROADMAP.md`; explicit catalog decision still required.**
+40. **MAIL-2.40 — Production Release** — **HANDED OFF to `docs/ROADMAP.md`; production release remains gated.**
 
 ## Milestones
 
 - **Mailbox foundation milestone:** MAIL-2.1 through MAIL-2.10 — **COMPLETE, Level 2 PASS** on qualified implementation SHA `a8b646134893a9c07a35e1cc998d8d397c449059`; durable evidence: `docs/audit/420MAIL-MAILBOX-FOUNDATION-MILESTONE-QUALIFICATION.md`.
-- **Wallet-native identity milestone:** MAIL-2.11 through MAIL-2.14.
-- **External bridge milestone:** MAIL-2.15 through MAIL-2.29.
+- **Wallet-native identity milestone:** MAIL-2.11 through MAIL-2.14 — **COMPLETE, Level 2 PASS** on qualified implementation SHA `aa299b706ff2739e9e010f1140c435af3fdd0218`; durable evidence: `docs/audit/420MAIL-WALLET-NATIVE-IDENTITY-MILESTONE-QUALIFICATION.md`.
+- **External bridge milestone:** MAIL-2.15 through MAIL-2.29 — **COMPLETE, Level 2 PASS** on exact tested PR merge-candidate SHA `7d9e4860a8d8c82283dc7bf6c19ba304106bcea5` (feature parent `07243b332b6e752475985878049bc84b9b5d952b`, tested `main` parent `d1e6dae8cf6cc8ea513ffaf26d1dbad6d3c7f0b4`); durable evidence: `docs/audit/420MAIL-EXTERNAL-BRIDGE-MILESTONE-QUALIFICATION.md`.
 - **Product/security milestone:** MAIL-2.30 through MAIL-2.35.
 - **Phase closeout:** MAIL-2.36 through MAIL-2.40, with Level 3 only at the applicable complete app-phase closeout.
 
 ## Current step
 
-**MAIL-2.1 — Mailbox State Model** through **MAIL-2.10 — Outbox & Delivery Queue** are COMPLETE at Level 1. The **Mailbox Foundation milestone (MAIL-2.1–MAIL-2.10)** is COMPLETE at Level 2. **MAIL-2.11 — Email-as-a-Wallet Onboarding** is the active canonical Phase 2 step.
+**MAIL-2.1 — Mailbox State Model** through **MAIL-2.36 — Repository Qualification** are COMPLETE at the applicable repository qualification levels. MAIL-2.22 remains a qualified conditional-gate outcome with Signal deep sync disabled because its prerequisite integration surface is unavailable. The **Mailbox Foundation**, **Wallet-native identity**, **External bridge**, and **Product/security** milestones are COMPLETE at Level 2. Repository qualification MAIL-2.36 passed on exact tested PR merge-candidate SHA `f0ab41aef75ca85421fb417529b6c188c3e92daa` before handoff. **MAIL-2.37 through MAIL-2.40 are intentionally unfinished and have been moved to the canonical testnet work roadmap in `docs/ROADMAP.md`.** No live-testnet, Genesis catalog, security/operations, production, or Level-3 completion is claimed by this repository handoff.
+

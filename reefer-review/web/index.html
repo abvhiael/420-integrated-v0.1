@@ -25,9 +25,11 @@
     <nav class="primary-nav" aria-label="Primary">
       <a href="#latest" data-route="latest">Latest</a>
       <a href="#news" data-route="news">Cannabis News</a>
-      <a href="#originals" data-route="originals">ReeferReview Originals</a>
+      <a href="#originals" data-route="originals">Originals</a>
       <a href="#topics" data-route="topics">Topics</a>
       <a href="#search" data-route="search">Search</a>
+      <a href="#editorial" data-route="editorial">Write</a>
+      <a href="#moderation" data-route="moderation">Moderation</a>
     </nav>
   </header>
 
@@ -40,6 +42,18 @@
         <p class="hero-copy">Follow persistent cannabis news from reviewed publishers alongside original ReeferReview publications. External stories always link back to the original publisher.</p>
       </div>
     </section>
+
+    <aside class="session-bar" aria-labelledby="session-title">
+      <div>
+        <strong id="session-title">Repository-stage editorial session</strong>
+        <p>Uses the current development actor boundary. Production Wallet/420Identity sessions are RR-4 work.</p>
+      </div>
+      <label>
+        <span>Actor</span>
+        <input id="session-actor" autocomplete="off" placeholder="writer.420">
+      </label>
+      <button id="session-save" type="button" class="secondary">Use actor</button>
+    </aside>
 
     <aside class="filter-bar" aria-label="News filters">
       <label>
@@ -61,10 +75,7 @@
 
     <section id="view-latest" class="view" data-view="latest" aria-labelledby="latest-title">
       <div class="section-heading">
-        <div>
-          <p class="eyebrow">Latest</p>
-          <h2 id="latest-title">Latest from the cannabis newsdesk</h2>
-        </div>
+        <div><p class="eyebrow">Latest</p><h2 id="latest-title">Latest from the cannabis newsdesk</h2></div>
         <button type="button" class="secondary" data-refresh="latest">Refresh</button>
       </div>
       <div id="latest-feed" class="card-grid" aria-live="polite"></div>
@@ -72,10 +83,7 @@
 
     <section id="view-news" class="view" data-view="news" aria-labelledby="news-title" hidden>
       <div class="section-heading">
-        <div>
-          <p class="eyebrow">External reporting</p>
-          <h2 id="news-title">Cannabis News</h2>
-        </div>
+        <div><p class="eyebrow">External reporting</p><h2 id="news-title">Cannabis News</h2></div>
         <button type="button" class="secondary" data-refresh="news">Refresh</button>
       </div>
       <p class="section-note">Headlines and permitted feed excerpts are attributed to their publishers. Use <strong>Read original</strong> to continue at the source.</p>
@@ -85,10 +93,7 @@
 
     <section id="view-originals" class="view" data-view="originals" aria-labelledby="originals-title" hidden>
       <div class="section-heading">
-        <div>
-          <p class="eyebrow">Original publishing</p>
-          <h2 id="originals-title">ReeferReview Originals</h2>
-        </div>
+        <div><p class="eyebrow">Original publishing</p><h2 id="originals-title">ReeferReview Originals</h2></div>
         <button type="button" class="secondary" data-refresh="originals">Refresh</button>
       </div>
       <p class="section-note">These are publications authored inside ReeferReview, not imported third-party stories.</p>
@@ -96,23 +101,20 @@
       <button id="originals-more" class="load-more" type="button" hidden>Load more originals</button>
     </section>
 
-    <section id="view-topics" class="view" data-view="topics" aria-labelledby="topics-title" hidden>
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Browse</p>
-          <h2 id="topics-title">Topics</h2>
-        </div>
+    <section id="view-article" class="view article-reader" data-view="article" aria-labelledby="article-title" hidden>
+      <a href="#originals" class="back-link">← Back to Originals</a>
+      <div id="article-content" aria-live="polite">
+        <h2 id="article-title">Article</h2>
       </div>
+    </section>
+
+    <section id="view-topics" class="view" data-view="topics" aria-labelledby="topics-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Browse</p><h2 id="topics-title">Topics</h2></div></div>
       <div id="topic-list" class="topic-list" aria-live="polite"></div>
     </section>
 
     <section id="view-search" class="view" data-view="search" aria-labelledby="search-title" hidden>
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Find coverage</p>
-          <h2 id="search-title">Search</h2>
-        </div>
-      </div>
+      <div class="section-heading"><div><p class="eyebrow">Find coverage</p><h2 id="search-title">Search</h2></div></div>
       <form id="search-form" class="search-form" role="search">
         <label for="search-query">Search cannabis news and ReeferReview Originals</label>
         <div class="search-row">
@@ -123,41 +125,80 @@
       <div id="search-results" class="card-grid" aria-live="polite"></div>
     </section>
 
-    <details class="developer-tools">
-      <summary>Development writer tools</summary>
-      <p>This repository-stage form creates a draft only. Production identity and writer workflows remain later roadmap work.</p>
-      <form id="draft-form">
-        <label for="actor">Development actor</label>
-        <input id="actor" autocomplete="off" placeholder="writer.420">
+    <section id="view-editorial" class="view" data-view="editorial" aria-labelledby="editorial-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Editorial workspace</p><h2 id="editorial-title">Write &amp; publish</h2></div>
+        <button id="editorial-refresh" class="secondary" type="button">Refresh workspace</button>
+      </div>
+      <p class="section-note">The current repository-stage actor is checked by the backend Identity/Authorizer interfaces. Production Wallet/420Identity authentication remains RR-4.</p>
 
-        <label for="draft-title">Title</label>
-        <input id="draft-title" maxlength="200">
+      <div class="editorial-layout">
+        <section class="workspace-panel" aria-labelledby="draft-heading">
+          <h3 id="draft-heading">New draft</h3>
+          <form id="draft-form">
+            <label for="draft-title">Title</label>
+            <input id="draft-title" maxlength="200" required>
+            <label for="draft-summary">Summary</label>
+            <textarea id="draft-summary" rows="3" maxlength="1200"></textarea>
+            <label for="draft-body">Article</label>
+            <textarea id="draft-body" rows="12" required></textarea>
+            <label for="visibility">Visibility</label>
+            <select id="visibility">
+              <option>PUBLIC</option><option>UNLISTED</option><option>FOLLOWERS</option>
+              <option>COMMUNITY_ONLY</option><option>PRIVATE</option>
+              <option>ORGANIZATION_MEMBERS</option><option>MODERATORS</option><option>ADMINS</option>
+            </select>
+            <button type="submit">Create draft</button>
+          </form>
+          <pre id="draft-status" class="draft-status" aria-live="polite"></pre>
+        </section>
 
-        <label for="draft-body">Article</label>
-        <textarea id="draft-body" rows="8"></textarea>
+        <section class="workspace-panel" aria-labelledby="edit-heading">
+          <h3 id="edit-heading">Edit selected publication</h3>
+          <form id="edit-form">
+            <input id="edit-id" type="hidden">
+            <label for="edit-title">Title</label>
+            <input id="edit-title" maxlength="200" required>
+            <label for="edit-summary">Summary</label>
+            <textarea id="edit-summary" rows="3" maxlength="1200"></textarea>
+            <label for="edit-body">Article</label>
+            <textarea id="edit-body" rows="12" required></textarea>
+            <label for="edit-visibility">Visibility</label>
+            <select id="edit-visibility">
+              <option>PUBLIC</option><option>UNLISTED</option><option>FOLLOWERS</option>
+              <option>COMMUNITY_ONLY</option><option>PRIVATE</option>
+              <option>ORGANIZATION_MEMBERS</option><option>MODERATORS</option><option>ADMINS</option>
+            </select>
+            <div class="button-row">
+              <button type="submit">Save revision</button>
+              <button id="edit-clear" class="secondary" type="button">Clear</button>
+            </div>
+          </form>
+        </section>
+      </div>
 
-        <label for="visibility">Visibility</label>
-        <select id="visibility">
-          <option>PUBLIC</option>
-          <option>UNLISTED</option>
-          <option>FOLLOWERS</option>
-          <option>PRIVATE</option>
-        </select>
+      <h3>Your editorial records</h3>
+      <div id="editorial-list" class="card-grid" aria-live="polite"></div>
+      <button id="editorial-more" class="load-more" type="button" hidden>Load more editorial records</button>
+    </section>
 
-        <button type="submit">Create draft</button>
-      </form>
-      <pre id="draft-status" class="draft-status" aria-live="polite"></pre>
-    </details>
+    <section id="view-moderation" class="view" data-view="moderation" aria-labelledby="moderation-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Moderation</p><h2 id="moderation-title">Moderation dashboard</h2></div>
+        <button id="moderation-refresh" class="secondary" type="button">Refresh dashboard</button>
+      </div>
+      <p class="section-note">Current development policy recognizes <code>moderator.420</code> and <code>publisher.420</code>. RR-4 replaces this with production capabilities.</p>
+      <div id="moderation-list" class="card-grid" aria-live="polite"></div>
+      <section class="workspace-panel moderation-history" aria-labelledby="history-title">
+        <h3 id="history-title">Moderation history</h3>
+        <div id="moderation-history" aria-live="polite"><p class="empty">Choose “History” on an editorial record.</p></div>
+      </section>
+    </section>
 
-    <noscript>
-      <p class="status error">Reefer Review needs JavaScript to load its news and publication feeds.</p>
-    </noscript>
+    <noscript><p class="status error">Reefer Review needs JavaScript to load its news and publication feeds.</p></noscript>
   </main>
 
-  <footer>
-    <p>Reefer Review keeps external reporting distinct from ReeferReview Originals and preserves publisher attribution.</p>
-  </footer>
-
+  <footer><p>Reefer Review keeps external reporting distinct from ReeferReview Originals and preserves publisher attribution.</p></footer>
   <script src="./app.js" defer></script>
 </body>
 </html>

@@ -51,9 +51,11 @@ Status: **COMPLETE / LEVEL 1 PASS**
 ## RR-3 — Editorial Publishing Completion
 Article reader, authenticated writer/publish workflow, revisions, tombstone lifecycle, restricted reads, moderation dashboard/history and API/client parity.
 
-Status: **IMPLEMENTED / LEVEL 1 + LEVEL 2 QUALIFICATION PENDING**
+Status: **COMPLETE / LEVEL 1 PASS + LEVEL 2 PASS**
 
-RR-3 is the documented RR-2/RR-3 user-facing/editorial convergence milestone. Complete it only after the exact accumulated implementation SHA passes both the app-scoped RR-3 Level 1 workflow and the retained ReeferReview Level 2 integration workflow.
+RR-3 is the documented RR-2/RR-3 user-facing/editorial convergence milestone. Its exit criteria are SATISFIED on exact implementation SHA `b264250d5014cc30435b86e09d3f2143668cdfb8`: Reefer Review RR-3 Level 1 run `37668110302` PASS and Reefer Review Level 2 Integration run `37668110367` PASS. Durable evidence is recorded in `RR-3-QUALIFICATION.md`. Level 3 remains deferred to RR-10.
+
+**Next canonical roadmap step:** RR-4 — Identity & Permissions.
 
 ## RR-4 — Identity & Permissions
 Production 420Identity/Wallet sessions, scoped author/publisher/moderator capabilities, revocation/expiry, no public reliance on `X-420-Actor`.

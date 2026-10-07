@@ -288,4 +288,15 @@ describe("Budtender web client host", () => {
       assert.equal(state.customers.queue[0].id, "same-origin");
     });
   });
+
+  it("keeps static serving rooted and fails closed on traversal-shaped paths", async () => {
+    await withServer(async (baseUrl) => {
+      for (const path of ["/..%2fpackage.json", "/%2e%2e%2fpackage.json", "/missing.txt"]) {
+        const response = await fetch(baseUrl + path);
+        assert.ok(response.status === 400 || response.status === 404);
+        const body = await response.text();
+        assert.doesNotMatch(body, /"name"\s*:\s*"@420\/budtender-web-v1"/);
+      }
+    });
+  });
 });

@@ -84,6 +84,26 @@ jobs:
         working-directory: clients/budtender-access-v1
         run: npm test
 
+  gaming-client-hardening:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Run Gaming client hostile-state and four-game E2E suite
+        working-directory: packages/420-gaming-client-hardening
+        run: npm test
+      - name: Run Gaming cross-game qualification
+        working-directory: packages/420-gaming-cross-game-qualification
+        run: npm test
+
   gaming-contract-security:
     runs-on: ubuntu-latest
     steps:

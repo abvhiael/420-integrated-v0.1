@@ -13,6 +13,7 @@ from doobtube.api.errors import (
     INVALID_REQUEST, NOT_FOUND, UNAUTHORIZED, UNAVAILABLE,
 )
 from doobtube.api.persistence import Store
+from doobtube.security import AbuseGuard, SecurityDenied, redact_sensitive_text
 from doobtube.api.types import (
     API_VERSION, MAX_IDEMPOTENCY_KEY, MAX_PAGE_LIMIT, AuthContext, ProjectionEvent,
     Request, Response, decode_cursor, encode_cursor, rfc3339, utc_now,
@@ -62,6 +63,7 @@ class Backend:
         store: Store | None = None,
         dependency_probe: Callable[[], Mapping[str, bool]] | None = None,
         now: Callable[[], datetime] = utc_now,
+        abuse_guard: AbuseGuard | None = None,
     ):
         config.validate()
         self.config = config
@@ -69,6 +71,7 @@ class Backend:
         self.dependency_probe = dependency_probe or (lambda: {"420Media": True, "420Registry": True})
         self.now = now
         self.metrics = Metrics()
+        self.abuse = abuse_guard or AbuseGuard(now=now)
         self.started_at = self.now()
 
     def close(self) -> None:
@@ -110,6 +113,8 @@ class Backend:
             raise APIError(NOT_FOUND, "route not found", 404)
         except APIError as err:
             return self._error(err)
+        except SecurityDenied as err:
+            return self._error(APIError('RATE_LIMITED', str(err), 429))
         except (ValueError, TypeError, json.JSONDecodeError):
             return self._error(APIError(INVALID_REQUEST, "invalid request", 400))
 
@@ -189,6 +194,7 @@ class Backend:
                 raise APIError(INVALID_REQUEST, "invalid muted_creators", 400)
 
         def effect():
+            self.abuse.require(auth.wallet or "", "preferences.write")
             payload = dict(request.body)
             self.store.put_preferences(auth.wallet or "", payload, rfc3339(self.now()))
             return {"preferences": payload, "updated_at": rfc3339(self.now())}
@@ -234,6 +240,7 @@ class Backend:
         auth = self._auth(request, capability="doobtube.operator.rebuild")
 
         def effect():
+            self.abuse.require(auth.wallet or "", "control.rebuild")
             job_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"doobtube:rebuild:{auth.wallet}:{self._idempotency_key(request)}"))
             now = rfc3339(self.now())
             self.store.enqueue_job({
@@ -254,7 +261,8 @@ class Backend:
         return self._ok(202, data)
 
     def metrics_endpoint(self, request: Request) -> Response:
-        self._auth(request, capability="doobtube.operator.metrics")
+        auth = self._auth(request, capability="doobtube.operator.metrics")
+        self.abuse.require(auth.wallet or "", "operator.metrics")
         return self._ok(200, {"counters": self.metrics.snapshot()})
 
     def apply_projection(self, event: ProjectionEvent) -> None:
@@ -323,7 +331,7 @@ class Backend:
                     delay = min(self.config.retry_base_seconds * (2 ** (attempts - 1)), 300)
                     next_at = now + timedelta(seconds=delay)
                 self.store.save_job_state(
-                    row["job_id"], state, attempts, rfc3339(next_at), str(exc)[:500], rfc3339(now)
+                    row["job_id"], state, attempts, rfc3339(next_at), redact_sensitive_text(exc), rfc3339(now)
                 )
                 self.store.db.commit()
                 self.metrics.inc("jobs_failed_total")

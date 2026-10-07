@@ -152,31 +152,57 @@ func (f FeedFetcher) FetchConditional(ctx context.Context, source NewsSource, et
 		return nil, "", "", false, ErrInvalidInput
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, nil)
-	if err != nil { return nil, "", "", false, err }
+	if err != nil {
+		return nil, "", "", false, err
+	}
 	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9")
 	req.Header.Set("User-Agent", "420Integrated-ReeferReview/1.0")
-	if len(etag) <= 512 && !strings.ContainsAny(etag, "\r\n") && etag != "" { req.Header.Set("If-None-Match", etag) }
-	if len(modified) <= 128 && !strings.ContainsAny(modified, "\r\n") && modified != "" { req.Header.Set("If-Modified-Since", modified) }
+	if len(etag) <= 512 && !strings.ContainsAny(etag, "\r\n") && etag != "" {
+		req.Header.Set("If-None-Match", etag)
+	}
+	if len(modified) <= 128 && !strings.ContainsAny(modified, "\r\n") && modified != "" {
+		req.Header.Set("If-Modified-Since", modified)
+	}
 	hc := f.HTTP
-	if hc == nil { hc = secureNewsHTTPClient() }
+	if hc == nil {
+		hc = secureNewsHTTPClient()
+	}
 	client := *hc
 	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
 	resp, err := client.Do(req)
-	if err != nil { return nil, "", "", false, err }
+	if err != nil {
+		return nil, "", "", false, err
+	}
 	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusNotModified { return nil, etag, modified, true, nil }
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 { return nil, "", "", false, fmt.Errorf("feed http %d", resp.StatusCode) }
+	if resp.StatusCode == http.StatusNotModified {
+		return nil, etag, modified, true, nil
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, "", "", false, fmt.Errorf("feed http %d", resp.StatusCode)
+	}
 	max := f.MaxBytes
-	if max <= 0 { max = defaultMaxFeedBytes }
+	if max <= 0 {
+		max = defaultMaxFeedBytes
+	}
 	b, err := io.ReadAll(io.LimitReader(resp.Body, max+1))
-	if err != nil { return nil, "", "", false, err }
-	if int64(len(b)) > max { return nil, "", "", false, ErrInvalidInput }
+	if err != nil {
+		return nil, "", "", false, err
+	}
+	if int64(len(b)) > max {
+		return nil, "", "", false, ErrInvalidInput
+	}
 	entries, err := ParseNewsFeed(b)
-	if err != nil { return nil, "", "", false, err }
+	if err != nil {
+		return nil, "", "", false, err
+	}
 	newETag := strings.TrimSpace(resp.Header.Get("ETag"))
 	newModified := strings.TrimSpace(resp.Header.Get("Last-Modified"))
-	if len(newETag) > 512 || strings.ContainsAny(newETag, "\r\n") { newETag = "" }
-	if len(newModified) > 128 || strings.ContainsAny(newModified, "\r\n") { newModified = "" }
+	if len(newETag) > 512 || strings.ContainsAny(newETag, "\r\n") {
+		newETag = ""
+	}
+	if len(newModified) > 128 || strings.ContainsAny(newModified, "\r\n") {
+		newModified = ""
+	}
 	return entries, newETag, newModified, false, nil
 }
 

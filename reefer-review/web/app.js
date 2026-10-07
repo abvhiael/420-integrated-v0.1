@@ -3,7 +3,9 @@
 const state = {
   route: "latest",
   routeID: "",
-  actor: sessionStorage.getItem("reefer-review-actor") || "",
+  sessionToken: "",
+  sessionSubject: "",
+  sessionCapabilities: [],
   source: "",
   topic: "",
   newsCursor: "",
@@ -25,7 +27,45 @@ function setStatus(message, isError = false) {
 }
 
 function authHeaders(extra = {}) {
-  return state.actor ? { "X-420-Actor": state.actor, ...extra } : { ...extra };
+  return state.sessionToken ? { Authorization: `Bearer ${state.sessionToken}`, ...extra } : { ...extra };
+}
+
+function clearSession() {
+  state.sessionToken = "";
+  state.sessionSubject = "";
+  state.sessionCapabilities = [];
+  $("#session-state").textContent = "Not connected. Session credentials stay in memory and are never written to browser storage.";
+  $("#session-connect").disabled = false;
+  $("#session-disconnect").disabled = true;
+}
+
+async function connectWalletSession() {
+  const gateway = window.ReeferReviewWalletSession;
+  if (!gateway || typeof gateway.requestSession !== "function") {
+    setStatus("A qualified 420 Wallet authentication gateway is not available in this deployment.", true);
+    return;
+  }
+  try {
+    const session = await gateway.requestSession({
+      audience: "420/service/reefer-review/v1",
+      capabilities: ["reefer.author", "reefer.publisher", "reefer.moderator"],
+    });
+    const token = typeof session?.token === "string" ? session.token.trim() : "";
+    if (!token || /[\s,]/.test(token)) throw new Error("invalid session token");
+    state.sessionToken = token;
+    state.sessionSubject = typeof session?.subject === "string" ? session.subject.trim() : "";
+    state.sessionCapabilities = Array.isArray(session?.capabilities) ? session.capabilities.filter((v)=>typeof v==="string") : [];
+    $("#session-state").textContent = state.sessionSubject
+      ? `Connected as ${state.sessionSubject}. Session is memory-only.`
+      : "Verified Wallet session connected. Session is memory-only.";
+    $("#session-connect").disabled = true;
+    $("#session-disconnect").disabled = false;
+    setStatus("Verified ReeferReview session connected.");
+    if (state.route === "editorial" || state.route === "moderation" || state.route === "article") refreshRoute();
+  } catch (error) {
+    clearSession();
+    setStatus(`Wallet session failed: ${error.message || "authentication unavailable"}`, true);
+  }
 }
 
 async function getJSON(path, options = {}) {
@@ -281,7 +321,7 @@ function editorialCard(item, moderation=false) {
 
 async function loadEditorial({moderation=false,append=false}={}) {
   const container=moderation?$("#moderation-list"):$("#editorial-list");
-  if(!state.actor) {renderList(container,[],editorialCard,"Choose a repository-stage actor first.");return;}
+  if(!state.sessionSubject) {renderList(container,[],editorialCard,"Connect a verified Wallet session first.");return;}
   try {
     const params=new URLSearchParams({limit:"40"});
     if(append&&state.editorialCursor) params.set("cursor",state.editorialCursor);
@@ -377,11 +417,14 @@ function showRoute(route,id="") {
 }
 function refreshRoute(){const parsed=parseRoute();showRoute(parsed.route,parsed.id);}
 
-$("#session-actor").value=state.actor;
-$("#session-save").addEventListener("click",()=>{
-  state.actor=$("#session-actor").value.trim();
-  if(state.actor) sessionStorage.setItem("reefer-review-actor",state.actor); else sessionStorage.removeItem("reefer-review-actor");
-  setStatus(state.actor?`Using repository-stage actor ${state.actor}.`:"Actor cleared.");
+$("#session-connect").addEventListener("click", connectWalletSession);
+$("#session-disconnect").addEventListener("click", ()=>{
+  const gateway = window.ReeferReviewWalletSession;
+  if (gateway && typeof gateway.endSession === "function") {
+    try { gateway.endSession(); } catch {}
+  }
+  clearSession();
+  setStatus("Signed out.");
   if(state.route==="editorial"||state.route==="moderation"||state.route==="article") refreshRoute();
 });
 $("#source-filter").addEventListener("change",(e)=>{state.source=e.target.value;state.newsCursor="";refreshRoute();});
@@ -402,7 +445,7 @@ $("#search-form").addEventListener("submit",(e)=>{e.preventDefault();runSearch($
 
 $("#draft-form").addEventListener("submit",async(e)=>{
   e.preventDefault();
-  if(!state.actor){setStatus("Choose an editorial actor first.",true);return;}
+  if(!state.sessionSubject){setStatus("Connect a verified Wallet session first.",true);return;}
   try {
     const result=await getJSON("/v1/publications",{
       method:"POST",headers:authHeaders({"Content-Type":"application/json"}),
@@ -418,7 +461,7 @@ $("#draft-form").addEventListener("submit",async(e)=>{
 $("#edit-form").addEventListener("submit",async(e)=>{
   e.preventDefault();
   const id=$("#edit-id").value;
-  if(!state.actor||!id){setStatus("Choose an actor and select a publication to edit.",true);return;}
+  if(!state.sessionSubject||!id){setStatus("Connect a verified Wallet session and select a publication to edit.",true);return;}
   try {
     await getJSON(`/v1/publications/${encodeURIComponent(id)}`,{
       method:"PUT",headers:authHeaders({"Content-Type":"application/json"}),

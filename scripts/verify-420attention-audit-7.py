@@ -40,7 +40,7 @@ if privacy.is_file():
 http=need("attention/service/core/http.js")
 if http.is_file():
     s=http.read_text()
-    for route in ["/v1/attention/runtime","/v1/attention/campaigns","/v1/attention/accounts/","/v1/attention/proofs/","/v1/attention/rewards/","/v1/attention/prepare/"]:
+    for route in ["/v1/attention/runtime","/v1/attention/campaigns","attention\\/accounts\\/","attention\\/proofs\\/","attention\\/rewards\\/","attention\\/prepare\\/"]:
         if route not in s: errors.append("Attention API route missing "+route)
 web=need("attention/web/core/service.js")
 if web.is_file():

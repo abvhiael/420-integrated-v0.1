@@ -12,7 +12,8 @@ The simulation core is authoritative for ordinary game state. The current integr
 - `StoreProgression.ts` — BUD-4 canonical internal cash, upgrade and expansion progression;
 - `OfflineProgression.ts` — BUD-AUDIT-5 deterministic bounded offline calculation boundary;
 - `BudtenderApplicationService.ts` — BUD-AUDIT-6 application-facing command/snapshot boundary over the current domain services;
-- `clients/budtender-web-v1` — BUD-AUDIT-7 mobile-first responsive presentation client over the application service.
+- `clients/budtender-web-v1` — BUD-AUDIT-7 mobile-first responsive presentation client over the application service;
+- `clients/budtender-access-v1` — BUD-AUDIT-8 shared Gaming Protocol progressive-access boundary pinned to the canonical Budtender game namespace.
 
 `BudtenderStore` delegates inventory to `ProductInventory` and internal cash/upgrades to `StoreProgression`; it does not maintain a second independent economy.
 
@@ -61,6 +62,10 @@ BUD-AUDIT-6 adds `BudtenderApplicationService` as the presentation-facing bounda
 ## User-facing client
 
 BUD-AUDIT-7 adds `clients/budtender-web-v1`, a responsive touch-friendly browser client hosted by Node 22. The browser renders detached `BudtenderApplicationService` snapshots and sends sanctioned commands only; it does not become authoritative for cash, inventory, settlement, upgrades, or progression.
+
+## Gaming Protocol integration
+
+BUD-AUDIT-8 connects the user-facing host to the existing shared Gaming Protocol access policy. The integration is policy/status only at repository stage: guest core play remains wallet-free, registered/cloud-save policy remains wallet-optional, wallet-linked ecosystem features remain optional, and access evaluation cannot mutate game state. Live registry/operator/contract qualification remains deployment-pending under GP-15.
 
 ## Current release boundary
 

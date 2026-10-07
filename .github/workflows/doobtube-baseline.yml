@@ -8,6 +8,7 @@ on:
       - "scripts/verify-doobtube-baseline.py"
       - "scripts/verify-doobtube-level2.py"
       - "scripts/verify-doobtube-security.py"
+      - "scripts/verify-doobtube-docs.py"
       - "doobtube/**"
       - ".github/workflows/doobtube-baseline.yml"
       - ".github/workflows/doobtube-integration.yml"
@@ -53,7 +54,11 @@ jobs:
         run: go test ./media/security ./media/api
       - name: Qualify DoobTube web application
         run: npm --prefix doobtube/web run qualify
+      - name: Test DoobTube non-production deployment
+        run: python3 -m unittest -v doobtube.tests.test_doobtube_ops
       - name: Verify DoobTube security qualification
         run: python3 scripts/verify-doobtube-security.py
+      - name: Verify DoobTube documentation and operator closeout
+        run: python3 scripts/verify-doobtube-docs.py
       - name: Verify DoobTube audit baseline
         run: python3 scripts/verify-doobtube-baseline.py

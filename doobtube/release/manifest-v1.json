@@ -1,0 +1,35 @@
+{
+  "schema":"doobtube-release-manifest-v1",
+  "application":"DoobTube",
+  "release":"0.1.0-repository-candidate",
+  "source_sha":"MATERIALIZE_AT_RELEASE",
+  "production":false,
+  "testnet_ready":false,
+  "genesis_ready":false,
+  "production_ready":false,
+  "service_identity":{
+    "doobtube":null,
+    "canonical_media":"420/service/media/v1"
+  },
+  "contracts":[],
+  "reserved_addresses":[],
+  "web":{
+    "package":"@420integrated/doobtube-web",
+    "runtime_schema":"doobtube-web-runtime-v1",
+    "production_origin":null
+  },
+  "backend":{
+    "api_version":"v1",
+    "database_schema_version":2
+  },
+  "qualification":{
+    "level3_required":true,
+    "public_testnet_required":true,
+    "independent_release_security_review_or_exception_required":true
+  },
+  "limitations":[
+    "This repository manifest is not deployment evidence.",
+    "Source SHA must be materialized at final exact-head release qualification.",
+    "Live endpoints, TLS, Registry records, scanner, egress, monitoring and backup evidence are deferred."
+  ]
+}

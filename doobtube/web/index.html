@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>DoobTube</title>
+  <link rel="icon" href="./brand.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="shell topbar">
+  <a class="brand" href="#/home" aria-label="DoobTube home"><img src="./brand.svg" alt="" width="54" height="54"><div><h1>DoobTube</h1><div class="muted">420Integrated video</div></div></a>
+  <div class="actions"><span id="runtime-state" class="pill">Runtime unresolved</span><span id="wallet-state" class="pill">Wallet disconnected</span><button id="connect-wallet" type="button">Connect wallet</button></div>
+</header>
+<nav class="shell nav" aria-label="Primary">
+  <a href="#/home" data-route="home">Home</a><a href="#/search" data-route="search">Search</a><a href="#/library" data-route="library">Library</a>
+  <a href="#/upload" data-route="upload">Upload</a><a href="#/live" data-route="live">Live</a><a href="#/subscriptions" data-route="subscriptions">Subscriptions</a>
+  <a href="#/moderation" data-route="moderation">Report / appeal</a><a href="#/data" data-route="data">Data</a><a href="#/status" data-route="status">Status</a>
+</nav>
+<main id="main" class="shell">
+  <div id="global-status" class="status panel" role="status" aria-live="polite">Loading fail-closed runtime configuration…</div>
+
+  <section class="view panel" data-view="home" aria-labelledby="home-title"><h2 id="home-title">Public discovery</h2><p class="muted">Public viewing never requires a Wallet. Feed order is non-authoritative.</p><div id="feed-loading" class="status">Loading public feed…</div><div id="feed-error" class="status" role="alert" hidden></div><div id="feed-empty" class="empty" hidden>No eligible public video is available.</div><div id="feed-grid" class="grid"></div><button id="feed-more" type="button" hidden>Load more</button></section>
+
+  <section class="view panel" data-view="search" aria-labelledby="search-title"><h2 id="search-title">Search public video</h2><form id="search-form" class="form"><label class="wide">Search query<input id="search-query" name="q" maxlength="160" required></label><button class="primary" type="submit">Search</button></form><div id="search-state" class="status" role="status" aria-live="polite">Enter a search query.</div><div id="search-results" class="grid"></div></section>
+
+  <section class="view panel" data-view="watch" aria-labelledby="watch-title"><h2 id="watch-title">Media detail</h2><div class="detail"><video id="player" controls playsinline preload="metadata" aria-label="Video playback"></video><div><div class="kv"><span>Title</span><strong id="watch-name">—</strong></div><div class="kv"><span>Creator</span><a id="watch-creator" href="#/home">—</a></div><div class="kv"><span>State</span><span id="watch-state">—</span></div><div class="kv"><span>Visibility</span><span id="watch-visibility">—</span></div><div class="kv"><span>Provenance</span><span id="watch-provenance">—</span></div><div class="kv"><span>Playback</span><span id="playback-state">Unavailable</span></div><div class="actions"><button id="share-media" type="button">Share</button><a id="report-media" href="#/moderation">Report</a></div></div></div></section>
+
+  <section class="view panel" data-view="creator" aria-labelledby="creator-title"><h2 id="creator-title">Creator / channel</h2><p id="creator-name">Pseudonymous creator presentation</p><p class="muted">Channel grouping is presentation only; Wallet / optional Identity remain authoritative.</p><button id="creator-subscribe" type="button">Subscribe to creator updates</button><div id="creator-items" class="grid"></div></section>
+
+  <section class="view panel" data-view="library" aria-labelledby="library-title"><h2 id="library-title">Creator library</h2><div class="actions"><button id="refresh-library" type="button">Refresh</button><button id="library-more" type="button" hidden>Load more</button></div><div id="library-loading" class="status" hidden>Loading library…</div><div id="library-error" class="status" role="alert" hidden></div><div id="library-empty" class="empty" hidden>Your library is empty.</div><div id="library-grid" class="grid"></div></section>
+
+  <section class="view panel" data-view="upload" aria-labelledby="upload-title"><h2 id="upload-title">Upload video</h2><form id="upload-form" class="form"><label class="wide">Video file<input id="upload-file" name="file" type="file" accept="video/*" required></label><label>Visibility<select name="visibility"><option>PRIVATE</option><option>UNLISTED</option><option>PUBLIC</option></select></label><label>Storage agreement ID<input name="agreementId" maxlength="160" required></label><label>Capacity reservation ID<input name="capacityReservationId" maxlength="160" required></label><button id="prepare-upload" class="primary" type="submit">Prepare upload</button><button id="retry-upload" type="button" hidden>Retry safely</button></form><div id="upload-state" class="status" role="status" aria-live="polite">Idle.</div></section>
+
+  <section class="view panel" data-view="live" aria-labelledby="live-title"><h2 id="live-title">Livestream create / control</h2><form id="live-form" class="form"><label>Session ID<input name="id" maxlength="96" required></label><label>Stream reference<input name="streamRef" maxlength="160" required></label><label>Protocol<select name="protocol"><option value="whip">WHIP</option><option value="whep">WHEP</option><option value="rtmp">RTMP</option><option value="srt">SRT</option></select></label><label>Direction<select name="direction"><option value="ingress">Ingress</option><option value="egress">Egress</option></select></label><label class="wide">Endpoint<input name="endpoint" type="url" required></label><label class="wide">Opaque credential reference<input name="credentialRef" maxlength="256" required></label><label>Max duration seconds<input name="maxDuration" type="number" min="1" max="86400" value="3600" required></label><button class="primary" type="submit">Create session</button></form><div class="actions"><button id="live-refresh" type="button">Refresh canonical status</button><button id="live-start" type="button">Start</button><button id="live-stop" type="button">Stop</button></div><div id="live-state" class="status" role="status" aria-live="polite">No session selected.</div></section>
+
+  <section class="view panel" data-view="subscriptions" aria-labelledby="subs-title"><h2 id="subs-title">Subscriptions & preferences</h2><p>Creator-update subscriptions are opt-in, reversible, non-paid and separate from promotional consent.</p><form id="preferences-form" class="form"><label><input id="pref-autoplay" type="checkbox"> Autoplay preference</label><label><input id="pref-reduced" type="checkbox"> Reduced motion preference</label><button type="submit">Save preferences</button></form><div id="subscriptions-state" class="status" role="status" aria-live="polite">No subscription action pending.</div></section>
+
+  <section class="view panel" data-view="moderation" aria-labelledby="mod-title"><h2 id="mod-title">Report / appeal</h2><form id="report-form" class="form"><label>Target media ID<input name="targetId" maxlength="160" required></label><label>Reason<input name="reason" maxlength="500" required></label><label class="wide">Optional evidence reference<input name="evidenceRef" maxlength="512"></label><button type="submit">Submit report</button></form><form id="appeal-form" class="form"><label>Decision ID<input name="decisionId" maxlength="160" required></label><label>Reason<input name="reason" maxlength="500" required></label><button type="submit">Submit appeal</button></form><div id="moderation-state" class="status" role="status" aria-live="polite">Submitting a report never itself deletes or transfers media.</div></section>
+
+  <section class="view panel" data-view="data" aria-labelledby="data-title"><h2 id="data-title">Data export / deletion</h2><p class="danger-note">The currently qualified Media API exposes no delete/export endpoint. DoobTube will not fabricate irreversible deletion, raw Storage access, or export authority.</p><div class="actions"><button id="export-data" type="button" disabled>Export unavailable</button><button id="delete-media" type="button" disabled>Delete unavailable</button></div><p>Immutable protocol commitments or audit history may remain even when a future owning-service deletion is supported.</p></section>
+
+  <section class="view panel" data-view="status" aria-labelledby="status-title"><h2 id="status-title">Wallet / network / service status</h2><div id="status-grid" class="grid"></div><p class="muted">DoobTube never accepts private keys, seed phrases or mnemonics.</p></section>
+</main>
+<footer class="shell muted">DoobTube is a replaceable client over canonical 420Integrated services.</footer>
+<script type="module" src="./app.js"></script>
+</body></html>

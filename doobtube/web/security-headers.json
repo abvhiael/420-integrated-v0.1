@@ -1,0 +1,10 @@
+{
+  "schema":"doobtube-web-security-headers-v1",
+  "headers":{
+    "X-Content-Type-Options":"nosniff",
+    "Referrer-Policy":"no-referrer",
+    "X-Frame-Options":"DENY",
+    "Permissions-Policy":"camera=(), microphone=(self), geolocation=()",
+    "Content-Security-Policy":"default-src 'self'; connect-src 'self' https:; media-src 'self' https: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; form-action 'self'"
+  }
+}

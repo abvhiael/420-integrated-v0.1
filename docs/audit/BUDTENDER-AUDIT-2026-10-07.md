@@ -79,8 +79,8 @@ The audit branch:
 | Customer system | `src/budtender/BudtenderCustomers.ts` | COMPLETE | Deterministic tick lifecycle |
 | Product/inventory | `src/budtender/ProductInventory.ts` | COMPLETE | Canonical BUD-3 inventory/economics |
 | Progression | `src/budtender/StoreProgression.ts` | COMPLETE | Canonical BUD-4 cash/upgrade/expansion state |
-| Offline progression | `src/budtender/OfflineProgression.ts` | IMPLEMENTED | 24-hour bounded, replay-safe, chain-independent calculation; exact-head Level 1 qualification pending |
-| BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | IMPLEMENTED | Audit-phase requirements and invariants frozen; qualification pending |
+| Offline progression | `src/budtender/OfflineProgression.ts` | COMPLETE | 24-hour bounded, replay-safe, chain-independent calculation; exact-head Level 1 qualified |
+| BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | COMPLETE | Audit-phase requirements frozen and Level 1 exact-head qualification recorded |
 | Core unit tests | `test/budtender/*.spec.ts` | COMPLETE | Includes negative/boundary and cross-phase integration tests |
 | Gaming access client | `clients/budtender-access-v1` | COMPLETE | Shared SDK consumer; no parallel wallet authority |
 | Dedicated CI | `.github/workflows/budtender-gaming.yml` | COMPLETE | Exact-head core/access/contract-security qualification |
@@ -151,7 +151,7 @@ Live Gaming Protocol operator/contract bindings are not deployed/qualified in th
 | BUD-ARCH-005 cross-game entitlement/reference only | BUD-0 | shared SDK/protocol boundary | shared cross-game tests | GP-12/GP-14 | COMPLETE | Live runtime qualification |
 | BUD-ARCH-006 registered cloud save without wallet | BUD-0 | Access policy permits registered/no-wallet | access tests | BUD-0/GP-12 | PARTIAL | Implement cloud-save persistence |
 | BUD-ARCH-007 wallet disconnect preserves progression | BUD-0 | Core independent of wallet | hostile access/shared tests | BUD-0/GP-16 | COMPLETE | Persistence-layer regression when added |
-| BUD-ARCH-008 bounded deterministic offline progression | BUD-0 / BUD-AUDIT-5 | `OfflineProgression` pure domain calculator; 24h bound; replay/rollback protections; current BUD-1..4 remain offline-inert | offline boundary/adversarial tests | BUD-0 / BUD-AUDIT-5 | IMPLEMENTED — QUALIFICATION PENDING | Exact-head Level 1 qualification; persistence must later own trusted cursor/source state before production exposure |
+| BUD-ARCH-008 bounded deterministic offline progression | BUD-0 / BUD-AUDIT-5 | `OfflineProgression` pure domain calculator; 24h bound; replay/rollback protections; current BUD-1..4 remain offline-inert | offline boundary/adversarial tests | BUD-0 / BUD-AUDIT-5 | COMPLETE | Qualified on implementation SHA `c619c3fecbbb17ae34303209b908e78844d48051`; persistence must later own trusted cursor/source state before production exposure |
 | BUD-ARCH-009 UI not authoritative | BUD-0 | Domain core separated; no UI exists | source inspection | BUD-0 | COMPLETE | Preserve when client is implemented |
 | BUD-ARCH-010 versioned/migration-aware saves | BUD-0 | No save format/migration | none | BUD-0 | MISSING | Implement before production |
 | BUD-INV-001 no negative inventory | BUD-1 | ProductInventory bounds | BUD-1/BUD-3 tests | BUD-1 | COMPLETE | None |
@@ -200,7 +200,7 @@ The correct repository-grounded interpretation is:
 
 - BUD-0 architecture: complete.
 - BUD-1..BUD-4 deterministic simulation slice: implemented and remediated.
-- BUD-AUDIT-5 offline progression boundary: implemented; exact-head Level 1 qualification is pending.
+- BUD-AUDIT-5 offline progression boundary: complete and exact-head Level 1 qualified on `c619c3fecbbb17ae34303209b908e78844d48051`.
 - Shared Gaming Protocol source integration: implemented.
 - Live Gaming Protocol deployment: pending.
 - Full user-facing Budtender product: not implemented.

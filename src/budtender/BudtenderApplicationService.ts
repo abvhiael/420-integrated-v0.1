@@ -36,11 +36,11 @@ export interface BudtenderApplicationSnapshot {
 }
 
 export class BudtenderApplicationService {
-  private readonly store = new BudtenderStore();
-  private readonly customers = new BudtenderCustomerSystem(this.store);
+  readonly #store = new BudtenderStore();
+  readonly #customers = new BudtenderCustomerSystem(this.#store);
 
   arriveCustomer(command: CustomerArrivalCommand): void {
-    this.customers.addCustomer(
+    this.#customers.addCustomer(
       command.id,
       command.product,
       command.archetype,
@@ -49,29 +49,29 @@ export class BudtenderApplicationService {
   }
 
   tickCustomers(): void {
-    this.customers.tick();
+    this.#customers.tick();
   }
 
   serveCustomer(customerId: string): number {
-    return this.customers.serveCustomer(customerId);
+    return this.#customers.serveCustomer(customerId);
   }
 
   restock(product: StarterProduct, units: number): void {
     // Application callers cannot inject a price. The store resolves the canonical
     // BUD-3 wholesale price internally.
-    this.store.restock(product, units);
+    this.#store.restock(product, units);
   }
 
   purchaseUpgrade(track: UpgradeTrack): void {
-    this.store.purchaseProgressionUpgrade(track);
+    this.#store.purchaseProgressionUpgrade(track);
   }
 
   unlockExpansion(stage: ExpansionStage): number {
-    return this.store.unlockExpansion(stage);
+    return this.#store.unlockExpansion(stage);
   }
 
   setDemandProfile(profile: DemandProfile): void {
-    this.customers.setDemandProfile(profile);
+    this.#customers.setDemandProfile(profile);
   }
 
   evaluateOfflineProgression(input: OfflineProgressionInput): OfflineProgressionResult {
@@ -82,9 +82,9 @@ export class BudtenderApplicationService {
 
   snapshot(): BudtenderApplicationSnapshot {
     return {
-      store: this.store.snapshot(),
-      customers: this.customers.snapshot(),
-      progression: this.store.progressionSnapshot(),
+      store: this.#store.snapshot(),
+      customers: this.#customers.snapshot(),
+      progression: this.#store.progressionSnapshot(),
     };
   }
 }

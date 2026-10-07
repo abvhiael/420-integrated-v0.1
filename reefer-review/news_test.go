@@ -227,3 +227,32 @@ func TestRR7OversizeFeedAndEntityPayloadFailClosed(t *testing.T) {
 		}
 	}
 }
+
+
+func TestRR7ParserEntryLimitAndSanitizedExcerpt(t *testing.T) {
+	var xml strings.Builder
+	xml.WriteString("<rss><channel>")
+	for i := 0; i < 501; i++ {
+		xml.WriteString("<item><title>Cannabis</title><link>https://example.test/a</link></item>")
+	}
+	xml.WriteString("</channel></rss>")
+	if _, err := ParseNewsFeed([]byte(xml.String())); !errors.Is(err, ErrInvalidInput) {
+		t.Fatalf("overpopulated RSS was accepted: %v", err)
+	}
+	decoded := cleanFeedText("&lt;img src=x onerror=alert(1)&gt; News &amp; updates")
+	if strings.Contains(decoded, "<") || strings.Contains(decoded, "onerror") || !strings.Contains(decoded, "News & updates") {
+		t.Fatalf("unsafe excerpt: %q", decoded)
+	}
+}
+
+func TestRR7SourceExcerptAndImageConsent(t *testing.T) {
+	source := testNewsSource()
+	source.AllowExcerpt = false
+	source.AllowImage = false
+	now := time.Now().UTC()
+	entry := RawNewsEntry{Title: "Cannabis policy", URL: "https://example.test/one", Summary: "<script>bad</script> Cannabis reform", ImageURL: "https://example.test/tracker.png"}
+	got, err := normalizeNewsEntry(source, entry, now)
+	if err != nil || got.Summary != "" || got.ImageURL != "" || got.Attribution != source.Attribution {
+		t.Fatalf("source copyright controls bypassed: item=%+v err=%v", got, err)
+	}
+}

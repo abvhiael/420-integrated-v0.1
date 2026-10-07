@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -31,7 +30,7 @@ func main() {
 	}
 	ingestor := reeferreview.NewsIngestor{
 		Store:   store,
-		Fetcher: reeferreview.FeedFetcher{HTTP: &http.Client{Timeout: 20 * time.Second}},
+		Fetcher: reeferreview.FeedFetcher{},
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()

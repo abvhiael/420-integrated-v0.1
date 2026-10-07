@@ -185,3 +185,45 @@ func TestNewsSourceRegistryRejectsInsecureFeed(t *testing.T) {
 }
 
 func ptrTime(t time.Time) *time.Time { return &t }
+
+
+func TestRR7RejectsUnsafeFeedEndpoints(t *testing.T) {
+	for _, raw := range []string{
+		"https://127.0.0.1/feed", "https://10.2.3.4/rss", "https://169.254.169.254/latest",
+		"https://[::1]/rss", "https://[fc00::1]/rss", "https://192.0.2.1/rss",
+		"https://localhost/rss", "https://metadata.local/rss", "https://user:pass@feeds.example.test/rss",
+	} {
+		if _, err := (&FeedFetcher{}).Fetch(context.Background(), NewsSource{FeedURL: raw}); !errors.Is(err, ErrInvalidInput) {
+			t.Errorf("unsafe endpoint %q: got %v", raw, err)
+		}
+	}
+}
+
+func TestRR7RedirectIsNotFollowed(t *testing.T) {
+	calls := 0
+	hc := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		calls++
+		return &http.Response{StatusCode: http.StatusFound, Header: http.Header{"Location": []string{"https://127.0.0.1/private"}}, Body: io.NopCloser(strings.NewReader("")), Request: r}, nil
+	})}
+	_, err := (FeedFetcher{HTTP: hc}).Fetch(context.Background(), testNewsSource())
+	if err == nil || calls != 1 {
+		t.Fatalf("redirect was accepted or followed: calls=%d err=%v", calls, err)
+	}
+}
+
+func TestRR7OversizeFeedAndEntityPayloadFailClosed(t *testing.T) {
+	hc := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(strings.Repeat("x", 65))), Request: r}, nil
+	})}
+	if _, err := (FeedFetcher{HTTP: hc, MaxBytes: 64}).Fetch(context.Background(), testNewsSource()); !errors.Is(err, ErrInvalidInput) {
+		t.Fatalf("oversized body accepted: %v", err)
+	}
+	for _, xml := range []string{
+		"<!DOCTYPE rss [<!ENTITY x SYSTEM \"file:///etc/passwd\">]><rss/>",
+		"<!ENTITY x \"danger\"><rss/>",
+	} {
+		if _, err := ParseNewsFeed([]byte(xml)); !errors.Is(err, ErrInvalidInput) {
+			t.Fatalf("XML declaration admitted: %v", err)
+		}
+	}
+}

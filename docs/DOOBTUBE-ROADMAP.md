@@ -69,6 +69,8 @@ Define canonical objects and ownership for:
 
 Explicitly decide whether existing 420Media/420Storage/420Compute surfaces are reused.
 
+**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition: `docs/DOOBTUBE-DATA-LIFECYCLE.md`. DoobTube reuses the qualified 420Media/420Storage/420 Compute Market lifecycle and freezes MediaAsset/Stream/Subscription ownership, complete Storage object identity, derivative/output semantics, playback locator authority, visibility/delete behavior, livestream recovery, rebuildable projection behavior, persistence classes, logical schemas, idempotency and recovery rules.
+
 **Exit:** schemas, lifecycle/state machines and idempotency/recovery rules are frozen.
 
 ## DOOBTUBE-4 — Contracts and protocol adapters

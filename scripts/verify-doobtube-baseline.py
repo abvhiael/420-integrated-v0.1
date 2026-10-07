@@ -801,7 +801,7 @@ for phrase in [
     "Canonical user surfaces",
     "Wallet connection",
     "loading/empty/error/pending/success states",
-    "retry/revalidation",
+    "Retry reuses",
     "Safe media rendering",
     "Accessibility",
     "Responsive behavior",

@@ -74,12 +74,12 @@ func TestModerationScope(t *testing.T) {
 	ctx := context.Background()
 	p, _ := s.CreateDraft(ctx, "writer.420", CreateDraftRequest{IdempotencyKey: "m", Title: "A", Body: "b", Visibility: VisibilityPublic})
 	p, _, _ = s.Publish(ctx, "writer.420", p.ID)
-	_, err := s.Moderate(ctx, "writer.420", p.ID, "HIDE")
+	_, _, err := s.Moderate(ctx, "writer.420", p.ID, "HIDE", "writer attempt")
 	if !errors.Is(err, ErrUnauthorized) {
 		t.Fatalf("want unauthorized")
 	}
-	hidden, err := s.Moderate(ctx, "moderator.420", p.ID, "HIDE")
-	if err != nil || hidden.Status != StatusHidden {
+	hidden, event, err := s.Moderate(ctx, "moderator.420", p.ID, "HIDE", "policy")
+	if err != nil || hidden.Status != StatusHidden || event.Reason != "policy" {
 		t.Fatalf("hide failed")
 	}
 }

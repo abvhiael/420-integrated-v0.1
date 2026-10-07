@@ -1686,6 +1686,26 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 **Exit criteria:** canonical backend/API transport exists; every PB-11/PB-12 endpoint is explicitly routed; transport/session/body/replay/rate-limit/audit/error/stale-generation controls fail closed; retained web/mobile clients and complete PuffBuddies regressions pass; PB-0/PB-13 authority verifiers remain green; durable exact-SHA evidence is recorded; live deployment and Level-3 remain deferred.
 
 
+
+### PB-15 — Qualification — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-15-QUALIFICATION.md` (evidence commit `31807f090da6d93659513341bc641642232c9be5`).
+
+**Purpose:** freeze and qualify the complete accumulated repository-side PuffBuddies application through PB-14 as the final app-specific qualification milestone before the separate PB-16 security/privacy audit and later comprehensive app-phase closeout.
+
+**Canonical requirements:** retain all PB-0 through PB-14 authority/privacy/lifecycle/consent/deletion behavior; compile all PuffBuddies packages; run the complete retained Python suite once; run retained PB-11 web and PB-12 mobile tests/builds; verify PB-0, PB-13 and PB-14 invariants; verify distinct Genesis-service, Registry, 420Pay and 420Messenger compatibility; reconcile durable roadmap/qualification evidence; preserve migration/recovery/adversarial/security coverage; reject contracts/fixed addresses/service-ID invention/live deployment/secrets/public private-state enumeration/force-authority surfaces; record unresolved risks honestly; bind all required PB-15 evidence to one exact implementation SHA.
+
+**Affected components:** PB-15 qualification definition/verifier/workflow, current roadmap/master mapping and durable evidence. PB-15 adds qualification ownership only and no new application authority or product runtime.
+
+**Qualification:** Level 1 exact-head PB-15 qualification reconciliation **plus Level 2 milestone E — final retained app-specific release-candidate qualification** across PB-1 through PB-14.
+
+**Level-3 boundary:** final current-main reconciliation, canonical full Solidity inventory, Genesis address/namespace/predeploy/frozen-address/manifest authority, 420 Integrated/global, Docs/global, Geth/fault/soak and deployment/config closeout remain deferred to the complete app-phase Level-3 boundary.
+
+**Dependencies:** PB-0 architecture/qualification policy; PB-1/PB-2 accumulated foundations; **PB-3 through PB-14 COMPLETE**.
+
+**Exit criteria:** exact-head PB-15 workflow passes; complete retained PuffBuddies suite and both client builds pass; PB-0/PB-13/PB-14 and retained dependency compatibility verifiers pass; evidence/roadmap reconciliation passes; privacy/authority/deployment negative gates pass; Level-2 milestone E is recorded on the same exact SHA; no repository blocker remains for PB-15; PB-16 remains the next canonical step.
+
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:

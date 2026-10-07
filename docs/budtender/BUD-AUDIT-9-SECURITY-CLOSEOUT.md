@@ -1,6 +1,6 @@
 # BUD-AUDIT-9 — Security Closeout
 
-Status: IMPLEMENTED — Level 1 exact-head qualification pending
+Status: COMPLETE — Level 1 exact-head qualified
 
 ## Authority and scope
 
@@ -138,10 +138,10 @@ BUD-AUDIT-9 is COMPLETE only when:
 4. loopback default binding is retained;
 5. static verifier passes;
 6. existing economy, replay, offline, application-service, and Gaming security regressions remain green;
-7. exact-head Budtender Qualification passes on the implementation SHA;
+7. exact-head Budtender Qualification passes on the implementation SHA (satisfied by `24cd08e9fa759c7702fca8538d4596c25e5078a9`, run `37689407077`);
 8. no unresolved critical/high repository-stage Budtender security finding remains;
 9. live/testnet/deployment limitations are explicitly documented rather than represented as complete;
-10. durable evidence records implementation SHA, evidence SHA, base/current main, CI run/job results, deferred checks, limitations, blockers, and next roadmap step.
+10. durable evidence records implementation SHA, evidence SHA, base/current main, CI run/job results, deferred checks, limitations, blockers, and next roadmap step (recorded in `docs/audit/BUD-AUDIT-9-EVIDENCE-2026-10-07.md`).
 
 ## Known limitations
 

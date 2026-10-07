@@ -1,0 +1,66 @@
+name: PuffBuddies PB-16 Security Privacy Audit
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb16.py"
+      - ".github/workflows/puffbuddies-pb16.yml"
+  push:
+    branches: ["puffbuddies-pb16-security-privacy-audit-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - "scripts/verify-puffbuddies-pb16.py"
+      - ".github/workflows/puffbuddies-pb16.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb16:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile PuffBuddies
+        run: python3 -m compileall -q puffbuddies
+      - name: PB-16 focused security privacy audit tests
+        run: python3 -m unittest puffbuddies.tests.test_pb_16_security_privacy_audit -v
+      - name: Verify PB-16 audit contract
+        run: python3 scripts/verify-puffbuddies-pb16.py
+      - name: Complete retained PuffBuddies regressions
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Retained web tests and build
+        working-directory: puffbuddies/web
+        run: npm test && npm run build
+      - name: Retained mobile tests and build
+        working-directory: puffbuddies/mobile
+        run: npm test && npm run build
+      - name: Verify PB-0 canonical authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Verify PB-13 cross-app boundary
+        run: python3 scripts/verify-puffbuddies-pb13.py
+      - name: Verify PB-14 API hardening
+        run: python3 scripts/verify-puffbuddies-pb14.py
+      - name: Verify PB-15 accumulated qualification
+        run: python3 scripts/verify-puffbuddies-pb15.py
+      - name: Security privacy deployment negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e contracts/src/puffbuddies
+          ! grep -RIE '(FORCE_MATCH|FORCE_UNBLOCK|ADMIN_MATCH|BLOCK_OVERRIDE|UNSUSPEND|UNBAN)' puffbuddies/api puffbuddies/integrations
+          ! grep -RIE "(private_key|mnemonic|seed_phrase|government_id|date_of_birth|production_secret|provider_secret)[[:space:]]*[:=][[:space:]]*[\"']" puffbuddies
+          ! grep -RIE '(public_member_search|public_match_graph|public_block_graph|public_safety_graph|public_moderation_graph)[[:space:]]*[:=]' puffbuddies
+          ! grep -RIE '"(deploymentStatus|distributionStatus)"[[:space:]]*:[[:space:]]*"(live|production|mainnet)"' puffbuddies

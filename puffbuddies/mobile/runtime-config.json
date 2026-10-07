@@ -1,0 +1,11 @@
+{
+  "appId":"puffbuddies",
+  "deploymentStatus":"repository-qualified-not-deployed",
+  "apiBase":null,
+  "apiPolicy":"injected-https-only",
+  "authorityMode":"server-revalidated",
+  "sessionStorage":"device-bound-secure-store",
+  "derivedCache":"memory-only",
+  "pushStatus":"not-live",
+  "distributionStatus":"not-store-qualified"
+}

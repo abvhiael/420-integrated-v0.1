@@ -1,0 +1,55 @@
+name: PuffBuddies PB-11 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb11.yml"
+  push:
+    branches: ["puffbuddies-pb11-web-application-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb11.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb11-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: PB-11 Level 1 web static checks
+        working-directory: puffbuddies/web
+        run: npm run check
+      - name: PB-11 Level 1 web tests
+        working-directory: puffbuddies/web
+        run: npm test
+      - name: PB-11 Level 1 static build
+        working-directory: puffbuddies/web
+        run: npm run build
+      - name: PB-11 Level 2 retained PuffBuddies integration
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Verify PB-0 web structure and authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Web privacy, cache, logging and authority negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIE '(localStorage|sessionStorage|indexedDB|document\.cookie)' puffbuddies/web/app.js puffbuddies/web/api-client.js puffbuddies/web/state.js
+          ! grep -RIE '(forceMatch|forceUnblock|adminMatch|blockOverride|wallet_balance|token_balance|desirability_score)' puffbuddies/web/app.js puffbuddies/web/api-client.js puffbuddies/web/state.js
+          ! grep -RIE '(console\.log|console\.debug|console\.info).*?(token|profile|message|location|safety|report)' puffbuddies/web/app.js puffbuddies/web/api-client.js puffbuddies/web/state.js
+          grep -q '"deploymentStatus":"repository-qualified-not-deployed"' puffbuddies/web/runtime-config.json
+          test ! -e contracts/src/puffbuddies

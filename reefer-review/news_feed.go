@@ -81,7 +81,6 @@ type atomCategory struct {
 	Term string `xml:"term,attr"`
 }
 
-
 func validateFeedEndpoint(u *url.URL) error {
 	if u == nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Fragment != "" {
 		return ErrInvalidInput
@@ -117,18 +116,24 @@ func publicFeedIP(ip netip.Addr) bool {
 func secureNewsHTTPClient() *http.Client {
 	dialer := &net.Dialer{Timeout: 5 * time.Second}
 	transport := &http.Transport{
-		Proxy: nil,
-		DisableKeepAlives: true,
-		TLSHandshakeTimeout: 5 * time.Second,
+		Proxy:                 nil,
+		DisableKeepAlives:     true,
+		TLSHandshakeTimeout:   5 * time.Second,
 		ResponseHeaderTimeout: 10 * time.Second,
 	}
 	transport.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
 		host, port, err := net.SplitHostPort(address)
-		if err != nil { return nil, ErrInvalidInput }
+		if err != nil {
+			return nil, ErrInvalidInput
+		}
 		ips, err := net.DefaultResolver.LookupNetIP(ctx, "ip", host)
-		if err != nil { return nil, err }
+		if err != nil {
+			return nil, err
+		}
 		for _, ip := range ips {
-			if !publicFeedIP(ip) { continue }
+			if !publicFeedIP(ip) {
+				continue
+			}
 			return dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), port))
 		}
 		return nil, fmt.Errorf("%w: no permitted public feed address", ErrInvalidInput)
@@ -155,7 +160,9 @@ func (f FeedFetcher) Fetch(ctx context.Context, source NewsSource) ([]RawNewsEnt
 	}
 	req.Header.Set("Accept", "application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9")
 	req.Header.Set("User-Agent", "420Integrated-ReeferReview/1.0")
-	if err := validateFeedEndpoint(req.URL); err != nil { return nil, err }
+	if err := validateFeedEndpoint(req.URL); err != nil {
+		return nil, err
+	}
 	// Never accept a feed redirect: even HTTPS redirects may cross the allowlist or DNS boundary.
 	client := *hc
 	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
@@ -193,7 +200,9 @@ func ParseNewsFeed(b []byte) ([]RawNewsEntry, error) {
 		if err := xml.Unmarshal(b, &doc); err != nil {
 			return nil, err
 		}
-		if len(doc.Channel.Items) > 500 { return nil, fmt.Errorf("%w: too many feed entries", ErrInvalidInput) }
+		if len(doc.Channel.Items) > 500 {
+			return nil, fmt.Errorf("%w: too many feed entries", ErrInvalidInput)
+		}
 		out := make([]RawNewsEntry, 0, len(doc.Channel.Items))
 		for _, item := range doc.Channel.Items {
 			author := strings.TrimSpace(item.Author)
@@ -220,7 +229,9 @@ func ParseNewsFeed(b []byte) ([]RawNewsEntry, error) {
 		if err := xml.Unmarshal(b, &doc); err != nil {
 			return nil, err
 		}
-		if len(doc.Entries) > 500 { return nil, fmt.Errorf("%w: too many feed entries", ErrInvalidInput) }
+		if len(doc.Entries) > 500 {
+			return nil, fmt.Errorf("%w: too many feed entries", ErrInvalidInput)
+		}
 		out := make([]RawNewsEntry, 0, len(doc.Entries))
 		for _, item := range doc.Entries {
 			link, image := "", ""

@@ -1,0 +1,13 @@
+{
+  "schema":"doobtube-web-runtime-v1",
+  "site":{"name":"DoobTube","productionOrigin":null},
+  "network":{"chainId":420,"network":"testnet"},
+  "services":{
+    "doobtube":{"baseUrl":"https://doobtube-api.example.invalid"},
+    "media":{"serviceId":"420/service/media/v1","baseUrl":"https://media.example.invalid"},
+    "search":{"serviceId":"420/service/search/v1","baseUrl":"https://search.example.invalid"},
+    "notifications":{"serviceId":"420/service/notifications/v1","baseUrl":"https://notifications.example.invalid"}
+  },
+  "features":{"feed":true,"search":true,"playback":true,"library":true,"upload":true,"livestreaming":true,"subscriptions":true,"moderation":true,"preferences":true,"delete":false,"export":false},
+  "execution":{"status":"DEPLOYMENT_MUST_MATERIALIZE_CANONICAL_VALUES","requireWalletChainMatch":true,"requireHTTPS":true}
+}

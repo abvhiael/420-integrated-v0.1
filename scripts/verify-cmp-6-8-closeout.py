@@ -10,12 +10,12 @@ FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 GENESIS=ROOT/".github/workflows/genesis-address-authority.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
 DOCS=ROOT/".github/workflows/docs-qualify.yml"
-COMPUTE=ROOT/".github/workflows/compute-market.yml"
+COMPUTE=ROOT/".github/workflows/compute-market.yml"\nHARDENING=ROOT/".github/workflows/contracts-hardening.yml"
 
 def fail(msg):
     raise SystemExit("CMP-6.8 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,DOCS,COMPUTE):
+for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,DOCS,COMPUTE,HARDENING):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
@@ -34,7 +34,7 @@ if d.get("level_2_milestones")!=[
     "CMP-6.7 — Transparent reward accounting",
 ]:
     fail("Level 2 milestone inventory drift")
-for key in ("solidity_full_inventory","genesis_address_authority","integrated_global","docs_global","retained_compute_market_suite","phase_config_verification","adversarial_invariant_security","deployment_config_verification"):
+for key in ("solidity_full_inventory","genesis_address_authority","integrated_global","docs_global","retained_compute_market_suite","phase_config_verification","adversarial_invariant_security","deployment_config_verification","contract_hardening_static_analysis"):
     if d.get("level_3_required",{}).get(key) is not True:
         fail(f"Level 3 owner missing {key}")
 if d.get("next_canonical_step")!="CMP-7 — SDK, API, CLI and indexer":
@@ -68,7 +68,7 @@ dw=DOCS.read_text()
 if "docs/**" not in dw:
     fail("Docs global ownership missing")
 
-cw=COMPUTE.read_text()
+hw=HARDENING.read_text()\nif "contracts/config/compute-market/cmp-6.8-phase-closeout.json" not in hw:\n    fail("Contract Hardening CMP-6.8 PR trigger missing")\nif "Slither high-severity gate" not in hw:\n    fail("Contract Hardening static-analysis gate missing")\n\ncw=COMPUTE.read_text()
 for i in range(1,9):
     token=f"verify-cmp-6-{i}-"
     if i==8:

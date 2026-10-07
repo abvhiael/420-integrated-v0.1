@@ -1618,6 +1618,127 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 
 **Exit criteria:** exact SETTLED evidence grants only approved bounded feature entitlements; non-settled/refunded/mismatched/stale evidence fails/revokes; policy/lifetime expiry revokes; private persistence has no payment/wallet linkage; lifecycle/block/consent/safety remain supreme; no purchased protected access exists; canonical Pay verifier passes unchanged; Level-1 targeted, retained PuffBuddies regressions and Level-2 payment-integration checks pass on one exact SHA; durable evidence recorded.
 
+### PB-11 — Web application — COMPLETE
+
+**Purpose:** implement the first complete user-facing PuffBuddies client as the canonical web-first MVP surface required by PB-0.2, while preserving the browser/client as presentation-only state.
+
+**Canonical requirements:** implement PB-MVP-001 through PB-MVP-015 across eligibility entry, profile editing/media, discovery, like/pass, current matches, matched Messenger entry, notifications, unmatch/block/report, visibility/lifecycle/deletion controls, PB-9 verification presentation and PB-10 premium availability; all protected actions delegate to same-origin PuffBuddies API authority; browser state is non-canonical, memory-only and generation-invalidated; stale/lower generations fail closed; protected authorization failures clear derived caches; session tokens remain memory-only; profile location is coarse only; media upload is bounded and server-authorized; safety/account-exit controls remain baseline/non-premium; verification/premium never create relationship/safety authority; UI must satisfy basic semantic/accessibility/responsive gates; runtime config must explicitly remain repository-qualified-not-deployed; no public member search, wallet/profile enumeration, public match/safety/reputation graph, exact location, client force-match/block-bypass path, production API binding or live deployment claim is introduced.
+
+**Affected components:** `puffbuddies/web/` presentation/runtime/test/build surface, PB-11 workflow, canonical definition/evidence and PB-0.19 scope reconciliation.
+
+**Qualification:** Level 1 exact-head web-client qualification **plus Level 2 app-focused web-MVP integration**, because PB-11 is the first user-facing convergence of PB-1 through PB-10. Level 2 remains app-specific.
+
+**Level-3 boundary:** repository-wide Solidity/Genesis/global/Docs/Geth/fault/soak/deployment qualification remains deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0.2 through PB-0.17 as applicable; PB-1 through **PB-10 — Payments and premium entitlements — COMPLETE**.
+
+**Exit criteria:** complete core web MVP surface exists; same-origin fail-closed client/API boundary works; cache revocation and memory-only session semantics pass; accessibility/privacy/static checks pass; web build passes; retained PuffBuddies regressions and Level-2 integration pass on one exact SHA; PB-0 structure/authority verification stays green; durable evidence is recorded; deployment/live API/testnet readiness remain explicitly deferred.
+
+### PB-12 — Mobile applications — COMPLETE
+
+**Purpose:** implement repository-side native PuffBuddies clients for iOS and Android after the qualified PB-11 web MVP, while preserving server/domain authority and all privacy, consent, safety, lifecycle, deletion, visibility and non-goal invariants.
+
+**Canonical requirements:** both native project/source trees must exist; both expose the PB-11-equivalent eligibility/profile/media/discovery/like-pass/matches/Messenger-entry/notifications/safety/settings/verification/premium surface; shared mobile state is presentation/cache only; API endpoints are injected HTTPS only; runtime config remains repository-qualified-not-deployed; derived cache is memory-only and invalidated on authority-generation advance/resume/protected denial/sign-out; iOS uses device-bound Keychain session storage; Android uses AndroidKeyStore AES-GCM with unlocked-device requirement; no wallet/private signing authority or raw provider credential is introduced; profile media is bounded to JPEG/PNG/WebP opaque device references; no precise-location permission; Android cleartext disabled; verified HTTPS app links only; push registration is opaque/non-authoritative; baseline safety/account-exit is non-premium; premium/verification remain bounded presentation/feature availability; no client force-match/unblock/admin-consent path; bundle/application identifiers are stable; generated artifacts are non-canonical; no signed device/store/live API/push/distribution claim is made.
+
+**Affected components:** `puffbuddies/mobile/`, PB-0.17 structural authorization, PB-12 workflow, current roadmap/master reconciliation and durable evidence.
+
+**Qualification:** Level 1 exact-head mobile qualification **plus Level 2 PB-11/PB-12 client-parity integration milestone**. Level 2 runs PB-12 mobile qualification, retained PB-11 web qualification, complete retained PuffBuddies Python regressions and PB-0 structure/authority verification on the same SHA.
+
+**Level-3 boundary:** full Solidity/Genesis/global/Docs/Geth/fault/soak/deployment qualification remains deferred to complete app-phase closeout and later live release phases.
+
+**Dependencies:** PB-0.2 through PB-0.17 as applicable; PB-1 through **PB-11 — Web application — COMPLETE**.
+
+**Exit criteria:** iOS/Android project/source checks pass; shared mobile behavior/security tests pass; device-bound session/stale-state/resume/privacy gates pass; repository mobile bundle build passes; retained PB-11 web qualification and complete PuffBuddies regressions pass on the same SHA; PB-0 owner stays green; exact-SHA evidence is recorded; device/store/live API/push/distribution gates remain explicitly deferred.
+
+### PB-13 — 420Integrated cross-app integration — COMPLETE
+
+**Purpose:** harden the accumulated PuffBuddies dependency surface across approved 420Integrated services without transferring PuffBuddies profile, eligibility-decision, relationship, consent, safety, lifecycle, deletion, visibility or premium/private-access authority.
+
+**Canonical requirements:** cover Wallet, Identity, Names, Messenger, Notifications, Pay, Registry, AppStore, Analytics, Indexer, Explorer, Search and Verify; Registry-backed dependencies must match exact ServiceIds420 IDs and current active/non-deprecated/right-chain/fresh state; Indexer remains derived infrastructure without fabricated service identity; dependency capabilities are allowlisted; every protected PuffBuddies decision remains PuffBuddies-owned; AppStore cannot rewrite Registry identity/version/active state; Analytics accepts privacy-safe aggregates only; Indexer/Explorer/Search remain fresh/right-chain/non-canonical; Verify remains deployment/source-build evidence only; authority inheritance and dependency conflict fail closed; dependency failure/staleness cannot broaden access; existing PB-2/PB-6/PB-7/PB-9/PB-10 narrow integrations remain intact; no PuffBuddies service ID, contract, fixed address, provider credential, production endpoint, deployment or live-wiring claim is introduced.
+
+**Affected components:** `puffbuddies/integrations/ecosystem.py`, PB-13 targeted/retained integration tests, PB-13 workflow, canonical definition/evidence and PB-0.19 scope reconciliation.
+
+**Qualification:** Level 1 exact-head dependency/interface/privacy/failure qualification **plus Level 2 milestone D — complete retained PuffBuddies integration suite**, as explicitly defined by the legacy bounded-ecosystem-hardening roadmap.
+
+**Level-3 boundary:** canonical full Solidity/Genesis/420 Integrated/Docs/Geth/fault/soak/deployment closeout remains deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.7, PB-0.8, PB-0.9, PB-0.16; PB-2, PB-6, PB-7, PB-9, PB-10; **PB-12 — Mobile applications — COMPLETE**.
+
+**Exit criteria:** exact dependency inventory and canonical service-ID bindings exist; stale/inactive/deprecated/wrong-chain inputs fail closed; authority inheritance/conflicts fail closed; Registry/AppStore/Analytics/derived/Verify boundaries pass; applicable repository verifiers pass; complete retained PuffBuddies suite passes on one exact SHA; durable evidence is recorded; Level-3/live deployment remains deferred.
+
+
+### PB-14 — Backend/API hardening — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-14-QUALIFICATION.md` (evidence commit `48dc44c5b53948f277f586b78706b9b53e7fab0c`).
+
+**Purpose:** materialize and harden the authenticated PuffBuddies API/edge transport reserved by PB-0.17 and consumed by PB-11/PB-12, while preserving canonical application/domain authority and privacy boundaries.
+
+**Canonical requirements:** implement the explicit `/api/puffbuddies/v1` route contract for all qualified client surfaces; enforce HTTPS/allowed-host/origin policy, bounded Bearer sessions with expiry/revocation, strict method/path allowlisting, no-store/security headers, bounded content types/body sizes, duplicate-key JSON rejection, Content-Length consistency, mutation idempotency/replay protection, route/session rate limiting, bounded request correlation, privacy-safe audit metadata, generic error mapping, stale authority-generation rejection, and fail-closed dependency behavior; retain PB-11/PB-12 client compatibility and PB-13 authority boundaries; no public member/relationship/safety enumeration, admin force-authority route, contract/address/service-ID invention, production hostname/credential/deployment or live endpoint claim is introduced.
+
+**Affected components:** `puffbuddies/api/`, PB-11/PB-12 API clients for mutation idempotency, PB-14 targeted/regression tests, verifier/workflow, canonical definition/evidence and PB-0.19 reconciliation.
+
+**Qualification:** Level 1 exact-head app-scoped backend/API hardening qualification. PB-13 already completed Level-2 milestone D; PB-14 does not create another shared authority owner and therefore does not trigger a redundant Level-2 milestone.
+
+**Level-3 boundary:** current-main reconciliation, full Solidity inventory, Genesis/address-authority, 420 Integrated/global, Docs/global, Geth/fault/soak and deployment/config qualification remain deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0.3, PB-0.4, PB-0.5, PB-0.7, PB-0.8, PB-0.9, PB-0.11, PB-0.12, PB-0.15, PB-0.17; PB-1 through **PB-13 — 420Integrated cross-app integration — COMPLETE**.
+
+**Exit criteria:** canonical backend/API transport exists; every PB-11/PB-12 endpoint is explicitly routed; transport/session/body/replay/rate-limit/audit/error/stale-generation controls fail closed; retained web/mobile clients and complete PuffBuddies regressions pass; PB-0/PB-13 authority verifiers remain green; durable exact-SHA evidence is recorded; live deployment and Level-3 remain deferred.
+
+
+
+### PB-15 — Qualification — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-15-QUALIFICATION.md` (evidence commit `31807f090da6d93659513341bc641642232c9be5`).
+
+**Purpose:** freeze and qualify the complete accumulated repository-side PuffBuddies application through PB-14 as the final app-specific qualification milestone before the separate PB-16 security/privacy audit and later comprehensive app-phase closeout.
+
+**Canonical requirements:** retain all PB-0 through PB-14 authority/privacy/lifecycle/consent/deletion behavior; compile all PuffBuddies packages; run the complete retained Python suite once; run retained PB-11 web and PB-12 mobile tests/builds; verify PB-0, PB-13 and PB-14 invariants; verify distinct Genesis-service, Registry, 420Pay and 420Messenger compatibility; reconcile durable roadmap/qualification evidence; preserve migration/recovery/adversarial/security coverage; reject contracts/fixed addresses/service-ID invention/live deployment/secrets/public private-state enumeration/force-authority surfaces; record unresolved risks honestly; bind all required PB-15 evidence to one exact implementation SHA.
+
+**Affected components:** PB-15 qualification definition/verifier/workflow, current roadmap/master mapping and durable evidence. PB-15 adds qualification ownership only and no new application authority or product runtime.
+
+**Qualification:** Level 1 exact-head PB-15 qualification reconciliation **plus Level 2 milestone E — final retained app-specific release-candidate qualification** across PB-1 through PB-14.
+
+**Level-3 boundary:** final current-main reconciliation, canonical full Solidity inventory, Genesis address/namespace/predeploy/frozen-address/manifest authority, 420 Integrated/global, Docs/global, Geth/fault/soak and deployment/config closeout remain deferred to the complete app-phase Level-3 boundary.
+
+**Dependencies:** PB-0 architecture/qualification policy; PB-1/PB-2 accumulated foundations; **PB-3 through PB-14 COMPLETE**.
+
+**Exit criteria:** exact-head PB-15 workflow passes; complete retained PuffBuddies suite and both client builds pass; PB-0/PB-13/PB-14 and retained dependency compatibility verifiers pass; evidence/roadmap reconciliation passes; privacy/authority/deployment negative gates pass; Level-2 milestone E is recorded on the same exact SHA; no repository blocker remains for PB-15; PB-16 remains the next canonical step.
+
+
+
+### PB-16 — Security/privacy audit — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-16-QUALIFICATION.md` (evidence commit `ad27be4a4211861432ffa420861d82aceabf919b`).
+
+**Purpose:** audit the accumulated repository-side PuffBuddies implementation through PB-15 against canonical privacy, consent, adult-eligibility, threat/trust, safety, data-lifecycle, visibility, state-ownership and non-goal invariants; remediate concrete findings; and record exact-SHA security/privacy evidence before closed testnet.
+
+**Canonical requirements:** review metadata leakage, public enumeration, location privacy, consent/block/messaging authority, eligibility, replay/stale state, moderation evidence, deletion/retention, dependency authority, payment non-consent, client/API trust, session/secret handling, rate/resource abuse, input/media validation, dangerous runtime execution and deployment-claim hygiene; remediate identified repository findings; run focused audit tests, complete retained PuffBuddies regressions, web/mobile builds and PB-0/PB-13/PB-14/PB-15 verifiers; reject secret/public-graph/force-authority/contract/live-deployment regressions; record residual live-environment risks honestly.
+
+**Audit finding:** PB16-F1 — PB-14 accepted client-controlled `X-Request-Id` into protected audit/response metadata. Remediation makes canonical request IDs server-generated only, preventing sensitive metadata injection and deliberate audit-correlation collisions.
+
+**Affected components:** PB-14 API request correlation, PB-16 audit tests/verifier/workflow, canonical definition/evidence and PB-0.19 reconciliation.
+
+**Qualification:** Level 1 exact-head app-scoped security/privacy audit. PB-15 already completed Level-2 milestone E; PB-16 does not create a redundant new Level-2 milestone.
+
+**Level-3 boundary:** final current-main reconciliation, canonical full Solidity inventory, Genesis address/namespace/predeploy/frozen-address/manifest authority, 420 Integrated/global, Docs/global, Geth/fault/soak and deployment/config closeout remain deferred to complete app-phase closeout.
+
+**Dependencies:** PB-0 security/privacy/consent/lifecycle authorities; **PB-1 through PB-15 COMPLETE**.
+
+**Exit criteria:** PB16-F1 is remediated; focused and retained security/privacy tests pass; complete app regressions and clients pass; PB-0/PB-13/PB-14/PB-15 verifiers pass; static privacy/security/deployment gates pass; durable exact-SHA evidence is recorded; no repository blocker remains for PB-16; PB-17 — Closed testnet is next.
+
+
+## Repository-to-testnet handoff
+
+Repository-side implementation, integration, qualification, and security/privacy audit work is complete through **PB-16**.
+
+All unfinished live-environment and release work for **PB-17 through PB-20** is now owned by:
+
+`docs/puffbuddies/PUFFBUDDIES-TESTNET-ROADMAP.md`
+
+PB-17 through PB-20 remain canonical phase names and are **not COMPLETE**. Moving them to the testnet roadmap changes work ownership/location only; it does not claim deployed testnet, mainnet, production, or launch readiness.
+
+
 ## Post-PB-0 phase names
 
 The currently reserved phase sequence is:
@@ -1638,9 +1759,9 @@ The currently reserved phase sequence is:
 - PB-14 — Backend/API hardening
 - PB-15 — Qualification
 - PB-16 — Security/privacy audit
-- PB-17 — Closed testnet
-- PB-18 — Public testnet
-- PB-19 — Mainnet
-- PB-20 — Public launch
+- PB-17 — Closed testnet — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
+- PB-18 — Public testnet — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
+- PB-19 — Mainnet — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
+- PB-20 — Public launch — moved to `PUFFBUDDIES-TESTNET-ROADMAP.md`
 
 These phase names reserve roadmap order only; they do not assert implementation or readiness.

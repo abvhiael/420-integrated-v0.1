@@ -81,6 +81,27 @@ Launch readiness includes privacy/safety/deletion operations, incident response,
 A roadmap change must identify affected PB-0 invariants, authority changes, privacy/consent/lifecycle/deletion/security consequences, migration compatibility, test impact, and qualification impact.
 
 ## Current phase-number authority
+### Post-PB-16 live-work ownership
+
+Repository-side PuffBuddies implementation/audit work is complete through PB-16. Current **PB-17 Closed testnet, PB-18 Public testnet, PB-19 Mainnet, and PB-20 Public launch** remain canonical, but their unfinished deployed/live/operational work is now tracked in `docs/puffbuddies/PUFFBUDDIES-TESTNET-ROADMAP.md`. This handoff does not mark those phases complete and does not weaken their external/testnet prerequisites or Level-3 release-closeout requirements.
+
+### Current PB-16 security/privacy-audit scope
+
+Current **PB-16 — Security/privacy audit** is the dedicated app-scoped security/privacy review after PB-15 milestone E. It audits the accumulated implementation against PB-0 privacy, consent, threat/trust, safety, lifecycle, visibility and non-goal authorities, remediates concrete repository findings, and re-runs directly relevant retained app/client/authority gates. PB-16 is Level 1 audit qualification, not the comprehensive Level-3 repository closeout. Closed/public testnet remain PB-17/PB-18; final repository-wide reconciliation/qualification remains later closeout work.
+
+### Current PB-15 qualification scope
+
+Current **PB-15 — Qualification** promotes the app-specific release-candidate qualification portion of the legacy PB-0.19 release-candidate boundary. It freezes and qualifies accumulated PB-1 through PB-14 behavior through one exact-head retained PuffBuddies suite, web/mobile release builds, dependency compatibility verification, security/adversarial/static gates and durable evidence reconciliation. This is **Level 2 milestone E**, not the comprehensive repository-wide Level-3 closeout. Under the current phase-based audit policy, final reconciliation with then-current `main`, canonical full Solidity/Genesis/global/Docs/Geth/deployment qualification and monolithic merge-candidate evidence remain later Level-3 work after the required pre-closeout roadmap phases.
+
+### Current PB-14 backend/API-hardening scope
+
+Current **PB-14 — Backend/API hardening** materializes the reserved `puffbuddies/api/` transport boundary required by PB-0.17 and already consumed contractually by PB-11/PB-12. PB-14 owns authenticated HTTP/edge hardening, strict route/body/session/origin/replay/rate-limit/audit/error controls and stale-authority rejection, while canonical relationship, consent, eligibility-decision, lifecycle, visibility, deletion, safety and premium/private-access decisions remain owned by the existing PuffBuddies domain/application layer. PB-14 is repository-qualified transport implementation only; live endpoint deployment remains PB-17+ work.
+
+### Current PB-12 mobile-applications scope
+
+Current **PB-12 — Mobile applications** explicitly promotes the iOS and Android clients that PB-0.2 deferred behind the web-first MVP. PB-12 preserves the PB-11 client/domain authority model while adding only bounded native device capabilities: device-bound session storage, lifecycle resume/revalidation, media handoff, OS notification-registration handoff and verified app/universal links. Device/store signing, live push credentials, live API binding and distribution remain later external/release gates.
+
+
 ### Current PB-10 payments/premium scope
 
 Current **PB-10 — Payments and premium entitlements** promotes the premium/monetization work explicitly deferred by PB-0.2 while preserving PB-0.5/PB-0.7/PB-0.8/PB-0.9/PB-0.12/PB-0.16: canonical settlement remains 420Pay-owned, PuffBuddies owns only product feature entitlement, and no economic state can create or restore consent, bypass block/safety/lifecycle, buy protected private-person data, or become dating desirability/reputation. PB-10 implements the entitlement policy boundary; PB-11 later owns web-client mechanics.
@@ -144,11 +165,19 @@ Implement deletion workers, retention policy, cache/index/recommendation invalid
 **Required gates:** deletion propagation; restore/backfill/reindex adversarial tests; stale-state resurrection rejection; dependency-boundary tests; retention-purpose tests.
 **Level 2 milestone C:** accumulated lifecycle/safety/deletion integration.
 
+### Current PB-11 web-application mapping
+
+The legacy PB-0.19 **PB-7 — Web MVP and baseline user experience** scope is implemented by current **PB-11 — Web application**. Current PB-11 carries the complete web-first MVP client requirement, while current PB-14 remains the later backend/API-hardening owner and PB-17+ remain live-environment/release owners. This mapping changes numbering only and does not promote the legacy PB-11 launch-readiness meaning into current PB-11.
+
 ### PB-7 — Web MVP and baseline user experience
 Implement the web-first MVP across eligibility, account/profile, discovery, matching, matched messaging entry, notifications, safety controls, lifecycle controls, and deletion status. Baseline safety/account-exit capabilities remain non-premium.
 
 **PB-0 authorities:** all PB-0 product, privacy, consent, safety, lifecycle, matching, cannabis, visibility, and non-goal authorities.
 **Required gates:** build/lint/type; UI authorization boundaries; accessibility; end-to-end happy/negative paths; sensitive logging review; client cache revocation.
+
+### Current PB-13 cross-app integration mapping
+
+The legacy PB-0.19 **PB-8 — Bounded ecosystem integration hardening** scope is implemented by current **PB-13 — 420Integrated cross-app integration**. Current PB-13 retains the original dependency-contract/interface, stale/revoked capability, failure-injection, metadata/privacy and authority-conflict gates plus the documented **Level 2 milestone D** complete retained PuffBuddies integration suite. This is a numbering/scope reconciliation only and does not promote legacy testnet/release work into PB-13.
 
 ### PB-8 — Bounded ecosystem integration hardening
 Harden Wallet, Identity, Names, Messenger, Notifications, Pay where later approved, Registry/AppStore presentation, and derived Analytics/Search/Indexer/Explorer boundaries without transferring PuffBuddies authority.

@@ -1,0 +1,59 @@
+name: PuffBuddies PB-12 Qualification
+
+on:
+  pull_request:
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb12.yml"
+  push:
+    branches: ["puffbuddies-pb12-mobile-applications-20261006"]
+    paths:
+      - "puffbuddies/**"
+      - "docs/puffbuddies/**"
+      - ".github/workflows/puffbuddies-pb12.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pb12-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: PB-12 Level 1 mobile static checks
+        working-directory: puffbuddies/mobile
+        run: npm run check
+      - name: PB-12 Level 1 mobile tests
+        working-directory: puffbuddies/mobile
+        run: npm test
+      - name: PB-12 Level 1 repository mobile bundle build
+        working-directory: puffbuddies/mobile
+        run: npm run build
+      - name: PB-12 Level 2 retained PB-11 web qualification
+        working-directory: puffbuddies/web
+        run: npm run qualify
+      - name: PB-12 Level 2 retained PuffBuddies integration
+        run: python3 -m unittest discover -s puffbuddies/tests -p 'test_*.py' -v
+      - name: Verify PB-0 structure and authority
+        run: python3 scripts/verify-puffbuddies-pb0.py
+      - name: Mobile privacy, authority and secret negative gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RIE '(ACCESS_FINE_LOCATION|ACCESS_COARSE_LOCATION|NSLocationAlways|NSLocationWhenInUse)' puffbuddies/mobile/ios puffbuddies/mobile/android
+          ! grep -RIE '(privateKey|remoteSigner|signingService|FORCE_MATCH|FORCE_UNBLOCK|ADMIN_MATCH|BLOCK_OVERRIDE)' puffbuddies/mobile/core
+          ! find puffbuddies/mobile -type f \( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' -o -name '*.mobileprovision' -o -name '*.apk' -o -name '*.aab' -o -name '*.ipa' -o -name 'google-services.json' -o -name 'GoogleService-Info.plist' \) | grep .
+          grep -q '"deploymentStatus":"repository-qualified-not-deployed"' puffbuddies/mobile/runtime-config.json
+          grep -q '"apiBase":null' puffbuddies/mobile/runtime-config.json
+          test ! -e contracts/src/puffbuddies

@@ -43,21 +43,19 @@ jobs:
       - name: Run PB-0 documentation invariant mutation tests
         run: python3 scripts/test-puffbuddies-pb0-invariants.py
 
-      - name: Reject accidental PuffBuddies implementation in PB-0.1
+      - name: Reject implementation paths not yet authorized by current roadmap
         shell: bash
         run: |
           set -euo pipefail
           forbidden=(
             "contracts/src/puffbuddies"
             "contracts/src/apps/PuffBuddies"
-            "puffbuddies/api"
             "puffbuddies/matching"
             "puffbuddies/profile"
-            "puffbuddies/web"
           )
           for path in "${forbidden[@]}"; do
             if [ -e "$path" ]; then
-              echo "PB-0.1 unexpectedly introduced implementation path: $path" >&2
+              echo "PuffBuddies roadmap has not authorized implementation path: $path" >&2
               exit 1
             fi
           done

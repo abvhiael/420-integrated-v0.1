@@ -40,6 +40,7 @@ contract StorageSourceRegistry420 {
     mapping(uint256 => uint64) private _nextSourceId;
     mapping(uint256 => mapping(uint64 => StorageSource420)) private _sources;
     mapping(uint256 => uint64[]) private _sourceIds;
+    mapping(uint256 => uint64[]) private _currentSourceIds;
 
     event StorageSourceAdded(
         uint256 indexed recordingId,
@@ -78,7 +79,7 @@ contract StorageSourceRegistry420 {
         }
 
         uint256 rawId = RecordingId.unwrap(recordingId);
-        if (_sourceIds[rawId].length >= MAX_CURRENT_SOURCES) revert CreativeErrors420.InvalidState();
+        if (_currentSourceIds[rawId].length >= MAX_CURRENT_SOURCES) revert CreativeErrors420.InvalidState();
         sourceId = ++_nextSourceId[rawId];
         _sources[rawId][sourceId] = StorageSource420({
             providerKey: providerKey,
@@ -91,6 +92,7 @@ contract StorageSourceRegistry420 {
             state: SourceState.ACTIVE
         });
         _sourceIds[rawId].push(sourceId);
+        _currentSourceIds[rawId].push(sourceId);
 
         emit StorageSourceAdded(rawId, sourceId, providerKey, locatorHash, contentHash, integrityHash, priority);
     }
@@ -150,6 +152,7 @@ contract StorageSourceRegistry420 {
             priority: replacementPriority,
             state: SourceState.ACTIVE
         });
+        _sourceIds[rawId].push(replacementSourceId);
         _replaceCurrentSourceId(rawId, sourceId, replacementSourceId);
 
         source.state = SourceState.RETIRED;
@@ -175,12 +178,16 @@ contract StorageSourceRegistry420 {
         return _sourceIds[RecordingId.unwrap(recordingId)];
     }
 
+    function currentSourceIds(RecordingId recordingId) external view returns (uint64[] memory) {
+        return _currentSourceIds[RecordingId.unwrap(recordingId)];
+    }
+
     function bestAvailableSource(RecordingId recordingId)
         external
         view
         returns (uint64 sourceId, StorageSource420 memory source_)
     {
-        uint64[] storage ids = _sourceIds[RecordingId.unwrap(recordingId)];
+        uint64[] storage ids = _currentSourceIds[RecordingId.unwrap(recordingId)];
         bool found;
         uint32 bestPriority = type(uint32).max;
         for (uint256 i = 0; i < ids.length; ++i) {
@@ -196,7 +203,7 @@ contract StorageSourceRegistry420 {
     }
 
     function _replaceCurrentSourceId(uint256 rawId, uint64 oldSourceId, uint64 newSourceId) internal {
-        uint64[] storage ids = _sourceIds[rawId];
+        uint64[] storage ids = _currentSourceIds[rawId];
         for (uint256 i = 0; i < ids.length; ++i) {
             if (ids[i] == oldSourceId) {
                 ids[i] = newSourceId;

@@ -31,7 +31,10 @@
     "reject duplicate event keys, multiple hashes for one supplied block and out-of-order event batches",
     "support JSON-RPC eth_getLogs plus canonical block-header lookup through a decoder boundary",
     "reject removed RPC logs and log/header block-hash disagreement",
-    "retain public-testnet endpoint, deployment address and receipt evidence for HZ-AUDIT-7"
+    "retain public-testnet endpoint, deployment address and receipt evidence for HZ-AUDIT-7",
+    "apply canonical event batches atomically across the shared journal and all HZ projection families",
+    "allow idempotent replay to promote block finality without duplicating projection state",
+    "reject event-key replay when block/transaction/log provenance changes"
   ],
   "tests": [
     "creative-indexer/test/hz-indexer-reorg-rebuild.test.ts",
@@ -43,7 +46,9 @@
   ],
   "security_invariants": [
     "finalized indexed blocks are not rolled back",
-    "failed or invalid canonical batches mutate no projection state before validation",
+    "structural batch validation occurs before mutation and canonical multi-event batches commit atomically",
+    "per-event replay provenance must match the original block/transaction/log identity",
+    "idempotent replay may promote finality but must not duplicate projection state",
     "removed RPC logs are not accepted as canonical",
     "RPC log block hashes must match fetched canonical headers",
     "PostgreSQL remains rebuildable and non-authoritative",
@@ -75,7 +80,9 @@
     "reorg replacement and full rebuild digest tests pass",
     "finalized-fork and malformed-order negative tests pass",
     "RPC ordering/finality and removed/hash-mismatch tests pass",
-    "no live/testnet evidence is fabricated"
+    "no live/testnet evidence is fabricated",
+    "invalid multi-event batches roll back journal and derived projection state atomically",
+    "idempotent replay finality promotion passes without duplicate projection writes"
   ],
   "next_step": "HZ-AUDIT-7"
 }

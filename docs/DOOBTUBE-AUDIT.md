@@ -328,8 +328,8 @@ Readiness remains:
 | app security/abuse/moderation | COMPLETE |
 | consolidated docs/operator/deployment closeout | COMPLETE |
 | repository Level 3 exact-head closeout | COMPLETE DOOBTUBE-11 |
-| public-testnet qualification | PENDING DOOBTUBE-12 |
-| Genesis/production release | PENDING DOOBTUBE-13 |
+| public-testnet qualification | TRANSFERRED TO `docs/ROADMAP.md` — DOOBTUBE-12 |
+| Genesis/production release | TRANSFERRED TO `docs/ROADMAP.md` — DOOBTUBE-13 |
 
 ## 13. Qualification policy
 
@@ -347,13 +347,12 @@ Repository blockers remaining before app-phase closeout:
 
 **None. DOOBTUBE-11 repository Level 3 closeout is complete.**
 
-External/live blockers after repository closeout:
+External/live blockers after repository closeout are now canonically tracked in `docs/ROADMAP.md` under the DoobTube testnet/release handoff:
 
-3. approved public testnet and production-equivalent infrastructure;
-4. live service endpoints/TLS/Registry bindings;
-5. live scanner/provider/storage/CDN behavior;
-6. monitoring/backups/rollback/operator response;
-7. production/Genesis release approval and final security review/exception.
+1. DOOBTUBE-12 — approved public testnet and production-equivalent infrastructure, live endpoints/dependencies, end-to-end deployed workflows, live scanner/provider/storage behavior, recovery/reorg/failure drills, abuse/resource controls, observability/monitoring/backups/rollback and exact deployment lineage;
+2. DOOBTUBE-13 — final Genesis/production disposition, production endpoints/configuration, Registry publication where applicable, admin/deployer handoff, secrets/credentials, SLO/incident/recovery operations, security/release review and exact-release reconciliation.
+
+There is no remaining repository-only DoobTube implementation task before the live testnet gate.
 
 ## 15. Readiness state
 
@@ -374,6 +373,6 @@ External/live blockers after repository closeout:
 
 Exact reconciled implementation SHA `c71bc027d284fc9bbb7a68f2ac0e068aecd10cd7` passed the canonical Level 3 owner set. Durable run/job evidence is recorded in `docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md`.
 
-This does **not** claim public-testnet, Genesis, or production readiness. Those remain DOOBTUBE-12 and DOOBTUBE-13.
+This does **not** claim public-testnet, Genesis, or production readiness. All unfinished DOOBTUBE-12/13 live-environment work has been transferred to the canonical testnet/release roadmap in `docs/ROADMAP.md`.
 
 Historical pre-closeout state, retained for verifier/evidence continuity: **DOOBTUBE-0 through DOOBTUBE-10 are complete. Next: DOOBTUBE-11 — Repository Level 3 exact-head closeout.**

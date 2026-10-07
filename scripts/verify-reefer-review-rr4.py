@@ -35,13 +35,15 @@ for marker in [
 
 for marker in [
     'const prefix = "Bearer "', "Authorization", "sessionRequirements",
-    "actorFromContext", "WithSessionClaims", "SESSION_EXPIRED",
+    "actorFromContext", "withSessionClaims", "SESSION_EXPIRED",
     "SESSION_REVOKED", "CAPABILITY_DENIED",
 ]:
     req(marker in http,f"HTTP session boundary missing {marker}")
 
 req('Header.Get("X-420-Actor")' not in http, "HTTP still trusts X-420-Actor")
 req('"X-420-Actor"' not in client, "typed client still sends X-420-Actor")
+req("func WithSessionClaims" not in session and "func AuthenticatedSession" not in session,
+    "verified session context injection must not be exported")
 req("SessionTokenProvider" in client and '"Authorization", "Bearer "+token' in client,
     "typed client bearer session provider missing")
 

@@ -24,13 +24,13 @@ func rr4Claims(subject string, capabilities ...string) SessionClaims {
 	}
 	now := time.Now().UTC()
 	return SessionClaims{
-		SessionID:    "session-" + subject,
-		Subject:      subject,
-		Wallet:       "0x1111111111111111111111111111111111111111",
-		Audience:     ServiceID,
-		ChainID:      420,
-		Network:      "testnet",
-		IssuedAt:     now.Add(-time.Minute),
+		SessionID:      "session-" + subject,
+		Subject:        subject,
+		Wallet:         "0x1111111111111111111111111111111111111111",
+		Audience:       ServiceID,
+		ChainID:        420,
+		Network:        "testnet",
+		IssuedAt:       now.Add(-time.Minute),
 		ExpiresAt:      now.Add(time.Hour),
 		IdentityActive: true,
 		Capabilities:   caps,

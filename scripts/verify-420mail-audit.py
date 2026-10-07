@@ -296,7 +296,7 @@ if roadmap_path.is_file():
         if token not in phase2_roadmap: errors.append("MAIL-2.36 phase-closeout roadmap definition missing: "+token)
 if global_roadmap_path.is_file():
     global_roadmap=global_roadmap_path.read_text()
-    for token in ["420Mail — MAIL-AUDIT testnet handoff","MAIL-AUDIT-7 through MAIL-AUDIT-10","mail.external_smtp=false"]:
+    for token in ["420Mail — MAIL-2 / MAIL-AUDIT testnet handoff","MAIL-2.37 through MAIL-2.40","MAIL-AUDIT-7 through MAIL-AUDIT-10","mail.external_smtp=false"]:
         if token not in global_roadmap: errors.append("MAIL-2.36 global testnet handoff missing: "+token)
 if workflow_path.is_file():
     mail_workflow=workflow_path.read_text()

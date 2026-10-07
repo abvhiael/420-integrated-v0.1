@@ -120,6 +120,64 @@ func bodyDigest(body string) string {
 	return hex.EncodeToString(sum[:])
 }
 
+func (s Service) putBody(ctx context.Context, owner, digest string, body []byte) (string, error) {
+	if scoped, ok := s.Blobs.(OwnerScopedBlobStore); ok {
+		ref, err := scoped.PutForOwner(ctx, owner, digest, body)
+		if err != nil {
+			return "", err
+		}
+		if strings.TrimSpace(ref) == "" {
+			return "", ErrStorageIntegrity
+		}
+		return ref, nil
+	}
+	ref, err := s.Blobs.Put(ctx, digest, body)
+	if err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(ref) == "" {
+		return "", ErrStorageIntegrity
+	}
+	return ref, nil
+}
+
+func (s Service) getBody(ctx context.Context, p Publication) ([]byte, error) {
+	var (
+		body []byte
+		err error
+	)
+	if scoped, ok := s.Blobs.(OwnerScopedBlobStore); ok {
+		body, err = scoped.GetForOwner(ctx, p.Author, p.BodyRef)
+	} else {
+		body, err = s.Blobs.Get(ctx, p.BodyRef)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !strings.EqualFold(bodyDigest(string(body)), p.BodyDigest) {
+		return nil, ErrStorageIntegrity
+	}
+	return body, nil
+}
+
+func (s Service) assertRights(ctx context.Context, actor string, p Publication, digest string) (string, *RightsProvenance, error) {
+	if _, ok := s.Rights.(RightsProvenanceProvider); ok {
+		evidence, err := validateRightsProvenance(ctx, actor, p.ID, digest, s.Rights)
+		if err != nil {
+			return "", nil, err
+		}
+		return evidence.RightID, &evidence, nil
+	}
+	claim, err := s.Rights.Assert(ctx, actor, digest)
+	if err != nil {
+		return "", nil, err
+	}
+	if strings.TrimSpace(claim) == "" {
+		return "", nil, fmt.Errorf("rights assertion empty")
+	}
+	return claim, nil, nil
+}
+
 func (s Service) CreateDraft(ctx context.Context, actor string, req CreateDraftRequest) (Publication, error) {
 	if err := s.validate(); err != nil {
 		return Publication{}, err
@@ -157,7 +215,7 @@ func (s Service) CreateDraft(ctx context.Context, actor string, req CreateDraftR
 		}
 	}
 
-	ref, err := s.Blobs.Put(ctx, digest, []byte(req.Body))
+	ref, err := s.putBody(ctx, actor, digest, []byte(req.Body))
 	if err != nil {
 		return Publication{}, err
 	}
@@ -216,15 +274,13 @@ func (s Service) Publish(ctx context.Context, actor, id string) (Publication, []
 	if !ok {
 		return Publication{}, nil, ErrUnauthorized
 	}
-	claim, err := s.Rights.Assert(ctx, actor, p.BodyDigest)
+	claim, provenance, err := s.assertRights(ctx, actor, p, p.BodyDigest)
 	if err != nil {
 		return Publication{}, nil, err
 	}
-	if strings.TrimSpace(claim) == "" {
-		return Publication{}, nil, fmt.Errorf("rights assertion empty")
-	}
 	now := s.now()
 	p.RightsClaim = claim
+	p.RightsProvenance = provenance
 	p.Status = StatusPublished
 	p.PublishedAt = &now
 	p.UpdatedAt = now
@@ -236,6 +292,7 @@ func (s Service) Publish(ctx context.Context, actor, id string) (Publication, []
 		return Publication{}, nil, err
 	}
 	revision.RightsClaim = claim
+	revision.RightsProvenance = provenance
 	if err := s.Store.UpdateRevision(ctx, revision); err != nil {
 		return Publication{}, nil, err
 	}
@@ -287,7 +344,7 @@ func (s Service) Update(ctx context.Context, actor, id string, req UpdatePublica
 	}
 
 	digest := bodyDigest(req.Body)
-	ref, err := s.Blobs.Put(ctx, digest, []byte(req.Body))
+	ref, err := s.putBody(ctx, p.Author, digest, []byte(req.Body))
 	if err != nil {
 		return Publication{}, nil, err
 	}
@@ -297,14 +354,12 @@ func (s Service) Update(ctx context.Context, actor, id string, req UpdatePublica
 		BodyRef: ref, BodyDigest: digest, Visibility: req.Visibility, CreatedAt: now,
 	}
 	if p.Status == StatusPublished {
-		claim, e := s.Rights.Assert(ctx, actor, digest)
+		claim, provenance, e := s.assertRights(ctx, actor, p, digest)
 		if e != nil {
 			return Publication{}, nil, e
 		}
-		if strings.TrimSpace(claim) == "" {
-			return Publication{}, nil, fmt.Errorf("rights assertion empty")
-		}
 		revision.RightsClaim = claim
+		revision.RightsProvenance = provenance
 	}
 	revision, err = s.Store.AppendRevision(ctx, revision)
 	if err != nil {
@@ -318,6 +373,7 @@ func (s Service) Update(ctx context.Context, actor, id string, req UpdatePublica
 	p.BodyDigest = revision.BodyDigest
 	p.Visibility = revision.Visibility
 	p.RightsClaim = revision.RightsClaim
+	p.RightsProvenance = revision.RightsProvenance
 	p.CurrentRevisionID = revision.ID
 	p.Revision = revision.Number
 	p.UpdatedAt = now
@@ -441,35 +497,37 @@ func (s Service) Get(ctx context.Context, id string) (Publication, []byte, error
 	if err != nil {
 		return Publication{}, nil, err
 	}
-	b, err := s.Blobs.Get(ctx, p.BodyRef)
-	return p, b, err
+	body, err := s.getBody(ctx, p)
+	return p, body, err
 }
 
 func (s Service) GetPublic(ctx context.Context, id string) (Publication, []byte, error) {
-	p, body, err := s.Get(ctx, id)
+	p, err := s.Store.Get(ctx, id)
 	if err != nil {
 		return Publication{}, nil, err
 	}
 	if p.Status != StatusPublished || p.Visibility != VisibilityPublic {
 		return Publication{}, nil, ErrNotFound
 	}
-	return p, body, nil
+	body, err := s.getBody(ctx, p)
+	return p, body, err
 }
 
 func (s Service) GetForActor(ctx context.Context, actor, id string) (Publication, []byte, error) {
 	if err := s.validate(); err != nil {
 		return Publication{}, nil, err
 	}
-	p, body, err := s.Get(ctx, id)
+	p, err := s.Store.Get(ctx, id)
 	if err != nil {
 		return Publication{}, nil, err
 	}
 	actor = strings.TrimSpace(actor)
 	if actor == "" {
-		if p.Status == StatusPublished && (p.Visibility == VisibilityPublic || p.Visibility == VisibilityUnlisted) {
-			return p, body, nil
+		if p.Status != StatusPublished || (p.Visibility != VisibilityPublic && p.Visibility != VisibilityUnlisted) {
+			return Publication{}, nil, ErrNotFound
 		}
-		return Publication{}, nil, ErrNotFound
+		body, err := s.getBody(ctx, p)
+		return p, body, err
 	}
 	if _, err := s.requireActiveActor(ctx, actor); err != nil {
 		return Publication{}, nil, err
@@ -481,7 +539,8 @@ func (s Service) GetForActor(ctx context.Context, actor, id string) (Publication
 	if !ok {
 		return Publication{}, nil, ErrNotFound
 	}
-	return p, body, nil
+	body, err := s.getBody(ctx, p)
+	return p, body, err
 }
 
 func (s Service) List(ctx context.Context, offset, limit int) ([]Publication, int, error) {

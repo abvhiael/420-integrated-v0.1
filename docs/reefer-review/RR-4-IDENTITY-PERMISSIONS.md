@@ -20,6 +20,7 @@ A deployment-supplied trusted Wallet/420Identity session verifier is responsible
 - expected chain ID and network;
 - expiry;
 - revocation;
+- current 420Identity-active subject state as asserted by the trusted verifier;
 - bounded issue-time sanity;
 - required action capability;
 - publication ownership where author authority is used;
@@ -48,6 +49,7 @@ A verified session contains:
 - issued-at;
 - expires-at;
 - revocation state;
+- current Identity-active state;
 - scoped capabilities;
 - optional verifier-derived visibility grants.
 

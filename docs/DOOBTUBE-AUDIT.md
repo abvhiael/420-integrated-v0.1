@@ -117,11 +117,11 @@ DoobTube contract responsibility is now explicit: **no DoobTube-owned smart cont
 
 No DoobTube integration contract exists, and DOOBTUBE-0 intentionally creates none.
 
-Potentially relevant ecosystem dependencies cannot be promoted from "possible" to "required" until the architecture decision is adopted. In particular, the repository proves only that 420Media depends on Identity, Rights, Storage, Search, Notifications, Pay and Compute.
+DOOBTUBE-2 now freezes the V1 dependency graph in `docs/DOOBTUBE-DEPENDENCIES-TRUST.md`.
 
-For DoobTube, Registry, Identity, Names, Wallet, Pay, Token/native 420, Stake, Governance, Treasury, Bridge, AI, Compute, Notifications, Analytics, Verify, Rights, Arbitration, Storage, Oracle Interface Layer, Explorer/Indexer and any other dependency are currently **UNSPECIFIED**.
+Direct V1 dependencies are ProtocolRegistry, Wallet/Smart Account authority, 420Media, optional 420Identity, 420Rights, 420Storage/Resource, 420Search and 420Notifications. 420Pay and Compute Market remain transitive through 420Media. Names, Explorer, Analytics, Verify, Arbitration, AppStore, Governance, Treasury, Bridge, AI, Oracle, Stake, Token, Swap, Attention, Gaming and unrelated services are explicitly not adopted for V1.
 
-DoobTube receives no new protocol/service Registry identity at DOOBTUBE-0; Media discovery remains `420/service/media/v1`. Exact later dependency bindings, schemas, API contracts and projections remain DOOBTUBE-2 through DOOBTUBE-5 work.
+DoobTube receives no new protocol/service Registry identity; Media discovery remains `420/service/media/v1`. Exact adapter/API/schema implementation remains DOOBTUBE-3 through DOOBTUBE-7 work.
 
 ## 6. Application-layer audit
 
@@ -168,13 +168,14 @@ Present after this remediation:
 - `docs/DOOBTUBE-ARCHITECTURE.md`
 - `docs/DOOBTUBE-AUDIT.md`
 - `docs/DOOBTUBE-ROADMAP.md`
+- `docs/DOOBTUBE-PRODUCT-SCOPE.md`
+- `docs/DOOBTUBE-DEPENDENCIES-TRUST.md`
 
 Still required before a code-complete declaration:
 
-- complete component/dependency map;
 - API/interface/event documentation as applicable;
 - state machine;
-- authorization/security model;
+- implementation-level authorization/security model;
 - roles/permissions;
 - Registry identity/key;
 - deployed/reserved address policy;
@@ -185,7 +186,7 @@ Still required before a code-complete declaration:
 - integration guide;
 - user guide;
 - operator/admin guide;
-- threat model;
+- runtime/security closeout threat model;
 - known limitations;
 - release and qualification record.
 
@@ -292,13 +293,14 @@ No DoobTube runtime test suites exist. Only the new structural baseline verifier
 No source-level DoobTube vulnerability was identified because there is no DoobTube source surface. **SECURITY QUALIFIED remains NO**.
 
 ### Documentation
-Canonical name, architecture, audit, roadmap and V1 product/workflow scope are present. Developer, final user, operator, deployment and full security documentation remain later roadmap work.
+Canonical name, architecture, audit, roadmap, V1 product/workflow scope, and dependency/trust-boundary documentation are present. Developer, final user, operator, deployment and implementation/security closeout documentation remain later roadmap work.
 
 ### Integration
 DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. Direct dependencies are Registry, Wallet/Smart Account authority, 420Media, optional Identity, Rights, Storage/Resource, Search and Notifications; Pay/Compute remain transitive through Media. Runtime adapters are not yet implemented.
 
 ### Outstanding blockers
-3. **code** — all DoobTube runtime/application implementation;
+1. **data/lifecycle architecture** — DOOBTUBE-3 schemas, ownership, idempotency and recovery;
+2. **code** — all DoobTube runtime/application implementation;
 4. **code/tests** — requirement-mapped unit/integration/security qualification;
 5. **infrastructure** — deployment/runtime/service topology;
 6. **testnet** — public production-equivalent qualification after repository implementation;
@@ -312,7 +314,7 @@ DOOBTUBE-2 canonically defines the V1 dependency graph and trust boundaries. Dir
 - CONTRACT COMPLETE: **NO for app phase** — DOOBTUBE-0 decides no app-owned contract is currently required, but later requirements and integration qualification are not complete.
 - TEST COMPLETE: **NO** — no requirement-mapped DoobTube runtime tests exist.
 - DOCUMENTATION COMPLETE: **NO** — only baseline governance/audit documentation exists.
-- INTEGRATION COMPLETE: **NO** — the Media relationship is canonical, but DOOBTUBE-2 has not frozen the complete dependency graph or adapters.
+- INTEGRATION COMPLETE: **NO** — DOOBTUBE-2 freezes the dependency graph/trust model, but runtime adapters and end-to-end integration are not yet implemented.
 - SECURITY QUALIFIED: **NO** — no DoobTube threat model or implementation qualification exists.
 - TESTNET READY: **NO** — no deployable DoobTube release candidate exists.
 - GENESIS READY: **NO** — no Genesis catalog/service decision or deployment exists.

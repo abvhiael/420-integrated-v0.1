@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {validateAttentionRuntimeConfig,attentionRuntimeReadiness} from '../core/config.js';
+const config=JSON.parse(fs.readFileSync(new URL('../runtime-config.json',import.meta.url),'utf8'));
+test('committed runtime is safe, unresolved and mutation-disabled',()=>{validateAttentionRuntimeConfig(config);assert.equal(attentionRuntimeReadiness(config).ready,false);assert.equal(config.network.chainId,null);assert.equal(config.api.baseUrl,null);assert.equal(config.features.consentManagement,false);assert.equal(config.features.rewardClaims,false);assert.equal(config.features.sponsorCampaignManagement,false);});

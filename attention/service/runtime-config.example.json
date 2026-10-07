@@ -1,0 +1,21 @@
+{
+  "schema": "420-attention-service-runtime-v1",
+  "chainId": "420",
+  "indexerBaseUrl": "https://indexer.example.invalid",
+  "rpcUrl": "https://rpc.example.invalid",
+  "contracts": {
+    "attentionTreasury": "0x0000000000000000000000000000000000000421",
+    "campaignRegistry": "0x000000000000000000000000000000000000043b",
+    "consentRegistry": "0x0000000000000000000000000000000000001002",
+    "proofRegistry": "0x0000000000000000000000000000000000001003",
+    "rewardRegistry": "0x0000000000000000000000000000000000001004",
+    "attentionRouter": "0x0000000000000000000000000000000000001001"
+  },
+  "projection": {
+    "schema": "420-attention-projection-v1",
+    "pageLimit": 50,
+    "maxPageLimit": 200,
+    "maxRetries": 3,
+    "retryBaseMs": 100
+  }
+}

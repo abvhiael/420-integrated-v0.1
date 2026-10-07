@@ -15,19 +15,36 @@ def need(path: str, needles=()):
 
 
 name = need("docs/DOOBTUBE-NAME-DECISION.md", [
+    "Status: **ADOPTED — DOOBTUBE-0**",
     "The application referred to in the current audit request as **420Video** is named **DoobTube**.",
-    "does **not** by itself",
+    "docs/DOOBTUBE-ARCHITECTURE.md",
+    "DOOBTUBE-1 — Product scope and canonical user workflows",
+])
+architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
+    "Status: **ADOPTED**",
+    "replaceable user-facing video application/client layer",
     "420/service/media/v1",
+    "no new protocol/service Registry identity",
+    "not added to \`config/genesis-applications.json\`",
+    "not added to \`config/genesis-consumer-services.json\`",
+    "no DoobTube-owned smart contract requirement",
+    "DoobTube is **non-custodial by architecture**",
+    "DOOBTUBE-ARCH-001",
+    "DOOBTUBE-ARCH-012",
+    "Next canonical roadmap step: DOOBTUBE-1 — Product scope and canonical user workflows",
 ])
 audit = need("docs/DOOBTUBE-AUDIT.md", [
-    "DoobTube is **not currently an implemented or canonically specified application in this repository**.",
-    "DoobTube is NOT COMPLETE",
+    "DoobTube has **no runtime implementation yet**",
+    "DOOBTUBE-0 now canonically specifies",
+    "DOOBTUBE-0 is complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
 ])
 roadmap = need("docs/DOOBTUBE-ROADMAP.md", [
-    "DOOBTUBE-0",
+    "## DOOBTUBE-0 — Canonical identity and architecture decision",
+    "**Status: COMPLETE (Level 1).**",
+    "docs/DOOBTUBE-ARCHITECTURE.md",
     "DOOBTUBE-1",
     "DOOBTUBE-2",
     "DOOBTUBE-3",
@@ -46,23 +63,33 @@ roadmap = need("docs/DOOBTUBE-ROADMAP.md", [
 svc = json.loads(need("config/genesis-consumer-services.json"))
 media = next((x for x in svc["services"] if x["id"] == "420/service/media/v1"), None)
 assert media is not None, "canonical 420Media service disappeared"
-assert media["name"] == "420Media", "DoobTube baseline must not silently rename 420Media"
+assert media["name"] == "420Media", "DoobTube must not silently rename 420Media"
 assert media["genesis_target"] == "video_uploads_basic_livestreaming"
 assert media["authority"] == "REPLACEABLE_APPLICATION"
+assert all(x.get("name") not in {"DoobTube", "420Video"} for x in svc["services"]), (
+    "DoobTube/420Video must not create a second Genesis consumer-service identity at DOOBTUBE-0"
+)
+assert all(x.get("id") not in {"420/service/doobtube/v1", "420/service/video/v1"} for x in svc["services"])
 
 apps = json.loads(need("config/genesis-applications.json"))
 assert all(x["name"] not in {"DoobTube", "420Video"} for x in apps["apps"]), (
-    "DoobTube/420Video was added to frozen Genesis catalog without reconciling baseline"
+    "DoobTube/420Video was added to the frozen Genesis catalog without an explicit later catalog decision"
 )
 
-# This phase intentionally creates no runtime namespace.
-assert not (ROOT / "doobtube").exists(), "runtime appeared before DOOBTUBE-0 architecture closeout"
+assert not (ROOT / "doobtube").exists(), "runtime appeared before DOOBTUBE-1+ implementation ownership"
 assert not (ROOT / "contracts" / "src" / "doobtube").exists(), (
-    "DoobTube contracts appeared before contract responsibility was canonically decided"
+    "DoobTube contracts appeared despite DOOBTUBE-0's no-contract ownership decision"
+)
+assert not (ROOT / "contracts" / "src" / "video").exists(), (
+    "parallel 420Video contract namespace appeared despite canonical DoobTube/420Media boundary"
 )
 
-# Guard against false readiness claims in baseline governance documents.
-for text, source in [(name, "name decision"), (audit, "audit"), (roadmap, "roadmap")]:
+for text, source in [
+    (name, "name decision"),
+    (architecture, "architecture"),
+    (audit, "audit"),
+    (roadmap, "roadmap"),
+]:
     for forbidden in [
         "DoobTube is deployed",
         "DoobTube is Genesis-ready",
@@ -71,4 +98,16 @@ for text, source in [(name, "name decision"), (audit, "audit"), (roadmap, "roadm
     ]:
         assert forbidden not in text, f"{source}: forbidden readiness claim {forbidden!r}"
 
-print("DoobTube baseline verification: PASS")
+for invariant in [
+    "DoobTube does not replace or rename \`420Media\`",
+    "\`420/service/media/v1\` remains the canonical Media service identity",
+    "DoobTube creates no second Media protocol/service authority",
+    "DOOBTUBE-0 allocates no frozen/reserved address",
+    "DOOBTUBE-0 requires no DoobTube-owned smart contract",
+    "DoobTube is non-custodial by default",
+    "Wallet/private signing material remains outside DoobTube",
+    "raw media and high-volume transport data remain off-chain",
+]:
+    assert invariant in architecture, f"architecture invariant missing: {invariant!r}"
+
+print("DOOBTUBE-0 Level 1 architecture verification: PASS")

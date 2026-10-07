@@ -30,7 +30,7 @@ Repository: `abvhiael/420-integrated-v0.1`
 | STREAM royalty routing | PR #105 | StreamingRoyaltySettlement420 | StreamingRoyaltySettlement420.t.sol | this audit | COMPLETE | exact-head CI + live allowlist/schedules |
 | Settlement projection | PR #105 | SQL/TS projection | projection tests | this audit | COMPLETE | exact-head CI |
 | Dedicated 420Hz frontend | no canonical committed requirement found | absent | none | limitation recorded | NOT APPLICABLE | future roadmap only if adopted |
-| Consolidated HZ-1..HZ-4 deploy/init architecture | HZ-AUDIT-2 | HzDeploymentGraph420 + HzConsolidatedDeploy420 + retained package | HzDeploymentGraph420.t.sol + verifier | HZ-AUDIT-2 architecture record | IMPLEMENTED / QUALIFICATION PENDING | exact-head Level 1 |
+| Consolidated HZ-1..HZ-4 deploy/init architecture | HZ-AUDIT-2 | HzDeploymentGraph420 + HzConsolidatedDeploy420 + retained package | HzDeploymentGraph420.t.sol + verifier | HZ-AUDIT-2 architecture record | COMPLETE | Level 1 qualified on `967addaf33e311c72b3481f6300a8b4f25cd433e`; no further remediation |
 | Live Registry/address bindings | release-readiness requirement | absent | none | gap recorded | BLOCKED | public testnet/deployment |
 | Live RPC/storage/indexer qualification | release-readiness requirement | local/reference only | repository CI only | gap recorded | BLOCKED | public testnet/infrastructure |
 
@@ -58,3 +58,39 @@ Indexer: Node.js >=22, TypeScript, PostgreSQL 16. The Creative Reference Indexer
 Governance/Registry authority publication and submitter grants remain HZ-AUDIT-3. STREAM schedule terms remain HZ-AUDIT-4. Public-testnet network identity, deployed transaction/runtime evidence, live indexer/RPC configuration, monitoring and recovery remain later live qualification.
 
 420Hz must therefore distinguish repository qualification from live deployment readiness.
+
+
+## HZ-AUDIT-2 formal closeout
+
+**HZ-AUDIT-2 — Consolidated deployment architecture: COMPLETE.**
+
+Qualification level: **Level 1**.
+
+Qualified implementation SHA: `967addaf33e311c72b3481f6300a8b4f25cd433e`.
+
+Audit branch / PR: `feature/420hz-remediation-20261006` / PR **#556**.
+
+Qualification merge-base/base SHA: `ff4440bfd7b69c0712ee3dd7c4b417cb049ae76d`.
+
+Current `main` observed during durable closeout: `f674fbed767efc126da253c66800e38d030dc1dd`. Subsequent mainline movement is unrelated PuffBuddies work and does not invalidate the exact-head HZ-AUDIT-2 evidence.
+
+Exact-head evidence:
+
+- 420Hz Audit Qualification run `37567292712` / job `112617806286` — **PASS**
+- Solidity Contracts run `37567292700` — **PASS**
+  - shard 0 `112618365019` — PASS
+  - shard 1 `112618365059` — PASS
+  - shard 2 `112618364965` — PASS
+  - shard 3 `112618365052` — PASS
+- Creative Reference Indexer run `37567292824` — **PASS**
+- 420Docs Qualification run `37567292754` — **PASS**
+
+The consolidated constructor graph, deployment script/package, fail-closed governance boundaries, focused deployment tests, and static verifier therefore satisfy HZ-AUDIT-2. No live deployment, Registry publication, submitter assignment, STREAM schedule initialization, or production-readiness claim is made by this step.
+
+Level 2: **not required for this ordinary audit step**.
+
+Level 3: **intentionally deferred** to the single 420Hz audit-phase closeout.
+
+This formal closeout is evidence-only. It does not change executable/test/workflow/dependency/configuration/interface/deployment behavior or substantive requirements; therefore no recursive substantive test rerun is required.
+
+Next canonical roadmap step: **HZ-AUDIT-3 — Registry and authority wiring.**

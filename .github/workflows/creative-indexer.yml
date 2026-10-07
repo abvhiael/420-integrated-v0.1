@@ -36,7 +36,15 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/creative_indexer
       CREATIVE_FIXTURE_PATH: ../artifacts/contracts/creative-kernel-v1.fixture.json
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
       - name: Generate Decision #10 fixture

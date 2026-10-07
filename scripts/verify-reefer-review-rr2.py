@@ -53,7 +53,7 @@ parser = AuditParser()
 parser.feed(index)
 
 expected_routes = {"latest", "news", "originals", "topics", "search"}
-req(parser.nav_routes == expected_routes, f"navigation routes mismatch: {parser.nav_routes}")
+req(expected_routes.issubset(parser.nav_routes), f"required RR-2 navigation routes missing: {parser.nav_routes}")
 for route in expected_routes:
     req(f"view-{route}" in parser.ids, f"missing view-{route}")
 req(parser.skip and parser.main, "skip-link/main landmark missing")

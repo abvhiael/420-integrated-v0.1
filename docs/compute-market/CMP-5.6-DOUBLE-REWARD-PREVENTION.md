@@ -1,6 +1,6 @@
 # CMP-5.6 — Double-reward prevention
 
-Status: **IMPLEMENTATION COMPLETE — LEVEL 1 + THIRD CMP-5 LEVEL 2 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 + THIRD CMP-5 LEVEL 2 EXACT-HEAD QUALIFIED ON `505eea3d3eeb8e23c9a6f3a958e6afbc84946b02`.**
 
 Canonical roadmap step: **CMP-5.6 — Double-reward prevention**.
 
@@ -112,7 +112,9 @@ Repository-wide Level 3 remains reserved for CMP-5.8.
 
 ## Exit criteria
 
-CMP-5.6 is complete only when one exact implementation SHA satisfies every machine-readable exit criterion and the required Level 1 + app-focused Level 2 qualification passes.
+All machine-readable CMP-5.6 exit criteria passed on exact implementation SHA `505eea3d3eeb8e23c9a6f3a958e6afbc84946b02`.
+
+Durable evidence: [CMP-5.6 qualification](CMP-5.6-QUALIFICATION-EVIDENCE.md).
 
 ## Limitations
 

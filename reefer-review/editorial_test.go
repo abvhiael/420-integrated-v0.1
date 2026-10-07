@@ -11,10 +11,10 @@ func TestRR3InitialAndEditedRevisionHistory(t *testing.T) {
 	ctx := context.Background()
 	p, err := s.CreateDraft(ctx, "writer.420", CreateDraftRequest{
 		IdempotencyKey: "rr3-revision",
-		Title: "First title",
-		Summary: "first summary",
-		Body: "first body",
-		Visibility: VisibilityPrivate,
+		Title:          "First title",
+		Summary:        "first summary",
+		Body:           "first body",
+		Visibility:     VisibilityPrivate,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -23,9 +23,9 @@ func TestRR3InitialAndEditedRevisionHistory(t *testing.T) {
 		t.Fatalf("missing initial revision: %+v", p)
 	}
 	updated, warnings, err := s.Update(ctx, "writer.420", p.ID, UpdatePublicationRequest{
-		Title: "Second title",
-		Summary: "second summary",
-		Body: "second body",
+		Title:      "Second title",
+		Summary:    "second summary",
+		Body:       "second body",
 		Visibility: VisibilityPublic,
 	})
 	if err != nil || len(warnings) != 0 {

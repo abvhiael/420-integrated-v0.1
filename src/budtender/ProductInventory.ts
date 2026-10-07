@@ -87,6 +87,13 @@ export class ProductInventory {
     return units * product.wholesaleUnitCost;
   }
 
+  increaseCapacity(id: string, units: number): void {
+    const product = this.requireProduct(id);
+    assertInteger(units, "capacity increase");
+    if (units <= 0) throw new Error("capacity increase must be positive");
+    product.capacity += units;
+  }
+
   consume(id: string, units = 1): number {
     const product = this.requireProduct(id);
     if (!product.unlocked) throw new Error("product locked");

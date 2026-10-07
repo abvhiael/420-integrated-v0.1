@@ -212,6 +212,8 @@ Complete:
 - monitoring/SLOs;
 - release manifest.
 
+**Status: COMPLETE (Level 1).** Canonical documentation/operator definition: `doobtube/README.md`, `docs/DOOBTUBE-REFERENCE.md`, `docs/DOOBTUBE-USER-GUIDE.md`, `docs/DOOBTUBE-DEVELOPER-GUIDE.md`, and `docs/DOOBTUBE-OPERATOR-GUIDE.md`. DOOBTUBE-10 adds a loopback-only reproducible non-production launcher, explicit deployment profile, release manifest, migration/rollback/recovery guidance, monitoring/SLO targets, troubleshooting, role/Registry/API/state references, and clean build/test/deploy instructions without claiming testnet or production readiness.
+
 **Exit:** a new developer/operator can reproduce build, tests and a non-production deployment from clean inputs.
 
 ## DOOBTUBE-11 — Repository Level 3 exact-head closeout

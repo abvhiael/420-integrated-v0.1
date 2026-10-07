@@ -1,6 +1,6 @@
 # CMP-5.7 — External-result attestation
 
-Status: **IMPLEMENTATION COMPLETE — LEVEL 1 + FOURTH CMP-5 LEVEL 2 EXACT-HEAD QUALIFICATION PENDING.**
+Status: **COMPLETE — LEVEL 1 + FOURTH CMP-5 LEVEL 2 EXACT-HEAD QUALIFIED ON `e04d6baa0e636a361ef7dd8d046f5a31ff2f72d4`.**
 
 Canonical roadmap step: **CMP-5.7 — External-result attestation**.
 
@@ -132,7 +132,9 @@ Repository-wide Level 3 remains reserved for CMP-5.8.
 
 ## Exit criteria
 
-CMP-5.7 is complete only when one exact implementation SHA satisfies every machine-readable exit criterion and required Level 1 + app-focused Level 2 qualification passes.
+All machine-readable CMP-5.7 exit criteria passed on exact implementation SHA `e04d6baa0e636a361ef7dd8d046f5a31ff2f72d4`.
+
+Durable evidence: [CMP-5.7 qualification](CMP-5.7-QUALIFICATION-EVIDENCE.md).
 
 ## Limitations
 

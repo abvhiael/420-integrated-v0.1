@@ -63,6 +63,7 @@ The audit branch:
 - adds cross-phase integration tests;
 - adds safe-integer/atomicity guards and boundary tests;
 - adds BUD-AUDIT-5 deterministic bounded offline progression with replay/rollback protections;
+- adds BUD-AUDIT-6 application service authority boundary over store/customer/progression/offline evaluation;
 - documents the actual current release boundary.
 
 ## File inventory
@@ -80,6 +81,8 @@ The audit branch:
 | Product/inventory | `src/budtender/ProductInventory.ts` | COMPLETE | Canonical BUD-3 inventory/economics |
 | Progression | `src/budtender/StoreProgression.ts` | COMPLETE | Canonical BUD-4 cash/upgrade/expansion state |
 | Offline progression | `src/budtender/OfflineProgression.ts` | COMPLETE | 24-hour bounded, replay-safe, chain-independent calculation; exact-head Level 1 qualified |
+| Application service | `src/budtender/BudtenderApplicationService.ts` | IMPLEMENTED | Authoritative command + detached snapshot boundary; Level 1 qualification pending |
+| BUD-AUDIT-6 spec | `docs/budtender/BUD-AUDIT-6-APPLICATION-SERVICE.md` | IMPLEMENTED | Application-service requirements/invariants frozen; qualification pending |
 | BUD-AUDIT-5 spec | `docs/budtender/BUD-AUDIT-5-OFFLINE-PROGRESSION.md` | COMPLETE | Audit-phase requirements frozen and Level 1 exact-head qualification recorded |
 | Core unit tests | `test/budtender/*.spec.ts` | COMPLETE | Includes negative/boundary and cross-phase integration tests |
 | Gaming access client | `clients/budtender-access-v1` | COMPLETE | Shared SDK consumer; no parallel wallet authority |
@@ -201,6 +204,7 @@ The correct repository-grounded interpretation is:
 - BUD-0 architecture: complete.
 - BUD-1..BUD-4 deterministic simulation slice: implemented and remediated.
 - BUD-AUDIT-5 offline progression boundary: complete and exact-head Level 1 qualified on `c619c3fecbbb17ae34303209b908e78844d48051`.
+- BUD-AUDIT-6 application service boundary: implemented; exact-head Level 1 qualification pending.
 - Shared Gaming Protocol source integration: implemented.
 - Live Gaming Protocol deployment: pending.
 - Full user-facing Budtender product: not implemented.

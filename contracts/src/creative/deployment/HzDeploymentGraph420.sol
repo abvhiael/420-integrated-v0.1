@@ -51,10 +51,10 @@ library HzDeploymentGraph420 {
         StreamingRoyaltySettlement420 streamingRoyaltySettlement;
     }
 
-    function deploy(address governanceTimelock, address protocolTreasury)
-        internal
-        returns (Deployment memory d)
-    {
+    function deploy(
+        address governanceTimelock,
+        address protocolTreasury
+    ) internal returns (Deployment memory d) {
         if (governanceTimelock == address(0) || protocolTreasury == address(0)) {
             revert CreativeErrors420.ZeroAddress();
         }
@@ -62,39 +62,23 @@ library HzDeploymentGraph420 {
         d.creativeProtocolRegistry = new CreativeProtocolRegistry420(governanceTimelock);
         d.creatorProfileRegistry = new CreatorProfileRegistry420(governanceTimelock);
         d.workRegistry = new WorkRegistry420(governanceTimelock, address(d.creatorProfileRegistry));
-        d.recordingRegistry = new RecordingRegistry420(
-            governanceTimelock,
-            address(d.creatorProfileRegistry),
-            address(d.workRegistry)
-        );
+        d.recordingRegistry =
+            new RecordingRegistry420(governanceTimelock, address(d.creatorProfileRegistry), address(d.workRegistry));
         d.contributorRegistry = new ContributorRegistry420(
-            address(d.creatorProfileRegistry),
-            address(d.workRegistry),
-            address(d.recordingRegistry)
+            address(d.creatorProfileRegistry), address(d.workRegistry), address(d.recordingRegistry)
         );
         d.rightsRegistry = new RightsRegistry420(
-            governanceTimelock,
-            address(d.creatorProfileRegistry),
-            address(d.workRegistry),
-            address(d.recordingRegistry)
+            governanceTimelock, address(d.creatorProfileRegistry), address(d.workRegistry), address(d.recordingRegistry)
         );
         d.authorizationRegistry = new AuthorizationRegistry420(
-            governanceTimelock,
-            address(d.creatorProfileRegistry),
-            address(d.workRegistry),
-            address(d.recordingRegistry)
+            governanceTimelock, address(d.creatorProfileRegistry), address(d.workRegistry), address(d.recordingRegistry)
         );
         d.licenseRegistry = new LicenseRegistry420(
-            governanceTimelock,
-            address(d.creatorProfileRegistry),
-            address(d.recordingRegistry)
+            governanceTimelock, address(d.creatorProfileRegistry), address(d.recordingRegistry)
         );
         d.royaltyScheduleRegistry = new RoyaltyScheduleRegistry420(governanceTimelock);
         d.royaltyVault = new RoyaltyVault420(
-            governanceTimelock,
-            address(d.rightsRegistry),
-            address(d.creatorProfileRegistry),
-            protocolTreasury
+            governanceTimelock, address(d.rightsRegistry), address(d.creatorProfileRegistry), protocolTreasury
         );
         d.royaltyRouter = new RoyaltyRouter420(
             governanceTimelock,
@@ -103,43 +87,21 @@ library HzDeploymentGraph420 {
             address(d.royaltyVault)
         );
 
-        d.catalogRegistry = new CatalogRegistry420(
-            address(d.creatorProfileRegistry),
-            address(d.recordingRegistry)
-        );
-        d.catalogMetadataRegistry = new CatalogMetadataRegistry420(
-            address(d.creatorProfileRegistry),
-            address(d.catalogRegistry)
-        );
+        d.catalogRegistry = new CatalogRegistry420(address(d.creatorProfileRegistry), address(d.recordingRegistry));
+        d.catalogMetadataRegistry =
+            new CatalogMetadataRegistry420(address(d.creatorProfileRegistry), address(d.catalogRegistry));
 
-        d.mediaManifestRegistry = new MediaManifestRegistry420(
-            address(d.recordingRegistry),
-            address(d.creatorProfileRegistry)
-        );
-        d.storageSourceRegistry = new StorageSourceRegistry420(
-            address(d.recordingRegistry),
-            address(d.creatorProfileRegistry)
-        );
-        d.playbackResolver = new PlaybackResolver420(
-            address(d.mediaManifestRegistry),
-            address(d.storageSourceRegistry)
-        );
-        d.playbackAccounting = new PlaybackAccounting420(
-            governanceTimelock,
-            address(d.recordingRegistry)
-        );
+        d.mediaManifestRegistry =
+            new MediaManifestRegistry420(address(d.recordingRegistry), address(d.creatorProfileRegistry));
+        d.storageSourceRegistry =
+            new StorageSourceRegistry420(address(d.recordingRegistry), address(d.creatorProfileRegistry));
+        d.playbackResolver = new PlaybackResolver420(address(d.mediaManifestRegistry), address(d.storageSourceRegistry));
+        d.playbackAccounting = new PlaybackAccounting420(governanceTimelock, address(d.recordingRegistry));
 
-        d.streamingSettlementEpoch = new StreamingSettlementEpoch420(
-            governanceTimelock,
-            address(d.playbackAccounting)
-        );
-        d.streamingRevenueAllocator = new StreamingRevenueAllocator420(
-            address(d.streamingSettlementEpoch),
-            address(d.playbackAccounting)
-        );
-        d.streamingRoyaltySettlement = new StreamingRoyaltySettlement420(
-            address(d.streamingRevenueAllocator),
-            address(d.royaltyRouter)
-        );
+        d.streamingSettlementEpoch = new StreamingSettlementEpoch420(governanceTimelock, address(d.playbackAccounting));
+        d.streamingRevenueAllocator =
+            new StreamingRevenueAllocator420(address(d.streamingSettlementEpoch), address(d.playbackAccounting));
+        d.streamingRoyaltySettlement =
+            new StreamingRoyaltySettlement420(address(d.streamingRevenueAllocator), address(d.royaltyRouter));
     }
 }

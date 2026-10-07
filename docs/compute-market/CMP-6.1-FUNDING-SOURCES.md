@@ -145,6 +145,8 @@ CMP-6.1 is COMPLETE only when:
 - exact-head Compute Market Level 1 qualification passes;
 - durable qualification evidence records the implementation SHA.
 
+Durable evidence: [CMP-6.1 qualification](CMP-6.1-QUALIFICATION-EVIDENCE.md).
+
 Next canonical step:
 
 **CMP-6.2 — Verification-gated rewards**

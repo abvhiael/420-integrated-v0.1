@@ -38,15 +38,13 @@ DOOBTUBE-0 now resolves the application identity, 420Media relationship, service
 
 - exact later dependency graph and adopted interfaces;
 - service/runtime topology;
-- frontend routes and workflows;
 - backend/API/indexer requirements;
 - storage/transcoding/streaming model;
 - external dependencies;
 - exact 420Integrated integrations;
 - deployment topology;
-- Registry identity/key;
-- Genesis disposition;
-- test and documentation acceptance criteria.
+- exact Registry/application listing metadata if later required;
+- implementation/build/test/deployment acceptance evidence.
 
 ## 2. Repository state
 
@@ -222,17 +220,17 @@ Readiness classification:
 
 ## 12. Requirement matrix
 
-There are no repository-canonical DoobTube feature requirements yet. The only explicit application-specific decision available at this audit point is the new name.
+DOOBTUBE-1 now freezes repository-canonical V1 product requirements, non-goals, workflow state machines and acceptance criteria in `docs/DOOBTUBE-PRODUCT-SCOPE.md`. Runtime implementation remains later roadmap work.
 
 | Requirement | Canonical source | Current implementation | Tests | Documentation | Status | Required remediation |
 |---|---|---|---|---|---|---|
 | Application is named DoobTube | Current audit directive; `docs/DOOBTUBE-NAME-DECISION.md` on audit branch | Naming record created | Baseline structural verifier | Name decision | COMPLETE | Merge/adopt with audit PR |
-| Canonical DoobTube architecture exists | `docs/DOOBTUBE-ARCHITECTURE.md` | App/client architecture and authority boundary adopted | Structural verifier | Architecture doc | COMPLETE | Detailed product scope moves to DOOBTUBE-1 |
+| Canonical DoobTube architecture exists | `docs/DOOBTUBE-ARCHITECTURE.md` | App/client architecture and authority boundary adopted | Structural verifier | Architecture doc | COMPLETE | None for DOOBTUBE-0 |
 | Relationship to 420Media is explicit | `docs/DOOBTUBE-ARCHITECTURE.md` | DoobTube consumes canonical 420Media; no rename/replacement/parallel authority | Structural verifier | Architecture doc | COMPLETE | None for DOOBTUBE-0 |
 | Registry/service identity decision exists | `docs/DOOBTUBE-ARCHITECTURE.md` | No new DoobTube protocol/service ID; resolve `420/service/media/v1` | Structural verifier | Architecture doc | COMPLETE | AppStore/listing metadata, if needed, is later non-authoritative work |
 | Genesis disposition is defined | Genesis catalogs + `docs/DOOBTUBE-ARCHITECTURE.md` | No new frozen app or consumer-service entry | Structural verifier | Architecture doc | COMPLETE | Future promotion requires explicit separate decision |
 | Smart-contract responsibility is defined | `docs/DOOBTUBE-ARCHITECTURE.md` | No DoobTube-owned contract required by DOOBTUBE-0 | Structural verifier | Architecture doc | COMPLETE | Revisit only if DOOBTUBE-1..3 prove necessity |
-| Frontend/workflows are canonically specified | `docs/DOOBTUBE-PRODUCT-SCOPE.md` | V1 workflow requirements/routes/state machines frozen; runtime not yet implemented | Structural verifier | Product scope | COMPLETE for DOOBTUBE-1 | Implement in later runtime/frontend steps |
+| V1 product scope/workflows are frozen | `docs/DOOBTUBE-PRODUCT-SCOPE.md` | Requirement IDs, non-goals, routes/surfaces, state machines and acceptance matrix adopted; runtime not yet implemented | DOOBTUBE-1 verifier | Product scope | COMPLETE | Implement in DOOBTUBE-5 through -7 |
 | Backend/API/indexer/workers exist | None | None | None | None | MISSING | Implement after architecture freeze |
 | Product dependency needs are identified | `docs/DOOBTUBE-PRODUCT-SCOPE.md` | Required product capabilities are frozen; exact owning dependencies/interfaces remain DOOBTUBE-2 | Structural verifier | Product scope | PARTIAL | DOOBTUBE-2 dependency/trust freeze |
 | Build is reproducible | None | No package | None | None | BLOCKED | Implementation/build instructions |
@@ -281,7 +279,7 @@ DoobTube is now canonically defined as a replaceable user-facing video applicati
 ### Files
 - expected DoobTube runtime files: undefined until architecture is adopted
 - present at audit base: 0 DoobTube files
-- created by this baseline: name decision, audit, roadmap, verifier, CI
+- created/updated by audit phase: name decision, architecture, V1 product scope, audit, roadmap, verifier, CI
 - obsolete/stale DoobTube files: none found
 
 ### Smart contracts

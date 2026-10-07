@@ -45,14 +45,19 @@ Not implemented or not yet qualified:
 ## API
 
 All routes are under `/v1`.
-- `POST /v1/publications` — create draft; requires `X-420-Actor` in the repository harness.
+- `POST /v1/publications` — create draft; requires an author or publisher Bearer session.
 - `GET /v1/publications` — public published feed; cursor pagination.
-- `GET /v1/publications/{id}` — repository harness article read.
-- `POST /v1/publications/{id}/publish` — publish after authorization and rights assertion.
-- `POST /v1/publications/{id}/moderate` — scoped HIDE/RESTORE.
-- `GET /readyz` — dependency-construction readiness only.
+- `GET /v1/publications/{id}` — anonymous PUBLIC/UNLISTED read, or viewer-aware read when a verified Bearer session is supplied.
+- `PUT /v1/publications/{id}` — author/publisher edit with ownership/capability checks.
+- `POST /v1/publications/{id}/publish` — author/publisher publish after authorization and rights assertion.
+- `POST /v1/publications/{id}/moderate` — moderator/publisher scoped HIDE/RESTORE.
+- `POST /v1/publications/{id}/tombstone` — authorized tombstone.
+- `GET /v1/editorial/publications` — scoped editorial listing.
+- `GET /v1/publications/{id}/revisions` — authorized revision history.
+- `GET /v1/publications/{id}/moderation` — authorized moderation history.
+- `GET /readyz` — dependency/session-verifier construction readiness.
 
-`X-420-Actor` is a test/development injection boundary, not production authentication. Production must bind a validated Wallet/Identity session and reject spoofed headers at ingress.
+Protected routes derive identity only from a validated Wallet/420Identity Bearer session. `X-420-Actor` is not accepted as authentication authority.
 
 ## Build and test
 
@@ -105,7 +110,7 @@ RR-3 completes the repository-stage editorial lifecycle:
 - moderation dashboard;
 - expanded Go client/API parity.
 
-The browser stores only the current repository-stage actor string in session storage and sends it through the existing `X-420-Actor` development boundary. This is not production authentication. RR-4 replaces it with qualified 420Identity/Wallet sessions and capabilities.
+RR-3 originally qualified against the repository-stage actor boundary. RR-4 has now replaced that browser/API boundary with verified Wallet/420Identity Bearer sessions and scoped capabilities while retaining the RR-3 editorial lifecycle.
 
 New API surface:
 - `GET /v1/editorial/publications`
@@ -114,7 +119,7 @@ New API surface:
 - `GET /v1/publications/{id}/revisions`
 - `GET /v1/publications/{id}/moderation`
 
-`GET /v1/publications/{id}` is viewer-aware: anonymous readers receive only PUBLIC or UNLISTED published records; restricted, draft and hidden access requires the current repository-stage actor and authorization policy.
+`GET /v1/publications/{id}` is viewer-aware: anonymous readers receive only PUBLIC or UNLISTED published records; restricted, draft and hidden access requires a verified session accepted by the current authorization policy.
 
 
 ## RR-4 identity and permissions

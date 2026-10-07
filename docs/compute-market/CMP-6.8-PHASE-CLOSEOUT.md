@@ -8,9 +8,9 @@ Reconcile the complete accumulated CMP-6 useful-computation reward phase against
 
 ## Reconciliation baseline
 
-Current `main` reconciled: `dff7c038160871436a5df81295ce71fd94e4ddfe`.
+Current `main` reconciled: `537525ebc636eabc76ff261f5b5ff5d236869b32`.
 
-Reconciled branch anchor: `b5d8423589db5607bc59be282b654ff9b40a88a5`.
+Reconciled branch anchor: `d39f62e1a5e0ac5b646d851abe9d0a17fbf1450d`.
 
 That anchor is a true two-parent merge of current main plus the complete CMP-6.1–6.7 implementation. Subsequent closeout/evidence/config/workflow commits are descendants of that reconciled anchor and remain zero commits behind that recorded main baseline.
 

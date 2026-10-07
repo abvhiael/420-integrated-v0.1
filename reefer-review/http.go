@@ -27,7 +27,7 @@ func (h HTTP) Handler() http.Handler {
 	mux.HandleFunc("/v1/news/sources", h.newsSources)
 	mux.HandleFunc("/v1/news/topics", h.newsTopics)
 	mux.HandleFunc("/v1/news/", h.newsItem)
-	return h.sessionMiddleware(mux)
+	return securityResponseHeaders(h.sessionMiddleware(mux))
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

@@ -60,9 +60,11 @@ RR-3 is the documented RR-2/RR-3 user-facing/editorial convergence milestone. It
 ## RR-4 — Identity & Permissions
 Production 420Identity/Wallet sessions, scoped author/publisher/moderator capabilities, revocation/expiry, no public reliance on `X-420-Actor`.
 
-Status: **IMPLEMENTED / LEVEL 1 + AUTHORITY-MILESTONE LEVEL 2 QUALIFICATION PENDING**
+Status: **COMPLETE / LEVEL 1 PASS + AUTHORITY-MILESTONE LEVEL 2 PASS**
 
-RR-4 is an authority milestone because it replaces the development actor boundary with the verified Wallet/420Identity session/capability boundary. Complete it only after the exact accumulated implementation SHA passes both the RR-4 Level 1 workflow and retained ReeferReview Level 2 integration workflow.
+RR-4 is an authority milestone because it replaces the development actor boundary with the verified Wallet/420Identity session/capability boundary. Its exit criteria are SATISFIED on exact implementation SHA `74b6f6777dfa47442654b8afcbc4888fe574c3cb`: Reefer Review RR-4 Level 1 run `37673979895` PASS and Reefer Review Level 2 Integration run `37673979982` PASS. Durable evidence is recorded in `RR-4-QUALIFICATION.md`. Level 3 remains deferred to RR-10.
+
+**Next canonical roadmap step:** RR-5 — Durable Storage & Rights.
 
 ## RR-5 — Durable Storage & Rights
 Persistent publication store, qualified 420 Storage, encryption/integrity, durable idempotency and live 420 Rights provenance.

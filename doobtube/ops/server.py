@@ -113,6 +113,7 @@ class Server(ThreadingHTTPServer):
         super().__init__((cfg.host,cfg.port),Handler)
 
 def create_server(cfg:NonProductionConfig) -> Server:
+    cfg.validate()
     root=Path(cfg.web_root)
     if not root.exists() or not (root/"index.html").exists():
         raise FileNotFoundError("web build missing; run npm --prefix doobtube/web run build")

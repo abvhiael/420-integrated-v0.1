@@ -36,7 +36,7 @@ architecture = need("docs/DOOBTUBE-ARCHITECTURE.md", [
 audit = need("docs/DOOBTUBE-AUDIT.md", [
     "DoobTube has **no runtime implementation yet**",
     "DOOBTUBE-0 now canonically specifies",
-    "DOOBTUBE-0 through DOOBTUBE-5 are complete",
+    "DOOBTUBE-0 through DOOBTUBE-6 are complete",
     "CODE COMPLETE: **NO**",
     "PRODUCTION READY: **NO**",
     "420/service/media/v1",
@@ -89,6 +89,11 @@ allowed_doobtube_files = {
     "doobtube/api/persistence.py",
     "doobtube/api/service.py",
     "doobtube/tests/test_doobtube_backend.py",
+    "doobtube/media/__init__.py",
+    "doobtube/media/types.py",
+    "doobtube/media/security.py",
+    "doobtube/media/service.py",
+    "doobtube/tests/test_doobtube_media.py",
 }
 if (ROOT / "doobtube").exists():
     observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"}
@@ -230,7 +235,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical V1 product definition" in roadmap
 assert "docs/DOOBTUBE-PRODUCT-SCOPE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
 
 dependencies = need("docs/DOOBTUBE-DEPENDENCIES-TRUST.md", [
     "Roadmap step: **DOOBTUBE-2 — Dependency and trust-boundary freeze**",
@@ -344,7 +349,7 @@ for phrase in [
 
 assert "**Status: COMPLETE (Level 1).** Canonical dependency/trust definition" in roadmap
 assert "docs/DOOBTUBE-DEPENDENCIES-TRUST.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
 
 lifecycle = need("docs/DOOBTUBE-DATA-LIFECYCLE.md", [
     "Roadmap step: **DOOBTUBE-3 — Data, storage, media-processing and lifecycle architecture**",
@@ -437,7 +442,7 @@ for schema in ["MediaAssetView","StorageObjectRef","UploadRetryContext","Process
 
 assert "**Status: COMPLETE (Level 1).** Canonical data/lifecycle definition" in roadmap
 assert "docs/DOOBTUBE-DATA-LIFECYCLE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
 
 adapters_doc = need("docs/DOOBTUBE-CONTRACTS-ADAPTERS.md", [
     "Roadmap step: **DOOBTUBE-4 — Contracts and protocol adapters**",
@@ -517,7 +522,7 @@ assert "return False" in adapter_code, "DoobTube contract requirement must remai
 assert "return None" in adapter_code, "DoobTube service ID must remain absent"
 assert "**Status: COMPLETE (Level 1).** Canonical contract/adapter definition" in roadmap
 assert "docs/DOOBTUBE-CONTRACTS-ADAPTERS.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
 
 backend_doc = need("docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md", [
     "Roadmap step: **DOOBTUBE-5 — Backend/API/indexing/service control plane**",
@@ -562,12 +567,13 @@ backend_types = need("doobtube/api/types.py", [
     "class ProjectionEvent",
 ])
 backend_store = need("doobtube/api/persistence.py", [
-    "SCHEMA_VERSION = 1",
+    "SCHEMA_VERSION = 2",
     "CREATE TABLE IF NOT EXISTS idempotency",
     "CREATE TABLE IF NOT EXISTS preferences",
     "CREATE TABLE IF NOT EXISTS jobs",
     "CREATE TABLE IF NOT EXISTS projection_blocks",
     "CREATE TABLE IF NOT EXISTS feed_items",
+    "CREATE TABLE IF NOT EXISTS media_sessions",
     "database schema is newer than runtime",
 ])
 backend_tests = need("doobtube/tests/test_doobtube_backend.py", [
@@ -609,6 +615,114 @@ for route in ["/v1/health","/v1/readiness","/v1/feed","/v1/preferences","/v1/con
 
 assert "**Status: COMPLETE (Level 1).** Canonical backend/control-plane definition" in roadmap
 assert "docs/DOOBTUBE-BACKEND-CONTROL-PLANE.md" in roadmap
-assert "DOOBTUBE-0 through DOOBTUBE-5 are complete" in audit
+assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
 
-print("DOOBTUBE-5 Level 1 backend/control-plane verification: PASS")
+media_doc = need("docs/DOOBTUBE-MEDIA-INTEGRATION.md", [
+    "Roadmap step: **DOOBTUBE-6 — Media processing, delivery and livestream integration**",
+    "Status: **ADOPTED / IMPLEMENTED**",
+    "DT-MEDIA-001",
+    "DT-EGRESS-001",
+    "DT-MANIFEST-001",
+    "DT-PLAYBACK-001",
+    "DT-PROCESS-001",
+    "DT-PROVIDER-001",
+    "DT-LIVE-001",
+    "DT-MEDIA-INV-001",
+    "DT-MEDIA-INV-014",
+    "Next canonical roadmap step: DOOBTUBE-7 — User-facing web application",
+])
+media_types = need("doobtube/media/types.py", [
+    "MAX_UPLOAD_BYTES = 8 << 30",
+    "MAX_SESSION_SECONDS = 24 * 60 * 60",
+    "class UploadInspection",
+    "class StorageManifest",
+    "class ProcessingProfile",
+    "class ProviderSnapshot",
+    "class PlaybackLocator",
+    "class LivestreamSpec",
+])
+media_security = need("doobtube/media/security.py", [
+    "def validate_upload",
+    "def validate_endpoint",
+    "DNS-aware resolver required",
+    "def validate_manifest",
+    "def validate_profile",
+    "def validate_livestream",
+    'ALLOWED_ENGINES = {"ffmpeg", "gstreamer"}',
+])
+media_service = need("doobtube/media/service.py", [
+    "class MediaIntegration",
+    "def prepare_upload",
+    "def confirm_ready",
+    "def admit_playback",
+    "def validate_provider",
+    "def process",
+    "def create_livestream",
+    "def start_livestream",
+    "def stop_livestream",
+    "def recover_livestreams",
+    "recovery=True",
+])
+media_tests = need("doobtube/tests/test_doobtube_media.py", [
+    "test_malformed_malicious_media_rejected",
+    "test_scanner_quarantine_and_reject_fail_closed",
+    "test_ssrf_and_embedded_credentials_denied",
+    "test_dns_aware_resolution_required",
+    "test_stale_invalid_manifest_rejected",
+    "test_verified_playback_rejects_stale_manifest_and_unsafe_url",
+    "test_processing_static_profile_and_resource_bounds",
+    "test_provider_compromise_and_stale_evidence_rejected",
+    "test_processing_result_substitution_and_deadline_rejected",
+    "test_livestream_secrets_and_ssrf_fail_closed",
+    "test_livestream_controller_authority_and_recovery",
+    "test_interrupted_livestream_retry_is_bounded",
+])
+
+# Required repository Media security model remains the baseline for DoobTube integration.
+media_security_go = need("media/security/policy.go", [
+    "MaxUploadBytes: 8 << 30",
+    "ValidateResolvedEndpoint",
+    "ErrContentQuarantined",
+    "ErrContentRejected",
+])
+media_processor_go = need("media/node/mediaprocessor/processor.go", [
+    "Implementations MUST NOT invoke a shell",
+    "MaxRuntime",
+    "ffmpeg",
+    "gstreamer",
+])
+media_live_go = need("media/node/livegateway/gateway.go", [
+    "MaxEndpointBytes = 4096",
+    "MaxCredentialRefBytes = 256",
+    "MaxSessionDuration = 24 * time.Hour",
+    "credentials must not be embedded in endpoint",
+])
+security_profile = need("media/deploy/security-profile.json", [
+    '"content_scanner_required": true',
+    '"dns_resolution_validation_required": true',
+    '"shell_execution_forbidden": true',
+    '"max_parallel_jobs": 4',
+    '"opaque_credential_refs_only": true',
+])
+
+# DOOBTUBE-6 original adversarial categories must all be explicitly covered.
+for phrase in [
+    "malformed/non-video uploads",
+    "scanner quarantine/rejection",
+    "SSRF",
+    "embedded URL credentials",
+    "stale/mismatched/unsealed/unretrievable/dead manifests",
+    "excessive runtime/memory/CPU/PIDs",
+    "inactive/unverified/stale/substituted provider",
+    "processing deadline expiry",
+    "controller drift",
+    "bounded retry exhaustion",
+    "restart recovery",
+]:
+    assert phrase in media_doc, f"DOOBTUBE-6 adversarial category missing: {phrase!r}"
+
+assert "**Status: COMPLETE (Level 1).** Canonical media integration definition" in roadmap
+assert "docs/DOOBTUBE-MEDIA-INTEGRATION.md" in roadmap
+assert "DOOBTUBE-0 through DOOBTUBE-6 are complete" in audit
+
+print("DOOBTUBE-6 Level 1 media integration verification: PASS")

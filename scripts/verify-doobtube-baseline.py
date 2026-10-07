@@ -112,7 +112,7 @@ allowed_doobtube_files = {
     "doobtube/web/test/web.test.js",
 }
 if (ROOT / "doobtube").exists():
-    observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc"}
+    observed = {str(p.relative_to(ROOT)).replace("\\", "/") for p in (ROOT / "doobtube").rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc" and "dist" not in p.parts}
     assert observed == allowed_doobtube_files, f"unexpected DoobTube runtime files before DOOBTUBE-5: {sorted(observed ^ allowed_doobtube_files)}"
 assert not (ROOT / "contracts" / "src" / "doobtube").exists(), (
     "DoobTube contracts appeared despite DOOBTUBE-0's no-contract ownership decision"

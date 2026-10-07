@@ -1667,7 +1667,9 @@ Broad repository inventories are not required after every ordinary PuffBuddies s
 **Exit criteria:** exact dependency inventory and canonical service-ID bindings exist; stale/inactive/deprecated/wrong-chain inputs fail closed; authority inheritance/conflicts fail closed; Registry/AppStore/Analytics/derived/Verify boundaries pass; applicable repository verifiers pass; complete retained PuffBuddies suite passes on one exact SHA; durable evidence is recorded; Level-3/live deployment remains deferred.
 
 
-### PB-14 — Backend/API hardening
+### PB-14 — Backend/API hardening — COMPLETE
+
+**Qualification evidence:** `docs/puffbuddies/PB-14-QUALIFICATION.md` (evidence commit `48dc44c5b53948f277f586b78706b9b53e7fab0c`).
 
 **Purpose:** materialize and harden the authenticated PuffBuddies API/edge transport reserved by PB-0.17 and consumed by PB-11/PB-12, while preserving canonical application/domain authority and privacy boundaries.
 

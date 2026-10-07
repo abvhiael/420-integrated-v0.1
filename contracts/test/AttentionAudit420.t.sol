@@ -6,7 +6,11 @@ import "./AttentionGenesis420.t.sol";
 contract AttentionAudit420Test is AttentionGenesis420Test {
     address constant DELEGATE = address(0xD1);
 
-    function _activeCampaign(\n        uint64 startsAt,\n        uint64 endsAt,\n        uint256 cap\n    ) internal returns (bytes32 id) {
+    function _activeCampaign(
+        uint64 startsAt,
+        uint64 endsAt,
+        uint256 cap
+    ) internal returns (bytes32 id) {
         vm.prank(SPONSOR);
         id = campaigns.createCampaign(
             keccak256("audit-meta"), keccak256("audit-audience"), VERIFIER, 10 ether, 1 ether, cap, startsAt, endsAt
@@ -17,7 +21,9 @@ contract AttentionAudit420Test is AttentionGenesis420Test {
         campaigns.activate(id);
     }
 
-    function _optIn(\n        address account\n    ) internal {
+    function _optIn(
+        address account
+    ) internal {
         vm.prank(account);
         consent.setGlobal(account, true, keccak256("audit-policy"));
     }
@@ -110,7 +116,7 @@ contract AttentionAudit420Test is AttentionGenesis420Test {
             type(uint64).max
         );
         vm.prank(SPONSOR);
-        treasury.fundCampaign{value: 10 ether}(id);
+        treasury.fundCampaign{ value: 10 ether }(id);
         vm.prank(SPONSOR);
         campaigns.cancel(id);
         uint256 beforeBalance = SPONSOR.balance;

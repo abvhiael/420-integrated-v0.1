@@ -189,6 +189,8 @@ Perform application-specific threat review covering:
 - operator compromise;
 - secrets/logging/privacy leakage.
 
+**Status: COMPLETE (Level 1).** Canonical security definition: `docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md`. App-owned hardening now includes actor/operation abuse bounds, replay-safe limiter semantics, durable error redaction and secret-field checks; the step also retains Media session/moderation/webhook/scanner/rate protections, explicitly dispositions every original threat class, and records contract/custody/MEV/oracle/bridge classes as repository-grounded N/A rather than silently untested.
+
 **Exit:** unresolved vulnerabilities are closed or explicitly accepted by the appropriate authority with rationale.
 
 ## DOOBTUBE-10 — Documentation, deployment and operator closeout

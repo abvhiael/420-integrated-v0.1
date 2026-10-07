@@ -96,6 +96,8 @@ describe("BudtenderApplicationService BUD-AUDIT-6", () => {
     assert.equal("grantStartingCash" in app, false);
     assert.equal("createOrder" in app, false);
     assert.equal("creditCash" in app, false);
+    assert.equal("store" in app, false);
+    assert.equal("customers" in app, false);
     assert.equal("inventory" in app, false);
     assert.equal("progression" in app, false);
   });

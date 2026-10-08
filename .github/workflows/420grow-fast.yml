@@ -46,7 +46,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: GROW-03 consumer and directly affected SDK tests
-        run: go test ./grow/location ./genesis/svc2/sdk ./location/uikit ./location/privacy
+        run: go test ./grow/location ./genesis/svc2/... ./location/...
       - name: GROW-03 static analysis and format
         run: |
           gofmt -d grow/location/*.go

@@ -1,0 +1,275 @@
+{
+  "schema": "420hz-gca-nomination-voting-policy-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.13",
+  "title": "Define nomination & voting policy framework",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "policyModes": {
+    "nomination": [
+      "OPEN_SUBMISSION",
+      "CURATED_SUBMISSION",
+      "COMMUNITY_THRESHOLD"
+    ],
+    "selfNomination": [
+      "ALLOWED",
+      "DISALLOWED"
+    ],
+    "voterEligibility": [
+      "WALLET_ONE_ACCOUNT_ONE_VOTE",
+      "IDENTITY_UNIQUE_ONE_VOTE",
+      "JURY_ONE_MEMBER_ONE_VOTE"
+    ],
+    "quorum": [
+      "MIN_VALID_VOTES",
+      "MIN_PARTICIPATION_BPS"
+    ],
+    "winner": [
+      "PLURALITY",
+      "MIN_SHARE_BPS"
+    ],
+    "tie": [
+      "CO_WINNERS",
+      "NO_WINNER",
+      "RUNOFF_REQUIRED"
+    ]
+  },
+  "targetEligibility": {
+    "commonRules": [
+      "target must be eligible under the exact season/category EligibilityPolicy snapshot",
+      "target must remain PUBLIC and canonically available at nomination acceptance and ballot freeze",
+      "withdrawn, deleted, unavailable, rights-blocked or otherwise ineligible targets fail closed",
+      "eligibility is evaluated from canonical Creative/publication/disclosure sources and frozen references rather than mutable application labels"
+    ],
+    "recordingRules": [
+      "RECORDING target requires a canonical published RecordingId",
+      "Recording publication must fall inside the category eligibility window when that category requires a release-window predicate",
+      "source Work/Recording/disclosure/provenance state remains externally authoritative"
+    ],
+    "creatorRules": [
+      "CREATOR_PROFILE target requires a canonical CreatorId",
+      "artist-category eligibility requires at least one eligible published Recording in the season/category eligibility window unless the exact category policy explicitly defines another canonical predicate",
+      "Creator profile presentation does not substitute for published-recording eligibility"
+    ]
+  },
+  "aiDisclosureCompatibility": {
+    "SONG_OF_THE_YEAR": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "ARTIST_OF_THE_YEAR": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "BEST_AI_GENERATED_SONG": [
+      "AI_GENERATED"
+    ],
+    "BEST_AI_ASSISTED_SONG": [
+      "AI_ASSISTED"
+    ],
+    "BEST_REMIX_AI_DERIVATIVE": [
+      "AI_DERIVATIVE"
+    ],
+    "BEST_INSTRUMENTAL": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "BEST_LYRICS": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "BEST_PRODUCTION": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "COMMUNITY_CHOICE": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "BREAKTHROUGH_ARTIST": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ]
+  },
+  "categoryPolicyRequirements": [
+    "every active AwardCategory must bind exactly one EligibilityPolicy version/commitment",
+    "every category policy must explicitly declare targetType, eligibility window, nomination mode, max nominations per nominator, self-nomination mode, voter eligibility mode, quorum mode/value, winner mode/value and tie mode before nominations open",
+    "category policy changes after NOMINATIONS_OPEN require a replacement season/category/policy rather than silent mutation",
+    "BEST_AI_GENERATED_SONG requires AI_GENERATED disclosure",
+    "BEST_AI_ASSISTED_SONG requires AI_ASSISTED disclosure",
+    "BEST_REMIX_AI_DERIVATIVE requires AI_DERIVATIVE disclosure",
+    "other initial categories do not automatically exclude HUMAN or AI classes solely because of disclosure class"
+  ],
+  "nominationRules": [
+    "nomination window is [nominationStart, nominationEnd] inclusive under the frozen season clock semantics",
+    "nomination outside the open window fails closed",
+    "nominator must have qualified Wallet/session actor authorization",
+    "self-nomination behavior is controlled only by the frozen category selfNomination mode",
+    "maxNominationsPerNominator is a positive explicit category policy value and cannot be silently treated as unlimited",
+    "duplicate logical nomination key is seasonId + categoryId + targetType + targetId + nominatorEligibilityKey; replay is idempotent or rejected without a second count",
+    "the ballot candidate key is seasonId + categoryId + targetType + targetId so multiple eligible nominators never create duplicate ballot candidates",
+    "a nomination that later becomes ineligible may be DISQUALIFIED before ballot freeze with a durable reason commitment",
+    "after BALLOT_FROZEN, ordinary nomination acceptance/rejection cannot mutate that ballot"
+  ],
+  "communityThresholdRules": [
+    "COMMUNITY_THRESHOLD nomination mode requires an explicit thresholdType and thresholdValue in the frozen category policy",
+    "eligible support is derived only from policy-approved PUBLIC community records; PRIVATE/UNLISTED community state is excluded",
+    "duplicate/replayed community relations cannot multiply threshold support",
+    "COMMUNITY_CHOICE does not imply any fixed threshold number in HZ-GCA-1.13; the exact season/category policy must declare it",
+    "community threshold satisfaction may make a target nomination-eligible but never casts AwardVote records"
+  ],
+  "ballotConstructionRules": [
+    "ballot construction begins only after nominations close",
+    "candidate set is the deterministic deduplicated set of ACCEPTED still-eligible nominations for the exact category",
+    "candidateSetCommitment and policyCommitment are frozen before AwardBallot enters FROZEN",
+    "candidate ordering for presentation is deterministic and cannot change target identity",
+    "after FROZEN, candidate membership is immutable; correction requires VOID plus explicit replacement ballot under the same frozen season policy or a replacement season if policy itself changed",
+    "voting cannot open unless the ballot, voter-eligibility mode, quorum, winner and tie policy are fully specified"
+  ],
+  "voterEligibilityRules": [
+    "Wallet/session authorization proves the actor controls the voting account but does not prove unique-human identity",
+    "WALLET_ONE_ACCOUNT_ONE_VOTE means one qualified Wallet/account key per ballot and must never be described as one-person-one-vote",
+    "IDENTITY_UNIQUE_ONE_VOTE requires a qualified minimum-disclosure eligibility result from the canonical Identity authority or approved verifier source",
+    "identity eligibility proof must be domain-separated to Awards ballot/policy/audience and reveal no unnecessary raw legal identity, document, biometric, wallet-link or credential payload",
+    "revoked, expired, stale, wrong-ballot, wrong-policy or wrong-audience Identity eligibility fails closed",
+    "JURY_ONE_MEMBER_ONE_VOTE requires a frozen explicit jury membership snapshot/reference and one eligible jury member key per ballot",
+    "production public voting that claims unique-human semantics must use IDENTITY_UNIQUE_ONE_VOTE or a later equally explicit qualified policy; Wallet addresses alone are insufficient"
+  ],
+  "antiSybilRules": [
+    "vote policy must explicitly declare its Sybil assumptions and cannot imply stronger uniqueness than its eligibility mode proves",
+    "WALLET_ONE_ACCOUNT_ONE_VOTE receives replay protection but is acknowledged as wallet-account uniqueness only",
+    "IDENTITY_UNIQUE_ONE_VOTE consumes only the minimum-disclosure uniqueness/eligibility conclusion and a ballot-scoped nullifier or equivalent replay key; raw identity evidence remains outside Awards",
+    "a ballot-scoped voter key/nullifier contributes at most one accepted vote",
+    "multiple wallets resolving to the same qualified unique-human proof/nullifier cannot create multiple votes",
+    "rate limits, anomaly flags or moderation may pause/review suspicious submissions but cannot fabricate a voter credential or silently rewrite valid votes",
+    "Sybil controls cannot expose private Identity proof material in public AwardVote or result records"
+  ],
+  "voteRules": [
+    "vote window is [votingStart, votingEnd] inclusive under frozen season clock semantics",
+    "vote before opening or after closing fails closed",
+    "every vote binds ballotId, voterEligibilityRef/key, choiceCommitment, submittedAt and a domain-separated replayDomain",
+    "one voter eligibility key may have at most one ACCEPTED vote per ballot",
+    "duplicate vote/replay is rejected or idempotently resolves to the existing accepted vote and never increments totals",
+    "choice must reference an exact frozen candidate or explicit ABSTAIN when abstention is enabled by policy",
+    "vote mutation after acceptance is forbidden in v1; change-your-vote requires a future explicit policy version",
+    "invalidated vote status requires a durable objective reason/evidence reference and cannot be used as an operator edit to favor a candidate"
+  ],
+  "abstentionInvalidRules": [
+    "ABSTAIN is explicit and optional per category policy",
+    "an accepted abstention counts toward participation quorum when the quorum mode measures participation, but contributes zero candidate support",
+    "INVALIDATED votes count neither toward quorum nor candidate support after canonical invalidation",
+    "malformed, ineligible, duplicate, stale-policy or wrong-ballot votes are rejected before acceptance where determinable",
+    "final tally records accepted candidate votes, accepted abstentions and invalidated/rejected counts separately"
+  ],
+  "quorumThresholdRules": [
+    "every category policy must choose exactly one quorum mode and explicit positive threshold value before voting opens",
+    "MIN_VALID_VOTES quorum counts accepted candidate votes plus accepted abstentions only when abstention participation is enabled by the policy",
+    "MIN_PARTICIPATION_BPS quorum is evaluated against the frozen eligible-voter denominator/reference and fails closed if that denominator cannot be established",
+    "PLURALITY winner mode selects the highest candidate valid-vote total after quorum",
+    "MIN_SHARE_BPS additionally requires each winner to satisfy the frozen minimum candidate-share threshold",
+    "threshold arithmetic uses exact integer-safe comparisons defined by the implementation policy and cannot be changed after voting opens"
+  ],
+  "tieRules": [
+    "tie policy is explicit per category before voting opens",
+    "CO_WINNERS returns all candidates tied at the winning score/threshold",
+    "NO_WINNER produces a finalized no-winner outcome and no AwardBadge for that category",
+    "RUNOFF_REQUIRED produces no winner from the tied ballot and requires a deterministic replacement/runoff ballot limited to the tied candidates under the frozen runoff policy",
+    "target identifier ordering may normalize output display but cannot silently resolve a substantive winner tie unless a future policy explicitly defines that as the tie rule",
+    "random tie-breaking is not part of v1 and cannot be invented at runtime"
+  ],
+  "deterministicFinalizationRules": [
+    "finalization may begin only after votingEnd and only from a valid CLOSED ballot",
+    "finalizer recomputes eligibility mode, accepted vote set, quorum, threshold, tie handling and winner set from the frozen policy and canonical accepted vote records",
+    "same ballot/policy/accepted-vote set produces the same resultCommitment and winnerTargetIds/no-winner disposition",
+    "finalization is single-use for the exact ballot; repeated finalization returns the existing result or fails without creating another AwardResult",
+    "result records policyCommitment, tally commitment, winner/no-winner disposition, finalizedAt and exact ballot reference",
+    "a finalized season/result cannot be retroactively re-tallied under a new policy; correction/dispute must use explicit superseding history under HZ-GCA-1.14"
+  ],
+  "privacyRules": [
+    "public tally/result may reveal aggregate counts permitted by policy but not wallet signatures, private keys, raw Identity proofs, legal identity or hidden voter-linkage data",
+    "AwardVote visibility follows the privacy policy and need not reveal voter identity publicly",
+    "ballot-scoped nullifiers/eligibility references must not be reusable across unrelated ballots to correlate voters unnecessarily",
+    "private/secret Identity evidence remains outside Search/Indexer/Analytics public projection",
+    "minimum-disclosure proof results are consumed only for the exact eligibility predicate needed by the ballot"
+  ],
+  "failureRules": [
+    "nomination outside the frozen window fails closed",
+    "unpublished or canonically unavailable Recording nomination fails closed",
+    "AI disclosure/category mismatch fails closed",
+    "self-nomination when DISALLOWED fails closed",
+    "nomination cap overflow fails closed",
+    "duplicate nomination replay cannot create duplicate ballot candidates",
+    "community threshold using PRIVATE/UNLISTED support is invalid",
+    "voting opens without frozen candidate set/policy/quorum/winner/tie semantics fails closed",
+    "Wallet-only voter mode claiming one-person-one-vote is invalid",
+    "IDENTITY_UNIQUE_ONE_VOTE without qualified current minimum-disclosure eligibility fails closed",
+    "duplicate/replayed voter key cannot create a second accepted vote",
+    "vote for non-candidate or wrong ballot fails closed",
+    "quorum denominator unavailable for MIN_PARTICIPATION_BPS fails closed",
+    "operator/manual tally mutation is invalid",
+    "finalization before votingEnd or from non-CLOSED ballot fails closed",
+    "repeated finalization cannot create a second AwardResult",
+    "closed/finalized season cannot be recomputed under a later policy"
+  ],
+  "invariants": [
+    "HZGCA-VOTE-001 nomination and voting policy is frozen per season/category before participation and is never silently reinterpreted",
+    "HZGCA-VOTE-002 eligible song-category targets reference canonical published Recordings; artist-category eligibility retains canonical Creator plus required published-work predicate",
+    "HZGCA-VOTE-003 AI-generated, AI-assisted and AI-derivative categories enforce exact disclosure compatibility",
+    "HZGCA-VOTE-004 nomination replay/caps/self-nomination rules are explicit and cannot create duplicate ballot candidates",
+    "HZGCA-VOTE-005 community-threshold support consumes only eligible PUBLIC deduped community state and never becomes an Award vote",
+    "HZGCA-VOTE-006 ballot candidate set and voting policy are immutable after FROZEN",
+    "HZGCA-VOTE-007 Wallet authorization proves account control only and never unique-human identity",
+    "HZGCA-VOTE-008 any unique-human voting claim requires qualified minimum-disclosure Identity eligibility and fails closed when unavailable/stale/revoked",
+    "HZGCA-VOTE-009 one ballot-scoped voter key/nullifier creates at most one accepted vote per ballot",
+    "HZGCA-VOTE-010 raw Identity evidence, legal identity, wallet signing secrets and private proof payloads never enter AwardVote/public tally state",
+    "HZGCA-VOTE-011 abstention, invalid/rejected votes and candidate votes remain separately accounted",
+    "HZGCA-VOTE-012 quorum, winner threshold and tie semantics are explicit frozen policy inputs",
+    "HZGCA-VOTE-013 ties are handled only by the declared CO_WINNERS, NO_WINNER or RUNOFF_REQUIRED policy; no hidden/random tie break exists",
+    "HZGCA-VOTE-014 identical frozen ballot/policy/accepted-vote inputs produce deterministic finalization",
+    "HZGCA-VOTE-015 repeated finalization cannot create multiple results for one ballot",
+    "HZGCA-VOTE-016 finalized/closed season history is not retroactively recomputed under later policy",
+    "HZGCA-VOTE-017 Chart rank, Community popularity, payment/prize state and Civic governance cannot substitute for nomination/voting authority",
+    "HZGCA-VOTE-018 nomination/voting policy creates no new Creative rights, Identity trust, payment, governance or Chart authority"
+  ],
+  "exitCriteria": [
+    "eligibility windows and canonical published-target requirements are explicit",
+    "AI disclosure/category compatibility is explicit",
+    "nomination caps, duplicate prevention, self-nomination and optional community thresholds are explicit",
+    "ballot construction/freeze semantics are explicit",
+    "Wallet, Identity and jury voter-eligibility modes are explicit with honest Sybil guarantees",
+    "privacy-preserving unique-human proof consumption and fail-closed unavailability are explicit",
+    "vote replay, abstention, invalid-vote, quorum, winner-threshold and tie policies are explicit",
+    "deterministic close/finalization and no-retroactive-recompute rules are explicit",
+    "targeted verifier enforces the frozen policy vocabulary and invariants",
+    "no Identity proof scheme, ABI, runtime service, deployment or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.14 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.12-AWARDS-ARCHITECTURE.md",
+    "hz/config/gca-awards-architecture-v1.json",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "hz/config/gca-community-authority-v1.json",
+    "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+    "hz/config/gca-charts-v1.json",
+    "docs/apps/governance/security.md",
+    "docs/puffbuddies/PB-2.4-PRIVACY-PRESERVING-ELIGIBILITY-PROOFS.md",
+    "docs/puffbuddies/PB-2.4-QUALIFICATION.md"
+  ]
+}

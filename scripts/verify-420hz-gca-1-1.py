@@ -79,7 +79,7 @@ if not errors:
 
     need("HZ-GCA-1.1 — Define product boundaries" in roadmap, "roadmap work package missing")
     need("Level 1 only" in roadmap, "roadmap Level-1 qualification rule missing")
-    need("does not replace, renumber or independently close" in roadmap,
+    need("do not replace, renumber or independently close" in roadmap,
          "roadmap parent-step preservation statement missing")
 
 print(json.dumps({

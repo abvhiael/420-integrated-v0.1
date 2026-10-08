@@ -128,7 +128,7 @@ No provider may become canonical protocol authority.
 
 Route generation execution through the canonical compute architecture.
 
-**Qualification:** Level 1 ordinary app-scoped integration step. Because this step materially consumes existing 420AI/Compute authority surfaces, Level 1 retains directly affected 420AI Compute/provider compatibility checks; it does not change shared Compute/AI implementation and therefore does not independently trigger a new Level-2 milestone.
+**Qualification:** Level 1 ordinary app-scoped integration step. **COMPLETE** — exact-head implementation SHA `28a87b7fda4e9a719dfedc4999466fc5beb75922`, `420Hz Web Qualification` run `37813944369`, job `HZ-GCA-3 Level 1` (`113437604323`). Because this step materially consumes existing 420AI/Compute authority surfaces, Level 1 retains directly affected 420AI Compute/provider compatibility checks; it does not change shared Compute/AI implementation and therefore does not independently trigger a new Level-2 milestone.
 
 **Repository artifacts:** `hz/generate/src/compute-adapter.js`, deterministic development Compute client, machine-readable execution-adapter manifest, architecture document, targeted verifier and app-specific/shared-compatibility CI coverage.
 

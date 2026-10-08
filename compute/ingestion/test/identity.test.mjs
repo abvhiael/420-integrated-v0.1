@@ -4,7 +4,7 @@ const mk=()=>createIdentityRegistry({chainId:'420',now:()=>now,sourcePolicies:[{
 const req={chainId:'420',wallet,sourceId:'boinc',projectId:'project',externalCommitment:external,nonce:'c'.repeat(64),expiresAt:now+60000};
 const digest=x=>createHash('sha256').update(x).digest('hex');
 const authorization=x=>({wallet:x.wallet,chainId:x.chainId,digest:digest(JSON.stringify(x)),verified:true});
-const signature=x=>sign(null,Buffer.from('420/S04/EXTERNAL_OWNERSHIP/V1\\n'+JSON.stringify(x)),k.privateKey).toString('base64url');
+const signature=x=>sign(null,Buffer.from('420/S04/EXTERNAL_OWNERSHIP/V1\n'+JSON.stringify(x)),k.privateKey).toString('base64url');
 const bad=(f,c)=>assert.throws(f,e=>e instanceof IdentityError&&e.code===c);
 test('explicit dual control creates nonmonetized link without raw identities',()=>{let r=mk().link({request:req,externalSignature:signature(req),walletAuthorization:authorization(req)});assert.equal(r.identityVerified,true);assert.equal(r.monetizationEligible,false);assert.equal(JSON.stringify(r).includes('username'),false)});
 test('public username or statistics cannot prove ownership',()=>bad(()=>mk().link({request:req,externalSignature:'',walletAuthorization:authorization(req)}),'EXTERNAL_PROOF_REQUIRED'));

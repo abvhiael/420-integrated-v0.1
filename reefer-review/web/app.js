@@ -546,4 +546,4 @@ $("#edit-form").addEventListener("submit",async(e)=>{
 });
 
 window.addEventListener("hashchange",refreshRoute);
-document.addEventListener("DOMContentLoaded",async()=>{await loadSourcesAndTopics();refreshRoute();});
+document.addEventListener("DOMContentLoaded",()=>{refreshRoute();void loadSourcesAndTopics();});

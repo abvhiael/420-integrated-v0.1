@@ -166,7 +166,7 @@ if not errors:
       "submitAttempts",
       "QUOTE_EXPIRED",
       "INTEGRITY_MISMATCH",
-      "PROVIDER_UNAVAILABLE",
+      "normalizeProviderError420",
       "TIMEOUT",
       "validateOutputManifest420"
     ]:

@@ -43,3 +43,5 @@ export * from './ai-descriptors.js';
 export * from './ai-read-model.js';
 export * from './compute-descriptors.js';
 export * from './compute-read-model.js';
+
+export * from './compute-analytics.js';

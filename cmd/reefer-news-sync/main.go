@@ -13,6 +13,10 @@ import (
 )
 
 func main() {
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("REEFER_REVIEW_EMBEDDED_POLLING")), "true") {
+		log.Print("standalone RSS poller disabled; API process owns shared in-memory store")
+		return
+	}
 	db := strings.TrimSpace(os.Getenv("REEFER_REVIEW_NEWS_DB"))
 	if db == "" {
 		db = ".reefer-review/news.json"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
@@ -48,6 +49,18 @@ func main() {
 		checkpoint := strings.TrimSpace(os.Getenv("REEFER_REVIEW_FEED_CHECKPOINT"))
 		if checkpoint == "" {
 			checkpoint = ".reefer-review/feed-operations.json"
+		}
+		if strings.EqualFold(strings.TrimSpace(os.Getenv("REEFER_REVIEW_FEED_MODE")), "poll") && strings.EqualFold(strings.TrimSpace(os.Getenv("REEFER_REVIEW_EMBEDDED_POLLING")), "true") {
+			operations := &reeferreview.FeedOperations{
+				Path: checkpoint, Sources: newsRegistry, SourcesPath: newsSources,
+				Ingestor: reeferreview.NewsIngestor{Store: newsStore, Fetcher: reeferreview.FeedFetcher{}},
+			}
+			go func() {
+				if err := operations.Run(context.Background(), 30*time.Second); err != nil {
+					log.Printf("RSS polling stopped: %v", err)
+				}
+			}()
+			log.Print("RSS polling enabled in API process using one shared news store")
 		}
 		server := &http.Server{Addr: addr, Handler: (reeferreview.HTTP{News: news, NewsAdminKey: []byte(secret), NewsFeedCheckpointPath: checkpoint}).NewsOnlyHandler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 30 * time.Second}
 		log.Printf("ReeferReview standalone RSS news service listening on %s; editorial/chain endpoints disabled", addr)

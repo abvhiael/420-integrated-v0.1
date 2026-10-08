@@ -74,7 +74,7 @@ jobs:
 
   sdk:
     needs: classify
-    if: needs.classify.outputs.sdk == 'true'
+    if: needs.classify.outputs.sdk == 'true' && needs.classify.outputs.level3_closeout != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
 
   api:
     needs: classify
-    if: needs.classify.outputs.api == 'true'
+    if: needs.classify.outputs.api == 'true' && needs.classify.outputs.level3_closeout != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -108,7 +108,7 @@ jobs:
 
   indexer:
     needs: classify
-    if: needs.classify.outputs.indexer == 'true'
+    if: needs.classify.outputs.indexer == 'true' && needs.classify.outputs.level3_closeout != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -124,7 +124,7 @@ jobs:
 
   cli:
     needs: classify
-    if: needs.classify.outputs.cli == 'true'
+    if: needs.classify.outputs.cli == 'true' && needs.classify.outputs.level3_closeout != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -5,6 +5,7 @@ on:
       - 'docs/audit/420GROW-*.md'
       - 'scripts/verify-grow-01.py'
       - 'scripts/verify-grow-02.py'
+      - 'scripts/verify-grow-06.py'
       - 'grow/**'
       - 'genesis/svc2/sdk/**'
       - 'location/uikit/**'
@@ -20,6 +21,7 @@ on:
       - 'docs/audit/420GROW-*.md'
       - 'scripts/verify-grow-01.py'
       - 'scripts/verify-grow-02.py'
+      - 'scripts/verify-grow-06.py'
       - 'grow/**'
       - 'genesis/svc2/sdk/**'
       - 'location/uikit/**'
@@ -68,5 +70,7 @@ jobs:
         run: python3 scripts/verify-grow-01.py
       - name: GROW-02 canonical identity verifier
         run: python3 scripts/verify-grow-02.py
+      - name: GROW-06 no-contract authority verifier
+        run: python3 scripts/verify-grow-06.py
       - name: Python verifier syntax
-        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py
+        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py scripts/verify-grow-06.py

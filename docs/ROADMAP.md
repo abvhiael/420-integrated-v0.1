@@ -174,7 +174,7 @@ Shared-service and application launch gates are being completed before public ex
 
 **Deliverable:** stable public 420 testnet tied to a reconciled and adversarially qualified release candidate.
 
-### 420Compute / Compute Market — deferred live-testnet, security and mainnet work
+**Scientific-provider live ingestion and optional Gridcoin interoperability:** the [BOINC/Folding@home evidence, identity, reward and GRC feasibility annex](compute-market/CMP-9-SCIENTIFIC-INGESTION-AND-GRIDCOIN-ROADMAP.md) now tracks S-01–S-10 live provider-to-funded-$420 requirements and G-01–G-06 independent Gridcoin bridge/Exchange feasibility. All items are PENDING; existing CMP-5/6 implementation and CMP-8 qualification remain intact. No GRC route, Exchange listing or $420 external payout is authorized by documenting these tasks.\n\n### 420Compute / Compute Market — deferred live-testnet, security and mainnet work
 
 **Status: TESTNET-GATED HANDOFF — NOT COMPLETE.** CMP-1 through CMP-8 repository qualification is retained; CMP-8 implementation qualified at `1889713a30ebee9afbdfc21b151d7c69789c1e09` and merged through PR #570 (merge `6a3c611a3c0629c9bbae1e67f992d98ba1787550`). No live deployment, funded execution, payout, operational closeout or mainnet readiness is implied. Canonical phase numbering and protocol authority remain governed by [the Compute roadmap](compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md) and [CMP-8 evidence](compute-market/CMP-8-QUALIFICATION-EVIDENCE.md).
 

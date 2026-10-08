@@ -1,6 +1,6 @@
 # CMP-7.7 — Historical analytics
 
-Status: **IMPLEMENTED — Level 1 exact-head qualification pending.**
+Status: **COMPLETE — Level 1 exact-head qualified on `b204b6a427580dcb14aab0bc88bcf52d30856b05`.**
 
 ## Canonical purpose
 

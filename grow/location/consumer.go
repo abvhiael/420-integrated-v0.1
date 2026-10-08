@@ -25,17 +25,17 @@ type PublicReader interface {
 // Source and optional Registry record ID are upstream provenance references.
 // They never assert that Grow has verified a business or owns the record.
 type Card struct {
-	ID        string         `json:"id"`
-	Name      string         `json:"name"`
-	Category  model.Category `json:"category"`
-	Source    string         `json:"source"`
-	RegistryRecordID string `json:"registryRecordId,omitempty"`
-	Kind      uikit.Kind     `json:"kind"`
-	Latitude  *float64       `json:"latitude,omitempty"`
-	Longitude *float64       `json:"longitude,omitempty"`
-	Region    string         `json:"region,omitempty"`
-	City      string         `json:"city,omitempty"`
-	Country   string         `json:"country,omitempty"`
+	ID               string         `json:"id"`
+	Name             string         `json:"name"`
+	Category         model.Category `json:"category"`
+	Source           string         `json:"source"`
+	RegistryRecordID string         `json:"registryRecordId,omitempty"`
+	Kind             uikit.Kind     `json:"kind"`
+	Latitude         *float64       `json:"latitude,omitempty"`
+	Longitude        *float64       `json:"longitude,omitempty"`
+	Region           string         `json:"region,omitempty"`
+	City             string         `json:"city,omitempty"`
+	Country          string         `json:"country,omitempty"`
 }
 type View struct {
 	Items               []Card `json:"items"`

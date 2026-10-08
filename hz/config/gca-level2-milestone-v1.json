@@ -78,5 +78,6 @@
     "zero unresolved authority duplication/critical architecture contradiction",
     "durable Level-2 evidence records exact implementation SHA and next canonical step"
   ],
-  "nextCanonicalStep": "HZ-GCA-2 — Generation job and provider abstraction"
+  "nextCanonicalStep": "HZ-GCA-2 — Generation job and provider abstraction",
+  "qualificationWorkflow": "420Hz GCA Qualification / HZ-GCA Level 2"
 }

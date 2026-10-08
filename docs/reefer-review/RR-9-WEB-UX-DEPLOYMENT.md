@@ -30,3 +30,19 @@ Repository-source Level 1 is not proof of deployed browser behavior. These gates
 ## Next canonical step
 
 **RR-10 — Repository Level 3 Closeout** only after RR-9's own required release-stage criteria are satisfied.
+
+## Operator encrypted local backup
+
+Use a deployment-managed 32-byte AES key supplied as 64 hexadecimal characters in `REEFER_REVIEW_BACKUP_KEY_HEX`. Never commit, log, or persist this key with the snapshot. Select a consistent quiesced set of local files; the command does not create a distributed transaction or back up remote 420 Storage objects.
+
+```sh
+go run ./cmd/reefer-backup backup ./reefer-snapshot.enc \
+  publications=/secure/path/publications.json \
+  news=/secure/path/news.json \
+  feed-checkpoints=/secure/path/feed-operations.json \
+  integration-outbox=/secure/path/integrations.json
+
+go run ./cmd/reefer-backup restore ./reefer-snapshot.enc ./restored-new-directory
+```
+
+The backup refuses symlinks, oversized files, invalid labels and existing output files; restore authenticates ciphertext and digests, writes owner-only files in a *new* directory and refuses overwrite. A live operator must still qualify quiescence, key rotation, off-site retention, independent remote-object snapshots and full disaster recovery on the real deployment.

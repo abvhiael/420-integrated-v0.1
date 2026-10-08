@@ -1,0 +1,1 @@
+{"name":"@420integrated/grow-web","version":"0.1.0","private":true,"type":"module","scripts":{"check":"node --check app.js && node --test test/*.test.js","build":"node scripts/build.mjs","qualify":"npm run check && npm run build"},"engines":{"node":">=22"}}

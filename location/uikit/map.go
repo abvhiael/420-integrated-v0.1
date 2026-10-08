@@ -20,6 +20,8 @@ type Item struct {
  ID string `json:"id"`
  Name string `json:"name"`
  Category model.Category `json:"category"`
+ Source string `json:"source"`
+ RegistryRecordID string `json:"registryRecordId,omitempty"`
  Kind Kind `json:"kind"`
  Latitude *float64 `json:"latitude,omitempty"`
  Longitude *float64 `json:"longitude,omitempty"`
@@ -41,7 +43,7 @@ func Build(places []model.Place)(View,error) {
   if p.Visibility!=model.VisibilityPublic {continue}
   if err:=p.Validate();err!=nil{return View{},err}
   if _,ok:=seen[p.ID];ok{return View{},errors.New("duplicate public place id")};seen[p.ID]=struct{}{}
-  item:=Item{ID:p.ID,Name:p.Name,Category:p.Category,Kind:KindArea,City:p.City,Region:p.Region,Country:p.Country}
+  item:=Item{ID:p.ID,Name:p.Name,Category:p.Category,Source:p.Source,RegistryRecordID:p.RegistryRecordID,Kind:KindArea,City:p.City,Region:p.Region,Country:p.Country}
   if p.Precision==model.PrecisionExactPublic {
    if p.Latitude==nil||p.Longitude==nil||math.IsNaN(*p.Latitude)||math.IsNaN(*p.Longitude) {return View{},errors.New("public pin coordinates missing")}
    lat,lon:=*p.Latitude,*p.Longitude

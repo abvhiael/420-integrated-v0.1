@@ -1,0 +1,18 @@
+# 420Grow — deferred testnet and release qualification roadmap
+
+**Disposition (2026-10-08): DEFERRED / NOT QUALIFIED.** PR #567 is authorized for repository integration with expressly accepted unfinished gates; this is **not** a Level-3 PASS, security attestation, public testnet acceptance, or production go-live authorization. Implemented candidate: `f920b9f459c12ec7a2fc6badd918d76e5f8e1208`. Keep canonical 420Grow GROW-01–GROW-10 identities unchanged, consumer-only boundaries intact, and no Grow Genesis service/contract/catalog admission.
+
+## Deferred qualification ownership
+
+1. **GROW-L3-SOL — canonical Solidity Level-3 recovery (BLOCKED):** recover `contracts-foundry.yml` full `FOUNDRY_PROFILE=ci` inventory, comprehensive tests and Decision #10 at the exact implementation candidate or properly reconciled release lineage. Run 37825348329 attempts 1 and 2 FAILED: jobs 113476666106 and 113490259647 terminated at runner shutdown/exit 143 while compiling 1,043 files, before tests. Investigate GitHub/Azure runner termination/resource telemetry, preserve cause uncertainty; no falsified PASS, no duplication of Solidity inventory in Genesis. Three other exact-SHA gates already PASS and must not be needlessly rerun: Genesis 37825473703/job 113477097858; integrated 37825535806/jobs 113477308978/113477309254/113477309257/113477309282; Docs 37825623919/job 113477615529.
+2. **GROW-10-A — approved live location source (BLOCKED):** bind to an operator-approved public GEN-SVC-2 / 420Location source, valid public FARM/BUSINESS data and allowed visibility/provenance; retain consumer-only data flow and prove missing/private/disallowed source data fails closed.
+3. **GROW-10-B — immutable testnet deployment (BLOCKED):** record actual release SHA/artifact digests, hosting, HTTPS endpoints, deployed frontend and optional service, configuration and upstream provenance; do not invent chain identifiers, contracts or wallet functionality.
+4. **GROW-10-C — public browser/security/privacy acceptance (BLOCKED):** exercise TLS, CSP, CORS, origin/referrer and cache policy, privacy/coarse-coordinate controls, anonymous access, pagination, malicious upstream responses, outage/timeout handling, keyboard/accessibility and manual device/browser checks against real deployed endpoints.
+5. **GROW-10-D — operations and rollback (BLOCKED):** establish owner, live health/alerting, logs without private location leakage, failure/restart/degraded-mode evidence, rollback execution, incident/runbook review and handoff.
+6. **GROW-10-E — final testnet go/no-go (BLOCKED):** reconcile actual deployment lineage, collected negative/adversarial evidence and operator acceptance; separately complete any deferred comprehensive Level-3 requirement before claiming phase-qualified or release-ready. Preserve exact run/job IDs, outcomes and evidence.
+
+## Evidence and restrictions
+
+- [PR #567](https://github.com/abvhiael/420-integrated-v0.1/pull/567), [initial Solidity run](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37825348329), [runner investigation](https://github.com/abvhiael/420-integrated-v0.1/pull/567#issuecomment-6068827125).
+- App-scoped Grow candidate [run 37802378736](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37802378736) PASS; GEN-SVC-2 build workflows have passing *repository* evidence but do not prove live release.
+- Release declarations: app-scoped implementation qualified; **Solidity Level 3 NOT PASS; full Level 3 INCOMPLETE; TESTNET NOT QUALIFIED; PRODUCTION NOT QUALIFIED**. Merging repository work with these known exceptions is a project scheduling decision, not waiver of later qualification.

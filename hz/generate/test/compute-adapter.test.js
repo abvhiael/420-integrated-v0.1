@@ -99,3 +99,93 @@ test("missing authorization fails before Compute submission",async()=>{
   await assert.rejects(()=>manager.submit(job.jobId,provider),e=>e.code==="PROVIDER_REJECTED");
   assert.equal(compute.jobs.size,0);
 });
+
+test("repeated submit remains one canonical Compute job",async()=>{
+  const compute=new DeterministicDevelopmentComputeClient420();
+  const provider=new ComputeMarketGenerationProvider420({computeClient:compute,authorizeIntent:auth,chainId:"420",computeGraphHash:"dev:compute-graph:v1"});
+  const manager=new GenerationJobManager420();
+  const job=manager.create(request());
+  await manager.quote(job.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+  const a=await manager.submit(job.jobId,provider);
+  const b=await manager.submit(job.jobId,provider);
+  assert.equal(a.providerJobRef,b.providerJobRef);
+  assert.equal(compute.jobs.size,1);
+});
+
+test("canonical assignment or accepted-price drift fails closed",async()=>{
+  const compute=new DeterministicDevelopmentComputeClient420();
+  const provider=new ComputeMarketGenerationProvider420({computeClient:compute,authorizeIntent:auth,chainId:"420",computeGraphHash:"dev:compute-graph:v1"});
+  const manager=new GenerationJobManager420();
+  const job=manager.create(request());
+  await manager.quote(job.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+  const submitted=await manager.submit(job.jobId,provider);
+  compute.jobs.get(submitted.providerJobRef).acceptedPrice="421";
+  await assert.rejects(()=>manager.poll(job.jobId,provider),e=>e.code==="INTEGRITY_MISMATCH");
+});
+
+test("positive verification is required before application success",async()=>{
+  const compute=new DeterministicDevelopmentComputeClient420({settleOnVerified:false});
+  const provider=new ComputeMarketGenerationProvider420({computeClient:compute,authorizeIntent:auth,chainId:"420",computeGraphHash:"dev:compute-graph:v1"});
+  const manager=new GenerationJobManager420();
+  const job=manager.create(request());
+  await manager.quote(job.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+  const submitted=await manager.submit(job.jobId,provider);
+  await manager.poll(job.jobId,provider);
+  const canonical=compute.jobs.get(submitted.providerJobRef);
+  canonical.polls=2;
+  canonical.status="VERIFIED";
+  canonical.verificationVerdict="FAIL";
+  canonical.verificationRef="verify:fail";
+  canonical.resultCommitment="result:x";
+  canonical.outputManifest={artifacts:[{kind:"MIX",storageRef:"dev://x",integrity:"sha256:x",label:"mix"}]};
+  await assert.rejects(()=>manager.poll(job.jobId,provider),e=>e.code==="MALFORMED_RESULT");
+  assert.equal(manager.get(job.jobId).state,"FAILED");
+});
+
+test("cancellation is authorized and exposes refund reference without claiming payment",async()=>{
+  const compute=new DeterministicDevelopmentComputeClient420();
+  const plans=[];
+  const provider=new ComputeMarketGenerationProvider420({
+    computeClient:compute,
+    authorizeIntent:async(plan)=>{plans.push(plan);return "wallet:"+plan.operationId;},
+    chainId:"420",computeGraphHash:"dev:compute-graph:v1"
+  });
+  const manager=new GenerationJobManager420();
+  const job=manager.create(request());
+  await manager.quote(job.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+  const submitted=await manager.submit(job.jobId,provider);
+  const result=await provider.cancel({providerJobRef:submitted.providerJobRef});
+  assert.equal(result.status,"CANCELLED");
+  assert.ok(result.refundRef);
+  assert.equal(plans.at(-1).action,"CANCEL_MUSIC_GENERATION");
+  const execution=await provider.execution(submitted.providerJobRef);
+  assert.equal(execution.status,"CANCELLED");
+  assert.ok(execution.refundRef);
+  assert.equal(execution.settlementRef,null);
+});
+
+test("wrong chain or Compute graph fails before discovery or execution",async()=>{
+  const compute=new DeterministicDevelopmentComputeClient420({chainId:"420",computeGraphHash:"graph:a"});
+  const wrongChain=new ComputeMarketGenerationProvider420({computeClient:compute,authorizeIntent:auth,chainId:"421",computeGraphHash:"graph:a"});
+  await assert.rejects(()=>wrongChain.descriptor(),e=>e.code==="PROVIDER_UNAVAILABLE");
+  const wrongGraph=new ComputeMarketGenerationProvider420({computeClient:compute,authorizeIntent:auth,chainId:"420",computeGraphHash:"graph:b"});
+  await assert.rejects(()=>wrongGraph.descriptor(),e=>e.code==="PROVIDER_UNAVAILABLE");
+});
+
+test("development adapter preserves funding, verification, entitlement and settlement references separately",async()=>{
+  const compute=new DeterministicDevelopmentComputeClient420();
+  const provider=new ComputeMarketGenerationProvider420({computeClient:compute,authorizeIntent:auth,chainId:"420",computeGraphHash:"dev:compute-graph:v1"});
+  const manager=new GenerationJobManager420();
+  const job=manager.create(request());
+  await manager.quote(job.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+  const submitted=await manager.submit(job.jobId,provider);
+  await manager.poll(job.jobId,provider);
+  await manager.poll(job.jobId,provider);
+  const execution=await provider.execution(submitted.providerJobRef);
+  assert.ok(execution.fundingRef);
+  assert.ok(execution.acceptedMatchRef);
+  assert.ok(execution.verificationRef);
+  assert.ok(execution.entitlementRef);
+  assert.ok(execution.settlementRef);
+  assert.notEqual(execution.fundingRef,execution.settlementRef);
+});

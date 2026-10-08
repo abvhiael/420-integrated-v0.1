@@ -23,6 +23,21 @@ test.beforeEach(async ({ page }) => {
   }));
 });
 
+test.afterEach(async ({page},testInfo) => {
+  if (testInfo.status !== testInfo.expectedStatus && !page.isClosed()) {
+    const snapshot = await page.evaluate(() => ({
+      hash:location.hash,
+      readyState:document.readyState,
+      sections:Array.from(document.querySelectorAll('.view')).map(node=>({id:node.id,hidden:node.hidden,display:getComputedStyle(node).display})),
+      newsCards:document.querySelectorAll('#news-feed article').length,
+      newsText:document.querySelector('#news-feed')?.textContent?.slice(0,400),
+      topicsHeading:document.querySelector('#topics-title')?.textContent,
+      appStatus:document.querySelector('#app-status')?.textContent
+    })).catch(error=>({captureError:error.message}));
+    console.log('[RR9 PAGESTATE]', JSON.stringify(snapshot));
+  }
+});
+
 test('anonymous news is attributed and links to original without script injection', async ({page}) => {
   await page.goto('http://127.0.0.1:8765/#news');
   await expect(page.getByRole('heading', {name:'Cannabis News'})).toBeVisible();

@@ -30,7 +30,9 @@ Build separately versioned, provider-scoped off-chain ingestion clients with HTT
 
 Exit: deterministic contract tests using approved fixtures plus actual read-only provider endpoint responses; reject malformed, forged, late, missing and inconsistent records. No writes or rewards.
 
-### S-03 — Source-of-truth and trusted evidence verification
+### S-03 — Source-of-truth and trusted evidence verification — PARTIAL (Level 1 offline PASS; live gates BLOCKED)
+
+Offline verifier evidence: [S-03 qualification](CMP-S03-QUALIFICATION-EVIDENCE.md), exact implementation SHA `1d3d13e9876bfdec6f5bac9674132b51e638c573`. Signed-source receipt checks are qualified at Level 1, but no provider-authorized work-unit source, durable dispute channel or live governed attester exists. S-03 is **not COMPLETE**.
 
 Require provider-server corroboration, or a project-authorized independent proof source, sufficient to establish contributor, project, assignment, work unit, result acceptance and credited event under its actual provider semantics. Reconcile updates/rollbacks and rescoring; prohibit deriving work-unit uniqueness from points-only snapshots. Attest only supported evidence strength. If only account-level aggregates are available, display them as observations **not reward-eligible work** until an audited uniqueness policy exists.
 

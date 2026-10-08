@@ -1,6 +1,6 @@
 # RR-11 — Standalone RSS news aggregation implementation and qualification
 
-Status: **IN PROGRESS / exact-head CI qualification pending**. New additive post-RR-10 app-scoped phase. No change to Genesis, Solidity contracts, network addresses or completed RR-10 evidence.
+Status: **COMPLETE — repository Level 1 + Level 2 qualified on implementation SHA `93f4bd0b547ab1b72e584968b1f800ba886255f6`; live operation and release gates remain unverified.** Durable evidence: [`RR-11-QUALIFICATION.md`](./RR-11-QUALIFICATION.md). New additive post-RR-10 app-scoped phase. No change to Genesis, Solidity contracts, network addresses or completed RR-10 evidence.
 
 ## Implemented
 - Retain RR-1 persistent external news store, RSS/Atom parser, deduplication, canonical article links and publisher attribution; RR-7 secure SSRF-blocking fetcher and RR-8 conditional GET, per-source scheduled polling, retries/backoff/circuit health/checkpoint persistence.

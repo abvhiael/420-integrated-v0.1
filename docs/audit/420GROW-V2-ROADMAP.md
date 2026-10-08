@@ -1,12 +1,12 @@
 # 420Grow V2 cultivation operations roadmap
 
-**Status:** Expansion PRODUCT DECISION in progress; engineering not yet implemented. Does not overwrite GROW-01–GROW-10 and does not assert Genesis authority.
+**Status:** GROW-V2-01 product decision COMPLETE at Level 1; V2-02 onward not yet implemented. Does not overwrite GROW-01–GROW-10 and does not assert Genesis authority.
 
 **Decision source:** [GROW-V2-01](420GROW-V2-01-EXPANDED-PRODUCT-DECISION.md), which explicitly defines tenant-private cultivation software for lawful home, licensed small-business and commercial users. The prior public read-only FARM/BUSINESS directory remains independent. Canonical original audit is [420Grow initial roadmap](420GROW-INITIAL-AUDIT-AND-REMEDIATION-ROADMAP.md). Remaining former release/qualification work remains in [the deferred testnet ledger](420GROW-TESTNET-AND-DEFERRED-QUALIFICATION-ROADMAP.md).
 
 | Step | Name | State / boundary |
 | --- | --- | --- |
-| GROW-V2-01 | Expanded product decision, personas and approved scope | IN PROGRESS / Level 1 |
+| GROW-V2-01 | Expanded product decision, personas and approved scope | COMPLETE / Level 1 — SHA `fc00b78f442c20eac35669d411dbe8d8ac8f99df`; runs 37846815165, 37846815166 SUCCESS |
 | GROW-V2-02 | Architecture, tenancy, roles and security model | PLANNED / Level 1 |
 | GROW-V2-03 | Persistent storage, schemas and migrations | PLANNED / Level 1 |
 | GROW-V2-04 | Facility, room and zone management | PLANNED / Level 1 |

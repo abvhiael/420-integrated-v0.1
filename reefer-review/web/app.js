@@ -430,6 +430,7 @@ $("#session-disconnect").addEventListener("click", ()=>{
   setStatus("Signed out.");
   if(state.route==="editorial"||state.route==="moderation"||state.route==="article") refreshRoute();
 });
+$("[data-news-section]").forEach((button)=>button.addEventListener("click",()=>{state.topic=button.dataset.newsSection;state.newsCursor="";const filter=$("#topic-filter");filter.value=state.topic; if(filter.value!==state.topic) filter.value=""; $("[data-news-section]").forEach((b)=>b.setAttribute("aria-pressed",String(b===button)));location.hash="news";refreshRoute();}));
 $("#source-filter").addEventListener("change",(e)=>{state.source=e.target.value;state.newsCursor="";refreshRoute();});
 $("#topic-filter").addEventListener("change",(e)=>{state.topic=e.target.value;state.newsCursor="";refreshRoute();});
 $("#clear-filters").addEventListener("click",()=>{state.source="";state.topic="";$("#source-filter").value="";$("#topic-filter").value="";state.newsCursor="";refreshRoute();});

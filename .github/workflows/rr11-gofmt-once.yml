@@ -1,0 +1,28 @@
+name: RR-11 One-Shot Go Format Repair
+on:
+  push:
+    branches:
+      - reefer-review-rr11-standalone-rss-20261008
+    paths:
+      - '.github/workflows/rr11-gofmt-once.yml'
+permissions:
+  contents: write
+jobs:
+  gofmt:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Format RR-11 changed Go files
+        run: |
+          gofmt -w reefer-review/news_admin.go reefer-review/news_admin_test.go reefer-review/news_service.go reefer-review/news_feed.go reefer-review/news_operations.go reefer-review/http.go reefer-review/news_standalone.go reefer-review/news_standalone_test.go cmd/reefer-review/main.go cmd/reefer-news-sync/main.go
+          git diff --check
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add reefer-review/news_admin.go reefer-review/news_admin_test.go reefer-review/news_service.go reefer-review/news_feed.go reefer-review/news_operations.go reefer-review/http.go reefer-review/news_standalone.go reefer-review/news_standalone_test.go cmd/reefer-review/main.go cmd/reefer-news-sync/main.go
+            git commit -m "style(reefer-review): apply gofmt to final RR-11 changes"
+            git push origin HEAD:reefer-review-rr11-standalone-rss-20261008
+          fi

@@ -64,6 +64,20 @@ jobs:
       - name: Frontend JavaScript syntax
         run: node --check reefer-review/web/app.js
 
+      - name: Install browser qualification dependencies
+        run: |
+          npm install --no-save --package-lock=false @playwright/test@1.56.1 @axe-core/playwright@4.11.0
+          npx playwright install --with-deps chromium
+
+      - name: RR-9 real-browser E2E and accessibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory reefer-review/web >/tmp/reefer-rr9-browser.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          npx playwright test reefer-review/web/rr9.e2e.spec.cjs --workers=1 --reporter=line
+
       - name: RR-9 verifier
         run: python3 scripts/verify-reefer-review-rr9.py
 

@@ -176,7 +176,7 @@ Required work:
 
 Implement the creator-side project model.
 
-**Qualification:** Level 1 ordinary app-scoped step. Retain HZ-GCA-1.8 storage/retention and HZ-GCA-4 provenance boundaries, plus the complete generation/project suite and HZ-GCA-5 targeted verifier. No Level-2 milestone is introduced.
+**Qualification:** Level 1 ordinary app-scoped step. **COMPLETE** — exact-head implementation SHA `f296e4a40ba2bba2d9ea033b682d185aa5b15973`, `420Hz Web Qualification` run `37823618595`, job `HZ-GCA-5 Level 1` (`113470663884`). Retain HZ-GCA-1.8 storage/retention and HZ-GCA-4 provenance boundaries, plus the complete generation/project suite and HZ-GCA-5 targeted verifier. No Level-2 milestone is introduced.
 
 **Repository artifacts:** private project workspace/runtime, deterministic private-storage adapter, project/version/take/artifact model, quota/retention/archive/export/delete behavior, machine-readable policy manifest, architecture document, storage integration tests and targeted verifier.
 

@@ -15,6 +15,7 @@ type HTTP struct {
 	Service  Service
 	News     *NewsService
 	Security *SessionSecurity
+	NewsAdminKey []byte
 }
 
 func (h HTTP) Handler() http.Handler {

@@ -1,6 +1,6 @@
 # HZ-GCA-7 — Register & Publish integration
 
-Status: **IMPLEMENTED — awaiting exact-head Level-1 + Generate milestone Level-2 qualification**
+Status: **COMPLETE — exact-head Level 1 + Generate milestone Level 2 qualified**
 
 Canonical roadmap step: **HZ-GCA-7 — Register & Publish integration**
 
@@ -326,3 +326,46 @@ HZ-GCA-7 is complete when:
 Next canonical roadmap step:
 
 **HZ-GCA-8 — Community identity and social graph**
+
+
+## Qualification result
+
+Final reconciled implementation SHA:
+
+`4ec2b353f3688b252df8c7d55dde7c7ea21a0ef9`
+
+Authoritative workflow:
+
+- **420Hz Web Qualification**
+- Run: **37846580684** (#257)
+- Result: **PASS**
+
+Level 1:
+
+- Job: **HZ-GCA-7 Level 1**
+- Job ID: **113548844949**
+- exact-head checkout: PASS
+- complete 420Hz generation/register-publish suite: **67 PASS / 0 FAIL / 0 SKIPPED**
+- HZ-GCA-4 provenance verifier: PASS
+- HZ-GCA-5 project/storage verifier: PASS
+- HZ-GCA-6 Generate Studio verifier: PASS
+- HZ-GCA-7 targeted verifier: PASS
+- 420Hz web verifier: PASS
+
+Generate milestone Level 2:
+
+- Job: **HZ-GCA-7 Generate Milestone Level 2**
+- Job ID: **113548845001**
+- exact-head checkout: PASS
+- complete Generate implementation suite: **67 PASS / 0 FAIL / 0 SKIPPED**
+- Generate Studio state model: **10 PASS / 0 FAIL / 0 SKIPPED**
+- HZ-GCA-2 through HZ-GCA-7 targeted verifiers: PASS
+- 420Hz web verifier: PASS
+- targeted `CreativeKernelAcceptance420` Foundry qualification: **13 PASS / 0 FAIL / 0 SKIPPED** across the acceptance and royalty-allocation fuzz suites
+- Decision #10 deterministic Creative fixture generation: PASS
+- Creative reference indexer dependency install/build: PASS
+- Creative reference projection tests: **4 PASS / 0 FAIL / 0 SKIPPED**
+
+Before final qualification, current `main` advanced to `ffc6a4028676907c266714b5c1ae8ba3af9a7137` with Compute web/logo changes. There were no overlapping paths with the HZ-GCA branch. The branch was nevertheless reconciled because HZ-GCA-7 is the Generate milestone boundary, producing exact candidate `4ec2b353f3688b252df8c7d55dde7c7ea21a0ef9`, and both required levels were rerun successfully against that exact SHA.
+
+The full repository Solidity inventory was intentionally not run at this Level-2 milestone; it remains owned by the canonical Solidity workflow at HZ-GCA-17 Level 3.

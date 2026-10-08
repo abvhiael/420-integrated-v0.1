@@ -1,0 +1,19 @@
+{
+  "schemaVersion":"420-compute-web-runtime-v1",
+  "chainId":"420",
+  "indexerUrl":"https://indexer.420integrated.org",
+  "computeApiUrl":"https://compute.420integrated.org",
+  "walletUrl":"https://wallet.420integrated.org",
+  "contracts":{
+    "workerRegistry":"0x0000000000000000000000000000000000000001",
+    "researchProjectRegistry":"0x0000000000000000000000000000000000000002",
+    "verifierRegistry":"0x0000000000000000000000000000000000000003"
+  },
+  "workerDownloads":{
+    "windows":"https://downloads.420integrated.org/node420-compute-windows.zip",
+    "linux":"https://downloads.420integrated.org/node420-compute-linux.tar.gz",
+    "darwin":"https://downloads.420integrated.org/node420-compute-darwin.tar.gz"
+  },
+  "cpuMetricId":null,
+  "gpuMetricId":null
+}

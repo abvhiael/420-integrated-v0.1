@@ -1,0 +1,203 @@
+{
+  "schema": "420hz-gca-product-boundaries-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.1",
+  "title": "Define product boundaries",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "classification": "APPLICATION_ARCHITECTURE_AUTHORITY_MAP",
+  "level": 1,
+  "milestoneRequired": false,
+  "application": {
+    "name": "420Hz",
+    "owns": [
+      "replaceable user-facing Generate/Community/Awards presentation and orchestration",
+      "private application draft/project metadata that is not protocol authority",
+      "user review and explicit Register & Publish intent",
+      "420Hz-specific community interaction records where they do not overlap canonical 420Commons membership/channel authority",
+      "420Hz Awards program/season/category/nomination/ballot/result records once implemented under later HZ-GCA steps"
+    ],
+    "mustNotOwn": [
+      "wallet signing or smart-account execution authority",
+      "identity credentials or legal identity",
+      "AI model/provider/request/result canonical authority already owned by 420AI",
+      "compute provider/resource/match/job/receipt/settlement authority",
+      "Work/Recording/contributor/rights/license/royalty authority",
+      "payment finality/refund authority",
+      "storage provider/agreement/proof/settlement authority",
+      "chain ingestion/finality/indexed canonical truth",
+      "search ranking as canonical truth",
+      "notification truth or transaction execution",
+      "governance execution authority",
+      "arbitration resolver/remedy-execution authority",
+      "420Commons community-space/channel membership authority",
+      "ProtocolRegistry service publication/discovery authority"
+    ]
+  },
+  "systems": [
+    {
+      "id": "wallet",
+      "name": "420 Wallet / SmartAccount",
+      "authority": "canonical user account execution, signing, session/capability and spending authorization",
+      "hzRole": "request reviewed actions and receive explicit authorization results",
+      "forbidden": "420Hz may not treat wallet connection as signing/spending authority"
+    },
+    {
+      "id": "identity",
+      "name": "420Identity",
+      "authority": "optional pseudonymous profiles, issuer/credential state and validity",
+      "hzRole": "consume optional public/profile/credential assertions when product policy requires them",
+      "forbidden": "420Hz may not manufacture identity assurance or make Identity mandatory for ordinary pseudonymous use unless a later policy explicitly requires it"
+    },
+    {
+      "id": "ai",
+      "name": "420AI",
+      "authority": "model/model-version identity, AI workload/request constraints, privacy and verification policy, AI-level result commitment/lifecycle",
+      "hzRole": "translate reviewed 420Hz generation intent into bounded AI requests and consume verified results",
+      "forbidden": "420Hz may not create a second AI provider/model/request/result authority"
+    },
+    {
+      "id": "compute",
+      "name": "420 ComputeMarket",
+      "authority": "compute provider/node/resource/offer/request/match/job/receipt/verification and settlement entitlement state",
+      "hzRole": "consume execution capacity through 420AI or a qualified adapter",
+      "forbidden": "420Hz may not become matcher, worker, verifier, escrow or settlement authority"
+    },
+    {
+      "id": "creative",
+      "name": "420 Creative Protocol / 420Hz kernel",
+      "authority": "CreatorProfile, Work, Recording, contributors, rights, authorization, licenses, royalty schedules and royalty settlement state",
+      "hzRole": "register reviewed generated outputs only after rights/provenance checks and explicit user publication intent",
+      "forbidden": "generation success may not imply Work/Recording registration, publication, ownership, permission or royalty entitlement"
+    },
+    {
+      "id": "pay",
+      "name": "420Pay",
+      "authority": "invoice/payment identity and lifecycle, bounded settlement authorization, refund/accounting state",
+      "hzRole": "use canonical payment rails for user-facing purchases/prizes when required",
+      "forbidden": "420Hz may not create alternate payment finality, refund or arbitrary spending authority"
+    },
+    {
+      "id": "resource",
+      "name": "420ResourceProtocol / 420Store",
+      "authority": "provider/service policy, offers/agreements/commitments, proof receipts and bounded storage/resource settlement control state",
+      "hzRole": "store or reference draft/published artifacts through canonical storage/resource interfaces",
+      "forbidden": "stored bytes, provider credentials or application URLs do not become protocol authority; private bytes remain off-chain"
+    },
+    {
+      "id": "indexer",
+      "name": "420Indexer",
+      "authority": "none over protocol state; rebuildable projection of canonical sources with provenance/finality context",
+      "hzRole": "serve catalog/community/award projections and history",
+      "forbidden": "420Hz may not treat indexer disagreement as override of canonical chain/protocol state"
+    },
+    {
+      "id": "search",
+      "name": "420Search",
+      "authority": "none over protocol state; replaceable discovery/ranking projection over qualified Indexer/public sources",
+      "hzRole": "public discovery, filters, charts/search entry points where appropriate",
+      "forbidden": "ranking, trending or sponsored placement may not rewrite rights, identity, award results or canonical fields"
+    },
+    {
+      "id": "notifications",
+      "name": "420Notifications",
+      "authority": "none over originating events; opt-in presentation/delivery state only",
+      "hzRole": "deliver generation, publication, community and award alerts with source provenance",
+      "forbidden": "notification actions may not sign transactions, transfer assets or mutate underlying state"
+    },
+    {
+      "id": "commons",
+      "name": "420Commons",
+      "authority": "community spaces/channels and their membership/role authority",
+      "hzRole": "integrate only if 420Hz later exposes shared spaces/channels",
+      "forbidden": "420Hz follows/favorites/playlists may not silently become alternate Commons membership/channel authority"
+    },
+    {
+      "id": "governance",
+      "name": "420Governance / 420 Civic",
+      "authority": "canonical governed policy mutation and delayed execution through GovernanceTimelock/Civic",
+      "hzRole": "consume governance only for policies that are explicitly governed",
+      "forbidden": "ordinary generation, social interaction, nomination or voting UX may not inherit protocol-governance authority"
+    },
+    {
+      "id": "arbitration",
+      "name": "420Arbitration",
+      "authority": "domain-scoped policy, case/evidence/resolver/ruling/appeal/finality coordination",
+      "hzRole": "refer disputes to canonical Arbitration domains when later policy requires it and consume finalized rulings through the owning protocol",
+      "forbidden": "420Hz or Arbitration may not bypass the origin protocol's authorization/accounting/remedy execution"
+    },
+    {
+      "id": "registry",
+      "name": "420Registry / ProtocolRegistry",
+      "authority": "canonical service/component publication, versioning and discovery metadata",
+      "hzRole": "resolve approved deployed dependencies",
+      "forbidden": "Registry discovery does not grant runtime mutation, payment, governance, rights or execution authority"
+    }
+  ],
+  "crossSystemInvariants": [
+    "HZGCA-BND-001 wallet connection alone never authorizes signing, spending or protocol mutation",
+    "HZGCA-BND-002 420Hz generation intent never becomes AI or compute canonical state until accepted by the owning protocol",
+    "HZGCA-BND-003 successful AI/compute execution never implies Creative Protocol registration, rights ownership or publication",
+    "HZGCA-BND-004 rights and derivative authorization remain in the Creative Protocol; transformation permission is distinct from training permission",
+    "HZGCA-BND-005 payment and compute settlement state cannot be fabricated by 420Hz UI/application state",
+    "HZGCA-BND-006 private prompts, draft lyrics/audio/stems and provider credentials are not public Indexer/Search inputs",
+    "HZGCA-BND-007 Indexer/Search/Analytics-style projections are rebuildable and non-authoritative",
+    "HZGCA-BND-008 Notifications cannot sign, spend or mutate originating protocol state",
+    "HZGCA-BND-009 420Commons retains community-space/channel membership authority",
+    "HZGCA-BND-010 Governance changes only explicitly governed policy and cannot fabricate generation, rights, vote or award history",
+    "HZGCA-BND-011 Arbitration coordinates final rulings but origin protocols execute bounded remedies under their own checks",
+    "HZGCA-BND-012 ProtocolRegistry discovery cannot be interpreted as runtime authorization",
+    "HZGCA-BND-013 420Hz Awards voting is product-domain voting and must never be confused with 420Governance/Civic voting",
+    "HZGCA-BND-014 later HZ-GCA steps may refine object schemas/lifecycles but may not broaden another system's authority without an explicit architecture change and requalification"
+  ],
+  "authoritativeVsDerived": {
+    "authoritative": [
+      "SmartAccount/account authorization in canonical Wallet/account contracts",
+      "420Identity profile/credential state",
+      "420AI model/request/result commitments",
+      "ComputeMarket execution/economic commitments",
+      "Creative Protocol Work/Recording/rights/license/royalty state",
+      "420Pay payment/refund state",
+      "Resource/Storage agreements/proofs/settlement control state",
+      "420Commons space/channel membership state",
+      "420Governance/Civic governed policy and execution state",
+      "420Arbitration case/ruling/finality state",
+      "ProtocolRegistry service publication/discovery state",
+      "future 420Hz Awards records only within their explicitly defined product domain"
+    ],
+    "derived": [
+      "420Hz web rendering",
+      "cached generation/project read models",
+      "Indexer projections",
+      "Search ranking/discovery",
+      "charts/trending scores",
+      "notification delivery records",
+      "analytics and dashboards",
+      "award presentation pages and badges projected from canonical award result records"
+    ]
+  },
+  "sourceDocs": [
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md",
+    "contracts/src/creative/README.md",
+    "docs/developers/wallet-and-smart-accounts.md",
+    "docs/audit/420IDENTITY-COMPLETE-AUDIT-20260930.md",
+    "docs/architecture/protocols/pay-token-exchange-bridge.md",
+    "docs/audit/420RESOURCE-AUDIT-REPORT.md",
+    "docs/420INDEXER.md",
+    "docs/420SEARCH-GENESIS-CLOSEOUT.md",
+    "docs/420NOTIFICATIONS.md",
+    "docs/420-PULSE-V1-MODEL.md",
+    "docs/architecture/decisions/GOV-AUDIT-1-AUTHORITY-DEPENDENCY-CANCELLATION.md",
+    "docs/audit/420ARBITRATION-COMPLETE-AUDIT-20261004.md",
+    "docs/420WALLET.md"
+  ],
+  "exitCriteria": [
+    "every required dependency has exactly one explicit authority boundary",
+    "420Hz-owned state is limited to application/product state and does not duplicate canonical protocol authority",
+    "authoritative and derived state are explicitly separated",
+    "cross-system no-escalation invariants are machine-verifiable",
+    "no fixed address, deployment, provider or live-testnet claim is invented",
+    "HZ-GCA-1 remains open for subsequent 1.2-1.20 work packages"
+  ]
+}

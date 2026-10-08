@@ -199,7 +199,7 @@ Required work:
 
 Build the primary **Generate your own song** experience.
 
-**Qualification:** Level 1 ordinary app-scoped UX step. **COMPLETE** — exact-head implementation SHA `d46585be81059dc1619e5005495a773e47efe5d3`, `420Hz Web Qualification` run `37826287208`, job `HZ-GCA-6 Level 1` (`113479885333`). Retain the 420Hz web verifier and HZ-GCA-5 project/storage boundary, plus dedicated Generate Studio state-model tests and an HZ-GCA-6 targeted verifier. No Level-2 milestone is introduced.
+**Qualification:** Level 1 ordinary app-scoped UX step. **COMPLETE** — exact-head implementation SHA `a6b32e97f95d868eb89785af3dd877969d49d26c`, `420Hz Web Qualification` run `37841673679`, job `HZ-GCA-6 Level 1` (`113532303192`). Retain the 420Hz web verifier and HZ-GCA-5 project/storage boundary, plus dedicated Generate Studio state-model tests and an HZ-GCA-6 targeted verifier. No Level-2 milestone is introduced.
 
 **Repository artifacts:** prominent home-page Generate CTA, fully navigable Generate Studio section, deterministic dev UX state model, responsive/accessibility styling, state-model tests, machine-readable UX policy, architecture document and targeted verifier.
 

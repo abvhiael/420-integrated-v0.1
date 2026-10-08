@@ -8,7 +8,8 @@ p = root / "contracts/config/compute-market/cmp-s01-provider-access.json"
 o = json.loads(p.read_text(encoding="utf-8"))
 assert o["schemaVersion"] == "cmp-s01-provider-inventory-v1"
 assert o["fundedRewardsEnabled"] is False
-assert all(o["rules"].values()), "security rules must remain strict"
+assert all(v is True for k, v in o["rules"].items() if k != "rawIdentifiersOnChain"), "security rules must remain strict"
+assert o["rules"]["rawIdentifiersOnChain"] is False
 assert len(o["sources"]) >= 2
 assert {s["system"] for s in o["sources"]} == {"BOINC", "FOLDING_AT_HOME"}
 for s in o["sources"]:

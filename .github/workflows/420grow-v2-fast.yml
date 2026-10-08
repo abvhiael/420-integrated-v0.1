@@ -1,0 +1,33 @@
+name: 420Grow V2 product decision
+on:
+  pull_request:
+    paths:
+      - 'docs/audit/420GROW-V2-*.md'
+      - 'scripts/verify-grow-v2-01.py'
+      - '.github/workflows/420grow-v2-fast.yml'
+  push:
+    paths:
+      - 'docs/audit/420GROW-V2-*.md'
+      - 'scripts/verify-grow-v2-01.py'
+      - '.github/workflows/420grow-v2-fast.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v2-01-product-decision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact checkout
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check verifier syntax
+        run: python3 -m py_compile scripts/verify-grow-v2-01.py
+      - name: GROW-V2-01 product scope and non-promotion verification
+        run: python3 scripts/verify-grow-v2-01.py

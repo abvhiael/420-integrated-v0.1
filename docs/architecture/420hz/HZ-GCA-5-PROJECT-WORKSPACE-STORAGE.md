@@ -1,6 +1,6 @@
 # HZ-GCA-5 — Project workspace, versions, stems and storage
 
-Status: **IMPLEMENTED — awaiting exact-head Level-1 qualification**
+Status: **COMPLETE — Level 1 exact-head qualified**
 
 Canonical roadmap step: **HZ-GCA-5 — Project workspace, versions, stems and storage**
 
@@ -95,3 +95,30 @@ No Level-2 milestone is introduced.
 HZ-GCA-5 is complete when every canonical requirement is implemented and the exact-head Level-1 suite passes with no required skipped/cancelled/missing checks.
 
 Next canonical step: **HZ-GCA-6 — 420Hz Generate Studio UX**
+
+
+## Qualification result
+
+Qualified implementation SHA:
+
+`f296e4a40ba2bba2d9ea033b682d185aa5b15973`
+
+Authoritative workflow:
+
+- **420Hz Web Qualification**
+- Run: **37823618595** (#223)
+- Job: **HZ-GCA-5 Level 1**
+- Job ID: **113470663884**
+- Result: **PASS**
+
+Exact-head required results:
+
+- complete 420Hz generation/project suite: **54 PASS / 0 FAIL / 0 SKIPPED**
+- HZ-GCA-1.8 storage/retention verifier: **PASS**
+- HZ-GCA-4 provenance verifier: **PASS**
+- HZ-GCA-5 targeted verifier: **PASS**
+- retained 420Hz web job: **PASS**
+
+Current `main` advanced after the implementation run to `f3221728500e5e280b8f29781ad7e3af42f5134a` through an unrelated ReeferReview RSS repair. The executable main delta is confined to ReeferReview; the only path overlap with the accumulated feature branch is global `docs/ROADMAP.md`. It does not alter the 420Hz generation/project module, storage policy, provenance policy, or active HZ-GCA-5 qualification workflow. Under the ordinary-step policy this does not justify ceremonial reconciliation or invalidate the exact-head HZ-GCA-5 Level-1 result.
+
+No Level-2 milestone is required for HZ-GCA-5. Level-3 repository-wide qualification remains deferred to HZ-GCA-17.

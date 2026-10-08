@@ -37,6 +37,7 @@ type FeedOperations struct {
 	mu       sync.Mutex
 	Path     string
 	Sources  NewsSourceRegistry
+	SourcesPath string
 	Ingestor NewsIngestor
 	Now      func() time.Time
 }
@@ -114,6 +115,7 @@ func (o *FeedOperations) validate() error {
 	if o == nil || o.Path == "" || o.Ingestor.Store == nil {
 		return ErrInvalidInput
 	}
+	if o.SourcesPath != "" { registry, err := LoadNewsSourceRegistry(o.SourcesPath); if err != nil { return err }; o.Sources = registry }
 	return ValidateNewsSourceRegistry(o.Sources)
 }
 

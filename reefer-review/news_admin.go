@@ -3,14 +3,13 @@ package reeferreview
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sync"
-	"time"
 )
 
 var newsAdminMutex sync.Mutex
@@ -113,7 +112,7 @@ func (h HTTP) newsAdminSources(w http.ResponseWriter, r *http.Request) {
 	}
 	// Actor identity is not returned publicly; operations must retain structured
 	// audit logs in the deployment log pipeline before production qualification.
-	_ = fmt.Sprintf("news_source_admin actor=%s id=%s method=%s at=%s", claims.Subject, source.ID, r.Method, time.Now().UTC().Format(time.RFC3339))
+	log.Printf("news_source_admin actor=%q id=%q method=%q enabled=%t", claims.Subject, source.ID, r.Method, source.Enabled)
 	writeJSON(w, http.StatusOK, map[string]any{"source": source})
 }
 

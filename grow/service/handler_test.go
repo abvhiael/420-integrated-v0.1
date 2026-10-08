@@ -26,6 +26,7 @@ func TestPaginationFilteringAndEmpty(t *testing.T){
  var response struct{Version string `json:"version"`; Data struct{Items []grow.Card `json:"items"`;NextOffset *int `json:"nextOffset"`;Total int `json:"total"`;Empty bool `json:"empty"`} `json:"data"`}
  if err:=json.Unmarshal(w.Body.Bytes(),&response);err!=nil{t.Fatal(err)}
  if response.Version!="v1"||response.Data.Total!=2||len(response.Data.Items)!=1||response.Data.NextOffset==nil||*response.Data.NextOffset!=1{t.Fatalf("pagination %+v",response)}
+ response.Data.NextOffset=nil
  w=serve(h,"/v1/grow/places?category=FARM&limit=1&offset=1","GET")
  if err:=json.Unmarshal(w.Body.Bytes(),&response);err!=nil{t.Fatal(err)}
  if len(response.Data.Items)!=1||response.Data.Items[0].ID!="farm-2"||response.Data.NextOffset!=nil{t.Fatalf("next page %+v",response)}

@@ -482,7 +482,7 @@ func normalizeNewsEntry(source NewsSource, entry RawNewsEntry, now time.Time) (E
 		ID: stableNewsID(canonical), SourceID: source.ID, SourceName: source.Name,
 		SourceHomeURL: source.HomeURL, CanonicalURL: canonical, Title: strings.TrimSpace(entry.Title),
 		Author: strings.TrimSpace(entry.Author), Summary: summary, ImageURL: image,
-		Categories: normalizeStringSlice(entry.Categories), Topics: classifyNewsTopics(entry),
+		Categories: normalizeStringSlice(entry.Categories), Topics: normalizeStringSlice(append(classifyNewsTopics(entry), source.Category)),
 		Language: source.Language, FeedGUID: strings.TrimSpace(entry.GUID),
 		CanonicalURLHash:   newsURLHash(canonical),
 		ContentFingerprint: newsContentFingerprint(entry.Title, summary, entry.PublishedAt),

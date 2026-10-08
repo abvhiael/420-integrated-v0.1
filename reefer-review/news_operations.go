@@ -34,11 +34,12 @@ type feedOperationsDisk struct {
 // FeedOperations is an owner-controlled, serialized checkpoint store. It is deliberately
 // not an authorization source and never overrides canonical publication metadata.
 type FeedOperations struct {
-	mu       sync.Mutex
-	Path     string
-	Sources  NewsSourceRegistry
-	Ingestor NewsIngestor
-	Now      func() time.Time
+	mu          sync.Mutex
+	Path        string
+	Sources     NewsSourceRegistry
+	SourcesPath string
+	Ingestor    NewsIngestor
+	Now         func() time.Time
 }
 
 func (o *FeedOperations) clock() time.Time {
@@ -113,6 +114,13 @@ func (o *FeedOperations) save(data feedOperationsDisk) error {
 func (o *FeedOperations) validate() error {
 	if o == nil || o.Path == "" || o.Ingestor.Store == nil {
 		return ErrInvalidInput
+	}
+	if o.SourcesPath != "" {
+		registry, err := LoadNewsSourceRegistry(o.SourcesPath)
+		if err != nil {
+			return err
+		}
+		o.Sources = registry
 	}
 	return ValidateNewsSourceRegistry(o.Sources)
 }

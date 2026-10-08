@@ -25,6 +25,23 @@ That asset embeds the approved logo image and is the canonical website brand ima
 
 The surrounding visual system follows the approved artwork: lustrous gold, rich forest green, cannabis green and electric blue accents on a deep green-black field.
 
+## Planned Generate / Community / Awards expansion
+
+The current static web client reflects the already implemented publishing/rights/streaming foundation. The next dedicated 420Hz application phase is defined in `docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md`.
+
+That phase adds:
+
+- a prominent **Generate your own song** entry point;
+- AI-generated / AI-assisted song creation through 420AI + Compute Market;
+- project/version/stem/provenance workflows;
+- Generate → register Work/Recording → publish integration;
+- community follows/favorites/playlists and chart/discovery projections;
+- award seasons/categories, nominations, voting, results and permanent badges;
+- anti-Sybil, moderation, privacy and adversarial hardening;
+- production-equivalent testnet qualification before live claims.
+
+Until those roadmap steps are implemented and qualified, the existing site must not imply that generation, community voting or awards are already live.
+
 ## User experience
 
 The initial client provides:

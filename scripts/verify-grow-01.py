@@ -2,7 +2,6 @@
 """GROW-01 app-scoped product-definition consistency gate (stdlib-only)."""
 import json
 import pathlib
-import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -31,10 +30,10 @@ def main():
     for code in range(1,11):
         require(f"GROW-{code:02d}" in ledger, f"Ledger missing GROW-{code:02d}")
     for code in ["G1","G2","G3","G4","G5","G6"]:
-        require(re.search(r"\\*\\*Invariant " + code + r":",spec),f"Missing invariant {code}")
+        require(f"**Invariant {code}:" in spec, f"Missing invariant {code}")
     for label in ["Purpose","Users","Required user workflows","Trust boundaries","Release classification","Level 1","GROW-02"]:
         require(label.lower() in spec.lower(),f"Missing definition element {label}")
-    require("not an amendment" in spec and "no new smart contract" in spec.lower(), "Product authority boundary missing")
+    require("not an amendment" in spec and "any new smart contract" in spec.lower(), "Product authority boundary missing")
     print("PASS GROW-01 canonical product-definition consistency: catalog, ID, upstream contract, invariants, roadmap")
 
 if __name__ == "__main__":

@@ -22,12 +22,14 @@ type PublicReader interface {
 }
 
 // Card exposes only already-public, precision-constrained place presentation.
-// Registry or Verify credentials are deliberately absent: the current /v1/places
-// SDK has no provenance fields and Grow may not infer them from place names/IDs.
+// Source and optional Registry record ID are upstream provenance references.
+// They never assert that Grow has verified a business or owns the record.
 type Card struct {
 	ID        string         `json:"id"`
 	Name      string         `json:"name"`
 	Category  model.Category `json:"category"`
+	Source    string         `json:"source"`
+	RegistryRecordID string `json:"registryRecordId,omitempty"`
 	Kind      uikit.Kind     `json:"kind"`
 	Latitude  *float64       `json:"latitude,omitempty"`
 	Longitude *float64       `json:"longitude,omitempty"`
@@ -56,9 +58,9 @@ func Read(ctx context.Context, reader PublicReader) (View, error) {
 		return View{}, ErrInvalidProjection
 	}
 	seen := make(map[string]struct{}, len(upstream.Items))
-	result := View{Items: make([]Card, 0), Empty: true, ProvenanceAvailable: false}
+	result := View{Items: make([]Card, 0), Empty: true, ProvenanceAvailable: true}
 	for _, item := range upstream.Items {
-		if strings.TrimSpace(item.ID) == "" || strings.TrimSpace(item.Name) == "" {
+		if strings.TrimSpace(item.ID) == "" || strings.TrimSpace(item.Name) == "" || strings.TrimSpace(item.Source) == "" {
 			return View{}, ErrInvalidProjection
 		}
 		if _, ok := seen[item.ID]; ok {
@@ -92,7 +94,7 @@ func Read(ctx context.Context, reader PublicReader) (View, error) {
 		if item.Category != model.CategoryFarm && item.Category != model.CategoryBusiness {
 			continue
 		}
-		card := Card{ID: item.ID, Name: item.Name, Category: item.Category, Kind: item.Kind, Region: item.Region, City: item.City, Country: item.Country}
+		card := Card{ID: item.ID, Name: item.Name, Category: item.Category, Source: item.Source, RegistryRecordID: item.RegistryRecordID, Kind: item.Kind, Region: item.Region, City: item.City, Country: item.Country}
 		if item.Kind == uikit.KindPin {
 			lat, lon := *item.Latitude, *item.Longitude
 			card.Latitude = &lat

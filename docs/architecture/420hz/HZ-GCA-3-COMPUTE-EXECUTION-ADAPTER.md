@@ -1,6 +1,6 @@
 # HZ-GCA-3 — 420AI / Compute Market execution adapter
 
-Status: **IMPLEMENTED — awaiting exact-head Level-1 qualification**
+Status: **COMPLETE — Level 1 exact-head qualified**
 
 Canonical roadmap step:
 
@@ -268,3 +268,33 @@ HZ-GCA-3 is complete when:
 Next canonical roadmap step:
 
 **HZ-GCA-4 — Provenance, consent and AI rights metadata**
+
+
+## Qualification result
+
+Qualified implementation SHA:
+
+`28a87b7fda4e9a719dfedc4999466fc5beb75922`
+
+Authoritative step workflow:
+
+- **420Hz Web Qualification**
+- Run: **37813944369** (#195)
+- Job: **HZ-GCA-3 Level 1**
+- Job ID: **113437604323**
+- Result: **PASS**
+
+Exact-head required results:
+
+- 420Hz generation module: **29 PASS / 0 FAIL / 0 SKIPPED**
+- HZ-GCA-2 retained verifier: **PASS**
+- HZ-GCA-3 targeted verifier: **PASS**
+- canonical 420AI Compute integration verifier: **PASS**
+- 420AI provider runtime: **14 PASS / 0 FAIL / 0 SKIPPED**
+- 420AI provider runtime verifier: **PASS**
+- Compute SDK: **28 PASS / 0 FAIL / 0 SKIPPED**
+- Compute SDK build: **PASS**
+- Compute API: **14 PASS / 0 FAIL / 0 SKIPPED**
+- 420Hz web job: **PASS**
+
+No Level-2 milestone was required for HZ-GCA-3 and no Level-3 repository-wide inventory was run.

@@ -115,4 +115,31 @@ contract StorageSourceRegistry420Test {
         vm.prank(ARTIST);
         registry.updateSourceState(RECORDING, oldId, StorageSourceRegistry420.SourceState.ACTIVE, keccak256("proof"));
     }
+    function testSourceSetIsBoundedAndRetiredSlotsCanBeReused() public {
+        for (uint256 i = 0; i < registry.MAX_CURRENT_SOURCES(); ++i) {
+            vm.prank(ARTIST);
+            registry.addSource(
+                RECORDING,
+                keccak256(abi.encode("provider", i)),
+                keccak256(abi.encode("locator", i)),
+                keccak256("audio"),
+                keccak256(abi.encode("proof", i)),
+                uint32(i + 1)
+            );
+        }
+
+        vm.expectRevert(CreativeErrors420.InvalidState.selector);
+        vm.prank(ARTIST);
+        registry.addSource(RECORDING, keccak256("overflow"), keccak256("overflow-locator"), keccak256("audio"), keccak256("overflow-proof"), 99);
+
+        vm.prank(ARTIST);
+        registry.updateSourceState(RECORDING, 1, StorageSourceRegistry420.SourceState.RETIRED, keccak256("retired-proof"));
+
+        vm.prank(ARTIST);
+        registry.addSource(RECORDING, keccak256("replacement"), keccak256("replacement-locator"), keccak256("audio"), keccak256("replacement-proof"), 1);
+        require(registry.currentSourceIds(RECORDING).length == registry.MAX_CURRENT_SOURCES(), "current source set must stay bounded");
+        require(registry.sourceIds(RECORDING).length == registry.MAX_CURRENT_SOURCES() + 1, "historical source ids must remain enumerable");
+    }
+
+
 }

@@ -50,3 +50,21 @@ func TestFailClosedAndNoInternalErrorDisclosure(t *testing.T){
 }
 func contains(s,needle string)bool {return len(s)>=len(needle)&&find(s,needle)}
 func find(s,needle string)bool{for i:=0;i+len(needle)<=len(s);i++{if s[i:i+len(needle)]==needle{return true}};return false}
+
+type rawSource struct { view uikit.View; err error }
+func (s rawSource) Places(context.Context)(uikit.View,error){return s.view,s.err}
+func TestProductionConstructorUsesSafeLocationProjection(t *testing.T){
+ source:=rawSource{view:uikit.View{Items:[]uikit.Item{
+ {ID:"b1",Name:"Store",Source:"origin",Category:model.CategoryBusiness,Kind:uikit.KindArea,Region:"SK"},
+ {ID:"v1",Name:"Other",Source:"origin",Category:model.CategoryVenue,Kind:uikit.KindArea,City:"Calgary"},
+ },Empty:false}}
+ w:=serve(New(source),"/v1/grow/places","GET")
+ if w.Code!=200{t.Fatalf("public adapter: %s",w.Body.String())}
+ var body struct{Data struct{Items []grow.Card `json:"items"`;Total int `json:"total"`} `json:"data"`}
+ if err:=json.Unmarshal(w.Body.Bytes(),&body);err!=nil{t.Fatal(err)}
+ if body.Data.Total!=1||len(body.Data.Items)!=1||body.Data.Items[0].ID!="b1"{t.Fatalf("unexpected projection %+v",body)}
+ source.view.Items[0].Kind=uikit.KindArea
+ val:=55.0;source.view.Items[0].Latitude=&val
+ w=serve(New(source),"/v1/grow/places","GET")
+ if w.Code!=503{t.Fatalf("private-coordinate corruption accepted status=%d",w.Code)}
+}

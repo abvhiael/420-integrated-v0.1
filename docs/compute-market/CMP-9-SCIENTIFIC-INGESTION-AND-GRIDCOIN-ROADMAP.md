@@ -55,7 +55,9 @@ Feed verified records through existing CMP-5.1/5.2 and CMP-5.5 normalized commit
 
 Exit: source-to-canonical trace, idempotent processing, reorg/replay tests, correction handling, authorized-consumer controls and immutable auditable mapping.
 
-### S-06 — Read model, app, and Level 2 evidence-ingestion milestone
+### S-06 — Read model, app, and Level 2 evidence-ingestion milestone — REPOSITORY LEVEL 2 PASS; LIVE ENDPOINT OBSERVATION DEFERRED
+
+[S-06 evidence and blockers](CMP-S06-QUALIFICATION-EVIDENCE.md): actual provider/API and durable 420Indexer ingestion remain deferred to testnet. Repository exact-SHA tests cover the observation model and browser integration; this is **not complete live provider ingestion**.
 
 Expose chain-scoped bounded Indexed contribution/attestation/claim state and clearly separated external-source observations through 420Compute. Show project, provider, verified/unverified/pending/revoked eligibility, credit unit, credited event and age/finality without pretending external points equal $420 or computing a nonexistent balance. Never publish source credentials, private workloads or result payloads. Run integrated ingestion → attestation → indexed view testing on one SHA plus genuine read-only endpoint observation.
 

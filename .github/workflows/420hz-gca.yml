@@ -84,3 +84,6 @@ jobs:
 
       - name: Verify HZ-GCA-1.13 nomination voting policy
         run: python3 scripts/verify-420hz-gca-1-13.py
+
+      - name: Verify HZ-GCA-1.14 moderation dispute boundaries
+        run: python3 scripts/verify-420hz-gca-1-14.py

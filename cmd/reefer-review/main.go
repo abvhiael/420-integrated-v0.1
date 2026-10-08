@@ -50,7 +50,7 @@ func main() {
 		if checkpoint == "" {
 			checkpoint = ".reefer-review/feed-operations.json"
 		}
-		if strings.EqualFold(strings.TrimSpace(os.Getenv("REEFER_REVIEW_FEED_MODE")), "poll") {
+		if strings.EqualFold(strings.TrimSpace(os.Getenv("REEFER_REVIEW_FEED_MODE")), "poll") && strings.EqualFold(strings.TrimSpace(os.Getenv("REEFER_REVIEW_EMBEDDED_POLLING")), "true") {
 			operations := &reeferreview.FeedOperations{
 				Path: checkpoint, Sources: newsRegistry, SourcesPath: newsSources,
 				Ingestor: reeferreview.NewsIngestor{Store: newsStore, Fetcher: reeferreview.FeedFetcher{}},

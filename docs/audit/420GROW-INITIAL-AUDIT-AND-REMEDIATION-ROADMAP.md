@@ -36,7 +36,7 @@
 | GROW-06 | Contracts/interfaces/permission/funds | NO new Grow authority-bearing contract required by bounded consumer-only decision | No-contract guard and retained Grow Level-1 checks PASS on exact SHA 423557a | GROW-06 contract-decision matrix and CI evidence | COMPLETE | GROW-07 — Cross-app qualification |
 | GROW-07 | SDK, events, integrations, authorization | Cross-app 420Location SDK/Registry provenance/Verify/Wallet/Genesis/wrong-network fail-closed matrix established | GROW-07 boundary guard + retained app-focused Level-1 and Level-2 tests PASS exact SHA 04836cd | GROW-07 matrix plus durable exact-SHA CI evidence | COMPLETE | GROW-08 — Repository qualification |
 | GROW-08 | Build, static checks, test and security qualification | Clean-checkout web/Go build, race tests, repeated adversarial paths and app static/security checks | Completed SUCCESS exact SHA ab6eacd; run 37794520529 | GROW-08 verifier and workflow; durable CI closeout | COMPLETE | GROW-09 — Documentation closeout |
-| GROW-09 | Developer/operator/user docs | Comprehensive architecture, API/SDK, environment, build/test, operator, security, threat, troubleshooting, release/user guide committed | Dedicated documentation verifier and fast app CI triggered; exact-head PASS pending | GROW-09 operations and user guide | PARTIAL | Verify GROW-09 exact-head CI and close evidence without re-running unrelated inventories |
+| GROW-09 | Developer/operator/user docs | Complete architecture, API/SDK, environment, tests, operators, threat model and user guide, with exact GROW-05 spec reference | GROW-09 verifier and retained app-scoped fast tests PASS exact SHA 6ff60d5, run 37799086427 | GROW-09 guide and durable Level-1 evidence | COMPLETE | GROW-10 — Deployment and stage qualification |
 | GROW-10 | Deploy, testnet, Genesis and production evidence | Frozen catalog; GEN-SVC-0 | No Grow deployment artifacts | NOT RUN | No Grow deployment plan | BLOCKED | Decide release class; later collect real environment evidence |
 
 These rows enumerate *established* and *definition-blocked* domains, not invented hidden requirements. Expand the matrix requirement-by-requirement once the product definition is formally approved; retain these IDs.
@@ -225,3 +225,15 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Main/base SHA last inspected:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71`; cumulative draft PR #567 and Level-3 reconciliation deferred.
 - **Level 2:** retained GROW-03–07 app integration; no additional Level-2 milestone solely for docs. **Level 3:** phase-end exact merge candidate, separately owned Solidity full Foundry and Genesis/address checks, global 420Integrated and Docs.
 - **Next canonical step only after qualification:** **GROW-10 — Deployment and stage qualification**.
+
+## GROW-09 Level-1 exact-SHA documentation closeout (2026-10-08)
+
+- **Status:** GROW-09 — Documentation closeout **COMPLETE** at Level 1, following a narrow documentation-only fix. All original sections remain intact; one explicit source reference was added to the related-documentation section.
+- **Qualified implementation SHA:** `6ff60d562118a93ab9c3348fc8435696653ba050`. Sole repaired path: `docs/audit/420GROW-GROW-09-OPERATIONS-AND-USER-GUIDE.md`; added exact `docs/audit/420GROW-GROW-05-SERVICE.md` reference. No application source, tests, scripts, workflows, config, or protocol behavior changed.
+- **CI proof:** [420Grow fast #37799086427](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37799086427), job `113386179801`, **completed SUCCESS** and exact head SHA matched. GROW-09 document completeness verifier PASS, Python syntax PASS, GROW-08 race/clean build/static/security PASS, GROW-01–07 retained Go/SDK/Location/web/identity/cross-app checks PASS.
+- **Root cause:** previous exact-head failures on GROW-09 verifier were an omitted required documentary cross-reference, not a runtime implementation defect. No weakened checks or blind reruns.
+- **Evidence-only commit:** this roadmap change inherits above tested substantive SHA, requires no recursive CI rerun and introduces no executable/CI/config change.
+- **Main/base last checked:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71`; cumulative branch `audit/420grow-canonical-gap-inventory`, draft PR #567, unmerged. Reconciliation still required at phase Level 3.
+- **Level 2:** retained GROW-03–07 app-focused milestone PASS; no additional docs-only Level 2. **Level 3:** phase-closeout Solidity full inventory and separate Genesis/address authority, 420Integrated/global Docs, exact merged-candidate SHA deferred.
+- **Blockers:** none for GROW-09 Level 1. Live stage qualification remains GROW-10.
+- **Next canonical roadmap step:** **GROW-10 — Deployment and stage qualification**.

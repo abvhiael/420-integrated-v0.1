@@ -11,7 +11,7 @@ const verifyLane=(lane,chainId)=>{
  return true;
 };
 export function verifyS09Milestone(m){
- if(!m||m.schemaVersion!=='420-cmp-s09-live-milestone-v1'||m.environment!=='FUNDED_PUBLIC_TESTNET'||!good(m.releaseSha)||!good(m.chainId)||m.governanceApproved!==true||m.actualVaultFundingVerified!==true||!good(m.governanceDecisionRef)||!good(m.treasuryFundingRef)||!good(m.operatorSignoff)||!good(m.independentReviewer)||m.operatorSignoff===m.independentReviewer)deny('MILESTONE_NOT_AUTHORIZED');
+ if(!m||m.schemaVersion!=='420-cmp-s09-live-milestone-v1'||m.environment!=='FUNDED_PUBLIC_TESTNET'||!good(m.releaseSha)||!(typeof m.chainId==='string'&&/^[1-9][0-9]*$/.test(m.chainId))||m.governanceApproved!==true||m.actualVaultFundingVerified!==true||!good(m.governanceDecisionRef)||!good(m.treasuryFundingRef)||!good(m.operatorSignoff)||!good(m.independentReviewer)||m.operatorSignoff===m.independentReviewer)deny('MILESTONE_NOT_AUTHORIZED');
  if(!Array.isArray(m.lanes)||m.lanes.length!==2)deny('TWO_PROVIDERS_REQUIRED');
  const providers=m.lanes.map(x=>x?.provider);if(providers[0]===providers[1]||!providers.includes('FOLDING_AT_HOME')||!providers.includes('BOINC'))deny('TWO_PROVIDERS_REQUIRED');
  for(const lane of m.lanes)verifyLane(lane,m.chainId);

@@ -402,9 +402,69 @@ function parseRoute() {
   const raw=location.hash.replace(/^#/,"")||"latest";
   const [route,...rest]=raw.split("/");
   if(route==="article"&&rest[0]) return {route:"article",id:decodeURIComponent(rest[0])};
-  const allowed=["latest","news","originals","topics","search","editorial","moderation"];
+  const allowed=["latest","news","originals","topics","search","editorial","moderation","news-admin"];
   return {route:allowed.includes(route)?route:"latest",id:""};
 }
+let editingNewsSource = "";
+
+async function loadNewsAdmin() {
+  const status = $("#news-admin-status"), list = $("#news-admin-list");
+  list.replaceChildren();
+  if (!state.sessionToken) { status.textContent="Connect a verified moderator session to manage news sources."; return; }
+  try {
+    const response = await getJSON("/v1/admin/news/sources",{headers:authHeaders()});
+    const sources = Array.isArray(response.sources) ? response.sources : [];
+    status.textContent = `${sources.length} configured publisher sources. Disabled sources are not fetched.`;
+    for (const source of sources) {
+      const item = document.createElement("article");
+      item.className="news-admin-source";
+      item.append(textElement("strong","",source.name),textElement("p","",`${source.id} · ${source.category} · ${source.enabled ? "Enabled" : "Disabled"} · every ${source.poll_interval_minutes} min`));
+      const button=document.createElement("button");button.type="button";button.textContent="Edit source";
+      button.addEventListener("click",()=>{
+        editingNewsSource=source.id;
+        $("#news-admin-id").value=source.id;
+        $("#news-admin-id").readOnly=true;
+        $("#news-admin-name").value=source.name;
+        $("#news-admin-feed").value=source.feed_url;
+        $("#news-admin-home").value=source.home_url;
+        $("#news-admin-category").value=source.category;
+        $("#news-admin-interval").value=source.poll_interval_minutes;
+        $("#news-admin-attribution").value=source.attribution;
+        $("#news-admin-enabled").checked=Boolean(source.enabled);
+        $("#news-admin-form").scrollIntoView({block:"nearest"});
+      });
+      item.append(button);list.append(item);
+    }
+  } catch (error) { status.textContent=`Source management unavailable: ${error.message}`; }
+}
+
+function resetNewsAdmin() {
+  editingNewsSource="";
+  $("#news-admin-form").reset();
+  $("#news-admin-id").readOnly=false;
+}
+$("#news-admin-refresh").addEventListener("click",loadNewsAdmin);
+$("#news-admin-new").addEventListener("click",resetNewsAdmin);
+$("#news-admin-form").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const status=$("#news-admin-status");
+  if (!state.sessionToken) {status.textContent="Moderator session required.";return;}
+  const id=$("#news-admin-id").value.trim();
+  const source={
+    id,name:$("#news-admin-name").value.trim(),feed_url:$("#news-admin-feed").value.trim(),
+    home_url:$("#news-admin-home").value.trim(),enabled:editingNewsSource ? $("#news-admin-enabled").checked : false,
+    category:$("#news-admin-category").value,language:"en",
+    poll_interval_minutes:Number($("#news-admin-interval").value),
+    allow_excerpt:false,allow_image:false,attribution:$("#news-admin-attribution").value.trim()
+  };
+  try {
+    await getJSON("/v1/admin/news/sources",{method:editingNewsSource?"PUT":"POST",
+      headers:authHeaders({"Content-Type":"application/json"}),body:JSON.stringify({source})});
+    status.textContent=`Source ${id} saved. ${source.enabled?"Enabled":"Disabled"}.`;
+    resetNewsAdmin();await loadNewsAdmin();await loadSourcesAndTopics();
+  } catch (error) {status.textContent=`Source save rejected: ${error.message}`;}
+});
+
 function showRoute(route,id="") {
   state.route=route; state.routeID=id;
   $$(".view").forEach((view)=>{view.hidden=view.dataset.view!==route;});
@@ -417,6 +477,7 @@ function showRoute(route,id="") {
   if(route==="search") $("#search-query").focus();
   if(route==="editorial") {state.editorialCursor="";loadEditorial();}
   if(route==="moderation") {state.editorialCursor="";loadEditorial({moderation:true});}
+  if(route==="news-admin") loadNewsAdmin();
 }
 function refreshRoute(){const parsed=parseRoute();showRoute(parsed.route,parsed.id);}
 

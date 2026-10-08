@@ -18,6 +18,8 @@ on:
       - 'compute/worker/**'
       - 'packaging/node420-compute/**'
       - 'scripts/verify-cmp-8-420compute-app.py'
+      - 'scripts/verify-cmp-8-closeout.py'
+      - 'contracts/config/compute-market/cmp-8-phase-closeout.json'
       - 'docs/compute-market/CMP-8*'
       - '.github/workflows/420compute-app.yml'
   push:
@@ -29,6 +31,8 @@ on:
       - 'compute/worker/**'
       - 'packaging/node420-compute/**'
       - 'scripts/verify-cmp-8-420compute-app.py'
+      - 'scripts/verify-cmp-8-closeout.py'
+      - 'contracts/config/compute-market/cmp-8-phase-closeout.json'
       - 'docs/compute-market/CMP-8*'
       - '.github/workflows/420compute-app.yml'
 

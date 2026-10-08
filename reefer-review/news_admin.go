@@ -42,7 +42,7 @@ func (h HTTP) newsAdminSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	claims, authenticated := authenticatedSession(r.Context())
-	if !authenticated || !HasAnyCapability(claims, CapabilityModerator) {
+	if !isNewsAdmin(r.Context()) && (!authenticated || !HasAnyCapability(claims, CapabilityModerator)) {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "CAPABILITY_DENIED"})
 		return
 	}
@@ -112,7 +112,9 @@ func (h HTTP) newsAdminSources(w http.ResponseWriter, r *http.Request) {
 	}
 	// Actor identity is not returned publicly; operations must retain structured
 	// audit logs in the deployment log pipeline before production qualification.
-	log.Printf("news_source_admin actor=%q id=%q method=%q enabled=%t", claims.Subject, source.ID, r.Method, source.Enabled)
+	actor := claims.Subject
+	if isNewsAdmin(r.Context()) { actor = "standalone-news-operator" }
+	log.Printf("news_source_admin actor=%q id=%q method=%q enabled=%t", actor, source.ID, r.Method, source.Enabled)
 	writeJSON(w, http.StatusOK, map[string]any{"source": source})
 }
 

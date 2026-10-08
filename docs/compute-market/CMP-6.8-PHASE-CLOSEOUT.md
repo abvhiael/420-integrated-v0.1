@@ -1,6 +1,6 @@
 # CMP-6.8 — Phase closeout
 
-Status: **LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification required.**
+Status: **COMPLETE — Level 3 exact-head phase closeout qualified.**
 
 ## Canonical definition
 
@@ -42,7 +42,8 @@ CMP-6 contains:
 2. **Genesis Address Authority** owns address, namespace, collision, predeploy, frozen-manifest and manifest-authority verification and must not duplicate full Foundry.
 3. **420 Integrated Qualification** owns global runtime/build/Geth/fault/soak qualification.
 4. **420Docs Qualification** owns global documentation/reconciliation.
-5. **Compute Market Qualification** owns the retained Compute suite and all CMP-6 verifiers including this closeout verifier.\n6. **420 Genesis Contract Hardening** owns production size checks, invariant campaigns and the Slither high-severity gate as distinct security/static-analysis coverage.
+5. **Compute Market Qualification** owns the retained Compute suite and all CMP-6 verifiers including this closeout verifier.
+6. **420 Genesis Contract Hardening** owns production size checks, invariant campaigns and the Slither high-severity gate as distinct security/static-analysis coverage.
 
 Missing, cancelled, stale, superseded, skipped-required or untriggered gates are not passing evidence. Contract Hardening is required because Level 3 explicitly includes static/security analysis; its work is distinct from the canonical Solidity full-inventory owner.
 
@@ -97,9 +98,26 @@ Still external/live/testnet work:
 - SDK/API/CLI/indexer integration in CMP-7;
 - human-facing participation/earnings experience in CMP-8.
 
+## Qualification result
+
+Exact implementation SHA: `ba4b412d376a65d3ddbd2b1c16f471def100ada4`.
+
+Durable evidence: [CMP-6.8 qualification evidence](CMP-6.8-QUALIFICATION-EVIDENCE.md).
+
+All required Level-3 owners passed on that same exact SHA:
+
+- Solidity Contracts #5496 — SUCCESS;
+- Genesis Address Authority #2530 — SUCCESS;
+- 420 Integrated Qualification #6582 — SUCCESS;
+- 420Docs Qualification #7064 — SUCCESS;
+- Compute Market Qualification #561 — SUCCESS;
+- 420 Genesis Contract Hardening #1757 — SUCCESS.
+
+The recorded reconciliation baseline remains current `main` at `537525ebc636eabc76ff261f5b5ff5d236869b32`; the branch was verified 0 commits behind that baseline before evidence closeout.
+
 ## Exit criteria
 
-CMP-6.8 is COMPLETE only when all required Level-3 owners pass on one exact merge-candidate SHA, the candidate is reconciled to the recorded current-main baseline, durable evidence records those run results, and no required gate is missing or substituted.
+CMP-6.8 is **COMPLETE**. All required Level-3 owners passed on one exact merge-candidate SHA, the candidate is reconciled to the recorded current-main baseline, durable evidence records those run results, and no required gate is missing or substituted.
 
 ## Next canonical phase
 

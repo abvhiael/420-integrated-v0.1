@@ -622,7 +622,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **COMPLETE — Level 1 + third/final CMP-6 Level 2 exact-head qualified.** Durable evidence: [CMP-6.7 qualification](CMP-6.7-QUALIFICATION-EVIDENCE.md).
 
 ## CMP-6.8 — Phase closeout
-**LEVEL 3 CLOSEOUT CANDIDATE.** Reconcile the complete accumulated CMP-6 reward phase against current `main`, run canonical full Solidity once, Genesis/address authority separately without duplicate Foundry, global/Docs and retained Compute qualification, and preserve one exact merge-candidate SHA. Closeout definition: [CMP-6.8 phase closeout](CMP-6.8-PHASE-CLOSEOUT.md).
+**COMPLETE — Level 3 exact-head qualified on `ba4b412d376a65d3ddbd2b1c16f471def100ada4`.** The complete accumulated CMP-6 reward phase was reconciled against current `main`, canonical full Solidity ran once in four balanced shards, Genesis/address authority passed separately without duplicate Foundry, global/Docs, retained Compute and contract hardening all passed on the same exact implementation SHA. Durable evidence: [CMP-6.8 qualification](CMP-6.8-QUALIFICATION-EVIDENCE.md). Closeout definition: [CMP-6.8 phase closeout](CMP-6.8-PHASE-CLOSEOUT.md).
 
 ---
 
@@ -763,7 +763,7 @@ Production target flow:
 | CMP-3 node420 worker runtime | CMP-3.1–CMP-3.14 COMPLETE; Level 3 exact-head qualified |
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
 | CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.8 Level 3 closeout candidate — comprehensive exact-head qualification pending |
-| CMP-6 useful-compute rewards | forthcoming |
+| CMP-6 useful-compute rewards | CMP-6.1–CMP-6.8 COMPLETE; Level 3 exact-head qualified |
 | CMP-7 SDK/API/indexer | forthcoming |
 | CMP-8 420Compute UI | forthcoming |
 | CMP-9 public testnet | forthcoming |

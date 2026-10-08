@@ -1,0 +1,46 @@
+name: 420Hz GCA Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'hz/config/gca-product-boundaries-v1.json'
+      - 'docs/architecture/420hz/**'
+      - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
+      - 'scripts/verify-420hz-gca-*.py'
+      - '.github/workflows/420hz-gca.yml'
+  push:
+    branches:
+      - 'feature/420hz-generate-community-awards-*'
+      - 'audit/420hz-gca-*'
+    paths:
+      - 'hz/config/gca-product-boundaries-v1.json'
+      - 'docs/architecture/420hz/**'
+      - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
+      - 'scripts/verify-420hz-gca-*.py'
+      - '.github/workflows/420hz-gca.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  level1:
+    name: HZ-GCA Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact pull-request head
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Validate boundary manifest JSON
+        run: python3 -m json.tool hz/config/gca-product-boundaries-v1.json >/dev/null
+
+      - name: Verify HZ-GCA-1.1 product boundaries
+        run: python3 scripts/verify-420hz-gca-1-1.py

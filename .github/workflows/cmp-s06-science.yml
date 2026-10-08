@@ -1,0 +1,26 @@
+name: CMP S-06 Science Read Model
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - 'compute/web/**'
+      - '.github/workflows/cmp-s06-science.yml'
+  workflow_dispatch:
+jobs:
+  science-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained science ingestion suite
+        working-directory: compute/ingestion
+        run: npm run qualify
+      - name: Complete 420Compute frontend suite and build
+        working-directory: compute/web
+        run: npm run build

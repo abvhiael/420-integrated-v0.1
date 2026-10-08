@@ -108,6 +108,20 @@ jobs:
     name: HZ-GCA Level 2
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indexer420
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d indexer420"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -115,11 +129,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Detect HZ-GCA-1.20 milestone commit
+      - name: Detect HZ-GCA-1.20 milestone
         id: scope
         shell: bash
         run: |
-          if git diff-tree --no-commit-id --name-only -r HEAD | grep -Fxq 'hz/config/gca-level2-milestone-v1.json'; then
+          if test -f hz/config/gca-level2-milestone-v1.json; then
             echo "level2=true" >> "$GITHUB_OUTPUT"
           else
             echo "level2=false" >> "$GITHUB_OUTPUT"
@@ -191,4 +205,6 @@ jobs:
       - name: Retain reconciled Compute Indexer suite
         if: steps.scope.outputs.level2 == 'true'
         working-directory: 420-indexer
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@localhost:5432/indexer420
         run: npm install --no-audit --no-fund && npm test

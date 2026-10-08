@@ -123,6 +123,15 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     }
 
 
+    const computeReputationId = pathParam420(path, /^\/v1\/compute\/reputation\/([^/]+)$/);
+    if (computeReputationId !== null) { if(!api.computeReputationReference) return error420(503,'unavailable','Compute reputation surface unavailable'); const value=await api.computeReputationReference(chainId,computeReputationId); return value?ok420(value):error420(404,'not_found','Compute reputation reference not found'); }
+    const computeStakeId = pathParam420(path, /^\/v1\/compute\/stake\/([^/]+)$/);
+    if (computeStakeId !== null) { if(!api.computeStakeReference) return error420(503,'unavailable','Compute stake surface unavailable'); const value=await api.computeStakeReference(chainId,computeStakeId); return value?ok420(value):error420(404,'not_found','Compute stake reference not found'); }
+    const computeWorkerReputation = pathParam420(path, /^\/v1\/compute\/workers\/([^/]+)\/reputation$/);
+    if (computeWorkerReputation !== null) { if(!api.computeReputationReferences) return error420(503,'unavailable','Compute reputation surface unavailable'); return ok420(await api.computeReputationReferences(chainId,computeWorkerReputation,pageRequest420(url))); }
+    const computeWorkerStake = pathParam420(path, /^\/v1\/compute\/workers\/([^/]+)\/stake$/);
+    if (computeWorkerStake !== null) { if(!api.computeStakeReferences) return error420(503,'unavailable','Compute stake surface unavailable'); return ok420(await api.computeStakeReferences(chainId,computeWorkerStake,pageRequest420(url))); }
+
     const computeJobId = pathParam420(path, /^\/v1\/compute\/jobs\/([^/]+)$/);
     if (computeJobId !== null) { if(!api.computeJob) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeJob(chainId,computeJobId); return value?ok420(value):error420(404,'not_found','Compute job not found'); }
     const computeRequestId = pathParam420(path, /^\/v1\/compute\/requests\/([^/]+)$/);
@@ -227,6 +236,13 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
         objectKey: url.searchParams.get('objectKey') ?? undefined
       }));
     }
+    if (path === '/v1/compute/jobs') { if(!api.computeJobs) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeJobs(chainId,{...pageRequest420(url),owner:url.searchParams.get('owner')??undefined,status:url.searchParams.get('status')??undefined})); }
+    if (path === '/v1/compute/workers') { if(!api.computeWorkers) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeWorkers(chainId,{...pageRequest420(url),operator:url.searchParams.get('operator')??undefined})); }
+    if (path === '/v1/compute/verifiers') { if(!api.computeVerifiers) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeVerifiers(chainId,{...pageRequest420(url),authority:url.searchParams.get('authority')??undefined})); }
+    if (path === '/v1/compute/research/projects') { if(!api.computeResearchProjects) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeResearchProjects(chainId,{...pageRequest420(url),owner:url.searchParams.get('owner')??undefined})); }
+    if (path === '/v1/compute/rewards') { if(!api.computeRewards) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeRewards(chainId,{...pageRequest420(url),beneficiary:url.searchParams.get('beneficiary')??undefined})); }
+    if (path === '/v1/compute/contributions') { if(!api.computeContributions) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeContributions(chainId,{...pageRequest420(url),contributor:url.searchParams.get('contributor')??undefined})); }
+
     if (path === '/v1/ai/providers') return ok420(await api.aiProviders(chainId, pageRequest420(url)));
     if (path === '/v1/ai/models') return ok420(await api.aiModels(chainId, pageRequest420(url)));
     if (path === '/v1/ai/model-versions') return ok420(await api.aiModelVersions(chainId, pageRequest420(url)));

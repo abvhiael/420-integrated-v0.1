@@ -5,7 +5,7 @@ import type { ProtocolEventDescriptor420, ProtocolFieldKind420 } from './protoco
 
 export const COMPUTE_EVENT_CONTRACTS_420=[
   'ComputeRequestRegistry420','ComputeJobRegistry420','ComputeWorkerRegistry420','ComputeVerifierRegistry420',
-  'ComputeResearchProjectRegistry420','ComputeUsefulRewardAccounting420'
+  'ComputeResearchProjectRegistry420','ComputeUsefulRewardAccounting420','ComputeUsefulContributionAccounting420','ComputeWorkerTrust420','ComputeWorkerStake420'
 ] as const;
 export type ComputeEventContract420=typeof COMPUTE_EVENT_CONTRACTS_420[number];
 export interface ComputeManifestInput420{name:string;type:ProtocolFieldKind420;indexed:boolean;}
@@ -13,7 +13,7 @@ export interface ComputeManifestEvent420{name:string;signature:string;inputs:Com
 export interface ComputeManifestContract420{contractName:ComputeEventContract420;sourcePath:string;events:ComputeManifestEvent420[];}
 export interface ComputeArtifactManifest420{schema:'420-compute-artifact-descriptor-v1';descriptorVersion:1;protocol:'420Compute';authority:'artifact_events_only_addresses_resolved_by_deployment';contracts:ComputeManifestContract420[];}
 export interface ComputeEventDescriptor420 extends ProtocolEventDescriptor420{contractName:ComputeEventContract420;signature:string;}
-const SUPPORTED=new Set<ProtocolFieldKind420>(['bytes4','bytes8','bytes16','bytes32','address','bool','uint8','uint16','uint32','uint64','uint128','uint256']);
+const SUPPORTED=new Set<ProtocolFieldKind420>(['bytes4','bytes8','bytes16','bytes32','address','bool','uint8','uint16','uint32','uint64','uint128','uint256','int256']);
 const PRIVATE=/(payload|plaintext|document|dataset|token|secret|credential|privatekey|apikey|inputbytes|outputbytes|rawoutput)/i;
 function sig(event:any){return event.name+'('+event.inputs.map((x:any)=>x.type).join(',')+')';}
 export function computeDescriptorsFromArtifacts420(manifest:ComputeArtifactManifest420,artifacts:ReadonlyMap<string,Artifact420>):ComputeEventDescriptor420[]{

@@ -509,6 +509,172 @@
           ]
         }
       ]
+    },
+    {
+      "contractName": "ComputeWorkerTrust420",
+      "sourcePath": "contracts/src/compute/ComputeWorkerTrust420.sol",
+      "events": [
+        {
+          "name": "ReputationReferenceCaptured",
+          "signature": "ReputationReferenceCaptured(bytes32,bytes32,uint64,bytes32,uint32,uint32,int256,uint64)",
+          "inputs": [
+            {
+              "name": "referenceId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "workerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "workerRevision",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "policyId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "policyRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "metricRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "total",
+              "type": "int256",
+              "indexed": false
+            },
+            {
+              "name": "activeSignals",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeWorkerStake420",
+      "sourcePath": "contracts/src/compute/ComputeWorkerStake420.sol",
+      "events": [
+        {
+          "name": "StakeReferenceCaptured",
+          "signature": "StakeReferenceCaptured(bytes32,bytes32,uint64,bytes32,uint32,uint32,bytes32,uint64)",
+          "inputs": [
+            {
+              "name": "referenceId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "workerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "workerRevision",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "stakePolicyId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "stakePolicyRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "sourceBindingRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "positionId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "positionRevision",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeUsefulContributionAccounting420",
+      "sourcePath": "contracts/src/compute/ComputeUsefulContributionAccounting420.sol",
+      "events": [
+        {
+          "name": "ContributionRecorded",
+          "signature": "ContributionRecorded(bytes32,bytes32,address,bytes32,bytes32,uint32,uint8,bytes32,uint256,bytes32)",
+          "inputs": [
+            {
+              "name": "contributionId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "contributor",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "projectRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "policyId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "policyRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "metricKind",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "metricId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "gateId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
     }
   ]
 }

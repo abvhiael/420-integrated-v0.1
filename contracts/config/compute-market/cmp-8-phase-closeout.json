@@ -1,0 +1,46 @@
+{
+  "schema": "420-compute-market-phase-closeout-v1",
+  "step": "CMP-8",
+  "name": "420Compute application",
+  "status": "LEVEL_3_CANDIDATE",
+  "reconciliation": {
+    "main_sha": "0993ff5b5b3b213a0768dbde90e4734df5ab4cc0",
+    "reconciled_anchor_sha": "f8970cc02d5d780471c04bab955d396032eeee74",
+    "behind_main": 0
+  },
+  "qualified_scope": [
+    "420Compute browser application",
+    "Compute Indexer application projections",
+    "Compute API job-submission boundary",
+    "node420-compute participation configuration"
+  ],
+  "level_2_milestones": [
+    "human participation convergence"
+  ],
+  "level_3_required": {
+    "solidity_full_inventory": true,
+    "genesis_address_authority": true,
+    "integrated_global": true,
+    "docs_global": true,
+    "retained_compute_market_suite": true,
+    "compute_app_retained_integration": true,
+    "indexer_direct": true,
+    "indexer_shared_consumers": true,
+    "phase_config_verification": true,
+    "contract_hardening_static_analysis": true
+  },
+  "authority_boundaries": {
+    "browser_canonical_authority": false,
+    "indexer_authoritative": false,
+    "wallet_authorization_required_for_writes": true,
+    "project_preferences": "LOCAL_PREFERENCE_ONLY",
+    "live_runtime_materialized": false
+  },
+  "deployment_boundary": {
+    "repository_implementation": true,
+    "public_testnet_deployment": false,
+    "live_worker_fleet": false,
+    "funded_end_to_end_workload": false
+  },
+  "next_canonical_step": "CMP-9 — Public testnet compute"
+}

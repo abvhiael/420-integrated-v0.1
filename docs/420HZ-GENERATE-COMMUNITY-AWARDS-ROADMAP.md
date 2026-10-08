@@ -152,7 +152,7 @@ The adapter must support future third-party or first-party models without changi
 
 Add durable provenance for generated outputs without putting private prompts/audio on-chain.
 
-**Qualification:** Level 1 ordinary app-scoped step. **COMPLETE** — exact-head implementation SHA `e13ff098988028bd1a9181edd7559066a611de99`, `420Hz Web Qualification` run `37816294856`, job `HZ-GCA-4 Level 1` (`113445676046`). Retain the directly applicable HZ-GCA-1.4 disclosure, HZ-GCA-1.5 provenance, HZ-GCA-1.6 rights/consent and HZ-GCA-3 execution-evidence verifiers; no new Level-2 milestone is introduced.
+**Qualification:** Level 1 ordinary app-scoped step. **COMPLETE** — exact-head implementation SHA `1a96ea3e136219e7900569eb98359007d483ec29`, `420Hz Web Qualification` run `37817799769`, job `HZ-GCA-4 Level 1` (`113450783236`). Retain the directly applicable HZ-GCA-1.4 disclosure, HZ-GCA-1.5 provenance, HZ-GCA-1.6 rights/consent and HZ-GCA-3 execution-evidence verifiers; no new Level-2 milestone is introduced.
 
 **Repository artifacts:** executable provenance validator/finalizer/job bridge, provenance/consent/AI-rights policy manifest, architecture document, adversarial tests and targeted verifier.
 

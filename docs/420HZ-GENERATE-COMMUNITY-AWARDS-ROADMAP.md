@@ -102,7 +102,7 @@ Required work:
 
 Implement a provider-neutral 420Hz generation job model.
 
-**Qualification:** Level 1 ordinary app-scoped step. HZ-GCA-2 does not independently trigger a Level-2 milestone; the next broader app milestone remains a later documented roadmap boundary.
+**Qualification:** Level 1 ordinary app-scoped step. **COMPLETE** — exact-head implementation SHA `d983e77cadb8d6cfb09bc3a6da0c02e027c1b3f2`, `420Hz GCA Qualification` run `37809590885`, job `HZ-GCA Level 1` (`113422667411`). HZ-GCA-2 does not independently trigger a Level-2 milestone; the next broader app milestone remains a later documented roadmap boundary.
 
 **Repository artifacts:** `hz/generate/` provider-neutral runtime/model, deterministic mock provider, machine-readable contract manifest, architecture document, targeted verifier and app-specific CI coverage.
 

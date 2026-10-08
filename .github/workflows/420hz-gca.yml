@@ -62,6 +62,9 @@ jobs:
       - name: Verify HZ-GCA-3 Compute execution adapter
         run: python3 scripts/verify-420hz-gca-3.py
 
+      - name: Verify HZ-GCA-4 provenance consent AI rights
+        run: python3 scripts/verify-420hz-gca-4.py
+
       - name: Retain 420AI Compute integration boundaries for HZ-GCA-3
         run: python3 scripts/verify-420ai-compute-integration.py
 

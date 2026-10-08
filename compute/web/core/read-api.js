@@ -12,7 +12,7 @@ return Object.freeze({
  worker:(workerId)=>get('/v1/compute/workers/'+id(workerId,'workerId')),
  verifiers:(authority,limit=50)=>get('/v1/compute/verifiers',{authority:account(authority,'authority'),limit}),
  verifier:(verifierId)=>get('/v1/compute/verifiers/'+id(verifierId,'verifierId')),
- projects:(owner,limit=50)=>get('/v1/compute/research/projects',{owner:account(owner,'owner'),limit}),
+ projects:(owner,limit=50)=>get('/v1/compute/research/projects',{owner:account(owner,'owner'),limit}),\n availableProjects:(limit=50)=>get('/v1/compute/research/projects',{limit}),
  project:(projectId)=>get('/v1/compute/research/projects/'+id(projectId,'projectId')),
  rewards:(beneficiary,limit=100)=>get('/v1/compute/rewards',{beneficiary:account(beneficiary,'beneficiary'),limit}),
  reputation:(workerId,limit=50)=>get('/v1/compute/workers/'+id(workerId,'workerId')+'/reputation',{limit}),

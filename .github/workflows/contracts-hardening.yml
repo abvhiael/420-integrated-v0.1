@@ -10,6 +10,9 @@ on:
   pull_request:
     paths:
       - "contracts/config/compute-market/cmp-6.8-phase-closeout.json"
+      - "contracts/config/compute-market/cmp-7.10-phase-closeout.json"
+      - "docs/compute-market/CMP-7.10-PHASE-CLOSEOUT.md"
+      - "scripts/verify-cmp-7-10-closeout.py"
       - "docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md"
       - "scripts/verify-cmp-6-8-closeout.py"
       - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"

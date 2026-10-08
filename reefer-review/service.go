@@ -20,30 +20,47 @@ var (
 type Identity interface {
 	Active(context.Context, string) (bool, error)
 }
+
 type Authorizer interface {
 	CanPublish(context.Context, string, Publication) (bool, error)
 	CanModerate(context.Context, string, Publication) (bool, error)
+	CanEdit(context.Context, string, Publication) (bool, error)
+	CanTombstone(context.Context, string, Publication) (bool, error)
+	CanRead(context.Context, string, Publication) (bool, error)
 }
+
 type Rights interface {
 	Assert(context.Context, string, string) (string, error)
 }
+
 type BlobStore interface {
 	Put(context.Context, string, []byte) (string, error)
 	Get(context.Context, string) ([]byte, error)
 }
+
 type Store interface {
 	Put(context.Context, Publication) error
 	Get(context.Context, string) (Publication, error)
 	List(context.Context, int, int) ([]Publication, int, error)
+	ListAll(context.Context) ([]Publication, error)
 	BindIdempotency(context.Context, string, string, string) (string, error)
+	AppendRevision(context.Context, PublicationRevision) (PublicationRevision, error)
+	UpdateRevision(context.Context, PublicationRevision) error
+	GetRevision(context.Context, string, string) (PublicationRevision, error)
+	ListRevisions(context.Context, string) ([]PublicationRevision, error)
+	AppendModerationEvent(context.Context, ModerationEvent) (ModerationEvent, error)
+	ListModerationEvents(context.Context, string) ([]ModerationEvent, error)
 }
+
 type Search interface {
 	Upsert(context.Context, Publication) error
 	Delete(context.Context, string) error
 }
+
 type Notifications interface {
 	Published(context.Context, Publication) error
 }
+
 type Mail interface {
 	Published(context.Context, Publication) error
 }
@@ -76,26 +93,111 @@ func validVisibility(v Visibility) bool {
 	}
 }
 
+func (s Service) now() time.Time {
+	if s.Now != nil {
+		return s.Now().UTC()
+	}
+	return time.Now().UTC()
+}
+
+func (s Service) requireActiveActor(ctx context.Context, actor string) (string, error) {
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		return "", ErrUnauthorized
+	}
+	active, err := s.Identity.Active(ctx, actor)
+	if err != nil {
+		return "", err
+	}
+	if !active {
+		return "", ErrUnauthorized
+	}
+	return actor, nil
+}
+
+func bodyDigest(body string) string {
+	sum := sha256.Sum256([]byte(body))
+	return hex.EncodeToString(sum[:])
+}
+
+func (s Service) putBody(ctx context.Context, owner, digest string, body []byte) (string, error) {
+	if scoped, ok := s.Blobs.(OwnerScopedBlobStore); ok {
+		ref, err := scoped.PutForOwner(ctx, owner, digest, body)
+		if err != nil {
+			return "", err
+		}
+		if strings.TrimSpace(ref) == "" {
+			return "", ErrStorageIntegrity
+		}
+		return ref, nil
+	}
+	ref, err := s.Blobs.Put(ctx, digest, body)
+	if err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(ref) == "" {
+		return "", ErrStorageIntegrity
+	}
+	return ref, nil
+}
+
+func (s Service) getBody(ctx context.Context, p Publication) ([]byte, error) {
+	var (
+		body []byte
+		err  error
+	)
+	if scoped, ok := s.Blobs.(OwnerScopedBlobStore); ok {
+		body, err = scoped.GetForOwner(ctx, p.Author, p.BodyRef)
+	} else {
+		body, err = s.Blobs.Get(ctx, p.BodyRef)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !strings.EqualFold(bodyDigest(string(body)), p.BodyDigest) {
+		return nil, ErrStorageIntegrity
+	}
+	return body, nil
+}
+
+func (s Service) assertRights(ctx context.Context, actor string, p Publication, digest string) (string, *RightsProvenance, error) {
+	if _, ok := s.Rights.(RightsProvenanceProvider); ok {
+		evidence, err := validateRightsProvenance(ctx, actor, p.ID, digest, s.Rights)
+		if err != nil {
+			return "", nil, err
+		}
+		return evidence.RightID, &evidence, nil
+	}
+	claim, err := s.Rights.Assert(ctx, actor, digest)
+	if err != nil {
+		return "", nil, err
+	}
+	if strings.TrimSpace(claim) == "" {
+		return "", nil, fmt.Errorf("rights assertion empty")
+	}
+	return claim, nil, nil
+}
+
 func (s Service) CreateDraft(ctx context.Context, actor string, req CreateDraftRequest) (Publication, error) {
 	if err := s.validate(); err != nil {
 		return Publication{}, err
 	}
 	actor = strings.TrimSpace(actor)
-	req.Title = strings.TrimSpace(req.Title)
-	req.IdempotencyKey = strings.TrimSpace(req.IdempotencyKey)
-	if actor == "" || req.IdempotencyKey == "" || req.Title == "" || strings.TrimSpace(req.Body) == "" || !validVisibility(req.Visibility) {
+	if actor == "" {
 		return Publication{}, ErrInvalidInput
 	}
-	active, err := s.Identity.Active(ctx, actor)
+	var err error
+	actor, err = s.requireActiveActor(ctx, actor)
 	if err != nil {
 		return Publication{}, err
 	}
-	if !active {
-		return Publication{}, ErrUnauthorized
+	req.Title = strings.TrimSpace(req.Title)
+	req.IdempotencyKey = strings.TrimSpace(req.IdempotencyKey)
+	if req.IdempotencyKey == "" || req.Title == "" || strings.TrimSpace(req.Body) == "" || !validVisibility(req.Visibility) {
+		return Publication{}, ErrInvalidInput
 	}
-	body := []byte(req.Body)
-	sum := sha256.Sum256(body)
-	digest := hex.EncodeToString(sum[:])
+
+	digest := bodyDigest(req.Body)
 	fpSum := sha256.Sum256([]byte(req.Title + "\x00" + digest + "\x00" + string(req.Visibility)))
 	fingerprint := hex.EncodeToString(fpSum[:])
 	proposed := stableID(actor, req.IdempotencyKey)
@@ -107,15 +209,37 @@ func (s Service) CreateDraft(ctx context.Context, actor string, req CreateDraftR
 		p, e := s.Store.Get(ctx, id)
 		return p, e
 	}
-	ref, err := s.Blobs.Put(ctx, digest, body)
+	if id == proposed {
+		if existing, e := s.Store.Get(ctx, proposed); e == nil {
+			return existing, nil
+		}
+	}
+
+	ref, err := s.putBody(ctx, actor, digest, []byte(req.Body))
 	if err != nil {
 		return Publication{}, err
 	}
-	now := time.Now().UTC()
-	if s.Now != nil {
-		now = s.Now().UTC()
+	now := s.now()
+	revision, err := s.Store.AppendRevision(ctx, PublicationRevision{
+		PublicationID: proposed,
+		Editor:        actor,
+		Title:         req.Title,
+		Summary:       strings.TrimSpace(req.Summary),
+		BodyRef:       ref,
+		BodyDigest:    digest,
+		Visibility:    req.Visibility,
+		CreatedAt:     now,
+	})
+	if err != nil {
+		return Publication{}, err
 	}
-	p := Publication{ID: proposed, Namespace: ServiceID, Version: "v1", Author: actor, Title: req.Title, Summary: strings.TrimSpace(req.Summary), BodyRef: ref, BodyDigest: digest, Visibility: req.Visibility, Status: StatusDraft, Source: "USER_AUTHORED", CreatedAt: now, UpdatedAt: now}
+	p := Publication{
+		ID: proposed, Namespace: ServiceID, Version: "v2", Author: actor,
+		Title: req.Title, Summary: strings.TrimSpace(req.Summary), BodyRef: ref, BodyDigest: digest,
+		Visibility: req.Visibility, Status: StatusDraft, Source: "USER_AUTHORED",
+		CurrentRevisionID: revision.ID, Revision: revision.Number,
+		CreatedAt: now, UpdatedAt: now,
+	}
 	if err := s.Store.Put(ctx, p); err != nil {
 		return Publication{}, err
 	}
@@ -129,6 +253,11 @@ func stableID(actor, key string) string {
 
 func (s Service) Publish(ctx context.Context, actor, id string) (Publication, []string, error) {
 	if err := s.validate(); err != nil {
+		return Publication{}, nil, err
+	}
+	var err error
+	actor, err = s.requireActiveActor(ctx, actor)
+	if err != nil {
 		return Publication{}, nil, err
 	}
 	p, err := s.Store.Get(ctx, id)
@@ -145,24 +274,32 @@ func (s Service) Publish(ctx context.Context, actor, id string) (Publication, []
 	if !ok {
 		return Publication{}, nil, ErrUnauthorized
 	}
-	claim, err := s.Rights.Assert(ctx, actor, p.BodyDigest)
+	claim, provenance, err := s.assertRights(ctx, actor, p, p.BodyDigest)
 	if err != nil {
 		return Publication{}, nil, err
 	}
-	if strings.TrimSpace(claim) == "" {
-		return Publication{}, nil, fmt.Errorf("rights assertion empty")
-	}
-	now := time.Now().UTC()
-	if s.Now != nil {
-		now = s.Now().UTC()
-	}
+	now := s.now()
 	p.RightsClaim = claim
+	p.RightsProvenance = provenance
 	p.Status = StatusPublished
 	p.PublishedAt = &now
 	p.UpdatedAt = now
 	if err := s.Store.Put(ctx, p); err != nil {
 		return Publication{}, nil, err
 	}
+	revision, err := s.Store.GetRevision(ctx, p.ID, p.CurrentRevisionID)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	revision.RightsClaim = claim
+	revision.RightsProvenance = provenance
+	if err := s.Store.UpdateRevision(ctx, revision); err != nil {
+		return Publication{}, nil, err
+	}
+	return p, s.publishProjections(ctx, p), nil
+}
+
+func (s Service) publishProjections(ctx context.Context, p Publication) []string {
 	warnings := []string{}
 	if p.Visibility == VisibilityPublic {
 		if err := s.Search.Upsert(ctx, p); err != nil {
@@ -175,48 +312,184 @@ func (s Service) Publish(ctx context.Context, actor, id string) (Publication, []
 	if err := s.Mail.Published(ctx, p); err != nil {
 		warnings = append(warnings, "mail:"+err.Error())
 	}
+	return warnings
+}
+
+func (s Service) Update(ctx context.Context, actor, id string, req UpdatePublicationRequest) (Publication, []string, error) {
+	if err := s.validate(); err != nil {
+		return Publication{}, nil, err
+	}
+	var err error
+	actor, err = s.requireActiveActor(ctx, actor)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	p, err := s.Store.Get(ctx, id)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	if p.Status != StatusDraft && p.Status != StatusPublished {
+		return Publication{}, nil, ErrConflict
+	}
+	ok, err := s.Auth.CanEdit(ctx, actor, p)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	if !ok {
+		return Publication{}, nil, ErrUnauthorized
+	}
+	req.Title = strings.TrimSpace(req.Title)
+	if req.Title == "" || strings.TrimSpace(req.Body) == "" || !validVisibility(req.Visibility) {
+		return Publication{}, nil, ErrInvalidInput
+	}
+
+	digest := bodyDigest(req.Body)
+	ref, err := s.putBody(ctx, p.Author, digest, []byte(req.Body))
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	now := s.now()
+	revision := PublicationRevision{
+		PublicationID: p.ID, Editor: actor, Title: req.Title, Summary: strings.TrimSpace(req.Summary),
+		BodyRef: ref, BodyDigest: digest, Visibility: req.Visibility, CreatedAt: now,
+	}
+	if p.Status == StatusPublished {
+		claim, provenance, e := s.assertRights(ctx, actor, p, digest)
+		if e != nil {
+			return Publication{}, nil, e
+		}
+		revision.RightsClaim = claim
+		revision.RightsProvenance = provenance
+	}
+	revision, err = s.Store.AppendRevision(ctx, revision)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+
+	wasPublic := p.Status == StatusPublished && p.Visibility == VisibilityPublic
+	p.Title = revision.Title
+	p.Summary = revision.Summary
+	p.BodyRef = revision.BodyRef
+	p.BodyDigest = revision.BodyDigest
+	p.Visibility = revision.Visibility
+	p.RightsClaim = revision.RightsClaim
+	p.RightsProvenance = revision.RightsProvenance
+	p.CurrentRevisionID = revision.ID
+	p.Revision = revision.Number
+	p.UpdatedAt = now
+	if err := s.Store.Put(ctx, p); err != nil {
+		return Publication{}, nil, err
+	}
+
+	warnings := []string{}
+	if p.Status == StatusPublished {
+		if wasPublic && p.Visibility != VisibilityPublic {
+			if err := s.Search.Delete(ctx, p.ID); err != nil {
+				warnings = append(warnings, "search-delete:"+err.Error())
+			}
+		}
+		if p.Visibility == VisibilityPublic {
+			if err := s.Search.Upsert(ctx, p); err != nil {
+				warnings = append(warnings, "search:"+err.Error())
+			}
+		}
+	}
 	return p, warnings, nil
 }
 
-func (s Service) Moderate(ctx context.Context, actor, id, action string) (Publication, error) {
+func (s Service) Moderate(ctx context.Context, actor, id, action, reason string) (Publication, ModerationEvent, error) {
+	if err := s.validate(); err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	var err error
+	actor, err = s.requireActiveActor(ctx, actor)
+	if err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
 	p, err := s.Store.Get(ctx, id)
 	if err != nil {
-		return Publication{}, err
+		return Publication{}, ModerationEvent{}, err
 	}
 	ok, err := s.Auth.CanModerate(ctx, actor, p)
 	if err != nil {
-		return Publication{}, err
+		return Publication{}, ModerationEvent{}, err
 	}
 	if !ok {
-		return Publication{}, ErrUnauthorized
+		return Publication{}, ModerationEvent{}, ErrUnauthorized
 	}
-	switch strings.ToUpper(strings.TrimSpace(action)) {
+	from := p.Status
+	action = strings.ToUpper(strings.TrimSpace(action))
+	switch action {
 	case "HIDE":
 		if p.Status != StatusPublished {
-			return Publication{}, ErrConflict
+			return Publication{}, ModerationEvent{}, ErrConflict
 		}
 		p.Status = StatusHidden
 		_ = s.Search.Delete(ctx, p.ID)
 	case "RESTORE":
 		if p.Status != StatusHidden {
-			return Publication{}, ErrConflict
+			return Publication{}, ModerationEvent{}, ErrConflict
 		}
 		p.Status = StatusPublished
 		if p.Visibility == VisibilityPublic {
 			_ = s.Search.Upsert(ctx, p)
 		}
 	default:
-		return Publication{}, ErrInvalidInput
+		return Publication{}, ModerationEvent{}, ErrInvalidInput
 	}
-	now := time.Now().UTC()
-	if s.Now != nil {
-		now = s.Now().UTC()
-	}
+	now := s.now()
 	p.UpdatedAt = now
 	if err := s.Store.Put(ctx, p); err != nil {
-		return Publication{}, err
+		return Publication{}, ModerationEvent{}, err
 	}
-	return p, nil
+	event, err := s.Store.AppendModerationEvent(ctx, ModerationEvent{
+		PublicationID: p.ID, Actor: actor, Action: action, Reason: strings.TrimSpace(reason),
+		FromStatus: from, ToStatus: p.Status, CreatedAt: now,
+	})
+	if err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	return p, event, nil
+}
+
+func (s Service) Tombstone(ctx context.Context, actor, id, reason string) (Publication, ModerationEvent, error) {
+	if err := s.validate(); err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	var err error
+	actor, err = s.requireActiveActor(ctx, actor)
+	if err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	p, err := s.Store.Get(ctx, id)
+	if err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	if p.Status == StatusTombstoned {
+		return Publication{}, ModerationEvent{}, ErrConflict
+	}
+	ok, err := s.Auth.CanTombstone(ctx, actor, p)
+	if err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	if !ok {
+		return Publication{}, ModerationEvent{}, ErrUnauthorized
+	}
+	from := p.Status
+	p.Status = StatusTombstoned
+	p.UpdatedAt = s.now()
+	_ = s.Search.Delete(ctx, p.ID)
+	if err := s.Store.Put(ctx, p); err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	event, err := s.Store.AppendModerationEvent(ctx, ModerationEvent{
+		PublicationID: p.ID, Actor: actor, Action: "TOMBSTONE", Reason: strings.TrimSpace(reason),
+		FromStatus: from, ToStatus: StatusTombstoned, CreatedAt: p.UpdatedAt,
+	})
+	if err != nil {
+		return Publication{}, ModerationEvent{}, err
+	}
+	return p, event, nil
 }
 
 func (s Service) Get(ctx context.Context, id string) (Publication, []byte, error) {
@@ -224,19 +497,50 @@ func (s Service) Get(ctx context.Context, id string) (Publication, []byte, error
 	if err != nil {
 		return Publication{}, nil, err
 	}
-	b, err := s.Blobs.Get(ctx, p.BodyRef)
-	return p, b, err
+	body, err := s.getBody(ctx, p)
+	return p, body, err
 }
 
 func (s Service) GetPublic(ctx context.Context, id string) (Publication, []byte, error) {
-	p, body, err := s.Get(ctx, id)
+	p, err := s.Store.Get(ctx, id)
 	if err != nil {
 		return Publication{}, nil, err
 	}
 	if p.Status != StatusPublished || p.Visibility != VisibilityPublic {
 		return Publication{}, nil, ErrNotFound
 	}
-	return p, body, nil
+	body, err := s.getBody(ctx, p)
+	return p, body, err
+}
+
+func (s Service) GetForActor(ctx context.Context, actor, id string) (Publication, []byte, error) {
+	if err := s.validate(); err != nil {
+		return Publication{}, nil, err
+	}
+	p, err := s.Store.Get(ctx, id)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	actor = strings.TrimSpace(actor)
+	if actor == "" {
+		if p.Status != StatusPublished || (p.Visibility != VisibilityPublic && p.Visibility != VisibilityUnlisted) {
+			return Publication{}, nil, ErrNotFound
+		}
+		body, err := s.getBody(ctx, p)
+		return p, body, err
+	}
+	if _, err := s.requireActiveActor(ctx, actor); err != nil {
+		return Publication{}, nil, err
+	}
+	ok, err := s.Auth.CanRead(ctx, actor, p)
+	if err != nil {
+		return Publication{}, nil, err
+	}
+	if !ok {
+		return Publication{}, nil, ErrNotFound
+	}
+	body, err := s.getBody(ctx, p)
+	return p, body, err
 }
 
 func (s Service) List(ctx context.Context, offset, limit int) ([]Publication, int, error) {
@@ -244,4 +548,98 @@ func (s Service) List(ctx context.Context, offset, limit int) ([]Publication, in
 		return nil, 0, ErrInvalidInput
 	}
 	return s.Store.List(ctx, offset, limit)
+}
+
+func (s Service) ListEditorial(ctx context.Context, actor string, offset, limit int) ([]Publication, int, error) {
+	if limit < 1 || limit > 100 || offset < 0 {
+		return nil, 0, ErrInvalidInput
+	}
+	var err error
+	actor, err = s.requireActiveActor(ctx, actor)
+	if err != nil {
+		return nil, 0, err
+	}
+	all, err := s.Store.ListAll(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	visible := make([]Publication, 0, len(all))
+	for _, p := range all {
+		if actor == p.Author {
+			visible = append(visible, p)
+			continue
+		}
+		ok, e := s.Auth.CanModerate(ctx, actor, p)
+		if e != nil {
+			return nil, 0, e
+		}
+		if ok {
+			visible = append(visible, p)
+		}
+	}
+	total := len(visible)
+	if offset > total {
+		return nil, total, ErrInvalidInput
+	}
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	return append([]Publication(nil), visible[offset:end]...), total, nil
+}
+
+func (s Service) ListRevisions(ctx context.Context, actor, id string) ([]PublicationRevision, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
+	actor, err := s.requireActiveActor(ctx, actor)
+	if err != nil {
+		return nil, err
+	}
+	p, err := s.Store.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	allowed := actor == p.Author
+	if !allowed {
+		allowed, err = s.Auth.CanEdit(ctx, actor, p)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !allowed {
+		allowed, err = s.Auth.CanModerate(ctx, actor, p)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !allowed {
+		return nil, ErrUnauthorized
+	}
+	return s.Store.ListRevisions(ctx, id)
+}
+
+func (s Service) ListModerationHistory(ctx context.Context, actor, id string) ([]ModerationEvent, error) {
+	if err := s.validate(); err != nil {
+		return nil, err
+	}
+	actor, err := s.requireActiveActor(ctx, actor)
+	if err != nil {
+		return nil, err
+	}
+	p, err := s.Store.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	allowed := actor == p.Author
+	if !allowed {
+		allowed, err = s.Auth.CanModerate(ctx, actor, p)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if !allowed {
+		return nil, ErrUnauthorized
+	}
+	return s.Store.ListModerationEvents(ctx, id)
 }

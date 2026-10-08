@@ -1,0 +1,91 @@
+name: Reefer Review Level 2 Integration
+
+on:
+  pull_request:
+    paths:
+      - 'reefer-review/**'
+      - 'cmd/reefer-review/**'
+      - 'cmd/reefer-news-sync/**'
+      - 'config/reefer-review*.json'
+      - 'docs/reefer-review/**'
+      - 'scripts/verify-reefer-review-rr*.py'
+      - '.github/workflows/reefer-review-level2.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: reefer-level2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  retained-app-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact milestone head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build retained ReeferReview executables
+        run: go build ./cmd/reefer-review ./cmd/reefer-news-sync
+
+      - name: Full ReeferReview package tests
+        run: go test ./reefer-review/...
+
+      - name: Full ReeferReview race suite
+        run: go test -race ./reefer-review/...
+
+      - name: Vet ReeferReview app surface
+        run: go vet ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/...
+
+      - name: Frontend syntax
+        run: node --check reefer-review/web/app.js
+
+      - name: RR-1 retained verifier
+        run: python3 scripts/verify-reefer-review-rr1.py
+
+      - name: RR-2 retained verifier
+        run: python3 scripts/verify-reefer-review-rr2.py
+
+      - name: RR-3 retained verifier
+        run: python3 scripts/verify-reefer-review-rr3.py
+
+      - name: RR-4 retained verifier
+        run: python3 scripts/verify-reefer-review-rr4.py
+
+      - name: RR-5 retained verifier
+        run: python3 scripts/verify-reefer-review-rr5.py
+
+      - name: RR-6 retained verifier
+        run: python3 scripts/verify-reefer-review-rr6.py
+
+      - name: RR-6 Search schema dependency tests
+        run: go test ./search/architecture ./search/result
+
+      - name: RR-6 Notifications boundary dependency tests
+        run: go test ./notifications/architecture ./notifications/security
+
+      - name: RR-6 Mail contract dependency tests
+        run: go test ./mail ./mail/client
+
+      - name: Canonical 420 Storage SDK dependency tests
+        run: go test ./sdk/storage420
+
+      - name: Canonical Reefer Review audit verifier
+        run: python3 scripts/verify-reefer-review-audit.py
+
+      - name: Shared GEN-SVC validator
+        run: python3 scripts/validate-gen-svc-0.py

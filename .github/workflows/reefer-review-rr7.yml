@@ -1,0 +1,89 @@
+name: Reefer Review RR-7
+
+on:
+  pull_request:
+    paths:
+      - 'reefer-review/**'
+      - 'cmd/reefer-review/**'
+      - 'cmd/reefer-news-sync/**'
+      - 'docs/reefer-review/RR-7-**'
+      - 'docs/reefer-review/RR-ROADMAP.md'
+      - 'docs/audit/REEFER-REVIEW-SECURITY.md'
+      - 'docs/audit/REEFER-REVIEW-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'scripts/verify-reefer-review-rr7.py'
+      - '.github/workflows/reefer-review-rr7.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: reefer-rr7-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Go format
+        shell: bash
+        run: |
+          set -euo pipefail
+          files="$(gofmt -l reefer-review cmd/reefer-review cmd/reefer-news-sync)"
+          if [ -n "$files" ]; then
+            printf 'gofmt required for:\n%s\n' "$files" >&2
+            gofmt -d $files
+            exit 1
+          fi
+
+      - name: RR-7 newsfeed and app regression tests
+        run: go test ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/...
+
+      - name: RR-7 race qualification
+        run: go test -race ./reefer-review/...
+
+      - name: RR-7 vet
+        run: go vet ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/...
+
+      - name: Frontend JavaScript syntax
+        run: node --check reefer-review/web/app.js
+
+      - name: RR-7 verifier
+        run: python3 scripts/verify-reefer-review-rr7.py
+
+      - name: Retained RR-6 verifier
+        run: python3 scripts/verify-reefer-review-rr6.py
+
+      - name: Retained RR-5 verifier
+        run: python3 scripts/verify-reefer-review-rr5.py
+
+      - name: Retained RR-4 verifier
+        run: python3 scripts/verify-reefer-review-rr4.py
+
+      - name: Retained RR-3 verifier
+        run: python3 scripts/verify-reefer-review-rr3.py
+
+      - name: Retained RR-2 verifier
+        run: python3 scripts/verify-reefer-review-rr2.py
+
+      - name: Retained RR-1 verifier
+        run: python3 scripts/verify-reefer-review-rr1.py
+
+      - name: Retained Reefer Review audit verifier
+        run: python3 scripts/verify-reefer-review-audit.py

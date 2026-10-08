@@ -1,0 +1,31 @@
+{
+  "schema": "420-reefer-review-news-sources-v1",
+  "sources": [
+    {
+      "id": "marijuana-moment",
+      "name": "Marijuana Moment",
+      "feed_url": "https://www.marijuanamoment.net/feed/",
+      "home_url": "https://www.marijuanamoment.net/",
+      "enabled": true,
+      "category": "cannabis-news",
+      "language": "en",
+      "poll_interval_minutes": 30,
+      "allow_excerpt": true,
+      "allow_image": false,
+      "attribution": "Headline and source-provided excerpt via Marijuana Moment RSS; read the original at the canonical publisher URL."
+    },
+    {
+      "id": "high-times",
+      "name": "High Times",
+      "feed_url": "https://hightimes.com/feed/",
+      "home_url": "https://hightimes.com/",
+      "enabled": true,
+      "category": "cannabis-news",
+      "language": "en",
+      "poll_interval_minutes": 30,
+      "allow_excerpt": true,
+      "allow_image": false,
+      "attribution": "Headline and source-provided excerpt via High Times RSS; read the original at the canonical publisher URL."
+    }
+  ]
+}

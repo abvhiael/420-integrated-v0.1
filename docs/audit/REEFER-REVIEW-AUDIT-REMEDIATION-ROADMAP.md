@@ -20,23 +20,23 @@ No dedicated smart contract is required by the canonical architecture: the appli
 |---|---|---|---|---|---|---|
 | service identity/scope | consumer registry | config + package constant | static verifier | README | COMPLETE | live Registry publication if adopted |
 | Publication object | GEN-SVC-0 objects | model with opaque ID/timestamps/visibility/provenance | unit | README | COMPLETE | schema compatibility during live integration |
-| off-chain article body | GEN-SVC-0 boundary | blob interface + digest/reference | unit | README | PARTIAL | durable encrypted 420 Storage adapter |
-| Identity boundary | dependency registry | interface + active identity gate | auth negative unit | README | PARTIAL | Wallet/Identity session adapter |
-| Rights/provenance | suite roadmap/threat model | mandatory rights assertion before publish | unit | README/security | PARTIAL | live 420 Rights + chain provenance validation |
-| Search | registry | public-only projection hook | warning path unit | README/security | PARTIAL | live Search adapter/rebuild/reorg qualification |
-| Notifications | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live delivery/opt-in/dedup |
-| 420Mail | registry/journey 006 | publish hook | integration-path unit | README | PARTIAL | live signed internal delivery |
-| permissions | GEN-SVC-0 | actor/author/publisher/moderator boundaries | negative unit | security | PARTIAL | production auth/capabilities |
+| off-chain article body | GEN-SVC-0 boundary | owner-scoped Storage420 adapter + digest/ObjectRef integrity + auth-before-fetch | RR-5 unit/adversarial | README/RR-5 | COMPLETE AT REPOSITORY LEVEL | live deployed 420 Storage provider/key-custody qualification |
+| Identity boundary | dependency registry | verified Wallet/Identity session-verifier boundary + active-identity claim gate | session/adversarial HTTP tests | README/RR-4 | COMPLETE AT REPOSITORY LEVEL | live deployed verifier composition |
+| Rights/provenance | suite roadmap/threat model | structured 420 Rights provenance bound to digest/session chain/network/holder | RR-5 unit/adversarial | README/security/RR-5 | COMPLETE AT REPOSITORY LEVEL | live deployed Rights Registry/Router qualification |
+| Search | registry | canonical Search result adapter + PUBLIC-only reconciliation + durable retry | RR-6 unit/adversarial | README/security/RR-6 | COMPLETE AT REPOSITORY LEVEL | live Search/Indexer endpoint and reorg qualification |
+| Notifications | registry/journey 006 | canonical service-targeted minimized/idempotent publication adapter + durable retry | RR-6 unit/adversarial | README/security/RR-6 | COMPLETE AT REPOSITORY LEVEL | live opt-in/provider/failover qualification |
+| 420Mail | registry/journey 006 | canonical Mail-source internal adapter + opt-in audience + recipient idempotency + durable retry | RR-6 unit/adversarial | README/security/RR-6 | COMPLETE AT REPOSITORY LEVEL | live authenticated sender/recipient delivery qualification |
+| permissions | GEN-SVC-0 | Bearer-session actor derivation + scoped author/publisher/moderator capabilities | negative/adversarial/session tests | security/RR-4 | COMPLETE AT REPOSITORY LEVEL | live capability/session issuer deployment |
 | moderation | GEN-SVC-0 | HIDE/RESTORE scoped actions | unit | security | PARTIAL | report/appeal/audit persistence |
 | /v1 API | GEN-SVC-0 | HTTP routes, stable errors, size bounds | HTTP | README | COMPLETE | deployed ingress qualification |
 | cursor pagination | GEN-SVC-0 | opaque cursor public feed | HTTP | README | COMPLETE | load qualification |
 | SDK/client | GEN-SVC-0 | typed Go client boundary | compile in CI | README | COMPLETE | compatibility tests against deployed service |
-| thin UI | app target | static repository UI | static verifier | README | PARTIAL | production routing, Wallet auth, E2E/a11y/mobile |
+| thin UI | app target | static repository UI + memory-only Wallet session gateway seam | static verifier + frontend syntax | README/RR-4 | PARTIAL | production routing/gateway deployment, E2E/a11y/mobile |
 | paid external newsletters | feature flag | absent and disabled | static verifier | README | COMPLETE | keep disabled unless explicit later decision |
 | dedicated contracts | on/off-chain rule | none | N/A | architecture | NOT APPLICABLE | do not create parallel rights/identity authority |
-| deployment/runtime | release requirement | development executable; prod fails closed | compile | README | PARTIAL | live adapters + public testnet |
+| deployment/runtime | release requirement | development executable; protected routes fail closed without verified-session composition; prod mode fails closed | compile/session tests | README/security | PARTIAL | live verifier + live adapters + public testnet |
 | Genesis catalog authorization | frozen catalog | absent by design | shared validator | roadmap | BLOCKED | explicit frozen-catalog decision |
-| production security/ops | threat model | repository controls only | unit/static | security | BLOCKED | rate limits, abuse ops, encryption, monitoring, recovery, load |
+| production security/ops | threat model | repository controls plus durable metadata and Storage security/integrity contract | unit/static | security | BLOCKED | live provider encryption/key custody, rate limits, monitoring, backup/restore, load |
 | independent review | release gate | none | none | self-audit only | BLOCKED | external review after freeze |
 
 ## Ordered remediation roadmap

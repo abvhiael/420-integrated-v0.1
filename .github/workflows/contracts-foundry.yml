@@ -1,3 +1,4 @@
+# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.
 name: Solidity Contracts
 
 on:

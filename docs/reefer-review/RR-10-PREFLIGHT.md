@@ -31,3 +31,17 @@ RR-10 must reconcile accumulated RR-1 through RR-9 app work with current `main`,
 **No RR-10 Level 3 suite triggered.** The prerequisite candidate is not established and RR-9 deployment qualification is still incomplete. Running expensive canonical inventories on the known stale SHA would violate the exact-SHA rule.
 
 **Next required work:** finish RR-9 outstanding deployment requirements, reconcile RR-7/RR-8 evidence, then reconcile with `main`, establish one candidate and perform Level 3. PR #562 remains open and unmerged. REEFER-AUDIT-7 through REEFER-AUDIT-10 remain downstream live/testnet/Genesis/production gates.
+
+## Preflight remediation progress
+
+- **RR-7 ledger reconciled:** `RR-7-QUALIFICATION.md` committed, with verified exact-head passing Level 1 `37695907354` and Level 2 `37695907728`. Canonical roadmap and RR-7 technical doc no longer falsely claim qualification pending.
+- **RR-8 ledger reconciled:** `RR-8-QUALIFICATION.md` committed, with verified exact-head passing Level 1 `37697397017` and Level 2 `37697397030`. Canonical roadmap and RR-8 technical doc no longer falsely claim qualification pending.
+- **RR-9 latest repository evidence reconciled:** `RR-9-QUALIFICATION.md` records exact implementation `d5ddc7e1ae63aaf86df5ccb3a8a791313d310116`, Level 1 `37718113350` PASS and Level 2 `37718113288` PASS. Production/deployed requirements still remain.
+- GitHub comparison against current main showed the branch diverged (204 main commits behind). No reconciled integration tree or merge-candidate exact SHA has been produced. The available connector supports changing Git refs and constructing commits but does not perform a safe, conflict-resolving three-way merge. Artificially constructing a two-parent commit with only one side's tree would silently discard changes and is prohibited.
+- **No global Level 3 workflows started:** RR-9 deployed requirements and the current-main reconciliation are not complete; existing passing Level 1/2 evidence is preserved rather than relabeled.
+
+## Production-equivalent evidence that must be supplied
+
+A release environment must prove approved service composition using qualified non-development Wallet/Identity, Storage, Rights, Search, Notifications and Mail providers; HTTPS same-origin API routing and trusted ingress; distributed rate limits; working operational telemetry with actionable alert delivery; encrypted off-site backup/restore and provider-object disaster recovery under managed keys; and real deployed authenticated/revoked/forbidden browser flows plus accessibility/mobile/performance/load tests. Repository-local encrypted backup and mocked Chromium tests are not substitutes for this deployed evidence. Until qualified, `REEFER_REVIEW_DEPLOYMENT_MODE` must remain fail-closed outside development.
+
+Once these specific blockers are resolved, establish a true main-reconciled branch with an audited three-way merge (or equivalent verifiable integration tree), freeze the exact implementation SHA, and then run canonical Solidity Contracts, Genesis Address Authority, 420 Integrated, Docs/global and retained affected ReeferReview/service qualification once, respecting inventory ownership and exact-SHA rules.

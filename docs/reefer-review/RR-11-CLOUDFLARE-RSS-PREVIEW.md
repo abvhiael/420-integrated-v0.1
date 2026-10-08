@@ -22,13 +22,29 @@
 
 ## Preview procedure (manual Cloudflare action required)
 
-1. Confirm that Cloudflare preview builds can be selected for `reeferreview/cloudflare-rss-proxy`. If a preview deploy will still target production `reeferreview` by name, **do not run** the ordinary deploy command. Use a separate preview Worker name/config and domain; do not overwrite the production Worker.
-2. Validate the Worker bundle with `npx wrangler deploy --dry-run` from `reefer-review/web` using the Cloudflare project token and expected Wrangler version.
-3. Deploy into an isolated preview Worker; do not merge to `main` or trigger the production Git build until acceptance.
+1. Check out branch `reeferreview/cloudflare-rss-proxy` and run `cd reefer-review/web`. Do **not** use the existing production command `npx wrangler deploy` on this branch to test a preview. The separate checked-in `wrangler.preview.jsonc` explicitly names the preview Worker `reeferreview-rss-preview-worker`.
+2. Validate with `npx wrangler deploy --config wrangler.preview.jsonc --dry-run`.
+3. From that same directory, deploy with `npx wrangler deploy --config wrangler.preview.jsonc`. The expected preview address is the `workers.dev` URL printed by Wrangler (the account-specific subdomain must be read from actual output). Check the printed Worker name is `reeferreview-rss-preview-worker` before accepting. Do not merge to `main` or trigger the production Git build until acceptance.
 4. Check preview `/v1/news?limit=5`, `/v1/news/sources`, `/v1/news/topics`, static index/assets, and reject POST `/v1/news`.
 5. Verify publisher attribution and real articles via the live JSON response. An HTTP 200 alone is insufficient.
 6. Verify the existing site's latest view separately; the RSS-only Render backend does not serve `/v1/publications`, so original/editorial requests still require their own backing service.
 7. Observe Cloudflare preview request logs and Render poller logs. No persistent news durability is implied.
+
+### Live HTTP checks
+
+Use the **actual URL printed by Wrangler** as `PREVIEW_URL` (no trailing slash), then run:
+
+```sh
+curl -i "$PREVIEW_URL/"
+curl -i "$PREVIEW_URL/styles.css"
+curl -i "$PREVIEW_URL/v1/news?limit=5"
+curl -i "$PREVIEW_URL/v1/news/sources"
+curl -i "$PREVIEW_URL/v1/news/topics"
+curl -i -X POST "$PREVIEW_URL/v1/news"
+curl -i "https://reeferreview-rss-preview.onrender.com/v1/news?limit=5"
+```
+
+Passing requires HTTP 200 plus real publisher stories for article retrieval, static HTML and CSS served correctly, and HTTP 405 for POST. Missing articles or unavailable upstream **do not** count as a pass. Keep evidence tied to the exact commit SHA and deployed Worker version.
 
 ## Rollback
 

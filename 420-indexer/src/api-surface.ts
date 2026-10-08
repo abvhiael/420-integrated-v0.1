@@ -42,6 +42,12 @@ import {
   type ComputeJobState420, type ComputeRequestState420, type ComputeWorkerState420,
   type ComputeVerifierState420, type ComputeResearchProjectState420, type ComputeRewardState420
 } from './compute-read-model.js';
+import {
+  computeJobs420, computeWorkers420, computeVerifiers420, computeResearchProjects420, computeRewards420,
+  computeReputationReference420, computeStakeReference420, computeReputationReferences420, computeStakeReferences420,
+  type ComputeJobListRequest420, type ComputeWorkerListRequest420, type ComputeVerifierListRequest420,
+  type ComputeProjectListRequest420, type ComputeRewardListRequest420, type ComputeReputationReference420, type ComputeStakeReference420
+} from './compute-app-read-model.js';
 
 export const INDEXER_API_VERSION_420 = 'v1' as const;
 
@@ -124,6 +130,15 @@ export interface IndexerPublicApi420 {
   computeVerifier?(chainId: bigint, verifierId: string): Promise<ComputeVerifierState420 | null>;
   computeResearchProject?(chainId: bigint, projectId: string): Promise<ComputeResearchProjectState420 | null>;
   computeReward?(chainId: bigint, rewardId: string): Promise<ComputeRewardState420 | null>;
+  computeJobs?(chainId: bigint, request?: ComputeJobListRequest420): Promise<QueryPage420<ComputeJobState420>>;
+  computeWorkers?(chainId: bigint, request?: ComputeWorkerListRequest420): Promise<QueryPage420<ComputeWorkerState420>>;
+  computeVerifiers?(chainId: bigint, request?: ComputeVerifierListRequest420): Promise<QueryPage420<ComputeVerifierState420>>;
+  computeResearchProjects?(chainId: bigint, request?: ComputeProjectListRequest420): Promise<QueryPage420<ComputeResearchProjectState420>>;
+  computeRewards?(chainId: bigint, request?: ComputeRewardListRequest420): Promise<QueryPage420<ComputeRewardState420>>;
+  computeReputationReference?(chainId: bigint, referenceId: string): Promise<ComputeReputationReference420 | null>;
+  computeStakeReference?(chainId: bigint, referenceId: string): Promise<ComputeStakeReference420 | null>;
+  computeReputationReferences?(chainId: bigint, workerId: string, request?: PageRequest420): Promise<QueryPage420<ComputeReputationReference420>>;
+  computeStakeReferences?(chainId: bigint, workerId: string, request?: PageRequest420): Promise<QueryPage420<ComputeStakeReference420>>;
   search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]>;
 }
 
@@ -261,6 +276,15 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   computeVerifier(chainId: bigint, verifierId: string): Promise<ComputeVerifierState420 | null> { return computeVerifierState420(this.service.db, chainId, verifierId); }
   computeResearchProject(chainId: bigint, projectId: string): Promise<ComputeResearchProjectState420 | null> { return computeResearchProjectState420(this.service.db, chainId, projectId); }
   computeReward(chainId: bigint, rewardId: string): Promise<ComputeRewardState420 | null> { return computeRewardState420(this.service.db, chainId, rewardId); }
+  computeJobs(chainId: bigint, request: ComputeJobListRequest420 = {}) { return computeJobs420(this.service.db, chainId, request); }
+  computeWorkers(chainId: bigint, request: ComputeWorkerListRequest420 = {}) { return computeWorkers420(this.service.db, chainId, request); }
+  computeVerifiers(chainId: bigint, request: ComputeVerifierListRequest420 = {}) { return computeVerifiers420(this.service.db, chainId, request); }
+  computeResearchProjects(chainId: bigint, request: ComputeProjectListRequest420 = {}) { return computeResearchProjects420(this.service.db, chainId, request); }
+  computeRewards(chainId: bigint, request: ComputeRewardListRequest420 = {}) { return computeRewards420(this.service.db, chainId, request); }
+  computeReputationReference(chainId: bigint, referenceId: string) { return computeReputationReference420(this.service.db, chainId, referenceId); }
+  computeStakeReference(chainId: bigint, referenceId: string) { return computeStakeReference420(this.service.db, chainId, referenceId); }
+  computeReputationReferences(chainId: bigint, workerId: string, request: PageRequest420 = {}) { return computeReputationReferences420(this.service.db, chainId, workerId, request); }
+  computeStakeReferences(chainId: bigint, workerId: string, request: PageRequest420 = {}) { return computeStakeReferences420(this.service.db, chainId, workerId, request); }
 
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> {
     return (await this.service.search(chainId, term, limit)).map(searchResult420);

@@ -71,7 +71,9 @@ Publish explicit governed eligibility rules for accepted projects, source scheme
 
 Exit: reviewed payout policy, cap/solvency simulations, adversarial gaming analysis, economic-governance decision and approved testnet funding.
 
-### S-08 — Funded entitlement and Wallet settlement integration
+### S-08 — Funded entitlement and Wallet settlement integration — LEVEL 1 REPOSITORY PASS; LIVE FUNDED PAYOUT TESTNET DEFERRED
+
+[S-08 qualification evidence](CMP-S08-QUALIFICATION-EVIDENCE.md) records exact-SHA targeted settlement-sequence validation. A funded $420 testnet beneficiary payout is **not** qualified, and no external work-to-CMP-6 monetary adapter has been approved or deployed.
 
 Deploy/publish exact canonical contracts, configure trusted attesters, allowlisted reward consumer, projects/policies and verified Source → CanonicalWork mapping. Use one-time claim consumption plus CMP-6 authorized reward entitlement, Vault funding and beneficiary transfer as implemented in the actual deployed release; where a direct integration path is missing, implement and qualify the narrow canonical adapter before activation. Record each transition, source ID, chain, policy, proof digest, transaction, finality and reconciliation. Never pay from a browser, indexer, source poller or unverifiable external data.
 

@@ -38,7 +38,9 @@ func TestGrowFiltersRealPublicSDKPlaces(t *testing.T) {
 	if view.Items[0].Latitude != nil || view.Items[0].Longitude != nil || view.Items[1].Latitude == nil {
 		t.Fatal("coordinate precision increased")
 	}
-	if view.Items[1].Source != "registry-source" || view.Items[1].RegistryRecordID != "registry-1" {t.Fatal("source provenance not preserved")}
+	if view.Items[1].Source != "registry-source" || view.Items[1].RegistryRecordID != "registry-1" {
+		t.Fatal("source provenance not preserved")
+	}
 	if view.Items[0].ID != original.Items[0].ID {
 		t.Fatal("canonical place ID mutated")
 	}

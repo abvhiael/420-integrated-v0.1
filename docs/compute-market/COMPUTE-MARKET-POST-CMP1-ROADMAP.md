@@ -662,7 +662,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 
 # CMP-8 — 420Compute application
 
-**Status: IMPLEMENTED — Level 1 + human-participation Level 2 qualification pending.** Specification: [CMP-8 420Compute application](CMP-8-420COMPUTE-APPLICATION.md).
+**Status: LEVEL 3 CLOSEOUT CANDIDATE — reconciled to current main; comprehensive exact-head qualification pending.** Specification: [CMP-8 420Compute application](CMP-8-420COMPUTE-APPLICATION.md). Closeout: [CMP-8 phase closeout](CMP-8-PHASE-CLOSEOUT.md).
 
 Purpose: provide the human-facing market and participation experience.
 
@@ -776,7 +776,7 @@ Production target flow:
 | CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.8 Level 3 closeout candidate — comprehensive exact-head qualification pending |
 | CMP-6 useful-compute rewards | CMP-6.1–CMP-6.8 COMPLETE; Level 3 exact-head qualified |
 | CMP-7 SDK/API/indexer | CMP-7.1–CMP-7.10 COMPLETE; Level 3 exact-head qualified |
-| CMP-8 420Compute UI | forthcoming |
+| CMP-8 420Compute UI | Level 3 closeout candidate — reconciled; exact-head qualification pending |
 | CMP-9 public testnet | forthcoming |
 | CMP-10 security/adversarial qualification | forthcoming |
 | CMP-11 mainnet | forthcoming |

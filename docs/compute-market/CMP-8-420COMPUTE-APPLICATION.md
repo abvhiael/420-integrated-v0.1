@@ -1,6 +1,6 @@
 # CMP-8 — 420Compute application
 
-Status: **IMPLEMENTED — app-scoped Level 1 + Level 2 qualification pending.**
+Status: **LEVEL 3 CLOSEOUT CANDIDATE — reconciled to current main; exact-head comprehensive qualification pending.**
 
 ## Canonical purpose
 

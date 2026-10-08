@@ -250,11 +250,49 @@ func (f FeedFetcher) Fetch(ctx context.Context, source NewsSource) ([]RawNewsEnt
 	return ParseNewsFeed(b)
 }
 
+// escapeBrokenFeedEntities preserves strict XML parsing while allowing publisher
+// text with unescaped ampersands or non-XML named entities. DTD/entity declarations
+// are rejected before this function is called. Only the five built-in XML entities
+// and syntactically complete numeric references survive unchanged.
+func escapeBrokenFeedEntities(b []byte) []byte {
+	var out []byte
+	for i := 0; i < len(b); i++ {
+		if b[i] != '&' {
+			out = append(out, b[i])
+			continue
+		}
+		end := bytes.IndexByte(b[i:], ';')
+		valid := false
+		if end > 1 && end <= 16 {
+			name := string(b[i+1 : i+end])
+			switch name {
+			case "amp", "lt", "gt", "quot", "apos":
+				valid = true
+			default:
+				if strings.HasPrefix(name, "#x") || strings.HasPrefix(name, "#X") {
+					digits := name[2:]
+					valid = len(digits) > 0 && strings.IndexFunc(digits, func(r rune) bool { return !strings.ContainsRune("0123456789abcdefABCDEF", r) }) == -1
+				} else if strings.HasPrefix(name, "#") {
+					digits := name[1:]
+					valid = len(digits) > 0 && strings.IndexFunc(digits, func(r rune) bool { return r < '0' || r > '9' }) == -1
+				}
+			}
+		}
+		if valid {
+			out = append(out, '&')
+		} else {
+			out = append(out, []byte("&amp;")...)
+		}
+	}
+	return out
+}
+
 func ParseNewsFeed(b []byte) ([]RawNewsEntry, error) {
 	upper := bytes.ToUpper(b)
 	if bytes.Contains(upper, []byte("<!DOCTYPE")) || bytes.Contains(upper, []byte("<!ENTITY")) {
 		return nil, fmt.Errorf("%w: disallowed xml declaration", ErrInvalidInput)
 	}
+	b = escapeBrokenFeedEntities(b)
 	var root struct{ XMLName xml.Name }
 	if err := xml.Unmarshal(b, &root); err != nil {
 		return nil, err

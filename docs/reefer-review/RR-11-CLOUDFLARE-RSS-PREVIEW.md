@@ -1,32 +1,35 @@
-# RR-11 — Cloudflare Pages read-only RSS preview proxy
+# RR-11 — Cloudflare Worker RSS preview proxy
 
-This is **preview integration only**. Render's free service has an **ephemeral filesystem**: news items, source changes and poll checkpoints may be lost after a restart, redeploy or idle shutdown. This does not satisfy RR-11 persistent-storage, rights, operational or production gates.
+**Preview only:** the Render free instance still uses an ephemeral filesystem, not durable article or checkpoint storage. This change does not satisfy production, source rights or persistence gates.
 
-## Pages setup
+## Confirmed Cloudflare deployment settings (operator screenshot, 2026-10-08)
 
-- Confirm the **ReeferReview Pages project** is Git-connected to this repository.
-- For the provided `functions/` tree to be detected, configure **Root directory: repository root** (leave blank in the Cloudflare Pages dashboard).
-- Use **Build output directory: `reefer-review/web`**. Preserve existing build configuration if a site-specific build step is required. **Do not** put `functions/` inside the static web output directory. Do not configure the entire monorepo's other Pages sites to use this proxy.
-- Do not deploy until confirming the currently deployed ReeferReview Pages project can retain its existing static assets and all other API behavior. Changing its root may affect build behavior; capture the current settings first.
-- Deploy this branch to a Pages preview first. Validate before merging to `main`.
+- Cloudflare Workers & Pages > `reeferreview` > Production > Settings
+- Git repository: `abvhiael/420-integrated-v0.1`
+- Production branch: `main`
+- Root directory: `reefer-review/web`
+- Build command: none
+- Deploy command: `npx wrangler deploy`
 
-## Routing
+**Do not migrate this deployment to Pages** or change its root directory. The previous `functions/` approach was inappropriate for the existing Worker deployment and has been removed from this PR.
 
-Cloudflare Pages Functions:
-- `GET/HEAD /v1/news`
-- `GET/HEAD /v1/news/*` (article, sources and topics paths only as supported by upstream)
+## Implementation
 
-They forward only public JSON queries to `https://reeferreview-rss-preview.onrender.com`, preserving query strings, without forwarding client credentials/cookies. Other methods return 405. Admin endpoints (`/v1/admin/news/sources`), editorial, Wallet and chain APIs are **not** proxied. Root assets are unchanged. API responses are marked `no-store`, and redirects are not followed.
+- `reefer-review/web/wrangler.jsonc`: configures named Worker `reeferreview`, script entrypoint and an existing-directory static asset binding. The worker runs before only `/v1/news` and `/v1/news/*`. Other requests continue via `env.ASSETS.fetch(request)`.
+- `reefer-review/web/worker.js`: proxy only GET/HEAD public news routes to `https://reeferreview-rss-preview.onrender.com`. Preserves path, query and conditional request headers. Rejects redirects, strips incoming cookies and authorization, and does not expose admin routes.
+- `reefer-review/web/.assetsignore`: prevents the Worker implementation and config files from being served as public site assets.
+- No Render storage changes, no paid resources, no chain/testnet changes.
 
-## Acceptance checklist
+## Preview procedure (manual Cloudflare action required)
 
-1. Check Render `/readyz` and `/v1/news?limit=5` directly; verify actual HTTP response, real source attribution and canonical publisher URLs.
-2. Visit the **Cloudflare Pages preview** of ReeferReview: test `/v1/news?limit=5`, `/v1/news/sources`, `/v1/news/topics`, news filters and home/latest, and verify no cross-origin fetch/CORS problem.
-3. Ensure `POST /v1/news` is 405 and `/v1/admin/news/sources` is **not routed through this proxy**.
-4. Confirm existing static pages and ReeferReview Originals remain intact. The news-only backend does **not** supply `/v1/publications`; latest/originals may still show unavailable unless separately backed.
-5. Review Pages Function logs and Render polling logs. Free Render may sleep on inactivity and its temporary files may be cleared. Do not call RSS storage durable or label production ready.
-6. For a production launch, provide durable shared storage or a safe transactional DB adapter, backups, rights review, operational controls, tested same-origin ingress, and retained app qualification.
+1. Confirm that Cloudflare preview builds can be selected for `reeferreview/cloudflare-rss-proxy`. If a preview deploy will still target production `reeferreview` by name, **do not run** the ordinary deploy command. Use a separate preview Worker name/config and domain; do not overwrite the production Worker.
+2. Validate the Worker bundle with `npx wrangler deploy --dry-run` from `reefer-review/web` using the Cloudflare project token and expected Wrangler version.
+3. Deploy into an isolated preview Worker; do not merge to `main` or trigger the production Git build until acceptance.
+4. Check preview `/v1/news?limit=5`, `/v1/news/sources`, `/v1/news/topics`, static index/assets, and reject POST `/v1/news`.
+5. Verify publisher attribution and real articles via the live JSON response. An HTTP 200 alone is insufficient.
+6. Verify the existing site's latest view separately; the RSS-only Render backend does not serve `/v1/publications`, so original/editorial requests still require their own backing service.
+7. Observe Cloudflare preview request logs and Render poller logs. No persistent news durability is implied.
 
 ## Rollback
 
-Remove the new `functions/v1/news.js`, `functions/v1/news/[[path]].js` and the helper on this branch or roll back the Pages deployment. No Render storage configuration is changed.
+Rollback the isolated preview Worker or remove `worker.js`, `wrangler.jsonc` and `.assetsignore` before merging; production is unchanged while the PR is unmerged.

@@ -7,6 +7,7 @@ on:
       - 'scripts/verify-grow-02.py'
       - 'scripts/verify-grow-06.py'
       - 'scripts/verify-grow-07.py'
+      - 'scripts/verify-grow-08.py'
       - 'grow/**'
       - 'genesis/svc2/sdk/**'
       - 'location/uikit/**'
@@ -24,6 +25,7 @@ on:
       - 'scripts/verify-grow-02.py'
       - 'scripts/verify-grow-06.py'
       - 'scripts/verify-grow-07.py'
+      - 'scripts/verify-grow-08.py'
       - 'grow/**'
       - 'genesis/svc2/sdk/**'
       - 'location/uikit/**'
@@ -40,7 +42,7 @@ permissions:
 jobs:
   canonical-definition:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -76,5 +78,16 @@ jobs:
         run: python3 scripts/verify-grow-06.py
       - name: GROW-07 cross-app boundary and Level-2 milestone
         run: python3 scripts/verify-grow-07.py
+      - name: GROW-08 clean checkout build and race/integration qualification
+        run: |
+          go build ./grow/location ./grow/service ./grow/cmd/server
+          go test -race -count=1 ./grow/... ./genesis/svc2/sdk/... ./location/...
+          go test -run 'TestRejectsBadRequestsAndMethods|TestFailClosedAndNoInternalErrorDisclosure|TestProductionConstructorUsesSafeLocationProjection' -count=10 ./grow/service
+          go vet ./grow/... ./genesis/svc2/sdk/... ./location/...
+      - name: GROW-08 static and package security guards
+        run: |
+          node --check grow/web/app.js
+          node --test grow/web/test/*.test.js
+          python3 scripts/verify-grow-08.py
       - name: Python verifier syntax
-        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py scripts/verify-grow-06.py scripts/verify-grow-07.py
+        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py scripts/verify-grow-06.py scripts/verify-grow-07.py scripts/verify-grow-08.py

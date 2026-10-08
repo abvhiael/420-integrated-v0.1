@@ -99,9 +99,9 @@ Status: **COMPLETE at repository Level 1 + Level 2** on implementation SHA `43a4
 ## RR-9 — Web UX & Deployment
 Production frontend/backend deployment configuration, API routing, security headers/rate limits, logs/metrics/alerts, backup/restore and browser E2E/accessibility/load qualification.
 
-Status: **PARTIAL / SECURITY HEADERS IMPLEMENTED; FULL DEPLOYMENT AND BROWSER QUALIFICATION BLOCKED**
+Status: **REPOSITORY LEVEL 1 + LEVEL 2 PASS; CANONICAL DEPLOYMENT QUALIFICATION PARTIAL**
 
-See `RR-9-WEB-UX-DEPLOYMENT.md` for precise incomplete gates. RR-9 app-scoped tests and a verifier have been introduced, but live routing, authenticated production dependencies, rate limits, monitoring/alerts, backup restore, browser E2E/accessibility/load evidence remain to be qualified. Do not declare COMPLETE on static/source evidence alone.
+Exact executable SHA `d5ddc7e1ae63aaf86df5ccb3a8a791313d310116`: RR-9 Level 1 `37718113350` PASS and Level 2 `37718113288` PASS, including mocked Chromium/browser-a11y tests and local backup recovery tests. See `RR-9-QUALIFICATION.md` and `RR-9-WEB-UX-DEPLOYMENT.md`. Live same-origin routing, non-development adapters, distributed ingress, operational alerts, remote disaster recovery and production-equivalent browser/load checks remain unqualified; RR-9 is NOT fully COMPLETE.
 
 
 ## RR-10 — Repository Level 3 Closeout

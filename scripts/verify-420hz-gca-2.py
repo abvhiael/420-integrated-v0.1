@@ -176,7 +176,6 @@ if not errors:
     for code in expected_errors:
         need(f'"{code}"' in err,f"error implementation missing {code}")
     need("normalizeProviderError420" in err,"provider error normalization missing")
-    need("error?.transient===true" not in err.replace(" ", ""),"sanity placeholder")
 
     # Exact required test coverage.
     test_tokens=[

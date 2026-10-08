@@ -9,8 +9,8 @@ Canonical roadmap step: **HZ-GCA-4 — Provenance, consent and AI rights metadat
 - Repository: `abvhiael/420-integrated-v0.1`
 - PR: **#565 — Add 420Hz Generate, Community & Awards roadmap phase**
 - Branch: `feature/420hz-generate-community-awards-roadmap`
-- Current `main` / base SHA: `0993ff5b5b3b213a0768dbde90e4734df5ab4cc0`
-- Qualified implementation SHA: `e13ff098988028bd1a9181edd7559066a611de99`
+- Current `main` / base SHA: `6a3c611a3c0629c9bbae1e67f992d98ba1787550`
+- Qualified implementation SHA: `1a96ea3e136219e7900569eb98359007d483ec29`
 - Evidence SHA: the commit containing this document
 - Qualification level: **Level 1**
 - Level 2: **NOT REQUIRED / NOT RUN**
@@ -44,11 +44,21 @@ The step began at branch HEAD:
 
 `63e73bafc61a6b302e027c1af383909fbdf43b29`
 
-Current main remained:
+Current main at initial implementation remained:
 
-`0993ff5b5b3b213a0768dbde90e4734df5ab4cc0`
+`0993ff5b5b3b213a0768dbde90e4734df5ab4cc0`.
 
-PR #565 remained open and mergeable.
+After the first exact-head PASS, current `main` advanced through CMP-8 to:
+
+`6a3c611a3c0629c9bbae1e67f992d98ba1787550`.
+
+The new main delta added the 420Compute application and extended Compute Indexer/application projection surfaces. It did not overlap any path changed by HZ-GCA-4, but it changed executable repository state. Under exact-SHA qualification rules the branch was therefore reconciled before final closeout rather than relying on stale pre-reconciliation evidence.
+
+Final reconciliation merge commit / final qualified implementation SHA:
+
+`1a96ea3e136219e7900569eb98359007d483ec29`.
+
+A base-to-main/base-to-branch path comparison found **zero overlapping changed paths**, so reconciliation preserved both current-main CMP-8 state and the HZ-GCA implementation without conflict. PR #565 returned to a mergeable state.
 
 Existing qualified architecture already froze the relevant authority model in:
 
@@ -266,13 +276,24 @@ Authoritative workflow:
 
 **420Hz Web Qualification**
 
-Successful exact-head run:
+Initial exact-head implementation run before current-main reconciliation:
 
 - Run ID: **37816294856**
 - Run number: **#208**
 - Job: **HZ-GCA-4 Level 1**
 - Job ID: **113445676046**
 - Exact tested implementation SHA: `e13ff098988028bd1a9181edd7559066a611de99`
+- Result: **PASS**
+
+Because current `main` later advanced with executable CMP-8 state, that run was superseded for final closeout by the reconciled exact-head run below.
+
+Final authoritative exact-head run:
+
+- Run ID: **37817799769**
+- Run number: **#211**
+- Job: **HZ-GCA-4 Level 1**
+- Job ID: **113450783236**
+- Exact tested implementation SHA: `1a96ea3e136219e7900569eb98359007d483ec29`
 - Result: **PASS**
 
 Required results:
@@ -287,7 +308,7 @@ Required results:
 8. HZ-GCA-4 targeted verifier — PASS;
 9. retained 420Hz web job — PASS.
 
-No required HZ-GCA-4 check was skipped, cancelled, missing or untriggered.
+No required HZ-GCA-4 check was skipped, cancelled, missing or untriggered. The final reconciled run reported **40 tests / 40 pass / 0 fail / 0 skipped** for the generation/provenance module, and all retained policy/adapter verifiers returned PASS.
 
 ## Security / adversarial results
 
@@ -362,7 +383,7 @@ The runtime validates record shape, required relationships and fail-closed appli
 
 ## Blockers
 
-None.
+None. Current-main reconciliation was completed and the reconciled exact implementation SHA was requalified successfully.
 
 ## Completion state
 

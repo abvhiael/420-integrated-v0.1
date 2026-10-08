@@ -1,39 +1,51 @@
-# RR-10 — Level 3 qualification evidence ledger
+# RR-10 — Final repository Level 3 qualification
 
-## Exact candidate and authority
+## Qualification decision
 
-- **Step:** RR-10 — Repository Level 3 Closeout.
-- **Status:** IN PROGRESS — not COMPLETE until all four canonical Solidity Foundry shards succeed and remaining scope/exit criteria are reconciled.
-- **Reconciled merge-candidate implementation SHA:** `dd18b1d3f31856dbf3eafa236ca932162c92299f`.
-- **Reconciliation base SHA (main):** `537525ebc636eabc76ff261f5b5ff5d236869b32`.
-- **PR:** [#562](https://github.com/abvhiael/420-integrated-v0.1/pull/562), `reefer-review-rr1-newsfeed-20261007`; not merged.
-- This file is **documentation-only** and inherits the exact implementation SHA above; a later executable/config/CI change requires requalification.
+**COMPLETE — repository phase Level 3 (not production/testnet release qualification).** All required canonical repository Level 3 workflows passed on the reconciled accumulated merge candidate. This does **not** mark canonical RR-9 deployed requirements COMPLETE and does **not** authorize deployment. Live/testnet and production qualification remain explicitly open.
 
-## Verified exact-implementation-SHA CI
+- **Qualified accumulated implementation SHA:** `a513e2ecf99c08688465623393f441eb753c903b`
+- **Reconciliation base `main` SHA:** `c6b62a6ea75be97564564e56b779dfad7df3f784`
+- **PR:** [#562](https://github.com/abvhiael/420-integrated-v0.1/pull/562), branch `reefer-review-rr1-newsfeed-20261007`
+- **Pre-closeout state:** HEAD equals qualified SHA, 0 behind `main`, GitHub mergeable, PR open.
+- **Evidence-only closeout:** this ledger and canonical roadmap update reference the qualified implementation without modifying executable code, tests, workflows, build/deployment configuration, interfaces, or substantive requirements. Evidence commits inherit the implementation SHA; their own commit SHA identifies the final documentary record. A subsequent substantive change or main reconciliation needs fresh applicable exact-head qualification.
 
-| Required inventory | Run | Verified |
+## Final canonical CI evidence
+
+| Scope | Exact SHA CI run | Status |
 | --- | --- | --- |
-| Canonical Solidity Contracts full Foundry inventory (4 shards) | [37721793570](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793570) | **IN PROGRESS**: classifier PASS; 4 shards running; no failed steps reported at ledger inspection. The `foundry` monolithic and `compute-fast` jobs were intentionally skipped by event/classification, not counted as coverage. |
-| Genesis Address Authority (separate from full Foundry) | [37721793564](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793564) | **PASS**: `cross-manifest-authority` job and its required steps; no duplicated Foundry inventory. |
-| 420 Integrated Qualification | [37721793557](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793557) | **PASS**: `offline-core`, `production-dependencies`, `geth-engine`, `fault-matrix`; all four succeeded, no failed steps. |
-| 420Docs Qualification | [37721793567](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793567) | **PASS**: `qualify`; no failed steps. |
-| 420Indexer | [37721793545](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793545) | **PASS**: `qualify`; no failed steps. |
-| ReeferReview RR-9 | [37721793549](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793549) | **PASS**: `qualify`; no failed steps, includes mocked browser E2E/a11y, app Go/static, backup and security tests. |
-| Retained ReeferReview Level 2 | [37721793576](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37721793576) | **PASS**: `retained-app-integration`; no failed steps. |
-| ReeferReview RR-1 through RR-8 | [Actions commit history](https://github.com/abvhiael/420-integrated-v0.1/commit/dd18b1d3f31856dbf3eafa236ca932162c92299f/checks) | **PASS**: all eight named step workflows completed successfully on this SHA. |
-| ReeferReview Audit and REEFER-AUDIT-7 | [Actions commit history](https://github.com/abvhiael/420-integrated-v0.1/commit/dd18b1d3f31856dbf3eafa236ca932162c92299f/checks) | **PASS**: both app audit workflows. |
-| 420Oracle audit qualification / 420Registry REG-AUDIT-4 | [Actions commit history](https://github.com/abvhiael/420-integrated-v0.1/commit/dd18b1d3f31856dbf3eafa236ca932162c92299f/checks) | **PASS**: both incidental dependent workflows. |
-| EXP-1.9 and EXP-1.10 | [Actions commit history](https://github.com/abvhiael/420-integrated-v0.1/commit/dd18b1d3f31856dbf3eafa236ca932162c92299f/checks) | **PASS**: both incidental Explorer workflows. |
+| Solidity Contracts | [37727302938](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302938) | PASS |
+| 420 Integrated Qualification | [37727302915](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302915) | PASS |
+| Genesis Address Authority | [37727302974](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302974) | PASS |
+| 420Docs Qualification | [37727302963](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302963) | PASS |
+| 420Indexer | [37727303004](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727303004) | PASS |
+| ReeferReview Level 2 | [37727303025](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727303025) | PASS |
+| RR-9 | [37727302973](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302973) | PASS |
+| ReeferReview Audit | [37727302950](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302950) | PASS |
+| REEFER-AUDIT-7 | [37727302990](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37727302990) | PASS |
 
-## Reconciled coverage and missing evidence
+- **Solidity Contracts**: classifier PASS; four required Foundry shards **0, 1, 2, 3 all PASS**, none cancelled. The push-only monolithic `foundry` job and the alternate `compute-fast` job were expected skips, not missing inventory. Solidity Contracts is the single canonical owner for this complete four-shard Foundry inventory.
+- **Genesis Address Authority**: `cross-manifest-authority` PASS, including canonical address, namespace/collision, predeploy and manifest/consumer checks; it did **not** duplicate full Foundry inventory.
+- **420 Integrated**: all four jobs `offline-core`, `geth-engine`, `production-dependencies`, `fault-matrix` PASS.
+- **420Docs** and **420Indexer**: `qualify` jobs PASS.
+- **ReeferReview RR-1–RR-9**: all nine distinct app workflows PASS on this exact SHA, including app-specific static, Go, security/negative/adversarial, SSRF/source checking, backup and restore and mocked Chromium/browser accessibility. Individual RR-1–RR-8 successful run identifiers: `37727302933`, `37727302884`, `37727302943`, `37727303031`, `37727302922`, `37727302939`, `37727302901`, `37727302995`. RR-9: `37727302973`.
+- **Retained Level 2 app integration**, **ReeferReview Audit**, **REEFER-AUDIT-7 repository workflow**: PASS; REEFER-AUDIT-7 repository checks are not evidence of successful *live* provider integration.
+- Ancillary workflow PASS on same SHA: 420Registry REG-AUDIT-4 `37727302862`; 420Oracle audit `37727302955`; Explorer EXP-1.9 `37727302888`; EXP-1.10 `37727302957`.
+- All **21 recorded exact-head workflow runs completed successfully**. Inspected canonical Solidity, global, Genesis, Docs, and Level 2 jobs showed no unexpected skipped or failed required steps.
 
-- **Security/negative/adversarial:** existing RR-4 identity/capability, RR-5 Rights/Storage, RR-6 dependency/outbox, RR-7 SSRF/parser/redirect and RR-8 backoff/circuit negative suites plus RR-9 rate-limit, encryption/restore tamper and browser controls are included in passing retained app workflows. Canonical Genesis collision, namespace and predeploy verification passed. Global fault matrix passed.
-- **Core, deployment dependencies, Geth:** all 420 Integrated jobs PASSED. These are CI qualifications, not successful live-provider deployment.
-- **Search/Notifications/Mail/RPC/SDK:** RR-6 and retained Level 2 app integration exercised repository adapter/contracts. Dedicated live-provider evidence and any otherwise required independent RPC/SDK CI checks have not been confirmed as a separate exact-head Level 3 run. Do not infer deployed provider authorization from these passes.
-- **Indexer:** dedicated CI passed. **Docs:** canonical CI passed. **Frontend:** mocked Chromium/a11y and static app qualification passed, not deployed authenticated end-to-end and production load tests.
-- **Solidity:** 4-shard inventory has not yet completed; no claim of canonical complete Foundry coverage, invariants or bytecode checks until shard jobs all finish successfully and their reports can be inspected.
-- **External/deployed gates:** REEFER-AUDIT-7 live service integration, REEFER-AUDIT-8 deployed security/operations, REEFER-AUDIT-9 Genesis decision/release authority and REEFER-AUDIT-10 production closeout remain live/testnet release gates. RR-9's canonical production routing, telemetry/alerts, off-site backup/DR, and deployed browser/a11y/load checks remain pending. Distinguish repository phase closeout policy from these actual requirements rather than manufacturing green deployment evidence.
+## Coverage, security and boundaries
 
-## Closeout rule and next action
+Repository qualification covers Foundry inventory (including applicable contract tests and shard coverage), address/namespace collision and predeploy validation, global core/Geth/production dependency installation and fault matrix, app boundary/authorization, SSRF/redirect/parser, outbox/retry and circuit-breaker regression, encryption/restore tampering, application API headers/rate limiting, mocked browser UX/accessibility, Indexer and Docs. The retained RR-6 app suite exercises repository Search/Notifications/Mail adapter contracts; it is **not** an independent live-provider or deployed RPC/SDK end-to-end attestation.
 
-Do not mark RR-10 COMPLETE or merge PR #562 based only on this interim ledger. Verify Solidity all four shards and reconcile whether outstanding RR-9 deployment criteria are an explicit RR-10 prerequisite or live-testnet handoff per canonical architecture. Once all applicable RR-10 Level 3 checks are satisfied, append final immutable run/job evidence, mark canonical roadmap and PR state COMPLETE, and preserve this documentation-only evidence SHA without repeated substantive CI.
+**Explicit outstanding live/testnet/external deployment requirements — unchanged:**
+- RR-9 deployed frontend/backend routing, TLS/same-origin API, trusted/distributed ingress policy and production rate limiting.
+- Approved non-development Wallet/Identity/Storage/Rights/Search/Notifications/Mail composition, network authority/capability and live-provider end-to-end verification.
+- Deployed metrics/log retention and alerts, encrypted offsite backups, provider-object disaster recovery and restore drills.
+- Deployed browser/mobile accessibility, authenticated/revoked authorization flows and production-equivalent performance/load testing.
+- Canonical REEFER-AUDIT-7 live dependencies, REEFER-AUDIT-8 deployed security/operations, REEFER-AUDIT-9 Genesis decision/release, REEFER-AUDIT-10 production closeout.
+
+These are **not qualified by this repository-only RR-10 closeout**. RR-9 retains **PARTIAL / NOT PRODUCTION QUALIFIED** status in the roadmap. No production-readiness or release authorization is claimed.
+
+## Completion and next work
+
+**RR-10 repository Level 3 COMPLETE**, contingent only on the recorded repository phase criteria already passed. PR #562 is **prepared for merge review**, not merged by this evidence commit. Recheck current `main` divergence and PR conflicts immediately before merging; do not silently carry an obsolete base. Next canonical phase: the existing REEFER-AUDIT-7–10 live/testnet and production deployment gates, with RR-9 deployed requirements tracked as outstanding.

@@ -14,7 +14,9 @@ Status: **PLANNED / NOT LIVE-QUALIFIED**. Owner: CMP-9 testnet, with independent
 
 All implementation steps are Level 1 focused checks; a single retained science-ingestion Level 2 milestone applies at S-06, and a separate payout Level 2 at S-09. CMP-9 overall live operational closeout and CMP-10 security remain separate. Use exact release/deployment SHA and real chain/provider data; no synthetic fixture qualifies an operational gate.
 
-### S-01 — External-provider policy, capabilities and source inventory
+### S-01 — External-provider policy, capabilities and source inventory — COMPLETE (Level 1)
+
+**S-01 status:** repository policy/inventory qualified on `879beafc2268f7fe7d7c2f5023c4c128a8bfc639`; [S-01 source assessment](CMP-S01-PROVIDER-ACCESS.md) and [Level 1 evidence](CMP-S01-QUALIFICATION-EVIDENCE.md). All provider production access, account monetization and reward pathways remain explicitly disabled pending real provider/operator approval and trusted work-unit evidence. This status does not qualify S-02 or live use.
 
 Inventory each supported Folding@home statistics/result channel and each specific BOINC project (BOINC has no single universal project-wide truth endpoint). Capture documented provider terms, permitted automated access, API stability/rate limits, identifier formats, user-consent/privacy requirements, reporting delays, revocation/correction behavior, project-scoped trust and whether credible work-unit-level evidence is available. Record **unsupported** wherever only aggregate points/credits are exposed. Neither donations nor third-party credits are accepted as scientific validity proofs.
 

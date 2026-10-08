@@ -46,6 +46,7 @@ Where repository-defined service IDs already exist, the logical contracts bind:
 - Search — `420/service/search/v1`
 - Notifications — `420/service/notifications/v1`
 - Analytics — `420/service/analytics/v1`
+- Arbitration — `420/service/arbitration/v1` (optional/explicit only under HZ-GCA-1.14)
 
 420Hz itself receives **no new service ID** in this architecture step.
 

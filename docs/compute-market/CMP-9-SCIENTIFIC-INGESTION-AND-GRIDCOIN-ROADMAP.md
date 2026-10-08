@@ -63,7 +63,9 @@ Expose chain-scoped bounded Indexed contribution/attestation/claim state and cle
 
 Exit: Level 2 exact-SHA pass with privacy, unavailable-source, stale-data and UI authority-label assertions. Live payout remains off.
 
-### S-07 — Economic eligibility and policy approval
+### S-07 — Economic eligibility and policy approval — LEVEL 1 REPOSITORY PASS; GOVERNANCE/FUNDING PENDING
+
+[S-07 exact-SHA evidence](CMP-S07-QUALIFICATION-EVIDENCE.md) proves default-deny economic controls and deterministic capped solvency simulations. No proposal vote, approved economic scheme, source permission, testnet funded treasury or live payout has occurred. Live/governance closeout remains an explicit testnet gate.
 
 Publish explicit governed eligibility rules for accepted projects, source schemes, unit conversion/scoring, effective epochs, budget caps, per-user/project/period quotas, maturity/finality delays, anti-farming, identity-change windows and corrections/clawback policy. Assess whether external participation is allowed to earn both third-party rewards and $420; **CMP-5.6 only prevents double claims inside 420**, not another network's payout. Never derive $420 amounts by assuming one BOINC credit or Folding@home point is a coin. Treasury/funding authority and accounting must remain canonical CMP-6/Vault paths; avoid unapproved inflation.
 

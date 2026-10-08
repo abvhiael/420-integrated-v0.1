@@ -5,6 +5,10 @@ on:
       - 'docs/audit/420GROW-*.md'
       - 'scripts/verify-grow-01.py'
       - 'scripts/verify-grow-02.py'
+      - 'grow/**'
+      - 'genesis/svc2/sdk/**'
+      - 'location/uikit/**'
+      - 'location/model/**'
       - 'config/genesis-applications.json'
       - 'config/genesis-consumer-services.json'
       - 'config/420location-events-genesis.json'
@@ -16,6 +20,10 @@ on:
       - 'docs/audit/420GROW-*.md'
       - 'scripts/verify-grow-01.py'
       - 'scripts/verify-grow-02.py'
+      - 'grow/**'
+      - 'genesis/svc2/sdk/**'
+      - 'location/uikit/**'
+      - 'location/model/**'
       - 'config/genesis-applications.json'
       - 'config/genesis-consumer-services.json'
       - 'config/420location-events-genesis.json'
@@ -34,6 +42,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: GROW-03 consumer and directly affected SDK tests
+        run: go test ./grow/location ./genesis/svc2/sdk ./location/uikit ./location/privacy
+      - name: GROW-03 static analysis and format
+        run: |
+          test -z "$(gofmt -l grow/location/*.go)"
+          go vet ./grow/location
       - name: GROW-01 bounded canonical definition verifier
         run: python3 scripts/verify-grow-01.py
       - name: GROW-02 canonical identity verifier

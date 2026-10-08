@@ -176,6 +176,10 @@ Required work:
 
 Implement the creator-side project model.
 
+**Qualification:** Level 1 ordinary app-scoped step. Retain HZ-GCA-1.8 storage/retention and HZ-GCA-4 provenance boundaries, plus the complete generation/project suite and HZ-GCA-5 targeted verifier. No Level-2 milestone is introduced.
+
+**Repository artifacts:** private project workspace/runtime, deterministic private-storage adapter, project/version/take/artifact model, quota/retention/archive/export/delete behavior, machine-readable policy manifest, architecture document, storage integration tests and targeted verifier.
+
 Required work:
 
 - private generation projects;
@@ -189,7 +193,7 @@ Required work:
 - no accidental public indexing of drafts;
 - safe handling of incomplete/failed output sets.
 
-**Exit:** deterministic project state model and storage integration tests.
+**Exit:** deterministic project state model and storage integration tests. Completion additionally requires exact-head Level-1 qualification of privacy/owner isolation, version-tree determinism, complete-vs-incomplete take rules, artifact integrity, quota preflight, archive/export/delete retention, anti-resurrection and no-public-index behavior.
 
 ## HZ-GCA-6 — 420Hz Generate Studio UX
 

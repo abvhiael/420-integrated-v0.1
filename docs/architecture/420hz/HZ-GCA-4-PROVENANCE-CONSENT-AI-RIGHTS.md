@@ -251,14 +251,14 @@ Next canonical roadmap step:
 
 Qualified implementation SHA:
 
-`e13ff098988028bd1a9181edd7559066a611de99`
+`1a96ea3e136219e7900569eb98359007d483ec29`
 
 Authoritative workflow:
 
 - **420Hz Web Qualification**
-- Run: **37816294856** (#208)
+- Run: **37817799769** (#211)
 - Job: **HZ-GCA-4 Level 1**
-- Job ID: **113445676046**
+- Job ID: **113450783236**
 - Result: **PASS**
 
 Exact-head required results:
@@ -271,4 +271,4 @@ Exact-head required results:
 - HZ-GCA-4 targeted verifier: **PASS**
 - retained 420Hz web job: **PASS**
 
-No Level-2 milestone was required for HZ-GCA-4. Level-3 repository-wide qualification remains deferred to HZ-GCA-17.
+No Level-2 milestone was required for HZ-GCA-4. Before final closeout, current `main` advanced through CMP-8 to `6a3c611a3c0629c9bbae1e67f992d98ba1787550`; the HZ-GCA branch was reconciled by merge commit `1a96ea3e136219e7900569eb98359007d483ec29` and the complete HZ-GCA-4 Level-1 suite was rerun successfully on that exact reconciled SHA. Level-3 repository-wide qualification remains deferred to HZ-GCA-17.

@@ -1,0 +1,20 @@
+{
+  "schema":"doobtube-nonproduction-v1",
+  "production":false,
+  "bind":{"host":"127.0.0.1","port":8420},
+  "runtime":{
+    "chainId":420,
+    "network":"development",
+    "databasePath":".doobtube-dev/doobtube.sqlite",
+    "webRoot":"doobtube/web/dist"
+  },
+  "dependencies":{
+    "420Media":false,
+    "420Registry":false
+  },
+  "notes":[
+    "Loopback-only repository deployment profile.",
+    "External canonical dependencies are intentionally unresolved by default.",
+    "Authority-bearing HTTP writes remain disabled without a qualified auth/session gateway."
+  ]
+}

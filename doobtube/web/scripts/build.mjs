@@ -1,0 +1,10 @@
+import fs from 'node:fs';import path from 'node:path';
+const root=path.resolve(import.meta.dirname,'..'),dist=path.join(root,'dist');
+fs.rmSync(dist,{recursive:true,force:true});fs.mkdirSync(dist,{recursive:true});
+for(const f of ['index.html','app.js','styles.css','runtime-config.json','doobtube-logo.webp'])fs.copyFileSync(path.join(root,f),path.join(dist,f));
+fs.cpSync(path.join(root,'core'),path.join(dist,'core'),{recursive:true});
+fs.copyFileSync(path.join(dist,'index.html'),path.join(dist,'404.html'));
+const headers=JSON.parse(fs.readFileSync(path.join(root,'security-headers.json'),'utf8')).headers;
+fs.writeFileSync(path.join(dist,'_headers'),['/*',...Object.entries(headers).map(([k,v])=>'  '+k+': '+v)].join('\n')+'\n');
+fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify({schema:'doobtube-web-build-v1',sourceSha:process.env.GITHUB_SHA||'local',productionOrigin:null,execution:'FAIL_CLOSED_UNTIL_CANONICAL_RUNTIME_RESOLVED'},null,2)+'\n');
+console.log('DoobTube static web build PASS');

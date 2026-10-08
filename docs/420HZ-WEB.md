@@ -40,7 +40,28 @@ That phase adds:
 - anti-Sybil, moderation, privacy and adversarial hardening;
 - production-equivalent testnet qualification before live claims.
 
-Until those roadmap steps are implemented and qualified, the existing site must not imply that generation, community voting or awards are already live.
+Generate Studio is now repository-implemented under HZ-GCA-6 using qualified deterministic mock/dev execution. It remains explicitly pre-testnet and must not imply that live generation, registration/publication, community voting or awards are already deployed.
+
+
+## Generate Studio
+
+HZ-GCA-6 adds a prominent **Generate your own song** home-page CTA and a fully navigable pre-testnet Generate Studio.
+
+The repository-qualified UX includes:
+
+- prompt and optional lyrics composer;
+- advanced genre/style/mood/instrumentation controls;
+- development cost/capacity preview;
+- accessible generation progress;
+- deterministic A/B take comparison;
+- audio/stem preview surfaces without fabricated public media URLs;
+- provenance/disclosure presentation;
+- save/regenerate/remix controls;
+- explicit Register & Publish handoff owned by HZ-GCA-7;
+- failure/retry/refund state;
+- responsive/mobile layout and reduced-motion/accessibility support.
+
+The Generate Studio uses deterministic mock/dev state only. It does not enable Wallet signing, submit publication transactions, invent a production chain/provider/storage endpoint, or represent generation success as registration/publication success.
 
 ## User experience
 

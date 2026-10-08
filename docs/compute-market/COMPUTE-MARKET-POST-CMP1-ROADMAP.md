@@ -683,7 +683,7 @@ The participation loop should be simple enough that a user can install the worke
 
 ---
 
-# CMP-9 — Public testnet compute
+> **Execution handoff:** CMP-9 live work, CMP-10 adversarial campaigns and CMP-11 release dependencies are now tracked in [the shared Step 15 testnet work roadmap](../ROADMAP.md#420compute--compute-market--deferred-live-testnet-security-and-mainnet-work). The original numbered CMP requirements below remain canonical for scope and ordering. CMP-1–8 repository qualifications remain complete; CMP-0 operational closeout stays open until actual live evidence qualifies it. None of CMP-9–11 is represented as complete.\n\n# CMP-9 — Public testnet compute
 
 Purpose: turn repository qualification into real deployed evidence.
 

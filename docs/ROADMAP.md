@@ -167,6 +167,34 @@ This phase begins only after the Genesis requirements reconciliation gate passes
 
 **Deliverable:** adversarial simulation report tied to the reconciled Genesis release identity.
 
+### 420Compute / Compute Market — deferred live-testnet, security and mainnet work
+
+**Status: TESTNET-GATED HANDOFF — NOT COMPLETE.** CMP-1 through CMP-8 repository qualification is retained; CMP-8 implementation qualified at `1889713a30ebee9afbdfc21b151d7c69789c1e09` and merged through PR #570 (merge `6a3c611a3c0629c9bbae1e67f992d98ba1787550`). No live deployment, funded execution, payout, operational closeout or mainnet readiness is implied. Canonical phase numbering and protocol authority remain governed by [the Compute roadmap](compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md) and [CMP-8 evidence](compute-market/CMP-8-QUALIFICATION-EVIDENCE.md).
+
+**CMP-9 — Public testnet compute (BLOCKED pending approved operational network, real endpoints and canonical contract publication).** Retain the exact fifteen work items in order, with deployment-specific qualification and durable evidence:
+
+1. **CMP-9.1** — Deploy canonical Compute contracts; record release/chain/genesis identity, code hashes and deployment receipts.
+2. **CMP-9.2** — Publish and verify ProtocolRegistry bindings; record address/source/revision consistency and fail-closed consumer behaviour.
+3. **CMP-9.3** — Operate actual worker machines using signed packages, real identities, capability/health observations and recovery evidence.
+4. **CMP-9.4** — Submit genuinely funded test-$420 jobs with Wallet-authorized signatures, escrow provenance and replay protection.
+5. **CMP-9.5** — Match real eligible workers; verify canonical admission, identity, capacity and owner acceptance.
+6. **CMP-9.6** — Execute real work units in the qualified node420 sandbox; capture signed execution receipts, resource metrics and failure paths.
+7. **CMP-9.7** — Verify real results using canonical verifier policy, signed provenance, rejection and challenge paths.
+8. **CMP-9.8** — Pay real workers from eligible verified entitlements; reconcile Vault movements, rewards and balance accounting.
+9. **CMP-9.9** — Exercise real eligible cancellation/expiry/failure refunds, including adversarial duplicate attempts.
+10. **CMP-9.10** — Exercise actual dispute opening, freezes, decisions, appeals and authorization boundaries.
+11. **CMP-9.11** — Slash test collateral only through objective authorized evidence; demonstrate solvency and payer-escrow separation.
+12. **CMP-9.12** — Run multi-worker replicated jobs and quorum verification, including unavailable or malicious participants.
+13. **CMP-9.13** — Demonstrate a real scientific workload, while retaining general-purpose compute architecture.
+14. **CMP-9.14** — Perform sustained soak/restart/failover/reorg/rebuild, telemetry and operational-recovery testing.
+15. **CMP-9.15** — Close CMP-0 operational qualification using retained end-to-end live receipts and an explicit go/no-go decision.
+
+**CMP-10 — Security and adversarial qualification (PENDING; requires an exact deployed release lineage).** Retain external contract audit, worker-sandbox audit, hostile workloads, malicious worker/verifier/scheduler behavior, collusion, Sybil workers, fraudulent hardware attestations, replay/stolen/duplicate results, reward farming, DoS, dataset poisoning, supply-chain/escape/key-compromise tests, economic insolvency and stake/slash attacks. An incentivized public-testnet campaign and remediation requalification must be evidenced before closeout.
+
+**CMP-11 — Mainnet Compute Market (NOT TESTNET COMPLETE).** Track here solely as a downstream launch dependency, not as a testnet deliverable. After CMP-9 live validation, CMP-10 adversarial security and the shared Step 16 independent release review, qualify the exact mainnet release: funded job -> canonical match/acceptance -> sandbox execution -> signed result -> verification/challenge -> Vault settlement -> earned $420. No mainnet readiness or launch claim without independent go/no-go approval.
+
+**Cross-cutting entry/exit requirements:** share the Step 5 canary/observation/public promotion gates; freeze network/genesis/contract/release SHA and service URLs; integrate 420Wallet, 420Indexer, Compute API/SDK, 420Compute and node420 worker against real compatible deployed versions; prohibit browser custody, Indexer/scheduler authority, synthetic stake amounts or project-preference authorization; retain exact release lineage, transaction hashes, safe/finalized heights, signed receipts, negative/privacy/replay tests, CI job evidence, monitoring/recovery and rollback decisions. Gate each CMP-9 milestone on actual deployed evidence rather than fixture-only repository tests. CMP-0 operational closeout remains open until CMP-9.15 proves it.
+
 ## 15. Public testnet — PREPARATION ACTIVE
 Open validator qualification, faucet, public dApp deployment, bug bounties, telemetry, upgrades, and community testing.
 

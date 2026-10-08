@@ -2,8 +2,8 @@
 set -eu
 
 BLST_VERSION="v0.3.16"
-LIBP2P_VERSION="v0.49.0"
-PUBSUB_VERSION="v0.17.0"
+LIBP2P_VERSION="v0.39.1"
+PUBSUB_VERSION="v0.14.2"
 
 retry() {
   attempt=1

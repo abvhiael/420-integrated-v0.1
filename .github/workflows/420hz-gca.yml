@@ -52,11 +52,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Detect HZ-GCA-3 execution-adapter change
-        id: hz_gca_3
-        shell: bash
-        run: |
-          if git diff-tree --no-commit-id --name-only -r HEAD | grep -Eq '^(hz/config/gca-compute-execution-adapter-v1.json|hz/generate/src/compute-adapter.js|hz/generate/test/compute-adapter.test.js|docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md|scripts/verify-420hz-gca-3.py)      - name: Qualify HZ-GCA-2 generation provider abstraction
+      - name: Qualify HZ-GCA-2 generation provider abstraction
         working-directory: hz/generate
         run: npm run qualify
 
@@ -67,30 +63,24 @@ jobs:
         run: python3 scripts/verify-420hz-gca-3.py
 
       - name: Retain 420AI Compute integration boundaries for HZ-GCA-3
-        if: steps.hz_gca_3.outputs.qualify == 'true'
         run: python3 scripts/verify-420ai-compute-integration.py
 
       - name: Retain 420AI provider runtime for HZ-GCA-3
-        if: steps.hz_gca_3.outputs.qualify == 'true'
         working-directory: services/420ai-provider
         run: npm test
 
       - name: Verify 420AI provider runtime boundaries for HZ-GCA-3
-        if: steps.hz_gca_3.outputs.qualify == 'true'
         run: python3 scripts/verify-420ai-provider-runtime.py
 
       - name: Retain Compute SDK compatibility for HZ-GCA-3
-        if: steps.hz_gca_3.outputs.qualify == 'true'
         working-directory: packages/420-sdk
         run: npm install --no-audit --no-fund && npm test
 
       - name: Build Compute SDK for HZ-GCA-3 API compatibility
-        if: steps.hz_gca_3.outputs.qualify == 'true'
         working-directory: packages/420-sdk
         run: npm run build
 
       - name: Retain Compute API compatibility for HZ-GCA-3
-        if: steps.hz_gca_3.outputs.qualify == 'true'
         working-directory: services/compute-api
         run: npm install --no-audit --no-fund && npm test
 

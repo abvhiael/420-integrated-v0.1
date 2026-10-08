@@ -6,8 +6,8 @@
   "title": "HZ-GCA-1 Level-2 milestone qualification",
   "qualificationLevel": 2,
   "milestone": true,
-  "reconciledMainSha": "dbe29983986fefb77a4e78ff96a3689c8589f956",
-  "reconciliationCommit": "3fc377dd193bf940c7ccebfee3ce2876026164e7",
+  "reconciledMainSha": "0993ff5b5b3b213a0768dbde90e4734df5ab4cc0",
+  "reconciliationCommit": "2c9e626dea96706391536a4950245575c4b40f32",
   "accumulatedRange": [
     "HZ-GCA-1.1",
     "HZ-GCA-1.2",
@@ -33,9 +33,10 @@
     "materialOverlap": [
       "Compute SDK",
       "Compute API",
-      "Compute Indexer"
+      "Compute Indexer",
+      "ReeferReview RR-11 current-main state"
     ],
-    "reason": "CMP-7 merged after the HZ-GCA branch base and materially overlaps the AI/Compute/Indexer authority/interface boundaries consumed by HZ-GCA-1.",
+    "reason": "CMP-7 materially overlaps the AI/Compute/Indexer boundaries consumed by HZ-GCA-1. RR-11 subsequently advanced main in unrelated ReeferReview paths; the milestone branch was reconciled to current main while preserving current-main ReeferReview state and the qualified HZ-GCA/CMP integration surface.",
     "disposition": "RECONCILED_BEFORE_LEVEL2"
   },
   "retainedSuite": [

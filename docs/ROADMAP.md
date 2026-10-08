@@ -167,6 +167,13 @@ This phase begins only after the Genesis requirements reconciliation gate passes
 
 **Deliverable:** adversarial simulation report tied to the reconciled Genesis release identity.
 
+## 15. Public testnet — PREPARATION ACTIVE
+Open validator qualification, faucet, public dApp deployment, bug bounties, telemetry, upgrades, and community testing.
+
+Shared-service and application launch gates are being completed before public exposure. Every public-testnet application must bind to an exact qualified release identity, preserve chain/service provenance, pass its failure drills, and record an explicit go/no-go closeout. Public-testnet promotion requires both the Genesis requirements reconciliation gate and adversarial qualification to pass against the same release lineage.
+
+**Deliverable:** stable public 420 testnet tied to a reconciled and adversarially qualified release candidate.
+
 ### 420Compute / Compute Market — deferred live-testnet, security and mainnet work
 
 **Status: TESTNET-GATED HANDOFF — NOT COMPLETE.** CMP-1 through CMP-8 repository qualification is retained; CMP-8 implementation qualified at `1889713a30ebee9afbdfc21b151d7c69789c1e09` and merged through PR #570 (merge `6a3c611a3c0629c9bbae1e67f992d98ba1787550`). No live deployment, funded execution, payout, operational closeout or mainnet readiness is implied. Canonical phase numbering and protocol authority remain governed by [the Compute roadmap](compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md) and [CMP-8 evidence](compute-market/CMP-8-QUALIFICATION-EVIDENCE.md).
@@ -194,13 +201,6 @@ This phase begins only after the Genesis requirements reconciliation gate passes
 **CMP-11 — Mainnet Compute Market (NOT TESTNET COMPLETE).** Track here solely as a downstream launch dependency, not as a testnet deliverable. After CMP-9 live validation, CMP-10 adversarial security and the shared Step 16 independent release review, qualify the exact mainnet release: funded job -> canonical match/acceptance -> sandbox execution -> signed result -> verification/challenge -> Vault settlement -> earned $420. No mainnet readiness or launch claim without independent go/no-go approval.
 
 **Cross-cutting entry/exit requirements:** share the Step 5 canary/observation/public promotion gates; freeze network/genesis/contract/release SHA and service URLs; integrate 420Wallet, 420Indexer, Compute API/SDK, 420Compute and node420 worker against real compatible deployed versions; prohibit browser custody, Indexer/scheduler authority, synthetic stake amounts or project-preference authorization; retain exact release lineage, transaction hashes, safe/finalized heights, signed receipts, negative/privacy/replay tests, CI job evidence, monitoring/recovery and rollback decisions. Gate each CMP-9 milestone on actual deployed evidence rather than fixture-only repository tests. CMP-0 operational closeout remains open until CMP-9.15 proves it.
-
-## 15. Public testnet — PREPARATION ACTIVE
-Open validator qualification, faucet, public dApp deployment, bug bounties, telemetry, upgrades, and community testing.
-
-Shared-service and application launch gates are being completed before public exposure. Every public-testnet application must bind to an exact qualified release identity, preserve chain/service provenance, pass its failure drills, and record an explicit go/no-go closeout. Public-testnet promotion requires both the Genesis requirements reconciliation gate and adversarial qualification to pass against the same release lineage.
-
-**Deliverable:** stable public 420 testnet tied to a reconciled and adversarially qualified release candidate.
 
 ## 16. Independent audit and launch review
 Audit consensus-critical Go code, system contracts, genesis allocations, validator economics, bridges/oracles, and regulatory launch structure before considering mainnet.

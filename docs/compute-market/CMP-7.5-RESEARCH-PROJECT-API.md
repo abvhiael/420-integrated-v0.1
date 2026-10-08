@@ -1,6 +1,6 @@
 # CMP-7.5 — Research project API
 
-Status: **IMPLEMENTED — Level 1 + first CMP-7 Level 2 milestone qualification pending.**
+Status: **COMPLETE — Level 1 + first CMP-7 Level 2 exact-head qualified on `e2095a027660157382d35456d73bf7219257611d`.**
 
 ## Canonical purpose
 

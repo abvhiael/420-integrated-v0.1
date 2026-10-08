@@ -42,10 +42,24 @@ if d.get("next_canonical_step")!="CMP-8 — 420Compute application":
 
 road=ROADMAP.read_text()
 for i in range(1,10):
-    if f"## CMP-7.{i} —" not in road:
+    heading=f"## CMP-7.{i} —"
+    pos=road.find(heading)
+    if pos<0:
         fail(f"roadmap prerequisite CMP-7.{i} missing")
+    if "COMPLETE" not in road[pos:pos+900]:
+        fail(f"roadmap prerequisite CMP-7.{i} not COMPLETE")
 if "## CMP-7.10 — Phase closeout" not in road or "LEVEL 3 CLOSEOUT CANDIDATE" not in road:
     fail("roadmap closeout state drift")
+
+specs=[
+    "CMP-7.1-COMPUTE-SDK.md","CMP-7.2-JOB-SUBMISSION-API.md","CMP-7.3-WORKER-API.md",
+    "CMP-7.4-VERIFIER-API.md","CMP-7.5-RESEARCH-PROJECT-API.md","CMP-7.6-COMPUTE-INDEXER.md",
+    "CMP-7.7-HISTORICAL-ANALYTICS.md","CMP-7.8-DEVELOPER-DOCUMENTATION.md","CMP-7.9-CLI.md",
+]
+for name in specs:
+    p=ROOT/"docs/compute-market"/name
+    if not p.is_file() or "Status: **COMPLETE" not in p.read_text():
+        fail("qualified prerequisite spec status missing "+name)
 
 fw=FOUNDRY.read_text()
 for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-7.10-phase-closeout.json","qualify-foundry-shard.sh"):

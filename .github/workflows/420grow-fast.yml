@@ -9,6 +9,7 @@ on:
       - 'scripts/verify-grow-07.py'
       - 'scripts/verify-grow-08.py'
       - 'scripts/verify-grow-09.py'
+      - 'scripts/verify-grow-10.py'
       - 'grow/**'
       - 'genesis/svc2/sdk/**'
       - 'location/uikit/**'
@@ -28,6 +29,7 @@ on:
       - 'scripts/verify-grow-07.py'
       - 'scripts/verify-grow-08.py'
       - 'scripts/verify-grow-09.py'
+      - 'scripts/verify-grow-10.py'
       - 'grow/**'
       - 'genesis/svc2/sdk/**'
       - 'location/uikit/**'
@@ -93,5 +95,7 @@ jobs:
           python3 scripts/verify-grow-08.py
       - name: GROW-09 documentation closeout verifier
         run: python3 scripts/verify-grow-09.py
+      - name: GROW-10 deployment stage readiness preflight
+        run: python3 scripts/verify-grow-10.py
       - name: Python verifier syntax
-        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py scripts/verify-grow-06.py scripts/verify-grow-07.py scripts/verify-grow-08.py scripts/verify-grow-09.py
+        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py scripts/verify-grow-06.py scripts/verify-grow-07.py scripts/verify-grow-08.py scripts/verify-grow-09.py scripts/verify-grow-10.py

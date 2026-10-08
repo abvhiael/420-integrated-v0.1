@@ -5,13 +5,19 @@ import "context"
 type NewsService struct {
 	Store   NewsRepository
 	Sources NewsSourceRegistry
+	SourcesPath string
+}
+
+func (s NewsService) currentSources() (NewsSourceRegistry, error) {
+	if s.SourcesPath != "" { return LoadNewsSourceRegistry(s.SourcesPath) }
+	return s.Sources, ValidateNewsSourceRegistry(s.Sources)
 }
 
 func (s NewsService) validate() error {
 	if s.Store == nil {
 		return ErrInvalidInput
 	}
-	if err := ValidateNewsSourceRegistry(s.Sources); err != nil {
+	if _, err := s.currentSources(); err != nil {
 		return err
 	}
 	return nil
@@ -42,5 +48,7 @@ func (s NewsService) PublicSources() ([]map[string]any, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
-	return s.Sources.PublicSources(), nil
+	registry, err := s.currentSources()
+	if err != nil { return nil, err }
+	return registry.PublicSources(), nil
 }

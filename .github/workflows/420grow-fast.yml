@@ -51,6 +51,12 @@ jobs:
       - name: GROW-04 web build, UX/security regressions
         working-directory: grow/web
         run: npm run qualify
+      - name: GROW-05 service behavior and security qualification
+        run: |
+          go test ./grow/service ./grow/location
+          go vet ./grow/service
+          gofmt -d grow/service/*.go
+          test -z "$(gofmt -l grow/service/*.go)"
       - name: GROW-03 consumer and directly affected SDK tests
         run: go test ./grow/location ./genesis/svc2/... ./location/...
       - name: GROW-03 static analysis and format

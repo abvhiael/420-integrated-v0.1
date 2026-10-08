@@ -61,6 +61,31 @@ Disclosure must not be inferred from provider marketing text. It is explicit met
 
 Define the complete Generate/Community/Awards product model, trust boundaries and invariants.
 
+### HZ-GCA-1 implementation decomposition
+
+The numbered items below are subordinate work packages inside canonical **HZ-GCA-1**. They do not replace, renumber or independently close the top-level HZ-GCA-1 exit criteria.
+
+- **HZ-GCA-1.1 — Define product boundaries** — freeze which state/actions belong to 420Hz versus 420AI, Compute Market, Creative Protocol, Wallet/Identity, Pay, Resource/Storage, Indexer/Search, Notifications, Governance, Arbitration, Commons and Registry. Required artifact: normative authority/trust map plus machine-readable boundary manifest and a targeted verifier. **Level 1 only**; this is not a Level-2 milestone.
+- **HZ-GCA-1.2 — Define canonical object model**
+- **HZ-GCA-1.3 — Define Generate lifecycle**
+- **HZ-GCA-1.4 — Define AI disclosure rules**
+- **HZ-GCA-1.5 — Define provenance model**
+- **HZ-GCA-1.6 — Define rights & consent boundaries**
+- **HZ-GCA-1.7 — Define privacy model**
+- **HZ-GCA-1.8 — Define storage & retention rules**
+- **HZ-GCA-1.9 — Define generation economics**
+- **HZ-GCA-1.10 — Define Community authority model**
+- **HZ-GCA-1.11 — Define Charts rules**
+- **HZ-GCA-1.12 — Define Awards architecture**
+- **HZ-GCA-1.13 — Define nomination & voting policy framework**
+- **HZ-GCA-1.14 — Define moderation & dispute boundaries**
+- **HZ-GCA-1.15 — Threat model**
+- **HZ-GCA-1.16 — API/event/interface contracts**
+- **HZ-GCA-1.17 — Failure and recovery semantics**
+- **HZ-GCA-1.18 — Architecture documentation consolidation**
+- **HZ-GCA-1.19 — Phase-1 adversarial review**
+- **HZ-GCA-1.20 — HZ-GCA-1 Level-2 milestone qualification**
+
 Required work:
 
 - map 420Hz ↔ 420AI ↔ Compute Market ↔ Creative Protocol ↔ Identity ↔ Pay ↔ Storage ↔ Indexer/Search ↔ Notifications;

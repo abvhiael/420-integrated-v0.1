@@ -30,6 +30,7 @@
       <a href="#search" data-route="search">Search</a>
       <a href="#editorial" data-route="editorial">Write</a>
       <a href="#moderation" data-route="moderation">Moderation</a>
+      <a href="#news-admin" data-route="news-admin">News Sources</a>
     </nav>
   </header>
 
@@ -92,6 +93,7 @@
         <button type="button" class="secondary" data-refresh="news">Refresh</button>
       </div>
       <p class="section-note">Headlines and permitted feed excerpts are attributed to their publishers. Use <strong>Read original</strong> to continue at the source.</p>
+      <nav class="news-section-nav" aria-label="Cannabis news sections"><button type="button" data-news-section="">Latest News</button><button type="button" data-news-section="canada">Canada</button><button type="button" data-news-section="legalization-policy">Legalization &amp; Policy</button><button type="button" data-news-section="medical-research">Medical &amp; Research</button><button type="button" data-news-section="cultivation">Cultivation</button><button type="button" data-news-section="business-markets">Business &amp; Markets</button><button type="button" data-news-section="culture">Culture</button><button type="button" data-news-section="international">International</button></nav>
       <div id="news-feed" class="card-grid" aria-live="polite"></div>
       <button id="news-more" class="load-more" type="button" hidden>Load more news</button>
     </section>
@@ -102,6 +104,7 @@
         <button type="button" class="secondary" data-refresh="originals">Refresh</button>
       </div>
       <p class="section-note">These are publications authored inside ReeferReview, not imported third-party stories.</p>
+      <aside class="workspace-panel" aria-label="Original cannabis policy coverage"><strong>ReeferReview Originals</strong><p><a href="./cannabis-policy-update.html">Ottawa tracking-rule consultation explainer</a> — October 8, 2026. Original reporting, separate from RSS publisher feeds.</p></aside>
       <div id="originals-feed" class="card-grid" aria-live="polite"></div>
       <button id="originals-more" class="load-more" type="button" hidden>Load more originals</button>
     </section>
@@ -198,6 +201,30 @@
         <h3 id="history-title">Moderation history</h3>
         <div id="moderation-history" aria-live="polite"><p class="empty">Choose “History” on an editorial record.</p></div>
       </section>
+    </section>
+
+    <section id="view-news-admin" class="view" data-view="news-admin" aria-labelledby="news-admin-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Editorial operations</p><h2 id="news-admin-title">News sources admin</h2></div><button id="news-admin-refresh" type="button" class="secondary">Refresh</button></div>
+      <p class="section-note">A verified moderator session is required. New feeds start disabled; validate publisher feed URL and permissions before activation. Publisher headlines always link to their original articles.</p>
+      <label>Standalone RSS administrator key (kept in browser memory only) <input id="news-admin-key" type="password" autocomplete="off" minlength="32" placeholder="Configured deployment admin key"></label>
+      <p id="news-admin-status" role="status" aria-live="polite"></p>
+      <div id="news-admin-list" class="card-grid" aria-live="polite"></div>
+      <form id="news-admin-form" class="workspace-panel">
+        <h3>Add or edit an RSS source</h3>
+        <label>Source ID <input id="news-admin-id" required maxlength="64" pattern="[a-z0-9][a-z0-9-]*" placeholder="publisher-id"></label>
+        <label>Publisher name <input id="news-admin-name" required maxlength="120"></label>
+        <label>RSS / Atom feed URL <input id="news-admin-feed" required type="url" placeholder="https://publisher.example/feed/"></label>
+        <label>Publisher homepage <input id="news-admin-home" required type="url" placeholder="https://publisher.example/"></label>
+        <label>Section <select id="news-admin-category" required>
+          <option value="canada">Canada</option><option value="legalization-policy">Legalization &amp; Policy</option><option value="medical-research">Medical &amp; Research</option><option value="cultivation">Cultivation</option><option value="business-markets">Business &amp; Markets</option><option value="culture">Culture</option><option value="international">International</option>
+        </select></label>
+        <label>Poll interval (minutes) <input id="news-admin-interval" type="number" min="15" max="1440" value="30" required></label>
+        <label>Attribution <input id="news-admin-attribution" maxlength="500" required placeholder="Headline from publisher; read the original."></label>
+        <label><input id="news-admin-enabled" type="checkbox"> Enable existing source after validation</label>
+        <p>New sources always begin disabled. Excerpts and embedded images cannot be enabled through this panel without an independent reuse-rights review.</p>
+        <button type="submit">Save source</button>
+        <button type="button" id="news-admin-new" class="secondary">New source</button>
+      </form>
     </section>
 
     <noscript><p class="status error">Reefer Review needs JavaScript to load its news and publication feeds.</p></noscript>

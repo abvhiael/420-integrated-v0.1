@@ -12,9 +12,11 @@ import (
 )
 
 type HTTP struct {
-	Service  Service
-	News     *NewsService
-	Security *SessionSecurity
+	Service                Service
+	News                   *NewsService
+	Security               *SessionSecurity
+	NewsAdminKey           []byte
+	NewsFeedCheckpointPath string
 }
 
 func (h HTTP) Handler() http.Handler {
@@ -25,6 +27,8 @@ func (h HTTP) Handler() http.Handler {
 	mux.HandleFunc("/v1/editorial/publications", h.editorialPublications)
 	mux.HandleFunc("/v1/news", h.news)
 	mux.HandleFunc("/v1/news/sources", h.newsSources)
+	mux.HandleFunc("/v1/admin/news/sources", h.newsAdminSources)
+	mux.HandleFunc("/v1/admin/news/health", h.newsAdminHealth)
 	mux.HandleFunc("/v1/news/topics", h.newsTopics)
 	mux.HandleFunc("/v1/news/", h.newsItem)
 	return securityResponseHeaders((&HTTPMetrics{}).Middleware(newAPIRateLimiter(120, 1, 4096).wrap(h.sessionMiddleware(mux))))
@@ -57,6 +61,9 @@ func bearerToken(header string) string {
 }
 
 func sessionRequirements(method, path string) ([]string, bool) {
+	if (path == "/v1/admin/news/sources" && (method == http.MethodGet || method == http.MethodPost || method == http.MethodPut)) || (path == "/v1/admin/news/health" && method == http.MethodGet) {
+		return []string{CapabilityModerator}, true
+	}
 	if method == http.MethodPost && path == "/v1/publications" {
 		return []string{CapabilityAuthor, CapabilityPublisher}, true
 	}

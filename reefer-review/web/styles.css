@@ -204,3 +204,9 @@ footer{
   .session-bar{grid-template-columns:1fr}
   .editorial-layout{grid-template-columns:1fr}
 }
+
+/* RR-11 curated news section navigation */
+.news-section-nav {display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 1.5rem}
+.news-section-nav button {border:1px solid currentColor;border-radius:999px;padding:.55rem .8rem;cursor:pointer}
+.news-section-nav button[aria-pressed="true"] {outline:2px solid currentColor;outline-offset:2px}
+.news-section-nav button:focus-visible {outline:3px solid currentColor;outline-offset:3px}

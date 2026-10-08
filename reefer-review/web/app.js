@@ -402,9 +402,78 @@ function parseRoute() {
   const raw=location.hash.replace(/^#/,"")||"latest";
   const [route,...rest]=raw.split("/");
   if(route==="article"&&rest[0]) return {route:"article",id:decodeURIComponent(rest[0])};
-  const allowed=["latest","news","originals","topics","search","editorial","moderation"];
+  const allowed=["latest","news","originals","topics","search","editorial","moderation","news-admin"];
   return {route:allowed.includes(route)?route:"latest",id:""};
 }
+function newsAdminHeaders(extra={}) {
+  const secret=$("#news-admin-key").value;
+  if (secret && secret.length>=32) return {Authorization:`Bearer ${secret}`,...extra};
+  return authHeaders(extra);
+}
+let editingNewsSource = "";
+
+async function loadNewsAdmin() {
+  const status = $("#news-admin-status"), list = $("#news-admin-list");
+  list.replaceChildren();
+  if (!state.sessionToken && !$("#news-admin-key").value) { status.textContent="Provide a standalone news admin key or connect a verified moderator session."; return; }
+  try {
+    const response = await getJSON("/v1/admin/news/sources",{headers:newsAdminHeaders()});
+    const healthResponse = await getJSON("/v1/admin/news/health",{headers:newsAdminHeaders()}).catch(()=>({health:[]}));
+    const healthByID=new Map((Array.isArray(healthResponse.health)?healthResponse.health:[]).map((h)=>[h.source_id,h]));
+    const sources = Array.isArray(response.sources) ? response.sources : [];
+    status.textContent = `${sources.length} configured publisher sources. Disabled sources are not fetched.`;
+    for (const source of sources) {
+      const item = document.createElement("article");
+      item.className="news-admin-source";
+      item.append(textElement("strong","",source.name),textElement("p","",`${source.id} · ${source.category} · ${source.enabled ? "Enabled" : "Disabled"} · every ${source.poll_interval_minutes} min`));
+      const health=healthByID.get(source.id);
+      if (health) item.append(textElement("p","",`Last success: ${health.last_success || "Never"} · failures: ${health.consecutive_failures || 0} · ${health.last_error || "No reported error"}`));
+      const button=document.createElement("button");button.type="button";button.textContent="Edit source";
+      button.addEventListener("click",()=>{
+        editingNewsSource=source.id;
+        $("#news-admin-id").value=source.id;
+        $("#news-admin-id").readOnly=true;
+        $("#news-admin-name").value=source.name;
+        $("#news-admin-feed").value=source.feed_url;
+        $("#news-admin-home").value=source.home_url;
+        $("#news-admin-category").value=source.category;
+        $("#news-admin-interval").value=source.poll_interval_minutes;
+        $("#news-admin-attribution").value=source.attribution;
+        $("#news-admin-enabled").checked=Boolean(source.enabled);
+        $("#news-admin-form").scrollIntoView({block:"nearest"});
+      });
+      item.append(button);list.append(item);
+    }
+  } catch (error) { status.textContent=`Source management unavailable: ${error.message}`; }
+}
+
+function resetNewsAdmin() {
+  editingNewsSource="";
+  $("#news-admin-form").reset();
+  $("#news-admin-id").readOnly=false;
+}
+$("#news-admin-refresh").addEventListener("click",loadNewsAdmin);
+$("#news-admin-new").addEventListener("click",resetNewsAdmin);
+$("#news-admin-form").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const status=$("#news-admin-status");
+  if (!state.sessionToken && !$("#news-admin-key").value) {status.textContent="Admin credential required.";return;}
+  const id=$("#news-admin-id").value.trim();
+  const source={
+    id,name:$("#news-admin-name").value.trim(),feed_url:$("#news-admin-feed").value.trim(),
+    home_url:$("#news-admin-home").value.trim(),enabled:editingNewsSource ? $("#news-admin-enabled").checked : false,
+    category:$("#news-admin-category").value,language:"en",
+    poll_interval_minutes:Number($("#news-admin-interval").value),
+    allow_excerpt:false,allow_image:false,attribution:$("#news-admin-attribution").value.trim()
+  };
+  try {
+    await getJSON("/v1/admin/news/sources",{method:editingNewsSource?"PUT":"POST",
+      headers:newsAdminHeaders({"Content-Type":"application/json"}),body:JSON.stringify({source})});
+    status.textContent=`Source ${id} saved. ${source.enabled?"Enabled":"Disabled"}.`;
+    resetNewsAdmin();await loadNewsAdmin();await loadSourcesAndTopics();
+  } catch (error) {status.textContent=`Source save rejected: ${error.message}`;}
+});
+
 function showRoute(route,id="") {
   state.route=route; state.routeID=id;
   $$(".view").forEach((view)=>{view.hidden=view.dataset.view!==route;});
@@ -417,6 +486,7 @@ function showRoute(route,id="") {
   if(route==="search") $("#search-query").focus();
   if(route==="editorial") {state.editorialCursor="";loadEditorial();}
   if(route==="moderation") {state.editorialCursor="";loadEditorial({moderation:true});}
+  if(route==="news-admin") loadNewsAdmin();
 }
 function refreshRoute(){const parsed=parseRoute();showRoute(parsed.route,parsed.id);}
 
@@ -430,6 +500,7 @@ $("#session-disconnect").addEventListener("click", ()=>{
   setStatus("Signed out.");
   if(state.route==="editorial"||state.route==="moderation"||state.route==="article") refreshRoute();
 });
+$$("[data-news-section]").forEach((button)=>button.addEventListener("click",()=>{state.topic=button.dataset.newsSection;state.newsCursor="";const filter=$("#topic-filter");filter.value=state.topic; if(filter.value!==state.topic) filter.value=""; $$("[data-news-section]").forEach((b)=>b.setAttribute("aria-pressed",String(b===button)));location.hash="news";refreshRoute();}));
 $("#source-filter").addEventListener("change",(e)=>{state.source=e.target.value;state.newsCursor="";refreshRoute();});
 $("#topic-filter").addEventListener("change",(e)=>{state.topic=e.target.value;state.newsCursor="";refreshRoute();});
 $("#clear-filters").addEventListener("click",()=>{state.source="";state.topic="";$("#source-filter").value="";$("#topic-filter").value="";state.newsCursor="";refreshRoute();});
@@ -475,4 +546,4 @@ $("#edit-form").addEventListener("submit",async(e)=>{
 });
 
 window.addEventListener("hashchange",refreshRoute);
-document.addEventListener("DOMContentLoaded",async()=>{await loadSourcesAndTopics();refreshRoute();});
+document.addEventListener("DOMContentLoaded",()=>{refreshRoute();void loadSourcesAndTopics();});

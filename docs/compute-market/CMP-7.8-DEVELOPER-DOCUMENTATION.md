@@ -1,6 +1,6 @@
 # CMP-7.8 — Developer documentation
 
-Status: **IMPLEMENTED — Level 1 documentation qualification pending.**
+Status: **COMPLETE — Level 1 documentation qualified on `63b0bf7d77389685e464edb1f8db10548b72e181`.**
 
 CMP-7.8 documents the accumulated SDK/API/Indexer/analytics authority boundary, stable routes, exact chain scoping, Wallet handoff, privacy rules, reorg/finality expectations and retry behavior.
 

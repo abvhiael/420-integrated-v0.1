@@ -14,13 +14,13 @@ import (
  "github.com/420integrated/420-integrated/location/uikit"
 )
 
-type Reader interface { Read(context.Context) (grow.View,error) }
+type reader interface { Read(context.Context) (grow.View,error) }
 type ReaderFunc func(context.Context)(grow.View,error)
 func (f ReaderFunc) Read(ctx context.Context)(grow.View,error){return f(ctx)}
-type Handler struct { Reader Reader }
+type Handler struct { reader reader }
 // New binds the handler exclusively to the validated 420Location public SDK.
 func New(source interface{ Places(context.Context)(uikit.View,error) }) Handler {
- return Handler{Reader:ReaderFunc(func(ctx context.Context)(grow.View,error){return grow.Read(ctx,source)})}
+ return Handler{reader:ReaderFunc(func(ctx context.Context)(grow.View,error){return grow.Read(ctx,source)})}
 }
 type response struct { Version string `json:"version"`; Data page `json:"data"` }
 type page struct { Items []grow.Card `json:"items"`; Empty bool `json:"empty"`; NextOffset *int `json:"nextOffset,omitempty"`; Total int `json:"total"` }
@@ -39,9 +39,9 @@ func (h Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  limit:=50;offset:=0
  if q.Has("limit"){v,e:=strconv.Atoi(q.Get("limit"));if e!=nil||v<1||v>100{fail(http.StatusBadRequest);return};limit=v}
  if q.Has("offset"){v,e:=strconv.Atoi(q.Get("offset"));if e!=nil||v<0||v>100000{fail(http.StatusBadRequest);return};offset=v}
- if h.Reader==nil{fail(http.StatusServiceUnavailable);return}
+ if h.reader==nil{fail(http.StatusServiceUnavailable);return}
  ctx,cancel:=context.WithTimeout(r.Context(),8*time.Second);defer cancel()
- view,err:=h.Reader.Read(ctx);if err!=nil{fail(http.StatusServiceUnavailable);return}
+ view,err:=h.reader.Read(ctx);if err!=nil{fail(http.StatusServiceUnavailable);return}
  if !view.ProvenanceAvailable||view.Empty!=(len(view.Items)==0){fail(http.StatusBadGateway);return}
  // Validate the public projection through the upstream Grow adapter, which is
  // expected to run before this handler. This endpoint never reads canonical state.

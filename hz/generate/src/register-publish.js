@@ -82,6 +82,7 @@ export class DeterministicCreativeKernel420 {
     if(!CREATIVE_RECORDING_CLASSES_420.includes(recordingClass))throw new GenerationError420("INVALID_REQUEST","unknown recordingClass");
     if(recordingClass==="ORIGINAL"&&parentRecordingId)throw new GenerationError420("INVALID_REQUEST","ORIGINAL cannot have source Recording");
     if(sourceRequired(recordingClass)&&!parentRecordingId)throw new GenerationError420("REFERENCE_AUDIO_NOT_AUTHORIZED","derivative Recording requires source Recording");
+    if(parentRecordingId)this.#recording(parentRecordingId);
     if(authorizationRequired(recordingClass)){
       if(!authorizationEvidence?.allowed||!authorizationEvidence?.authorizationRef)throw new GenerationError420("REFERENCE_AUDIO_NOT_AUTHORIZED","derivative/source authorization failed");
       if(recordingClass==="AI_DERIVATIVE"&&!authorizationEvidence.transformationPermission)throw new GenerationError420("REFERENCE_AUDIO_NOT_AUTHORIZED","AI derivative requires Creative transformation permission");
@@ -151,12 +152,13 @@ export class RegisterPublishCoordinator420 {
       stage("PROFILE_READY",()=>{profile=this.kernel.selectOrCreateProfile(request.creator);a.refs.creatorId=profile.creatorId;});
       if(!profile)profile=this.kernel.profiles.get(a.refs.creatorId);
 
-      stage("WORK_REGISTERED",()=>{const w=this.kernel.registerWork({...request.work,creatorId:a.refs.creatorId,provenanceHash:request.generationProvenanceCommitment});a.refs.workId=w.workId;this.kernel.proposeCredits("WORK",w.workId,request.workCredits);});
-      stage("WORK_RIGHTS_FINALIZED",()=>this.kernel.finalizeSplit("WORK",a.refs.workId,request.workRightsSplit));
+      const resolveSelf=list=>list.map(x=>({...x,profileRef:x.profileRef==="SELF"?a.refs.creatorId:x.profileRef}));
+      stage("WORK_REGISTERED",()=>{const w=this.kernel.registerWork({...request.work,creatorId:a.refs.creatorId,provenanceHash:request.generationProvenanceCommitment});a.refs.workId=w.workId;this.kernel.proposeCredits("WORK",w.workId,resolveSelf(request.workCredits));});
+      stage("WORK_RIGHTS_FINALIZED",()=>this.kernel.finalizeSplit("WORK",a.refs.workId,resolveSelf(request.workRightsSplit)));
       stage("WORK_ACTIVE",()=>this.kernel.activateWork(a.refs.workId));
 
-      stage("RECORDING_REGISTERED",()=>{const r=this.kernel.registerRecording({...request.recording,creatorId:a.refs.creatorId,workId:a.refs.workId,provenanceHash:request.generationProvenanceCommitment,aiDisclosureClass:request.generationProvenance.aiDisclosureClass});a.refs.recordingId=r.recordingId;this.kernel.proposeCredits("RECORDING",r.recordingId,request.recordingCredits);});
-      stage("RECORDING_RIGHTS_FINALIZED",()=>this.kernel.finalizeSplit("RECORDING",a.refs.recordingId,request.recordingRightsSplit));
+      stage("RECORDING_REGISTERED",()=>{const r=this.kernel.registerRecording({...request.recording,creatorId:a.refs.creatorId,workId:a.refs.workId,provenanceHash:request.generationProvenanceCommitment,aiDisclosureClass:request.generationProvenance.aiDisclosureClass});a.refs.recordingId=r.recordingId;this.kernel.proposeCredits("RECORDING",r.recordingId,resolveSelf(request.recordingCredits));});
+      stage("RECORDING_RIGHTS_FINALIZED",()=>this.kernel.finalizeSplit("RECORDING",a.refs.recordingId,resolveSelf(request.recordingRightsSplit)));
       stage("RECORDING_ACTIVE",()=>this.kernel.activateRecording(a.refs.recordingId));
       stage("MEDIA_PUBLISHED",()=>{const m=this.kernel.publishMedia({...request.media,recordingId:a.refs.recordingId,provenanceHash:request.generationProvenanceCommitment});a.refs.mediaManifestHash=m.media.manifestHash;a.refs.storageSourceIds=m.storageSources.map(x=>x.sourceId);});
 

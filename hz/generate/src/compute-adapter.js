@@ -6,6 +6,7 @@ const RUNNING=new Set(["CREATED","FUNDED","MATCHED","ACCEPTED","RUNNING","RESULT
 const SUCCESS=new Set(["VERIFIED","SETTLED"]);
 const FAILED=new Set(["FAILED","EXPIRED","REFUNDED"]);
 const clone=(v)=>structuredClone(v);
+const wire=(v)=>typeof v==="bigint"?v.toString():Array.isArray(v)?v.map(wire):(v&&typeof v==="object"?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,wire(x)])):v);
 const req=(v,n)=>{if(v===undefined||v===null||v==="")throw new GenerationError420("INVALID_REQUEST",n+" is required");return v;};
 const u=(v,n)=>{try{const x=BigInt(v);if(x<0n)throw 0;return x;}catch{throw new GenerationError420("INVALID_REQUEST",n+" must be unsigned");}};
 
@@ -95,7 +96,7 @@ export class DeterministicDevelopmentComputeClient420 {
   }
   async environment(){return {chainId:this.chainId,computeGraphHash:this.computeGraphHash};}
   async discoverMusicGenerationCandidates(){return clone(this.candidates);}
-  async prepareSubmission(input){return Object.freeze({schemaVersion:"hz-compute-development-plan-v1",action:"SUBMIT_MUSIC_GENERATION",chainId:this.chainId,operationId:"op:"+digest420(input),requestId:"cmpreq:"+digest420({clientRequestId:input.clientRequestId,requestDigest:input.requestDigest}),input:clone(input),canonicalAuthority:false,requiresWalletAuthorization:true,secretMaterialManaged:false});}
+  async prepareSubmission(input){return Object.freeze({schemaVersion:"hz-compute-development-plan-v1",action:"SUBMIT_MUSIC_GENERATION",chainId:this.chainId,operationId:"op:"+digest420(wire(input)),requestId:"cmpreq:"+digest420({clientRequestId:input.clientRequestId,requestDigest:input.requestDigest}),input:clone(input),canonicalAuthority:false,requiresWalletAuthorization:true,secretMaterialManaged:false});}
   async submitAuthorized({plan,authorizationRef,idempotencyKey}){
     req(authorizationRef,"authorizationRef");if(this.byKey.has(idempotencyKey))return clone(this.byKey.get(idempotencyKey));if(plan?.action!=="SUBMIT_MUSIC_GENERATION")throw new GenerationError420("PROVIDER_REJECTED","invalid development plan");
     const c=normCandidate(plan.input.selectedCandidate),computeRequestId=plan.requestId,computeJobId="cmpjob:"+digest420({computeRequestId,idempotencyKey}),a={computeRequestId,computeJobId,acceptedMatchRef:"cmpmatch:"+digest420({computeJobId}),fundingRef:"cmpfund:"+digest420({computeJobId,amount:c.quotedPrice.toString()}),computeProviderId:c.computeProviderId,workerId:c.workerId,resourceId:c.resourceId,acceptedPrice:c.quotedPrice.toString(),acceptedAt:this.now()};

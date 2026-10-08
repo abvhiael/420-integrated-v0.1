@@ -213,6 +213,7 @@ export function mountGenerateStudio420(doc=document){
         const article=doc.createElement("article");article.className="take-card";article.dataset.takeId=t.takeId;
         article.innerHTML=`<div class="take-topline"><strong>take ${t.variant}</strong><span>${t.durationSec}s</span></div>
           <div class="mock-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <audio controls preload="none" aria-label="Take ${t.variant} audio preview"><p>Audio preview unavailable until a development media URL is resolved.</p></audio>
           <p class="take-note">development preview • no public media URL claimed</p>
           <ul class="artifact-list">${t.artifacts.filter(a=>a.available).map(a=>`<li>${a.kind.toLowerCase()} • ${a.label}</li>`).join("")}</ul>
           <button class="button secondary select-take" type="button" aria-pressed="${s.selectedTakeId===t.takeId}">${s.selectedTakeId===t.takeId?"selected":"select take "+t.variant}</button>`;

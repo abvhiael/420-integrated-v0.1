@@ -88,7 +88,7 @@ if not errors:
         need(token in ballot,f"ballot architecture missing: {token}")
 
     vote=" ".join(award.get("voteArchitecture",[]))
-    for token in ["product-domain vote/commitment only","wallet signature/private key material is never stored","never a Civic vote","deferred to HZ-GCA-1.13"]:
+    for token in ["product-domain vote/commitment only","wallet signature/private key material is never stored","does not become a Civic vote","deferred to HZ-GCA-1.13"]:
         need(token in vote,f"vote architecture missing: {token}")
 
     result=" ".join(award.get("resultArchitecture",[]))

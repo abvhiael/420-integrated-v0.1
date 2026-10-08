@@ -128,6 +128,10 @@ No provider may become canonical protocol authority.
 
 Route generation execution through the canonical compute architecture.
 
+**Qualification:** Level 1 ordinary app-scoped integration step. Because this step materially consumes existing 420AI/Compute authority surfaces, Level 1 retains directly affected 420AI Compute/provider compatibility checks; it does not change shared Compute/AI implementation and therefore does not independently trigger a new Level-2 milestone.
+
+**Repository artifacts:** `hz/generate/src/compute-adapter.js`, deterministic development Compute client, machine-readable execution-adapter manifest, architecture document, targeted verifier and app-specific/shared-compatibility CI coverage.
+
 Required work:
 
 - 420AI job adapter for music-generation workloads;
@@ -142,7 +146,7 @@ Required work:
 
 The adapter must support future third-party or first-party models without changing 420Hz publication semantics.
 
-**Exit:** end-to-end test generation using a qualified non-production adapter and the same lifecycle used by real providers.
+**Exit:** end-to-end test generation using a qualified non-production adapter and the same lifecycle used by real providers. Completion additionally requires exact-head Level-1 qualification of capacity/price selection, Wallet authorization handoff, idempotent submit/cancel, result verification, economic-reference separation, directly affected 420AI/Compute compatibility checks, and the targeted HZ-GCA-3 verifier with no required skipped/cancelled checks.
 
 ## HZ-GCA-4 — Provenance, consent and AI rights metadata
 

@@ -244,5 +244,6 @@
     "future provider/model implementations can use the same abstraction",
     "exact-head Level-1 qualification passes with no required skipped/cancelled checks"
   ],
-  "nextCanonicalStep": "HZ-GCA-4 — Provenance, consent and AI rights metadata"
+  "nextCanonicalStep": "HZ-GCA-4 — Provenance, consent and AI rights metadata",
+  "qualificationWorkflow": "420Hz GCA Qualification / HZ-GCA Level 1"
 }

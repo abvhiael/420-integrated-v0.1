@@ -36,7 +36,7 @@
 | GROW-06 | Contracts/interfaces/permission/funds | NO new Grow authority-bearing contract required by bounded consumer-only decision | No-contract guard and retained Grow Level-1 checks PASS on exact SHA 423557a | GROW-06 contract-decision matrix and CI evidence | COMPLETE | GROW-07 — Cross-app qualification |
 | GROW-07 | SDK, events, integrations, authorization | Cross-app 420Location SDK/Registry provenance/Verify/Wallet/Genesis/wrong-network fail-closed matrix established | GROW-07 boundary guard + retained app-focused Level-1 and Level-2 tests PASS exact SHA 04836cd | GROW-07 matrix plus durable exact-SHA CI evidence | COMPLETE | GROW-08 — Repository qualification |
 | GROW-08 | Build, static checks, test and security qualification | Clean-checkout web/Go build, race tests, repeated adversarial paths and app static/security checks | Completed SUCCESS exact SHA ab6eacd; run 37794520529 | GROW-08 verifier and workflow; durable CI closeout | COMPLETE | GROW-09 — Documentation closeout |
-| GROW-09 | Developer/operator/user docs | GEN-SVC-0 conventions | No Grow docs prior to this audit | N/A | This gap ledger only | PARTIAL | Write approved spec, architecture, operations and testing guides |
+| GROW-09 | Developer/operator/user docs | Comprehensive architecture, API/SDK, environment, build/test, operator, security, threat, troubleshooting, release/user guide committed | Dedicated documentation verifier and fast app CI triggered; exact-head PASS pending | GROW-09 operations and user guide | PARTIAL | Verify GROW-09 exact-head CI and close evidence without re-running unrelated inventories |
 | GROW-10 | Deploy, testnet, Genesis and production evidence | Frozen catalog; GEN-SVC-0 | No Grow deployment artifacts | NOT RUN | No Grow deployment plan | BLOCKED | Decide release class; later collect real environment evidence |
 
 These rows enumerate *established* and *definition-blocked* domains, not invented hidden requirements. Expand the matrix requirement-by-requirement once the product definition is formally approved; retain these IDs.
@@ -215,3 +215,13 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Level 2:** GROW-03–07 convergence milestone previously PASS and retained in this GROW-08 run. **Level 3:** canonical Solidity full inventory once, separate Genesis address-authority, 420Integrated/global Docs and exact merge candidate at end of app phase.
 - **Blockers:** none for GROW-08 Level 1. Live/testnet source, manual browser/device and accessibility, security/operations evidence require GROW-10; phase architecture/operator docs closeout at GROW-09.
 - **Next canonical step:** **GROW-09 — Documentation closeout**.
+
+## GROW-09 documentation implementation pending exact-head qualification (2026-10-08)
+
+- **Step:** GROW-09 — Documentation closeout. **State:** PARTIAL until exact-head app CI has passed.
+- **Substantive implementation SHA:** `563dd7c1e57ae4bb67b741f1d0e3aa85eb237be9`. Files: `docs/audit/420GROW-GROW-09-OPERATIONS-AND-USER-GUIDE.md`, `scripts/verify-grow-09.py`, `.github/workflows/420grow-fast.yml`.
+- **Scope:** architecture and two read-only data paths (browser uses 420Location directly; optional Grow service is distinct), contract/event/role not-applicable rationale, public SDK/API schema/status codes, environment/setup/build/test/deployment preparation, operation/incident/troubleshooting/rollback procedures, threat model, anonymous user instructions and known production/testnet limitations. No fictional live environment.
+- **CI:** [420Grow fast run #37796537295](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37796537295), job `113377321416`; queued at evidence entry, **not qualified PASS**. Must include GROW-09 documentation verifier, Python syntax, retained GROW-08 clean build/race/static security and GROW-01–07 checks on exact SHA.
+- **Main/base SHA last inspected:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71`; cumulative draft PR #567 and Level-3 reconciliation deferred.
+- **Level 2:** retained GROW-03–07 app integration; no additional Level-2 milestone solely for docs. **Level 3:** phase-end exact merge candidate, separately owned Solidity full Foundry and Genesis/address checks, global 420Integrated and Docs.
+- **Next canonical step only after qualification:** **GROW-10 — Deployment and stage qualification**.

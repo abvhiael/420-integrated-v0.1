@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -103,5 +102,3 @@ func RestoreEncryptedBackup(blob,key []byte,dest string) error {
 	rollback=false
 	return nil
 }
-
-var _ = errors.Is

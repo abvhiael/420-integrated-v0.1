@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import type {SqlExecutor420} from '../src/core-projections.js';
-import {computeJobs420,computeRewards420,computeReputationReference420,computeStakeReference420} from '../src/compute-app-read-model.js';
+import {computeJobs420,computeRewards420,computeContributions420,computeReputationReference420,computeStakeReference420} from '../src/compute-app-read-model.js';
 const h=(n:number)=>'0x'+n.toString(16).padStart(64,'0'),a=(n:number)=>'0x'+n.toString(16).padStart(40,'0');
 class Db implements SqlExecutor420{queue:unknown[]=[];calls:any[]=[];async query(sql:string,params?:readonly unknown[]){this.calls.push({sql,params});return this.queue.shift()??{rows:[]};}}
 const row=(event_name:string,fields:any,n=1)=>({event_name,fields,block_number:String(n),block_hash:h(100+n),tx_hash:h(200+n),tx_index:0,log_index:n});
@@ -9,3 +9,5 @@ test('CMP-8 reward list scopes beneficiary without inventing payout authority',a
 test('CMP-8 reputation projection preserves signed total and non-authority',async()=>{const db=new Db();db.queue.push({rows:[row('ReputationReferenceCaptured',{referenceId:h(1),workerId:h(2),workerRevision:'3',policyId:h(4),policyRevision:'2',metricRevision:'5',total:'-7',activeSignals:'9'})]});const x=await computeReputationReference420(db,420n,h(1));assert.equal(x?.total,'-7');assert.equal(x?.authoritative,false);});
 test('CMP-8 stake projection exposes exact reference metadata without claiming stake amount',async()=>{const db=new Db();db.queue.push({rows:[row('StakeReferenceCaptured',{referenceId:h(1),workerId:h(2),workerRevision:'3',stakePolicyId:h(4),stakePolicyRevision:'2',sourceBindingRevision:'6',positionId:h(5),positionRevision:'8'})]});const x=await computeStakeReference420(db,420n,h(1));assert.equal(x?.positionRevision,'8');assert.equal(x?.authoritative,false);assert.equal('activeAmount' in (x??{}),false);});
 test('CMP-8 collection filters fail closed on malformed account input',async()=>{await assert.rejects(()=>computeJobs420(new Db(),420n,{owner:'0x12'}),/address invalid/);});
+
+test('CMP-8 contributions expose canonical project and metric linkage',async()=>{const db=new Db();db.queue.push({rows:[{object_id:h(7),block_number:'1',tx_index:0,log_index:0}]},{rows:[row('ContributionRecorded',{contributionId:h(7),jobId:h(8),contributor:a(2),projectRef:h(9),policyId:h(10),policyRevision:'1',metricKind:'2',metricId:h(11),amount:'42',gateId:h(12)})]});const page=await computeContributions420(db,420n,{contributor:a(2)});assert.equal(page.items[0]?.projectRef,h(9));assert.equal(page.items[0]?.amount,'42');assert.equal(page.items[0]?.authoritative,false);});

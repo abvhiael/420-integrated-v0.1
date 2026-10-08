@@ -40,7 +40,7 @@ func main() {
 			statePath = ".reefer-review/feed-operations.json"
 		}
 		operations := &reeferreview.FeedOperations{
-			Path: statePath, Sources: registry, Ingestor: ingestor,
+			Path: statePath, Sources: registry, SourcesPath: sourcePath, Ingestor: ingestor,
 		}
 		if mode == "health" {
 			health, err := operations.Health(context.Background())

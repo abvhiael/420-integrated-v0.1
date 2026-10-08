@@ -175,7 +175,6 @@ test("generation success never implies registration or release success",async()=
   const f=await generatedFixture(),kernel=new DeterministicCreativeKernel420(),coordinator=new RegisterPublishCoordinator420({kernel});
   const req=publishRequest(f);
   assert.throws(()=>coordinator.publish(req,{failAt:"RECORDING_ACTIVE"}),e=>e.code==="PROVIDER_UNAVAILABLE");
-  const requestId="hzpublish:"+await import("../src/schema.js").then(m=>m.digest420((()=>{try{return null}catch{return null}})()));
   assert.equal([...kernel.releases.values()].filter(x=>x.status==="PUBLISHED").length,0);
   assert.equal(f.done.state,"SUCCEEDED");
 });

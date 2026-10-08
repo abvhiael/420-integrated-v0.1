@@ -56,9 +56,10 @@ All records remain `authoritative:false`. Reputation signed totals are decoded a
 
 The checked-in runtime config is fail-closed:
 
+- canonical network/API/download endpoints are unresolved/null;
 - write actions are disabled;
 - unresolved canonical contract addresses are null;
-- Wallet handoff creation refuses to proceed without an explicitly enabled canonical write runtime.
+- reads/submissions and Wallet handoff creation refuse to proceed without an explicitly enabled canonical runtime.
 
 This repository state qualifies the application implementation, not a live public deployment. Canonical endpoint/address materialization belongs to the later public-testnet deployment phase.
 

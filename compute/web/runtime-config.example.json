@@ -1,16 +1,14 @@
 {
   "schemaVersion":"420-compute-web-runtime-v1",
   "chainId":"420",
+  "runtimeReady":true,
+  "runtimeStatus":"READY",
   "indexerUrl":"https://indexer.example.invalid",
-  "computeApiUrl":"https://compute.example.invalid",
+  "computeApiUrl":"https://compute-api.example.invalid",
   "walletUrl":"https://wallet.example.invalid",
-  "writeActionsEnabled":false,
-  "contracts":{"workerRegistry":null,"researchProjectRegistry":null,"verifierRegistry":null},
-  "workerDownloads":{
-    "windows":"https://downloads.example.invalid/node420-compute-windows.zip",
-    "linux":"https://downloads.example.invalid/node420-compute-linux.tar.gz",
-    "darwin":"https://downloads.example.invalid/node420-compute-darwin.tar.gz"
-  },
+  "writeActionsEnabled":true,
+  "contracts":{"workerRegistry":"0x0000000000000000000000000000000000000001","researchProjectRegistry":"0x0000000000000000000000000000000000000002","verifierRegistry":"0x0000000000000000000000000000000000000003"},
+  "workerDownloads":{"windows":"https://downloads.example.invalid/w.zip","linux":"https://downloads.example.invalid/l.tar.gz","darwin":"https://downloads.example.invalid/m.tar.gz"},
   "cpuMetricId":null,
   "gpuMetricId":null
 }

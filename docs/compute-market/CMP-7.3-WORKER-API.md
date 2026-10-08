@@ -1,6 +1,6 @@
 # CMP-7.3 — Worker API
 
-Status: **IMPLEMENTED — Level 1 exact-head qualification pending.**
+Status: **COMPLETE — Level 1 exact-head qualified on `dc475de260cc240b687c78b21a1d64b163432274`.**
 
 ## Canonical purpose
 

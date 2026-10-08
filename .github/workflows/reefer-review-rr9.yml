@@ -45,7 +45,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          files="$(gofmt -l reefer-review cmd/reefer-review cmd/reefer-news-sync)"
+          files="$(gofmt -l reefer-review cmd/reefer-review cmd/reefer-news-sync cmd/reefer-backup)"
           if [ -n "$files" ]; then
             printf 'gofmt required for:\n%s\n' "$files" >&2
             gofmt -d $files
@@ -53,13 +53,13 @@ jobs:
           fi
 
       - name: RR-9 newsfeed and app regression tests
-        run: go test ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/...
+        run: go test ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/... ./cmd/reefer-backup/...
 
       - name: RR-9 race qualification
         run: go test -race ./reefer-review/...
 
       - name: RR-9 vet
-        run: go vet ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/...
+        run: go vet ./reefer-review/... ./cmd/reefer-review/... ./cmd/reefer-news-sync/... ./cmd/reefer-backup/...
 
       - name: Frontend JavaScript syntax
         run: node --check reefer-review/web/app.js

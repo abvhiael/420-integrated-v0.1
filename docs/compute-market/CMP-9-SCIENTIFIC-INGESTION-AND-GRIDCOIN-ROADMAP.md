@@ -22,7 +22,7 @@ Inventory each supported Folding@home statistics/result channel and each specifi
 
 Exit: versioned allowlist, evidence-quality tiers, permissions, threat model, provider outage/terms-change procedure and an explicit per-provider enable/disable decision.
 
-### S-02 — Production-grade read-only ingestion clients — PARTIAL (Level 1 implementation PASS; live provider gate BLOCKED)
+### S-02 — Production-grade read-only ingestion clients — PARTIAL (Level 1 implementation PASS; live provider gate DEFERRED TO TESTNET)
 
 **Implementation evidence:** [S-02 Level 1](CMP-S02-QUALIFICATION-EVIDENCE.md), qualified implementation `ec0eb70b5a44f5195b530b2e31166bf18bdefb76`. Fixture-based client security and source format tests passed, but S-02 cannot be marked COMPLETE without authorized real provider response/schema evidence and transport DNS pinning. No production source access or funded rewards enabled.
 
@@ -30,7 +30,7 @@ Build separately versioned, provider-scoped off-chain ingestion clients with HTT
 
 Exit: deterministic contract tests using approved fixtures plus actual read-only provider endpoint responses; reject malformed, forged, late, missing and inconsistent records. No writes or rewards.
 
-### S-03 — Source-of-truth and trusted evidence verification — PARTIAL (Level 1 offline PASS; live gates BLOCKED)
+### S-03 — Source-of-truth and trusted evidence verification — PARTIAL (Level 1 offline PASS; live gates DEFERRED TO TESTNET)
 
 Offline verifier evidence: [S-03 qualification](CMP-S03-QUALIFICATION-EVIDENCE.md), exact implementation SHA `1d3d13e9876bfdec6f5bac9674132b51e638c573`. Signed-source receipt checks are qualified at Level 1, but no provider-authorized work-unit source, durable dispute channel or live governed attester exists. S-03 is **not COMPLETE**.
 
@@ -38,7 +38,10 @@ Require provider-server corroboration, or a project-authorized independent proof
 
 Exit: independent evidence-verifier service, signed scheme/version, source receipt hashes, freshness/expiry, dispute/correction channel, source-unavailable fail-closed tests, attester governance onboarding and revocation drills.
 
-### S-04 — Participant identity and consent
+### S-04 — Participant identity and consent — IMPLEMENTED OFFLINE; LIVE GATES DEFERRED TO TESTNET
+
+[S-04 identity/consent boundaries](CMP-S04-IDENTITY-CONSENT.md): consent, independent external proof and Wallet authorization handoff prototypes plus replay/collision/opt-out tests. **Not qualified as production Wallet signature verification or persistent identity authority.** Live project-owned proof, cryptographic EIP-712/1271 Wallet verification, durable registry, historical ownership transitions, recoverable opt-out and key rotations are transferred to the shared testnet closeout; no monetized linking enabled.
+
 
 Use explicit opted-in account linking between a 420Wallet address and an external Folding@home donor/team or specific BOINC project participant/host. Verify control via provider-supported cryptographic challenge or equivalent independently verified proof; forbid self-asserted usernames or public-stat lookups as ownership proof. Where no reliable ownership proof exists, **disable monetized identity linkage** rather than pretending one is available. Support opt-out, rekey/relink, historical ownership transitions, collision/Sybil resistance, consent records, pseudonymous on-chain commitments, privacy minimization and right-to-disconnect without falsifying historical reward settlement.
 

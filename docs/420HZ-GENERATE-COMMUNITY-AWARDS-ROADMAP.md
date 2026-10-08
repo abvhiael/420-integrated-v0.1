@@ -152,6 +152,10 @@ The adapter must support future third-party or first-party models without changi
 
 Add durable provenance for generated outputs without putting private prompts/audio on-chain.
 
+**Qualification:** Level 1 ordinary app-scoped step. Retain the directly applicable HZ-GCA-1.4 disclosure, HZ-GCA-1.5 provenance, HZ-GCA-1.6 rights/consent and HZ-GCA-3 execution-evidence verifiers; no new Level-2 milestone is introduced.
+
+**Repository artifacts:** executable provenance validator/finalizer/job bridge, provenance/consent/AI-rights policy manifest, architecture document, adversarial tests and targeted verifier.
+
 Required work:
 
 - generation manifest hash;
@@ -166,7 +170,7 @@ Required work:
 - immutable provenance versioning at publication;
 - clear rule that private prompts/lyrics remain off-chain unless the creator publishes them.
 
-**Exit:** provenance schemas, validation and adversarial tests preventing unauthorized derivative/voice claims.
+**Exit:** provenance schemas, validation and adversarial tests preventing unauthorized derivative/voice claims. Completion also requires exact-head Level-1 qualification of private-input boundaries, immutable publication commitments, source/authorization linkage, transformation-vs-training separation, voice-consent fail-closed behavior and successful generation-job provenance binding.
 
 ## HZ-GCA-5 — Project workspace, versions, stems and storage
 

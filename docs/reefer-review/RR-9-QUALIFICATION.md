@@ -17,3 +17,11 @@
 - Next required step: finish canonical **RR-9 — Web UX & Deployment**, not RR-10 yet.
 
 This evidence file is documentary only; it does not amend executable source or tests.
+
+## RR-9 expanded exact-head repository qualification (2026-10-07)
+
+- **Qualified implementation SHA:** `d5ddc7e1ae63aaf86df5ccb3a8a791313d310116`.
+- RR-9 Level 1 [run 37718113350](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37718113350) **PASS**, no failed/skipped steps; includes four mocked-API Chromium E2E/a11y tests, backup tests, race/vet/verifiers.
+- Retained Level 2 [run 37718113288](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37718113288) **PASS**, no failed/skipped steps.
+- Source and repository-test controls are qualified; production ingress, Wallet/Identity and provider integrations, remote backup/DR, deployed browser/mobile/load and alerting remain outside the verified scope.
+- Overall RR-9 canonical status remains **PARTIAL / NOT PRODUCTION QUALIFIED**. A document-only evidence update inherits the exact executable SHA.

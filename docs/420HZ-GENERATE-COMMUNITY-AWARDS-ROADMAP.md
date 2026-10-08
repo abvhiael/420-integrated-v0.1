@@ -226,6 +226,10 @@ The home page must contain a prominent **Generate your own song** call to action
 
 Connect generated outputs to existing 420Hz music primitives.
 
+**Qualification:** ordinary step-specific Level 1 plus **Generate milestone Level 2**. HZ-GCA-7 is the meaningful integration boundary where HZ-GCA-2 through HZ-GCA-7 converge into the first complete Generate → Creative publication lifecycle and materially consume the shared 420 Creative kernel/indexer. Level 2 remains app-focused: retain HZ-GCA-2 through HZ-GCA-7 verifiers, complete generation/project/register-publish tests, 420Hz web verification, targeted `CreativeKernelAcceptance420` Foundry qualification, deterministic Decision #10 Creative fixture generation and Creative reference-indexer projection tests. Do **not** run the full repository Solidity inventory here; that remains a Level-3 closeout responsibility.
+
+**Repository artifacts:** deterministic Register/Publish coordinator and local Creative qualification kernel, complete end-to-end integration tests, machine-readable policy manifest, architecture document, targeted verifier and Level-2 retained integration CI.
+
 Required work:
 
 - create or select Creator Profile;
@@ -240,7 +244,7 @@ Required work:
 - catalog release creation;
 - rollback/failure handling so generation success never implies registration success.
 
-**Exit:** one complete Generate → Work → Recording → Release flow on repository/local qualification infrastructure.
+**Exit:** one complete Generate → Work → Recording → Release flow on repository/local qualification infrastructure. Completion additionally requires exact-head Level-1 step qualification and the app-focused Generate milestone Level-2 retained integration suite, with no required skipped/cancelled/missing checks.
 
 ## HZ-GCA-8 — Community identity and social graph
 

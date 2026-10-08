@@ -101,6 +101,7 @@ export class GenerationJobManager420 {
       provider: null,
       providerJobRef: null,
       outputManifest: null,
+      executionEvidence: null,
       lastError: null,
       submitAttempts: 0,
       createdAt,
@@ -251,6 +252,12 @@ export class GenerationJobManager420 {
         modelVersion: job.provider.modelVersion,
         providerJobRef: job.providerJobRef
       });
+      job.executionEvidence = {
+        resultCommitment: status.resultCommitment ?? null,
+        verificationRef: status.verificationRef ?? null,
+        entitlementRef: status.entitlementRef ?? null,
+        settlementRef: status.settlementRef ?? null
+      };
       job.state = "SUCCEEDED";
       job.lastError = null;
       job.updatedAt = this.now();

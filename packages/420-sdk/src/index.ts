@@ -101,3 +101,5 @@ export * from './wallet.js';
 export * from './compute.js';
 
 export * from './stake.js';
+
+export * from './compute-client.js';

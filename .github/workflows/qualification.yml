@@ -1,3 +1,4 @@
+# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.
 
 name: 420 Integrated Qualification
 
@@ -46,8 +47,11 @@ on:
       - 'docs/compute-market/CMP-5.8-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-5-8-closeout.py'
       - 'contracts/config/compute-market/cmp-6.8-phase-closeout.json'
+      - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
       - 'docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md'
+      - 'docs/compute-market/CMP-7.10-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-6-8-closeout.py'
+      - 'scripts/verify-cmp-7-10-closeout.py'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
@@ -88,8 +92,11 @@ on:
       - 'docs/compute-market/CMP-4.10-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-4-10-closeout.py'
       - 'contracts/config/compute-market/cmp-6.8-phase-closeout.json'
+      - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
       - 'docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md'
+      - 'docs/compute-market/CMP-7.10-PHASE-CLOSEOUT.md'
       - 'scripts/verify-cmp-6-8-closeout.py'
+      - 'scripts/verify-cmp-7-10-closeout.py'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
@@ -175,5 +182,3 @@ jobs:
       - run: make build
       - run: python3 scripts/run-fault-matrix.py
       - run: python3 scripts/run-soak.py --slots 120 --slot-ms 35
-
-# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.

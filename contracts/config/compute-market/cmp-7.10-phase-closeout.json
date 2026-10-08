@@ -1,0 +1,44 @@
+{
+  "schema": "420Integrated.ComputeMarket.CMP-7.10.PhaseCloseout.v1",
+  "step": "CMP-7.10",
+  "title": "Phase closeout",
+  "status": "LEVEL_3_CANDIDATE",
+  "canonical_definition": "Reconcile the complete accumulated CMP-7 SDK, API, indexer, analytics, documentation and CLI phase against current main, establish one exact merge-candidate implementation SHA, run all required Level 3 owners once on that SHA, preserve durable evidence, and hand off to CMP-8 — 420Compute application.",
+  "reconciliation": {
+    "main_sha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+    "reconciled_anchor_sha": "7516fc8b9cd85eafb2c88ba013074074b5f70520",
+    "behind_main": 0
+  },
+  "qualified_prerequisites": ["CMP-7.1","CMP-7.2","CMP-7.3","CMP-7.4","CMP-7.5","CMP-7.6","CMP-7.7","CMP-7.8","CMP-7.9"],
+  "level_2_milestones": [
+    "CMP-7.5 — Research project API",
+    "CMP-7.9 — CLI"
+  ],
+  "level_3_required": {
+    "solidity_full_inventory": true,
+    "genesis_address_authority": true,
+    "integrated_global": true,
+    "docs_global": true,
+    "retained_compute_market_suite": true,
+    "compute_developer_surfaces": true,
+    "indexer_shared_consumers": true,
+    "phase_config_verification": true,
+    "contract_hardening_static_analysis": true
+  },
+  "ci_ownership": {
+    "solidity_full_inventory": "Solidity Contracts / four balanced PR shards",
+    "genesis_address_authority": "Genesis Address Authority / no duplicate full Foundry",
+    "global_runtime": "420 Integrated Qualification",
+    "docs": "420Docs Qualification",
+    "retained_compute_market": "Compute Market Qualification",
+    "developer_surfaces": "Compute Developer Surfaces / Level 3 SDK + API + Indexer + CLI",
+    "indexer_shared_consumers": "420Indexer workflows",
+    "contract_hardening": "420 Genesis Contract Hardening / size, invariant and Slither high-severity gate"
+  },
+  "live_blockers": [
+    "repository qualification is not a live/public-testnet deployment claim",
+    "public Compute deployment and funded end-to-end execution remain CMP-9 work",
+    "human-facing 420Compute participation UI remains CMP-8 work"
+  ],
+  "next_canonical_step": "CMP-8 — 420Compute application"
+}

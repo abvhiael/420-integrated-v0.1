@@ -2,6 +2,8 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
 test.beforeEach(async ({ page }) => {
+  page.on('pageerror', error => console.log('[RR9 PAGEERROR]', error.stack || error.message));
+  page.on('console', message => { if (message.type() === 'error') console.log('[RR9 CONSOLE]', message.text()); });
   await page.route('**/v1/news/sources', route => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ sources: [{id:'source-a',name:'Source A',home_url:'https://publisher.example',attribution:'Source A'}] })
@@ -19,6 +21,21 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/v1/editorial/publications**', route => route.fulfill({
     status:401,contentType:'application/json',body:JSON.stringify({error:'SESSION_REQUIRED'})
   }));
+});
+
+test.afterEach(async ({page},testInfo) => {
+  if (testInfo.status !== testInfo.expectedStatus && !page.isClosed()) {
+    const snapshot = await page.evaluate(() => ({
+      hash:location.hash,
+      readyState:document.readyState,
+      sections:Array.from(document.querySelectorAll('.view')).map(node=>({id:node.id,hidden:node.hidden,display:getComputedStyle(node).display})),
+      newsCards:document.querySelectorAll('#news-feed article').length,
+      newsText:document.querySelector('#news-feed')?.textContent?.slice(0,400),
+      topicsHeading:document.querySelector('#topics-title')?.textContent,
+      appStatus:document.querySelector('#app-status')?.textContent
+    })).catch(error=>({captureError:error.message}));
+    console.log('[RR9 PAGESTATE]', JSON.stringify(snapshot));
+  }
 });
 
 test('anonymous news is attributed and links to original without script injection', async ({page}) => {

@@ -122,6 +122,20 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
       return object ? ok420(object) : error420(404, 'not_found', 'protocol object not found');
     }
 
+
+    const computeJobId = pathParam420(path, /^\/v1\/compute\/jobs\/([^/]+)$/);
+    if (computeJobId !== null) { if(!api.computeJob) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeJob(chainId,computeJobId); return value?ok420(value):error420(404,'not_found','Compute job not found'); }
+    const computeRequestId = pathParam420(path, /^\/v1\/compute\/requests\/([^/]+)$/);
+    if (computeRequestId !== null) { if(!api.computeRequest) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeRequest(chainId,computeRequestId); return value?ok420(value):error420(404,'not_found','Compute request not found'); }
+    const computeWorkerId = pathParam420(path, /^\/v1\/compute\/workers\/([^/]+)$/);
+    if (computeWorkerId !== null) { if(!api.computeWorker) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeWorker(chainId,computeWorkerId); return value?ok420(value):error420(404,'not_found','Compute worker not found'); }
+    const computeVerifierId = pathParam420(path, /^\/v1\/compute\/verifiers\/([^/]+)$/);
+    if (computeVerifierId !== null) { if(!api.computeVerifier) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeVerifier(chainId,computeVerifierId); return value?ok420(value):error420(404,'not_found','Compute verifier not found'); }
+    const computeProjectId = pathParam420(path, /^\/v1\/compute\/research\/projects\/([^/]+)$/);
+    if (computeProjectId !== null) { if(!api.computeResearchProject) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeResearchProject(chainId,computeProjectId); return value?ok420(value):error420(404,'not_found','Compute research project not found'); }
+    const computeRewardId = pathParam420(path, /^\/v1\/compute\/rewards\/([^/]+)$/);
+    if (computeRewardId !== null) { if(!api.computeReward) return error420(503,'unavailable','Compute indexer surface unavailable'); const value=await api.computeReward(chainId,computeRewardId); return value?ok420(value):error420(404,'not_found','Compute reward not found'); }
+
     const aiProviderId = pathParam420(path, /^\/v1\/ai\/providers\/([^/]+)$/);
     if (aiProviderId !== null) { const value = await api.aiProvider(chainId, aiProviderId); return value ? ok420(value) : error420(404, 'not_found', 'AI provider not found'); }
     const aiModelVersionId = pathParam420(path, /^\/v1\/ai\/model-versions\/([^/]+)$/);

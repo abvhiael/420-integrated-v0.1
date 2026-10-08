@@ -36,6 +36,12 @@ import {
   type AiPageRequest420, type AiProviderState420, type AiModelState420,
   type AiModelVersionState420, type AiDeploymentState420, type AiJobState420, type AiPolicyState420, type AiReputationState420
 } from './ai-read-model.js';
+import {
+  computeJobState420, computeRequestState420, computeWorkerState420, computeVerifierState420,
+  computeResearchProjectState420, computeRewardState420,
+  type ComputeJobState420, type ComputeRequestState420, type ComputeWorkerState420,
+  type ComputeVerifierState420, type ComputeResearchProjectState420, type ComputeRewardState420
+} from './compute-read-model.js';
 
 export const INDEXER_API_VERSION_420 = 'v1' as const;
 
@@ -112,6 +118,12 @@ export interface IndexerPublicApi420 {
   aiPolicy(chainId: bigint, policyId: string): Promise<AiPolicyState420 | null>;
   aiReputations(chainId: bigint, request?: AiPageRequest420): Promise<QueryPage420<AiReputationState420>>;
   aiReputation(chainId: bigint, providerId: string): Promise<AiReputationState420 | null>;
+  computeJob?(chainId: bigint, jobId: string): Promise<ComputeJobState420 | null>;
+  computeRequest?(chainId: bigint, requestId: string): Promise<ComputeRequestState420 | null>;
+  computeWorker?(chainId: bigint, workerId: string): Promise<ComputeWorkerState420 | null>;
+  computeVerifier?(chainId: bigint, verifierId: string): Promise<ComputeVerifierState420 | null>;
+  computeResearchProject?(chainId: bigint, projectId: string): Promise<ComputeResearchProjectState420 | null>;
+  computeReward?(chainId: bigint, rewardId: string): Promise<ComputeRewardState420 | null>;
   search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]>;
 }
 
@@ -242,6 +254,13 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   aiPolicy(chainId: bigint, policyId: string): Promise<AiPolicyState420 | null> { return aiPolicyState420(this.service.db, chainId, policyId, this.aiReadConfig()); }
   aiReputations(chainId: bigint, request: AiPageRequest420 = {}): Promise<QueryPage420<AiReputationState420>> { return aiReputations420(this.service.db, chainId, request, this.aiReadConfig()); }
   aiReputation(chainId: bigint, providerId: string): Promise<AiReputationState420 | null> { return aiReputationState420(this.service.db, chainId, providerId, this.aiReadConfig()); }
+
+  computeJob(chainId: bigint, jobId: string): Promise<ComputeJobState420 | null> { return computeJobState420(this.service.db, chainId, jobId); }
+  computeRequest(chainId: bigint, requestId: string): Promise<ComputeRequestState420 | null> { return computeRequestState420(this.service.db, chainId, requestId); }
+  computeWorker(chainId: bigint, workerId: string): Promise<ComputeWorkerState420 | null> { return computeWorkerState420(this.service.db, chainId, workerId); }
+  computeVerifier(chainId: bigint, verifierId: string): Promise<ComputeVerifierState420 | null> { return computeVerifierState420(this.service.db, chainId, verifierId); }
+  computeResearchProject(chainId: bigint, projectId: string): Promise<ComputeResearchProjectState420 | null> { return computeResearchProjectState420(this.service.db, chainId, projectId); }
+  computeReward(chainId: bigint, rewardId: string): Promise<ComputeRewardState420 | null> { return computeRewardState420(this.service.db, chainId, rewardId); }
 
   async search(chainId: bigint, term: string, limit?: number): Promise<SearchResult420[]> {
     return (await this.service.search(chainId, term, limit)).map(searchResult420);

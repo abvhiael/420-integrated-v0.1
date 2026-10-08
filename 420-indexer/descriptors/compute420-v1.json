@@ -1,0 +1,514 @@
+{
+  "schema": "420-compute-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Compute",
+  "authority": "artifact_events_only_addresses_resolved_by_deployment",
+  "contracts": [
+    {
+      "contractName": "ComputeRequestRegistry420",
+      "sourcePath": "contracts/src/compute/ComputeRequestRegistry420.sol",
+      "events": [
+        {
+          "name": "RequestRevision",
+          "signature": "RequestRevision(bytes32,address,uint64,address,bytes32,bytes32,uint8)",
+          "inputs": [
+            {
+              "name": "requestId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "owner",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "actor",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "commitment",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "predecessorCommitment",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeJobRegistry420",
+      "sourcePath": "contracts/src/compute/ComputeJobRegistry420.sol",
+      "events": [
+        {
+          "name": "JobCreated",
+          "signature": "JobCreated(bytes32,bytes32,address,bytes32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "requestId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "owner",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "manifestHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "workloadType",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "inputCommitment",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "outputSchemaCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "JobTransition",
+          "signature": "JobTransition(bytes32,uint8,uint8,uint64,uint64,address,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previous",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "current",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "previousRevision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "currentRevision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "actor",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "evidenceRef",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "WorkerAssigned",
+          "signature": "WorkerAssigned(bytes32,address,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "worker",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "assignmentRef",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ResultRecorded",
+          "signature": "ResultRecorded(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "resultCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "VerifierDecision",
+          "signature": "VerifierDecision(bytes32,address,bytes32,bool)",
+          "inputs": [
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "verifier",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "decisionRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "approved",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeWorkerRegistry420",
+      "sourcePath": "contracts/src/compute/ComputeWorkerRegistry420.sol",
+      "events": [
+        {
+          "name": "WorkerRegistered",
+          "signature": "WorkerRegistered(bytes32,bytes32,bytes32,address,address,uint64)",
+          "inputs": [
+            {
+              "name": "workerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "nodeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "resourceId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "operator",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "executionSigner",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "serial",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "WorkerRevised",
+          "signature": "WorkerRevised(bytes32,uint64,uint64,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "workerId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "oldRevision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "newRevision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "oldCommitment",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "newCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeVerifierRegistry420",
+      "sourcePath": "contracts/src/compute/ComputeVerifierRegistry420.sol",
+      "events": [
+        {
+          "name": "VerifierRegistered",
+          "signature": "VerifierRegistered(bytes32,address,bytes32,uint64)",
+          "inputs": [
+            {
+              "name": "verifierId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "authority",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "registrationManifestHash",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "serial",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "VerifierRevised",
+          "signature": "VerifierRevised(bytes32,uint64,uint64,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "verifierId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "oldRevision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "newRevision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "oldCommitment",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "newCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeResearchProjectRegistry420",
+      "sourcePath": "contracts/src/compute/ComputeResearchProjectRegistry420.sol",
+      "events": [
+        {
+          "name": "ResearchProjectRegistered",
+          "signature": "ResearchProjectRegistered(bytes32,address,bytes32,uint64,bytes32)",
+          "inputs": [
+            {
+              "name": "projectId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "owner",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "researchDomain",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "projectCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ResearchProjectRevised",
+          "signature": "ResearchProjectRevised(bytes32,uint64,uint64,bytes32)",
+          "inputs": [
+            {
+              "name": "projectId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "previousRevision",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "currentRevision",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "projectCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ResearchProjectAcceptanceSet",
+          "signature": "ResearchProjectAcceptanceSet(bytes32,bool,uint64,bytes32)",
+          "inputs": [
+            {
+              "name": "projectId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "acceptingNewWork",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "revision",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "projectCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ResearchProjectRetired",
+          "signature": "ResearchProjectRetired(bytes32,uint64,bytes32)",
+          "inputs": [
+            {
+              "name": "projectId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "projectCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ComputeUsefulRewardAccounting420",
+      "sourcePath": "contracts/src/compute/ComputeUsefulRewardAccounting420.sol",
+      "events": [
+        {
+          "name": "UsefulRewardAccounted",
+          "signature": "UsefulRewardAccounted(bytes32,bytes32,bytes32,address,bytes32,uint256,uint256,bytes32,uint32,uint256)",
+          "inputs": [
+            {
+              "name": "rewardId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "contributionId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "poolId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "beneficiary",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "metricId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "contributionAmount",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "rewardPolicyId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "rewardPolicyRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "poolFundingSnapshot",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

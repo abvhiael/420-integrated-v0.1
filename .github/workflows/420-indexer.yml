@@ -4,10 +4,16 @@ on:
   pull_request:
     paths:
       - '420-indexer/**'
+      - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
+      - 'docs/compute-market/CMP-7.10-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-7-10-closeout.py'
       - '.github/workflows/420-indexer.yml'
   push:
     paths:
       - '420-indexer/**'
+      - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
+      - 'docs/compute-market/CMP-7.10-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-7-10-closeout.py'
       - '.github/workflows/420-indexer.yml'
 
 jobs:

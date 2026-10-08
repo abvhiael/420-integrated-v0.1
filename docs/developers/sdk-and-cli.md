@@ -50,3 +50,7 @@ Treat SDK and CLI versions as developer-tool versions, not protocol versions. A 
 - [Networks and manifests](networks-and-manifests.md)
 - [Contracts and interfaces](contracts-and-interfaces.md)
 - [Wallet and Smart Account integration](wallet-and-smart-accounts.md)
+
+## Compute Market SDK
+
+CMP-7 extends the shared SDK with createComputeSdk420. It validates canonical Compute requests and prepares unsigned canonical-contract intents while preserving Wallet authorization. See [Compute Market developer integration](compute-market-integration.md) for the API, Indexer, analytics and CLI contract.

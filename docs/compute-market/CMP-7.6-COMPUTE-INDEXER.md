@@ -1,6 +1,6 @@
 # CMP-7.6 — Compute indexer
 
-Status: **IMPLEMENTED — Level 1 exact-head qualification pending.**
+Status: **COMPLETE — Level 1 exact-head qualified on `f3f3e6280fd47df5793b07623f9db75c5e9b1c38`.**
 
 ## Canonical purpose
 

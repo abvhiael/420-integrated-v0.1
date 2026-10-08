@@ -218,19 +218,30 @@ function latestTimestamp(entry) {
   return safeDate(value)?.getTime() || 0;
 }
 async function loadLatest() {
-  try {
-    const [news, originals] = await Promise.all([getJSON(`/v1/news?${newsQuery().toString()}`), getJSON("/v1/publications?limit=20")]);
-    const combined = [
-      ...(Array.isArray(news.items)?news.items:[]).map((item)=>({kind:"news",item})),
-      ...(Array.isArray(originals.items)?originals.items:[]).map((item)=>({kind:"original",item})),
-    ].sort((a,b)=>latestTimestamp(b)-latestTimestamp(a)).slice(0,30);
-    const container=$("#latest-feed"); container.replaceChildren();
-    if (!combined.length) container.append(emptyCard("No coverage is available yet."));
-    else combined.forEach((entry)=>container.append(entry.kind==="news"?externalNewsCard(entry.item):originalCard(entry.item)));
-    setStatus(combined.length?`Loaded ${combined.length} latest item${combined.length===1?"":"s"}.`:"No coverage is available yet.");
-  } catch (error) {
-    renderList($("#latest-feed"),[],externalNewsCard,"Latest coverage is temporarily unavailable.");
-    setStatus(`Latest coverage unavailable: ${error.message}`,true);
+  const [newsResult, originalsResult] = await Promise.allSettled([
+    getJSON(`/v1/news?${newsQuery().toString()}`),
+    getJSON("/v1/publications?limit=20"),
+  ]);
+  if (newsResult.status === "rejected" && originalsResult.status === "rejected") {
+    renderList($("#latest-feed"), [], externalNewsCard, "Latest coverage is temporarily unavailable.");
+    setStatus("Latest coverage unavailable: news and originals could not be loaded.", true);
+    return;
+  }
+  const news = newsResult.status === "fulfilled" && Array.isArray(newsResult.value.items) ? newsResult.value.items : [];
+  const originals = originalsResult.status === "fulfilled" && Array.isArray(originalsResult.value.items) ? originalsResult.value.items : [];
+  const combined = [
+    ...news.map((item) => ({kind:"news",item})),
+    ...originals.map((item) => ({kind:"original",item})),
+  ].sort((a,b) => latestTimestamp(b)-latestTimestamp(a)).slice(0,30);
+  const container = $("#latest-feed"); container.replaceChildren();
+  if (!combined.length) container.append(emptyCard("No coverage is available yet."));
+  else combined.forEach((entry) => container.append(entry.kind === "news" ? externalNewsCard(entry.item) : originalCard(entry.item)));
+  if (newsResult.status === "rejected") {
+    setStatus("Cannabis news unavailable; showing ReeferReview Originals.", true);
+  } else if (originalsResult.status === "rejected") {
+    setStatus(combined.length ? `Loaded ${combined.length} news item(s). ReeferReview Originals are unavailable.` : "ReeferReview Originals are unavailable.");
+  } else {
+    setStatus(combined.length ? `Loaded ${combined.length} latest item(s).` : "No coverage is available yet.");
   }
 }
 

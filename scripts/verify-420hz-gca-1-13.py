@@ -103,7 +103,7 @@ if not errors:
         need(token in final,f"finalization rule missing: {token}")
 
     privacy=" ".join(pol.get("privacyRules",[]))
-    for token in ["raw Identity proofs","need not reveal voter identity publicly","cross-ballot correlation","outside Search/Indexer/Analytics","minimum-disclosure"]:
+    for token in ["raw Identity proofs","need not reveal voter identity publicly","unrelated ballots to correlate voters unnecessarily","outside Search/Indexer/Analytics","minimum-disclosure"]:
         need(token in privacy,f"voting privacy rule missing: {token}")
 
     failures=set(pol.get("failureRules",[]))

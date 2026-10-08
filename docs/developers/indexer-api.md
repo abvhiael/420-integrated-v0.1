@@ -103,3 +103,7 @@ DOC-10 will own machine-generated API reference. This DOC-9 guide explains how t
 - [Pagination, replay and reorgs](pagination-replay-and-reorgs.md)
 - [API fallback and reliability](api-fallback-and-reliability.md)
 - `docs/420INDEXER-API-V1.md`
+
+## Compute Market projections
+
+CMP-7 adds artifact-derived 420Compute descriptors and non-authoritative job/request/worker/verifier/research/reward projections. Direct Compute routes live under /v1/compute/...; they are read models, not protocol authority. Historical analytics are bounded, replay-safe and reject duplicate reward identities. See [Compute Market developer integration](compute-market-integration.md).

@@ -1,3 +1,4 @@
+# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.
 name: Solidity Contracts
 
 on:
@@ -71,7 +72,8 @@ jobs:
              grep -Fxq 'contracts/config/compute-market/cmp-3.14-phase-closeout.json' "$scope_files" || \
              grep -Fxq 'contracts/config/compute-market/cmp-4.10-phase-closeout.json' "$scope_files" || \
              grep -Fxq 'contracts/config/compute-market/cmp-5.8-phase-closeout.json' "$scope_files" || \
-             grep -Fxq 'contracts/config/compute-market/cmp-6.8-phase-closeout.json' "$scope_files"; then
+             grep -Fxq 'contracts/config/compute-market/cmp-6.8-phase-closeout.json' "$scope_files" || \
+             grep -Fxq 'contracts/config/compute-market/cmp-7.10-phase-closeout.json' "$scope_files"; then
             compute_only=false
           fi
           echo "compute_only=$compute_only" >> "$GITHUB_OUTPUT"

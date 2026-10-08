@@ -162,3 +162,12 @@ test('HTTP transport exposes AI policy and reputation read surfaces without auth
   assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/reputation?chainId=420')).status,200);
   assert.equal((await routeIndexerHttp420(api,'GET','/v1/ai/reputation/0xdef?chainId=420')).status,200);
 });
+
+test('HTTP transport exposes optional non-authoritative Compute projections', async () => {
+  const api=new FakeApi420() as FakeApi420 & any;
+  api.computeJob=async(chainId:bigint,jobId:string)=>({schemaVersion:'420-compute-read-v1',chainId:chainId.toString(),jobId,requestId:'0x'+'01'.repeat(32),owner:'0x'+'02'.repeat(20),manifestHash:'0x'+'03'.repeat(32),workloadType:'0x'+'04'.repeat(32),status:'VERIFIED',revision:'3',worker:null,assignmentRef:null,resultCommitment:null,verifier:null,verificationRef:null,approved:null,blockNumber:'1',blockHash:'0x1',transactionHash:'0x2',transactionIndex:0,logIndex:0,authoritative:false});
+  const id='0x'+'aa'.repeat(32);const result=await routeIndexerHttp420(api,'GET','/v1/compute/jobs/'+id+'?chainId=420');assert.equal(result.status,200);assert.equal((result.body as any).data.authoritative,false);
+});
+test('HTTP transport fails closed when optional Compute projection support is unavailable', async () => {
+  const id='0x'+'aa'.repeat(32);const result=await routeIndexerHttp420(new FakeApi420(),'GET','/v1/compute/jobs/'+id+'?chainId=420');assert.equal(result.status,503);
+});

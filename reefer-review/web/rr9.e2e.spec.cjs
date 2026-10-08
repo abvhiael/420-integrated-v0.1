@@ -2,6 +2,8 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 
 test.beforeEach(async ({ page }) => {
+  page.on('pageerror', error => console.log('[RR9 PAGEERROR]', error.stack || error.message));
+  page.on('console', message => { if (message.type() === 'error') console.log('[RR9 CONSOLE]', message.text()); });
   await page.route('**/v1/news/sources', route => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ sources: [{id:'source-a',name:'Source A',home_url:'https://publisher.example',attribution:'Source A'}] })

@@ -5,6 +5,8 @@ on:
     paths:
       - 'packages/420-sdk/**'
       - 'packages/420-cli/**'
+      - 'services/compute-api/**'
+      - 'services/compute-api/**'
       - '420-indexer/**'
       - 'docs/compute-market/CMP-7*'
       - '.github/workflows/compute-developer.yml'
@@ -30,6 +32,7 @@ jobs:
     outputs:
       sdk: ${{ steps.paths.outputs.sdk }}
       cli: ${{ steps.paths.outputs.cli }}
+      api: ${{ steps.paths.outputs.api }}
       indexer: ${{ steps.paths.outputs.indexer }}
     steps:
       - uses: actions/checkout@v4
@@ -46,12 +49,14 @@ jobs:
           else
             files="$(git diff-tree --no-commit-id --name-only -r HEAD)"
           fi
-          sdk=false; cli=false; indexer=false
+          sdk=false; cli=false; api=false; indexer=false
           grep -qE '^packages/420-sdk/' <<<"$files" && sdk=true || true
           grep -qE '^packages/420-cli/' <<<"$files" && cli=true || true
+          grep -qE '^services/compute-api/' <<<"$files" && api=true || true
           grep -qE '^420-indexer/' <<<"$files" && indexer=true || true
           echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
           echo "cli=$cli" >> "$GITHUB_OUTPUT"
+          echo "api=$api" >> "$GITHUB_OUTPUT"
           echo "indexer=$indexer" >> "$GITHUB_OUTPUT"
 
   sdk:
@@ -91,6 +96,24 @@ jobs:
       - working-directory: packages/420-sdk
         run: npm install --no-audit --no-fund && npm run build
       - working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+
+  api:
+    needs: classify
+    if: needs.classify.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - working-directory: services/compute-api
         run: npm install --no-audit --no-fund && npm test
 
   indexer:

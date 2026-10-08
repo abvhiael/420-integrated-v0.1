@@ -632,6 +632,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.1 @420/compute-sdk](CMP-7.1-COMPUTE-SDK.md).
 
 ## CMP-7.2 — Job submission API
+**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.2 job submission API](CMP-7.2-JOB-SUBMISSION-API.md).
 
 ## CMP-7.3 — Worker API
 

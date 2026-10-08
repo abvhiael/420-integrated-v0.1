@@ -9,8 +9,8 @@ Canonical roadmap step: **HZ-GCA-6 — 420Hz Generate Studio UX**
 - Repository: `abvhiael/420-integrated-v0.1`
 - PR: **#565 — Add 420Hz Generate, Community & Awards roadmap phase**
 - Branch: `feature/420hz-generate-community-awards-roadmap`
-- Qualified implementation SHA: `d46585be81059dc1619e5005495a773e47efe5d3`
-- Current main at evidence closeout: `e3bd7128a572ca4db9e4ab346996fce7c4ff140e`
+- Qualified implementation SHA: `a6b32e97f95d868eb89785af3dd877969d49d26c`
+- Current main at evidence closeout: `ff61fc1171d422c081f4a5abb9e5828e88949c0f`
 - Qualification level: **Level 1**
 - Level 2: **NOT REQUIRED / NOT RUN**
 - Level 3: **DEFERRED to HZ-GCA-17**
@@ -44,32 +44,23 @@ Canonical exit:
 
 HZ-GCA-6 was implemented on the existing HZ-GCA branch after HZ-GCA-5 completion.
 
-The exact qualified implementation SHA is:
+The original implementation qualified successfully, but `main` subsequently advanced through ReeferReview recovery work and the Compute scientific-ingestion/Gridcoin roadmap update.
 
-`d46585be81059dc1619e5005495a773e47efe5d3`
+Current `main` at final closeout is:
 
-After exact-head qualification, current `main` advanced to:
+`ff61fc1171d422c081f4a5abb9e5828e88949c0f`
 
-`e3bd7128a572ca4db9e4ab346996fce7c4ff140e`
+The accumulated branch/main comparison showed only one shared changed path:
 
-through ReeferReview feed-recovery work.
+`docs/ROADMAP.md`
 
-The intervening main executable delta is confined to:
+The branch version carried the HZ-GCA phase handoff while current main added the Compute scientific-ingestion/Gridcoin roadmap. The roadmap was explicitly reconciled to preserve both bodies of work.
 
-- `reefer-review/news_feed.go`
-- `reefer-review/news_malformed_entity_test.go`
-- `reefer-review/web/app.js`
+The feature branch was then merged with current main using:
 
-It does not overlap or alter:
+`a6b32e97f95d868eb89785af3dd877969d49d26c`
 
-- `hz/web/`;
-- `hz/generate/`;
-- HZ-GCA manifests;
-- HZ-GCA architecture;
-- HZ-GCA-6 tests/verifier;
-- the active 420Hz qualification workflow.
-
-No ceremonial reconciliation was required for this ordinary app-scoped UX step.
+That reconciled SHA became the final HZ-GCA-6 implementation candidate and was requalified exactly. PR #565 is open and mergeable against the current main base.
 
 ## Implementation completed
 
@@ -271,7 +262,7 @@ Authoritative workflow:
 
 **420Hz Web Qualification**
 
-Successful exact-head run:
+Original exact-head implementation run:
 
 - Run ID: **37826287208**
 - Run number: **#237**
@@ -279,6 +270,17 @@ Successful exact-head run:
 - Job ID: **113479885333**
 - Exact tested SHA: `d46585be81059dc1619e5005495a773e47efe5d3`
 - Result: **PASS**
+
+Final authoritative reconciled exact-head run:
+
+- Run ID: **37841673679**
+- Run number: **#241**
+- Job: **HZ-GCA-6 Level 1**
+- Job ID: **113532303192**
+- Exact tested SHA: `a6b32e97f95d868eb89785af3dd877969d49d26c`
+- Result: **PASS**
+
+A later documentation-only evidence commit was also exercised by **420Hz Web Qualification #242**; its HZ-GCA-6 job `113533255008` passed **10/10 state-model tests**, the retained web verifier, HZ-GCA-5 verifier and HZ-GCA-6 verifier. This later run is supporting evidence only; the executable qualification identity remains the reconciled implementation SHA above.
 
 Required results:
 
@@ -289,7 +291,7 @@ Required results:
 5. HZ-GCA-6 targeted verifier — PASS;
 6. retained 420Hz web job — PASS.
 
-No required HZ-GCA-6 check was skipped, cancelled, missing, stale or untriggered.
+No required HZ-GCA-6 check was skipped, cancelled, missing, stale or untriggered on the final reconciled implementation SHA. The subsequent evidence-only head also passed the same HZ-GCA-6 job.
 
 ## Security / adversarial result
 
@@ -364,7 +366,7 @@ HZ-GCA-6 intentionally does not claim:
 
 ## Blockers
 
-None.
+None. Current-main reconciliation is complete and the reconciled exact implementation SHA is qualified.
 
 ## Completion state
 

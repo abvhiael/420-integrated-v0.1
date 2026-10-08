@@ -79,7 +79,9 @@ Deploy/publish exact canonical contracts, configure trusted attesters, allowlist
 
 Exit: actual funded testnet $420 payout with conservation/accounting evidence and negative replay/expiry/revocation/funding-exhaustion tests.
 
-### S-09 — Live end-to-end two-provider milestone
+### S-09 — Live end-to-end two-provider milestone — TESTNET BLOCKED (offline manifest gate implemented)
+
+[Operational checklist and evidence gate](CMP-S09-LIVE-MILESTONE-TESTNET.md). **No real BOINC and Folding@home accepted work-unit records, funded payouts, and Wallet/Indexer finality receipts have been qualified**; Level 2 live closeout remains pending. The structural manifest tests only protect against falsely accepting missing two-provider/funded evidence.
 
 With real provider-approved participant identities and real non-private contribution events, qualify Folding@home and at least one independently supported BOINC project end-to-end: observed → independently verified → attested → canonical work → one-time consumed → authorized reward → funded paid $420 → Wallet/Indexer/420Compute reconciled. Check wrong-user, duplicate-work, stale rescoring, outage, failed settlement, refund/rollback and malicious-attester conditions. Do not claim this milestone complete if either provider lacks legitimate adequate work-unit or identity evidence.
 

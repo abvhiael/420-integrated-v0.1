@@ -9,6 +9,9 @@ on:
       - ".github/workflows/contracts-hardening.yml"
   pull_request:
     paths:
+      - "contracts/config/compute-market/cmp-6.8-phase-closeout.json"
+      - "docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md"
+      - "scripts/verify-cmp-6-8-closeout.py"
       - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
       - ".github/workflows/contracts-hardening.yml"
   workflow_dispatch:

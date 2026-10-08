@@ -252,6 +252,30 @@ jobs:
       - name: Verify CMP-5.8 Phase closeout
         run: python scripts/verify-cmp-5-8-closeout.py
 
+      - name: Verify CMP-6.1 funding sources
+        run: python scripts/verify-cmp-6-1-funding-sources.py
+
+      - name: Verify CMP-6.2 verification-gated rewards
+        run: python scripts/verify-cmp-6-2-verification-gated-rewards.py
+
+      - name: Verify CMP-6.3 contribution accounting
+        run: python scripts/verify-cmp-6-3-contribution-accounting.py
+
+      - name: Verify CMP-6.4 research reward pools
+        run: python scripts/verify-cmp-6-4-research-reward-pools.py
+
+      - name: Verify CMP-6.5 sponsor matching
+        run: python scripts/verify-cmp-6-5-sponsor-matching.py
+
+      - name: Verify CMP-6.6 anti-Sybil / anti-farming economics
+        run: python scripts/verify-cmp-6-6-anti-farming-economics.py
+
+      - name: Verify CMP-6.7 transparent reward accounting
+        run: python scripts/verify-cmp-6-7-transparent-reward-accounting.py
+
+      - name: Verify CMP-6.8 Phase closeout
+        run: python scripts/verify-cmp-6-8-closeout.py
+
       - name: Setup Node for affected Compute SDK
         if: github.head_ref == 'cmp-1.5.13-phase-closeout-20261002' || github.head_ref == 'cmp-2.1-worker-offers-20261002'
         uses: actions/setup-node@v4

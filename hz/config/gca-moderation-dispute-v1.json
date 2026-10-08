@@ -1,0 +1,253 @@
+{
+  "schema": "420hz-gca-moderation-dispute-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.14",
+  "title": "Define moderation & dispute boundaries",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "vocabulary": {
+    "report": [
+      "REPORT"
+    ],
+    "enforcement": [
+      "HIDE",
+      "LOCK",
+      "SUSPEND",
+      "BLOCK",
+      "MUTE"
+    ],
+    "process": [
+      "MODERATOR_DECISION",
+      "APPEAL",
+      "RESTORE"
+    ],
+    "dispute": [
+      "RIGHTS_DISPUTE",
+      "AWARD_CHALLENGE",
+      "VOTE_ABUSE_CHALLENGE",
+      "ARBITRATION_REFERENCE"
+    ]
+  },
+  "authority": {
+    "hzModerationOwns": [
+      "420Hz application report records",
+      "420Hz application visibility/interactivity enforcement",
+      "420Hz community block/mute state",
+      "420Hz Awards challenge intake/status",
+      "420Hz application moderation decisions/appeals/restoration"
+    ],
+    "externalAuthorities": {
+      "creative": "420 Creative Protocol remains authoritative for Work/Recording/Creator publication and music-rights state",
+      "rights": "420 Rights remains authoritative for canonical rights claims/licenses/provenance; competing legal claims are not decided by 420Hz moderation",
+      "wallet": "Wallet/SmartAccount remains actor/signing authority",
+      "identity": "420Identity remains identity/credential authority",
+      "arbitration": "420Arbitration owns registered domain-scoped case/ruling/finality state only when explicitly adopted",
+      "pay": "420Pay/Treasury/Grants/Vault remain payment/custody authority",
+      "governance": "420Governance/Civic remains protocol governance authority",
+      "search": "420Search is rebuildable presentation only",
+      "notifications": "420Notifications is delivery only",
+      "charts": "420Hz Charts remains derived ranking; moderation may exclude invalid inputs under policy but cannot hand-edit rank",
+      "awards": "420Hz Awards owns canonical product-domain nomination/ballot/vote/result history"
+    }
+  },
+  "reportModel": {
+    "required": [
+      "reportId",
+      "reporterActorRef",
+      "targetType",
+      "targetId",
+      "reasonCode",
+      "submittedAt",
+      "status",
+      "version"
+    ],
+    "optional": [
+      "evidenceRef",
+      "evidenceCommitment",
+      "affectedSubjectRef"
+    ],
+    "rules": [
+      "reporterActorRef must match the qualified Wallet/session actor when the report is not anonymous-by-policy",
+      "a report is allegation/intake only and creates no canonical finding, rights change, payment action, Identity sanction or Award result change",
+      "target type/id must resolve to an eligible 420Hz target and may not be substituted by arbitrary external objects",
+      "duplicate/replayed report submissions are idempotent or rejected without duplicate enforcement",
+      "report spam/rate abuse may be bounded without changing the truth of existing reports"
+    ]
+  },
+  "evidenceRules": [
+    "evidence may remain encrypted/access-controlled off-chain and should be referenced by commitment rather than embedded publicly",
+    "an evidence hash/commitment does not make the underlying payload public or authorize disclosure",
+    "authorized evidence viewers are case/role scoped and least privilege",
+    "evidence retention follows HZ-GCA-1.8 and may be extended only by a scoped active appeal/dispute hold",
+    "late, missing, forged, altered or unverifiable evidence is handled by explicit policy rather than presumed true",
+    "raw Identity proofs, wallet secrets, private generation inputs, private consent evidence and unrelated private community data must not enter public moderation records"
+  ],
+  "enforcementSemantics": {
+    "HIDE": "remove ordinary 420Hz read/discovery visibility while preserving target identity/history and authorized review access",
+    "LOCK": "preserve eligible read visibility while disabling further 420Hz interaction/mutation paths for the target",
+    "SUSPEND": "disable defined 420Hz mutation/participation capability for the subject within the scoped app/domain; does not revoke protocol Identity or Wallet",
+    "BLOCK": "user-scoped relationship/access suppression preventing the blocked relationship from being used as an alternate interaction path",
+    "MUTE": "user-scoped presentation suppression for the muting user only",
+    "RESTORE": "release active app enforcement while preserving full prior moderation history"
+  },
+  "enforcementRules": [
+    "HIDE/LOCK/SUSPEND are application enforcement only and cannot alter Creative/Rights ownership, canonical Recording/Work IDs, Wallet authority, Identity credentials, payment balances or governance state",
+    "BLOCK/MUTE do not fabricate follow/unfollow/favorite mutations and do not alter Commons/Town membership or protocol Identity",
+    "enforcement scope is explicit to target/app/domain and cannot silently spread to unrelated recordings, creators, projects, communities or ballots",
+    "Search/Indexer projections must respect active HIDE/visibility enforcement and cannot resurrect hidden/tombstoned state",
+    "RESTORE never deletes the prior report/decision/appeal history"
+  ],
+  "moderatorRules": [
+    "moderation decisions require an explicitly authorized 420Hz moderation capability/role bound to the target domain",
+    "reporter, target owner, ordinary Wallet user, provider, chart operator or Awards participant cannot self-promote into moderator authority",
+    "moderator authority is not transferable to Wallet, Rights, Identity, payment or Governance domains",
+    "moderation decisions are append-only/versioned and preserve actor, action, reason, evidence references and timestamps",
+    "a moderator cannot directly alter a finalized AwardResult or immutable Creative/Rights record"
+  ],
+  "appeals": [
+    "only an affected subject or otherwise policy-authorized party may appeal an application moderation decision",
+    "appeal is linked to the prior decision and never overwrites history",
+    "appeal windows/limits must be explicit and frozen for the case/policy before enforcement becomes appealable",
+    "appeal reviewer authority must be distinct/scoped by policy and cannot be inferred from reporter status",
+    "RESTORE or revised enforcement requires a new decision after appeal review; it does not erase earlier state"
+  ],
+  "commentsBoundary": [
+    "comments/replies may be enabled only after REPORT/BLOCK/MUTE/HIDE/LOCK/APPEAL paths are implemented and qualified for that surface",
+    "comment moderation must retain stable actor/target references, replay protection and source visibility bounds",
+    "enabling comments without reporting/appeal/moderation support is invalid"
+  ],
+  "rightsDisputes": [
+    "rights/provenance complaint may cause temporary HIDE/LOCK or publication-review hold in 420Hz but does not rewrite Creative/Rights state",
+    "non-identical competing Rights claims remain preserved by 420 Rights; 420Hz does not choose a legal winner from UI/indexer metadata",
+    "where an explicit Arbitration domain is adopted, a Rights dispute may reference/open a domain-scoped Arbitration case against the exact originating component/object",
+    "a finalized Arbitration ruling cannot directly rewrite Rights; any Rights-consuming remedy requires an explicit exact-right transition in the owning protocol",
+    "until canonical source state is resolved/revalidated, public 420Hz availability may fail closed under the applicable publication/right policy"
+  ],
+  "awardsChallenges": [
+    "Award challenge types include eligibility challenge, nomination challenge, ballot-integrity challenge, vote-abuse challenge and result-correction request",
+    "ordinary moderation may hide abusive presentation or pause unresolved participation where policy allows but cannot hand-edit tallies or winner identities",
+    "pre-finalization objective invalidation may only use rules frozen in the season/category/voting policy and must retain reason/evidence commitments",
+    "post-finalization correction cannot mutate historical AwardResult bytes; it requires an explicit superseding result/history path",
+    "prize state cannot decide the validity of an Awards challenge or result correction",
+    "Chart/community popularity cannot substitute for evidence in an Awards challenge"
+  ],
+  "voteAbuseRules": [
+    "suspected duplicate/replay/Sybil/manipulation evidence may flag, quarantine or challenge affected vote inputs under the frozen HZ-GCA-1.13 policy",
+    "moderation cannot create voter eligibility, fabricate a nullifier, change a valid vote choice or silently delete valid votes",
+    "vote invalidation requires objective reason/evidence tied to the exact ballot/vote/policy and durable audit history",
+    "rate/anomaly scores are evidence inputs only and never sole canonical authority unless the frozen policy explicitly defines an objective threshold",
+    "final tally correction follows deterministic recomputation from accepted/invalidated canonical vote state, not operator-edited totals"
+  ],
+  "arbitrationIntegration": {
+    "adopted": "OPTIONAL_EXPLICIT_ONLY",
+    "serviceId": "420/service/arbitration/v1",
+    "rules": [
+      "420Arbitration is not automatically invoked by a 420Hz report, appeal, rights complaint or Award challenge",
+      "Arbitration integration requires a registered domain plus exact origin component/object and explicit HZ consumption policy",
+      "opening an Arbitration case records a dispute and is not a ruling",
+      "only claimant/respondent may submit evidence/appeal and only the selected resolver may rule under the snapshotted Arbitration policy",
+      "a finalized ruling is a bounded input; 420Hz must verify expected domain/origin/parties/finality/ruling/remedy/replay before consuming it",
+      "420Hz consuming logic remains responsible for its own authorization/state transition and may consume only explicitly enumerated remedies",
+      "Arbitration cannot directly seize funds, rewrite Rights, alter Awards history, grant Wallet/Identity authority or override Governance",
+      "unresolved/deprecated/wrong-service/unverified Arbitration bindings fail closed if the chosen 420Hz policy requires Arbitration"
+    ]
+  },
+  "arbitrationRemedyAllowlist": [
+    "NO_ACTION",
+    "RESTORE_APPLICATION_VISIBILITY",
+    "MAINTAIN_APPLICATION_ENFORCEMENT",
+    "MARK_AWARDS_CHALLENGE_UPHELD",
+    "MARK_AWARDS_CHALLENGE_REJECTED",
+    "REQUEST_EXPLICIT_AWARDS_CORRECTION_PATH"
+  ],
+  "arbitrationForbiddenRemedies": [
+    "direct payment transfer/refund",
+    "direct Rights mutation",
+    "Wallet capability grant/revocation",
+    "Identity credential mutation",
+    "Civic/Governance execution",
+    "direct provider slash",
+    "direct finalized AwardResult byte mutation"
+  ],
+  "privacyAndRetention": [
+    "moderation reports, appeals and evidence visibility follow the narrowest applicable privacy class",
+    "public moderation summaries may disclose only policy-approved reason/status metadata and non-sensitive commitments",
+    "private evidence payloads are excluded from public Search/Indexer/Analytics and notification content",
+    "case-specific evidence hold follows HZ-GCA-1.8 scoped dispute retention and cannot retain unrelated project data",
+    "deletion of application-visible report content does not erase immutable external Arbitration/Creative/Rights history where such history legitimately exists"
+  ],
+  "searchNotificationRules": [
+    "Search may suppress or remove active hidden/ineligible public projections but cannot mutate moderation or source state",
+    "Notifications may deliver report/decision/appeal/challenge events only to eligible recipients under privacy/opt-in policy",
+    "notification delivery failure cannot roll back a moderation decision or Arbitration state",
+    "a notification action/deep link cannot bypass Wallet/session/moderator/appeal authorization"
+  ],
+  "failureRules": [
+    "report target substitution or actor mismatch fails closed",
+    "duplicate/replayed report cannot create duplicate enforcement",
+    "moderation without scoped moderator authority fails closed",
+    "HIDE/LOCK/SUSPEND attempting to rewrite Creative/Rights/Wallet/Identity/payment/governance state is invalid",
+    "BLOCK/MUTE fabricating follow/membership/Identity mutations is invalid",
+    "appeal overwriting prior decision history is invalid",
+    "comments/replies enabled without report/block/mute/appeal support is invalid",
+    "operator/manual Awards tally or winner edit is invalid",
+    "vote invalidation without objective reason/evidence and policy binding is invalid",
+    "finalized AwardResult in-place mutation is invalid",
+    "Arbitration auto-invocation from ordinary moderation/report state is invalid",
+    "Arbitration ruling consumed without exact domain/origin/finality/replay validation fails closed",
+    "Arbitration remedy outside the explicit 420Hz allowlist fails closed",
+    "private evidence publication from commitment alone is invalid",
+    "Search/Notifications state cannot override moderation/source authority"
+  ],
+  "invariants": [
+    "HZGCA-MOD-001 moderation owns only 420Hz application enforcement/report/appeal state and never Creative/Rights/Identity/Wallet/payment/governance authority",
+    "HZGCA-MOD-002 reports are allegations/intake and never canonical findings by themselves",
+    "HZGCA-MOD-003 moderation decisions require scoped moderator authority and append-only audit history",
+    "HZGCA-MOD-004 HIDE/LOCK/SUSPEND alter only application visibility/interactivity/participation within explicit scope",
+    "HZGCA-MOD-005 BLOCK/MUTE are user/app relationship controls and never fabricate source social or protocol identity state",
+    "HZGCA-MOD-006 appeals preserve prior reports/decisions and require authorized affected-party/reviewer paths",
+    "HZGCA-MOD-007 comments/replies remain disabled until moderation/report/appeal boundaries for that surface are qualified",
+    "HZGCA-MOD-008 private evidence remains private; a commitment never grants disclosure authority",
+    "HZGCA-MOD-009 rights disputes may fail closed application publication but cannot cause 420Hz to rewrite Creative/Rights truth",
+    "HZGCA-MOD-010 Awards challenges cannot hand-edit tallies, votes, winners or finalized result bytes",
+    "HZGCA-MOD-011 vote invalidation requires objective ballot/policy-bound evidence and deterministic retally",
+    "HZGCA-MOD-012 post-finalization Awards correction uses explicit superseding history, never in-place mutation",
+    "HZGCA-MOD-013 420Arbitration is optional/explicit and is never automatically invoked by ordinary moderation",
+    "HZGCA-MOD-014 Arbitration case opening is not a ruling and finalized rulings are bounded evidence inputs only",
+    "HZGCA-MOD-015 Arbitration remedy consumption is domain/origin/finality/replay checked and allowlisted by the owning 420Hz transition",
+    "HZGCA-MOD-016 Arbitration cannot directly move funds, rewrite Rights/Awards history, mutate Identity/Wallet or execute Governance",
+    "HZGCA-MOD-017 Search/Indexer/Notifications remain projections/delivery and cannot override moderation or source truth",
+    "HZGCA-MOD-018 moderation/dispute policy creates no new custody, Rights, Identity, payment, governance, Charts or Arbitration resolver authority"
+  ],
+  "exitCriteria": [
+    "moderation vocabulary and application enforcement semantics are explicit",
+    "report/evidence/decision/appeal/restoration lifecycle and actor boundaries are explicit",
+    "block/mute/comment enablement boundaries are explicit",
+    "Creative/Rights/Identity/Wallet/payment/governance non-authority is explicit",
+    "Rights dispute and Awards challenge/correction boundaries are explicit",
+    "vote-abuse evidence/invalidation/deterministic-retally boundaries are explicit",
+    "420Arbitration adoption and ruling-consumption boundaries are explicit and fail closed",
+    "evidence privacy/retention and Search/Notifications boundaries are explicit",
+    "targeted verifier enforces vocabulary, authority separation, dispute/arbitration constraints and invariants",
+    "no Arbitration domain/address/remedy executor, moderation runtime service, ABI, deployment or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.15 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "docs/architecture/420hz/HZ-GCA-1.12-AWARDS-ARCHITECTURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.13-NOMINATION-VOTING-POLICY.md",
+    "docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md",
+    "docs/apps/town/moderation.md",
+    "docs/420ARBITRATION.md",
+    "docs/architecture/protocols/arbitration.md",
+    "docs/apps/arbitration/architecture.md",
+    "docs/apps/arbitration/security.md",
+    "docs/apps/arbitration/permissions.md",
+    "docs/architecture/protocols/rights-verify.md"
+  ]
+}

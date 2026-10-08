@@ -35,7 +35,7 @@
 | GROW-05 | Backend/API/worker/indexer/storage | Read-only Grow HTTP service, bounded discovery/pagination, public SDK constructor and guarded server entrypoint | Fast Level-1 Go service/SDK/privacy plus web/regression checks PASS on exact implementation SHA 46c4827 | GROW-05 service spec and durable exact-SHA CI closeout | COMPLETE | Proceed to GROW-06; retained Level 2/3 checks remain deferred |
 | GROW-06 | Contracts/interfaces/permission/funds | NO new Grow authority-bearing contract required by bounded consumer-only decision | No-contract guard and retained Grow Level-1 checks PASS on exact SHA 423557a | GROW-06 contract-decision matrix and CI evidence | COMPLETE | GROW-07 — Cross-app qualification |
 | GROW-07 | SDK, events, integrations, authorization | Cross-app 420Location SDK/Registry provenance/Verify/Wallet/Genesis/wrong-network fail-closed matrix established | GROW-07 boundary guard + retained app-focused Level-1 and Level-2 tests PASS exact SHA 04836cd | GROW-07 matrix plus durable exact-SHA CI evidence | COMPLETE | GROW-08 — Repository qualification |
-| GROW-08 | Build, static checks, test and security qualification | App implementation pending | No Grow-specific targets | NOT RUN; no app implementation | None | BLOCKED | Implement suites then qualify exact immutable SHA |
+| GROW-08 | Build, static checks, test and security qualification | Clean-checkout web/Go build, race tests, repeated adversarial paths and app static/security checks | Completed SUCCESS exact SHA ab6eacd; run 37794520529 | GROW-08 verifier and workflow; durable CI closeout | COMPLETE | GROW-09 — Documentation closeout |
 | GROW-09 | Developer/operator/user docs | GEN-SVC-0 conventions | No Grow docs prior to this audit | N/A | This gap ledger only | PARTIAL | Write approved spec, architecture, operations and testing guides |
 | GROW-10 | Deploy, testnet, Genesis and production evidence | Frozen catalog; GEN-SVC-0 | No Grow deployment artifacts | NOT RUN | No Grow deployment plan | BLOCKED | Decide release class; later collect real environment evidence |
 
@@ -200,3 +200,18 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Limits/defer:** no real source/testnet deployment, actual wallet session/chain-claim integration or cross-domain ingress; none authorized by bounded product. Live/browser/device checks at GROW-10. Level 3 canonical Solidity/Genesis/420Integrated/Docs full phase closeout deferred, no duplicate inventories.
 - **Blockers:** none for GROW-07 scoped Level-1 and accumulated Level-2.
 - **Next canonical step:** **GROW-08 — Repository qualification**.
+
+## GROW-08 — Repository qualification, exact-SHA Level-1 closeout (2026-10-08)
+
+- **Status:** GROW-08 — Repository qualification **COMPLETE** at Level 1 app-scoped qualification; this is not Level 3 global closeout.
+- **Qualified substantive SHA:** `ab6eacd34c8ebd4a6e37cbc38d5700f40990900f`.
+- **Proof:** [420Grow fast qualification #37794520529](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37794520529), job `113370375176`, completed **SUCCESS** on that exact implementation SHA. No skipped/missing required check counted PASS.
+- **Build/install:** GitHub Actions clean checkout, Go toolchain from pinned repository go.mod and Node 22; dependency-free `grow/web` qualification and static distribution build, `go build ./grow/location ./grow/service ./grow/cmd/server`. No third-party npm package install required by the app.
+- **Affected tests:** `go test -race -count=1 ./grow/... ./genesis/svc2/sdk/... ./location/...`; ten repeat executions of GROW-05 malformed/authorization/service-corruption test selection; `go vet` affected Grow/SDK/Location packages; retained normal service and SDK Go tests, gofmt, Node web six security/UX regressions and frontend JS syntax.
+- **Security/static checks:** `scripts/verify-grow-08.py` asserts guarded HTTPS/no-redirect upstream, no writes, public-projection-only service, no-store response, safe text rendering and credentials omission, browser CSP/referrer/permissions, disabled live source and no Grow Solidity; retained GROW-01, 02, 06, 07 canonical and cross-app verifiers PASS; Python scripts compile PASS.
+- **Scope/applicability:** No Grow contract/ABI/chain transaction; Solidity Foundry/invariants and deployment/Genesis qualification not applicable to this ordinary step. No independent RPC/Indexer/Search/Geth runtime modifications. No full repository inventory run. App-scoped race/repeat negative tests are bounded rather than a claim of unconstrained fuzzing or external security penetration.
+- **Main/base earlier inspected:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71`; branch `audit/420grow-canonical-gap-inventory`, cumulative draft PR #567. Main reconciliation reserved for Level 3.
+- **Evidence-only qualification inheritance:** This roadmap record changes no source, workflow, artifacts or substantive requirements; the qualified implementation SHA remains the controlling CI identity.
+- **Level 2:** GROW-03–07 convergence milestone previously PASS and retained in this GROW-08 run. **Level 3:** canonical Solidity full inventory once, separate Genesis address-authority, 420Integrated/global Docs and exact merge candidate at end of app phase.
+- **Blockers:** none for GROW-08 Level 1. Live/testnet source, manual browser/device and accessibility, security/operations evidence require GROW-10; phase architecture/operator docs closeout at GROW-09.
+- **Next canonical step:** **GROW-09 — Documentation closeout**.

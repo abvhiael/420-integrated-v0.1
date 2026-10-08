@@ -28,7 +28,7 @@ if d.get("step")!="CMP-7.10" or d.get("status")!="LEVEL_3_CANDIDATE":
 rec=d.get("reconciliation",{})
 if rec.get("main_sha")!="c6b62a6ea75be97564564e56b779dfad7df3f784":
     fail("reconciliation main drift")
-if rec.get("reconciled_anchor_sha")!="110bbc33ae10e2436e25fc2bc6abb0a2a096fe68" or rec.get("behind_main")!=0:
+if rec.get("reconciled_anchor_sha")!="63b0bf7d77389685e464edb1f8db10548b72e181" or rec.get("behind_main")!=0:
     fail("reconciliation anchor drift")
 if d.get("qualified_prerequisites")!=[f"CMP-7.{i}" for i in range(1,10)]:
     fail("prerequisite inventory drift")

@@ -656,7 +656,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **Status: COMPLETE — Level 1 + second/final CMP-7 Level 2 exact-head qualified on `63b0bf7d77389685e464edb1f8db10548b72e181`.** Commands: compute submit, worker, status, verify and rewards. Specification: [CMP-7.9 CLI](CMP-7.9-CLI.md).
 
 ## CMP-7.10 — Phase closeout
-**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.** Closeout: [CMP-7.10 phase closeout](CMP-7.10-PHASE-CLOSEOUT.md).
+**Status: COMPLETE — Level 3 exact-head qualified on `3e7ea3dca2d3f731b40155df2e5e48f13680d955`.** Durable evidence: [CMP-7.10 qualification](CMP-7.10-QUALIFICATION-EVIDENCE.md). Closeout: [CMP-7.10 phase closeout](CMP-7.10-PHASE-CLOSEOUT.md).
 
 ---
 
@@ -773,7 +773,7 @@ Production target flow:
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
 | CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.8 Level 3 closeout candidate — comprehensive exact-head qualification pending |
 | CMP-6 useful-compute rewards | CMP-6.1–CMP-6.8 COMPLETE; Level 3 exact-head qualified |
-| CMP-7 SDK/API/indexer | CMP-7.1–CMP-7.9 COMPLETE; CMP-7.10 Level 3 closeout candidate |
+| CMP-7 SDK/API/indexer | CMP-7.1–CMP-7.10 COMPLETE; Level 3 exact-head qualified |
 | CMP-8 420Compute UI | forthcoming |
 | CMP-9 public testnet | forthcoming |
 | CMP-10 security/adversarial qualification | forthcoming |

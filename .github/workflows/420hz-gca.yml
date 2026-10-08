@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'hz/config/gca-*.json'
+      - 'hz/generate/**'
       - 'docs/architecture/420hz/**'
       - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'scripts/verify-420hz-gca-*.py'
@@ -14,6 +15,7 @@ on:
       - 'audit/420hz-gca-*'
     paths:
       - 'hz/config/gca-*.json'
+      - 'hz/generate/**'
       - 'docs/architecture/420hz/**'
       - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'scripts/verify-420hz-gca-*.py'
@@ -45,6 +47,17 @@ jobs:
           for f in hz/config/gca-*.json; do
             python3 -m json.tool "$f" >/dev/null
           done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify HZ-GCA-2 generation provider abstraction
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Verify HZ-GCA-2 generation provider abstraction
+        run: python3 scripts/verify-420hz-gca-2.py
 
       - name: Verify HZ-GCA-1.1 product boundaries
         run: python3 scripts/verify-420hz-gca-1-1.py
@@ -133,7 +146,77 @@ jobs:
         id: scope
         shell: bash
         run: |
-          if test -f hz/config/gca-level2-milestone-v1.json; then
+          if git diff-tree --no-commit-id --name-only -r HEAD | grep -Eq '^(hz/config/gca-level2-milestone-v1.json|docs/architecture/420hz/HZ-GCA-1.20-LEVEL2-MILESTONE.md)
+      - name: Verify exact qualification head
+        if: steps.scope.outputs.level2 == 'true'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+
+      - name: Verify reconciled current main ancestry
+        if: steps.scope.outputs.level2 == 'true'
+        run: git merge-base --is-ancestor 0993ff5b5b3b213a0768dbde90e4734df5ab4cc0 HEAD
+
+      - name: Validate all GCA manifests
+        if: steps.scope.outputs.level2 == 'true'
+        run: |
+          for f in hz/config/gca-*.json; do
+            python3 -m json.tool "$f" >/dev/null
+          done
+
+      - name: Retain complete HZ-GCA-1 verifier inventory
+        if: steps.scope.outputs.level2 == 'true'
+        run: |
+          for n in $(seq 1 19); do
+            python3 "scripts/verify-420hz-gca-1-$n.py"
+          done
+
+      - name: Verify HZ-GCA-1.20 milestone integration
+        if: steps.scope.outputs.level2 == 'true'
+        run: python3 scripts/verify-420hz-gca-1-20.py
+
+      - name: Retain 420Hz web qualification
+        if: steps.scope.outputs.level2 == 'true'
+        run: python3 scripts/verify-420hz-web.py
+
+      - name: Retain 420AI Compute integration boundaries
+        if: steps.scope.outputs.level2 == 'true'
+        run: python3 scripts/verify-420ai-compute-integration.py
+
+      - uses: actions/setup-node@v4
+        if: steps.scope.outputs.level2 == 'true'
+        with:
+          node-version: '22'
+
+      - name: Retain 420AI provider runtime
+        if: steps.scope.outputs.level2 == 'true'
+        working-directory: services/420ai-provider
+        run: npm test
+
+      - name: Verify 420AI provider runtime boundaries
+        if: steps.scope.outputs.level2 == 'true'
+        run: python3 scripts/verify-420ai-provider-runtime.py
+
+      - name: Retain reconciled Compute SDK suite
+        if: steps.scope.outputs.level2 == 'true'
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+
+      - name: Build reconciled Compute SDK for API
+        if: steps.scope.outputs.level2 == 'true'
+        working-directory: packages/420-sdk
+        run: npm run build
+
+      - name: Retain reconciled Compute API suite
+        if: steps.scope.outputs.level2 == 'true'
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+      - name: Retain reconciled Compute Indexer suite
+        if: steps.scope.outputs.level2 == 'true'
+        working-directory: 420-indexer
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@localhost:5432/indexer420
+        run: npm install --no-audit --no-fund && npm test
+; then
             echo "level2=true" >> "$GITHUB_OUTPUT"
           else
             echo "level2=false" >> "$GITHUB_OUTPUT"

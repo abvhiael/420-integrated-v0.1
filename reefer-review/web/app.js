@@ -418,12 +418,16 @@ async function loadNewsAdmin() {
   if (!state.sessionToken && !$("#news-admin-key").value) { status.textContent="Provide a standalone news admin key or connect a verified moderator session."; return; }
   try {
     const response = await getJSON("/v1/admin/news/sources",{headers:newsAdminHeaders()});
+    const healthResponse = await getJSON("/v1/admin/news/health",{headers:newsAdminHeaders()}).catch(()=>({health:[]}));
+    const healthByID=new Map((Array.isArray(healthResponse.health)?healthResponse.health:[]).map((h)=>[h.source_id,h]));
     const sources = Array.isArray(response.sources) ? response.sources : [];
     status.textContent = `${sources.length} configured publisher sources. Disabled sources are not fetched.`;
     for (const source of sources) {
       const item = document.createElement("article");
       item.className="news-admin-source";
       item.append(textElement("strong","",source.name),textElement("p","",`${source.id} · ${source.category} · ${source.enabled ? "Enabled" : "Disabled"} · every ${source.poll_interval_minutes} min`));
+      const health=healthByID.get(source.id);
+      if (health) item.append(textElement("p","",`Last success: ${health.last_success || "Never"} · failures: ${health.consecutive_failures || 0} · ${health.last_error || "No reported error"}`));
       const button=document.createElement("button");button.type="button";button.textContent="Edit source";
       button.addEventListener("click",()=>{
         editingNewsSource=source.id;

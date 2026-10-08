@@ -19,7 +19,7 @@ SSRF/redirect/DNS-rebinding controls, parser hardening, sanitization, source all
 - Static audit evidence is not a substitute for successful exact-head Go tests, race, vet and security verifier.
 
 ## Current qualification
-**PENDING exact-implementation-SHA RR-7 Level 1 CI.** Do not mark RR-7 COMPLETE on an unverified SHA. Level 2 remains milestone-based; Level 3 remains RR-10.
+**COMPLETE at repository Level 1 and Level 2.** Exact qualified SHA `c0f874efbd754c9ff49c313c3096ed0c6488572c`; Level 1 run `37695907354` PASS, Level 2 run `37695907728` PASS. Durable `RR-7-QUALIFICATION.md`. Live deployment and RR-10 Level 3 remain open.
 
 ## Next canonical step
 **RR-8 — Feed Operations** (only after RR-7 qualifies).

@@ -78,13 +78,13 @@ The following command forms are extracted from the primary CLI help contract:
 - `420 debug events PROTOCOL [OBJECT_KEY] [LIMIT] [--manifest PATH] [--catalogue PATH]`
 - `420 guides`
 - `420 guide ID`
-- `420 app plan RELEASE_JSON [--manifest PATH] [--catalogue PATH]`
-- `420 app view RELEASE_JSON [--manifest PATH] [--catalogue PATH]`
-- `420 compute submit REQUEST_JSON --compute-api URL [--manifest PATH] [--catalogue PATH]`
-- `420 compute worker WORKER_ID [--compute-indexer URL]`
-- `420 compute status JOB_ID [--compute-indexer URL]`
-- `420 compute verify JOB_ID [--compute-indexer URL]`
-- `420 compute rewards REWARD_ID [--compute-indexer URL]`
+- `420 app plan RELEASE_JSON [--manifest PATH] [--catalogue PATH]
+  420 app view RELEASE_JSON [--manifest PATH] [--catalogue PATH]
+  420 compute submit REQUEST_JSON --compute-api URL [--manifest PATH] [--catalogue PATH]
+  420 compute worker WORKER_ID [--compute-indexer URL]
+  420 compute status JOB_ID [--compute-indexer URL]
+  420 compute verify JOB_ID [--compute-indexer URL]
+  420 compute rewards REWARD_ID [--compute-indexer URL]`
 
 ## CLI runtime options and defaults
 

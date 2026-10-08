@@ -629,33 +629,34 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 # CMP-7 — SDK, API, CLI and indexer
 
 ## CMP-7.1 — @420/compute-sdk
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.1 @420/compute-sdk](CMP-7.1-COMPUTE-SDK.md).
+**Status: COMPLETE — Level 1 exact-head qualified on `2ea2b3d2d7da94a9b864516655436b46321039a4`.** Specification: [CMP-7.1 @420/compute-sdk](CMP-7.1-COMPUTE-SDK.md).
 
 ## CMP-7.2 — Job submission API
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.2 job submission API](CMP-7.2-JOB-SUBMISSION-API.md).
+**Status: COMPLETE — Level 1 exact-head qualified on `3c8126201278f51aecf066f92ec4551a7ea9a90a`.** Specification: [CMP-7.2 job submission API](CMP-7.2-JOB-SUBMISSION-API.md).
 
 ## CMP-7.3 — Worker API
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.3 worker API](CMP-7.3-WORKER-API.md).
+**Status: COMPLETE — Level 1 exact-head qualified on `dc475de260cc240b687c78b21a1d64b163432274`.** Specification: [CMP-7.3 worker API](CMP-7.3-WORKER-API.md).
 
 ## CMP-7.4 — Verifier API
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.4 verifier API](CMP-7.4-VERIFIER-API.md).
+**Status: COMPLETE — Level 1 exact-head qualified on `c52ba0bfc34248f639fa198e523c6e97b870d21f`.** Specification: [CMP-7.4 verifier API](CMP-7.4-VERIFIER-API.md).
 
 ## CMP-7.5 — Research project API
-**Status: IMPLEMENTED — Level 1 + first CMP-7 Level 2 milestone qualification pending.** Specification: [CMP-7.5 research project API](CMP-7.5-RESEARCH-PROJECT-API.md).
+**Status: COMPLETE — Level 1 + first CMP-7 Level 2 exact-head qualified on `e2095a027660157382d35456d73bf7219257611d`.** Specification: [CMP-7.5 research project API](CMP-7.5-RESEARCH-PROJECT-API.md).
 
 ## CMP-7.6 — Compute indexer
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.6 Compute indexer](CMP-7.6-COMPUTE-INDEXER.md).
+**Status: COMPLETE — Level 1 exact-head qualified on `f3f3e6280fd47df5793b07623f9db75c5e9b1c38`.** Specification: [CMP-7.6 Compute indexer](CMP-7.6-COMPUTE-INDEXER.md).
 
 ## CMP-7.7 — Historical analytics
-**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.7 historical analytics](CMP-7.7-HISTORICAL-ANALYTICS.md).
+**Status: COMPLETE — Level 1 exact-head qualified on `b204b6a427580dcb14aab0bc88bcf52d30856b05`.** Specification: [CMP-7.7 historical analytics](CMP-7.7-HISTORICAL-ANALYTICS.md).
 
 ## CMP-7.8 — Developer documentation
-**Status: IMPLEMENTED — Level 1 documentation qualification pending.** Developer guide: [Compute Market developer integration](../developers/compute-market-integration.md).
+**Status: COMPLETE — Level 1 documentation qualified on `63b0bf7d77389685e464edb1f8db10548b72e181`.** Developer guide: [Compute Market developer integration](../developers/compute-market-integration.md).
 
 ## CMP-7.9 — CLI
-**Status: IMPLEMENTED — Level 1 + second/final CMP-7 Level 2 milestone qualification pending.** Commands: compute submit, worker, status, verify and rewards. Specification: [CMP-7.9 CLI](CMP-7.9-CLI.md).
+**Status: COMPLETE — Level 1 + second/final CMP-7 Level 2 exact-head qualified on `63b0bf7d77389685e464edb1f8db10548b72e181`.** Commands: compute submit, worker, status, verify and rewards. Specification: [CMP-7.9 CLI](CMP-7.9-CLI.md).
 
 ## CMP-7.10 — Phase closeout
+**Status: LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.** Closeout: [CMP-7.10 phase closeout](CMP-7.10-PHASE-CLOSEOUT.md).
 
 ---
 
@@ -772,7 +773,7 @@ Production target flow:
 | CMP-4 scientific compute framework | CMP-4.1–CMP-4.9 COMPLETE; CMP-4.9 is the second Level 2 integration milestone; CMP-4.10 Level 3 phase closeout next |
 | CMP-5 external compute adapters | CMP-5.1–CMP-5.7 COMPLETE; CMP-5.8 Level 3 closeout candidate — comprehensive exact-head qualification pending |
 | CMP-6 useful-compute rewards | CMP-6.1–CMP-6.8 COMPLETE; Level 3 exact-head qualified |
-| CMP-7 SDK/API/indexer | forthcoming |
+| CMP-7 SDK/API/indexer | CMP-7.1–CMP-7.9 COMPLETE; CMP-7.10 Level 3 closeout candidate |
 | CMP-8 420Compute UI | forthcoming |
 | CMP-9 public testnet | forthcoming |
 | CMP-10 security/adversarial qualification | forthcoming |

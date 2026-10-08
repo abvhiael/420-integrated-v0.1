@@ -45,7 +45,7 @@ func main() {
 		if secret != "" && len(secret) < 32 {
 			log.Fatal("news-only admin secret must be at least 32 characters")
 		}
-		server := &http.Server{Addr: addr, Handler: (reeferreview.HTTP{News: news, NewsAdminKey: []byte(secret)}).NewsOnlyHandler(), ReadHeaderTimeout: 5*time.Second, ReadTimeout: 10*time.Second, WriteTimeout: 10*time.Second, IdleTimeout: 30*time.Second}
+		server := &http.Server{Addr: addr, Handler: (reeferreview.HTTP{News: news, NewsAdminKey: []byte(secret)}).NewsOnlyHandler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 30 * time.Second}
 		log.Printf("ReeferReview standalone RSS news service listening on %s; editorial/chain endpoints disabled", addr)
 		log.Fatal(server.ListenAndServe())
 		return

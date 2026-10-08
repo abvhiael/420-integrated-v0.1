@@ -113,7 +113,9 @@ func (h HTTP) newsAdminSources(w http.ResponseWriter, r *http.Request) {
 	// Actor identity is not returned publicly; operations must retain structured
 	// audit logs in the deployment log pipeline before production qualification.
 	actor := claims.Subject
-	if isNewsAdmin(r.Context()) { actor = "standalone-news-operator" }
+	if isNewsAdmin(r.Context()) {
+		actor = "standalone-news-operator"
+	}
 	log.Printf("news_source_admin actor=%q id=%q method=%q enabled=%t", actor, source.ID, r.Method, source.Enabled)
 	writeJSON(w, http.StatusOK, map[string]any{"source": source})
 }

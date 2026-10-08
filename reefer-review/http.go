@@ -12,9 +12,9 @@ import (
 )
 
 type HTTP struct {
-	Service  Service
-	News     *NewsService
-	Security *SessionSecurity
+	Service      Service
+	News         *NewsService
+	Security     *SessionSecurity
 	NewsAdminKey []byte
 }
 

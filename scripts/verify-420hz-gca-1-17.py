@@ -77,7 +77,7 @@ if not errors:
         need(token in timeout,f"timeout rule missing: {token}")
 
     cancel=" ".join(gen.get("cancellation",[]))
-    for token in ["local cancel intent is not proof","same request/job identity","economic state","does not imply PAYER_REFUND_PAID"]:
+    for token in ["local cancel intent is not proof","same request/job identity","economic state","never implies PAYER_REFUND_PAID"]:
         need(token in cancel,f"cancellation rule missing: {token}")
 
     partial=" ".join(gen.get("partialOutput",[]))
@@ -102,7 +102,7 @@ if not errors:
         need(token in rrules,f"restart recovery rule missing: {token}")
 
     storage=" ".join(rec.get("storageRecovery",[]))
-    for token in ["integrity commitment","tombstone state wins","different bytes under the same identity","reapply current privacy/retention/deletion","remain PRIVATE"]:
+    for token in ["integrity commitment","tombstone state wins","different bytes under the same identity","reapply current privacy/retention/deletion","retain PRIVATE visibility"]:
         need(token in storage,f"storage recovery rule missing: {token}")
 
     econr=" ".join(rec.get("economicRecovery",[]))

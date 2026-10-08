@@ -23,8 +23,24 @@ export interface ComputeJobProjection420 {
   readonly authoritative: false;
 }
 
+export interface ComputeWorkerProjection420 {
+  readonly schemaVersion: typeof COMPUTE_API_SCHEMA_420;
+  readonly chainId: string;
+  readonly workerId: string;
+  readonly providerId: string;
+  readonly nodeId: string;
+  readonly resourceId: string;
+  readonly status: string;
+  readonly liveCapacityUnits: string;
+  readonly availableCapacityUnits: string;
+  readonly activeOfferIds: readonly string[];
+  readonly finality: 'pending' | 'safe' | 'finalized';
+  readonly authoritative: false;
+}
+
 export interface ComputeJobReadStore420 {
   job(chainId: bigint, jobId: string): Promise<ComputeJobProjection420 | null>;
+  worker?(chainId: bigint, workerId: string): Promise<ComputeWorkerProjection420 | null>;
 }
 
 export interface ComputeJobSubmission420 {
@@ -49,6 +65,7 @@ export interface ComputeJobSubmissionPlan420 {
 export interface ComputeJobApi420 {
   submit(input: ComputeJobSubmission420): ComputeJobSubmissionPlan420;
   job(jobId: string): Promise<ComputeJobProjection420 | null>;
+  worker(workerId: string): Promise<ComputeWorkerProjection420 | null>;
 }
 
 export interface ComputeApiResponse420 {
@@ -142,6 +159,10 @@ function requireJobId420(value: string): string {
   if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new ComputeApiRequestError420(400,'jobId must be bytes32 hex');
   return value.toLowerCase();
 }
+function requireWorkerId420(value: string): string {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new ComputeApiRequestError420(400,'workerId must be bytes32 hex');
+  return value.toLowerCase();
+}
 
 export function createComputeJobApi420(host: ComputeSdkHost420, store: ComputeJobReadStore420): ComputeJobApi420 {
   const sdk=createComputeSdk420(host);
@@ -165,7 +186,13 @@ export function createComputeJobApi420(host: ComputeSdkHost420, store: ComputeJo
         secretMaterialManaged:false
       });
     },
-    job(jobId: string) { return store.job(BigInt(sdk.chainId),requireJobId420(jobId)); }
+    job(jobId: string) { return store.job(BigInt(sdk.chainId),requireJobId420(jobId)); },
+    async worker(workerId: string) {
+      if (!store.worker) throw new ComputeApiRequestError420(503,'worker projection unavailable');
+      const value=await store.worker(BigInt(sdk.chainId),requireWorkerId420(workerId));
+      if (value && value.authoritative !== false) throw new ComputeApiRequestError420(500,'worker projection authority violation');
+      return value;
+    }
   });
 }
 
@@ -183,6 +210,12 @@ export async function routeComputeJobApi420(api: ComputeJobApi420, method: strin
       if (verb !== 'POST') return error420(405,'method_not_allowed','job submission requires POST');
       if (body === undefined) return error420(400,'invalid_request','request body is required');
       return ok420(api.submit(object420(body,'body') as unknown as ComputeJobSubmission420),202);
+    }
+    const workerMatch=/^\/v1\/compute\/workers\/(0x[0-9a-fA-F]{64})$/.exec(path);
+    if (workerMatch) {
+      if (verb !== 'GET') return error420(405,'method_not_allowed','worker reads require GET');
+      const value=await api.worker(workerMatch[1]!);
+      return value ? ok420(value) : error420(404,'not_found','compute worker not found');
     }
     const match=/^\/v1\/compute\/jobs\/(0x[0-9a-fA-F]{64})$/.exec(path);
     if (match) {

@@ -650,6 +650,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.7 historical analytics](CMP-7.7-HISTORICAL-ANALYTICS.md).
 
 ## CMP-7.8 — Developer documentation
+**Status: IMPLEMENTED — Level 1 documentation qualification pending.** Developer guide: [Compute Market developer integration](../developers/compute-market-integration.md).
 
 ## CMP-7.9 — CLI
 Examples: compute submit, worker, status, verify and rewards.

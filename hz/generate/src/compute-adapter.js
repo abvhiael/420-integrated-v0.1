@@ -20,7 +20,7 @@ function normCandidate(x){
     outputKinds:[...new Set(x.outputKinds??[])],availableCapacityUnits:u(x.availableCapacityUnits,"availableCapacityUnits"),
     queueDepth:Number(x.queueDepth??0),estimatedStartMs:Number(x.estimatedStartMs??0),quotedPrice:u(x.quotedPrice,"quotedPrice"),
     quoteAsset:String(req(x.quoteAsset,"quoteAsset")),reputationScore:Number(x.reputationScore??0),slaScore:Number(x.slaScore??0),
-    finality:x.finality??"safe"
+    finality:x.finality??"safe",authoritative:false
   });
 }
 function supports(c,r){return c.availableCapacityUnits>0n&&Number.isInteger(c.maxDurationSec)&&r.durationSec<=c.maxDurationSec&&c.modes.includes(r.mode)&&(!r.lyrics||c.supportsLyrics)&&(!r.referenceAudio||(c.supportsReferenceAudio&&c.referenceAudioPaths.includes(r.referenceAudio.path)));}

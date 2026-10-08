@@ -1,0 +1,273 @@
+{
+  "schema": "420hz-gca-charts-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.11",
+  "title": "Define Charts rules",
+  "baseMainSha": "c6b62a6ea75be97564564e56b779dfad7df3f784",
+  "level": 1,
+  "milestoneRequired": false,
+  "authority": {
+    "chartState": "DERIVED_PROJECTION_ONLY",
+    "canonicalSources": [
+      "eligible published Creative Recording/Creator references",
+      "qualified public playback/listener events when a later runtime source is implemented",
+      "eligible PUBLIC 420Hz community source records under HZ-GCA-1.10",
+      "policy-approved metadata/disclosure/category fields"
+    ],
+    "forbiddenAuthorities": [
+      "Creative ownership/rights",
+      "420Identity trust/credential truth",
+      "Awards nomination/ballot/vote/result",
+      "payment/reward entitlement",
+      "governance",
+      "source visibility/readiness",
+      "playback access"
+    ]
+  },
+  "chartFamilies": [
+    {
+      "key": "TOP_RECORDINGS",
+      "target": "Recording",
+      "purpose": "rank eligible published recordings by qualified engagement under exact chart policy"
+    },
+    {
+      "key": "TRENDING_RECORDINGS",
+      "target": "Recording",
+      "purpose": "rank recent qualified engagement velocity under bounded window/decay policy"
+    },
+    {
+      "key": "NEW_RECORDINGS",
+      "target": "Recording",
+      "purpose": "deterministic recency view over newly eligible published recordings; not popularity authority"
+    },
+    {
+      "key": "TOP_ARTISTS",
+      "target": "CreatorProfile",
+      "purpose": "aggregate eligible recording/community signals to artist reference under exact policy"
+    },
+    {
+      "key": "COMMUNITY_FAVORITES",
+      "target": "Recording",
+      "purpose": "rank only explicitly eligible PUBLIC favorite/community signals under the frozen methodology"
+    }
+  ],
+  "signalVocabulary": [
+    {
+      "signal": "RAW_PLAY",
+      "canonicalForCharts": false,
+      "meaning": "observed playback-start/attempt or equivalent raw event; never automatically chart credit"
+    },
+    {
+      "signal": "QUALIFIED_PLAY",
+      "canonicalForCharts": true,
+      "meaning": "playback event satisfying the exact chart policy's duration/completion, dedupe, source-readiness and anti-abuse gates"
+    },
+    {
+      "signal": "DISTINCT_LISTENER",
+      "canonicalForCharts": true,
+      "meaning": "privacy-preserving distinct audience contribution within policy window; identity mechanism must not broaden Identity authority"
+    },
+    {
+      "signal": "PUBLIC_FAVORITE",
+      "canonicalForCharts": true,
+      "meaning": "eligible PUBLIC RecordingFavorite contribution; private favorite excluded"
+    },
+    {
+      "signal": "PUBLIC_PLAYLIST_ADD",
+      "canonicalForCharts": true,
+      "meaning": "eligible add to PUBLIC playlist subject to dedupe/anti-gaming policy"
+    },
+    {
+      "signal": "PUBLIC_FOLLOW",
+      "canonicalForCharts": true,
+      "meaning": "eligible PUBLIC ArtistFollow contribution only for artist/community charts where policy allows"
+    },
+    {
+      "signal": "PUBLIC_SHARE",
+      "canonicalForCharts": false,
+      "meaning": "share/reference signal may be displayed analytically but is excluded from chart score by default v1"
+    },
+    {
+      "signal": "AWARD_VOTE",
+      "canonicalForCharts": false,
+      "meaning": "Award vote is a separate product-domain object and never chart credit"
+    },
+    {
+      "signal": "SEARCH_CLICK",
+      "canonicalForCharts": false,
+      "meaning": "Search interaction is non-authoritative presentation telemetry and excluded from v1 score"
+    },
+    {
+      "signal": "GENERATE_COUNT",
+      "canonicalForCharts": false,
+      "meaning": "generation/project activity is private/product workflow state and excluded from Charts"
+    }
+  ],
+  "eligibilityRules": [
+    "target Recording/Creator must be eligible PUBLIC presentation under canonical Creative/publication/source rules",
+    "PRIVATE and UNLISTED source content is excluded from chart eligibility",
+    "deleted, withdrawn, unavailable, rights-blocked or stale-unverified source objects are excluded or marked ineligible before snapshot publication",
+    "Chart methodology may filter by disclosure class, genre, mood, category or release period only when the source field is public and policy-defined",
+    "AI disclosure class is a filter/facet, not a positive or negative weighting by itself unless a later policy version explicitly says so",
+    "Award state does not determine chart eligibility unless a later versioned policy explicitly adds a non-circular rule"
+  ],
+  "timeWindows": [
+    {
+      "key": "DAILY",
+      "duration": "24h",
+      "alignment": "UTC fixed window"
+    },
+    {
+      "key": "WEEKLY",
+      "duration": "7d",
+      "alignment": "UTC fixed window"
+    },
+    {
+      "key": "MONTHLY",
+      "duration": "30d",
+      "alignment": "UTC rolling/fixed policy version must declare exact mode"
+    },
+    {
+      "key": "ALL_TIME",
+      "duration": "unbounded eligible history",
+      "alignment": "policy checkpoint bounded"
+    }
+  ],
+  "methodology": {
+    "version": "1",
+    "initialScoreModel": "QUALIFIED_PLAYS_PRIMARY",
+    "formula": "score = qualifiedPlayPoints + distinctListenerBonus + publicFavoritePoints + publicPlaylistAddPoints + publicFollowArtistPoints",
+    "weights": {
+      "qualifiedPlayPoints": 1,
+      "distinctListenerBonus": 1,
+      "publicFavoritePoints": 0,
+      "publicPlaylistAddPoints": 0,
+      "publicFollowArtistPoints": 0
+    },
+    "interpretation": [
+      "v1 freezes qualified plays as the only positive score weight",
+      "other eligible signal classes are frozen for future policy use/analytics but have zero weight in v1",
+      "changing any nonzero/zero weight, qualification rule, dedupe rule, decay rule or window semantics requires a new chartPolicyVersion",
+      "no hidden personalized or sponsored boost may alter canonical chart rank"
+    ]
+  },
+  "qualifiedPlayRules": [
+    "a raw play becomes QUALIFIED_PLAY only after the exact runtime playback source satisfies the versioned minimum-listen/completion rule; HZ-GCA-1.11 does not invent an unavailable playback-service threshold",
+    "one event/source replay key contributes at most once",
+    "retries, duplicate delivery and projection rebuild cannot multiply chart credit",
+    "self-play/creator-controlled traffic may be capped/excluded by later runtime policy but cannot be silently privileged",
+    "automated/bot/repeated abnormal traffic must be rejected or down-weighted only through documented deterministic policy, never ad hoc manual score edits",
+    "qualified play evidence must retain source/reference/checkpoint sufficient for deterministic rebuild without storing protected raw identity payloads",
+    "playback visibility/access must have been valid at event time and target must remain eligible at snapshot publication"
+  ],
+  "distinctListenerRules": [
+    "distinct-listener contribution must use privacy-preserving bounded identifiers or aggregation and must not require publishing Wallet/Identity linkage",
+    "one listener contributes at most once per target per declared distinct-listener window",
+    "sybil resistance may use qualified rate/behavior/account/device signals only under later privacy/threat-model policy; no legal-identity requirement is implied",
+    "distinct-listener data is derived analytics and never Identity credential/trust authority"
+  ],
+  "antiGamingRules": [
+    "dedupe by stable event/replay key before scoring",
+    "cap repeated contribution from one bounded listener/source according to the versioned policy",
+    "reject impossible timestamps, future-window events, malformed source references and source-window mismatches",
+    "exclude known test/synthetic fixtures from production charts",
+    "exclude private/unlisted events from public charts",
+    "provider/operator/admin cannot directly edit final rank or score without publishing a new policy/input correction record and deterministic rebuild",
+    "sponsored placement must never be mixed into chart rank; sponsored discovery remains separately labeled Search presentation",
+    "community relation replay cannot inflate counts or chart score",
+    "award votes cannot be reused as chart events",
+    "chart manipulation enforcement/remediation may flag/exclude inputs but cannot rewrite Creative rights, payments or Awards history"
+  ],
+  "snapshotRules": [
+    "ChartSnapshot is immutable derived output keyed by chartPolicyVersion, windowStart, windowEnd, sourceCheckpoint and resultCommitment",
+    "ranking is deterministic for the same policy version and exact eligible input set",
+    "ties are broken deterministically by score descending, then stable canonical target identifier ascending unless a later policy version explicitly changes tie-break semantics",
+    "snapshot generation records source checkpoints/freshness needed to reproduce the result",
+    "a corrected/rebuilt snapshot creates a new snapshot/result commitment and supersession reference rather than mutating historical snapshot bytes in place",
+    "ChartSnapshot never becomes source authority for play events, community relations, rights or Award votes"
+  ],
+  "freshnessRebuildRules": [
+    "Indexer/Search/Analytics inputs are non-authoritative and charts fail closed or label stale/degraded when required source freshness/provenance is unavailable",
+    "non-finalized/reorg-sensitive source inputs must follow the owning Indexer/source canonicality model",
+    "projection rebuild from the same checkpoint/policy must reproduce the same ordered result",
+    "deleted/tombstoned/ineligible source state must not resurrect through stale caches or rebuild",
+    "current charts may supersede prior snapshots while historical snapshot commitments remain immutable presentation history",
+    "Search may index published ChartSnapshots as public derived results but cannot rewrite rank"
+  ],
+  "privacyRules": [
+    "PRIVATE favorites and PRIVATE playlists are excluded from public chart inputs",
+    "UNLISTED playlists/content are excluded from public chart inputs",
+    "raw listener identity, wallet secrets, private playback payloads and private project data are not chart outputs",
+    "public snapshot output contains target refs, rank/score, policy version, window, checkpoint and result commitment only as policy allows",
+    "privacy-safe aggregation must prevent chart publication from exposing a hidden private relation"
+  ],
+  "chartAwardsCommunitySeparation": [
+    "follow/favorite/playlist/community actions do not automatically become chart points; only policy-approved signal classes with explicit nonzero weight do",
+    "AwardVote is never a chart signal",
+    "chart rank/score does not create Award eligibility, nomination, ballot placement or winner status",
+    "community popularity and chart performance are distinct from Creative ownership/rights and payment entitlement",
+    "future Awards policy may reference chart snapshots only through an explicit versioned eligibility rule that avoids circular mutation of the chart itself"
+  ],
+  "displayRules": [
+    "UI must show chart family, policy version, time window and freshness/staleness context",
+    "rank is presentation/derived truth, not canonical ownership/trust/quality judgment",
+    "raw plays, qualified plays, distinct listeners, favorites and Award votes must not be conflated in labels",
+    "if methodology changes, current and historical snapshots must identify the applicable chartPolicyVersion",
+    "paid/sponsored placement cannot be visually merged with organic ChartSnapshot ranking"
+  ],
+  "failureRules": [
+    "PRIVATE or UNLISTED activity entering a public chart fails closed",
+    "AwardVote used as chart credit fails closed",
+    "duplicate/replayed event producing additional chart credit fails closed",
+    "snapshot without policy version/window/source checkpoint/result commitment is invalid",
+    "non-deterministic tie-breaking for identical input set is invalid",
+    "stale/degraded source presented as current without disclosure is invalid",
+    "manual/operator rank mutation without policy/input correction and rebuild is invalid",
+    "sponsored placement altering chart rank is invalid",
+    "chart score granting rights, payment, Award result, Identity trust or governance authority is invalid"
+  ],
+  "invariants": [
+    "HZGCA-CHART-001 Charts are versioned rebuildable derived projections and never canonical protocol authority",
+    "HZGCA-CHART-002 RAW_PLAY and QUALIFIED_PLAY are distinct; only policy-qualified play may score",
+    "HZGCA-CHART-003 one replay/event key contributes at most once to the applicable chart policy/window",
+    "HZGCA-CHART-004 PRIVATE and UNLISTED activity never enters public chart scoring",
+    "HZGCA-CHART-005 AwardVote is categorically separate and never chart credit",
+    "HZGCA-CHART-006 v1 positive score weight is qualified plays only; other frozen community signals have zero score weight until a new policy version",
+    "HZGCA-CHART-007 methodology/window/weight/dedupe/tie-break changes require a new chartPolicyVersion",
+    "HZGCA-CHART-008 same policy version plus same eligible input set/checkpoint yields deterministic ordered result",
+    "HZGCA-CHART-009 ties are deterministic and cannot depend on database iteration order",
+    "HZGCA-CHART-010 ChartSnapshot preserves window, policy version, source checkpoint and result commitment",
+    "HZGCA-CHART-011 rebuild/correction creates superseding snapshot rather than mutating historical snapshot in place",
+    "HZGCA-CHART-012 Search/Indexer/Analytics remain non-authoritative inputs/projections and stale/degraded state is explicit",
+    "HZGCA-CHART-013 community replay, share counts, Search clicks and generation counts cannot silently inflate chart score",
+    "HZGCA-CHART-014 sponsored placement never alters organic chart ranking",
+    "HZGCA-CHART-015 chart publication does not expose protected listener/community/private payloads",
+    "HZGCA-CHART-016 chart rank creates no Creative rights, payment/reward entitlement, Identity trust, governance authority or Award result",
+    "HZGCA-CHART-017 source deletion/withdrawal/ineligibility prevents stale projection resurrection into current chart eligibility",
+    "HZGCA-CHART-018 Charts policy creates no new playback, media, Identity, Awards, payment, Search or governance authority"
+  ],
+  "exitCriteria": [
+    "Chart authority is explicitly derived/rebuildable and source authority is preserved",
+    "raw play, qualified play, distinct listener, community signals and Award votes are semantically separated",
+    "initial chart families, time windows and v1 scoring methodology are explicit",
+    "qualification/dedupe/anti-gaming/privacy rules are explicit without inventing unavailable runtime thresholds",
+    "deterministic snapshot, tie-break, source checkpoint, rebuild/supersession and stale-source rules are explicit",
+    "Charts/Community/Awards/Creative/Search/Indexer/Analytics/Identity/payment boundaries are explicit",
+    "machine verifier enforces vocabulary, v1 weights, deterministic snapshot requirements and no-escalation invariants",
+    "no ABI, live playback analytics source, deployment, provider or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.12 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-community-authority-v1.json",
+    "docs/420INDEXER.md",
+    "docs/420SEARCH-ROADMAP.md",
+    "docs/architecture/trust-boundary-model.md"
+  ]
+}

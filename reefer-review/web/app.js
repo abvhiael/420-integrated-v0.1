@@ -405,14 +405,19 @@ function parseRoute() {
   const allowed=["latest","news","originals","topics","search","editorial","moderation","news-admin"];
   return {route:allowed.includes(route)?route:"latest",id:""};
 }
+function newsAdminHeaders(extra={}) {
+  const secret=$("#news-admin-key").value;
+  if (secret && secret.length>=32) return {Authorization:`Bearer ${secret}`,...extra};
+  return authHeaders(extra);
+}
 let editingNewsSource = "";
 
 async function loadNewsAdmin() {
   const status = $("#news-admin-status"), list = $("#news-admin-list");
   list.replaceChildren();
-  if (!state.sessionToken) { status.textContent="Connect a verified moderator session to manage news sources."; return; }
+  if (!state.sessionToken && !$("#news-admin-key").value) { status.textContent="Provide a standalone news admin key or connect a verified moderator session."; return; }
   try {
-    const response = await getJSON("/v1/admin/news/sources",{headers:authHeaders()});
+    const response = await getJSON("/v1/admin/news/sources",{headers:newsAdminHeaders()});
     const sources = Array.isArray(response.sources) ? response.sources : [];
     status.textContent = `${sources.length} configured publisher sources. Disabled sources are not fetched.`;
     for (const source of sources) {
@@ -448,7 +453,7 @@ $("#news-admin-new").addEventListener("click",resetNewsAdmin);
 $("#news-admin-form").addEventListener("submit",async(e)=>{
   e.preventDefault();
   const status=$("#news-admin-status");
-  if (!state.sessionToken) {status.textContent="Moderator session required.";return;}
+  if (!state.sessionToken && !$("#news-admin-key").value) {status.textContent="Admin credential required.";return;}
   const id=$("#news-admin-id").value.trim();
   const source={
     id,name:$("#news-admin-name").value.trim(),feed_url:$("#news-admin-feed").value.trim(),
@@ -459,7 +464,7 @@ $("#news-admin-form").addEventListener("submit",async(e)=>{
   };
   try {
     await getJSON("/v1/admin/news/sources",{method:editingNewsSource?"PUT":"POST",
-      headers:authHeaders({"Content-Type":"application/json"}),body:JSON.stringify({source})});
+      headers:newsAdminHeaders({"Content-Type":"application/json"}),body:JSON.stringify({source})});
     status.textContent=`Source ${id} saved. ${source.enabled?"Enabled":"Disabled"}.`;
     resetNewsAdmin();await loadNewsAdmin();await loadSourcesAndTopics();
   } catch (error) {status.textContent=`Source save rejected: ${error.message}`;}

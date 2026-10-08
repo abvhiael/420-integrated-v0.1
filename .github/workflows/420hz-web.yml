@@ -8,12 +8,16 @@ on:
       - 'hz/config/gca-compute-execution-adapter-v1.json'
       - 'hz/config/gca-provenance-consent-rights-v1.json'
       - 'hz/config/gca-project-workspace-v1.json'
+      - 'hz/config/gca-generate-studio-ux-v1.json'
       - 'scripts/verify-420hz-gca-3.py'
       - 'scripts/verify-420hz-gca-4.py'
       - 'scripts/verify-420hz-gca-5.py'
+      - 'scripts/verify-420hz-gca-6.py'
       - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
       - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
       - 'docs/architecture/420hz/HZ-GCA-5-PROJECT-WORKSPACE-STORAGE.md'
+      - 'docs/architecture/420hz/HZ-GCA-6-GENERATE-STUDIO-UX.md'
+      - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -26,12 +30,16 @@ on:
       - 'hz/config/gca-compute-execution-adapter-v1.json'
       - 'hz/config/gca-provenance-consent-rights-v1.json'
       - 'hz/config/gca-project-workspace-v1.json'
+      - 'hz/config/gca-generate-studio-ux-v1.json'
       - 'scripts/verify-420hz-gca-3.py'
       - 'scripts/verify-420hz-gca-4.py'
       - 'scripts/verify-420hz-gca-5.py'
+      - 'scripts/verify-420hz-gca-6.py'
       - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
       - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
       - 'docs/architecture/420hz/HZ-GCA-5-PROJECT-WORKSPACE-STORAGE.md'
+      - 'docs/architecture/420hz/HZ-GCA-6-GENERATE-STUDIO-UX.md'
+      - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -176,3 +184,34 @@ jobs:
 
       - name: Verify HZ-GCA-5 project workspace storage
         run: python3 scripts/verify-420hz-gca-5.py
+
+
+  gca6:
+    name: HZ-GCA-6 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test Generate Studio state model
+        run: node --test hz/web/test/generate-studio.test.mjs
+
+      - name: Retain 420Hz web qualification
+        run: python3 scripts/verify-420hz-web.py
+
+      - name: Retain HZ-GCA-5 project/storage boundary
+        run: python3 scripts/verify-420hz-gca-5.py
+
+      - name: Verify HZ-GCA-6 Generate Studio UX
+        run: python3 scripts/verify-420hz-gca-6.py

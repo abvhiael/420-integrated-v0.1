@@ -87,17 +87,13 @@ RR-6 is a material cross-component milestone because it replaces the generic Sea
 ## RR-7 — Newsfeed Security
 SSRF/redirect/DNS-rebinding controls, parser hardening, sanitization, source allowlisting, fetch limits, copyright/attribution enforcement and adversarial ingestion tests.
 
-Status: **IMPLEMENTATION IN PROGRESS / LEVEL 1 QUALIFICATION PENDING**
-
-RR-7 security changes and adversarial tests are on the accumulated PR branch, along with a dedicated exact-head fast qualification workflow and `RR-7-NEWSFEED-SECURITY.md`. Do not mark COMPLETE until the RR-7 Level 1 workflow passes on the final implementation SHA and durable evidence is recorded. Level 2 is milestone-driven; Level 3 remains RR-10.
+Status: **COMPLETE at repository Level 1 + Level 2** on implementation SHA `c0f874efbd754c9ff49c313c3096ed0c6488572c`; passing runs `37695907354` and `37695907728`. Durable record: `RR-7-QUALIFICATION.md`. Live security and Level 3 reconciliation remain separate.
 
 
 ## RR-8 — Feed Operations
 Background polling scheduler, conditional GET, retry/backoff/circuit breaking, source health, checkpoints and operator source dashboard.
 
-Status: **IMPLEMENTED / LEVEL 1 QUALIFICATION PENDING**
-
-Repository implementation adds a scheduler, safe conditional fetch, versioned operational checkpoints, retry/backoff and circuit state, source-health readout, and focused tests. The exact-head `Reefer Review RR-8` workflow must pass before RR-8 can be declared COMPLETE. See `RR-8-FEED-OPERATIONS.md`. Level 3 remains RR-10.
+Status: **COMPLETE at repository Level 1 + Level 2** on implementation SHA `43a44e756fceb1b811c1992ca5b48df0558b76bb`; passing runs `37697397017` and `37697397030`. Durable record: `RR-8-QUALIFICATION.md`. Live operations and Level 3 reconciliation remain separate.
 
 
 ## RR-9 — Web UX & Deployment

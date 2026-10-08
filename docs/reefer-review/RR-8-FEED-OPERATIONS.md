@@ -32,6 +32,6 @@ REEFER_REVIEW_FEED_MODE=poll go run ./cmd/reefer-news-sync
 
 RR-8 tests cover conditional request headers, 304, persist/restart, polling cadence, outage retry and circuit suppression. RR-7 secure feed fetching remains in use when a custom HTTP client is not injected. No live feed polling, monitoring or public-testnet operation is claimed.
 
-**Status: Level 1 exact-head qualification pending.** Level 2 retained app integration remains milestone-triggered. Level 3 is RR-10.
+**Status: COMPLETE at repository Level 1 and Level 2.** Exact qualified SHA `43a44e756fceb1b811c1992ca5b48df0558b76bb`; Level 1 run `37697397017` PASS, Level 2 run `37697397030` PASS. Durable `RR-8-QUALIFICATION.md`. Live operations and RR-10 Level 3 remain open.
 
 Next canonical step after completion: **RR-9 — Web UX & Deployment**.

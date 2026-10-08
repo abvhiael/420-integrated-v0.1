@@ -6,7 +6,7 @@
   "canonical_definition": "Reconcile the complete accumulated CMP-7 SDK, API, indexer, analytics, documentation and CLI phase against current main, establish one exact merge-candidate implementation SHA, run all required Level 3 owners once on that SHA, preserve durable evidence, and hand off to CMP-8 — 420Compute application.",
   "reconciliation": {
     "main_sha": "c6b62a6ea75be97564564e56b779dfad7df3f784",
-    "reconciled_anchor_sha": "110bbc33ae10e2436e25fc2bc6abb0a2a096fe68",
+    "reconciled_anchor_sha": "63b0bf7d77389685e464edb1f8db10548b72e181",
     "behind_main": 0
   },
   "qualified_prerequisites": ["CMP-7.1","CMP-7.2","CMP-7.3","CMP-7.4","CMP-7.5","CMP-7.6","CMP-7.7","CMP-7.8","CMP-7.9"],

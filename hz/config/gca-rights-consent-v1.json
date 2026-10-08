@@ -1,0 +1,247 @@
+{
+  "schema": "420hz-gca-rights-consent-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.6",
+  "title": "Define rights & consent boundaries",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "authorities": {
+    "creativeRights": "420 Creative Protocol rights/authorization/license registries",
+    "contributorCredits": "420 Creative ContributorRegistry accepted-credit state",
+    "aiTrainingRights": "420AI ModelRegistry training-rights declaration/grants",
+    "walletAuthorization": "420 Wallet / SmartAccount for explicit user signatures/actions",
+    "voicePersonaConsent": "no canonical production registry is claimed by HZ-GCA-1.6; only qualified explicit consent references may be consumed",
+    "hzRole": "collect intent, display requirements, preserve references, fail closed, and submit only bounded requests to owning systems"
+  },
+  "disclosureRequirements": {
+    "HUMAN": [
+      "ordinary Creative registration/rights/contributor requirements apply",
+      "no AI-specific transformation or synthetic-identity consent is implied solely by HUMAN disclosure"
+    ],
+    "AI_ASSISTED": [
+      "ordinary Creative registration/rights/contributor requirements apply",
+      "if source Work/Recording material is actually used, the applicable Creative permissions still apply",
+      "if a synthetic identifiable voice/persona is used, explicit consent references are required"
+    ],
+    "AI_GENERATED": [
+      "ordinary Creative registration/rights/contributor requirements apply for claimed human contributors/rights holders",
+      "synthetic identifiable voice/persona use requires explicit consent references",
+      "model/provider execution does not confer copyright, contributor or commercialization rights"
+    ],
+    "AI_DERIVATIVE": [
+      "source Work/Recording authorization is mandatory",
+      "Creative AI_TRANSFORM plus USE_MASTER and COMMERCIALIZE permissions are required for the canonical AI_DERIVATIVE source-recording path unless a later Creative policy version changes the exact required mask",
+      "a valid source license may satisfy recording permissions only through Creative LicenseRegistry.hasPermissions semantics",
+      "synthetic identifiable voice/persona use additionally requires explicit consent references"
+    ]
+  },
+  "creativePermissionRules": [
+    {
+      "case": "COVER",
+      "requiredWorkPermissions": [
+        "CREATE_COVER",
+        "COMMERCIALIZE"
+      ],
+      "requiredSourceRecordingPermissions": [],
+      "authority": "AuthorizationRegistry420"
+    },
+    {
+      "case": "REMIX",
+      "requiredWorkPermissions": [
+        "CREATE_REMIX",
+        "COMMERCIALIZE"
+      ],
+      "requiredSourceRecordingPermissions": [
+        "CREATE_REMIX",
+        "USE_MASTER",
+        "COMMERCIALIZE"
+      ],
+      "authority": "AuthorizationRegistry420"
+    },
+    {
+      "case": "STEM_REMIX",
+      "requiredWorkPermissions": [
+        "CREATE_REMIX",
+        "COMMERCIALIZE"
+      ],
+      "requiredSourceRecordingPermissions": [
+        "CREATE_REMIX",
+        "USE_STEMS",
+        "COMMERCIALIZE"
+      ],
+      "authority": "AuthorizationRegistry420"
+    },
+    {
+      "case": "SAMPLE_DERIVATIVE",
+      "requiredWorkPermissions": [
+        "COMMERCIALIZE"
+      ],
+      "requiredSourceRecordingPermissions": [
+        "USE_SAMPLE",
+        "COMMERCIALIZE"
+      ],
+      "authority": "AuthorizationRegistry420"
+    },
+    {
+      "case": "AI_DERIVATIVE",
+      "requiredWorkPermissions": [
+        "COMMERCIALIZE"
+      ],
+      "requiredSourceRecordingPermissions": [
+        "AI_TRANSFORM",
+        "USE_MASTER",
+        "COMMERCIALIZE"
+      ],
+      "authority": "AuthorizationRegistry420"
+    }
+  ],
+  "licenseRules": [
+    "Creative LicenseRegistry may satisfy required source-recording permissions only for the exact active licenseeProfileId, source RecordingId, permission mask and validity window.",
+    "Expired, inactive, wrong-licensee, wrong-recording or insufficient-mask licenses fail closed.",
+    "420Hz cannot infer permission from existence of a license offer, payment receipt, metadata label or provider claim.",
+    "Derivative activation must be revalidated by the Creative Protocol at activation time; preflight approval in 420Hz is not final authority."
+  ],
+  "contributorRules": [
+    "A proposed Creative contributor credit is not accepted consent or attribution.",
+    "Only ContributorRegistry credit state ACCEPTED establishes accepted protocol credit for that exact asset/role.",
+    "Contributor credit is distinct from economic rights ownership; RightsRegistry split/finalization controls economic rights.",
+    "Economic rights ownership is distinct from source-use authorization and distinct from synthetic voice/persona consent.",
+    "420Hz may not auto-accept contributor credits, fabricate rights splits or infer rights from display metadata."
+  ],
+  "rightsRules": [
+    "Creative Work and Recording rights remain separate canonical pools.",
+    "Initial splits require the canonical RightsRegistry acceptance/finalization path.",
+    "RightsStatus metadata does not itself replace finalized RightsRegistry split state.",
+    "A generation provider, AI model creator, Compute worker or storage provider receives no Creative rights merely by participating in execution.",
+    "Awards/community popularity never changes Creative rights."
+  ],
+  "trainingVsTransformation": {
+    "transformationAuthority": "Creative AuthorizationRegistry420 / LicenseRegistry420",
+    "trainingAuthority": "420AI AIModelRegistry Model420Metadata + TrainingGrant policy",
+    "rules": [
+      "AI_TRANSFORM permission authorizes a transformation use under Creative policy only; it does not authorize model training.",
+      "AI training rights fail closed under 420AI unless the model/version training mode and valid grant authorize the exact grantee/scope.",
+      "An ordinary Creative licensePolicyId, remix license, contributor credit or rights split does not imply AI training permission.",
+      "A 420AI training grant does not authorize transformation, remix, sampling, commercialization or use of a Creative Work/Recording."
+    ]
+  },
+  "voicePersonaConsent": {
+    "scope": "synthetic or cloned voice/persona claims that identify or purport to identify a real performer/creator/person",
+    "requiredEvidence": [
+      "consent subject identity/reference",
+      "consenting authority/controller reference",
+      "scope commitment covering the intended synthetic use",
+      "effective/expiry bounds where applicable",
+      "revocation/status evidence source",
+      "evidence commitment/reference that can be independently checked by the qualified consent source"
+    ],
+    "rules": [
+      "A typed name, artist name, model name, prompt text, provider badge, user checkbox without qualified evidence, or public availability of recordings is not consent.",
+      "Consent must be scoped to the intended synthetic identity use; generic contributor credit or source-license permission is insufficient unless that canonical instrument explicitly covers the synthetic identity scope.",
+      "Consent expiry or revocation blocks new REVIEWED/REGISTERED/PUBLISHED transitions requiring that consent.",
+      "Historical provenance retains the consent reference/status observed at publication even if later revoked.",
+      "Because the repository does not currently establish a canonical production voice/persona consent registry for this HZ phase, 420Hz must fail closed for such claims unless a qualified explicit consent source/reference is available."
+    ]
+  },
+  "sourceMaterialRules": [
+    "Reference audio that contains protected Work/Recording material must follow Creative source authorization; upload possession alone is not permission.",
+    "USE_MASTER, USE_STEMS, USE_SAMPLE and AI_TRANSFORM are distinct permissions and must not be substituted for one another.",
+    "A source Work permission cannot satisfy a required source Recording permission where AuthorizationRegistry420 requires both.",
+    "Public-domain or independently-owned source assertions require provenance/evidence; 420Hz does not self-certify legal status.",
+    "External processing permission, where relevant, remains separate from Creative derivative permission."
+  ],
+  "reviewAndLifecycleGates": {
+    "beforeSUBMITTED": [
+      "creator must acknowledge applicable source/voice rights requirements for the intended request",
+      "known disallowed source/persona use must fail before paid execution where determinable"
+    ],
+    "beforeREVIEWED": [
+      "HZ-GCA-1.5 provenance is complete for the selected output",
+      "AI_DERIVATIVE has source authorization references",
+      "synthetic identifiable voice/persona claims have qualified consent references",
+      "expired/revoked/insufficient known authorization blocks review"
+    ],
+    "beforeREGISTERED": [
+      "Creative registrant/creator-profile authority is valid",
+      "required source authorization/license state is revalidated",
+      "accepted contributor credits/rights setup required by Creative activation workflow are not fabricated by 420Hz",
+      "authorizationManifestCommitment binds the exact rights/consent references used"
+    ],
+    "beforePUBLISHED": [
+      "Creative Work/Recording activation requirements pass canonically",
+      "derivative authorization is valid at activation/publication time",
+      "required voice/persona consent remains valid for the publication action",
+      "disclosure/provenance/rights/consent references are internally consistent"
+    ]
+  },
+  "expiryRevocationRevalidation": [
+    "Time-bounded source licenses and consent instruments must be checked at the action that relies on them, not merely when first uploaded.",
+    "Revocation cannot retroactively erase immutable historical provenance but can block new generation, registration, publication, republication or derivative actions according to policy.",
+    "Cached authorization/consent status is non-authoritative and must not outlive its source freshness/validity.",
+    "If canonical source state is unavailable or conflicting, the gated action fails closed."
+  ],
+  "failureRules": [
+    "AI_DERIVATIVE without required Creative authorization fails closed.",
+    "Wrong/expired/inactive/insufficient Creative license fails closed.",
+    "Required synthetic voice/persona consent without qualified explicit evidence fails closed.",
+    "Contributor PROPOSED is not treated as ACCEPTED.",
+    "Unfinalized rights split is not treated as finalized economic rights.",
+    "Creative AI_TRANSFORM is never treated as AI training permission.",
+    "420AI TrainingGrant is never treated as Creative transformation/commercialization permission.",
+    "Provider/model/user assertions cannot substitute for canonical authorization or qualified consent.",
+    "Missing/unavailable/conflicting required authority state blocks the action rather than defaulting to allowed."
+  ],
+  "invariants": [
+    "HZGCA-RC-001 420Hz never becomes the canonical authority for Creative rights, licenses, contributor credits, AI training grants or wallet authorization",
+    "HZGCA-RC-002 AI_DERIVATIVE requires canonical Creative source authorization and cannot be authorized by disclosure/provenance labels alone",
+    "HZGCA-RC-003 Creative AI_TRANSFORM permission and 420AI training permission are independent and non-substitutable",
+    "HZGCA-RC-004 source Recording permission masks are checked exactly for the derivative class and cannot be broadened by 420Hz",
+    "HZGCA-RC-005 an issued Creative license is usable only when active, unexpired, correct-licensee, correct-source and sufficient-mask",
+    "HZGCA-RC-006 derivative authorization is revalidated by the Creative Protocol at activation rather than trusted from stale application preflight",
+    "HZGCA-RC-007 contributor credit requires ContributorRegistry ACCEPTED state; PROPOSED is insufficient",
+    "HZGCA-RC-008 accepted contributor credit does not imply economic rights ownership",
+    "HZGCA-RC-009 finalized economic rights do not imply source-use authorization or synthetic identity consent",
+    "HZGCA-RC-010 AI providers, models, workers and storage providers acquire no Creative rights by execution participation alone",
+    "HZGCA-RC-011 synthetic identifiable voice/persona use requires explicit scoped consent evidence from a qualified source",
+    "HZGCA-RC-012 names, prompts, model labels, provider claims, public recordings and unverified checkboxes are not consent",
+    "HZGCA-RC-013 consent/source authorization expiry or revocation blocks new gated actions that rely on it",
+    "HZGCA-RC-014 historical provenance preserves prior authorization/consent references without converting revoked consent into current permission",
+    "HZGCA-RC-015 reference-audio possession is not authorization; source Work/Recording permissions remain distinct",
+    "HZGCA-RC-016 missing, unavailable or conflicting required rights/consent state fails closed",
+    "HZGCA-RC-017 rights/consent checks cannot be bypassed by HUMAN/AI_ASSISTED/AI_GENERATED disclosure selection",
+    "HZGCA-RC-018 authorizationManifestCommitment binds exact source/consent references but does not itself grant the underlying authority"
+  ],
+  "exitCriteria": [
+    "rights, contributor, source-use, AI-training and voice/persona consent authorities are explicitly separated",
+    "canonical Creative derivative permission masks and license validation boundaries are preserved",
+    "AI transformation and AI training permission are explicitly non-substitutable",
+    "synthetic voice/persona consent evidence requirements and fail-closed absence behavior are explicit",
+    "lifecycle revalidation, expiry/revocation and historical-provenance semantics are explicit",
+    "machine verifier enforces authority separation, exact permission vocabulary and fail-closed invariants",
+    "no nonexistent consent registry, ABI, deployment, provider or testnet state is claimed",
+    "HZ-GCA-1 remains open for HZ-GCA-1.7 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.4-AI-DISCLOSURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.5-PROVENANCE-MODEL.md",
+    "hz/config/gca-product-boundaries-v1.json",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-generate-lifecycle-v1.json",
+    "hz/config/gca-ai-disclosure-v1.json",
+    "hz/config/gca-provenance-v1.json",
+    "contracts/src/creative/shared/CreativeTypes420.sol",
+    "contracts/src/creative/rights/AuthorizationRegistry420.sol",
+    "contracts/src/creative/rights/LicenseRegistry420.sol",
+    "contracts/src/creative/rights/ContributorRegistry420.sol",
+    "contracts/src/creative/rights/RightsRegistry420.sol",
+    "contracts/src/creative/README.md",
+    "contracts/src/ai/AIModelRegistry.sol",
+    "contracts/test/CreativeKernelAcceptance420.t.sol"
+  ]
+}

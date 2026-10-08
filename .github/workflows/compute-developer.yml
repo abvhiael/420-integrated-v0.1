@@ -8,6 +8,8 @@ on:
       - 'services/compute-api/**'
       - '420-indexer/**'
       - 'docs/compute-market/CMP-7*'
+      - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
+      - 'scripts/verify-cmp-7-10-closeout.py'
       - '.github/workflows/compute-developer.yml'
   push:
     branches: [ main ]
@@ -17,6 +19,8 @@ on:
       - 'services/compute-api/**'
       - '420-indexer/**'
       - 'docs/compute-market/CMP-7*'
+      - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
+      - 'scripts/verify-cmp-7-10-closeout.py'
       - '.github/workflows/compute-developer.yml'
 
 concurrency:
@@ -36,6 +40,7 @@ jobs:
       cli: ${{ steps.paths.outputs.cli }}
       api_milestone: ${{ steps.paths.outputs.api_milestone }}
       full_milestone: ${{ steps.paths.outputs.full_milestone }}
+      level3_closeout: ${{ steps.paths.outputs.level3_closeout }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,13 +57,136 @@ jobs:
             files="$(git diff-tree --no-commit-id --name-only -r HEAD)"
           fi
           sdk=false; api=false; indexer=false; cli=false
-          api_milestone=false; full_milestone=false
+          api_milestone=false; full_milestone=false; level3_closeout=false
           grep -qE '^packages/420-sdk/' <<<"$files" && sdk=true || true
           grep -qE '^services/compute-api/' <<<"$files" && api=true || true
           grep -qE '^420-indexer/' <<<"$files" && indexer=true || true
           grep -qE '^packages/420-cli/' <<<"$files" && cli=true || true
           if grep -qE '^docs/compute-market/CMP-7\.5-RESEARCH-PROJECT-API\.md$' <<<"$files" && ! grep -qE '^docs/compute-market/CMP-7\.6-COMPUTE-INDEXER\.md$' <<<"$files"; then api_milestone=true; fi
-          if grep -qE '^docs/compute-market/CMP-7\.9-CLI\.md$' <<<"$files" && ! grep -qE '^docs/compute-market/CMP-7\.10-' <<<"$files"; then full_milestone=true; fi
+          if grep -qE '^docs/compute-market/CMP-7\.9-CLI\.md
+          echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
+          echo "api=$api" >> "$GITHUB_OUTPUT"
+          echo "indexer=$indexer" >> "$GITHUB_OUTPUT"
+          echo "cli=$cli" >> "$GITHUB_OUTPUT"
+          echo "api_milestone=$api_milestone" >> "$GITHUB_OUTPUT"
+          echo "full_milestone=$full_milestone" >> "$GITHUB_OUTPUT"
+          echo "level3_closeout=$level3_closeout" >> "$GITHUB_OUTPUT"
+
+  sdk:
+    needs: classify
+    if: needs.classify.outputs.sdk == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+
+  api:
+    needs: classify
+    if: needs.classify.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+  indexer:
+    needs: classify
+    if: needs.classify.outputs.indexer == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test
+
+  cli:
+    needs: classify
+    if: needs.classify.outputs.cli == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+
+  api-integration:
+    needs: classify
+    if: needs.classify.outputs.api_milestone == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained Compute SDK suite
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+      - name: Retained Compute API suite
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+  full-integration:
+    needs: classify
+    if: needs.classify.outputs.full_milestone == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: SDK
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+      - name: API
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+      - name: Indexer
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test
+      - name: CLI
+        working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+ <<<"$files" && ! grep -qE '^docs/compute-market/CMP-7\.10-' <<<"$files"; then full_milestone=true; fi
+          grep -qE '^contracts/config/compute-market/cmp-7\.10-phase-closeout\.json
           echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
           echo "api=$api" >> "$GITHUB_OUTPUT"
           echo "indexer=$indexer" >> "$GITHUB_OUTPUT"
@@ -157,6 +285,153 @@ jobs:
   full-integration:
     needs: classify
     if: needs.classify.outputs.full_milestone == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: SDK
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+      - name: API
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+      - name: Indexer
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test
+      - name: CLI
+        working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+ <<<"$files" && level3_closeout=true || true
+          echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
+          echo "api=$api" >> "$GITHUB_OUTPUT"
+          echo "indexer=$indexer" >> "$GITHUB_OUTPUT"
+          echo "cli=$cli" >> "$GITHUB_OUTPUT"
+          echo "api_milestone=$api_milestone" >> "$GITHUB_OUTPUT"
+          echo "full_milestone=$full_milestone" >> "$GITHUB_OUTPUT"
+
+  sdk:
+    needs: classify
+    if: needs.classify.outputs.sdk == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+
+  api:
+    needs: classify
+    if: needs.classify.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+  indexer:
+    needs: classify
+    if: needs.classify.outputs.indexer == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test
+
+  cli:
+    needs: classify
+    if: needs.classify.outputs.cli == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+
+  api-integration:
+    needs: classify
+    if: needs.classify.outputs.api_milestone == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained Compute SDK suite
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+      - name: Retained Compute API suite
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+  full-integration:
+    needs: classify
+    if: needs.classify.outputs.full_milestone == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: SDK
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+      - name: API
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+      - name: Indexer
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test
+      - name: CLI
+        working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+
+  level3-integration:
+    needs: classify
+    if: needs.classify.outputs.level3_closeout == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

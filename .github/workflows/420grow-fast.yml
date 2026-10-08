@@ -53,10 +53,10 @@ jobs:
         run: npm run qualify
       - name: GROW-05 service behavior and security qualification
         run: |
-          go test ./grow/service ./grow/location
-          go vet ./grow/service
-          gofmt -d grow/service/*.go
-          test -z "$(gofmt -l grow/service/*.go)"
+          go test ./grow/service ./grow/location ./grow/cmd/server
+          go vet ./grow/service ./grow/cmd/server
+          gofmt -d grow/service/*.go grow/cmd/server/*.go
+          test -z "$(gofmt -l grow/service/*.go grow/cmd/server/*.go)"
       - name: GROW-03 consumer and directly affected SDK tests
         run: go test ./grow/location ./genesis/svc2/... ./location/...
       - name: GROW-03 static analysis and format

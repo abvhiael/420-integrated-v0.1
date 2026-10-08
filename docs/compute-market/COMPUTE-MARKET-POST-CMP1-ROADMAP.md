@@ -638,6 +638,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.3 worker API](CMP-7.3-WORKER-API.md).
 
 ## CMP-7.4 — Verifier API
+**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.4 verifier API](CMP-7.4-VERIFIER-API.md).
 
 ## CMP-7.5 — Research project API
 

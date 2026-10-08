@@ -38,9 +38,36 @@ export interface ComputeWorkerProjection420 {
   readonly authoritative: false;
 }
 
+export interface ComputeVerifierProjection420 {
+  readonly schemaVersion: typeof COMPUTE_API_SCHEMA_420;
+  readonly chainId: string;
+  readonly verifierId: string;
+  readonly operator: string;
+  readonly status: string;
+  readonly classIds: readonly string[];
+  readonly policyIds: readonly string[];
+  readonly finality: 'pending' | 'safe' | 'finalized';
+  readonly authoritative: false;
+}
+
+export interface ComputeVerificationProjection420 {
+  readonly schemaVersion: typeof COMPUTE_API_SCHEMA_420;
+  readonly chainId: string;
+  readonly jobId: string;
+  readonly policyId: string;
+  readonly verdict: string;
+  readonly decisionRef: string;
+  readonly verifierIds: readonly string[];
+  readonly challengeDeadline: string | null;
+  readonly finality: 'pending' | 'safe' | 'finalized';
+  readonly authoritative: false;
+}
+
 export interface ComputeJobReadStore420 {
   job(chainId: bigint, jobId: string): Promise<ComputeJobProjection420 | null>;
   worker?(chainId: bigint, workerId: string): Promise<ComputeWorkerProjection420 | null>;
+  verifier?(chainId: bigint, verifierId: string): Promise<ComputeVerifierProjection420 | null>;
+  verification?(chainId: bigint, jobId: string): Promise<ComputeVerificationProjection420 | null>;
 }
 
 export interface ComputeJobSubmission420 {
@@ -66,6 +93,8 @@ export interface ComputeJobApi420 {
   submit(input: ComputeJobSubmission420): ComputeJobSubmissionPlan420;
   job(jobId: string): Promise<ComputeJobProjection420 | null>;
   worker(workerId: string): Promise<ComputeWorkerProjection420 | null>;
+  verifier(verifierId: string): Promise<ComputeVerifierProjection420 | null>;
+  verification(jobId: string): Promise<ComputeVerificationProjection420 | null>;
 }
 
 export interface ComputeApiResponse420 {
@@ -163,6 +192,10 @@ function requireWorkerId420(value: string): string {
   if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new ComputeApiRequestError420(400,'workerId must be bytes32 hex');
   return value.toLowerCase();
 }
+function requireVerifierId420(value: string): string {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new ComputeApiRequestError420(400,'verifierId must be bytes32 hex');
+  return value.toLowerCase();
+}
 
 export function createComputeJobApi420(host: ComputeSdkHost420, store: ComputeJobReadStore420): ComputeJobApi420 {
   const sdk=createComputeSdk420(host);
@@ -192,6 +225,18 @@ export function createComputeJobApi420(host: ComputeSdkHost420, store: ComputeJo
       const value=await store.worker(BigInt(sdk.chainId),requireWorkerId420(workerId));
       if (value && value.authoritative !== false) throw new ComputeApiRequestError420(500,'worker projection authority violation');
       return value;
+    },
+    async verifier(verifierId: string) {
+      if (!store.verifier) throw new ComputeApiRequestError420(503,'verifier projection unavailable');
+      const value=await store.verifier(BigInt(sdk.chainId),requireVerifierId420(verifierId));
+      if (value && value.authoritative !== false) throw new ComputeApiRequestError420(500,'verifier projection authority violation');
+      return value;
+    },
+    async verification(jobId: string) {
+      if (!store.verification) throw new ComputeApiRequestError420(503,'verification projection unavailable');
+      const value=await store.verification(BigInt(sdk.chainId),requireJobId420(jobId));
+      if (value && value.authoritative !== false) throw new ComputeApiRequestError420(500,'verification projection authority violation');
+      return value;
     }
   });
 }
@@ -210,6 +255,18 @@ export async function routeComputeJobApi420(api: ComputeJobApi420, method: strin
       if (verb !== 'POST') return error420(405,'method_not_allowed','job submission requires POST');
       if (body === undefined) return error420(400,'invalid_request','request body is required');
       return ok420(api.submit(object420(body,'body') as unknown as ComputeJobSubmission420),202);
+    }
+    const verifierMatch=/^\/v1\/compute\/verifiers\/(0x[0-9a-fA-F]{64})$/.exec(path);
+    if (verifierMatch) {
+      if (verb !== 'GET') return error420(405,'method_not_allowed','verifier reads require GET');
+      const value=await api.verifier(verifierMatch[1]!);
+      return value ? ok420(value) : error420(404,'not_found','compute verifier not found');
+    }
+    const verificationMatch=/^\/v1\/compute\/verifications\/(0x[0-9a-fA-F]{64})$/.exec(path);
+    if (verificationMatch) {
+      if (verb !== 'GET') return error420(405,'method_not_allowed','verification reads require GET');
+      const value=await api.verification(verificationMatch[1]!);
+      return value ? ok420(value) : error420(404,'not_found','compute verification not found');
     }
     const workerMatch=/^\/v1\/compute\/workers\/(0x[0-9a-fA-F]{64})$/.exec(path);
     if (workerMatch) {

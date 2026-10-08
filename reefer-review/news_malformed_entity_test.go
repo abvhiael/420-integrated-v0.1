@@ -11,7 +11,7 @@ func TestRR11MalformedPublisherEntityRecovery(t *testing.T) {
 	if err != nil || len(entries) != 1 {
 		t.Fatalf("publisher entity recovery: %v, %d entries", err, len(entries))
 	}
-	if entries[0].Title != "Cannabis &y market" || !strings.Contains(entries[0].Summary, "Hemp &copy; & retail") {
+	if entries[0].Title != "Cannabis &y market" || !strings.Contains(entries[0].Summary, "Hemp © & retail") {
 		t.Fatalf("unexpected feed content: %+v", entries[0])
 	}
 }

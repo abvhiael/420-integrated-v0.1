@@ -65,7 +65,7 @@ if not errors:
         need(token in license_rules, f"license rule missing: {token}")
 
     contributor = " ".join(rc.get("contributorRules", []))
-    need("PROPOSED" in contributor and "ACCEPTED" in contributor, "contributor proposed/accepted distinction missing")
+    need("proposed Creative contributor credit is not accepted" in contributor and "ContributorRegistry credit state ACCEPTED" in contributor, "contributor proposed/accepted distinction missing")
     need("distinct from economic rights ownership" in contributor, "credit/economic-rights separation missing")
     need("synthetic voice/persona consent" in contributor, "credit/voice-consent separation missing")
 
@@ -77,7 +77,7 @@ if not errors:
     joined_training = " ".join(training.get("rules", []))
     need("AI_TRANSFORM permission authorizes" in joined_training, "AI_TRANSFORM boundary missing")
     need("does not authorize model training" in joined_training, "transform/training non-substitution missing")
-    need("TrainingGrant does not authorize transformation" in joined_training, "training/Creative non-substitution missing")
+    need("420AI training grant does not authorize transformation" in joined_training, "training/Creative non-substitution missing")
 
     voice = rc.get("voicePersonaConsent", {})
     need("synthetic or cloned voice/persona" in voice.get("scope",""), "voice/persona scope missing")

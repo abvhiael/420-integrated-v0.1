@@ -261,14 +261,14 @@ Next canonical roadmap step:
 
 Qualified implementation SHA:
 
-`d46585be81059dc1619e5005495a773e47efe5d3`
+`a6b32e97f95d868eb89785af3dd877969d49d26c`
 
 Authoritative workflow:
 
 - **420Hz Web Qualification**
-- Run: **37826287208** (#237)
+- Run: **37841673679** (#241)
 - Job: **HZ-GCA-6 Level 1**
-- Job ID: **113479885333**
+- Job ID: **113532303192**
 - Result: **PASS**
 
 Exact-head required results:
@@ -279,6 +279,6 @@ Exact-head required results:
 - HZ-GCA-6 targeted verifier: **PASS**
 - retained web job: **PASS**
 
-Current `main` advanced after implementation qualification to `e3bd7128a572ca4db9e4ab346996fce7c4ff140e` through ReeferReview feed-recovery work. The intervening executable delta is confined to `reefer-review/news_feed.go`, `reefer-review/news_malformed_entity_test.go`, and `reefer-review/web/app.js`; it does not overlap or alter 420Hz web/generation code, HZ-GCA policies, or the HZ-GCA-6 qualification workflow. No ceremonial reconciliation is required for this ordinary step.
+Current `main` advanced after the original HZ-GCA-6 implementation qualification through ReeferReview and Compute-roadmap work. The branch was reconciled to current `main` `ff61fc1171d422c081f4a5abb9e5828e88949c0f` using merge commit `a6b32e97f95d868eb89785af3dd877969d49d26c`. The only content conflict was global `docs/ROADMAP.md`; the merged file preserves both the HZ-GCA phase handoff and current Compute scientific-ingestion/Gridcoin roadmap additions. The exact reconciled SHA then passed the complete HZ-GCA-6 Level-1 suite.
 
 No Level-2 milestone is required for HZ-GCA-6. Level-3 repository-wide qualification remains deferred to HZ-GCA-17.

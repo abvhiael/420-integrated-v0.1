@@ -89,3 +89,11 @@ test('Governance event projection is idempotent and reorg replay replaces fork p
   assert.equal(db.queries[3]!.params?.[2], h(44));
   assert.equal(db.queries[3]!.params?.[3], h(45));
 });
+
+test('protocol decoder preserves signed int256 reputation totals', () => {
+  const topic0=h(888);
+  const registry=new ProtocolDecoderRegistry420([{protocol:'420Compute',eventName:'ReputationReferenceCaptured',topic0,fields:[{name:'total',kind:'int256',indexed:false}]}]);
+  const negOne=('0x'+'f'.repeat(64)) as Hex;
+  const log:IndexerLog={address:h(1),blockHash:h(2),blockNumber:1n,transactionHash:h(3),transactionIndex:0,logIndex:0,topics:[topic0],data:negOne};
+  assert.equal(registry.decode(log)?.fields.total,-1n);
+});

@@ -49,6 +49,7 @@ jobs:
         run: go test ./grow/location ./genesis/svc2/sdk ./location/uikit ./location/privacy
       - name: GROW-03 static analysis and format
         run: |
+          gofmt -d grow/location/*.go
           test -z "$(gofmt -l grow/location/*.go)"
           go vet ./grow/location
       - name: GROW-01 bounded canonical definition verifier

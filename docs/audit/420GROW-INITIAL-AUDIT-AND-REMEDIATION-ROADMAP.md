@@ -32,7 +32,7 @@
 | GROW-02 | Canonical service ID/Registry and Wallet discovery | ServiceIds420; W14.5 | Consumer-only identity decision; no service ID, Registry or Wallet promotion | App-scoped identity verifier introduced and CI executed | GROW-02 identity decision document | COMPLETE | Grow remains unregistered; independent service promotion requires a future explicit authority decision |
 | GROW-03 | Business/farm place integration | GEN-SVC-2 and location-events config | Public read-only Grow consumer via canonical GEN-SVC-2 SDK; public source and optional Registry provenance preserved | Go consumer/SDK/GEN-SVC-2/420Location suite and negative tests PASS at exact SHA 3131735 | GROW-03 consumer and security documentation | COMPLETE | Later GROW-04/05/07 implement UI, service pagination, and independent Verify integration if needed |
 | GROW-04 | Frontend, routes, UX, wallet flow, assets | Static read-only public Grow frontend, searchable category list, schematic map, details and fail-closed states | Web build and six UI/security tests PASS at exact SHA 1d7684e | GROW-04 UX specification and web README | COMPLETE | Live binding, visual/manual device and accessibility qualification deferred to GROW-10 |
-| GROW-05 | Backend/API/worker/indexer/storage | Product spec not yet defined | No Grow-owned surface | None | None | BLOCKED | Determine required services; reuse shared standards |
+| GROW-05 | Backend/API/worker/indexer/storage | Read-only Grow HTTP service, pagination/filter handler, production public SDK constructor and guarded server entrypoint committed | Unit/integration/negative tests committed; required exact-head GitHub Actions still queued | GROW-05 service boundary spec | PARTIAL | Execute affected fast workflow, repair any deterministic failures, record exact qualified implementation SHA |
 | GROW-06 | Contracts/interfaces/permission/funds | Product spec not yet defined | No Grow-owned contracts | None | None | BLOCKED | Determine whether any contract is required; do not invent custody |
 | GROW-07 | SDK, events, integrations, authorization | GEN-SVC-0; product decision pending | No Grow client | None | Shared standards only | BLOCKED | Define specific interop matrix and tests |
 | GROW-08 | Build, static checks, test and security qualification | App implementation pending | No Grow-specific targets | NOT RUN; no app implementation | None | BLOCKED | Implement suites then qualify exact immutable SHA |
@@ -127,3 +127,16 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Limitations:** browser device/screen reader/manual visual checks and deployed HTTPS API integration remain GROW-10 release responsibilities; unpaginated upstream discovery scaling belongs GROW-05/GROW-07. Live source intentionally disabled by default.
 - **Level 2:** defer retained app-wide integration milestone until backend and integrations converge. **Level 3:** complete phase closeout only; canonical Solidity Foundry owner and Genesis address authority must not duplicate full inventory.
 - **Next step:** **GROW-05 — Service layer**.
+
+## GROW-05 implementation and open Level-1 evidence (2026-10-08)
+
+- **Step:** GROW-05 — Service layer, Level 1. **Status:** PARTIAL, not COMPLETE pending exact implementation SHA tests.
+- **Current substantive implementation SHA at entry:** `8616a977a707602b761a4a12376b57eda5b411a3`; subsequent substantive code changes supersede this SHA.
+- **Change scope:** `grow/service/handler.go`, `grow/service/handler_test.go`, `grow/cmd/server/main.go`, `.github/workflows/420grow-fast.yml`, `docs/audit/420GROW-GROW-05-SERVICE.md`, and this evidence ledger.
+- **Authority:** public Location reader only, noncanonical/read-only; no DB, worker/indexer, token, smart contracts, Registry mutation, Wallet execution or private Place lookup.
+- **API:** GET-only `/v1/grow/places`, category/search, limit and offset with bounded parser, sanitized failure codes; stable public place IDs/source provenance preserved; no independent 420Verify claim. Pagination is snapshot-local against upstream 500-item cap, NOT a stable global pagination claim.
+- **Source authentication:** guarded HTTPS origin configuration and loopback-default service; no upstream redirect following; request/response timeouts and graceful exit.
+- **Targeted CI:** GitHub Actions 420Grow fast qualification queued at initial SHA, run [37741341830](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37741341830) and [37741345430](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37741345430). **No tests, lint, format or verifiers are claimed PASS until the required workflow reaches completed success on exact implementation HEAD.**
+- **Milestones:** Level 2 app convergence deferred to GROW-03–07 milestone; Level 3 full Solidity/Genesis/420Integrated/global Docs qualification deferred to phase closeout.
+- **Main/base SHA previously inspected:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71`; branch remains cumulative draft PR #567. Recheck before closeout.
+- **Next roadmap step when GROW-05 qualified:** **GROW-06 — Contracts**. Do not advance to GROW-06 while GROW-05 is PARTIAL.

@@ -27,7 +27,8 @@
     "computeMarket": "420/service/compute-market/v1",
     "search": "420/service/search/v1",
     "notifications": "420/service/notifications/v1",
-    "analytics": "420/service/analytics/v1"
+    "analytics": "420/service/analytics/v1",
+    "arbitration": "420/service/arbitration/v1"
   },
   "requestEnvelope": {
     "required": [
@@ -430,7 +431,7 @@
     {
       "name": "Arbitration420Hz",
       "owner": "420Arbitration",
-      "dependency": null,
+      "dependency": "arbitration",
       "operations": [
         "OpenExplicitCase",
         "ObserveCase",

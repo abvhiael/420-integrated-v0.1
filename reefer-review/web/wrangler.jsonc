@@ -1,0 +1,10 @@
+{
+  "name": "reeferreview",
+  "compatibility_date": "2026-10-08",
+  "main": "./worker.js",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/v1/news", "/v1/news/*"]
+  }
+}

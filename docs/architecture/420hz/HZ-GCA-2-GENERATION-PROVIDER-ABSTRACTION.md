@@ -1,6 +1,6 @@
 # HZ-GCA-2 — Generation job and provider abstraction
 
-Status: **IMPLEMENTED — awaiting exact-head Level-1 qualification**
+Status: **COMPLETE — Level 1 exact-head qualified**
 
 Canonical roadmap step:
 
@@ -409,3 +409,31 @@ HZ-GCA-2 is complete when:
 Next canonical roadmap step:
 
 **HZ-GCA-3 — 420AI / Compute Market execution adapter**
+
+
+## Qualification result
+
+Qualified implementation SHA:
+
+`d983e77cadb8d6cfb09bc3a6da0c02e027c1b3f2`
+
+Required workflow:
+
+- **420Hz GCA Qualification**
+- Run: **37809590885** (#291)
+- Job: **HZ-GCA Level 1**
+- Job ID: **113422667411**
+- Result: **PASS**
+
+The generation module qualification executed 17 Node tests with:
+
+- pass: 17
+- fail: 0
+- cancelled: 0
+- skipped: 0
+
+The targeted HZ-GCA-2 verifier passed, and retained HZ-GCA-1.1 through HZ-GCA-1.19 architecture verifiers also passed on the exact same implementation SHA.
+
+Level 2 was intentionally not run for HZ-GCA-2. The conditional HZ-GCA Level-2 job correctly classified this commit as non-milestone and skipped its broader retained integration steps.
+
+**HZ-GCA-2 is COMPLETE at Level 1.**

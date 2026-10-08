@@ -56,8 +56,8 @@ if not errors:
 
     substantial = disc.get("substantialityRule", {})
     need("No fixed percentage threshold is invented" in substantial.get("policy", ""), "no-invented-threshold rule missing")
-    need("fails closed" in substantial.get("failClosed", ""), "ambiguous classification fail-closed rule missing")
-    need("never default to HUMAN" in substantial.get("failClosed", ""), "ambiguous HUMAN default prohibition missing")
+    need("fail closed" in substantial.get("failClosed", ""), "ambiguous classification fail-closed rule missing")
+    need("rather than default to HUMAN" in substantial.get("failClosed", ""), "ambiguous HUMAN default prohibition missing")
 
     binding = disc.get("publicationBinding", {})
     need(binding.get("requiredForGenerateOrigin") is True, "Generate-origin disclosure must be mandatory")

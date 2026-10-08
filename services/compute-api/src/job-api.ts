@@ -63,11 +63,40 @@ export interface ComputeVerificationProjection420 {
   readonly authoritative: false;
 }
 
+export interface ComputeResearchProjectProjection420 {
+  readonly schemaVersion: typeof COMPUTE_API_SCHEMA_420;
+  readonly chainId: string;
+  readonly projectId: string;
+  readonly owner: string;
+  readonly projectCommitment: string;
+  readonly metadataCommitment: string;
+  readonly revision: string;
+  readonly active: boolean;
+  readonly resultCount: string;
+  readonly finality: 'pending' | 'safe' | 'finalized';
+  readonly authoritative: false;
+}
+
+export interface ComputeResearchResultProjection420 {
+  readonly schemaVersion: typeof COMPUTE_API_SCHEMA_420;
+  readonly chainId: string;
+  readonly resultId: string;
+  readonly projectId: string;
+  readonly workUnitId: string;
+  readonly provenanceRef: string;
+  readonly verificationDecisionRef: string;
+  readonly publicationPolicyId: string;
+  readonly finality: 'pending' | 'safe' | 'finalized';
+  readonly authoritative: false;
+}
+
 export interface ComputeJobReadStore420 {
   job(chainId: bigint, jobId: string): Promise<ComputeJobProjection420 | null>;
   worker?(chainId: bigint, workerId: string): Promise<ComputeWorkerProjection420 | null>;
   verifier?(chainId: bigint, verifierId: string): Promise<ComputeVerifierProjection420 | null>;
   verification?(chainId: bigint, jobId: string): Promise<ComputeVerificationProjection420 | null>;
+  researchProject?(chainId: bigint, projectId: string): Promise<ComputeResearchProjectProjection420 | null>;
+  researchResults?(chainId: bigint, projectId: string): Promise<readonly ComputeResearchResultProjection420[]>;
 }
 
 export interface ComputeJobSubmission420 {
@@ -95,6 +124,8 @@ export interface ComputeJobApi420 {
   worker(workerId: string): Promise<ComputeWorkerProjection420 | null>;
   verifier(verifierId: string): Promise<ComputeVerifierProjection420 | null>;
   verification(jobId: string): Promise<ComputeVerificationProjection420 | null>;
+  researchProject(projectId: string): Promise<ComputeResearchProjectProjection420 | null>;
+  researchResults(projectId: string): Promise<readonly ComputeResearchResultProjection420[]>;
 }
 
 export interface ComputeApiResponse420 {
@@ -196,6 +227,10 @@ function requireVerifierId420(value: string): string {
   if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new ComputeApiRequestError420(400,'verifierId must be bytes32 hex');
   return value.toLowerCase();
 }
+function requireProjectId420(value: string): string {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new ComputeApiRequestError420(400,'projectId must be bytes32 hex');
+  return value.toLowerCase();
+}
 
 export function createComputeJobApi420(host: ComputeSdkHost420, store: ComputeJobReadStore420): ComputeJobApi420 {
   const sdk=createComputeSdk420(host);
@@ -237,6 +272,19 @@ export function createComputeJobApi420(host: ComputeSdkHost420, store: ComputeJo
       const value=await store.verification(BigInt(sdk.chainId),requireJobId420(jobId));
       if (value && value.authoritative !== false) throw new ComputeApiRequestError420(500,'verification projection authority violation');
       return value;
+    },
+    async researchProject(projectId: string) {
+      if (!store.researchProject) throw new ComputeApiRequestError420(503,'research project projection unavailable');
+      const value=await store.researchProject(BigInt(sdk.chainId),requireProjectId420(projectId));
+      if (value && value.authoritative !== false) throw new ComputeApiRequestError420(500,'research project projection authority violation');
+      return value;
+    },
+    async researchResults(projectId: string) {
+      if (!store.researchResults) throw new ComputeApiRequestError420(503,'research result projection unavailable');
+      const values=await store.researchResults(BigInt(sdk.chainId),requireProjectId420(projectId));
+      if (values.length > 200) throw new ComputeApiRequestError420(500,'research result projection exceeded bounded page');
+      if (values.some((value)=>value.authoritative !== false)) throw new ComputeApiRequestError420(500,'research result projection authority violation');
+      return values;
     }
   });
 }
@@ -255,6 +303,17 @@ export async function routeComputeJobApi420(api: ComputeJobApi420, method: strin
       if (verb !== 'POST') return error420(405,'method_not_allowed','job submission requires POST');
       if (body === undefined) return error420(400,'invalid_request','request body is required');
       return ok420(api.submit(object420(body,'body') as unknown as ComputeJobSubmission420),202);
+    }
+    const researchResultsMatch=/^\/v1\/compute\/research\/projects\/(0x[0-9a-fA-F]{64})\/results$/.exec(path);
+    if (researchResultsMatch) {
+      if (verb !== 'GET') return error420(405,'method_not_allowed','research result reads require GET');
+      return ok420(await api.researchResults(researchResultsMatch[1]!));
+    }
+    const researchProjectMatch=/^\/v1\/compute\/research\/projects\/(0x[0-9a-fA-F]{64})$/.exec(path);
+    if (researchProjectMatch) {
+      if (verb !== 'GET') return error420(405,'method_not_allowed','research project reads require GET');
+      const value=await api.researchProject(researchProjectMatch[1]!);
+      return value ? ok420(value) : error420(404,'not_found','research project not found');
     }
     const verifierMatch=/^\/v1\/compute\/verifiers\/(0x[0-9a-fA-F]{64})$/.exec(path);
     if (verifierMatch) {

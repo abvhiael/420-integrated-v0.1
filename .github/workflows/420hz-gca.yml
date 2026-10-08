@@ -93,3 +93,6 @@ jobs:
 
       - name: Verify HZ-GCA-1.16 API event interface contracts
         run: python3 scripts/verify-420hz-gca-1-16.py
+
+      - name: Verify HZ-GCA-1.17 failure recovery semantics
+        run: python3 scripts/verify-420hz-gca-1-17.py

@@ -28,8 +28,8 @@
 
 | ID | Requirement | Canonical source | Current implementation | Tests | Documentation | Status | Required remediation |
 |---|---|---|---|---|---|---|---|
-| GROW-01 | Canonical product definition, scope, release target | GEN-SVC-0 promotion rule; W14.5 | Bounded read-only implementation baseline documented; Genesis authority deliberately withheld | Targeted verifier committed; CI not yet evidenced | GROW-01 product-definition document | PARTIAL | Obtain passing exact-SHA Level 1 evidence and distinguish provisional baseline from full product expansion approval |
-| GROW-02 | Canonical service ID/Registry and Wallet discovery | ServiceIds420; W14.5 | No Grow ID | No Grow tests | Explicit unresolved note | BLOCKED | Decide whether a new service is justified; approve ID before code |
+| GROW-01 | Canonical product definition, scope, release target | GEN-SVC-0 promotion rule; W14.5 | Read-only implementation baseline documented; Genesis authority deliberately withheld | 420Grow fast qualification successful on aacf1ec and bd542651 implementation SHAs | GROW-01 product-definition document | COMPLETE | Any broader Grow product vision requires a new explicit product decision |
+| GROW-02 | Canonical service ID/Registry and Wallet discovery | ServiceIds420; W14.5 | Consumer-only identity decision; no service ID, Registry or Wallet promotion | App-scoped identity verifier introduced and CI executed | GROW-02 identity decision document | COMPLETE | Grow remains unregistered; independent service promotion requires a future explicit authority decision |
 | GROW-03 | Business/farm place integration | GEN-SVC-2 and location-events config | Shared provider contract exists; no Grow consumer | No Grow integration tests | Shared contract only | PARTIAL | Build app consumer using source precision and provenance restrictions |
 | GROW-04 | Frontend, routes, UX, wallet flow, assets | Product spec not yet defined | No Grow-named surface | None | None | BLOCKED | Define and implement approved UX |
 | GROW-05 | Backend/API/worker/indexer/storage | Product spec not yet defined | No Grow-owned surface | None | None | BLOCKED | Determine required services; reuse shared standards |
@@ -87,3 +87,17 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Level 3:** deferred to monolithic app phase closeout; do not duplicate Solidity Foundry in Genesis.
 - **Security:** only documented fail-closed public visibility, geospatial-precision and canonical-authority invariants; none implementation-tested.
 - **Next roadmap identity:** **GROW-02 — Canonical identity decision**, but do not implement/promote it as GROW-01 qualification evidence.
+
+## GROW-02 Level-1 identity-decision qualification evidence (2026-10-08)
+
+- **Step:** GROW-02 — Canonical identity decision; **Level 1**.
+- **Chosen authority model:** consumer-only/non-authoritative public farm/business Place discovery; no new protocol service identity, Genesis application record, Registry key, Wallet canonical launch entry, frozen-address reservation or app custodial authority. A new independent identity remains behind a separate explicit Genesis/catalog decision.
+- **Substantive implementation SHA:** `bd54265109bd9322d8cf6b44b65a57cbaf2f0a06`.
+- **Changes:** `docs/audit/420GROW-GROW-02-IDENTITY-DECISION.md`, `scripts/verify-grow-02.py`, `.github/workflows/420grow-fast.yml`; evidence-only ledger commit follows.
+- **Reconciliation base at implementation:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71` (`main`), audit branch diverged; Level 3 main reconciliation deferred.
+- **Targeted CI:** GitHub Actions **420Grow fast qualification**, run [37739003794](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37739003794), job `113185097844`, SHA `bd54265109bd9322d8cf6b44b65a57cbaf2f0a06`. Steps GROW-01 verifier, GROW-02 verifier and Python syntax reported **SUCCESS**; await completed overall job/run conclusion before calling whole workflow PASS.
+- **GROW-01 retrospective:** run [37736244376](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37736244376) at `aacf1ec2957db0075a52fbd17ff36c32e028b681` was **SUCCESS**, superseding previously absent run evidence. No unrelated Governance workflow failure is treated as Grow identity qualification.
+- **Security checks:** fail-closed registration/Wallet identity invariant; no Grow service ID/alias; unchanged upstream Place scope; no execution/custody capability introduced. No contract-level security claim made.
+- **Level 2:** staged milestone after GROW-03 through GROW-07 integration convergence; no new material shared authority introduced. **Level 3:** deferred until complete phase closeout. Broad Solidity/Genesis/full Docs global reruns deliberately omitted.
+- **Milestone:** product-and-authority decision documented; further identity promotion prohibited without explicit new decision.
+- **Next:** **GROW-03 — Shared location consumer**.

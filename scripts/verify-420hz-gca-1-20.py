@@ -48,7 +48,7 @@ if not errors:
     need(m.get("accumulatedRange")==expected,"accumulated HZ-GCA-1 range drift")
 
     main_sha=m.get("reconciledMainSha")
-    need(main_sha=="dbe29983986fefb77a4e78ff96a3689c8589f956","reconciled main SHA drift")
+    need(main_sha=="0993ff5b5b3b213a0768dbde90e4734df5ab4cc0","reconciled main SHA drift")
     try:
         rc=subprocess.run(["git","merge-base","--is-ancestor",main_sha,"HEAD"],cwd=ROOT,check=False).returncode
         need(rc==0,"reconciled main is not an ancestor of exact qualification HEAD")

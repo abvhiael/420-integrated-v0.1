@@ -8,11 +8,11 @@ Reconcile the complete accumulated CMP-7 developer-surface phase against current
 
 ## Reconciliation baseline
 
-Current reconciled `main`: `c6b62a6ea75be97564564e56b779dfad7df3f784`.
+Current reconciled `main`: `d112b2eb55b50a3a4f52a5e2a5364374595efe71`.
 
-Accumulated CMP-7 anchor: `63b0bf7d77389685e464edb1f8db10548b72e181`.
+Accumulated CMP-7 anchor: `7516fc8b9cd85eafb2c88ba013074074b5f70520`.
 
-At closeout construction the branch is 22 commits ahead and 0 commits behind that current-main baseline, so no synthetic reconciliation merge is required.
+The branch was reconciled to current `main` with true merge anchor `7516fc8b9cd85eafb2c88ba013074074b5f70520`; the closeout candidate is therefore 0 commits behind the recorded baseline.
 
 ## Qualified phase surface
 

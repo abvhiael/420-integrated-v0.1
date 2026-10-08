@@ -5,6 +5,10 @@ root=Path(__file__).resolve().parents[1]
 checks={
 "reefer-review/http.go":["securityResponseHeaders","sessionMiddleware"],
 "reefer-review/http_security.go":["X-Content-Type-Options","X-Frame-Options","Referrer-Policy","Content-Security-Policy","Cache-Control"],
+"reefer-review/backup.go":["CreateEncryptedBackup","RestoreEncryptedBackup","backupSchema"],
+"reefer-review/backup_test.go":["TestRR9EncryptedBackupRestoreAndTampering","TestRR9BackupRejectsSymlinksAndUnsafeNames"],
+"reefer-review/web/rr9.e2e.spec.cjs":["AxeBuilder","mobile navigation","anonymous news"],
+"reefer-review/http_metrics.go":["HTTPMetrics","TotalLatencyNS","duration_ms"],
 "reefer-review/http_rate_limit.go":["apiRateLimiter","Retry-After","StatusTooManyRequests","RemoteAddr"],
 "reefer-review/http_security_test.go":["TestRR9SecurityHeadersOnPublicAndDeniedResponses","TestRR9NoImplicitCORSOptIn","TestRR9RateLimitIgnoresSpoofedForwardedHeader"],
 "reefer-review/web/index.html":["skip-link","main-content","viewport"],

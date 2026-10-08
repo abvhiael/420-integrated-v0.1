@@ -89,5 +89,21 @@ Threat cases to qualify during implementation: cross-tenant IDOR, privilege esca
 - [x] Privacy, trust, authorization, device safety and compliance nonclaims defined.
 - [x] Dependencies, deferred architecture selections and authority constraints defined.
 - [x] Future steps and milestone qualification boundaries defined without replacing GROW-01–10.
-- [ ] Exact implementation-SHA Level-1 repository qualification evidence and required workflow conclusions.
-- [ ] Durable audited completion status (only after Level-1 PASS).
+- [x] Exact implementation-SHA Level-1 repository qualification evidence and required workflow conclusions.
+- [x] Durable audited completion status (only after Level-1 PASS).
+
+
+## GROW-V2-01 — Level 1 exact-SHA closeout (2026-10-08)
+
+**Step status: COMPLETE — Level 1 product decision only.** The substantive product definition, roadmap, verifier and app-specific workflow were qualified together at implementation SHA `fc00b78f442c20eac35669d411dbe8d8ac8f99df`. Main/base at branch creation: `ffc6a4028676907c266714b5c1ae8ba3af9a7137`. PR #582: `audit/420grow-v2-01-product-decision-20261008`. Source changes are exclusively documentation, scoped Python verifier and dedicated Level-1 workflow; no altered Grow runtime, shared service, contract, address map or Genesis inventory.
+
+- **[420Grow V2 product decision run #37846815165](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37846815165)** — exact SHA verified; job `113549623734` **SUCCESS**; Python 3.11 syntax and product contract/non-promotion checks **PASS**.
+- **[420Grow fast qualification run #37846815166](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37846815166)** — exact SHA; canonical-definition job `113549623595` **SUCCESS**; existing Go/Location/GEN-SVC-2, web UX/security, clean build/race, boundaries, static checks and retained GROW-01–10 preflight/regression **PASS**.
+- **Separate unrelated repository workflow:** `governance-deployment-audit.yml` run `37846813718` reported failure with no jobs exposed via connector; not counted as a V2-01 PASS or an applicable product-decision test. Investigate separately if it becomes a required branch rule.
+- **Level 2:** not required at product-definition boundary; milestones planned for V2-05 and V2-10.
+- **Level 3:** deferred to V2-15; original Foundry full-inventory shutdown remains explicitly unresolved on the earlier testnet worklist. No new run of Solidity, Genesis, 420 Integrated or global Docs was required or requested for this ordinary scope-decision step.
+- **Live/testnet:** V2-16 remains pending and original GROW-10 remains blocked; no deployment, paid workflow, private data custody or Genesis service admission authorized.
+
+**Next canonical step:** **GROW-V2-02 — Architecture, tenancy, roles and security model**.
+
+This paragraph is an **evidence-only closeout** referring to the earlier exactly tested implementation SHA; it changes no product requirements, test assertions, workflows or deployed behavior and does not recursively require another substantive rerun.

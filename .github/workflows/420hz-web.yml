@@ -7,10 +7,13 @@ on:
       - 'hz/generate/**'
       - 'hz/config/gca-compute-execution-adapter-v1.json'
       - 'hz/config/gca-provenance-consent-rights-v1.json'
+      - 'hz/config/gca-project-workspace-v1.json'
       - 'scripts/verify-420hz-gca-3.py'
       - 'scripts/verify-420hz-gca-4.py'
+      - 'scripts/verify-420hz-gca-5.py'
       - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
       - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
+      - 'docs/architecture/420hz/HZ-GCA-5-PROJECT-WORKSPACE-STORAGE.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -22,10 +25,13 @@ on:
       - 'hz/generate/**'
       - 'hz/config/gca-compute-execution-adapter-v1.json'
       - 'hz/config/gca-provenance-consent-rights-v1.json'
+      - 'hz/config/gca-project-workspace-v1.json'
       - 'scripts/verify-420hz-gca-3.py'
       - 'scripts/verify-420hz-gca-4.py'
+      - 'scripts/verify-420hz-gca-5.py'
       - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
       - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
+      - 'docs/architecture/420hz/HZ-GCA-5-PROJECT-WORKSPACE-STORAGE.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -138,3 +144,35 @@ jobs:
 
       - name: Verify HZ-GCA-4 provenance consent AI rights
         run: python3 scripts/verify-420hz-gca-4.py
+
+
+  gca5:
+    name: HZ-GCA-5 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify 420Hz generation project module
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Retain HZ-GCA-1.8 storage retention policy
+        run: python3 scripts/verify-420hz-gca-1-8.py
+
+      - name: Retain HZ-GCA-4 provenance boundary
+        run: python3 scripts/verify-420hz-gca-4.py
+
+      - name: Verify HZ-GCA-5 project workspace storage
+        run: python3 scripts/verify-420hz-gca-5.py

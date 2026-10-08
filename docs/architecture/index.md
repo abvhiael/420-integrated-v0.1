@@ -13,6 +13,7 @@ This directory is the canonical home for system-level architecture documentation
 - [Consensus architecture](consensus/index.md) — validators, committees/cohorts, proposer scheduling, epochs, QCs/finality, rewards, slashing, failure, and recovery.
 - [Infrastructure architecture](infrastructure/index.md) — `fourtwentyd`, `node420`, 420Indexer, RPC/gateways, storage/resources, AI compute, oracle/provider infrastructure, observability, and operator services.
 - [Core protocol architecture](protocols/index.md) — canonical protocol discovery, integration, authority, composition, provider-neutrality, settlement, evidence and recovery rules.
+- [420Hz Generate + Community + Awards architecture](420hz/index.md) — consolidated application authority, object, privacy, economics, Charts, Awards, moderation, API and recovery architecture.
 - [Architecture Decision Records](decisions/README.md) — accepted, proposed, superseded, and deprecated architectural decisions.
 
 ## Purpose

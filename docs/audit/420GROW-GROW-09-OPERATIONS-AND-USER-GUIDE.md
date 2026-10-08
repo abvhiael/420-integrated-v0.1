@@ -94,4 +94,4 @@ Accessibility design includes labelled search/filter controls, keyboard operabil
 - Level-2 app integration checkpoint was GROW-03–07; GROW-08 clean checkout/race/security app suite has separate exact-SHA evidence.
 - GROW-10 retains deployment/stage gating; comprehensive Level-3 main reconciliation, canonical Solidity inventory and separate Genesis address authority occur only at final app-phase closeout.
 
-**Related specs:** GROW-01 product; GROW-02 identity; GROW-03 public Location; GROW-04 UX; GROW-05 service; GROW-06 contract decision; GROW-07 integration matrix; GROW-08 CI and audit roadmap. **Next step:** GROW-10 — Deployment and stage qualification.
+**Related specs:** `docs/audit/420GROW-GROW-05-SERVICE.md`; GROW-01 product; GROW-02 identity; GROW-03 public Location; GROW-04 UX; GROW-05 service; GROW-06 contract decision; GROW-07 integration matrix; GROW-08 CI and audit roadmap. **Next step:** GROW-10 — Deployment and stage qualification.

@@ -1,0 +1,110 @@
+name: Compute Developer Surfaces
+
+on:
+  pull_request:
+    paths:
+      - 'packages/420-sdk/**'
+      - 'packages/420-cli/**'
+      - '420-indexer/**'
+      - 'docs/compute-market/CMP-7*'
+      - '.github/workflows/compute-developer.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/420-sdk/**'
+      - 'packages/420-cli/**'
+      - '420-indexer/**'
+      - 'docs/compute-market/CMP-7*'
+      - '.github/workflows/compute-developer.yml'
+
+concurrency:
+  group: compute-developer-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    outputs:
+      sdk: ${{ steps.paths.outputs.sdk }}
+      cli: ${{ steps.paths.outputs.cli }}
+      indexer: ${{ steps.paths.outputs.indexer }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            files="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
+          else
+            files="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+          fi
+          sdk=false; cli=false; indexer=false
+          grep -qE '^packages/420-sdk/' <<<"$files" && sdk=true || true
+          grep -qE '^packages/420-cli/' <<<"$files" && cli=true || true
+          grep -qE '^420-indexer/' <<<"$files" && indexer=true || true
+          echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
+          echo "cli=$cli" >> "$GITHUB_OUTPUT"
+          echo "indexer=$indexer" >> "$GITHUB_OUTPUT"
+
+  sdk:
+    needs: classify
+    if: needs.classify.outputs.sdk == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund
+      - working-directory: packages/420-sdk
+        run: npm test
+
+  cli:
+    needs: classify
+    if: needs.classify.outputs.cli == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - working-directory: packages/420-cli
+        run: npm install --no-audit --no-fund && npm test
+
+  indexer:
+    needs: classify
+    if: needs.classify.outputs.indexer == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test

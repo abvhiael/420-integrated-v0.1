@@ -175,3 +175,5 @@ jobs:
       - run: make build
       - run: python3 scripts/run-fault-matrix.py
       - run: python3 scripts/run-soak.py --slots 120 --slot-ms 35
+
+# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.

@@ -240,3 +240,5 @@ jobs:
         continue-on-error: true
         working-directory: contracts
         run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary
+
+# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.

@@ -23,10 +23,20 @@ Implemented:
 - development-only thin web page;
 - production fail-closed executable.
 
+Implemented and repository-qualified:
+- deployment-supplied Wallet/420Identity verified-session boundary;
+- Bearer session enforcement with ReeferReview audience, chain/network, expiry and revocation checks;
+- scoped `reefer.author`, `reefer.publisher` and `reefer.moderator` capabilities;
+- memory-only browser session handling through the deployment Wallet authentication gateway;
+- typed Go client session-token provider with no `X-420-Actor` authentication;
+- durable publication/revision/moderation metadata store with durable idempotency;
+- owner-scoped 420 Storage adapter contract requiring encrypted-at-rest, external-key-custody and SHA-256 integrity guarantees;
+- structured 420 Rights provenance evidence bound to publication body digest and, when present, the verified Wallet session chain/network/holder.
+
 Not implemented or not yet qualified:
-- live Identity/Wallet session adapter;
-- encrypted/durable 420 Storage adapter;
-- live 420 Rights adapter and chain provenance verification;
+- live deployed Wallet/420Identity verifier composition;
+- live deployed 420 Storage provider/endpoints and production key-custody evidence;
+- live deployed 420 Rights registry/router endpoint evidence;
 - deployed 420 Search/Notifications/420Mail integrations;
 - production ingress/rate limiting/observability/backups;
 - browser accessibility/mobile E2E;
@@ -38,14 +48,19 @@ Not implemented or not yet qualified:
 ## API
 
 All routes are under `/v1`.
-- `POST /v1/publications` — create draft; requires `X-420-Actor` in the repository harness.
+- `POST /v1/publications` — create draft; requires an author or publisher Bearer session.
 - `GET /v1/publications` — public published feed; cursor pagination.
-- `GET /v1/publications/{id}` — repository harness article read.
-- `POST /v1/publications/{id}/publish` — publish after authorization and rights assertion.
-- `POST /v1/publications/{id}/moderate` — scoped HIDE/RESTORE.
-- `GET /readyz` — dependency-construction readiness only.
+- `GET /v1/publications/{id}` — anonymous PUBLIC/UNLISTED read, or viewer-aware read when a verified Bearer session is supplied.
+- `PUT /v1/publications/{id}` — author/publisher edit with ownership/capability checks.
+- `POST /v1/publications/{id}/publish` — author/publisher publish after authorization and rights assertion.
+- `POST /v1/publications/{id}/moderate` — moderator/publisher scoped HIDE/RESTORE.
+- `POST /v1/publications/{id}/tombstone` — authorized tombstone.
+- `GET /v1/editorial/publications` — scoped editorial listing.
+- `GET /v1/publications/{id}/revisions` — authorized revision history.
+- `GET /v1/publications/{id}/moderation` — authorized moderation history.
+- `GET /readyz` — dependency/session-verifier construction readiness.
 
-`X-420-Actor` is a test/development injection boundary, not production authentication. Production must bind a validated Wallet/Identity session and reject spoofed headers at ingress.
+Protected routes derive identity only from a validated Wallet/420Identity Bearer session. `X-420-Actor` is not accepted as authentication authority.
 
 ## Build and test
 
@@ -60,3 +75,86 @@ REEFER_REVIEW_DEPLOYMENT_MODE=development go run ./cmd/reefer-review
 ```
 
 Any staging/production mode intentionally fails closed until live adapters are implemented and qualified.
+
+
+## Persistent cannabis newsfeed (RR-1)
+
+The repository now contains the RR-1 persistent external cannabis-news foundation.
+
+- External stories use a distinct `ExternalNewsItem` model; they are not rewritten as ReeferReview-authored Publications.
+- RSS 2.0 and Atom feeds are normalized into title/link/source/byline/summary/topic/provenance metadata.
+- Full third-party article bodies are not ingested. The canonical article URL remains the reader handoff.
+- `config/reefer-review-news-sources.json` is the reviewed source registry.
+- `FileNewsStore` persists normalized items across process restarts and uses atomic file replacement.
+- Canonical URL normalization, stable IDs, feed-GUID continuity and content fingerprints provide deduplication/replay resistance.
+- Deterministic cannabis relevance filtering rejects unrelated feed entries from the public news API.
+- Public news routes:
+  - `GET /v1/news`
+  - `GET /v1/news/{id}`
+  - `GET /v1/news/sources`
+  - `GET /v1/news/topics`
+- One-shot ingestion is performed by `go run ./cmd/reefer-news-sync`. Background scheduling remains RR-8 and is intentionally not claimed by RR-1.
+
+Development data defaults to `.reefer-review/news.json`. Override with `REEFER_REVIEW_NEWS_DB`.
+Override the source registry path with `REEFER_REVIEW_NEWS_SOURCES`.
+
+
+## Editorial publishing completion (RR-3)
+
+RR-3 completes the repository-stage editorial lifecycle:
+
+- browser article reader;
+- editorial workspace for draft creation, revision editing and publication;
+- immutable revision history;
+- fresh rights assertions for published revisions;
+- viewer-aware restricted reads;
+- explicit TOMBSTONED lifecycle;
+- moderation reasons and durable history;
+- moderation dashboard;
+- expanded Go client/API parity.
+
+RR-3 originally qualified against the repository-stage actor boundary. RR-4 has now replaced that browser/API boundary with verified Wallet/420Identity Bearer sessions and scoped capabilities while retaining the RR-3 editorial lifecycle.
+
+New API surface:
+- `GET /v1/editorial/publications`
+- `PUT /v1/publications/{id}`
+- `POST /v1/publications/{id}/tombstone`
+- `GET /v1/publications/{id}/revisions`
+- `GET /v1/publications/{id}/moderation`
+
+`GET /v1/publications/{id}` is viewer-aware: anonymous readers receive only PUBLIC or UNLISTED published records; restricted, draft and hidden access requires a verified session accepted by the current authorization policy.
+
+
+## RR-4 identity and permissions
+
+ReeferReview protected editorial and moderation routes are authenticated with `Authorization: Bearer <session>`. The service never accepts `X-420-Actor` as identity authority. A deployment-supplied trusted Wallet/420Identity verifier must return claims bound to `420/service/reefer-review/v1`, the configured chain/network, current expiry/revocation state and scoped capabilities.
+
+The browser requests credentials through `window.ReeferReviewWalletSession` and keeps the bearer token only in JavaScript memory. The typed Go client accepts a `SessionTokenProvider` and retrieves a token at request time. Neither layer mints or persists session credentials.
+
+Live deployment wiring remains a later deployment/live-integration gate.
+
+
+## RR-5 durable storage and Rights
+
+RR-5 introduces the repository-qualified durable publishing composition.
+
+Publication metadata, revision history, moderation history and idempotency bindings can be persisted through `DurableStore`, which uses a schema-versioned JSON representation, process/file locking, 0600 state/lock files, atomic temporary-file replacement, file sync and directory sync. Store corruption and unsupported future schemas fail closed.
+
+Article bodies remain outside the metadata store. `Storage420BlobAdapter` binds ReeferReview to the canonical `sdk/storage420.ObjectRef` identity while requiring a deployment provider to attest qualified 420 Storage, encryption at rest, external key custody, owner-scoped access and SHA-256 integrity. ReeferReview verifies body SHA-256 on write and read and checks the returned object size/root. Restricted records are authorized before their blob is fetched.
+
+Publishing through the RR-5 durable composition requires `RightsProvenanceProvider`. The stored provenance records the canonical `420/service/rights/v1` service identity, subject/right/claim references, holder wallet, evidence/provenance hashes, article digest, chain/network, Registry/Router references, block evidence and verification time. A verified RR-4 session additionally binds holder wallet and chain/network. Local Rights evidence never becomes external legal adjudication.
+
+Repository qualification does not invent or claim live 420 Storage or 420 Rights deployment addresses. Those live deployment/Registry/runtime identities remain later testnet/deployment gates.
+
+
+## RR-6 ecosystem integrations
+
+RR-6 implements repository-side adapters for 420Search, 420Notifications and 420Mail while preserving their non-authoritative roles.
+
+- `Search420Adapter` emits the canonical `search/result` v1 schema for PUBLIC + PUBLISHED ReeferReview articles only, binds discovery to retained 420Rights provenance, never publishes article bodies/private Storage references, and supports deterministic reconciliation/deletion of ReeferReview-owned Search projections.
+- `Notifications420Adapter` targets `420/service/notifications/v1` through a deployment-supplied authority boundary. Requests carry minimized public publication/provenance metadata plus deterministic idempotency; consent suppression is a valid non-delivery result and malformed receipts fail closed.
+- `Mail420Adapter` uses the canonical 420Mail send contract, always uses `420/service/mail/v1` as the Mail transport source, requires a configured authenticated internal sender identity and opt-in recipient resolver, and uses recipient-bound deterministic idempotency. It does not enable external SMTP or paid external newsletters.
+- `IntegrationOutbox` persists failed Search/Notifications/Mail work with owner-only files, OS locking, atomic replacement and fsync. `IntegrationReconciler` retries pending operations without changing publication authority.
+- `NewEcosystemIntegrationBundle` installs queued adapters so dependency outages can degrade projections/delivery without rolling back canonical publication state.
+
+Repository qualification does not claim live service endpoints, deployment credentials, testnet Registry bindings or provider operation. Those remain REEFER-AUDIT-7+ live gates.

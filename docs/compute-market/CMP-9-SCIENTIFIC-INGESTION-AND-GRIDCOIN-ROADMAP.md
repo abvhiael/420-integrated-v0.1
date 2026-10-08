@@ -22,7 +22,9 @@ Inventory each supported Folding@home statistics/result channel and each specifi
 
 Exit: versioned allowlist, evidence-quality tiers, permissions, threat model, provider outage/terms-change procedure and an explicit per-provider enable/disable decision.
 
-### S-02 — Production-grade read-only ingestion clients
+### S-02 — Production-grade read-only ingestion clients — PARTIAL (Level 1 implementation PASS; live provider gate BLOCKED)
+
+**Implementation evidence:** [S-02 Level 1](CMP-S02-QUALIFICATION-EVIDENCE.md), qualified implementation `ec0eb70b5a44f5195b530b2e31166bf18bdefb76`. Fixture-based client security and source format tests passed, but S-02 cannot be marked COMPLETE without authorized real provider response/schema evidence and transport DNS pinning. No production source access or funded rewards enabled.
 
 Build separately versioned, provider-scoped off-chain ingestion clients with HTTPS/TLS validation, no embedded credentials, strict hostname/redirect/SSRF policy, bounded pagination/rate limits, safe timeouts/backoff, stale-source states, schema/version drift alerts, normalization of timestamp/timezone and credit units, and observation cursors. Preserve minimally necessary immutable raw-source digests and redacted provenance; avoid publishing usernames/host IDs, data sets or result files.
 

@@ -37,7 +37,7 @@
 | GROW-07 | SDK, events, integrations, authorization | Cross-app 420Location SDK/Registry provenance/Verify/Wallet/Genesis/wrong-network fail-closed matrix established | GROW-07 boundary guard + retained app-focused Level-1 and Level-2 tests PASS exact SHA 04836cd | GROW-07 matrix plus durable exact-SHA CI evidence | COMPLETE | GROW-08 — Repository qualification |
 | GROW-08 | Build, static checks, test and security qualification | Clean-checkout web/Go build, race tests, repeated adversarial paths and app static/security checks | Completed SUCCESS exact SHA ab6eacd; run 37794520529 | GROW-08 verifier and workflow; durable CI closeout | COMPLETE | GROW-09 — Documentation closeout |
 | GROW-09 | Developer/operator/user docs | Complete architecture, API/SDK, environment, tests, operators, threat model and user guide, with exact GROW-05 spec reference | GROW-09 verifier and retained app-scoped fast tests PASS exact SHA 6ff60d5, run 37799086427 | GROW-09 guide and durable Level-1 evidence | COMPLETE | GROW-10 — Deployment and stage qualification |
-| GROW-10 | Deploy, testnet, Genesis and production evidence | Frozen catalog; GEN-SVC-0 | No Grow deployment artifacts | NOT RUN | No Grow deployment plan | BLOCKED | Decide release class; later collect real environment evidence |
+| GROW-10 | Deploy, testnet, Genesis and production evidence | Non-canonical static/optional read-only service release class defined; independent stage gates and required live evidence specified | GROW-10 preflight verifier and fast workflow initiated; no deployment or live acceptance evidence | GROW-10 stage qualification ledger and release checklist | BLOCKED — live stage evidence required | Qualify preflight exact SHA, then approved public API/site deployment and observed acceptance before phase closeout |
 
 These rows enumerate *established* and *definition-blocked* domains, not invented hidden requirements. Expand the matrix requirement-by-requirement once the product definition is formally approved; retain these IDs.
 
@@ -237,3 +237,12 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Level 2:** retained GROW-03–07 app-focused milestone PASS; no additional docs-only Level 2. **Level 3:** phase-closeout Solidity full inventory and separate Genesis/address authority, 420Integrated/global Docs, exact merged-candidate SHA deferred.
 - **Blockers:** none for GROW-09 Level 1. Live stage qualification remains GROW-10.
 - **Next canonical roadmap step:** **GROW-10 — Deployment and stage qualification**.
+
+## GROW-10 deployment/stage preparation (2026-10-08)
+
+- **Canonical GROW-10 status BLOCKED** on verifiable external deployment and stage acceptance; no false completion for code-only qualification. Implementation of release gates: `docs/audit/420GROW-GROW-10-STAGE-QUALIFICATION.md`, `scripts/verify-grow-10.py`, `.github/workflows/420grow-fast.yml`.
+- **Stage preflight implementation SHA:** `423e6a1b2be9b3346b750a32a4818eb706dd34f2`. Required app fast workflow: [#37800603975](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37800603975), job `113391464735`. Pending; not yet a green preflight assertion.
+- **Release gate disposition:** CODE/BUILD/TEST/DOCUMENTATION app-scoped evidence previously PASS; CONTRACT and independent GENESIS admission NOT APPLICABLE; INTEGRATION/SECURITY only repository scope, not live acceptance; TESTNET and PRODUCTION NOT QUALIFIED. This is not a replacement for Level-3 full merger qualification.
+- **External blockers:** approved public GEN-SVC-2 endpoint, actual web/optional service environment and immutable deployed artifacts, observed privacy/negative-path/browser/device/accessibility, TLS/CSP/CORS, monitoring/admin handover, rollback exercise, operator ownership and real provenance. Do not invent chain IDs, addresses, URLs or signoff.
+- **Main SHA inspected:** `dbe29983986fefb77a4e78ff96a3689c8589f956`; cumulative branch ahead 75/behind 44 at inspection. Draft PR #567 remains unmerged. Exact main reconciliation and costly canonical Solidity/Genesis/420Integrated/Docs phase Level-3 retained until actual app-phase readiness.
+- **Next boundary:** GROW-10 live stage evidence and then app-phase Level-3 exact merge-candidate closeout. No fabricated GROW-11.

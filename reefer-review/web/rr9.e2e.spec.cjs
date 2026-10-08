@@ -28,7 +28,7 @@ test('anonymous news is attributed and links to original without script injectio
   const original=page.getByRole('link',{name:/Read original article at Source A/});
   await expect(original).toHaveAttribute('href','https://publisher.example/story');
   await expect(original).toHaveAttribute('rel',/noopener/);
-  await expect(page.getByText('Source A',{exact:true}).first()).toBeVisible();
+  await expect(page.locator('article[data-kind="external-news"]').getByText('Source A',{exact:true})).toBeVisible();
 });
 
 test('protected editorial route fails closed without verified wallet', async ({page}) => {

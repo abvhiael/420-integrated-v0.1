@@ -3,74 +3,234 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Reefer Review — cannabis news and independent publishing in the 420Integrated ecosystem.">
   <title>Reefer Review</title>
   <link rel="icon" type="image/webp" href="./assets/favicon.webp">
   <link rel="apple-touch-icon" href="./assets/reefer-review-logo.webp">
+  <link rel="stylesheet" href="./styles.css">
   <meta name="theme-color" content="#082f24">
-  <style>
-    :root{color-scheme:dark;--bg:#0b1210;--panel:#111b17;--line:#29483a;--text:#f3f7f4;--muted:#a9b8af;--green:#5fd38a;--green2:#bff5d0}
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:980px;margin:0 auto;padding:0 1.25rem 4rem;background:radial-gradient(circle at 50% 0,#173426 0,#0b1210 45%);color:var(--text)}
-    a{color:var(--green2)}
-    header{display:flex;align-items:center;gap:1rem;padding:1.25rem 0;border-bottom:1px solid var(--line)}
-    .header-logo{width:72px;height:72px;object-fit:contain;border-radius:16px;background:#fff}
-    .brand h1{margin:0;font-size:clamp(1.8rem,4vw,2.7rem);letter-spacing:.03em}
-    .brand p{margin:.2rem 0 0;color:var(--muted)}
-    .hero{text-align:center;padding:2.2rem 0 1.4rem}
-    .main-logo{display:block;width:min(420px,88vw);height:auto;margin:0 auto 1.3rem;border-radius:28px;background:#fff;box-shadow:0 20px 60px #0008}
-    .hero-copy{max-width:700px;margin:0 auto;color:#dfe9e3;font-size:1.05rem}
-    .notice{display:block;margin:1.2rem auto 0;max-width:760px;color:var(--muted);line-height:1.5}
-    section{margin-top:2rem}
-    .card{border:1px solid var(--line);border-radius:14px;padding:1rem;margin:1rem 0;background:var(--panel)}
-    input,textarea,select,button{font:inherit;padding:.78rem;margin:.35rem 0;width:100%;border-radius:10px;border:1px solid #385647;box-sizing:border-box;background:#0d1713;color:var(--text)}
-    button{cursor:pointer;background:#174b32;border-color:#347a53;font-weight:700}
-    button:hover{background:#1d5c3d}
-    small{color:var(--muted)}
-    pre{white-space:pre-wrap;overflow-wrap:anywhere}
-  </style>
 </head>
 <body>
-  <header>
-    <img class="header-logo" src="./assets/reefer-review-logo.webp" alt="Reefer Review logo">
-    <div class="brand">
-      <h1>Reefer Review</h1>
-      <p>Independent publishing for the 420Integrated ecosystem.</p>
-    </div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="#latest" aria-label="Reefer Review home">
+      <img class="header-logo" src="./assets/reefer-review-logo.webp" alt="">
+      <span>
+        <strong>Reefer Review</strong>
+        <small>Cannabis news &amp; independent publishing</small>
+      </span>
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <a href="#latest" data-route="latest">Latest</a>
+      <a href="#news" data-route="news">Cannabis News</a>
+      <a href="#originals" data-route="originals">Originals</a>
+      <a href="#topics" data-route="topics">Topics</a>
+      <a href="#search" data-route="search">Search</a>
+      <a href="#editorial" data-route="editorial">Write</a>
+      <a href="#moderation" data-route="moderation">Moderation</a>
+      <a href="#news-admin" data-route="news-admin">News Sources</a>
+    </nav>
   </header>
 
-  <main>
-    <section class="hero" aria-labelledby="reefer-review-title">
-      <img class="main-logo" src="./assets/reefer-review-logo.webp" alt="Official Reefer Review logo">
-      <p id="reefer-review-title" class="hero-copy">Editorial news &amp; independent publishing for the 420Integrated ecosystem.</p>
-      <small class="notice">Repository MVP. Paid external newsletters are disabled. Production identity, rights, storage, search, notification &amp; mail adapters must be qualified before release.</small>
+  <main id="main-content" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="main-logo" src="./assets/reefer-review-logo.webp" alt="Reefer Review">
+      <div>
+        <p class="eyebrow">420Integrated publishing</p>
+        <h1 id="hero-title">Cannabis reporting, without losing the source.</h1>
+        <p class="hero-copy">Follow persistent cannabis news from reviewed publishers alongside original ReeferReview publications. External stories always link back to the original publisher.</p>
+      </div>
     </section>
 
-    <section>
-      <h2>Published</h2>
-      <div id="feed"></div>
+    <aside class="session-bar" aria-labelledby="session-title">
+      <div>
+        <strong id="session-title">420 Wallet / 420Identity session</strong>
+        <p id="session-state">Not connected. Session credentials stay in memory and are never written to localStorage or sessionStorage.</p>
+      </div>
+      <label for="session-scope">
+        <span>Requested scope</span>
+        <select id="session-scope">
+          <option value="reefer.author">Writer</option>
+          <option value="reefer.moderator">Moderator</option>
+          <option value="reefer.publisher">Publisher</option>
+        </select>
+      </label>
+      <button id="session-connect" type="button">Connect Wallet</button>
+      <button id="session-disconnect" type="button" class="secondary" disabled>Sign out</button>
+    </aside>
+
+    <aside class="filter-bar" aria-label="News filters">
+      <label>
+        <span>Source</span>
+        <select id="source-filter">
+          <option value="">All sources</option>
+        </select>
+      </label>
+      <label>
+        <span>Topic</span>
+        <select id="topic-filter">
+          <option value="">All topics</option>
+        </select>
+      </label>
+      <button id="clear-filters" type="button" class="secondary">Clear filters</button>
+    </aside>
+
+    <p id="app-status" class="status" role="status" aria-live="polite"></p>
+
+    <section id="view-latest" class="view" data-view="latest" aria-labelledby="latest-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Latest</p><h2 id="latest-title">Latest from the cannabis newsdesk</h2></div>
+        <button type="button" class="secondary" data-refresh="latest">Refresh</button>
+      </div>
+      <div id="latest-feed" class="card-grid" aria-live="polite"></div>
     </section>
 
-    <section>
-      <h2>Draft</h2>
-      <input id="actor" placeholder="development actor, e.g. writer.420">
-      <input id="title" placeholder="title">
-      <textarea id="body" rows="8" placeholder="article"></textarea>
-      <select id="visibility">
-        <option>PUBLIC</option>
-        <option>UNLISTED</option>
-        <option>FOLLOWERS</option>
-        <option>PRIVATE</option>
-      </select>
-      <button id="save">Create draft</button>
-      <pre id="status"></pre>
+    <section id="view-news" class="view" data-view="news" aria-labelledby="news-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">External reporting</p><h2 id="news-title">Cannabis News</h2></div>
+        <button type="button" class="secondary" data-refresh="news">Refresh</button>
+      </div>
+      <p class="section-note">Headlines and permitted feed excerpts are attributed to their publishers. Use <strong>Read original</strong> to continue at the source.</p>
+      <nav class="news-section-nav" aria-label="Cannabis news sections"><button type="button" data-news-section="">Latest News</button><button type="button" data-news-section="canada">Canada</button><button type="button" data-news-section="legalization-policy">Legalization &amp; Policy</button><button type="button" data-news-section="medical-research">Medical &amp; Research</button><button type="button" data-news-section="cultivation">Cultivation</button><button type="button" data-news-section="business-markets">Business &amp; Markets</button><button type="button" data-news-section="culture">Culture</button><button type="button" data-news-section="international">International</button></nav>
+      <div id="news-feed" class="card-grid" aria-live="polite"></div>
+      <button id="news-more" class="load-more" type="button" hidden>Load more news</button>
     </section>
+
+    <section id="view-originals" class="view" data-view="originals" aria-labelledby="originals-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Original publishing</p><h2 id="originals-title">ReeferReview Originals</h2></div>
+        <button type="button" class="secondary" data-refresh="originals">Refresh</button>
+      </div>
+      <p class="section-note">These are publications authored inside ReeferReview, not imported third-party stories.</p>
+      <aside class="workspace-panel" aria-label="Original cannabis policy coverage"><strong>ReeferReview Originals</strong><p><a href="./cannabis-policy-update.html">Ottawa tracking-rule consultation explainer</a> — October 8, 2026. Original reporting, separate from RSS publisher feeds.</p></aside>
+      <div id="originals-feed" class="card-grid" aria-live="polite"></div>
+      <button id="originals-more" class="load-more" type="button" hidden>Load more originals</button>
+    </section>
+
+    <section id="view-article" class="view article-reader" data-view="article" aria-labelledby="article-title" hidden>
+      <a href="#originals" class="back-link">← Back to Originals</a>
+      <div id="article-content" aria-live="polite">
+        <h2 id="article-title">Article</h2>
+      </div>
+    </section>
+
+    <section id="view-topics" class="view" data-view="topics" aria-labelledby="topics-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Browse</p><h2 id="topics-title">Topics</h2></div></div>
+      <div id="topic-list" class="topic-list" aria-live="polite"></div>
+    </section>
+
+    <section id="view-search" class="view" data-view="search" aria-labelledby="search-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Find coverage</p><h2 id="search-title">Search</h2></div></div>
+      <form id="search-form" class="search-form" role="search">
+        <label for="search-query">Search cannabis news and ReeferReview Originals</label>
+        <div class="search-row">
+          <input id="search-query" name="q" type="search" minlength="2" maxlength="120" autocomplete="off" placeholder="e.g. legalization, CBD, cultivation">
+          <button type="submit">Search</button>
+        </div>
+      </form>
+      <div id="search-results" class="card-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="view-editorial" class="view" data-view="editorial" aria-labelledby="editorial-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Editorial workspace</p><h2 id="editorial-title">Write &amp; publish</h2></div>
+        <button id="editorial-refresh" class="secondary" type="button">Refresh workspace</button>
+      </div>
+      <p class="section-note">Protected editorial actions require a verified, unexpired 420 Wallet/420Identity session carrying a scoped ReeferReview author or publisher capability.</p>
+
+      <div class="editorial-layout">
+        <section class="workspace-panel" aria-labelledby="draft-heading">
+          <h3 id="draft-heading">New draft</h3>
+          <form id="draft-form">
+            <label for="draft-title">Title</label>
+            <input id="draft-title" maxlength="200" required>
+            <label for="draft-summary">Summary</label>
+            <textarea id="draft-summary" rows="3" maxlength="1200"></textarea>
+            <label for="draft-body">Article</label>
+            <textarea id="draft-body" rows="12" required></textarea>
+            <label for="visibility">Visibility</label>
+            <select id="visibility">
+              <option>PUBLIC</option><option>UNLISTED</option><option>FOLLOWERS</option>
+              <option>COMMUNITY_ONLY</option><option>PRIVATE</option>
+              <option>ORGANIZATION_MEMBERS</option><option>MODERATORS</option><option>ADMINS</option>
+            </select>
+            <button type="submit">Create draft</button>
+          </form>
+          <pre id="draft-status" class="draft-status" aria-live="polite"></pre>
+        </section>
+
+        <section class="workspace-panel" aria-labelledby="edit-heading">
+          <h3 id="edit-heading">Edit selected publication</h3>
+          <form id="edit-form">
+            <input id="edit-id" type="hidden">
+            <label for="edit-title">Title</label>
+            <input id="edit-title" maxlength="200" required>
+            <label for="edit-summary">Summary</label>
+            <textarea id="edit-summary" rows="3" maxlength="1200"></textarea>
+            <label for="edit-body">Article</label>
+            <textarea id="edit-body" rows="12" required></textarea>
+            <label for="edit-visibility">Visibility</label>
+            <select id="edit-visibility">
+              <option>PUBLIC</option><option>UNLISTED</option><option>FOLLOWERS</option>
+              <option>COMMUNITY_ONLY</option><option>PRIVATE</option>
+              <option>ORGANIZATION_MEMBERS</option><option>MODERATORS</option><option>ADMINS</option>
+            </select>
+            <div class="button-row">
+              <button type="submit">Save revision</button>
+              <button id="edit-clear" class="secondary" type="button">Clear</button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <h3>Your editorial records</h3>
+      <div id="editorial-list" class="card-grid" aria-live="polite"></div>
+      <button id="editorial-more" class="load-more" type="button" hidden>Load more editorial records</button>
+    </section>
+
+    <section id="view-moderation" class="view" data-view="moderation" aria-labelledby="moderation-title" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">Moderation</p><h2 id="moderation-title">Moderation dashboard</h2></div>
+        <button id="moderation-refresh" class="secondary" type="button">Refresh dashboard</button>
+      </div>
+      <p class="section-note">Moderation requires a verified session carrying the scoped <code>reefer.moderator</code> or <code>reefer.publisher</code> capability.</p>
+      <div id="moderation-list" class="card-grid" aria-live="polite"></div>
+      <section class="workspace-panel moderation-history" aria-labelledby="history-title">
+        <h3 id="history-title">Moderation history</h3>
+        <div id="moderation-history" aria-live="polite"><p class="empty">Choose “History” on an editorial record.</p></div>
+      </section>
+    </section>
+
+    <section id="view-news-admin" class="view" data-view="news-admin" aria-labelledby="news-admin-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Editorial operations</p><h2 id="news-admin-title">News sources admin</h2></div><button id="news-admin-refresh" type="button" class="secondary">Refresh</button></div>
+      <p class="section-note">A verified moderator session is required. New feeds start disabled; validate publisher feed URL and permissions before activation. Publisher headlines always link to their original articles.</p>
+      <label>Standalone RSS administrator key (kept in browser memory only) <input id="news-admin-key" type="password" autocomplete="off" minlength="32" placeholder="Configured deployment admin key"></label>
+      <p id="news-admin-status" role="status" aria-live="polite"></p>
+      <div id="news-admin-list" class="card-grid" aria-live="polite"></div>
+      <form id="news-admin-form" class="workspace-panel">
+        <h3>Add or edit an RSS source</h3>
+        <label>Source ID <input id="news-admin-id" required maxlength="64" pattern="[a-z0-9][a-z0-9-]*" placeholder="publisher-id"></label>
+        <label>Publisher name <input id="news-admin-name" required maxlength="120"></label>
+        <label>RSS / Atom feed URL <input id="news-admin-feed" required type="url" placeholder="https://publisher.example/feed/"></label>
+        <label>Publisher homepage <input id="news-admin-home" required type="url" placeholder="https://publisher.example/"></label>
+        <label>Section <select id="news-admin-category" required>
+          <option value="canada">Canada</option><option value="legalization-policy">Legalization &amp; Policy</option><option value="medical-research">Medical &amp; Research</option><option value="cultivation">Cultivation</option><option value="business-markets">Business &amp; Markets</option><option value="culture">Culture</option><option value="international">International</option>
+        </select></label>
+        <label>Poll interval (minutes) <input id="news-admin-interval" type="number" min="15" max="1440" value="30" required></label>
+        <label>Attribution <input id="news-admin-attribution" maxlength="500" required placeholder="Headline from publisher; read the original."></label>
+        <label><input id="news-admin-enabled" type="checkbox"> Enable existing source after validation</label>
+        <p>New sources always begin disabled. Excerpts and embedded images cannot be enabled through this panel without an independent reuse-rights review.</p>
+        <button type="submit">Save source</button>
+        <button type="button" id="news-admin-new" class="secondary">New source</button>
+      </form>
+    </section>
+
+    <noscript><p class="status error">Reefer Review needs JavaScript to load its news and publication feeds.</p></noscript>
   </main>
 
-  <script>
-    async function feed(){const r=await fetch('/v1/publications?limit=20');const j=await r.json();document.querySelector('#feed').innerHTML=(j.items||[]).map(x=>'<article class="card"><h3>'+esc(x.title)+'</h3><small>'+esc(x.author)+'</small><p>'+esc(x.summary||'')+'</p></article>').join('')||'<p>No public articles yet.</p>'}
-    function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-    document.querySelector('#save').onclick=async()=>{const actor=document.querySelector('#actor').value;const payload={idempotency_key:crypto.randomUUID(),title:document.querySelector('#title').value,body:document.querySelector('#body').value,visibility:document.querySelector('#visibility').value};const r=await fetch('/v1/publications',{method:'POST',headers:{'content-type':'application/json','X-420-Actor':actor},body:JSON.stringify(payload)});document.querySelector('#status').textContent=JSON.stringify(await r.json(),null,2)}
-    feed()
-  </script>
+  <footer><p>Reefer Review keeps external reporting distinct from ReeferReview Originals and preserves publisher attribution.</p></footer>
+  <script src="./app.js" defer></script>
 </body>
 </html>

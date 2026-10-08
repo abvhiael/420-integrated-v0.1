@@ -1,0 +1,57 @@
+{
+  "schema": "420-reefer-review-news-sources-v1",
+  "sources": [
+    {
+      "id": "marijuana-moment",
+      "name": "Marijuana Moment",
+      "feed_url": "https://www.marijuanamoment.net/feed/",
+      "home_url": "https://www.marijuanamoment.net/",
+      "enabled": true,
+      "category": "legalization-policy",
+      "language": "en",
+      "poll_interval_minutes": 30,
+      "allow_excerpt": true,
+      "allow_image": false,
+      "attribution": "Headline and source-provided excerpt via Marijuana Moment RSS; read the original at the canonical publisher URL."
+    },
+    {
+      "id": "stratcann",
+      "name": "StratCann",
+      "feed_url": "https://stratcann.com/feed/",
+      "home_url": "https://stratcann.com/",
+      "enabled": true,
+      "category": "canada",
+      "language": "en",
+      "poll_interval_minutes": 30,
+      "allow_excerpt": false,
+      "allow_image": false,
+      "attribution": "Headline via StratCann RSS; read the original article at the publisher URL."
+    },
+    {
+      "id": "mjbizdaily",
+      "name": "MJBizDaily",
+      "feed_url": "https://mjbizdaily.com/feed/",
+      "home_url": "https://mjbizdaily.com/",
+      "enabled": true,
+      "category": "business-markets",
+      "language": "en",
+      "poll_interval_minutes": 30,
+      "allow_excerpt": false,
+      "allow_image": false,
+      "attribution": "Headline via MJBizDaily RSS; read the original article at the publisher URL."
+    },
+    {
+      "id": "green-market-report",
+      "name": "Green Market Report",
+      "feed_url": "https://www.greenmarketreport.com/feed/",
+      "home_url": "https://www.greenmarketreport.com/",
+      "enabled": false,
+      "category": "business-markets",
+      "language": "en",
+      "poll_interval_minutes": 30,
+      "allow_excerpt": false,
+      "allow_image": false,
+      "attribution": "Headline from Green Market Report; follow the canonical publisher link. Feed endpoint and reuse permissions require validation before enabling."
+    }
+  ]
+}

@@ -66,7 +66,7 @@ Define the complete Generate/Community/Awards product model, trust boundaries an
 The numbered items below are subordinate work packages inside canonical **HZ-GCA-1**. They do not replace, renumber or independently close the top-level HZ-GCA-1 exit criteria.
 
 - **HZ-GCA-1.1 — Define product boundaries** — freeze which state/actions belong to 420Hz versus 420AI, Compute Market, Creative Protocol, Wallet/Identity, Pay, Resource/Storage, Indexer/Search, Notifications, Governance, Arbitration, Commons and Registry. Required artifact: normative authority/trust map plus machine-readable boundary manifest and a targeted verifier. **Level 1 only**; this is not a Level-2 milestone.
-- **HZ-GCA-1.2 — Define canonical object model**
+- **HZ-GCA-1.2 — Define canonical object model** — freeze the logical 420Hz-owned and reference-only object vocabulary, typed identity rules, ownership/visibility classes, immutable vs mutable fields, reference edges and no-duplication invariants for Generate, Community and Awards. Required artifacts: normative object-model document, machine-readable object manifest and targeted verifier. **Level 1 only**; this is not a Level-2 milestone.
 - **HZ-GCA-1.3 — Define Generate lifecycle**
 - **HZ-GCA-1.4 — Define AI disclosure rules**
 - **HZ-GCA-1.5 — Define provenance model**

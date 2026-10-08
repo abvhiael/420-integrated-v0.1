@@ -69,7 +69,13 @@ dw=DOCS.read_text()
 if "docs/**" not in dw:
     fail("Docs global ownership missing")
 
-hw=HARDENING.read_text()\nif "contracts/config/compute-market/cmp-6.8-phase-closeout.json" not in hw:\n    fail("Contract Hardening CMP-6.8 PR trigger missing")\nif "Slither high-severity gate" not in hw:\n    fail("Contract Hardening static-analysis gate missing")\n\ncw=COMPUTE.read_text()
+hw=HARDENING.read_text()
+if "contracts/config/compute-market/cmp-6.8-phase-closeout.json" not in hw:
+    fail("Contract Hardening CMP-6.8 PR trigger missing")
+if "Slither high-severity gate" not in hw:
+    fail("Contract Hardening static-analysis gate missing")
+
+cw=COMPUTE.read_text()
 for i in range(1,9):
     token=f"verify-cmp-6-{i}-"
     if i==8:

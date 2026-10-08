@@ -22,7 +22,7 @@ ensure("func New(" in backend and "grow.Read(ctx, source)" in backend, "public S
 ensure('http.MethodGet' in backend and 'http.StatusMethodNotAllowed' in backend,"read-only method restriction absent")
 ensure('"/v1/grow/places"' in backend and 'NextOffset' in backend, "bounded discovery contract changed")
 ensure("ProvenanceAvailable" in consumer and "ErrInvalidProjection" in consumer, "public provenance/precision validation missing")
-ensure('"registryRecordId"' in consumer and 'Verified' not in consumer, "registry provenance incorrectly promoted")
+ensure('registryRecordId' in consumer and 'Verified' not in consumer, "registry provenance incorrectly promoted")
 ensure('Not independently verified' in ui and 'textContent' in ui, "web verification or safe rendering contract changed")
 ensure('credentials:"omit"' in ui and 'configOrigin' in ui, "browser request security changed")
 ensure('enabled:false' in config, "unqualified live publication enabled")

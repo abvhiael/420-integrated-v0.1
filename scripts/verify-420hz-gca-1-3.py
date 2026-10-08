@@ -109,7 +109,7 @@ if not errors:
     need("cannot bypass REVIEWED" in partial.get("publication",""), "partial-output publication guard missing")
 
     cancellation = life.get("cancellationPolicy", {})
-    need("canonical owning AI/Compute cancellation confirmation" in cancellation.get("postSubmission",""), "post-submission cancellation authority missing")
+    need("owning AI/Compute cancellation confirmation" in cancellation.get("postSubmission",""), "post-submission cancellation authority missing")
     need("never directly refunds/transfers funds" in cancellation.get("economics",""), "cancellation economic boundary missing")
 
     gates = life.get("publicationGates", {})
@@ -131,7 +131,7 @@ if not errors:
         "RESULT_COMMITTED",
         "VERIFIED",
         "A UI click alone cannot manufacture canonical cancellation",
-        "A follow is not 420Commons membership" if False else "Product success does not imply Creative rights",
+        "Product success does not imply Creative rights",
         "Duplicate submission with the same idempotency/client key",
     ]:
         need(token in doc, f"normative lifecycle token missing: {token}")

@@ -1,0 +1,101 @@
+name: 420Grow fast qualification
+on:
+  pull_request:
+    paths:
+      - 'docs/audit/420GROW-*.md'
+      - 'scripts/verify-grow-01.py'
+      - 'scripts/verify-grow-02.py'
+      - 'scripts/verify-grow-06.py'
+      - 'scripts/verify-grow-07.py'
+      - 'scripts/verify-grow-08.py'
+      - 'scripts/verify-grow-09.py'
+      - 'scripts/verify-grow-10.py'
+      - 'grow/**'
+      - 'genesis/svc2/sdk/**'
+      - 'location/uikit/**'
+      - 'location/model/**'
+      - 'config/genesis-applications.json'
+      - 'config/genesis-consumer-services.json'
+      - 'config/420location-events-genesis.json'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'docs/420WALLET-W14.5-APP-CATALOG.md'
+      - '.github/workflows/420grow-fast.yml'
+  push:
+    paths:
+      - 'docs/audit/420GROW-*.md'
+      - 'scripts/verify-grow-01.py'
+      - 'scripts/verify-grow-02.py'
+      - 'scripts/verify-grow-06.py'
+      - 'scripts/verify-grow-07.py'
+      - 'scripts/verify-grow-08.py'
+      - 'scripts/verify-grow-09.py'
+      - 'scripts/verify-grow-10.py'
+      - 'grow/**'
+      - 'genesis/svc2/sdk/**'
+      - 'location/uikit/**'
+      - 'location/model/**'
+      - 'config/genesis-applications.json'
+      - 'config/genesis-consumer-services.json'
+      - 'config/420location-events-genesis.json'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'docs/420WALLET-W14.5-APP-CATALOG.md'
+      - '.github/workflows/420grow-fast.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical-definition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: GROW-04 web build, UX/security regressions
+        working-directory: grow/web
+        run: npm run qualify
+      - name: GROW-05 service behavior and security qualification
+        run: |
+          go test ./grow/service ./grow/location ./grow/cmd/server
+          go vet ./grow/service ./grow/cmd/server
+          gofmt -d grow/service/*.go grow/cmd/server/*.go
+          test -z "$(gofmt -l grow/service/*.go grow/cmd/server/*.go)"
+      - name: GROW-03 consumer and directly affected SDK tests
+        run: go test ./grow/location ./genesis/svc2/... ./location/...
+      - name: GROW-03 static analysis and format
+        run: |
+          gofmt -d grow/location/*.go
+          test -z "$(gofmt -l grow/location/*.go)"
+          go vet ./grow/location
+      - name: GROW-01 bounded canonical definition verifier
+        run: python3 scripts/verify-grow-01.py
+      - name: GROW-02 canonical identity verifier
+        run: python3 scripts/verify-grow-02.py
+      - name: GROW-06 no-contract authority verifier
+        run: python3 scripts/verify-grow-06.py
+      - name: GROW-07 cross-app boundary and Level-2 milestone
+        run: python3 scripts/verify-grow-07.py
+      - name: GROW-08 clean checkout build and race/integration qualification
+        run: |
+          go build ./grow/location ./grow/service ./grow/cmd/server
+          go test -race -count=1 ./grow/... ./genesis/svc2/sdk/... ./location/...
+          go test -run 'TestRejectsBadRequestsAndMethods|TestFailClosedAndNoInternalErrorDisclosure|TestProductionConstructorUsesSafeLocationProjection' -count=10 ./grow/service
+          go vet ./grow/... ./genesis/svc2/sdk/... ./location/...
+      - name: GROW-08 static and package security guards
+        run: |
+          node --check grow/web/app.js
+          node --test grow/web/test/*.test.js
+          python3 scripts/verify-grow-08.py
+      - name: GROW-09 documentation closeout verifier
+        run: python3 scripts/verify-grow-09.py
+      - name: GROW-10 deployment stage readiness preflight
+        run: python3 scripts/verify-grow-10.py
+      - name: Python verifier syntax
+        run: python3 -m py_compile scripts/verify-grow-01.py scripts/verify-grow-02.py scripts/verify-grow-06.py scripts/verify-grow-07.py scripts/verify-grow-08.py scripts/verify-grow-09.py scripts/verify-grow-10.py

@@ -1,6 +1,6 @@
 # HZ-GCA-6 — 420Hz Generate Studio UX
 
-Status: **IMPLEMENTED — awaiting exact-head Level-1 qualification**
+Status: **COMPLETE — Level 1 exact-head qualified**
 
 Canonical roadmap step: **HZ-GCA-6 — 420Hz Generate Studio UX**
 
@@ -255,3 +255,30 @@ HZ-GCA-6 is complete when every required screen/control is present, the home-pag
 Next canonical roadmap step:
 
 **HZ-GCA-7 — Register & Publish integration**
+
+
+## Qualification result
+
+Qualified implementation SHA:
+
+`d46585be81059dc1619e5005495a773e47efe5d3`
+
+Authoritative workflow:
+
+- **420Hz Web Qualification**
+- Run: **37826287208** (#237)
+- Job: **HZ-GCA-6 Level 1**
+- Job ID: **113479885333**
+- Result: **PASS**
+
+Exact-head required results:
+
+- Generate Studio state model: **10 PASS / 0 FAIL / 0 SKIPPED**
+- retained 420Hz web verifier: **PASS**
+- retained HZ-GCA-5 project/storage verifier: **PASS**
+- HZ-GCA-6 targeted verifier: **PASS**
+- retained web job: **PASS**
+
+Current `main` advanced after implementation qualification to `e3bd7128a572ca4db9e4ab346996fce7c4ff140e` through ReeferReview feed-recovery work. The intervening executable delta is confined to `reefer-review/news_feed.go`, `reefer-review/news_malformed_entity_test.go`, and `reefer-review/web/app.js`; it does not overlap or alter 420Hz web/generation code, HZ-GCA policies, or the HZ-GCA-6 qualification workflow. No ceremonial reconciliation is required for this ordinary step.
+
+No Level-2 milestone is required for HZ-GCA-6. Level-3 repository-wide qualification remains deferred to HZ-GCA-17.

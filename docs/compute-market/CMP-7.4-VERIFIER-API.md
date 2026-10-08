@@ -1,6 +1,6 @@
 # CMP-7.4 — Verifier API
 
-Status: **IMPLEMENTED — Level 1 exact-head qualification pending.**
+Status: **COMPLETE — Level 1 exact-head qualified on `c52ba0bfc34248f639fa198e523c6e97b870d21f`.**
 
 ## Canonical purpose
 

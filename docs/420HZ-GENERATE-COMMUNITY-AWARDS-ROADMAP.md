@@ -199,6 +199,10 @@ Required work:
 
 Build the primary **Generate your own song** experience.
 
+**Qualification:** Level 1 ordinary app-scoped UX step. Retain the 420Hz web verifier and HZ-GCA-5 project/storage boundary, plus dedicated Generate Studio state-model tests and an HZ-GCA-6 targeted verifier. No Level-2 milestone is introduced.
+
+**Repository artifacts:** prominent home-page Generate CTA, fully navigable Generate Studio section, deterministic dev UX state model, responsive/accessibility styling, state-model tests, machine-readable UX policy, architecture document and targeted verifier.
+
 Required screens:
 
 - Generate landing page;
@@ -216,7 +220,7 @@ Required screens:
 
 The home page must contain a prominent **Generate your own song** call to action.
 
-**Exit:** fully navigable Generate workflow against qualified mock/dev execution.
+**Exit:** fully navigable Generate workflow against qualified mock/dev execution. Completion additionally requires exact-head Level-1 qualification of all required screens, responsive/mobile behavior, accessibility, failure/retry/refund state, A/B take comparison, provenance/disclosure presentation, audio/stem preview surface, save/regenerate/remix controls, and the explicit HZ-GCA-7 Register & Publish handoff.
 
 ## HZ-GCA-7 — Register & Publish integration
 

@@ -15,7 +15,7 @@ func main() {
 	if mode == "" {
 		mode = "development"
 	}
-	if mode != "development" {
+	if mode != "development" && mode != "news-only" {
 		log.Fatal("Reefer Review live adapters are not configured; staging/production fail closed")
 	}
 	newsDB := strings.TrimSpace(os.Getenv("REEFER_REVIEW_NEWS_DB"))
@@ -39,6 +39,16 @@ func main() {
 	addr := strings.TrimSpace(os.Getenv("REEFER_REVIEW_LISTEN_ADDR"))
 	if addr == "" {
 		addr = "127.0.0.1:8096"
+	}
+	if mode == "news-only" {
+		secret := strings.TrimSpace(os.Getenv("REEFER_REVIEW_NEWS_ADMIN_KEY"))
+		if secret != "" && len(secret) < 32 {
+			log.Fatal("news-only admin secret must be at least 32 characters")
+		}
+		server := &http.Server{Addr: addr, Handler: (reeferreview.HTTP{News: news, NewsAdminKey: []byte(secret)}).NewsOnlyHandler(), ReadHeaderTimeout: 5*time.Second, ReadTimeout: 10*time.Second, WriteTimeout: 10*time.Second, IdleTimeout: 30*time.Second}
+		log.Printf("ReeferReview standalone RSS news service listening on %s; editorial/chain endpoints disabled", addr)
+		log.Fatal(server.ListenAndServe())
+		return
 	}
 	mem := reeferreview.NewMemory()
 	svc := reeferreview.Service{Identity: reeferreview.AllowIdentity{}, Auth: reeferreview.DevAuthorizer{}, Rights: reeferreview.DevRights{}, Blobs: reeferreview.MemoryBlob{M: mem}, Store: mem, Search: reeferreview.NoopSearch{}, Notifications: reeferreview.NoopNotifications{}, Mail: reeferreview.NoopMail{}}

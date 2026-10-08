@@ -4,3 +4,4 @@ export * from "./provider.js";
 export * from "./jobs.js";
 export * from "./compute-adapter.js";
 export * from "./provenance.js";
+export * from "./project-workspace.js";

@@ -30,6 +30,7 @@
       <a href="#search" data-route="search">Search</a>
       <a href="#editorial" data-route="editorial">Write</a>
       <a href="#moderation" data-route="moderation">Moderation</a>
+      <a href="#news-admin" data-route="news-admin">News Sources</a>
     </nav>
   </header>
 
@@ -199,6 +200,29 @@
         <h3 id="history-title">Moderation history</h3>
         <div id="moderation-history" aria-live="polite"><p class="empty">Choose “History” on an editorial record.</p></div>
       </section>
+    </section>
+
+    <section id="view-news-admin" class="view" data-view="news-admin" aria-labelledby="news-admin-title" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Editorial operations</p><h2 id="news-admin-title">News sources admin</h2></div><button id="news-admin-refresh" type="button" class="secondary">Refresh</button></div>
+      <p class="section-note">A verified moderator session is required. New feeds start disabled; validate publisher feed URL and permissions before activation. Publisher headlines always link to their original articles.</p>
+      <p id="news-admin-status" role="status" aria-live="polite"></p>
+      <div id="news-admin-list" class="card-grid" aria-live="polite"></div>
+      <form id="news-admin-form" class="workspace-panel">
+        <h3>Add or edit an RSS source</h3>
+        <label>Source ID <input id="news-admin-id" required maxlength="64" pattern="[a-z0-9][a-z0-9-]*" placeholder="publisher-id"></label>
+        <label>Publisher name <input id="news-admin-name" required maxlength="120"></label>
+        <label>RSS / Atom feed URL <input id="news-admin-feed" required type="url" placeholder="https://publisher.example/feed/"></label>
+        <label>Publisher homepage <input id="news-admin-home" required type="url" placeholder="https://publisher.example/"></label>
+        <label>Section <select id="news-admin-category" required>
+          <option value="canada">Canada</option><option value="legalization-policy">Legalization &amp; Policy</option><option value="medical-research">Medical &amp; Research</option><option value="cultivation">Cultivation</option><option value="business-markets">Business &amp; Markets</option><option value="culture">Culture</option><option value="international">International</option>
+        </select></label>
+        <label>Poll interval (minutes) <input id="news-admin-interval" type="number" min="15" max="1440" value="30" required></label>
+        <label>Attribution <input id="news-admin-attribution" maxlength="500" required placeholder="Headline from publisher; read the original."></label>
+        <label><input id="news-admin-enabled" type="checkbox"> Enable existing source after validation</label>
+        <p>New sources always begin disabled. Excerpts and embedded images cannot be enabled through this panel without an independent reuse-rights review.</p>
+        <button type="submit">Save source</button>
+        <button type="button" id="news-admin-new" class="secondary">New source</button>
+      </form>
     </section>
 
     <noscript><p class="status error">Reefer Review needs JavaScript to load its news and publication feeds.</p></noscript>

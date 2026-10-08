@@ -653,7 +653,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **Status: IMPLEMENTED — Level 1 documentation qualification pending.** Developer guide: [Compute Market developer integration](../developers/compute-market-integration.md).
 
 ## CMP-7.9 — CLI
-Examples: compute submit, worker, status, verify and rewards.
+**Status: IMPLEMENTED — Level 1 + second/final CMP-7 Level 2 milestone qualification pending.** Commands: compute submit, worker, status, verify and rewards. Specification: [CMP-7.9 CLI](CMP-7.9-CLI.md).
 
 ## CMP-7.10 — Phase closeout
 

@@ -33,3 +33,7 @@ Level 2 therefore runs the complete retained SDK test suite plus the complete Co
 ## Next canonical step
 
 **CMP-7.6 — Compute indexer**
+
+## Qualification marker
+
+This document change intentionally selects the first CMP-7 Level-2 retained SDK + API integration milestone after repair of the milestone workflow. The implementation and authority semantics are unchanged.

@@ -57,12 +57,15 @@ Every logical request includes:
 - requestId;
 - operation;
 - domain;
-- actorRef;
-- idempotencyKey;
 - resourceRef;
 - payload.
 
-Chain-sensitive or stale-state-sensitive requests additionally bind:
+Authority-bearing mutations additionally require:
+
+- actorRef;
+- idempotencyKey.
+
+Chain-sensitive or stale-state-sensitive requests may additionally bind:
 
 - chainId/networkId;
 - capabilityRef;
@@ -70,13 +73,15 @@ Chain-sensitive or stale-state-sensitive requests additionally bind:
 - expectedRevision;
 - sourceCheckpoint.
 
+Eligible PUBLIC reads may remain anonymous under HZ-GCA-1.10 and therefore need not invent an actorRef merely to query public state.
+
 The request ID identifies one attempt.
 
-The idempotency key identifies the logical operation and is bound to operation/domain/resource/material payload.
+The idempotency key identifies the logical mutation and is bound to operation/domain/resource/material payload.
 
 Reusing the same idempotency key with changed material payload is a conflict/replay error.
 
-A caller-supplied actorRef does not create authorization. It must correspond to the qualified Wallet/session actor.
+A caller-supplied actorRef does not create authorization. For mutations it must correspond to the qualified Wallet/session actor.
 
 ## Response envelope
 

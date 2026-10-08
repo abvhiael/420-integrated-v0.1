@@ -3,7 +3,7 @@ name: 420Hz GCA Qualification
 on:
   pull_request:
     paths:
-      - 'hz/config/gca-product-boundaries-v1.json'
+      - 'hz/config/gca-*.json'
       - 'docs/architecture/420hz/**'
       - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'scripts/verify-420hz-gca-*.py'
@@ -13,7 +13,7 @@ on:
       - 'feature/420hz-generate-community-awards-*'
       - 'audit/420hz-gca-*'
     paths:
-      - 'hz/config/gca-product-boundaries-v1.json'
+      - 'hz/config/gca-*.json'
       - 'docs/architecture/420hz/**'
       - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'scripts/verify-420hz-gca-*.py'
@@ -44,3 +44,6 @@ jobs:
 
       - name: Verify HZ-GCA-1.1 product boundaries
         run: python3 scripts/verify-420hz-gca-1-1.py
+
+      - name: Verify HZ-GCA-1.2 canonical object model
+        run: python3 scripts/verify-420hz-gca-1-2.py

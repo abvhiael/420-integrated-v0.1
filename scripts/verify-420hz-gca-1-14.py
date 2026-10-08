@@ -80,7 +80,7 @@ if not errors:
         need(token in comments,f"comments boundary missing: {token}")
 
     rights_rules=" ".join(mod.get("rightsDisputes",[]))
-    for token in ["temporary HIDE/LOCK","does not rewrite Creative/Rights state","competing Rights claims","finalized Arbitration ruling cannot directly rewrite Rights","fails closed"]:
+    for token in ["temporary HIDE/LOCK","does not rewrite Creative/Rights state","competing Rights claims","finalized Arbitration ruling cannot directly rewrite Rights","may fail closed"]:
         need(token in rights_rules,f"rights dispute boundary missing: {token}")
 
     awards=" ".join(mod.get("awardsChallenges",[]))
@@ -88,14 +88,14 @@ if not errors:
         need(token in awards,f"Awards challenge boundary missing: {token}")
 
     abuse=" ".join(mod.get("voteAbuseRules",[]))
-    for token in ["duplicate/replay/Sybil/manipulation","cannot create voter eligibility","objective reason/evidence","not sole canonical authority","deterministic recomputation"]:
+    for token in ["duplicate/replay/Sybil/manipulation","cannot create voter eligibility","objective reason/evidence","never sole canonical authority","deterministic recomputation"]:
         need(token in abuse,f"vote abuse rule missing: {token}")
 
     arbi=mod.get("arbitrationIntegration",{})
     need(arbi.get("adopted")=="OPTIONAL_EXPLICIT_ONLY","Arbitration adoption mode drift")
     need(arbi.get("serviceId")=="420/service/arbitration/v1","Arbitration service ID drift")
     arules=" ".join(arbi.get("rules",[]))
-    for token in ["not automatically invoked","registered domain","Opening an Arbitration case records a dispute and is not a ruling","bounded input","expected domain/origin/parties/finality/ruling/remedy/replay","explicitly enumerated remedies","cannot directly seize funds"]:
+    for token in ["not automatically invoked","registered domain","opening an Arbitration case records a dispute and is not a ruling","bounded input","expected domain/origin/parties/finality/ruling/remedy/replay","explicitly enumerated remedies","cannot directly seize funds"]:
         need(token in arules,f"Arbitration integration rule missing: {token}")
 
     allowed=set(mod.get("arbitrationRemedyAllowlist",[]))

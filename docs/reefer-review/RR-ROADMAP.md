@@ -115,3 +115,12 @@ Qualified reconciled implementation SHA: `a513e2ecf99c08688465623393f441eb753c90
 
 
 After RR-10, resume the existing canonical live gates: REEFER-AUDIT-7 live dependency integration, REEFER-AUDIT-8 deployed security/operations, REEFER-AUDIT-9 Genesis decision/release closeout, and REEFER-AUDIT-10 production closeout.
+
+
+## RR-11 — Standalone RSS News Aggregation (new post-RR-10 app phase)
+
+Purpose: make the existing RSS/Atom news ingestion, scheduled polling, durable news store and public ReeferReview news UI operable independently of the 420 Integrated blockchain/testnet. This is an additive app-scoped step, authorized after the prior RR-10 repository audit closeout; it does not rename, replace, or reopen RR-1–RR-10.
+
+**Status: IN PROGRESS — NOT QUALIFIED.** Launch sources: StratCann (Canadian priority), Marijuana Moment (policy), MJBizDaily and Green Market Report (business/markets). News sections: Latest, Canada, Legalization & Policy, Medical & Research, Cultivation, Business & Markets, Culture and International. Feed endpoints and rights must be validated before activation; disable unknown endpoints and fail closed, not fake a live feed. Admin requirements: capability-protected and persistent source enable/disable/add/edit, URL and SSRF validation, per-source category and polling controls, health/failure visibility and audit trail, rejection of unauthorized and malformed changes. Existing RR-7 news security, RR-8 conditional poller, public API and website must be preserved.
+
+**Level 1 exit criteria:** verified approved feeds and use rights; safe backend source management and persistent scheduled RSS ingestion; all eight visible/filterable news sections; provenance labels/canonical publisher outbound links; live admin management with authorization, negative/SSRF/concurrency tests; same-origin public API; successful affected Go/browser/verifier/app-specific fast CI against one executable SHA. **Level 2 milestone:** retained ReeferReview app integration once ingestion, API and admin converge. **Level 3:** one complete new app-phase closeout after its final accumulated scope, not after each change. **External live gates:** Cloudflare/backend publication, real DNS/TLS/API routing and deployed RSS egress/storage qualification; 420 testnet is not needed for read-only RSS, and REEFER-AUDIT-7–10 on-chain/live service gates remain separate.

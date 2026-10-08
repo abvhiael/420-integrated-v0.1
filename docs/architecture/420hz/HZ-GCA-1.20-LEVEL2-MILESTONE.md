@@ -1,6 +1,6 @@
 # HZ-GCA-1.20 — HZ-GCA-1 Level-2 milestone qualification
 
-Status: **IMPLEMENTED — awaiting exact-head Level-2 qualification**
+Status: **COMPLETE — Level 2 exact-head qualified**
 
 This is the documented app-specific integration milestone for the accumulated HZ-GCA-1 architecture.
 
@@ -79,3 +79,37 @@ HZ-GCA-1.20 is complete when the exact-head Level-2 workflow passes every requir
 Next canonical roadmap step after successful milestone closeout:
 
 **HZ-GCA-2 — Generation job and provider abstraction**
+
+
+## Qualification result
+
+Qualified implementation SHA:
+
+`b8974c2aa68b7b0c027ce0cc7dc4784ca5ad02c1`
+
+Required workflow:
+
+- **420Hz GCA Qualification**
+- Run: **37803965886** (#261)
+- Job: **HZ-GCA Level 2**
+- Job ID: **113403242290**
+- Result: **PASS**
+
+The exact-head Level-2 run included a PostgreSQL service so the retained 420Indexer PostgreSQL integration test executed instead of being skipped.
+
+Required Level-2 checks passed:
+
+- HZ-GCA-1.1 through HZ-GCA-1.19 retained verifiers;
+- HZ-GCA-1.20 milestone verifier;
+- 420Hz web verifier;
+- 420AI Compute integration verifier;
+- 420AI provider runtime and provider-boundary verifier;
+- reconciled Compute SDK suite and build;
+- reconciled Compute API suite;
+- reconciled 420Indexer suite including PostgreSQL integration.
+
+The same exact SHA also passed 420Hz Web Qualification #159 and 420Docs Qualification #7406.
+
+No canonical full Solidity, Genesis/address-authority, 420 Integrated/global, Geth/fault/soak or unrelated app Level-3 inventories were run for this milestone.
+
+**HZ-GCA-1 is COMPLETE at Level 2.**

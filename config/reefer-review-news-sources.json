@@ -19,26 +19,26 @@
       "name": "StratCann",
       "feed_url": "https://stratcann.com/feed/",
       "home_url": "https://stratcann.com/",
-      "enabled": false,
+      "enabled": true,
       "category": "canada",
       "language": "en",
       "poll_interval_minutes": 30,
       "allow_excerpt": false,
       "allow_image": false,
-      "attribution": "Headline from StratCann; follow the canonical publisher link. Feed endpoint and reuse permissions require validation before enabling."
+      "attribution": "Headline via StratCann RSS; read the original article at the publisher URL."
     },
     {
       "id": "mjbizdaily",
       "name": "MJBizDaily",
       "feed_url": "https://mjbizdaily.com/feed/",
       "home_url": "https://mjbizdaily.com/",
-      "enabled": false,
+      "enabled": true,
       "category": "business-markets",
       "language": "en",
       "poll_interval_minutes": 30,
       "allow_excerpt": false,
       "allow_image": false,
-      "attribution": "Headline from MJBizDaily; follow the canonical publisher link. Feed endpoint and reuse permissions require validation before enabling."
+      "attribution": "Headline via MJBizDaily RSS; read the original article at the publisher URL."
     },
     {
       "id": "green-market-report",

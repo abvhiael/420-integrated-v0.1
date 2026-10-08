@@ -1,0 +1,257 @@
+{
+  "schema": "420hz-gca-awards-architecture-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.12",
+  "title": "Define Awards architecture",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "authority": {
+    "domain": "420Hz Awards canonical product domain only",
+    "owns": [
+      "AwardProgram",
+      "AwardSeason",
+      "AwardCategory",
+      "EligibilityPolicy",
+      "AwardNomination",
+      "AwardBallot",
+      "AwardVote",
+      "AwardResult",
+      "AwardBadge"
+    ],
+    "externalAuthorities": {
+      "creative": "420 Creative Protocol owns Creator/Work/Recording identity, publication, rights and licensing",
+      "wallet": "Wallet/SmartAccount owns actor authorization/signing",
+      "identity": "420Identity may supply optional eligibility assertions under later policy; Awards does not mint Identity trust",
+      "governance": "420Governance/Civic remains protocol governance authority; Awards ballots/votes are not Civic",
+      "charts": "420Hz Charts is derived ranking only and cannot determine Awards truth unless later policy explicitly references a frozen snapshot",
+      "community": "420Hz Community owns follows/favorites/playlists and cannot itself create nominations/votes/results",
+      "pay": "420Pay/Treasury/Grants/Vault own payment/prize movement; prize state never determines award legitimacy",
+      "search": "420Search may index public Awards projections only",
+      "notifications": "420Notifications may deliver Awards events only"
+    }
+  },
+  "objectGraph": [
+    "AwardProgram -> AwardSeason[]",
+    "AwardSeason -> AwardCategory[] + EligibilityPolicy snapshot",
+    "AwardCategory -> AwardNomination[]",
+    "accepted nominations -> frozen AwardBallot",
+    "AwardBallot -> qualified AwardVote[]",
+    "finalized AwardBallot -> immutable AwardResult",
+    "AwardResult -> permanent AwardBadge[]"
+  ],
+  "states": {
+    "AwardProgram": [
+      "DRAFT",
+      "ACTIVE",
+      "PAUSED",
+      "RETIRED"
+    ],
+    "AwardSeason": [
+      "DRAFT",
+      "SCHEDULED",
+      "NOMINATIONS_OPEN",
+      "NOMINATIONS_CLOSED",
+      "BALLOT_FROZEN",
+      "VOTING_OPEN",
+      "VOTING_CLOSED",
+      "FINALIZED",
+      "ARCHIVED",
+      "CANCELLED"
+    ],
+    "AwardCategory": [
+      "DRAFT",
+      "ACTIVE",
+      "CLOSED",
+      "RETIRED"
+    ],
+    "AwardNomination": [
+      "SUBMITTED",
+      "ACCEPTED",
+      "REJECTED",
+      "WITHDRAWN",
+      "DISQUALIFIED"
+    ],
+    "AwardBallot": [
+      "DRAFT",
+      "FROZEN",
+      "OPEN",
+      "CLOSED",
+      "FINALIZED",
+      "VOID"
+    ],
+    "AwardVote": [
+      "ACCEPTED",
+      "INVALIDATED"
+    ],
+    "AwardResult": [
+      "FINALIZED",
+      "SUPERSEDED_BY_CORRECTION"
+    ],
+    "AwardBadge": [
+      "ISSUED",
+      "DISPLAY_SUPERSEDED"
+    ]
+  },
+  "seasonRules": [
+    "season identity, date windows and policyCommitment are fixed before NOMINATIONS_OPEN",
+    "once NOMINATIONS_OPEN, material rule changes require cancellation/replacement or a new season/policy version; silent reinterpretation is forbidden",
+    "nomination, voting and eligibility windows are explicit non-overlapping/ordered ranges validated before activation",
+    "FINALIZED season cannot return to an earlier lifecycle state",
+    "ARCHIVED is presentation/history state and does not erase finalized result/badge history",
+    "CANCELLED season cannot produce a valid AwardResult"
+  ],
+  "categoryFramework": {
+    "versionedPerSeason": true,
+    "permanentHardcodedList": false,
+    "initialCategoryKeys": [
+      "SONG_OF_THE_YEAR",
+      "ARTIST_OF_THE_YEAR",
+      "BEST_AI_GENERATED_SONG",
+      "BEST_AI_ASSISTED_SONG",
+      "BEST_REMIX_AI_DERIVATIVE",
+      "BEST_INSTRUMENTAL",
+      "BEST_LYRICS",
+      "BEST_PRODUCTION",
+      "COMMUNITY_CHOICE",
+      "BREAKTHROUGH_ARTIST"
+    ],
+    "rules": [
+      "category definitions bind categoryKey, targetType, definitionCommitment, eligibilityPolicyId and seasonId",
+      "category meaning is frozen for the season once active",
+      "future seasons may add/remove/rename categories through new versioned definitions without rewriting historical seasons",
+      "AwardCategory is distinct from Creative RecordingClass, Search category, Charts family and AI disclosure class",
+      "category targetType is RECORDING or CREATOR_PROFILE in v1 unless a later version explicitly adds another canonical target type"
+    ]
+  },
+  "eligibilityPolicyArchitecture": [
+    "EligibilityPolicy is a versioned rules commitment referenced by season/category",
+    "it may reference Creative publication/status, AI disclosure class, date window, Identity eligibility assertions and frozen ChartSnapshot references only through explicit fields",
+    "it does not duplicate or override Creative rights, Identity credentials, Chart methodology or source visibility",
+    "the exact policy used for nomination/ballot/result must remain recoverable from immutable commitments",
+    "exact eligibility rules, self-nomination, thresholds and voter policy are deferred to HZ-GCA-1.13"
+  ],
+  "nominationArchitecture": [
+    "AwardNomination binds exact seasonId, categoryId, targetType, targetId, nominatorRef, submittedAt and eligibilitySnapshotCommitment",
+    "target IDs preserve native Creative CreatorId/RecordingId identity",
+    "one nomination record cannot silently retarget another candidate",
+    "accept/reject/withdraw/disqualify status changes preserve immutable submission identity/history",
+    "duplicate prevention/caps/community thresholds are deferred to HZ-GCA-1.13"
+  ],
+  "ballotArchitecture": [
+    "AwardBallot freezes one exact candidateSetCommitment and policyCommitment for one season/category",
+    "after FROZEN, candidate membership cannot be silently added/removed; correction requires void/replacement under explicit policy",
+    "AwardBallot is not a Civic/Governance ballot",
+    "candidate order/presentation may be deterministically normalized but cannot change candidate identity",
+    "exact voter eligibility/quorum/tie/finalization math is deferred to HZ-GCA-1.13"
+  ],
+  "voteArchitecture": [
+    "AwardVote is product-domain vote/commitment only",
+    "vote records bind ballotId, voterEligibilityRef, choiceCommitment, submittedAt and replayDomain",
+    "wallet signature/private key material is never stored as AwardVote payload",
+    "AwardVote does not become a Civic vote, Chart signal, payment instruction or community favorite",
+    "exact privacy, anti-Sybil, replay, abstention and invalid-vote semantics are deferred to HZ-GCA-1.13"
+  ],
+  "resultArchitecture": [
+    "AwardResult may exist only for a valid closed/finalizable AwardBallot under the frozen policy",
+    "result binds resultId, ballotId, resultCommitment, winnerTargetIds, finalizedAt and policyCommitment",
+    "final result is immutable historical Awards truth inside the product domain",
+    "a correction cannot mutate historical result bytes in place; it creates an explicit superseding result/history edge under later dispute/finalization policy",
+    "result legitimacy is independent of whether any financial prize exists or succeeds"
+  ],
+  "badgeArchitecture": [
+    "AwardBadge references exactly one finalized AwardResult and exact target/season/category",
+    "badge is permanent recognition metadata, not automatically a token/NFT or transferable asset",
+    "badge does not grant Creative rights, Identity trust, payment entitlement or governance privilege",
+    "display metadata may be superseded without changing the award/result identity"
+  ],
+  "chartCommunitySeparation": [
+    "Chart rank/score does not automatically nominate, place on ballot or win an Award",
+    "Community follow/favorite/playlist/share state does not automatically nominate, cast a vote or satisfy eligibility",
+    "COMMUNITY_CHOICE is only a category name until HZ-GCA-1.13 explicitly defines nomination/voting semantics",
+    "if a later eligibility policy references ChartSnapshot, it must bind an immutable chartSnapshotId/policy/window and cannot mutate the chart"
+  ],
+  "prizeSeparation": [
+    "AwardProgram/Season/Category/Nomination/Ballot/Vote/Result/Badge legitimacy is independent of prize settlement",
+    "zero-prize awards are valid",
+    "Treasury/Grants/Pay/Vault references, if later used, are external settlement references only",
+    "failed/withheld/replayed prize payment cannot change the finalized AwardResult",
+    "HZ-GCA-1.13 does not define prize settlement; HZ-GCA-13 implements optional rewards/prizes"
+  ],
+  "historyRules": [
+    "program/season/category/policy/ballot/result/badge IDs are never recycled",
+    "finalized seasons/results remain queryable as permanent public history",
+    "Search/Indexer projections may be rebuilt but cannot rewrite canonical Awards product-domain history",
+    "withdrawn/rejected/disqualified nominations retain historical status according to privacy/moderation policy rather than being silently rewritten as never existing",
+    "policy/version supersession is prospective unless an explicit correction/dispute path says otherwise"
+  ],
+  "validationRules": [
+    "every AwardSeason references one AwardProgram and a valid policy snapshot",
+    "every AwardCategory belongs to exactly one season and references one eligibility policy",
+    "every AwardNomination references the exact season/category and canonical target type/id",
+    "every AwardBallot references one season/category and frozen candidate/policy commitments",
+    "every AwardVote references one ballot and replay domain without private signature material",
+    "every AwardResult references one finalized ballot and frozen policy commitment",
+    "every AwardBadge references one finalized result and matching target/season/category",
+    "Civic/Governance proposal/ballot/vote IDs cannot substitute for Awards IDs",
+    "Creative/Identity/Charts/community/payment projections cannot authoritatively mutate Awards state"
+  ],
+  "failureRules": [
+    "season activation with invalid/unordered windows fails closed",
+    "material season/category/policy mutation after freeze/open fails closed",
+    "nomination retargeting after submission is invalid",
+    "ballot candidate mutation after FROZEN is invalid",
+    "AwardVote carrying wallet private/signature material is invalid",
+    "AwardResult before valid ballot closure/finalization is invalid",
+    "AwardBadge without finalized matching AwardResult is invalid",
+    "Civic vote/proposal/ballot used as Awards state is invalid",
+    "Chart/community popularity directly creating nomination/vote/result is invalid",
+    "prize payment state changing AwardResult legitimacy is invalid"
+  ],
+  "invariants": [
+    "HZGCA-AWARD-001 Awards state is canonical only inside the 420Hz Awards product domain and never Civic governance authority",
+    "HZGCA-AWARD-002 Award Program, Season, Category, Policy, Nomination, Ballot, Vote, Result and Badge have stable non-recycled IDs",
+    "HZGCA-AWARD-003 season windows and policy snapshot are frozen before nominations open and cannot be silently reinterpreted",
+    "HZGCA-AWARD-004 category definitions are versioned per season and are not a permanent hard-coded global list",
+    "HZGCA-AWARD-005 AwardCategory never substitutes for Creative RecordingClass, Search category, Chart family or AI disclosure class",
+    "HZGCA-AWARD-006 EligibilityPolicy references external authorities without duplicating Creative, Identity or Charts truth",
+    "HZGCA-AWARD-007 AwardNomination target identity is immutable and preserves native Creative target IDs",
+    "HZGCA-AWARD-008 AwardBallot candidate set and policy are frozen before voting",
+    "HZGCA-AWARD-009 AwardVote is product-domain voting only and stores no wallet private/signature material",
+    "HZGCA-AWARD-010 AwardVote is never a Civic vote, Chart signal, payment instruction or community favorite",
+    "HZGCA-AWARD-011 AwardResult is immutable finalized Awards history and cannot depend on prize settlement success",
+    "HZGCA-AWARD-012 corrections/supersession never mutate historical finalized result bytes in place",
+    "HZGCA-AWARD-013 AwardBadge derives from exactly one finalized result and creates no token/NFT ownership by default",
+    "HZGCA-AWARD-014 community/chart popularity cannot automatically create nominations, ballot placement, votes or winners",
+    "HZGCA-AWARD-015 zero-prize awards remain legitimate and optional prize settlement is external",
+    "HZGCA-AWARD-016 Search/Indexer/Notifications are projections/delivery only and cannot mutate Awards canonical product state",
+    "HZGCA-AWARD-017 closed/finalized season history is permanent and IDs are never recycled",
+    "HZGCA-AWARD-018 Awards architecture creates no new Creative rights, Identity trust, payment, custody, governance or Chart authority"
+  ],
+  "exitCriteria": [
+    "Awards object graph and authority boundaries are explicit",
+    "program/season/category/nomination/ballot/vote/result/badge lifecycle vocabulary is explicit",
+    "initial configurable category framework is explicit without permanently hard-coding the list",
+    "season/category/policy freeze/versioning semantics are explicit",
+    "Awards vs Civic/Creative/Identity/Charts/Community/Search/Notifications/prize boundaries are explicit",
+    "result and badge permanence/history semantics are explicit",
+    "architecture validation/failure invariants are executable in the targeted verifier",
+    "exact nomination/voting eligibility/quorum/tie/finalization policy remains explicitly deferred to HZ-GCA-1.13",
+    "no ABI, deployed contract, live service or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.13 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-community-authority-v1.json",
+    "hz/config/gca-charts-v1.json",
+    "docs/architecture/protocols/stake-governance-treasury-grants.md",
+    "docs/420SEARCH-ROADMAP.md",
+    "docs/420NOTIFICATIONS.md"
+  ]
+}

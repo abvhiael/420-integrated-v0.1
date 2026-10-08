@@ -218,10 +218,7 @@ if not errors:
         need((ROOT/source).is_file(),f"missing HZ-GCA-2 source doc: {source}")
 
     # HZ-GCA-2 must not invent production endpoints/addresses/provider-specific canonical authority.
-    blob=json.dumps(m)+"
-"+schema+"
-"+provider+"
-"+jobs
+    blob=json.dumps(m)+"\\n"+schema+"\\n"+provider+"\\n"+jobs
     need(re.search(r"0x[a-fA-F0-9]{40}",blob) is None,"HZ-GCA-2 must not assign a deployed address")
     need("https://" not in provider and "http://" not in provider,"mock provider must not invent external provider endpoints")
     need(m.get("nextCanonicalStep")=="HZ-GCA-3 — 420AI / Compute Market execution adapter","next canonical roadmap step drift")

@@ -5,7 +5,7 @@ import type { ProtocolEventDescriptor420, ProtocolFieldKind420 } from './protoco
 
 export const COMPUTE_EVENT_CONTRACTS_420=[
   'ComputeRequestRegistry420','ComputeJobRegistry420','ComputeWorkerRegistry420','ComputeVerifierRegistry420',
-  'ComputeResearchProjectRegistry420','ComputeUsefulRewardAccounting420','ComputeWorkerTrust420','ComputeWorkerStake420'
+  'ComputeResearchProjectRegistry420','ComputeUsefulRewardAccounting420','ComputeUsefulContributionAccounting420','ComputeWorkerTrust420','ComputeWorkerStake420'
 ] as const;
 export type ComputeEventContract420=typeof COMPUTE_EVENT_CONTRACTS_420[number];
 export interface ComputeManifestInput420{name:string;type:ProtocolFieldKind420;indexed:boolean;}

@@ -14,11 +14,16 @@ export interface ComputeWorkerListRequest420 extends ComputeAppPageRequest420 { 
 export interface ComputeVerifierListRequest420 extends ComputeAppPageRequest420 { authority?: string; }
 export interface ComputeProjectListRequest420 extends ComputeAppPageRequest420 { owner?: string; }
 export interface ComputeRewardListRequest420 extends ComputeAppPageRequest420 { beneficiary?: string; }
+export interface ComputeContributionListRequest420 extends ComputeAppPageRequest420 { contributor?: string; }
 
 interface Position420 { blockNumber:string; blockHash:string; transactionHash:string; transactionIndex:number; logIndex:number; }
 export interface ComputeReputationReference420 extends Position420 {
   schemaVersion:'420-compute-app-read-v1'; chainId:string; referenceId:string; workerId:string; workerRevision:string;
   policyId:string; policyRevision:string; metricRevision:string; total:string; activeSignals:string; authoritative:false;
+}
+export interface ComputeContributionState420 extends Position420 {
+  schemaVersion:'420-compute-app-read-v1'; chainId:string; contributionId:string; jobId:string; contributor:string; projectRef:string;
+  policyId:string; policyRevision:string; metricKind:string; metricId:string; amount:string; gateId:string; authoritative:false;
 }
 export interface ComputeStakeReference420 extends Position420 {
   schemaVersion:'420-compute-app-read-v1'; chainId:string; referenceId:string; workerId:string; workerRevision:string;
@@ -83,6 +88,18 @@ export async function computeRewards420(db:SqlExecutor420,chainId:bigint,request
   const beneficiary=optAddress(request.beneficiary,'beneficiary');
   const page=await listIds420(db,chainId,'rewardId',['UsefulRewardAccounted'],request,beneficiary?{field:'beneficiary',value:beneficiary}:undefined);
   return states(page.ids,id=>computeRewardState420(db,chainId,id),page.nextCursor);
+}
+
+async function contributionState420(db:SqlExecutor420,chainId:bigint,id:string):Promise<ComputeContributionState420|null>{
+  if(chainId<=0n)throw new Error('Compute app chain id invalid');const contributionId=bytes32(id,'contributionId');
+  const rs=rows(await db.query("select * from idx_protocol_events where chain_id=$1 and protocol='420Compute' and event_name='ContributionRecorded' and fields->>'contributionId'=$2 order by block_number desc,tx_index desc,log_index desc limit 1",[chainId.toString(),contributionId]));
+  const row=rs[0];if(!row)return null;const f=safeFields(row.fields);
+  return{schemaVersion:'420-compute-app-read-v1',chainId:chainId.toString(),contributionId:bytes32(f.contributionId,'contributionId'),jobId:bytes32(f.jobId,'jobId'),contributor:address(f.contributor,'contributor'),projectRef:bytes32(f.projectRef,'projectRef'),policyId:bytes32(f.policyId,'policyId'),policyRevision:uint(f.policyRevision,'policyRevision'),metricKind:uint(f.metricKind,'metricKind'),metricId:bytes32(f.metricId,'metricId'),amount:uint(f.amount,'amount'),gateId:bytes32(f.gateId,'gateId'),...pos(row),authoritative:false};
+}
+export async function computeContributions420(db:SqlExecutor420,chainId:bigint,request:ComputeContributionListRequest420={}):Promise<QueryPage420<ComputeContributionState420>>{
+  const contributor=optAddress(request.contributor,'contributor');
+  const page=await listIds420(db,chainId,'contributionId',['ContributionRecorded'],request,contributor?{field:'contributor',value:contributor}:undefined);
+  return states(page.ids,id=>contributionState420(db,chainId,id),page.nextCursor);
 }
 
 async function referenceEvent420(db:SqlExecutor420,chainId:bigint,id:string,eventName:string):Promise<QueryRow420|null>{

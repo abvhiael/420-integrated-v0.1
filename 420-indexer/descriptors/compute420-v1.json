@@ -613,6 +613,68 @@
           ]
         }
       ]
+    },
+    {
+      "contractName": "ComputeUsefulContributionAccounting420",
+      "sourcePath": "contracts/src/compute/ComputeUsefulContributionAccounting420.sol",
+      "events": [
+        {
+          "name": "ContributionRecorded",
+          "signature": "ContributionRecorded(bytes32,bytes32,address,bytes32,bytes32,uint32,uint8,bytes32,uint256,bytes32)",
+          "inputs": [
+            {
+              "name": "contributionId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "jobId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "contributor",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "projectRef",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "policyId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "policyRevision",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "metricKind",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "metricId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "gateId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
     }
   ]
 }

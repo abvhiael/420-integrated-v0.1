@@ -241,6 +241,7 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (path === '/v1/compute/verifiers') { if(!api.computeVerifiers) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeVerifiers(chainId,{...pageRequest420(url),authority:url.searchParams.get('authority')??undefined})); }
     if (path === '/v1/compute/research/projects') { if(!api.computeResearchProjects) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeResearchProjects(chainId,{...pageRequest420(url),owner:url.searchParams.get('owner')??undefined})); }
     if (path === '/v1/compute/rewards') { if(!api.computeRewards) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeRewards(chainId,{...pageRequest420(url),beneficiary:url.searchParams.get('beneficiary')??undefined})); }
+    if (path === '/v1/compute/contributions') { if(!api.computeContributions) return error420(503,'unavailable','Compute indexer surface unavailable'); return ok420(await api.computeContributions(chainId,{...pageRequest420(url),contributor:url.searchParams.get('contributor')??undefined})); }
 
     if (path === '/v1/ai/providers') return ok420(await api.aiProviders(chainId, pageRequest420(url)));
     if (path === '/v1/ai/models') return ok420(await api.aiModels(chainId, pageRequest420(url)));

@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	news := &reeferreview.NewsService{Store: newsStore, Sources: newsRegistry}
+	news := &reeferreview.NewsService{Store: newsStore, Sources: newsRegistry, SourcesPath: newsSources}
 
 	addr := strings.TrimSpace(os.Getenv("REEFER_REVIEW_LISTEN_ADDR"))
 	if addr == "" {

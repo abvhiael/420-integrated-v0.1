@@ -10,7 +10,8 @@ FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 GENESIS=ROOT/".github/workflows/genesis-address-authority.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
 DOCS=ROOT/".github/workflows/docs-qualify.yml"
-COMPUTE=ROOT/".github/workflows/compute-market.yml"\nHARDENING=ROOT/".github/workflows/contracts-hardening.yml"
+COMPUTE=ROOT/".github/workflows/compute-market.yml"
+HARDENING=ROOT/".github/workflows/contracts-hardening.yml"
 
 def fail(msg):
     raise SystemExit("CMP-6.8 closeout verification failed: "+msg)

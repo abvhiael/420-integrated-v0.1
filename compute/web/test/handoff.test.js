@@ -1,0 +1,5 @@
+import test from'node:test';import assert from'node:assert/strict';import{workerLifecycleHandoff420,registerProjectHandoff420}from'../core/handoff.js';const h=(n)=>'0x'+n.repeat(64);
+const off={chainId:'420',walletUrl:'https://wallet.example',writeActionsEnabled:false,contracts:{workerRegistry:null,researchProjectRegistry:null,verifierRegistry:null}};
+const on={...off,writeActionsEnabled:true,contracts:{workerRegistry:'0x'+'1'.repeat(40),researchProjectRegistry:'0x'+'2'.repeat(40),verifierRegistry:'0x'+'3'.repeat(40)}};
+test('CMP-8 Wallet handoff fails closed when canonical write runtime is unresolved',()=>{assert.throws(()=>workerLifecycleHandoff420(off,'activate',h('a')),/not enabled/);});
+test('CMP-8 Wallet handoff never claims canonical state or signing authority',()=>{const x=registerProjectHandoff420(on,{researchDomain:h('1'),definitionCommitment:h('2')});assert.equal(x.requiresWalletAuthorization,true);assert.equal(x.canonicalState,false);assert.equal(x.secretMaterialManaged,false);assert.equal(x.method,'registerProject');});

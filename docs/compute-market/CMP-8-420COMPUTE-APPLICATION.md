@@ -1,6 +1,6 @@
 # CMP-8 — 420Compute application
 
-Status: **LEVEL 3 CLOSEOUT CANDIDATE — reconciled to current main; exact-head comprehensive qualification pending.**
+Status: **COMPLETE — Level 3 exact-head qualified on `1889713a30ebee9afbdfc21b151d7c69789c1e09`.** See [qualification evidence](CMP-8-QUALIFICATION-EVIDENCE.md).
 
 ## Canonical purpose
 

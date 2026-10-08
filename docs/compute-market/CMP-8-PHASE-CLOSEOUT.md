@@ -1,6 +1,8 @@
 # CMP-8 — Phase closeout
 
-Status: **LEVEL 3 CLOSEOUT CANDIDATE — exact-head comprehensive qualification pending.**
+Status: **COMPLETE — Level 3 comprehensively qualified on `1889713a30ebee9afbdfc21b151d7c69789c1e09`.**
+
+Durable evidence: [CMP-8 qualification](CMP-8-QUALIFICATION-EVIDENCE.md). The closeout commit is evidence-only and inherits the qualified implementation SHA.
 
 ## Scope
 

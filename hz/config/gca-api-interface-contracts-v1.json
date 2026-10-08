@@ -35,12 +35,12 @@
       "requestId",
       "operation",
       "domain",
-      "actorRef",
-      "idempotencyKey",
       "resourceRef",
       "payload"
     ],
     "conditional": [
+      "actorRef",
+      "idempotencyKey",
       "chainId",
       "networkId",
       "capabilityRef",
@@ -51,10 +51,15 @@
     "rules": [
       "requestId identifies one transport/application attempt and is not reusable as business idempotency authority by itself",
       "idempotencyKey is operation/domain/resource scoped and must bind the material request payload",
-      "actorRef is presentation of the qualified Wallet/session actor and cannot be caller-selected authorization without the matching Wallet/session proof",
+      "actorRef is required for authority-bearing mutations and is presentation of the qualified Wallet/session actor; it cannot be caller-selected authorization without the matching Wallet/session proof",
       "chainId/networkId are required for chain-sensitive operations and wrong-network requests fail closed",
       "expectedRevision/sourceCheckpoint are required where lost-update/stale-state protection is material",
-      "payload must contain only the minimum fields needed for the operation and never wallet private keys, mnemonics, raw Identity proof payloads, provider secrets or unrelated private project data"
+      "payload must contain only the minimum fields needed for the operation and never wallet private keys, mnemonics, raw Identity proof payloads, provider secrets or unrelated private project data",
+      "eligible PUBLIC read queries may omit actorRef/idempotencyKey and remain anonymous under HZ-GCA-1.10; anonymous reads never gain mutation authority"
+    ],
+    "requiredForMutations": [
+      "actorRef",
+      "idempotencyKey"
     ]
   },
   "responseEnvelope": {

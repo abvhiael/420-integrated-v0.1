@@ -1,6 +1,6 @@
 # CMP-7.9 — CLI
 
-Status: **IMPLEMENTED — Level 1 + second/final CMP-7 Level 2 milestone qualification pending.**
+Status: **COMPLETE — Level 1 + second/final CMP-7 Level 2 exact-head qualified on `63b0bf7d77389685e464edb1f8db10548b72e181`.**
 
 ## Canonical purpose
 

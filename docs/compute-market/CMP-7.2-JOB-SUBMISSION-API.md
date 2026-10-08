@@ -1,6 +1,6 @@
 # CMP-7.2 — Job submission API
 
-Status: **IMPLEMENTED — Level 1 exact-head qualification pending.**
+Status: **COMPLETE — Level 1 exact-head qualified on `3c8126201278f51aecf066f92ec4551a7ea9a90a`.**
 
 ## Canonical purpose
 

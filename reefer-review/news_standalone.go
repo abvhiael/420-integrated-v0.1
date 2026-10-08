@@ -37,17 +37,17 @@ func (h HTTP) NewsOnlyHandler() http.Handler {
 	mux.HandleFunc("/v1/news/sources", h.newsSources)
 	mux.HandleFunc("/v1/news/topics", h.newsTopics)
 	mux.HandleFunc("/v1/news/", h.newsItem)
-	mux.HandleFunc("/v1/admin/news/sources", func(w http.ResponseWriter, r *http.Request) {
-		if len(h.NewsAdminKey) < 32 {
-			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "SOURCE_ADMIN_DISABLED"})
-			return
-		}
-		token := bearerToken(r.Header.Get("Authorization"))
-		if len(token) != len(h.NewsAdminKey) || subtle.ConstantTimeCompare([]byte(token), h.NewsAdminKey) != 1 {
-			writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "SOURCE_ADMIN_REQUIRED"})
-			return
-		}
-		h.newsAdminSources(w, r.WithContext(withNewsAdmin(r.Context())))
-	})
+	adminGuard := func(next http.HandlerFunc) http.HandlerFunc {
+  return func(w http.ResponseWriter,r *http.Request) {
+    if len(h.NewsAdminKey)<32 {writeJSON(w,http.StatusServiceUnavailable,map[string]string{"error":"SOURCE_ADMIN_DISABLED"});return}
+    token:=bearerToken(r.Header.Get("Authorization"))
+    if len(token)!=len(h.NewsAdminKey) || subtle.ConstantTimeCompare([]byte(token),h.NewsAdminKey)!=1 {
+      writeJSON(w,http.StatusUnauthorized,map[string]string{"error":"SOURCE_ADMIN_REQUIRED"});return
+    }
+    next(w,r.WithContext(withNewsAdmin(r.Context())))
+  }
+ }
+ mux.HandleFunc("/v1/admin/news/sources",adminGuard(h.newsAdminSources))
+ mux.HandleFunc("/v1/admin/news/health",adminGuard(h.newsAdminHealth))
 	return securityResponseHeaders((&HTTPMetrics{}).Middleware(newAPIRateLimiter(120, 1, 4096).wrap(mux)))
 }

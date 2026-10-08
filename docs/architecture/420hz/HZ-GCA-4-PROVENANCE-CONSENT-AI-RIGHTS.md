@@ -1,6 +1,6 @@
 # HZ-GCA-4 — Provenance, consent and AI rights metadata
 
-Status: **IMPLEMENTED — awaiting exact-head Level-1 qualification**
+Status: **COMPLETE — Level 1 exact-head qualified**
 
 Canonical roadmap step:
 
@@ -245,3 +245,30 @@ HZ-GCA-4 is complete when:
 Next canonical roadmap step:
 
 **HZ-GCA-5 — Project workspace, versions, stems and storage**
+
+
+## Qualification result
+
+Qualified implementation SHA:
+
+`e13ff098988028bd1a9181edd7559066a611de99`
+
+Authoritative workflow:
+
+- **420Hz Web Qualification**
+- Run: **37816294856** (#208)
+- Job: **HZ-GCA-4 Level 1**
+- Job ID: **113445676046**
+- Result: **PASS**
+
+Exact-head required results:
+
+- 420Hz generation/provenance module: **40 PASS / 0 FAIL / 0 SKIPPED**
+- HZ-GCA-1.4 AI disclosure verifier: **PASS**
+- HZ-GCA-1.5 provenance verifier: **PASS**
+- HZ-GCA-1.6 rights/consent verifier: **PASS**
+- HZ-GCA-3 execution-evidence verifier: **PASS**
+- HZ-GCA-4 targeted verifier: **PASS**
+- retained 420Hz web job: **PASS**
+
+No Level-2 milestone was required for HZ-GCA-4. Level-3 repository-wide qualification remains deferred to HZ-GCA-17.

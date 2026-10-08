@@ -7,6 +7,8 @@ checks={
 "reefer-review/http_security.go":["X-Content-Type-Options","X-Frame-Options","Referrer-Policy","Content-Security-Policy","Cache-Control"],
 "reefer-review/backup.go":["CreateEncryptedBackup","RestoreEncryptedBackup","backupSchema"],
 "reefer-review/backup_test.go":["TestRR9EncryptedBackupRestoreAndTampering","TestRR9BackupRejectsSymlinksAndUnsafeNames"],
+"reefer-review/web/_headers":["Content-Security-Policy","connect-src","X-Frame-Options"],
+"cmd/reefer-backup/main.go":["CreateEncryptedBackup","RestoreEncryptedBackup","REEFER_REVIEW_BACKUP_KEY_HEX"],
 "reefer-review/web/rr9.e2e.spec.cjs":["AxeBuilder","mobile navigation","anonymous news"],
 "reefer-review/http_metrics.go":["HTTPMetrics","TotalLatencyNS","duration_ms"],
 "reefer-review/http_rate_limit.go":["apiRateLimiter","Retry-After","StatusTooManyRequests","RemoteAddr"],

@@ -1,0 +1,159 @@
+{
+  "schema": "420hz-gca-generate-studio-ux-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-6",
+  "title": "420Hz Generate Studio UX",
+  "qualificationLevel": 1,
+  "milestoneRequired": false,
+  "baseMainSha": "f3221728500e5e280b8f29781ad7e3af42f5134a",
+  "implementationRoot": "hz/web",
+  "dependencies": {
+    "projectWorkspace": "hz/config/gca-project-workspace-v1.json",
+    "providerAbstraction": "hz/config/gca-generation-provider-abstraction-v1.json",
+    "computeAdapter": "hz/config/gca-compute-execution-adapter-v1.json",
+    "provenance": "hz/config/gca-provenance-consent-rights-v1.json",
+    "currentWeb": "docs/420HZ-WEB.md"
+  },
+  "navigation": {
+    "homeCta": "Generate your own song",
+    "sectionId": "generate",
+    "navEntry": true,
+    "fullyNavigableDevFlow": true
+  },
+  "screens": [
+    "generate landing",
+    "prompt/lyrics composer",
+    "advanced music controls",
+    "cost/capacity preview",
+    "generation progress",
+    "A/B take comparison",
+    "audio player and stem preview where available",
+    "provenance/disclosure panel",
+    "save/regenerate/remix controls",
+    "Register & Publish handoff",
+    "failure/retry/refund state"
+  ],
+  "devExecution": {
+    "model": "GenerateStudioModel420",
+    "provider": "mock:420hz",
+    "modelId": "mock:music",
+    "modelVersion": "1.0.0",
+    "liveClaim": false,
+    "quoteAuthoritative": false,
+    "registerPublishTransaction": false,
+    "publicationAuthority": false,
+    "settlementAuthority": false
+  },
+  "accessibility": {
+    "semanticHeadings": true,
+    "labelBoundInputs": true,
+    "liveStatusRegions": true,
+    "progressElement": true,
+    "ariaPressedForTakeSelection": true,
+    "audioControlsLabeled": true,
+    "keyboardNativeControls": true,
+    "reducedMotionSupport": true
+  },
+  "responsive": {
+    "desktop": true,
+    "tabletBreakpointPx": 760,
+    "mobileBreakpointPx": 480,
+    "oneColumnMobileForms": true,
+    "oneColumnMobileTakeComparison": true
+  },
+  "stateModel": {
+    "states": [
+      "LANDING",
+      "COMPOSING",
+      "READY",
+      "GENERATING",
+      "COMPARE",
+      "SAVED",
+      "FAILED",
+      "CANCELLED"
+    ],
+    "generateRequiresValidPromptAndCapacity": true,
+    "completeTakes": [
+      "A",
+      "B"
+    ],
+    "saveRequiresSelectedTake": true,
+    "publishHandoffRequiresSavedTake": true,
+    "failureRetryableExample": "PROVIDER_UNAVAILABLE",
+    "cancellationNoOutputSuccess": true,
+    "refundStateNoFabrication": "NO_SETTLEMENT_OBSERVED"
+  },
+  "authorityBoundaries": [
+    "Generate Studio is presentation/application state and not canonical protocol authority",
+    "development quote/capacity is explicitly non-authoritative",
+    "mock/dev take completion does not imply Creative registration or publication",
+    "Register & Publish is an explicit disabled handoff owned by HZ-GCA-7",
+    "failure and cancellation never fabricate settlement or refund completion",
+    "no production chain ID, provider endpoint, storage gateway URL or transaction target is invented",
+    "private generation drafts remain application-local and are not public-indexed by this UX",
+    "audio controls do not fabricate playable public media when no qualified media URL exists"
+  ],
+  "invariants": [
+    "HZGCA6-001 home page exposes a prominent Generate your own song CTA",
+    "HZGCA6-002 Generate Studio has a dedicated navigable section",
+    "HZGCA6-003 prompt and optional lyrics composer is present",
+    "HZGCA6-004 advanced genre/style/mood/instrumentation controls are present",
+    "HZGCA6-005 cost and capacity preview is explicit and non-authoritative",
+    "HZGCA6-006 generation progress is represented with an accessible progress control",
+    "HZGCA6-007 successful development generation yields two comparable A/B takes",
+    "HZGCA6-008 audio/stem preview surfaces never invent a public media URL",
+    "HZGCA6-009 provenance and AI disclosure are visible for selected development takes",
+    "HZGCA6-010 save regenerate and remix controls have explicit state transitions",
+    "HZGCA6-011 Register & Publish is a separate handoff and submits no HZ-GCA-6 transaction",
+    "HZGCA6-012 provider failure exposes retry only when retryable",
+    "HZGCA6-013 cancellation produces no successful output",
+    "HZGCA6-014 refund presentation never claims a refund without canonical settlement evidence",
+    "HZGCA6-015 mobile layout collapses composer take comparison and provenance grids",
+    "HZGCA6-016 native labels headings status regions and keyboard controls remain accessible",
+    "HZGCA6-017 reduced-motion preference is respected",
+    "HZGCA6-018 pre-testnet UX creates no live deployment publication settlement or custody claim"
+  ],
+  "tests": {
+    "nodeSuite": "hz/web/test/generate-studio.test.mjs",
+    "targetedVerifier": "scripts/verify-420hz-gca-6.py",
+    "retained": [
+      "scripts/verify-420hz-web.py",
+      "scripts/verify-420hz-gca-5.py"
+    ],
+    "requiredCoverage": [
+      "landing/composer readiness",
+      "non-authoritative quote",
+      "generation progress and A/B completion",
+      "instrumental/lyrics behavior",
+      "take selection save regenerate remix",
+      "Register & Publish handoff only",
+      "provider failure and retry",
+      "cancel without output/refund fabrication",
+      "no-capacity fail closed",
+      "no registration/publication/settlement completion claim"
+    ]
+  },
+  "limitations": [
+    "the Generate Studio is pre-testnet and uses qualified deterministic development state",
+    "no public media gateway is invented, so audio controls remain unbound until a qualified media URL exists",
+    "Wallet connection and state-changing publication remain disabled before the verified deployment",
+    "HZ-GCA-7 owns actual Creator/Work/Recording/Register & Publish integration"
+  ],
+  "exitCriteria": [
+    "Generate landing is present",
+    "prompt/lyrics composer is present",
+    "advanced music controls are present",
+    "cost/capacity preview is present",
+    "generation progress is present",
+    "A/B take comparison is present",
+    "audio player and stem preview surface is present where available",
+    "provenance/disclosure panel is present",
+    "save/regenerate/remix controls are present",
+    "explicit Register & Publish handoff is present",
+    "failure/retry/refund state is present",
+    "responsive/mobile behavior and accessibility are qualified",
+    "home page contains a prominent Generate your own song CTA",
+    "fully navigable Generate workflow passes against qualified mock/dev execution on exact implementation SHA"
+  ],
+  "nextCanonicalStep": "HZ-GCA-7 — Register & Publish integration"
+}

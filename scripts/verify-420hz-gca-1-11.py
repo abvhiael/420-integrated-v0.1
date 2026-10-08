@@ -72,7 +72,7 @@ if not errors:
     interp=" ".join(method.get("interpretation",[]))
     need("qualified plays as the only positive score weight" in interp,"qualified-play primary v1 rule missing")
     need("new chartPolicyVersion" in interp,"methodology versioning rule missing")
-    need("No hidden personalized or sponsored boost" in interp,"hidden boost prohibition missing")
+    need("no hidden personalized or sponsored boost" in interp,"hidden boost prohibition missing")
 
     qp=" ".join(chart.get("qualifiedPlayRules",[]))
     for token in ["does not invent an unavailable playback-service threshold","one event/source replay key contributes at most once","cannot multiply chart credit","deterministic policy","retain source/reference/checkpoint"]:

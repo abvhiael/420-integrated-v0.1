@@ -52,16 +52,21 @@ func TestRR11NewsOnlyServerRequiresNoTestnetAndExposesNoEditorialRoutes(t *testi
 	if rr.Code != http.StatusOK {
 		t.Fatalf("authenticated admin GET failed: %d %s", rr.Code, rr.Body.String())
 	}
-	healthServer:=HTTP{News:&NewsService{Store:store,Sources:registry,SourcesPath:path},NewsAdminKey:[]byte(secret),NewsFeedCheckpointPath:filepath.Join(dir,"checkpoint.json")}.NewsOnlyHandler()
- healthReq:=httptest.NewRequest(http.MethodGet,"/v1/admin/news/health",nil)
- healthReq.Header.Set("Authorization","Bearer "+secret)
- healthRec:=httptest.NewRecorder()
- healthServer.ServeHTTP(healthRec,healthReq)
- if healthRec.Code!=http.StatusOK || !strings.Contains(healthRec.Body.String(),"source-a") {t.Fatalf("admin health failed: %d %s",healthRec.Code,healthRec.Body.String())}
- healthReq.Header.Set("Authorization","Bearer wrong")
- healthRec=httptest.NewRecorder();healthServer.ServeHTTP(healthRec,healthReq)
- if healthRec.Code!=http.StatusUnauthorized {t.Fatalf("health route leaked without admin key: %d",healthRec.Code)}
- wrong := HTTP{News: &NewsService{Store: store, Sources: registry, SourcesPath: path}}.NewsOnlyHandler()
+	healthServer := HTTP{News: &NewsService{Store: store, Sources: registry, SourcesPath: path}, NewsAdminKey: []byte(secret), NewsFeedCheckpointPath: filepath.Join(dir, "checkpoint.json")}.NewsOnlyHandler()
+	healthReq := httptest.NewRequest(http.MethodGet, "/v1/admin/news/health", nil)
+	healthReq.Header.Set("Authorization", "Bearer "+secret)
+	healthRec := httptest.NewRecorder()
+	healthServer.ServeHTTP(healthRec, healthReq)
+	if healthRec.Code != http.StatusOK || !strings.Contains(healthRec.Body.String(), "source-a") {
+		t.Fatalf("admin health failed: %d %s", healthRec.Code, healthRec.Body.String())
+	}
+	healthReq.Header.Set("Authorization", "Bearer wrong")
+	healthRec = httptest.NewRecorder()
+	healthServer.ServeHTTP(healthRec, healthReq)
+	if healthRec.Code != http.StatusUnauthorized {
+		t.Fatalf("health route leaked without admin key: %d", healthRec.Code)
+	}
+	wrong := HTTP{News: &NewsService{Store: store, Sources: registry, SourcesPath: path}}.NewsOnlyHandler()
 	rr = httptest.NewRecorder()
 	wrong.ServeHTTP(rr, req)
 	if rr.Code != http.StatusServiceUnavailable {

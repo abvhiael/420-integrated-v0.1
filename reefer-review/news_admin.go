@@ -161,17 +161,33 @@ func persistNewsRegistry(path string, registry NewsSourceRegistry) error {
 	return dir.Sync()
 }
 
-func (h HTTP) newsAdminHealth(w http.ResponseWriter,r *http.Request) {
- if r.Method!=http.MethodGet {w.Header().Set("Allow","GET");w.WriteHeader(http.StatusMethodNotAllowed);return}
- if !isNewsAdmin(r.Context()) {
-  claims,ok:=authenticatedSession(r.Context())
-  if !ok || !HasAnyCapability(claims,CapabilityModerator) {writeJSON(w,http.StatusForbidden,map[string]string{"error":"CAPABILITY_DENIED"});return}
- }
- if h.News==nil || h.NewsFeedCheckpointPath=="" {writeJSON(w,http.StatusServiceUnavailable,map[string]string{"error":"FEED_HEALTH_UNAVAILABLE"});return}
- sources,err:=h.News.currentSources()
- if err!=nil {writeJSON(w,http.StatusServiceUnavailable,map[string]string{"error":"SOURCE_REGISTRY_UNAVAILABLE"});return}
- ops:=&FeedOperations{Path:h.NewsFeedCheckpointPath,Sources:sources,Ingestor:NewsIngestor{Store:h.News.Store}}
- health,err:=ops.Health(r.Context())
- if err!=nil {writeJSON(w,http.StatusServiceUnavailable,map[string]string{"error":"FEED_HEALTH_UNAVAILABLE"});return}
- writeJSON(w,http.StatusOK,map[string]any{"health":health})
+func (h HTTP) newsAdminHealth(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if !isNewsAdmin(r.Context()) {
+		claims, ok := authenticatedSession(r.Context())
+		if !ok || !HasAnyCapability(claims, CapabilityModerator) {
+			writeJSON(w, http.StatusForbidden, map[string]string{"error": "CAPABILITY_DENIED"})
+			return
+		}
+	}
+	if h.News == nil || h.NewsFeedCheckpointPath == "" {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "FEED_HEALTH_UNAVAILABLE"})
+		return
+	}
+	sources, err := h.News.currentSources()
+	if err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "SOURCE_REGISTRY_UNAVAILABLE"})
+		return
+	}
+	ops := &FeedOperations{Path: h.NewsFeedCheckpointPath, Sources: sources, Ingestor: NewsIngestor{Store: h.News.Store}}
+	health, err := ops.Health(r.Context())
+	if err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "FEED_HEALTH_UNAVAILABLE"})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"health": health})
 }

@@ -12,10 +12,10 @@ import (
 )
 
 type HTTP struct {
-	Service      Service
-	News         *NewsService
-	Security     *SessionSecurity
-	NewsAdminKey []byte
+	Service                Service
+	News                   *NewsService
+	Security               *SessionSecurity
+	NewsAdminKey           []byte
 	NewsFeedCheckpointPath string
 }
 

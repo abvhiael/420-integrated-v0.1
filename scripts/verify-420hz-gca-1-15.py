@@ -53,7 +53,7 @@ if not errors:
         need(any(token in x for x in bounds),f"trust boundary missing: {token}")
 
     adversaries=t.get("adversaries",[])
-    for token in ["Sybil Wallet","prompt/tool-injection","reference-audio uploader","voice/persona","AI worker/provider","storage gateway/provider","chart manipulator","collusive nominator","compromised moderator","compromised operator"]:
+    for token in ["Sybil Wallet","prompt/tool/provider injection","reference-audio uploader","voice/persona","AI worker/provider","storage gateway/provider","chart manipulator","collusive nominator","compromised moderator","compromised operator"]:
         need(any(token in x for x in adversaries),f"adversary class missing: {token}")
 
     threats=t.get("threatCatalogue",[])

@@ -1,0 +1,137 @@
+name: 420Compute App Qualification
+
+on:
+  pull_request:
+    paths:
+      - 'compute/web/**'
+      - '420-indexer/src/compute-app-read-model.ts'
+      - '420-indexer/src/compute-read-model.ts'
+      - '420-indexer/src/compute-descriptors.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/src/api-surface.ts'
+      - '420-indexer/src/http-transport.ts'
+      - '420-indexer/descriptors/compute420-v1.json'
+      - '420-indexer/test/compute*'
+      - '420-indexer/test/http-transport.test.ts'
+      - '420-indexer/test/protocol-projections.test.ts'
+      - 'services/compute-api/**'
+      - 'compute/worker/**'
+      - 'packaging/node420-compute/**'
+      - 'scripts/verify-cmp-8-420compute-app.py'
+      - 'scripts/verify-cmp-8-closeout.py'
+      - 'contracts/config/compute-market/cmp-8-phase-closeout.json'
+      - 'docs/compute-market/CMP-8*'
+      - '.github/workflows/420compute-app.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'compute/web/**'
+      - '420-indexer/**'
+      - 'services/compute-api/**'
+      - 'compute/worker/**'
+      - 'packaging/node420-compute/**'
+      - 'scripts/verify-cmp-8-420compute-app.py'
+      - 'scripts/verify-cmp-8-closeout.py'
+      - 'contracts/config/compute-market/cmp-8-phase-closeout.json'
+      - 'docs/compute-market/CMP-8*'
+      - '.github/workflows/420compute-app.yml'
+
+concurrency:
+  group: compute-app-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 420Compute web build and tests
+        working-directory: compute/web
+        run: npm run build
+      - name: CMP-8 inventory verifier
+        run: python scripts/verify-cmp-8-420compute-app.py
+
+  indexer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Affected 420Indexer suite
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm test
+
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm run build
+      - name: Compute API regression
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Worker config/resource regressions
+        run: go test ./compute/worker -run 'Test.*(Config|Resource|Schedule|Daemon)' -count=1
+
+  integration:
+    needs: [web,indexer,api,worker]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Retained web suite
+        working-directory: compute/web
+        run: npm run build
+      - name: Retained Compute API suite
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+      - name: Retained Indexer application tests
+        working-directory: 420-indexer
+        run: npm install --no-audit --no-fund && npm run build && node --test --test-concurrency=1 dist/test/compute-app-read-model.test.js dist/test/compute-read-model.test.js dist/test/http-transport.test.js
+      - name: Retained worker participation controls
+        run: go test ./compute/worker -run 'Test.*(Config|Resource|Schedule|Daemon)' -count=1
+      - name: CMP-8 inventory verifier
+        run: python scripts/verify-cmp-8-420compute-app.py

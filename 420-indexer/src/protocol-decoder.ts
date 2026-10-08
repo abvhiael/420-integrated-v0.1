@@ -3,7 +3,8 @@ import type { Hex, IndexerLog } from './chain-source.js';
 export type ProtocolFieldKind420 =
   | 'bytes4' | 'bytes8' | 'bytes16' | 'bytes32'
   | 'address' | 'bool'
-  | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256';
+  | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256'
+  | 'int256';
 
 export interface ProtocolField420 {
   name: string;
@@ -34,10 +35,12 @@ export interface DecodedProtocolEvent420 {
 const word = (hex: Hex, index: number): Hex => `0x${hex.slice(2 + index * 64, 2 + (index + 1) * 64)}` as Hex;
 const addressFromWord = (value: Hex): Hex => `0x${value.slice(-40)}` as Hex;
 const isUintKind420 = (kind: ProtocolFieldKind420): boolean => kind.startsWith('uint');
+const int256FromWord420 = (value: Hex): bigint => { const n=BigInt(value); return n >= (1n<<255n) ? n-(1n<<256n) : n; };
 
 function decodeValue420(kind: ProtocolFieldKind420, value: Hex): string | bigint | boolean {
   if (kind === 'address') return addressFromWord(value).toLowerCase() as Hex;
   if (isUintKind420(kind)) return BigInt(value);
+  if (kind === 'int256') return int256FromWord420(value);
   if (kind === 'bool') return BigInt(value) !== 0n;
   return value.toLowerCase();
 }

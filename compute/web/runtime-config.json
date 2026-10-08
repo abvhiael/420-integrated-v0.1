@@ -1,0 +1,14 @@
+{
+  "schemaVersion":"420-compute-web-runtime-v1",
+  "chainId":"420",
+  "runtimeReady":false,
+  "runtimeStatus":"DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED",
+  "indexerUrl":null,
+  "computeApiUrl":null,
+  "walletUrl":null,
+  "writeActionsEnabled":false,
+  "contracts":{"workerRegistry":null,"researchProjectRegistry":null,"verifierRegistry":null},
+  "workerDownloads":{"windows":null,"linux":null,"darwin":null},
+  "cpuMetricId":null,
+  "gpuMetricId":null
+}

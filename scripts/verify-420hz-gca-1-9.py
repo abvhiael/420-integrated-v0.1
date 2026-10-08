@@ -110,7 +110,7 @@ if not errors:
       "A quote is not funding.",
       "RESULT_COMMITTED",
       "cancelObligation",
-      "must not silently recharge",
+      "before any new charge is allowed",
       "defines **no hidden or implicit 420Hz surcharge**",
       "funded = provider earned/claimable/paid + payer refundable/claimable/paid + still reserved + explicit accepted fees/holds",
       "HZ-GCA-1.10 — Define Community authority model"

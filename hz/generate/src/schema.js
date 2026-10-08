@@ -207,24 +207,35 @@ export function assertProviderSupportsRequest420(descriptor, request, { modelId,
   return { descriptor: d, model, request: r };
 }
 
+function manifestString(value, name, { required = false, max = 512 } = {}) {
+  try {
+    return cleanString(value, name, { required, max });
+  } catch (error) {
+    if (error instanceof GenerationError420 && error.code === "INVALID_REQUEST") {
+      throw new GenerationError420("MALFORMED_RESULT", error.message, { cause: error });
+    }
+    throw error;
+  }
+}
+
 function validateArtifact(artifact, i) {
   if (!isPlainObject(artifact)) throw new GenerationError420("MALFORMED_RESULT", `artifacts[${i}] invalid`);
   if (!OUTPUT_KINDS_420.includes(artifact.kind)) {
     throw new GenerationError420("MALFORMED_RESULT", `artifacts[${i}].kind unsupported`);
   }
-  const storageRef = cleanString(artifact.storageRef, `artifacts[${i}].storageRef`, { required: true, max: 512 });
-  const integrity = cleanString(artifact.integrity, `artifacts[${i}].integrity`, { required: true, max: 256 });
-  const label = cleanString(artifact.label, `artifacts[${i}].label`, { max: 128 });
+  const storageRef = manifestString(artifact.storageRef, `artifacts[${i}].storageRef`, { required: true, max: 512 });
+  const integrity = manifestString(artifact.integrity, `artifacts[${i}].integrity`, { required: true, max: 256 });
+  const label = manifestString(artifact.label, `artifacts[${i}].label`, { max: 128 });
   return Object.freeze({ kind: artifact.kind, storageRef, integrity, label });
 }
 
 export function validateOutputManifest420(manifest, expected = {}) {
   if (!isPlainObject(manifest)) throw new GenerationError420("MALFORMED_RESULT", "output manifest must be an object");
-  const providerId = cleanString(manifest.providerId, "manifest.providerId", { required: true, max: 256 });
-  const providerRevision = cleanString(manifest.providerRevision, "manifest.providerRevision", { required: true, max: 128 });
-  const modelId = cleanString(manifest.modelId, "manifest.modelId", { required: true, max: 256 });
-  const modelVersion = cleanString(manifest.modelVersion, "manifest.modelVersion", { required: true, max: 128 });
-  const providerJobRef = cleanString(manifest.providerJobRef, "manifest.providerJobRef", { required: true, max: 256 });
+  const providerId = manifestString(manifest.providerId, "manifest.providerId", { required: true, max: 256 });
+  const providerRevision = manifestString(manifest.providerRevision, "manifest.providerRevision", { required: true, max: 128 });
+  const modelId = manifestString(manifest.modelId, "manifest.modelId", { required: true, max: 256 });
+  const modelVersion = manifestString(manifest.modelVersion, "manifest.modelVersion", { required: true, max: 128 });
+  const providerJobRef = manifestString(manifest.providerJobRef, "manifest.providerJobRef", { required: true, max: 256 });
   const artifacts = (manifest.artifacts ?? []).map(validateArtifact);
   if (!artifacts.some((a) => a.kind === "MIX")) {
     throw new GenerationError420("MALFORMED_RESULT", "output manifest must contain a MIX artifact");

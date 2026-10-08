@@ -644,6 +644,7 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 **Status: IMPLEMENTED — Level 1 + first CMP-7 Level 2 milestone qualification pending.** Specification: [CMP-7.5 research project API](CMP-7.5-RESEARCH-PROJECT-API.md).
 
 ## CMP-7.6 — Compute indexer
+**Status: IMPLEMENTED — Level 1 exact-head qualification pending.** Specification: [CMP-7.6 Compute indexer](CMP-7.6-COMPUTE-INDEXER.md).
 
 ## CMP-7.7 — Historical analytics
 

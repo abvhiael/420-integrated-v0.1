@@ -144,7 +144,7 @@ if not errors:
     need(events["moderation.report.submitted"].get("visibility")=="SECURITY_RESTRICTED","moderation report event visibility drift")
 
     evrules=" ".join(api.get("eventRules",[]))
-    for token in ["does not imply REGISTERED or PUBLISHED","does not imply payer refund paid","not automatically Chart credit","not Award eligibility","do not become Chart or Civic votes","allegations","never auto-executes","never change source state"]:
+    for token in ["does not imply REGISTERED or PUBLISHED","does not imply payer refund paid","do not become Chart credit unless admitted by the exact chart policy","does not create Award eligibility/result","do not become Chart or Civic votes","allegations","never auto-executes","never change source state"]:
         need(token in evrules,f"event semantic rule missing: {token}")
 
     idem=" ".join(api.get("idempotencyReplayRules",[]))
@@ -152,7 +152,7 @@ if not errors:
         need(token in idem,f"idempotency/replay rule missing: {token}")
 
     ver=" ".join(api.get("versioningCompatibilityRules",[]))
-    for token in ["schemaVersion","canonical Registry","breaking field/semantic changes","Unknown required enum/state","retain the interface/policy commitments frozen"]:
+    for token in ["schemaVersion","canonical Registry","breaking field/semantic changes","unknown required enum/state values fail closed","retain the interface/policy commitments frozen"]:
         need(token in ver,f"versioning rule missing: {token}")
 
     privacy=" ".join(api.get("privacyMinimumDisclosureRules",[]))

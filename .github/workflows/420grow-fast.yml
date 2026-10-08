@@ -45,6 +45,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: GROW-04 web build, UX/security regressions
+        working-directory: grow/web
+        run: npm run qualify
       - name: GROW-03 consumer and directly affected SDK tests
         run: go test ./grow/location ./genesis/svc2/... ./location/...
       - name: GROW-03 static analysis and format

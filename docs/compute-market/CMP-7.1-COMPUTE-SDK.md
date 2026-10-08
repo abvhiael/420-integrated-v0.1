@@ -1,6 +1,6 @@
 # CMP-7.1 — @420/compute-sdk
 
-Status: **IMPLEMENTED — Level 1 exact-head qualification pending.**
+Status: **COMPLETE — Level 1 exact-head qualified on `2ea2b3d2d7da94a9b864516655436b46321039a4`.**
 
 ## Canonical purpose
 

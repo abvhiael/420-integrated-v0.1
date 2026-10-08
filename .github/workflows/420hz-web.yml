@@ -6,8 +6,11 @@ on:
       - 'hz/web/**'
       - 'hz/generate/**'
       - 'hz/config/gca-compute-execution-adapter-v1.json'
+      - 'hz/config/gca-provenance-consent-rights-v1.json'
       - 'scripts/verify-420hz-gca-3.py'
+      - 'scripts/verify-420hz-gca-4.py'
       - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
+      - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -18,8 +21,11 @@ on:
       - 'hz/web/**'
       - 'hz/generate/**'
       - 'hz/config/gca-compute-execution-adapter-v1.json'
+      - 'hz/config/gca-provenance-consent-rights-v1.json'
       - 'scripts/verify-420hz-gca-3.py'
+      - 'scripts/verify-420hz-gca-4.py'
       - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
+      - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -94,3 +100,41 @@ jobs:
       - name: Retain Compute API
         working-directory: services/compute-api
         run: npm install --no-audit --no-fund && npm test
+
+
+  gca4:
+    name: HZ-GCA-4 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify 420Hz generation and provenance module
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Retain HZ-GCA-1.4 AI disclosure policy
+        run: python3 scripts/verify-420hz-gca-1-4.py
+
+      - name: Retain HZ-GCA-1.5 provenance policy
+        run: python3 scripts/verify-420hz-gca-1-5.py
+
+      - name: Retain HZ-GCA-1.6 rights consent policy
+        run: python3 scripts/verify-420hz-gca-1-6.py
+
+      - name: Retain HZ-GCA-3 execution evidence boundary
+        run: python3 scripts/verify-420hz-gca-3.py
+
+      - name: Verify HZ-GCA-4 provenance consent AI rights
+        run: python3 scripts/verify-420hz-gca-4.py

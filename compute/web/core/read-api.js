@@ -16,6 +16,7 @@ return Object.freeze({
  availableProjects:(limit=50)=>get('/v1/compute/research/projects',{limit}),
  project:(projectId)=>get('/v1/compute/research/projects/'+id(projectId,'projectId')),
  rewards:(beneficiary,limit=100)=>get('/v1/compute/rewards',{beneficiary:account(beneficiary,'beneficiary'),limit}),
+ contributions:(contributor,limit=100)=>get('/v1/compute/contributions',{contributor:account(contributor,'contributor'),limit}),
  reputation:(workerId,limit=50)=>get('/v1/compute/workers/'+id(workerId,'workerId')+'/reputation',{limit}),
  stake:(workerId,limit=50)=>get('/v1/compute/workers/'+id(workerId,'workerId')+'/stake',{limit})
 });}

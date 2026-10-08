@@ -1,0 +1,606 @@
+{
+  "schema": "420hz-gca-phase1-adversarial-review-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.19",
+  "title": "Phase-1 adversarial review",
+  "level": 1,
+  "milestoneRequired": false,
+  "reviewedArchitecture": [
+    "HZ-GCA-1.1",
+    "HZ-GCA-1.2",
+    "HZ-GCA-1.3",
+    "HZ-GCA-1.4",
+    "HZ-GCA-1.5",
+    "HZ-GCA-1.6",
+    "HZ-GCA-1.7",
+    "HZ-GCA-1.8",
+    "HZ-GCA-1.9",
+    "HZ-GCA-1.10",
+    "HZ-GCA-1.11",
+    "HZ-GCA-1.12",
+    "HZ-GCA-1.13",
+    "HZ-GCA-1.14",
+    "HZ-GCA-1.15",
+    "HZ-GCA-1.16",
+    "HZ-GCA-1.17",
+    "HZ-GCA-1.18"
+  ],
+  "currentMainReview": {
+    "sha": "dbe29983986fefb77a4e78ff96a3689c8589f956",
+    "materialSharedChange": "CMP-7 SDK/API/CLI/Indexer merged after the HZ-GCA branch base",
+    "reviewedFiles": [
+      "docs/compute-market/CMP-7.2-JOB-SUBMISSION-API.md",
+      "docs/developers/compute-market-integration.md",
+      "services/compute-api/src/job-api.ts",
+      "420-indexer/src/compute-read-model.ts"
+    ],
+    "conclusion": "No HZ-GCA authority contradiction found: the new Compute API prepares unsigned Wallet-authorized intents, marks projections authoritative:false, rejects secret material and requires canonical/finality reconciliation. This ordinary architecture-review step does not require ceremonial branch reconciliation; HZ-GCA-1.20/Level-3 retain their documented reconciliation duties."
+  },
+  "reviewMethod": [
+    "attack each authority boundary by substituting a lower-authority or derived source",
+    "attack privacy by attempting visibility widening and evidence disclosure",
+    "attack idempotency/replay by retrying exact and modified payloads",
+    "attack rights/consent by substituting possession, training permission, provider metadata or moderation for canonical authorization",
+    "attack economics by conflating quote/funding/earned/paid/refund states and inducing retries after ambiguous timeout",
+    "attack storage/recovery by replaying stale caches/backups/projections and hash-mismatched bytes",
+    "attack Community/Charts/Awards boundaries by converting social popularity, raw plays or votes across domains",
+    "attack Awards determinism through ballot mutation, Sybil duplication, hidden tie-breaking and retroactive policy changes",
+    "attack moderation/Arbitration through privilege escalation and ambient remedy execution",
+    "attack dependency failure/restart ordering by forcing degraded components and stale projections",
+    "review current main shared-dependency changes for contradictions with the frozen architecture"
+  ],
+  "cases": [
+    {
+      "id": "HZGCA-ADV-001",
+      "category": "AUTHORITY",
+      "attack": "Wallet connection used as mutation approval",
+      "expectedOutcome": "mutation fails without qualified Wallet/session actor and matching domain/resource/idempotency context",
+      "sources": [
+        "HZ-GCA-1.1",
+        "HZ-GCA-1.16"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "runtime signer implementation remains later work"
+    },
+    {
+      "id": "HZGCA-ADV-002",
+      "category": "AUTHORITY",
+      "attack": "Identity profile/eligibility result reused as Wallet authorization",
+      "expectedOutcome": "fail closed; Identity is eligibility/profile authority only",
+      "sources": [
+        "HZ-GCA-1.1",
+        "HZ-GCA-1.13",
+        "HZ-GCA-1.16"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live Identity verifier deferred"
+    },
+    {
+      "id": "HZGCA-ADV-003",
+      "category": "AI_PROVIDER",
+      "attack": "model/provider prose declares generation successful",
+      "expectedOutcome": "no canonical success; bound AI/Compute job/result/verification state controls",
+      "sources": [
+        "HZ-GCA-1.3",
+        "HZ-GCA-1.5",
+        "HZ-GCA-1.15",
+        "HZ-GCA-1.16"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live provider adapters deferred"
+    },
+    {
+      "id": "HZGCA-ADV-004",
+      "category": "AI_PROVIDER",
+      "attack": "provider/result/job/model identifiers are substituted after submission",
+      "expectedOutcome": "mismatch fails closed and cannot settle/publish",
+      "sources": [
+        "HZ-GCA-1.3",
+        "HZ-GCA-1.5",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "runtime verification adapter deferred"
+    },
+    {
+      "id": "HZGCA-ADV-005",
+      "category": "RIGHTS",
+      "attack": "private reference-audio possession treated as permission",
+      "expectedOutcome": "reference/derivative path fails closed without qualified source authorization",
+      "sources": [
+        "HZ-GCA-1.6",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "external legal disputes may remain external"
+    },
+    {
+      "id": "HZGCA-ADV-006",
+      "category": "RIGHTS",
+      "attack": "AI training permission reused as transformation permission",
+      "expectedOutcome": "fail closed; training and transformation permissions remain distinct",
+      "sources": [
+        "HZ-GCA-1.6",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "none at architecture level"
+    },
+    {
+      "id": "HZGCA-ADV-007",
+      "category": "CONSENT",
+      "attack": "synthetic voice/persona published without explicit consent evidence",
+      "expectedOutcome": "restricted voice/persona path fails closed",
+      "sources": [
+        "HZ-GCA-1.5",
+        "HZ-GCA-1.6",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "production consent verifier deferred"
+    },
+    {
+      "id": "HZGCA-ADV-008",
+      "category": "PRIVACY",
+      "attack": "private prompt/draft/reference audio leaks through Search/Analytics/Notifications",
+      "expectedOutcome": "public/derived delivery path rejects or omits private payload",
+      "sources": [
+        "HZ-GCA-1.7",
+        "HZ-GCA-1.15",
+        "HZ-GCA-1.16"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live transport enforcement deferred"
+    },
+    {
+      "id": "HZGCA-ADV-009",
+      "category": "PRIVACY",
+      "attack": "evidence commitment interpreted as permission to publish evidence bytes",
+      "expectedOutcome": "fail closed; commitment is not disclosure authority",
+      "sources": [
+        "HZ-GCA-1.14",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live evidence-host controls deferred"
+    },
+    {
+      "id": "HZGCA-ADV-010",
+      "category": "STORAGE",
+      "attack": "deleted private artifact resurrected from backup/cache/index rebuild",
+      "expectedOutcome": "tombstone/deletion state wins and restored bytes remain inaccessible",
+      "sources": [
+        "HZ-GCA-1.8",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live backup/restore proof deferred"
+    },
+    {
+      "id": "HZGCA-ADV-011",
+      "category": "STORAGE",
+      "attack": "different artifact bytes served under existing StorageObjectRef/hash",
+      "expectedOutcome": "integrity mismatch fails closed",
+      "sources": [
+        "HZ-GCA-1.8",
+        "HZ-GCA-1.15",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live provider qualification deferred"
+    },
+    {
+      "id": "HZGCA-ADV-012",
+      "category": "ECONOMICS",
+      "attack": "timeout causes automatic second paid generation submission",
+      "expectedOutcome": "reconcile canonical job/economic state before any new paid attempt",
+      "sources": [
+        "HZ-GCA-1.9",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live Vault/Compute integration deferred"
+    },
+    {
+      "id": "HZGCA-ADV-013",
+      "category": "ECONOMICS",
+      "attack": "provider failure marked refunded/paid from local application state",
+      "expectedOutcome": "fail closed; earned/claimable/paid and refundable/claimable/paid remain distinct",
+      "sources": [
+        "HZ-GCA-1.9",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live settlement evidence deferred"
+    },
+    {
+      "id": "HZGCA-ADV-014",
+      "category": "ECONOMICS",
+      "attack": "hidden 420Hz surcharge added after quote",
+      "expectedOutcome": "forbidden; quoted/accepted economics may not silently add a 420Hz surcharge",
+      "sources": [
+        "HZ-GCA-1.9",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "future fee policy would require explicit new version/authorization"
+    },
+    {
+      "id": "HZGCA-ADV-015",
+      "category": "REPLAY",
+      "attack": "same idempotency key reused with changed payload",
+      "expectedOutcome": "conflict/replay fails closed",
+      "sources": [
+        "HZ-GCA-1.16",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "persistent runtime idempotency store deferred"
+    },
+    {
+      "id": "HZGCA-ADV-016",
+      "category": "REPLAY",
+      "attack": "duplicate event delivery repeats publication/payment/community/vote side effect",
+      "expectedOutcome": "stable event/business identity deduplicates; source mutation is not replayed",
+      "sources": [
+        "HZ-GCA-1.16",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live event bus deferred"
+    },
+    {
+      "id": "HZGCA-ADV-017",
+      "category": "COMMUNITY",
+      "attack": "PRIVATE favorite or UNLISTED playlist enters public discovery/chart scoring",
+      "expectedOutcome": "excluded; visibility is an upper bound and private/unlisted state stays non-public",
+      "sources": [
+        "HZ-GCA-1.7",
+        "HZ-GCA-1.10",
+        "HZ-GCA-1.11"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "runtime APIs deferred"
+    },
+    {
+      "id": "HZGCA-ADV-018",
+      "category": "COMMUNITY",
+      "attack": "multiple eligible nominations for the same target create duplicate ballot candidates",
+      "expectedOutcome": "candidate key deduplicates exact season/category/target",
+      "sources": [
+        "HZ-GCA-1.12",
+        "HZ-GCA-1.13"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "runtime nomination store deferred"
+    },
+    {
+      "id": "HZGCA-ADV-019",
+      "category": "CHARTS",
+      "attack": "RAW_PLAY counted as QUALIFIED_PLAY",
+      "expectedOutcome": "invalid; raw play is not qualified chart credit",
+      "sources": [
+        "HZ-GCA-1.11",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live qualified-play threshold deferred"
+    },
+    {
+      "id": "HZGCA-ADV-020",
+      "category": "CHARTS",
+      "attack": "operator manually boosts rank or mixes sponsored placement into organic score",
+      "expectedOutcome": "invalid; chart policy is deterministic/versioned and forbids hidden/manual boost",
+      "sources": [
+        "HZ-GCA-1.11",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live anti-bot pipeline deferred"
+    },
+    {
+      "id": "HZGCA-ADV-021",
+      "category": "CHARTS",
+      "attack": "AwardVote reused as chart signal",
+      "expectedOutcome": "invalid; AwardVote is never chart credit",
+      "sources": [
+        "HZ-GCA-1.11",
+        "HZ-GCA-1.12",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "none at architecture level"
+    },
+    {
+      "id": "HZGCA-ADV-022",
+      "category": "AWARDS",
+      "attack": "Wallet addresses advertised as one-person-one-vote",
+      "expectedOutcome": "invalid; Wallet mode is account uniqueness only",
+      "sources": [
+        "HZ-GCA-1.13",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "production unique-human verifier deferred"
+    },
+    {
+      "id": "HZGCA-ADV-023",
+      "category": "AWARDS",
+      "attack": "same qualified human uses multiple wallets to vote multiple times",
+      "expectedOutcome": "ballot-scoped nullifier/equivalent contributes at most once in unique-human mode",
+      "sources": [
+        "HZ-GCA-1.13"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "production proof/nullifier implementation deferred"
+    },
+    {
+      "id": "HZGCA-ADV-024",
+      "category": "AWARDS",
+      "attack": "candidate list changed after ballot FROZEN",
+      "expectedOutcome": "invalid; correction requires explicit void/replacement path",
+      "sources": [
+        "HZ-GCA-1.12",
+        "HZ-GCA-1.13"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "runtime ballot service deferred"
+    },
+    {
+      "id": "HZGCA-ADV-025",
+      "category": "AWARDS",
+      "attack": "operator resolves substantive tie by target-ID order",
+      "expectedOutcome": "invalid; only declared CO_WINNERS/NO_WINNER/RUNOFF_REQUIRED tie policy controls",
+      "sources": [
+        "HZ-GCA-1.13"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "none at architecture level"
+    },
+    {
+      "id": "HZGCA-ADV-026",
+      "category": "AWARDS",
+      "attack": "finalized result recalculated under a later policy",
+      "expectedOutcome": "invalid; finalized result/history is immutable and corrections supersede explicitly",
+      "sources": [
+        "HZ-GCA-1.12",
+        "HZ-GCA-1.13",
+        "HZ-GCA-1.14"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "runtime correction executor deferred"
+    },
+    {
+      "id": "HZGCA-ADV-027",
+      "category": "MODERATION",
+      "attack": "report submission automatically hides content or establishes a finding",
+      "expectedOutcome": "invalid; report is allegation/intake only and enforcement needs scoped moderator decision",
+      "sources": [
+        "HZ-GCA-1.14"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live moderator workflow deferred"
+    },
+    {
+      "id": "HZGCA-ADV-028",
+      "category": "MODERATION",
+      "attack": "moderator rewrites Rights/Identity/Wallet/payment state",
+      "expectedOutcome": "invalid; moderation is application-scoped only",
+      "sources": [
+        "HZ-GCA-1.14",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "none at architecture level"
+    },
+    {
+      "id": "HZGCA-ADV-029",
+      "category": "MODERATION",
+      "attack": "vote-abuse reviewer hand-edits tally/winner",
+      "expectedOutcome": "invalid; objective vote state drives deterministic retally",
+      "sources": [
+        "HZ-GCA-1.13",
+        "HZ-GCA-1.14"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live abuse tooling deferred"
+    },
+    {
+      "id": "HZGCA-ADV-030",
+      "category": "ARBITRATION",
+      "attack": "ordinary report auto-opens Arbitration and executes remedy",
+      "expectedOutcome": "invalid; Arbitration adoption is optional/explicit and case opening is not a ruling",
+      "sources": [
+        "HZ-GCA-1.14",
+        "HZ-GCA-1.16"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live Arbitration adapter deferred"
+    },
+    {
+      "id": "HZGCA-ADV-031",
+      "category": "ARBITRATION",
+      "attack": "final ruling directly transfers funds, rewrites Rights or mutates AwardResult bytes",
+      "expectedOutcome": "invalid; only allowlisted bounded 420Hz remedies may be consumed after validation",
+      "sources": [
+        "HZ-GCA-1.14",
+        "HZ-GCA-1.15"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live remedy consumer deferred"
+    },
+    {
+      "id": "HZGCA-ADV-032",
+      "category": "DERIVED_STATE",
+      "attack": "stale Search/Indexer/Analytics projection authorizes protected mutation",
+      "expectedOutcome": "fail closed/revalidate canonical source; derived state is non-authoritative",
+      "sources": [
+        "HZ-GCA-1.15",
+        "HZ-GCA-1.16",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live reorg/freshness evidence deferred"
+    },
+    {
+      "id": "HZGCA-ADV-033",
+      "category": "RECOVERY",
+      "attack": "restart restores Search/Charts before authoritative source and accepts new privileged work",
+      "expectedOutcome": "invalid; canonical reconciliation order restores higher authority first",
+      "sources": [
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "testnet restart/reorg testing deferred"
+    },
+    {
+      "id": "HZGCA-ADV-034",
+      "category": "RECOVERY",
+      "attack": "partial generation artifact shown as verified/published/settled after restart",
+      "expectedOutcome": "invalid; partial output stays non-final/private unless explicit later transitions succeed",
+      "sources": [
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live recovery runtime deferred"
+    },
+    {
+      "id": "HZGCA-ADV-035",
+      "category": "CONFUSED_DEPUTY",
+      "attack": "Chart rank, Community favorite or Search result is converted directly into Award winner/eligibility authority",
+      "expectedOutcome": "invalid; explicit policy references may consume frozen facts but never convert derived/popularity state into ambient authority",
+      "sources": [
+        "HZ-GCA-1.10",
+        "HZ-GCA-1.11",
+        "HZ-GCA-1.12",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "none at architecture level"
+    },
+    {
+      "id": "HZGCA-ADV-036",
+      "category": "DEPENDENCY_FAILURE",
+      "attack": "Identity outage silently downgrades IDENTITY_UNIQUE_ONE_VOTE ballot to Wallet-only mode",
+      "expectedOutcome": "fail closed; frozen voter-eligibility policy cannot be weakened on dependency failure",
+      "sources": [
+        "HZ-GCA-1.13",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "production Identity availability deferred"
+    },
+    {
+      "id": "HZGCA-ADV-037",
+      "category": "DEPENDENCY_FAILURE",
+      "attack": "Creative/Rights outage publishes using cached rights state",
+      "expectedOutcome": "publication disabled/fails closed until canonical source is revalidated",
+      "sources": [
+        "HZ-GCA-1.6",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live publication adapter deferred"
+    },
+    {
+      "id": "HZGCA-ADV-038",
+      "category": "DEPENDENCY_FAILURE",
+      "attack": "Notifications failure rolls back source operation",
+      "expectedOutcome": "invalid; notification delivery is non-authoritative and cannot mutate source state",
+      "sources": [
+        "HZ-GCA-1.16",
+        "HZ-GCA-1.17"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "live replay/delivery service deferred"
+    },
+    {
+      "id": "HZGCA-ADV-039",
+      "category": "MAIN_DRIFT",
+      "attack": "new CMP-7 developer API/Indexer surfaces are treated as Compute canonical authority",
+      "expectedOutcome": "invalid; current main CMP-7.2 explicitly returns unsigned Wallet-authorized intents and authoritative:false projections",
+      "sources": [
+        "CURRENT_MAIN_CMP7",
+        "HZ-GCA-1.16",
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "branch need not be ceremonially rebased for this architecture-only review"
+    },
+    {
+      "id": "HZGCA-ADV-040",
+      "category": "AUTHORITY_DUPLICATION",
+      "attack": "consolidated architecture introduces second canonical source for Wallet, Identity, Creative/Rights, Compute settlement, Community, Awards or Governance",
+      "expectedOutcome": "review fails and blocks HZ-GCA-1.19; unresolvedAuthorityDuplication must remain empty",
+      "sources": [
+        "HZ-GCA-1.18"
+      ],
+      "disposition": "PASS",
+      "residualRisk": "none"
+    }
+  ],
+  "findings": {
+    "criticalOpen": 0,
+    "highOpen": 0,
+    "mediumOpen": 0,
+    "lowOpen": 0,
+    "architectureContradictions": 0,
+    "unresolvedAuthorityDuplication": 0,
+    "disposition": "PASS"
+  },
+  "acceptedResidualRisks": [
+    "AI model output quality/safety remains probabilistic",
+    "Wallet-one-account-one-vote does not prove unique-human identity",
+    "social collusion cannot be eliminated by static architecture",
+    "off-chain evidence availability is not guaranteed by a commitment",
+    "live anti-bot/media-scanner/rate-limit/provider-isolation controls require runtime evidence",
+    "external legal/personality-right disputes may require external/canonical adjudication"
+  ],
+  "deferredRuntimeAdversarialEvidence": [
+    "AI worker sandbox and network/tool isolation",
+    "media scanner/codec sandbox and production CSP/egress policy",
+    "persistent production idempotency/replay store",
+    "live Vault/Compute settlement/refund failure injection",
+    "storage backup/restore/tombstone fault injection",
+    "qualified-play bot/replay simulation",
+    "production unique-human proof/nullifier abuse testing",
+    "moderation privilege/appeal workflow runtime testing",
+    "live Arbitration domain/remedy-consumer abuse testing",
+    "public-testnet restart/reorg/stale-index recovery testing"
+  ],
+  "completionRules": [
+    "all adversarial cases must have PASS disposition or an explicitly accepted non-critical residual risk already represented by qualified architecture",
+    "criticalOpen and highOpen must be zero",
+    "architectureContradictions and unresolvedAuthorityDuplication must be zero",
+    "every case must cite at least one controlling qualified source",
+    "deferred runtime attacks remain explicitly deferred and may not be misreported as live qualification",
+    "HZ-GCA-1.19 does not perform the HZ-GCA-1.20 Level-2 milestone or HZ-GCA-17 Level-3 closeout"
+  ],
+  "exitCriteria": [
+    "complete cross-authority adversarial matrix covers HZ-GCA-1.1 through HZ-GCA-1.18",
+    "authority escalation, privacy, replay, rights, economics, storage, derived-state, Community, Charts, Awards, moderation, Arbitration and recovery abuse cases are covered",
+    "current main shared Compute API/Indexer drift is reviewed for contradiction",
+    "no critical/high architecture findings remain open",
+    "no architecture contradictions or unresolved authority duplication remain",
+    "deferred runtime risks are separated from architecture qualification",
+    "targeted exact-head verifier validates the matrix and controlling source consistency",
+    "HZ-GCA-1 remains open only for the documented HZ-GCA-1.20 Level-2 milestone"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1-ARCHITECTURE.md",
+    "hz/config/gca-architecture-consolidation-v1.json",
+    "hz/config/gca-threat-model-v1.json",
+    "hz/config/gca-api-interface-contracts-v1.json",
+    "hz/config/gca-failure-recovery-v1.json",
+    "hz/config/gca-moderation-dispute-v1.json",
+    "hz/config/gca-nomination-voting-policy-v1.json",
+    "hz/config/gca-charts-v1.json",
+    "hz/config/gca-community-authority-v1.json",
+    "hz/config/gca-generation-economics-v1.json",
+    "hz/config/gca-storage-retention-v1.json",
+    "hz/config/gca-rights-consent-v1.json",
+    "hz/config/gca-privacy-v1.json"
+  ]
+}

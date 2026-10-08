@@ -1,0 +1,3 @@
+Cloudflare preview Git-build trigger for isolated Worker only.
+Branch: reeferreview/cloudflare-rss-proxy
+This file is not part of the RSS application.

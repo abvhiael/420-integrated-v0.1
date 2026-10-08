@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
@@ -218,6 +219,14 @@ func (o *FeedOperations) PollDue(ctx context.Context) ([]NewsIngestStats, error)
 				h.LastModified = modified
 			}
 		}
+		if fetchErr != nil {
+			log.Printf("reefer_rss source=%s result=failed failures=%d error=%q next_attempt=%s", src.ID, h.ConsecutiveFailures, h.LastError, h.NextAttempt.Format(time.RFC3339))
+		} else if notModified {
+			log.Printf("reefer_rss source=%s result=not_modified next_attempt=%s", src.ID, h.NextAttempt.Format(time.RFC3339))
+		} else if len(stats) > 0 && stats[len(stats)-1].SourceID == src.ID {
+			s := stats[len(stats)-1]
+			log.Printf("reefer_rss source=%s result=success fetched=%d visible=%d rejected=%d inserted=%d updated=%d duplicates=%d", src.ID, s.Fetched, s.Visible, s.Rejected, s.Inserted, s.Updated, s.Duplicate)
+		}
 		state.Sources[src.ID] = h
 		if err := o.save(state); err != nil {
 			return stats, err
@@ -233,7 +242,9 @@ func (o *FeedOperations) Run(ctx context.Context, interval time.Duration) error 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
-		_, _ = o.PollDue(ctx)
+		if _, err := o.PollDue(ctx); err != nil {
+			log.Printf("reefer_rss poll_cycle=failed error=%q", err)
+		}
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

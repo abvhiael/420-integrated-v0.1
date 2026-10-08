@@ -1,5 +1,7 @@
 # 420Exchange — release status and live-testnet qualification roadmap
 
+**Future asset candidate only:** Gridcoin (GRC) bridge and optional GRC/420 market evaluation is specified at [G-01–G-06](compute-market/CMP-9-SCIENTIFIC-INGESTION-AND-GRIDCOIN-ROADMAP.md). No GRC listing, chain verifier, bridge activation or liquidity is approved; existing live-execution gates remain OFF.
+
 **Current phase:** PRE-12 final pre-testnet closeout.  
 **Release state:** `PRE_TESTNET_ENGINEERING_COMPLETE` candidate; `LIVE_TESTNET_QUALIFICATION_PENDING` once exact-head PRE-12 qualification is green.  
 **Audit branch:** `audit/exchange-pretestnet-phase-20260930`.  

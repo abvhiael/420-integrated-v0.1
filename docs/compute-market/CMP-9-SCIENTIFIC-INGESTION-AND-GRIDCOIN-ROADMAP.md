@@ -47,7 +47,9 @@ Use explicit opted-in account linking between a 420Wallet address and an externa
 
 Exit: canonical chain/account/source/participant binding; negative tests for impersonation, reused proof, wrong chain/account, disclosure and stale ownership.
 
-### S-05 — Canonical record binding and cross-provider deduplication
+### S-05 — Canonical record binding and cross-provider deduplication — PARTIAL (repository Level 1 PASS; live testnet gates deferred)
+
+[S-05 evidence](CMP-S05-QUALIFICATION-EVIDENCE.md): repository-side read-only binding and canonical mapping regression checks qualified on `d4ed86f9bcd0ebd40220f0cfe03842f434d29ba7`. **No live provider attestation, authorized CMP-5.6 guard consumption, reorg reconstruction or global cross-provider identity guarantee is claimed.**
 
 Feed verified records through existing CMP-5.1/5.2 and CMP-5.5 normalized commitment interfaces. CMP-5.7 trusted attester resolves source/result/proof to one canonical external-work identity; CMP-5.6 authorized consumer consumes that identity exactly once. Prove that changed credit, donor/team alias, API wrapper, resubmitted record or source adapter cannot create second eligible work where equality is established. When cross-provider equality cannot be established, explicitly bound the uncertainty and do not claim global duplicate protection.
 

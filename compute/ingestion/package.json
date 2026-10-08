@@ -1,0 +1,1 @@
+{"name":"@420integrated/external-science-ingestion","private":true,"type":"module","engines":{"node":">=22"},"scripts":{"test":"node --test test/*.test.mjs","check":"node --check src/client.mjs && node --check src/parsers.mjs && node --check src/providers.mjs","qualify":"npm run check && npm test"}}

@@ -38,6 +38,7 @@ const isUintKind420 = (kind: ProtocolFieldKind420): boolean => kind.startsWith('
 function decodeValue420(kind: ProtocolFieldKind420, value: Hex): string | bigint | boolean {
   if (kind === 'address') return addressFromWord(value).toLowerCase() as Hex;
   if (isUintKind420(kind)) return BigInt(value);
+  if (kind === 'int256') return int256FromWord420(value);
   if (kind === 'bool') return BigInt(value) !== 0n;
   return value.toLowerCase();
 }

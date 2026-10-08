@@ -662,6 +662,8 @@ Purpose: provide application-layer incentives for verified useful compute. Compu
 
 # CMP-8 — 420Compute application
 
+**Status: IMPLEMENTED — Level 1 + human-participation Level 2 qualification pending.** Specification: [CMP-8 420Compute application](CMP-8-420COMPUTE-APPLICATION.md).
+
 Purpose: provide the human-facing market and participation experience.
 
 Required user surfaces:

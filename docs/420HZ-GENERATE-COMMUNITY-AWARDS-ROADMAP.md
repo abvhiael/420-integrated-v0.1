@@ -102,6 +102,10 @@ Required work:
 
 Implement a provider-neutral 420Hz generation job model.
 
+**Qualification:** Level 1 ordinary app-scoped step. HZ-GCA-2 does not independently trigger a Level-2 milestone; the next broader app milestone remains a later documented roadmap boundary.
+
+**Repository artifacts:** `hz/generate/` provider-neutral runtime/model, deterministic mock provider, machine-readable contract manifest, architecture document, targeted verifier and app-specific CI coverage.
+
 Required capabilities:
 
 - prompt and optional lyrics;
@@ -118,7 +122,7 @@ Required capabilities:
 
 No provider may become canonical protocol authority.
 
-**Exit:** provider abstraction + mocks + lifecycle tests + failure/retry tests.
+**Exit:** provider abstraction + mocks + lifecycle tests + failure/retry tests. Completion additionally requires exact-head Level-1 qualification of the generation module and targeted verifier with no skipped required checks.
 
 ## HZ-GCA-3 — 420AI / Compute Market execution adapter
 

@@ -1,4 +1,5 @@
-import{normalizeScienceObservations420}from'./core/science.js';\nimport{loadComputeWebConfig420}from'./core/config.js';import{createComputeController420}from'./core/controller.js';import{buildParticipationProfile420,participationSteps420}from'./core/participation.js';import{registerProjectHandoff420,workerRegistrationHandoff420,workerLifecycleHandoff420,reviseProjectHandoff420,projectAcceptanceHandoff420,retireProjectHandoff420}from'./core/handoff.js';
+import{normalizeScienceObservations420}from'./core/science.js';
+import{loadComputeWebConfig420}from'./core/config.js';import{createComputeController420}from'./core/controller.js';import{buildParticipationProfile420,participationSteps420}from'./core/participation.js';import{registerProjectHandoff420,workerRegistrationHandoff420,workerLifecycleHandoff420,reviseProjectHandoff420,projectAcceptanceHandoff420,retireProjectHandoff420}from'./core/handoff.js';
 const $=(id)=>document.getElementById(id);let config,controller,lastPlan=null,lastWorkerHandoff=null,lastProjectHandoff=null;
 const show=(el,value)=>{el.textContent=typeof value==='string'?value:JSON.stringify(value,null,2);};
 const fail=(el,error)=>{el.textContent=error instanceof Error?error.message:String(error);el.classList.add('error');};

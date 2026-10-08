@@ -18,7 +18,7 @@ The application provides:
 4. research-project management with indexed project views and reviewed Wallet handoffs for canonical owner actions;
 5. worker health and earnings, where “health” is explicitly indexed registration/activity and not local host telemetry;
 6. completed-job views;
-7. CPU/GPU contribution totals keyed by configured canonical reward metric IDs;
+7. CPU/GPU contribution totals keyed by configured canonical contribution metric IDs;
 8. projects supported;
 9. result and verification status;
 10. worker reputation and stake-reference evidence.
@@ -47,8 +47,11 @@ CMP-8 extends 420Indexer only as needed for human presentation:
 - bounded verifiers by authority;
 - bounded research projects by owner;
 - bounded useful-reward records by beneficiary;
+- bounded useful-contribution records by contributor, including canonical `projectRef` and metric linkage;
 - worker reputation-reference history;
 - worker stake-reference history.
+
+CPU/GPU contribution and projects-supported counts are derived from canonical `ContributionRecorded` projections rather than project ownership or reward metadata. Earnings remain derived from useful-reward records.
 
 All records remain `authoritative:false`. Reputation signed totals are decoded as `int256`. Stake capture events expose policy/source/position reference metadata only; the app does not invent a stake amount absent from the indexed event.
 

@@ -17,13 +17,13 @@ participation=(WEB/"core/participation.js").read_text()
 for token in ("--cpu-percent","--gpu-percent","projectPreferences","LOCAL_PREFERENCE_ONLY","canonicalAssignmentRequired"):
     if token not in participation:fail("participation loop missing "+token)
 read=(WEB/"core/read-api.js").read_text()
-for route in ("/v1/compute/jobs","/v1/compute/workers","/v1/compute/verifiers","/v1/compute/research/projects","/v1/compute/rewards","/reputation","/stake"):
+for route in ("/v1/compute/jobs","/v1/compute/workers","/v1/compute/verifiers","/v1/compute/research/projects","/v1/compute/rewards","/v1/compute/contributions","/reputation","/stake"):
     if route not in read:fail("read API route missing "+route)
 handoff=(WEB/"core/handoff.js").read_text()
 for token in ("requiresWalletAuthorization:true","canonicalState:false","secretMaterialManaged:false","canonical write runtime is not enabled"):
     if token not in handoff:fail("Wallet handoff boundary missing "+token)
 indexer=(ROOT/"420-indexer/src/compute-app-read-model.ts").read_text()
-for token in ("computeJobs420","computeWorkers420","computeVerifiers420","computeResearchProjects420","computeRewards420","computeReputationReference420","computeStakeReference420","authoritative:false"):
+for token in ("computeJobs420","computeWorkers420","computeVerifiers420","computeResearchProjects420","computeRewards420","computeContributions420","computeReputationReference420","computeStakeReference420","authoritative:false"):
     if token not in indexer:fail("application read model missing "+token)
 decoder=(ROOT/"420-indexer/src/protocol-decoder.ts").read_text()
 if "'int256'" not in decoder or "int256FromWord420" not in decoder:fail("signed reputation decoder missing")

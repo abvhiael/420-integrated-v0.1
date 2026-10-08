@@ -4,7 +4,6 @@ package service
 import (
  "context"
  "encoding/json"
- "errors"
  "net/http"
  "strconv"
  "strings"
@@ -12,12 +11,17 @@ import (
 
  grow "github.com/420integrated/420-integrated/grow/location"
  "github.com/420integrated/420-integrated/location/model"
+ "github.com/420integrated/420-integrated/location/uikit"
 )
 
 type Reader interface { Read(context.Context) (grow.View,error) }
 type ReaderFunc func(context.Context)(grow.View,error)
 func (f ReaderFunc) Read(ctx context.Context)(grow.View,error){return f(ctx)}
 type Handler struct { Reader Reader }
+// New binds the handler exclusively to the validated 420Location public SDK.
+func New(source interface{ Places(context.Context)(uikit.View,error) }) Handler {
+ return Handler{Reader:ReaderFunc(func(ctx context.Context)(grow.View,error){return grow.Read(ctx,source)})}
+}
 type response struct { Version string `json:"version"`; Data page `json:"data"` }
 type page struct { Items []grow.Card `json:"items"`; Empty bool `json:"empty"`; NextOffset *int `json:"nextOffset,omitempty"`; Total int `json:"total"` }
 func (h Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
@@ -50,6 +54,5 @@ func (h Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  }
  result:=page{Items:make([]grow.Card,0),Total:len(filtered),Empty:true}
  if offset<len(filtered){end:=offset+limit;if end>len(filtered){end=len(filtered)};result.Items=append(result.Items,filtered[offset:end]...);result.Empty=len(result.Items)==0;if end<len(filtered){result.NextOffset=&end}}
- _=errors.Is
  _=json.NewEncoder(w).Encode(response{Version:"v1",Data:result})
 }

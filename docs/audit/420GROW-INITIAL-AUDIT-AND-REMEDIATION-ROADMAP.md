@@ -33,7 +33,7 @@
 | GROW-03 | Business/farm place integration | GEN-SVC-2 and location-events config | Public read-only Grow consumer via canonical GEN-SVC-2 SDK; public source and optional Registry provenance preserved | Go consumer/SDK/GEN-SVC-2/420Location suite and negative tests PASS at exact SHA 3131735 | GROW-03 consumer and security documentation | COMPLETE | Later GROW-04/05/07 implement UI, service pagination, and independent Verify integration if needed |
 | GROW-04 | Frontend, routes, UX, wallet flow, assets | Static read-only public Grow frontend, searchable category list, schematic map, details and fail-closed states | Web build and six UI/security tests PASS at exact SHA 1d7684e | GROW-04 UX specification and web README | COMPLETE | Live binding, visual/manual device and accessibility qualification deferred to GROW-10 |
 | GROW-05 | Backend/API/worker/indexer/storage | Read-only Grow HTTP service, bounded discovery/pagination, public SDK constructor and guarded server entrypoint | Fast Level-1 Go service/SDK/privacy plus web/regression checks PASS on exact implementation SHA 46c4827 | GROW-05 service spec and durable exact-SHA CI closeout | COMPLETE | Proceed to GROW-06; retained Level 2/3 checks remain deferred |
-| GROW-06 | Contracts/interfaces/permission/funds | Product spec not yet defined | No Grow-owned contracts | None | None | BLOCKED | Determine whether any contract is required; do not invent custody |
+| GROW-06 | Contracts/interfaces/permission/funds | GROW-02 consumer-only design and read-only public Places require NO new authority-bearing contract | GROW-06 contract decision and static guard committed; fast exact-SHA CI pending | GROW-06 contract-decision matrix | PARTIAL | Confirm successful GROW-06 verifier and retained Level-1 workflow against implementation SHA |
 | GROW-07 | SDK, events, integrations, authorization | GEN-SVC-0; product decision pending | No Grow client | None | Shared standards only | BLOCKED | Define specific interop matrix and tests |
 | GROW-08 | Build, static checks, test and security qualification | App implementation pending | No Grow-specific targets | NOT RUN; no app implementation | None | BLOCKED | Implement suites then qualify exact immutable SHA |
 | GROW-09 | Developer/operator/user docs | GEN-SVC-0 conventions | No Grow docs prior to this audit | N/A | This gap ledger only | PARTIAL | Write approved spec, architecture, operations and testing guides |
@@ -153,3 +153,13 @@ CODE NO; BUILD NO; CONTRACT NO (contract requirements undecided); TEST NO; DOCUM
 - **Level 2:** app integration at convergence milestone GROW-03–07. **Level 3:** defer full Solidity, Genesis address authority, 420 Integrated and global Docs qualification until complete app-phase closeout.
 - **Residual limitations:** capped upstream location feed and snapshot-local pagination; live production/testnet service qualification and manual browser/accessibility/device work deferred to respective later roadmap steps.
 - **Next canonical step:** **GROW-06 — Contracts**.
+
+## GROW-06 no-contract decision awaiting Level-1 qualification (2026-10-08)
+
+- **Step:** GROW-06 — Contracts. The approved consumer-only/read-only product requires no new authority-bearing Solidity, ABI, custody, Registry ownership, frozen address, payment or signing operation. No new contract has been fabricated.
+- **Substantive implementation SHA:** `423557aec4c8f03e16ac333e7158a080f43bda3e` (GROW-06 guard and fast workflow). **Status PARTIAL until exact-head Level-1 PASS.**
+- **Files:** `docs/audit/420GROW-GROW-06-CONTRACT-DECISION.md`, `scripts/verify-grow-06.py`, `.github/workflows/420grow-fast.yml`. Earlier GROW-01–05 files preserved.
+- **Validation:** [fast workflow run #37742793909](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37742793909), job `113197189240`, queued at record time, not a PASS. Required: GROW-06 no-contract verifier, all retained Grow app/service/SDK/web regressions and prior definition/identity guards.
+- **Main/base inspected:** `d112b2eb55b50a3a4f52a5e2a5364374595efe71`; PR #567 branch `audit/420grow-canonical-gap-inventory` cumulative and draft; Level-3 reconciliation intentionally deferred.
+- **Milestone:** Level 2 after GROW-03–07 convergence, Level 3 comprehensive repository/Genesis/Docs app-phase closeout; no redundant full Foundry inventory at GROW-06.
+- **Next exact roadmap step, conditional on PASS:** **GROW-07 — Cross-app qualification**.

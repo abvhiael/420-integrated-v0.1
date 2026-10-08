@@ -124,15 +124,17 @@ export class ProjectWorkspace420 {
     if(p.takes.has(takeId))return clone(p.takes.get(takeId));
     const artifacts=[];
     if(status==="COMPLETE"&&Array.isArray(job.outputManifest?.artifacts)){
-      for(const a of job.outputManifest.artifacts){
-        const source=artifactFromProvider(a);if(!source)continue;
-        if(saveArtifacts){
-          const payload=JSON.stringify({sourceStorageRef:source.sourceStorageRef,sourceIntegrity:source.sourceIntegrity,kind:source.kind,label:source.label});
-          this.#assertQuota(p,bytesOf(payload));
+      const sources=job.outputManifest.artifacts.map(artifactFromProvider).filter(Boolean);
+      if(saveArtifacts){
+        const pending=sources.map(source=>({source,payload:JSON.stringify({sourceStorageRef:source.sourceStorageRef,sourceIntegrity:source.sourceIntegrity,kind:source.kind,label:source.label})}));
+        this.#assertQuota(p,pending.reduce((n,x)=>n+bytesOf(x.payload),0));
+        for(const {source,payload} of pending){
           const stored=this.storage.put({accountRef:p.ownerRef,projectId,kind:source.kind,label:source.label,content:payload,idempotencyKey:takeId+":"+source.kind+":"+(source.label??"")});
           p.storageRefs.add(stored.storageRef);p.usage.privatePrimaryBytes+=stored.bytes;p.usage.objectCount+=1;
           artifacts.push(Object.freeze({...source,storageRef:stored.storageRef,integrity:stored.integrity,bytes:stored.bytes,storageClass:"HZ_PRIVATE_PRIMARY"}));
-        } else artifacts.push(Object.freeze({...source,storageRef:null,integrity:source.sourceIntegrity,bytes:0,storageClass:"EXTERNAL_REFERENCE"}));
+        }
+      } else {
+        for(const source of sources)artifacts.push(Object.freeze({...source,storageRef:null,integrity:source.sourceIntegrity,bytes:0,storageClass:"EXTERNAL_REFERENCE"}));
       }
     }
     const now=this.now();

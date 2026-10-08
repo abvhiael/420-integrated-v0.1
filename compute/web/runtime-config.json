@@ -4,11 +4,8 @@
   "indexerUrl":"https://indexer.420integrated.org",
   "computeApiUrl":"https://compute.420integrated.org",
   "walletUrl":"https://wallet.420integrated.org",
-  "contracts":{
-    "workerRegistry":"0x0000000000000000000000000000000000000001",
-    "researchProjectRegistry":"0x0000000000000000000000000000000000000002",
-    "verifierRegistry":"0x0000000000000000000000000000000000000003"
-  },
+  "writeActionsEnabled":false,
+  "contracts":{"workerRegistry":null,"researchProjectRegistry":null,"verifierRegistry":null},
   "workerDownloads":{
     "windows":"https://downloads.420integrated.org/node420-compute-windows.zip",
     "linux":"https://downloads.420integrated.org/node420-compute-linux.tar.gz",

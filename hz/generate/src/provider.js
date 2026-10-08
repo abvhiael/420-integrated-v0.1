@@ -209,7 +209,7 @@ export class DeterministicMockGenerationProvider420 extends GenerationProvider42
       modelVersion: state.modelVersion,
       providerJobRef
     });
-    return { status: "SUCCEEDED", outputManifest };
+    return { status: "SUCCEEDED", outputManifest, resultCommitment: `mockresult:${digest420(outputManifest)}`, verificationRef: `mockverify:${digest420({ providerJobRef, resultManifestHash: digest420(outputManifest) })}` };
   }
 
   async cancel({ providerJobRef }) {

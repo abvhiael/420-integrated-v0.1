@@ -1,5 +1,5 @@
 import test from'node:test';import assert from'node:assert/strict';import{createComputeJobClient420}from'../core/job-api.js';
-const cfg={chainId:'420',computeApiUrl:'https://api.example'};
+const cfg={chainId:'420',runtimeReady:true,computeApiUrl:'https://api.example'};
 function response(status,body){return{ok:status>=200&&status<300,status,async json(){return body;}};}
 test('CMP-8 job submission accepts only Wallet-authorized non-canonical plan',async()=>{const client=createComputeJobClient420(cfg,async()=>response(202,{data:{status:'READY_FOR_WALLET_AUTHORIZATION',canonicalState:false,secretMaterialManaged:false,intent:{requiresWalletAuthorization:true}}}));const p=await client.submit({chainId:'420'});assert.equal(p.canonicalState,false);});
 test('CMP-8 job submission rejects cross-chain, secret and unsafe API output',async()=>{const client=createComputeJobClient420(cfg,async()=>response(200,{data:{canonicalState:true}}));await assert.rejects(()=>client.submit({chainId:'421'}),/chain identity/);await assert.rejects(()=>client.submit({chainId:'420',privateKey:'bad'}),/secret field/);await assert.rejects(()=>client.submit({chainId:'420'}),/unsafe/);});

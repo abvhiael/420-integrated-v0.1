@@ -145,7 +145,7 @@ jobs:
 
       - name: Verify reconciled current main ancestry
         if: steps.scope.outputs.level2 == 'true'
-        run: git merge-base --is-ancestor dbe29983986fefb77a4e78ff96a3689c8589f956 HEAD
+        run: git merge-base --is-ancestor 0993ff5b5b3b213a0768dbde90e4734df5ab4cc0 HEAD
 
       - name: Validate all GCA manifests
         if: steps.scope.outputs.level2 == 'true'

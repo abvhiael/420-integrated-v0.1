@@ -135,9 +135,10 @@ export class DeterministicCreativeKernel420 {
 }
 
 export class RegisterPublishCoordinator420 {
-  constructor({kernel=new DeterministicCreativeKernel420(),now=()=>Date.now()}={}){this.kernel=kernel;this.now=now;this.attempts=new Map();}
+  constructor({kernel=new DeterministicCreativeKernel420(),now=()=>Date.now(),verifyCreativeRights=null,production=false}={}){if(production&&typeof verifyCreativeRights!=="function")throw new GenerationError420("INVALID_REQUEST","Creative rights verifier required");this.kernel=kernel;this.now=now;this.verifyCreativeRights=verifyCreativeRights;this.production=production;this.attempts=new Map();}
   publish(input,{failAt=null}={}){
     const request=this.#normalize(input),requestId="hzpublish:"+digest420(request);
+    if(this.production&&this.verifyCreativeRights({creator:request.creator,recording:request.recording,provenance:request.generationProvenance,at:this.now(),action:"PUBLISH"})!==true)throw new GenerationError420("REFERENCE_AUDIO_NOT_AUTHORIZED","Creative rights revoked, expired or unverified");
     let a=this.attempts.get(requestId);
     if(a?.status==="PUBLISHED")return clone(a);
     if(!a)a={requestId,status:"RUNNING",completedStages:[],refs:{},error:null,startedAt:this.now(),updatedAt:this.now()};

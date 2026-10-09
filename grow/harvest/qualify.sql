@@ -32,11 +32,11 @@ VALUES ('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-3333-4333-8333-33333333
 now()+interval '14 days',now()+interval '21 days','operator','manual');
 UPDATE grow_private.harvest_plans SET start_at=now()+interval '15 days',
  end_at=now()+interval '22 days' WHERE actor_subject='operator';
-DO $ BEGIN
+DO $$ BEGIN
  IF (SELECT count(*) FROM grow_private.harvest_plan_events
  WHERE plant_id='aaaaaaaa-6666-4666-8666-666666666666')<>2
  THEN RAISE EXCEPTION 'harvest plan revision provenance lost'; END IF;
-END $;
+END $$;
 DO $$
 BEGIN
  BEGIN

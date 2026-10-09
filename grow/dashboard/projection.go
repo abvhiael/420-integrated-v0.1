@@ -22,7 +22,7 @@ func sectionQuery(section string) (string, error) {
 	case "environment":
 		return "SELECT observation_id::text,kind,reading::text||' '||unit||' at '||measured_at::text,source FROM grow_private.observations" + where + " ORDER BY measured_at DESC,observation_id LIMIT 100", nil
 	case "equipment":
-		return "SELECT device_id::text,device_type,'Monitored equipment; physical override required',CASE WHEN online THEN 'ONLINE' ELSE 'OFFLINE' END FROM grow_private.equipment" + where + " ORDER BY device_id LIMIT 100", nil
+		return "SELECT device_id::text,device_type,'Monitored equipment; physical override required','REGISTERED' FROM grow_private.equipment" + where + " ORDER BY device_id LIMIT 100", nil
 	case "cultivation":
 		return "SELECT event_id::text,metric,amount::text||' '||unit||' at '||occurred_at::text,kind FROM grow_private.cultivation_events" + where + " ORDER BY occurred_at DESC,event_id LIMIT 100", nil
 	case "harvests":
@@ -46,7 +46,7 @@ func (s SQLReader) List(r *http.Request, session Session, section string) ([]Ite
 	if err != nil {
 		return nil, err
 	}
-	tx, err := s.DB.BeginTx(r.Context(), &sql.TxOptions{ReadOnly: true})
+	tx, err := s.DB.BeginTx(r.Context(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +86,9 @@ WHERE tenant_id=$1::uuid AND subject_id=$2 AND state='ACTIVE'`, session.TenantID
 		items = append(items, item)
 	}
 	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	if err = rows.Close(); err != nil {
 		return nil, err
 	}
 	if err = tx.Commit(); err != nil {

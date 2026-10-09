@@ -6,6 +6,8 @@
 
 **Canonical financial authority:** **420Pay** is the authoritative protocol for payment intents, merchant financial identity, invoices, finalized payment records, settlement, refunds and governed payout execution. 420BnB owns accommodation-specific booking and inventory records only; it cannot self-attest finality, hold funds, or independently redirect or execute refunds and payouts. The table below preserves the specific responsibilities of 420Pay's MerchantRegistry420, InvoiceRegistry420, PaymentRegistry420, PaymentRouter420, SettlementRouter420, RefundManager420 and approved Swap execution adapter. Actual operation remains subject to deployed, Registry-resolved, governance-approved authorities and testnet qualification.
 
+**Approved asset-conversion authority:** **420Swap** is the approved protocol authority for supported asset-conversion routes; it does not independently grant 420BnB payment, settlement, or custody authority. Conversion execution must remain within the canonical **420Pay-bound Swap** path: use the approved canonical quote engine (not `CanonicalSettlementAdapter420.quote()`, which reverts), verify quote expiry, chain, asset, payer, recipient, slippage and minimum settlement delivery, and allow only the bound approved `PaymentRouter420` to invoke the settlement adapter's execution. Consumed or stale quotes cannot be replayed. An independently valid Swap conversion is not evidence of Pay-finalized payment; 420Pay retains canonical financial finality and refund/payout authority.
+
 
 
 | Capability | Authoritative component | Evidence and boundary |

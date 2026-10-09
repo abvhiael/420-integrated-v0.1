@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
-      "sha256": "3d11cc103b95dd35a10a0f595304ee074c152049c2d49f5b12b8299663f3bf60",
+      "path": "docs/highcountry/qualification/R01.2-level1.json",
+      "sha256": "c4f2cd5f2a045d8411a32cc92ab8a5b64ee35a3fa2712f3f85b218666da5b6b6",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1143,6 +1143,14 @@
         "testOneProfilePerAccount",
         "testRejectsInvalidFoundingRegionIds"
       ]
+    },
+    {
+      "path": "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
+      "sha256": "3d11cc103b95dd35a10a0f595304ee074c152049c2d49f5b12b8299663f3bf60",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
     },
     {
       "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",

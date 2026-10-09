@@ -9,6 +9,7 @@ on:
       - 'grow/plants/**'
       - 'grow/telemetry/**'
       - 'grow/equipment/**'
+      - 'grow/cultivation/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -113,3 +114,12 @@ jobs:
           go vet ./grow/equipment
           test -z "$(gofmt -l grow/equipment/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/equipment/qualify.sql
+      - name: GROW-V2-08 nutrients irrigation environmental history and privacy
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/cultivation
+          go test -race -count=1 ./grow/cultivation
+          go vet ./grow/cultivation
+          test -z "$(gofmt -l grow/cultivation/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/cultivation/qualify.sql

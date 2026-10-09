@@ -4,14 +4,6 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "80cd7137b953e5dd1a978892ab9c98ea5bc1885b74eabe61c94497828f295e29",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
       "path": "clients/highcountry-access-v1/package.json",
       "sha256": "bccf87b28f6b89fa87c7ea5b63cded3b5f83f525da2ef5178bf28622fa44a907",
       "classification": "COMPLETE",
@@ -1225,8 +1217,104 @@
       "tests": []
     },
     {
+      "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
+      "sha256": "80cd7137b953e5dd1a978892ab9c98ea5bc1885b74eabe61c94497828f295e29",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
-      "sha256": "a57c66d7602001f51fef22e8c28c316c77dfb9a00584e7085898941f873cf1ce",
+      "sha256": "2d0febda027b760a0286ff513a752602f581a7719527b5ffc528a31831f0a96d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/hc-access-sdk.log",
+      "sha256": "2e415ac295d4d7e25e6ceb7507b4716a1ca566a056dec5ebdfe3541e80ec83c3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/hc-unit-integration-invariants.log",
+      "sha256": "cb6c95cac5247cf63474a4d99d2aaf30ff429e1ed952b8acd958d09c66100805",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/live-runtime-blocker.log",
+      "sha256": "10d85cf80f6a6231fd58be86af2de6d1416e83cbefb2e17e47c30b4fc120695f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/patch-whitespace.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/qualification.json",
+      "sha256": "dd574a7d768659be5609aa510b9029bb7ce934e78bbfc7430485caa5d568a8ce",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/runtime-template.log",
+      "sha256": "2b8bea4424316c75ee418c9876ae82a01c90f53ba106a21899c5728a791e5d29",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/shared-gaming-contracts.log",
+      "sha256": "a02957566e8b3a9af127fffb6a0c2ad0c15dba3ac0854070a5f6f05dc1ff2538",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/shared-runtime-libraries.log",
+      "sha256": "781db9f71b94a6e8c8cf7460431ccfae0d8fd156424a744264b95e0e9610cd80",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/solidity-build-sizes.log",
+      "sha256": "c49c7ba2a539c590529284cd83927327516a75cff3f9bc990cfbcdf767932985",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/solidity-format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/solidity-static-lint.log",
+      "sha256": "26ab53c7cae11d1b28fb8cabfdced35577342087352626e4f024824a5316602f",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

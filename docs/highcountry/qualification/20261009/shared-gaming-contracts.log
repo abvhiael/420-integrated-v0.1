@@ -1,0 +1,32 @@
+Compiling 30 files with Solc 0.8.24
+Solc 0.8.24 finished in 17.85s
+Compiler run successful!
+
+Ran 5 tests for test/GamingProtocol420.t.sol:GamingProtocol420Test
+[PASS] testCrossGameAttestationHasNoEnumerationAuthority() (gas: 3783539)
+[PASS] testGameRegistrationDefaultsToCapabilityDeny() (gas: 1070010)
+[PASS] testGuestMigrationClaimIsTargetBoundAndReplaySafe() (gas: 3842210)
+[PASS] testInactiveGameCannotCreateNewProfiles() (gas: 3507792)
+[PASS] testWalletLinkedProfileAndEntitlementLifecycle() (gas: 3850370)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.68ms (2.01ms CPU time)
+
+Ran 9 tests for test/GamingProtocol420Hardening.t.sol:GamingProtocol420HardeningTest
+[PASS] testCrossGameAttestationExpiryAndRevocationFailClosed() (gas: 4090646)
+[PASS] testDuplicateWalletProfileIsRejected() (gas: 3616174)
+[PASS] testEntitlementTimeWindowFailsClosed() (gas: 3818442)
+[PASS] testMigrationRequiresCanonicalProfileAndRejectsReplay() (gas: 3851025)
+[PASS] testMigrationWrongAccountCancelledAndExpiredClaimsFailClosed() (gas: 4200881)
+[PASS] testNoWalletWideEnumerationSurface() (gas: 3423931)
+[PASS] testUnauthorizedRegistryMutationFailsClosed() (gas: 3519085)
+[PASS] testWrongOperatorCannotIssueOrRevokeCrossGameAttestation() (gas: 3906728)
+[PASS] testWrongOperatorCannotIssueOrRevokeEntitlement() (gas: 3879345)
+Suite result: ok. 9 passed; 0 failed; 0 skipped; finished in 1.70ms (3.45ms CPU time)
+
+Ran 4 tests for test/GamingProtocol420AuthorityIsolation.t.sol:GamingProtocol420AuthorityIsolationTest
+[PASS] testProductionGamingGrantExpiryAndRevocationFailClosed() (gas: 2383430)
+[PASS] testProductionRegistryBindsExactGamingComponentActionAndGameScope() (gas: 2272901)
+[PASS] testProtocolComponentRegistrarCannotBeClaimedOrHijackSmartAccountComponent() (gas: 1114888)
+[PASS] testSmartAccountSessionNeedsBothCallGrantAndExactGamingGrant() (gas: 5833119)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.96ms (1.82ms CPU time)
+
+Ran 3 test suites in 3.18ms (5.34ms CPU time): 18 tests passed, 0 failed, 0 skipped (18 total tests)

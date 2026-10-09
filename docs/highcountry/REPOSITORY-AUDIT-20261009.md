@@ -227,3 +227,7 @@ Formatting remediation applies the repository Foundry format configuration to al
 PR #593 candidate `0b2a2895cf2381a72deda6758c71dd7d129787c2` Solidity run 37884770129 completed with a success conclusion, but job 113672180587 only classified scope; Foundry/Compute/PR-shard jobs were skipped by the existing branch-name audit exclusion. **This run is not Foundry qualification.** Docs run 37884769996 was skipped. The local expanded HC suite ran 35 suites/116 tests with zero failures and zero skips, using the unchanged compiler/profile settings and HC source/test roots plus all imported dependencies; final-head reruns remain authoritative.
 
 The full buildout plan is `RECONCILIATION-AND-BUILDOUT-ROADMAP.md`: stable R01..R10 packages with substeps for every missing gameplay, resource, economic, service, UI, deployment and acceptance boundary. Testnet does not block local specification, foundation repair or HC-7 development.
+
+## Committed qualification evidence
+
+`qualification/20261009/qualification.json` and accompanying hashed logs record the clean implementation head `5684f0f1fe59fa207bcacc816d6bf00f9686e170`. All executable foundation checks passed; live deployment acceptance is BLOCKED. These committed results retain their original SHA. The subsequent evidence-only head must be rerun separately; its exact-head result is recorded in PR #593, without attributing an earlier run to the later commit. This does not qualify the missing whole-game components.

@@ -719,7 +719,9 @@ Purpose: turn repository qualification into real deployed evidence.
 
 [Readiness gate and testnet worklist](CMP-9-14-LONG-DURATION-SOAK.md). No real sustained soak, worker/failover recovery, chain reorg or real funded payout is qualified. Level 1 exact-SHA CI is tracked in [CMP-9.14 qualification evidence](CMP-9-14-QUALIFICATION-EVIDENCE.md).
 
-## CMP-9.15 — Close CMP-0 operational qualification
+## CMP-9.15 — Close CMP-0 operational qualification — OFFLINE PREFLIGHT IMPLEMENTED; CMP-0 NO-GO
+
+[Operational closeout gate](CMP-9-15-CMP0-CLOSEOUT.md) and [exact-SHA qualification evidence](CMP-9-15-QUALIFICATION-EVIDENCE.md). Required real CMP-9.13, CMP-9.14, funded payout/recovery/independent review and on-chain testnet receipts remain missing. CMP-0 is **NOT CLOSED**.
 
 ---
 

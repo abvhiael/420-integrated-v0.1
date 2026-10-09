@@ -179,3 +179,52 @@ func TestCSVInjection(t *testing.T) {
 		}
 	}
 }
+
+type transferRecorder struct {
+	fakeStore
+	received bool
+}
+func (f *transferRecorder) Transfer(_ context.Context, from, to Entry) error {
+	f.received = true
+	if from.Kind != "TRANSFER_OUT" || to.Kind != "TRANSFER_IN" {
+		return ErrInvalid
+	}
+	return nil
+}
+func TestPairedTransferAuthorizationAndValidation(t *testing.T) {
+	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
+	ctx := context.Background()
+	db := &transferRecorder{}
+	s := New(db)
+	a := Entry{TenantID: "t", FacilityID: "f", ZoneID: "z", LotID: "a",
+		ID: "out", Kind: "TRANSFER_OUT", ReferenceID: "move-1", IdempotencyKey: "out-1",
+		Quantity: 4, Reason: "custody move", Actor: "u", Source: "manual", OccurredAt: now}
+	b := a
+	b.LotID = "b"
+	b.ID = "in"
+	b.Kind = "TRANSFER_IN"
+	b.IdempotencyKey = "in-1"
+	if err := s.Transfer(ctx, owner("t", security.Owner), a, b, now); err != nil || !db.received {
+		t.Fatalf("paired transfer denied: %v", err)
+	}
+	for _,change := range []func(*Entry){
+		func(e *Entry) { e.ReferenceID = "different" },
+		func(e *Entry) { e.LotID = "a" },
+		func(e *Entry) { e.Quantity = 3 },
+		func(e *Entry) { e.Actor = "other" },
+		func(e *Entry) { e.TenantID = "other" },
+		func(e *Entry) { e.IdempotencyKey = "out-1" },
+	}{
+		bad := b
+		change(&bad)
+		if err := s.Transfer(ctx, owner("t", security.Owner), a, bad, now); err == nil {
+			t.Fatal("invalid custody pair accepted")
+		}
+	}
+	if err := s.Transfer(ctx, owner("t", security.Technician), a, b, now); !errors.Is(err, ErrDenied) {
+		t.Fatal("technician bypassed inventory adjustment")
+	}
+	if err := s.Apply(ctx, owner("t", security.Owner), a, now); !errors.Is(err, ErrInvalid) {
+		t.Fatal("unpaired transfer accepted")
+	}
+}

@@ -8,6 +8,7 @@ on:
       - 'grow/facility/**'
       - 'grow/plants/**'
       - 'grow/telemetry/**'
+      - 'grow/equipment/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -103,3 +104,9 @@ jobs:
           test -z "$(gofmt -l grow/telemetry/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/telemetry/qualify.sql
           node --test grow/telemetry/chart.test.mjs
+      - name: GROW-V2-07 safety policy, observation adapter and adversarial checks
+        run: |
+          go test -count=1 ./grow/equipment
+          go test -race -count=1 ./grow/equipment
+          go vet ./grow/equipment
+          test -z "$(gofmt -l grow/equipment/*.go)"

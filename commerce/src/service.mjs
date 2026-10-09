@@ -349,7 +349,7 @@ export class CommerceService {
         requireThat(BigInt(proposal.amount)+pending<=BigInt(proposal.refundableMaximum)-BigInt(proposal.previousRefunded),'refund_pending_exceeds_available',409);
         this.db.run('INSERT INTO refund_requests VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',requestId,storeId,attemptId,status.paymentId,row.order_id,proposal.amount,proposal.settlementAsset,proposal.recipient,request.reasonHash,proposal.previousRefunded,'PENDING_GOVERNANCE',this.now());
       });
-      proposal={...proposal,requestId,requestState:'PENDING_GOVERNANCE',recorded:true};
+      proposal={...proposal,requestId,refundId:'0x'+requestId,requestState:'PENDING_GOVERNANCE',recorded:true};
     }
     else requireThat(['PAID','FULFILLED','DISPUTED'].includes(status.state),'dispute_not_eligible',409);
     // Governance / Arbitration alone authorizes effects. No fabricated signed transaction.

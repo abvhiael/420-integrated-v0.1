@@ -1,6 +1,6 @@
 # HZ-GCA-16 — Website and product navigation integration
 
-Status: **IMPLEMENTED — Level 1 exact-SHA CI qualification pending**.
+Status: **COMPLETE — targeted Level 1 PASS, broader app milestone / Level 3 deferred**.
 
 Canonical roadmap: `docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md`.
 PR: #565 on `feature/420hz-generate-community-awards-roadmap`.
@@ -19,6 +19,6 @@ PR: #565 on `feature/420hz-generate-community-awards-roadmap`.
 
 ## Remaining gates
 
-Qualify the new implementation commit with HZ-GCA-16 Website Level 1 and inspect every mandatory job/step conclusion. Verify existing `420Hz Web Qualification` web verifier job against same SHA when triggered; do not substitute stale evidence. HZ-GCA-14 live integrations and HZ-GCA-15 production-equivalent security remain HZ-GCA-18 testnet gated. No live endpoints, Wallet, Search, Indexer, nominations, votes or awards seasons are asserted operational. Level 2 app milestone and Level 3 at HZ-GCA-17 remain separate.
+Targeted exact-SHA Level 1 qualification **PASS**: implementation SHA `f5a7eb8a9d63563ca14be53833f3b271291ff35c`, workflow `HZ-GCA-16 Website Level 1`, run https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37879652476, job `113656154554`, SUCCESS. Exact SHA verified; website verifier PASS (`errors: []`), all 10 retained Generate Studio web tests PASS (0 failures), JavaScript syntax checks PASS. Verify existing `420Hz Web Qualification` web verifier job against same SHA when triggered; do not substitute stale evidence. HZ-GCA-14 live integrations and HZ-GCA-15 production-equivalent security remain HZ-GCA-18 testnet gated. No live endpoints, Wallet, Search, Indexer, nominations, votes or awards seasons are asserted operational. Level 2 app milestone and Level 3 at HZ-GCA-17 remain separate.
 
-Do **not** mark COMPLETE until exact-SHA CI confirms all Level 1 exit criteria.
+Original HZ-GCA-16 exit criteria are satisfied for the pre-testnet repository website. No unavailable action is advertised as live. Evidence-only commit may inherit the above qualified implementation SHA; later substantive code or workflow changes require requalification. Next canonical step: **HZ-GCA-17 — Repository phase qualification and closeout**.

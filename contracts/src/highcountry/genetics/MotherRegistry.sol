@@ -18,7 +18,9 @@ interface ICloneIssuerMother {
     function authorization() external view returns (address);
     function genomeRegistry() external view returns (address);
     function motherRegistry() external view returns (address);
-    function cloneContext(uint64 cloneId) external view returns (uint64 motherId, bytes32 genomeId, address owner);
+    function cloneContext(
+        uint64 cloneId
+    ) external view returns (uint64 motherId, bytes32 genomeId, address owner);
 }
 
 interface IGenomeRegistryMother {
@@ -93,15 +95,16 @@ contract MotherRegistry {
         emit MotherTransferred(motherId, previous, newOwner);
     }
 
-    function bindCloneRegistry(address issuer) external {
+    function bindCloneRegistry(
+        address issuer
+    ) external {
         if (address(cloneRegistry) != address(0) || issuer.code.length == 0) revert HCInvalidState();
         authorization.requireAuthorized(
             AuthorizationRequest(msg.sender, ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES, BIND_SCOPE, 0)
         );
         ICloneIssuerMother candidate = ICloneIssuerMother(issuer);
         if (
-            candidate.authorization() != address(authorization)
-                || candidate.genomeRegistry() != address(genomeRegistry)
+            candidate.authorization() != address(authorization) || candidate.genomeRegistry() != address(genomeRegistry)
                 || candidate.motherRegistry() != address(this)
         ) revert HCInvalidState();
         cloneRegistry = candidate;
@@ -109,11 +112,16 @@ contract MotherRegistry {
     }
 
     /// @notice Cutting consumption without a canonical clone is forbidden.
-    function consumeCutting(uint64) external pure {
+    function consumeCutting(
+        uint64
+    ) external pure {
         revert HCInvalidState();
     }
 
-    function consumeForClone(uint64 motherId, uint64 cloneId) external {
+    function consumeForClone(
+        uint64 motherId,
+        uint64 cloneId
+    ) external {
         if (msg.sender != address(cloneRegistry) || cloneId == 0 || cuttingForClone[cloneId] != 0) {
             revert HCInvalidState();
         }

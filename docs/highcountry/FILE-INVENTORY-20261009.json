@@ -4,44 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "contracts/test/highcountry/integration/RealCapabilityGenesis.t.sol",
-      "sha256": "00f9ae199de39151934b3a3f9bb6ed2126a8b085f690a7a568c99654567a021c",
-      "classification": "COMPLETE",
-      "contracts": [
-        "RealCapabilityGenesisTest"
-      ],
-      "interfaces": [],
-      "tests": [
-        "testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation"
-      ]
-    },
-    {
-      "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",
-      "sha256": "e7a068914df4733ca48a903b9b40542c188bb44721563ca43c6c44e1e1707b88",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/README.md",
-      "sha256": "e43351be3e5e79db9cfd09ff1854e587bfcc43686e1ad64ef69d8142fc9b3ca4",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
-      "sha256": "89374fe6937e3f9f45e7ec70bb33e3ded7162822795daaa12f25014f3f1b3409",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "scripts/highcountry/qualify.py",
-      "sha256": "b2f610e9c1ca2fdc1b53f28655faa77d3d3f9c3bafdd92d1a61831b75afafd27",
+      "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
+      "sha256": "80cd7137b953e5dd1a978892ab9c98ea5bc1885b74eabe61c94497828f295e29",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -601,6 +565,18 @@
       "interfaces": [],
       "tests": [
         "testFoundationIdsAreDomainSeparated"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/integration/RealCapabilityGenesis.t.sol",
+      "sha256": "00f9ae199de39151934b3a3f9bb6ed2126a8b085f690a7a568c99654567a021c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RealCapabilityGenesisTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation"
       ]
     },
     {
@@ -1169,6 +1145,14 @@
       ]
     },
     {
+      "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",
+      "sha256": "37583f02480389d6fa991c2c8dba67fdb969c283e31636687c861132a510ddef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "docs/highcountry/HC-GAMING-PROTOCOL-REFERENCE.md",
       "sha256": "669600c27ab7c178b92c7b64c3e46a45cf4cc776b84bc7f2ded94ea00bfa6b20",
       "classification": "COMPLETE",
@@ -1227,6 +1211,30 @@
     {
       "path": "docs/highcountry/HC-PA-PROGRESSIVE-ACCESS.md",
       "sha256": "2ac8f641aff13536ef8d21fd2063bef09f4abf6c54d81230781f07482d9bf96b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/README.md",
+      "sha256": "39bb4b30a1f59ce9570dae1a2b6bc96362dab0705a4bd4f1cfc2721841fdc1fd",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
+      "sha256": "a57c66d7602001f51fef22e8c28c316c77dfb9a00584e7085898941f873cf1ce",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/qualify.py",
+      "sha256": "62cab70c23dbc6bac1f7f9f62fa92c7d5e324989f09edbb12b1cc789c922d9b8",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

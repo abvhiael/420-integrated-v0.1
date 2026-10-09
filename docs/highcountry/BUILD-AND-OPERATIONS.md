@@ -94,3 +94,5 @@ python scripts/highcountry/qualify.py --expected-sha "$(git rev-parse HEAD)" --o
 ```
 
 It executes HC contract build/size checks, HC unit/integration/invariant tests, immediate shared Gaming contract tests, formatter, access/SDK/shared service tests and runtime validation. Exit 2 from the unresolved live harness is recorded as BLOCKED, never deployed success. Its foundation-pass result explicitly cannot certify missing full-game components. Preserve output and exact SHA in the PR qualification record; do not treat a subsequent implementation change as covered by those results.
+
+The evidence runner scopes Solidity compilation roots to all High Country source/tests and imports every required dependency under the committed compiler settings. Shared Gaming tests use byte-identical copies of the three canonical test files with the repository source tree and original Foundry configuration. This avoids compiling unrelated application tests while preserving the app/dependency inventory; it does not replace the canonical complete-repository Solidity owner at a Level 3 closeout.

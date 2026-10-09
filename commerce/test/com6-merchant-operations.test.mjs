@@ -20,7 +20,8 @@ test('COM-6 dashboard shows no synthetic settlement or refund on pending order',
  const stats=await f.service.merchantAnalytics(seller.address,store.store_id);
  assert.equal(stats.totals.orders,1);assert.equal(stats.totals.paid,0);
  assert.deepEqual(stats.byAsset[order.paymentAsset.toLowerCase()],{paidBaseUnits:'0',refundedBaseUnits:'0'});
- assert.equal(stats.scope,'first_100_attempts_only');
+ assert.equal(stats.scope,'all_local_checkout_attempts_at_finalized_block');
+ assert.equal(stats.partial,false);
  await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund'),e=>e.code==='refund_not_authorized');
  await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute',{disputeHash:b32(406)}),e=>e.code==='dispute_not_eligible');
 });

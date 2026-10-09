@@ -99,7 +99,9 @@ Exit: auditable go/no-go and known blocker list; no production credit or reward 
 
 **Disposition: CANDIDATE FOR FEASIBILITY STUDY; NOT APPROVED/IMPLEMENTED.** Gridcoin is relevant because of BOINC reward participation, but it is an independent UTXO-style blockchain and GRC is **not** a native BOINC credit. There is no requirement to bridge GRC to fund $420 compute rewards.
 
-### G-01 — Chain/source and asset feasibility (GO/NO-GO)
+### G-01 — Chain/source and asset feasibility (GO/NO-GO) — PROVISIONAL NO-GO; LIVE NODE / GOVERNANCE EVIDENCE OPEN
+
+[G-01 independent upstream release review and feasibility inventory](CMP-G01-GRIDCOIN-FEASIBILITY.md). No bridge or GRC exchange market approval. The canonical live-node and two-way settlement verification gates remain unsatisfied.
 
 Independently confirm current Gridcoin network genesis/network ID, address encoding, chain/transaction model, current consensus/finality and reorganization/security characteristics, node RPC/indexing availability, signing/custody capabilities, required confirmations, maintenance status, denomination/precision and bridge-policy constraints. Verify any permission/license, supported custodial gateway model, contract/verifier feasibility, liquidity and risk appetite using primary network documentation and live nodes. Do not copy Curecoin's PoS assumptions, genesis constants or verifier. Document whether trust-minimized proof verification is feasible or whether a federated/custodial gateway would be necessary. If no credible two-way verified settlement path exists, stop bridge approval.
 

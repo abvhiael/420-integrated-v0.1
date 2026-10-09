@@ -48,6 +48,32 @@ export class WalletSession {
     return {epoch,address,tag,deadline};
   }
   wallet(){const address=this.address;return {address,signMessage:async message=>{if(address!==this.address)fail('Wallet session changed.');await this.verify();const epoch=this.epoch;const result=await this.provider.request({method:'personal_sign',params:['0x'+[...new TextEncoder().encode(message)].map(x=>x.toString(16).padStart(2,'0')).join(''),address]});if(epoch!==this.epoch)fail('Wallet changed while signing.');await this.verify();return result;}};}
+  async sendMarketDispute(proposal){
+    if(this.pending)fail('A transaction is already awaiting Wallet.');
+    this.pending=true;
+    try {
+      if(!proposal||proposal.executed!==false||proposal.state!=='AWAITING_MARKET_WALLET_SUBMISSION')fail('Invalid dispute handoff.');
+      const binding=this.config.contracts.OrderRegistry420;
+      if(!binding||proposal.requester!==this.address||!/^0x[0-9a-f]{64}$/.test(proposal.orderId)||!/^0x[0-9a-f]{64}$/.test(proposal.disputeHash))fail('Dispute is not bound to seller and Market.');
+      const intent=proposal.intent;
+      if(intent?.chainId!==this.config.chainId||intent?.target?.toLowerCase()!==binding.address.toLowerCase()||intent.method!=='disputeOrder'||intent.requiresWalletAuthorization!==true||intent.canonicalAuthority!==false||intent.args?.length!==2||intent.args[0]!==proposal.orderId||intent.args[1]!==proposal.disputeHash)fail('Dispute transaction intent mismatch.');
+      const abi=new Interface(['function disputeOrder(bytes32,bytes32)','function getOrder(bytes32) view returns(tuple(bytes32 listingId,uint32 listingRevision,address buyer,address seller,uint256 quantity,address paymentAsset,uint256 totalAmount,bytes32 settlementAdapterId,bytes32 paymentRef,bytes32 fulfillmentHash,bytes32 disputeHash,uint8 status,uint64 createdAt,uint64 updatedAt))']);
+      const data=abi.encodeFunctionData('disputeOrder',intent.args);
+      const checked=await this.verify();
+      const read=abi.encodeFunctionData('getOrder',[proposal.orderId]);
+      const raw=await this.provider.request({method:'eth_call',params:[{to:binding.address,data:read},checked.tag]});
+      const order=abi.decodeFunctionResult('getOrder',raw)[0];
+      if(order.seller.toLowerCase()!==checked.address||![2,3].includes(Number(order.status))||order.disputeHash!=='0x'+'0'.repeat(64))fail('Canonical Market seller or eligibility changed.');
+      const tx={from:checked.address,to:binding.address,data,value:'0x0'};
+      await this.provider.request({method:'eth_call',params:[tx,checked.tag]});
+      if(checked.epoch!==this.epoch)fail('Wallet changed.');
+      if(BigInt(await this.provider.request({method:'eth_chainId'}))!==BigInt(this.config.chainId)||(await this.provider.request({method:'eth_accounts'}))[0]?.toLowerCase()!==checked.address)fail('Wallet account or chain changed.');
+      if(checked.epoch!==this.epoch)fail('Wallet changed.');
+      const hash=await this.provider.request({method:'eth_sendTransaction',params:[tx]});
+      if(!/^0x[0-9a-f]{64}$/.test(hash)||checked.epoch!==this.epoch)fail('Dispute submission unverified.');
+      return {transactionHash:hash,finalized:false,marketDisputed:false,arbitrationCaseOpened:false};
+    } finally {this.pending=false;}
+  }
   async send(plan){
     if(this.pending)fail('A transaction is already awaiting Wallet.');this.pending=true;
     try {

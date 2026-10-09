@@ -179,6 +179,7 @@ jobs:
       - name: GROW-V2-13 private cultivation dashboard and mobile UX Level 1
         env:
           GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+          GROW_DASHBOARD_TEST_DSN: postgresql://grow_v2_dashboard_ci:ci-private-only@127.0.0.1:5432/growtest?sslmode=disable
         run: |
           go build ./grow/dashboard ./grow/cmd/private-server
           go test -count=1 ./grow/dashboard ./grow/cmd/private-server
@@ -187,6 +188,7 @@ jobs:
           gofmt -d grow/dashboard/*.go grow/cmd/private-server/*.go
           test -z "$(gofmt -l grow/dashboard/*.go grow/cmd/private-server/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/dashboard/qualify.sql
+          go test -tags grow_integration -count=1 ./grow/dashboard
           node --check grow/web/workspace.js
           node --test grow/web/test/workspace.test.js
           (cd grow/web && npm run qualify)

@@ -40,7 +40,7 @@ func(s SQLStore)ChangeStage(ctx context.Context,p Plant,expected int64)(Plant,er
   if err!=nil{return err}
   if !canMove(old,p.State){return ErrInvalid}
   if err=tx.QueryRowContext(ctx,"UPDATE grow_private.plants SET state=$1,revision=revision+1 WHERE tenant_id=$2::uuid AND plant_id=$3::uuid AND revision=$4 RETURNING revision",p.State,p.TenantID,p.ID,expected).Scan(&p.Revision);err!=nil{return err}
-  _,err=tx.ExecContext(ctx,"INSERT INTO grow_private.plant_events(tenant_id,event_id,plant_id,actor_subject,from_state,to_state,expected_revision) VALUES ($1::uuid,gen_random_uuid(),$2::uuid,$3,$4,$5,$6)",p.TenantID,p.ID,"system:authenticated-adapter-required",old,p.State,expected)
+  _,err=tx.ExecContext(ctx,"INSERT INTO grow_private.plant_events(tenant_id,event_id,plant_id,actor_subject,from_state,to_state,expected_revision) VALUES ($1::uuid,gen_random_uuid(),$2::uuid,$3,$4,$5,$6)",p.TenantID,p.ID,"authenticated-actor-pending-v2-integration",old,p.State,expected)
   return err
  })
  if err!=nil{return Plant{},err}

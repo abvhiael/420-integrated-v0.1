@@ -47,7 +47,8 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
       else if(/^\/v1\/media\/[^/]+$/.test(path)&&method==='GET'){keys(query,[]);const media=service.publicMedia(path.split('/').at(-1));res.writeHead(200,{...headers,'Content-Type':media.content_type});res.end(Buffer.from(media.content));return;}
       else {
         const notificationFeed=method==='GET'&&/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications$/.test(path);
-        keys(query,notificationFeed?['limit','cursor']:[]);
+        const analyticsPage=method==='GET'&&/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/analytics$/.test(path);
+        keys(query,notificationFeed?['limit','cursor']:analyticsPage?['offset','limit']:[]);
         const parts=path.split('/'),storeId=parts[4],action=parts[5];
         if(/^\/v1\/merchant\/identity\/0x[a-f0-9]{64}$/.test(path)&&method==='GET')data=await service.identity(actor,parts[4]);
         else if(path==='/v1/merchant/registration'&&method==='POST')data=await service.registration(actor,input);
@@ -58,7 +59,7 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications$/.test(path)&&method==='GET'){keys(query,['limit','cursor']);data=await service.merchantNotifications(actor,storeId,{limit:query.limit===undefined?25:integer(Number(query.limit),1,100),cursor:query.cursor??null});}
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications\/[a-f0-9]{64}\/read$/.test(path)&&method==='POST')data=await service.merchantNotificationRead(actor,storeId,parts[7],input??{});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/refunds$/.test(path)&&method==='GET')data=await service.merchantRefunds(actor,storeId);
-        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/analytics$/.test(path)&&method==='GET')data=await service.merchantAnalytics(actor,storeId);
+        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/analytics$/.test(path)&&method==='GET')data=await service.merchantAnalytics(actor,storeId,{offset:query.offset===undefined?0:integer(Number(query.offset),0,Number.MAX_SAFE_INTEGER),limit:query.limit===undefined?100:integer(Number(query.limit),1,100)});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/integrations$/.test(path)&&method==='GET')data=await service.merchantIntegrations(actor,storeId);
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders\/[a-f0-9]{64}\/arbitration\/prepare$/.test(path)&&method==='POST')data=await service.merchantArbitrationPrepare(actor,storeId,parts[7],input??{});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders\/[a-f0-9]{64}\/arbitration\/bind$/.test(path)&&method==='POST')data=await service.merchantArbitrationBind(actor,storeId,parts[7],input??{});

@@ -107,9 +107,21 @@ contract CultivationEngineTest is PlantSourcesFixture {
         _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
         EmergencyState emergency = new EmergencyState(address(auth));
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, plants.EMERGENCY_BIND_SCOPE(), keccak256("em:plant"));
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_BIND_EMERGENCY,
+            plants.EMERGENCY_BIND_SCOPE(),
+            keccak256("em:plant")
+        );
         plants.bindEmergencyState(address(emergency));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_EMERGENCY, cultivation.EMERGENCY_BIND_SCOPE(), keccak256("em:cult"));
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_BIND_EMERGENCY,
+            cultivation.EMERGENCY_BIND_SCOPE(),
+            keccak256("em:cult")
+        );
         cultivation.bindEmergencyState(address(emergency));
 
         RulesetRegistry rulesets = new RulesetRegistry(address(auth));
@@ -164,27 +176,49 @@ contract CultivationEngineTest is PlantSourcesFixture {
     }
 
     function testRestrictedCultivationDeniesEnvironmentMutationAndRequiresReleaseAuthority() public {
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER,
-            bytes32(uint256(99)), keccak256("em:plant99"));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE,
-            bytes32(uint256(99)), keccak256("em:update99"));
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(99)),
+            keccak256("em:plant99")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(99)),
+            keccak256("em:update99")
+        );
         _sourcePlant(caps, plants, 99, genomeId, address(this), 11);
         EmergencyState state = EmergencyState(address(cultivation.emergencyState()));
-        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
-            EmergencyDomains.CULTIVATION, keccak256("em:restrict"));
+        _grant(
+            address(this),
+            ModuleIds.EMERGENCY_STATE,
+            ActionIds.EMERGENCY_RESTRICT,
+            EmergencyDomains.CULTIVATION,
+            keccak256("em:restrict")
+        );
         state.setRestricted(EmergencyDomains.CULTIVATION, true);
-        (bool ok,) = address(cultivation).call(abi.encodeCall(
-            cultivation.updateEnvironment, (uint64(99),
-                CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000))));
+        (bool ok,) = address(cultivation)
+            .call(
+                abi.encodeCall(
+                    cultivation.updateEnvironment,
+                    (uint64(99), CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000))
+                )
+            );
         require(!ok, "restricted environment update accepted");
-        (ok,) = address(state).call(abi.encodeCall(
-            state.setRestricted, (EmergencyDomains.CULTIVATION, false)));
+        (ok,) = address(state).call(abi.encodeCall(state.setRestricted, (EmergencyDomains.CULTIVATION, false)));
         require(!ok, "unprivileged emergency release accepted");
-        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RELEASE,
-            EmergencyDomains.CULTIVATION, keccak256("em:release"));
+        _grant(
+            address(this),
+            ModuleIds.EMERGENCY_STATE,
+            ActionIds.EMERGENCY_RELEASE,
+            EmergencyDomains.CULTIVATION,
+            keccak256("em:release")
+        );
         state.setRestricted(EmergencyDomains.CULTIVATION, false);
-        cultivation.updateEnvironment(99,
-            CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000));
+        cultivation.updateEnvironment(99, CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000));
         require(cultivation.getState(99).exists, "authorized recovery failed");
     }
 

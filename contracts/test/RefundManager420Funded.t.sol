@@ -7,6 +7,7 @@ import "./helpers/GenesisMocks420.sol";
 
 interface VmRefundFunding420 {
     function deal(address who,uint256 amount) external;
+    function expectRevert() external;
 }
 contract RefundedPaymentLedgerMock420 {
     address public payer;
@@ -53,6 +54,7 @@ contract RefundUntrustedCaller420 {
     }
 }
 contract RefundManager420FundedTest {
+    VmRefundFunding420 internal constant vm=VmRefundFunding420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address internal constant BUYER=address(0xBEEF);
     bytes32 internal constant PAYMENT=keccak256("funded-payment");
     bytes32 internal constant REFUND=keccak256("funded-refund");
@@ -77,26 +79,26 @@ contract RefundManager420FundedTest {
         require(m.refundedByPayment(PAYMENT)==60,"canonical amount mismatch");
         require(m.authorizedRefundEscrow(PAYMENT)==0,"escrow not consumed");
         require(m.fundedRefundExecuted(REFUND),"refund not proven executed");
-        (bool replay,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(token),BUYER,60,100,keccak256("reason")));
-        require(!replay,"replay paid twice");
+        vm.expectRevert();
+        m.executeFundedRefund(REFUND,PAYMENT,address(token),BUYER,60,100,keccak256("reason"));
     }
     function testCannotPayBeforeFundingOrBeyondGovernanceAuthorization() public {
         (RefundManager420 m,,RefundFundingTokenMock420 token)=setUpFixture();
-        (bool missing,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(token),BUYER,1,100,bytes32(0)));
-        require(!missing,"unfunded payout");
-        (bool excess,)=address(m).call(abi.encodeWithSelector(m.fundAuthorizedRefund.selector,PAYMENT,address(token),61));
-        require(!excess,"excess fund");
+        vm.expectRevert();
+        m.executeFundedRefund(REFUND,PAYMENT,address(token),BUYER,1,100,bytes32(0));
+        vm.expectRevert();
+        m.fundAuthorizedRefund(PAYMENT,address(token),61);
         m.fundAuthorizedRefund(PAYMENT,address(token),40);
-        (bool excessPayout,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(token),BUYER,41,100,bytes32(0)));
-        require(!excessPayout,"overdraft paid");
+        vm.expectRevert();
+        m.executeFundedRefund(REFUND,PAYMENT,address(token),BUYER,41,100,bytes32(0));
         require(token.balanceOf(BUYER)==0,"unapproved funds sent");
     }
     function testTransferFailureRollsBackAccountingAndEscrow() public {
         (RefundManager420 m,,RefundFundingTokenMock420 token)=setUpFixture();
         m.fundAuthorizedRefund(PAYMENT,address(token),20);
         token.fail(true);
-        (bool ok,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(token),BUYER,20,100,bytes32(0)));
-        require(!ok,"failed transfer succeeded");
+        vm.expectRevert();
+        m.executeFundedRefund(REFUND,PAYMENT,address(token),BUYER,20,100,bytes32(0));
         require(m.authorizedRefundEscrow(PAYMENT)==20,"escrow corrupted");
         require(m.refundedByPayment(PAYMENT)==0,"phantom accounting");
         require(!m.fundedRefundExecuted(REFUND),"phantom payout");
@@ -107,10 +109,10 @@ contract RefundManager420FundedTest {
     function testWrongRecipientAndAssetNeverPaid() public {
         (RefundManager420 m,,RefundFundingTokenMock420 token)=setUpFixture();
         m.fundAuthorizedRefund(PAYMENT,address(token),20);
-        (bool wrong,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(token),address(0xDEAD),20,100,bytes32(0)));
-        require(!wrong,"wrong recipient");
-        (bool asset,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(0xCAFE),BUYER,20,100,bytes32(0)));
-        require(!asset,"wrong asset");
+        vm.expectRevert();
+        m.executeFundedRefund(REFUND,PAYMENT,address(token),address(0xDEAD),20,100,bytes32(0));
+        vm.expectRevert();
+        m.executeFundedRefund(REFUND,PAYMENT,address(0xCAFE),BUYER,20,100,bytes32(0));
         require(m.authorizedRefundEscrow(PAYMENT)==20 && m.refundedByPayment(PAYMENT)==0,"corrupt after reject");
     }
     function testGovernanceUnwindsUnusedEscrowToOriginalFundingCaller() public {
@@ -157,6 +159,7 @@ contract RefundManager420NativeFundedTest {
 }
 
 contract RefundManager420RealRegistryIntegrationTest {
+    VmRefundFunding420 internal constant vm=VmRefundFunding420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 internal constant INVOICE=keccak256("verified-merchant-invoice");
     bytes32 internal constant REFUND=keccak256("governed-real-refund");
     function _setup() internal returns(PaymentRegistry420 payments,RefundManager420 refunds,RefundFundingTokenMock420 token) {
@@ -181,7 +184,7 @@ contract RefundManager420RealRegistryIntegrationTest {
         refunds.executeFundedRefund(REFUND,paymentId,address(token),address(this),60,100,keccak256("refund reason"));
         require(refunds.fundedRefundExecuted(REFUND) && refunds.refundedByPayment(paymentId)==60,"Pay payout not reconciled");
         require(token.balanceOf(address(this))==100 && token.balanceOf(address(refunds))==0,"actual return missing");
-        (bool replay,)=address(refunds).call(abi.encodeWithSelector(refunds.executeFundedRefund.selector,REFUND,paymentId,address(token),address(this),60,100,bytes32(0)));
-        require(!replay,"duplicate refund succeeded");
+        vm.expectRevert();
+        refunds.executeFundedRefund(REFUND,paymentId,address(token),address(this),60,100,bytes32(0));
     }
 }

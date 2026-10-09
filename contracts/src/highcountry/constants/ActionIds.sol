@@ -35,6 +35,7 @@ library ActionIds {
     bytes32 internal constant SEED_TRANSFER = keccak256("HC.ACTION.SEED_REGISTRY.TRANSFER");
     bytes32 internal constant CLONE_REGISTER = keccak256("HC.ACTION.CLONE_REGISTRY.REGISTER");
     bytes32 internal constant CLONE_TRANSFER = keccak256("HC.ACTION.CLONE_REGISTRY.TRANSFER");
+    bytes32 internal constant MOTHER_BIND_CLONES = keccak256("HC.ACTION.MOTHER_REGISTRY.BIND_CLONES");
     bytes32 internal constant MOTHER_REGISTER = keccak256("HC.ACTION.MOTHER_REGISTRY.REGISTER");
     bytes32 internal constant MOTHER_TRANSFER = keccak256("HC.ACTION.MOTHER_REGISTRY.TRANSFER");
     bytes32 internal constant MOTHER_CONSUME_CUTTING = keccak256("HC.ACTION.MOTHER_REGISTRY.CONSUME_CUTTING");

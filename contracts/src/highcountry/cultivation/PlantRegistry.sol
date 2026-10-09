@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import { PublicCultivationAccess } from "../land/PublicCultivationAccess.sol";
+
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
 import {
@@ -65,6 +67,12 @@ contract PlantRegistry {
     IHighCountryAuthorization public immutable authorization;
     IGenomeRegistryPlant public immutable genomeRegistry;
     ILandRegistryPlant public immutable landRegistry;
+    PublicCultivationAccess public immutable publicAccess;
+    mapping(uint64 => uint32) public privatePlantsByParcel;
+    mapping(uint64 => mapping(address => uint32)) public activePublicPlants;
+    mapping(uint64 => uint64) public publicPlotOfPlant;
+    event PublicPlantAdmitted(uint64 indexed plantId, uint64 indexed plotId, address indexed grower);
+    event PlantCapacityReleased(uint64 indexed plantId, uint64 indexed parcelId, uint64 indexed plotId, address grower);
     mapping(uint64 => PlantRecord) private _plants;
     mapping(uint64 => uint32) public activePlantsByParcel;
 
@@ -76,14 +84,25 @@ contract PlantRegistry {
     constructor(
         address authorization_,
         address genomeRegistry_,
-        address landRegistry_
+        address landRegistry_,
+        address publicAccess_
     ) {
-        if (authorization_ == address(0) || genomeRegistry_ == address(0) || landRegistry_ == address(0)) {
+        if (
+            authorization_ == address(0) || genomeRegistry_ == address(0) || landRegistry_ == address(0)
+                || publicAccess_ == address(0)
+        ) {
             revert HCZeroAddress();
         }
         authorization = IHighCountryAuthorization(authorization_);
         genomeRegistry = IGenomeRegistryPlant(genomeRegistry_);
         landRegistry = ILandRegistryPlant(landRegistry_);
+        publicAccess = PublicCultivationAccess(publicAccess_);
+        if (
+            address(publicAccess.authorization()) != authorization_
+                || address(publicAccess.landRegistry()) != landRegistry_
+        ) {
+            revert HCInvalidState();
+        }
     }
 
     function registerPlant(
@@ -95,11 +114,43 @@ contract PlantRegistry {
         if (plantId == 0 || genomeId == bytes32(0) || grower == address(0) || landParcelId == 0) revert HCInvalidId();
         if (_plants[plantId].exists) revert HCAlreadyExists();
         if (!genomeRegistry.exists(genomeId) || !landRegistry.exists(landParcelId)) revert HCNotFound();
+        if (address(publicAccess.plantRegistry()) != address(this)) revert HCInvalidState();
         if (landRegistry.effectiveOperator(landParcelId) != grower) revert HCInvalidState();
         uint32 capacity = landRegistry.growCapacityOf(landParcelId);
-        uint32 active = activePlantsByParcel[landParcelId];
-        if (active >= capacity) revert HCCapacityExceeded(active + 1, capacity);
+        uint256 used = uint256(privatePlantsByParcel[landParcelId]) + publicAccess.publicCapacityOnParcel(landParcelId);
+        if (used >= capacity) revert HCCapacityExceeded(used + 1, capacity);
         _auth(ActionIds.PLANT_REGISTER, plantId);
+        privatePlantsByParcel[landParcelId] += 1;
+        _registerPlant(plantId, genomeId, grower, landParcelId);
+    }
+
+    function registerPublicPlant(
+        uint64 plantId,
+        bytes32 genomeId,
+        address grower,
+        uint64 plotId
+    ) external {
+        if (plantId == 0 || genomeId == bytes32(0) || grower == address(0)) revert HCInvalidId();
+        if (_plants[plantId].exists) revert HCAlreadyExists();
+        if (address(publicAccess.plantRegistry()) != address(this)) revert HCInvalidState();
+        PublicCultivationAccess.PublicPlot memory plot = publicAccess.getPlot(plotId);
+        if (!genomeRegistry.exists(genomeId) || !landRegistry.exists(plot.parcelId)) revert HCNotFound();
+        uint32 allocated = publicAccess.allocationOf(plotId, grower);
+        uint32 active = activePublicPlants[plotId][grower];
+        if (active >= allocated) revert HCCapacityExceeded(uint256(active) + 1, allocated);
+        _auth(ActionIds.PLANT_REGISTER, plantId);
+        activePublicPlants[plotId][grower] = active + 1;
+        publicPlotOfPlant[plantId] = plotId;
+        _registerPlant(plantId, genomeId, grower, plot.parcelId);
+        emit PublicPlantAdmitted(plantId, plotId, grower);
+    }
+
+    function _registerPlant(
+        uint64 plantId,
+        bytes32 genomeId,
+        address grower,
+        uint64 landParcelId
+    ) private {
         uint16 regionId = landRegistry.regionIdOf(landParcelId);
         _plants[plantId] = PlantRecord(
             plantId,
@@ -112,7 +163,7 @@ contract PlantRegistry {
             uint64(block.timestamp),
             true
         );
-        activePlantsByParcel[landParcelId] = active + 1;
+        activePlantsByParcel[landParcelId] += 1;
         emit PlantRegistered(plantId, genomeId, grower, landParcelId, regionId);
     }
 
@@ -201,7 +252,13 @@ contract PlantRegistry {
         PlantStage previous = p.stage;
         p.stage = newStage;
         p.lastAdvancedAt = effectiveAt;
-        if (newStage == PlantStage.TERMINATED) activePlantsByParcel[p.landParcelId] -= 1;
+        if (newStage == PlantStage.TERMINATED) {
+            activePlantsByParcel[p.landParcelId] -= 1;
+            uint64 plotId = publicPlotOfPlant[p.id];
+            if (plotId == 0) privatePlantsByParcel[p.landParcelId] -= 1;
+            else activePublicPlants[plotId][p.grower] -= 1;
+            emit PlantCapacityReleased(p.id, p.landParcelId, plotId, p.grower);
+        }
         emit PlantAdvanced(p.id, previous, newStage, effectiveAt);
     }
 

@@ -1,0 +1,380 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+
+import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
+import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
+import { GenesisRegistry } from "../../../src/highcountry/genesis/GenesisRegistry.sol";
+import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry.sol";
+import { RegionRegistry } from "../../../src/highcountry/world/RegionRegistry.sol";
+import { LandRegistry } from "../../../src/highcountry/land/LandRegistry.sol";
+import { PublicCultivationAccess } from "../../../src/highcountry/land/PublicCultivationAccess.sol";
+import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
+import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
+import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
+import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
+import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
+import {
+    HCCapacityExceeded,
+    HCInvalidState,
+    HCNotFound,
+    HCAlreadyExists,
+    HCUnauthorized
+} from "../../../src/highcountry/errors/HighCountryErrors.sol";
+
+interface VmHCPlot {
+    function prank(
+        address
+    ) external;
+    function warp(
+        uint256
+    ) external;
+}
+
+contract PublicPlantCapacityFixture {
+    VmHCPlot internal constant vm = VmHCPlot(address(uint160(uint256(keccak256("hevm cheat code")))));
+    CapabilityRegistry420 internal caps;
+    HighCountryAuthorization internal auth;
+    GenesisRegistry internal genesis;
+    GenomeRegistry internal genomes;
+    RegionRegistry internal regions;
+    LandRegistry internal land;
+    PublicCultivationAccess internal plots;
+    PlantRegistry internal plants;
+    address internal constant ALICE = address(0xA11CE);
+    address internal constant BOB = address(0xB0B);
+    bytes32 internal constant GENOME = keccak256("capacity-genome");
+    uint256 internal serial;
+
+    function setUp() public virtual {
+        caps = new CapabilityRegistry420();
+        auth = new HighCountryAuthorization(address(caps));
+        genesis = new GenesisRegistry(address(auth));
+        regions = new RegionRegistry(address(auth), address(genesis));
+        genomes = new GenomeRegistry(address(auth), address(genesis));
+        land = new LandRegistry(address(auth), address(regions), address(genesis));
+        plots = new PublicCultivationAccess(address(auth), address(land));
+        plants = new PlantRegistry(address(auth), address(genomes), address(land), address(plots));
+        caps.registerProtocolComponent(ModuleIds.GENESIS_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.REGION_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.GENOME_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.LAND_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.PUBLIC_CULTIVATION_ACCESS, address(this));
+        caps.registerProtocolComponent(ModuleIds.PLANT_REGISTRY, address(this));
+        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, genesis.ADMIN_SCOPE());
+        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, genesis.ADMIN_SCOPE());
+        genesis.setRoots(
+            GenesisRoots(keccak256("m"), keccak256("p"), keccak256("r"), keccak256("l"), keccak256("x"), keccak256("q"))
+        );
+        _grant(address(this), ModuleIds.REGION_REGISTRY, ActionIds.REGION_REGISTER, bytes32(uint256(1)));
+        regions.registerFoundingRegion(1, keccak256("meta"), keccak256("climate"), keccak256("rules"));
+        genesis.finalizeGenesis();
+        _grant(address(this), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, GENOME);
+        bytes32[28] memory loci;
+        genomes.registerGenome(GENOME, keccak256("line"), keccak256("meta"), loci);
+        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, bytes32(uint256(1)));
+        land.registerParcel(1, 1, address(this), 4, keccak256("land"), keccak256("meta"));
+        _grant(
+            address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_BIND_PLANTS, plots.BIND_SCOPE()
+        );
+        plots.bindPlantRegistry(address(plants));
+    }
+
+    function _grant(
+        address who,
+        bytes32 module,
+        bytes32 action,
+        bytes32 scope
+    ) internal returns (bytes32 id) {
+        id = keccak256(abi.encode(++serial, who, module, action, scope));
+        caps.createGrant(id, who, module, action, scope, 0, 0, 0, 0, 0);
+    }
+
+    function _plot(
+        uint64 id,
+        uint32 capacity
+    ) internal {
+        _grant(address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, bytes32(uint256(id)));
+        plots.registerPublicPlot(id, 1, capacity);
+    }
+
+    function _allocate(
+        uint64 id,
+        address who,
+        uint32 capacity
+    ) internal {
+        _grant(who, ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_ALLOCATE, bytes32(uint256(id)));
+        _grant(who, ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_RELEASE, bytes32(uint256(id)));
+        vm.prank(who);
+        plots.allocate(id, capacity);
+    }
+
+    function _public(
+        uint64 id,
+        address who,
+        uint64 plot
+    ) internal {
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(id)));
+        plants.registerPublicPlant(id, GENOME, who, plot);
+    }
+
+    function _private(
+        uint64 id
+    ) internal {
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(id)));
+        plants.registerPlant(id, GENOME, address(this), 1);
+    }
+
+    function _reject(
+        address target,
+        bytes memory input,
+        bytes4 selector
+    ) internal {
+        (bool ok, bytes memory reason) = target.call(input);
+        require(!ok && reason.length >= 4 && bytes4(reason) == selector, "unexpected rejection");
+    }
+
+    function _finish(
+        uint64 id
+    ) internal {
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE, bytes32(uint256(id)));
+        vm.warp(block.timestamp + 17 days);
+        plants.syncOfflineGrowth(id);
+        require(plants.getPlant(id).stage == PlantRegistry.PlantStage.READY, "not ready");
+        plants.advanceStage(id, PlantRegistry.PlantStage.TERMINATED);
+    }
+}
+
+contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
+    function testAllocatedNonownerCultivatesAndReleaseWaitsForTermination() public {
+        _plot(1, 2);
+        _allocate(1, ALICE, 2);
+        _public(1, ALICE, 1);
+        require(land.effectiveOperator(1) != ALICE && plants.getPlant(1).grower == ALICE, "public admission");
+        vm.prank(ALICE);
+        _reject(address(plots), abi.encodeCall(plots.release, (1)), HCInvalidState.selector);
+        _finish(1);
+        require(plants.activePublicPlants(1, ALICE) == 0 && plants.activePlantsByParcel(1) == 0, "capacity leak");
+        vm.prank(ALICE);
+        plots.release(1);
+        _allocate(1, BOB, 2);
+        _public(2, BOB, 1);
+        require(plants.activePublicPlants(1, BOB) == 1, "reallocation failed");
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.advanceStage, (1, PlantRegistry.PlantStage.TERMINATED)),
+            HCInvalidState.selector
+        );
+        require(plants.activePlantsByParcel(1) == 1, "double release");
+    }
+
+    function testPrivatePlantsPreventLaterOverreservation() public {
+        _private(1);
+        _private(2);
+        _private(3);
+        _grant(address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, bytes32(uint256(1)));
+        _reject(address(plots), abi.encodeCall(plots.registerPublicPlot, (1, 1, 2)), HCCapacityExceeded.selector);
+        require(plots.publicCapacityOnParcel(1) == 0 && !plots.exists(1), "failed reservation persisted");
+        _plot(1, 1);
+        _allocate(1, ALICE, 1);
+        _public(4, ALICE, 1);
+        require(plants.activePlantsByParcel(1) == 4, "capacity not usable");
+    }
+
+    function testReservationsProtectUnusedPublicSlotsFromPrivatePlants() public {
+        _plot(1, 3);
+        _private(1);
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)));
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPlant, (2, GENOME, address(this), 1)),
+            HCCapacityExceeded.selector
+        );
+        require(!plants.exists(2) && plants.privatePlantsByParcel(1) == 1, "failed admission persisted");
+        _allocate(1, ALICE, 3);
+        _public(2, ALICE, 1);
+        _public(3, ALICE, 1);
+        _public(4, ALICE, 1);
+        require(plants.activePlantsByParcel(1) == 4, "total wrong");
+    }
+
+    function testAllocationIsGrowerAndPlotSpecific() public {
+        _plot(1, 2);
+        _plot(2, 2);
+        _allocate(1, ALICE, 1);
+        _allocate(2, BOB, 1);
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPublicPlant, (1, GENOME, BOB, 1)),
+            HCCapacityExceeded.selector
+        );
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 2)),
+            HCCapacityExceeded.selector
+        );
+        _public(1, ALICE, 1);
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)));
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPublicPlant, (2, GENOME, ALICE, 1)),
+            HCCapacityExceeded.selector
+        );
+        require(plants.activePublicPlants(1, ALICE) == 1 && !plants.exists(2), "overbooked");
+    }
+
+    function testUnauthorizedAdmissionAndRevocationRollBackCounters() public {
+        _plot(1, 1);
+        _allocate(1, ALICE, 1);
+        _reject(
+            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 1)), HCUnauthorized.selector
+        );
+        bytes32 id = _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));
+        caps.revokeGrant(id);
+        _reject(
+            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 1)), HCUnauthorized.selector
+        );
+        require(plants.activePublicPlants(1, ALICE) == 0 && plots.allocationOf(1, ALICE) == 1, "rollback failed");
+    }
+
+    function testPublicPlantFlowsThroughCultivationEngine() public {
+        _plot(1, 1);
+        _allocate(1, ALICE, 1);
+        _public(1, ALICE, 1);
+        CultivationEngine engine = new CultivationEngine(address(auth), address(plants));
+        caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(1)));
+        engine.updateEnvironment(1, CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000));
+        require(plants.getPlant(1).regionId == 1, "region mismatch");
+    }
+
+    function testBindingIsOneTimeAndUnauthorizedBindingFails() public {
+        _reject(address(plots), abi.encodeCall(plots.bindPlantRegistry, (address(plants))), HCInvalidState.selector);
+        PublicCultivationAccess other = new PublicCultivationAccess(address(auth), address(land));
+        PlantRegistry otherPlants = new PlantRegistry(address(auth), address(genomes), address(land), address(other));
+        vm.prank(BOB);
+        _reject(
+            address(other), abi.encodeCall(other.bindPlantRegistry, (address(otherPlants))), HCUnauthorized.selector
+        );
+        _reject(address(other), abi.encodeCall(other.bindPlantRegistry, (address(plants))), HCInvalidState.selector);
+        _reject(address(other), abi.encodeCall(other.bindPlantRegistry, (ALICE)), HCInvalidState.selector);
+        _reject(address(other), abi.encodeCall(other.registerPublicPlot, (1, 1, 1)), HCInvalidState.selector);
+        _reject(
+            address(otherPlants),
+            abi.encodeCall(otherPlants.registerPlant, (1, GENOME, address(this), 1)),
+            HCInvalidState.selector
+        );
+    }
+
+    function testDuplicateMissingGenomeAndUnknownPlotDoNotConsumeCapacity() public {
+        _plot(1, 1);
+        _allocate(1, ALICE, 1);
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPublicPlant, (1, keccak256("unknown"), ALICE, 1)),
+            HCNotFound.selector
+        );
+        _reject(
+            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 99)), HCNotFound.selector
+        );
+        _public(1, ALICE, 1);
+        _reject(
+            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 1)), HCAlreadyExists.selector
+        );
+        require(plants.activePublicPlants(1, ALICE) == 1, "duplicate consumed capacity");
+    }
+
+    function testPrivateTerminationFreesReservationSpaceButPublicTerminationKeepsReservation() public {
+        _private(1);
+        _finish(1);
+        _plot(1, 4);
+        _allocate(1, ALICE, 4);
+        _public(2, ALICE, 1);
+        _finish(2);
+        require(plants.privatePlantsByParcel(1) == 0 && plots.publicCapacityOnParcel(1) == 4, "wrong capacity release");
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(3)));
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPlant, (3, GENOME, address(this), 1)),
+            HCCapacityExceeded.selector
+        );
+        _public(3, ALICE, 1);
+    }
+
+    function testReadyAndUnauthorizedTerminationKeepAllocationOccupied() public {
+        _plot(1, 1);
+        _allocate(1, ALICE, 1);
+        _public(1, ALICE, 1);
+        bytes32 grant = _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE, bytes32(uint256(1)));
+        vm.warp(block.timestamp + 17 days);
+        plants.syncOfflineGrowth(1);
+        vm.prank(ALICE);
+        _reject(address(plots), abi.encodeCall(plots.release, (1)), HCInvalidState.selector);
+        caps.revokeGrant(grant);
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.advanceStage, (1, PlantRegistry.PlantStage.TERMINATED)),
+            HCUnauthorized.selector
+        );
+        require(plants.activePublicPlants(1, ALICE) == 1 && plants.activePlantsByParcel(1) == 1, "unauthorized release");
+    }
+
+    function testOperatorChangesDoNotEraseOrDuplicateOccupancy() public {
+        _private(1);
+        _plot(1, 2);
+        _allocate(1, ALICE, 2);
+        _public(2, ALICE, 1);
+        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, bytes32(uint256(1)));
+        land.setOccupancy(1, BOB, LandRegistry.OccupancyKind.LEASE, keccak256("lease"));
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(3)));
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPlant, (3, GENOME, address(this), 1)),
+            HCInvalidState.selector
+        );
+        plants.registerPlant(3, GENOME, BOB, 1);
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(4)));
+        _reject(address(plants), abi.encodeCall(plants.registerPlant, (4, GENOME, BOB, 1)), HCCapacityExceeded.selector);
+        require(
+            plants.getPlant(1).grower == address(this) && plants.activePublicPlants(1, ALICE) == 1,
+            "occupancy rewritten"
+        );
+    }
+
+    function testMaximumCapacityUsesWideReservationArithmetic() public {
+        _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, bytes32(uint256(2)));
+        land.registerParcel(2, 1, address(this), type(uint32).max, keccak256("land"), keccak256("meta"));
+        _grant(address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, bytes32(uint256(2)));
+        plots.registerPublicPlot(2, 2, type(uint32).max);
+        _allocate(2, ALICE, type(uint32).max);
+        _public(1, ALICE, 2);
+        _grant(address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, bytes32(uint256(3)));
+        _reject(address(plots), abi.encodeCall(plots.registerPublicPlot, (3, 2, 1)), HCCapacityExceeded.selector);
+        require(
+            plots.publicCapacityOnParcel(2) == type(uint32).max && plants.activePlantsByParcel(2) == 1, "overflow drift"
+        );
+    }
+
+    function testFuzzMixedCapacityConservation(
+        uint8 requested
+    ) public {
+        uint32 reserved = uint32(requested % 5);
+        if (reserved != 0) {
+            _plot(1, reserved);
+            _allocate(1, ALICE, reserved);
+        }
+        uint64 id = 1;
+        for (uint32 i; i < 4 - reserved; ++i) {
+            _private(id++);
+        }
+        for (uint32 i; i < reserved; ++i) {
+            _public(id++, ALICE, 1);
+        }
+        require(plants.activePlantsByParcel(1) == 4, "mixed conservation");
+        require(
+            uint256(plants.privatePlantsByParcel(1)) + plots.publicCapacityOnParcel(1) == 4, "reservation conservation"
+        );
+        _finish(1);
+        require(plants.activePlantsByParcel(1) == 3, "termination conservation");
+    }
+}

@@ -28,3 +28,5 @@ Core play must remain available without registration or a wallet. Wallet linking
 - [R02.1 real CapabilityRegistry wiring and five-fix qualification](R02.1-CAPABILITY-WIRING.md)
 
 - [R02.2 nonperiodic capability policy](R02.2-CAPABILITY-BUDGET-POLICY.md)
+
+R02.3 links PublicCultivationAccess reservations and allocations to PlantRegistry private/public admission and terminal release. One-time capability-authorized reciprocal binding is required before use; active allocations cannot release. See [capacity policy](R02.3-PUBLIC-PLANT-CAPACITY.md). Source consumption, harvest and production services remain later work.

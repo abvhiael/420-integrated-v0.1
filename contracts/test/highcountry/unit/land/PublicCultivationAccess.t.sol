@@ -7,9 +7,18 @@ import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
 import { IGenesisRegistry } from "../../../../src/highcountry/interfaces/IGenesisRegistry.sol";
 import { LandRegistry } from "../../../../src/highcountry/land/LandRegistry.sol";
+import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { PublicCultivationAccess } from "../../../../src/highcountry/land/PublicCultivationAccess.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
+
+contract PlotGenomePublic {
+    function exists(
+        bytes32
+    ) external pure returns (bool) {
+        return true;
+    }
+}
 
 contract MockRegionRegistryHC3Public {
     function exists(
@@ -53,6 +62,23 @@ contract PublicCultivationAccessHC3Test {
         MockGenesisRegistryHC3Public genesis = new MockGenesisRegistryHC3Public();
         land = new LandRegistry(address(authorization), address(regions), address(genesis));
         publicAccess = new PublicCultivationAccess(address(authorization), address(land));
+        PlantRegistry plants = new PlantRegistry(
+            address(authorization), address(new PlotGenomePublic()), address(land), address(publicAccess)
+        );
+        ICapabilityRegistry420.CapabilityGrant memory binding = ICapabilityRegistry420.CapabilityGrant({
+            principal: address(this),
+            componentId: ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            capabilityId: ActionIds.PUBLIC_PLOT_BIND_PLANTS,
+            scopeHash: publicAccess.BIND_SCOPE(),
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 1 days),
+            revoked: false
+        });
+        capabilityRegistry.setGrant(keccak256("bind-plants"), binding, 0);
+        publicAccess.bindPlantRegistry(address(plants));
 
         _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, 1, 10, keccak256("land-1"));
         land.registerParcel(1, 1, address(this), 10, keccak256("PUBLIC_LAND"), keccak256("land-meta"));

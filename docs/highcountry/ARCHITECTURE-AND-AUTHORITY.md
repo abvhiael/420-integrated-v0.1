@@ -88,3 +88,5 @@ Local save failure leaves a recoverable last-known save and visible error. Regis
 5. Saves are distinct from canonical assets/provenance: no client promotion or raw-save chain storage.
 
 R01.2 closes specification boundaries only. Production implementation gaps remain R02–R10. The R01.3–R01.6 records now specify types, migration, trust/deployment policy and adopted mechanics; their accumulated review is R01.7. Level 2 is R01.7; Level 3 is accumulated app-phase closeout.
+
+R02.3 links PublicCultivationAccess reservations and allocations to PlantRegistry private/public admission and terminal release. One-time capability-authorized reciprocal binding is required before use; active allocations cannot release. See [capacity policy](R02.3-PUBLIC-PLANT-CAPACITY.md). Source consumption, harvest and production services remain later work.

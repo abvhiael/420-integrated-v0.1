@@ -4,96 +4,50 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/qualification/R02.2-level1.json",
-      "sha256": "544a0bdf0437a70fd07f1f56f97903f58fa7c845b5bed6e34ebdf89d78fc2cf1",
+      "path": "contracts/test/highcountry/integration/PublicPlantCapacity.t.sol",
+      "sha256": "7f13621b86ee9985bf662896b01fb0274babaca8b66eb2161b629093afad6ff8",
       "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
+      "contracts": [
+        "PublicPlantCapacityFixture",
+        "PublicPlantCapacityTest"
+      ],
+      "interfaces": [
+        "VmHCPlot"
+      ],
+      "tests": [
+        "testAllocatedNonownerCultivatesAndReleaseWaitsForTermination",
+        "testPrivatePlantsPreventLaterOverreservation",
+        "testReservationsProtectUnusedPublicSlotsFromPrivatePlants",
+        "testAllocationIsGrowerAndPlotSpecific",
+        "testUnauthorizedAdmissionAndRevocationRollBackCounters",
+        "testPublicPlantFlowsThroughCultivationEngine",
+        "testBindingIsOneTimeAndUnauthorizedBindingFails",
+        "testDuplicateMissingGenomeAndUnknownPlotDoNotConsumeCapacity",
+        "testPrivateTerminationFreesReservationSpaceButPublicTerminationKeepsReservation",
+        "testReadyAndUnauthorizedTerminationKeepAllocationOccupied",
+        "testOperatorChangesDoNotEraseOrDuplicateOccupancy",
+        "testMaximumCapacityUsesWideReservationArithmetic",
+        "testFuzzMixedCapacityConservation"
+      ]
     },
     {
-      "path": "docs/highcountry/qualification/R02.2/hc-access-sdk.json",
-      "sha256": "2da4f963e15818c11cbd8e234f7a95503337c6ab54e61194145fcf15fee5c186",
+      "path": "contracts/test/highcountry/invariant/PublicPlantCapacityInvariant.t.sol",
+      "sha256": "981bf613af2840f50b4583d14cd3e328f96303ce7eeb7385ca5469dd4eb86e76",
       "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
+      "contracts": [
+        "PublicPlantCapacityHandler",
+        "PublicPlantCapacityInvariantTest"
+      ],
+      "interfaces": [
+        "VmPlotInvariant"
+      ],
+      "tests": [
+        "invariantCapacityAndAllocationConservation"
+      ]
     },
     {
-      "path": "docs/highcountry/qualification/R02.2/hc-unit-integration-invariants.json",
-      "sha256": "93ad8396d90d7a7c0a433885052aa764268ed09547760715c20065119c53291d",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/live-runtime-blocker.json",
-      "sha256": "74fad75ed7fbc4a9d4c03814d46cbf6868e31664398c249b8c08d904b74f0a6d",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/patch-whitespace.json",
-      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/runtime-template.json",
-      "sha256": "b99e908176c10e10ace4506cf713744c267ec8910fc686d82f5852f5f48249ef",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/shared-gaming-contracts.json",
-      "sha256": "eaf19a343ab5c7430766de5a672aad80cc79920c4f0d2d5ea02f50ef7dfa2301",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/shared-runtime-libraries.json",
-      "sha256": "5ef4224fa49b902f67a9fd8231937e513f70cf1e5c6706a454b31d7f54e1cfbf",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/solidity-build-sizes.json",
-      "sha256": "764d952a874cd94a1c2942553ba13bc136302f59a5d4fc44bf934ffa3dde7ad7",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/solidity-format.json",
-      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/solidity-static-lint.json",
-      "sha256": "bccb323db74b3641e7fd39d11448954e12aacfef5fc015e4f6bdf43e36d6d0af",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.2/source-specification.json",
-      "sha256": "1bf4d9a98dee8ab5be7e12a48a2c063f84b7a0cfde4ee0a049831fc434d7c89c",
+      "path": "docs/highcountry/R02.3-PUBLIC-PLANT-CAPACITY.md",
+      "sha256": "c96239f528b6f7b0974311542626f21300c1ccd9cd652407af593bfe11688480",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -194,7 +148,7 @@
     },
     {
       "path": "contracts/src/highcountry/constants/ActionIds.sol",
-      "sha256": "6548e992365b5637923d278deea0431ec82cd8358f96d38efc01ef15dbc079f0",
+      "sha256": "2767dc4654947677c45ff6abe8da23a4361fd47f727e17fb7ce9ab611aab8931",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -238,7 +192,7 @@
     },
     {
       "path": "contracts/src/highcountry/cultivation/PlantRegistry.sol",
-      "sha256": "71e42d25c243c656ddbbe8d6f9d222fd21c5fb135e7280f78e89cd4385a7e329",
+      "sha256": "213c2eeacc2a6efd0b1f15112db2f88ab2c3ee7b90fec1c635ae53bb10fc2aef",
       "classification": "COMPLETE",
       "contracts": [
         "PlantRegistry"
@@ -434,13 +388,14 @@
     },
     {
       "path": "contracts/src/highcountry/land/PublicCultivationAccess.sol",
-      "sha256": "7e9a1d92073df02441ec0231d91a75e7eecf28170a650d75285edc6ae120e825",
+      "sha256": "65deaadb2ef5a96dd30509d33a1b9560acba592f1acc39f55c455adc6e238fbc",
       "classification": "COMPLETE",
       "contracts": [
         "PublicCultivationAccess"
       ],
       "interfaces": [
-        "ILandRegistryHC3"
+        "ILandRegistryHC3",
+        "IPlantOccupancyHC"
       ],
       "tests": []
     },
@@ -732,7 +687,7 @@
     },
     {
       "path": "contracts/test/highcountry/invariant/CultivationInvariant.t.sol",
-      "sha256": "7a4aa155abf347c4eb15aea5abad3aac7f341a9a2acf0a73bea0376566b4ad7b",
+      "sha256": "a9cd0505e0cd8f6be56c4e06437a56053fefafa57e0b8847ac38d42c15077b9c",
       "classification": "COMPLETE",
       "contracts": [
         "MockLandRegistryHC6Invariant",
@@ -793,9 +748,10 @@
     },
     {
       "path": "contracts/test/highcountry/invariant/LandAccessInvariant.t.sol",
-      "sha256": "ebdc51b6784406aeed4d9467fbb5cb8e061d41f2e63121461a1b34dc9e539227",
+      "sha256": "d64721fb62067de942b8193179dedfaa0b6b8a3fa9ce04163781247d2e63d4e6",
       "classification": "COMPLETE",
       "contracts": [
+        "PlotGenomeInvariant",
         "MockRegionRegistryHC3Invariant",
         "MockGenesisRegistryHC3Invariant",
         "LandAccessInvariantHandler",
@@ -958,7 +914,7 @@
     },
     {
       "path": "contracts/test/highcountry/unit/cultivation/CultivationEngine.t.sol",
-      "sha256": "0d021299a0d1de5bd0ea7cca811189ac99d2b6fd7c471f924ae9730e740d4a1a",
+      "sha256": "6d28bc17caad5129385f792c33b31e8739c96291fd34d463c00d4f12dcececc1",
       "classification": "COMPLETE",
       "contracts": [
         "MockLandRegistryHC6",
@@ -1044,9 +1000,10 @@
     },
     {
       "path": "contracts/test/highcountry/unit/land/PublicCultivationAccess.t.sol",
-      "sha256": "9f8a64a700bb29285c3eb216b16161047553ddd9c7a46e069bce9ebd124586ad",
+      "sha256": "3259e43273e70e77c81b870920d357c8e14e12751b5e0010beb8848e52471c87",
       "classification": "COMPLETE",
       "contracts": [
+        "PlotGenomePublic",
         "MockRegionRegistryHC3Public",
         "MockGenesisRegistryHC3Public",
         "PublicCultivationAccessHC3Test"
@@ -1272,7 +1229,7 @@
     },
     {
       "path": "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
-      "sha256": "6664f59dcbc2f353765c49c9909f3b5c7984131a8faeeb9d661805228cf76fc4",
+      "sha256": "07616055c4618fa5d39c7cda79c07745372d76eb55a674fe6ec08a7c947b966f",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1280,7 +1237,7 @@
     },
     {
       "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",
-      "sha256": "fd63ffa3b7b2504c317ff6cd8a3bbca4570bcd76963e38091abd210343ed1221",
+      "sha256": "8a9ae4f4afdd2fb983a357ff670312f8a079f5491f460f644ce9dea6f5e77d92",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1288,7 +1245,7 @@
     },
     {
       "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
-      "sha256": "e084edd24cb1d151a46d0fd1cb6cf3e52bbc446446e0b45ae0f832c46ff27e99",
+      "sha256": "349f54c411bf9e03fc8f245665a24f44cbbc73d9446f1b0ffc2eed8b7eb66259",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1400,7 +1357,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "c632f5a83cbc2335401d278eeda1beac16d271173f721d0d21f2c4125a27a01e",
+      "sha256": "6c4650817388cef1e100c187c0b1f0250eb3bd2e768cc5d2795cc143caa8a180",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1408,7 +1365,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "3a39c9dbc0fce9e653f7abee747c2f944d93fdc8be56cae4898f43b9c47cf0fa",
+      "sha256": "d7dc359592474004ec266a77bff1e7562821e5576fc02c53da02298b354c6607",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1424,7 +1381,7 @@
     },
     {
       "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
-      "sha256": "44e1751c6cea3cda014cdd5c7b8083d951a7cf699be4458f60ad8b5ffb097c16",
+      "sha256": "65a94239111625255ad816dcf7e38d37deb9fe82f840a537b4c5ab076cdd13f4",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1719,6 +1676,102 @@
       "tests": []
     },
     {
+      "path": "docs/highcountry/qualification/R02.2-level1.json",
+      "sha256": "544a0bdf0437a70fd07f1f56f97903f58fa7c845b5bed6e34ebdf89d78fc2cf1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/hc-access-sdk.json",
+      "sha256": "2da4f963e15818c11cbd8e234f7a95503337c6ab54e61194145fcf15fee5c186",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/hc-unit-integration-invariants.json",
+      "sha256": "93ad8396d90d7a7c0a433885052aa764268ed09547760715c20065119c53291d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/live-runtime-blocker.json",
+      "sha256": "74fad75ed7fbc4a9d4c03814d46cbf6868e31664398c249b8c08d904b74f0a6d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/runtime-template.json",
+      "sha256": "b99e908176c10e10ace4506cf713744c267ec8910fc686d82f5852f5f48249ef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/shared-gaming-contracts.json",
+      "sha256": "eaf19a343ab5c7430766de5a672aad80cc79920c4f0d2d5ea02f50ef7dfa2301",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/shared-runtime-libraries.json",
+      "sha256": "5ef4224fa49b902f67a9fd8231937e513f70cf1e5c6706a454b31d7f54e1cfbf",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/solidity-build-sizes.json",
+      "sha256": "764d952a874cd94a1c2942553ba13bc136302f59a5d4fc44bf934ffa3dde7ad7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/solidity-format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/solidity-static-lint.json",
+      "sha256": "bccb323db74b3641e7fd39d11448954e12aacfef5fc015e4f6bdf43e36d6d0af",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/source-specification.json",
+      "sha256": "1bf4d9a98dee8ab5be7e12a48a2c063f84b7a0cfde4ee0a049831fc434d7c89c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "scripts/highcountry/qualify-r02-1.py",
       "sha256": "fa835edf86dd042117ed3a3cad1a2abe4082f9dc0b6acb8430bbb7233f26f2c7",
       "classification": "COMPLETE",
@@ -1736,7 +1789,7 @@
     },
     {
       "path": "scripts/highcountry/verify-r01.py",
-      "sha256": "890da9a9f84d645d0c62f75bcbce354420bf72482f836dfa75a99e67a0c4c21a",
+      "sha256": "9a3ab970a5aaefbf72c2f41a7adfd3166c0e710d565df3d16b514c17754bc311",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

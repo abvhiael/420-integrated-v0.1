@@ -125,3 +125,7 @@ Each source action is listed once; family policy above applies. Scope hashes and
 - MODULE_SET_STATE: `HC.ACTION.MODULE_REGISTRY.SET_STATE`
 - EMERGENCY_RESTRICT: `HC.ACTION.EMERGENCY_STATE.RESTRICT`
 - EMERGENCY_RELEASE: `HC.ACTION.EMERGENCY_STATE.RELEASE`
+
+- PUBLIC_PLOT_BIND_PLANTS: `HC.ACTION.PUBLIC_CULTIVATION_ACCESS.BIND_PLANTS`
+
+R02.3 adds deployment-only PUBLIC_PLOT_BIND_PLANTS at PublicCultivationAccess.BIND_SCOPE(); binding is one-time, reciprocal and capability-authorized. Deploy public access before PlantRegistry, supply its new fourth constructor argument, bind before reservations/admission, verify canonical code and revoke the bootstrap grant. Public allocations are not intrinsic PLANT_REGISTER authority. See R02.3-PUBLIC-PLANT-CAPACITY.md for accounting, additive ABI and immutable replacement policy.

@@ -7,6 +7,7 @@ import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 import { GenesisRegistry } from "../../../src/highcountry/genesis/GenesisRegistry.sol";
 import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry.sol";
+import { PublicCultivationAccess } from "../../../src/highcountry/land/PublicCultivationAccess.sol";
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
@@ -124,7 +125,16 @@ contract CultivationInvariantTest is InvariantTarget420 {
         genomes = new GenomeRegistry(address(auth), address(genesis));
         land = new MockLandRegistryHC6Invariant();
         land.configure(21, address(this), 2, 2);
-        plants = new PlantRegistry(address(auth), address(genomes), address(land));
+        PublicCultivationAccess access = new PublicCultivationAccess(address(auth), address(land));
+        plants = new PlantRegistry(address(auth), address(genomes), address(land), address(access));
+        _grant(
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_BIND_PLANTS,
+            access.BIND_SCOPE(),
+            keccak256("bind-plants")
+        );
+        access.bindPlantRegistry(address(plants));
         cultivation = new CultivationEngine(address(auth), address(plants));
         _grant(
             address(this),

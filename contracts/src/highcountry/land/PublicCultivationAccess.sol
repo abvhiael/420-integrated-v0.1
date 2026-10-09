@@ -22,7 +22,24 @@ interface ILandRegistryHC3 {
     ) external view returns (uint32);
 }
 
+interface IPlantOccupancyHC {
+    function authorization() external view returns (address);
+    function landRegistry() external view returns (address);
+    function publicAccess() external view returns (address);
+    function privatePlantsByParcel(
+        uint64 parcelId
+    ) external view returns (uint32);
+    function activePublicPlants(
+        uint64 plotId,
+        address grower
+    ) external view returns (uint32);
+}
+
 contract PublicCultivationAccess {
+    bytes32 public constant BIND_SCOPE = keccak256("HC.PUBLIC_CULTIVATION_ACCESS.PLANT_BINDING");
+    IPlantOccupancyHC public plantRegistry;
+    event PlantRegistryBound(address indexed plantRegistry);
+
     struct PublicPlot {
         uint64 id;
         uint64 parcelId;
@@ -52,6 +69,25 @@ contract PublicCultivationAccess {
         landRegistry = ILandRegistryHC3(landRegistry_);
     }
 
+    /// @notice One-time deployment wiring. Reservations are unavailable before binding.
+    function bindPlantRegistry(
+        address plants
+    ) external {
+        if (address(plantRegistry) != address(0) || plants.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_BIND_PLANTS, BIND_SCOPE, 0
+            )
+        );
+        IPlantOccupancyHC candidate = IPlantOccupancyHC(plants);
+        if (
+            candidate.authorization() != address(authorization) || candidate.landRegistry() != address(landRegistry)
+                || candidate.publicAccess() != address(this)
+        ) revert HCInvalidState();
+        plantRegistry = candidate;
+        emit PlantRegistryBound(plants);
+    }
+
     function registerPublicPlot(
         uint64 plotId,
         uint64 parcelId,
@@ -61,10 +97,13 @@ contract PublicCultivationAccess {
         if (!landRegistry.exists(parcelId)) revert HCNotFound();
         if (_plots[plotId].exists) revert HCAlreadyExists();
 
+        if (address(plantRegistry) == address(0)) revert HCInvalidState();
         uint32 parcelCapacity = landRegistry.growCapacityOf(parcelId);
         uint256 nextPublicCapacity = uint256(publicCapacityOnParcel[parcelId]) + growCapacity;
-        if (nextPublicCapacity > parcelCapacity) {
-            revert HCCapacityExceeded(nextPublicCapacity, parcelCapacity);
+        if (nextPublicCapacity + plantRegistry.privatePlantsByParcel(parcelId) > parcelCapacity) {
+            revert HCCapacityExceeded(
+                nextPublicCapacity + plantRegistry.privatePlantsByParcel(parcelId), parcelCapacity
+            );
         }
 
         _requireAuthorized(ActionIds.PUBLIC_PLOT_REGISTER, plotId, growCapacity);
@@ -103,6 +142,8 @@ contract PublicCultivationAccess {
         PublicPlot storage plot = _requirePlot(plotId);
         uint32 capacity = allocationOf[plotId][msg.sender];
         if (capacity == 0) revert HCInvalidState();
+
+        if (plantRegistry.activePublicPlants(plotId, msg.sender) != 0) revert HCInvalidState();
 
         _requireAuthorized(ActionIds.PUBLIC_PLOT_RELEASE, plotId, capacity);
         delete allocationOf[plotId][msg.sender];

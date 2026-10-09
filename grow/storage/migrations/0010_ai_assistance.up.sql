@@ -88,4 +88,87 @@ BEGIN
   EXECUTE format('CREATE POLICY tenant_scoped ON grow_private.%I USING(tenant_id=grow_private.current_tenant()) WITH CHECK(tenant_id=grow_private.current_tenant())',t);
  END LOOP;
 END $$;
+
+-- Preserve consent transitions without allowing retroactive history edits.
+CREATE TABLE grow_private.ai_consent_events(
+ tenant_id uuid NOT NULL,
+ event_id uuid NOT NULL DEFAULT gen_random_uuid(),
+ consent_id uuid NOT NULL,
+ actor_subject text NOT NULL,
+ old_granted boolean,
+ new_granted boolean NOT NULL,
+ changed_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(tenant_id,event_id),
+ FOREIGN KEY(tenant_id,consent_id) REFERENCES grow_private.ai_consents(tenant_id,consent_id)
+);
+CREATE FUNCTION grow_private.audit_ai_consent() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+ INSERT INTO grow_private.ai_consent_events
+ (tenant_id,consent_id,actor_subject,old_granted,new_granted)
+ VALUES (NEW.tenant_id,NEW.consent_id,NEW.actor_subject,
+ CASE WHEN TG_OP='UPDATE' THEN OLD.granted ELSE NULL END,NEW.granted);
+ RETURN NEW;
+END $$;
+CREATE TRIGGER ai_consent_audit AFTER INSERT OR UPDATE ON grow_private.ai_consents
+ FOR EACH ROW EXECUTE FUNCTION grow_private.audit_ai_consent();
+CREATE TRIGGER ai_consent_audit_immutable BEFORE UPDATE OR DELETE ON grow_private.ai_consent_events
+ FOR EACH ROW EXECUTE FUNCTION grow_private.block_ai_audit_mutation();
+
+-- A database writer cannot forge a job on another source or bypass consent.
+CREATE FUNCTION grow_private.validate_ai_job() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE authorized boolean;
+BEGIN
+ SELECT EXISTS(SELECT 1 FROM grow_private.ai_consents c
+ WHERE c.tenant_id=NEW.tenant_id AND c.consent_id=NEW.consent_id
+ AND c.facility_id=NEW.facility_id AND c.zone_id=NEW.zone_id
+ AND c.actor_subject=NEW.requested_by AND c.purpose='CULTIVATION_ADVICE'
+ AND c.granted=true) INTO authorized;
+ IF NOT authorized THEN
+  RAISE EXCEPTION 'no current scoped AI consent' USING ERRCODE='23514';
+ END IF;
+ IF NEW.source_kind='PLANT' THEN
+  SELECT EXISTS(SELECT 1 FROM grow_private.plants p
+  WHERE p.tenant_id=NEW.tenant_id AND p.facility_id=NEW.facility_id
+  AND p.zone_id=NEW.zone_id AND p.plant_id=NEW.source_id) INTO authorized;
+ ELSE
+  SELECT EXISTS(SELECT 1 FROM grow_private.observations o
+  WHERE o.tenant_id=NEW.tenant_id AND o.facility_id=NEW.facility_id
+  AND o.zone_id=NEW.zone_id AND o.observation_id=NEW.source_id) INTO authorized;
+ END IF;
+ IF NOT authorized THEN
+  RAISE EXCEPTION 'AI source outside consent scope' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END $$;
+CREATE TRIGGER ai_job_authority BEFORE INSERT ON grow_private.ai_advice_jobs
+ FOR EACH ROW EXECUTE FUNCTION grow_private.validate_ai_job();
+
+CREATE FUNCTION grow_private.validate_ai_recommendation() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE authorized boolean;
+BEGIN
+ SELECT EXISTS(SELECT 1 FROM grow_private.ai_advice_jobs j
+ JOIN grow_private.ai_consents c
+ ON c.tenant_id=j.tenant_id AND c.consent_id=j.consent_id
+ WHERE j.tenant_id=NEW.tenant_id AND j.job_id=NEW.job_id
+ AND j.facility_id=NEW.facility_id AND j.zone_id=NEW.zone_id
+ AND j.status='QUEUED' AND c.granted=true) INTO authorized;
+ IF NOT authorized THEN
+  RAISE EXCEPTION 'AI result not authorized or consent withdrawn' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END $$;
+CREATE TRIGGER ai_result_authority BEFORE INSERT ON grow_private.ai_recommendations
+ FOR EACH ROW EXECUTE FUNCTION grow_private.validate_ai_recommendation();
+
+ALTER TABLE grow_private.ai_recommendations
+ ADD CONSTRAINT ai_recommendation_scope_unique
+ UNIQUE(tenant_id,recommendation_id,facility_id,zone_id);
+ALTER TABLE grow_private.ai_reviews
+ ADD CONSTRAINT ai_review_scope_fk
+ FOREIGN KEY(tenant_id,recommendation_id,facility_id,zone_id)
+ REFERENCES grow_private.ai_recommendations(tenant_id,recommendation_id,facility_id,zone_id);
+ALTER TABLE grow_private.ai_consent_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grow_private.ai_consent_events FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_scoped ON grow_private.ai_consent_events
+ USING(tenant_id=grow_private.current_tenant()) WITH CHECK(tenant_id=grow_private.current_tenant());
 COMMIT;

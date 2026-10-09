@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import { PublicPlantCapacityFixture } from "./PublicPlantCapacity.t.sol";
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { PhenotypeRegistry } from "../../../src/highcountry/genetics/PhenotypeRegistry.sol";
+import { RulesetRouter } from "../../../src/highcountry/rules/RulesetRouter.sol";
 import { RulesetRegistry } from "../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { BreedingEngine } from "../../../src/highcountry/breeding/BreedingEngine.sol";
@@ -35,7 +36,12 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
             ActionIds.CULTIVATION_BIND_RULESETS,
             cultivation.RULESET_BIND_SCOPE()
         );
-        cultivation.bindRulesetRegistry(address(rulesets));
+        caps.registerProtocolComponent(ModuleIds.RULESET_ROUTER, address(this));
+        RulesetRouter router = new RulesetRouter(address(auth), address(rulesets));
+        _grant(address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE,
+            cultivation.EXPRESSION_RULESET_DOMAIN());
+        router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
+        cultivation.bindRulesetRegistry(address(rulesets), address(router));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(random));
         phenotype = new PhenotypeRegistry(address(auth), address(genomes));

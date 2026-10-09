@@ -1,27 +1,133 @@
-name: Budtender Gaming Integration
+name: Budtender Qualification
 
 on:
   pull_request:
     paths:
+      - "src/budtender/**"
+      - "test/budtender/**"
       - "clients/budtender-access-v1/**"
+      - "clients/budtender-web-v1/**"
       - "packages/420-gaming-sdk/**"
+      - "contracts/src/gaming/**"
+      - "contracts/test/GamingProtocol420*.t.sol"
+      - "docs/budtender/**"
+      - "docs/gaming/420GP-12-BUDTENDER.md"
       - ".github/workflows/budtender-gaming.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: budtender-qualification-v3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  core:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Syntax-check Budtender TypeScript core
+        run: |
+          for file in src/budtender/*.ts test/budtender/*.spec.ts; do
+            node --experimental-strip-types --check "$file"
+          done
+      - name: Test Budtender BUD-1 through BUD-4 core
+        run: node --experimental-strip-types --test test/budtender/*.spec.ts
+
+  web-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Check Budtender web client
+        working-directory: clients/budtender-web-v1
+        run: npm run check
+      - name: Test Budtender web client
+        working-directory: clients/budtender-web-v1
+        run: npm test
+      - name: Verify Budtender web security controls
+        working-directory: clients/budtender-web-v1
+        run: npm run security
+      - name: Verify Budtender deployment operations controls
+        working-directory: clients/budtender-web-v1
+        run: npm run ops
+
+  gaming-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Test shared gaming SDK
         working-directory: packages/420-gaming-sdk
         run: npm test
-      - name: Test Budtender integration
+      - name: Test Budtender gaming integration
         working-directory: clients/budtender-access-v1
         run: npm test
+
+  gaming-client-hardening:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Run Gaming client hostile-state and four-game E2E suite
+        working-directory: packages/420-gaming-client-hardening
+        run: npm test
+      - name: Run Gaming cross-game qualification
+        working-directory: packages/420-gaming-cross-game-qualification
+        run: npm test
+
+  gaming-contract-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build shared Gaming Protocol security targets
+        working-directory: contracts
+        run: |
+          forge build test/GamingProtocol420Hardening.t.sol --force
+          forge build test/GamingProtocol420AuthorityIsolation.t.sol --force
+      - name: Run shared Gaming Protocol adversarial suite
+        working-directory: contracts
+        run: forge test --match-path 'test/GamingProtocol420*.t.sol' -vvv

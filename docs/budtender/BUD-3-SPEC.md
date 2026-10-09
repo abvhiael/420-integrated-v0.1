@@ -1,6 +1,6 @@
 # BUD-3 Specification — Product & Inventory System
 
-Status: in progress
+Status: IMPLEMENTED — exact-head repository qualification remains the merge gate.
 
 ## Objective
 

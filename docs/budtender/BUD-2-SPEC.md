@@ -1,6 +1,6 @@
 # BUD-2 Specification — Customer System
 
-Status: in progress
+Status: IMPLEMENTED — exact-head repository qualification remains the merge gate.
 
 ## Objective
 

@@ -20,7 +20,7 @@ export interface ProductInventoryState extends ProductDefinition {
 }
 
 const assertInteger = (value: number, label: string): void => {
-  if (!Number.isInteger(value)) throw new Error(`${label} must be an integer`);
+  if (!Number.isSafeInteger(value)) throw new Error(`${label} must be an integer`);
 };
 
 const validateDefinition = (definition: ProductDefinition): void => {
@@ -83,8 +83,20 @@ export class ProductInventory {
     if (units <= 0) throw new Error("restock units must be positive");
     if (product.stock + units > product.capacity) throw new Error("restock exceeds capacity");
 
+    const cost = units * product.wholesaleUnitCost;
+    if (!Number.isSafeInteger(cost)) throw new Error("restock cost exceeds safe integer range");
     product.stock += units;
-    return units * product.wholesaleUnitCost;
+    return cost;
+  }
+
+  increaseCapacity(id: string, units: number): void {
+    const product = this.requireProduct(id);
+    assertInteger(units, "capacity increase");
+    if (units <= 0) throw new Error("capacity increase must be positive");
+    if (!Number.isSafeInteger(product.capacity + units)) {
+      throw new Error("capacity exceeds safe integer range");
+    }
+    product.capacity += units;
   }
 
   consume(id: string, units = 1): number {
@@ -94,8 +106,10 @@ export class ProductInventory {
     if (units <= 0) throw new Error("consume units must be positive");
     if (units > product.stock) throw new Error("insufficient stock");
 
+    const sale = units * product.baseSalePrice;
+    if (!Number.isSafeInteger(sale)) throw new Error("sale value exceeds safe integer range");
     product.stock -= units;
-    return units * product.baseSalePrice;
+    return sale;
   }
 
   get(id: string): ProductInventoryState {

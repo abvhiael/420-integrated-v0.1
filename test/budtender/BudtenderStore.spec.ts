@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { BudtenderStore } from "../../src/budtender/BudtenderStore";
+import { BudtenderStore } from "../../src/budtender/BudtenderStore.ts";
 
 describe("BudtenderStore BUD-1", () => {
   it("serves a valid starter-product order exactly once", () => {
@@ -29,11 +29,11 @@ describe("BudtenderStore BUD-1", () => {
 
   it("prevents restocking above capacity or spending below zero", () => {
     const store = new BudtenderStore();
-    assert.throws(() => store.restock("flower", 3, 1), /exceeds capacity/);
-    assert.throws(() => store.restock("flower", 1, 1), /insufficient cash/);
+    assert.throws(() => store.restock("flower", 5, 10), /exceeds capacity/);
+    assert.throws(() => store.restock("flower", 1, 10), /insufficient cash/);
   });
 
-  it("supports a valid sell-restock loop", () => {
+  it("supports a valid sell-restock loop using the canonical BUD-3 wholesale price", () => {
     const store = new BudtenderStore();
     store.createOrder("order-1", "preroll");
     store.serveOrder("order-1");
@@ -42,6 +42,7 @@ describe("BudtenderStore BUD-1", () => {
     const snapshot = store.snapshot();
     assert.equal(snapshot.cash, 6);
     assert.equal(snapshot.products.preroll.stock, 4);
+    assert.throws(() => store.restock("preroll", 1, 3), /canonical catalog/);
   });
 
   it("upgrades shelf capacity and enforces the configured maximum level", () => {
@@ -52,7 +53,7 @@ describe("BudtenderStore BUD-1", () => {
 
     const snapshot = store.snapshot();
     assert.equal(snapshot.upgrades.shelfCapacity, 5);
-    assert.equal(snapshot.products.flower.capacity, 16);
+    assert.equal(snapshot.products.flower.capacity, 18);
     assert.throws(() => store.purchaseUpgrade("shelfCapacity"), /maxed/);
   });
 
@@ -63,5 +64,14 @@ describe("BudtenderStore BUD-1", () => {
     store.createOrder("order-1", "flower");
 
     assert.equal(store.serveOrder("order-1"), 22);
+  });
+  it("fails atomically when a sale would overflow the safe-integer cash range", () => {
+    const store = new BudtenderStore();
+    store.grantStartingCash(Number.MAX_SAFE_INTEGER);
+    store.createOrder("overflow-sale", "flower");
+    const before = store.snapshot();
+
+    assert.throws(() => store.serveOrder("overflow-sale"), /safe integer range/);
+    assert.deepEqual(store.snapshot(), before);
   });
 });

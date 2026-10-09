@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "app": "Budtender",
+  "package": "clients/budtender-web-v1",
+  "runtime": "node>=22",
+  "entrypoint": "npm start",
+  "defaultHost": "127.0.0.1",
+  "defaultPort": 4207,
+  "healthPath": "/healthz",
+  "readinessPath": "/readyz",
+  "productionExposure": {
+    "remoteBindRequiresPublicOrigin": true,
+    "httpsPublicOriginRequired": true,
+    "tlsTermination": "external-reverse-proxy-or-platform"
+  },
+  "persistence": "in-memory",
+  "gamingRuntime": "deployment-pending",
+  "liveDeployment": false,
+  "testnetQualified": false
+}

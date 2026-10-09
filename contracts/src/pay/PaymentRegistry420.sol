@@ -50,6 +50,8 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         return PayIds420.PAYMENT_REGISTRY;
     }
 
+    function getPayment(bytes32 paymentId) external view returns (Payment memory) { return payments[paymentId]; }
+
     function derivePaymentId(
         bytes32 invoiceId,
         address payer,

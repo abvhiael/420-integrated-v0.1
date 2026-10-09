@@ -84,6 +84,8 @@ contract OrderRegistry420 is I420System {
     function systemName() external pure returns (string memory) { return "OrderRegistry420"; }
     function protocolVersion() external pure returns (uint32) { return 2; }
 
+    function getOrder(bytes32 orderId) external view returns (Order memory) { return orders[orderId]; }
+
     function orderStatus(bytes32 orderId) external view returns (Status) {
         Order storage order = _order(orderId);
         return order.status;

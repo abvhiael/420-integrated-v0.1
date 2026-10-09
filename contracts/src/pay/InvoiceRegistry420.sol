@@ -120,6 +120,8 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         emit InvoiceCreated(invoiceId, i.merchantId, msg.sender, i.amount, i.mode);
     }
 
+    function getInvoice(bytes32 invoiceId) external view returns (Invoice memory) { return _invoices[invoiceId]; }
+
     function merchantOf(bytes32 invoiceId) external view returns (address) { return _invoices[invoiceId].merchant; }
     function amountOf(bytes32 invoiceId) external view returns (uint256) { return _invoices[invoiceId].amount; }
     function expiresAtOf(bytes32 invoiceId) external view returns (uint64) { return _invoices[invoiceId].expiresAt; }

@@ -108,7 +108,7 @@ func (a SQLActions) Execute(r *http.Request, session Session, section string, bo
 	if err := decoder.Decode(new(any)); err != io.EOF {
 		return ActionResult{}, errors.New("trailing JSON")
 	}
-	if in.Operation == "" || len(in.Label) > 160 || len(in.Reason) > 1000 || len(in.RequestID) > 128 {
+	if in.Operation == "" || len(in.Label) > 160 || len(in.Reason) > 1000 || !tenantUUID.MatchString(in.RequestID) {
 		return ActionResult{}, errors.New("invalid private action")
 	}
 	grant, err := a.grant(r, session)
@@ -118,10 +118,7 @@ func (a SQLActions) Execute(r *http.Request, session Session, section string, bo
 	scope := security.Principal{SubjectID: session.SubjectID, Authenticated: true}
 	ctx := r.Context()
 	now := time.Now().UTC()
-	id, err := uuidV4()
-	if err != nil {
-		return ActionResult{}, err
-	}
+	id := in.RequestID
 	switch section {
 	case "facilities":
 		svc := facility.New(facility.SQLStore{DB: a.DB})

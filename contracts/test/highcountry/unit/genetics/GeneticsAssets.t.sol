@@ -10,6 +10,7 @@ import { GenomeRegistry } from "../../../../src/highcountry/genetics/GenomeRegis
 import { SeedRegistry } from "../../../../src/highcountry/genetics/SeedRegistry.sol";
 import { CloneRegistry } from "../../../../src/highcountry/genetics/CloneRegistry.sol";
 import { MotherRegistry } from "../../../../src/highcountry/genetics/MotherRegistry.sol";
+import { MockCanonicalPhenotypeSources } from "../../mocks/MockCanonicalPhenotypeSources.sol";
 import { PhenotypeRegistry } from "../../../../src/highcountry/genetics/PhenotypeRegistry.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
@@ -34,6 +35,12 @@ contract GeneticsAssetsTest {
         mothers = new MotherRegistry(address(auth), address(genomes));
         clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
         phenotypes = new PhenotypeRegistry(address(auth), address(genomes));
+        MockCanonicalPhenotypeSources proven = new MockCanonicalPhenotypeSources(
+            address(auth), address(genomes), keccak256("asset:genome"), keccak256("traits"), 12, 9
+        );
+        _grant(ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE,
+            phenotypes.BIND_SCOPE(), keccak256("phenotype:bind"));
+        phenotypes.bindProvenanceSources(address(proven), address(proven), address(proven));
         _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES, mothers.BIND_SCOPE(), keccak256("mother:bind"));
         mothers.bindCloneRegistry(address(clones));
 

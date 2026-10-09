@@ -53,9 +53,14 @@ type OptInStore interface {
 	OptIn(context.Context, Scope, string, string, bool) error
 }
 
+type WorkerVerifier interface {
+	VerifyWorker(context.Context, string, string) error
+}
+
 type Service struct {
 	Store    Store
 	Notifier Notifier
+	Worker   WorkerVerifier
 }
 
 func permitted(s Scope, facility, zone string, action security.Action) bool {
@@ -89,7 +94,10 @@ func (s Service) Queue(ctx context.Context, scope Scope, event Event, now time.T
 // Dispatch is a trusted worker operation, not exposed through user scopes.
 // A failed or absent adapter cannot turn a queued item into successful delivery.
 func (s Service) Dispatch(ctx context.Context, tenant, worker string, now time.Time) error {
-	if s.Store == nil || s.Notifier == nil || tenant == "" || worker == "" {
+	if s.Store == nil || s.Notifier == nil || s.Worker == nil || tenant == "" || worker == "" {
+		return ErrDenied
+	}
+	if err := s.Worker.VerifyWorker(ctx, tenant, worker); err != nil {
 		return ErrDenied
 	}
 	delivery, err := s.Store.Claim(ctx, tenant, worker, now)

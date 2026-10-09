@@ -14,7 +14,7 @@ INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subj
 VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000301',decode(repeat('aa',32),'hex'),'operator',now()+interval '1 hour',decode(repeat('cc',32),'hex'));
 DO $$ BEGIN
  BEGIN
-  INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subject_id,expires_at)
+  INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subject_id,expires_at,identity_fingerprint)
   VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000302',decode(repeat('bb',32),'hex'),'operator',now()+interval '2 days',decode(repeat('cc',32),'hex'));
   RAISE EXCEPTION 'unbounded dashboard session accepted';
  EXCEPTION WHEN check_violation THEN NULL;

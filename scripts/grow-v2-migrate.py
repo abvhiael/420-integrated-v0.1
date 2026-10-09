@@ -19,7 +19,7 @@ def main():
     dsn = os.getenv("GROW_MIGRATION_DATABASE_URL", "")
     if not dsn.startswith(("postgresql://", "postgres://")):
         raise SystemExit("explicit PostgreSQL migration DSN required")
-    names = ["0001_initial.up.sql", "0002_rooms.up.sql", "0003_plant_lifecycle.up.sql", "0004_telemetry.up.sql", "0005_equipment.up.sql", "0006_cultivation_history.up.sql", "0007_harvest_analytics.up.sql", "0008_harvest_plans.up.sql", "0009_inventory_ledger.up.sql", "0010_ai_assistance.up.sql", "0011_ecosystem_outbox.up.sql", "0012_dashboard_sessions.up.sql"]
+    names = ["0001_initial.up.sql", "0002_rooms.up.sql", "0003_plant_lifecycle.up.sql", "0004_telemetry.up.sql", "0005_equipment.up.sql", "0006_cultivation_history.up.sql", "0007_harvest_analytics.up.sql", "0008_harvest_plans.up.sql", "0009_inventory_ledger.up.sql", "0010_ai_assistance.up.sql", "0011_ecosystem_outbox.up.sql", "0012_dashboard_sessions.up.sql", "0013_dashboard_certificates.up.sql"]
     actual = sorted(x.name for x in DIR.glob("*.up.sql"))
     if actual != names:
         raise SystemExit("unexpected migration manifest")

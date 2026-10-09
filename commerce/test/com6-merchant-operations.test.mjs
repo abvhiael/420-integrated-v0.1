@@ -72,7 +72,9 @@ assert.equal(refund.refunded,false);assert.equal(refund.authority,'Pay.RefundMan
 test('COM-6 optional identity, names, notifications and external analytics fail closed, without pretending verified credential',async t=>{
  const f=setup();t.after(()=>f.close());const {store}=await checkout(f);
  const adapters=await f.service.merchantIntegrations(seller.address,store.store_id);
- assert.equal(adapters.notifications.status,'NOT_CONFIGURED');
+ assert.equal(adapters.notifications.status,'LOCAL_OPT_IN_FEED_ONLY');
+ assert.equal(adapters.notifications.externalDelivery,'NOT_CONFIGURED');
+ assert.equal(adapters.notifications.sideEffects,false);
  assert.equal(adapters.names.status,'NOT_VERIFIED');
  assert.equal(adapters.identity.status,'NOT_VERIFIED');
  assert.equal(adapters.analytics.status,'LOCAL_FINALIZED_PROJECTION');

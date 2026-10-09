@@ -51,7 +51,6 @@ contract BreedingEngineTest {
         );
         breeding.bindEmergencyState(address(emergency));
 
-
         _grant(
             address(this),
             ModuleIds.GENESIS_REGISTRY,
@@ -203,8 +202,8 @@ contract BreedingEngineTest {
                 )
             );
         require(!ok, "breeding request bypassed emergency");
-        (ok,) = address(state)
-            .call(abi.encodeWithSelector(state.setRestricted.selector, EmergencyDomains.BREEDING, false));
+        (ok,) =
+            address(state).call(abi.encodeWithSelector(state.setRestricted.selector, EmergencyDomains.BREEDING, false));
         require(!ok, "release permitted without capability");
         _grant(
             address(this),

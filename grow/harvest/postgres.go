@@ -24,7 +24,7 @@ func (s SQLStore) Append(ctx context.Context,r Record) error {
  FROM grow_private.plants
  WHERE tenant_id=$1::uuid AND facility_id=$3::uuid AND zone_id=$4::uuid
  AND plant_id=$5::uuid AND state='HARVESTED'
- ON CONFLICT(tenant_id,idempotency_key) DO NOTHING`,
+ ON CONFLICT DO NOTHING`,
   r.TenantID,r.ID,r.FacilityID,r.ZoneID,r.PlantID,r.WeightGrams,r.HarvestedAt,r.Actor,r.Source,r.IdempotencyKey)
   if err!=nil{return err}
   n,err:=result.RowsAffected()

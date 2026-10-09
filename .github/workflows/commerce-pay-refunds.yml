@@ -43,9 +43,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
       - name: Pay source and governance safety verification
         run: |
           python3 scripts/verify-420pay-parameters.py
@@ -53,12 +50,11 @@ jobs:
           python3 scripts/verify-420pay-hardening.py
           python3 scripts/verify-420pay-audit.py
           python3 scripts/verify-genesis-interface-layer.py
-      - name: Focused canonical refund manager compilation and tests
-        working-directory: contracts
+      - name: Assert targeted Foundry ownership remains in Commerce upstream
         run: |
-          forge build src/pay/RefundManager420.sol
-          forge test --match-path 'test/RefundManager420Fuzz.t.sol' -vv
-          forge test --match-path 'test/RefundManager420Funded.t.sol' -vv
+          grep -q "'RefundManager420Fuzz.t.sol'" scripts/commerce/qualify-contracts.py
+          grep -q "'RefundManager420Funded.t.sol'" scripts/commerce/qualify-contracts.py
+          echo 'Refund Foundry inventory owned by Commerce upstream contracts; no duplicate compilation.'
       - name: Forbidden primitive scan
         run: |
           if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/pay; then

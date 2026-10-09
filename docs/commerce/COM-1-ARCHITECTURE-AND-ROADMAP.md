@@ -1,6 +1,6 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
-**Status:** IN PROGRESS — COM-1.1–COM-1.6 architecture deliverables documented; COM-1.7–1.8 remain open and unqualified at phase level.
+**Status:** IN PROGRESS — COM-1.1–COM-1.7 architecture deliverables documented; COM-1.8 exact-SHA phase closeout not yet qualified.
 **Target surface:** `commerce.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
@@ -45,7 +45,7 @@
 - COM-1.4 define off-chain schemas, event ingestion, tenant isolation and chain reorg reconciliation. **ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.4-DATA-STORAGE-AND-EVENT-INDEXING.md`; exact-SHA CI evidence pending.
 - COM-1.5 specify exact Wallet/Pay/Market/Swap/Identity/Registry adapters and fail-closed behaviour. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.5-ECOSYSTEM-ADAPTER-DESIGN.md`; live reporter bridge not yet implemented.
 - COM-1.6 design merchant onboarding, storefront templates, product management, cart and checkout UX. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.6-MARKETPLACE-STOREFRONT-UX.md`; executable web and checkout remain future phases.
-- COM-1.7 write financial, inventory, upload, access-control, fraud and privacy threat model.
+- COM-1.7 write financial, inventory, upload, access-control, fraud and privacy threat model. **THREAT MODEL DOCUMENTED** in `docs/commerce/COM-1.7-SECURITY-THREAT-MODEL.md`; exact-SHA CI qualification to be checked.
 - COM-1.8 Level 3 architecture closeout only after all preceding criteria/evidence and exact-SHA canonical qualification.
 
 **COM-2 Contracts / upstream adaptations:** inspect first; implement only demonstrated gaps within the canonical owning protocol; targeted Foundry Level 1 and milestone Level 2; security Level 3. No parallel Commerce order/payment contract.
@@ -82,4 +82,4 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** COM-1.7 security model and threat assessment; COM-1.8 is the COM-1 phase closeout.
+**Next action:** verify COM-1.7 exact-SHA Level 1 evidence, then COM-1.8 phase closeout after reconciliation and the required Level 3 workflows.

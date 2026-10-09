@@ -9,6 +9,14 @@ import (
 	"github.com/420integrated/420-integrated/grow/security"
 )
 
+type verifiedProvider struct{}
+func (verifiedProvider) Verify(_ context.Context, output Recommendation) error {
+	if output.Provider != "internal" {
+		return ErrDenied
+	}
+	return nil
+}
+
 type fakeStore struct {
 	jobs []Input
 	outputs []Recommendation
@@ -94,7 +102,7 @@ func TestRecommendationRequiresExplanationAndHumanDecision(t *testing.T) {
 	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
 	ctx := context.Background()
 	store := &fakeStore{consented: true}
-	svc := New(store)
+	svc := NewWithProvider(store, verifiedProvider{})
 	out := Recommendation{TenantID: "a", FacilityID: "f", ZoneID: "z", JobID: "j",
 		ID: "r", Provider: "internal", Model: "advisory-v1", Text: "Inspect plant",
 		Explanation: "Based on the provided observation", Limitations: "Manual evaluation required",
@@ -122,5 +130,19 @@ func TestRecommendationRequiresExplanationAndHumanDecision(t *testing.T) {
 	review.Decision = "EXECUTE_EQUIPMENT"
 	if err := svc.Decide(ctx, scope("a", security.Owner), review, now); !errors.Is(err, ErrInvalid) {
 		t.Fatalf("autonomous equipment instruction accepted: %v", err)
+	}
+}
+
+func TestUnverifiedProviderIsDenied(t *testing.T) {
+	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
+	output := Recommendation{TenantID: "a", FacilityID: "f", ZoneID: "z", JobID: "j",
+		ID: "r", Provider: "attacker", Model: "x", Text: "Act now",
+		Explanation: "unknown", Limitations: "unknown", Confidence: "LOW", CreatedAt: now}
+	ctx := context.Background()
+	if err := New(&fakeStore{}).Record(ctx, scope("a", security.Owner), output, now); !errors.Is(err, ErrDenied) {
+		t.Fatalf("no trusted provider verifier accepted: %v", err)
+	}
+	if err := NewWithProvider(&fakeStore{}, verifiedProvider{}).Record(ctx, scope("a", security.Owner), output, now); !errors.Is(err, ErrDenied) {
+		t.Fatalf("untrusted provider accepted: %v", err)
 	}
 }

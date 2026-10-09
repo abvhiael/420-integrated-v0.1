@@ -1,0 +1,27 @@
+name: Grow V2-08 one-time formatter
+on:
+  push:
+    branches: [audit/420grow-v2-01-product-decision-20261008]
+    paths: [.github/workflows/grow-v2-08-format-once.yml]
+permissions:
+  contents: write
+jobs:
+  gofmt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/420grow-v2-01-product-decision-20261008
+          persist-credentials: true
+      - name: Format cultivation Go files
+        run: |
+          gofmt -w grow/cultivation/*.go
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add grow/cultivation
+          if ! git diff --cached --quiet; then
+            git commit -m "style(grow): gofmt cultivation history source"
+            git push origin HEAD:audit/420grow-v2-01-product-decision-20261008
+          fi

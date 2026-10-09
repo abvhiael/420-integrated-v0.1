@@ -40,7 +40,7 @@ export function validateSession(session){
  new Set(session.sections).size!==session.sections.length||
  !session.expiresAt||!Number.isFinite(Date.parse(session.expiresAt))||Date.parse(session.expiresAt)<=Date.now()||
  typeof session.csrf!=="string"||!/^[a-f0-9]{64}$/.test(session.csrf)||
- !Array.isArray(session.actions)||!session.actions.every(v=>typeof v==="string"&&Object.hasOwn(ACTION_FIELDS,v))||
+ !Array.isArray(session.actions)||!session.actions.every(v=>typeof v==="string"&&Object.hasOwn(ACTION_FIELDS,v)&&session.sections.includes(v.split(".")[0]))||
  new Set(session.actions).size!==session.actions.length)throw Error("Session unavailable");
  return Object.freeze({tenantId:session.tenantId,subjectId:session.subjectId,sections:[...session.sections],actions:[...session.actions],csrf:session.csrf,expiresAt:session.expiresAt});
 }

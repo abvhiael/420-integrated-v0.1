@@ -7,7 +7,7 @@ test('transactional schema migrates once, survives restart and rolls back all ro
   const f=setup();t.after(()=>f.close());
   assert.throws(()=>f.db.transaction(()=>{f.db.run('INSERT INTO audit_log VALUES(1,\'test\',NULL,\'test\',\'x\',0)');throw new Error('crash');}));
   assert.equal(f.db.all('SELECT * FROM audit_log').length,0);
-  const reopened=new Database(f.file);assert.equal(reopened.get('SELECT MAX(version) AS v FROM migrations').v,2);reopened.close();
+  const reopened=new Database(f.file);assert.equal(reopened.get('SELECT MAX(version) AS v FROM migrations').v,3);reopened.close();
 });
 test('merchant binding and unique slugs fail closed; fresh controller and active state checked on writes',async t=>{
   const f=setup();t.after(()=>f.close());

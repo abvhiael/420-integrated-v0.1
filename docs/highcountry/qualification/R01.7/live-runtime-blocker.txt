@@ -1,1 +1,3 @@
-420GP-15 live qualification blocked: testnet runtime is unresolved until deployment.
+{
+  "output": "420GP-15 live qualification blocked: testnet runtime is unresolved until deployment.\n"
+}

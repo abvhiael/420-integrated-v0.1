@@ -6,6 +6,7 @@ on:
       - 'config/420travel-genesis.json'
       - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
       - 'scripts/validate-gen-svc-3.py'
+      - 'scripts/travel-postgres-migrate.py'
       - 'genesis/svc3/**'
       - 'cmd/420travel/**'
       - 'go.mod'
@@ -16,6 +17,7 @@ on:
       - 'config/420travel-genesis.json'
       - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
       - 'scripts/validate-gen-svc-3.py'
+      - 'scripts/travel-postgres-migrate.py'
       - 'genesis/svc3/**'
       - 'cmd/420travel/**'
       - 'go.mod'
@@ -33,6 +35,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python3 scripts/validate-gen-svc-3.py
+      - name: Validate migration files and print content checksums
+        run: python3 scripts/travel-postgres-migrate.py plan
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod

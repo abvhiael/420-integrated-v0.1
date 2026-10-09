@@ -3,6 +3,7 @@ package travelapp
 import (
  "context"
  "net/http"
+ "crypto/tls"
  "net/http/httptest"
  "net/url"
  "strings"
@@ -41,5 +42,20 @@ func TestOwnerClaimStatusAndReviewerFailClosed(t *testing.T) {
  if w:=post("forged","APPROVED");w.Code!=403 {t.Fatalf("csrf bypass=%d",w.Code)}
  if w:=post(csrf,"INVALID");w.Code!=400 {t.Fatalf("invalid decision=%d",w.Code)}
  if called {t.Fatal("unauthorized decision executed")}
+ wrongMethod:=httptest.NewRequest(http.MethodDelete,"/travel/business/claim/review/claim-one",nil)
+ wrong:=httptest.NewRecorder();permitted.ServeHTTP(wrong,wrongMethod)
+ if wrong.Code!=http.StatusMethodNotAllowed {t.Fatalf("unexpected method accepted: %d",wrong.Code)}
+ enormous:=url.Values{"csrf_token":{csrf},"claim_id":{"claim-one"},"decision":{"APPROVED"},"padding":{strings.Repeat("a",5000)}}
+ over:=httptest.NewRequest(http.MethodPost,"/travel/business/claim/review/claim-one",strings.NewReader(enormous.Encode()))
+ over.Header.Set("Content-Type","application/x-www-form-urlencoded")
+ rejected:=httptest.NewRecorder();permitted.ServeHTTP(rejected,over)
+ if rejected.Code!=http.StatusBadRequest {t.Fatalf("oversized review accepted: %d",rejected.Code)}
+ badOrigin:=httptest.NewRequest(http.MethodPost,"/travel/business/claim/review/claim-one",strings.NewReader(url.Values{"csrf_token":{csrf},"claim_id":{"claim-one"},"decision":{"APPROVED"}}.Encode()))
+ badOrigin.Header.Set("Content-Type","application/x-www-form-urlencoded")
+ badOrigin.Header.Set("Origin","https://attacker.example")
+ badOrigin.TLS=&tls.ConnectionState{}
+ originResponse:=httptest.NewRecorder();permitted.ServeHTTP(originResponse,badOrigin)
+ if originResponse.Code!=http.StatusForbidden {t.Fatalf("foreign origin accepted: %d",originResponse.Code)}
+ if called {t.Fatal("unsafe review request executed")}
  if w:=post(csrf,"APPROVED");w.Code!=303||!called {t.Fatalf("review decision=%d,called=%t",w.Code,called)}
 }

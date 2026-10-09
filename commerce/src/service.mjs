@@ -2,6 +2,7 @@ import { keccak256, toUtf8Bytes } from 'ethers';
 import { requireThat, text, wallet, bytes32, integer, quantity, keys, id, hash, safeMedia, encryptDelivery, decryptDelivery } from './security.mjs';
 import { fixedPrice, orderStates } from './authority.mjs';
 import { canonicalRefundProposal } from './refund.mjs';
+import {MARKET_ARBITRATION_DOMAIN,MARKET_ORIGIN_COMPONENT,CASE_STATES} from './arbitration.mjs';
 
 const editableScopes = ['branding','catalogue','categories','media'];
 const objectID = value => { requireThat(typeof value === 'string' && /^[a-f0-9]{64}$/.test(value), 'invalid_id'); return value; };
@@ -377,6 +378,73 @@ export class CommerceService {
     }
     // Governance / Arbitration alone authorizes effects. No fabricated signed transaction.
     return {kind,orderId:row.order_id,merchantId:store.merchant_id,amount:proposal?.amount??row.total,asset:row.asset,paymentId:status.paymentId??null,proposal,status:'CANONICAL_AUTHORITY_ACTION_REQUIRED',executed:false,refunded:false,disputed:false,authority:kind==='refund'?'Pay.RefundManager420':'Market.OrderRegistry420 / 420Arbitration',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+  }
+  async merchantArbitrationPrepare(actor,storeId,attemptId,request={}) {
+    keys(request,['remedyHash']);bytes32(request.remedyHash);
+    const {source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    requireThat(source.arbitration,'arbitration_unavailable',503);
+    const attempt=this.db.get('SELECT a.* FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND a.attempt_id=?',storeId,objectID(attemptId));
+    requireThat(attempt,'not_found',404);
+    const dispute=this.db.get('SELECT * FROM dispute_requests WHERE store_id=? AND order_id=?',storeId,attempt.order_id);
+    requireThat(dispute&&dispute.requester===wallet(actor),'dispute_request_required',409);
+    const order=await source.order(bytes32(attempt.order_id));
+    requireThat(String(order.status)==='6'&&order.disputeHash===dispute.dispute_hash&&wallet(order.seller)===wallet(actor),'market_dispute_not_finalized',409);
+    requireThat(wallet(order.buyer)!==wallet(actor),'arbitration_same_party',409);
+    const policy=await source.arbitration.policy();
+    requireThat(policy.exists===true&&policy.active===true&&wallet(policy.resolver)!=='0x'+'0'.repeat(40),'arbitration_policy_inactive',503);
+    requireThat(source.arbitration.domainId===MARKET_ARBITRATION_DOMAIN&&source.arbitration.componentId===MARKET_ORIGIN_COMPONENT,'arbitration_domain_mismatch',503);
+    this.mutate(actor,storeId,'arbitration_plan',attempt.order_id,()=>{
+      const found=this.db.get('SELECT arbitration_remedy_hash,arbitration_case_id FROM dispute_requests WHERE request_id=?',dispute.request_id);
+      requireThat(!found.arbitration_case_id,'arbitration_case_already_bound',409);
+      requireThat(!found.arbitration_remedy_hash||found.arbitration_remedy_hash===request.remedyHash,'arbitration_remedy_conflict',409);
+      this.db.run('UPDATE dispute_requests SET arbitration_remedy_hash=? WHERE request_id=?',request.remedyHash,dispute.request_id);
+    });
+    const args=[MARKET_ARBITRATION_DOMAIN,wallet(order.buyer),MARKET_ORIGIN_COMPONENT,bytes32(attempt.order_id),dispute.dispute_hash,request.remedyHash];
+    return {requestId:dispute.request_id,orderId:attempt.order_id,claimant:wallet(actor),respondent:wallet(order.buyer),claimHash:dispute.dispute_hash,requestedRemedyHash:request.remedyHash,policy:{resolver:wallet(policy.resolver),appealResolver:policy.appealResolver,evidenceWindow:policy.evidenceWindow,appealWindow:policy.appealWindow,maxAppeals:policy.maxAppeals},intent:source.arbitration.intent('openCase',args),state:'ARBITRATION_WALLET_SUBMISSION_REQUIRED',caseOpened:false,remedyExecuted:false,provenance:{chainId:source.chainId,blockHash:source.blockHash,finalized:true}};
+  }
+  async merchantArbitrationBind(actor,storeId,attemptId,request={}) {
+    keys(request,['caseId']);bytes32(request.caseId);
+    const {source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    requireThat(source.arbitration,'arbitration_unavailable',503);
+    const attempt=this.db.get('SELECT a.* FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND a.attempt_id=?',storeId,objectID(attemptId));
+    requireThat(attempt,'not_found',404);
+    const dispute=this.db.get('SELECT * FROM dispute_requests WHERE store_id=? AND order_id=?',storeId,attempt.order_id);
+    requireThat(dispute?.arbitration_remedy_hash&&dispute.requester===wallet(actor),'arbitration_plan_required',409);
+    const order=await source.order(bytes32(attempt.order_id));
+    requireThat(String(order.status)==='6'&&order.disputeHash===dispute.dispute_hash,'market_dispute_not_finalized',409);
+    const caseRecord=await source.arbitration.getCase(request.caseId);
+    requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)&&wallet(caseRecord.respondent)===wallet(order.buyer)&&caseRecord.domainId===MARKET_ARBITRATION_DOMAIN&&caseRecord.originComponentId===MARKET_ORIGIN_COMPONENT&&caseRecord.originObjectId===attempt.order_id&&caseRecord.claimHash===dispute.dispute_hash&&caseRecord.requestedRemedyHash===dispute.arbitration_remedy_hash,'arbitration_case_mismatch',503);
+    this.mutate(actor,storeId,'arbitration_bind',attempt.order_id,()=>{
+      const existing=this.db.get('SELECT arbitration_case_id FROM dispute_requests WHERE request_id=?',dispute.request_id);
+      requireThat(!existing.arbitration_case_id||existing.arbitration_case_id===request.caseId,'arbitration_case_conflict',409);
+      this.db.run('UPDATE dispute_requests SET arbitration_case_id=? WHERE request_id=?',request.caseId,dispute.request_id);
+    });
+    return {orderId:attempt.order_id,caseId:request.caseId,state:CASE_STATES[Number(caseRecord.state)]??'UNKNOWN',finalized:source.finalized,arbitrationCaseOpened:true,remedyExecuted:false};
+  }
+  async merchantArbitrationAction(actor,storeId,attemptId,action,request={}) {
+    requireThat(['submitEvidence','appeal'].includes(action),'arbitration_action_invalid');
+    const {source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    requireThat(source.arbitration,'arbitration_unavailable',503);
+    const attempt=this.db.get('SELECT a.* FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND a.attempt_id=?',storeId,objectID(attemptId));
+    requireThat(attempt,'not_found',404);
+    const dispute=this.db.get('SELECT * FROM dispute_requests WHERE store_id=? AND order_id=?',storeId,attempt.order_id);
+    requireThat(dispute?.arbitration_case_id&&dispute.requester===wallet(actor),'arbitration_case_unbound',409);
+    const caseRecord=await source.arbitration.getCase(dispute.arbitration_case_id);
+    requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)&&caseRecord.originObjectId===attempt.order_id&&caseRecord.claimHash===dispute.dispute_hash,'arbitration_case_mismatch',503);
+    let args;
+    if(action==='submitEvidence'){
+      keys(request,['evidenceHash']);bytes32(request.evidenceHash);
+      requireThat(Number(caseRecord.state)===1&&Number(caseRecord.evidenceDeadline)>=source.blockTimestamp,'arbitration_evidence_closed',409);
+      args=[dispute.arbitration_case_id,request.evidenceHash];
+    }else{
+      keys(request,[]);
+      requireThat(Number(caseRecord.state)===2&&Number(caseRecord.appealDeadline)>=source.blockTimestamp&&Number(caseRecord.round)<Number(caseRecord.maxAppeals),'arbitration_appeal_closed',409);
+      args=[dispute.arbitration_case_id];
+    }
+    return {caseId:dispute.arbitration_case_id,action,requester:wallet(actor),intent:source.arbitration.intent(action,args),executed:false,remedyExecuted:false,provenance:{chainId:source.chainId,blockHash:source.blockHash,finalized:true}};
   }
   async merchantDisputes(actor,storeId) {
     const {source,merchant}=await this.access(actor,storeId,'publish');

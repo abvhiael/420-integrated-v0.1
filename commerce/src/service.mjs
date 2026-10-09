@@ -370,7 +370,7 @@ export class CommerceService {
           return existing.request_id;
         }
         const requestId=id();
-        this.db.run('INSERT INTO dispute_requests VALUES(?,?,?,?,?,?,?,?)',requestId,storeId,attemptId,row.order_id,request.disputeHash,wallet(actor),'AWAITING_MARKET_WALLET_SUBMISSION',this.now());
+        this.db.run('INSERT INTO dispute_requests(request_id,store_id,attempt_id,order_id,dispute_hash,requester,state,created_at) VALUES(?,?,?,?,?,?,?,?)',requestId,storeId,attemptId,row.order_id,request.disputeHash,wallet(actor),'AWAITING_MARKET_WALLET_SUBMISSION',this.now());
         return requestId;
       });
       proposal={requestId,orderId:row.order_id,disputeHash:request.disputeHash,requester:wallet(actor),intent:source.intent('disputeOrder',[bytes32(row.order_id),request.disputeHash]),state:'AWAITING_MARKET_WALLET_SUBMISSION',executed:false,arbitrationCaseOpened:false};

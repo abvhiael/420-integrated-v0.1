@@ -77,7 +77,7 @@ func TestAuthorizationAdversarialAndBounds(t *testing.T){
  if _,_,err:=svc.Analytics(ctx,owner("a",security.Owner),"f","z",now,now,10);!errors.Is(err,ErrInvalid){t.Fatal("invalid window")}
  db.rows=[]Record{{TenantID:"b",FacilityID:"f",ZoneID:"z",WeightGrams:10,HarvestedAt:now.Add(-time.Minute)}}
  // A compromised/misconfigured repository returning B's data must fail closed.
- dbBad:=&leakyStore{rows:db.rows}
+ dbBad:=&leakyStore{fakeStore: fakeStore{rows:db.rows}}
  if _,_,err:=New(dbBad).Analytics(ctx,owner("a",security.Owner),"f","z",now.Add(-time.Hour),now,10);!errors.Is(err,ErrDenied){t.Fatal("repository leak")}
 }
 type leakyStore struct {fakeStore}

@@ -1,6 +1,6 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
-**Status:** IN PROGRESS — source discovery performed; no qualification or implementation completion claimed.
+**Status:** IN PROGRESS — COM-1.1 inventory and COM-1.2 ownership/dependency mapping documented; remaining COM-1.3–1.8 not complete.
 **Target surface:** `commerce.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
@@ -40,7 +40,7 @@
 
 **COM-1 Repository and architecture**
 - COM-1.1 inventory existing Market, Pay, Swap, Wallet, Registry and commerce-related paths and live readiness; record actual interfaces, not just documentation.
-- COM-1.2 freeze dependency and authority matrix; resolve Commerce brand/client versus canonical service ID.
+- COM-1.2 freeze dependency and authority matrix; resolve Commerce brand/client versus canonical service ID. **IMPLEMENTED** in `docs/commerce/COM-1.2-DEPENDENCY-AND-AUTHORITY-MAP.md`; branded noncanonical application, no new Genesis service ID.
 - COM-1.3 inspect Market/Pay contract ABIs, map missing capability proposals and immutable V1 transitions.
 - COM-1.4 define off-chain schemas, event ingestion, tenant isolation and chain reorg reconciliation.
 - COM-1.5 specify exact Wallet/Pay/Market/Swap/Identity/Registry adapters and fail-closed behaviour.
@@ -75,11 +75,11 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 | Item | Status |
 | --- | --- |
 | COM-1 initial normative source reconciliation | IN PROGRESS |
-| COM-1 exhaustive source/interface inventory | NOT COMPLETE |
-| COM-1 architectural decision on distinct service ID | OPEN |
+| COM-1.1 targeted source/interface inventory | DOCUMENTED — see `COM-1.1-SOURCE-INVENTORY.md` |
+| COM-1.2 ownership / service identity | DOCUMENTED — Commerce V1 branded application; separate canonical ID deferred for governed decision |
 | COM-1 acceptance evidence and exact-SHA qualification | NOT RUN |
 | COM-2 through COM-7 | NOT STARTED |
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** inspect canonical Market contract files and application/service web conventions, catalogue the actual interfaces, finish COM-1.1 before marking any milestone COMPLETE.
+**Next action:** COM-1.3 inspect the exact Market/Pay ABI contracts, settle the adapter/settlement reporter integration design, and preserve the frozen Market V1 semantics. COM-1.8 is the only COM-1 phase closeout.

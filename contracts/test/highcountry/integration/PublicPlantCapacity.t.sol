@@ -324,7 +324,12 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _allocate(1, ALICE, 1);
         _public(1, ALICE, 1);
         CultivationEngine engine = new CultivationEngine(address(auth), address(plants));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_EMERGENCY, engine.EMERGENCY_BIND_SCOPE());
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_BIND_EMERGENCY,
+            engine.EMERGENCY_BIND_SCOPE()
+        );
         engine.bindEmergencyState(address(emergency));
         caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(1)));
@@ -477,23 +482,36 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         vm.warp(block.timestamp + 17 days);
         plants.syncOfflineGrowth(1);
         require(plants.getPlant(1).stage == PlantRegistry.PlantStage.READY, "not ready");
-        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
-            keccak256("HC.EMERGENCY.CULTIVATION"));
+        _grant(
+            address(this),
+            ModuleIds.EMERGENCY_STATE,
+            ActionIds.EMERGENCY_RESTRICT,
+            keccak256("HC.EMERGENCY.CULTIVATION")
+        );
         emergency.setRestricted(keccak256("HC.EMERGENCY.CULTIVATION"), true);
-        _reject(address(plants), abi.encodeCall(plants.syncOfflineGrowth, (uint64(1))),
-            bytes4(keccak256("HCEmergencyRestrictionActive(bytes32)")));
-        _reject(address(plants), abi.encodeCall(plants.registerPlant,
-            (uint64(2), GENOME, address(this), uint64(1))), HCInvalidState.selector);
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.syncOfflineGrowth, (uint64(1))),
+            bytes4(keccak256("HCEmergencyRestrictionActive(bytes32)"))
+        );
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.registerPlant, (uint64(2), GENOME, address(this), uint64(1))),
+            HCInvalidState.selector
+        );
         plants.advanceStage(1, PlantRegistry.PlantStage.TERMINATED);
-        require(plants.activePlantsByParcel(1) == 0 && plants.privatePlantsByParcel(1) == 0,
-            "capacity not conserved");
-        _reject(address(plants), abi.encodeCall(plants.advanceStage,
-            (uint64(1), PlantRegistry.PlantStage.TERMINATED)), HCInvalidState.selector);
-        (bool ok,) = address(emergency).call(abi.encodeCall(emergency.setRestricted,
-            (keccak256("HC.EMERGENCY.CULTIVATION"), false)));
+        require(plants.activePlantsByParcel(1) == 0 && plants.privatePlantsByParcel(1) == 0, "capacity not conserved");
+        _reject(
+            address(plants),
+            abi.encodeCall(plants.advanceStage, (uint64(1), PlantRegistry.PlantStage.TERMINATED)),
+            HCInvalidState.selector
+        );
+        (bool ok,) = address(emergency)
+            .call(abi.encodeCall(emergency.setRestricted, (keccak256("HC.EMERGENCY.CULTIVATION"), false)));
         require(!ok, "unauthorized release");
-        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RELEASE,
-            keccak256("HC.EMERGENCY.CULTIVATION"));
+        _grant(
+            address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RELEASE, keccak256("HC.EMERGENCY.CULTIVATION")
+        );
         emergency.setRestricted(keccak256("HC.EMERGENCY.CULTIVATION"), false);
         _private(2);
         require(plants.activePlantsByParcel(1) == 1, "recovery failed");

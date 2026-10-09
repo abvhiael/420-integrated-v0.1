@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 
 import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
 import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
@@ -43,6 +44,7 @@ contract PublicPlantCapacityFixture {
     LandRegistry internal land;
     PublicCultivationAccess internal plots;
     PlantRegistry internal plants;
+    EmergencyState internal emergency;
     SeedRegistry internal seeds;
     CloneRegistry internal clones;
     MotherRegistry internal mothers;
@@ -71,6 +73,10 @@ contract PublicPlantCapacityFixture {
         caps.registerProtocolComponent(ModuleIds.LAND_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.PUBLIC_CULTIVATION_ACCESS, address(this));
         caps.registerProtocolComponent(ModuleIds.PLANT_REGISTRY, address(this));
+        emergency = new EmergencyState(address(auth));
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, plants.EMERGENCY_BIND_SCOPE());
+        plants.bindEmergencyState(address(emergency));
+
         caps.registerProtocolComponent(ModuleIds.SEED_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.CLONE_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.MOTHER_REGISTRY, address(this));
@@ -318,6 +324,8 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _allocate(1, ALICE, 1);
         _public(1, ALICE, 1);
         CultivationEngine engine = new CultivationEngine(address(auth), address(plants));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_EMERGENCY, engine.EMERGENCY_BIND_SCOPE());
+        engine.bindEmergencyState(address(emergency));
         caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(1)));
         engine.updateEnvironment(1, CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000));

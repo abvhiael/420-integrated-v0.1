@@ -1,6 +1,6 @@
 # GEN-SVC-3 / 420Travel — remaining Genesis implementation roadmap
 
-Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, PR #356. Baseline implementation commit: `934311336fa197a6d92bd0f5aee7b98371517daf`. At that baseline dedicated GEN-SVC-3 Travel run #93 and repository-wide Qualification #5108 completed successfully. **Passing CI is not a live deployment or production acceptance. PR remains open.**
+Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, PR #356. Baseline implementation commit: `934311336fa197a6d92bd0f5aee7b98371517daf`. At that baseline dedicated GEN-SVC-3 Travel run #93 and repository-wide Qualification #5108 completed successfully. **Passing CI is not a live deployment or production acceptance. PR #356 was merged September 21, 2026; that merge did not establish live acceptance.**
 
 ## Current implemented foundation (do not rebuild)
 
@@ -46,4 +46,4 @@ Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, 
 - Reconcile PR #356 with current `main`; run dedicated Travel, repository-wide, SQL multi-instance, live dependency, privacy/recovery and deployed acceptance against the exact merge candidate. Record all commits and reports; fix failures before merge.
 - Merge only when required independent release checks pass and an authorized release decision accepts any documented deferrals; then verify final `main` SHA and its checks. Passing PR CI alone does not authorize a Genesis production launch.
 
-**Immediate next implementation:** GEN-SVC-3.11.10.1 one-click save-to-trip with current-public authorization, followed by complete trip/share UI. **Current release status:** development-stage, not production-qualified; no verified live staging acceptance at baseline.
+**Current audit continuation:** GEN-SVC-3.11.10.1 remains OPEN on the dedicated audit branch. Existing save-to-trip, cards, ordering, sharing and public review links have source/tests. An owner-only claim status link and a separately authorized opt-in reviewer UI have been added, but exact-SHA Go/browser CI and complete manual keyboard/mobile accessibility acceptance are not recorded. Production Identity, Registry/Verify, shared PostgreSQL, Reputation and reviewer authority remain subject to GEN-SVC-3.11.10.2. Do not mark this step qualified until its targeted checks pass. **Current release status:** development-stage, not production-qualified; no verified live staging acceptance at baseline.

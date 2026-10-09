@@ -30,7 +30,7 @@ udvts = re.findall(r'type\s+(\w+)\s+is\s+(\w+)\s*;', read('contracts/src/highcou
 for name, abi in udvts:
     require(f'| {name} | {abi} |' in types, 'type mismatch: ' + name)
 actions = re.findall(r'bytes32\s+(?:public\s+)?(?:internal\s+)?constant\s+(\w+)\s*=\s*keccak256\("([^"]+)"\)', read('contracts/src/highcountry/constants/ActionIds.sol'))
-require(len(actions) == 49, 'unexpected action catalogue size')
+require(len(actions) == 50, 'unexpected action catalogue size')
 trust = read('docs/highcountry/DEPLOYMENT-AND-TRUST.md')
 for name, domain in actions:
     require(trust.count(f'- {name}: `{domain}`') == 1, 'action mismatch: ' + name)

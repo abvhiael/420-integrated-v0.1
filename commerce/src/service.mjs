@@ -534,16 +534,14 @@ export class CommerceService {
     }
     // Only finalized canonical events bound to this merchant's actual checkout orders.
     // Rebuildable feed; a chain reorg or controller change cannot confer authority.
-    const attempts=this.db.all('SELECT a.order_id FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=?',storeId);
-    const allowed=new Set(attempts.map(x=>x.order_id));
-    const events=this.db.all("SELECT event_id,payload,block_hash,block_number,finality FROM event_inbox WHERE canonical=1 AND finality='finalized' AND topic LIKE '420Market.%' ORDER BY block_number,event_id LIMIT 5000");
+    const events=this.db.all("SELECT DISTINCT e.event_id,e.payload,e.block_hash,e.block_number,e.finality FROM event_inbox e JOIN checkout_attempts a ON json_extract(e.payload,'$.fields.orderId')=a.order_id JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND e.canonical=1 AND e.finality='finalized' AND e.topic LIKE '420Market.%' ORDER BY e.block_number,e.event_id",storeId);
     const kinds=new Set(['OrderCreated','PaymentRecorded','FulfillmentRecorded','OrderCompleted','OrderCancelled','OrderDisputed','RefundRecorded']);
     this.db.transaction(()=>{
       // Previously visible evidence may be retracted or superseded; remove invalid rows.
       this.db.run("DELETE FROM commerce_notification_feed WHERE store_id=? AND event_id NOT IN (SELECT event_id FROM event_inbox WHERE canonical=1 AND finality='finalized')",storeId);
       for(const event of events){
         const row=JSON.parse(event.payload);
-        if(!kinds.has(row.eventName)||!allowed.has(row.fields?.orderId))continue;
+        if(!kinds.has(row.eventName))continue;
         this.db.run('INSERT OR IGNORE INTO commerce_notification_feed(store_id,event_id,operation,created_at) VALUES(?,?,?,?)',storeId,event.event_id,row.eventName,this.now());
       }
     });

@@ -18,6 +18,14 @@ export function validateConfig(config) {
   if(config.contracts.PaymentRouter420)names.push('PaymentRouter420');
   for(const binding of [config.registry,...names.map(n=>config.contracts[n])])if(!binding || !/^0x[0-9a-fA-F]{40}$/.test(binding.address) || /^0x0{40}$/.test(binding.address) || !/^0x[0-9a-f]{64}$/.test(binding.codeHash))fail('Missing approved binding.');
   for(const name of names){const b=config.contracts[name];if(b.verified!==true||!/^0x[0-9a-f]+$/.test(b.versionResult)||!b.version)fail('Missing approved version.');if(['MerchantRegistry420','PaymentRegistry420','InvoiceRegistry420'].includes(name)){const component=keccak256(toUtf8Bytes('420/APP/420PAY/'+name.replace('Registry420','').toUpperCase()+'_REGISTRY'));if(b.componentId!==component||!Array.isArray(b.registryVersion)||b.registryVersion.length!==3)fail('Missing canonical Pay identity.');}}
+  if(config.arbitration){
+    const a=config.arbitration;
+    if(a.serviceId!=='420/service/arbitration/v1'||String(a.chainId)!==config.chainId||!Number.isInteger(a.version)||a.version<1||a.version>4294967295)fail('Unapproved Arbitration service.');
+    const entries=[a.router,a.dependencies?.policies,a.dependencies?.cases,a.dependencies?.rulings];
+    if(entries.some(x=>x?.verified!==true||!/^0x[0-9a-fA-F]{40}$/.test(x.address)||/^0x0{40}$/.test(x.address)||!/^0x[0-9a-f]{64}$/.test(x.codeHash)||/^0x0{64}$/.test(x.codeHash)))fail('Unverified Arbitration contracts.');
+    if(new Set(entries.map(x=>x.address.toLowerCase())).size!==4)fail('Arbitration contract aliases.');
+    for(const value of [a.manifestHash,a.interfaceHash,a.dependencyRoot])if(!/^0x[0-9a-f]{64}$/.test(value)||/^0x0{64}$/.test(value))fail('Unapproved Arbitration profile.');
+  }
   return structuredClone(config);
 }
 export class WalletSession {

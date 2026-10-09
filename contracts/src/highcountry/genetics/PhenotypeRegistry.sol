@@ -14,12 +14,18 @@ interface IGenomeRegistryPhenotype {
 }
 
 interface IPlantProvenance {
+    function authorization() external view returns (address);
+    function genomeRegistry() external view returns (address);
     function genomeOf(uint64 plantId) external view returns (bytes32);
 }
 interface IBreedingProvenance {
+    function authorization() external view returns (address);
+    function genomeRegistry() external view returns (address);
     function childGenomeOfFinalizedEvent(uint64 eventId) external view returns (bytes32);
 }
 interface IExpressionProvenance {
+    function authorization() external view returns (address);
+    function plantRegistry() external view returns (address);
     function expressionForPlant(uint64 plantId) external view returns (bytes32);
 }
 
@@ -70,6 +76,12 @@ contract PhenotypeRegistry {
         authorization.requireAuthorized(AuthorizationRequest(
             msg.sender, ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE, BIND_SCOPE, 0
         ));
+        if (IPlantProvenance(plants).authorization() != address(authorization)
+            || IPlantProvenance(plants).genomeRegistry() != address(genomeRegistry)
+            || IBreedingProvenance(breeding).authorization() != address(authorization)
+            || IBreedingProvenance(breeding).genomeRegistry() != address(genomeRegistry)
+            || IExpressionProvenance(cultivation).authorization() != address(authorization)
+            || IExpressionProvenance(cultivation).plantRegistry() != plants) revert HCInvalidState();
         plantRegistry = IPlantProvenance(plants);
         breedingEngine = IBreedingProvenance(breeding);
         cultivationEngine = IExpressionProvenance(cultivation);

@@ -20,9 +20,20 @@ async function load(){
   if(['PAID','FULFILLED','DISPUTED'].includes(item.state)){
    for(const kind of ['refund','dispute']){
     if(kind==='refund'&&!item.paid)continue;
+    let inputs;
+    if(kind==='refund'){
+      const form=add(li,'div','');
+      const amountLabel=add(form,'label','Refund amount (asset base units)');
+      const amount=document.createElement('input');amount.type='text';amount.required=true;amount.pattern='[1-9][0-9]*';amount.value=String(item.total);amountLabel.append(amount);
+      const reasonLabel=add(form,'label','Reason commitment (0x + 64 hex)');
+      const reason=document.createElement('input');reason.type='text';reason.required=true;reason.pattern='0x[a-f0-9]{64}';reason.placeholder='0x…';reasonLabel.append(reason);
+      inputs={amount,reason};
+    }
     const button=add(li,'button','Prepare '+kind+' handoff');button.type='button';
     button.addEventListener('click',()=>action(async()=>{
-     const result=await sdk.merchantRemedy(id,item.attempt_id,kind);
+     if(inputs&&(!inputs.amount.checkValidity()||!inputs.reason.checkValidity()))throw Error('Valid refund amount and reason commitment required');
+     const request=inputs?{amount:inputs.amount.value,reasonHash:inputs.reason.value}:undefined;
+     const result=await sdk.merchantRemedy(id,item.attempt_id,kind,request);
      add(li,'p',result.authority+': '+result.status+' · No transaction executed.');
     }));
    }

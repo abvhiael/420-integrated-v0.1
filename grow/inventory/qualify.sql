@@ -113,7 +113,7 @@ DO $$ BEGIN
   VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000030',
    'aaaaaaaa-0000-4000-8000-000000000010','aaaaaaaa-3333-4333-8333-333333333333',
    'aaaaaaaa-4444-4444-8444-444444444444','TRANSFER_OUT',1,'orphan attempt','u','manual','orphan-out','orphan-ref',now());
-  SET CONSTRAINTS inventory_transfer_pair IMMEDIATE;
+  SET CONSTRAINTS grow_private.inventory_transfer_pair IMMEDIATE;
   RAISE EXCEPTION 'unpaired transfer accepted';
  EXCEPTION WHEN check_violation THEN NULL;
  END;

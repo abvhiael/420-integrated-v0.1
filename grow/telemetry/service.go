@@ -14,38 +14,40 @@ var ErrInvalid = errors.New("invalid telemetry")
 var ErrConflict = errors.New("duplicate telemetry")
 
 type Reading struct {
-	TenantID string
-	FacilityID string
-	ZoneID string
+	TenantID      string
+	FacilityID    string
+	ZoneID        string
 	ObservationID string
-	SensorID string
-	Kind string
-	Unit string
-	Source string
-	Value float64
-	MeasuredAt time.Time
-	RecordedAt time.Time
+	SensorID      string
+	Kind          string
+	Unit          string
+	Source        string
+	Value         float64
+	MeasuredAt    time.Time
+	RecordedAt    time.Time
 }
 type Scope struct {
-	Principal security.Principal
+	Principal  security.Principal
 	Membership security.Grant
-	TenantID string
+	TenantID   string
 }
 type Store interface {
 	Insert(context.Context, Reading) error
 	History(context.Context, string, string, string, string, time.Time, time.Time, int) ([]Reading, error)
 }
 type Service struct{ Store Store }
+
 func New(store Store) Service { return Service{Store: store} }
 
 var allowedUnits = map[string]string{
-	"temperature": "C",
-	"humidity": "%",
-	"light": "lux",
-	"ph": "pH",
+	"temperature":  "C",
+	"humidity":     "%",
+	"light":        "lux",
+	"ph":           "pH",
 	"conductivity": "mS/cm",
-	"water_level": "cm",
+	"water_level":  "cm",
 }
+
 func authorized(s Scope, facility, zone string, action security.Action) bool {
 	return s.Principal.Authenticated && s.Principal.SubjectID != "" &&
 		s.Principal.SubjectID == s.Membership.SubjectID && s.TenantID != "" &&
@@ -99,7 +101,9 @@ func (svc Service) History(ctx context.Context, scope Scope, facility, zone, kin
 		return nil, ErrInvalid
 	}
 	records, err := svc.Store.History(ctx, scope.TenantID, facility, zone, kind, from, to, limit)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	for _, r := range records {
 		if r.TenantID != scope.TenantID || r.FacilityID != facility || r.ZoneID != zone ||
 			r.Kind != kind || r.MeasuredAt.Before(from) || !r.MeasuredAt.Before(to) {

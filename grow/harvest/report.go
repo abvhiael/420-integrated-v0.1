@@ -17,12 +17,13 @@ import (
 // Plan is a human-entered harvest window, never a recorded harvest.
 type Plan struct {
 	TenantID, FacilityID, ZoneID, PlantID, Actor, Source string
-	Start, End                                              time.Time
+	Start, End                                           time.Time
 }
 type PlanStore interface {
 	SavePlan(context.Context, Plan) error
 	Plans(context.Context, string, string, string, time.Time, time.Time, int) ([]Plan, error)
 }
+
 func (s Service) Plan(ctx context.Context, scope Scope, p Plan, now time.Time) error {
 	if !allowed(scope, p.FacilityID, p.ZoneID, security.PlantWrite) || p.TenantID != scope.TenantID {
 		return ErrDenied
@@ -88,6 +89,7 @@ type Report struct {
 	Periods    []Period
 	CSV        []byte
 }
+
 func (s Service) Production(ctx context.Context, scope Scope, facility, zone string, from, to time.Time, limit int) (Report, error) {
 	if s.store == nil || !allowed(scope, facility, zone, security.View) {
 		return Report{}, ErrDenied

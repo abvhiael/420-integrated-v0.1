@@ -7,7 +7,7 @@ test('transactional schema migrates once, survives restart and rolls back all ro
   const f=setup();t.after(()=>f.close());
   assert.throws(()=>f.db.transaction(()=>{f.db.run('INSERT INTO audit_log VALUES(1,\'test\',NULL,\'test\',\'x\',0)');throw new Error('crash');}));
   assert.equal(f.db.all('SELECT * FROM audit_log').length,0);
-  const reopened=new Database(f.file);assert.equal(reopened.get('SELECT MAX(version) AS v FROM migrations').v,1);reopened.close();
+  const reopened=new Database(f.file);assert.equal(reopened.get('SELECT MAX(version) AS v FROM migrations').v,2);reopened.close();
 });
 test('merchant binding and unique slugs fail closed; fresh controller and active state checked on writes',async t=>{
   const f=setup();t.after(()=>f.close());
@@ -55,6 +55,8 @@ test('categories enforce tenant ancestry, global taxonomy separation and bounded
   const child=await f.service.category(seller.address,store.store_id,{slug:'child-menu',order:1,visibility:'public',parent:parent.category_id});
   await rejects(()=>f.service.category(seller.address,store.store_id,{id:parent.category_id,version:1,slug:'parent-menu',order:0,visibility:'public',parent:child.category_id}),'category_parent');
   await rejects(()=>f.service.category(seller.address,store.store_id,{slug:'global-menu',order:0,visibility:'public',globalTaxonomy:parent.category_id}),'global_taxonomy');
+  assert.equal(f.service.publicStore('test-store').categories.length,0);
+  await f.service.updateStore(seller.address,store.store_id,{version:2,slug:'test-store',status:'published'});
   assert.equal(f.service.publicStore('test-store').categories.length,2);
 });
 test('approved global taxonomy remains separate from merchant menus and cannot delete a referenced taxonomy',async t=>{

@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Wallet } from 'ethers';
+import { Wallet, Interface } from 'ethers';
 import { Database } from '../src/database.mjs';
 import { Projection } from '../src/projection.mjs';
 import { CommerceService } from '../src/service.mjs';
@@ -16,7 +16,7 @@ export function setup() {
   const db=new Database(file);let clock=NOW;
   const contracts=Object.fromEntries(Object.keys(ABIS).map((name,i)=>[name,{address:address(i+20)}]));
   const listings=new Map(),orders=new Map(),payments=new Map(),invoices=new Map();let controller=seller.address.toLowerCase(),active=true,unavailable=false;
-  const source={chainId:'420',finalized:true,blockHash:b32(100),blockNumber:100,merchant:async()=>({controller,active}),listing:async key=>listings.get(key),order:async key=>orders.get(key)??{status:'0'},payment:async key=>payments.get(key),invoice:async key=>invoices.get(key)??{active:false},invoiceId:async()=>b32(900),boundPayment:async()=>b32(901),invoicePaid:async()=>({amount:'100',closed:true}),intent:(method,args)=>({chainId:'420',target:contracts.OrderRegistry420.address,method,args,requiresWalletAuthorization:true,canonicalAuthority:false})};
+  const source={chainId:'420',finalized:true,blockHash:b32(100),blockNumber:100,merchant:async()=>({controller,active}),listing:async key=>listings.get(key),order:async key=>orders.get(key)??{status:'0'},payment:async key=>payments.get(key),invoice:async key=>invoices.get(key)??{active:false},invoiceId:async()=>b32(900),boundPayment:async()=>b32(901),invoicePaid:async()=>({amount:'100',closed:true}),policy:async()=>({policyActive:true,adapterActive:true}),transaction:(contract,method,args)=>({chainId:'420',contract,target:contracts[contract].address,method,args,data:new Interface(ABIS[contract]).encodeFunctionData(method,args),requiresWalletAuthorization:true,canonicalAuthority:false}),intent:(method,args)=>({chainId:'420',target:contracts.OrderRegistry420.address,method,args,requiresWalletAuthorization:true,canonicalAuthority:false})};
   const authority={snapshot:async()=>{if(unavailable)throw new Error('outage');return source;},verifyBlocks:async()=>true};
   const projection=new Projection(db,authority,{chainId:'420',contracts,startHeight:1,startParentHash:b32(99),now:()=>clock});
   const service=new CommerceService(db,authority,projection,{chainId:'420',deliveryKey:randomBytes(32),now:()=>clock});

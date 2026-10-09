@@ -157,3 +157,37 @@ payload hashes fail rebuild. SIGTERM stops polling and drains HTTP before closin
 SQLite. Horizontal writers, live deployment, cloud backup drills, soak/load and
 independent security review belong to COM-7/8 qualification, not a claimed COM-3
 production deployment.
+
+## COM-4 builder handoff
+
+The executable merchant client now lives in `commerce/web`; see its README for
+approved-manifest build, same-origin proxy, Wallet review, accessibility and
+qualification commands. New authenticated endpoints are:
+
+- `GET /v1/merchant/identity/{merchantId}`: unregistered identity or verified
+  controller's merchant/store reference; no cross-controller tenant lookup.
+- `POST /v1/merchant/registration`: fresh canonical `register` transaction plan;
+  caller explicitly reviews/signs in Wallet. No backend chain mutation.
+- `GET /v1/merchant/storefronts/{storeId}/builder`: only the delegate's granted
+  sections; controller also receives publication/delegation rights.
+- `GET /v1/merchant/storefronts/{storeId}/listings/{listingId}`: seller-bound
+  finalized listing and inventory read, including private draft inventory.
+- `POST /v1/merchant/storefronts/{storeId}/products/{productId}/listing-plan`:
+  product-version/hash-pinned create/revise plan with canonical ABI calldata,
+  controller, verified target, policy/adapter validation and bounded expiry.
+
+SQLite schema 2 adds immutable `store_releases`, backfilling already published
+schema-1 stores atomically. Store branding and collection edits remain drafts;
+explicit store publication releases them together. Public search uses released
+descriptions, and public media reads require current released branding or a
+published product reference. `designVersion` and `categoryVersions` on store
+publication pin the reviewed saved design; mismatches fail with `design_conflict`.
+Previously released branding may be restored to a new private draft. Products
+keep their existing independent explicit publication gates and immutable canonical
+listing bindings; no historical design operation restores economic/stock state.
+
+Protected browser GET may omit Origin only with `Sec-Fetch-Site: same-origin` and
+exact configured Host; all existing signature/nonce/tenant checks still apply.
+SDK requests omit cookies. The proxy must preserve Host, enforce HTTPS, and never
+substitute forwarding metadata for Wallet authorization. Same-origin deployments
+are required by the builder's approved manifest and CSP.

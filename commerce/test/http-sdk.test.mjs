@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {request} from 'node:http';
 import assert from 'node:assert/strict';
 import { createCommerceSdk420 } from '../../packages/420-sdk/dist/index.js';
 import { commerceServer } from '../src/http.mjs';
@@ -43,4 +44,15 @@ test('draft media preview is protected and narrow branding delegates can read th
   const f=await running(t),sdk=f.sdk(seller),store=await sdk.createStore(b32(1),'private-media');
   const png=await sharp({create:{width:2,height:2,channels:3,background:'#000'}}).png().toBuffer(),media=await sdk.upload(store.store_id,png,'image/png');assert.equal((await sdk.merchantMedia(store.store_id,media.objectId)).contentType,'image/png');assert.equal((await fetch(f.baseUrl+'/v1/media/'+media.objectId)).status,404);
   await sdk.delegate(store.store_id,{wallet:attacker.address,scopes:['branding'],expiresAt:f.now()+10000});const editor=f.sdk(attacker);assert.equal((await editor.merchantSection(store.store_id,'branding')).version,1);await assert.rejects(()=>editor.merchantMedia(store.store_id,media.objectId),e=>e.status===403);await assert.rejects(()=>editor.merchantSection(store.store_id,'products'),e=>e.status===403);
+});
+test('browser signed GET with forbidden Origin omitted requires exact same-origin Fetch and Host, retains signature and tenant checks',async t=>{
+  const f=await running(t),sdk=f.sdk(seller),store=await sdk.createStore(b32(1),'browser-get');
+  const fetcher=async(url,init)=>{if(init?.method==='GET'){const headers=new Headers(init.headers);headers.delete('Origin');headers.set('Sec-Fetch-Site','same-origin');return fetch(url,{...init,headers});}return fetch(url,init);};
+  const browser=createCommerceSdk420({baseUrl:f.baseUrl,origin:f.origin,chainId:'420',now:f.now,wallet:seller,fetcher});
+  // Different proxy Host cannot claim same origin. The production reverse proxy must preserve configured Host.
+  await assert.rejects(()=>browser.merchantBuilder(store.store_id),e=>e.code==='origin_mismatch');
+  const good=async(url,init)=>{if(init?.method==='GET'){const headers=new Headers(init.headers);headers.delete('Origin');headers.set('Sec-Fetch-Site','same-origin');headers.set('Host',new URL(f.origin).host);return new Promise((resolve,reject)=>{const req=request(url,{method:'GET',headers:Object.fromEntries(headers)},res=>{const chunks=[];res.on('data',c=>chunks.push(c));res.on('end',()=>resolve(new Response(Buffer.concat(chunks),{status:res.statusCode})));});req.on('error',reject);req.end();});}return fetch(url,init);};
+  assert.ok((await createCommerceSdk420({baseUrl:f.baseUrl,origin:f.origin,chainId:'420',now:f.now,wallet:seller,fetcher:good}).merchantBuilder(store.store_id)).permissions.includes('publish'));
+  const cross=async(url,init)=>{if(init?.method==='GET'){const headers=new Headers(init.headers);headers.delete('Origin');headers.set('Sec-Fetch-Site','cross-site');headers.set('Host',new URL(f.origin).host);return fetch(url,{...init,headers});}return fetch(url,init);};
+  await assert.rejects(()=>createCommerceSdk420({baseUrl:f.baseUrl,origin:f.origin,chainId:'420',now:f.now,wallet:seller,fetcher:cross}).merchantBuilder(store.store_id),e=>e.code==='origin_mismatch');
 });

@@ -1,0 +1,13 @@
+# GROW-V2-08 — Nutrients, irrigation and environmental history
+
+**Canonical scope:** cultivation history for tenant-private grow operations; Level 1 ordinary step, inherited V2-02 role/tenancy, V2-03 persistence and V2-06 observations. No physical irrigation control or autonomous nutrient dosing.
+
+- Immutable **append-only** `grow_private.cultivation_events` journal with tenant, facility and zone composite FK, event ID, per-tenant idempotency key, event kind, metric, validated amount+canonical unit, UTC event/record timestamps, verified actor, source and optional notes. Only database migration owner may change schema, and UPDATE/DELETE trigger denies edits. Corrections require a separate event and later audited reversal protocol, not silent rewriting.
+- Three kinds: NUTRIENT (electrical conductivity mS/cm, pH, application volume L); IRRIGATION (delivered/manual-reported volume L); ENVIRONMENT (temperature C and humidity percent). These are observational/manual records; physical delivery, nutrient formulation and treatment effectiveness are not certified. SQL rejects mismatched kind/metric/unit and out-of-range values, Go rejects NaN, infinity, stale/future timestamps, actor spoofing and oversized inputs. A recorded quantity does not prove hardware delivery.
+- `grow/cultivation/service.go` enforces server-verified ACTIVE principal/membership, facility+zone scope and `PLANT_WRITE` authorization before insertion, and `VIEW` for bounded history (start-inclusive/end-exclusive, 1–500 records and at most 366 days). `postgres.go` always sets tenant context in a transaction and additionally constrains all SQL queries by tenant/facility/zone and kind. Identity/session integration requires V2-13/V2-14 qualification.
+- `0006_cultivation_history.up.sql` creates indexed tenant journal, tenant FORCE RLS, composite zone FK, append-only trigger and replay-resistant idempotency uniqueness. Migration runner enforces ordered checksums/replay across previous V2 migrations.
+- `service_test.go` and `qualify.sql` include accepted metric cases, cross-tenant RLS, parent FK, out-of-range and unit failures, replay rejection, tamper denial, invalid window, revoked/anonymous sessions and read-only roles. App CI owns Go unit/race/vet/format plus live PostgreSQL 16 negative checks; retained Grow suite preserves original public read-only experience.
+
+**Qualification:** exact implementation SHA app-scoped Level 1; previous V2-05 Level 2 unaffected, next Level 2 is V2-10. Level 3 deferred until V2-15, real testnet/customer activation V2-16.
+
+**Next canonical step:** GROW-V2-09 — Harvest forecasting and production analytics.

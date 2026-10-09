@@ -4,6 +4,7 @@ import { fixedPrice, orderStates } from './authority.mjs';
 
 const editableScopes = ['branding','catalogue','categories','media'];
 const objectID = value => { requireThat(typeof value === 'string' && /^[a-f0-9]{64}$/.test(value), 'invalid_id'); return value; };
+const word=value=>{requireThat(typeof value==='string'&&/^0x[0-9a-f]{64}$/.test(value),'invalid_bytes32');return value;};
 const version = value => integer(value,1,Number.MAX_SAFE_INTEGER);
 const slug = value => { requireThat(typeof value === 'string' && /^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(value), 'invalid_slug'); return value; };
 export class CommerceService {
@@ -27,6 +28,58 @@ export class CommerceService {
     return {store,source,merchant,actor};
   }
   mutate(actor, store, operation, object, fn) { return this.db.transaction(() => { const result=fn(); this.db.audit(actor,store,operation,object,this.now()); return result; }); }
+  async builder(actor,storeId) {
+    actor=wallet(actor);const store=this.store(storeId),source=await this.source(),merchant=await source.merchant(store.merchant_id);
+    requireThat(merchant.active,'inactive_merchant',403);
+    let permissions;
+    if(wallet(merchant.controller)===actor)permissions=[...editableScopes,'publish','delegate'];
+    else {const d=this.db.get('SELECT * FROM delegates WHERE store_id=? AND wallet=?',storeId,actor);requireThat(d&&d.expires_at>this.now()&&d.controller_reference===wallet(merchant.controller),'forbidden',403);permissions=JSON.parse(d.scopes);requireThat(permissions.length,'forbidden',403);}
+    const has=s=>permissions.includes(s);
+    return {store,permissions,branding:has('branding')?this.db.get('SELECT * FROM store_branding WHERE store_id=?',storeId):null,categories:has('categories')?this.db.all('SELECT * FROM store_categories WHERE store_id=?',storeId):[],products:has('catalogue')?this.db.all('SELECT * FROM products WHERE store_id=?',storeId):[],variants:has('catalogue')?this.db.all('SELECT v.* FROM product_variants v JOIN products p ON p.product_id=v.product_id WHERE p.store_id=?',storeId):[],media:has('media')?this.db.all('SELECT object_id,content_hash,content_type FROM media WHERE store_id=?',storeId):[],releases:has('branding')?this.db.all('SELECT version,branding,published_at FROM store_releases WHERE store_id=? ORDER BY version DESC LIMIT 50',storeId):[]};
+  }
+  async identity(actor,merchantId) {
+    bytes32(merchantId); actor=wallet(actor); const source=await this.source(),merchant=await source.merchant(merchantId);
+    const registered=wallet(merchant.controller)!=='0x0000000000000000000000000000000000000000';
+    requireThat(!registered || wallet(merchant.controller)===actor,'forbidden',403);
+    return {registered,merchant,store:registered?this.db.get('SELECT * FROM stores WHERE merchant_id=?',merchantId)??null:null,provenance:this.provenance(source)};
+  }
+  provenance(source) {return {chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true};}
+  plan(source,contract,method,args,details) {
+    const expiresAt=Math.min(this.now()+60000,source.expiresAt??this.now()+60000);
+    return {...details,expiresAt,provenance:this.provenance(source),intent:source.transaction(contract,method,args)};
+  }
+  async registration(actor,input) {
+    keys(input,['merchantId','profileId','metadataHash','payout']); actor=wallet(actor);
+    const args=[bytes32(input.merchantId),word(input.profileId),word(input.metadataHash),wallet(input.payout)],source=await this.source(),merchant=await source.merchant(input.merchantId);
+    requireThat(wallet(merchant.controller)==='0x0000000000000000000000000000000000000000','merchant_exists',409);
+    return this.plan(source,'MerchantRegistry420','register',args,{merchantId:input.merchantId,controller:actor,payout:args[3]});
+  }
+  async merchantListing(actor,storeId,listingId) {
+    const {source,merchant}=await this.access(actor,storeId,'catalogue'),listing=await source.listing(bytes32(listingId));
+    requireThat(listing && wallet(listing.seller)===wallet(merchant.controller),'listing_tenant',403);
+    return {listingId,listing,provenance:this.provenance(source),reservationRequired:true};
+  }
+  async listingPlan(actor,storeId,productId,input) {
+    keys(input,['version','method','listingId','revision','sellerProfileId','itemClass','assetRef','policyId','adapterId','quoteAsset','unitPrice','quantity','expiresAt']);
+    const {source,merchant}=await this.access(actor,storeId,'publish'),p=this.db.get('SELECT * FROM products WHERE store_id=? AND product_id=?',storeId,objectID(productId));
+    requireThat(p && p.version===version(input.version),'version_conflict',409);
+    requireThat(['createListing','reviseListing'].includes(input.method),'invalid_listing_method');
+    const listingId=bytes32(input.listingId),policyId=bytes32(input.policyId),adapterId=bytes32(input.adapterId),asset=wallet(input.quoteAsset);
+    requireThat(asset!=='0x0000000000000000000000000000000000000000','invalid_asset'); quantity(input.unitPrice);quantity(input.quantity);integer(input.expiresAt,0,Number.MAX_SAFE_INTEGER);
+    requireThat(input.expiresAt===0 || input.expiresAt>Math.floor(this.now()/1000),'invalid_expiry');
+    const policy=await source.policy(policyId,adapterId);requireThat(policy.policyActive&&policy.adapterActive,'inactive_policy',409);
+    const listing=await source.listing(listingId);let args,revision;
+    if(input.method==='createListing') {
+      requireThat(!listing || wallet(listing.seller)==='0x0000000000000000000000000000000000000000','listing_exists',409);
+      requireThat(['PHYSICAL_GOOD','SERVICE','DIGITAL_GOOD','LICENSE','GAME_ASSET','CREATIVE_PRODUCT','MERCHANT_INVENTORY'].map(x=>keccak256(toUtf8Bytes('420/MARKET/ITEM/'+x+'/V1'))).includes(input.itemClass),'invalid_item_class');
+      args=[listingId,word(input.sellerProfileId),bytes32(input.itemClass),bytes32(input.assetRef),p.metadata_hash,policyId,fixedPrice,adapterId,asset,input.unitPrice,input.quantity,input.expiresAt];revision=1;
+    } else {
+      requireThat(listing && wallet(listing.seller)===wallet(merchant.controller) && Number(listing.revision)===integer(input.revision,1,2**32-2),'listing_binding',409);
+      requireThat(input.quantity===listing.quantity,'quantity_immutable',409);
+      args=[listingId,p.metadata_hash,policyId,fixedPrice,adapterId,asset,input.unitPrice,input.quantity,input.expiresAt];revision=input.revision+1;
+    }
+    return this.plan(source,'ListingRegistry420',input.method,args,{productId,productVersion:p.version,metadataHash:p.metadata_hash,listingId,revision,controller:wallet(merchant.controller)});
+  }
   async createStore(actor,input) {
     keys(input,['merchantId','slug']); bytes32(input.merchantId); slug(input.slug);
     const source=await this.source(), merchant=await source.merchant(input.merchantId); actor=wallet(actor);
@@ -39,10 +92,12 @@ export class CommerceService {
     });
   }
   async updateStore(actor,storeId,input) {
-    keys(input,['version','status','slug']); version(input.version); slug(input.slug); requireThat(['draft','published'].includes(input.status),'invalid_status');
+    keys(input,['version','status','slug','designVersion','categoryVersions']); version(input.version); slug(input.slug); requireThat(['draft','published'].includes(input.status),'invalid_status');
     await this.access(actor,storeId,'publish');
     return this.mutate(actor,storeId,'update_store',storeId,() => {
-      requireThat(this.db.run('UPDATE stores SET slug=?,status=?,updated_at=?,version=version+1 WHERE store_id=? AND version=?',input.slug,input.status,this.now(),storeId,input.version).changes===1,'version_conflict',409); return this.store(storeId);
+      if(input.designVersion!==undefined)requireThat(this.db.get('SELECT version FROM store_branding WHERE store_id=?',storeId).version===version(input.designVersion),'design_conflict',409);
+      if(input.categoryVersions!==undefined){requireThat(Array.isArray(input.categoryVersions),'invalid_categories');const expected=this.db.all('SELECT category_id,version FROM store_categories WHERE store_id=? ORDER BY category_id',storeId);requireThat(JSON.stringify(expected)===JSON.stringify(input.categoryVersions),'design_conflict',409);}
+      requireThat(this.db.run('UPDATE stores SET slug=?,status=?,updated_at=?,version=version+1 WHERE store_id=? AND version=?',input.slug,input.status,this.now(),storeId,input.version).changes===1,'version_conflict',409); if(input.status==='published') this.db.run('INSERT INTO store_releases VALUES(?,?,?,?,?)',storeId,input.version+1,JSON.stringify(this.db.get('SELECT * FROM store_branding WHERE store_id=?',storeId)),JSON.stringify(this.db.all("SELECT category_id,parent_id,global_taxonomy_id,slug,sort_order FROM store_categories WHERE store_id=? AND visibility='public' ORDER BY sort_order,category_id",storeId)),this.now()); return this.store(storeId);
     });
   }
   async delegate(actor,storeId,input) {
@@ -56,7 +111,7 @@ export class CommerceService {
   }
   async branding(actor,storeId,input) {
     keys(input,['version','avatar','banner','theme','description']); version(input.version); text(input.description); requireThat(['default','light','dark'].includes(input.theme),'invalid_theme');
-    await this.access(actor,storeId,'branding'); this.mediaReferences(storeId,[input.avatar,input.banner].filter(Boolean));
+    await this.access(actor,storeId,'branding'); this.mediaReferences(storeId,[...new Set([input.avatar,input.banner].filter(Boolean))]);
     return this.mutate(actor,storeId,'branding',storeId,() => {
       requireThat(this.db.run('UPDATE store_branding SET avatar_object_id=?,banner_object_id=?,theme_id=?,public_description=?,version=version+1 WHERE store_id=? AND version=?',input.avatar??null,input.banner??null,input.theme,input.description,storeId,input.version).changes===1,'version_conflict',409);
       return this.db.get('SELECT * FROM store_branding WHERE store_id=?',storeId);
@@ -75,7 +130,7 @@ export class CommerceService {
     });
   }
   publicMedia(mediaId) {
-    const row=this.db.get("SELECT m.content,m.content_type FROM media m JOIN stores s ON s.store_id=m.store_id WHERE m.object_id=? AND s.status='published' AND (EXISTS(SELECT 1 FROM store_branding b WHERE b.store_id=s.store_id AND (b.avatar_object_id=m.object_id OR b.banner_object_id=m.object_id)) OR EXISTS(SELECT 1 FROM products p,json_each(p.media_manifest) j WHERE p.store_id=s.store_id AND p.publish_state='published' AND j.value=m.object_id))",objectID(mediaId));
+    const row=this.db.get("SELECT m.content,m.content_type FROM media m JOIN stores s ON s.store_id=m.store_id WHERE m.object_id=? AND s.status='published' AND (EXISTS(SELECT 1 FROM store_releases r WHERE r.store_id=s.store_id AND r.version=(SELECT MAX(version) FROM store_releases WHERE store_id=s.store_id) AND (json_extract(r.branding,'$.avatar_object_id')=m.object_id OR json_extract(r.branding,'$.banner_object_id')=m.object_id)) OR EXISTS(SELECT 1 FROM products p,json_each(p.media_manifest) j WHERE p.store_id=s.store_id AND p.publish_state='published' AND j.value=m.object_id))",objectID(mediaId));
     requireThat(row,'not_found',404); return row;
   }
   async category(actor,storeId,input) {
@@ -103,7 +158,7 @@ export class CommerceService {
     if(input.listingId) bytes32(input.listingId); if(input.revision) integer(input.revision,1,2**32-1);
     if(input.publishState==='published') {
       const listing=await source.listing(bytes32(input.listingId));
-      requireThat(listing.active && wallet(listing.seller)===wallet(merchant.controller) && Number(listing.revision)===input.revision && listing.metadataHash===metadataHash && listing.policyActive && listing.adapterActive && (listing.expiresAt==='0' || BigInt(listing.expiresAt)>BigInt(Math.floor(this.now()/1000))),'listing_binding',409);
+      requireThat(listing && listing.active && wallet(listing.seller)===wallet(merchant.controller) && Number(listing.revision)===input.revision && listing.metadataHash===metadataHash && listing.policyActive && listing.adapterActive && (listing.expiresAt==='0' || BigInt(listing.expiresAt)>BigInt(Math.floor(this.now()/1000))),'listing_binding',409);
     }
     const productId=input.id?objectID(input.id):id();
     return this.mutate(actor,storeId,'product',productId,() => {
@@ -130,11 +185,12 @@ export class CommerceService {
   }
   publicStores({query='',offset=0,limit=20}={}) {
     text(query,120); integer(offset,0,100000); integer(limit,1,100);
-    const items=this.db.all("SELECT s.store_id,s.slug,b.theme_id,b.public_description,b.avatar_object_id,b.banner_object_id FROM stores s JOIN store_branding b ON b.store_id=s.store_id WHERE s.status='published' AND instr(lower(s.slug||' '||b.public_description),lower(?))>0 ORDER BY s.slug LIMIT ? OFFSET ?",query,limit+1,offset);
+    const items=this.db.all("SELECT s.store_id,s.slug,b.theme_id,b.public_description,b.avatar_object_id,b.banner_object_id FROM stores s JOIN store_releases r ON r.store_id=s.store_id AND r.version=(SELECT MAX(version) FROM store_releases WHERE store_id=s.store_id) JOIN store_branding b ON b.store_id=s.store_id WHERE s.status='published' AND instr(lower(s.slug||' '||json_extract(r.branding,'$.public_description')),lower(?))>0 ORDER BY s.slug LIMIT ? OFFSET ?",query,limit+1,offset);
+    for(const item of items){const release=this.db.get('SELECT branding FROM store_releases WHERE store_id=? ORDER BY version DESC LIMIT 1',item.store_id);requireThat(release,'release_unavailable',503);const b=JSON.parse(release.branding);Object.assign(item,{theme_id:b.theme_id,public_description:b.public_description,avatar_object_id:b.avatar_object_id,banner_object_id:b.banner_object_id});}
     return this.page(items,offset,limit);
   }
   page(items,offset,limit) { return {schema:'420-commerce-api-v1',authoritative:false,state:items.length?'ready':'empty',provenance:this.projection.health(),items:items.slice(0,limit),nextOffset:items.length>limit?offset+limit:null}; }
-  publicStore(slugValue) { slug(slugValue); const row=this.db.get("SELECT store_id FROM stores WHERE slug=? AND status='published'",slugValue); requireThat(row,'not_found',404); return { ...this.publicStores({query:slugValue}).items.find(s => s.store_id===row.store_id),categories:this.db.all("SELECT category_id,parent_id,global_taxonomy_id,slug,sort_order FROM store_categories WHERE store_id=? AND visibility='public' ORDER BY sort_order,category_id",row.store_id),authoritative:false,provenance:this.projection.health() }; }
+  publicStore(slugValue) { slug(slugValue); const row=this.db.get("SELECT store_id FROM stores WHERE slug=? AND status='published'",slugValue); requireThat(row,'not_found',404); return { ...this.publicStores({query:slugValue}).items.find(s => s.store_id===row.store_id),categories:JSON.parse(this.db.get('SELECT categories FROM store_releases WHERE store_id=? ORDER BY version DESC LIMIT 1',row.store_id).categories),authoritative:false,provenance:this.projection.health() }; }
   globalCategories() { return {items:this.db.all("SELECT category_id,parent_id,slug,sort_order FROM store_categories WHERE store_id IS NULL AND visibility='public' ORDER BY sort_order,category_id"),authoritative:false}; }
   // Operator-approved taxonomy is presentation data; merchant routes cannot
   // modify it. Snapshot replacement is transactionally validated as a full set.
@@ -163,7 +219,7 @@ export class CommerceService {
     const items=rows.map(row => { const {payload,...publicData}=row,listing=payload?JSON.parse(payload):null; return {...publicData,media:JSON.parse(row.media_manifest),listing:listing&&listing.metadataHash===row.metadata_hash&&Number(listing.revision)===row.listing_revision?listing:null,availability:'canonical_reservation_required',authoritative:false}; });
     return this.page(items,offset,limit);
   }
-  async draft(actor,storeId) { await this.access(actor,storeId,'catalogue'); return {store:this.store(storeId),branding:this.db.get('SELECT * FROM store_branding WHERE store_id=?',storeId),categories:this.db.all('SELECT * FROM store_categories WHERE store_id=?',storeId),products:this.db.all('SELECT * FROM products WHERE store_id=?',storeId),variants:this.db.all('SELECT v.* FROM product_variants v JOIN products p ON p.product_id=v.product_id WHERE p.store_id=?',storeId)}; }
+  async draft(actor,storeId) { await this.access(actor,storeId,'catalogue'); return {releases:this.db.all('SELECT version,branding,categories,published_at FROM store_releases WHERE store_id=? ORDER BY version DESC LIMIT 50',storeId),store:this.store(storeId),branding:this.db.get('SELECT * FROM store_branding WHERE store_id=?',storeId),categories:this.db.all('SELECT * FROM store_categories WHERE store_id=?',storeId),products:this.db.all('SELECT * FROM products WHERE store_id=?',storeId),variants:this.db.all('SELECT v.* FROM product_variants v JOIN products p ON p.product_id=v.product_id WHERE p.store_id=?',storeId)}; }
   async section(actor,storeId,section) {
     const scopes={branding:'branding',categories:'categories',products:'catalogue',media:'media'};requireThat(Object.hasOwn(scopes,section),'not_found',404);await this.access(actor,storeId,scopes[section]);
     if(section==='branding')return this.db.get('SELECT * FROM store_branding WHERE store_id=?',storeId);

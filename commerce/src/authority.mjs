@@ -2,8 +2,8 @@ import { JsonRpcProvider, FetchRequest, Interface, keccak256, toUtf8Bytes, hashM
 import { Fault, requireThat, bytes32, wallet } from './security.mjs';
 
 export const ABIS = {
-  MerchantRegistry420: ['function merchants(bytes32) view returns (address controller,bytes32 profileId,bytes32 metadataHash,uint8 status,bool active,uint32 payoutVersion)', 'function currentPayout(bytes32) view returns(address,uint32,bytes32)'],
-  ListingRegistry420: ['function getListing(bytes32) view returns(tuple(address seller,bytes32 sellerProfileId,bytes32 itemClass,bytes32 assetRef,bytes32 metadataHash,bytes32 policyId,bytes32 saleMechanism,bytes32 settlementAdapterId,address quoteAsset,uint256 unitPrice,uint256 quantity,uint64 expiresAt,uint32 revision,bool active))'],
+  MerchantRegistry420: ['function register(bytes32,bytes32,bytes32,address)', 'function merchants(bytes32) view returns (address controller,bytes32 profileId,bytes32 metadataHash,uint8 status,bool active,uint32 payoutVersion)', 'function currentPayout(bytes32) view returns(address,uint32,bytes32)'],
+  ListingRegistry420: ['function createListing(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,address,uint256,uint256,uint64)', 'function reviseListing(bytes32,bytes32,bytes32,bytes32,bytes32,address,uint256,uint256,uint64)', 'function getListing(bytes32) view returns(tuple(address seller,bytes32 sellerProfileId,bytes32 itemClass,bytes32 assetRef,bytes32 metadataHash,bytes32 policyId,bytes32 saleMechanism,bytes32 settlementAdapterId,address quoteAsset,uint256 unitPrice,uint256 quantity,uint64 expiresAt,uint32 revision,bool active))'],
   InventoryReservation420: ['function available(bytes32) view returns(uint256)', 'function inventory(bytes32) view returns(uint256 originalOffered,uint256 reserved,uint256 sold,uint256 released,bool initialized)', 'function listingRegistry() view returns(address)', 'function orderRegistry() view returns(address)'],
   MarketPolicyRegistry420: ['function policyActive(bytes32) view returns(bool)', 'function settlementAdapterActive(bytes32) view returns(bool)', 'function isSettlementReporter(bytes32,address) view returns(bool)'],
   OrderRegistry420: ['function getOrder(bytes32) view returns(tuple(bytes32 listingId,uint32 listingRevision,address buyer,address seller,uint256 quantity,address paymentAsset,uint256 totalAmount,bytes32 settlementAdapterId,bytes32 paymentRef,bytes32 fulfillmentHash,bytes32 disputeHash,uint8 status,uint64 createdAt,uint64 updatedAt))', 'function createOrder(bytes32,bytes32,uint32,uint256,address,uint256)', 'function listingRegistry() view returns(address)', 'function policyRegistry() view returns(address)', 'function inventoryReservation() view returns(address)'],
@@ -104,6 +104,8 @@ export class RpcAuthority {
           listing.reporterActive = (await read('MarketPolicyRegistry420','isSettlementReporter',[listing.settlementAdapterId,this.config.contracts.MarketPaySettlementAdapter420.address]))[0];
           return listing;
         },
+        policy: async (policyId, adapterId) => ({policyActive:(await read('MarketPolicyRegistry420','policyActive',[bytes32(policyId)]))[0],adapterActive:(await read('MarketPolicyRegistry420','settlementAdapterActive',[bytes32(adapterId)]))[0]}),
+        transaction: (contract,method,args) => ({chainId:this.config.chainId,target:this.config.contracts[contract].address,contract,method,args,data:new Interface(ABIS[contract]).encodeFunctionData(method,args),requiresWalletAuthorization:true,canonicalAuthority:false}),
         order: async orderId => record((await read('OrderRegistry420','getOrder',[bytes32(orderId)]))[0]),
         payment: async paymentId => record((await read('PaymentRegistry420','getPayment',[bytes32(paymentId)]))[0]),
         invoice: async invoiceId => record((await read('InvoiceRegistry420','getInvoice',[bytes32(invoiceId)]))[0]),

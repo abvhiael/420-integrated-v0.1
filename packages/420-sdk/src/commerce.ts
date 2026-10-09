@@ -17,9 +17,38 @@ export interface CommerceOrderPlan420 {
   attemptId: string; orderId: string; state: string; expiresAt: number; paymentAllowed: false; reserved: false;
   intent: { chainId: string; target: string; method: 'createOrder'; args: readonly unknown[]; requiresWalletAuthorization: true; canonicalAuthority: false };
 }
+export interface CommerceTransactionPlan420 {
+  expiresAt: number; controller: string; merchantId?: string; payout?: string; productId?: string; productVersion?: number; metadataHash?: string; listingId?: string; revision?: number;
+  provenance: {chainId: string; blockHash: string; blockNumber: number; finalized: true};
+  intent: {chainId: string; target: string; contract: string; method: string; args: readonly unknown[]; data: string; requiresWalletAuthorization: true; canonicalAuthority: false};
+}
+export interface CommerceListingChange420 {
+  version: number; method: 'createListing' | 'reviseListing'; listingId: string; revision?: number; sellerProfileId?: string; itemClass?: string; assetRef?: string;
+  policyId: string; adapterId: string; quoteAsset: string; unitPrice: string; quantity: string; expiresAt: number;
+}
 export interface CommerceStatus420 { attemptId: string; orderId?: string; state: string; paid: boolean; reserved: boolean; paymentAllowed?: boolean; invoiceId?: string | null }
 export class CommerceApiError420 extends Error {
   constructor(readonly code: string, readonly status: number) { super(code); this.name = 'CommerceApiError420'; }
+}
+
+// These three canonical interfaces contain only static ABI words. Independent
+// encoding prevents a service plan's calldata from overriding reviewed arguments.
+export function encodeCommerceMerchantTransaction420(method: string, args: readonly unknown[]): string {
+  const layout: Record<string, {selector: string; types: string[]}> = {
+    register: {selector: '3aa8cd8b', types: ['b32','b32','b32','address']},
+    createListing: {selector: 'fb5ef79a', types: ['b32','b32','b32','b32','b32','b32','b32','b32','address','uint256','uint256','uint64']},
+    reviseListing: {selector: '1e81e74f', types: ['b32','b32','b32','b32','b32','address','uint256','uint256','uint64']},
+  };
+  const spec = layout[method];
+  if (!spec || args.length !== spec.types.length) throw new CommerceApiError420('invalid_transaction_plan', 0);
+  const words = spec.types.map((type, index) => {
+    const value = String(args[index]);
+    if (type === 'b32' && /^0x[0-9a-f]{64}$/.test(value)) return value.slice(2);
+    if (type === 'address' && /^0x[0-9a-f]{40}$/.test(value)) return value.slice(2).padStart(64, '0');
+    if (type.startsWith('uint') && /^(0|[1-9][0-9]{0,77})$/.test(value) && BigInt(value) < 2n ** BigInt(type.slice(4))) return BigInt(value).toString(16).padStart(64, '0');
+    throw new CommerceApiError420('invalid_transaction_plan', 0);
+  });
+  return '0x' + spec.selector + words.join('');
 }
 
 export function commerceSigningMessage420(challenge: CommerceChallenge420, method: string, path: string, bodyHash: string): string {
@@ -35,7 +64,7 @@ export function createCommerceSdk420(input: {
   const fetcher = input.fetcher ?? fetch, now = input.now ?? Date.now;
   const read = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
     if (!path.startsWith('/v1/') || path.includes('..') || path.includes('://')) throw new CommerceApiError420('invalid_path', 0);
-    const response = await fetcher(new URL(path, base), { ...init, redirect: 'error', signal: AbortSignal.timeout(10000) });
+    const response = await fetcher(new URL(path, base), { ...init, credentials: 'omit', redirect: 'error', signal: AbortSignal.timeout(10000) });
     const result = await response.json() as { schema?: string; data?: T; error?: { code?: string } };
     if (!response.ok) throw new CommerceApiError420(result.error?.code ?? 'service_unavailable', response.status);
     if (result.schema !== COMMERCE_API_SCHEMA_420 || result.data === undefined) throw new CommerceApiError420('invalid_response', response.status);
@@ -61,6 +90,12 @@ export function createCommerceSdk420(input: {
   };
   const objectId = (value: string) => { if (!/^[a-f0-9]{64}$/.test(value)) throw new CommerceApiError420('invalid_id', 0); return value; };
   const merchantPath = (storeId: string) => `/v1/merchant/storefronts/${objectId(storeId)}`;
+  const chainPlan = (plan: CommerceTransactionPlan420, contractName: string, method: string, expectedArgs: readonly unknown[]) => {
+    const contract = input.host?.contract(contractName), intent = plan.intent;
+    if (!input.wallet || !contract || contract.verified !== true || !contract.version || input.host?.network.chainIdDecimal !== input.chainId || plan.controller?.toLowerCase() !== input.wallet.address.toLowerCase() || !Number.isSafeInteger(plan.expiresAt) || plan.expiresAt <= now() || plan.expiresAt > now() + 60000 || !plan.provenance || plan.provenance.chainId !== input.chainId || plan.provenance.finalized !== true || !/^0x[0-9a-f]{64}$/.test(plan.provenance.blockHash) || !intent || intent.chainId !== input.chainId || intent.contract !== contractName || intent.target?.toLowerCase() !== contract.address.toLowerCase() || intent.method !== method || intent.requiresWalletAuthorization !== true || intent.canonicalAuthority !== false || !/^0x[0-9a-f]+$/.test(intent.data) || JSON.stringify(intent.args) !== JSON.stringify(expectedArgs)) throw new CommerceApiError420('invalid_transaction_plan', 0);
+    if (intent.data !== encodeCommerceMerchantTransaction420(method, expectedArgs)) throw new CommerceApiError420('invalid_transaction_plan', 0);
+    return plan;
+  };
   return Object.freeze({
     schema: COMMERCE_API_SCHEMA_420,
     storefronts: (filters: { query?: string; offset?: number; limit?: number } = {}) => read<CommercePage420<CommerceStore420>>('/v1/storefronts' + query(filters)),
@@ -70,10 +105,24 @@ export function createCommerceSdk420(input: {
     categories: () => read<{ items: { category_id: string; slug: string; parent_id: string | null; sort_order: number }[]; authoritative: false }>('/v1/categories'),
     availability: (productId: string) => read<{ listingId: string; revision: number; available: string; reservationRequired: true; authority: 'Market.InventoryReservation420'; provenance: { chainId: string; blockHash: string; blockNumber: number; finalized: true } }>(`/v1/products/${objectId(productId)}/availability`),
     createStore: (merchantId: string, slug: string) => signed<CommerceStore420>('POST', '/v1/merchant/storefronts', { merchantId, slug }),
+    merchantIdentity: (merchantId: string) => { if (!/^0x[0-9a-f]{64}$/.test(merchantId)) throw new CommerceApiError420('invalid_id', 0); return signed<{registered: boolean; merchant: Record<string, unknown>; store: Record<string, unknown> | null}>('GET', `/v1/merchant/identity/${merchantId}`); },
+    registrationPlan: async (change: {merchantId: string; profileId: string; metadataHash: string; payout: string}) => {
+      const plan = await signed<CommerceTransactionPlan420>('POST', '/v1/merchant/registration', change);
+      return chainPlan(plan, 'MerchantRegistry420', 'register', [change.merchantId, change.profileId, change.metadataHash, change.payout.toLowerCase()]);
+    },
+    listingPlan: async (storeId: string, productId: string, change: CommerceListingChange420, metadataHash: string) => {
+      const plan = await signed<CommerceTransactionPlan420>('POST', merchantPath(storeId) + `/products/${objectId(productId)}/listing-plan`, change);
+      const sale = '0x6e36660fe6a85ad1f0554774375fe0e67440db0f7aeaee8659d5de63a032a364';
+      const args = change.method === 'createListing' ? [change.listingId, change.sellerProfileId, change.itemClass, change.assetRef, metadataHash, change.policyId, sale, change.adapterId, change.quoteAsset.toLowerCase(), change.unitPrice, change.quantity, change.expiresAt] : [change.listingId, metadataHash, change.policyId, sale, change.adapterId, change.quoteAsset.toLowerCase(), change.unitPrice, change.quantity, change.expiresAt];
+      if (plan.productId !== productId || plan.productVersion !== change.version || plan.metadataHash !== metadataHash || plan.listingId !== change.listingId || plan.revision !== (change.method === 'createListing' ? 1 : Number(change.revision) + 1)) throw new CommerceApiError420('invalid_transaction_plan', 0);
+      return chainPlan(plan, 'ListingRegistry420', change.method, args);
+    },
+    merchantListing: (storeId: string, listingId: string) => { if (!/^0x[0-9a-f]{64}$/.test(listingId)) throw new CommerceApiError420('invalid_id', 0); return signed<{listingId: string; listing: Record<string, unknown>; provenance: Record<string, unknown>}>('GET', merchantPath(storeId) + `/listings/${listingId}`); },
+    merchantBuilder: (storeId: string) => signed<Record<string, unknown>>('GET', merchantPath(storeId) + '/builder'),
     merchantStore: (storeId: string) => signed<Record<string, unknown>>('GET', merchantPath(storeId)),
     merchantSection: (storeId: string, section: 'branding' | 'categories' | 'products' | 'media') => signed<Record<string, unknown>>('GET', merchantPath(storeId) + '/' + section),
     merchantMedia: (storeId: string, mediaId: string) => signed<{ objectId: string; contentType: 'image/png'; dataBase64: string }>('GET', merchantPath(storeId) + '/media/' + objectId(mediaId)),
-    updateStore: (storeId: string, change: { version: number; status: 'draft' | 'published'; slug: string }) => signed('PATCH', merchantPath(storeId), change),
+    updateStore: (storeId: string, change: { version: number; status: 'draft' | 'published'; slug: string; designVersion?: number; categoryVersions?: {category_id: string; version: number}[] }) => signed('PATCH', merchantPath(storeId), change),
     branding: (storeId: string, change: { version: number; avatar?: string; banner?: string; theme: 'default' | 'light' | 'dark'; description: string }) => signed('POST', merchantPath(storeId) + '/branding', change),
     delegate: (storeId: string, change: { wallet: string; scopes: ('branding' | 'catalogue' | 'categories' | 'media')[]; expiresAt: number }) => signed('POST', merchantPath(storeId) + '/delegates', change),
     category: (storeId: string, change: { id?: string; version?: number; slug: string; parent?: string; globalTaxonomy?: string; order: number; visibility: 'public' | 'hidden' }) => signed('POST', merchantPath(storeId) + '/categories', change),

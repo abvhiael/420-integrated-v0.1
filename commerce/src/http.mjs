@@ -26,7 +26,12 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
       if(method==='GET')requireThat(raw.length===0,'get_body');
       const publicPath=['/v1/health','/v1/storefronts','/v1/search','/v1/categories'].includes(path)||/^\/v1\/(storefronts|products|media)\/[^/]+$/.test(path)||/^\/v1\/products\/[a-f0-9]{64}\/availability$/.test(path);
       let actor=null;
-      if(!publicPath && path!=='/v1/auth/challenge')actor=await auth.authenticate(req.headers,method,req.url,raw,req.headers.origin);
+      if(!publicPath && path!=='/v1/auth/challenge'){
+        // Browser GET omits the forbidden Origin header. Same-origin Fetch plus
+        // exact Host permits the signed origin binding; no cookie authorization.
+        const browserOrigin=method==='GET'&&!req.headers.origin&&req.headers['sec-fetch-site']==='same-origin'&&req.headers.host===new URL(origin).host?origin:req.headers.origin;
+        actor=await auth.authenticate(req.headers,method,req.url,raw,browserOrigin);
+      }
       let input=null;
       if(raw.length&&!path.endsWith('/media')){requireThat(req.headers['content-type']==='application/json','content_type');try{input=JSON.parse(raw);}catch{throw new Fault('invalid_json');}}
       const pagination=()=>{keys(query,['query','offset','limit','storeId','category']); const result={query:query.query??''}; if(query.offset!==undefined)result.offset=integer(Number(query.offset),0,100000);if(query.limit!==undefined)result.limit=integer(Number(query.limit),1,100);if(query.storeId)result.storeId=query.storeId;if(query.category)result.category=query.category;return result;};
@@ -43,9 +48,13 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
       else {
         keys(query,[]);
         const parts=path.split('/'),storeId=parts[4],action=parts[5];
-        if(path==='/v1/merchant/storefronts'&&method==='POST')data=await service.createStore(actor,input);
+        if(/^\/v1\/merchant\/identity\/0x[a-f0-9]{64}$/.test(path)&&method==='GET')data=await service.identity(actor,parts[4]);
+        else if(path==='/v1/merchant/registration'&&method==='POST')data=await service.registration(actor,input);
+        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/listings\/0x[a-f0-9]{64}$/.test(path)&&method==='GET')data=await service.merchantListing(actor,storeId,parts[6]);
+        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/products\/[a-f0-9]{64}\/listing-plan$/.test(path)&&method==='POST')data=await service.listingPlan(actor,storeId,parts[6],input);
+        else if(path==='/v1/merchant/storefronts'&&method==='POST')data=await service.createStore(actor,input);
         else if(parts[1]==='v1'&&parts[2]==='merchant'&&parts[3]==='storefronts'&&parts.length===5){if(method==='GET')data=await service.draft(actor,storeId);else if(method==='PATCH')data=await service.updateStore(actor,storeId,input);else throw new Fault('method_not_allowed',405);}
-        else if(parts[1]==='v1'&&parts[2]==='merchant'&&parts[3]==='storefronts'&&parts.length===6&&method==='GET')data=await service.section(actor,storeId,action);
+        else if(parts[1]==='v1'&&parts[2]==='merchant'&&parts[3]==='storefronts'&&parts.length===6&&method==='GET')data=action==='builder'?await service.builder(actor,storeId):await service.section(actor,storeId,action);
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/media\/[a-f0-9]{64}$/.test(path)&&method==='GET')data=await service.privateMedia(actor,storeId,parts[6]);
         else if(parts[1]==='v1'&&parts[2]==='merchant'&&parts[3]==='storefronts'&&parts.length===6&&method==='POST'){
           if(action==='branding')data=await service.branding(actor,storeId,input);

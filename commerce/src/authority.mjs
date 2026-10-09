@@ -14,6 +14,7 @@ export const ABIS = {
 };
 const registryABI = ['function component(bytes32) view returns(tuple(bytes32 componentId,address implementation,bytes32 runtimeCodeHash,tuple(uint16 major,uint16 minor,uint16 patch) version,uint8 lifecycle))', 'function isActive(bytes32) view returns(bool)'];
 export const payComponents = Object.fromEntries(['Merchant','Payment','Invoice'].map(name => [name+'Registry420',keccak256(toUtf8Bytes('420/APP/420PAY/'+name.toUpperCase()+'_REGISTRY'))]));
+payComponents.RefundManager420=keccak256(toUtf8Bytes('420/APP/420PAY/REFUND_MANAGER'));
 export const orderStates = ['NONE','CREATED','PAID','FULFILLED','COMPLETED','CANCELLED','DISPUTED','REFUNDED'];
 const record = result => Object.fromEntries(Object.keys(result.toObject()).map(key => [key, typeof result[key] === 'bigint' ? result[key].toString() : result[key]]));
 

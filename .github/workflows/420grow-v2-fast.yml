@@ -1,9 +1,10 @@
-name: 420Grow V2 product decision
+name: 420Grow V2 fast qualification
 on:
   pull_request:
     paths:
       - 'docs/audit/420GROW-V2-*.md'
-      - 'scripts/verify-grow-v2-01.py'
+      - 'scripts/verify-grow-v2-*.py'
+      - 'grow/security/**'
       - '.github/workflows/420grow-v2-fast.yml'
   push:
     paths:
@@ -14,7 +15,7 @@ on:
 permissions:
   contents: read
 jobs:
-  v2-01-product-decision:
+  v2-app-qualification:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -31,3 +32,15 @@ jobs:
         run: python3 -m py_compile scripts/verify-grow-v2-01.py
       - name: GROW-V2-01 product scope and non-promotion verification
         run: python3 scripts/verify-grow-v2-01.py
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: GROW-V2-02 authorization negative tests and static checks
+        run: |
+          go test -count=1 ./grow/security
+          go test -race -count=1 ./grow/security
+          go vet ./grow/security
+      - name: GROW-V2-02 scope and boundary verifier
+        run: |
+          python3 -m py_compile scripts/verify-grow-v2-02.py
+          python3 scripts/verify-grow-v2-02.py

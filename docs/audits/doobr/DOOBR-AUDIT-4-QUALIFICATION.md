@@ -32,3 +32,9 @@ Level 2 not required for this step. Level 3 deferred to app-phase final merge ca
 
 ## Next step
 DOOBR-AUDIT-5 — Define any separately authorized DOOBR service, payment, identity and delivery integrations required by the approved scope.
+
+## Latest qualification candidate and workflow reconciliation
+- Latest executable/workflow SHA: `b71cb25b87c51e2638ebca8e657c29455dda448c` (supersedes earlier `0cb236c8057aec5dbaa1a51687b989a70ae8a4e8`).
+- Canonical `.github/workflows/gen-svc-3.yml` was updated with GEN-SVC-0 validator, DOOBR authority verifier and noncached targeted DOOBR regressions, in addition to existing Travel Go tests, vet and build. This ensures an app-scoped canonical workflow can qualify AUDIT-4 even if the audit-only workflow's independent trigger is unavailable.
+- At recording time GitHub has not exposed completed required validation jobs for the final executable SHA. **Do not mark AUDIT-4 COMPLETE until exact-SHA passes appear**.
+- Earlier queued canonical validation runs at older SHAs cannot qualify the updated workflow commit.

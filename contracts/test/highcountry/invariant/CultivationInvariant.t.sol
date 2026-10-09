@@ -176,8 +176,13 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
             keccak256("hc6:inv:bind")
         );
         RulesetRouter router = new RulesetRouter(address(auth), address(rulesets));
-        _grant(address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE,
-            cultivation.EXPRESSION_RULESET_DOMAIN(), keccak256("hc6:inv:route"));
+        _grant(
+            address(this),
+            ModuleIds.RULESET_ROUTER,
+            ActionIds.RULESET_ROUTE,
+            cultivation.EXPRESSION_RULESET_DOMAIN(),
+            keccak256("hc6:inv:route")
+        );
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), rulesetId);
         cultivation.bindRulesetRegistry(address(rulesets), address(router));
         _grant(

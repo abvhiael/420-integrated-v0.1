@@ -118,3 +118,7 @@ VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000
 'Inspect the historical reading','Synthetic fixture, not an agronomic recommendation',
 'Human review only','LOW',now());
 COMMIT;
+
+-- V2-14: second facility for same tenant must not be enumerable by zone-scoped staff.
+INSERT INTO grow_private.facilities(tenant_id,facility_id,name)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-3333-4333-8333-333333333334','Restricted other facility');

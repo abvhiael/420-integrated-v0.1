@@ -106,10 +106,21 @@ contract CultivationEngineTest is PlantSourcesFixture {
         RulesetRegistry rulesets = new RulesetRegistry(address(auth));
         bytes32 contentHash = keccak256("hc6:approved-ruleset-version");
         approvedRulesetId = rulesets.deriveRulesetId(contentHash);
-        _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, approvedRulesetId, keccak256("hc6:ruleset:register"));
+        _grant(
+            address(this),
+            ModuleIds.RULESET_REGISTRY,
+            ActionIds.RULESET_REGISTER,
+            approvedRulesetId,
+            keccak256("hc6:ruleset:register")
+        );
         rulesets.registerRuleset(contentHash);
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS,
-            cultivation.RULESET_BIND_SCOPE(), keccak256("hc6:bind-rulesets"));
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_BIND_RULESETS,
+            cultivation.RULESET_BIND_SCOPE(),
+            keccak256("hc6:bind-rulesets")
+        );
         cultivation.bindRulesetRegistry(address(rulesets));
         _grant(
             address(this),
@@ -379,12 +390,21 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId) != bytes32(0), "recovery failed");
     }
 
-    function _ready(uint64 plantId) private {
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE,
-            bytes32(uint256(plantId)), keccak256(abi.encode("hc6:ready", plantId)));
+    function _ready(
+        uint64 plantId
+    ) private {
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_ADVANCE,
+            bytes32(uint256(plantId)),
+            keccak256(abi.encode("hc6:ready", plantId))
+        );
         PlantRegistry.PlantRecord memory p = plants.getPlant(plantId);
-        vm.warp(uint256(p.plantedAt) + plants.GERMINATION_DURATION()
-            + plants.SEEDLING_DURATION() + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION());
+        vm.warp(
+            uint256(p.plantedAt) + plants.GERMINATION_DURATION() + plants.SEEDLING_DURATION()
+                + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION()
+        );
         plants.syncOfflineGrowth(plantId);
         require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.READY, "ready stage");
     }

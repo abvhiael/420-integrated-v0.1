@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 
 import { ICapabilityRegistry420 } from "../../../../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighCountryAuthorization.sol";
@@ -104,6 +105,12 @@ contract CultivationEngineTest is PlantSourcesFixture {
         access.bindPlantRegistry(address(plants));
         _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
+        EmergencyState emergency = new EmergencyState(address(auth));
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, plants.EMERGENCY_BIND_SCOPE(), keccak256("em:plant"));
+        plants.bindEmergencyState(address(emergency));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_EMERGENCY, cultivation.EMERGENCY_BIND_SCOPE(), keccak256("em:cult"));
+        cultivation.bindEmergencyState(address(emergency));
+
         RulesetRegistry rulesets = new RulesetRegistry(address(auth));
         bytes32 contentHash = keccak256("hc6:approved-ruleset-version");
         approvedRulesetId = rulesets.deriveRulesetId(contentHash);

@@ -40,8 +40,9 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         );
         caps.registerProtocolComponent(ModuleIds.RULESET_ROUTER, address(this));
         router = new RulesetRouter(address(auth), address(rulesets));
-        _grant(address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE,
-            cultivation.EXPRESSION_RULESET_DOMAIN());
+        _grant(
+            address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE, cultivation.EXPRESSION_RULESET_DOMAIN()
+        );
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
         cultivation.bindRulesetRegistry(address(rulesets), address(router));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
@@ -171,25 +172,34 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
             HCInvalidState.selector
         );
     }
+
     function testR027RegisteredButWrongRoutedVersionDenied() public {
         bytes32 nextContent = keccak256("r02.7:ruleset:version2");
         bytes32 nextId = rulesets.deriveRulesetId(nextContent);
         _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, nextId);
         rulesets.registerRuleset(nextContent);
         _environment();
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, nextId)), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, nextId)),
+            HCInvalidState.selector
+        );
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), nextId);
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, approvedRulesetId)),
+            HCInvalidState.selector
+        );
         bytes32 expression = cultivation.expressPhenotype(1, GENOME, nextId);
         require(expression != bytes32(0), "routed version did not seal");
         require(cultivation.sealedRulesetId(1) == nextId, "routed ID not pinned");
         require(cultivation.sealedRulesetContentHash(1) == nextContent, "routed content not pinned");
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
         require(cultivation.sealedRulesetId(1) == nextId, "sealed version changed on reroute");
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, approvedRulesetId)),
+            HCInvalidState.selector
+        );
     }
-
 }

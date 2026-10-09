@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
+import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
 import { RandomDomains } from "../constants/RandomDomains.sol";
 import {
@@ -9,7 +11,8 @@ import {
     HCInvalidId,
     HCInvalidState,
     HCNotFound,
-    HCZeroAddress
+    HCZeroAddress,
+    HCEmergencyRestrictionActive
 } from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
@@ -65,6 +68,32 @@ contract BreedingEngine {
         bool exists;
     }
 
+    IEmergencyState public emergencyState;
+    bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.ENGINE_BIND.V1");
+    event EmergencyStateBound(address indexed emergencyState);
+
+    function bindEmergencyState(address candidate) external {
+        if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.BREEDING_ENGINE,
+                ActionIds.BREEDING_BIND_EMERGENCY,
+                EMERGENCY_BIND_SCOPE, 0
+            )
+        );
+        if (IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false) revert HCInvalidState();
+        emergencyState = IEmergencyState(candidate);
+        emit EmergencyStateBound(candidate);
+    }
+
+    function _requireUnrestricted(bytes32 domain) private view {
+        if (address(emergencyState) == address(0) || emergencyState.isRestricted(domain)) {
+            revert HCEmergencyRestrictionActive(domain);
+        }
+    }
+
     IHighCountryAuthorization public immutable authorization;
     IGenomeRegistryBreeding public immutable genomeRegistry;
     IRandomnessCoordinatorBreeding public immutable randomness;
@@ -100,6 +129,8 @@ contract BreedingEngine {
         bytes32 childLineId,
         bytes32 metadataHash
     ) external {
+        _requireUnrestricted(EmergencyDomains.BREEDING);
+        _requireUnrestricted(EmergencyDomains.RANDOMNESS_REQUEST);
         if (
             breedingEventId == 0 || parentA == bytes32(0) || parentB == bytes32(0) || childGenomeId == bytes32(0)
                 || childLineId == bytes32(0) || metadataHash == bytes32(0)
@@ -132,6 +163,7 @@ contract BreedingEngine {
     function finalizeBreeding(
         uint64 breedingEventId
     ) external {
+        _requireUnrestricted(EmergencyDomains.BREEDING);
         BreedingEvent storage e = _events[breedingEventId];
         if (!e.exists) revert HCNotFound();
         if (e.finalized) revert HCInvalidState();

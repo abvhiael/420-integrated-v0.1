@@ -14,9 +14,38 @@ interface IPlantRegistryCultivation {
     function genomeOf(
         uint64 plantId
     ) external view returns (bytes32);
+    function getPlant(uint64 plantId) external view returns (PlantRecord memory);
+    struct PlantRecord { uint64 id; bytes32 genomeId; address grower; uint64 landParcelId; uint16 regionId; uint8 stage; uint64 plantedAt; uint64 lastAdvancedAt; bool exists; }
+}
+
+interface ICanonicalRulesets {
+    function authorization() external view returns (address);
+    function exists(bytes32 rulesetId) external view returns (bool);
+    function getRuleset(bytes32 rulesetId) external view returns (bytes32 contentHash, uint64 registeredAt, bool exists_);
+    function deriveRulesetId(bytes32 contentHash) external pure returns (bytes32);
 }
 
 contract CultivationEngine {
+    bytes32 public constant RULESET_BIND_SCOPE = keccak256("HC.CULTIVATION.RULESET_BIND");
+    uint8 public constant READY_STAGE = 5;
+    uint8 public constant TERMINATED_STAGE = 6;
+    ICanonicalRulesets public rulesetRegistry;
+    event RulesetRegistryBound(address indexed registry);
+    mapping(uint64 => bytes32) public sealedRulesetId;
+    mapping(uint64 => bytes32) public sealedRulesetContentHash;
+    function bindRulesetRegistry(address candidate) external {
+        if (address(rulesetRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(AuthorizationRequest(
+            msg.sender, ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS, RULESET_BIND_SCOPE, 0
+        ));
+        if (ICanonicalRulesets(candidate).authorization() != address(authorization)) revert HCInvalidState();
+        rulesetRegistry = ICanonicalRulesets(candidate);
+        emit RulesetRegistryBound(candidate);
+    }
+    function _stage(uint64 plantId) private view returns (uint8) {
+        return plantRegistry.getPlant(plantId).stage;
+    }
+
     uint16 public constant BPS = 10_000;
     uint16 public constant TEMPERATURE_MIN = 1_000;
     uint16 public constant TEMPERATURE_MAX = 4_000;
@@ -66,6 +95,7 @@ contract CultivationEngine {
     ) external {
         if (plantId == 0) revert HCInvalidId();
         if (!plantRegistry.exists(plantId)) revert HCNotFound();
+        if (_stage(plantId) == TERMINATED_STAGE) revert HCInvalidState();
         if (_states[plantId].expressionLocked) revert HCInvalidState();
         _validateEnvironment(environment);
         _auth(ActionIds.CULTIVATION_UPDATE, plantId);
@@ -91,13 +121,18 @@ contract CultivationEngine {
         CultivationState storage s = _states[plantId];
         if (!s.exists) revert HCNotFound();
         if (s.expressionLocked || genomeId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidState();
-        if (plantRegistry.genomeOf(plantId) != genomeId) revert HCInvalidState();
+        if (plantRegistry.genomeOf(plantId) != genomeId || _stage(plantId) != READY_STAGE) revert HCInvalidState();
+        if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)) revert HCInvalidState();
+        (bytes32 contentHash,,bool registered) = rulesetRegistry.getRuleset(rulesetId);
+        if (!registered || contentHash == bytes32(0) || rulesetRegistry.deriveRulesetId(contentHash) != rulesetId) revert HCInvalidState();
         _auth(ActionIds.PHENOTYPE_EXPRESS, plantId);
         expressionHash = keccak256(
             abi.encode(
                 "HC.PHENOTYPE.EXPRESSION.V1", plantId, genomeId, rulesetId, s.environment, s.stressBps, s.qualityBps
             )
         );
+        sealedRulesetId[plantId] = rulesetId;
+        sealedRulesetContentHash[plantId] = contentHash;
         s.expressionHash = expressionHash;
         s.expressionLocked = true;
         s.updatedAt = uint64(block.timestamp);

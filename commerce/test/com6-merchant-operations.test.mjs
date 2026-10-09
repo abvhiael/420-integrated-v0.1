@@ -19,8 +19,8 @@ test('COM-6 dashboard shows no synthetic settlement or refund on pending order',
  f.orders.set(attempt.orderId,order);
  const stats=await f.service.merchantAnalytics(seller.address,store.store_id);
  assert.equal(stats.totals.orders,1);assert.equal(stats.totals.paid,0);
- assert.deepEqual(stats.byAsset[order.paymentAsset.toLowerCase()],{paidBaseUnits:'0',refundedBaseUnits:'0'});
- assert.equal(stats.scope,'all_local_checkout_attempts_at_finalized_block');
+ assert.deepEqual(stats.byAsset[order.paymentAsset.toLowerCase()],{paidBaseUnits:'0',refundedBaseUnits:'0',netBaseUnits:'0'});
+ assert.equal(stats.scope,'finalized_checkout_page_only');
  assert.equal(stats.partial,false);
  await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund'),e=>e.code==='refund_not_authorized');
  await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute',{disputeHash:b32(406)}),e=>e.code==='dispute_not_eligible');
@@ -105,4 +105,22 @@ test('COM-6E fails closed if finalized RPC snapshot changes during aggregation',
  const original=f.source.order;
  f.source.order=async key=>{const value=await original(key);f.source.blockHash=b32(700);return value;};
  await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id),e=>e.code==='analytics_snapshot_changed');
+});
+
+test('COM-6E reconciles partial Pay refunds and rejects impossible refund amounts',async t=>{
+ const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);
+ order.status='2';order.paymentRef=b32(901);f.orders.set(attempt.orderId,order);
+ f.invoices.set(b32(900),{active:true,merchantId:b32(1),merchant:seller.address.toLowerCase(),amount:'100',currency:'0x343230',mode:'0',acceptance:'1',partialPayments:false,expiresAt:'0'});
+ f.payments.set(b32(901),{invoiceId:b32(900),payer:buyer.address.toLowerCase(),merchant:seller.address.toLowerCase(),settlementAsset:order.paymentAsset,settlementAmount:'100',receiptHash:b32(55),status:'5',refundedAmount:'40',tipAmount:'0'});
+ const data=await f.service.merchantAnalytics(seller.address,store.store_id);
+ assert.deepEqual(data.byAsset[order.paymentAsset],{paidBaseUnits:'100',refundedBaseUnits:'40',netBaseUnits:'60'});
+ assert.equal(data.totals.refunded,1);
+ f.payments.get(b32(901)).refundedAmount='101';
+ await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id),e=>e.code==='refund_accounting_mismatch');
+});
+test('COM-6E rejects invalid page boundaries and other merchant access',async t=>{
+ const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);f.orders.set(attempt.orderId,order);
+ await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{limit:101}),e=>e.code);
+ await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{offset:-1}),e=>e.code);
+ await assert.rejects(()=>f.service.merchantAnalytics(attacker.address,store.store_id,{offset:0}),e=>e.code==='forbidden');
 });

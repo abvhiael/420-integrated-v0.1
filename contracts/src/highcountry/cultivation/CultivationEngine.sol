@@ -47,7 +47,9 @@ interface ICanonicalRulesets {
 interface ICanonicalRulesetRouter {
     function authorization() external view returns (address);
     function rulesetRegistry() external view returns (address);
-    function rulesetFor(bytes32 domain) external view returns (bytes32);
+    function rulesetFor(
+        bytes32 domain
+    ) external view returns (bytes32);
 }
 
 contract CultivationEngine {
@@ -65,16 +67,19 @@ contract CultivationEngine {
         address candidate,
         address router
     ) external {
-        if (address(rulesetRegistry) != address(0) || candidate.code.length == 0 || router.code.length == 0)
+        if (address(rulesetRegistry) != address(0) || candidate.code.length == 0 || router.code.length == 0) {
             revert HCInvalidState();
+        }
         authorization.requireAuthorized(
             AuthorizationRequest(
                 msg.sender, ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS, RULESET_BIND_SCOPE, 0
             )
         );
         if (ICanonicalRulesets(candidate).authorization() != address(authorization)) revert HCInvalidState();
-        if (ICanonicalRulesetRouter(router).authorization() != address(authorization)
-            || ICanonicalRulesetRouter(router).rulesetRegistry() != candidate) revert HCInvalidState();
+        if (
+            ICanonicalRulesetRouter(router).authorization() != address(authorization)
+                || ICanonicalRulesetRouter(router).rulesetRegistry() != candidate
+        ) revert HCInvalidState();
         rulesetRegistry = ICanonicalRulesets(candidate);
         rulesetRouter = ICanonicalRulesetRouter(router);
         emit RulesetRegistryBound(candidate, router);
@@ -162,8 +167,10 @@ contract CultivationEngine {
         if (!s.exists) revert HCNotFound();
         if (s.expressionLocked || genomeId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidState();
         if (plantRegistry.genomeOf(plantId) != genomeId || _stage(plantId) != READY_STAGE) revert HCInvalidState();
-        if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)
-            || rulesetRouter.rulesetFor(EXPRESSION_RULESET_DOMAIN) != rulesetId) revert HCInvalidState();
+        if (
+            address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)
+                || rulesetRouter.rulesetFor(EXPRESSION_RULESET_DOMAIN) != rulesetId
+        ) revert HCInvalidState();
         (bytes32 contentHash,, bool registered) = rulesetRegistry.getRuleset(rulesetId);
         if (!registered || contentHash == bytes32(0) || rulesetRegistry.deriveRulesetId(contentHash) != rulesetId) {
             revert HCInvalidState();

@@ -38,6 +38,7 @@ def main():
         raise SystemExit("TRAVEL_MIGRATION_DATABASE_URL must be a PostgreSQL DSN")
     # No shell invocation; never echo the credential.
     env = os.environ.copy()
+    env["PGDATABASE"] = dsn
     env["PGCONNECT_TIMEOUT"] = "5"
     env["PGOPTIONS"] = "-c statement_timeout=30000 -c lock_timeout=5000"
     def sql(statement):

@@ -56,3 +56,21 @@ Qualification: Level 1, documentary governance boundary and machine-checkable in
 Canonical compatibility/fail-closed boundaries — satisfied by current source; dependency map and proposed independent service interfaces — documented here. Independent DOOBR approval, executable adapters, licensed delivery and live receipts — **not approved / not implemented**, not a failing requirement of the current compatibility-only scope. Never mark a standalone DOOBR production service COMPLETE on the strength of this audit.
 
 Level 1 proof must verify unchanged frozen/config authority and this decision contract against one exact SHA. Level 2 is reserved for a future implementation milestone, Level 3 for full app-phase closure. Full repository Foundry and duplicated Genesis inventory are outside this step.
+
+## DOOBR-AUDIT-5 exact-SHA Level 1 qualification
+
+**Status: COMPLETE — architecture and conditional integration definition only.**
+- Qualified implementation/workflow SHA: `84742f4608be6d559ae583cafa5861354d453582`.
+- GitHub Actions: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37995990630
+- Job `scoped-qualification`: SUCCESS, no failed steps.
+- GEN-SVC-0 and GEN-SVC-3 validators: PASS.
+- DOOBR AUDIT-2 architecture authority verifier: PASS.
+- DOOBR AUDIT-5 integration and governance verifier: PASS.
+- Noncached compatibility and fail-closed regression tests: PASS.
+- Scoped GEN-SVC-3 Go tests, vet, build: PASS.
+- Exact checkout SHA assertion: PASS.
+- Files implemented: this document, `scripts/verify-doobr-audit-5.py`, scoped workflow amendment.
+- Inspected main: `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`.
+- Level 2: not required for documentation governance step; Level 3: deferred to full audit-phase closeout.
+- Security condition: no delivery, payment or identity adapter was enabled. Independent DOOBR launch remains blocked on explicit authority and external qualification.
+- Unrelated Cloudflare Worker failures and broad global suites are outside the Level 1 coverage.

@@ -74,7 +74,21 @@ AND s.revoked_at IS NULL AND s.expires_at>now() AND m.state='ACTIVE'`,
 		parts[0],parts[1],hash[:]).Scan(&s.TenantID,&s.SubjectID,&s.ExpiresAt,&role,&facility,&zone)
 	if err!=nil{return Session{},errors.New("expired, revoked or invalid session")}
 	s.Sections=[]string{"overview","facilities","plants","environment","cultivation","harvests","inventory","advice","notifications"}
-	if role=="MAINTAINER" {s.Sections=[]string{"equipment"}} else if role!="REVIEWER"{s.Sections=append(s.Sections,"equipment")}
+	if role=="MAINTAINER" {
+		s.Sections=[]string{"equipment"}
+	} else {
+		if role!="REVIEWER" {s.Sections=append(s.Sections,"equipment")}
+		switch role {
+		case "OWNER","MANAGER":
+			s.Actions=[]string{"facilities.create","facilities.rename","plants.create","plants.transition",
+				"cultivation.record","harvests.record","inventory.create","inventory.adjust",
+				"inventory.export","advice.review"}
+		case "TECHNICIAN":
+			s.Actions=[]string{"plants.create","plants.transition","cultivation.record","harvests.record","advice.review"}
+		case "REVIEWER":
+			s.Actions=[]string{"inventory.export"}
+		}
+	}
 	if err=tx.Commit();err!=nil{return Session{},err}
 	return s,nil
 }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 
 import { ICapabilityRegistry420 } from "../../../../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighCountryAuthorization.sol";
@@ -30,6 +31,12 @@ contract BreedingEngineTest {
         genomes = new GenomeRegistry(address(auth), address(genesis));
         randomness = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(randomness));
+        EmergencyState emergency = new EmergencyState(address(auth));
+        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_BIND_EMERGENCY, randomness.EMERGENCY_BIND_SCOPE(), keccak256("em:rand"));
+        randomness.bindEmergencyState(address(emergency));
+        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_BIND_EMERGENCY, breeding.EMERGENCY_BIND_SCOPE(), keccak256("em:breed"));
+        breeding.bindEmergencyState(address(emergency));
+
 
         _grant(
             address(this),

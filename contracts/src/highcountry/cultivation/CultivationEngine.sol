@@ -14,15 +14,34 @@ interface IPlantRegistryCultivation {
     function genomeOf(
         uint64 plantId
     ) external view returns (bytes32);
-    function getPlant(uint64 plantId) external view returns (PlantRecord memory);
-    struct PlantRecord { uint64 id; bytes32 genomeId; address grower; uint64 landParcelId; uint16 regionId; uint8 stage; uint64 plantedAt; uint64 lastAdvancedAt; bool exists; }
+    function getPlant(
+        uint64 plantId
+    ) external view returns (PlantRecord memory);
+
+    struct PlantRecord {
+        uint64 id;
+        bytes32 genomeId;
+        address grower;
+        uint64 landParcelId;
+        uint16 regionId;
+        uint8 stage;
+        uint64 plantedAt;
+        uint64 lastAdvancedAt;
+        bool exists;
+    }
 }
 
 interface ICanonicalRulesets {
     function authorization() external view returns (address);
-    function exists(bytes32 rulesetId) external view returns (bool);
-    function getRuleset(bytes32 rulesetId) external view returns (bytes32 contentHash, uint64 registeredAt, bool exists_);
-    function deriveRulesetId(bytes32 contentHash) external pure returns (bytes32);
+    function exists(
+        bytes32 rulesetId
+    ) external view returns (bool);
+    function getRuleset(
+        bytes32 rulesetId
+    ) external view returns (bytes32 contentHash, uint64 registeredAt, bool exists_);
+    function deriveRulesetId(
+        bytes32 contentHash
+    ) external pure returns (bytes32);
 }
 
 contract CultivationEngine {
@@ -33,16 +52,24 @@ contract CultivationEngine {
     event RulesetRegistryBound(address indexed registry);
     mapping(uint64 => bytes32) public sealedRulesetId;
     mapping(uint64 => bytes32) public sealedRulesetContentHash;
-    function bindRulesetRegistry(address candidate) external {
+
+    function bindRulesetRegistry(
+        address candidate
+    ) external {
         if (address(rulesetRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
-        authorization.requireAuthorized(AuthorizationRequest(
-            msg.sender, ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS, RULESET_BIND_SCOPE, 0
-        ));
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS, RULESET_BIND_SCOPE, 0
+            )
+        );
         if (ICanonicalRulesets(candidate).authorization() != address(authorization)) revert HCInvalidState();
         rulesetRegistry = ICanonicalRulesets(candidate);
         emit RulesetRegistryBound(candidate);
     }
-    function _stage(uint64 plantId) private view returns (uint8) {
+
+    function _stage(
+        uint64 plantId
+    ) private view returns (uint8) {
         return plantRegistry.getPlant(plantId).stage;
     }
 
@@ -123,8 +150,10 @@ contract CultivationEngine {
         if (s.expressionLocked || genomeId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidState();
         if (plantRegistry.genomeOf(plantId) != genomeId || _stage(plantId) != READY_STAGE) revert HCInvalidState();
         if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)) revert HCInvalidState();
-        (bytes32 contentHash,,bool registered) = rulesetRegistry.getRuleset(rulesetId);
-        if (!registered || contentHash == bytes32(0) || rulesetRegistry.deriveRulesetId(contentHash) != rulesetId) revert HCInvalidState();
+        (bytes32 contentHash,, bool registered) = rulesetRegistry.getRuleset(rulesetId);
+        if (!registered || contentHash == bytes32(0) || rulesetRegistry.deriveRulesetId(contentHash) != rulesetId) {
+            revert HCInvalidState();
+        }
         _auth(ActionIds.PHENOTYPE_EXPRESS, plantId);
         expressionHash = keccak256(
             abi.encode(

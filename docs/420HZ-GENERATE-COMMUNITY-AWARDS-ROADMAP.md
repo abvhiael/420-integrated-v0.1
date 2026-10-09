@@ -473,6 +473,8 @@ Evidence-only closeout commits inherit the qualified SHA and do not require blin
 
 ## HZ-GCA-18 — Production-equivalent public testnet qualification
 
+HZ-GCA-14 deferred live Notifications/Indexer/Search/Analytics/Explorer integration and same-object replay evidence are tracked in `docs/audit/420HZ-TESTNET-DEFERRED-INTEGRATION-ROADMAP.md`. Its repository-local Level 1 PASS does not qualify live service behavior.
+
 **TESTNET-GATED.** Do not claim completion from repository/local CI evidence.
 
 Required live evidence:

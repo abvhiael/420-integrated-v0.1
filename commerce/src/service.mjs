@@ -568,7 +568,8 @@ export class CommerceService {
   async merchantIntegrations(actor,storeId) {
     const {store,merchant,source}=await this.access(actor,storeId,'publish');
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
-    return {merchantId:store.merchant_id,chainId:this.chainId,identity:{status:'NOT_VERIFIED',authority:'420Identity/420Verify'},names:{status:'NOT_VERIFIED',authority:'420Names'},notifications:{status:'LOCAL_OPT_IN_FEED_ONLY',externalDelivery:'NOT_CONFIGURED',authority:'420Notifications',sideEffects:false},search:{status:'LOCAL_PUBLIC_CATALOGUE',authority:'420Commerce projection; 420Search external integration unverified'},analytics:{status:'LOCAL_FINALIZED_PROJECTION',authority:'420Analytics external integration unverified'},provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    const display=source.merchantDisplay?await source.merchantDisplay(merchant):{identity:{status:'NOT_VERIFIED',authority:'420Identity/420Verify'},names:{status:'NOT_VERIFIED',authority:'420Names'}};
+    return {merchantId:store.merchant_id,chainId:this.chainId,identity:display.identity,names:display.names,notifications:{status:'LOCAL_OPT_IN_FEED_ONLY',externalDelivery:'NOT_CONFIGURED',authority:'420Notifications',sideEffects:false},search:{status:'LOCAL_PUBLIC_CATALOGUE',authority:'420Commerce projection; 420Search external integration unverified'},analytics:{status:'LOCAL_FINALIZED_PROJECTION',authority:'420Analytics external integration unverified'},provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async putDelivery(actor,attemptId,input) {
     keys(input,['address','contact']); text(input.address,2000); text(input.contact,200); actor=wallet(actor);

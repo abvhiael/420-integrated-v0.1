@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
-      "sha256": "2a61aa81117332f37910c0c4092b0380cfd75df03d1541ba233a6881d3fe50a1",
+      "path": "docs/highcountry/qualification/R01.5-level1.json",
+      "sha256": "f71d7c89d93f386bc6fac767c9a76ca37a5f0d7e2a2f60248902f789f9d1d5da",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1155,6 +1155,14 @@
     {
       "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",
       "sha256": "37583f02480389d6fa991c2c8dba67fdb969c283e31636687c861132a510ddef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
+      "sha256": "2a61aa81117332f37910c0c4092b0380cfd75df03d1541ba233a6881d3fe50a1",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

@@ -1,0 +1,48 @@
+{
+  "step": "R01.5 \u2014 Deployment and trust",
+  "status": "COMPLETE",
+  "qualificationLevel": 1,
+  "implementationSha": "e5d5f729eccb834b9f5688a208baec262b8d5877",
+  "mainSha": "0ec695481fc84e6066aeae50baf6e0fd3c7f8731",
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "branch": "review/high-country-complete-audit-20261009",
+  "pr": 593,
+  "filesChanged": [
+    "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
+    "docs/highcountry/FILE-INVENTORY-20261009.json",
+    "docs/highcountry/README.md",
+    "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md"
+  ],
+  "exitCriteria": {
+    "accountProvenance": "PASS: canonical factory/account/EntryPoint and no self-report attestation",
+    "sessions": "PASS: initial empty allowlist, exact reviewed admission and sensitive escalation",
+    "randomness": "PASS: verified adapter required; no fairness claim for current trusted entropy; pause/recovery",
+    "operatorPowers": "PASS: action families and complete source catalogue; scope/handoff/revoke",
+    "emergency": "PASS: scoped restrict/release and safe exits, existing enforcement gap explicit",
+    "upgradeRebinding": "PASS: immutable dependency closure replacement and no fake rollback/reset",
+    "custody": "PASS: no current custody; conditional settlement controls and no worker player keys",
+    "dependenciesRecovery": "PASS: external trust/failure/recovery map"
+  },
+  "checks": {
+    "sourceActions": "42 exact identifiers matched once",
+    "contractRegressions": "30 PASS, 6 suites, 0 fail/skip",
+    "runtimeTemplate": "PASS deployment-pending only",
+    "referencesPathsInventory": "PASS",
+    "docOnlyCleanHeadWhitespace": "PASS"
+  },
+  "commands": [
+    "forge test --match-contract HighCountrySessionAccess420Test|EmergencyStateTest|ModuleRegistryTest|GenesisRegistryTest|HighCountryAuthorizationTest|BreedingEngineTest -vv (HC roots, unchanged default profile)",
+    "node scripts/gaming/verify-runtime-manifest.mjs deployments/gaming/testnet.runtime.json",
+    "git diff --check HEAD^ HEAD",
+    "Python action/reference/path/hash/scope checks"
+  ],
+  "security": "No grants, custody, deployment addresses or risk acceptance introduced; production enforcement gaps remain R02/R04/R05/R07",
+  "ci": "No app-specific R01 documentation workflow; existing audit exclusions skip broad Docs/Foundry jobs, not counted as PASS. Targeted exact-SHA local checks executed.",
+  "level2": "R01.7 pending; no executable shared authority change",
+  "level3": "Deferred to accumulated app-phase closeout; canonical inventory ownership preserved",
+  "limitations": "Actual operator custodians, provider adapter parameters and deployment manifests require R07/R09; policy does not qualify unresolved live deployment",
+  "blockers": [],
+  "next": "R01.6 \u2014 Gameplay specifications",
+  "foundryOutput": "No files changed, compilation skipped\n\nRan 5 tests for test/highcountry/unit/auth/HighCountryAuthorization.t.sol:HighCountryAuthorizationTest\n[PASS] testCapabilityApproval() (gas: 240441)\n[PASS] testDefaultDeny() (gas: 12104)\n[PASS] testExpiredCapabilityDenied() (gas: 265908)\n[PASS] testRevokedCapabilityDenied() (gas: 265628)\n[PASS] testZeroPrincipalFailsClosed() (gas: 6230)\nSuite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.15ms (757.24\u00b5s CPU time)\n\nRan 7 tests for test/highcountry/unit/player/HighCountrySessionAccess420.t.sol:HighCountrySessionAccess420Test\n[PASS] testAccountCannotSubstituteCapabilityRegistry() (gas: 1301562)\n[PASS] testRevokedOrInactiveGrantFailsClosed() (gas: 365431)\n[PASS] testRoutineCallPolicyDefaultsToWalletEscalation() (gas: 75988)\n[PASS] testRoutinePolicyAdministrationIsCapabilityAuthorized() (gas: 67065)\n[PASS] testRoutineSessionRequiresExactLiveSmartAccountGrant() (gas: 337399)\n[PASS] testRoutineSessionsHaveZeroNative420SpendLimit() (gas: 5492)\n[PASS] testStaleSessionEpochFailsClosed() (gas: 343392)\nSuite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.10ms (677.49\u00b5s CPU time)\n\nRan 4 tests for test/highcountry/unit/upgrades/ModuleRegistry.t.sol:ModuleRegistryTest\n[PASS] testCannotSkipLifecycle() (gas: 247534)\n[PASS] testForwardLifecycle() (gas: 511710)\n[PASS] testRegisterBindsImplementationOnce() (gas: 363564)\n[PASS] testRejectedModuleIsTerminal() (gas: 304090)\nSuite result: ok. 4 passed; 0 failed; 0 skipped; finished in 993.11\u00b5s (1.09ms CPU time)\n\nRan 6 tests for test/highcountry/unit/security/EmergencyState.t.sol:EmergencyStateTest\n[PASS] testCapabilityCanRestrictEnumeratedDomain() (gas: 247454)\n[PASS] testCapabilityIsDomainScoped() (gas: 208587)\n[PASS] testPositiveEmergencyDomainEnumeration() (gas: 48391)\n[PASS] testReleaseRequiresSeparateCapability() (gas: 505042)\n[PASS] testRestrictionRequiresCapability() (gas: 40091)\n[PASS] testUnknownDomainDefaultsDenied() (gas: 31687)\nSuite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.07ms (432.20\u00b5s CPU time)\n\nRan 5 tests for test/highcountry/unit/genesis/GenesisRegistry.t.sol:GenesisRegistryTest\n[PASS] testCannotChangeRootsAfterFinalization() (gas: 303268)\n[PASS] testCannotFinalizeTwice() (gas: 284091)\n[PASS] testCannotFinalizeWithoutCompleteRoots() (gas: 69222)\n[PASS] testFinalizeDisablesGenesisAuthority() (gas: 268268)\n[PASS] testSetRootsBeforeFinalization() (gas: 208117)\nSuite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.58ms (526.59\u00b5s CPU time)\n\nRan 3 tests for test/highcountry/unit/breeding/BreedingEngine.t.sol:BreedingEngineTest\n[PASS] testBreedingRequiresDistinctExistingParents() (gas: 200105)\n[PASS] testOnlyOriginalRequesterCanConsumeBoundRequest() (gas: 666636)\n[PASS] testRandomnessReplayDeniedAndBreedingFinalizesOnce() (gas: 2475172)\nSuite result: ok. 3 passed; 0 failed; 0 skipped; finished in 2.65ms (1.42ms CPU time)\n\nRan 6 test suites in 3.90ms (10.54ms CPU time): 30 tests passed, 0 failed, 0 skipped (30 total tests)\n",
+  "runtimeOutput": "420 Gaming runtime manifest verified: deployments/gaming/testnet.runtime.json (deployment-pending)\n"
+}

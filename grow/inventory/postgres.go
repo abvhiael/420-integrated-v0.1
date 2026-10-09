@@ -18,7 +18,7 @@ func (s SQLStore) transaction(ctx context.Context, tenant string, callback func(
 }
 func (s SQLStore) Create(ctx context.Context,l Lot, actor string) error {
 	return s.transaction(ctx,l.TenantID,func(tx *sql.Tx)error{
-		res,err:=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_lots
+		res,err:=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_lots_v2
 (tenant_id,lot_id,facility_id,zone_id,kind,unit,label,harvest_id,created_by)
 VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5,$6,$7,NULLIF($8,'')::uuid,$9)
 ON CONFLICT DO NOTHING`,l.TenantID,l.ID,l.FacilityID,l.ZoneID,l.Kind,l.Unit,l.Label,l.HarvestID,actor)
@@ -27,7 +27,7 @@ ON CONFLICT DO NOTHING`,l.TenantID,l.ID,l.FacilityID,l.ZoneID,l.Kind,l.Unit,l.La
 		if err!=nil{return err}
 		if n!=1{return ErrConflict}
 		if l.Opening>0 {
-			res,err=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_ledger
+			res,err=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_ledger_v2
 (tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,occurred_at)
 VALUES($1::uuid,gen_random_uuid(),$2::uuid,$3::uuid,$4::uuid,'OPENING',$5,'initial audited stock',$6,'creation',$7,now())`,
 				l.TenantID,l.ID,l.FacilityID,l.ZoneID,l.Opening,actor,"open:"+l.ID)
@@ -41,7 +41,7 @@ VALUES($1::uuid,gen_random_uuid(),$2::uuid,$3::uuid,$4::uuid,'OPENING',$5,'initi
 }
 func (s SQLStore) Apply(ctx context.Context,e Entry) error {
 	return s.transaction(ctx,e.TenantID,func(tx *sql.Tx)error{
-		res,err:=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_ledger
+		res,err:=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_ledger_v2
 (tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,reference_id,occurred_at)
 VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5::uuid,$6,$7,$8,$9,$10,$11,$12,$13)
 ON CONFLICT(tenant_id,idempotency_key) DO NOTHING`,
@@ -58,7 +58,7 @@ func (s SQLStore) Snapshot(ctx context.Context,tenant,facility,zone,lot string,l
 	err:=s.transaction(ctx,tenant,func(tx *sql.Tx)error{
 		err:=tx.QueryRowContext(ctx,`SELECT tenant_id::text,lot_id::text,facility_id::text,zone_id::text,
 kind,unit,label,coalesce(harvest_id::text,''),balance::float8
-FROM grow_private.inventory_lots WHERE tenant_id=$1::uuid AND lot_id=$2::uuid
+FROM grow_private.inventory_lots_v2 WHERE tenant_id=$1::uuid AND lot_id=$2::uuid
 AND facility_id=$3::uuid AND zone_id=$4::uuid`,tenant,lot,facility,zone).
 			Scan(&result.Lot.TenantID,&result.Lot.ID,&result.Lot.FacilityID,&result.Lot.ZoneID,
 			&result.Lot.Kind,&result.Lot.Unit,&result.Lot.Label,&result.Lot.HarvestID,&result.Balance)
@@ -66,7 +66,7 @@ AND facility_id=$3::uuid AND zone_id=$4::uuid`,tenant,lot,facility,zone).
 		if err!=nil{return err}
 		rows,err:=tx.QueryContext(ctx,`SELECT tenant_id::text,event_id::text,lot_id::text,facility_id::text,zone_id::text,
 kind,quantity::float8,reason,actor_subject,source,idempotency_key,reference_id,occurred_at
-FROM grow_private.inventory_ledger
+FROM grow_private.inventory_ledger_v2
 WHERE tenant_id=$1::uuid AND lot_id=$2::uuid AND facility_id=$3::uuid AND zone_id=$4::uuid
 ORDER BY occurred_at,event_id LIMIT $5`,tenant,lot,facility,zone,limit)
 		if err!=nil{return err}

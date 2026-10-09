@@ -7,6 +7,7 @@ on:
       - 'grow/security/**'
       - 'grow/facility/**'
       - 'grow/plants/**'
+      - 'grow/telemetry/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -92,3 +93,12 @@ jobs:
           go vet ./grow/security ./grow/facility ./grow/plants
           test -z "$(gofmt -l grow/plants/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/plants/qualify.sql
+      - name: GROW-V2-06 telemetry scoped Level-1 and historical charts
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/telemetry
+          go test -race -count=1 ./grow/telemetry
+          go vet ./grow/telemetry
+          test -z "$(gofmt -l grow/telemetry/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/telemetry/qualify.sql

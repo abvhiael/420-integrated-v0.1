@@ -331,7 +331,9 @@ export class CommerceService {
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
     const row=this.db.get('SELECT a.* FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND a.attempt_id=?',storeId,objectID(attemptId));
     requireThat(row,'not_found',404);
-    const status=await this.status(actor,attemptId);
+    // Dispute initiation is governed by Market order identity/state, not by Pay's finalized invoice reader.
+    // Avoid requiring unrelated Pay settlement proof before a Market-only eligibility decision.
+    const status=kind==='refund'?await this.status(actor,attemptId):{paymentId:null};
     let proposal=null;
     if(kind==='refund') {
       requireThat(status.paid&&status.paymentId&&status.receiptHash,'refund_not_authorized',409);

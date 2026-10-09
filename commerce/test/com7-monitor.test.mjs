@@ -6,7 +6,7 @@ test('COM-7 health monitor accepts only verified ready, current service state wi
  assert.deepEqual(validateCommerceHealth(envelope,{chainId:'420',now:100100}),{state:'ready',chainId:'420',height:120,finalizedHeight:119});
  const changes=[
   {state:'halted'},{state:'stale'},{chainId:'421'},{authoritative:true},
-  {updatedAt:1},{updatedAt:120000},{finalizedHeight:121},
+  {updatedAt:-30000},{updatedAt:120000},{finalizedHeight:121},
   {finalizedHeight:0},{height:120.5}
  ];
  for(const update of changes)assert.throws(()=>validateCommerceHealth({schema:'420-commerce-api-v1',data:{...envelope.data,...update}},{chainId:'420',now:100100,maxUnfinalizedBlocks:64}));

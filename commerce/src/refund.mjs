@@ -1,4 +1,4 @@
-import {requireThat,bytes32,wallet,integer} from './security.mjs';
+import {requireThat,bytes32,wallet} from './security.mjs';
 
 // Pure eligibility planning only. Pay governance alone may apply and record a refund.
 // No merchant signature, HTTP request or returned proposal creates a refund.

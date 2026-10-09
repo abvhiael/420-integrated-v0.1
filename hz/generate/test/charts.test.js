@@ -1,0 +1,14 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { Charts420 } from "../src/charts.js";
+const data=[{id:"b",creatorId:"artist",status:"PUBLISHED",visibility:"PUBLIC",publishedAt:1000,genre:"rock",mood:"dark",disclosure:"AI_ASSISTED",category:"grunge"},{id:"a",creatorId:"artist",status:"PUBLISHED",visibility:"PUBLIC",publishedAt:1000,genre:"folk",mood:"soft",disclosure:"HUMAN",category:"acoustic"},{id:"secret",creatorId:"artist",status:"PUBLISHED",visibility:"PRIVATE",publishedAt:1000}];
+const recording=id=>data.find(x=>x.id===id);recording.list=()=>data;
+const build=()=>new Charts420({recording,creator:id=>({id,visibility:"PUBLIC"}),qualification:e=>e.proof==="trusted"});
+const ev=(id,recordingId="a",signal="QUALIFIED_PLAY",listenerToken=id)=>({id,recordingId,signal,listenerToken,checkpoint:"cp1",at:10000,public:true,proof:"trusted"});
+const snap=(s,family="TOP_RECORDINGS")=>s.snapshot({family,window:"DAILY",windowEnd:20000,checkpoint:"cp1"});
+test("reject forged qualifying events and replay conflict",()=>{const c=build();assert.throws(()=>c.ingest({...ev("1"),proof:"false"}),/UNVERIFIED/);assert.equal(c.ingest(ev("1")),true);assert.equal(c.ingest(ev("1")),false);assert.throws(()=>c.ingest({...ev("1"),recordingId:"b"}),/CONFLICT/);});
+test("deterministic snapshot, strict scores, dedupe, award and raw isolation",()=>{const c=build();c.ingest(ev("1","a","QUALIFIED_PLAY","listener"));c.ingest(ev("2","a","QUALIFIED_PLAY","listener"));c.ingest(ev("3","b","QUALIFIED_PLAY","other"));c.ingest(ev("4","a","AWARD_VOTE"));c.ingest(ev("5","a","RAW_PLAY"));c.ingest(ev("6","a","PUBLIC_FAVORITE"));const x=snap(c);assert.deepEqual(x.rows.map(r=>[r.id,r.score]),[["a",2],["b",2]]);assert.equal(x.rows[0].rank,1);assert.deepEqual(snap(c),x);});
+test("privacy source visibility stale and fixture exclusion",()=>{const c=build();c.ingest(ev("1","secret"));c.ingest({...ev("2"),fixture:true});c.ingest({...ev("3"),public:false});assert.deepEqual(snap(c).rows,[]);assert.throws(()=>c.snapshot({family:"TOP_RECORDINGS",window:"DAILY",windowEnd:20000,checkpoint:"cp1",stale:true}),/STALE/);});
+test("discovery filters/new releases without hidden sources",()=>{const c=build();assert.deepEqual(c.discover({genre:"rock",asOf:20000}).map(x=>x.id),["b"]);assert.deepEqual(snap(c,"NEW_RECORDINGS").rows.map(x=>x.id),["a","b"]);});
+test("artist and community chart authority separation",()=>{const c=build();c.ingest(ev("1"));assert.equal(snap(c,"TOP_ARTISTS").rows[0].score,2);assert.equal(snap(c,"COMMUNITY_FAVORITES").rows[0].score,0);});
+test("correction supersedes immutable historical result",()=>{const c=build();c.ingest(ev("1"));const old=snap(c);c.ingest(ev("2","b"));const newer=snap(c);assert.notEqual(newer.resultCommitment,old.resultCommitment);assert.equal(newer.supersedes,old.resultCommitment);assert.equal(c.historyFor({family:"TOP_RECORDINGS",window:"DAILY",windowEnd:20000,checkpoint:"cp1"}).length,2);});

@@ -35,7 +35,7 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
       let input=null;
       if(raw.length&&!path.endsWith('/media')){requireThat(req.headers['content-type']==='application/json','content_type');try{input=JSON.parse(raw);}catch{throw new Fault('invalid_json');}}
       const pageInteger=(value,min,max)=>{requireThat(typeof value==='string'&&/^(0|[1-9][0-9]*)$/.test(value),'invalid_integer');return integer(Number(value),min,max);};
-      const pagination=()=>{keys(query,['query','offset','limit','storeId','category']); const result={query:query.query??''}; if(query.offset!==undefined)result.offset=integer(Number(query.offset),0,100000);if(query.limit!==undefined)result.limit=pageInteger(query.limit,1,100);if(query.storeId)result.storeId=query.storeId;if(query.category)result.category=query.category;return result;};
+      const pagination=()=>{keys(query,['query','offset','limit','storeId','category']); const result={query:query.query??''}; if(query.offset!==undefined)result.offset=pageInteger(query.offset,0,100000);if(query.limit!==undefined)result.limit=pageInteger(query.limit,1,100);if(query.storeId)result.storeId=query.storeId;if(query.category)result.category=query.category;return result;};
       let data;
       if(path==='/v1/auth/challenge'&&method==='POST'){keys(input,['wallet']);data=auth.challenge(input.wallet);}
       else if(path==='/v1/health'&&method==='GET'){keys(query,[]);data=service.projection.health();}

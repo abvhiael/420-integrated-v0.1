@@ -1,0 +1,29 @@
+name: 420Grow V2-05 formatting maintenance
+on:
+  push:
+    branches:
+      - audit/420grow-v2-01-product-decision-20261008
+    paths:
+      - .github/workflows/grow-v2-05-format-once.yml
+permissions:
+  contents: write
+jobs:
+  gofmt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/420grow-v2-01-product-decision-20261008
+          persist-credentials: true
+      - name: Format and commit V2-05 Go sources
+        run: |
+          gofmt -w grow/plants/*.go
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add grow/plants
+          if ! git diff --cached --quiet; then
+            git commit -m "style(grow): gofmt V2-05 plant sources"
+            git push origin HEAD:audit/420grow-v2-01-product-decision-20261008
+          fi

@@ -542,26 +542,25 @@ export class CommerceService {
       for(const event of events){
         const row=JSON.parse(event.payload);
         if(!kinds.has(row.eventName))continue;
-        this.db.run('INSERT OR IGNORE INTO commerce_notification_feed(store_id,event_id,operation,created_at) VALUES(?,?,?,?)',storeId,event.event_id,row.eventName,this.now());
+        this.db.run('INSERT OR IGNORE INTO commerce_notification_feed(store_id,event_id,notification_id,operation,created_at) VALUES(?,?,?,?,?)',storeId,event.event_id,hash(event.event_id),row.eventName,this.now());
       }
     });
-    const candidates=this.db.all('SELECT f.*,e.payload,e.block_hash,e.block_number FROM commerce_notification_feed f JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND e.canonical=1 AND e.finality=\'finalized\' ORDER BY e.block_number DESC,f.event_id DESC LIMIT 5000',storeId);
-    const offset=cursor?candidates.findIndex(x=>hash(x.event_id)===cursor):-1;
-    requireThat(cursor===null||offset>=0,'invalid_notification_cursor');
-    const matching=candidates.slice(offset+1);
-    const page=matching.slice(0,limit);
+    const cursorRow=cursor?this.db.get("SELECT e.block_number,f.event_id FROM commerce_notification_feed f JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND f.notification_id=? AND e.canonical=1 AND e.finality='finalized'",storeId,cursor):null;
+    requireThat(cursor===null||cursorRow,'invalid_notification_cursor');
+    const pageRows=this.db.all("SELECT f.*,e.payload,e.block_hash,e.block_number FROM commerce_notification_feed f JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND e.canonical=1 AND e.finality='finalized' AND (? IS NULL OR e.block_number<? OR (e.block_number=? AND f.event_id<?)) ORDER BY e.block_number DESC,f.event_id DESC LIMIT ?",storeId,cursorRow?.block_number??null,cursorRow?.block_number??null,cursorRow?.block_number??null,cursorRow?.event_id??null,limit+1);
+    const more=pageRows.length>limit,page=pageRows.slice(0,limit);
     const items=page.map(row=>{
       const event=JSON.parse(row.payload);
-      return {id:hash(row.event_id),orderId:event.fields.orderId,eventName:row.operation,read:row.read_at!==null,finality:'finalized',chainId:this.chainId,blockHash:row.block_hash,blockNumber:row.block_number,transactionHash:event.provenance.transactionHash,logIndex:event.provenance.logIndex,authoritative:false};
+      return {id:row.notification_id,orderId:event.fields.orderId,eventName:row.operation,read:row.read_at!==null,finality:'finalized',chainId:this.chainId,blockHash:row.block_hash,blockNumber:row.block_number,transactionHash:event.provenance.transactionHash,logIndex:event.provenance.logIndex,authoritative:false};
     });
-    return {enabled:true,items,nextCursor:matching.length>limit?hash(page.at(-1).event_id):null,delivery:'IN_APP_PRESENTATION_ONLY',authoritative:false,provenance:{chainId:this.chainId,blockHash:source.blockHash,finalized:true}};
+    return {enabled:true,items,nextCursor:more?page.at(-1).notification_id:null,delivery:'IN_APP_PRESENTATION_ONLY',authoritative:false,provenance:{chainId:this.chainId,blockHash:source.blockHash,finalized:true}};
   }
   async merchantNotificationRead(actor,storeId,eventId,request) {
     keys(request,['read']);requireThat(typeof request.read==='boolean','invalid_read_state');
     const {merchant}=await this.access(actor,storeId,'publish');
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
     objectID(eventId);
-    const row=this.db.all("SELECT f.event_id FROM commerce_notification_feed f JOIN commerce_notification_preferences p ON p.store_id=f.store_id JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND p.enabled=1 AND p.controller=? AND e.canonical=1 AND e.finality='finalized'",storeId,wallet(actor)).find(item=>hash(item.event_id)===eventId);
+    const row=this.db.get("SELECT f.event_id FROM commerce_notification_feed f JOIN commerce_notification_preferences p ON p.store_id=f.store_id JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND f.notification_id=? AND p.enabled=1 AND p.controller=? AND e.canonical=1 AND e.finality='finalized'",storeId,eventId,wallet(actor));
     requireThat(row,'notification_not_found',404);
     this.mutate(actor,storeId,'notification_read',eventId,()=>this.db.run('UPDATE commerce_notification_feed SET read_at=? WHERE store_id=? AND event_id=?',request.read?this.now():null,storeId,row.event_id));
     return {id:eventId,read:request.read,authoritative:false};

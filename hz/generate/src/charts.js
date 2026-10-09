@@ -5,10 +5,11 @@ const hash=x=>createHash("sha256").update(JSON.stringify(x)).digest("hex");
 const validId=x=>typeof x==="string" && /^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$/.test(x);
 const compare=(a,b)=>b.score-a.score||a.id.localeCompare(b.id,"en");
 export class Charts420 {
- constructor({recording,creator,policyVersion="1",qualification,verifyCheckpoint=null}={}){
+ constructor({recording,creator,policyVersion="1",qualification,verifyCheckpoint=null,production=false}={}){
   if(typeof recording!=="function"||typeof creator!=="function")throw Error("SOURCE_REQUIRED");
   if(policyVersion!=="1")throw Error("UNSUPPORTED_POLICY");
-  this.recording=recording;this.creator=creator;this.qualification=qualification;this.verifyCheckpoint=verifyCheckpoint;
+  if(production&&(typeof qualification!=="function"||typeof verifyCheckpoint!=="function"))throw Error("PRODUCTION_CHART_AUTHORITIES_REQUIRED");
+  this.production=production;this.recording=recording;this.creator=creator;this.qualification=qualification;this.verifyCheckpoint=verifyCheckpoint;
   this.events=new Map();this.history=new Map();
  }
  ingest(event){

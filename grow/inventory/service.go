@@ -139,11 +139,11 @@ func (s Service) Snapshot(ctx context.Context, scope Scope, facility, zone, lot 
 
 // Jurisdiction templates describe internal reporting labels only and never certify or submit legal reports.
 type Export struct {
-	Jurisdiction string
-	Filename     string
+	Jurisdiction  string
+	Filename      string
 	SchemaVersion string
-	Certified bool
-	CSV          []byte
+	Certified     bool
+	CSV           []byte
 }
 
 func cell(v string) string {
@@ -169,7 +169,9 @@ func (s Service) Export(ctx context.Context, scope Scope, facility, zone, lot, j
 	var output strings.Builder
 	w := csv.NewWriter(&output)
 	createdAt := ""
-	if !snap.Lot.CreatedAt.IsZero() { createdAt = snap.Lot.CreatedAt.UTC().Format(time.RFC3339Nano) }
+	if !snap.Lot.CreatedAt.IsZero() {
+		createdAt = snap.Lot.CreatedAt.UTC().Format(time.RFC3339Nano)
+	}
 	for _, row := range [][]string{
 		{"record_type", "jurisdiction_template", "lot_id", "kind", "unit", "balance", "event_id", "event_type", "quantity", "reason", "actor", "source", "occurred_at_utc", "reference_id", "harvest_id", "audit_status", "schema_version", "lot_created_at_utc", "lot_created_by"},
 		{"BALANCE", jurisdiction, snap.Lot.ID, snap.Lot.Kind, snap.Lot.Unit, strconv.FormatFloat(snap.Balance, 'f', -1, 64), "", "", "", "", "", "", "", "", snap.Lot.HarvestID, "INTERNAL_UNVERIFIED", "GROW-V2-10-1", createdAt, cell(snap.Lot.CreatedBy)},

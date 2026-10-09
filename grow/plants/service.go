@@ -17,7 +17,7 @@ type Scope struct { Principal security.Principal; Membership security.Grant; Ten
 type Store interface {
  Get(context.Context,string,string)(Plant,error)
  Create(context.Context,Plant)(Plant,error)
- ChangeStage(context.Context,Plant,int64)(Plant,error)
+ ChangeStage(context.Context,Plant,int64,string)(Plant,error)
  Ancestors(context.Context,string,string)([]string,error)
  Link(context.Context,Edge)error
 }
@@ -63,7 +63,7 @@ func(s Service)Transition(ctx context.Context,scope Scope,id string,to Stage,rev
  if revision!=p.Revision{return Plant{},ErrConflict}
  if !canMove(p.State,to){return Plant{},ErrInvalid}
  p.State=to
- return s.store.ChangeStage(ctx,p,revision)
+ return s.store.ChangeStage(ctx,p,revision,scope.Principal.SubjectID)
 }
 func(s Service)Link(ctx context.Context,scope Scope,childID,parentID,relation string)error{
  if childID==""||parentID==""||childID==parentID||relation!="CLONE_PARENT"&&relation!="SEED_PARENT"{return ErrInvalid}

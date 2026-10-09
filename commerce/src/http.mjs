@@ -46,7 +46,8 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
       else if(/^\/v1\/products\/[^/]+$/.test(path)&&method==='GET'){keys(query,[]);data=service.search({productId:path.split('/').at(-1)});requireThat(data.items.length,'not_found',404);}
       else if(/^\/v1\/media\/[^/]+$/.test(path)&&method==='GET'){keys(query,[]);const media=service.publicMedia(path.split('/').at(-1));res.writeHead(200,{...headers,'Content-Type':media.content_type});res.end(Buffer.from(media.content));return;}
       else {
-        keys(query,[]);
+        const notificationFeed=method==='GET'&&/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications$/.test(path);
+        keys(query,notificationFeed?['limit','cursor']:[]);
         const parts=path.split('/'),storeId=parts[4],action=parts[5];
         if(/^\/v1\/merchant\/identity\/0x[a-f0-9]{64}$/.test(path)&&method==='GET')data=await service.identity(actor,parts[4]);
         else if(path==='/v1/merchant/registration'&&method==='POST')data=await service.registration(actor,input);

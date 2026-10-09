@@ -48,27 +48,31 @@ export class RpcAuthority {
   async verifyContractSignature(address,message,signature) {
     const source=await this.snapshot(),tag={blockHash:source.blockHash,requireCanonical:true};
     const code=await this.rpc.send('eth_getCode',[address,tag]); if(code==='0x')return false;
+    requireThat(this.now()<source.expiresAt,'authority_deadline',503);
     const iface=new Interface(['function isValidSignature(bytes32,bytes) view returns(bytes4)']);
     try {
       const result=await this.rpc.send('eth_call',[{to:address,data:iface.encodeFunctionData('isValidSignature',[hashMessage(message),signature]),gas:'0x186a0'},tag]);
+      requireThat(this.now()<source.expiresAt,'authority_deadline',503);
       return iface.decodeFunctionResult('isValidSignature',result)[0]==='0x1626ba7e';
     }catch{return false;}
   }
   async snapshot() {
     try {
-      requireThat(BigInt(await this.rpc.send('eth_chainId', [])) === BigInt(this.config.chainId), 'chain_mismatch', 503);
-      const block = await this.rpc.send('eth_getBlockByNumber', ['finalized', false]);
+      const deadline=this.now()+10000;
+      const send=async(method,args)=>{requireThat(this.now()<deadline,'authority_deadline',503);const result=await this.rpc.send(method,args);requireThat(this.now()<deadline,'authority_deadline',503);return result;};
+      requireThat(BigInt(await send('eth_chainId', [])) === BigInt(this.config.chainId), 'chain_mismatch', 503);
+      const block = await send('eth_getBlockByNumber', ['finalized', false]);
       requireThat(block && /^0x[0-9a-f]{64}$/.test(block.hash), 'finality_unavailable', 503);
       const age = this.now() / 1000 - Number(BigInt(block.timestamp));
       requireThat(age >= -5 && age <= 120, 'stale_authority', 503);
       const tag = { blockHash: block.hash, requireCanonical: true };
       const call = async (address, abi, method, args = []) => {
         const iface = new Interface(abi);
-        const result = await this.rpc.send('eth_call', [{ to: address, data: iface.encodeFunctionData(method, args) }, tag]);
+        const result = await send('eth_call', [{ to: address, data: iface.encodeFunctionData(method, args) }, tag]);
         return iface.decodeFunctionResult(method, result);
       };
       const verifyCode = async binding => {
-        const code = await this.rpc.send('eth_getCode', [binding.address, tag]);
+        const code = await send('eth_getCode', [binding.address, tag]);
         requireThat(code !== '0x' && keccak256(code) === binding.codeHash, 'code_mismatch', 503);
       };
       await verifyCode(this.config.registry);
@@ -77,7 +81,7 @@ export class RpcAuthority {
         await verifyCode(binding);
         // Compare raw encoded bytes: Pay and Market have different version layouts.
         const versionData = new Interface(['function protocolVersion() view returns(uint32)']).encodeFunctionData('protocolVersion');
-        const exactVersion = await this.rpc.send('eth_call', [{ to: binding.address, data: versionData }, tag]);
+        const exactVersion = await send('eth_call', [{ to: binding.address, data: versionData }, tag]);
         requireThat(exactVersion.toLowerCase() === binding.versionResult, 'version_mismatch', 503);
         if (binding.componentId) {
           const ref = (await call(this.config.registry.address, registryABI, 'component', [binding.componentId]))[0];
@@ -89,7 +93,7 @@ export class RpcAuthority {
       for (const [name, getter, target] of wiring) requireThat(wallet((await read(name, getter))[0]) === wallet(this.config.contracts[target].address), 'dependency_mismatch', 503);
       requireThat((await read('MarketPaySettlementAdapter420','deploymentChainId'))[0] === BigInt(this.config.chainId), 'adapter_chain_mismatch', 503);
       return {
-        chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), finalized: true,
+        chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), finalized: true, expiresAt:deadline,
         merchant: async merchantId => record(await read('MerchantRegistry420','merchants',[bytes32(merchantId)])),
         listing: async listingId => {
           const listing = record((await read('ListingRegistry420','getListing',[bytes32(listingId)]))[0]);

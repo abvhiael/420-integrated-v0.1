@@ -54,6 +54,10 @@ unknown protected route, while mandatory Origin validation correctly returned
 403. The test expectation was corrected without weakening the origin gate.
 Dependency scanning identified vulnerable initial sharp/ethers pins; patched
 sharp 0.35.5/ethers 6.17.0 replace them with locked reproducible dependencies.
+The first successful CI run also flagged unsupported ESLint 9; it was upgraded
+to supported ESLint 10.12.0, creating a new implementation SHA for targeted CI.
+Final configuration review also enforces strict encryption-key/port validation
+and an authority-snapshot deadline so delayed canonical reads cannot authorize writes.
 Review found SQL LIKE wildcard idempotency collisions, duplicate concurrent
 prepare attempts, missing descriptor/lifecycle bindings and already-attempted
 orphan outbox compensation; these were fixed with adversarial regressions.

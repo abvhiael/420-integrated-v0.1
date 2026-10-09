@@ -12,7 +12,8 @@ const manifest=readFileSync(process.env.COMMERCE_MANIFEST_FILE);
 requireThat(hash(manifest)===process.env.COMMERCE_MANIFEST_SHA256,'unapproved_manifest',503);
 const config=JSON.parse(manifest),origin=new URL(config.origin);
 requireThat(origin.origin===config.origin&&(origin.protocol==='https:'||config.environment==='local'&&origin.hostname==='127.0.0.1'),'invalid_origin');
-const deliveryKey=Buffer.from(process.env.COMMERCE_DELIVERY_KEY_HEX??'','hex');requireThat(deliveryKey.length===32,'missing_delivery_key',503);
+requireThat(/^[a-fA-F0-9]{64}$/.test(process.env.COMMERCE_DELIVERY_KEY_HEX??''),'missing_delivery_key',503);
+const deliveryKey=Buffer.from(process.env.COMMERCE_DELIVERY_KEY_HEX,'hex');
 const db=new Database(process.env.COMMERCE_DB_FILE),authority=new RpcAuthority(config);
 const projection=new Projection(db,authority,{...config,contracts:config.contracts}),worker=new ProjectionWorker(projection,authority,config);
 const service=new CommerceService(db,authority,projection,{chainId:config.chainId,deliveryKey});
@@ -26,6 +27,7 @@ const tick=async()=>{
   if(!stopped)timer=setTimeout(tick,10000);
 };
 await authority.snapshot();await worker.syncOnce();
-server.listen(Number(process.env.PORT??8080),'127.0.0.1');tick();
+const port=Number(process.env.PORT??8080);requireThat(Number.isInteger(port)&&port>0&&port<=65535,'invalid_port');
+server.listen(port,'127.0.0.1');tick();
 const shutdown=()=>{stopped=true;clearTimeout(timer);server.close(()=>{db.close();process.exit(0);});setTimeout(()=>process.exit(1),10000).unref();};
 process.once('SIGTERM',shutdown);process.once('SIGINT',shutdown);

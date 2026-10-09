@@ -63,6 +63,8 @@ Canonical reads pin `finalized` block hashes with EIP-1898 `requireCanonical` an
 refuse stale (>120 seconds), wrong-chain, missing-code, version/Registry/wiring
 mismatches or unsupported RPC. There is no fallback to `latest`. Protocol
 availability, policy and reporter status are re-read for each checkout plan.
+RPC transport requests time out after five seconds and a snapshot expires after
+ten seconds, including its subsequent reads; delayed results cannot authorize writes.
 
 ## API v1
 

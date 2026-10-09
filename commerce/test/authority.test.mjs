@@ -39,6 +39,9 @@ test('production contract-wallet verifier requires finalized EIP-1271 magic and 
   f.rpc.send=async(method,args)=>{if(method==='eth_call'&&args[0].to===contract){assert.equal(args[0].gas,'0x186a0');assert.deepEqual(args[1],{blockHash:b32(100),requireCanonical:true});return iface.encodeFunctionResult('isValidSignature',[valid?'0x1626ba7e':'0xffffffff']);}return original(method,args);};
   assert.equal(await f.authority.verifyContractSignature(contract,'message','0x1234'),true);valid=false;assert.equal(await f.authority.verifyContractSignature(contract,'message','0x1234'),false);
 });
+test('canonical snapshot read cannot authorize after its request deadline',async()=>{
+  const f=fixture();let clock=NOW;f.authority.now=()=>clock;const source=await f.authority.snapshot();clock+=10001;await assert.rejects(()=>source.merchant(b32(4)),e=>e.code==='authority_deadline');
+});
 test('all service function bindings exactly match freshly compiled canonical contract ABI',()=>{
   assert.ok(process.env.COMMERCE_ARTIFACT_DIR,'COMMERCE_ARTIFACT_DIR required: run scripts/commerce/qualify-service.py');
   for(const [name,abi] of Object.entries(ABIS)){

@@ -32,3 +32,16 @@ Canonical definition: `docs/commerce/COM-1-ARCHITECTURE-AND-ROADMAP.md`, COM-7: 
 ## Exit status
 
 **COM-7 IN PROGRESS / NOT QUALIFIED** until all original security/ops requirements have documented applicable test evidence, current-main reconciliation, and applicable complete Level 3 pass. Do not merge PR #594. Next canonical milestone after COM-7 repository closeout: **COM-8 TESTNET HANDOFF**, blocked on actual service/network/authority deployment and real transaction evidence.
+
+## October 9 security candidate and exact-SHA CI status
+
+Implementation SHA: `06de4a1ce04663c30fa89590db654bb096cd91d9`. The implementation includes hardened HTTP semantics, in-process concurrency/rate-abuse and privacy tests, fail-closed monitoring module and controller/finality/recovery regressions. Associated app CI results at last inspection:
+
+- Governed Pay refund qualification: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707594 — **completed/success**.
+- Merchant builder/browser: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707717 — **completed/success**.
+- Commerce service/SDK/Indexer: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707692 — queued (NOT PASS).
+- Retained upstream Market/Pay/Arbitration: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707811 — queued (NOT PASS).
+
+The latter two jobs have not started at capture time; this is a runner/queue condition, **not** evidence of successful qualification nor an observed implementation test failure.
+
+Main-branch reconciliation is outstanding: GitHub compare of `main` and audit branch reported **205 commits ahead / 410 behind**, with merge base `41d173dbcfbeb8299f54f22e7c049f1fec20336d`. Do not invent a synthesized merge-SHA or use the unmerged branch's fast suite as Level 3 evidence. No canonical full Solidity, Genesis/address authority, 420 Integrated/global, Docs/global or single merged-candidate Level 3 pass has been performed for COM-7. Preserve PR #594 as draft and unmerged.

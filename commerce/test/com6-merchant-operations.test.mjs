@@ -22,7 +22,7 @@ test('COM-6 dashboard shows no synthetic settlement or refund on pending order',
  assert.deepEqual(stats.byAsset[order.paymentAsset.toLowerCase()],{paidBaseUnits:'0',refundedBaseUnits:'0'});
  assert.equal(stats.scope,'first_100_attempts_only');
  await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund'),e=>e.code==='refund_not_authorized');
- await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute'),e=>e.code==='dispute_not_eligible');
+ await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute',{disputeHash:b32(406)}),e=>e.code==='dispute_not_eligible');
 });
 test('COM-6 refund and dispute handoff never mutates Pay, Market, receipt, order or balances',async t=>{
  const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);
@@ -64,7 +64,7 @@ test('COM-6 refund and dispute handoff never mutates Pay, Market, receipt, order
  await assert.rejects(()=>f.service.merchantRefunds(attacker.address,store.store_id),e=>e.code==='forbidden');
  await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund',{amount:'1',reasonHash:b32(405)}),e=>e.code==='refund_exceeds_available');
 assert.equal(refund.refunded,false);assert.equal(refund.authority,'Pay.RefundManager420');
- const dispute=await f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute');
+ const dispute=await f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute',{disputeHash:b32(406)});
  assert.equal(dispute.executed,false);assert.equal(dispute.disputed,false);
  assert.equal(order.status,'2');assert.equal(f.payments.get(b32(901)).status,'5');
  await assert.rejects(()=>f.service.merchantRemedy(buyer.address,store.store_id,attempt.attemptId,'refund'),e=>e.code==='forbidden');

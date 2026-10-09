@@ -6,6 +6,8 @@ on:
       - 'config/420travel-genesis.json'
       - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
       - 'scripts/validate-gen-svc-3.py'
+      - 'scripts/validate-gen-svc-0.py'
+      - 'scripts/verify-doobr-audit-2.py'
       - 'genesis/svc3/**'
       - 'cmd/420travel/**'
       - 'go.mod'
@@ -16,6 +18,8 @@ on:
       - 'config/420travel-genesis.json'
       - 'docs/genesis-services/GEN-SVC-3-TRAVEL.md'
       - 'scripts/validate-gen-svc-3.py'
+      - 'scripts/validate-gen-svc-0.py'
+      - 'scripts/verify-doobr-audit-2.py'
       - 'genesis/svc3/**'
       - 'cmd/420travel/**'
       - 'go.mod'
@@ -32,7 +36,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python3 scripts/validate-gen-svc-3.py
+      - name: GEN-SVC-3 canonical validator
+        run: python3 scripts/validate-gen-svc-3.py
       - name: Shared Genesis architecture validator
         run: python3 scripts/validate-gen-svc-0.py
       - name: DOOBR authority verifier
@@ -42,13 +47,8 @@ jobs:
           go-version-file: go.mod
           cache: false
       - name: DOOBR noncached compatibility regressions
-        run: go test -count=1 ./genesis/svc3/travelapp -run '^(TestGenesisCompatibilitySchemas|TestGenesisTransactionMethodsAlwaysDisabled|TestDOOBRAudit3BoundaryMatrix|TestDOOBRAudit3GatewayCannotBeEnabledByInput)
-        run: go test ./genesis/svc3/... ./cmd/420travel/...
-      - name: Travel shell static analysis
-        run: go vet ./genesis/svc3/... ./cmd/420travel/...
-      - name: Travel server build
-        run: go build -o /tmp/420travel ./cmd/420travel
- -v
+        run: |
+          go test -count=1 ./genesis/svc3/travelapp -run '^(TestGenesisCompatibilitySchemas|TestGenesisTransactionMethodsAlwaysDisabled|TestDOOBRAudit3BoundaryMatrix|TestDOOBRAudit3GatewayCannotBeEnabledByInput)$' -v
       - name: Travel shell tests
         run: go test ./genesis/svc3/... ./cmd/420travel/...
       - name: Travel shell static analysis

@@ -11,7 +11,7 @@ for required in (
     "Tenant isolation", "Principal", "Membership", "Role and action matrix",
     "OWNER", "MANAGER", "TECHNICIAN", "REVIEWER", "MAINTAINER",
     "DEVICE_CONTROL", "V2-03", "V2-07", "cross-tenant",
-    "revocation", "CSRF", "object", "audit", "public directory",
+    "revocation", "CSRF", "object", "audit", "public 420Location",
     "NOT IMPLEMENTED", "GROW-V2-03",
 ):
     assert required.casefold() in spec.casefold(), f"Missing specification boundary: {required}"

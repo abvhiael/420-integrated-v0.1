@@ -17,6 +17,8 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
 
     function setUp() public override {
         super.setUp();
+        caps.registerProtocolComponent(ModuleIds.PHENOTYPE_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         cultivation = new CultivationEngine(address(auth), address(plants));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(random));

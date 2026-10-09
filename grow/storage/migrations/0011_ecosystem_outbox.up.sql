@@ -15,13 +15,13 @@ CREATE TABLE grow_private.integration_outbox(
  kind text NOT NULL CHECK(kind IN ('HARVEST_RECORDED','EQUIPMENT_ALERT','AI_REVIEW_READY')),
  source_id uuid NOT NULL,requested_by text NOT NULL,
  state text NOT NULL DEFAULT 'QUEUED'
- CHECK(state IN ('QUEUED','IN_FLIGHT','DELIVERED','DEAD','REVOKED')),
+ CHECK(state IN ('QUEUED','IN_FLIGHT','ACCEPTED','DEAD','REVOKED')),
  attempts integer NOT NULL DEFAULT 0 CHECK(attempts BETWEEN 0 AND 4),
  claim_token text NOT NULL DEFAULT '',
  lease_until timestamptz,
  next_attempt_at timestamptz NOT NULL DEFAULT now(),
  created_at timestamptz NOT NULL,
- delivered_at timestamptz,
+ accepted_at timestamptz,
  PRIMARY KEY(tenant_id,event_id),
  FOREIGN KEY(tenant_id,facility_id,zone_id)
  REFERENCES grow_private.zones(tenant_id,facility_id,zone_id)

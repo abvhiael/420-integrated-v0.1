@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'audit/420pay-*'
-      - 'audit/420commerce-*'
     paths:
       - 'contracts/src/pay/**'
       - 'contracts/src/swap/CanonicalSwapExecutor420.sol'
@@ -77,7 +76,7 @@ concurrency:
 
 jobs:
   qualify:
-    if: github.event_name != 'pull_request' || (startsWith(github.head_ref, 'audit/420pay-') || startsWith(github.head_ref, 'audit/420commerce-'))
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420pay-')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

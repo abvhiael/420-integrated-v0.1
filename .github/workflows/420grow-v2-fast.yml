@@ -10,6 +10,7 @@ on:
       - 'grow/telemetry/**'
       - 'grow/equipment/**'
       - 'grow/cultivation/**'
+      - 'grow/harvest/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -19,6 +20,7 @@ on:
       - 'scripts/verify-grow-v2-*.py'
       - 'grow/security/**'
       - 'grow/storage/**'
+      - 'grow/harvest/**'
       - 'grow/facility/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -123,3 +125,12 @@ jobs:
           go vet ./grow/cultivation
           test -z "$(gofmt -l grow/cultivation/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/cultivation/qualify.sql
+      - name: GROW-V2-09 harvest observations analytics and privacy
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/harvest
+          go test -race -count=1 ./grow/harvest
+          go vet ./grow/harvest
+          test -z "$(gofmt -l grow/harvest/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/harvest/qualify.sql

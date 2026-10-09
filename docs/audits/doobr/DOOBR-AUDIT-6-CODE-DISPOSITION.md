@@ -33,3 +33,23 @@ This step adds only a machine-checkable static scope verifier and app-scoped exa
 - Level 2 not triggered (no cross-component implementation). Level 3 deferred to app phase closeout; unrelated Cloudflare builds excluded.
 
 Next canonical proposed step: `DOOBR-AUDIT-7 — Security and adversarial verification of the confirmed DOOBR scope` (verify roadmap authority before proceeding).
+
+## Exact-SHA Level 1 verification closeout
+
+Status: **COMPLETE for approved Genesis compatibility-only implementation**; independent DOOBR delivery application remains UNAUTHORIZED / NOT IMPLEMENTED.
+
+- Qualified implementation/workflow SHA: `ee26fd99f34131645195c8d65af997abac678a4f`.
+- GitHub Actions run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37997149116
+- Job `scoped-qualification` ID `114045998782`: completed SUCCESS, no failed job steps.
+- DOOBR-AUDIT-6 scope verifier: PASS.
+- GEN-SVC-0 and GEN-SVC-3 validators: PASS.
+- DOOBR-AUDIT-2 / AUDIT-5 authority verifiers: PASS.
+- Noncached DOOBR compatibility/fail-closed regression tests: PASS.
+- Scoped Travel Go tests: PASS.
+- Scoped `go vet` and server build: PASS.
+- Exact checkout SHA assertion: PASS.
+- Files changed for step: `docs/audits/doobr/DOOBR-AUDIT-6-CODE-DISPOSITION.md`, `scripts/verify-doobr-audit-6.py`, `.github/workflows/doobr-audit-1-level1.yml`.
+- Inspected main: `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`. PR #598 audit branch remains unmerged.
+- No production code, protocol authority, payment operation, regulated delivery flow, deployment or frozen catalog changes.
+- Level 2 not triggered; Level 3 deferred. Unrelated Cloudflare Worker checks excluded from app-scoped Level 1 without weakening repository policy.
+- This evidence-only closeout commit does not replace the qualified implementation SHA.

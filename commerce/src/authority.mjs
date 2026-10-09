@@ -98,7 +98,7 @@ export class RpcAuthority {
       requireThat((await read('MarketPaySettlementAdapter420','deploymentChainId'))[0] === BigInt(this.config.chainId), 'adapter_chain_mismatch', 503);
       const arbitration=await finalizedArbitrationBinding(this.config,{send,tag,deadline,now:this.now});
       return {
-        chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), finalized: true, expiresAt:deadline, arbitration,
+        chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), blockTimestamp: Number(BigInt(block.timestamp)), finalized: true, expiresAt:deadline, arbitration,
         merchant: async merchantId => record(await read('MerchantRegistry420','merchants',[bytes32(merchantId)])),
         listing: async listingId => {
           const listing = record((await read('ListingRegistry420','getListing',[bytes32(listingId)]))[0]);

@@ -1,0 +1,36 @@
+✔ guest can play core gameplay with no wallet prompt (0.91599ms)
+✔ registration upgrades cloud save without requiring a wallet (0.163727ms)
+✔ wallet-only content prompts only when that optional feature is requested (0.116456ms)
+✔ linked but disconnected wallet asks for reconnect at feature boundary (0.121022ms)
+✔ connected wallet unlocks optional web3 feature without altering base state progression (0.105049ms)
+✔ unknown feature classes fail closed (0.370057ms)
+✔ guest-only core play remains available and wallet-free (0.899035ms)
+✔ registration unlocks cloud save without requiring a wallet (0.240463ms)
+✔ wallet-only features prompt contextually rather than during routine play (0.163777ms)
+✔ guest migration follows consume -> bind -> apply and rejects replay (0.409808ms)
+✔ optional entitlement requires both wallet access and active entitlement (0.184989ms)
+✔ disconnect and reconnect only block wallet-only features (0.158079ms)
+✔ revoked routine session escalates without breaking core play (0.170888ms)
+✔ cross-game access requires a specific active attestation (0.127433ms)
+✔ wallet linkage does not change ordinary progression (0.200853ms)
+✔ adapter validation reports missing protocol boundaries (0.754247ms)
+✔ adapter validation accepts a complete game transport (0.846155ms)
+✔ High Country still keeps routine play wallet-free through shared SDK (0.880037ms)
+✔ High Country optional content preserves contextual wallet prompts (0.220573ms)
+✔ derives guest registered and wallet-linked states (1.017604ms)
+✔ core play never prompts for registration or wallet (0.173621ms)
+✔ registered-only feature prompts guests to register (0.105749ms)
+✔ wallet feature links then reconnects only at feature boundary (0.123626ms)
+✔ client scopes every adapter call to one game id (0.453714ms)
+✔ client rejects adapter results explicitly scoped to another game (0.311269ms)
+✔ migration adapter failure is not automatically replayed (0.72989ms)
+✔ entitlement reads are not cached across revocation (0.295255ms)
+✔ missing adapters fail closed (0.243578ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.072824

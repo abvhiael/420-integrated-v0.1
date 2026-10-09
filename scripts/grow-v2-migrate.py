@@ -30,6 +30,26 @@ def main() -> None:
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         if not path.name.startswith("0001_") or len(files) != 1:
             raise SystemExit("unexpected migration inventory; explicit executor update required")
+        # Reject drift and skip already-applied migrations rather than replay DDL.
+        lookup = subprocess.run(
+            ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-At", url, "-c",
+             "SELECT to_regclass('grow_private.schema_migrations') IS NOT NULL"],
+            capture_output=True, text=True, check=False, timeout=30,
+        )
+        if lookup.returncode != 0:
+            raise SystemExit("cannot inspect migration ledger")
+        if lookup.stdout.strip() == "t":
+            recorded = subprocess.run(
+                ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-At", url, "-c",
+                 "SELECT checksum FROM grow_private.schema_migrations WHERE version='0001_initial'"],
+                capture_output=True, text=True, check=False, timeout=30,
+            )
+            if recorded.returncode != 0:
+                raise SystemExit("cannot read migration ledger")
+            if recorded.stdout.strip() == digest:
+                print("GROW-V2-03 already applied:", path.name, digest)
+                continue
+            raise SystemExit("unrecognized or drifted schema migration")
         # Migration SQL owns its BEGIN/COMMIT; preserve checksum verification in same
         # transaction by inserting ledger record before final COMMIT.
         sql = path.read_text()

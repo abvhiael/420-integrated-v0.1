@@ -47,6 +47,15 @@ test('COM-6 refund and dispute handoff never mutates Pay, Market, receipt, order
  f.payments.get(b32(901)).refundedAmount='100';
  const completed=await f.service.merchantRefunds(seller.address,store.store_id);
  assert.equal(completed.items[0].fundsReturned,true);
+ assert.equal(completed.items[0].state,'FUNDS_RETURNED_MARKET_REPORT_PENDING');
+ assert.equal(completed.items[0].marketReported,false);
+ f.orders.get(attempt.orderId).status='7';
+ f.source.marketRefundReported=async()=>true;
+ const reconciled=await f.service.merchantRefunds(seller.address,store.store_id);
+ assert.equal(reconciled.items[0].state,'FUNDED_REFUND_MARKET_RECONCILED');
+ assert.equal(reconciled.items[0].marketReported,true);
+ f.orders.get(attempt.orderId).status='2';
+ f.source.marketRefundReported=null;
  assert.equal(completed.items[0].refundId,'0x'+refund.proposal.requestId);
  assert.equal(completed.provenance.finalized,true);
  f.source.fundedRefund=async()=>({executed:true,record:{paymentId:b32(901),settlementAsset:order.paymentAsset,recipient:attacker.address.toLowerCase(),amount:'100',reasonHash:b32(404)}});

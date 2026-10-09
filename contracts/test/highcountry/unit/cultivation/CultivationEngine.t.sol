@@ -9,6 +9,7 @@ import { GenesisRegistry } from "../../../../src/highcountry/genesis/GenesisRegi
 import { GenomeRegistry } from "../../../../src/highcountry/genetics/GenomeRegistry.sol";
 import { PublicCultivationAccess } from "../../../../src/highcountry/land/PublicCultivationAccess.sol";
 import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegistry.sol";
+import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { HCInvalidState, HCCapacityExceeded } from "../../../../src/highcountry/errors/HighCountryErrors.sol";
@@ -74,6 +75,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
     PlantRegistry private plants;
     CultivationEngine private cultivation;
     bytes32 private genomeId;
+    bytes32 private approvedRulesetId;
 
     constructor() {
         caps = new MockCapabilityRegistry();
@@ -101,6 +103,14 @@ contract CultivationEngineTest is PlantSourcesFixture {
         access.bindPlantRegistry(address(plants));
         _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
+        RulesetRegistry rulesets = new RulesetRegistry(address(auth));
+        bytes32 contentHash = keccak256("hc6:approved-ruleset-version");
+        approvedRulesetId = rulesets.deriveRulesetId(contentHash);
+        _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, approvedRulesetId, keccak256("hc6:ruleset:register"));
+        rulesets.registerRuleset(contentHash);
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS,
+            cultivation.RULESET_BIND_SCOPE(), keccak256("hc6:bind-rulesets"));
+        cultivation.bindRulesetRegistry(address(rulesets));
         _grant(
             address(this),
             ModuleIds.GENESIS_REGISTRY,
@@ -310,7 +320,8 @@ contract CultivationEngineTest is PlantSourcesFixture {
         });
         cultivation.updateEnvironment(2, env);
         (uint16 stress, uint16 quality) = cultivation.deriveScores(env);
-        bytes32 expression = cultivation.expressPhenotype(2, genomeId, keccak256("hc6:ruleset"));
+        _ready(2);
+        bytes32 expression = cultivation.expressPhenotype(2, genomeId, approvedRulesetId);
         require(expression != bytes32(0), "expression missing");
         CultivationEngine.CultivationState memory s = cultivation.getState(2);
         require(s.environment.temperature == 2400 && s.environment.airflow == 4100, "environment not retained");
@@ -364,7 +375,18 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(!ok, "foreign genome sealed");
         require(!cultivation.getState(plantId).expressionLocked, "failed expression locked state");
         require(plants.genomeOf(plantId) == genomeId, "canonical genome changed");
-        require(cultivation.expressPhenotype(plantId, genomeId, keccak256("ruleset")) != bytes32(0), "recovery failed");
+        _ready(plantId);
+        require(cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId) != bytes32(0), "recovery failed");
+    }
+
+    function _ready(uint64 plantId) private {
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE,
+            bytes32(uint256(plantId)), keccak256(abi.encode("hc6:ready", plantId)));
+        PlantRegistry.PlantRecord memory p = plants.getPlant(plantId);
+        vm.warp(uint256(p.plantedAt) + plants.GERMINATION_DURATION()
+            + plants.SEEDLING_DURATION() + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION());
+        plants.syncOfflineGrowth(plantId);
+        require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.READY, "ready stage");
     }
 
     function _grant(

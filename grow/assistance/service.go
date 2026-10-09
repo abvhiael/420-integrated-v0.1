@@ -10,55 +10,55 @@ import (
 )
 
 var (
-	ErrDenied = errors.New("AI assistance unavailable")
-	ErrInvalid = errors.New("invalid AI assistance request")
+	ErrDenied   = errors.New("AI assistance unavailable")
+	ErrInvalid  = errors.New("invalid AI assistance request")
 	ErrConflict = errors.New("AI assistance state conflict")
 )
 
 type Scope struct {
-	TenantID string
+	TenantID  string
 	Principal security.Principal
-	Grant security.Grant
+	Grant     security.Grant
 }
 
 type Input struct {
-	TenantID string
-	FacilityID string
-	ZoneID string
-	JobID string
-	Purpose string
-	SourceKind string
-	SourceID string
-	ConsentID string
-	Prompt string
+	TenantID    string
+	FacilityID  string
+	ZoneID      string
+	JobID       string
+	Purpose     string
+	SourceKind  string
+	SourceID    string
+	ConsentID   string
+	Prompt      string
 	RequestedAt time.Time
 }
 
 type Recommendation struct {
-	TenantID string
-	FacilityID string
-	ZoneID string
-	JobID string
-	ID string
-	Provider string
-	Model string
-	Text string
+	TenantID    string
+	FacilityID  string
+	ZoneID      string
+	JobID       string
+	ID          string
+	Provider    string
+	Model       string
+	Text        string
 	Explanation string
 	Limitations string
-	Confidence string
-	CreatedAt time.Time
+	Confidence  string
+	CreatedAt   time.Time
 }
 
 type Review struct {
-	TenantID string
-	FacilityID string
-	ZoneID string
+	TenantID         string
+	FacilityID       string
+	ZoneID           string
 	RecommendationID string
-	ID string
-	Actor string
-	Decision string
-	Reason string
-	ReviewedAt time.Time
+	ID               string
+	Actor            string
+	Decision         string
+	Reason           string
+	ReviewedAt       time.Time
 }
 
 type Store interface {
@@ -77,7 +77,7 @@ type ConsentStore interface {
 }
 
 type Service struct {
-	Store Store
+	Store    Store
 	Provider ProviderVerifier
 }
 

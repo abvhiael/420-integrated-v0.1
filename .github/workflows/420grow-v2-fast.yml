@@ -174,12 +174,15 @@ jobs:
           test -z "$(gofmt -l grow/integrations/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/integrations/qualify.sql
       - name: GROW-V2-13 private cultivation dashboard and mobile UX Level 1
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
         run: |
           go test -count=1 ./grow/dashboard
           go test -race -count=1 ./grow/dashboard
           go vet ./grow/dashboard
           gofmt -d grow/dashboard/*.go
           test -z "$(gofmt -l grow/dashboard/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/dashboard/qualify.sql
           node --check grow/web/workspace.js
           node --test grow/web/test/workspace.test.js
           (cd grow/web && npm run qualify)

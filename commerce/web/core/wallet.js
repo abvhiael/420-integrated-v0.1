@@ -56,6 +56,69 @@ export class WalletSession {
     return {epoch,address,tag,deadline};
   }
   wallet(){const address=this.address;return {address,signMessage:async message=>{if(address!==this.address)fail('Wallet session changed.');await this.verify();const epoch=this.epoch;const result=await this.provider.request({method:'personal_sign',params:['0x'+[...new TextEncoder().encode(message)].map(x=>x.toString(16).padStart(2,'0')).join(''),address]});if(epoch!==this.epoch)fail('Wallet changed while signing.');await this.verify();return result;}};}
+  async _verifiedArbitration(checked){
+    const a=this.config.arbitration;
+    if(!a)fail('Approved Arbitration service unavailable.');
+    const call=async(target,abi,method,args=[])=>{
+      if(this.now()>checked.deadline||checked.epoch!==this.epoch)fail('Arbitration authority expired.');
+      const iface=new Interface(abi),raw=await this.provider.request({method:'eth_call',params:[{to:target,data:iface.encodeFunctionData(method,args)},checked.tag]});
+      return iface.decodeFunctionResult(method,raw);
+    };
+    const serviceId=keccak256(toUtf8Bytes('420/service/arbitration/v1'));
+    const registryInterface=['function getService(bytes32) view returns(tuple(address implementation,bytes32 codeHash,bytes32 metadataHash,uint32 version,uint64 publishedAt,bool active))','function getRegistrationProfile(bytes32,uint32) view returns(tuple(uint8 componentType,bytes32 manifestHash,bytes32 dependencyRoot,bytes32 interfaceHash))'];
+    const service=(await call(this.config.registry.address,registryInterface,'getService',[serviceId]))[0];
+    if(!service.active||Number(service.version)!==a.version||service.implementation.toLowerCase()!==a.router.address.toLowerCase()||service.codeHash!==a.router.codeHash)fail('Arbitration service publication changed.');
+    const profile=(await call(this.config.registry.address,registryInterface,'getRegistrationProfile',[serviceId,a.version]))[0];
+    if(profile.manifestHash!==a.manifestHash||profile.interfaceHash!==a.interfaceHash||profile.dependencyRoot!==a.dependencyRoot)fail('Arbitration approval profile mismatch.');
+    const addr={router:a.router.address,policies:a.dependencies.policies.address,cases:a.dependencies.cases.address,rulings:a.dependencies.rulings.address};
+    for(const [name,b] of Object.entries({router:a.router,...a.dependencies})){
+      const code=await this.provider.request({method:'eth_getCode',params:[b.address,checked.tag]});
+      if(code==='0x'||keccak256(code)!==b.codeHash)fail('Arbitration '+name+' code changed.');
+      if(Number((await call(b.address,['function protocolVersion() view returns(uint32)'],'protocolVersion'))[0])!==1)fail('Arbitration version mismatch.');
+    }
+    const links=[['router','policies','policies'],['router','cases','cases'],['router','rulings','rulings'],['cases','policies','policies'],['cases','rulingRegistry','rulings'],['rulings','cases','cases']];
+    for(const [from,selector,to] of links)if((await call(addr[from],['function '+selector+'() view returns(address)'],selector))[0].toLowerCase()!==addr[to].toLowerCase())fail('Arbitration dependency graph changed.');
+    const block=await this.provider.request({method:'eth_getBlockByNumber',params:['finalized',false]});
+    if(block?.hash!==checked.tag.blockHash)fail('Arbitration finalized block changed.');
+    return {a,addr,call,blockTimestamp:Number(BigInt(block.timestamp))};
+  }
+  async sendArbitrationAction(plan){
+    if(this.pending)fail('A transaction is already awaiting Wallet.');
+    this.pending=true;
+    try {
+      const intent=plan?.intent,method=intent?.method;
+      if(!['openCase','submitEvidence','appeal'].includes(method)||plan.requester!==this.address&&plan.claimant!==this.address||intent.chainId!==this.config.chainId||intent.contract!=='ArbitrationCaseRegistry420'||intent.requiresWalletAuthorization!==true||intent.canonicalAuthority!==false)fail('Invalid Arbitration Wallet handoff.');
+      const checked=await this.verify(),v=await this._verifiedArbitration(checked);
+      if(intent.target.toLowerCase()!==v.addr.cases.toLowerCase())fail('Arbitration target changed.');
+      const actionABI=new Interface(['function openCase(bytes32,address,bytes32,bytes32,bytes32,bytes32) returns(bytes32)','function submitEvidence(bytes32,bytes32)','function appeal(bytes32)']);
+      let args=intent.args;
+      if(!Array.isArray(args))fail('Invalid Arbitration action.');
+      const domain=keccak256(toUtf8Bytes('420/arbitration/domain/market/v1')),origin=keccak256(toUtf8Bytes('420/component/market/v1'));
+      const caseABI=['function getCase(bytes32) view returns(tuple(address claimant,address respondent,bytes32 domainId,bytes32 originComponentId,bytes32 originObjectId,bytes32 claimHash,bytes32 requestedRemedyHash,address resolver,address appealResolver,uint64 evidenceWindow,uint64 appealWindow,uint64 openedAt,uint64 evidenceDeadline,uint64 appealDeadline,uint8 maxAppeals,uint8 round,uint8 state,bool exists))'];
+      if(method==='openCase'){
+        if(plan.state!=='ARBITRATION_WALLET_SUBMISSION_REQUIRED'||args.length!==6||args[0]!==domain||args[1]?.toLowerCase()!==plan.respondent||args[2]!==origin||args[3]!==plan.orderId||args[4]!==plan.claimHash||args[5]!==plan.requestedRemedyHash)fail('Arbitration claim commitment mismatch.');
+        const policy=(await v.call(v.addr.router,['function getPolicy(bytes32) view returns(tuple(address resolver,address appealResolver,uint64 evidenceWindow,uint64 appealWindow,uint8 maxAppeals,bool active,bool exists))'],'getPolicy',[domain]))[0];
+        if(!policy.exists||!policy.active||policy.resolver.toLowerCase()!==plan.policy.resolver)fail('Arbitration policy changed.');
+        const orderABI=['function getOrder(bytes32) view returns(tuple(bytes32 listingId,uint32 listingRevision,address buyer,address seller,uint256 quantity,address paymentAsset,uint256 totalAmount,bytes32 settlementAdapterId,bytes32 paymentRef,bytes32 fulfillmentHash,bytes32 disputeHash,uint8 status,uint64 createdAt,uint64 updatedAt))'];
+        const order=(await v.call(this.config.contracts.OrderRegistry420.address,orderABI,'getOrder',[plan.orderId]))[0];
+        if(Number(order.status)!==6||order.seller.toLowerCase()!==this.address||order.buyer.toLowerCase()!==plan.respondent||order.disputeHash!==plan.claimHash)fail('Market dispute is not finalized for this claim.');
+      }else{
+        if(args[0]!==plan.caseId||plan.action!==method)fail('Arbitration case action changed.');
+        const record=(await v.call(v.addr.cases,caseABI,'getCase',[plan.caseId]))[0];
+        if(!record.exists||record.claimant.toLowerCase()!==this.address||record.domainId!==domain||record.originComponentId!==origin)fail('Arbitration case claimant mismatch.');
+        if(method==='submitEvidence'&&(args.length!==2||!/^0x[0-9a-f]{64}$/.test(args[1])||Number(record.state)!==1||Number(record.evidenceDeadline)<v.blockTimestamp))fail('Evidence window closed.');
+        if(method==='appeal'&&(args.length!==1||Number(record.state)!==2||Number(record.appealDeadline)<v.blockTimestamp||Number(record.round)>=Number(record.maxAppeals)))fail('Appeal not authorized.');
+      }
+      const tx={from:checked.address,to:v.addr.cases,data:actionABI.encodeFunctionData(method,args),value:'0x0'};
+      await this.provider.request({method:'eth_call',params:[tx,checked.tag]});
+      if(checked.epoch!==this.epoch||this.now()>checked.deadline)fail('Arbitration authority expired.');
+      if(BigInt(await this.provider.request({method:'eth_chainId'}))!==BigInt(this.config.chainId)||(await this.provider.request({method:'eth_accounts'}))[0]?.toLowerCase()!==checked.address)fail('Wallet chain or account changed.');
+      if(checked.epoch!==this.epoch)fail('Wallet session changed.');
+      const transactionHash=await this.provider.request({method:'eth_sendTransaction',params:[tx]});
+      if(!/^0x[0-9a-f]{64}$/.test(transactionHash)||checked.epoch!==this.epoch)fail('Unverified Arbitration broadcast.');
+      return {transactionHash,finalized:false,arbitrationCaseOpened:false,remedyExecuted:false};
+    }finally{this.pending=false;}
+  }
   async sendMarketDispute(proposal){
     if(this.pending)fail('A transaction is already awaiting Wallet.');
     this.pending=true;

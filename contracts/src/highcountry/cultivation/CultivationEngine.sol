@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
+import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
 import { HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
@@ -116,6 +118,32 @@ contract CultivationEngine {
         bool exists;
     }
 
+    IEmergencyState public emergencyState;
+    bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.ENGINE_BIND.V1");
+    event EmergencyStateBound(address indexed emergencyState);
+
+    function bindEmergencyState(address candidate) external {
+        if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.CULTIVATION_ENGINE,
+                ActionIds.CULTIVATION_BIND_EMERGENCY,
+                EMERGENCY_BIND_SCOPE, 0
+            )
+        );
+        if (IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false) revert HCInvalidState();
+        emergencyState = IEmergencyState(candidate);
+        emit EmergencyStateBound(candidate);
+    }
+
+    function _requireUnrestricted(bytes32 domain) private view {
+        if (address(emergencyState) == address(0) || emergencyState.isRestricted(domain)) {
+            revert HCEmergencyRestrictionActive(domain);
+        }
+    }
+
     IHighCountryAuthorization public immutable authorization;
     IPlantRegistryCultivation public immutable plantRegistry;
     mapping(uint64 => CultivationState) private _states;
@@ -138,6 +166,7 @@ contract CultivationEngine {
         uint64 plantId,
         EnvironmentSnapshot calldata environment
     ) external {
+        _requireUnrestricted(EmergencyDomains.CULTIVATION);
         if (plantId == 0) revert HCInvalidId();
         if (!plantRegistry.exists(plantId)) revert HCNotFound();
         if (_stage(plantId) == TERMINATED_STAGE) revert HCInvalidState();
@@ -163,6 +192,7 @@ contract CultivationEngine {
         bytes32 genomeId,
         bytes32 rulesetId
     ) external returns (bytes32 expressionHash) {
+        _requireUnrestricted(EmergencyDomains.CULTIVATION);
         CultivationState storage s = _states[plantId];
         if (!s.exists) revert HCNotFound();
         if (s.expressionLocked || genomeId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidState();

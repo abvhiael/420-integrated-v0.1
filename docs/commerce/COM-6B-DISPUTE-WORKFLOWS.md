@@ -2,7 +2,7 @@
 
 **Canonical parent roadmap:** `docs/commerce/COM-1-ARCHITECTURE-AND-ROADMAP.md`, COM-6 Merchant operations. COM-6B is a proposed implementation work package; it does not replace, renumber or alter the COM-6 exit criteria.
 
-**Audit branch:** `audit/420commerce-com-2-upstream-adaptations`, PR #594 (draft). **Executable candidate SHA:** `6a788bdfe7d6337f0d05b8f9c3f5dd00f5077f53`. Current implementation and tests require exact-SHA Level 1 completion before a PASS disposition. No repository-wide Level 3 requested.
+**Audit branch:** `audit/420commerce-com-2-upstream-adaptations`, PR #594 (draft). **Executable candidate SHA:** `938a35772ea70b684a8e38e456cc4d96544f6199`. Current implementation and tests require exact-SHA Level 1 completion before a PASS disposition. No repository-wide Level 3 requested.
 
 ## 1. Authority matrix
 
@@ -57,3 +57,25 @@ There is **no blanket Arbitration authority** and the UI cannot sign governance,
 5. PR #594 still accumulates other COM-6 requirements (Notifications, credentials/names, full analytics) and is not merge-ready solely because COM-6B code is implemented.
 
 **Completion language:** repository-side handoff and independently verified optional-case path may be Level-1-qualified; live Arbitration/deployment/remedy acceptance is a separate real-world gate. Never claim a signed transaction, created case, returned funds or final ruling based only on an API intent, mock or unverified external service. Next canonical work package after COM-6B is COM-6C Notifications, but do not erase the external COM-6B blockers.
+
+## COM-6B exact-SHA Level 1 + app-specific Level 2 evidence — 2026-10-09
+
+**Executable implementation SHA:** `938a35772ea70b684a8e38e456cc4d96544f6199`. **PR:** #594, branch `audit/420commerce-com-2-upstream-adaptations`; **PR base:** `41d173dbcfbeb8299f54f22e7c049f1fec20336d`; **current main as independently rechecked:** `f8bbb62e1cdfe68cff25261fd4a036db1840a15c` (main has advanced; no branch/main reconciliation yet). All applicable targeted workflows completed at this single implementation SHA:
+
+| Workflow | GitHub Actions run | Conclusion |
+| --- | --- | --- |
+| Commerce service fast qualification (Level 1: service, signed API, SDK/Indexer, SQLite v5, adversarial authorization, optional Arbitration service/case/ruling verification) | [37989067827](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989067827) | **PASS** |
+| Commerce merchant builder fast qualification (Level 1: Wallet, browser UX and responsive/accessibility regressions) | [37989068342](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989068342) | **PASS** |
+| Commerce upstream contracts (retained Market/Pay and funded-refund Foundry plus retained Arbitration Genesis and deployment-binding integration, app-scoped Level 2) | [37989068080](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989068080) | **PASS** |
+| Solidity Contracts (affected classification/build check, not claimed as global Level 3 full inventory) | [37989067983](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989067983) | **PASS** |
+| Commerce governed Pay refund qualification (affected existing Pay governance/source checks) | [37989068370](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989068370) | **PASS** |
+
+420Pay historical audit workflow [37989068389](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989068389) was **SKIPPED by design** for the Commerce branch; it is **not passing COM-6B evidence** and its frozen PAY-AUDIT-6 identity/release requirements remain intact on canonical Pay audit branches. The exact candidate has 5 passed applicable workflows, zero failed applicable workflows, and zero pending applicable workflows. Early failed/cancelled tests on earlier SHAs are superseded, not counted green.
+
+**Security and invariants qualified:** independent Market buyer/seller eligibility and exact evidence hash, per-store authorization/IDOR, serialized request idempotence and conflict/replay denial, verified Registry-published Arbitration service/version/runtime code/dependency graph, case parties/domain/origin/remedy/round binding, active policy and exact appeal/evidence deadlines, no forged case/ruling/finality, no unapproved Wallet signing, noncustodial case/ruling reads, and no automatic financial/Market remedy. App-scoped Level 2 additionally exercised retained canonical Market/Pay/Arbitration Solidity integration without duplicating repo-wide Foundry.
+
+**COM-6B disposition:** **repository-side implementation COMPLETE; Level 1 PASS; focused app Level 2 PASS.** This is not live/testnet acceptance. The approved Arbitration service deployment, active governance policy, independently authorized resolver, real Wallet transactions and finalized event receipts, protocol-origin remedy enforcement, live reorg/adversarial recovery, frozen deployment identities and production-equivalent acceptance remain separate gated deployment/integration work. In particular, no actual user dispute or case was opened on a live chain; no ruling or fund transfer was executed. The overall canonical COM-6 Merchant operations roadmap remains INCOMPLETE because COM-6C Notifications, COM-6D Identity/Names, and COM-6E full analytics and phase qualification remain.
+
+**Level 3:** deliberately not run until app-phase closeout. The phase merge requires reconciliation against then-current main and one accumulated exact merge-candidate SHA; Solidity owns full Foundry and Genesis owns address/namespace/manifest checks without duplicating Foundry.
+
+**Next planned COM-6 work package:** COM-6C Notifications (not a renumbered canonical roadmap step). Canonical next top-level step after COM-6 is COM-7 Security/ops.

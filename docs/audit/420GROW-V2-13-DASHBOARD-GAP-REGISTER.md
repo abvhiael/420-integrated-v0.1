@@ -1,30 +1,21 @@
-# GROW-V2-13 — Cultivation dashboard and mobile UX: qualification gap register
+# GROW-V2-13 — Cultivation dashboard/mobile UX: reconciled gap register
 
 **Canonical step:** GROW-V2-13 — Full cultivation dashboard and mobile UX.
-**Current disposition:** IN PROGRESS; not Level 1 COMPLETE and not production-enabled.
+**Audit status:** **COMPLETE / Level 1 PASS** — qualified implementation `d9ef0c17086d66df39d05349ec6829ff684c58b5`. Grow V2 workflow 37891172433/job 113692221365 and retained Grow 37891172465/job 113692221230 both SUCCESS. Follow-on GROW-V2-14 hardening qualified at `e6049e4d3ef134afabcc43af1438ba9350c5a801`.
 
-## Repository-grounded interface boundary
+The original pre-implementation open gaps listed in this file are now reconciled. This record describes **source-level app audit**, not live deployment.
 
-The existing `grow/web/index.html` and `grow/cmd/server/main.go` are public read-only 420Location consumers. Their public anonymous discovery rights are not valid for the separate tenant-private cultivation workspace described in [GROW-V2-01](420GROW-V2-01-EXPANDED-PRODUCT-DECISION.md). The existing Go domain packages implement multiple qualified private operations, but the public web server has no trusted private session issuer and no authenticated API aggregator binding them to HTTP.
+## Resolved app-audit gaps
 
-This step adds a **separate** `grow/web/workspace.html`, `workspace.js`, `workspace.css`, and frontend tests. It packages with the existing public static build but does not modify the directory or publish tenant records. It also introduces a narrow `grow/dashboard` Go HTTP interface with mandatory injected authenticated session authority and a PostgreSQL `SQLReader` which consults current ACTIVE tenant memberships, enforces role and facility/zone scope, uses tenant-local RLS, and returns fixed bounded projections for the ten read-only sections. The production authentication adapter, private server route mounting, and real-data end-to-end acceptance remain absent. There is **no default demonstration account, token, fixture tenant or trust inheritance from public 420Location**.
+1. **Verified revocable session:** `grow/dashboard/auth.go`, `certificate.go` and `mount.go` authenticate enrolled TLS client certificates against SPIFFE tenant/subject and fingerprints plus current membership, issue random hashed opaque Secure/HttpOnly/SameSite cookies and check live session expiry, certificate, membership and revocation on each private request.
+2. **Mounted private server and actual PostgreSQL:** `grow/cmd/private-server/main.go` is an independent TLS1.3/private HTTP service, distinct from anonymous `grow/cmd/server`; `grow/dashboard/projection.go` reads actual PostgreSQL data through the dedicated non-superuser role with tenant RLS and facility/zone scopes. The retained V2-14 regression fixed facilities horizontal access.
+3. **Authorized UI workflows:** `grow/web/workspace.{html,js,css}` renders server-authorized facility/plant/cultivation/harvest/inventory/human-review and internal CSV export actions, with CSRF and role gates. Actual domain service stores and SQL tests back these operations; equipment control remains separately safety-gated.
+4. **Browser, accessibility and recovery:** Chromium exercises real desktop/mobile viewports, keyboard/labels, XSS-safe DOM, stale-session recovery, logout and revoked data clearing. Go integration and negative suites cover cross-tenant/facility/zone restrictions, revoked memberships, CSRF/origin/method spoof, certificate revocation and failed database connections.
+5. **Exact-SHA tests:** Grow V2 and retained Grow workflows both succeeded on exact V2-13 SHA. The subsequent V2-14 exact SHA also succeeded in both app-specific workflows and its explicit V2-14 security gate. [V2-14 qualification record](420GROW-V2-14-LEVEL-1-QUALIFICATION.md).
 
-## Implemented UX and privacy controls
+## Remaining *release* gates — not missing V2-13/V2-14 Level 1
 
-- Touch-sized, horizontal scroll mobile navigation, responsive record grid, keyboard skip link, readable status announcements and reduced-motion support.
-- Sections for overview, facilities, plants, environment, equipment, cultivation, harvests, inventory, advice and notifications, rendered only if server-authorized for the current tenant.
-- Explicit empty, unavailable, unauthenticated and expired-session states; no example records misrepresented as live data.
-- Client checks HTTPS origin, same-origin or explicitly approved cross-origin boundary, credentialed no-cache/no-redirect requests, typed `grow-private-v1` contracts, maximum 500 records, bounded response sizes, tenant ID alignment, duplicate IDs and HTML-free text rendering.
-- Server-side interface validates an externally verified unexpired authenticated session, section allowlist, scope, per-row tenant consistency, record counts, duplicate IDs, denied/unavailable routes, cache prevention, no public read fallback and no mutation endpoints.
+- **GROW-V2-15:** Phase closeout: reconcile draft PR against then-current main, establish exact merge-candidate, complete canonical comprehensive Level 3 with Solidity and Genesis inventory ownership separated.
+- **GROW-V2-16:** Authenticated production-equivalent testnet deployment, actual external browser/devices, certificate issuance/rotation, live tenant data controls and operational failure/recovery acceptance. No deployment or genuine customer records are asserted by app-audit tests.
 
-## Open qualification requirements (must not be relabeled as passed)
-
-1. Connect an actual, authenticated, revocable cultivation session issuer/verifier to the private HTTP handler; do not infer authority from public directory browsing.
-2. Wire the now-implemented `grow/dashboard.SQLReader` to an actual private HTTP server under a verified-session adapter; demonstrate its SQL reads and role/zone restrictions against an unprivileged production-equivalent database. Unit-only query assertions do not establish database end-to-end readiness.
-3. Implement backed, authorized create/edit/record/review/export journeys for the required home grower, technician, facility manager and quality reviewer workflows. This page currently supplies a **read-only overview**, not the full management UX or real editing forms.
-4. Qualify mobile browsers and accessibility (keyboard/screen reader/touch), responsive chart rendering, failure and stale-state recovery, session logout/revocation, multi-tenant attack paths, retention and payload privacy with real authenticated backend data.
-5. Run the V2-13 app fast qualification against one exact implementation SHA including the retained original Grow web/build/Go suites, as well as any newly wired private API tests. Record workflow run/job conclusions, scope limits, main divergence and remaining release gates.
-
-A static file build passing does **not** prove live login or complete dashboard. The endpoint is disabled by default until genuine private service infrastructure is configured and qualified. GROW-V2-14 security hardening and V2-15 Level 3 do not substitute for missing V2-13 Level 1 criteria. GROW-V2-16 remains the production-equivalent testnet gate.
-
-**Next canonical step after complete V2-13 qualification:** GROW-V2-14 — Security, privacy, adversarial and recovery qualification.
+The original `420GROW-V2-13-INTERIM-QUALIFICATION.md` remains a historical subcheck snapshot and **is superseded by** the exact-SHA V2-13 and V2-14 successful workflows above. The existing public 420Location consumer is not a private-cultivation identity provider.

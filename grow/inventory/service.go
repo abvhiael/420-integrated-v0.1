@@ -28,6 +28,8 @@ type Scope struct {
 type Lot struct {
 	TenantID, FacilityID, ZoneID, ID, Kind, Unit, Label, HarvestID string
 	Opening                                                        float64
+	CreatedBy                                                      string
+	CreatedAt                                                      time.Time
 }
 type Entry struct {
 	TenantID, FacilityID, ZoneID, LotID, ID, Kind, Reason, Actor, Source, IdempotencyKey, ReferenceID string
@@ -64,6 +66,9 @@ func validLot(l Lot) bool {
 	switch l.Unit {
 	case "g", "kg", "L", "mL", "each":
 	default:
+		return false
+	}
+	if (l.Kind == "SEED" || l.Kind == "CLONE" || l.Kind == "EQUIPMENT") && l.Unit != "each" {
 		return false
 	}
 	if l.Kind == "HARVEST" && (l.HarvestID == "" || l.Unit != "g") {
@@ -136,6 +141,8 @@ func (s Service) Snapshot(ctx context.Context, scope Scope, facility, zone, lot 
 type Export struct {
 	Jurisdiction string
 	Filename     string
+	SchemaVersion string
+	Certified bool
 	CSV          []byte
 }
 

@@ -2,6 +2,7 @@
 import {createCommerceSdk420} from '../../packages/420-sdk/dist/commerce.js';
 import {normalizeCart,getPublicProduct,reviewedOrder,receiptLabel} from './public-core.js';
 import {WalletSession} from './core/wallet.js';
+import {submitReviewedMarketOrder} from './buyer-order.js';
 const $=id=>document.getElementById(id);
 const add=(node,tag,value)=>{const el=document.createElement(tag);el.textContent=String(value??'');node.append(el);return el;};
 let sdk=null, wallet=null, lines=[],offset=0,attempts=[],page=[],busy=false;

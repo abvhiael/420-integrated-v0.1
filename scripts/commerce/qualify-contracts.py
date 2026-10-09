@@ -5,7 +5,8 @@ root = pathlib.Path(__file__).resolve().parents[2]
 contracts = root / 'contracts'
 tests = ['MarketPaySettlementAdapter420.t.sol', 'Market420.t.sol', 'PayAudit3Lifecycle420.t.sol',
          'PayAudit4SettlementAndAccounting420.t.sol', 'PaymentAtomicSettlement420.t.sol',
-         'PayFocusedHardening420.t.sol']
+         'PayFocusedHardening420.t.sol', 'RefundManager420Fuzz.t.sol',
+         'RefundManager420Funded.t.sol']
 files = set()
 def include(path):
     path = path.resolve()

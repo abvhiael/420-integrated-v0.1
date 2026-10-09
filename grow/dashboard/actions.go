@@ -98,7 +98,7 @@ func (a SQLActions) Execute(r *http.Request,session Session,section string,body 
 		switch in.Operation {
 		case "create":
 			kind:=facility.Kind(in.Kind)
-			var parentID=in.ParentID
+			parentID := in.ParentID
 			fid:=in.FacilityID
 			if kind==facility.Facility{parentID="";fid=""}
 			_,err=svc.Create(ctx,s,facility.Record{TenantID:session.TenantID,ID:id,ParentID:parentID,

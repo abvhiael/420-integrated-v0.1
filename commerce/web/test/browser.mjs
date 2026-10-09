@@ -88,6 +88,8 @@ try{
   const operations=await context.newPage();operations.on('pageerror',e=>errors.push(e.message));await operations.goto(origin+'/operations.html');
   assert.match(await operations.locator('h1').textContent(),/Merchant operations/);
   await operations.locator('#connect').click();
+  await operations.waitForFunction(()=>document.querySelector('#status').textContent.includes('Verified Wallet connected')||!document.querySelector('#error').hidden);
+  assert.equal(await operations.locator('#error').isVisible(),false,'operations connect: '+await operations.locator('#error').textContent());
   await operations.locator('#open input[name=storeId]').fill(f.db.get('SELECT store_id FROM stores').store_id);
   await operations.locator('#open button').click();
   await operations.waitForFunction(()=>document.querySelector('#summary').textContent.includes('order attempts')||!document.querySelector('#error').hidden);

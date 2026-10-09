@@ -1,0 +1,9 @@
+# 420Compute external science read endpoint
+
+The frontend S-06 scientific contributions section requests `GET /v1/compute/external-science?chainId=420&limit=50`. The 420Indexer server now registers this route and returns an explicitly non-authoritative response `{data:{schemaVersion:"420-science-read-v1",chainId,items,total,authoritative:false,rewardEligible:false},canonicalAuthority:false}` when a validated science projection reader is available.
+
+**Fail closed by design:** the default current 420Indexer backend has no durable science projection reader; the new endpoint returns HTTP **503**, not a misleading empty successful read. Independent source ingestion and a durable, reorg-aware external-science read-store must be connected and qualified before any live result can be returned. No file fixtures or fabricated BOINC/Folding@home events are installed in production. The frontend clears previously shown cards on failed reload and displays a neutral unavailable message; an explicitly available but empty page displays “No external scientific contributions indexed yet.” Repeated loads never preserve stale apparent balances.
+
+Indexer tests use an injected read-only test provider to verify populated and empty wire contracts; they test wrong-chain, unavailable provider, source failure and rejection of any claimed native $420 amount. UI normalizer retains a 24-hour stale label, explicit no monetary entitlement and chain/authority safeguards.
+
+Neither 420Indexer nor browser pays funds. The endpoint is a read facade only. Actual source pipeline integration, verified issuer claims and publicly deployed runtime remain blocked until independently authorized on-chain/source evidence and live testnet qualifications. Deploy only after existing PR stack is merged and environment points the frontend to the correct actual 420Indexer URL.

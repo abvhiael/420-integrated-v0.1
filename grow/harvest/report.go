@@ -8,6 +8,7 @@ import (
 	"math"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/420integrated/420-integrated/grow/security"
@@ -62,6 +63,15 @@ func (s Service) Calendar(ctx context.Context, scope Scope, facility, zone strin
 		}
 	}
 	return rows, nil
+}
+
+// csvCell neutralizes spreadsheet formula execution in otherwise valid CSV fields.
+func csvCell(v string) string {
+	if strings.HasPrefix(v, "=") || strings.HasPrefix(v, "+") || strings.HasPrefix(v, "-") || strings.HasPrefix(v, "@") ||
+		strings.HasPrefix(v, "\t") || strings.HasPrefix(v, "\r") {
+		return "'" + v
+	}
+	return v
 }
 
 // Report provides bounded production-by-period and provenance-bearing CSV export.
@@ -119,7 +129,7 @@ func (s Service) Production(ctx context.Context, scope Scope, facility, zone str
 		periods[month].Grams += r.WeightGrams
 		report.Count++
 		report.TotalGrams += r.WeightGrams
-		if err = writer.Write([]string{"OBSERVED", r.ID, r.PlantID, r.FacilityID, r.ZoneID, r.HarvestedAt.UTC().Format(time.RFC3339Nano), strconv.FormatFloat(r.WeightGrams, 'f', -1, 64), r.Source, r.Actor}); err != nil {
+		if err = writer.Write([]string{"OBSERVED", r.ID, r.PlantID, r.FacilityID, r.ZoneID, r.HarvestedAt.UTC().Format(time.RFC3339Nano), strconv.FormatFloat(r.WeightGrams, 'f', -1, 64), csvCell(r.Source), csvCell(r.Actor)}); err != nil {
 			return Report{}, err
 		}
 	}

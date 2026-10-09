@@ -82,7 +82,6 @@ contract BreedingRandomnessInvariantTest is InvariantTarget420 {
         );
         breeding.bindEmergencyState(address(emergency));
 
-
         _grant(
             address(this),
             ModuleIds.GENESIS_REGISTRY,

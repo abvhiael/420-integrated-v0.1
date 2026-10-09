@@ -19,7 +19,7 @@ func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader
  publicReviews:=HandlerWithReviewReader(reader,reviews)
  saveReady:=reader!=nil&&users.Identity!=nil
  if _,ok:=users.Trips.(EditableTripRepository);!ok {saveReady=false}
- return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+ return HandlerWithClaimWorkflows(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
   // Issue links only via authenticated POST; never offer a GET that can
   // retrieve or re-display a previous bearer token.
   const tripPrefix="/travel/trips/"
@@ -50,5 +50,12 @@ func HandlerWithQualifiedJourneys(reader PublicReader,reviews TravelReviewReader
    publicReviews.ServeHTTP(w,r);return
   }
   private.ServeHTTP(w,r)
- })
+ }),users.Identity,users.Claims,nil,nil)
 }
+
+// Explicit reviewer composition; reviewer authority is never inferred from Identity.
+func HandlerWithQualifiedClaimReviewers(reader PublicReader,reviews TravelReviewReader,users TravelUserDependencies,shares TripSharing,reviewer ClaimReviewerAuthorizer,decisions ClaimDecisionRepository)http.Handler {
+ base:=HandlerWithQualifiedJourneys(reader,reviews,users,shares)
+ return HandlerWithClaimWorkflows(base,users.Identity,users.Claims,reviewer,decisions)
+}
+

@@ -7,7 +7,13 @@ Status: **IN PROGRESS / NOT PRODUCTION QUALIFIED.** CI tests and injected adapte
 - `cmd/420travel` mounts `PublicTravelHandler`: public discovery, public Location/Events place and event pages, and the public map/list route. No Identity/session service or private repository is created by this binary.
 - `HandlerWithQualifiedJourneys(reader,reviews,users,shares)` is the explicit composition for an authorized deployment. It supplies map/list, verified-review pages only with a trusted review adapter, owned Trips create/list/edit, owner-scoped unlisted share issue/revoke, and business claim submission only with independently verified ClaimRepository + session identity.
 - Authenticated trip list links to the existing trip editor, and shows unlisted share/revoke POST controls only when share repository, grant store and publication verifier are all configured. Creation and share mutations retain session-bound CSRF and owner checks. Shared URLs are secrets; never store plaintext tokens in logs, referrers, analytics or public indexes.
-- Saved place/event IDs remain manual editor inputs and are **not yet** wired to one-click public-place/event save actions. PublishedTripVerifier and ClaimProvenance are trusted interfaces, not deployed-service evidence. Public-trip listing needs separate policy review.
+- Public place/event pages have opt-in save-to-trip links, and owner-scoped saved item cards support reorder/removal with stale-version conflicts. The manual ID editor remains available as fallback. PublishedTripVerifier and ClaimProvenance are trusted interfaces, not deployed-service evidence. Public-trip listing needs separate policy review.
+
+## Claim status and reviewer UI (follow-up GEN-SVC-3.11.10.1)
+
+The owner-scoped `/travel/business/claim/status/{claim_id}` GET returns only the verified session owner's place ID and claim status, without exposing evidence references or enumerating claims. Successful claim submission offers a private status link. The review form at `/travel/business/claim/review/{claim_id}` is **not** enabled in default or ordinary qualified composition; it requires explicit `HandlerWithQualifiedClaimReviewers`, a trusted reviewer authorizer and an audited decision repository. Every GET/POST requires an authenticated session and independent authorization; POST also enforces CSRF, size and decision validation. The SQL decision implementation retains self-review denial, serializable conflict handling and provenance recheck. This is not proof of live reviewer or Registry/Verify service integration.
+
+Targeted Go route tests exist, but CI/browser/a11y qualification is not yet recorded for the audit branch. No production release claim is made.
 
 ## Deployment prerequisites — verify against actual endpoints before enabling private routes
 
@@ -24,4 +30,4 @@ Status: **IN PROGRESS / NOT PRODUCTION QUALIFIED.** CI tests and injected adapte
 - Desktop/mobile browser and keyboard/screen-reader run through `/travel`, `/travel/events`, `/travel/map`, public place/reviews, authenticated trips and claim submission. Verify focus order, form errors, zoom/reflow at narrow widths, no-JS map list, accessible share-link handling and no unexpected third-party requests.
 - Operator evidence: precise staging hostname, deploy SHA, service versions and endpoints (without secrets), migration checksums, timestamped test runs, backup/restore report, monitoring dashboards, incident procedure and signed release decision.
 
-**Merge gate:** Keep PR #356 open until these live acceptance artifacts exist. CI passing on an opt-in route or mock is not production proof. DOOBR and 420BnB transactions remain disabled.
+**Release gate:** PR #356 was merged on 2026-09-21, but its merge does not satisfy live acceptance. The GEN-SVC-3.11.10.1 follow-up must pass its own exact-SHA app-scoped qualification before its audit PR is merged. CI passing on an opt-in route or mock is not production proof. DOOBR and 420BnB transactions remain disabled.

@@ -13,7 +13,7 @@ HC-6 closes the first persistent plant-simulation layer on top of HC-3 land and 
 5. ready
 6. terminated
 
-`syncOfflineGrowth()` deterministically catches a plant up after player absence while retaining canonical stage-boundary timestamps. Registration requires the grower to be the parcel's effective operator and cannot exceed the parcel's `growCapacity`.
+`syncOfflineGrowth()` deterministically catches a plant up after player absence while retaining canonical stage-boundary timestamps. Source-backed registration requires an owner-approved eligible seed/clone. Private admission requires the grower to be the parcel's effective operator; public admission requires the grower's plot allocation. Reservations plus private plants cannot exceed parcel growCapacity. Legacy source-less methods fail closed. Termination releases capacity once without restoring the resource. See docs/highcountry/R02.4-PLANT-SOURCE-CONSUMPTION.md for constructor/binding/grant/approval instructions.
 
 ## Environment model
 
@@ -38,4 +38,4 @@ Phenotype expression verifies the supplied genome equals the canonical plant gen
 
 ## Phase boundary
 
-HC-6 owns active plant lifecycle, offline growth, environmental state, deterministic stress/quality derivation, and phenotype sealing. Harvest resolution, product grading, seeds/clones/mothers and downstream economic objects belong to HC-7 and later phases.
+HC-6 owns active plant lifecycle, offline growth, environmental state, deterministic stress/quality derivation, and phenotype sealing. HC-4 owns seed/clone/mother records; R02.4 connects source consumption to HC-6 admission. Harvest resolution and product grading belong to HC-7, with downstream economic objects in later phases.

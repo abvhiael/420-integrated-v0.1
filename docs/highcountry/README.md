@@ -30,3 +30,5 @@ Core play must remain available without registration or a wallet. Wallet linking
 - [R02.2 nonperiodic capability policy](R02.2-CAPABILITY-BUDGET-POLICY.md)
 
 R02.3 links PublicCultivationAccess reservations and allocations to PlantRegistry private/public admission and terminal release. One-time capability-authorized reciprocal binding is required before use; active allocations cannot release. See [capacity policy](R02.3-PUBLIC-PLANT-CAPACITY.md). Source consumption, harvest and production services remain later work.
+
+R02.4 requires explicit seed/clone owner approval for the plant/parcel/plot and atomic scoped resource consumption. Source-less admission rejects; PlantRegistry now requires both resource registries in its constructor and all three reciprocal bindings before admission. Transfer invalidates approvals; termination never refunds the resource. See [source policy](R02.4-PLANT-SOURCE-CONSUMPTION.md). Clone cutting issuance and fabricated lineage/phenotype prevention remain R02.5/R02.6.

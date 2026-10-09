@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import { IPlantSourceConsumer } from "../interfaces/IPlantSourceConsumer.sol";
+
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
 import {
@@ -8,6 +10,7 @@ import {
     HCInvalidId,
     HCInvalidState,
     HCNotFound,
+    HCUnauthorized,
     HCZeroAddress
 } from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
@@ -38,6 +41,24 @@ contract CloneRegistry {
         bool exists;
     }
 
+    bytes32 public constant BIND_SCOPE = keccak256("HC.CLONE_REGISTRY.PLANT_BINDING");
+    IPlantSourceConsumer public plantRegistry;
+    mapping(uint64 => uint64) public ownershipEpoch;
+    mapping(uint64 => mapping(uint64 => bytes32)) public plantApproval;
+    event PlantRegistryBound(address indexed plantRegistry);
+    event PlantSourceApproved(
+        uint64 indexed sourceId,
+        uint64 indexed plantId,
+        address indexed owner,
+        uint64 parcelId,
+        uint64 plotId,
+        uint64 ownershipEpoch
+    );
+    event PlantSourceApprovalRevoked(uint64 indexed sourceId, uint64 indexed plantId, address indexed owner);
+    mapping(uint64 => uint64) public consumedByPlant;
+    mapping(uint64 => uint64) public cloneForPlant;
+    event CloneConsumed(uint64 indexed cloneId, uint64 indexed plantId, address indexed grower);
+
     IHighCountryAuthorization public immutable authorization;
     IGenomeRegistryClone public immutable genomeRegistry;
     IMotherRegistryClone public immutable motherRegistry;
@@ -57,6 +78,92 @@ contract CloneRegistry {
         authorization = IHighCountryAuthorization(authorization_);
         genomeRegistry = IGenomeRegistryClone(genomeRegistry_);
         motherRegistry = IMotherRegistryClone(motherRegistry_);
+    }
+
+    /// @notice Deployment-only binding; replacement requires a new registry.
+    function bindPlantRegistry(
+        address plants
+    ) external {
+        if (address(plantRegistry) != address(0) || plants.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(msg.sender, ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_BIND_PLANTS, BIND_SCOPE, 0)
+        );
+        IPlantSourceConsumer candidate = IPlantSourceConsumer(plants);
+        if (
+            candidate.authorization() != address(authorization) || candidate.genomeRegistry() != address(genomeRegistry)
+                || candidate.cloneRegistry() != address(this)
+        ) revert HCInvalidState();
+        plantRegistry = candidate;
+        emit PlantRegistryBound(plants);
+    }
+
+    function approvePlant(
+        uint64 sourceId,
+        uint64 plantId,
+        uint64 parcelId,
+        uint64 plotId
+    ) external {
+        CloneRecord storage clone = _require(sourceId);
+        if (clone.owner != msg.sender) {
+            revert HCUnauthorized(msg.sender, ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_CONSUME);
+        }
+        if (address(plantRegistry) == address(0) || plantId == 0 || parcelId == 0) revert HCInvalidState();
+        if (consumedByPlant[sourceId] != 0) revert HCInvalidState();
+        plantApproval[sourceId][plantId] = _approval(sourceId, plantId, clone.genomeId, msg.sender, parcelId, plotId);
+        emit PlantSourceApproved(sourceId, plantId, msg.sender, parcelId, plotId, ownershipEpoch[sourceId]);
+    }
+
+    function revokePlantApproval(
+        uint64 sourceId,
+        uint64 plantId
+    ) external {
+        CloneRecord storage clone = _require(sourceId);
+        if (clone.owner != msg.sender) {
+            revert HCUnauthorized(msg.sender, ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_CONSUME);
+        }
+        delete plantApproval[sourceId][plantId];
+        emit PlantSourceApprovalRevoked(sourceId, plantId, msg.sender);
+    }
+
+    function consumeForPlant(
+        uint64 sourceId,
+        uint64 plantId
+    ) external {
+        if (msg.sender != address(plantRegistry) || plantId == 0) revert HCInvalidState();
+        CloneRecord storage clone = _require(sourceId);
+        (uint8 kind, uint64 recordedSource, bytes32 genomeId, address grower, uint64 parcelId, uint64 plotId) =
+            plantRegistry.sourceContext(plantId);
+        if (kind != 2 || recordedSource != sourceId || clone.genomeId != genomeId || clone.owner != grower) {
+            revert HCInvalidState();
+        }
+        if (plantApproval[sourceId][plantId] != _approval(sourceId, plantId, genomeId, grower, parcelId, plotId)) {
+            revert HCInvalidState();
+        }
+        if (cloneForPlant[plantId] != 0 || consumedByPlant[sourceId] != 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_CONSUME, bytes32(uint256(sourceId)), 1
+            )
+        );
+        delete plantApproval[sourceId][plantId];
+        cloneForPlant[plantId] = sourceId;
+        consumedByPlant[sourceId] = plantId;
+        emit CloneConsumed(sourceId, plantId, grower);
+    }
+
+    function _approval(
+        uint64 sourceId,
+        uint64 plantId,
+        bytes32 genomeId,
+        address grower,
+        uint64 parcelId,
+        uint64 plotId
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                address(plantRegistry), sourceId, plantId, genomeId, grower, parcelId, plotId, ownershipEpoch[sourceId]
+            )
+        );
     }
 
     function registerClone(
@@ -81,6 +188,8 @@ contract CloneRegistry {
     ) external {
         if (newOwner == address(0)) revert HCZeroAddress();
         CloneRecord storage clone = _require(cloneId);
+        if (consumedByPlant[cloneId] != 0) revert HCInvalidState();
+        ownershipEpoch[cloneId] += 1;
         _auth(ActionIds.CLONE_TRANSFER, cloneId);
         address previous = clone.owner;
         clone.owner = newOwner;

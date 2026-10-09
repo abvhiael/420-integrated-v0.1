@@ -8,10 +8,13 @@ import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 import { GenesisRegistry } from "../../../src/highcountry/genesis/GenesisRegistry.sol";
 import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry.sol";
 import { PublicCultivationAccess } from "../../../src/highcountry/land/PublicCultivationAccess.sol";
+import { HCCapacityExceeded } from "../../../src/highcountry/errors/HighCountryErrors.sol";
+import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
+import { PlantSourcesFixture } from "../mocks/PlantSourcesFixture.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
 interface VmHC6Invariant {
@@ -69,15 +72,18 @@ contract CultivationInvariantHandler {
     CultivationEngine private immutable cultivation;
     PlantRegistry private immutable plants;
     bytes32 private immutable genomeId;
+    SeedRegistry private immutable seeds;
 
     constructor(
         CultivationEngine cultivation_,
         PlantRegistry plants_,
-        bytes32 genomeId_
+        bytes32 genomeId_,
+        SeedRegistry seeds_
     ) {
         cultivation = cultivation_;
         plants = plants_;
         genomeId = genomeId_;
+        seeds = seeds_;
     }
 
     function stepAttemptSealedEnvironment(
@@ -96,13 +102,22 @@ contract CultivationInvariantHandler {
         uint64 id
     ) external {
         if (id == 0 || id == 1 || id == 2) return;
-        (bool ok,) = address(plants)
-            .call(abi.encodeWithSelector(plants.registerPlant.selector, id, genomeId, address(this), uint64(21)));
-        require(!ok, "over-capacity plant accepted");
+        seeds.approvePlant(3, id, 21, 0);
+        (bool ok, bytes memory reason) = address(plants)
+            .call(
+                abi.encodeCall(
+                    plants.registerPlantFromSource,
+                    (id, genomeId, address(this), 21, 0, PlantRegistry.PlantSourceKind.SEED, 3)
+                )
+            );
+        require(
+            !ok && reason.length >= 4 && bytes4(reason) == HCCapacityExceeded.selector,
+            "over-capacity admission boundary"
+        );
     }
 }
 
-contract CultivationInvariantTest is InvariantTarget420 {
+contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
     VmHC6Invariant private constant vm = VmHC6Invariant(address(uint160(uint256(keccak256("hevm cheat code")))));
     MockCapabilityRegistry private caps;
     HighCountryAuthorization private auth;
@@ -126,7 +141,10 @@ contract CultivationInvariantTest is InvariantTarget420 {
         land = new MockLandRegistryHC6Invariant();
         land.configure(21, address(this), 2, 2);
         PublicCultivationAccess access = new PublicCultivationAccess(address(auth), address(land));
-        plants = new PlantRegistry(address(auth), address(genomes), address(land), address(access));
+        _createPlantSources(address(auth), address(genomes));
+        plants = new PlantRegistry(
+            address(auth), address(genomes), address(land), address(access), address(sourceSeeds), address(sourceClones)
+        );
         _grant(
             address(this),
             ModuleIds.PUBLIC_CULTIVATION_ACCESS,
@@ -135,6 +153,7 @@ contract CultivationInvariantTest is InvariantTarget420 {
             keccak256("bind-plants")
         );
         access.bindPlantRegistry(address(plants));
+        _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
         _grant(
             address(this),
@@ -174,7 +193,7 @@ contract CultivationInvariantTest is InvariantTarget420 {
             bytes32(uint256(1)),
             keccak256("hc6:inv:p1:advance")
         );
-        plants.registerPlant(1, genomeId, address(this), 21);
+        _sourcePlant(caps, plants, 1, genomeId, address(this), 21);
         plantedAt = plants.getPlant(1).plantedAt;
         uint256 total = uint256(plants.GERMINATION_DURATION()) + plants.SEEDLING_DURATION()
             + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION();
@@ -201,7 +220,7 @@ contract CultivationInvariantTest is InvariantTarget420 {
             bytes32(uint256(2)),
             keccak256("hc6:inv:p2:express")
         );
-        plants.registerPlant(2, genomeId, address(this), 21);
+        _sourcePlant(caps, plants, 2, genomeId, address(this), 21);
         CultivationEngine.EnvironmentSnapshot memory env = CultivationEngine.EnvironmentSnapshot({
             temperature: 1800, humidity: 3500, light: 9500, water: 3000, nutrients: 8500, airflow: 1500
         });
@@ -214,7 +233,12 @@ contract CultivationInvariantTest is InvariantTarget420 {
         (bool changed,) = address(cultivation)
             .call(abi.encodeWithSelector(cultivation.updateEnvironment.selector, uint64(2), replacement));
         require(!changed, "HC-INV-CULTIVATION-017 setup: sealed environment changed");
-        targetContract(address(new CultivationInvariantHandler(cultivation, plants, genomeId)));
+        CultivationInvariantHandler handler =
+            new CultivationInvariantHandler(cultivation, plants, genomeId, sourceSeeds);
+        _sourceGrant(caps, address(this), ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(3)), 1);
+        sourceSeeds.registerSeedLot(3, genomeId, 0, address(handler), 1, keccak256("capacity-probe"));
+        land.configure(21, address(handler), 2, 2);
+        targetContract(address(handler));
     }
 
     function invariant_HC_INV_CULTIVATION_016_LifecycleIdentityAndCapacityStayConserved() public view {

@@ -56,7 +56,9 @@ Dependencies: R01; audit fixes retained. Category: code, real contract integrati
 | R02.12 | Validate module code/interface/version/ruleset and active-state consumers | No EOA/invalid/inactive module accepted as executable; scheduled activation and emergency rules agree |
 | R02.13 | Bind canonical SmartAccount deployment provenance and reviewed routine selectors | Forged account views do not authorize execution; native value, assets, fees, grants and sensitive operations escalate |
 
-R02.3 implements reciprocal one-time binding, private/public reservation accounting, allocated nonowner admission and terminal-only release. Policy: `R02.3-PUBLIC-PLANT-CAPACITY.md`; exact-head evidence: `qualification/R02.3-level1.json`. Source consumption remains R02.4.
+R02.4 implements owner-approved source-backed admission, seed quantity conservation, one-time clone consumption and atomic rollback. Policy: `R02.4-PLANT-SOURCE-CONSUMPTION.md`; evidence: `qualification/R02.4-level1.json`. Mother cutting issuance remains R02.5; canonical breeding/phenotype anchors remain R02.6.
+
+R02.3 implements reciprocal one-time binding, private/public reservation accounting, allocated nonowner admission and terminal-only release. Policy: `R02.3-PUBLIC-PLANT-CAPACITY.md`; exact-head evidence: `qualification/R02.3-level1.json`. R02.4 subsequently adds source consumption.
 
 R02.2 selects enforced nonperiodic-only grants; both periodLimit and periodSeconds must be zero. Policy/evidence: `R02.2-CAPABILITY-BUDGET-POLICY.md`, `qualification/R02.2-level1.json`. Cumulative budget support is not claimed.
 

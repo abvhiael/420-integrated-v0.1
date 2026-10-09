@@ -4,6 +4,9 @@ pragma solidity ^0.8.24;
 import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
 import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
 import { GenesisRegistry } from "../../../src/highcountry/genesis/GenesisRegistry.sol";
+import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
+import { CloneRegistry } from "../../../src/highcountry/genetics/CloneRegistry.sol";
+import { MotherRegistry } from "../../../src/highcountry/genetics/MotherRegistry.sol";
 import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry.sol";
 import { RegionRegistry } from "../../../src/highcountry/world/RegionRegistry.sol";
 import { LandRegistry } from "../../../src/highcountry/land/LandRegistry.sol";
@@ -40,6 +43,9 @@ contract PublicPlantCapacityFixture {
     LandRegistry internal land;
     PublicCultivationAccess internal plots;
     PlantRegistry internal plants;
+    SeedRegistry internal seeds;
+    CloneRegistry internal clones;
+    MotherRegistry internal mothers;
     address internal constant ALICE = address(0xA11CE);
     address internal constant BOB = address(0xB0B);
     bytes32 internal constant GENOME = keccak256("capacity-genome");
@@ -53,13 +59,21 @@ contract PublicPlantCapacityFixture {
         genomes = new GenomeRegistry(address(auth), address(genesis));
         land = new LandRegistry(address(auth), address(regions), address(genesis));
         plots = new PublicCultivationAccess(address(auth), address(land));
-        plants = new PlantRegistry(address(auth), address(genomes), address(land), address(plots));
+        seeds = new SeedRegistry(address(auth), address(genomes));
+        mothers = new MotherRegistry(address(auth), address(genomes));
+        clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
+        plants = new PlantRegistry(
+            address(auth), address(genomes), address(land), address(plots), address(seeds), address(clones)
+        );
         caps.registerProtocolComponent(ModuleIds.GENESIS_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.REGION_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.GENOME_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.LAND_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.PUBLIC_CULTIVATION_ACCESS, address(this));
         caps.registerProtocolComponent(ModuleIds.PLANT_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.SEED_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.CLONE_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.MOTHER_REGISTRY, address(this));
         _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, genesis.ADMIN_SCOPE());
         _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, genesis.ADMIN_SCOPE());
         genesis.setRoots(
@@ -77,6 +91,39 @@ contract PublicPlantCapacityFixture {
             address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_BIND_PLANTS, plots.BIND_SCOPE()
         );
         plots.bindPlantRegistry(address(plants));
+        _grant(address(this), ModuleIds.SEED_REGISTRY, ActionIds.SEED_BIND_PLANTS, seeds.BIND_SCOPE());
+        _grant(address(this), ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_BIND_PLANTS, clones.BIND_SCOPE());
+        seeds.bindPlantRegistry(address(plants));
+        clones.bindPlantRegistry(address(plants));
+        _issueSeeds(100, address(this), type(uint32).max);
+        _issueSeeds(101, ALICE, type(uint32).max);
+        _issueSeeds(102, BOB, type(uint32).max);
+    }
+
+    function _issueSeeds(
+        uint64 id,
+        address who,
+        uint32 quantity
+    ) internal {
+        _grant(address(this), ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(id)));
+        seeds.registerSeedLot(id, GENOME, 0, who, quantity, keccak256("plant-source"));
+        _grant(address(plants), ModuleIds.SEED_REGISTRY, ActionIds.SEED_CONSUME, bytes32(uint256(id)));
+    }
+
+    function _sourceId(
+        address who
+    ) internal view returns (uint64) {
+        return who == ALICE ? 101 : who == BOB ? 102 : 100;
+    }
+
+    function _preparePlant(
+        uint64 id,
+        address who,
+        uint64 parcel,
+        uint64 plot
+    ) internal {
+        vm.prank(who);
+        seeds.approvePlant(_sourceId(who), id, parcel, plot);
     }
 
     function _grant(
@@ -114,14 +161,19 @@ contract PublicPlantCapacityFixture {
         uint64 plot
     ) internal {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(id)));
-        plants.registerPublicPlant(id, GENOME, who, plot);
+        uint64 parcel = plots.getPlot(plot).parcelId;
+        _preparePlant(id, who, parcel, plot);
+        plants.registerPlantFromSource(
+            id, GENOME, who, parcel, plot, PlantRegistry.PlantSourceKind.SEED, _sourceId(who)
+        );
     }
 
     function _private(
         uint64 id
     ) internal {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(id)));
-        plants.registerPlant(id, GENOME, address(this), 1);
+        _preparePlant(id, address(this), 1, 0);
+        plants.registerPlantFromSource(id, GENOME, address(this), 1, 0, PlantRegistry.PlantSourceKind.SEED, 100);
     }
 
     function _reject(
@@ -186,7 +238,10 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)));
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPlant, (2, GENOME, address(this), 1)),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (2, GENOME, address(this), 1, 0, PlantRegistry.PlantSourceKind.SEED, _sourceId(address(this)))
+            ),
             HCCapacityExceeded.selector
         );
         require(!plants.exists(2) && plants.privatePlantsByParcel(1) == 1, "failed admission persisted");
@@ -205,19 +260,28 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPublicPlant, (1, GENOME, BOB, 1)),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, GENOME, BOB, 1, 1, PlantRegistry.PlantSourceKind.SEED, _sourceId(BOB))
+            ),
             HCCapacityExceeded.selector
         );
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 2)),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, GENOME, ALICE, 1, 2, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
             HCCapacityExceeded.selector
         );
         _public(1, ALICE, 1);
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(2)));
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPublicPlant, (2, GENOME, ALICE, 1)),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (2, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
             HCCapacityExceeded.selector
         );
         require(plants.activePublicPlants(1, ALICE) == 1 && !plants.exists(2), "overbooked");
@@ -227,12 +291,22 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _plot(1, 1);
         _allocate(1, ALICE, 1);
         _reject(
-            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 1)), HCUnauthorized.selector
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
+            HCUnauthorized.selector
         );
         bytes32 id = _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(1)));
         caps.revokeGrant(id);
         _reject(
-            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 1)), HCUnauthorized.selector
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
+            HCUnauthorized.selector
         );
         require(plants.activePublicPlants(1, ALICE) == 0 && plots.allocationOf(1, ALICE) == 1, "rollback failed");
     }
@@ -251,7 +325,9 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
     function testBindingIsOneTimeAndUnauthorizedBindingFails() public {
         _reject(address(plots), abi.encodeCall(plots.bindPlantRegistry, (address(plants))), HCInvalidState.selector);
         PublicCultivationAccess other = new PublicCultivationAccess(address(auth), address(land));
-        PlantRegistry otherPlants = new PlantRegistry(address(auth), address(genomes), address(land), address(other));
+        PlantRegistry otherPlants = new PlantRegistry(
+            address(auth), address(genomes), address(land), address(other), address(seeds), address(clones)
+        );
         vm.prank(BOB);
         _reject(
             address(other), abi.encodeCall(other.bindPlantRegistry, (address(otherPlants))), HCUnauthorized.selector
@@ -261,7 +337,10 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _reject(address(other), abi.encodeCall(other.registerPublicPlot, (1, 1, 1)), HCInvalidState.selector);
         _reject(
             address(otherPlants),
-            abi.encodeCall(otherPlants.registerPlant, (1, GENOME, address(this), 1)),
+            abi.encodeCall(
+                otherPlants.registerPlantFromSource,
+                (1, GENOME, address(this), 1, 0, PlantRegistry.PlantSourceKind.SEED, 100)
+            ),
             HCInvalidState.selector
         );
     }
@@ -271,15 +350,28 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _allocate(1, ALICE, 1);
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPublicPlant, (1, keccak256("unknown"), ALICE, 1)),
-            HCNotFound.selector
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, keccak256("unknown"), ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
+            HCInvalidState.selector
         );
         _reject(
-            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 99)), HCNotFound.selector
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, GENOME, ALICE, 1, 99, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
+            HCNotFound.selector
         );
         _public(1, ALICE, 1);
         _reject(
-            address(plants), abi.encodeCall(plants.registerPublicPlant, (1, GENOME, ALICE, 1)), HCAlreadyExists.selector
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (1, GENOME, ALICE, 1, 1, PlantRegistry.PlantSourceKind.SEED, _sourceId(ALICE))
+            ),
+            HCAlreadyExists.selector
         );
         require(plants.activePublicPlants(1, ALICE) == 1, "duplicate consumed capacity");
     }
@@ -295,7 +387,10 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(3)));
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPlant, (3, GENOME, address(this), 1)),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (3, GENOME, address(this), 1, 0, PlantRegistry.PlantSourceKind.SEED, _sourceId(address(this)))
+            ),
             HCCapacityExceeded.selector
         );
         _public(3, ALICE, 1);
@@ -329,12 +424,23 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(3)));
         _reject(
             address(plants),
-            abi.encodeCall(plants.registerPlant, (3, GENOME, address(this), 1)),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (3, GENOME, address(this), 1, 0, PlantRegistry.PlantSourceKind.SEED, _sourceId(address(this)))
+            ),
             HCInvalidState.selector
         );
-        plants.registerPlant(3, GENOME, BOB, 1);
+        _preparePlant(3, BOB, 1, 0);
+        plants.registerPlantFromSource(3, GENOME, BOB, 1, 0, PlantRegistry.PlantSourceKind.SEED, 102);
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(4)));
-        _reject(address(plants), abi.encodeCall(plants.registerPlant, (4, GENOME, BOB, 1)), HCCapacityExceeded.selector);
+        _reject(
+            address(plants),
+            abi.encodeCall(
+                plants.registerPlantFromSource,
+                (4, GENOME, BOB, 1, 0, PlantRegistry.PlantSourceKind.SEED, _sourceId(BOB))
+            ),
+            HCCapacityExceeded.selector
+        );
         require(
             plants.getPlant(1).grower == address(this) && plants.activePublicPlants(1, ALICE) == 1,
             "occupancy rewritten"

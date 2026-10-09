@@ -144,3 +144,5 @@ Existing Solidity enum ordinals, tuple field order, signedness, widths, event en
 Migration stages are decode → validate source schema/ranges → normalize exact units/IDs → attach source evidence → validate destination rules → commit idempotently. Failed/ambiguous conversion leaves the original save intact; no partial resource/asset creation. Semantic schema changes require a new version plus explicit forward/backward compatibility and rollback policy. R01.4 defines authorization/manifest/claim state machines; R05 implements real transport adapters and schema validation. This specification does not rewrite historic saves or claim deployed compatibility testing.
 
 Level 1 acceptance: catalogue agrees with all named source enums/types; exact temperature vectors and rejection boundaries verified; lifecycle projections preserve lossiness; access tests verify linked/disconnected behavior without promotion; references and inventory hashes valid; patch scope is docs-only. R01.7 reviews accumulated specification consistency. Next: R01.4 — Migration boundaries.
+
+- PlantSourceKind: 0=NONE, 1=SEED, 2=CLONE.

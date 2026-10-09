@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
+import { SeedRegistry } from "../genetics/SeedRegistry.sol";
+import { CloneRegistry } from "../genetics/CloneRegistry.sol";
 import { PublicCultivationAccess } from "../land/PublicCultivationAccess.sol";
 
 import { ActionIds } from "../constants/ActionIds.sol";
@@ -38,6 +40,30 @@ interface ILandRegistryPlant {
 }
 
 contract PlantRegistry {
+    enum PlantSourceKind {
+        NONE,
+        SEED,
+        CLONE
+    }
+
+    struct PlantSource {
+        PlantSourceKind kind;
+        uint64 sourceId;
+    }
+    mapping(uint64 => PlantSource) public sourceOfPlant;
+    SeedRegistry public immutable seedRegistry;
+    CloneRegistry public immutable cloneRegistry;
+    bool private _entering;
+    event PlantSourceConsumed(
+        uint64 indexed plantId, PlantSourceKind indexed kind, uint64 indexed sourceId, address grower
+    );
+    modifier nonReentrantAdmission() {
+        if (_entering) revert HCInvalidState();
+        _entering = true;
+        _;
+        _entering = false;
+    }
+
     enum PlantStage {
         NONE,
         GERMINATION,
@@ -85,11 +111,13 @@ contract PlantRegistry {
         address authorization_,
         address genomeRegistry_,
         address landRegistry_,
-        address publicAccess_
+        address publicAccess_,
+        address seedRegistry_,
+        address cloneRegistry_
     ) {
         if (
             authorization_ == address(0) || genomeRegistry_ == address(0) || landRegistry_ == address(0)
-                || publicAccess_ == address(0)
+                || publicAccess_ == address(0) || seedRegistry_ == address(0) || cloneRegistry_ == address(0)
         ) {
             revert HCZeroAddress();
         }
@@ -97,6 +125,14 @@ contract PlantRegistry {
         genomeRegistry = IGenomeRegistryPlant(genomeRegistry_);
         landRegistry = ILandRegistryPlant(landRegistry_);
         publicAccess = PublicCultivationAccess(publicAccess_);
+        seedRegistry = SeedRegistry(seedRegistry_);
+        cloneRegistry = CloneRegistry(cloneRegistry_);
+        if (
+            address(seedRegistry.authorization()) != authorization_
+                || address(cloneRegistry.authorization()) != authorization_
+                || address(seedRegistry.genomeRegistry()) != genomeRegistry_
+                || address(cloneRegistry.genomeRegistry()) != genomeRegistry_
+        ) revert HCInvalidState();
         if (
             address(publicAccess.authorization()) != authorization_
                 || address(publicAccess.landRegistry()) != landRegistry_
@@ -105,12 +141,76 @@ contract PlantRegistry {
         }
     }
 
+    /// @notice Source-less legacy admission is deliberately disabled.
     function registerPlant(
+        uint64,
+        bytes32,
+        address,
+        uint64
+    ) external pure {
+        revert HCInvalidState();
+    }
+
+    function registerPublicPlant(
+        uint64,
+        bytes32,
+        address,
+        uint64
+    ) external pure {
+        revert HCInvalidState();
+    }
+
+    function registerPlantFromSource(
+        uint64 plantId,
+        bytes32 genomeId,
+        address grower,
+        uint64 parcelId,
+        uint64 plotId,
+        PlantSourceKind kind,
+        uint64 sourceId
+    ) external nonReentrantAdmission {
+        if (sourceId == 0 || kind == PlantSourceKind.NONE) revert HCInvalidId();
+        if (
+            address(seedRegistry.plantRegistry()) != address(this)
+                || address(cloneRegistry.plantRegistry()) != address(this)
+        ) revert HCInvalidState();
+        if (kind == PlantSourceKind.SEED) {
+            SeedRegistry.SeedLot memory lot = seedRegistry.getSeedLot(sourceId);
+            if (lot.owner != grower || lot.genomeId != genomeId) revert HCInvalidState();
+        } else {
+            CloneRegistry.CloneRecord memory clone = cloneRegistry.getClone(sourceId);
+            if (clone.owner != grower || clone.genomeId != genomeId) revert HCInvalidState();
+        }
+        if (plotId == 0) {
+            _registerPrivatePlant(plantId, genomeId, grower, parcelId);
+        } else {
+            if (publicAccess.getPlot(plotId).parcelId != parcelId) revert HCInvalidState();
+            _registerPublicPlant(plantId, genomeId, grower, plotId);
+        }
+        sourceOfPlant[plantId] = PlantSource(kind, sourceId);
+        if (kind == PlantSourceKind.SEED) seedRegistry.consumeForPlant(sourceId, plantId);
+        else cloneRegistry.consumeForPlant(sourceId, plantId);
+        emit PlantSourceConsumed(plantId, kind, sourceId, grower);
+    }
+
+    function sourceContext(
+        uint64 plantId
+    )
+        external
+        view
+        returns (uint8 kind, uint64 sourceId, bytes32 genomeId, address grower, uint64 parcelId, uint64 plotId)
+    {
+        PlantRecord storage p = _require(plantId);
+        PlantSource memory source = sourceOfPlant[plantId];
+        return (uint8(source.kind), source.sourceId, p.genomeId, p.grower, p.landParcelId, publicPlotOfPlant[plantId]);
+    }
+
+    function _registerPrivatePlant(
         uint64 plantId,
         bytes32 genomeId,
         address grower,
         uint64 landParcelId
-    ) external {
+    ) private {
         if (plantId == 0 || genomeId == bytes32(0) || grower == address(0) || landParcelId == 0) revert HCInvalidId();
         if (_plants[plantId].exists) revert HCAlreadyExists();
         if (!genomeRegistry.exists(genomeId) || !landRegistry.exists(landParcelId)) revert HCNotFound();
@@ -124,12 +224,12 @@ contract PlantRegistry {
         _registerPlant(plantId, genomeId, grower, landParcelId);
     }
 
-    function registerPublicPlant(
+    function _registerPublicPlant(
         uint64 plantId,
         bytes32 genomeId,
         address grower,
         uint64 plotId
-    ) external {
+    ) private {
         if (plantId == 0 || genomeId == bytes32(0) || grower == address(0)) revert HCInvalidId();
         if (_plants[plantId].exists) revert HCAlreadyExists();
         if (address(publicAccess.plantRegistry()) != address(this)) revert HCInvalidState();

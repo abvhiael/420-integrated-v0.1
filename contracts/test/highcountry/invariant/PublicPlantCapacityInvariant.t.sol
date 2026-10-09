@@ -2,12 +2,16 @@
 pragma solidity ^0.8.24;
 import { PublicPlantCapacityFixture } from "../integration/PublicPlantCapacity.t.sol";
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
+import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { PublicCultivationAccess } from "../../../src/highcountry/land/PublicCultivationAccess.sol";
 import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 
 interface VmPlotInvariant {
+    function prank(
+        address
+    ) external;
     function warp(
         uint256
     ) external;
@@ -19,17 +23,20 @@ contract PublicPlantCapacityHandler {
     PublicCultivationAccess private immutable plots;
     bytes32 private immutable genome;
     address private immutable owner;
+    SeedRegistry private immutable seeds;
 
     constructor(
         PlantRegistry plants_,
         PublicCultivationAccess plots_,
         bytes32 genome_,
-        address owner_
+        address owner_,
+        SeedRegistry seeds_
     ) {
         plants = plants_;
         plots = plots_;
         genome = genome_;
         owner = owner_;
+        seeds = seeds_;
     }
 
     function stepAdmit(
@@ -38,9 +45,24 @@ contract PublicPlantCapacityHandler {
     ) external {
         uint64 id = uint64(salt % 16) + 1;
         if (publicPlant) {
-            address(plants).call(abi.encodeCall(plants.registerPublicPlant, (id, genome, address(this), 1)));
+            seeds.approvePlant(103, id, 1, 1);
+            address(plants)
+                .call(
+                    abi.encodeCall(
+                        plants.registerPlantFromSource,
+                        (id, genome, address(this), 1, 1, PlantRegistry.PlantSourceKind.SEED, 103)
+                    )
+                );
         } else {
-            address(plants).call(abi.encodeCall(plants.registerPlant, (id, genome, owner, 1)));
+            vm.prank(owner);
+            seeds.approvePlant(100, id, 1, 0);
+            address(plants)
+                .call(
+                    abi.encodeCall(
+                        plants.registerPlantFromSource,
+                        (id, genome, owner, 1, 0, PlantRegistry.PlantSourceKind.SEED, 100)
+                    )
+                );
         }
     }
 
@@ -73,8 +95,9 @@ contract PublicPlantCapacityInvariantTest is PublicPlantCapacityFixture, Invaria
     function setUp() public override {
         super.setUp();
         _plot(1, 2);
-        handler = new PublicPlantCapacityHandler(plants, plots, GENOME, address(this));
+        handler = new PublicPlantCapacityHandler(plants, plots, GENOME, address(this), seeds);
         _allocate(1, address(handler), 2);
+        _issueSeeds(103, address(handler), 32);
         for (uint64 id = 1; id <= 16; ++id) {
             _grant(address(handler), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(id)));
             _grant(address(handler), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE, bytes32(uint256(id)));
@@ -84,14 +107,28 @@ contract PublicPlantCapacityInvariantTest is PublicPlantCapacityFixture, Invaria
 
     function invariantCapacityAndAllocationConservation() public view {
         uint32 privateCount;
+        uint32 issuedPrivate;
+        uint32 issuedPublic;
         uint32 publicCount;
         for (uint64 id = 1; id <= 16; ++id) {
             if (!plants.exists(id)) continue;
             PlantRegistry.PlantRecord memory p = plants.getPlant(id);
+            (PlantRegistry.PlantSourceKind kind, uint64 sourceId) = plants.sourceOfPlant(id);
+            require(kind == PlantRegistry.PlantSourceKind.SEED && seeds.seedLotForPlant(id) == sourceId, "source drift");
+            if (sourceId == 100) {
+                ++issuedPrivate;
+            } else {
+                require(sourceId == 103, "wrong source");
+                ++issuedPublic;
+            }
             if (p.stage == PlantRegistry.PlantStage.TERMINATED) continue;
             if (plants.publicPlotOfPlant(id) == 0) ++privateCount;
             else ++publicCount;
         }
+        require(
+            issuedPrivate == seeds.consumedQuantity(100) && issuedPublic == seeds.consumedQuantity(103),
+            "source consumption drift"
+        );
         require(privateCount == plants.privatePlantsByParcel(1), "private ledger drift");
         require(publicCount == plants.activePublicPlants(1, address(handler)), "public ledger drift");
         require(privateCount + publicCount == plants.activePlantsByParcel(1), "parcel ledger drift");

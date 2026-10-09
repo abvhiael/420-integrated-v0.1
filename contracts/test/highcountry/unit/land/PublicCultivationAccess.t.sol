@@ -10,6 +10,7 @@ import { LandRegistry } from "../../../../src/highcountry/land/LandRegistry.sol"
 import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { PublicCultivationAccess } from "../../../../src/highcountry/land/PublicCultivationAccess.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
+import { PlantSourcesFixture } from "../../mocks/PlantSourcesFixture.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
 contract PlotGenomePublic {
@@ -49,7 +50,7 @@ contract MockGenesisRegistryHC3Public is IGenesisRegistry {
     }
 }
 
-contract PublicCultivationAccessHC3Test {
+contract PublicCultivationAccessHC3Test is PlantSourcesFixture {
     MockCapabilityRegistry private capabilityRegistry;
     HighCountryAuthorization private authorization;
     LandRegistry private land;
@@ -62,9 +63,17 @@ contract PublicCultivationAccessHC3Test {
         MockGenesisRegistryHC3Public genesis = new MockGenesisRegistryHC3Public();
         land = new LandRegistry(address(authorization), address(regions), address(genesis));
         publicAccess = new PublicCultivationAccess(address(authorization), address(land));
+        address plotGenome = address(new PlotGenomePublic());
+        _createPlantSources(address(authorization), plotGenome);
         PlantRegistry plants = new PlantRegistry(
-            address(authorization), address(new PlotGenomePublic()), address(land), address(publicAccess)
+            address(authorization),
+            plotGenome,
+            address(land),
+            address(publicAccess),
+            address(sourceSeeds),
+            address(sourceClones)
         );
+        _bindPlantSources(capabilityRegistry, plants);
         ICapabilityRegistry420.CapabilityGrant memory binding = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.PUBLIC_CULTIVATION_ACCESS,

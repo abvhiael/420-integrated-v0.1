@@ -27,6 +27,10 @@ library ActionIds {
 
     bytes32 internal constant GENOME_REGISTER = keccak256("HC.ACTION.GENOME_REGISTRY.REGISTER");
     bytes32 internal constant FOUNDING_GENOME_REGISTER = keccak256("HC.ACTION.GENOME_REGISTRY.REGISTER_FOUNDING");
+    bytes32 internal constant SEED_BIND_PLANTS = keccak256("HC.ACTION.SEED_REGISTRY.BIND_PLANTS");
+    bytes32 internal constant SEED_CONSUME = keccak256("HC.ACTION.SEED_REGISTRY.CONSUME");
+    bytes32 internal constant CLONE_BIND_PLANTS = keccak256("HC.ACTION.CLONE_REGISTRY.BIND_PLANTS");
+    bytes32 internal constant CLONE_CONSUME = keccak256("HC.ACTION.CLONE_REGISTRY.CONSUME");
     bytes32 internal constant SEED_REGISTER = keccak256("HC.ACTION.SEED_REGISTRY.REGISTER");
     bytes32 internal constant SEED_TRANSFER = keccak256("HC.ACTION.SEED_REGISTRY.TRANSFER");
     bytes32 internal constant CLONE_REGISTER = keccak256("HC.ACTION.CLONE_REGISTRY.REGISTER");

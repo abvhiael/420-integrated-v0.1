@@ -11,6 +11,8 @@ import { PublicCultivationAccess } from "../../../../src/highcountry/land/Public
 import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { CultivationEngine } from "../../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
+import { HCInvalidState, HCCapacityExceeded } from "../../../../src/highcountry/errors/HighCountryErrors.sol";
+import { PlantSourcesFixture } from "../../mocks/PlantSourcesFixture.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
 interface Vm {
@@ -62,7 +64,7 @@ contract MockLandRegistryHC6 {
     }
 }
 
-contract CultivationEngineTest {
+contract CultivationEngineTest is PlantSourcesFixture {
     Vm private constant vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
     MockCapabilityRegistry private caps;
     HighCountryAuthorization private auth;
@@ -85,7 +87,10 @@ contract CultivationEngineTest {
         land.configure(14, address(0xBEEF), 1, 1);
         land.configure(15, address(this), 1, 2);
         PublicCultivationAccess access = new PublicCultivationAccess(address(auth), address(land));
-        plants = new PlantRegistry(address(auth), address(genomes), address(land), address(access));
+        _createPlantSources(address(auth), address(genomes));
+        plants = new PlantRegistry(
+            address(auth), address(genomes), address(land), address(access), address(sourceSeeds), address(sourceClones)
+        );
         _grant(
             address(this),
             ModuleIds.PUBLIC_CULTIVATION_ACCESS,
@@ -94,6 +99,7 @@ contract CultivationEngineTest {
             keccak256("bind-plants")
         );
         access.bindPlantRegistry(address(plants));
+        _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
         _grant(
             address(this),
@@ -133,7 +139,7 @@ contract CultivationEngineTest {
             bytes32(uint256(1)),
             keccak256("hc6:plant:advance")
         );
-        plants.registerPlant(1, genomeId, address(this), 11);
+        _sourcePlant(caps, plants, 1, genomeId, address(this), 11);
         (bool early,) = address(plants)
             .call(abi.encodeWithSelector(plants.advanceStage.selector, 1, PlantRegistry.PlantStage.SEEDLING));
         require(!early, "plant advanced before germination elapsed");
@@ -167,7 +173,7 @@ contract CultivationEngineTest {
             bytes32(uint256(plantId)),
             keccak256("hc6:plant3:advance")
         );
-        plants.registerPlant(plantId, genomeId, address(this), 13);
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 13);
         PlantRegistry.PlantRecord memory start = plants.getPlant(plantId);
         uint256 total = uint256(plants.GERMINATION_DURATION()) + plants.SEEDLING_DURATION()
             + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION();
@@ -189,9 +195,19 @@ contract CultivationEngineTest {
             bytes32(uint256(4)),
             keccak256("hc6:plant4:create")
         );
-        (bool wrongOperator,) = address(plants)
-            .call(abi.encodeWithSelector(plants.registerPlant.selector, uint64(4), genomeId, address(this), uint64(14)));
-        require(!wrongOperator, "non-operator registered plant on parcel");
+        _preparePlantSource(caps, plants, 4, genomeId, address(this), 14);
+        (bool wrongOperator, bytes memory operatorReason) = address(plants)
+            .call(
+                abi.encodeCall(
+                    plants.registerPlantFromSource,
+                    (4, genomeId, address(this), 14, 0, PlantRegistry.PlantSourceKind.SEED, 4)
+                )
+            );
+        require(
+            !wrongOperator && operatorReason.length >= 4 && bytes4(operatorReason) == HCInvalidState.selector,
+            "non-operator registration boundary"
+        );
+        require(sourceSeeds.remainingQuantity(4) == 1, "operator failure consumed seed");
         _grant(
             address(this),
             ModuleIds.PLANT_REGISTRY,
@@ -199,7 +215,7 @@ contract CultivationEngineTest {
             bytes32(uint256(5)),
             keccak256("hc6:plant5:create")
         );
-        plants.registerPlant(5, genomeId, address(this), 15);
+        _sourcePlant(caps, plants, 5, genomeId, address(this), 15);
         require(plants.activePlantsByParcel(15) == 1, "active parcel count missing");
         _grant(
             address(this),
@@ -208,9 +224,19 @@ contract CultivationEngineTest {
             bytes32(uint256(6)),
             keccak256("hc6:plant6:create")
         );
-        (bool overCapacity,) = address(plants)
-            .call(abi.encodeWithSelector(plants.registerPlant.selector, uint64(6), genomeId, address(this), uint64(15)));
-        require(!overCapacity, "parcel grow capacity exceeded");
+        _preparePlantSource(caps, plants, 6, genomeId, address(this), 15);
+        (bool overCapacity, bytes memory capacityReason) = address(plants)
+            .call(
+                abi.encodeCall(
+                    plants.registerPlantFromSource,
+                    (6, genomeId, address(this), 15, 0, PlantRegistry.PlantSourceKind.SEED, 6)
+                )
+            );
+        require(
+            !overCapacity && capacityReason.length >= 4 && bytes4(capacityReason) == HCCapacityExceeded.selector,
+            "parcel grow capacity boundary"
+        );
+        require(sourceSeeds.remainingQuantity(6) == 1, "capacity failure consumed seed");
     }
 
     function testEnvironmentBoundsAndStressQualityDerivation() public {
@@ -229,7 +255,7 @@ contract CultivationEngineTest {
             bytes32(uint256(plantId)),
             keccak256("hc6:plant7:env")
         );
-        plants.registerPlant(plantId, genomeId, address(this), 11);
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
         CultivationEngine.EnvironmentSnapshot memory ideal = CultivationEngine.EnvironmentSnapshot({
             temperature: 2400, humidity: 6000, light: 7000, water: 6000, nutrients: 6000, airflow: 5000
         });
@@ -278,7 +304,7 @@ contract CultivationEngineTest {
             bytes32(uint256(2)),
             keccak256("hc6:express")
         );
-        plants.registerPlant(2, genomeId, address(this), 12);
+        _sourcePlant(caps, plants, 2, genomeId, address(this), 12);
         CultivationEngine.EnvironmentSnapshot memory env = CultivationEngine.EnvironmentSnapshot({
             temperature: 2400, humidity: 6200, light: 7800, water: 5400, nutrients: 6600, airflow: 4100
         });
@@ -325,7 +351,7 @@ contract CultivationEngineTest {
             bytes32(uint256(plantId)),
             keccak256("audit:express")
         );
-        plants.registerPlant(plantId, genomeId, address(this), 11);
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
         cultivation.updateEnvironment(
             plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
         );

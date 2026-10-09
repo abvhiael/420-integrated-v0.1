@@ -4,6 +4,10 @@
 
 ## 1. Canonical owners and verified repository sources
 
+**Canonical financial authority:** **420Pay** is the authoritative protocol for payment intents, merchant financial identity, invoices, finalized payment records, settlement, refunds and governed payout execution. 420BnB owns accommodation-specific booking and inventory records only; it cannot self-attest finality, hold funds, or independently redirect or execute refunds and payouts. The table below preserves the specific responsibilities of 420Pay's MerchantRegistry420, InvoiceRegistry420, PaymentRegistry420, PaymentRouter420, SettlementRouter420, RefundManager420 and approved Swap execution adapter. Actual operation remains subject to deployed, Registry-resolved, governance-approved authorities and testnet qualification.
+
+
+
 | Capability | Authoritative component | Evidence and boundary |
 | --- | --- | --- |
 | Accommodation booking inventory, price/house-rule snapshot and cancellation eligibility | Future independently authorized BnB application | BNB-1.3 and BNB-1.4; no executable BnB booking backend is qualified |

@@ -27,3 +27,12 @@ func TestExternalScienceUnavailableReaderAndUnsafeAmount(t *testing.T){
  w:=httptest.NewRecorder();NewServer(f).Handler().ServeHTTP(w,httptest.NewRequest("GET","/v1/compute/external-science?chainId=420",nil));if w.Code!=503{t.Fatalf("%d %s",w.Code,w.Body.String())}
  }
 }
+
+func TestExternalScienceCORSOnlyApprovedComputeOrigin(t *testing.T){
+ for _,origin:=range []string{"https://compute.420integrated.org","https://untrusted.example"}{
+  w:=httptest.NewRecorder();r:=httptest.NewRequest("GET","/v1/compute/external-science?chainId=420",nil);r.Header.Set("Origin",origin)
+  NewServer(fakeBackend{}).Handler().ServeHTTP(w,r)
+  expected:="";if origin=="https://compute.420integrated.org"{expected=origin}
+  if w.Header().Get("Access-Control-Allow-Origin")!=expected{t.Fatalf("unsafe origin %s %s",origin,w.Header().Get("Access-Control-Allow-Origin"))}
+ }
+}

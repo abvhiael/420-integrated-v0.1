@@ -5,12 +5,12 @@ const $=id=>document.getElementById(id),add=(node,tag,text)=>{const element=docu
 let session=null,sdk=null,store=null,busy=false,epoch=0;
 const status=text=>$('status').textContent=text;
 const fail=e=>{$('error').hidden=false;$('error').textContent=e.code??e.message??'Unavailable';$('error').focus();};
-const clean=()=>{epoch++;session=null;sdk=null;store=null;$('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();$('refunds').replaceChildren();$('summary').textContent='No merchant selected.';$('analytics').textContent='No verified data.';$('refresh').disabled=true;status('Wallet disconnected; merchant data cleared.');};
+const clean=()=>{epoch++;session=null;sdk=null;store=null;$('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();$('refunds').replaceChildren();$('disputes').replaceChildren();$('summary').textContent='No merchant selected.';$('analytics').textContent='No verified data.';$('refresh').disabled=true;status('Wallet disconnected; merchant data cleared.');};
 async function action(fn){if(busy)return;busy=true;$('error').hidden=true;try{if(!navigator.onLine)throw Error('Offline');await fn();}catch(e){fail(e);}finally{busy=false}}
 async function load(){
  if(!sdk||!store)throw Error('Connect Wallet and select a store');
  const current=epoch,id=store;
- const [orders,analytics,integrations,refunds]=await Promise.all([sdk.merchantOperations(id),sdk.merchantAnalytics(id),sdk.merchantIntegrations(id),sdk.merchantRefunds(id)]);
+ const [orders,analytics,integrations,refunds,disputes]=await Promise.all([sdk.merchantOperations(id),sdk.merchantAnalytics(id),sdk.merchantIntegrations(id),sdk.merchantRefunds(id),sdk.merchantDisputes(id)]);
  if(current!==epoch||id!==store)throw Error('Wallet identity changed');
  $('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();
  $('summary').textContent=orders.totalCount+' order attempts · '+orders.items.length+' shown · chain '+orders.provenance.chainId+' · finalized block '+orders.provenance.blockNumber;
@@ -29,16 +29,19 @@ async function load(){
       const reason=document.createElement('input');reason.type='text';reason.required=true;reason.pattern='0x[a-f0-9]{64}';reason.placeholder='0x…';reasonLabel.append(reason);
       inputs={amount,reason};
     }
+    if(kind==='dispute') {const label=add(li,'label','Dispute evidence commitment (0x + 64 lowercase hex)');const reason=document.createElement('input');reason.type='text';reason.required=true;reason.pattern='0x[a-f0-9]{64}';reason.placeholder='0x…';label.append(reason);inputs={reason};}
     const button=add(li,'button','Prepare '+kind+' handoff');button.type='button';
     button.addEventListener('click',()=>action(async()=>{
-     if(inputs&&(!inputs.amount.checkValidity()||!inputs.reason.checkValidity()))throw Error('Valid refund amount and reason commitment required');
-     const request=inputs?{amount:inputs.amount.value,reasonHash:inputs.reason.value}:undefined;
+     if(inputs&&(!inputs.reason.checkValidity()||(kind==='refund'&&!inputs.amount.checkValidity())))throw Error('Valid dispute or refund commitment required');
+     const request=kind==='refund'?{amount:inputs.amount.value,reasonHash:inputs.reason.value}:{disputeHash:inputs.reason.value};
      const result=await sdk.merchantRemedy(id,item.attempt_id,kind,request);
      add(li,'p',result.authority+': '+result.status+' · No transaction executed.');
+     if(kind==='dispute'&&result.proposal?.intent)add(li,'p','Canonical Market wallet intent prepared; requires the seller Wallet to submit the on-chain transaction. No Arbitration case or ruling has been created.');
     }));
    }
   }
  }
+ for(const dispute of disputes.items)add($('disputes'),'li',dispute.orderId+' · '+dispute.state+' · Arbitration case not verified');
  for(const refund of refunds.items)add($('refunds'),'li',refund.refundId+' · '+refund.amount+' base units '+refund.asset+' · '+(refund.fundsReturned?'FUNDS RETURNED — canonical funded payout verified':'NOT PAID — governance pending or payout unverified'));
  $('analytics').textContent='Finalized projection preview (first 100 attempts; incomplete when more exist). '+JSON.stringify(analytics.totals)+' · partial='+analytics.partial;
  for(const [asset,amounts] of Object.entries(analytics.byAsset??{}))add($('assets'),'li',asset+' · '+JSON.stringify(amounts));

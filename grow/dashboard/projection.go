@@ -13,7 +13,7 @@ import (
 type SQLReader struct{ DB *sql.DB }
 
 func sectionQuery(section string) (string, error) {
-	const where = " WHERE tenant_id=$1::uuid AND ($3='' OR facility_id=$3::uuid) AND ($4='' OR zone_id=$4::uuid)"
+	const where = " WHERE tenant_id=$1::uuid AND ($3='' OR facility_id=NULLIF($3,'')::uuid) AND ($4='' OR zone_id=NULLIF($4,'')::uuid)"
 	switch section {
 	case "overview", "facilities":
 		return "SELECT facility_id::text,name,'Private facility', 'ACTIVE' FROM grow_private.facilities WHERE tenant_id=$1::uuid AND ($3='' OR facility_id=$3::uuid) ORDER BY facility_id LIMIT 100", nil

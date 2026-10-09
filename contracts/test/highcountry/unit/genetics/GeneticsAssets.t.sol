@@ -114,35 +114,45 @@ contract GeneticsAssetsTest {
     }
 
     function testMotherHasFiniteCuttingBudgetAndRetires() public {
-        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER,
-            bytes32(uint256(3)), keccak256("mother:create"), 2);
+        _grantAmount(
+            ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("mother:create"), 2
+        );
         mothers.registerMother(3, genomeId, address(this), 2, keccak256("mother:meta"));
         _grantCloneCut(3);
         for (uint64 n = 30; n < 32; ++n) {
-            _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER,
-                bytes32(uint256(n)), keccak256(abi.encode("clone", n)));
+            _grant(
+                ModuleIds.CLONE_REGISTRY,
+                ActionIds.CLONE_REGISTER,
+                bytes32(uint256(n)),
+                keccak256(abi.encode("clone", n))
+            );
             clones.registerClone(n, genomeId, 3, address(this), keccak256(abi.encode(n)));
         }
         MotherRegistry.MotherRecord memory m = mothers.getMother(3);
         require(m.retired && m.cuttingsTaken == 2, "mother finite lifecycle");
         require(mothers.remainingCuttings(3) == 0, "mother remaining");
-        _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER,
-            bytes32(uint256(32)), keccak256("clone:exhaust"));
-        (bool ok,) = address(clones).call(abi.encodeCall(clones.registerClone,
-            (32, genomeId, 3, address(this), keccak256("exhaust"))));
+        _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(32)), keccak256("clone:exhaust"));
+        (bool ok,) = address(clones)
+            .call(abi.encodeCall(clones.registerClone, (32, genomeId, 3, address(this), keccak256("exhaust"))));
         require(!ok && !clones.exists(32), "retired mother reused");
         (ok,) = address(mothers).call(abi.encodeCall(mothers.consumeCutting, (3)));
         require(!ok, "unlinked mother consumption");
     }
 
-    function _grantCloneCut(uint64 motherId) private {
+    function _grantCloneCut(
+        uint64 motherId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(clones),
             componentId: ModuleIds.MOTHER_REGISTRY,
             capabilityId: ActionIds.MOTHER_CONSUME_CUTTING,
             scopeHash: bytes32(uint256(motherId)),
-            perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
-            validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 1 days),
+            revoked: false
         });
         caps.setGrant(keccak256(abi.encode("clone:cut", motherId)), grant, 1);
     }

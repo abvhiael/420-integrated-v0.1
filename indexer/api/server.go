@@ -34,6 +34,7 @@ func NewServer(backend Backend) *Server { return &Server{backend: backend} }
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/health", s.health)
+	mux.HandleFunc("GET /v1/compute/external-science", s.externalScience)
 	mux.HandleFunc("GET /v1/consensus", s.consensus)
 	mux.HandleFunc("GET /v1/blocks/{number}", s.block)
 	mux.HandleFunc("GET /v1/blocks", s.blocks)

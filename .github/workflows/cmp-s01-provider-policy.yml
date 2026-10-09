@@ -1,0 +1,20 @@
+name: CMP S-01 Provider Policy
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/compute-market/cmp-s01-provider-access.json'
+      - 'docs/compute-market/CMP-S01-PROVIDER-ACCESS.md'
+      - 'scripts/verify-cmp-s01-provider-access.py'
+      - '.github/workflows/cmp-s01-provider-policy.yml'
+  workflow_dispatch:
+jobs:
+  provider-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Source permission and fail-closed evidence checks
+        run: python3 scripts/verify-cmp-s01-provider-access.py

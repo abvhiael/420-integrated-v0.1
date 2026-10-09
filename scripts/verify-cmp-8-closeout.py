@@ -34,7 +34,7 @@ if d.get("next_canonical_step")!="CMP-9 — Public testnet compute": fail("next 
 
 road=ROADMAP.read_text()
 if "# CMP-8 — 420Compute application" not in road or "LEVEL 3 CLOSEOUT CANDIDATE" not in road: fail("roadmap CMP-8 closeout state drift")
-if "Status: **LEVEL 3 CLOSEOUT CANDIDATE" not in SPEC.read_text(): fail("CMP-8 spec status drift")
+if "Status: **COMPLETE — Level 3 exact-head qualified on `1889713a30ebee9afbdfc21b151d7c69789c1e09`." not in SPEC.read_text(): fail("CMP-8 spec completed qualification status drift")
 
 for required in (
     "compute/web/index.html","compute/web/core/controller.js","compute/web/core/participation.js",

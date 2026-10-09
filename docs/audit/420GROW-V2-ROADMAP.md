@@ -12,7 +12,7 @@
 | GROW-V2-04 | Facility, room and zone management | COMPLETE / Level 1 — SHA `f80edd1c6bd7592e2009d353b850f6f091c3f2e0`; V2 run 37865044110/job 113609659718 and retained Grow run 37865044115/job 113609659505 SUCCESS; [evidence](420GROW-V2-04-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-05 | Plant lifecycle, genetics and cloning records | COMPLETE / Level 1 and Level 2 (V2-02–05) — SHA `ef59b62c7c30251e0f0b4723d8e8335f77b104e9`; V2 run 37866330441/job 113613816069 and Grow run 37866330391/job 113613815845 SUCCESS; [evidence](420GROW-V2-05-LEVEL-1-AND-2-QUALIFICATION.md) |
 | GROW-V2-06 | Sensor telemetry ingestion and historical charts | COMPLETE / Level 1 — SHA `0ec71e7af64116d8698bd15212d198511e6295f9`; V2 run 37868683106/job 113621431632 and retained Grow run 37868683071/job 113621431170 SUCCESS; [evidence](420GROW-V2-06-LEVEL-1-QUALIFICATION.md) |
-| GROW-V2-07 | Equipment adapters, monitoring and safe controls | PLANNED / Level 1 |
+| GROW-V2-07 | Equipment adapters, monitoring and safe controls | IMPLEMENTED / Level 1 exact-SHA qualification PENDING |
 | GROW-V2-08 | Nutrients, irrigation and environmental history | PLANNED / Level 1 |
 | GROW-V2-09 | Harvest forecasting and production analytics | PLANNED / Level 1 |
 | GROW-V2-10 | Inventory, traceability and compliance exports | PLANNED / Level 2 accumulated V2-06–10 |

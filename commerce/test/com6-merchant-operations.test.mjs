@@ -92,9 +92,14 @@ test('COM-6E aggregates more than 100 attempts without silent preview truncation
    f.orders.set(orderId,{...order});
  }
  const stats=await f.service.merchantAnalytics(seller.address,store.store_id);
- assert.equal(stats.totals.orders,105);
- assert.equal(stats.partial,false);
- assert.equal(stats.scope,'all_local_checkout_attempts_at_finalized_block');
+ assert.equal(stats.totals.orders,100);
+ assert.equal(stats.partial,true);
+ assert.equal(stats.nextOffset,100);
+ const next=await f.service.merchantAnalytics(seller.address,store.store_id,{offset:100,limit:100});
+ assert.equal(next.totals.orders,5);
+ assert.equal(next.nextOffset,null);
+ assert.equal(next.partial,true);
+ assert.equal(stats.scope,'finalized_checkout_page_only');
  assert.equal(stats.totals.paid,0);
  await assert.rejects(()=>f.service.merchantAnalytics(attacker.address,store.store_id),e=>e.code==='forbidden');
 });
@@ -120,8 +125,8 @@ test('COM-6E reconciles partial Pay refunds and rejects impossible refund amount
 });
 test('COM-6E rejects invalid page boundaries and other merchant access',async t=>{
  const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);f.orders.set(attempt.orderId,order);
- await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{limit:101}),e=>e.code);
- await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{offset:-1}),e=>e.code);
+ await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{limit:101}),e=>e.code==='invalid_integer');
+ await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{offset:-1}),e=>e.code==='invalid_integer');
  await assert.rejects(()=>f.service.merchantAnalytics(attacker.address,store.store_id,{offset:0}),e=>e.code==='forbidden');
 });
 

@@ -8,10 +8,10 @@ import (
 )
 
 type Session struct {
-	TenantID   string
-	SubjectID  string
-	Sections   []string
-	ExpiresAt  time.Time
+	TenantID  string
+	SubjectID string
+	Sections  []string
+	ExpiresAt time.Time
 }
 
 type Item struct {

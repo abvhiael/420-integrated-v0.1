@@ -5,12 +5,12 @@ const $=id=>document.getElementById(id),add=(node,tag,text)=>{const element=docu
 let session=null,sdk=null,store=null,busy=false,epoch=0;
 const status=text=>$('status').textContent=text;
 const fail=e=>{$('error').hidden=false;$('error').textContent=e.code??e.message??'Unavailable';$('error').focus();};
-const clean=()=>{epoch++;session=null;sdk=null;store=null;$('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();$('summary').textContent='No merchant selected.';$('analytics').textContent='No verified data.';$('refresh').disabled=true;status('Wallet disconnected; merchant data cleared.');};
+const clean=()=>{epoch++;session=null;sdk=null;store=null;$('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();$('refunds').replaceChildren();$('summary').textContent='No merchant selected.';$('analytics').textContent='No verified data.';$('refresh').disabled=true;status('Wallet disconnected; merchant data cleared.');};
 async function action(fn){if(busy)return;busy=true;$('error').hidden=true;try{if(!navigator.onLine)throw Error('Offline');await fn();}catch(e){fail(e);}finally{busy=false}}
 async function load(){
  if(!sdk||!store)throw Error('Connect Wallet and select a store');
  const current=epoch,id=store;
- const [orders,analytics,integrations]=await Promise.all([sdk.merchantOperations(id),sdk.merchantAnalytics(id),sdk.merchantIntegrations(id)]);
+ const [orders,analytics,integrations,refunds]=await Promise.all([sdk.merchantOperations(id),sdk.merchantAnalytics(id),sdk.merchantIntegrations(id),sdk.merchantRefunds(id)]);
  if(current!==epoch||id!==store)throw Error('Wallet identity changed');
  $('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();
  $('summary').textContent=orders.totalCount+' order attempts · '+orders.items.length+' shown · chain '+orders.provenance.chainId+' · finalized block '+orders.provenance.blockNumber;
@@ -39,6 +39,7 @@ async function load(){
    }
   }
  }
+ for(const refund of refunds.items)add($('refunds'),'li',refund.refundId+' · '+refund.amount+' base units '+refund.asset+' · '+(refund.fundsReturned?'FUNDS RETURNED — canonical funded payout verified':'NOT PAID — governance pending or payout unverified'));
  $('analytics').textContent='Finalized projection preview (first 100 attempts; incomplete when more exist). '+JSON.stringify(analytics.totals)+' · partial='+analytics.partial;
  for(const [asset,amounts] of Object.entries(analytics.byAsset??{}))add($('assets'),'li',asset+' · '+JSON.stringify(amounts));
  for(const [name,value] of Object.entries(integrations))if(value&&typeof value==='object'&&'status' in value)add($('integrations'),'li',name+': '+value.status+' · '+value.authority);

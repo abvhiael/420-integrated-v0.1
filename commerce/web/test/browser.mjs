@@ -63,7 +63,12 @@ try{
   await fill('publish-store-form',{slug:'browser-store',status:'published'});await submit('publish-store-form');assert.equal((await fetch(origin+'/v1/storefronts/browser-store').then(r=>r.json())).data.public_description,'Paper merchant');assert.equal((await fetch(origin+'/v1/media/'+media)).status,200);
   await fill('branding-form',{theme:'dark',description:'Night draft'});await submit('branding-form');assert.equal((await fetch(origin+'/v1/storefronts/browser-store').then(r=>r.json())).data.public_description,'Paper merchant');await submit('publish-store-form');assert.equal((await fetch(origin+'/v1/storefronts/browser-store').then(r=>r.json())).data.public_description,'Night draft');pass('versioned preview/publish separates public and draft branding');
   // COM-5 real browser smoke against the actual signed-service HTTP + SQLite fixture.
+  const publicSearch=await fetch(origin+'/v1/search').then(async response=>({status:response.status,body:await response.json()}));
+  assert.equal(publicSearch.status,200,'published public catalogue API must be readable');
+  assert.equal(publicSearch.body.data.items.length,1,'published product must exist in the real service before browser navigation');
   const shopper=await context.newPage();shopper.on('pageerror',e=>errors.push(e.message));await shopper.goto(origin+'/public.html');
+  await shopper.waitForFunction(()=>document.querySelector('#products article')||!document.querySelector('#error').hidden,{timeout:10000});
+  assert.equal(await shopper.locator('#error').isVisible(),false,'shopper startup: '+await shopper.locator('#error').textContent());
   await shopper.locator('#products article').first().waitFor();
   assert.match(await shopper.locator('#products').textContent(),/BROWSER/);
   assert.match(await shopper.locator('#stores').textContent(),/browser-store/);

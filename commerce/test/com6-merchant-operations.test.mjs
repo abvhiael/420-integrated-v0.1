@@ -124,3 +124,17 @@ test('COM-6E rejects invalid page boundaries and other merchant access',async t=
  await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id,{offset:-1}),e=>e.code);
  await assert.rejects(()=>f.service.merchantAnalytics(attacker.address,store.store_id,{offset:0}),e=>e.code==='forbidden');
 });
+
+test('COM-6E supports page offsets beyond five thousand attempts',async t=>{
+ const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);f.orders.set(attempt.orderId,order);
+ f.db.transaction(()=>{
+  for(let i=1;i<=5000;i++){
+   const attemptId=b32(100000+i).slice(2),orderId=b32(200000+i);
+   f.db.run('INSERT INTO checkout_attempts SELECT ?,cart_id,customer_scope,merchant_id,network_id,?,listing_id,listing_revision,quantity,seller,asset,total,payment_id,quote_id,?,request_hash,state,expires_at FROM checkout_attempts WHERE attempt_id=?',attemptId,orderId,'large-'+i,attempt.attemptId);
+   if(i===5000)f.orders.set(orderId,{...order});
+  }
+ });
+ const end=await f.service.merchantAnalytics(seller.address,store.store_id,{offset:5000,limit:10});
+ assert.equal(end.totalCount,5001);assert.equal(end.totals.orders,1);
+ assert.equal(end.nextOffset,null);assert.equal(end.partial,true);
+});

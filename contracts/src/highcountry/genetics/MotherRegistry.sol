@@ -93,11 +93,35 @@ contract MotherRegistry {
         emit MotherTransferred(motherId, previous, newOwner);
     }
 
-    function consumeCutting(
-        uint64 motherId
-    ) external {
+    function bindCloneRegistry(address issuer) external {
+        if (address(cloneRegistry) != address(0) || issuer.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(msg.sender, ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES, BIND_SCOPE, 0)
+        );
+        ICloneIssuerMother candidate = ICloneIssuerMother(issuer);
+        if (
+            candidate.authorization() != address(authorization)
+                || candidate.genomeRegistry() != address(genomeRegistry)
+                || candidate.motherRegistry() != address(this)
+        ) revert HCInvalidState();
+        cloneRegistry = candidate;
+        emit CloneRegistryBound(issuer);
+    }
+
+    /// @notice Cutting consumption without a canonical clone is forbidden.
+    function consumeCutting(uint64) external pure {
+        revert HCInvalidState();
+    }
+
+    function consumeForClone(uint64 motherId, uint64 cloneId) external {
+        if (msg.sender != address(cloneRegistry) || cloneId == 0 || cuttingForClone[cloneId] != 0) {
+            revert HCInvalidState();
+        }
+        (uint64 source, bytes32 genomeId, address owner) = cloneRegistry.cloneContext(cloneId);
         MotherRecord storage mother = _require(motherId);
-        if (mother.retired) revert HCInvalidState();
+        if (source != motherId || mother.genomeId != genomeId || mother.owner != owner || mother.retired) {
+            revert HCInvalidState();
+        }
         uint256 next = uint256(mother.cuttingsTaken) + 1;
         if (next > mother.maxCuttings) revert HCCapacityExceeded(next, mother.maxCuttings);
         _auth(ActionIds.MOTHER_CONSUME_CUTTING, motherId, 1);

@@ -11,6 +11,7 @@ type Session struct {
 	TenantID  string
 	SubjectID string
 	Sections  []string
+	Actions   []string
 	ExpiresAt time.Time
 }
 

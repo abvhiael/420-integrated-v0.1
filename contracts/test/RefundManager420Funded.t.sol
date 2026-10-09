@@ -4,6 +4,9 @@ pragma solidity ^0.8.24;
 import "../src/pay/RefundManager420.sol";
 import "./helpers/GenesisMocks420.sol";
 
+interface VmRefundFunding420 {
+    function deal(address who,uint256 amount) external;
+}
 contract RefundedPaymentLedgerMock420 {
     address public payer;
     address public settlementAsset;
@@ -33,6 +36,12 @@ contract RefundFundingTokenMock420 {
         balanceOf[msg.sender]-=amount;balanceOf[receiver]+=amount;return true;
     }
     function fail(bool value) external {failPayout=value;}
+}
+contract RefundUntrustedCaller420 {
+    function attempt(RefundManager420 manager, bytes32 paymentId, address asset, uint256 amount) external returns(bool) {
+        (bool ok,)=address(manager).call(abi.encodeWithSelector(manager.fundAuthorizedRefund.selector,paymentId,asset,amount));
+        return ok;
+    }
 }
 contract RefundManager420FundedTest {
     address internal constant BUYER=address(0xBEEF);
@@ -94,5 +103,46 @@ contract RefundManager420FundedTest {
         (bool asset,)=address(m).call(abi.encodeWithSelector(m.executeFundedRefund.selector,REFUND,PAYMENT,address(0xCAFE),BUYER,20,100,bytes32(0)));
         require(!asset,"wrong asset");
         require(m.authorizedRefundEscrow(PAYMENT)==20 && m.refundedByPayment(PAYMENT)==0,"corrupt after reject");
+    }
+    function testGovernanceUnwindsUnusedEscrowToOriginalFundingCaller() public {
+        (RefundManager420 m,,RefundFundingTokenMock420 token)=setUpFixture();
+        m.fundAuthorizedRefund(PAYMENT,address(token),40);
+        m.cancelAuthorizedRefundFunding(PAYMENT,address(token),10);
+        require(m.authorizedRefundEscrow(PAYMENT)==30,"unwind escrow mismatch");
+        require(token.balanceOf(address(this))==70,"governance funding not returned");
+        m.executeFundedRefund(REFUND,PAYMENT,address(token),BUYER,30,100,bytes32(0));
+        require(token.balanceOf(BUYER)==30,"remaining refund not returned");
+    }
+    function testNonGovernanceCannotFundOrExecuteOrCancel() public {
+        (RefundManager420 m,,RefundFundingTokenMock420 token)=setUpFixture();
+        RefundUntrustedCaller420 attacker=new RefundUntrustedCaller420();
+        require(!attacker.attempt(m,PAYMENT,address(token),1),"non governance funded");
+        m.fundAuthorizedRefund(PAYMENT,address(token),20);
+        (bool cancelOk,)=address(attacker).call(abi.encodeWithSignature("cancel(address,bytes32,address,uint256)",address(m),PAYMENT,address(token),1));
+        require(!cancelOk,"unauthorized cancel");
+        require(m.authorizedRefundEscrow(PAYMENT)==20,"escrow changed");
+    }
+
+}
+
+contract RefundManager420NativeFundedTest {
+    VmRefundFunding420 internal constant vm = VmRefundFunding420(address(uint160(uint256(keccak256("hevm cheat code")))));
+    address internal constant PAYER=address(0xBEEF);
+    bytes32 internal constant PAYMENT=keccak256("native-refund-payment");
+    receive() external payable {}
+    function testNativeGovernanceFundedRefundActuallyReturnsCoin() public {
+        GenesisMockEnvironment420 env=new GenesisMockEnvironment420();
+        RefundManager420 m=new RefundManager420(address(this),address(env.registry()),keccak256("native-refund"));
+        RefundedPaymentLedgerMock420 ledger=new RefundedPaymentLedgerMock420();
+        env.registerResident(address(m),m.componentId());
+        env.setSettlementAsset(address(0),keccak256("CANONICAL-NATIVE"),true);
+        m.setPaymentRegistry(address(ledger));
+        ledger.set(PAYER,address(0),1 ether,1 ether,6);
+        vm.deal(address(this),2 ether);
+        m.fundAuthorizedRefund{value:1 ether}(PAYMENT,address(0),1 ether);
+        require(address(m).balance==1 ether,"native escrow missing");
+        m.executeFundedRefund(keccak256("native-refund-id"),PAYMENT,address(0),PAYER,1 ether,1 ether,bytes32(0));
+        require(PAYER.balance==1 ether,"native payment not returned");
+        require(address(m).balance==0 && m.refundedByPayment(PAYMENT)==1 ether,"native refund accounting");
     }
 }

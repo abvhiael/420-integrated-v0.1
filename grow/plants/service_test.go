@@ -10,7 +10,7 @@ type fakeStore struct{ plants map[string]Plant; lineage map[string][]string }
 func key(tenant,id string)string{return tenant+"/"+id}
 func (s *fakeStore)Get(_ context.Context,t,id string)(Plant,error){p,ok:=s.plants[key(t,id)];if !ok{return Plant{},ErrDenied};return p,nil}
 func (s *fakeStore)Create(_ context.Context,p Plant)(Plant,error){k:=key(p.TenantID,p.ID);if _,exists:=s.plants[k];exists{return Plant{},ErrConflict};p.Revision=1;s.plants[k]=p;return p,nil}
-func (s *fakeStore)ChangeStage(_ context.Context,p Plant,rev int64)(Plant,error){old:=s.plants[key(p.TenantID,p.ID)];if old.Revision!=rev{return Plant{},ErrConflict};p.Revision=rev+1;s.plants[key(p.TenantID,p.ID)]=p;return p,nil}
+func (s *fakeStore)ChangeStage(_ context.Context,p Plant,rev int64,actor string)(Plant,error){old:=s.plants[key(p.TenantID,p.ID)];if old.Revision!=rev{return Plant{},ErrConflict};p.Revision=rev+1;s.plants[key(p.TenantID,p.ID)]=p;return p,nil}
 func(s *fakeStore)Ancestors(_ context.Context,t,id string)([]string,error){
  result:=[]string{};seen:=map[string]bool{};var walk func(string)
  walk=func(cur string){for _,p:=range s.lineage[key(t,cur)]{if !seen[p]{seen[p]=true;result=append(result,p);walk(p)}}}
@@ -35,7 +35,7 @@ func TestPlantLifecycleGeneticsAndTenantSafety(t *testing.T){
 type panicStore struct{}
 func(panicStore)Get(context.Context,string,string)(Plant,error){panic("unauthorized lookup")}
 func(panicStore)Create(context.Context,Plant)(Plant,error){panic("unauthorized creation")}
-func(panicStore)ChangeStage(context.Context,Plant,int64)(Plant,error){panic("unauthorized mutation")}
+func(panicStore)ChangeStage(context.Context,Plant,int64,string)(Plant,error){panic("unauthorized mutation")}
 func(panicStore)Ancestors(context.Context,string,string)([]string,error){panic("unauthorized lineage")}
 func(panicStore)Link(context.Context,Edge)error{panic("unauthorized link")}
 func TestUnauthorizedNeverReadsStorage(t *testing.T){

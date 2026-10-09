@@ -16,6 +16,7 @@ test("trusted wallet, rights, quota and replay must all pass",()=>{
  assert.throws(()=>s.guard(req),/REPLAY/);
  d.wallet.verifySession=()=>false;
  assert.throws(()=>createProductionSecurity420(d).guard({...req,nonce:"fresh"}),/UNAUTHORIZED/);
+ d.wallet.verifySession=()=>true;
  d.creative.verifyAuthorization=()=>false;
  assert.throws(()=>createProductionSecurity420(d).guard({...req,nonce:"fresh"}),/RIGHTS_UNVERIFIED/);
  d.rateStore.consumeQuota=()=>false;

@@ -11,3 +11,25 @@ Service/SDK/browser retain existing merchant signed permission boundaries and di
 This is not real-world Identity/Names/Verify acceptance. A config flag does not establish ProtocolRegistry publication, human-readable label attestation, provider-issued trust class or a live on-chain credential; these remain testnet/release gates. COM-6E analytics and the later complete COM-6 phase milestone remain outstanding. Next top-level canonical step after COM-6 is COM-7 Security/ops.
 
 Level 1 exact-SHA evidence to be appended only after required workflows finish.
+
+## COM-6D exact-SHA Level 1 closeout — October 9, 2026
+
+**Implementation SHA:** `9e10283c5271008d15d358493a9fc889d10c11ea`.
+**PR:** [#594](https://github.com/abvhiael/420-integrated-v0.1/pull/594), `audit/420commerce-com-2-upstream-adaptations` (draft/unmerged).
+**PR base SHA:** `41d173dbcfbeb8299f54f22e7c049f1fec20336d`.
+**Current main SHA at evidence capture:** `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`.
+
+Exact implementation-SHA CI completed **SUCCESS** in every triggered applicable Commerce workflow:
+
+- [Commerce service fast qualification 37992245829](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37992245829) — PASS: app service, source adapters, SDK, Indexer, negative/adversarial, affected lint/build.
+- [Commerce merchant builder fast qualification 37992245912](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37992245912) — PASS: builder, Wallet, browser UX and accessibility regressions.
+- [Commerce upstream contracts 37992246037](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37992246037) — PASS: retained Market/Pay/Arbitration targeted tests, with no new Solidity source.
+- [Commerce governed Pay refund qualification 37992245847](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37992245847) — PASS: retained Pay authority/security regressions.
+
+No applicable workflow is failed, queued, skipped or cancelled at this implementation SHA.
+
+**Implementation delivered:** optional finalized-block Identity420 profile/credential proof and Names420 forward/reverse/expiry/profile resolution, verified contract runtime code/chain/version from approved config, presentation-only merchant integration status, and explicit non-authorization of changes to merchant ownership, payment or payout. Adversarial tests cover expired resolution, inactive profile, revoked/absent credential, wrong code, wrong/aliased binding, missing service and cross-tenant access. No prior qualified COM-6A/B/C source was discarded.
+
+**Disposition: COM-6D repository-side Level 1 COMPLETE / PASS.** This is not proof of a live mainnet/testnet profile credential or name. No external identity/name deployment was changed. Qualified Registry service publications, issuer trust/420Verify proof beyond Identity's typed valid-credential reader, end-user human-readable label attestation, real chain expiry/revocation events and production-equivalent acceptance remain release/testnet gates. Component-level Level 2 retained Commerce milestone and Level 3 full phase qualification remain deferred; no global Foundry/Genesis duplicates were executed for this step.
+
+**Next planned package:** COM-6E merchant analytics/phase evidence. **Next canonical top-level step after COM-6:** COM-7 — Security/ops. PR #594 is not yet ready to merge and requires accumulated reconciliation with newer main.

@@ -19,12 +19,18 @@ func MountPrivate(mux *http.ServeMux, db *sql.DB) error {
 	service := PrivateServer{
 		Login: func(w http.ResponseWriter, r *http.Request) error {
 			tenant, subject, fingerprint, err := (CertificateIdentity{DB: db}).Authenticate(r)
-			if err != nil {return err}
+			if err != nil {
+				return err
+			}
 			id, err := uuidV4()
-			if err != nil {return err}
-			cookie, err := auth.Issue(r.Context(),tenant,subject,id,time.Now().UTC(),fingerprint)
-			if err != nil {return err}
-			http.SetCookie(w,cookie)
+			if err != nil {
+				return err
+			}
+			cookie, err := auth.Issue(r.Context(), tenant, subject, id, time.Now().UTC(), fingerprint)
+			if err != nil {
+				return err
+			}
+			http.SetCookie(w, cookie)
 			return nil
 		},
 		Handler: Handler{Auth: auth, Reader: SQLReader{DB: db}},

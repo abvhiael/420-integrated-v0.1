@@ -37,12 +37,14 @@ async function finalizedRead(session,checked,name,iface,method,args) {
 }
 async function verifyInvoiceOrderPayout(session,status,checked,now) {
  const invoice=(await finalizedRead(session,checked,'InvoiceRegistry420',invoiceABI,'getInvoice',[status.invoiceId]))[0];
- if(!invoice.active||invoice.merchantId!==status.merchantId||invoice.merchant.toLowerCase()!==status.seller||invoice.amount.toString()!==String(status.total)||invoice.currency.toLowerCase()!=='0x343230'||Number(invoice.mode)!==0||Number(invoice.acceptance)<1||invoice.partialPayments||Number(invoice.expiresAt)<=Math.floor(now/1000))fail('canonical_invoice_mismatch');
+ const assetPolicy=session.config.nativePayment;
+ if(assetPolicy?.approved!==true||!ID.test(assetPolicy.native420AcceptedAssetsHash)||assetPolicy.native420AcceptedAssetsHash===ZERO32)fail('approved_native_asset_policy_missing');
+ if(!invoice.active||invoice.merchantId!==status.merchantId||invoice.merchant.toLowerCase()!==status.seller||invoice.amount.toString()!==String(status.total)||invoice.currency.toLowerCase()!=='0x343230'||Number(invoice.mode)!==0||Number(invoice.acceptance)<1||invoice.partialPayments||Number(invoice.expiresAt)<=Math.floor(now/1000)||invoice.acceptedAssetsHash!==assetPolicy.native420AcceptedAssetsHash||invoice.settlementPlanHash!==ZERO32||invoice.tipPolicyHash!==ZERO32)fail('canonical_invoice_mismatch');
  const order=(await finalizedRead(session,checked,'OrderRegistry420',orderABI,'getOrder',[status.orderId]))[0];
  if(Number(order.status)!==1||order.buyer.toLowerCase()!==status.buyer||order.seller.toLowerCase()!==status.seller||order.paymentAsset.toLowerCase()!==ZERO||order.totalAmount.toString()!==String(status.total))fail('canonical_order_mismatch');
  const payout=await finalizedRead(session,checked,'MerchantRegistry420',merchantABI,'currentPayout',[status.merchantId]);
  const recipient=payout[0].toLowerCase();
- if(!ADDRESS.test(recipient)||recipient===ZERO||Number(payout[1])<1)fail('canonical_payout_unavailable');
+ if(!ADDRESS.test(recipient)||recipient===ZERO||Number(payout[1])<1||payout[2]!==ZERO32)fail('canonical_payout_unavailable');
  return recipient;
 }
 async function guardSend(session,checked,transaction) {

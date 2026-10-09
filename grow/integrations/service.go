@@ -42,11 +42,15 @@ type Delivery struct {
 type Store interface {
 	Queue(context.Context, Event, string) error
 	Claim(context.Context, string, string, time.Time) (Delivery, error)
-	Complete(context.Context, string, string, bool, time.Time) error
+	Complete(context.Context, string, string, string, bool, time.Time) error
 }
 
 type Notifier interface {
 	Send(context.Context, Delivery) error
+}
+
+type OptInStore interface {
+	OptIn(context.Context, Scope, string, string, bool) error
 }
 
 type Service struct {
@@ -97,8 +101,19 @@ func (s Service) Dispatch(ctx context.Context, tenant, worker string, now time.T
 		return ErrDenied
 	}
 	err = s.Notifier.Send(ctx, delivery)
-	if doneErr := s.Store.Complete(ctx, tenant, delivery.EventID, err == nil, now); doneErr != nil {
+	if doneErr := s.Store.Complete(ctx, tenant, delivery.EventID, worker, err == nil, now); doneErr != nil {
 		return doneErr
 	}
 	return err
+}
+
+func (s Service) SetOptIn(ctx context.Context, scope Scope, facility, zone string, enabled bool) error {
+	if s.Store == nil || !permitted(scope, facility, zone, security.PlantWrite) {
+		return ErrDenied
+	}
+	opt, ok := s.Store.(OptInStore)
+	if !ok {
+		return ErrDenied
+	}
+	return opt.OptIn(ctx, scope, facility, zone, enabled)
 }

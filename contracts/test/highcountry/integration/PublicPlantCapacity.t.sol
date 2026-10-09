@@ -95,6 +95,8 @@ contract PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_BIND_PLANTS, clones.BIND_SCOPE());
         seeds.bindPlantRegistry(address(plants));
         clones.bindPlantRegistry(address(plants));
+        _grant(address(this), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES, mothers.BIND_SCOPE());
+        mothers.bindCloneRegistry(address(clones));
         _issueSeeds(100, address(this), type(uint32).max);
         _issueSeeds(101, ALICE, type(uint32).max);
         _issueSeeds(102, BOB, type(uint32).max);

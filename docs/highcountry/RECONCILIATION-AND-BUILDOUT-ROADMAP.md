@@ -25,6 +25,8 @@ Dependencies: none. Category: specification, product/governance decisions, docum
 
 Exit: canonical documents agree with the implemented boundaries and clearly identify planned features. Ambiguous product mechanics are resolved before their code phases.
 
+R01.4 migration specification is `MIGRATION-BOUNDARIES.md`; object-manifest and shared-save flows retain distinct permissions and replay/recovery boundaries.
+
 R01.3 schema specification is `TYPES-AND-UNITS.md`; source ordinals and ABI remain unchanged, conversions reject ambiguity and preserve exact values.
 
 R01.2 architecture specification is `ARCHITECTURE-AND-AUTHORITY.md`; it preserves existing canonical authority and explicitly separates the wallet-free internal market from the ecosystem asset market. Qualification evidence is recorded under `qualification/`.

@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/qualification/R01.3-level1.json",
-      "sha256": "6327526ae84fb9f1869af162501349dd01efb48c42f3d75252e838c8c520434b",
+      "path": "docs/highcountry/MIGRATION-BOUNDARIES.md",
+      "sha256": "377aed8067e7e0a427a843185f1009bc233d56c5cd192f8281df9bc8a09c3ceb",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1178,7 +1178,7 @@
     },
     {
       "path": "docs/highcountry/HC-GP-5-GUEST-MIGRATION.md",
-      "sha256": "d4c640b1cdafa31c67937dbe36f40976bf4720dbe57c27c59c1c67a99a55fe65",
+      "sha256": "db308fb4bdda61fa0ed6d7e1a8e7623a9fcb4f579ba75d844f3b2526d958e986",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1226,7 +1226,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "3c6b2a679be847df63c8391a42c4e746cd22e1dc7b75353ee5b8111050abbfb5",
+      "sha256": "3cb4abf4db0ea8ab99bf3333985a45a759e0af6f4e1619e3e64273b04460cae9",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1234,7 +1234,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "94c084cab7ea02af8f3ecf324e120e0d0e6075dfdc8e7d446716e11a01f76ae3",
+      "sha256": "8e7b76f2ba1e657862deb27ad3ea7a2378230d1ee6dbba44cd2952112616cb39",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1355,6 +1355,14 @@
     {
       "path": "docs/highcountry/qualification/R01.2-level1.json",
       "sha256": "c4f2cd5f2a045d8411a32cc92ab8a5b64ee35a3fa2712f3f85b218666da5b6b6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.3-level1.json",
+      "sha256": "6327526ae84fb9f1869af162501349dd01efb48c42f3d75252e838c8c520434b",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

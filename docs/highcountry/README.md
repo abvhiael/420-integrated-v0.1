@@ -2,6 +2,7 @@
 
 High Country is the browser-first cultivation/genetics game defined in the root README. The repository currently contains HC-1..HC-6 contract foundations, HC-PA progressive-access policy, HC-GP Gaming Protocol adapters and a framework-neutral access client. It does not yet contain a playable browser game, harvest/product economy or a deployable persistent game service.
 
+- [Migration consent, authority and recovery boundaries](MIGRATION-BOUNDARIES.md)
 - [Canonical types, units and compatibility](TYPES-AND-UNITS.md)
 - [Architecture, state authority, permissions and dependency map](ARCHITECTURE-AND-AUTHORITY.md)
 - [Approved full social economy launch scope and all 65 requirement assignments](RELEASE-SCOPE.md)

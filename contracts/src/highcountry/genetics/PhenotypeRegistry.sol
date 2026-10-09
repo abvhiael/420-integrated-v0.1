@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCAlreadyExists, HCInvalidId, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import { HCAlreadyExists, HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
@@ -11,6 +11,16 @@ interface IGenomeRegistryPhenotype {
     function exists(
         bytes32 genomeId
     ) external view returns (bool);
+}
+
+interface IPlantProvenance {
+    function genomeOf(uint64 plantId) external view returns (bytes32);
+}
+interface IBreedingProvenance {
+    function childGenomeOfFinalizedEvent(uint64 eventId) external view returns (bytes32);
+}
+interface IExpressionProvenance {
+    function expressionForPlant(uint64 plantId) external view returns (bytes32);
 }
 
 contract PhenotypeRegistry {
@@ -23,6 +33,12 @@ contract PhenotypeRegistry {
         bytes32 metadataHash;
         bool exists;
     }
+
+    bytes32 public constant BIND_SCOPE = keccak256("HC.PHENOTYPE_REGISTRY.PROVENANCE_BINDING");
+    IPlantProvenance public plantRegistry;
+    IBreedingProvenance public breedingEngine;
+    IExpressionProvenance public cultivationEngine;
+    event ProvenanceSourcesBound(address indexed plants, address indexed breeding, address indexed cultivation);
 
     IHighCountryAuthorization public immutable authorization;
     IGenomeRegistryPhenotype public immutable genomeRegistry;
@@ -44,6 +60,22 @@ contract PhenotypeRegistry {
         genomeRegistry = IGenomeRegistryPhenotype(genomeRegistry_);
     }
 
+    function bindProvenanceSources(
+        address plants,
+        address breeding,
+        address cultivation
+    ) external {
+        if (address(plantRegistry) != address(0) || plants.code.length == 0
+            || breeding.code.length == 0 || cultivation.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(AuthorizationRequest(
+            msg.sender, ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE, BIND_SCOPE, 0
+        ));
+        plantRegistry = IPlantProvenance(plants);
+        breedingEngine = IBreedingProvenance(breeding);
+        cultivationEngine = IExpressionProvenance(cultivation);
+        emit ProvenanceSourcesBound(plants, breeding, cultivation);
+    }
+
     function registerPhenotype(
         bytes32 phenotypeId,
         bytes32 genomeId,
@@ -55,6 +87,15 @@ contract PhenotypeRegistry {
         if (phenotypeId == bytes32(0) || genomeId == bytes32(0) || traitHash == bytes32(0)) revert HCInvalidId();
         if (!genomeRegistry.exists(genomeId)) revert HCNotFound();
         if (_phenotypes[phenotypeId].exists) revert HCAlreadyExists();
+        if (address(plantRegistry) == address(0) || sourcePlantId == 0) revert HCInvalidState();
+        if (plantRegistry.genomeOf(sourcePlantId) != genomeId) revert HCInvalidState();
+        bytes32 expression = cultivationEngine.expressionForPlant(sourcePlantId);
+        if (expression == bytes32(0) || traitHash != expression) revert HCInvalidState();
+        if (sourceBreedingEventId != 0) {
+            if (breedingEngine.childGenomeOfFinalizedEvent(sourceBreedingEventId) != genomeId) {
+                revert HCInvalidState();
+            }
+        }
         authorization.requireAuthorized(
             AuthorizationRequest(msg.sender, ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, phenotypeId, 0)
         );

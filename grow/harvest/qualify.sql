@@ -1,9 +1,4 @@
 -- V2-09 data isolation, append-only, and observed yield qualification
-BEGIN;
-INSERT INTO grow_private.facilities(tenant_id,facility_id,name) VALUES
- ('11111111-1111-4111-8111-111111111111','11111111-1111-4111-8111-111111111112','Harvest Facility')
- ON CONFLICT DO NOTHING;
-ROLLBACK;
 SELECT 1 WHERE to_regclass('grow_private.harvest_records') IS NOT NULL;
 DO $$
 BEGIN

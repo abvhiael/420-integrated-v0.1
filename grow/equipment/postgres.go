@@ -22,10 +22,10 @@ func(s SQLStore)Device(ctx context.Context,tenant,id string)(Device,error){
  var d Device
  err:=s.withinTenant(ctx,tenant,func(tx *sql.Tx)error{
   return tx.QueryRowContext(ctx,`SELECT tenant_id::text,facility_id::text,zone_id::text,device_id::text,
-device_type,safe_minimum::float8,safe_maximum::float8,online,interlock_ok,manual_override
+device_type,safe_minimum::float8,safe_maximum::float8,online,interlock_ok,manual_override,control_signing_key
 FROM grow_private.equipment WHERE tenant_id=$1::uuid AND device_id=$2::uuid`,tenant,id).Scan(
  &d.TenantID,&d.FacilityID,&d.ZoneID,&d.ID,&d.Type,&d.SafeMinimum,&d.SafeMaximum,
- &d.Online,&d.InterlockOK,&d.ManualOverride)
+ &d.Online,&d.InterlockOK,&d.ManualOverride,&d.ControlSigningKey)
  })
  if errors.Is(err,sql.ErrNoRows){return Device{},ErrDenied}
  return d,err

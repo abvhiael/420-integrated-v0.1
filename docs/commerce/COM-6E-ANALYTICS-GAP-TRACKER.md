@@ -31,3 +31,11 @@ Incremental source changes:
 - `ca1d853bd3a01fc7bdad2336ffe8652a3edf49f1`: update existing COM-6 analytics-scope regression expectation.
 
 These changes do **not** satisfy every exit criterion. Larger datasets still lack resumable paginated reconciliation; partial-refund amount handling, material cross-page mutation, additional negative/finality regressions and full COM-6 Level 2 need investigation. No passing CI results were observed at this candidate when this record was written. Do not call it Level 1 qualified or COM-6E complete.
+
+## Paginated accounting revision — implementation candidate
+
+Replaces the earlier all-at-once 5,000-order bound with `GET .../operations/analytics?offset=N&limit=M` (M 1–100) and SDK `merchantAnalytics(storeId, offset, limit)`. Every response includes `totalCount`, `offset`, `nextOffset`, `partial` and finalized-block provenance. Financial amounts are scoped **only to the returned page**, so aggregating across pages requires an externally reconciled stable source/dataset snapshot; the service must not claim page sums as complete business revenue.
+
+The underlying Pay payment record's `refundedAmount` is validated as a nonnegative decimal within the original settlement amount. The page produces gross paid, refunded, and net base units per asset; pending refund proposals are not booked as transfers. New regression cases include partial refund, invalid refund amount, bad pagination/tenant, >100 attempts, offset after 5,000, and finalized-block mutation.
+
+Implementation candidate `2e55a3dee45b5243934fd5a1e47db1014343100d` (source, SDK, HTTP, browser, tests). **Not Level 1 certified until CI successfully completes at that exact SHA.** Snapshot consistency across separate HTTP pagination requests remains an explicit caveat, not a claim of full historical aggregate. No COM-6 Level 2 or Level 3 claim.

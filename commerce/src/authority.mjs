@@ -1,6 +1,7 @@
 import { JsonRpcProvider, FetchRequest, Interface, keccak256, toUtf8Bytes, hashMessage } from 'ethers';
 import { Fault, requireThat, bytes32, wallet } from './security.mjs';
 import {validateArbitrationBinding,finalizedArbitrationBinding} from './arbitration.mjs';
+import {validateDisplayBindings,optionalMerchantDisplay} from './identity-names.mjs';
 
 export const ABIS = {
   MerchantRegistry420: ['function register(bytes32,bytes32,bytes32,address)', 'function merchants(bytes32) view returns (address controller,bytes32 profileId,bytes32 metadataHash,uint8 status,bool active,uint32 payoutVersion)', 'function currentPayout(bytes32) view returns(address,uint32,bytes32)'],
@@ -31,6 +32,7 @@ export class RpcAuthority {
     this.rpc = rpc ?? new JsonRpcProvider(request, undefined, { batchMaxCount: 1 });
     wallet(config.registry.address); bytes32(config.registry.codeHash);
     if(config.arbitration)validateArbitrationBinding(config.arbitration,config.chainId);
+    if(config.identityNames)validateDisplayBindings(config.identityNames,config.chainId);
     for (const name of [...Object.keys(ABIS),...(config.contracts.RefundManager420?['RefundManager420']:[])]) {
       const binding = config.contracts[name];
       requireThat(binding && binding.verified === true, 'missing_verified_binding');
@@ -100,6 +102,7 @@ export class RpcAuthority {
       return {
         chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), blockTimestamp: Number(BigInt(block.timestamp)), finalized: true, expiresAt:deadline, arbitration,
         merchant: async merchantId => record(await read('MerchantRegistry420','merchants',[bytes32(merchantId)])),
+        merchantDisplay: async merchant => optionalMerchantDisplay(this.config.identityNames,{send,tag,deadline,now:this.now,blockTimestamp:Number(BigInt(block.timestamp))},merchant),
         listing: async listingId => {
           const listing = record((await read('ListingRegistry420','getListing',[bytes32(listingId)]))[0]);
           listing.available = (await read('InventoryReservation420','available',[listingId]))[0].toString();

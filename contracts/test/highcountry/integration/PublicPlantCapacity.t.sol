@@ -73,6 +73,7 @@ contract PublicPlantCapacityFixture {
         caps.registerProtocolComponent(ModuleIds.LAND_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.PUBLIC_CULTIVATION_ACCESS, address(this));
         caps.registerProtocolComponent(ModuleIds.PLANT_REGISTRY, address(this));
+        caps.registerProtocolComponent(ModuleIds.EMERGENCY_STATE, address(this));
         emergency = new EmergencyState(address(auth));
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, plants.EMERGENCY_BIND_SCOPE());
         plants.bindEmergencyState(address(emergency));
@@ -324,6 +325,7 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _allocate(1, ALICE, 1);
         _public(1, ALICE, 1);
         CultivationEngine engine = new CultivationEngine(address(auth), address(plants));
+        caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         _grant(
             address(this),
             ModuleIds.CULTIVATION_ENGINE,
@@ -331,7 +333,6 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
             engine.EMERGENCY_BIND_SCOPE()
         );
         engine.bindEmergencyState(address(emergency));
-        caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(1)));
         engine.updateEnvironment(1, CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000));
         require(plants.getPlant(1).regionId == 1, "region mismatch");
@@ -343,6 +344,8 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         PlantRegistry otherPlants = new PlantRegistry(
             address(auth), address(genomes), address(land), address(other), address(seeds), address(clones)
         );
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, otherPlants.EMERGENCY_BIND_SCOPE());
+        otherPlants.bindEmergencyState(address(emergency));
         vm.prank(BOB);
         _reject(
             address(other), abi.encodeCall(other.bindPlantRegistry, (address(otherPlants))), HCUnauthorized.selector

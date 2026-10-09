@@ -118,6 +118,10 @@ export function createCommerceSdk420(input: {
       return chainPlan(plan, 'ListingRegistry420', change.method, args);
     },
     merchantListing: (storeId: string, listingId: string) => { if (!/^0x[0-9a-f]{64}$/.test(listingId)) throw new CommerceApiError420('invalid_id', 0); return signed<{listingId: string; listing: Record<string, unknown>; provenance: Record<string, unknown>}>('GET', merchantPath(storeId) + `/listings/${listingId}`); },
+    merchantOperations: (storeId: string) => signed<{items: Array<Record<string, unknown>>;totalCount:number;nextOffset:number|null;provenance:Record<string, unknown>}>('GET', merchantPath(storeId)+'/operations/orders'),
+    merchantAnalytics: (storeId: string) => signed<{totals:Record<string, unknown>;byAsset:Record<string, unknown>;partial:boolean;provenance:Record<string, unknown>}>('GET',merchantPath(storeId)+'/operations/analytics'),
+    merchantIntegrations: (storeId: string) => signed<Record<string, unknown>>('GET',merchantPath(storeId)+'/operations/integrations'),
+    merchantRemedy: (storeId: string,attemptId: string,kind:'refund'|'dispute') => signed<Record<string, unknown>>('POST',merchantPath(storeId)+'/operations/orders/'+objectId(attemptId)+'/'+kind,{}),
     merchantBuilder: (storeId: string) => signed<Record<string, unknown>>('GET', merchantPath(storeId) + '/builder'),
     merchantStore: (storeId: string) => signed<Record<string, unknown>>('GET', merchantPath(storeId)),
     merchantSection: (storeId: string, section: 'branding' | 'categories' | 'products' | 'media') => signed<Record<string, unknown>>('GET', merchantPath(storeId) + '/' + section),

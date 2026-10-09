@@ -42,7 +42,8 @@ contract RandomnessCoordinator {
                 EMERGENCY_BIND_SCOPE, 0
             )
         );
-        if (IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+        if (IEmergencyState(candidate).authorizationRoot() != address(authorization)
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
             || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
             || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false) revert HCInvalidState();
         emergencyState = IEmergencyState(candidate);

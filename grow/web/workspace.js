@@ -1,5 +1,28 @@
 const SECTIONS=Object.freeze(["overview","facilities","plants","environment","equipment","cultivation","harvests","inventory","advice","notifications"]);
 const MAX=500;
+const ACTION_FIELDS=Object.freeze({
+ "facilities.create":["kind","label","parentId","facilityId"],"facilities.rename":["kind","id","label","revision"],
+ "plants.create":["facilityId","zoneId","label","state"],"plants.transition":["id","state","revision"],
+ "cultivation.record":["facilityId","zoneId","kind","metric","unit","amount","reason"],
+ "harvests.record":["facilityId","zoneId","sourceId","amount"],
+ "inventory.create":["facilityId","zoneId","kind","unit","label","amount"],
+ "inventory.adjust":["facilityId","zoneId","sourceId","kind","amount","reason"],
+ "inventory.export":["facilityId","zoneId","sourceId","jurisdiction"],
+ "advice.review":["facilityId","zoneId","sourceId","state","reason"]
+});
+const SELECT_VALUES=Object.freeze({
+ "facilities.create.kind":["FACILITY","ROOM","ZONE"],"facilities.rename.kind":["FACILITY","ROOM","ZONE"],
+ "plants.create.state":["SEED","CLONE"],"plants.transition.state":["VEGETATIVE","FLOWERING","HARVESTED","RETIRED"],
+ "cultivation.record.kind":["NUTRIENT","IRRIGATION","ENVIRONMENT"],
+ "cultivation.record.metric":["NUTRIENT_EC","NUTRIENT_PH","NUTRIENT_VOLUME","IRRIGATION_VOLUME","ENV_TEMPERATURE","ENV_HUMIDITY"],
+ "cultivation.record.unit":["mS/cm","pH","L","C","%"],
+ "inventory.create.kind":["SEED","CLONE","INPUT","MATERIAL","EQUIPMENT","HARVEST"],
+ "inventory.create.unit":["each","g","kg","L","mL"],
+ "inventory.adjust.kind":["RECEIVE","ADJUST_IN","ISSUE","CONSUME","ADJUST_OUT"],
+ "inventory.export.jurisdiction":["GENERIC","CA-SK","CA-AB","CA-NS","CA-ON"],
+ "advice.review.state":["ACCEPTED_FOR_REVIEW","REJECTED"]
+});
+
 export function endpoint(config,pageOrigin){
  if(!config||config.enabled!==true||typeof config.privateApiBaseUrl!=="string")return null;
  try{
@@ -15,8 +38,11 @@ export function validateSession(session){
  typeof session.subjectId!=="string"||!session.subjectId||
  !Array.isArray(session.sections)||!session.sections.every(x=>SECTIONS.includes(x))||
  new Set(session.sections).size!==session.sections.length||
- !session.expiresAt||!Number.isFinite(Date.parse(session.expiresAt))||Date.parse(session.expiresAt)<=Date.now())throw Error("Session unavailable");
- return Object.freeze({tenantId:session.tenantId,subjectId:session.subjectId,sections:[...session.sections],expiresAt:session.expiresAt});
+ !session.expiresAt||!Number.isFinite(Date.parse(session.expiresAt))||Date.parse(session.expiresAt)<=Date.now()||
+ typeof session.csrf!=="string"||!/^[a-f0-9]{64}$/.test(session.csrf)||
+ !Array.isArray(session.actions)||!session.actions.every(v=>typeof v==="string"&&Object.hasOwn(ACTION_FIELDS,v))||
+ new Set(session.actions).size!==session.actions.length)throw Error("Session unavailable");
+ return Object.freeze({tenantId:session.tenantId,subjectId:session.subjectId,sections:[...session.sections],actions:[...session.actions],csrf:session.csrf,expiresAt:session.expiresAt});
 }
 export function validatePage(payload,section,session){
  if(!session?.sections.includes(section)||!payload||payload.version!=="grow-private-v1"||
@@ -40,7 +66,23 @@ export async function fetchPrivate(config,pageOrigin,fetcher=fetch){
   return JSON.parse(text);
  };
  const session=validateSession(await request("/v1/private/session"));
- return {session,request};
+ const post=async(path,payload)=>{
+  const response=await fetcher(origin+path,{method:"POST",credentials:"include",mode:"cors",redirect:"error",cache:"no-store",
+   headers:{"Content-Type":"application/json","X-CSRF-Token":session.csrf,Accept:"text/csv, application/json"},
+   body:JSON.stringify(payload),signal:AbortSignal.timeout(10000)});
+  if(!response.ok)throw Error("Private action denied");
+  if(response.status===204)return {success:true};
+  if(response.headers.get("content-type")?.toLowerCase().startsWith("text/csv")){
+   const csv=await response.text();
+   if(csv.length>1048576)throw Error("Export exceeds limit");
+   return {csv};
+  }
+  throw Error("Unexpected action result");
+ };
+ const logout=async()=>fetcher(origin+"/v1/private/logout",{method:"POST",credentials:"include",
+  mode:"cors",redirect:"error",cache:"no-store",headers:{"X-CSRF-Token":session.csrf},
+  signal:AbortSignal.timeout(10000)});
+ return {session,request,post,logout};
 }
 export function boot(doc=globalThis.document,win=globalThis.window){
  if(!doc||!win)return;

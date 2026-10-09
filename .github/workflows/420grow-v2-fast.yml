@@ -132,5 +132,6 @@ jobs:
           go test -count=1 ./grow/harvest
           go test -race -count=1 ./grow/harvest
           go vet ./grow/harvest
+          gofmt -d grow/harvest/*.go
           test -z "$(gofmt -l grow/harvest/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/harvest/qualify.sql

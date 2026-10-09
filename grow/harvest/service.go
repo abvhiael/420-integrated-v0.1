@@ -18,6 +18,7 @@ type Record struct {
 	TenantID, FacilityID, ZoneID, PlantID, ID, Actor, IdempotencyKey, Source string
 	WeightGrams                                                              float64
 	HarvestedAt                                                              time.Time
+	CultivarID                                                               string
 }
 type Scope struct {
 	Principal security.Principal
@@ -62,6 +63,8 @@ type Forecast struct {
 	SampleCount                           int
 	EstimateGrams, LowerGrams, UpperGrams float64
 	Method                                string
+	Available                             bool
+	Status                                string
 }
 
 func (s Service) Analytics(ctx context.Context, scope Scope, facility, zone string, from, to time.Time, limit int) (Summary, Forecast, error) {
@@ -96,10 +99,17 @@ func (s Service) Analytics(ctx context.Context, scope Scope, facility, zone stri
 	if sum.Count > 0 {
 		sum.MeanGrams = mean
 	}
-	forecast := Forecast{Kind: "ESTIMATE", SampleCount: sum.Count, Method: "Historical per-record mean; no crop, plant, date or weather adjustments"}
+	forecast := Forecast{Kind: "ESTIMATE", SampleCount: sum.Count, Method: "Historical per-record mean with heuristic standard-error range; not an individual-plant prediction", Status: "INSUFFICIENT_DATA"}
 	if sum.Count >= 3 {
 		deviation := math.Sqrt(m2 / float64(sum.Count-1))
+		if deviation/mean > 1.0 {
+			forecast.Status = "HIGH_VARIANCE"
+			forecast.Method = "Historical variance too high for an informative forecast"
+			return sum, forecast, nil
+		}
 		margin := 1.96 * deviation / math.Sqrt(float64(sum.Count))
+		forecast.Available = true
+		forecast.Status = "AVAILABLE"
 		forecast.EstimateGrams = mean
 		forecast.LowerGrams = math.Max(0, mean-margin)
 		forecast.UpperGrams = mean + margin

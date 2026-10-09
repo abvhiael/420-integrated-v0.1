@@ -12,7 +12,7 @@ import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 contract EmergencyState is IEmergencyState {
     IHighCountryAuthorization public immutable authorization;
 
-    function authorizationRoot() external view returns (address) {
+    function authorizationRoot() external view override returns (address) {
         return address(authorization);
     }
 

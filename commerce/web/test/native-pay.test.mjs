@@ -64,3 +64,19 @@ test('native settlement denies unsettled registry, replay, changed payout and re
  const {s,calls}=mock({submitted:true});await assert.rejects(()=>settleNative420Payment(s,status,created,{now:()=>now,approve:()=>false}),/buyer_cancelled/);assert.equal(calls.some(x=>x.method==='eth_sendTransaction'),false);
 });
 test('Swap is unavailable absent approved executable routing and quote',()=>{assert.equal(qualifiedSwapRoute().available,false)});
+
+test('COM-7 unqualified Swap cannot create a funded transaction under a forged quote or route',async()=>{
+ const {s,calls}=mock({submitted:true});
+ for(const candidate of [
+  {quoteId:word(77),expiresAt:now+1000},
+  {quoteId:word(77),expiresAt:now-1},
+  {route:['unapproved-router'],minimumOut:'420'},
+  {recipient:addr(99),minimumOut:'419',slippageBps:10000},
+  {network:'421',quoteId:word(77),replay:true},
+  {status:'reverted',nonce:word(77)}
+ ]) {
+  const availability=qualifiedSwapRoute(s,candidate);
+  assert.equal(availability.available,false);
+ }
+ assert.equal(calls.some(x=>x.method==='eth_sendTransaction'),false);
+});

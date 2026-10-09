@@ -53,7 +53,7 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders$/.test(path)&&method==='GET')data=await service.merchantOperations(actor,storeId,{});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/analytics$/.test(path)&&method==='GET')data=await service.merchantAnalytics(actor,storeId);
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/integrations$/.test(path)&&method==='GET')data=await service.merchantIntegrations(actor,storeId);
-        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders\/[a-f0-9]{64}\/(refund|dispute)$/.test(path)&&method==='POST')data=await service.merchantRemedy(actor,storeId,parts[7],parts[8]);
+        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders\/[a-f0-9]{64}\/(refund|dispute)$/.test(path)&&method==='POST')data=await service.merchantRemedy(actor,storeId,parts[7],parts[8],input??{});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/listings\/0x[a-f0-9]{64}$/.test(path)&&method==='GET')data=await service.merchantListing(actor,storeId,parts[6]);
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/products\/[a-f0-9]{64}\/listing-plan$/.test(path)&&method==='POST')data=await service.listingPlan(actor,storeId,parts[6],input);
         else if(path==='/v1/merchant/storefronts'&&method==='POST')data=await service.createStore(actor,input);

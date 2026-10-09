@@ -25,6 +25,7 @@ BEGIN
  EXCEPTION WHEN foreign_key_violation THEN NULL;
  END;
 END $$;
+COMMIT;
 -- Separate nonowner app identity with explicit tenant context.
 SET ROLE grow_v2_test_runtime;
 BEGIN;
@@ -43,4 +44,3 @@ DO $$ BEGIN
 END $$;
 ROLLBACK;
 RESET ROLE;
-ROLLBACK;

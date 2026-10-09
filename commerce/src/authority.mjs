@@ -9,9 +9,9 @@ export const ABIS = {
   OrderRegistry420: ['function getOrder(bytes32) view returns(tuple(bytes32 listingId,uint32 listingRevision,address buyer,address seller,uint256 quantity,address paymentAsset,uint256 totalAmount,bytes32 settlementAdapterId,bytes32 paymentRef,bytes32 fulfillmentHash,bytes32 disputeHash,uint8 status,uint64 createdAt,uint64 updatedAt))', 'function createOrder(bytes32,bytes32,uint32,uint256,address,uint256)', 'function listingRegistry() view returns(address)', 'function policyRegistry() view returns(address)', 'function inventoryReservation() view returns(address)'],
   PaymentRegistry420: ['function getPayment(bytes32) view returns(tuple(bytes32 invoiceId,address payer,address merchant,address inputAsset,uint256 inputAmount,address settlementAsset,uint256 settlementAmount,bytes32 quoteId,uint256 payerNonce,bytes32 receiptHash,uint256 tipAmount,uint256 refundedAmount,uint8 status))'],
   InvoiceRegistry420: ['function getInvoice(bytes32) view returns(tuple(bytes32 merchantId,address merchant,bytes32 metadataHash,bytes3 currency,uint256 amount,uint64 expiresAt,uint64 refundUntil,uint8 mode,uint8 acceptance,bool partialPayments,uint16 quoteMaxSlippageBps,bytes32 acceptedAssetsHash,bytes32 settlementPlanHash,bytes32 tipPolicyHash,bool active))', 'function paidAmount(bytes32) view returns(uint256)', 'function isClosed(bytes32) view returns(bool)'],
-  RefundManager420: ['function fundedRefundExecuted(bytes32) view returns(bool)','function refunds(bytes32) view returns(bytes32 paymentId,address settlementAsset,address recipient,uint256 amount,bytes32 reasonHash,uint64 createdAt)'],
   MarketPaySettlementAdapter420: ['function invoiceIdForOrder(bytes32) view returns(bytes32)', 'function orderPayment(bytes32) view returns(bytes32)', 'function orders() view returns(address)', 'function payments() view returns(address)', 'function invoices() view returns(address)', 'function merchants() view returns(address)', 'function deploymentChainId() view returns(uint256)'],
 };
+const refundReadABI=['function fundedRefundExecuted(bytes32) view returns(bool)','function refunds(bytes32) view returns(bytes32 paymentId,address settlementAsset,address recipient,uint256 amount,bytes32 reasonHash,uint64 createdAt)'];
 const registryABI = ['function component(bytes32) view returns(tuple(bytes32 componentId,address implementation,bytes32 runtimeCodeHash,tuple(uint16 major,uint16 minor,uint16 patch) version,uint8 lifecycle))', 'function isActive(bytes32) view returns(bool)'];
 export const payComponents = Object.fromEntries(['Merchant','Payment','Invoice'].map(name => [name+'Registry420',keccak256(toUtf8Bytes('420/APP/420PAY/'+name.toUpperCase()+'_REGISTRY'))]));
 payComponents.RefundManager420=keccak256(toUtf8Bytes('420/APP/420PAY/REFUND_MANAGER'));
@@ -29,7 +29,7 @@ export class RpcAuthority {
     const request = new FetchRequest(config.rpcUrl); request.timeout=5000;
     this.rpc = rpc ?? new JsonRpcProvider(request, undefined, { batchMaxCount: 1 });
     wallet(config.registry.address); bytes32(config.registry.codeHash);
-    for (const name of Object.keys(ABIS).filter(name=>name!=='RefundManager420'||config.contracts.RefundManager420)) {
+    for (const name of [...Object.keys(ABIS),...(config.contracts.RefundManager420?['RefundManager420']:[])]) {
       const binding = config.contracts[name];
       requireThat(binding && binding.verified === true, 'missing_verified_binding');
       wallet(binding.address); bytes32(binding.codeHash);
@@ -79,7 +79,7 @@ export class RpcAuthority {
       };
       await verifyCode(this.config.registry);
       for (const [name, binding] of Object.entries(this.config.contracts)) {
-        requireThat(Object.hasOwn(ABIS, name), 'unknown_binding', 503);
+        requireThat(Object.hasOwn(ABIS, name)||name==='RefundManager420', 'unknown_binding', 503);
         await verifyCode(binding);
         // Compare raw encoded bytes: Pay and Market have different version layouts.
         const versionData = new Interface(['function protocolVersion() view returns(uint32)']).encodeFunctionData('protocolVersion');
@@ -90,7 +90,7 @@ export class RpcAuthority {
           requireThat(ref.componentId === binding.componentId && wallet(ref.implementation) === wallet(binding.address) && ref.runtimeCodeHash === binding.codeHash && ref.version.every((v, i) => Number(v) === binding.registryVersion[i]) && (await call(this.config.registry.address, registryABI, 'isActive', [binding.componentId]))[0], 'registry_mismatch', 503);
         }
       }
-      const read = async (name, method, args = []) => (await call(this.config.contracts[name].address, ABIS[name], method, args));
+      const read = async (name, method, args = []) => (await call(this.config.contracts[name].address, name==='RefundManager420'?refundReadABI:ABIS[name], method, args));
       const wiring = [['OrderRegistry420','listingRegistry','ListingRegistry420'],['OrderRegistry420','policyRegistry','MarketPolicyRegistry420'],['OrderRegistry420','inventoryReservation','InventoryReservation420'],['InventoryReservation420','listingRegistry','ListingRegistry420'],['InventoryReservation420','orderRegistry','OrderRegistry420'],['MarketPaySettlementAdapter420','orders','OrderRegistry420'],['MarketPaySettlementAdapter420','payments','PaymentRegistry420'],['MarketPaySettlementAdapter420','invoices','InvoiceRegistry420'],['MarketPaySettlementAdapter420','merchants','MerchantRegistry420']];
       for (const [name, getter, target] of wiring) requireThat(wallet((await read(name, getter))[0]) === wallet(this.config.contracts[target].address), 'dependency_mismatch', 503);
       requireThat((await read('MarketPaySettlementAdapter420','deploymentChainId'))[0] === BigInt(this.config.chainId), 'adapter_chain_mismatch', 503);

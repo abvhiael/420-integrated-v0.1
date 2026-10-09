@@ -513,7 +513,9 @@ contract PlantSourceConsumptionTest is PublicPlantCapacityFixture {
             address(dependency),
             address(otherClones)
         );
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, otherPlants.EMERGENCY_BIND_SCOPE());
+        _grant(
+            address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, otherPlants.EMERGENCY_BIND_SCOPE()
+        );
         otherPlants.bindEmergencyState(address(emergency));
         dependency.setConsumer(address(otherPlants));
         otherClones.bindPlantRegistry(address(otherPlants));

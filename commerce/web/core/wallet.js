@@ -11,7 +11,11 @@ export function validateConfig(config) {
   if(!config || config.schema!=='420-commerce-web-v1' || !/^[1-9][0-9]*$/.test(config.chainId) || !config.registry || !config.contracts)fail('Verified deployment configuration is unavailable.');
   const api=new URL(config.apiUrl);if(api.origin!==config.origin || api.pathname!=='/' || api.search || api.hash || api.username || api.password || (api.protocol!=='https:' && !(config.environment==='local'&&api.hostname==='127.0.0.1')))fail('Invalid service origin.');
   const names=['MerchantRegistry420','ListingRegistry420','InventoryReservation420','MarketPolicyRegistry420','OrderRegistry420','PaymentRegistry420','InvoiceRegistry420','MarketPaySettlementAdapter420'];
-  if(Object.keys(config.contracts).length!==names.length)fail('Invalid contract inventory.');
+  const optional=['PaymentRouter420'];
+  const supplied=Object.keys(config.contracts);
+  if(supplied.length!==names.length && supplied.length!==names.length+1 || supplied.some(name=>![...names,...optional].includes(name)) || names.some(name=>!config.contracts[name]))fail('Invalid contract inventory.');
+  if(config.contracts.PaymentRouter420){const router=config.contracts.PaymentRouter420;const expected=keccak256(toUtf8Bytes('420/APP/420PAY/PAYMENT_ROUTER'));if(router.componentId!==expected||!Array.isArray(router.registryVersion)||router.registryVersion.length!==3)fail('Unapproved Pay router identity.');}
+  if(config.contracts.PaymentRouter420)names.push('PaymentRouter420');
   for(const binding of [config.registry,...names.map(n=>config.contracts[n])])if(!binding || !/^0x[0-9a-fA-F]{40}$/.test(binding.address) || /^0x0{40}$/.test(binding.address) || !/^0x[0-9a-f]{64}$/.test(binding.codeHash))fail('Missing approved binding.');
   for(const name of names){const b=config.contracts[name];if(b.verified!==true||!/^0x[0-9a-f]+$/.test(b.versionResult)||!b.version)fail('Missing approved version.');if(['MerchantRegistry420','PaymentRegistry420','InvoiceRegistry420'].includes(name)){const component=keccak256(toUtf8Bytes('420/APP/420PAY/'+name.replace('Registry420','').toUpperCase()+'_REGISTRY'));if(b.componentId!==component||!Array.isArray(b.registryVersion)||b.registryVersion.length!==3)fail('Missing canonical Pay identity.');}}
   return structuredClone(config);

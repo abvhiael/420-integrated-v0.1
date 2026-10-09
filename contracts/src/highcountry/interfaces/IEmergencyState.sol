@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 interface IEmergencyState {
     event EmergencyRestrictionChanged(bytes32 indexed domain, bool restricted);
 
-    function authorization() external view returns (address);
+    function authorizationRoot() external view returns (address);
 
     function isAllowedDomain(
         bytes32 domain

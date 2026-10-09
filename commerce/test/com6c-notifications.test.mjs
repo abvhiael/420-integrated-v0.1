@@ -38,3 +38,23 @@ test('COM-6C foreign order events never cross merchant scope and deactivated con
  const p=await f.service.merchantNotificationPreferences(attacker.address,store.store_id);
  assert.equal(p.enabled,false);
 });
+
+test('COM-6C bounded opaque pagination and read-state isolation remain stable under same-height events',async t=>{
+ const f=setup();t.after(()=>f.close());const {store,attempt}=await checkout(f);
+ await f.service.merchantNotificationPreferences(seller.address,store.store_id,{enabled:true});
+ for(const n of [201,202,203]){
+  const x=event(attempt.orderId,n);
+  f.db.run('INSERT INTO event_inbox(event_id,chain_id,block_number,block_hash,tx_hash,tx_index,log_index,source_contract,topic,payload_hash,payload,finality,applied_at,canonical) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',x.id,'420',1,b32(100),x.provenance.transactionHash,0,0,address(23),x.topic,hash(JSON.stringify(x)),JSON.stringify(x),'finalized',f.now(),1);
+ }
+ const first=await f.service.merchantNotifications(seller.address,store.store_id,{limit:2});
+ assert.equal(first.items.length,2);assert.match(first.nextCursor,/^[a-f0-9]{64}$/);
+ const second=await f.service.merchantNotifications(seller.address,store.store_id,{limit:2,cursor:first.nextCursor});
+ assert.equal(second.items.length,1);assert.equal(second.nextCursor,null);
+ assert.equal(new Set([...first.items,...second.items].map(x=>x.id)).size,3);
+ await assert.rejects(()=>f.service.merchantNotifications(seller.address,store.store_id,{cursor:'f'.repeat(64)}),e=>e.code==='invalid_notification_cursor');
+ const target=first.items[0].id;
+ await f.service.merchantNotificationRead(seller.address,store.store_id,target,{read:true});
+ const reread=await f.service.merchantNotifications(seller.address,store.store_id,{limit:3});
+ assert.equal(reread.items.find(x=>x.id===target).read,true);
+ assert.equal(reread.items.filter(x=>x.read).length,1);
+});

@@ -22,3 +22,12 @@ Payment and refund authority belongs to Pay/Market and approved governance, not 
 ## Qualification status
 
 **INCOMPLETE — gap analysis recorded, not a qualified implementation or Level 1 PASS.** No new executable change is certified by this document. No workflow result, test SHA, milestone or full phase qualification is claimed. Next action is implementing the above on PR #594 and obtaining exact-SHA scoped CI evidence. Subsequent canonical top-level step is **COM-7 Security/ops**, only after COM-6 requirements and milestone requirements are met.
+
+## Initial implementation candidate (not qualified)
+
+Incremental source changes:
+- `f5d7d78cc4b902b6d0e5ce9a32e2a4702da38a14`: traverse all attempts up to 5,000 using 100-item chunks; require consistent finalized block and unchanging local count; reject larger histories with explicit `analytics_history_requires_pagination` instead of returning misleading totals.
+- `220205e8fddcc9e9ce97d7ee6a8a9e9b13b9b20a`: correct the merchant browser coverage label.
+- `ca1d853bd3a01fc7bdad2336ffe8652a3edf49f1`: update existing COM-6 analytics-scope regression expectation.
+
+These changes do **not** satisfy every exit criterion. Larger datasets still lack resumable paginated reconciliation; partial-refund amount handling, material cross-page mutation, additional negative/finality regressions and full COM-6 Level 2 need investigation. No passing CI results were observed at this candidate when this record was written. Do not call it Level 1 qualified or COM-6E complete.

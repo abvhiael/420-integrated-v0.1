@@ -10,6 +10,8 @@ The five audit fixes are implemented in PR #593: usable nonzero Genesis capabili
 
 ## R01 — canonical specification and reconciliation
 
+R01.1 scope decision: the owner selected the full social economy launch, with wallet-optional core play and no protected-stat/scoring advantage. `RELEASE-SCOPE.md` assigns all 65 audit requirements; no launch requirement is deferred. Detailed mechanics and remaining R01 decisions remain open.
+
 Dependencies: none. Category: specification, product/governance decisions, documentation.
 
 | Substep | Deliverable | Acceptance |

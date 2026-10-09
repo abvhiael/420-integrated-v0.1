@@ -68,12 +68,36 @@ type Store interface {
 	Read(context.Context, string, string, string, string) (Recommendation, error)
 }
 
+type ProviderVerifier interface {
+	Verify(context.Context, Recommendation) error
+}
+
+type ConsentStore interface {
+	SetConsent(context.Context, Scope, string, string, string, bool) error
+}
+
 type Service struct {
 	Store Store
+	Provider ProviderVerifier
 }
 
 func New(store Store) Service {
 	return Service{Store: store}
+}
+
+func NewWithProvider(store Store, provider ProviderVerifier) Service {
+	return Service{Store: store, Provider: provider}
+}
+
+func (s Service) Consent(ctx context.Context, scope Scope, consentID, facility, zone string, granted bool) error {
+	if s.Store == nil || consentID == "" || !allowed(scope, facility, zone, security.PlantWrite) {
+		return ErrDenied
+	}
+	store, ok := s.Store.(ConsentStore)
+	if !ok {
+		return ErrDenied
+	}
+	return store.SetConsent(ctx, scope, consentID, facility, zone, granted)
 }
 
 func allowed(scope Scope, facility, zone string, action security.Action) bool {
@@ -107,8 +131,8 @@ func (s Service) Submit(ctx context.Context, scope Scope, input Input, now time.
 // Record is only for results from an already authenticated, allowlisted provider adapter.
 // It does not authorize action, publish information or change controlled equipment.
 func (s Service) Record(ctx context.Context, scope Scope, output Recommendation, now time.Time) error {
-	if s.Store == nil || output.TenantID != scope.TenantID ||
-		!allowed(scope, output.FacilityID, output.ZoneID, security.View) {
+	if s.Store == nil || s.Provider == nil || output.TenantID != scope.TenantID ||
+		!allowed(scope, output.FacilityID, output.ZoneID, security.PlantWrite) {
 		return ErrDenied
 	}
 	if output.ID == "" || output.JobID == "" || output.Provider == "" ||
@@ -120,6 +144,9 @@ func (s Service) Record(ctx context.Context, scope Scope, output Recommendation,
 		output.CreatedAt.After(now.Add(5*time.Minute)) ||
 		(output.Confidence != "LOW" && output.Confidence != "MEDIUM" && output.Confidence != "HIGH") {
 		return ErrInvalid
+	}
+	if err := s.Provider.Verify(ctx, output); err != nil {
+		return ErrDenied
 	}
 	return s.Store.SaveRecommendation(ctx, output)
 }

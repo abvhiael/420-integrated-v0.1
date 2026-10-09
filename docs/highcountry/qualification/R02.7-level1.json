@@ -1,0 +1,96 @@
+{
+  "schema": "highcountry-roadmap-step-qualification-v1",
+  "step": "R02.7",
+  "name": "Verify ruleset identity/version and plant lifecycle at environment/expression boundaries",
+  "status": "COMPLETE_REPOSITORY_QUALIFICATION",
+  "qualificationLevel": "Level 1 targeted, affected retained High Country suite and invariants PASS",
+  "implementationSha": "04466e38816428366b005f1d083f06a4cd2a6467",
+  "branch": "review/high-country-complete-audit-20261009",
+  "prNumber": 593,
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "workflow": {
+    "name": "High Country R02.7 Targeted Qualification",
+    "runId": 37993477814,
+    "jobId": 114033386032,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37993477814"
+  },
+  "requirementsSatisfied": [
+    "Only canonical registered ruleset IDs whose immutable content hash derives the ID are valid",
+    "Expression ruleset must match the approved RulesetRouter route for the cultivation expression domain",
+    "One-time binding verifies matching authorization and registry identity; failed and repeated bindings denied",
+    "Plant environmental updates reject terminated plants",
+    "Expression may be sealed only in READY stage after environment snapshot, matching plant genome and registered routed ruleset",
+    "Successful expression permanently locks environment and preserves immutable ruleset identity and content hash despite subsequent route changes",
+    "Unknown and unrouted rulesets, premature or terminated expression, and reroll denied"
+  ],
+  "changedFiles": [
+    "contracts/src/highcountry/cultivation/CultivationEngine.sol",
+    "contracts/src/highcountry/constants/ActionIds.sol",
+    "contracts/test/highcountry/unit/cultivation/CultivationEngine.t.sol",
+    "contracts/test/highcountry/invariant/CultivationInvariant.t.sol",
+    "contracts/test/highcountry/integration/PhenotypeProvenance.t.sol",
+    "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
+    "docs/highcountry/R02.7-RULESET-LIFECYCLE.md",
+    "scripts/highcountry/verify-r01.py",
+    ".github/workflows/highcountry-r02-7.yml"
+  ],
+  "checks": [
+    {
+      "name": "Exact implementation source checkout",
+      "status": "PASS"
+    },
+    {
+      "name": "forge build src/highcountry --sizes",
+      "status": "PASS"
+    },
+    {
+      "name": "forge fmt --check src/highcountry test/highcountry",
+      "status": "PASS"
+    },
+    {
+      "name": "forge lint src/highcountry --severity high med low",
+      "status": "PASS_WITH_WARNINGS"
+    },
+    {
+      "name": "PhenotypeProvenance.t.sol targeted version and lifecycle regression",
+      "status": "PASS",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "Retained High Country integration and invariant suite",
+      "status": "PASS",
+      "suites": 42,
+      "passed": 183,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "High Country source/specification catalogue",
+      "status": "PASS"
+    },
+    {
+      "name": "R02.7 ABI artifacts and semantics",
+      "status": "PASS"
+    }
+  ],
+  "countNote": "The seven targeted tests are included in the 183-test retained suite, not additional.",
+  "level2": "Affected retained High Country app-specific suite passed; later documented milestones remain deferred.",
+  "level3": "Deferred until accumulated High Country phase closeout; Solidity Contracts owns canonical full Foundry inventory, Genesis owns independent address-authority verification.",
+  "deferred": [
+    "R02.8 EmergencyState enforcement",
+    "R02.9 pending breeding reservation and recovery",
+    "R07/R09 live/testnet codehash and operational acceptance",
+    "R08 app-phase exact-SHA Level 3 and main reconciliation"
+  ],
+  "blockers": [],
+  "limitations": [
+    "No deployed production readiness or live/testnet acceptance asserted",
+    "Operator must independently attest binding target deployed bytecode before granting bootstrap authorization"
+  ],
+  "evidenceOnlyCommitPolicy": "Evidence-only commit inherits already qualified implementation SHA with no executable/configuration/interface changes.",
+  "nextCanonicalStep": "R02.8 — Make EmergencyState effective in mutating engines"
+}

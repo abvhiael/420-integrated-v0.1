@@ -81,3 +81,44 @@ ORDER BY occurred_at,event_id LIMIT $5`,tenant,lot,facility,zone,limit)
 	})
 	return result,err
 }
+
+func (s SQLStore) Transfer(ctx context.Context, from, to Entry) error {
+	return s.transaction(ctx,from.TenantID,func(tx *sql.Tx)error{
+		if from.TenantID!=to.TenantID || from.LotID==to.LotID{return ErrInvalid}
+		rows,err:=tx.QueryContext(ctx,`SELECT lot_id::text,facility_id::text,zone_id::text,kind,unit
+FROM grow_private.inventory_lots_v2
+WHERE tenant_id=$1::uuid AND lot_id IN ($2::uuid,$3::uuid)
+ORDER BY lot_id FOR UPDATE`,from.TenantID,from.LotID,to.LotID)
+		if err!=nil{return err}
+		type locked struct{ facility,zone,kind,unit string }
+		found:=map[string]locked{}
+		for rows.Next(){
+			var id string
+			var x locked
+			if err=rows.Scan(&id,&x.facility,&x.zone,&x.kind,&x.unit);err!=nil{rows.Close();return err}
+			found[id]=x
+		}
+		err=rows.Err()
+		rows.Close()
+		if err!=nil{return err}
+		a,okA:=found[from.LotID]
+		b,okB:=found[to.LotID]
+		if !okA || !okB || len(found)!=2 ||
+			a.facility!=from.FacilityID || a.zone!=from.ZoneID ||
+			b.facility!=to.FacilityID || b.zone!=to.ZoneID ||
+			a.kind!=b.kind || a.unit!=b.unit {return ErrDenied}
+		for _,e:=range []Entry{from,to}{
+			result,err:=tx.ExecContext(ctx,`INSERT INTO grow_private.inventory_ledger_v2
+(tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,reference_id,occurred_at)
+VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5::uuid,$6,$7,$8,$9,$10,$11,$12,$13)
+ON CONFLICT(tenant_id,idempotency_key) DO NOTHING`,
+				e.TenantID,e.ID,e.LotID,e.FacilityID,e.ZoneID,e.Kind,e.Quantity,
+				e.Reason,e.Actor,e.Source,e.IdempotencyKey,e.ReferenceID,e.OccurredAt)
+			if err!=nil{return err}
+			count,err:=result.RowsAffected()
+			if err!=nil{return err}
+			if count!=1{return ErrConflict}
+		}
+		return nil
+	})
+}

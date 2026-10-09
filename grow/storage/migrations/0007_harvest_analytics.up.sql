@@ -9,7 +9,7 @@ CREATE TABLE grow_private.harvest_records(
  actor_subject text NOT NULL CHECK(length(actor_subject) BETWEEN 1 AND 180),
  source text NOT NULL CHECK(length(source) BETWEEN 1 AND 128),
  idempotency_key text NOT NULL CHECK(length(idempotency_key) BETWEEN 1 AND 128),
- PRIMARY KEY(tenant_id,harvest_id), UNIQUE(tenant_id,idempotency_key),
+ PRIMARY KEY(tenant_id,harvest_id), UNIQUE(tenant_id,idempotency_key), UNIQUE(tenant_id,plant_id),
  FOREIGN KEY(tenant_id,facility_id,zone_id) REFERENCES grow_private.zones(tenant_id,facility_id,zone_id),
  FOREIGN KEY(tenant_id,plant_id) REFERENCES grow_private.plants(tenant_id,plant_id)
 );

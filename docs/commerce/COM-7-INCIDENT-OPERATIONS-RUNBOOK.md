@@ -25,3 +25,7 @@ Reviewers need the canonical COM-1.7 threat register (COM-T01–T16), COM-2 thro
 ## Qualification boundary
 
 COM-7's load and recovery acceptance require recorded runnable evidence and real multi-instance exercises where applicable. COM-8 real transaction hashes, actual deployed protocol versions, swap routes and approved governance/RefundManager bindings are live/testnet-gated. The monolithic Level 3 merge-candidate test suite is a separate exact-SHA exercise and must use one owning full Foundry inventory in Solidity, while Genesis validates addresses/manifests independently.
+
+## Health monitor operator invocation
+
+Deploy the application health endpoint only over an approved HTTPS origin. To check readiness from an external scheduler or monitoring runner (never from a browser), configure `COMMERCE_HEALTH_URL=https://<approved-host>/v1/health` and `COMMERCE_CHAIN_ID=<approved-chain>` then run `node commerce/src/monitor.mjs`. A nonzero exit is a health alert; ingest only the emitted event/code and do not send private keys, Wallet signatures, delivery data or bearer credentials. Confirm the real chain ID and origin from the approved manifest. This is an executable integration point, not a claim that a monitoring vendor or production alert rule is already deployed.

@@ -25,6 +25,8 @@ Dependencies: none. Category: specification, product/governance decisions, docum
 
 Exit: canonical documents agree with the implemented boundaries and clearly identify planned features. Ambiguous product mechanics are resolved before their code phases.
 
+R01.2 architecture specification is `ARCHITECTURE-AND-AUTHORITY.md`; it preserves existing canonical authority and explicitly separates the wallet-free internal market from the ecosystem asset market. Qualification evidence is recorded under `qualification/`.
+
 ## R02 — reconcile and harden existing foundations
 
 Dependencies: R01; audit fixes retained. Category: code, real contract integration, security.

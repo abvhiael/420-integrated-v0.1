@@ -44,27 +44,40 @@ interface ICanonicalRulesets {
     ) external pure returns (bytes32);
 }
 
+interface ICanonicalRulesetRouter {
+    function authorization() external view returns (address);
+    function rulesetRegistry() external view returns (address);
+    function rulesetFor(bytes32 domain) external view returns (bytes32);
+}
+
 contract CultivationEngine {
+    bytes32 public constant EXPRESSION_RULESET_DOMAIN = keccak256("HC.CULTIVATION.EXPRESSION.V1");
+    ICanonicalRulesetRouter public rulesetRouter;
     bytes32 public constant RULESET_BIND_SCOPE = keccak256("HC.CULTIVATION.RULESET_BIND");
     uint8 public constant READY_STAGE = 5;
     uint8 public constant TERMINATED_STAGE = 6;
     ICanonicalRulesets public rulesetRegistry;
-    event RulesetRegistryBound(address indexed registry);
+    event RulesetRegistryBound(address indexed registry, address indexed router);
     mapping(uint64 => bytes32) public sealedRulesetId;
     mapping(uint64 => bytes32) public sealedRulesetContentHash;
 
     function bindRulesetRegistry(
-        address candidate
+        address candidate,
+        address router
     ) external {
-        if (address(rulesetRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        if (address(rulesetRegistry) != address(0) || candidate.code.length == 0 || router.code.length == 0)
+            revert HCInvalidState();
         authorization.requireAuthorized(
             AuthorizationRequest(
                 msg.sender, ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS, RULESET_BIND_SCOPE, 0
             )
         );
         if (ICanonicalRulesets(candidate).authorization() != address(authorization)) revert HCInvalidState();
+        if (ICanonicalRulesetRouter(router).authorization() != address(authorization)
+            || ICanonicalRulesetRouter(router).rulesetRegistry() != candidate) revert HCInvalidState();
         rulesetRegistry = ICanonicalRulesets(candidate);
-        emit RulesetRegistryBound(candidate);
+        rulesetRouter = ICanonicalRulesetRouter(router);
+        emit RulesetRegistryBound(candidate, router);
     }
 
     function _stage(
@@ -149,7 +162,8 @@ contract CultivationEngine {
         if (!s.exists) revert HCNotFound();
         if (s.expressionLocked || genomeId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidState();
         if (plantRegistry.genomeOf(plantId) != genomeId || _stage(plantId) != READY_STAGE) revert HCInvalidState();
-        if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)) revert HCInvalidState();
+        if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)
+            || rulesetRouter.rulesetFor(EXPRESSION_RULESET_DOMAIN) != rulesetId) revert HCInvalidState();
         (bytes32 contentHash,, bool registered) = rulesetRegistry.getRuleset(rulesetId);
         if (!registered || contentHash == bytes32(0) || rulesetRegistry.deriveRulesetId(contentHash) != rulesetId) {
             revert HCInvalidState();

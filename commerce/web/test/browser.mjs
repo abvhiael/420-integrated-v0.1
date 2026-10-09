@@ -69,8 +69,8 @@ try{
   await shopper.locator('#filters button').click();
   await shopper.locator('#products article').first().waitFor();
   assert.equal(await shopper.locator('#products article').count(),1);
-  await shopper.locator('#products article button').last().click();
-  assert.match(await shopper.locator('#cart').textContent(),/BROWSER/);
+  assert.equal(await shopper.locator('#products article button').last().isDisabled(),true);
+  assert.equal(await shopper.locator('#cart li').count(),0);
   await shopper.locator('#clear').click();assert.equal(await shopper.locator('#cart li').count(),0);
   assert.deepEqual((await new AxeBuilder({page:shopper}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations,[]);
   await shopper.setViewportSize({width:320,height:740});

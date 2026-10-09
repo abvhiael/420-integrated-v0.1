@@ -1,5 +1,6 @@
 import { JsonRpcProvider, FetchRequest, Interface, keccak256, toUtf8Bytes, hashMessage } from 'ethers';
 import { Fault, requireThat, bytes32, wallet } from './security.mjs';
+import {validateArbitrationBinding,finalizedArbitrationBinding} from './arbitration.mjs';
 
 export const ABIS = {
   MerchantRegistry420: ['function register(bytes32,bytes32,bytes32,address)', 'function merchants(bytes32) view returns (address controller,bytes32 profileId,bytes32 metadataHash,uint8 status,bool active,uint32 payoutVersion)', 'function currentPayout(bytes32) view returns(address,uint32,bytes32)'],
@@ -29,6 +30,7 @@ export class RpcAuthority {
     const request = new FetchRequest(config.rpcUrl); request.timeout=5000;
     this.rpc = rpc ?? new JsonRpcProvider(request, undefined, { batchMaxCount: 1 });
     wallet(config.registry.address); bytes32(config.registry.codeHash);
+    if(config.arbitration)validateArbitrationBinding(config.arbitration,config.chainId);
     for (const name of [...Object.keys(ABIS),...(config.contracts.RefundManager420?['RefundManager420']:[])]) {
       const binding = config.contracts[name];
       requireThat(binding && binding.verified === true, 'missing_verified_binding');
@@ -94,8 +96,9 @@ export class RpcAuthority {
       const wiring = [['OrderRegistry420','listingRegistry','ListingRegistry420'],['OrderRegistry420','policyRegistry','MarketPolicyRegistry420'],['OrderRegistry420','inventoryReservation','InventoryReservation420'],['InventoryReservation420','listingRegistry','ListingRegistry420'],['InventoryReservation420','orderRegistry','OrderRegistry420'],['MarketPaySettlementAdapter420','orders','OrderRegistry420'],['MarketPaySettlementAdapter420','payments','PaymentRegistry420'],['MarketPaySettlementAdapter420','invoices','InvoiceRegistry420'],['MarketPaySettlementAdapter420','merchants','MerchantRegistry420']];
       for (const [name, getter, target] of wiring) requireThat(wallet((await read(name, getter))[0]) === wallet(this.config.contracts[target].address), 'dependency_mismatch', 503);
       requireThat((await read('MarketPaySettlementAdapter420','deploymentChainId'))[0] === BigInt(this.config.chainId), 'adapter_chain_mismatch', 503);
+      const arbitration=await finalizedArbitrationBinding(this.config,{send,tag,deadline,now:this.now});
       return {
-        chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), finalized: true, expiresAt:deadline,
+        chainId: this.config.chainId, blockHash: block.hash, blockNumber: Number(BigInt(block.number)), finalized: true, expiresAt:deadline, arbitration,
         merchant: async merchantId => record(await read('MerchantRegistry420','merchants',[bytes32(merchantId)])),
         listing: async listingId => {
           const listing = record((await read('ListingRegistry420','getListing',[bytes32(listingId)]))[0]);

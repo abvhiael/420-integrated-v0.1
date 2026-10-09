@@ -5,6 +5,11 @@ BEGIN
  IF NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON c.relnamespace=n.oid
  WHERE n.nspname='grow_private' AND c.relname='harvest_records' AND c.relrowsecurity AND c.relforcerowsecurity)
  THEN RAISE EXCEPTION 'harvest records missing forced RLS'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON c.relnamespace=n.oid
+ WHERE n.nspname='grow_private' AND c.relname='harvest_plans' AND c.relrowsecurity AND c.relforcerowsecurity)
+ THEN RAISE EXCEPTION 'planned harvest calendar missing forced RLS'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='grow_private.harvest_plans'::regclass AND contype='f')
+ THEN RAISE EXCEPTION 'planned harvest missing plant and zone foreign keys'; END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgrelid='grow_private.harvest_records'::regclass
  AND tgname='harvest_immutable' AND NOT tgisinternal)
  THEN RAISE EXCEPTION 'harvest append-only trigger missing'; END IF;

@@ -6,6 +6,7 @@ on:
       - 'scripts/verify-grow-v2-*.py'
       - 'grow/security/**'
       - 'grow/facility/**'
+      - 'grow/plants/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -82,3 +83,12 @@ jobs:
           go vet ./grow/facility
           test -z "$(gofmt -l grow/facility/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/facility/qualify.sql
+      - name: GROW-V2-05 lifecycle and genetics Level-1 with cumulative Level-2 integration
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/security ./grow/facility ./grow/plants
+          go test -race -count=1 ./grow/security ./grow/facility ./grow/plants
+          go vet ./grow/security ./grow/facility ./grow/plants
+          test -z "$(gofmt -l grow/plants/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/plants/qualify.sql

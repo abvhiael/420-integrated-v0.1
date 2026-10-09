@@ -17,14 +17,20 @@ BEGIN
 END $$;
 BEGIN;
 INSERT INTO grow_private.plants
-(tenant_id,facility_id,zone_id,plant_id,label,state)
+(tenant_id,facility_id,zone_id,plant_id,label,state,cultivar_id)
 VALUES ('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-3333-4333-8333-333333333333',
-'aaaaaaaa-4444-4444-8444-444444444444','aaaaaaaa-8888-4888-8888-888888888888','Harvest fixture','HARVESTED');
+'aaaaaaaa-4444-4444-8444-444444444444','aaaaaaaa-8888-4888-8888-888888888888','Harvest fixture','HARVESTED','aaaaaaaa-5555-4555-8555-555555555555');
 INSERT INTO grow_private.harvest_records
 (tenant_id,harvest_id,facility_id,zone_id,plant_id,weight_grams,harvested_at,actor_subject,source,idempotency_key)
 VALUES ('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-9999-4999-8999-999999999999',
 'aaaaaaaa-3333-4333-8333-333333333333','aaaaaaaa-4444-4444-8444-444444444444',
 'aaaaaaaa-8888-4888-8888-888888888888',42,now(),'operator','manual','fixture-1');
+DO $$ BEGIN
+ IF (SELECT count(*) FROM grow_private.harvest_records h
+ JOIN grow_private.plants p ON p.tenant_id=h.tenant_id AND p.plant_id=h.plant_id
+ WHERE p.cultivar_id='aaaaaaaa-5555-4555-8555-555555555555' AND h.weight_grams=42)<>1
+ THEN RAISE EXCEPTION 'cultivar production join failed'; END IF;
+END $$;
 INSERT INTO grow_private.harvest_plans
 (tenant_id,facility_id,zone_id,plant_id,start_at,end_at,actor_subject,source)
 VALUES ('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-3333-4333-8333-333333333333',

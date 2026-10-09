@@ -1,0 +1,22 @@
+name: CMP 9.15 CMP-0 Closeout Gate
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-9-15-cmp0.yml'
+  workflow_dispatch:
+jobs:
+  cmp0-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: CMP-0 closeout preflight and retained compute science tests
+        working-directory: compute/ingestion
+        run: npm run qualify

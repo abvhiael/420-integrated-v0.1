@@ -1,0 +1,13 @@
+# CMP-9.15 — Close CMP-0 operational qualification
+
+**Operational decision: NO-GO. CMP-0 NOT CLOSED.** The canonical exit requires retained **live** end-to-end Compute Market testnet receipts and an explicit operational GO/NO-GO. The offline closeout preflight cannot substitute for the required completion of CMP-9.1–9.14.
+
+The fail-closed assessor `compute/ingestion/src/cmp0-closeout.mjs` checks an exact release SHA, deployment manifest, all mandatory CMP-0 operational gates, provenance authentication, funded live-receipt verification, address authority, final conservation, prior CMP-9.13 and CMP-9.14 live results and distinct operator/independent reviewer signoffs. A source-provided manifest with PASS labels does **not** by itself prove any of these things: independent validation of chain receipts, provider identities, funded native-$420 transfers, time-series logs, tamper-evident artifacts and signer authority remains necessary. This checker is not an RPC verifier, implementation audit or operation of real testnet nodes.
+
+Required CMP-0 evidence: actual public testnet deployment, real workers and funded jobs, matching, isolated execution, verified results, authorized settlement and beneficiary payouts, refunds/disputes/slashing, replication, scientific workload CMP-9.13, long-running soak CMP-9.14, Indexer chain reorg and data recovery, Wallet/420Compute reconciliation, authorization/privacy, security and operational incident recovery. Do not mark GO when there is a single missing, failed, unauthenticated or expired gate.
+
+**Known open blockers:** no proven live approved Folding@home and named BOINC work-unit and identity source; S-02 DNS-pinned endpoint transport outstanding; S-04 cryptographic wallet linking and persistent identity; S-05/06 durable canonical Indexer external science endpoint, S-07 governance economics and approved funded treasury, S-08 real CMP-6/Vault entitlement+Wallet payout, S-09 two-provider live funded Level 2; CMP-9.13 actual scientific workload and CMP-9.14 real long-duration testnet soak unqualified. CMP-10 independent security campaigns remain downstream.
+
+The current safe closeout outcome is **NO-GO**, while Level 1 qualification may establish that the offline preflight rejects missing and false claims. Full CMP-9.15 operational qualification, CMP-0 final approval, any live payout claim and monolithic Level 3 merge closeout are **deferred until authenticated testnet evidence exists**. No funding, signer, chain, runtime, account or governance authority is changed by this task.
+
+Next canonical phase: **CMP-10 — Security and adversarial qualification** after operational prerequisites, followed by CMP-11 only after testnet and security requirements.

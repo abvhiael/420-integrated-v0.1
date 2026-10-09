@@ -184,6 +184,7 @@ type transferRecorder struct {
 	fakeStore
 	received bool
 }
+
 func (f *transferRecorder) Transfer(_ context.Context, from, to Entry) error {
 	f.received = true
 	if from.Kind != "TRANSFER_OUT" || to.Kind != "TRANSFER_IN" {
@@ -207,7 +208,7 @@ func TestPairedTransferAuthorizationAndValidation(t *testing.T) {
 	if err := s.Transfer(ctx, owner("t", security.Owner), a, b, now); err != nil || !db.received {
 		t.Fatalf("paired transfer denied: %v", err)
 	}
-	for _,change := range []func(*Entry){
+	for _, change := range []func(*Entry){
 		func(e *Entry) { e.ReferenceID = "different" },
 		func(e *Entry) { e.LotID = "a" },
 		func(e *Entry) { e.Quantity = 3 },

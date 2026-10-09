@@ -215,7 +215,7 @@ func TestPairedTransferAuthorizationAndValidation(t *testing.T) {
 		func(e *Entry) { e.Actor = "other" },
 		func(e *Entry) { e.TenantID = "other" },
 		func(e *Entry) { e.IdempotencyKey = "out-1" },
-	}{
+	} {
 		bad := b
 		change(&bad)
 		if err := s.Transfer(ctx, owner("t", security.Owner), a, bad, now); err == nil {

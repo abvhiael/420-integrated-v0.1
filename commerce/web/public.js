@@ -18,6 +18,29 @@ async function search(append=false){const f=filters();if(!append)offset=0;const 
 offset=result.nextOffset??offset+result.items.length;$('more').hidden=result.nextOffset===null;$('count').textContent=page.length+' products loaded · source is not a live stock guarantee';message('Results loaded')}
 function renderCart(){$('cart').replaceChildren();for(const item of lines){const li=add($('cart'),'li',item.sku+' · '+item.quantity+' · listing '+item.listingId.slice(0,12));const remove=add(li,'button','Remove');remove.type='button';remove.addEventListener('click',()=>{lines=lines.filter(l=>l.listingId!==item.listingId);renderCart()})}$('review').disabled=!wallet||!lines.length||busy;message(lines.length+' cart items (not reserved)')}
 async function connect(){if(!COMMERCE_CONFIG)throw Error('Approved chain manifest required for checkout');if(!window.ethereum)throw Error('Compatible Wallet unavailable');wallet=new WalletSession(window.ethereum,COMMERCE_CONFIG,{onReset:()=>{wallet=null;attempts=[];renderCart()}});await wallet.connect();sdk=createCommerceSdk420({baseUrl:api,origin,chainId:COMMERCE_CONFIG.chainId,wallet:wallet.wallet(),host:wallet.host()});renderCart()}
-async function prepare(){if(!wallet||!lines.length)throw Error('Connect verified Wallet and select products');const cart=await sdk.cart({storeId:lines[0].storeId,lines:lines.map(({listingId,revision,quantity})=>({listingId,revision,quantity}))});const key=crypto.randomUUID().replaceAll('-','')+Date.now().toString();const result=await sdk.prepareCheckout(cart.cart_id,cart.version,key);for(const a of result.attempts){const terms=reviewedOrder(a,COMMERCE_CONFIG.chainId);attempts.push(a.attemptId);add($('attempts'),'li','Order '+terms.orderId+' · '+terms.quantity+' units · '+terms.total+' base units · order signature required. No payment has occurred.')} $('refresh').disabled=false;message('Order plans prepared; no signature was submitted or inventory reserved.')}
+async function prepare(){
+ if(!wallet||!lines.length)throw Error('Connect verified Wallet and select products');
+ const cart=await sdk.cart({storeId:lines[0].storeId,lines:lines.map(({listingId,revision,quantity})=>({listingId,revision,quantity}))});
+ const key=crypto.randomUUID().replaceAll('-','')+Date.now().toString();
+ const result=await sdk.prepareCheckout(cart.cart_id,cart.version,key);
+ for(const a of result.attempts){
+   const terms=reviewedOrder(a,COMMERCE_CONFIG.chainId);
+   attempts.push(a.attemptId);
+   const li=add($('attempts'),'li','Order '+terms.orderId+' · '+terms.quantity+' units · '+terms.total+' base units · order signature required. No payment has occurred.');
+   const confirm=add(li,'button','Review and sign Market order');
+   confirm.type='button';
+   confirm.addEventListener('click',()=>guard(async()=>{
+     if(!wallet)throw Error('Wallet disconnected');
+     const info=reviewedOrder(a,COMMERCE_CONFIG.chainId);
+     const summary='MARKET ORDER (not payment)\\nOrder: '+info.orderId+'\\nListing: '+info.listingId+'\\nQuantity: '+info.quantity+'\\nAsset: '+info.asset+'\\nTotal base units: '+info.total+'\\nContract: '+info.target;
+     if(!window.confirm(summary))return;
+     const sent=await submitReviewedMarketOrder(wallet,a);
+     confirm.disabled=true;
+     add(li,'p','Order broadcast: '+sent.transactionHash+' · NOT FINALIZED / NOT PAID. Refresh chain status after finality.');
+   }));
+ }
+ $('refresh').disabled=false;
+ message('Order plans prepared; no signature was submitted or inventory reserved.');
+}
 async function refresh(){if(!wallet)throw Error('Wallet required');$('attempts').replaceChildren();for(const id of attempts){const state=await sdk.checkoutStatus(id);add($('attempts'),'li',String(state.orderId??id)+' · '+state.state+' · '+receiptLabel(state));}message('Chain-backed order status refreshed; unconfirmed payments never show as paid.')}
 $('filters').addEventListener('submit',e=>{e.preventDefault();guard(()=>search())});$('more').addEventListener('click',()=>guard(()=>search(true)));$('clear').addEventListener('click',()=>{lines=[];renderCart()});$('connect').addEventListener('click',()=>guard(connect));$('review').addEventListener('click',()=>guard(prepare));$('refresh').addEventListener('click',()=>guard(refresh));guard(async()=>{await stores();await search()});

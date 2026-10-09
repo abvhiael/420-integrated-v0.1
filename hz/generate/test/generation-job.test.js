@@ -311,3 +311,24 @@ test("provider-independent error taxonomy is frozen and does not expose provider
   assert.equal(GENERATION_ERROR_CODES_420.includes("CANONICAL_SUCCESS"), false);
   assert.equal(GENERATION_ERROR_CODES_420.includes("SETTLED"), false);
 });
+
+test("canonical mode fails closed without a verifier or on forged provider result",async()=>{
+ assert.throws(()=>new GenerationJobManager420({requireCanonicalResult:true}),/canonical provider verifier required/);
+ const now=()=>10000,provider=new DeterministicMockGenerationProvider420({now});
+ const manager=new GenerationJobManager420({now,requireCanonicalResult:true,verifyProviderResult:()=>false});
+ const draft=manager.create(request(),{timeoutMs:120000});
+ await manager.quote(draft.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+ await manager.submit(draft.jobId,provider);
+ await assert.rejects(()=>manager.poll(draft.jobId,provider),e=>e.code==="INTEGRITY_MISMATCH");
+ assert.equal(manager.get(draft.jobId).state,"FAILED");
+});
+test("canonical mode accepts only positively verified provider manifests",async()=>{
+ const now=()=>10000,provider=new DeterministicMockGenerationProvider420({now});
+ let observed;
+ const manager=new GenerationJobManager420({now,requireCanonicalResult:true,verifyProviderResult:e=>{observed=e;return e.provider.providerId==="mock:420hz"&&e.outputManifest.providerJobRef===e.providerJobRef&&Boolean(e.verificationRef)}});
+ const draft=manager.create(request(),{timeoutMs:120000});
+ await manager.quote(draft.jobId,provider,{modelId:"mock:music",modelVersion:"1.0.0"});
+ await manager.submit(draft.jobId,provider);
+ assert.equal((await manager.poll(draft.jobId,provider)).state,"SUCCEEDED");
+ assert.equal(observed.jobId,draft.jobId);
+});

@@ -69,6 +69,12 @@ func (s PrivateServer) ServeHTTP(w http.ResponseWriter,r *http.Request){
 		r.Body=http.MaxBytesReader(w,r.Body,8192)
 		var body json.RawMessage
 		if err=json.NewDecoder(r.Body).Decode(&body);err!=nil||len(body)==0 {http.Error(w,"invalid request",http.StatusBadRequest);return}
+		var request struct { Operation string `json:"operation"` }
+		if json.Unmarshal(body,&request)!=nil {http.Error(w,"invalid request",http.StatusBadRequest);return}
+		if request.Operation=="" {http.Error(w,"invalid operation",http.StatusBadRequest);return}
+		allowedAction:=false
+		for _,v:=range session.Actions {if v==section+"."+request.Operation {allowedAction=true;break}}
+		if !allowedAction {http.Error(w,"action not authorized",http.StatusForbidden);return}
 		result,err:=s.Actions.Execute(r,session,section,body)
 		if err!=nil {http.Error(w,"action unavailable or denied",http.StatusForbidden);return}
 		if len(result.CSV)>0{
@@ -90,7 +96,7 @@ func (s PrivateServer) ServeHTTP(w http.ResponseWriter,r *http.Request){
 		sections:=make([]string,0,len(session.Sections));seen:=map[string]bool{}
 		for _,v:=range session.Sections{if !known[v]||seen[v]{http.Error(w,"invalid session",403);return};seen[v]=true;sections=append(sections,v)}
 		w.Header().Set("Content-Type","application/json; charset=utf-8")
-		_=json.NewEncoder(w).Encode(map[string]any{"version":"grow-private-v1","authenticated":true,"tenantId":session.TenantID,"subjectId":session.SubjectID,"sections":sections,"expiresAt":session.ExpiresAt.UTC().Format(time.RFC3339Nano),"csrf":csrfToken(cookie.Value)})
+		_=json.NewEncoder(w).Encode(map[string]any{"version":"grow-private-v1","authenticated":true,"tenantId":session.TenantID,"subjectId":session.SubjectID,"sections":sections,"expiresAt":session.ExpiresAt.UTC().Format(time.RFC3339Nano),"csrf":csrfToken(cookie.Value),"actions":session.Actions})
 		return
 	}
 	s.Handler.ServeHTTP(w,r)

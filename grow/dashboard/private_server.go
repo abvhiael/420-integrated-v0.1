@@ -23,6 +23,7 @@ type PrivateServer struct {
 	Handler Handler
 	Actions Actions
 	Revoke func(*http.Request,Session) error
+	Login func(http.ResponseWriter,*http.Request) error
 }
 
 // CSRF tokens bind state-changing requests to the unreadable, Host-only session
@@ -46,6 +47,14 @@ func (s PrivateServer) ServeHTTP(w http.ResponseWriter,r *http.Request){
 	w.Header().Set("Cache-Control","no-store, private")
 	w.Header().Set("X-Content-Type-Options","nosniff")
 	w.Header().Set("Referrer-Policy","no-referrer")
+	if r.URL.Path=="/v1/private/login" {
+		if r.Method!="POST"||r.TLS==nil||r.Header.Get("Origin")!="https://"+r.Host {
+			http.Error(w,"private login forbidden",http.StatusForbidden);return
+		}
+		if s.Login==nil {http.Error(w,"login unavailable",http.StatusServiceUnavailable);return}
+		if err:=s.Login(w,r);err!=nil{http.Error(w,"verified certificate or active membership required",http.StatusUnauthorized);return}
+		w.WriteHeader(http.StatusNoContent);return
+	}
 	if r.URL.Path=="/v1/private/logout" {
 		if r.Method!="POST"||!verifyCSRF(r) {http.Error(w,"forbidden",http.StatusForbidden);return}
 		if s.Handler.Auth==nil||s.Revoke==nil {http.Error(w,"private service unavailable",http.StatusServiceUnavailable);return}

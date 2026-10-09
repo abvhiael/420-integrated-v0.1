@@ -39,3 +39,20 @@ DOOBR is **not** an available standalone delivery app in this repository's appro
 
 ## Evidence and completion criteria
 Documentation covers (1) current user-facing limits, (2) technical interfaces and dependencies, (3) deployment/environment truth, (4) operations/incident/recovery, (5) privacy/security and external integration gates, (6) qualification and rollback rules. Qualification must validate these claims and the actual configuration at one SHA. Broader Level 2 not triggered; Level 3 intentionally deferred.
+
+## DOOBR-AUDIT-8 — exact-SHA Level 1 qualification closeout
+
+**Status: COMPLETE for the approved compatibility-only documentation and infrastructure boundary.**
+
+- Qualified implementation SHA: `0ddb153de140891844f9ce7690ac34a1e17bdb63`.
+- CI run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37999474615
+- Job `scoped-qualification` ID `114053765195`: completed SUCCESS, no failed steps.
+- DOOBR-AUDIT-8 deployment/documentation/environment verifier: PASS.
+- GEN-SVC-0 / GEN-SVC-3 configuration validators and DOOBR-AUDIT-2/5/6 security/authority verifiers: PASS.
+- Targeted noncached compatibility, AUDIT-7 security/recovery, affected Travel Go tests, Go vet and Travel build: PASS.
+- Exact checkout SHA assertion and Python syntax checks: PASS.
+- Files changed: this operations/user guide, `scripts/verify-doobr-audit-8.py`, `.github/workflows/doobr-audit-1-level1.yml`.
+- Inspected current main: `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`. PR #598 remains unmerged.
+- Level 2 not triggered by documentation-only change; Level 3 deferred to audit-phase closeout.
+- No live standalone DOOBR deployment, environment, external provider service, payment or regulatory acceptance is claimed. These remain outside the approved scope.
+- This is an evidence-only documentation commit and does not alter the qualified implementation SHA.

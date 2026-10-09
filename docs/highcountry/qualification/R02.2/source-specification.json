@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "sha": "05cecf16bca00d1cf55e57b22c81b250fbc9489e",
+  "enums": 19,
+  "types": 53,
+  "actions": 42,
+  "requirements": 65,
+  "links": 29,
+  "harvestInputs": 10001,
+  "temperatureInputs": 3001,
+  "inputHashes": {
+    "contracts/src/highcountry/types/HighCountryEnums.sol": "2bd75b5f96c4ce36de16b23392eec2d57db3bd24bfdf4b4ff329c1db097a229f",
+    "contracts/src/highcountry/cultivation/PlantRegistry.sol": "71e42d25c243c656ddbbe8d6f9d222fd21c5fb135e7280f78e89cd4385a7e329",
+    "contracts/src/gaming/access/ProgressiveGamingTypes.sol": "a3dac71c4ba80b58bece8ebf45c33381135ccd46b904c7c2e4b6198ee6bd3793",
+    "contracts/src/highcountry/types/HighCountryTypes.sol": "837f65c6b9ead9b46f8966565c399bfdf20b7000dac4caf129eff4ba21681357",
+    "contracts/src/highcountry/constants/ActionIds.sol": "6548e992365b5637923d278deea0431ec82cd8358f96d38efc01ef15dbc079f0",
+    "docs/highcountry/RELEASE-SCOPE.md": "1d3799652f3e10644bbc553bf3e6049593843e5d317e5d0d8c2d0d6e2304ed7f",
+    "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md": "6664f59dcbc2f353765c49c9909f3b5c7984131a8faeeb9d661805228cf76fc4",
+    "docs/highcountry/TYPES-AND-UNITS.md": "0938bde0928a9f2b441d631a4f7b4897e4a4da78f59ea308fce677924a19cbd4",
+    "docs/highcountry/MIGRATION-BOUNDARIES.md": "377aed8067e7e0a427a843185f1009bc233d56c5cd192f8281df9bc8a09c3ceb",
+    "docs/highcountry/DEPLOYMENT-AND-TRUST.md": "e084edd24cb1d151a46d0fd1cb6cf3e52bbc446446e0b45ae0f832c46ff27e99",
+    "docs/highcountry/GAMEPLAY-SPECIFICATION.md": "9b4f535a4d3502c939273fff825833a5fa90d32e4e9bb770122d3d3bd7e5e478"
+  },
+  "scope": "Source/specification consistency only; not runtime or full-game qualification."
+}

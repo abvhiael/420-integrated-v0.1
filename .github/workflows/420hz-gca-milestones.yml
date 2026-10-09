@@ -1,0 +1,35 @@
+name: 420Hz GCA M2 M3 M4 milestone integration
+on:
+  pull_request:
+    paths:
+      - 'hz/generate/src/**'
+      - 'hz/generate/test/**'
+      - '.github/workflows/420hz-gca-milestones.yml'
+  push:
+    branches:
+      - 'feature/420hz-generate-community-awards-*'
+    paths:
+      - 'hz/generate/src/**'
+      - 'hz/generate/test/**'
+      - '.github/workflows/420hz-gca-milestones.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  milestone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: M2 M3 M4 cross-module milestone tests
+        run: node --test hz/generate/test/milestone-integration.test.js
+      - name: Retain all generation domain regressions
+        working-directory: hz/generate
+        run: npm run qualify

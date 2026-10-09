@@ -26,3 +26,11 @@ Tests: `commerce/test/com6a-refund.test.mjs` covers full remaining refund, parti
 5. **Live acceptance**: preserve genuine testnet/governance deployment and transaction evidence for COM-8. Do not call a mock ledger real funds.
 
 Level 2 retained app milestone only after authority and execution boundaries converge. Level 3 reserved for COM-7 app-phase closeout; no duplicated full Foundry inventory. **COM-6A is NOT COMPLETE until the first three repository-side requirements are implemented and qualified.**
+
+## Follow-on governed request outbox (not money movement)
+
+Commerce migration `003-refund-requests.sql` introduces an immutable, owner-scoped refund request ledger with a unique `payment_id + reason_hash + amount` constraint and an audit event. A signed merchant proposal now persists `PENDING_GOVERNANCE`, returns a stable request ID on idempotent retry, and refuses competing pending amounts that would exceed Pay's remaining refundable balance. This records seller intent **only**; it is not governance approval and must never be treated as a Pay authorization or a transfer receipt.
+
+### Critical actual-fund-return gap
+
+The canonical `SettlementRouter420` distributes money directly to split recipients and retains no newly received custody balance. The existing `PaymentRegistry420.applyRefund` updates Pay's authorized refund accounting. The existing `RefundManager420.recordRefund` records evidence under Genesis governance and **does not transfer ERC-20 or native tokens**. Thus neither a signed Commerce request nor those two governance calls can prove that the payer received their funds. To implement a genuine return requires an explicitly approved source of money (e.g., a merchant-funded refund vault or authorized merchant transfer), its actual transfer authority, atomic/replay-safe funding and payout semantics, and separate finalized transfer plus canonical Pay/Market reconciliation. No unapproved custody or authority change is introduced by this Commerce-only change. **Execution and complete reconciliation remain BLOCKED** until the owning Pay protocol authorizes and qualifies that mechanism. Do not display `refunded` from a request or accounting record alone.

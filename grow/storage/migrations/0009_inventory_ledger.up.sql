@@ -37,9 +37,14 @@ CREATE TABLE grow_private.inventory_ledger_v2(
 CREATE INDEX inventory_ledger_v2_history ON grow_private.inventory_ledger_v2(tenant_id,lot_id,occurred_at,event_id);
 CREATE FUNCTION grow_private.apply_inventory_ledger_v2() RETURNS trigger
  LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog,grow_private AS $$
-DECLARE changed integer;
+DECLARE changed integer; lot_unit text;
 BEGIN
  -- Row-level lock and guarded debit in the same database transaction; no overdraft or cross-parent attribution.
+ SELECT unit INTO lot_unit FROM grow_private.inventory_lots_v2
+ WHERE tenant_id=NEW.tenant_id AND lot_id=NEW.lot_id AND facility_id=NEW.facility_id AND zone_id=NEW.zone_id FOR UPDATE;
+ IF lot_unit IS NULL THEN RAISE EXCEPTION 'inventory parent unavailable' USING ERRCODE='23514'; END IF;
+ IF lot_unit='each' AND NEW.quantity<>trunc(NEW.quantity) THEN
+  RAISE EXCEPTION 'discrete inventory must be whole units' USING ERRCODE='23514'; END IF;
  IF NEW.kind IN ('ISSUE','CONSUME','ADJUST_OUT','TRANSFER_OUT') THEN
   UPDATE grow_private.inventory_lots_v2 SET balance=balance-NEW.quantity
   WHERE tenant_id=NEW.tenant_id AND lot_id=NEW.lot_id

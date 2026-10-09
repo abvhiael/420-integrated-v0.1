@@ -13,7 +13,7 @@
 | GROW-V2-05 | Plant lifecycle, genetics and cloning records | COMPLETE / Level 1 and Level 2 (V2-02–05) — SHA `ef59b62c7c30251e0f0b4723d8e8335f77b104e9`; V2 run 37866330441/job 113613816069 and Grow run 37866330391/job 113613815845 SUCCESS; [evidence](420GROW-V2-05-LEVEL-1-AND-2-QUALIFICATION.md) |
 | GROW-V2-06 | Sensor telemetry ingestion and historical charts | COMPLETE / Level 1 — SHA `0ec71e7af64116d8698bd15212d198511e6295f9`; V2 run 37868683106/job 113621431632 and retained Grow run 37868683071/job 113621431170 SUCCESS; [evidence](420GROW-V2-06-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-07 | Equipment adapters, monitoring and safe controls | COMPLETE / Level 1 — SHA `d4bc7ca541bda9af942395ba066cd397d6812eea`; V2 run 37870067867/job 113625861105 and retained Grow run 37870067647/job 113625860693 SUCCESS; [evidence](420GROW-V2-07-LEVEL-1-QUALIFICATION.md) |
-| GROW-V2-08 | Nutrients, irrigation and environmental history | PLANNED / Level 1 |
+| GROW-V2-08 | Nutrients, irrigation and environmental history | IMPLEMENTED / Level 1 exact-SHA qualification PENDING |
 | GROW-V2-09 | Harvest forecasting and production analytics | PLANNED / Level 1 |
 | GROW-V2-10 | Inventory, traceability and compliance exports | PLANNED / Level 2 accumulated V2-06–10 |
 | GROW-V2-11 | AI-assisted analysis and human-reviewed recommendations | PLANNED / Level 1 |

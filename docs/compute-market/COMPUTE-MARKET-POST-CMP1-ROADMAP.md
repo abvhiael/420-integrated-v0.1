@@ -711,7 +711,9 @@ Purpose: turn repository qualification into real deployed evidence.
 
 ## CMP-9.12 — Multi-worker replicated jobs
 
-## CMP-9.13 — Scientific workload demonstration
+## CMP-9.13 — Scientific workload demonstration — OFFLINE LEVEL 1 PASS, LIVE TESTNET NO-GO
+
+[Preparatory gate and honest live blockers](CMP-9-13-SCIENTIFIC-DEMONSTRATION.md). Exact-SHA offline verifier PASS; actual scientific demonstration with trusted, finalized, funded testnet receipts remains PENDING. No provider or worker activation asserted.
 
 ## CMP-9.14 — Long-duration soak testing
 

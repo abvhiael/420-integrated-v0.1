@@ -4,6 +4,7 @@ package equipment
 
 import (
  "context"
+ "crypto/subtle"
  "crypto/ed25519"
  "crypto/sha256"
  "encoding/binary"
@@ -17,7 +18,7 @@ var ErrDenied=errors.New("equipment operation denied")
 var ErrInvalid=errors.New("invalid equipment input")
 var ErrUnavailable=errors.New("equipment unavailable")
 type Scope struct { Principal security.Principal; Grant security.Grant; TenantID string }
-type Device struct { TenantID,FacilityID,ZoneID,ID,Type string; SafeMinimum,SafeMaximum float64; Online bool; InterlockOK bool; ManualOverride bool }
+type Device struct { TenantID,FacilityID,ZoneID,ID,Type string; SafeMinimum,SafeMaximum float64; Online bool; InterlockOK bool; ManualOverride bool; ControlSigningKey ed25519.PublicKey }
 type Observation struct { DeviceID string; Value float64; At time.Time; Healthy bool }
 type Command struct { DeviceID,Action string; Value float64; Nonce [16]byte; ExpiresAt time.Time }
 type Approval struct { SubjectID string; PublicKey ed25519.PublicKey; Signature []byte; MFAConfirmed bool }
@@ -62,7 +63,7 @@ func VerifyControlApproval(s Scope,d Device,c Command,a Approval,now time.Time)e
  math.IsNaN(d.SafeMinimum)||math.IsNaN(d.SafeMaximum)||
  d.SafeMinimum>d.SafeMaximum||c.Value<d.SafeMinimum||c.Value>d.SafeMaximum||
  c.ExpiresAt.IsZero()||!c.ExpiresAt.After(now)||c.ExpiresAt.After(now.Add(2*time.Minute))||
- c.Nonce==([16]byte{})||len(a.PublicKey)!=ed25519.PublicKeySize{
+ c.Nonce==([16]byte{})||len(a.PublicKey)!=ed25519.PublicKeySize||len(d.ControlSigningKey)!=ed25519.PublicKeySize||subtle.ConstantTimeCompare(a.PublicKey,d.ControlSigningKey)!=1{
   return ErrDenied
  }
  msg:=approvalPayload(s,d,c)

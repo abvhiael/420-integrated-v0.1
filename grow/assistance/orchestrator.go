@@ -11,17 +11,17 @@ import (
 // MinimalInput is an allowlisted data transfer object; it contains no tenant address,
 // user name, media bytes, image metadata, public-location coordinates or credentials.
 type MinimalInput struct {
-	Kind string
-	Metric string
-	Unit string
-	Value float64
-	State string
+	Kind       string
+	Metric     string
+	Unit       string
+	Value      float64
+	State      string
 	ObservedAt time.Time
 }
 
 // WorkItem is server-resolved, never a client-authored LLM prompt.
 type WorkItem struct {
-	Input Input
+	Input       Input
 	Observation MinimalInput
 }
 

@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/doobr-audit-1-level1.yml'
       - 'docs/audits/doobr/**'
+      - 'scripts/verify-doobr-audit-2.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,6 +25,8 @@ jobs:
           python-version: '3.12'
       - name: GEN-SVC-3 canonical validator
         run: python3 scripts/validate-gen-svc-3.py
+      - name: DOOBR AUDIT-2 architectural authority verification
+        run: python3 scripts/verify-doobr-audit-2.py
       - name: Go from go.mod
         uses: actions/setup-go@v5
         with:

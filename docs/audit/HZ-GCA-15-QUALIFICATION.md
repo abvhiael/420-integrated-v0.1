@@ -1,6 +1,6 @@
 # HZ-GCA-15 — Moderation, abuse, privacy and adversarial hardening
 
-Status: **PARTIAL — targeted Level 1 CI pending; canonical threat closure remains incomplete**.
+Status: **PARTIAL — local Level 1 PASS (99/99), canonical threat closure remains incomplete**.
 
 Source: `docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md`, HZ-GCA-15.
 PR #565, implementation SHA `6f0aa739faeaa42c2953fe738f0dcde4db2e7e4f`; observed main/base `ffc6a4028676907c266714b5c1ae8ba3af9a7137`.
@@ -24,7 +24,7 @@ Threat review (a standalone gate does not secure routes until bound to the actua
 
 The local gate is not a substitute for trusted canonical Wallet/Creative/Identity and provider source verifiers. It must not be wired to a public write path relying on caller-controlled `authorize` or `verifyCanonical` callbacks.
 
-Required Level 1: exact-SHA `hz/generate npm run qualify` in run https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37871466964 (status pending at creation).
+Level 1 PASSED: exact-SHA `hz/generate npm run qualify` in run https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37871466964, job `113630306132`: 99 tests PASS, 0 failures/skips/cancellations; SHA check PASS. Evidence HEAD run https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37871498068 also SUCCESS.
 Canonical exit *documented threat-model closure with negative/adversarial tests* is **not yet satisfied comprehensively**. Do not mark HZ-GCA-15 COMPLETE from five new local gate tests alone.
 
 Level 2: app-focused integration milestone at HZ-GCA-14–16.

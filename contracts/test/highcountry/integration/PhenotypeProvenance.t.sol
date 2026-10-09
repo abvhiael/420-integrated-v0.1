@@ -52,6 +52,8 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         );
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
         cultivation.bindRulesetRegistry(address(rulesets), address(router));
+        caps.registerProtocolComponent(ModuleIds.RANDOMNESS_COORDINATOR, address(this));
+        caps.registerProtocolComponent(ModuleIds.BREEDING_ENGINE, address(this));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(random));
         _grant(

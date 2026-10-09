@@ -77,3 +77,16 @@ For PR #598 head `aac980b9ccda4de5ffe7708d0e039b1514107b97`, Cloudflare Workers 
 - GitHub Actions run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984555653
 - At time of this record, `scoped-qualification` is **QUEUED**. No executable PASS/FAIL result is yet established; do not treat queue state as qualification.
 - This is an evidence-only update; the executable scope is the preceding implementation/workflow SHA. A later completed run must be inspected at the individual step level and the outcome appended with an evidence-only commit.
+
+## Completed exact-SHA Level 1 CI result (verified 2026-10-09)
+- Run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984555653
+- Exact tested implementation SHA: `da1934e1b1aee8a91142de71f6485fee80b691f7`.
+- Job `scoped-qualification` (114003163159): **SUCCESS**.
+- Checkout triggering SHA: PASS.
+- `python3 scripts/validate-gen-svc-3.py`: PASS.
+- `go test ./genesis/svc3/... ./cmd/420travel/...`: PASS.
+- `go vet ./genesis/svc3/... ./cmd/420travel/...`: PASS.
+- `go build -o /tmp/420travel ./cmd/420travel`: PASS.
+- Assert checkout HEAD equals `GITHUB_SHA`: PASS.
+- This result covers scoped compatibility/runtime validation; it does not prove a full bytewise 8,125-entry content scan. Full-tree *path* inventory is nontruncated; source/content searches were scoped. Therefore the inventory completion criterion still needs interpretation/closure before marking DOOBR-AUDIT-1 entirely COMPLETE.
+- Level 2 not triggered. Level 3 deferred; unrelated Cloudflare Worker failures are not part of this Level 1 coverage.

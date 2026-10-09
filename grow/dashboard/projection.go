@@ -71,7 +71,11 @@ WHERE tenant_id=$1::uuid AND subject_id=$2 AND state='ACTIVE'`, session.TenantID
 		security.Resource{TenantID: session.TenantID, FacilityID: facility, ZoneID: zone}, action) {
 		return nil, errors.New("dashboard membership denied")
 	}
-	rows, err := tx.QueryContext(r.Context(), query, session.TenantID, facility, zone)
+	args := []any{session.TenantID, facility, zone}
+	if section == "overview" || section == "facilities" {
+		args = args[:2]
+	}
+	rows, err := tx.QueryContext(r.Context(), query, args...)
 	if err != nil {
 		return nil, err
 	}

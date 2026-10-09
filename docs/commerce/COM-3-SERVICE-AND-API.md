@@ -33,9 +33,10 @@ file-backed SQLite transactions. It introduces no Go dependency or Genesis ID.
 | Runtime/config/recovery absent | SHA-approved external manifest, code/version/Registry/EIP-1898 binding, private server-owned keys and volume, rate/concurrency/body/time limits, monitored worker, SIGTERM, documented replay/retention/runbook |
 | Exact-SHA fast CI absent | `commerce-service.yml` explicit audit branch/path triggers, exact checkout/assertion, locked installs, security audit, lint/type/ABI/size/regression/integration gates; no missing/skipped checks accepted |
 
-Implementation is written; completion requires the exact-SHA workflow evidence in
-`COM-3-QUALIFICATION-EVIDENCE.md`. This document does not independently assert CI
-PASS. See `commerce/README.md` for API/configuration/recovery contracts and limits.
+**COMPLETE:** every original exit requirement is verified individually in
+`COM-3-QUALIFICATION-EVIDENCE.md`; final implementation
+`49c5875d35cd205a8c58634d7ecf1a4ba2ae99b1` passed exact-SHA Level 1 and retained
+Level 2. See `commerce/README.md` for API/configuration/recovery contracts and limits.
 
 ## Scope, milestones and retained coverage
 

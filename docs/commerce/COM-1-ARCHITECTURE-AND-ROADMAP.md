@@ -1,6 +1,6 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
-**Status:** COM-1 architecture closeout qualified and merged through PR #588; COM-2 upstream adaptations qualified at targeted Level 1 and retained Level 2. COM-1.8 evidence is reconciled in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`.
+**Status:** COM-1 architecture closeout qualified and merged through PR #588; COM-2 upstream adaptations and COM-3 service/API/SDK qualified at targeted Level 1 and retained Level 2. COM-1.8 evidence is reconciled in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`.
 **Target surface:** `commerce.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
@@ -79,9 +79,9 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 | COM-1.2 ownership / service identity | DOCUMENTED — Commerce V1 branded application; separate canonical ID deferred for governed decision |
 | COM-1 acceptance evidence and exact-SHA qualification | COMPLETE — candidate `d32c1eeacc2ba4f13d3a6fcd1afb84a5abb0aa3c`, merge `0ec695481fc84e6066aeae50baf6e0fd3c7f8731` |
 | COM-2 | COMPLETE — targeted Level 1 and retained Level 2; exact SHA `0b1a3f5d12fdf6d5c76e6ba860058887886daf9f`, run 37890773444 SUCCESS; PR #594 unmerged |
-| COM-3 | IMPLEMENTED — exact-SHA service qualification pending; see `COM-3-SERVICE-AND-API.md` |
+| COM-3 | COMPLETE — Level 1 and retained Level 2; exact SHA `49c5875d35cd205a8c58634d7ecf1a4ba2ae99b1`, service run 37895449006 SUCCESS; see `COM-3-QUALIFICATION-EVIDENCE.md` |
 | COM-4 through COM-7 | NOT STARTED |
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** qualify COM-3 — Service + API. COM-2 qualification is recorded in `COM-2-QUALIFICATION-EVIDENCE.md`; COM-3 implementation and requirement mapping in `COM-3-SERVICE-AND-API.md`. Accumulated app-phase Level 3 and live gates remain deferred. After qualified COM-3, next canonical step is COM-4 — Merchant storefront builder.
+**Next action:** COM-4 — Merchant storefront builder. COM-2 qualification is recorded in `COM-2-QUALIFICATION-EVIDENCE.md`; COM-3 implementation and individual requirement mapping in `COM-3-SERVICE-AND-API.md`, exact-SHA conclusion in `COM-3-QUALIFICATION-EVIDENCE.md`. Accumulated app-phase Level 3 and live gates remain deferred; PR #594 remains draft/unmerged.

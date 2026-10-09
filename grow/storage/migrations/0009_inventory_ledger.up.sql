@@ -1,7 +1,7 @@
 -- GROW-V2-10 private inventory ledger, locked nonnegative accounting and traceability.
 BEGIN;
 SELECT pg_advisory_xact_lock(420203);
-CREATE TABLE grow_private.inventory_lots(
+CREATE TABLE grow_private.inventory_lots_v2(
  tenant_id uuid NOT NULL,lot_id uuid NOT NULL,facility_id uuid NOT NULL,zone_id uuid NOT NULL,
  kind text NOT NULL CHECK(kind IN ('SEED','CLONE','INPUT','MATERIAL','EQUIPMENT','HARVEST')),
  unit text NOT NULL CHECK(unit IN ('g','kg','L','mL','each')),
@@ -14,8 +14,8 @@ CREATE TABLE grow_private.inventory_lots(
  CHECK((kind='HARVEST' AND harvest_id IS NOT NULL AND unit='g')
  OR (kind<>'HARVEST' AND harvest_id IS NULL))
 );
-CREATE UNIQUE INDEX inventory_harvest_unique ON grow_private.inventory_lots(tenant_id,harvest_id) WHERE harvest_id IS NOT NULL;
-CREATE TABLE grow_private.inventory_ledger(
+CREATE UNIQUE INDEX inventory_harvest_unique ON grow_private.inventory_lots_v2(tenant_id,harvest_id) WHERE harvest_id IS NOT NULL;
+CREATE TABLE grow_private.inventory_ledger_v2(
  tenant_id uuid NOT NULL,event_id uuid NOT NULL,lot_id uuid NOT NULL,
  facility_id uuid NOT NULL,zone_id uuid NOT NULL,
  kind text NOT NULL CHECK(kind IN ('OPENING','RECEIVE','ADJUST_IN','TRANSFER_IN','ISSUE','CONSUME','ADJUST_OUT','TRANSFER_OUT')),
@@ -27,22 +27,22 @@ CREATE TABLE grow_private.inventory_ledger(
  reference_id text NOT NULL DEFAULT '',occurred_at timestamptz NOT NULL,
  recorded_at timestamptz NOT NULL DEFAULT now(),
  PRIMARY KEY(tenant_id,event_id),UNIQUE(tenant_id,idempotency_key),
- FOREIGN KEY(tenant_id,lot_id) REFERENCES grow_private.inventory_lots(tenant_id,lot_id),
+ FOREIGN KEY(tenant_id,lot_id) REFERENCES grow_private.inventory_lots_v2(tenant_id,lot_id),
  FOREIGN KEY(tenant_id,facility_id,zone_id) REFERENCES grow_private.zones(tenant_id,facility_id,zone_id),
  CHECK ((kind NOT IN ('TRANSFER_IN','TRANSFER_OUT')) OR length(reference_id)>0)
 );
-CREATE INDEX inventory_ledger_history ON grow_private.inventory_ledger(tenant_id,lot_id,occurred_at,event_id);
-CREATE FUNCTION grow_private.apply_inventory_ledger() RETURNS trigger
+CREATE INDEX inventory_ledger_v2_history ON grow_private.inventory_ledger_v2(tenant_id,lot_id,occurred_at,event_id);
+CREATE FUNCTION grow_private.apply_inventory_ledger_v2() RETURNS trigger
  LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog,grow_private AS $$
 DECLARE changed integer;
 BEGIN
  -- Row-level lock and guarded debit in the same database transaction; no overdraft or cross-parent attribution.
  IF NEW.kind IN ('ISSUE','CONSUME','ADJUST_OUT','TRANSFER_OUT') THEN
-  UPDATE grow_private.inventory_lots SET balance=balance-NEW.quantity
+  UPDATE grow_private.inventory_lots_v2 SET balance=balance-NEW.quantity
   WHERE tenant_id=NEW.tenant_id AND lot_id=NEW.lot_id
   AND facility_id=NEW.facility_id AND zone_id=NEW.zone_id AND balance>=NEW.quantity;
  ELSE
-  UPDATE grow_private.inventory_lots SET balance=balance+NEW.quantity
+  UPDATE grow_private.inventory_lots_v2 SET balance=balance+NEW.quantity
   WHERE tenant_id=NEW.tenant_id AND lot_id=NEW.lot_id
   AND facility_id=NEW.facility_id AND zone_id=NEW.zone_id AND balance+NEW.quantity<=1000000;
  END IF;
@@ -50,18 +50,18 @@ BEGIN
  IF changed<>1 THEN RAISE EXCEPTION 'inventory lot unavailable or balance violation' USING ERRCODE='23514'; END IF;
  RETURN NEW;
 END $$;
-CREATE TRIGGER inventory_balance AFTER INSERT ON grow_private.inventory_ledger
- FOR EACH ROW EXECUTE FUNCTION grow_private.apply_inventory_ledger();
+CREATE TRIGGER inventory_balance AFTER INSERT ON grow_private.inventory_ledger_v2
+ FOR EACH ROW EXECUTE FUNCTION grow_private.apply_inventory_ledger_v2();
 CREATE FUNCTION grow_private.reject_inventory_mutation() RETURNS trigger
  LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'inventory ledger is immutable'; END $$;
-CREATE TRIGGER inventory_immutable BEFORE UPDATE OR DELETE ON grow_private.inventory_ledger
+CREATE TRIGGER inventory_immutable BEFORE UPDATE OR DELETE ON grow_private.inventory_ledger_v2
  FOR EACH ROW EXECUTE FUNCTION grow_private.reject_inventory_mutation();
-ALTER TABLE grow_private.inventory_lots ENABLE ROW LEVEL SECURITY;
-ALTER TABLE grow_private.inventory_lots FORCE ROW LEVEL SECURITY;
-CREATE POLICY tenant_scoped ON grow_private.inventory_lots
+ALTER TABLE grow_private.inventory_lots_v2 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grow_private.inventory_lots_v2 FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_scoped ON grow_private.inventory_lots_v2
  USING(tenant_id=grow_private.current_tenant()) WITH CHECK(tenant_id=grow_private.current_tenant());
-ALTER TABLE grow_private.inventory_ledger ENABLE ROW LEVEL SECURITY;
-ALTER TABLE grow_private.inventory_ledger FORCE ROW LEVEL SECURITY;
-CREATE POLICY tenant_scoped ON grow_private.inventory_ledger
+ALTER TABLE grow_private.inventory_ledger_v2 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE grow_private.inventory_ledger_v2 FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_scoped ON grow_private.inventory_ledger_v2
  USING(tenant_id=grow_private.current_tenant()) WITH CHECK(tenant_id=grow_private.current_tenant());
 COMMIT;

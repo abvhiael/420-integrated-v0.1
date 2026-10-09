@@ -1,0 +1,176 @@
+{
+  "schema": "420hz-gca-ai-disclosure-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.4",
+  "title": "Define AI disclosure rules",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "scope": "Every published Recording created through 420Hz Generate must bind exactly one stable disclosure class and a versioned disclosure commitment.",
+  "classes": [
+    {
+      "class": "HUMAN",
+      "meaning": "No generative AI contribution is claimed in the published composition or master.",
+      "allowedWhen": [
+        "Generate/project tooling may have been opened, but no generative output is materially incorporated into the published Work or Recording",
+        "non-generative editing, deterministic processing, metering, storage, indexing, mastering tools or ordinary automation do not by themselves require an AI disclosure class"
+      ],
+      "forbiddenWhen": [
+        "generated melody, harmony, lyrics, arrangement, voice, instrumental performance, stem or audible master content is materially incorporated",
+        "a pre-existing Work or Recording was transformed/remixed by a generative model"
+      ]
+    },
+    {
+      "class": "AI_ASSISTED",
+      "meaning": "AI materially assisted the creative/production process, but the published composition/master does not contain substantial generated musical, lyrical, vocal or performance content.",
+      "allowedWhen": [
+        "AI was used for ideation, critique, tagging, arrangement suggestions, cleanup/restoration assistance, timing suggestions or other assistive workflow",
+        "any retained generated contribution is incidental/non-substantial and does not become the defining composition, vocal, instrumental performance or substantial master content"
+      ],
+      "forbiddenWhen": [
+        "substantial generated composition or audible performance/master content is retained",
+        "the release is a generative transformation/remix of a pre-existing source"
+      ]
+    },
+    {
+      "class": "AI_GENERATED",
+      "meaning": "The published Work or Recording contains substantial AI-generated composition, lyrics, vocal/instrumental performance, stems or other audible/generated master content and is not classified as AI_DERIVATIVE.",
+      "allowedWhen": [
+        "generated musical/compositional material materially forms the Work",
+        "generated vocal/instrumental/audio content materially forms the Recording",
+        "the creator curates, edits, performs over or mixes generated material but substantial generated content remains in the released result"
+      ],
+      "forbiddenWhen": [
+        "the defining AI operation is a transformation/remix of a pre-existing source requiring derivative authorization; AI_DERIVATIVE takes precedence"
+      ]
+    },
+    {
+      "class": "AI_DERIVATIVE",
+      "meaning": "The published result is created by generative transformation/remix of an existing Work or Recording and therefore requires source authorization under the Creative Protocol.",
+      "allowedWhen": [
+        "a generative model transforms, remixes, revoices, restyles, stem-processes or otherwise derives from an existing Work/Recording in a way requiring source authorization",
+        "Creative RecordingClass is AI_DERIVATIVE or the source/reference authorization path establishes an AI transformation derivative"
+      ],
+      "forbiddenWhen": [
+        "no source Work/Recording requiring derivative authorization exists"
+      ]
+    }
+  ],
+  "precedence": [
+    "AI_DERIVATIVE overrides AI_GENERATED when generative output is based on a pre-existing source requiring derivative authorization",
+    "AI_GENERATED overrides AI_ASSISTED when substantial generated compositional or audible/performance content is retained",
+    "AI_ASSISTED overrides HUMAN whenever material generative assistance contributed to the released creative/production process",
+    "HUMAN is valid only when none of the AI-assisted/generated/derivative conditions apply"
+  ],
+  "substantialityRule": {
+    "policy": "No fixed percentage threshold is invented at HZ-GCA-1.4. Substantiality is determined by whether generated material forms a meaningful compositional, lyrical, vocal, instrumental, stem or audible-master contribution to the released result.",
+    "failClosed": "If classification between AI_ASSISTED and AI_GENERATED is genuinely unresolved at publication review, Generate publication must fail closed pending correction rather than default to HUMAN.",
+    "futureVersioning": "A later governed/versioned policy may introduce more objective thresholds, but cannot rewrite historical disclosure meaning without an explicit new disclosure-policy version."
+  },
+  "publicationBinding": {
+    "requiredForGenerateOrigin": true,
+    "exactlyOneClass": true,
+    "bindAt": "before or atomically with publication handoff; publication may not complete without a valid disclosure commitment",
+    "immutableHistory": "the disclosure commitment bound to a published Recording/version is historical metadata and cannot be silently overwritten",
+    "correction": "a correction requires an explicit new disclosure revision/version with prior value retained and current presentation clearly identifying the superseding disclosure",
+    "withdrawal": "withdrawal/restriction of a Recording does not erase historical disclosure"
+  },
+  "requiredDisclosureRecord": [
+    "schemaVersion",
+    "disclosureClass",
+    "policyVersion",
+    "declarationCommitment",
+    "recordingRef when available",
+    "provenanceDraftRef or provenanceCommitment",
+    "createdAt/revision identity"
+  ],
+  "sourceEvidenceRules": [
+    "Disclosure is not inferred from provider marketing copy, model name, UI labels, Search tags, chart placement or popularity.",
+    "420AI Model420 aiDisclosureHash describes the model/version disclosure metadata; it does not determine a Recording's HUMAN/AI_ASSISTED/AI_GENERATED/AI_DERIVATIVE class.",
+    "A provider or model declaring itself 'human-like', 'assistive', 'original' or similar cannot downgrade the Recording disclosure class.",
+    "The recording disclosure is declared/reviewed against the actual generation/provenance/source-authority record."
+  ],
+  "rightsBoundaries": [
+    "Disclosure is descriptive metadata, not proof of copyright ownership, authorship, license validity, consent or legal status.",
+    "AI_DERIVATIVE requires the applicable Creative source Work/Recording/License authorization path; the label itself grants no permission.",
+    "AI transformation permission remains distinct from AI training permission.",
+    "HUMAN does not certify absence of all software automation; it only states no material generative AI contribution under this policy.",
+    "AI_GENERATED or AI_ASSISTED does not waive contributor rights, royalty rights or provenance requirements."
+  ],
+  "creativeMapping": {
+    "recordingClassAI_DERIVATIVE": "must disclose AI_DERIVATIVE",
+    "otherRecordingClasses": "may disclose HUMAN, AI_ASSISTED or AI_GENERATED if consistent with actual process; recording class alone does not fully determine disclosure",
+    "provenanceClass": "does not substitute for disclosure class",
+    "rightsStatus": "does not substitute for disclosure class"
+  },
+  "lifecycleIntegration": {
+    "DRAFT": "disclosure may be absent/undetermined",
+    "QUOTED": "disclosure may be provisional",
+    "SUBMITTED": "provisional disclosure may exist but is not publication-bound",
+    "RUNNING": "provisional disclosure may be updated from actual job/source path",
+    "SUCCEEDED": "one candidate disclosure must be determinable from the successful output/source path before REVIEWED",
+    "REVIEWED": "creator explicitly confirms the disclosure as part of review/provenance handoff",
+    "REGISTERED": "disclosure commitment must remain bound to the exact Work/Recording handoff data",
+    "PUBLISHED": "exactly one valid disclosure class is public and bound to the published Recording/version"
+  },
+  "privacyRules": [
+    "Public disclosure class does not require publishing plaintext prompts, private lyrics drafts, raw reference audio, model secrets or provider credentials.",
+    "Public disclosure may reference commitments/IDs sufficient for provenance without exposing protected payloads.",
+    "Private draft disclosure deliberation remains non-indexable until publication policy makes the final disclosure public."
+  ],
+  "validationFailures": [
+    "missing disclosure at Generate publication",
+    "unknown disclosure class",
+    "multiple simultaneous disclosure classes",
+    "HUMAN when generated content is materially retained",
+    "AI_ASSISTED when substantial generated content is materially retained",
+    "AI_GENERATED when derivative transformation of a protected/pre-existing source requires AI_DERIVATIVE",
+    "AI_DERIVATIVE without source/reference authorization path",
+    "attempt to derive Recording disclosure solely from Model420 aiDisclosureHash/provider marketing",
+    "attempt to overwrite historical disclosure in place",
+    "attempt to use disclosure as rights/license/training permission"
+  ],
+  "invariants": [
+    "HZGCA-DISC-001 every published Generate-origin Recording binds exactly one disclosure class",
+    "HZGCA-DISC-002 allowed disclosure vocabulary is exactly HUMAN, AI_ASSISTED, AI_GENERATED, AI_DERIVATIVE",
+    "HZGCA-DISC-003 AI_DERIVATIVE has precedence over AI_GENERATED for generative transformations of pre-existing sources requiring authorization",
+    "HZGCA-DISC-004 AI_GENERATED has precedence over AI_ASSISTED when substantial generated composition or audible/performance content remains",
+    "HZGCA-DISC-005 AI_ASSISTED has precedence over HUMAN when material generative assistance contributed to the release",
+    "HZGCA-DISC-006 unresolved classification at publication fails closed and never defaults to HUMAN",
+    "HZGCA-DISC-007 provider/model marketing or Model420 aiDisclosureHash cannot independently determine Recording disclosure",
+    "HZGCA-DISC-008 disclosure metadata never grants rights, licenses, consent, custody, payment or governance authority",
+    "HZGCA-DISC-009 AI transformation authorization remains distinct from AI training permission",
+    "HZGCA-DISC-010 RecordingClass AI_DERIVATIVE requires disclosure AI_DERIVATIVE",
+    "HZGCA-DISC-011 provenanceClass and rightsStatus do not substitute for disclosure",
+    "HZGCA-DISC-012 REVIEWED requires explicit creator confirmation of candidate disclosure",
+    "HZGCA-DISC-013 PUBLISHED requires one valid public disclosure bound to the exact Recording/version",
+    "HZGCA-DISC-014 disclosure correction is append-only/versioned and preserves historical values",
+    "HZGCA-DISC-015 public disclosure does not require disclosure of private prompts, drafts, reference payloads or secrets",
+    "HZGCA-DISC-016 disclosure classification cannot bypass provenance, consent, derivative authorization, registration or publication gates"
+  ],
+  "exitCriteria": [
+    "the four disclosure classes and their meanings are explicit",
+    "classification precedence and fail-closed ambiguity handling are explicit",
+    "publication-time binding and correction/versioning semantics are explicit",
+    "Model420/provider disclosure is separated from Recording disclosure",
+    "Creative RecordingClass/rights/provenance relationships are explicit without duplicating authority",
+    "privacy and non-rights-grant boundaries are explicit",
+    "machine verifier enforces vocabulary, precedence, publication and authority invariants",
+    "no ABI, contract deployment, provider integration or testnet claim is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.5 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "hz/config/gca-product-boundaries-v1.json",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-generate-lifecycle-v1.json",
+    "contracts/src/ai/AIModelRegistry.sol",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "contracts/src/creative/shared/CreativeTypes420.sol",
+    "contracts/src/creative/README.md"
+  ]
+}

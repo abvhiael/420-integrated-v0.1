@@ -1,0 +1,464 @@
+{
+  "schema": "420hz-gca-provenance-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.5",
+  "title": "Define provenance model",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "scope": "Generate-origin provenance links 420Hz product state to canonical 420AI/Compute/Creative references using commitments and native IDs without publishing private payloads or inventing authority.",
+  "record": {
+    "name": "GenerationProvenanceRecord",
+    "idField": "provenanceRecordId",
+    "revisionField": "revision",
+    "immutableIdentityFields": [
+      "provenanceRecordId",
+      "schemaVersion",
+      "policyVersion",
+      "projectId",
+      "intentId",
+      "runId",
+      "outputId",
+      "creatorAccountRef",
+      "createdAt"
+    ],
+    "requiredBeforeReviewed": [
+      "schemaVersion",
+      "policyVersion",
+      "projectId",
+      "intentId",
+      "runId",
+      "outputId",
+      "creatorAccountRef",
+      "aiJobId",
+      "modelVersionId",
+      "requestCommitment",
+      "resultCommitment",
+      "resultManifestHash",
+      "aiDisclosureClass",
+      "declarationCommitment",
+      "createdAt",
+      "revision"
+    ],
+    "requiredBeforeRegistered": [
+      "all REVIEWED requirements",
+      "creativeProvenanceCommitment",
+      "authorizationManifestCommitment",
+      "creatorProfileId"
+    ],
+    "requiredBeforePublished": [
+      "all REGISTERED requirements",
+      "workId",
+      "recordingId",
+      "publishedProvenanceCommitment"
+    ]
+  },
+  "fields": [
+    {
+      "name": "provenanceRecordId",
+      "kind": "HZ_OWNED_ID",
+      "required": "ALWAYS",
+      "visibility": "PUBLIC_REFERENCE",
+      "authority": "420Hz product provenance record",
+      "rule": "stable logical identity; never recycled"
+    },
+    {
+      "name": "schemaVersion",
+      "kind": "VERSION",
+      "required": "ALWAYS",
+      "visibility": "PUBLIC",
+      "authority": "420Hz provenance schema",
+      "rule": "exact schema semantics"
+    },
+    {
+      "name": "policyVersion",
+      "kind": "VERSION",
+      "required": "ALWAYS",
+      "visibility": "PUBLIC",
+      "authority": "420Hz provenance policy",
+      "rule": "binds interpretation and correction rules"
+    },
+    {
+      "name": "revision",
+      "kind": "VERSION",
+      "required": "ALWAYS",
+      "visibility": "PUBLIC",
+      "authority": "420Hz provenance record",
+      "rule": "append-only monotonic revision"
+    },
+    {
+      "name": "projectId",
+      "kind": "HZ_REFERENCE",
+      "required": "ALWAYS",
+      "visibility": "PRIVATE_OR_COMMITMENT",
+      "authority": "GenerationProject",
+      "rule": "native 420Hz project identity"
+    },
+    {
+      "name": "intentId",
+      "kind": "HZ_REFERENCE",
+      "required": "ALWAYS",
+      "visibility": "PRIVATE_OR_COMMITMENT",
+      "authority": "GenerationIntent",
+      "rule": "native 420Hz intent identity"
+    },
+    {
+      "name": "runId",
+      "kind": "HZ_REFERENCE",
+      "required": "ALWAYS",
+      "visibility": "PRIVATE_OR_COMMITMENT",
+      "authority": "GenerationRunBinding",
+      "rule": "native 420Hz run identity"
+    },
+    {
+      "name": "outputId",
+      "kind": "HZ_REFERENCE",
+      "required": "ALWAYS",
+      "visibility": "PRIVATE_OR_COMMITMENT",
+      "authority": "GenerationOutput",
+      "rule": "exact reviewed output"
+    },
+    {
+      "name": "creatorAccountRef",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "ALWAYS",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "Wallet/SmartAccount",
+      "rule": "account/controller reference only; no signing authority"
+    },
+    {
+      "name": "creatorProfileId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "BEFORE_REGISTERED",
+      "visibility": "PUBLIC",
+      "authority": "420 Creative Protocol",
+      "rule": "native CreatorId; no remapping"
+    },
+    {
+      "name": "aiJobId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "420AI",
+      "rule": "exact canonical AI job ID"
+    },
+    {
+      "name": "modelVersionId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC",
+      "authority": "420AI ModelRegistry",
+      "rule": "exact immutable model-version identity"
+    },
+    {
+      "name": "providerId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "IF_BOUND_BY_JOB",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "420AI/Compute binding",
+      "rule": "record only canonical provider reference actually bound to execution"
+    },
+    {
+      "name": "computeRequestId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "IF_BOUND_BY_JOB",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "ComputeMarket",
+      "rule": "native compute request reference"
+    },
+    {
+      "name": "computeJobId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "IF_BOUND_BY_JOB",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "ComputeMarket",
+      "rule": "native compute job reference"
+    },
+    {
+      "name": "requestCommitment",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420AI request/input commitment",
+      "rule": "commitment only; never plaintext prompt/lyrics/reference media"
+    },
+    {
+      "name": "resultCommitment",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420AI result commitment",
+      "rule": "must match verified canonical AI result"
+    },
+    {
+      "name": "resultManifestHash",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420AI result manifest",
+      "rule": "must match verified canonical AI result manifest"
+    },
+    {
+      "name": "verificationOutcomeRef",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "IF_AVAILABLE",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "420AI/Compute verification",
+      "rule": "cannot be fabricated by 420Hz"
+    },
+    {
+      "name": "aiDisclosureClass",
+      "kind": "ENUM",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC",
+      "authority": "HZ-GCA-1.4 disclosure policy",
+      "rule": "one of HUMAN, AI_ASSISTED, AI_GENERATED, AI_DERIVATIVE"
+    },
+    {
+      "name": "declarationCommitment",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420Hz disclosure declaration",
+      "rule": "binds reviewed disclosure declaration under exact policy version"
+    },
+    {
+      "name": "sourceWorkIds",
+      "kind": "EXTERNAL_REFERENCE_SET",
+      "required": "IF_DERIVATIVE",
+      "visibility": "PUBLIC",
+      "authority": "420 Creative Protocol",
+      "rule": "native WorkId references only"
+    },
+    {
+      "name": "sourceRecordingIds",
+      "kind": "EXTERNAL_REFERENCE_SET",
+      "required": "IF_DERIVATIVE",
+      "visibility": "PUBLIC",
+      "authority": "420 Creative Protocol",
+      "rule": "native RecordingId references only"
+    },
+    {
+      "name": "sourceLicenseIds",
+      "kind": "EXTERNAL_REFERENCE_SET",
+      "required": "IF_AUTHORIZED_BY_LICENSE",
+      "visibility": "PUBLIC",
+      "authority": "420 Creative Protocol",
+      "rule": "native LicenseId references only"
+    },
+    {
+      "name": "sourceAuthorizationRefs",
+      "kind": "EXTERNAL_REFERENCE_SET",
+      "required": "IF_DERIVATIVE",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "Creative authorization path",
+      "rule": "proves linkage only; 420Hz does not grant permission"
+    },
+    {
+      "name": "voiceConsentRefs",
+      "kind": "EXTERNAL_REFERENCE_SET",
+      "required": "IF_SYNTHETIC_IDENTITY_CLAIM",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "future/qualified consent source",
+      "rule": "must reference explicit consent evidence; absence blocks such claim"
+    },
+    {
+      "name": "artifactCommitments",
+      "kind": "COMMITMENT_SET",
+      "required": "BEFORE_REVIEWED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "GenerationArtifact/Storage linkage",
+      "rule": "commitments to selected output artifacts; raw bytes may remain private"
+    },
+    {
+      "name": "storageManifestRefs",
+      "kind": "EXTERNAL_REFERENCE_SET",
+      "required": "IF_STORED_CANONICALLY",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "420ResourceProtocol/420Store",
+      "rule": "references only; no storage-proof authority"
+    },
+    {
+      "name": "creativeProvenanceCommitment",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_REGISTERED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420Hz-to-Creative handoff",
+      "rule": "exact commitment supplied as/into Creative provenanceHash semantics"
+    },
+    {
+      "name": "authorizationManifestCommitment",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_REGISTERED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420Hz-to-Creative handoff",
+      "rule": "exact source/authorization manifest commitment supplied to Recording registration where applicable"
+    },
+    {
+      "name": "workId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "BEFORE_PUBLISHED",
+      "visibility": "PUBLIC",
+      "authority": "420 Creative Protocol",
+      "rule": "native WorkId returned by registration"
+    },
+    {
+      "name": "recordingId",
+      "kind": "EXTERNAL_REFERENCE",
+      "required": "BEFORE_PUBLISHED",
+      "visibility": "PUBLIC",
+      "authority": "420 Creative Protocol",
+      "rule": "native RecordingId returned by registration"
+    },
+    {
+      "name": "publishedProvenanceCommitment",
+      "kind": "COMMITMENT",
+      "required": "BEFORE_PUBLISHED",
+      "visibility": "PUBLIC_COMMITMENT",
+      "authority": "420Hz publication record",
+      "rule": "final published commitment for exact Recording/version"
+    },
+    {
+      "name": "createdAt",
+      "kind": "TIMESTAMP",
+      "required": "ALWAYS",
+      "visibility": "PUBLIC_OR_COMMITMENT",
+      "authority": "420Hz provenance record",
+      "rule": "observation only; not authority proof"
+    },
+    {
+      "name": "supersedesProvenanceRecordId",
+      "kind": "HZ_REFERENCE",
+      "required": "ON_CORRECTION",
+      "visibility": "PUBLIC",
+      "authority": "420Hz provenance record",
+      "rule": "correction edge; historical record remains immutable"
+    }
+  ],
+  "privacy": {
+    "neverPublicPlaintext": [
+      "prompts",
+      "private lyric drafts",
+      "raw reference audio",
+      "private stems",
+      "provider API credentials",
+      "wallet secrets/private keys",
+      "model secrets/private weights unless intentionally public",
+      "decryption keys"
+    ],
+    "allowedPublic": [
+      "hashes/commitments",
+      "native canonical IDs",
+      "policy/schema versions",
+      "disclosure class",
+      "source authorization references",
+      "final publication references"
+    ],
+    "rule": "A commitment/reference proves linkage only to the extent the owning system and verification policy support; it does not reveal or validate hidden plaintext by itself."
+  },
+  "lineage": [
+    "GenerationProject.projectId",
+    "GenerationIntent.intentId + intentCommitment",
+    "GenerationRunBinding.runId + AIJobRef",
+    "420AI aiJobId + modelVersionId + requestCommitment",
+    "Compute request/job/provider references when bound",
+    "420AI verified resultCommitment + resultManifestHash",
+    "GenerationOutput.outputId + artifact commitments",
+    "HZ-GCA-1.4 disclosureClass + declarationCommitment",
+    "source Work/Recording/License/authorization and voice-consent references when applicable",
+    "creativeProvenanceCommitment + authorizationManifestCommitment",
+    "Creative WorkId + RecordingId",
+    "publishedProvenanceCommitment"
+  ],
+  "derivativeRules": [
+    "AI_DERIVATIVE provenance must include at least one sourceWorkId or sourceRecordingId and an applicable sourceAuthorizationRef.",
+    "Where permission is represented by a Creative License, preserve native LicenseId in sourceLicenseIds.",
+    "source IDs and authorization references are provenance links, not a grant created by 420Hz.",
+    "AI transformation permission and AI training permission remain distinct and must never share one implied authorization flag."
+  ],
+  "voiceRules": [
+    "A synthetic voice/persona identity claim requires explicit voiceConsentRefs before REVIEWED and publication.",
+    "voiceConsentRefs must identify a qualified consent source/commitment; a model name or provider claim is insufficient.",
+    "HZ-GCA-1.5 records the reference shape only; detailed consent policy/validation is frozen in HZ-GCA-1.6."
+  ],
+  "correctionRules": [
+    "Published provenance is append-only/versioned.",
+    "A correction creates a new revision/provenanceRecordId or revision edge that references supersedesProvenanceRecordId.",
+    "Historical request/result/source/disclosure commitments are never overwritten in place.",
+    "If canonical external evidence is later disputed/revoked, current presentation may mark status/restriction but retains historical provenance lineage."
+  ],
+  "creativeHandoff": {
+    "Work": {
+      "provenanceHash": "must be derived from/bind creativeProvenanceCommitment for the exact reviewed provenance package",
+      "provenanceClass": "must be chosen under Creative Protocol semantics and does not replace the HZ disclosure class"
+    },
+    "Recording": {
+      "provenanceHash": "must bind the exact reviewed provenance package",
+      "authorizationManifestHash": "must bind applicable source/consent/authorization references where required",
+      "mediaManifestHash": "remains media/storage manifest authority and does not substitute for provenance",
+      "recordingClass": "AI_DERIVATIVE must remain consistent with HZ-GCA-1.4 disclosure and source provenance"
+    }
+  },
+  "failureRules": [
+    "missing required provenance before REVIEWED blocks REVIEWED",
+    "mismatched aiJobId/modelVersionId/requestCommitment/resultCommitment/resultManifestHash blocks REVIEWED",
+    "AI_DERIVATIVE without source provenance/authorization blocks REVIEWED and publication",
+    "synthetic identity claim without required voiceConsentRefs blocks REVIEWED/publication",
+    "missing Creative handoff commitments blocks REGISTERED",
+    "returned WorkId/RecordingId mismatch blocks PUBLISHED",
+    "plaintext protected payloads in public provenance are invalid",
+    "provider/model marketing claims cannot substitute for canonical AI/job/result references",
+    "in-place mutation of published provenance is invalid"
+  ],
+  "invariants": [
+    "HZGCA-PROV-001 every Generate-origin published Recording has a versioned provenance record linked to the exact output",
+    "HZGCA-PROV-002 provenance preserves native external IDs and never creates competing AI, Compute or Creative identities",
+    "HZGCA-PROV-003 request/result provenance uses canonical commitments/references and never requires public plaintext prompts or private audio",
+    "HZGCA-PROV-004 aiJobId, modelVersionId, resultCommitment and resultManifestHash must agree with the owning 420AI job/version",
+    "HZGCA-PROV-005 provider/compute references are recorded only when actually bound by canonical execution",
+    "HZGCA-PROV-006 disclosure class and declaration commitment are bound under the exact HZ-GCA-1.4 policy version",
+    "HZGCA-PROV-007 AI_DERIVATIVE provenance includes source identity plus applicable authorization references",
+    "HZGCA-PROV-008 source WorkId, RecordingId and LicenseId remain native Creative IDs",
+    "HZGCA-PROV-009 synthetic voice/persona claims require explicit consent references and cannot rely on model/provider naming alone",
+    "HZGCA-PROV-010 provenance references do not themselves grant copyright, license, consent, payment, custody or governance authority",
+    "HZGCA-PROV-011 AI transformation authorization remains distinct from AI training permission",
+    "HZGCA-PROV-012 REVIEWED requires complete required provenance for the exact selected output",
+    "HZGCA-PROV-013 REGISTERED requires exact Creative handoff commitments and native CreatorProfile/Work/Recording linkage",
+    "HZGCA-PROV-014 PUBLISHED binds final provenance to the exact Recording/version and preserves historical lineage",
+    "HZGCA-PROV-015 provenance corrections are append-only/versioned and never overwrite historical commitments",
+    "HZGCA-PROV-016 public provenance excludes protected plaintext/secrets while permitting hashes, commitments and canonical IDs",
+    "HZGCA-PROV-017 provenanceClass, rightsStatus, mediaManifestHash and disclosureClass remain distinct semantic fields",
+    "HZGCA-PROV-018 later dispute/restriction may alter current availability/status but cannot erase historical provenance"
+  ],
+  "exitCriteria": [
+    "creator/project/intent/run/output lineage is explicit",
+    "420AI model/job/request/result/provider/compute references and authority are explicit",
+    "disclosure is bound to provenance under exact policy version",
+    "source Work/Recording/License/authorization and voice-consent reference rules are explicit",
+    "Creative Work/Recording provenance and authorization handoff is explicit",
+    "privacy/public-commitment boundaries are explicit",
+    "correction/versioning and dispute-history semantics are explicit",
+    "machine verifier enforces required fields, derivative/voice gates, native IDs and privacy/authority invariants",
+    "no ABI, deployment, live provider or testnet claim is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.6 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.4-AI-DISCLOSURE.md",
+    "hz/config/gca-product-boundaries-v1.json",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-generate-lifecycle-v1.json",
+    "hz/config/gca-ai-disclosure-v1.json",
+    "contracts/src/ai/AIJobManager.sol",
+    "contracts/src/ai/AIModelRegistry.sol",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "contracts/src/creative/shared/CreativeTypes420.sol",
+    "contracts/src/creative/music/WorkRegistry420.sol",
+    "contracts/src/creative/music/RecordingRegistry420.sol",
+    "contracts/src/creative/README.md"
+  ]
+}

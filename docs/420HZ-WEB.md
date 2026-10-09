@@ -25,6 +25,44 @@ That asset embeds the approved logo image and is the canonical website brand ima
 
 The surrounding visual system follows the approved artwork: lustrous gold, rich forest green, cannabis green and electric blue accents on a deep green-black field.
 
+## Planned Generate / Community / Awards expansion
+
+The current static web client reflects the already implemented publishing/rights/streaming foundation. The next dedicated 420Hz application phase is defined in `docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md`.
+
+That phase adds:
+
+- a prominent **Generate your own song** entry point;
+- AI-generated / AI-assisted song creation through 420AI + Compute Market;
+- project/version/stem/provenance workflows;
+- Generate → register Work/Recording → publish integration;
+- community follows/favorites/playlists and chart/discovery projections;
+- award seasons/categories, nominations, voting, results and permanent badges;
+- anti-Sybil, moderation, privacy and adversarial hardening;
+- production-equivalent testnet qualification before live claims.
+
+Generate Studio is now repository-implemented under HZ-GCA-6 using qualified deterministic mock/dev execution. It remains explicitly pre-testnet and must not imply that live generation, registration/publication, community voting or awards are already deployed.
+
+
+## Generate Studio
+
+HZ-GCA-6 adds a prominent **Generate your own song** home-page CTA and a fully navigable pre-testnet Generate Studio.
+
+The repository-qualified UX includes:
+
+- prompt and optional lyrics composer;
+- advanced genre/style/mood/instrumentation controls;
+- development cost/capacity preview;
+- accessible generation progress;
+- deterministic A/B take comparison;
+- audio/stem preview surfaces without fabricated public media URLs;
+- provenance/disclosure presentation;
+- save/regenerate/remix controls;
+- explicit Register & Publish handoff owned by HZ-GCA-7;
+- failure/retry/refund state;
+- responsive/mobile layout and reduced-motion/accessibility support.
+
+The Generate Studio uses deterministic mock/dev state only. It does not enable Wallet signing, submit publication transactions, invent a production chain/provider/storage endpoint, or represent generation success as registration/publication success.
+
 ## User experience
 
 The initial client provides:

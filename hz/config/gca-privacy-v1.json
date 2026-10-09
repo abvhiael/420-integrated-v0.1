@@ -1,0 +1,317 @@
+{
+  "schema": "420hz-gca-privacy-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.7",
+  "title": "Define privacy model",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "classes": [
+    {
+      "class": "PUBLIC",
+      "meaning": "intended for public publication/discovery once canonical publication gates pass",
+      "defaultIndexable": true
+    },
+    {
+      "class": "UNLISTED",
+      "meaning": "shareable by explicit reference but excluded from broad discovery/search unless later promoted",
+      "defaultIndexable": false
+    },
+    {
+      "class": "PRIVATE",
+      "meaning": "creator/account scoped content inaccessible to public projections by default",
+      "defaultIndexable": false
+    },
+    {
+      "class": "SECRET",
+      "meaning": "credentials, keys, tokens or other data that must never be persisted in application records, public manifests, logs or indexes",
+      "defaultIndexable": false
+    }
+  ],
+  "dataRules": [
+    {
+      "data": "promptText",
+      "class": "PRIVATE",
+      "phase": "DRAFT_TO_REVIEWED",
+      "publicTransition": "never automatic; explicit publication only if a future feature separately defines it",
+      "storage": "encrypted authenticated off-chain only",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "privateLyricsDraft",
+      "class": "PRIVATE",
+      "phase": "DRAFT_TO_REVIEWED",
+      "publicTransition": "explicit user publication only",
+      "storage": "encrypted authenticated off-chain only",
+      "indexing": "forbidden until explicitly public"
+    },
+    {
+      "data": "referenceAudio",
+      "class": "PRIVATE",
+      "phase": "DRAFT_TO_EXECUTION",
+      "publicTransition": "never implied by generation/publication",
+      "storage": "encrypted authenticated off-chain only",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "draftOutputAudio",
+      "class": "PRIVATE",
+      "phase": "SUCCEEDED_TO_REVIEWED",
+      "publicTransition": "only selected output may become publishable after review/rights/provenance gates",
+      "storage": "encrypted authenticated off-chain only",
+      "indexing": "forbidden before publication"
+    },
+    {
+      "data": "privateStems",
+      "class": "PRIVATE",
+      "phase": "SUCCEEDED_TO_PROJECT",
+      "publicTransition": "explicit user choice/publishing policy only",
+      "storage": "encrypted authenticated off-chain only",
+      "indexing": "forbidden before publication"
+    },
+    {
+      "data": "provenanceCommitments",
+      "class": "PUBLIC",
+      "phase": "REVIEWED_TO_PUBLISHED",
+      "publicTransition": "commitments/IDs only; hidden payloads remain private",
+      "storage": "public commitment/reference",
+      "indexing": "allowed when attached to published canonical object"
+    },
+    {
+      "data": "finalDisclosureClass",
+      "class": "PUBLIC",
+      "phase": "PUBLISHED",
+      "publicTransition": "required at publication under HZ-GCA-1.4",
+      "storage": "public metadata",
+      "indexing": "allowed"
+    },
+    {
+      "data": "sourceAuthorizationReferences",
+      "class": "PUBLIC",
+      "phase": "REGISTERED_TO_PUBLISHED",
+      "publicTransition": "reference/commitment only, subject to underlying privacy",
+      "storage": "public reference/commitment",
+      "indexing": "allowed when publication policy permits"
+    },
+    {
+      "data": "voiceConsentEvidencePayload",
+      "class": "PRIVATE",
+      "phase": "REVIEWED_TO_PUBLISHED",
+      "publicTransition": "only minimal consent reference/status may be public; raw evidence remains private unless source policy says otherwise",
+      "storage": "encrypted authenticated off-chain only",
+      "indexing": "raw payload forbidden"
+    },
+    {
+      "data": "voiceConsentReference",
+      "class": "PUBLIC",
+      "phase": "REVIEWED_TO_PUBLISHED",
+      "publicTransition": "minimal qualified reference/status only",
+      "storage": "public or privacy-preserving commitment",
+      "indexing": "allowed when required for published provenance"
+    },
+    {
+      "data": "walletPrivateKey",
+      "class": "SECRET",
+      "phase": "ALL",
+      "publicTransition": "never",
+      "storage": "must not be accepted or persisted by 420Hz",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "providerApiCredential",
+      "class": "SECRET",
+      "phase": "ALL",
+      "publicTransition": "never",
+      "storage": "secret manager/runtime injection only; never application content",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "sessionBearerToken",
+      "class": "SECRET",
+      "phase": "ALL",
+      "publicTransition": "never",
+      "storage": "ephemeral/session-scoped only",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "communityFollow",
+      "class": "PUBLIC",
+      "phase": "COMMUNITY",
+      "publicTransition": "subject to future user privacy preference if supported",
+      "storage": "application state",
+      "indexing": "allowed only if visibility permits"
+    },
+    {
+      "data": "favorite",
+      "class": "PRIVATE",
+      "phase": "COMMUNITY",
+      "publicTransition": "user-controlled visibility",
+      "storage": "application state",
+      "indexing": "forbidden unless explicitly public"
+    },
+    {
+      "data": "playlistPrivate",
+      "class": "PRIVATE",
+      "phase": "COMMUNITY",
+      "publicTransition": "explicit owner visibility change",
+      "storage": "application state",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "playlistUnlisted",
+      "class": "UNLISTED",
+      "phase": "COMMUNITY",
+      "publicTransition": "direct-link access only",
+      "storage": "application state",
+      "indexing": "excluded from broad Search"
+    },
+    {
+      "data": "playlistPublic",
+      "class": "PUBLIC",
+      "phase": "COMMUNITY",
+      "publicTransition": "explicit owner visibility",
+      "storage": "application state",
+      "indexing": "allowed"
+    },
+    {
+      "data": "awardVoteSecretMaterial",
+      "class": "PRIVATE",
+      "phase": "AWARDS",
+      "publicTransition": "never expose voter secret/signature material; published result may expose only policy-approved aggregate/commitment",
+      "storage": "minimal encrypted/private state",
+      "indexing": "forbidden"
+    },
+    {
+      "data": "awardResult",
+      "class": "PUBLIC",
+      "phase": "AWARDS_FINAL",
+      "publicTransition": "after canonical finalization",
+      "storage": "public product-domain result",
+      "indexing": "allowed"
+    }
+  ],
+  "privateDefaults": [
+    "GenerationProject",
+    "GenerationIntent",
+    "GenerationRunBinding",
+    "GenerationOutput",
+    "GenerationArtifact",
+    "ProvenanceDraft",
+    "PublishIntent",
+    "prompts",
+    "private lyrics drafts",
+    "reference audio",
+    "draft audio",
+    "private stems",
+    "raw consent evidence"
+  ],
+  "providerRules": [
+    "Private execution payloads must use authenticated encrypted off-chain transport/storage.",
+    "Provider/worker access is assignment-scoped, least-privilege, time-bounded and limited to data required for the exact accepted job.",
+    "An accepted compute/AI assignment is not permission for cross-project, cross-job, account-wide or dataset-wide access.",
+    "Plaintext prompts, reference audio, draft lyrics and output bytes must not be persisted in public runtime state or logs.",
+    "Expired, revoked, wrong-scope or wrong-assignment payload access fails closed.",
+    "420Hz may send only the minimum data required by the selected generation request and privacy policy."
+  ],
+  "encryptionAndStorage": [
+    "Where 420AI private payload services are used, preserve their authenticated-encryption and assignment-scoped access guarantees rather than downgrading to plaintext transport/storage.",
+    "Raw private media/content remains off-chain by default.",
+    "Public chain/protocol state may contain only bounded IDs, commitments, policy versions and minimally necessary public references.",
+    "Low-entropy private data must not rely on an unsalted plain hash as confidentiality protection.",
+    "Exact retention/deletion durations are deferred to HZ-GCA-1.8, but HZ-GCA-1.7 requires bounded retention and no indefinite provider/runtime copies by default."
+  ],
+  "indexingRules": [
+    "420Indexer/Search receive only data explicitly eligible for public projection.",
+    "PRIVATE and SECRET data are excluded from public Indexer/Search projections.",
+    "UNLISTED objects are excluded from broad Search/trending/discovery unless explicitly promoted to PUBLIC.",
+    "Hashes, commitments or ciphertext references do not authorize recovery, decryption or indexing of protected payloads.",
+    "Draft Generate objects remain non-indexable before publication.",
+    "Search ranking/discovery cannot broaden visibility beyond the source object's privacy class."
+  ],
+  "notificationRules": [
+    "420Notifications may receive minimal event metadata needed for opt-in delivery, not raw private prompts/audio/stems/consent payloads.",
+    "Subscription state, watchlists, delivery endpoints and notification history remain private by default.",
+    "Notification delivery does not make the underlying private source object public.",
+    "Promotional notification consent remains separate from operational/security delivery."
+  ],
+  "loggingTelemetryRules": [
+    "Logs, traces, metrics and CI artifacts must redact or omit prompts, lyrics, raw audio bytes, private stems, access tokens, credentials, wallet secrets and raw consent evidence.",
+    "Operational metrics may expose aggregate latency/capacity/error data without customer payload contents.",
+    "Crash reports and provider diagnostics must preserve the same privacy classification and redaction rules.",
+    "No debug mode may silently disable production privacy/redaction semantics in qualification or production."
+  ],
+  "lifecycleRules": [
+    "DRAFT, QUOTED, SUBMITTED, RUNNING and SUCCEEDED generation content remains private unless a field is explicitly defined public.",
+    "REVIEWED makes disclosure/provenance candidates complete but does not itself publish private payloads.",
+    "REGISTERED may publish canonical Creative commitments/IDs while hidden source payloads remain private.",
+    "PUBLISHED exposes only fields explicitly classified PUBLIC for the exact Recording/version.",
+    "Withdrawal/restriction stops current public availability where canonical policy requires but does not erase immutable public commitments already legitimately published.",
+    "Privacy class changes require explicit user/policy action and must not be inferred from link sharing, successful generation or registration."
+  ],
+  "accessRules": [
+    "Wallet/account authorization gates access to private creator projects; connection alone is insufficient for signing or broad data access.",
+    "Optional Identity assertions may gate policy where needed but do not grant access to unrelated private content.",
+    "Storage/provider access tokens are purpose-scoped and may not be reused as application-session or wallet authority.",
+    "Moderation/arbitration evidence access, where later applicable, must be separately authorized and does not make evidence public."
+  ],
+  "failClosedRules": [
+    "attempt to public-index PRIVATE or SECRET data fails closed",
+    "attempt to broad-index UNLISTED data fails closed",
+    "provider access with expired/wrong-scope assignment fails closed",
+    "missing privacy-policy/reference on a private AI job fails closed where the owning 420AI policy requires one",
+    "plaintext secret/credential persistence in application records or logs is invalid",
+    "publication request with unresolved field visibility/classification fails closed",
+    "notification payload containing raw protected generation content is rejected",
+    "search/discovery visibility may never exceed source visibility",
+    "debug/telemetry configuration that would leak protected payloads is invalid"
+  ],
+  "invariants": [
+    "HZGCA-PRIV-001 Generate project, intent, run, output, artifact, provenance-draft and publish-intent objects are private by default",
+    "HZGCA-PRIV-002 prompts, private lyric drafts, reference audio, draft outputs, private stems and raw consent evidence are off-chain/private by default",
+    "HZGCA-PRIV-003 wallet private keys, provider credentials and bearer/session secrets are SECRET and never valid public/application content",
+    "HZGCA-PRIV-004 private AI/Compute payload access is authenticated, encrypted, least-privilege, assignment-scoped and time-bounded",
+    "HZGCA-PRIV-005 successful generation, review or registration never automatically changes private content to public",
+    "HZGCA-PRIV-006 only explicitly PUBLIC data may enter public Indexer/Search projections",
+    "HZGCA-PRIV-007 UNLISTED objects remain excluded from broad Search/trending/discovery",
+    "HZGCA-PRIV-008 hashes/commitments/ciphertext references do not authorize recovery or disclosure of protected payloads",
+    "HZGCA-PRIV-009 logs/metrics/CI artifacts never contain raw prompts, private media, credentials, tokens or raw consent evidence",
+    "HZGCA-PRIV-010 provider execution never grants cross-job/cross-project access",
+    "HZGCA-PRIV-011 420Notifications retains private subscription/delivery policy and never republishes protected payloads",
+    "HZGCA-PRIV-012 privacy class transitions require explicit user/policy action and are never inferred from sharing or execution success",
+    "HZGCA-PRIV-013 published provenance exposes commitments/references, not protected plaintext",
+    "HZGCA-PRIV-014 moderation/arbitration evidence access is separately authorized and does not imply public visibility",
+    "HZGCA-PRIV-015 retention is bounded; exact deletion/retention policy remains HZ-GCA-1.8",
+    "HZGCA-PRIV-016 source visibility is an upper bound for Search/Notification projection visibility",
+    "HZGCA-PRIV-017 missing/conflicting privacy classification fails closed at publication/indexing boundaries",
+    "HZGCA-PRIV-018 privacy protections do not create new rights, identity, payment, governance or protocol authority"
+  ],
+  "exitCriteria": [
+    "Generate/Community/Awards data classes and default visibility are explicit",
+    "private prompts/lyrics/reference audio/drafts/stems/consent payload handling is explicit",
+    "provider/worker least-privilege encrypted off-chain access rules are explicit",
+    "public Indexer/Search/Notification exclusion and visibility rules are explicit",
+    "logging/telemetry/CI redaction rules are explicit",
+    "lifecycle privacy transitions and fail-closed ambiguity are explicit",
+    "retention is bounded with exact retention/deletion deferred only to HZ-GCA-1.8",
+    "machine verifier enforces classes, protected-data exclusions, projection rules and privacy invariants",
+    "no ABI, deployment, live provider or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.8 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.4-AI-DISCLOSURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.5-PROVENANCE-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/compute-market/CMP-0.10-DISPUTES-PRIVACY-AND-SECURITY.md",
+    "docs/compute-market/CMP-0.11-CLIENT-NODE-AND-420AI-INTEGRATION.md",
+    "docs/420SEARCH-ROADMAP.md",
+    "docs/420SEARCH-GENESIS-CLOSEOUT.md",
+    "docs/420NOTIFICATIONS.md",
+    "420-indexer/README.md"
+  ]
+}

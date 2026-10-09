@@ -1,0 +1,178 @@
+{
+  "schema": "420hz-gca-provenance-consent-rights-metadata-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-4",
+  "title": "Provenance, consent and AI rights metadata",
+  "qualificationLevel": 1,
+  "milestoneRequired": false,
+  "baseMainSha": "0993ff5b5b3b213a0768dbde90e4734df5ab4cc0",
+  "implementationRoot": "hz/generate",
+  "dependencies": {
+    "priorStep": "HZ-GCA-3",
+    "provenancePolicy": "hz/config/gca-provenance-v1.json",
+    "rightsConsentPolicy": "hz/config/gca-rights-consent-v1.json",
+    "aiDisclosurePolicy": "hz/config/gca-ai-disclosure-v1.json",
+    "aiTrainingAuthority": "contracts/src/ai/AIModelRegistry.sol",
+    "creativeAuthorization": "contracts/src/creative/rights/AuthorizationRegistry420.sol",
+    "creativeLicensing": "contracts/src/creative/rights/LicenseRegistry420.sol"
+  },
+  "provenance": {
+    "schemaVersion": 1,
+    "policyVersion": 1,
+    "requiredFields": [
+      "provenanceRecordId",
+      "provenanceVersion",
+      "generationManifestHash",
+      "creatorAccountRef",
+      "createdAt",
+      "provider.providerId",
+      "provider.providerRevision",
+      "provider.modelId",
+      "provider.modelVersion",
+      "requestCommitment",
+      "resultCommitment",
+      "resultManifestHash",
+      "aiDisclosureClass",
+      "declarationCommitment",
+      "artifactCommitments"
+    ],
+    "publicationSnapshot": [
+      "creatorProfileId",
+      "workId",
+      "recordingId",
+      "creativeProvenanceCommitment",
+      "authorizationManifestCommitment",
+      "publishedAt",
+      "publishedProvenanceCommitment"
+    ],
+    "immutableAtPublication": true,
+    "correctionModel": "new provenance version/supersession reference; never in-place mutation"
+  },
+  "privacy": {
+    "rawPublicFieldsForbidden": [
+      "prompt",
+      "lyrics",
+      "rawReferenceAudio",
+      "referenceAudioBytes",
+      "privateAudio",
+      "audioBytes"
+    ],
+    "privatePromptLyricsOffChainByDefault": true,
+    "creatorPublication": "explicit public references may be attached only after creator action; plaintext is not embedded in provenance",
+    "commitmentsAllowed": true
+  },
+  "disclosure": {
+    "classes": [
+      "HUMAN",
+      "AI_ASSISTED",
+      "AI_GENERATED",
+      "AI_DERIVATIVE"
+    ],
+    "exactPolicy": "HZ-GCA-1.4",
+    "declarationCommitmentRequired": true
+  },
+  "derivative": {
+    "sourceRefs": [
+      "workIds",
+      "recordingIds",
+      "licenseIds",
+      "authorizationRefs"
+    ],
+    "aiDerivativeRequiresSourceIdentity": true,
+    "aiDerivativeRequiresAuthorizationRef": true,
+    "aiDerivativeRequiresTransformationAuthorization": true,
+    "transformationAuthority": "420 Creative Protocol",
+    "trainingAuthority": "420AI ModelRegistry",
+    "transformationAndTrainingNonSubstitutable": true
+  },
+  "voiceConsent": {
+    "requiredWhen": "syntheticVoiceClaim=true",
+    "requiredFields": [
+      "subjectRef",
+      "controllerRef",
+      "scopeCommitment",
+      "evidenceRef",
+      "status",
+      "effectiveAt",
+      "checkedAt"
+    ],
+    "statusRequired": "ACTIVE",
+    "expiryFailsClosed": true,
+    "noCanonicalVoiceRegistryClaimed": true
+  },
+  "runtime": {
+    "provenanceBuilder": "buildGenerationProvenance420",
+    "publicationFinalizer": "finalizeGenerationProvenance420",
+    "jobBridge": "provenanceFromSucceededJob420",
+    "succeededJobRequiresCanonicalResultCommitment": true
+  },
+  "authorityBoundaries": [
+    "420Hz provenance records preserve links and commitments but do not grant Creative rights or licenses",
+    "transformation authorization cannot be inferred from AI training grants",
+    "AI training authorization cannot be inferred from Creative transformation/license state",
+    "voice/persona consent cannot be inferred from names, prompts, provider/model labels or public recordings",
+    "provider/model execution participation grants no Creative ownership",
+    "published provenance commitment is not publication authority by itself",
+    "private prompts/lyrics remain off-chain unless separately and explicitly published by the creator"
+  ],
+  "invariants": [
+    "HZGCA4-001 every provenance record binds a stable provenance version and generation manifest hash",
+    "HZGCA4-002 provider/model/version identity is explicit and stable",
+    "HZGCA4-003 creator account binding is explicit",
+    "HZGCA4-004 request/result/result-manifest commitments are explicit",
+    "HZGCA4-005 AI disclosure class and declaration commitment are explicit",
+    "HZGCA4-006 private prompt/lyrics/audio plaintext is rejected from public provenance",
+    "HZGCA4-007 creator publication of prompt/lyrics uses explicit public references rather than embedded private plaintext",
+    "HZGCA4-008 AI_DERIVATIVE requires source Work/Recording identity",
+    "HZGCA4-009 AI_DERIVATIVE requires canonical source authorization references",
+    "HZGCA4-010 AI_DERIVATIVE requires transformation authorization",
+    "HZGCA4-011 AI training authorization never substitutes for transformation authorization",
+    "HZGCA4-012 synthetic voice/persona claims require active scoped consent evidence",
+    "HZGCA4-013 expired/revoked voice consent fails closed for new provenance relying on it",
+    "HZGCA4-014 successful job provenance binds provider/model/request/result/artifact evidence",
+    "HZGCA4-015 unpublished/unfinished generation cannot be promoted into completed provenance",
+    "HZGCA4-016 publication freezes exact CreatorProfile/Work/Recording and handoff commitments",
+    "HZGCA4-017 published provenance tampering fails commitment verification",
+    "HZGCA4-018 corrections require a new version/supersession edge rather than in-place mutation"
+  ],
+  "tests": {
+    "suite": "hz/generate/test/provenance.test.js",
+    "requiredCoverage": [
+      "private prompt/lyrics rejection",
+      "AI derivative source/authorization requirements",
+      "training vs transformation non-substitution",
+      "voice consent required/active/unexpired",
+      "explicit creator publication refs",
+      "publication commitment immutability",
+      "published tamper detection",
+      "SUCCEEDED job provenance bridge",
+      "unfinished job rejection"
+    ],
+    "retainedPolicyVerifiers": [
+      "scripts/verify-420hz-gca-1-4.py",
+      "scripts/verify-420hz-gca-1-5.py",
+      "scripts/verify-420hz-gca-1-6.py"
+    ]
+  },
+  "limitations": [
+    "no canonical production voice/persona consent registry is claimed",
+    "no live deployment or testnet provenance publication is claimed",
+    "no new Creative or 420AI authority is introduced",
+    "publication finalization is repository/local metadata qualification only until later Register & Publish integration"
+  ],
+  "exitCriteria": [
+    "generation manifest hash is durable",
+    "provider/model/version and creator identity are bound",
+    "timestamp plus request/result commitments are validated",
+    "source/reference authorization references are represented",
+    "AI disclosure metadata is bound",
+    "training and transformation permissions are distinct and non-substitutable",
+    "synthetic voice/persona claims fail closed without qualified consent evidence",
+    "source Work/Recording/License references are supported",
+    "publication provenance is immutable/versioned",
+    "private prompts/lyrics remain off-chain unless explicitly published by the creator",
+    "adversarial tests block unauthorized derivative and voice claims",
+    "exact-head Level-1 qualification passes"
+  ],
+  "nextCanonicalStep": "HZ-GCA-5 — Project workspace, versions, stems and storage"
+}

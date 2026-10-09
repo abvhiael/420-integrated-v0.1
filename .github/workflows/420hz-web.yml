@@ -4,6 +4,26 @@ on:
   pull_request:
     paths:
       - 'hz/web/**'
+      - 'hz/generate/**'
+      - 'hz/config/gca-compute-execution-adapter-v1.json'
+      - 'hz/config/gca-provenance-consent-rights-v1.json'
+      - 'hz/config/gca-project-workspace-v1.json'
+      - 'hz/config/gca-generate-studio-ux-v1.json'
+      - 'hz/config/gca-register-publish-v1.json'
+      - 'hz/config/gca-register-publish-v1.json'
+      - 'scripts/verify-420hz-gca-3.py'
+      - 'scripts/verify-420hz-gca-4.py'
+      - 'scripts/verify-420hz-gca-5.py'
+      - 'scripts/verify-420hz-gca-6.py'
+      - 'scripts/verify-420hz-gca-7.py'
+      - 'scripts/verify-420hz-gca-7.py'
+      - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
+      - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
+      - 'docs/architecture/420hz/HZ-GCA-5-PROJECT-WORKSPACE-STORAGE.md'
+      - 'docs/architecture/420hz/HZ-GCA-6-GENERATE-STUDIO-UX.md'
+      - 'docs/architecture/420hz/HZ-GCA-7-REGISTER-PUBLISH.md'
+      - 'docs/architecture/420hz/HZ-GCA-7-REGISTER-PUBLISH.md'
+      - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -12,6 +32,20 @@ on:
       - 'feature/420hz-web-*'
     paths:
       - 'hz/web/**'
+      - 'hz/generate/**'
+      - 'hz/config/gca-compute-execution-adapter-v1.json'
+      - 'hz/config/gca-provenance-consent-rights-v1.json'
+      - 'hz/config/gca-project-workspace-v1.json'
+      - 'hz/config/gca-generate-studio-ux-v1.json'
+      - 'scripts/verify-420hz-gca-3.py'
+      - 'scripts/verify-420hz-gca-4.py'
+      - 'scripts/verify-420hz-gca-5.py'
+      - 'scripts/verify-420hz-gca-6.py'
+      - 'docs/architecture/420hz/HZ-GCA-3-COMPUTE-EXECUTION-ADAPTER.md'
+      - 'docs/architecture/420hz/HZ-GCA-4-PROVENANCE-CONSENT-AI-RIGHTS.md'
+      - 'docs/architecture/420hz/HZ-GCA-5-PROJECT-WORKSPACE-STORAGE.md'
+      - 'docs/architecture/420hz/HZ-GCA-6-GENERATE-STUDIO-UX.md'
+      - 'docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md'
       - 'docs/420HZ-WEB.md'
       - 'scripts/verify-420hz-web.py'
       - '.github/workflows/420hz-web.yml'
@@ -35,3 +69,270 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
       - name: Verify 420Hz web
         run: python3 scripts/verify-420hz-web.py
+
+
+  gca3:
+    name: HZ-GCA-3 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify 420Hz generation module
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Verify HZ-GCA-2 retained provider abstraction
+        run: python3 scripts/verify-420hz-gca-2.py
+
+      - name: Verify HZ-GCA-3 execution adapter
+        run: python3 scripts/verify-420hz-gca-3.py
+
+      - name: Verify canonical 420AI Compute integration boundary
+        run: python3 scripts/verify-420ai-compute-integration.py
+
+      - name: Retain 420AI provider runtime
+        working-directory: services/420ai-provider
+        run: npm test
+
+      - name: Verify 420AI provider runtime boundary
+        run: python3 scripts/verify-420ai-provider-runtime.py
+
+      - name: Retain Compute SDK
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test
+
+      - name: Build Compute SDK
+        working-directory: packages/420-sdk
+        run: npm run build
+
+      - name: Retain Compute API
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+
+
+  gca4:
+    name: HZ-GCA-4 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify 420Hz generation and provenance module
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Retain HZ-GCA-1.4 AI disclosure policy
+        run: python3 scripts/verify-420hz-gca-1-4.py
+
+      - name: Retain HZ-GCA-1.5 provenance policy
+        run: python3 scripts/verify-420hz-gca-1-5.py
+
+      - name: Retain HZ-GCA-1.6 rights consent policy
+        run: python3 scripts/verify-420hz-gca-1-6.py
+
+      - name: Retain HZ-GCA-3 execution evidence boundary
+        run: python3 scripts/verify-420hz-gca-3.py
+
+      - name: Verify HZ-GCA-4 provenance consent AI rights
+        run: python3 scripts/verify-420hz-gca-4.py
+
+
+  gca5:
+    name: HZ-GCA-5 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify 420Hz generation project module
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Retain HZ-GCA-1.8 storage retention policy
+        run: python3 scripts/verify-420hz-gca-1-8.py
+
+      - name: Retain HZ-GCA-4 provenance boundary
+        run: python3 scripts/verify-420hz-gca-4.py
+
+      - name: Verify HZ-GCA-5 project workspace storage
+        run: python3 scripts/verify-420hz-gca-5.py
+
+
+  gca6:
+    name: HZ-GCA-6 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test Generate Studio state model
+        run: node --test hz/web/test/generate-studio.test.mjs
+
+      - name: Retain 420Hz web qualification
+        run: python3 scripts/verify-420hz-web.py
+
+      - name: Retain HZ-GCA-5 project/storage boundary
+        run: python3 scripts/verify-420hz-gca-5.py
+
+      - name: Verify HZ-GCA-6 Generate Studio UX
+        run: python3 scripts/verify-420hz-gca-6.py
+
+
+  gca7_level1:
+    name: HZ-GCA-7 Level 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Qualify complete 420Hz generation/register-publish module
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Retain HZ-GCA-4 provenance boundary
+        run: python3 scripts/verify-420hz-gca-4.py
+
+      - name: Retain HZ-GCA-5 project/storage boundary
+        run: python3 scripts/verify-420hz-gca-5.py
+
+      - name: Retain HZ-GCA-6 Generate Studio boundary
+        run: python3 scripts/verify-420hz-gca-6.py
+
+      - name: Verify HZ-GCA-7 Register Publish integration
+        run: python3 scripts/verify-420hz-gca-7.py
+
+      - name: Retain 420Hz web qualification
+        run: python3 scripts/verify-420hz-web.py
+
+  gca7_level2:
+    name: HZ-GCA-7 Generate Milestone Level 2
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: creative_indexer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d creative_indexer"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/creative_indexer
+      CREATIVE_FIXTURE_PATH: ../artifacts/contracts/creative-kernel-v1.fixture.json
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Retain complete Generate implementation suite
+        working-directory: hz/generate
+        run: npm run qualify
+
+      - name: Retain Generate Studio state model
+        run: node --test hz/web/test/generate-studio.test.mjs
+
+      - name: Retain HZ-GCA-2 through HZ-GCA-7 verifiers
+        run: |
+          for n in 2 3 4 5 6 7; do
+            python3 "scripts/verify-420hz-gca-$n.py"
+          done
+
+      - name: Retain 420Hz web verifier
+        run: python3 scripts/verify-420hz-web.py
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Targeted Creative kernel acceptance
+        working-directory: contracts
+        run: forge test --match-path test/CreativeKernelAcceptance420.t.sol -vvv
+
+      - name: Generate deterministic Decision #10 Creative fixture
+        working-directory: contracts
+        run: |
+          mkdir -p ../artifacts/contracts
+          forge script script/Decision10DeploySeed420.s.sol:Decision10DeploySeed420 --sig "run()" -vvv
+          test -s ../artifacts/contracts/creative-kernel-v1.fixture.json
+
+      - name: Install Creative indexer dependencies
+        working-directory: creative-indexer
+        run: npm install --no-audit --no-fund
+
+      - name: Build Creative indexer
+        working-directory: creative-indexer
+        run: npm run build
+
+      - name: Retain Creative reference projection tests
+        working-directory: creative-indexer
+        run: npm test

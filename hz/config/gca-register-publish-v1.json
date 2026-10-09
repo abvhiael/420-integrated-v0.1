@@ -1,0 +1,218 @@
+{
+  "schema": "420hz-gca-register-publish-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-7",
+  "title": "Register & Publish integration",
+  "qualificationLevel": 2,
+  "milestone": "HZ-GCA Generate milestone",
+  "milestoneRequired": true,
+  "baseMainSha": "ff61fc1171d422c081f4a5abb9e5828e88949c0f",
+  "implementationRoot": "hz/generate",
+  "dependencies": {
+    "priorSteps": [
+      "HZ-GCA-2",
+      "HZ-GCA-3",
+      "HZ-GCA-4",
+      "HZ-GCA-5",
+      "HZ-GCA-6"
+    ],
+    "creatorProfile": "contracts/src/creative/core/CreatorProfileRegistry420.sol",
+    "workRegistry": "contracts/src/creative/music/WorkRegistry420.sol",
+    "recordingRegistry": "contracts/src/creative/music/RecordingRegistry420.sol",
+    "contributorRegistry": "contracts/src/creative/rights/ContributorRegistry420.sol",
+    "rightsRegistry": "contracts/src/creative/rights/RightsRegistry420.sol",
+    "authorizationRegistry": "contracts/src/creative/rights/AuthorizationRegistry420.sol",
+    "mediaManifestRegistry": "contracts/src/creative/media/MediaManifestRegistry420.sol",
+    "storageSourceRegistry": "contracts/src/creative/media/StorageSourceRegistry420.sol",
+    "catalogRegistry": "contracts/src/creative/catalog/CatalogRegistry420.sol",
+    "creativeIndexer": "creative-indexer"
+  },
+  "creatorProfile": {
+    "mode": "create-or-select",
+    "ownerAuthorizationRequired": true,
+    "profileStatusRequired": "ACTIVE",
+    "defaultIdentityType": "ARTIST_PROJECT"
+  },
+  "work": {
+    "initialStatus": "PROVISIONAL",
+    "activationRequiresFinalizedRights": true,
+    "requiredCommitments": [
+      "compositionHash",
+      "metadataHash",
+      "generationProvenanceCommitment"
+    ],
+    "contributorCreditsRequired": true
+  },
+  "rights": {
+    "denominatorBps": 10000,
+    "duplicateHoldersForbidden": true,
+    "explicitHolderAcceptanceRequired": true,
+    "finalizeBeforeActivation": true,
+    "workAndRecordingPoolsIndependent": true
+  },
+  "recording": {
+    "initialStatus": "PROVISIONAL",
+    "activationRequiresFinalizedRights": true,
+    "requiredCommitments": [
+      "masterHash",
+      "metadataHash",
+      "generationProvenanceCommitment",
+      "mediaManifestHash"
+    ],
+    "derivativeClasses": [
+      "COVER",
+      "REMIX",
+      "STEM_REMIX",
+      "SAMPLE_DERIVATIVE",
+      "AI_DERIVATIVE"
+    ],
+    "sourceRecordingRequiredFor": [
+      "REMIX",
+      "STEM_REMIX",
+      "SAMPLE_DERIVATIVE",
+      "AI_DERIVATIVE"
+    ],
+    "derivativeAuthorizationFailsClosed": true,
+    "aiDerivativeRequiresTransformationPermission": true,
+    "trainingPermissionDoesNotSubstitute": true,
+    "contributorCreditsRequired": true
+  },
+  "provenance": {
+    "prePublicationCommitment": "digest of exact validated HZ-GCA-4 generation provenance",
+    "immutablePublicationSnapshot": true,
+    "publicationFields": [
+      "creatorProfileId",
+      "workId",
+      "recordingId",
+      "creativeProvenanceCommitment",
+      "authorizationManifestCommitment",
+      "publishedAt",
+      "publishedProvenanceCommitment"
+    ],
+    "tamperDetectionRequired": true
+  },
+  "aiDisclosure": {
+    "source": "HZ-GCA-4 generation provenance",
+    "immutableAcrossRegisterPublish": true,
+    "publishedOnRecordingAndReleaseProjection": true
+  },
+  "media": {
+    "publishOnlyAfterRecordingActive": true,
+    "requiredManifestFields": [
+      "manifestHash",
+      "masterContentHash",
+      "technicalMetadataHash",
+      "storageLocatorHash",
+      "provenanceHash",
+      "durationMs"
+    ],
+    "storageSourceRequired": true,
+    "externalStorageAuthorityNotClaimed": true
+  },
+  "catalog": {
+    "releaseTypeDefault": "SINGLE",
+    "initialStatus": "DRAFT",
+    "addTrackRequiresActiveRecording": true,
+    "publishRequiresActiveTrackAndMedia": true,
+    "finalStatus": "PUBLISHED"
+  },
+  "orchestration": {
+    "coordinator": "RegisterPublishCoordinator420",
+    "localKernel": "DeterministicCreativeKernel420",
+    "idempotency": "same normalized publication request -> same request/release identities",
+    "stages": [
+      "PROFILE_READY",
+      "WORK_REGISTERED",
+      "WORK_RIGHTS_FINALIZED",
+      "WORK_ACTIVE",
+      "RECORDING_REGISTERED",
+      "RECORDING_RIGHTS_FINALIZED",
+      "RECORDING_ACTIVE",
+      "MEDIA_PUBLISHED",
+      "PROVENANCE_FINALIZED",
+      "RELEASE_DRAFT",
+      "RELEASE_PUBLISHED"
+    ],
+    "failureBehavior": [
+      "generation SUCCEEDED never implies Work/Recording/Release success",
+      "partial canonical-like references remain explicit on failure",
+      "no PUBLISHED Release exists until every prior stage succeeds",
+      "retry resumes completed stages without duplicating Work/Recording/Release"
+    ]
+  },
+  "authorityBoundaries": [
+    "HZ-GCA-7 orchestrates existing Creative primitives but does not replace their canonical authority",
+    "local deterministic Creative kernel is qualification infrastructure and not a deployed chain",
+    "rights acceptance cannot be inferred or auto-accepted for another profile",
+    "derivative authorization cannot be inferred from AI training permission",
+    "media/storage publication does not create physical storage-provider authority",
+    "generation success never means registration, recording activation or catalog publication success",
+    "release publication does not imply settlement, royalty payment or public-testnet deployment"
+  ],
+  "level1": {
+    "required": [
+      "hz/generate npm qualify",
+      "HZ-GCA-7 targeted verifier",
+      "retained HZ-GCA-4 provenance verifier",
+      "retained HZ-GCA-5 project/storage verifier",
+      "retained HZ-GCA-6 Generate Studio verifier",
+      "420Hz web verifier"
+    ]
+  },
+  "level2": {
+    "reason": "HZ-GCA-7 closes the Generate milestone (HZ-GCA-2 through HZ-GCA-7) and introduces the first end-to-end Creative registration/publication integration",
+    "retainedAppChecks": [
+      "HZ-GCA-2 through HZ-GCA-7 targeted verifiers",
+      "complete generation/project/register-publish Node suite",
+      "420Hz web verifier",
+      "targeted CreativeKernelAcceptance420 Foundry suite",
+      "Decision #10 deterministic Creative fixture generation",
+      "Creative reference indexer build and projection tests"
+    ],
+    "repositoryWide": false,
+    "fullSolidityInventoryDeferredToLevel3": true
+  },
+  "invariants": [
+    "HZGCA7-001 Register & Publish requires a saved COMPLETE take containing MIX",
+    "HZGCA7-002 Creator Profile creation/selection is owner-authorized",
+    "HZGCA7-003 Work begins PROVISIONAL and activates only after finalized 10000-bps rights",
+    "HZGCA7-004 contributor credits are explicit records and accepted status is preserved",
+    "HZGCA7-005 every initial rights holder explicitly accepts before finalization",
+    "HZGCA7-006 Recording registration requires ACTIVE Work",
+    "HZGCA7-007 derivative Recording source/authorization requirements fail closed",
+    "HZGCA7-008 AI training permission never substitutes for Creative transformation permission",
+    "HZGCA7-009 Recording activates only after finalized independent Recording rights",
+    "HZGCA7-010 media manifest/storage publication occurs only after Recording activation",
+    "HZGCA7-011 exact HZ-GCA-4 provenance commitment is retained through Work and Recording",
+    "HZGCA7-012 publication finalizes immutable Creator/Work/Recording provenance linkage",
+    "HZGCA7-013 AI disclosure remains unchanged from generation provenance into published release metadata",
+    "HZGCA7-014 Release starts DRAFT and publishes only with ACTIVE Recording and media",
+    "HZGCA7-015 generation success never implies registration/publication success",
+    "HZGCA7-016 failed orchestration is retryable without duplicate Work/Recording/Release identity",
+    "HZGCA7-017 repeated successful publication request is idempotent",
+    "HZGCA7-018 local qualification infrastructure creates no deployed-chain, storage, settlement or governance authority"
+  ],
+  "limitations": [
+    "no public-testnet or production Creative transaction is claimed",
+    "no Wallet signing or deployed address is introduced by the local coordinator",
+    "deterministic IDs are local qualification identities, not on-chain numeric IDs",
+    "rollback means publication is withheld and partial-stage references are retained/resumable; immutable canonical writes are not falsely deleted"
+  ],
+  "exitCriteria": [
+    "create or select Creator Profile",
+    "register and activate Work after accepted/finalized rights",
+    "register contributor credits",
+    "review/accept/finalize Work and Recording rights splits",
+    "register and activate Recording",
+    "fail-closed derivative/source authorization checks",
+    "retain immutable generation provenance commitment",
+    "publish AI disclosure metadata",
+    "publish media manifest and storage source metadata",
+    "create and publish catalog Release",
+    "failure/retry behavior prevents generation success from implying registration success",
+    "one complete Generate -> Work -> Recording -> Release flow passes on repository/local qualification infrastructure",
+    "Level 1 exact-head qualification passes",
+    "Generate milestone Level 2 retained app integration passes"
+  ],
+  "nextCanonicalStep": "HZ-GCA-8 — Community identity and social graph"
+}

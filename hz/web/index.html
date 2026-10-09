@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/styles.css">
   <script src="/runtime-config.js"></script>
   <script src="/app.js" defer></script>
+  <script type="module" src="/generate-studio.mjs"></script>
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
@@ -24,6 +25,11 @@
       </span>
     </a>
     <nav class="nav" aria-label="Primary">
+      <a href="#generate">Generate</a>
+      <a href="#community">Community</a>
+      <a href="#charts">Charts</a>
+      <a href="#awards">Awards</a>
+      <a href="#creators">Creator Studio</a>
       <a href="#discover">discover</a>
       <a href="#artists">artists</a>
       <a href="#streaming">streaming</a>
@@ -39,7 +45,8 @@
         <h1>music without the black box.</h1>
         <p class="lede">420Hz is the music layer of 420 Integrated: artist profiles, releases, playback, discovery, rights, streaming settlements and royalty routing built around verifiable protocol state.</p>
         <div class="hero-actions">
-          <a class="button primary" href="#discover">explore 420Hz</a>
+          <a class="button primary generate-cta" href="#generate">Generate your own song</a>
+          <a class="button secondary" href="#discover">explore 420Hz</a>
           <button id="publishButton" class="button secondary" type="button" disabled>publish music</button>
         </div>
         <div class="network-pill" id="networkPill" role="status" aria-live="polite">
@@ -53,6 +60,131 @@
           <img class="hero-logo" src="/420hz-logo.svg" alt="420Hz — music, nature, higher, you">
           <div class="brand-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
+      </div>
+    </section>
+
+    <section id="generate" class="section studio-section" aria-labelledby="generateHeading">
+      <div class="section-heading">
+        <p class="eyebrow">generate studio</p>
+        <h2 id="generateHeading">Generate your own song.</h2>
+        <p>Create private development takes through the qualified mock/dev workflow. Nothing here registers, publishes, settles, or exposes your drafts publicly.</p>
+      </div>
+
+      <div id="generateStudio" class="studio-shell">
+        <div class="studio-status-row">
+          <span class="studio-badge">pre-testnet development flow</span>
+          <span id="studioStatus" role="status" aria-live="polite">ready to start</span>
+        </div>
+
+        <section id="studioLanding" class="studio-panel" aria-labelledby="studioLandingHeading">
+          <h3 id="studioLandingHeading">start a private generation project</h3>
+          <p>Compose a prompt, add optional lyrics, tune the musical controls, inspect cost/capacity, then generate two development takes for comparison.</p>
+          <button id="startGenerateButton" class="button primary" type="button">start generating</button>
+        </section>
+
+        <section id="studioComposer" class="studio-panel" hidden aria-labelledby="composerHeading">
+          <div class="studio-panel-heading">
+            <div><p class="step-label">01 • compose</p><h3 id="composerHeading">prompt & lyrics</h3></div>
+            <div class="quote-card" aria-label="Development quote and capacity">
+              <strong id="quotePrice">0.42 $420</strong>
+              <span id="quoteCapacity">4 slots • queue 0</span>
+              <small id="quoteModel">mock:music @ 1.0.0 • development projection</small>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label class="field span-2">song prompt
+              <textarea id="songPrompt" class="studio-input" rows="4" maxlength="2000" placeholder="slow distorted grunge song about a motel at dawn"></textarea>
+            </label>
+            <label class="field span-2">lyrics <span class="optional">(optional)</span>
+              <textarea id="songLyrics" class="studio-input" rows="7" maxlength="12000" placeholder="write or paste lyrics here"></textarea>
+            </label>
+            <label class="field">mode
+              <select id="songMode" class="studio-input">
+                <option value="VOCAL">vocal</option>
+                <option value="INSTRUMENTAL">instrumental</option>
+              </select>
+            </label>
+            <label class="field">duration
+              <select id="songDuration" class="studio-input">
+                <option value="120">2:00</option>
+                <option value="180" selected>3:00</option>
+                <option value="240">4:00</option>
+                <option value="300">5:00</option>
+              </select>
+            </label>
+          </div>
+
+          <details class="advanced-controls">
+            <summary>advanced music controls</summary>
+            <div class="form-grid">
+              <label class="field">genres
+                <input id="songGenres" class="studio-input" type="text" placeholder="grunge, alternative">
+              </label>
+              <label class="field">styles
+                <input id="songStyles" class="studio-input" type="text" placeholder="lo-fi, dynamic">
+              </label>
+              <label class="field">moods
+                <input id="songMoods" class="studio-input" type="text" placeholder="melancholy, tense">
+              </label>
+              <label class="field">instrumentation
+                <input id="songInstrumentation" class="studio-input" type="text" placeholder="guitar, bass, drums">
+              </label>
+            </div>
+          </details>
+
+          <div class="studio-actions">
+            <label class="failure-toggle"><input id="simulateFailure" type="checkbox"> simulate provider failure</label>
+            <button id="generateSongButton" class="button primary" type="button" disabled>generate development takes</button>
+          </div>
+        </section>
+
+        <section id="studioProgress" class="studio-panel" hidden aria-labelledby="progressHeading">
+          <p class="step-label">02 • generation</p>
+          <h3 id="progressHeading">creating private takes</h3>
+          <progress id="generationProgress" max="100" value="0" aria-label="Generation progress"></progress>
+          <p><strong id="generationProgressText">0%</strong> • provider-neutral development execution</p>
+          <button id="cancelGenerationButton" class="button ghost" type="button">cancel generation</button>
+        </section>
+
+        <section id="studioFailure" class="studio-panel failure-panel" hidden aria-labelledby="failureHeading">
+          <p class="step-label">failure / recovery</p>
+          <h3 id="failureHeading">generation did not complete</h3>
+          <p><strong id="failureCode">—</strong> <span id="failureMessage"></span></p>
+          <p>refund state: <span id="refundState">not applicable</span></p>
+          <button id="retryGenerationButton" class="button secondary" type="button">retry exact request</button>
+        </section>
+
+        <section id="studioComparison" class="studio-panel" hidden aria-labelledby="compareHeading">
+          <p class="step-label">03 • compare</p>
+          <h3 id="compareHeading">A/B take comparison</h3>
+          <p class="fine-print">Development artifacts are represented by qualified mock/dev references. No public media gateway URL is fabricated.</p>
+          <div id="takeCards" class="take-grid" aria-live="polite"></div>
+          <div class="studio-actions">
+            <button id="saveTakeButton" class="button primary" type="button">save selected take</button>
+            <button id="regenerateButton" class="button secondary" type="button">regenerate</button>
+            <button id="remixTakeButton" class="button secondary" type="button">remix selected take</button>
+          </div>
+        </section>
+
+        <section id="studioProvenance" class="studio-panel" hidden aria-labelledby="provenanceHeading">
+          <p class="step-label">04 • provenance</p>
+          <h3 id="provenanceHeading">provenance & disclosure</h3>
+          <dl class="provenance-grid">
+            <div><dt>provider / model</dt><dd id="provProvider">—</dd></div>
+            <div><dt>AI disclosure</dt><dd id="provDisclosure">—</dd></div>
+            <div><dt>result commitment</dt><dd id="provCommitment">—</dd></div>
+            <div><dt>visibility</dt><dd>private development project</dd></div>
+          </dl>
+        </section>
+
+        <section id="registerPublishPanel" class="studio-panel publish-handoff" hidden aria-labelledby="publishHandoffHeading">
+          <p class="step-label">05 • explicit handoff</p>
+          <h3 id="publishHandoffHeading">Register & Publish</h3>
+          <p>Generation success does not register a Work, create a Recording, publish media, or create a release. Save a complete take first, then hand it to the separately qualified HZ-GCA-7 flow.</p>
+          <button id="registerPublishButton" class="button primary" type="button" disabled>Register & Publish</button>
+          <p id="publishHandoffStatus" class="fine-print" role="status" aria-live="polite">No transaction will be submitted by this HZ-GCA-6 development flow.</p>
+        </section>
       </div>
     </section>
 
@@ -100,6 +232,39 @@
           <p>The public catalog is a non-authoritative projection that can be rebuilt from canonical event history.</p>
         </article>
       </div>
+    </section>
+
+    <section id="community" class="section product-preview" aria-labelledby="communityHeading">
+      <div class="section-heading"><p class="eyebrow">community • pre-testnet</p><h2 id="communityHeading">Follow the music, not the noise.</h2>
+      <p>Follows, favorites, playlists and sharing are implemented in the 420Hz community domain. Authenticated community writes and live feeds are not available on this deployment.</p></div>
+      <div class="empty-state" role="status"><strong>Community coming with verified testnet services</strong><span>Live follows, playlists, reports and personalized feeds are unavailable. No real account activity is shown.</span></div>
+    </section>
+    <section id="charts" class="section product-preview" aria-labelledby="chartsHeading">
+      <div class="section-heading"><p class="eyebrow">charts • pre-testnet</p><h2 id="chartsHeading">Discovery with verifiable signals.</h2>
+      <p>Charts use source-qualified public listening activity and rebuildable snapshots. Live rankings cannot be shown until a finalized Indexer checkpoint is available.</p></div>
+      <div class="empty-state" role="status"><strong>Charts awaiting verified data</strong><span>No rankings, plays or trending counts are fabricated for this preview.</span></div>
+    </section>
+    <section id="awards" class="section product-preview" aria-labelledby="awardsHeading">
+      <div class="section-heading"><p class="eyebrow">420Hz awards • pre-testnet</p><h2 id="awardsHeading">Celebrate the work. Preserve the history.</h2>
+      <p>Eligibility, nominations, voting and finalized award history follow the 420Hz Awards domain rules. Voting and nominations require verified authority and a live season.</p></div>
+      <div id="currentAwardsSeason" class="season-module" aria-label="Current Awards season" role="status">
+        <strong>Current Awards season</strong>
+        <p id="awardsSeasonState">No verified live season is available.</p>
+        <span class="studio-badge">Pre-testnet • nominations and voting unavailable</span>
+        <button type="button" class="button secondary" disabled aria-label="Nominations unavailable until testnet">Nominate — testnet required</button>
+        <button type="button" class="button secondary" disabled aria-label="Voting unavailable until testnet">Vote — testnet required</button>
+      </div>
+    </section>
+    <section id="disclosure" class="section product-preview" aria-labelledby="disclosureHeading">
+      <div class="section-heading"><p class="eyebrow">recording provenance</p><h2 id="disclosureHeading">Know how the song was made.</h2>
+      <p>Generated releases carry source-bound disclosure metadata. These labels explain the available categories; they are not live recording claims.</p></div>
+      <div class="disclosure-legend" aria-label="AI disclosure class legend">
+        <span class="disclosure-badge" data-disclosure="HUMAN">Human</span>
+        <span class="disclosure-badge" data-disclosure="AI_ASSISTED">AI assisted</span>
+        <span class="disclosure-badge" data-disclosure="AI_GENERATED">AI generated</span>
+        <span class="disclosure-badge" data-disclosure="AI_DERIVATIVE">AI derivative</span>
+      </div>
+      <p class="fine-print">When live public recordings are available, each recording must display its actual canonical disclosure class.</p>
     </section>
 
     <section id="artists" class="section split">

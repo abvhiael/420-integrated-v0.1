@@ -1,0 +1,335 @@
+{
+  "schema": "420hz-gca-storage-retention-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.8",
+  "title": "Define storage & retention rules",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "storageClasses": [
+    {
+      "class": "EPHEMERAL_PROVIDER_PRIVATE",
+      "owner": "420AI/provider runtime",
+      "content": "private execution inputs only",
+      "encrypted": true,
+      "offChain": true
+    },
+    {
+      "class": "HZ_PRIVATE_PRIMARY",
+      "owner": "420Hz application/private object store",
+      "content": "projects, prompts, lyrics drafts, private audio/stems, draft metadata",
+      "encrypted": true,
+      "offChain": true
+    },
+    {
+      "class": "HZ_PRIVATE_ARCHIVE",
+      "owner": "420Hz archival tier",
+      "content": "inactive/pinned private project artifacts awaiting expiry/export/deletion",
+      "encrypted": true,
+      "offChain": true
+    },
+    {
+      "class": "PUBLIC_MEDIA",
+      "owner": "canonical publication/storage path",
+      "content": "selected published media/artifacts",
+      "encrypted": false,
+      "offChain": true
+    },
+    {
+      "class": "PUBLIC_COMMITMENT_HISTORY",
+      "owner": "canonical chain/product history",
+      "content": "hashes, IDs, provenance/disclosure/award/public-history commitments",
+      "encrypted": false,
+      "offChain": false
+    },
+    {
+      "class": "SECURITY_AUDIT_METADATA",
+      "owner": "420Hz/operator",
+      "content": "redacted access/security/operations metadata only",
+      "encrypted": true,
+      "offChain": true
+    }
+  ],
+  "retentionPolicies": [
+    {
+      "id": "provider-private-payload",
+      "appliesTo": [
+        "promptText",
+        "privateLyricsDraft",
+        "referenceAudio",
+        "private execution payload"
+      ],
+      "storageClass": "EPHEMERAL_PROVIDER_PRIVATE",
+      "maxRetention": "24 hours",
+      "deleteTrigger": "earlier of job terminal cleanup when no longer needed or expiry",
+      "deletionSla": "immediate on expiry/access; purge on next cleanup cycle",
+      "source": "services/420ai-provider/src/private-payload-store.js default maxRetentionMs = 24h",
+      "rule": "420Hz may request a shorter period but never a longer provider-runtime private-payload lifetime"
+    },
+    {
+      "id": "failed-cancelled-generation-private",
+      "appliesTo": [
+        "failed/cancelled prompts",
+        "failed/cancelled reference audio",
+        "failed/cancelled draft outputs/stems"
+      ],
+      "storageClass": "HZ_PRIVATE_PRIMARY",
+      "maxRetention": "7 days after terminal FAILED/CANCELLED",
+      "deleteTrigger": "terminal lifecycle plus no explicit user save/export/legal hold",
+      "deletionSla": "primary private bytes deleted within 24 hours after retention expiry; replicas within 7 days; backups within 30 days",
+      "rule": "failed/cancelled data must not silently become long-lived project storage"
+    },
+    {
+      "id": "unsaved-generated-takes",
+      "appliesTo": [
+        "GenerationOutput",
+        "GenerationArtifact",
+        "draftOutputAudio",
+        "privateStems"
+      ],
+      "storageClass": "HZ_PRIVATE_PRIMARY",
+      "maxRetention": "30 days after generation unless explicitly saved/pinned into an active project",
+      "deleteTrigger": "retention expiry or user deletion",
+      "deletionSla": "primary within 24 hours; replicas within 7 days; backups within 30 days",
+      "rule": "selected/pinned artifacts may move to active-project retention"
+    },
+    {
+      "id": "active-project-private",
+      "appliesTo": [
+        "GenerationProject",
+        "GenerationIntent",
+        "privateLyricsDraft",
+        "saved outputs",
+        "saved stems",
+        "project metadata"
+      ],
+      "storageClass": "HZ_PRIVATE_PRIMARY",
+      "maxRetention": "365 days after last authenticated project activity unless refreshed by user activity/export/save policy",
+      "deleteTrigger": "365 days inactivity, explicit delete, or account/project closure",
+      "deletionSla": "logical access disabled immediately; primary bytes within 24 hours; replicas within 7 days; backups within 30 days",
+      "rule": "warn/notify before inactivity expiry where notification capability is available; no automatic public transition"
+    },
+    {
+      "id": "archived-project-private",
+      "appliesTo": [
+        "archived GenerationProject private payloads"
+      ],
+      "storageClass": "HZ_PRIVATE_ARCHIVE",
+      "maxRetention": "30 days after archive/expiry transition",
+      "deleteTrigger": "archive grace expiry or explicit delete",
+      "deletionSla": "primary/archive bytes within 24 hours after grace expiry; replicas within 7 days; backups within 30 days",
+      "rule": "archive is a deletion grace tier, not indefinite storage"
+    },
+    {
+      "id": "export-package",
+      "appliesTo": [
+        "user-generated export archives"
+      ],
+      "storageClass": "HZ_PRIVATE_PRIMARY",
+      "maxRetention": "24 hours after export package creation",
+      "deleteTrigger": "expiry or explicit download-complete deletion",
+      "deletionSla": "primary within 24 hours of expiry; no backup required",
+      "rule": "export URLs/tokens are single-purpose, time-bounded and access-controlled"
+    },
+    {
+      "id": "private-consent-evidence",
+      "appliesTo": [
+        "voiceConsentEvidencePayload",
+        "private rights/consent evidence copied into 420Hz"
+      ],
+      "storageClass": "HZ_PRIVATE_PRIMARY",
+      "maxRetention": "30 days after the gated action completes unless a live dispute/evidence hold requires longer",
+      "deleteTrigger": "retention expiry, source revocation, or explicit delete where policy permits",
+      "deletionSla": "primary within 24 hours; replicas within 7 days; backups within 30 days",
+      "rule": "prefer qualified external consent references/commitments over copying raw evidence"
+    },
+    {
+      "id": "dispute-evidence-hold",
+      "appliesTo": [
+        "private evidence needed for an accepted challenge/appeal"
+      ],
+      "storageClass": "HZ_PRIVATE_ARCHIVE",
+      "maxRetention": "through the canonical challenge/appeal window plus 30 days",
+      "deleteTrigger": "finality plus 30-day post-resolution grace, unless another binding legal/policy hold applies",
+      "deletionSla": "primary/archive within 24 hours after hold expiry; replicas within 7 days; backups within 30 days",
+      "rule": "hold is case-scoped and cannot retain unrelated project payloads"
+    },
+    {
+      "id": "security-audit-metadata",
+      "appliesTo": [
+        "redacted access logs",
+        "security events",
+        "retention/deletion receipts",
+        "provider access audit metadata"
+      ],
+      "storageClass": "SECURITY_AUDIT_METADATA",
+      "maxRetention": "90 days",
+      "deleteTrigger": "age expiry unless active incident/dispute requires a scoped hold",
+      "deletionSla": "delete/compact within 7 days after expiry; backups within 30 days",
+      "rule": "must not contain protected raw payloads, credentials or private media"
+    },
+    {
+      "id": "deleted-community-private-state",
+      "appliesTo": [
+        "private favorites",
+        "private playlists",
+        "private community preferences"
+      ],
+      "storageClass": "HZ_PRIVATE_PRIMARY",
+      "maxRetention": "30 days after deletion/tombstone",
+      "deleteTrigger": "explicit delete/tombstone",
+      "deletionSla": "hidden immediately; primary bytes within 24 hours where feasible; replicas within 7 days; backups within 30 days",
+      "rule": "public derived projections must stop presenting deleted private state immediately"
+    },
+    {
+      "id": "published-media",
+      "appliesTo": [
+        "selected public Recording media",
+        "published artwork/stems only when intentionally published"
+      ],
+      "storageClass": "PUBLIC_MEDIA",
+      "maxRetention": "while canonical publication/storage agreement remains active or until withdrawal/depublication policy applies",
+      "deleteTrigger": "canonical withdrawal/depublication/storage-policy action",
+      "deletionSla": "implementation-specific to owning canonical storage agreement; 420Hz must stop serving immediately when canonical availability says unavailable",
+      "rule": "420Hz does not claim deletion authority over storage it does not own"
+    },
+    {
+      "id": "public-history",
+      "appliesTo": [
+        "published provenance commitments",
+        "disclosure commitments",
+        "native WorkId/RecordingId references",
+        "final AwardResult/AwardBadge history",
+        "canonical transaction/event history"
+      ],
+      "storageClass": "PUBLIC_COMMITMENT_HISTORY",
+      "maxRetention": "indefinite immutable/history-preserving",
+      "deleteTrigger": "none for immutable canonical history; mutable presentation may hide/restrict where canonical policy allows",
+      "deletionSla": "not applicable to immutable history",
+      "rule": "user deletion of private bytes must never be misrepresented as deletion of immutable canonical commitments/history"
+    }
+  ],
+  "deletionSemantics": {
+    "immediateEffects": [
+      "revoke application access and public/private serving paths immediately",
+      "issue a tombstone/deletion marker for application-controlled objects",
+      "revoke provider/storage access grants where controlled by 420Hz",
+      "stop Search/Indexer/Notifications from presenting deleted private/unlisted state"
+    ],
+    "boundedPhysicalDeletion": [
+      "primary application-controlled private bytes: <=24h",
+      "replicas/caches/CDN-private copies: <=7d",
+      "ordinary backups: <=30d",
+      "provider execution payloads: <=24h absolute maximum and preferably earlier",
+      "export packages: <=24h"
+    ],
+    "exceptions": [
+      "immutable canonical chain/product commitments/history",
+      "independently controlled external systems with their own authoritative retention",
+      "case-scoped dispute/evidence hold through accepted challenge/appeal period plus 30d",
+      "lawful/binding external retention obligations, which must be separately documented rather than silently extending ordinary retention"
+    ],
+    "antiResurrection": [
+      "deletion/tombstone wins over stale cache, replica, retry, replay and restore",
+      "restored backups must reapply deletion/tombstone ledger before objects become readable",
+      "Indexer/Search rebuilds must not resurrect objects whose source state is deleted/private/unlisted",
+      "provider retry must not restore expired private payloads from local state",
+      "recreated content receives a new object/version identity unless canonical object semantics explicitly require restoration"
+    ]
+  },
+  "quotaRules": [
+    "quota accounting is per account/project and separates private primary bytes, archived bytes and published-media references",
+    "configured byte/count limits remain deployment configuration and are not invented as protocol constants in HZ-GCA-1.8",
+    "before generation/upload would exceed quota, fail closed or require explicit cleanup/plan change; never silently discard unrelated saved work",
+    "failed/cancelled/expired data is eligible for cleanup before active saved/pinned project data",
+    "published canonical media/history is never silently deleted merely to satisfy a private-project quota",
+    "user-visible usage must distinguish storage actually controlled by 420Hz from external canonical storage references"
+  ],
+  "archiveExportRules": [
+    "archive is private, encrypted and time-bounded",
+    "export must include user-owned 420Hz project metadata and eligible private artifacts plus canonical reference IDs/commitments where useful",
+    "export does not disclose provider credentials, wallet secrets, unrelated users' private data or inaccessible source evidence",
+    "export package access is authenticated and expires within 24h",
+    "archive/export does not create public visibility or new rights"
+  ],
+  "providerRules": [
+    "420AI EncryptedPayloadStore420 maxRetentionMs defaults to 24h and rejects longer requested expiry windows",
+    "420Hz must not configure provider private payload retention above the qualified provider-runtime maximum",
+    "provider runtime plaintext is not persisted in workflow state",
+    "payload access is assignment scoped and expiration deletes/denies access",
+    "provider/state recovery may retain non-secret signed manifests/receipts/commitments for idempotency without retaining plaintext inputs",
+    "terminal cleanup must prefer deletion as soon as the private payload is no longer needed for accepted verification/dispute semantics"
+  ],
+  "storageAuthorityRules": [
+    "420Hz owns only application-controlled private project/archive/export stores and their deletion ledger",
+    "420ResourceProtocol/420Store or other canonical storage services retain authority over their own agreements, proofs and object references",
+    "a StorageObjectRef/manifest is a reference, not proof that 420Hz can physically delete all external replicas",
+    "published media deletion/availability follows the owning canonical storage/publication policy",
+    "immutable chain commitments and Creative IDs are historical references and are not deleted by private-data erasure"
+  ],
+  "backupRecoveryRules": [
+    "ordinary private backups expire within 30 days",
+    "restore procedures must replay deletion/tombstone state before serving restored objects",
+    "backups must preserve encryption and access controls equivalent to primary private storage",
+    "backups must not become a hidden retention bypass for provider payloads whose maximum is 24h",
+    "deletion receipts/metrics may be retained as redacted audit metadata without payload contents"
+  ],
+  "failureRules": [
+    "attempt to configure provider private-payload retention above 24h fails closed",
+    "expired provider payload access fails closed and triggers deletion",
+    "quota exhaustion cannot silently delete saved/pinned or published content",
+    "restore that cannot reconcile deletion/tombstone state fails closed before serving private objects",
+    "deletion request that cannot revoke serving/indexing visibility immediately is treated as degraded and must not report success",
+    "private payload retained beyond its applicable policy without a documented scoped hold is invalid",
+    "backup retention above 30 days for ordinary private application data is invalid absent a separately documented binding hold",
+    "Search/Indexer/Notifications resurrection of deleted private state is invalid",
+    "deletion of private application data cannot be represented as erasure of immutable public canonical history"
+  ],
+  "invariants": [
+    "HZGCA-STORE-001 provider private execution payload retention never exceeds the qualified 24-hour 420AI runtime maximum",
+    "HZGCA-STORE-002 failed/cancelled private generation payloads expire within 7 days absent explicit save/export/scoped hold",
+    "HZGCA-STORE-003 unsaved generated takes/stems expire within 30 days",
+    "HZGCA-STORE-004 active saved private projects expire after 365 days inactivity unless refreshed under explicit user policy",
+    "HZGCA-STORE-005 archive grace is bounded to 30 days and is not indefinite storage",
+    "HZGCA-STORE-006 generated export packages expire within 24 hours",
+    "HZGCA-STORE-007 application-controlled deletion revokes access immediately and removes primary private bytes within 24 hours, replicas within 7 days and ordinary backups within 30 days",
+    "HZGCA-STORE-008 backup restore cannot resurrect deleted/tombstoned private objects",
+    "HZGCA-STORE-009 Search/Indexer/Notifications cannot resurrect or broaden visibility of deleted/private/unlisted state",
+    "HZGCA-STORE-010 dispute/evidence retention is scoped to the accepted case/window plus a bounded 30-day post-finality grace",
+    "HZGCA-STORE-011 raw consent evidence is minimized and expires under bounded private retention unless a scoped hold applies",
+    "HZGCA-STORE-012 quota exhaustion never silently destroys saved/pinned work, canonical published media or immutable history",
+    "HZGCA-STORE-013 public published media follows canonical storage/publication authority rather than 420Hz inventing physical-deletion control",
+    "HZGCA-STORE-014 immutable provenance/disclosure/award/chain history survives private-byte deletion as historical commitments only",
+    "HZGCA-STORE-015 provider recovery may preserve nonsecret commitments/receipts but not revive expired plaintext payloads",
+    "HZGCA-STORE-016 private backups preserve encryption/access controls and never bypass the provider 24-hour payload maximum",
+    "HZGCA-STORE-017 retention/deletion receipts and security metadata contain no protected payload contents",
+    "HZGCA-STORE-018 storage/retention policy creates no new rights, identity, payment, governance, storage-provider or protocol authority"
+  ],
+  "exitCriteria": [
+    "storage tiers and authority boundaries are explicit",
+    "provider/private/project/output/archive/export/evidence/audit/public-history retention periods are explicit",
+    "failed/cancelled/abandoned project cleanup is explicit",
+    "deletion/tombstone/replica/backup/anti-resurrection behavior is explicit",
+    "quota, archive and export behavior is explicit",
+    "canonical public-history and external-storage deletion exceptions are explicit without overclaiming authority",
+    "machine verifier enforces bounded durations, provider 24h maximum, deletion SLAs and anti-resurrection invariants",
+    "no ABI, deployment, live provider or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.9 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "hz/config/gca-privacy-v1.json",
+    "services/420ai-provider/src/private-payload-store.js",
+    "services/420ai-provider/src/runtime.js",
+    "services/420ai-provider/README.md",
+    "scripts/verify-420ai-provider-runtime.py",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/compute-market/CMP-0.10-DISPUTES-PRIVACY-AND-SECURITY.md",
+    "docs/compute-market/CMP-0.11-CLIENT-NODE-AND-420AI-INTEGRATION.md",
+    "docs/audit/420RESOURCE-AUDIT-REPORT.md",
+    "docs/420SEARCH-GENESIS-CLOSEOUT.md",
+    "docs/420NOTIFICATIONS.md"
+  ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Qualify retained Commerce/Market/Pay tests and the distinct governed refund extension.
+"""Qualify retained Market/Pay, governed refund and Arbitration protocol boundary tests.
 Keep the two independent compilation closures isolated to diagnose via-IR failures
 without skipping either inventory or running the repository-wide Foundry suite.
 """
@@ -11,6 +11,7 @@ groups = {
         'PayAudit3Lifecycle420.t.sol', 'PayAudit4SettlementAndAccounting420.t.sol',
         'PaymentAtomicSettlement420.t.sol', 'PayFocusedHardening420.t.sol'],
     'funded-refunds': ['RefundManager420Fuzz.t.sol', 'RefundManager420Funded.t.sol'],
+    'arbitration': ['ArbitrationGenesis420.t.sol', 'ArbitrationDeploymentBinding420.t.sol'],
 }
 def closure(tests):
     files = set()

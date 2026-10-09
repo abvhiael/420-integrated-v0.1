@@ -97,24 +97,28 @@ contract PlantRegistry {
     bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.ENGINE_BIND.V1");
     event EmergencyStateBound(address indexed emergencyState);
 
-    function bindEmergencyState(address candidate) external {
+    function bindEmergencyState(
+        address candidate
+    ) external {
         if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
         authorization.requireAuthorized(
             AuthorizationRequest(
-                msg.sender, ModuleIds.PLANT_REGISTRY,
-                ActionIds.PLANT_BIND_EMERGENCY,
-                EMERGENCY_BIND_SCOPE, 0
+                msg.sender, ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, EMERGENCY_BIND_SCOPE, 0
             )
         );
-        if (IEmergencyState(candidate).authorizationRoot() != address(authorization)
-            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
-            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
-            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false) revert HCInvalidState();
+        if (
+            IEmergencyState(candidate).authorizationRoot() != address(authorization)
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false
+        ) revert HCInvalidState();
         emergencyState = IEmergencyState(candidate);
         emit EmergencyStateBound(candidate);
     }
 
-    function _requireUnrestricted(bytes32 domain) private view {
+    function _requireUnrestricted(
+        bytes32 domain
+    ) private view {
         if (address(emergencyState) == address(0) || emergencyState.isRestricted(domain)) {
             revert HCEmergencyRestrictionActive(domain);
         }

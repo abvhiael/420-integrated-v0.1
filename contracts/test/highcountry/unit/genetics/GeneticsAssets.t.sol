@@ -38,8 +38,12 @@ contract GeneticsAssetsTest {
         MockCanonicalPhenotypeSources proven = new MockCanonicalPhenotypeSources(
             address(auth), address(genomes), keccak256("asset:genome"), keccak256("traits"), 12, 9
         );
-        _grant(ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE,
-            phenotypes.BIND_SCOPE(), keccak256("phenotype:bind"));
+        _grant(
+            ModuleIds.PHENOTYPE_REGISTRY,
+            ActionIds.PHENOTYPE_BIND_PROVENANCE,
+            phenotypes.BIND_SCOPE(),
+            keccak256("phenotype:bind")
+        );
         phenotypes.bindProvenanceSources(address(proven), address(proven), address(proven));
         _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES, mothers.BIND_SCOPE(), keccak256("mother:bind"));
         mothers.bindCloneRegistry(address(clones));

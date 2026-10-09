@@ -1,6 +1,6 @@
 # HZ-GCA-13 — Rewards and prize settlement: Level 1 qualification
 
-Status: **PENDING exact-SHA Level 1 CI; not COMPLETE**.
+Status: **COMPLETE — repository-local Level 1 PASS**.
 
 Canonical source: `docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md`, HZ-GCA-13.
 PR: #565; branch `feature/420hz-generate-community-awards-roadmap`.
@@ -12,8 +12,8 @@ App-scoped modified files: `hz/generate/src/award-prizes.js`, `hz/generate/test/
 Exit coverage intended: zero-prize and funded-prize accounting conservation; immutable season/category schedule, legitimate finalized result requirement, deterministic exact recipient/amount/currency/purpose/commitment binding, canonical Treasury/Grants/Pay delegated funding, eligibility/compliance gate, replay-safe provider key, partial failure and retry, privacy-minimal public accounting. External funding and actual payout remain provider-owned and are not performed by tests.
 
 Required Level 1: `npm run qualify` from `hz/generate` with exact checkout SHA assertion through dedicated workflow `.github/workflows/420hz-gca-13.yml`.
-Queued run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37868649669
-Job: `113621325022`; state QUEUED when first recorded. No CI pass asserted.
+Successful run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37868649669
+Job: `113621325022`; SUCCESS. Exact SHA assertion PASS; retained Generate/Rewards qualification 90 PASS / 0 FAIL / 0 SKIPPED / 0 CANCELLED.
 
 Important production blockers: fixture-only in-memory idempotency; no transactional durable reservation, payment ambiguity reconciliation, canonical wallet recipient authority, live sanctions/abuse attestation, collateral/funding exhaustion handling, on-chain settlement or public deployment qualification. These cannot be represented as qualified financial execution.
 

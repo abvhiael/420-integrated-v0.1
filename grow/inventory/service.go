@@ -86,7 +86,7 @@ func (s Service) Apply(ctx context.Context,scope Scope,e Entry,now time.Time) er
 	case "RECEIVE","ADJUST_IN","TRANSFER_IN","ISSUE","CONSUME","ADJUST_OUT","TRANSFER_OUT":
 	default:return ErrInvalid
 	}
-	if (e.Kind=="TRANSFER_IN" || e.Kind=="TRANSFER_OUT") && e.ReferenceID==""{return ErrInvalid}
+	if e.Kind=="TRANSFER_IN" || e.Kind=="TRANSFER_OUT"{return ErrInvalid} // Transfers are atomic paired operations only.
 	return s.Store.Apply(ctx,e)
 }
 func (s Service) Snapshot(ctx context.Context,scope Scope,facility,zone,lot string,limit int)(Snapshot,error){
@@ -136,3 +136,31 @@ func (s Service) Export(ctx context.Context,scope Scope,facility,zone,lot,jurisd
 	return Export{Jurisdiction:jurisdiction,Filename:"grow-inventory-"+lot+".csv",CSV:[]byte(output.String())},nil
 }
 var _ io.Writer = (*strings.Builder)(nil)
+
+type TransferStore interface {
+	Transfer(context.Context, Entry, Entry) error
+}
+// Transfer is an indivisible custody change between tenant-owned inventory lots.
+// Source and destination both require an active inventory-adjust grant.
+func (s Service) Transfer(ctx context.Context, scope Scope, from, to Entry, now time.Time) error {
+	if s.Store==nil || from.TenantID!=scope.TenantID || to.TenantID!=scope.TenantID ||
+		!allow(scope,from.FacilityID,from.ZoneID,security.InventoryAdjust) ||
+		!allow(scope,to.FacilityID,to.ZoneID,security.InventoryAdjust){return ErrDenied}
+	if from.LotID=="" || to.LotID=="" || from.LotID==to.LotID ||
+		from.ID=="" || to.ID=="" || from.ID==to.ID ||
+		from.Kind!="TRANSFER_OUT" || to.Kind!="TRANSFER_IN" ||
+		from.ReferenceID=="" || from.ReferenceID!=to.ReferenceID ||
+		from.IdempotencyKey=="" || to.IdempotencyKey=="" || from.IdempotencyKey==to.IdempotencyKey ||
+		len(from.IdempotencyKey)>128 || len(to.IdempotencyKey)>128 ||
+		from.Quantity<=0 || from.Quantity!=to.Quantity || math.IsNaN(from.Quantity) ||
+		math.IsInf(from.Quantity,0) || from.Quantity>1000000 ||
+		from.Actor!=scope.Principal.SubjectID || to.Actor!=scope.Principal.SubjectID ||
+		from.Reason=="" || to.Reason=="" || len(from.Reason)>500 || len(to.Reason)>500 ||
+		from.Source=="" || to.Source=="" || len(from.Source)>128 || len(to.Source)>128 ||
+		from.OccurredAt.IsZero() || to.OccurredAt.IsZero() ||
+		from.OccurredAt.After(now.Add(5*time.Minute)) || to.OccurredAt.After(now.Add(5*time.Minute)) ||
+		from.OccurredAt.Before(now.AddDate(-2,0,0)) || to.OccurredAt.Before(now.AddDate(-2,0,0)) {return ErrInvalid}
+	store,ok:=s.Store.(TransferStore)
+	if !ok{return ErrDenied}
+	return store.Transfer(ctx,from,to)
+}

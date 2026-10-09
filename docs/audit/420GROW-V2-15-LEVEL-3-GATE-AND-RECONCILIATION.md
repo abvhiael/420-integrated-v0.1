@@ -1,34 +1,49 @@
-# GROW-V2-15 — Phase closeout reconciliation and Level 3 gate
+# GROW-V2-15 — Phase reconciliation and Level 3 qualification
 
-**Canonical roadmap step:** GROW-V2-15 — Documentation, exact-SHA phase reconciliation and complete Level 3.
-**Disposition:** **IN PROGRESS / BLOCKED ON EXACT MAIN RECONCILIATION AND QUALIFICATION. NOT COMPLETE.**
+**Disposition:** IN PROGRESS — canonical full Solidity gate still running. No phase completion or PR merge is asserted until every mandatory gate passes.
 
-## Repository state and qualified prerequisite
+## Exact reconciliation
 
-- PR [#582](https://github.com/abvhiael/420-integrated-v0.1/pull/582); draft, unmerged; branch `audit/420grow-v2-01-product-decision-20261008`.
-- Last app-audit Level 1 implementation SHA: `e6049e4d3ef134afabcc43af1438ba9350c5a801` (V2-14).
-- V2-14 exact-SHA V2 fast **SUCCESS**: run 37892233748/job 113695496169; retained Grow **SUCCESS**: run 37892233870.
-- Branch pre-V2-15 HEAD: `89e203df52d89e2bb9ffe39eedd6db54e2224eb5` (V2-14 evidence only after implementation SHA).
-- Main at initial V2-15 inspection: `0ec695481fc84e6066aeae50baf6e0fd3c7f8731`.
-- Common ancestor/original PR base: `ffc6a4028676907c266714b5c1ae8ba3af9a7137`.
-- Divergence at inspection: **329 commits ahead / 84 behind**; branch changes affect 115 paths (82 `grow/`, 27 `docs/`, Go module, scripts, Grow workflow); zero direct `contracts/` source changes. Main-only updates affect 109 paths (98 added, 11 modified), including `.github/workflows/contracts-foundry.yml`, Compute Market, Indexer and project documentation; **no identical path overlaps in compared changed-file sets**. This is a path-level diagnostic, **not** proof of semantic compatibility or a merged tree.
-- PR reported GitHub mergeability `true`, but no actual merge candidate has been generated or tested.
+- PR #582: `audit/420grow-v2-01-product-decision-20261008`.
+- Reconciled implementation SHA: `d949475124c6fa07f11ec47ac8b5604e99cbab56`.
+- Main reconciliation base: `0ec695481fc84e6066aeae50baf6e0fd3c7f8731`.
+- Audit parent: `f82981a0c765cfcc3f2fa3b0eeda987ee0b652c9`; original common ancestor: `ffc6a4028676907c266714b5c1ae8ba3af9a7137`.
+- Actual local `git merge --no-ff origin/main` used the ort three-way strategy and succeeded without conflicts. Its tree `7619b62fa5d058d4c56187eff1c2a1b6667ccf7e` exactly matched GitHub's fetched PR test-merge tree. The connector published that verified tree with audit/main parents and advanced only the audit ref with `force=false` and expected-head protection. No force push or main overwrite.
+- Current main is an ancestor of the candidate; at reconciliation, divergence was 332 ahead / zero behind. Qualified Grow changes and all main-only Compute, Indexer, Commerce and CI changes were preserved.
+- No implementation repair was needed after reconciliation. Earlier V2-14 implementation qualification remains historical evidence, not a substitute for this accumulated candidate.
 
-## Phase-closeout authority and required exact-SHA work
+## Exact-SHA canonical workflows
 
-1. Perform an actual **non-forced, non-destructive three-way merge of current main into the Grow audit branch**; resolve any conflicts and reconcile changed shared Go dependencies, CI, Indexer, docs and app behavior. Do not synthesize a Git merge merely by declaring two parent SHAs or overwriting main files.
-2. Freeze and record the exact accumulated implementation/merge-candidate SHA **after** reconciliation. Any subsequent implementation, test, workflow, dependency, configuration or material requirement change invalidates it.
-3. Run the canonical **Solidity Contracts** full repository Foundry inventory **once** against that exact SHA. The checked `contracts-foundry.yml` owns full inventory; its existing classifier distinguishes Compute-only scope. Favor its canonical approximately four balanced shards. Full source/test/script coverage, static/security/invariant and bytecode-size coverage cannot be reduced for this phase boundary.
-4. Run **Genesis Address Authority** separately, verifying predeploy, frozen-address/namespace/collision/manifest and consumers. Current canonical `genesis-address-authority.yml` is explicitly address-only: do **not** duplicate Solidity Foundry.
-5. Run `qualification.yml` (420 Integrated global) and `docs-qualify.yml` (Docs/global) against the same exact SHA, including their required client/service/static/deployment checks.
-6. Run `420grow-v2-fast.yml` and retained `420grow-fast.yml` against the same candidate, including actual PostgreSQL non-superuser tenant/facility/zone checks, certificate-authenticated TLS, Go race/vet/build/gofmt, Chromium mobile/recovery, privacy, mutation, review, export and V2-14 adversarial tests. Requalify directly affected Indexer/RPC/SDK/client integrations if the main merge touches shared interfaces.
-7. Verify **real workflow run IDs, exact checkout SHA, every required job conclusion, all classified/sharded coverage and retained artifacts**. Skipped, untriggered, queued, cancelled or failed gates are **not PASS**; this branch's changed paths do not by themselves trigger the PR Solidity or Genesis workflow under their current path filters. Explicit authenticated dispatch (or a narrowly approved closeout trigger change) is required for those canonical phase gates.
-8. Preserve one Level 3 evidence file and the canonical roadmap with all results and relevant artifacts, and only then close/merge if all gates pass. Evidence-only commits after qualified candidate may inherit only if they do not change executable source/tests/workflows/dependencies/configuration/interfaces or substantive requirements.
+All jobs below verified their exact checkout; manual dispatch was used where audit path/branch policy otherwise skipped global gates. Each run URL is `https://github.com/abvhiael/420-integrated-v0.1/actions/runs/<run ID>`.
 
-## Outstanding blocker and nonclaims
+| Workflow | Run ID | Required jobs | Result |
+| --- | --- | --- | --- |
+| `contracts-foundry.yml` | 37894345957 | shards 0/1/2/3: 113702148743 / 113702148747 / 113702148763 / 113702148549; inventory/fixture job follows shards | RUNNING |
+| `genesis-address-authority.yml` | 37894383829 | cross-manifest-authority 113702273062 | PASS |
+| `qualification.yml` | 37894412174 | fault-matrix 113702364099; geth-engine 113702364380; offline-core 113702364413; production-dependencies 113702364420 | PASS — all four jobs |
+| `docs-qualify.yml` | 37894493542 | qualify 113702624780 | PASS |
+| `420grow-v2-fast.yml` | 37894293237, attempt 2 | v2-app-qualification 113702530598 | PASS — every required stage |
+| `420grow-fast.yml` | 37894293364 | canonical-definition 113701979114 | PASS — every required stage |
 
-At evidence creation, the connected GitHub actions exposed through this chat do **not** include a safe server-side three-way merge/update-branch operation, authenticated workflow-dispatch operation, or a read Git-tree primitive needed to construct and check an exact reconciled tree. As a result **no exact merge-candidate SHA exists**, and **no canonical Level 3 workflow has been launched against one**. The earlier app audit tests do not satisfy comprehensive Level 3.
+The initial Grow V2 attempt, job 113701978918, failed at browser process startup before the DevTools endpoint existed (`browser-smoke.mjs:83`), after backend/SQL/frontend tests passed. One failed-job-only retry on the identical SHA passed the complete browser and V2-14 gates without code changes. This is recorded as a transient Chromium startup failure; the failed attempt is not passing evidence.
 
-No repo-wide Foundry inventory, Genesis address authority, 420 Integrated global, Docs global, or qualified accumulated merged tree is claimed here. Do not mark V2-15 COMPLETE or merge PR #582 without those explicit results.
+Integrated PR-triggered run 37894293360 and Docs PR-triggered run 37894293327 were skipped by audit policy and are NOT counted as qualification. Their explicitly dispatched complete runs above replace those missing gates. Solidity's PR classifier, compute-fast, PR-shards and main-only monolith are intentionally inapplicable to manual Level 3; its four full CI shards and downstream inventory/fixture are the required gate. Genesis runs no duplicate Foundry inventory.
 
-**Next canonical roadmap step once V2-15 passes:** GROW-V2-16 — Live production-equivalent testnet deployment and acceptance.
+## Integration, security, deployment and documentation scope
+
+- Integrated `go test ./...` and consensus/execution builds passed on this candidate, covering the merged Go services including Indexer. Production dependencies and pinned Geth v1.17.5 engine payload acceptance passed; fault matrix and bounded soak passed.
+- Retained Grow workflow passed affected SDK consumer, public Location/service, web/static/security checks, clean build/race integration and original deployment-stage readiness preflight.
+- Accumulated V2 suite passed actual PostgreSQL ordered/checksum migrations, composite tenant FKs and forced RLS under non-superuser runtime roles; facility/zone scope, lifecycle/lineage, telemetry, equipment no-actuation/replay, cultivation, harvest planning/analytics, inventory ledger/reconciliation/exports, advice consent/revocation/human review and leased notification outbox checks.
+- Private HTTP and real TLS client-CA/certificate identity enrollment/revocation tests, membership suspension, tenant/facility/zone denial, origin/CSRF/method/path negatives, database outage confidentiality, stable mutation idempotency, Go race/vet/build/format and Chromium mobile/desktop accessibility/XSS/session recovery passed. No unresolved security failure was reported by these suites; this does not certify untested live systems.
+- Genesis passed frozen-address, manifest, namespace/collision and physical predeploy authority checks. Grow V2 adds no Genesis contract or address authority.
+- Docs passed strict MkDocs/render, generated reference/version/link/navigation/search/publication safety and retained Compute evidence checks.
+- Supplemental preservation checks on the exact local candidate: Compute ingestion syntax + 63 tests PASS; Compute website structural/security checks, build and 19 tests PASS. No new SDK/Search/RPC interface or deployment configuration changed through the merge; applicable retained consumer and global checks cover those unchanged boundaries. Live cross-service integration is not asserted.
+- `grow/web/README.md` reconciles the public-directory versus private-workspace documentation, actual private-server configuration, certificate/session prerequisites, migration/runtime role separation and release boundaries. Earlier per-step/interim evidence files describe their historical candidate; this record and the current roadmap govern phase state.
+
+## Remaining live/testnet acceptance — GROW-V2-16
+
+Production-equivalent private HTTPS/PostgreSQL deployment and encrypted backups/PITR restore drills; real certificate issuance, enrollment, rotation and revocation operations; actual tenant/browser/device acceptance; monitoring and outage recovery; live 420Identity/Wallet/Registry/Location/Storage and Notifications recipient/subscription/delivery authority; verified 420AI/Compute provider/media sanitization/model acceptance; real sensor accuracy and equipment safety remain external release gates. Internal CSV exports are not certified regulatory filing adapters. Autonomous physical actuation is not authorized or enabled by this phase qualification.
+
+**Next canonical step after all Level 3 gates pass:** GROW-V2-16 — Live production-equivalent testnet deployment and acceptance.
+
+Evidence-only documentation commits may inherit this exact implementation qualification only when they change no executable source, test, workflow, dependency, configuration, interface or substantive requirement. The exact evidence commit SHA and merge result are recorded in the PR closeout to avoid a self-referential commit hash in this file.

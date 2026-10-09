@@ -15,6 +15,7 @@ on:
       - 'grow/assistance/**'
       - 'grow/integrations/**'
       - 'grow/web/**'
+      - 'grow/dashboard/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -174,6 +175,10 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/integrations/qualify.sql
       - name: GROW-V2-13 private cultivation dashboard and mobile UX Level 1
         run: |
+          go test -count=1 ./grow/dashboard
+          go test -race -count=1 ./grow/dashboard
+          go vet ./grow/dashboard
+          test -z "$(gofmt -l grow/dashboard/*.go)"
           node --check grow/web/workspace.js
           node --test grow/web/test/workspace.test.js
           (cd grow/web && npm run qualify)

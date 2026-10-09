@@ -87,6 +87,23 @@ DO $$ BEGIN
  OR (SELECT balance FROM grow_private.inventory_lots_v2 WHERE lot_id='aaaaaaaa-0000-4000-8000-000000000011')<>4
  THEN RAISE EXCEPTION 'atomic custody move did not conserve inventory'; END IF;
 END $$;
+
+INSERT INTO grow_private.inventory_lots_v2
+(tenant_id,lot_id,facility_id,zone_id,kind,unit,label,created_by)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000020',
+'aaaaaaaa-3333-4333-8333-333333333333','aaaaaaaa-4444-4444-8444-444444444444',
+'SEED','each','discrete seeds','u');
+DO $$ BEGIN
+ BEGIN
+  INSERT INTO grow_private.inventory_ledger_v2
+  (tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,occurred_at)
+  VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000021',
+  'aaaaaaaa-0000-4000-8000-000000000020','aaaaaaaa-3333-4333-8333-333333333333',
+  'aaaaaaaa-4444-4444-8444-444444444444','RECEIVE',0.5,'invalid fractional seed','u','manual','fractional-seed',now());
+  RAISE EXCEPTION 'fractional discrete unit accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+END $$;
 COMMIT;
 SET ROLE grow_v2_test_runtime;
 BEGIN;

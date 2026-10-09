@@ -47,7 +47,7 @@ func TestMinimalAdvisoryGenerationNeverControlsEquipment(t *testing.T) {
 		Provider: "internal", Model: "advisory-v1", Text: "Investigate temperature trend",
 		Explanation: "One sensor reading is insufficient to establish a trend",
 		Limitations: "Verify sensor calibration and inspect environment manually",
-		Confidence: "LOW", CreatedAt: now}
+		Confidence:  "LOW", CreatedAt: now}
 	provider := &adviceFake{output: out}
 	s := NewWithProvider(f, verifiedProvider{})
 	got, err := s.Generate(ctx, scope("a", security.Owner), "f", "z", "j", now, provider)

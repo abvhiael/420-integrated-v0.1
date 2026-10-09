@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/MIGRATION-BOUNDARIES.md",
-      "sha256": "377aed8067e7e0a427a843185f1009bc233d56c5cd192f8281df9bc8a09c3ceb",
+      "path": "docs/highcountry/qualification/R01.4-level1.json",
+      "sha256": "65ad27e5b80bfa25bb8c79382957d9a227ff0ab6c22d6dab1e693173b6250adb",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1219,6 +1219,14 @@
     {
       "path": "docs/highcountry/HC-PA-PROGRESSIVE-ACCESS.md",
       "sha256": "2ac8f641aff13536ef8d21fd2063bef09f4abf6c54d81230781f07482d9bf96b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/MIGRATION-BOUNDARIES.md",
+      "sha256": "377aed8067e7e0a427a843185f1009bc233d56c5cd192f8281df9bc8a09c3ceb",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

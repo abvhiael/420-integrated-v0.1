@@ -355,6 +355,28 @@ export class CommerceService {
     // Governance / Arbitration alone authorizes effects. No fabricated signed transaction.
     return {kind,orderId:row.order_id,merchantId:store.merchant_id,amount:proposal?.amount??row.total,asset:row.asset,paymentId:status.paymentId??null,proposal,status:'CANONICAL_AUTHORITY_ACTION_REQUIRED',executed:false,refunded:false,disputed:false,authority:kind==='refund'?'Pay.RefundManager420':'Market.OrderRegistry420 / 420Arbitration',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
+  async merchantRefunds(actor,storeId) {
+    const {source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    const rows=this.db.all('SELECT * FROM refund_requests WHERE store_id=? ORDER BY created_at,request_id LIMIT 50',storeId);
+    const items=[];
+    for(const request of rows) {
+      const refundId='0x'+request.request_id;
+      let executed=false;
+      if(source.fundedRefund) {
+        const proof=await source.fundedRefund(refundId);
+        if(proof.executed) {
+          const evidence=proof.record;
+          requireThat(evidence.paymentId===request.payment_id&&wallet(evidence.settlementAsset)===wallet(request.asset)&&wallet(evidence.recipient)===wallet(request.recipient)&&BigInt(evidence.amount)===BigInt(request.amount)&&evidence.reasonHash===request.reason_hash,'refund_proof_mismatch',503);
+          const payment=await source.payment(bytes32(request.payment_id));
+          requireThat(BigInt(payment.refundedAmount)>=BigInt(request.payment_refunded_at_request)+BigInt(request.amount),'refund_pay_correlation',503);
+          executed=true;
+        }
+      }
+      items.push({requestId:request.request_id,refundId,paymentId:request.payment_id,orderId:request.order_id,amount:request.amount,asset:request.asset,recipient:request.recipient,reasonHash:request.reason_hash,state:executed?'FUNDED_REFUND_FINALIZED':'PENDING_GOVERNANCE_OR_UNVERIFIED',fundsReturned:executed,canonicalPayoutProof:executed,requestRecorded:true});
+    }
+    return {items,partial:rows.length===50,refundAuthority:source.fundedRefund?'FINALIZED_REFUND_MANAGER':'UNBOUND_REFUND_MANAGER',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+  }
   async merchantIntegrations(actor,storeId) {
     const {store,merchant,source}=await this.access(actor,storeId,'publish');
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);

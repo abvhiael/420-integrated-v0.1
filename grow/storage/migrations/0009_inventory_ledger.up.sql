@@ -64,4 +64,24 @@ ALTER TABLE grow_private.inventory_ledger_v2 ENABLE ROW LEVEL SECURITY;
 ALTER TABLE grow_private.inventory_ledger_v2 FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_scoped ON grow_private.inventory_ledger_v2
  USING(tenant_id=grow_private.current_tenant()) WITH CHECK(tenant_id=grow_private.current_tenant());
+-- A custody transfer commits only with precisely one matching out and one matching in.
+CREATE FUNCTION grow_private.validate_inventory_transfer_pair() RETURNS trigger
+ LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog,grow_private AS $$
+DECLARE matching integer; out_count integer; in_count integer; units integer; kinds integer; amounts integer; lots integer;
+BEGIN
+ IF NEW.kind NOT IN ('TRANSFER_IN','TRANSFER_OUT') THEN RETURN NEW; END IF;
+ SELECT count(*),count(*) FILTER(WHERE e.kind='TRANSFER_OUT'),count(*) FILTER(WHERE e.kind='TRANSFER_IN'),
+        count(DISTINCT l.unit),count(DISTINCT l.kind),count(DISTINCT e.quantity),count(DISTINCT e.lot_id)
+ INTO matching,out_count,in_count,units,kinds,amounts,lots
+ FROM grow_private.inventory_ledger_v2 e JOIN grow_private.inventory_lots_v2 l
+ ON l.tenant_id=e.tenant_id AND l.lot_id=e.lot_id
+ WHERE e.tenant_id=NEW.tenant_id AND e.reference_id=NEW.reference_id
+ AND e.kind IN ('TRANSFER_IN','TRANSFER_OUT');
+ IF matching<>2 OR out_count<>1 OR in_count<>1 OR units<>1 OR kinds<>1 OR amounts<>1 OR lots<>2 THEN
+  RAISE EXCEPTION 'unpaired or mismatched inventory transfer' USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END $$;
+CREATE CONSTRAINT TRIGGER inventory_transfer_pair AFTER INSERT ON grow_private.inventory_ledger_v2
+ DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION grow_private.validate_inventory_transfer_pair();
 COMMIT;

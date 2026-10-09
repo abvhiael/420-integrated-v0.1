@@ -11,6 +11,7 @@ import { PublicCultivationAccess } from "../../../src/highcountry/land/PublicCul
 import { HCCapacityExceeded } from "../../../src/highcountry/errors/HighCountryErrors.sol";
 import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
+import { RulesetRouter } from "../../../src/highcountry/rules/RulesetRouter.sol";
 import { RulesetRegistry } from "../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
@@ -174,7 +175,11 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
             cultivation.RULESET_BIND_SCOPE(),
             keccak256("hc6:inv:bind")
         );
-        cultivation.bindRulesetRegistry(address(rulesets));
+        RulesetRouter router = new RulesetRouter(address(auth), address(rulesets));
+        _grant(address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE,
+            cultivation.EXPRESSION_RULESET_DOMAIN(), keccak256("hc6:inv:route"));
+        router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), rulesetId);
+        cultivation.bindRulesetRegistry(address(rulesets), address(router));
         _grant(
             address(this),
             ModuleIds.GENESIS_REGISTRY,

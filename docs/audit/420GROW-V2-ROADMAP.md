@@ -1,6 +1,6 @@
 # 420Grow V2 cultivation operations roadmap
 
-**Status:** GROW-V2-01–11 COMPLETE at their required app-audit levels; GROW-V2-12 next. Accumulated V2-06–10 Level 2 qualified at V2-10. Does not overwrite GROW-01–GROW-10 and does not assert Genesis authority.
+**Status:** GROW-V2-01–12 COMPLETE at their required app-audit levels; GROW-V2-13 next. Accumulated V2-06–10 Level 2 qualified at V2-10. Does not overwrite GROW-01–GROW-10 and does not assert Genesis authority.
 
 **Decision source:** [GROW-V2-01](420GROW-V2-01-EXPANDED-PRODUCT-DECISION.md), which explicitly defines tenant-private cultivation software for lawful home, licensed small-business and commercial users. The prior public read-only FARM/BUSINESS directory remains independent. Canonical original audit is [420Grow initial roadmap](420GROW-INITIAL-AUDIT-AND-REMEDIATION-ROADMAP.md). Remaining former release/qualification work remains in [the deferred testnet ledger](420GROW-TESTNET-AND-DEFERRED-QUALIFICATION-ROADMAP.md).
 
@@ -17,7 +17,7 @@
 | GROW-V2-09 | Harvest forecasting and production analytics | COMPLETE / Level 1 — SHA `802e5f5b34fe4ab7d086cf0bae47ed522a811ec8`; V2 run 37878130176/job 113651306866 and retained Grow 37878130127/job 113651306665 SUCCESS; [evidence](420GROW-V2-09-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-10 | Inventory, traceability and compliance exports | COMPLETE / Level 1 and Level 2 accumulated V2-06–10 — implementation `5e05b171bf09edb011f6dd0f1ad8ee30f53f4fd1`; V2 run 37880126261 and Grow run 37880126176 SUCCESS; [evidence](420GROW-V2-10-LEVEL-1-AND-2-QUALIFICATION.md) |
 | GROW-V2-11 | AI-assisted analysis and human-reviewed recommendations | COMPLETE / Level 1 — implementation `f93dc2faf76809f7ba20357ef945574edf4a1b39`; V2 run 37884405196/job 113671048798 and Grow run 37884404979/job 113671048803 SUCCESS; [evidence](420GROW-V2-11-LEVEL-1-QUALIFICATION.md). Live AI/media integration deferred to V2-12/16 |
-| GROW-V2-12 | Ecosystem integrations and notifications | PLANNED / Level 1 |
+| GROW-V2-12 | Ecosystem integrations and notifications | COMPLETE / Level 1 app-owned outbox and provider-neutral interface — SHA `2981ed17555835ff6b0a2f9b039baab50eaad1a1`; V2 run 37885267845/job 113673742153 and retained Grow 37885267818/job 113673741996 SUCCESS; [evidence](420GROW-V2-12-LEVEL-1-QUALIFICATION.md). Live provider delivery/testnet integration not claimed |
 | GROW-V2-13 | Full cultivation dashboard and mobile UX | PLANNED / Level 1 |
 | GROW-V2-14 | Security, privacy, adversarial and recovery qualification | PLANNED / Level 1 |
 | GROW-V2-15 | Documentation, exact-SHA phase reconciliation and complete Level 3 | PLANNED / Level 3 |

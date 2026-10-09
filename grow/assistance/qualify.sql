@@ -65,6 +65,28 @@ DO $$ BEGIN
  WHERE job_id='aaaaaaaa-0000-4000-8000-000000000106')<>'REVOKED'
  THEN RAISE EXCEPTION 'consent withdrawal did not cancel queued AI job'; END IF;
 END $$;
+DO $$ BEGIN
+ IF (SELECT count(*) FROM grow_private.ai_consent_events
+ WHERE consent_id='aaaaaaaa-0000-4000-8000-000000000101')<>2
+ THEN RAISE EXCEPTION 'AI consent grant/revocation provenance missing'; END IF;
+ BEGIN
+  UPDATE grow_private.ai_consent_events SET new_granted=true
+  WHERE consent_id='aaaaaaaa-0000-4000-8000-000000000101';
+  RAISE EXCEPTION 'AI consent audit mutation accepted';
+ EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM='AI consent audit mutation accepted' THEN RAISE; END IF;
+ END;
+ BEGIN
+  INSERT INTO grow_private.ai_recommendations
+  (tenant_id,recommendation_id,job_id,facility_id,zone_id,provider,model,text,explanation,limitations,confidence,created_at)
+  VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000107',
+  'aaaaaaaa-0000-4000-8000-000000000106','aaaaaaaa-3333-4333-8333-333333333333',
+  'aaaaaaaa-4444-4444-8444-444444444444','trusted-test','test-model','Late advice',
+  'Observation','Human review','LOW',now());
+  RAISE EXCEPTION 'revoked AI job produced advice';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+END $$;
 COMMIT;
 SET ROLE grow_v2_test_runtime;
 BEGIN;
@@ -74,6 +96,7 @@ DO $$ BEGIN
  OR EXISTS(SELECT 1 FROM grow_private.ai_advice_jobs)
  OR EXISTS(SELECT 1 FROM grow_private.ai_recommendations)
  OR EXISTS(SELECT 1 FROM grow_private.ai_reviews)
+ OR EXISTS(SELECT 1 FROM grow_private.ai_consent_events)
  THEN RAISE EXCEPTION 'cross tenant AI information exposed'; END IF;
 END $$;
 ROLLBACK;

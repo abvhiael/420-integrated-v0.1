@@ -5,6 +5,9 @@ on:
       - 'contracts/src/highcountry/**'
       - 'contracts/test/highcountry/**'
       - 'docs/highcountry/qualification/R02.5-level1.json'
+      - 'docs/highcountry/R02.5-MOTHER-CLONE-CONSUMPTION.md'
+      - 'docs/highcountry/DEPLOYMENT-AND-TRUST.md'
+      - 'scripts/highcountry/verify-r01.py'
       - '.github/workflows/highcountry-r02-5.yml'
   workflow_dispatch:
 permissions:
@@ -48,6 +51,8 @@ jobs:
       - name: Affected High Country suites and invariants
         working-directory: contracts
         run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+      - name: High Country source/specification catalogue
+        run: python3 scripts/highcountry/verify-r01.py
       - name: Verify ABI artifacts and source semantics
         working-directory: contracts
         shell: bash

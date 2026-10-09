@@ -105,8 +105,11 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/telemetry/qualify.sql
           node --test grow/telemetry/chart.test.mjs
       - name: GROW-V2-07 safety policy, observation adapter and adversarial checks
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
         run: |
           go test -count=1 ./grow/equipment
           go test -race -count=1 ./grow/equipment
           go vet ./grow/equipment
           test -z "$(gofmt -l grow/equipment/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/equipment/qualify.sql

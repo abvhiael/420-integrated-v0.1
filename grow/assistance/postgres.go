@@ -155,3 +155,49 @@ AND ai_consents.actor_subject=EXCLUDED.actor_subject`,
 		return nil
 	})
 }
+
+func (s SQLStore) Resolve(ctx context.Context, tenant, facility, zone, jobID string) (WorkItem, error) {
+	var item WorkItem
+	err := s.transact(ctx, tenant, func(tx *sql.Tx) error {
+		var consentID, sourceID string
+		err := tx.QueryRowContext(ctx, `SELECT j.tenant_id::text,j.job_id::text,j.facility_id::text,
+j.zone_id::text,j.source_kind,j.source_id::text,j.consent_id::text
+FROM grow_private.ai_advice_jobs j
+JOIN grow_private.ai_consents c ON c.tenant_id=j.tenant_id AND c.consent_id=j.consent_id
+WHERE j.tenant_id=$1::uuid AND j.facility_id=$2::uuid AND j.zone_id=$3::uuid
+AND j.job_id=$4::uuid AND j.status='QUEUED' AND c.granted=true`,
+			tenant, facility, zone, jobID).Scan(&item.Input.TenantID, &item.Input.JobID,
+			&item.Input.FacilityID, &item.Input.ZoneID, &item.Input.SourceKind,
+			&sourceID, &consentID)
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrDenied
+		}
+		if err != nil {
+			return err
+		}
+		item.Input.ConsentID = consentID
+		item.Input.Purpose = "CULTIVATION_ADVICE"
+		item.Input.SourceID = sourceID
+		item.Observation.Kind = item.Input.SourceKind
+		switch item.Input.SourceKind {
+		case "PLANT":
+			err = tx.QueryRowContext(ctx, `SELECT state,recorded_at
+FROM grow_private.plants WHERE tenant_id=$1::uuid AND facility_id=$2::uuid
+AND zone_id=$3::uuid AND plant_id=$4::uuid`, tenant, facility, zone, sourceID).
+				Scan(&item.Observation.State, &item.Observation.ObservedAt)
+		case "OBSERVATION":
+			err = tx.QueryRowContext(ctx, `SELECT kind,unit,reading::float8,measured_at
+FROM grow_private.observations WHERE tenant_id=$1::uuid AND facility_id=$2::uuid
+AND zone_id=$3::uuid AND observation_id=$4::uuid`, tenant, facility, zone, sourceID).
+				Scan(&item.Observation.Metric, &item.Observation.Unit,
+					&item.Observation.Value, &item.Observation.ObservedAt)
+		default:
+			return ErrDenied
+		}
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrDenied
+		}
+		return err
+	})
+	return item, err
+}

@@ -13,6 +13,7 @@ type planFake struct {
 	fakeStore
 	planned []Plan
 }
+
 func (f *planFake) SavePlan(_ context.Context, p Plan) error {
 	f.planned = append(f.planned, p)
 	return nil

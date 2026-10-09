@@ -72,3 +72,16 @@ test('COM-6B signed SDK/HTTP dispute route never bypasses seller or Market autho
  assert.equal(final.items[0].state,'MARKET_DISPUTE_FINALIZED');
  await assert.rejects(()=>sdk.arbitrationPrepare(state.store.store_id,state.attempt.attemptId,{remedyHash:b32(703)}),e=>e.code==='arbitration_unavailable');
 });
+
+test('COM-6C signed SDK/HTTP notifications require merchant controller, opt-in and carry no execution authority',async t=>{
+ const f=await running(t),{store}=await checkout(f),owner=f.sdk(seller);
+ assert.equal((await owner.merchantNotificationPreferences(store.store_id)).enabled,false);
+ const consent=await owner.setMerchantNotificationPreferences(store.store_id,true);
+ assert.equal(consent.enabled,true);assert.equal(consent.externalDelivery,'NOT_CONFIGURED');
+ assert.deepEqual((await owner.merchantNotifications(store.store_id)).items,[]);
+ await assert.rejects(()=>f.sdk(attacker).merchantNotifications(store.store_id),e=>e.code==='forbidden');
+ await assert.rejects(()=>f.sdk(attacker).setMerchantNotificationPreferences(store.store_id,false),e=>e.code==='forbidden');
+ await assert.rejects(()=>f.sdk(buyer).merchantNotificationPreferences(store.store_id),e=>e.code==='forbidden');
+ const stopped=await owner.setMerchantNotificationPreferences(store.store_id,false);
+ assert.equal(stopped.enabled,false);assert.equal((await owner.merchantNotifications(store.store_id)).authoritative,false);
+});

@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/doobr-audit-1-level1.yml'
       - 'docs/audits/doobr/**'
+      - 'docs/audit/DOOBR-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md'
+      - '.github/workflows/gen-svc-3.yml'
       - 'scripts/verify-doobr-audit-2.py'
       - 'scripts/verify-doobr-audit-5.py'
       - 'scripts/verify-doobr-audit-6.py'

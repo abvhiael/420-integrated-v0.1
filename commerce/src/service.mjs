@@ -295,6 +295,51 @@ export class CommerceService {
     this.db.run('UPDATE checkout_attempts SET state=?,payment_id=?,quote_id=? WHERE attempt_id=?',state,order.paymentRef==='0x'+'0'.repeat(64)?null:order.paymentRef,null,attemptId);
     return {attemptId,orderId:a.order_id,merchantId:a.merchant_id,seller:a.seller,buyer:a.customer_scope,asset:a.asset,total:a.total,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
+  // COM-6: projections only. Canonical Pay/Market remain financial authorities.
+  async merchantOperations(actor,storeId,{offset=0,limit=25}={}) {
+    integer(offset,0,100000);integer(limit,1,100);
+    const {store,source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    const where='FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=?';
+    const count=this.db.get('SELECT COUNT(*) AS count '+where,storeId).count;
+    const rows=this.db.all('SELECT a.attempt_id,a.order_id,a.listing_id,a.listing_revision,a.quantity,a.asset,a.total,a.expires_at '+where+' ORDER BY a.attempt_id LIMIT ? OFFSET ?',storeId,limit,offset);
+    const items=[];
+    for(const row of rows){
+      const status=await this.status(actor,row.attempt_id);
+      items.push({...row,...status,canonical:true,merchantId:store.merchant_id});
+    }
+    return {items,totalCount:count,nextOffset:offset+rows.length<count?offset+rows.length:null,source:'finalized_market_pay',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+  }
+  async merchantAnalytics(actor,storeId) {
+    const data=await this.merchantOperations(actor,storeId,{offset:0,limit:100});
+    // Deliberately bounded preview; never silently present it as all-time revenue.
+    const totals={orders:data.items.length,paid:0,refunded:0,awaitingPayment:0,finalizedPaidBaseUnits:'0',finalizedRefundedBaseUnits:'0'};
+    let paid=0n,refunded=0n;
+    for(const order of data.items) {
+      if(order.paid===true){totals.paid++;paid+=BigInt(order.total);}
+      if(order.state==='REFUNDED'){totals.refunded++;refunded+=BigInt(order.total);}
+      if(['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING'].includes(order.state))totals.awaitingPayment++;
+    }
+    totals.finalizedPaidBaseUnits=paid.toString();totals.finalizedRefundedBaseUnits=refunded.toString();
+    return {totals,partial:data.nextOffset!==null,limit:100,scope:'first_100_attempts_only',assetBreakdownRequired:true,financialAuthority:'Pay/Market',provenance:data.provenance};
+  }
+  async merchantRemedy(actor,storeId,attemptId,kind) {
+    requireThat(['refund','dispute'].includes(kind),'invalid_remedy');
+    const {store,merchant,source}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    const row=this.db.get('SELECT a.* FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND a.attempt_id=?',storeId,objectID(attemptId));
+    requireThat(row,'not_found',404);
+    const status=await this.status(actor,attemptId);
+    if(kind==='refund')requireThat(status.paid&&status.paymentId&&status.receiptHash,'refund_not_authorized',409);
+    else requireThat(['PAID','FULFILLED','DISPUTED'].includes(status.state),'dispute_not_eligible',409);
+    // Governance / Arbitration alone authorizes effects. No fabricated signed transaction.
+    return {kind,orderId:row.order_id,merchantId:store.merchant_id,amount:row.total,asset:row.asset,paymentId:status.paymentId??null,status:'CANONICAL_AUTHORITY_ACTION_REQUIRED',executed:false,refunded:false,disputed:false,authority:kind==='refund'?'Pay.RefundManager420':'Market.OrderRegistry420 / 420Arbitration',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+  }
+  async merchantIntegrations(actor,storeId) {
+    const {store,merchant,source}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    return {merchantId:store.merchant_id,chainId:this.chainId,identity:{status:'NOT_VERIFIED',authority:'420Identity/420Verify'},names:{status:'NOT_VERIFIED',authority:'420Names'},notifications:{status:'NOT_CONFIGURED',authority:'420Notifications',sideEffects:false},search:{status:'LOCAL_PUBLIC_CATALOGUE',authority:'420Commerce projection; 420Search external integration unverified'},analytics:{status:'LOCAL_FINALIZED_PROJECTION',authority:'420Analytics external integration unverified'},provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+  }
   async putDelivery(actor,attemptId,input) {
     keys(input,['address','contact']); text(input.address,2000); text(input.contact,200); actor=wallet(actor);
     const a=this.db.get('SELECT a.*,c.store_id FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE attempt_id=? AND a.customer_scope=?',objectID(attemptId),actor); requireThat(a,'not_found',404);

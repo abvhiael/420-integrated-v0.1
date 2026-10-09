@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/TYPES-AND-UNITS.md",
-      "sha256": "37dc070dd6ac4aff512a03d61e29d8b8e3bd4ad4c60a0d6d2d58c3fad41d372d",
+      "path": "docs/highcountry/qualification/R01.3-level1.json",
+      "sha256": "6327526ae84fb9f1869af162501349dd01efb48c42f3d75252e838c8c520434b",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1251,6 +1251,14 @@
     {
       "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
       "sha256": "2d0febda027b760a0286ff513a752602f581a7719527b5ffc528a31831f0a96d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/TYPES-AND-UNITS.md",
+      "sha256": "37dc070dd6ac4aff512a03d61e29d8b8e3bd4ad4c60a0d6d2d58c3fad41d372d",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

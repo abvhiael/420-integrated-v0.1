@@ -24,7 +24,10 @@ interface IGenomeRegistryClone {
 
 interface IMotherRegistryClone {
     function cloneRegistry() external view returns (address);
-    function consumeForClone(uint64 motherId, uint64 cloneId) external;
+    function consumeForClone(
+        uint64 motherId,
+        uint64 cloneId
+    ) external;
     function exists(
         uint64 motherId
     ) external view returns (bool);

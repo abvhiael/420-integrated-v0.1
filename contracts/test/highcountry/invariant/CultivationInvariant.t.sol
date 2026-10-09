@@ -11,6 +11,7 @@ import { PublicCultivationAccess } from "../../../src/highcountry/land/PublicCul
 import { HCCapacityExceeded } from "../../../src/highcountry/errors/HighCountryErrors.sol";
 import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
 import { PlantRegistry } from "../../../src/highcountry/cultivation/PlantRegistry.sol";
+import { RulesetRegistry } from "../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
@@ -155,6 +156,15 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
         access.bindPlantRegistry(address(plants));
         _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
+        RulesetRegistry rulesets = new RulesetRegistry(address(auth));
+        bytes32 hash = keccak256("hc6:inv:ruleset:content");
+        rulesetId = rulesets.deriveRulesetId(hash);
+        _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER,
+            rulesetId, keccak256("hc6:inv:register"));
+        rulesets.registerRuleset(hash);
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS,
+            cultivation.RULESET_BIND_SCOPE(), keccak256("hc6:inv:bind"));
+        cultivation.bindRulesetRegistry(address(rulesets));
         _grant(
             address(this),
             ModuleIds.GENESIS_REGISTRY,
@@ -226,6 +236,12 @@ contract CultivationInvariantTest is InvariantTarget420, PlantSourcesFixture {
         });
         (expectedStress, expectedQuality) = cultivation.deriveScores(env);
         cultivation.updateEnvironment(2, env);
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE,
+            bytes32(uint256(2)), keccak256("hc6:inv:p2:advance"));
+        uint256 matureAt = uint256(plants.getPlant(2).plantedAt) + plants.GERMINATION_DURATION()
+            + plants.SEEDLING_DURATION() + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION();
+        vm.warp(matureAt);
+        plants.syncOfflineGrowth(2);
         expressionHash = cultivation.expressPhenotype(2, genomeId, rulesetId);
         CultivationEngine.EnvironmentSnapshot memory replacement = CultivationEngine.EnvironmentSnapshot({
             temperature: 2400, humidity: 6000, light: 7000, water: 6000, nutrients: 6000, airflow: 5000

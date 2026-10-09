@@ -121,7 +121,7 @@ export function createCommerceSdk420(input: {
     merchantOperations: (storeId: string) => signed<{items: Array<Record<string, unknown>>;totalCount:number;nextOffset:number|null;provenance:Record<string, unknown>}>('GET', merchantPath(storeId)+'/operations/orders'),
     merchantAnalytics: (storeId: string) => signed<{totals:Record<string, unknown>;byAsset:Record<string, unknown>;partial:boolean;provenance:Record<string, unknown>}>('GET',merchantPath(storeId)+'/operations/analytics'),
     merchantIntegrations: (storeId: string) => signed<Record<string, unknown>>('GET',merchantPath(storeId)+'/operations/integrations'),
-    merchantRemedy: (storeId: string,attemptId: string,kind:'refund'|'dispute') => signed<Record<string, unknown>>('POST',merchantPath(storeId)+'/operations/orders/'+objectId(attemptId)+'/'+kind,{}),
+    merchantRemedy: (storeId: string,attemptId: string,kind:'refund'|'dispute',request?:{amount:string;reasonHash:string}) => signed<Record<string, unknown>>('POST',merchantPath(storeId)+'/operations/orders/'+objectId(attemptId)+'/'+kind,kind==='refund'?request:{}),
     merchantBuilder: (storeId: string) => signed<Record<string, unknown>>('GET', merchantPath(storeId) + '/builder'),
     merchantStore: (storeId: string) => signed<Record<string, unknown>>('GET', merchantPath(storeId)),
     merchantSection: (storeId: string, section: 'branding' | 'categories' | 'products' | 'media') => signed<Record<string, unknown>>('GET', merchantPath(storeId) + '/' + section),

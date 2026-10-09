@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DIR = ROOT / "grow/storage/migrations"
 
 def psql(dsn, sql):
-    p = subprocess.run(["psql", "-X", "-v", "ON_ERROR_STOP=1", dsn],
+    p = subprocess.run(["psql", "-X", "-At", "-v", "ON_ERROR_STOP=1", dsn],
                        input=sql, text=True, capture_output=True, timeout=90)
     if p.returncode:
         raise SystemExit("Grow database migration/inspection failed")

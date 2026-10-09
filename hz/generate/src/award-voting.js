@@ -2,9 +2,9 @@ import {createHash} from "node:crypto";
 const sha=x=>createHash("sha256").update(JSON.stringify(x)).digest("hex");
 const required=x=>{if(typeof x!=="string"||!x||x.length>128)throw Error("INVALID_KEY");return x;};
 export class AwardVoting420 {
- constructor({domain,source,authorize,verifyIdentity,verifyJury,publicSupport}={}){
+ constructor({domain,source,authorize,verifyIdentity,verifyJury,publicSupport,verifyAbuse=null,production=false}={}){
   if(!domain||typeof source!=="function"||typeof authorize!=="function")throw Error("DEPENDENCIES_REQUIRED");
-  Object.assign(this,{domain,source,authorize,verifyIdentity,verifyJury,publicSupport});this.nominationKeys=new Map();this.voteKeys=new Map();this.accepted=new Map();this.audit=[];
+  if(production&&typeof verifyAbuse!=="function")throw Error("ABUSE_VERIFIER_REQUIRED");Object.assign(this,{domain,source,authorize,verifyIdentity,verifyJury,publicSupport,verifyAbuse,production});this.nominationKeys=new Map();this.voteKeys=new Map();this.accepted=new Map();this.audit=[];
  }
  actor(context,action){if(this.authorize(context,action)!==true)throw Error("UNAUTHORIZED");return required(context.account);}
  policy(categoryId){const c=this.domain.get(this.domain.categories,categoryId);const p=this.domain.get(this.domain.policies,c.policyId);const r=p.rules;
@@ -26,6 +26,7 @@ export class AwardVoting420 {
   const actor=this.actor(context,"nominate"),{category:c,rules:r}=this.policy(categoryId),season=this.domain.get(this.domain.seasons,c.seasonId);
   if(season.state!=="NOMINATIONS_OPEN"||at<season.nominationStart||at>season.nominationEnd)throw Error("NOMINATIONS_CLOSED");
   const target=this.eligible(c,targetId,at);
+  if(this.production&&this.verifyAbuse({action:"NOMINATE",actor,categoryId,targetId,at,seasonId:season.id})!==true)throw Error("NOMINATION_ABUSE");
   if(r.selfNomination==="DISALLOWED"&&target.owner===actor)throw Error("SELF_NOMINATION");
   if(r.nominationMode==="CURATED_SUBMISSION"&&context.curatorAuthorized!==true)throw Error("CURATOR_REQUIRED");
   if(r.nominationMode==="COMMUNITY_THRESHOLD"&&(typeof this.publicSupport!=="function"||this.publicSupport({category:c,targetId,at,thresholdType:r.thresholdType})<r.thresholdValue))throw Error("THRESHOLD_NOT_MET");
@@ -47,6 +48,7 @@ export class AwardVoting420 {
   if(b.state!=="OPEN"||s.state!=="VOTING_OPEN"||at<s.votingStart||at>s.votingEnd)throw Error("VOTE_CLOSED");
   const ids=b.candidateIds.map(n=>this.domain.get(this.domain.nominations,n).targetId);
   if(targetId!=="ABSTAIN"&&!ids.includes(targetId)||targetId==="ABSTAIN"&&!r.allowAbstain)throw Error("INVALID_CHOICE");
+  if(this.production&&this.verifyAbuse({action:"VOTE",actor,ballotId,targetId,at,policyCommitment:p.commitment})!==true)throw Error("VOTE_ABUSE");
   let key=actor;
   const req={proof,actor,ballotId,policyCommitment:p.commitment,audience:"420hz-awards",at};
   if(r.voterEligibility==="IDENTITY_UNIQUE_ONE_VOTE"){const x=this.verifyIdentity(req);if(x?.eligible!==true||x.ballotId!==ballotId||x.policyCommitment!==p.commitment||x.audience!=="420hz-awards"||x.expiresAt<at||x.revoked)throw Error("IDENTITY_INVALID");key=required(x.nullifier);}

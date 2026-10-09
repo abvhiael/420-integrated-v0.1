@@ -280,7 +280,7 @@ export class CommerceService {
     const order=await source.order(a.order_id);
     if(Number(order.status)===0) return {attemptId,state:'ORDER_SIGNATURE_REQUIRED',paid:false,reserved:false};
     requireThat(order.listingId===a.listing_id&&Number(order.listingRevision)===a.listing_revision&&wallet(order.buyer)===a.customer_scope&&wallet(order.seller)===a.seller&&order.quantity===a.quantity&&wallet(order.paymentAsset)===a.asset&&order.totalAmount===a.total,'order_correlation',503);
-    let paid=false,invoiceId=null,receiptHash=null,paymentId=null,state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
+    let paid=false,invoiceId=null,receiptHash=null,paymentId=null,refundedBaseUnits='0',state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
     if(state==='CREATED') {
       invoiceId=await source.invoiceId(a.order_id); const invoice=await source.invoice(invoiceId);
       const valid=invoice.active&&invoice.merchantId===a.merchant_id&&wallet(invoice.merchant)===a.seller&&invoice.amount===a.total&&invoice.currency==='0x343230'&&Number(invoice.mode)===0&&Number(invoice.acceptance)>=1&&!invoice.partialPayments&&(invoice.expiresAt==='0'||BigInt(invoice.expiresAt)>BigInt(Math.floor(this.now()/1000)));
@@ -291,15 +291,17 @@ export class CommerceService {
       requireThat(bound===order.paymentRef&&payment.invoiceId===invoiceId&&wallet(payment.payer)===a.customer_scope&&wallet(payment.merchant)===a.seller&&wallet(payment.settlementAsset)===a.asset&&payment.settlementAmount===a.total&&payment.receiptHash!== '0x'+'0'.repeat(64)&&invoice.active&&invoice.merchantId===a.merchant_id&&wallet(invoice.merchant)===a.seller&&invoice.amount===a.total&&invoice.currency==='0x343230'&&Number(invoice.mode)===0&&Number(invoice.acceptance)>=1&&!invoice.partialPayments&&paidInvoice.amount===a.total&&paidInvoice.closed,'payment_correlation',503);
       const status=Number(payment.status);
       requireThat(state==='REFUNDED'?status===6&&BigInt(payment.refundedAmount)===BigInt(payment.settlementAmount)+BigInt(payment.tipAmount):[5,7].includes(status),'payment_finality',503);
+      requireThat(/^[0-9]+$/.test(String(payment.refundedAmount))&&BigInt(payment.refundedAmount)<=BigInt(a.total),'refund_accounting_mismatch',503);
+      refundedBaseUnits=String(payment.refundedAmount);
       // Partial Pay refund keeps canonical Market status; never release SQL stock.
       paid=state!=='REFUNDED';
     }
     this.db.run('UPDATE checkout_attempts SET state=?,payment_id=?,quote_id=? WHERE attempt_id=?',state,order.paymentRef==='0x'+'0'.repeat(64)?null:order.paymentRef,null,attemptId);
-    return {attemptId,orderId:a.order_id,merchantId:a.merchant_id,seller:a.seller,buyer:a.customer_scope,asset:a.asset,total:a.total,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {attemptId,orderId:a.order_id,merchantId:a.merchant_id,seller:a.seller,buyer:a.customer_scope,asset:a.asset,total:a.total,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,refundedBaseUnits,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   // COM-6: projections only. Canonical Pay/Market remain financial authorities.
   async merchantOperations(actor,storeId,{offset=0,limit=25}={}) {
-    integer(offset,0,100000);integer(limit,1,100);
+    integer(offset,0,Number.MAX_SAFE_INTEGER);integer(limit,1,100);
     const {store,source,merchant}=await this.access(actor,storeId,'publish');
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
     const where='FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=?';
@@ -312,31 +314,32 @@ export class CommerceService {
     }
     return {items,totalCount:count,nextOffset:offset+rows.length<count?offset+rows.length:null,source:'finalized_market_pay',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
-  async merchantAnalytics(actor,storeId) {
-    // Traverse every local checkout attempt instead of silently truncating at 100.
-    // A bounded maximum fails closed: large histories require a snapshot/cursor
-    // reconciliation design before this synchronous endpoint can claim completion.
-    const {source,merchant}=await this.access(actor,storeId,'publish');
-    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
-    const count=this.db.get('SELECT COUNT(*) AS n FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=?',storeId).n;
-    requireThat(count<=5000,'analytics_history_requires_pagination',503);
-    const snapshot={chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true};
+  async merchantAnalytics(actor,storeId,{offset=0,limit=100}={}) {
+    // Page-local ledger reconciled against finalized Market/Pay, with explicit
+    // partial coverage. Never publish a paginated result as all-time revenue.
+    integer(offset,0,Number.MAX_SAFE_INTEGER);integer(limit,1,100);
+    const page=await this.merchantOperations(actor,storeId,{offset,limit});
     const totals={orders:0,paid:0,refunded:0,awaitingPayment:0};
     const byAsset={};
-    for(let offset=0;offset<count;offset+=100) {
-      const page=await this.merchantOperations(actor,storeId,{offset,limit:100});
-      requireThat(page.totalCount===count&&page.provenance.blockHash===snapshot.blockHash&&page.provenance.blockNumber===snapshot.blockNumber,'analytics_snapshot_changed',503);
-      requireThat(page.items.length===Math.min(100,count-offset),'analytics_history_changed',503);
-      for(const order of page.items) {
-        requireThat(order.provenance.blockHash===snapshot.blockHash&&order.provenance.blockNumber===snapshot.blockNumber&&order.provenance.finalized,'analytics_snapshot_changed',503);
-        totals.orders++;
-        if(!byAsset[order.asset])byAsset[order.asset]={paidBaseUnits:'0',refundedBaseUnits:'0'};
-        if(order.paid===true){totals.paid++;byAsset[order.asset].paidBaseUnits=(BigInt(byAsset[order.asset].paidBaseUnits)+BigInt(order.total)).toString();}
-        if(order.state==='REFUNDED'){totals.refunded++;byAsset[order.asset].refundedBaseUnits=(BigInt(byAsset[order.asset].refundedBaseUnits)+BigInt(order.total)).toString();}
-        if(['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING'].includes(order.state))totals.awaitingPayment++;
+    for(const order of page.items) {
+      requireThat(order.provenance.blockHash===page.provenance.blockHash&&order.provenance.blockNumber===page.provenance.blockNumber&&order.provenance.finalized,'analytics_snapshot_changed',503);
+      totals.orders++;
+      if(!byAsset[order.asset])byAsset[order.asset]={paidBaseUnits:'0',refundedBaseUnits:'0',netBaseUnits:'0'};
+      const amounts=byAsset[order.asset];
+      const refunded=BigInt(order.refundedBaseUnits??'0');
+      requireThat(refunded>=0n&&refunded<=BigInt(order.total),'refund_accounting_mismatch',503);
+      if(order.paid===true||order.state==='REFUNDED'){
+        if(order.paid===true)totals.paid++;
+        if(refunded>0n)totals.refunded++;
+        amounts.paidBaseUnits=(BigInt(amounts.paidBaseUnits)+BigInt(order.total)).toString();
+        amounts.refundedBaseUnits=(BigInt(amounts.refundedBaseUnits)+refunded).toString();
+        amounts.netBaseUnits=(BigInt(amounts.netBaseUnits)+BigInt(order.total)-refunded).toString();
       }
+      if(['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING'].includes(order.state))totals.awaitingPayment++;
     }
-    return {totals,byAsset,partial:false,limit:5000,scope:'all_local_checkout_attempts_at_finalized_block',assetBreakdownRequired:false,financialAuthority:'Pay/Market',provenance:snapshot};
+    // Count can change between pages; callers must not combine pages without
+    // independently pinning/reconciling finality and local dataset generation.
+    return {totals,byAsset,partial:offset>0||page.nextOffset!==null,totalCount:page.totalCount,nextOffset:page.nextOffset,offset,limit,scope:'finalized_checkout_page_only',assetBreakdownRequired:true,financialAuthority:'Pay/Market',provenance:page.provenance};
   }
   async merchantRemedy(actor,storeId,attemptId,kind,request={}) {
     requireThat(['refund','dispute'].includes(kind),'invalid_remedy');

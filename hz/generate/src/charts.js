@@ -5,10 +5,10 @@ const hash=x=>createHash("sha256").update(JSON.stringify(x)).digest("hex");
 const validId=x=>typeof x==="string" && /^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$/.test(x);
 const compare=(a,b)=>b.score-a.score||a.id.localeCompare(b.id,"en");
 export class Charts420 {
- constructor({recording,creator,policyVersion="1",qualification}={}){
+ constructor({recording,creator,policyVersion="1",qualification,verifyCheckpoint=null}={}){
   if(typeof recording!=="function"||typeof creator!=="function")throw Error("SOURCE_REQUIRED");
   if(policyVersion!=="1")throw Error("UNSUPPORTED_POLICY");
-  this.recording=recording;this.creator=creator;this.qualification=qualification;
+  this.recording=recording;this.creator=creator;this.qualification=qualification;this.verifyCheckpoint=verifyCheckpoint;
   this.events=new Map();this.history=new Map();
  }
  ingest(event){
@@ -19,6 +19,7 @@ export class Charts420 {
    // No client-asserted booleans or RAW_PLAY can become QUALIFIED_PLAY.
    if(typeof this.qualification!=="function"||this.qualification(event)!==true)throw Error("UNVERIFIED_QUALIFICATION");
    if(!validId(event.listenerToken))throw Error("MISSING_PRIVACY_TOKEN");
+   if(event.actorAccount&&event.sourceOwner&&event.actorAccount===event.sourceOwner)throw Error("SELF_INFLATION");
   }
   const committed={id:event.id,recordingId:event.recordingId,signal:event.signal,at:event.at,checkpoint:event.checkpoint,listenerToken:event.listenerToken||null,public:event.public===true,fixture:event.fixture===true};
   const previous=this.events.get(event.id);
@@ -33,7 +34,7 @@ export class Charts420 {
  }
  snapshot({family="TOP_RECORDINGS",window="WEEKLY",windowEnd,checkpoint,stale=false,sourceFinal=true,sourceReady=true}={}){
   if(!families.has(family)||!(window in windows)||!Number.isSafeInteger(windowEnd)||windowEnd<0||!validId(checkpoint))throw Error("INVALID_SNAPSHOT");
-  if(!sourceFinal||!sourceReady||stale)throw Error("STALE_SOURCE");
+  if(!sourceFinal||!sourceReady||stale||this.verifyCheckpoint&&this.verifyCheckpoint(checkpoint)!==true)throw Error("STALE_SOURCE");
   const start=windowEnd-windows[window],count=new Map(),listeners=new Map(),seenListener=new Set();
   const records=[...this.events.values()].sort((a,b)=>a.id.localeCompare(b.id,"en"));
   for(const e of records){

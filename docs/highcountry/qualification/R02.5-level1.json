@@ -1,0 +1,70 @@
+{
+  "schema": "highcountry-roadmap-step-qualification-v1",
+  "step": "R02.5",
+  "name": "Atomically consume mother cuttings during clone issuance",
+  "status": "COMPLETE",
+  "qualificationLevel": "Level 1 targeted, affected retained High Country integration/invariant suite PASS",
+  "implementationSha": "1db250972d288ea1490ba322cc3b34757007acb1",
+  "branch": "review/high-country-complete-audit-20261009",
+  "pr": "https://github.com/abvhiael/420-integrated-v0.1/pull/593",
+  "mainSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "evidencePolicy": "Evidence-only commit inherits qualified implementation SHA. No executable/configuration/test/workflow changes are included in evidence commit; such future changes require new qualification.",
+  "implementation": "One-time reciprocal clone issuer binding; only bound CloneRegistry consumes mother budget in same transaction as canonical clone issuance; identity/genome/owner validation, exhaustion and retirement; legacy unlinked cutting path rejected; failed clone registration atomically rolls back cutting and clone.",
+  "checks": [
+    {
+      "name": "Exact implementation checkout",
+      "status": "PASS"
+    },
+    {
+      "name": "forge build src/highcountry --sizes",
+      "status": "PASS"
+    },
+    {
+      "name": "forge fmt --check src/highcountry test/highcountry",
+      "status": "PASS"
+    },
+    {
+      "name": "forge lint src/highcountry --severity high med low",
+      "status": "PASS_WITH_WARNINGS"
+    },
+    {
+      "name": "MotherCloneConsumption.t.sol",
+      "status": "PASS",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "High Country complete affected app test and invariant suite",
+      "status": "PASS",
+      "suites": 41,
+      "passed": 176,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "High Country source/specification catalogue",
+      "status": "PASS"
+    },
+    {
+      "name": "R02.5 ABI and interface checks",
+      "status": "PASS"
+    }
+  ],
+  "workflow": {
+    "name": "High Country R02.5 Targeted Qualification",
+    "runId": 37984306193,
+    "jobId": 114002316818,
+    "result": "success",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984306193",
+    "jobUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984306193/job/114002316818"
+  },
+  "testCountNote": "Four targeted tests are included in the 176-test affected app suite; not additive.",
+  "deferred": [
+    "R08 app-phase Level 3 full repository Foundry inventory and Genesis address-authority qualification",
+    "Live testnet deployed code/hash and RPC acceptance in R07/R09",
+    "Remaining R02.6 provenance requirements and subsequent application phases"
+  ],
+  "fullApplicationReleaseQualified": false,
+  "nextStep": "R02.6 — Replace opaque provenance anchors with canonical plant/breeding/expression validation"
+}

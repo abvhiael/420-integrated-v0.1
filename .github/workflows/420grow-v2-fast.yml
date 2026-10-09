@@ -33,6 +33,11 @@ on:
       - 'grow/assistance/**'
       - 'grow/integrations/**'
       - 'grow/facility/**'
+      - 'grow/dashboard/**'
+      - 'grow/cmd/private-server/**'
+      - 'grow/web/**'
+      - 'go.mod'
+      - 'go.sum'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
   workflow_dispatch:
@@ -196,3 +201,7 @@ jobs:
           test -f grow/web/dist/workspace.js
           test -f grow/web/dist/workspace.css
           node grow/web/test/browser-smoke.mjs
+      - name: GROW-V2-14 security privacy adversarial recovery Level 1
+        run: |
+          go test -count=1 -run '^TestV214' ./grow/dashboard
+          go test -race -count=1 -run '^TestV214' ./grow/dashboard

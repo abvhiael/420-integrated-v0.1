@@ -38,3 +38,25 @@ DOOBR-AUDIT-5 — Define any separately authorized DOOBR service, payment, ident
 - Canonical `.github/workflows/gen-svc-3.yml` was updated with GEN-SVC-0 validator, DOOBR authority verifier and noncached targeted DOOBR regressions, in addition to existing Travel Go tests, vet and build. This ensures an app-scoped canonical workflow can qualify AUDIT-4 even if the audit-only workflow's independent trigger is unavailable.
 - At recording time GitHub has not exposed completed required validation jobs for the final executable SHA. **Do not mark AUDIT-4 COMPLETE until exact-SHA passes appear**.
 - Earlier queued canonical validation runs at older SHAs cannot qualify the updated workflow commit.
+
+## Final qualified Level 1 closeout — 2026-10-09
+
+**Status: COMPLETE (DOOBR-AUDIT-4 only).**
+
+- Exact qualified implementation/workflow SHA: `e8893b7eabc0d3ee32a1e2e14a606738335ef3ef`.
+- GitHub Actions [DOOBR Audit Level 1](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37995733609), run ID `37995733609`, job ID `114041195838`: completed SUCCESS, no failed required steps.
+- Checkout triggering commit — PASS; exact checkout SHA assertion — PASS.
+- Python syntax compilation of validators — PASS.
+- GEN-SVC-0 shared Genesis architecture validator — PASS.
+- GEN-SVC-3 canonical Travel validator — PASS.
+- DOOBR-AUDIT-2 architecture authority verifier — PASS.
+- DOOBR noncached compatibility/fail-closed regression tests — PASS.
+- GEN-SVC-3 scoped Go tests — PASS.
+- GEN-SVC-3 scoped `go vet` — PASS.
+- Travel Go server build — PASS.
+- Root cause of older startup failures: malformed YAML with truncated Go regexp, duplicate run keys/steps and stray `-v`; fixed in `.github/workflows/doobr-audit-1-level1.yml` and `.github/workflows/gen-svc-3.yml`. Earlier zero-job workflow failures are superseded, not reclassified as passing.
+- No runtime DOOBR transaction authority was enabled; the existing Genesis compatibility gateway remains fail-closed.
+- Inspected main at implementation time: `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`; PR #598 is not yet merged.
+- No Level 2 milestone required here. Level 3 deferred to audit-phase reconciliation on final merge candidate. Unrelated Cloudflare Worker failures excluded from DOOBR Level 1 without altering repository-wide checks.
+- Evidence-only append commit is not a new executable implementation SHA; no recursive qualification needed.
+- Next roadmap step: `DOOBR-AUDIT-5 — Define any separately authorized DOOBR service, payment, identity and delivery integrations required by the approved scope`.

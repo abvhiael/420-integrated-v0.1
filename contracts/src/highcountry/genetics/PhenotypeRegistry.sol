@@ -3,7 +3,13 @@ pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCAlreadyExists, HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import {
+    HCAlreadyExists,
+    HCInvalidId,
+    HCInvalidState,
+    HCNotFound,
+    HCZeroAddress
+} from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
@@ -16,17 +22,25 @@ interface IGenomeRegistryPhenotype {
 interface IPlantProvenance {
     function authorization() external view returns (address);
     function genomeRegistry() external view returns (address);
-    function genomeOf(uint64 plantId) external view returns (bytes32);
+    function genomeOf(
+        uint64 plantId
+    ) external view returns (bytes32);
 }
+
 interface IBreedingProvenance {
     function authorization() external view returns (address);
     function genomeRegistry() external view returns (address);
-    function childGenomeOfFinalizedEvent(uint64 eventId) external view returns (bytes32);
+    function childGenomeOfFinalizedEvent(
+        uint64 eventId
+    ) external view returns (bytes32);
 }
+
 interface IExpressionProvenance {
     function authorization() external view returns (address);
     function plantRegistry() external view returns (address);
-    function expressionForPlant(uint64 plantId) external view returns (bytes32);
+    function expressionForPlant(
+        uint64 plantId
+    ) external view returns (bytes32);
 }
 
 contract PhenotypeRegistry {
@@ -71,17 +85,23 @@ contract PhenotypeRegistry {
         address breeding,
         address cultivation
     ) external {
-        if (address(plantRegistry) != address(0) || plants.code.length == 0
-            || breeding.code.length == 0 || cultivation.code.length == 0) revert HCInvalidState();
-        authorization.requireAuthorized(AuthorizationRequest(
-            msg.sender, ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE, BIND_SCOPE, 0
-        ));
-        if (IPlantProvenance(plants).authorization() != address(authorization)
-            || IPlantProvenance(plants).genomeRegistry() != address(genomeRegistry)
-            || IBreedingProvenance(breeding).authorization() != address(authorization)
-            || IBreedingProvenance(breeding).genomeRegistry() != address(genomeRegistry)
-            || IExpressionProvenance(cultivation).authorization() != address(authorization)
-            || IExpressionProvenance(cultivation).plantRegistry() != plants) revert HCInvalidState();
+        if (
+            address(plantRegistry) != address(0) || plants.code.length == 0 || breeding.code.length == 0
+                || cultivation.code.length == 0
+        ) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE, BIND_SCOPE, 0
+            )
+        );
+        if (
+            IPlantProvenance(plants).authorization() != address(authorization)
+                || IPlantProvenance(plants).genomeRegistry() != address(genomeRegistry)
+                || IBreedingProvenance(breeding).authorization() != address(authorization)
+                || IBreedingProvenance(breeding).genomeRegistry() != address(genomeRegistry)
+                || IExpressionProvenance(cultivation).authorization() != address(authorization)
+                || IExpressionProvenance(cultivation).plantRegistry() != plants
+        ) revert HCInvalidState();
         plantRegistry = IPlantProvenance(plants);
         breedingEngine = IBreedingProvenance(breeding);
         cultivationEngine = IExpressionProvenance(cultivation);

@@ -69,9 +69,12 @@ export class GenerationJobStore420 {
 }
 
 export class GenerationJobManager420 {
-  constructor({ store = new GenerationJobStore420(), now = () => Date.now() } = {}) {
+  constructor({ store = new GenerationJobStore420(), now = () => Date.now(), verifyProviderResult = null, requireCanonicalResult = false } = {}) {
     this.store = store;
     this.now = now;
+    if (requireCanonicalResult && typeof verifyProviderResult !== "function") throw new GenerationError420("INVALID_REQUEST", "canonical provider verifier required");
+    this.verifyProviderResult = verifyProviderResult;
+    this.requireCanonicalResult = requireCanonicalResult;
   }
 
   create(input, { clientRequestId = null, timeoutMs = 10 * 60_000 } = {}) {
@@ -252,6 +255,9 @@ export class GenerationJobManager420 {
         modelVersion: job.provider.modelVersion,
         providerJobRef: job.providerJobRef
       });
+      if (this.requireCanonicalResult && this.verifyProviderResult({ jobId: job.jobId, providerJobRef: job.providerJobRef, provider: clone(job.provider), outputManifest: clone(job.outputManifest), resultCommitment: status.resultCommitment, verificationRef: status.verificationRef }) !== true) {
+        throw new GenerationError420("INTEGRITY_MISMATCH", "canonical provider result verification failed");
+      }
       job.executionEvidence = {
         resultCommitment: status.resultCommitment ?? null,
         verificationRef: status.verificationRef ?? null,

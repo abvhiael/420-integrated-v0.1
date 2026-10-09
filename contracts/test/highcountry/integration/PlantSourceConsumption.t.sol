@@ -105,6 +105,7 @@ contract PlantSourceConsumptionTest is PublicPlantCapacityFixture {
             mothers.registerMother(1, GENOME, address(this), 10, keccak256("mother"));
         }
         _grant(address(this), ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(id)));
+        _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(1)));
         clones.registerClone(id, GENOME, 1, owner, keccak256("clone"));
         _grant(address(plants), ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_CONSUME, bytes32(uint256(id)));
     }

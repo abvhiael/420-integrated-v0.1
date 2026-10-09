@@ -25,7 +25,11 @@
       </span>
     </a>
     <nav class="nav" aria-label="Primary">
-      <a href="#generate">generate</a>
+      <a href="#generate">Generate</a>
+      <a href="#community">Community</a>
+      <a href="#charts">Charts</a>
+      <a href="#awards">Awards</a>
+      <a href="#creators">Creator Studio</a>
       <a href="#discover">discover</a>
       <a href="#artists">artists</a>
       <a href="#streaming">streaming</a>
@@ -228,6 +232,39 @@
           <p>The public catalog is a non-authoritative projection that can be rebuilt from canonical event history.</p>
         </article>
       </div>
+    </section>
+
+    <section id="community" class="section product-preview" aria-labelledby="communityHeading">
+      <div class="section-heading"><p class="eyebrow">community • pre-testnet</p><h2 id="communityHeading">Follow the music, not the noise.</h2>
+      <p>Follows, favorites, playlists and sharing are implemented in the 420Hz community domain. Authenticated community writes and live feeds are not available on this deployment.</p></div>
+      <div class="empty-state" role="status"><strong>Community coming with verified testnet services</strong><span>Live follows, playlists, reports and personalized feeds are unavailable. No real account activity is shown.</span></div>
+    </section>
+    <section id="charts" class="section product-preview" aria-labelledby="chartsHeading">
+      <div class="section-heading"><p class="eyebrow">charts • pre-testnet</p><h2 id="chartsHeading">Discovery with verifiable signals.</h2>
+      <p>Charts use source-qualified public listening activity and rebuildable snapshots. Live rankings cannot be shown until a finalized Indexer checkpoint is available.</p></div>
+      <div class="empty-state" role="status"><strong>Charts awaiting verified data</strong><span>No rankings, plays or trending counts are fabricated for this preview.</span></div>
+    </section>
+    <section id="awards" class="section product-preview" aria-labelledby="awardsHeading">
+      <div class="section-heading"><p class="eyebrow">420Hz awards • pre-testnet</p><h2 id="awardsHeading">Celebrate the work. Preserve the history.</h2>
+      <p>Eligibility, nominations, voting and finalized award history follow the 420Hz Awards domain rules. Voting and nominations require verified authority and a live season.</p></div>
+      <div id="currentAwardsSeason" class="season-module" aria-label="Current Awards season" role="status">
+        <strong>Current Awards season</strong>
+        <p id="awardsSeasonState">No verified live season is available.</p>
+        <span class="studio-badge">Pre-testnet • nominations and voting unavailable</span>
+        <button type="button" class="button secondary" disabled aria-label="Nominations unavailable until testnet">Nominate — testnet required</button>
+        <button type="button" class="button secondary" disabled aria-label="Voting unavailable until testnet">Vote — testnet required</button>
+      </div>
+    </section>
+    <section id="disclosure" class="section product-preview" aria-labelledby="disclosureHeading">
+      <div class="section-heading"><p class="eyebrow">recording provenance</p><h2 id="disclosureHeading">Know how the song was made.</h2>
+      <p>Generated releases carry source-bound disclosure metadata. These labels explain the available categories; they are not live recording claims.</p></div>
+      <div class="disclosure-legend" aria-label="AI disclosure class legend">
+        <span class="disclosure-badge" data-disclosure="HUMAN">Human</span>
+        <span class="disclosure-badge" data-disclosure="AI_ASSISTED">AI assisted</span>
+        <span class="disclosure-badge" data-disclosure="AI_GENERATED">AI generated</span>
+        <span class="disclosure-badge" data-disclosure="AI_DERIVATIVE">AI derivative</span>
+      </div>
+      <p class="fine-print">When live public recordings are available, each recording must display its actual canonical disclosure class.</p>
     </section>
 
     <section id="artists" class="section split">

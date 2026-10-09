@@ -105,7 +105,7 @@ contract RefundManager420 is GenesisResidentAccess420 {
         require(canonicalSettlementAsset == settlementAsset, "settlement asset");
         require(canonicalMaximum == refundableMaximum, "refund maximum");
         require(status == 6 || status == 7, "refund not authorized");
-        require(refundedByPayment[paymentId] + amount <= authorizedRefunded, "refund exceeds authorized");
+        require(refundedByPayment[paymentId] + authorizedRefundEscrow[paymentId] + amount <= authorizedRefunded, "refund exceeds authorized");
         require(refundedByPayment[paymentId] + amount <= canonicalMaximum, "refund exceeds payment");
 
         refundedByPayment[paymentId] += amount;

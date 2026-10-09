@@ -21,13 +21,13 @@ type Scope struct {
 }
 
 type Event struct {
-	TenantID  string
+	TenantID   string
 	FacilityID string
-	ZoneID    string
-	ID        string
-	Kind      string
-	SourceID  string
-	CreatedAt time.Time
+	ZoneID     string
+	ID         string
+	Kind       string
+	SourceID   string
+	CreatedAt  time.Time
 }
 
 type Delivery struct {

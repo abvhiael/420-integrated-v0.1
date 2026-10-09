@@ -341,13 +341,14 @@ export class CommerceService {
       proposal=canonicalRefundProposal({paymentId:status.paymentId,orderId:row.order_id,payer:row.customer_scope,asset:row.asset,payment,requestedAmount:request.amount,reasonHash:request.reasonHash});
       // Immutable, idempotent request. Pending requests consume the locally
       // proposed budget without claiming that Pay governance approved them.
-      const existing=this.db.get('SELECT * FROM refund_requests WHERE payment_id=? AND reason_hash=? AND amount=?',status.paymentId,request.reasonHash,request.amount);
-      const requestId=existing?.request_id??id();
-      this.mutate(actor,storeId,'refund_request',row.order_id,()=>{
-        if(existing)return;
+      const requestId=this.mutate(actor,storeId,'refund_request',row.order_id,()=>{
+        const existing=this.db.get('SELECT * FROM refund_requests WHERE payment_id=? AND reason_hash=? AND amount=?',status.paymentId,request.reasonHash,request.amount);
+        if(existing)return existing.request_id;
         const pending=this.db.all('SELECT amount FROM refund_requests WHERE payment_id=? AND request_state=?',status.paymentId,'PENDING_GOVERNANCE').reduce((sum,item)=>sum+BigInt(item.amount),0n);
         requireThat(BigInt(proposal.amount)+pending<=BigInt(proposal.refundableMaximum)-BigInt(proposal.previousRefunded),'refund_pending_exceeds_available',409);
+        const requestId=id();
         this.db.run('INSERT INTO refund_requests VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',requestId,storeId,attemptId,status.paymentId,row.order_id,proposal.amount,proposal.settlementAsset,proposal.recipient,request.reasonHash,proposal.previousRefunded,'PENDING_GOVERNANCE',this.now());
+        return requestId;
       });
       proposal={...proposal,requestId,refundId:'0x'+requestId,requestState:'PENDING_GOVERNANCE',recorded:true};
     }

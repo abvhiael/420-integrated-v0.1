@@ -1,6 +1,8 @@
 -- GROW-V2-10 private inventory ledger, locked nonnegative accounting and traceability.
 BEGIN;
 SELECT pg_advisory_xact_lock(420203);
+ALTER TABLE grow_private.harvest_records
+ ADD CONSTRAINT harvest_records_location_reference UNIQUE(tenant_id,harvest_id,facility_id,zone_id);
 CREATE TABLE grow_private.inventory_lots_v2(
  tenant_id uuid NOT NULL,lot_id uuid NOT NULL,facility_id uuid NOT NULL,zone_id uuid NOT NULL,
  kind text NOT NULL CHECK(kind IN ('SEED','CLONE','INPUT','MATERIAL','EQUIPMENT','HARVEST')),
@@ -10,7 +12,7 @@ CREATE TABLE grow_private.inventory_lots_v2(
  created_at timestamptz NOT NULL DEFAULT now(),created_by text NOT NULL CHECK(length(created_by)>0),
  PRIMARY KEY(tenant_id,lot_id),
  FOREIGN KEY(tenant_id,facility_id,zone_id) REFERENCES grow_private.zones(tenant_id,facility_id,zone_id),
- FOREIGN KEY(tenant_id,harvest_id) REFERENCES grow_private.harvest_records(tenant_id,harvest_id),
+ FOREIGN KEY(tenant_id,harvest_id,facility_id,zone_id) REFERENCES grow_private.harvest_records(tenant_id,harvest_id,facility_id,zone_id),
  CHECK((kind='HARVEST' AND harvest_id IS NOT NULL AND unit='g')
  OR (kind<>'HARVEST' AND harvest_id IS NULL))
 );

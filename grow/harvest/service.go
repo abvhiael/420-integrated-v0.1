@@ -72,9 +72,12 @@ func (s Service) Analytics(ctx context.Context, scope Scope, facility, zone stri
 		limit < 1 || limit > 500 {
 		return Summary{}, Forecast{}, ErrInvalid
 	}
-	rows, err := s.store.List(ctx, scope.TenantID, facility, zone, from, to, limit)
+	rows, err := s.store.List(ctx, scope.TenantID, facility, zone, from, to, limit+1)
 	if err != nil {
 		return Summary{}, Forecast{}, err
+	}
+	if len(rows) > limit {
+		return Summary{}, Forecast{}, ErrInvalid // Incomplete aggregates must never masquerade as complete.
 	}
 	sum := Summary{Kind: "OBSERVED", From: from, To: to}
 	mean, m2 := 0.0, 0.0

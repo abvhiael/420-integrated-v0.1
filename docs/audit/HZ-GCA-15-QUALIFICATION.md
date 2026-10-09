@@ -30,3 +30,16 @@ Canonical exit *documented threat-model closure with negative/adversarial tests*
 Level 2: app-focused integration milestone at HZ-GCA-14–16.
 Level 3: comprehensive merge-candidate closeout deferred.
 Next canonical: **HZ-GCA-16 — Website and product navigation integration**.
+
+## Security follow-up (2026-10-08; NOT a complete HZ-GCA-15 closeout)
+
+Repository-side changes made after the original 99-test baseline:
+- Hardened `HzSecurityGate420` URL filtering for IPv6 literals and additional private/reserved host classes; reject non-object metadata and require explicitly injected replay/rate stores in production mode. **Injection alone does not prove persistence, atomicity, distributed rate enforcement or DNS/redirect safety.**
+- Added `GenerationJobManager420({requireCanonicalResult:true,verifyProviderResult})` for positive canonical verification of the actual output manifest at the real polling boundary, failing a job on negative verification. Existing mock-compatible/default paths do **not** automatically activate canonical verification; production composition must enforce this mode and use a source-authentic verifier, not a caller-provided boolean.
+- Added adversarial tests for forged results, trusted-result acceptance, unsafe URL classes, malformed metadata and missing external stores. Updated HZ-GCA-15 workflow paths to cover job manager changes.
+
+Remaining blocking repository-side work: wire verified Wallet/Creative/Identity/420AI sources to every real Generate/Publish/Community/Vote/Chart entry point; enforce report/block/mute across cross-service projections; verify anti-collusion and source-unique Chart/Awards events; isolate secret and private data in logs/notifications; robust media validation and authenticated storage receipts; verify signed provider status/commitment binding. **This note does not assert those items are fixed.**
+
+Deferred HZ-GCA-18 testnet requirements: externally persistent atomic nonce/replay and rate stores across restarts/replicas, cross-wallet abuse resistance, verified network-bound wallet sessions, concurrent Sybil/vote/collusion protection, canonical consent expiry/revocation, redirect/DNS-rebinding safe fetch, real media decoding/CSP, 420AI provider finality, reorg rollback, service-level privacy/secrets and actual cross-service abuse traces.
+
+Qualification: new implementation HEAD and exact-SHA CI results must be verified independently; old 99/99 PASS may not be cited as qualification of these changes. HZ-GCA-15 remains **PARTIAL**, and HZ-GCA-16 / HZ-GCA-17 must not be declared complete from this follow-up alone.

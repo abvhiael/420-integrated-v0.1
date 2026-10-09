@@ -82,11 +82,20 @@ type Period struct {
 	Count int
 	Grams float64
 }
+type Dimension struct {
+	ID    string
+	Count int
+	Grams float64
+}
 type Report struct {
 	Kind       string
+	FacilityID string
+	ZoneID     string
 	Count      int
 	TotalGrams float64
 	Periods    []Period
+	ByPlant    []Dimension
+	ByCultivar []Dimension
 	CSV        []byte
 }
 
@@ -110,20 +119,40 @@ func (s Service) Production(ctx context.Context, scope Scope, facility, zone str
 		}
 		return rows[i].HarvestedAt.Before(rows[j].HarvestedAt)
 	})
-	report := Report{Kind: "OBSERVED"}
+	report := Report{Kind: "OBSERVED", FacilityID: facility, ZoneID: zone}
 	periods := map[string]*Period{}
+	plants := map[string]*Dimension{}
+	cultivars := map[string]*Dimension{}
+	seen := map[string]bool{}
 	var out bytes.Buffer
 	writer := csv.NewWriter(&out)
-	if err = writer.Write([]string{"record_type", "harvest_id", "plant_id", "facility_id", "zone_id", "harvested_at_utc", "weight_grams", "source", "actor"}); err != nil {
+	if err = writer.Write([]string{"record_type", "harvest_id", "plant_id", "facility_id", "zone_id", "harvested_at_utc", "weight_grams", "source", "actor", "cultivar_id"}); err != nil {
 		return Report{}, err
 	}
 	for _, r := range rows {
 		if r.TenantID != scope.TenantID || r.FacilityID != facility || r.ZoneID != zone ||
-			r.ID == "" || r.PlantID == "" || r.HarvestedAt.Before(from) || !r.HarvestedAt.Before(to) ||
+			r.ID == "" || r.PlantID == "" || seen[r.ID] || r.HarvestedAt.Before(from) || !r.HarvestedAt.Before(to) ||
 			math.IsNaN(r.WeightGrams) || math.IsInf(r.WeightGrams, 0) || r.WeightGrams <= 0 || r.WeightGrams > 1000000 {
 			return Report{}, ErrDenied
 		}
+		seen[r.ID] = true
 		month := r.HarvestedAt.UTC().Format("2006-01")
+		if plants[r.PlantID] == nil {
+			plants[r.PlantID] = &Dimension{ID: r.PlantID}
+		}
+		plant := plants[r.PlantID]
+		plant.Count++
+		plant.Grams += r.WeightGrams
+		cultivarID := r.CultivarID
+		if cultivarID == "" {
+			cultivarID = "UNSPECIFIED"
+		}
+		if cultivars[cultivarID] == nil {
+			cultivars[cultivarID] = &Dimension{ID: cultivarID}
+		}
+		cultivar := cultivars[cultivarID]
+		cultivar.Count++
+		cultivar.Grams += r.WeightGrams
 		if periods[month] == nil {
 			periods[month] = &Period{Month: month}
 		}
@@ -131,14 +160,22 @@ func (s Service) Production(ctx context.Context, scope Scope, facility, zone str
 		periods[month].Grams += r.WeightGrams
 		report.Count++
 		report.TotalGrams += r.WeightGrams
-		if err = writer.Write([]string{"OBSERVED", r.ID, r.PlantID, r.FacilityID, r.ZoneID, r.HarvestedAt.UTC().Format(time.RFC3339Nano), strconv.FormatFloat(r.WeightGrams, 'f', -1, 64), csvCell(r.Source), csvCell(r.Actor)}); err != nil {
+		if err = writer.Write([]string{"OBSERVED", r.ID, r.PlantID, r.FacilityID, r.ZoneID, r.HarvestedAt.UTC().Format(time.RFC3339Nano), strconv.FormatFloat(r.WeightGrams, 'f', -1, 64), csvCell(r.Source), csvCell(r.Actor), csvCell(r.CultivarID)}); err != nil {
 			return Report{}, err
 		}
 	}
 	for _, p := range periods {
 		report.Periods = append(report.Periods, *p)
 	}
+	for _, p := range plants {
+		report.ByPlant = append(report.ByPlant, *p)
+	}
+	for _, p := range cultivars {
+		report.ByCultivar = append(report.ByCultivar, *p)
+	}
 	sort.Slice(report.Periods, func(i, j int) bool { return report.Periods[i].Month < report.Periods[j].Month })
+	sort.Slice(report.ByPlant, func(i, j int) bool { return report.ByPlant[i].ID < report.ByPlant[j].ID })
+	sort.Slice(report.ByCultivar, func(i, j int) bool { return report.ByCultivar[i].ID < report.ByCultivar[j].ID })
 	writer.Flush()
 	if err = writer.Error(); err != nil {
 		return Report{}, errors.New("harvest export failed")

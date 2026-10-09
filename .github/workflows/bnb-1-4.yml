@@ -1,0 +1,35 @@
+name: 420BnB BNB-1.4 Authority Boundaries
+on:
+  pull_request:
+    paths:
+      - 'docs/bnb/**'
+      - 'scripts/validate-bnb-1-4.py'
+      - '.github/workflows/bnb-1-4.yml'
+      - 'config/420travel-genesis.json'
+      - 'config/genesis-consumer-services.json'
+      - 'genesis/svc3/travelapp/compatibility.go'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authority:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bind implementation SHA to PR head
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="$(git rev-parse HEAD)"
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$SHA" = "$EXPECTED"
+          echo "BNB-1.4 implementation SHA: $SHA"
+          echo "GitHub event SHA (possibly synthetic merge): $GITHUB_SHA"
+      - name: BNB-1.4 scoped Level 1 verifier
+        run: python3 scripts/validate-bnb-1-4.py

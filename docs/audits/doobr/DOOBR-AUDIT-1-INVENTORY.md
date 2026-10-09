@@ -52,3 +52,21 @@ DOOBR's *documented current Genesis commitment* is forward-compatible Travel rec
 **Disposition:** PARTIAL — inventory and scope discovery documented, but do not claim a fully qualified step until the remaining Level 1 verification/evidence requirement is met.
 
 Next proposed roadmap step after complete qualification: `DOOBR-AUDIT-2 — Reconcile standalone DOOBR requirements with the frozen Genesis application decision and consumer-services architecture`.
+
+## Additional Level 1 source verification (2026-10-09)
+Exact executable-source baseline: `aacf7ddcf587224ab48fb2dcd28af1ee133745f1`.
+Performed nine independent programmatic **static source assertions** using GitHub fetched files against the above immutable ref:
+1. Travel DOOBR Genesis enablement is false — PASS.
+2. DOOBR transaction flows appear in deferred scope — PASS.
+3. Four DOOBR reserved object names present — PASS.
+4. Shared service registry DOOBR feature default is false — PASS.
+5. Seven transaction gateway methods return disabled error — PASS (source pattern).
+6. Four DOOBR record validators are declared — PASS.
+7. Fail-closed gateway regression test is declared — PASS.
+8. Mismatched-provider negative regression test is declared — PASS.
+9. Scoped GEN-SVC-3 workflow declares Go tests, vet, and build — PASS.
+
+These **9/9 static assertions are not Go runtime tests, nor a GitHub Actions workflow PASS**. Environment cannot clone private repository for local Go/Python execution (no network DNS access), and connector does not expose workflow dispatch. GEN-SVC-3 path filters do not cover this audit-only Markdown change. Required executable Level 1 checks remain NOT RUN; status stays PARTIAL.
+
+### Unrelated Cloudflare checks
+For PR #598 head `aac980b9ccda4de5ffe7708d0e039b1514107b97`, Cloudflare Workers builds failed for `420wallet`, `420-integrated-explorer`, `doobtube`, `reeferreview`, and `420-integrated-status`. Cloudflare Pages previews passed for `420travel` and `bonggoggles`. Cloudflare workers concern external app deployments and the audit commit only changes a DOOBR Markdown inventory; **exclude those failures from DOOBR Level 1 eligibility**, unless repository required-check policy independently mandates them. Do not change or suppress global branch protection or CI checks.

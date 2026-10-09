@@ -55,3 +55,16 @@ Applicable GitHub Actions workflow conclusions checked as **completed/success** 
 Service CI on previous SHA `69aeb4a86d6676ae215044017f6e7a56e98112e7` failed two stale test assertions, 122/124 passing. The exact failed job and logs were inspected; assertions were updated to match page-local semantics and boolean error-code predicate, without bypassing safety checks. Final SHA reran successfully.
 
 **COM-6E paginated-analytics repository-side Level 1: PASS.** Scope is bounded per-page finalized projections, with optional offsets beyond 5,000 and source-refund gross/refunded/net base units. Whole-history snapshot-stable aggregation across independent pages, durable external 420Analytics publication and live chain acceptance have **not** been demonstrated; no all-time financial authority is claimed. COM-6 accumulated Level 2 and COM-7 Phase Level 3 remain separate milestones. PR is not merge-ready.
+
+## COM-6 accumulated Level 2 app-integration milestone — PASS (2026-10-09)
+
+**Exact tested implementation SHA:** `37887e89f613a6a48e3738a39362e8e731ea6f9a`. The new app-scoped workflow is `.github/workflows/commerce-com6-level2.yml`. Single exact-SHA milestone run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37999332517 (job 114053294688), **completed/success**. Steps independently checked successful:
+
+1. Exact SHA checkout, locked dependencies and scoped dependency audits.
+2. Retained Market/Pay settlement, funded-refund fuzz and Arbitration Foundry integration (`scripts/commerce/qualify-contracts.py`).
+3. Commerce service, SDK, Indexer, consumed ABI build and application integration/adversarial tests (`scripts/commerce/qualify-service.py`).
+4. Merchant browser, Wallet, responsive/accessibility tests (`npm run qualify --prefix commerce/web`).
+5. Pay implementation/hardening/audit and Genesis interface parameter/safety verifiers, without Genesis duplicating Foundry inventory.
+6. App patch whitespace verification.
+
+**Disposition: COM-6 repository-side accumulated Level 2 PASS.** The app's canonical COM-6 merchant operations milestone is qualified at repo test/fixture and targeted protocol-integration level; it does not prove live service delivery, production-equivalent Identity/Names/Notifications/Arbitration, governance deployment or funded external acceptance. COM-6E analytics remains deliberately paginated per response: multiple pages do not automatically constitute a snapshot-consistent all-time report. No global Foundry, Genesis full address-authority, 420 Integrated or Docs Level 3 claims. PR #594 remains draft/unmerged pending COM-7 security/ops and one reconciled Level 3 closeout against current main. Canonical next top-level step: **COM-7 — Security/ops**.

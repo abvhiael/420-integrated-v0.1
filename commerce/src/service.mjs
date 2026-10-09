@@ -278,7 +278,7 @@ export class CommerceService {
     actor=wallet(actor); const a=this.db.get('SELECT * FROM checkout_attempts WHERE attempt_id=?',objectID(attemptId)); requireThat(a,'not_found',404);
     const source=await this.source(),merchant=await source.merchant(a.merchant_id); requireThat(actor===a.customer_scope||actor===wallet(merchant.controller)&&merchant.active,'forbidden',403);
     const order=await source.order(a.order_id);
-    if(Number(order.status)===0) return {attemptId,state:'ORDER_SIGNATURE_REQUIRED',paid:false,reserved:false};
+    if(Number(order.status)===0) return {attemptId,state:'ORDER_SIGNATURE_REQUIRED',paid:false,reserved:false,refundedBaseUnits:'0',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
     requireThat(order.listingId===a.listing_id&&Number(order.listingRevision)===a.listing_revision&&wallet(order.buyer)===a.customer_scope&&wallet(order.seller)===a.seller&&order.quantity===a.quantity&&wallet(order.paymentAsset)===a.asset&&order.totalAmount===a.total,'order_correlation',503);
     let paid=false,invoiceId=null,receiptHash=null,paymentId=null,refundedBaseUnits='0',state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
     if(state==='CREATED') {

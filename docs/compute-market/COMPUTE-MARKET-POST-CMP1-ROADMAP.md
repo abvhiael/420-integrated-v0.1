@@ -725,7 +725,9 @@ Purpose: turn repository qualification into real deployed evidence.
 
 ---
 
-# CMP-10 — Security and adversarial qualification
+# CMP-10 — Security and adversarial qualification — REPOSITORY PREFLIGHT IMPLEMENTED; LIVE SECURITY NO-GO
+
+[CMP-10 threat inventory and limitations](CMP-10-SECURITY-HANDOFF.md) and [exact-SHA qualification evidence](CMP-10-QUALIFICATION-EVIDENCE.md). Independent contract and worker sandbox audits, real adversarial campaigns and incentivized public testnet qualification are NOT complete.
 
 Required campaigns include:
 

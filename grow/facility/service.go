@@ -72,13 +72,21 @@ func (svc Service) Create(ctx context.Context,s Scope,rec Record)(Record,error){
  }
  return svc.store.Create(ctx,rec)
 }
+func tenantPreflight(s Scope)bool{
+ return s.Principal.Authenticated && s.Principal.SubjectID!="" &&
+ s.Principal.SubjectID==s.Membership.SubjectID &&
+ s.Membership.State==security.Active &&
+ s.Membership.TenantID!="" && s.Membership.TenantID==s.TenantID
+}
 func(svc Service) Get(ctx context.Context,s Scope,kind Kind,id string)(Record,error){
+ if !tenantPreflight(s){return Record{},ErrDenied}
  if svc.store==nil||!validID(s.TenantID)||!validID(id){return Record{},ErrDenied}
  rec,err:=svc.store.Get(ctx,s.TenantID,id,kind)
  if err!=nil||rec.TenantID!=s.TenantID||rec.Kind!=kind||!allowed(s,rec,security.View){return Record{},ErrDenied}
  return rec,nil
 }
 func(svc Service) List(ctx context.Context,s Scope,kind Kind,parentID string)([]Record,error){
+ if !tenantPreflight(s){return nil,ErrDenied}
  if svc.store==nil||!validID(s.TenantID)||kind!=Facility&&kind!=Room&&kind!=Zone{return nil,ErrDenied}
  if kind!=Facility&&!validID(parentID){return nil,ErrDenied}
  if kind!=Facility{

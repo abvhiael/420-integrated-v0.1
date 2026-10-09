@@ -150,7 +150,8 @@ func TestPrivatePostgresRealSessionsScopedReadsWritesAndRevocation(t *testing.T)
 	}
 	// A zone-restricted user cannot enumerate a different facility even within their tenant.
 	if zoneFacilities := api(t, mux, zoneUser, "GET", "/v1/private/dashboard/facilities", nil, false); zoneFacilities.Code != 200 ||
-		!strings.Contains(zoneFacilities.Body.String(), "Test Facility") {
+		!strings.Contains(zoneFacilities.Body.String(), "Test Facility") ||
+		strings.Contains(zoneFacilities.Body.String(), "Restricted other facility") {
 		t.Fatalf("zone member facility scope broken: %d %s", zoneFacilities.Code, zoneFacilities.Body.String())
 	}
 	if got := api(t, mux, reviewer, "GET", "/v1/private/dashboard/equipment", nil, false); got.Code != 403 {

@@ -37,7 +37,7 @@ func TestMonitoringReadOnlyAndTenantSecurity(t *testing.T){
 }
 func TestSignedControlPolicyNeverDispatches(t *testing.T){
  pub,priv,err:=ed25519.GenerateKey(rand.Reader);if err!=nil{t.Fatal(err)}
- now:=time.Now().UTC();s:=scoped(security.Owner);d:=device()
+ now:=time.Now().UTC();s:=scoped(security.Owner);d:=device();d.ControlSigningKey=pub
  c:=Command{DeviceID:d.ID,Action:"SET_TARGET",Value:22,ExpiresAt:now.Add(time.Minute)}
  c.Nonce[0]=1
  a:=Approval{SubjectID:"operator",PublicKey:pub,MFAConfirmed:true}
@@ -55,6 +55,7 @@ func TestSignedControlPolicyNeverDispatches(t *testing.T){
   func(d *Device,c *Command,a *Approval,s *Scope){a.Signature[0]^=0xff},
   func(d *Device,c *Command,a *Approval,s *Scope){s.Grant.Role=security.Technician},
   func(d *Device,c *Command,a *Approval,s *Scope){s.TenantID="other"},
+  func(d *Device,c *Command,a *Approval,s *Scope){d.ControlSigningKey=make([]byte,ed25519.PublicKeySize)},
  }{
   dd,cc,aa,ss:=d,c,a,s
   aa.Signature=append([]byte(nil),a.Signature...)

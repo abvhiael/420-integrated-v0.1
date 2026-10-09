@@ -27,6 +27,21 @@ func (s SQLStore) transaction(ctx context.Context, tenant string, callback func(
 }
 func (s SQLStore) Create(ctx context.Context, l Lot, actor string) error {
 	return s.transaction(ctx, l.TenantID, func(tx *sql.Tx) error {
+		if l.Kind == "HARVEST" {
+			var recorded float64
+			err := tx.QueryRowContext(ctx, `SELECT weight_grams::float8 FROM grow_private.harvest_records
+WHERE tenant_id=$1::uuid AND harvest_id=$2::uuid AND facility_id=$3::uuid AND zone_id=$4::uuid`,
+				l.TenantID, l.HarvestID, l.FacilityID, l.ZoneID).Scan(&recorded)
+			if errors.Is(err, sql.ErrNoRows) {
+				return ErrDenied
+			}
+			if err != nil {
+				return err
+			}
+			if l.Opening != recorded {
+				return ErrInvalid
+			}
+		}
 		res, err := tx.ExecContext(ctx, `INSERT INTO grow_private.inventory_lots_v2
 (tenant_id,lot_id,facility_id,zone_id,kind,unit,label,harvest_id,created_by)
 VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5,$6,$7,NULLIF($8,'')::uuid,$9)
@@ -86,7 +101,7 @@ func (s SQLStore) Snapshot(ctx context.Context, tenant, facility, zone, lot stri
 		err := tx.QueryRowContext(ctx, `SELECT tenant_id::text,lot_id::text,facility_id::text,zone_id::text,
 kind,unit,label,coalesce(harvest_id::text,''),balance::float8
 FROM grow_private.inventory_lots_v2 WHERE tenant_id=$1::uuid AND lot_id=$2::uuid
-AND facility_id=$3::uuid AND zone_id=$4::uuid`, tenant, lot, facility, zone).
+AND facility_id=$3::uuid AND zone_id=$4::uuid FOR SHARE`, tenant, lot, facility, zone).
 			Scan(&result.Lot.TenantID, &result.Lot.ID, &result.Lot.FacilityID, &result.Lot.ZoneID,
 				&result.Lot.Kind, &result.Lot.Unit, &result.Lot.Label, &result.Lot.HarvestID, &result.Balance)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -94,6 +109,20 @@ AND facility_id=$3::uuid AND zone_id=$4::uuid`, tenant, lot, facility, zone).
 		}
 		if err != nil {
 			return err
+		}
+		var correct bool
+		err = tx.QueryRowContext(ctx, `SELECT l.balance = COALESCE((
+SELECT SUM(CASE WHEN e.kind IN ('ISSUE','CONSUME','ADJUST_OUT','TRANSFER_OUT')
+THEN -e.quantity ELSE e.quantity END)
+FROM grow_private.inventory_ledger_v2 e
+WHERE e.tenant_id=l.tenant_id AND e.lot_id=l.lot_id
+),0) FROM grow_private.inventory_lots_v2 l
+WHERE l.tenant_id=$1::uuid AND l.lot_id=$2::uuid`, tenant, lot).Scan(&correct)
+		if err != nil {
+			return err
+		}
+		if !correct {
+			return ErrConflict
 		}
 		rows, err := tx.QueryContext(ctx, `SELECT tenant_id::text,event_id::text,lot_id::text,facility_id::text,zone_id::text,
 kind,quantity::float8,reason,actor_subject,source,idempotency_key,reference_id,occurred_at

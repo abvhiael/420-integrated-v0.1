@@ -26,7 +26,7 @@ export interface CommerceListingChange420 {
   version: number; method: 'createListing' | 'reviseListing'; listingId: string; revision?: number; sellerProfileId?: string; itemClass?: string; assetRef?: string;
   policyId: string; adapterId: string; quoteAsset: string; unitPrice: string; quantity: string; expiresAt: number;
 }
-export interface CommerceStatus420 { attemptId: string; orderId?: string; state: string; paid: boolean; reserved: boolean; paymentAllowed?: boolean; invoiceId?: string | null }
+export interface CommerceStatus420 { attemptId: string; orderId?: string; state: string; paid: boolean; reserved: boolean; paymentAllowed?: boolean; invoiceId?: string | null; paymentId?: string | null; receiptHash?: string | null; provenance?: {chainId: string; blockHash: string; blockNumber: number; finalized: true} }
 export class CommerceApiError420 extends Error {
   constructor(readonly code: string, readonly status: number) { super(code); this.name = 'CommerceApiError420'; }
 }

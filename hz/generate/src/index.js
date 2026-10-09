@@ -10,3 +10,4 @@ export * from "./community.js";
 export * from "./charts.js";
 export * from "./awards.js";
 export * from "./award-voting.js";
+export * from "./award-prizes.js";

@@ -56,3 +56,19 @@ test('browser signed GET with forbidden Origin omitted requires exact same-origi
   const cross=async(url,init)=>{if(init?.method==='GET'){const headers=new Headers(init.headers);headers.delete('Origin');headers.set('Sec-Fetch-Site','cross-site');headers.set('Host',new URL(f.origin).host);return fetch(url,{...init,headers});}return fetch(url,init);};
   await assert.rejects(()=>createCommerceSdk420({baseUrl:f.baseUrl,origin:f.origin,chainId:'420',now:f.now,wallet:seller,fetcher:cross}).merchantBuilder(store.store_id),e=>e.code==='origin_mismatch');
 });
+
+test('COM-6B signed SDK/HTTP dispute route never bypasses seller or Market authority',async t=>{
+ const f=await running(t),state=await checkout(f),sdk=f.sdk(seller);
+ state.order.status='2';f.orders.set(state.attempt.orderId,state.order);
+ const prepared=await sdk.merchantRemedy(state.store.store_id,state.attempt.attemptId,'dispute',{disputeHash:b32(702)});
+ assert.equal(prepared.proposal.intent.method,'disputeOrder');
+ assert.equal(prepared.proposal.arbitrationCaseOpened,false);
+ const pending=await sdk.merchantDisputes(state.store.store_id);
+ assert.equal(pending.items[0].marketDisputed,false);
+ await assert.rejects(()=>f.sdk(attacker).merchantDisputes(state.store.store_id),e=>e.code==='forbidden');
+ await assert.rejects(()=>f.sdk(buyer).merchantRemedy(state.store.store_id,state.attempt.attemptId,'dispute',{disputeHash:b32(702)}),e=>e.code==='forbidden');
+ state.order.status='6';state.order.disputeHash=b32(702);
+ const final=await sdk.merchantDisputes(state.store.store_id);
+ assert.equal(final.items[0].state,'MARKET_DISPUTE_FINALIZED');
+ await assert.rejects(()=>sdk.arbitrationPrepare(state.store.store_id,state.attempt.attemptId,{remedyHash:b32(703)}),e=>e.code==='arbitration_unavailable');
+});

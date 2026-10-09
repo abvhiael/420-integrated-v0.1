@@ -18,7 +18,7 @@ import {fixture} from './fixture.mjs';
 const f=setup(),wf=fixture(),temp=mkdtempSync(join(tmpdir(),'com4-browser-'));let api,browser;const errors=[],checks=[];let rejectTx=false,unmined=null,account=seller.address.toLowerCase(),chain='0x1a4';
 f.service.reconcileTaxonomy([{id:'a'.repeat(64),slug:'app-goods',order:0}]);
 f.source.merchant=async id=>({controller:id===b32(1)?seller.address.toLowerCase():address(0),active:id===b32(1)});
-const server=createServer((req,res)=>{if(req.url.startsWith('/v1/'))return api.listeners('request')[0](req,res);const path=req.url==='/'?'index.html':req.url.slice(1);if(!['index.html','app.js','style.css','public.html','public.js','public.css'].includes(path)){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':'text/html','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(readFileSync(join(temp,'site',path)));});
+const server=createServer((req,res)=>{if(req.url.startsWith('/v1/'))return api.listeners('request')[0](req,res);const path=req.url==='/'?'index.html':req.url.slice(1);if(!['index.html','app.js','style.css','public.html','public.js','public.css','operations.html','operations.js'].includes(path)){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':'text/html','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(readFileSync(join(temp,'site',path)));});
 try{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
   api=commerceServer(f.service,new RequestAuth(f.db,{origin,chainId:'420',now:f.now}),{origin,now:f.now,rateLimit:10000});
@@ -85,6 +85,19 @@ try{
   assert.equal(await shopper.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   assert.deepEqual((await new AxeBuilder({page:shopper}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations,[]);
   await shopper.close();pass('COM-5 anonymous marketplace search, cart, axe and 320px browser acceptance');
+  const operations=await context.newPage();operations.on('pageerror',e=>errors.push(e.message));await operations.goto(origin+'/operations.html');
+  assert.match(await operations.locator('h1').textContent(),/Merchant operations/);
+  await operations.locator('#connect').click();
+  await operations.locator('#open input[name=storeId]').fill(f.db.get('SELECT store_id FROM stores').store_id);
+  await operations.locator('#open button').click();
+  await operations.waitForFunction(()=>document.querySelector('#summary').textContent.includes('order attempts'));
+  assert.match(await operations.locator('#summary').textContent(),/0 order attempts/);
+  assert.match(await operations.locator('#integrations').textContent(),/NOT_CONFIGURED/);
+  assert.deepEqual((await new AxeBuilder({page:operations}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations,[]);
+  await operations.setViewportSize({width:320,height:740});
+  assert.equal(await operations.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
+  await operations.close();pass('COM-6 signed merchant dashboard, no invented receipts, integration gates, mobile accessibility');
+
   await fill('rollback-form',{release:'2'});await submit('rollback-form');assert.equal(f.db.get('SELECT public_description FROM store_branding').public_description,'Paper merchant');assert.equal((await fetch(origin+'/v1/storefronts/browser-store').then(r=>r.json())).data.public_description,'Night draft');pass('published branding rollback restores a private draft');
   // Text must fail server validation and never become HTML in preview.
   await fill('branding-form',{description:'<script>window.compromised=true</script>'});await page.locator('#preview-button').click();assert.equal(await page.locator('#preview script').count(),0);await submit('branding-form');assert.equal(await page.locator('#error').textContent(),'invalid_text');assert.equal(await page.evaluate(()=>document.activeElement.id),'error');pass('malicious content is rendered as text and rejected by API');

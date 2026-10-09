@@ -81,3 +81,28 @@ test('COM-6 optional identity, names, notifications and external analytics fail 
  assert.equal(adapters.analytics.status,'LOCAL_FINALIZED_PROJECTION');
  await assert.rejects(()=>f.service.merchantIntegrations(attacker.address,store.store_id),e=>e.code==='forbidden');
 });
+
+test('COM-6E aggregates more than 100 attempts without silent preview truncation',async t=>{
+ const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);
+ f.orders.set(attempt.orderId,order);
+ for(let i=1;i<105;i++){
+   const attemptId=b32(20000+i).slice(2);
+   const orderId=b32(30000+i);
+   f.db.run('INSERT INTO checkout_attempts SELECT ?,cart_id,customer_scope,merchant_id,network_id,?,listing_id,listing_revision,quantity,seller,asset,total,payment_id,quote_id,?,request_hash,state,expires_at FROM checkout_attempts WHERE attempt_id=?',attemptId,orderId,'generated-'+i,attempt.attemptId);
+   f.orders.set(orderId,{...order});
+ }
+ const stats=await f.service.merchantAnalytics(seller.address,store.store_id);
+ assert.equal(stats.totals.orders,105);
+ assert.equal(stats.partial,false);
+ assert.equal(stats.scope,'all_local_checkout_attempts_at_finalized_block');
+ assert.equal(stats.totals.paid,0);
+ await assert.rejects(()=>f.service.merchantAnalytics(attacker.address,store.store_id),e=>e.code==='forbidden');
+});
+
+test('COM-6E fails closed if finalized RPC snapshot changes during aggregation',async t=>{
+ const f=setup();t.after(()=>f.close());const {store,attempt,order}=await checkout(f);
+ f.orders.set(attempt.orderId,order);
+ const original=f.source.order;
+ f.source.order=async key=>{const value=await original(key);f.source.blockHash=b32(700);return value;};
+ await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id),e=>e.code==='analytics_snapshot_changed');
+});

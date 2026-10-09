@@ -53,7 +53,7 @@ test('COM-6 refund and dispute handoff never mutates Pay, Market, receipt, order
  await assert.rejects(()=>f.service.merchantRefunds(seller.address,store.store_id),e=>e.code==='refund_proof_mismatch');
  f.source.fundedRefund=null;
  await assert.rejects(()=>f.service.merchantRefunds(attacker.address,store.store_id),e=>e.code==='forbidden');
- await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund',{amount:'1',reasonHash:b32(405)}),e=>e.code==='refund_pending_exceeds_available');
+ await assert.rejects(()=>f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund',{amount:'1',reasonHash:b32(405)}),e=>e.code==='refund_exceeds_available');
 assert.equal(refund.refunded,false);assert.equal(refund.authority,'Pay.RefundManager420');
  const dispute=await f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute');
  assert.equal(dispute.executed,false);assert.equal(dispute.disputed,false);

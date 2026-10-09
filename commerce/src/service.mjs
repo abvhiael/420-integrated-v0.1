@@ -65,7 +65,9 @@ export class CommerceService {
     requireThat(p && p.version===version(input.version),'version_conflict',409);
     requireThat(['createListing','reviseListing'].includes(input.method),'invalid_listing_method');
     const listingId=bytes32(input.listingId),policyId=bytes32(input.policyId),adapterId=bytes32(input.adapterId),asset=wallet(input.quoteAsset);
-    requireThat(asset!=='0x0000000000000000000000000000000000000000','invalid_asset'); quantity(input.unitPrice);quantity(input.quantity);integer(input.expiresAt,0,Number.MAX_SAFE_INTEGER);
+    // Zero address is the canonical native $420 settlement-asset representation.
+    // The owning Market and Pay contracts still validate their own policy/adapter.
+    quantity(input.unitPrice);quantity(input.quantity);integer(input.expiresAt,0,Number.MAX_SAFE_INTEGER);
     requireThat(input.expiresAt===0 || input.expiresAt>Math.floor(this.now()/1000),'invalid_expiry');
     const policy=await source.policy(policyId,adapterId);requireThat(policy.policyActive&&policy.adapterActive,'inactive_policy',409);
     const listing=await source.listing(listingId);let args,revision;
@@ -276,13 +278,13 @@ export class CommerceService {
     const order=await source.order(a.order_id);
     if(Number(order.status)===0) return {attemptId,state:'ORDER_SIGNATURE_REQUIRED',paid:false,reserved:false};
     requireThat(order.listingId===a.listing_id&&Number(order.listingRevision)===a.listing_revision&&wallet(order.buyer)===a.customer_scope&&wallet(order.seller)===a.seller&&order.quantity===a.quantity&&wallet(order.paymentAsset)===a.asset&&order.totalAmount===a.total,'order_correlation',503);
-    let paid=false,invoiceId=null,state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
+    let paid=false,invoiceId=null,receiptHash=null,paymentId=null,state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
     if(state==='CREATED') {
       invoiceId=await source.invoiceId(a.order_id); const invoice=await source.invoice(invoiceId);
       const valid=invoice.active&&invoice.merchantId===a.merchant_id&&wallet(invoice.merchant)===a.seller&&invoice.amount===a.total&&invoice.currency==='0x343230'&&Number(invoice.mode)===0&&Number(invoice.acceptance)>=1&&!invoice.partialPayments&&(invoice.expiresAt==='0'||BigInt(invoice.expiresAt)>BigInt(Math.floor(this.now()/1000)));
       state=valid?'PAYMENT_SIGNATURE_REQUIRED':'MERCHANT_INVOICE_PENDING';
     } else if(['PAID','FULFILLED','COMPLETED','DISPUTED','REFUNDED'].includes(state)) {
-      const payment=await source.payment(bytes32(order.paymentRef)); invoiceId=await source.invoiceId(a.order_id);
+      const payment=await source.payment(bytes32(order.paymentRef)); paymentId=order.paymentRef; receiptHash=payment.receiptHash; invoiceId=await source.invoiceId(a.order_id);
       const invoice=await source.invoice(invoiceId),paidInvoice=await source.invoicePaid(invoiceId),bound=await source.boundPayment(a.order_id);
       requireThat(bound===order.paymentRef&&payment.invoiceId===invoiceId&&wallet(payment.payer)===a.customer_scope&&wallet(payment.merchant)===a.seller&&wallet(payment.settlementAsset)===a.asset&&payment.settlementAmount===a.total&&payment.receiptHash!== '0x'+'0'.repeat(64)&&invoice.active&&invoice.merchantId===a.merchant_id&&wallet(invoice.merchant)===a.seller&&invoice.amount===a.total&&invoice.currency==='0x343230'&&Number(invoice.mode)===0&&Number(invoice.acceptance)>=1&&!invoice.partialPayments&&paidInvoice.amount===a.total&&paidInvoice.closed,'payment_correlation',503);
       const status=Number(payment.status);
@@ -291,7 +293,7 @@ export class CommerceService {
       paid=state!=='REFUNDED';
     }
     this.db.run('UPDATE checkout_attempts SET state=?,payment_id=?,quote_id=? WHERE attempt_id=?',state,order.paymentRef==='0x'+'0'.repeat(64)?null:order.paymentRef,null,attemptId);
-    return {attemptId,orderId:a.order_id,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {attemptId,orderId:a.order_id,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async putDelivery(actor,attemptId,input) {
     keys(input,['address','contact']); text(input.address,2000); text(input.contact,200); actor=wallet(actor);

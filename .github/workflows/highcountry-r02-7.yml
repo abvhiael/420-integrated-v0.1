@@ -96,7 +96,7 @@ jobs:
           assert types(entry(cult,'function','expressionForPlant'),'outputs')==['bytes32']
           entry(phen,'event','ProvenanceSourcesBound')
           cult=abi('CultivationEngine')
-          assert types(entry(cult,'function','bindRulesetRegistry'),'inputs')==['address']
+          assert types(entry(cult,'function','bindRulesetRegistry'),'inputs')==['address','address']
           assert types(entry(cult,'function','sealedRulesetId'),'inputs')==['uint64']
           assert types(entry(cult,'function','sealedRulesetContentHash'),'outputs')==['bytes32']
           entry(cult,'event','RulesetRegistryBound')

@@ -10,6 +10,7 @@ import (
 )
 
 type verifiedProvider struct{}
+
 func (verifiedProvider) Verify(_ context.Context, output Recommendation) error {
 	if output.Provider != "internal" {
 		return ErrDenied
@@ -18,11 +19,12 @@ func (verifiedProvider) Verify(_ context.Context, output Recommendation) error {
 }
 
 type fakeStore struct {
-	jobs []Input
-	outputs []Recommendation
-	reviews []Review
+	jobs      []Input
+	outputs   []Recommendation
+	reviews   []Review
 	consented bool
 }
+
 func (f *fakeStore) Enqueue(_ context.Context, input Input, _ string) error {
 	if !f.consented {
 		return ErrDenied
@@ -63,9 +65,9 @@ func (f *fakeStore) Read(_ context.Context, _, _, _, id string) (Recommendation,
 }
 func scope(tenant string, role security.Role) Scope {
 	return Scope{
-		TenantID: tenant,
+		TenantID:  tenant,
 		Principal: security.Principal{SubjectID: "operator", Authenticated: true},
-		Grant: security.Grant{SubjectID: "operator", TenantID: tenant, Role: role, State: security.Active},
+		Grant:     security.Grant{SubjectID: "operator", TenantID: tenant, Role: role, State: security.Active},
 	}
 }
 func TestConsentMinimalPayloadAndTenantIsolation(t *testing.T) {

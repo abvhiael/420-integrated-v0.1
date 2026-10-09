@@ -92,9 +92,13 @@ func main() {
 		addr = "127.0.0.1:8443"
 	}
 	pem, err := os.ReadFile(clientCA)
-	if err != nil {log.Fatal("private client CA unavailable")}
+	if err != nil {
+		log.Fatal("private client CA unavailable")
+	}
 	clientPool := x509.NewCertPool()
-	if !clientPool.AppendCertsFromPEM(pem) {log.Fatal("private client CA is invalid")}
+	if !clientPool.AppendCertsFromPEM(pem) {
+		log.Fatal("private client CA is invalid")
+	}
 	server := &http.Server{
 		Addr: addr, Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
@@ -104,12 +108,12 @@ func main() {
 			w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
 			mux.ServeHTTP(w, r)
 		}),
-		TLSConfig: &tls.Config{MinVersion: tls.VersionTLS13,ClientAuth: tls.VerifyClientCertIfGiven,ClientCAs:clientPool},
+		TLSConfig:         &tls.Config{MinVersion: tls.VersionTLS13, ClientAuth: tls.VerifyClientCertIfGiven, ClientCAs: clientPool},
 		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout: 15 * time.Second,
-		WriteTimeout: 20 * time.Second,
-		IdleTimeout: 45 * time.Second,
-		MaxHeaderBytes: 16384,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      20 * time.Second,
+		IdleTimeout:       45 * time.Second,
+		MaxHeaderBytes:    16384,
 	}
 	go func() {
 		<-ctx.Done()

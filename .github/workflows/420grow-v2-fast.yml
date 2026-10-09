@@ -13,6 +13,7 @@ on:
       - 'grow/harvest/**'
       - 'grow/inventory/**'
       - 'grow/assistance/**'
+      - 'grow/integrations/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -25,6 +26,7 @@ on:
       - 'grow/harvest/**'
       - 'grow/inventory/**'
       - 'grow/assistance/**'
+      - 'grow/integrations/**'
       - 'grow/facility/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -159,3 +161,13 @@ jobs:
           gofmt -d grow/assistance/*.go
           test -z "$(gofmt -l grow/assistance/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/assistance/qualify.sql
+      - name: GROW-V2-12 scoped ecosystem outbox and notification Level 1
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/integrations
+          go test -race -count=1 ./grow/integrations
+          go vet ./grow/integrations
+          gofmt -d grow/integrations/*.go
+          test -z "$(gofmt -l grow/integrations/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/integrations/qualify.sql

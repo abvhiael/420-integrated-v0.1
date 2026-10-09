@@ -30,14 +30,14 @@ DO $$ BEGIN
 END $$;
 UPDATE grow_private.dashboard_identities SET enabled=false,revoked_at=now()
 WHERE tenant_id='aaaaaaaa-1111-4111-8111-111111111111' AND subject_id='operator';
-DO $ BEGIN
+DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM grow_private.dashboard_sessions s
  JOIN grow_private.dashboard_identities i ON i.tenant_id=s.tenant_id AND i.subject_id=s.subject_id
  AND i.cert_fingerprint=s.identity_fingerprint
  WHERE s.session_id='aaaaaaaa-0000-4000-8000-000000000301'
  AND s.revoked_at IS NULL AND i.enabled=true AND i.revoked_at IS NULL)
  THEN RAISE EXCEPTION 'revoked certificate still authenticates'; END IF;
-END $;
+END $$;
 COMMIT;
 SET ROLE grow_v2_test_runtime;
 BEGIN;

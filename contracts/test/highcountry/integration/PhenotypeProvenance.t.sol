@@ -18,6 +18,8 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
     CultivationEngine internal cultivation;
     BreedingEngine internal breeding;
     bytes32 internal approvedRulesetId;
+    RulesetRegistry internal rulesets;
+    RulesetRouter internal router;
 
     function setUp() public override {
         super.setUp();
@@ -25,7 +27,7 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         cultivation = new CultivationEngine(address(auth), address(plants));
         caps.registerProtocolComponent(ModuleIds.RULESET_REGISTRY, address(this));
-        RulesetRegistry rulesets = new RulesetRegistry(address(auth));
+        rulesets = new RulesetRegistry(address(auth));
         bytes32 hash = keccak256("r02.7:ruleset:version1");
         approvedRulesetId = rulesets.deriveRulesetId(hash);
         _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, approvedRulesetId);
@@ -37,7 +39,7 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
             cultivation.RULESET_BIND_SCOPE()
         );
         caps.registerProtocolComponent(ModuleIds.RULESET_ROUTER, address(this));
-        RulesetRouter router = new RulesetRouter(address(auth), address(rulesets));
+        router = new RulesetRouter(address(auth), address(rulesets));
         _grant(address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE,
             cultivation.EXPRESSION_RULESET_DOMAIN());
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
@@ -169,4 +171,25 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
             HCInvalidState.selector
         );
     }
+    function testR027RegisteredButWrongRoutedVersionDenied() public {
+        bytes32 nextContent = keccak256("r02.7:ruleset:version2");
+        bytes32 nextId = rulesets.deriveRulesetId(nextContent);
+        _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, nextId);
+        rulesets.registerRuleset(nextContent);
+        _environment();
+        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
+            (1, GENOME, nextId)), HCInvalidState.selector);
+        router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), nextId);
+        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
+            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
+        bytes32 expression = cultivation.expressPhenotype(1, GENOME, nextId);
+        require(expression != bytes32(0), "routed version did not seal");
+        require(cultivation.sealedRulesetId(1) == nextId, "routed ID not pinned");
+        require(cultivation.sealedRulesetContentHash(1) == nextContent, "routed content not pinned");
+        router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
+        require(cultivation.sealedRulesetId(1) == nextId, "sealed version changed on reroute");
+        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
+            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
+    }
+
 }

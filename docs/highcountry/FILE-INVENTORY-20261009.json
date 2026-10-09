@@ -4,50 +4,96 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "contracts/test/highcountry/integration/PublicPlantCapacity.t.sol",
-      "sha256": "7f13621b86ee9985bf662896b01fb0274babaca8b66eb2161b629093afad6ff8",
+      "path": "docs/highcountry/qualification/R02.3-level1.json",
+      "sha256": "2ee6a06f6db95c99fc42fc9a97e0757c565ef8b25673864ca7990fa591e8f9f1",
       "classification": "COMPLETE",
-      "contracts": [
-        "PublicPlantCapacityFixture",
-        "PublicPlantCapacityTest"
-      ],
-      "interfaces": [
-        "VmHCPlot"
-      ],
-      "tests": [
-        "testAllocatedNonownerCultivatesAndReleaseWaitsForTermination",
-        "testPrivatePlantsPreventLaterOverreservation",
-        "testReservationsProtectUnusedPublicSlotsFromPrivatePlants",
-        "testAllocationIsGrowerAndPlotSpecific",
-        "testUnauthorizedAdmissionAndRevocationRollBackCounters",
-        "testPublicPlantFlowsThroughCultivationEngine",
-        "testBindingIsOneTimeAndUnauthorizedBindingFails",
-        "testDuplicateMissingGenomeAndUnknownPlotDoNotConsumeCapacity",
-        "testPrivateTerminationFreesReservationSpaceButPublicTerminationKeepsReservation",
-        "testReadyAndUnauthorizedTerminationKeepAllocationOccupied",
-        "testOperatorChangesDoNotEraseOrDuplicateOccupancy",
-        "testMaximumCapacityUsesWideReservationArithmetic",
-        "testFuzzMixedCapacityConservation"
-      ]
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
     },
     {
-      "path": "contracts/test/highcountry/invariant/PublicPlantCapacityInvariant.t.sol",
-      "sha256": "981bf613af2840f50b4583d14cd3e328f96303ce7eeb7385ca5469dd4eb86e76",
+      "path": "docs/highcountry/qualification/R02.3/hc-access-sdk.json",
+      "sha256": "6b2a1951ffb9a3df3624fc9422c47e5a6a8f96b612307fe049f6c55e7f1111a9",
       "classification": "COMPLETE",
-      "contracts": [
-        "PublicPlantCapacityHandler",
-        "PublicPlantCapacityInvariantTest"
-      ],
-      "interfaces": [
-        "VmPlotInvariant"
-      ],
-      "tests": [
-        "invariantCapacityAndAllocationConservation"
-      ]
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
     },
     {
-      "path": "docs/highcountry/R02.3-PUBLIC-PLANT-CAPACITY.md",
-      "sha256": "c96239f528b6f7b0974311542626f21300c1ccd9cd652407af593bfe11688480",
+      "path": "docs/highcountry/qualification/R02.3/hc-unit-integration-invariants.json",
+      "sha256": "7847242cb4da60ec5b1853142e0399f262e52923c7edbe4b9456b12a77ca6dd8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/live-runtime-blocker.json",
+      "sha256": "74fad75ed7fbc4a9d4c03814d46cbf6868e31664398c249b8c08d904b74f0a6d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/runtime-template.json",
+      "sha256": "b99e908176c10e10ace4506cf713744c267ec8910fc686d82f5852f5f48249ef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/shared-gaming-contracts.json",
+      "sha256": "68163c48b48ca55e3565c7bb321439d5b1ee24a292377f05697c32bb62de4454",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/shared-runtime-libraries.json",
+      "sha256": "f9091f8ada3ee8a0efc7f63ebf358663b84e2eaa0aaeeb7249b06260d9bd62c0",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/solidity-build-sizes.json",
+      "sha256": "ec9d8081b0444d6fb5e051f3755b8f34f3a0daf2fa621505396c0fb7a5e3a323",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/solidity-format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/solidity-static-lint.json",
+      "sha256": "85fbfa72e3b571f7dc1ca0c103b5dfe7de702faa796e97325a62c8c58821591a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/source-specification.json",
+      "sha256": "6f6060f80e0de997c40b2e3b7dffad841bf0cbf05e7b279f944e6867c48b7f7b",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -611,6 +657,33 @@
       ]
     },
     {
+      "path": "contracts/test/highcountry/integration/PublicPlantCapacity.t.sol",
+      "sha256": "7f13621b86ee9985bf662896b01fb0274babaca8b66eb2161b629093afad6ff8",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PublicPlantCapacityFixture",
+        "PublicPlantCapacityTest"
+      ],
+      "interfaces": [
+        "VmHCPlot"
+      ],
+      "tests": [
+        "testAllocatedNonownerCultivatesAndReleaseWaitsForTermination",
+        "testPrivatePlantsPreventLaterOverreservation",
+        "testReservationsProtectUnusedPublicSlotsFromPrivatePlants",
+        "testAllocationIsGrowerAndPlotSpecific",
+        "testUnauthorizedAdmissionAndRevocationRollBackCounters",
+        "testPublicPlantFlowsThroughCultivationEngine",
+        "testBindingIsOneTimeAndUnauthorizedBindingFails",
+        "testDuplicateMissingGenomeAndUnknownPlotDoNotConsumeCapacity",
+        "testPrivateTerminationFreesReservationSpaceButPublicTerminationKeepsReservation",
+        "testReadyAndUnauthorizedTerminationKeepAllocationOccupied",
+        "testOperatorChangesDoNotEraseOrDuplicateOccupancy",
+        "testMaximumCapacityUsesWideReservationArithmetic",
+        "testFuzzMixedCapacityConservation"
+      ]
+    },
+    {
       "path": "contracts/test/highcountry/integration/RealCapabilityBudgetPolicy.t.sol",
       "sha256": "3f3116b2e6199078ab4b95ea7dec155690f8527c1de69cbf1bc8633453bc1c52",
       "classification": "COMPLETE",
@@ -812,6 +885,21 @@
         "invariant_HC_INV_ACCESS_024_SessionScopeCannotSpendNative420",
         "invariant_HC_INV_ACCESS_024_UnknownCallsFailClosed",
         "invariant_HC_INV_ACCESS_025_OnlyExplicitRoutineCallsAvoidWalletEscalation"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/PublicPlantCapacityInvariant.t.sol",
+      "sha256": "981bf613af2840f50b4583d14cd3e328f96303ce7eeb7385ca5469dd4eb86e76",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PublicPlantCapacityHandler",
+        "PublicPlantCapacityInvariantTest"
+      ],
+      "interfaces": [
+        "VmPlotInvariant"
+      ],
+      "tests": [
+        "invariantCapacityAndAllocationConservation"
       ]
     },
     {
@@ -1350,6 +1438,14 @@
     {
       "path": "docs/highcountry/R02.2-CAPABILITY-BUDGET-POLICY.md",
       "sha256": "0b7270d04e55d66b31d33b014416d3a684174fd27a366ffa4b430b4f28c996c2",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/R02.3-PUBLIC-PLANT-CAPACITY.md",
+      "sha256": "c96239f528b6f7b0974311542626f21300c1ccd9cd652407af593bfe11688480",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

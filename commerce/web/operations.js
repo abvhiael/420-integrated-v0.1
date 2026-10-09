@@ -118,7 +118,7 @@ async function load(){
  for(const refund of refunds.items)add($('refunds'),'li',refund.refundId+' · '+refund.amount+' base units '+refund.asset+' · '+(refund.fundsReturned?'FUNDS RETURNED — canonical funded payout verified':'NOT PAID — governance pending or payout unverified'));
  $('analytics').textContent='Finalized projection preview (first 100 attempts; incomplete when more exist). '+JSON.stringify(analytics.totals)+' · partial='+analytics.partial;
  for(const [asset,amounts] of Object.entries(analytics.byAsset??{}))add($('assets'),'li',asset+' · '+JSON.stringify(amounts));
- for(const [name,value] of Object.entries(integrations))if(value&&typeof value==='object'&&'status' in value)add($('integrations'),'li',name+': '+value.status+' · '+value.authority);
+ for(const [name,value] of Object.entries(integrations))if(value&&typeof value==='object'&&'status' in value)add($('integrations'),'li',name+': '+value.status+' · '+value.authority+(value.externalDelivery?' · external delivery: '+value.externalDelivery:''));
  $('refresh').disabled=false;status('Verified finalized merchant operations loaded. No settlement, refund or dispute was executed.');
 }
 $('notifySave').addEventListener('click',()=>action(async()=>{if(!sdk||!store)throw Error('Connect merchant Wallet first');await sdk.setMerchantNotificationPreferences(store,$('notifyOptIn').checked);await load();}));

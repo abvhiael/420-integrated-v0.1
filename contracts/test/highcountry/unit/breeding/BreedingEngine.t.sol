@@ -6,6 +6,8 @@ import { ICapabilityRegistry420 } from "../../../../src/interfaces/genesis/ICapa
 import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighCountryAuthorization.sol";
 import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
+import { EmergencyDomains } from "../../../../src/highcountry/constants/EmergencyDomains.sol";
+import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 import { GenesisRegistry } from "../../../../src/highcountry/genesis/GenesisRegistry.sol";
 import { GenomeRegistry } from "../../../../src/highcountry/genetics/GenomeRegistry.sol";
 import { RandomnessCoordinator } from "../../../../src/highcountry/random/RandomnessCoordinator.sol";
@@ -164,6 +166,31 @@ contract BreedingEngineTest {
         (bool replay,) = address(randomness)
             .call(abi.encodeWithSelector(randomness.consume.selector, requestId, domain, contextHash));
         require(!replay, "randomness consumed twice");
+    }
+
+    function testEmergencyBreedingAndRandomnessRequireIndependentRelease() public {
+        EmergencyState state = EmergencyState(address(breeding.emergencyState()));
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
+            EmergencyDomains.BREEDING, keccak256("restrict:breed"));
+        state.setRestricted(EmergencyDomains.BREEDING, true);
+        (bool ok,) = address(breeding).call(abi.encodeWithSelector(breeding.requestBreeding.selector,
+            uint64(4), parentA, parentB, keccak256("child"), keccak256("line"), keccak256("metadata")));
+        require(!ok, "breeding request bypassed emergency");
+        (ok,) = address(state).call(abi.encodeWithSelector(
+            state.setRestricted.selector, EmergencyDomains.BREEDING, false));
+        require(!ok, "release permitted without capability");
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RELEASE,
+            EmergencyDomains.BREEDING, keccak256("release:breed"));
+        state.setRestricted(EmergencyDomains.BREEDING, false);
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
+            EmergencyDomains.RANDOMNESS_REQUEST, keccak256("restrict:random"));
+        state.setRestricted(EmergencyDomains.RANDOMNESS_REQUEST, true);
+        bytes32 req = keccak256("restricted:request");
+        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST,
+            req, keccak256("restricted:request:grant"));
+        (ok,) = address(randomness).call(abi.encodeWithSelector(
+            randomness.request.selector, req, keccak256("domain"), keccak256("context")));
+        require(!ok, "randomness request bypassed emergency");
     }
 
     function _grant(

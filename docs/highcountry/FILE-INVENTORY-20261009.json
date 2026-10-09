@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/qualification/R01.5-level1.json",
-      "sha256": "f71d7c89d93f386bc6fac767c9a76ca37a5f0d7e2a2f60248902f789f9d1d5da",
+      "path": "docs/highcountry/GAMEPLAY-SPECIFICATION.md",
+      "sha256": "2fbc80785f1f34993e89622d1f4570b206cd6c29e217c002f6977ea75dd1b6ec",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1242,7 +1242,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "0987ed35b7b00f1089b21126eeff45860cd91953afcac02f77823a2de5c92b94",
+      "sha256": "1a6d04635068c426a9d5afa257f65889e0cea9a833ce779d81463d8c206e7a3b",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1250,7 +1250,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "f876be0fb7214503478c00f14db08ec5423ae1e05b420fad4a57ea796fcf0539",
+      "sha256": "046049b68b68fcf69c407f62b3d732fd568e03aa3473a005bcf6966925e97722",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1387,6 +1387,14 @@
     {
       "path": "docs/highcountry/qualification/R01.4-level1.json",
       "sha256": "65ad27e5b80bfa25bb8c79382957d9a227ff0ab6c22d6dab1e693173b6250adb",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.5-level1.json",
+      "sha256": "f71d7c89d93f386bc6fac767c9a76ca37a5f0d7e2a2f60248902f789f9d1d5da",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

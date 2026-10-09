@@ -1,6 +1,7 @@
 import { keccak256, toUtf8Bytes } from 'ethers';
 import { requireThat, text, wallet, bytes32, integer, quantity, keys, id, hash, safeMedia, encryptDelivery, decryptDelivery } from './security.mjs';
 import { fixedPrice, orderStates } from './authority.mjs';
+import { canonicalRefundProposal } from './refund.mjs';
 
 const editableScopes = ['branding','catalogue','categories','media'];
 const objectID = value => { requireThat(typeof value === 'string' && /^[a-f0-9]{64}$/.test(value), 'invalid_id'); return value; };
@@ -324,17 +325,24 @@ export class CommerceService {
     delete totals.finalizedPaidBaseUnits;delete totals.finalizedRefundedBaseUnits;
     return {totals,byAsset,partial:data.nextOffset!==null,limit:100,scope:'first_100_attempts_only',assetBreakdownRequired:false,financialAuthority:'Pay/Market',provenance:data.provenance};
   }
-  async merchantRemedy(actor,storeId,attemptId,kind) {
+  async merchantRemedy(actor,storeId,attemptId,kind,request={}) {
     requireThat(['refund','dispute'].includes(kind),'invalid_remedy');
     const {store,merchant,source}=await this.access(actor,storeId,'publish');
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
     const row=this.db.get('SELECT a.* FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=? AND a.attempt_id=?',storeId,objectID(attemptId));
     requireThat(row,'not_found',404);
     const status=await this.status(actor,attemptId);
-    if(kind==='refund')requireThat(status.paid&&status.paymentId&&status.receiptHash,'refund_not_authorized',409);
+    let proposal=null;
+    if(kind==='refund') {
+      requireThat(status.paid&&status.paymentId&&status.receiptHash,'refund_not_authorized',409);
+      keys(request,['amount','reasonHash']);
+      const payment=await source.payment(bytes32(status.paymentId));
+      requireThat(payment.receiptHash===status.receiptHash&&payment.invoiceId===status.invoiceId,'refund_payment_correlation',503);
+      proposal=canonicalRefundProposal({paymentId:status.paymentId,orderId:row.order_id,payer:row.customer_scope,asset:row.asset,payment,requestedAmount:request.amount,reasonHash:request.reasonHash});
+    }
     else requireThat(['PAID','FULFILLED','DISPUTED'].includes(status.state),'dispute_not_eligible',409);
     // Governance / Arbitration alone authorizes effects. No fabricated signed transaction.
-    return {kind,orderId:row.order_id,merchantId:store.merchant_id,amount:row.total,asset:row.asset,paymentId:status.paymentId??null,status:'CANONICAL_AUTHORITY_ACTION_REQUIRED',executed:false,refunded:false,disputed:false,authority:kind==='refund'?'Pay.RefundManager420':'Market.OrderRegistry420 / 420Arbitration',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {kind,orderId:row.order_id,merchantId:store.merchant_id,amount:proposal?.amount??row.total,asset:row.asset,paymentId:status.paymentId??null,proposal,status:'CANONICAL_AUTHORITY_ACTION_REQUIRED',executed:false,refunded:false,disputed:false,authority:kind==='refund'?'Pay.RefundManager420':'Market.OrderRegistry420 / 420Arbitration',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async merchantIntegrations(actor,storeId) {
     const {store,merchant,source}=await this.access(actor,storeId,'publish');

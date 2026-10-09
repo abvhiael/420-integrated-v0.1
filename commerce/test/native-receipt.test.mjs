@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {keccak256,toUtf8Bytes} from 'ethers';
 import {setup,published,buyer,seller,b32,address} from './fixtures.mjs';
 const zeroAddress=address(0);
 test('native 420 zero-address quote asset remains legal in Market listing plan, under canonical policy',async t=>{
  const f=setup();t.after(()=>f.close());
  const store=await f.service.createStore(seller.address,{merchantId:b32(1),slug:'native-merchant'});
  const p=await f.service.product(seller.address,store.store_id,{sku:'NATIVE',description:'Native 420 quote',media:[],publishState:'draft'});
- const change={version:p.version,method:'createListing',listingId:b32(78),sellerProfileId:b32(3),itemClass:b32(4),assetRef:b32(5),policyId:b32(6),adapterId:b32(7),quoteAsset:zeroAddress,unitPrice:'420',quantity:'1',expiresAt:0};
+ const change={version:p.version,method:'createListing',listingId:b32(78),sellerProfileId:b32(3),itemClass:keccak256(toUtf8Bytes('420/MARKET/ITEM/PHYSICAL_GOOD/V1')),assetRef:b32(5),policyId:b32(6),adapterId:b32(7),quoteAsset:zeroAddress,unitPrice:'420',quantity:'1',expiresAt:0};
  // Existing canonical policy and Market authority remain the final gate;
  // zero address is the native value convention, not an invalid ERC20 token.
  const plan=await f.service.listingPlan(seller.address,store.store_id,p.product_id,change);

@@ -80,7 +80,8 @@ func validLot(l Lot) bool {
 	return l.ID != "" && l.FacilityID != "" && l.ZoneID != "" &&
 		strings.TrimSpace(l.Label) == l.Label && len(l.Label) > 0 && len(l.Label) <= 160 &&
 		!math.IsNaN(l.Opening) && !math.IsInf(l.Opening, 0) &&
-		l.Opening >= 0 && l.Opening <= 1000000
+		l.Opening >= 0 && l.Opening <= 1000000 &&
+		(l.Unit != "each" || math.Trunc(l.Opening) == l.Opening)
 }
 func (s Service) Create(ctx context.Context, scope Scope, l Lot) error {
 	if s.Store == nil || l.TenantID != scope.TenantID || !allow(scope, l.FacilityID, l.ZoneID, security.InventoryAdjust) {

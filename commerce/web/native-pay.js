@@ -54,7 +54,7 @@ async function guardSend(session,checked,transaction) {
  if(!ID.test(txHash)||checked.epoch!==session.epoch)fail('invalid_transaction_response');
  return txHash;
 }
-export async function createNative420Payment(session,status,{now=Date.now,nonceBytes}={}) {
+export async function createNative420Payment(session,status,{now=Date.now,nonceBytes,approve=()=>false}={}) {
  if(session.pending)fail('wallet_busy');
  verifyStatus(status,session,now());
  const nonce=nonceBytes??crypto.getRandomValues(new Uint8Array(32));
@@ -71,11 +71,12 @@ export async function createNative420Payment(session,status,{now=Date.now,nonceB
    const before=(await finalizedRead(session,checked,'PaymentRegistry420',paymentABI,'getPayment',[paymentId]))[0];
    if(Number(before.status)!==0)fail('payment_replay');
    const tx={from:checked.address,to:assertBinding(session,'PaymentRegistry420'),data:paymentABI.encodeFunctionData('createPayment',args),value:'0x0'};
+   if(!await approve({action:'create_payment',payer:status.buyer,seller:status.seller,recipient,asset:ZERO,amount:String(status.total),chainId:session.config.chainId,target:tx.to,paymentId,invoiceId:status.invoiceId}))fail('buyer_cancelled');
    const transactionHash=await guardSend(session,checked,tx);
    return {paymentId,payerNonce,invoiceId:status.invoiceId,orderId:status.orderId,merchantId:status.merchantId,payer:status.buyer,seller:status.seller,recipient,amount:String(status.total),asset:ZERO,transactionHash,state:'PAYMENT_CREATION_BROADCAST_NOT_FINAL',paid:false};
  } finally{session.pending=false;}
 }
-export async function settleNative420Payment(session,status,created,{now=Date.now}={}) {
+export async function settleNative420Payment(session,status,created,{now=Date.now,approve=()=>false}={}) {
  if(session.pending)fail('wallet_busy');
  verifyStatus(status,session,now());
  if(!created||!ID.test(created.paymentId)||created.orderId!==status.orderId||created.invoiceId!==status.invoiceId||created.payer!==session.address||created.amount!==String(status.total)||created.asset!==ZERO)fail('payment_plan_mismatch');
@@ -89,6 +90,7 @@ export async function settleNative420Payment(session,status,created,{now=Date.no
    const consumed=(await finalizedRead(session,checked,'PaymentRouter420',routerABI,'consumedPaymentAuthorization',[created.paymentId]))[0];
    if(consumed)fail('settlement_replay');
    const tx={from:checked.address,to:assertBinding(session,'PaymentRouter420'),data:routerABI.encodeFunctionData('executeNativeSplitSettlement',[created.paymentId,session.address,[recipient],[10000],0]),value:'0x'+BigInt(created.amount).toString(16)};
+   if(!await approve({action:'send_native_420',payer:status.buyer,seller:status.seller,recipient,asset:ZERO,amount:created.amount,chainId:session.config.chainId,target:tx.to,paymentId:created.paymentId,invoiceId:status.invoiceId}))fail('buyer_cancelled');
    const transactionHash=await guardSend(session,checked,tx);
    return {paymentId:created.paymentId,transactionHash,state:'NATIVE_SETTLEMENT_BROADCAST_NOT_FINAL',paid:false};
  } finally{session.pending=false;}

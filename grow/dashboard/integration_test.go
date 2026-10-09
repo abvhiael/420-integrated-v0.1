@@ -133,6 +133,9 @@ func TestPrivatePostgresRealSessionsScopedReadsWritesAndRevocation(t *testing.T)
 	if ownerView.Code != 200 {
 		t.Fatalf("owner read: %d %s", ownerView.Code, ownerView.Body.String())
 	}
+	if ownerFacilities := api(t, mux, owner, "GET", "/v1/private/dashboard/facilities", nil, false); ownerFacilities.Code != 200 {
+		t.Fatalf("owner facilities unavailable: %d", ownerFacilities.Code)
+	}
 	if !strings.Contains(ownerView.Body.String(), "Other zone plant") {
 		t.Fatal("owner lost second zone")
 	}
@@ -144,6 +147,11 @@ func TestPrivatePostgresRealSessionsScopedReadsWritesAndRevocation(t *testing.T)
 	otherView := api(t, mux, other, "GET", "/v1/private/dashboard/plants", nil, false)
 	if otherView.Code != 200 || strings.Contains(otherView.Body.String(), "Mother") {
 		t.Fatalf("cross tenant data exposed: %d %s", otherView.Code, otherView.Body.String())
+	}
+	// A zone-restricted user cannot enumerate a different facility even within their tenant.
+	if zoneFacilities := api(t, mux, zoneUser, "GET", "/v1/private/dashboard/facilities", nil, false); zoneFacilities.Code != 200 ||
+		!strings.Contains(zoneFacilities.Body.String(), "Test Facility") {
+		t.Fatalf("zone member facility scope broken: %d %s", zoneFacilities.Code, zoneFacilities.Body.String())
 	}
 	if got := api(t, mux, reviewer, "GET", "/v1/private/dashboard/equipment", nil, false); got.Code != 403 {
 		t.Fatalf("reviewer equipment authorization: %d", got.Code)
@@ -180,4 +188,26 @@ func TestPrivatePostgresRealSessionsScopedReadsWritesAndRevocation(t *testing.T)
 	if after := api(t, mux, owner, "GET", "/v1/private/session", nil, false); after.Code != 401 {
 		t.Fatalf("revoked owner cookie accepted: %d", after.Code)
 	}
+	// Revocation and role changes are checked against the database for every request.
+	adminDSN := os.Getenv("GROW_MIGRATION_DATABASE_URL")
+	admin, err := sql.Open("postgres", adminDSN)
+	if err != nil { t.Fatal(err) }
+	defer admin.Close()
+	if _, err := admin.Exec(`UPDATE grow_private.memberships SET state='SUSPENDED'
+	WHERE tenant_id=$1::uuid AND subject_id='ci-zone'`, tenantA); err != nil { t.Fatal(err) }
+	if got := api(t,mux,zoneUser,"GET","/v1/private/dashboard/plants",nil,false); got.Code != 401 {
+		t.Fatalf("suspended member retained access: %d",got.Code)
+	}
+	if got := api(t,mux,zoneUser,"POST","/v1/private/action/plants",map[string]any{
+		"operation":"create","requestId":requestID(t),"facilityId":facilityA,"zoneId":zoneA,
+		"label":"revoked race","state":"SEED"},true);got.Code != 401 {
+		t.Fatalf("suspended member could mutate: %d",got.Code)
+	}
+	// Restart/outage responses must never disclose cached private records.
+	if err := db.Close(); err != nil { t.Fatal(err) }
+	if got := api(t,mux,other,"GET","/v1/private/dashboard/plants",nil,false); got.Code == 200 ||
+		strings.Contains(got.Body.String(),"Mother") {
+		t.Fatalf("database outage leaked private data: %d",got.Code)
+	}
+
 }

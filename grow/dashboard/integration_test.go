@@ -192,23 +192,28 @@ func TestPrivatePostgresRealSessionsScopedReadsWritesAndRevocation(t *testing.T)
 	// Revocation and role changes are checked against the database for every request.
 	adminDSN := os.Getenv("GROW_MIGRATION_DATABASE_URL")
 	admin, err := sql.Open("postgres", adminDSN)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer admin.Close()
 	if _, err := admin.Exec(`UPDATE grow_private.memberships SET state='SUSPENDED'
-	WHERE tenant_id=$1::uuid AND subject_id='ci-zone'`, tenantA); err != nil { t.Fatal(err) }
-	if got := api(t,mux,zoneUser,"GET","/v1/private/dashboard/plants",nil,false); got.Code != 401 {
-		t.Fatalf("suspended member retained access: %d",got.Code)
+	WHERE tenant_id=$1::uuid AND subject_id='ci-zone'`, tenantA); err != nil {
+		t.Fatal(err)
 	}
-	if got := api(t,mux,zoneUser,"POST","/v1/private/action/plants",map[string]any{
-		"operation":"create","requestId":requestID(t),"facilityId":facilityA,"zoneId":zoneA,
-		"label":"revoked race","state":"SEED"},true);got.Code != 401 {
-		t.Fatalf("suspended member could mutate: %d",got.Code)
+	if got := api(t, mux, zoneUser, "GET", "/v1/private/dashboard/plants", nil, false); got.Code != 401 {
+		t.Fatalf("suspended member retained access: %d", got.Code)
 	}
-	// Restart/outage responses must never disclose cached private records.
-	if err := db.Close(); err != nil { t.Fatal(err) }
-	if got := api(t,mux,other,"GET","/v1/private/dashboard/plants",nil,false); got.Code == 200 ||
-		strings.Contains(got.Body.String(),"Mother") {
-		t.Fatalf("database outage leaked private data: %d",got.Code)
+	if got := api(t, mux, zoneUser, "POST", "/v1/private/action/plants", map[string]any{
+		"operation": "create", "requestId": requestID(t), "facilityId": facilityA, "zoneId": zoneA,
+		"label": "revoked race", "state": "SEED"}, true); got.Code != 401 {
+		t.Fatalf("suspended member could mutate: %d", got.Code)
 	}
-
+	// Outage responses must never disclose cached private records.
+	if err := db.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if got := api(t, mux, other, "GET", "/v1/private/dashboard/plants", nil, false); got.Code == 200 ||
+		strings.Contains(got.Body.String(), "Mother") {
+		t.Fatalf("database outage leaked private data: %d", got.Code)
+	}
 }

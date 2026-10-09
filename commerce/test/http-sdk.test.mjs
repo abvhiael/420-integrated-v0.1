@@ -95,6 +95,8 @@ test('COM-7 security headers and strict numeric pagination reject ambiguous inpu
  for(const value of ['','+1','01','1e2','-1','NaN','Infinity','1.5']){
   const res=await fetch(f.baseUrl+'/v1/storefronts?limit='+value);
   assert.equal(res.status,400,'rejected limit '+value);
+  const offsetRes=await fetch(f.baseUrl+'/v1/storefronts?offset='+value);
+  assert.equal(offsetRes.status,400,'rejected offset '+value);
  }
  assert.ok((await anonymous.storefronts()).items);
 });

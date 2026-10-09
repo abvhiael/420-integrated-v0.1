@@ -158,6 +158,14 @@ contract BreedingEngine {
         emit BreedingFinalized(breedingEventId, e.childGenomeId, entropy);
     }
 
+    function childGenomeOfFinalizedEvent(
+        uint64 breedingEventId
+    ) external view returns (bytes32) {
+        BreedingEvent storage e = _events[breedingEventId];
+        if (!e.exists || !e.finalized) revert HCInvalidState();
+        return e.childGenomeId;
+    }
+
     function getBreedingEvent(
         uint64 breedingEventId
     ) external view returns (BreedingEvent memory) {

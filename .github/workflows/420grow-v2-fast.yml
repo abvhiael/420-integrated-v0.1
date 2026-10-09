@@ -178,6 +178,7 @@ jobs:
           go test -count=1 ./grow/dashboard
           go test -race -count=1 ./grow/dashboard
           go vet ./grow/dashboard
+          gofmt -d grow/dashboard/*.go
           test -z "$(gofmt -l grow/dashboard/*.go)"
           node --check grow/web/workspace.js
           node --test grow/web/test/workspace.test.js

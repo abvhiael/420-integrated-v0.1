@@ -101,7 +101,9 @@ contract MotherRegistry {
         uint256 next = uint256(mother.cuttingsTaken) + 1;
         if (next > mother.maxCuttings) revert HCCapacityExceeded(next, mother.maxCuttings);
         _auth(ActionIds.MOTHER_CONSUME_CUTTING, motherId, 1);
-        mother.cuttingsTaken = uint32(next);\n        cuttingForClone[cloneId] = motherId;\n        emit CloneCuttingConsumed(motherId, cloneId, owner);
+        mother.cuttingsTaken = uint32(next);
+        cuttingForClone[cloneId] = motherId;
+        emit CloneCuttingConsumed(motherId, cloneId, owner);
         uint32 remaining = mother.maxCuttings - mother.cuttingsTaken;
         if (remaining == 0) {
             mother.retired = true;

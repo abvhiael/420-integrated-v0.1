@@ -11,9 +11,9 @@ import (
 
 type fakeStore struct {
 	enabled bool
-	queued map[string]Event
-	sent bool
-	failed bool
+	queued  map[string]Event
+	sent    bool
+	failed  bool
 }
 
 func (f *fakeStore) OptIn(_ context.Context, _ Scope, _, _ string, enabled bool) error {
@@ -76,7 +76,7 @@ func (n fakeNotifier) Send(_ context.Context, event Delivery) error {
 func owner(tenant string, role security.Role) Scope {
 	return Scope{TenantID: tenant,
 		Principal: security.Principal{SubjectID: "operator", Authenticated: true},
-		Grant: security.Grant{TenantID: tenant, SubjectID: "operator", State: security.Active, Role: role}}
+		Grant:     security.Grant{TenantID: tenant, SubjectID: "operator", State: security.Active, Role: role}}
 }
 func TestConsentReplayAndDelivery(t *testing.T) {
 	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)

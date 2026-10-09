@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import { PublicPlantCapacityFixture } from "./PublicPlantCapacity.t.sol";
 import { PhenotypeRegistry } from "../../../src/highcountry/genetics/PhenotypeRegistry.sol";
+import { RulesetRegistry } from "../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { BreedingEngine } from "../../../src/highcountry/breeding/BreedingEngine.sol";
 import { RandomnessCoordinator } from "../../../src/highcountry/random/RandomnessCoordinator.sol";
@@ -14,12 +15,22 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
     PhenotypeRegistry internal phenotype;
     CultivationEngine internal cultivation;
     BreedingEngine internal breeding;
+    bytes32 internal approvedRulesetId;
 
     function setUp() public override {
         super.setUp();
         caps.registerProtocolComponent(ModuleIds.PHENOTYPE_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         cultivation = new CultivationEngine(address(auth), address(plants));
+        caps.registerProtocolComponent(ModuleIds.RULESET_REGISTRY, address(this));
+        RulesetRegistry rulesets = new RulesetRegistry(address(auth));
+        bytes32 hash = keccak256("r02.7:ruleset:version1");
+        approvedRulesetId = rulesets.deriveRulesetId(hash);
+        _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, approvedRulesetId);
+        rulesets.registerRuleset(hash);
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS,
+            cultivation.RULESET_BIND_SCOPE());
+        cultivation.bindRulesetRegistry(address(rulesets));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(random));
         phenotype = new PhenotypeRegistry(address(auth), address(genomes));
@@ -31,12 +42,15 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
     }
 
     function _environment() internal {
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE, bytes32(uint256(1)));
         cultivation.updateEnvironment(1, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6500, 5000));
+        vm.warp(block.timestamp + 17 days);
+        plants.syncOfflineGrowth(1);
     }
 
     function testCanonicalExpressionAcceptedAndAnchorsImmutable() public {
         _environment();
-        bytes32 expression = cultivation.expressPhenotype(1, GENOME, keccak256("ruleset"));
+        bytes32 expression = cultivation.expressPhenotype(1, GENOME, approvedRulesetId);
         bytes32 id = keccak256("phenotype");
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, id);
         phenotype.registerPhenotype(id, GENOME, 1, 0, expression, keccak256("metadata"));

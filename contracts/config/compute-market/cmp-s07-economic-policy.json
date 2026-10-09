@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "420-cmp-s07-policy-v1",
+  "status": "DRAFT_GOVERNANCE_APPROVAL_REQUIRED",
+  "effectiveEpoch": null,
+  "approved": false,
+  "testnetFundingApproved": false,
+  "payoutsEnabled": false,
+  "treasurySource": "CMP-6_CANONICAL_FUNDED_VAULT_ONLY",
+  "thirdPartyRewardPolicy": "UNRESOLVED_GOVERNANCE_DECISION",
+  "allowDoubleExternalReward": null,
+  "sourceSchemes": [],
+  "acceptedProjects": [],
+  "unitScoring": {
+    "foldingPointsTo420": null,
+    "boincCreditsTo420": null,
+    "creditIsCurrency": false
+  },
+  "economicCaps": {
+    "totalFundedBudgetUnits": "0",
+    "perEpochBudgetUnits": "0",
+    "perProjectBudgetUnits": "0",
+    "perParticipantBudgetUnits": "0",
+    "perWorkUnitBudgetUnits": "0"
+  },
+  "quotas": {
+    "maxWorksPerParticipantPerEpoch": 0,
+    "maxWorksPerProjectPerEpoch": 0,
+    "maxWorksPerSourcePerEpoch": 0
+  },
+  "maturity": {
+    "minimumSourceAgeSeconds": 0,
+    "minimumFinalityBlocks": 0,
+    "identityChangeCooldownSeconds": 0
+  },
+  "antiFarming": {
+    "requireProviderApprovedWorkUnit": true,
+    "requireParticipantOwnership": true,
+    "requireAuthorizedAttester": true,
+    "requireCanonicalDedup": true,
+    "requireFinalizedSettlement": true,
+    "requireSourceCorrectionWindow": true,
+    "requireSourceNotRevoked": true
+  },
+  "corrections": {
+    "policy": "HOLD_THEN_GOVERNED_DISPUTE",
+    "postSettlementAction": "GOVERNANCE_REVIEW_NO_UNAUTHORIZED_CLAWBACK",
+    "automaticReversal": false
+  },
+  "approval": {
+    "economicGovernanceProposal": null,
+    "approvedProposalTx": null,
+    "treasuryAuthorizationTx": null,
+    "approvedPolicyDigest": null
+  },
+  "notes": "Policy is a funding-disabled governance proposal template, not an executable price feed or reward entitlement."
+}

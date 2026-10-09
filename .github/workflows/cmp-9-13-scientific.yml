@@ -1,0 +1,22 @@
+name: CMP 9.13 Scientific Demonstration Gate
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-9-13-scientific.yml'
+  workflow_dispatch:
+jobs:
+  scientific-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scientific gate and retained ingestion regression
+        working-directory: compute/ingestion
+        run: npm run qualify

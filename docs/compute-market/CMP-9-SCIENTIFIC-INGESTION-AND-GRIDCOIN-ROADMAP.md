@@ -14,61 +14,82 @@ Status: **PLANNED / NOT LIVE-QUALIFIED**. Owner: CMP-9 testnet, with independent
 
 All implementation steps are Level 1 focused checks; a single retained science-ingestion Level 2 milestone applies at S-06, and a separate payout Level 2 at S-09. CMP-9 overall live operational closeout and CMP-10 security remain separate. Use exact release/deployment SHA and real chain/provider data; no synthetic fixture qualifies an operational gate.
 
-### S-01 — External-provider policy, capabilities and source inventory
+### S-01 — External-provider policy, capabilities and source inventory — COMPLETE (Level 1)
+
+**S-01 status:** repository policy/inventory qualified on `879beafc2268f7fe7d7c2f5023c4c128a8bfc639`; [S-01 source assessment](CMP-S01-PROVIDER-ACCESS.md) and [Level 1 evidence](CMP-S01-QUALIFICATION-EVIDENCE.md). All provider production access, account monetization and reward pathways remain explicitly disabled pending real provider/operator approval and trusted work-unit evidence. This status does not qualify S-02 or live use.
 
 Inventory each supported Folding@home statistics/result channel and each specific BOINC project (BOINC has no single universal project-wide truth endpoint). Capture documented provider terms, permitted automated access, API stability/rate limits, identifier formats, user-consent/privacy requirements, reporting delays, revocation/correction behavior, project-scoped trust and whether credible work-unit-level evidence is available. Record **unsupported** wherever only aggregate points/credits are exposed. Neither donations nor third-party credits are accepted as scientific validity proofs.
 
 Exit: versioned allowlist, evidence-quality tiers, permissions, threat model, provider outage/terms-change procedure and an explicit per-provider enable/disable decision.
 
-### S-02 — Production-grade read-only ingestion clients
+### S-02 — Production-grade read-only ingestion clients — PARTIAL (Level 1 implementation PASS; live provider gate DEFERRED TO TESTNET)
+
+**Implementation evidence:** [S-02 Level 1](CMP-S02-QUALIFICATION-EVIDENCE.md), qualified implementation `ec0eb70b5a44f5195b530b2e31166bf18bdefb76`. Fixture-based client security and source format tests passed, but S-02 cannot be marked COMPLETE without authorized real provider response/schema evidence and transport DNS pinning. No production source access or funded rewards enabled.
 
 Build separately versioned, provider-scoped off-chain ingestion clients with HTTPS/TLS validation, no embedded credentials, strict hostname/redirect/SSRF policy, bounded pagination/rate limits, safe timeouts/backoff, stale-source states, schema/version drift alerts, normalization of timestamp/timezone and credit units, and observation cursors. Preserve minimally necessary immutable raw-source digests and redacted provenance; avoid publishing usernames/host IDs, data sets or result files.
 
 Exit: deterministic contract tests using approved fixtures plus actual read-only provider endpoint responses; reject malformed, forged, late, missing and inconsistent records. No writes or rewards.
 
-### S-03 — Source-of-truth and trusted evidence verification
+### S-03 — Source-of-truth and trusted evidence verification — PARTIAL (Level 1 offline PASS; live gates DEFERRED TO TESTNET)
+
+Offline verifier evidence: [S-03 qualification](CMP-S03-QUALIFICATION-EVIDENCE.md), exact implementation SHA `1d3d13e9876bfdec6f5bac9674132b51e638c573`. Signed-source receipt checks are qualified at Level 1, but no provider-authorized work-unit source, durable dispute channel or live governed attester exists. S-03 is **not COMPLETE**.
 
 Require provider-server corroboration, or a project-authorized independent proof source, sufficient to establish contributor, project, assignment, work unit, result acceptance and credited event under its actual provider semantics. Reconcile updates/rollbacks and rescoring; prohibit deriving work-unit uniqueness from points-only snapshots. Attest only supported evidence strength. If only account-level aggregates are available, display them as observations **not reward-eligible work** until an audited uniqueness policy exists.
 
 Exit: independent evidence-verifier service, signed scheme/version, source receipt hashes, freshness/expiry, dispute/correction channel, source-unavailable fail-closed tests, attester governance onboarding and revocation drills.
 
-### S-04 — Participant identity and consent
+### S-04 — Participant identity and consent — IMPLEMENTED OFFLINE; LIVE GATES DEFERRED TO TESTNET
+
+[S-04 identity/consent boundaries](CMP-S04-IDENTITY-CONSENT.md): consent, independent external proof and Wallet authorization handoff prototypes plus replay/collision/opt-out tests. **Not qualified as production Wallet signature verification or persistent identity authority.** Live project-owned proof, cryptographic EIP-712/1271 Wallet verification, durable registry, historical ownership transitions, recoverable opt-out and key rotations are transferred to the shared testnet closeout; no monetized linking enabled.
+
 
 Use explicit opted-in account linking between a 420Wallet address and an external Folding@home donor/team or specific BOINC project participant/host. Verify control via provider-supported cryptographic challenge or equivalent independently verified proof; forbid self-asserted usernames or public-stat lookups as ownership proof. Where no reliable ownership proof exists, **disable monetized identity linkage** rather than pretending one is available. Support opt-out, rekey/relink, historical ownership transitions, collision/Sybil resistance, consent records, pseudonymous on-chain commitments, privacy minimization and right-to-disconnect without falsifying historical reward settlement.
 
 Exit: canonical chain/account/source/participant binding; negative tests for impersonation, reused proof, wrong chain/account, disclosure and stale ownership.
 
-### S-05 — Canonical record binding and cross-provider deduplication
+### S-05 — Canonical record binding and cross-provider deduplication — PARTIAL (repository Level 1 PASS; live testnet gates deferred)
+
+[S-05 evidence](CMP-S05-QUALIFICATION-EVIDENCE.md): repository-side read-only binding and canonical mapping regression checks qualified on `d4ed86f9bcd0ebd40220f0cfe03842f434d29ba7`. **No live provider attestation, authorized CMP-5.6 guard consumption, reorg reconstruction or global cross-provider identity guarantee is claimed.**
 
 Feed verified records through existing CMP-5.1/5.2 and CMP-5.5 normalized commitment interfaces. CMP-5.7 trusted attester resolves source/result/proof to one canonical external-work identity; CMP-5.6 authorized consumer consumes that identity exactly once. Prove that changed credit, donor/team alias, API wrapper, resubmitted record or source adapter cannot create second eligible work where equality is established. When cross-provider equality cannot be established, explicitly bound the uncertainty and do not claim global duplicate protection.
 
 Exit: source-to-canonical trace, idempotent processing, reorg/replay tests, correction handling, authorized-consumer controls and immutable auditable mapping.
 
-### S-06 — Read model, app, and Level 2 evidence-ingestion milestone
+### S-06 — Read model, app, and Level 2 evidence-ingestion milestone — REPOSITORY LEVEL 2 PASS; LIVE ENDPOINT OBSERVATION DEFERRED
+
+[S-06 evidence and blockers](CMP-S06-QUALIFICATION-EVIDENCE.md): actual provider/API and durable 420Indexer ingestion remain deferred to testnet. Repository exact-SHA tests cover the observation model and browser integration; this is **not complete live provider ingestion**.
 
 Expose chain-scoped bounded Indexed contribution/attestation/claim state and clearly separated external-source observations through 420Compute. Show project, provider, verified/unverified/pending/revoked eligibility, credit unit, credited event and age/finality without pretending external points equal $420 or computing a nonexistent balance. Never publish source credentials, private workloads or result payloads. Run integrated ingestion → attestation → indexed view testing on one SHA plus genuine read-only endpoint observation.
 
 Exit: Level 2 exact-SHA pass with privacy, unavailable-source, stale-data and UI authority-label assertions. Live payout remains off.
 
-### S-07 — Economic eligibility and policy approval
+### S-07 — Economic eligibility and policy approval — LEVEL 1 REPOSITORY PASS; GOVERNANCE/FUNDING PENDING
+
+[S-07 exact-SHA evidence](CMP-S07-QUALIFICATION-EVIDENCE.md) proves default-deny economic controls and deterministic capped solvency simulations. No proposal vote, approved economic scheme, source permission, testnet funded treasury or live payout has occurred. Live/governance closeout remains an explicit testnet gate.
 
 Publish explicit governed eligibility rules for accepted projects, source schemes, unit conversion/scoring, effective epochs, budget caps, per-user/project/period quotas, maturity/finality delays, anti-farming, identity-change windows and corrections/clawback policy. Assess whether external participation is allowed to earn both third-party rewards and $420; **CMP-5.6 only prevents double claims inside 420**, not another network's payout. Never derive $420 amounts by assuming one BOINC credit or Folding@home point is a coin. Treasury/funding authority and accounting must remain canonical CMP-6/Vault paths; avoid unapproved inflation.
 
 Exit: reviewed payout policy, cap/solvency simulations, adversarial gaming analysis, economic-governance decision and approved testnet funding.
 
-### S-08 — Funded entitlement and Wallet settlement integration
+### S-08 — Funded entitlement and Wallet settlement integration — LEVEL 1 REPOSITORY PASS; LIVE FUNDED PAYOUT TESTNET DEFERRED
+
+[S-08 qualification evidence](CMP-S08-QUALIFICATION-EVIDENCE.md) records exact-SHA targeted settlement-sequence validation. A funded $420 testnet beneficiary payout is **not** qualified, and no external work-to-CMP-6 monetary adapter has been approved or deployed.
 
 Deploy/publish exact canonical contracts, configure trusted attesters, allowlisted reward consumer, projects/policies and verified Source → CanonicalWork mapping. Use one-time claim consumption plus CMP-6 authorized reward entitlement, Vault funding and beneficiary transfer as implemented in the actual deployed release; where a direct integration path is missing, implement and qualify the narrow canonical adapter before activation. Record each transition, source ID, chain, policy, proof digest, transaction, finality and reconciliation. Never pay from a browser, indexer, source poller or unverifiable external data.
 
 Exit: actual funded testnet $420 payout with conservation/accounting evidence and negative replay/expiry/revocation/funding-exhaustion tests.
 
-### S-09 — Live end-to-end two-provider milestone
+### S-09 — Live end-to-end two-provider milestone — TESTNET BLOCKED (offline manifest gate implemented)
+
+[Operational checklist and evidence gate](CMP-S09-LIVE-MILESTONE-TESTNET.md). **No real BOINC and Folding@home accepted work-unit records, funded payouts, and Wallet/Indexer finality receipts have been qualified**; Level 2 live closeout remains pending. The structural manifest tests only protect against falsely accepting missing two-provider/funded evidence.
 
 With real provider-approved participant identities and real non-private contribution events, qualify Folding@home and at least one independently supported BOINC project end-to-end: observed → independently verified → attested → canonical work → one-time consumed → authorized reward → funded paid $420 → Wallet/Indexer/420Compute reconciled. Check wrong-user, duplicate-work, stale rescoring, outage, failed settlement, refund/rollback and malicious-attester conditions. Do not claim this milestone complete if either provider lacks legitimate adequate work-unit or identity evidence.
 
 Exit: one retained Level 2 exact-release testnet evidence bundle including live transaction/receipt hashes, deployment and source identities, operator sign-off and independent review.
 
-### S-10 — Operational soak, CMP-9 and CMP-10 handoff
+### S-10 — Operational soak, CMP-9 and CMP-10 handoff — REPOSITORY LEVEL 1 PASS; OPERATIONAL NO-GO
+
+[S-10 offline qualification evidence](CMP-S10-QUALIFICATION-EVIDENCE.md) and [operational testnet handoff](CMP-S10-OPERATIONS-HANDOFF.md) enumerate the blocked gates. No live soak, provider payout, recovery drill or CMP-9.13/9.14/9.15/CMP-10 closeout is asserted. Testnet operating decision remains **NO-GO**.
 
 Prove sustained ingestion, rate-limit resilience, restart/backfill correctness, source correction, indexing reorg handling, key/attester rotation, recovery, capped-budget exhaustion, emergency pause and rollback. Feed evidence into canonical CMP-9.13 scientific demonstration, CMP-9.14 soak, CMP-9.15 CMP-0 operational closeout, and CMP-10 security campaigns. These are prerequisites, not silently completed by this annex.
 

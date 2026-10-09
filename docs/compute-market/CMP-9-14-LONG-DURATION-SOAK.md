@@ -1,0 +1,11 @@
+# CMP-9.14 — Long-duration soak testing
+
+**Status: LIVE OPERATIONAL NO-GO — offline readiness tests do not fulfill canonical CMP-9.14.**
+
+Canonical purpose: sustained compute/integration soak including **restart, failover, chain reorg, Indexer rebuild, telemetry and operational recovery**, with honest provenance and exact deployed release lineage. The repository gate in `compute/ingestion/src/long-soak.mjs` rejects shortened runs, missing recovery/failure scenarios, unsigned or absent evidence references, an unqualified CMP-9.13, missing live funding conservation/finality and lack of independent operator review. Its 24-hour floor is an additional preflight policy, **not an assertion that 24 hours suffices** for every operational workload.
+
+Deployment execution must establish genuine funded testnet conditions, approved providers, worker fleet and scheduler, scientific job/verify/payout flow, uninterrupted observations and restart/backfill, failover, Indexer reorg/rebuild and monitoring logs. Exercise source correction and revocation, treasury conservation, unauthorized-reward fail-closed behavior, key rotation and emergency recovery without losing chain-to-Indexer or Wallet/UI finality consistency. Every run must retain start/end timestamps, environment, commit/manifest, scenario result, logs/receipts, failure cause and recovery timestamps, operator signature and independent-review identity. The code checks **manifest structure and assertions only**, not signature authenticity, real RPC state or actual elapsed execution.
+
+Current external blockers from CMP S-01–S-10 and CMP-9.13: no live provider-authorized work acceptance, verified identities, funded $420 testnet settlement, approved Vault/governance, durable external Indexer pipeline, or completed live scientific demonstration. Hence no live long-duration soak or finalized operational evidence can be asserted. No payments or production credit claims may be enabled by this offline gate.
+
+Exit remains **pending real sustained testnet soak and independently reviewed recovery/finality evidence**. Level 1 offline tests are app-scoped, Level 2 operational integration follows live CMP-9.13 and CMP-9.14; Level 3 runs once against accumulated merge-candidate SHA. Next canonical CMP milestone: **CMP-9.15 — Close CMP-0 operational qualification**.

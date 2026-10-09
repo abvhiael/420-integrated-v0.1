@@ -4,6 +4,22 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
+      "path": "docs/highcountry/R02.1-CAPABILITY-WIRING.md",
+      "sha256": "87a631b4308c4143a8958b8268cf89cb8c10ad3c58ce8cb93d44a163bfb994dc",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/qualify-r02-1.py",
+      "sha256": "b3da39b96b42049d6285f175a70dd0f575a34085d89068c2d663af6534909af3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "clients/highcountry-access-v1/package.json",
       "sha256": "bccf87b28f6b89fa87c7ea5b63cded3b5f83f525da2ef5178bf28622fa44a907",
       "classification": "COMPLETE",
@@ -561,14 +577,29 @@
     },
     {
       "path": "contracts/test/highcountry/integration/RealCapabilityGenesis.t.sol",
-      "sha256": "00f9ae199de39151934b3a3f9bb6ed2126a8b085f690a7a568c99654567a021c",
+      "sha256": "6544deb279b0711917cf8232a7b06f43bcf1890018fd08129801184d636d3b54",
       "classification": "COMPLETE",
       "contracts": [
-        "RealCapabilityGenesisTest"
+        "RealCapabilityGenesisTest",
+        "RealCapabilityWiringTest"
       ],
-      "interfaces": [],
+      "interfaces": [
+        "VmRealCapability"
+      ],
       "tests": [
-        "testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation"
+        "testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation",
+        "testUnregisteredComponentCannotIssueGrant",
+        "testOnlyRegistrarCanRegisterOrRotateComponent",
+        "testOnlyComponentAuthorityCanIssueAndRevoke",
+        "testZeroScopeIsUnissuableAndAdminScopeIsCanonical",
+        "testWrongScopeCannotSetRoots",
+        "testWrongActionCannotSetRootsOrFinalize",
+        "testWrongPrincipalCannotUseGrant",
+        "testModuleActionScopeAndAmountMatchExactly",
+        "testGrantTimeBoundariesAreInclusiveAndExpiredCallsDoNotMutate",
+        "testGrantReplacementRevokesOldTupleAndRevocationStopsConsumer",
+        "testAuthorityHandoffRequiresExplicitOldGrantRevocation",
+        "testRegistrarHandoffDisablesOldRegistrar"
       ]
     },
     {
@@ -1250,7 +1281,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "d05dd381afb23a72d612a297695b8389b432b390bf2477946802d7900458609b",
+      "sha256": "e2864a6df9e266d0472949bee25e5b63e8119ce4b8bfaf1d6772ee1e52fb2bbf",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1258,7 +1289,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "2678bcc87dc738d5524d3b5efee27fed4a06689474a8377d4cb42a4409c54f5d",
+      "sha256": "7438beae080a072667f0ae86807018579c2c206b4ed18d45c19d1d1336fefbe8",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

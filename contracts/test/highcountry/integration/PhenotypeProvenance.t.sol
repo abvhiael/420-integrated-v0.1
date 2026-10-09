@@ -39,17 +39,26 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, id);
         phenotype.registerPhenotype(id, GENOME, 1, 0, expression, keccak256("metadata"));
         require(phenotype.getPhenotype(id).traitHash == expression, "canonical expression");
-        _reject(address(phenotype), abi.encodeCall(phenotype.registerPhenotype,
-            (id, GENOME, 1, 0, expression, bytes32(0))), bytes4(keccak256("HCAlreadyExists()")));
+        _reject(
+            address(phenotype),
+            abi.encodeCall(phenotype.registerPhenotype, (id, GENOME, 1, 0, expression, bytes32(0))),
+            bytes4(keccak256("HCAlreadyExists()"))
+        );
     }
 
     function testUnknownPlantAndUnlockedExpressionDenied() public {
         bytes32 id = keccak256("phenotype");
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, id);
-        _reject(address(phenotype), abi.encodeCall(phenotype.registerPhenotype,
-            (id, GENOME, 999, 0, keccak256("fake"), bytes32(0))), bytes4(keccak256("HCNotFound()")));
-        _reject(address(phenotype), abi.encodeCall(phenotype.registerPhenotype,
-            (id, GENOME, 1, 0, keccak256("fake"), bytes32(0))), HCInvalidState.selector);
+        _reject(
+            address(phenotype),
+            abi.encodeCall(phenotype.registerPhenotype, (id, GENOME, 999, 0, keccak256("fake"), bytes32(0))),
+            bytes4(keccak256("HCNotFound()"))
+        );
+        _reject(
+            address(phenotype),
+            abi.encodeCall(phenotype.registerPhenotype, (id, GENOME, 1, 0, keccak256("fake"), bytes32(0))),
+            HCInvalidState.selector
+        );
     }
 
     function testUnrelatedGenomeFabricatedTraitsAndBreedingDenied() public {
@@ -57,11 +66,20 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         bytes32 expression = cultivation.expressPhenotype(1, GENOME, keccak256("ruleset"));
         bytes32 id = keccak256("phenotype");
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, id);
-        _reject(address(phenotype), abi.encodeCall(phenotype.registerPhenotype,
-            (id, keccak256("wrong"), 1, 0, expression, bytes32(0))), bytes4(keccak256("HCNotFound()")));
-        _reject(address(phenotype), abi.encodeCall(phenotype.registerPhenotype,
-            (id, GENOME, 1, 0, keccak256("fabrication"), bytes32(0))), HCInvalidState.selector);
-        _reject(address(phenotype), abi.encodeCall(phenotype.registerPhenotype,
-            (id, GENOME, 1, 77, expression, bytes32(0))), HCInvalidState.selector);
+        _reject(
+            address(phenotype),
+            abi.encodeCall(phenotype.registerPhenotype, (id, keccak256("wrong"), 1, 0, expression, bytes32(0))),
+            bytes4(keccak256("HCNotFound()"))
+        );
+        _reject(
+            address(phenotype),
+            abi.encodeCall(phenotype.registerPhenotype, (id, GENOME, 1, 0, keccak256("fabrication"), bytes32(0))),
+            HCInvalidState.selector
+        );
+        _reject(
+            address(phenotype),
+            abi.encodeCall(phenotype.registerPhenotype, (id, GENOME, 1, 77, expression, bytes32(0))),
+            HCInvalidState.selector
+        );
     }
 }

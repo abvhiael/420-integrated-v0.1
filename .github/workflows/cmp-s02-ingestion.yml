@@ -1,0 +1,22 @@
+name: CMP S-02 External Ingestion
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-s02-ingestion.yml'
+  workflow_dispatch:
+jobs:
+  ingestion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact-head checkout
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Targeted check and test
+        working-directory: compute/ingestion
+        run: npm run qualify

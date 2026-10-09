@@ -1,0 +1,22 @@
+name: CMP S-09 Testnet Milestone Gate
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-s09-milestone.yml'
+  workflow_dispatch:
+jobs:
+  milestone-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Targeted milestone and retained science tests
+        working-directory: compute/ingestion
+        run: npm run qualify

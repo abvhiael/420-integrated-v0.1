@@ -1,0 +1,22 @@
+name: CMP S-05 Canonical Binding
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-s05-binding.yml'
+  workflow_dispatch:
+jobs:
+  canonical-binding:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained science ingestion tests
+        working-directory: compute/ingestion
+        run: npm run qualify

@@ -352,9 +352,43 @@ export class CommerceService {
       });
       proposal={...proposal,requestId,refundId:'0x'+requestId,requestState:'PENDING_GOVERNANCE',recorded:true};
     }
-    else requireThat(['PAID','FULFILLED','DISPUTED'].includes(status.state),'dispute_not_eligible',409);
+    else {
+      keys(request,['disputeHash']);
+      bytes32(request.disputeHash);
+      // Only the Market V1 original buyer or seller may call disputeOrder.
+      // The merchant dashboard acts for the canonical seller, never Arbitration.
+      const canonical=await source.order(bytes32(row.order_id));
+      requireThat(wallet(canonical.seller)===wallet(actor),'dispute_party_mismatch',403);
+      requireThat(['2','3'].includes(String(canonical.status)),'dispute_not_eligible',409);
+      requireThat(canonical.disputeHash===undefined||!canonical.disputeHash||canonical.disputeHash==='0x'+'0'.repeat(64),'dispute_already_committed',409);
+      const requestId=this.mutate(actor,storeId,'dispute_request',row.order_id,()=>{
+        const existing=this.db.get('SELECT * FROM dispute_requests WHERE order_id=?',row.order_id);
+        if(existing) {
+          requireThat(existing.dispute_hash===request.disputeHash&&existing.requester===wallet(actor),'dispute_conflict',409);
+          return existing.request_id;
+        }
+        const requestId=id();
+        this.db.run('INSERT INTO dispute_requests VALUES(?,?,?,?,?,?,?,?)',requestId,storeId,attemptId,row.order_id,request.disputeHash,wallet(actor),'AWAITING_MARKET_WALLET_SUBMISSION',this.now());
+        return requestId;
+      });
+      proposal={requestId,orderId:row.order_id,disputeHash:request.disputeHash,requester:wallet(actor),intent:source.intent('disputeOrder',[bytes32(row.order_id),request.disputeHash]),state:'AWAITING_MARKET_WALLET_SUBMISSION',executed:false,arbitrationCaseOpened:false};
+    }
     // Governance / Arbitration alone authorizes effects. No fabricated signed transaction.
     return {kind,orderId:row.order_id,merchantId:store.merchant_id,amount:proposal?.amount??row.total,asset:row.asset,paymentId:status.paymentId??null,proposal,status:'CANONICAL_AUTHORITY_ACTION_REQUIRED',executed:false,refunded:false,disputed:false,authority:kind==='refund'?'Pay.RefundManager420':'Market.OrderRegistry420 / 420Arbitration',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+  }
+  async merchantDisputes(actor,storeId) {
+    const {source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    const rows=this.db.all('SELECT * FROM dispute_requests WHERE store_id=? ORDER BY created_at,request_id LIMIT 50',storeId);
+    const items=[];
+    for(const row of rows){
+      const order=await source.order(bytes32(row.order_id));
+      const onChain=String(order.status)==='6';
+      const matched=onChain&&order.disputeHash===row.dispute_hash;
+      requireThat(!onChain||matched,'dispute_commitment_mismatch',503);
+      items.push({requestId:row.request_id,orderId:row.order_id,disputeHash:row.dispute_hash,requester:row.requester,state:matched?'MARKET_DISPUTE_FINALIZED':'AWAITING_MARKET_WALLET_SUBMISSION',marketDisputed:matched,arbitrationCaseOpened:false,arbitrationRulingFinalized:false,remedyExecuted:false});
+    }
+    return {items,partial:rows.length===50,authority:'420MarketV1; 420Arbitration independent case authority not yet approved',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async merchantRefunds(actor,storeId) {
     const {source,merchant}=await this.access(actor,storeId,'publish');

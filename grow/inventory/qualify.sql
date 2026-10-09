@@ -104,6 +104,20 @@ DO $$ BEGIN
  EXCEPTION WHEN check_violation THEN NULL;
  END;
 END $$;
+
+-- An unmatched custody leg must fail at constraint evaluation and roll back its debit.
+DO $$ BEGIN
+ BEGIN
+  INSERT INTO grow_private.inventory_ledger_v2
+  (tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,reference_id,occurred_at)
+  VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000030',
+   'aaaaaaaa-0000-4000-8000-000000000010','aaaaaaaa-3333-4333-8333-333333333333',
+   'aaaaaaaa-4444-4444-8444-444444444444','TRANSFER_OUT',1,'orphan attempt','u','manual','orphan-out','orphan-ref',now());
+  SET CONSTRAINTS inventory_transfer_pair IMMEDIATE;
+  RAISE EXCEPTION 'unpaired transfer accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+END $$;
 COMMIT;
 SET ROLE grow_v2_test_runtime;
 BEGIN;

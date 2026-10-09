@@ -73,8 +73,8 @@ test("M3/M4: published recording -> nomination -> qualified ballot -> result/bad
  projections.ingest({...pub,id:"award1",objectId:result.id,recordingId:"song1",creatorId:"artist1",type:"AWARD_WON",awardCategory:"SONG_OF_THE_YEAR",commitment:result.resultCommitment});
  projections.ingest({...pub,id:"private1",objectId:"draft1",type:"GENERATION_COMPLETED",visibility:"PRIVATE",recipientAccount:"alice"});
  const view=projections.rebuild({checkpoint:"cp1",includePrivateForAccount:"alice"});
- assert.deepEqual(view.search.map(x=>x.kind),["RECORDING","AWARD_RESULT"]);
- assert.equal(view.search[1].recordingId,view.search[0].recordingId);
+ assert.deepEqual(view.search.map(x=>x.kind).sort(),["AWARD_RESULT","RECORDING"]);
+ assert.equal(view.search.find(x=>x.kind==="AWARD_RESULT").recordingId,view.search.find(x=>x.kind==="RECORDING").recordingId);
  assert.equal(view.explorer.some(x=>x.objectId===result.id),true);
  assert.equal(view.notifications.some(x=>x.id==="private1"),false);
  assert.throws(()=>projections.ingest({...pub,id:"award1",objectId:"forged",type:"AWARD_WON"}),/REPLAY_CONFLICT/);

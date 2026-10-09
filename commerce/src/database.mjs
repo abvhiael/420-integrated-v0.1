@@ -12,11 +12,12 @@ export class Database {
     this.db.exec('PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA secure_delete=ON; PRAGMA busy_timeout=5000;');
     this.db.exec('CREATE TABLE IF NOT EXISTS migrations(version INTEGER PRIMARY KEY)');
     const version = this.get('SELECT MAX(version) AS version FROM migrations').version ?? 0;
-    if (version > 4) throw new Error('unsupported database schema');
+    if (version > 5) throw new Error('unsupported database schema');
     if (version === 0) this.transaction(() => this.db.exec(readFileSync(new URL('../sql/001-commerce.sql', import.meta.url), 'utf8')));
     if (version < 2) this.transaction(() => this.db.exec(readFileSync(new URL('../sql/002-store-releases.sql', import.meta.url), 'utf8')));
     if (version < 3) this.transaction(() => this.db.exec(readFileSync(new URL('../sql/003-refund-requests.sql', import.meta.url), 'utf8')));
     if (version < 4) this.transaction(() => this.db.exec(readFileSync(new URL('../sql/004-dispute-requests.sql', import.meta.url), 'utf8')));
+    if (version < 5) this.transaction(() => this.db.exec(readFileSync(new URL('../sql/005-arbitration-case-bindings.sql', import.meta.url), 'utf8')));
   }
   get(sql, ...args) { return this.db.prepare(sql).get(...args); }
   all(sql, ...args) { return this.db.prepare(sql).all(...args); }

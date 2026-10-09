@@ -41,3 +41,24 @@ test("production publish and voting refuse missing trusted authority adapters",(
  assert.throws(()=>new RegisterPublishCoordinator420({production:true}),/Creative rights verifier required/);
  assert.throws(()=>new AwardVoting420({production:true,domain:{},source:()=>true,authorize:()=>true}),/ABUSE_VERIFIER_REQUIRED/);
 });
+
+test("production Community requires independent canonical session verification",async()=>{
+ const {CommunityStore420}=await import("../src/community.js");
+ const source={creator:id=>({id,status:"ACTIVE",visibility:"PUBLIC"}),recording:id=>({id,status:"ACTIVE",visibility:"PUBLIC"})};
+ const session={verified:true,scope:"420hz:community:write",accountRef:"alice",domain:"420hz:test",expiresAt:Date.now()+60000};
+ assert.throws(()=>new CommunityStore420({source,production:true}),/SESSION_VERIFIER_REQUIRED/);
+ const denied=new CommunityStore420({source,production:true,verifySession:()=>false});
+ assert.throws(()=>denied.follow(session,"artist"),/SESSION_UNVERIFIED/);
+ const trusted=new CommunityStore420({source,production:true,verifySession:({actor,scope,audience})=>actor==="alice"&&scope==="420hz:community:write"&&audience==="420hz"});
+ assert.equal(trusted.follow(session,"artist").enabled,true);
+});
+test("production cross-service social projection suppresses blocked or unverified community activity",()=>{
+ assert.throws(()=>new HzCrossService420({verifySource:()=>true,production:true}),/COMMUNITY_POLICY_REQUIRED/);
+ const x=new HzCrossService420({verifySource:()=>true,production:true,allowCommunityEvent:()=>false});
+ x.ingest({id:"blocked",objectId:"blocked-artist",creatorId:"blocked-artist",sourceCheckpoint:"cp",type:"FOLLOW_ACTIVITY",at:1,visibility:"PUBLIC",finalized:true,sourceReady:true});
+ x.ingest({id:"release",objectId:"recording",recordingId:"recording",sourceCheckpoint:"cp",type:"RELEASE_PUBLISHED",at:2,visibility:"PUBLIC",finalized:true,sourceReady:true});
+ const view=x.rebuild({checkpoint:"cp"});
+ assert.equal(view.notifications.some(e=>e.id==="blocked"),false);
+ assert.equal(view.publicAnalytics.community.activities,0);
+ assert.equal(view.search.some(e=>e.recordingId==="recording"),true);
+});

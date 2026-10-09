@@ -51,19 +51,21 @@ func (s SQLStore) Append(ctx context.Context, r Record) error {
 func (s SQLStore) List(ctx context.Context, tenant, facility, zone string, from, to time.Time, limit int) ([]Record, error) {
 	out := []Record{}
 	err := s.withinTenant(ctx, tenant, func(tx *sql.Tx) error {
-		rows, err := tx.QueryContext(ctx, `SELECT tenant_id::text,harvest_id::text,facility_id::text,zone_id::text,
- plant_id::text,weight_grams::float8,harvested_at,actor_subject,source,idempotency_key
- FROM grow_private.harvest_records
- WHERE tenant_id=$1::uuid AND facility_id=$2::uuid AND zone_id=$3::uuid
- AND harvested_at >= $4 AND harvested_at < $5
- ORDER BY harvested_at,harvest_id LIMIT $6`, tenant, facility, zone, from, to, limit)
+		rows, err := tx.QueryContext(ctx, `SELECT h.tenant_id::text,h.harvest_id::text,h.facility_id::text,h.zone_id::text,
+ h.plant_id::text,h.weight_grams::float8,h.harvested_at,h.actor_subject,h.source,h.idempotency_key,
+ coalesce(p.cultivar_id::text,'')
+ FROM grow_private.harvest_records h
+ JOIN grow_private.plants p ON p.tenant_id=h.tenant_id AND p.plant_id=h.plant_id
+ WHERE h.tenant_id=$1::uuid AND h.facility_id=$2::uuid AND h.zone_id=$3::uuid
+ AND h.harvested_at >= $4 AND h.harvested_at < $5
+ ORDER BY h.harvested_at,h.harvest_id LIMIT $6`, tenant, facility, zone, from, to, limit)
 		if err != nil {
 			return err
 		}
 		defer rows.Close()
 		for rows.Next() {
 			var r Record
-			if err := rows.Scan(&r.TenantID, &r.ID, &r.FacilityID, &r.ZoneID, &r.PlantID, &r.WeightGrams, &r.HarvestedAt, &r.Actor, &r.Source, &r.IdempotencyKey); err != nil {
+			if err := rows.Scan(&r.TenantID, &r.ID, &r.FacilityID, &r.ZoneID, &r.PlantID, &r.WeightGrams, &r.HarvestedAt, &r.Actor, &r.Source, &r.IdempotencyKey, &r.CultivarID); err != nil {
 				return err
 			}
 			out = append(out, r)

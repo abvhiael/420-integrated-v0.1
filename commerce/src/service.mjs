@@ -433,15 +433,15 @@ export class CommerceService {
     const dispute=this.db.get('SELECT * FROM dispute_requests WHERE store_id=? AND order_id=?',storeId,attempt.order_id);
     requireThat(dispute?.arbitration_case_id&&dispute.requester===wallet(actor),'arbitration_case_unbound',409);
     const caseRecord=await source.arbitration.getCase(dispute.arbitration_case_id);
-    requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)&&caseRecord.originObjectId===attempt.order_id&&caseRecord.claimHash===dispute.dispute_hash,'arbitration_case_mismatch',503);
+    requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)&&caseRecord.domainId===MARKET_ARBITRATION_DOMAIN&&caseRecord.originComponentId===MARKET_ORIGIN_COMPONENT&&caseRecord.originObjectId===attempt.order_id&&caseRecord.claimHash===dispute.dispute_hash&&caseRecord.requestedRemedyHash===dispute.arbitration_remedy_hash,'arbitration_case_mismatch',503);
     let args;
     if(action==='submitEvidence'){
       keys(request,['evidenceHash']);bytes32(request.evidenceHash);
-      requireThat(Number(caseRecord.state)===1&&Number(caseRecord.evidenceDeadline)>=source.blockTimestamp,'arbitration_evidence_closed',409);
+      requireThat(Number(caseRecord.state)===1&&BigInt(caseRecord.evidenceDeadline)>=BigInt(source.blockTimestamp),'arbitration_evidence_closed',409);
       args=[dispute.arbitration_case_id,request.evidenceHash];
     }else{
       keys(request,[]);
-      requireThat(Number(caseRecord.state)===2&&Number(caseRecord.appealDeadline)>=source.blockTimestamp&&Number(caseRecord.round)<Number(caseRecord.maxAppeals),'arbitration_appeal_closed',409);
+      requireThat(Number(caseRecord.state)===2&&BigInt(caseRecord.appealDeadline)>=BigInt(source.blockTimestamp)&&Number(caseRecord.round)<Number(caseRecord.maxAppeals),'arbitration_appeal_closed',409);
       args=[dispute.arbitration_case_id];
     }
     return {caseId:dispute.arbitration_case_id,action,requester:wallet(actor),intent:source.arbitration.intent(action,args),executed:false,remedyExecuted:false,provenance:{chainId:source.chainId,blockHash:source.blockHash,finalized:true}};
@@ -476,7 +476,7 @@ export class CommerceService {
       const state=caseSummary?(arbitrationRulingFinalized?'ARBITRATION_FINALIZED_REMEDY_NOT_EXECUTED':'ARBITRATION_'+caseSummary.caseState):matched?(marketStatus==='7'?'MARKET_REFUNDED_NO_ARBITRATION_CASE':'MARKET_DISPUTE_FINALIZED'):'AWAITING_MARKET_WALLET_SUBMISSION';
       items.push({requestId:row.request_id,attemptId:row.attempt_id,orderId:row.order_id,disputeHash:row.dispute_hash,requester:row.requester,state,marketDisputed:matched,marketStatus,arbitrationCaseOpened:!!caseSummary,arbitrationRulingFinalized,arbitrationCase:caseSummary,remedyExecuted:false});
     }
-    return {items,partial:rows.length===50,authority:'420MarketV1; 420Arbitration independent case authority not yet approved',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {items,partial:rows.length===50,authority:source.arbitration?'420Market V1 + ProtocolRegistry-approved independent 420Arbitration':'420Market V1; 420Arbitration unverified/unavailable',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async merchantRefunds(actor,storeId) {
     const {source,merchant}=await this.access(actor,storeId,'publish');

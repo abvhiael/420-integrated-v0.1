@@ -14,6 +14,13 @@ import {
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
+interface ICloneIssuerMother {
+    function authorization() external view returns (address);
+    function genomeRegistry() external view returns (address);
+    function motherRegistry() external view returns (address);
+    function cloneContext(uint64 cloneId) external view returns (uint64 motherId, bytes32 genomeId, address owner);
+}
+
 interface IGenomeRegistryMother {
     function exists(
         bytes32 genomeId
@@ -31,6 +38,12 @@ contract MotherRegistry {
         bool retired;
         bool exists;
     }
+
+    bytes32 public constant BIND_SCOPE = keccak256("HC.MOTHER_REGISTRY.CLONE_BINDING");
+    ICloneIssuerMother public cloneRegistry;
+    mapping(uint64 => uint64) public cuttingForClone;
+    event CloneRegistryBound(address indexed cloneRegistry);
+    event CloneCuttingConsumed(uint64 indexed motherId, uint64 indexed cloneId, address indexed owner);
 
     IHighCountryAuthorization public immutable authorization;
     IGenomeRegistryMother public immutable genomeRegistry;
@@ -88,7 +101,7 @@ contract MotherRegistry {
         uint256 next = uint256(mother.cuttingsTaken) + 1;
         if (next > mother.maxCuttings) revert HCCapacityExceeded(next, mother.maxCuttings);
         _auth(ActionIds.MOTHER_CONSUME_CUTTING, motherId, 1);
-        mother.cuttingsTaken = uint32(next);
+        mother.cuttingsTaken = uint32(next);\n        cuttingForClone[cloneId] = motherId;\n        emit CloneCuttingConsumed(motherId, cloneId, owner);
         uint32 remaining = mother.maxCuttings - mother.cuttingsTaken;
         if (remaining == 0) {
             mother.retired = true;

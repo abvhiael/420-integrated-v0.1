@@ -7,6 +7,7 @@ CREATE TABLE grow_private.equipment (
  safe_minimum numeric NOT NULL, safe_maximum numeric NOT NULL,
  online boolean NOT NULL DEFAULT false, interlock_ok boolean NOT NULL DEFAULT false,
  manual_override boolean NOT NULL DEFAULT true,
+ control_signing_key bytea CHECK(control_signing_key IS NULL OR octet_length(control_signing_key)=32),
  updated_at timestamptz NOT NULL DEFAULT now(),
  PRIMARY KEY(tenant_id,device_id),
  FOREIGN KEY(tenant_id,facility_id,zone_id) REFERENCES grow_private.zones(tenant_id,facility_id,zone_id),

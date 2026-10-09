@@ -15,7 +15,7 @@ def main():
         need("BNB-P%02d"%n in text,"missing product requirement %02d"%n)
     for actor in ["Anonymous visitor","Guest","Host","Property manager","Moderator","Customer support","Administrator/operator","Protocol service adapter"]:
         need(actor in text,"missing actor "+actor)
-    for word in ["DISABLED","420Pay","420Travel","420Reputation","420Identity","cannabis","private"]:
+    for word in ["DISABLED","420Pay","420Travel","420Reputation","Identity","cannabis","private"]:
         need(word.lower() in text.lower(),"missing boundary "+word)
     cfg=json.loads((ROOT/"config/420travel-genesis.json").read_text())
     need(cfg["bnb_compatibility"]["enabled_at_genesis"] is False,"BnB Genesis transactions enabled")

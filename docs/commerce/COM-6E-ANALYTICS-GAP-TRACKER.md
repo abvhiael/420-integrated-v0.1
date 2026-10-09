@@ -39,3 +39,19 @@ Replaces the earlier all-at-once 5,000-order bound with `GET .../operations/anal
 The underlying Pay payment record's `refundedAmount` is validated as a nonnegative decimal within the original settlement amount. The page produces gross paid, refunded, and net base units per asset; pending refund proposals are not booked as transfers. New regression cases include partial refund, invalid refund amount, bad pagination/tenant, >100 attempts, offset after 5,000, and finalized-block mutation.
 
 Implementation candidate `2e55a3dee45b5243934fd5a1e47db1014343100d` (source, SDK, HTTP, browser, tests). **Not Level 1 certified until CI successfully completes at that exact SHA.** Snapshot consistency across separate HTTP pagination requests remains an explicit caveat, not a claim of full historical aggregate. No COM-6 Level 2 or Level 3 claim.
+
+## COM-6E scoped Level 1 exact-SHA qualification — October 9, 2026
+
+**Implementation SHA:** `3e463d8a07c5e8e370d2e0fcfccfd9a0d97ce61c`. Branch `audit/420commerce-com-2-upstream-adaptations`, draft PR #594. This supersedes earlier candidate SHAs.
+
+Applicable GitHub Actions workflow conclusions checked as **completed/success** at the exact SHA:
+
+- Commerce service fast qualification: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37997698625 — PASS.
+- Commerce merchant builder fast qualification: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37997698683 — PASS.
+- Commerce upstream contracts: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37997698541 — PASS.
+- Commerce governed Pay refund qualification: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37997698616 — PASS.
+- Solidity Contracts workflow: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37997698724 — overall SUCCESS for PR classification; full Foundry shards skipped, **not** counted as passing full Solidity inventory.
+
+Service CI on previous SHA `69aeb4a86d6676ae215044017f6e7a56e98112e7` failed two stale test assertions, 122/124 passing. The exact failed job and logs were inspected; assertions were updated to match page-local semantics and boolean error-code predicate, without bypassing safety checks. Final SHA reran successfully.
+
+**COM-6E paginated-analytics repository-side Level 1: PASS.** Scope is bounded per-page finalized projections, with optional offsets beyond 5,000 and source-refund gross/refunded/net base units. Whole-history snapshot-stable aggregation across independent pages, durable external 420Analytics publication and live chain acceptance have **not** been demonstrated; no all-time financial authority is claimed. COM-6 accumulated Level 2 and COM-7 Phase Level 3 remain separate milestones. PR is not merge-ready.

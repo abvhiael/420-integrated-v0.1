@@ -4,56 +4,27 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/qualification/R02.1-level1.json",
-      "sha256": "f758e20178c8bce0c50edbcca46443a95eae243b2205ce95718c3f7cedd027e1",
+      "path": "contracts/test/highcountry/integration/RealCapabilityBudgetPolicy.t.sol",
+      "sha256": "3f3116b2e6199078ab4b95ea7dec155690f8527c1de69cbf1bc8633453bc1c52",
       "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
+      "contracts": [
+        "RealCapabilityBudgetPolicyTest"
+      ],
+      "interfaces": [
+        "VmHCBudget"
+      ],
+      "tests": [
+        "testPeriodicGrantNeverAdmitsRepeatedZeroAmountCalls",
+        "testPeriodicReplacementCannotFallBackToOldUnlimitedGrant",
+        "testExplicitNonperiodicReplacementRestoresAuthorization",
+        "testPeriodicRolloverDoesNotEnableHCGrant",
+        "testHCDoesNotTakeComponentConsumptionAuthority",
+        "testPeriodicGrantDoesNotAuthorizePositiveAmounts"
+      ]
     },
     {
-      "path": "docs/highcountry/qualification/R02.1/build-sizes.json",
-      "sha256": "e0303f8f6d0822cc7ed5faf2e6e1b18a87222ae9d223ef529635eafec984a6a3",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.1/format.json",
-      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.1/patch-whitespace.json",
-      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.1/source-specification.json",
-      "sha256": "70866bde21fd12d6501c4406bcb37552767a41d4a19eb11cf26810828357c2a7",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.1/static-lint.json",
-      "sha256": "69ac37b4afda09fe16fd7a0e2a8e18e3c474fd4c9e7adf8756bfa93599443c10",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "docs/highcountry/qualification/R02.1/targeted-contracts.json",
-      "sha256": "995ba1dd2155fd70720c1af62f65748bfce6cfc2ae82f0bc5a3ff4c351401380",
+      "path": "docs/highcountry/R02.2-CAPABILITY-BUDGET-POLICY.md",
+      "sha256": "0b7270d04e55d66b31d33b014416d3a684174fd27a366ffa4b430b4f28c996c2",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -123,7 +94,7 @@
     },
     {
       "path": "contracts/src/highcountry/auth/HighCountryAuthorization.sol",
-      "sha256": "07e7272df63ad41a3ac7a37f294b5b31f9d44042e7b9699be9994574327708c7",
+      "sha256": "41f487ded0e61ad2ee9d9ade4cad205791543779288602116cfe1b4ec7fb5eca",
       "classification": "COMPLETE",
       "contracts": [
         "HighCountryAuthorization"
@@ -467,7 +438,7 @@
     },
     {
       "path": "contracts/src/highcountry/player/HighCountrySessionAccess420.sol",
-      "sha256": "f584b4a29658f43b82f3c52b91f1370409e105412cd85807192617fea57cbb59",
+      "sha256": "b399cc5d62f47aeb1bbdac31544985849fdfbfe48f94931d6143b995d759687a",
       "classification": "COMPLETE",
       "contracts": [
         "HighCountrySessionAccess420"
@@ -825,7 +796,7 @@
     },
     {
       "path": "contracts/test/highcountry/mocks/MockCapabilityRegistry.sol",
-      "sha256": "45053a652e122265348bfa809a3373a08eba7ac68057a1cec5b379d4bbde278f",
+      "sha256": "c34baa0137255ec941a9324da2855379dd94fff3d7d794d602bb828a63f5284a",
       "classification": "COMPLETE",
       "contracts": [
         "MockCapabilityRegistry"
@@ -866,10 +837,11 @@
     },
     {
       "path": "contracts/test/highcountry/unit/auth/HighCountryAuthorization.t.sol",
-      "sha256": "f68adf77f94ec65eec38f3e6a6031dc662d1f96b5ccec56baca10e71aae1c616",
+      "sha256": "1e6f057fb5277bfaea2e6cdc788260fddc695fd0d9bc536e781fd94be63c50b0",
       "classification": "COMPLETE",
       "contracts": [
-        "HighCountryAuthorizationTest"
+        "HighCountryAuthorizationTest",
+        "LegacyCapabilityOracle"
       ],
       "interfaces": [],
       "tests": [
@@ -877,7 +849,9 @@
         "testCapabilityApproval",
         "testExpiredCapabilityDenied",
         "testRevokedCapabilityDenied",
-        "testZeroPrincipalFailsClosed"
+        "testZeroPrincipalFailsClosed",
+        "testPeriodicOrMalformedPeriodMetadataFailsClosed",
+        "testMissingActiveGrantMetadataFailsClosed"
       ]
     },
     {
@@ -1060,7 +1034,7 @@
     },
     {
       "path": "contracts/test/highcountry/unit/player/HighCountrySessionAccess420.t.sol",
-      "sha256": "03937f9db08559cb547a364b4686f971bbe13845dd13a3f570f0a2c679f08057",
+      "sha256": "bb00dbc2169102fe81a1ec424ac38ff098f23c21e0b2645c10c0608d96126569",
       "classification": "COMPLETE",
       "contracts": [
         "MockHCAuthorizationSessionAccess",
@@ -1074,6 +1048,7 @@
         "testRoutineSessionsHaveZeroNative420SpendLimit",
         "testRoutineCallPolicyDefaultsToWalletEscalation",
         "testRoutineSessionRequiresExactLiveSmartAccountGrant",
+        "testPeriodicRoutineGrantIsDeniedEvenForZeroNativeValue",
         "testStaleSessionEpochFailsClosed",
         "testAccountCannotSubstituteCapabilityRegistry",
         "testRevokedOrInactiveGrantFailsClosed",
@@ -1209,7 +1184,7 @@
     },
     {
       "path": "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
-      "sha256": "2d18ae67be0f54fc343513a99b54ea1aaffa9d950b2efe84dd7f76c805ef6600",
+      "sha256": "6664f59dcbc2f353765c49c9909f3b5c7984131a8faeeb9d661805228cf76fc4",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1217,7 +1192,7 @@
     },
     {
       "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",
-      "sha256": "37583f02480389d6fa991c2c8dba67fdb969c283e31636687c861132a510ddef",
+      "sha256": "fd63ffa3b7b2504c317ff6cd8a3bbca4570bcd76963e38091abd210343ed1221",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1225,7 +1200,7 @@
     },
     {
       "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
-      "sha256": "984f84218340b033f1e38a224dc265cfce3f296012de6a368ddb1f07773912c6",
+      "sha256": "e084edd24cb1d151a46d0fd1cb6cf3e52bbc446446e0b45ae0f832c46ff27e99",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1329,7 +1304,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "e2864a6df9e266d0472949bee25e5b63e8119ce4b8bfaf1d6772ee1e52fb2bbf",
+      "sha256": "c632f5a83cbc2335401d278eeda1beac16d271173f721d0d21f2c4125a27a01e",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1337,7 +1312,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "7438beae080a072667f0ae86807018579c2c206b4ed18d45c19d1d1336fefbe8",
+      "sha256": "3a39c9dbc0fce9e653f7abee747c2f944d93fdc8be56cae4898f43b9c47cf0fa",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1353,7 +1328,7 @@
     },
     {
       "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
-      "sha256": "2d0febda027b760a0286ff513a752602f581a7719527b5ffc528a31831f0a96d",
+      "sha256": "44e1751c6cea3cda014cdd5c7b8083d951a7cf699be4458f60ad8b5ffb097c16",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1586,6 +1561,62 @@
     {
       "path": "docs/highcountry/qualification/R01.7/specification-check.txt",
       "sha256": "774565b1174e86680051475b0e607bd4ebe6947b81ba5310999aa8c71966fef8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1-level1.json",
+      "sha256": "f758e20178c8bce0c50edbcca46443a95eae243b2205ce95718c3f7cedd027e1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/build-sizes.json",
+      "sha256": "e0303f8f6d0822cc7ed5faf2e6e1b18a87222ae9d223ef529635eafec984a6a3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/source-specification.json",
+      "sha256": "70866bde21fd12d6501c4406bcb37552767a41d4a19eb11cf26810828357c2a7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/static-lint.json",
+      "sha256": "69ac37b4afda09fe16fd7a0e2a8e18e3c474fd4c9e7adf8756bfa93599443c10",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/targeted-contracts.json",
+      "sha256": "995ba1dd2155fd70720c1af62f65748bfce6cfc2ae82f0bc5a3ff4c351401380",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

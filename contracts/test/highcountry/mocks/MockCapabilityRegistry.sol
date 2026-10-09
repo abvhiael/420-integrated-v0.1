@@ -5,6 +5,7 @@ import { ICapabilityRegistry420 } from "../../../src/interfaces/genesis/ICapabil
 
 contract MockCapabilityRegistry is ICapabilityRegistry420 {
     mapping(bytes32 => CapabilityGrant) private _grants;
+    mapping(bytes32 => bytes32) private _active;
     mapping(bytes32 => bytes32) private _grantIdsByAuthorizationKey;
 
     function grant(
@@ -19,6 +20,16 @@ contract MockCapabilityRegistry is ICapabilityRegistry420 {
         uint256 amount
     ) external {
         _grants[grantId] = capabilityGrant;
+        _active[
+            keccak256(
+                abi.encode(
+                    capabilityGrant.principal,
+                    capabilityGrant.componentId,
+                    capabilityGrant.capabilityId,
+                    capabilityGrant.scopeHash
+                )
+            )
+        ] = grantId;
         _grantIdsByAuthorizationKey[
             keccak256(
                 abi.encode(
@@ -30,6 +41,24 @@ contract MockCapabilityRegistry is ICapabilityRegistry420 {
                 )
             )
         ] = grantId;
+    }
+
+    function activeGrantId(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash
+    ) external view returns (bytes32) {
+        return _active[keccak256(abi.encode(principal, componentId, capabilityId, scopeHash))];
+    }
+
+    function setPeriodicLimits(
+        bytes32 id,
+        uint256 limit,
+        uint64 seconds_
+    ) external {
+        _grants[id].periodLimit = limit;
+        _grants[id].periodSeconds = seconds_;
     }
 
     function setRevoked(

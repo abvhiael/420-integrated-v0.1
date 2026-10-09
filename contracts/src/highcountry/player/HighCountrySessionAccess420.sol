@@ -167,6 +167,18 @@ contract HighCountrySessionAccess420 {
         }
         if (grantId == bytes32(0)) return false;
 
+        // Advisory HC session checks do not consume periodic wallet budgets.
+        // Fail closed even for a zero-value call when a periodic grant is selected.
+        try registry.grant(grantId) returns (ICapabilityRegistry420.CapabilityGrant memory g) {
+            if (
+                g.principal != sessionKey || g.componentId != componentId
+                    || g.capabilityId != CapabilityIds420.SESSION_EXECUTE || g.scopeHash != scopeHash || g.revoked
+                    || g.periodLimit != 0 || g.periodSeconds != 0
+            ) return false;
+        } catch {
+            return false;
+        }
+
         try ICapabilityRegistry420(address(registry))
             .isAuthorized(sessionKey, componentId, CapabilityIds420.SESSION_EXECUTE, scopeHash, 0) returns (
             bool allowed

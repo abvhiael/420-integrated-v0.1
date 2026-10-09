@@ -53,6 +53,24 @@ contract HighCountryAuthorizationTest {
         require(!authorization.isAuthorized(request), "zero principal authorized");
     }
 
+    function testPeriodicOrMalformedPeriodMetadataFailsClosed() public {
+        _setGrant(0, 0, false);
+        registry.setPeriodicLimits(GRANT_ID, 10, 60);
+        require(!authorization.isAuthorized(_request()), "periodic grant accepted");
+        registry.setPeriodicLimits(GRANT_ID, 0, 60);
+        require(!authorization.isAuthorized(_request()), "period-only grant accepted");
+        registry.setPeriodicLimits(GRANT_ID, 10, 0);
+        require(!authorization.isAuthorized(_request()), "limit-only grant accepted");
+        registry.setPeriodicLimits(GRANT_ID, 0, 0);
+        require(authorization.isAuthorized(_request()), "nonperiodic grant rejected");
+    }
+
+    function testMissingActiveGrantMetadataFailsClosed() public {
+        LegacyCapabilityOracle legacy = new LegacyCapabilityOracle();
+        HighCountryAuthorization adapter = new HighCountryAuthorization(address(legacy));
+        require(!adapter.isAuthorized(_request()), "legacy oracle without active metadata accepted");
+    }
+
     function _setGrant(
         uint64 validFrom,
         uint64 validUntil,
@@ -85,5 +103,17 @@ contract HighCountryAuthorizationTest {
         (bool ok,) =
             address(authorization).call(abi.encodeWithSelector(authorization.requireAuthorized.selector, request));
         return !ok;
+    }
+}
+
+contract LegacyCapabilityOracle {
+    function isAuthorized(
+        address,
+        bytes32,
+        bytes32,
+        bytes32,
+        uint256
+    ) external pure returns (bool) {
+        return true;
     }
 }

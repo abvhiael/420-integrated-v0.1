@@ -56,6 +56,8 @@ Dependencies: R01; audit fixes retained. Category: code, real contract integrati
 | R02.12 | Validate module code/interface/version/ruleset and active-state consumers | No EOA/invalid/inactive module accepted as executable; scheduled activation and emergency rules agree |
 | R02.13 | Bind canonical SmartAccount deployment provenance and reviewed routine selectors | Forged account views do not authorize execution; native value, assets, fees, grants and sensitive operations escalate |
 
+R02.2 selects enforced nonperiodic-only grants; both periodLimit and periodSeconds must be zero. Policy/evidence: `R02.2-CAPABILITY-BUDGET-POLICY.md`, `qualification/R02.2-level1.json`. Cumulative budget support is not claimed.
+
 R02.1 qualification and verified registrar/component/grant/handoff procedure: `R02.1-CAPABILITY-WIRING.md`, exact-head evidence `qualification/R02.1-level1.json`. No live production deployment or cumulative budget enforcement is claimed.
 
 Exit: resolve HC-SEC-06..10 and 14..17; document accepted trust assumptions; all repaired cross-contract journeys tested with real dependencies, not only configurable mocks.

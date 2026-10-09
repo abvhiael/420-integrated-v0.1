@@ -50,7 +50,7 @@ Base events and service competitive results are wallet-free for authenticated pl
 | Wallet owner | Explicit canonical transaction and targeted claim consumption | Connection alone is not permission/entitlement; domain/nonce/expiry proof for service linking |
 | Routine session key | Reviewed exact zero-value target/selector with current scope/epoch/grant | Native spend, transfers, settlement, grants and other sensitive actions escalate; unknown selectors fail closed |
 | HC service/operator | Bounded approved game-domain writes/issuance under service roles and actual contract capabilities | No target-wallet claim consumption or private key custody; no implicit owner override beyond contract-authorized powers |
-| Capability/admin authority | Exact module/action/scope grants and documented emergency/configuration powers | No unrestricted worker grant; real budget consumption and revocation wiring remain R02 |
+| Capability/admin authority | Exact module/action/scope grants and documented emergency/configuration powers | No unrestricted worker grant; R02.2 rejects periodic grants; real revocation wiring is qualified in R02.1 |
 | Randomness provider | Exact request/domain/context fulfillment | Trusted entropy is not independently fair; proof/timeout/recovery decision R01.5/R02 |
 | Indexer/query adapter | Scoped projection reads | Cannot grant rights based on self-reported finalized metadata; high-risk reads require canonical verification |
 
@@ -60,7 +60,7 @@ Existing capability administrators can authorize transitions without intrinsic o
 
 | Dependency | Consumer / boundary | Verified scope / unresolved work |
 |---|---|---|
-| CapabilityRegistry420 | HighCountryAuthorization and session verifier | Direct dependency; exact component/action/scope/amount; metering gap R02 |
+| CapabilityRegistry420 | HighCountryAuthorization and session verifier | Direct dependency; exact component/action/scope/amount; nonperiodic-only policy R02.2; no cumulative metering |
 | SmartAccount420 / EntryPoint420 | Optional wallet/session transport | Existing wallet execution; canonical provenance and approved selector catalogue required |
 | GameRegistry420 / GamingAuthorization420 | Shared operator registration/issuance | Shared protocol authorization; no HC domain logic added to shared storage |
 | GameIdentity420 / GameClaims420 / GameEntitlements420 | HighCountryGamingBridge420, migration and optional gates | Existing narrow interfaces; targeted consumed claims and exact scoped entitlement checks |

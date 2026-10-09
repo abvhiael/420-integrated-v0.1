@@ -231,3 +231,9 @@ The full buildout plan is `RECONCILIATION-AND-BUILDOUT-ROADMAP.md`: stable R01..
 ## Committed qualification evidence
 
 `qualification/20261009/qualification.json` and accompanying hashed logs record the clean implementation head `5684f0f1fe59fa207bcacc816d6bf00f9686e170`. All executable foundation checks passed; live deployment acceptance is BLOCKED. These committed results retain their original SHA. The subsequent evidence-only head must be rerun separately; its exact-head result is recorded in PR #593, without attributing an earlier run to the later commit. This does not qualify the missing whole-game components.
+
+## R02.2 remediation update — 2026-10-09
+
+The original audit rows above retain their historical baseline. HC-SEC-14 is now mitigated by the canonical R02.2 alternative: explicitly reject finite-period HC grants, rather than pretend view-only calls account for usage. HighCountryAuthorization and HighCountrySessionAccess420 read the exact active grant, require matching tuple/metadata and reject either nonzero periodLimit or periodSeconds. Missing/reverting metadata fails closed. No registry consume authority is delegated to HC. Real-registry tests prove repeated zero/positive calls, replacement, rollover and component authority boundaries. Nonperiodic per-call limits, inclusive real-registry time boundaries and revocation remain supported.
+
+This closes the periodic-budget bypass within these HC production authorization paths; it does not add cumulative metering, factory provenance or missing engine integrations. Remaining security findings are HC-SEC-06..13 and HC-SEC-15..17. Exact-head evidence and policy are in `qualification/R02.2-level1.json` and `R02.2-CAPABILITY-BUDGET-POLICY.md`. Original readiness flags remain NO.

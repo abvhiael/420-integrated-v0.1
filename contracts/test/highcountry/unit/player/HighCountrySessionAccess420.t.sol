@@ -48,6 +48,15 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
     mapping(bytes32 => bytes32) internal active;
     mapping(bytes32 => bool) internal authorized;
 
+    function setPeriodicLimits(
+        bytes32 id,
+        uint256 limit,
+        uint64 seconds_
+    ) external {
+        grants[id].periodLimit = limit;
+        grants[id].periodSeconds = seconds_;
+    }
+
     function _key(
         address principal,
         bytes32 componentId,
@@ -288,6 +297,38 @@ contract HighCountrySessionAccess420Test {
                 address(account), SESSION_KEY, address(target), target.risky.selector
             ),
             "wrong selector accepted"
+        );
+    }
+
+    function testPeriodicRoutineGrantIsDeniedEvenForZeroNativeValue() public {
+        (bytes32 id,) = _enableRoutineGrant();
+        registry.setPeriodicLimits(id, 10, 60);
+        require(
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
+            "periodic session accepted"
+        );
+        registry.setPeriodicLimits(id, 0, 60);
+        require(
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
+            "period-only session accepted"
+        );
+        registry.setPeriodicLimits(id, 10, 0);
+        require(
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
+            "limit-only session accepted"
+        );
+        registry.setPeriodicLimits(id, 0, 0);
+        require(
+            sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
+            "nonperiodic session rejected"
         );
     }
 

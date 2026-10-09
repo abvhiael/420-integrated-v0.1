@@ -109,8 +109,14 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
         mothers = new MotherRegistry(address(auth), address(genomes));
         clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
         phenotypes = new PhenotypeRegistry(address(auth), address(genomes));
-        _grant(address(this), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES,
-            mothers.BIND_SCOPE(), keccak256("assets:mother:bind"), 0);
+        _grant(
+            address(this),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_BIND_CLONES,
+            mothers.BIND_SCOPE(),
+            keccak256("assets:mother:bind"),
+            0
+        );
         mothers.bindCloneRegistry(address(clones));
 
         _grant(
@@ -165,8 +171,14 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
             keccak256("assets:clone"),
             0
         );
-        _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING,
-            bytes32(uint256(3)), keccak256("assets:clone:cut"), 1);
+        _grant(
+            address(clones),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_CONSUME_CUTTING,
+            bytes32(uint256(3)),
+            keccak256("assets:clone:cut"),
+            1
+        );
         clones.registerClone(2, genomeId, 3, address(this), cloneMetadata);
 
         _grant(

@@ -36,3 +36,19 @@ func TestReadBoundaries(t *testing.T){
  records,e:=s.List(ctx,scope("a",security.Owner),Facility,"");if e!=nil||len(records)!=1||records[0].ID!="f"{t.Fatalf("leak: %+v %v",records,e)}
  _,e=s.List(ctx,scope("a",security.Maintainer),Facility,"");if e!=nil{t.Fatal(e)}
 }
+
+type rejectingStore struct{}
+func (rejectingStore) Create(context.Context,Record)(Record,error){panic("unauthorized create reached store")}
+func (rejectingStore) Get(context.Context,string,string,Kind)(Record,error){panic("unauthorized get reached store")}
+func (rejectingStore) List(context.Context,string,Kind,string)([]Record,error){panic("unauthorized list reached store")}
+func (rejectingStore) Update(context.Context,Record,int64)(Record,error){panic("unauthorized update reached store")}
+func TestUnauthorizedContextCannotQueryStorage(t *testing.T){
+ s:=New(rejectingStore{})
+ bad:=scope("a",security.Owner)
+ bad.Principal.Authenticated=false
+ if _,e:=s.Get(context.Background(),bad,Facility,"f");!errors.Is(e,ErrDenied){t.Fatal("unauthenticated get reached storage")}
+ if _,e:=s.List(context.Background(),bad,Facility,"");!errors.Is(e,ErrDenied){t.Fatal("unauthenticated list reached storage")}
+ bad=scope("a",security.Owner)
+ bad.Membership.State=security.Revoked
+ if _,e:=s.Get(context.Background(),bad,Room,"r");!errors.Is(e,ErrDenied){t.Fatal("revoked read reached storage")}
+}

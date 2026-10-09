@@ -20,15 +20,15 @@ function mock({invoiceAmount='420',orderStatus=1,payout=recipient,submitted=fals
    if(method==='eth_sendTransaction')return word(999);
    if(method!=='eth_call')throw Error('unexpected_method');
    const tx=params[0];const data=tx.data;
-   if(data.startsWith(invoice.getFunction('getInvoice').selector))return invoice.encodeFunctionResult('getInvoice',[[mid,seller,Z32,'0x343230',invoiceAmount,BigInt(Math.floor(now/1000)+1000),BigInt(Math.floor(now/1000)+2000),0,1,false,0,word(5),word(6),word(7),true]]);
+   if(data.startsWith(invoice.getFunction('getInvoice').selector))return invoice.encodeFunctionResult('getInvoice',[[mid,seller,Z32,'0x343230',invoiceAmount,BigInt(Math.floor(now/1000)+1000),BigInt(Math.floor(now/1000)+2000),0,1,false,0,word(5),Z32,Z32,true]]);
    if(data.startsWith(order.getFunction('getOrder').selector))return order.encodeFunctionResult('getOrder',[[word(20),1,buyer,seller,1,ZERO,420,word(21),Z32,Z32,Z32,orderStatus,0,0]]);
-   if(data.startsWith(merchant.getFunction('currentPayout').selector))return merchant.encodeFunctionResult('currentPayout',[payout,1,word(8)]);
+   if(data.startsWith(merchant.getFunction('currentPayout').selector))return merchant.encodeFunctionResult('currentPayout',[payout,1,Z32]);
    if(data.startsWith(pay.getFunction('derivePaymentId').selector))return pay.encodeFunctionResult('derivePaymentId',[paymentId]);
    if(data.startsWith(pay.getFunction('getPayment').selector))return pay.encodeFunctionResult('getPayment',[[invoiceId,buyer,seller,ZERO,420,ZERO,420,Z32,BigInt('0x'+Buffer.alloc(32,1).toString('hex')),Z32,0,0,submitted?1:0]]);
    if(data.startsWith(router.getFunction('consumedPaymentAuthorization').selector))return router.encodeFunctionResult('consumedPaymentAuthorization',[consumed]);
    return '0x';
  }};
- const s={address:buyer,epoch:0,pending:false,provider,config:{chainId:'420',contracts},verify:async()=>({epoch:0,address:buyer,tag:{blockHash:word(90),requireCanonical:true}})};
+ const s={address:buyer,epoch:0,pending:false,provider,config:{chainId:'420',contracts,nativePayment:{approved:true,native420AcceptedAssetsHash:word(5)}},verify:async()=>({epoch:0,address:buyer,tag:{blockHash:word(90),requireCanonical:true}})};
  return {s,calls};
 }
 const nonce=new Uint8Array(32).fill(1);

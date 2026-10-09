@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import { EmergencyDomains } from "../../../../src/highcountry/constants/EmergencyDomains.sol";
 import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 
 import { ICapabilityRegistry420 } from "../../../../src/interfaces/genesis/ICapabilityRegistry420.sol";
@@ -160,6 +161,31 @@ contract CultivationEngineTest is PlantSourcesFixture {
             address(this), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, genomeId, keccak256("hc6:genome:grant")
         );
         genomes.registerGenome(genomeId, keccak256("hc6:line"), keccak256("hc6:meta"), _loci());
+    }
+
+    function testRestrictedCultivationDeniesEnvironmentMutationAndRequiresReleaseAuthority() public {
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER,
+            bytes32(uint256(99)), keccak256("em:plant99"));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(99)), keccak256("em:update99"));
+        _sourcePlant(caps, plants, 99, genomeId, address(this), 11);
+        EmergencyState state = EmergencyState(address(cultivation.emergencyState()));
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
+            EmergencyDomains.CULTIVATION, keccak256("em:restrict"));
+        state.setRestricted(EmergencyDomains.CULTIVATION, true);
+        (bool ok,) = address(cultivation).call(abi.encodeCall(
+            cultivation.updateEnvironment, (uint64(99),
+                CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000))));
+        require(!ok, "restricted environment update accepted");
+        (ok,) = address(state).call(abi.encodeCall(
+            state.setRestricted, (EmergencyDomains.CULTIVATION, false)));
+        require(!ok, "unprivileged emergency release accepted");
+        _grant(address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RELEASE,
+            EmergencyDomains.CULTIVATION, keccak256("em:release"));
+        state.setRestricted(EmergencyDomains.CULTIVATION, false);
+        cultivation.updateEnvironment(99,
+            CultivationEngine.EnvironmentSnapshot(2200, 6000, 7000, 6000, 6000, 5000));
+        require(cultivation.getState(99).exists, "authorized recovery failed");
     }
 
     function testPlantLifecycleMovesForwardOnlyAfterRequiredTime() public {

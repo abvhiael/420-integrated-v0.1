@@ -6,7 +6,7 @@ root=Path(__file__).resolve().parents[1]
 def check(ok,msg):
     if not ok: raise SystemExit("BNB-M1 FAIL: "+msg)
 def run():
-    docs={n:(root/f"docs/bnb/BNB-1.{n}-"+{1:"CANONICAL-SOURCE-RECONCILIATION",2:"PRODUCT-SCOPE-AND-USER-JOURNEYS",3:"DOMAIN-MODEL-AND-STATE-MACHINES"}[n]+".md").read_text() for n in (1,2,3)}
+    docs={n:(root / "docs" / "bnb" / (f"BNB-1.{n}-" + {1:"CANONICAL-SOURCE-RECONCILIATION",2:"PRODUCT-SCOPE-AND-USER-JOURNEYS",3:"DOMAIN-MODEL-AND-STATE-MACHINES"}[n] + ".md")).read_text() for n in (1,2,3)}
     d=docs[3]
     for n in range(1,13):check(f"BNB-D{n:02d}" in d,f"missing domain acceptance D{n:02d}")
     for n in range(1,17):check(f"BNB-P{n:02d}" in docs[2],f"missing upstream P{n:02d}")

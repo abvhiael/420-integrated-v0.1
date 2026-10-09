@@ -4,7 +4,8 @@ Canonical source: `COM-1-ARCHITECTURE-AND-ROADMAP.md`, COM-4 (unchanged purpose 
 number); architecture handoff `COM-1.6-MARKETPLACE-STOREFRONT-UX.md`, adapters
 `COM-1.5-ECOSYSTEM-ADAPTER-DESIGN.md`, security `COM-1.7-SECURITY-THREAT-MODEL.md`,
 frozen Market V1/Pay sources and committed COM-2/3 qualification. Status:
-IMPLEMENTED; exact implementation-SHA CI must pass before COMPLETE is recorded.
+COMPLETE at Level 1 and the merchant-builder Level 2 milestone; exact-SHA evidence
+in `COM-4-QUALIFICATION-EVIDENCE.md`.
 
 ## Repository discovery and gap analysis
 
@@ -87,9 +88,9 @@ be requalified; superseded failures are never substituted as passing evidence.
   320px wrap and reduced motion; static self-only CSP. Actual root/build/output
   documented. Cloudflare project/live host/chain deployment remains unverified.
 
-The original COM-4 requirements are implementation-complete. Qualification evidence
-must individually confirm them on one exact SHA before updating the roadmap to
-COMPLETE. No standalone Commerce service ID, frozen-address edit, new financial
+Every original COM-4 criterion is individually SATISFIED on implementation SHA
+`594bd4e1e1554a1b8e34445eefd506765ffd9594`; all required CI jobs/steps and logs
+confirm PASS. See `COM-4-QUALIFICATION-EVIDENCE.md`. No standalone Commerce service ID, frozen-address edit, new financial
 contract, private key, hidden transaction or deployment was introduced.
 
 ## Phase qualification relationship

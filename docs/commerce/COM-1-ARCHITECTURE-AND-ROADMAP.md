@@ -1,6 +1,6 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
-**Status:** COM-1 architecture closeout qualified and merged through PR #588; COM-2 upstream adaptations and COM-3 service/API/SDK qualified at targeted Level 1 and retained Level 2. COM-1.8 evidence is reconciled in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`.
+**Status:** COM-1 architecture closeout qualified and merged through PR #588; COM-2 upstream adaptations, COM-3 service/API/SDK and COM-4 merchant builder qualified at targeted Level 1 and retained app Level 2 milestones. COM-1.8 evidence is reconciled in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`.
 **Target surface:** `commerce.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
@@ -44,7 +44,7 @@
 - COM-1.3 inspect Market/Pay contract ABIs, map missing capability proposals and immutable V1 transitions. **SOURCE ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.3-SMART-CONTRACT-ARCHITECTURE.md`; exact-SHA Level 1 verification pending.
 - COM-1.4 define off-chain schemas, event ingestion, tenant isolation and chain reorg reconciliation. **ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.4-DATA-STORAGE-AND-EVENT-INDEXING.md`; exact-SHA CI evidence pending.
 - COM-1.5 specify exact Wallet/Pay/Market/Swap/Identity/Registry adapters and fail-closed behaviour. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.5-ECOSYSTEM-ADAPTER-DESIGN.md`; reporter source implemented/qualified in COM-2; live deployment remains COM-8.
-- COM-1.6 design merchant onboarding, storefront templates, product management, cart and checkout UX. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.6-MARKETPLACE-STOREFRONT-UX.md`; executable web and checkout remain future phases.
+- COM-1.6 design merchant onboarding, storefront templates, product management, cart and checkout UX. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.6-MARKETPLACE-STOREFRONT-UX.md`; merchant builder implemented/qualified in COM-4; public marketplace/checkout remain COM-5.
 - COM-1.7 write financial, inventory, upload, access-control, fraud and privacy threat model. **THREAT MODEL DOCUMENTED** in `docs/commerce/COM-1.7-SECURITY-THREAT-MODEL.md`; exact-SHA CI qualification to be checked.
 - COM-1.8 Level 3 architecture closeout only after all preceding criteria/evidence and exact-SHA canonical qualification. **LEVEL 3 QUALIFIED AND MERGED**; see `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md` for required workflows, evidence and blockers.
 
@@ -66,7 +66,7 @@
 
 ## Cloudflare deployment planning
 
-Target branded client `commerce.420integrated.org` with verified configuration, separate testnet/mainnet settings, server-owned secrets and privacy-safe persistence. **Root directory, build command, output directory and Cloudflare project are TBD after choosing the real repository web stack.** Do not guess these values, configure an unverified service manifest, or claim a deployment.
+Target branded client `commerce.420integrated.org` with verified configuration, separate testnet/mainnet settings, server-owned secrets and privacy-safe persistence. **Implemented merchant web root: `commerce/web`; build: `npm run build` after SDK build; output: `commerce/web/dist`. Cloudflare project, DNS/TLS and live binding remain unverified.** Do not guess these values, configure an unverified service manifest, or claim a deployment.
 
 ## Qualification and status
 
@@ -80,8 +80,9 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 | COM-1 acceptance evidence and exact-SHA qualification | COMPLETE — candidate `d32c1eeacc2ba4f13d3a6fcd1afb84a5abb0aa3c`, merge `0ec695481fc84e6066aeae50baf6e0fd3c7f8731` |
 | COM-2 | COMPLETE — targeted Level 1 and retained Level 2; exact SHA `0b1a3f5d12fdf6d5c76e6ba860058887886daf9f`, run 37890773444 SUCCESS; PR #594 unmerged |
 | COM-3 | COMPLETE — Level 1 and retained Level 2; exact SHA `49c5875d35cd205a8c58634d7ecf1a4ba2ae99b1`, service run 37895449006 SUCCESS; see `COM-3-QUALIFICATION-EVIDENCE.md` |
-| COM-4 through COM-7 | NOT STARTED |
+| COM-4 | COMPLETE — Level 1 and merchant-builder Level 2; exact SHA `594bd4e1e1554a1b8e34445eefd506765ffd9594`; builder run 37959428862, service 37959429065, upstream 37959429112 SUCCESS; see `COM-4-QUALIFICATION-EVIDENCE.md` |
+| COM-5 through COM-7 | NOT STARTED |
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** COM-4 — Merchant storefront builder. COM-2 qualification is recorded in `COM-2-QUALIFICATION-EVIDENCE.md`; COM-3 implementation and individual requirement mapping in `COM-3-SERVICE-AND-API.md`, exact-SHA conclusion in `COM-3-QUALIFICATION-EVIDENCE.md`. Accumulated app-phase Level 3 and live gates remain deferred; PR #594 remains draft/unmerged.
+**Next action:** COM-5 Public marketplace. COM-2 qualification is recorded in `COM-2-QUALIFICATION-EVIDENCE.md`; COM-3 implementation and individual requirement mapping in `COM-3-SERVICE-AND-API.md`, exact-SHA conclusion in `COM-3-QUALIFICATION-EVIDENCE.md`. COM-4 individual exit, final exact-SHA CI and merchant-builder integration evidence are in `COM-4-QUALIFICATION-EVIDENCE.md`. Accumulated app-phase Level 3 and live gates remain deferred; PR #594 remains draft/unmerged.

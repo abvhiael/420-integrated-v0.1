@@ -1,0 +1,84 @@
+name: Commerce COM-6 Level 2 merchant operations milestone
+on:
+  push:
+    branches: ['audit/420commerce-com-2-upstream-adaptations']
+    paths:
+      - '.github/workflows/commerce-com6-level2.yml'
+      - 'commerce/**'
+      - 'packages/420-sdk/**'
+      - '420-indexer/**'
+      - 'contracts/src/market/**'
+      - 'contracts/src/pay/**'
+      - 'contracts/src/apps/Identity420.sol'
+      - 'contracts/src/apps/Names420.sol'
+      - 'contracts/test/Market*.t.sol'
+      - 'contracts/test/RefundManager420*.t.sol'
+      - 'scripts/commerce/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: commerce-com6-level2-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  milestone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Assert exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            commerce/package-lock.json
+            commerce/web/package-lock.json
+            packages/420-sdk/package-lock.json
+            420-indexer/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Install locked app dependencies
+        run: |
+          npm ci --prefix commerce --ignore-scripts
+          npm ci --prefix commerce/web --ignore-scripts
+          npm ci --prefix packages/420-sdk --ignore-scripts
+          npm ci --prefix 420-indexer --ignore-scripts
+      - name: Scoped dependency security
+        run: |
+          npm audit --prefix commerce --audit-level=moderate
+          npm audit --prefix commerce/web --audit-level=moderate
+          npm audit --prefix packages/420-sdk --audit-level=moderate
+          npm audit --prefix 420-indexer --omit=dev --audit-level=moderate
+      - name: Retained Market Pay funded refund and Arbitration boundary
+        run: python scripts/commerce/qualify-contracts.py
+      - name: Retained Commerce service SDK Indexer and ABI integration
+        run: python scripts/commerce/qualify-service.py
+      - name: Browser and Wallet milestone integration
+        run: |
+          npm run build --prefix packages/420-sdk
+          npx --prefix commerce/web playwright install --with-deps chromium
+          npm run qualify --prefix commerce/web
+      - name: Governed Pay and Genesis interface parameter safety (no Foundry duplication)
+        run: |
+          python3 scripts/verify-420pay-parameters.py
+          python3 scripts/verify-420pay-implementation.py
+          python3 scripts/verify-420pay-hardening.py
+          python3 scripts/verify-420pay-audit.py
+          python3 scripts/verify-genesis-interface-layer.py
+      - name: Whitespace and patch guard
+        env:
+          COMMERCE_PATCH_BASE: ${{ github.event.pull_request.base.sha || '' }}
+        run: node scripts/commerce/check-patch.mjs

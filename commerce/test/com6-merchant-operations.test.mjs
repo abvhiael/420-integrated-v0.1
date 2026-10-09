@@ -32,8 +32,8 @@ test('COM-6 refund and dispute handoff never mutates Pay, Market, receipt, order
  f.payments.set(b32(901),{invoiceId:b32(900),payer:buyer.address.toLowerCase(),merchant:seller.address.toLowerCase(),settlementAsset:order.paymentAsset,settlementAmount:'100',receiptHash:b32(55),status:'5',refundedAmount:'0',tipAmount:'0'});
  const data=await f.service.merchantAnalytics(seller.address,store.store_id);
  assert.equal(data.totals.paid,1);assert.equal(data.byAsset[order.paymentAsset.toLowerCase()].paidBaseUnits,'100');
- const refund=await f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund');
- assert.equal(refund.executed,false);assert.equal(refund.refunded,false);assert.equal(refund.authority,'Pay.RefundManager420');
+ const refund=await f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'refund',{amount:'100',reasonHash:b32(404)});
+ assert.equal(refund.executed,false);assert.equal(refund.proposal.amount,'100');assert.equal(refund.proposal.remainingAfterProposal,'0');assert.equal(refund.refunded,false);assert.equal(refund.authority,'Pay.RefundManager420');
  const dispute=await f.service.merchantRemedy(seller.address,store.store_id,attempt.attemptId,'dispute');
  assert.equal(dispute.executed,false);assert.equal(dispute.disputed,false);
  assert.equal(order.status,'2');assert.equal(f.payments.get(b32(901)).status,'5');

@@ -70,6 +70,7 @@ on:
       - '.github/workflows/docs-pages.yml'
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
+      - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
   push:
     branches:
       - main

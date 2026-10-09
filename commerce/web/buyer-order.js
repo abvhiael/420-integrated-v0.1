@@ -23,7 +23,7 @@ export async function submitReviewedMarketOrder(session,plan,{now=Date.now}={}){
    const availability=inventoryABI.decodeFunctionResult('available',await call(cfg.contracts.InventoryReservation420.address,inventoryABI.encodeFunctionData('available',[args[1]])))[0];
    if(!listing.active||Number(listing.revision)!==args[2]||listing.quoteAsset.toLowerCase()!==String(args[4]).toLowerCase()||BigInt(listing.unitPrice)*BigInt(args[3])!==BigInt(args[5])||BigInt(availability)<BigInt(args[3]))fail();
    const transaction={from:checked.address,to:contract.address,data:encoded,value:'0x0'};
-   await call(contract.address,encoded).catch(()=>fail());
+   await request('eth_call',[transaction,checked.tag]).catch(()=>fail());
    if(checked.epoch!==session.epoch||now()>=plan.expiresAt||checked.address!==session.address)fail();
    if(BigInt(await request('eth_chainId',[]))!==BigInt(cfg.chainId)||(await request('eth_accounts',[]))[0]?.toLowerCase()!==checked.address)fail();
    const hash=await request('eth_sendTransaction',[transaction]);

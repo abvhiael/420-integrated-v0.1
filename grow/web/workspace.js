@@ -88,12 +88,13 @@ export function boot(doc=globalThis.document,win=globalThis.window){
  if(!doc||!win)return;
  const root=doc.getElementById("workspace"),status=doc.getElementById("workspace-status"),
  nav=doc.getElementById("workspace-nav"),heading=doc.getElementById("section-heading"),
- refresh=doc.getElementById("workspace-refresh"),logoutButton=doc.getElementById("workspace-logout");
+ refresh=doc.getElementById("workspace-refresh"),logoutButton=doc.getElementById("workspace-logout"),
+ loginButton=doc.getElementById("workspace-login");
  if(!root||!status||!nav||!heading||!refresh)return;
  let api=null,selected="",generation=0;
  const report=text=>{status.textContent=text;};
  function lock(text){
-  generation++;api=null;selected="";if(logoutButton)logoutButton.hidden=true;nav.replaceChildren();root.replaceChildren();heading.textContent="Private workspace";refresh.disabled=true;report(text);
+  generation++;api=null;selected="";if(logoutButton)logoutButton.hidden=true;if(loginButton)loginButton.hidden=false;nav.replaceChildren();root.replaceChildren();heading.textContent="Private workspace";refresh.disabled=true;report(text);
  }
 
  function forms(section){
@@ -181,7 +182,7 @@ export function boot(doc=globalThis.document,win=globalThis.window){
   lock("Checking private API and session…");
   try{
    const instance=await fetchPrivate(win.GROW420_PRIVATE_CONFIG,win.location.origin);
-   api=instance;if(logoutButton)logoutButton.hidden=false;nav.replaceChildren();
+   api=instance;if(logoutButton)logoutButton.hidden=false;if(loginButton)loginButton.hidden=true;nav.replaceChildren();
    for(const section of api.session.sections){
     const button=doc.createElement("button");button.type="button";button.textContent=section;
     button.addEventListener("click",()=>display(section));nav.append(button);
@@ -192,6 +193,17 @@ export function boot(doc=globalThis.document,win=globalThis.window){
   }catch{lock("Private workspace unavailable. No public directory identity grants access to cultivation data.");}
  }
  refresh.addEventListener("click",()=>selected?display(selected):connect());
+ if(loginButton)loginButton.addEventListener("click",async()=>{
+  loginButton.disabled=true;
+  try{
+   const origin=endpoint(win.GROW420_PRIVATE_CONFIG,win.location.origin);
+   if(!origin||origin!==win.location.origin)throw Error("Same-origin TLS required");
+   const result=await win.fetch(origin+"/v1/private/login",{method:"POST",credentials:"include",redirect:"error",cache:"no-store"});
+   if(!result.ok)throw Error("Certificate not approved");
+   await connect();
+  }catch{lock("Certificate login unavailable. Enroll a verified identity with the operator.");}
+  finally{loginButton.disabled=false;}
+ });
  if(logoutButton)logoutButton.addEventListener("click",async()=>{
   const current=api;lock("Signing out…");
   try{if(!current)throw Error("No session");const response=await current.logout();

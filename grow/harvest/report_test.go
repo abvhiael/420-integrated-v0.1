@@ -50,7 +50,7 @@ func TestPlanningCalendarAndProductionExport(t *testing.T) {
 	}
 	report, err := s.Production(context.Background(), scope, "f", "z", now.Add(-24*time.Hour), now, 10)
 	if err != nil || report.Count != 1 || report.TotalGrams != 12 || len(report.Periods) != 1 ||
-		!strings.Contains(string(report.CSV), "OBSERVED,h1,p1,f,z") || !strings.Contains(string(report.CSV), "\'=HYPERLINK(1)") {
+		!strings.Contains(string(report.CSV), "OBSERVED,h1,p1,f,z") || !strings.Contains(string(report.CSV), "'=HYPERLINK(1)") {
 		t.Fatalf("report=%+v err=%v", report, err)
 	}
 	_, err = s.Production(context.Background(), scope, "f", "z", now.Add(-24*time.Hour), now, 0)

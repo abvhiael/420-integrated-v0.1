@@ -1,0 +1,241 @@
+{
+  "step": "R02.1 \u2014 Qualify five audit fixes and production CapabilityRegistry component/grant wiring",
+  "status": "COMPLETE",
+  "qualificationLevel": 1,
+  "implementationSha": "275664caefd3e6d9d00f5517ac16df96639e1257",
+  "evidenceSha": "Resolve this evidence-only commit in git history; no recursive self-hash.",
+  "branch": "review/high-country-complete-audit-20261009",
+  "pr": "https://github.com/abvhiael/420-integrated-v0.1/pull/593",
+  "mainSha": "41d173dbcfbeb8299f54f22e7c049f1fec20336d",
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "divergenceAtCandidate": {
+    "behindMain": 1,
+    "aheadMain": 23
+  },
+  "implementation": "Added 12 real production-registry tests, verified grant/registrar/component handoff procedure, exact-head runner with required-suite checks. Existing five source fixes retained; no production source/ABI/address edits.",
+  "filesChanged": [
+    "contracts/test/highcountry/integration/RealCapabilityGenesis.t.sol",
+    "docs/highcountry/FILE-INVENTORY-20261009.json",
+    "docs/highcountry/R02.1-CAPABILITY-WIRING.md",
+    "docs/highcountry/README.md",
+    "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
+    "scripts/highcountry/qualify-r02-1.py"
+  ],
+  "exitCriteria": {
+    "fiveAuditFixes": "PASS: exact retained zero scope, foreign genome/no lock, zero grower, zero dependencies and substituted registry regressions",
+    "productionRegistryWiring": "PASS: real registration/issuance/revocation, permissions, handoff, exact tuple/amount/time/replacement",
+    "Genesis": "PASS: actual registry set/finalize/revoke; finalized state cannot reopen",
+    "negativeScopePrincipalAction": "PASS: denied real consumers; no root mutation",
+    "durableEvidence": "PASS: exact clean implementation head and decoded-log hashes"
+  },
+  "qualification": {
+    "step": "R02.1",
+    "qualificationLevel": 1,
+    "implementationSha": "275664caefd3e6d9d00f5517ac16df96639e1257",
+    "treeSha": "72a2eedc6c8b54a3d960b6d3d7bb81ba95948cc2",
+    "cleanSameHeadAfter": true,
+    "profile": "default",
+    "steps": [
+      {
+        "name": "build-sizes",
+        "command": [
+          "/workspace/scratch/c2bf41b11555/toolchain/forge",
+          "build",
+          "src/highcountry",
+          "--sizes"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "log": "build-sizes.log",
+        "logSha256": "c276d6b4456a2eaf58f774f040c3cbd13ccab4f8129edeb58ea93330b41b16e1",
+        "committedLog": "docs/highcountry/qualification/R02.1/build-sizes.json",
+        "committedLogEncoding": "JSON output field, lossless UTF-8; decoded original hash verified"
+      },
+      {
+        "name": "targeted-contracts",
+        "command": [
+          "/workspace/scratch/c2bf41b11555/toolchain/forge",
+          "test",
+          "--match-contract",
+          "^(RealCapabilityGenesisTest|RealCapabilityWiringTest|GenesisRegistryTest|HighCountryAuthorizationTest|GenomeRegistryTest|CultivationEngineTest|HighCountryMigration420Test|HighCountrySessionAccess420Test|GenesisRegistryInvariantTest|GenomeRegistryInvariantTest|CultivationInvariantTest|ProgressiveSessionAccessInvariantTest)$",
+          "-vv"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "log": "targeted-contracts.log",
+        "logSha256": "d1d97c3b189c6a60d65bb0b8f2ead3054be777a855b89fe6a9cacedf557eedf9",
+        "committedLog": "docs/highcountry/qualification/R02.1/targeted-contracts.json",
+        "committedLogEncoding": "JSON output field, lossless UTF-8; decoded original hash verified"
+      },
+      {
+        "name": "format",
+        "command": [
+          "/workspace/scratch/c2bf41b11555/toolchain/forge",
+          "fmt",
+          "--check",
+          "test/highcountry/integration/RealCapabilityGenesis.t.sol"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "log": "format.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "committedLog": "docs/highcountry/qualification/R02.1/format.json",
+        "committedLogEncoding": "JSON output field, lossless UTF-8; decoded original hash verified"
+      },
+      {
+        "name": "static-lint",
+        "command": [
+          "/workspace/scratch/c2bf41b11555/toolchain/forge",
+          "lint",
+          "src/highcountry",
+          "--severity",
+          "high",
+          "med",
+          "low"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "log": "static-lint.log",
+        "logSha256": "02cd1610008e49b3578c04e7d532726c43eafaf79cf37be8365f24cdd3ddb162",
+        "committedLog": "docs/highcountry/qualification/R02.1/static-lint.json",
+        "committedLogEncoding": "JSON output field, lossless UTF-8; decoded original hash verified"
+      },
+      {
+        "name": "source-specification",
+        "command": [
+          "python3",
+          "scripts/highcountry/verify-r01.py"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "log": "source-specification.log",
+        "logSha256": "918a29a779be8613cf7c5e713be553012ebf64fa0fdb72e8310c527961c8291b",
+        "committedLog": "docs/highcountry/qualification/R02.1/source-specification.json",
+        "committedLogEncoding": "JSON output field, lossless UTF-8; decoded original hash verified"
+      },
+      {
+        "name": "patch-whitespace",
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "HEAD^",
+          "HEAD"
+        ],
+        "exitCode": 0,
+        "status": "PASS",
+        "log": "patch-whitespace.log",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "committedLog": "docs/highcountry/qualification/R02.1/patch-whitespace.json",
+        "committedLogEncoding": "JSON output field, lossless UTF-8; decoded original hash verified"
+      },
+      {
+        "name": "required-suite-coverage",
+        "status": "PASS",
+        "summary": "Ran 12 test suites in 12.48s (33.45s CPU time): 51 tests passed, 0 failed, 0 skipped"
+      }
+    ],
+    "forgeVersion": "forge Version: 1.8.5\nCommit SHA: 51a52c59cffd940f76eddd0b4bb1791aa4b5ac7f\nBuild Timestamp: 2026-10-05T17:18:54.332175693Z (1791220734)\nBuild Profile: dist",
+    "scope": "Five audit-fix regressions and real CapabilityRegistry wiring only; budgets and account deployment provenance remain separate roadmap steps."
+  },
+  "testSummary": {
+    "tests": 51,
+    "suites": 12,
+    "failed": 0,
+    "skipped": 0,
+    "newRealRegistryTests": 12,
+    "realRegistryTestsTotal": 13,
+    "invariantSuites": 4
+  },
+  "staticAnalysis": {
+    "exitCode": 0,
+    "warnings": 25,
+    "categories": {
+      "block-timestamp": 2,
+      "reentrancy-events": 2,
+      "uninitialized-local": 6,
+      "unsafe-typecast": 15
+    },
+    "review": "Same 25 existing findings: bounded uint64/normalized casts, day-scale timestamp assumptions, try/catch assigned locals, breeding events after trusted external calls. Not clean security certification; no findings suppressed."
+  },
+  "sourceInputs": [
+    {
+      "path": "contracts/src/highcountry/genesis/GenesisRegistry.sol",
+      "sha256": "6020b36ce17a8e3bdd9246d6fb6f524f88c01d1fcedff47695fc65d1f5b0953f"
+    },
+    {
+      "path": "contracts/src/highcountry/cultivation/CultivationEngine.sol",
+      "sha256": "4bf16b0854d61a853f90cd9a9807081397a0e145beed75f840f3bca32424d348"
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountryMigration420.sol",
+      "sha256": "d1d5b7b189eb97d365959cb3fd74b7198afdeb97a5476153503a0d11434d0bc4"
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/GenomeRegistry.sol",
+      "sha256": "eab5d6e6db62009877cf6660610e074c40cff151cc2f258e55b31a41b668ee6a"
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountrySessionAccess420.sol",
+      "sha256": "f584b4a29658f43b82f3c52b91f1370409e105412cd85807192617fea57cbb59"
+    },
+    {
+      "path": "contracts/src/system/CapabilityRegistry420.sol",
+      "sha256": "eec70c83ff91b2c7a5fd3fc10728db06d402642be0f8e0c48c4530ac96e7b7ef"
+    },
+    {
+      "path": "contracts/src/interfaces/genesis/ICapabilityRegistry420.sol",
+      "sha256": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431"
+    },
+    {
+      "path": "contracts/src/interfaces/genesis/ICapabilityRegistryExtended420.sol",
+      "sha256": "2ab13853023a734c75adc0c19bdd7483d77d7aaf75fe8daa079f7258771fdf85"
+    }
+  ],
+  "diagnoses": [
+    {
+      "issue": "Initial wrong-caller test failed",
+      "classification": "test-harness defect",
+      "rootCause": "ADMIN_SCOPE staticcall consumed vm.prank before target grant issuance",
+      "fix": "Read scope before spoofing caller; assertions and production guards unchanged"
+    },
+    {
+      "issue": "First exact candidate formatting failed",
+      "classification": "preparation/formatter configuration defect",
+      "supersededSha": "0f8cd7bf8fe0bb8ba3d9b6276783e3f6377b574d",
+      "fix": "Format from contracts root with committed configuration; all gates rerun at final implementation SHA"
+    }
+  ],
+  "security": "All five audited fix regressions PASS; HC-SEC-06..17 remain roadmap-owned. Authority rotation does not revoke existing grants: explicit revocation documented/tested. No cumulative budget or canonical account factory attestation claimed.",
+  "level2": "Not required for this individual step; R01 milestone evidence retained at its own SHA, R02 accumulated integration remains future.",
+  "level3": "Deferred R08 accumulated phase closeout/main reconciliation; Solidity owns full repository Foundry, Genesis addresses/manifests separately.",
+  "blockersForStep": [],
+  "releaseBlockers": [
+    "Remaining R02/R04/R05 security and gameplay implementations",
+    "R07 actual manifests/deployment/role handoff",
+    "R09 testnet runtime/provider/RPC/credentials and R10 production acceptance"
+  ],
+  "next": "R02.2 \u2014 Define and enforce cumulative capability budget consumption or explicitly disallow finite-period HC grants",
+  "fullApplicationReleaseQualified": false,
+  "ci": {
+    "qualificationOwner": "Exact-SHA local Level 1 runner; no dedicated HC fast workflow currently exists.",
+    "SolidityContracts": {
+      "runId": 37961197682,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37961197682",
+      "conclusion": "success",
+      "actualCoverage": "classify-pr succeeded; foundry/pr-shards/compute-fast/level3 jobs skipped by branch/scope policy. NOT contract test evidence."
+    },
+    "DocsQualification": {
+      "runId": 37961197704,
+      "conclusion": "skipped",
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37961197704",
+      "countedAsPass": false
+    },
+    "OracleAudit": {
+      "runId": 37961197678,
+      "observedStatus": "in_progress",
+      "qualificationScope": "Unrelated to HC R02.1; no HC evidence inferred or rerun requested."
+    }
+  },
+  "relevantMainChanges": []
+}

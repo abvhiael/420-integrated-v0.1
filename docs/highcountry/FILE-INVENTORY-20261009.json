@@ -4,6 +4,62 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
+      "path": "docs/highcountry/qualification/R02.1-level1.json",
+      "sha256": "f758e20178c8bce0c50edbcca46443a95eae243b2205ce95718c3f7cedd027e1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/build-sizes.json",
+      "sha256": "e0303f8f6d0822cc7ed5faf2e6e1b18a87222ae9d223ef529635eafec984a6a3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/source-specification.json",
+      "sha256": "70866bde21fd12d6501c4406bcb37552767a41d4a19eb11cf26810828357c2a7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/static-lint.json",
+      "sha256": "69ac37b4afda09fe16fd7a0e2a8e18e3c474fd4c9e7adf8756bfa93599443c10",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/targeted-contracts.json",
+      "sha256": "995ba1dd2155fd70720c1af62f65748bfce6cfc2ae82f0bc5a3ff4c351401380",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "clients/highcountry-access-v1/package.json",
       "sha256": "bccf87b28f6b89fa87c7ea5b63cded3b5f83f525da2ef5178bf28622fa44a907",
       "classification": "COMPLETE",

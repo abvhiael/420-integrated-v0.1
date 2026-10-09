@@ -59,3 +59,15 @@ Do not use SQL totals as authoritative bank balances; `paid` derives from canoni
 **Remaining blockers:** canonical external notification, names/credential proof, governed refund/dispute execution path, complete all-order analytics, payment-testnet acceptance, Level 1 full green and Level 2 retained milestone evidence. **Do not mark COM-6 COMPLETE until individually satisfied.**
 
 **Next canonical roadmap step after completing COM-6:** COM-7 Security/ops.
+
+## COM-6 Level 1 exact-SHA qualification (2026-10-09)
+
+Implementation SHA: `16787cb83ec3c65ef1f9ec96234f74c8913ed603`.
+PR #594 (`audit/420commerce-com-2-upstream-adaptations`), draft and unmerged; verified PR base `41d173dbcfbeb8299f54f22e7c049f1fec20336d`.
+The preceding browser-failure candidates are **NOT** PASS evidence. Root causes were asynchronous Wallet-connect ordering, missing EIP-1193 mock injection in the new browser page, and an actual 320px overflow from long chain identifiers. Corrected without disabling checks or weakening assertions.
+
+- Commerce merchant builder fast qualification: [37972080672](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37972080672) — **SUCCESS**; exact-SHA build, lint, Wallet security/unit regressions and Playwright browser + accessible responsive dashboard.
+- Commerce service fast qualification: [37972080647](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37972080647) — **SUCCESS**; affected service, SDK/Indexer, new COM-6 owner/IDOR/refund/accounting checks, adversarial and patch verification.
+- Commerce upstream contracts: [37972080665](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37972080665) — **SUCCESS**; affected retained Market/Pay contract checks (not full repository Foundry).
+
+**Level 1 for the implemented COM-6 repository-side changes: PASS.** This does **not** establish that all original COM-6 acceptance criteria are fulfilled. Remaining missing requirements are exactly those in the exit-criterion matrix above; overall canonical COM-6 remains **PARTIAL / BLOCKED**. Level 2 app milestone **not run**, and Level 3 phase closeout deliberately **not run**.

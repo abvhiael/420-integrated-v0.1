@@ -25,7 +25,7 @@ Dependencies: none. Category: specification, product/governance decisions, docum
 
 Exit: canonical documents agree with the implemented boundaries and clearly identify planned features. Ambiguous product mechanics are resolved before their code phases.
 
-R01.6 is PARTIAL: `GAMEPLAY-SPECIFICATION.md` defines inherited rules, HC-7 proposal, later-system boundaries and explicit product decisions pending approval. Do not qualify R01.7 as complete until resolved.
+R01.6 baseline specification is COMPLETE: the owner adopted the five HC-7/economy rules on 2026-10-09. `GAMEPLAY-SPECIFICATION.md` fixes these rules and retains later-module catalogue/implementation prerequisites. This is specification completion, not gameplay implementation. R01.7 Level 2 milestone qualification remains unexecuted.
 
 R01.5 trust specification is `DEPLOYMENT-AND-TRUST.md`; no new grants or deployed readiness are claimed.
 

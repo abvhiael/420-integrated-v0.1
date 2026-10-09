@@ -100,3 +100,19 @@ test('COM-7 security headers and strict numeric pagination reject ambiguous inpu
  }
  assert.ok((await anonymous.storefronts()).items);
 });
+
+test('COM-7 bounded HTTP burst rejects overload without leaking internal error bodies',async t=>{
+ const f=await running(t);
+ const requests=Array.from({length:150},()=>fetch(f.baseUrl+'/v1/health'));
+ const responses=await Promise.all(requests);
+ const codes=responses.map(r=>r.status);
+ assert.ok(codes.every(code=>code===200||code===429),'bounded successful or rate-limited outcomes');
+ assert.ok(codes.includes(429),'rate/concurrency guard must apply during burst');
+ for(const response of responses){
+  const body=await response.text();
+  assert.equal(body.includes('stack'),false);
+  assert.equal(body.includes('COMMERCE_DELIVERY_KEY'),false);
+ }
+ f.advance(60001);
+ assert.equal((await fetch(f.baseUrl+'/v1/health')).status,200);
+});

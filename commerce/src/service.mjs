@@ -314,14 +314,15 @@ export class CommerceService {
     const data=await this.merchantOperations(actor,storeId,{offset:0,limit:100});
     // Deliberately bounded preview; never silently present it as all-time revenue.
     const totals={orders:data.items.length,paid:0,refunded:0,awaitingPayment:0,finalizedPaidBaseUnits:'0',finalizedRefundedBaseUnits:'0'};
-    let paid=0n,refunded=0n;
+    const byAsset={};
     for(const order of data.items) {
-      if(order.paid===true){totals.paid++;paid+=BigInt(order.total);}
-      if(order.state==='REFUNDED'){totals.refunded++;refunded+=BigInt(order.total);}
+      if(!byAsset[order.asset])byAsset[order.asset]={paidBaseUnits:'0',refundedBaseUnits:'0'};
+      if(order.paid===true){totals.paid++;byAsset[order.asset].paidBaseUnits=(BigInt(byAsset[order.asset].paidBaseUnits)+BigInt(order.total)).toString();}
+      if(order.state==='REFUNDED'){totals.refunded++;byAsset[order.asset].refundedBaseUnits=(BigInt(byAsset[order.asset].refundedBaseUnits)+BigInt(order.total)).toString();}
       if(['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING'].includes(order.state))totals.awaitingPayment++;
     }
-    totals.finalizedPaidBaseUnits=paid.toString();totals.finalizedRefundedBaseUnits=refunded.toString();
-    return {totals,partial:data.nextOffset!==null,limit:100,scope:'first_100_attempts_only',assetBreakdownRequired:true,financialAuthority:'Pay/Market',provenance:data.provenance};
+    delete totals.finalizedPaidBaseUnits;delete totals.finalizedRefundedBaseUnits;
+    return {totals,byAsset,partial:data.nextOffset!==null,limit:100,scope:'first_100_attempts_only',assetBreakdownRequired:false,financialAuthority:'Pay/Market',provenance:data.provenance};
   }
   async merchantRemedy(actor,storeId,attemptId,kind) {
     requireThat(['refund','dispute'].includes(kind),'invalid_remedy');

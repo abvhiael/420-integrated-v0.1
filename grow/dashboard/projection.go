@@ -13,7 +13,7 @@ import (
 type SQLReader struct{ DB *sql.DB }
 
 func sectionQuery(section string) (string, error) {
-	const where = " WHERE tenant_id=$1::uuid AND ($3='' OR facility_id=NULLIF($3,'')::uuid) AND ($4='' OR zone_id=NULLIF($4,'')::uuid)"
+	const where = " WHERE tenant_id=$1::uuid AND ($2='' OR facility_id=NULLIF($2,'')::uuid) AND ($3='' OR zone_id=NULLIF($3,'')::uuid)"
 	switch section {
 	case "overview", "facilities":
 		return "SELECT facility_id::text,name,'Private facility', 'ACTIVE' FROM grow_private.facilities WHERE tenant_id=$1::uuid AND ($3='' OR facility_id=$3::uuid) ORDER BY facility_id LIMIT 100", nil
@@ -71,7 +71,7 @@ WHERE tenant_id=$1::uuid AND subject_id=$2 AND state='ACTIVE'`, session.TenantID
 		security.Resource{TenantID: session.TenantID, FacilityID: facility, ZoneID: zone}, action) {
 		return nil, errors.New("dashboard membership denied")
 	}
-	rows, err := tx.QueryContext(r.Context(), query, session.TenantID, session.SubjectID, facility, zone)
+	rows, err := tx.QueryContext(r.Context(), query, session.TenantID, facility, zone)
 	if err != nil {
 		return nil, err
 	}

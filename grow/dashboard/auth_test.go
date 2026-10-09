@@ -18,7 +18,7 @@ func TestPrivateSessionRequiresTLSAndConfiguredDatabase(t *testing.T) {
 	if _, err := auth.Verify(r); err == nil {
 		t.Fatal("non TLS request must reject session")
 	}
-	if _, err := auth.Issue(r.Context(), "", "", "", time.Now()); err == nil {
+	if _, err := auth.Issue(r.Context(), "", "", "", time.Now(), nil); err == nil {
 		t.Fatal("unauthenticated issuance accepted")
 	}
 }

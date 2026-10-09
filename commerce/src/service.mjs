@@ -293,7 +293,7 @@ export class CommerceService {
       paid=state!=='REFUNDED';
     }
     this.db.run('UPDATE checkout_attempts SET state=?,payment_id=?,quote_id=? WHERE attempt_id=?',state,order.paymentRef==='0x'+'0'.repeat(64)?null:order.paymentRef,null,attemptId);
-    return {attemptId,orderId:a.order_id,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {attemptId,orderId:a.order_id,merchantId:a.merchant_id,seller:a.seller,buyer:a.customer_scope,asset:a.asset,total:a.total,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async putDelivery(actor,attemptId,input) {
     keys(input,['address','contact']); text(input.address,2000); text(input.contact,200); actor=wallet(actor);

@@ -98,11 +98,11 @@ o.event_id::text,o.kind,o.source_id::text`, tenant, worker, now).
 func (s SQLStore) Complete(ctx context.Context, tenant, eventID, worker string, successful bool, now time.Time) error {
 	return s.tx(ctx, tenant, func(tx *sql.Tx) error {
 		result, err := tx.ExecContext(ctx, `UPDATE grow_private.integration_outbox
-SET state=CASE WHEN $4 THEN 'DELIVERED'
+SET state=CASE WHEN $4 THEN 'ACCEPTED'
  WHEN attempts>=4 THEN 'DEAD' ELSE 'QUEUED' END,
  next_attempt_at=CASE WHEN $4 THEN next_attempt_at
  ELSE $5+(attempts*attempts)*interval '1 minute' END,
- delivered_at=CASE WHEN $4 THEN $5 ELSE NULL END,
+ accepted_at=CASE WHEN $4 THEN $5 ELSE NULL END,
  claim_token='',lease_until=NULL
 WHERE tenant_id=$1::uuid AND event_id=$2::uuid AND claim_token=$3
 AND state='IN_FLIGHT' AND lease_until>=$5`, tenant, eventID, worker, successful, now)

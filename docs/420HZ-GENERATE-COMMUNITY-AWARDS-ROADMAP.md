@@ -426,6 +426,33 @@ Coverage:
 
 **Exit:** documented threat-model closure with negative/adversarial tests.
 
+## Current execution status — October 8, 2026
+
+This status is scoped to PR #565 (`feature/420hz-generate-community-awards-roadmap`), and preserves the original roadmap numbering and exit criteria. A passing local gate never establishes production or testnet readiness.
+
+| Canonical step | Current disposition | Evidence / remaining work |
+| --- | --- | --- |
+| HZ-GCA-1–7 | Prior foundation work — retain qualification records | Reconcile accumulated evidence at milestone / phase closeout; do not infer live provider readiness |
+| HZ-GCA-8–9 | Local Level 1 previously qualified | Community and Charts app-specific regressions retained |
+| HZ-GCA-10–13 | Local Level 1 previously qualified | Awards model, voting, fixture UX and prize model; production authorization, durable ballots and actual payouts are not implied |
+| HZ-GCA-14 | **Local Level 1 PASS; live integration deferred / canonical cross-service exit remains open** | 94 passing tests, run [37869728517](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37869728517); actual Notifications/Indexer/Search/Analytics/Explorer same-object integration and replay/rebuild tracked under HZ-GCA-18 in `docs/audit/420HZ-TESTNET-DEFERRED-INTEGRATION-ROADMAP.md` |
+| HZ-GCA-15 | **Local Level 1 PASS; canonical threat closure PARTIAL** | 99 passing tests at current evidence HEAD, run [37872385003](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37872385003); `docs/audit/HZ-GCA-15-QUALIFICATION.md` documents unclosed cross-component abuse, consent, identity, privacy and adversarial controls |
+| HZ-GCA-16 | **NEXT IMPLEMENTATION STEP — NOT YET QUALIFIED** | Production-facing Generate / Community / Charts / Awards / Creator Studio navigation, disclosure badges, season module, truthful unavailable-state gating, website verifier |
+| HZ-GCA-17 | NOT STARTED | Complete all required repository-side exits and M4 integration/hardening checks first; reconcile with current `main` and run one exact-SHA Level 3 phase closeout |
+| HZ-GCA-18 | TESTNET-GATED | Live source/service integration including HZ-GCA-14 carry-forward; real generation, publication, awards and resilience evidence |
+| HZ-GCA-19 | DEFERRED | Production/Genesis disposition after qualified testnet |
+
+### Immediate execution order
+
+1. **HZ-GCA-16:** implement and Level 1 qualify the canonical public website entry points, preserved branding and honest availability states.
+2. **HZ-GCA-15 security closure:** resolve or explicitly testnet-gate every remaining threat-model item according to its actual scope; integrate the security controls into affected pathways and run app-scoped negative/adversarial tests. Do **not** declare the complete threat model closed from the isolated 99-test gate.
+3. **HZ-GCA-14 integration disposition:** retain local PASS; complete repository-side same-object contracts/adapters/tests needed before Level 3. Defer only genuinely live endpoints, persistent replay/reorg and deployment-specific receipts to the linked HZ-GCA-18 testnet checklist.
+4. **M4 app integration milestone:** run the broader affected 420Hz app/client/service suite across HZ-GCA-14–16, without duplicating repository-wide qualification.
+5. **HZ-GCA-17 Level 3:** reconcile to current `main`, then qualify one exact merge-candidate SHA. Solidity alone owns full Foundry inventory; Genesis separately owns address/manifests without repeating the same full Foundry inventory. Record exact run IDs, job conclusions and durable audit evidence; do not merge before required gates pass.
+6. **HZ-GCA-18 then HZ-GCA-19:** live testnet qualification and, only afterward, production/Genesis disposition.
+
+---
+
 ## HZ-GCA-16 — Website and product navigation integration
 
 Update the production-facing 420Hz web client so the product promise matches capability.

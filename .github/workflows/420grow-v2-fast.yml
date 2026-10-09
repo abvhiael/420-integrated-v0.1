@@ -102,3 +102,4 @@ jobs:
           go vet ./grow/telemetry
           test -z "$(gofmt -l grow/telemetry/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/telemetry/qualify.sql
+          node --test grow/telemetry/chart.test.mjs

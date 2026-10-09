@@ -47,6 +47,7 @@ contract RefundManager420 is GenesisResidentAccess420 {
     event PaymentRegistrySet(address indexed registry);
     event RefundRecorded(bytes32 indexed refundId, bytes32 indexed paymentId, address settlementAsset, uint256 amount);
     event AuthorizedRefundFunded(bytes32 indexed paymentId, address indexed asset, uint256 amount);
+    event AuthorizedRefundFundingCancelled(bytes32 indexed paymentId, address indexed asset, uint256 amount);
     event FundedRefundPaid(bytes32 indexed refundId, bytes32 indexed paymentId, address indexed recipient, address asset, uint256 amount);
 
     modifier refundNonReentrant() {
@@ -143,6 +144,37 @@ contract RefundManager420 is GenesisResidentAccess420 {
             require(token.balanceOf(address(this)) - beforeBalance == amount, "fund delta");
         }
         emit AuthorizedRefundFunded(paymentId, asset, amount);
+    }
+
+    // Emergency governance-only unwind returns unspent escrow to the exact
+    // governance funding caller, never to an arbitrary user-supplied payee.
+    // A cancelled deposit is NOT a refund and does not alter Pay accounting.
+    function cancelAuthorizedRefundFunding(
+        bytes32 paymentId,
+        address asset,
+        uint256 amount
+    ) external refundNonReentrant {
+        _requireGenesisGovernance(PayIds420.ACTION_REFUND);
+        _requireOperational(
+            PayIds420.ACTION_REFUND, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND
+        );
+        _canonicalSettlementAsset(asset);
+        require(paymentRegistry != address(0) && paymentRegistry.code.length != 0, "payment registry");
+        (, address canonicalAsset,,,) = IPaymentRefundAccounting420(paymentRegistry).refundAccounting(paymentId);
+        require(canonicalAsset == asset && amount > 0 && authorizedRefundEscrow[paymentId] >= amount, "refund funding");
+        authorizedRefundEscrow[paymentId] -= amount;
+        if (asset == address(0)) {
+            (bool ok,) = payable(msg.sender).call{value: amount}("");
+            require(ok, "native funding unwind");
+        } else {
+            IERC20RefundAsset420 token = IERC20RefundAsset420(asset);
+            uint256 beforeRecipient = token.balanceOf(msg.sender);
+            uint256 beforeContract = token.balanceOf(address(this));
+            require(token.transfer(msg.sender, amount), "fund unwind transfer");
+            require(token.balanceOf(msg.sender) - beforeRecipient == amount, "fund unwind recipient");
+            require(beforeContract - token.balanceOf(address(this)) == amount, "fund unwind delta");
+        }
+        emit AuthorizedRefundFundingCancelled(paymentId, asset, amount);
     }
 
     // The sole new real-transfer entrypoint. Pay must have already approved

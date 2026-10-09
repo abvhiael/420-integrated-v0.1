@@ -3,6 +3,12 @@ on:
   pull_request:
     paths:
       - 'hz/generate/src/security-gate.js'
+      - 'hz/generate/src/production-security.js'
+      - 'hz/generate/src/cross-service.js'
+      - 'hz/generate/src/charts.js'
+      - 'hz/generate/src/award-voting.js'
+      - 'hz/generate/src/register-publish.js'
+      - 'hz/generate/test/production-security.test.js'
       - 'hz/generate/src/jobs.js'
       - 'hz/generate/test/generation-job.test.js'
       - 'hz/generate/test/security-gate.test.js'
@@ -14,6 +20,12 @@ on:
       - 'feature/420hz-generate-community-awards-*'
     paths:
       - 'hz/generate/src/security-gate.js'
+      - 'hz/generate/src/production-security.js'
+      - 'hz/generate/src/cross-service.js'
+      - 'hz/generate/src/charts.js'
+      - 'hz/generate/src/award-voting.js'
+      - 'hz/generate/src/register-publish.js'
+      - 'hz/generate/test/production-security.test.js'
       - 'hz/generate/src/jobs.js'
       - 'hz/generate/test/generation-job.test.js'
       - 'hz/generate/test/security-gate.test.js'

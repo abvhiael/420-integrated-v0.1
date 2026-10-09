@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/qualification/R01.2-level1.json",
-      "sha256": "c4f2cd5f2a045d8411a32cc92ab8a5b64ee35a3fa2712f3f85b218666da5b6b6",
+      "path": "docs/highcountry/TYPES-AND-UNITS.md",
+      "sha256": "37dc070dd6ac4aff512a03d61e29d8b8e3bd4ad4c60a0d6d2d58c3fad41d372d",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1226,7 +1226,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "f3f2a05f933e94a7ff10bb66f690cee602886e93a6c8f2110a8ff5b1970af013",
+      "sha256": "3c6b2a679be847df63c8391a42c4e746cd22e1dc7b75353ee5b8111050abbfb5",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1234,7 +1234,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "8f71345fe41c43072d1564c10ab569f568a9b917375670e83e2046aa232418bd",
+      "sha256": "94c084cab7ea02af8f3ecf324e120e0d0e6075dfdc8e7d446716e11a01f76ae3",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1339,6 +1339,14 @@
     {
       "path": "docs/highcountry/qualification/20261009/solidity-static-lint.log",
       "sha256": "4f2677eda1df88c6566c9d8603741161753fe5f15049eb364c9d6baf9f89a1a3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.2-level1.json",
+      "sha256": "c4f2cd5f2a045d8411a32cc92ab8a5b64ee35a3fa2712f3f85b218666da5b6b6",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

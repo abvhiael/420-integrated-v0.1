@@ -90,7 +90,8 @@ try{
   await operations.locator('#connect').click();
   await operations.locator('#open input[name=storeId]').fill(f.db.get('SELECT store_id FROM stores').store_id);
   await operations.locator('#open button').click();
-  await operations.waitForFunction(()=>document.querySelector('#summary').textContent.includes('order attempts'));
+  await operations.waitForFunction(()=>document.querySelector('#summary').textContent.includes('order attempts')||!document.querySelector('#error').hidden);
+  assert.equal(await operations.locator('#error').isVisible(),false,'merchant operations: '+await operations.locator('#error').textContent());
   assert.match(await operations.locator('#summary').textContent(),/0 order attempts/);
   assert.match(await operations.locator('#integrations').textContent(),/NOT_CONFIGURED/);
   assert.deepEqual((await new AxeBuilder({page:operations}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations,[]);

@@ -1,0 +1,16 @@
+# 420Compute / 420Indexer — S-06 external science read endpoint qualification evidence
+
+**Repository result: targeted exact-SHA PASS. Live source integration: unavailable by default, with explicit 503. No funds or provider approval implied.**
+
+- Change: add `GET /v1/compute/external-science?chainId=420&limit=50` to native Go 420Indexer; connect existing S-06 420Compute page using the strict no-authority response contract; add bounded optional operator-supplied observation snapshot reader; error/empty handling; canonical origin-limited CORS.
+- Qualified implementation SHA: `bf2f4eb725d8310864fc0efdbcabeb75e1169735`, audit branch `cmp-science-indexer-read-endpoint-20261008`, PR #591 stacked on CMP-10 PR #589. Main at check: `ffc6a4028676907c266714b5c1ae8ba3af9a7137`; initial stacked base `c75cc81064ab9d700ca47c20159122375c8ebf46`.
+- Required dedicated Level 1 run [37868962314](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37868962314) **SUCCESS** on exact source SHA, job `113622314795` **SUCCESS**. Workflow `.github/workflows/cmp-science-read-endpoint.yml` checked out exact SHA, ran `go test ./indexer/api ./indexer/cmd/indexer420 -count=1` and `compute/web npm run build`, covering frontend tests.
+- Go tests: unconfigured 503 and `canonicalAuthority:false`; present empty snapshot HTTP 200; read-only populated observation HTTP 200 with untrusted verification/finality forcibly downgraded; wrong-chain/invalid limit HTTP 400; unsafe amount or inconsistent provider page rejected; reader errors HTTP 503; canonical website origin allowed and unrelated origins not granted CORS.
+- Frontend tests: populated and empty page; HTTP 503, network failure, untrusted `canonicalAuthority:true`; wrong chain or native monetary amount; old observations labeled STALE after 24 hours. The button clears prior cards before reload and after failure, and displays separate empty/unavailable messaging. Read-only fetch may operate independently of `runtimeReady` whenever `indexerUrl` is safely configured.
+- Missing live prerequisites: no independently provider-approved BOINC or Folding@home stream configured; default `compute/web/runtime-config.json` has `indexerUrl:null`; the Go process has no `INDEXER_EXTERNAL_SCIENCE_SNAPSHOT_PATH` unless explicitly configured. Therefore neither production live endpoint nor production UI is claimed deployed or populated.
+- The optional local projection file supplies only publicly safe non-authoritative observations. It is **NOT** a trusted, durable on-chain Indexer projector, provider signature verifier or reward entitlement source. Until a genuine approved source and reorg-aware projection are deployed, never claim independently VERIFIED credit, paid $420 or complete S-06 end-to-end live evidence.
+- No CMP-5 or CMP-6 smart contracts, Genesis addresses, Wallet payout authority or other monetary rights changed.
+- Level 2 live source/Indexer authenticity remains testnet-blocked. Level 3 global closeout deferred. Broader unrelated workflows were not used as substitutes for the targeted qualifying run.
+- Completion scope: website/Indexer HTTP plumbing and offline error-path qualification PASS; live data feed and deployment PENDING.
+
+This is evidence-only after the qualified implementation SHA and does not change executable scope.

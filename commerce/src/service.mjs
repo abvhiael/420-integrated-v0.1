@@ -313,18 +313,30 @@ export class CommerceService {
     return {items,totalCount:count,nextOffset:offset+rows.length<count?offset+rows.length:null,source:'finalized_market_pay',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async merchantAnalytics(actor,storeId) {
-    const data=await this.merchantOperations(actor,storeId,{offset:0,limit:100});
-    // Deliberately bounded preview; never silently present it as all-time revenue.
-    const totals={orders:data.items.length,paid:0,refunded:0,awaitingPayment:0,finalizedPaidBaseUnits:'0',finalizedRefundedBaseUnits:'0'};
+    // Traverse every local checkout attempt instead of silently truncating at 100.
+    // A bounded maximum fails closed: large histories require a snapshot/cursor
+    // reconciliation design before this synchronous endpoint can claim completion.
+    const {source,merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    const count=this.db.get('SELECT COUNT(*) AS n FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=?',storeId).n;
+    requireThat(count<=5000,'analytics_history_requires_pagination',503);
+    const snapshot={chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true};
+    const totals={orders:0,paid:0,refunded:0,awaitingPayment:0};
     const byAsset={};
-    for(const order of data.items) {
-      if(!byAsset[order.asset])byAsset[order.asset]={paidBaseUnits:'0',refundedBaseUnits:'0'};
-      if(order.paid===true){totals.paid++;byAsset[order.asset].paidBaseUnits=(BigInt(byAsset[order.asset].paidBaseUnits)+BigInt(order.total)).toString();}
-      if(order.state==='REFUNDED'){totals.refunded++;byAsset[order.asset].refundedBaseUnits=(BigInt(byAsset[order.asset].refundedBaseUnits)+BigInt(order.total)).toString();}
-      if(['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING'].includes(order.state))totals.awaitingPayment++;
+    for(let offset=0;offset<count;offset+=100) {
+      const page=await this.merchantOperations(actor,storeId,{offset,limit:100});
+      requireThat(page.totalCount===count&&page.provenance.blockHash===snapshot.blockHash&&page.provenance.blockNumber===snapshot.blockNumber,'analytics_snapshot_changed',503);
+      requireThat(page.items.length===Math.min(100,count-offset),'analytics_history_changed',503);
+      for(const order of page.items) {
+        requireThat(order.provenance.blockHash===snapshot.blockHash&&order.provenance.blockNumber===snapshot.blockNumber&&order.provenance.finalized,'analytics_snapshot_changed',503);
+        totals.orders++;
+        if(!byAsset[order.asset])byAsset[order.asset]={paidBaseUnits:'0',refundedBaseUnits:'0'};
+        if(order.paid===true){totals.paid++;byAsset[order.asset].paidBaseUnits=(BigInt(byAsset[order.asset].paidBaseUnits)+BigInt(order.total)).toString();}
+        if(order.state==='REFUNDED'){totals.refunded++;byAsset[order.asset].refundedBaseUnits=(BigInt(byAsset[order.asset].refundedBaseUnits)+BigInt(order.total)).toString();}
+        if(['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING'].includes(order.state))totals.awaitingPayment++;
+      }
     }
-    delete totals.finalizedPaidBaseUnits;delete totals.finalizedRefundedBaseUnits;
-    return {totals,byAsset,partial:data.nextOffset!==null,limit:100,scope:'first_100_attempts_only',assetBreakdownRequired:false,financialAuthority:'Pay/Market',provenance:data.provenance};
+    return {totals,byAsset,partial:false,limit:5000,scope:'all_local_checkout_attempts_at_finalized_block',assetBreakdownRequired:false,financialAuthority:'Pay/Market',provenance:snapshot};
   }
   async merchantRemedy(actor,storeId,attemptId,kind,request={}) {
     requireThat(['refund','dispute'].includes(kind),'invalid_remedy');

@@ -9,6 +9,7 @@ export const ABIS = {
   OrderRegistry420: ['function getOrder(bytes32) view returns(tuple(bytes32 listingId,uint32 listingRevision,address buyer,address seller,uint256 quantity,address paymentAsset,uint256 totalAmount,bytes32 settlementAdapterId,bytes32 paymentRef,bytes32 fulfillmentHash,bytes32 disputeHash,uint8 status,uint64 createdAt,uint64 updatedAt))', 'function createOrder(bytes32,bytes32,uint32,uint256,address,uint256)', 'function listingRegistry() view returns(address)', 'function policyRegistry() view returns(address)', 'function inventoryReservation() view returns(address)'],
   PaymentRegistry420: ['function getPayment(bytes32) view returns(tuple(bytes32 invoiceId,address payer,address merchant,address inputAsset,uint256 inputAmount,address settlementAsset,uint256 settlementAmount,bytes32 quoteId,uint256 payerNonce,bytes32 receiptHash,uint256 tipAmount,uint256 refundedAmount,uint8 status))'],
   InvoiceRegistry420: ['function getInvoice(bytes32) view returns(tuple(bytes32 merchantId,address merchant,bytes32 metadataHash,bytes3 currency,uint256 amount,uint64 expiresAt,uint64 refundUntil,uint8 mode,uint8 acceptance,bool partialPayments,uint16 quoteMaxSlippageBps,bytes32 acceptedAssetsHash,bytes32 settlementPlanHash,bytes32 tipPolicyHash,bool active))', 'function paidAmount(bytes32) view returns(uint256)', 'function isClosed(bytes32) view returns(bool)'],
+  RefundManager420: ['function fundedRefundExecuted(bytes32) view returns(bool)','function refunds(bytes32) view returns(bytes32 paymentId,address settlementAsset,address recipient,uint256 amount,bytes32 reasonHash,uint64 createdAt)'],
   MarketPaySettlementAdapter420: ['function invoiceIdForOrder(bytes32) view returns(bytes32)', 'function orderPayment(bytes32) view returns(bytes32)', 'function orders() view returns(address)', 'function payments() view returns(address)', 'function invoices() view returns(address)', 'function merchants() view returns(address)', 'function deploymentChainId() view returns(uint256)'],
 };
 const registryABI = ['function component(bytes32) view returns(tuple(bytes32 componentId,address implementation,bytes32 runtimeCodeHash,tuple(uint16 major,uint16 minor,uint16 patch) version,uint8 lifecycle))', 'function isActive(bytes32) view returns(bool)'];
@@ -27,7 +28,7 @@ export class RpcAuthority {
     const request = new FetchRequest(config.rpcUrl); request.timeout=5000;
     this.rpc = rpc ?? new JsonRpcProvider(request, undefined, { batchMaxCount: 1 });
     wallet(config.registry.address); bytes32(config.registry.codeHash);
-    for (const name of Object.keys(ABIS)) {
+    for (const name of Object.keys(ABIS).filter(name=>name!=='RefundManager420'||config.contracts.RefundManager420)) {
       const binding = config.contracts[name];
       requireThat(binding && binding.verified === true, 'missing_verified_binding');
       wallet(binding.address); bytes32(binding.codeHash);
@@ -108,6 +109,7 @@ export class RpcAuthority {
         transaction: (contract,method,args) => ({chainId:this.config.chainId,target:this.config.contracts[contract].address,contract,method,args,data:new Interface(ABIS[contract]).encodeFunctionData(method,args),requiresWalletAuthorization:true,canonicalAuthority:false}),
         order: async orderId => record((await read('OrderRegistry420','getOrder',[bytes32(orderId)]))[0]),
         payment: async paymentId => record((await read('PaymentRegistry420','getPayment',[bytes32(paymentId)]))[0]),
+        fundedRefund: this.config.contracts.RefundManager420 ? async refundId => ({executed:(await read('RefundManager420','fundedRefundExecuted',[bytes32(refundId)]))[0],record:record(await read('RefundManager420','refunds',[bytes32(refundId)]))}) : null,
         invoice: async invoiceId => record((await read('InvoiceRegistry420','getInvoice',[bytes32(invoiceId)]))[0]),
         invoiceId: async orderId => (await read('MarketPaySettlementAdapter420','invoiceIdForOrder',[bytes32(orderId)]))[0],
         boundPayment: async orderId => (await read('MarketPaySettlementAdapter420','orderPayment',[bytes32(orderId)]))[0],

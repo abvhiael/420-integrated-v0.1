@@ -20,7 +20,8 @@ contract MotherCloneConsumptionTest is PublicPlantCapacityFixture {
     ) internal returns (bytes32 cuttingGrant) {
         _grant(address(this), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(id)));
         mothers.registerMother(id, GENOME, owner, capacity, keccak256("mother"));
-        cuttingGrant = _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(id)));
+        cuttingGrant =
+            _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(id)));
     }
 
     function _clone(

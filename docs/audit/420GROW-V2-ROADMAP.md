@@ -7,7 +7,7 @@
 | Step | Name | State / boundary |
 | --- | --- | --- |
 | GROW-V2-01 | Expanded product decision, personas and approved scope | COMPLETE / Level 1 — SHA `fc00b78f442c20eac35669d411dbe8d8ac8f99df`; runs 37846815165, 37846815166 SUCCESS |
-| GROW-V2-02 | Architecture, tenancy, roles and security model | PLANNED / Level 1 |
+| GROW-V2-02 | Architecture, tenancy, roles and security model | IMPLEMENTED / Level 1 qualification pending |
 | GROW-V2-03 | Persistent storage, schemas and migrations | PLANNED / Level 1 |
 | GROW-V2-04 | Facility, room and zone management | PLANNED / Level 1 |
 | GROW-V2-05 | Plant lifecycle, genetics and cloning records | PLANNED / Level 2 accumulated V2-02–05 |

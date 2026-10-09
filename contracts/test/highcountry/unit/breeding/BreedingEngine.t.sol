@@ -50,7 +50,6 @@ contract BreedingEngineTest {
             keccak256("em:breed")
         );
         breeding.bindEmergencyState(address(emergency));
-
         _grant(
             address(this),
             ModuleIds.GENESIS_REGISTRY,

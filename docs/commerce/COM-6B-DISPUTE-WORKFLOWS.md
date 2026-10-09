@@ -1,24 +1,59 @@
-# COM-6B — Dispute workflow qualification
+# COM-6B — Canonical Market dispute and independent Arbitration handoff
 
-Canonical source: `docs/commerce/COM-1-ARCHITECTURE-AND-ROADMAP.md`, COM-6 Merchant operations, dispute handoff. Proposed COM-6B subpackage; **not** a new canonical roadmap number.
+**Canonical parent roadmap:** `docs/commerce/COM-1-ARCHITECTURE-AND-ROADMAP.md`, COM-6 Merchant operations. COM-6B is a proposed implementation work package; it does not replace, renumber or alter the COM-6 exit criteria.
 
-## Verified authority boundary
+**Audit branch:** `audit/420commerce-com-2-upstream-adaptations`, PR #594 (draft). **Executable candidate SHA:** `6a788bdfe7d6337f0d05b8f9c3f5dd00f5077f53`. Current implementation and tests require exact-SHA Level 1 completion before a PASS disposition. No repository-wide Level 3 requested.
 
-`OrderRegistry420.disputeOrder(orderId,disputeHash)` is the canonical Market V1 contract entrypoint. The *actual buyer or seller* must submit the on-chain transaction; it accepts only `PAID` or `FULFILLED` states and records the supplied nonzero dispute commitment with status `DISPUTED`. 420Arbitration is an independent case/policy/ruling protocol; a Market dispute does not automatically create an arbitration case, bind an independent resolver, obtain a ruling or execute a remedy. Arbitration itself does not custody or return funds. Do not blur these authorities.
+## 1. Authority matrix
 
-## Implemented
+| Authority | Canonical action | Commerce boundary |
+| --- | --- | --- |
+| 420Market V1 `OrderRegistry420` | Actual buyer or seller calls `disputeOrder(orderId,disputeHash)` only from PAID/FULFILLED; order becomes DISPUTED | Prepare signed merchant request and exact Wallet intent; verify finalized order/commitment; never mutate Market directly |
+| 420Arbitration `ArbitrationCaseRegistry420` | Open case; submit evidence; appeal with bound claimant/respondent, policy and deadlines | Optional, independently Registry-verified case action and Wallet confirmation only |
+| 420Arbitration `ArbitrationRulingRegistry420` | Authorized resolver submits ruling, finalized after appeal window | Read finalized case/ruling from approved code; Commerce cannot resolve, alter policy, force finalization or create fictitious rulings |
+| Governance / Pay / Market reporter | Independently approves and executes any money return or other bounded remedy | Arbitration ruling **never** grants Commerce authority to transfer money, overwrite canonical order/payment records or execute a remedy |
 
-- SQLite v4 `004-dispute-requests.sql`: durable request with unique order/commitment binding and store index, compatible v1→v4 migration.
-- Signed merchant-only `merchantRemedy(...,'dispute',{disputeHash})`: rechecks merchant-controller identity, canonical seller and eligible Market state before creating idempotent, serialized request. Returns a non-executing canonical Market Wallet intent for `disputeOrder`; a different second commitment fails closed.
-- Signed `GET /v1/merchant/storefronts/{storeId}/operations/disputes` and `merchantDisputes` SDK: verifies finalized Market `DISPUTED` state and exact commitment, rejects mismatches, never claims Arbitration case/ruling or payment remedy. Dashboard includes evidence commitment and order-linked status.
-- Regression suite `commerce/test/com6b-dispute.test.mjs` tests idempotency, eligibility, role/tenant isolation, malformed and forged commitments and false finality.
+The canonical Market domain is `keccak256("420/arbitration/domain/market/v1")`; origin component `keccak256("420/component/market/v1")`. These correspond to retained `ArbitrationGenesis420.t.sol` semantics, not arbitrary user input. No custody, privileged reviewer shortcut, unfrozen address or new smart contract is introduced.
 
-## Remaining original exit criteria / blockers
+## 2. Implemented repository-side workflows
 
-1. **Actual user Wallet submission and transaction finality:** the current UI surfaces a Market transaction intent; it does not submit a transaction. No actual Wallet signature, mined transaction or live chain proof is asserted.
-2. **Qualified arbitration case adapter:** 420Arbitration's registered case/policy/router must be verified from approved manifests and tested for case creation, claimant/defendant provenance, evidence, resolver independence, appeal and finalized ruling. No approved, proven end-to-end case binding has yet been integrated.
-3. **Governed remedy handoff:** arbitration rulings cannot mutate Market or Pay automatically; any final remedy must go through the originating protocol's separately qualified authority, with permission, accounting and replay checks. Not implemented.
-4. **Milestone / live acceptance:** production-equivalent testnet, canonical deployment/manifest bindings, authorized case reviewers, end-to-end chain acceptance. No live dispute has been created.
-5. **Exact SHA qualification:** app-scoped service and merchant-browser workflows must complete green; pending checks cannot be treated as pass.
+**Market dispute request.** Migration `commerce/sql/004-dispute-requests.sql` retains store-scoped dispute requests and exact evidence commitment; POST signed `.../operations/orders/{attemptId}/dispute` checks live controller, canonical seller, permitted Market status, idempotence and conflicting evidence. The returned `OrderRegistry420.disputeOrder` intent cannot sign or submit for another party. `WalletSession.sendMarketDispute` checks the approved manifest, final block, runtime code, original seller and state, calldata, chain/account and on-chain simulation immediately before an explicit Wallet transaction. Broadcast remains UNFINALIZED.
 
-**Disposition: COM-6B PARTIAL until the original exit criteria above are fulfilled.** Do not advance to COM-6C or merge PR #594 on the strength of a mere dispute-request record. No global Level 3 requested; Level 2 app milestone only when integrated authorities converge.
+**Status/reconciliation.** Signed GET `.../operations/disputes` reads the finalized Market order and verifies the exact dispute commitment (including separately identifying a subsequently refunded order). A pending request without canonical DISPUTED state is not a dispute success. Forged or mismatched finalized commitments fail closed.
+
+**Optional approved Arbitration path.** `commerce/src/arbitration.mjs` requires a manifest-pinned `420/service/arbitration/v1` ProtocolRegistry publication with active, exact version, metadata manifest/dependency/interface commitments, full runtime code hashes and the distinct Router→Policy/Case/Ruling and Case→Policy/Ruling and Ruling→Case graph. All reads use the SAME finalized RPC block. Missing, stale, inactive or mismatched service identity fails closed; no default/fabricated addresses are substituted. The separate signed HTTP/SDK methods are:
+
+- `POST .../operations/orders/{attemptId}/arbitration/prepare`: seller-only, only after canonical Market DISPUTED and matching claim commitment; verifies active governance policy, snapshots requested remedy commitment in durable SQLite v5 and returns canonical `openCase` Wallet intent.
+- `POST .../operations/orders/{attemptId}/arbitration/bind`: requires a **real finalized Case ID**, reads canonical CaseRegistry and matches claimant/respondent, domain, origin component/order ID, claim commitment and requested remedy. A different second case/reason is rejected; Commerce never invents an on-chain case ID.
+- `POST .../operations/orders/{attemptId}/arbitration/evidence`: checks stored case and claimant, round OPEN, evidence deadline and nonzero commitment; returns independent CaseRegistry intent.
+- `POST .../operations/orders/{attemptId}/arbitration/appeal`: checks RULED state, snapshotted appeal window/cap and original claimant; returns independent CaseRegistry intent.
+
+`WalletSession.sendArbitrationAction` revalidates the Registry publication, profile, code hashes and immutable graph, exact Market origin/case, active domain policy, case parties and state/deadlines where applicable, and simulates the action before requiring an explicit Wallet transaction. It reports only an unfinalized broadcast. Case IDs must subsequently be verified through the signed bind route. The dashboard offers case preparation, explicit signing, ID binding, evidence and appeal controls when an approved Arbitration manifest exists; otherwise those actions remain unavailable and clearly labeled.
+
+**Read-only lifecycle.** The signed disputes view compares the stored request to finalized Market state, optional canonical case identity, case round/state and current-round independent RulingRegistry record. RULED is distinct from FINALIZED, and a finalized ruling is distinct from an executed remedy. No buyer identifying data is stored beyond the canonical on-chain party Wallet address.
+
+## 3. Deployment manifest extension (optional, operator-approved)
+
+The backend and browser manifests may include `arbitration` with the canonical service ID, chainId, integer version, `router:{address,codeHash,verified:true}`, `dependencies:{policies,cases,rulings}` with their individual verified addresses and runtime code hashes, and nonzero `manifestHash`, `dependencyRoot`, `interfaceHash` matching ProtocolRegistry profile. The entire manifest remains protected by the existing operator-approved SHA-256 gate. No case-opening action is enabled without both this pin and fresh, Registry-proven on-chain identity.
+
+There is **no blanket Arbitration authority** and the UI cannot sign governance, resolver or financial actions. For evidence privacy, submit commitments only; do not upload raw private evidence into public chain data.
+
+## 4. Qualification and tests
+
+- `commerce/test/com6b-dispute.test.mjs`: tenant/seller authorization, Market eligibility, invalid evidence, idempotence and conflict, finalized Market reconciliation, approved Arbitration case binding, requested remedy, appeal/finality and forged-case/ruling negative paths.
+- `commerce/test/arbitration-adapter.test.mjs`: finalized Registry service, code/graph, case/ruling read and service substitution/alias/deprecation rejection.
+- `commerce/web/test/arbitration.test.mjs`: Wallet-approved Arbitration identity and transaction preflight; rejects inactive publication, wrong chain/claim/target/Market state.
+- `commerce/test/http-sdk.test.mjs`: real signed HTTP/SQLite dispute endpoint, IDOR and absent-service fail closed.
+- Existing service, browser, SDK, Market/Pay regression and security workflows apply to this exact executable SHA.
+
+**Level 1** is complete only when the required exact-SHA workflow results pass and are recorded. **Level 2** retained Commerce/Market/Arbitration milestone evidence is required when the optional service is production-equivalent and related COM-6 work converges. **Level 3** remains reserved for app-phase closeout; Solidity owns full Foundry and Genesis owns address/manifest authority, without duplicate complete Foundry runs.
+
+## 5. Outstanding external and release-stage gates
+
+1. Approved, deployed `420/service/arbitration/v1` with active governance domain policy, exact ProtocolRegistry publication/profile and qualified manifests across browser/backend.
+2. Live Wallet submission and finalized, chain-authentic Market `OrderDisputed`, Arbitration `CaseOpened`, independent evidence, ruling/appeal/finalization and read/reorg/replay evidence.
+3. Independent authorized resolvers and an approved origin-protocol remedy adapter. Existing Arbitration cannot custody funds or mutate Market/Pay; a ruling alone does not satisfy financial or fulfilment remediation.
+4. Operational event indexing, reorg resynchronization, evidence confidentiality/retention, incident recovery and testnet E2E acceptance where required by the broader COM-8 deployment roadmap.
+5. PR #594 still accumulates other COM-6 requirements (Notifications, credentials/names, full analytics) and is not merge-ready solely because COM-6B code is implemented.
+
+**Completion language:** repository-side handoff and independently verified optional-case path may be Level-1-qualified; live Arbitration/deployment/remedy acceptance is a separate real-world gate. Never claim a signed transaction, created case, returned funds or final ruling based only on an API intent, mock or unverified external service. Next canonical work package after COM-6B is COM-6C Notifications, but do not erase the external COM-6B blockers.

@@ -1,0 +1,81 @@
+{
+  "schema": "highcountry-roadmap-step-qualification-v1",
+  "step": "R02.4",
+  "name": "Tie plant creation to actual seed/clone eligibility and atomic consumption",
+  "status": "COMPLETE_REPOSITORY_QUALIFICATION",
+  "qualificationLevel": "Level 1 targeted and affected Level 2 High Country integration/invariants",
+  "implementationSha": "26f15dbdc582c316b160cf0b73263a9594e883dd",
+  "branch": "review/high-country-complete-audit-20261009",
+  "pr": "https://github.com/abvhiael/420-integrated-v0.1/pull/593",
+  "workflow": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37971953815",
+  "workflowRunId": 37971953815,
+  "workflowJobId": 113960544671,
+  "workflowConclusion": "success",
+  "evidencePolicy": "Evidence-only commit containing this JSON inherits tested implementation SHA if no executable/requirement changes are made. Later executable changes require requalification.",
+  "executedChecks": [
+    {
+      "name": "checkout exact source SHA",
+      "status": "PASS"
+    },
+    {
+      "name": "Foundry installation",
+      "status": "PASS"
+    },
+    {
+      "name": "forge build src/highcountry --sizes",
+      "status": "PASS"
+    },
+    {
+      "name": "forge fmt --check src/highcountry test/highcountry",
+      "status": "PASS"
+    },
+    {
+      "name": "forge lint src/highcountry --severity high med low",
+      "status": "PASS_WITH_WARNINGS",
+      "note": "Lint exit 0; warnings were reported, not zero-warning security certification."
+    },
+    {
+      "name": "forge test --match-path test/highcountry/integration/PlantSourceConsumption.t.sol -vv",
+      "status": "PASS",
+      "testsPassed": 21,
+      "testsFailed": 0,
+      "testsSkipped": 0
+    },
+    {
+      "name": "forge test --match-path test/highcountry/**/*.t.sol -vv",
+      "status": "PASS",
+      "suites": 40,
+      "testsPassed": 172,
+      "testsFailed": 0,
+      "testsSkipped": 0
+    },
+    {
+      "name": "Compiled ABI compatibility and reciprocal IPlantSourceConsumer validation",
+      "status": "PASS",
+      "note": "Six-address constructor, legacy selector shapes, typed source admission, seed/clone consumer functions and provenance events verified."
+    }
+  ],
+  "foundryProfile": {
+    "src": "src/highcountry",
+    "test": "test/highcountry",
+    "script": "script/highcountry",
+    "fuzzRuns": 256,
+    "invariantRuns": 128,
+    "invariantDepth": 64
+  },
+  "evidence": {
+    "source": "GitHub Actions job logs",
+    "jobLogsUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37971953815/job/113960544671",
+    "note": "Job execution logs are retained by GitHub. upload-artifact completed but found no files under contracts/out/highcountry/**; no separate downloadable artifact is claimed."
+  },
+  "securityCoverage": "R02.4 consent, source-identity, source consumption, transfer/revocation, replay, exhaustion, binding, rollback, adversarial reentrancy and affected capacity invariants exercised by committed tests. Audit of all system risks is not claimed.",
+  "excluded": [
+    "Full repository-wide Solidity inventory, reserved for R08 Level 3",
+    "Real RPC transaction/finality qualification and deployed code hash attestation, reserved for deployment/testnet milestones",
+    "R02.5 mother cutting budgets and R02.6 breeding/genetics provenance",
+    "Production gaming frontend/backend completion"
+  ],
+  "liveRuntime": "BLOCKED_PENDING_TESTNET",
+  "fullHighCountryReleaseQualified": false,
+  "followUp": "R02.5 atomically consume mother cuttings during clone issuance"
+}

@@ -1,0 +1,21 @@
+# GROW-V2-11 — Level 1 exact-SHA qualification
+
+**Disposition: COMPLETE — Level 1 app-audit implementation/qualification only.** No live provider integration, image service, equipment automation, official advice certification, production release, testnet or Level 3 claimed.
+
+- **Canonical step:** GROW-V2-11 — AI-assisted analysis and human-reviewed recommendations.
+- **Exact qualified implementation SHA:** `f93dc2faf76809f7ba20357ef945574edf4a1b39`.
+- **Audited PR:** [#582](https://github.com/abvhiael/420-integrated-v0.1/pull/582), `audit/420grow-v2-01-product-decision-20261008`; draft and unmerged.
+- **Original merge base:** `ffc6a4028676907c266714b5c1ae8ba3af9a7137`. At this evidence review, current `main` was `3de7a0d87600fa30ec6090c1351a11d36ba59de9`, branch **217 ahead/60 behind**. No main reconciliation or merge represented by this Level 1 closeout; reconciliation is mandatory at V2-15.
+- **V2 application CI:** [run 37884405196](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37884405196), job `113671048798`, **SUCCESS**; all steps completed, no failed step.
+- **Original Grow retained CI:** [run 37884404979](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37884404979), job `113671048803`, **SUCCESS**; no failed step.
+- **Direct gate coverage:** `go test -count=1 ./grow/assistance`, `go test -race -count=1 ./grow/assistance`, `go vet ./grow/assistance`, strict `gofmt`; PostgreSQL 16 migration replay/drift, tenant isolation and the real `grow/assistance/qualify.sql`. The V2 workflow retained qualifying V2-01 through V2-10, including the accumulated V2-06–10 integration inventory gate.
+- **Implementation:** `grow/assistance/{service,postgres,orchestrator,service_test,orchestrator_test}.go`, `grow/assistance/qualify.sql`, `grow/storage/migrations/0010_ai_assistance.up.sql`, `scripts/grow-v2-migrate.py`, `.github/workflows/420grow-v2-fast.yml`.
+- **Requirements met:** affirmative facility/zone/subject/purpose consent; consent withdrawal and queued-job revocation; immutable consent transition audit; tenant-verified plant/observation source references; provider receives only bounded minimal state/metric/time; no unrestricted free-form prompt or image metadata; mandatory trusted `ProviderVerifier` to admit recommendations; provider/model and confidence labeling, explicit explanation/limitations; immutable advice and human acceptance-for-review/rejection reason and actor; no automatic equipment, plant, ledger, notification or public directory write.
+- **Adversarial evidence:** missing/revoked consent, cross-tenant read/write and provider projection attempts, untrusted callback, unauthorized reviewer creation, replayed jobs and decisions, unsafe autonomous decision code, malformed/missing rationale, NaN observations, direct SQL cross-tenant access, immutable journal attempts, and late result after consent revocation.
+- **Trust limitations:** advisory only. Input references and synthetic provider tests demonstrate the provider boundary, **not** an authenticated deployed AI backend or independently validated model accuracy. A live provider, calibrated multi-observation trend engine, photo/image sanitization and signed media transport, service credential management, external AI compute, model safety/abuse monitoring, cross-service notification handling and frontend display require separate integration and production-equivalent testing; do not describe these as deployed. No statutory or agronomic claim is asserted.
+- **Level 2:** no new Level 2 milestone at V2-11; V2-10 accumulated app integration PASS is preserved by the V2-11 fast workflow.
+- **Level 3:** deferred to V2-15; Solidity owns the full Foundry inventory once, Genesis owns address authority without duplicate full Foundry; unrelated expensive global suites not rerun after this app step.
+- **External deployment:** V2-16 testnet-gated; no live customer data, credential custody, or actuator authority promoted.
+- **Next canonical step:** **GROW-V2-12 — Ecosystem integrations and notifications**.
+
+The following roadmap, audit and PR documentation closeout commits are evidence-only; they inherit the qualified implementation SHA only while no executable source, tests, workflows, dependencies, config or substantive requirements change.

@@ -12,6 +12,7 @@ on:
       - 'grow/cultivation/**'
       - 'grow/harvest/**'
       - 'grow/inventory/**'
+      - 'grow/assistance/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -23,6 +24,7 @@ on:
       - 'grow/storage/**'
       - 'grow/harvest/**'
       - 'grow/inventory/**'
+      - 'grow/assistance/**'
       - 'grow/facility/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -147,3 +149,13 @@ jobs:
           gofmt -d grow/inventory/*.go
           test -z "$(gofmt -l grow/inventory/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/inventory/qualify.sql
+      - name: GROW-V2-11 opt-in AI advice privacy and human review Level 1
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/assistance
+          go test -race -count=1 ./grow/assistance
+          go vet ./grow/assistance
+          gofmt -d grow/assistance/*.go
+          test -z "$(gofmt -l grow/assistance/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/assistance/qualify.sql

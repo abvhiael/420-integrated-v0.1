@@ -45,9 +45,9 @@ BEGIN
   WHERE r.tenant_id=NEW.tenant_id AND r.facility_id=NEW.facility_id
   AND r.zone_id=NEW.zone_id AND r.review_id=NEW.source_id) INTO allowed;
  ELSE
-  SELECT EXISTS(SELECT 1 FROM grow_private.equipment_events e
+  SELECT EXISTS(SELECT 1 FROM grow_private.equipment e
   WHERE e.tenant_id=NEW.tenant_id AND e.facility_id=NEW.facility_id
-  AND e.zone_id=NEW.zone_id AND e.event_id=NEW.source_id) INTO allowed;
+  AND e.zone_id=NEW.zone_id AND e.device_id=NEW.source_id) INTO allowed;
  END IF;
  IF NOT allowed THEN RAISE EXCEPTION 'integration source outside authorization scope' USING ERRCODE='23514'; END IF;
  RETURN NEW;

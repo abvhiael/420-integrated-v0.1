@@ -8,3 +8,4 @@ export * from "./project-workspace.js";
 export * from "./register-publish.js";
 export * from "./community.js";
 export * from "./charts.js";
+export * from "./awards.js";

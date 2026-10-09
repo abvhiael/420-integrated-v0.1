@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -28,8 +29,10 @@ jobs:
         run: |
           set -euo pipefail
           SHA="$(git rev-parse HEAD)"
-          test "$SHA" = "$GITHUB_SHA"
-          echo "Qualified SHA: $SHA"
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          test "$SHA" = "$EXPECTED"
+          echo "Qualified PR branch implementation SHA: $SHA"
+          echo "GitHub event SHA (may be a synthetic merge): $GITHUB_SHA"
       - name: BNB-1.1 source boundary
         run: python3 scripts/validate-bnb-1-1.py
       - name: BNB-1.2 product contract

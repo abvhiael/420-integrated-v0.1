@@ -50,7 +50,62 @@ async function load(){
    }
   }
  }
- for(const dispute of disputes.items)add($('disputes'),'li',dispute.orderId+' · '+dispute.state+' · Arbitration case not verified');
+ for(const dispute of disputes.items){
+  const li=add($('disputes'),'li',dispute.orderId+' · '+dispute.state+(dispute.arbitrationCase?' · Case '+dispute.arbitrationCase.caseId:''));
+  if(dispute.arbitrationCase?.ruling){
+    const ruling=dispute.arbitrationCase.ruling;
+    add(li,'p','Ruling commitment: '+ruling.rulingHash+' · '+(ruling.finalized?'FINALIZED':'APPEAL WINDOW / NOT FINAL')+' · No external remedy executed.');
+  }
+  if(!COMMERCE_CONFIG?.arbitration){add(li,'p','Arbitration service not approved in deployment manifest. No case or ruling is implied.');continue;}
+  if(dispute.marketDisputed&&!dispute.arbitrationCase){
+    const remedyLabel=add(li,'label','Requested remedy commitment (0x + 64 lowercase hex)');
+    const remedy=document.createElement('input');remedy.pattern='0x[a-f0-9]{64}';remedy.required=true;remedyLabel.append(remedy);
+    const prepare=add(li,'button','Prepare independent Arbitration case');prepare.type='button';
+    prepare.addEventListener('click',()=>action(async()=>{
+      if(!remedy.checkValidity())throw Error('Valid requested remedy commitment required');
+      const plan=await sdk.arbitrationPrepare(id,dispute.attemptId,{remedyHash:remedy.value});
+      const send=add(li,'button','Open case using verified Wallet');send.type='button';
+      send.addEventListener('click',()=>action(async()=>{
+        const receipt=await session.sendArbitrationAction(plan);
+        add(li,'p','Arbitration transaction broadcast: '+receipt.transactionHash+' · Not finalized. Retrieve the finalized CaseOpened case ID before binding.');
+      }));
+      add(li,'p','Policy checked at finalized block. A separate Wallet confirmation is required to open a case; Commerce cannot adjudicate.');
+    }));
+    const caseLabel=add(li,'label','Finalized Arbitration Case ID (0x + 64 lowercase hex)');
+    const caseInput=document.createElement('input');caseInput.pattern='0x[a-f0-9]{64}';caseInput.required=true;caseLabel.append(caseInput);
+    const bind=add(li,'button','Verify and bind finalized Arbitration case');bind.type='button';
+    bind.addEventListener('click',()=>action(async()=>{
+      if(!caseInput.checkValidity())throw Error('Valid finalized case ID required');
+      await sdk.arbitrationBind(id,dispute.attemptId,{caseId:caseInput.value});
+      await load();
+    }));
+  }
+  if(dispute.arbitrationCase&&dispute.arbitrationCase.caseState==='OPEN'){
+    const evidenceLabel=add(li,'label','Evidence commitment (0x + 64 lowercase hex)');
+    const evidence=document.createElement('input');evidence.required=true;evidence.pattern='0x[a-f0-9]{64}';evidenceLabel.append(evidence);
+    const submit=add(li,'button','Prepare evidence submission');submit.type='button';
+    submit.addEventListener('click',()=>action(async()=>{
+      if(!evidence.checkValidity())throw Error('Valid evidence commitment required');
+      const plan=await sdk.arbitrationEvidence(id,dispute.attemptId,{evidenceHash:evidence.value});
+      const send=add(li,'button','Submit evidence with verified Wallet');send.type='button';
+      send.addEventListener('click',()=>action(async()=>{
+        const receipt=await session.sendArbitrationAction(plan);
+        add(li,'p','Evidence broadcast '+receipt.transactionHash+' · finality pending.');
+      }));
+    }));
+  }
+  if(dispute.arbitrationCase&&dispute.arbitrationCase.caseState==='RULED'){
+    const appeal=add(li,'button','Prepare bounded Arbitration appeal');appeal.type='button';
+    appeal.addEventListener('click',()=>action(async()=>{
+      const plan=await sdk.arbitrationAppeal(id,dispute.attemptId);
+      const send=add(li,'button','Submit appeal with verified Wallet');send.type='button';
+      send.addEventListener('click',()=>action(async()=>{
+        const receipt=await session.sendArbitrationAction(plan);
+        add(li,'p','Appeal broadcast '+receipt.transactionHash+' · await canonical round update.');
+      }));
+    }));
+  }
+ }
  for(const refund of refunds.items)add($('refunds'),'li',refund.refundId+' · '+refund.amount+' base units '+refund.asset+' · '+(refund.fundsReturned?'FUNDS RETURNED — canonical funded payout verified':'NOT PAID — governance pending or payout unverified'));
  $('analytics').textContent='Finalized projection preview (first 100 attempts; incomplete when more exist). '+JSON.stringify(analytics.totals)+' · partial='+analytics.partial;
  for(const [asset,amounts] of Object.entries(analytics.byAsset??{}))add($('assets'),'li',asset+' · '+JSON.stringify(amounts));

@@ -16,7 +16,7 @@ func sectionQuery(section string) (string, error) {
 	const where = " WHERE tenant_id=$1::uuid AND ($2='' OR facility_id=NULLIF($2,'')::uuid) AND ($3='' OR zone_id=NULLIF($3,'')::uuid)"
 	switch section {
 	case "overview", "facilities":
-		return "SELECT facility_id::text,name,'Private facility', 'ACTIVE' FROM grow_private.facilities WHERE tenant_id=$1::uuid AND ($3='' OR facility_id=$3::uuid) ORDER BY facility_id LIMIT 100", nil
+		return "SELECT facility_id::text,name,'Private facility', 'ACTIVE' FROM grow_private.facilities WHERE tenant_id=$1::uuid AND ($2='' OR facility_id=NULLIF($2,'')::uuid) ORDER BY facility_id LIMIT 100", nil
 	case "plants":
 		return "SELECT plant_id::text,label,coalesce(cultivar_id::text,'No cultivar assigned'),state FROM grow_private.plants" + where + " ORDER BY plant_id LIMIT 100", nil
 	case "environment":

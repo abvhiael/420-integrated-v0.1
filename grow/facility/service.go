@@ -20,6 +20,7 @@ type Record struct{
  TenantID string
  ID string
  ParentID string
+ FacilityID string
  Name string
  Kind Kind
  Revision int64
@@ -51,7 +52,8 @@ func allowed(s Scope, rec Record, action security.Action)bool{
  case Zone:
   // Zones are scoped through a verified room-parent chain by calling code;
   // this layer cannot grant zone-scoped membership without a concrete facility.
-  target.FacilityID=rec.ParentID
+  target.FacilityID=rec.FacilityID
+  target.ZoneID=rec.ID
  default:return false
  }
  return security.Authorize(s.Principal,s.Membership,target,action)
@@ -66,6 +68,7 @@ func (svc Service) Create(ctx context.Context,s Scope,rec Record)(Record,error){
   parent,err:=svc.store.Get(ctx,s.TenantID,rec.ParentID,parentKind)
   if err!=nil||parent.TenantID!=s.TenantID||parent.Kind!=parentKind{return Record{},ErrDenied}
   if !allowed(s,parent,security.FacilityManage){return Record{},ErrDenied}
+  if rec.Kind==Zone&&(!validID(rec.FacilityID)||rec.FacilityID!=parent.ParentID){return Record{},ErrDenied}
  }
  return svc.store.Create(ctx,rec)
 }

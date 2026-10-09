@@ -23,6 +23,8 @@ interface IGenomeRegistryClone {
 }
 
 interface IMotherRegistryClone {
+    function cloneRegistry() external view returns (address);
+    function consumeForClone(uint64 motherId, uint64 cloneId) external;
     function exists(
         uint64 motherId
     ) external view returns (bool);
@@ -177,9 +179,18 @@ contract CloneRegistry {
         if (!genomeRegistry.exists(genomeId) || !motherRegistry.exists(motherId)) revert HCNotFound();
         if (motherRegistry.genomeOf(motherId) != genomeId) revert HCInvalidState();
         if (_clones[cloneId].exists) revert HCAlreadyExists();
+        if (motherRegistry.cloneRegistry() != address(this)) revert HCInvalidState();
         _auth(ActionIds.CLONE_REGISTER, cloneId);
         _clones[cloneId] = CloneRecord(cloneId, genomeId, motherId, owner, metadataHash, true);
+        motherRegistry.consumeForClone(motherId, cloneId);
         emit CloneRegistered(cloneId, genomeId, motherId, owner);
+    }
+
+    function cloneContext(
+        uint64 cloneId
+    ) external view returns (uint64 motherId, bytes32 genomeId, address owner) {
+        CloneRecord storage clone = _require(cloneId);
+        return (clone.motherId, clone.genomeId, clone.owner);
     }
 
     function transfer(

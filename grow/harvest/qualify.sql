@@ -30,6 +30,13 @@ INSERT INTO grow_private.harvest_plans
 VALUES ('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-3333-4333-8333-333333333333',
 'aaaaaaaa-4444-4444-8444-444444444444','aaaaaaaa-6666-4666-8666-666666666666',
 now()+interval '14 days',now()+interval '21 days','operator','manual');
+UPDATE grow_private.harvest_plans SET start_at=now()+interval '15 days',
+ end_at=now()+interval '22 days' WHERE actor_subject='operator';
+DO $ BEGIN
+ IF (SELECT count(*) FROM grow_private.harvest_plan_events
+ WHERE plant_id='aaaaaaaa-6666-4666-8666-666666666666')<>2
+ THEN RAISE EXCEPTION 'harvest plan revision provenance lost'; END IF;
+END $;
 DO $$
 BEGIN
  BEGIN
@@ -61,6 +68,7 @@ SET LOCAL grow.tenant_id='bbbbbbbb-2222-4222-8222-222222222222';
 DO $$ BEGIN
  IF EXISTS(SELECT 1 FROM grow_private.harvest_records)
  OR EXISTS(SELECT 1 FROM grow_private.harvest_plans)
+ OR EXISTS(SELECT 1 FROM grow_private.harvest_plan_events)
  THEN RAISE EXCEPTION 'cross-tenant harvest/calendar leak'; END IF;
 END $$;
 ROLLBACK;

@@ -24,6 +24,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: GEN-SVC-0 shared Genesis architecture validator
+        run: python3 scripts/validate-gen-svc-0.py
       - name: GEN-SVC-3 canonical validator
         run: python3 scripts/validate-gen-svc-3.py
       - name: DOOBR AUDIT-2 architectural authority verification
@@ -33,6 +35,16 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: DOOBR compatibility and disabled gateway targeted regressions
+        run: go test -count=1 ./genesis/svc3/travelapp -run '^(TestGenesisCompatibilitySchemas|TestGenesisTransactionMethodsAlwaysDisabled|TestDOOBRAudit3BoundaryMatrix|TestDOOBRAudit3GatewayCannotBeEnabledByInput)
+        run: go test ./genesis/svc3/... ./cmd/420travel/...
+      - name: GEN-SVC-3 scoped vet
+        run: go vet ./genesis/svc3/... ./cmd/420travel/...
+      - name: GEN-SVC-3 scoped build
+        run: go build -o /tmp/420travel ./cmd/420travel
+      - name: Assert exact commit
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+ -v
       - name: GEN-SVC-3 scoped tests
         run: go test ./genesis/svc3/... ./cmd/420travel/...
       - name: GEN-SVC-3 scoped vet

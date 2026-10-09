@@ -1,6 +1,6 @@
 # 420Grow V2 cultivation operations roadmap
 
-**Status:** GROW-V2-01 product decision COMPLETE at Level 1; V2-02 onward not yet implemented. Does not overwrite GROW-01–GROW-10 and does not assert Genesis authority.
+**Status:** GROW-V2-01–09 COMPLETE at their required levels; GROW-V2-10 next with accumulated V2-06–10 Level 2 milestone. Does not overwrite GROW-01–GROW-10 and does not assert Genesis authority.
 
 **Decision source:** [GROW-V2-01](420GROW-V2-01-EXPANDED-PRODUCT-DECISION.md), which explicitly defines tenant-private cultivation software for lawful home, licensed small-business and commercial users. The prior public read-only FARM/BUSINESS directory remains independent. Canonical original audit is [420Grow initial roadmap](420GROW-INITIAL-AUDIT-AND-REMEDIATION-ROADMAP.md). Remaining former release/qualification work remains in [the deferred testnet ledger](420GROW-TESTNET-AND-DEFERRED-QUALIFICATION-ROADMAP.md).
 
@@ -14,7 +14,7 @@
 | GROW-V2-06 | Sensor telemetry ingestion and historical charts | COMPLETE / Level 1 — SHA `0ec71e7af64116d8698bd15212d198511e6295f9`; V2 run 37868683106/job 113621431632 and retained Grow run 37868683071/job 113621431170 SUCCESS; [evidence](420GROW-V2-06-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-07 | Equipment adapters, monitoring and safe controls | COMPLETE / Level 1 — SHA `d4bc7ca541bda9af942395ba066cd397d6812eea`; V2 run 37870067867/job 113625861105 and retained Grow run 37870067647/job 113625860693 SUCCESS; [evidence](420GROW-V2-07-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-08 | Nutrients, irrigation and environmental history | COMPLETE / Level 1 — SHA `4918101a4dee85b4f8c8e8d287c1320c07ecd6d2`; V2 run 37872648633/job 113633987634 and retained Grow run 37872648630/job 113633987622 SUCCESS; [evidence](420GROW-V2-08-LEVEL-1-QUALIFICATION.md) |
-| GROW-V2-09 | Harvest forecasting and production analytics | PLANNED / Level 1 |
+| GROW-V2-09 | Harvest forecasting and production analytics | COMPLETE / Level 1 — SHA `802e5f5b34fe4ab7d086cf0bae47ed522a811ec8`; V2 run 37878130176/job 113651306866 and retained Grow 37878130127/job 113651306665 SUCCESS; [evidence](420GROW-V2-09-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-10 | Inventory, traceability and compliance exports | PLANNED / Level 2 accumulated V2-06–10 |
 | GROW-V2-11 | AI-assisted analysis and human-reviewed recommendations | PLANNED / Level 1 |
 | GROW-V2-12 | Ecosystem integrations and notifications | PLANNED / Level 1 |

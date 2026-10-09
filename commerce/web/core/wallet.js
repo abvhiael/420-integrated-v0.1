@@ -106,8 +106,8 @@ export class WalletSession {
         if(args[0]!==plan.caseId||plan.action!==method)fail('Arbitration case action changed.');
         const record=(await v.call(v.addr.cases,caseABI,'getCase',[plan.caseId]))[0];
         if(!record.exists||record.claimant.toLowerCase()!==this.address||record.domainId!==domain||record.originComponentId!==origin)fail('Arbitration case claimant mismatch.');
-        if(method==='submitEvidence'&&(args.length!==2||!/^0x[0-9a-f]{64}$/.test(args[1])||Number(record.state)!==1||Number(record.evidenceDeadline)<v.blockTimestamp))fail('Evidence window closed.');
-        if(method==='appeal'&&(args.length!==1||Number(record.state)!==2||Number(record.appealDeadline)<v.blockTimestamp||Number(record.round)>=Number(record.maxAppeals)))fail('Appeal not authorized.');
+        if(method==='submitEvidence'&&(args.length!==2||!/^0x[0-9a-f]{64}$/.test(args[1])||Number(record.state)!==1||BigInt(record.evidenceDeadline)<BigInt(v.blockTimestamp)))fail('Evidence window closed.');
+        if(method==='appeal'&&(args.length!==1||Number(record.state)!==2||BigInt(record.appealDeadline)<BigInt(v.blockTimestamp)||Number(record.round)>=Number(record.maxAppeals)))fail('Appeal not authorized.');
       }
       const tx={from:checked.address,to:v.addr.cases,data:actionABI.encodeFunctionData(method,args),value:'0x0'};
       await this.provider.request({method:'eth_call',params:[tx,checked.tag]});

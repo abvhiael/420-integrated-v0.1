@@ -4,6 +4,12 @@
 
 ## Sources and architectural boundary
 
+**Implementation reconciliation:** this remains the original COM-1.4 architecture
+record. COM-2 subsequently implemented/qualified reporter source; COM-3 implements
+the schema/service/replay/privacy/API handoff in `COM-3-SERVICE-AND-API.md` and
+`commerce/README.md`. Exact-SHA service evidence is recorded separately, and no
+live deployment is inferred from source implementation.
+
 - `docs/420-MARKET-V1-MODEL.md`: canonical listing/revision, finite-inventory reservation, orders, fulfilment and dispute state; payment finality belongs to 420Pay. No private delivery content on-chain.
 - `indexer/README.md`: shared indexer is a **rebuildable, non-authoritative read layer**; `indexer/model`, `indexer/core` and named RPC/store/reorg/decoder/API capabilities must be verified for actual implementation before committing a deployment design. A README's *planned packages* are not evidence that every service runs.
 - `indexer/ingest/engine.go`: sequential RPC ingestion, `PutBundle` before checkpoint advancement, restart-safe idempotent replay, ancestry checking, reorg repair and finality promotion.

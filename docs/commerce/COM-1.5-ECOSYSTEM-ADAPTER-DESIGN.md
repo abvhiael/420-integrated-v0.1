@@ -1,5 +1,12 @@
 # COM-1.5 — Canonical ecosystem integration design
 
+**Implementation reconciliation:** the original architecture below records the
+COM-1 design baseline. COM-2 implemented/qualified the reporter source (see
+`COM-2-QUALIFICATION-EVIDENCE.md`); COM-3 implements the noncustodial service/API/SDK
+handoff (see `COM-3-SERVICE-AND-API.md`). Reporter live deployment and compatible
+live Pay/Swap quote wiring remain later qualification gates; historical pending
+source statements below do not override these subsequent implementation records.
+
 **Canonical step:** COM-1.5 — 420Pay/Wallet/Registry/Identity/Swap integration design. **PR:** #588. **Status:** architecture delivered; automated exact-SHA qualification pending. **Current main reconciliation baseline:** `ffc6a4028676907c266714b5c1ae8ba3af9a7137`.
 
 ## Contract of integration

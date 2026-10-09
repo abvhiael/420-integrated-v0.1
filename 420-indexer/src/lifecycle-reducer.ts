@@ -1,6 +1,6 @@
 import type { DecodedProtocolEvent420 } from './protocol-decoder.js';
 
-export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED';
+export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED' | 'CREATED' | 'PAID' | 'FULFILLED' | 'DISPUTED' | 'REFUNDED';
 
 export interface LifecycleRule420 {
   eventName: string;
@@ -35,6 +35,11 @@ const KEY_FIELDS = [
 ] as const;
 
 export function protocolObjectKey420(event: DecodedProtocolEvent420): string | null {
+  if (event.protocol === '420Market') {
+    const key = event.fields.orderId !== undefined ? 'orderId' : 'listingId';
+    const value = event.fields[key];
+    return value === undefined ? null : `${key}:${String(value).toLowerCase()}`;
+  }
   if (event.protocol === '420Rights') {
     if (event.eventName === 'ClaimSuperseded') {
       const oldRightId = event.fields.oldRightId;
@@ -71,6 +76,17 @@ export function protocolObjectKey420(event: DecodedProtocolEvent420): string | n
 }
 
 const POLICY_LIST: LifecyclePolicy420[] = [
+  { protocol: '420Market', rules: [
+    { eventName: 'ListingPublished', state: 'ACTIVE' },
+    { eventName: 'ListingCancelled', state: 'CANCELLED' },
+    { eventName: 'OrderCreated', state: 'CREATED' },
+    { eventName: 'PaymentRecorded', state: 'PAID' },
+    { eventName: 'FulfillmentRecorded', state: 'FULFILLED' },
+    { eventName: 'OrderCompleted', state: 'COMPLETED', terminal: true },
+    { eventName: 'OrderCancelled', state: 'CANCELLED', terminal: true },
+    { eventName: 'OrderDisputed', state: 'DISPUTED' },
+    { eventName: 'RefundRecorded', state: 'REFUNDED', terminal: true }
+  ]},
   { protocol: '420Names', rules: [
     { eventName: 'NameRegistered', state: 'ACTIVE' },
     { eventName: 'NameRenewed', state: 'ACTIVE' },

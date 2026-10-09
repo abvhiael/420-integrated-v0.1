@@ -2,8 +2,9 @@ name: Commerce upstream contracts
 on:
   push:
     branches: ['audit/420commerce-com-2-*']
+    paths: ['contracts/src/market/**', 'contracts/src/pay/**', 'contracts/test/Market*.t.sol', 'scripts/commerce/qualify-contracts.py', '.github/workflows/commerce-contracts.yml']
   pull_request:
-    paths: ['contracts/src/market/**', 'contracts/src/pay/**', 'contracts/test/Market*.t.sol', 'scripts/commerce/**', '.github/workflows/commerce-contracts.yml']
+    paths: ['contracts/src/market/**', 'contracts/src/pay/**', 'contracts/test/Market*.t.sol', 'scripts/commerce/qualify-contracts.py', '.github/workflows/commerce-contracts.yml']
   workflow_dispatch:
 permissions:
   contents: read

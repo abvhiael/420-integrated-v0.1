@@ -1,0 +1,31 @@
+name: CMP External Science Read Endpoint
+on:
+  pull_request:
+    paths:
+      - 'indexer/api/external_science*'
+      - 'indexer/api/backend.go'
+      - 'indexer/api/server.go'
+      - 'indexer/cmd/indexer420/main.go'
+      - 'compute/web/**'
+      - '.github/workflows/cmp-science-read-endpoint.yml'
+  workflow_dispatch:
+jobs:
+  science-read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify qualified implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Targeted Indexer science API and runtime tests
+        run: go test ./indexer/api ./indexer/cmd/indexer420 -count=1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 420Compute UI build and science behavior tests
+        working-directory: compute/web
+        run: npm run build

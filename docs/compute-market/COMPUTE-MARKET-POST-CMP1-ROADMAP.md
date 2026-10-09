@@ -711,15 +711,23 @@ Purpose: turn repository qualification into real deployed evidence.
 
 ## CMP-9.12 — Multi-worker replicated jobs
 
-## CMP-9.13 — Scientific workload demonstration
+## CMP-9.13 — Scientific workload demonstration — OFFLINE LEVEL 1 PASS, LIVE TESTNET NO-GO
 
-## CMP-9.14 — Long-duration soak testing
+[Preparatory gate and honest live blockers](CMP-9-13-SCIENTIFIC-DEMONSTRATION.md). Exact-SHA offline verifier PASS; actual scientific demonstration with trusted, finalized, funded testnet receipts remains PENDING. No provider or worker activation asserted.
 
-## CMP-9.15 — Close CMP-0 operational qualification
+## CMP-9.14 — Long-duration soak testing — OFFLINE GATE IMPLEMENTED, LIVE NO-GO
+
+[Readiness gate and testnet worklist](CMP-9-14-LONG-DURATION-SOAK.md). No real sustained soak, worker/failover recovery, chain reorg or real funded payout is qualified. Level 1 exact-SHA CI is tracked in [CMP-9.14 qualification evidence](CMP-9-14-QUALIFICATION-EVIDENCE.md).
+
+## CMP-9.15 — Close CMP-0 operational qualification — OFFLINE PREFLIGHT IMPLEMENTED; CMP-0 NO-GO
+
+[Operational closeout gate](CMP-9-15-CMP0-CLOSEOUT.md) and [exact-SHA qualification evidence](CMP-9-15-QUALIFICATION-EVIDENCE.md). Required real CMP-9.13, CMP-9.14, funded payout/recovery/independent review and on-chain testnet receipts remain missing. CMP-0 is **NOT CLOSED**.
 
 ---
 
-# CMP-10 — Security and adversarial qualification
+# CMP-10 — Security and adversarial qualification — REPOSITORY PREFLIGHT IMPLEMENTED; LIVE SECURITY NO-GO
+
+[CMP-10 threat inventory and limitations](CMP-10-SECURITY-HANDOFF.md) and [exact-SHA qualification evidence](CMP-10-QUALIFICATION-EVIDENCE.md). Independent contract and worker sandbox audits, real adversarial campaigns and incentivized public testnet qualification are NOT complete.
 
 Required campaigns include:
 

@@ -1,0 +1,22 @@
+name: CMP S-08 Settlement Evidence
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-s08-settlement.yml'
+  workflow_dispatch:
+jobs:
+  settlement-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA verification
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Targeted settlement and retained ingestion tests
+        working-directory: compute/ingestion
+        run: npm run qualify

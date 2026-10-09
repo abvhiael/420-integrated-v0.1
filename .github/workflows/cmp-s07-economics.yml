@@ -1,0 +1,23 @@
+name: CMP S-07 Economic Policy
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - 'contracts/config/compute-market/cmp-s07-economic-policy.json'
+      - '.github/workflows/cmp-s07-economics.yml'
+  workflow_dispatch:
+jobs:
+  economic-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: S-07 policy and retained ingestion suite
+        working-directory: compute/ingestion
+        run: npm run qualify

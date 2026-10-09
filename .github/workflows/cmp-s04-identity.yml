@@ -1,0 +1,22 @@
+name: CMP S-04 Identity Consent
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-s04-identity.yml'
+  workflow_dispatch:
+jobs:
+  identity-consent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Identity and retained ingestion tests
+        working-directory: compute/ingestion
+        run: npm run qualify

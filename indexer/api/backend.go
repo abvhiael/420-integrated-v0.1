@@ -52,6 +52,7 @@ type StoreBackend struct {
 	canonicalRegistry CanonicalRegistryReader
 	consensus ConsensusProvider
 	runtimeHealth *RuntimeHealth
+	scienceReader scienceReader
 }
 func NewStoreBackend(store ReadStore, catalog *decoder.Catalog) *StoreBackend { if catalog == nil { catalog = decoder.NewCatalog() }; return &StoreBackend{store: store, catalog: catalog} }
 func (b *StoreBackend) ReplaceRegistryCatalog(catalog *decoder.Catalog) {
@@ -61,6 +62,8 @@ func (b *StoreBackend) ReplaceRegistryCatalog(catalog *decoder.Catalog) {
 func (b *StoreBackend) WithCanonicalRegistryReader(reader CanonicalRegistryReader) *StoreBackend { b.canonicalRegistry = reader; return b }
 func (b *StoreBackend) registryCatalog() *decoder.Catalog { b.catalogMu.RLock(); defer b.catalogMu.RUnlock(); return b.catalog }
 func (b *StoreBackend) WithConsensusProvider(provider ConsensusProvider) *StoreBackend { b.consensus = provider; return b }
+func (b *StoreBackend) WithScienceReader(reader scienceReader) *StoreBackend { b.scienceReader=reader; return b }
+func (b *StoreBackend) ExternalScience(chainID string, limit uint32) (SciencePage,error) { if b.scienceReader==nil{return SciencePage{},ErrScienceSourceUnavailable}; return b.scienceReader.ExternalScience(chainID,limit) }
 func (b *StoreBackend) WithRuntimeHealth(runtimeHealth *RuntimeHealth) *StoreBackend { b.runtimeHealth = runtimeHealth; return b }
 func (b *StoreBackend) Consensus() (model.ConsensusStatus, error) { if b.consensus == nil { return model.ConsensusStatus{}, ErrConsensusQueryUnavailable }; return b.consensus.Consensus() }
 func (b *StoreBackend) Health() (model.Health, error) {

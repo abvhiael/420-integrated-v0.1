@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "cmp-s01-provider-inventory-v1",
+  "status": "POLICY_INVENTORY_COMPLETE_NO_LIVE_ACCESS_AUTHORIZED",
+  "updated": "2026-10-08",
+  "fundedRewardsEnabled": false,
+  "rules": {
+    "defaultDeny": true,
+    "requireProviderPermission": true,
+    "requireIndependentWorkUnitEvidence": true,
+    "requireParticipantOwnershipProof": true,
+    "requireSourceSpecificConsent": true,
+    "neverInferWorkUnitFromAggregate": true,
+    "neverTreatCreditAsCurrency": true,
+    "rawIdentifiersOnChain": false
+  },
+  "sources": [
+    {
+      "id": "foldingathome-official-bulk",
+      "system": "FOLDING_AT_HOME",
+      "projectScope": "network",
+      "status": "DISABLED_PENDING_SOURCE_PERMISSION_AND_WORK_UNIT_EVIDENCE",
+      "readOnlyCandidate": true,
+      "rewardEligibility": "DENIED",
+      "approvedForProduction": false,
+      "providerUrl": "https://foldingathome.org/statistics/",
+      "statsSource": "official full donor/team flat-file exports only, subject to robots and publication rules",
+      "apiCandidate": "https://api5.foldingathome.org/openapi-spec",
+      "pollMinimumSeconds": 3600,
+      "sourceFreshnessSeconds": 7200,
+      "evidenceTier": "AGGREGATE_OBSERVATION_ONLY",
+      "workUnitProofAvailable": false,
+      "identityOwnershipProofAvailable": false,
+      "credentialPolicy": "never collect passkeys or credentials",
+      "permissions": "official statistics page disallows scripting donor/team HTML pages; file downloads and API usage must obey published limits and obtain consent for monetized ingestion",
+      "requiredApprovals": [
+        "provider-usage/monetization review",
+        "authentic work-unit acceptance proof",
+        "account ownership proof"
+      ]
+    },
+    {
+      "id": "boinc-project-not-selected",
+      "system": "BOINC",
+      "projectScope": "PROJECT_SPECIFIC",
+      "status": "DISABLED_UNTIL_EXPLICIT_PROJECT_ALLOWLIST_AND_PERMISSION",
+      "readOnlyCandidate": false,
+      "rewardEligibility": "DENIED",
+      "approvedForProduction": false,
+      "providerUrl": "https://github.com/BOINC/boinc/wiki/CreditStats",
+      "statsSource": "project-specific daily compressed XML and user Web RPC, not a global BOINC authority",
+      "pollMinimumSeconds": 3600,
+      "sourceFreshnessSeconds": 172800,
+      "evidenceTier": "AGGREGATE_OBSERVATION_ONLY",
+      "workUnitProofAvailable": false,
+      "identityOwnershipProofAvailable": false,
+      "credentialPolicy": "never accept BOINC weak-auth or account credentials in browser/Indexer",
+      "permissions": "BOINC framework documents stats exports; individual BOINC projects require their own URL, policy, consent and operational assessment",
+      "requiredApprovals": [
+        "select project and verify operator",
+        "project-specific permitted source and poll limits",
+        "work-unit acceptance attestation",
+        "wallet identity ownership proof"
+      ]
+    }
+  ]
+}

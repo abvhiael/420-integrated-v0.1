@@ -168,9 +168,11 @@ func (s Service) Export(ctx context.Context, scope Scope, facility, zone, lot, j
 	}
 	var output strings.Builder
 	w := csv.NewWriter(&output)
+	createdAt := ""
+	if !snap.Lot.CreatedAt.IsZero() { createdAt = snap.Lot.CreatedAt.UTC().Format(time.RFC3339Nano) }
 	for _, row := range [][]string{
-		{"record_type", "jurisdiction_template", "lot_id", "kind", "unit", "balance", "event_id", "event_type", "quantity", "reason", "actor", "source", "occurred_at_utc", "reference_id", "harvest_id"},
-		{"BALANCE", jurisdiction, snap.Lot.ID, snap.Lot.Kind, snap.Lot.Unit, strconv.FormatFloat(snap.Balance, 'f', -1, 64), "", "", "", "", "", "", "", "", snap.Lot.HarvestID},
+		{"record_type", "jurisdiction_template", "lot_id", "kind", "unit", "balance", "event_id", "event_type", "quantity", "reason", "actor", "source", "occurred_at_utc", "reference_id", "harvest_id", "audit_status", "schema_version", "lot_created_at_utc", "lot_created_by"},
+		{"BALANCE", jurisdiction, snap.Lot.ID, snap.Lot.Kind, snap.Lot.Unit, strconv.FormatFloat(snap.Balance, 'f', -1, 64), "", "", "", "", "", "", "", "", snap.Lot.HarvestID, "INTERNAL_UNVERIFIED", "GROW-V2-10-1", createdAt, cell(snap.Lot.CreatedBy)},
 	} {
 		if err = w.Write(row); err != nil {
 			return Export{}, err
@@ -179,7 +181,7 @@ func (s Service) Export(ctx context.Context, scope Scope, facility, zone, lot, j
 	for _, e := range snap.Entries {
 		row := []string{"LEDGER", jurisdiction, lot, snap.Lot.Kind, snap.Lot.Unit, "", e.ID, e.Kind,
 			strconv.FormatFloat(e.Quantity, 'f', -1, 64), cell(e.Reason), cell(e.Actor), cell(e.Source),
-			e.OccurredAt.UTC().Format(time.RFC3339Nano), cell(e.ReferenceID), snap.Lot.HarvestID}
+			e.OccurredAt.UTC().Format(time.RFC3339Nano), cell(e.ReferenceID), snap.Lot.HarvestID, "INTERNAL_UNVERIFIED", "GROW-V2-10-1", createdAt, cell(snap.Lot.CreatedBy)}
 		if err = w.Write(row); err != nil {
 			return Export{}, err
 		}
@@ -188,7 +190,7 @@ func (s Service) Export(ctx context.Context, scope Scope, facility, zone, lot, j
 	if err = w.Error(); err != nil {
 		return Export{}, fmt.Errorf("inventory export: %w", err)
 	}
-	return Export{Jurisdiction: jurisdiction, Filename: "grow-inventory-" + lot + ".csv", CSV: []byte(output.String())}, nil
+	return Export{Jurisdiction: jurisdiction, Filename: "grow-inventory-" + lot + ".csv", SchemaVersion: "GROW-V2-10-1", Certified: false, CSV: []byte(output.String())}, nil
 }
 
 var _ io.Writer = (*strings.Builder)(nil)

@@ -54,12 +54,12 @@ func TestRecordedVsEstimated(t *testing.T) {
 	}
 	sum, forecast, err := svc.Analytics(ctx, scope, "f", "z", from, now, 50)
 	if err != nil || sum.Kind != "OBSERVED" || sum.Count != 3 || sum.TotalGrams != 60 ||
-		forecast.Kind != "ESTIMATE" || forecast.SampleCount != 3 || forecast.EstimateGrams != 20 ||
+		forecast.Kind != "ESTIMATE" || !forecast.Available || forecast.Status != "AVAILABLE" || forecast.SampleCount != 3 || forecast.EstimateGrams != 20 ||
 		forecast.LowerGrams >= forecast.EstimateGrams || forecast.UpperGrams <= forecast.EstimateGrams {
 		t.Fatalf("summary=%+v forecast=%+v err=%v", sum, forecast, err)
 	}
 	_, empty, err := svc.Analytics(ctx, scope, "f", "z", now.Add(-time.Minute), now, 50)
-	if err != nil || empty.SampleCount != 0 || empty.EstimateGrams != 0 {
+	if err != nil || empty.SampleCount != 0 || empty.EstimateGrams != 0 || empty.Available || empty.Status != "INSUFFICIENT_DATA" {
 		t.Fatal("missing data must not synthesize forecast")
 	}
 }
@@ -113,4 +113,20 @@ type leakyStore struct{ fakeStore }
 
 func (l *leakyStore) List(_ context.Context, _ string, _ string, _ string, _ time.Time, _ time.Time, _ int) ([]Record, error) {
 	return l.rows, nil
+}
+
+func TestHighVarianceDoesNotProduceAnAuthoritativeForecast(t *testing.T) {
+	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
+	db := &fakeStore{}
+	for i, weight := range []float64{1, 2, 10000} {
+		db.rows = append(db.rows, Record{TenantID: "a", FacilityID: "f", ZoneID: "z",
+			PlantID: string(rune('p' + i)), ID: string(rune('a' + i)),
+			WeightGrams: weight, HarvestedAt: now.Add(-time.Hour)})
+	}
+	observed, estimated, err := New(db).Analytics(context.Background(), owner("a", security.Owner),
+		"f", "z", now.Add(-24*time.Hour), now, 50)
+	if err != nil || observed.Count != 3 || observed.TotalGrams != 10003 ||
+		estimated.Available || estimated.Status != "HIGH_VARIANCE" || estimated.EstimateGrams != 0 {
+		t.Fatalf("high variance incorrectly published forecast: %+v %+v %v", observed, estimated, err)
+	}
 }

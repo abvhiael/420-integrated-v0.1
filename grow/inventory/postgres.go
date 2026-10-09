@@ -99,11 +99,11 @@ func (s SQLStore) Snapshot(ctx context.Context, tenant, facility, zone, lot stri
 	var result Snapshot
 	err := s.transaction(ctx, tenant, func(tx *sql.Tx) error {
 		err := tx.QueryRowContext(ctx, `SELECT tenant_id::text,lot_id::text,facility_id::text,zone_id::text,
-kind,unit,label,coalesce(harvest_id::text,''),balance::float8
+kind,unit,label,coalesce(harvest_id::text,''),balance::float8,created_at,created_by
 FROM grow_private.inventory_lots_v2 WHERE tenant_id=$1::uuid AND lot_id=$2::uuid
 AND facility_id=$3::uuid AND zone_id=$4::uuid FOR SHARE`, tenant, lot, facility, zone).
 			Scan(&result.Lot.TenantID, &result.Lot.ID, &result.Lot.FacilityID, &result.Lot.ZoneID,
-				&result.Lot.Kind, &result.Lot.Unit, &result.Lot.Label, &result.Lot.HarvestID, &result.Balance)
+				&result.Lot.Kind, &result.Lot.Unit, &result.Lot.Label, &result.Lot.HarvestID, &result.Balance, &result.Lot.CreatedAt, &result.Lot.CreatedBy)
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrDenied
 		}

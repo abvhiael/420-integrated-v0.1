@@ -2,15 +2,15 @@
 import {createCommerceSdk420} from '../../packages/420-sdk/dist/commerce.js';
 import {WalletSession} from './core/wallet.js';
 const $=id=>document.getElementById(id),add=(node,tag,text)=>{const element=document.createElement(tag);element.textContent=String(text??'');node.append(element);return element;};
-let session=null,sdk=null,store=null,busy=false,epoch=0;
+let session=null,sdk=null,store=null,busy=false,epoch=0,notificationCursor=null;
 const status=text=>$('status').textContent=text;
 const fail=e=>{$('error').hidden=false;$('error').textContent=e.code??e.message??'Unavailable';$('error').focus();};
-const clean=()=>{epoch++;session=null;sdk=null;store=null;$('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();$('refunds').replaceChildren();$('disputes').replaceChildren();$('summary').textContent='No merchant selected.';$('analytics').textContent='No verified data.';$('refresh').disabled=true;status('Wallet disconnected; merchant data cleared.');};
+const clean=()=>{epoch++;session=null;sdk=null;store=null;$('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();$('refunds').replaceChildren();$('disputes').replaceChildren();$('notifications').replaceChildren();notificationCursor=null;$('notifySave').disabled=true;$('notifyMore').disabled=true;$('notifyMore').hidden=true;$('notifyOptIn').checked=false;$('summary').textContent='No merchant selected.';$('analytics').textContent='No verified data.';$('refresh').disabled=true;status('Wallet disconnected; merchant data cleared.');};
 async function action(fn){if(busy)return;busy=true;$('error').hidden=true;try{if(!navigator.onLine)throw Error('Offline');await fn();}catch(e){fail(e);}finally{busy=false}}
 async function load(){
  if(!sdk||!store)throw Error('Connect Wallet and select a store');
  const current=epoch,id=store;
- const [orders,analytics,integrations,refunds,disputes]=await Promise.all([sdk.merchantOperations(id),sdk.merchantAnalytics(id),sdk.merchantIntegrations(id),sdk.merchantRefunds(id),sdk.merchantDisputes(id)]);
+ const [orders,analytics,integrations,refunds,disputes,preferences,notifications]=await Promise.all([sdk.merchantOperations(id),sdk.merchantAnalytics(id),sdk.merchantIntegrations(id),sdk.merchantRefunds(id),sdk.merchantDisputes(id),sdk.merchantNotificationPreferences(id),sdk.merchantNotifications(id)]);
  if(current!==epoch||id!==store)throw Error('Wallet identity changed');
  $('orders').replaceChildren();$('assets').replaceChildren();$('integrations').replaceChildren();
  $('summary').textContent=orders.totalCount+' order attempts · '+orders.items.length+' shown · chain '+orders.provenance.chainId+' · finalized block '+orders.provenance.blockNumber;
@@ -106,12 +106,23 @@ async function load(){
     }));
   }
  }
+ $('notifyOptIn').checked=preferences.enabled===true;$('notifySave').disabled=false;
+ $('notifications').replaceChildren();notificationCursor=notifications.nextCursor;
+ for(const n of notifications.items){
+  const li=add($('notifications'),'li',n.eventName+' · Order '+n.orderId+' · finalized block '+n.blockNumber+(n.read?' · Read':' · Unread'));
+  add(li,'small','Transaction '+n.transactionHash+' · '+n.blockHash+' · noncanonical alert');
+  const button=add(li,'button',n.read?'Mark unread':'Mark read');button.type='button';
+  button.addEventListener('click',()=>action(async()=>{await sdk.markMerchantNotification(id,n.id,!n.read);await load();}));
+ }
+ $('notifyMore').hidden=!notificationCursor;$('notifyMore').disabled=!notificationCursor;
  for(const refund of refunds.items)add($('refunds'),'li',refund.refundId+' · '+refund.amount+' base units '+refund.asset+' · '+(refund.fundsReturned?'FUNDS RETURNED — canonical funded payout verified':'NOT PAID — governance pending or payout unverified'));
  $('analytics').textContent='Finalized projection preview (first 100 attempts; incomplete when more exist). '+JSON.stringify(analytics.totals)+' · partial='+analytics.partial;
  for(const [asset,amounts] of Object.entries(analytics.byAsset??{}))add($('assets'),'li',asset+' · '+JSON.stringify(amounts));
  for(const [name,value] of Object.entries(integrations))if(value&&typeof value==='object'&&'status' in value)add($('integrations'),'li',name+': '+value.status+' · '+value.authority);
  $('refresh').disabled=false;status('Verified finalized merchant operations loaded. No settlement, refund or dispute was executed.');
 }
+$('notifySave').addEventListener('click',()=>action(async()=>{if(!sdk||!store)throw Error('Connect merchant Wallet first');await sdk.setMerchantNotificationPreferences(store,$('notifyOptIn').checked);await load();}));
+$('notifyMore').addEventListener('click',()=>action(async()=>{if(!sdk||!store||!notificationCursor)throw Error('No older alerts');const current=store,epochBefore=epoch;const result=await sdk.merchantNotifications(store,25,notificationCursor);if(current!==store||epochBefore!==epoch)throw Error('Wallet changed');for(const n of result.items)add($('notifications'),'li',n.eventName+' · Order '+n.orderId+' · finalized block '+n.blockNumber+(n.read?' · Read':' · Unread'));notificationCursor=result.nextCursor;$('notifyMore').hidden=!notificationCursor;$('notifyMore').disabled=!notificationCursor;}));
 $('connect').addEventListener('click',()=>action(async()=>{
  if(!COMMERCE_CONFIG||!window.ethereum)throw Error('Approved Wallet and manifest required');
  clean();session=new WalletSession(window.ethereum,COMMERCE_CONFIG,{onReset:clean});await session.connect();

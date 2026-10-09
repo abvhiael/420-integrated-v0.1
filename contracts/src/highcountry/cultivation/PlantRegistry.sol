@@ -6,6 +6,8 @@ import { CloneRegistry } from "../genetics/CloneRegistry.sol";
 import { PublicCultivationAccess } from "../land/PublicCultivationAccess.sol";
 
 import { ActionIds } from "../constants/ActionIds.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
+import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
 import {
     HCAlreadyExists,
@@ -13,7 +15,8 @@ import {
     HCInvalidId,
     HCInvalidState,
     HCNotFound,
-    HCZeroAddress
+    HCZeroAddress,
+    HCEmergencyRestrictionActive
 } from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
@@ -88,6 +91,32 @@ contract PlantRegistry {
         uint64 plantedAt;
         uint64 lastAdvancedAt;
         bool exists;
+    }
+
+    IEmergencyState public emergencyState;
+    bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.ENGINE_BIND.V1");
+    event EmergencyStateBound(address indexed emergencyState);
+
+    function bindEmergencyState(address candidate) external {
+        if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.PLANT_REGISTRY,
+                ActionIds.PLANT_BIND_EMERGENCY,
+                EMERGENCY_BIND_SCOPE, 0
+            )
+        );
+        if (IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
+            || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false) revert HCInvalidState();
+        emergencyState = IEmergencyState(candidate);
+        emit EmergencyStateBound(candidate);
+    }
+
+    function _requireUnrestricted(bytes32 domain) private view {
+        if (address(emergencyState) == address(0) || emergencyState.isRestricted(domain)) {
+            revert HCEmergencyRestrictionActive(domain);
+        }
     }
 
     IHighCountryAuthorization public immutable authorization;
@@ -169,6 +198,7 @@ contract PlantRegistry {
         PlantSourceKind kind,
         uint64 sourceId
     ) external nonReentrantAdmission {
+        _requireUnrestricted(EmergencyDomains.CULTIVATION);
         if (sourceId == 0 || kind == PlantSourceKind.NONE) revert HCInvalidId();
         if (
             address(seedRegistry.plantRegistry()) != address(this)
@@ -272,6 +302,11 @@ contract PlantRegistry {
         PlantStage newStage
     ) external {
         PlantRecord storage p = _require(plantId);
+        if (!(p.stage == PlantStage.READY && newStage == PlantStage.TERMINATED)) {
+            _requireUnrestricted(EmergencyDomains.CULTIVATION);
+        } else if (address(emergencyState) == address(0)) {
+            revert HCEmergencyRestrictionActive(EmergencyDomains.CULTIVATION);
+        }
         if (p.stage == PlantStage.TERMINATED || newStage == PlantStage.NONE) revert HCInvalidState();
         if (uint8(newStage) != uint8(p.stage) + 1) revert HCInvalidState();
         _auth(ActionIds.PLANT_ADVANCE, plantId);
@@ -287,6 +322,7 @@ contract PlantRegistry {
     function syncOfflineGrowth(
         uint64 plantId
     ) external returns (PlantStage stage, uint8 stagesAdvanced) {
+        _requireUnrestricted(EmergencyDomains.CULTIVATION);
         PlantRecord storage p = _require(plantId);
         if (p.stage == PlantStage.TERMINATED) revert HCInvalidState();
         _auth(ActionIds.PLANT_ADVANCE, plantId);

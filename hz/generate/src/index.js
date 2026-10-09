@@ -14,3 +14,4 @@ export * from "./award-prizes.js";
 export * from "./cross-service.js";
 export * from "./security-gate.js";
 export * from "./production-security.js";
+export * from "./production-surfaces.js";

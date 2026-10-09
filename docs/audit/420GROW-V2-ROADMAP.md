@@ -9,7 +9,7 @@
 | GROW-V2-01 | Expanded product decision, personas and approved scope | COMPLETE / Level 1 — SHA `fc00b78f442c20eac35669d411dbe8d8ac8f99df`; runs 37846815165, 37846815166 SUCCESS |
 | GROW-V2-02 | Architecture, tenancy, roles and security model | COMPLETE / Level 1 — SHA `2533e22b501802eeb913d0b143a68f8d2637ce97`; V2 CI 37862864718/job 113602515673 SUCCESS; original Grow 37862864805/job 113602515723 SUCCESS; [evidence](420GROW-V2-02-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-03 | Persistent storage, schemas and migrations | COMPLETE / Level 1 — SHA `b38fc6c52d430dcc9969f0084324920b47c7d83a`; V2 run 37863365384/job 113604158748 and Grow run 37863365351/job 113604158759 SUCCESS |
-| GROW-V2-04 | Facility, room and zone management | PLANNED / Level 1 |
+| GROW-V2-04 | Facility, room and zone management | IMPLEMENTED / Level 1 qualification pending |
 | GROW-V2-05 | Plant lifecycle, genetics and cloning records | PLANNED / Level 2 accumulated V2-02–05 |
 | GROW-V2-06 | Sensor telemetry ingestion and historical charts | PLANNED / Level 1 |
 | GROW-V2-07 | Equipment adapters, monitoring and safe controls | PLANNED / Level 1 |

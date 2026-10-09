@@ -10,7 +10,7 @@
 | GROW-V2-02 | Architecture, tenancy, roles and security model | COMPLETE / Level 1 — SHA `2533e22b501802eeb913d0b143a68f8d2637ce97`; V2 CI 37862864718/job 113602515673 SUCCESS; original Grow 37862864805/job 113602515723 SUCCESS; [evidence](420GROW-V2-02-LEVEL-1-QUALIFICATION.md) |
 | GROW-V2-03 | Persistent storage, schemas and migrations | COMPLETE / Level 1 — SHA `b38fc6c52d430dcc9969f0084324920b47c7d83a`; V2 run 37863365384/job 113604158748 and Grow run 37863365351/job 113604158759 SUCCESS |
 | GROW-V2-04 | Facility, room and zone management | COMPLETE / Level 1 — SHA `f80edd1c6bd7592e2009d353b850f6f091c3f2e0`; V2 run 37865044110/job 113609659718 and retained Grow run 37865044115/job 113609659505 SUCCESS; [evidence](420GROW-V2-04-LEVEL-1-QUALIFICATION.md) |
-| GROW-V2-05 | Plant lifecycle, genetics and cloning records | PLANNED / Level 2 accumulated V2-02–05 |
+| GROW-V2-05 | Plant lifecycle, genetics and cloning records | IMPLEMENTED / Level 1 + cumulative Level 2 verification PENDING |
 | GROW-V2-06 | Sensor telemetry ingestion and historical charts | PLANNED / Level 1 |
 | GROW-V2-07 | Equipment adapters, monitoring and safe controls | PLANNED / Level 1 |
 | GROW-V2-08 | Nutrients, irrigation and environmental history | PLANNED / Level 1 |

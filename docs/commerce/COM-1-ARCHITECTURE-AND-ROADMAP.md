@@ -1,6 +1,6 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
-**Status:** COM-1 architecture closeout qualified and merged through PR #588; COM-2 upstream adaptations in progress. COM-1.8 evidence is reconciled in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`.
+**Status:** COM-1 architecture closeout qualified and merged through PR #588; COM-2 upstream adaptations qualified at targeted Level 1 and retained Level 2. COM-1.8 evidence is reconciled in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`.
 **Target surface:** `commerce.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
@@ -78,9 +78,9 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 | COM-1.1 targeted source/interface inventory | DOCUMENTED — see `COM-1.1-SOURCE-INVENTORY.md` |
 | COM-1.2 ownership / service identity | DOCUMENTED — Commerce V1 branded application; separate canonical ID deferred for governed decision |
 | COM-1 acceptance evidence and exact-SHA qualification | COMPLETE — candidate `d32c1eeacc2ba4f13d3a6fcd1afb84a5abb0aa3c`, merge `0ec695481fc84e6066aeae50baf6e0fd3c7f8731` |
-| COM-2 | IN PROGRESS — canonical Market/Pay reporter and retained integration qualification |
+| COM-2 | COMPLETE — targeted Level 1 and retained Level 2; exact SHA `0b1a3f5d12fdf6d5c76e6ba860058887886daf9f`, run 37890773444 SUCCESS; PR #594 unmerged |
 | COM-3 through COM-7 | NOT STARTED |
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** finish exact-SHA COM-2 qualification and record its evidence. Next canonical phase after COM-2: COM-3 — Service + API.
+**Next action:** COM-3 — Service + API. COM-2 qualification is recorded in `COM-2-QUALIFICATION-EVIDENCE.md`; accumulated app-phase Level 3 and live gates remain deferred.

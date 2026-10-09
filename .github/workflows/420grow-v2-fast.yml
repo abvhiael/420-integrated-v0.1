@@ -16,6 +16,9 @@ on:
       - 'grow/integrations/**'
       - 'grow/web/**'
       - 'grow/dashboard/**'
+      - 'grow/cmd/private-server/**'
+      - 'go.mod'
+      - 'go.sum'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -177,11 +180,12 @@ jobs:
         env:
           GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
         run: |
-          go test -count=1 ./grow/dashboard
-          go test -race -count=1 ./grow/dashboard
-          go vet ./grow/dashboard
-          gofmt -d grow/dashboard/*.go
-          test -z "$(gofmt -l grow/dashboard/*.go)"
+          go build ./grow/dashboard ./grow/cmd/private-server
+          go test -count=1 ./grow/dashboard ./grow/cmd/private-server
+          go test -race -count=1 ./grow/dashboard ./grow/cmd/private-server
+          go vet ./grow/dashboard ./grow/cmd/private-server
+          gofmt -d grow/dashboard/*.go grow/cmd/private-server/*.go
+          test -z "$(gofmt -l grow/dashboard/*.go grow/cmd/private-server/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/dashboard/qualify.sql
           node --check grow/web/workspace.js
           node --test grow/web/test/workspace.test.js
@@ -189,3 +193,4 @@ jobs:
           test -f grow/web/dist/workspace.html
           test -f grow/web/dist/workspace.js
           test -f grow/web/dist/workspace.css
+          node grow/web/test/browser-smoke.mjs

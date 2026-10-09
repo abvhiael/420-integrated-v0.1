@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 
@@ -40,6 +41,12 @@ for name, cmd, cwd in steps:
         r = subprocess.run(cmd, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=1800)
     content = (out/(name+'.log')).read_bytes()
     results.append(dict(name=name, command=cmd, exitCode=r.returncode, status='PASS' if r.returncode == 0 else 'FAIL', log=name+'.log', logSha256=hashlib.sha256(content).hexdigest()))
+test_log = (out/'targeted-contracts.log').read_text()
+summary = re.search(r'Ran (\d+) test suites[^\n]*: (\d+) tests passed, (\d+) failed, (\d+) skipped', test_log)
+coverage = summary is not None and int(summary[1]) == len(contracts.split('|')) and int(summary[2]) >= 51 and summary[3] == '0' and summary[4] == '0'
+for contract in contracts.split('|'):
+    coverage = coverage and (':'+contract+'\n') in test_log
+results.append(dict(name='required-suite-coverage', status='PASS' if coverage else 'FAIL', summary=summary.group(0) if summary else None))
 clean = not git('status', '--porcelain') and git('rev-parse','HEAD') == a.expected_sha
 record = dict(step='R02.1', qualificationLevel=1, implementationSha=a.expected_sha, treeSha=git('rev-parse','HEAD^{tree}'),
               cleanSameHeadAfter=clean, profile='default', steps=results,

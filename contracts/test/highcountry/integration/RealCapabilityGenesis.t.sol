@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import {CapabilityRegistry420} from "../../../src/system/CapabilityRegistry420.sol";
-import {HighCountryAuthorization} from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
-import {GenesisRegistry} from "../../../src/highcountry/genesis/GenesisRegistry.sol";
-import {ActionIds} from "../../../src/highcountry/constants/ActionIds.sol";
-import {ModuleIds} from "../../../src/highcountry/constants/ModuleIds.sol";
-import {AuthorizationRequest, GenesisRoots} from "../../../src/highcountry/types/HighCountryTypes.sol";
+import { CapabilityRegistry420 } from "../../../src/system/CapabilityRegistry420.sol";
+import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
+import { GenesisRegistry } from "../../../src/highcountry/genesis/GenesisRegistry.sol";
+import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
+import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
+import { AuthorizationRequest, GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
 
 contract RealCapabilityGenesisTest {
     function testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation() public {
@@ -67,8 +67,12 @@ contract RealCapabilityGenesisTest {
 }
 
 interface VmRealCapability {
-    function prank(address caller) external;
-    function warp(uint256 timestamp) external;
+    function prank(
+        address caller
+    ) external;
+    function warp(
+        uint256 timestamp
+    ) external;
 }
 
 /// @dev Exercises the production registry, not a programmable authorization mock.
@@ -90,7 +94,13 @@ contract RealCapabilityWiringTest {
         caps.registerProtocolComponent(ModuleIds.GENESIS_REGISTRY, address(this));
     }
 
-    function _grant(bytes32 id, bytes32 action, bytes32 scope, uint64 from, uint64 until) private {
+    function _grant(
+        bytes32 id,
+        bytes32 action,
+        bytes32 scope,
+        uint64 from,
+        uint64 until
+    ) private {
         caps.createGrant(id, address(this), ModuleIds.GENESIS_REGISTRY, action, scope, 0, 0, 0, from, until);
     }
 
@@ -99,7 +109,11 @@ contract RealCapabilityWiringTest {
             GenesisRoots(keccak256("m"), keccak256("p"), keccak256("r"), keccak256("l"), keccak256("x"), keccak256("q"));
     }
 
-    function _reject(address target, bytes memory input, bytes4 expected) private {
+    function _reject(
+        address target,
+        bytes memory input,
+        bytes4 expected
+    ) private {
         (bool ok, bytes memory reason) = target.call(input);
         require(!ok && reason.length >= 4 && bytes4(reason) == expected, "wrong failure or unexpectedly succeeded");
     }

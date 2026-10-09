@@ -4,22 +4,6 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/R02.1-CAPABILITY-WIRING.md",
-      "sha256": "87a631b4308c4143a8958b8268cf89cb8c10ad3c58ce8cb93d44a163bfb994dc",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
-      "path": "scripts/highcountry/qualify-r02-1.py",
-      "sha256": "b3da39b96b42049d6285f175a70dd0f575a34085d89068c2d663af6534909af3",
-      "classification": "COMPLETE",
-      "contracts": [],
-      "interfaces": [],
-      "tests": []
-    },
-    {
       "path": "clients/highcountry-access-v1/package.json",
       "sha256": "bccf87b28f6b89fa87c7ea5b63cded3b5f83f525da2ef5178bf28622fa44a907",
       "classification": "COMPLETE",
@@ -577,7 +561,7 @@
     },
     {
       "path": "contracts/test/highcountry/integration/RealCapabilityGenesis.t.sol",
-      "sha256": "6544deb279b0711917cf8232a7b06f43bcf1890018fd08129801184d636d3b54",
+      "sha256": "b7cd5ecab8edfb37b1b6e1d8d8e9fa73ad56547be759d17b88a59c564a66ef65",
       "classification": "COMPLETE",
       "contracts": [
         "RealCapabilityGenesisTest",
@@ -1280,6 +1264,14 @@
       "tests": []
     },
     {
+      "path": "docs/highcountry/R02.1-CAPABILITY-WIRING.md",
+      "sha256": "a25a58743415671e34bd73eefa326dd0867b6c1bfbcf2de3c76339e92ceac323",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "docs/highcountry/README.md",
       "sha256": "e2864a6df9e266d0472949bee25e5b63e8119ce4b8bfaf1d6772ee1e52fb2bbf",
       "classification": "COMPLETE",
@@ -1538,6 +1530,14 @@
     {
       "path": "docs/highcountry/qualification/R01.7/specification-check.txt",
       "sha256": "774565b1174e86680051475b0e607bd4ebe6947b81ba5310999aa8c71966fef8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/qualify-r02-1.py",
+      "sha256": "fa835edf86dd042117ed3a3cad1a2abe4082f9dc0b6acb8430bbb7233f26f2c7",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

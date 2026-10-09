@@ -1,6 +1,6 @@
 # GEN-SVC-3 / 420Travel — remaining Genesis implementation roadmap
 
-Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, PR #356. Baseline implementation commit: `934311336fa197a6d92bd0f5aee7b98371517daf`. At that baseline dedicated GEN-SVC-3 Travel run #93 and repository-wide Qualification #5108 completed successfully. **Passing CI is not a live deployment or production acceptance. PR remains open.**
+Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, PR #356. Baseline implementation commit: `934311336fa197a6d92bd0f5aee7b98371517daf`. At that baseline dedicated GEN-SVC-3 Travel run #93 and repository-wide Qualification #5108 completed successfully. **Passing CI is not a live deployment or production acceptance. PR #356 was merged September 21, 2026; that merge did not establish live acceptance.**
 
 ## Current implemented foundation (do not rebuild)
 
@@ -19,6 +19,8 @@ Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, 
 - Acceptance: route/browser tests for each action, keyboard and narrow-viewport review, no-JS list fallback, cross-owner and anonymous denials, upstream-failure fail-closed behavior. Record actual test outputs and commit.
 
 ## GEN-SVC-3.11.10.2 — wire real services and multi-instance storage [BUILD + INTEGRATE]
+
+**Audit disposition (2026-10-09): REPOSITORY-SIDE SCAFFOLD MERGEABLE, STEP NOT QUALIFIED.** Remaining live adapters, actual PostgreSQL migration/roles and two-process acceptance, publication/provenance/reputation revocation acceptance, and HTTPS-deployed browser/security verification are **carried forward intact** to `docs/audit/420TRAVEL-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md`. Deferral authorizes merging safely disabled scaffolding, **not** enabling or asserting completion of this canonical step. No mock or successful app CI replaces the listed live evidence.
 
 - Implement deployable configuration and startup readiness checks for **live** 420Identity session introspection, trusted public Location/Events, shared PostgreSQL, provenance-backed Registry/Verify/Identity claim adapter, and 420Reputation. Fail startup or leave individual dependent routes disabled if their required trust/availability checks fail. Never accept user-supplied verified flags, reviewer identity or arbitrary URLs as authority. Keep booking/DOOBR transactions disabled.
 - Apply/checksum SQL migrations 001 Trips, 002 shares, 003 claims. Use least-privilege DB role, TLS, connection/statement timeouts and transaction-safe CAS. Run two independent Travel processes against one PostgreSQL database; verify cross-process create/edit/delete, visibility transitions, share issuance/revocation/expiry, and claim-review audit consistency.
@@ -46,4 +48,4 @@ Updated: 2026-09-20. Working branch: `feature/gen-svc-3-travel-implementation`, 
 - Reconcile PR #356 with current `main`; run dedicated Travel, repository-wide, SQL multi-instance, live dependency, privacy/recovery and deployed acceptance against the exact merge candidate. Record all commits and reports; fix failures before merge.
 - Merge only when required independent release checks pass and an authorized release decision accepts any documented deferrals; then verify final `main` SHA and its checks. Passing PR CI alone does not authorize a Genesis production launch.
 
-**Immediate next implementation:** GEN-SVC-3.11.10.1 one-click save-to-trip with current-public authorization, followed by complete trip/share UI. **Current release status:** development-stage, not production-qualified; no verified live staging acceptance at baseline.
+**Current audit continuation:** GEN-SVC-3.11.10.1 remains OPEN on the dedicated audit branch. Existing save-to-trip, cards, ordering, sharing and public review links have source/tests. An owner-only claim status link and a separately authorized opt-in reviewer UI have been added, but exact-SHA Go/browser CI and complete manual keyboard/mobile accessibility acceptance are not recorded. Production Identity, Registry/Verify, shared PostgreSQL, Reputation and reviewer authority remain subject to GEN-SVC-3.11.10.2. Do not mark this step qualified until its targeted checks pass. **Current release status:** development-stage, not production-qualified; no verified live staging acceptance at baseline.

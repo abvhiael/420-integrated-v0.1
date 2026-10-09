@@ -35,7 +35,7 @@ func TestRecordedVsEstimated(t *testing.T){
  ctx:=context.Background()
  from:=now.Add(-24*time.Hour)
  for i,w:=range []float64{10,20,30}{
-  r:=Record{TenantID:"a",FacilityID:"f",ZoneID:"z",PlantID:"p",ID:string(rune('a'+i)),
+  r:=Record{TenantID:"a",FacilityID:"f",ZoneID:"z",PlantID:string(rune('p'+i)),ID:string(rune('a'+i)),
    Actor:"u",IdempotencyKey:string(rune('a'+i)),Source:"manual",WeightGrams:w,HarvestedAt:now.Add(-time.Hour)}
   if err:=svc.Record(ctx,scope,r,now);err!=nil{t.Fatal(err)}
   if err:=svc.Record(ctx,scope,r,now);!errors.Is(err,ErrConflict){t.Fatal("replay accepted",err)}

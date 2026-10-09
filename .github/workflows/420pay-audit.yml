@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'audit/420pay-*'
+      - 'audit/420commerce-*'
     paths:
       - 'contracts/src/pay/**'
       - 'contracts/src/swap/CanonicalSwapExecutor420.sol'
@@ -19,6 +20,7 @@ on:
       - 'contracts/test/InvoiceRegistry420Fuzz.t.sol'
       - 'contracts/test/SettlementRouter420*.t.sol'
       - 'contracts/test/RefundManager420Fuzz.t.sol'
+      - 'contracts/test/RefundManager420Funded.t.sol'
       - 'contracts/test/GasSponsor420*.t.sol'
       - 'contracts/test/ReplayProtectionConsumer420.t.sol'
       - '420-indexer/src/abi-manifest.ts'
@@ -75,7 +77,7 @@ concurrency:
 
 jobs:
   qualify:
-    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420pay-')
+    if: github.event_name != 'pull_request' || (startsWith(github.head_ref, 'audit/420pay-') || startsWith(github.head_ref, 'audit/420commerce-'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:

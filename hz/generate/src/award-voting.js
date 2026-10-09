@@ -16,7 +16,8 @@ export class AwardVoting420 {
   if(r.voterEligibility==="JURY_ONE_MEMBER_ONE_VOTE"&&typeof this.verifyJury!=="function")throw Error("JURY_NOT_QUALIFIED");
   return {category:c,policy:p,rules:r};
  }
- eligible(category,targetId,at){const item=this.source(category.targetType,required(targetId));if(!item||item.status!=="PUBLISHED"&&item.status!=="ACTIVE"||item.visibility!=="PUBLIC"||item.rightsBlocked||item.deleted||!Number.isSafeInteger(at))throw Error("SOURCE_NOT_ELIGIBLE");const r=this.policy(category.id).rules;
+ eligible(category,targetId,at){const item=this.source(category.targetType,required(targetId));if(!item||(category.targetType==="RECORDING" ? item.status!=="PUBLISHED" : item.status!=="ACTIVE")||item.visibility!=="PUBLIC"||item.rightsBlocked||item.deleted||!Number.isSafeInteger(at))throw Error("SOURCE_NOT_ELIGIBLE");const r=this.policy(category.id).rules;
+  if(category.targetType==="CREATOR_PROFILE"&&item.hasEligiblePublishedRecording!==true)throw Error("CREATOR_PUBLICATION_REQUIRED");
   if(r.releaseStart!==undefined&&(item.publishedAt<r.releaseStart||item.publishedAt>r.releaseEnd))throw Error("OUTSIDE_RELEASE_WINDOW");
   const compatible=r.aiClasses||null;if(compatible&&(!Array.isArray(compatible)||!compatible.includes(item.disclosure)))throw Error("DISCLOSURE_MISMATCH");
   return item;
@@ -57,6 +58,7 @@ export class AwardVoting420 {
  finalize(context,{resultId,ballotId,at}){
   this.actor(context,"finalize");const b=this.domain.get(this.domain.ballots,ballotId),s=this.domain.get(this.domain.seasons,b.seasonId),{rules:r}=this.policy(b.categoryId);
   if(b.state!=="CLOSED"||s.state!=="VOTING_CLOSED"||at<s.votingEnd)throw Error("NOT_FINALIZABLE");
+  for(const nominationId of b.candidateIds){const n=this.domain.get(this.domain.nominations,nominationId);this.eligible(this.domain.get(this.domain.categories,b.categoryId),n.targetId,at);}
   const votes=[...this.accepted.values()].filter(v=>v.ballotId===ballotId);const cast=votes.filter(v=>v.targetId!=="ABSTAIN");
   const count=new Map();for(const v of cast)count.set(v.targetId,(count.get(v.targetId)||0)+1);
   if(r.quorumMode==="MIN_VALID_VOTES"&&cast.length<r.quorumValue)throw Error("NO_QUORUM");

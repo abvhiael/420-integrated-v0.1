@@ -34,7 +34,7 @@ ALTER TABLE grow_private.harvest_plan_events FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_scoped ON grow_private.harvest_plan_events
  USING(tenant_id=grow_private.current_tenant()) WITH CHECK(tenant_id=grow_private.current_tenant());
 CREATE FUNCTION grow_private.record_harvest_plan_change() RETURNS trigger
- LANGUAGE plpgsql AS $
+ LANGUAGE plpgsql AS $$
 BEGIN
  INSERT INTO grow_private.harvest_plan_events
  (tenant_id,plant_id,facility_id,zone_id,old_start_at,old_end_at,new_start_at,new_end_at,actor_subject,source)
@@ -43,11 +43,11 @@ BEGIN
  CASE WHEN TG_OP='UPDATE' THEN OLD.end_at ELSE NULL END,
  NEW.start_at,NEW.end_at,NEW.actor_subject,NEW.source);
  RETURN NEW;
-END $;
+END $$;
 CREATE TRIGGER harvest_plan_audit AFTER INSERT OR UPDATE ON grow_private.harvest_plans
  FOR EACH ROW EXECUTE FUNCTION grow_private.record_harvest_plan_change();
 CREATE FUNCTION grow_private.reject_harvest_plan_event_mutation() RETURNS trigger
- LANGUAGE plpgsql AS $ BEGIN RAISE EXCEPTION 'harvest plan events are immutable'; END $;
+ LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'harvest plan events are immutable'; END $$;
 CREATE TRIGGER harvest_plan_event_immutable BEFORE UPDATE OR DELETE ON grow_private.harvest_plan_events
  FOR EACH ROW EXECUTE FUNCTION grow_private.reject_harvest_plan_event_mutation();
 COMMIT;

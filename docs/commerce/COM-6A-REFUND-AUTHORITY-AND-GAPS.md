@@ -67,3 +67,37 @@ The merchant status endpoint classifies:
 **Recovery**: The additive `cancelAuthorizedRefundFunding` returns unused, explicitly funded escrow only to the authenticated Genesis-governance caller, with exact native/ERC20 balance-delta checks. It does not reverse Pay authorization or claim a refund. The older note above about no recovery applied before this method was added.
 
 **Pay audit barrier**: The dedicated 420Pay audit CI may fail its frozen PAY-AUDIT-6 materialization due a prior `InvoiceRegistry420 source_blob_sha1` divergence on the Commerce audit branch. This is not a reason to overwrite canonical frozen artifact fingerprints casually; it requires an approved reconciliation and new qualified deployment package. Existing deploys retain old RefundManager bytecode and therefore cannot execute the new entrypoints until governed upgrade/Registry/manifest qualification at COM-8.
+
+## COM-6A repository-side Level 1 closeout — exact executable SHA (2026-10-09)
+
+**Implementation SHA:** `8747c14878676c7adc9c4bb70c24f42f6be64869`.
+**Qualification:** PASS for the scoped repository implementation; **not a live testnet/production acceptance claim**.
+
+Completed exact-SHA jobs:
+
+- Commerce service fast qualification: [37984811803](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984811803) — SUCCESS; Commerce service, migration, API, authorization, financial reconciliation, SDK, Indexer and adversarial regressions.
+- Commerce merchant builder fast qualification: [37984812093](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984812093) — SUCCESS; responsive/accessibility browser and merchant refund UI.
+- Commerce upstream contracts: [37984812119](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984812119) — SUCCESS; retained Market/Pay and funded-refund Solidity test import closures; canonical upstream Foundry test owner.
+- Solidity Contracts: [37984812163](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984812163) — SUCCESS for affected inventory.
+- Commerce governed Pay refund qualification: [37984811911](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984811911) — SUCCESS; independent Pay governance, source-parameter and forbidden-primitive checks, without duplicating Foundry.
+
+The dedicated historical 420Pay audit workflow is **SKIPPED by design on Commerce branches**; it remains unchanged for canonical Pay-audit branches. Earlier attempts against this audit branch failed a retained PAY-AUDIT-6 `InvoiceRegistry420 source_blob_sha1` identity mismatch. That frozen deployment-package drift has not been reconciled, rewritten or waived. Do **not** cite a skipped PAY-AUDIT-6 workflow as passing; it remains an explicit cross-protocol deployment/reconciliation gate.
+
+### Implementation obligations met
+
+- Idempotent merchant-scoped SQLite outbox with serialized pending-budget reservation and durable request/refund IDs, distinct from approval.
+- Genesis-governance-only payment authorization, canonical refundable-maximum accounting, funded escrow, asset-return execution and restricted unused-funding cancellation.
+- Atomic funded payout to original payer, strict ERC-20 native-delta checks, non-reentrancy, replay prevention, full/partial amount boundaries and transfer-failure rollback tested.
+- Optional Registry/code/version/chain/finality-bound canonical refund proof in Commerce; mismatch fails closed.
+- Separate pending, partial payout, paid-but-Market-unreported and fully Market-reconciled merchant status. Legacy accounting-only `recordRefund` is **not** transfer proof.
+- Dedicated Market+Pay Foundry qualification; no repository-wide Level 3 and no duplicate Solidity/Genesis Foundry matrix.
+
+### Explicit remaining release gates
+
+1. Governed deployment approval and PAY-AUDIT-6 frozen identity reconciliation against current main and real release manifest, then upgrade/registration of new RefundManager bytecode.
+2. Real treasury/merchant funding source approved and funded; independent reviewer governance/timelock decision and authority evidence for the specific refund request.
+3. Real testnet transactions proving authorization, escrow funding, recipient balance transfer, finalized payout receipt and Market report (full refunds), including reorg/replay/failed transaction recovery drills. Record deployed addresses, transaction hashes and exact block finality. No live funds moved by repository tests.
+4. Existing V1 permissionless Market `reportRefund` accepts fully refunded **Pay accounting** without requiring funded payout evidence. Commerce avoids false paid claims, but a future upstream Market version must close that protocol-level authority gap before production if the canonical Market status is to imply funds actually returned.
+5. COM-6B through COM-6E (disputes, notifications, identity/names, analytics) are separate COM-6 exit items; qualification here does not close them.
+
+**Disposition:** COM-6A **repository-side Level 1 COMPLETE / PASS**, live environment acceptance and cross-protocol release gates **DEFERRED TO TESTNET ROADMAP**, broader COM-6 **INCOMPLETE**. Level 2 milestone remains required for completed COM-6 integrated scope. No Level 3 performed.

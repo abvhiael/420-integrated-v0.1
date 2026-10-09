@@ -85,3 +85,16 @@ test('COM-6C signed SDK/HTTP notifications require merchant controller, opt-in a
  const stopped=await owner.setMerchantNotificationPreferences(store.store_id,false);
  assert.equal(stopped.enabled,false);assert.equal((await owner.merchantNotifications(store.store_id)).authoritative,false);
 });
+
+test('COM-7 security headers and strict numeric pagination reject ambiguous inputs',async t=>{
+ const f=await running(t),anonymous=f.sdk();
+ const healthy=await fetch(f.baseUrl+'/v1/health');
+ assert.equal(healthy.headers.get('x-frame-options'),'DENY');
+ assert.match(healthy.headers.get('permissions-policy'),/geolocation=\(\)/);
+ assert.equal(healthy.headers.get('strict-transport-security'),'max-age=31536000');
+ for(const value of ['','+1','01','1e2','-1','NaN','Infinity','1.5']){
+  const res=await fetch(f.baseUrl+'/v1/storefronts?limit='+value);
+  assert.equal(res.status,400,'rejected limit '+value);
+ }
+ assert.ok((await anonymous.storefronts()).items);
+});

@@ -12,3 +12,4 @@ export * from "./awards.js";
 export * from "./award-voting.js";
 export * from "./award-prizes.js";
 export * from "./cross-service.js";
+export * from "./security-gate.js";

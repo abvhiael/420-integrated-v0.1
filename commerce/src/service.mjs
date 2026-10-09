@@ -363,7 +363,7 @@ export class CommerceService {
     const items=[];
     for(const request of rows) {
       const refundId='0x'+request.request_id;
-      let executed=false;
+      let executed=false,marketReported=false,state='PENDING_GOVERNANCE_OR_UNVERIFIED';
       if(source.fundedRefund) {
         const proof=await source.fundedRefund(refundId);
         if(proof.executed) {
@@ -372,9 +372,15 @@ export class CommerceService {
           const payment=await source.payment(bytes32(request.payment_id));
           requireThat(BigInt(payment.refundedAmount)>=BigInt(request.payment_refunded_at_request)+BigInt(request.amount),'refund_pay_correlation',503);
           executed=true;
+          const fullyRefunded=BigInt(payment.refundedAmount)===BigInt(payment.settlementAmount)+BigInt(payment.tipAmount);
+          if(fullyRefunded) {
+            const market=await source.order(bytes32(request.order_id));
+            marketReported=Number(market.status)===7&&source.marketRefundReported?await source.marketRefundReported(request.order_id):false;
+            state=marketReported?'FUNDED_REFUND_MARKET_RECONCILED':'FUNDS_RETURNED_MARKET_REPORT_PENDING';
+          } else state='PARTIAL_FUNDED_REFUND_FINALIZED';
         }
       }
-      items.push({requestId:request.request_id,refundId,paymentId:request.payment_id,orderId:request.order_id,amount:request.amount,asset:request.asset,recipient:request.recipient,reasonHash:request.reason_hash,state:executed?'FUNDED_REFUND_FINALIZED':'PENDING_GOVERNANCE_OR_UNVERIFIED',fundsReturned:executed,canonicalPayoutProof:executed,requestRecorded:true});
+      items.push({requestId:request.request_id,refundId,paymentId:request.payment_id,orderId:request.order_id,amount:request.amount,asset:request.asset,recipient:request.recipient,reasonHash:request.reason_hash,state,fundsReturned:executed,marketReported,canonicalPayoutProof:executed,requestRecorded:true});
     }
     return {items,partial:rows.length===50,refundAuthority:source.fundedRefund?'FINALIZED_REFUND_MANAGER':'UNBOUND_REFUND_MANAGER',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }

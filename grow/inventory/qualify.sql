@@ -1,0 +1,81 @@
+\set ON_ERROR_STOP on
+-- Real inventory ledger: previously run V2-05 plant and V2-09 harvest fixtures.
+DO $$ BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+ WHERE n.nspname='grow_private' AND c.relname='inventory_lots' AND c.relrowsecurity AND c.relforcerowsecurity)
+ OR NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+ WHERE n.nspname='grow_private' AND c.relname='inventory_ledger' AND c.relrowsecurity AND c.relforcerowsecurity)
+ THEN RAISE EXCEPTION 'inventory tenant isolation not forced'; END IF;
+END $$;
+BEGIN;
+INSERT INTO grow_private.inventory_lots
+(tenant_id,lot_id,facility_id,zone_id,kind,unit,label,harvest_id,created_by)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000001',
+'aaaaaaaa-3333-4333-8333-333333333333','aaaaaaaa-4444-4444-8444-444444444444',
+'HARVEST','g','harvest inventory','aaaaaaaa-9999-4999-8999-999999999999','u');
+INSERT INTO grow_private.inventory_ledger
+(tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,occurred_at)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000002',
+'aaaaaaaa-0000-4000-8000-000000000001','aaaaaaaa-3333-4333-8333-333333333333',
+'aaaaaaaa-4444-4444-8444-444444444444','OPENING',42,'linked harvested weight','u','manual','inventory-opening-1',now());
+-- Conflict replay must not cause BEFORE INSERT balance increment.
+INSERT INTO grow_private.inventory_ledger
+(tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,occurred_at)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000003',
+'aaaaaaaa-0000-4000-8000-000000000001','aaaaaaaa-3333-4333-8333-333333333333',
+'aaaaaaaa-4444-4444-8444-444444444444','OPENING',42,'replay attempt','u','manual','inventory-opening-1',now())
+ON CONFLICT(tenant_id,idempotency_key) DO NOTHING;
+DO $$ BEGIN
+ IF (SELECT balance FROM grow_private.inventory_lots WHERE lot_id='aaaaaaaa-0000-4000-8000-000000000001')<>42
+ THEN RAISE EXCEPTION 'replay modified inventory balance'; END IF;
+END $$;
+DO $$ BEGIN
+ BEGIN
+  INSERT INTO grow_private.inventory_ledger
+  (tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,occurred_at)
+  VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000004',
+  'aaaaaaaa-0000-4000-8000-000000000001','aaaaaaaa-3333-4333-8333-333333333333',
+  'aaaaaaaa-4444-4444-8444-444444444444','ISSUE',43,'overdraw','u','manual','inventory-overdraft',now());
+  RAISE EXCEPTION 'overdraft accepted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+ BEGIN
+  UPDATE grow_private.inventory_ledger SET quantity=1 WHERE idempotency_key='inventory-opening-1';
+  RAISE EXCEPTION 'immutable ledger mutated';
+ EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM='immutable ledger mutated' THEN RAISE; END IF;
+ END;
+ BEGIN
+  INSERT INTO grow_private.inventory_lots
+  (tenant_id,lot_id,facility_id,zone_id,kind,unit,label,created_by)
+  VALUES('bbbbbbbb-2222-4222-8222-222222222222','aaaaaaaa-0000-4000-8000-000000000005',
+   'aaaaaaaa-3333-4333-8333-333333333333','aaaaaaaa-4444-4444-8444-444444444444',
+   'INPUT','g','cross tenant','u');
+  RAISE EXCEPTION 'cross tenant lot parent admitted';
+ EXCEPTION WHEN foreign_key_violation THEN NULL;
+ END;
+END $$;
+INSERT INTO grow_private.inventory_ledger
+(tenant_id,event_id,lot_id,facility_id,zone_id,kind,quantity,reason,actor_subject,source,idempotency_key,occurred_at)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000006',
+'aaaaaaaa-0000-4000-8000-000000000001','aaaaaaaa-3333-4333-8333-333333333333',
+'aaaaaaaa-4444-4444-8444-444444444444','ISSUE',4,'quality sample','u','manual','inventory-issue-1',now());
+COMMIT;
+SET ROLE grow_v2_test_runtime;
+BEGIN;
+SET LOCAL grow.tenant_id='bbbbbbbb-2222-4222-8222-222222222222';
+DO $$ BEGIN
+ IF EXISTS(SELECT 1 FROM grow_private.inventory_lots)
+ OR EXISTS(SELECT 1 FROM grow_private.inventory_ledger)
+ THEN RAISE EXCEPTION 'cross tenant inventory leak'; END IF;
+END $$;
+ROLLBACK;
+BEGIN;
+SET LOCAL grow.tenant_id='aaaaaaaa-1111-4111-8111-111111111111';
+DO $$ BEGIN
+ IF (SELECT balance FROM grow_private.inventory_lots WHERE lot_id='aaaaaaaa-0000-4000-8000-000000000001')<>38
+ OR (SELECT count(*) FROM grow_private.inventory_ledger WHERE lot_id='aaaaaaaa-0000-4000-8000-000000000001')<>2
+ THEN RAISE EXCEPTION 'inventory balance/traceability reconciliation mismatch'; END IF;
+END $$;
+ROLLBACK;
+RESET ROLE;

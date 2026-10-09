@@ -36,6 +36,8 @@ type scienceReader interface { ExternalScience(chainID string,limit uint32) (Sci
 
 func (s *Server) externalScience(w http.ResponseWriter,r *http.Request){
  w.Header().Set("Cache-Control","no-store")
+ origin:=r.Header.Get("Origin")
+ if origin=="https://compute.420integrated.org" { w.Header().Set("Access-Control-Allow-Origin",origin);w.Header().Set("Vary","Origin") }
  raw:=r.URL.Query().Get("chainId")
  n,err:=strconv.ParseUint(raw,10,64)
  if err!=nil||n==0||strconv.FormatUint(n,10)!=raw {writeError(w,http.StatusBadRequest,errors.New("valid chainId required"));return}

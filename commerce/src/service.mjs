@@ -453,10 +453,28 @@ export class CommerceService {
     const items=[];
     for(const row of rows){
       const order=await source.order(bytes32(row.order_id));
-      const onChain=String(order.status)==='6';
+      const marketStatus=String(order.status);
+      const onChain=marketStatus==='6'||marketStatus==='7';
       const matched=onChain&&order.disputeHash===row.dispute_hash;
       requireThat(!onChain||matched,'dispute_commitment_mismatch',503);
-      items.push({requestId:row.request_id,orderId:row.order_id,disputeHash:row.dispute_hash,requester:row.requester,state:matched?'MARKET_DISPUTE_FINALIZED':'AWAITING_MARKET_WALLET_SUBMISSION',marketDisputed:matched,arbitrationCaseOpened:false,arbitrationRulingFinalized:false,remedyExecuted:false});
+      let caseSummary=null,arbitrationRulingFinalized=false;
+      if(row.arbitration_case_id){
+        requireThat(matched&&source.arbitration,'arbitration_binding_unavailable',503);
+        const record=await source.arbitration.getCase(row.arbitration_case_id);
+        requireThat(record.exists===true&&wallet(record.claimant)===wallet(row.requester)&&wallet(record.respondent)===wallet(order.buyer)&&record.domainId===MARKET_ARBITRATION_DOMAIN&&record.originComponentId===MARKET_ORIGIN_COMPONENT&&record.originObjectId===row.order_id&&record.claimHash===row.dispute_hash&&record.requestedRemedyHash===row.arbitration_remedy_hash,'arbitration_case_mismatch',503);
+        const state=CASE_STATES[Number(record.state)];
+        requireThat(state&&state!=='NONE','arbitration_state_invalid',503);
+        let ruling=null;
+        if(['RULED','FINALIZED'].includes(state)){
+          ruling=await source.arbitration.getRuling(row.arbitration_case_id,Number(record.round));
+          const selected=Number(record.round)===0?record.resolver:record.appealResolver;
+          requireThat(ruling.exists===true&&wallet(ruling.resolver)===wallet(selected)&&ruling.rulingHash!=='0x'+'0'.repeat(64)&&ruling.remedyCommitment!=='0x'+'0'.repeat(64),'arbitration_ruling_invalid',503);
+          arbitrationRulingFinalized=state==='FINALIZED';
+        }
+        caseSummary={caseId:row.arbitration_case_id,caseState:state,round:Number(record.round),evidenceDeadline:record.evidenceDeadline,appealDeadline:record.appealDeadline,claimant:record.claimant,respondent:record.respondent,ruling:ruling?{outcomeCode:Number(ruling.outcomeCode),rulingHash:ruling.rulingHash,remedyCommitment:ruling.remedyCommitment,finalized:arbitrationRulingFinalized}:null};
+      }
+      const state=caseSummary?(arbitrationRulingFinalized?'ARBITRATION_FINALIZED_REMEDY_NOT_EXECUTED':'ARBITRATION_'+caseSummary.caseState):matched?(marketStatus==='7'?'MARKET_REFUNDED_NO_ARBITRATION_CASE':'MARKET_DISPUTE_FINALIZED'):'AWAITING_MARKET_WALLET_SUBMISSION';
+      items.push({requestId:row.request_id,attemptId:row.attempt_id,orderId:row.order_id,disputeHash:row.dispute_hash,requester:row.requester,state,marketDisputed:matched,marketStatus,arbitrationCaseOpened:!!caseSummary,arbitrationRulingFinalized,arbitrationCase:caseSummary,remedyExecuted:false});
     }
     return {items,partial:rows.length===50,authority:'420MarketV1; 420Arbitration independent case authority not yet approved',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }

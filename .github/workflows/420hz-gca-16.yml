@@ -1,0 +1,36 @@
+name: HZ-GCA-16 Website Level 1
+on:
+  pull_request:
+    paths:
+      - 'hz/web/**'
+      - 'scripts/verify-420hz-web.py'
+      - '.github/workflows/420hz-gca-16.yml'
+  push:
+    branches:
+      - 'feature/420hz-generate-community-awards-*'
+    paths:
+      - 'hz/web/**'
+      - 'scripts/verify-420hz-web.py'
+      - '.github/workflows/420hz-gca-16.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify all website product entry points and live gates
+        run: python3 scripts/verify-420hz-web.py
+      - name: Verify website JavaScript
+        run: node --check hz/web/app.js && node --check hz/web/runtime-config.js && node --check hz/web/generate-studio.mjs
+      - name: Run retained Generate Studio web tests
+        run: node --test hz/web/test/*.test.mjs

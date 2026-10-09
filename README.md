@@ -277,7 +277,9 @@ Repository entry point: [`doobtube/README.md`](doobtube/README.md). DoobTube rem
 
 ## 420Hz
 
-A music-focused ecosystem for artists, listeners and communities, exploring publishing, streaming, discovery, artist identity, rights, fan relationships and native economic interaction between creators and audiences.
+A music-focused ecosystem for artists, listeners and communities, spanning publishing, streaming, discovery, artist identity, rights, fan relationships and native economic interaction between creators and audiences.
+
+The next major 420Hz application phase adds **420Hz Generate** for AI-generated / AI-assisted song creation through 420AI + Compute Market, plus **420Hz Community & Awards** for social discovery, charts, nominations, voting, permanent award history and optional prize settlement. See [`docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md`](docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md).
 
 ## Marijuanopolis
 

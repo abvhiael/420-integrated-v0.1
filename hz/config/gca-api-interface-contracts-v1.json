@@ -1,0 +1,699 @@
+{
+  "schema": "420hz-gca-api-interface-contracts-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.16",
+  "title": "420Hz API/event/interface contracts",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "implementationBoundary": {
+    "logicalContractsOnly": true,
+    "hzCanonicalServiceId": null,
+    "productionBaseUrl": null,
+    "deployedAddress": null,
+    "liveAdapterClaim": false,
+    "rule": "HZ-GCA-1.16 freezes logical contracts and dependency bindings only; no 420Hz service ID, endpoint, contract address, deployed adapter or live wiring is invented."
+  },
+  "canonicalDependencyIds": {
+    "protocolRegistry": "420/service/protocol-registry/v1",
+    "wallet": "420/service/wallet/v1",
+    "smartAccounts": "420/service/smart-accounts/v1",
+    "identity": "420/service/identity/v1",
+    "rights": "420/service/rights/v1",
+    "resourceProtocol": "420/service/resource-protocol/v1",
+    "pay": "420/service/pay/v1",
+    "ai": "420/service/ai/v1",
+    "computeMarket": "420/service/compute-market/v1",
+    "search": "420/service/search/v1",
+    "notifications": "420/service/notifications/v1",
+    "analytics": "420/service/analytics/v1",
+    "arbitration": "420/service/arbitration/v1"
+  },
+  "requestEnvelope": {
+    "required": [
+      "schemaVersion",
+      "requestId",
+      "operation",
+      "domain",
+      "resourceRef",
+      "payload"
+    ],
+    "conditional": [
+      "actorRef",
+      "idempotencyKey",
+      "chainId",
+      "networkId",
+      "capabilityRef",
+      "deadline",
+      "expectedRevision",
+      "sourceCheckpoint"
+    ],
+    "rules": [
+      "requestId identifies one transport/application attempt and is not reusable as business idempotency authority by itself",
+      "idempotencyKey is operation/domain/resource scoped and must bind the material request payload",
+      "actorRef is required for authority-bearing mutations and is presentation of the qualified Wallet/session actor; it cannot be caller-selected authorization without the matching Wallet/session proof",
+      "chainId/networkId are required for chain-sensitive operations and wrong-network requests fail closed",
+      "expectedRevision/sourceCheckpoint are required where lost-update/stale-state protection is material",
+      "payload must contain only the minimum fields needed for the operation and never wallet private keys, mnemonics, raw Identity proof payloads, provider secrets or unrelated private project data",
+      "eligible PUBLIC read queries may omit actorRef/idempotencyKey and remain anonymous under HZ-GCA-1.10; anonymous reads never gain mutation authority"
+    ],
+    "requiredForMutations": [
+      "actorRef",
+      "idempotencyKey"
+    ]
+  },
+  "responseEnvelope": {
+    "required": [
+      "schemaVersion",
+      "requestId",
+      "status",
+      "source",
+      "sourceVersion"
+    ],
+    "optional": [
+      "data",
+      "error",
+      "sourceCheckpoint",
+      "finality",
+      "retryAfter",
+      "supersededBy"
+    ],
+    "statuses": [
+      "OK",
+      "ACCEPTED",
+      "PENDING",
+      "PARTIAL",
+      "REJECTED",
+      "FAILED"
+    ],
+    "rules": [
+      "response status does not create authority beyond the source domain",
+      "security-sensitive reads retain source identity/version and freshness/finality/checkpoint where applicable",
+      "PENDING/PARTIAL must not be presented as final success",
+      "derived Search/Indexer/Analytics responses never replace canonical source authority"
+    ]
+  },
+  "errorTaxonomy": [
+    "INVALID_ARGUMENT",
+    "UNAUTHORIZED",
+    "FORBIDDEN",
+    "NOT_FOUND",
+    "CONFLICT",
+    "STALE_STATE",
+    "WRONG_NETWORK",
+    "REPLAY_DETECTED",
+    "EXPIRED",
+    "RATE_LIMITED",
+    "POLICY_DENIED",
+    "DEPENDENCY_UNAVAILABLE",
+    "DEPENDENCY_MISMATCH",
+    "INTEGRITY_MISMATCH",
+    "VERIFICATION_FAILED",
+    "NOT_SUPPORTED",
+    "INTERNAL_ERROR"
+  ],
+  "eventEnvelope": {
+    "required": [
+      "schemaVersion",
+      "eventId",
+      "eventType",
+      "occurredAt",
+      "sourceDomain",
+      "sourceRef",
+      "subjectRef",
+      "visibility",
+      "payload"
+    ],
+    "conditional": [
+      "chainId",
+      "blockRef",
+      "finality",
+      "sourceRevision",
+      "supersedesEventId",
+      "payloadCommitment"
+    ],
+    "visibility": [
+      "PRIVATE",
+      "UNLISTED",
+      "PUBLIC",
+      "SECURITY_RESTRICTED"
+    ],
+    "rules": [
+      "events describe facts/observations and do not themselves grant Wallet, payment, Rights, Identity, moderation, Awards or governance authority",
+      "eventId is stable for dedupe/replay and duplicate delivery cannot repeat the underlying state transition",
+      "on-chain-derived events retain chain/block/finality context",
+      "derived/rebuildable events retain source revision/checkpoint/provenance sufficient to supersede or retract stale projections",
+      "PRIVATE/UNLISTED/SECURITY_RESTRICTED events are excluded from public Search/Analytics feeds unless a later explicit privacy-safe aggregate policy allows it",
+      "event payloads are minimum-disclosure and may carry commitments/references instead of private bytes"
+    ]
+  },
+  "logicalInterfaces": [
+    {
+      "name": "RegistryDiscovery420Hz",
+      "owner": "ProtocolRegistry",
+      "dependency": "protocolRegistry",
+      "operations": [
+        "ResolveService",
+        "ResolveCompatibleVersion",
+        "CheckActiveState"
+      ],
+      "consumes": [
+        "serviceId",
+        "minimumVersion",
+        "expectedInterfaceCommitment"
+      ],
+      "returns": [
+        "resolvedServiceRef",
+        "version",
+        "active/deprecated state",
+        "interface/manifest commitment"
+      ],
+      "forbidden": [
+        "invent service identity",
+        "treat cached deprecated service as active",
+        "grant app authority from registration alone"
+      ]
+    },
+    {
+      "name": "WalletAuthorization420Hz",
+      "owner": "Wallet/SmartAccount",
+      "dependency": "wallet+smartAccounts",
+      "operations": [
+        "RequestActorAuthorization",
+        "RequestTypedSignatureOrCapability",
+        "CheckSessionCapability"
+      ],
+      "consumes": [
+        "operation/domain/resource/payload commitment",
+        "chain/network",
+        "expiry"
+      ],
+      "returns": [
+        "actorRef",
+        "authorization/capability reference",
+        "scope/expiry"
+      ],
+      "forbidden": [
+        "receive private keys/mnemonics",
+        "treat wallet connection alone as approval",
+        "broaden capability scope"
+      ]
+    },
+    {
+      "name": "AIGeneration420Hz",
+      "owner": "420AI",
+      "dependency": "ai",
+      "operations": [
+        "QuoteGeneration",
+        "SubmitGeneration",
+        "GetGenerationStatus",
+        "CancelGeneration",
+        "GetResultManifest"
+      ],
+      "consumes": [
+        "GenerationIntent/request commitment",
+        "model/capability constraints",
+        "privacy/verification profile",
+        "payer max/deadline"
+      ],
+      "returns": [
+        "quote/reference",
+        "AI job/request refs",
+        "lifecycle state",
+        "provider/model/version refs",
+        "result/manifest commitments"
+      ],
+      "forbidden": [
+        "accept provider prose as canonical success",
+        "bypass ComputeMarket/Vault economics",
+        "broaden payer/provider/privacy constraints"
+      ]
+    },
+    {
+      "name": "ComputeExecution420Hz",
+      "owner": "ComputeMarket",
+      "dependency": "computeMarket",
+      "operations": [
+        "ObserveCapacityOrOffer",
+        "ObserveAcceptedMatch",
+        "ObserveVerification",
+        "ObserveSettlementOrRefund"
+      ],
+      "consumes": [
+        "AI/Compute request/job/provider/resource references"
+      ],
+      "returns": [
+        "capacity/offer observation",
+        "accepted price/match refs",
+        "verification outcome",
+        "settlement/refund state"
+      ],
+      "forbidden": [
+        "420Hz direct arbitrary matching rewrite",
+        "caller-selected beneficiary",
+        "treat observation as authority beyond ComputeMarket",
+        "duplicate settlement"
+      ]
+    },
+    {
+      "name": "CreativeRights420Hz",
+      "owner": "Creative Protocol / 420 Rights",
+      "dependency": "rights",
+      "operations": [
+        "ResolveCreatorWorkRecording",
+        "CheckReferenceAuthorization",
+        "CheckDerivativeAuthorization",
+        "RegisterWorkRecordingIntent",
+        "PublishReleaseIntent",
+        "ResolveRightsOrLicense"
+      ],
+      "consumes": [
+        "native Creator/Work/Recording IDs",
+        "contributor/right/license/provenance refs",
+        "Wallet authorization"
+      ],
+      "returns": [
+        "canonical IDs/state",
+        "authorization/rights result",
+        "registration/publication result refs"
+      ],
+      "forbidden": [
+        "rehash native IDs into competing canonical IDs",
+        "infer rights from upload/provider metadata",
+        "rewrite Rights from moderation/UI state"
+      ]
+    },
+    {
+      "name": "Storage420Hz",
+      "owner": "Resource Protocol / qualified storage",
+      "dependency": "resourceProtocol",
+      "operations": [
+        "PutPrivateArtifact",
+        "PutPublicArtifact",
+        "GetArtifact",
+        "VerifyArtifact",
+        "RequestApplicationDeletion"
+      ],
+      "consumes": [
+        "bytes or upload reference",
+        "content commitment",
+        "privacy/retention class",
+        "owner/controller authorization"
+      ],
+      "returns": [
+        "StorageObjectRef/manifest ref",
+        "integrity result",
+        "availability/proof metadata where supported"
+      ],
+      "forbidden": [
+        "claim universal physical deletion authority",
+        "serve hash-mismatched bytes",
+        "widen visibility",
+        "store secrets in public metadata"
+      ]
+    },
+    {
+      "name": "IdentityEligibility420Hz",
+      "owner": "420Identity / approved verifier",
+      "dependency": "identity",
+      "operations": [
+        "ResolvePublicProfile",
+        "CheckEligibilityPredicate",
+        "VerifyBallotScopedEligibility"
+      ],
+      "consumes": [
+        "profile/credential reference or privacy-preserving proof reference",
+        "predicate",
+        "audience/domain/ballot/policy context"
+      ],
+      "returns": [
+        "minimum-disclosure eligibility result",
+        "profile presentation fields when public",
+        "ballot-scoped voter/nullifier reference when qualified"
+      ],
+      "forbidden": [
+        "return raw legal identity by default",
+        "treat profile as Wallet authority",
+        "claim unique-human without qualified proof"
+      ]
+    },
+    {
+      "name": "PaymentHandoff420Hz",
+      "owner": "420Pay / canonical payment rails",
+      "dependency": "pay",
+      "operations": [
+        "CreateExplicitPaymentIntent",
+        "ObservePaymentSettlement"
+      ],
+      "consumes": [
+        "payer authorization",
+        "amount/asset/purpose/beneficiary reference"
+      ],
+      "returns": [
+        "payment reference",
+        "settlement status"
+      ],
+      "forbidden": [
+        "replace Compute/Vault job funding authority",
+        "grant interpersonal/community/Awards authority",
+        "fabricate settlement from intent"
+      ]
+    },
+    {
+      "name": "IndexerSearchRead420Hz",
+      "owner": "420Indexer / 420Search",
+      "dependency": "search",
+      "operations": [
+        "QueryPublicCatalog",
+        "QueryPublicCreatorsRecordings",
+        "QueryPublicCommunity",
+        "QueryCharts",
+        "QueryAwardsHistory"
+      ],
+      "consumes": [
+        "public filters/query",
+        "cursor",
+        "requested freshness"
+      ],
+      "returns": [
+        "rebuildable public projections",
+        "cursor",
+        "source/freshness/checkpoint metadata"
+      ],
+      "forbidden": [
+        "expose private/unlisted data",
+        "authorize writes",
+        "override canonical source state",
+        "hide stale/degraded context on security-sensitive reads"
+      ]
+    },
+    {
+      "name": "Notifications420Hz",
+      "owner": "420Notifications",
+      "dependency": "notifications",
+      "operations": [
+        "PublishEligibleNotificationEvent",
+        "ObserveDeliveryStatus"
+      ],
+      "consumes": [
+        "minimum-disclosure event envelope",
+        "recipient/subscription selector owned by Notifications"
+      ],
+      "returns": [
+        "delivery/reference status"
+      ],
+      "forbidden": [
+        "mutate source state",
+        "bypass recipient privacy/opt-in",
+        "treat delivery success/failure as source authorization"
+      ]
+    },
+    {
+      "name": "Analytics420Hz",
+      "owner": "420Analytics",
+      "dependency": "analytics",
+      "operations": [
+        "PublishPrivacySafeAggregateSignal",
+        "QueryAggregateMetrics"
+      ],
+      "consumes": [
+        "public or privacy-safe aggregate event/snapshot references"
+      ],
+      "returns": [
+        "derived aggregate metrics"
+      ],
+      "forbidden": [
+        "ingest raw private prompts/drafts/Identity proofs/evidence",
+        "become Chart/Awards/rights/payment authority"
+      ]
+    },
+    {
+      "name": "Arbitration420Hz",
+      "owner": "420Arbitration",
+      "dependency": "arbitration",
+      "operations": [
+        "OpenExplicitCase",
+        "ObserveCase",
+        "SubmitAuthorizedEvidenceRef",
+        "ObserveFinalizedRuling"
+      ],
+      "consumes": [
+        "registered domain/origin/parties/policy/evidence/remedy commitments"
+      ],
+      "returns": [
+        "case/ruling/finality/remedy references"
+      ],
+      "forbidden": [
+        "automatic invocation",
+        "ambient remedy execution",
+        "direct fund/rights/Identity/Wallet/Governance/AwardResult mutation"
+      ]
+    }
+  ],
+  "applicationCommands": [
+    "CreateGenerationProject",
+    "UpdateGenerationDraft",
+    "RequestGenerationQuote",
+    "SubmitGeneration",
+    "CancelGeneration",
+    "SelectGenerationOutput",
+    "RequestRegisterAndPublish",
+    "FollowArtist",
+    "UnfollowArtist",
+    "FavoriteRecording",
+    "UnfavoriteRecording",
+    "CreatePlaylist",
+    "UpdatePlaylist",
+    "AddPlaylistItem",
+    "RemovePlaylistItem",
+    "SubmitAwardNomination",
+    "SubmitAwardVote",
+    "SubmitModerationReport",
+    "SubmitModerationAppeal"
+  ],
+  "applicationQueries": [
+    "GetGenerationProject",
+    "GetGenerationJob",
+    "GetGenerationProvenance",
+    "GetPublishedRecording",
+    "GetCreatorCommunityState",
+    "GetPlaylist",
+    "GetChartSnapshot",
+    "GetAwardSeason",
+    "GetAwardBallot",
+    "GetAwardResult",
+    "GetModerationCase"
+  ],
+  "eventCatalogue": [
+    {
+      "event": "generation.quote.created",
+      "visibility": "PRIVATE",
+      "authority": "420Hz application snapshot only"
+    },
+    {
+      "event": "generation.submitted",
+      "visibility": "PRIVATE",
+      "authority": "420Hz workflow fact; AI/Compute refs remain authoritative"
+    },
+    {
+      "event": "generation.running",
+      "visibility": "PRIVATE",
+      "authority": "derived from qualified AI/Compute lifecycle"
+    },
+    {
+      "event": "generation.succeeded",
+      "visibility": "PRIVATE",
+      "authority": "result/manifest commitment reference only"
+    },
+    {
+      "event": "generation.failed",
+      "visibility": "PRIVATE",
+      "authority": "failure state reference; no refund implied"
+    },
+    {
+      "event": "generation.cancelled",
+      "visibility": "PRIVATE",
+      "authority": "workflow state; no refund implied"
+    },
+    {
+      "event": "generation.reviewed",
+      "visibility": "PRIVATE",
+      "authority": "420Hz project selection state"
+    },
+    {
+      "event": "release.registered",
+      "visibility": "PUBLIC",
+      "authority": "references canonical Creative IDs/state"
+    },
+    {
+      "event": "release.published",
+      "visibility": "PUBLIC",
+      "authority": "references canonical publication state"
+    },
+    {
+      "event": "community.follow.changed",
+      "visibility": "PUBLIC",
+      "authority": "420Hz ArtistFollow source relation"
+    },
+    {
+      "event": "community.favorite.changed",
+      "visibility": "PRIVATE",
+      "authority": "420Hz RecordingFavorite source relation"
+    },
+    {
+      "event": "community.playlist.changed",
+      "visibility": "PRIVATE",
+      "authority": "420Hz Playlist source relation/visibility-bound"
+    },
+    {
+      "event": "chart.snapshot.published",
+      "visibility": "PUBLIC",
+      "authority": "derived ChartSnapshot only"
+    },
+    {
+      "event": "award.nomination.changed",
+      "visibility": "PUBLIC",
+      "authority": "420Hz Awards product-domain nomination state"
+    },
+    {
+      "event": "award.ballot.opened",
+      "visibility": "PUBLIC",
+      "authority": "420Hz Awards product-domain ballot state"
+    },
+    {
+      "event": "award.vote.accepted",
+      "visibility": "SECURITY_RESTRICTED",
+      "authority": "Awards vote acceptance; public voter identity not implied"
+    },
+    {
+      "event": "award.result.finalized",
+      "visibility": "PUBLIC",
+      "authority": "immutable Awards product-domain result"
+    },
+    {
+      "event": "award.badge.issued",
+      "visibility": "PUBLIC",
+      "authority": "recognition metadata from finalized result"
+    },
+    {
+      "event": "moderation.report.submitted",
+      "visibility": "SECURITY_RESTRICTED",
+      "authority": "allegation/intake only"
+    },
+    {
+      "event": "moderation.decision.changed",
+      "visibility": "SECURITY_RESTRICTED",
+      "authority": "420Hz application enforcement state"
+    },
+    {
+      "event": "moderation.appeal.changed",
+      "visibility": "SECURITY_RESTRICTED",
+      "authority": "appeal/review state"
+    },
+    {
+      "event": "arbitration.ruling.observed",
+      "visibility": "SECURITY_RESTRICTED",
+      "authority": "bounded external ruling observation; no automatic remedy"
+    },
+    {
+      "event": "notification.delivery.failed",
+      "visibility": "PRIVATE",
+      "authority": "delivery failure only; source operation unchanged"
+    }
+  ],
+  "eventRules": [
+    "generation success does not imply REGISTERED or PUBLISHED",
+    "generation cancel/fail does not imply payer refund paid",
+    "release events reference canonical Creative IDs rather than duplicating publication authority",
+    "community events do not become Chart credit unless admitted by the exact chart policy",
+    "ChartSnapshot publication does not create Award eligibility/result",
+    "AwardVote events do not become Chart or Civic votes",
+    "moderation report events are allegations and do not imply enforcement",
+    "Arbitration ruling observation never auto-executes a remedy",
+    "notification delivery events never change source state"
+  ],
+  "idempotencyReplayRules": [
+    "each mutating command has an operation/domain/resource scoped idempotency key bound to material payload",
+    "retry of the same command returns/reconciles the existing logical result or fails without duplicate state",
+    "changed payload under the same idempotency key fails as conflict/replay",
+    "event redelivery uses stable eventId and cannot reapply the source mutation",
+    "cross-chain/cross-domain reuse of authorization, idempotency key, voter nullifier, settlement reference or moderation capability fails closed"
+  ],
+  "versioningCompatibilityRules": [
+    "schemaVersion is explicit on every request/response/event envelope",
+    "dependency service identity/version is discovered/validated against canonical Registry or another repository-approved source where required",
+    "breaking field/semantic changes require a new interface/schema version rather than silent reinterpretation",
+    "unknown required enum/state values fail closed; additive optional fields may be ignored only when the consumer explicitly supports forward compatibility",
+    "accepted jobs/ballots/results retain the interface/policy commitments frozen at acceptance even if a newer service/interface version becomes active"
+  ],
+  "privacyMinimumDisclosureRules": [
+    "private generation payloads travel by protected references/bytes only to interfaces that need them; Search/Analytics/Notifications never receive raw private prompts/drafts",
+    "Identity voting integration consumes only the minimum-disclosure predicate/nullifier result",
+    "moderation/Arbitration public events carry commitments/status, not raw private evidence",
+    "Notification payloads omit secrets, private Identity proofs, raw payment details and unrelated project state",
+    "Analytics receives only public/privacy-safe aggregate signals",
+    "public API/query responses never broaden the source object's visibility"
+  ],
+  "failureRules": [
+    "missing actor/domain/idempotency context for a mutating command fails closed",
+    "wrong chain/network or inactive/deprecated incompatible service fails closed",
+    "stale revision/checkpoint on a protected mutation/read fails closed or requires explicit refresh",
+    "dependency timeout/unavailability cannot be converted into synthetic success",
+    "unknown breaking schema/state cannot be guessed",
+    "private/unlisted payload cannot fall back to a public event/query path",
+    "duplicate command/event delivery cannot repeat payment, generation, community, chart, nomination, vote, moderation or publication side effects",
+    "derived read disagreement with canonical source cannot authorize a privileged transition",
+    "Notification/Analytics/Search delivery or indexing failure cannot roll back or rewrite source state",
+    "Arbitration observation cannot invoke a remedy outside the HZ-GCA-1.14 allowlist"
+  ],
+  "invariants": [
+    "HZGCA-API-001 HZ-GCA-1.16 defines logical interfaces only and assigns no 420Hz canonical service ID, endpoint, address or live adapter",
+    "HZGCA-API-002 every mutating command binds qualified actor, domain, resource and idempotency context",
+    "HZGCA-API-003 Wallet/session authority is external and private signing material never enters 420Hz API payloads",
+    "HZGCA-API-004 dependency identity/version/freshness is validated before security-sensitive use",
+    "HZGCA-API-005 request replay or changed-payload idempotency reuse cannot duplicate or mutate an existing logical operation",
+    "HZGCA-API-006 event redelivery is deduplicated and events never become ambient cross-domain authority",
+    "HZGCA-API-007 private/unlisted/security-restricted payloads never enter public Search/Analytics/event surfaces by fallback",
+    "HZGCA-API-008 420AI/Compute result observation cannot bypass canonical verification/settlement rules",
+    "HZGCA-API-009 Creative/Rights native IDs and authority are referenced, never redefined by 420Hz",
+    "HZGCA-API-010 Storage references do not imply universal deletion authority and integrity mismatch fails closed",
+    "HZGCA-API-011 Identity integration is minimum-disclosure and never substitutes for Wallet authorization",
+    "HZGCA-API-012 Search/Indexer/Analytics responses are derived and never authoritative for protected state transitions",
+    "HZGCA-API-013 Notifications delivery state cannot mutate source application/protocol state",
+    "HZGCA-API-014 Community events do not automatically become Chart or Award signals",
+    "HZGCA-API-015 AwardVote remains distinct from Chart, Community and Civic/Governance events",
+    "HZGCA-API-016 moderation and Arbitration interfaces preserve HZ-GCA-1.14 scoped/allowlisted remedy boundaries",
+    "HZGCA-API-017 breaking interface semantics require explicit version change and frozen accepted operations retain their bound version/policy",
+    "HZGCA-API-018 API/event contracts create no new custody, Rights, Identity, payment, governance, resolver or protocol authority"
+  ],
+  "exitCriteria": [
+    "request/response/event envelopes are explicit",
+    "logical command/query/event catalogues are explicit",
+    "Wallet/Registry/AI/Compute/Creative/Rights/Storage/Identity/Pay/Search/Notifications/Analytics/Arbitration interface boundaries are explicit",
+    "authorization/idempotency/replay/version/freshness/error semantics are explicit",
+    "privacy/minimum-disclosure and derived-state boundaries are explicit",
+    "targeted verifier checks canonical dependency IDs against repository ServiceIds420 where applicable",
+    "no 420Hz service ID, endpoint, address, ABI, deployed adapter or testnet/live state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.17 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/trust-boundary-model.md",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/architecture/infrastructure/420indexer.md",
+    "docs/420NOTIFICATIONS.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.9-GENERATION-ECONOMICS.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+    "docs/architecture/420hz/HZ-GCA-1.12-AWARDS-ARCHITECTURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.13-NOMINATION-VOTING-POLICY.md",
+    "docs/architecture/420hz/HZ-GCA-1.14-MODERATION-DISPUTE-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.15-THREAT-MODEL.md",
+    "contracts/src/libraries/ServiceIds420.sol"
+  ]
+}

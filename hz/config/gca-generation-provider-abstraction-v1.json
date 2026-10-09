@@ -1,0 +1,243 @@
+{
+  "schema": "420hz-gca-generation-provider-abstraction-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-2",
+  "title": "Generation job and provider abstraction",
+  "qualificationLevel": 1,
+  "milestoneRequired": false,
+  "baseMainSha": "0993ff5b5b3b213a0768dbde90e4734df5ab4cc0",
+  "implementationRoot": "hz/generate",
+  "providerNeutral": true,
+  "providerCanonicalAuthority": false,
+  "request": {
+    "required": [
+      "prompt",
+      "durationSec",
+      "mode",
+      "controls"
+    ],
+    "optional": [
+      "lyrics",
+      "referenceAudio"
+    ],
+    "controls": [
+      "genres",
+      "styles",
+      "moods",
+      "instrumentation"
+    ],
+    "modes": [
+      "VOCAL",
+      "INSTRUMENTAL"
+    ],
+    "durationSec": {
+      "min": 15,
+      "max": 1800
+    },
+    "clientRequestId": {
+      "deterministic": true,
+      "algorithm": "sha256(canonical normalized request)",
+      "prefix": "hzgen:",
+      "replayRule": "same request -> same id; expected id with changed material fails closed"
+    },
+    "referenceAudio": {
+      "optional": true,
+      "permittedPaths": [
+        "AUTHORIZED_STORAGE_REF"
+      ],
+      "requiredFieldsWhenPresent": [
+        "storageRef",
+        "authorizationRef"
+      ],
+      "rawUrlAllowed": false
+    }
+  },
+  "providerDescriptor": {
+    "required": [
+      "providerId",
+      "providerRevision",
+      "models",
+      "capacity"
+    ],
+    "modelFields": [
+      "modelId",
+      "modelVersion",
+      "maxDurationSec",
+      "modes",
+      "supportsLyrics",
+      "supportsReferenceAudio",
+      "referenceAudioPaths",
+      "outputKinds"
+    ],
+    "capacityFields": [
+      "availableSlots",
+      "queueDepth",
+      "estimatedStartMs"
+    ],
+    "quoteBinding": [
+      "providerId",
+      "providerRevision",
+      "modelId",
+      "modelVersion",
+      "clientRequestId",
+      "requestDigest",
+      "amount",
+      "asset",
+      "capacity",
+      "issuedAt",
+      "expiresAt"
+    ],
+    "capabilityDriftAfterQuote": "fail closed"
+  },
+  "lifecycle": {
+    "states": [
+      "DRAFT",
+      "QUOTED",
+      "SUBMITTED",
+      "RUNNING",
+      "SUCCEEDED",
+      "FAILED",
+      "CANCELLED"
+    ],
+    "timeoutRepresentation": "FAILED + TIMEOUT",
+    "terminal": [
+      "SUCCEEDED",
+      "FAILED",
+      "CANCELLED"
+    ],
+    "rules": [
+      "DRAFT may be quoted or locally cancelled",
+      "QUOTED may submit, requote or cancel",
+      "SUBMITTED/RUNNING may poll or cancel",
+      "provider success requires a valid bound output manifest before SUCCEEDED",
+      "timeout never fabricates provider completion or publication",
+      "provider lifecycle is application execution state only and not protocol settlement/publication authority"
+    ]
+  },
+  "outputManifest": {
+    "requiredIdentity": [
+      "providerId",
+      "providerRevision",
+      "modelId",
+      "modelVersion",
+      "providerJobRef"
+    ],
+    "requiredMinimumOutput": [
+      "MIX"
+    ],
+    "optionalKinds": [
+      "STEM",
+      "LYRICS_TIMING",
+      "ARTWORK"
+    ],
+    "artifactFields": [
+      "kind",
+      "storageRef",
+      "integrity",
+      "label"
+    ],
+    "identityMismatch": "INTEGRITY_MISMATCH"
+  },
+  "errorTaxonomy": [
+    "INVALID_REQUEST",
+    "INVALID_CLIENT_REQUEST_ID",
+    "REFERENCE_AUDIO_NOT_AUTHORIZED",
+    "UNSUPPORTED_CAPABILITY",
+    "NO_CAPACITY",
+    "QUOTE_EXPIRED",
+    "QUOTE_MISMATCH",
+    "REPLAY_CONFLICT",
+    "PROVIDER_UNAVAILABLE",
+    "PROVIDER_REJECTED",
+    "TIMEOUT",
+    "CANCELLED",
+    "MALFORMED_RESULT",
+    "INTEGRITY_MISMATCH",
+    "INTERNAL_ERROR"
+  ],
+  "mockProvider": {
+    "deterministic": true,
+    "idempotentSubmit": true,
+    "supportsFaultInjection": [
+      "descriptorUnavailable",
+      "quoteUnavailable",
+      "submitUnavailable",
+      "submitRejected",
+      "pollUnavailable",
+      "providerFailed",
+      "malformedResult",
+      "runningPolls"
+    ]
+  },
+  "authorityBoundaries": [
+    "provider descriptor/capacity is selection input, not canonical protocol authority",
+    "provider quote is application/provider information and not canonical payment settlement",
+    "provider job success does not imply VERIFIED/SETTLED/REGISTERED/PUBLISHED",
+    "provider cannot broaden reference-audio authorization path",
+    "provider/model/revision/job identity is frozen across quote/submit/result validation",
+    "420Hz does not accept provider-specific error states as canonical cross-provider semantics",
+    "HZ-GCA-2 does not implement HZ-GCA-3 420AI/ComputeMarket routing, escrow or settlement"
+  ],
+  "invariants": [
+    "HZGCA2-001 deterministic normalized request material produces one deterministic client request id",
+    "HZGCA2-002 changed material cannot be accepted under a mismatched expected client request id",
+    "HZGCA2-003 reference audio is rejected unless it uses an explicitly permitted authorization path",
+    "HZGCA2-004 provider/model/revision identity is bound at quote and checked at submit/result",
+    "HZGCA2-005 quote includes cost and capacity envelope with explicit expiry",
+    "HZGCA2-006 submit is idempotent and retry does not duplicate provider jobs",
+    "HZGCA2-007 transient provider failure is normalized into provider-independent retryable errors",
+    "HZGCA2-008 timeout fails locally without fabricating provider success or output",
+    "HZGCA2-009 cancellation is explicit before or after provider submission",
+    "HZGCA2-010 provider success is accepted only with a valid MIX-bearing output manifest",
+    "HZGCA2-011 output artifact identity/integrity references remain provider-neutral storage references",
+    "HZGCA2-012 mix/stems/lyrics-timing/artwork are represented through one provider-neutral artifact vocabulary",
+    "HZGCA2-013 provider capability drift after quote fails closed",
+    "HZGCA2-014 provider error codes are diagnostic only and mapped into frozen application error taxonomy",
+    "HZGCA2-015 provider state never becomes Creative/Rights/payment/settlement/publication authority",
+    "HZGCA2-016 implementation remains usable with deterministic mock provider and future provider adapters",
+    "HZGCA2-017 HZ-GCA-2 introduces no provider-specific canonical protocol dependency",
+    "HZGCA2-018 HZ-GCA-3 remains the owner of 420AI/ComputeMarket execution routing and settlement integration"
+  ],
+  "tests": {
+    "package": "hz/generate/package.json",
+    "suite": "hz/generate/test/generation-job.test.js",
+    "requiredCoverage": [
+      "deterministic request id",
+      "reference-audio authorization boundary",
+      "provider capability/model/capacity descriptor",
+      "quote cost/capacity binding",
+      "full lifecycle to valid output",
+      "create/submit replay safety",
+      "transient submit retry",
+      "transient poll retry",
+      "cancellation before and after submit",
+      "timeout",
+      "provider capability revision drift",
+      "malformed result fail-closed",
+      "output identity mismatch",
+      "frozen provider-independent error taxonomy"
+    ]
+  },
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1-ARCHITECTURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.9-GENERATION-ECONOMICS.md",
+    "docs/architecture/420hz/HZ-GCA-1.16-API-EVENT-INTERFACE-CONTRACTS.md",
+    "docs/architecture/420hz/HZ-GCA-1.17-FAILURE-RECOVERY-SEMANTICS.md",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md"
+  ],
+  "exitCriteria": [
+    "provider-neutral generation request and job model exists",
+    "deterministic mock provider exists",
+    "lifecycle, cancellation, timeout, replay and failure/retry behavior are tested",
+    "provider capability/model/version/cost/capacity/output contracts are explicit",
+    "reference audio is restricted to authorized paths",
+    "provider-independent error taxonomy is frozen",
+    "provider cannot become canonical protocol authority",
+    "targeted exact-head Level-1 workflow passes with no skipped required checks"
+  ],
+  "nextCanonicalStep": "HZ-GCA-3 — 420AI / Compute Market execution adapter"
+}

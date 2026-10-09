@@ -1,0 +1,234 @@
+{
+  "schema": "420hz-gca-generation-economics-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.9",
+  "title": "Define generation economics",
+  "baseMainSha": "c6b62a6ea75be97564564e56b779dfad7df3f784",
+  "level": 1,
+  "milestoneRequired": false,
+  "settlementAsset": {
+    "default": "native $420",
+    "authority": "420AI / ComputeMarket / Vault canonical settlement path",
+    "rule": "420Hz may display canonical amounts but may not mint, custody, reserve, release, claim, refund or redirect settlement value itself"
+  },
+  "economicStates": [
+    {
+      "state": "ESTIMATE",
+      "authority": "420Hz application",
+      "meaning": "non-binding cost/capacity preview derived from current qualified source data; creates no reservation or payment right"
+    },
+    {
+      "state": "QUOTED",
+      "authority": "420Hz application",
+      "meaning": "versioned/expiring quote snapshot for the exact GenerationIntent; remains non-canonical until accepted through 420AI/ComputeMarket"
+    },
+    {
+      "state": "AUTHORIZED_MAX",
+      "authority": "payer/Wallet + canonical request",
+      "meaning": "explicit payer maximum spend authorization for the exact request/funding scope"
+    },
+    {
+      "state": "FUNDED",
+      "authority": "ComputeMarket/Vault + 420AI mirror",
+      "meaning": "actual payer-backed job credit/funding reference exists within the authorized maximum"
+    },
+    {
+      "state": "ACCEPTED_PRICE",
+      "authority": "ComputeMarket",
+      "meaning": "immutable accepted provider/resource/price/beneficiary snapshot bounded by payer max, actual funded credit and scoped accept-match authorization"
+    },
+    {
+      "state": "VERIFIED_EARNED",
+      "authority": "ComputeMarket verification/economic accounting",
+      "meaning": "objectively verified provider earning/entitlement for exact accepted work; not yet proof of external payout"
+    },
+    {
+      "state": "PROVIDER_CLAIMABLE",
+      "authority": "Vault/settlement path",
+      "meaning": "verified/final provider entitlement has become claimable to the frozen canonical beneficiary"
+    },
+    {
+      "state": "PROVIDER_PAID",
+      "authority": "Vault/settlement path",
+      "meaning": "actual provider payout/claim movement completed to the frozen beneficiary"
+    },
+    {
+      "state": "PAYER_REFUNDABLE",
+      "authority": "ComputeMarket/Vault accounting",
+      "meaning": "unearned payer-backed residual has been classified as refundable; no external refund implied"
+    },
+    {
+      "state": "PAYER_REFUND_CLAIMABLE",
+      "authority": "Vault/settlement path",
+      "meaning": "refund amount is claimable/withdrawable by the bound payer"
+    },
+    {
+      "state": "PAYER_REFUND_PAID",
+      "authority": "Vault/settlement path",
+      "meaning": "actual payer withdrawal/refund movement completed"
+    },
+    {
+      "state": "DISPUTE_HOLD",
+      "authority": "ComputeMarket dispute/economic policy",
+      "meaning": "only the specifically contested not-yet-released entitlement/refund is held pending canonical resolution"
+    }
+  ],
+  "quoteRules": [
+    "Every quote binds the exact GenerationIntent/request commitment, model/version or capability class, workload controls that materially affect price, privacy/verification profile, pricing-policy/version reference, quoted amount, maximum amount shown to the user, settlement asset, expiry and quote source timestamp/reference.",
+    "QUOTED is application state only and does not prove provider capacity reservation, funding, acceptance, entitlement or payout.",
+    "A material request change, quote expiry, provider/resource revision drift or incompatible capacity/privacy/verification change invalidates the quote and requires re-quote before submission.",
+    "420Hz must label estimated ranges separately from exact accepted price and must not present an estimate as guaranteed final cost.",
+    "Current qualified fixed-price ComputeMarket admission may be displayed as an exact candidate quote only while its offer/revision remains valid; future pricing models require an explicit versioned policy rather than reinterpretation."
+  ],
+  "authorizationAndFundingRules": [
+    "The payer maximum is explicit, bounded and specific to the exact request/funding scope; 420Hz may not use an unbounded legacy max-spend path for paid generation.",
+    "Payer and requester may differ only when the payer has independently authorized the funding obligation.",
+    "Actual funded credit must be payer/job-bound and cannot be inferred from Vault-wide free balance, donor surplus, a payment receipt alone or an application ledger.",
+    "Funding amount cannot exceed the payer-authorized maximum.",
+    "420Hz must distinguish payment authorization from actual canonical funding confirmation.",
+    "420Pay, if used for user-facing payment acquisition, does not replace ComputeMarket/Vault job funding and settlement authority."
+  ],
+  "acceptedPriceRules": [
+    "Accepted price must be <= payer signed/authorized maximum.",
+    "Accepted price must be <= actual job-specific Vault-backed funded credit.",
+    "Accepted price must be <= the amount limit of the scoped accept-match capability.",
+    "Accepted price freezes the exact provider/resource revision, provider-derived beneficiary, pricing policy/version, accepted amount and payer/funding references.",
+    "Matching/acceptance creates no provider earning or payout by itself.",
+    "No scheduler, UI, provider endpoint change or later provider revision may redirect the frozen beneficiary or raise the accepted price."
+  ],
+  "entitlementAndSettlementRules": [
+    "Provider earning requires canonical verification under the preaccepted verification policy; worker/provider signature alone is insufficient.",
+    "RESULT_COMMITTED is not VERIFIED_EARNED.",
+    "For every payable unit/result, retries and resubmissions share one canonical entitlement key; duplicate attempts cannot create second payment.",
+    "sum(verified earnings plus explicitly accepted fees) <= accepted aggregate price <= payer maximum <= payer-backed funded reserve.",
+    "PROVIDER_CLAIMABLE and PROVIDER_PAID are distinct states; VERIFIED_EARNED alone is not proof of Vault transfer.",
+    "Provider payout recipient is the already-bound canonical beneficiary and may never be supplied or replaced by a 420Hz client at settlement time.",
+    "Partial provider earning is allowed only when the accepted job/verification policy explicitly supports partial units/results; subjective dissatisfaction is not a unilateral reason to rewrite verified entitlement.",
+    "No 420Hz administrator, governance role, application server or UI may confiscate, redirect or fabricate provider entitlement."
+  ],
+  "cancellationFailureRefundRules": [
+    "DRAFT/QUOTED cancellation before canonical funding/acceptance creates no provider charge and requires no fabricated refund state.",
+    "After funding, cancellation/expiry/failure/refund semantics are determined by the canonical AI/Compute/Vault lifecycle; a local cancel click cannot promise or execute a refund.",
+    "Unused/unearned payer-backed value remains payer-bound and may become refundable/claimable only through canonical accounting.",
+    "PAYER_REFUNDABLE, PAYER_REFUND_CLAIMABLE and PAYER_REFUND_PAID must be displayed distinctly.",
+    "Vault cancelObligation or a freed internal balance alone is not an external payer refund.",
+    "A settled under-budget job returns/resolves unused payer-backed value under the canonical refund path without reopening settled provider earnings.",
+    "Failed/expired/disputed jobs cannot be shown as refunded until the corresponding canonical refund state/reference proves the applicable stage.",
+    "Refunds return only to the recorded/bound payer or authorized payer route; 420Hz cannot nominate an alternate refund recipient."
+  ],
+  "retryReplayRules": [
+    "A transient retry/resubmission of the same canonical unit/job cannot create a second payable entitlement.",
+    "A duplicate client request/idempotency key must resolve to the same economic intent/job or fail closed.",
+    "A genuinely new paid attempt after a terminal FAILED/CANCELLED result requires a new GenerationIntent/run, fresh quote where required and fresh explicit payer authorization unless the canonical recovery policy reuses the already-funded entitlement.",
+    "420Hz may never silently recharge a user because a provider/network timeout occurred.",
+    "Lost-response recovery must reconcile canonical funding/acceptance/receipt/settlement before deciding whether any new economic action is allowed."
+  ],
+  "disputeRules": [
+    "A dispute may hold only the specific contested not-yet-released entitlement/refund under the accepted challenge policy.",
+    "Unaffected verified units/entitlements may proceed when canonical policy permits.",
+    "An allegation, popularity score, subjective quality complaint or provider reputation alone cannot create a refund, payout denial or slash.",
+    "Final dispute resolution cannot mint a second entitlement, change the frozen provider beneficiary or consume another payer's credit.",
+    "Open appeal/finality gates must be respected before claimable payout where the accepted policy requires them."
+  ],
+  "sponsorshipAndSubsidyRules": [
+    "Optional sponsorship, grant, research-pool or ecosystem funding may reduce the user's own funded portion only when a canonical funding source/pool explicitly authorizes and backs the exact job/request.",
+    "420Hz may display a subsidy/sponsor contribution only from canonical observable funding records and must identify the payer/funding source separately from the requester.",
+    "A sponsor match, useful-computation reward, research reward or contribution reward is a distinct economic surface and must not be relabeled as a generation-provider payment, user refund or discount unless the canonical funding path explicitly funds that job.",
+    "No community/award popularity metric creates a compute subsidy or provider entitlement.",
+    "If sponsored funding disappears, expires or is insufficient before acceptance, the job must re-quote/re-authorize or fail closed; 420Hz may not silently shift the amount to the user."
+  ],
+  "feePolicy": {
+    "hidden420HzSurcharge": "forbidden",
+    "currentApplicationFee": "none defined by HZ-GCA-1.9",
+    "futureRule": "any future 420Hz application/service fee requires an explicit versioned policy, separate line item, clear beneficiary and separate user authorization; it must fit within the displayed total maximum and cannot be hidden inside provider cost",
+    "providerFees": "only fees explicitly part of the canonical accepted pricing policy may be charged",
+    "taxesOrExternalFees": "not invented by this architecture step; if later applicable they must be explicit and separately authorized"
+  },
+  "uiPresentationRules": [
+    "Before submission show settlement asset, quote/estimate status, quoted amount or range, payer maximum, quote expiry and whether funding/subsidy is expected.",
+    "After canonical acceptance show exact accepted price separately from the earlier estimate/quote.",
+    "Display provider earning, provider claimable and provider paid as different states.",
+    "Display payer refundable, refund claimable and refund paid as different states.",
+    "Do not show 'refunded' based only on AI status, app bookkeeping, cancelObligation, a support decision or pending withdrawal.",
+    "Do not show 'paid provider' based only on VERIFIED, SETTLED facade state or application receipt unless canonical Vault/settlement evidence establishes the intended meaning.",
+    "Cost/capacity preview must disclose stale/unavailable pricing rather than inventing a default amount."
+  ],
+  "reconciliationEquation": {
+    "equation": "funded = provider_earned_or_claimable_or_paid + payer_refundable_or_claimable_or_paid + still_reserved + policy_explicit_fees_or_holds",
+    "rules": [
+      "Every amount is counted exactly once in the applicable stage.",
+      "No amount may exceed payer-backed funding.",
+      "A dispute hold reclassifies an existing bounded liability; it does not create new value.",
+      "Application estimates/quotes are excluded from reconciliation until canonical funding/acceptance occurs."
+    ]
+  },
+  "failureRules": [
+    "quote above payer maximum fails closed",
+    "accepted price above actual job funding fails closed",
+    "accepted price above scoped capability amount fails closed",
+    "stale/expired quote used for paid submission fails closed",
+    "payer/requester mismatch without independent payer authorization fails closed",
+    "provider beneficiary substitution fails closed",
+    "duplicate payable entitlement for retry/replay fails closed",
+    "provider payout before required verification/finality fails closed",
+    "refund to any recipient other than the bound payer/authorized payer route fails closed",
+    "application label claiming PAID or REFUNDED without canonical evidence is invalid",
+    "sponsor/subsidy claim without canonical funded source fails closed",
+    "silent transfer of expired/insufficient sponsor amount to the user fails closed",
+    "hidden 420Hz surcharge is invalid",
+    "economic state disagreement between app cache and canonical source fails closed for new spending/settlement actions"
+  ],
+  "invariants": [
+    "HZGCA-ECON-001 QUOTED is non-canonical application state and creates no capacity, custody, entitlement or payout authority",
+    "HZGCA-ECON-002 payer maximum authorization is explicit and bounded for the exact request; unbounded legacy max-spend is not accepted for paid Generate",
+    "HZGCA-ECON-003 accepted price never exceeds payer maximum, actual job-specific funded credit or scoped accept-match amount",
+    "HZGCA-ECON-004 accepted provider/resource/beneficiary/pricing terms are immutable for the accepted job",
+    "HZGCA-ECON-005 matching and acceptance create no provider earnings or payout",
+    "HZGCA-ECON-006 RESULT_COMMITTED is not verified earning and provider signature alone cannot unlock settlement",
+    "HZGCA-ECON-007 one canonical payable entitlement exists per accepted unit/result across retries and replays",
+    "HZGCA-ECON-008 verified earning, provider claimable and provider paid are distinct economic states",
+    "HZGCA-ECON-009 payer refundable, refund claimable and refund paid are distinct economic states",
+    "HZGCA-ECON-010 cancelObligation/free-balance bookkeeping is never presented as actual payer refund",
+    "HZGCA-ECON-011 unused/unearned payer-backed value remains payer-bound and cannot subsidize another payer/job",
+    "HZGCA-ECON-012 refund recipient and provider beneficiary are canonical bound identities, never caller-selected by 420Hz",
+    "HZGCA-ECON-013 retry/network recovery cannot silently recharge the user or create duplicate provider entitlement",
+    "HZGCA-ECON-014 dispute holds are bounded to contested liabilities and cannot confiscate unrelated payer/provider value",
+    "HZGCA-ECON-015 canonical sponsorship/subsidy is distinct from provider reward/refund and cannot be fabricated from community/award signals",
+    "HZGCA-ECON-016 no hidden 420Hz surcharge exists; any future application fee requires explicit versioned separate authorization",
+    "HZGCA-ECON-017 application economic presentation must fail closed on stale/conflicting canonical state rather than inventing price/payment/refund status",
+    "HZGCA-ECON-018 HZ-GCA-1.9 creates no custody, Vault, settlement, minting, payment, subsidy, rights or governance authority for 420Hz"
+  ],
+  "exitCriteria": [
+    "quote/estimate/max-spend/funding/accepted-price states and authorities are explicit",
+    "provider earning/claimable/paid and payer refundable/claimable/paid states are distinct",
+    "accepted-price bounds and beneficiary immutability are explicit",
+    "cancellation/failure/refund/dispute/retry/idempotency economics are explicit",
+    "optional canonical sponsorship/subsidy is separated from provider rewards and user refunds",
+    "hidden 420Hz surcharge is prohibited and future fee policy requires separate authorization",
+    "UI truthfulness and exact economic reconciliation rules are explicit",
+    "machine verifier enforces economic vocabulary, bounds, separation and no-authority invariants",
+    "no live quote, deployed funding adapter, provider price, production fee or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.10 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "contracts/src/ai/AIJobManager.sol",
+    "contracts/src/ai/AIJobEscrow.sol",
+    "docs/compute-market/CMP-0.6-OFFERS-REQUESTS-AND-MATCHING.md",
+    "docs/compute-market/CMP-0.7-AUTHORIZED-JOB-LIFECYCLE.md",
+    "docs/compute-market/CMP-0.8-VAULT-FUNDING-SETTLEMENT-AND-REFUNDS.md",
+    "docs/compute-market/CMP-0.9-SIGNED-RECEIPTS-AND-VERIFICATION.md",
+    "docs/compute-market/CMP-0.10-DISPUTES-PRIVACY-AND-SECURITY.md",
+    "docs/compute-market/CMP-0.11-CLIENT-NODE-AND-420AI-INTEGRATION.md",
+    "docs/compute-market/CMP-1.2.1-VAULT-PAYER-FUNDING-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.2.2-ACCEPTED-PRICE-RESERVATION-QUALIFICATION.md",
+    "docs/compute-market/CMP-1.2.4-PROVIDER-PAYOUT-QUALIFICATION.md",
+    "docs/compute-market/CMP-6.1-FUNDING-SOURCES.md",
+    "docs/compute-market/CMP-6.5-SPONSOR-MATCHING.md",
+    "docs/compute-market/CMP-6.7-TRANSPARENT-REWARD-ACCOUNTING.md"
+  ]
+}

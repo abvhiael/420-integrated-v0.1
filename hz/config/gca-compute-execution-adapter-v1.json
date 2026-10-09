@@ -1,0 +1,249 @@
+{
+  "schema": "420hz-gca-compute-execution-adapter-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-3",
+  "title": "420AI / Compute Market execution adapter",
+  "qualificationLevel": 1,
+  "milestoneRequired": false,
+  "baseMainSha": "0993ff5b5b3b213a0768dbde90e4734df5ab4cc0",
+  "implementationRoot": "hz/generate",
+  "dependsOn": {
+    "priorStep": "HZ-GCA-2",
+    "canonicalAIAdapter": "contracts/src/ai/AIComputeAdapter420.sol",
+    "canonicalComputeSdk": "packages/420-sdk/src/compute-client.ts",
+    "computeApi": "services/compute-api/src/job-api.ts",
+    "providerRuntime": "services/420ai-provider/src/runtime.js"
+  },
+  "adapter": {
+    "class": "ComputeMarketGenerationProvider420",
+    "developmentClient": "DeterministicDevelopmentComputeClient420",
+    "workloadClass": "MUSIC_GENERATION",
+    "providerIdentity": "420ai-compute-market",
+    "publicationAuthority": false,
+    "settlementAuthority": false,
+    "custodyAuthority": false
+  },
+  "discovery": {
+    "source": "Compute Market worker/provider projections",
+    "mustBeNonAuthoritative": true,
+    "requiredCandidateFields": [
+      "computeProviderId",
+      "workerId",
+      "resourceId",
+      "modelId",
+      "modelVersion",
+      "maxDurationSec",
+      "modes",
+      "availableCapacityUnits",
+      "quotedPrice",
+      "quoteAsset",
+      "authoritative"
+    ],
+    "eligibility": [
+      "exact modelId/modelVersion",
+      "supported vocal/instrumental mode",
+      "requested duration <= provider limit",
+      "lyrics capability when lyrics present",
+      "approved reference-audio path when reference audio present",
+      "available capacity > 0",
+      "quoted price <= user/application maximum when a maximum exists"
+    ],
+    "selectionOrder": [
+      "lowest quoted price",
+      "highest available capacity",
+      "highest reputation score",
+      "highest SLA score",
+      "stable provider/resource identity"
+    ],
+    "reputationAndSla": "non-authoritative selection signals only"
+  },
+  "submission": {
+    "canonicalEnvironment": [
+      "chainId",
+      "computeGraphHash"
+    ],
+    "planRules": [
+      "submission plan must declare requiresWalletAuthorization=true",
+      "submission plan must declare canonicalAuthority=false",
+      "submission plan must declare secretMaterialManaged=false"
+    ],
+    "acceptedBinding": [
+      "computeRequestId",
+      "computeJobId",
+      "acceptedMatchRef",
+      "fundingRef",
+      "computeProviderId",
+      "workerId",
+      "resourceId",
+      "acceptedPrice"
+    ],
+    "idempotency": "HZ-GCA-2 deterministic submit identity is passed through to canonical Compute submission"
+  },
+  "economics": {
+    "quoteFields": [
+      "quotedPrice",
+      "quoteAsset",
+      "maximumPrice"
+    ],
+    "acceptedFields": [
+      "acceptedPrice",
+      "fundingRef",
+      "acceptedMatchRef"
+    ],
+    "verificationFields": [
+      "resultCommitment",
+      "verificationRef",
+      "verificationVerdict"
+    ],
+    "settlementFields": [
+      "entitlementRef",
+      "settlementRef"
+    ],
+    "cancellationFields": [
+      "refundRef"
+    ],
+    "rules": [
+      "funding, accepted match, verification, entitlement, settlement and refund references remain distinct",
+      "adapter never fabricates PAID or REFUNDED state",
+      "accepted price must equal selected quoted price",
+      "Wallet authorization remains required for submit and cancel plans"
+    ]
+  },
+  "lifecycleMapping": {
+    "running": [
+      "CREATED",
+      "FUNDED",
+      "MATCHED",
+      "ACCEPTED",
+      "RUNNING",
+      "RESULT_COMMITTED",
+      "DISPUTED"
+    ],
+    "success": [
+      "VERIFIED",
+      "SETTLED"
+    ],
+    "cancelled": [
+      "CANCELLED"
+    ],
+    "failed": [
+      "FAILED",
+      "EXPIRED",
+      "REFUNDED"
+    ],
+    "successRequirements": [
+      "verificationVerdict=PASS",
+      "verificationRef",
+      "resultCommitment",
+      "valid provider-neutral output manifest"
+    ]
+  },
+  "output": {
+    "providerNeutralKinds": [
+      "MIX",
+      "STEM",
+      "LYRICS_TIMING",
+      "ARTWORK"
+    ],
+    "required": [
+      "MIX"
+    ],
+    "verificationRequired": true,
+    "providerSpecificPublicationSemantics": false
+  },
+  "cancellation": {
+    "authorizationRequired": true,
+    "confirmationRequired": true,
+    "refundRefMayBeObserved": true,
+    "refundRefDoesNotMeanPaid": true
+  },
+  "developmentAdapter": {
+    "nonProduction": true,
+    "deterministic": true,
+    "usesSameProviderInterface": true,
+    "usesSameGenerationJobManagerLifecycle": true,
+    "produces": [
+      "fundingRef",
+      "acceptedMatchRef",
+      "resultCommitment",
+      "verificationRef",
+      "entitlementRef",
+      "settlementRef",
+      "refundRef"
+    ],
+    "purpose": "repository/local end-to-end qualification only"
+  },
+  "authorityBoundaries": [
+    "worker/provider discovery is non-authoritative",
+    "reputation/SLA cannot bypass eligibility, capacity, price, Wallet authorization, verification or canonical state",
+    "Compute plan preparation is not transaction authorization",
+    "adapter does not sign or hold Wallet secrets",
+    "adapter does not create funding, settlement or refund authority",
+    "VERIFIED/SETTLED Compute state still does not imply Creative registration or publication",
+    "output manifest validation does not create Rights or consent authority",
+    "future third-party/first-party models plug into the same provider interface without changing publication semantics"
+  ],
+  "invariants": [
+    "HZGCA3-001 canonical chain ID and Compute graph must match before discovery or execution",
+    "HZGCA3-002 candidate discovery records must remain explicitly non-authoritative",
+    "HZGCA3-003 capacity <= 0 is ineligible",
+    "HZGCA3-004 price above the configured maximum is ineligible",
+    "HZGCA3-005 reputation/SLA are deterministic tie-break signals only",
+    "HZGCA3-006 selected provider/worker/resource identity is immutable after quote/acceptance",
+    "HZGCA3-007 accepted price equals selected quoted price",
+    "HZGCA3-008 submit requires a Wallet-authorized unsigned plan boundary",
+    "HZGCA3-009 cancellation requires a Wallet-authorized unsigned plan boundary",
+    "HZGCA3-010 repeated submit does not create a second canonical Compute job",
+    "HZGCA3-011 result success requires positive verification reference and commitment",
+    "HZGCA3-012 malformed or negatively verified result fails closed",
+    "HZGCA3-013 funding/match/verification/entitlement/settlement/refund identities remain distinct",
+    "HZGCA3-014 refund reference is not represented as refund payment",
+    "HZGCA3-015 canonical Compute failure/cancel states do not fabricate output success",
+    "HZGCA3-016 development adapter uses the same HZ-GCA-2 lifecycle/provider abstraction",
+    "HZGCA3-017 adapter creates no Creative/Rights/publication authority",
+    "HZGCA3-018 provider/model replacement does not change 420Hz publication semantics"
+  ],
+  "tests": {
+    "suite": "hz/generate/test/compute-adapter.test.js",
+    "directlyAffectedSharedChecks": [
+      "scripts/verify-420ai-compute-integration.py",
+      "scripts/verify-420ai-provider-runtime.py",
+      "services/420ai-provider npm test"
+    ],
+    "requiredCoverage": [
+      "capacity and price selection",
+      "non-authoritative reputation/SLA tie breaking",
+      "non-authoritative discovery enforcement",
+      "end-to-end HZ-GCA-2 lifecycle on deterministic development Compute adapter",
+      "Wallet authorization boundary",
+      "missing authorization fail-closed",
+      "idempotent canonical submit",
+      "assignment/price drift fail-closed",
+      "positive verification requirement",
+      "authorized cancellation/refund observation",
+      "wrong chain/graph fail-closed",
+      "distinct funding/match/verification/settlement references"
+    ]
+  },
+  "limitations": [
+    "no live ComputeMarket deployment is claimed",
+    "development adapter is not production provider evidence",
+    "no new Solidity contract or shared Compute protocol behavior is introduced",
+    "no production Vault funding/settlement/refund transaction is claimed",
+    "testnet/live qualification remains deferred"
+  ],
+  "exitCriteria": [
+    "420AI/Compute-backed provider adapter exists",
+    "capacity-aware provider selection exists",
+    "quote/accepted-price/funding/match state is bound and checked",
+    "submit/retry/cancel remains idempotent and Wallet-authorized",
+    "result commitment and positive verification gate application success",
+    "settlement/refund observations remain distinct and non-fabricated",
+    "reputation/SLA remain non-authoritative",
+    "deterministic development adapter completes end-to-end HZ-GCA-2 lifecycle",
+    "future provider/model implementations can use the same abstraction",
+    "exact-head Level-1 qualification passes with no required skipped/cancelled checks"
+  ],
+  "nextCanonicalStep": "HZ-GCA-4 — Provenance, consent and AI rights metadata",
+  "qualificationWorkflow": "420Hz GCA Qualification / HZ-GCA Level 1"
+}

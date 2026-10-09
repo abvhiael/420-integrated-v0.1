@@ -1,0 +1,84 @@
+{
+  "schema": "420hz-gca-level2-milestone-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.20",
+  "title": "HZ-GCA-1 Level-2 milestone qualification",
+  "qualificationLevel": 2,
+  "milestone": true,
+  "reconciledMainSha": "0993ff5b5b3b213a0768dbde90e4734df5ab4cc0",
+  "reconciliationCommit": "2c9e626dea96706391536a4950245575c4b40f32",
+  "accumulatedRange": [
+    "HZ-GCA-1.1",
+    "HZ-GCA-1.2",
+    "HZ-GCA-1.3",
+    "HZ-GCA-1.4",
+    "HZ-GCA-1.5",
+    "HZ-GCA-1.6",
+    "HZ-GCA-1.7",
+    "HZ-GCA-1.8",
+    "HZ-GCA-1.9",
+    "HZ-GCA-1.10",
+    "HZ-GCA-1.11",
+    "HZ-GCA-1.12",
+    "HZ-GCA-1.13",
+    "HZ-GCA-1.14",
+    "HZ-GCA-1.15",
+    "HZ-GCA-1.16",
+    "HZ-GCA-1.17",
+    "HZ-GCA-1.18",
+    "HZ-GCA-1.19"
+  ],
+  "currentMainIntegration": {
+    "materialOverlap": [
+      "Compute SDK",
+      "Compute API",
+      "Compute Indexer",
+      "ReeferReview RR-11 current-main state"
+    ],
+    "reason": "CMP-7 materially overlaps the AI/Compute/Indexer boundaries consumed by HZ-GCA-1. RR-11 subsequently advanced main in unrelated ReeferReview paths; the milestone branch was reconciled to current main while preserving current-main ReeferReview state and the qualified HZ-GCA/CMP integration surface.",
+    "disposition": "RECONCILED_BEFORE_LEVEL2"
+  },
+  "retainedSuite": [
+    "all HZ-GCA-1.1 through HZ-GCA-1.19 targeted verifiers",
+    "420Hz web verifier",
+    "420AI Compute integration verifier",
+    "420AI provider runtime verifier",
+    "Compute SDK retained test suite",
+    "Compute API retained test suite",
+    "Compute Indexer retained test suite",
+    "HZ-GCA-1.20 milestone integration verifier"
+  ],
+  "requiredIntegrationAssertions": [
+    "authority ledger has one owner per canonical domain and zero unresolved duplication",
+    "Generate lifecycle, disclosure, provenance, rights/consent, privacy, storage and economics remain mutually consistent",
+    "Community source relations remain distinct from Charts derived ranking and Awards product voting/results",
+    "RAW_PLAY never becomes QUALIFIED_PLAY by implication and AwardVote never becomes Chart/Civic vote",
+    "Wallet-only voting never claims unique-human identity; unique-human mode remains minimum-disclosure and replay-safe",
+    "moderation remains application scoped and Arbitration remains optional/explicit with bounded remedies",
+    "mutating API operations remain actor/domain/resource/idempotency bound and derived reads remain non-authoritative",
+    "timeouts/retries/restarts reconcile canonical source authority before duplicate spend/publication/vote/moderation/remedy effects",
+    "private/unlisted data cannot widen through Search/Indexer/Analytics/Notifications or recovery",
+    "reconciled CMP-7 SDK/API/Indexer surfaces preserve unsigned Wallet authorization and authoritative:false projections"
+  ],
+  "forbiddenLevel3Work": [
+    "canonical full Solidity inventory",
+    "Genesis/address-authority full qualification",
+    "420 Integrated/global qualification",
+    "Geth/global fault/soak qualification",
+    "unrelated app audits",
+    "production deployment/config closeout"
+  ],
+  "completionCriteria": [
+    "exact-head Level-2 workflow passes with no required skips/cancellations",
+    "all retained HZ-GCA verifiers pass",
+    "420Hz web verifier passes",
+    "420AI/Compute targeted compatibility verifiers pass",
+    "Compute SDK/API/Indexer retained suites pass",
+    "milestone integration verifier passes",
+    "zero unresolved authority duplication/critical architecture contradiction",
+    "durable Level-2 evidence records exact implementation SHA and next canonical step"
+  ],
+  "nextCanonicalStep": "HZ-GCA-2 — Generation job and provider abstraction",
+  "qualificationWorkflow": "420Hz GCA Qualification / HZ-GCA Level 2"
+}

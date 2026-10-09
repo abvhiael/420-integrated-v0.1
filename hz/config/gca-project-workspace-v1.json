@@ -1,0 +1,197 @@
+{
+  "schema": "420hz-gca-project-workspace-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-5",
+  "title": "Project workspace, versions, stems and storage",
+  "qualificationLevel": 1,
+  "milestoneRequired": false,
+  "baseMainSha": "6a3c611a3c0629c9bbae1e67f992d98ba1787550",
+  "implementationRoot": "hz/generate",
+  "dependencies": {
+    "priorStep": "HZ-GCA-4",
+    "storageRetentionPolicy": "hz/config/gca-storage-retention-v1.json",
+    "generationProviderAbstraction": "hz/config/gca-generation-provider-abstraction-v1.json",
+    "provenancePolicy": "hz/config/gca-provenance-consent-rights-v1.json",
+    "canonicalExternalStorageAuthority": "420ResourceProtocol/420Store remains authoritative for its own agreements/proofs/object references"
+  },
+  "project": {
+    "visibility": "PRIVATE",
+    "indexable": false,
+    "statuses": [
+      "ACTIVE",
+      "ARCHIVED",
+      "DELETED"
+    ],
+    "ownerMutationRequired": true,
+    "versionTree": {
+      "immutableNodes": true,
+      "parentLinked": true,
+      "headPointer": true,
+      "kinds": [
+        "PROJECT_CREATED",
+        "DRAFT_UPDATED",
+        "GENERATION_RECORDED",
+        "TAKE_FAVORITED",
+        "TAKE_UNFAVORITED",
+        "TAKE_SELECTED",
+        "PROJECT_ARCHIVED",
+        "PROJECT_RESTORED"
+      ]
+    },
+    "drafts": [
+      "lyricsDraft",
+      "metadataDraft",
+      "title"
+    ]
+  },
+  "takes": {
+    "statuses": [
+      "COMPLETE",
+      "INCOMPLETE",
+      "FAILED",
+      "CANCELLED"
+    ],
+    "favoriteCompleteOnly": true,
+    "selectableCompleteMixOnly": true,
+    "incompleteOrFailedSelectable": false,
+    "artifactKinds": [
+      "MIX",
+      "STEM",
+      "LYRICS_TIMING",
+      "ARTWORK"
+    ]
+  },
+  "storage": {
+    "applicationStore": "DeterministicPrivateStorage420",
+    "class": "HZ_PRIVATE_PRIMARY",
+    "integrity": "sha256",
+    "storageRefOpaque": true,
+    "providerSourceRefsPreserved": true,
+    "antiResurrectionTombstone": true,
+    "publicIndexing": false,
+    "externalStorageAuthorityNotClaimed": true
+  },
+  "retention": {
+    "failedCancelledDays": 7,
+    "unsavedTakeDays": 30,
+    "activeProjectInactivityDays": 365,
+    "archiveGraceDays": 30,
+    "exportHours": 24,
+    "rules": [
+      "failed/cancelled takes expire within seven days absent an explicit later save/hold policy",
+      "unsaved generated takes expire within thirty days",
+      "active private projects transition after 365 days inactivity",
+      "archive is a private thirty-day grace tier, not indefinite storage",
+      "export packages expire within twenty-four hours",
+      "deletion/tombstone wins over stale replay/restore"
+    ]
+  },
+  "quota": {
+    "configurableNotProtocolConstant": true,
+    "dimensions": [
+      "account private+archive bytes",
+      "project private+archive bytes",
+      "object count observation"
+    ],
+    "preflightBeforeWrite": true,
+    "failClosed": true,
+    "neverSilentlyDeletesSavedOrPublishedWork": true,
+    "separates": [
+      "privatePrimaryBytes",
+      "archivedBytes",
+      "publishedExternalReferenceBytes"
+    ]
+  },
+  "export": {
+    "authenticated": true,
+    "expiresHours": 24,
+    "includes": [
+      "project summary",
+      "version history",
+      "take manifests",
+      "storage integrity references"
+    ],
+    "secretsIncluded": false,
+    "publicVisibilityCreated": false
+  },
+  "deletion": {
+    "servingRevokedImmediately": true,
+    "indexingRevokedImmediately": true,
+    "tombstoneRequired": true,
+    "privateStorageRefsDeleted": true,
+    "exportRefsDeleted": true,
+    "immutableCanonicalHistoryNotClaimedDeleted": true
+  },
+  "authorityBoundaries": [
+    "420Hz owns only application-controlled private workspace state and its local deletion ledger",
+    "420ResourceProtocol/420Store retain authority over external storage agreements, proofs, placement and settlement",
+    "a project StorageObjectRef/integrity hash does not prove 420Hz can physically erase every external replica",
+    "private project deletion does not erase immutable Creative/chain provenance history",
+    "project favorites/selections are workspace preferences only and create no rights, payment, Charts or Awards authority",
+    "private projects, drafts, failed outputs and archives are never public Search/Indexer inputs",
+    "quota policy is deployment/application configuration and not a protocol constant",
+    "archive/export does not create public visibility or new rights"
+  ],
+  "invariants": [
+    "HZGCA5-001 every project is PRIVATE and non-indexable by default",
+    "HZGCA5-002 only the project owner may read or mutate workspace state",
+    "HZGCA5-003 project history is an immutable parent-linked version tree",
+    "HZGCA5-004 complete generation outputs preserve provider-neutral MIX/STEM/LYRICS_TIMING/ARTWORK manifests",
+    "HZGCA5-005 selected takes must be COMPLETE and contain a MIX",
+    "HZGCA5-006 failed/incomplete outputs cannot become selected or favorite takes",
+    "HZGCA5-007 stored private artifacts carry SHA-256 integrity commitments checked on read",
+    "HZGCA5-008 quota is preflighted before writes and quota exhaustion fails closed",
+    "HZGCA5-009 quota exhaustion never silently deletes saved work",
+    "HZGCA5-010 failed/cancelled take retention is bounded to seven days",
+    "HZGCA5-011 active project inactivity transitions after 365 days without becoming public",
+    "HZGCA5-012 archive grace is private and bounded to thirty days",
+    "HZGCA5-013 export packages are authenticated and expire within twenty-four hours",
+    "HZGCA5-014 explicit deletion revokes serving/indexing and tombstones application-controlled storage",
+    "HZGCA5-015 tombstones prevent replay/restore resurrection under the same storage identity",
+    "HZGCA5-016 storage integrity tampering fails closed",
+    "HZGCA5-017 private workspace state never feeds a public indexing projection",
+    "HZGCA5-018 workspace/storage behavior creates no new storage-provider, rights, payment, governance, Charts or Awards authority"
+  ],
+  "tests": {
+    "suite": "hz/generate/test/project-workspace.test.js",
+    "retainedVerifiers": [
+      "scripts/verify-420hz-gca-1-8.py",
+      "scripts/verify-420hz-gca-4.py"
+    ],
+    "requiredCoverage": [
+      "privacy and owner isolation",
+      "version-tree parent linkage",
+      "artifact manifests and integrity checks",
+      "favorite/selected take constraints",
+      "failed/incomplete output safety",
+      "atomic quota preflight",
+      "archive/restore/expiry",
+      "export authorization and expiry",
+      "delete/indexing revocation",
+      "storage tamper failure",
+      "retention sweep",
+      "anti-resurrection tombstone"
+    ]
+  },
+  "limitations": [
+    "deterministic private storage is repository/local qualification infrastructure, not a production 420Store deployment",
+    "no live Resource/Storage agreement, proof, placement or settlement is claimed",
+    "no live Search/Indexer endpoint is claimed; privacy is qualified by absence of public projection output",
+    "physical replica/backup deletion outside application control is not claimed"
+  ],
+  "exitCriteria": [
+    "private generation projects exist",
+    "generation history/version tree is deterministic",
+    "favorite and selected takes are implemented",
+    "stem/artifact manifests are retained",
+    "lyrics and metadata drafts are versioned",
+    "delete/archive/export flows exist",
+    "storage integrity hashes are verified",
+    "quota/resource accounting exists and fails closed",
+    "drafts are never public-indexed",
+    "incomplete/failed output sets are safe and non-selectable",
+    "storage/retention behavior matches HZ-GCA-1.8 boundaries",
+    "deterministic project state and storage integration tests pass on the exact implementation SHA"
+  ],
+  "nextCanonicalStep": "HZ-GCA-6 — 420Hz Generate Studio UX"
+}

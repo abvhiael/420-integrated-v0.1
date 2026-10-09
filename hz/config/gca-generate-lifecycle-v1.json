@@ -1,0 +1,305 @@
+{
+  "schema": "420hz-gca-generate-lifecycle-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.3",
+  "title": "Define Generate lifecycle",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "lifecycleOwner": "420Hz product/application state",
+  "states": [
+    {
+      "state": "DRAFT",
+      "kind": "pre_submission",
+      "terminal": false,
+      "meaning": "local/private GenerationIntent exists; no canonical AI or Compute state is implied"
+    },
+    {
+      "state": "QUOTED",
+      "kind": "pre_submission",
+      "terminal": false,
+      "meaning": "intent has an accepted application quote snapshot/reference; quote is not payment or compute settlement authority"
+    },
+    {
+      "state": "SUBMITTED",
+      "kind": "execution_observation",
+      "terminal": false,
+      "meaning": "a canonical 420AI job reference has been created/bound; underlying AI/Compute lifecycle remains authoritative"
+    },
+    {
+      "state": "RUNNING",
+      "kind": "execution_observation",
+      "terminal": false,
+      "meaning": "420Hz observes canonical AI execution as RUNNING; application state cannot force or skip the owning protocol transition"
+    },
+    {
+      "state": "SUCCEEDED",
+      "kind": "execution_observation",
+      "terminal": false,
+      "meaning": "a canonical AI result commitment/manifest has reached VERIFIED or SETTLED and an output is available for review"
+    },
+    {
+      "state": "FAILED",
+      "kind": "execution_exception",
+      "terminal": true,
+      "meaning": "the submitted generation ended in objective canonical failure/expiry or an unrecoverable bounded application failure; retry creates a new intent/run rather than rewriting history"
+    },
+    {
+      "state": "CANCELLED",
+      "kind": "execution_exception",
+      "terminal": true,
+      "meaning": "the creator cancelled before submission or canonical cancellation was confirmed after submission; cancellation cannot erase earned/verified external entitlements"
+    },
+    {
+      "state": "REVIEWED",
+      "kind": "human_gate",
+      "terminal": false,
+      "meaning": "creator explicitly selected/reviewed a successful output and accepted the review/provenance handoff; does not imply Creative registration"
+    },
+    {
+      "state": "REGISTERED",
+      "kind": "creative_handoff",
+      "terminal": false,
+      "meaning": "canonical Creative Work/Recording references exist from successful registration; does not imply Recording activation or publication"
+    },
+    {
+      "state": "PUBLISHED",
+      "kind": "creative_handoff",
+      "terminal": true,
+      "meaning": "canonical Creative publication prerequisites are satisfied and the Recording/release is published; later withdrawal/restriction is canonical Creative state, not lifecycle-history rewrite"
+    }
+  ],
+  "normalPath": [
+    "DRAFT",
+    "QUOTED",
+    "SUBMITTED",
+    "RUNNING",
+    "SUCCEEDED",
+    "REVIEWED",
+    "REGISTERED",
+    "PUBLISHED"
+  ],
+  "exceptionalPath": [
+    "FAILED",
+    "CANCELLED"
+  ],
+  "allowedTransitions": [
+    {
+      "from": "DRAFT",
+      "to": "QUOTED",
+      "guard": "valid intent commitment and current quote/reference for the same intent; no canonical AI job required"
+    },
+    {
+      "from": "DRAFT",
+      "to": "CANCELLED",
+      "guard": "creator explicitly abandons the local intent before submission"
+    },
+    {
+      "from": "QUOTED",
+      "to": "DRAFT",
+      "guard": "quote is rejected/expired/materially changed; return to editable draft without creating canonical AI state"
+    },
+    {
+      "from": "QUOTED",
+      "to": "SUBMITTED",
+      "guard": "creator explicitly submits; exact canonical 420AI job ID is created/bound to this intent; stale quote cannot be used"
+    },
+    {
+      "from": "QUOTED",
+      "to": "CANCELLED",
+      "guard": "creator abandons before canonical submission"
+    },
+    {
+      "from": "SUBMITTED",
+      "to": "RUNNING",
+      "guard": "observed canonical AI job state is RUNNING; CREATED/FUNDED/MATCHED/ACCEPTED remain represented as SUBMITTED"
+    },
+    {
+      "from": "SUBMITTED",
+      "to": "FAILED",
+      "guard": "canonical AI job enters FAILED or EXPIRED, or bounded submission orchestration irrecoverably fails with no runnable job"
+    },
+    {
+      "from": "SUBMITTED",
+      "to": "CANCELLED",
+      "guard": "canonical AI cancellation is confirmed for an already-submitted job; local UI intent alone is insufficient"
+    },
+    {
+      "from": "RUNNING",
+      "to": "SUCCEEDED",
+      "guard": "canonical AI job is VERIFIED or SETTLED with nonzero result and result-manifest commitments; RESULT_COMMITTED alone is insufficient"
+    },
+    {
+      "from": "RUNNING",
+      "to": "FAILED",
+      "guard": "canonical AI job reaches FAILED or EXPIRED or verification fails under the owning policy"
+    },
+    {
+      "from": "RUNNING",
+      "to": "CANCELLED",
+      "guard": "owning AI/Compute policy confirms legal cancellation; cancellation cannot erase verified receipts or earned external entitlement"
+    },
+    {
+      "from": "SUCCEEDED",
+      "to": "REVIEWED",
+      "guard": "creator explicitly selects an output and confirms review/provenance/disclosure handoff; automatic promotion is forbidden"
+    },
+    {
+      "from": "REVIEWED",
+      "to": "REGISTERED",
+      "guard": "canonical Creative registration returns valid native WorkId and RecordingId references; Work must satisfy Creative prerequisites; existence of PublishIntent alone is insufficient"
+    },
+    {
+      "from": "REGISTERED",
+      "to": "PUBLISHED",
+      "guard": "canonical Recording is ACTIVE and the required release/catalog/media publication succeeds; product state cannot activate Creative state itself"
+    }
+  ],
+  "forbiddenTransitions": [
+    "DRAFT->SUBMITTED",
+    "DRAFT->RUNNING",
+    "DRAFT->SUCCEEDED",
+    "QUOTED->RUNNING",
+    "QUOTED->SUCCEEDED",
+    "SUBMITTED->SUCCEEDED",
+    "FAILED->RUNNING",
+    "FAILED->SUCCEEDED",
+    "FAILED->REVIEWED",
+    "CANCELLED->SUBMITTED",
+    "CANCELLED->RUNNING",
+    "CANCELLED->REVIEWED",
+    "SUCCEEDED->REGISTERED",
+    "SUCCEEDED->PUBLISHED",
+    "REVIEWED->PUBLISHED",
+    "PUBLISHED->REGISTERED",
+    "PUBLISHED->REVIEWED"
+  ],
+  "aiStatusMapping": {
+    "NONE": "invalid/unbound; cannot support SUBMITTED or later",
+    "CREATED": "SUBMITTED",
+    "FUNDED": "SUBMITTED",
+    "MATCHED": "SUBMITTED",
+    "ACCEPTED": "SUBMITTED",
+    "RUNNING": "RUNNING",
+    "RESULT_COMMITTED": "RUNNING",
+    "VERIFIED": "SUCCEEDED",
+    "SETTLED": "SUCCEEDED",
+    "CANCELLED": "CANCELLED",
+    "EXPIRED": "FAILED",
+    "FAILED": "FAILED",
+    "DISPUTED": "SUBMITTED_OR_RUNNING_HOLD",
+    "REFUNDED": "FAILED_OR_CANCELLED_PRESERVE_CAUSE"
+  },
+  "aiMappingRules": [
+    "420Hz may only advance from SUBMITTED to RUNNING on observed canonical AI RUNNING",
+    "RESULT_COMMITTED is not success; verification must complete before SUCCEEDED",
+    "VERIFIED is sufficient for SUCCEEDED even if economic settlement is still pending",
+    "SETTLED remains SUCCEEDED and does not create Creative registration",
+    "DISPUTED never advances product success; preserve the pre-dispute phase and block new forward transitions until resolution",
+    "REFUNDED does not independently define product cause; preserve FAILED or CANCELLED according to the preceding canonical reason"
+  ],
+  "objectStateBindings": [
+    {
+      "object": "GenerationIntent",
+      "field": "status",
+      "owns": "product lifecycle state DRAFT..PUBLISHED",
+      "rule": "one-way according to allowedTransitions; FAILED/CANCELLED/PUBLISHED are historical terminal states"
+    },
+    {
+      "object": "GenerationRunBinding",
+      "field": "latestObservedAIStatus",
+      "owns": "non-authoritative cache only",
+      "rule": "must match observed AIJobRef state; cannot drive canonical AI mutation"
+    },
+    {
+      "object": "GenerationOutput",
+      "field": "reviewState",
+      "owns": "review selection state only",
+      "rule": "cannot mark lifecycle REVIEWED without explicit creator review"
+    },
+    {
+      "object": "PublishIntent",
+      "field": "state",
+      "owns": "handoff orchestration only",
+      "rule": "cannot fabricate REGISTERED/PUBLISHED without canonical Creative references/status"
+    }
+  ],
+  "retryPolicy": {
+    "failed": "retry MUST create a new GenerationIntent or a new immutable run binding with explicit supersession/reference; never rewrite FAILED history into RUNNING",
+    "cancelled": "resubmission MUST create a new intent/run; CANCELLED history remains terminal",
+    "quoteRefresh": "QUOTED may return to DRAFT and be re-quoted before canonical submission",
+    "duplicateSubmission": "same client request/idempotency key must resolve to the same canonical AI job or fail closed; never create parallel payable jobs silently"
+  },
+  "partialOutputPolicy": {
+    "rule": "partial artifacts may be retained as GenerationOutput/GenerationArtifact only when the owning AI/Compute result policy explicitly marks them admissible",
+    "lifecycle": "partial output does not automatically mean SUCCEEDED; SUCCEEDED still requires canonical VERIFIED or SETTLED result under the accepted policy",
+    "publication": "partial output cannot bypass REVIEWED, rights/provenance, REGISTERED or PUBLISHED gates"
+  },
+  "cancellationPolicy": {
+    "preSubmission": "DRAFT/QUOTED may be locally cancelled by the creator",
+    "postSubmission": "SUBMITTED/RUNNING require owning AI/Compute cancellation confirmation",
+    "economics": "420Hz cancellation never directly refunds/transfers funds and cannot erase already-valid external earned entitlements",
+    "replay": "cancellation is idempotent and terminal for that intent/run"
+  },
+  "publicationGates": {
+    "reviewed": [
+      "lifecycle is SUCCEEDED",
+      "creator explicitly selects output",
+      "provenance/disclosure review commitment exists"
+    ],
+    "registered": [
+      "lifecycle is REVIEWED",
+      "canonical Creative WorkId exists",
+      "canonical Creative RecordingId exists",
+      "returned IDs preserve native Creative identity"
+    ],
+    "published": [
+      "lifecycle is REGISTERED",
+      "canonical Recording status is ACTIVE",
+      "required media/release/catalog publication has succeeded",
+      "publication does not rewrite canonical rights/provenance history"
+    ]
+  },
+  "invariants": [
+    "HZGCA-LIFE-001 lifecycle state is 420Hz product state and never overrides canonical 420AI, ComputeMarket or Creative state",
+    "HZGCA-LIFE-002 normal forward path is DRAFT->QUOTED->SUBMITTED->RUNNING->SUCCEEDED->REVIEWED->REGISTERED->PUBLISHED",
+    "HZGCA-LIFE-003 FAILED and CANCELLED are terminal for that intent/run; retry uses a new intent/run or explicit supersession",
+    "HZGCA-LIFE-004 quote state never proves funding, payment finality, compute reservation or provider entitlement",
+    "HZGCA-LIFE-005 SUBMITTED requires an exact canonical 420AI job reference",
+    "HZGCA-LIFE-006 canonical AI CREATED/FUNDED/MATCHED/ACCEPTED map to SUBMITTED and cannot be presented as RUNNING",
+    "HZGCA-LIFE-007 RESULT_COMMITTED is not success; SUCCEEDED requires canonical VERIFIED or SETTLED result commitments",
+    "HZGCA-LIFE-008 DISPUTED blocks forward success progression until canonical resolution and cannot be converted to success by UI state",
+    "HZGCA-LIFE-009 cancellation after submission requires canonical owning-protocol confirmation and cannot erase external earned entitlements",
+    "HZGCA-LIFE-010 SUCCEEDED never implies rights ownership, Creative registration or publication",
+    "HZGCA-LIFE-011 REVIEWED requires explicit creator action and cannot be automatic",
+    "HZGCA-LIFE-012 REGISTERED requires native canonical WorkId and RecordingId references returned by Creative registration",
+    "HZGCA-LIFE-013 PUBLISHED requires canonical Recording ACTIVE plus successful release/catalog/media publication",
+    "HZGCA-LIFE-014 later Creative withdrawal/restriction does not rewrite historical PUBLISHED lifecycle; current availability is derived from Creative state",
+    "HZGCA-LIFE-015 private draft/output lifecycle events are not public Indexer/Search inputs until publication policy explicitly permits them",
+    "HZGCA-LIFE-016 duplicate/replayed submissions cannot create additional canonical payable jobs",
+    "HZGCA-LIFE-017 partial outputs cannot bypass verification, review, provenance, rights, registration or publication gates",
+    "HZGCA-LIFE-018 no lifecycle transition itself signs a wallet action, transfers funds, grants rights, resolves disputes or mutates another protocol"
+  ],
+  "exitCriteria": [
+    "canonical product lifecycle states and normal/exception paths are explicit",
+    "every legal transition has a guard and forbidden shortcut transitions are enumerated",
+    "420AI status mapping is explicit and does not duplicate AI authority",
+    "retry, cancellation, dispute and partial-output semantics are explicit",
+    "review, registration and publication gates are separated",
+    "machine verifier enforces lifecycle vocabulary, transitions and invariants",
+    "no contract ABI, deployment, provider or testnet claim is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.4 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "hz/config/gca-product-boundaries-v1.json",
+    "hz/config/gca-object-model-v1.json",
+    "contracts/src/ai/AIJobManager.sol",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/compute-market/CMP-0.7-AUTHORIZED-JOB-LIFECYCLE.md",
+    "contracts/src/creative/music/WorkRegistry420.sol",
+    "contracts/src/creative/music/RecordingRegistry420.sol"
+  ]
+}

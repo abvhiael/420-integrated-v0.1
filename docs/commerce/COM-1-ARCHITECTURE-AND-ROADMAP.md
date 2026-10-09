@@ -41,7 +41,7 @@
 **COM-1 Repository and architecture**
 - COM-1.1 inventory existing Market, Pay, Swap, Wallet, Registry and commerce-related paths and live readiness; record actual interfaces, not just documentation.
 - COM-1.2 freeze dependency and authority matrix; resolve Commerce brand/client versus canonical service ID. **IMPLEMENTED** in `docs/commerce/COM-1.2-DEPENDENCY-AND-AUTHORITY-MAP.md`; branded noncanonical application, no new Genesis service ID.
-- COM-1.3 inspect Market/Pay contract ABIs, map missing capability proposals and immutable V1 transitions.
+- COM-1.3 inspect Market/Pay contract ABIs, map missing capability proposals and immutable V1 transitions. **SOURCE ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.3-SMART-CONTRACT-ARCHITECTURE.md`; exact-SHA Level 1 verification pending.
 - COM-1.4 define off-chain schemas, event ingestion, tenant isolation and chain reorg reconciliation.
 - COM-1.5 specify exact Wallet/Pay/Market/Swap/Identity/Registry adapters and fail-closed behaviour.
 - COM-1.6 design merchant onboarding, storefront templates, product management, cart and checkout UX.
@@ -82,4 +82,4 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** COM-1.3 inspect the exact Market/Pay ABI contracts, settle the adapter/settlement reporter integration design, and preserve the frozen Market V1 semantics. COM-1.8 is the only COM-1 phase closeout.
+**Next action:** COM-1.4 data storage and event-indexing architecture after COM-1.3 Level 1 verification; COM-1.5 owns final adapter design. COM-1.8 is the only COM-1 phase closeout.

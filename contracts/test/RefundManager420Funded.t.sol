@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/pay/RefundManager420.sol";
+import "../src/pay/PaymentRegistry420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmRefundFunding420 {
@@ -152,5 +153,35 @@ contract RefundManager420NativeFundedTest {
         m.executeFundedRefund(keccak256("native-refund-id"),PAYMENT,address(0),PAYER,1 ether,1 ether,bytes32(0));
         require(PAYER.balance==1 ether,"native payment not returned");
         require(address(m).balance==0 && m.refundedByPayment(PAYMENT)==1 ether,"native refund accounting");
+    }
+}
+
+contract RefundManager420RealRegistryIntegrationTest {
+    function testGovernedRegistryAuthorizationFundsAndTransfersExactlyOnce() public {
+        GenesisMockEnvironment420 env = new GenesisMockEnvironment420();
+        bytes32 cfg = keccak256("real-registry-funded-refund");
+        PaymentRegistry420 payments = new PaymentRegistry420(address(this),address(env.registry()),cfg);
+        RefundManager420 refunds = new RefundManager420(address(this),address(env.registry()),cfg);
+        RefundFundingTokenMock420 token = new RefundFundingTokenMock420();
+        env.registerResident(address(payments),payments.componentId());
+        env.registerResident(address(refunds),refunds.componentId());
+        env.setSettlementAsset(address(token),keccak256("INTEGRATION-ASSET"),true);
+        refunds.setPaymentRegistry(address(payments));
+        token.mint(address(this),100);
+        token.approve(address(refunds),100);
+        bytes32 invoice=keccak256("verified-merchant-invoice");
+        bytes32 paymentId=payments.createPayment(invoice,address(this),address(0xCAFE),address(token),100,address(token),100,bytes32(0),1);
+        payments.recordFinalized(paymentId,invoice,keccak256("receipt"),address(token),100,0);
+        payments.applyRefund(paymentId,60,false);
+        (, ,uint256 maximum,uint256 authorized,PaymentRegistry420.Status state) = payments.refundAccounting(paymentId);
+        require(maximum==100 && authorized==60 && state==PaymentRegistry420.Status.PARTIALLY_REFUNDED,"Pay authorization missing");
+        refunds.fundAuthorizedRefund(paymentId,address(token),60);
+        bytes32 refundId=keccak256("governed-real-refund");
+        refunds.executeFundedRefund(refundId,paymentId,address(token),address(this),60,100,keccak256("refund reason"));
+        require(refunds.fundedRefundExecuted(refundId),"payout proof absent");
+        require(refunds.refundedByPayment(paymentId)==60,"refund ledger mismatch");
+        require(token.balanceOf(address(this))==100 && token.balanceOf(address(refunds))==0,"actual recipient transfer missing");
+        (bool replay,)=address(refunds).call(abi.encodeWithSelector(refunds.executeFundedRefund.selector,refundId,paymentId,address(token),address(this),60,100,bytes32(0)));
+        require(!replay,"duplicate refund succeeded");
     }
 }

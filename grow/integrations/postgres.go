@@ -75,6 +75,12 @@ ON CONFLICT DO NOTHING`, event.TenantID, event.ID, event.FacilityID, event.ZoneI
 func (s SQLStore) Claim(ctx context.Context, tenant, worker string, now time.Time) (Delivery, error) {
 	var out Delivery
 	err := s.tx(ctx, tenant, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, `UPDATE grow_private.integration_outbox
+SET state='DEAD',claim_token='',lease_until=NULL
+WHERE tenant_id=$1::uuid AND state='IN_FLIGHT' AND attempts>=4
+AND lease_until<$2`, tenant, now); err != nil {
+			return err
+		}
 		return tx.QueryRowContext(ctx, `WITH picked AS(
  SELECT tenant_id,event_id FROM grow_private.integration_outbox
  WHERE tenant_id=$1::uuid AND ((state='QUEUED' AND next_attempt_at<=$3)

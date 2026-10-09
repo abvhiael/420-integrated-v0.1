@@ -20,8 +20,8 @@ type SQLAuthenticator struct {
 
 // Issue must be invoked exclusively after an external identity provider has
 // authenticated the subject. It never authenticates a username/password itself.
-func (a SQLAuthenticator) Issue(ctx context.Context, verifiedTenant, verifiedSubject, sessionID string, now time.Time) (*http.Cookie, error) {
-	if a.DB == nil || verifiedTenant == "" || verifiedSubject == "" || sessionID == "" {
+func (a SQLAuthenticator) Issue(ctx context.Context, verifiedTenant, verifiedSubject, sessionID string, now time.Time, certificateFingerprint []byte) (*http.Cookie, error) {
+	if a.DB == nil || verifiedTenant == "" || verifiedSubject == "" || sessionID == "" || len(certificateFingerprint)!=32 {
 		return nil, errors.New("verified identity required")
 	}
 	random := make([]byte, 32)
@@ -41,8 +41,8 @@ WHERE tenant_id=$1::uuid AND subject_id=$2 AND state='ACTIVE')`,verifiedTenant,v
 	if err != nil || !active { return nil, errors.New("inactive membership") }
 	expiry := now.UTC().Add(8*time.Hour)
 	_,err=tx.ExecContext(ctx,`INSERT INTO grow_private.dashboard_sessions
-(tenant_id,session_id,subject_id,token_hash,issued_at,expires_at)
-VALUES($1::uuid,$2::uuid,$3,$4,$5,$6)`,verifiedTenant,sessionID,verifiedSubject,hash[:],now.UTC(),expiry)
+(tenant_id,session_id,subject_id,token_hash,issued_at,expires_at,identity_fingerprint)
+VALUES($1::uuid,$2::uuid,$3,$4,$5,$6,$7)`,verifiedTenant,sessionID,verifiedSubject,hash[:],now.UTC(),expiry,certificateFingerprint)
 	if err != nil{return nil,err}
 	if err=tx.Commit();err!=nil{return nil,err}
 	return &http.Cookie{Name:CookieName,Value:verifiedTenant+"."+sessionID+"."+secret,
@@ -69,6 +69,8 @@ func (a SQLAuthenticator) Verify(r *http.Request)(Session,error){
 	err=tx.QueryRowContext(r.Context(),`SELECT s.tenant_id::text,s.subject_id,s.expires_at,m.role,m.facility_id::text,m.zone_id::text
 FROM grow_private.dashboard_sessions s
 JOIN grow_private.memberships m ON m.tenant_id=s.tenant_id AND m.subject_id=s.subject_id
+JOIN grow_private.dashboard_identities i ON i.tenant_id=s.tenant_id AND i.subject_id=s.subject_id
+ AND i.cert_fingerprint=s.identity_fingerprint AND i.enabled=true AND i.revoked_at IS NULL
 WHERE s.tenant_id=$1::uuid AND s.session_id=$2::uuid AND s.token_hash=$3
 AND s.revoked_at IS NULL AND s.expires_at>now() AND m.state='ACTIVE'`,
 		parts[0],parts[1],hash[:]).Scan(&s.TenantID,&s.SubjectID,&s.ExpiresAt,&role,&facility,&zone)

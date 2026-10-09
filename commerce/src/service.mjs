@@ -506,10 +506,70 @@ export class CommerceService {
     }
     return {items,partial:rows.length===50,refundAuthority:source.fundedRefund?'FINALIZED_REFUND_MANAGER':'UNBOUND_REFUND_MANAGER',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
+  async merchantNotificationPreferences(actor,storeId,request=null) {
+    const {merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    if(request!==null){
+      keys(request,['enabled']);
+      requireThat(typeof request.enabled==='boolean','invalid_notification_consent');
+      this.mutate(actor,storeId,'notification_preferences',storeId,()=>{
+        const prior=this.db.get('SELECT controller FROM commerce_notification_preferences WHERE store_id=?',storeId);
+        // A change of canonical merchant controller invalidates the old subscription.
+        if(prior&&prior.controller!==wallet(actor))this.db.run('DELETE FROM commerce_notification_feed WHERE store_id=?',storeId);
+        this.db.run('INSERT INTO commerce_notification_preferences(store_id,controller,enabled,updated_at) VALUES(?,?,?,?) ON CONFLICT(store_id) DO UPDATE SET controller=excluded.controller,enabled=excluded.enabled,updated_at=excluded.updated_at',storeId,wallet(actor),request.enabled?1:0,this.now());
+        if(!request.enabled)this.db.run('DELETE FROM commerce_notification_feed WHERE store_id=?',storeId);
+      });
+    }
+    const row=this.db.get('SELECT * FROM commerce_notification_preferences WHERE store_id=?',storeId);
+    return {enabled:!!(row&&row.controller===wallet(actor)&&row.enabled===1),channels:['in_app'],externalDelivery:'NOT_CONFIGURED',promotionalConsent:false,source:'420Market finalized shared Indexer events',authority:'NONCANONICAL_LOCAL_FEED'};
+  }
+  async merchantNotifications(actor,storeId,{limit=25,cursor=null}={}) {
+    const {merchant,source}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    integer(limit,1,100);
+    if(cursor!==null)objectID(cursor);
+    const setting=this.db.get('SELECT * FROM commerce_notification_preferences WHERE store_id=?',storeId);
+    if(!setting||setting.controller!==wallet(actor)||setting.enabled!==1){
+      return {enabled:false,items:[],nextCursor:null,delivery:'NOT_CONFIGURED',authoritative:false,provenance:{chainId:this.chainId,blockHash:source.blockHash,finalized:true}};
+    }
+    // Only finalized canonical events bound to this merchant's actual checkout orders.
+    // Rebuildable feed; a chain reorg or controller change cannot confer authority.
+    const attempts=this.db.all('SELECT a.order_id FROM checkout_attempts a JOIN cart_sessions c ON c.cart_id=a.cart_id WHERE c.store_id=?',storeId);
+    const allowed=new Set(attempts.map(x=>x.order_id));
+    const events=this.db.all("SELECT event_id,payload,block_hash,block_number,finality FROM event_inbox WHERE canonical=1 AND finality='finalized' AND topic LIKE '420Market.%' ORDER BY block_number,event_id LIMIT 5000");
+    const kinds=new Set(['OrderCreated','PaymentRecorded','FulfillmentRecorded','OrderCompleted','OrderCancelled','OrderDisputed','RefundRecorded']);
+    this.db.transaction(()=>{
+      // Previously visible evidence may be retracted or superseded; remove invalid rows.
+      this.db.run("DELETE FROM commerce_notification_feed WHERE store_id=? AND event_id NOT IN (SELECT event_id FROM event_inbox WHERE canonical=1 AND finality='finalized')",storeId);
+      for(const event of events){
+        const row=JSON.parse(event.payload);
+        if(!kinds.has(row.eventName)||!allowed.has(row.fields?.orderId))continue;
+        this.db.run('INSERT OR IGNORE INTO commerce_notification_feed(store_id,event_id,operation,created_at) VALUES(?,?,?,?)',storeId,event.event_id,row.eventName,this.now());
+      }
+    });
+    const candidates=this.db.all('SELECT f.*,e.payload,e.block_hash,e.block_number FROM commerce_notification_feed f JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND e.canonical=1 AND e.finality=\'finalized\' ORDER BY e.block_number DESC,f.event_id DESC LIMIT 5000',storeId);
+    const matching=cursor?candidates.filter(x=>x.event_id<cursor):candidates;
+    const page=matching.slice(0,limit);
+    const items=page.map(row=>{
+      const event=JSON.parse(row.payload);
+      return {id:row.event_id,orderId:event.fields.orderId,eventName:row.operation,read:row.read_at!==null,finality:'finalized',chainId:this.chainId,blockHash:row.block_hash,blockNumber:row.block_number,transactionHash:event.provenance.transactionHash,logIndex:event.provenance.logIndex,authoritative:false};
+    });
+    return {enabled:true,items,nextCursor:matching.length>limit?page.at(-1).event_id:null,delivery:'IN_APP_PRESENTATION_ONLY',authoritative:false,provenance:{chainId:this.chainId,blockHash:source.blockHash,finalized:true}};
+  }
+  async merchantNotificationRead(actor,storeId,eventId,request) {
+    keys(request,['read']);requireThat(typeof request.read==='boolean','invalid_read_state');
+    const {merchant}=await this.access(actor,storeId,'publish');
+    requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
+    objectID(eventId);
+    const row=this.db.get('SELECT f.event_id FROM commerce_notification_feed f JOIN commerce_notification_preferences p ON p.store_id=f.store_id JOIN event_inbox e ON e.event_id=f.event_id WHERE f.store_id=? AND f.event_id=? AND p.enabled=1 AND p.controller=? AND e.canonical=1 AND e.finality=\'finalized\'',storeId,eventId,wallet(actor));
+    requireThat(row,'notification_not_found',404);
+    this.mutate(actor,storeId,'notification_read',eventId,()=>this.db.run('UPDATE commerce_notification_feed SET read_at=? WHERE store_id=? AND event_id=?',request.read?this.now():null,storeId,eventId));
+    return {id:eventId,read:request.read,authoritative:false};
+  }
   async merchantIntegrations(actor,storeId) {
     const {store,merchant,source}=await this.access(actor,storeId,'publish');
     requireThat(wallet(merchant.controller)===wallet(actor),'forbidden',403);
-    return {merchantId:store.merchant_id,chainId:this.chainId,identity:{status:'NOT_VERIFIED',authority:'420Identity/420Verify'},names:{status:'NOT_VERIFIED',authority:'420Names'},notifications:{status:'NOT_CONFIGURED',authority:'420Notifications',sideEffects:false},search:{status:'LOCAL_PUBLIC_CATALOGUE',authority:'420Commerce projection; 420Search external integration unverified'},analytics:{status:'LOCAL_FINALIZED_PROJECTION',authority:'420Analytics external integration unverified'},provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {merchantId:store.merchant_id,chainId:this.chainId,identity:{status:'NOT_VERIFIED',authority:'420Identity/420Verify'},names:{status:'NOT_VERIFIED',authority:'420Names'},notifications:{status:'LOCAL_OPT_IN_FEED_ONLY',externalDelivery:'NOT_CONFIGURED',authority:'420Notifications',sideEffects:false},search:{status:'LOCAL_PUBLIC_CATALOGUE',authority:'420Commerce projection; 420Search external integration unverified'},analytics:{status:'LOCAL_FINALIZED_PROJECTION',authority:'420Analytics external integration unverified'},provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   async putDelivery(actor,attemptId,input) {
     keys(input,['address','contact']); text(input.address,2000); text(input.contact,200); actor=wallet(actor);

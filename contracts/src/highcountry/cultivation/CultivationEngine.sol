@@ -118,6 +118,14 @@ contract CultivationEngine {
         qualityBps = BPS - stressBps;
     }
 
+    function expressionForPlant(
+        uint64 plantId
+    ) external view returns (bytes32) {
+        CultivationState storage s = _states[plantId];
+        if (!s.exists || !s.expressionLocked) revert HCInvalidState();
+        return s.expressionHash;
+    }
+
     function getState(
         uint64 plantId
     ) external view returns (CultivationState memory) {

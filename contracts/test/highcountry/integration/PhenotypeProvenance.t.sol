@@ -26,6 +26,8 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         caps.registerProtocolComponent(ModuleIds.PHENOTYPE_REGISTRY, address(this));
         caps.registerProtocolComponent(ModuleIds.CULTIVATION_ENGINE, address(this));
         cultivation = new CultivationEngine(address(auth), address(plants));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_EMERGENCY, cultivation.EMERGENCY_BIND_SCOPE());
+        cultivation.bindEmergencyState(address(emergency));
         caps.registerProtocolComponent(ModuleIds.RULESET_REGISTRY, address(this));
         rulesets = new RulesetRegistry(address(auth));
         bytes32 hash = keccak256("r02.7:ruleset:version1");
@@ -47,6 +49,10 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         cultivation.bindRulesetRegistry(address(rulesets), address(router));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(random));
+        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_BIND_EMERGENCY, random.EMERGENCY_BIND_SCOPE());
+        random.bindEmergencyState(address(emergency));
+        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_BIND_EMERGENCY, breeding.EMERGENCY_BIND_SCOPE());
+        breeding.bindEmergencyState(address(emergency));
         phenotype = new PhenotypeRegistry(address(auth), address(genomes));
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE, phenotype.BIND_SCOPE());
         phenotype.bindProvenanceSources(address(plants), address(breeding), address(cultivation));

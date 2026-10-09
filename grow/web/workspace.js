@@ -95,6 +95,65 @@ export function boot(doc=globalThis.document,win=globalThis.window){
  function lock(text){
   generation++;api=null;selected="";nav.replaceChildren();root.replaceChildren();heading.textContent="Private workspace";refresh.disabled=true;report(text);
  }
+
+ function forms(section){
+  if(!api)return;
+  const allowed=api.session.actions.filter(v=>v.startsWith(section+"."));
+  if(!allowed.length)return;
+  const group=doc.createElement("section");group.className="workspace-forms";
+  const title=doc.createElement("h3");title.textContent="Authorized workflows";group.append(title);
+  for(const action of allowed){
+   const fields=ACTION_FIELDS[action];if(!fields)continue;
+   const form=doc.createElement("form");form.className="workspace-action";
+   const heading=doc.createElement("h4");heading.textContent=action.split(".")[1].replaceAll("_"," ");form.append(heading);
+   for(const field of fields){
+    const id="grow-"+action.replace(".","-")+"-"+field;
+    const wrapper=doc.createElement("label");wrapper.textContent=field.replace(/([A-Z])/g," $1");
+    let input;const values=SELECT_VALUES[action+"."+field];
+    if(values){
+     input=doc.createElement("select");
+     const placeholder=doc.createElement("option");placeholder.value="";placeholder.textContent="Select…";input.append(placeholder);
+     for(const value of values){const opt=doc.createElement("option");opt.value=value;opt.textContent=value;input.append(opt);}
+    }else{
+     input=doc.createElement("input");
+     input.type=field==="amount"||field==="revision"?"number":"text";
+     if(field==="amount"){input.min="0";input.step="any";}
+     if(field==="revision"){input.min="1";input.step="1";}
+     input.maxLength=field==="reason"?1000:160;
+    }
+    input.id=id;input.name=field;
+    input.required=!(field==="reason"||field==="parentId"||field==="facilityId"&&action==="facilities.create");
+    wrapper.append(input);form.append(wrapper);
+   }
+   const button=doc.createElement("button");button.type="submit";
+   button.textContent=action.endsWith(".export")?"Generate internal CSV":"Submit "+action.split(".")[1];
+   form.append(button);
+   form.addEventListener("submit",async event=>{
+    event.preventDefault();button.disabled=true;
+    const data={operation:action.split(".")[1],requestId:win.crypto?.randomUUID?.()};
+    for(const field of fields){
+     const value=form.elements.namedItem(field)?.value??"";
+     if(value!=="")data[field]=field==="amount"||field==="revision"?Number(value):value;
+    }
+    try{
+     if(!data.requestId)throw Error("Secure request identifier unavailable");
+     const result=await api.post("/v1/private/action/"+section,data);
+     if(result.csv){
+      const blob=new Blob([result.csv],{type:"text/csv;charset=utf-8"});
+      const href=URL.createObjectURL(blob);
+      const link=doc.createElement("a");link.href=href;link.download="grow-inventory-internal.csv";link.click();
+      URL.revokeObjectURL(href);
+     }
+     report("Action accepted. Reloading authorized records…");
+     await display(section);
+    }catch{report("Action denied or unavailable. No mutation was confirmed.");}
+    finally{button.disabled=false;}
+   });
+   group.append(form);
+  }
+  root.append(group);
+ }
+
  async function display(section){
   const current=++generation;selected=section;
   root.replaceChildren();heading.textContent=section[0].toUpperCase()+section.slice(1);report("Loading authorized records…");
@@ -102,7 +161,7 @@ export function boot(doc=globalThis.document,win=globalThis.window){
    if(!api||!api.session.sections.includes(section))throw Error("Section not authorized");
    const records=validatePage(await api.request("/v1/private/dashboard/"+encodeURIComponent(section)),section,api.session);
    if(current!==generation)return;
-   if(!records.length){report("No records available for this section.");return;}
+   if(!records.length){report("No records available for this section.");forms(section);return;}
    for(const record of records){
     const card=doc.createElement("article");card.className="workspace-card";
     const h=doc.createElement("h3");h.textContent=record.title;
@@ -111,7 +170,8 @@ export function boot(doc=globalThis.document,win=globalThis.window){
     if(record.state){const small=doc.createElement("small");small.textContent=record.state;card.append(small);}
     root.append(card);
    }
-   report(records.length+" authorized records. Read-only dashboard; no equipment commands are available.");
+   forms(section);
+   report(records.length+" authorized records. No autonomous equipment commands are available.");
   }catch{
    if(current!==generation)return;
    lock("Private data unavailable or session expired. Sign in again through the authorized cultivation service.");

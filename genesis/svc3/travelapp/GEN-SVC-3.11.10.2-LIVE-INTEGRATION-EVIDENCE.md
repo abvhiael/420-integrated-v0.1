@@ -30,7 +30,7 @@ This record is an app-scoped evidence and deployment gate, not a production appr
 | Reputation moderation | Hidden/withdrawn review and revoked interaction proof removed; upstream outage fail-closed | MISSING |
 | Operator evidence | Staging URLs, exact SHA, logs without secrets, disabled-feature matrix and run IDs | MISSING |
 
-Connected Render workspace `reefer review` was inspected on 2026-10-09: one unrelated `reeferreview-rss-preview` service, **no PostgreSQL instances** and no Travel service were returned. Do not mutate that unrelated service or claim it is Travel infrastructure.
+Connected Render workspace `reefer review` was inspected on 2026-10-09. A **new dedicated free PostgreSQL 16 database** was provisioned for Travel staging: instance `dpg-db4j78k9v7es738ajh8g-a`, region Oregon, name `420travel-staging-postgres`. Render reported status `creating` and expiration 2026-11-08. This is not evidence of migrations, shared-instance access, backups, least-privilege roles or a live Travel deployment. The unrelated `reeferreview-rss-preview` service was not modified.
 
 ## Enabled-feature matrix on default Go entrypoint
 
@@ -40,6 +40,12 @@ Connected Render workspace `reefer review` was inspected on 2026-10-09: one unre
 | Private Trips, shares, business claims and reviews | DISABLED |
 | Review/claim integrations in injected test compositions | DEVELOPMENT ONLY; NOT LIVE ACCEPTANCE |
 | Booking, payment, escrow, DOOBR transaction | DISABLED — Genesis exclusion |
+
+## Database migration procedure (not executed)
+
+From the trusted migration environment with `psql` installed, set `TRAVEL_MIGRATION_DATABASE_URL` to the dedicated **migration-role** PostgreSQL connection URL using an external secret store. Run `python3 scripts/travel-postgres-migrate.py plan`, then `apply`, then `verify`. The command prints only filenames/digests and redacts command failure details. It requires noninteractive PostgreSQL credentials. Do not use the Travel runtime role for DDL. The three migration SQL files run their own transactions; the checksum ledger write follows each script and retries only when digests agree. If a migration transaction succeeds but the checksum write fails, investigate before retrying. The script does not establish full schema-drift protection against manual DB edits, and it is **not** evidence that migration 001/002/003 has been executed here.
+
+A free Render database is temporary and not suitable for qualifying durable production backups, high availability, or guaranteed retention. Obtain separate database credentials and capture two independent process IDs before multi-instance tests.
 
 ## Required Level 1 / Level 2 evidence
 

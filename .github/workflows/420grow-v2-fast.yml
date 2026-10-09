@@ -11,6 +11,7 @@ on:
       - 'grow/equipment/**'
       - 'grow/cultivation/**'
       - 'grow/harvest/**'
+      - 'grow/inventory/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -21,6 +22,7 @@ on:
       - 'grow/security/**'
       - 'grow/storage/**'
       - 'grow/harvest/**'
+      - 'grow/inventory/**'
       - 'grow/facility/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
@@ -135,3 +137,13 @@ jobs:
           gofmt -d grow/harvest/*.go
           test -z "$(gofmt -l grow/harvest/*.go)"
           psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/harvest/qualify.sql
+      - name: GROW-V2-10 inventory traceability exports and cumulative Level 2 integration
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/security ./grow/facility ./grow/plants ./grow/telemetry ./grow/equipment ./grow/cultivation ./grow/harvest ./grow/inventory
+          go test -race -count=1 ./grow/security ./grow/facility ./grow/plants ./grow/telemetry ./grow/equipment ./grow/cultivation ./grow/harvest ./grow/inventory
+          go vet ./grow/inventory
+          gofmt -d grow/inventory/*.go
+          test -z "$(gofmt -l grow/inventory/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/inventory/qualify.sql

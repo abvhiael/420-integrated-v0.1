@@ -54,6 +54,15 @@ func (f *fakeStore) Complete(_ context.Context, _, _, worker string, success boo
 	return nil
 }
 
+type fakeWorker struct{}
+
+func (fakeWorker) VerifyWorker(_ context.Context, tenant, worker string) error {
+	if tenant != "a" || worker != "worker" {
+		return ErrDenied
+	}
+	return nil
+}
+
 type fakeNotifier struct {
 	err error
 }
@@ -73,7 +82,7 @@ func TestConsentReplayAndDelivery(t *testing.T) {
 	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
 	ctx := context.Background()
 	db := &fakeStore{}
-	svc := Service{Store: db, Notifier: fakeNotifier{}}
+	svc := Service{Store: db, Notifier: fakeNotifier{}, Worker: fakeWorker{}}
 	e := Event{TenantID: "a", FacilityID: "f", ZoneID: "z", ID: "id",
 		Kind: "HARVEST_RECORDED", SourceID: "h", CreatedAt: now}
 	if err := svc.Queue(ctx, owner("a", security.Owner), e, now); !errors.Is(err, ErrDenied) {
@@ -104,7 +113,7 @@ func TestConsentReplayAndDelivery(t *testing.T) {
 }
 func TestAuthorizationAndInvalidEvents(t *testing.T) {
 	now := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
-	svc := Service{Store: &fakeStore{enabled: true}, Notifier: fakeNotifier{}}
+	svc := Service{Store: &fakeStore{enabled: true}, Notifier: fakeNotifier{}, Worker: fakeWorker{}}
 	e := Event{TenantID: "a", FacilityID: "f", ZoneID: "z", ID: "id",
 		Kind: "AI_REVIEW_READY", SourceID: "review", CreatedAt: now}
 	ctx := context.Background()
@@ -122,6 +131,9 @@ func TestAuthorizationAndInvalidEvents(t *testing.T) {
 	}
 	if err := (Service{Store: svc.Store}).Dispatch(ctx, "a", "worker", now); !errors.Is(err, ErrDenied) {
 		t.Fatalf("missing provider succeeded: %v", err)
+	}
+	if err := svc.Dispatch(ctx, "b", "worker", now); !errors.Is(err, ErrDenied) {
+		t.Fatalf("unauthorized worker tenant scope accepted: %v", err)
 	}
 	if err := svc.SetOptIn(ctx, owner("a", security.Reviewer), "f", "z", true); !errors.Is(err, ErrDenied) {
 		t.Fatalf("reader toggled opt-in: %v", err)

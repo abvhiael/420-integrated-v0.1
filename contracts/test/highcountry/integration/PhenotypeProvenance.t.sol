@@ -93,7 +93,7 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
 
     function testUnrelatedGenomeFabricatedTraitsAndBreedingDenied() public {
         _environment();
-        bytes32 expression = cultivation.expressPhenotype(1, GENOME, keccak256("ruleset"));
+        bytes32 expression = cultivation.expressPhenotype(1, GENOME, approvedRulesetId);
         bytes32 id = keccak256("phenotype");
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, id);
         _reject(

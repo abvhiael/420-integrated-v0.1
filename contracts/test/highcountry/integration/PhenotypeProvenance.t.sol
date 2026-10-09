@@ -29,8 +29,12 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         approvedRulesetId = rulesets.deriveRulesetId(hash);
         _grant(address(this), ModuleIds.RULESET_REGISTRY, ActionIds.RULESET_REGISTER, approvedRulesetId);
         rulesets.registerRuleset(hash);
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_BIND_RULESETS,
-            cultivation.RULESET_BIND_SCOPE());
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_BIND_RULESETS,
+            cultivation.RULESET_BIND_SCOPE()
+        );
         cultivation.bindRulesetRegistry(address(rulesets));
         RandomnessCoordinator random = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(random));
@@ -99,28 +103,39 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
             HCInvalidState.selector
         );
     }
+
     function testR027RulesetIdentityLifecycleAndNoReroll() public {
         _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, keccak256("r027"));
         CultivationEngine.EnvironmentSnapshot memory env =
             CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6500, 5000);
         cultivation.updateEnvironment(1, env);
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, approvedRulesetId)),
+            HCInvalidState.selector
+        );
         _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE, bytes32(uint256(1)));
         vm.warp(block.timestamp + 17 days);
         plants.syncOfflineGrowth(1);
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, keccak256("unregistered:ruleset"))), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, keccak256("unregistered:ruleset"))),
+            HCInvalidState.selector
+        );
         require(!cultivation.getState(1).expressionLocked, "failed sealing locked state");
         bytes32 expression = cultivation.expressPhenotype(1, GENOME, approvedRulesetId);
         require(expression != bytes32(0), "no expression");
         require(cultivation.sealedRulesetId(1) == approvedRulesetId, "ruleset identity missing");
-        require(cultivation.sealedRulesetContentHash(1) == keccak256("r02.7:ruleset:version1"),
-            "ruleset content version missing");
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
-        _reject(address(cultivation), abi.encodeCall(cultivation.updateEnvironment,
-            (1, env)), HCInvalidState.selector);
+        require(
+            cultivation.sealedRulesetContentHash(1) == keccak256("r02.7:ruleset:version1"),
+            "ruleset content version missing"
+        );
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, approvedRulesetId)),
+            HCInvalidState.selector
+        );
+        _reject(address(cultivation), abi.encodeCall(cultivation.updateEnvironment, (1, env)), HCInvalidState.selector);
     }
 
     function testR027TerminatedPlantCannotMutateOrSeal() public {
@@ -131,17 +146,21 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         vm.warp(block.timestamp + 17 days);
         plants.syncOfflineGrowth(1);
         plants.advanceStage(1, PlantRegistry.PlantStage.TERMINATED);
-        _reject(address(cultivation), abi.encodeCall(cultivation.updateEnvironment,
-            (1, env)), HCInvalidState.selector);
-        _reject(address(cultivation), abi.encodeCall(cultivation.expressPhenotype,
-            (1, GENOME, approvedRulesetId)), HCInvalidState.selector);
+        _reject(address(cultivation), abi.encodeCall(cultivation.updateEnvironment, (1, env)), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.expressPhenotype, (1, GENOME, approvedRulesetId)),
+            HCInvalidState.selector
+        );
         require(!cultivation.getState(1).expressionLocked, "terminated plant sealed");
     }
 
     function testR027CannotChangeCanonicalRulesetBinding() public {
         RulesetRegistry candidate = new RulesetRegistry(address(auth));
-        _reject(address(cultivation), abi.encodeCall(cultivation.bindRulesetRegistry,
-            (address(candidate))), HCInvalidState.selector);
+        _reject(
+            address(cultivation),
+            abi.encodeCall(cultivation.bindRulesetRegistry, (address(candidate))),
+            HCInvalidState.selector
+        );
     }
-
 }

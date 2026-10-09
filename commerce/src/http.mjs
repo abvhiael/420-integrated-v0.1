@@ -4,7 +4,7 @@ import { Fault, requireThat, integer, keys } from './security.mjs';
 export function commerceServer(service, auth, { origin, now = Date.now, rateLimit = 120 } = {}) {
   const rates=new Map(); let active=0;
   const server=createServer(async (req,res)=>{
-    const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; frame-ancestors 'none'",'Referrer-Policy':'no-referrer'};
+    const headers={'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; frame-ancestors 'none'",'X-Frame-Options':'DENY','Permissions-Policy':'camera=(), microphone=(), geolocation=(), payment=()','Referrer-Policy':'no-referrer',...(origin.startsWith('https:')?{'Strict-Transport-Security':'max-age=31536000'}:{})};
     let counted=false;
     const send=(status,value)=>{if(!res.writableEnded){res.writeHead(status,headers);res.end(JSON.stringify({schema:'420-commerce-api-v1',...value}));}};
     try {
@@ -34,7 +34,8 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
       }
       let input=null;
       if(raw.length&&!path.endsWith('/media')){requireThat(req.headers['content-type']==='application/json','content_type');try{input=JSON.parse(raw);}catch{throw new Fault('invalid_json');}}
-      const pagination=()=>{keys(query,['query','offset','limit','storeId','category']); const result={query:query.query??''}; if(query.offset!==undefined)result.offset=integer(Number(query.offset),0,100000);if(query.limit!==undefined)result.limit=integer(Number(query.limit),1,100);if(query.storeId)result.storeId=query.storeId;if(query.category)result.category=query.category;return result;};
+      const pageInteger=(value,min,max)=>{requireThat(typeof value==='string'&&/^(0|[1-9][0-9]*)$/.test(value),'invalid_integer');return integer(Number(value),min,max);};
+      const pagination=()=>{keys(query,['query','offset','limit','storeId','category']); const result={query:query.query??''}; if(query.offset!==undefined)result.offset=integer(Number(query.offset),0,100000);if(query.limit!==undefined)result.limit=pageInteger(query.limit,1,100);if(query.storeId)result.storeId=query.storeId;if(query.category)result.category=query.category;return result;};
       let data;
       if(path==='/v1/auth/challenge'&&method==='POST'){keys(input,['wallet']);data=auth.challenge(input.wallet);}
       else if(path==='/v1/health'&&method==='GET'){keys(query,[]);data=service.projection.health();}
@@ -56,10 +57,10 @@ export function commerceServer(service, auth, { origin, now = Date.now, rateLimi
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/disputes$/.test(path)&&method==='GET')data=await service.merchantDisputes(actor,storeId);
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications\/preferences$/.test(path)&&method==='GET'){keys(query,[]);data=await service.merchantNotificationPreferences(actor,storeId);}
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications\/preferences$/.test(path)&&method==='POST')data=await service.merchantNotificationPreferences(actor,storeId,input??{});
-        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications$/.test(path)&&method==='GET'){keys(query,['limit','cursor']);data=await service.merchantNotifications(actor,storeId,{limit:query.limit===undefined?25:integer(Number(query.limit),1,100),cursor:query.cursor??null});}
+        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications$/.test(path)&&method==='GET'){keys(query,['limit','cursor']);data=await service.merchantNotifications(actor,storeId,{limit:query.limit===undefined?25:pageInteger(query.limit,1,100),cursor:query.cursor??null});}
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/notifications\/[a-f0-9]{64}\/read$/.test(path)&&method==='POST')data=await service.merchantNotificationRead(actor,storeId,parts[7],input??{});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/refunds$/.test(path)&&method==='GET')data=await service.merchantRefunds(actor,storeId);
-        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/analytics$/.test(path)&&method==='GET')data=await service.merchantAnalytics(actor,storeId,{offset:query.offset===undefined?0:integer(Number(query.offset),0,Number.MAX_SAFE_INTEGER),limit:query.limit===undefined?100:integer(Number(query.limit),1,100)});
+        else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/analytics$/.test(path)&&method==='GET')data=await service.merchantAnalytics(actor,storeId,{offset:query.offset===undefined?0:pageInteger(query.offset,0,Number.MAX_SAFE_INTEGER),limit:query.limit===undefined?100:pageInteger(query.limit,1,100)});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/integrations$/.test(path)&&method==='GET')data=await service.merchantIntegrations(actor,storeId);
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders\/[a-f0-9]{64}\/arbitration\/prepare$/.test(path)&&method==='POST')data=await service.merchantArbitrationPrepare(actor,storeId,parts[7],input??{});
         else if(/^\/v1\/merchant\/storefronts\/[a-f0-9]{64}\/operations\/orders\/[a-f0-9]{64}\/arbitration\/bind$/.test(path)&&method==='POST')data=await service.merchantArbitrationBind(actor,storeId,parts[7],input??{});

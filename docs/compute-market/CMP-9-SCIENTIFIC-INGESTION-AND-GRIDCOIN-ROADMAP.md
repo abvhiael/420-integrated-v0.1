@@ -87,7 +87,9 @@ With real provider-approved participant identities and real non-private contribu
 
 Exit: one retained Level 2 exact-release testnet evidence bundle including live transaction/receipt hashes, deployment and source identities, operator sign-off and independent review.
 
-### S-10 — Operational soak, CMP-9 and CMP-10 handoff
+### S-10 — Operational soak, CMP-9 and CMP-10 handoff — REPOSITORY LEVEL 1 PASS; OPERATIONAL NO-GO
+
+[S-10 offline qualification evidence](CMP-S10-QUALIFICATION-EVIDENCE.md) and [operational testnet handoff](CMP-S10-OPERATIONS-HANDOFF.md) enumerate the blocked gates. No live soak, provider payout, recovery drill or CMP-9.13/9.14/9.15/CMP-10 closeout is asserted. Testnet operating decision remains **NO-GO**.
 
 Prove sustained ingestion, rate-limit resilience, restart/backfill correctness, source correction, indexing reorg handling, key/attester rotation, recovery, capped-budget exhaustion, emergency pause and rollback. Feed evidence into canonical CMP-9.13 scientific demonstration, CMP-9.14 soak, CMP-9.15 CMP-0 operational closeout, and CMP-10 security campaigns. These are prerequisites, not silently completed by this annex.
 

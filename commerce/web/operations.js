@@ -36,7 +36,16 @@ async function load(){
      const request=kind==='refund'?{amount:inputs.amount.value,reasonHash:inputs.reason.value}:{disputeHash:inputs.reason.value};
      const result=await sdk.merchantRemedy(id,item.attempt_id,kind,request);
      add(li,'p',result.authority+': '+result.status+' · No transaction executed.');
-     if(kind==='dispute'&&result.proposal?.intent)add(li,'p','Canonical Market wallet intent prepared; requires the seller Wallet to submit the on-chain transaction. No Arbitration case or ruling has been created.');
+     if(kind==='dispute'&&result.proposal?.intent){
+       const submit=add(li,'button','Submit canonical Market dispute via Wallet');submit.type='button';
+       submit.addEventListener('click',()=>action(async()=>{
+         if(!session||!sdk||id!==store)throw Error('Wallet or merchant store changed');
+         const receipt=await session.sendMarketDispute(result.proposal);
+         add(li,'p','Market transaction broadcast: '+receipt.transactionHash+'. Await finalized Market proof; not an Arbitration case or ruling.');
+         await load();
+       }));
+       add(li,'p','Review the dispute evidence commitment, then explicitly submit through your verified Wallet. No transaction executed yet.');
+     }
     }));
    }
   }

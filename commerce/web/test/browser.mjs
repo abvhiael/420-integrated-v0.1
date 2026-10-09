@@ -85,7 +85,10 @@ try{
   assert.equal(await shopper.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
   assert.deepEqual((await new AxeBuilder({page:shopper}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations,[]);
   await shopper.close();pass('COM-5 anonymous marketplace search, cart, axe and 320px browser acceptance');
-  const operations=await context.newPage();operations.on('pageerror',e=>errors.push(e.message));await operations.goto(origin+'/operations.html');
+  const operations=await context.newPage();operations.on('pageerror',e=>errors.push(e.message));
+  await operations.exposeFunction('walletRequest',async call=>page.evaluate(async c=>window.walletRequest(c),call).catch(async()=>{throw Error('wallet fixture unavailable')}));
+  await operations.addInitScript(({now})=>{Date.now=()=>now;const listeners={};window.ethereum={request:call=>window.walletRequest(call),on:(e,f)=>listeners[e]=f,removeListener:e=>delete listeners[e]};},{now:f.now()});
+  await operations.goto(origin+'/operations.html');
   assert.match(await operations.locator('h1').textContent(),/Merchant operations/);
   await operations.locator('#connect').click();
   await operations.waitForFunction(()=>document.querySelector('#status').textContent.includes('Verified Wallet connected')||!document.querySelector('#error').hidden);

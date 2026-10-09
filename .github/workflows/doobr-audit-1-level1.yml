@@ -1,0 +1,39 @@
+name: DOOBR AUDIT-1 Level 1
+on:
+  push:
+    branches:
+      - audit/doobr-audit-1-inventory-20261009
+    paths:
+      - '.github/workflows/doobr-audit-1-level1.yml'
+      - 'docs/audits/doobr/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-qualification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: GEN-SVC-3 canonical validator
+        run: python3 scripts/validate-gen-svc-3.py
+      - name: Go from go.mod
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: GEN-SVC-3 scoped tests
+        run: go test ./genesis/svc3/... ./cmd/420travel/...
+      - name: GEN-SVC-3 scoped vet
+        run: go vet ./genesis/svc3/... ./cmd/420travel/...
+      - name: GEN-SVC-3 scoped build
+        run: go build -o /tmp/420travel ./cmd/420travel
+      - name: Assert exact commit
+        run: test "$(git rev-parse HEAD)" = "$GITHUB_SHA"

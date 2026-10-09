@@ -168,7 +168,7 @@ contract PhenotypeProvenanceTest is PublicPlantCapacityFixture {
         RulesetRegistry candidate = new RulesetRegistry(address(auth));
         _reject(
             address(cultivation),
-            abi.encodeCall(cultivation.bindRulesetRegistry, (address(candidate))),
+            abi.encodeCall(cultivation.bindRulesetRegistry, (address(candidate), address(candidate))),
             HCInvalidState.selector
         );
     }

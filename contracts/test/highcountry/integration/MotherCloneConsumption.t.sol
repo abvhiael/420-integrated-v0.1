@@ -17,10 +17,10 @@ contract MotherCloneConsumptionTest is PublicPlantCapacityFixture {
         uint64 id,
         address owner,
         uint32 capacity
-    ) internal {
+    ) internal returns (bytes32 cuttingGrant) {
         _grant(address(this), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(id)));
         mothers.registerMother(id, GENOME, owner, capacity, keccak256("mother"));
-        _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(id)));
+        cuttingGrant = _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(id)));
     }
 
     function _clone(
@@ -56,10 +56,8 @@ contract MotherCloneConsumptionTest is PublicPlantCapacityFixture {
             HCInvalidState.selector
         );
         require(!clones.exists(20) && mothers.remainingCuttings(10) == 2, "owner rollback");
-        _mother(11, address(this), 1);
+        bytes32 revoke = _mother(11, address(this), 1);
         // A revoked consumption capability must revert the complete clone issuance.
-        bytes32 revoke =
-            _grant(address(clones), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(11)));
         caps.revokeGrant(revoke);
         _reject(
             address(clones),

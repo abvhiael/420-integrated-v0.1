@@ -12,7 +12,7 @@ Supporting sources: `../../README.md`, `HC-PA-PROGRESSIVE-ACCESS.md`, `HC-GAMING
 
 High Country launches as a browser-first cannabis cultivation and genetics game with a complete social economy. Smaller cultivation and economy builds are development milestones; they do not replace this launch scope. No audited requirement is deferred by this decision.
 
-The core loop is obtain seeds or eligible clones → cultivate → harvest → inventory/products → use, manufacture or trade → reinvest and progress. Launch includes genetics inspection, mothers/cuttings, breeding, cultivation capacity and inputs, offline growth, harvest quality and provenance, equipment manufacturing and lifecycle, internal BUDS economy, skills/research/discovery/missions, markets, leases/licenses/rights, organizations/cooperatives and their governance, seasons/competitions and the Global 420 Cup. Rules, parameters, content and rewards must be specified in R01.6 before implementation acceptance.
+The core loop is obtain seeds or eligible clones → cultivate → harvest → inventory/products → use, manufacture or trade → reinvest and progress. Launch includes genetics inspection, mothers/cuttings, breeding, cultivation capacity and inputs, offline growth, harvest quality and provenance, equipment manufacturing and lifecycle, internal BUDS economy, skills/research/discovery/missions, markets, leases/licenses/rights, organizations/cooperatives and their governance, seasons/competitions and the Global 420 Cup. The adopted R01.6 baseline fixes harvest, grades, internal currency, ordinary market and base exhibition rules. Each later module must provide its detailed versioned content, recipes, prices, rewards and acceptance vectors under the retained R04 assignment before implementation acceptance; none is waived or numerically approved by the baseline.
 
 Launch also requires the actual browser UI, onboarding, reliable persistence, authenticated shared services, SDK/indexing, deployment tooling, security remediation, documentation, live testnet acceptance and production operations. Access-policy simulations cannot substitute for browser/service/contract end-to-end journeys.
 
@@ -106,9 +106,9 @@ The audit's current status column is a historical implementation assessment, not
 | HC-AUD-064 Upgrade/migration execution | PARTIAL | HC-1 module lifecycle; R01.5 / R04.14 / R07 | Launch required |
 | HC-AUD-065 Custody/allowance/bridge/oracle prices | NOT APPLICABLE | R01.5 / R04.5 / R04.8 / R08 | Launch security review required; individual custody/bridge/oracle paths conditional on approved mechanics |
 
-## Remaining R01 decisions
+## Accumulated R01 specification records
 
-R01.2 freezes authority/component/service boundaries; R01.3 reconciles enums/units/access states; R01.4 specifies both migration flows; R01.5 defines privileges, randomness, emergencies, account provenance, custody and upgrades; R01.6 specifies gameplay parameters, BUDS/settlement semantics, optional perks and competition rules. R01.7 performs the accumulated Level 2 specification milestone review. R01.1 does not close those steps or mark R01 complete.
+R01.2 freezes authority/component/service boundaries; R01.3 reconciles enums/units/access states; R01.4 specifies both migration flows; R01.5 defines privileges, randomness, emergencies, account provenance, custody and upgrades; R01.6 specifies gameplay parameters, BUDS/settlement semantics, optional perks and competition rules. R01.7 performs the accumulated Level 2 specification milestone review. R01.1 alone does not close those steps. See the R01.7 milestone review for their accumulated qualification and remaining module/deployment prerequisites.
 
 ## R01.1 Level 1 verification
 

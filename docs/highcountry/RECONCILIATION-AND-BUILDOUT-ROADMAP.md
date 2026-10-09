@@ -22,10 +22,11 @@ Dependencies: none. Category: specification, product/governance decisions, docum
 | R01.4 | Two migration boundaries and trusted source issuance policy | Specify guest object manifest approvals versus shared target-consumed save claim; define eligible canonicalization and anti-cheat |
 | R01.5 | Deployment/upgrade/emergency/operator trust policy | Decide direct redeployment/rebinding strategy, routine selector catalogue, entropy provider trust, ownership-transfer powers, spending/reward custody |
 | R01.6 | HC-7 gameplay spec and later phase rules | Yield/grade/resources/equipment/economy/competition parameters and failure states must be reproducible; named constants are not specifications |
+| R01.7 | R01 milestone qualification | Review accumulated documents against contracts, interfaces, tests and audit matrix; no unexplained contradictions or unmapped requirements; exact specification commit and durable Level 2 evidence |
 
 Exit: canonical documents agree with the implemented boundaries and clearly identify planned features. Ambiguous product mechanics are resolved before their code phases.
 
-R01.6 baseline specification is COMPLETE: the owner adopted the five HC-7/economy rules on 2026-10-09. `GAMEPLAY-SPECIFICATION.md` fixes these rules and retains later-module catalogue/implementation prerequisites. This is specification completion, not gameplay implementation. R01.7 Level 2 milestone qualification remains unexecuted.
+R01.6 baseline specification is COMPLETE: the owner adopted the five HC-7/economy rules on 2026-10-09. `GAMEPLAY-SPECIFICATION.md` fixes these rules and retains later-module catalogue/implementation prerequisites. This is specification completion, not gameplay implementation. R01.7 is qualified through the exact-head Level 2 record in `qualification/R01.7-level2.json`; specification review and retained foundation integration do not qualify the full game.
 
 R01.5 trust specification is `DEPLOYMENT-AND-TRUST.md`; no new grants or deployed readiness are claimed.
 
@@ -180,4 +181,4 @@ Exit: PRODUCTION READY only when selected release requirements and operations pa
 
 All ten whole-application readiness flags remain **NO**: code, builds, contracts, tests, documentation, integration, security, testnet, Genesis and production. Implemented foundations and targeted passing tests can be qualified separately without claiming missing systems.
 
-**Next actionable work is R01 plus R02 foundation reconciliation, followed by the existing HC-7 harvest/product phase.** Live testnet is not a prerequisite for writing these specifications, repairing local integration or building the remaining game; it is a later deployment-evidence gate.
+**Next canonical step after R01.7 is R02.1 — Qualify five audit fixes and production CapabilityRegistry component/grant wiring, followed by remaining R02 and the existing HC-7 phase.** Live testnet is not a prerequisite for writing these specifications, repairing local integration or building the remaining game; it is a later deployment-evidence gate.

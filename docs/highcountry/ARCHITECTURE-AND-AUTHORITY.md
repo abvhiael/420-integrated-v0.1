@@ -37,7 +37,7 @@ Status: normative architecture specification for the approved full social econom
 
 ## Two markets and two competition boundaries
 
-The existing `ProgressiveGamingTypes.Capability.MARKETPLACE` and HC-PA ECOSYSTEM_PARTICIPANT gate mean **canonical ecosystem asset trading**. The R01.1 wallet-free social economy additionally requires an **ordinary service market** for internal game assets/BUDS. These are separate authority/settlement domains; the ordinary market cannot transfer canonical ownership, fabricate tokens or convert BUDS into $420. API names and UI labels must distinguish them; detailed accounting/fees/conversion eligibility are R01.6, with no conversion assumed.
+The existing `ProgressiveGamingTypes.Capability.MARKETPLACE` and HC-PA ECOSYSTEM_PARTICIPANT gate mean **canonical ecosystem asset trading**. The R01.1 wallet-free social economy additionally requires an **ordinary service market** for internal game assets/BUDS. These are separate authority/settlement domains; the ordinary market cannot transfer canonical ownership, fabricate tokens or convert BUDS into $420. API names and UI labels must distinguish them; R01.6 fixes integer internal BUDS without conversion and zero-fee full-fill ordinary trading; detailed ledger/settlement implementation remains R04.5/R04.8.
 
 Base events and service competitive results are wallet-free for authenticated players. Optional entitlement events and canonical championship provenance have separate explicit eligibility/issuance boundaries. Wallet entitlement cannot alter protected yield, capacity, genetics quality, equipment stats, BUDS generation, ordinary progression or scoring. Canonical result recording does not independently prove fair gameplay; service evidence/anti-cheat and authorized issuer policy are required.
 
@@ -87,4 +87,4 @@ Local save failure leaves a recoverable last-known save and visible error. Regis
 4. Wallet-free core and social play are preserved: market/competition separation and failure boundaries.
 5. Saves are distinct from canonical assets/provenance: no client promotion or raw-save chain storage.
 
-R01.2 closes specification boundaries only. Production implementation gaps remain R02–R10. R01.3 — Types and units is next; R01.4 migration, R01.5 trust/deployment and R01.6 mechanics remain open. Level 2 is R01.7; Level 3 is accumulated app-phase closeout.
+R01.2 closes specification boundaries only. Production implementation gaps remain R02–R10. The R01.3–R01.6 records now specify types, migration, trust/deployment policy and adopted mechanics; their accumulated review is R01.7. Level 2 is R01.7; Level 3 is accumulated app-phase closeout.

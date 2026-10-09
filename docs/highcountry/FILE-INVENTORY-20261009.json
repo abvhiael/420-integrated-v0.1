@@ -4,6 +4,22 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
+      "path": "docs/highcountry/R01-MILESTONE-REVIEW.md",
+      "sha256": "7fef605fdfdf29924c7c827904d774bd7e246049fe96c6a04e11009a7ad09a17",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/verify-r01.py",
+      "sha256": "890da9a9f84d645d0c62f75bcbce354420bf72482f836dfa75a99e67a0c4c21a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
       "path": "clients/highcountry-access-v1/package.json",
       "sha256": "bccf87b28f6b89fa87c7ea5b63cded3b5f83f525da2ef5178bf28622fa44a907",
       "classification": "COMPLETE",
@@ -1138,7 +1154,7 @@
     },
     {
       "path": "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
-      "sha256": "3d11cc103b95dd35a10a0f595304ee074c152049c2d49f5b12b8299663f3bf60",
+      "sha256": "2d18ae67be0f54fc343513a99b54ea1aaffa9d950b2efe84dd7f76c805ef6600",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1154,7 +1170,7 @@
     },
     {
       "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
-      "sha256": "2a61aa81117332f37910c0c4092b0380cfd75df03d1541ba233a6881d3fe50a1",
+      "sha256": "984f84218340b033f1e38a224dc265cfce3f296012de6a368ddb1f07773912c6",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1242,7 +1258,7 @@
     },
     {
       "path": "docs/highcountry/README.md",
-      "sha256": "8a46c9c849a38cbd960cbdd0f1dbda0b1488435907534b82fe586d96fd8e998d",
+      "sha256": "d05dd381afb23a72d612a297695b8389b432b390bf2477946802d7900458609b",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1250,7 +1266,7 @@
     },
     {
       "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
-      "sha256": "6f86840d42129f2154aba614427d8938d776364d5d2cb22177e5b63459ae50dd",
+      "sha256": "2678bcc87dc738d5524d3b5efee27fed4a06689474a8377d4cb42a4409c54f5d",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1258,7 +1274,7 @@
     },
     {
       "path": "docs/highcountry/RELEASE-SCOPE.md",
-      "sha256": "191101e06773f8709d1f7ff4acceafdf67b758e7d419721f65599e3e136468e7",
+      "sha256": "1d3799652f3e10644bbc553bf3e6049593843e5d317e5d0d8c2d0d6e2304ed7f",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1274,7 +1290,7 @@
     },
     {
       "path": "docs/highcountry/TYPES-AND-UNITS.md",
-      "sha256": "37dc070dd6ac4aff512a03d61e29d8b8e3bd4ad4c60a0d6d2d58c3fad41d372d",
+      "sha256": "0938bde0928a9f2b441d631a4f7b4897e4a4da78f59ea308fce677924a19cbd4",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1402,7 +1418,7 @@
     },
     {
       "path": "docs/highcountry/qualification/R01.6-level1.json",
-      "sha256": "fa8ee99ef364695613686768e12e85eda70a88a96821efef2dcacd60c86a08b4",
+      "sha256": "797b23959c93e3641d76aa686ee451c85a0c04c640db5efce481a13ba700fcaf",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

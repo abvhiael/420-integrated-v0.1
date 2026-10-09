@@ -22,3 +22,5 @@ High Country is the browser-first cultivation/genetics game defined in the root 
 - [Deterministic policy qualification scope](HC-GP-9-E2E-QUALIFICATION.md)
 
 Core play must remain available without registration or a wallet. Wallet linking expands optional ownership/interoperability/content; it may not improve protected gameplay statistics. The shared Gaming Protocol is a Genesis component; the entire High Country game is listed as a first-year application. Test results and readiness must preserve that distinction.
+
+- [R01 milestone review and retained delivery decisions](R01-MILESTONE-REVIEW.md)

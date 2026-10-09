@@ -71,7 +71,7 @@ Rollback means revert configuration only before incompatible effects; afterward 
 
 ## Custody and economic boundaries
 
-Existing HC foundations hold no monetary custody, token approvals, bridge messages or price-oracle balances. Internal BUDS are game-domain accounting, not native $420; conversion/decimals/fees/rewards remain R01.6. Wallet/service linking never delegates general spend. Service workers hold no player keys and cannot consume target-wallet claims.
+Existing HC foundations hold no monetary custody, token approvals, bridge messages or price-oracle balances. Internal BUDS are game-domain accounting, not native $420; R01.6 fixes zero-decimal internal BUDS without conversion and zero-fee ordinary full-fill trading. Detailed reward catalogues and optional canonical settlement fees remain required under R04.5/R04.8 before acceptance. Wallet/service linking never delegates general spend. Service workers hold no player keys and cannot consume target-wallet claims.
 
 Before monetary modules activate: specify custody asset/owner/refund destination, conservation and fee rounding, approvals/spend limits, cancellations/expiry, external-call/reentrancy handling and emergency exits. Prefer explicit player-signed settlement and bounded asset-specific authority; no unlimited background approvals or implicit service custody. Real token/Pay/rights integration tests and funded acceptance are required; no unfunded rewards marketed. Bridge/price-oracle dependencies are conditional; stale data or unverifiable messages fail closed if introduced. This is a mandatory design boundary, not a claim that missing economic contracts are secure.
 

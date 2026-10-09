@@ -52,8 +52,8 @@ contract EmergencyEnforcementTest {
         random.fulfill(bytes32(uint256(1)), keccak256("ENTROPY"));
         bytes32 entropy = random.consume(bytes32(uint256(1)), domain, context);
         require(entropy == keccak256("ENTROPY"), "pending request not recoverable");
-        (ok,) = address(random)
-            .call(abi.encodeWithSelector(random.consume.selector, bytes32(uint256(1)), domain, context));
+        (ok,) =
+            address(random).call(abi.encodeWithSelector(random.consume.selector, bytes32(uint256(1)), domain, context));
         require(!ok, "consumed twice");
         (ok,) = address(emergency)
             .call(abi.encodeWithSelector(emergency.setRestricted.selector, EmergencyDomains.RANDOMNESS_REQUEST, false));

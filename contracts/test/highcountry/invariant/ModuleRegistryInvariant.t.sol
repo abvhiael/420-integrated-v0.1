@@ -10,34 +10,44 @@ import { ModuleRegistry } from "../../../src/highcountry/upgrades/ModuleRegistry
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
-contract ModuleInvariantImplementationV1 {}
-contract ModuleInvariantReplacement {}
+contract ModuleInvariantImplementationV1 { }
+
+contract ModuleInvariantReplacement { }
 
 contract ModuleInvariantHandler {
     ModuleRegistry public immutable registry;
     bytes32 public immutable moduleId;
     bytes32 public immutable rulesetId;
 
-    constructor(ModuleRegistry registry_, bytes32 moduleId_, bytes32 rulesetId_) {
+    constructor(
+        ModuleRegistry registry_,
+        bytes32 moduleId_,
+        bytes32 rulesetId_
+    ) {
         registry = registry_;
         moduleId = moduleId_;
         rulesetId = rulesetId_;
     }
 
-    function stepAttemptReplacement(uint32 version) external {
+    function stepAttemptReplacement(
+        uint32 version
+    ) external {
         ModuleInvariantReplacement replacement = new ModuleInvariantReplacement();
-        address(registry).call(
-            abi.encodeWithSelector(
-                registry.registerModule.selector,
-                moduleId,
-                address(replacement),
-                version == 0 ? uint32(1) : version,
-                rulesetId
-            )
-        );
+        address(registry)
+            .call(
+                abi.encodeWithSelector(
+                    registry.registerModule.selector,
+                    moduleId,
+                    address(replacement),
+                    version == 0 ? uint32(1) : version,
+                    rulesetId
+                )
+            );
     }
 
-    function stepAdvanceLifecycle(uint8 rawState) external {
+    function stepAdvanceLifecycle(
+        uint8 rawState
+    ) external {
         UpgradeState state = UpgradeState(rawState % 8);
         address(registry).call(abi.encodeWithSelector(registry.setModuleState.selector, moduleId, state));
     }
@@ -71,12 +81,15 @@ contract ModuleRegistryInvariantTest is InvariantTarget420 {
 
     function invariant_HC_INV_UPGRADE_003_NoArbitraryImplementationSwap() public view {
         require(
-            registry.implementationOf(MODULE_ID) == expectedImplementation,
-            "HC-INV-UPGRADE-003: implementation changed"
+            registry.implementationOf(MODULE_ID) == expectedImplementation, "HC-INV-UPGRADE-003: implementation changed"
         );
     }
 
-    function _grant(address principal, bytes32 actionId, bytes32 grantId) private {
+    function _grant(
+        address principal,
+        bytes32 actionId,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: principal,
             componentId: ModuleIds.MODULE_REGISTRY,

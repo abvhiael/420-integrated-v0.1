@@ -8,7 +8,12 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
 interface IPlantRegistryCultivation {
-    function exists(uint64 plantId) external view returns (bool);
+    function exists(
+        uint64 plantId
+    ) external view returns (bool);
+    function genomeOf(
+        uint64 plantId
+    ) external view returns (bytes32);
 }
 
 contract CultivationEngine {
@@ -42,38 +47,66 @@ contract CultivationEngine {
     mapping(uint64 => CultivationState) private _states;
 
     event EnvironmentUpdated(uint64 indexed plantId, uint16 stressBps, uint16 qualityBps, uint64 timestamp);
-    event PhenotypeExpressed(uint64 indexed plantId, bytes32 indexed expressionHash, uint16 stressBps, uint16 qualityBps, uint64 timestamp);
+    event PhenotypeExpressed(
+        uint64 indexed plantId, bytes32 indexed expressionHash, uint16 stressBps, uint16 qualityBps, uint64 timestamp
+    );
 
-    constructor(address authorization_, address plantRegistry_) {
+    constructor(
+        address authorization_,
+        address plantRegistry_
+    ) {
         if (authorization_ == address(0) || plantRegistry_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
         plantRegistry = IPlantRegistryCultivation(plantRegistry_);
     }
 
-    function updateEnvironment(uint64 plantId, EnvironmentSnapshot calldata environment) external {
+    function updateEnvironment(
+        uint64 plantId,
+        EnvironmentSnapshot calldata environment
+    ) external {
         if (plantId == 0) revert HCInvalidId();
         if (!plantRegistry.exists(plantId)) revert HCNotFound();
         if (_states[plantId].expressionLocked) revert HCInvalidState();
         _validateEnvironment(environment);
         _auth(ActionIds.CULTIVATION_UPDATE, plantId);
         (uint16 stressBps, uint16 qualityBps) = deriveScores(environment);
-        _states[plantId] = CultivationState({plantId: plantId, environment: environment, expressionHash: bytes32(0), updatedAt: uint64(block.timestamp), stressBps: stressBps, qualityBps: qualityBps, expressionLocked: false, exists: true});
+        _states[plantId] = CultivationState({
+            plantId: plantId,
+            environment: environment,
+            expressionHash: bytes32(0),
+            updatedAt: uint64(block.timestamp),
+            stressBps: stressBps,
+            qualityBps: qualityBps,
+            expressionLocked: false,
+            exists: true
+        });
         emit EnvironmentUpdated(plantId, stressBps, qualityBps, uint64(block.timestamp));
     }
 
-    function expressPhenotype(uint64 plantId, bytes32 genomeId, bytes32 rulesetId) external returns (bytes32 expressionHash) {
+    function expressPhenotype(
+        uint64 plantId,
+        bytes32 genomeId,
+        bytes32 rulesetId
+    ) external returns (bytes32 expressionHash) {
         CultivationState storage s = _states[plantId];
         if (!s.exists) revert HCNotFound();
         if (s.expressionLocked || genomeId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidState();
+        if (plantRegistry.genomeOf(plantId) != genomeId) revert HCInvalidState();
         _auth(ActionIds.PHENOTYPE_EXPRESS, plantId);
-        expressionHash = keccak256(abi.encode("HC.PHENOTYPE.EXPRESSION.V1", plantId, genomeId, rulesetId, s.environment, s.stressBps, s.qualityBps));
+        expressionHash = keccak256(
+            abi.encode(
+                "HC.PHENOTYPE.EXPRESSION.V1", plantId, genomeId, rulesetId, s.environment, s.stressBps, s.qualityBps
+            )
+        );
         s.expressionHash = expressionHash;
         s.expressionLocked = true;
         s.updatedAt = uint64(block.timestamp);
         emit PhenotypeExpressed(plantId, expressionHash, s.stressBps, s.qualityBps, s.updatedAt);
     }
 
-    function deriveScores(EnvironmentSnapshot memory environment) public pure returns (uint16 stressBps, uint16 qualityBps) {
+    function deriveScores(
+        EnvironmentSnapshot memory environment
+    ) public pure returns (uint16 stressBps, uint16 qualityBps) {
         _validateEnvironment(environment);
         uint256 stress = _dimensionStress(environment.temperature, 2_000, 2_800, TEMPERATURE_MIN, TEMPERATURE_MAX)
             + _dimensionStress(environment.humidity, 4_500, 7_000, 0, CONTROL_MAX)
@@ -85,24 +118,44 @@ contract CultivationEngine {
         qualityBps = BPS - stressBps;
     }
 
-    function getState(uint64 plantId) external view returns (CultivationState memory) {
+    function getState(
+        uint64 plantId
+    ) external view returns (CultivationState memory) {
         CultivationState memory s = _states[plantId];
         if (!s.exists) revert HCNotFound();
         return s;
     }
 
-    function _validateEnvironment(EnvironmentSnapshot memory environment) private pure {
-        if (environment.temperature < TEMPERATURE_MIN || environment.temperature > TEMPERATURE_MAX) revert HCInvalidState();
-        if (environment.humidity > CONTROL_MAX || environment.light > CONTROL_MAX || environment.water > CONTROL_MAX || environment.nutrients > CONTROL_MAX || environment.airflow > CONTROL_MAX) revert HCInvalidState();
+    function _validateEnvironment(
+        EnvironmentSnapshot memory environment
+    ) private pure {
+        if (environment.temperature < TEMPERATURE_MIN || environment.temperature > TEMPERATURE_MAX) {
+            revert HCInvalidState();
+        }
+        if (
+            environment.humidity > CONTROL_MAX || environment.light > CONTROL_MAX || environment.water > CONTROL_MAX
+                || environment.nutrients > CONTROL_MAX || environment.airflow > CONTROL_MAX
+        ) revert HCInvalidState();
     }
 
-    function _dimensionStress(uint16 value, uint16 idealMin, uint16 idealMax, uint16 absoluteMin, uint16 absoluteMax) private pure returns (uint256) {
+    function _dimensionStress(
+        uint16 value,
+        uint16 idealMin,
+        uint16 idealMax,
+        uint16 absoluteMin,
+        uint16 absoluteMax
+    ) private pure returns (uint256) {
         if (value >= idealMin && value <= idealMax) return 0;
         if (value < idealMin) return ((uint256(idealMin) - value) * BPS) / (uint256(idealMin) - absoluteMin);
         return ((uint256(value) - idealMax) * BPS) / (uint256(absoluteMax) - idealMax);
     }
 
-    function _auth(bytes32 actionId, uint64 plantId) private view {
-        authorization.requireAuthorized(AuthorizationRequest(msg.sender, ModuleIds.CULTIVATION_ENGINE, actionId, bytes32(uint256(plantId)), 0));
+    function _auth(
+        bytes32 actionId,
+        uint64 plantId
+    ) private view {
+        authorization.requireAuthorized(
+            AuthorizationRequest(msg.sender, ModuleIds.CULTIVATION_ENGINE, actionId, bytes32(uint256(plantId)), 0)
+        );
     }
 }

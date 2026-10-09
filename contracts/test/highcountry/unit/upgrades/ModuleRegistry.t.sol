@@ -9,8 +9,9 @@ import { UpgradeState } from "../../../../src/highcountry/types/HighCountryEnums
 import { ModuleRegistry } from "../../../../src/highcountry/upgrades/ModuleRegistry.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
-contract MockHighCountryModuleV1 {}
-contract MockHighCountryModuleV2 {}
+contract MockHighCountryModuleV1 { }
+
+contract MockHighCountryModuleV2 { }
 
 contract ModuleRegistryTest {
     bytes32 private constant MODULE_ID = keccak256("HC.MODULE.TEST");
@@ -34,9 +35,10 @@ contract ModuleRegistryTest {
         require(registry.implementationOf(MODULE_ID) == address(implementation), "implementation mismatch");
 
         MockHighCountryModuleV2 replacement = new MockHighCountryModuleV2();
-        (bool ok,) = address(registry).call(
-            abi.encodeWithSelector(registry.registerModule.selector, MODULE_ID, address(replacement), 2, RULESET_ID)
-        );
+        (bool ok,) = address(registry)
+            .call(
+                abi.encodeWithSelector(registry.registerModule.selector, MODULE_ID, address(replacement), 2, RULESET_ID)
+            );
         require(!ok, "arbitrary implementation swap succeeded");
         require(registry.implementationOf(MODULE_ID) == address(implementation), "implementation changed");
     }
@@ -55,9 +57,8 @@ contract ModuleRegistryTest {
     function testCannotSkipLifecycle() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
-        (bool ok,) = address(registry).call(
-            abi.encodeWithSelector(registry.setModuleState.selector, MODULE_ID, UpgradeState.ACTIVE)
-        );
+        (bool ok,) = address(registry)
+            .call(abi.encodeWithSelector(registry.setModuleState.selector, MODULE_ID, UpgradeState.ACTIVE));
         require(!ok, "lifecycle skip succeeded");
     }
 
@@ -65,13 +66,15 @@ contract ModuleRegistryTest {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.setModuleState(MODULE_ID, UpgradeState.REJECTED);
-        (bool ok,) = address(registry).call(
-            abi.encodeWithSelector(registry.setModuleState.selector, MODULE_ID, UpgradeState.PROPOSED)
-        );
+        (bool ok,) = address(registry)
+            .call(abi.encodeWithSelector(registry.setModuleState.selector, MODULE_ID, UpgradeState.PROPOSED));
         require(!ok, "rejected module revived");
     }
 
-    function _grant(bytes32 actionId, bytes32 grantId) private {
+    function _grant(
+        bytes32 actionId,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.MODULE_REGISTRY,

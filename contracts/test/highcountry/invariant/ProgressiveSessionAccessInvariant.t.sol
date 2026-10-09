@@ -7,14 +7,27 @@ import { AuthorizationRequest } from "../../../src/highcountry/types/HighCountry
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 
 contract MockHCAuthorizationPA4 is IHighCountryAuthorization {
-    function capabilityRegistry() external pure returns (address) { return address(1); }
-    function isAuthorized(AuthorizationRequest calldata) external pure returns (bool) { return true; }
-    function requireAuthorized(AuthorizationRequest calldata) external pure {}
+    function capabilityRegistry() external pure returns (address) {
+        return address(1);
+    }
+
+    function isAuthorized(
+        AuthorizationRequest calldata
+    ) external pure returns (bool) {
+        return true;
+    }
+    function requireAuthorized(
+        AuthorizationRequest calldata
+    ) external pure { }
 }
 
 contract RoutineTargetPA4 {
-    function routine(uint256) external {}
-    function sensitive(uint256) external {}
+    function routine(
+        uint256
+    ) external { }
+    function sensitive(
+        uint256
+    ) external { }
 }
 
 /// @notice Fuzz unrelated policy entries without rewriting the explicitly configured
@@ -23,9 +36,16 @@ contract ProgressiveSessionAccessHandlerPA4 {
     HighCountrySessionAccess420 private immutable sessionAccess;
     address private constant UNRELATED_TARGET = address(0xBEEF);
 
-    constructor(HighCountrySessionAccess420 sessionAccess_) { sessionAccess = sessionAccess_; }
+    constructor(
+        HighCountrySessionAccess420 sessionAccess_
+    ) {
+        sessionAccess = sessionAccess_;
+    }
 
-    function stepSetUnrelatedRoutine(bytes4 selector, bool allowed) external {
+    function stepSetUnrelatedRoutine(
+        bytes4 selector,
+        bool allowed
+    ) external {
         if (selector == bytes4(0)) return;
         sessionAccess.setRoutineCall(UNRELATED_TARGET, selector, allowed);
     }

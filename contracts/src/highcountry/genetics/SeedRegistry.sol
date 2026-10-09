@@ -8,7 +8,9 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
 interface IGenomeRegistrySeed {
-    function exists(bytes32 genomeId) external view returns (bool);
+    function exists(
+        bytes32 genomeId
+    ) external view returns (bool);
 }
 
 contract SeedRegistry {
@@ -26,16 +28,32 @@ contract SeedRegistry {
     IGenomeRegistrySeed public immutable genomeRegistry;
     mapping(uint64 => SeedLot) private _lots;
 
-    event SeedLotRegistered(uint64 indexed seedLotId, bytes32 indexed genomeId, address indexed owner, uint32 quantity, uint64 breedingEventId);
+    event SeedLotRegistered(
+        uint64 indexed seedLotId,
+        bytes32 indexed genomeId,
+        address indexed owner,
+        uint32 quantity,
+        uint64 breedingEventId
+    );
     event SeedLotTransferred(uint64 indexed seedLotId, address indexed previousOwner, address indexed newOwner);
 
-    constructor(address authorization_, address genomeRegistry_) {
+    constructor(
+        address authorization_,
+        address genomeRegistry_
+    ) {
         if (authorization_ == address(0) || genomeRegistry_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
         genomeRegistry = IGenomeRegistrySeed(genomeRegistry_);
     }
 
-    function registerSeedLot(uint64 seedLotId, bytes32 genomeId, uint64 breedingEventId, address owner, uint32 quantity, bytes32 metadataHash) external {
+    function registerSeedLot(
+        uint64 seedLotId,
+        bytes32 genomeId,
+        uint64 breedingEventId,
+        address owner,
+        uint32 quantity,
+        bytes32 metadataHash
+    ) external {
         if (seedLotId == 0 || genomeId == bytes32(0) || owner == address(0) || quantity == 0) revert HCInvalidId();
         if (!genomeRegistry.exists(genomeId)) revert HCNotFound();
         if (_lots[seedLotId].exists) revert HCAlreadyExists();
@@ -44,7 +62,10 @@ contract SeedRegistry {
         emit SeedLotRegistered(seedLotId, genomeId, owner, quantity, breedingEventId);
     }
 
-    function transfer(uint64 seedLotId, address newOwner) external {
+    function transfer(
+        uint64 seedLotId,
+        address newOwner
+    ) external {
         if (newOwner == address(0)) revert HCZeroAddress();
         SeedLot storage lot = _require(seedLotId);
         _auth(ActionIds.SEED_TRANSFER, seedLotId, lot.quantity);
@@ -53,12 +74,39 @@ contract SeedRegistry {
         emit SeedLotTransferred(seedLotId, previous, newOwner);
     }
 
-    function getSeedLot(uint64 seedLotId) external view returns (SeedLot memory) { return _requireView(seedLotId); }
-    function exists(uint64 seedLotId) external view returns (bool) { return _lots[seedLotId].exists; }
+    function getSeedLot(
+        uint64 seedLotId
+    ) external view returns (SeedLot memory) {
+        return _requireView(seedLotId);
+    }
 
-    function _require(uint64 id) private view returns (SeedLot storage lot) { lot = _lots[id]; if (!lot.exists) revert HCNotFound(); }
-    function _requireView(uint64 id) private view returns (SeedLot memory lot) { lot = _lots[id]; if (!lot.exists) revert HCNotFound(); }
-    function _auth(bytes32 actionId, uint64 id, uint256 amount) private view {
-        authorization.requireAuthorized(AuthorizationRequest(msg.sender, ModuleIds.SEED_REGISTRY, actionId, bytes32(uint256(id)), amount));
+    function exists(
+        uint64 seedLotId
+    ) external view returns (bool) {
+        return _lots[seedLotId].exists;
+    }
+
+    function _require(
+        uint64 id
+    ) private view returns (SeedLot storage lot) {
+        lot = _lots[id];
+        if (!lot.exists) revert HCNotFound();
+    }
+
+    function _requireView(
+        uint64 id
+    ) private view returns (SeedLot memory lot) {
+        lot = _lots[id];
+        if (!lot.exists) revert HCNotFound();
+    }
+
+    function _auth(
+        bytes32 actionId,
+        uint64 id,
+        uint256 amount
+    ) private view {
+        authorization.requireAuthorized(
+            AuthorizationRequest(msg.sender, ModuleIds.SEED_REGISTRY, actionId, bytes32(uint256(id)), amount)
+        );
     }
 }

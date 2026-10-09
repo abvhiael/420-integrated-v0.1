@@ -8,15 +8,37 @@ import { AuthorizationRequest } from "../../../../src/highcountry/types/HighCoun
 
 contract MockHCAuthorizationMigration is IHighCountryAuthorization {
     bool public allowed = true;
-    function setAllowed(bool value) external { allowed = value; }
-    function capabilityRegistry() external pure returns (address) { return address(1); }
-    function isAuthorized(AuthorizationRequest calldata) external view returns (bool) { return allowed; }
-    function requireAuthorized(AuthorizationRequest calldata) external view { require(allowed, "unauthorized"); }
+
+    function setAllowed(
+        bool value
+    ) external {
+        allowed = value;
+    }
+
+    function capabilityRegistry() external pure returns (address) {
+        return address(1);
+    }
+
+    function isAuthorized(
+        AuthorizationRequest calldata
+    ) external view returns (bool) {
+        return allowed;
+    }
+
+    function requireAuthorized(
+        AuthorizationRequest calldata
+    ) external view {
+        require(allowed, "unauthorized");
+    }
 }
 
 contract MockHCBridgeMigration {
     mapping(bytes32 => uint64) public growerProfileIdOfMigrationClaim;
-    function bind(bytes32 claimId, uint64 growerProfileId) external {
+
+    function bind(
+        bytes32 claimId,
+        uint64 growerProfileId
+    ) external {
         growerProfileIdOfMigrationClaim[claimId] = growerProfileId;
     }
 }
@@ -34,8 +56,16 @@ contract MockGameClaimsMigration {
         bool exists;
     }
     mapping(bytes32 => MigrationClaim) internal claims;
-    function setClaim(MigrationClaim calldata record) external { claims[record.claimId] = record; }
-    function claim(bytes32 claimId) external view returns (MigrationClaim memory) {
+
+    function setClaim(
+        MigrationClaim calldata record
+    ) external {
+        claims[record.claimId] = record;
+    }
+
+    function claim(
+        bytes32 claimId
+    ) external view returns (MigrationClaim memory) {
         require(claims[claimId].exists, "missing");
         return claims[claimId];
     }
@@ -61,17 +91,19 @@ contract HighCountryMigration420Test {
         guestCommitment = migration.guestStateCommitment(keccak256("guest-account"), 9, keccak256("state"));
         payloadHash = migration.migrationPayloadHash(guestCommitment, GROWER_ID, 1, keccak256("payload"));
         bridge.bind(CLAIM_ID, GROWER_ID);
-        claims.setClaim(MockGameClaimsMigration.MigrationClaim({
-            claimId: CLAIM_ID,
-            gameId: HighCountryGamingIds.GAME_ID,
-            targetAccount: address(0xBEEF),
-            guestStateCommitment: guestCommitment,
-            migrationPayloadHash: payloadHash,
-            validUntil: 0,
-            consumed: true,
-            cancelled: false,
-            exists: true
-        }));
+        claims.setClaim(
+            MockGameClaimsMigration.MigrationClaim({
+                claimId: CLAIM_ID,
+                gameId: HighCountryGamingIds.GAME_ID,
+                targetAccount: address(0xBEEF),
+                guestStateCommitment: guestCommitment,
+                migrationPayloadHash: payloadHash,
+                validUntil: 0,
+                consumed: true,
+                cancelled: false,
+                exists: true
+            })
+        );
     }
 
     function testConsumedBoundClaimCanBeAppliedOnce() public {
@@ -79,51 +111,88 @@ contract HighCountryMigration420Test {
         migration.markApplied(CLAIM_ID, GROWER_ID, guestCommitment, payloadHash);
         require(!migration.isReadyToApply(CLAIM_ID, GROWER_ID, guestCommitment, payloadHash), "replay ready");
 
-        (bool ok,) = address(migration).call(
-            abi.encodeWithSelector(migration.markApplied.selector, CLAIM_ID, GROWER_ID, guestCommitment, payloadHash)
-        );
+        (bool ok,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.markApplied.selector, CLAIM_ID, GROWER_ID, guestCommitment, payloadHash
+                )
+            );
         require(!ok, "replay applied");
     }
 
     function testWrongPayloadFailsClosed() public {
-        require(!migration.isReadyToApply(CLAIM_ID, GROWER_ID, guestCommitment, keccak256("wrong")), "wrong payload ready");
+        require(
+            !migration.isReadyToApply(CLAIM_ID, GROWER_ID, guestCommitment, keccak256("wrong")), "wrong payload ready"
+        );
     }
 
     function testUnconsumedClaimFailsClosed() public {
-        claims.setClaim(MockGameClaimsMigration.MigrationClaim({
-            claimId: CLAIM_ID,
-            gameId: HighCountryGamingIds.GAME_ID,
-            targetAccount: address(0xBEEF),
-            guestStateCommitment: guestCommitment,
-            migrationPayloadHash: payloadHash,
-            validUntil: 0,
-            consumed: false,
-            cancelled: false,
-            exists: true
-        }));
+        claims.setClaim(
+            MockGameClaimsMigration.MigrationClaim({
+                claimId: CLAIM_ID,
+                gameId: HighCountryGamingIds.GAME_ID,
+                targetAccount: address(0xBEEF),
+                guestStateCommitment: guestCommitment,
+                migrationPayloadHash: payloadHash,
+                validUntil: 0,
+                consumed: false,
+                cancelled: false,
+                exists: true
+            })
+        );
         require(!migration.isReadyToApply(CLAIM_ID, GROWER_ID, guestCommitment, payloadHash), "unconsumed ready");
     }
 
     function testWrongGameFailsClosed() public {
-        claims.setClaim(MockGameClaimsMigration.MigrationClaim({
-            claimId: CLAIM_ID,
-            gameId: keccak256("other-game"),
-            targetAccount: address(0xBEEF),
-            guestStateCommitment: guestCommitment,
-            migrationPayloadHash: payloadHash,
-            validUntil: 0,
-            consumed: true,
-            cancelled: false,
-            exists: true
-        }));
+        claims.setClaim(
+            MockGameClaimsMigration.MigrationClaim({
+                claimId: CLAIM_ID,
+                gameId: keccak256("other-game"),
+                targetAccount: address(0xBEEF),
+                guestStateCommitment: guestCommitment,
+                migrationPayloadHash: payloadHash,
+                validUntil: 0,
+                consumed: true,
+                cancelled: false,
+                exists: true
+            })
+        );
         require(!migration.isReadyToApply(CLAIM_ID, GROWER_ID, guestCommitment, payloadHash), "other game ready");
+    }
+
+    function testUnboundZeroGrowerCannotBeApplied() public {
+        bytes32 unboundClaim = keccak256("unbound");
+        claims.setClaim(
+            MockGameClaimsMigration.MigrationClaim({
+                claimId: unboundClaim,
+                gameId: HighCountryGamingIds.GAME_ID,
+                targetAccount: address(0xBEEF),
+                guestStateCommitment: guestCommitment,
+                migrationPayloadHash: payloadHash,
+                validUntil: 0,
+                consumed: true,
+                cancelled: false,
+                exists: true
+            })
+        );
+        require(!migration.isReadyToApply(unboundClaim, 0, guestCommitment, payloadHash), "unbound zero grower ready");
+        (bool ok,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.markApplied.selector, unboundClaim, uint64(0), guestCommitment, payloadHash
+                )
+            );
+        require(!ok, "unbound claim applied");
     }
 
     function testApplyRequiresCapabilityAuthorization() public {
         authorization.setAllowed(false);
-        (bool ok,) = address(migration).call(
-            abi.encodeWithSelector(migration.markApplied.selector, CLAIM_ID, GROWER_ID, guestCommitment, payloadHash)
-        );
+        (bool ok,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.markApplied.selector, CLAIM_ID, GROWER_ID, guestCommitment, payloadHash
+                )
+            );
         require(!ok, "unauthorized apply");
     }
 }

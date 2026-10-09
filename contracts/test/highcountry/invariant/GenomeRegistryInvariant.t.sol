@@ -14,22 +14,30 @@ import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 contract GenomeRegistryInvariantHandler {
     GenomeRegistry public immutable genomes;
 
-    constructor(GenomeRegistry genomes_) {
+    constructor(
+        GenomeRegistry genomes_
+    ) {
         genomes = genomes_;
     }
 
-    function stepAttemptDuplicate(bytes32 genomeId, uint256 salt) external {
+    function stepAttemptDuplicate(
+        bytes32 genomeId,
+        uint256 salt
+    ) external {
         bytes32[28] memory loci;
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode("mutated", salt, i));
-        address(genomes).call(
-            abi.encodeWithSelector(
-                genomes.registerGenome.selector,
-                genomeId,
-                keccak256(abi.encode("line", salt)),
-                keccak256(abi.encode("metadata", salt)),
-                loci
-            )
-        );
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode("mutated", salt, i));
+        }
+        address(genomes)
+            .call(
+                abi.encodeWithSelector(
+                    genomes.registerGenome.selector,
+                    genomeId,
+                    keccak256(abi.encode("line", salt)),
+                    keccak256(abi.encode("metadata", salt)),
+                    loci
+                )
+            );
     }
 }
 
@@ -51,20 +59,46 @@ contract GenomeRegistryInvariantTest is InvariantTarget420 {
         genesis = new GenesisRegistry(address(authorization));
         genomes = new GenomeRegistry(address(authorization), address(genesis));
 
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("inv:roots"));
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("inv:finalize"));
-        _grant(address(this), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, canonicalGenomeId, keccak256("inv:genome"));
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_SET_ROOTS,
+            genesis.ADMIN_SCOPE(),
+            keccak256("inv:roots")
+        );
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_FINALIZE,
+            genesis.ADMIN_SCOPE(),
+            keccak256("inv:finalize")
+        );
+        _grant(
+            address(this),
+            ModuleIds.GENOME_REGISTRY,
+            ActionIds.GENOME_REGISTER,
+            canonicalGenomeId,
+            keccak256("inv:genome")
+        );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
 
         bytes32[28] memory loci;
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode("canonical", i));
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode("canonical", i));
+        }
         canonicalLocus0 = loci[0];
         canonicalLocus27 = loci[27];
         genomes.registerGenome(canonicalGenomeId, canonicalLineId, canonicalMetadata, loci);
 
         handler = new GenomeRegistryInvariantHandler(genomes);
-        _grant(address(handler), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, canonicalGenomeId, keccak256("inv:handler"));
+        _grant(
+            address(handler),
+            ModuleIds.GENOME_REGISTRY,
+            ActionIds.GENOME_REGISTER,
+            canonicalGenomeId,
+            keccak256("inv:handler")
+        );
         targetContract(address(handler));
     }
 
@@ -77,7 +111,13 @@ contract GenomeRegistryInvariantTest is InvariantTarget420 {
         require(genomes.genomeCount() == 1, "HC-INV-GENETICS-009: duplicate genome inserted");
     }
 
-    function _grant(address principal, bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function _grant(
+        address principal,
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: principal,
             componentId: moduleId,

@@ -5,17 +5,25 @@ import { ICapabilityRegistry420 } from "../../../../src/interfaces/genesis/ICapa
 import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighCountryAuthorization.sol";
 import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
-import { GuestProfileMigration, IGrowerProfileMigration } from "../../../../src/highcountry/access/GuestProfileMigration.sol";
+import {
+    GuestProfileMigration,
+    IGrowerProfileMigration
+} from "../../../../src/highcountry/access/GuestProfileMigration.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
 contract MockGrowerProfilesPA3 is IGrowerProfileMigration {
     mapping(uint64 => GrowerProfile) private _profiles;
 
-    function setProfile(uint64 id, address account) external {
+    function setProfile(
+        uint64 id,
+        address account
+    ) external {
         _profiles[id] = GrowerProfile(id, account, 1, uint64(block.timestamp), true);
     }
 
-    function getProfile(uint64 id) external view returns (GrowerProfile memory) {
+    function getProfile(
+        uint64 id
+    ) external view returns (GrowerProfile memory) {
         return _profiles[id];
     }
 }
@@ -42,87 +50,82 @@ contract GuestProfileMigrationTest {
 
     function testProfileClaimIsIdempotentAndOneToOne() public {
         bytes32 root = migration.migrationLeaf(
-            source,
-            objectId,
-            GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
-            payloadHash,
-            POLICY_VERSION
+            source, objectId, GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR, payloadHash, POLICY_VERSION
         );
 
         require(migration.claimProfile(source, 7, root, POLICY_VERSION), "initial claim not created");
         require(!migration.claimProfile(source, 7, root, POLICY_VERSION), "exact replay not idempotent");
 
-        (bool conflicting,) = address(migration).call(
-            abi.encodeWithSelector(migration.claimProfile.selector, source, uint64(7), keccak256("other-root"), POLICY_VERSION)
-        );
+        (bool conflicting,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.claimProfile.selector, source, uint64(7), keccak256("other-root"), POLICY_VERSION
+                )
+            );
         require(!conflicting, "conflicting replay accepted");
 
         bytes32 secondSource = keccak256("guest:save:beta");
         _grant(secondSource, keccak256("hc-pa3:grant:beta"));
-        (bool secondBind,) = address(migration).call(
-            abi.encodeWithSelector(migration.claimProfile.selector, secondSource, uint64(7), keccak256("beta-root"), POLICY_VERSION)
-        );
+        (bool secondBind,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.claimProfile.selector, secondSource, uint64(7), keccak256("beta-root"), POLICY_VERSION
+                )
+            );
         require(!secondBind, "grower profile bound to multiple source profiles");
     }
 
     function testManifestedObjectConsumesExactlyOnce() public {
         bytes32 root = migration.migrationLeaf(
-            source,
-            objectId,
-            GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
-            payloadHash,
-            POLICY_VERSION
+            source, objectId, GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR, payloadHash, POLICY_VERSION
         );
         migration.claimProfile(source, 7, root, POLICY_VERSION);
 
         bytes32[] memory emptyProof = new bytes32[](0);
         bytes32 key = migration.consumeObject(
-            source,
-            objectId,
-            GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
-            payloadHash,
-            emptyProof
+            source, objectId, GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR, payloadHash, emptyProof
         );
         require(migration.consumedObject(key), "object consumption missing");
 
-        (bool replay,) = address(migration).call(
-            abi.encodeWithSelector(
-                migration.consumeObject.selector,
-                source,
-                objectId,
-                GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
-                payloadHash,
-                emptyProof
-            )
-        );
+        (bool replay,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.consumeObject.selector,
+                    source,
+                    objectId,
+                    GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
+                    payloadHash,
+                    emptyProof
+                )
+            );
         require(!replay, "object replay consumed twice");
     }
 
     function testObjectOutsideManifestCannotCanonicalize() public {
         bytes32 root = migration.migrationLeaf(
-            source,
-            objectId,
-            GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
-            payloadHash,
-            POLICY_VERSION
+            source, objectId, GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR, payloadHash, POLICY_VERSION
         );
         migration.claimProfile(source, 7, root, POLICY_VERSION);
         bytes32[] memory emptyProof = new bytes32[](0);
 
-        (bool accepted,) = address(migration).call(
-            abi.encodeWithSelector(
-                migration.consumeObject.selector,
-                source,
-                keccak256("ordinary:irrigation:level"),
-                GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
-                keccak256("ordinary:payload"),
-                emptyProof
-            )
-        );
+        (bool accepted,) = address(migration)
+            .call(
+                abi.encodeWithSelector(
+                    migration.consumeObject.selector,
+                    source,
+                    keccak256("ordinary:irrigation:level"),
+                    GuestProfileMigration.CanonicalObjectKind.REGISTERED_CULTIVAR,
+                    keccak256("ordinary:payload"),
+                    emptyProof
+                )
+            );
         require(!accepted, "object outside explicit manifest canonicalized");
     }
 
-    function _grant(bytes32 scope, bytes32 grantId) private {
+    function _grant(
+        bytes32 scope,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.GUEST_MIGRATION,

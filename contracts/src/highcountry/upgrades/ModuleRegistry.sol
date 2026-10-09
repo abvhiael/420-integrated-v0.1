@@ -19,24 +19,35 @@ contract ModuleRegistry is IModuleRegistry {
     IHighCountryAuthorization public immutable authorization;
     mapping(bytes32 => ModuleRecord) private _modules;
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
     }
 
-    function getModule(bytes32 moduleId) external view returns (ModuleRecord memory) {
+    function getModule(
+        bytes32 moduleId
+    ) external view returns (ModuleRecord memory) {
         ModuleRecord memory record = _modules[moduleId];
         if (!record.exists) revert HCModuleNotFound(moduleId);
         return record;
     }
 
-    function implementationOf(bytes32 moduleId) external view returns (address) {
+    function implementationOf(
+        bytes32 moduleId
+    ) external view returns (address) {
         ModuleRecord memory record = _modules[moduleId];
         if (!record.exists) revert HCModuleNotFound(moduleId);
         return record.implementation;
     }
 
-    function registerModule(bytes32 moduleId, address implementation, uint32 version, bytes32 rulesetId) external {
+    function registerModule(
+        bytes32 moduleId,
+        address implementation,
+        uint32 version,
+        bytes32 rulesetId
+    ) external {
         if (moduleId == bytes32(0) || rulesetId == bytes32(0) || version == 0) revert HCInvalidId();
         if (implementation == address(0)) revert HCZeroAddress();
         if (_modules[moduleId].exists) revert HCModuleAlreadyRegistered(moduleId);
@@ -62,7 +73,10 @@ contract ModuleRegistry is IModuleRegistry {
         emit ModuleRegistered(moduleId, implementation, version, rulesetId);
     }
 
-    function setModuleState(bytes32 moduleId, UpgradeState newState) external {
+    function setModuleState(
+        bytes32 moduleId,
+        UpgradeState newState
+    ) external {
         ModuleRecord storage record = _modules[moduleId];
         if (!record.exists) revert HCModuleNotFound(moduleId);
         if (!_isValidTransition(record.state, newState)) revert HCInvalidState();
@@ -82,7 +96,10 @@ contract ModuleRegistry is IModuleRegistry {
         emit ModuleStateChanged(moduleId, previousState, newState);
     }
 
-    function _isValidTransition(UpgradeState from, UpgradeState to) private pure returns (bool) {
+    function _isValidTransition(
+        UpgradeState from,
+        UpgradeState to
+    ) private pure returns (bool) {
         if (from == UpgradeState.PROPOSED) return to == UpgradeState.QUALIFIED || to == UpgradeState.REJECTED;
         if (from == UpgradeState.QUALIFIED) return to == UpgradeState.SCHEDULED || to == UpgradeState.REJECTED;
         if (from == UpgradeState.SCHEDULED) return to == UpgradeState.ACTIVE || to == UpgradeState.REJECTED;

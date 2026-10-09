@@ -11,5 +11,5 @@ HC-4 introduces the immutable genome and typed genetics-asset substrate used by 
 - Clones are transferable and must reference an existing mother with the same genome.
 - Mothers are transferable while active, have a finite cutting budget, and retire automatically when exhausted.
 - Phenotypes are permanent immutable provenance records.
-- Breeding-event IDs and plant IDs remain opaque provenance anchors until HC-5 and HC-6 own their canonical registries.
+- Breeding-event IDs and plant IDs currently remain opaque provenance anchors in these asset registries, even though HC-5 and HC-6 registries now exist. Cross-registry validation and seed/clone resource consumption remain integration gaps; see the High Country repository audit.
 - HC-INV-GENETICS-009 through HC-INV-GENETICS-013 protect genome immutability, typed-asset provenance, mother budget conservation, and phenotype permanence.

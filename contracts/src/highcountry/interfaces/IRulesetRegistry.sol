@@ -10,8 +10,16 @@ interface IRulesetRegistry {
 
     event RulesetRegistered(bytes32 indexed rulesetId, bytes32 indexed contentHash, uint64 registeredAt);
 
-    function deriveRulesetId(bytes32 contentHash) external pure returns (bytes32);
-    function registerRuleset(bytes32 contentHash) external returns (bytes32 rulesetId);
-    function getRuleset(bytes32 rulesetId) external view returns (RulesetRecord memory);
-    function exists(bytes32 rulesetId) external view returns (bool);
+    function deriveRulesetId(
+        bytes32 contentHash
+    ) external pure returns (bytes32);
+    function registerRuleset(
+        bytes32 contentHash
+    ) external returns (bytes32 rulesetId);
+    function getRuleset(
+        bytes32 rulesetId
+    ) external view returns (RulesetRecord memory);
+    function exists(
+        bytes32 rulesetId
+    ) external view returns (bool);
 }

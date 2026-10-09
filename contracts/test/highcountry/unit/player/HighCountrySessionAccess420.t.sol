@@ -11,11 +11,35 @@ import { AuthorizationRequest } from "../../../../src/highcountry/types/HighCoun
 
 contract MockHCAuthorizationSessionAccess is IHighCountryAuthorization {
     bool public allowed = true;
+    address public registry;
 
-    function setAllowed(bool allowed_) external { allowed = allowed_; }
-    function capabilityRegistry() external pure returns (address) { return address(1); }
-    function isAuthorized(AuthorizationRequest calldata) external view returns (bool) { return allowed; }
-    function requireAuthorized(AuthorizationRequest calldata) external view { require(allowed, "unauthorized"); }
+    function setAllowed(
+        bool allowed_
+    ) external {
+        allowed = allowed_;
+    }
+
+    function setRegistry(
+        address value
+    ) external {
+        registry = value;
+    }
+
+    function capabilityRegistry() external view returns (address) {
+        return registry;
+    }
+
+    function isAuthorized(
+        AuthorizationRequest calldata
+    ) external view returns (bool) {
+        return allowed;
+    }
+
+    function requireAuthorized(
+        AuthorizationRequest calldata
+    ) external view {
+        require(allowed, "unauthorized");
+    }
 }
 
 contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
@@ -24,11 +48,12 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
     mapping(bytes32 => bytes32) internal active;
     mapping(bytes32 => bool) internal authorized;
 
-    function _key(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function _key(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode(principal, componentId, capabilityId, scopeHash));
     }
 
@@ -57,29 +82,64 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
         authorized[key] = allowed;
     }
 
-    function setAuthorized(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash, bool allowed)
-        external
-    {
+    function setAuthorized(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash,
+        bool allowed
+    ) external {
         authorized[_key(principal, componentId, capabilityId, scopeHash)] = allowed;
     }
 
-    function grant(bytes32 grantId) external view returns (CapabilityGrant memory) { return grants[grantId]; }
+    function grant(
+        bytes32 grantId
+    ) external view returns (CapabilityGrant memory) {
+        return grants[grantId];
+    }
 
-    function isAuthorized(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash, uint256)
-        external
-        view
-        returns (bool)
-    {
+    function isAuthorized(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash,
+        uint256
+    ) external view returns (bool) {
         return authorized[_key(principal, componentId, capabilityId, scopeHash)];
     }
 
-    function componentAuthority(bytes32) external pure returns (address) { return address(0); }
-    function componentRegistrar() external pure returns (address) { return address(0); }
-    function protocolComponentManaged(bytes32) external pure returns (bool) { return false; }
-    function registerSmartAccount(address) external pure returns (bytes32) { return bytes32(0); }
-    function registerProtocolComponent(bytes32, address) external pure {}
-    function updateProtocolComponentAuthority(bytes32, address) external pure {}
-    function transferComponentRegistrar(address) external pure {}
+    function componentAuthority(
+        bytes32
+    ) external pure returns (address) {
+        return address(0);
+    }
+
+    function componentRegistrar() external pure returns (address) {
+        return address(0);
+    }
+
+    function protocolComponentManaged(
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function registerSmartAccount(
+        address
+    ) external pure returns (bytes32) {
+        return bytes32(0);
+    }
+    function registerProtocolComponent(
+        bytes32,
+        address
+    ) external pure { }
+    function updateProtocolComponentAuthority(
+        bytes32,
+        address
+    ) external pure { }
+    function transferComponentRegistrar(
+        address
+    ) external pure { }
 
     function createGrant(
         bytes32,
@@ -92,20 +152,35 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
         uint64,
         uint64,
         uint64
-    ) external {}
+    ) external { }
 
-    function revokeGrant(bytes32 grantId) external { grants[grantId].revoked = true; }
+    function revokeGrant(
+        bytes32 grantId
+    ) external {
+        grants[grantId].revoked = true;
+    }
 
-    function activeGrantId(address principal, bytes32 componentId, bytes32 capabilityId, bytes32 scopeHash)
-        external
-        view
-        returns (bytes32)
-    {
+    function activeGrantId(
+        address principal,
+        bytes32 componentId,
+        bytes32 capabilityId,
+        bytes32 scopeHash
+    ) external view returns (bytes32) {
         return active[_key(principal, componentId, capabilityId, scopeHash)];
     }
 
-    function usage(bytes32 grantId) external view returns (UsageView memory) { return usages[grantId]; }
-    function consume(bytes32, uint256) external pure returns (uint256) { return 0; }
+    function usage(
+        bytes32 grantId
+    ) external view returns (UsageView memory) {
+        return usages[grantId];
+    }
+
+    function consume(
+        bytes32,
+        uint256
+    ) external pure returns (uint256) {
+        return 0;
+    }
 }
 
 contract MockSmartAccountHCSession {
@@ -114,15 +189,30 @@ contract MockSmartAccountHCSession {
     bytes32 public immutable accountComponentId;
     ICapabilityRegistryExtended420 public immutable capabilityRegistry;
 
-    constructor(address registry) {
+    constructor(
+        address registry
+    ) {
         capabilityRegistry = ICapabilityRegistryExtended420(registry);
         accountComponentId = SmartAccountScopes420.accountComponentId(address(this));
     }
 
-    function setAuthorizationEpoch(uint64 epoch) external { authorizationEpoch = epoch; }
-    function setSessionEpoch(address key, uint64 epoch) external { sessionEpoch[key] = epoch; }
+    function setAuthorizationEpoch(
+        uint64 epoch
+    ) external {
+        authorizationEpoch = epoch;
+    }
 
-    function sessionScope(address target, bytes4 selector) external view returns (bytes32) {
+    function setSessionEpoch(
+        address key,
+        uint64 epoch
+    ) external {
+        sessionEpoch[key] = epoch;
+    }
+
+    function sessionScope(
+        address target,
+        bytes4 selector
+    ) external view returns (bytes32) {
         return SmartAccountScopes420.sessionCallScope(
             address(this), accountComponentId, authorizationEpoch, target, selector
         );
@@ -130,8 +220,12 @@ contract MockSmartAccountHCSession {
 }
 
 contract RoutineTargetHCSession {
-    function tick(uint64) external {}
-    function risky(uint64) external {}
+    function tick(
+        uint64
+    ) external { }
+    function risky(
+        uint64
+    ) external { }
 }
 
 contract HighCountrySessionAccess420Test {
@@ -146,6 +240,7 @@ contract HighCountrySessionAccess420Test {
     function setUp() public {
         authorization = new MockHCAuthorizationSessionAccess();
         registry = new MockCapabilityRegistryHCSession();
+        authorization.setRegistry(address(registry));
         account = new MockSmartAccountHCSession(address(registry));
         target = new RoutineTargetHCSession();
         sessionAccess = new HighCountrySessionAccess420(address(authorization));
@@ -157,12 +252,7 @@ contract HighCountrySessionAccess420Test {
         scopeHash = account.sessionScope(address(target), target.tick.selector);
         grantId = keccak256("hc-session-grant");
         registry.setGrant(
-            grantId,
-            SESSION_KEY,
-            account.accountComponentId(),
-            CapabilityIds420.SESSION_EXECUTE,
-            scopeHash,
-            true
+            grantId, SESSION_KEY, account.accountComponentId(), CapabilityIds420.SESSION_EXECUTE, scopeHash, true
         );
     }
 
@@ -177,8 +267,7 @@ contract HighCountrySessionAccess420Test {
         );
         sessionAccess.setRoutineCall(address(target), target.tick.selector, true);
         require(
-            !sessionAccess.requiresWalletEscalation(address(target), target.tick.selector, 0),
-            "routine call escalated"
+            !sessionAccess.requiresWalletEscalation(address(target), target.tick.selector, 0), "routine call escalated"
         );
         require(
             sessionAccess.requiresWalletEscalation(address(target), target.tick.selector, 1),
@@ -189,11 +278,15 @@ contract HighCountrySessionAccess420Test {
     function testRoutineSessionRequiresExactLiveSmartAccountGrant() public {
         _enableRoutineGrant();
         require(
-            sessionAccess.isRoutineSessionAuthorized(address(account), SESSION_KEY, address(target), target.tick.selector),
+            sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
             "valid routine session rejected"
         );
         require(
-            !sessionAccess.isRoutineSessionAuthorized(address(account), SESSION_KEY, address(target), target.risky.selector),
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.risky.selector
+            ),
             "wrong selector accepted"
         );
     }
@@ -202,31 +295,55 @@ contract HighCountrySessionAccess420Test {
         _enableRoutineGrant();
         account.setAuthorizationEpoch(2);
         require(
-            !sessionAccess.isRoutineSessionAuthorized(address(account), SESSION_KEY, address(target), target.tick.selector),
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
             "stale session accepted"
+        );
+    }
+
+    function testAccountCannotSubstituteCapabilityRegistry() public {
+        _enableRoutineGrant();
+        MockCapabilityRegistryHCSession rogueRegistry = new MockCapabilityRegistryHCSession();
+        MockSmartAccountHCSession rogueAccount = new MockSmartAccountHCSession(address(rogueRegistry));
+        rogueAccount.setSessionEpoch(SESSION_KEY, 1);
+        rogueRegistry.setGrant(
+            keccak256("rogue"),
+            SESSION_KEY,
+            rogueAccount.accountComponentId(),
+            CapabilityIds420.SESSION_EXECUTE,
+            rogueAccount.sessionScope(address(target), target.tick.selector),
+            true
+        );
+        require(
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(rogueAccount), SESSION_KEY, address(target), target.tick.selector
+            ),
+            "substituted registry accepted"
         );
     }
 
     function testRevokedOrInactiveGrantFailsClosed() public {
         (, bytes32 scopeHash) = _enableRoutineGrant();
         registry.setAuthorized(
-            SESSION_KEY,
-            account.accountComponentId(),
-            CapabilityIds420.SESSION_EXECUTE,
-            scopeHash,
-            false
+            SESSION_KEY, account.accountComponentId(), CapabilityIds420.SESSION_EXECUTE, scopeHash, false
         );
         require(
-            !sessionAccess.isRoutineSessionAuthorized(address(account), SESSION_KEY, address(target), target.tick.selector),
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(account), SESSION_KEY, address(target), target.tick.selector
+            ),
             "inactive grant accepted"
         );
     }
 
     function testRoutinePolicyAdministrationIsCapabilityAuthorized() public {
         authorization.setAllowed(false);
-        (bool ok,) = address(sessionAccess).call(
-            abi.encodeWithSelector(sessionAccess.setRoutineCall.selector, address(target), target.tick.selector, true)
-        );
+        (bool ok,) = address(sessionAccess)
+            .call(
+                abi.encodeWithSelector(
+                    sessionAccess.setRoutineCall.selector, address(target), target.tick.selector, true
+                )
+            );
         require(!ok, "unauthorized routine call policy update accepted");
     }
 }

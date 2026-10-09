@@ -15,7 +15,9 @@ interface IGrowerProfileMigration {
         bool exists;
     }
 
-    function getProfile(uint64 profileId) external view returns (GrowerProfile memory);
+    function getProfile(
+        uint64 profileId
+    ) external view returns (GrowerProfile memory);
 }
 
 /// @notice HC-PA.3 deterministic guest/registered profile claim registry.
@@ -59,13 +61,13 @@ contract GuestProfileMigration {
         uint32 policyVersion
     );
     event MigrationObjectConsumed(
-        bytes32 indexed sourceProfileId,
-        bytes32 indexed objectId,
-        CanonicalObjectKind indexed kind,
-        bytes32 payloadHash
+        bytes32 indexed sourceProfileId, bytes32 indexed objectId, CanonicalObjectKind indexed kind, bytes32 payloadHash
     );
 
-    constructor(address authorization_, address growerProfiles_) {
+    constructor(
+        address authorization_,
+        address growerProfiles_
+    ) {
         require(authorization_ != address(0) && growerProfiles_ != address(0), "HC-PA: zero address");
         authorization = IHighCountryAuthorization(authorization_);
         growerProfiles = IGrowerProfileMigration(growerProfiles_);
@@ -89,10 +91,8 @@ contract GuestProfileMigration {
         ProfileClaim storage existing = _claims[sourceProfileId];
         if (existing.exists) {
             require(
-                existing.growerProfileId == growerProfileId
-                    && existing.account == msg.sender
-                    && existing.manifestRoot == manifestRoot
-                    && existing.policyVersion == policyVersion,
+                existing.growerProfileId == growerProfileId && existing.account == msg.sender
+                    && existing.manifestRoot == manifestRoot && existing.policyVersion == policyVersion,
                 "HC-PA: conflicting replay"
             );
             return false;
@@ -139,7 +139,9 @@ contract GuestProfileMigration {
         emit MigrationObjectConsumed(sourceProfileId, objectId, kind, payloadHash);
     }
 
-    function getClaim(bytes32 sourceProfileId) external view returns (ProfileClaim memory) {
+    function getClaim(
+        bytes32 sourceProfileId
+    ) external view returns (ProfileClaim memory) {
         ProfileClaim memory claim = _claims[sourceProfileId];
         require(claim.exists, "HC-PA: claim not found");
         return claim;
@@ -152,10 +154,14 @@ contract GuestProfileMigration {
         bytes32 payloadHash,
         uint32 policyVersion
     ) public pure returns (bytes32) {
-        return keccak256(abi.encode("HC.PA.MIGRATION.OBJECT.V1", sourceProfileId, objectId, kind, payloadHash, policyVersion));
+        return keccak256(
+            abi.encode("HC.PA.MIGRATION.OBJECT.V1", sourceProfileId, objectId, kind, payloadHash, policyVersion)
+        );
     }
 
-    function _auth(bytes32 sourceProfileId) private view {
+    function _auth(
+        bytes32 sourceProfileId
+    ) private view {
         authorization.requireAuthorized(
             AuthorizationRequest({
                 principal: msg.sender,
@@ -167,7 +173,11 @@ contract GuestProfileMigration {
         );
     }
 
-    function _verifyProof(bytes32[] calldata proof, bytes32 root, bytes32 leaf) private pure returns (bool) {
+    function _verifyProof(
+        bytes32[] calldata proof,
+        bytes32 root,
+        bytes32 leaf
+    ) private pure returns (bool) {
         bytes32 computed = leaf;
         for (uint256 i = 0; i < proof.length; ++i) {
             bytes32 sibling = proof[i];

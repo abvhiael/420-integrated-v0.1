@@ -53,7 +53,11 @@ contract HighCountryAuthorizationTest {
         require(!authorization.isAuthorized(request), "zero principal authorized");
     }
 
-    function _setGrant(uint64 validFrom, uint64 validUntil, bool revoked) private {
+    function _setGrant(
+        uint64 validFrom,
+        uint64 validUntil,
+        bool revoked
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: MODULE_ID,
@@ -71,18 +75,15 @@ contract HighCountryAuthorizationTest {
 
     function _request() private view returns (AuthorizationRequest memory) {
         return AuthorizationRequest({
-            principal: address(this),
-            moduleId: MODULE_ID,
-            actionId: ACTION_ID,
-            scopeHash: SCOPE_HASH,
-            amount: AMOUNT
+            principal: address(this), moduleId: MODULE_ID, actionId: ACTION_ID, scopeHash: SCOPE_HASH, amount: AMOUNT
         });
     }
 
-    function _requireAuthorizedReverts(AuthorizationRequest memory request) private returns (bool) {
-        (bool ok,) = address(authorization).call(
-            abi.encodeWithSelector(authorization.requireAuthorized.selector, request)
-        );
+    function _requireAuthorizedReverts(
+        AuthorizationRequest memory request
+    ) private returns (bool) {
+        (bool ok,) =
+            address(authorization).call(abi.encodeWithSelector(authorization.requireAuthorized.selector, request));
         return !ok;
     }
 }

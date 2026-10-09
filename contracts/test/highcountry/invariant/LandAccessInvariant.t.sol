@@ -13,37 +13,59 @@ import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
 contract MockRegionRegistryHC3Invariant {
-    function exists(uint16 regionId) external pure returns (bool) { return regionId >= 1 && regionId <= 3; }
+    function exists(
+        uint16 regionId
+    ) external pure returns (bool) {
+        return regionId >= 1 && regionId <= 3;
+    }
 }
 
 contract MockGenesisRegistryHC3Invariant is IGenesisRegistry {
     GenesisRoots private _roots;
     bool public finalized = true;
     bool public genesisAuthorityEnabled;
-    function roots() external view returns (GenesisRoots memory) { return _roots; }
-    function setRoots(GenesisRoots calldata newRoots) external { _roots = newRoots; }
-    function finalizeGenesis() external { finalized = true; genesisAuthorityEnabled = false; }
+
+    function roots() external view returns (GenesisRoots memory) {
+        return _roots;
+    }
+
+    function setRoots(
+        GenesisRoots calldata newRoots
+    ) external {
+        _roots = newRoots;
+    }
+
+    function finalizeGenesis() external {
+        finalized = true;
+        genesisAuthorityEnabled = false;
+    }
 }
 
 contract LandAccessInvariantHandler {
     LandRegistry public immutable land;
     PublicCultivationAccess public immutable publicAccess;
 
-    constructor(LandRegistry land_, PublicCultivationAccess publicAccess_) {
+    constructor(
+        LandRegistry land_,
+        PublicCultivationAccess publicAccess_
+    ) {
         land = land_;
         publicAccess = publicAccess_;
     }
 
-    function stepSetOccupancy(uint256 salt) external {
-        address(land).call(
-            abi.encodeWithSelector(
-                land.setOccupancy.selector,
-                uint64(1),
-                address(uint160(uint256(keccak256(abi.encode("occupant", salt))) | 1)),
-                LandRegistry.OccupancyKind.LEASE,
-                keccak256(abi.encode("lease", salt))
-            )
-        );
+    function stepSetOccupancy(
+        uint256 salt
+    ) external {
+        address(land)
+            .call(
+                abi.encodeWithSelector(
+                    land.setOccupancy.selector,
+                    uint64(1),
+                    address(uint160(uint256(keccak256(abi.encode("occupant", salt))) | 1)),
+                    LandRegistry.OccupancyKind.LEASE,
+                    keccak256(abi.encode("lease", salt))
+                )
+            );
     }
 
     function stepClearOccupancy() external {
@@ -58,13 +80,21 @@ contract LandAccessInvariantHandler {
         address(publicAccess).call(abi.encodeWithSelector(publicAccess.release.selector, uint64(1)));
     }
 
-    function stepAttemptDuplicateLand(uint256 salt) external {
-        address(land).call(
-            abi.encodeWithSelector(
-                land.registerParcel.selector,
-                uint64(1), uint16(2), address(this), uint32(99), keccak256("MUTATED"), keccak256(abi.encode("mutated", salt))
-            )
-        );
+    function stepAttemptDuplicateLand(
+        uint256 salt
+    ) external {
+        address(land)
+            .call(
+                abi.encodeWithSelector(
+                    land.registerParcel.selector,
+                    uint64(1),
+                    uint16(2),
+                    address(this),
+                    uint32(99),
+                    keccak256("MUTATED"),
+                    keccak256(abi.encode("mutated", salt))
+                )
+            );
     }
 }
 
@@ -89,14 +119,49 @@ contract LandAccessInvariantTest is InvariantTarget420 {
         _grant(address(this), ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, 1, 10, keccak256("inv:land-register"));
         land.registerParcel(1, 1, address(this), 10, ORIGINAL_TYPE, ORIGINAL_METADATA);
 
-        _grant(address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, 1, 10, keccak256("inv:plot-register"));
+        _grant(
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_REGISTER,
+            1,
+            10,
+            keccak256("inv:plot-register")
+        );
         publicAccess.registerPublicPlot(1, 1, 10);
 
         handler = new LandAccessInvariantHandler(land, publicAccess);
-        _grant(address(handler), ModuleIds.LAND_REGISTRY, ActionIds.LAND_SET_OCCUPANCY, 1, 0, keccak256("inv:set-occupancy"));
-        _grant(address(handler), ModuleIds.LAND_REGISTRY, ActionIds.LAND_CLEAR_OCCUPANCY, 1, 0, keccak256("inv:clear-occupancy"));
-        _grant(address(handler), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_ALLOCATE, 1, 1, keccak256("inv:allocate"));
-        _grant(address(handler), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_RELEASE, 1, 1, keccak256("inv:release"));
+        _grant(
+            address(handler),
+            ModuleIds.LAND_REGISTRY,
+            ActionIds.LAND_SET_OCCUPANCY,
+            1,
+            0,
+            keccak256("inv:set-occupancy")
+        );
+        _grant(
+            address(handler),
+            ModuleIds.LAND_REGISTRY,
+            ActionIds.LAND_CLEAR_OCCUPANCY,
+            1,
+            0,
+            keccak256("inv:clear-occupancy")
+        );
+        _grant(
+            address(handler),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_ALLOCATE,
+            1,
+            1,
+            keccak256("inv:allocate")
+        );
+        _grant(
+            address(handler),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_RELEASE,
+            1,
+            1,
+            keccak256("inv:release")
+        );
         targetContract(address(handler));
     }
 
@@ -113,7 +178,10 @@ contract LandAccessInvariantTest is InvariantTarget420 {
         PublicCultivationAccess.PublicPlot memory plot = publicAccess.getPlot(1);
         require(publicAccess.publicCapacityOnParcel(1) <= land.growCapacityOf(1), "HC-INV-LAND-007: land overbooked");
         require(plot.allocatedCapacity <= plot.growCapacity, "HC-INV-LAND-007: plot overbooked");
-        require(publicAccess.availableCapacity(1) + plot.allocatedCapacity == plot.growCapacity, "HC-INV-LAND-007: capacity not conserved");
+        require(
+            publicAccess.availableCapacity(1) + plot.allocatedCapacity == plot.growCapacity,
+            "HC-INV-LAND-007: capacity not conserved"
+        );
     }
 
     function invariant_HC_INV_LAND_008_OccupancyStateIsCanonical() public view {

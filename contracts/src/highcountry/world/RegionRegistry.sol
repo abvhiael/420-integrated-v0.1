@@ -27,27 +27,41 @@ contract RegionRegistry {
 
     event RegionRegistered(uint16 indexed regionId, bytes32 metadataHash, bytes32 climateProfileId, bytes32 rulesetId);
 
-    constructor(address authorization_, address genesisRegistry_) {
+    constructor(
+        address authorization_,
+        address genesisRegistry_
+    ) {
         if (authorization_ == address(0) || genesisRegistry_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
         genesisRegistry = IGenesisRegistry(genesisRegistry_);
     }
 
-    function getRegion(uint16 regionId) external view returns (RegionRecord memory) {
+    function getRegion(
+        uint16 regionId
+    ) external view returns (RegionRecord memory) {
         RegionRecord memory region = _regions[regionId];
         if (!region.exists) revert HCInvalidRegion(regionId);
         return region;
     }
 
-    function exists(uint16 regionId) public view returns (bool) {
+    function exists(
+        uint16 regionId
+    ) public view returns (bool) {
         return _regions[regionId].exists;
     }
 
-    function registerFoundingRegion(uint16 regionId, bytes32 metadataHash, bytes32 climateProfileId, bytes32 rulesetId) external {
+    function registerFoundingRegion(
+        uint16 regionId,
+        bytes32 metadataHash,
+        bytes32 climateProfileId,
+        bytes32 rulesetId
+    ) external {
         if (genesisRegistry.finalized()) revert HCAlreadyExists();
         if (regionId == 0 || regionId > FOUNDING_REGION_COUNT) revert HCInvalidRegion(regionId);
         if (_regions[regionId].exists) revert HCAlreadyExists();
-        if (metadataHash == bytes32(0) || climateProfileId == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidRegion(regionId);
+        if (metadataHash == bytes32(0) || climateProfileId == bytes32(0) || rulesetId == bytes32(0)) {
+            revert HCInvalidRegion(regionId);
+        }
 
         authorization.requireAuthorized(
             AuthorizationRequest({
@@ -66,7 +80,9 @@ contract RegionRegistry {
             rulesetId: rulesetId,
             exists: true
         });
-        unchecked { regionCount += 1; }
+        unchecked {
+            regionCount += 1;
+        }
         emit RegionRegistered(regionId, metadataHash, climateProfileId, rulesetId);
     }
 

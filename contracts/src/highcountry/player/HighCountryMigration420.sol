@@ -8,7 +8,9 @@ import { ActionIds } from "../constants/ActionIds.sol";
 import { HighCountryGamingIds } from "./HighCountryGamingIds.sol";
 
 interface IHighCountryGamingMigrationBridge420 {
-    function growerProfileIdOfMigrationClaim(bytes32 claimId) external view returns (uint64);
+    function growerProfileIdOfMigrationClaim(
+        bytes32 claimId
+    ) external view returns (uint64);
 }
 
 interface IGameClaimsMigration420 {
@@ -23,27 +25,31 @@ interface IGameClaimsMigration420 {
         bool cancelled;
         bool exists;
     }
-    function claim(bytes32 claimId) external view returns (MigrationClaim memory);
+    function claim(
+        bytes32 claimId
+    ) external view returns (MigrationClaim memory);
 }
 
 library HighCountryMigrationCommitments420 {
     bytes32 internal constant GUEST_STATE_DOMAIN = keccak256("420/HC/GUEST_STATE/V1");
     bytes32 internal constant PAYLOAD_DOMAIN = keccak256("420/HC/MIGRATION_PAYLOAD/V1");
 
-    function guestState(bytes32 guestAccountCommitment, uint64 saveRevision, bytes32 stateHash)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function guestState(
+        bytes32 guestAccountCommitment,
+        uint64 saveRevision,
+        bytes32 stateHash
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode(GUEST_STATE_DOMAIN, guestAccountCommitment, saveRevision, stateHash));
     }
 
-    function payload(bytes32 guestStateCommitment, uint64 growerProfileId, uint32 schemaVersion, bytes32 payloadBodyHash)
-        internal
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encode(PAYLOAD_DOMAIN, guestStateCommitment, growerProfileId, schemaVersion, payloadBodyHash));
+    function payload(
+        bytes32 guestStateCommitment,
+        uint64 growerProfileId,
+        uint32 schemaVersion,
+        bytes32 payloadBodyHash
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(abi.encode(PAYLOAD_DOMAIN, guestStateCommitment, growerProfileId, schemaVersion, payloadBodyHash));
     }
 }
 
@@ -73,18 +79,24 @@ contract HighCountryMigration420 {
         bytes32 migrationPayloadHash
     );
 
-    constructor(address authorization_, address gamingBridge_, address gameClaims_) {
-        if (authorization_ == address(0) || gamingBridge_ == address(0) || gameClaims_ == address(0)) revert ZeroAddress();
+    constructor(
+        address authorization_,
+        address gamingBridge_,
+        address gameClaims_
+    ) {
+        if (authorization_ == address(0) || gamingBridge_ == address(0) || gameClaims_ == address(0)) {
+            revert ZeroAddress();
+        }
         authorization = IHighCountryAuthorization(authorization_);
         gamingBridge = IHighCountryGamingMigrationBridge420(gamingBridge_);
         gameClaims = IGameClaimsMigration420(gameClaims_);
     }
 
-    function guestStateCommitment(bytes32 guestAccountCommitment, uint64 saveRevision, bytes32 stateHash)
-        external
-        pure
-        returns (bytes32)
-    {
+    function guestStateCommitment(
+        bytes32 guestAccountCommitment,
+        uint64 saveRevision,
+        bytes32 stateHash
+    ) external pure returns (bytes32) {
         return HighCountryMigrationCommitments420.guestState(guestAccountCommitment, saveRevision, stateHash);
     }
 
@@ -105,13 +117,15 @@ contract HighCountryMigration420 {
         bytes32 expectedGuestStateCommitment,
         bytes32 expectedPayloadHash
     ) public view returns (bool) {
+        if (
+            claimId == bytes32(0) || growerProfileId == 0 || expectedGuestStateCommitment == bytes32(0)
+                || expectedPayloadHash == bytes32(0)
+        ) return false;
         if (appliedMigration[claimId].exists) return false;
         if (gamingBridge.growerProfileIdOfMigrationClaim(claimId) != growerProfileId) return false;
 
         try gameClaims.claim(claimId) returns (IGameClaimsMigration420.MigrationClaim memory migration) {
-            return migration.exists
-                && migration.consumed
-                && !migration.cancelled
+            return migration.exists && migration.consumed && !migration.cancelled
                 && migration.gameId == HighCountryGamingIds.GAME_ID
                 && migration.guestStateCommitment == expectedGuestStateCommitment
                 && migration.migrationPayloadHash == expectedPayloadHash;

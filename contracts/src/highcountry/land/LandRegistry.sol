@@ -19,7 +19,9 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest, GenesisRoots } from "../types/HighCountryTypes.sol";
 
 interface IRegionRegistryHC3 {
-    function exists(uint16 regionId) external view returns (bool);
+    function exists(
+        uint16 regionId
+    ) external view returns (bool);
 }
 
 contract LandRegistry {
@@ -61,14 +63,15 @@ contract LandRegistry {
     );
     event LandOwnerTransferred(uint64 indexed parcelId, address indexed previousOwner, address indexed newOwner);
     event LandOccupancySet(
-        uint64 indexed parcelId,
-        address indexed occupant,
-        OccupancyKind occupancyKind,
-        bytes32 indexed occupancyRef
+        uint64 indexed parcelId, address indexed occupant, OccupancyKind occupancyKind, bytes32 indexed occupancyRef
     );
     event LandOccupancyCleared(uint64 indexed parcelId, address indexed previousOccupant, bytes32 indexed occupancyRef);
 
-    constructor(address authorization_, address regionRegistry_, address genesisRegistry_) {
+    constructor(
+        address authorization_,
+        address regionRegistry_,
+        address genesisRegistry_
+    ) {
         if (authorization_ == address(0) || regionRegistry_ == address(0) || genesisRegistry_ == address(0)) {
             revert HCZeroAddress();
         }
@@ -111,7 +114,10 @@ contract LandRegistry {
         _register(parcelId, regionId, owner, growCapacity, parcelType, metadataHash, false);
     }
 
-    function transferOwner(uint64 parcelId, address newOwner) external {
+    function transferOwner(
+        uint64 parcelId,
+        address newOwner
+    ) external {
         if (newOwner == address(0)) revert HCZeroAddress();
         LandParcel storage parcel = _requireParcel(parcelId);
         _requireAuthorized(ActionIds.LAND_TRANSFER, parcelId, 0);
@@ -140,7 +146,9 @@ contract LandRegistry {
         emit LandOccupancySet(parcelId, occupant, occupancyKind, occupancyRef);
     }
 
-    function clearOccupancy(uint64 parcelId) external {
+    function clearOccupancy(
+        uint64 parcelId
+    ) external {
         LandParcel storage parcel = _requireParcel(parcelId);
         if (parcel.occupant == address(0)) revert HCInvalidState();
 
@@ -153,29 +161,39 @@ contract LandRegistry {
         emit LandOccupancyCleared(parcelId, previousOccupant, previousRef);
     }
 
-    function effectiveOperator(uint64 parcelId) external view returns (address) {
+    function effectiveOperator(
+        uint64 parcelId
+    ) external view returns (address) {
         LandParcel memory parcel = _parcels[parcelId];
         if (!parcel.exists) revert HCNotFound();
         return parcel.occupant == address(0) ? parcel.owner : parcel.occupant;
     }
 
-    function growCapacityOf(uint64 parcelId) external view returns (uint32) {
+    function growCapacityOf(
+        uint64 parcelId
+    ) external view returns (uint32) {
         LandParcel memory parcel = _parcels[parcelId];
         if (!parcel.exists) revert HCNotFound();
         return parcel.growCapacity;
     }
 
-    function regionIdOf(uint64 parcelId) external view returns (uint16) {
+    function regionIdOf(
+        uint64 parcelId
+    ) external view returns (uint16) {
         LandParcel memory parcel = _parcels[parcelId];
         if (!parcel.exists) revert HCNotFound();
         return parcel.regionId;
     }
 
-    function exists(uint64 parcelId) external view returns (bool) {
+    function exists(
+        uint64 parcelId
+    ) external view returns (bool) {
         return _parcels[parcelId].exists;
     }
 
-    function getParcel(uint64 parcelId) external view returns (LandParcel memory) {
+    function getParcel(
+        uint64 parcelId
+    ) external view returns (LandParcel memory) {
         LandParcel memory parcel = _parcels[parcelId];
         if (!parcel.exists) revert HCNotFound();
         return parcel;
@@ -214,7 +232,9 @@ contract LandRegistry {
             genesisParcel: isGenesis,
             exists: true
         });
-        unchecked { parcelCount += 1; }
+        unchecked {
+            parcelCount += 1;
+        }
         emit LandParcelRegistered(parcelId, regionId, owner, growCapacity, parcelType, metadataHash, isGenesis);
     }
 
@@ -230,12 +250,18 @@ contract LandRegistry {
         if (_parcels[parcelId].exists) revert HCAlreadyExists();
     }
 
-    function _requireParcel(uint64 parcelId) private view returns (LandParcel storage parcel) {
+    function _requireParcel(
+        uint64 parcelId
+    ) private view returns (LandParcel storage parcel) {
         parcel = _parcels[parcelId];
         if (!parcel.exists) revert HCNotFound();
     }
 
-    function _requireAuthorized(bytes32 actionId, uint64 parcelId, uint256 amount) private view {
+    function _requireAuthorized(
+        bytes32 actionId,
+        uint64 parcelId,
+        uint256 amount
+    ) private view {
         authorization.requireAuthorized(
             AuthorizationRequest({
                 principal: msg.sender,
@@ -247,7 +273,11 @@ contract LandRegistry {
         );
     }
 
-    function _verifyProof(bytes32[] calldata proof, bytes32 root, bytes32 leaf) private pure returns (bool) {
+    function _verifyProof(
+        bytes32[] calldata proof,
+        bytes32 root,
+        bytes32 leaf
+    ) private pure returns (bool) {
         bytes32 computed = leaf;
         for (uint256 i = 0; i < proof.length; ++i) {
             bytes32 sibling = proof[i];

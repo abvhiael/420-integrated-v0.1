@@ -26,9 +26,8 @@ contract RulesetRouterTest {
         bytes32 domain = keccak256("HC.RULES.DOMAIN.CULTIVATION");
         bytes32 unknownRulesetId = keccak256("unknown");
         _grantRoute(domain);
-        (bool ok,) = address(router).call(
-            abi.encodeWithSelector(router.setRulesetFor.selector, domain, unknownRulesetId)
-        );
+        (bool ok,) =
+            address(router).call(abi.encodeWithSelector(router.setRulesetFor.selector, domain, unknownRulesetId));
         require(!ok, "unknown ruleset routed");
     }
 
@@ -55,7 +54,9 @@ contract RulesetRouterTest {
         require(!ok, "unauthorized route changed");
     }
 
-    function _grantRegister(bytes32 rulesetId) private {
+    function _grantRegister(
+        bytes32 rulesetId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.RULESET_REGISTRY,
@@ -71,7 +72,9 @@ contract RulesetRouterTest {
         capabilityRegistry.setGrant(keccak256(abi.encode("register", rulesetId)), grant, 0);
     }
 
-    function _grantRoute(bytes32 domain) private {
+    function _grantRoute(
+        bytes32 domain
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.RULESET_ROUTER,

@@ -9,7 +9,9 @@ import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 contract HighCountryAuthorization is IHighCountryAuthorization {
     ICapabilityRegistry420 private immutable _capabilityRegistry;
 
-    constructor(address capabilityRegistry_) {
+    constructor(
+        address capabilityRegistry_
+    ) {
         if (capabilityRegistry_ == address(0)) revert HCZeroAddress();
         _capabilityRegistry = ICapabilityRegistry420(capabilityRegistry_);
     }
@@ -18,21 +20,21 @@ contract HighCountryAuthorization is IHighCountryAuthorization {
         return address(_capabilityRegistry);
     }
 
-    function isAuthorized(AuthorizationRequest calldata request) public view returns (bool) {
+    function isAuthorized(
+        AuthorizationRequest calldata request
+    ) public view returns (bool) {
         if (request.principal == address(0) || request.moduleId == bytes32(0) || request.actionId == bytes32(0)) {
             return false;
         }
 
         return _capabilityRegistry.isAuthorized(
-            request.principal,
-            request.moduleId,
-            request.actionId,
-            request.scopeHash,
-            request.amount
+            request.principal, request.moduleId, request.actionId, request.scopeHash, request.amount
         );
     }
 
-    function requireAuthorized(AuthorizationRequest calldata request) external view {
+    function requireAuthorized(
+        AuthorizationRequest calldata request
+    ) external view {
         if (!isAuthorized(request)) {
             revert HCUnauthorized(request.principal, request.moduleId, request.actionId);
         }

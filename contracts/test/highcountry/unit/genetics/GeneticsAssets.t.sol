@@ -35,8 +35,10 @@ contract GeneticsAssetsTest {
         clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
         phenotypes = new PhenotypeRegistry(address(auth), address(genomes));
 
-        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("asset:roots"));
-        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("asset:finalize"));
+        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, genesis.ADMIN_SCOPE(), keccak256("asset:roots"));
+        _grant(
+            ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, genesis.ADMIN_SCOPE(), keccak256("asset:finalize")
+        );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
 
@@ -46,8 +48,12 @@ contract GeneticsAssetsTest {
     }
 
     function testSeedLotIsTransferableAndKeepsGenomeProvenance() public {
-        _grantAmount(ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(1)), keccak256("seed:create"), 42);
-        _grantAmount(ModuleIds.SEED_REGISTRY, ActionIds.SEED_TRANSFER, bytes32(uint256(1)), keccak256("seed:transfer"), 42);
+        _grantAmount(
+            ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(1)), keccak256("seed:create"), 42
+        );
+        _grantAmount(
+            ModuleIds.SEED_REGISTRY, ActionIds.SEED_TRANSFER, bytes32(uint256(1)), keccak256("seed:transfer"), 42
+        );
         seeds.registerSeedLot(1, genomeId, 9, address(this), 42, keccak256("seed:meta"));
         seeds.transfer(1, address(0xBEEF));
         SeedRegistry.SeedLot memory lot = seeds.getSeedLot(1);
@@ -56,7 +62,13 @@ contract GeneticsAssetsTest {
     }
 
     function testCloneIsTransferableAndTracksCanonicalMother() public {
-        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(77)), keccak256("clone:mother:create"), 4);
+        _grantAmount(
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_REGISTER,
+            bytes32(uint256(77)),
+            keccak256("clone:mother:create"),
+            4
+        );
         mothers.registerMother(77, genomeId, address(this), 4, keccak256("clone:mother:meta"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(2)), keccak256("clone:create"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_TRANSFER, bytes32(uint256(2)), keccak256("clone:transfer"));
@@ -69,22 +81,42 @@ contract GeneticsAssetsTest {
 
     function testCloneRejectsMissingOrMismatchedMother() public {
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(20)), keccak256("clone:missing"));
-        (bool missingOk,) = address(clones).call(abi.encodeWithSelector(clones.registerClone.selector, 20, genomeId, 999, address(this), keccak256("missing")));
+        (bool missingOk,) = address(clones)
+            .call(
+                abi.encodeWithSelector(
+                    clones.registerClone.selector, 20, genomeId, 999, address(this), keccak256("missing")
+                )
+            );
         require(!missingOk, "missing mother accepted");
 
         bytes32 otherGenome = keccak256("asset:other-genome");
         _grant(ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, otherGenome, keccak256("asset:other-genome:grant"));
         genomes.registerGenome(otherGenome, keccak256("asset:other-line"), keccak256("asset:other-meta"), _loci2());
-        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(78)), keccak256("clone:mismatch:mother"), 4);
+        _grantAmount(
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_REGISTER,
+            bytes32(uint256(78)),
+            keccak256("clone:mismatch:mother"),
+            4
+        );
         mothers.registerMother(78, otherGenome, address(this), 4, keccak256("clone:mismatch:mother:meta"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(21)), keccak256("clone:mismatch"));
-        (bool mismatchOk,) = address(clones).call(abi.encodeWithSelector(clones.registerClone.selector, 21, genomeId, 78, address(this), keccak256("mismatch")));
+        (bool mismatchOk,) = address(clones)
+            .call(
+                abi.encodeWithSelector(
+                    clones.registerClone.selector, 21, genomeId, 78, address(this), keccak256("mismatch")
+                )
+            );
         require(!mismatchOk, "mismatched mother genome accepted");
     }
 
     function testMotherHasFiniteCuttingBudgetAndRetires() public {
-        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("mother:create"), 2);
-        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(3)), keccak256("mother:cut"), 1);
+        _grantAmount(
+            ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("mother:create"), 2
+        );
+        _grantAmount(
+            ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(3)), keccak256("mother:cut"), 1
+        );
         mothers.registerMother(3, genomeId, address(this), 2, keccak256("mother:meta"));
         mothers.consumeCutting(3);
         mothers.consumeCutting(3);
@@ -101,32 +133,72 @@ contract GeneticsAssetsTest {
         phenotypes.registerPhenotype(phenotypeId, genomeId, 12, 9, keccak256("traits"), keccak256("phenotype:meta"));
         PhenotypeRegistry.PhenotypeRecord memory p = phenotypes.getPhenotype(phenotypeId);
         require(p.genomeId == genomeId && p.sourcePlantId == 12 && p.sourceBreedingEventId == 9, "phenotype provenance");
-        (bool ok,) = address(phenotypes).call(abi.encodeWithSelector(phenotypes.registerPhenotype.selector, phenotypeId, genomeId, 99, 99, keccak256("mutated"), keccak256("mutated:meta")));
+        (bool ok,) = address(phenotypes)
+            .call(
+                abi.encodeWithSelector(
+                    phenotypes.registerPhenotype.selector,
+                    phenotypeId,
+                    genomeId,
+                    99,
+                    99,
+                    keccak256("mutated"),
+                    keccak256("mutated:meta")
+                )
+            );
         require(!ok, "phenotype mutated");
     }
 
-    function _grant(bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function _grant(
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         _grantAmount(moduleId, actionId, scopeHash, grantId, 0);
     }
 
-    function _grantAmount(bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId, uint256 amount) private {
+    function _grantAmount(
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId,
+        uint256 amount
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
-            principal: address(this), componentId: moduleId, capabilityId: actionId, scopeHash: scopeHash,
-            perCallLimit: 0, periodLimit: 0, periodSeconds: 0, validFrom: 0,
-            validUntil: uint64(block.timestamp + 1 days), revoked: false
+            principal: address(this),
+            componentId: moduleId,
+            capabilityId: actionId,
+            scopeHash: scopeHash,
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 1 days),
+            revoked: false
         });
         caps.setGrant(grantId, grant, amount);
     }
 
     function _loci() private pure returns (bytes32[28] memory loci) {
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode("asset:locus", i));
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode("asset:locus", i));
+        }
     }
 
     function _loci2() private pure returns (bytes32[28] memory loci) {
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode("asset:locus:two", i));
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode("asset:locus:two", i));
+        }
     }
 
     function _roots() private pure returns (GenesisRoots memory) {
-        return GenesisRoots({manifestRoot: keccak256("m"), parameterRoot: keccak256("p"), rulesetRoot: keccak256("r"), landRoot: keccak256("l"), randomnessRoot: keccak256("x"), qualificationRoot: keccak256("q")});
+        return GenesisRoots({
+            manifestRoot: keccak256("m"),
+            parameterRoot: keccak256("p"),
+            rulesetRoot: keccak256("r"),
+            landRoot: keccak256("l"),
+            randomnessRoot: keccak256("x"),
+            qualificationRoot: keccak256("q")
+        });
     }
 }

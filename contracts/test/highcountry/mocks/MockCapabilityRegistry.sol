@@ -7,11 +7,17 @@ contract MockCapabilityRegistry is ICapabilityRegistry420 {
     mapping(bytes32 => CapabilityGrant) private _grants;
     mapping(bytes32 => bytes32) private _grantIdsByAuthorizationKey;
 
-    function grant(bytes32 grantId) external view returns (CapabilityGrant memory) {
+    function grant(
+        bytes32 grantId
+    ) external view returns (CapabilityGrant memory) {
         return _grants[grantId];
     }
 
-    function setGrant(bytes32 grantId, CapabilityGrant calldata capabilityGrant, uint256 amount) external {
+    function setGrant(
+        bytes32 grantId,
+        CapabilityGrant calldata capabilityGrant,
+        uint256 amount
+    ) external {
         _grants[grantId] = capabilityGrant;
         _grantIdsByAuthorizationKey[
             keccak256(
@@ -26,7 +32,10 @@ contract MockCapabilityRegistry is ICapabilityRegistry420 {
         ] = grantId;
     }
 
-    function setRevoked(bytes32 grantId, bool revoked) external {
+    function setRevoked(
+        bytes32 grantId,
+        bool revoked
+    ) external {
         _grants[grantId].revoked = revoked;
     }
 

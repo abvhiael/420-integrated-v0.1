@@ -13,10 +13,15 @@ import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
 interface ISmartAccountHCSession420 {
     function authorizationEpoch() external view returns (uint64);
-    function sessionEpoch(address key) external view returns (uint64);
+    function sessionEpoch(
+        address key
+    ) external view returns (uint64);
     function accountComponentId() external view returns (bytes32);
     function capabilityRegistry() external view returns (ICapabilityRegistryExtended420);
-    function sessionScope(address target, bytes4 selector) external view returns (bytes32);
+    function sessionScope(
+        address target,
+        bytes4 selector
+    ) external view returns (bytes32);
 }
 
 /// @notice High Country policy bridge for SmartAccount420 session grants.
@@ -32,7 +37,9 @@ contract HighCountrySessionAccess420 {
 
     error SessionCallRequiresWallet();
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
     }
@@ -44,7 +51,11 @@ contract HighCountrySessionAccess420 {
 
     /// @notice Capability-authorized administration of the exact High Country call surface
     ///         that may be delegated to a SmartAccount420 session key.
-    function setRoutineCall(address target, bytes4 selector, bool allowed) external {
+    function setRoutineCall(
+        address target,
+        bytes4 selector,
+        bool allowed
+    ) external {
         if (target == address(0) || selector == bytes4(0)) revert HCInvalidState();
 
         authorization.requireAuthorized(
@@ -61,21 +72,29 @@ contract HighCountrySessionAccess420 {
         emit RoutineSessionCallSet(target, selector, allowed);
     }
 
-    function isRoutineCall(address target, bytes4 selector, uint256 nativeValue) public view returns (bool) {
+    function isRoutineCall(
+        address target,
+        bytes4 selector,
+        uint256 nativeValue
+    ) public view returns (bool) {
         return nativeValue == 0 && routineCall[target][selector];
     }
 
     /// @notice Anything not explicitly routine, or any native-value transfer, must escalate
     ///         to owner/passkey authority in the wallet rather than a background game session.
-    function requiresWalletEscalation(address target, bytes4 selector, uint256 nativeValue)
-        external
-        view
-        returns (bool)
-    {
+    function requiresWalletEscalation(
+        address target,
+        bytes4 selector,
+        uint256 nativeValue
+    ) external view returns (bool) {
         return !isRoutineCall(target, selector, nativeValue);
     }
 
-    function requireRoutineCall(address target, bytes4 selector, uint256 nativeValue) external view {
+    function requireRoutineCall(
+        address target,
+        bytes4 selector,
+        uint256 nativeValue
+    ) external view {
         if (!isRoutineCall(target, selector, nativeValue)) revert SessionCallRequiresWallet();
     }
 
@@ -123,7 +142,10 @@ contract HighCountrySessionAccess420 {
         } catch {
             return false;
         }
-        if (scopeHash != SmartAccountScopes420.sessionCallScope(smartAccount, componentId, accountEpoch, target, selector)) {
+        if (
+            scopeHash
+                != SmartAccountScopes420.sessionCallScope(smartAccount, componentId, accountEpoch, target, selector)
+        ) {
             return false;
         }
 
@@ -132,25 +154,23 @@ contract HighCountrySessionAccess420 {
         } catch {
             return false;
         }
-        if (address(registry) == address(0)) return false;
+        // An account cannot select an attacker-controlled authorization oracle.
+        if (address(registry) == address(0) || address(registry) != authorization.capabilityRegistry()) return false;
 
         bytes32 grantId;
-        try registry.activeGrantId(sessionKey, componentId, CapabilityIds420.SESSION_EXECUTE, scopeHash)
-            returns (bytes32 activeGrant)
-        {
+        try registry.activeGrantId(sessionKey, componentId, CapabilityIds420.SESSION_EXECUTE, scopeHash) returns (
+            bytes32 activeGrant
+        ) {
             grantId = activeGrant;
         } catch {
             return false;
         }
         if (grantId == bytes32(0)) return false;
 
-        try ICapabilityRegistry420(address(registry)).isAuthorized(
-            sessionKey,
-            componentId,
-            CapabilityIds420.SESSION_EXECUTE,
-            scopeHash,
-            0
-        ) returns (bool allowed) {
+        try ICapabilityRegistry420(address(registry))
+            .isAuthorized(sessionKey, componentId, CapabilityIds420.SESSION_EXECUTE, scopeHash, 0) returns (
+            bool allowed
+        ) {
             return allowed;
         } catch {
             return false;

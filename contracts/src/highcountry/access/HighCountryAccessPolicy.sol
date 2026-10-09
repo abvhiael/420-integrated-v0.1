@@ -23,21 +23,40 @@ contract HighCountryAccessPolicy {
         LICENSING_RIGHT
     }
 
-    function canUse(ProgressiveGamingTypes.AccessState state, ProgressiveGamingTypes.Capability capability)
-        external pure returns (bool)
-    {
-        if (capability == ProgressiveGamingTypes.Capability.CORE_GAMEPLAY || capability == ProgressiveGamingTypes.Capability.LOCAL_SAVE) return true;
-        if (capability == ProgressiveGamingTypes.Capability.CLOUD_SAVE || capability == ProgressiveGamingTypes.Capability.CROSS_DEVICE_RECOVERY || capability == ProgressiveGamingTypes.Capability.STANDARD_LEADERBOARD) {
+    function canUse(
+        ProgressiveGamingTypes.AccessState state,
+        ProgressiveGamingTypes.Capability capability
+    ) external pure returns (bool) {
+        if (
+            capability == ProgressiveGamingTypes.Capability.CORE_GAMEPLAY
+                || capability == ProgressiveGamingTypes.Capability.LOCAL_SAVE
+        ) return true;
+        if (
+            capability == ProgressiveGamingTypes.Capability.CLOUD_SAVE
+                || capability == ProgressiveGamingTypes.Capability.CROSS_DEVICE_RECOVERY
+                || capability == ProgressiveGamingTypes.Capability.STANDARD_LEADERBOARD
+        ) {
             return uint8(state) >= uint8(ProgressiveGamingTypes.AccessState.REGISTERED);
         }
-        if (capability == ProgressiveGamingTypes.Capability.WALLET_EXCLUSIVE_CONTENT || capability == ProgressiveGamingTypes.Capability.ECOSYSTEM_REWARDS || capability == ProgressiveGamingTypes.Capability.VERIFIED_OWNERSHIP || capability == ProgressiveGamingTypes.Capability.CROSS_GAME_INTEROPERABILITY) {
+        if (
+            capability == ProgressiveGamingTypes.Capability.WALLET_EXCLUSIVE_CONTENT
+                || capability == ProgressiveGamingTypes.Capability.ECOSYSTEM_REWARDS
+                || capability == ProgressiveGamingTypes.Capability.VERIFIED_OWNERSHIP
+                || capability == ProgressiveGamingTypes.Capability.CROSS_GAME_INTEROPERABILITY
+        ) {
             return uint8(state) >= uint8(ProgressiveGamingTypes.AccessState.WALLET_CONNECTED);
         }
         return state == ProgressiveGamingTypes.AccessState.ECOSYSTEM_PARTICIPANT;
     }
 
-    function authorityFor(StateObject objectType) external pure returns (ProgressiveGamingTypes.StateAuthority) {
-        if (objectType == StateObject.ROUTINE_EQUIPMENT_LEVEL || objectType == StateObject.ORDINARY_FARM_PROGRESSION || objectType == StateObject.COMMON_INVENTORY || objectType == StateObject.IRRIGATION_UPGRADE || objectType == StateObject.LOCAL_MISSION_PROGRESS) {
+    function authorityFor(
+        StateObject objectType
+    ) external pure returns (ProgressiveGamingTypes.StateAuthority) {
+        if (
+            objectType == StateObject.ROUTINE_EQUIPMENT_LEVEL || objectType == StateObject.ORDINARY_FARM_PROGRESSION
+                || objectType == StateObject.COMMON_INVENTORY || objectType == StateObject.IRRIGATION_UPGRADE
+                || objectType == StateObject.LOCAL_MISSION_PROGRESS
+        ) {
             return ProgressiveGamingTypes.StateAuthority.LOCAL_GAME_STATE;
         }
         if (objectType == StateObject.REGISTERED_ACCOUNT_SAVE || objectType == StateObject.REGISTERED_CLOUD_PROGRESS) {
@@ -46,6 +65,11 @@ contract HighCountryAccessPolicy {
         return ProgressiveGamingTypes.StateAuthority.CANONICAL_ECOSYSTEM_STATE;
     }
 
-    function walletRequiredForCoreGameplay() external pure returns (bool) { return false; }
-    function walletMayGrantStatAdvantage() external pure returns (bool) { return false; }
+    function walletRequiredForCoreGameplay() external pure returns (bool) {
+        return false;
+    }
+
+    function walletMayGrantStatAdvantage() external pure returns (bool) {
+        return false;
+    }
 }

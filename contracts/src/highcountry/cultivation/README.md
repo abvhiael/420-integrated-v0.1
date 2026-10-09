@@ -28,7 +28,7 @@ HC-6 closes the first persistent plant-simulation layer on top of HC-3 land and 
 
 Accepted environments deterministically derive `stressBps` and `qualityBps`. Both are bounded to 0–10,000 and always conserve `stressBps + qualityBps == 10,000`. Stress is the mean normalized deviation outside the V1 ideal band for each dimension; conditions inside an ideal band contribute zero stress.
 
-Phenotype expression seals the genome ID, ruleset ID, six-dimensional environment, stress score, and quality score into one immutable expression hash. After expression, environment mutation and phenotype rerolling are denied.
+Phenotype expression verifies the supplied genome equals the canonical plant genome, then seals the genome ID, ruleset ID, six-dimensional environment, stress score, and quality score into one immutable expression hash. After expression, environment mutation and phenotype rerolling are denied.
 
 ## HC-6 invariants
 

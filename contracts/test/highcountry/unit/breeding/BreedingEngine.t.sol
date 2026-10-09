@@ -31,8 +31,20 @@ contract BreedingEngineTest {
         randomness = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(randomness));
 
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("hc5:roots"));
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("hc5:finalize"));
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_SET_ROOTS,
+            genesis.ADMIN_SCOPE(),
+            keccak256("hc5:roots")
+        );
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_FINALIZE,
+            genesis.ADMIN_SCOPE(),
+            keccak256("hc5:finalize")
+        );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
 
@@ -43,11 +55,25 @@ contract BreedingEngineTest {
     }
 
     function testBreedingRequiresDistinctExistingParents() public {
-        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_REQUEST, bytes32(uint256(1)), keccak256("hc5:req:1"));
-        (bool ok,) = address(breeding).call(abi.encodeWithSelector(
-            breeding.requestBreeding.selector,
-            uint64(1), parentA, parentA, keccak256("child"), keccak256("line:c"), keccak256("meta:c")
-        ));
+        _grant(
+            address(this),
+            ModuleIds.BREEDING_ENGINE,
+            ActionIds.BREEDING_REQUEST,
+            bytes32(uint256(1)),
+            keccak256("hc5:req:1")
+        );
+        (bool ok,) = address(breeding)
+            .call(
+                abi.encodeWithSelector(
+                    breeding.requestBreeding.selector,
+                    uint64(1),
+                    parentA,
+                    parentA,
+                    keccak256("child"),
+                    keccak256("line:c"),
+                    keccak256("meta:c")
+                )
+            );
         require(!ok, "same-parent breeding allowed");
     }
 
@@ -62,24 +88,47 @@ contract BreedingEngineTest {
         bytes32 metadataHash = keccak256("meta:c");
         bytes32 contextHash = keccak256(abi.encode(eventId, parentA, parentB, childId, lineId, metadataHash));
         bytes32 requestId = keccak256(abi.encode(keccak256("HC.RANDOM.BREEDING.V1"), contextHash));
-        _grant(address(breeding), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("hc5:rand:req"));
-        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_FULFILL, requestId, keccak256("hc5:rand:fulfill"));
-        _grant(address(breeding), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, childId, keccak256("hc5:child:grant"));
+        _grant(
+            address(breeding),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_REQUEST,
+            requestId,
+            keccak256("hc5:rand:req")
+        );
+        _grant(
+            address(this),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_FULFILL,
+            requestId,
+            keccak256("hc5:rand:fulfill")
+        );
+        _grant(
+            address(breeding),
+            ModuleIds.GENOME_REGISTRY,
+            ActionIds.GENOME_REGISTER,
+            childId,
+            keccak256("hc5:child:grant")
+        );
 
         breeding.requestBreeding(eventId, parentA, parentB, childId, lineId, metadataHash);
         bytes32 entropy = keccak256("entropy:2");
         randomness.fulfill(requestId, entropy);
         RandomnessCoordinator.RandomRequest memory beforeConsume = randomness.getRequest(requestId);
-        require(beforeConsume.provider == address(this) && beforeConsume.fulfilled && !beforeConsume.consumed, "provider provenance");
+        require(
+            beforeConsume.provider == address(this) && beforeConsume.fulfilled && !beforeConsume.consumed,
+            "provider provenance"
+        );
 
         breeding.finalizeBreeding(eventId);
         require(genomes.exists(childId), "child genome missing");
         RandomnessCoordinator.RandomRequest memory afterConsume = randomness.getRequest(requestId);
         require(afterConsume.consumed && afterConsume.entropy == entropy, "request not consumed exactly once");
 
-        (bool replayFulfill,) = address(randomness).call(abi.encodeWithSelector(randomness.fulfill.selector, requestId, keccak256("entropy:again")));
+        (bool replayFulfill,) = address(randomness)
+            .call(abi.encodeWithSelector(randomness.fulfill.selector, requestId, keccak256("entropy:again")));
         require(!replayFulfill, "randomness replay allowed");
-        (bool replayFinalize,) = address(breeding).call(abi.encodeWithSelector(breeding.finalizeBreeding.selector, eventId));
+        (bool replayFinalize,) =
+            address(breeding).call(abi.encodeWithSelector(breeding.finalizeBreeding.selector, eventId));
         require(!replayFinalize, "breeding finalized twice");
     }
 
@@ -87,17 +136,36 @@ contract BreedingEngineTest {
         bytes32 requestId = keccak256("standalone:request");
         bytes32 domain = keccak256("standalone:domain");
         bytes32 contextHash = keccak256("standalone:context");
-        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("standalone:req"));
-        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_FULFILL, requestId, keccak256("standalone:fulfill"));
+        _grant(
+            address(this),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_REQUEST,
+            requestId,
+            keccak256("standalone:req")
+        );
+        _grant(
+            address(this),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_FULFILL,
+            requestId,
+            keccak256("standalone:fulfill")
+        );
         randomness.request(requestId, domain, contextHash);
         randomness.fulfill(requestId, keccak256("standalone:entropy"));
         bytes32 entropy = randomness.consume(requestId, domain, contextHash);
         require(entropy == keccak256("standalone:entropy"), "consume entropy mismatch");
-        (bool replay,) = address(randomness).call(abi.encodeWithSelector(randomness.consume.selector, requestId, domain, contextHash));
+        (bool replay,) = address(randomness)
+            .call(abi.encodeWithSelector(randomness.consume.selector, requestId, domain, contextHash));
         require(!replay, "randomness consumed twice");
     }
 
-    function _grant(address principal, bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function _grant(
+        address principal,
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: principal,
             componentId: moduleId,
@@ -113,14 +181,22 @@ contract BreedingEngineTest {
         caps.setGrant(grantId, grant, 0);
     }
 
-    function _loci(string memory prefix) private pure returns (bytes32[28] memory loci) {
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode(prefix, i));
+    function _loci(
+        string memory prefix
+    ) private pure returns (bytes32[28] memory loci) {
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode(prefix, i));
+        }
     }
 
     function _roots() private pure returns (GenesisRoots memory) {
         return GenesisRoots({
-            manifestRoot: keccak256("m"), parameterRoot: keccak256("p"), rulesetRoot: keccak256("r"),
-            landRoot: keccak256("l"), randomnessRoot: keccak256("x"), qualificationRoot: keccak256("q")
+            manifestRoot: keccak256("m"),
+            parameterRoot: keccak256("p"),
+            rulesetRoot: keccak256("r"),
+            landRoot: keccak256("l"),
+            randomnessRoot: keccak256("x"),
+            qualificationRoot: keccak256("q")
         });
     }
 }

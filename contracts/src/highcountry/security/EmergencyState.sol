@@ -14,12 +14,16 @@ contract EmergencyState is IEmergencyState {
 
     mapping(bytes32 => bool) private _restricted;
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
     }
 
-    function isAllowedDomain(bytes32 domain) public pure returns (bool) {
+    function isAllowedDomain(
+        bytes32 domain
+    ) public pure returns (bool) {
         return domain == EmergencyDomains.CULTIVATION || domain == EmergencyDomains.BREEDING
             || domain == EmergencyDomains.MANUFACTURING || domain == EmergencyDomains.MARKET
             || domain == EmergencyDomains.LEASE || domain == EmergencyDomains.LICENSE
@@ -29,11 +33,16 @@ contract EmergencyState is IEmergencyState {
             || domain == EmergencyDomains.MODULE_ACTIVATION;
     }
 
-    function isRestricted(bytes32 domain) external view returns (bool) {
+    function isRestricted(
+        bytes32 domain
+    ) external view returns (bool) {
         return _restricted[domain];
     }
 
-    function setRestricted(bytes32 domain, bool restricted) external {
+    function setRestricted(
+        bytes32 domain,
+        bool restricted
+    ) external {
         if (!isAllowedDomain(domain)) revert HCEmergencyDomainNotAllowed(domain);
 
         bytes32 actionId = restricted ? ActionIds.EMERGENCY_RESTRICT : ActionIds.EMERGENCY_RELEASE;

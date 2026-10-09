@@ -22,3 +22,7 @@ Never place raw guest saves, account credentials, cloud-save payloads, device id
 Migration fails closed when the claim is unconsumed, cancelled, from another game, bound to another grower, hash-mismatched, already applied, or when the applying service lacks the High Country migration capability.
 
 The receipt is intentionally idempotent: one shared migration claim can be applied to High Country state exactly once.
+
+## Operational qualification limitation
+
+The one-time receipt constrains on-chain records only. The apply-save-then-markApplied sequence is not atomic across a database and the chain: crashes, concurrent workers and reorgs can cause duplicate or mismatched off-chain effects. Production integration requires a durable unique claim key, transactional save application/outbox, reconciliation and finality-aware retry behavior. The current shared Player/Profile Service is process-local and does not provide these guarantees. Zero grower IDs and zero commitments are rejected by the receipt verifier. See the repository audit before deployment.

@@ -56,6 +56,8 @@ try{
   await fill('publish-product-form',{productId:p.product_id,listingId:b32(2),revision:1});await submit('publish-product-form');assert.equal(f.db.get('SELECT publish_state FROM products').publish_state,'draft');pass('broadcast alone cannot publish; finalized listing binding required');
   f.listings.set(b32(2),{seller:seller.address.toLowerCase(),metadataHash:p.metadata_hash,revision:'1',active:true,quantity:'10',available:'7',unitPrice:'100',quoteAsset:address(100),expiresAt:'0',policyActive:true,adapterActive:true,reporterActive:true,saleMechanism:fixedPrice,policyId:b32(5),settlementAdapterId:b32(6),inventory:{originalOffered:'10',reserved:'1',sold:'2',released:'0',initialized:true}});
   await submit('publish-product-form');assert.equal(f.db.get('SELECT publish_state FROM products').publish_state,'published');
+  f.db.run('INSERT INTO catalogue_projection VALUES(?,?,?,?,?)',b32(2),JSON.stringify({...f.listings.get(b32(2)),metadataHash:p.metadata_hash,revision:1}),b32(100),100,1);
+
   await fill('stock-form',{listingId:b32(2)});await submit('stock-form');assert.match(await page.locator('#stock-result').textContent(),/"available": "7"/);assert.match(await page.locator('#stock-result').textContent(),/"finalized": true/);pass('finalized product publication and canonical reserved/sold stock display');
   await fill('listing-form',{method:'reviseListing',revision:1,quantity:'11'});await submit('listing-form');assert.equal(await page.locator('#error').textContent(),'quantity_immutable');await fill('listing-form',{quantity:'10',unitPrice:'120'});await page.locator('#listing-form button').click();await page.locator('#review').waitFor({state:'visible'});assert.match(await page.locator('#review-terms').textContent(),/reviseListing/);await page.locator('#cancel-transaction').click();pass('revision review preserves immutable quantity and rejects attempted restock');
   await fill('publish-store-form',{slug:'browser-store',status:'published'});await submit('publish-store-form');assert.equal((await fetch(origin+'/v1/storefronts/browser-store').then(r=>r.json())).data.public_description,'Paper merchant');assert.equal((await fetch(origin+'/v1/media/'+media)).status,200);
@@ -69,8 +71,9 @@ try{
   await shopper.locator('#filters button').click();
   await shopper.locator('#products article').first().waitFor();
   assert.equal(await shopper.locator('#products article').count(),1);
-  assert.equal(await shopper.locator('#products article button').last().isDisabled(),true);
-  assert.equal(await shopper.locator('#cart li').count(),0);
+  assert.equal(await shopper.locator('#products article button').last().isEnabled(),true);
+  await shopper.locator('#products article button').last().click();
+  assert.match(await shopper.locator('#cart').textContent(),/BROWSER/);
   await shopper.locator('#clear').click();assert.equal(await shopper.locator('#cart li').count(),0);
   assert.deepEqual((await new AxeBuilder({page:shopper}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations,[]);
   await shopper.setViewportSize({width:320,height:740});

@@ -7,3 +7,16 @@ export function normalizeScienceObservations420(response,{chainId,max=50,now=Dat
   return Object.freeze({project:x.project,provider:x.provider,credit:x.creditedEvent,unit:x.creditUnit,status:stale?'STALE':x.eligibility,finality:x.finality,ageMs:Math.max(0,now-x.observedAt),reward:'No $420 entitlement',authoritative:false});
  });
 }
+
+export async function fetchScienceObservations420({indexerUrl,chainId,fetchImpl=fetch,now=Date.now()}={}){
+ if(typeof indexerUrl!=='string'||!/^https?:\/\//.test(indexerUrl)||typeof chainId!=='string'||!/^\d+$/.test(chainId))throw Error('science read unavailable');
+ const u=new URL(indexerUrl.replace(/\/$/,'')+'/v1/compute/external-science');
+ u.searchParams.set('chainId',chainId);u.searchParams.set('limit','50');
+ let r;
+ try{r=await fetchImpl(u.toString(),{headers:{accept:'application/json'},cache:'no-store'});}
+ catch{throw Error('science read unavailable');}
+ if(!r?.ok)throw Error('science read unavailable');
+ let body;try{body=await r.json()}catch{throw Error('science read unavailable')}
+ if(body?.canonicalAuthority!==false)throw Error('untrusted science response');
+ return normalizeScienceObservations420(body.data,{chainId,now});
+}

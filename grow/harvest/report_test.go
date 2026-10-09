@@ -46,11 +46,13 @@ func TestPlanningCalendarAndProductionExport(t *testing.T) {
 		t.Fatalf("readonly reviewer changed schedule: %v", err)
 	}
 	db.rows = []Record{
-		{TenantID: "t", FacilityID: "f", ZoneID: "z", PlantID: "p1", ID: "h1",
+		{TenantID: "t", FacilityID: "f", ZoneID: "z", PlantID: "p1", ID: "h1", CultivarID: "cultivar-a",
 			WeightGrams: 12, HarvestedAt: now.Add(-time.Hour), Actor: "u", Source: "=HYPERLINK(1)"},
 	}
 	report, err := s.Production(context.Background(), scope, "f", "z", now.Add(-24*time.Hour), now, 10)
 	if err != nil || report.Count != 1 || report.TotalGrams != 12 || len(report.Periods) != 1 ||
+		len(report.ByPlant) != 1 || report.ByPlant[0].ID != "p1" ||
+		len(report.ByCultivar) != 1 || report.ByCultivar[0].ID != "cultivar-a" ||
 		!strings.Contains(string(report.CSV), "OBSERVED,h1,p1,f,z") || !strings.Contains(string(report.CSV), "'=HYPERLINK(1)") {
 		t.Fatalf("report=%+v err=%v", report, err)
 	}

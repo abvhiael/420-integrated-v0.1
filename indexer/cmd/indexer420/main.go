@@ -98,6 +98,9 @@ func run() error {
 	runtimeHealth := api.NewRuntimeHealth()
 	runtimeHealth.MarkHealthy()
 	backend := api.NewStoreBackend(durable, registryCatalog).WithConsensusProvider(consensusProvider).WithRuntimeHealth(runtimeHealth)
+	if sciencePath := os.Getenv("INDEXER_EXTERNAL_SCIENCE_SNAPSHOT_PATH"); sciencePath != "" {
+		backend.WithScienceReader(api.ScienceSnapshotReader{Path: sciencePath})
+	}
 	server := &http.Server{
 		Addr:              httpAddr,
 		Handler:           api.NewServer(backend).Handler(),

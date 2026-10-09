@@ -42,6 +42,14 @@ contract RefundUntrustedCaller420 {
         (bool ok,)=address(manager).call(abi.encodeWithSelector(manager.fundAuthorizedRefund.selector,paymentId,asset,amount));
         return ok;
     }
+    function cancel(RefundManager420 manager,bytes32 paymentId,address asset,uint256 amount) external returns(bool) {
+        (bool ok,)=address(manager).call(abi.encodeWithSelector(manager.cancelAuthorizedRefundFunding.selector,paymentId,asset,amount));
+        return ok;
+    }
+    function execute(RefundManager420 manager,bytes32 paymentId,address asset,address payer,uint256 amount) external returns(bool) {
+        (bool ok,)=address(manager).call(abi.encodeWithSelector(manager.executeFundedRefund.selector,keccak256("untrusted-refund"),paymentId,asset,payer,amount,uint256(100),bytes32(0)));
+        return ok;
+    }
 }
 contract RefundManager420FundedTest {
     address internal constant BUYER=address(0xBEEF);
@@ -118,8 +126,8 @@ contract RefundManager420FundedTest {
         RefundUntrustedCaller420 attacker=new RefundUntrustedCaller420();
         require(!attacker.attempt(m,PAYMENT,address(token),1),"non governance funded");
         m.fundAuthorizedRefund(PAYMENT,address(token),20);
-        (bool cancelOk,)=address(attacker).call(abi.encodeWithSignature("cancel(address,bytes32,address,uint256)",address(m),PAYMENT,address(token),1));
-        require(!cancelOk,"unauthorized cancel");
+        require(!attacker.cancel(m,PAYMENT,address(token),1),"unauthorized cancel");
+        require(!attacker.execute(m,PAYMENT,address(token),BUYER,1),"unauthorized payout");
         require(m.authorizedRefundEscrow(PAYMENT)==20,"escrow changed");
     }
 

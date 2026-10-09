@@ -34,6 +34,8 @@ contract GeneticsAssetsTest {
         mothers = new MotherRegistry(address(auth), address(genomes));
         clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
         phenotypes = new PhenotypeRegistry(address(auth), address(genomes));
+        _grant(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_BIND_CLONES, mothers.BIND_SCOPE(), keccak256("mother:bind"));
+        mothers.bindCloneRegistry(address(clones));
 
         _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, genesis.ADMIN_SCOPE(), keccak256("asset:roots"));
         _grant(
@@ -72,6 +74,7 @@ contract GeneticsAssetsTest {
         mothers.registerMother(77, genomeId, address(this), 4, keccak256("clone:mother:meta"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(2)), keccak256("clone:create"));
         _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_TRANSFER, bytes32(uint256(2)), keccak256("clone:transfer"));
+        _grantCloneCut(77);
         clones.registerClone(2, genomeId, 77, address(this), keccak256("clone:meta"));
         clones.transfer(2, address(0xCAFE));
         CloneRegistry.CloneRecord memory c = clones.getClone(2);
@@ -111,20 +114,37 @@ contract GeneticsAssetsTest {
     }
 
     function testMotherHasFiniteCuttingBudgetAndRetires() public {
-        _grantAmount(
-            ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("mother:create"), 2
-        );
-        _grantAmount(
-            ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(3)), keccak256("mother:cut"), 1
-        );
+        _grantAmount(ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER,
+            bytes32(uint256(3)), keccak256("mother:create"), 2);
         mothers.registerMother(3, genomeId, address(this), 2, keccak256("mother:meta"));
-        mothers.consumeCutting(3);
-        mothers.consumeCutting(3);
+        _grantCloneCut(3);
+        for (uint64 n = 30; n < 32; ++n) {
+            _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER,
+                bytes32(uint256(n)), keccak256(abi.encode("clone", n)));
+            clones.registerClone(n, genomeId, 3, address(this), keccak256(abi.encode(n)));
+        }
         MotherRegistry.MotherRecord memory m = mothers.getMother(3);
         require(m.retired && m.cuttingsTaken == 2, "mother finite lifecycle");
         require(mothers.remainingCuttings(3) == 0, "mother remaining");
-        (bool ok,) = address(mothers).call(abi.encodeWithSelector(mothers.consumeCutting.selector, 3));
-        require(!ok, "retired mother reused");
+        _grant(ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER,
+            bytes32(uint256(32)), keccak256("clone:exhaust"));
+        (bool ok,) = address(clones).call(abi.encodeCall(clones.registerClone,
+            (32, genomeId, 3, address(this), keccak256("exhaust"))));
+        require(!ok && !clones.exists(32), "retired mother reused");
+        (ok,) = address(mothers).call(abi.encodeCall(mothers.consumeCutting, (3)));
+        require(!ok, "unlinked mother consumption");
+    }
+
+    function _grantCloneCut(uint64 motherId) private {
+        ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
+            principal: address(clones),
+            componentId: ModuleIds.MOTHER_REGISTRY,
+            capabilityId: ActionIds.MOTHER_CONSUME_CUTTING,
+            scopeHash: bytes32(uint256(motherId)),
+            perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
+            validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
+        });
+        caps.setGrant(keccak256(abi.encode("clone:cut", motherId)), grant, 1);
     }
 
     function testPhenotypeIsPermanentProvenanceRecord() public {

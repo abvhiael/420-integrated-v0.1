@@ -45,3 +45,16 @@ Added `genesis/svc3/travelapp/doobr_audit3_test.go` with:
 Pending exact-SHA CI execution of `python3 scripts/validate-gen-svc-3.py`, `python3 scripts/verify-doobr-audit-2.py`, `go test ./genesis/svc3/... ./cmd/420travel/...`, `go vet ./genesis/svc3/... ./cmd/420travel/...`, and `go build -o /tmp/420travel ./cmd/420travel`. Level 2 not required; Level 3 deferred. No source gateway, funds, authority, frozen address, or protocol configuration changed.
 
 Next: `DOOBR-AUDIT-4 — Run targeted compatibility regression tests and Genesis validators`.
+
+## Verified exact-SHA Level 1 CI result (2026-10-09)
+- Qualifying implementation SHA: `357bc194412661dae06f91602a2470c0ea4a6f57`.
+- Workflow run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989374640
+- Job: `scoped-qualification` (114019333133) — SUCCESS.
+- GEN-SVC-3 canonical Python validator: PASS.
+- DOOBR-AUDIT-2 architecture verifier: PASS.
+- GEN-SVC-3 Go tests (includes `doobr_audit3_test.go`): PASS.
+- `go vet ./genesis/svc3/... ./cmd/420travel/...`: PASS.
+- Go server build: PASS.
+- Exact checkout SHA assertion: PASS.
+- No required scoped steps failed or skipped. Level 2 not required for this standalone boundary audit; Level 3 deferred.
+- Disposition: DOOBR-AUDIT-3 Level 1 COMPLETE, limited to Genesis compatibility objects and fail-closed gateway; no independent delivery app is authorized or qualified.

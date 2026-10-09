@@ -50,7 +50,7 @@ BEGIN
  IF changed<>1 THEN RAISE EXCEPTION 'inventory lot unavailable or balance violation' USING ERRCODE='23514'; END IF;
  RETURN NEW;
 END $$;
-CREATE TRIGGER inventory_balance BEFORE INSERT ON grow_private.inventory_ledger
+CREATE TRIGGER inventory_balance AFTER INSERT ON grow_private.inventory_ledger
  FOR EACH ROW EXECUTE FUNCTION grow_private.apply_inventory_ledger();
 CREATE FUNCTION grow_private.reject_inventory_mutation() RETURNS trigger
  LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'inventory ledger is immutable'; END $$;

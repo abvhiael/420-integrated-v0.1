@@ -42,6 +42,17 @@ Chromium. Accessibility context setup was corrected without suppressing rules.
 Mobile long IDs were wrapped rather than hiding overflow. A low-severity esbuild
 advisory was fixed by pinning patched 0.28.2; no audit suppression.
 
+Exact-SHA candidate `17e80d93511adc1f9910664f07f3c0496d4dd9bb` passed all
+implementation tests but service PR run 37958894307/job 113916366949 and builder
+PR run 37958894581/job 113916367378 failed only whitespace verification. Logs
+identify pre-existing main Grow evidence Markdown line 3 (two trailing spaces).
+This is a CI merge-comparison defect, not failing Commerce behavior. The checker
+now uses the exact PR base for accumulated app changes, imported main parent for
+reconciliation pushes, and immediate parent for ordinary commits. Regression
+fixtures preserve old main whitespace while rejecting new app whitespace and
+malformed base SHA. No assertion or source check was suppressed. Final SHA must
+be requalified; superseded failures are never substituted as passing evidence.
+
 ## Implementation and individual exit criteria
 
 - Wallet/onboarding: approved SHA-pinned build manifest; same-origin HTTPS production;

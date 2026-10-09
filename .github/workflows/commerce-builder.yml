@@ -2,9 +2,9 @@ name: Commerce merchant builder fast qualification
 on:
   push:
     branches: ['audit/420commerce-*']
-    paths: ['commerce/**', 'packages/420-sdk/**', '.github/workflows/commerce-builder.yml']
+    paths: ['commerce/**', 'packages/420-sdk/**', '.github/workflows/commerce-builder.yml', 'scripts/commerce/check-patch.mjs']
   pull_request:
-    paths: ['commerce/**', 'packages/420-sdk/**', '.github/workflows/commerce-builder.yml']
+    paths: ['commerce/**', 'packages/420-sdk/**', '.github/workflows/commerce-builder.yml', 'scripts/commerce/check-patch.mjs']
   workflow_dispatch:
 permissions:
   contents: read
@@ -48,4 +48,6 @@ jobs:
       - name: Builder build, lint, Wallet adversarial and real service browser UX/accessibility integration
         run: npm run qualify --prefix commerce/web
       - name: Whitespace verification
-        run: git diff --check HEAD^ HEAD
+        env:
+          COMMERCE_PATCH_BASE: ${{ github.event.pull_request.base.sha || '' }}
+        run: node scripts/commerce/check-patch.mjs

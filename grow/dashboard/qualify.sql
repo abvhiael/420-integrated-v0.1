@@ -8,12 +8,14 @@ BEGIN;
 INSERT INTO grow_private.memberships(tenant_id,subject_id,role,state)
 VALUES('aaaaaaaa-1111-4111-8111-111111111111','operator','OWNER','ACTIVE')
 ON CONFLICT(tenant_id,subject_id) DO NOTHING;
-INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subject_id,expires_at)
-VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000301',decode(repeat('aa',32),'hex'),'operator',now()+interval '1 hour');
+INSERT INTO grow_private.dashboard_identities(tenant_id,subject_id,cert_fingerprint,enabled)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','operator',decode(repeat('cc',32),'hex'),true);
+INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subject_id,expires_at,identity_fingerprint)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000301',decode(repeat('aa',32),'hex'),'operator',now()+interval '1 hour',decode(repeat('cc',32),'hex'));
 DO $$ BEGIN
  BEGIN
   INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subject_id,expires_at)
-  VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000302',decode(repeat('bb',32),'hex'),'operator',now()+interval '2 days');
+  VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000302',decode(repeat('bb',32),'hex'),'operator',now()+interval '2 days',decode(repeat('cc',32),'hex'));
   RAISE EXCEPTION 'unbounded dashboard session accepted';
  EXCEPTION WHEN check_violation THEN NULL;
  END;
@@ -26,6 +28,16 @@ DO $$ BEGIN
  RAISE EXCEPTION 'session revocation not durable';
  END IF;
 END $$;
+UPDATE grow_private.dashboard_identities SET enabled=false,revoked_at=now()
+WHERE tenant_id='aaaaaaaa-1111-4111-8111-111111111111' AND subject_id='operator';
+DO $ BEGIN
+ IF EXISTS(SELECT 1 FROM grow_private.dashboard_sessions s
+ JOIN grow_private.dashboard_identities i ON i.tenant_id=s.tenant_id AND i.subject_id=s.subject_id
+ AND i.cert_fingerprint=s.identity_fingerprint
+ WHERE s.session_id='aaaaaaaa-0000-4000-8000-000000000301'
+ AND s.revoked_at IS NULL AND i.enabled=true AND i.revoked_at IS NULL)
+ THEN RAISE EXCEPTION 'revoked certificate still authenticates'; END IF;
+END $;
 COMMIT;
 SET ROLE grow_v2_test_runtime;
 BEGIN;

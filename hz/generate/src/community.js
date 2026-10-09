@@ -11,13 +11,17 @@ const authorized = (session, account) => {
 };
 const assertVisibility = v => { if (!["PRIVATE","UNLISTED","PUBLIC"].includes(v)) throw new Error("INVALID_VISIBILITY"); };
 export class CommunityStore420 {
-  constructor({ source, now = () => Date.now() } = {}) {
+  constructor({ source, now = () => Date.now(), production = false, verifySession = null } = {}) {
     if (!source || typeof source.creator !== "function" || typeof source.recording !== "function") throw new Error("SOURCE_REQUIRED");
+    if (production && typeof verifySession !== "function") throw new Error("SESSION_VERIFIER_REQUIRED");
+    this.production = production; this.verifySession = verifySession;
     this.source = source; this.now = now; this.follows = new Map(); this.favorites = new Map();
     this.playlists = new Map(); this.shares = new Map(); this.blocks = new Set();
     this.mutes = new Set(); this.reports = new Map(); this.preferences = new Map(); this.sequence = 0;
   }
-  actor(session) { return authorized(session, requireId(session?.accountRef)); }
+  actor(session) { const actor = authorized(session, requireId(session?.accountRef));
+    if (this.production && this.verifySession({session,actor,scope:"420hz:community:write",audience:"420hz",at:this.now()}) !== true) throw new Error("SESSION_UNVERIFIED");
+    return actor; }
   creator(id) { const x = this.source.creator(requireId(id)); if (!x || x.status !== "ACTIVE" || x.visibility !== "PUBLIC") throw new Error("SOURCE_UNAVAILABLE"); return x; }
   recording(id, allowUnlisted = false) {
     const x = this.source.recording(requireId(id));

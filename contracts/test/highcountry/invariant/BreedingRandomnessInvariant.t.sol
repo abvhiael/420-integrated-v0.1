@@ -65,9 +65,21 @@ contract BreedingRandomnessInvariantTest is InvariantTarget420 {
         randomness = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(randomness));
         EmergencyState emergency = new EmergencyState(address(auth));
-        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_BIND_EMERGENCY, randomness.EMERGENCY_BIND_SCOPE(), keccak256("em:rand"));
+        _grant(
+            address(this),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_BIND_EMERGENCY,
+            randomness.EMERGENCY_BIND_SCOPE(),
+            keccak256("em:rand")
+        );
         randomness.bindEmergencyState(address(emergency));
-        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_BIND_EMERGENCY, breeding.EMERGENCY_BIND_SCOPE(), keccak256("em:breed"));
+        _grant(
+            address(this),
+            ModuleIds.BREEDING_ENGINE,
+            ActionIds.BREEDING_BIND_EMERGENCY,
+            breeding.EMERGENCY_BIND_SCOPE(),
+            keccak256("em:breed")
+        );
         breeding.bindEmergencyState(address(emergency));
 
 

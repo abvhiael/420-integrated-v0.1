@@ -5,7 +5,7 @@ import { ActionIds } from "../constants/ActionIds.sol";
 import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import { HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress, HCEmergencyRestrictionActive } from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 

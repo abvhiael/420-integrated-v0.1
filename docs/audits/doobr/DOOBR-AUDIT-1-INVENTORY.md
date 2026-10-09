@@ -70,3 +70,10 @@ These **9/9 static assertions are not Go runtime tests, nor a GitHub Actions wor
 
 ### Unrelated Cloudflare checks
 For PR #598 head `aac980b9ccda4de5ffe7708d0e039b1514107b97`, Cloudflare Workers builds failed for `420wallet`, `420-integrated-explorer`, `doobtube`, `reeferreview`, and `420-integrated-status`. Cloudflare Pages previews passed for `420travel` and `bonggoggles`. Cloudflare workers concern external app deployments and the audit commit only changes a DOOBR Markdown inventory; **exclude those failures from DOOBR Level 1 eligibility**, unless repository required-check policy independently mandates them. Do not change or suppress global branch protection or CI checks.
+
+## Exact-SHA Level 1 CI execution record
+- Implementation / workflow-trigger commit SHA: `da1934e1b1aee8a91142de71f6485fee80b691f7`.
+- New scoped CI: `.github/workflows/doobr-audit-1-level1.yml`, which checks out `github.sha`; runs the GEN-SVC-3 Python validator, Go tests, `go vet`, Go build, and verifies checkout HEAD equals the trigger SHA.
+- GitHub Actions run: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37984555653
+- At time of this record, `scoped-qualification` is **QUEUED**. No executable PASS/FAIL result is yet established; do not treat queue state as qualification.
+- This is an evidence-only update; the executable scope is the preceding implementation/workflow SHA. A later completed run must be inspected at the individual step level and the outcome appended with an evidence-only commit.

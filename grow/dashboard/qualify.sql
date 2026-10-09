@@ -5,6 +5,9 @@ DO $$ BEGIN
  END IF;
 END $$;
 BEGIN;
+INSERT INTO grow_private.memberships(tenant_id,subject_id,role,state)
+VALUES('aaaaaaaa-1111-4111-8111-111111111111','operator','OWNER','ACTIVE')
+ON CONFLICT(tenant_id,subject_id) DO NOTHING;
 INSERT INTO grow_private.dashboard_sessions(tenant_id,session_id,token_hash,subject_id,expires_at)
 VALUES('aaaaaaaa-1111-4111-8111-111111111111','aaaaaaaa-0000-4000-8000-000000000301',decode(repeat('aa',32),'hex'),'operator',now()+interval '1 hour');
 DO $$ BEGIN

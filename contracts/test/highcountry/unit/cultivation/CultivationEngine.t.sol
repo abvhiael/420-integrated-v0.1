@@ -123,8 +123,13 @@ contract CultivationEngineTest is PlantSourcesFixture {
             keccak256("hc6:bind-rulesets")
         );
         RulesetRouter router = new RulesetRouter(address(auth), address(rulesets));
-        _grant(address(this), ModuleIds.RULESET_ROUTER, ActionIds.RULESET_ROUTE,
-            cultivation.EXPRESSION_RULESET_DOMAIN(), keccak256("hc6:ruleset:route"));
+        _grant(
+            address(this),
+            ModuleIds.RULESET_ROUTER,
+            ActionIds.RULESET_ROUTE,
+            cultivation.EXPRESSION_RULESET_DOMAIN(),
+            keccak256("hc6:ruleset:route")
+        );
         router.setRulesetFor(cultivation.EXPRESSION_RULESET_DOMAIN(), approvedRulesetId);
         cultivation.bindRulesetRegistry(address(rulesets), address(router));
         _grant(

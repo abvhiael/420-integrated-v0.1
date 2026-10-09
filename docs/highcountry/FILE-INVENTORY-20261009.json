@@ -4,8 +4,8 @@
   "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
   "owned": [
     {
-      "path": "docs/highcountry/GAMEPLAY-SPECIFICATION.md",
-      "sha256": "2fbc80785f1f34993e89622d1f4570b206cd6c29e217c002f6977ea75dd1b6ec",
+      "path": "docs/highcountry/qualification/R01.6-level1.json",
+      "sha256": "fa8ee99ef364695613686768e12e85eda70a88a96821efef2dcacd60c86a08b4",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1163,6 +1163,14 @@
     {
       "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
       "sha256": "2a61aa81117332f37910c0c4092b0380cfd75df03d1541ba233a6881d3fe50a1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/GAMEPLAY-SPECIFICATION.md",
+      "sha256": "2fbc80785f1f34993e89622d1f4570b206cd6c29e217c002f6977ea75dd1b6ec",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

@@ -1,0 +1,32 @@
+{
+  "step": "R01.6",
+  "status": "PARTIAL",
+  "qualified_document_head": "6216463d1366d2bd66db1aa282fe01bc1eaeae7d",
+  "main_head": "0ec695481fc84e6066aeae50baf6e0fd3c7f8731",
+  "checks": [
+    {
+      "name": "proposed integer harvest formula",
+      "result": "PASS",
+      "inputs": 10001
+    },
+    {
+      "name": "rounding and maximum base vectors",
+      "result": "PASS",
+      "vectors": 2
+    },
+    {
+      "name": "diff whitespace",
+      "result": "PASS"
+    },
+    {
+      "name": "explicit proposal status",
+      "result": "PASS"
+    }
+  ],
+  "scope": "Document proposal only; no HC-7 implementation or release readiness qualified. Existing foundation evidence remains separately scoped.",
+  "blockers": [
+    "Owner decision on five proposed gameplay/economy rules.",
+    "Exact field, action and event schemas and detailed content catalogues remain later implementation prerequisites."
+  ],
+  "qualification_policy": "Evidence-only commit inherits the exact document head; R01.6 completion and R01.7 milestone qualification remain blocked."
+}

@@ -34,9 +34,9 @@ def main():
         require(k in cfg["deferred_scope"], f"missing deferred scope {k}")
     source = read("genesis/svc3/travelapp/compatibility.go")
     for typename in ["Property", "Host", "Guest", "Availability", "NightlyPrice", "Reservation"]:
-        require(re.search(r"\\btype " + typename + r" struct\\b", source) is not None, f"missing compatibility {typename}")
+        require(re.search(r"\btype " + typename + r" struct\b", source) is not None, f"missing compatibility {typename}")
     for method in ["Reserve", "Quote", "Pay", "Escrow", "CancelAndSettle", "DynamicPrice"]:
-        require(re.search(r"func \\(GenesisTravelTransactions\\) " + method + r"\\([^\\n]*ErrTravelTransactionDisabled", source) is not None, f"{method} no longer statically fails closed")
+        require(re.search(r"func \(GenesisTravelTransactions\) " + method + r"\([^\n]*ErrTravelTransactionDisabled", source) is not None, f"{method} no longer statically fails closed")
     require("travel-compat/v1" in source, "compatibility version mismatch")
     print("BNB-1.1 source-boundary verification PASS; SHA " + head)
 if __name__ == "__main__":

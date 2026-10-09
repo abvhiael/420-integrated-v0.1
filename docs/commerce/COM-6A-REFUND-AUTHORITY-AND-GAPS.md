@@ -51,3 +51,19 @@ This phase subsequently added a **new, explicitly pre-funded payout route** to t
 **Legacy status:** the old `recordRefund` method remains accounting-only and is not treated by Commerce as proof of a transfer. Its allowance accounting now also considers escrowed authorized amounts, preventing those records from stealing budget from funded payouts.
 
 **Qualification:** directly affected canonical Pay/Solidity suite and Commerce service, SDK, browser and integration checks must pass against the same executable implementation SHA; any skipped workflow does not count as success. Application-level Level 2 is required at this shared Pay authority milestone; repository-wide Level 3 remains deferred.
+
+## Finalization phases and Market V1 caveat
+
+The request ID is the canonical Pay `refundId = 0x + Commerce request_id`. Intended governed sequence: (1) merchant signs and stores a request; (2) Genesis governance evaluates and authorizes exactly the amount in `PaymentRegistry420.applyRefund`; (3) Genesis governance supplies the approved asset into `RefundManager420.fundAuthorizedRefund`; (4) governance invokes `executeFundedRefund`, which atomically pays the original payer and records its immutable funded payout proof; (5) for a **fully** refunded payment, the existing permissionless `MarketPaySettlementAdapter420.reportRefund(orderId)` submits canonical Market reporting; for partial payment refunds Market remains in its prior status.
+
+The merchant status endpoint classifies:
+- `PENDING_GOVERNANCE_OR_UNVERIFIED`: durable request, but no verified transfer.
+- `PARTIAL_FUNDED_REFUND_FINALIZED`: exact transferred partial amount proved by the approved on-chain RefundManager.
+- `FUNDS_RETURNED_MARKET_REPORT_PENDING`: fully returned funds with no finalized Market reporter proof yet.
+- `FUNDED_REFUND_MARKET_RECONCILED`: both real funded payout and Market `REFUNDED` with canonical `refundReported(orderId)` at the finalized same source.
+
+**Important existing Market V1 limitation:** its permissionless `reportRefund(orderId)` checks full *Pay accounting state*, not `fundedRefundExecuted`. Consequently a third party could report Market `REFUNDED` after the accounting authorization but before actual return of funds. Commerce explicitly refuses to treat that Market status alone as a successful financial refund. Hardening the frozen immutable Market V1 adapter to require funded transfer proof is a separate governed upstream protocol/version decision; no silent constructor/identity or frozen-address changes are made here.
+
+**Recovery**: The additive `cancelAuthorizedRefundFunding` returns unused, explicitly funded escrow only to the authenticated Genesis-governance caller, with exact native/ERC20 balance-delta checks. It does not reverse Pay authorization or claim a refund. The older note above about no recovery applied before this method was added.
+
+**Pay audit barrier**: The dedicated 420Pay audit CI may fail its frozen PAY-AUDIT-6 materialization due a prior `InvoiceRegistry420 source_blob_sha1` divergence on the Commerce audit branch. This is not a reason to overwrite canonical frozen artifact fingerprints casually; it requires an approved reconciliation and new qualified deployment package. Existing deploys retain old RefundManager bytecode and therefore cannot execute the new entrypoints until governed upgrade/Registry/manifest qualification at COM-8.

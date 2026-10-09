@@ -5,13 +5,18 @@ on:
       - 'docs/audit/420GROW-V2-*.md'
       - 'scripts/verify-grow-v2-*.py'
       - 'grow/security/**'
+      - 'grow/facility/**'
       - 'grow/storage/**'
       - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
   push:
     paths:
       - 'docs/audit/420GROW-V2-*.md'
-      - 'scripts/verify-grow-v2-01.py'
+      - 'scripts/verify-grow-v2-*.py'
+      - 'grow/security/**'
+      - 'grow/storage/**'
+      - 'grow/facility/**'
+      - 'scripts/grow-v2-migrate.py'
       - '.github/workflows/420grow-v2-fast.yml'
   workflow_dispatch:
 permissions:
@@ -68,3 +73,12 @@ jobs:
         run: |
           python3 -m py_compile scripts/grow-v2-migrate.py
           bash grow/storage/test/qualify.sh
+      - name: GROW-V2-04 facility/room/zone authorization and PostgreSQL qualification
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/facility
+          go test -race -count=1 ./grow/facility
+          go vet ./grow/facility
+          test -z "$(gofmt -l grow/facility/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/facility/qualify.sql

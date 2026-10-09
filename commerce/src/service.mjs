@@ -318,7 +318,10 @@ export class CommerceService {
     // Page-local ledger reconciled against finalized Market/Pay, with explicit
     // partial coverage. Never publish a paginated result as all-time revenue.
     integer(offset,0,Number.MAX_SAFE_INTEGER);integer(limit,1,100);
+    const pinned=await this.source();
+    const expectedHash=pinned.blockHash,expectedNumber=pinned.blockNumber;
     const page=await this.merchantOperations(actor,storeId,{offset,limit});
+    requireThat(page.provenance.blockHash===expectedHash&&page.provenance.blockNumber===expectedNumber,'analytics_snapshot_changed',503);
     const totals={orders:0,paid:0,refunded:0,awaitingPayment:0};
     const byAsset={};
     for(const order of page.items) {

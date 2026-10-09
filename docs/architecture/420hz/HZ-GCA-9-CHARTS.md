@@ -15,4 +15,4 @@ No API deployment, public service store, independently validated playback eviden
 
 Targeted CI: `.github/workflows/420hz-gca-9.yml`. The retained generation tests and frozen chart-policy verifier are Level 1; Level 2 app milestone and global Level 3 are deferred unless other documented gates become applicable.
 
-Next: **HZ-GCA-10 — Award seasons and categories** (subject to canonical roadmap verification).
+Next: **HZ-GCA-10 — Awards domain model** (subject to canonical roadmap verification).

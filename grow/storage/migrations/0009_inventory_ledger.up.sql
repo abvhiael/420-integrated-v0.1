@@ -13,6 +13,7 @@ CREATE TABLE grow_private.inventory_lots_v2(
  PRIMARY KEY(tenant_id,lot_id),
  FOREIGN KEY(tenant_id,facility_id,zone_id) REFERENCES grow_private.zones(tenant_id,facility_id,zone_id),
  FOREIGN KEY(tenant_id,harvest_id,facility_id,zone_id) REFERENCES grow_private.harvest_records(tenant_id,harvest_id,facility_id,zone_id),
+ CHECK((kind NOT IN ('SEED','CLONE','EQUIPMENT') OR unit='each')),
  CHECK((kind='HARVEST' AND harvest_id IS NOT NULL AND unit='g')
  OR (kind<>'HARVEST' AND harvest_id IS NULL))
 );

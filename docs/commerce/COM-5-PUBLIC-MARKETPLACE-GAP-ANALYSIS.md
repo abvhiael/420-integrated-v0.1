@@ -45,3 +45,29 @@ Unresolved COM-5 exit criteria:
 - Live RPC, Wallet, deployment and real transaction acceptance still belongs to COM-8, not mock CI.
 
 Do not advance to COM-6 or merge the phase before closing these items. Level 3 full Solidity/Genesis/Integrated/Docs remains reserved for COM-7 accumulated phase closeout.
+
+## Subsequent native Pay implementation and qualification state
+
+Latest executable candidate in this handoff: `491ca1a43de75fbe7f5fa974233d2d5cd5c66654`. This is a candidate, NOT a qualified merge SHA. The branch is still PR #594, audit/420commerce-com-2-upstream-adaptations. Main at most recent verified PR reconciliation: `41d173dbcfbeb8299f54f22e7c049f1fec20336d`.
+
+### Committed code
+- `commerce/web/native-pay.js`: **two explicitly buyer-authorized native $420 stages**, Pay PaymentRegistry420.createPayment followed only after finalized matching SUBMITTED evidence by PaymentRouter420.executeNativeSplitSettlement (single primary recipient); both simulate before send, independently revalidate exact approved binding, onchain invoice/order, payout, account/network, replay and asset/amount. Both broadcasts deliberately remain NOT PAID. Verified live Pay and Market reporter status governs final receipt.
+- `commerce/web/core/wallet.js`: optional approved Pay Router contract is validated by code hash, version and Registry component identity, not invented address. Missing binding fails closed.
+- `commerce/web/public.js`: shopper-triggered stage-specific review and consent; no background sends, fabricated funding, or Pay success on broadcast.
+- `commerce/src/service.mjs` + SDK: native zero-address representation allowed for upstream Market/Pay validation; buyer-scoped canonical order economic terms and finalized paymentId/receiptHash references for receipts.
+- Security: native route additionally requires **independently approved SHA-pinned** native accepted-assets commitment `nativePayment.native420AcceptedAssetsHash` (plus `approved:true`) matching invoice, a simple zero-hash invoice settlement/tip plan, zero-hash merchant payout plan and current activated primary recipient. Absent proof is unavailable. Do not invent an accepted-assets hash.
+- `commerce/web/test/native-pay.test.mjs`: authoritative RPC fixture regression for consent, wrong invoice/order/payout, missing router, premature settlement, replay, rejected signature and pending/paid distinction. `commerce/test/native-receipt.test.mjs` protects native asset semantics and unconfirmed receipt truth. `commerce/web/test/browser.mjs` exercises public shopping against real signed HTTP/SQLite and immutable projected listings, including mobile/axe.
+- Swap routes remain explicitly **unavailable** without a qualified canonical executable quote, adapter, fee and expiry proof. No route is invented.
+- No new custody contract, Commerce service ID, Genesis change or deployment.
+
+### Qualification and nonclaims
+A previous COM-5 service run [37962764866](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37962764866) exposed a genuine test-fixture failure `invalid_item_class`, not a protocol flaw: the new native-asset test passed an arbitrary bytes32 class instead of canonical Market PHYSICAL_GOOD. Corrected in commit `e2a109c0428600edab3cd2b7eec472109a92f9b1`. Superseded runs may be cancelled by subsequent implementation commits and are never final evidence.
+Latest implementation candidate workflows were triggered: [builder 37963673340](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37963673340), [service 37963673248](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37963673248), [upstream 37963673046](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37963673046). At evidence writing they were pending/queued: **not PASS**. Prior passing runs apply only to prior SHAs.
+Level 1 COM-5: **NOT YET QUALIFIED**. Level 2 app milestone: **NOT YET QUALIFIED**. Level 3 repository-wide inventory remains deferred to COM-7; COM-8 live acceptance still requires approved addresses, merchant-issued invoice and governed settlement/finality.
+
+### Remaining completion gates
+1. Verify exact candidate SHA and every required builder/service/upstream job and its completed steps. Diagnose and fix each real failure; changes to executable code force fresh exact-SHA qualification.
+2. Full browser Wallet-to-Pay-to-Market payment lifecycle, seller-issued canonical invoice, buyer Pay creation/settlement, governed inclusion/certification/finality, approved reporter and matching receipt. Mock stages are not live network proof.
+3. Obtain an independently approved same-chain manifest including Pay Router, native asset commitment and approved payout policy; source and document whether any Swap route has a qualified executable quote/fee/health adapter. Without those bindings, production financial controls **must remain disabled**.
+4. Level 2 retained app-specific Market/Pay/Commerce/Indexer/SDK/browser qualification at integration milestone. Keep full global Solidity/Genesis/Integrated/Docs out of ordinary COM-5 step.
+5. COM-5 must NOT be declared COMPLETE or COM-6 started solely from these committed sources.

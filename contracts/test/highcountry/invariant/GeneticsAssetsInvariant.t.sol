@@ -10,6 +10,7 @@ import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry
 import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
 import { CloneRegistry } from "../../../src/highcountry/genetics/CloneRegistry.sol";
 import { MotherRegistry } from "../../../src/highcountry/genetics/MotherRegistry.sol";
+import { MockCanonicalPhenotypeSources } from "../mocks/MockCanonicalPhenotypeSources.sol";
 import { PhenotypeRegistry } from "../../../src/highcountry/genetics/PhenotypeRegistry.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
@@ -109,6 +110,12 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
         mothers = new MotherRegistry(address(auth), address(genomes));
         clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
         phenotypes = new PhenotypeRegistry(address(auth), address(genomes));
+        MockCanonicalPhenotypeSources proven = new MockCanonicalPhenotypeSources(
+            address(auth), address(genomes), genomeId, phenotypeTraits, 55, 44
+        );
+        _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_BIND_PROVENANCE,
+            phenotypes.BIND_SCOPE(), keccak256("phenotype:bind"), 0);
+        phenotypes.bindProvenanceSources(address(proven), address(proven), address(proven));
         _grant(
             address(this),
             ModuleIds.MOTHER_REGISTRY,

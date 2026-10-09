@@ -5,11 +5,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                               ━━━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint64' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[uninitialized-local]: local variable is read before being initialized
@@ -75,11 +75,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                        ━━━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint64' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -89,11 +89,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                                            ━━━━━━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint32' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
@@ -111,11 +111,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                                  ━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint32' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -125,11 +125,11 @@ warning[unsafe-typecast]: typecast can truncate values
     │                        ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint64' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -139,11 +139,11 @@ warning[unsafe-typecast]: typecast can truncate values
     │                        ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint64' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -153,11 +153,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                               ━━━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint64' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -167,11 +167,11 @@ warning[unsafe-typecast]: typecast can truncate values
     │             ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint64' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -181,11 +181,11 @@ warning[unsafe-typecast]: typecast can truncate values
     │             ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint64' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
@@ -203,11 +203,11 @@ warning[unsafe-typecast]: typecast can truncate values
     │                                     ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint64' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -217,11 +217,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                        ━━━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint64' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -231,11 +231,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                                                                 ━━━━━━━━━━━━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint64' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -245,11 +245,11 @@ warning[unsafe-typecast]: typecast can truncate values
    │                                ━━━━━━━━━━━━
    │
    ├ note: consider disabling this lint if you're certain the cast is safe
-   │       
+   │
    │       // casting to 'uint32' is safe because [explain why]
    │       // forge-lint: disable-next-line(unsafe-typecast)
-   │       
-   │       
+   │
+   │
    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
@@ -267,11 +267,11 @@ warning[unsafe-typecast]: typecast can truncate values
     │                       ━━━━━━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint64' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 
 warning[unsafe-typecast]: typecast can truncate values
@@ -281,10 +281,10 @@ warning[unsafe-typecast]: typecast can truncate values
     │                     ━━━━━━━━━━━━━━━━━━
     │
     ├ note: consider disabling this lint if you're certain the cast is safe
-    │       
+    │
     │       // casting to 'uint16' is safe because [explain why]
     │       // forge-lint: disable-next-line(unsafe-typecast)
-    │       
-    │       
+    │
+    │
     ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
 

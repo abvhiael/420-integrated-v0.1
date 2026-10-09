@@ -84,7 +84,7 @@
         "FOUNDRY_SCRIPT": "script/highcountry"
       },
       "log": "solidity-static-lint.log",
-      "logSha256": "26ab53c7cae11d1b28fb8cabfdced35577342087352626e4f024824a5316602f"
+      "logSha256": "4f2677eda1df88c6566c9d8603741161753fe5f15049eb364c9d6baf9f89a1a3"
     },
     {
       "name": "solidity-format",
@@ -193,5 +193,6 @@
     "contracts/test/GamingProtocol420AuthorityIsolation.t.sol": "1c0479582615c6ee22253dc65bc2b8d77ec5e7eafb77df644bb115e5ef93a25b",
     "contracts/test/GamingProtocol420Hardening.t.sol": "90872553b250e5a12088f1be4eff9c0ce3cad763f74cfa9ac6dc0a5db6dce9fd"
   },
-  "scope": "Existing HC/Gaming foundations only; compiler configuration retained, all imported dependencies included; unresolved live acceptance is BLOCKED."
+  "scope": "Existing HC/Gaming foundations only; compiler configuration retained, all imported dependencies included; unresolved live acceptance is BLOCKED.",
+  "logNormalization": "Committed logs normalize trailing whitespace; commands and original implementation SHA unchanged."
 }

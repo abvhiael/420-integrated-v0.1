@@ -1266,7 +1266,7 @@
     },
     {
       "path": "docs/highcountry/qualification/20261009/qualification.json",
-      "sha256": "dd574a7d768659be5609aa510b9029bb7ce934e78bbfc7430485caa5d568a8ce",
+      "sha256": "4904e26411838a29a4be104f3e50fd2c4b2a1c4cefb1f9e624ccc0892590edd8",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],
@@ -1314,7 +1314,7 @@
     },
     {
       "path": "docs/highcountry/qualification/20261009/solidity-static-lint.log",
-      "sha256": "26ab53c7cae11d1b28fb8cabfdced35577342087352626e4f024824a5316602f",
+      "sha256": "4f2677eda1df88c6566c9d8603741161753fe5f15049eb364c9d6baf9f89a1a3",
       "classification": "COMPLETE",
       "contracts": [],
       "interfaces": [],

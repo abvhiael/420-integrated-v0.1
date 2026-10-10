@@ -61,7 +61,7 @@ def settle(*,connect,tenant_id,worker_id,event_id,attempt,receipt_ref=None,
        lease_owner=NULL,lease_until=NULL,delivered_at=%s,last_error_code=NULL
        WHERE tenant_id=%s AND event_id=%s""",(at,tenant_id,event_id))
       c.execute("""INSERT INTO doobr_private.event_receipts(tenant_id,event_id,consumer_id,receipt_ref)
-        VALUES(%s,%s,'notifications',%s) ON CONFLICT (tenant_id,event_id,consumer_id) DO NOTHING""",
+        VALUES(%s,%s,'notifications',%s)""",
         (tenant_id,event_id,receipt_ref))
       return "DELIVERED"
      dead=attempt>=8

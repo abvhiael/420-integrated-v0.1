@@ -81,7 +81,7 @@ contract BonusRegionAccess420 {
     ) public view returns (bool) {
         BonusRegion memory region = _bonusRegions[regionId];
         if (!region.exists || !region.active) return false;
-        return gamingAccess.hasBonusRegion(growerProfileId, region.entitlementId, region.contentId);
+        return gamingAccess.hasPlayerBonusRegion(growerProfileId, region.contentId);
     }
 
     function requireAccess(
@@ -91,7 +91,7 @@ contract BonusRegionAccess420 {
         BonusRegion memory region = _bonusRegions[regionId];
         if (!region.exists) revert HCNotFound();
         if (!region.active) revert BonusRegionInactive(regionId);
-        if (!gamingAccess.hasBonusRegion(growerProfileId, region.entitlementId, region.contentId)) {
+        if (!gamingAccess.hasPlayerBonusRegion(growerProfileId, region.contentId)) {
             revert BonusRegionEntitlementRequired(regionId, growerProfileId);
         }
     }

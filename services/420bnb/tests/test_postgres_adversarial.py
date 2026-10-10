@@ -374,3 +374,64 @@ def test_bnb23_policy_minimum_nights_guest_and_hold(fixture_property):
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
+
+
+def test_bnb24_integer_pricing_rounding_and_bounds():
+    from pricing import quote_breakdown
+    from datetime import date
+    v=quote_breakdown(date(2027,1,1),date(2027,1,4),2,1001,
+        [{"start":"2027-01-02","end":"2027-01-03","nightly_minor":2500}],
+        300,750,1000,100,1)
+    assert v["nightly_rates_minor"]==[1001,2500,1001]
+    assert v["subtotal_minor"]==9004
+    assert v["discount_minor"]==900
+    assert v["taxable_minor"]==8504
+    assert v["tax_minor"]==638
+    assert v["total_minor"]==9142
+    with pytest.raises(ValueError):
+        quote_breakdown(date(2027,1,1),date(2027,1,2),1,10**16,[],0,0,0)
+    with pytest.raises(ValueError):
+        quote_breakdown(date(2027,1,1),date(2027,1,2),1,100,
+            [{"start":"2027-01-01","end":"2027-01-03","nightly_minor":200},
+             {"start":"2027-01-01","end":"2027-01-04","nightly_minor":300}],0,0,0)
+
+
+def test_bnb24_immutable_quote_expiry_policy_and_nonce(fixture_property):
+    pid,headers=fixture_property
+    from zoneinfo import ZoneInfo
+    start=(datetime.now(ZoneInfo("America/Regina"))+timedelta(days=11)).date()
+    plan={"property_id":str(pid),"checkin":start.isoformat(),
+        "checkout":(start+timedelta(days=3)).isoformat(),
+        "units":1,"nonce":"quote-repeat-0001"}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_listing_policy
+            (property_id,house_rules,cancellation_policy,timezone_id,min_nights)
+            VALUES (%s,'Quiet after 10','Refund policy A','America/Regina',2)""",(pid,))
+        c.execute("""INSERT INTO bnb_rate_plan
+            (property_id,cleaning_minor,service_minor,tax_bps,discount_bps)
+            VALUES (%s,150,10,500,1000)""",(pid,))
+    try:
+        quoted=client.post("/v1/bnb/quotes",json=plan,headers=headers)
+        assert quoted.status_code==201,quoted.text
+        uid=quoted.json()["id"]
+        assert quoted.json()["calculation"]["nights"]==3
+        assert quoted.json()["financial_finality"] is False
+        again=client.post("/v1/bnb/quotes",json=plan,headers=headers)
+        assert again.status_code==201 and again.json()["id"]==uid
+        altered=client.post("/v1/bnb/quotes",json={**plan,"units":2},headers=headers)
+        assert altered.status_code==409
+        assert client.get("/v1/bnb/quotes/"+uid).status_code==401
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_rate_plan SET cleaning_minor=999,version=version+1 WHERE property_id=%s",(pid,))
+            c.execute("UPDATE bnb_listing_policy SET house_rules='Changed rules' WHERE property_id=%s",(pid,))
+            saved=c.execute("SELECT policy_snapshot,calculation FROM bnb_price_quote WHERE id=%s",(uid,)).fetchone()
+            assert saved[0]["house_rules"]=="Quiet after 10"
+            assert saved[1]["cleaning_minor"]==150
+            c.execute("UPDATE bnb_price_quote SET expires_at=now()-interval '1 second' WHERE id=%s",(uid,))
+        assert client.get("/v1/bnb/quotes/"+uid,headers=headers).json()["status"]=="expired"
+        assert client.post("/v1/bnb/quotes",json=plan,headers=headers).json()["status"]=="expired"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))

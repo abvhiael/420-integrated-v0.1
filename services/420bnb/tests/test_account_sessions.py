@@ -429,3 +429,60 @@ def test_host_policy_and_media_rights_boundaries(actor):
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_bnb23_quantity_closure_atomic_reschedule_and_owner_boundary(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    result=client.post("/v1/bnb/properties",headers=headers,json={
+        "title":"Calendar closure property","public_region":"Prairies",
+        "capacity":3,"nightly_minor":1000,"currency":"CAD"})
+    assert result.status_code==201,result.text
+    pid=result.json()["id"]
+    url=f"/v1/bnb/account/properties/{pid}"
+    start=(datetime.now(timezone.utc)+timedelta(days=12)).replace(hour=14,minute=0,second=0,microsecond=0)
+    period={"start":start.isoformat(),"end":(start+timedelta(days=2)).isoformat(),
+            "reason":"Maintenance"}
+    try:
+        unit=client.post(url+"/units",headers=headers,
+            json={"label":"Suite A","quantity":3,"expected_version":1})
+        assert unit.status_code==201,unit.text
+        uid=unit.json()["id"]
+        endpoint=url+"/calendar/blocks"
+        first=client.post(endpoint,params={"unit_id":uid},headers=headers,
+            json={**period,"quantity":1,"expected_version":2})
+        assert first.status_code==201,first.text
+        second=client.post(endpoint,params={"unit_id":uid},headers=headers,
+            json={**period,"quantity":2,"expected_version":3})
+        assert second.status_code==201,second.text
+        full=client.post(endpoint,params={"unit_id":uid},headers=headers,
+            json={**period,"quantity":1,"expected_version":4})
+        assert full.status_code==409
+        wrong_owner=client.put(endpoint+"/"+first.json()["id"],
+            json={**period,"quantity":1,"expected_version":4})
+        assert wrong_owner.status_code==401
+        failed_edit=client.put(endpoint+"/"+first.json()["id"],headers=headers,
+            json={**period,"quantity":2,"expected_version":4})
+        assert failed_edit.status_code==409
+        # Failed edit is rolled back; the prior calendar block is preserved.
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT quantity FROM bnb_block WHERE id=%s",
+                             (first.json()["id"],)).fetchone()[0]==1
+        new_start=start+timedelta(days=4)
+        shifted={**period,"start":new_start.isoformat(),
+                 "end":(new_start+timedelta(days=2)).isoformat()}
+        moved=client.put(endpoint+"/"+first.json()["id"],headers=headers,
+            json={**shifted,"quantity":1,"expected_version":4})
+        assert moved.status_code==200,moved.text
+        assert moved.json()["version"]==5
+        # Property-wide blocks cannot claim a partial quantity with no unit mapping.
+        rejected=client.post(endpoint,headers=headers,
+            json={**period,"quantity":1,"expected_version":5})
+        assert rejected.status_code==422
+        assert client.get(url+"/calendar").status_code==401
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

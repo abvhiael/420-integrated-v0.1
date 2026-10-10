@@ -7,12 +7,14 @@ on:
       - 'docs/compliance/C01.1-*'
       - 'docs/compliance/C01.2-*'
       - 'docs/compliance/C01.3-*'
+      - 'docs/compliance/C01.4-*'
       - 'scripts/verify-compliance-c01-1.py'
       - 'scripts/test-compliance-c01-1.py'
       - 'scripts/verify-compliance-c01-2.py'
       - 'scripts/test-compliance-c01-2.py'
       - 'scripts/verify-compliance-c01-3.py'
       - 'scripts/test-compliance-c01-3.py'
+      - 'scripts/verify-compliance-c01-4.py'
       - '.github/workflows/420compliance-c01-level1.yml'
   pull_request:
     paths:
@@ -20,12 +22,14 @@ on:
       - 'docs/compliance/C01.1-*'
       - 'docs/compliance/C01.2-*'
       - 'docs/compliance/C01.3-*'
+      - 'docs/compliance/C01.4-*'
       - 'scripts/verify-compliance-c01-1.py'
       - 'scripts/test-compliance-c01-1.py'
       - 'scripts/verify-compliance-c01-2.py'
       - 'scripts/test-compliance-c01-2.py'
       - 'scripts/verify-compliance-c01-3.py'
       - 'scripts/test-compliance-c01-3.py'
+      - 'scripts/verify-compliance-c01-4.py'
       - '.github/workflows/420compliance-c01-level1.yml'
   workflow_dispatch:
 permissions:
@@ -56,6 +60,8 @@ jobs:
         run: python3 scripts/verify-compliance-c01-3.py --expected-sha "$EXPECTED_SHA" --output /tmp/compliance-c01-level1.json
       - name: Negative source, review, approval-plane and legal-gap regressions
         run: python3 scripts/test-compliance-c01-3.py
+      - name: Verify C01.4 shared authority, requirement IDs and fail-closed Travel boundary
+        run: python3 scripts/verify-compliance-c01-4.py "$EXPECTED_SHA"
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

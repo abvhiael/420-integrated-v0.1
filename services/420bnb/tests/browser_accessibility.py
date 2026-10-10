@@ -44,9 +44,21 @@ with sync_playwright() as p:
             route.fulfill(json={"units":[{"label":"Suite A","available":2}],"nonbinding":True})
         elif url.endswith("/v1/bnb/quotes"):
             route.fulfill(status=201,json={"id":"sample-quote","expires_at":"2027-02-10T14:00:00Z",
+                "start":"2027-02-10T21:00:00+00:00","end":"2027-02-12T17:00:00+00:00",
+                "policy_snapshot_text":"{\\\"property_id\\\":\\\"demo\\\"}",
                 "currency":"CAD","calculation":{"nights":2,"subtotal_minor":2000,
                 "discount_minor":100,"cleaning_minor":200,"service_minor":50,
                 "tax_minor":105,"total_minor":2255}})
+        elif url.endswith("/v1/bnb/holds") and route.request.method=="POST":
+            route.fulfill(status=201,json={"id":"00000000-0000-0000-0000-000000000124","status":"held"})
+        elif url.endswith("/v1/bnb/booking-requests") and route.request.method=="POST":
+            route.fulfill(status=201,json={"id":"00000000-0000-0000-0000-000000000125",
+                                           "state":"requested","confirmed":False})
+        elif "/v1/bnb/account/booking-requests?role=" in url:
+            route.fulfill(json=[{"id":"00000000-0000-0000-0000-000000000125",
+                 "state":"requested","type":"request","deadline":"2027-02-10T14:00:00Z"}])
+        elif "/v1/bnb/booking-requests/" in url and route.request.method=="POST":
+            route.fulfill(json={"state":"withdrawn","confirmed":False})
         elif url.endswith("/v1/bnb/account/session"):
             route.fulfill(status=201,json={"session_id":"test-session-id","subject":"fixture-host"})
         elif url.endswith("/v1/bnb/account/properties"):
@@ -76,6 +88,11 @@ with sync_playwright() as p:
     section.get_by_role("button",name="Request nonbinding itemized quote").click()
     expect(section).to_contain_text("Total 2255 CAD minor units")
     expect(section).to_contain_text("No payment or booking.")
+    section.get_by_role("button",name="Submit nonbinding booking request").click()
+    expect(section).to_contain_text("Payment and booking confirmation remain unavailable.")
+    session.get_by_role("button",name="Refresh booking requests").click()
+    expect(session.locator("#booking-inbox")).to_contain_text("Requests you submitted")
+    expect(session.locator("#booking-inbox")).to_contain_text("Requests awaiting your host action")
     session.get_by_role("button",name="Refresh drafts").click()
     expect(session.get_by_role("heading",name="Draft cabin")).to_have_count(1)
     assert session.get_by_label("Minimum stay in nights").count()==1

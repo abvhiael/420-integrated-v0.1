@@ -1,0 +1,33 @@
+{
+  "step": "BNB-2.4",
+  "title": "Pricing and Booking Quotes",
+  "qualification_level": "Level 1",
+  "status": "PENDING_EXACT_SHA_CI",
+  "implementation_sha": "837f9427816f75aee6ba1b4826611e17549a81e1",
+  "pr_number": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "requirements": [
+    "Integer nightly and seasonal charges",
+    "Cleaning/service fees, tax basis points and discounts with defined rounding",
+    "Minimum night enforcement",
+    "Immutable guest/property/unit/policy and rate-plan snapshot with SHA-256",
+    "10-minute quote expiration, guest nonce and Payer maximum",
+    "Guest-only quote read and guarded one-way revocation",
+    "One-quote-one-hold, same guest/stay/quantity/policy binding and frozen quoted total",
+    "Draft host rate plan and guest quote browser affordances",
+    "Negative, monetary, concurrency and authorization tests"
+  ],
+  "targeted_workflow_run": 38089425722,
+  "required_test_status": "queued at record creation; do not treat as pass",
+  "milestones": {
+    "level2": "Deferred to documented BNB-2.5 app milestone",
+    "level3": "Deferred until full app phase closeout"
+  },
+  "external_gates": [
+    "Tax jurisdiction/rates and legal tax provider authority",
+    "Canonical 420Pay signed financial quote, merchant/payment controller, chain/asset and receipt finality",
+    "Qualified service/host split, permitted deposits and cross-protocol settlement",
+    "Live media and human accessibility acceptance"
+  ],
+  "next_step": "BNB-2.5 — canonical title/requirements must be read from repository before implementation"
+}

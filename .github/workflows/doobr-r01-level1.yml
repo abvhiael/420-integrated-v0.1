@@ -36,6 +36,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install scoped schema parser
+        run: python3 -m pip install 'PyYAML==6.0.2'
       - name: Check scoped Python syntax
         run: python3 -m py_compile scripts/verify-doobr-r01-1.py scripts/verify-doobr-audit-2.py scripts/validate-gen-svc-3.py
       - name: Verify DOOBR R01.1 inventory and canonical authority

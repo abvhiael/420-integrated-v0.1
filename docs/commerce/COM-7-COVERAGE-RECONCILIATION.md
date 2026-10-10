@@ -158,3 +158,17 @@ regression before canonical compilation. There are 18 harness checks.
 The preceding 17 boundary checks passed, but did not check the file mode.
 The bounded Yul compiler retry has not yet been exercised by this candidate;
 its actual execution and complete replacement Level 3 remain mandatory.
+
+## Native coverage failure retained for focused replay
+
+Candidate `23ea85c907a37791584ffb6c3c9bf741427fc50f` is NOT qualified.
+Normal shard 0 passed, but mandatory context 9 failed with a native Yul
+stack-depth error, run 38038205736 / job 114173041314.
+Artifact 11664864891, digest
+`sha256:0457c9652c31ea28f5f1924895c8d61616f71dc91e87add5f36c8e0ae1fd8d5c`.
+The execute-mode guard passed; it did not resolve this compiler failure.
+A temporary native replay checks unchanged source contents against the retained
+exact compiler input and reports bounded optimizer experiments. It deliberately
+fails and blocks new canonical shards until the correction is selected; it is
+not test execution or Level 3 acceptance. Remove the one-time replay dependency
+before final qualification. No runtime source or test assertion is changed.

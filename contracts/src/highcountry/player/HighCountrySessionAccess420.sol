@@ -45,6 +45,28 @@ contract HighCountrySessionAccess420 {
     IHighCountryAuthorization public immutable authorization;
 
     mapping(address => mapping(bytes4 => bool)) public routineCall;
+    mapping(address => mapping(bytes4 => bytes32)) public reviewedCodeHash;
+    event RoutineCallReviewed(address indexed target, bytes4 indexed selector, bytes32 codeHash);
+
+    /// @notice Independent selector-level approval of the currently deployed code artifact.
+    function reviewRoutineCall(
+        address target,
+        bytes4 selector
+    ) external {
+        if (target.code.length == 0 || selector == bytes4(0) || _sensitiveSelector(selector)) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest({
+                principal: msg.sender,
+                moduleId: ModuleIds.GAMING_SESSION_POLICY,
+                actionId: ActionIds.SESSION_POLICY_REVIEW_ROUTINE_CALL,
+                scopeHash: keccak256(abi.encode(target, selector, target.codehash)),
+                amount: 0
+            })
+        );
+        reviewedCodeHash[target][selector] = target.codehash;
+        emit RoutineCallReviewed(target, selector, target.codehash);
+    }
+
     ICanonicalHCFactory420 public immutable canonicalFactory;
     address public immutable canonicalEntryPoint;
     mapping(address => bool) public canonicalAccount;
@@ -120,7 +142,10 @@ contract HighCountrySessionAccess420 {
         bytes4 selector,
         bool allowed
     ) external {
-        if (target.code.length == 0 || selector == bytes4(0) || (allowed && _sensitiveSelector(selector))) {
+        if (
+            target.code.length == 0 || selector == bytes4(0)
+                || (allowed && (_sensitiveSelector(selector) || reviewedCodeHash[target][selector] != target.codehash))
+        ) {
             revert HCInvalidState();
         }
 
@@ -143,7 +168,8 @@ contract HighCountrySessionAccess420 {
         bytes4 selector,
         uint256 nativeValue
     ) public view returns (bool) {
-        return nativeValue == 0 && !_sensitiveSelector(selector) && routineCall[target][selector];
+        return nativeValue == 0 && target.code.length != 0 && !_sensitiveSelector(selector) && routineCall[target][selector]
+            && reviewedCodeHash[target][selector] == target.codehash;
     }
 
     /// @notice Anything not explicitly routine, or any native-value transfer, must escalate

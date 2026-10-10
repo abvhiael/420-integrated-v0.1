@@ -16,7 +16,7 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
     bytes32 internal proof;
     bytes32 internal identifier;
     function requestRandomness(bytes32 profile, bytes32 domain, bytes32 purpose, uint64 deadline)
-        external returns (bytes32 requestId)
+        external override returns (bytes32 requestId)
     {
         identifier = keccak256(abi.encode(msg.sender, profile, domain, purpose, deadline));
         bound.requester = msg.sender;
@@ -32,21 +32,21 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
         root = randomness;
         proof = proofHash;
     }
-    function request(bytes32 id) external view returns (Request memory) {
+    function request(bytes32 id) external view override returns (Request memory) {
         require(id == identifier, "wrong id");
         return bound;
     }
-    function status(bytes32 id) external view returns (Status) {
+    function status(bytes32 id) external view override returns (Status) {
         require(id == identifier, "wrong id");
         return bound.status;
     }
-    function result(bytes32 id) external view returns (bytes32, bytes32) {
+    function result(bytes32 id) external view override returns (bytes32, bytes32) {
         require(id == identifier, "wrong id");
         return (root, proof);
     }
-    function fulfillRandomness(bytes32, bytes32, bytes calldata) external pure { revert("fixture"); }
-    function activateFallback(bytes32) external pure { revert("fixture"); }
-    function voidExpired(bytes32) external pure { revert("fixture"); }
+    function fulfillRandomness(bytes32, bytes32, bytes calldata) external pure override { revert("fixture"); }
+    function activateFallback(bytes32) external pure override { revert("fixture"); }
+    function voidExpired(bytes32) external pure override { revert("fixture"); }
 }
 
 contract MockBreedingAdapterCaller {

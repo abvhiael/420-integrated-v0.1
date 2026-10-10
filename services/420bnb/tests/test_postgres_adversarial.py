@@ -714,6 +714,11 @@ def test_bnb25_independent_host_approval_decline_and_expiry(fixture_property,mon
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_reservation WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
+            c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_identity_session WHERE subject IN (%s,%s)",(guest,host))
             c.execute("DELETE FROM bnb_account WHERE subject IN (%s,%s)",(guest,host))

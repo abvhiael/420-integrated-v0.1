@@ -122,9 +122,11 @@ jobs:
         run: go test -race ./services/complianceauth -run TestC031AuthorityGraphBoundaries -count=1 -v
       - name: C03.2 policy schema negative and boundary regressions
         run: go test -race ./services/complianceauth -run TestC032PolicySchemaFailClosed -count=1 -v
-      - name: Write current C03.2 exact-SHA Level 1 qualification result
+      - name: C03.3 temporal validity, DST and knowledge-time regressions
+        run: go test -race ./services/complianceauth -run TestC033TemporalLegalAndKnowledgeTime -count=1 -v
+      - name: Write current C03.3 exact-SHA Level 1 qualification result
         run: |
-          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C03.2","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_2_policy_schema":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C03.3","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_3_temporal":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

@@ -503,6 +503,49 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(harvest.getHarvest(plantId).expressionHash == expression, "duplicate changed receipt");
     }
 
+    function testR031HarvestFailsClosedOnEmergencyAndTerminatedPlant() public {
+        uint64 plantId = 89;
+        _grant(
+            address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)), keccak256("hc7:plant89")
+        );
+        _grant(
+            address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(plantId)), keccak256("hc7:env89")
+        );
+        _grant(
+            address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.PHENOTYPE_EXPRESS,
+            bytes32(uint256(plantId)), keccak256("hc7:expression89")
+        );
+        _grant(
+            address(this), ModuleIds.HARVEST_ENGINE, ActionIds.HARVEST_ACCEPT,
+            bytes32(uint256(plantId)), keccak256("hc7:harvest89")
+        );
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+        cultivation.updateEnvironment(
+            plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
+        );
+        _ready(plantId);
+        cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
+        EmergencyState state = EmergencyState(address(cultivation.emergencyState()));
+        _grant(
+            address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
+            EmergencyDomains.CULTIVATION, keccak256("hc7:restrict")
+        );
+        state.setRestricted(EmergencyDomains.CULTIVATION, true);
+        (bool restricted,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!restricted, "restricted harvest accepted");
+        require(!harvest.isHarvestAccepted(plantId), "restricted harvest left receipt");
+        _grant(
+            address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE,
+            bytes32(uint256(plantId)), keccak256("hc7:terminate")
+        );
+        plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
+        (bool terminated,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!terminated, "terminated plant harvested");
+        require(!harvest.isHarvestAccepted(plantId), "terminated harvest left receipt");
+    }
+
     function _ready(
         uint64 plantId
     ) private {

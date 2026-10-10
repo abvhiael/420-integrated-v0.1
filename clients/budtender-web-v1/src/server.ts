@@ -10,6 +10,20 @@ import {
 } from "../../budtender-access-v1/src/access.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
+const REPO_ROOT = join(ROOT, "..", "..", "..");
+const ART_INVENTORY = join(REPO_ROOT, "assets", "budtender", "asset_inventory.json");
+
+type ArtEntry = { path: string; sha256: string; bytes: number };
+const loadArtwork = async (): Promise<ArtEntry[]> => {
+  const raw = JSON.parse(await readFile(ART_INVENTORY, "utf8")) as { assets?: ArtEntry[] };
+  if (!Array.isArray(raw.assets)) throw new Error("invalid artwork inventory");
+  const paths = new Set<string>();
+  for (const entry of raw.assets) {
+    if (!/^assets\/budtender\/phase-3\.(?:[1-9]|1[0-4])\/[a-z0-9_]+\.png$/.test(entry.path) || paths.has(entry.path)) throw new Error("invalid artwork path");
+    paths.add(entry.path);
+  }
+  return raw.assets;
+};
 const MAX_BODY_BYTES = 16 * 1024;
 
 type Json = Record<string, unknown>;
@@ -192,6 +206,26 @@ export const createBudtenderWebServer = (
       const body = await readJson(req);
       application.setDemandProfile(body.profile as any);
       return json(res, 200, application.snapshot());
+    }
+
+    if (method === "GET" && url.pathname === "/assets/budtender/registry.json") {
+      const assets = await loadArtwork();
+      return json(res, 200, { version: 1, count: assets.length, assets: assets.map(({ path, sha256, bytes }) => ({ url: "/" + path, sha256, bytes })) });
+    }
+
+    if (url.pathname.startsWith("/assets/budtender/")) {
+      if (method !== "GET") return json(res, 405, { error: "method not allowed" });
+      const relative = url.pathname.slice(1);
+      const assets = await loadArtwork();
+      const entry = assets.find((item) => item.path === relative);
+      if (!entry) return json(res, 404, { error: "asset not registered" });
+      try {
+        const content = await readFile(join(REPO_ROOT, relative));
+        res.writeHead(200, responseHeaders({ "content-type": "image/png", "content-length": content.length, "cache-control": "public, max-age=3600" }));
+        return res.end(content);
+      } catch {
+        return json(res, 404, { error: "asset missing" });
+      }
     }
 
     if (url.pathname.startsWith("/api/")) {

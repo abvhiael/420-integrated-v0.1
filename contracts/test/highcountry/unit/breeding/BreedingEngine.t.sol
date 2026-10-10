@@ -15,7 +15,12 @@ import { BreedingEngine } from "../../../../src/highcountry/breeding/BreedingEng
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
+interface VmBreedingR029 {
+    function warp(uint256 timestamp) external;
+}
+
 contract BreedingEngineTest {
+    VmBreedingR029 private constant vm = VmBreedingR029(address(uint160(uint256(keccak256("hevm cheat code")))));
     MockCapabilityRegistry private caps;
     HighCountryAuthorization private auth;
     GenesisRegistry private genesis;
@@ -140,6 +145,7 @@ contract BreedingEngineTest {
 
         breeding.finalizeBreeding(eventId);
         require(genomes.exists(childId), "child genome missing");
+        require(breeding.pendingChildOwner(childId) == 0, "finalization stranded reservation");
         RandomnessCoordinator.RandomRequest memory afterConsume = randomness.getRequest(requestId);
         require(afterConsume.consumed && afterConsume.entropy == entropy, "request not consumed exactly once");
 
@@ -273,6 +279,12 @@ contract BreedingEngineTest {
         breeding.requestBreeding(eventId, parentA, parentB, child, line, metadata);
         (bool ok,) = address(breeding).call(abi.encodeCall(breeding.expireBreeding, (eventId)));
         require(!ok && breeding.pendingChildOwner(child) == eventId, "early expiry released reservation");
+        vm.warp(block.timestamp + breeding.BREEDING_TIMEOUT());
+        breeding.expireBreeding(eventId);
+        require(breeding.cancelled(eventId) && breeding.pendingChildOwner(child) == 0, "timeout did not recover");
+        require(randomness.cancelled(requestId), "timeout did not cancel randomness");
+        (ok,) = address(breeding).call(abi.encodeCall(breeding.expireBreeding, (eventId)));
+        require(!ok, "timeout replay");
     }
 
     function _grant(

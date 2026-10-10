@@ -20,6 +20,12 @@ interface IModuleRegistry {
     function getModule(
         bytes32 moduleId
     ) external view returns (ModuleRecord memory);
+    function activeImplementation(
+        bytes32 moduleId
+    ) external view returns (address);
+    function bindEmergencyState(
+        address candidate
+    ) external;
     function implementationOf(
         bytes32 moduleId
     ) external view returns (address);

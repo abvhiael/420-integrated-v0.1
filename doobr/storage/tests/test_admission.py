@@ -21,7 +21,7 @@ class Cursor:
     def __init__(self):self.calls=[];self.pending=None;self.inserted=False;self.state="DRAFT"
     def __enter__(self):return self
     def __exit__(self,*x):return False
-    def execute(self,sql,params):
+    def execute(self,sql,params=None):
         self.calls.append(sql)
         if "FROM doobr_private.delivery_orders" in sql:
             self.pending=(UUID(R),UUID(G),self.state,1,None)

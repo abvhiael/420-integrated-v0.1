@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 interface IRulesetRegistry {
+    function authorization() external view returns (address);
     struct RulesetRecord {
         bytes32 contentHash;
         uint64 registeredAt;

@@ -967,6 +967,8 @@ def submit_booking_request(payload:BookingRequestInput,
             if c.execute("SELECT 1 FROM bnb_booking_request WHERE hold_id=%s",
                          (payload.hold_id,)).fetchone():
                 raise HTTPException(409,"HOLD_ALREADY_REQUESTED")
+            if hold[2] is None:
+                raise HTTPException(409,"BOOKING_QUOTE_REQUIRED")
             if hold[2]:
                 quote=c.execute("""SELECT status,expires_at FROM bnb_price_quote
                     WHERE id=%s""",(hold[2],)).fetchone()

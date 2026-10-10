@@ -43,5 +43,22 @@ jobs:
         run: pytest -q services/420bnb/tests
       - name: Compile runtime module
         run: python -m py_compile services/420bnb/api.py
+      - name: Build non-root BnB container
+        run: docker build -f services/420bnb/Dockerfile -t bnb-test:${{ github.sha }} .
+      - name: Container staging smoke (isolated CI PostgreSQL)
+        run: |
+          set -euo pipefail
+          docker run -d --name bnb-smoke --network host \
+            -e BNB_DATABASE_URL="$BNB_DATABASE_URL" \
+            bnb-test:${{ github.sha }}
+          trap 'docker logs bnb-smoke; docker rm -f bnb-smoke' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health/ready | grep -q '"status":"ready"'; then
+              curl --fail --silent http://127.0.0.1:8080/v1/bnb/listings
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Container readiness failed' >&2; exit 1
       - name: Verify front-end surfaces
         run: python -c "from pathlib import Path; s=Path('web/bnb/index.html').read_text(); assert 'aria-live' in s and 'Payments' not in s.split('<script>')[0] or 'disabled' in s"

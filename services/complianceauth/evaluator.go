@@ -85,8 +85,8 @@ func (service EvaluationService) Evaluate(p ReviewedPolicy,r EvaluationRequest,n
  }
  bytes,err:=json.Marshal(r);if err!=nil{return deny("UNKNOWN","INPUT_ERROR")}
  hash:=sha256.Sum256(bytes)
- expires:=p.Manifest.EffectiveUntil
- if p.Manifest.ReviewExpiresAt.Before(expires){expires=p.Manifest.ReviewExpiresAt}
+ expires:=p.Manifest.Manifest.EffectiveUntil
+ if p.Manifest.Manifest.ReviewExpiresAt.Before(expires){expires=p.Manifest.Manifest.ReviewExpiresAt}
  if !now.Before(expires){return deny("UNKNOWN","EXPIRED")}
- return Decision{Outcome:"ALLOW",ReasonCodes:[]string{"REVIEWED_REQUIREMENTS_MET"},PolicyDigest:p.Manifest.PolicyDigest,RequestDigest:hex.EncodeToString(hash[:]),ExpiresAt:expires}
+ return Decision{Outcome:"ALLOW",ReasonCodes:[]string{"REVIEWED_REQUIREMENTS_MET"},PolicyDigest:p.Manifest.Manifest.PolicyDigest,RequestDigest:hex.EncodeToString(hash[:]),ExpiresAt:expires}
 }

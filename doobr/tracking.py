@@ -74,7 +74,7 @@ def record_location(*,connect,issuer,store,token,tenant_id,order_id,permission_i
                     c.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
                     c.execute("SELECT set_config('doobr.tenant_id',%s,true)",(tenant_id,))
                     c.execute("""SELECT state,region_id FROM doobr_private.delivery_orders
-                        WHERE tenant_id=%s AND order_id=%s FOR UPDATE""",(tenant_id,order_id))
+                        WHERE tenant_id=%s AND order_id=%s""",(tenant_id,order_id))
                     order=c.fetchone()
                     if not order or order[0] not in ACTIVE:raise Denied("tracking state not active")
                     c.execute("""SELECT 1 FROM doobr_private.dispatch_assignments

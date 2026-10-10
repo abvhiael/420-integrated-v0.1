@@ -234,7 +234,7 @@ class HoldInput(BaseModel):
     start: datetime
     end: datetime
     units: int = Field(default=1, ge=1, le=100)
-    policy_snapshot: str = Field(min_length=1, max_length=4000)
+    policy_snapshot: str = Field(min_length=1, max_length=20000)
 
 
 def validate_window(start, end):

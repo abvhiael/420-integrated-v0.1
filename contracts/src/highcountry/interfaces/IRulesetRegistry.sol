@@ -5,6 +5,7 @@ import { IHighCountryAuthorization } from "./IHighCountryAuthorization.sol";
 
 interface IRulesetRegistry {
     function authorization() external view returns (IHighCountryAuthorization);
+
     struct RulesetRecord {
         bytes32 contentHash;
         uint64 registeredAt;

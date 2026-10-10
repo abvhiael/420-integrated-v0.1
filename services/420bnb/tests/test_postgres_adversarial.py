@@ -580,6 +580,11 @@ def test_bnb25_request_withdraw_idempotency_and_capability(fixture_property):
     sent=client.post(route,json=body,headers={**headers,"idempotency-key":"bnb25-request-0001"})
     assert sent.status_code==201,sent.text
     assert sent.json()["state"]=="requested"
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        window=c.execute("""SELECT r.deadline,h.expires_at FROM bnb_booking_request r
+            JOIN bnb_hold h ON h.id=r.hold_id WHERE r.id=%s""",
+            (sent.json()["id"],)).fetchone()
+    assert window[0]==window[1]
     assert client.post("/v1/bnb/holds/"+hold.json()["id"]+"/release",headers=headers).status_code==409
     again=client.post(route,json=body,headers={**headers,"idempotency-key":"bnb25-request-0001"})
     assert again.status_code==201 and again.json()["id"]==sent.json()["id"]

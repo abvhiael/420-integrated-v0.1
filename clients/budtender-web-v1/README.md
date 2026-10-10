@@ -1,0 +1,125 @@
+# Budtender web client v1
+
+This package is the first user-facing Budtender presentation client.
+
+It is intentionally dependency-light and runs on Node.js 22 or newer.
+
+## Start
+
+From this directory:
+
+```bash
+npm start
+```
+
+Default local address:
+
+```text
+http://127.0.0.1:4207
+```
+
+Set `PORT` to use another local port.
+
+## Qualification
+
+```bash
+npm run check
+npm test
+npm run security
+npm run ops
+```
+
+## Deployment and operations
+
+Default repository-stage operation remains loopback-only at `127.0.0.1:4207`.
+
+Runtime configuration:
+
+- `HOST`
+- `PORT`
+- `BUDTENDER_PUBLIC_ORIGIN`
+
+Any non-loopback bind requires an explicit HTTPS public origin.
+
+Operational probes:
+
+- `GET /healthz` — liveness
+- `GET /readyz` — readiness
+
+SIGTERM/SIGINT initiate graceful listener shutdown after readiness is withdrawn.
+
+See `docs/budtender/BUD-AUDIT-10-OPERATIONS-RUNBOOK.md`.
+
+## Authority model
+
+The browser is presentation-only.
+
+The local host owns one `BudtenderApplicationService` instance and exposes only sanctioned commands and detached snapshots.
+
+The browser does not own:
+
+- cash;
+- inventory;
+- order settlement;
+- customer terminal state;
+- upgrades;
+- progression;
+- expansion state;
+- offline reward application.
+
+Restocking accepts product and units only. Canonical wholesale pricing remains inside the game domain.
+
+There is intentionally no API route that applies offline rewards.
+
+## Current scope
+
+The UI exposes the currently implemented Budtender gameplay slice:
+
+- inventory;
+- customers/queue;
+- sales;
+- restocking;
+- demand profile;
+- upgrades;
+- expansions.
+
+The layout is responsive and touch-friendly.
+
+## Gaming Protocol integration
+
+BUD-AUDIT-8 wires the client to the existing `clients/budtender-access-v1` progressive-access policy without creating browser-owned wallet/session authority.
+
+The host exposes:
+- `GET /api/gaming` for canonical namespace/runtime/policy metadata;
+- `POST /api/gaming/access` for non-authoritative access-policy evaluation.
+
+These endpoints never mutate game state. Core management remains wallet-free, and the checked-in Gaming runtime is reported as deployment-pending until GP-15 live qualification.
+
+## Security posture
+
+BUD-AUDIT-9 hardens the repository-stage web host with:
+
+- same-origin enforcement for browser mutation requests;
+- mandatory `application/json` mutation bodies;
+- 16 KiB request-body cap;
+- fail-closed malformed/unknown requests;
+- Content-Security-Policy and anti-framing/content-sniffing/referrer/capability headers;
+- same-origin resource policy and no-store caching;
+- loopback-only default bind;
+- an app-scoped static security verifier for required controls and forbidden dynamic/shell execution surfaces.
+
+These controls complement, rather than replace, the domain-level economy/replay/offline/Gaming security boundaries.
+
+## Current limitations
+
+State is in-memory. Restarting the host resets the game.
+
+This package is not yet:
+
+- durable guest/local save;
+- cloud save;
+- packaged native iOS/Android;
+- production hosted;
+- live Gaming Protocol testnet connected.
+
+Those remain later audit/release work.

@@ -22,8 +22,12 @@ contract MockHCAuthorizationPA4 is IHighCountryAuthorization {
 }
 
 contract MockHCFactoryPA4 {
-    function entryPoint() external pure returns (address) { return address(0x420); }
-    function capabilityRegistry() external pure returns (address) { return address(1); }
+    function entryPoint() external pure returns (address) {
+        return address(0x420);
+    }
+    function capabilityRegistry() external pure returns (address) {
+        return address(1);
+    }
 }
 
 contract RoutineTargetPA4 {
@@ -62,7 +66,8 @@ contract ProgressiveSessionAccessInvariantTest is InvariantTarget420 {
     RoutineTargetPA4 private target;
 
     function setUp() public {
-        sessionAccess = new HighCountrySessionAccess420(address(new MockHCAuthorizationPA4()), address(new MockHCFactoryPA4()));
+        sessionAccess =
+            new HighCountrySessionAccess420(address(new MockHCAuthorizationPA4()), address(new MockHCFactoryPA4()));
         target = new RoutineTargetPA4();
         sessionAccess.setRoutineCall(address(target), target.routine.selector, true);
         targetContract(address(new ProgressiveSessionAccessHandlerPA4(sessionAccess)));

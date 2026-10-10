@@ -567,6 +567,8 @@ def test_bnb25_request_withdraw_idempotency_and_capability(fixture_property):
                          (hold.json()["id"],)).fetchone()[0]=="cancelled"
         assert c.execute("SELECT COUNT(*) FROM bnb_reservation WHERE property_id=%s",
                          (pid,)).fetchone()[0]==0
+        c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
 
 
 def test_bnb25_instant_eligibility_pending_payment_and_cancel(fixture_property):

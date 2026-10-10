@@ -19,7 +19,7 @@ def test_untrusted_identity_rejected(monkeypatch):
         "x-authenticated-subject":"forged-host","x-authenticated-role":"host"},json={
         "title":"House","public_region":"Prairies","capacity":1,
         "nightly_minor":5000,"currency":"CAD"})
-    assert r.status_code==503 and r.json()["detail"]=="IDENTITY_NOT_CONFIGURED"
+    assert r.status_code==503 and r.json()["detail"]=="IDENTITY_SESSION_REQUIRED"
 
 def test_guest_hold_requires_explicit_idempotency():
     r=client.post("/v1/bnb/holds",json={

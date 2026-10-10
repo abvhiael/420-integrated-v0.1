@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 import { HighCountrySessionAccess420 } from "../../../../src/highcountry/player/HighCountrySessionAccess420.sol";
+import { SmartAccount420 } from "../../../../src/accounts/SmartAccount420.sol";
+import { SmartAccountFactory420 } from "../../../../src/accounts/SmartAccountFactory420.sol";
 import { SmartAccountScopes420 } from "../../../../src/accounts/SmartAccountScopes420.sol";
 import { CapabilityIds420 } from "../../../../src/libraries/CapabilityIds420.sol";
 import { ICapabilityRegistry420 } from "../../../../src/interfaces/genesis/ICapabilityRegistry420.sol";
@@ -134,9 +136,9 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
     }
 
     function registerSmartAccount(
-        address
+        address account
     ) external pure returns (bytes32) {
-        return bytes32(0);
+        return SmartAccountScopes420.accountComponentId(account);
     }
     function registerProtocolComponent(
         bytes32,
@@ -294,6 +296,47 @@ contract HighCountrySessionAccess420Test {
         grantId = keccak256("hc-session-grant");
         registry.setGrant(
             grantId, SESSION_KEY, account.accountComponentId(), CapabilityIds420.SESSION_EXECUTE, scopeHash, true
+        );
+    }
+
+    function testR0213RealCanonicalFactorySmartAccountIntegration() public {
+        SmartAccountFactory420 realFactory = new SmartAccountFactory420(address(0x420), address(registry));
+        HighCountrySessionAccess420 realPolicy =
+            new HighCountrySessionAccess420(address(authorization), address(realFactory));
+        bytes32 salt = keccak256("r0213:canonical-factory");
+        SmartAccount420 realAccount = realFactory.createAccount(address(this), address(0), salt);
+        require(
+            address(realAccount) == realFactory.getAddress(address(this), address(0), salt),
+            "CREATE2 address mismatch"
+        );
+        realAccount.enableSessionKey(SESSION_KEY);
+        realPolicy.setRoutineCall(address(target), target.tick.selector, true);
+        bytes32 component = realAccount.accountComponentId();
+        bytes32 scope = realAccount.sessionScope(address(target), target.tick.selector);
+        registry.setGrant(
+            keccak256("r0213:real-grant"), SESSION_KEY, component, CapabilityIds420.SESSION_EXECUTE, scope, true
+        );
+        require(
+            !realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.tick.selector),
+            "unattested canonical wallet accepted"
+        );
+        realPolicy.attestAccount(address(realAccount), address(this), address(0), salt);
+        require(
+            realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.tick.selector),
+            "factory deployed and granted wallet denied"
+        );
+        require(
+            !realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.risky.selector),
+            "unreviewed selector accepted"
+        );
+        require(
+            realPolicy.requiresWalletEscalation(address(target), target.tick.selector, 1),
+            "native value did not escalate"
+        );
+        realAccount.revokeKey(SESSION_KEY);
+        require(
+            !realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.tick.selector),
+            "revoked real wallet key accepted"
         );
     }
 

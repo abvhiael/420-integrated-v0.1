@@ -6,6 +6,8 @@ import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighC
 import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
 import { UpgradeState } from "../../../../src/highcountry/types/HighCountryEnums.sol";
+import { ModuleExecutionGateway } from "../../../../src/highcountry/upgrades/ModuleExecutionGateway.sol";
+import { EmergencyDomains } from "../../../../src/highcountry/constants/EmergencyDomains.sol";
 import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
 import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 import { ModuleRegistry } from "../../../../src/highcountry/upgrades/ModuleRegistry.sol";
@@ -19,6 +21,11 @@ contract MockHighCountryModuleV1 {
 
 contract MockHighCountryModuleV2 { }
 
+interface VmModuleR0212 {
+    function etch(address who, bytes calldata code) external;
+}
+
+
 contract ModuleRegistryTest {
     bytes32 private constant MODULE_ID = keccak256("HC.MODULE.TEST");
     bytes32 private immutable RULESET_ID;
@@ -26,6 +33,8 @@ contract ModuleRegistryTest {
     MockCapabilityRegistry private capabilityRegistry;
     HighCountryAuthorization private authorization;
     ModuleRegistry private registry;
+    EmergencyState private emergency;
+    VmModuleR0212 private constant vm = VmModuleR0212(address(uint160(uint256(keccak256("hevm cheat code")))));
     RulesetRegistry private rulesets;
 
     constructor() {
@@ -59,6 +68,25 @@ contract ModuleRegistryTest {
         _grant(ActionIds.MODULE_SET_STATE, keccak256("grant:set-state"));
         _grant(ActionIds.MODULE_APPROVE_ARTIFACT, keccak256("grant:approve-artifact"));
         capabilityRegistry.setGrant(
+            keccak256("grant:execute"),
+            ICapabilityRegistry420.CapabilityGrant({
+                principal: address(this), componentId: ModuleIds.MODULE_REGISTRY,
+                capabilityId: ActionIds.MODULE_EXECUTE,
+                scopeHash: keccak256(abi.encode(MODULE_ID, MockHighCountryModuleV1.highCountryModuleIdentity.selector)),
+                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
+                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
+            }), 0
+        );
+        capabilityRegistry.setGrant(
+            keccak256("grant:restrict"),
+            ICapabilityRegistry420.CapabilityGrant({
+                principal: address(this), componentId: ModuleIds.EMERGENCY_STATE,
+                capabilityId: ActionIds.EMERGENCY_RESTRICT, scopeHash: EmergencyDomains.MODULE_ACTIVATION,
+                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
+                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
+            }), 0
+        );
+        capabilityRegistry.setGrant(
             keccak256("grant:bind-emergency"),
             ICapabilityRegistry420.CapabilityGrant({
                 principal: address(this),
@@ -74,7 +102,7 @@ contract ModuleRegistryTest {
             }),
             0
         );
-        EmergencyState emergency = new EmergencyState(address(authorization));
+        emergency = new EmergencyState(address(authorization));
         registry.bindEmergencyState(address(emergency));
     }
 
@@ -157,6 +185,71 @@ contract ModuleRegistryTest {
         registry.setModuleState(MODULE_ID, UpgradeState.DRAINING);
         (ok,) = address(registry).call(abi.encodeWithSelector(registry.activeImplementation.selector, MODULE_ID));
         require(!ok, "draining module executable");
+    }
+
+    function testR0212CanonicalRulesetAndArtifactMismatchesRejected() public {
+        MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        (bool ok,) = address(registry).call(
+            abi.encodeCall(registry.registerModule, (MODULE_ID, address(implementation), uint32(1), RULESET_ID))
+        );
+        require(!ok, "unapproved binary registered");
+        (ok,) = address(registry).call(
+            abi.encodeCall(registry.approveArtifact, (MODULE_ID, address(implementation), uint32(2), RULESET_ID))
+        );
+        require(!ok, "wrong version approved");
+        (ok,) = address(registry).call(
+            abi.encodeCall(registry.approveArtifact, (MODULE_ID, address(implementation), uint32(1), keccak256("bogus")))
+        );
+        require(!ok, "unregistered ruleset approved");
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
+        require(registry.approvedArtifactHash(MODULE_ID) != bytes32(0), "missing manifest approval");
+        registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
+    }
+
+    function testR0212ProductionGatewayRechecksActiveAndRuntimeCode() public {
+        MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
+        registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
+        ModuleExecutionGateway gateway = new ModuleExecutionGateway(address(registry), address(authorization));
+        bytes memory callData = abi.encodeCall(MockHighCountryModuleV1.highCountryModuleIdentity, ());
+        (bool ok,) = address(gateway).call(abi.encodeCall(gateway.execute, (MODULE_ID, callData)));
+        require(!ok, "gateway dispatched proposed module");
+        registry.setModuleState(MODULE_ID, UpgradeState.QUALIFIED);
+        registry.setModuleState(MODULE_ID, UpgradeState.SCHEDULED);
+        (ok,) = address(gateway).call(abi.encodeCall(gateway.execute, (MODULE_ID, callData)));
+        require(!ok, "gateway dispatched scheduled module");
+        registry.setModuleState(MODULE_ID, UpgradeState.ACTIVE);
+        bytes memory reply = gateway.execute(MODULE_ID, callData);
+        (bytes32 id,,,) = abi.decode(reply, (bytes32, uint32, bytes32, bytes32));
+        require(id == MODULE_ID, "gateway wrong result");
+        emergency.setRestricted(EmergencyDomains.MODULE_ACTIVATION, true);
+        (ok,) = address(gateway).call(abi.encodeCall(gateway.execute, (MODULE_ID, callData)));
+        require(!ok, "gateway bypassed emergency");
+    }
+
+    function testR0212RuntimeCodeTamperRejected() public {
+        MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
+        registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
+        registry.setModuleState(MODULE_ID, UpgradeState.QUALIFIED);
+        registry.setModuleState(MODULE_ID, UpgradeState.SCHEDULED);
+        registry.setModuleState(MODULE_ID, UpgradeState.ACTIVE);
+        vm.etch(address(implementation), hex"60006000fd");
+        (bool ok,) = address(registry).call(abi.encodeCall(registry.activeImplementation, (MODULE_ID)));
+        require(!ok, "tampered runtime accepted");
+    }
+
+    function testR0212EmergencyBlocksScheduledActivation() public {
+        MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
+        registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
+        registry.setModuleState(MODULE_ID, UpgradeState.QUALIFIED);
+        registry.setModuleState(MODULE_ID, UpgradeState.SCHEDULED);
+        emergency.setRestricted(EmergencyDomains.MODULE_ACTIVATION, true);
+        (bool ok,) = address(registry).call(
+            abi.encodeCall(registry.setModuleState, (MODULE_ID, UpgradeState.ACTIVE))
+        );
+        require(!ok, "emergency activated scheduled module");
     }
 
     function _grant(

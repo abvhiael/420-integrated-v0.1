@@ -66,7 +66,7 @@ contract ModuleInvariantHandler {
 
 contract ModuleRegistryInvariantTest is InvariantTarget420 {
     bytes32 private constant MODULE_ID = keccak256("HC.MODULE.INVARIANT.TEST");
-    bytes32 private immutable RULESET_ID;
+    bytes32 private RULESET_ID;
 
     MockCapabilityRegistry private capabilityRegistry;
     HighCountryAuthorization private authorization;

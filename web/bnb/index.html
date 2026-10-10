@@ -8,14 +8,14 @@
 <p class="warning" role="status">Preview service. Bookings and payments are not enabled. Listings shown below depend on your configured API; no reservation is confirmed here.</p>
 <section id="explore" aria-labelledby="explore-title"><h2 id="explore-title">Explore stays</h2>
 <button id="refresh">Refresh public listings</button><p id="results-status" role="status" aria-live="polite">Choose refresh to look for public listings.</p><div class="grid" id="listings"></div></section>
-<section id="hosting" aria-labelledby="host-title"><h2 id="host-title">Host a property</h2><p class="muted">Draft creation requires authenticated, verified host identity. Publication, booking and payments are not available in this preview.</p>
-<form id="host-form"><label>Property title<input required minlength="3" maxlength="160" name="title"></label>
+<section id="hosting" aria-labelledby="host-title"><h2 id="host-title">Host a property</h2><p class="muted">Authenticated users can prepare private drafts. Independent ownership approval is required for publication; booking and payments remain disabled.</p>
+<form id="host-auth"><label>420Identity signed session token (held only in memory; never saved)<input id="host-token" type="password" autocomplete="off" spellcheck="false" required></label><button type="submit">Verify session</button> <button id="sign-out" type="button">Clear session</button></form><p id="host-status" aria-live="polite" role="status">Not signed in.</p><form id="host-form"><label>Property title<input required minlength="3" maxlength="160" name="title"></label>
 <label>Public region (not street address)<input required name="public_region"></label>
 <label>Unit capacity<input required name="capacity" type="number" min="1" max="1000" value="1"></label>
 <label>Nightly amount in minor units<input required name="nightly_minor" type="number" min="0" value="5000"></label>
 <label>Currency<select name="currency"><option>CAD</option><option>USD</option></select></label>
-<button type="submit" disabled aria-describedby="host-note">Save draft (requires secure sign-in)</button>
-<p id="host-note" class="muted">A trusted Identity gateway must be configured before draft submissions can be enabled.</p></form></section></main>
+<button type="submit" disabled aria-describedby="host-note" id="save-draft">Save unpublished draft</button>
+<p id="host-note" class="muted">Drafts never grant verified hosting, publication or financial permissions.</p></form><section aria-labelledby="my-drafts"><h3 id="my-drafts">Your private drafts</h3><button type="button" id="load-drafts" disabled>Refresh drafts</button><div id="host-drafts"></div></section></section></main>
 <footer class="muted">420BnB — no public precise property addresses • no wallet custody • payments disabled</footer>
 <script>
 const status=document.querySelector("#results-status"),list=document.querySelector("#listings");
@@ -31,4 +31,61 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  el.append(heading,details);list.append(el);}
  }catch{status.textContent="Public listings are unavailable. No reservation has been made.";}
 });
+
+let hostProof=null;
+const hostStatus=document.querySelector("#host-status");
+function hostHeaders(){return {"authorization":"Bearer "+hostProof,"content-type":"application/json"};}
+function resetHost(){hostProof=null;document.querySelector("#host-token").value="";document.querySelector("#save-draft").disabled=true;document.querySelector("#load-drafts").disabled=true;document.querySelector("#host-drafts").replaceChildren();hostStatus.textContent="Not signed in.";}
+document.querySelector("#sign-out").addEventListener("click",resetHost);
+document.querySelector("#host-auth").addEventListener("submit",async event=>{
+ event.preventDefault();resetHost();
+ const token=document.querySelector("#host-token").value.trim();
+ if(!token){hostStatus.textContent="A signed Identity token is required.";return;}
+ try{const res=await fetch("/v1/bnb/account/session",{method:"POST",headers:{"authorization":"Bearer "+token},cache:"no-store",credentials:"omit"});
+ if(!res.ok)throw Error("Session verification failed ("+res.status+").");
+ const data=await res.json();if(!data.session_id)throw Error("Session was not issued.");
+ hostProof=token;document.querySelector("#save-draft").disabled=false;document.querySelector("#load-drafts").disabled=false;
+ hostStatus.textContent="Authenticated. Property authority not yet verified; drafts remain private.";
+ }catch(e){hostStatus.textContent=e.message;}
+ finally{document.querySelector("#host-token").value="";}
+});
+document.querySelector("#host-form").addEventListener("submit",async event=>{
+ event.preventDefault();if(!hostProof)return;
+ const form=new FormData(event.currentTarget);
+ const input={title:form.get("title"),public_region:form.get("public_region"),capacity:Number(form.get("capacity")),
+ nightly_minor:Number(form.get("nightly_minor")),currency:form.get("currency")};
+ hostStatus.textContent="Saving unpublished draft…";
+ try{const r=await fetch("/v1/bnb/properties",{method:"POST",headers:hostHeaders(),body:JSON.stringify(input),cache:"no-store",credentials:"omit"});
+ if(!r.ok)throw Error("Draft save failed ("+r.status+").");
+ hostStatus.textContent="Private draft saved. Publication is not available.";await loadDrafts();
+ }catch(e){hostStatus.textContent=e.message;}
+});
+async function loadDrafts(){
+ if(!hostProof)return;
+ const out=document.querySelector("#host-drafts");out.replaceChildren();
+ try{const r=await fetch("/v1/bnb/account/properties",{headers:hostHeaders(),cache:"no-store",credentials:"omit"});
+ if(!r.ok)throw Error("Cannot load private drafts ("+r.status+").");
+ const items=await r.json();
+ if(!items.length){out.textContent="No properties yet.";return;}
+ for(const item of items){
+ const article=document.createElement("article");article.className="card";
+ const h=document.createElement("h4");h.textContent=item.title;
+ const meta=document.createElement("p");meta.textContent=item.public_region+" · "+item.status+" · version "+item.version;
+ const units=document.createElement("div");units.setAttribute("aria-live","polite");
+ const load=document.createElement("button");load.type="button";load.textContent="View units and review status";
+ load.addEventListener("click",async()=>{
+ units.textContent="Loading…";
+ try{const [a,b]=await Promise.all([
+ fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/units",{headers:hostHeaders(),credentials:"omit",cache:"no-store"}),
+ fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/reviews",{headers:hostHeaders(),credentials:"omit",cache:"no-store"})]);
+ if(!a.ok||!b.ok)throw Error("Host details unavailable");
+ const unitData=await a.json(),reviewData=await b.json();
+ units.textContent=unitData.length+" configured unit(s) · "+(reviewData.at(-1)?.state||"no publication review")+
+ " · publication is controlled by an independent authority.";
+ }catch{units.textContent="Host details unavailable.";}
+ });article.append(h,meta,load,units);out.append(article);
+ }
+ }catch(e){out.textContent=e.message;}
+}
+document.querySelector("#load-drafts").addEventListener("click",loadDrafts);
 </script></body></html>

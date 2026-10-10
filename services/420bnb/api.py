@@ -72,6 +72,7 @@ class PropertyInput(BaseModel):
 
 class HoldInput(BaseModel):
     property_id: str
+    unit_id: str | None = None
     start: datetime
     end: datetime
     units: int = Field(default=1, ge=1, le=100)
@@ -566,15 +567,27 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
             if old:
                 if old[0]!=digest:raise HTTPException(409,"IDEMPOTENCY_CONFLICT")
                 return old[1]
+            unit_capacity=property_row[0]
+            if payload.unit_id:
+                unit=c.execute("""SELECT quantity FROM bnb_unit
+                    WHERE property_id=%s AND id=%s""",
+                    (payload.property_id,payload.unit_id)).fetchone()
+                if not unit:raise HTTPException(404,"UNIT_NOT_FOUND")
+                unit_capacity=unit[0]
+            elif c.execute("SELECT 1 FROM bnb_unit WHERE property_id=%s LIMIT 1",
+                           (payload.property_id,)).fetchone():
+                raise HTTPException(422,"UNIT_SELECTION_REQUIRED")
             if c.execute("""SELECT 1 FROM bnb_block WHERE property_id=%s
+                 AND (unit_id IS NULL OR unit_id=%s)
                  AND period && tstzrange(%s,%s,'[)') LIMIT 1""",
-                 (payload.property_id,payload.start,payload.end)).fetchone():
+                 (payload.property_id,payload.unit_id,payload.start,payload.end)).fetchone():
                 raise HTTPException(409,"PROPERTY_BLOCKED")
             used=c.execute("""SELECT COALESCE(SUM(units),0) FROM bnb_hold
-                WHERE property_id=%s AND period && tstzrange(%s,%s,'[)')
+                WHERE property_id=%s AND unit_id IS NOT DISTINCT FROM %s
+                AND period && tstzrange(%s,%s,'[)')
                 AND (status='confirmed' OR (status='held' AND expires_at>now()))""",
-                (payload.property_id,payload.start,payload.end)).fetchone()[0]
-            if used+payload.units>property_row[0]:
+                (payload.property_id,payload.unit_id,payload.start,payload.end)).fetchone()[0]
+            if used+payload.units>unit_capacity:
                 raise HTTPException(409,"CAPACITY_EXHAUSTED")
             uid=uuid4()
             # Explicitly nonbinding quote; no payments permitted in this stage.
@@ -582,9 +595,9 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
             if nights<=0:raise HTTPException(422,"MINIMUM_NIGHTS")
             total=nights*property_row[1]*payload.units
             c.execute("""INSERT INTO bnb_hold
-                (id,property_id,guest_subject,period,units,status,expires_at,quote_total_minor,policy_snapshot)
-                VALUES (%s,%s,%s,tstzrange(%s,%s,'[)'),%s,'held',now()+interval '15 minutes',%s,%s)""",
-                (uid,payload.property_id,subject,payload.start,payload.end,
+                (id,property_id,unit_id,guest_subject,period,units,status,expires_at,quote_total_minor,policy_snapshot)
+                VALUES (%s,%s,%s,%s,tstzrange(%s,%s,'[)'),%s,'held',now()+interval '15 minutes',%s,%s)""",
+                (uid,payload.property_id,payload.unit_id,subject,payload.start,payload.end,
                  payload.units,total,payload.policy_snapshot))
             result={"id":str(uid),"status":"held","total_minor":total,
                     "payment_status":"unavailable","confirmed":False}

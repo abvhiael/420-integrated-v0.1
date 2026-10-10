@@ -342,6 +342,21 @@ contract HighCountrySessionAccess420Test {
         );
     }
 
+    function testR0213RoutineRequiresIndependentReview() public {
+        (bool ok,) = address(sessionAccess)
+            .call(
+                abi.encodeWithSelector(
+                    sessionAccess.setRoutineCall.selector, address(target), target.tick.selector, true
+                )
+            );
+        require(!ok, "unreviewed routine accepted");
+        sessionAccess.reviewRoutineCall(address(target), target.tick.selector);
+        sessionAccess.setRoutineCall(address(target), target.tick.selector, true);
+        require(sessionAccess.isRoutineCall(address(target), target.tick.selector, 0), "reviewed routine denied");
+        require(!sessionAccess.isRoutineCall(address(target), target.tick.selector, 1), "native value downgraded");
+        require(!sessionAccess.isRoutineCall(address(target), target.risky.selector, 0), "unreviewed selector accepted");
+    }
+
     function testR0213SensitiveSelectorsCannotBecomeRoutine() public {
         bytes4[5] memory blocked = [
             bytes4(keccak256("execute(address,uint256,bytes)")),

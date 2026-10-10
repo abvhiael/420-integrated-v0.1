@@ -44,10 +44,19 @@ contract MockHCCompetitionGamingAccess is IHighCountryGamingAccess420 {
         access[keccak256(abi.encode(growerProfileId, entitlementId, contentId))] = allowed;
     }
 
-    function hasPlayerCompetition(uint64 player, bytes32 content) external view returns (bool) {
+    function hasPlayerCompetition(
+        uint64 player,
+        bytes32 content
+    ) external view returns (bool) {
         return access[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
     }
-    function hasPlayerBonusRegion(uint64, bytes32) external pure returns (bool) { return false; }
+    function hasPlayerBonusRegion(
+        uint64,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
     function hasScopedEntitlement(
         uint64,
         bytes32,

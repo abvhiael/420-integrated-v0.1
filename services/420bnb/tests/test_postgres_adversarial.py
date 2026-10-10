@@ -806,6 +806,22 @@ def test_bnb25_atomic_quote_based_reservation_replacement_and_replay(fixture_pro
     assert new_quote.status_code==201,new_quote.text
     path=f"/v1/bnb/reservations/{old_id}/replace"
     body={"new_quote_id":new_quote.json()["id"],"request_type":"instant"}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        dates=c.execute("SELECT lower(period),upper(period) FROM bnb_price_quote WHERE id=%s",
+                        (new_quote.json()["id"],)).fetchone()
+        blocker=uuid4()
+        c.execute("""INSERT INTO bnb_block(id,property_id,period,reason)
+            VALUES (%s,%s,tstzrange(%s,%s,'[)'),'fixture-conflict')""",
+            (blocker,pid,dates[0],dates[1]))
+    failed=client.post(path,json=body,headers={
+        **headers,"idempotency-key":"bnb25-replace-event-1"})
+    assert failed.status_code==409
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        assert c.execute("SELECT status FROM bnb_reservation WHERE id=%s",
+                         (old_id,)).fetchone()[0]=="payment_pending"
+        assert c.execute("SELECT status FROM bnb_hold WHERE id=%s",
+                         (original.json()["id"],)).fetchone()[0]=="held"
+        c.execute("DELETE FROM bnb_block WHERE id=%s",(blocker,))
     first=client.post(path,json=body,headers={
         **headers,"idempotency-key":"bnb25-replace-event-1"})
     assert first.status_code==201,first.text

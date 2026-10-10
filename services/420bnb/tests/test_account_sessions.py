@@ -366,3 +366,48 @@ def test_host_units_calendar_review_and_adversarial_boundaries(actor):
             c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_host_policy_and_media_rights_boundaries(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    payload={"title":"Rights review cabin","public_region":"Prairies","capacity":1,
+             "nightly_minor":1000,"currency":"CAD"}
+    created=client.post("/v1/bnb/properties",headers=headers,json=payload)
+    assert created.status_code==201,created.text
+    pid=created.json()["id"]
+    base=f"/v1/bnb/account/properties/{pid}"
+    try:
+        bad=client.put(base+"/policy",headers=headers,json={
+            "expected_version":1,"house_rules":"No smoking",
+            "cancellation_policy":"Flexible","timezone_id":"Atlantis/Unknown"})
+        assert bad.status_code==422
+        policy=client.put(base+"/policy",headers=headers,json={
+            "expected_version":1,"house_rules":"No smoking",
+            "cancellation_policy":"Flexible","timezone_id":"America/Regina"})
+        assert policy.status_code==200,policy.text
+        assert policy.json()["version"]==2
+        forged=client.post(base+"/media",headers=headers,json={
+            "expected_version":2,"asset_url":"http://insecure.example.org/a.png",
+            "alt_text":"Property exterior","rights_statement":"I own the photograph"})
+        assert forged.status_code==422
+        media=client.post(base+"/media",headers=headers,json={
+            "expected_version":2,"asset_url":"https://media.example.org/a.png",
+            "alt_text":"Property exterior","rights_statement":"I own the photograph"})
+        assert media.status_code==201,media.text
+        assert media.json()["moderation_state"]=="pending"
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT moderation_state FROM bnb_listing_media WHERE id=%s",
+                             (media.json()["id"],)).fetchone()[0]=="pending"
+        assert client.post(base+"/media",headers=headers,json={
+            "expected_version":2,"asset_url":"https://media.example.org/b.png",
+            "alt_text":"Property exterior","rights_statement":"I own the photograph"}).status_code==409
+        assert client.put(base+"/policy",json={"expected_version":3,
+            "house_rules":"No smoking","cancellation_policy":"Flexible",
+            "timezone_id":"America/Regina"}).status_code==401
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_listing_media WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

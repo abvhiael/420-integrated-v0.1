@@ -59,6 +59,7 @@ library ActionIds {
     bytes32 internal constant GENESIS_FINALIZE = keccak256("HC.ACTION.GENESIS_REGISTRY.FINALIZE");
     bytes32 internal constant RULESET_REGISTER = keccak256("HC.ACTION.RULESET_REGISTRY.REGISTER");
     bytes32 internal constant RULESET_ROUTE = keccak256("HC.ACTION.RULESET_ROUTER.ROUTE");
+    bytes32 internal constant MODULE_EXECUTE = keccak256("HC.ACTION.MODULE_REGISTRY.EXECUTE");
     bytes32 internal constant MODULE_BIND_RULESETS = keccak256("HC.ACTION.MODULE_REGISTRY.BIND_RULESETS");
     bytes32 internal constant MODULE_BIND_EMERGENCY = keccak256("HC.ACTION.MODULE_REGISTRY.BIND_EMERGENCY");
     bytes32 internal constant MODULE_REGISTER = keccak256("HC.ACTION.MODULE_REGISTRY.REGISTER");

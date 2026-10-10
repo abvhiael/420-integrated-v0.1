@@ -65,7 +65,7 @@ def test_recovery_epoch_invalidates_every_active_session(actor):
     response=client.get(f"/v1/bnb/account/property/{property_id}/access",params={"capability":"edit_listing"},headers=headers)
     assert response.status_code==401
     assert client.post("/v1/bnb/account/sessions/"+first.json()["session_id"]+"/revoke",headers=headers).status_code==401
-    assert client.post("/v1/bnb/account/recover",headers=headers).status_code==503
+    # Missing recovery proof is rejected before any authority-provider lookup.\n    response=client.post("/v1/bnb/account/recover",headers=headers)\n    assert response.status_code==401 and response.json()["detail"]=="RECOVERY_PROOF_REQUIRED"
 
 
 def test_invalid_property_capability_is_rejected(actor):

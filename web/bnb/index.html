@@ -38,8 +38,8 @@ function hostHeaders(){return {"authorization":"Bearer "+hostProof,"content-type
 function resetHost(){hostProof=null;document.querySelector("#host-token").value="";document.querySelector("#save-draft").disabled=true;document.querySelector("#load-drafts").disabled=true;document.querySelector("#host-drafts").replaceChildren();hostStatus.textContent="Not signed in.";}
 document.querySelector("#sign-out").addEventListener("click",resetHost);
 document.querySelector("#host-auth").addEventListener("submit",async event=>{
- event.preventDefault();resetHost();
- const token=document.querySelector("#host-token").value.trim();
+ event.preventDefault();
+ const token=document.querySelector("#host-token").value.trim();resetHost();
  if(!token){hostStatus.textContent="A signed Identity token is required.";return;}
  try{const res=await fetch("/v1/bnb/account/session",{method:"POST",headers:{"authorization":"Bearer "+token},cache:"no-store",credentials:"omit"});
  if(!res.ok)throw Error("Session verification failed ("+res.status+").");

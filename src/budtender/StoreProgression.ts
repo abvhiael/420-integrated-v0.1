@@ -30,8 +30,8 @@ export interface ProgressionSnapshot {
 
 const UPGRADE_DEFINITIONS: Record<UpgradeTrack, UpgradeDefinition> = {
   counterSpeed: { baseCost: 50, maxLevel: 5 },
-  shelfCapacity: { baseCost: 60, maxLevel: 5 },
-  saleValue: { baseCost: 75, maxLevel: 5 },
+  shelfCapacity: { baseCost: 50, maxLevel: 5 },
+  saleValue: { baseCost: 50, maxLevel: 5 },
   customerPatience: { baseCost: 55, maxLevel: 5 },
   tipChance: { baseCost: 70, maxLevel: 5 },
   restockCapacity: { baseCost: 65, maxLevel: 5 },
@@ -120,7 +120,14 @@ export class StoreProgression {
 
   creditCash(amount: number): void {
     if (!Number.isSafeInteger(amount) || amount < 0) throw new Error("invalid cash credit");
+    if (!Number.isSafeInteger(this.cash + amount)) throw new Error("cash exceeds safe integer range");
     this.cash += amount;
+  }
+
+  debitCash(amount: number): void {
+    if (!Number.isSafeInteger(amount) || amount < 0) throw new Error("invalid cash debit");
+    if (amount > this.cash) throw new Error("insufficient cash");
+    this.cash -= amount;
   }
 
   snapshot(): ProgressionSnapshot {

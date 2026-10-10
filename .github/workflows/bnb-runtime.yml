@@ -1,0 +1,64 @@
+name: 420BnB Runtime Slice
+on:
+  pull_request:
+    paths:
+      - 'services/420bnb/**'
+      - 'web/bnb/**'
+      - '.github/workflows/bnb-runtime.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bnb
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: bnb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bnb -d bnb"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      BNB_DATABASE_URL: postgresql://bnb:test-only@localhost:5432/bnb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Install runtime dependencies
+        run: python -m pip install -r services/420bnb/requirements.txt
+      - name: Apply PostgreSQL schema
+        run: python -c "import os,psycopg,pathlib; c=psycopg.connect(os.environ['BNB_DATABASE_URL']); c.execute(pathlib.Path('services/420bnb/migrations/001_initial.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/002_identity_access.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/003_recovery_claims.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/004_authority_replay.sql').read_text()); c.commit();c.close()"
+      - name: Runtime security and API tests
+        run: pytest -q services/420bnb/tests
+      - name: Compile runtime module
+        run: python -m py_compile services/420bnb/api.py
+      - name: Build non-root BnB container
+        run: docker build -f services/420bnb/Dockerfile -t bnb-test:${{ github.sha }} .
+      - name: Container staging smoke (isolated CI PostgreSQL)
+        run: |
+          set -euo pipefail
+          docker run -d --name bnb-smoke --network host \
+            -e BNB_DATABASE_URL="$BNB_DATABASE_URL" \
+            bnb-test:${{ github.sha }}
+          trap 'docker logs bnb-smoke; docker rm -f bnb-smoke' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health/ready | grep -q '"status":"ready"'; then
+              curl --fail --silent http://127.0.0.1:8080/v1/bnb/listings
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Container readiness failed' >&2; exit 1
+      - name: Verify front-end surfaces
+        run: python -c "from pathlib import Path; s=Path('web/bnb/index.html').read_text(); assert 'aria-live' in s and 'Payments' not in s.split('<script>')[0] or 'disabled' in s"

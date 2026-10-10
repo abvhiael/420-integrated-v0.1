@@ -1,7 +1,7 @@
 """Browser accessibility smoke for BnB host preview (no live Identity authority)."""
 from pathlib import Path
 import subprocess
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 PAGE = Path(__file__).resolve().parents[3] / "web" / "bnb" / "index.html"
 with sync_playwright() as p:
@@ -57,19 +57,19 @@ with sync_playwright() as p:
     session.route("http://bnb.test/**",stub)
     session.goto("http://bnb.test/")
     session.get_by_role("button",name="Refresh public listings").click()
-    assert session.get_by_role("heading",name="Accessible cabin").count()==1
+    expect(session.get_by_role("heading",name="Accessible cabin")).to_have_count(1)
     section=session.locator("#explore")
     section.get_by_label("Check-in date").fill("2027-02-10")
     section.get_by_label("Check-out date").fill("2027-02-12")
     section.get_by_role("button",name="Check availability").click()
-    assert "2 available" in section.inner_text()
+    expect(section).to_contain_text("2 available")
     session.get_by_label("420Identity signed session token (held only in memory; never saved)").fill("test-fixture-only")
     session.get_by_role("button",name="Verify session").click()
-    assert session.get_by_role("button",name="Save unpublished draft").is_enabled()
+    expect(session.get_by_role("button",name="Save unpublished draft")).to_be_enabled()
     session.get_by_role("button",name="Refresh drafts").click()
-    assert session.get_by_role("heading",name="Draft cabin").count()==1
+    expect(session.get_by_role("heading",name="Draft cabin")).to_have_count(1)
     assert session.get_by_label("Minimum stay in nights").count()==1
     session.get_by_role("button",name="Clear session").click()
-    assert session.get_by_role("button",name="Save unpublished draft").is_disabled()
+    expect(session.get_by_role("button",name="Save unpublished draft")).to_be_disabled()
     session.close()
     browser.close()

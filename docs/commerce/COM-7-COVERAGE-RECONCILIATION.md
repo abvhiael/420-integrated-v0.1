@@ -1,5 +1,9 @@
 # COM-7 coverage failure remediation and main reconciliation
 
+**Current result: comprehensive repository Level 3 PASS on `2648c0b6df52a375c2d6bdbd2839cdbc607ff113`.**
+Earlier pending/failure statements below describe superseded remediation history;
+the verified final closeout at the end records actual successful results.
+
 The earlier executable candidate `4c539aa5529e7f16aa82d434f696a31e33fbf9e1`
 completed all four canonical Solidity shards, inventory aggregation and Decision
 #10 fixture. Its coverage compiler failed with a Yul stack-depth exception. The
@@ -205,3 +209,17 @@ the canonical workflow is restored. Neither diagnostic replay candidate is quali
 (the jobs deliberately failed after recording experiments). Successful native
 compilation is not coverage execution or Level 3. Complete replacement qualification
 is mandatory before COM-7 acceptance or merge readiness.
+
+## Verified final closeout
+
+Candidate `2648c0b6df52a375c2d6bdbd2839cdbc607ff113`, tree `f8368ce6462db0449256c34e65a5a57407f44b78`, main `c5a4f220d1fbda01f707d359aa9bb32921a138b1`:
+canonical Solidity run [38041865973](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865973) completed successfully.
+All four normal CI partitions, all 64 mandatory bounded coverage contexts, exact-SHA
+inventory/LCOV aggregation, local Decision10 fixture and ABI/configuration checks passed.
+The complete canonical inventory is 1,045 primary units; 2528
+reported test cases passed, zero failed/skipped. All 18 harness regressions passed
+on the final candidate. Full actual job/step/artifact evidence is in
+`COM-7-LEVEL3-QUALIFICATION-STATUS.json` and per-file test names/campaigns are in
+`COM-7-LEVEL3-TEST-INVENTORY.json`. Superseded failed/cancelled attempts remain
+historical, not qualified. Optimized-IR source maps and percentages remain diagnostic.
+No testnet deployment or external security signoff is claimed.

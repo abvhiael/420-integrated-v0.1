@@ -1,7 +1,10 @@
 # COM-7 repository recovery and independent review readiness
 
-This package supplies reproducible repository controls; external review signoff,
-live deployment and comprehensive Level 3 remain unqualified until verified.
+Repository controls and comprehensive Level 3 passed on exact candidate
+`2648c0b6df52a375c2d6bdbd2839cdbc607ff113`, tree `f8368ce6462db0449256c34e65a5a57407f44b78`.
+External review signoff and live deployment remain unqualified. This evidence-only
+update inherits unchanged executable qualification; see
+`COM-7-LEVEL3-QUALIFICATION-STATUS.json` for actual jobs and artifact identities.
 
 ## Repeatable drills and declared local thresholds
 
@@ -59,3 +62,12 @@ alert delivery, RPC outage and deployed recovery acceptance. Multi-instance writ
 operation and production-like capacity require actual deployment evidence.
 COM-9 requires independent external security signoff and authorized production
 acceptance. This checklist does not provide those approvals.
+
+## Actual final-candidate drill evidence
+
+Security readiness run [38041866016](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041866016), job 114183544768,
+passed all three persistent/load drills. HTTP elapsed 139.344 ms,
+p95 32.349 ms, 120 accepted and 136 limited of 256 requests;
+next-window recovery and no checkout mutation passed. Gitleaks reported zero leaks;
+locked dependency/static/configuration/provenance checks and reviewer intake passed.
+The supported single-process topology and all COM-8/COM-9 limits above remain unchanged.

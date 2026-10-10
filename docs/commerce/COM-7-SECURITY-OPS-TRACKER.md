@@ -1,85 +1,66 @@
-# COM-7 — Security/ops audit and qualification tracker
+# COM-7 — Security/ops acceptance and Level 3 closeout
 
-Canonical definition: `docs/commerce/COM-1-ARCHITECTURE-AND-ROADMAP.md`, COM-7: payment adversarial tests, reservation races, swap failures, auth/tenant isolation, upload security, load, recovery, monitoring, independent security review readiness and Level 3 repository closeout. COM-8 is a separately blocked live testnet handoff, not a substitute for repository qualification.
+**COM-7 repository-side acceptance and comprehensive Level 3: PASS.** Qualified executable candidate `2648c0b6df52a375c2d6bdbd2839cdbc607ff113`, tree `f8368ce6462db0449256c34e65a5a57407f44b78`, reconciled main `c5a4f220d1fbda01f707d359aa9bb32921a138b1`. Main is an ancestor, with 223 commits ahead and zero behind. The genuine merge `46152b4af8cb82dc4c3b4b7bb269cc614a1b5761` preserves both main and qualified Commerce ancestry. PR #594 remains draft and unmerged.
 
-## Baseline
+This evidence-only descendant records the exact tested candidate; it does not claim its own new execution. Full machine-readable workflow/job/step results, source blobs, artifacts and test inventory are in `COM-7-LEVEL3-QUALIFICATION-STATUS.json` and `COM-7-LEVEL3-TEST-INVENTORY.json`.
 
-- PR #594, branch `audit/420commerce-com-2-upstream-adaptations`; previously qualified COM-6 accumulated milestone implementation `37887e89f613a6a48e3738a39362e8e731ea6f9a`, evidence-only HEAD `242b9eb5f7109672d1fdeca99ada2ed8f429a915`.
-- `main` SHA at initial audit `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`; PR's recorded base `41d173dbcfbeb8299f54f22e7c049f1fec20336d`.
-- Retained service/SDK/Indexer, browser and Market/Pay/Arbitration qualification exists in `.github/workflows/commerce-com6-level2.yml`. COM-7 must not assert full inventory or global phase PASS based on these narrower checks.
-- Financial authority remains canonical governed Pay and Market; Commerce projections and 420Analytics cannot grant execution authority. COM-8 real chain/adapter acceptance is deferred but cannot be recorded as passed.
+## Acceptance evidence
 
-## Control matrix: existing evidence versus COM-7 gates
+All COM-T01–T16 were checked against implementation and actual final-candidate logs. Service/SDK/Indexer: 134 / 33 / 76 passing tests. Web: 39, browser: 20. Upstream Market/Pay: 57, funded refund: 11, Arbitration: 13. No failed or skipped cases in these suites. Retained COM-6 Level 2 is run [38006767611](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006767611) / job 114077233472 at `95fc1102d5b7700609cadaa95ed443acbe6cf65c`; runtime implementation paths remain unchanged and final component lanes reran.
 
-| Area | Existing controls observed | Required COM-7 closeout |
+Bounded HTTP/persistent SQLite drill: 256 requests, concurrency 16, 120 accepted, 136 limited; elapsed 139.344 ms, p95 32.349 ms. Next-window recovery and absence of checkout mutations passed; declared regression budgets are below 15 seconds and p95 below 2 seconds. Persisted nonce exclusion/reopen, duplicate projection recovery and process-exit rollback passed. These are local engineering budgets, not operator-approved production SLOs.
+
+Locked dependency/static checks, canonical ABI comparisons, signing-disabled builds, pinned redacted Commerce-tree Gitleaks (zero leaks), provenance, fail-closed configuration and monitor/recovery regressions passed. Reviewer intake is ready; no independent human security signoff is asserted. SQLite supports one application process per database. Shared-connection/crash evidence does not authorize distributed multi-writer operation.
+
+Canonical Solidity compiled and tested the complete 1,045 primary units (618 source, 426 test, one script), with 2528 reported passing cases, 14 grouped invariant campaigns, 3 single-invariant campaigns, 49 observed invariant assertions and 55 fuzz cases. Normal CI fuzz/invariant budgets and all assertions remain unchanged. Mandatory 64 bounded coverage contexts and exact-SHA four-shard aggregation passed; optimized-IR LCOV mapping remains approximate and diagnostic. Genesis passed five address/manifests/collision/deployment-authority checks and 28 regressions without duplicating Foundry; its live Wallet readiness remains false.
+
+Complete Docs ran all 42 PASS stage lines, strict build and 1,753 rendered pages. Global integration passed offline, fault matrix/soak, production dependencies and pinned local Geth Engine smoke. Local Engine smoke and repository materialization are not testnet deployment.
+
+## Final-candidate workflow results
+
+| Workflow | Run | Result |
 | --- | --- | --- |
-| Payment/adversarial | Canonical source correlated to invoices, settled payment, receipt and finalized Market state; targeted Foundry and SDK negative tests | Fresh threat-to-test matrix for forged reporter, replay, wrong payout, refund races and canonical source staleness; verify retained exact SHA |
-| Reservation races | Revision/stock, policy and adapter checks, idempotent cart/order preparation | Concurrency and depletion race evidence against Market owner, cancellation/fulfillment/release recovery invariants |
-| Swap failures | Swap restricted to governed route as specified by earlier architecture | Stale quote, under-delivery, blocked recipient, reverting swap, nonce replay, cross-chain/policy failure regression |
-| Auth/tenant | Wallet signed origin/chain/body/nonce; fresh merchant owner and delegate authorization; IDOR tests | Cross-resource horizontal/vertical auth matrix; abuse/CSRF/nonce exhaustion and owner rotation |
-| Upload/privacy | JPEG/PNG/WebP bounded re-encode, media metadata stripped; purpose-encrypted delivery; retention purge | Malicious large-media/load stress, private data leak/log review and secret/config exposure checks |
-| Load/recovery | HTTP concurrency limit/rate cap, request timeout; Indexer durable inbox/outbox and halt/rebuild | Bounded load and failure/restart drills with retained traces and pass thresholds |
-| Monitoring | Health endpoint reports projection state, startup/tick emits minimal unavailable state | Metrics/alerting and incident response/runbooks; evidence for degraded/stop/recovery |
-| Security review | COM-1.7 threat register COM-T01–T16 | Independent review readiness package; external security signoff must not be fabricated |
-| Phase closeout | COM-6 app Level 2 qualified | Reconcile current main, single exact merge candidate, Level 3 full canonical Solidity once; Genesis address authority separately; 420 Integrated and Docs/global where applicable; no duplicate full Foundry |
+| 420Stake STAKE-AUDIT-3 | [38041865953](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865953) | PASS |
+| Commerce security review readiness | [38041866016](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041866016) | PASS |
+| 420Explorer EXP-NEXT.1 Registry Descriptor Provenance | [38041865884](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865884) | PASS |
+| 420Randomness RANDOM-AUDIT-5 | [38041865969](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865969) | PASS |
+| 420Registry REG-AUDIT-6 | [38041866003](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041866003) | PASS |
+| Genesis Address Authority | [38041865958](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865958) | PASS |
+| 420Stake STAKE-AUDIT-6 | [38041865966](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865966) | PASS |
+| Commerce governed Pay refund qualification | [38041865983](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865983) | PASS |
+| 420Hz HZ-GCA-17 Level 3 exact-SHA qualification | [38041866024](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041866024) | PASS |
+| Compute Developer Surfaces | [38041865911](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865911) | PASS |
+| Commerce merchant builder fast qualification | [38041865916](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865916) | PASS |
+| 420Docs Qualification | [38041865932](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865932) | PASS |
+| 420 Developer Hub | [38041865978](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865978) | PASS |
+| 420Identity ID-AUDIT-4 | [38041865942](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865942) | PASS |
+| 420Identity ID-AUDIT-6 | [38041865944](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865944) | PASS |
+| Commerce service fast qualification | [38041865909](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865909) | PASS |
+| Commerce upstream contracts | [38041865982](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865982) | PASS |
+| 420 Integrated Qualification | [38041865960](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865960) | PASS |
+| 420Registry REG-AUDIT-7 | [38041865997](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865997) | PASS |
+| 420Oracle audit qualification | [38041865869](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865869) | PASS |
+| 420Randomness audit qualification | [38041865948](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865948) | PASS |
+| 420Rights audit qualification | [38041865928](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865928) | PASS |
+| 420Grants Audit Qualification | [38041865853](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865853) | PASS |
+| 420AI Audit Qualification | [38041865921](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865921) | PASS |
+| Solidity Contracts | [38041865973](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041865973) | PASS |
 
-## Initial COM-7 hardening candidate
+9 conditionally skipped workflows are explicitly excluded from passing evidence. Conditional skipped jobs within passing workflows are also listed separately in JSON. No queued, failed or cancelled final-candidate job is promoted to PASS.
 
-- `commerce/src/http.mjs`: reject ambiguous/noncanonical numeric pagination input (empty/leading-zero/scientific notation), add explicit X-Frame-Options DENY and Permissions-Policy, and HSTS on approved HTTPS origin.
-- `commerce/test/http-sdk.test.mjs`: regression for these API/security requirements.
-- Implementation SHA `0ee8eb1ff3b31947ddd89b379cc77acf2b4c6beb`. Tests were only queued at document authoring; **not a qualified COM-7 SHA**.
+## Superseded failed candidates
 
-## Exit status
+The earlier tolerated Yul coverage failure is retracted in `COM-7-COVERAGE-RECONCILIATION.md`. Candidate `7379236e7a688d9ff0666b87f2949ff1b5b8c28b` passed normal canonical tests but failed mandatory coverage, run 38028988533 / job 114145814151: mutable cache lost `script/Decision10DeploySeed420.s.sol`. That candidate is NOT Level 3 qualified. The final candidate captures the complete exact-SHA graph before sparse cache pruning. Candidate `f6a642b33d2a59ff94387e94cf56c3aed899c631` subsequently failed native coverage context 9 (run 38032286595 / job 114155612335), with nine completed coverage contexts. The final coverage-only bridge retains that compiler failure and exact inputs, permitting one retry only for a Yul stack-depth error with a pinned non-inlining optimizer sequence. The abbreviated sequence failed again on candidate `23ea85c907a37791584ffb6c3c9bf741427fc50f` (run 38038205736 / job 114173041314). Focused native replay run 38041352046 / job 114182065699 verified all 100 source contents and compiled the complete retained input using Solc 0.8.24's full default sequence with only full function inlining removed. This verified sequence replaces the abbreviated retry. Both temporary replay jobs deliberately failed after recording experiments and are NOT qualified; their temporary workflow/script is removed. Compiler diagnostics are separate from the final passing coverage execution. All 18 harness regressions and final coverage gates passed. Candidate `2f576b41ecaee19e48f607f405f8ab9580111b54` failed before coverage execution because the directly invoked compiler bridge lacked execute permission (run 38035654957 / job 114165461822); it is NOT qualified. The final candidate restores execute permission and checks it before compilation. No contract/test source, assertion, normal compiler profile or qualification budget was relaxed.
 
-**COM-7 IN PROGRESS / NOT QUALIFIED** until all original security/ops requirements have documented applicable test evidence, current-main reconciliation, and applicable complete Level 3 pass. Do not merge PR #594. Next canonical milestone after COM-7 repository closeout: **COM-8 TESTNET HANDOFF**, blocked on actual service/network/authority deployment and real transaction evidence.
+## Remaining acceptance gates
 
-## October 9 security candidate and exact-SHA CI status
+Next canonical milestone: **COM-8 — TESTNET HANDOFF**.
 
-Implementation SHA: `06de4a1ce04663c30fa89590db654bb096cd91d9`. The implementation includes hardened HTTP semantics, in-process concurrency/rate-abuse and privacy tests, fail-closed monitoring module and controller/finality/recovery regressions. Associated app CI results at last inspection:
+- Approved testnet chain/RPC/Registry/Wallet/runtime-code/version and manifests; release approval and frozen PAY-AUDIT-6 identities.
+- Real merchant/listing/invoice/native payment/settlement/funded refund transactions with finalized receipts, balances and Market stock/status correlation.
+- Approved executable Swap or documented unsupported route; no invented success.
+- Live Arbitration/Identity/Names/Notifications integrations and canonical service policy.
+- Operational keys/storage/retention, DNS/TLS/CSP/edge, monitoring and alert delivery; deployed outage/reorg/recovery and operator capacity budgets.
+- Any multi-instance operation requires coordinator/worker ownership, nonce/idempotency, distributed rate limits, migration/crash and delivery evidence.
 
-- Governed Pay refund qualification: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707594 — **completed/success**.
-- Merchant builder/browser: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707717 — **completed/success**.
-- Commerce service/SDK/Indexer: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707692 — queued (NOT PASS).
-- Retained upstream Market/Pay/Arbitration: https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38000707811 — queued (NOT PASS).
-
-The latter two jobs have not started at capture time; this is a runner/queue condition, **not** evidence of successful qualification nor an observed implementation test failure.
-
-Main-branch reconciliation is outstanding: GitHub compare of `main` and audit branch reported **205 commits ahead / 410 behind**, with merge base `41d173dbcfbeb8299f54f22e7c049f1fec20336d`. Do not invent a synthesized merge-SHA or use the unmerged branch's fast suite as Level 3 evidence. No canonical full Solidity, Genesis/address authority, 420 Integrated/global, Docs/global or single merged-candidate Level 3 pass has been performed for COM-7. Preserve PR #594 as draft and unmerged.
-
-## Reconciled implementation and COM-7 acceptance mapping (October 9, 2026)
-
-**Canonical merge reconciliation:** exact first parent `3d9ef79b572820ef067a15e060ac7c52e9677605`, exact second parent `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`, reconciled merge `84601d909ee71d8bb48d15af81ea612cba8dc531`, tree `1c7f5cad930a58ff57976d7b70091dceaf32b891`. Both sides of the common base `41d173dbcfbeb8299f54f22e7c049f1fec20336d` were compared: 113 Commerce-branch changed files and 205 `main` changed files with **no overlapping paths**; all Commerce files were copied into a new tree on top of the exact main tree. The merge SHA's tree and parents were independently re-fetched; GitHub comparison then reported zero commits behind `main`. This reconciled branch is **not a Level 3 qualification**.
-
-### Repository-side acceptance gates and retained evidence owners
-
-- **COM-T01/T02/T03 / financial identity and settlement**: `commerce/test/native-receipt.test.mjs`, `commerce/test/com6a-refund.test.mjs`, `commerce/web/test/native-pay.test.mjs`, `scripts/commerce/qualify-contracts.py` (canonical Market/Pay, reporter, receipt, controller/payout and funded refund checks); payment never asserted final from a transaction broadcast. Real transaction proof remains COM-8.
-- **COM-T04/T05 / reservation concurrency and replay**: `commerce/test/service.test.mjs`, `commerce/test/com7-security-ops.test.mjs` plus owning Market Foundry tests; burst retries must reuse one checkout attempt and SQL must not mutate canonical reserved stock.
-- **COM-T06 / Swap**: `commerce/web/native-pay.js` rejects absent approved Swap quote/settlement adapter; `commerce/web/test/native-pay.test.mjs` includes unapproved, stale, under-delivering, recipient-substituted, network-mismatch, replay and reverting-quote negatives. **No live approved Swap execution acceptance is claimed**, which belongs to COM-8 if the route becomes supported.
-- **COM-T07/T08 / refunds and reorgs**: `commerce/test/com6a-refund.test.mjs`, `commerce/test/com6-merchant-operations.test.mjs`, `commerce/test/projection.test.mjs`, `commerce/test/worker.test.mjs`; canonical funded Pay partial refund is not conflated with Market terminal refund; unknown finalized ancestry halts.
-- **COM-T09/T13 / wallet, CSRF and tenants**: `commerce/test/security.test.mjs`, `commerce/test/http-sdk.test.mjs`, `commerce/test/com7-security-ops.test.mjs`; per-request signed chain/origin/method/body nonce, tenant and controller rotation; rejects cross-origin writes and unknown authorization.
-- **COM-T10/T11 / upload, PII, privacy**: `commerce/test/security.test.mjs` exercises media MIME/magic, dimension/active content and PII encryption; `commerce/test/http-sdk.test.mjs` verifies private media and delivery tenant boundaries. Browser and service upload quarantine/retention are local only.
-- **COM-T12/T16 / manifest, runtime and secrets**: `commerce/test/authority.test.mjs`, `commerce/web/test/wallet.test.mjs` and `commerce/src/server.mjs` hash-verified manifest, fixed chain code and origin; no production secret or DNS/TLS attestation here.
-- **COM-T14 / DoS and loads**: bounded HTTP burst and rate-reset regressions in `commerce/test/http-sdk.test.mjs`; concurrency and read-work limits in `commerce/src/http.mjs`. These are app-harness tests, **not** production load/soak measurements.
-- **COM-T15 / role/Arbitration boundaries**: `commerce/test/com6b-dispute.test.mjs`, `commerce/test/arbitration-adapter.test.mjs`; no Commerce-operator-controlled fund transfers.
-- **Ops/recovery/monitoring**: `commerce/src/monitor.mjs`, `commerce/test/com7-monitor.test.mjs`, `commerce/test/worker.test.mjs`, `docs/commerce/COM-7-INCIDENT-OPERATIONS-RUNBOOK.md`; deployment alert delivery, multi-instance operations and human incident rehearsal have not been independently confirmed.
-
-### Exact-SHA status and required next boundary
-
-Post-reconciliation executable candidate `95fc1102d5b7700609cadaa95ed443acbe6cf65c` contains Swap negative tests in addition to the merge commit. Its exact-SHA applicable CI must complete before COM-7's newly added tests can be qualified. Older successes for `3d9ef79...` are historical/retained evidence, **not** substitutes for the post-merge suite. This update is documentary evidence only. Do not claim independently reviewed production security, live Swap, full chain settlement, multi-instance recovery or Level 3. The final COM-7 phase-closeout must run full canonical Solidity under its owning workflow, Genesis address authority separately, relevant global/Docs and retained Commerce on one exact merge-candidate SHA; PR #594 remains unmerged.
-
-
-## Post-reconciliation Level 1 verification — October 9, 2026
-
-Confirmed executable implementation SHA: `95fc1102d5b7700609cadaa95ed443acbe6cf65c`. All five directly applicable workflows completed successfully **on that exact SHA**, with individual required executed steps reporting success:
-
-| Scope | GitHub Actions run | Verified status |
-| --- | --- | --- |
-| Commerce service / SDK / Indexer / adversarial | [38006770588](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770588) | completed / success |
-| Merchant builder / real-service browser | [38006770545](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770545) | completed / success |
-| Governed Pay safety | [38006770604](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770604) | completed / success |
-| Upstream Market/Pay/Arbitration scoped contract tests | [38006770483](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770483) | completed / success |
-| Retained COM-6 Level 2 | [38006767611](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006767611) | completed / success |
-
-Solidity run [38006770521](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770521) classified the PR successfully but **skipped** the full Foundry jobs. These skips do not qualify the canonical full inventory. Existing implementation tests establish local/integration harness behavior, not production-scale load, deployed monitoring/alert delivery, live multi-instance restart, independent external review, real funded chain settlement or COM-8 acceptance.
-
-At inspection, PR #594 was open/draft at documentation-only HEAD `284ff81fcb532cd8dd345ec50a5a941130ab14d6`, and comparison with then-current main `f8bbb62e1cdfe68cff25261fd4a036db1840a15c` yielded 211 ahead / zero behind. This entry is evidence-only. **COM-7 remains in progress; Level 3 has not run and PR must not merge** until canonical acceptance coverage and a single new exact-SHA Level 3 merge candidate are independently established.
+PAY-AUDIT-6 frozen release identities remain unreconciled. Canonical Market refund status accepts full Pay accounting without funded payout proof; Commerce verifies funded payout separately. Neither limitation is waived by repository qualification. Notifications are a local opt-in finalized feed, and analytics is bounded page-local. COM-9 requires independent external review/findings/signoff and authorized production release. PR #594 is ready for repository-scope merge review following this Level 3; no merge, release or testnet acceptance is asserted.

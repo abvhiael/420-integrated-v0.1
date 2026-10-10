@@ -6,21 +6,24 @@ The projection API exposes no courier locations, counts, identifiers or writes.
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
-from .auth import Denied
+from .auth import Denied, Permission, authorize
 from .courier import verify_courier
 from .region_presence import Presence, project_region
 
-def ingest_presence(*, connect, session, courier_id, region_id, jurisdiction,
+def ingest_presence(*, connect, identity_issuer, session_store, signed_token, tenant_id, courier_id, region_id, jurisdiction,
                     carrier_class, vehicle_ref, credentials, credential_authority,
                     courier_policy, region_policy_authority, capacity, latitude,
                     longitude, at=None, lifetime_seconds=90):
     at=at or datetime.now(timezone.utc)
+    session=authorize(issuer=identity_issuer,store=session_store,signed_token=signed_token,
+        tenant_id=tenant_id,permission=Permission(role="COURIER",action="UPDATE_PRESENCE",
+        resource="courier:"+courier_id),now=at)
     if (at.tzinfo is None or not 1<=lifetime_seconds<=120
         or type(capacity) is not int or not 0<=capacity<=100
         or type(latitude) not in (float,int) or type(longitude) not in (float,int)
         or not -90<=latitude<=90 or not -180<=longitude<=180
         or session.revoked or session.expires_at<=at or session.actor_id!=courier_id
-        or not session.tenant_id):
+        or not session.tenant_id or session.tenant_id!=tenant_id):
         raise Denied("invalid or unauthenticated courier update")
     try:
         tenant_id=str(UUID(session.tenant_id))

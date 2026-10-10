@@ -39,7 +39,13 @@ def fixture_property(monkeypatch):
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
         c.execute("DELETE FROM bnb_request_dedupe WHERE actor='guest-fixture'")
+        c.execute("DELETE FROM bnb_reservation WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
         c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
         c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
         c.execute("DELETE FROM bnb_identity_session WHERE subject='guest-fixture'")
         c.execute("DELETE FROM bnb_account WHERE subject='guest-fixture'")
@@ -51,6 +57,29 @@ def payload(pid):
     start=(datetime.now(timezone.utc)+timedelta(days=8)).replace(microsecond=0)
     return {"property_id":str(pid),"start":start.isoformat(),"end":(start+timedelta(days=2)).isoformat(),
             "units":1,"policy_snapshot":"fixture policy v1"}
+
+
+def make_bnb25_hold(pid,headers,nonce,hold_key):
+    """Build a real immutable local quote and quote-bound hold for lifecycle tests."""
+    from zoneinfo import ZoneInfo
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_listing_policy
+            (property_id,house_rules,cancellation_policy,timezone_id,min_nights)
+            VALUES (%s,'Quiet hours','Fixture cancellation policy','America/Regina',1)
+            ON CONFLICT(property_id) DO NOTHING""",(pid,))
+        c.execute("""INSERT INTO bnb_rate_plan(property_id,cleaning_minor)
+            VALUES (%s,100) ON CONFLICT(property_id) DO NOTHING""",(pid,))
+    checkin=(datetime.now(ZoneInfo("America/Regina"))+timedelta(days=11)).date()
+    quote=client.post("/v1/bnb/quotes",headers=headers,json={
+        "property_id":str(pid),"checkin":checkin.isoformat(),
+        "checkout":(checkin+timedelta(days=2)).isoformat(),"nonce":nonce,"units":1})
+    assert quote.status_code==201,quote.text
+    row=quote.json()
+    return client.post("/v1/bnb/holds",json={
+        "property_id":str(pid),"quote_id":row["id"],"start":row["start"],
+        "end":row["end"],"units":1,"policy_snapshot":row["policy_snapshot_text"]},
+        headers={**headers,"idempotency-key":hold_key})
+
 
 def test_forged_identity_fails(fixture_property):
     pid,secret=fixture_property

@@ -44,3 +44,9 @@ Implementation SHA: `968137add514b82af193920b62570b108d97ae4b` (targeted qualifi
 **Qualification state:** LEVEL 1 PENDING. CI queued/not yet verified at this record's creation; documentation is not a PASS. No Level 2/Level 3 rerun.
 
 **Unresolved host-management requirements:** full independent publication-reviewer issuance/approval and live revocation are testnet/external-governance work. Remaining repository-side scope includes an end-to-end accessible unit/calendar editor and listing media/policy editor, media rights and moderation acceptance, robust timezone/DST modeling, complete multi-unit quantity allocation for guest booking, actual cross-instance concurrent admission/property ownership transfers, grant-consent/expiry end-to-end and broader browser/adversarial acceptance. Publication, financial operations and booking confirmation remain disabled. BNB-2.2 cannot be declared complete until required repository-side exit criteria pass as well.
+
+### Host UI and syntax qualification addendum
+
+The host dashboard now includes an authenticated draft unit form, request-independent-review action, and an owner-scoped calendar-block form. The client sends source-issued Identity bearer credentials only from transient memory, uses `credentials:"omit"`, and does not store credentials in localStorage/cookies. Input and errors remain visible through semantic labels and live status updates. This is not an independently approved Identity login experience and does not satisfy full WCAG/browser testing.
+
+The targeted BnB runtime workflow now executes a JavaScript syntax check on the inline host script. Full Playwright/browser interaction, host media upload rights, published listing policies, multi-instance property management, timezone ID + DST policies, and approved independent reviewer integration remain unqualified. No publication, settlement or guest booking privilege is introduced.

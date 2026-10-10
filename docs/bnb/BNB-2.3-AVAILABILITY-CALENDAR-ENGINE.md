@@ -30,3 +30,20 @@ Build correct, privacy-safe guest/host availability across bounded unit quantiti
 - Production Pay/Identity/property authority integration remains a distinct testnet gate; do not promote local held status to canonical confirmed reservation.
 
 **Next work:** implement conservative accurate sweep-line inventory calculation plus boundary/concurrency tests, then unit-aware availability read API, timezone and calendar synchronization controls. Do not label BNB-2.3 complete until individually qualified.
+
+## BNB-2.3 implementation and exact-qualification handoff (2026-10-10)
+
+Repository-side implementation on PR #600 now includes:
+
+- Public **published-only** `GET /v1/bnb/availability` by property/unit and UTC half-open date range, privacy-safe coarse fields, quantity remaining, property revision and nonbinding `as_of` stamp. `/v1/bnb/availability/local` adds check-in/checkout date projection with IANA timezone and minimum-night policy.
+- `calendar_engine.py`: sweep-line peak concurrent occupancy for holds, bounded quantity closures and signed calendar busy observations; edge-touching intervals do not overlap. Strict IANA local-time resolution rejects nonexistent DST times and requires explicit fold for ambiguous clocks.
+- Migration `009_availability_sync.sql`: bounded partial-unit closures and signed external busy-event provenance. Property-wide closures remain all-or-nothing. Host unit closure creation, version-checked atomic rescheduling and release preserve property-row locking and rollback on capacity conflicts.
+- Independent `BNB_CALENDAR_SYNC_*` signed claim ingest, full request SHA-256 binding, source-id/external event ID/JTI uniqueness, 24-hour freshness limit and outage/stale-data fail-close for previously ingested affected inventory. This is an **adapter**, not operational permission to trust a provider; live provider authorization stays external/testnet dependent.
+- Migration `010_minimum_stay_policy.sql`: enforce property IANA local date-based minimum nights for guest previews and hold admission, bounded 1–90 nights.
+- Owner-only atomic cancellation of nonbinding holds, expired/cancelled idempotency replay state, active-occupancy filtering and zero financial confirmation authority.
+- PostgreSQL tests for privacy, published-only reads, quantity closures, atomic block edit rollback and contention, property-wide closure, cross-property/anonymous denial, DST fold/gap, signed sync accepted/replayed/wrong scope/tampered/stale, expiration/cancellation and minimum stay.
+- Chromium mocked-API guest/host browser journeys, mobile/desktop axe-core accessibility scans, same narrow CI and two actual Uvicorn processes sharing PostgreSQL. The runtime Dockerfile explicitly includes the new calendar engine module.
+
+**Level 1:** targeted runtime qualification must be checked on one final exact implementation SHA. Older CI run #38086650647 failed its staging-container import because `calendar_engine.py` was missing from Dockerfile; this was remedied in the branch. Do not mark final status PASS until corrected exact-SHA runtime and affected workflows complete successfully. Evidence-only additions can inherit qualified SHA; further implementation changes cannot.
+
+**Remaining operational testnet/external requirements:** real authorized calendar issuer/provider credentials, staged provider key rotation/revocation/outage, publication authority, financial settlement/confirmation and human accessibility/media reviewer approvals remain on the BNB testnet roadmap. These do not authorize restricted features merely because local integration tests pass. Full independent downstream release acceptance is distinct from BNB-2.3 repository-side Level 1.

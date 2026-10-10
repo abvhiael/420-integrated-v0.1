@@ -1,6 +1,8 @@
 """Postgres-backed negative/adversarial booking invariants with signed synthetic ingress."""
 import hashlib
-import hmac
+import jwt
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import Encoding,PublicFormat
 import importlib.util
 import os
 import time
@@ -19,23 +21,31 @@ client=TestClient(api.app)
 @pytest.fixture()
 def fixture_property(monkeypatch):
     if not os.environ.get("BNB_DATABASE_URL"):pytest.skip("Postgres integration requires BNB_DATABASE_URL")
-    secret="test-only-"+("x"*40);monkeypatch.setenv("BNB_IDENTITY_ASSERTION_SECRET",secret)
+    key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    monkeypatch.setenv("BNB_IDENTITY_PUBLIC_KEY_PEM",key.public_key().public_bytes(Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    monkeypatch.setenv("BNB_IDENTITY_ISSUER","https://identity.test.invalid")
+    monkeypatch.setenv("BNB_IDENTITY_AUDIENCE","420bnb")
+    now=int(time.time())
+    token=jwt.encode(dict(sub="guest-fixture",iss="https://identity.test.invalid",aud="420bnb",iat=now,nbf=now,exp=now+300,jti="bnb-fixture-session"),key,algorithm="RS256")
+    headers={"authorization":"Bearer "+token}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_account(subject) VALUES ('guest-fixture') ON CONFLICT DO NOTHING")
+        c.execute("INSERT INTO bnb_identity_session(id,subject,issuer,issuer_session_id,expires_at) VALUES (%s,'guest-fixture','https://identity.test.invalid','bnb-fixture-session',now()+interval '5 minutes') ON CONFLICT(issuer,issuer_session_id) DO UPDATE SET expires_at=excluded.expires_at,revoked_at=NULL",(uuid4(),))
     pid=uuid4()
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("""INSERT INTO bnb_property(id,host_subject,title,public_region,status,capacity,nightly_minor,currency)
         VALUES (%s,'verified-host','Synthetic suite','Public region','published',1,1000,'CAD')""",(pid,))
-    yield pid,secret
+    yield pid,headers
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
         c.execute("DELETE FROM bnb_request_dedupe WHERE actor='guest-fixture'")
         c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
         c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+        c.execute("DELETE FROM bnb_identity_session WHERE subject='guest-fixture'")
+        c.execute("DELETE FROM bnb_account WHERE subject='guest-fixture'")
 
-def auth(secret,subject="guest-fixture",role="guest"):
-    at=str(int(time.time()))
-    signature=hmac.new(secret.encode(),f"bnb-v1\\n{subject}\\n{role}\\n{at}".encode(),hashlib.sha256).hexdigest()
-    return {"x-authenticated-subject":subject,"x-authenticated-role":role,
-            "x-authenticated-at":at,"x-authenticated-signature":signature}
+def auth(headers,subject="guest-fixture",role="guest"):
+    return dict(headers)
 
 def payload(pid):
     start=(datetime.now(timezone.utc)+timedelta(days=8)).replace(microsecond=0)
@@ -44,7 +54,7 @@ def payload(pid):
 
 def test_forged_identity_fails(fixture_property):
     pid,secret=fixture_property
-    headers=auth(secret);headers["x-authenticated-subject"]="other-guest"
+    headers={"x-authenticated-subject":"other-guest"}
     headers["idempotency-key"]="forged-id-123"
     response=client.post("/v1/bnb/holds",headers=headers,json=payload(pid))
     assert response.status_code==401

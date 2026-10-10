@@ -274,7 +274,7 @@ contract HighCountryGamingBridge420Test {
                 validUntil: 0,
                 revoked: false,
                 exists: true
-                    }),
+            }),
             true
         );
         entitlements.setEntitlement(
@@ -288,7 +288,7 @@ contract HighCountryGamingBridge420Test {
                 validUntil: 0,
                 revoked: false,
                 exists: true
-                    }),
+            }),
             true
         );
         vm.prank(ALICE);
@@ -317,7 +317,7 @@ contract HighCountryGamingBridge420Test {
                 validUntil: 0,
                 revoked: true,
                 exists: true
-                    }),
+            }),
             false
         );
         require(!bridge.hasPlayerBonusRegion(1, content), "revoked alice accepted");

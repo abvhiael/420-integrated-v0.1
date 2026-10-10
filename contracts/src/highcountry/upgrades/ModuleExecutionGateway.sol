@@ -15,19 +15,28 @@ contract ModuleExecutionGateway {
     error InvalidGatewayCall();
     event ModuleExecuted(bytes32 indexed moduleId, bytes4 indexed selector, address indexed caller);
 
-    constructor(address registry, address auth) {
+    constructor(
+        address registry,
+        address auth
+    ) {
         if (registry.code.length == 0 || auth.code.length == 0) revert InvalidGatewayCall();
         modules = IModuleRegistry(registry);
         authorization = IHighCountryAuthorization(auth);
     }
 
-    function execute(bytes32 moduleId, bytes calldata callData) external returns (bytes memory result) {
+    function execute(
+        bytes32 moduleId,
+        bytes calldata callData
+    ) external returns (bytes memory result) {
         if (callData.length < 4) revert InvalidGatewayCall();
         bytes4 selector = bytes4(callData[:4]);
         authorization.requireAuthorized(
             AuthorizationRequest(
-                msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_EXECUTE,
-                keccak256(abi.encode(moduleId, selector)), 0
+                msg.sender,
+                ModuleIds.MODULE_REGISTRY,
+                ActionIds.MODULE_EXECUTE,
+                keccak256(abi.encode(moduleId, selector)),
+                0
             )
         );
         address implementation = modules.activeImplementation(moduleId);

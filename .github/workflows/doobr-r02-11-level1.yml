@@ -1,0 +1,60 @@
+name: DOOBR R02.11 Outbox Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/outbox.py','doobr/storage/migrations/0010_outbox.up.sql','doobr/storage/tests/test_outbox.py','docs/doobr/DOOBR-R02-11-*','.github/workflows/doobr-r02-11-level1.yml']
+  pull_request:
+    paths: ['doobr/outbox.py','doobr/storage/migrations/0010_outbox.up.sql','doobr/storage/tests/test_outbox.py','docs/doobr/DOOBR-R02-11-*','.github/workflows/doobr-r02-11-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  outbox:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_11
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_11"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_11
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and negative cases
+        run: |
+          python3 -m py_compile doobr/outbox.py doobr/storage/tests/test_outbox.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_outbox.py -v
+      - name: Install pinned Postgres driver
+        run: python3 -m pip install 'psycopg[binary]==3.2.4'
+      - name: Apply canonical schema
+        run: |
+          for num in 0001_initial 0002_identity 0003_retailer 0004_courier 0005_presence 0006_order_commands 0007_dispatch 0008_tracking 0009_return_cases 0010_outbox; do
+            psql -v ON_ERROR_STOP=1 -f "doobr/storage/migrations/${num}.up.sql"
+          done
+      - name: Outbox forced RLS
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN IF (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='doobr_private' AND c.relname IN ('event_outbox','event_receipts') AND c.relrowsecurity AND c.relforcerowsecurity)<>2 THEN RAISE EXCEPTION 'outbox RLS absent'; END IF; END \$\$;"
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

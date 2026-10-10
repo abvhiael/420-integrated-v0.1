@@ -46,7 +46,9 @@ interface IRandomnessCoordinatorBreeding {
         bytes32 domain,
         bytes32 contextHash
     ) external;
-    function cancel(bytes32 requestId) external;
+    function cancel(
+        bytes32 requestId
+    ) external;
     function consume(
         bytes32 requestId,
         bytes32 expectedDomain,
@@ -148,7 +150,10 @@ contract BreedingEngine {
         ) revert HCInvalidId();
         if (parentA == parentB) revert HCInvalidState();
         if (!genomeRegistry.exists(parentA) || !genomeRegistry.exists(parentB)) revert HCNotFound();
-        if (genomeRegistry.exists(childGenomeId) || _events[breedingEventId].exists || pendingChildOwner[childGenomeId] != 0) revert HCAlreadyExists();
+        if (
+            genomeRegistry.exists(childGenomeId) || _events[breedingEventId].exists
+                || pendingChildOwner[childGenomeId] != 0
+        ) revert HCAlreadyExists();
 
         _auth(ActionIds.BREEDING_REQUEST, breedingEventId);
         bytes32 contextHash =
@@ -206,19 +211,26 @@ contract BreedingEngine {
     }
 
     /// @notice Authorized cancellation is available even when breeding is restricted.
-    function cancelBreeding(uint64 breedingEventId) external {
+    function cancelBreeding(
+        uint64 breedingEventId
+    ) external {
         _auth(ActionIds.BREEDING_CANCEL, breedingEventId);
         _cancel(breedingEventId, false);
     }
 
     /// @notice Anyone may release a stranded reservation after its fixed deadline.
-    function expireBreeding(uint64 breedingEventId) external {
+    function expireBreeding(
+        uint64 breedingEventId
+    ) external {
         if (!_events[breedingEventId].exists) revert HCNotFound();
         if (block.timestamp < uint256(requestedAt[breedingEventId]) + BREEDING_TIMEOUT) revert HCInvalidState();
         _cancel(breedingEventId, true);
     }
 
-    function _cancel(uint64 breedingEventId, bool timedOut) private {
+    function _cancel(
+        uint64 breedingEventId,
+        bool timedOut
+    ) private {
         BreedingEvent storage e = _events[breedingEventId];
         if (!e.exists) revert HCNotFound();
         if (e.finalized || cancelled[breedingEventId]) revert HCInvalidState();

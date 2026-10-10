@@ -1230,6 +1230,27 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
             "invoice_id":payload.pay_invoice_id,"confirmed":False}
 
 
+@app.get("/v1/bnb/reservations/{reservation_id}/payment")
+def guest_payment_projection(reservation_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,r.status,i.id,i.state,i.pay_invoice_id,
+            i.asset,i.asset_amount,i.chain_id,i.pay_invoice_expires,i.pay_payment_id
+            FROM bnb_reservation r LEFT JOIN bnb_pay_intent i ON i.reservation_id=r.id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+    if not row or actor!=row[0]:raise HTTPException(404,"NOT_FOUND")
+    return {"reservation_id":str(reservation_id),"reservation_status":row[1],
+            "invoice_authorized":row[2] is not None,
+            "pay_intent_id":str(row[2]) if row[2] else None,
+            "payment_state":row[3] if row[2] else "unavailable",
+            "pay_invoice_id":row[4],"asset":row[5],
+            "asset_amount":row[6],"chain_id":row[7],
+            "invoice_expires":row[8].isoformat() if row[8] else None,
+            "payment_id":row[9],
+            "confirmed":row[1]=="confirmed",
+            "wallet_execution_available":False}
+
+
 @app.post("/v1/bnb/internal/pay/finality",status_code=202)
 def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=Header(None)):
     """Finality only from independently authorized canonical Pay signer, no callback shortcuts."""

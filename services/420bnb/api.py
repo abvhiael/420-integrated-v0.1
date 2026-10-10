@@ -1470,7 +1470,7 @@ def read_booking_reservation(reservation_id:UUID,authorization:str|None=Header(N
             (reservation_id,)).fetchone()
     if not row or actor not in (row[0],row[1]):raise HTTPException(404,"NOT_FOUND")
     return {"id":str(reservation_id),"booking_public_id":str(row[5]),
-            "request_id":str(row[3]),"status":row[2],"confirmed":False,
+            "request_id":str(row[3]),"status":row[2],"confirmed":row[2]=="confirmed",
             "payment_status":"unavailable","policy_snapshot":row[4]}
 
 

@@ -61,7 +61,7 @@ jobs:
               if name=='RandomnessCoordinator':
                   assert {'cancel','cancelled'} <= functions
           for name,expected in {
-              'HighCountrySessionAccess420': {'attestAccount','canonicalAccount','canonicalFactory','canonicalEntryPoint','isRoutineSessionAuthorized','requiresWalletEscalation'},
+              'HighCountrySessionAccess420': {'attestAccount','canonicalAccount','canonicalFactory','canonicalEntryPoint','isRoutineSessionAuthorized','requiresWalletEscalation','reviewRoutineCall','reviewedCodeHash'},
               'ModuleRegistry': {'activeImplementation','registeredCodeHash','registeredInterface','approvedArtifactHash','approveArtifact','bindEmergencyState','bindRulesetRegistry'},
               'ModuleExecutionGateway': {'execute','modules','authorization'},
               'HighCountryGamingBridge420': {'bindPlayerEntitlement','hasPlayerContent','hasPlayerBonusRegion','hasPlayerCompetition'},

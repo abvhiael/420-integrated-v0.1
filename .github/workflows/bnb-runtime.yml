@@ -78,6 +78,7 @@ jobs:
           PY
       - name: Host browser accessibility smoke
         run: |
+          npm install --no-save --no-package-lock axe-core@4.10.3
           python -m pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
           python services/420bnb/tests/browser_accessibility.py

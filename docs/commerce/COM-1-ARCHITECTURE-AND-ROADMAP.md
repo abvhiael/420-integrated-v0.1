@@ -1,7 +1,7 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
 **Status:** COM-1 architecture closeout qualified and merged through PR #588. COM-2 through COM-6 are qualified at their applicable repository boundaries; accumulated COM-7 repository security acceptance and comprehensive Level 3 passed on `2648c0b6df52a375c2d6bdbd2839cdbc607ff113`. Live deployment/integration acceptance remains COM-8; external production signoff remains COM-9. See `COM-7-LEVEL3-QUALIFICATION-STATUS.json`. PR #594 remains draft/unmerged.
-**Target surface:** `commerce.420integrated.org`
+**Target surface:** `marketplace.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
 ## COM-1 discovery — canonical source findings
@@ -66,7 +66,7 @@
 
 ## Cloudflare deployment planning
 
-Target branded client `commerce.420integrated.org` with verified configuration, separate testnet/mainnet settings, server-owned secrets and privacy-safe persistence. **Implemented merchant web root: `commerce/web`; build: `npm run build` after SDK build; output: `commerce/web/dist`. Cloudflare project, DNS/TLS and live binding remain unverified.** Do not guess these values, configure an unverified service manifest, or claim a deployment.
+Target branded client `marketplace.420integrated.org` with verified configuration, separate testnet/mainnet settings, server-owned secrets and privacy-safe persistence. **Implemented merchant web root: `commerce/web`; build: `npm run build` after SDK build; output: `commerce/web/dist`. Cloudflare project, DNS/TLS and live binding remain unverified.** Do not guess these values, configure an unverified service manifest, or claim a deployment.
 
 ## Qualification and status
 

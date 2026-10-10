@@ -307,8 +307,7 @@ contract HighCountrySessionAccess420Test {
         bytes32 salt = keccak256("r0213:canonical-factory");
         SmartAccount420 realAccount = realFactory.createAccount(address(this), address(0), salt);
         require(
-            address(realAccount) == realFactory.getAddress(address(this), address(0), salt),
-            "CREATE2 address mismatch"
+            address(realAccount) == realFactory.getAddress(address(this), address(0), salt), "CREATE2 address mismatch"
         );
         realAccount.enableSessionKey(SESSION_KEY);
         realPolicy.reviewRoutineCall(address(target), target.tick.selector);
@@ -319,16 +318,22 @@ contract HighCountrySessionAccess420Test {
             keccak256("r0213:real-grant"), SESSION_KEY, component, CapabilityIds420.SESSION_EXECUTE, scope, true
         );
         require(
-            !realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.tick.selector),
+            !realPolicy.isRoutineSessionAuthorized(
+                address(realAccount), SESSION_KEY, address(target), target.tick.selector
+            ),
             "unattested canonical wallet accepted"
         );
         realPolicy.attestAccount(address(realAccount), address(this), address(0), salt);
         require(
-            realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.tick.selector),
+            realPolicy.isRoutineSessionAuthorized(
+                address(realAccount), SESSION_KEY, address(target), target.tick.selector
+            ),
             "factory deployed and granted wallet denied"
         );
         require(
-            !realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.risky.selector),
+            !realPolicy.isRoutineSessionAuthorized(
+                address(realAccount), SESSION_KEY, address(target), target.risky.selector
+            ),
             "unreviewed selector accepted"
         );
         require(
@@ -337,7 +342,9 @@ contract HighCountrySessionAccess420Test {
         );
         realAccount.revokeKey(SESSION_KEY);
         require(
-            !realPolicy.isRoutineSessionAuthorized(address(realAccount), SESSION_KEY, address(target), target.tick.selector),
+            !realPolicy.isRoutineSessionAuthorized(
+                address(realAccount), SESSION_KEY, address(target), target.tick.selector
+            ),
             "revoked real wallet key accepted"
         );
     }

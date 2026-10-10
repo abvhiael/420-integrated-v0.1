@@ -195,6 +195,8 @@ def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
                 calculation=quote_breakdown(checkin,checkout,payload.units,prop[1],
                     rate[1],rate[2],rate[4],rate[5],rate[3],policy[1])
             except (ValueError,OverflowError) as e:raise HTTPException(422,str(e))
+            if payload.payer_max_minor is not None and calculation["total_minor"]>payload.payer_max_minor:
+                raise HTTPException(409,"PAYER_MAX_EXCEEDED")
             snapshot={"property_id":payload.property_id,"unit_id":payload.unit_id,
                 "guest":subject,"property_version":prop[3],"rate_version":rate[0],
                 "timezone":policy[0],"house_rules":policy[2],"cancellation_policy":policy[3],

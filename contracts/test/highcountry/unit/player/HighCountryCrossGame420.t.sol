@@ -6,7 +6,13 @@ import { HighCountryGamingIds } from "../../../../src/highcountry/player/HighCou
 
 contract MockHCBindingCrossGame {
     mapping(uint64 => bytes32) public gameProfileIdOfGrower;
-    function setBinding(uint64 growerProfileId, bytes32 profileId) external { gameProfileIdOfGrower[growerProfileId] = profileId; }
+
+    function setBinding(
+        uint64 growerProfileId,
+        bytes32 profileId
+    ) external {
+        gameProfileIdOfGrower[growerProfileId] = profileId;
+    }
 }
 
 contract MockCrossGameRegistryHC {
@@ -24,12 +30,25 @@ contract MockCrossGameRegistryHC {
     mapping(bytes32 => Attestation) internal records;
     mapping(bytes32 => bool) internal active;
 
-    function setAttestation(Attestation calldata a, bool isActive_) external {
+    function setAttestation(
+        Attestation calldata a,
+        bool isActive_
+    ) external {
         records[a.attestationId] = a;
         active[a.attestationId] = isActive_;
     }
-    function attestation(bytes32 id) external view returns (Attestation memory) { return records[id]; }
-    function isActive(bytes32 id) external view returns (bool) { return active[id]; }
+
+    function attestation(
+        bytes32 id
+    ) external view returns (Attestation memory) {
+        return records[id];
+    }
+
+    function isActive(
+        bytes32 id
+    ) external view returns (bool) {
+        return active[id];
+    }
 }
 
 contract HighCountryCrossGame420Test {
@@ -67,7 +86,9 @@ contract HighCountryCrossGame420Test {
             }),
             true
         );
-        require(access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, PAYLOAD), "attestation rejected");
+        require(
+            access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, PAYLOAD), "attestation rejected"
+        );
     }
 
     function testCrossGameSourceRejected() public {
@@ -87,7 +108,10 @@ contract HighCountryCrossGame420Test {
             }),
             true
         );
-        require(!access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, PAYLOAD), "cross-game source accepted");
+        require(
+            !access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, PAYLOAD),
+            "cross-game source accepted"
+        );
     }
 
     function testWrongPayloadRejected() public {
@@ -107,7 +131,10 @@ contract HighCountryCrossGame420Test {
             }),
             true
         );
-        require(!access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, keccak256("wrong")), "wrong payload accepted");
+        require(
+            !access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, keccak256("wrong")),
+            "wrong payload accepted"
+        );
     }
 
     function testInactiveAttestationRejected() public {
@@ -127,11 +154,17 @@ contract HighCountryCrossGame420Test {
             }),
             false
         );
-        require(!access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, PAYLOAD), "inactive attestation accepted");
+        require(
+            !access.hasScopedAttestation(GROWER, ATTESTATION, subjectType, SUBJECT_ID, PAYLOAD),
+            "inactive attestation accepted"
+        );
     }
 
     function testUnboundGrowerRejected() public {
         setUp();
-        require(!access.hasScopedAttestation(99, ATTESTATION, access.strainDiscoverySubject(), SUBJECT_ID, PAYLOAD), "unbound grower accepted");
+        require(
+            !access.hasScopedAttestation(99, ATTESTATION, access.strainDiscoverySubject(), SUBJECT_ID, PAYLOAD),
+            "unbound grower accepted"
+        );
     }
 }

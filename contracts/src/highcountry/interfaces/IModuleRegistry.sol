@@ -13,15 +13,30 @@ interface IModuleRegistry {
     }
 
     event ModuleRegistered(
-        bytes32 indexed moduleId,
-        address indexed implementation,
-        uint32 version,
-        bytes32 indexed rulesetId
+        bytes32 indexed moduleId, address indexed implementation, uint32 version, bytes32 indexed rulesetId
     );
     event ModuleStateChanged(bytes32 indexed moduleId, UpgradeState previousState, UpgradeState newState);
 
-    function getModule(bytes32 moduleId) external view returns (ModuleRecord memory);
-    function implementationOf(bytes32 moduleId) external view returns (address);
-    function registerModule(bytes32 moduleId, address implementation, uint32 version, bytes32 rulesetId) external;
-    function setModuleState(bytes32 moduleId, UpgradeState newState) external;
+    function getModule(
+        bytes32 moduleId
+    ) external view returns (ModuleRecord memory);
+    function activeImplementation(
+        bytes32 moduleId
+    ) external view returns (address);
+    function bindEmergencyState(
+        address candidate
+    ) external;
+    function implementationOf(
+        bytes32 moduleId
+    ) external view returns (address);
+    function registerModule(
+        bytes32 moduleId,
+        address implementation,
+        uint32 version,
+        bytes32 rulesetId
+    ) external;
+    function setModuleState(
+        bytes32 moduleId,
+        UpgradeState newState
+    ) external;
 }

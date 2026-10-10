@@ -2,6 +2,14 @@
 pragma solidity ^0.8.24;
 
 interface IHighCountryGamingAccess420 {
+    function hasPlayerBonusRegion(
+        uint64 growerProfileId,
+        bytes32 contentId
+    ) external view returns (bool);
+    function hasPlayerCompetition(
+        uint64 growerProfileId,
+        bytes32 contentId
+    ) external view returns (bool);
     function hasScopedEntitlement(
         uint64 growerProfileId,
         bytes32 entitlementId,
@@ -16,23 +24,27 @@ interface IHighCountryGamingAccess420 {
         bytes32 expectedContentId
     ) external view;
 
-    function hasBonusRegion(uint64 growerProfileId, bytes32 entitlementId, bytes32 regionContentId)
-        external
-        view
-        returns (bool);
+    function hasBonusRegion(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 regionContentId
+    ) external view returns (bool);
 
-    function hasCosmetic(uint64 growerProfileId, bytes32 entitlementId, bytes32 cosmeticContentId)
-        external
-        view
-        returns (bool);
+    function hasCosmetic(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 cosmeticContentId
+    ) external view returns (bool);
 
-    function hasCompetitionAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 competitionContentId)
-        external
-        view
-        returns (bool);
+    function hasCompetitionAccess(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 competitionContentId
+    ) external view returns (bool);
 
-    function hasGeneticsAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 geneticsContentId)
-        external
-        view
-        returns (bool);
+    function hasGeneticsAccess(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 geneticsContentId
+    ) external view returns (bool);
 }

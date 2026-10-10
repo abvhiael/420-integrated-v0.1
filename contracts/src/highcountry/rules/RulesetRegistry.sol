@@ -3,7 +3,12 @@ pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCInvalidId, HCRulesetAlreadyRegistered, HCRulesetNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import {
+    HCInvalidId,
+    HCRulesetAlreadyRegistered,
+    HCRulesetNotFound,
+    HCZeroAddress
+} from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { IRulesetRegistry } from "../interfaces/IRulesetRegistry.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
@@ -14,17 +19,23 @@ contract RulesetRegistry is IRulesetRegistry {
     IHighCountryAuthorization public immutable authorization;
     mapping(bytes32 => RulesetRecord) private _rulesets;
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
     }
 
-    function deriveRulesetId(bytes32 contentHash) public pure returns (bytes32) {
+    function deriveRulesetId(
+        bytes32 contentHash
+    ) public pure returns (bytes32) {
         if (contentHash == bytes32(0)) revert HCInvalidId();
         return keccak256(abi.encode(RULESET_ID_DOMAIN, contentHash));
     }
 
-    function registerRuleset(bytes32 contentHash) external returns (bytes32 rulesetId) {
+    function registerRuleset(
+        bytes32 contentHash
+    ) external returns (bytes32 rulesetId) {
         rulesetId = deriveRulesetId(contentHash);
         if (_rulesets[rulesetId].exists) revert HCRulesetAlreadyRegistered(rulesetId);
 
@@ -43,13 +54,17 @@ contract RulesetRegistry is IRulesetRegistry {
         emit RulesetRegistered(rulesetId, contentHash, registeredAt);
     }
 
-    function getRuleset(bytes32 rulesetId) external view returns (RulesetRecord memory) {
+    function getRuleset(
+        bytes32 rulesetId
+    ) external view returns (RulesetRecord memory) {
         RulesetRecord memory record = _rulesets[rulesetId];
         if (!record.exists) revert HCRulesetNotFound(rulesetId);
         return record;
     }
 
-    function exists(bytes32 rulesetId) external view returns (bool) {
+    function exists(
+        bytes32 rulesetId
+    ) external view returns (bool) {
         return _rulesets[rulesetId].exists;
     }
 }

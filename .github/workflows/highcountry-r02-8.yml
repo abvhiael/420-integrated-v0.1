@@ -1,0 +1,59 @@
+name: High Country R02.8 Targeted Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/**'
+      - 'docs/highcountry/R02.8-EMERGENCY-ENFORCEMENT.md'
+      - 'docs/highcountry/DEPLOYMENT-AND-TRUST.md'
+      - 'scripts/highcountry/verify-r01.py'
+      - '.github/workflows/highcountry-r02-8.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r02-8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        run: git rev-parse HEAD
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Contract build
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry test/highcountry
+      - name: Security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: Emergency authorization and engine regression
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/integration/EmergencyEnforcement.t.sol' -vv
+      - name: Retained High Country tests and invariants
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+      - name: Source specification
+        run: python3 scripts/highcountry/verify-r01.py
+      - name: Emergency ABI
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import pathlib,json
+          for name in ('PlantRegistry','CultivationEngine','BreedingEngine','RandomnessCoordinator'):
+              matches=list(pathlib.Path('out').glob('**/'+name+'.json'))
+              assert len(matches)==1, (name,matches)
+              abi=json.loads(matches[0].read_text())['abi']
+              functions={x['name'] for x in abi if x['type']=='function'}
+              assert {'bindEmergencyState','emergencyState','EMERGENCY_BIND_SCOPE'} <= functions,name
+          PY

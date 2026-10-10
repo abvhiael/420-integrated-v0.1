@@ -5,7 +5,10 @@ import { ICapabilityRegistry420 } from "../../../src/interfaces/genesis/ICapabil
 import { ProgressiveGamingTypes } from "../../../src/gaming/access/ProgressiveGamingTypes.sol";
 import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
 import { HighCountryAccessPolicy } from "../../../src/highcountry/access/HighCountryAccessPolicy.sol";
-import { GuestProfileMigration, IGrowerProfileMigration } from "../../../src/highcountry/access/GuestProfileMigration.sol";
+import {
+    GuestProfileMigration,
+    IGrowerProfileMigration
+} from "../../../src/highcountry/access/GuestProfileMigration.sol";
 import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
@@ -13,8 +16,16 @@ import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 
 contract MockGrowerProfilesPAInvariant is IGrowerProfileMigration {
     GrowerProfile private _profile;
-    constructor(address account) { _profile = GrowerProfile(9, account, 1, uint64(block.timestamp), true); }
-    function getProfile(uint64 profileId) external view returns (GrowerProfile memory) {
+
+    constructor(
+        address account
+    ) {
+        _profile = GrowerProfile(9, account, 1, uint64(block.timestamp), true);
+    }
+
+    function getProfile(
+        uint64 profileId
+    ) external view returns (GrowerProfile memory) {
         require(profileId == 9, "unknown profile");
         return _profile;
     }
@@ -27,16 +38,21 @@ contract ProgressiveAccessInvariantHandler {
     bytes32 private immutable source;
     bytes32 private immutable manifestRoot;
 
-    constructor(GuestProfileMigration migration_, bytes32 source_, bytes32 manifestRoot_) {
+    constructor(
+        GuestProfileMigration migration_,
+        bytes32 source_,
+        bytes32 manifestRoot_
+    ) {
         migration = migration_;
         source = source_;
         manifestRoot = manifestRoot_;
     }
 
-    function stepAttemptReclaim(uint32 version) external {
-        (bool succeeded,) = address(migration).call(
-            abi.encodeWithSelector(migration.claimProfile.selector, source, uint64(9), manifestRoot, version)
-        );
+    function stepAttemptReclaim(
+        uint32 version
+    ) external {
+        (bool succeeded,) = address(migration)
+            .call(abi.encodeWithSelector(migration.claimProfile.selector, source, uint64(9), manifestRoot, version));
         require(!succeeded, "existing profile claim replaced");
     }
 }
@@ -60,10 +76,16 @@ contract ProgressiveAccessInvariantTest is InvariantTarget420 {
         migration = new GuestProfileMigration(address(auth), address(growers));
 
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
-            principal: address(this), componentId: ModuleIds.GUEST_MIGRATION,
-            capabilityId: ActionIds.GUEST_MIGRATION_APPLY, scopeHash: source,
-            perCallLimit: 0, periodLimit: 0, periodSeconds: 0, validFrom: 0,
-            validUntil: uint64(block.timestamp + 365 days), revoked: false
+            principal: address(this),
+            componentId: ModuleIds.GUEST_MIGRATION,
+            capabilityId: ActionIds.GUEST_MIGRATION_APPLY,
+            scopeHash: source,
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 365 days),
+            revoked: false
         });
         caps.setGrant(keccak256("hc-pa:inv:grant"), grant, 0);
 
@@ -79,7 +101,10 @@ contract ProgressiveAccessInvariantTest is InvariantTarget420 {
     }
 
     function invariant_HC_INV_ACCESS_019_CoreGameplayNeverRequiresWallet() public view {
-        require(policy.canUse(ProgressiveGamingTypes.AccessState.GUEST, ProgressiveGamingTypes.Capability.CORE_GAMEPLAY), "HC-INV-ACCESS-019: guest core play blocked");
+        require(
+            policy.canUse(ProgressiveGamingTypes.AccessState.GUEST, ProgressiveGamingTypes.Capability.CORE_GAMEPLAY),
+            "HC-INV-ACCESS-019: guest core play blocked"
+        );
         require(!policy.walletRequiredForCoreGameplay(), "HC-INV-ACCESS-019: wallet required");
         require(!policy.walletMayGrantStatAdvantage(), "HC-INV-ACCESS-019: wallet stat advantage");
     }
@@ -101,7 +126,15 @@ contract ProgressiveAccessInvariantTest is InvariantTarget420 {
     }
 
     function invariant_HC_INV_ACCESS_023_OrdinaryStateRemainsOffChainAuthority() public view {
-        require(policy.authorityFor(HighCountryAccessPolicy.StateObject.ORDINARY_FARM_PROGRESSION) == ProgressiveGamingTypes.StateAuthority.LOCAL_GAME_STATE, "HC-INV-ACCESS-023: farm state promoted");
-        require(policy.authorityFor(HighCountryAccessPolicy.StateObject.IRRIGATION_UPGRADE) == ProgressiveGamingTypes.StateAuthority.LOCAL_GAME_STATE, "HC-INV-ACCESS-023: irrigation promoted");
+        require(
+            policy.authorityFor(HighCountryAccessPolicy.StateObject.ORDINARY_FARM_PROGRESSION)
+                == ProgressiveGamingTypes.StateAuthority.LOCAL_GAME_STATE,
+            "HC-INV-ACCESS-023: farm state promoted"
+        );
+        require(
+            policy.authorityFor(HighCountryAccessPolicy.StateObject.IRRIGATION_UPGRADE)
+                == ProgressiveGamingTypes.StateAuthority.LOCAL_GAME_STATE,
+            "HC-INV-ACCESS-023: irrigation promoted"
+        );
     }
 }

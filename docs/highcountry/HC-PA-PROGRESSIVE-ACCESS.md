@@ -86,4 +86,4 @@ Wallet prompts are contextual, optional and dismissible. Every optional prompt e
 HC Genesis/module authority, three-region world genesis, GrowerProfile canonical semantics, land authority, genome architecture, seeds/clones/mothers/phenotypes, provider-neutral randomness, breeding provenance, HC-6 cultivation, BUDS design, smart-account/session-key architecture and chain authority for ecosystem-significant state remain intact.
 
 ## Current order
-HC-1 through HC-6 are complete/merged. HC-PA.1 through HC-PA.5 are implemented on `feature/high-country-hcpa-progressive-access`. Next: qualify/reconcile and merge HC-PA, then proceed to HC-7 harvest/product resolution.
+HC-1 through HC-6 and HC-PA.1 through HC-PA.5 are present on `main`. PR #114 is the HC-PA reconciliation record. HC-7 harvest/product resolution remains the next documented gameplay phase. These foundations do not constitute a complete playable game or deployed release. See `REPOSITORY-AUDIT-20261009.md` for component-level gaps and release gates.

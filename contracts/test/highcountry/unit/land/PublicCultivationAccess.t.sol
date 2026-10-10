@@ -7,24 +7,50 @@ import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
 import { IGenesisRegistry } from "../../../../src/highcountry/interfaces/IGenesisRegistry.sol";
 import { LandRegistry } from "../../../../src/highcountry/land/LandRegistry.sol";
+import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegistry.sol";
 import { PublicCultivationAccess } from "../../../../src/highcountry/land/PublicCultivationAccess.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
+import { PlantSourcesFixture } from "../../mocks/PlantSourcesFixture.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
+contract PlotGenomePublic {
+    function exists(
+        bytes32
+    ) external pure returns (bool) {
+        return true;
+    }
+}
+
 contract MockRegionRegistryHC3Public {
-    function exists(uint16 regionId) external pure returns (bool) { return regionId >= 1 && regionId <= 3; }
+    function exists(
+        uint16 regionId
+    ) external pure returns (bool) {
+        return regionId >= 1 && regionId <= 3;
+    }
 }
 
 contract MockGenesisRegistryHC3Public is IGenesisRegistry {
     GenesisRoots private _roots;
     bool public finalized = true;
     bool public genesisAuthorityEnabled;
-    function roots() external view returns (GenesisRoots memory) { return _roots; }
-    function setRoots(GenesisRoots calldata newRoots) external { _roots = newRoots; }
-    function finalizeGenesis() external { finalized = true; genesisAuthorityEnabled = false; }
+
+    function roots() external view returns (GenesisRoots memory) {
+        return _roots;
+    }
+
+    function setRoots(
+        GenesisRoots calldata newRoots
+    ) external {
+        _roots = newRoots;
+    }
+
+    function finalizeGenesis() external {
+        finalized = true;
+        genesisAuthorityEnabled = false;
+    }
 }
 
-contract PublicCultivationAccessHC3Test {
+contract PublicCultivationAccessHC3Test is PlantSourcesFixture {
     MockCapabilityRegistry private capabilityRegistry;
     HighCountryAuthorization private authorization;
     LandRegistry private land;
@@ -37,6 +63,31 @@ contract PublicCultivationAccessHC3Test {
         MockGenesisRegistryHC3Public genesis = new MockGenesisRegistryHC3Public();
         land = new LandRegistry(address(authorization), address(regions), address(genesis));
         publicAccess = new PublicCultivationAccess(address(authorization), address(land));
+        address plotGenome = address(new PlotGenomePublic());
+        _createPlantSources(address(authorization), plotGenome);
+        PlantRegistry plants = new PlantRegistry(
+            address(authorization),
+            plotGenome,
+            address(land),
+            address(publicAccess),
+            address(sourceSeeds),
+            address(sourceClones)
+        );
+        _bindPlantSources(capabilityRegistry, plants);
+        ICapabilityRegistry420.CapabilityGrant memory binding = ICapabilityRegistry420.CapabilityGrant({
+            principal: address(this),
+            componentId: ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            capabilityId: ActionIds.PUBLIC_PLOT_BIND_PLANTS,
+            scopeHash: publicAccess.BIND_SCOPE(),
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 1 days),
+            revoked: false
+        });
+        capabilityRegistry.setGrant(keccak256("bind-plants"), binding, 0);
+        publicAccess.bindPlantRegistry(address(plants));
 
         _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, 1, 10, keccak256("land-1"));
         land.registerParcel(1, 1, address(this), 10, keccak256("PUBLIC_LAND"), keccak256("land-meta"));
@@ -47,9 +98,8 @@ contract PublicCultivationAccessHC3Test {
         publicAccess.registerPublicPlot(1, 1, 6);
         require(publicAccess.publicCapacityOnParcel(1) == 6, "wrong parcel public capacity");
 
-        (bool ok,) = address(publicAccess).call(
-            abi.encodeWithSelector(publicAccess.registerPublicPlot.selector, uint64(2), uint64(1), uint32(5))
-        );
+        (bool ok,) = address(publicAccess)
+            .call(abi.encodeWithSelector(publicAccess.registerPublicPlot.selector, uint64(2), uint64(1), uint32(5)));
         require(!ok, "parcel public capacity exceeded");
         require(!publicAccess.exists(2), "overflow plot persisted");
     }
@@ -64,9 +114,8 @@ contract PublicCultivationAccessHC3Test {
         require(publicAccess.allocationOf(3, address(this)) == 4, "allocation missing");
         require(publicAccess.availableCapacity(3) == 6, "available capacity wrong");
 
-        (bool duplicateOk,) = address(publicAccess).call(
-            abi.encodeWithSelector(publicAccess.allocate.selector, uint64(3), uint32(1))
-        );
+        (bool duplicateOk,) =
+            address(publicAccess).call(abi.encodeWithSelector(publicAccess.allocate.selector, uint64(3), uint32(1)));
         require(!duplicateOk, "duplicate allocation accepted");
 
         publicAccess.release(3);
@@ -78,14 +127,19 @@ contract PublicCultivationAccessHC3Test {
         _grant(ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, 4, 5, keccak256("plot-4"));
         publicAccess.registerPublicPlot(4, 1, 5);
 
-        (bool ok,) = address(publicAccess).call(
-            abi.encodeWithSelector(publicAccess.allocate.selector, uint64(4), uint32(6))
-        );
+        (bool ok,) =
+            address(publicAccess).call(abi.encodeWithSelector(publicAccess.allocate.selector, uint64(4), uint32(6)));
         require(!ok, "plot overbooked");
         require(publicAccess.availableCapacity(4) == 5, "failed allocation changed capacity");
     }
 
-    function _grant(bytes32 moduleId, bytes32 actionId, uint64 id, uint256 amount, bytes32 grantId) private {
+    function _grant(
+        bytes32 moduleId,
+        bytes32 actionId,
+        uint64 id,
+        uint256 amount,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: moduleId,

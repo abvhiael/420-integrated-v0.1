@@ -29,12 +29,10 @@ contract EmergencyStateTest {
         require(emergencyState.isAllowedDomain(EmergencyDomains.LICENSE), "license missing");
         require(emergencyState.isAllowedDomain(EmergencyDomains.RIGHTS), "rights missing");
         require(
-            emergencyState.isAllowedDomain(EmergencyDomains.ORGANIZATION_GOVERNANCE),
-            "organization governance missing"
+            emergencyState.isAllowedDomain(EmergencyDomains.ORGANIZATION_GOVERNANCE), "organization governance missing"
         );
         require(
-            emergencyState.isAllowedDomain(EmergencyDomains.COOPERATIVE_GOVERNANCE),
-            "cooperative governance missing"
+            emergencyState.isAllowedDomain(EmergencyDomains.COOPERATIVE_GOVERNANCE), "cooperative governance missing"
         );
         require(emergencyState.isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST), "randomness request missing");
         require(emergencyState.isAllowedDomain(EmergencyDomains.COMPETITION_ENTRY), "competition entry missing");
@@ -46,16 +44,14 @@ contract EmergencyStateTest {
         bytes32 unknownDomain = keccak256("HC.EMERGENCY.ALL");
         require(!emergencyState.isAllowedDomain(unknownDomain), "unknown domain allowed");
 
-        (bool ok,) = address(emergencyState).call(
-            abi.encodeWithSelector(emergencyState.setRestricted.selector, unknownDomain, true)
-        );
+        (bool ok,) = address(emergencyState)
+            .call(abi.encodeWithSelector(emergencyState.setRestricted.selector, unknownDomain, true));
         require(!ok, "unknown domain restricted");
     }
 
     function testRestrictionRequiresCapability() public {
-        (bool ok,) = address(emergencyState).call(
-            abi.encodeWithSelector(emergencyState.setRestricted.selector, EmergencyDomains.MARKET, true)
-        );
+        (bool ok,) = address(emergencyState)
+            .call(abi.encodeWithSelector(emergencyState.setRestricted.selector, EmergencyDomains.MARKET, true));
         require(!ok, "restriction succeeded without capability");
         require(!emergencyState.isRestricted(EmergencyDomains.MARKET), "market unexpectedly restricted");
     }
@@ -70,9 +66,8 @@ contract EmergencyStateTest {
         _grant(ActionIds.EMERGENCY_RESTRICT, EmergencyDomains.MARKET, keccak256("grant:market:restrict"));
         emergencyState.setRestricted(EmergencyDomains.MARKET, true);
 
-        (bool ok,) = address(emergencyState).call(
-            abi.encodeWithSelector(emergencyState.setRestricted.selector, EmergencyDomains.MARKET, false)
-        );
+        (bool ok,) = address(emergencyState)
+            .call(abi.encodeWithSelector(emergencyState.setRestricted.selector, EmergencyDomains.MARKET, false));
         require(!ok, "release succeeded without release capability");
         require(emergencyState.isRestricted(EmergencyDomains.MARKET), "restriction unexpectedly released");
 
@@ -84,14 +79,17 @@ contract EmergencyStateTest {
     function testCapabilityIsDomainScoped() public {
         _grant(ActionIds.EMERGENCY_RESTRICT, EmergencyDomains.MARKET, keccak256("grant:market:restrict"));
 
-        (bool ok,) = address(emergencyState).call(
-            abi.encodeWithSelector(emergencyState.setRestricted.selector, EmergencyDomains.BREEDING, true)
-        );
+        (bool ok,) = address(emergencyState)
+            .call(abi.encodeWithSelector(emergencyState.setRestricted.selector, EmergencyDomains.BREEDING, true));
         require(!ok, "market capability restricted breeding");
         require(!emergencyState.isRestricted(EmergencyDomains.BREEDING), "breeding unexpectedly restricted");
     }
 
-    function _grant(bytes32 actionId, bytes32 domain, bytes32 grantId) private {
+    function _grant(
+        bytes32 actionId,
+        bytes32 domain,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.EMERGENCY_STATE,

@@ -18,6 +18,8 @@ interface IGenesisRegistry {
     function roots() external view returns (GenesisRoots memory);
     function finalized() external view returns (bool);
     function genesisAuthorityEnabled() external view returns (bool);
-    function setRoots(GenesisRoots calldata newRoots) external;
+    function setRoots(
+        GenesisRoots calldata newRoots
+    ) external;
     function finalizeGenesis() external;
 }

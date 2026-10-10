@@ -2,8 +2,17 @@
 pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
+import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCAlreadyExists, HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import {
+    HCAlreadyExists,
+    HCInvalidId,
+    HCInvalidState,
+    HCNotFound,
+    HCZeroAddress,
+    HCEmergencyRestrictionActive
+} from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
@@ -20,31 +29,81 @@ contract RandomnessCoordinator {
         bool exists;
     }
 
+    IEmergencyState public emergencyState;
+    bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.ENGINE_BIND.V1");
+    event EmergencyStateBound(address indexed emergencyState);
+
+    function bindEmergencyState(
+        address candidate
+    ) external {
+        if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender,
+                ModuleIds.RANDOMNESS_COORDINATOR,
+                ActionIds.RANDOMNESS_BIND_EMERGENCY,
+                EMERGENCY_BIND_SCOPE,
+                0
+            )
+        );
+        if (
+            IEmergencyState(candidate).authorizationRoot() != address(authorization)
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false
+        ) revert HCInvalidState();
+        emergencyState = IEmergencyState(candidate);
+        emit EmergencyStateBound(candidate);
+    }
+
+    function _requireUnrestricted(
+        bytes32 domain
+    ) private view {
+        if (address(emergencyState) == address(0) || emergencyState.isRestricted(domain)) {
+            revert HCEmergencyRestrictionActive(domain);
+        }
+    }
+
     IHighCountryAuthorization public immutable authorization;
     mapping(bytes32 => RandomRequest) private _requests;
+    mapping(bytes32 => bool) public cancelled;
+    event RandomnessCancelled(bytes32 indexed requestId, address indexed requester);
 
-    event RandomnessRequested(bytes32 indexed requestId, bytes32 indexed domain, address indexed requester, bytes32 contextHash);
+    event RandomnessRequested(
+        bytes32 indexed requestId, bytes32 indexed domain, address indexed requester, bytes32 contextHash
+    );
     event RandomnessFulfilled(bytes32 indexed requestId, address indexed provider, bytes32 entropy);
     event RandomnessConsumed(bytes32 indexed requestId, address indexed requester);
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
     }
 
-    function request(bytes32 requestId, bytes32 domain, bytes32 contextHash) external {
+    function request(
+        bytes32 requestId,
+        bytes32 domain,
+        bytes32 contextHash
+    ) external {
+        _requireUnrestricted(EmergencyDomains.RANDOMNESS_REQUEST);
         if (requestId == bytes32(0) || domain == bytes32(0) || contextHash == bytes32(0)) revert HCInvalidId();
         if (_requests[requestId].exists) revert HCAlreadyExists();
         _auth(ActionIds.RANDOMNESS_REQUEST, requestId);
-        _requests[requestId] = RandomRequest(requestId, domain, contextHash, msg.sender, address(0), bytes32(0), false, false, true);
+        _requests[requestId] =
+            RandomRequest(requestId, domain, contextHash, msg.sender, address(0), bytes32(0), false, false, true);
         emit RandomnessRequested(requestId, domain, msg.sender, contextHash);
     }
 
-    function fulfill(bytes32 requestId, bytes32 entropy) external {
+    function fulfill(
+        bytes32 requestId,
+        bytes32 entropy
+    ) external {
         if (entropy == bytes32(0)) revert HCInvalidId();
         RandomRequest storage r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
-        if (r.fulfilled || r.consumed) revert HCInvalidState();
+        if (r.fulfilled || r.consumed || cancelled[requestId]) revert HCInvalidState();
         _auth(ActionIds.RANDOMNESS_FULFILL, requestId);
         r.provider = msg.sender;
         r.entropy = entropy;
@@ -52,29 +111,55 @@ contract RandomnessCoordinator {
         emit RandomnessFulfilled(requestId, msg.sender, entropy);
     }
 
-    function consume(bytes32 requestId, bytes32 expectedDomain, bytes32 expectedContextHash) external returns (bytes32 entropy) {
+    function consume(
+        bytes32 requestId,
+        bytes32 expectedDomain,
+        bytes32 expectedContextHash
+    ) external returns (bytes32 entropy) {
         RandomRequest storage r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
-        if (!r.fulfilled || r.consumed) revert HCInvalidState();
-        if (msg.sender != r.requester || r.domain != expectedDomain || r.contextHash != expectedContextHash) revert HCInvalidState();
+        if (!r.fulfilled || r.consumed || cancelled[requestId]) revert HCInvalidState();
+        if (msg.sender != r.requester || r.domain != expectedDomain || r.contextHash != expectedContextHash) {
+            revert HCInvalidState();
+        }
         r.consumed = true;
         emit RandomnessConsumed(requestId, msg.sender);
         return r.entropy;
     }
 
-    function result(bytes32 requestId) external view returns (bytes32 entropy, bool fulfilled) {
+    /// @notice Only the original requester can abandon an unconsumed request.
+    function cancel(
+        bytes32 requestId
+    ) external {
+        RandomRequest storage r = _requests[requestId];
+        if (!r.exists) revert HCNotFound();
+        if (msg.sender != r.requester || r.consumed || cancelled[requestId]) revert HCInvalidState();
+        cancelled[requestId] = true;
+        emit RandomnessCancelled(requestId, msg.sender);
+    }
+
+    function result(
+        bytes32 requestId
+    ) external view returns (bytes32 entropy, bool fulfilled) {
         RandomRequest memory r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
         return (r.entropy, r.fulfilled);
     }
 
-    function getRequest(bytes32 requestId) external view returns (RandomRequest memory) {
+    function getRequest(
+        bytes32 requestId
+    ) external view returns (RandomRequest memory) {
         RandomRequest memory r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
         return r;
     }
 
-    function _auth(bytes32 actionId, bytes32 requestId) private view {
-        authorization.requireAuthorized(AuthorizationRequest(msg.sender, ModuleIds.RANDOMNESS_COORDINATOR, actionId, requestId, 0));
+    function _auth(
+        bytes32 actionId,
+        bytes32 requestId
+    ) private view {
+        authorization.requireAuthorized(
+            AuthorizationRequest(msg.sender, ModuleIds.RANDOMNESS_COORDINATOR, actionId, requestId, 0)
+        );
     }
 }

@@ -28,34 +28,38 @@ contract OptionalCompetitionAccess420 {
     error CompetitionEntitlementRequired(bytes32 competitionId, uint64 growerProfileId);
 
     event OptionalCompetitionRegistered(
-        bytes32 indexed competitionId,
-        bytes32 indexed entitlementId,
-        bytes32 indexed contentId
+        bytes32 indexed competitionId, bytes32 indexed entitlementId, bytes32 indexed contentId
     );
     event OptionalCompetitionStatusChanged(bytes32 indexed competitionId, bool active);
 
-    constructor(address authorization_, address gamingAccess_) {
+    constructor(
+        address authorization_,
+        address gamingAccess_
+    ) {
         if (authorization_ == address(0) || gamingAccess_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
         gamingAccess = IHighCountryGamingAccess420(gamingAccess_);
     }
 
-    function registerOptionalCompetition(bytes32 competitionId, bytes32 entitlementId, bytes32 contentId) external {
+    function registerOptionalCompetition(
+        bytes32 competitionId,
+        bytes32 entitlementId,
+        bytes32 contentId
+    ) external {
         if (competitionId == bytes32(0) || entitlementId == bytes32(0) || contentId == bytes32(0)) revert HCNotFound();
         if (_competitions[competitionId].exists) revert HCAlreadyExists();
         _requireAuthorized(ActionIds.OPTIONAL_COMPETITION_REGISTER, competitionId);
 
         _competitions[competitionId] = OptionalCompetition({
-            competitionId: competitionId,
-            entitlementId: entitlementId,
-            contentId: contentId,
-            active: true,
-            exists: true
+            competitionId: competitionId, entitlementId: entitlementId, contentId: contentId, active: true, exists: true
         });
         emit OptionalCompetitionRegistered(competitionId, entitlementId, contentId);
     }
 
-    function setOptionalCompetitionStatus(bytes32 competitionId, bool active) external {
+    function setOptionalCompetitionStatus(
+        bytes32 competitionId,
+        bool active
+    ) external {
         OptionalCompetition storage record = _competitions[competitionId];
         if (!record.exists) revert HCNotFound();
         _requireAuthorized(ActionIds.OPTIONAL_COMPETITION_SET_STATUS, competitionId);
@@ -63,28 +67,39 @@ contract OptionalCompetitionAccess420 {
         emit OptionalCompetitionStatusChanged(competitionId, active);
     }
 
-    function optionalCompetition(bytes32 competitionId) external view returns (OptionalCompetition memory) {
+    function optionalCompetition(
+        bytes32 competitionId
+    ) external view returns (OptionalCompetition memory) {
         OptionalCompetition memory record = _competitions[competitionId];
         if (!record.exists) revert HCNotFound();
         return record;
     }
 
-    function hasAccess(uint64 growerProfileId, bytes32 competitionId) public view returns (bool) {
+    function hasAccess(
+        uint64 growerProfileId,
+        bytes32 competitionId
+    ) public view returns (bool) {
         OptionalCompetition memory record = _competitions[competitionId];
         if (!record.exists || !record.active) return false;
-        return gamingAccess.hasCompetitionAccess(growerProfileId, record.entitlementId, record.contentId);
+        return gamingAccess.hasPlayerCompetition(growerProfileId, record.contentId);
     }
 
-    function requireAccess(uint64 growerProfileId, bytes32 competitionId) external view {
+    function requireAccess(
+        uint64 growerProfileId,
+        bytes32 competitionId
+    ) external view {
         OptionalCompetition memory record = _competitions[competitionId];
         if (!record.exists) revert HCNotFound();
         if (!record.active) revert CompetitionInactive(competitionId);
-        if (!gamingAccess.hasCompetitionAccess(growerProfileId, record.entitlementId, record.contentId)) {
+        if (!gamingAccess.hasPlayerCompetition(growerProfileId, record.contentId)) {
             revert CompetitionEntitlementRequired(competitionId, growerProfileId);
         }
     }
 
-    function _requireAuthorized(bytes32 actionId, bytes32 competitionId) private view {
+    function _requireAuthorized(
+        bytes32 actionId,
+        bytes32 competitionId
+    ) private view {
         authorization.requireAuthorized(
             AuthorizationRequest({
                 principal: msg.sender,

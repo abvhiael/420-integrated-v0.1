@@ -1,0 +1,198 @@
+{
+  "schema": "highcountry-exact-head-foundation-qualification-v1",
+  "implementationSha": "5684f0f1fe59fa207bcacc816d6bf00f9686e170",
+  "treeSha": "27e463b243e9a045fde3e36d2f68d174878890d2",
+  "timeUtc": "2026-10-09T04:47:01.822869+00:00",
+  "profile": "default",
+  "forgeVersion": "forge Version: 1.8.5\nCommit SHA: 51a52c59cffd940f76eddd0b4bb1791aa4b5ac7f\nBuild Timestamp: 2026-10-05T17:18:54.332175693Z (1791220734)\nBuild Profile: dist",
+  "nodeVersion": "v24.19.0",
+  "cleanCheckoutAfter": true,
+  "sameHeadAfter": true,
+  "steps": [
+    {
+      "name": "solidity-build-sizes",
+      "command": [
+        "/workspace/scratch/c2bf41b11555/toolchain/forge",
+        "build",
+        "src/highcountry",
+        "--sizes"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {
+        "FOUNDRY_SRC": "src/highcountry",
+        "FOUNDRY_TEST": "test/highcountry",
+        "FOUNDRY_SCRIPT": "script/highcountry"
+      },
+      "log": "solidity-build-sizes.log",
+      "logSha256": "c49c7ba2a539c590529284cd83927327516a75cff3f9bc990cfbcdf767932985"
+    },
+    {
+      "name": "hc-unit-integration-invariants",
+      "command": [
+        "/workspace/scratch/c2bf41b11555/toolchain/forge",
+        "test",
+        "--match-path",
+        "test/highcountry/**/*.t.sol",
+        "-vv"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {
+        "FOUNDRY_SRC": "src/highcountry",
+        "FOUNDRY_TEST": "test/highcountry",
+        "FOUNDRY_SCRIPT": "script/highcountry"
+      },
+      "log": "hc-unit-integration-invariants.log",
+      "logSha256": "cb6c95cac5247cf63474a4d99d2aaf30ff429e1ed952b8acd958d09c66100805"
+    },
+    {
+      "name": "shared-gaming-contracts",
+      "command": [
+        "/workspace/scratch/c2bf41b11555/toolchain/forge",
+        "test",
+        "--match-path",
+        "test/GamingProtocol420*.t.sol",
+        "-vv"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {
+        "FOUNDRY_SRC": "src/gaming",
+        "FOUNDRY_TEST": "test",
+        "FOUNDRY_SCRIPT": "script"
+      },
+      "log": "shared-gaming-contracts.log",
+      "logSha256": "a02957566e8b3a9af127fffb6a0c2ad0c15dba3ac0854070a5f6f05dc1ff2538"
+    },
+    {
+      "name": "solidity-static-lint",
+      "command": [
+        "/workspace/scratch/c2bf41b11555/toolchain/forge",
+        "lint",
+        "src/highcountry",
+        "--severity",
+        "high",
+        "med",
+        "low"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {
+        "FOUNDRY_SRC": "src/highcountry",
+        "FOUNDRY_TEST": "test/highcountry",
+        "FOUNDRY_SCRIPT": "script/highcountry"
+      },
+      "log": "solidity-static-lint.log",
+      "logSha256": "4f2677eda1df88c6566c9d8603741161753fe5f15049eb364c9d6baf9f89a1a3"
+    },
+    {
+      "name": "solidity-format",
+      "command": [
+        "/workspace/scratch/c2bf41b11555/toolchain/forge",
+        "fmt",
+        "--check",
+        "src/highcountry",
+        "test/highcountry"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {
+        "FOUNDRY_SRC": "src/highcountry",
+        "FOUNDRY_TEST": "test/highcountry",
+        "FOUNDRY_SCRIPT": "script/highcountry"
+      },
+      "log": "solidity-format.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "hc-access-sdk",
+      "command": [
+        "node",
+        "--test",
+        "clients/highcountry-access-v1/test/access-state.test.js",
+        "clients/highcountry-access-v1/test/e2e-qualification.test.js",
+        "packages/420-gaming-sdk/test/contracts.test.js",
+        "packages/420-gaming-sdk/test/highcountry-compat.test.js",
+        "packages/420-gaming-sdk/test/sdk.test.js"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {},
+      "log": "hc-access-sdk.log",
+      "logSha256": "2e415ac295d4d7e25e6ceb7507b4716a1ca566a056dec5ebdfe3541e80ec83c3"
+    },
+    {
+      "name": "shared-runtime-libraries",
+      "command": [
+        "node",
+        "--test",
+        "packages/420-gaming-client-hardening/test/four-game-e2e.test.js",
+        "packages/420-gaming-client-hardening/test/hostile-state.test.js",
+        "packages/420-gaming-cross-game-qualification/test/cross-game.test.js",
+        "services/420-gaming-player-profile/test/service.test.js",
+        "services/420-gaming-query/test/finality-state.test.js",
+        "services/420-gaming-query/test/query-service.test.js"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {},
+      "log": "shared-runtime-libraries.log",
+      "logSha256": "781db9f71b94a6e8c8cf7460431ccfae0d8fd156424a744264b95e0e9610cd80"
+    },
+    {
+      "name": "runtime-template",
+      "command": [
+        "node",
+        "scripts/gaming/verify-runtime-manifest.mjs",
+        "deployments/gaming/testnet.runtime.json"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {},
+      "log": "runtime-template.log",
+      "logSha256": "2b8bea4424316c75ee418c9876ae82a01c90f53ba106a21899c5728a791e5d29"
+    },
+    {
+      "name": "live-runtime-blocker",
+      "command": [
+        "node",
+        "scripts/gaming/qualify-live-testnet.mjs",
+        "deployments/gaming/testnet.runtime.json"
+      ],
+      "exitCode": 2,
+      "status": "BLOCKED",
+      "sourceRoots": {},
+      "log": "live-runtime-blocker.log",
+      "logSha256": "10d85cf80f6a6231fd58be86af2de6d1416e83cbefb2e17e47c30b4fc120695f"
+    },
+    {
+      "name": "patch-whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "5684f0f1fe59fa207bcacc816d6bf00f9686e170^",
+        "5684f0f1fe59fa207bcacc816d6bf00f9686e170"
+      ],
+      "exitCode": 0,
+      "status": "PASS",
+      "sourceRoots": {},
+      "log": "patch-whitespace.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reviewed-inventory",
+      "status": "PASS",
+      "mismatches": []
+    }
+  ],
+  "fullApplicationReleaseQualified": false,
+  "sharedTestInputs": {
+    "contracts/test/GamingProtocol420.t.sol": "e500b7e557ec218e26299427c7b764165dad2d90ba12d45b0a5c57c44bd1b9be",
+    "contracts/test/GamingProtocol420AuthorityIsolation.t.sol": "1c0479582615c6ee22253dc65bc2b8d77ec5e7eafb77df644bb115e5ef93a25b",
+    "contracts/test/GamingProtocol420Hardening.t.sol": "90872553b250e5a12088f1be4eff9c0ce3cad763f74cfa9ac6dc0a5db6dce9fd"
+  },
+  "scope": "Existing HC/Gaming foundations only; compiler configuration retained, all imported dependencies included; unresolved live acceptance is BLOCKED.",
+  "logNormalization": "Committed logs normalize trailing whitespace; commands and original implementation SHA unchanged."
+}

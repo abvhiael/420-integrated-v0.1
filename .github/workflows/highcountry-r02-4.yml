@@ -1,0 +1,92 @@
+name: High Country R02.4 Targeted Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/**'
+      - 'docs/highcountry/qualification/R02.4-level1.json'
+      - '.github/workflows/highcountry-r02-4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r02-4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+      FOUNDRY_FUZZ_RUNS: 256
+      FOUNDRY_INVARIANT_RUNS: 128
+      FOUNDRY_INVARIANT_DEPTH: 64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+      - name: Pin tested source
+        shell: bash
+        run: |
+          echo "implementationSha=$(git rev-parse HEAD)" | tee -a "$GITHUB_STEP_SUMMARY"
+          git status --porcelain
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Contract build and sizes
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Format
+        working-directory: contracts
+        run: forge fmt --check src/highcountry test/highcountry
+      - name: Security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: Seed/clone provenance, consumption and rollback
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/integration/PlantSourceConsumption.t.sol' -vv
+      - name: Affected High Country suites and invariants
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+      - name: Verify ABI artifacts and source semantics
+        working-directory: contracts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          out=pathlib.Path('out')
+          def abi(name):
+              p=list(out.glob('**/'+name+'.json'))
+              assert len(p)==1, (name,[str(x) for x in p])
+              return json.loads(p[0].read_text())['abi']
+          def entry(xs,kind,name=None):
+              z=[x for x in xs if x['type']==kind and (name is None or x.get('name')==name)]
+              assert len(z)==1,(kind,name)
+              return z[0]
+          def types(x,k):return [i['type'] for i in x.get(k,[])]
+          plant=abi('PlantRegistry');seed=abi('SeedRegistry');clone=abi('CloneRegistry');consumer=abi('IPlantSourceConsumer')
+          assert types(entry(plant,'constructor'),'inputs')==['address']*6
+          assert types(entry(plant,'function','registerPlantFromSource'),'inputs')==['uint64','bytes32','address','uint64','uint64','uint8','uint64']
+          for old in ('registerPlant','registerPublicPlant'):
+              assert types(entry(plant,'function',old),'inputs')==['uint64','bytes32','address','uint64']
+          for x in consumer:
+              if x['type']=='function':
+                  y=entry(plant,'function',x['name'])
+                  assert types(x,'inputs')==types(y,'inputs') and types(x,'outputs')==types(y,'outputs')
+          for registry in (seed,clone):
+              for name,n in [('approvePlant',4),('revokePlantApproval',2),('consumeForPlant',2)]:
+                  assert types(entry(registry,'function',name),'inputs')==['uint64']*n
+              assert types(entry(registry,'function','bindPlantRegistry'),'inputs')==['address']
+          for n in ('SeedConsumed','SeedLotRegistered'):entry(seed,'event',n)
+          for n in ('CloneConsumed','CloneRegistered'):entry(clone,'event',n)
+          entry(plant,'event','PlantSourceConsumed')
+          print('R02.4 ABI checks PASS')
+          PY
+      - name: Upload targeted qualification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: highcountry-r02-4-${{ github.run_id }}
+          path: |
+            contracts/out/highcountry/**
+          retention-days: 14

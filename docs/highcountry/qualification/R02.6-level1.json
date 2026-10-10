@@ -1,0 +1,104 @@
+{
+  "schema": "highcountry-roadmap-step-qualification-v1",
+  "step": "R02.6",
+  "name": "Replace opaque provenance anchors with canonical plant/breeding/expression validation",
+  "status": "COMPLETE_REPOSITORY_QUALIFICATION",
+  "qualificationLevel": "Level 1 targeted with affected retained High Country app integration/invariants",
+  "implementationSha": "faeeda55835f41dcc35a5a90b168a86efcc2a834",
+  "qualificationEvidenceSha": "faeeda55835f41dcc35a5a90b168a86efcc2a834",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "branch": "review/high-country-complete-audit-20261009",
+  "prNumber": 593,
+  "mainBaseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "workflow": {
+    "name": "High Country R02.6 Targeted Qualification",
+    "runId": 37989199856,
+    "jobId": 114018733016,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989199856",
+    "jobUrl": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37989199856/job/114018733016"
+  },
+  "requirementsSatisfied": [
+    "Reject phenotype records with invalid canonical plant/source IDs",
+    "Match phenotype genome to actual PlantRegistry.genomeOf source plant",
+    "Require on-chain locked cultivation expression and exact traitHash equality; reject fabricated phenotype traits",
+    "Verify optional nonzero breeding provenance references against existing finalized breeding child genome",
+    "Preserve legacy PhenotypeRecord shape and immutable record behavior; duplicate registration denied",
+    "Require one-time authorized reciprocal authority/genome/plant relationship binding; fail closed before binding",
+    "Retain negative/positive real-registry integration tests, legacy genetics invariants, exact-SHA Foundry/ABI and action catalogue consistency"
+  ],
+  "changes": [
+    "contracts/src/highcountry/genetics/PhenotypeRegistry.sol",
+    "contracts/src/highcountry/breeding/BreedingEngine.sol",
+    "contracts/src/highcountry/cultivation/CultivationEngine.sol",
+    "contracts/src/highcountry/constants/ActionIds.sol",
+    "contracts/test/highcountry/integration/PhenotypeProvenance.t.sol",
+    "contracts/test/highcountry/mocks/MockCanonicalPhenotypeSources.sol",
+    "contracts/test/highcountry/unit/genetics/GeneticsAssets.t.sol",
+    "contracts/test/highcountry/invariant/GeneticsAssetsInvariant.t.sol",
+    "docs/highcountry/R02.6-CANONICAL-PROVENANCE.md",
+    "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
+    "scripts/highcountry/verify-r01.py",
+    ".github/workflows/highcountry-r02-6.yml"
+  ],
+  "checks": [
+    {
+      "name": "Exact-SHA source checkout",
+      "result": "PASS"
+    },
+    {
+      "name": "forge build src/highcountry --sizes",
+      "result": "PASS"
+    },
+    {
+      "name": "forge fmt --check src/highcountry test/highcountry",
+      "result": "PASS"
+    },
+    {
+      "name": "forge lint src/highcountry --severity high med low",
+      "result": "PASS_WITH_WARNINGS",
+      "notes": "Existing lint warnings emitted; command exit success."
+    },
+    {
+      "name": "PhenotypeProvenance.t.sol targeted real-registry integration",
+      "result": "PASS",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "High Country retained integration and invariant suite",
+      "result": "PASS",
+      "suites": 42,
+      "passed": 179,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "High Country source/specification catalogue",
+      "result": "PASS"
+    },
+    {
+      "name": "ABI artifacts and source semantics",
+      "result": "PASS"
+    }
+  ],
+  "countingNote": "Three targeted tests also appear in 179-test High Country retained suite, and must not be added as unique tests.",
+  "level2": "Affected accumulated High Country integration and invariants executed PASS (42 suites); other phase milestone boundaries remain deferred as documented.",
+  "level3": "Deferred to R08 accumulated app-phase closeout; Solidity Contracts owns single full Foundry inventory, Genesis owns separate address-authority verification.",
+  "deferred": [
+    "R02.7 ruleset identity/version and lifecycle-stage checks",
+    "R02.9 pending breeding child reservation/recovery",
+    "R07/R09 deployed-contract codehash, network acceptance and operational validation",
+    "R08 Level 3 exact merge-candidate broad qualification"
+  ],
+  "blockers": [],
+  "limitations": [
+    "No live network deployment or complete High Country launch claimed",
+    "Bytecode identities must be independently attested by deployment process",
+    "Separate compiled artifact upload may warn if configured path absent; complete GitHub job logs remain linked"
+  ],
+  "implementationEvidencePolicy": "Evidence-only commit may inherit tested implementation SHA if no executable source, tests, CI/workflow, interfaces, artifacts, configuration or substantive requirements change.",
+  "nextCanonicalStep": "R02.7 — Verify ruleset identity/version and plant lifecycle at environment/expression boundaries"
+}

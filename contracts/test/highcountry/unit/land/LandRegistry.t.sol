@@ -11,7 +11,9 @@ import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
 contract MockRegionRegistryHC3Unit {
-    function exists(uint16 regionId) external pure returns (bool) {
+    function exists(
+        uint16 regionId
+    ) external pure returns (bool) {
         return regionId >= 1 && regionId <= 3;
     }
 }
@@ -21,9 +23,20 @@ contract MockGenesisRegistryHC3Unit is IGenesisRegistry {
     bool public finalized;
     bool public genesisAuthorityEnabled = true;
 
-    function roots() external view returns (GenesisRoots memory) { return _roots; }
-    function setRoots(GenesisRoots calldata newRoots) external { _roots = newRoots; }
-    function finalizeGenesis() external { finalized = true; genesisAuthorityEnabled = false; }
+    function roots() external view returns (GenesisRoots memory) {
+        return _roots;
+    }
+
+    function setRoots(
+        GenesisRoots calldata newRoots
+    ) external {
+        _roots = newRoots;
+    }
+
+    function finalizeGenesis() external {
+        finalized = true;
+        genesisAuthorityEnabled = false;
+    }
 }
 
 contract LandRegistryHC3Test {
@@ -64,21 +77,37 @@ contract LandRegistryHC3Test {
         _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_GENESIS_REGISTER, 2, 9, keccak256("bad-proof"));
         bytes32[] memory proof = new bytes32[](0);
 
-        (bool ok,) = address(land).call(
-            abi.encodeWithSelector(
-                land.registerGenesisParcel.selector,
-                uint64(2), uint16(1), address(this), uint32(9), keccak256("TYPE"), keccak256("META"), proof
-            )
-        );
+        (bool ok,) = address(land)
+            .call(
+                abi.encodeWithSelector(
+                    land.registerGenesisParcel.selector,
+                    uint64(2),
+                    uint16(1),
+                    address(this),
+                    uint32(9),
+                    keccak256("TYPE"),
+                    keccak256("META"),
+                    proof
+                )
+            );
         require(!ok, "invalid manifest proof accepted");
         require(!land.exists(2), "invalid parcel persisted");
     }
 
     function testNormalParcelRegistrationRequiresFinalizedGenesis() public {
         _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_REGISTER, 3, 10, keccak256("normal-land"));
-        (bool beforeOk,) = address(land).call(
-            abi.encodeWithSelector(land.registerParcel.selector, uint64(3), uint16(2), address(this), uint32(10), keccak256("TYPE"), keccak256("META"))
-        );
+        (bool beforeOk,) = address(land)
+            .call(
+                abi.encodeWithSelector(
+                    land.registerParcel.selector,
+                    uint64(3),
+                    uint16(2),
+                    address(this),
+                    uint32(10),
+                    keccak256("TYPE"),
+                    keccak256("META")
+                )
+            );
         require(!beforeOk, "normal parcel registered before finalization");
 
         genesis.finalizeGenesis();
@@ -107,9 +136,16 @@ contract LandRegistryHC3Test {
         require(occupied.occupancyRef == leaseRef, "lease ref missing");
         require(land.effectiveOperator(4) == lessee, "occupant not operator");
 
-        (bool conflictOk,) = address(land).call(
-            abi.encodeWithSelector(land.setOccupancy.selector, uint64(4), address(0xD00D), LandRegistry.OccupancyKind.LICENSE, keccak256("license"))
-        );
+        (bool conflictOk,) = address(land)
+            .call(
+                abi.encodeWithSelector(
+                    land.setOccupancy.selector,
+                    uint64(4),
+                    address(0xD00D),
+                    LandRegistry.OccupancyKind.LICENSE,
+                    keccak256("license")
+                )
+            );
         require(!conflictOk, "conflicting occupancy accepted");
 
         land.clearOccupancy(4);
@@ -127,13 +163,29 @@ contract LandRegistryHC3Test {
         _grant(ModuleIds.LAND_REGISTRY, ActionIds.LAND_GENESIS_REGISTER, parcelId, capacity, keccak256("late-genesis"));
         bytes32[] memory proof = new bytes32[](0);
 
-        (bool ok,) = address(land).call(
-            abi.encodeWithSelector(land.registerGenesisParcel.selector, parcelId, uint16(1), address(this), capacity, parcelType, metadataHash, proof)
-        );
+        (bool ok,) = address(land)
+            .call(
+                abi.encodeWithSelector(
+                    land.registerGenesisParcel.selector,
+                    parcelId,
+                    uint16(1),
+                    address(this),
+                    capacity,
+                    parcelType,
+                    metadataHash,
+                    proof
+                )
+            );
         require(!ok, "genesis land injected after finalization");
     }
 
-    function _grant(bytes32 moduleId, bytes32 actionId, uint64 id, uint256 amount, bytes32 grantId) private {
+    function _grant(
+        bytes32 moduleId,
+        bytes32 actionId,
+        uint64 id,
+        uint256 amount,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: moduleId,
@@ -149,7 +201,9 @@ contract LandRegistryHC3Test {
         capabilityRegistry.setGrant(grantId, grant, amount);
     }
 
-    function _rootsWithLand(bytes32 landRoot) private pure returns (GenesisRoots memory) {
+    function _rootsWithLand(
+        bytes32 landRoot
+    ) private pure returns (GenesisRoots memory) {
         return GenesisRoots({
             manifestRoot: keccak256("manifest"),
             parameterRoot: keccak256("parameters"),

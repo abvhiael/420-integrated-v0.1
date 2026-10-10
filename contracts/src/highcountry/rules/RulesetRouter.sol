@@ -14,17 +14,25 @@ contract RulesetRouter is IRulesetRouter {
     IRulesetRegistry public immutable rulesetRegistry;
     mapping(bytes32 => bytes32) private _routes;
 
-    constructor(address authorization_, address rulesetRegistry_) {
+    constructor(
+        address authorization_,
+        address rulesetRegistry_
+    ) {
         if (authorization_ == address(0) || rulesetRegistry_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
         rulesetRegistry = IRulesetRegistry(rulesetRegistry_);
     }
 
-    function rulesetFor(bytes32 domain) external view returns (bytes32) {
+    function rulesetFor(
+        bytes32 domain
+    ) external view returns (bytes32) {
         return _routes[domain];
     }
 
-    function setRulesetFor(bytes32 domain, bytes32 rulesetId) external {
+    function setRulesetFor(
+        bytes32 domain,
+        bytes32 rulesetId
+    ) external {
         if (domain == bytes32(0) || rulesetId == bytes32(0)) revert HCInvalidId();
         if (!rulesetRegistry.exists(rulesetId)) revert HCRulesetNotFound(rulesetId);
 

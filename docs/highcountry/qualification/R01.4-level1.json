@@ -1,0 +1,46 @@
+{
+  "step": "R01.4 \u2014 Migration boundaries",
+  "status": "COMPLETE",
+  "qualificationLevel": 1,
+  "implementationSha": "db51c0e35f714f6a71b24dd5e7e55505aee25522",
+  "mainSha": "0ec695481fc84e6066aeae50baf6e0fd3c7f8731",
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "pr": 593,
+  "branch": "review/high-country-complete-audit-20261009",
+  "filesChanged": [
+    "docs/highcountry/FILE-INVENTORY-20261009.json",
+    "docs/highcountry/HC-GP-5-GUEST-MIGRATION.md",
+    "docs/highcountry/MIGRATION-BOUNDARIES.md",
+    "docs/highcountry/README.md",
+    "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md"
+  ],
+  "exitCriteria": {
+    "distinctStateMachines": "PASS: HC-PA.3 and HC-GP.5 separate transitions",
+    "consentOwnership": "PASS: explicit account/source/wallet challenge and irreversible boundary",
+    "eligibilityAntiCheat": "PASS: default-deny trusted source policy; no arbitrary save promotion",
+    "authorizationReplay": "PASS: exact actor/grant/domain/ABI/expiry rules; global durable constraints required",
+    "failureRecovery": "PASS: cancellation, DB/outbox/reorg/quarantine and matching receipt reconciliation"
+  },
+  "checks": {
+    "migrationContractRegressions": "17 PASS, 4 suites, 0 fail/skip",
+    "accessSdkProfileRegressions": "36 PASS, 0 fail/skip",
+    "referencesPathsInventory": "PASS",
+    "cleanHeadDocOnlyWhitespace": "PASS"
+  },
+  "commands": [
+    "forge test --match-contract GuestProfileMigrationTest|HighCountryMigration420Test|HighCountryGamingBridge420Test|ProgressiveAccessInvariantTest -vv (HC roots, default profile, imported dependencies)",
+    "node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js services/420-gaming-player-profile/test/*.test.js",
+    "git diff --check HEAD^ HEAD",
+    "Python reference/path/inventory/scope checks"
+  ],
+  "forgeWarnings": "Invariant optional targeting metadata hooks revert on the existing custom harness; invariant executed and passed. No skipped test treated as success.",
+  "security": "Boundary specification qualifies; contract/provider/source trust and durable service gaps remain R02/R05. No new service implementation or real-wallet production proof claimed.",
+  "ci": "No app-specific R01 documentation workflow identified; broad Docs/Foundry audit exclusions not counted as PASS; targeted local exact-SHA tests executed.",
+  "level2": "R01.7 pending",
+  "level3": "Deferred to accumulated phase closeout; canonical ownership/no duplicate inventory preserved",
+  "limitations": "Golden serialization vectors, production consent verifier, approved-root enforcement, downstream atomic effects and durable DB/outbox/reorg implementation remain assigned delivery work",
+  "blockers": [],
+  "next": "R01.5 \u2014 Deployment and trust",
+  "nodeOutput": "\u2714 guest can play core gameplay with no wallet prompt (0.775739ms)\n\u2714 registration upgrades cloud save without requiring a wallet (0.392521ms)\n\u2714 wallet-only content prompts only when that optional feature is requested (0.180833ms)\n\u2714 linked but disconnected wallet asks for reconnect at feature boundary (0.170186ms)\n\u2714 connected wallet unlocks optional web3 feature without altering base state progression (0.119079ms)\n\u2714 unknown feature classes fail closed (0.380853ms)\n\u2714 guest-only core play remains available and wallet-free (1.357134ms)\n\u2714 registration unlocks cloud save without requiring a wallet (0.269276ms)\n\u2714 wallet-only features prompt contextually rather than during routine play (0.233191ms)\n\u2714 guest migration follows consume -> bind -> apply and rejects replay (0.586854ms)\n\u2714 optional entitlement requires both wallet access and active entitlement (0.201904ms)\n\u2714 disconnect and reconnect only block wallet-only features (0.200673ms)\n\u2714 revoked routine session escalates without breaking core play (0.175594ms)\n\u2714 cross-game access requires a specific active attestation (0.124898ms)\n\u2714 wallet linkage does not change ordinary progression (0.164578ms)\n\u2714 adapter validation reports missing protocol boundaries (1.310825ms)\n\u2714 adapter validation accepts a complete game transport (0.860687ms)\n\u2714 High Country still keeps routine play wallet-free through shared SDK (0.818083ms)\n\u2714 High Country optional content preserves contextual wallet prompts (0.257007ms)\n\u2714 derives guest registered and wallet-linked states (0.781147ms)\n\u2714 core play never prompts for registration or wallet (0.164859ms)\n\u2714 registered-only feature prompts guests to register (0.102444ms)\n\u2714 wallet feature links then reconnects only at feature boundary (0.119771ms)\n\u2714 client scopes every adapter call to one game id (0.520224ms)\n\u2714 client rejects adapter results explicitly scoped to another game (0.301704ms)\n\u2714 migration adapter failure is not automatically replayed (0.923371ms)\n\u2714 entitlement reads are not cached across revocation (0.207022ms)\n\u2714 missing adapters fail closed (0.225069ms)\n\u2714 registered account can maintain a game-scoped cloud profile without wallet (2.533918ms)\n\u2714 wallet links are isolated per account and game (0.259551ms)\n\u2714 wallet relinking to another account fails closed (0.541817ms)\n\u2714 migration preparation requires a wallet link and stores only commitments (0.349176ms)\n\u2714 duplicate migration preparation is idempotent for the same account game and payload (0.16621ms)\n\u2714 migration replay key remains game scoped (0.168814ms)\n\u2714 migration claim issuance is idempotent for the canonical claim and rejects alternate replay (0.23882ms)\n\u2714 migration consumption is one-way and safely recoverable after duplicate acknowledgement (0.31904ms)\n\u2139 tests 36\n\u2139 suites 0\n\u2139 pass 36\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 120.097326\n",
+  "foundryOutput": "No files changed, compilation skipped\n\nRan 3 tests for test/highcountry/unit/access/GuestProfileMigration.t.sol:GuestProfileMigrationTest\n[PASS] testManifestedObjectConsumesExactlyOnce() (gas: 348889)\n[PASS] testObjectOutsideManifestCannotCanonicalize() (gas: 247591)\n[PASS] testProfileClaimIsIdempotentAndOneToOne() (gas: 542570)\nSuite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.39ms (936.75\u00b5s CPU time)\n\nRan 7 tests for test/highcountry/unit/player/HighCountryGamingBridge420.t.sol:HighCountryGamingBridge420Test\n[PASS] testBindsGrowerToCanonicalSharedGameProfile() (gas: 323692)\n[PASS] testConsumedGuestMigrationCanBindOnce() (gas: 601784)\n[PASS] testEntitlementMustBelongToBoundHighCountryProfile() (gas: 734577)\n[PASS] testRejectsBindingByDifferentWallet() (gas: 250664)\n[PASS] testRequireScopedEntitlementFailsClosed() (gas: 346628)\n[PASS] testRequiresSharedGamingProfileBeforeBinding() (gas: 117623)\n[PASS] testScopedEntitlementRequiresMatchingTypeAndContent() (gas: 602680)\nSuite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.41ms (1.25ms CPU time)\n\nRan 6 tests for test/highcountry/unit/player/HighCountryMigration420.t.sol:HighCountryMigration420Test\n[PASS] testApplyRequiresCapabilityAuthorization() (gas: 67070)\n[PASS] testConsumedBoundClaimCanBeAppliedOnce() (gas: 219244)\n[PASS] testUnboundZeroGrowerCannotBeApplied() (gas: 206852)\n[PASS] testUnconsumedClaimFailsClosed() (gas: 81528)\n[PASS] testWrongGameFailsClosed() (gas: 81522)\n[PASS] testWrongPayloadFailsClosed() (gas: 33282)\nSuite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.41ms (727.61\u00b5s CPU time)\n\nRan 1 test for test/highcountry/invariant/ProgressiveAccessInvariant.t.sol:ProgressiveAccessInvariantTest\n[PASS]\nProgressiveAccessInvariantTest invariants:\n[PASS] invariant_HC_INV_ACCESS_019_CoreGameplayNeverRequiresWallet\n[PASS] invariant_HC_INV_ACCESS_020_SourceProfileHasSingleCanonicalBinding\n[PASS] invariant_HC_INV_ACCESS_021_ObjectCanonicalizesAtMostOnce\n[PASS] invariant_HC_INV_ACCESS_022_ClaimManifestAndPolicyStayImmutable\n[PASS] invariant_HC_INV_ACCESS_023_OrdinaryStateRemainsOffChainAuthority\n ProgressiveAccessInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)\n\n\u256d-----------------------------------+--------------------+-------+---------+----------\u256e\n| Contract                          | Selector           | Calls | Reverts | Discards |\n+=====================================================================================+\n| ProgressiveAccessInvariantHandler | stepAttemptReclaim | 65536 | 0       | 0        |\n\u2570-----------------------------------+--------------------+-------+---------+----------\u256f\n\nSuite result: ok. 1 passed; 0 failed; 0 skipped; finished in 7.84s (7.83s CPU time)\n\nRan 4 test suites in 7.84s (7.84s CPU time): 17 tests passed, 0 failed, 0 skipped (17 total tests)\n"
+}

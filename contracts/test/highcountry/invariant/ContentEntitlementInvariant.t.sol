@@ -10,10 +10,16 @@ import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 contract ContentEntitlementInvariantHandler {
     HighCountryGamingBridge420 private immutable bridge;
 
-    constructor(HighCountryGamingBridge420 bridge_) { bridge = bridge_; }
+    constructor(
+        HighCountryGamingBridge420 bridge_
+    ) {
+        bridge = bridge_;
+    }
 
     // Foundry only selects non-view/non-pure functions as invariant fuzz targets.
-    function stepProbeUngatedCore(uint64 playerId) external {
+    function stepProbeUngatedCore(
+        uint64 playerId
+    ) external {
         require(!bridge.entitlementMayModifyCoreBalance(), "core balance affected");
         require(!bridge.coreGameplayRequiresEntitlement(), "core gameplay gated");
         require(

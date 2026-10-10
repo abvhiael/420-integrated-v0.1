@@ -580,6 +580,7 @@ def test_bnb25_request_withdraw_idempotency_and_capability(fixture_property):
     sent=client.post(route,json=body,headers={**headers,"idempotency-key":"bnb25-request-0001"})
     assert sent.status_code==201,sent.text
     assert sent.json()["state"]=="requested"
+    assert client.post("/v1/bnb/holds/"+hold.json()["id"]+"/release",headers=headers).status_code==409
     again=client.post(route,json=body,headers={**headers,"idempotency-key":"bnb25-request-0001"})
     assert again.status_code==201 and again.json()["id"]==sent.json()["id"]
     collision=client.post(route,json={**body,"request_type":"instant"},
@@ -758,3 +759,16 @@ def test_bnb25_expired_pending_payment_releases_capacity_once(fixture_property):
             c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb25_legacy_unpriced_hold_does_not_grant_booking_authority(fixture_property):
+    pid,headers=fixture_property
+    held=client.post("/v1/bnb/holds",headers={
+        **headers,"idempotency-key":"bnb25-legacy-hold"},json=payload(pid))
+    assert held.status_code==201,held.text
+    denied=client.post("/v1/bnb/booking-requests",headers={
+        **headers,"idempotency-key":"bnb25-legacy-request"},
+        json={"hold_id":held.json()["id"],"request_type":"request"})
+    assert denied.status_code==409 and denied.json()["detail"]=="BOOKING_QUOTE_REQUIRED"
+    assert client.post("/v1/bnb/holds/"+held.json()["id"]+"/release",
+                       headers=headers).status_code==200

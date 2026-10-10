@@ -97,7 +97,12 @@ contract HighCountryGamingBridge420 {
     error MigrationClaimAlreadyBound();
     error EntitlementRequired();
     error InvalidEntitlementBinding();
-    event PlayerEntitlementBound(uint64 indexed growerProfileId, bytes32 indexed entitlementType, bytes32 indexed contentId, bytes32 entitlementId);
+    event PlayerEntitlementBound(
+        uint64 indexed growerProfileId,
+        bytes32 indexed entitlementType,
+        bytes32 indexed contentId,
+        bytes32 entitlementId
+    );
 
     event GrowerGamingProfileBound(
         uint64 indexed growerProfileId, bytes32 indexed gameProfileId, address indexed account
@@ -203,8 +208,10 @@ contract HighCountryGamingBridge420 {
         if (gameProfileId == bytes32(0)) revert SharedProfileRequired();
         IGrowerProfileHC420.GrowerProfile memory grower = growerProfiles.getProfile(growerProfileId);
         IGameIdentityHC420.GameProfile memory shared = gameIdentity.profile(gameProfileId);
-        if (!grower.exists || grower.account != msg.sender || !shared.exists || shared.account != msg.sender
-            || shared.gameId != HighCountryGamingIds.GAME_ID) revert GrowerAccountMismatch();
+        if (
+            !grower.exists || grower.account != msg.sender || !shared.exists || shared.account != msg.sender
+                || shared.gameId != HighCountryGamingIds.GAME_ID
+        ) revert GrowerAccountMismatch();
         if (!hasScopedEntitlement(growerProfileId, entitlementId, entitlementType, contentId)) {
             revert EntitlementRequired();
         }
@@ -218,8 +225,9 @@ contract HighCountryGamingBridge420 {
         bytes32 contentId
     ) public view returns (bool) {
         bytes32 entitlementId = entitlementForContent[growerProfileId][entitlementType][contentId];
-        return entitlementId != bytes32(0)
-            && hasScopedEntitlement(growerProfileId, entitlementId, entitlementType, contentId);
+        return
+            entitlementId != bytes32(0)
+                && hasScopedEntitlement(growerProfileId, entitlementId, entitlementType, contentId);
     }
 
     function hasPlayerBonusRegion(

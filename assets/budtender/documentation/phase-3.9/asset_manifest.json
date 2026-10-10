@@ -1,0 +1,626 @@
+{
+  "project": "Budtender",
+  "phase": "3.9",
+  "title": "Queue System Environment Assets",
+  "status": "PROCESSED_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "User-supplied crops derived from approved Phase 3.9 artwork sheets; no generative alteration during asset processing",
+  "asset_count": 28,
+  "assets": [
+    {
+      "filename": "queue_control_stand.png",
+      "category": "operational_prop",
+      "description": "Queue Configuration Control Stand",
+      "source_filename": "51bd5fe5-4329-59c6-a4a4-b771cbebf649.png",
+      "source_sha256": "5d24b09b40ca839b205f935bf19d553d7eae481f1ba8be32fa8d599f313b628e",
+      "output_sha256": "203930d44f8d93cac81f3b932d25dd89e9a2477ddce1dea6be2c77ec04bf382d",
+      "dimensions_px": [
+        253,
+        264
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        1,
+        231,
+        264
+      ],
+      "transparent_pixel_fraction": 0.4007,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_barrier_closed.png",
+      "category": "operational_prop",
+      "description": "Temporary Queue Closure Barrier",
+      "source_filename": "8dd40c76-d58a-550f-b54b-922fd772ce4d.png",
+      "source_sha256": "a7b59eeda09c9c43890c11ffab4c2cc31245f09503c3a4296d36d7ff728e0c7f",
+      "output_sha256": "6c09a48e09628c84302254fdb66b4ab93d9877b064892b1524627afeb69123f6",
+      "dimensions_px": [
+        382,
+        275
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        18,
+        381,
+        273
+      ],
+      "transparent_pixel_fraction": 0.4151,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_flow_counter.png",
+      "category": "operational_prop",
+      "description": "Customer Flow Counter",
+      "source_filename": "7b73f9cc-d0fa-5935-8bdf-ce0580a6315c.png",
+      "source_sha256": "0cb21ce39c7bf2d058da97dcc90078c655795ce28b40a967d84a8bee1e1db626",
+      "output_sha256": "35a90678d0e260ee28305f9cb0f6719c4d54af6a7bce209306f755b42b63a0a4",
+      "dimensions_px": [
+        276,
+        229
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        12,
+        253,
+        227
+      ],
+      "transparent_pixel_fraction": 0.3884,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_divider_planter.png",
+      "category": "operational_prop",
+      "description": "Small Queue Divider Planter",
+      "source_filename": "fad20257-b780-51c2-b861-6c6e08ecc974.png",
+      "source_sha256": "aded6ad6d48f221fd4eca7c40c442233eb7db1072df22373060d27cb0799688f",
+      "output_sha256": "8d9371ad01f67c6bfafce106520f80d35d58724c4a0b39a569fd62ef25b9b457",
+      "dimensions_px": [
+        469,
+        264
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        1,
+        444,
+        259
+      ],
+      "transparent_pixel_fraction": 0.3406,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_number_display.png",
+      "category": "operational_prop",
+      "description": "Queue Number Display",
+      "source_filename": "378661d1-f3c5-5d7d-a354-18f6d3d16d0f.png",
+      "source_sha256": "6bcdd339eb149586cf5224d205c427edf8ae9fc1e74ca33f0d15204db0867cb2",
+      "output_sha256": "7afd67e43f1827e8dee9eb1d0352e3c93fa36468ca17a11ae372a0977c9e381b",
+      "dimensions_px": [
+        264,
+        247
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        6,
+        237,
+        243
+      ],
+      "transparent_pixel_fraction": 0.3083,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_ticket_dispenser.png",
+      "category": "operational_prop",
+      "description": "Queue Number Ticket Dispenser",
+      "source_filename": "ee135a9d-c99c-5429-af51-d5f04175ae63.png",
+      "source_sha256": "789fe4550b175accfd5012674b5dcc31196ba1e4de74dd8dc024f17f91984d12",
+      "output_sha256": "24f51c0a1c772969d5d59ddbf3dd5e87a0d24ad4a1dd337cf220be4653e0fa38",
+      "dimensions_px": [
+        297,
+        256
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        19,
+        7,
+        271,
+        256
+      ],
+      "transparent_pixel_fraction": 0.4131,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_information.png",
+      "category": "queue_sign",
+      "description": "Queue Information Plaque",
+      "source_filename": "6dffdf97-371d-5cd5-9490-7c6bd2b64b88.png",
+      "source_sha256": "73c11b1e81507b100220f8b4bddc4394858a37b6c42211baf1b400b9e2ac2315",
+      "output_sha256": "515c1d85916f1b596958d78e134cdd530499b5fd0a8c57e00dbdc2b3de61adb1",
+      "dimensions_px": [
+        386,
+        244
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        29,
+        6,
+        346,
+        239
+      ],
+      "transparent_pixel_fraction": 0.3564,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_wait_time.png",
+      "category": "queue_sign",
+      "description": "Estimated Wait-Time Display",
+      "source_filename": "fa155099-a38b-54d9-acfa-7bd7433644ff.png",
+      "source_sha256": "22ef670c24bb511f73cbba7e5a91e0c08bbadbbc4ff988655333db71448644f8",
+      "output_sha256": "b63b9933f37278f674149d98ccf857903d180a83b7d982b6b5428436f91c1e32",
+      "dimensions_px": [
+        432,
+        237
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        33,
+        10,
+        393,
+        235
+      ],
+      "transparent_pixel_fraction": 0.3986,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_accessible.png",
+      "category": "queue_sign",
+      "description": "Accessible Service Sign",
+      "source_filename": "7332fc21-e2cf-5be2-90aa-78a33d6285ba.png",
+      "source_sha256": "02ece830b3c1aeb810318f58dbc923e2f81d739257d30ae2906fb4a1fc193e3a",
+      "output_sha256": "e4b04c6fb185e56254e90518e8d5b70709db4a6d306fdc59561dbfb0f2d7f32b",
+      "dimensions_px": [
+        268,
+        305
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        1,
+        245,
+        301
+      ],
+      "transparent_pixel_fraction": 0.4718,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_express.png",
+      "category": "queue_sign",
+      "description": "Express Pickup Queue Sign",
+      "source_filename": "455acb29-b2cc-5f48-b027-0755700207f4.png",
+      "source_sha256": "29378ab2b914c4d246c3e18e20b999269348e47b1367cc6698c964ade4defc56",
+      "output_sha256": "9f2316d604d651e32fffd21220ea589c6b256037074de2b9e6f26eefcab3b870",
+      "dimensions_px": [
+        291,
+        309
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        5,
+        262,
+        307
+      ],
+      "transparent_pixel_fraction": 0.5028,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_wait.png",
+      "category": "queue_sign",
+      "description": "Please Wait Here Sign",
+      "source_filename": "64b0d358-020c-5f1e-8693-fc01532de464.png",
+      "source_sha256": "147b383f7f797838077f75a4fb085ba37d6fd45ae54b66225cfbcf55f48e16d6",
+      "output_sha256": "a8aa3c7ee0e02c7b4a67c0987c1f0858f9a32c7a2220b7dfb7e38b4b02b46aa0",
+      "dimensions_px": [
+        282,
+        309
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        5,
+        253,
+        308
+      ],
+      "transparent_pixel_fraction": 0.4979,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_runner.png",
+      "category": "floor_marker",
+      "description": "Decorative Queue Runner",
+      "source_filename": "165a6ec3-c2cb-55b4-af83-42ebe439e5d8.png",
+      "source_sha256": "f4acd576fa16ddb8eceac8d588081e3cdbb925f2e5e34adce7ce6afaf28f54be",
+      "output_sha256": "d6557007773d6d4afa83d3dbb0370a6f4b97f942763b44c478a246afa1159a17",
+      "dimensions_px": [
+        1252,
+        175
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        11,
+        1247,
+        168
+      ],
+      "transparent_pixel_fraction": 0.1448,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_end.png",
+      "category": "floor_marker",
+      "description": "Queue End Marker",
+      "source_filename": "b80eceea-7714-5e71-a012-b7c09042e90b.png",
+      "source_sha256": "a79d13f2f0a9e1f5cd1189880112f01f134569f3b1d17a10add1d082af89ed3f",
+      "output_sha256": "51200ac54c05814227a44c816509093a6c9c62a7274add272c634b5dbe4a2ee4",
+      "dimensions_px": [
+        216,
+        164
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        6,
+        210,
+        162
+      ],
+      "transparent_pixel_fraction": 0.2824,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_start.png",
+      "category": "floor_marker",
+      "description": "Queue Start Marker",
+      "source_filename": "6e484012-b0a2-52bf-93fa-58ccf543c9ae.png",
+      "source_sha256": "a6226d7f4cc214df716a6703b1ef5abdb00c6bc203159e1d01a9bfc240d457e1",
+      "output_sha256": "c78730332e7529e43b780ca7ae9b9a3e750b1b66db8c272df81743d97d23c8ff",
+      "dimensions_px": [
+        216,
+        164
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        5,
+        212,
+        161
+      ],
+      "transparent_pixel_fraction": 0.274,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_position.png",
+      "category": "floor_marker",
+      "description": "Standing Position Marker",
+      "source_filename": "44a1d5d6-b520-5c1b-8cc0-09c007029300.png",
+      "source_sha256": "7b0ce69a2fbab1a39561b6d5de74d57311c10a59e686a3fe47a19295790c0067",
+      "output_sha256": "66e00d260092b0d17f526f53b65724f138675b8fc6fcf8fa7a22e353cd655365",
+      "dimensions_px": [
+        226,
+        168
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        10,
+        214,
+        165
+      ],
+      "transparent_pixel_fraction": 0.3428,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_wait.png",
+      "category": "floor_marker",
+      "description": "Please Wait Floor Marker",
+      "source_filename": "e5a173a7-45e3-5ec7-9e00-cc850dd44f51.png",
+      "source_sha256": "cbab819c443f72e56569699da12e5e092c861487147d0bd7b36dd91c7e00cdea",
+      "output_sha256": "12dd34cd0e3dc28ed5dfc7e9bc80183466cd1136911660625abd9a29169af0e3",
+      "dimensions_px": [
+        216,
+        163
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        4,
+        212,
+        159
+      ],
+      "transparent_pixel_fraction": 0.2747,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_arrow.png",
+      "category": "floor_marker",
+      "description": "Brass Floor Direction Arrow",
+      "source_filename": "986084be-abd6-5dd0-889f-e561310aac5b.png",
+      "source_sha256": "49ec9bff5ee45d2632ac0a5bd5eec07156debd222963a3d81c417c491a06b093",
+      "output_sha256": "a1570487307617c435b0c992eb8892aa94971651f3e1d8b554ba269ba8f64130",
+      "dimensions_px": [
+        227,
+        163
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        5,
+        214,
+        160
+      ],
+      "transparent_pixel_fraction": 0.3157,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_next.png",
+      "category": "queue_sign",
+      "description": "Next Customer Sign",
+      "source_filename": "46701520-9f01-5edb-9ad6-5ec78e29cf05.png",
+      "source_sha256": "bf148bef99d728a835790fc3466c2f98f1d5660f3932c064162705d073013aa5",
+      "output_sha256": "31abc6c14beeb939d79bbffc7515cd7e57e9d7d50bb863937b4d8db3d10e21cb",
+      "dimensions_px": [
+        267,
+        231
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        12,
+        26,
+        232,
+        229
+      ],
+      "transparent_pixel_fraction": 0.4454,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_sign_start.png",
+      "category": "queue_sign",
+      "description": "Line Starts Here Sign",
+      "source_filename": "7dfe8f1f-66f5-5cd2-87ee-691094f38571.png",
+      "source_sha256": "16739db8160d9d4ae9b16d0242835fe2e3bb1948695c49f5721b032b45465b51",
+      "output_sha256": "51476a5fe2a8cc46f485b219c6d33ad0f42621a7e94298f0c26bfa0fa21f15b7",
+      "dimensions_px": [
+        294,
+        311
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        5,
+        260,
+        309
+      ],
+      "transparent_pixel_fraction": 0.5103,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_floor_accessible.png",
+      "category": "floor_marker",
+      "description": "Accessible Queue Marker",
+      "source_filename": "5781f147-a671-5e5c-ad40-3144bda9ca43.png",
+      "source_sha256": "b1cc4ed47b271b6ea2c1ddf22760617d5b76b266a0a8b8b56a6df620a0cc8a57",
+      "output_sha256": "d83db55b9b698b5fd33e9ff63d1b88098c3047b3216b528c38031890ebaa6e70",
+      "dimensions_px": [
+        214,
+        169
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        12,
+        211,
+        167
+      ],
+      "transparent_pixel_fraction": 0.2945,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_entrance_gateway.png",
+      "category": "queue_structure",
+      "description": "Queue Entrance Gateway",
+      "source_filename": "6dbe913e-15a1-55be-a4d4-9afed46a2fc4.png",
+      "source_sha256": "19dff5d39404ed0d9987d177875cbeef11b7df78dce94b8f0dc800971d2048f6",
+      "output_sha256": "c595e9a7a732688272f92e10f3c9fea8bc565c4d31ed06f7bfb8f13e9b20ab6c",
+      "dimensions_px": [
+        581,
+        255
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        8,
+        570,
+        251
+      ],
+      "transparent_pixel_fraction": 0.4875,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_barrier_corner.png",
+      "category": "queue_structure",
+      "description": "Corner Queue Barrier Section",
+      "source_filename": "e4665674-9035-54d6-9413-9f3d87e6fbaa.png",
+      "source_sha256": "dea8fa3b179bd276e0d93ab8f5f495104063787489bcfacbe78be1765bc94a9b",
+      "output_sha256": "76994aca3c3ff2e4cb2bd9b9eb24e74b461bd86ecf3fafbdb08e6358695b219f",
+      "dimensions_px": [
+        393,
+        235
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        8,
+        389,
+        229
+      ],
+      "transparent_pixel_fraction": 0.7762,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_belt_retractable.png",
+      "category": "queue_structure",
+      "description": "Retractable Belt Barrier",
+      "source_filename": "e5483ab1-386d-5070-bf94-ee4e563c9ce7.png",
+      "source_sha256": "e57b3e506ef2d8ef5a62ca8a405c7f71ac332ba4e62a45dd70cc339eadc65614",
+      "output_sha256": "aa97eaba64e3722277cd76d57d031a5716a050df95fed312088e2b530e2c66a9",
+      "dimensions_px": [
+        278,
+        251
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        4,
+        269,
+        249
+      ],
+      "transparent_pixel_fraction": 0.7599,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_chain_brass.png",
+      "category": "queue_structure",
+      "description": "Brass Chain Barrier",
+      "source_filename": "25dafa73-7c8e-59bf-89a0-c06932a823e2.png",
+      "source_sha256": "c93c97e573139276d1ba30498d21764b5a12c5b1c39410d32c12f00661123827",
+      "output_sha256": "a2c5582214c763a2620435006e67962fe50b79a6367929edc3d04626dc3bbb1a",
+      "dimensions_px": [
+        324,
+        215
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        7,
+        318,
+        206
+      ],
+      "transparent_pixel_fraction": 0.879,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_rope_green.png",
+      "category": "queue_structure",
+      "description": "Forest-Green Velvet Rope",
+      "source_filename": "2a1cc501-7c62-5113-94bd-5ad5314e9476.png",
+      "source_sha256": "280138bad0835c9f4d68f892fd83d0b6d5ff97b42a97bd7a42bda6a0644a121c",
+      "output_sha256": "b767712f37aa3249af3b3c1a11f411924f43dde7430731857d253e070337de11",
+      "dimensions_px": [
+        284,
+        223
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        8,
+        248,
+        217
+      ],
+      "transparent_pixel_fraction": 0.8258,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_stanchion_walnut.png",
+      "category": "queue_structure",
+      "description": "Walnut Queue Stanchion",
+      "source_filename": "e504a666-0437-5e14-8d2f-60e9cb49bb90.png",
+      "source_sha256": "e25b36779a1f8028bc56a34e3eca99735fcdb9dc2e6817b994a9a96e3a0e919b",
+      "output_sha256": "916eb43f31f71b60baa6f6687a8f71e3e507344dfd2cff27f8679aa1129aef8f",
+      "dimensions_px": [
+        148,
+        254
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        2,
+        137,
+        251
+      ],
+      "transparent_pixel_fraction": 0.708,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_stanchion_brass.png",
+      "category": "queue_structure",
+      "description": "Brass Queue Stanchion",
+      "source_filename": "324258fa-8645-54bc-8248-800cec8aa5e2.png",
+      "source_sha256": "b2d8ce5f75c54c728f4be8d6be5d7d6da9982d943695eb72fd1340a20640f714",
+      "output_sha256": "98b44c3e992f94230452c13ef619f3d18e916944a999ee5d93866b37d9e6a8e3",
+      "dimensions_px": [
+        182,
+        257
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        6,
+        136,
+        255
+      ],
+      "transparent_pixel_fraction": 0.7778,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "queue_barrier_straight.png",
+      "category": "queue_structure",
+      "description": "Complete Straight Barrier Section",
+      "source_filename": "ab35f0d7-4b4b-5f30-abf6-7c3eddba1efc.png",
+      "source_sha256": "4908ce28bdec618c9a041635ed7fd0db1aabeb250cad2cd67a9d67a0d785c8f7",
+      "output_sha256": "f4f60d5d5c6b2e64c17697358d1e79a0b0dbb604f245b69a5152963a1e567b66",
+      "dimensions_px": [
+        477,
+        207
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        6,
+        441,
+        206
+      ],
+      "transparent_pixel_fraction": 0.81,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    }
+  ]
+}

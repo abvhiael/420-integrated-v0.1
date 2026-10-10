@@ -1,0 +1,567 @@
+{
+  "project": "Budtender",
+  "phase": "3.6",
+  "title": "Lighting Kit",
+  "status": "CORRECTED_TRANSPARENCY_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "User-supplied crops derived from approved Phase 3.6 artwork sheets; no generative alteration during asset processing",
+  "asset_count": 24,
+  "notes": [
+    "Physical fixtures were cut to transparent PNGs from cream-background crops.",
+    "Effects and overlays were rebuilt as RGBA transparency assets from their original source crops.",
+    "Suggested blend modes are implementation hints only."
+  ],
+  "assets": [
+    {
+      "filename": "light_fx_corner_shadow.png",
+      "category": "overlay_shadow",
+      "description": "Interior occlusion / corner shadow",
+      "source_filename": "827ff734-8d2b-5f96-8a76-1a7618825b94.png",
+      "source_sha256": "14ae527085f7d3767074f498e5baefe4a9419baf89caf84ec0ed02f56e90ac2b",
+      "output_sha256": "a70791b68d674288feb32f04caa4210f7b2654fa02a5ba6ca94b94bd07618b76",
+      "dimensions_px": [
+        524,
+        327
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        509,
+        311
+      ],
+      "transparent_pixel_fraction": 0.4485,
+      "processing": "black_background_converted_to_alpha_shadow",
+      "no_resize": true,
+      "suggested_blend_mode": "multiply"
+    },
+    {
+      "filename": "light_fx_contact_shadow.png",
+      "category": "overlay_shadow",
+      "description": "Soft floor contact shadow",
+      "source_filename": "0ef827a5-ebcc-5677-89e4-77d4ee40798f.png",
+      "source_sha256": "3f5061d72fa7cdaff1523e0aee30e18e0f0811a625503b63978a16137667fa49",
+      "output_sha256": "c017bb7e000c7c6382f0d6f8b1e048518978ed2559f9456b783759ccf7589eb1",
+      "dimensions_px": [
+        767,
+        247
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        30,
+        767,
+        214
+      ],
+      "transparent_pixel_fraction": 0.4278,
+      "processing": "black_background_converted_to_alpha_shadow",
+      "no_resize": true,
+      "suggested_blend_mode": "multiply"
+    },
+    {
+      "filename": "light_state_premium_upgrade.png",
+      "category": "overlay_state",
+      "description": "Premium lighting upgrade glow",
+      "source_filename": "2b2a04ee-dd26-5de2-9ef8-20ef29e90428.png",
+      "source_sha256": "9b8db4a5618612c56e29c61df5800aab5a1efbb997a21ea15270013f69517f33",
+      "output_sha256": "6687ce20725feb6ee80e2fa20dbfbfab711231b5e63c55d58a10b2e473243daf",
+      "dimensions_px": [
+        473,
+        283
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        473,
+        283
+      ],
+      "transparent_pixel_fraction": 0.0,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "overlay"
+    },
+    {
+      "filename": "light_state_lights_off.png",
+      "category": "overlay_state",
+      "description": "Lights-off environment overlay",
+      "source_filename": "32d67548-9fec-5510-95b9-c91c7c09489c.png",
+      "source_sha256": "74b84bc5ca242f7071233d2a96d54fce3de02ecab31675d55c7aa80e1190ed2a",
+      "output_sha256": "7729f7e8a318577a5ff38e581b2edcca2bd25162d86b45f0bbf4631a31459231",
+      "dimensions_px": [
+        473,
+        283
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        473,
+        265
+      ],
+      "transparent_pixel_fraction": 0.0997,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "multiply"
+    },
+    {
+      "filename": "light_state_closing.png",
+      "category": "overlay_state",
+      "description": "Closing-time dimmed lighting",
+      "source_filename": "2fa9e050-b833-58a4-b1a1-bba762d916ec.png",
+      "source_sha256": "b02b98db4a66d969ec42cea2a779510fd31725cb336b31493769cbd10a853825",
+      "output_sha256": "57e8602ebcd021e50d338f7d0b98b2108256c78f46102b4d952cc083303ee969",
+      "dimensions_px": [
+        473,
+        283
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        473,
+        283
+      ],
+      "transparent_pixel_fraction": 0.0,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "multiply"
+    },
+    {
+      "filename": "light_state_evening.png",
+      "category": "overlay_state",
+      "description": "Evening environment tint",
+      "source_filename": "5d92f9eb-4968-5ed1-9326-5cfe1bb15332.png",
+      "source_sha256": "09f0f1f2839250d22669cc3d738d15eceafffe81d2101ccb5d9a3118e4d42b0a",
+      "output_sha256": "f3b86254245f1f705f02a306b6d5999f828a29c095597655132f8386b49962cb",
+      "dimensions_px": [
+        473,
+        284
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        1,
+        471,
+        284
+      ],
+      "transparent_pixel_fraction": 0.0641,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "overlay"
+    },
+    {
+      "filename": "light_state_golden_hour.png",
+      "category": "overlay_state",
+      "description": "Golden hour environment tint",
+      "source_filename": "0c7d0a5f-5da2-5be7-9120-2871a29e9cb1.png",
+      "source_sha256": "802c606a37432ec37ea518f6237099d93eb6808c7692c68d86b2e351f8b8bcbd",
+      "output_sha256": "dd7db87eb70c5d65664b41c978c5a5880feb95c75cf07f72367e99e5fdf3a229",
+      "dimensions_px": [
+        460,
+        294
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        460,
+        294
+      ],
+      "transparent_pixel_fraction": 0.0,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "overlay"
+    },
+    {
+      "filename": "light_state_daylight.png",
+      "category": "overlay_state",
+      "description": "Daylight environment tint",
+      "source_filename": "33b87482-cf8c-5d7c-819f-4ad8e489b867.png",
+      "source_sha256": "df1047681a2a359adaf615c46260a07d4e3160ec250e049eee479e421a33f046",
+      "output_sha256": "0616a9c0882ce94d858925cf093d3e596ae1993bbbf150dcda4695ceebf1dc33",
+      "dimensions_px": [
+        464,
+        294
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        464,
+        294
+      ],
+      "transparent_pixel_fraction": 0.0,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "overlay"
+    },
+    {
+      "filename": "light_fx_exterior_evening.png",
+      "category": "light_effect",
+      "description": "Exterior evening glow",
+      "source_filename": "b8a2f7e8-af67-5ad8-9fdd-2392114fe925.png",
+      "source_sha256": "bcf660d53109a3da0f7d91a9bf64fb3b76068ac94e847fb2f4b153e695f76457",
+      "output_sha256": "7b35bce7b8828ec26755d05b28dc886a499d546be04a5e249cc63b438e9f6246",
+      "dimensions_px": [
+        413,
+        359
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        413,
+        359
+      ],
+      "transparent_pixel_fraction": 0.0,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_ambient_warm.png",
+      "category": "light_effect",
+      "description": "Soft interior ambient glow",
+      "source_filename": "740ee0e0-d6bd-5107-9292-93b1c0802eda.png",
+      "source_sha256": "8430b2d4328067a2794c404e32eac152fbc1b4f3bd52c2a14da7efcd16c94444",
+      "output_sha256": "e7942604e7f594763f22fdc266bbe688e32126f159da83d321322931e3662146",
+      "dimensions_px": [
+        329,
+        358
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        329,
+        358
+      ],
+      "transparent_pixel_fraction": 0.0,
+      "processing": "overlay_tint_alpha_rebuilt",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_window_sunbeam.png",
+      "category": "light_effect",
+      "description": "Window sunlight beam",
+      "source_filename": "bf5368f5-bfc1-54d9-bc9c-0cf830fd1643.png",
+      "source_sha256": "0e00e77ed59e7a141e194af0ed4375dffc0719eecbe84ea7b0bf8f1a18245acd",
+      "output_sha256": "1344594ab0a2eee81d00713398ef288ce4bad5445fc675d6cb462354cbbe1d22",
+      "dimensions_px": [
+        327,
+        439
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        327,
+        439
+      ],
+      "transparent_pixel_fraction": 0.0034,
+      "processing": "black_background_converted_to_alpha_glow",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_counter_pool.png",
+      "category": "light_effect",
+      "description": "Counter task-light pool",
+      "source_filename": "73613953-c356-50de-a137-2ea684c2c532.png",
+      "source_sha256": "a20d3cbcca8a45e2e2c4298ad50a0e69ea51c28350a19f19e8a6280650f74167",
+      "output_sha256": "264a751719d2e7f9af274d97a666cee8d0ca4c31ca0e11ccbf27f6c0cf398e11",
+      "dimensions_px": [
+        336,
+        457
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        336,
+        424
+      ],
+      "transparent_pixel_fraction": 0.1301,
+      "processing": "black_background_converted_to_alpha_glow",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_shelf_wash.png",
+      "category": "light_effect",
+      "description": "Shelf illumination / wash",
+      "source_filename": "c748475e-4f18-5d5f-ad77-b7d229d988a6.png",
+      "source_sha256": "b235d359482ddb663d06f6eb0f2cc8b9e2accc095a8f393d2a72656a5bca80e9",
+      "output_sha256": "2ba6d6b9e1e9b5e682f05b6c6c0f7460c449eadc97ee8883b75c499b95e2a198",
+      "dimensions_px": [
+        425,
+        295
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        425,
+        295
+      ],
+      "transparent_pixel_fraction": 0.0069,
+      "processing": "black_background_converted_to_alpha_glow",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_ceiling_pool.png",
+      "category": "light_effect",
+      "description": "Ceiling light pool",
+      "source_filename": "30966e96-0a7a-5a42-89bf-4f3afc6c5faf.png",
+      "source_sha256": "6858b3ec6dd372f5fd911f87553145abe7844868cfa389928cc1fff7b57eb4b9",
+      "output_sha256": "73f45f91f3f00f0a402d23d91344a4d758429320a3a880dd8074ede8bed39c74",
+      "dimensions_px": [
+        357,
+        439
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        357,
+        439
+      ],
+      "transparent_pixel_fraction": 0.1221,
+      "processing": "black_background_converted_to_alpha_glow",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_sconce_glow.png",
+      "category": "light_effect",
+      "description": "Wall sconce glow",
+      "source_filename": "7e4a4b0c-f5c2-5ead-bd0d-18a003350d78.png",
+      "source_sha256": "23e57b60118e3d629e9d671239cc6e57f8e57282b05040e463c1038899245f7c",
+      "output_sha256": "8c96513147cd132c8043886bce08ed6c95551540e8e2c18767f66a716dcc73c6",
+      "dimensions_px": [
+        245,
+        445
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        245,
+        445
+      ],
+      "transparent_pixel_fraction": 0.0003,
+      "processing": "black_background_converted_to_alpha_glow",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_fx_pendant_glow.png",
+      "category": "light_effect",
+      "description": "Pendant warm glow",
+      "source_filename": "456c8ff0-091c-53e9-87ea-293b76d6c0e8.png",
+      "source_sha256": "82214d3157b566be6edc11c029d0b3585d76b38a6e120f20b7c671590b27e844",
+      "output_sha256": "61b8f77111db7512e4346444ea707fc693c01f3f3124c0f24e413e1076e7a27a",
+      "dimensions_px": [
+        315,
+        376
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        315,
+        376
+      ],
+      "transparent_pixel_fraction": 0.1573,
+      "processing": "black_background_converted_to_alpha_glow",
+      "no_resize": true,
+      "suggested_blend_mode": "screen"
+    },
+    {
+      "filename": "light_storefront_exterior.png",
+      "category": "fixture",
+      "description": "Storefront exterior lamp",
+      "source_filename": "05785cb4-077d-5f6f-86df-bf5448abfe47.png",
+      "source_sha256": "baefbcb98bb359d7e6b14101a25470536e6832dbcc1cbdcfb97ce32966f558af",
+      "output_sha256": "7c57d80c34ac63d48f7f147458edd28039190dcb6a48da717506cdadd6ac048b",
+      "dimensions_px": [
+        387,
+        430
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        32,
+        13,
+        364,
+        410
+      ],
+      "transparent_pixel_fraction": 0.5415,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_counter_task.png",
+      "category": "fixture",
+      "description": "Counter task lamp",
+      "source_filename": "8b0d815c-378f-5fe8-8ac1-854bbad74262.png",
+      "source_sha256": "dbad08ce5353ec2a1f3ab45c65590b9513173e8f3c93bd2a0c4d942922166751",
+      "output_sha256": "927a2a61b3063a3b3e5e38d4491f323a7cc0e0c3ef9a834db8fc85c1e293a8c8",
+      "dimensions_px": [
+        311,
+        436
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        12,
+        302,
+        416
+      ],
+      "transparent_pixel_fraction": 0.7112,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_shelf_accent.png",
+      "category": "fixture",
+      "description": "Shelf accent light",
+      "source_filename": "01b977a1-1875-53c9-b067-7456ea850bf5.png",
+      "source_sha256": "cb25b3abd0b5c80a27c6aaf1e56ad52336c05a95d8dfb0a704794bc2055909c9",
+      "output_sha256": "b2b17d05f3fd7b36dca1e4212d1b0c2f1b5a73fae70852f8c8e9f045cf6aee09",
+      "dimensions_px": [
+        419,
+        220
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        19,
+        55,
+        397,
+        213
+      ],
+      "transparent_pixel_fraction": 0.5473,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_ceiling_recessed.png",
+      "category": "fixture",
+      "description": "Recessed ceiling light",
+      "source_filename": "36fbc395-8923-567f-8a9f-ddb21e29a8c2.png",
+      "source_sha256": "ddf43249e37a90bb785b91736b98a30455104fadf4a125a0bbfce18dfd67f2bd",
+      "output_sha256": "19c706edfafcdca7730cdf8f8834596ae6c05a7a127729afaa71518fddc1acc8",
+      "dimensions_px": [
+        305,
+        225
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        21,
+        27,
+        288,
+        189
+      ],
+      "transparent_pixel_fraction": 0.5076,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_ceiling_track.png",
+      "category": "fixture",
+      "description": "Ceiling track light",
+      "source_filename": "fb3a7e16-58b9-537f-8a37-56e11fa9cc0a.png",
+      "source_sha256": "b8a536b58628689b0129340d984b3ddecd582d031a4a92a874bb3896e7c42ad7",
+      "output_sha256": "8e679c0a1207d7f8b6c288729c5137541bb920bd2aac8f79f9452484c9b2cb9c",
+      "dimensions_px": [
+        476,
+        328
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        32,
+        463,
+        303
+      ],
+      "transparent_pixel_fraction": 0.7124,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_wall_sconce.png",
+      "category": "fixture",
+      "description": "Wall sconce",
+      "source_filename": "2ada0a89-ff88-5a9a-a14b-b1dd361ef27f.png",
+      "source_sha256": "2ed3ffd3dbf632edc341cd5765a6ce62bee45c81ef34a75c5f8e6bcd37651897",
+      "output_sha256": "f4e8e9ff049e85a6c3eade1c8e3be7a3939d2e1f04f72eadd657f60fdc519833",
+      "dimensions_px": [
+        271,
+        381
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        24,
+        258,
+        350
+      ],
+      "transparent_pixel_fraction": 0.5653,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_pendant_green.png",
+      "category": "fixture",
+      "description": "Green enamel pendant",
+      "source_filename": "285a0572-7bf1-52fc-89c9-31e727d1422a.png",
+      "source_sha256": "c14ef87bc7de9da6269221bc8ecaba5f0aec5eae4126b3f1b81c86a0666f555f",
+      "output_sha256": "8fc54a6574c4cad88122f6a28329e42c8e8bd39ff51b623594291213bc381db6",
+      "dimensions_px": [
+        292,
+        532
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        14,
+        282,
+        508
+      ],
+      "transparent_pixel_fraction": 0.7169,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    },
+    {
+      "filename": "light_pendant_brass.png",
+      "category": "fixture",
+      "description": "Brass pendant light",
+      "source_filename": "38ab6eac-ef08-5695-9322-647f5bbfc0af.png",
+      "source_sha256": "f851399eefc3ac05a986bafa55898c83cfe760f3e35ffbf0cb1bc92f9b8bb5f2",
+      "output_sha256": "aacb755e3eea970e09adefe3a7b94b501676816eb6e155e902ab4aa2db6fe37f",
+      "dimensions_px": [
+        341,
+        521
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        21,
+        17,
+        312,
+        504
+      ],
+      "transparent_pixel_fraction": 0.706,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "suggested_blend_mode": "normal"
+    }
+  ]
+}

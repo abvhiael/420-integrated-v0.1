@@ -1,0 +1,688 @@
+{
+  "project": "Budtender",
+  "phase": "3.7",
+  "title": "Plant and Botanical Kit",
+  "status": "PROCESSED_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "User-supplied crops derived from approved Phase 3.7 artwork sheets; no generative alteration during asset processing",
+  "asset_count": 32,
+  "notes": [
+    "All 32 PNG backgrounds reprocessed after discovering opaque cream rectangles in initial pack.",
+    "True per-pixel RGBA transparency verified; foreground cutouts should be visually approved for fine foliage and shadows.",
+    "Original source crops retained unchanged; output dimensions preserved."
+  ],
+  "assets": [
+    {
+      "filename": "decor_botanical_corner.png",
+      "category": "decor",
+      "description": "Large Botanical Corner Arrangement",
+      "source_filename": "decor_botanical_corner.png.png",
+      "source_sha256": "5a271f4c19bb9743d0aa6c8387098e78b73391bbfd837e2d6991e45609657485",
+      "output_sha256": "c94341d01af9a7e817eb719f894b898d3ee9a662b173d5a2942dfef432cb3d69",
+      "dimensions_px": [
+        142,
+        186
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        1,
+        141,
+        185
+      ],
+      "transparent_pixel_fraction": 0.2555,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_window_plants.png",
+      "category": "decor",
+      "description": "Window Plant Arrangement",
+      "source_filename": "decor_window_plants.png.png",
+      "source_sha256": "ca814fc7324bfa1ef9f1d5e2966638a168204c08842615d002445117ac2b86a3",
+      "output_sha256": "4ca39db8d012166049a37b6d8d1684688c0b6cbc9bd8a961eb9e78ce8010ac32",
+      "dimensions_px": [
+        202,
+        174
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        8,
+        201,
+        173
+      ],
+      "transparent_pixel_fraction": 0.2307,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_shelf_greenery.png",
+      "category": "decor",
+      "description": "Shelf Greenery Cluster",
+      "source_filename": "decor_shelf_greenery.png.png",
+      "source_sha256": "de10e2457c2a753c1d05b9f85385123f74580bf917cee831be6bf4dfbd74a7a5",
+      "output_sha256": "1c5d1f41b48fc8e1d87c49df42d303b38338314044f98f96a959359bdd182c1e",
+      "dimensions_px": [
+        204,
+        180
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        2,
+        203,
+        179
+      ],
+      "transparent_pixel_fraction": 0.3441,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_dried_flower.png",
+      "category": "decor",
+      "description": "Dried Floral Arrangement",
+      "source_filename": "decor_dried_flower.png.png",
+      "source_sha256": "482bc431d36fe991a12d83596ba4e266f18053b813e9c799ef8189e6b0c3f0d0",
+      "output_sha256": "c93bf532447913558cd84097764d9455ffaa5fa5b3676e4827fd997e65472514",
+      "dimensions_px": [
+        128,
+        181
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        1,
+        127,
+        180
+      ],
+      "transparent_pixel_fraction": 0.5068,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_counter_plant.png",
+      "category": "decor",
+      "description": "Small Countertop Plant Arrangement",
+      "source_filename": "decor_counter_plant.png.png",
+      "source_sha256": "fd1855e946c72d670cc3ad7c8cde622383c03768034fdae3d2276a3a71e2c004",
+      "output_sha256": "b170c95fd0eefbc11d58ad4d7ae119bfb8a6c892d3466b9fc7457aa278daf9a4",
+      "dimensions_px": [
+        203,
+        145
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        6,
+        194,
+        144
+      ],
+      "transparent_pixel_fraction": 0.4235,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_pressed_botanical.png",
+      "category": "decor",
+      "description": "Pressed Botanical Frame",
+      "source_filename": "decor_pressed_botanical.png.png",
+      "source_sha256": "3c3408c733b0c5fced8f720b9520a822c0041bc2d03b7af2e5d9957e4512b307",
+      "output_sha256": "68e9443eac22a1d5ddec8e42c338ddd9e48d9986941b5285786a3fe6c879052e",
+      "dimensions_px": [
+        131,
+        158
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        2,
+        121,
+        157
+      ],
+      "transparent_pixel_fraction": 0.1887,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_framed_leaf.png",
+      "category": "decor",
+      "description": "Framed Leaf Illustration",
+      "source_filename": "decor_framed_leaf.png.png",
+      "source_sha256": "f34e9a1e8db78b914fdd83dbc0e066170f51de649ba125e777cefc1d6002cf4e",
+      "output_sha256": "8d268e4a09d1e6e0a2dae27023a915178a052a0b9ce348b2ac09c144ff6d4066",
+      "dimensions_px": [
+        144,
+        155
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        5,
+        138,
+        154
+      ],
+      "transparent_pixel_fraction": 0.1671,
+      "no_resize": true
+    },
+    {
+      "filename": "decor_botanical_wall_print.png",
+      "category": "decor",
+      "description": "Botanical Wall Print",
+      "source_filename": "decor_botanical_wall_print.png.png",
+      "source_sha256": "892cd303af3eee48d7a9a7e573b62adc95738ca5af1ebcbfd8d711993ad9a8f6",
+      "output_sha256": "fe6a1c4e07f4721268841c0ea255ea7eb800c97a2bd7f9822c688a358604b641",
+      "dimensions_px": [
+        133,
+        157
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        7,
+        122,
+        156
+      ],
+      "transparent_pixel_fraction": 0.3193,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_hanging_basket.png",
+      "category": "planter",
+      "description": "Hanging Planter Basket",
+      "source_filename": "planter_hanging_basket.png.png",
+      "source_sha256": "2f6c207e0505f113ee8f50773921f6f388fb746ba1d5d3bc03e94c60f4118237",
+      "output_sha256": "7d513203316d8211ead89931ff4d88ba49bd71f74524290549c33fe8619354da",
+      "dimensions_px": [
+        150,
+        177
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        1,
+        131,
+        176
+      ],
+      "transparent_pixel_fraction": 0.6017,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_floor_stand.png",
+      "category": "planter",
+      "description": "Floor Planter Stand",
+      "source_filename": "planter_floor_stand.png.png",
+      "source_sha256": "f6ca5db1a52f67d464a020a03aeeefb003254432c8b1e007350ed076e65e460a",
+      "output_sha256": "21c123029dc17b78bb7aa4a8ea3d6c0cf6b8d57375f92918023d661836befa24",
+      "dimensions_px": [
+        127,
+        169
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        6,
+        126,
+        168
+      ],
+      "transparent_pixel_fraction": 0.4192,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_walnut_box.png",
+      "category": "planter",
+      "description": "Walnut Planter Box",
+      "source_filename": "planter_walnut_box.png.png",
+      "source_sha256": "bd3f7c60fb0f5894956c61cbd81f63110df79226261c99ab5d4cd5d05fabe7a7",
+      "output_sha256": "6bf5272015810b7792f4311ebdcb63722c318b6e3a6b6e10a58cf729806482e7",
+      "dimensions_px": [
+        200,
+        136
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        4,
+        199,
+        135
+      ],
+      "transparent_pixel_fraction": 0.2734,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_brass.png",
+      "category": "planter",
+      "description": "Brass Planter",
+      "source_filename": "planter_brass.png.png",
+      "source_sha256": "d15ec8ab43a62418f6c6331a543b8767d724db0662dabbcf4141720ea45166af",
+      "output_sha256": "8157261757fe350f5ae59d9e3824711fe14d309a979e07e1390001ea9742a23b",
+      "dimensions_px": [
+        146,
+        137
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        2,
+        136,
+        136
+      ],
+      "transparent_pixel_fraction": 0.2625,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_ceramic_green.png",
+      "category": "planter",
+      "description": "Forest-Green Ceramic Pot",
+      "source_filename": "planter_ceramic_green.png.png",
+      "source_sha256": "492b804d260788f93ed333a815452bc01b3de112dedd65b53b0c20f5f647f460",
+      "output_sha256": "5c97630eef39fa76ac525b146605d7847022954a72151660cdb98697e454c046",
+      "dimensions_px": [
+        163,
+        133
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        2,
+        151,
+        132
+      ],
+      "transparent_pixel_fraction": 0.238,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_ceramic_cream.png",
+      "category": "planter",
+      "description": "Cream Ceramic Pot",
+      "source_filename": "planter_ceramic_cream.png.png",
+      "source_sha256": "da423e60c66770c93bd709145302ef30c7a9c08665974136743c3a347c7c0d63",
+      "output_sha256": "67e2cd2bd54c2899ed81e8a3e6e2a9680b3a64c6e725b46a49434deb2a916ea6",
+      "dimensions_px": [
+        182,
+        125
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        2,
+        150,
+        124
+      ],
+      "transparent_pixel_fraction": 0.399,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_terracotta_large.png",
+      "category": "planter",
+      "description": "Large Terracotta Pot",
+      "source_filename": "planter_terracotta_large.png.png",
+      "source_sha256": "f9ea313e93afb784c0658a83a1a4f4cf6a5079035dc52399898d5b06ff987410",
+      "output_sha256": "9ddb5ef48c3badcfdacaeecfa7a544eadba73d0384a0b3fdf6cdb19b330bf39d",
+      "dimensions_px": [
+        175,
+        143
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        3,
+        150,
+        142
+      ],
+      "transparent_pixel_fraction": 0.3457,
+      "no_resize": true
+    },
+    {
+      "filename": "planter_terracotta_small.png",
+      "category": "planter",
+      "description": "Small Terracotta Pot",
+      "source_filename": "planter_terracotta_small.png.png",
+      "source_sha256": "dbd72cb008ea8f98d8af4bfbe9715a68cc299f6ea4aaac2e61626607832de1db",
+      "output_sha256": "e1cadeb12be85e1be6f1535fed1d2598c9d831b2a744f7c8f97a37e0390424f9",
+      "dimensions_px": [
+        147,
+        116
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        9,
+        123,
+        115
+      ],
+      "transparent_pixel_fraction": 0.4491,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_botanical_garland.png",
+      "category": "greenery",
+      "description": "Botanical Garland",
+      "source_filename": "plant_botanical_garland.png.png",
+      "source_sha256": "0eed04ad74c6052296a8b7d01f5798eb0e6f12e4158da378c9723edddfe0fa78",
+      "output_sha256": "ff42411b0a71bd5dc9d27e8245041c640badf6a746f845f3bd8dd3d91813ff49",
+      "dimensions_px": [
+        157,
+        272
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        10,
+        155,
+        271
+      ],
+      "transparent_pixel_fraction": 0.5807,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_climbing_vine.png",
+      "category": "greenery",
+      "description": "Climbing Vine Section",
+      "source_filename": "plant_climbing_vine.png.png",
+      "source_sha256": "65b30f00c1d61043d8627f93823f17a7956e14586f5f1b3ac872316ef403e0fb",
+      "output_sha256": "14d854fc7035939c4e2d03bcc01149c0122f32e73fe5d759dd0bf55acebe4152",
+      "dimensions_px": [
+        125,
+        273
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        9,
+        122,
+        272
+      ],
+      "transparent_pixel_fraction": 0.3581,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_wall_planter.png",
+      "category": "greenery",
+      "description": "Wall-Mounted Planter",
+      "source_filename": "plant_wall_planter.png.png",
+      "source_sha256": "0d716a0bcdd7e1163d7dc4139d1d3dd214d19d9fd056c84eb6020824051ddc73",
+      "output_sha256": "68a5598ad60916856a76ebb9887aae342c0678ad7598fa41081442e6f086ca6a",
+      "dimensions_px": [
+        146,
+        259
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        25,
+        145,
+        254
+      ],
+      "transparent_pixel_fraction": 0.4733,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_trailing_ivy.png",
+      "category": "greenery",
+      "description": "Trailing Ivy",
+      "source_filename": "plant_trailing_ivy.png.png",
+      "source_sha256": "73a51570a2cb789bccb0ca087ca6234ead31f6661294bcad96324fe1f5fe32a5",
+      "output_sha256": "1addc3b2e367e99db33ef455861f1b69bbc9dfc1bcc622f98f810cdc8124cfb0",
+      "dimensions_px": [
+        127,
+        280
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        12,
+        9,
+        126,
+        278
+      ],
+      "transparent_pixel_fraction": 0.4854,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_hanging_fern.png",
+      "category": "greenery",
+      "description": "Hanging Fern Basket",
+      "source_filename": "plant_hanging_fern.png.png",
+      "source_sha256": "df593ac551316fa692fa017206b81cf52e86830394e462457ac96cf36e42b063",
+      "output_sha256": "21554a396d8d6f75e447471ca1f7d7267f3ff2adf27eca1c46cac3cc69aacf56",
+      "dimensions_px": [
+        176,
+        260
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        1,
+        170,
+        257
+      ],
+      "transparent_pixel_fraction": 0.5423,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_hanging_pothos.png",
+      "category": "greenery",
+      "description": "Hanging Pothos Basket",
+      "source_filename": "plant_hanging_pothos.png.png",
+      "source_sha256": "6803a704312c1f55d1fd21f54924ce2eb3c343a53cda9d2a4d8b89db472242f9",
+      "output_sha256": "56977d8d8d6884fc0a3ad5ce68b580c855927c43e2ebe70408d7679de97b8242",
+      "dimensions_px": [
+        139,
+        283
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        4,
+        132,
+        282
+      ],
+      "transparent_pixel_fraction": 0.5372,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_succulent.png",
+      "category": "plant",
+      "description": "Small Succulent",
+      "source_filename": "plant_succulent.png.png",
+      "source_sha256": "f6fa7de1215b30399ec2219860a607022020689cf9771e0ce5d6c3704c873cd3",
+      "output_sha256": "53820b26bdee1a82b60d37a79171496106ad1ccedcc2084b8a9447b47d5b51d3",
+      "dimensions_px": [
+        140,
+        155
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        12,
+        118,
+        154
+      ],
+      "transparent_pixel_fraction": 0.4919,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_fern.png",
+      "category": "plant",
+      "description": "Fern",
+      "source_filename": "plant_fern.png.png",
+      "source_sha256": "6d2641dc4d481ca278b8bac75f6bdd7d43567560e815010e536145b96873f2a4",
+      "output_sha256": "64a03b0975ac525a675a153776044ef8e6c8212cbf54472ff14d7c9c88c5d085",
+      "dimensions_px": [
+        202,
+        192
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        5,
+        201,
+        191
+      ],
+      "transparent_pixel_fraction": 0.3547,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_peace_lily.png",
+      "category": "plant",
+      "description": "Peace Lily",
+      "source_filename": "plant_peace_lily.png.png",
+      "source_sha256": "401097c2a0e1e44f8a6992cf4553e89bfb29291bc9f4b1650766f546f62fdd16",
+      "output_sha256": "5a167485313f5158e124bc25d619a8b12f038d2dabf64b878cbb0e48aadb49af",
+      "dimensions_px": [
+        184,
+        213
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        4,
+        181,
+        212
+      ],
+      "transparent_pixel_fraction": 0.4879,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_zz.png",
+      "category": "plant",
+      "description": "ZZ Plant",
+      "source_filename": "plant_zz.png.png",
+      "source_sha256": "539759319a3963cf2bfb30899ac8ccb01b847c580ca28ec4242535b0e04b487e",
+      "output_sha256": "24dcc4d3a827b7bd4943a0a8d54e97ffcb375d57ea122e67f4592773a3591eb9",
+      "dimensions_px": [
+        153,
+        199
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        6,
+        144,
+        196
+      ],
+      "transparent_pixel_fraction": 0.5323,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_fiddle_leaf_fig.png",
+      "category": "plant",
+      "description": "Fiddle-Leaf Fig",
+      "source_filename": "plant_fiddle_leaf_fig.png.png",
+      "source_sha256": "1e7ed1d8d3b3ec5f0658c5dcb134d3f6a397a81f9cd6aa3b7e5410ef79430d59",
+      "output_sha256": "9d37e9759f097a11c086f121eea5986b93a53dd18a9ef9b80470c1ec7828cc46",
+      "dimensions_px": [
+        163,
+        221
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        4,
+        152,
+        218
+      ],
+      "transparent_pixel_fraction": 0.4556,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_rubber.png",
+      "category": "plant",
+      "description": "Rubber Plant",
+      "source_filename": "plant_rubber.png.png",
+      "source_sha256": "8692b8a49ed1169be49738d36f0932f994e38f1177b845db41f9eb2f1ff93e6e",
+      "output_sha256": "08f13450bd778e3e4728e6b5eafcb4fcc8aa595713f9a102a755deedc9a60f9e",
+      "dimensions_px": [
+        170,
+        219
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        5,
+        161,
+        218
+      ],
+      "transparent_pixel_fraction": 0.4545,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_snake.png",
+      "category": "plant",
+      "description": "Snake Plant",
+      "source_filename": "plant_snake.png.png",
+      "source_sha256": "77f366b91ac5687ff786d992d870ca8ad15f2411c4b49e4ba87c4f88d898926d",
+      "output_sha256": "da7b38cc99141e3f92d6ff5c42b8d36ad7f705daf203e03affc954c4c16ae015",
+      "dimensions_px": [
+        142,
+        206
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        5,
+        119,
+        205
+      ],
+      "transparent_pixel_fraction": 0.5522,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_monstera.png",
+      "category": "plant",
+      "description": "Monstera",
+      "source_filename": "plant_monstera.png.png",
+      "source_sha256": "2758db50dbea53e8ea484e0995290e6697ac80786a19a9595706a557dc790050",
+      "output_sha256": "802e5d93c3cd589abdafa31e08bb114800a49cfca849e88548b95f44dc90e011",
+      "dimensions_px": [
+        220,
+        219
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        1,
+        216,
+        218
+      ],
+      "transparent_pixel_fraction": 0.3491,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_pothos_large.png",
+      "category": "plant",
+      "description": "Large Pothos",
+      "source_filename": "plant_pothos_large.png.png",
+      "source_sha256": "c332d484e7cc83732dfd08129b8a7daa3e2e100525348be3727f13c8dcedc748",
+      "output_sha256": "356412a1f333e36baac76b186f71e10662ee6e71f6095067cd8a3b5727987b1d",
+      "dimensions_px": [
+        169,
+        217
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        1,
+        166,
+        216
+      ],
+      "transparent_pixel_fraction": 0.3761,
+      "no_resize": true
+    },
+    {
+      "filename": "plant_pothos_small.png",
+      "category": "plant",
+      "description": "Small Pothos",
+      "source_filename": "plant_pothos_small.png.png",
+      "source_sha256": "fdf6dce33783b64f677714c80e1c26c2ff9c5b366a405c6e88a81f3b3e3ca8d2",
+      "output_sha256": "3de56cbfe76e46eb60618941211f350d0c420a064e42c44aaa8a282fa8e163f4",
+      "dimensions_px": [
+        167,
+        183
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        11,
+        154,
+        182
+      ],
+      "transparent_pixel_fraction": 0.436,
+      "no_resize": true
+    }
+  ],
+  "processing_method": "Source-based foreground mask (GrabCut with pale cream background constraints), subpixel feathering, no resizing or generative editing."
+}

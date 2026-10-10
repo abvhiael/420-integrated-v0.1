@@ -1,0 +1,714 @@
+{
+  "project": "Budtender",
+  "phase": "3.11",
+  "title": "Side Merchandise / Upgrade-Display Kit",
+  "status": "PROCESSED_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "User-supplied crops derived from approved Phase 3.11 artwork sheets; no generative alteration during asset processing",
+  "asset_count": 32,
+  "assets": [
+    {
+      "filename": "merch_gift_wrap_station.png",
+      "category": "retail_operations",
+      "description": "Gift Wrapping Station",
+      "source_filename": "95626f8f-7bbf-54c5-bf44-63357da6bfb4.png",
+      "source_sha256": "25c692b04c6edd19bb19d255072d2ed4c8fb9be9873e886b099db7a58754a0ee",
+      "output_sha256": "93afcb49f889ba5baa2c66d716baaf304734b2ca2060f8b22d11a37b092cbc6f",
+      "dimensions_px": [
+        384,
+        232
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        8,
+        366,
+        225
+      ],
+      "transparent_pixel_fraction": 0.4172,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_restock_cart.png",
+      "category": "retail_operations",
+      "description": "Merchandise Restocking Cart",
+      "source_filename": "8ad82cc2-3b4f-5a56-bbac-cd179d566f9d.png",
+      "source_sha256": "0e134b5ecaf9c2ab11cadae5ba7e7c7df92e8f71ee3aaf718d41c890cc8e2f11",
+      "output_sha256": "449151ce96f1f8312647b6dd3aaab818726dd7215e92fe8612ac1fa81e1ce735",
+      "dimensions_px": [
+        309,
+        239
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        16,
+        7,
+        285,
+        236
+      ],
+      "transparent_pixel_fraction": 0.3036,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_apparel_stack.png",
+      "category": "retail_operations",
+      "description": "Folded Apparel Stack",
+      "source_filename": "a597c79b-919e-521e-ae3a-4565cbc27f08.png",
+      "source_sha256": "30ebe23aaf27855c4db0bde53e083b1588e65d0d2672cff6b62d93e19c2ab215",
+      "output_sha256": "1a104a719b775007e8d10c58b3246d00bbf23a36297baca6df7fe54ae03e78d5",
+      "dimensions_px": [
+        328,
+        219
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        12,
+        307,
+        212
+      ],
+      "transparent_pixel_fraction": 0.3552,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_inventory_basket.png",
+      "category": "retail_operations",
+      "description": "Merchandise Inventory Basket",
+      "source_filename": "a77129dd-aeb9-58c6-87a1-7a279727ace3.png",
+      "source_sha256": "74f4d9f31d46017e2966a978e85de260e15f0d26a88fd60db0e955e33b4049a1",
+      "output_sha256": "32f0ecf8909a606c01c0a876e3502ddec85ccae2f6265fd29fdb0894fa002a35",
+      "dimensions_px": [
+        365,
+        235
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        16,
+        355,
+        229
+      ],
+      "transparent_pixel_fraction": 0.3557,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_sign_limited.png",
+      "category": "retail_operations",
+      "description": "Limited Edition Display Plaque",
+      "source_filename": "ee5ac0af-d1ef-51cb-8a59-669040fe2692.png",
+      "source_sha256": "a7e40d49cbe9ad8c6cbf6f0c4fa53327e4fde4568dcb223bcb58969cfd330ee9",
+      "output_sha256": "b9ae0e0c8bde01ace35edac773847f88f52b9746c280f57a24adb19de861e049",
+      "dimensions_px": [
+        299,
+        210
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        11,
+        269,
+        204
+      ],
+      "transparent_pixel_fraction": 0.4405,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_sign_new.png",
+      "category": "retail_operations",
+      "description": "New Merchandise Display Sign",
+      "source_filename": "44579f79-ca28-53bc-afa8-90da7d3f4487.png",
+      "source_sha256": "aab6f8328031f5dbb577a1c0dd79c96d2000754b9ebff05a7370aa296e308300",
+      "output_sha256": "0b269752e09e46da06025b52946f209206848ef334cef3a412279c9753f3fbee",
+      "dimensions_px": [
+        289,
+        208
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        17,
+        2,
+        272,
+        206
+      ],
+      "transparent_pixel_fraction": 0.4057,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_shelf_talker.png",
+      "category": "retail_operations",
+      "description": "Promotional Shelf Talker",
+      "source_filename": "b1058c97-0310-5817-abfd-d7588d96e1fa.png",
+      "source_sha256": "203db07c7e6ef8913e4d30b7221627a5ca4913ca49372d3d32e67c1da2b6e43b",
+      "output_sha256": "7772aba5caa2a89abe464dc25bf82813b9a1f83e309134913e37a4dcc86f4afb",
+      "dimensions_px": [
+        316,
+        208
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        22,
+        7,
+        303,
+        196
+      ],
+      "transparent_pixel_fraction": 0.3949,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_price_holder.png",
+      "category": "retail_operations",
+      "description": "Merchandise Price Tag Holder",
+      "source_filename": "150660ab-5690-5940-95c9-14fcb6d63b6d.png",
+      "source_sha256": "b81050abd4639c30144cc5635e0a7c6e01daeaa6ae6621114326e79b379e1e71",
+      "output_sha256": "0fa2f2125afa4051c7a6152b803ac5bb78d8d88b7def72d1b3e34d70e04c464e",
+      "dimensions_px": [
+        338,
+        189
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        24,
+        8,
+        306,
+        179
+      ],
+      "transparent_pixel_fraction": 0.4633,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_presentation_stand.png",
+      "category": "display_upgrade",
+      "description": "Deluxe Merchandise Presentation Stand",
+      "source_filename": "bf9ccc42-cc20-5f07-905c-b69c250f6df4.png",
+      "source_sha256": "4d6b455364937008a131943baa68b5f57d0e0fd74d90c1076bd781c1796f5a09",
+      "output_sha256": "3a06745a85d18fc06f5dd3841bd36eeb6cdb41d2698391b15e1f5aa7f48b098e",
+      "dimensions_px": [
+        318,
+        206
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        21,
+        10,
+        306,
+        199
+      ],
+      "transparent_pixel_fraction": 0.4798,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_botanical_accent.png",
+      "category": "display_upgrade",
+      "description": "Botanical Display Accent",
+      "source_filename": "51b25e4a-6a29-5701-9498-e74498e9675b.png",
+      "source_sha256": "e6b2ecbf5bb80ba35dbf27689dee44451d86177921fc9bb1a093f3eb47d1d6b2",
+      "output_sha256": "e4695a5d0cfefa2db4c66704644a6b15fe3b12c08fc08708321ade2b52343ea4",
+      "dimensions_px": [
+        260,
+        216
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        5,
+        237,
+        212
+      ],
+      "transparent_pixel_fraction": 0.4667,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_glass_dome.png",
+      "category": "display_upgrade",
+      "description": "Glass Display Dome",
+      "source_filename": "ffb06717-8b07-549b-b27c-af89130969c5.png",
+      "source_sha256": "d5b08311c142723fab9e0b52ee7993178d2ae805594aeb2d81b71ac26dc01438",
+      "output_sha256": "16a9416afad1a8e28e539cad8eef38d9ababcd0acd4fa790dd11f51f2922043d",
+      "dimensions_px": [
+        224,
+        210
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        12,
+        4,
+        213,
+        209
+      ],
+      "transparent_pixel_fraction": 0.4088,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_riser.png",
+      "category": "display_upgrade",
+      "description": "Premium Display Riser",
+      "source_filename": "993702ec-fe3f-5e2b-9719-35cea4931d97.png",
+      "source_sha256": "1de62693a42fa584570b2896e74883761658b6fed42b5e593b5ac1b814c1a659",
+      "output_sha256": "6e1749e5d4da2d0fc0153df8716e0543c3f8a4ecab87c8a895b1f725da1973de",
+      "dimensions_px": [
+        354,
+        169
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        23,
+        6,
+        329,
+        165
+      ],
+      "transparent_pixel_fraction": 0.4192,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_pedestal.png",
+      "category": "display_upgrade",
+      "description": "Decorative Display Pedestal",
+      "source_filename": "3e010cde-f90a-53a0-9f28-1869b86e67d5.png",
+      "source_sha256": "7c877a063dd9b653df38bf7a2064d919acf85fd684574154c2b97a7ca7b34e0b",
+      "output_sha256": "ceb656166db35b483ff77d63928e68da52064cfb28a39c7285679cd6023cd759",
+      "dimensions_px": [
+        267,
+        220
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        5,
+        244,
+        219
+      ],
+      "transparent_pixel_fraction": 0.355,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_shelf_header.png",
+      "category": "display_upgrade",
+      "description": "Illuminated Shelf Header",
+      "source_filename": "728f6848-d93e-53e0-9b2e-2d2fc90c3621.png",
+      "source_sha256": "74146adef6e6d5b3ba0cd962253cd7c54b637a1062d070c4d520b9840655f3d1",
+      "output_sha256": "30484417d0f6f0a091fa4c3374ad625f087ab76cc61e8ad386195a763e2a1281",
+      "dimensions_px": [
+        340,
+        194
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        8,
+        336,
+        188
+      ],
+      "transparent_pixel_fraction": 0.5173,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_backboard.png",
+      "category": "display_upgrade",
+      "description": "Premium Display Backboard",
+      "source_filename": "949411a0-6a9e-52c0-b140-2cacb589e2be.png",
+      "source_sha256": "588a32c0bf6e6e593f79a8d23fb7f017b426395bf0d1cc67f9e7ea480aac7c4b",
+      "output_sha256": "b4b909d1a24082d55979d68e7dba45807065ad2665c6680d03e07db4323c4a65",
+      "dimensions_px": [
+        310,
+        227
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        4,
+        301,
+        227
+      ],
+      "transparent_pixel_fraction": 0.2565,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_upgrade_brass_trim.png",
+      "category": "display_upgrade",
+      "description": "Brass Shelf-Edge Trim",
+      "source_filename": "397df0b9-67fb-5b0a-8a92-08700dd47a03.png",
+      "source_sha256": "97f95f943bb19376c837e34bca9f1caea577a0278e053b04b57c29a0734c2ac8",
+      "output_sha256": "ba7a86906f5fdce9a3ab24393f1bc3bfcbd38f6350334afcd96251236aafeb74",
+      "dimensions_px": [
+        363,
+        143
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        5,
+        357,
+        137
+      ],
+      "transparent_pixel_fraction": 0.6439,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_accessory_bundle.png",
+      "category": "merch_product",
+      "description": "Premium Rolling Accessories Set",
+      "source_filename": "b8702453-d91e-5a1b-92e7-fb58611d249e.png",
+      "source_sha256": "51e784bf8e5a6fd43a6aa8196d480d42af9d61a6953783ada06be51737f10b2c",
+      "output_sha256": "7237d2a7e3fd44019393cf191bc2666e6d931283557952cfe127138f6d3348b3",
+      "dimensions_px": [
+        321,
+        198
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        6,
+        317,
+        193
+      ],
+      "transparent_pixel_fraction": 0.3394,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_keychain_display.png",
+      "category": "merch_product",
+      "description": "Branded Keychain Display",
+      "source_filename": "ec0196d4-d638-5cbc-9b17-70636edb4fc1.png",
+      "source_sha256": "b9eb5985bef3c6f7b0d263a78174a19ccf1f5447d5e61843de716d1cd7e3b647",
+      "output_sha256": "2d73311fa12653496597be1dd1c6285f5182078739bc11fc2dd875edb43b4c4f",
+      "dimensions_px": [
+        247,
+        212
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        5,
+        239,
+        206
+      ],
+      "transparent_pixel_fraction": 0.3963,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_glassware_set.png",
+      "category": "merch_product",
+      "description": "Glassware Display Set",
+      "source_filename": "86817315-b70d-55db-b21f-92c788a6e191.png",
+      "source_sha256": "585e118e4fc721f87238afea97bb3db4978b5da440370494f292a4b6fc3c5f1b",
+      "output_sha256": "9823bca7a667335ff287d583a1bbc9ddc649bfcf490a11dbb08a325304bec690",
+      "dimensions_px": [
+        281,
+        214
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        4,
+        272,
+        204
+      ],
+      "transparent_pixel_fraction": 0.5449,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_gift_box.png",
+      "category": "merch_product",
+      "description": "Premium Accessories Gift Box",
+      "source_filename": "6edeab45-9fdb-5c8b-8926-9449dc1d245a.png",
+      "source_sha256": "ea3de9bc69ebe253419ba6f4e189814a9ab7e7f115e6fcba58b8acd5d800add8",
+      "output_sha256": "16bda5de7edf037fb7963890469d61cc823954badd828c45028fa37ef46ed9e5",
+      "dimensions_px": [
+        308,
+        223
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        16,
+        2,
+        304,
+        222
+      ],
+      "transparent_pixel_fraction": 0.3464,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_mug_ceramic.png",
+      "category": "merch_product",
+      "description": "Branded Ceramic Mug",
+      "source_filename": "6acc3ba7-496c-5ade-ac96-db0bac3bbc01.png",
+      "source_sha256": "739b6a36124cd95a53e6255bc308dac1da2d900fb1ca17c5d3ba71b7b379168c",
+      "output_sha256": "047df2a8a6a71b38733ff0be8a8006d4ef04867768a8f72d7393a5a394eafab3",
+      "dimensions_px": [
+        187,
+        164
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        7,
+        185,
+        156
+      ],
+      "transparent_pixel_fraction": 0.2887,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_bag_canvas.png",
+      "category": "merch_product",
+      "description": "Branded Canvas Tote",
+      "source_filename": "7013cec2-8080-5dc3-ac5d-d166a72a9515.png",
+      "source_sha256": "1913aaebcd12450bf17cf96294ad95cf14bc535e4a4eb0f6d915163ebc555fd4",
+      "output_sha256": "b2aae091edfebe38ef9445f006b32315978c06ad1a4e1ec2d326fc67cab2d55a",
+      "dimensions_px": [
+        194,
+        220
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        18,
+        3,
+        190,
+        217
+      ],
+      "transparent_pixel_fraction": 0.3678,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_apparel_hoodie.png",
+      "category": "merch_product",
+      "description": "Branded Hoodie Display",
+      "source_filename": "0e374700-ddbf-5c0b-bb97-b63ddc052fc3.png",
+      "source_sha256": "82dc9befdbe1ce3634d75b83fb122331446c4ba5b9cd924307573494c374937d",
+      "output_sha256": "1d299df4ab38539f59ea4b77ddebaeafd1abf538c75b7135a24afeb6c597ad20",
+      "dimensions_px": [
+        258,
+        224
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        4,
+        254,
+        222
+      ],
+      "transparent_pixel_fraction": 0.299,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_apparel_tshirt.png",
+      "category": "merch_product",
+      "description": "Branded T-Shirt Display",
+      "source_filename": "5961ca5e-194a-518e-8568-6c0c9f4d5689.png",
+      "source_sha256": "5889fafeb437930d7f52820fe1fa99d5cad027076a74c50b1a73e137435c251c",
+      "output_sha256": "64202037be71a24bfeb932cafbeb6e912f6da0dd22fb83ebcd844bd123bd33b7",
+      "dimensions_px": [
+        273,
+        208
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        3,
+        268,
+        206
+      ],
+      "transparent_pixel_fraction": 0.3235,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_tower_premium.png",
+      "category": "display_furniture",
+      "description": "Premium Illuminated Display Tower",
+      "source_filename": "b7aaa341-307b-5506-85c8-9f761fc131e8.png",
+      "source_sha256": "f11806dd2c3531930ff2a72320d60cfdc5383095896ac21b547bcce1fc1d2c70",
+      "output_sha256": "5e69ed4bfcb023dd91c6cb1ecb6d2c88307a88f583b7d65f90f74427827da091",
+      "dimensions_px": [
+        135,
+        242
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        2,
+        128,
+        239
+      ],
+      "transparent_pixel_fraction": 0.2787,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_display_tiered.png",
+      "category": "display_furniture",
+      "description": "Tiered Merchandise Display",
+      "source_filename": "82dfcea3-62bb-5f84-944e-15f3619c810b.png",
+      "source_sha256": "aff23ca48796cd2461f148446d9c7b3fe306eb1bf090cef7dfa9c499ac11eb18",
+      "output_sha256": "70abf99fc58a96e8e7f18ff81733b943688e6bd1af8119a88e4f222160502f8f",
+      "dimensions_px": [
+        201,
+        235
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        3,
+        195,
+        231
+      ],
+      "transparent_pixel_fraction": 0.468,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_stand_countertop.png",
+      "category": "display_furniture",
+      "description": "Countertop Merchandise Stand",
+      "source_filename": "8c2f36ee-7f8a-5d70-b0da-975d5f383ea6.png",
+      "source_sha256": "c65f5e55f2ada6efa78453c7dbee9f6cbba8cfed5f365552af85df0c3aff1654",
+      "output_sha256": "a6e97def19555ff0a7475658f6975b6d8241f674f377c612654f763c45be91d1",
+      "dimensions_px": [
+        237,
+        208
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        3,
+        234,
+        203
+      ],
+      "transparent_pixel_fraction": 0.3628,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_pegboard_walnut.png",
+      "category": "display_furniture",
+      "description": "Walnut Pegboard Display",
+      "source_filename": "6661f49f-4145-5ecb-8b99-fde8e25bf82c.png",
+      "source_sha256": "ee7f460829388ac1f7c55d19b68693cce708d9aec3c99b058ee2fcef12281122",
+      "output_sha256": "b51699134f44a6b97d533ad37cec37533fa06c7a07de5576022c66ecf5308a3d",
+      "dimensions_px": [
+        272,
+        240
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        3,
+        270,
+        236
+      ],
+      "transparent_pixel_fraction": 0.1929,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_display_case_glass.png",
+      "category": "display_furniture",
+      "description": "Glass Premium Display Case",
+      "source_filename": "02b0c935-f22d-5836-9812-a2650acb9b15.png",
+      "source_sha256": "784cd518576aa5e2fd11c27d23f25a35ad79105e287568de4cb1455aa1722233",
+      "output_sha256": "5df0ceab9203b4c21b7ec009c3a2f917cc196ac203bab5d0c3a5cd54981ce262",
+      "dimensions_px": [
+        333,
+        206
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        16,
+        4,
+        330,
+        205
+      ],
+      "transparent_pixel_fraction": 0.2477,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_gondola_freestanding.png",
+      "category": "display_furniture",
+      "description": "Freestanding Merchandise Gondola",
+      "source_filename": "4e7d8167-3807-5a26-bda9-b12f7fa828d2.png",
+      "source_sha256": "48e34bd3970ba1f8aa02312e3eec799333b3609b718e7895f5e98fc099d75614",
+      "output_sha256": "00125094c9e016274f2af88c996ffcff35d4b53534ce1da4afe31514bab0b067",
+      "dimensions_px": [
+        323,
+        258
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        4,
+        314,
+        254
+      ],
+      "transparent_pixel_fraction": 0.2961,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_cabinet_green.png",
+      "category": "display_furniture",
+      "description": "Forest-Green Display Cabinet",
+      "source_filename": "c22e3897-f9f3-500a-83e5-b938845f716f.png",
+      "source_sha256": "2cfae8053960b92f5d1567b2609cd9bf8222c1ba5d50c3985c5697ef0f251884",
+      "output_sha256": "43064da7921b3b0c4f19da3798ddcddaef112a1f9cee0b074afb41ff373f084e",
+      "dimensions_px": [
+        181,
+        257
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        3,
+        178,
+        254
+      ],
+      "transparent_pixel_fraction": 0.1779,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "merch_shelf_walnut_narrow.png",
+      "category": "display_furniture",
+      "description": "Narrow Walnut Display Shelf",
+      "source_filename": "63d0bd69-9b3f-508b-9480-10397bb8c766.png",
+      "source_sha256": "506a7a5057275836e45290e89b1c5ef2e52c7b70f130676f03945c335d4dbc4d",
+      "output_sha256": "8d2e325bfd7fa1cdf014f36e1d3184d1df7a1dd23166a2e3109fea1ddf9c7a5f",
+      "dimensions_px": [
+        137,
+        251
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        18,
+        1,
+        134,
+        249
+      ],
+      "transparent_pixel_fraction": 0.3097,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    }
+  ]
+}

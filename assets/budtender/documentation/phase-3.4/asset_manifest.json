@@ -1,0 +1,758 @@
+{
+  "project": "Budtender",
+  "phase": "3.4",
+  "title": "Product Prop Kit",
+  "status": "CORRECTED_TRANSPARENCY_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "Existing approved Phase asset images, rebuilt for true transparent-background output without redesign or stylistic change",
+  "asset_count": 34,
+  "assets": [
+    {
+      "filename": "product_accessory_grinder.png",
+      "category": "accessories_merch",
+      "description": "Grinder",
+      "source_filename": "product_accessory_grinder.png",
+      "source_sha256": "67585d311b85e9fecbbe35ce398cefb08eb6da1536c11dcce73696ec60afa6ad",
+      "output_sha256": "67585d311b85e9fecbbe35ce398cefb08eb6da1536c11dcce73696ec60afa6ad",
+      "dimensions_px": [
+        206,
+        141
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        11,
+        194,
+        126
+      ],
+      "transparent_pixel_fraction": 0.3633,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_accessory_lighter.png",
+      "category": "accessories_merch",
+      "description": "Lighter",
+      "source_filename": "product_accessory_lighter.png",
+      "source_sha256": "fd84d27b820d56f6ebab46c5c56115503a8e10a3ab95e0c3b46b0e2f9ab99a11",
+      "output_sha256": "fd84d27b820d56f6ebab46c5c56115503a8e10a3ab95e0c3b46b0e2f9ab99a11",
+      "dimensions_px": [
+        80,
+        169
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        9,
+        80,
+        159
+      ],
+      "transparent_pixel_fraction": 0.3961,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_accessory_merch.png",
+      "category": "accessories_merch",
+      "description": "Branded merchandise item / baseball cap",
+      "source_filename": "product_accessory_merch.png",
+      "source_sha256": "23e5d44b8fe7cadba3a6e4ae5aab69a1a8fb146011d4fcc900aa779f4a4be74d",
+      "output_sha256": "23e5d44b8fe7cadba3a6e4ae5aab69a1a8fb146011d4fcc900aa779f4a4be74d",
+      "dimensions_px": [
+        230,
+        147
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        6,
+        226,
+        147
+      ],
+      "transparent_pixel_fraction": 0.4036,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_accessory_papers.png",
+      "category": "accessories_merch",
+      "description": "Rolling papers",
+      "source_filename": "product_accessory_papers.png",
+      "source_sha256": "9c40772fe073eed83aab9710f5d6b2889b712506b8086dda21a94ce45892a739",
+      "output_sha256": "9c40772fe073eed83aab9710f5d6b2889b712506b8086dda21a94ce45892a739",
+      "dimensions_px": [
+        202,
+        137
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        13,
+        202,
+        129
+      ],
+      "transparent_pixel_fraction": 0.4504,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_accessory_rolling_tray.png",
+      "category": "accessories_merch",
+      "description": "Rolling tray",
+      "source_filename": "product_accessory_rolling_tray.png",
+      "source_sha256": "cc1b19a75402a2ce00a8df06156bf48b51141c8a2c98deee7a428fc3dee75c17",
+      "output_sha256": "cc1b19a75402a2ce00a8df06156bf48b51141c8a2c98deee7a428fc3dee75c17",
+      "dimensions_px": [
+        352,
+        146
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        0,
+        340,
+        140
+      ],
+      "transparent_pixel_fraction": 0.2082,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_accessory_storage_jar.png",
+      "category": "accessories_merch",
+      "description": "Storage container / jar",
+      "source_filename": "product_accessory_storage_jar.png",
+      "source_sha256": "562e2923f3ca38e1e6f011712591fc7e7fd4bb3e46bff734fe3532c797ce8e85",
+      "output_sha256": "562e2923f3ca38e1e6f011712591fc7e7fd4bb3e46bff734fe3532c797ce8e85",
+      "dimensions_px": [
+        157,
+        150
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        15,
+        10,
+        157,
+        147
+      ],
+      "transparent_pixel_fraction": 0.3125,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_concentrate_box.png",
+      "category": "concentrates_tinctures",
+      "description": "Concentrate box",
+      "source_filename": "product_concentrate_box.png",
+      "source_sha256": "b97efa257039ca888460c3e322ac5a40f2b61702ca4e09317af4673bebec2957",
+      "output_sha256": "b97efa257039ca888460c3e322ac5a40f2b61702ca4e09317af4673bebec2957",
+      "dimensions_px": [
+        249,
+        147
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        5,
+        237,
+        142
+      ],
+      "transparent_pixel_fraction": 0.3588,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_concentrate_jar.png",
+      "category": "concentrates_tinctures",
+      "description": "Concentrate jar",
+      "source_filename": "product_concentrate_jar.png",
+      "source_sha256": "c9aab37da157aadebbc1da067be5643b8367de3b58fddeb1eb28286b5da536de",
+      "output_sha256": "c9aab37da157aadebbc1da067be5643b8367de3b58fddeb1eb28286b5da536de",
+      "dimensions_px": [
+        171,
+        119
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        15,
+        6,
+        152,
+        115
+      ],
+      "transparent_pixel_fraction": 0.4199,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_concentrate_premium.png",
+      "category": "concentrates_tinctures",
+      "description": "Premium concentrate container",
+      "source_filename": "product_concentrate_premium.png",
+      "source_sha256": "fd849280f4894e37fadb4f7d0970902b5b2b686309ed97b6df6f69b8a42ecda9",
+      "output_sha256": "fd849280f4894e37fadb4f7d0970902b5b2b686309ed97b6df6f69b8a42ecda9",
+      "dimensions_px": [
+        214,
+        120
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        15,
+        5,
+        206,
+        116
+      ],
+      "transparent_pixel_fraction": 0.3853,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_edible_baked_goods.png",
+      "category": "edibles",
+      "description": "Baked goods package",
+      "source_filename": "product_edible_baked_goods.png",
+      "source_sha256": "43fcebd7cba9247256e3d19879d5423fb19b95c1d723fea773a3e40932cffa2f",
+      "output_sha256": "43fcebd7cba9247256e3d19879d5423fb19b95c1d723fea773a3e40932cffa2f",
+      "dimensions_px": [
+        269,
+        165
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        12,
+        262,
+        158
+      ],
+      "transparent_pixel_fraction": 0.2944,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_edible_beverage_bottle.png",
+      "category": "edibles",
+      "description": "Beverage bottle",
+      "source_filename": "product_edible_beverage_bottle.png",
+      "source_sha256": "7c83d6960efd8b679709977ab3fb235a54b942c942b2e9ed937b0a13f1cbb35f",
+      "output_sha256": "7c83d6960efd8b679709977ab3fb235a54b942c942b2e9ed937b0a13f1cbb35f",
+      "dimensions_px": [
+        115,
+        185
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        0,
+        115,
+        184
+      ],
+      "transparent_pixel_fraction": 0.3637,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_edible_beverage_can.png",
+      "category": "edibles",
+      "description": "Beverage can",
+      "source_filename": "product_edible_beverage_can.png",
+      "source_sha256": "67f07987b2ed1c6790616a112b75ef5d663f5cd66d281d334a11376b38cadc1c",
+      "output_sha256": "67f07987b2ed1c6790616a112b75ef5d663f5cd66d281d334a11376b38cadc1c",
+      "dimensions_px": [
+        124,
+        179
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        9,
+        121,
+        177
+      ],
+      "transparent_pixel_fraction": 0.3023,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_edible_chocolate_bar.png",
+      "category": "edibles",
+      "description": "Chocolate bar package",
+      "source_filename": "product_edible_chocolate_bar.png",
+      "source_sha256": "d79e814aa44cacb42da3fa0b28fe9578cb611a3cf4f7f57565ecaabfaf906c6d",
+      "output_sha256": "d79e814aa44cacb42da3fa0b28fe9578cb611a3cf4f7f57565ecaabfaf906c6d",
+      "dimensions_px": [
+        166,
+        184
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        8,
+        158,
+        176
+      ],
+      "transparent_pixel_fraction": 0.4166,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_edible_gummies_jar.png",
+      "category": "edibles",
+      "description": "Gummies jar",
+      "source_filename": "product_edible_gummies_jar.png",
+      "source_sha256": "062b5a4d54ceabdd9df5f5a86eaac926daaa986c3bf4f2827d0e390ff018f65a",
+      "output_sha256": "062b5a4d54ceabdd9df5f5a86eaac926daaa986c3bf4f2827d0e390ff018f65a",
+      "dimensions_px": [
+        195,
+        178
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        19,
+        14,
+        176,
+        172
+      ],
+      "transparent_pixel_fraction": 0.4144,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_edible_gummies_pouch.png",
+      "category": "edibles",
+      "description": "Gummies pouch",
+      "source_filename": "product_edible_gummies_pouch.png",
+      "source_sha256": "cd9b31096ef2eca5fedd7b7e461c877eb7c17f69dea16ed7c19ce0d1d2d4d67b",
+      "output_sha256": "cd9b31096ef2eca5fedd7b7e461c877eb7c17f69dea16ed7c19ce0d1d2d4d67b",
+      "dimensions_px": [
+        195,
+        189
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        11,
+        188,
+        182
+      ],
+      "transparent_pixel_fraction": 0.2693,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_flower_jar_large.png",
+      "category": "flower",
+      "description": "Large flower jar",
+      "source_filename": "product_flower_jar_large.png",
+      "source_sha256": "2f0d1988273936ece88e22c14d2505293f040662e704dcf156275ae855d4aad5",
+      "output_sha256": "2f0d1988273936ece88e22c14d2505293f040662e704dcf156275ae855d4aad5",
+      "dimensions_px": [
+        195,
+        194
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        20,
+        6,
+        184,
+        190
+      ],
+      "transparent_pixel_fraction": 0.347,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_flower_jar_medium.png",
+      "category": "flower",
+      "description": "Medium flower jar",
+      "source_filename": "product_flower_jar_medium.png",
+      "source_sha256": "8b5c6b564440f8b5e6e457db6f3f8fa153269d5947d107b9ef8c2aad8011ba20",
+      "output_sha256": "8b5c6b564440f8b5e6e457db6f3f8fa153269d5947d107b9ef8c2aad8011ba20",
+      "dimensions_px": [
+        150,
+        162
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        17,
+        10,
+        150,
+        160
+      ],
+      "transparent_pixel_fraction": 0.3277,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_flower_jar_small.png",
+      "category": "flower",
+      "description": "Small flower jar",
+      "source_filename": "product_flower_jar_small.png",
+      "source_sha256": "446f4df7382cbd317dad3ccae2a0474fde938dadf03125851bbad354babc3e59",
+      "output_sha256": "446f4df7382cbd317dad3ccae2a0474fde938dadf03125851bbad354babc3e59",
+      "dimensions_px": [
+        103,
+        135
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        8,
+        103,
+        126
+      ],
+      "transparent_pixel_fraction": 0.2805,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_flower_pouch.png",
+      "category": "flower",
+      "description": "Flower pouch",
+      "source_filename": "product_flower_pouch.png",
+      "source_sha256": "11632152df60efa1c3d28c4d201ace6d869f77fb2c0bdca2bbd10e47ce9c2397",
+      "output_sha256": "11632152df60efa1c3d28c4d201ace6d869f77fb2c0bdca2bbd10e47ce9c2397",
+      "dimensions_px": [
+        196,
+        179
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        14,
+        8,
+        176,
+        175
+      ],
+      "transparent_pixel_fraction": 0.3199,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_flower_sample.png",
+      "category": "flower",
+      "description": "Flower sample container",
+      "source_filename": "product_flower_sample.png",
+      "source_sha256": "1390348faad1852fe2f0bc58f6b3fd9f26c43e50713553d4727658b2e7063d6f",
+      "output_sha256": "1390348faad1852fe2f0bc58f6b3fd9f26c43e50713553d4727658b2e7063d6f",
+      "dimensions_px": [
+        135,
+        134
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        21,
+        19,
+        123,
+        123
+      ],
+      "transparent_pixel_fraction": 0.5067,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_flower_tin_premium.png",
+      "category": "flower",
+      "description": "Premium flower tin",
+      "source_filename": "product_flower_tin_premium.png",
+      "source_sha256": "1662de302389ad6f84ae07e6bcdbbc51106c32453dd167f6f760ba9044edc26b",
+      "output_sha256": "1662de302389ad6f84ae07e6bcdbbc51106c32453dd167f6f760ba9044edc26b",
+      "dimensions_px": [
+        227,
+        136
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        16,
+        15,
+        217,
+        128
+      ],
+      "transparent_pixel_fraction": 0.3957,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_preroll_carton.png",
+      "category": "prerolls",
+      "description": "Pre-roll carton",
+      "source_filename": "product_preroll_carton.png",
+      "source_sha256": "e3516f9ebfe8f5fb6da067b963805379874a7cd5343415985ce7ca11aa29dc4d",
+      "output_sha256": "e3516f9ebfe8f5fb6da067b963805379874a7cd5343415985ce7ca11aa29dc4d",
+      "dimensions_px": [
+        156,
+        178
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        23,
+        5,
+        152,
+        175
+      ],
+      "transparent_pixel_fraction": 0.3557,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_preroll_case_premium.png",
+      "category": "prerolls",
+      "description": "Premium pre-roll case",
+      "source_filename": "product_preroll_case_premium.png",
+      "source_sha256": "6e97c526c20b91b491fb5170af5fa0ed13f5f5ae9722fbd127e35c2858ac7c9e",
+      "output_sha256": "6e97c526c20b91b491fb5170af5fa0ed13f5f5ae9722fbd127e35c2858ac7c9e",
+      "dimensions_px": [
+        263,
+        188
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        14,
+        256,
+        184
+      ],
+      "transparent_pixel_fraction": 0.3529,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_preroll_display_pack.png",
+      "category": "prerolls",
+      "description": "Pre-roll display pack",
+      "source_filename": "product_preroll_display_pack.png",
+      "source_sha256": "ce56d4496186d4ee8db44952619354e7d934779dc22d40015b302380535a14ae",
+      "output_sha256": "ce56d4496186d4ee8db44952619354e7d934779dc22d40015b302380535a14ae",
+      "dimensions_px": [
+        284,
+        177
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        10,
+        268,
+        177
+      ],
+      "transparent_pixel_fraction": 0.3267,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_preroll_multipack.png",
+      "category": "prerolls",
+      "description": "Pre-roll multipack",
+      "source_filename": "product_preroll_multipack.png",
+      "source_sha256": "2bf45cf5357678a045cc8cd590449c7cbe8431a34c368b4e19da3cc6ce02b1c3",
+      "output_sha256": "2bf45cf5357678a045cc8cd590449c7cbe8431a34c368b4e19da3cc6ce02b1c3",
+      "dimensions_px": [
+        210,
+        171
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        8,
+        195,
+        167
+      ],
+      "transparent_pixel_fraction": 0.322,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_preroll_tube_single.png",
+      "category": "prerolls",
+      "description": "Single pre-roll tube",
+      "source_filename": "product_preroll_tube_single.png",
+      "source_sha256": "2d1e144d984420a4a94b939370d797ce199e234e9c0689304536752628439af2",
+      "output_sha256": "2d1e144d984420a4a94b939370d797ce199e234e9c0689304536752628439af2",
+      "dimensions_px": [
+        115,
+        168
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        16,
+        10,
+        81,
+        165
+      ],
+      "transparent_pixel_fraction": 0.67,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_tincture_carton.png",
+      "category": "concentrates_tinctures",
+      "description": "Tincture carton",
+      "source_filename": "product_tincture_carton.png",
+      "source_sha256": "1c3f1f4b70b21092918959b49ccfa6f6363b019beeb83dacbb20fce4817f34c8",
+      "output_sha256": "1c3f1f4b70b21092918959b49ccfa6f6363b019beeb83dacbb20fce4817f34c8",
+      "dimensions_px": [
+        127,
+        175
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        4,
+        127,
+        170
+      ],
+      "transparent_pixel_fraction": 0.3133,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_tincture_dropper.png",
+      "category": "concentrates_tinctures",
+      "description": "Tincture dropper bottle",
+      "source_filename": "product_tincture_dropper.png",
+      "source_sha256": "a4a5a44fbe295eb76287fcc41b85e0cd23db103304f1901714f2695a796b7370",
+      "output_sha256": "a4a5a44fbe295eb76287fcc41b85e0cd23db103304f1901714f2695a796b7370",
+      "dimensions_px": [
+        88,
+        177
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        3,
+        88,
+        171
+      ],
+      "transparent_pixel_fraction": 0.436,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_tincture_gift_set.png",
+      "category": "concentrates_tinctures",
+      "description": "Tincture gift set",
+      "source_filename": "product_tincture_gift_set.png",
+      "source_sha256": "c7e7e26d9035a7d622aa01621ec677c60796537ab25ab0009fd6e2a656fdc895",
+      "output_sha256": "c7e7e26d9035a7d622aa01621ec677c60796537ab25ab0009fd6e2a656fdc895",
+      "dimensions_px": [
+        269,
+        183
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        0,
+        260,
+        180
+      ],
+      "transparent_pixel_fraction": 0.2873,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_vape_carton.png",
+      "category": "vapes",
+      "description": "Vape cartridge package",
+      "source_filename": "product_vape_carton.png",
+      "source_sha256": "bb410ce7a25e248ce4e1f25bd5e16fdb06ceef26b4a2092a89aadf30e6aba31a",
+      "output_sha256": "bb410ce7a25e248ce4e1f25bd5e16fdb06ceef26b4a2092a89aadf30e6aba31a",
+      "dimensions_px": [
+        157,
+        158
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        11,
+        4,
+        146,
+        156
+      ],
+      "transparent_pixel_fraction": 0.3278,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_vape_cartridge.png",
+      "category": "vapes",
+      "description": "Vape cartridge",
+      "source_filename": "product_vape_cartridge.png",
+      "source_sha256": "86e3cb03826f2d2e0e90192dded84529099c130bea8ae58937d1197cc3199022",
+      "output_sha256": "86e3cb03826f2d2e0e90192dded84529099c130bea8ae58937d1197cc3199022",
+      "dimensions_px": [
+        88,
+        167
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        12,
+        7,
+        75,
+        156
+      ],
+      "transparent_pixel_fraction": 0.597,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_vape_disposable.png",
+      "category": "vapes",
+      "description": "Disposable vape",
+      "source_filename": "product_vape_disposable.png",
+      "source_sha256": "a839fd6f63c67b53bc92261f2bd01fb4e93f83f4fbdc65e89e7a58ee3d4e923a",
+      "output_sha256": "a839fd6f63c67b53bc92261f2bd01fb4e93f83f4fbdc65e89e7a58ee3d4e923a",
+      "dimensions_px": [
+        94,
+        164
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        7,
+        82,
+        161
+      ],
+      "transparent_pixel_fraction": 0.4606,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_vape_kit_premium.png",
+      "category": "vapes",
+      "description": "Premium vape kit",
+      "source_filename": "product_vape_kit_premium.png",
+      "source_sha256": "ee8398cd123aec58a9c3c04d7ae17e33c633dd058a2e7f1bbfb1db1910ebf0a1",
+      "output_sha256": "ee8398cd123aec58a9c3c04d7ae17e33c633dd058a2e7f1bbfb1db1910ebf0a1",
+      "dimensions_px": [
+        273,
+        150
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        1,
+        273,
+        150
+      ],
+      "transparent_pixel_fraction": 0.2099,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "product_vape_pen.png",
+      "category": "vapes",
+      "description": "Vape pen",
+      "source_filename": "product_vape_pen.png",
+      "source_sha256": "608575868912c5994a22ad6c67942e78778e497374d551c356296ff9c4069993",
+      "output_sha256": "608575868912c5994a22ad6c67942e78778e497374d551c356296ff9c4069993",
+      "dimensions_px": [
+        84,
+        171
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        11,
+        73,
+        164
+      ],
+      "transparent_pixel_fraction": 0.5975,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    }
+  ]
+}

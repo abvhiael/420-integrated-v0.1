@@ -1,0 +1,626 @@
+{
+  "project": "Budtender",
+  "phase": "3.8",
+  "title": "Waiting Nook Kit",
+  "status": "PROCESSED_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "User-supplied crops derived from approved Phase 3.8 artwork sheets; no generative alteration during asset processing",
+  "asset_count": 28,
+  "assets": [
+    {
+      "filename": "nook_seat_status_marker.png",
+      "category": "decorative_detail",
+      "description": "Reserved / Occupied Seat Marker",
+      "source_filename": "28982f92-b91c-52e8-8e69-791e9cb3b584.png",
+      "source_sha256": "1a254abeea7ec99b1806f80d4d679255e6ce585ff712c264349e3bf4b6594f83",
+      "output_sha256": "f7f2b6ce1e6c7ad054fc96540a7fd4ab6a0b3c18855ca700b89b25802e444f85",
+      "dimensions_px": [
+        121,
+        110
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        8,
+        119,
+        108
+      ],
+      "transparent_pixel_fraction": 0.1955,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_waiting_marker.png",
+      "category": "decorative_detail",
+      "description": "Customer Waiting Marker",
+      "source_filename": "ca46bb7a-ec11-5160-8128-be8746ca54eb.png",
+      "source_sha256": "88f0e32cb6c4fe06659d9ca8a60ee5ad794fd88fb4d6bf2916983a1e0d476bc1",
+      "output_sha256": "c6a04c584c3f02e7e6798a5c75494dc4514dd371c618cc17f1b9f05600ec61a2",
+      "dimensions_px": [
+        107,
+        102
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        4,
+        106,
+        102
+      ],
+      "transparent_pixel_fraction": 0.2914,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_floor_lamp.png",
+      "category": "decorative_detail",
+      "description": "Brass Floor Lamp",
+      "source_filename": "85e87526-0d74-56ca-834b-0a04692840fb.png",
+      "source_sha256": "1985265495613320ec8cabcd971c55b5b51ee2f9bff7a8ee7d5d74e017b30887",
+      "output_sha256": "f093493ba1581dde95d81b45bcd7476bea6dcf5ea748e9e3a7c9180990c4cd7a",
+      "dimensions_px": [
+        120,
+        298
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        0,
+        120,
+        298
+      ],
+      "transparent_pixel_fraction": 0.7937,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_framed_art.png",
+      "category": "decorative_detail",
+      "description": "Framed Boutique Artwork",
+      "source_filename": "2e629492-db40-5a66-843c-f874bc4ade7a.png",
+      "source_sha256": "e3807195fc0ca37f47742d72ffa9c26eaa98c752f76a0e9bac09a98c19774c06",
+      "output_sha256": "378df5c8c15b6dd9c1307242d8a973a281f39774e2e1900b52dddffb62ebc97e",
+      "dimensions_px": [
+        144,
+        224
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        11,
+        138,
+        216
+      ],
+      "transparent_pixel_fraction": 0.1621,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_table_arrangement.png",
+      "category": "decorative_detail",
+      "description": "Botanical Table Arrangement",
+      "source_filename": "dc7ea287-3ba6-53bd-83b7-21ea8c67bca7.png",
+      "source_sha256": "6e28756b63ac0915058331745c35e7ddfbb5b1f24d813026859deb062198d7c5",
+      "output_sha256": "5092fabaa91d05642297b9a9777b267f5c6464c6ca1384c6560225749b4076c8",
+      "dimensions_px": [
+        180,
+        264
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        0,
+        180,
+        261
+      ],
+      "transparent_pixel_fraction": 0.4586,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_wall_clock.png",
+      "category": "decorative_detail",
+      "description": "Walnut Wall Clock",
+      "source_filename": "01d5d66b-72e6-582b-a06f-542dea7bc6cf.png",
+      "source_sha256": "7e0fbe0686bcca97e9fd435afe0ec924d1090901d8ec40ae160d8d36f01ce930",
+      "output_sha256": "ed46765db7dd354c47640b3b40ab33939b1b9cc3cb728fb9377c0f894c74b6c0",
+      "dimensions_px": [
+        154,
+        186
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        149,
+        186
+      ],
+      "transparent_pixel_fraction": 0.2687,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_charging_station.png",
+      "category": "customer_amenity",
+      "description": "Charging Station",
+      "source_filename": "38bb927c-f907-505c-98ed-f88cfb011992.png",
+      "source_sha256": "0ea88fc619a242b2b45e92d7a02443b96571f1a5ac4e1aa82c4a867d43a55b2d",
+      "output_sha256": "c60b183c28bb3dfc8493100b3f2264e4efa5eef1d26f2078f0f0bc19dfa56b52",
+      "dimensions_px": [
+        242,
+        214
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        7,
+        242,
+        213
+      ],
+      "transparent_pixel_fraction": 0.2661,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_wastebasket.png",
+      "category": "customer_amenity",
+      "description": "Small Wastebasket",
+      "source_filename": "2af56fd0-bce7-51ec-ba00-735aa968dc1e.png",
+      "source_sha256": "8d4ca6030d1dd7c58844c998b0dc3c5d011bc2d32166fc1aa7aa050dca9e2606",
+      "output_sha256": "978b0174f05e1f49537463d5b8109fdc2fed0e1d6b28ddd6cbd60cc1b7b84118",
+      "dimensions_px": [
+        118,
+        157
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        5,
+        114,
+        154
+      ],
+      "transparent_pixel_fraction": 0.2468,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_water_glass.png",
+      "category": "customer_amenity",
+      "description": "Water Glass & Coaster",
+      "source_filename": "9a50e7b8-da10-59de-a7e5-a7dc98093099.png",
+      "source_sha256": "ecad6e58a5bdb98260c975a6d655ead023a6b61dc4b46fdd62de2e0c803aa82d",
+      "output_sha256": "3968322288a064618407256cefea33e7f13140780efd7d712d96a64d12a0773e",
+      "dimensions_px": [
+        129,
+        156
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        19,
+        117,
+        153
+      ],
+      "transparent_pixel_fraction": 0.4727,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_water_dispenser.png",
+      "category": "customer_amenity",
+      "description": "Water Dispenser",
+      "source_filename": "69a37522-2f95-5b22-afdc-cedd7c2537c1.png",
+      "source_sha256": "cdedfe81c20e22c557db000a6081f8564711495033623248f991949d04dfc098",
+      "output_sha256": "18d85dc562bedaad07dab82a0ca2e87e442cb43625c64bf460b4b6a0dda82fe1",
+      "dimensions_px": [
+        160,
+        224
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        9,
+        158,
+        224
+      ],
+      "transparent_pixel_fraction": 0.3548,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_brochure_single.png",
+      "category": "customer_amenity",
+      "description": "Information Brochure",
+      "source_filename": "666565b7-cd30-5d27-b11b-d84d4880dfe3.png",
+      "source_sha256": "f622cd19944b2674bbaee8f5b6859d19675da10f533778b4a0e303b140a1bc2a",
+      "output_sha256": "1248c2f976903fe4e77ee244c86137e4f08704b60459a8ee842aebb7ab188b06",
+      "dimensions_px": [
+        109,
+        188
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        9,
+        101,
+        184
+      ],
+      "transparent_pixel_fraction": 0.6377,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_brochure_holder.png",
+      "category": "customer_amenity",
+      "description": "Brochure Holder",
+      "source_filename": "ced267cb-deb5-597d-878e-df3070ff4cc0.png",
+      "source_sha256": "4879c254abb88a2c846d48fd1de7d46d9c6fadfaa6d6b45c66c8ae4c3fa96878",
+      "output_sha256": "e1d832f4a7fb51a8c7f823896a412af91310785abfb68734ba8fb5afb9b40c99",
+      "dimensions_px": [
+        134,
+        192
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        5,
+        134,
+        189
+      ],
+      "transparent_pixel_fraction": 0.2883,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_magazine_open.png",
+      "category": "customer_amenity",
+      "description": "Open Magazine",
+      "source_filename": "7f220ac2-7d79-5d30-b3f3-395743521748.png",
+      "source_sha256": "3b8942b559fa7755c81d0fda2a754ac20d65c067dcd3a40c4e1b8d91e79391c1",
+      "output_sha256": "85af659f0cc3d18d9cf13d63a5a4ee2b5db37f2e48438136137c7b895c2fc92f",
+      "dimensions_px": [
+        236,
+        154
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        236,
+        152
+      ],
+      "transparent_pixel_fraction": 0.5217,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_magazines_stack.png",
+      "category": "customer_amenity",
+      "description": "Magazine Stack",
+      "source_filename": "4fc0e016-ab9c-5182-b639-e61f03701dd1.png",
+      "source_sha256": "b6768a4ee272f58080d196897890d8194f2f41b3c9ba198d1b872b618e186adf",
+      "output_sha256": "43bf23ec19d89dce639d92018c319c3465145f6fca06659a63eb0cd49d66aa73",
+      "dimensions_px": [
+        199,
+        164
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        6,
+        199,
+        160
+      ],
+      "transparent_pixel_fraction": 0.2956,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_rug_textured.png",
+      "category": "soft_furnishing",
+      "description": "Small Textured Area Rug",
+      "source_filename": "f90a6a0b-a74c-59d7-a35a-d123a89c1dad.png",
+      "source_sha256": "4d6c6a262881864dbbfe8315b8eea329911b5bf77e214e7fc3b24bf73cc85f5e",
+      "output_sha256": "ffd5c81b93ba875980b03526a3e26c889c2c90c16882ada68396b93dc48ccd8c",
+      "dimensions_px": [
+        394,
+        149
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        6,
+        393,
+        149
+      ],
+      "transparent_pixel_fraction": 0.1603,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_rug_botanical.png",
+      "category": "soft_furnishing",
+      "description": "Vintage Botanical Area Rug",
+      "source_filename": "8f417bf6-bfc1-54d5-b611-7bd429945bdd.png",
+      "source_sha256": "9a48aaab7a4fbf62ba59257a01261ae4fe8d0541783d43f91bbf41edd8392fbb",
+      "output_sha256": "4132f0ff169218fd4a200cd8a9d50a9e6b7018a541186c9233f8d96e2df8c1ff",
+      "dimensions_px": [
+        443,
+        141
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        5,
+        439,
+        141
+      ],
+      "transparent_pixel_fraction": 0.1287,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_blanket_rolled.png",
+      "category": "soft_furnishing",
+      "description": "Rolled Knit Blanket",
+      "source_filename": "34304dc9-d83e-564c-86e1-747061b57f59.png",
+      "source_sha256": "99be85737ac799570213e4d04d9cf70870388143ba4a63978d48b94707f3e769",
+      "output_sha256": "eea8e9ebe7f7010d1e41541bfef9fec04d993e5934ff78d838bf086832a3e4e6",
+      "dimensions_px": [
+        201,
+        133
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        1,
+        197,
+        133
+      ],
+      "transparent_pixel_fraction": 0.31,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_blanket_folded.png",
+      "category": "soft_furnishing",
+      "description": "Folded Knit Blanket",
+      "source_filename": "e3d5b282-3e74-50e9-b959-9213aeda52a1.png",
+      "source_sha256": "8eeb7b28197f1db612c8102b5b48a7e10793db079e0fab999e06502f8cc84f4f",
+      "output_sha256": "0bfd6abcff5940493f895251b380b03d8de9e042270b9305ef3453ffee41eaaa",
+      "dimensions_px": [
+        256,
+        125
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        2,
+        247,
+        124
+      ],
+      "transparent_pixel_fraction": 0.3166,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_pillow_cream.png",
+      "category": "soft_furnishing",
+      "description": "Cream Throw Pillow",
+      "source_filename": "679e3a07-0010-59ad-9ec9-5933bb1aaf86.png",
+      "source_sha256": "8baf76b61b156c4cd18bceee5d3e7d648863a8836238158b0c0f33236f2388d7",
+      "output_sha256": "db346582e8212a740c7b49454cc8064ab4c6270cd86189f186314f266802d41c",
+      "dimensions_px": [
+        185,
+        133
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        9,
+        183,
+        133
+      ],
+      "transparent_pixel_fraction": 0.2894,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_pillow_botanical.png",
+      "category": "soft_furnishing",
+      "description": "Botanical Throw Pillow",
+      "source_filename": "4fe68597-d155-543d-8d93-d5ef6e834572.png",
+      "source_sha256": "f985b850bd31a20da351664bdafa5bdd9ade994b1ed3209e9514fe134037b644",
+      "output_sha256": "c7bf27ed3b72179a75de496d9c0577a62deb3a6bcf4e9ef01aa311b0930a911a",
+      "dimensions_px": [
+        181,
+        135
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        3,
+        178,
+        134
+      ],
+      "transparent_pixel_fraction": 0.3418,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_magazine_rack.png",
+      "category": "furniture",
+      "description": "Walnut Magazine Rack",
+      "source_filename": "d7f70fed-b1d9-5e6f-a5a2-defb9f2e7f23.png",
+      "source_sha256": "990228e7b11344fcb59e7eecdc63c7c24783eab25a8ba08c74b7af3a80bb8753",
+      "output_sha256": "78dd285ed1ec781fe5aaee496f37d41b3f637a099dcdf95598f5b4842cfa1c35",
+      "dimensions_px": [
+        159,
+        196
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        0,
+        159,
+        194
+      ],
+      "transparent_pixel_fraction": 0.3235,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_ottoman.png",
+      "category": "furniture",
+      "description": "Upholstered Ottoman",
+      "source_filename": "92b32122-0d8b-5ff7-a68a-1f9d11058707.png",
+      "source_sha256": "e0478f1d64348b538cdb6bc595e933706cebad9701e3036ca8560d652d121ed3",
+      "output_sha256": "9768ed1bd1f88dd5630518d140a2e20934e49b9759fa50d1bce632f4a3286907",
+      "dimensions_px": [
+        170,
+        141
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        12,
+        166,
+        141
+      ],
+      "transparent_pixel_fraction": 0.2253,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_table_side_brass.png",
+      "category": "furniture",
+      "description": "Small Brass Side Table",
+      "source_filename": "0d781dfa-e631-5d31-a82f-461b13363466.png",
+      "source_sha256": "0a65e6a8b019318bedc76a4439a0d7d9630d85e6a76ff15ef1dc79f4f9b2e9e1",
+      "output_sha256": "4933155a495bc4243e8cb9eedb927ba243068e416ea3090861e359874a384122",
+      "dimensions_px": [
+        118,
+        185
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        2,
+        107,
+        180
+      ],
+      "transparent_pixel_fraction": 0.6309,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_table_coffee_round.png",
+      "category": "furniture",
+      "description": "Round Walnut Coffee Table",
+      "source_filename": "14f07742-425c-5213-977b-5a5913d09753.png",
+      "source_sha256": "28f10e45ccaca21762c9e4780ddeb257c29db2375b6e556d3673253c2aec0fc5",
+      "output_sha256": "00c687117508284408a5991263234ea79aca0b7f8816337e84a566c8dbaa1977",
+      "dimensions_px": [
+        226,
+        184
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        14,
+        220,
+        181
+      ],
+      "transparent_pixel_fraction": 0.452,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_chair_terracotta.png",
+      "category": "furniture",
+      "description": "Terracotta Accent Chair",
+      "source_filename": "0cbaaaa3-2e80-5eac-9555-0cff36d01030.png",
+      "source_sha256": "ec86309dfdedd94d50950a4838677edcee82586c283a0eda775eb9e37be01e7f",
+      "output_sha256": "c0d606ea0a094bbc520dc3b48b8ce03d1a49f6b8747c73634fcf5294079cd49b",
+      "dimensions_px": [
+        190,
+        197
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        5,
+        182,
+        197
+      ],
+      "transparent_pixel_fraction": 0.2598,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_armchair_sage.png",
+      "category": "furniture",
+      "description": "Sage Upholstered Armchair",
+      "source_filename": "fc13804e-435f-586f-be5c-65376d29b11c.png",
+      "source_sha256": "610d266cf1e2bf6cfa854e7a21d8e925ad962fd0485949790d57c5139dd2cfdb",
+      "output_sha256": "5bfcfaa5b494abb542fc88ece71d469e1b0217a852fcea52a1c9d0fa260a69dd",
+      "dimensions_px": [
+        189,
+        195
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        0,
+        189,
+        195
+      ],
+      "transparent_pixel_fraction": 0.2419,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_chair_walnut.png",
+      "category": "furniture",
+      "description": "Walnut-Framed Lounge Chair",
+      "source_filename": "605a12f7-dc12-5f8d-964b-345bb9b55b90.png",
+      "source_sha256": "c2d0d702a4c9fb5aa2d92cf2c2e5a7c53f1d2407163eebc5950c8c14d92ece27",
+      "output_sha256": "41973a6f085dc43b602f5c2fa83b7acbe7f1fe2b8b08a65cf0b8d281e60695a7",
+      "dimensions_px": [
+        221,
+        191
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        3,
+        221,
+        186
+      ],
+      "transparent_pixel_fraction": 0.3109,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "nook_sofa_green.png",
+      "category": "furniture",
+      "description": "Forest-Green Upholstered Sofa",
+      "source_filename": "d9a3ee3a-1955-585d-b187-63bde1fe0b18.png",
+      "source_sha256": "eb9598fbee250b0c34cc0903fc8a4670afec236850a4aa1467c2a08cb47c5f70",
+      "output_sha256": "1672f41a3334730208f2d63d5b1002210cc40cff04feb53e26334ec775bb5915",
+      "dimensions_px": [
+        449,
+        206
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        3,
+        434,
+        206
+      ],
+      "transparent_pixel_fraction": 0.2573,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    }
+  ]
+}

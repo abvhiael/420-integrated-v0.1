@@ -1,0 +1,539 @@
+{
+  "project": "420Integrated/Budtender",
+  "phase": "3.14",
+  "status": "ARTWORK_PACKAGED_PENDING_REPOSITORY_IMPORT_AND_RUNTIME_QUALIFICATION",
+  "counts": {
+    "total": 32,
+    "cutouts": 16,
+    "scenery": 8,
+    "effects": 8
+  },
+  "notes": [
+    "Cutouts retain matching alpha masks from prior qualified local processing, applied to latest user-uploaded RGB sources.",
+    "Weather source illustrations retained for provenance; operational effects are separately generated RGBA layers.",
+    "Weather overlays are not literal transparent extractions of uploaded framed illustrations.",
+    "No GitHub commit or in-game registration claimed."
+  ],
+  "assets": [
+    {
+      "file": "assets/exterior_prop_aframe_sign.png",
+      "source_filename": "exterior_prop_aframe_sign.png",
+      "source_sha256": "548e473c4f0247a64aee07e8b6e56994a42a5e9f5408e14eaa5d9bfdae288fa9",
+      "sha256": "7bd0a607f107c69961deb1741a9aeb718974954117968be6d4bee6d1d2da3b7d",
+      "dimensions": [
+        191,
+        207
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_bench.png",
+      "source_filename": "exterior_prop_bench.png",
+      "source_sha256": "34975d723559f038c6ff80e1388e0ccfb72050afae40125eae8171edad3918c7",
+      "sha256": "5d6d24429f103af294f312e2c49408a44eb8f97480a7e821161b6f26888a5958",
+      "dimensions": [
+        245,
+        168
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_bicycle.png",
+      "source_filename": "exterior_prop_bicycle.png",
+      "source_sha256": "e55ed7a5774358ea4a07a88046241a6cf67a6a75828e4c8396f9714bfcb61b3e",
+      "sha256": "a7e1c5689f62a622defe04c2ac1d6c8c94a81bb0314eb627e37b617b50dde305",
+      "dimensions": [
+        224,
+        171
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_signpost.png",
+      "source_filename": "exterior_prop_signpost.png",
+      "source_sha256": "e823085a620c794447f0206c64fa0588fbd9127d805aec72c3892b09b90eb284",
+      "sha256": "d353d87e035f2500efa60f7c94ac8e26a3ad7138eb15ac1eb0b75322434a8de9",
+      "dimensions": [
+        122,
+        220
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_view_evening_street.png",
+      "source_filename": "exterior_view_evening_street.png",
+      "source_sha256": "5f10f103b437368872183e2d08424368ded51226fece91959e8f1d29374f1f99",
+      "sha256": "546a5e35f794bdb334693149f6b8e6c78d9315506e6c664fa82ce7d4f75ba1ee",
+      "dimensions": [
+        189,
+        170
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_park.png",
+      "source_filename": "exterior_view_park.png",
+      "source_sha256": "188dec622e9bf83dc8e6997a3ccea0b12f8eddf502e51f33dbdd3eaa8d40c99f",
+      "sha256": "38a3953379797d227fae43361ac0888e1290c7efb76705029efb754622d85598",
+      "dimensions": [
+        182,
+        169
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_residential.png",
+      "source_filename": "exterior_view_residential.png",
+      "source_sha256": "3c21b4050a0878bf22459420f2fa3728c48b9fe71d3ca4bdc9c0a9f4487c5bab",
+      "sha256": "ceb5e308d8f0eaaf995a608b82d1c606e5b9327fd9a3a70b13e605296cbb3349",
+      "dimensions": [
+        184,
+        168
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_shopfront.png",
+      "source_filename": "exterior_view_shopfront.png",
+      "source_sha256": "d02860676750d90ddfda1b8dbf19610f264afee238aeb6795acecc583957b7c4",
+      "sha256": "349e3d6bc386bbf547925640d7489625d3f3977582fb5f7a85a2c2ebdf4629c1",
+      "dimensions": [
+        187,
+        167
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_sidewalk.png",
+      "source_filename": "exterior_view_sidewalk.png",
+      "source_sha256": "7b9602021e99df0c833e4c04ff94865ab24289347a0870871eed6735b9c98d6b",
+      "sha256": "49f428e821aee78b7bb00c50fa0b34f7e852a48e49386e98bbdb07a88a89abfd",
+      "dimensions": [
+        184,
+        166
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_skyline.png",
+      "source_filename": "exterior_view_skyline.png",
+      "source_sha256": "6158ee8459d9ca9555c399080704649f30434809d5490ec49f1b8e556da9c2c0",
+      "sha256": "9478984aa99ec28c24aa6c60c539b917b31e6e12a8e5a16291af7644affc3d7a",
+      "dimensions": [
+        185,
+        168
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_street.png",
+      "source_filename": "exterior_view_street.png",
+      "source_sha256": "a5b34452616af56a52b43a0f7487d47baa99cf453de20a57e074958b6b214edc",
+      "sha256": "af0b9717536bd209b96830620686d7c9137ef86943d677c60f3035ff4f139339",
+      "dimensions": [
+        181,
+        165
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/exterior_view_trees.png",
+      "source_filename": "exterior_view_trees.png",
+      "source_sha256": "9737ed0afd0bc6b0782b90208b390d7fd87b6b9d630a5e84a7729c525ee30a5a",
+      "sha256": "da24d3844ee39ab3e7c40aa4815b4a0280c15b9d5df31be6ffd6e2117b16096b",
+      "dimensions": [
+        199,
+        167
+      ],
+      "mode": "RGB",
+      "category": "scenery",
+      "alpha_range": null,
+      "has_partial_alpha": false
+    },
+    {
+      "file": "assets/window_fx_condensation.png",
+      "source_filename": "window_fx_condensation.png",
+      "source_sha256": "c220444e1389b50cc8afd5da4e98fab0ebfdad57f751b9995c11ae86c2a9ec0f",
+      "sha256": "c6e615859520250c2d54e3e592697752af989b1dbc7c94760429653e17fc70ce",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        9,
+        15
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_interior_glow.png",
+      "source_filename": "window_fx_interior_glow.png",
+      "source_sha256": "77fa2ef313483d1632f14d23b0d8aeaeb148e37eda997e425cc159a3ed822e70",
+      "sha256": "3e956c3eb4203cc5368253ffd0369bedff70183c3d2a8def7c1c5563cf2a488d",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        0,
+        104
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_night_overlay.png",
+      "source_filename": "window_fx_night_overlay.png",
+      "source_sha256": "1424b27907b9a162015adbaa00cb499fe37ce2870e611d77a6ccba109f7f2f82",
+      "sha256": "2b339e5da0d7fa498ae7f8b6e691ca81a9c4daf522f7a00c25a66bbbe007a5ac",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        42,
+        90
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_rain_heavy.png",
+      "source_filename": "window_fx_rain_heavy.png",
+      "source_sha256": "1a883b227c47ec0e3b170ea8dffa07ad2872de824f32e9a6b410193db13270a4",
+      "sha256": "0169de4253869c29ba3fd5f34626d59987b6cbe493b6cc78c3fe98abcd8d40e4",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        0,
+        139
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_rain_light.png",
+      "source_filename": "window_fx_rain_light.png",
+      "source_sha256": "3c767e826be7ca84e9ea608a9a4f6af492f2804a701b23c596eb8fe22485d354",
+      "sha256": "437b2e17cc948b96c0ef351e0f1e1ea119e0fe6f260046acfdb2a6e343ac0407",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        0,
+        99
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_reflection_clear.png",
+      "source_filename": "window_fx_reflection_clear.png",
+      "source_sha256": "030190a51f20ef6f82add47edeed1d53747392d608d463b7d5da0005dcbef520",
+      "sha256": "ba463af03bbb9a493f297cc4cc9490cda513994a862bca0dc41075f7f7f4ae91",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        0,
+        45
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_reflection_evening.png",
+      "source_filename": "window_fx_reflection_evening.png",
+      "source_sha256": "419d7c2018abf0b89d90df23ebad0d8e26cae0b308a3d29880db63e3b29299bc",
+      "sha256": "c0518da6388ee0ec82b8047fa249128deaa368c5dcc30c01d207e3d793c4a8ff",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        0,
+        45
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_fx_reflection_golden.png",
+      "source_filename": "window_fx_reflection_golden.png",
+      "source_sha256": "9853a840a272dfa7497b99c3c62b59e3d8acf9fa57af8a60936424c42e4e5174",
+      "sha256": "7d0faf15f144611a1deb5aee3d0cdabf356bd007b21db54d95d3974cbe88fcb3",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "category": "effect",
+      "alpha_range": [
+        0,
+        45
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_bike_rack.png",
+      "source_filename": "exterior_prop_bike_rack.png(1).png",
+      "source_sha256": "83c39b08096fa40f8a50433a4e012a6c375daee1002264477f3fbcc5d0d24994",
+      "sha256": "8880dbdb5b0a1abce9ad41ecabb7cf0685ebfa560c3758326f693adaf7849f3d",
+      "dimensions": [
+        184,
+        149
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_streetlamp.png",
+      "source_filename": "exterior_prop_streetlamp.png(1).png",
+      "source_sha256": "78d2c726a36ec8457610ce0b27f0d4b6de3f071d163b97be57c9f16b27d9a3c0",
+      "sha256": "1f8b6bf1885f311880c5d8d5c5233710acdb781cd583a2aa1d93e0b826f8aedd",
+      "dimensions": [
+        125,
+        216
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_planter.png",
+      "source_filename": "exterior_prop_planter.png(1).png",
+      "source_sha256": "a68522b154b5de822319be5ed67ce4f4ea4cdbe9cd73f1a08e93579102e83c62",
+      "sha256": "224e68d625ba1910f736fb3f151238a8c5959252f040044f78c2487397421117",
+      "dimensions": [
+        236,
+        169
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/exterior_prop_street_tree.png",
+      "source_filename": "exterior_prop_street_tree.png(1).png",
+      "source_sha256": "216c26b16b20f405a7832f380a33594ea3b69881909478ef5cc48c98f87bf1c5",
+      "sha256": "fc30f319ef29f67614c2c2422e3b284bd9699df41faf62831341c0deb0a4a080",
+      "dimensions": [
+        172,
+        215
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_valance_decorative.png",
+      "source_filename": "window_valance_decorative.png(1).png",
+      "source_sha256": "eef4da7d230526d43c81e983b63d644811f1b9ee644daf5a3332e49f3b53a99e",
+      "sha256": "ed716e618aa14206004d6ee81050e98ff312abf85a4fa42b0c0ec096b91763d6",
+      "dimensions": [
+        193,
+        190
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_mullion_divider.png",
+      "source_filename": "window_mullion_divider.png(1).png",
+      "source_sha256": "890a032fe120dac1f104f1b40da6e8edaa33f60c0281cc41868e87e81d32d0ed",
+      "sha256": "ab0c21a389b7054b8db67f811f1bf7a22b1d6414d79b105d04f301383c1cbeee",
+      "dimensions": [
+        160,
+        177
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_ledge_interior.png",
+      "source_filename": "window_ledge_interior.png(1).png",
+      "source_sha256": "9490dfb1d3a76e8ba76bec3314f2d89a5f85438f5176d7b99f60520bc2149847",
+      "sha256": "2f2af1ed7942a0f038655b32199c1f73c1233c79b2f55c4cba8b5d4bf828b77f",
+      "dimensions": [
+        225,
+        125
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_hardware_brass.png",
+      "source_filename": "window_hardware_brass.png(1).png",
+      "source_sha256": "e3cd00e9092da1d8b237dcafd4c60326694d79cc58f3b1466f637f83a0cf1362",
+      "sha256": "54220e1ded52bbe40bad21f41dd8f3282159e65c0103e7dcede156432ced9a60",
+      "dimensions": [
+        59,
+        138
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_trim_green.png",
+      "source_filename": "window_trim_green.png(1).png",
+      "source_sha256": "ee25ec4ed72b75745685c60714cb15475bc1fdbe5d8916c8eb7fc091065709fc",
+      "sha256": "c45c326e07a171f8df97b750bda4ab56d9a834f71d2b75c80a69862ba31931b1",
+      "dimensions": [
+        180,
+        184
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_sill_walnut.png",
+      "source_filename": "window_sill_walnut.png(1).png",
+      "source_sha256": "8d5a75872f4aa70207ec29741fe89775eccee41e8e5ec2302c22ae28d7868155",
+      "sha256": "cde4c0859aa1021e4265cbfe0f766ce2689af034b2b70b5b7e57505632c533ec",
+      "dimensions": [
+        213,
+        102
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_side_glass.png",
+      "source_filename": "window_side_glass.png(1).png",
+      "source_sha256": "8b170e8221e15d431b0ba38033fdc6c18cbf0af894793e0a2f0dd51d44f1be52",
+      "sha256": "7c15270f2bc3169ae629aea2f855d6e50213042230bef0c349b787ae7fec6702",
+      "dimensions": [
+        172,
+        187
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    },
+    {
+      "file": "assets/window_storefront_arch_glass.png",
+      "source_filename": "window_storefront_arch_glass.png(1).png",
+      "source_sha256": "b3255c6ef9c804addeddc7daaa37693d70640b0baff2a619c8f1b11b6c1fad94",
+      "sha256": "241df813896697457a02a851f6a80c90c44f648a11b8dac43a3fd05def8d1e34",
+      "dimensions": [
+        168,
+        194
+      ],
+      "mode": "RGBA",
+      "category": "cutout",
+      "alpha_range": [
+        0,
+        255
+      ],
+      "has_partial_alpha": true
+    }
+  ]
+}

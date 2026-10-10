@@ -1,0 +1,123 @@
+{
+  "project": "Budtender",
+  "phase": "3.1",
+  "phase_title": "Environment Base Layers / Background Shell",
+  "status": "PROCESSED_PENDING_VISUAL_ACCEPTANCE",
+  "asset_count": 7,
+  "asset_format": "PNG RGBA",
+  "artwork_policy": "No redraw, no resampling or color corrections",
+  "assets": [
+    {
+      "filename": "env_starter_wall_left.png",
+      "title": "Wall Left",
+      "source_filename": "env_starter_wall_left.png(1).png",
+      "source_sha256": "5a4a2b89967255837954d858f2b9ae9361d3dff3666e26998660412c5a305c8f",
+      "output_sha256": "0e5de20178b1a97c1f1f6b0b203d191a63fdaabc7c4aaa797781ae5451a7f62c",
+      "pixel_size": [
+        88,
+        154
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 5,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    },
+    {
+      "filename": "env_starter_wall_rear.png",
+      "title": "Wall Rear",
+      "source_filename": "env_starter_wall_rear.png(1).png",
+      "source_sha256": "58f7a6b651b229593dc7d21d1b2912c2c61f24de3e3c4bd66977df2904793aa7",
+      "output_sha256": "ead6ec5c9036cc825a79b7ba244b9ad6a9fa5fff8068752a7f8c02a7ec0426a6",
+      "pixel_size": [
+        170,
+        127
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 5,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    },
+    {
+      "filename": "env_starter_wall_right.png",
+      "title": "Wall Right",
+      "source_filename": "env_starter_wall_right.png(1).png",
+      "source_sha256": "ab1b24ff5411b3ac6dfbdfbd14b4fbc1ea9782b5488f6ac6f35b62292a9a7c2c",
+      "output_sha256": "30641b77ba390efc23a99558a8ffb393e6ad39d89feb5fbe1891567bb71a7a4a",
+      "pixel_size": [
+        88,
+        153
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 0,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    },
+    {
+      "filename": "env_starter_floor.png",
+      "title": "Floor",
+      "source_filename": "env_starter_floor.png(1).png",
+      "source_sha256": "e610cc3909b3207cc16a6579ebfc385ec744195b54066ee0c6a5e342e29becfb",
+      "output_sha256": "85877b559c71ba993d8cb7119a62515a84847b7e6cd0589ecef7f6725d050a3d",
+      "pixel_size": [
+        146,
+        117
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 7,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    },
+    {
+      "filename": "env_starter_ceiling_trim.png",
+      "title": "Ceiling Trim",
+      "source_filename": "env_starter_ceiling_trim.png(1).png",
+      "source_sha256": "13f893a9facea65aac923cf07398fe9d8757a2a7dc2fcc3a65bb41dfe7fbb52f",
+      "output_sha256": "29cca9c02c23fc2884d34dc48a101c99830ab9654427e128cc9cf02f133e9e50",
+      "pixel_size": [
+        141,
+        76
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 0,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    },
+    {
+      "filename": "env_starter_storefront_arch_window.png",
+      "title": "Storefront Arch Window",
+      "source_filename": "env_starter_storefront_arch_window.png(1).png",
+      "source_sha256": "cb5c0f1678763ba4a195065ce3fb86e4ec499323bd0154e1e123925a4372d001",
+      "output_sha256": "5745f22622351d1d7c63aedc6e1f7180a1f317163f03abe9bdbe15222a299cb4",
+      "pixel_size": [
+        137,
+        133
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 0,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    },
+    {
+      "filename": "env_starter_back_door.png",
+      "title": "Back Door",
+      "source_filename": "env_starter_back_door.png(1).png",
+      "source_sha256": "c193ce5f896ea6e9e407f286036934674230a788b3300e517a00ffa2b8ce6a1e",
+      "output_sha256": "0a43f6aa16318292a4db8cf8fe72a61c3e21c56c63e51fbd341ad24081662d0b",
+      "pixel_size": [
+        90,
+        129
+      ],
+      "source_resolution_preserved": true,
+      "alpha_channel": true,
+      "edge_foreground_pixels": 0,
+      "transparency_method": "border-connected light-backdrop removal; retained original foreground RGB",
+      "notes": "Source is low-resolution; inspect alpha boundaries at intended game scale."
+    }
+  ]
+}

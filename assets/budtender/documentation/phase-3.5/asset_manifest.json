@@ -1,0 +1,609 @@
+{
+  "project": "Budtender",
+  "phase": "3.5",
+  "title": "Menu and Signage Assets",
+  "status": "CORRECTED_TRANSPARENCY_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "User-supplied crops derived from approved Phase 3.5 artwork sheet; no generative alteration during asset processing",
+  "dynamic_text_note": "Gameplay-changing text should be rendered dynamically by the app; sign art includes static headings and placeholder areas only.",
+  "asset_count": 26,
+  "assets": [
+    {
+      "filename": "sign_info_responsible_use.png",
+      "category": "info_notice",
+      "description": "Responsible Use Notice",
+      "source_filename": "97c97cd2-9612-5f55-9ca2-0ddd340d987c.png",
+      "source_sha256": "118f87cfb7a80854a933660ee21f08014968b0a8cb24cfb4fdc47ef330f978cf",
+      "output_sha256": "b03aed7b239d0df4ebe552846e91d9b6a3a29f24d734963c4335b8af153b7ccd",
+      "dimensions_px": [
+        307,
+        192
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        0,
+        298,
+        191
+      ],
+      "transparent_pixel_fraction": 0.1685,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_info_age_verification.png",
+      "category": "info_notice",
+      "description": "Age Verification Notice",
+      "source_filename": "edf48c04-0bc4-5244-bcf1-29402400c174.png",
+      "source_sha256": "28acc62f0a7e6d7d8392d5d97f711cb9f1fb083cce97bee6d7bcd0bc8e29c3cf",
+      "output_sha256": "ef963f0230477adf7d838d6e7d902b3e27e885753f59863fc8bdee7331ab8f37",
+      "dimensions_px": [
+        301,
+        199
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        15,
+        0,
+        298,
+        195
+      ],
+      "transparent_pixel_fraction": 0.2382,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_info_store_hours.png",
+      "category": "info_notice",
+      "description": "Store Hours Plaque",
+      "source_filename": "71986868-c963-5c3a-95ad-1617cb3ae4b5.png",
+      "source_sha256": "edfeb178e7512237e120d4f0554dc6c5789378934e09a66079a65bb594224135",
+      "output_sha256": "8de4e90d99dffd93efe3baf23676b14038d72b9e384ba3844261093584609a86",
+      "dimensions_px": [
+        262,
+        209
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        16,
+        253,
+        201
+      ],
+      "transparent_pixel_fraction": 0.2531,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_promo_loyalty.png",
+      "category": "promo_sign",
+      "description": "Loyalty Program Sign",
+      "source_filename": "9539e4b1-0be7-5f29-a6ce-1bbbecadec1c.png",
+      "source_sha256": "22bb694312a7d6544c6b10d7fda671123025996894904343e37dbb54445d630c",
+      "output_sha256": "f4b7dffc13c3eaad4f286a803f71ea6dca46bc08819d719f18f91c5b60cecf82",
+      "dimensions_px": [
+        220,
+        251
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        11,
+        220,
+        243
+      ],
+      "transparent_pixel_fraction": 0.2628,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_promo_weekly_deals.png",
+      "category": "promo_sign",
+      "description": "Weekly Deals Board",
+      "source_filename": "e930da4e-9151-5396-83fe-a756b37ddf5c.png",
+      "source_sha256": "c6eea44f806e81f173a9af052c1e51a21f307e1d100e69ca5528a87b9baa8a5f",
+      "output_sha256": "93d37ef18dcc1069cc2a8b4a980ad67f3a8008359785ca3e24946c55fe7e7dcf",
+      "dimensions_px": [
+        242,
+        215
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        6,
+        238,
+        211
+      ],
+      "transparent_pixel_fraction": 0.2428,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_promo_daily_specials.png",
+      "category": "promo_sign",
+      "description": "Daily Specials Board",
+      "source_filename": "1557387d-c934-5299-8487-01af33567c43.png",
+      "source_sha256": "dc0b3cbd6d19d2c0c092c2c6f7d4639266c21b56278a750d0e403a9fdea31f3e",
+      "output_sha256": "f42e18f1deaa28e83bce3b07e1978036f67299a52e1574448d881d4ed7f1f558",
+      "dimensions_px": [
+        263,
+        217
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        17,
+        0,
+        263,
+        215
+      ],
+      "transparent_pixel_fraction": 0.2832,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_queue.png",
+      "category": "store_navigation",
+      "description": "Queue Direction Sign",
+      "source_filename": "7b1442a7-f548-587a-b128-547e21ae85a5.png",
+      "source_sha256": "c922cf34aac4f00a70a144c4520c3e8d136701f48a0510adf66b8483a87084a1",
+      "output_sha256": "3f8d5507d51688fd46eabe3e19e027996514afebf1eca85c789736b2c3a65019",
+      "dimensions_px": [
+        173,
+        203
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        12,
+        161,
+        195
+      ],
+      "transparent_pixel_fraction": 0.4515,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_storage.png",
+      "category": "store_navigation",
+      "description": "Storage Sign",
+      "source_filename": "fd5d8036-5455-57d4-a88c-873dd9c90de4.png",
+      "source_sha256": "062b05c5528729b01d14332961fa120f745e51da878a28c55057985d76e9edab",
+      "output_sha256": "82d8e5a89546fff4e7820a6fe960d8ba9ad2a62c82620d966b62029690b2f8bb",
+      "dimensions_px": [
+        223,
+        147
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        15,
+        15,
+        215,
+        123
+      ],
+      "transparent_pixel_fraction": 0.4392,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_staff_only.png",
+      "category": "store_navigation",
+      "description": "Staff-Only Sign",
+      "source_filename": "ae249a14-4a58-5a24-b169-b33dcc4d5eaf.png",
+      "source_sha256": "53dcd8d25c11044ab923605807009998e4911b4deab7206cdd7d4968c3e65e83",
+      "output_sha256": "2c581e351bcbc125cf9a4d99c060f7cec91b2bfd38a3edbc956f9ae9a7e2668c",
+      "dimensions_px": [
+        212,
+        139
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        15,
+        206,
+        123
+      ],
+      "transparent_pixel_fraction": 0.3817,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_pickup.png",
+      "category": "store_navigation",
+      "description": "Pickup Sign",
+      "source_filename": "d70a3c00-ba2e-5895-832b-3b5f139d2864.png",
+      "source_sha256": "3c960818b1190793800f552343c10b3b20120881ecb96dd65327cfa7b281fdcf",
+      "output_sha256": "2a0c7aaaa065b1ddc37adccf03f3248f1db28e524e2460a09e7e7aa0397e935e",
+      "dimensions_px": [
+        323,
+        161
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        0,
+        309,
+        156
+      ],
+      "transparent_pixel_fraction": 0.3901,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_checkout.png",
+      "category": "store_navigation",
+      "description": "Checkout Sign",
+      "source_filename": "84c6d138-d16a-5ed1-b1aa-ce46bf937482.png",
+      "source_sha256": "2f6aa34bd13a0d14a8054227bd14c78d275ddb1da89496813d96933c2545c606",
+      "output_sha256": "6c244987e83e27a858433d71c5f3b1e4e0288b4f7f10f70a1759898c43a74602",
+      "dimensions_px": [
+        323,
+        165
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        8,
+        293,
+        148
+      ],
+      "transparent_pixel_fraction": 0.4579,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_open_closed.png",
+      "category": "store_navigation",
+      "description": "Open / Closed Sign",
+      "source_filename": "eb4c3312-ccf7-597c-a7a3-6a7f5d6dbfa3.png",
+      "source_sha256": "856aa936f4615410c6490cb1b99df1d23cf625b86f07a19855d7cc55ca72e1e3",
+      "output_sha256": "9a3b42e36f7f6460ea76f83a0ff141e0567733f2e52dce6d80aec4c311f99956",
+      "dimensions_px": [
+        198,
+        195
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        0,
+        198,
+        193
+      ],
+      "transparent_pixel_fraction": 0.3994,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_store_welcome.png",
+      "category": "store_navigation",
+      "description": "Welcome Sign",
+      "source_filename": "8ae3738c-e29a-510f-b88f-7af02df2361a.png",
+      "source_sha256": "3e5a4bfbb25a40204a651714cb178134d8bbd2840d88fc25405dd4938975c560",
+      "output_sha256": "0241b36d38d1450fdea35d7aaa12176f44663e5e3b2f3e94c6e66a26c4771690",
+      "dimensions_px": [
+        244,
+        193
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        8,
+        232,
+        185
+      ],
+      "transparent_pixel_fraction": 0.3502,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_sold_out.png",
+      "category": "product_sign",
+      "description": "Sold-Out Sign",
+      "source_filename": "ef72cb34-7532-5867-a982-0c8e2f25081f.png",
+      "source_sha256": "cb82487ec6f627a9c4e7fded71218f6e419057757cd4322bb7d5cb157e36d057",
+      "output_sha256": "db63cc4a07819963c51ad6b9bab04d0179539e203411854bebd3320908dcc1b6",
+      "dimensions_px": [
+        208,
+        185
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        16,
+        201,
+        168
+      ],
+      "transparent_pixel_fraction": 0.3966,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_staff_pick.png",
+      "category": "product_sign",
+      "description": "Staff Recommendation Card",
+      "source_filename": "91d56f66-d998-5c56-9764-2670533c0cb1.png",
+      "source_sha256": "f14fa33d63c877ee544d27048da9bdc25cfbf29888635972a376e8125438653c",
+      "output_sha256": "2d9a0df7209007b17db31d7e07b7fc2da88c6fade3c66a81d82d634b3c1442a0",
+      "dimensions_px": [
+        229,
+        216
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        18,
+        0,
+        219,
+        209
+      ],
+      "transparent_pixel_fraction": 0.3895,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_new_arrival.png",
+      "category": "product_sign",
+      "description": "New Arrival Sign",
+      "source_filename": "2ab35a38-ef96-5f7b-a098-55b61f0b00de.png",
+      "source_sha256": "6894eac841f219472b3d1f33e2a8da340301d26ade4648e5a1e6bb7f90ae6404",
+      "output_sha256": "ebb6458eff57594157bbb66c2361f53ec552ec6c90f4c16269b8aada235a7b6a",
+      "dimensions_px": [
+        216,
+        208
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        13,
+        201,
+        206
+      ],
+      "transparent_pixel_fraction": 0.3586,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_sale.png",
+      "category": "product_sign",
+      "description": "Sale Sign",
+      "source_filename": "5f1bec62-c2fd-5e98-9170-7b3f8327eb2e.png",
+      "source_sha256": "89ea16e8b932279fc6171d4e8052c99aba22cf4dfc1a19d4d73dfe622fb6b028",
+      "output_sha256": "4126e034b8ce117f6e4a117605351d7126810eb3420604978da63392db857675",
+      "dimensions_px": [
+        221,
+        208
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        13,
+        6,
+        215,
+        203
+      ],
+      "transparent_pixel_fraction": 0.3416,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_premium.png",
+      "category": "product_sign",
+      "description": "Premium Product Badge",
+      "source_filename": "6b6c13c5-fa49-55a7-ba56-1e7673bc03ff.png",
+      "source_sha256": "f421b0abad2b174160d7c196e2544c038221ef7e55e69f1501c79a14b792fac9",
+      "output_sha256": "2a46b6fb3547bdc9e35de7b53cf2c9316e5b06d2beeab7b80086847b1a550215",
+      "dimensions_px": [
+        227,
+        161
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        8,
+        223,
+        158
+      ],
+      "transparent_pixel_fraction": 0.3371,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_price.png",
+      "category": "product_sign",
+      "description": "Product Price Card",
+      "source_filename": "95b887e6-928a-501b-96fd-ebea66612650.png",
+      "source_sha256": "f542a73cf033c754d7926822e781a33778574361ad7d8d022cbe44739cd17499",
+      "output_sha256": "f7084094cd7694f668d16fa69eb12bcc6c38e7d74b5e08a8f7bd07ace2c497ae",
+      "dimensions_px": [
+        216,
+        152
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        6,
+        2,
+        211,
+        148
+      ],
+      "transparent_pixel_fraction": 0.2766,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_product_category.png",
+      "category": "product_sign",
+      "description": "Shelf Category Label",
+      "source_filename": "d0f24bb5-03d6-56d4-8dc1-74486d47a66d.png",
+      "source_sha256": "c5c77ad7e0aa64266b79955eaa2b88ced62b664da28e733a236d675f39d0b9de",
+      "output_sha256": "0a254f4b0982e9700d5e0fa00e48b1ecc179fd54942870242bd3f3916e9e9c3b",
+      "dimensions_px": [
+        244,
+        144
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        10,
+        17,
+        243,
+        135
+      ],
+      "transparent_pixel_fraction": 0.3774,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_menu_vapes.png",
+      "category": "menu_board",
+      "description": "Vape Menu",
+      "source_filename": "9daa27a8-2332-5d24-8da1-b605748314fc.png",
+      "source_sha256": "b15ee77c2e1c0ff3e493621c2e453ebd39b9cdc2ec2e56bb3a561a4f85d24da8",
+      "output_sha256": "bbeb0139cd830397f75b44036999bc26247a8be699c3bb0c714b16ed080a5971",
+      "dimensions_px": [
+        208,
+        291
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        8,
+        200,
+        285
+      ],
+      "transparent_pixel_fraction": 0.1634,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_menu_concentrates.png",
+      "category": "menu_board",
+      "description": "Concentrates / Tinctures Menu",
+      "source_filename": "30d96134-59ea-571f-8fe3-3a7ccc45ed4b.png",
+      "source_sha256": "e3e98a0e53aff188a4e243d02e5f680b4a495a243c0c527d3edd2c8b7a4a2f62",
+      "output_sha256": "e0c2540cf22ef9f702395529cc9ea7d92721fa599d63f282141c135bf3a5a5b6",
+      "dimensions_px": [
+        205,
+        290
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        12,
+        7,
+        201,
+        283
+      ],
+      "transparent_pixel_fraction": 0.1634,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_menu_edibles.png",
+      "category": "menu_board",
+      "description": "Edibles Menu",
+      "source_filename": "5072a958-0f3f-5f9f-8e7e-ea21300b9647.png",
+      "source_sha256": "69746a948490d75b504a9da279a25c131a2e9b153a213493f2946c6e1d2f5ff6",
+      "output_sha256": "5d992db97b79d317168cc37134eb7b16922842537a3740407a2804247a7b939e",
+      "dimensions_px": [
+        202,
+        288
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        8,
+        198,
+        283
+      ],
+      "transparent_pixel_fraction": 0.1514,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_menu_main.png",
+      "category": "menu_board",
+      "description": "Main Menu Board",
+      "source_filename": "999beeb7-20a7-52cf-b7b4-e5ee45b361b3.png",
+      "source_sha256": "532346807277f833c374a4bd2423e41ef6916c51770ad4c03543cd0a6c1fba91",
+      "output_sha256": "f17b6f1060f76eb048712146e327fa08ace3d9419587614f497eb4b3aa60375c",
+      "dimensions_px": [
+        360,
+        302
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        3,
+        350,
+        295
+      ],
+      "transparent_pixel_fraction": 0.1465,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_menu_prerolls.png",
+      "category": "menu_board",
+      "description": "Pre-Roll Menu",
+      "source_filename": "54d6bd1b-e8c4-55ef-85b0-089ef4af4a95.png",
+      "source_sha256": "d90ba6b38974fdb37726a6cebf08fd9a02ab0ca0d60ee125dc566a482ca6d8df",
+      "output_sha256": "3897f52af9f6359647668a4f0aa52b72b5f5d5e686a54d588de867e5146d240d",
+      "dimensions_px": [
+        199,
+        289
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        9,
+        6,
+        196,
+        281
+      ],
+      "transparent_pixel_fraction": 0.1542,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    },
+    {
+      "filename": "sign_menu_flower.png",
+      "category": "menu_board",
+      "description": "Flower Menu",
+      "source_filename": "36ef3b5d-4a72-5310-9245-5ec08c6868b0.png",
+      "source_sha256": "4803afaf53077cc2ef3734fa6eea16f4f990544c27b50440f6c43ad0ddc46464",
+      "output_sha256": "486214abf16a3a2c8e8c2971a839822e3ae8c9046861a39a90f22fbb5e4946df",
+      "dimensions_px": [
+        212,
+        294
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        14,
+        14,
+        203,
+        288
+      ],
+      "transparent_pixel_fraction": 0.2113,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true,
+      "dynamic_text_ready": true
+    }
+  ]
+}

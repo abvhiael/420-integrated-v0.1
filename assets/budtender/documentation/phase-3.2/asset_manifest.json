@@ -1,0 +1,384 @@
+{
+  "project": "Budtender",
+  "phase": "3.2",
+  "title": "Primary Service Counter Kit",
+  "status": "CORRECTED_TRANSPARENCY_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "Existing approved Phase asset images, rebuilt for true transparent-background output without redesign or stylistic change",
+  "asset_count": 17,
+  "assets": [
+    {
+      "filename": "counter_bagging_area.png",
+      "category": "counter_structure",
+      "description": "counter bagging area",
+      "source_filename": "counter_bagging_area.png",
+      "source_sha256": "5360e51b8abbeb01b93a391b53320810cdeb78ce2c01626dd4ecca8854b0d5cd",
+      "output_sha256": "ab6a4e427559201fe08db1d8c699021a60d91f289b2b596aca8b6586ca2c6455",
+      "dimensions_px": [
+        109,
+        104
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        5,
+        108,
+        101
+      ],
+      "transparent_pixel_fraction": 0.279,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "counter_glass_display_front.png",
+      "category": "counter_structure",
+      "description": "counter glass display front",
+      "source_filename": "counter_glass_display_front.png",
+      "source_sha256": "f2871c1b56aedb766698ff0d380332f38e2459230b44955e80744f694e0f0eb0",
+      "output_sha256": "b00948eb4085cd634349ec9e24e7e842d6cab9de903f4a31acf27db9a7753c9f",
+      "dimensions_px": [
+        160,
+        96
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        5,
+        160,
+        90
+      ],
+      "transparent_pixel_fraction": 0.2198,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "counter_left_end_cap.png",
+      "category": "counter_structure",
+      "description": "counter left end cap",
+      "source_filename": "counter_left_end_cap.png",
+      "source_sha256": "0a430e723f78e40d49bc863c5dd6d032e1e1a8257726cbc3f7477410c33ed23c",
+      "output_sha256": "c127c67df693bc868b801deac5115b8119069a96faa1560de7256e010aa3e011",
+      "dimensions_px": [
+        91,
+        108
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        0,
+        87,
+        107
+      ],
+      "transparent_pixel_fraction": 0.3077,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "counter_lower_storage_cabinets.png",
+      "category": "counter_structure",
+      "description": "counter lower storage cabinets",
+      "source_filename": "counter_lower_storage_cabinets.png",
+      "source_sha256": "cd459202fbb6f05471b43eb4ea7c525abe29c736b67b4ba91cce59a1d83d4250",
+      "output_sha256": "561721834fc211d5a28cc37fa8ae7cc31f1f9e2f0655bf38e9c73b8803293a64",
+      "dimensions_px": [
+        162,
+        99
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        8,
+        159,
+        97
+      ],
+      "transparent_pixel_fraction": 0.2838,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "counter_main_body.png",
+      "category": "counter_structure",
+      "description": "counter main body",
+      "source_filename": "counter_main_body.png",
+      "source_sha256": "0d4ec4194b550fecb6e7134d591a56e757cba3460f544bc8ceb16f9cc7ec117d",
+      "output_sha256": "50a179de0ec136b35fddf638307318648a3ba45e6678b05e32954f56303197cc",
+      "dimensions_px": [
+        139,
+        102
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        4,
+        139,
+        94
+      ],
+      "transparent_pixel_fraction": 0.2244,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "counter_register_module.png",
+      "category": "counter_structure",
+      "description": "counter register module",
+      "source_filename": "counter_register_module.png",
+      "source_sha256": "4e5814858e0189cb2865141c9468f3465fe3a3ce68e4dd6bec78b0c4015a3ad3",
+      "output_sha256": "998aac98d60424ea3f96d1ecaa5c02e72f9c5c9f233f68954cfca9b13665dfca",
+      "dimensions_px": [
+        104,
+        106
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        1,
+        103,
+        103
+      ],
+      "transparent_pixel_fraction": 0.2221,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "counter_right_end_cap.png",
+      "category": "counter_structure",
+      "description": "counter right end cap",
+      "source_filename": "counter_right_end_cap.png",
+      "source_sha256": "62a4fb769ec51eb02813e949db5932ccaa1e740ad04a24fc80cf2a81d955ec46",
+      "output_sha256": "04fe5227ab9327cb8c681fba78051777c4ad8bf747fef3ab7844c5b8caed8cc7",
+      "dimensions_px": [
+        113,
+        108
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        0,
+        112,
+        107
+      ],
+      "transparent_pixel_fraction": 0.2755,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_branded_bag.png",
+      "category": "interactive_prop",
+      "description": "prop branded bag",
+      "source_filename": "prop_branded_bag.png",
+      "source_sha256": "78c306393786583ab07d2c3dff8ca83bed77c7aef3d536f18c7078ad829fb1be",
+      "output_sha256": "96b40391f6292f0d7560917ce16bdc380e85f13cd7aeb27ed4aea70cc3a48bb0",
+      "dimensions_px": [
+        77,
+        75
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        8,
+        0,
+        73,
+        75
+      ],
+      "transparent_pixel_fraction": 0.3668,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_clipboard.png",
+      "category": "interactive_prop",
+      "description": "prop clipboard",
+      "source_filename": "prop_clipboard.png",
+      "source_sha256": "f666d6787128caa873fc20cb827c56da6774a7e491677833a7f96562a921cff2",
+      "output_sha256": "6a2762e7c52b7ffdc537a01c4ccdf986f83d0785df44a04da2070c7e1fdb1093",
+      "dimensions_px": [
+        59,
+        87
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        12,
+        52,
+        81
+      ],
+      "transparent_pixel_fraction": 0.4551,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_display_jar.png",
+      "category": "interactive_prop",
+      "description": "prop display jar",
+      "source_filename": "prop_display_jar.png",
+      "source_sha256": "4158e28371e9d09541b1cf21ab560bf8426f6b3775f7909214524d41ead3b4b1",
+      "output_sha256": "f8c6e4f4b700881a248381f7f353b3bd712f98d4ebc1256fe1f0af15bf30a898",
+      "dimensions_px": [
+        65,
+        71
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        7,
+        3,
+        59,
+        65
+      ],
+      "transparent_pixel_fraction": 0.4121,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_pos_register.png",
+      "category": "interactive_prop",
+      "description": "prop pos register",
+      "source_filename": "prop_pos_register.png",
+      "source_sha256": "a77c57a17d16df17cadfc753f5a6be6a12b6e7963c969bd27f093e28df42357d",
+      "output_sha256": "db5123a9c037e62b54551660e1d71b75f9f264decfbe04dc84d3115fb793d559",
+      "dimensions_px": [
+        89,
+        73
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        0,
+        85,
+        70
+      ],
+      "transparent_pixel_fraction": 0.4013,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_product_cards.png",
+      "category": "interactive_prop",
+      "description": "prop product cards",
+      "source_filename": "prop_product_cards.png",
+      "source_sha256": "91e6d19be274bfdac1cc4362915966643c96cd6daf39480051f1871bad0845ed",
+      "output_sha256": "1ae5b917d98373ff3df4dab04416b1ddf68f683c0cf313bf29784dbe7742c8bd",
+      "dimensions_px": [
+        71,
+        72
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        4,
+        62,
+        67
+      ],
+      "transparent_pixel_fraction": 0.4486,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_receipt_printer.png",
+      "category": "interactive_prop",
+      "description": "prop receipt printer",
+      "source_filename": "prop_receipt_printer.png",
+      "source_sha256": "594098f693a971c7957ddc31b542db472a4e36e5c1763eae9ed2da739977f091",
+      "output_sha256": "8d43afd93e21b24fb5865662319976166fb1183d6ee093d891343eae22ff44aa",
+      "dimensions_px": [
+        54,
+        61
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        7,
+        52,
+        56
+      ],
+      "transparent_pixel_fraction": 0.4229,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_sample_tray.png",
+      "category": "interactive_prop",
+      "description": "prop sample tray",
+      "source_filename": "prop_sample_tray.png",
+      "source_sha256": "54b05125570c8a0d5148984c2a00e082618f16c2a89ec7af111366677778c51e",
+      "output_sha256": "b8a1487270b5418427177695981c5a07ee88976948322c7c372b04217312d74d",
+      "dimensions_px": [
+        90,
+        64
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        5,
+        88,
+        61
+      ],
+      "transparent_pixel_fraction": 0.4592,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_staff_stool.png",
+      "category": "interactive_prop",
+      "description": "prop staff stool",
+      "source_filename": "prop_staff_stool.png",
+      "source_sha256": "476c873e80df2ad17dacdf58c10d865f650ab789ec3537bb10843b00a33f6fc7",
+      "output_sha256": "7be89a3dd24d1d0faa27147d3461debf880916d3c341a2e72ceb4051f3ad9ca9",
+      "dimensions_px": [
+        61,
+        73
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        1,
+        54,
+        71
+      ],
+      "transparent_pixel_fraction": 0.4123,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_stock_box.png",
+      "category": "interactive_prop",
+      "description": "prop stock box",
+      "source_filename": "prop_stock_box.png",
+      "source_sha256": "d9a2de832f8e7f5cdcde285025875008373e99e1022f773a53e91734e1f1d772",
+      "output_sha256": "9db0d4f69956fcf464e4dc42507fc464cab746afdbc881c5fa164b52541b90a9",
+      "dimensions_px": [
+        68,
+        73
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        0,
+        3,
+        64,
+        70
+      ],
+      "transparent_pixel_fraction": 0.2812,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "prop_tip_jar.png",
+      "category": "interactive_prop",
+      "description": "prop tip jar",
+      "source_filename": "prop_tip_jar.png",
+      "source_sha256": "9a576b39ac9e76611211779f8fb549a334be63c29bc0530b5895602a7613a6e6",
+      "output_sha256": "17b5d0a9960544b32f643a47e9618185145cf4ab322696d89890d9b385edf61f",
+      "dimensions_px": [
+        44,
+        66
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        21,
+        40,
+        65
+      ],
+      "transparent_pixel_fraction": 0.5489,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    }
+  ]
+}

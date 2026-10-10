@@ -1,0 +1,594 @@
+{
+  "project": "Budtender",
+  "phase": "3.13",
+  "title": "Wall D\u00e9cor Kit",
+  "status": "PROCESSED_PENDING_VISUAL_QUALIFICATION",
+  "asset_count": 32,
+  "source_truth": "User-supplied 32 approved crops",
+  "qualification": {
+    "filename_count": "PASS",
+    "rgba_mode": "PASS",
+    "transparency_present": "PASS (32/32 contain transparent pixels)",
+    "modular_edge_alignment": "NOT_QUALIFIED (must test in game)",
+    "visual_cutout_review": "PENDING",
+    "archive_inventory": "PASS (32 PNGs + README, manifest, preview)"
+  },
+  "assets": [
+    {
+      "filename": "wall_art_botanical_cannabis.png",
+      "source_filename": "wall_art_botanical_cannabis.png.png",
+      "source_sha256": "3f60c6ad635d668a2a1d36ad7fffc1c86d4489478e3ea6d1ef3c98ccd081d1f3",
+      "sha256": "acbf946f8ea54db5426ee439ece0e8a32d1146273378e53597b1de0f8c255735",
+      "dimensions": [
+        158,
+        216
+      ],
+      "alpha_zero_fraction": 0.1201,
+      "visible_bounds_xywh": [
+        0,
+        3,
+        157,
+        213
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_monstera.png",
+      "source_filename": "wall_art_monstera.png.png",
+      "source_sha256": "898fbc082272207597b1838dcb284e2e9472f32ba36d312af55f68f4cf69868f",
+      "sha256": "a17abf97b7906ccfb6e02af8950f3e09dff46d7401fdb505f0edb1b8e90e2850",
+      "dimensions": [
+        133,
+        196
+      ],
+      "alpha_zero_fraction": 0.1287,
+      "visible_bounds_xywh": [
+        1,
+        3,
+        132,
+        191
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_pressed_herbs.png",
+      "source_filename": "wall_art_pressed_herbs.png.png",
+      "source_sha256": "e8925d10ff9dc6a4337ee5dcae3323ae1f91fa09a72732d762387a80af73460c",
+      "sha256": "029d6e64e6d1a0e2e544edd6f5e66124423f1e68a8b16c7da0a087f9cfd1d87c",
+      "dimensions": [
+        134,
+        202
+      ],
+      "alpha_zero_fraction": 0.1264,
+      "visible_bounds_xywh": [
+        2,
+        2,
+        132,
+        199
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_vintage_ad.png",
+      "source_filename": "wall_art_vintage_ad.png.png",
+      "source_sha256": "e2f708194567a8f43588ca7142082090703a8b338f7ec015432c05b8d5e318df",
+      "sha256": "e2dd3899368789cfa0034da7c3111ef597d3cbed2a208b90d58d1ca9d6b8c17e",
+      "dimensions": [
+        143,
+        219
+      ],
+      "alpha_zero_fraction": 0.1254,
+      "visible_bounds_xywh": [
+        0,
+        6,
+        143,
+        213
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_triptych.png",
+      "source_filename": "wall_art_triptych.png.png",
+      "source_sha256": "e728487dc5bee917d3f91c3089b77c3aa154f3b8835fb09a71e401d44fda1c99",
+      "sha256": "09d97921dd7fe833f45fd30a9fc7a8d3b280a5c6d5ec133e797b647760d26f39",
+      "dimensions": [
+        224,
+        188
+      ],
+      "alpha_zero_fraction": 0.1647,
+      "visible_bounds_xywh": [
+        0,
+        4,
+        223,
+        183
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_abstract.png",
+      "source_filename": "wall_art_abstract.png.png",
+      "source_sha256": "8e251f3ecb2139a1ac52ca845d7f8a5a9312a7016c1654e02f50a9ebb77eeb70",
+      "sha256": "0bc598799b93fa973f25558770054f2a93dc68f26edd949eaa7ce3a8841b0675",
+      "dimensions": [
+        126,
+        199
+      ],
+      "alpha_zero_fraction": 0.1172,
+      "visible_bounds_xywh": [
+        1,
+        5,
+        125,
+        194
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_premium_gold.png",
+      "source_filename": "wall_art_premium_gold.png.png",
+      "source_sha256": "e9899fe99202939cf18e3efd74fc3bf3b58494fe99fe9bcb998ff5b0ba1a42e7",
+      "sha256": "2385147a81ff68ce6c7dbe4c43d80c1baa427c0d4f71225c248f8908a2526140",
+      "dimensions": [
+        121,
+        201
+      ],
+      "alpha_zero_fraction": 0.1186,
+      "visible_bounds_xywh": [
+        1,
+        4,
+        120,
+        197
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_art_landscape.png",
+      "source_filename": "wall_art_landscape.png.png",
+      "source_sha256": "3c5bfff82755715dab75c9fe4b56e030b248372d8104f76c5d09d4893914a4cb",
+      "sha256": "eacce34f3a806ae3467f3a520469f577bdb0acf0b0bd1e26bf076cd72f3f74f6",
+      "dimensions": [
+        166,
+        207
+      ],
+      "alpha_zero_fraction": 0.1771,
+      "visible_bounds_xywh": [
+        6,
+        1,
+        160,
+        204
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_panel_walnut.png",
+      "source_filename": "wall_panel_walnut.png.png",
+      "source_sha256": "e7d4e7c53a71d0d6ea9e3dc9ef982a11095c0f1f0035cd8d8e7570bc7b4ec80e",
+      "sha256": "1c4c7871361bd6fcb966be15cc67bc8ce074e2704b22669d9d0c8d45ee207378",
+      "dimensions": [
+        153,
+        203
+      ],
+      "alpha_zero_fraction": 0.1736,
+      "visible_bounds_xywh": [
+        0,
+        6,
+        153,
+        196
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_panel_wainscoting.png",
+      "source_filename": "wall_panel_wainscoting.png.png",
+      "source_sha256": "5f0228b64fbf8a6875518ec00fa09267f5fe0a735c1a024023fa47059de7d75b",
+      "sha256": "541f9b1b5465333bcce1390d40163b9751bad5ccdb1d2de009aa82b8860c34f7",
+      "dimensions": [
+        157,
+        190
+      ],
+      "alpha_zero_fraction": 0.1904,
+      "visible_bounds_xywh": [
+        0,
+        5,
+        157,
+        182
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_trim_brass.png",
+      "source_filename": "New Project.png",
+      "source_sha256": "3209a6792c7ef202eec86f9658cf71c8bed29c845be416bcf7d3d1cb519a4f34",
+      "sha256": "eded9d41d5a5cf5596edb6a47be1da9d169d6c2630c7333aeb3bfcc35d4d0979",
+      "dimensions": [
+        142,
+        117
+      ],
+      "alpha_zero_fraction": 0.4159,
+      "visible_bounds_xywh": [
+        4,
+        8,
+        135,
+        102
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_picture_rail.png",
+      "source_filename": "wall_picture_rail.png.png",
+      "source_sha256": "3cd32a09d9c3a829831edd8c7785cf5506a7cc90ab9ad3db64ccaa49fc44b897",
+      "sha256": "48bf1e9508cf3daaf169290ff180d7d45a312ed52590c9fb2d923fb8c8eceb1d",
+      "dimensions": [
+        195,
+        131
+      ],
+      "alpha_zero_fraction": 0.3997,
+      "visible_bounds_xywh": [
+        1,
+        5,
+        193,
+        120
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_corner_molding.png",
+      "source_filename": "wall_corner_molding.png.png",
+      "source_sha256": "470b67cbf7d661d3ecbf7b6df8007eca8c58e7e34fa949e1449bf894ca1df5e0",
+      "sha256": "84cf2f7796253c1517acf65267314413d51ceac7211e3d69774798ce73ecf042",
+      "dimensions": [
+        82,
+        187
+      ],
+      "alpha_zero_fraction": 0.3906,
+      "visible_bounds_xywh": [
+        0,
+        5,
+        80,
+        181
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_panel_plaster.png",
+      "source_filename": "wall_panel_plaster.png.png",
+      "source_sha256": "4cbfc75bc09ce110a927503e578696464a32fbef0001874581045c99a05d8ddb",
+      "sha256": "0d1b6a7f6a5afb439bf371eb3611011343000ab431c8bb581d95582e8efb2f3c",
+      "dimensions": [
+        177,
+        212
+      ],
+      "alpha_zero_fraction": 0.2015,
+      "visible_bounds_xywh": [
+        0,
+        7,
+        177,
+        202
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_panel_fluted.png",
+      "source_filename": "wall_panel_fluted.png.png",
+      "source_sha256": "f95f14f48aa8a1d23cd6e484dff6edcb4922b538c78c3ccd1e1b4248630c0c5e",
+      "sha256": "1207dd9417d73ac557d7c725c7e01a04dc01ec723a55bb04a14159af51ec3b7b",
+      "dimensions": [
+        140,
+        204
+      ],
+      "alpha_zero_fraction": 0.1983,
+      "visible_bounds_xywh": [
+        3,
+        8,
+        136,
+        196
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_panel_botanical_wallpaper.png",
+      "source_filename": "wall_panel_botanical_wallpaper.png.png",
+      "source_sha256": "34aa58aa8c167f994b46055ed29df40bd507547096c87699686cdfbe114b5b6b",
+      "sha256": "4cdfa615794054d62d16b9c539b4deca6892b0b53e0f8d8b1a9879fd5d86e680",
+      "dimensions": [
+        143,
+        216
+      ],
+      "alpha_zero_fraction": 0.1837,
+      "visible_bounds_xywh": [
+        1,
+        8,
+        142,
+        205
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_planter_brass.png",
+      "source_filename": "wall_decor_planter_brass.png.png",
+      "source_sha256": "0498b909268b8f8ee287d7a26ae17ba332bbeb278828d20280e3e5c64374dd9d",
+      "sha256": "bef9ef7d172ee21c7237f0284bf94786a1135cc3332195261c316e10a0636a72",
+      "dimensions": [
+        168,
+        216
+      ],
+      "alpha_zero_fraction": 0.4255,
+      "visible_bounds_xywh": [
+        2,
+        2,
+        166,
+        213
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_plant_shelf.png",
+      "source_filename": "wall_decor_plant_shelf.png.png",
+      "source_sha256": "e58a4f28f8b74e447eb9c3dab27b6bf0e366b78eb5470697385f33831157b03c",
+      "sha256": "5bb243e80141d48ccd013e11af3116baf91b566a1020608465fd6572061613a9",
+      "dimensions": [
+        176,
+        190
+      ],
+      "alpha_zero_fraction": 0.3952,
+      "visible_bounds_xywh": [
+        2,
+        4,
+        172,
+        184
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_hanging_basket.png",
+      "source_filename": "wall_decor_hanging_basket.png.png",
+      "source_sha256": "a33ad24fcf39a032ea8aa88deaefc7cf85d33ffc4d61a0f4e91a2c3bda97881c",
+      "sha256": "7b806a99b4b239a8626a527ad11b0405a52fd874977315e271cfbd7d5d721909",
+      "dimensions": [
+        120,
+        204
+      ],
+      "alpha_zero_fraction": 0.4436,
+      "visible_bounds_xywh": [
+        0,
+        1,
+        118,
+        199
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_moss_frame.png",
+      "source_filename": "wall_decor_moss_frame.png.png",
+      "source_sha256": "e251d15d758f3948e49a941bdd32c70df94a047821162e8eaeb843fe416a9edd",
+      "sha256": "49f6d7076569e8a831e568061527d2249c76b4446f0640e6cd85164fdba07b1d",
+      "dimensions": [
+        146,
+        178
+      ],
+      "alpha_zero_fraction": 0.1618,
+      "visible_bounds_xywh": [
+        0,
+        6,
+        145,
+        171
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_garland.png",
+      "source_filename": "wall_decor_garland.png.png",
+      "source_sha256": "4277e97f1ccfc80ed53e5dcc88ae605431f9d04f39cc179c1e690735225865b4",
+      "sha256": "2dddf539dd073a8fff6e37af89dd572e3b2ba39509fedc62f1c8cac88a580950",
+      "dimensions": [
+        196,
+        186
+      ],
+      "alpha_zero_fraction": 0.3905,
+      "visible_bounds_xywh": [
+        1,
+        4,
+        194,
+        180
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_herb_display.png",
+      "source_filename": "wall_decor_herb_display.png.png",
+      "source_sha256": "1051a03a92cb4c9606c8fd3d9f4c09752c205958325fad15549e2ff35c6eb96c",
+      "sha256": "2cb868e28b29f5914a2a879a203bc6378bbbe5d0949150b4729c80c1145c6ea3",
+      "dimensions": [
+        123,
+        190
+      ],
+      "alpha_zero_fraction": 0.1939,
+      "visible_bounds_xywh": [
+        0,
+        4,
+        119,
+        184
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_leaf_relief.png",
+      "source_filename": "wall_decor_leaf_relief.png.png",
+      "source_sha256": "88daacdcf55a89c483cfae14a3e329bf5c9311d2b72e4d2b7031cdf24effd427",
+      "sha256": "30a8b1e6516f4afda87f02e20c13fc2b535655f888f0dd6267289489556dd0f5",
+      "dimensions": [
+        138,
+        155
+      ],
+      "alpha_zero_fraction": 0.2558,
+      "visible_bounds_xywh": [
+        2,
+        2,
+        134,
+        151
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_living_wall.png",
+      "source_filename": "wall_decor_living_wall.png.png",
+      "source_sha256": "8fc5f0530149ccf0c0f26254adc8fd2bc998af0fd9f3cdfd70bf4155c7e18988",
+      "sha256": "db0c4d7f2f5cfffcee0d57e5682ba834a5036d7302959afceadb173569114031",
+      "dimensions": [
+        142,
+        222
+      ],
+      "alpha_zero_fraction": 0.2556,
+      "visible_bounds_xywh": [
+        2,
+        0,
+        138,
+        214
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_mirror_brass.png",
+      "source_filename": "wall_decor_mirror_brass.png.png",
+      "source_sha256": "8f2bae27ff48d6ca15700a0ff76a3af85ae2cba77088b94937a2e4f499ffdaf2",
+      "sha256": "c756587a0b5a6b1d9c928d340dcdf1e08535b8b9e1485c8bc58a94f694012f6e",
+      "dimensions": [
+        128,
+        209
+      ],
+      "alpha_zero_fraction": 0.3176,
+      "visible_bounds_xywh": [
+        0,
+        3,
+        128,
+        204
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_clock_vintage.png",
+      "source_filename": "wall_decor_clock_vintage.png.png",
+      "source_sha256": "5f02b8ea8c53139dfbc384eb8b84277d835e65ca3a44a360d6fa2fd61e238ba5",
+      "sha256": "c5d42f86943fe3b76ccd57fac4c6ef9e04b35222c9b9f1baf3c1a148c73a6288",
+      "dimensions": [
+        140,
+        173
+      ],
+      "alpha_zero_fraction": 0.2331,
+      "visible_bounds_xywh": [
+        0,
+        3,
+        139,
+        170
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_heritage_plaque.png",
+      "source_filename": "wall_decor_heritage_plaque.png.png",
+      "source_sha256": "ef79f1bc2f4192d7761869bd9585ac99c50bc2b160764eb0b2a096c505377753",
+      "sha256": "2eab814ae884d9fa02b9e766f678e1eacecae0cfb438b8e1d98c4dfe098fab17",
+      "dimensions": [
+        148,
+        167
+      ],
+      "alpha_zero_fraction": 0.2606,
+      "visible_bounds_xywh": [
+        2,
+        2,
+        142,
+        163
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_emblem_brass.png",
+      "source_filename": "wall_decor_emblem_brass.png.png",
+      "source_sha256": "0ffbb8dd421d08db3f598ebbad68d9274dcd8f3befa8f3bb1e0d1efc545b8c1f",
+      "sha256": "91357ddc48cf298b9e650f81cf1d468088e38dc58c1e5b45f647f053d4bfef9e",
+      "dimensions": [
+        116,
+        154
+      ],
+      "alpha_zero_fraction": 0.48,
+      "visible_bounds_xywh": [
+        2,
+        1,
+        113,
+        151
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_floating_ledge.png",
+      "source_filename": "wall_decor_floating_ledge.png.png",
+      "source_sha256": "a1d9d3238d8b01040fc87b473d55e7ef38c45243ed62c822886212c539244853",
+      "sha256": "e2060b5dfe8d9d5cc52b5293fac1e6f939fb961ac1852dfe31517acf9343daf4",
+      "dimensions": [
+        257,
+        198
+      ],
+      "alpha_zero_fraction": 0.3885,
+      "visible_bounds_xywh": [
+        0,
+        3,
+        257,
+        193
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_community_board.png",
+      "source_filename": "wall_decor_community_board.png.png",
+      "source_sha256": "22649ed626bc0087402d6a27d912b1af7a2abd710a78e2cd465e7a8fa3d80d69",
+      "sha256": "345937a7d12c26de30995a989a924347818ea832bd3c1de98fbee0ffe8fac722",
+      "dimensions": [
+        166,
+        179
+      ],
+      "alpha_zero_fraction": 0.1752,
+      "visible_bounds_xywh": [
+        0,
+        1,
+        164,
+        174
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_backlit_sign.png",
+      "source_filename": "wall_decor_backlit_sign.png.png",
+      "source_sha256": "044fb2410a32e7c11819fc5a7c727dc940302dad4fe45bf977573a641c7c2650",
+      "sha256": "663c47f49d0779480cbeb3731ee0b2da6ef8308d9e884fd7b2d261814039ff99",
+      "dimensions": [
+        154,
+        150
+      ],
+      "alpha_zero_fraction": 0.2474,
+      "visible_bounds_xywh": [
+        2,
+        3,
+        149,
+        144
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    },
+    {
+      "filename": "wall_decor_feature_premium.png",
+      "source_filename": "wall_decor_feature_premium.png.png",
+      "source_sha256": "1b62fc64565b7f65bb943b58bd22ea54185868f8b9f286b7699bafaca30e8a78",
+      "sha256": "41fcf6fa5a298da5d633a9694a68cde51a5f3cdca8aae891c56e94e80feadf08",
+      "dimensions": [
+        139,
+        220
+      ],
+      "alpha_zero_fraction": 0.1795,
+      "visible_bounds_xywh": [
+        3,
+        1,
+        135,
+        219
+      ],
+      "processing": "Connected exterior cream-background removal; original pixels and dimensions retained"
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+{
+  "project": "Budtender",
+  "phase": "3.3",
+  "title": "Product Display Wall System",
+  "status": "CORRECTED_TRANSPARENCY_PENDING_VISUAL_ACCEPTANCE",
+  "source_of_truth": "Existing approved Phase asset images, rebuilt for true transparent-background output without redesign or stylistic change",
+  "asset_count": 16,
+  "assets": [
+    {
+      "filename": "display_category_concentrates.png",
+      "category": "category_display",
+      "description": "Concentrates display tray",
+      "source_filename": "display_category_concentrates.png",
+      "source_sha256": "75f5d3a5f16e88b1e4f7224452e030fe6ab13a43b5308c9d247aed6bc8781a46",
+      "output_sha256": "75f5d3a5f16e88b1e4f7224452e030fe6ab13a43b5308c9d247aed6bc8781a46",
+      "dimensions_px": [
+        131,
+        81
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        3,
+        127,
+        79
+      ],
+      "transparent_pixel_fraction": 0.3825,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_category_edibles.png",
+      "category": "category_display",
+      "description": "Edibles display tray",
+      "source_filename": "display_category_edibles.png",
+      "source_sha256": "05828c0da192a64aa266bf48b63b6e7f852da42d99edea2bf34c36d4b97a2083",
+      "output_sha256": "05828c0da192a64aa266bf48b63b6e7f852da42d99edea2bf34c36d4b97a2083",
+      "dimensions_px": [
+        126,
+        79
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        4,
+        125,
+        77
+      ],
+      "transparent_pixel_fraction": 0.3405,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_category_flower.png",
+      "category": "category_display",
+      "description": "Flower display tray",
+      "source_filename": "display_category_flower.png",
+      "source_sha256": "bc90f473047873f01cda30d26824bc50a70fbce091670400706d2efd8744b820",
+      "output_sha256": "bc90f473047873f01cda30d26824bc50a70fbce091670400706d2efd8744b820",
+      "dimensions_px": [
+        125,
+        85
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        3,
+        5,
+        122,
+        83
+      ],
+      "transparent_pixel_fraction": 0.4159,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_category_prerolls.png",
+      "category": "category_display",
+      "description": "Pre-roll display tray",
+      "source_filename": "display_category_prerolls.png",
+      "source_sha256": "8a1b1391a6a17475944b69429d157bc0646fd68b1e9d965eae4c6b46a7731341",
+      "output_sha256": "8a1b1391a6a17475944b69429d157bc0646fd68b1e9d965eae4c6b46a7731341",
+      "dimensions_px": [
+        111,
+        83
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        5,
+        109,
+        79
+      ],
+      "transparent_pixel_fraction": 0.4003,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_category_tinctures.png",
+      "category": "category_display",
+      "description": "Tincture tray display",
+      "source_filename": "display_category_tinctures.png",
+      "source_sha256": "277d3de8ad605f5a1c702e2915c4f2bc0d620872a2e95fb11c9dc96271a8b68b",
+      "output_sha256": "277d3de8ad605f5a1c702e2915c4f2bc0d620872a2e95fb11c9dc96271a8b68b",
+      "dimensions_px": [
+        130,
+        82
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        0,
+        129,
+        81
+      ],
+      "transparent_pixel_fraction": 0.3606,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_category_vapes.png",
+      "category": "category_display",
+      "description": "Vape display tray (source crop appears visually very similar to tinctures; preserved exactly as supplied)",
+      "source_filename": "display_category_vapes.png",
+      "source_sha256": "277d3de8ad605f5a1c702e2915c4f2bc0d620872a2e95fb11c9dc96271a8b68b",
+      "output_sha256": "277d3de8ad605f5a1c702e2915c4f2bc0d620872a2e95fb11c9dc96271a8b68b",
+      "dimensions_px": [
+        130,
+        82
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        0,
+        129,
+        81
+      ],
+      "transparent_pixel_fraction": 0.3606,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_shelf_corner.png",
+      "category": "shelf_structure",
+      "description": "Corner shelf",
+      "source_filename": "display_shelf_corner.png",
+      "source_sha256": "f2473c0ede56850c4f7aafe5f31adb834bc4a693112753bad739c4645496af2f",
+      "output_sha256": "f2473c0ede56850c4f7aafe5f31adb834bc4a693112753bad739c4645496af2f",
+      "dimensions_px": [
+        96,
+        112
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        3,
+        94,
+        108
+      ],
+      "transparent_pixel_fraction": 0.2267,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_shelf_countertop.png",
+      "category": "shelf_structure",
+      "description": "Small countertop shelf",
+      "source_filename": "display_shelf_countertop.png",
+      "source_sha256": "3c049fb77645f1c9e9efb726ad07b2e0cb4ebdaa716206880fbb06fb4ced6660",
+      "output_sha256": "3c049fb77645f1c9e9efb726ad07b2e0cb4ebdaa716206880fbb06fb4ced6660",
+      "dimensions_px": [
+        130,
+        113
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        2,
+        126,
+        110
+      ],
+      "transparent_pixel_fraction": 0.4285,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_shelf_double.png",
+      "category": "shelf_structure",
+      "description": "Double shelf",
+      "source_filename": "display_shelf_double.png",
+      "source_sha256": "d89c4832b73a41f4326099bfb1e1955c6e9a6e3b8067398549a6843fe36ff6b0",
+      "output_sha256": "d89c4832b73a41f4326099bfb1e1955c6e9a6e3b8067398549a6843fe36ff6b0",
+      "dimensions_px": [
+        105,
+        109
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        6,
+        101,
+        106
+      ],
+      "transparent_pixel_fraction": 0.4621,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_shelf_full_height.png",
+      "category": "shelf_structure",
+      "description": "Full-height shelving bay",
+      "source_filename": "display_shelf_full_height.png",
+      "source_sha256": "80dff72fc39194d3fec3496e6ee7bfa3365d3fa9d4387f4a868cb9b8b190438e",
+      "output_sha256": "80dff72fc39194d3fec3496e6ee7bfa3365d3fa9d4387f4a868cb9b8b190438e",
+      "dimensions_px": [
+        109,
+        113
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        2,
+        106,
+        112
+      ],
+      "transparent_pixel_fraction": 0.2108,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_shelf_single.png",
+      "category": "shelf_structure",
+      "description": "Single shelf",
+      "source_filename": "display_shelf_single.png",
+      "source_sha256": "22078de73be91605f4b11ef3860fdce8a07d77279f7bbf2391d7c94ba6d79b99",
+      "output_sha256": "22078de73be91605f4b11ef3860fdce8a07d77279f7bbf2391d7c94ba6d79b99",
+      "dimensions_px": [
+        97,
+        92
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        5,
+        7,
+        93,
+        85
+      ],
+      "transparent_pixel_fraction": 0.5279,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_state_empty.png",
+      "category": "display_state",
+      "description": "Empty shelf state",
+      "source_filename": "display_state_empty.png",
+      "source_sha256": "a9965e5d26f50285fe4bbd1d958adcbcdc0080fcf1df306bfa4cec5e90e39529",
+      "output_sha256": "a9965e5d26f50285fe4bbd1d958adcbcdc0080fcf1df306bfa4cec5e90e39529",
+      "dimensions_px": [
+        94,
+        92
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        4,
+        92,
+        90
+      ],
+      "transparent_pixel_fraction": 0.2327,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_state_full_stock.png",
+      "category": "display_state",
+      "description": "Full stock shelf state",
+      "source_filename": "display_state_full_stock.png",
+      "source_sha256": "3467b495834802ff5364de1e9c1e974e9241c3118b1a03cf41c5873fb27c6b6c",
+      "output_sha256": "3467b495834802ff5364de1e9c1e974e9241c3118b1a03cf41c5873fb27c6b6c",
+      "dimensions_px": [
+        112,
+        100
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        1,
+        108,
+        100
+      ],
+      "transparent_pixel_fraction": 0.1455,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_state_light_stock.png",
+      "category": "display_state",
+      "description": "Light stock shelf state",
+      "source_filename": "display_state_light_stock.png",
+      "source_sha256": "aa7077d1498fdd4abb25c3c22cd6f5bf4774e087818da1e2f2b075347792fdbd",
+      "output_sha256": "aa7077d1498fdd4abb25c3c22cd6f5bf4774e087818da1e2f2b075347792fdbd",
+      "dimensions_px": [
+        104,
+        95
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        2,
+        1,
+        100,
+        95
+      ],
+      "transparent_pixel_fraction": 0.1999,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_state_medium_stock.png",
+      "category": "display_state",
+      "description": "Medium stock shelf state",
+      "source_filename": "display_state_medium_stock.png",
+      "source_sha256": "68c434a92d2b413d573c870e619347019a49301d0213eb4696734d5c9652f1a4",
+      "output_sha256": "68c434a92d2b413d573c870e619347019a49301d0213eb4696734d5c9652f1a4",
+      "dimensions_px": [
+        109,
+        97
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        4,
+        2,
+        102,
+        96
+      ],
+      "transparent_pixel_fraction": 0.2399,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    },
+    {
+      "filename": "display_state_premium.png",
+      "category": "display_state",
+      "description": "Premium display state (source crop appears visually duplicate of full stock; preserved exactly as supplied)",
+      "source_filename": "display_state_premium.png",
+      "source_sha256": "3467b495834802ff5364de1e9c1e974e9241c3118b1a03cf41c5873fb27c6b6c",
+      "output_sha256": "3467b495834802ff5364de1e9c1e974e9241c3118b1a03cf41c5873fb27c6b6c",
+      "dimensions_px": [
+        112,
+        100
+      ],
+      "mode": "RGBA",
+      "visible_bounds_xyxy": [
+        1,
+        1,
+        108,
+        100
+      ],
+      "transparent_pixel_fraction": 0.1455,
+      "processing": "external_backdrop_removed_to_transparency",
+      "no_resize": true
+    }
+  ]
+}

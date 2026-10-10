@@ -14,3 +14,10 @@ Canonical: R02.5 — Coarse regional presence, geofences, capacity and safe Trav
 - Level 1: `.github/workflows/doobr-r02-5-level1.yml`. Level 2 R02.13; Level 3 R05.10.
 - External regulator/policy signoff and deployed systems deferred to the existing testnet roadmap, not silently marked passing.
 Next step, only after qualification: R02.6 Durable order state machine, exactly-once business semantics through idempotent commands, authorization.
+
+## Ingress and private HTTP adapter integration
+- `doobr/presence_service.py` requires a signed R02.2 identity token, non-revoked session, exact `COURIER/UPDATE_PRESENCE` resource grant, independently verified current R02.4 courier credentials, approved 420Compliance regional decision, active actor, tenant-bound DB session, actual PostGIS boundary inclusion and jurisdiction match before storing bounded presence. Older updates are refused.
+- `doobr/travel_maps_adapter.py` exposes a **read-only, service-to-service** `GET /v1/travel-maps/regions?region_id=...` projection with a private bearer service token. POST/PUT/DELETE are disabled, request credentials are not logged, and responses contain only `doobr-region/v1` schema, coarse region, enum, expiry and policy reference. Caller must provision the private token out of band, behind HTTPS and gateway authorization.
+- `test_presence_service.py` covers successful trusted ingestion, tenant / jurisdiction spoofing, invalid coordinates, revoked signed identity, and projection field minimization.
+- The actual Travel/Maps upstream deployment, service discovery, authorized token provisioning, and live 420Compliance/credential issuer services are **NOT established** by this repository integration. This is an implemented private HTTP adapter, not a deployed cross-service connection; integration with an existing Travel service and its consent/configuration remains an external/phase integration gate, including R03.10, R04.7 and R06.4. Do not publicly enable until acceptance.
+- SHA qualification evidence to be recorded only after the applicable targeted CI is successful.

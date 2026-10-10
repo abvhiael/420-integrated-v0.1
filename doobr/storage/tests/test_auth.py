@@ -16,7 +16,7 @@ class Issuer:
     def is_revoked(self,issuer,jti): return self.revoked
 class Store:
     def __init__(self):
-        self.session=a.Session("tenant-a","actor-a","subject","jti",now+timedelta(minutes=10),False,now+timedelta(minutes=5))
+        self.session=a.Session("tenant-a","actor-a","subject","trusted","jti",now+timedelta(minutes=10),False,now+timedelta(minutes=5))
         self.roles=[a.Grant("COURIER","job-a",now+timedelta(minutes=10),False)]
     def resolve(self, subject,token,tenant): return self.session
     def grants(self,tenant,actor): return self.roles
@@ -31,6 +31,7 @@ class Tests(unittest.TestCase):
          lambda:setattr(self.i,"bad",True),
          lambda:setattr(self.i,"revoked",True),
          lambda:setattr(self.s,"session",replace(self.s.session,revoked=True)),
+         lambda:setattr(self.s,"session",replace(self.s.session,issuer="imposter")),
          lambda:setattr(self.s,"session",replace(self.s.session,expires_at=now)),
          lambda:setattr(self.s,"session",replace(self.s.session,wallet_consent_until=now)),
          lambda:setattr(self.s,"roles",[replace(self.s.roles[0],expires_at=now)]),

@@ -536,13 +536,15 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(product.registered && product.plantId == plantId, "canonical product missing");
         require(product.grower == address(this) && product.parcelId == 11, "relayer stole provenance");
         require(product.genomeId == genomeId && product.expressionHash == expression, "product provenance changed");
-        require(product.rulesetId == approvedRulesetId && product.rulesetContentHash != bytes32(0), "ruleset provenance changed");
+        require(
+            product.rulesetId == approvedRulesetId && product.rulesetContentHash != bytes32(0),
+            "ruleset provenance changed"
+        );
         require(product.quantityGrams == harvest.getHarvestScore(plantId).yieldGrams, "quantity not canonical");
         require(products.issuedGramsByGrower(address(this)) == product.quantityGrams, "grower ledger incorrect");
         require(products.totalIssuedGrams() == product.quantityGrams, "issuance conservation failed");
         require(products.totalRegisteredProducts() == 1, "product count");
-        (bool duplicateProduct,) =
-            address(products).call(abi.encodeCall(products.registerHarvestProduct, (plantId)));
+        (bool duplicateProduct,) = address(products).call(abi.encodeCall(products.registerHarvestProduct, (plantId)));
         require(!duplicateProduct && products.totalIssuedGrams() == product.quantityGrams, "replay inflated inventory");
         HarvestScoring.Result memory scored = harvest.getHarvestScore(plantId);
         HarvestScoring.Result memory quote = harvest.quoteHarvest(plantId);

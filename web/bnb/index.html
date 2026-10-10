@@ -122,15 +122,16 @@ async function loadDrafts(){
  const policyForm=document.createElement("form");
  const makeField=(caption,kind="input")=>{const label=document.createElement("label");label.textContent=caption;const field=document.createElement(kind);field.required=true;label.append(field);return {label,field};};
  const rules=makeField("House rules","textarea"),cancel=makeField("Cancellation policy","textarea"),zone=makeField("IANA timezone");
+ const minStay=makeField("Minimum stay in nights");minStay.field.type="number";minStay.field.min="1";minStay.field.max="90";minStay.field.value="1";
  zone.field.value="America/Regina";
  const savePolicy=document.createElement("button");savePolicy.type="submit";savePolicy.textContent="Save draft policies";
  const policyStatus=document.createElement("p");policyStatus.setAttribute("aria-live","polite");
- policyForm.append(rules.label,cancel.label,zone.label,savePolicy,policyStatus);
+ policyForm.append(rules.label,cancel.label,zone.label,minStay.label,savePolicy,policyStatus);
  policyForm.addEventListener("submit",async event=>{
  event.preventDefault();policyStatus.textContent="Saving policies…";
  try{const r=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/policy",{
  method:"PUT",headers:hostHeaders(),credentials:"omit",body:JSON.stringify({
- house_rules:rules.field.value,cancellation_policy:cancel.field.value,timezone_id:zone.field.value,expected_version:item.version})});
+ house_rules:rules.field.value,cancellation_policy:cancel.field.value,timezone_id:zone.field.value,min_nights:Number(minStay.field.value),expected_version:item.version})});
  if(!r.ok)throw Error("Policy rejected ("+r.status+"). Refresh for latest version.");
  policyStatus.textContent="Draft policy saved.";await loadDrafts();
  }catch(e){policyStatus.textContent=e.message;}

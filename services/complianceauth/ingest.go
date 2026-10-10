@@ -81,7 +81,9 @@ func (f *SourceFetcher) Fetch(ctx context.Context,p SourcePolicy,etag,modified s
  req.Header.Set("Accept","text/html,application/pdf")
  if etag!=""&&!strings.ContainsAny(etag,"\r\n"){req.Header.Set("If-None-Match",etag)}
  if modified!=""&&!strings.ContainsAny(modified,"\r\n"){req.Header.Set("If-Modified-Since",modified)}
- res,err:=f.Client.Do(req);if err!=nil{return Snapshot{},err}
+ client:=*f.Client
+ client.CheckRedirect=func(_ *http.Request,_ []*http.Request)error{return http.ErrUseLastResponse}
+ res,err:=client.Do(req);if err!=nil{return Snapshot{},err}
  defer res.Body.Close()
  if res.Request!=nil && (res.Request.URL==nil||res.Request.URL.String()!=p.URL){return Snapshot{},ErrUnsafeSource}
  if res.StatusCode>=300&&res.StatusCode<400{return Snapshot{},ErrUnsafeSource}

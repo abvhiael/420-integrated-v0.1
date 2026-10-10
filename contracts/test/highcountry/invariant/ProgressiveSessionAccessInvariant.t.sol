@@ -62,10 +62,14 @@ contract ProgressiveSessionAccessHandlerPA4 {
         // Sensitive or unreviewable selectors must remain rejected by policy.
         if (allowed) {
             try sessionAccess.reviewRoutineCall(UNRELATED_TARGET, selector) { }
-            catch { return; }
+            catch {
+                return;
+            }
         }
         try sessionAccess.setRoutineCall(UNRELATED_TARGET, selector, allowed) { }
-        catch { return; }
+        catch {
+            return;
+        }
     }
 }
 

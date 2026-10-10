@@ -109,6 +109,7 @@ class QuoteInput(BaseModel):
     checkin: str
     checkout: str
     units: int=Field(default=1,ge=1,le=100)
+    payer_max_minor: int|None=Field(default=None,ge=0,le=10**15)
     nonce: str=Field(min_length=8,max_length=128)
 
 

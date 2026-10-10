@@ -4,16 +4,20 @@ on:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
     paths:
       - 'doobr/retailer.py'
+      - 'doobr/admission.py'
       - 'doobr/storage/migrations/0003_retailer.up.sql'
       - 'doobr/storage/tests/test_retailer.py'
+      - 'doobr/storage/tests/test_admission.py'
       - 'doobr/storage/tests/r02_3_rls.sql'
       - 'docs/doobr/DOOBR-R02-3-*'
       - '.github/workflows/doobr-r02-3-level1.yml'
   pull_request:
     paths:
       - 'doobr/retailer.py'
+      - 'doobr/admission.py'
       - 'doobr/storage/migrations/0003_retailer.up.sql'
       - 'doobr/storage/tests/test_retailer.py'
+      - 'doobr/storage/tests/test_admission.py'
       - 'doobr/storage/tests/r02_3_rls.sql'
       - 'docs/doobr/DOOBR-R02-3-*'
       - '.github/workflows/doobr-r02-3-level1.yml'
@@ -54,8 +58,9 @@ jobs:
           python-version: '3.12'
       - name: Compile and exercise retailer authorization
         run: |
-          python3 -m py_compile doobr/retailer.py doobr/storage/tests/test_retailer.py
+          python3 -m py_compile doobr/retailer.py doobr/admission.py doobr/storage/tests/test_retailer.py doobr/storage/tests/test_admission.py
           python3 -m unittest discover -s doobr/storage/tests -p test_retailer.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_admission.py -v
       - name: Apply actual PostgreSQL/PostGIS migrations
         run: |
           psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql

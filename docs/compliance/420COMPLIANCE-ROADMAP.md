@@ -333,3 +333,16 @@ The locked scope is recorded in [C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md](C01.2-PROD
 ### C01.3 adopted discovery contract
 
 [C01.3-SOURCE-AUTHORITY-AND-REVIEW.md](C01.3-SOURCE-AUTHORITY-AND-REVIEW.md) and its JSON companion establish 12 source types, 17 discovery entries, 10 review roles and 25 unresolved interpretation questions. C01.1/C01.2 remain qualified and unchanged. No legal approval, external reviewer appointment or operational eligibility is implied.
+
+## 17. Explicit external-authority and production-signing testnet handoff (October 10, 2026)
+
+**Disposition:** The remaining independently supplied credentials, qualified legal/partner evidence, non-exportable managed signing keys, authenticated service-discovery deployment and end-to-end operational acceptance are **deferred from the repository-only implementation track to C08.3 / C09 / C10**. This does not mark them complete, supersede C01.7, change any canonical C08–C10 requirement ID or waive any release gate. The detailed ledger is [C08.3 external authority / signing handoff](C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md).
+
+- **C08.3:** retain explicit live dependencies and provenance, scope, owner, prerequisites and disposition; keep the new registry synchronized with the prior external-authority acceptance record.
+- **C09.1 / C09.4:** create the isolated testnet services and provision approved *testnet-specific* non-exportable managed signing keys, key rotation/revocation, managed signer access and authenticated discovery. Never promote test keys into production.
+- **C09.3 / C09.9:** ingest genuine official sources and secure qualified reviewer review of the jurisdiction-specific policy with immutable evidence and independent security/legal-policy acceptance. Independent reviewer engagement and legal interpretation may start **before** testnet, but deployed approval lifecycle proof belongs at this boundary.
+- **C09.5 / C09.7:** connect actual issuer trust and revocation feeds, independently verifiable retailer/carrier licensing and authority evidence, test expiry, suspension, outage, cross-tenant/action and stale-consumer denial.
+- **C09.6 / C09.8 / C09.10:** qualify deployed DOOBr/Travel boundaries, operational recovery and retained exact artifact/configuration evidence. Simulated orders only; this does not approve regulated deliveries.
+- **C10.1 / C10.2 / C10.3 / C10.7:** revalidate live legal opinions, valid retailer/carrier licences and partner agreements; authorize separately managed *production* signing keys and scoped production service identity; complete independent legal, partner and operational go/no-go before any region/action is enabled.
+
+Keep production `ALLOW` disabled and distinguish a repository Go test PASS, a testnet integration PASS and independently accepted live operational permission. **Testnet availability alone never establishes legal or partner authorization.**

@@ -59,8 +59,10 @@ contract ModuleRegistry is IModuleRegistry {
     ) private view {
         if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)) revert HCInvalidState();
         IRulesetRegistry.RulesetRecord memory record = rulesetRegistry.getRuleset(rulesetId);
-        if (!record.exists || record.contentHash == bytes32(0)
-            || rulesetRegistry.deriveRulesetId(record.contentHash) != rulesetId) revert HCInvalidState();
+        if (
+            !record.exists || record.contentHash == bytes32(0)
+                || rulesetRegistry.deriveRulesetId(record.contentHash) != rulesetId
+        ) revert HCInvalidState();
     }
 
     function bindEmergencyState(
@@ -147,13 +149,9 @@ contract ModuleRegistry is IModuleRegistry {
         _verifyIdentity(moduleId, implementation, version, rulesetId, bytes32(0));
         (,,, bytes32 interfaceId) = IHighCountryModuleIdentity(implementation).highCountryModuleIdentity();
         authorization.requireAuthorized(
-            AuthorizationRequest(
-                msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_APPROVE_ARTIFACT, moduleId, 0
-            )
+            AuthorizationRequest(msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_APPROVE_ARTIFACT, moduleId, 0)
         );
-        bytes32 artifactHash = keccak256(
-            abi.encode(moduleId, implementation.codehash, interfaceId, version, rulesetId)
-        );
+        bytes32 artifactHash = keccak256(abi.encode(moduleId, implementation.codehash, interfaceId, version, rulesetId));
         approvedArtifactHash[moduleId] = artifactHash;
         emit ModuleArtifactApproved(moduleId, artifactHash);
     }
@@ -183,9 +181,8 @@ contract ModuleRegistry is IModuleRegistry {
         (,,, bytes32 interfaceId) = IHighCountryModuleIdentity(implementation).highCountryModuleIdentity();
         if (
             approvedArtifactHash[moduleId] == bytes32(0)
-                || approvedArtifactHash[moduleId] != keccak256(
-                    abi.encode(moduleId, implementation.codehash, interfaceId, version, rulesetId)
-                )
+                || approvedArtifactHash[moduleId]
+                    != keccak256(abi.encode(moduleId, implementation.codehash, interfaceId, version, rulesetId))
         ) revert HCInvalidState();
         registeredCodeHash[moduleId] = implementation.codehash;
         registeredInterface[moduleId] = interfaceId;

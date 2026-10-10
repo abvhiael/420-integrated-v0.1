@@ -742,6 +742,28 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
             return result
 
 
+@app.post("/v1/bnb/holds/{hold_id}/release")
+def release_hold(hold_id:str,authorization:str|None=Header(None)):
+    """Owner releases a nonbinding hold atomically; cannot cancel confirmed stays."""
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id,guest_subject FROM bnb_hold WHERE id=%s",
+                          (hold_id,)).fetchone()
+            if not ref or ref[1]!=subject:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            row=c.execute("""SELECT status,expires_at FROM bnb_hold WHERE id=%s FOR UPDATE""",
+                          (hold_id,)).fetchone()
+            if row[0]=="confirmed":raise HTTPException(409,"CONFIRMED_HOLD_PROTECTED")
+            if row[0]=="cancelled":return {"id":hold_id,"status":"cancelled"}
+            if row[0]!="held" or row[1]<=datetime.now(timezone.utc):
+                raise HTTPException(409,"HOLD_NOT_ACTIVE")
+            c.execute("UPDATE bnb_hold SET status='cancelled' WHERE id=%s",(hold_id,))
+            c.execute("INSERT INTO bnb_audit(id,subject,action,resource_id) VALUES (%s,%s,%s,%s)",
+                      (uuid4(),subject,"bnb.hold.released",ref[0]))
+    return {"id":hold_id,"status":"cancelled"}
+
+
 @app.get("/v1/bnb/holds/{hold_id}")
 def get_hold(hold_id: str,x_authenticated_subject: str | None=Header(None),
              x_authenticated_role: str | None=Header(None),

@@ -45,6 +45,13 @@ class Permission:
     resource: str
     wallet_required: bool = False
 
+ALLOWED_ACTIONS = {
+    "CONSUMER": frozenset({"READ_OWN_ORDER", "CANCEL_OWN_ORDER"}),
+    "COURIER": frozenset({"READ_ASSIGNED", "ACCEPT_OFFER", "PICKUP", "HANDOFF", "RETURN"}),
+    "RETAILER": frozenset({"READ_STORE_ORDER", "READY_PICKUP", "ACCEPT_RETURN"}),
+    "OPERATOR": frozenset({"READ_INCIDENT", "ESCALATE_INCIDENT"}),
+}
+
 def authorize(*, issuer: TrustedIdentity, store: AuthorizedSessionStore,
               signed_token: str, tenant_id: str, permission: Permission,
               now: datetime | None = None) -> Session:
@@ -62,7 +69,7 @@ def authorize(*, issuer: TrustedIdentity, store: AuthorizedSessionStore,
             raise Denied("session missing revoked or expired")
         if permission.wallet_required and (session.wallet_consent_until is None or session.wallet_consent_until<=now):
             raise Denied("wallet consent absent or expired")
-        if not permission.resource or not permission.action or not permission.role:
+        if not permission.resource or permission.action not in ALLOWED_ACTIONS.get(permission.role, ()):
             raise Denied("unspecified resource/action")
         grants=store.grants(tenant_id,session.actor_id)
         if not any(g.role==permission.role and g.resource==permission.resource and not g.revoked and g.expires_at>now for g in grants):

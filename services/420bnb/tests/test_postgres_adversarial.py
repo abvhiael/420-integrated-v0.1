@@ -200,3 +200,73 @@ def test_bnb23_peak_concurrent_quantity_half_open_boundaries():
         (start+timedelta(days=1),end,2),
     ],start,end)==3
     assert api.peak_occupied_units([(end,end+timedelta(days=1),5)],start,end)==0
+
+
+def test_bnb23_dst_fold_gap_and_local_date():
+    from calendar_engine import strict_local_instant,local_stay_window
+    with pytest.raises(ValueError,match="NONEXISTENT_LOCAL_TIME"):
+        strict_local_instant(datetime(2027,3,14,2,30),"America/New_York")
+    with pytest.raises(ValueError,match="AMBIGUOUS_LOCAL_TIME"):
+        strict_local_instant(datetime(2027,11,7,1,30),"America/New_York")
+    earlier=strict_local_instant(datetime(2027,11,7,1,30),"America/New_York",fold=0)
+    later=strict_local_instant(datetime(2027,11,7,1,30),"America/New_York",fold=1)
+    assert later-earlier==timedelta(hours=1)
+    from datetime import date
+    a,z,nights=local_stay_window(date(2027,3,13),date(2027,3,15),"America/New_York")
+    assert nights==2 and z>a
+    with pytest.raises(ValueError,match="MINIMUM_NIGHTS"):
+        local_stay_window(date(2027,3,15),date(2027,3,15),"America/New_York")
+
+
+def test_bnb23_public_availability_partial_closure_release_and_privacy(fixture_property):
+    pid,headers=fixture_property
+    uid=uuid4()
+    request=payload(pid)
+    start=datetime.fromisoformat(request["start"])
+    end=datetime.fromisoformat(request["end"])
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_property SET capacity=3,private_address='never return this' WHERE id=%s",(pid,))
+        c.execute("INSERT INTO bnb_unit(id,property_id,label,quantity) VALUES (%s,%s,'Suite A',3)",(uid,pid))
+        c.execute("""INSERT INTO bnb_block(id,property_id,unit_id,period,reason,quantity)
+            VALUES (%s,%s,%s,tstzrange(%s,%s,'[)'),'Partial closure',1)""",
+            (uuid4(),pid,uid,start,end))
+    try:
+        route="/v1/bnb/availability"
+        params={"property_id":str(pid),"start":request["start"],"end":request["end"]}
+        preview=client.get(route,params=params)
+        assert preview.status_code==200,preview.text
+        assert preview.json()["units"][0]["available"]==2
+        assert "never return this" not in preview.text
+        hold=client.post("/v1/bnb/holds",headers={**headers,"idempotency-key":"availability-2.3-001"},
+            json={**request,"unit_id":str(uid),"units":2})
+        assert hold.status_code==201,hold.text
+        assert client.get(route,params=params).json()["units"][0]["available"]==0
+        overbook=client.post("/v1/bnb/holds",headers={**headers,"idempotency-key":"availability-2.3-002"},
+            json={**request,"unit_id":str(uid),"units":1})
+        assert overbook.status_code==409
+        released=client.post("/v1/bnb/holds/"+hold.json()["id"]+"/release",headers=headers)
+        assert released.status_code==200
+        assert client.post("/v1/bnb/holds/"+hold.json()["id"]+"/release",headers=headers).status_code==200
+        assert client.get(route,params=params).json()["units"][0]["available"]==2
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_property SET status='draft' WHERE id=%s",(pid,))
+        assert client.get(route,params=params).status_code==404
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
+            c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb23_calendar_sync_has_no_self_provisioned_authority(fixture_property):
+    pid,headers=fixture_property
+    request=payload(pid)
+    body={"property_id":str(pid),"unit_id":str(uuid4()),"source_id":"source-1",
+          "external_event_id":"event-1","source_updated_at":datetime.now(timezone.utc).isoformat(),
+          "start":request["start"],"end":request["end"],"quantity":1}
+    assert client.post("/v1/bnb/internal/calendar/import",json=body).status_code==401
+    no_issuer=client.post("/v1/bnb/internal/calendar/import",
+        json=body,headers={"x-calendar-sync-proof":"forged"})
+    assert no_issuer.status_code==503

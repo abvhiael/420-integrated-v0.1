@@ -3,7 +3,7 @@
   "step": "C01.7",
   "canonical": "Approve service discovery strategy, signed publication and optional chain commitments; no new Genesis ID/address without canonical approval.",
   "level": 1,
-  "status": "PENDING_EXACT_SHA_CI",
+  "status": "COMPLETE_LEVEL1_PASS",
   "implementation_sha": "04b1c2b771ff0c4ff83c3832e0227e234de0c2e1",
   "main_sha": "e7614af49336f70e6ff0eda55aba41fdd3fc6ab3",
   "prior_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -24,15 +24,17 @@
     "no regulated runtime activation"
   ],
   "runs": [
-    38067852067,
-    38067854476
+    {
+      "id": 38067852067,
+      "conclusion": "success",
+      "job_id": 114259054461,
+      "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38067852067"
+    }
   ],
-  "qualification": "CI QUEUED; no PASS claim",
+  "qualification": "PASS on exact implementation SHA",
   "level2": "C01.8 pending",
   "level3": "C08.5 deferred",
-  "blockers": [
-    "Passing exact-SHA C01.7 CI",
-    "C01.8 integration milestone separate"
-  ],
-  "next": "C01.8 — Architecture Level 2 milestone: source-to-requirement-to-test matrix, authority review, implementation sequence and baseline lock."
+  "blockers": [],
+  "next": "C01.8 — Architecture Level 2 milestone: source-to-requirement-to-test matrix, authority review, implementation sequence and baseline lock.",
+  "retained_regressions": "C01.3-C01.6 and C01.7 exact SHA targeted checks PASS"
 }

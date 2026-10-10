@@ -420,6 +420,10 @@ def test_bnb24_immutable_quote_expiry_policy_and_nonce(fixture_property):
         uid=quoted.json()["id"]
         assert quoted.json()["calculation"]["nights"]==3
         assert quoted.json()["policy_snapshot"]["house_rules"]=="Quiet after 10"
+        canonical=__import__("json").dumps(quoted.json()["policy_snapshot"],
+            sort_keys=True,separators=(",",":"))
+        assert hashlib.sha256(canonical.encode()).hexdigest()==quoted.json()["snapshot_sha256"]
+        assert quoted.json()["currency"]=="CAD"
         assert quoted.json()["financial_finality"] is False
         again=client.post("/v1/bnb/quotes",json=plan,headers=headers)
         assert again.status_code==201 and again.json()["id"]==uid

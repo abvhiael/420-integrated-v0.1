@@ -64,8 +64,7 @@ contract CanonicalBreedingRandomnessAdapter {
         if (breedingEngine != address(0) || candidate.code.length == 0) revert InvalidRequest();
         authorization.requireAuthorized(
             AuthorizationRequest(
-                msg.sender, ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_BIND_BREEDING,
-                BIND_SCOPE, 0
+                msg.sender, ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_BIND_BREEDING, BIND_SCOPE, 0
             )
         );
         if (
@@ -109,21 +108,22 @@ contract CanonicalBreedingRandomnessAdapter {
         emit BreedingRandomnessAbandoned(localId);
     }
 
-    function consume(bytes32 localId, bytes32 expectedDomain, bytes32 expectedContext)
-        external returns (bytes32 entropy)
-    {
+    function consume(
+        bytes32 localId,
+        bytes32 expectedDomain,
+        bytes32 expectedContext
+    ) external returns (bytes32 entropy) {
         if (msg.sender != breedingEngine) revert Unauthorized();
         Pending storage p = pending[localId];
         if (
-            p.canonicalId == bytes32(0) || p.cancelled || p.consumed
-                || expectedDomain != p.domain || expectedContext != p.context
+            p.canonicalId == bytes32(0) || p.cancelled || p.consumed || expectedDomain != p.domain
+                || expectedContext != p.context
         ) revert InvalidRequest();
         if (router.status(p.canonicalId) != IRandomnessRouter420.Status.FULFILLED) revert UnverifiedRandomness();
         IRandomnessRouter420.Request memory bound = router.request(p.canonicalId);
         if (
-            bound.requester != address(this) || bound.profileId != profileId
-                || bound.domain != p.domain || bound.purpose != p.context
-                || bound.status != IRandomnessRouter420.Status.FULFILLED
+            bound.requester != address(this) || bound.profileId != profileId || bound.domain != p.domain
+                || bound.purpose != p.context || bound.status != IRandomnessRouter420.Status.FULFILLED
                 || block.timestamp > bound.deadline
         ) revert UnverifiedRandomness();
         bytes32 proofHash;

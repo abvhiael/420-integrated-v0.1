@@ -70,3 +70,7 @@ Canonical acceptance checklist: `docs/bnb/BNB-2.2-EXTERNAL-ACCEPTANCE-PLAN.md`.
 - BNB-2.2 live operational release remains **BLOCKED** until human and reviewer evidence is independently verified. Do not mint CI signoff or mark automated axe checks as manual PASS.
 
 The two external gates are *deferred, not waived*. Continue subsequent offline/repository-only roadmap work without activating restricted functions; run only targeted Level 1 checks until real integration/phase milestones.
+
+## T-BNB-CALENDAR-1 — Independently authorized calendar feed acceptance (BNB-2.3)
+
+**Repository-side adapter qualified** on `0b025f776d1c88ab38df959e2a5ef4a8f6a1a56b`, but no live provider authorization is implied. Approve actual calendar feed provider/issuer and property-unit ownership scope, secure independent managed signing credentials and revocation; exercise signed payload hash/issuer/audience/media-independent unit binding, source-ID and event-ID replay/duplicate handling, stale feed detection, outage/rotation/compromise, retention and appeals against deployment-equivalent BnB/PostgreSQL instances. Retain policy decision, operator approval, key lineage fingerprints, real non-secret source evidence, exact service image and per-case acceptance traces. Never configure fixtures or self-signed test keys as a production calendar authority. Until accepted, third-party feed state cannot grant booking/payment/property publication authority; stale signed observations fail closed.

@@ -40,3 +40,17 @@ for required in ["NOT AUTHORIZED", "NOT INTEGRATED", "DevelopmentCompensationVau
     assert_true(required in decision,"R01.2 authority evidence: "+required)
 assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.2 did not promote Genesis app")
 assert_true(flags.get("travel.doobr_transactions") is False,"R01.2 preserves disabled Travel transaction authority")
+
+# R01.3 scoped role/permission, journeys, abuse and operations design assertions.
+r13=read("docs/doobr/DOOBR-R01-3-ROLES-JOURNEYS-THREATS.md")
+assert_true("R01.3 Consumer/courier/retailer/operator roles" in roadmap,"canonical R01.3 intact")
+for actor in ["CONSUMER","COURIER","RETAILER","OPERATOR","COMPLIANCE_SERVICE","SYSTEM_SERVICE"]:
+    assert_true(actor in r13,"R01.3 actor documented: "+actor)
+for marker in ["Consumer discovery","Consumer order","Retailer handoff","Courier lifecycle","Operator exceptions","Reconciliation",
+               "ELIGIBILITY_PENDING","RETURN_REQUIRED","420Compliance","420Pay","DevelopmentCompensationVault420",
+               "Travel/Maps", "FAIL CLOSED", "dual control", "R01.4 BC/Vancouver"]:
+    assert_true(marker in r13,"R01.3 journey/authority/constraint: "+marker)
+for i in range(1,19):
+    assert_true(f"R13-T{i:02d}" in r13, f"R01.3 threat R13-T{i:02d} documented")
+assert_true(flags.get("travel.doobr_transactions") is False,"R01.3 has not activated Travel regulated transactions")
+assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.3 has not altered frozen Genesis catalog")

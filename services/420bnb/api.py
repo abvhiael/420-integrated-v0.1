@@ -1249,6 +1249,18 @@ def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=
                 if duplicate==(payload.pay_payment_id,payload.receipt_hash):
                     return {"state":record[7],"confirmed":record[11]=="confirmed","replayed":True}
                 raise HTTPException(409,"PAY_EVENT_REPLAY_CONFLICT")
+            previous_payment=c.execute("""SELECT pay_invoice_id,reservation_id,receipt_hash,
+                chain_id,finality FROM bnb_pay_finality_event
+                WHERE pay_payment_id=%s""",(payload.pay_payment_id,)).fetchone()
+            if previous_payment:
+                if (previous_payment[0]!=payload.pay_invoice_id or
+                    previous_payment[1]!=payload.reservation_id or
+                    previous_payment[2]!=payload.receipt_hash or
+                    previous_payment[3]!=payload.chain_id or
+                    previous_payment[4]!=payload.finality):
+                    raise HTTPException(409,"PAY_PAYMENT_REPLAY_CONFLICT")
+                return {"state":record[7],"confirmed":record[11]=="confirmed",
+                        "replayed":True}
             if record[10] and record[10]!=payload.pay_payment_id:
                 raise HTTPException(409,"PAY_ALREADY_RECONCILED")
             now=datetime.now(timezone.utc)

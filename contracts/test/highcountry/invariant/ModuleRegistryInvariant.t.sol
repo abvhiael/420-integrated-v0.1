@@ -13,7 +13,12 @@ import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
 contract ModuleInvariantImplementationV1 {
     function highCountryModuleIdentity() external pure returns (bytes32, uint32, bytes32, bytes32) {
-        return (keccak256("HC.MODULE.INVARIANT.TEST"), 1, keccak256("ruleset:invariant"), keccak256("HC.INTERFACE.INVARIANT.V1"));
+        return (
+            keccak256("HC.MODULE.INVARIANT.TEST"),
+            1,
+            keccak256("ruleset:invariant"),
+            keccak256("HC.INTERFACE.INVARIANT.V1")
+        );
     }
 }
 

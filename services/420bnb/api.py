@@ -266,11 +266,18 @@ def check_property_access(property_id: str,capability: str,
             AND revoked_at IS NULL AND expires_at>now()""",
             (proof["issuer"],proof["issuer_session_id"],proof["subject"])).fetchone()
         if not active:raise HTTPException(401,"SESSION_NOT_ACTIVE")
+        # A locally entered host_subject is an unverified claim, not authority.
+        # Both owner and manager permissions require an independently reviewed,
+        # currently valid property-control claim for the recorded controller.
+        verified=c.execute("""SELECT 1 FROM bnb_property p JOIN bnb_property_claim pc
+            ON pc.property_id=p.id AND pc.subject=p.host_subject
+            WHERE p.id=%s AND pc.state='verified' AND pc.expires_at>now()
+              AND pc.reviewed_at IS NOT NULL LIMIT 1""",(property_id,)).fetchone()
         host=c.execute("""SELECT 1 FROM bnb_property WHERE id=%s AND host_subject=%s""",
-                       (property_id,proof["subject"])).fetchone()
+                       (property_id,proof["subject"])).fetchone() if verified else None
         delegated=c.execute("""SELECT 1 FROM bnb_property_grant WHERE property_id=%s
             AND grantee_subject=%s AND capability=%s AND revoked_at IS NULL AND expires_at>now()""",
-            (property_id,proof["subject"],capability)).fetchone()
+            (property_id,proof["subject"],capability)).fetchone() if verified else None
     return {"allowed":bool(host or delegated),"capability":capability,"property_id":property_id}
 
 

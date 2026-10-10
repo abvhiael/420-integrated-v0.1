@@ -95,14 +95,20 @@ contract ModuleRegistryTest {
     }
 
     function testR0212RejectsEOAAndMissingModuleInterface() public {
-        (bool ok,) = address(registry).call(
-            abi.encodeWithSelector(registry.registerModule.selector, MODULE_ID, address(0x1234), uint32(1), RULESET_ID)
-        );
+        (bool ok,) = address(registry)
+            .call(
+                abi.encodeWithSelector(
+                    registry.registerModule.selector, MODULE_ID, address(0x1234), uint32(1), RULESET_ID
+                )
+            );
         require(!ok, "EOA registered as module");
         MockHighCountryModuleV2 invalid = new MockHighCountryModuleV2();
-        (ok,) = address(registry).call(
-            abi.encodeWithSelector(registry.registerModule.selector, MODULE_ID, address(invalid), uint32(1), RULESET_ID)
-        );
+        (ok,) = address(registry)
+            .call(
+                abi.encodeWithSelector(
+                    registry.registerModule.selector, MODULE_ID, address(invalid), uint32(1), RULESET_ID
+                )
+            );
         require(!ok, "module without identity accepted");
     }
 

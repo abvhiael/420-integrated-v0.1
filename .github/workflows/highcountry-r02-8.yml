@@ -5,6 +5,8 @@ on:
       - 'contracts/src/highcountry/**'
       - 'contracts/test/highcountry/**'
       - 'docs/highcountry/R02.8-EMERGENCY-ENFORCEMENT.md'
+      - 'docs/highcountry/DEPLOYMENT-AND-TRUST.md'
+      - 'scripts/highcountry/verify-r01.py'
       - '.github/workflows/highcountry-r02-8.yml'
   workflow_dispatch:
 permissions:

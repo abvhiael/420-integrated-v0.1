@@ -415,6 +415,10 @@ def test_bnb24_immutable_quote_expiry_policy_and_nonce(fixture_property):
             **plan,"nonce":"quote-low-max-0001","payer_max_minor":1},headers=headers)
         assert too_low.status_code==409
         assert too_low.json()["detail"]=="PAYER_MAX_EXCEEDED"
+        malformed=client.post("/v1/bnb/quotes",json={
+            **plan,"property_id":"not-a-uuid","nonce":"malformed-quote-0001"},headers=headers)
+        assert malformed.status_code==422
+        assert client.get("/v1/bnb/quotes/not-a-uuid",headers=headers).status_code==422
         quoted=client.post("/v1/bnb/quotes",json=plan,headers=headers)
         assert quoted.status_code==201,quoted.text
         uid=quoted.json()["id"]

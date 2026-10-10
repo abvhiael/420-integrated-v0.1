@@ -3,3 +3,6 @@
 #summary,#analytics,#status,#integrations,#orders,#assets{overflow-wrap:anywhere;min-width:0;max-width:100%}
 #open,#open label,#open input{min-width:0;max-width:100%}
 #open input{width:100%}
+
+/* High Street branded masthead, primary hero and footer. */
+.brand img,.brand-footer img,.market-hero img{display:block;object-fit:contain}.brand img{width:92px;height:78px}.market-hero{display:flex;gap:2rem;align-items:center;background:#f1f3e8;border-radius:14px;padding:1.25rem 2rem;margin:0 0 2rem}.market-hero img{width:min(32%,300px);height:auto;flex-shrink:0}.market-hero h1{margin:0}.market-hero p{margin:.35rem 0 0}.brand-footer{background:#152820;color:#fff;display:flex;align-items:center;justify-content:center;gap:1rem;padding:1.5rem}.brand-footer img{width:82px;height:70px}@media(max-width:600px){.market-hero{display:block;text-align:center;padding:1rem}.market-hero img{width:min(70%,210px);margin:auto}.brand-footer{flex-direction:column;text-align:center}}

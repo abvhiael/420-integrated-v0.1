@@ -68,7 +68,7 @@ class PropertyInput(BaseModel):
     title: str = Field(min_length=3, max_length=160)
     public_region: str = Field(min_length=2, max_length=100)
     capacity: int = Field(ge=1, le=1000)
-    nightly_minor: int = Field(ge=0, le=10**12)
+    nightly_minor: int = Field(ge=0, le=10**12, strict=True)
     currency: str = Field(pattern="^[A-Z]{3}$")
 
 
@@ -91,16 +91,16 @@ def peak_occupied_units(intervals,start,end):
 class SeasonalRate(BaseModel):
     start: str
     end: str
-    nightly_minor: int=Field(ge=0,le=10**12)
+    nightly_minor: int=Field(ge=0,le=10**12,strict=True)
 
 
 class RatePlanInput(BaseModel):
     expected_property_version: int=Field(ge=1)
     seasonal_rates: list[SeasonalRate]=Field(default_factory=list,max_length=100)
-    cleaning_minor: int=Field(ge=0,le=10**12)
-    service_minor: int=Field(default=0,ge=0,le=10**12)
-    tax_bps: int=Field(default=0,ge=0,le=10000)
-    discount_bps: int=Field(default=0,ge=0,le=10000)
+    cleaning_minor: int=Field(ge=0,le=10**12,strict=True)
+    service_minor: int=Field(default=0,ge=0,le=10**12,strict=True)
+    tax_bps: int=Field(default=0,ge=0,le=10000,strict=True)
+    discount_bps: int=Field(default=0,ge=0,le=10000,strict=True)
 
 
 class QuoteInput(BaseModel):

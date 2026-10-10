@@ -30,6 +30,7 @@ type ReceiptLedger struct {
  mu sync.Mutex
  spent map[string]bool
  issued map[string]BoundDecisionReceipt
+ nonces map[string]bool
 }
 func (l *ReceiptLedger) Issue(service EvaluationService,policy ReviewedPolicy,request EvaluationRequest,now time.Time,ttl time.Duration,nonce string)(BoundDecisionReceipt,error){
  if l==nil||nonce==""||len(nonce)>128||ttl<=0||ttl>5*time.Minute||now.IsZero(){return BoundDecisionReceipt{},ErrReceiptRejected}
@@ -44,7 +45,11 @@ func (l *ReceiptLedger) Issue(service EvaluationService,policy ReviewedPolicy,re
  l.mu.Lock();defer l.mu.Unlock()
  if l.issued==nil{l.issued=map[string]BoundDecisionReceipt{}}
  if l.spent==nil{l.spent=map[string]bool{}}
+ if l.nonces==nil{l.nonces=map[string]bool{}}
+ nonceKey:=request.TenantID+"\\x00"+request.OperationRef+"\\x00"+nonce
+ if l.nonces[nonceKey]{return BoundDecisionReceipt{},ErrReceiptRejected}
  if _,exists:=l.issued[id];exists||l.spent[id]{return BoundDecisionReceipt{},ErrReceiptRejected}
+ l.nonces[nonceKey]=true
  l.issued[id]=receipt
  return receipt,nil
 }

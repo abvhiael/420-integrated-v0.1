@@ -353,6 +353,20 @@ def property_calendar(property_id:str,authorization:str|None=Header(None)):
              "start":x[2].isoformat(),"end":x[3].isoformat(),"reason":x[4]} for x in rows]
 
 
+@app.delete("/v1/bnb/account/properties/{property_id}/calendar/blocks/{block_id}")
+def remove_calendar_block(property_id:str,block_id:str,expected_version:int,
+                          authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,property_id,subject,expected_version)
+            deleted=c.execute("""DELETE FROM bnb_block WHERE id=%s AND property_id=%s
+                AND created_by=%s RETURNING id""",(block_id,property_id,subject)).fetchone()
+            if not deleted:raise HTTPException(404,"BLOCK_NOT_FOUND")
+            version=bump_property(c,property_id,subject,"bnb.calendar.block_removed")
+    return {"removed":True,"version":version}
+
+
 @app.post("/v1/bnb/account/properties/{property_id}/review",status_code=202)
 def request_listing_review(property_id:str,payload:ReviewInput,authorization:str|None=Header(None)):
     subject=active_subject(authorization)
@@ -383,6 +397,24 @@ def request_listing_review(property_id:str,payload:ReviewInput,authorization:str
                       (uuid4(),subject,"bnb.listing.review_requested",property_id))
     return {"review_id":str(review_id),"state":"pending","published":False,
             "snapshot_hash":digest}
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/reviews/{review_id}/withdraw")
+def withdraw_listing_review(property_id:str,review_id:str,
+                            authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            owner=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s FOR UPDATE",
+                            (property_id,)).fetchone()
+            if not owner or owner[0]!=subject:raise HTTPException(404,"NOT_FOUND")
+            result=c.execute("""UPDATE bnb_listing_review SET state='withdrawn'
+                WHERE id=%s AND property_id=%s AND requested_by=%s AND state='pending'
+                RETURNING id""",(review_id,property_id,subject)).fetchone()
+            if not result:raise HTTPException(409,"REVIEW_NOT_PENDING")
+            c.execute("INSERT INTO bnb_audit(id,subject,action,resource_id) VALUES (%s,%s,%s,%s)",
+                      (uuid4(),subject,"bnb.listing.review_withdrawn",property_id))
+    return {"state":"withdrawn","published":False}
 
 
 @app.get("/v1/bnb/account/properties/{property_id}/reviews")

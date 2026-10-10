@@ -518,6 +518,10 @@ def test_bnb24_host_rate_plan_is_draft_only_versioned_and_bounded(actor):
         "cleaning_minor":1200,"service_minor":400,"tax_bps":500,"discount_bps":1000}
     try:
         assert client.put(path,json=sample).status_code==401
+        fractional=client.put(path,headers=headers,json={**sample,"cleaning_minor":1200.5})
+        assert fractional.status_code==422
+        coercible=client.put(path,headers=headers,json={**sample,"tax_bps":500.0})
+        assert coercible.status_code==422
         overlapping=client.put(path,headers=headers,json={**sample,"seasonal_rates":[
             {"start":"2027-06-01","end":"2027-08-01","nightly_minor":8000},
             {"start":"2027-07-01","end":"2027-09-01","nightly_minor":9000}]})

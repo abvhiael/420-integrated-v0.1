@@ -6,10 +6,15 @@ import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighC
 import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
 import { UpgradeState } from "../../../../src/highcountry/types/HighCountryEnums.sol";
+import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 import { ModuleRegistry } from "../../../../src/highcountry/upgrades/ModuleRegistry.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
-contract MockHighCountryModuleV1 { }
+contract MockHighCountryModuleV1 {
+    function highCountryModuleIdentity() external pure returns (bytes32, uint32, bytes32, bytes32) {
+        return (keccak256("HC.MODULE.TEST"), 1, keccak256("ruleset:test"), keccak256("HC.INTERFACE.TEST.V1"));
+    }
+}
 
 contract MockHighCountryModuleV2 { }
 
@@ -27,6 +32,24 @@ contract ModuleRegistryTest {
         registry = new ModuleRegistry(address(authorization));
         _grant(ActionIds.MODULE_REGISTER, keccak256("grant:register"));
         _grant(ActionIds.MODULE_SET_STATE, keccak256("grant:set-state"));
+        capabilityRegistry.setGrant(
+            keccak256("grant:bind-emergency"),
+            ICapabilityRegistry420.CapabilityGrant({
+                principal: address(this),
+                componentId: ModuleIds.MODULE_REGISTRY,
+                capabilityId: ActionIds.MODULE_BIND_EMERGENCY,
+                scopeHash: registry.EMERGENCY_BIND_SCOPE(),
+                perCallLimit: 0,
+                periodLimit: 0,
+                periodSeconds: 0,
+                validFrom: 0,
+                validUntil: uint64(block.timestamp + 1 days),
+                revoked: false
+            }),
+            0
+        );
+        EmergencyState emergency = new EmergencyState(address(authorization));
+        registry.bindEmergencyState(address(emergency));
     }
 
     function testRegisterBindsImplementationOnce() public {

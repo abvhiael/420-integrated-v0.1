@@ -74,3 +74,38 @@ def test_invalid_property_capability_is_rejected(actor):
     response=client.get("/v1/bnb/account/property/"+str(uuid4())+"/access",
         params={"capability":"approve_payout"},headers=headers)
     assert response.status_code==422
+
+
+def test_issuer_session_id_cannot_be_rebound_to_another_subject(actor):
+    """An issuer JTI collision must not grant access to another account."""
+    from identity import verify_external_token
+    import time
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    token=headers["authorization"].split(" ",1)[1]
+    proof=verify_external_token(token)
+    foreign="different-"+str(uuid4())
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_account(subject) VALUES (%s)",(foreign,))
+        c.execute("""UPDATE bnb_identity_session SET subject=%s WHERE
+            issuer=%s AND issuer_session_id=%s""",
+            (foreign,proof["issuer"],proof["issuer_session_id"]))
+    try:
+        response=client.post("/v1/bnb/account/session",headers=headers)
+        assert response.status_code==401, response.text
+        assert response.json()["detail"]=="SESSION_SUBJECT_MISMATCH"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_identity_session WHERE issuer=%s AND issuer_session_id=%s",
+                (proof["issuer"],proof["issuer_session_id"]))
+            c.execute("DELETE FROM bnb_account WHERE subject=%s",(foreign,))
+
+
+def test_recovery_epoch_cannot_be_rebound_by_session_exchange(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_account SET recovery_epoch=recovery_epoch+1 WHERE subject=%s",(subject,))
+    response=client.post("/v1/bnb/account/session",headers=headers)
+    assert response.status_code==401, response.text
+    assert response.json()["detail"]=="SESSION_EPOCH_REVOKED"

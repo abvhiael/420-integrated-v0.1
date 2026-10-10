@@ -153,6 +153,10 @@ def revise_draft_property(property_id: str, payload: PropertyRevision,
                 raise HTTPException(409,"PROPERTY_NOT_DRAFT")
             if row[2]!=payload.expected_version:
                 raise HTTPException(409,"VERSION_CONFLICT")
+            existing_units=c.execute("SELECT COALESCE(SUM(quantity),0) FROM bnb_unit WHERE property_id=%s",
+                                     (property_id,)).fetchone()[0]
+            if payload.capacity<existing_units:
+                raise HTTPException(409,"UNIT_CAPACITY_EXCEEDED")
             new=c.execute("""UPDATE bnb_property SET title=%s,public_region=%s,
                 capacity=%s,nightly_minor=%s,currency=%s,version=version+1
                 WHERE id=%s AND host_subject=%s AND status='draft' AND version=%s

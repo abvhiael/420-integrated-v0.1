@@ -80,21 +80,53 @@ contract ModuleRegistryInvariantTest is InvariantTarget420 {
         registry = new ModuleRegistry(address(authorization));
         RulesetRegistry rulesets = new RulesetRegistry(address(authorization));
         RULESET_ID = rulesets.deriveRulesetId(keccak256("ruleset:invariant"));
-        _grant(address(this), ActionIds.MODULE_BIND_RULESETS, keccak256("bind-rulesets"), registry.RULESET_BIND_SCOPE(), ModuleIds.MODULE_REGISTRY);
-        _grant(address(this), ActionIds.RULESET_REGISTER, keccak256("register-ruleset"), RULESET_ID, ModuleIds.RULESET_REGISTRY);
+        _grant(
+            address(this),
+            ActionIds.MODULE_BIND_RULESETS,
+            keccak256("bind-rulesets"),
+            registry.RULESET_BIND_SCOPE(),
+            ModuleIds.MODULE_REGISTRY
+        );
+        _grant(
+            address(this),
+            ActionIds.RULESET_REGISTER,
+            keccak256("register-ruleset"),
+            RULESET_ID,
+            ModuleIds.RULESET_REGISTRY
+        );
         rulesets.registerRuleset(keccak256("ruleset:invariant"));
         registry.bindRulesetRegistry(address(rulesets));
 
         ModuleInvariantImplementationV1 implementation = new ModuleInvariantImplementationV1();
         expectedImplementation = address(implementation);
-        _grant(address(this), ActionIds.MODULE_REGISTER, keccak256("setup:register"), MODULE_ID, ModuleIds.MODULE_REGISTRY);
-        _grant(address(this), ActionIds.MODULE_APPROVE_ARTIFACT, keccak256("setup:artifact"), MODULE_ID, ModuleIds.MODULE_REGISTRY);
+        _grant(
+            address(this), ActionIds.MODULE_REGISTER, keccak256("setup:register"), MODULE_ID, ModuleIds.MODULE_REGISTRY
+        );
+        _grant(
+            address(this),
+            ActionIds.MODULE_APPROVE_ARTIFACT,
+            keccak256("setup:artifact"),
+            MODULE_ID,
+            ModuleIds.MODULE_REGISTRY
+        );
         registry.approveArtifact(MODULE_ID, expectedImplementation, 1, RULESET_ID);
         registry.registerModule(MODULE_ID, expectedImplementation, 1, RULESET_ID);
 
         handler = new ModuleInvariantHandler(registry, MODULE_ID, RULESET_ID);
-        _grant(address(handler), ActionIds.MODULE_REGISTER, keccak256("handler:register"), MODULE_ID, ModuleIds.MODULE_REGISTRY);
-        _grant(address(handler), ActionIds.MODULE_SET_STATE, keccak256("handler:set-state"), MODULE_ID, ModuleIds.MODULE_REGISTRY);
+        _grant(
+            address(handler),
+            ActionIds.MODULE_REGISTER,
+            keccak256("handler:register"),
+            MODULE_ID,
+            ModuleIds.MODULE_REGISTRY
+        );
+        _grant(
+            address(handler),
+            ActionIds.MODULE_SET_STATE,
+            keccak256("handler:set-state"),
+            MODULE_ID,
+            ModuleIds.MODULE_REGISTRY
+        );
         targetContract(address(handler));
     }
 

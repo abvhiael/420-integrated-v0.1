@@ -28,7 +28,26 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  for(const item of data){const el=document.createElement("article");el.className="card";
  const heading=document.createElement("h3");heading.textContent=item.title||"Untitled stay";
  const details=document.createElement("p");details.textContent=[item.public_region,"Capacity: "+item.capacity,"Nightly: "+item.nightly_minor+" "+item.currency+" minor units"].join(" · ");
- el.append(heading,details);list.append(el);}
+ const dateForm=document.createElement("form");
+ const startLabel=document.createElement("label");startLabel.textContent="Check-in date";
+ const startInput=document.createElement("input");startInput.type="date";startInput.required=true;startLabel.append(startInput);
+ const endLabel=document.createElement("label");endLabel.textContent="Check-out date";
+ const endInput=document.createElement("input");endInput.type="date";endInput.required=true;endLabel.append(endInput);
+ const check=document.createElement("button");check.type="submit";check.textContent="Check availability";
+ const out=document.createElement("p");out.setAttribute("role","status");out.setAttribute("aria-live","polite");
+ dateForm.append(startLabel,endLabel,check,out);
+ dateForm.addEventListener("submit",async event=>{
+ event.preventDefault();out.textContent="Checking nonbinding availability…";
+ if(startInput.value>=endInput.value){out.textContent="Checkout must be later than check-in.";return;}
+ const params=new URLSearchParams({property_id:item.id,checkin:startInput.value,checkout:endInput.value});
+ try{const res=await fetch("/v1/bnb/availability/local?"+params,{credentials:"omit",cache:"no-store"});
+ if(!res.ok)throw Error("Availability unavailable ("+res.status+").");
+ const data=await res.json();
+ out.textContent=data.units.map(u=>u.label+": "+u.available+" available").join(" · ")+
+ " · Preview only; no reservation has been made.";
+ }catch(err){out.textContent=err.message;}
+ });
+ el.append(heading,details,dateForm);list.append(el);}
  }catch{status.textContent="Public listings are unavailable. No reservation has been made.";}
 });
 

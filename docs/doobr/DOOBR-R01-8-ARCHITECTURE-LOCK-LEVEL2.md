@@ -1,5 +1,5 @@
 # DOOBR R01.8 — Architecture decision lock and Level 2 qualification
-Status: PENDING exact-SHA Level 2. PR #601 `roadmap/doobr-bc-vancouver-infrastructure`; main at milestone start `c5a4f220d1fbda01f707d359aa9bb32921a138b1`.
+Status: COMPLETE — architecture-only Level 2 exact-SHA qualification PASS. PR #601 `roadmap/doobr-bc-vancouver-infrastructure`; main at milestone start `c5a4f220d1fbda01f707d359aa9bb32921a138b1`.
 Canonical R01.8: **Architecture decision lock and Level 2 milestone qualification**. This is a qualified architecture baseline, not an operational delivery application.
 
 ## Prior qualification reconciliation
@@ -36,3 +36,12 @@ Run one retained **DOOBR R01 Level 2** workflow at the exact R01.8 candidate, in
 ## Exit and deferred obligations
 Lock means **architecture design frozen for R02 handoff, not immutable canonical governance and not regulatory approval**. Changes affecting policy/authorities/contracts after this decision require versioned amendment and impacted requalification. Independent Compliance implementation and acceptance, licenses/insurance/partner contracts, signed policies, real 420Pay/Wallet/Identity/Verify integrations, actual mobile/web/browser/device tests and runtime dispatch remain unimplemented or externally gated. Level 3 R05.10, DOOBR-AUDIT-9/10 and R06 release gate remain outstanding.
 Next: **R02.1 Postgres/PostGIS schema, migrations, tenant isolation, encryption/retention.**
+
+## R01.8 final exact-SHA milestone closeout
+**Disposition: COMPLETE for the R01 architecture decision-lock and retained app-scoped Level 2.** Exact qualified implementation SHA: `1766b44c24565bd8423b3c9e8fee93a8c9f68088`, reconciled `main`/PR base: `c5a4f220d1fbda01f707d359aa9bb32921a138b1`. [DOOBR R01 Architecture Level 2 push run #38027330729](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38027330729) completed SUCCESS, job `architecture` with no failed steps, checkout bound to this SHA. PR-triggered run [#38027332389](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38027332389) was still queued at recording and is **not** counted as passing evidence; the required exact-SHA push workflow already passed.
+
+Level 2 checks exercised: retained R01.1–R01.7 source/schema assertions (OpenAPI 3.1, event taxonomy and public privacy allowlist), dedicated R01.8 integration/ADR invariants, canonical DOOBR AUDIT-2/5/6/8 and GEN-SVC-3 authority/config verifiers, real targeted Go Travel compatibility regression and adversarial suite, scoped Travel Go vet and build, Python compilation, and exact-SHA assertion. The first attempt run #38027299958 FAILED on a mismatch between a named versioned 420Compliance decision response and the R01.5 prose; R01.5 was fixed in `1766b44c24565bd8423b3c9e8fee93a8c9f68088` without weakening the assertion. Prior failed/stale runs are not substituted for this pass.
+
+Exit criteria reviewed: [x] prior R01.1–R01.7 scoped qualified baselines reconciled; [x] R01.7 tests PASS at `f6db961c4b11c1238bf0f8eb87e0d1daa402d392`; [x] C01.4 Compliance shared authority reflected in current roadmap; [x] 12 ADRs locked; [x] no unapproved Genesis promotion or transaction activation; [x] canonical cross-service ownership; [x] strict public projection and noncustodial payment flow; [x] Level 2 app-specific retained verification passed on exact R01.8 SHA. This evidence-only commit changes no executable files, CI definition, substantive requirements or interfaces, so it inherits the qualified SHA. Branch remains draft PR #601, not merged.
+
+**Intentionally deferred:** R05.10 Level 3 full repository once-only reconciliation; R06 real live/device/security/regulatory acceptance, DOOBR-AUDIT-9/10, DevComp testnet acceptance and all R02–R04 runtime builds. No running DOOBR service, 420Compliance live verifier or licensed delivery permission is implied by R01.8. Next canonical step: **R02.1 Postgres/PostGIS schema, migrations, tenant isolation, encryption/retention.**

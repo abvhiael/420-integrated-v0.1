@@ -442,12 +442,13 @@ def request_listing_review(property_id:str,payload:ReviewInput,authorization:str
                 FROM bnb_listing_policy WHERE property_id=%s""",(property_id,)).fetchone()
             media=c.execute("""SELECT COUNT(*) FROM bnb_listing_media
                 WHERE property_id=%s AND moderation_state='approved'""",(property_id,)).fetchone()[0]
-            if not policy:raise HTTPException(409,"LISTING_POLICY_REQUIRED")
-            if media<1:raise HTTPException(409,"APPROVED_MEDIA_REQUIRED")
+            # A pending review may include incomplete moderation evidence; it
+            # never represents publication approval or a verified host.
             snapshot={"property_id":property_id,"title":details[0],"public_region":details[1],
                 "capacity":details[2],"nightly_minor":details[3],"currency":details[4],
                 "version":payload.expected_version,
-                "policy":{"house_rules":policy[0],"cancellation_policy":policy[1],"timezone_id":policy[2]},
+                "policy":({"house_rules":policy[0],"cancellation_policy":policy[1],"timezone_id":policy[2]} if policy else None),
+                "approved_media_count":media,
                 "units":[{"label":x[0],"quantity":x[1]} for x in units]}
             encoded=json.dumps(snapshot,sort_keys=True,separators=(",",":"))
             digest=hashlib.sha256(encoded.encode()).hexdigest()

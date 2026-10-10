@@ -233,6 +233,48 @@ contract BreedingEngineTest {
         require(!ok, "randomness request bypassed emergency");
     }
 
+    function testPendingChildReservationAndAuthorizedCancelRecovery() public {
+        uint64 eventId = 21;
+        bytes32 child = keccak256("hc:r029:child");
+        bytes32 line = keccak256("hc:r029:line");
+        bytes32 metadata = keccak256("hc:r029:metadata");
+        bytes32 context = keccak256(abi.encode(eventId, parentA, parentB, child, line, metadata));
+        bytes32 requestId = keccak256(abi.encode(keccak256("HC.RANDOM.BREEDING.V1"), context));
+        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_REQUEST, bytes32(uint256(eventId)), keccak256("r029:req21"));
+        _grant(address(breeding), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("r029:rand21"));
+        breeding.requestBreeding(eventId, parentA, parentB, child, line, metadata);
+        require(breeding.pendingChildOwner(child) == eventId, "child not reserved");
+        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_REQUEST, bytes32(uint256(22)), keccak256("r029:req22"));
+        (bool ok,) = address(breeding).call(abi.encodeCall(breeding.requestBreeding, (uint64(22), parentA, parentB, child, line, metadata)));
+        require(!ok, "duplicate pending child accepted");
+        (ok,) = address(breeding).call(abi.encodeCall(breeding.cancelBreeding, (eventId)));
+        require(!ok, "unauthorized cancellation");
+        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_CANCEL, bytes32(uint256(eventId)), keccak256("r029:cancel21"));
+        breeding.cancelBreeding(eventId);
+        require(breeding.cancelled(eventId) && breeding.pendingChildOwner(child) == 0, "cancel did not recover reservation");
+        require(randomness.cancelled(requestId), "randomness not cancelled");
+        (ok,) = address(breeding).call(abi.encodeCall(breeding.cancelBreeding, (eventId)));
+        require(!ok, "cancellation replay");
+        (ok,) = address(breeding).call(abi.encodeCall(breeding.finalizeBreeding, (eventId)));
+        require(!ok, "cancelled child finalized");
+        (ok,) = address(randomness).call(abi.encodeCall(randomness.fulfill, (requestId, keccak256("late entropy"))));
+        require(!ok, "late entropy fulfilled");
+    }
+
+    function testTimeoutCannotBeUsedEarly() public {
+        uint64 eventId = 23;
+        bytes32 child = keccak256("hc:r029:timeout");
+        bytes32 line = keccak256("hc:r029:timeoutline");
+        bytes32 metadata = keccak256("hc:r029:timeoutmetadata");
+        bytes32 context = keccak256(abi.encode(eventId, parentA, parentB, child, line, metadata));
+        bytes32 requestId = keccak256(abi.encode(keccak256("HC.RANDOM.BREEDING.V1"), context));
+        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_REQUEST, bytes32(uint256(eventId)), keccak256("r029:req23"));
+        _grant(address(breeding), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("r029:rand23"));
+        breeding.requestBreeding(eventId, parentA, parentB, child, line, metadata);
+        (bool ok,) = address(breeding).call(abi.encodeCall(breeding.expireBreeding, (eventId)));
+        require(!ok && breeding.pendingChildOwner(child) == eventId, "early expiry released reservation");
+    }
+
     function _grant(
         address principal,
         bytes32 moduleId,

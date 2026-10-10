@@ -39,7 +39,8 @@ emergency_bindings = {
     'BREEDING_BIND_EMERGENCY': 'HC.ACTION.BREEDING_ENGINE.BIND_EMERGENCY',
     'RANDOMNESS_BIND_EMERGENCY': 'HC.ACTION.RANDOMNESS_COORDINATOR.BIND_EMERGENCY',
 }
-require(len(actions) == 60, 'unexpected action catalogue size')
+require(len(actions) == 61, 'unexpected action catalogue size')
+require(actions.count(('SESSION_POLICY_REVIEW_ROUTINE_CALL', 'HC.ACTION.GAMING_SESSION_POLICY.REVIEW_ROUTINE_CALL')) == 1, 'missing independent routine selector review')
 require(actions.count(('MODULE_APPROVE_ARTIFACT', 'HC.ACTION.MODULE_REGISTRY.APPROVE_ARTIFACT')) == 1, 'missing artifact approval authority')
 require(actions.count(('MODULE_EXECUTE', 'HC.ACTION.MODULE_REGISTRY.EXECUTE')) == 1, 'missing permission-scoped module execution')
 require(actions.count(('MODULE_BIND_RULESETS', 'HC.ACTION.MODULE_REGISTRY.BIND_RULESETS')) == 1, 'missing canonical ruleset binding action')

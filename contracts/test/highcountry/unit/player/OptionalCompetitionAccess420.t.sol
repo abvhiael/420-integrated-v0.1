@@ -50,6 +50,7 @@ contract MockHCCompetitionGamingAccess is IHighCountryGamingAccess420 {
     ) external view returns (bool) {
         return access[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
     }
+
     function hasPlayerBonusRegion(
         uint64,
         bytes32

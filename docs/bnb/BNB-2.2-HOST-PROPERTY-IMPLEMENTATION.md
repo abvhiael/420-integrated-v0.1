@@ -71,3 +71,13 @@ The targeted browser check has been expanded from Chromium smoke to responsive m
 A new shared-PostgreSQL concurrency test races **eight independent TestClient instances** for one inventory slot and verifies one success/seven capacity denials. It is still in-process integration—not two separately deployed service processes or a full multiple-unit reservation allocator. Live multi-instance/provider authority remains assigned to `BNB-TESTNET-WORK-ROADMAP.md`. No work here enables guest booking finality, payments or publication.
 
 **Qualification:** app-specific Level 1 exact-SHA CI pending. Do not describe these new tests as green before the reported run completes.
+
+## True multiprocess and unit allocation iteration
+
+- `008_unit_hold_allocation.sql` adds a unit-scoped hold reference, preserving the old no-unit schema for legacy properties. New unit-configured properties require explicit unit selection. Capacity is checked under the shared property row lock against overlapping holds for that exact unit. Other units remain independently allocatable; legacy properties retain conservative property-wide capacity semantics.
+- Two independently launched Uvicorn OS processes use the same PostgreSQL instance; the adversarial test concurrently sends eight real HTTP requests for one slot and expects one admission and seven conflicts. This is a **local multi-process integration test** and not deployed testnet acceptance.
+- Additional tests cover unit selection, isolated unit capacity, overbooking refusal and persisted per-unit allocated quantities. No actual payment finality or canonical confirmed booking lifecycle is enabled.
+
+**External/manual acceptance remains outstanding:** operational moderation approval requires authorized reviewer identity, governance decision, signing/key custody and independently retained review trails. CI cannot issue its own authorization. Human WCAG 2.2 AA testing requires keyboard, screen-reader, and representative assistive technologies on supported browsers, with qualified human reviewer evidence and defect closure. Automated axe/Playwright does **not** substitute for that acceptance. Full production-equivalent booking/payment integration remains in the testnet roadmap.
+
+**Qualification status:** targeted exact-implementation-SHA GitHub runtime acceptance required; do not claim this iteration complete on a queued check.

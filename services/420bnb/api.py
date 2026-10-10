@@ -89,8 +89,8 @@ def peak_occupied_units(intervals,start,end):
 
 
 class SeasonalRate(BaseModel):
-    start: str=Field(pattern=r"^\\d{4}-\\d{2}-\\d{2}$")
-    end: str=Field(pattern=r"^\\d{4}-\\d{2}-\\d{2}$")
+    start: str=Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    end: str=Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     nightly_minor: int=Field(ge=0,le=10**12,strict=True)
 
 
@@ -106,8 +106,8 @@ class RatePlanInput(BaseModel):
 class QuoteInput(BaseModel):
     property_id: str
     unit_id: str|None=None
-    checkin: str=Field(pattern=r"^\\d{4}-\\d{2}-\\d{2}$")
-    checkout: str=Field(pattern=r"^\\d{4}-\\d{2}-\\d{2}$")
+    checkin: str=Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    checkout: str=Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     units: int=Field(default=1,ge=1,le=100,strict=True)
     payer_max_minor: int|None=Field(default=None,ge=0,le=10**15,strict=True)
     nonce: str=Field(min_length=8,max_length=128)

@@ -540,3 +540,69 @@ def test_bnb24_concurrent_quote_same_guest_nonce_is_single_immutable_row(fixture
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
+
+
+def test_bnb25_request_withdraw_idempotency_and_capability(fixture_property):
+    pid,headers=fixture_property
+    hold=client.post("/v1/bnb/holds",json=payload(pid),headers={
+        **headers,"idempotency-key":"bnb25-hold-0001"})
+    assert hold.status_code==201,hold.text
+    route="/v1/bnb/booking-requests"
+    body={"hold_id":hold.json()["id"],"request_type":"request"}
+    sent=client.post(route,json=body,headers={**headers,"idempotency-key":"bnb25-request-0001"})
+    assert sent.status_code==201,sent.text
+    assert sent.json()["state"]=="requested"
+    again=client.post(route,json=body,headers={**headers,"idempotency-key":"bnb25-request-0001"})
+    assert again.status_code==201 and again.json()["id"]==sent.json()["id"]
+    collision=client.post(route,json={**body,"request_type":"instant"},
+        headers={**headers,"idempotency-key":"bnb25-request-0001"})
+    assert collision.status_code==409
+    assert client.get(route+"/"+sent.json()["id"]).status_code==401
+    assert client.post(route+"/"+sent.json()["id"]+"/accept",headers=headers).status_code==404
+    abandoned=client.post(route+"/"+sent.json()["id"]+"/withdraw",headers=headers)
+    assert abandoned.status_code==200 and abandoned.json()["state"]=="withdrawn"
+    assert client.post(route+"/"+sent.json()["id"]+"/withdraw",headers=headers).status_code==409
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        assert c.execute("SELECT status FROM bnb_hold WHERE id=%s",
+                         (hold.json()["id"],)).fetchone()[0]=="cancelled"
+        assert c.execute("SELECT COUNT(*) FROM bnb_reservation WHERE property_id=%s",
+                         (pid,)).fetchone()[0]==0
+
+
+def test_bnb25_instant_eligibility_pending_payment_and_cancel(fixture_property):
+    pid,headers=fixture_property
+    first=client.post("/v1/bnb/holds",json=payload(pid),headers={
+        **headers,"idempotency-key":"bnb25-instant-hold"})
+    assert first.status_code==201
+    body={"hold_id":first.json()["id"],"request_type":"instant"}
+    assert client.post("/v1/bnb/booking-requests",json=body,
+        headers={**headers,"idempotency-key":"bnb25-instant-disabled"}).status_code==403
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",
+                  (pid,))
+    try:
+        accepted=client.post("/v1/bnb/booking-requests",json=body,
+            headers={**headers,"idempotency-key":"bnb25-instant-allowed"})
+        assert accepted.status_code==201,accepted.text
+        assert accepted.json()["state"]=="accepted" and not accepted.json()["confirmed"]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            row=c.execute("SELECT id,status,pay_proof_id FROM bnb_reservation WHERE property_id=%s",
+                          (pid,)).fetchone()
+        assert row[1]=="payment_pending" and row[2] is None
+        detail=client.get("/v1/bnb/reservations/"+str(row[0]),headers=headers)
+        assert detail.status_code==200 and not detail.json()["confirmed"]
+        assert client.post("/v1/bnb/reservations/"+str(row[0])+"/modify",
+                           headers=headers).status_code==409
+        closed=client.post("/v1/bnb/reservations/"+str(row[0])+"/cancel",headers=headers)
+        assert closed.status_code==200 and closed.json()["refund_status"]=="not_applicable"
+        assert client.post("/v1/bnb/reservations/"+str(row[0])+"/cancel",
+                           headers=headers).status_code==200
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT status FROM bnb_hold WHERE id=%s",
+                             (first.json()["id"],)).fetchone()[0]=="cancelled"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_reservation WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

@@ -845,3 +845,96 @@ def test_bnb25_atomic_quote_based_reservation_replacement_and_replay(fixture_pro
         assert c.execute("""SELECT COUNT(*) FROM bnb_reservation
             WHERE booking_request_id=%s AND status='payment_pending'""",
             (first.json()["replacement_request_id"],)).fetchone()[0]==1
+
+
+def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_property,monkeypatch):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",(pid,))
+    hold=make_bnb25_hold(pid,headers,"bnb26-quote-00001","bnb26-held-00001")
+    assert hold.status_code==201,hold.text
+    sent=client.post("/v1/bnb/booking-requests",headers={
+        **headers,"idempotency-key":"bnb26-booking-00001"},json={
+        "hold_id":hold.json()["id"],"request_type":"instant"})
+    assert sent.status_code==201,sent.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        row=c.execute("""SELECT r.id,r.quote_id,q.calculation,p.currency,
+            r.guest_subject,p.host_subject FROM bnb_reservation r
+            JOIN bnb_price_quote q ON q.id=r.quote_id
+            JOIN bnb_property p ON p.id=r.property_id WHERE r.booking_request_id=%s""",
+            (sent.json()["id"],)).fetchone()
+    reservation_id,quote_id,calc,currency,guest,host=row
+    body={"reservation_id":str(reservation_id),"quote_id":str(quote_id),
+          "merchant_id":"merchant-fixture","payout_controller":"controller-fixture",
+          "chain_id":420,"asset":"native:$420","asset_amount":"1000000000000000000",
+          "pay_invoice_id":"invoice-bnb26-001",
+          "pay_invoice_expires":(datetime.now(timezone.utc)+timedelta(minutes=10)).isoformat()}
+    endpoint="/v1/bnb/internal/pay/intents"
+    assert client.post(endpoint,json=body).status_code==401
+    assert client.post(endpoint,json=body,headers={"x-pay-authority-proof":"invalid"}).status_code==503
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://pay.test.invalid"
+    monkeypatch.setenv("BNB_PAY_PUBLIC_KEY_PEM",private.public_key().public_bytes(
+        Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    monkeypatch.setenv("BNB_PAY_ISSUER",issuer)
+    monkeypatch.setenv("BNB_PAY_AUDIENCE","bnb-pay")
+    def sign(model,purpose,extra=None):
+        now=int(time.time())
+        claims={"iss":issuer,"aud":"bnb-pay","sub":"pay-service-fixture",
+            "iat":now,"nbf":now,"exp":now+120,"jti":str(uuid4()),
+            "purpose":"pay-"+purpose,"authority":"420Pay",
+            "registry_version":"test-registry-v1",
+            "payload_hash":hashlib.sha256(model.model_dump_json().encode()).hexdigest(),
+            **(extra or {})}
+        return jwt.encode(claims,private,algorithm="RS256")
+    model=api.PayIntentInput(**body)
+    trust={"merchant_id":body["merchant_id"],"payout_controller":body["payout_controller"],
+           "merchant_activated":True,"guest_subject":guest,"host_subject":host,
+           "quoted_minor":calc["total_minor"],"currency":currency}
+    try:
+        bad=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
+            model,"intent",{**trust,"quoted_minor":1})})
+        assert bad.status_code==409
+        intent=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(model,"intent",trust)})
+        assert intent.status_code==202,intent.text
+        assert intent.json()["confirmed"] is False
+        intent_id=intent.json()["intent_id"]
+        claims={"reservation_id":str(reservation_id),"intent_id":intent_id,
+                "pay_invoice_id":body["pay_invoice_id"],"pay_payment_id":"pay-bnb26-001",
+                "receipt_hash":"0x"+"a"*64,"chain_id":420,"asset":body["asset"],
+                "asset_amount":body["asset_amount"],"merchant_id":body["merchant_id"],
+                "payout_controller":body["payout_controller"],"finality":"FINALIZED"}
+        proof=api.PayFinalityInput(**claims)
+        no_finality=client.post("/v1/bnb/internal/pay/finality",json=claims,headers={
+            "x-pay-authority-proof":sign(proof,"finality",{"chain_id":420,
+                "asset":body["asset"],"payment_id":claims["pay_payment_id"]})})
+        assert no_finality.status_code==403
+        authorized={"finality_verified":True,"canonical_receipt":"fixture-block-log-proof",
+                    "chain_id":420,"asset":body["asset"],
+                    "payment_id":claims["pay_payment_id"]}
+        result=client.post("/v1/bnb/internal/pay/finality",json=claims,
+            headers={"x-pay-authority-proof":sign(proof,"finality",authorized)})
+        assert result.status_code==202,result.text
+        assert result.json()["confirmed"] is True
+        assert client.get(f"/v1/bnb/reservations/{reservation_id}",
+                          headers=headers).json()["confirmed"] is True
+        assert client.post(f"/v1/bnb/reservations/{reservation_id}/cancel",
+                           headers=headers).status_code==409
+        assert client.post(f"/v1/bnb/reservations/{reservation_id}/expire",
+                           headers=headers).status_code==409
+        repeated=client.post("/v1/bnb/internal/pay/finality",json=claims,headers={
+            "x-pay-authority-proof":sign(proof,"finality",authorized)})
+        assert repeated.status_code==202,repeated.text
+        assert repeated.json()["replayed"] is False or repeated.json()["confirmed"] is True
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT COUNT(*) FROM bnb_pay_finality_event WHERE reservation_id=%s",
+                             (reservation_id,)).fetchone()[0]==1
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_pay_finality_event WHERE reservation_id=%s",
+                      (reservation_id,))
+            c.execute("DELETE FROM bnb_pay_intent WHERE reservation_id=%s",(reservation_id,))
+            c.execute("DELETE FROM bnb_reservation WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

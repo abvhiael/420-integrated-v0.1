@@ -87,3 +87,16 @@ for forbidden in ["courier_id","address","order_id","phone"]:
     assert_true(forbidden in r15,"R01.5 forbids public field "+forbidden)
 assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.5 does not promote Genesis app")
 assert_true(flags.get("travel.doobr_transactions") is False,"R01.5 Travel gateway stays fail closed")
+
+# R01.6 privacy/security architecture and future attack-test traceability.
+r16=read("docs/doobr/DOOBR-R01-6-SECURITY-PRIVACY-THREAT-MODEL.md")
+assert_true("R01.6 Security/privacy threat model" in roadmap,"canonical R01.6 unchanged")
+for item in ["GPS","address","age","records","chain","coercion","impersonation",
+             "regulated-goods custody","RESTRICTED PII","REGULATED CONFIDENTIAL",
+             "SECRET","PUBLIC MINIMIZED","420Compliance","420Pay","Travel/Maps",
+             "UNKNOWN","fail closed","R01.7 OpenAPI/events"]:
+    assert_true(item in r16,"R01.6 threat/data/authority design: "+item)
+for i in range(1,21):
+    assert_true(f"SEC-{i:02d}" in r16,"R01.6 adversarial traceability SEC-"+str(i))
+assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.6 frozen Genesis catalog intact")
+assert_true(flags.get("travel.doobr_transactions") is False,"R01.6 regulated Travel gateway remains disabled")

@@ -435,3 +435,51 @@ def test_bnb24_immutable_quote_expiry_policy_and_nonce(fixture_property):
             c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
+
+
+def test_bnb24_quote_bound_hold_uses_exact_total_and_rejects_reuse(fixture_property):
+    pid,headers=fixture_property
+    from zoneinfo import ZoneInfo
+    beginning=(datetime.now(ZoneInfo("America/Regina"))+timedelta(days=10)).date()
+    request={"property_id":str(pid),"checkin":beginning.isoformat(),
+             "checkout":(beginning+timedelta(days=2)).isoformat(),
+             "nonce":"quoted-hold-00001","units":1}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_listing_policy
+            (property_id,house_rules,cancellation_policy,timezone_id,min_nights)
+            VALUES (%s,'Keep quiet','Firm cancellations','America/Regina',1)""",(pid,))
+        c.execute("""INSERT INTO bnb_rate_plan
+            (property_id,cleaning_minor,service_minor,tax_bps,discount_bps)
+            VALUES (%s,1000,200,1000,0)""",(pid,))
+    try:
+        q=client.post("/v1/bnb/quotes",headers=headers,json=request)
+        assert q.status_code==201,q.text
+        qid=q.json()["id"]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            row=c.execute("""SELECT lower(period),upper(period),policy_snapshot FROM bnb_price_quote
+                WHERE id=%s""",(qid,)).fetchone()
+        window={"property_id":str(pid),"start":row[0].isoformat(),
+                "end":row[1].isoformat(),"units":1,
+                "policy_snapshot":__import__("json").dumps(row[2],sort_keys=True,separators=(",",":"))}
+        assert client.post("/v1/bnb/holds",headers={**headers,"idempotency-key":"without-quote-0001"},
+                           json=window).status_code==422
+        assert client.post("/v1/bnb/holds",headers={**headers,"idempotency-key":"bad-policy-00001"},
+                           json={**window,"quote_id":qid,"policy_snapshot":"forged"}).status_code==409
+        accepted=client.post("/v1/bnb/holds",headers={**headers,"idempotency-key":"quote-hold-000001"},
+                           json={**window,"quote_id":qid})
+        assert accepted.status_code==201,accepted.text
+        assert accepted.json()["total_minor"]==q.json()["calculation"]["total_minor"]
+        assert accepted.json()["total_minor"]>2000
+        another=client.post("/v1/bnb/holds",headers={**headers,"idempotency-key":"quote-hold-000002"},
+                            json={**window,"quote_id":qid})
+        assert another.status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT quote_id FROM bnb_hold WHERE id=%s",
+                             (accepted.json()["id"],)).fetchone()[0]==__import__("uuid").UUID(qid)
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
+            c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))

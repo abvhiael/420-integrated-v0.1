@@ -1151,7 +1151,18 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
         payload.pay_invoice_expires<=now or
         payload.pay_invoice_expires>now+timedelta(hours=1)):
         raise HTTPException(422,"INVALID_PAY_INVOICE_EXPIRY")
+    if (proof.get("chain_id")!=payload.chain_id or
+        proof.get("asset")!=payload.asset or
+        proof.get("asset_amount")!=payload.asset_amount):
+        raise HTTPException(403,"PAY_ASSET_CHAIN_ROUTE_MISMATCH")
+    kind=proof.get("route_kind")
     swap=payload.conversion_route_id is not None
+    if swap and kind!="pay_swap":
+        raise HTTPException(403,"SWAP_MUST_USE_CANONICAL_PAY_ROUTER")
+    if not swap and (kind!="native_420" or payload.asset!="native:$420" or
+                     proof.get("native_420_route_approved") is not True or
+                     proof.get("priced_asset_conversion_approved") is not True):
+        raise HTTPException(403,"NATIVE_420_PAY_ROUTE_NOT_APPROVED")
     if swap:
         if (not payload.conversion_quote_id or payload.conversion_expires is None or
             payload.minimum_received is None or payload.payer_max is None or

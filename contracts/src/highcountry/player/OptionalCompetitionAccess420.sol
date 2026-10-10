@@ -81,7 +81,7 @@ contract OptionalCompetitionAccess420 {
     ) public view returns (bool) {
         OptionalCompetition memory record = _competitions[competitionId];
         if (!record.exists || !record.active) return false;
-        return gamingAccess.hasCompetitionAccess(growerProfileId, record.entitlementId, record.contentId);
+        return gamingAccess.hasPlayerCompetition(growerProfileId, record.contentId);
     }
 
     function requireAccess(
@@ -91,7 +91,7 @@ contract OptionalCompetitionAccess420 {
         OptionalCompetition memory record = _competitions[competitionId];
         if (!record.exists) revert HCNotFound();
         if (!record.active) revert CompetitionInactive(competitionId);
-        if (!gamingAccess.hasCompetitionAccess(growerProfileId, record.entitlementId, record.contentId)) {
+        if (!gamingAccess.hasPlayerCompetition(growerProfileId, record.contentId)) {
             revert CompetitionEntitlementRequired(competitionId, growerProfileId);
         }
     }

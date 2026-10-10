@@ -1,0 +1,218 @@
+{
+  "schema": "420compliance-official-source-registry/v1",
+  "step": "C02.1",
+  "status": "DISCOVERY_REGISTRY_NOT_LEGAL_APPROVAL",
+  "release_enabled": false,
+  "owners_are_roles_not_appointed_people": true,
+  "verification_date": "2026-10-10",
+  "source_count": 10,
+  "sources": [
+    {
+      "id": "FED-ACT",
+      "title": "Cannabis Act",
+      "type": "STATUTE",
+      "url": "https://laws-lois.justice.gc.ca/eng/acts/C-24.5/",
+      "approved_host": "laws-lois.justice.gc.ca",
+      "jurisdiction": "federal",
+      "owner_role": "Federal legislation curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "FED-REG",
+      "title": "Cannabis Regulations",
+      "type": "REGULATION",
+      "url": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-2018-144/",
+      "approved_host": "laws-lois.justice.gc.ca",
+      "jurisdiction": "federal",
+      "owner_role": "Federal legislation curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "BC-ACT",
+      "title": "Cannabis Control and Licensing Act",
+      "type": "STATUTE",
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/18029",
+      "approved_host": "www.bclaws.gov.bc.ca",
+      "jurisdiction": "british-columbia",
+      "owner_role": "BC legal-source curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "BC-LIC-REG",
+      "title": "Cannabis Licensing Regulation",
+      "type": "REGULATION",
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/202_2018",
+      "approved_host": "www.bclaws.gov.bc.ca",
+      "jurisdiction": "british-columbia",
+      "owner_role": "BC legal-source curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "BC-CTL-REG",
+      "title": "Cannabis Control Regulation",
+      "type": "REGULATION",
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/204_2018",
+      "approved_host": "www.bclaws.gov.bc.ca",
+      "jurisdiction": "british-columbia",
+      "owner_role": "BC legal-source curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "BC-STORE-HANDBOOK",
+      "title": "Cannabis terms and conditions / retail store handbook",
+      "type": "LICENCE_CONDITION",
+      "url": "https://www2.gov.bc.ca/gov/content/employment-business/business/liquor-regulation-licensing/cannabis-licences/law-policy-cannabis-licence-authorization/cannabis-terms-conditions",
+      "approved_host": "www2.gov.bc.ca",
+      "jurisdiction": "british-columbia",
+      "owner_role": "BC licensing materials curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "BC-DELIVERY",
+      "title": "Delivering cannabis - BC policy summary",
+      "type": "OFFICIAL_GUIDANCE",
+      "url": "https://www2.gov.bc.ca/gov/content/employment-business/business/liquor-regulation-licensing/cannabis-licences/cannabis-resources-information/delivering-cannabis",
+      "approved_host": "www2.gov.bc.ca",
+      "jurisdiction": "british-columbia",
+      "owner_role": "BC delivery policy curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "VAN-LIC",
+      "title": "City of Vancouver cannabis retail store business licence",
+      "type": "OFFICIAL_GUIDANCE",
+      "url": "https://vancouver.ca/doing-business/cannabis-retail-dealer-business-licence.aspx",
+      "approved_host": "vancouver.ca",
+      "jurisdiction": "vancouver",
+      "owner_role": "Vancouver municipal licence curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "VAN-APPLY",
+      "title": "City of Vancouver cannabis retail store licence applicants",
+      "type": "OFFICIAL_GUIDANCE",
+      "url": "https://vancouver.ca/doing-business/cannabis-retail-dealer-business-licence-applicants.aspx",
+      "approved_host": "vancouver.ca",
+      "jurisdiction": "vancouver",
+      "owner_role": "Vancouver planning curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 24,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    },
+    {
+      "id": "VAN-ZONING-AMEND",
+      "title": "Cannabis store Zoning and Development Bylaw amendment 12167",
+      "type": "MUNICIPAL_BYLAW",
+      "url": "https://bylaws.vancouver.ca/consolidated/12167.pdf",
+      "approved_host": "bylaws.vancouver.ca",
+      "jurisdiction": "vancouver",
+      "owner_role": "Vancouver bylaw curator",
+      "owner_assigned_to_person": false,
+      "refresh_policy": {
+        "max_age_hours": 48,
+        "check_method": "conditional-GET when supported; independent official revision/effective-date inspection",
+        "on_timeout": "STALE_BLOCKS_REGULATED_ALLOW",
+        "on_change": "QUARANTINE_AND_REQUIRE_REVIEW",
+        "fallback": "manual independent official source verification; no silent cached ALLOW"
+      },
+      "ingestion_state": "NOT_DEPLOYED",
+      "legal_review": "PENDING",
+      "production_authority": false
+    }
+  ],
+  "gaps": [
+    "Vancouver consolidated zoning/licence bylaw and amendments need section-level legal review",
+    "individual retailer licensing and issuer-specific conditions are not public register approvals",
+    "Indigenous Nation and site-specific operating authority cannot be inferred from municipality",
+    "delivery guidance is secondary to operative licence/legislative instruments"
+  ],
+  "global_failure_mode": "UNKNOWN_REVIEW_REQUIRED_NO_TRANSACTION_ALLOW"
+}

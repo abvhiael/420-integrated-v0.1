@@ -329,3 +329,7 @@ This file is the repository-adopted copy of the user-approved roadmap. Original 
 ### C01.2 adopted product contract
 
 The locked scope is recorded in [C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md](C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md) and its machine-readable JSON companion. Nine actors, 24 journeys and 14 exclusions define the first infrastructure release. C01.1 qualification remains retained; C01.2 acceptance is recorded separately.
+
+### C01.3 adopted discovery contract
+
+[C01.3-SOURCE-AUTHORITY-AND-REVIEW.md](C01.3-SOURCE-AUTHORITY-AND-REVIEW.md) and its JSON companion establish 12 source types, 17 discovery entries, 10 review roles and 25 unresolved interpretation questions. C01.1/C01.2 remain qualified and unchanged. No legal approval, external reviewer appointment or operational eligibility is implied.

@@ -924,6 +924,7 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
             "x-pay-authority-proof":sign(proof,"finality",{"chain_id":420,
                 "asset":body["asset"],"payment_id":claims["pay_payment_id"]})})
         assert no_finality.status_code==403
+        assert client.get(f"/v1/bnb/reservations/{reservation_id}/receipt",headers=headers).status_code==404
         authorized={"finality_verified":True,"canonical_receipt":"fixture-block-log-proof",
                     "chain_id":420,"asset":body["asset"],
                     "payment_id":claims["pay_payment_id"]}
@@ -936,6 +937,12 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
         checked=client.get(f"/v1/bnb/reservations/{reservation_id}/payment",headers=headers)
         assert checked.status_code==200 and checked.json()["confirmed"] is True
         assert checked.json()["payment_id"]==claims["pay_payment_id"]
+        canonical=client.get(f"/v1/bnb/reservations/{reservation_id}/receipt",headers=headers)
+        assert canonical.status_code==200
+        assert canonical.json()["receipt_hash"]==claims["receipt_hash"]
+        assert canonical.json()["finality"]=="FINALIZED"
+        assert canonical.json()["onchain_receipt_verified_by_bnb"] is False
+        assert client.get(f"/v1/bnb/reservations/{reservation_id}/receipt").status_code==401
         assert client.post(f"/v1/bnb/reservations/{reservation_id}/cancel",
                            headers=headers).status_code==409
         assert client.post(f"/v1/bnb/reservations/{reservation_id}/expire",

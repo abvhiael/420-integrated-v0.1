@@ -32,7 +32,7 @@ contract HarvestScoringTest {
     }
 
     function testFloorRoundingAndGenetics() public {
-        HarvestScoring.Result memory a = this.score(bytes32(uint256(0)), 10000);
+        HarvestScoring.Result memory a = this.score(bytes32(uint256(2001)), 10000);
         require(a.geneticBps == 9000 && a.yieldGrams == 450, "floor lower boundary");
         HarvestScoring.Result memory b = this.score(bytes32(uint256(2000)), 10000);
         require(b.geneticBps == 11000 && b.yieldGrams == 550, "upper genetics boundary");

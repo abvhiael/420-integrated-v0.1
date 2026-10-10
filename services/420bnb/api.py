@@ -3,10 +3,14 @@ import hashlib
 import hmac
 import json
 import os
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 import psycopg
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from identity import verify_external_token
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
@@ -173,3 +177,72 @@ def get_hold(hold_id: str,x_authenticated_subject: str | None=Header(None),
 def payment_disabled():
     # Never infer financial authority from a local reservation, caller or callback.
     raise HTTPException(503,"PAYMENT_UNAVAILABLE")
+
+
+@app.post("/v1/bnb/account/session", status_code=201)
+def establish_session(authorization: str | None = Header(None)):
+    """Exchange independently signed Identity assertion for scoped local session."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401,"UNAUTHORIZED")
+    proof=verify_external_token(authorization[7:])
+    sid=uuid4()
+    with db() as c:
+        with c.transaction():
+            c.execute("""INSERT INTO bnb_account(subject) VALUES (%s)
+                ON CONFLICT (subject) DO NOTHING""",(proof["subject"],))
+            state=c.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",
+                            (proof["subject"],)).fetchone()
+            if not state or state[0]!="active":
+                raise HTTPException(403,"ACCOUNT_DISABLED")
+            existing=c.execute("""SELECT id,revoked_at FROM bnb_identity_session
+                WHERE issuer=%s AND issuer_session_id=%s FOR UPDATE""",
+                (proof["issuer"],proof["issuer_session_id"])).fetchone()
+            if existing:
+                # Never resurrect a revoked issuer session.
+                if existing[1]:raise HTTPException(401,"SESSION_REVOKED")
+                sid=existing[0]
+            else:
+                c.execute("""INSERT INTO bnb_identity_session
+                  (id,subject,issuer,issuer_session_id,expires_at)
+                  VALUES (%s,%s,%s,%s,%s)""",
+                  (sid,proof["subject"],proof["issuer"],proof["issuer_session_id"],proof["expires_at"]))
+    return {"session_id":str(sid),"subject":proof["subject"],"expires_at":proof["expires_at"].isoformat(),
+            "host_verified":False,"financial_permissions":[]}
+
+
+@app.post("/v1/bnb/account/sessions/{session_id}/revoke")
+def revoke_session(session_id: str,authorization: str | None = Header(None)):
+    """Revocation may only be requested by the bearer of independent Identity proof."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401,"UNAUTHORIZED")
+    proof=verify_external_token(authorization[7:])
+    with db() as c:
+        result=c.execute("""UPDATE bnb_identity_session SET revoked_at=now()
+            WHERE id=%s AND subject=%s AND revoked_at IS NULL
+              AND issuer=%s AND expires_at>now() RETURNING id""",
+              (session_id,proof["subject"],proof["issuer"])).fetchone()
+    if not result:raise HTTPException(404,"NOT_FOUND")
+    return {"revoked":True}
+
+
+@app.get("/v1/bnb/account/property/{property_id}/access")
+def check_property_access(property_id: str,capability: str,
+                          authorization: str | None = Header(None)):
+    """Read-only property permission check; never grants ownership or payouts."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401,"UNAUTHORIZED")
+    proof=verify_external_token(authorization[7:])
+    if capability not in ("view_reservations","edit_calendar","edit_listing","handle_requests"):
+        raise HTTPException(422,"INVALID_CAPABILITY")
+    with db() as c:
+        active=c.execute("""SELECT 1 FROM bnb_identity_session WHERE
+            issuer=%s AND issuer_session_id=%s AND subject=%s
+            AND revoked_at IS NULL AND expires_at>now()""",
+            (proof["issuer"],proof["issuer_session_id"],proof["subject"])).fetchone()
+        if not active:raise HTTPException(401,"SESSION_NOT_ACTIVE")
+        host=c.execute("""SELECT 1 FROM bnb_property WHERE id=%s AND host_subject=%s""",
+                       (property_id,proof["subject"])).fetchone()
+        delegated=c.execute("""SELECT 1 FROM bnb_property_grant WHERE property_id=%s
+            AND grantee_subject=%s AND capability=%s AND revoked_at IS NULL AND expires_at>now()""",
+            (property_id,proof["subject"],capability)).fetchone()
+    return {"allowed":bool(host or delegated),"capability":capability,"property_id":property_id}

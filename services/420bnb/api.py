@@ -216,7 +216,8 @@ def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
                  start,end,checkin,checkout,prop[4],payload.units,json.dumps(calculation),
                  data,signature,expires,payload.nonce,digest))
     return {"id":str(uid),"status":"issued","expires_at":expires.isoformat(),
-            "snapshot_sha256":signature,"calculation":calculation,"currency":prop[4],
+            "snapshot_sha256":signature,"policy_snapshot":snapshot,
+            "calculation":calculation,"currency":prop[4],
             "financial_finality":False}
 
 
@@ -225,12 +226,13 @@ def get_quote(quote_id:str,authorization:str|None=Header(None)):
     subject=active_subject(authorization)
     with db() as c:
         row=c.execute("""SELECT guest_subject,status,expires_at,calculation,currency,
-            snapshot_sha256 FROM bnb_price_quote WHERE id=%s""",(quote_id,)).fetchone()
+            snapshot_sha256,policy_snapshot FROM bnb_price_quote WHERE id=%s""",(quote_id,)).fetchone()
     if not row or row[0]!=subject:raise HTTPException(404,"NOT_FOUND")
     state="expired" if row[2]<=datetime.now(timezone.utc) else row[1]
     return {"id":quote_id,"status":state,"expires_at":row[2].isoformat(),
             "calculation":row[3],"currency":row[4].strip(),
-            "snapshot_sha256":row[5],"financial_finality":False}
+            "snapshot_sha256":row[5],"policy_snapshot":row[6],
+            "financial_finality":False}
 
 
 class HoldInput(BaseModel):

@@ -50,3 +50,14 @@ Implementation SHA: `968137add514b82af193920b62570b108d97ae4b` (targeted qualifi
 The host dashboard now includes an authenticated draft unit form, request-independent-review action, and an owner-scoped calendar-block form. The client sends source-issued Identity bearer credentials only from transient memory, uses `credentials:"omit"`, and does not store credentials in localStorage/cookies. Input and errors remain visible through semantic labels and live status updates. This is not an independently approved Identity login experience and does not satisfy full WCAG/browser testing.
 
 The targeted BnB runtime workflow now executes a JavaScript syntax check on the inline host script. Full Playwright/browser interaction, host media upload rights, published listing policies, multi-instance property management, timezone ID + DST policies, and approved independent reviewer integration remain unqualified. No publication, settlement or guest booking privilege is introduced.
+
+## Policy, media, browser and timezone hardening
+
+- New `006_host_policy_media.sql` stores host-authored rules/cancellation policy and IANA timezone identifiers, plus private media URL, accessible alt text, rights statement, and moderation state (initially **pending**, never self-approved).
+- New owner-only endpoints `PUT /v1/bnb/account/properties/{id}/policy` and `POST /v1/bnb/account/properties/{id}/media` require active signed local session, draft-only row locking, expected version, rights/HTTPS validation and audit trail.
+- Publication review snapshot freezes any submitted policy and count of already independently approved media. Incomplete review submissions remain pending and **cannot** publish.
+- Calendar accepts canonical UTC instants or appropriately offset timezone-local timestamps; any non-UTC offset inconsistent with the property's IANA zone is rejected. Date-only, DST ambiguity and full local-day allocation semantics remain open.
+- Targeted CI now installs Chromium/Playwright to smoke-test responsive host page, semantic controls, anonymous fail-closed buttons and visible status. This is **not** complete WCAG 2.2 AA automated/manual acceptance or full authenticated browser journey.
+- New PostgreSQL adversarial cases cover invalid IANA zone, unsafe media URL, pending moderation, stale versions, no-auth changes and wrong time-zone offset.
+
+**Still not accepted:** full accessible host media/policy editing UI; approved media processing, copyright provenance and moderation operator; complete Playwright authenticated host journey/axe-based audit; unit-capacity calendar allocation under overlapping quantity reservations and multi-instance races; policy-change semantics for already accepted booking snapshots; live independent issuer and property/host approval. Those require additional implementation/qualification; do not label BNB-2.2 COMPLETE.

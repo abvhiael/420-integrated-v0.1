@@ -907,6 +907,171 @@ def my_listing_reviews(property_id:str,authorization:str|None=Header(None)):
     return [{"id":str(x[0]),"state":x[1],"version":x[2],"snapshot_hash":x[3]} for x in rows]
 
 
+class BookingRequestInput(BaseModel):
+    hold_id: UUID
+    request_type: str=Field(pattern="^(request|instant)$")
+
+
+class BookingPolicyInput(BaseModel):
+    expected_version: int=Field(ge=1)
+    instant_enabled: bool=False
+
+
+@app.put("/v1/bnb/account/properties/{property_id}/booking-policy")
+def set_booking_policy(property_id:UUID,payload:BookingPolicyInput,
+                       authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,str(property_id),subject,payload.expected_version)
+            c.execute("""INSERT INTO bnb_booking_policy(property_id,instant_enabled)
+                VALUES (%s,%s) ON CONFLICT(property_id) DO UPDATE
+                SET instant_enabled=EXCLUDED.instant_enabled,updated_at=now()""",
+                (property_id,payload.instant_enabled))
+            version=bump_property(c,str(property_id),subject,"bnb.booking_policy.updated")
+    return {"property_id":str(property_id),"instant_enabled":payload.instant_enabled,
+            "version":version,"publication_approval":False}
+
+
+@app.post("/v1/bnb/booking-requests",status_code=201)
+def submit_booking_request(payload:BookingRequestInput,
+                           idempotency_key:str=Header(min_length=8,max_length=128),
+                           authorization:str|None=Header(None)):
+    guest=active_subject(authorization)
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            # Lock ordering mirrors hold admission / cancellation.
+            ref=c.execute("SELECT property_id,guest_subject FROM bnb_hold WHERE id=%s",
+                          (payload.hold_id,)).fetchone()
+            if not ref or ref[1]!=guest:raise HTTPException(404,"HOLD_NOT_FOUND")
+            prop=c.execute("""SELECT host_subject,status FROM bnb_property
+                WHERE id=%s FOR UPDATE""",(ref[0],)).fetchone()
+            if not prop or prop[1]!="published":raise HTTPException(404,"NOT_FOUND")
+            prior=c.execute("""SELECT digest,result FROM bnb_request_dedupe
+                WHERE actor=%s AND operation='booking_request' AND key=%s FOR UPDATE""",
+                (guest,idempotency_key)).fetchone()
+            if prior:
+                if prior[0]!=digest:raise HTTPException(409,"IDEMPOTENCY_CONFLICT")
+                state=c.execute("SELECT state FROM bnb_booking_request WHERE id=%s",
+                                (prior[1]["id"],)).fetchone()
+                if not state:raise HTTPException(409,"REQUEST_NO_LONGER_AVAILABLE")
+                return {**prior[1],"state":state[0]}
+            hold=c.execute("""SELECT status,expires_at,quote_id,policy_snapshot FROM bnb_hold
+                WHERE id=%s FOR UPDATE""",(payload.hold_id,)).fetchone()
+            if hold[0]!="held" or hold[1]<=datetime.now(timezone.utc):
+                raise HTTPException(409,"HOLD_INACTIVE")
+            if c.execute("SELECT 1 FROM bnb_booking_request WHERE hold_id=%s",
+                         (payload.hold_id,)).fetchone():
+                raise HTTPException(409,"HOLD_ALREADY_REQUESTED")
+            if hold[2]:
+                quote=c.execute("""SELECT status,expires_at FROM bnb_price_quote
+                    WHERE id=%s""",(hold[2],)).fetchone()
+                if not quote or quote[0]!="issued" or quote[1]<=datetime.now(timezone.utc):
+                    raise HTTPException(409,"PRICE_QUOTE_INVALID")
+            policy=c.execute("SELECT instant_enabled FROM bnb_booking_policy WHERE property_id=%s",
+                             (ref[0],)).fetchone()
+            if payload.request_type=="instant" and (not policy or not policy[0]):
+                raise HTTPException(403,"INSTANT_BOOK_NOT_ENABLED")
+            deadline=min(hold[1],datetime.now(timezone.utc)+timedelta(minutes=10))
+            request_id=uuid4()
+            state="accepted" if payload.request_type=="instant" else "requested"
+            c.execute("""INSERT INTO bnb_booking_request
+                (id,hold_id,property_id,guest_subject,host_subject,request_type,
+                state,deadline,expected_quote_id,decided_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (request_id,payload.hold_id,ref[0],guest,prop[0],payload.request_type,
+                 state,deadline,hold[2],datetime.now(timezone.utc) if state=="accepted" else None))
+            if state=="accepted":
+                c.execute("""INSERT INTO bnb_reservation
+                    (id,hold_id,property_id,guest_subject,status,booking_request_id,
+                     policy_snapshot,quote_id,booking_public_id)
+                    VALUES (%s,%s,%s,%s,'payment_pending',%s,%s,%s,%s)""",
+                    (uuid4(),payload.hold_id,ref[0],guest,request_id,hold[3],hold[2],uuid4()))
+            response={"id":str(request_id),"hold_id":str(payload.hold_id),
+                      "state":state,"payment_status":"unavailable","confirmed":False}
+            c.execute("""INSERT INTO bnb_request_dedupe(actor,operation,key,digest,result)
+                VALUES (%s,'booking_request',%s,%s,%s::jsonb)""",
+                (guest,idempotency_key,digest,json.dumps(response)))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.booking.request_created',%s)""",(uuid4(),guest,ref[0]))
+    return response
+
+
+@app.post("/v1/bnb/booking-requests/{request_id}/{decision}")
+def decide_booking_request(request_id:UUID,decision:str,
+                           authorization:str|None=Header(None)):
+    if decision not in ("accept","decline","withdraw"):
+        raise HTTPException(422,"INVALID_BOOKING_DECISION")
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            info=c.execute("""SELECT property_id FROM bnb_booking_request
+                WHERE id=%s""",(request_id,)).fetchone()
+            if not info:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(info[0],))
+            record=c.execute("""SELECT hold_id,guest_subject,host_subject,state,deadline,
+                property_id,expected_quote_id FROM bnb_booking_request
+                WHERE id=%s FOR UPDATE""",(request_id,)).fetchone()
+            if decision=="withdraw":
+                if actor!=record[1]:raise HTTPException(404,"NOT_FOUND")
+            elif actor!=record[2]:
+                raise HTTPException(404,"NOT_FOUND")
+            if record[3]!="requested":
+                raise HTTPException(409,"REQUEST_NOT_PENDING")
+            h=c.execute("""SELECT status,expires_at,policy_snapshot FROM bnb_hold
+                WHERE id=%s FOR UPDATE""",(record[0],)).fetchone()
+            now=datetime.now(timezone.utc)
+            if now>=record[4] or h[0]!="held" or h[1]<=now:
+                c.execute("""UPDATE bnb_booking_request SET state='expired',
+                    decided_at=now(),version=version+1 WHERE id=%s""",(request_id,))
+                if h[0]=="held":c.execute("UPDATE bnb_hold SET status='expired' WHERE id=%s",(record[0],))
+                result="expired"
+            else:
+                result={"accept":"accepted","decline":"declined","withdraw":"withdrawn"}[decision]
+                c.execute("""UPDATE bnb_booking_request SET state=%s,decided_at=now(),
+                    version=version+1 WHERE id=%s""",(result,request_id))
+                if result=="accepted":
+                    c.execute("""INSERT INTO bnb_reservation
+                        (id,hold_id,property_id,guest_subject,status,booking_request_id,
+                         policy_snapshot,quote_id,booking_public_id)
+                        VALUES (%s,%s,%s,%s,'payment_pending',%s,%s,%s,%s)""",
+                        (uuid4(),record[0],record[5],record[1],request_id,
+                         h[2],record[6],uuid4()))
+                else:
+                    c.execute("UPDATE bnb_hold SET status='cancelled' WHERE id=%s",(record[0],))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,%s,%s)""",(uuid4(),actor,"bnb.booking."+result,record[5]))
+    return {"id":str(request_id),"state":result,"confirmed":False,
+            "payment_status":"unavailable"}
+
+
+@app.get("/v1/bnb/booking-requests/{request_id}")
+def read_booking_request(request_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT guest_subject,host_subject,state,request_type,
+            deadline,hold_id FROM bnb_booking_request WHERE id=%s""",(request_id,)).fetchone()
+    if not row or actor not in (row[0],row[1]):raise HTTPException(404,"NOT_FOUND")
+    effective="expired" if row[2]=="requested" and row[4]<=datetime.now(timezone.utc) else row[2]
+    return {"id":str(request_id),"state":effective,"type":row[3],
+            "hold_id":str(row[5]),"confirmed":False,"payment_status":"unavailable"}
+
+
+@app.get("/v1/bnb/reservations/{reservation_id}")
+def read_booking_reservation(reservation_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,p.host_subject,r.status,
+            r.booking_request_id,r.policy_snapshot,r.booking_public_id FROM bnb_reservation r
+            JOIN bnb_property p ON p.id=r.property_id WHERE r.id=%s""",
+            (reservation_id,)).fetchone()
+    if not row or actor not in (row[0],row[1]):raise HTTPException(404,"NOT_FOUND")
+    return {"id":str(reservation_id),"booking_public_id":str(row[5]),
+            "request_id":str(row[3]),"status":row[2],"confirmed":False,
+            "payment_status":"unavailable","policy_snapshot":row[4]}
+
+
 @app.post("/v1/bnb/holds", status_code=201)
 def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_length=128),
          x_authenticated_subject: str | None = Header(None),

@@ -9,7 +9,7 @@ assert "| C01.7 | Approve service discovery strategy, signed publication and opt
 g=d["genesis"]
 assert not any(g[k] for k in ("new_application_id","new_address","new_namespace","frozen_catalog_changes"))
 assert d["chain_commitment"]["decision"]=="DEFER_OPTIONAL"
-assert "governance" in d["chain_commitment"]["requires"]
+assert "420Governance" in d["chain_commitment"]["must_reuse"]
 assert len(d["threat_negative_cases"])>=20
 pub=d["publication"]
 assert {"policy_digest","source_digest_set","review_digest","effective_from","review_expires_at","environment","sequence","revocation_epoch","key_id","signature"}.issubset(pub["manifest_fields"])

@@ -595,6 +595,8 @@ def test_bnb25_instant_eligibility_pending_payment_and_cancel(fixture_property):
         assert detail.status_code==200 and not detail.json()["confirmed"]
         assert client.post("/v1/bnb/reservations/"+str(row[0])+"/modify",
                            headers=headers).status_code==409
+        assert client.post("/v1/bnb/reservations/"+str(row[0])+"/expire",
+                           headers=headers).status_code==409
         closed=client.post("/v1/bnb/reservations/"+str(row[0])+"/cancel",headers=headers)
         assert closed.status_code==200 and closed.json()["refund_status"]=="not_applicable"
         assert client.post("/v1/bnb/reservations/"+str(row[0])+"/cancel",
@@ -679,3 +681,39 @@ def test_bnb25_independent_host_approval_decline_and_expiry(fixture_property,mon
             c.execute("DELETE FROM bnb_identity_session WHERE subject IN (%s,%s)",(guest,host))
             c.execute("DELETE FROM bnb_account WHERE subject IN (%s,%s)",(guest,host))
             c.execute("UPDATE bnb_property SET host_subject='verified-host' WHERE id=%s",(pid,))
+
+
+def test_bnb25_expired_pending_payment_releases_capacity_once(fixture_property):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",
+                  (pid,))
+    try:
+        hold=client.post("/v1/bnb/holds",json=payload(pid),headers={
+            **headers,"idempotency-key":"bnb25-expire-hold-1"})
+        assert hold.status_code==201
+        booking=client.post("/v1/bnb/booking-requests",json={
+            "hold_id":hold.json()["id"],"request_type":"instant"},headers={
+            **headers,"idempotency-key":"bnb25-expire-request-1"})
+        assert booking.status_code==201
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            rid=c.execute("SELECT id FROM bnb_reservation WHERE booking_request_id=%s",
+                          (booking.json()["id"],)).fetchone()[0]
+            c.execute("UPDATE bnb_hold SET expires_at=now()-interval '2 seconds' WHERE id=%s",
+                      (hold.json()["id"],))
+        expired=client.post(f"/v1/bnb/reservations/{rid}/expire",headers=headers)
+        assert expired.status_code==200,expired.text
+        assert expired.json()["state"]=="expired" and not expired.json()["confirmed"]
+        assert client.post(f"/v1/bnb/reservations/{rid}/expire",headers=headers).status_code==200
+        assert client.post(f"/v1/bnb/reservations/{rid}/cancel",headers=headers).status_code==409
+        view=client.get(f"/v1/bnb/reservations/{rid}",headers=headers)
+        assert view.status_code==200 and view.json()["status"]=="expired"
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT status FROM bnb_hold WHERE id=%s",
+                             (hold.json()["id"],)).fetchone()[0]=="expired"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_reservation WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

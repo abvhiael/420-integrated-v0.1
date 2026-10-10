@@ -1,0 +1,69 @@
+name: DOOBR R02.3 Retailer Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths:
+      - 'doobr/retailer.py'
+      - 'doobr/storage/migrations/0003_retailer.up.sql'
+      - 'doobr/storage/tests/test_retailer.py'
+      - 'doobr/storage/tests/r02_3_rls.sql'
+      - 'docs/doobr/DOOBR-R02-3-*'
+      - '.github/workflows/doobr-r02-3-level1.yml'
+  pull_request:
+    paths:
+      - 'doobr/retailer.py'
+      - 'doobr/storage/migrations/0003_retailer.up.sql'
+      - 'doobr/storage/tests/test_retailer.py'
+      - 'doobr/storage/tests/r02_3_rls.sql'
+      - 'docs/doobr/DOOBR-R02-3-*'
+      - '.github/workflows/doobr-r02-3-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  retailer:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_3
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_3"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and exercise retailer authorization
+        run: |
+          python3 -m py_compile doobr/retailer.py doobr/storage/tests/test_retailer.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_retailer.py -v
+      - name: Apply actual PostgreSQL/PostGIS migrations
+        run: |
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0002_identity.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0003_retailer.up.sql
+      - name: Test restricted PostgreSQL RLS
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/tests/r02_3_rls.sql
+      - name: Verify exact implementation SHA after tests
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

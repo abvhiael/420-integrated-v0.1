@@ -1,0 +1,56 @@
+name: DOOBR R02.2 Identity Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/auth.py', 'doobr/storage/migrations/0002_identity.up.sql', 'doobr/storage/tests/r02_2_rls.sql', 'doobr/storage/tests/test_auth.py', 'docs/doobr/DOOBR-R02-2-*', '.github/workflows/doobr-r02-2-level1.yml']
+  pull_request:
+    paths: ['doobr/auth.py', 'doobr/storage/migrations/0002_identity.up.sql', 'doobr/storage/tests/r02_2_rls.sql', 'doobr/storage/tests/test_auth.py', 'docs/doobr/DOOBR-R02-2-*', '.github/workflows/doobr-r02-2-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  identity:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_2
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_2"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile auth and tests
+        run: python3 -m py_compile doobr/auth.py doobr/storage/tests/test_auth.py
+      - name: Identity authorization adversarial unit tests
+        run: python3 -m unittest discover -s doobr/storage/tests -p test_auth.py -v
+      - name: Apply existing PostGIS base migration
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
+      - name: Apply session and grant schema
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0002_identity.up.sql
+      - name: Test sessions, role isolation and revocation persistence constraints
+        run: psql -v ON_ERROR_STOP=1 -f doobr/storage/tests/r02_2_rls.sql
+      - name: Verify exact SHA at finish
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

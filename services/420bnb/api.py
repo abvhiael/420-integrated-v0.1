@@ -369,6 +369,15 @@ def block_unit_dates(property_id:str,unit_id:str,payload:CalendarBlockInput,
     with db() as c:
         with c.transaction():
             owner_draft(c,property_id,subject,payload.expected_version)
+            policy=c.execute("SELECT timezone_id FROM bnb_listing_policy WHERE property_id=%s",
+                             (property_id,)).fetchone()
+            if policy:
+                from zoneinfo import ZoneInfo
+                zone=ZoneInfo(policy[0])
+                # UTC instants must correspond to local check-in/check-out times.
+                # Clients need the explicit IANA zone to detect DST transitions.
+                if payload.start.astimezone(zone).utcoffset() != payload.start.utcoffset() or payload.end.astimezone(zone).utcoffset() != payload.end.utcoffset():
+                    raise HTTPException(422,"PROPERTY_TIMEZONE_OFFSET_MISMATCH")
             if not c.execute("SELECT 1 FROM bnb_unit WHERE id=%s AND property_id=%s",
                              (unit_id,property_id)).fetchone():
                 raise HTTPException(404,"UNIT_NOT_FOUND")

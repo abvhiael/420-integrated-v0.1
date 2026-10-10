@@ -236,6 +236,164 @@ def revoke_property_manager(property_id: str,grantee_subject: str,capability: st
     return {"revoked":True}
 
 
+class UnitInput(BaseModel):
+    label: str = Field(min_length=1,max_length=100)
+    quantity: int = Field(ge=1,le=1000)
+    expected_version: int = Field(ge=1)
+
+
+class CalendarBlockInput(BaseModel):
+    start: datetime
+    end: datetime
+    reason: str = Field(min_length=1,max_length=160)
+    expected_version: int = Field(ge=1)
+
+
+class ReviewInput(BaseModel):
+    expected_version: int = Field(ge=1)
+
+
+def owner_draft(c,property_id,subject,expected_version):
+    row=c.execute("""SELECT host_subject,status,version,capacity FROM bnb_property
+        WHERE id=%s FOR UPDATE""",(property_id,)).fetchone()
+    if not row or row[0]!=subject:raise HTTPException(404,"NOT_FOUND")
+    if row[1]!="draft":raise HTTPException(409,"PROPERTY_NOT_DRAFT")
+    if row[2]!=expected_version:raise HTTPException(409,"VERSION_CONFLICT")
+    return row
+
+
+def bump_property(c,property_id,subject,action):
+    version=c.execute("""UPDATE bnb_property SET version=version+1
+        WHERE id=%s RETURNING version""",(property_id,)).fetchone()[0]
+    c.execute("INSERT INTO bnb_audit(id,subject,action,resource_id) VALUES (%s,%s,%s,%s)",
+              (uuid4(),subject,action,property_id))
+    return version
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/units",status_code=201)
+def create_unit(property_id:str,payload:UnitInput,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            row=owner_draft(c,property_id,subject,payload.expected_version)
+            total=c.execute("SELECT COALESCE(SUM(quantity),0) FROM bnb_unit WHERE property_id=%s",
+                            (property_id,)).fetchone()[0]
+            if total+payload.quantity>row[3]:raise HTTPException(409,"UNIT_CAPACITY_EXCEEDED")
+            uid=uuid4()
+            if c.execute("SELECT 1 FROM bnb_unit WHERE property_id=%s AND label=%s",
+                         (property_id,payload.label)).fetchone():
+                raise HTTPException(409,"UNIT_LABEL_EXISTS")
+            c.execute("INSERT INTO bnb_unit(id,property_id,label,quantity) VALUES (%s,%s,%s,%s)",
+                      (uid,property_id,payload.label,payload.quantity))
+            version=bump_property(c,property_id,subject,"bnb.unit.created")
+    return {"id":str(uid),"property_id":property_id,"version":version,"status":"draft"}
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/units")
+def host_units(property_id:str,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        owner=c.execute("SELECT 1 FROM bnb_property WHERE id=%s AND host_subject=%s",
+                        (property_id,subject)).fetchone()
+        if not owner:raise HTTPException(404,"NOT_FOUND")
+        rows=c.execute("SELECT id,label,quantity,version FROM bnb_unit WHERE property_id=%s ORDER BY label",
+                       (property_id,)).fetchall()
+    return [{"id":str(x[0]),"label":x[1],"quantity":x[2],"version":x[3]} for x in rows]
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/calendar/blocks",status_code=201)
+def block_unit_dates(property_id:str,unit_id:str,payload:CalendarBlockInput,
+                     authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    validate_window(payload.start,payload.end)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,property_id,subject,payload.expected_version)
+            if not c.execute("SELECT 1 FROM bnb_unit WHERE id=%s AND property_id=%s",
+                             (unit_id,property_id)).fetchone():
+                raise HTTPException(404,"UNIT_NOT_FOUND")
+            if c.execute("""SELECT 1 FROM bnb_block WHERE unit_id=%s AND
+                 period && tstzrange(%s,%s,'[)') LIMIT 1""",
+                 (unit_id,payload.start,payload.end)).fetchone():
+                raise HTTPException(409,"CALENDAR_CONFLICT")
+            # Property-scoped blocks from earlier schema are conservatively global.
+            if c.execute("""SELECT 1 FROM bnb_block WHERE property_id=%s AND unit_id IS NULL
+                AND period && tstzrange(%s,%s,'[)') LIMIT 1""",
+                (property_id,payload.start,payload.end)).fetchone():
+                raise HTTPException(409,"CALENDAR_CONFLICT")
+            if c.execute("""SELECT 1 FROM bnb_hold WHERE property_id=%s
+                AND period && tstzrange(%s,%s,'[)') AND
+                (status='confirmed' OR (status='held' AND expires_at>now())) LIMIT 1""",
+                (property_id,payload.start,payload.end)).fetchone():
+                raise HTTPException(409,"EXISTING_BOOKING_CONFLICT")
+            bid=uuid4()
+            c.execute("""INSERT INTO bnb_block(id,property_id,unit_id,period,reason,created_by,
+                property_version) VALUES (%s,%s,%s,tstzrange(%s,%s,'[)'),%s,%s,%s)""",
+                (bid,property_id,unit_id,payload.start,payload.end,payload.reason,
+                 subject,payload.expected_version))
+            version=bump_property(c,property_id,subject,"bnb.calendar.block_created")
+    return {"id":str(bid),"version":version,"status":"blocked"}
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/calendar")
+def property_calendar(property_id:str,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        if not c.execute("SELECT 1 FROM bnb_property WHERE id=%s AND host_subject=%s",
+                         (property_id,subject)).fetchone():
+            raise HTTPException(404,"NOT_FOUND")
+        rows=c.execute("""SELECT id,unit_id,lower(period),upper(period),reason
+            FROM bnb_block WHERE property_id=%s ORDER BY lower(period) LIMIT 500""",
+            (property_id,)).fetchall()
+    return [{"id":str(x[0]),"unit_id":str(x[1]) if x[1] else None,
+             "start":x[2].isoformat(),"end":x[3].isoformat(),"reason":x[4]} for x in rows]
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/review",status_code=202)
+def request_listing_review(property_id:str,payload:ReviewInput,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            row=owner_draft(c,property_id,subject,payload.expected_version)
+            units=c.execute("SELECT label,quantity FROM bnb_unit WHERE property_id=%s ORDER BY label",
+                            (property_id,)).fetchall()
+            if not units or sum(x[1] for x in units)!=row[3]:
+                raise HTTPException(409,"UNIT_INVENTORY_INCOMPLETE")
+            if c.execute("SELECT 1 FROM bnb_listing_review WHERE property_id=%s AND state='pending'",
+                         (property_id,)).fetchone():
+                raise HTTPException(409,"REVIEW_ALREADY_PENDING")
+            details=c.execute("""SELECT title,public_region,capacity,nightly_minor,currency
+                FROM bnb_property WHERE id=%s""",(property_id,)).fetchone()
+            snapshot={"property_id":property_id,"title":details[0],"public_region":details[1],
+                "capacity":details[2],"nightly_minor":details[3],"currency":details[4],
+                "version":payload.expected_version,
+                "units":[{"label":x[0],"quantity":x[1]} for x in units]}
+            encoded=json.dumps(snapshot,sort_keys=True,separators=(",",":"))
+            digest=hashlib.sha256(encoded.encode()).hexdigest()
+            review_id=uuid4()
+            c.execute("""INSERT INTO bnb_listing_review
+                (id,property_id,requested_by,property_version,snapshot,snapshot_hash)
+                VALUES (%s,%s,%s,%s,%s::jsonb,%s)""",
+                (review_id,property_id,subject,payload.expected_version,encoded,digest))
+            c.execute("INSERT INTO bnb_audit(id,subject,action,resource_id) VALUES (%s,%s,%s,%s)",
+                      (uuid4(),subject,"bnb.listing.review_requested",property_id))
+    return {"review_id":str(review_id),"state":"pending","published":False,
+            "snapshot_hash":digest}
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/reviews")
+def my_listing_reviews(property_id:str,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        if not c.execute("SELECT 1 FROM bnb_property WHERE id=%s AND host_subject=%s",
+                         (property_id,subject)).fetchone():
+            raise HTTPException(404,"NOT_FOUND")
+        rows=c.execute("""SELECT id,state,property_version,snapshot_hash FROM
+            bnb_listing_review WHERE property_id=%s ORDER BY created_at,id""",
+            (property_id,)).fetchall()
+    return [{"id":str(x[0]),"state":x[1],"version":x[2],"snapshot_hash":x[3]} for x in rows]
+
+
 @app.post("/v1/bnb/holds", status_code=201)
 def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_length=128),
          x_authenticated_subject: str | None = Header(None),

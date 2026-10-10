@@ -2,27 +2,27 @@
   "schema": "highcountry-roadmap-step-qualification-v1",
   "step": "R02.12",
   "name": "Validate module code/interface/version/ruleset and active-state consumers",
-  "status": "REPOSITORY_COMPONENT_QUALIFIED_INTEGRATION_OPEN",
-  "qualificationLevel": "Level 1 targeted component",
-  "implementationSha": "dd46622ce55d308616ae24a17725121ee60f40c7",
+  "status": "COMPLETE_REPOSITORY_QUALIFICATION",
+  "qualificationLevel": "Level 1 targeted",
+  "implementationSha": "8f3b25dade79d086ee9409540a0c7435cf3caa2a",
   "branch": "review/high-country-complete-audit-20261009",
   "prNumber": 593,
   "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
   "workflow": {
     "name": "High Country R02.12 Targeted Qualification",
-    "runId": 38024385920,
-    "jobId": 114131993084,
+    "runId": 38025463242,
+    "jobId": 114135259056,
     "status": "completed",
     "conclusion": "success",
-    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38024385920"
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38025463242"
   },
   "implemented": [
-    "Runtime module identity/interface declaration and exact module ID, version, ruleset ID validation",
-    "Registration refuses EOA, missing code and missing/malformed module identity",
-    "Implementation runtime code hash and interface ID captured and rechecked on active lookup",
-    "Only ACTIVE modules pass activeImplementation; scheduled, draining, retired and missing modules fail closed",
-    "One-time scoped emergency-state binding requires shared authorization root and module-activation domain",
-    "Emergency-restricted or unbound registry cannot activate/resolve executable module"
+    "One-time canonical RulesetRegistry binding under scoped authority and shared authorization root; derived ID/content hash checked at approval, registration, activation and executable resolution",
+    "Independent MODULE_APPROVE_ARTIFACT capability approval before registration, binding extcodehash, declared interface, version, ruleset ID and module ID",
+    "Executable module always requires ACTIVE lifecycle, canonical registered ruleset, unchanged runtime bytecode and declared module identity/interface, and clear bound emergency state",
+    "Production ModuleExecutionGateway enforces MODULE_EXECUTE capability scoped by module ID and selector and resolves activeImplementation on every invocation without unsafe address fallback or native-value forwarding",
+    "Adversarial test coverage of missing artifact approval, mismatched version, unregistered ruleset, changed runtime bytecode, inactive/scheduled module dispatch, emergency activation and invocation restrictions",
+    "Deployment provenance and independent attestation procedure documented in docs/highcountry/R02.12-MODULE-ACTIVATION.md"
   ],
   "checks": [
     {
@@ -30,7 +30,7 @@
       "status": "PASS"
     },
     {
-      "name": "Formatting",
+      "name": "Forge formatting",
       "status": "PASS"
     },
     {
@@ -38,40 +38,39 @@
       "status": "PASS"
     },
     {
-      "name": "Module registration and active-state tests + invariant",
+      "name": "Module identity, ruleset, provenance, emergency and gateway targeted regressions",
       "status": "PASS"
     },
     {
-      "name": "Retained High Country tests and invariants",
+      "name": "Retained High Country app suite and invariants",
       "status": "PASS",
       "suites": 44,
-      "passed": 197,
+      "passed": 201,
       "failed": 0,
       "skipped": 0
     },
     {
-      "name": "Source specification",
+      "name": "Source action catalogue",
       "status": "PASS",
-      "actions": 57
+      "actions": 60
     },
     {
-      "name": "R02.12 ABI checks",
+      "name": "Module registry and consumer ABI",
       "status": "PASS"
     }
   ],
-  "gaps": [
-    "No independently verified deployment manifest or allowlisted code hash: registry records proposed implementation's own code hash and self-reported interface metadata",
-    "No verified registry-bound existence check that declared ruleset ID is canonically registered or active",
-    "Actual production module dispatch/consumer call paths were not demonstrated to call activeImplementation; legacy implementationOf remains a raw audit lookup",
-    "No explicit adversarial tests for module emergency restriction during scheduled activation or rejection of mismatched version/ruleset/identity"
+  "securityNote": "Independent artifact approval is permission-scoped and codehash-pinned; a source claim cannot alone authorize registration. Active execution and module dispatch fail closed.",
+  "level2": "Retained app integration/invariant suite covered on the same exact SHA; separately designated milestone closeout deferred unless canonical roadmap requires.",
+  "deferred": [
+    "Production-equivalent testnet deployment and external attestation of real deployed bytecode, interface ABI, chain ID, permissions and frozen addresses",
+    "Any application/service/UI migration to use ModuleExecutionGateway in an actually deployed stack; no existing contract call sites to unsafe implementationOf were found",
+    "Single final app phase Level 3 reconciliation and repository-wide qualification"
   ],
   "limitations": [
-    "The successful Level 1 CI checks qualify the changed component and retained app suite, not the missing consumer integration or live deployment"
+    "Execution gateway is a new on-chain production consumer with tests but has not been deployed or adopted by external clients/services; no claim of live end-to-end execution acceptance",
+    "Runtime artifact hash is approved on-chain; independent reproducible-build off-chain verification still requires real deployment evidence"
   ],
-  "level2": "Deferred milestone integration until actual consumer paths are wired",
-  "level3": "One phase closeout deferred",
-  "blockers": [
-    "Close remaining R02.12 production-consumer and canonical ruleset validation gaps before marking whole step complete"
-  ],
+  "blockers": [],
+  "evidenceOnlyCommitPolicy": "No executable changes in this qualification evidence update; reference exact passing implementation SHA without recursive rerun.",
   "nextCanonicalStep": "R02.13 — Bind canonical SmartAccount deployment provenance and reviewed routine selectors"
 }

@@ -19,3 +19,7 @@
 **Level 1:** exact implementation SHA runtime CI + focused signed-proof negatives and PostgreSQL migration must pass. **Level 2:** M1 after BNB-2.5, only when executable integration converges. **Level 3:** BNB-2.15 and BNB-1.10 outstanding release gate; canonical Solidity once, Genesis no duplicate full Foundry.
 
 **Next canonical step (once BNB-2.1 is closed): BNB-2.2 — Host and Property Management.**
+
+## Repository-side Level 1 closeout (2026-10-10)
+
+Scoped repository checks passed against implementation SHA `6186c6008a9960271d822c886af11e41dad95a1e`, runtime Actions run [38069293767](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38069293767), and all nine BNB-1 architecture workflows. Exact-SHA retained evidence is in `docs/bnb/qualification/BNB-2.1-LEVEL1-REPOSITORY-CLOSEOUT.json`. This is a **repository-side Level 1 PASS**, not full BNB-2.1 acceptance. The official Identity deployment, managed issuer rotation and live revocation, approved independent property issuer and multi-instance live acceptance remain blocked and are transferred to `docs/bnb/BNB-TESTNET-WORK-ROADMAP.md`. Synthetic JWT tests and local PostgreSQL are not substitute evidence. Payment and property publication remain unavailable. Evidence-only commits inherit the qualified implementation SHA; do not mislabel this documentation SHA as a newly tested implementation or perform redundant global Level 3 work.

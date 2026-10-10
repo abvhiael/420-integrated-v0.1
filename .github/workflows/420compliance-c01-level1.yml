@@ -110,9 +110,11 @@ jobs:
         run: go test -race ./services/complianceauth -run TestSourceChangeDetection -count=1 -v
       - name: C02.6 AI cited proposal validation and no-activation tests
         run: go test -race ./services/complianceauth -run TestAIProposalNeverAuthorizesPolicy -count=1 -v
-      - name: Write current C02.6 exact-SHA qualification result
+      - name: C02.7 source-change queue replay, ownership and race checks
+        run: go test -race ./services/complianceauth -run TestChangeIntakeQueueOwnerAndReplay -count=1 -v
+      - name: Write current C02.7 exact-SHA qualification result
         run: |
-          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C02.6","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c02_6_ai_proposals":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C02.7","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c02_7_review_queue":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

@@ -24,7 +24,7 @@ library HarvestScoring {
     }
 
     /// @notice Floor rounding at each integer division. Quality 0 yields 0 grams and NONE.
-    /// @dev The low 16 bits of a sealed genome ID provide a reproducible 9000–11000 bps
+    /// @dev The full sealed genome ID provides a reproducible 9000–11000 bps
     ///      game modifier; this is an explicit V1 game rule, not an independently validated
     ///      genotype-to-yield prediction.
     function calculate(

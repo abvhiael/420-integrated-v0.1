@@ -480,6 +480,22 @@ def test_bnb23_quantity_closure_atomic_reschedule_and_owner_boundary(actor):
             json={**period,"quantity":1,"expected_version":5})
         assert rejected.status_code==422
         assert client.get(url+"/calendar").status_code==401
+        from concurrent.futures import ThreadPoolExecutor
+        competing={**shifted,"start":(new_start+timedelta(days=5)).isoformat(),
+            "end":(new_start+timedelta(days=7)).isoformat(),"quantity":1,
+            "expected_version":5}
+        def concurrent_calendar(_):
+            return client.post(endpoint,params={"unit_id":uid},headers=headers,json=competing)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes=list(pool.map(concurrent_calendar,range(2)))
+        assert sorted(x.status_code for x in outcomes)==[201,409],[x.text for x in outcomes]
+        # A complete property closure remains permitted and consumes all availability.
+        global_block=client.post(endpoint,headers=headers,
+            json={**period,"expected_version":6})
+        assert global_block.status_code==201,global_block.text
+        denied_manager=client.get(f"/v1/bnb/account/property/{pid}/access",
+            params={"capability":"edit_calendar"},headers=headers)
+        assert denied_manager.status_code==200 and denied_manager.json()["allowed"] is False
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))

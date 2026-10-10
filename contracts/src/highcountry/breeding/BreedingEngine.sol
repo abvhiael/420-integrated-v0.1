@@ -46,6 +46,7 @@ interface IRandomnessCoordinatorBreeding {
         bytes32 domain,
         bytes32 contextHash
     ) external;
+    function cancel(bytes32 requestId) external;
     function consume(
         bytes32 requestId,
         bytes32 expectedDomain,
@@ -103,6 +104,11 @@ contract BreedingEngine {
     IGenomeRegistryBreeding public immutable genomeRegistry;
     IRandomnessCoordinatorBreeding public immutable randomness;
     mapping(uint64 => BreedingEvent) private _events;
+    mapping(bytes32 => uint64) public pendingChildOwner;
+    mapping(uint64 => uint64) public requestedAt;
+    mapping(uint64 => bool) public cancelled;
+    uint64 public constant BREEDING_TIMEOUT = 7 days;
+    event BreedingCancelled(uint64 indexed breedingEventId, bytes32 indexed childGenomeId, bool timedOut);
 
     event BreedingRequested(
         uint64 indexed breedingEventId,
@@ -142,7 +148,7 @@ contract BreedingEngine {
         ) revert HCInvalidId();
         if (parentA == parentB) revert HCInvalidState();
         if (!genomeRegistry.exists(parentA) || !genomeRegistry.exists(parentB)) revert HCNotFound();
-        if (genomeRegistry.exists(childGenomeId) || _events[breedingEventId].exists) revert HCAlreadyExists();
+        if (genomeRegistry.exists(childGenomeId) || _events[breedingEventId].exists || pendingChildOwner[childGenomeId] != 0) revert HCAlreadyExists();
 
         _auth(ActionIds.BREEDING_REQUEST, breedingEventId);
         bytes32 contextHash =
@@ -162,6 +168,8 @@ contract BreedingEngine {
             true
         );
         randomness.request(requestId, RandomDomains.BREEDING, contextHash);
+        pendingChildOwner[childGenomeId] = breedingEventId;
+        requestedAt[breedingEventId] = uint64(block.timestamp);
         emit BreedingRequested(breedingEventId, parentA, parentB, childGenomeId, requestId);
     }
 
@@ -171,7 +179,8 @@ contract BreedingEngine {
         _requireUnrestricted(EmergencyDomains.BREEDING);
         BreedingEvent storage e = _events[breedingEventId];
         if (!e.exists) revert HCNotFound();
-        if (e.finalized) revert HCInvalidState();
+        if (e.finalized || cancelled[breedingEventId]) revert HCInvalidState();
+        if (pendingChildOwner[e.childGenomeId] != breedingEventId) revert HCInvalidState();
         _auth(ActionIds.BREEDING_FINALIZE, breedingEventId);
 
         bytes32 entropy = randomness.consume(e.requestId, RandomDomains.BREEDING, e.contextHash);
@@ -191,8 +200,33 @@ contract BreedingEngine {
 
         e.entropy = entropy;
         e.finalized = true;
+        delete pendingChildOwner[e.childGenomeId];
         genomeRegistry.registerGenome(e.childGenomeId, e.childLineId, e.metadataHash, child);
         emit BreedingFinalized(breedingEventId, e.childGenomeId, entropy);
+    }
+
+    /// @notice Authorized cancellation is available even when breeding is restricted.
+    function cancelBreeding(uint64 breedingEventId) external {
+        _auth(ActionIds.BREEDING_CANCEL, breedingEventId);
+        _cancel(breedingEventId, false);
+    }
+
+    /// @notice Anyone may release a stranded reservation after its fixed deadline.
+    function expireBreeding(uint64 breedingEventId) external {
+        if (!_events[breedingEventId].exists) revert HCNotFound();
+        if (block.timestamp < uint256(requestedAt[breedingEventId]) + BREEDING_TIMEOUT) revert HCInvalidState();
+        _cancel(breedingEventId, true);
+    }
+
+    function _cancel(uint64 breedingEventId, bool timedOut) private {
+        BreedingEvent storage e = _events[breedingEventId];
+        if (!e.exists) revert HCNotFound();
+        if (e.finalized || cancelled[breedingEventId]) revert HCInvalidState();
+        if (pendingChildOwner[e.childGenomeId] != breedingEventId) revert HCInvalidState();
+        randomness.cancel(e.requestId);
+        cancelled[breedingEventId] = true;
+        delete pendingChildOwner[e.childGenomeId];
+        emit BreedingCancelled(breedingEventId, e.childGenomeId, timedOut);
     }
 
     function childGenomeOfFinalizedEvent(

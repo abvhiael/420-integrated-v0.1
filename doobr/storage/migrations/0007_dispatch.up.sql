@@ -20,12 +20,13 @@ CREATE TABLE doobr_private.dispatch_assignments (
  reserved_units integer NOT NULL CHECK(reserved_units>0 AND reserved_units<=100),
  state text NOT NULL CHECK(state IN ('ACTIVE','RELEASED')),
  assigned_at timestamptz NOT NULL DEFAULT now(),released_at timestamptz,
- PRIMARY KEY(tenant_id,order_id),
+ PRIMARY KEY(tenant_id,offer_id),
  FOREIGN KEY(tenant_id,order_id) REFERENCES doobr_private.delivery_orders(tenant_id,order_id),
  FOREIGN KEY(tenant_id,offer_id) REFERENCES doobr_private.dispatch_offers(tenant_id,offer_id),
  FOREIGN KEY(tenant_id,courier_id) REFERENCES doobr_private.actors(tenant_id,actor_id),
  CHECK((state='ACTIVE' AND released_at IS NULL) OR (state='RELEASED' AND released_at IS NOT NULL))
 );
+CREATE UNIQUE INDEX dispatch_one_active_assignment_per_order ON doobr_private.dispatch_assignments(tenant_id,order_id) WHERE state='ACTIVE';
 CREATE INDEX dispatch_courier_active ON doobr_private.dispatch_assignments(tenant_id,courier_id) WHERE state='ACTIVE';
 DO $$
 DECLARE tab text;

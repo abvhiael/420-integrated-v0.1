@@ -253,6 +253,48 @@ contract HighCountryGamingBridge420Test {
         );
     }
 
+    function testR0211MultiplePlayersAndRevocation() public {
+        bytes32 aliceShared = _bindAlice();
+        bytes32 bobShared = keccak256("r0211:bob");
+        growers.setProfile(2, BOB);
+        identity.setProfile(HighCountryGamingIds.GAME_ID, BOB, bobShared);
+        vm.prank(BOB);
+        bridge.bindGrowerProfile(2);
+        bytes32 content = keccak256("r0211:bonus");
+        bytes32 aliceEntitlement = keccak256("r0211:a");
+        bytes32 bobEntitlement = keccak256("r0211:b");
+        entitlements.setEntitlement(IGameEntitlementsHC420.Entitlement({
+            entitlementId: aliceEntitlement, profileId: aliceShared, gameId: HighCountryGamingIds.GAME_ID,
+            entitlementType: HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, contentId: content,
+            validFrom: 0, validUntil: 0, revoked: false, exists: true
+        }), true);
+        entitlements.setEntitlement(IGameEntitlementsHC420.Entitlement({
+            entitlementId: bobEntitlement, profileId: bobShared, gameId: HighCountryGamingIds.GAME_ID,
+            entitlementType: HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, contentId: content,
+            validFrom: 0, validUntil: 0, revoked: false, exists: true
+        }), true);
+        vm.prank(ALICE);
+        bridge.bindPlayerEntitlement(1, aliceEntitlement, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, content);
+        vm.prank(BOB);
+        bridge.bindPlayerEntitlement(2, bobEntitlement, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, content);
+        require(bridge.hasPlayerBonusRegion(1, content), "alice denied");
+        require(bridge.hasPlayerBonusRegion(2, content), "bob denied");
+        vm.prank(BOB);
+        (bool ok,) = address(bridge).call(abi.encodeCall(bridge.bindPlayerEntitlement, (
+            uint64(1), bobEntitlement, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, content
+        )));
+        require(!ok, "foreign account bound");
+        entitlements.setEntitlement(IGameEntitlementsHC420.Entitlement({
+            entitlementId: aliceEntitlement, profileId: aliceShared, gameId: HighCountryGamingIds.GAME_ID,
+            entitlementType: HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, contentId: content,
+            validFrom: 0, validUntil: 0, revoked: true, exists: true
+        }), false);
+        require(!bridge.hasPlayerBonusRegion(1, content), "revoked alice accepted");
+        require(bridge.hasPlayerBonusRegion(2, content), "bob affected by alice revoke");
+        require(!bridge.hasPlayerCompetition(2, content), "wrong type accepted");
+        require(!bridge.hasPlayerBonusRegion(2, keccak256("wrong")), "wrong content accepted");
+    }
+
     function testRequireScopedEntitlementFailsClosed() public {
         _bindAlice();
         bytes32 missingId = keccak256("missing-entitlement");

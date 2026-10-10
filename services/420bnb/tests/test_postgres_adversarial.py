@@ -898,9 +898,21 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
         bad=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
             model,"intent",{**trust,"quoted_minor":1})})
         assert bad.status_code==409
+        wrong_chain=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
+            model,"intent",{**trust,"chain_id":421})})
+        assert wrong_chain.status_code==403
+        unapproved=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
+            model,"intent",{**trust,"native_420_route_approved":False})})
+        assert unapproved.status_code==403
+        assert client.get(f"/v1/bnb/reservations/{reservation_id}/payment").status_code==401
+        before=client.get(f"/v1/bnb/reservations/{reservation_id}/payment",headers=headers)
+        assert before.status_code==200 and before.json()["payment_state"]=="unavailable"
         intent=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(model,"intent",trust)})
         assert intent.status_code==202,intent.text
         assert intent.json()["confirmed"] is False
+        pending=client.get(f"/v1/bnb/reservations/{reservation_id}/payment",headers=headers)
+        assert pending.status_code==200 and pending.json()["payment_state"]=="pending"
+        assert not pending.json()["wallet_execution_available"]
         intent_id=intent.json()["intent_id"]
         claims={"reservation_id":str(reservation_id),"intent_id":intent_id,
                 "pay_invoice_id":body["pay_invoice_id"],"pay_payment_id":"pay-bnb26-001",
@@ -921,6 +933,9 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
         assert result.json()["confirmed"] is True
         assert client.get(f"/v1/bnb/reservations/{reservation_id}",
                           headers=headers).json()["confirmed"] is True
+        checked=client.get(f"/v1/bnb/reservations/{reservation_id}/payment",headers=headers)
+        assert checked.status_code==200 and checked.json()["confirmed"] is True
+        assert checked.json()["payment_id"]==claims["pay_payment_id"]
         assert client.post(f"/v1/bnb/reservations/{reservation_id}/cancel",
                            headers=headers).status_code==409
         assert client.post(f"/v1/bnb/reservations/{reservation_id}/expire",

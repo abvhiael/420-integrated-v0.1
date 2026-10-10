@@ -1,6 +1,6 @@
 # COM-1.6 — Marketplace and storefront UX architecture
 
-**Canonical step:** COM-1.6 — design merchant onboarding, storefront templates, product management, cart and checkout UX. **Phase:** COM-1, PR #588. **Status:** design complete, Level 1 CI pending. **Target:** `commerce.420integrated.org`. This is a product/interface specification, **not** evidence that Commerce web routes, Cloudflare deployments or checkout are live.
+**Canonical step:** COM-1.6 — design merchant onboarding, storefront templates, product management, cart and checkout UX. **Phase:** COM-1, PR #588. **Status:** design complete, Level 1 CI pending. **Target:** `marketplace.420integrated.org`. This is a product/interface specification, **not** evidence that Commerce web routes, Cloudflare deployments or checkout are live.
 
 ## Product architecture and personas
 

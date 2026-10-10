@@ -914,6 +914,13 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
         assert pending.status_code==200 and pending.json()["payment_state"]=="pending"
         assert not pending.json()["wallet_execution_available"]
         intent_id=intent.json()["intent_id"]
+        conflicting={**body,"pay_invoice_id":"different-pay-invoice-001"}
+        mismatch=client.post(endpoint,json=conflicting,headers={"x-pay-authority-proof":sign(
+            api.PayIntentInput(**conflicting),"intent",trust)})
+        assert mismatch.status_code==409
+        identical=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
+            model,"intent",trust)})
+        assert identical.status_code==202 and identical.json()["intent_id"]==intent_id
         claims={"reservation_id":str(reservation_id),"intent_id":intent_id,
                 "pay_invoice_id":body["pay_invoice_id"],"pay_payment_id":"pay-bnb26-001",
                 "receipt_hash":"0x"+"a"*64,"chain_id":420,"asset":body["asset"],

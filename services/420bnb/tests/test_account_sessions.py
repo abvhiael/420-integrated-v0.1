@@ -402,11 +402,24 @@ def test_host_policy_and_media_rights_boundaries(actor):
         assert client.post(base+"/media",headers=headers,json={
             "expected_version":2,"asset_url":"https://media.example.org/b.png",
             "alt_text":"Property exterior","rights_statement":"I own the photograph"}).status_code==409
+        # Policy timezone is authoritative for supplied non-UTC local offsets.
+        unit=client.post(base+"/units",headers=headers,json={
+            "label":"Suite","quantity":1,"expected_version":3})
+        assert unit.status_code==201,unit.text
+        dst_start=datetime(2027,7,12,15,0,tzinfo=timezone(timedelta(hours=-5)))
+        dst_end=dst_start+timedelta(days=2)
+        wrong_offset=client.post(base+"/calendar/blocks",
+            params={"unit_id":unit.json()["id"]},headers=headers,json={
+                "start":dst_start.isoformat(),"end":dst_end.isoformat(),
+                "reason":"Maintenance","expected_version":4})
+        assert wrong_offset.status_code==422
+        assert wrong_offset.json()["detail"]=="PROPERTY_TIMEZONE_OFFSET_MISMATCH"
         assert client.put(base+"/policy",json={"expected_version":3,
             "house_rules":"No smoking","cancellation_policy":"Flexible",
             "timezone_id":"America/Regina"}).status_code==401
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_media WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

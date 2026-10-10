@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import {ActionIds} from "../constants/ActionIds.sol";
-import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
-import {HCEmergencyRestrictionActive} from "../errors/HighCountryErrors.sol";
-import {ModuleIds} from "../constants/ModuleIds.sol";
-import {HCInvalidId, HCInvalidState, HCZeroAddress} from "../errors/HighCountryErrors.sol";
-import {IHighCountryAuthorization} from "../interfaces/IHighCountryAuthorization.sol";
-import {AuthorizationRequest} from "../types/HighCountryTypes.sol";
-import {PlantRegistry} from "../cultivation/PlantRegistry.sol";
-import {CultivationEngine} from "../cultivation/CultivationEngine.sol";
+import { ActionIds } from "../constants/ActionIds.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
+import { HCEmergencyRestrictionActive } from "../errors/HighCountryErrors.sol";
+import { ModuleIds } from "../constants/ModuleIds.sol";
+import { HCInvalidId, HCInvalidState, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
+import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
+import { PlantRegistry } from "../cultivation/PlantRegistry.sol";
+import { CultivationEngine } from "../cultivation/CultivationEngine.sol";
 
 /// @notice R03.1 harvest acceptance only. Yield/product accounting and plant termination
 ///         are separate canonical R03.2-R03.4 responsibilities.
@@ -44,7 +44,11 @@ contract HarvestEngine {
         uint64 acceptedAt
     );
 
-    constructor(address authorization_, address plantRegistry_, address cultivationEngine_) {
+    constructor(
+        address authorization_,
+        address plantRegistry_,
+        address cultivationEngine_
+    ) {
         if (authorization_ == address(0) || plantRegistry_ == address(0) || cultivationEngine_ == address(0)) {
             revert HCZeroAddress();
         }
@@ -63,7 +67,9 @@ contract HarvestEngine {
 
     /// @notice Accept a single harvest of a READY plant with an already sealed canonical expression.
     /// @dev Deliberately does not mint a product or release cultivation capacity.
-    function acceptHarvest(uint64 plantId) external returns (HarvestAcceptance memory acceptance) {
+    function acceptHarvest(
+        uint64 plantId
+    ) external returns (HarvestAcceptance memory acceptance) {
         if (plantId == 0) revert HCInvalidId();
         if (_accepted[plantId].accepted) revert HCInvalidState();
         if (
@@ -79,8 +85,8 @@ contract HarvestEngine {
         bytes32 rulesetId = cultivationEngine.sealedRulesetId(plantId);
         bytes32 contentHash = cultivationEngine.sealedRulesetContentHash(plantId);
         if (
-            !cultivation.expressionLocked || cultivation.expressionHash == bytes32(0)
-                || rulesetId == bytes32(0) || contentHash == bytes32(0)
+            !cultivation.expressionLocked || cultivation.expressionHash == bytes32(0) || rulesetId == bytes32(0)
+                || contentHash == bytes32(0)
                 || cultivationEngine.expressionForPlant(plantId) != cultivation.expressionHash
                 || plant.genomeId != plantRegistry.genomeOf(plantId)
         ) revert HCInvalidState();
@@ -117,12 +123,16 @@ contract HarvestEngine {
         );
     }
 
-    function getHarvest(uint64 plantId) external view returns (HarvestAcceptance memory acceptance) {
+    function getHarvest(
+        uint64 plantId
+    ) external view returns (HarvestAcceptance memory acceptance) {
         acceptance = _accepted[plantId];
         if (!acceptance.accepted) revert HCInvalidState();
     }
 
-    function isHarvestAccepted(uint64 plantId) external view returns (bool) {
+    function isHarvestAccepted(
+        uint64 plantId
+    ) external view returns (bool) {
         return _accepted[plantId].accepted;
     }
 }

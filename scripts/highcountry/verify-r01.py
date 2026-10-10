@@ -30,7 +30,23 @@ udvts = re.findall(r'type\s+(\w+)\s+is\s+(\w+)\s*;', read('contracts/src/highcou
 for name, abi in udvts:
     require(f'| {name} | {abi} |' in types, 'type mismatch: ' + name)
 actions = re.findall(r'bytes32\s+(?:public\s+)?(?:internal\s+)?constant\s+(\w+)\s*=\s*keccak256\("([^"]+)"\)', read('contracts/src/highcountry/constants/ActionIds.sol'))
-require(len(actions) == 50, 'unexpected action catalogue size')
+# R02.8 extends the frozen R01 action catalogue with four separately authorized
+# one-time emergency-controller bindings. Reject unexpected names, domains, or
+# duplicated selectors rather than accepting an arbitrary catalogue growth.
+emergency_bindings = {
+    'PLANT_BIND_EMERGENCY': 'HC.ACTION.PLANT_REGISTRY.BIND_EMERGENCY',
+    'CULTIVATION_BIND_EMERGENCY': 'HC.ACTION.CULTIVATION_ENGINE.BIND_EMERGENCY',
+    'BREEDING_BIND_EMERGENCY': 'HC.ACTION.BREEDING_ENGINE.BIND_EMERGENCY',
+    'RANDOMNESS_BIND_EMERGENCY': 'HC.ACTION.RANDOMNESS_COORDINATOR.BIND_EMERGENCY',
+}
+require(len(actions) == 54, 'unexpected action catalogue size')
+action_names = [name for name, _ in actions]
+action_domains = [domain for _, domain in actions]
+require(len(set(action_names)) == len(actions), 'duplicate action names')
+require(len(set(action_domains)) == len(actions), 'duplicate action domains')
+for name, domain in emergency_bindings.items():
+    require(actions.count((name, domain)) == 1, 'missing or modified emergency binding action: ' + name)
+require(all(domain.startswith('HC.ACTION.') for domain in action_domains), 'unexpected action namespace')
 trust = read('docs/highcountry/DEPLOYMENT-AND-TRUST.md')
 for name, domain in actions:
     require(trust.count(f'- {name}: `{domain}`') == 1, 'action mismatch: ' + name)

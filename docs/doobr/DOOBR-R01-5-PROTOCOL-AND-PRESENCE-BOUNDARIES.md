@@ -1,5 +1,5 @@
 # DOOBR R01.5 — authority contracts, compliance adapter and protected Travel/Maps presence
-Status: Level 1 PENDING. Canonical step unchanged. Base main `c5a4f220d1fbda01f707d359aa9bb32921a138b1`; PR #601.
+Status: COMPLETE — R01.5 interface and authority design, Level 1 PASS. Canonical step unchanged. Base main `c5a4f220d1fbda01f707d359aa9bb32921a138b1`; PR #601.
 **This is the architecture/interface phase; it does not activate a real regulated fulfillment service.** Existing `GenesisTravelTransactions` and `travel.doobr_transactions=false` remain unmodified and fail closed. No frozen Genesis app or service ID is introduced.
 
 ## Authority and trust-contract matrix
@@ -38,3 +38,8 @@ R01.5 implementation/evidence deliverables: authority boundary matrix, strict pr
 ## Dependencies and exit
 R01.4 legal matrix and R01.2 development-only authorization retained. 420Compliance separately owns its public and private schemas, versioning and trust roots; official inter-service OpenAPI acceptance is R01.7, actual execution integration R04.7. Business/finance authorizations remain independently gated. R01.8 Level 2 and R05.10 Level 3 deferred. Original DOOBR-AUDIT-9/10 not complete.
 Next: **R01.6 Security/privacy threat model: GPS, address, age data, records, chain leakage, coercion, impersonation and regulated-goods custody.**
+
+## R01.5 exact-SHA Level 1 closeout
+**COMPLETE at documentary interface-design scope**, NOT running adapter deployment. Exact qualified implementation SHA `5aadbf94ce9cc6621a674f4da14422e0b8dc667a`. Required `DOOBR R01 Level 1 / inventory` passed on [push #38025345197](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38025345197) and [PR #38025346972](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38025346972) against that SHA. Source syntax, retained R01.1–R01.4 checks, new 16-case R01.5 authority/privacy test-contract assertions, disabled Travel gateway/Genesis catalog invariants, prior DOOBR authority and GEN-SVC-3 validators passed.
+
+Exit: [x] canonical reuse / prohibited competing authorities; [x] proposed signed versioned 420Compliance contract with negative scenarios; [x] strictly minimal Travel/Maps public presence contract, expiry and anonymous suppression; [x] identity, Wallet, Pay and Dev Compensation Vault boundary; [x] explicit separate implementation versus release authority; [x] targeted exact-head Level 1 evidence. No live 420Compliance implementation or actual Travel/Maps HTTP adapter was asserted, built or tested; operational integration remains R02–R04 and testnet R06. R01.8 Level 2 / R05.10 Level 3 and DOOBR-AUDIT-9/10 are deferred. Base main: `c5a4f220d1fbda01f707d359aa9bb32921a138b1`; PR #601 `roadmap/doobr-bc-vancouver-infrastructure`. This evidence-only commit inherits the exact qualified SHA without altering implementation/tests/interfaces. Next R01.6 as above.

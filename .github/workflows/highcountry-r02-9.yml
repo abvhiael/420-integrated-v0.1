@@ -45,7 +45,7 @@ jobs:
         run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
       - name: Source specification
         run: python3 scripts/highcountry/verify-r01.py
-      - name: Emergency ABI
+      - name: R02.9 breeding and randomness ABI
         working-directory: contracts
         run: |
           python3 - <<'PY'
@@ -56,4 +56,8 @@ jobs:
               abi=json.loads(matches[0].read_text())['abi']
               functions={x['name'] for x in abi if x['type']=='function'}
               assert {'bindEmergencyState','emergencyState','EMERGENCY_BIND_SCOPE'} <= functions,name
+              if name=='BreedingEngine':
+                  assert {'pendingChildOwner','requestedAt','cancelled','BREEDING_TIMEOUT','cancelBreeding','expireBreeding'} <= functions
+              if name=='RandomnessCoordinator':
+                  assert {'cancel','cancelled'} <= functions
           PY

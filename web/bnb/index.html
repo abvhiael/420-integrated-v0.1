@@ -37,7 +37,48 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  const out=document.createElement("p");out.setAttribute("role","status");out.setAttribute("aria-live","polite");
  const choose=document.createElement("label");choose.textContent="Rental unit";
  const unitSelect=document.createElement("select");choose.append(unitSelect);
+ let selectedQuote=null;
  const quoteBtn=document.createElement("button");quoteBtn.type="button";quoteBtn.textContent="Request nonbinding itemized quote";
+ const bookingChoice=document.createElement("label");bookingChoice.textContent="Request type";
+ const bookingType=document.createElement("select");
+ for(const [value,title] of [["request","Ask host to approve"],["instant","Instant booking (only if permitted)"]]){
+ const opt=document.createElement("option");opt.value=value;opt.textContent=title;bookingType.append(opt);
+ }
+ bookingChoice.append(bookingType);
+ const requestBooking=document.createElement("button");requestBooking.type="button";
+ requestBooking.textContent="Submit nonbinding booking request";requestBooking.disabled=true;
+ const bookingResult=document.createElement("p");bookingResult.setAttribute("role","status");
+ bookingResult.setAttribute("aria-live","polite");
+ for(const field of [startInput,endInput,unitSelect]){
+ field.addEventListener("change",()=>{selectedQuote=null;requestBooking.disabled=true;});
+ }
+ requestBooking.addEventListener("click",async()=>{
+ if(!hostProof||!selectedQuote){bookingResult.textContent="Sign in and obtain a current quote.";return;}
+ requestBooking.disabled=true;bookingResult.textContent="Requesting a temporary inventory hold…";
+ try{
+ const idempotency="bnb-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+ const params={property_id:item.id,unit_id:selectedQuote.unit_id||null,
+   quote_id:selectedQuote.id,units:1,start:selectedQuote.start,end:selectedQuote.end,
+   policy_snapshot:selectedQuote.policy_snapshot_text};
+ const holdResponse=await fetch("/v1/bnb/holds",{method:"POST",headers:{
+ ...hostHeaders(),"idempotency-key":idempotency+"-hold"},credentials:"omit",
+ body:JSON.stringify(params)});
+ if(!holdResponse.ok)throw Error("Temporary inventory hold unavailable ("+holdResponse.status+").");
+ const held=await holdResponse.json();
+ const booking=await fetch("/v1/bnb/booking-requests",{method:"POST",headers:{
+ ...hostHeaders(),"idempotency-key":idempotency+"-request"},credentials:"omit",
+ body:JSON.stringify({hold_id:held.id,request_type:bookingType.value})});
+ if(!booking.ok){
+ await fetch("/v1/bnb/holds/"+encodeURIComponent(held.id)+"/release",{
+ method:"POST",headers:hostHeaders(),credentials:"omit"});
+ throw Error("Booking request rejected ("+booking.status+"). Temporary hold released.");
+ }
+ const result=await booking.json();
+ bookingResult.textContent="Request "+result.id+" is "+result.state+
+ ". Payment and booking confirmation remain unavailable.";
+ selectedQuote=null;
+ }catch(error){bookingResult.textContent=error.message;}
+ });
  const quoteOutput=document.createElement("p");quoteOutput.setAttribute("role","status");quoteOutput.setAttribute("aria-live","polite");
  quoteBtn.addEventListener("click",async()=>{
  if(!hostProof){quoteOutput.textContent="Sign in with a valid 420Identity session first.";return;}
@@ -51,6 +92,8 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  checkin:startInput.value,checkout:endInput.value,nonce})});
  if(!response.ok)throw Error("Quote unavailable ("+response.status+").");
  const priced=await response.json(),bill=priced.calculation;
+ selectedQuote={...priced,unit_id:unitSelect.value||null};
+ requestBooking.disabled=false;
  quoteOutput.textContent="Quote "+priced.id+" · Nights: "+bill.nights+
  " · Base "+bill.subtotal_minor+" · Discount -"+bill.discount_minor+
  " · Cleaning "+bill.cleaning_minor+" · Service "+bill.service_minor+
@@ -58,7 +101,7 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  " minor units. Expires "+priced.expires_at+". No payment or booking.";
  }catch(error){quoteOutput.textContent=error.message;}
  });
- dateForm.append(startLabel,endLabel,check,choose,quoteBtn,out,quoteOutput);
+ dateForm.append(startLabel,endLabel,check,choose,quoteBtn,out,quoteOutput,bookingChoice,requestBooking,bookingResult);
  dateForm.addEventListener("submit",async event=>{
  event.preventDefault();out.textContent="Checking nonbinding availability…";
  if(startInput.value>=endInput.value){out.textContent="Checkout must be later than check-in.";return;}

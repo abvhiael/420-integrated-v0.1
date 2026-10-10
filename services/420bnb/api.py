@@ -1022,7 +1022,12 @@ def decide_booking_request(request_id:UUID,decision:str,
             h=c.execute("""SELECT status,expires_at,policy_snapshot FROM bnb_hold
                 WHERE id=%s FOR UPDATE""",(record[0],)).fetchone()
             now=datetime.now(timezone.utc)
-            if now>=record[4] or h[0]!="held" or h[1]<=now:
+            q_invalid=False
+            if record[6] is not None:
+                q=c.execute("SELECT status,expires_at FROM bnb_price_quote WHERE id=%s",
+                            (record[6],)).fetchone()
+                q_invalid=not q or q[0]!="issued" or q[1]<=now
+            if now>=record[4] or h[0]!="held" or h[1]<=now or q_invalid:
                 c.execute("""UPDATE bnb_booking_request SET state='expired',
                     decided_at=now(),version=version+1 WHERE id=%s""",(request_id,))
                 if h[0]=="held":c.execute("UPDATE bnb_hold SET status='expired' WHERE id=%s",(record[0],))

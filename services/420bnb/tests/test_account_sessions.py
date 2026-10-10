@@ -406,7 +406,7 @@ def test_host_policy_and_media_rights_boundaries(actor):
         unit=client.post(base+"/units",headers=headers,json={
             "label":"Suite","quantity":1,"expected_version":3})
         assert unit.status_code==201,unit.text
-        dst_start=datetime(2027,7,12,15,0,tzinfo=timezone(timedelta(hours=-5)))
+        dst_start=(datetime.now(timezone.utc)+timedelta(days=12)).replace(hour=15,minute=0,second=0,microsecond=0).astimezone(timezone(timedelta(hours=-5)))
         dst_end=dst_start+timedelta(days=2)
         wrong_offset=client.post(base+"/calendar/blocks",
             params={"unit_id":unit.json()["id"]},headers=headers,json={

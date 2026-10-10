@@ -195,6 +195,8 @@ contract MockCapabilityRegistryHCSession is ICapabilityRegistryExtended420 {
 contract MockSmartAccountHCSession {
     uint64 public authorizationEpoch = 1;
     mapping(address => uint64) public sessionEpoch;
+    address public entryPoint = address(0x420);
+    address public pendingRecoveryOwner;
     bytes32 public immutable accountComponentId;
     ICapabilityRegistryExtended420 public immutable capabilityRegistry;
 
@@ -228,6 +230,15 @@ contract MockSmartAccountHCSession {
     }
 }
 
+contract MockHCFactorySession {
+    address public immutable entryPoint = address(0x420);
+    address public immutable capabilityRegistry;
+    address public account;
+    constructor(address registry) { capabilityRegistry = registry; }
+    function setAccount(address candidate) external { account = candidate; }
+    function getAddress(address, address, bytes32) external view returns (address) { return account; }
+}
+
 contract RoutineTargetHCSession {
     function tick(
         uint64
@@ -241,6 +252,7 @@ contract HighCountrySessionAccess420Test {
     MockHCAuthorizationSessionAccess internal authorization;
     MockCapabilityRegistryHCSession internal registry;
     MockSmartAccountHCSession internal account;
+    MockHCFactorySession internal factory;
     RoutineTargetHCSession internal target;
     HighCountrySessionAccess420 internal sessionAccess;
 
@@ -252,7 +264,10 @@ contract HighCountrySessionAccess420Test {
         authorization.setRegistry(address(registry));
         account = new MockSmartAccountHCSession(address(registry));
         target = new RoutineTargetHCSession();
-        sessionAccess = new HighCountrySessionAccess420(address(authorization));
+        factory = new MockHCFactorySession(address(registry));
+        factory.setAccount(address(account));
+        sessionAccess = new HighCountrySessionAccess420(address(authorization), address(factory));
+        sessionAccess.attestAccount(address(account), address(this), address(0), bytes32(uint256(1)));
     }
 
     function _enableRoutineGrant() internal returns (bytes32 grantId, bytes32 scopeHash) {
@@ -263,6 +278,33 @@ contract HighCountrySessionAccess420Test {
         registry.setGrant(
             grantId, SESSION_KEY, account.accountComponentId(), CapabilityIds420.SESSION_EXECUTE, scopeHash, true
         );
+    }
+
+    function testR0213SensitiveSelectorsCannotBecomeRoutine() public {
+        bytes4[5] memory blocked = [
+            bytes4(keccak256("execute(address,uint256,bytes)")),
+            bytes4(keccak256("transfer(address,uint256)")),
+            bytes4(keccak256("approve(address,uint256)")),
+            bytes4(keccak256("createSessionGrant(address,address,bytes4,uint256,uint256,uint64,uint64,uint64)")),
+            bytes4(keccak256("enableSessionKey(address)"))
+        ];
+        for (uint256 i; i < blocked.length; i++) {
+            (bool ok,) = address(sessionAccess).call(
+                abi.encodeWithSelector(sessionAccess.setRoutineCall.selector, address(target), blocked[i], true)
+            );
+            require(!ok, "sensitive selector downgraded");
+        }
+    }
+
+    function testR0213UnknownAccountNeverTrusted() public {
+        _enableRoutineGrant();
+        MockSmartAccountHCSession forged = new MockSmartAccountHCSession(address(registry));
+        forged.setSessionEpoch(SESSION_KEY, 1);
+        require(!sessionAccess.isRoutineSessionAuthorized(address(forged), SESSION_KEY, address(target), target.tick.selector), "unattested account authorized");
+        (bool ok,) = address(sessionAccess).call(
+            abi.encodeCall(sessionAccess.attestAccount, (address(forged), address(this), address(0), bytes32(uint256(1))))
+        );
+        require(!ok, "nonfactory account attested");
     }
 
     function testRoutineSessionsHaveZeroNative420SpendLimit() public {

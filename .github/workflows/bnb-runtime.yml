@@ -60,5 +60,21 @@ jobs:
             sleep 1
           done
           echo 'Container readiness failed' >&2; exit 1
+      - name: Validate host UI script syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+          import tempfile
+          content = Path('web/bnb/index.html').read_text()
+          scripts = re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>', content, flags=re.S)
+          assert scripts, 'Host UI script missing'
+          with tempfile.TemporaryDirectory() as directory:
+              for index, script in enumerate(scripts):
+                  target = Path(directory) / f'bnb-host-{index}.js'
+                  target.write_text(script)
+                  subprocess.run(['node', '--check', str(target)], check=True)
+          PY
       - name: Verify front-end surfaces
         run: python -c "from pathlib import Path; s=Path('web/bnb/index.html').read_text(); assert 'aria-live' in s and 'Payments' not in s.split('<script>')[0] or 'disabled' in s"

@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 import {ActionIds} from "../constants/ActionIds.sol";
+import {EmergencyDomains} from "../constants/EmergencyDomains.sol";
+import {HCEmergencyRestrictionActive} from "../errors/HighCountryErrors.sol";
 import {ModuleIds} from "../constants/ModuleIds.sol";
 import {HCInvalidId, HCInvalidState, HCZeroAddress} from "../errors/HighCountryErrors.sol";
 import {IHighCountryAuthorization} from "../interfaces/IHighCountryAuthorization.sol";
@@ -64,6 +66,10 @@ contract HarvestEngine {
     function acceptHarvest(uint64 plantId) external returns (HarvestAcceptance memory acceptance) {
         if (plantId == 0) revert HCInvalidId();
         if (_accepted[plantId].accepted) revert HCInvalidState();
+        if (
+            address(cultivationEngine.emergencyState()) == address(0)
+                || cultivationEngine.emergencyState().isRestricted(EmergencyDomains.CULTIVATION)
+        ) revert HCEmergencyRestrictionActive(EmergencyDomains.CULTIVATION);
 
         PlantRegistry.PlantRecord memory plant = plantRegistry.getPlant(plantId);
         if (plant.stage != PlantRegistry.PlantStage.READY || plant.grower != msg.sender) {

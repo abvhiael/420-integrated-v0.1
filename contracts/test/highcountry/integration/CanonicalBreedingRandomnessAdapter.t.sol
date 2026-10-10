@@ -17,6 +17,7 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
     bytes32 internal root;
     bytes32 internal proof;
     bytes32 internal identifier;
+
     function requestRandomness(
         bytes32 profile,
         bytes32 domain,
@@ -32,6 +33,7 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
         bound.status = Status.REQUESTED;
         return identifier;
     }
+
     function setResult(
         Status state,
         bytes32 randomness,
@@ -41,24 +43,28 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
         root = randomness;
         proof = proofHash;
     }
+
     function request(
         bytes32 id
     ) external view override returns (Request memory) {
         require(id == identifier, "wrong id");
         return bound;
     }
+
     function status(
         bytes32 id
     ) external view override returns (Status) {
         require(id == identifier, "wrong id");
         return bound.status;
     }
+
     function result(
         bytes32 id
     ) external view override returns (bytes32, bytes32) {
         require(id == identifier, "wrong id");
         return (root, proof);
     }
+
     function fulfillRandomness(
         bytes32,
         bytes32,
@@ -66,11 +72,13 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
     ) external pure override {
         revert("fixture");
     }
+
     function activateFallback(
         bytes32
     ) external pure override {
         revert("fixture");
     }
+
     function voidExpired(
         bytes32
     ) external pure override {
@@ -81,6 +89,7 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
 contract MockBreedingAdapterCaller {
     CanonicalBreedingRandomnessAdapter public randomness;
     HighCountryAuthorization public authorization;
+
     constructor(
         CanonicalBreedingRandomnessAdapter adapter,
         HighCountryAuthorization auth
@@ -88,6 +97,7 @@ contract MockBreedingAdapterCaller {
         randomness = adapter;
         authorization = auth;
     }
+
     function request(
         bytes32 id,
         bytes32 domain,
@@ -95,11 +105,13 @@ contract MockBreedingAdapterCaller {
     ) external {
         randomness.request(id, domain, context);
     }
+
     function cancel(
         bytes32 id
     ) external {
         randomness.cancel(id);
     }
+
     function consume(
         bytes32 id,
         bytes32 domain,

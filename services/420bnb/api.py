@@ -70,6 +70,22 @@ class PropertyInput(BaseModel):
     currency: str = Field(pattern="^[A-Z]{3}$")
 
 
+def peak_occupied_units(intervals,start,end):
+    """Peak concurrent quantity within half-open [start,end), not sum of every overlap."""
+    events=[]
+    for left,right,units in intervals:
+        left=max(start,left)
+        right=min(end,right)
+        if left<right:
+            events.append((left,1,int(units)))
+            events.append((right,0,-int(units)))
+    active=peak=0
+    for _,_,delta in sorted(events):
+        active+=delta
+        peak=max(peak,active)
+    return peak
+
+
 class HoldInput(BaseModel):
     property_id: str
     unit_id: str | None = None
@@ -582,11 +598,12 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
                  AND period && tstzrange(%s,%s,'[)') LIMIT 1""",
                  (payload.property_id,payload.unit_id,payload.start,payload.end)).fetchone():
                 raise HTTPException(409,"PROPERTY_BLOCKED")
-            used=c.execute("""SELECT COALESCE(SUM(units),0) FROM bnb_hold
+            occupied=c.execute("""SELECT lower(period),upper(period),units FROM bnb_hold
                 WHERE property_id=%s AND unit_id IS NOT DISTINCT FROM %s
                 AND period && tstzrange(%s,%s,'[)')
                 AND (status='confirmed' OR (status='held' AND expires_at>now()))""",
-                (payload.property_id,payload.unit_id,payload.start,payload.end)).fetchone()[0]
+                (payload.property_id,payload.unit_id,payload.start,payload.end)).fetchall()
+            used=peak_occupied_units(occupied,payload.start,payload.end)
             if used+payload.units>unit_capacity:
                 raise HTTPException(409,"CAPACITY_EXHAUSTED")
             uid=uuid4()

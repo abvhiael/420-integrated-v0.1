@@ -88,6 +88,8 @@ contract ModuleRegistryInvariantTest is InvariantTarget420 {
         ModuleInvariantImplementationV1 implementation = new ModuleInvariantImplementationV1();
         expectedImplementation = address(implementation);
         _grant(address(this), ActionIds.MODULE_REGISTER, keccak256("setup:register"), MODULE_ID, ModuleIds.MODULE_REGISTRY);
+        _grant(address(this), ActionIds.MODULE_APPROVE_ARTIFACT, keccak256("setup:artifact"), MODULE_ID, ModuleIds.MODULE_REGISTRY);
+        registry.approveArtifact(MODULE_ID, expectedImplementation, 1, RULESET_ID);
         registry.registerModule(MODULE_ID, expectedImplementation, 1, RULESET_ID);
 
         handler = new ModuleInvariantHandler(registry, MODULE_ID, RULESET_ID);

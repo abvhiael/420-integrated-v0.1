@@ -435,6 +435,16 @@ def test_bnb24_immutable_quote_expiry_policy_and_nonce(fixture_property):
             c.execute("UPDATE bnb_price_quote SET expires_at=now()-interval '1 second' WHERE id=%s",(uid,))
         assert client.get("/v1/bnb/quotes/"+uid,headers=headers).json()["status"]=="expired"
         assert client.post("/v1/bnb/quotes",json=plan,headers=headers).json()["status"]=="expired"
+        alternate={**plan,"nonce":"quote-revocable-0001"}
+        newer=client.post("/v1/bnb/quotes",json=alternate,headers=headers)
+        assert newer.status_code==201,newer.text
+        revoked=client.post("/v1/bnb/quotes/"+newer.json()["id"]+"/revoke",headers=headers)
+        assert revoked.status_code==200 and revoked.json()["status"]=="revoked"
+        assert client.post("/v1/bnb/quotes/"+newer.json()["id"]+"/revoke",headers=headers).status_code==200
+        assert client.get("/v1/bnb/quotes/"+newer.json()["id"],headers=headers).json()["status"]=="revoked"
+        assert client.post("/v1/bnb/quotes",json=alternate,headers=headers).json()["status"]=="revoked"
+        assert client.post("/v1/bnb/quotes/"+uid+"/revoke",headers=headers).status_code==409
+
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))

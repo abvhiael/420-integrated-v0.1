@@ -2,9 +2,9 @@ name: DOOBR R02.11 Outbox Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['doobr/outbox.py','doobr/storage/migrations/0010_outbox.up.sql','doobr/storage/tests/test_outbox.py','docs/doobr/DOOBR-R02-11-*','.github/workflows/doobr-r02-11-level1.yml']
+    paths: ['doobr/outbox.py','doobr/storage/migrations/0010_outbox.up.sql','doobr/storage/tests/test_outbox.py','doobr/storage/tests/test_pg_outbox.py','docs/doobr/DOOBR-R02-11-*','.github/workflows/doobr-r02-11-level1.yml']
   pull_request:
-    paths: ['doobr/outbox.py','doobr/storage/migrations/0010_outbox.up.sql','doobr/storage/tests/test_outbox.py','docs/doobr/DOOBR-R02-11-*','.github/workflows/doobr-r02-11-level1.yml']
+    paths: ['doobr/outbox.py','doobr/storage/migrations/0010_outbox.up.sql','doobr/storage/tests/test_outbox.py','doobr/storage/tests/test_pg_outbox.py','docs/doobr/DOOBR-R02-11-*','.github/workflows/doobr-r02-11-level1.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -54,6 +54,8 @@ jobs:
       - name: Outbox forced RLS
         run: |
           psql -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN IF (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='doobr_private' AND c.relname IN ('event_outbox','event_receipts') AND c.relrowsecurity AND c.relforcerowsecurity)<>2 THEN RAISE EXCEPTION 'outbox RLS absent'; END IF; END \$\$;"
+      - name: Real PostgreSQL notification trigger and worker concurrency
+        run: python3 -m unittest discover -s doobr/storage/tests -p test_pg_outbox.py -v
       - name: Exact SHA after
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}

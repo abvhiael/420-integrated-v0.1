@@ -608,3 +608,74 @@ def test_bnb25_instant_eligibility_pending_payment_and_cancel(fixture_property):
             c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb25_independent_host_approval_decline_and_expiry(fixture_property,monkeypatch):
+    pid,_=fixture_property
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    monkeypatch.setenv("BNB_IDENTITY_PUBLIC_KEY_PEM",private.public_key().public_bytes(
+        Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    issuer="https://identity.test.invalid"
+    guest="guest25-"+str(uuid4())
+    host="host25-"+str(uuid4())
+    now=int(time.time())
+    def bearer(subject):
+        jti="session-"+str(uuid4())
+        token=jwt.encode({"sub":subject,"iss":issuer,"aud":"420bnb",
+            "iat":now,"nbf":now,"exp":now+300,"jti":jti},private,algorithm="RS256")
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("INSERT INTO bnb_account(subject) VALUES (%s)",(subject,))
+            c.execute("""INSERT INTO bnb_identity_session
+                (id,subject,issuer,issuer_session_id,expires_at)
+                VALUES (%s,%s,%s,%s,now()+interval '5 minutes')""",
+                (uuid4(),subject,issuer,jti))
+        return {"authorization":"Bearer "+token}
+    guest_headers=bearer(guest)
+    host_headers=bearer(host)
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_property SET host_subject=%s WHERE id=%s",(host,pid))
+    def make_request(suffix):
+        hold=client.post("/v1/bnb/holds",json=payload(pid),headers={
+            **guest_headers,"idempotency-key":"bnb25-host-hold-"+suffix})
+        assert hold.status_code==201,hold.text
+        req=client.post("/v1/bnb/booking-requests",json={
+            "hold_id":hold.json()["id"],"request_type":"request"},headers={
+            **guest_headers,"idempotency-key":"bnb25-host-req-"+suffix})
+        assert req.status_code==201,req.text
+        return hold.json()["id"],req.json()["id"]
+    try:
+        held,rid=make_request("a")
+        assert client.post("/v1/bnb/booking-requests/"+rid+"/accept",
+                           headers=guest_headers).status_code==404
+        accepted=client.post("/v1/bnb/booking-requests/"+rid+"/accept",
+                             headers=host_headers)
+        assert accepted.status_code==200 and accepted.json()["state"]=="accepted"
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            booking=c.execute("SELECT id,status FROM bnb_reservation WHERE booking_request_id=%s",
+                              (rid,)).fetchone()
+        assert booking[1]=="payment_pending"
+        assert client.get("/v1/bnb/reservations/"+str(booking[0]),headers=host_headers).status_code==200
+        assert client.post("/v1/bnb/booking-requests/"+rid+"/accept",
+                           headers=host_headers).status_code==409
+        assert client.post("/v1/bnb/reservations/"+str(booking[0])+"/cancel",
+                           headers=guest_headers).status_code==200
+        _,second=make_request("b")
+        reject=client.post("/v1/bnb/booking-requests/"+second+"/decline",
+                           headers=host_headers)
+        assert reject.status_code==200 and reject.json()["state"]=="declined"
+        _,third=make_request("c")
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_booking_request SET deadline=now()-interval '1 second' WHERE id=%s",
+                      (third,))
+        expired=client.post("/v1/bnb/booking-requests/"+third+"/accept",
+                            headers=host_headers)
+        assert expired.status_code==200 and expired.json()["state"]=="expired"
+        assert client.get("/v1/bnb/booking-requests/"+third,headers=guest_headers).json()["state"]=="expired"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_reservation WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_request WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_identity_session WHERE subject IN (%s,%s)",(guest,host))
+            c.execute("DELETE FROM bnb_account WHERE subject IN (%s,%s)",(guest,host))
+            c.execute("UPDATE bnb_property SET host_subject='verified-host' WHERE id=%s",(pid,))

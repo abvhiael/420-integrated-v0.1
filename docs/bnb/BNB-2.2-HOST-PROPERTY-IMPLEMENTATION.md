@@ -81,3 +81,17 @@ A new shared-PostgreSQL concurrency test races **eight independent TestClient in
 **External/manual acceptance remains outstanding:** operational moderation approval requires authorized reviewer identity, governance decision, signing/key custody and independently retained review trails. CI cannot issue its own authorization. Human WCAG 2.2 AA testing requires keyboard, screen-reader, and representative assistive technologies on supported browsers, with qualified human reviewer evidence and defect closure. Automated axe/Playwright does **not** substitute for that acceptance. Full production-equivalent booking/payment integration remains in the testnet roadmap.
 
 **Qualification status:** targeted exact-implementation-SHA GitHub runtime acceptance required; do not claim this iteration complete on a queued check.
+
+## BNB-2.2 repository-level closeout and external handoff
+
+**Qualified implementation SHA:** `70f6dacd41a2582bd26bc8ea0d78aa543b2f4200` (targeted 420BnB runtime run [38082344067](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38082344067): SUCCESS). Earlier multiprocess/unit allocation run [38078123432](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38078123432) also passed. This entry and the testnet roadmap change are evidence/documentation only; do not treat them as new executable qualification.
+
+**Repository-side BNB-2.2:** local host/property draft, unit inventory, calendar blocks, policy/media pending review, reviewer signed-adapter fail-close, quantity-scoped hold allocation, two-Uvicorn-process PostgreSQL contention, and automated Chromium/axe mobile/desktop checks qualified to the stated test coverage. Automated passing evidence does **not** prove legal publication, full guest booking finality, independent review or human WCAG 2.2 AA accessibility.
+
+**Explicitly deferred to testnet roadmap:**
+- `T-BNB-MEDIA-1`: independent real moderator approval, governance/operator credentials, managed signing keys, issuance, revocation, appeals, live signed decision evidence.
+- `T-BNB-ACCESSIBILITY-1`: real qualified human screen-reader, keyboard, supported-device/browser matrix and dated independent acceptance.
+
+These two requirements are not waived. BNB-2.2 can proceed as **repository-side Level 1 PASS / live operational acceptance DEFERRED**, not an unrestricted release. Payment, booking finality and self-publication remain disabled. No Level 2 or Level 3 broad rerun at this ordinary step.
+
+**Next roadmap:** inspect exact canonical BNB-2.3 definition before renumbering/implementing; prior BNB-2.1/2.2 handoff files do not establish that step's authoritative scope.

@@ -11,6 +11,7 @@ on:
       - 'docs/compliance/C01.5-*'
       - 'docs/compliance/C01.6-*'
       - 'docs/compliance/C01.7-*'
+      - 'docs/compliance/C01.8-*'
       - 'services/complianceauth/**'
       - 'scripts/verify-compliance-c01-1.py'
       - 'scripts/test-compliance-c01-1.py'
@@ -22,6 +23,7 @@ on:
       - 'scripts/verify-compliance-c01-5.py'
       - 'scripts/verify-compliance-c01-6.py'
       - 'scripts/verify-compliance-c01-7.py'
+      - 'scripts/verify-compliance-c01-8.py'
       - '.github/workflows/420compliance-c01-level1.yml'
   pull_request:
     paths:
@@ -33,6 +35,7 @@ on:
       - 'docs/compliance/C01.5-*'
       - 'docs/compliance/C01.6-*'
       - 'docs/compliance/C01.7-*'
+      - 'docs/compliance/C01.8-*'
       - 'services/complianceauth/**'
       - 'scripts/verify-compliance-c01-1.py'
       - 'scripts/test-compliance-c01-1.py'
@@ -44,6 +47,7 @@ on:
       - 'scripts/verify-compliance-c01-5.py'
       - 'scripts/verify-compliance-c01-6.py'
       - 'scripts/verify-compliance-c01-7.py'
+      - 'scripts/verify-compliance-c01-8.py'
       - '.github/workflows/420compliance-c01-level1.yml'
   workflow_dispatch:
 permissions:
@@ -69,7 +73,7 @@ jobs:
       - name: Assert exact implementation SHA
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Compile affected qualification scripts
-        run: python3 -m py_compile scripts/verify-compliance-c01-3.py scripts/test-compliance-c01-3.py scripts/verify-compliance-c01-5.py scripts/verify-compliance-c01-6.py scripts/verify-compliance-c01-7.py
+        run: python3 -m py_compile scripts/verify-compliance-c01-3.py scripts/test-compliance-c01-3.py scripts/verify-compliance-c01-5.py scripts/verify-compliance-c01-6.py scripts/verify-compliance-c01-7.py scripts/verify-compliance-c01-8.py
       - name: Verify retained C01.3 at its historically qualified implementation SHA
         run: |
           git worktree add --detach /tmp/compliance-c01-3-qualified 9c818d68d4de90bed78f89e9ca520f66efaa7337
@@ -86,9 +90,13 @@ jobs:
         run: python3 scripts/verify-compliance-c01-7.py "$EXPECTED_SHA"
       - name: Go security implementation and adversarial regressions
         run: go test ./services/complianceauth -count=1 -v
-      - name: Write current C01.7 exact-SHA qualification result
+      - name: C01.8 architecture Level 2 retained traceability and authority review
+        run: python3 scripts/verify-compliance-c01-8.py "$EXPECTED_SHA"
+      - name: C01.8 app-level integration and Go race detector
+        run: go test -race ./services/complianceauth -count=1
+      - name: Write current C01.8 exact-SHA qualification result
         run: |
-          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C01.7","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c01_7_publication_verifier":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C01.8","qualification_level":2,"implementation_sha":os.environ["EXPECTED_SHA"],"c01_8_architecture_verifier":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

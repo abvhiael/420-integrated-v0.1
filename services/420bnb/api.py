@@ -583,6 +583,47 @@ def block_unit_dates(property_id:str,unit_id:str|None=None,payload:CalendarBlock
     return {"id":str(bid),"version":version,"status":"blocked"}
 
 
+@app.put("/v1/bnb/account/properties/{property_id}/calendar/blocks/{block_id}")
+def revise_calendar_block(property_id:str,block_id:str,payload:CalendarBlockInput,
+                          authorization:str|None=Header(None)):
+    """Atomic rescheduling under the same property-row inventory lock."""
+    subject=active_subject(authorization)
+    validate_window(payload.start,payload.end)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,property_id,subject,payload.expected_version)
+            old=c.execute("""SELECT unit_id,reason,created_by FROM bnb_block
+                WHERE property_id=%s AND id=%s FOR UPDATE""",(property_id,block_id)).fetchone()
+            if not old or old[2]!=subject:raise HTTPException(404,"BLOCK_NOT_FOUND")
+            unit_id=old[0]
+            if unit_id is not None:
+                cap=c.execute("SELECT quantity FROM bnb_unit WHERE id=%s AND property_id=%s",
+                              (unit_id,property_id)).fetchone()
+                if not cap:raise HTTPException(404,"UNIT_NOT_FOUND")
+                closure=payload.quantity if payload.quantity is not None else cap[0]
+            else:
+                if payload.quantity is not None:raise HTTPException(422,"PROPERTY_BLOCK_MUST_BE_FULL")
+                closure=None
+            # Deleting within a transaction preserves original block on failure.
+            c.execute("DELETE FROM bnb_block WHERE id=%s",(block_id,))
+            if unit_id is not None:
+                used=occupancy_in_window(c,property_id,unit_id,payload.start,payload.end)
+                if used is None or used+closure>cap[0]:
+                    raise HTTPException(409,"CALENDAR_CAPACITY_CONFLICT")
+            elif c.execute("""SELECT 1 FROM bnb_hold WHERE property_id=%s AND
+                  period && tstzrange(%s,%s,'[)') AND
+                  (status='confirmed' OR (status='held' AND expires_at>now())) LIMIT 1""",
+                  (property_id,payload.start,payload.end)).fetchone():
+                raise HTTPException(409,"EXISTING_BOOKING_CONFLICT")
+            c.execute("""INSERT INTO bnb_block(id,property_id,unit_id,period,reason,
+                created_by,property_version,quantity)
+                VALUES (%s,%s,%s,tstzrange(%s,%s,'[)'),%s,%s,%s,%s)""",
+                (block_id,property_id,unit_id,payload.start,payload.end,payload.reason,
+                 subject,payload.expected_version,closure))
+            version=bump_property(c,property_id,subject,"bnb.calendar.block_rescheduled")
+    return {"id":block_id,"version":version,"status":"blocked"}
+
+
 @app.get("/v1/bnb/account/properties/{property_id}/calendar")
 def property_calendar(property_id:str,authorization:str|None=Header(None)):
     subject=active_subject(authorization)

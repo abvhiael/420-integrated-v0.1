@@ -407,6 +407,7 @@ contract HighCountrySessionAccess420Test {
             sessionAccess.requiresWalletEscalation(address(target), target.tick.selector, 0),
             "unknown call did not escalate"
         );
+        sessionAccess.reviewRoutineCall(address(target), target.tick.selector);
         sessionAccess.setRoutineCall(address(target), target.tick.selector, true);
         require(
             !sessionAccess.requiresWalletEscalation(address(target), target.tick.selector, 0), "routine call escalated"

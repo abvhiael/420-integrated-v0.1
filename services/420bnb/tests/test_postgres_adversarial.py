@@ -149,3 +149,37 @@ def test_two_actual_server_processes_share_postgres_lock(fixture_property):
         for process in processes:
             try:process.wait(timeout=5)
             except subprocess.TimeoutExpired:process.kill();process.wait()
+
+
+def test_unit_specific_capacity_and_cross_unit_isolation(fixture_property):
+    pid,headers=fixture_property
+    unit_a,unit_b=uuid4(),uuid4()
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_property SET capacity=3 WHERE id=%s",(pid,))
+        c.execute("INSERT INTO bnb_unit(id,property_id,label,quantity) VALUES (%s,%s,'Cabin A',1),(%s,%s,'Cabin B',2)",
+                  (unit_a,pid,unit_b,pid))
+    try:
+        base=payload(pid)
+        assert client.post("/v1/bnb/holds",json=base,
+            headers={**headers,"idempotency-key":"unit-missing-0001"}).status_code==422
+        first=client.post("/v1/bnb/holds",json={**base,"unit_id":str(unit_a)},
+            headers={**headers,"idempotency-key":"unit-a-first-0001"})
+        assert first.status_code==201,first.text
+        full=client.post("/v1/bnb/holds",json={**base,"unit_id":str(unit_a)},
+            headers={**headers,"idempotency-key":"unit-a-full-00002"})
+        assert full.status_code==409 and full.json()["detail"]=="CAPACITY_EXHAUSTED"
+        second=client.post("/v1/bnb/holds",json={**base,"unit_id":str(unit_b),"units":2},
+            headers={**headers,"idempotency-key":"unit-b-second-0001"})
+        assert second.status_code==201,second.text
+        third=client.post("/v1/bnb/holds",json={**base,"unit_id":str(unit_b)},
+            headers={**headers,"idempotency-key":"unit-b-overbook-001"})
+        assert third.status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            rows=c.execute("SELECT unit_id,SUM(units) FROM bnb_hold WHERE property_id=%s GROUP BY unit_id",
+                           (pid,)).fetchall()
+            assert {str(unit):count for unit,count in rows}=={str(unit_a):1,str(unit_b):2}
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
+            c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))

@@ -12,6 +12,7 @@ import psycopg
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from identity import verify_external_token
 from authority import verify_authority
+from calendar_engine import peak_used,strict_local_instant,local_stay_window
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
@@ -121,6 +122,68 @@ def listings():
             FROM bnb_property WHERE status='published' ORDER BY id LIMIT 50""").fetchall()
     return [{"id":str(x[0]),"title":x[1],"public_region":x[2],"capacity":x[3],
              "nightly_minor":x[4],"currency":x[5],"version":x[6]} for x in rows]
+
+
+def occupancy_in_window(c,property_id,unit_id,start,end):
+    """Count live holds, quantity closures and independently ingested busy events."""
+    holds=c.execute("""SELECT lower(period),upper(period),units FROM bnb_hold
+        WHERE property_id=%s AND unit_id IS NOT DISTINCT FROM %s
+        AND period && tstzrange(%s,%s,'[)')
+        AND (status='confirmed' OR (status='held' AND expires_at>now()))""",
+        (property_id,unit_id,start,end)).fetchall()
+    blocks=c.execute("""SELECT lower(period),upper(period),quantity FROM bnb_block
+        WHERE property_id=%s AND (unit_id IS NULL OR unit_id=%s)
+        AND period && tstzrange(%s,%s,'[)')""",
+        (property_id,unit_id,start,end)).fetchall()
+    if any(x[2] is None for x in blocks):
+        return None
+    synced=c.execute("""SELECT lower(period),upper(period),quantity,received_at FROM bnb_calendar_sync_event
+        WHERE property_id=%s AND (unit_id IS NULL OR unit_id=%s)
+        AND period && tstzrange(%s,%s,'[)')""",
+        (property_id,unit_id,start,end)).fetchall()
+    if any(x[3]<datetime.now(timezone.utc)-timedelta(hours=24) for x in synced):
+        raise HTTPException(503,"CALENDAR_SYNC_STALE")
+    return peak_used([*holds,*blocks,*[(x[0],x[1],x[2]) for x in synced]],start,end)
+
+
+@app.get("/v1/bnb/availability")
+def guest_availability(property_id:str,start:datetime,end:datetime):
+    """Public published-only read. No address, guest identity or booking commitment."""
+    validate_window(start,end)
+    with db() as c:
+        row=c.execute("""SELECT id,title,public_region,capacity,status,version
+            FROM bnb_property WHERE id=%s""",(property_id,)).fetchone()
+        if not row or row[4]!="published":raise HTTPException(404,"NOT_FOUND")
+        units=c.execute("""SELECT id,label,quantity FROM bnb_unit WHERE property_id=%s
+            ORDER BY label,id""",(property_id,)).fetchall()
+        if not units:units=[(None,"Entire property",row[3])]
+        result=[]
+        for uid,label,capacity in units:
+            peak=occupancy_in_window(c,property_id,uid,start,end)
+            result.append({"unit_id":str(uid) if uid else None,"label":label,
+                           "capacity":capacity,"available":0 if peak is None else max(0,capacity-peak)})
+    return {"property_id":str(row[0]),"title":row[1],"public_region":row[2],
+            "start":start.isoformat(),"end":end.isoformat(),"property_version":row[5],
+            "units":result,"nonbinding":True}
+
+
+@app.get("/v1/bnb/availability/local")
+def guest_local_availability(property_id:str,checkin:str,checkout:str):
+    from datetime import date
+    try:
+        begin=date.fromisoformat(checkin)
+        finish=date.fromisoformat(checkout)
+    except ValueError:raise HTTPException(422,"INVALID_LOCAL_DATE")
+    with db() as c:
+        prop=c.execute("SELECT status FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
+        if not prop or prop[0]!="published":raise HTTPException(404,"NOT_FOUND")
+        policy=c.execute("SELECT timezone_id FROM bnb_listing_policy WHERE property_id=%s",
+                         (property_id,)).fetchone()
+        if not policy:raise HTTPException(503,"PROPERTY_TIMEZONE_UNAVAILABLE")
+    try:start,end,nights=local_stay_window(begin,finish,policy[0])
+    except ValueError as e:raise HTTPException(422,str(e))
+    result=guest_availability(property_id,start,end)
+    return {**result,"timezone_id":policy[0],"nights":nights}
 
 
 @app.post("/v1/bnb/properties", status_code=201)

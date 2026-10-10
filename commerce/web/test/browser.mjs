@@ -18,13 +18,20 @@ import {fixture} from './fixture.mjs';
 const f=setup(),wf=fixture(),temp=mkdtempSync(join(tmpdir(),'com4-browser-'));let api,browser;const errors=[],checks=[];let rejectTx=false,unmined=null,account=seller.address.toLowerCase(),chain='0x1a4';
 f.service.reconcileTaxonomy([{id:'a'.repeat(64),slug:'app-goods',order:0}]);
 f.source.merchant=async id=>({controller:id===b32(1)?seller.address.toLowerCase():address(0),active:id===b32(1)});
-const server=createServer((req,res)=>{if(req.url.startsWith('/v1/'))return api.listeners('request')[0](req,res);const path=req.url==='/'?'index.html':req.url.slice(1);if(!['index.html','app.js','style.css','public.html','public.js','public.css','operations.html','operations.js'].includes(path)){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':'text/html','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(readFileSync(join(temp,'site',path)));});
+const server=createServer((req,res)=>{if(req.url.startsWith('/v1/'))return api.listeners('request')[0](req,res);const path=req.url==='/'?'index.html':req.url.slice(1);if(!['index.html','builder.html','app.js','style.css','public.html','public.js','public.css','operations.html','operations.js','high-street-logo.svg'].includes(path)){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':path.endsWith('.svg')?'image/svg+xml':'text/html','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(readFileSync(join(temp,'site',path)));});
 try{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
   api=commerceServer(f.service,new RequestAuth(f.db,{origin,chainId:'420',now:f.now}),{origin,now:f.now,rateLimit:10000});
   const config={...wf.config,origin,apiUrl:origin+'/'};
   const manifest=join(temp,'manifest.json');writeFileSync(manifest,JSON.stringify(config));
   execFileSync(process.execPath,['scripts/build.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,COMMERCE_WEB_TEST_OUTPUT:join(temp,'site'),COMMERCE_WEB_MANIFEST:manifest,COMMERCE_WEB_MANIFEST_SHA256:createHash('sha256').update(readFileSync(manifest)).digest('hex')},stdio:'inherit'});
+  const home=readFileSync(join(temp,'site','index.html'),'utf8'),builder=readFileSync(join(temp,'site','builder.html'),'utf8');
+  assert.match(home,/<h1 id="market-title">High Street Marketplace<\/h1>/);
+  assert.match(home,/href="high-street-logo.svg"/);assert.match(home,/href="builder.html"/);
+  assert.ok(home.indexOf('class="market-hero"')<home.indexOf('<h1 id="market-title"'));
+  assert.match(builder,/Merchant storefront builder/);assert.match(builder,/href="\/" aria-label="High Street marketplace home"/);
+  assert.match(readFileSync(join(temp,'site','high-street-logo.svg'),'utf8'),/<svg/);
+  checks.push('built root is public marketplace, builder route and favicon/logo exist');
   browser=await chromium.launch({headless:true,...process.env.COMMERCE_CHROMIUM_PATH?{executablePath:process.env.COMMERCE_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']}: {}});const context=await browser.newContext({viewport:{width:1280,height:900}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
   await page.exposeFunction('walletRequest',async call=>{
     if(['eth_accounts','eth_requestAccounts'].includes(call.method))return [account];
@@ -39,7 +46,7 @@ try{
   const fill=async(form,values)=>{for(const [key,value] of Object.entries(values)){const node=page.locator(`#${form} [name="${key}"]`);if(await node.evaluate(n=>n.tagName==='SELECT'))await node.selectOption(String(value));else await node.fill(String(value));}};
   const submit=async form=>{await page.locator('#'+form+' button').click();await page.waitForFunction(id=>!document.querySelector('#'+id+' button').disabled,form);};
   const pass=name=>{checks.push(name);console.log('PASS '+name);};
-  await page.goto(origin);await page.locator('#connect').click();await page.waitForFunction(()=>document.querySelector('#network').textContent.includes('code/Registry verified'));
+  await page.goto(origin+'/builder.html');await page.locator('#connect').click();await page.waitForFunction(()=>document.querySelector('#network').textContent.includes('code/Registry verified'));
   await fill('identity-form',{merchantId:b32(1)});await submit('identity-form');assert.match(await page.locator('#identity-result').textContent(),/controller verified/);pass('canonical Wallet/controller onboarding with real signed HTTP');
   await fill('registration-form',{merchantId:b32(9),profileId:b32(8),metadataHash:b32(7),payout:seller.address});await page.locator('#registration-form button').click();await page.locator('#review').waitFor({state:'visible'});assert.match(await page.locator('#review-terms').textContent(),/MerchantRegistry420/);assert.match(await page.locator('#review-terms').textContent(),new RegExp(seller.address.toLowerCase()));await page.locator('#cancel-transaction').click();assert.equal(unmined,null);pass('Pay registration reviews exact controller/payout and cancellation leaves identity untouched');
   await fill('store-form',{merchantId:b32(1),slug:'browser-store'});await submit('store-form');assert.equal(await page.locator('#error').isVisible(),false);assert.match(await page.locator('#store-result').textContent(),/browser-store/);
@@ -66,7 +73,7 @@ try{
   const publicSearch=await fetch(origin+'/v1/search').then(async response=>({status:response.status,body:await response.json()}));
   assert.equal(publicSearch.status,200,'published public catalogue API must be readable');
   assert.equal(publicSearch.body.data.items.length,1,'published product must exist in the real service before browser navigation');
-  const shopper=await context.newPage();shopper.on('pageerror',e=>errors.push(e.message));await shopper.goto(origin+'/public.html');
+  const shopper=await context.newPage();shopper.on('pageerror',e=>errors.push(e.message));await shopper.goto(origin+'/');
   await shopper.waitForFunction(()=>document.querySelector('#products article')||!document.querySelector('#error').hidden,{timeout:10000});
   assert.equal(await shopper.locator('#error').isVisible(),false,'shopper startup: '+await shopper.locator('#error').textContent());
   await shopper.locator('#products article').first().waitFor();

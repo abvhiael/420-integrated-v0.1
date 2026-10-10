@@ -17,7 +17,7 @@ type Signer interface {
 }
 type ManagedPublisher struct { Signer Signer; Trust Trust; Approvals ApprovalAuthority }
 func (p ManagedPublisher) Publish(ctx context.Context,m Manifest,a Approval)(SignedManifest,error){
- if p.Signer==nil || p.Approvals==nil || (a.ApprovalToken=="" || p.Approvals.VerifyApproval(m.PolicyDigest,m.ReviewDigest,a.ApprovalToken,time.Now().UTC())!=nil || !a.IndependentlyVerified || a.AuthorID=="" || a.ReviewerID=="" || a.PublisherID=="" || a.AuthorID==a.ReviewerID || a.AuthorID==a.PublisherID || a.ReviewerID==a.PublisherID || !digestValid(m.PolicyDigest) || !digestValid(m.ReviewDigest) || subtle.ConstantTimeCompare([]byte(a.Digest),[]byte(m.PolicyDigest))!=1 {return SignedManifest{},ErrUnauthorized}
+ if p.Signer==nil || p.Approvals==nil || (a.ApprovalToken=="" || p.Approvals.VerifyApproval(m.PolicyDigest,m.ReviewDigest,a.ApprovalToken,time.Now().UTC())!=nil || !a.IndependentlyVerified || a.AuthorID=="" || a.ReviewerID=="" || a.PublisherID=="" || a.AuthorID==a.ReviewerID || a.AuthorID==a.PublisherID || a.ReviewerID==a.PublisherID) || !digestValid(m.PolicyDigest) || !digestValid(m.ReviewDigest) || subtle.ConstantTimeCompare([]byte(a.Digest),[]byte(m.PolicyDigest))!=1 {return SignedManifest{},ErrUnauthorized}
  if m.Environment!=p.Trust.Environment || m.Audience!=p.Trust.Audience || m.Domain!=p.Trust.Domain || m.Jurisdiction!=p.Trust.Jurisdiction || m.Sequence<p.Trust.MinimumSequence || m.RevocationEpoch<p.Trust.MinimumEpoch || m.Sequence==0 || m.Schema!="420compliance-policy/v1" {return SignedManifest{},ErrUnauthorized}
  key,ok:=p.Trust.Keys[m.KeyID];if !ok||key.Revoked||key.Environment!=p.Trust.Environment{return SignedManifest{},ErrUnauthorized}
  payload,err:=canonical(m);if err!=nil{return SignedManifest{},err}

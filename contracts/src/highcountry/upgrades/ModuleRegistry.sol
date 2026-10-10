@@ -23,6 +23,8 @@ contract ModuleRegistry is IModuleRegistry {
     IHighCountryAuthorization public immutable authorization;
     mapping(bytes32 => ModuleRecord) private _modules;
     mapping(bytes32 => bytes32) public registeredCodeHash;
+    mapping(bytes32 => bytes32) public approvedArtifactHash;
+    event ModuleArtifactApproved(bytes32 indexed moduleId, bytes32 indexed artifactHash);
     mapping(bytes32 => bytes32) public registeredInterface;
     IEmergencyState public emergencyState;
     IRulesetRegistry public rulesetRegistry;
@@ -133,6 +135,29 @@ contract ModuleRegistry is IModuleRegistry {
         return record.implementation;
     }
 
+    /// @notice Independent authority approves exact runtime bytecode, interface, version and ruleset.
+    function approveArtifact(
+        bytes32 moduleId,
+        address implementation,
+        uint32 version,
+        bytes32 rulesetId
+    ) external {
+        if (_modules[moduleId].exists || moduleId == bytes32(0) || version == 0) revert HCInvalidState();
+        _requireRegisteredRuleset(rulesetId);
+        _verifyIdentity(moduleId, implementation, version, rulesetId, bytes32(0));
+        (,,, bytes32 interfaceId) = IHighCountryModuleIdentity(implementation).highCountryModuleIdentity();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_APPROVE_ARTIFACT, moduleId, 0
+            )
+        );
+        bytes32 artifactHash = keccak256(
+            abi.encode(moduleId, implementation.codehash, interfaceId, version, rulesetId)
+        );
+        approvedArtifactHash[moduleId] = artifactHash;
+        emit ModuleArtifactApproved(moduleId, artifactHash);
+    }
+
     function registerModule(
         bytes32 moduleId,
         address implementation,
@@ -156,6 +181,12 @@ contract ModuleRegistry is IModuleRegistry {
         );
 
         (,,, bytes32 interfaceId) = IHighCountryModuleIdentity(implementation).highCountryModuleIdentity();
+        if (
+            approvedArtifactHash[moduleId] == bytes32(0)
+                || approvedArtifactHash[moduleId] != keccak256(
+                    abi.encode(moduleId, implementation.codehash, interfaceId, version, rulesetId)
+                )
+        ) revert HCInvalidState();
         registeredCodeHash[moduleId] = implementation.codehash;
         registeredInterface[moduleId] = interfaceId;
         _modules[moduleId] = ModuleRecord({

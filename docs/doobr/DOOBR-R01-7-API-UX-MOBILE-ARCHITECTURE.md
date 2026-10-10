@@ -1,0 +1,50 @@
+# DOOBR R01.7 — API, events, client UX and jurisdiction contract
+Status: DRAFT pending Level 1 exact-SHA verification. Canonical R01.7: **OpenAPI/events, UX, native mobile strategy, availability semantics and versioned jurisdiction policy contract.**
+Main baseline: `c5a4f220d1fbda01f707d359aa9bb32921a138b1`; PR #601. Builds on approved *development-only* R01.2 and qualified R01.3–R01.6 design boundaries. NO live regulated dispatch/payment/checkout authorization.
+
+## Normative artifacts
+- `docs/doobr/openapi-v1.yaml` — proposed OpenAPI 3.1 interface; distinct public versus authenticated endpoints with least privilege. This schema is a **future contract**, not a deployed HTTP server or actual 420Compliance API agreement.
+- `docs/doobr/events-v1.json` — proposed event catalogue and redaction/idempotency rules.
+- This document — UX/navigation/mobile architecture, availability state semantics, threat-to-interface and dependency traceability.
+
+## UX information architecture / user journeys
+**Consumer web/mobile:** public age-appropriate service-region coverage without retail product marketing or order details; accessible sign-in through 420Identity/Wallet where authorized; own eligibility explanation; retailer-origin prepaid order reference; disclosed platform/delivery fee; explicit consent; private status timeline, handoff outcome, cancellation/refund case and support. No public checkout or functioning regulated order until separate permission.
+
+**Courier web/mobile:** verified enrollment/suspension/credential renewal; authenticated availability; expiring assignment offer; route shown only after one atomically accepted active assignment; pickup sealed-package reference, time-limited location, signed custody proofs, protected recipient name/signature confirmation, failed handoff and safe return. Emergency and coercion action visible throughout active assignment; offline queue cannot retroactively mark delivery as verified.
+
+**Retailer portal:** license and independent issuer status, prepaid-sale reference and product-equivalence details restricted to merchant, packed/sealed readiness, courier pickup audit, returns and 420Pay receipts. Retailer remains seller of record. No operator-created sale or DOOBR custody.
+
+**Operations console:** scoped regional availability diagnostics with privacy-safe aggregates; role revocation, incidents, support/dispute and regulatory shutdown; all sensitive data access audited, no unilateral policy or settlement override. Accessibility: keyboard-only navigation, WCAG 2.2 AA design target, dynamic announcements of assignment/denial, motion-reduction, screen reader and plain language. Cannabis promotion restrictions apply to all public-facing UX.
+
+## API and credential boundaries
+**Public:** `GET /v1/public/regions/{region_id}/presence`: coarse region status only. `GET /v1/health` must reveal no credentials or internal environment. Presence is not a delivery promise, eligibility or order authorization. Pin approved HTTPS origin for `handoff_url`.
+
+**Authenticated consumers:** own `GET /v1/orders/{order_id}`; controlled `POST /v1/orders`, `POST /v1/orders/{order_id}/cancel` are **future disabled-by-default interfaces**, must return 403/503 until independently approved. Idempotency keys and request version preconditions required for mutations; 401 unauthenticated, 403 not authorized, 404 conceal cross-tenant IDs, 409 conflict, 422 invalid schema, 429 rate limit. Never expose raw recipient identity proof.
+
+**Retailers/couriers/operators:** typed token scope, actor ID, tenant ID, delegated authorization and expiry on every request. Retailers create pickup readiness only for their own store; couriers accept single valid offer and attest custody for own assignments; operator incident endpoints require explicit audited scopes and cannot mint 420Compliance policy approval.
+
+**420Compliance:** independently qualified signed policy decision adapter consumes `ComplianceEvaluateDelivery/v1` and response `ComplianceDecision/v1` from R01.4–R01.5, not an assumed fixed public endpoint. Verify issuer/audience/request hash/action/tenant/jurisdiction/carrier/time/revocation epoch and expiry at dispatch + handoff. UNKNOWN, stale, unsigned, replayed or timeout => DENY new operations. Reject insecure backward schema downgrade.
+
+**Money:** 420Pay remains canonical; R01.7 API schemas may reference only opaque authoritative paid retailer sale/receipt IDs and approved fee schedules. A successful API request cannot self-certify payment finality. Eligible net protocol revenue and `DevelopmentCompensationVault420` remain separate, authorized-only settlement flows.
+
+## Versioned availability semantics
+`AVAILABLE`: confirmed authorized operating coverage + freshness-valid region-level aggregate of eligible capacity and positive 420Compliance public policy, above anonymity threshold; **not a commitment to a courier/ETA**.
+`LIMITED`: lawful coverage and fresh eligible aggregate but capacity constraints, not a predicted specific courier/ETA.
+`UNAVAILABLE`: confirmed legal operating exclusion or explicitly zero authorized capacity based on sufficiently fresh trustworthy evidence; do not infer from telemetry gap.
+`UNKNOWN`: default for unsupported policies, unapproved municipality, absent data, stale TTL, no anonymity threshold, ambiguous location, failed service, revocation, suppression or conflicting signals. Never silently promote UNKNOWN to AVAILABLE.
+Response must contain only public coarse `region_id,status,observed_at,expires_at,jurisdiction_policy_ref,handoff_url,schema_version`; no exact courier count, name, GPS, home address, order data, customer ID, payment or precise mobile tracing. Enforce bounded TTL, caching and no cross-origin private data leakage. Retain approved region hierarchy from 420Compliance: `country > province > municipality > zone`, with legal rules remaining 420Compliance-owned.
+
+## Durable event envelope v1
+Event envelope: `event_id, event_type, schema_version, aggregate_type, aggregate_id, tenant_id, sequence, occurred_at, actor_reference, correlation_id, causation_id, idempotency_key, policy_decision_reference, data_classification`. Transport is **at-least-once** with durable outbox + consumer deduplication; commit state and outbox atomically, never promise physically exactly-once delivery. Ordering is per aggregate with monotonic `sequence`; replay and out-of-order events cannot regress or duplicate financial/courier work. Signed callbacks bound to issuer/action/tenant/ref; retries exponential with DLQ and operator reconciliation.
+Events: `delivery.requested.v1`, `delivery.eligibility_checked.v1`, `delivery.retailer_ready.v1`, `delivery.offer_created.v1`, `delivery.assigned.v1`, `delivery.picked_up.v1`, `delivery.handoff_failed.v1`, `delivery.delivered.v1`, `delivery.return_required.v1`, `delivery.returned.v1`, `delivery.cancelled.v1`, `delivery.disputed.v1`, `delivery.reconciled.v1`, `region.presence_updated.v1`.
+Public projection consumes only `region.presence_updated.v1`, with sanitized schema; no encrypted address/ID payload republished to Search/Indexer/Travel/Maps. Terminal state or payment success cannot result solely from receiving an external event.
+
+## Mobile implementation decision
+Preferred shared React Native/Expo-compatible TypeScript app with **native iOS and Android builds**, separate consumer/courier role navigation and Wallet interoperability following canonical wallet auth, subject to later repository dependency review at R03.8. Not a webview-only mock advertised as native. Native secure OS key store, app-link allowlist, consent expiry, biometric/passkey options only through qualified 420Identity/Wallet, push token rotation, minimum data in notification content, no wallet seed custody. Courier location permission requested just-in-time, used only during active assignment, clear UI indicator, stop on logout/assignment revoke; background mode separately permissioned and justified. Lost-device revocation purges encrypted offline queue, signed offline commands are revalidated on reconnect, never autonomously release custody or payment. Platform signing, store restrictions on cannabis apps, age gating, OS location changes and real-device tests remain testnet/release acceptance.
+Cross-platform web should reuse contract types but preserve security boundary and accessibility, never store privileged tokens in localStorage. Proposed website: `doobr.420integrated.org`, currently NOT deployed; official approved Logo #1 must be committed unmodified before branding build.
+
+## Test ownership / exit
+R17-T01 public response strict field allowlist; T02 stale/invalid TTL -> UNKNOWN; T03 insufficient anonymized sample -> UNKNOWN; T04 unsupported jurisdiction -> UNKNOWN; T05 bad deep link -> reject; T06 cross-tenant fetch -> reject; T07 mutation without correct role/consent -> reject; T08 replayed idempotency -> no duplicate; T09 stale ETag/sequence -> conflict; T10 offline courier event -> revalidate; T11 forged Compliance ALLOW -> reject; T12 unauthorized financial field -> reject; T13 callback out of order -> no regression; T14 accessibility failure -> reject; T15 revoked mobile GPS -> stop collection; T16 public event leaked PII -> reject; T17 fail-closed Travel transaction gateway; T18 wallet disconnect and token revocation; T19 service outage -> unavailable transaction and UNKNOWN public presence; T20 pricing/DevComp mismatch -> deny.
+
+R01.7 Level 1: validate OpenAPI structure and representative semantics, event catalogue completeness, all R17 negative cases and this UX/mobile/availability contract, plus retained R01 safety verifiers and exact-SHA GitHub CI. **Do not represent source-schema and documentary assertions as actual runtime API/mobile or cryptographic penetration tests.** R01.8 Level 2 architectural integration, R05.10 Level 3 and R06 real deployment/consumer-courier acceptance deferred. R01.7 is complete only once targeted exact-SHA Level 1 passes.
+Next canonical step: **R01.8 Architecture decision lock and Level 2 milestone qualification.**

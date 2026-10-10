@@ -538,3 +538,31 @@ def test_bnb24_host_rate_plan_is_draft_only_versioned_and_bounded(actor):
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_bnb25_instant_policy_owner_version_and_publication_gate(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    property_response=client.post("/v1/bnb/properties",headers=headers,json={
+        "title":"Booking policy fixture","public_region":"Prairies",
+        "capacity":1,"nightly_minor":2500,"currency":"CAD"})
+    assert property_response.status_code==201,property_response.text
+    pid=property_response.json()["id"]
+    path=f"/v1/bnb/account/properties/{pid}/booking-policy"
+    try:
+        assert client.put(path,json={"expected_version":1,"instant_enabled":True}).status_code==401
+        first=client.put(path,headers=headers,json={"expected_version":1,"instant_enabled":True})
+        assert first.status_code==200,first.text
+        assert first.json()["version"]==2 and first.json()["instant_enabled"]
+        assert not first.json()["publication_approval"]
+        assert client.put(path,headers=headers,json={
+            "expected_version":1,"instant_enabled":False}).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_property SET status='published' WHERE id=%s",(pid,))
+        assert client.put(path,headers=headers,json={
+            "expected_version":2,"instant_enabled":False}).status_code==409
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_booking_policy WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

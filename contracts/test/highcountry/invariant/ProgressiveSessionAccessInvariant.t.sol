@@ -25,6 +25,7 @@ contract MockHCFactoryPA4 {
     function entryPoint() external pure returns (address) {
         return address(0x420);
     }
+
     function capabilityRegistry() external pure returns (address) {
         return address(1);
     }

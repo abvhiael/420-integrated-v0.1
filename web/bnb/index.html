@@ -72,6 +72,37 @@ async function loadDrafts(){
  const h=document.createElement("h4");h.textContent=item.title;
  const meta=document.createElement("p");meta.textContent=item.public_region+" · "+item.status+" · version "+item.version;
  const units=document.createElement("div");units.setAttribute("aria-live","polite");
+ const editor=document.createElement("div");
+ if(item.status==="draft"){
+ const unitForm=document.createElement("form");
+ const label=document.createElement("label");label.textContent="Unit label";
+ const nameInput=document.createElement("input");nameInput.required=true;nameInput.maxLength=100;label.append(nameInput);
+ const quantityLabel=document.createElement("label");quantityLabel.textContent="Unit quantity";
+ const quantityInput=document.createElement("input");quantityInput.type="number";quantityInput.min="1";quantityInput.max="1000";quantityInput.required=true;quantityLabel.append(quantityInput);
+ const add=document.createElement("button");add.type="submit";add.textContent="Add draft unit";
+ unitForm.append(label,quantityLabel,add);
+ unitForm.addEventListener("submit",async event=>{
+ event.preventDefault();units.textContent="Saving unit…";
+ try{const r=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/units",{
+ method:"POST",headers:hostHeaders(),body:JSON.stringify({label:nameInput.value,
+ quantity:Number(quantityInput.value),expected_version:item.version}),credentials:"omit"});
+ if(!r.ok)throw Error("Unit update rejected ("+r.status+"). Refresh the draft version.");
+ units.textContent="Draft unit saved.";await loadDrafts();
+ }catch(e){units.textContent=e.message;}
+ });
+ const reviewButton=document.createElement("button");reviewButton.type="button";reviewButton.textContent="Request independent publication review";
+ reviewButton.addEventListener("click",async()=>{
+ units.textContent="Submitting review request…";
+ try{const r=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/review",{
+ method:"POST",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({expected_version:item.version})});
+ if(!r.ok)throw Error("Review request rejected ("+r.status+").");
+ units.textContent="Review pending. This does not publish the listing.";
+ }catch(e){units.textContent=e.message;}
+ });
+ editor.append(unitForm,reviewButton);
+ }
+
  const load=document.createElement("button");load.type="button";load.textContent="View units and review status";
  load.addEventListener("click",async()=>{
  units.textContent="Loading…";
@@ -83,7 +114,7 @@ async function loadDrafts(){
  units.textContent=unitData.length+" configured unit(s) · "+(reviewData.at(-1)?.state||"no publication review")+
  " · publication is controlled by an independent authority.";
  }catch{units.textContent="Host details unavailable.";}
- });article.append(h,meta,load,units);out.append(article);
+ });article.append(h,meta,editor,load,units);out.append(article);
  }
  }catch(e){out.textContent=e.message;}
 }

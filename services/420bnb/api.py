@@ -1066,11 +1066,17 @@ def decide_booking_request(request_id:UUID,decision:str,
 def list_my_booking_requests(role:str="guest",authorization:str|None=Header(None)):
     actor=active_subject(authorization)
     if role not in ("guest","host"):raise HTTPException(422,"INVALID_ROLE")
-    column="guest_subject" if role=="guest" else "host_subject"
     with db() as c:
-        records=c.execute("""SELECT id,state,request_type,deadline,property_id,hold_id
-            FROM bnb_booking_request WHERE """+column+"""=%s
-            ORDER BY created_at DESC LIMIT 100""",(actor,)).fetchall()
+        if role=="guest":
+            records=c.execute("""SELECT id,state,request_type,deadline,property_id,hold_id
+                FROM bnb_booking_request WHERE guest_subject=%s
+                ORDER BY created_at DESC LIMIT 100""",(actor,)).fetchall()
+        else:
+            records=c.execute("""SELECT r.id,r.state,r.request_type,r.deadline,
+                r.property_id,r.hold_id FROM bnb_booking_request r
+                JOIN bnb_property p ON p.id=r.property_id
+                WHERE r.host_subject=%s AND p.host_subject=%s AND p.status='published'
+                ORDER BY r.created_at DESC LIMIT 100""",(actor,actor)).fetchall()
     return [{"id":str(x[0]),"state":("expired" if x[1]=="requested" and
             x[3]<=datetime.now(timezone.utc) else x[1]),
             "type":x[2],"deadline":x[3].isoformat(),
@@ -1082,9 +1088,13 @@ def list_my_booking_requests(role:str="guest",authorization:str|None=Header(None
 def read_booking_request(request_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)
     with db() as c:
-        row=c.execute("""SELECT guest_subject,host_subject,state,request_type,
-            deadline,hold_id FROM bnb_booking_request WHERE id=%s""",(request_id,)).fetchone()
-    if not row or actor not in (row[0],row[1]):raise HTTPException(404,"NOT_FOUND")
+        row=c.execute("""SELECT r.guest_subject,r.host_subject,r.state,r.request_type,
+            r.deadline,r.hold_id,p.host_subject,p.status FROM bnb_booking_request r
+            JOIN bnb_property p ON p.id=r.property_id WHERE r.id=%s""",
+            (request_id,)).fetchone()
+    if not row or (actor!=row[0] and not (actor==row[1] and
+            actor==row[6] and row[7]=="published")):
+        raise HTTPException(404,"NOT_FOUND")
     effective="expired" if row[2]=="requested" and row[4]<=datetime.now(timezone.utc) else row[2]
     return {"id":str(request_id),"state":effective,"type":row[3],
             "hold_id":str(row[5]),"confirmed":False,"payment_status":"unavailable"}

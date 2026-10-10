@@ -18,6 +18,7 @@ O2="00000000-0000-4000-8000-000000002012"
 F1="00000000-0000-4000-8000-000000002021"
 F2="00000000-0000-4000-8000-000000002022"
 F3="00000000-0000-4000-8000-000000002023"
+F4="00000000-0000-4000-8000-000000002024"
 DSN="host=localhost dbname=doobr_r02_7 user=postgres password=ci-only-password"
 USER_DSN="host=localhost dbname=doobr_r02_7 user=doobr_r027_user password=ci-only-password"
 class Issuer:
@@ -94,6 +95,22 @@ class Tests(unittest.TestCase):
    self.assertEqual(c.fetchone()[0],"RELEASED")
    c.execute("SELECT state FROM doobr_private.delivery_orders WHERE tenant_id=%s AND order_id=%s",(T,O2))
    self.assertEqual(c.fetchone()[0],"ASSIGNED")
+ def test_parallel_courier_capacity_acceptance(self):
+  self.assertEqual(release_assignment(connect=lambda:psycopg.connect(USER_DSN),
+   issuer=Issuer(),store=AuthStore(),token="operator",tenant_id=T,order_id=O2,
+   eligibility=Approved(),reason="capacity race"),"RETAILER_READY")
+  self.make_offer(O1,F3,revision=4)
+  self.make_offer(O2,F4,revision=4)
+  def attempt(pair):
+   try:return self.accept(*pair)
+   except Denied:return "DENIED"
+  with ThreadPoolExecutor(max_workers=2) as pool:
+   results=list(pool.map(attempt,[(O1,F3),(O2,F4)]))
+  self.assertEqual(results.count("ASSIGNED"),1)
+  self.assertEqual(results.count("DENIED"),1)
+  with self.admin.cursor() as c:
+   c.execute("SELECT count(*) FROM doobr_private.dispatch_assignments WHERE tenant_id=%s AND courier_id=%s AND state='ACTIVE'",(T,C))
+   self.assertEqual(c.fetchone()[0],1)
  def test_authority_cross_tenant_denial(self):
   with self.assertRaises(Denied):
    offer(**{**self.common(O1,F3),"tenant_id":FOREIGN},token="operator",courier_id=C,

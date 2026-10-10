@@ -752,7 +752,16 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
                 (subject,idempotency_key)).fetchone()
             if old:
                 if old[0]!=digest:raise HTTPException(409,"IDEMPOTENCY_CONFLICT")
-                return old[1]
+                cached=old[1]
+                prior=c.execute("""SELECT status,expires_at FROM bnb_hold
+                    WHERE id=%s AND guest_subject=%s""",
+                    (cached["id"],subject)).fetchone()
+                if not prior:raise HTTPException(409,"IDEMPOTENCY_RESOURCE_MISSING")
+                if prior[0]=="held" and prior[1]<=datetime.now(timezone.utc):
+                    return {**cached,"status":"expired","confirmed":False}
+                if prior[0]=="cancelled":
+                    return {**cached,"status":"cancelled","confirmed":False}
+                return cached
             unit_capacity=property_row[0]
             if payload.unit_id:
                 unit=c.execute("""SELECT quantity FROM bnb_unit

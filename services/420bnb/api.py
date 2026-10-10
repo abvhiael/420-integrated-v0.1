@@ -1058,6 +1058,47 @@ def read_booking_request(request_id:UUID,authorization:str|None=Header(None)):
             "hold_id":str(row[5]),"confirmed":False,"payment_status":"unavailable"}
 
 
+@app.post("/v1/bnb/reservations/{reservation_id}/cancel")
+def cancel_pending_reservation(reservation_id:UUID,authorization:str|None=Header(None)):
+    """Pre-payment cancellation only; canonical funded refunds require 420Pay."""
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"NOT_FOUND")
+            prop=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s FOR UPDATE",
+                           (ref[0],)).fetchone()
+            row=c.execute("""SELECT hold_id,guest_subject,status,booking_request_id
+                FROM bnb_reservation WHERE id=%s FOR UPDATE""",(reservation_id,)).fetchone()
+            if actor not in (row[1],prop[0]):raise HTTPException(404,"NOT_FOUND")
+            if row[2]=="cancelled":return {"id":str(reservation_id),"state":"cancelled",
+                                            "refund_status":"not_applicable"}
+            if row[2]!="payment_pending":
+                raise HTTPException(409,"CANONICAL_PAY_CANCELLATION_REQUIRED")
+            c.execute("UPDATE bnb_reservation SET status='cancelled' WHERE id=%s",
+                      (reservation_id,))
+            c.execute("""UPDATE bnb_hold SET status='cancelled'
+                WHERE id=%s AND status='held'""",(row[0],))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.reservation.prepayment_cancelled',%s)""",
+                (uuid4(),actor,ref[0]))
+    return {"id":str(reservation_id),"state":"cancelled",
+            "refund_status":"not_applicable","confirmed":False}
+
+
+@app.post("/v1/bnb/reservations/{reservation_id}/modify")
+def modification_requires_new_quote(reservation_id:UUID,authorization:str|None=Header(None)):
+    """Never mutate an accepted frozen stay or price in place."""
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,p.host_subject FROM bnb_reservation r
+            JOIN bnb_property p ON p.id=r.property_id WHERE r.id=%s""",
+            (reservation_id,)).fetchone()
+    if not row or actor not in row:raise HTTPException(404,"NOT_FOUND")
+    raise HTTPException(409,"NEW_QUOTE_AND_REQUEST_REQUIRED")
+
+
 @app.get("/v1/bnb/reservations/{reservation_id}")
 def read_booking_reservation(reservation_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)

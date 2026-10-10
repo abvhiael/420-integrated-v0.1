@@ -24,6 +24,21 @@ def db():
     return psycopg.connect(DATABASE_URL)
 
 
+def active_subject(authorization):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "UNAUTHORIZED")
+    proof=verify_external_token(authorization[7:])
+    with db() as c:
+        row=c.execute("""SELECT a.state,a.recovery_epoch,s.recovery_epoch FROM bnb_account a
+            JOIN bnb_identity_session s ON a.subject=s.subject
+            WHERE s.subject=%s AND s.issuer=%s AND s.issuer_session_id=%s
+            AND s.revoked_at IS NULL AND s.expires_at>now()""",
+            (proof["subject"],proof["issuer"],proof["issuer_session_id"])).fetchone()
+    if not row or row[0]!="active" or row[1]!=row[2]:
+        raise HTTPException(401,"SESSION_NOT_ACTIVE")
+    return proof["subject"]
+
+
 def principal(subject: str | None, role: str | None, signed_at: str | None, signature: str | None):
     # This is a service-to-service adapter, not a raw user session verifier.
     # Deploy only behind an ingress that verifies the real Identity issuer and
@@ -94,10 +109,10 @@ def listings():
 def create_property(payload: PropertyInput, x_authenticated_subject: str | None = Header(None),
                     x_authenticated_role: str | None = Header(None),
                     x_authenticated_at: str | None = Header(None),
-                    x_authenticated_signature: str | None = Header(None)):
-    subject,role=principal(x_authenticated_subject,x_authenticated_role,x_authenticated_at,x_authenticated_signature)
-    if role!="host":
-        raise HTTPException(403, "FORBIDDEN")
+                    x_authenticated_signature: str | None = Header(None), authorization: str | None = Header(None)):
+    subject=active_subject(authorization)
+    role="guest"
+    raise HTTPException(503,"PROPERTY_CLAIM_AUTHORITY_UNAVAILABLE")
     uid=uuid4()
     with db() as c:
         c.execute("""INSERT INTO bnb_property
@@ -113,8 +128,9 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
          x_authenticated_subject: str | None = Header(None),
          x_authenticated_role: str | None = Header(None),
                     x_authenticated_at: str | None = Header(None),
-                    x_authenticated_signature: str | None = Header(None)):
-    subject,role=principal(x_authenticated_subject,x_authenticated_role,x_authenticated_at,x_authenticated_signature)
+                    x_authenticated_signature: str | None = Header(None), authorization: str | None = Header(None)):
+    subject=active_subject(authorization)
+    role="guest"
     if role!="guest": raise HTTPException(403,"FORBIDDEN")
     validate_window(payload.start,payload.end)
     digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
@@ -165,8 +181,8 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
 def get_hold(hold_id: str,x_authenticated_subject: str | None=Header(None),
              x_authenticated_role: str | None=Header(None),
              x_authenticated_at: str | None=Header(None),
-             x_authenticated_signature: str | None=Header(None)):
-    subject,_=principal(x_authenticated_subject,x_authenticated_role,x_authenticated_at,x_authenticated_signature)
+             x_authenticated_signature: str | None=Header(None), authorization: str | None=Header(None)):
+    subject=active_subject(authorization)
     with db() as c:
         h=c.execute("SELECT guest_subject,status,expires_at FROM bnb_hold WHERE id=%s",
                     (hold_id,)).fetchone()

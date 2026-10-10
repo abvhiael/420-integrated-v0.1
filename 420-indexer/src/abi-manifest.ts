@@ -28,6 +28,8 @@ export const GENESIS_PROTOCOL_BY_CONTRACT_420: Record<string, string> = {
   ValidatorRegistry: '420Stake',
   RewardController: '420Stake',
   ListingRegistry420: '420Market',
+  OrderRegistry420: '420Market',
+  InventoryReservation420: '420Market',
   RightsPolicyRegistry420: '420Rights',
   RightsAssetRegistry420: '420Rights',
   RightsClaimRegistry420: '420Rights',

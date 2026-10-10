@@ -1,0 +1,53 @@
+name: Commerce merchant builder fast qualification
+on:
+  push:
+    branches: ['audit/420commerce-*']
+    paths: ['commerce/**', 'packages/420-sdk/**', '.github/workflows/commerce-builder.yml', 'scripts/commerce/check-patch.mjs']
+  pull_request:
+    paths: ['commerce/**', 'packages/420-sdk/**', '.github/workflows/commerce-builder.yml', 'scripts/commerce/check-patch.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: commerce-builder-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420commerce-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            commerce/package-lock.json
+            commerce/web/package-lock.json
+            packages/420-sdk/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm ci --prefix commerce --ignore-scripts
+          npm ci --prefix commerce/web --ignore-scripts
+          npm ci --prefix packages/420-sdk --ignore-scripts
+      - name: Builder dependency security
+        run: npm audit --prefix commerce/web --audit-level=moderate
+      - name: Compile affected SDK
+        run: npm run build --prefix packages/420-sdk
+      - name: Install browser
+        working-directory: commerce/web
+        run: npx playwright install --with-deps chromium
+      - name: Builder build, lint, Wallet adversarial and real service browser UX/accessibility integration
+        run: npm run qualify --prefix commerce/web
+      - name: Whitespace verification
+        env:
+          COMMERCE_PATCH_BASE: ${{ github.event.pull_request.base.sha || '' }}
+        run: node scripts/commerce/check-patch.mjs

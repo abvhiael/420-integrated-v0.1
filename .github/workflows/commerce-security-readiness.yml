@@ -1,0 +1,53 @@
+name: Commerce security review readiness
+on:
+  pull_request:
+    paths: ['commerce/**', 'docs/commerce/**', '.github/workflows/commerce-security-readiness.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  repository-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install locked dependencies
+        run: npm ci --prefix commerce --ignore-scripts
+      - name: Bounded persistent recovery and load drills
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/commerce-security
+          node --test commerce/test/com7-persistence-load.test.mjs 2>&1 | tee artifacts/commerce-security/recovery-load.log
+      - name: Pinned secret scanner and redacted source scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o "$RUNNER_TEMP/gitleaks.tar.gz" https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
+          echo "9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c  $RUNNER_TEMP/gitleaks.tar.gz" | sha256sum -c -
+          tar --no-same-owner -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" dir commerce --redact --report-format json --report-path artifacts/commerce-security/secrets.json
+      - name: Dependency, static and source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm audit --prefix commerce --audit-level=moderate --json > artifacts/commerce-security/dependencies.json
+          npm run check --prefix commerce
+          npm run lint --prefix commerce
+          git rev-parse HEAD > artifacts/commerce-security/qualified-candidate.txt
+          git ls-tree -r HEAD commerce contracts/src/market contracts/src/pay docs/commerce > artifacts/commerce-security/source-provenance.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: commerce-security-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/commerce-security
+          if-no-files-found: error

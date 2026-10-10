@@ -1,0 +1,22 @@
+{
+  "name": "@420/commerce-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "check": "node --check src/database.mjs && node --check src/security.mjs && node --check src/authority.mjs && node --check src/projection.mjs && node --check src/service.mjs && node --check src/http.mjs && node --check src/worker.mjs && node --check src/server.mjs",
+    "test": "npm run check && npm run lint && node --test test/*.test.mjs",
+    "lint": "eslint src",
+    "start": "node src/server.mjs"
+  },
+  "dependencies": {
+    "ethers": "6.17.0",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "eslint": "10.12.0"
+  }
+}

@@ -103,3 +103,4 @@ export * from './compute.js';
 export * from './stake.js';
 
 export * from './compute-client.js';
+export * from './commerce.js';

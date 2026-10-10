@@ -2,7 +2,22 @@
 
 **Canonical step:** COM-1.8 — Level 3 architecture closeout.  
 **PR:** #588. **Branch:** `commerce/com-1-architecture-reconciliation`.  
-**Status:** BLOCKED — comprehensive exact-SHA qualification not yet executed/verified. **Do not merge.**
+**Status:** LEVEL 3 QUALIFIED AND MERGED — PR #588. The original pre-dispatch ledger below is retained as historical evidence and superseded by this verified closeout.
+
+## Verified closeout (2026-10-09 UTC)
+
+Implementation `d32c1eeacc2ba4f13d3a6fcd1afb84a5abb0aa3c`; reconciliation base `3de7a0d87600fa30ec6090c1351a11d36ba59de9`; merge `0ec695481fc84e6066aeae50baf6e0fd3c7f8731`.
+
+| Gate | Exact-candidate evidence | Result |
+| --- | --- | --- |
+| Solidity | Run 37884486346; four shards, unique/complete inventory, Decision #10 fixture | All mandatory jobs SUCCESS |
+| Genesis authority | Run 37884524888; cross-manifest-authority | SUCCESS |
+| Integrated | Run 37884563459; offline-core, production-dependencies, geth-engine, fault-matrix | All four jobs SUCCESS |
+| Docs | Run 37884412517; qualify | SUCCESS |
+
+The manual Foundry recovery was included in this implementation candidate; old candidate results and cancelled PR-profile runs were not substituted. PR metadata records these results. Live Commerce execution, reporter deployment and testnet/mainnet readiness were never claimed. Next canonical phase: COM-2 — Contracts / upstream adaptations.
+
+## Historical pre-dispatch ledger (superseded)
 
 ## Candidate and main reconciliation
 

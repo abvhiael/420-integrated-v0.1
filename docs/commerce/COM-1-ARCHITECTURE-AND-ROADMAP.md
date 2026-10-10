@@ -1,6 +1,6 @@
 # 420Commerce — COM-1 architecture reconciliation and implementation roadmap
 
-**Status:** IN PROGRESS — COM-1.1–COM-1.7 architecture deliverables documented; COM-1.8 Level 3 reconciliation documented in `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md`, comprehensive exact-SHA qualification remains BLOCKED.
+**Status:** COM-1 architecture closeout qualified and merged through PR #588. COM-2 through COM-6 are qualified at their applicable repository boundaries; accumulated COM-7 repository security acceptance and comprehensive Level 3 passed on `2648c0b6df52a375c2d6bdbd2839cdbc607ff113`. Live deployment/integration acceptance remains COM-8; external production signoff remains COM-9. See `COM-7-LEVEL3-QUALIFICATION-STATUS.json`. PR #594 remains draft/unmerged.
 **Target surface:** `commerce.420integrated.org`
 **Repository:** `abvhiael/420-integrated-v0.1`
 
@@ -41,12 +41,12 @@
 **COM-1 Repository and architecture**
 - COM-1.1 inventory existing Market, Pay, Swap, Wallet, Registry and commerce-related paths and live readiness; record actual interfaces, not just documentation.
 - COM-1.2 freeze dependency and authority matrix; resolve Commerce brand/client versus canonical service ID. **IMPLEMENTED** in `docs/commerce/COM-1.2-DEPENDENCY-AND-AUTHORITY-MAP.md`; branded noncanonical application, no new Genesis service ID.
-- COM-1.3 inspect Market/Pay contract ABIs, map missing capability proposals and immutable V1 transitions. **SOURCE ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.3-SMART-CONTRACT-ARCHITECTURE.md`; exact-SHA Level 1 verification pending.
-- COM-1.4 define off-chain schemas, event ingestion, tenant isolation and chain reorg reconciliation. **ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.4-DATA-STORAGE-AND-EVENT-INDEXING.md`; exact-SHA CI evidence pending.
-- COM-1.5 specify exact Wallet/Pay/Market/Swap/Identity/Registry adapters and fail-closed behaviour. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.5-ECOSYSTEM-ADAPTER-DESIGN.md`; live reporter bridge not yet implemented.
-- COM-1.6 design merchant onboarding, storefront templates, product management, cart and checkout UX. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.6-MARKETPLACE-STOREFRONT-UX.md`; executable web and checkout remain future phases.
-- COM-1.7 write financial, inventory, upload, access-control, fraud and privacy threat model. **THREAT MODEL DOCUMENTED** in `docs/commerce/COM-1.7-SECURITY-THREAT-MODEL.md`; exact-SHA CI qualification to be checked.
-- COM-1.8 Level 3 architecture closeout only after all preceding criteria/evidence and exact-SHA canonical qualification. **RECONCILIATION DOCUMENTED, NOT QUALIFIED**; see `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md` for required workflows, evidence and blockers.
+- COM-1.3 inspect Market/Pay contract ABIs, map missing capability proposals and immutable V1 transitions. **SOURCE ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.3-SMART-CONTRACT-ARCHITECTURE.md`; qualified at the COM-1 architecture closeout; see COM-1.8 evidence.
+- COM-1.4 define off-chain schemas, event ingestion, tenant isolation and chain reorg reconciliation. **ARCHITECTURE DOCUMENTED** in `docs/commerce/COM-1.4-DATA-STORAGE-AND-EVENT-INDEXING.md`; qualified at the COM-1 architecture closeout; see COM-1.8 evidence.
+- COM-1.5 specify exact Wallet/Pay/Market/Swap/Identity/Registry adapters and fail-closed behaviour. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.5-ECOSYSTEM-ADAPTER-DESIGN.md`; reporter source implemented/qualified in COM-2; live deployment remains COM-8.
+- COM-1.6 design merchant onboarding, storefront templates, product management, cart and checkout UX. **DESIGN DOCUMENTED** in `docs/commerce/COM-1.6-MARKETPLACE-STOREFRONT-UX.md`; merchant builder qualified in COM-4; COM-5 repository marketplace/checkout qualification is retained; live chain remains COM-8.
+- COM-1.7 write financial, inventory, upload, access-control, fraud and privacy threat model. **THREAT MODEL DOCUMENTED** in `docs/commerce/COM-1.7-SECURITY-THREAT-MODEL.md`; architecture threat register retained; current COM-T01–T16 regressions qualified in COM-7.
+- COM-1.8 Level 3 architecture closeout only after all preceding criteria/evidence and exact-SHA canonical qualification. **LEVEL 3 QUALIFIED AND MERGED**; see `docs/commerce/COM-1.8-LEVEL3-CLOSEOUT.md` for required workflows, evidence and blockers.
 
 **COM-2 Contracts / upstream adaptations:** inspect first; implement only demonstrated gaps within the canonical owning protocol; targeted Foundry Level 1 and milestone Level 2; security Level 3. No parallel Commerce order/payment contract.
 
@@ -66,7 +66,7 @@
 
 ## Cloudflare deployment planning
 
-Target branded client `commerce.420integrated.org` with verified configuration, separate testnet/mainnet settings, server-owned secrets and privacy-safe persistence. **Root directory, build command, output directory and Cloudflare project are TBD after choosing the real repository web stack.** Do not guess these values, configure an unverified service manifest, or claim a deployment.
+Target branded client `commerce.420integrated.org` with verified configuration, separate testnet/mainnet settings, server-owned secrets and privacy-safe persistence. **Implemented merchant web root: `commerce/web`; build: `npm run build` after SDK build; output: `commerce/web/dist`. Cloudflare project, DNS/TLS and live binding remain unverified.** Do not guess these values, configure an unverified service manifest, or claim a deployment.
 
 ## Qualification and status
 
@@ -74,12 +74,17 @@ Follow repository's existing three levels: Level 1 targeted step tests, Level 2 
 
 | Item | Status |
 | --- | --- |
-| COM-1 initial normative source reconciliation | IN PROGRESS |
+| COM-1 initial normative source reconciliation | COMPLETE — PR #588 |
 | COM-1.1 targeted source/interface inventory | DOCUMENTED — see `COM-1.1-SOURCE-INVENTORY.md` |
 | COM-1.2 ownership / service identity | DOCUMENTED — Commerce V1 branded application; separate canonical ID deferred for governed decision |
-| COM-1 acceptance evidence and exact-SHA qualification | BLOCKED — COM-1.8 canonical Level 3 workflows have not passed against the final candidate |
-| COM-2 through COM-7 | NOT STARTED |
+| COM-1 acceptance evidence and exact-SHA qualification | COMPLETE — candidate `d32c1eeacc2ba4f13d3a6fcd1afb84a5abb0aa3c`, merge `0ec695481fc84e6066aeae50baf6e0fd3c7f8731` |
+| COM-2 | COMPLETE — targeted Level 1 and retained Level 2; exact SHA `0b1a3f5d12fdf6d5c76e6ba860058887886daf9f`, run 37890773444 SUCCESS; PR #594 unmerged |
+| COM-3 | COMPLETE — Level 1 and retained Level 2; exact SHA `49c5875d35cd205a8c58634d7ecf1a4ba2ae99b1`, service run 37895449006 SUCCESS; see `COM-3-QUALIFICATION-EVIDENCE.md` |
+| COM-4 | COMPLETE — Level 1 and merchant-builder Level 2; exact SHA `594bd4e1e1554a1b8e34445eefd506765ffd9594`; builder run 37959428862, service 37959429065, upstream 37959429112 SUCCESS; see `COM-4-QUALIFICATION-EVIDENCE.md` |
+| COM-5 | Repository public marketplace/native checkout/browser qualification retained; live payment and supported Swap acceptance remain COM-8 |
+| COM-6 | Applicable retained Level 2: `95fc1102d5b7700609cadaa95ed443acbe6cf65c`, run 38006767611; final component regressions passed; canonical refund, local notification and page-local analytics limits remain documented |
+| COM-7 | COMPLETE — repository security acceptance and comprehensive Level 3 on `2648c0b6df52a375c2d6bdbd2839cdbc607ff113`; no external signoff or testnet claim |
 | COM-8 testnet | BLOCKED — LIVE TESTNET |
 | COM-9 mainnet | BLOCKED — TESTNET AND AUTHORIZATION |
 
-**Next action:** dispatch and verify canonical COM-1.8 Solidity Contracts, Genesis Address Authority, 420 Integrated Qualification and 420Docs workflows on one exact final candidate SHA; preserve evidence before marking COMPLETE or merging.
+**Next action:** **COM-8 — TESTNET HANDOFF**. COM-7 exact-candidate evidence is in `COM-7-LEVEL3-QUALIFICATION-STATUS.json`; all actual workflow/job/step results and remaining live gates are retained. Real approved chain/Registry/Wallet/manifests, funded settlement/refund transactions, live integrations and operational acceptance are required. PAY-AUDIT-6 frozen release identities, canonical Market refund accounting versus payout proof, supported SQLite topology, local notification feed and page-local analytics limits are not waived. COM-9 requires independent external security signoff and explicit production authorization. PR #594 remains draft/unmerged.

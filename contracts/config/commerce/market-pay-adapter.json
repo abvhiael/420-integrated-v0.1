@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "protocol": "MarketPaySettlementAdapter420",
+  "protocolVersion": 1,
+  "deploymentStatus": "PROPOSED_UNDEPLOYED",
+  "canonicalServiceId": null,
+  "genesisMembershipChange": false,
+  "constructorDependencies": ["OrderRegistry420", "PaymentRegistry420", "InvoiceRegistry420", "MerchantRegistry420"],
+  "authorization": "Existing MarketPolicyRegistry420 governance must approve the deployed reporter for each intended adapter ID",
+  "invoiceCurrency": "420",
+  "invoiceMode": "SINGLE_USE",
+  "paymentAcceptance": "SETTLED",
+  "partialRefundMarketTransition": false,
+  "liveQualification": "COM-8"
+}

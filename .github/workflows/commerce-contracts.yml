@@ -1,0 +1,39 @@
+name: Commerce upstream contracts
+on:
+  push:
+    branches: ['audit/420commerce-com-2-*']
+    paths: ['contracts/src/market/**', 'contracts/src/pay/**', 'contracts/test/Market*.t.sol', 'contracts/test/RefundManager420*.t.sol', 'scripts/commerce/qualify-contracts.py', '.github/workflows/commerce-contracts.yml']
+  pull_request:
+    paths: ['contracts/src/market/**', 'contracts/src/pay/**', 'contracts/test/Market*.t.sol', 'scripts/commerce/qualify-contracts.py', '.github/workflows/commerce-contracts.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: commerce-contracts-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420commerce-com-2-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Targeted upstream integration, negative cases and production sizes
+        run: python scripts/commerce/qualify-contracts.py
+      - name: Changed adapter formatting
+        working-directory: contracts
+        run: forge fmt --check src/market/MarketPaySettlementAdapter420.sol test/MarketPaySettlementAdapter420.t.sol

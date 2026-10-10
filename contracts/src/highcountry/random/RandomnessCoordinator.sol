@@ -128,7 +128,9 @@ contract RandomnessCoordinator {
     }
 
     /// @notice Only the original requester can abandon an unconsumed request.
-    function cancel(bytes32 requestId) external {
+    function cancel(
+        bytes32 requestId
+    ) external {
         RandomRequest storage r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
         if (msg.sender != r.requester || r.consumed || cancelled[requestId]) revert HCInvalidState();

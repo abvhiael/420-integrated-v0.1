@@ -29,3 +29,14 @@ assert_true("R01.2 Standalone product authorization decision" in roadmap,"next c
 assert_true(all(k in report for k in ["SATISFIED", "PARTIAL", "MISSING", "BLOCKED", "Level 1", "main", "R01.2"]),"inventory gap and qualification metadata recorded")
 assert_true("DOOBR-AUDIT-9" in report and "DOOBR-AUDIT-10" in report,"deferred original testnet steps distinguished")
 print("DOOBR R01.1 source assertions complete")
+
+# R01.2 documentary development authority: no product decision can create Genesis
+# protocol, monetary, regulatory, or transaction execution authorization.
+decision=read("docs/doobr/DOOBR-R01-2-PRODUCT-AUTHORIZATION.md")
+assert_true("R01.2 Standalone product authorization decision" in roadmap,"canonical R01.2 intact")
+for required in ["NOT AUTHORIZED", "NOT INTEGRATED", "DevelopmentCompensationVault420",
+                 "420Compliance", "420Travel/Maps", "420Pay", "Vancouver",
+                 "DOOBR-AUDIT-9/10", "R01.3 Consumer/courier/retailer/operator"]:
+    assert_true(required in decision,"R01.2 authority evidence: "+required)
+assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.2 did not promote Genesis app")
+assert_true(flags.get("travel.doobr_transactions") is False,"R01.2 preserves disabled Travel transaction authority")

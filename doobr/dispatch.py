@@ -38,8 +38,7 @@ def offer(*, connect, issuer, store, token, tenant_id, order_id, courier_id, off
                     if c.fetchone()!=("ACTIVE",): raise Denied("courier inactive")
                     c.execute("""SELECT capacity FROM doobr_private.courier_region_presence
                                   WHERE tenant_id=%s AND courier_id=%s AND region_id=%s
-                                    AND updated_at<=%s AND expires_at>%s AND eligibility_verified_at<=%s
-                                  FOR UPDATE""",(tenant_id,courier_id,region,at,at,at))
+                                    AND updated_at<=%s AND expires_at>%s AND eligibility_verified_at<=%s""",(tenant_id,courier_id,region,at,at,at))
                     present=c.fetchone()
                     if not present: raise Denied("stale presence")
                     c.execute("""SELECT COALESCE(sum(reserved_units),0) FROM doobr_private.dispatch_assignments
@@ -91,7 +90,7 @@ def decide(*, connect, issuer, store, token, tenant_id, order_id, offer_id,
                     if valid:
                         c.execute("""SELECT capacity FROM doobr_private.courier_region_presence
                            WHERE tenant_id=%s AND courier_id=%s AND region_id=%s
-                           AND expires_at>%s FOR UPDATE""",(tenant_id,courier_id,str(item[1]),at))
+                           AND expires_at>%s""",(tenant_id,courier_id,str(item[1]),at))
                         row=c.fetchone()
                         if not row:raise Denied("courier presence expired")
                         c.execute("""SELECT COALESCE(sum(reserved_units),0) FROM doobr_private.dispatch_assignments

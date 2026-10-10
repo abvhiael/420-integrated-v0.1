@@ -1251,6 +1251,28 @@ def guest_payment_projection(reservation_id:UUID,authorization:str|None=Header(N
             "wallet_execution_available":False}
 
 
+@app.get("/v1/bnb/reservations/{reservation_id}/receipt")
+def guest_canonical_receipt(reservation_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        record=c.execute("""SELECT r.guest_subject,r.status,e.issuer,e.pay_payment_id,
+            e.pay_invoice_id,e.receipt_hash,e.chain_id,e.finality,e.received_at,i.asset,
+            i.asset_amount,i.merchant_id
+            FROM bnb_reservation r
+            LEFT JOIN bnb_pay_finality_event e ON e.reservation_id=r.id
+            LEFT JOIN bnb_pay_intent i ON i.reservation_id=r.id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+    if not record or record[0]!=actor:raise HTTPException(404,"NOT_FOUND")
+    if record[2] is None:raise HTTPException(404,"FINALIZED_PAY_RECEIPT_NOT_AVAILABLE")
+    return {"reservation_id":str(reservation_id),"reservation_status":record[1],
+            "issuer":record[2],"payment_id":record[3],"invoice_id":record[4],
+            "receipt_hash":record[5],"chain_id":record[6],"finality":record[7],
+            "recorded_at":record[8].isoformat(),"asset":record[9],
+            "asset_amount":record[10],"merchant_id":record[11],
+            "source":"420Pay_authorized_assertion",
+            "onchain_receipt_verified_by_bnb":False}
+
+
 @app.post("/v1/bnb/internal/pay/finality",status_code=202)
 def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=Header(None)):
     """Finality only from independently authorized canonical Pay signer, no callback shortcuts."""

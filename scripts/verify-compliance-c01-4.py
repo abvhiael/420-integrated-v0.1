@@ -15,7 +15,7 @@ def require(condition: bool, detail: str) -> None:
         raise AssertionError(detail)
 
 for step in ("C01.1", "C01.2", "C01.3", "C01.4", "C01.5", "C01.6", "C01.7", "C01.8"):
-    require(re.search(r"^\\| " + re.escape(step) + r" \\|", roadmap, re.M) is not None, "missing canonical " + step)
+    require(re.search(r"^\| " + re.escape(step) + r" \|", roadmap, re.M) is not None, "missing canonical " + step)
 require("C01.4-SHARED-AUTHORITY-AMENDMENT.md" in roadmap, "roadmap does not point to amendment")
 for item in ("420Compliance", "DOOBr", "420Travel", "420Location", "R01.4", "R01.5", "R01.7", "R04.7", "C05.4", "C05.7", "TRAVEL-TN-01", "TRAVEL-TN-08", "GEN-SVC-3.9", "Level 2", "Level 3"):
     require(item in amendment, "missing mapping: " + item)

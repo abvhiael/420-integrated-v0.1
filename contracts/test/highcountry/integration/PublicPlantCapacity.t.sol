@@ -509,7 +509,7 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         _reject(
             address(plants),
             abi.encodeCall(plants.advanceStage, (uint64(1), PlantRegistry.PlantStage.TERMINATED)),
-            HCInvalidState.selector
+            bytes4(keccak256("HCEmergencyRestrictionActive(bytes32)"))
         );
         (bool ok,) = address(emergency)
             .call(abi.encodeCall(emergency.setRestricted, (keccak256("HC.EMERGENCY.CULTIVATION"), false)));

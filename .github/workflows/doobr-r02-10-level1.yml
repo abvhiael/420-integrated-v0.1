@@ -1,0 +1,62 @@
+name: DOOBR R02.10 Returns Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/returns.py','doobr/storage/migrations/0009_return_cases.up.sql','doobr/storage/tests/test_returns.py','doobr/storage/tests/test_pg_returns.py','docs/doobr/DOOBR-R02-10-*','.github/workflows/doobr-r02-10-level1.yml']
+  pull_request:
+    paths: ['doobr/returns.py','doobr/storage/migrations/0009_return_cases.up.sql','doobr/storage/tests/test_returns.py','doobr/storage/tests/test_pg_returns.py','docs/doobr/DOOBR-R02-10-*','.github/workflows/doobr-r02-10-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  returns:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_10
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_10"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and negative return tests
+        run: |
+          python3 -m py_compile doobr/returns.py doobr/storage/tests/test_returns.py doobr/storage/tests/test_pg_returns.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_returns.py -v
+      - name: Install PostgreSQL driver
+        run: python3 -m pip install 'psycopg[binary]==3.2.4'
+      - name: Apply canonical migrations
+        run: |
+          for num in 0001_initial 0002_identity 0003_retailer 0004_courier 0005_presence 0006_order_commands 0007_dispatch 0008_tracking 0009_return_cases; do
+            psql -v ON_ERROR_STOP=1 -f "doobr/storage/migrations/${num}.up.sql"
+          done
+      - name: Verify forced tenant RLS
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN IF (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON c.relnamespace=n.oid WHERE n.nspname='doobr_private' AND c.relname IN ('return_cases','return_events') AND c.relrowsecurity AND c.relforcerowsecurity)<>2 THEN RAISE EXCEPTION 'return RLS missing'; END IF; END \$\$;"
+      - name: Real PostgreSQL return lifecycle and adversarial rollback
+        run: python3 -m unittest discover -s doobr/storage/tests -p test_pg_returns.py -v
+      - name: Exact implementation SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

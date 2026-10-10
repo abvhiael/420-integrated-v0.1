@@ -7,7 +7,6 @@ import (
  "crypto/subtle"
  "encoding/hex"
  "encoding/json"
- "errors"
  "time"
 )
 // Signer is deliberately independent of the HTTP request path. Production implementations
@@ -51,7 +50,7 @@ type ReviewedPolicy struct{
  Manifest SignedManifest
  ReviewID string
  Rules []Requirement
- Approved bool // Only a separately verified attestation can set this in a deployed adapter.
+ ApprovalToken string // opaque external approval reference, not supplied by transaction caller.
 }
 type Decision struct {
  Outcome string `json:"outcome"`
@@ -63,9 +62,18 @@ type Decision struct {
 func deny(outcome,reason string)Decision{return Decision{Outcome:outcome,ReasonCodes:[]string{reason}}}
 // Evaluate produces policy evidence, never a bearer entitlement, payment authorization,
 // or DOOBr workflow capability. Deployment must enforce trusted evidence adapters.
-func (t Trust) Evaluate(p ReviewedPolicy,r EvaluationRequest,now time.Time)Decision {
+type ApprovalAuthority interface { VerifyApproval(policyDigest,reviewDigest,approvalToken string,now time.Time) error }
+type CredentialAuthority interface { VerifyEvidence(request EvaluationRequest,now time.Time) (Evidence,error) }
+// EvaluationService accepts evidence only from external independent verified adapters.
+type EvaluationService struct { Trust Trust; Approvals ApprovalAuthority; Credentials CredentialAuthority }
+func (service EvaluationService) Evaluate(p ReviewedPolicy,r EvaluationRequest,now time.Time)Decision {
+ t:=service.Trust
+ if service.Approvals==nil||service.Credentials==nil{return deny("UNKNOWN","INDEPENDENT_AUTHORITIES_UNAVAILABLE")}
+ if p.ApprovalToken==""||service.Approvals.VerifyApproval(p.Manifest.Manifest.PolicyDigest,p.Manifest.Manifest.ReviewDigest,p.ApprovalToken,now)!=nil{return deny("UNKNOWN","LEGAL_REVIEW_UNVERIFIED")}
+ checked,err:=service.Credentials.VerifyEvidence(r,now);if err!=nil{return deny("UNKNOWN","EVIDENCE_UNVERIFIED")}
+ r.Evidence=checked
  if err:=t.Verify(p.Manifest,now);err!=nil{return deny("UNKNOWN","POLICY_UNAVAILABLE")}
- if !p.Approved || p.ReviewID=="" || len(p.Rules)==0{return deny("UNKNOWN","REVIEW_OR_POLICY_MISSING")}
+ if p.ReviewID=="" || len(p.Rules)==0{return deny("UNKNOWN","REVIEW_OR_POLICY_MISSING")}
  if r.TenantID==""||r.OperationRef==""||r.Action==""||r.Stage==""||r.FactsDigest==""||!digestValid(r.FactsDigest)||r.Audience!=t.Audience||r.Domain!=t.Domain||r.Jurisdiction!=t.Jurisdiction{return deny("REVIEW_REQUIRED","CONTEXT_INCOMPLETE")}
  e:=r.Evidence
  if !e.SourceVerified||!e.CredentialsVerified||!e.GeographyVerified||!e.CurrentRevocation||!e.PartnerVerified{return deny("UNKNOWN","MANDATORY_EVIDENCE_UNAVAILABLE")}
@@ -82,4 +90,3 @@ func (t Trust) Evaluate(p ReviewedPolicy,r EvaluationRequest,now time.Time)Decis
  if !now.Before(expires){return deny("UNKNOWN","EXPIRED")}
  return Decision{Outcome:"ALLOW",ReasonCodes:[]string{"REVIEWED_REQUIREMENTS_MET"},PolicyDigest:p.Manifest.PolicyDigest,RequestDigest:hex.EncodeToString(hash[:]),ExpiresAt:expires}
 }
-var _=errors.Is

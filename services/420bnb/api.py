@@ -221,6 +221,29 @@ def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
             "financial_finality":False}
 
 
+@app.post("/v1/bnb/quotes/{quote_id}/revoke")
+def revoke_quote(quote_id:str,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT property_id,guest_subject,status,expires_at FROM
+                bnb_price_quote WHERE id=%s""",(quote_id,)).fetchone()
+            if not row or row[1]!=subject:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(row[0],))
+            row=c.execute("""SELECT status,expires_at FROM bnb_price_quote
+                WHERE id=%s FOR UPDATE""",(quote_id,)).fetchone()
+            if row[0]=="revoked":return {"id":quote_id,"status":"revoked"}
+            if row[1]<=datetime.now(timezone.utc):
+                raise HTTPException(409,"QUOTE_EXPIRED")
+            if c.execute("SELECT 1 FROM bnb_hold WHERE quote_id=%s LIMIT 1",
+                         (quote_id,)).fetchone():
+                raise HTTPException(409,"QUOTE_ALREADY_USED")
+            c.execute("UPDATE bnb_price_quote SET status='revoked' WHERE id=%s",(quote_id,))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.quote.revoked',%s)""",(uuid4(),subject,None))
+    return {"id":quote_id,"status":"revoked"}
+
+
 @app.get("/v1/bnb/quotes/{quote_id}")
 def get_quote(quote_id:str,authorization:str|None=Header(None)):
     subject=active_subject(authorization)

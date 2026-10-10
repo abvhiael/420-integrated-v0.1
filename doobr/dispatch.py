@@ -163,3 +163,51 @@ def release_assignment(*, connect, issuer, store, token, tenant_id, order_id,
         return "RETAILER_READY"
     except Denied:raise
     except Exception as exc:raise Denied("assignment release unavailable") from exc
+
+def match_couriers(*, connect, issuer, store, token, tenant_id, order_id,
+                   eligibility, at=None, limit=10):
+    """Trusted dispatch shortlist only. Actual capacity reserved in offer/decide.
+
+    Sort by available capacity and freshness, then stable courier ID. Never
+    return private coordinates or publicly publish courier identifiers.
+    """
+    at=at or datetime.now(timezone.utc)
+    if at.tzinfo is None or type(limit) is not int or not 1<=limit<=50:
+        raise Denied("invalid scheduling window")
+    tenant_id,order_id=map(_uuid,(tenant_id,order_id))
+    actor=_principal(issuer,store,token,tenant_id,order_id,at)
+    try:
+        with connect() as db:
+            with db.transaction():
+                with db.cursor() as c:
+                    c.execute("SELECT set_config('doobr.tenant_id',%s,true)",(tenant_id,))
+                    c.execute("""SELECT region_id,state FROM doobr_private.delivery_orders
+                       WHERE tenant_id=%s AND order_id=%s""",(tenant_id,order_id))
+                    order=c.fetchone()
+                    if not order or order[1]!="RETAILER_READY":
+                        raise Denied("order not ready for scheduling")
+                    region=str(order[0])
+                    c.execute("""SELECT p.courier_id,p.capacity-COALESCE(r.units,0) AS free_units,
+                            p.updated_at FROM doobr_private.courier_region_presence p
+                            JOIN doobr_private.actors a ON a.tenant_id=p.tenant_id
+                              AND a.actor_id=p.courier_id AND a.kind='COURIER' AND a.state='ACTIVE'
+                            LEFT JOIN (SELECT tenant_id,courier_id,sum(reserved_units) AS units
+                              FROM doobr_private.dispatch_assignments WHERE state='ACTIVE'
+                              GROUP BY tenant_id,courier_id) r
+                              ON r.tenant_id=p.tenant_id AND r.courier_id=p.courier_id
+                            WHERE p.tenant_id=%s AND p.region_id=%s
+                              AND p.expires_at>%s AND p.updated_at<=%s
+                              AND p.eligibility_verified_at<=%s
+                              AND p.capacity>COALESCE(r.units,0)
+                            ORDER BY free_units DESC,p.updated_at DESC,p.courier_id LIMIT %s""",
+                              (tenant_id,region,at,at,at,limit))
+                    rows=c.fetchall()
+                    verified=[]
+                    for courier,available,_ in rows:
+                        cid=str(courier)
+                        if eligibility.approve(tenant_id=tenant_id,order_id=order_id,
+                            courier_id=cid,actor_id=actor,region_id=region,at=at) is True:
+                            verified.append((cid,int(available)))
+                    return tuple(verified)
+    except Denied:raise
+    except Exception as exc:raise Denied("trusted scheduling unavailable") from exc

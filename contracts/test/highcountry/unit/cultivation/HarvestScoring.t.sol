@@ -4,7 +4,10 @@ pragma solidity ^0.8.24;
 import { HarvestScoring } from "../../../../src/highcountry/harvest/HarvestScoring.sol";
 
 contract HarvestScoringTest {
-    function score(bytes32 genome, uint16 quality) external pure returns (HarvestScoring.Result memory) {
+    function score(
+        bytes32 genome,
+        uint16 quality
+    ) external pure returns (HarvestScoring.Result memory) {
         return HarvestScoring.calculate(genome, quality);
     }
 

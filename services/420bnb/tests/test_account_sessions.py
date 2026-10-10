@@ -345,6 +345,16 @@ def test_host_units_calendar_review_and_adversarial_boundaries(actor):
         assert client.get(f"/v1/bnb/account/properties/{pid}/reviews").status_code==401
         records=client.get(f"/v1/bnb/account/properties/{pid}/reviews",headers=headers)
         assert records.status_code==200 and records.json()[0]["state"]=="pending"
+        withdrawn=client.post(f"/v1/bnb/account/properties/{pid}/reviews/{review.json()['review_id']}/withdraw",headers=headers)
+        assert withdrawn.status_code==200 and withdrawn.json()["state"]=="withdrawn"
+        assert client.post(f"/v1/bnb/account/properties/{pid}/reviews/{review.json()['review_id']}/withdraw",
+                           headers=headers).status_code==409
+        removed=client.delete(f"/v1/bnb/account/properties/{pid}/calendar/blocks/{added.json()['id']}",
+                              params={"expected_version":3},headers=headers)
+        assert removed.status_code==200 and removed.json()["version"]==4
+        assert client.delete(f"/v1/bnb/account/properties/{pid}/calendar/blocks/{added.json()['id']}",
+                             params={"expected_version":4},headers=headers).status_code==404
+
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             assert c.execute("SELECT status FROM bnb_property WHERE id=%s",(pid,)).fetchone()[0]=="draft"
             assert c.execute("SELECT COUNT(*) FROM bnb_listing_review WHERE property_id=%s",

@@ -1,5 +1,6 @@
 """Browser accessibility smoke for BnB host preview (no live Identity authority)."""
 from pathlib import Path
+import subprocess
 from playwright.sync_api import sync_playwright
 
 PAGE = Path(__file__).resolve().parents[3] / "web" / "bnb" / "index.html"
@@ -22,4 +23,10 @@ with sync_playwright() as p:
     assert not errors, errors
     page.keyboard.press("Tab")
     assert page.evaluate("document.activeElement !== document.body")
+    axe = subprocess.check_output(["node","-p","require.resolve('axe-core/axe.min.js')"],text=True).strip()
+    for width,height in ((390,844),(1366,768)):
+        page.set_viewport_size({"width":width,"height":height})
+        page.add_script_tag(content=Path(axe).read_text())
+        report=page.evaluate("async () => axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}})")
+        assert not report["violations"],[(v["id"],v["nodes"][0]["target"]) for v in report["violations"]]
     browser.close()

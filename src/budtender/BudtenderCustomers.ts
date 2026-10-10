@@ -1,4 +1,5 @@
-import { BudtenderStore, StarterProduct } from "./BudtenderStore";
+import { BudtenderStore } from "./BudtenderStore.ts";
+import type { StarterProduct } from "./BudtenderStore.ts";
 
 export type CustomerArchetype = "regular" | "impatient" | "enthusiast" | "bargainHunter";
 export type CustomerStatus = "queued" | "served" | "abandoned";
@@ -31,8 +32,11 @@ export class BudtenderCustomerSystem {
   private customers = new Map<string, CustomerState>();
   private arrivalSequence = 0;
   private demandProfile: DemandProfile = "normal";
+  private readonly store: BudtenderStore;
 
-  constructor(private readonly store: BudtenderStore) {}
+  constructor(store: BudtenderStore) {
+    this.store = store;
+  }
 
   setDemandProfile(profile: DemandProfile): void {
     this.demandProfile = profile;

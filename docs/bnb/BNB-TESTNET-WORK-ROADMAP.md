@@ -48,3 +48,25 @@ BNB-2.1 code and security acceptance must still implement: fail-closed signed pr
 - Record the above as a separate **testnet handoff**; do not mark them complete merely because unit tests pass.
 - BNB-2.1 overall remains **PARTIAL / LIVE-DEPENDENCIES-DEFERRED** until the external gates are witnessed. A later governance decision may define a narrower repository-only milestone, but cannot retroactively assert live acceptance.
 - Do not merge or activate restricted functions based solely on this document. Reconcile with current main and apply the usual PR-specific merge approval and qualification rules.
+
+## T-BNB-MEDIA-1 — Independent media moderation operational authorization (BNB-2.2 handoff)
+
+**Deferred external prerequisite; not a completed certification.** App runtime currently verifies externally signed, purpose-scoped media reviewer decisions and replay fences, but cannot create organizational authorization or issue managed signing keys.
+
+- Obtain written independent operator/governance authorization, reviewer identities and separation-of-duties, jurisdiction-specific moderation/rights/privacy policy, appeal and incident-response plan.
+- Provision approved KMS/HSM custody, issuer and audience configuration, verifiable public key lineage, rotation/revocation and compromise response; never check credentials into Git.
+- Perform end-to-end approved/rejected/revoked decisions using actual reviewers, with negative wrong-media, wrong-decision, forged/expired/replayed/compromised signing assertions and fail-closed provider outages.
+- Record authorized independent signoff, exact release SHA, policy version, signed decision/audit identifiers, signer fingerprint and operator acceptance. Until verified, media remains pending and listings cannot self-publish.
+
+Canonical acceptance checklist: `docs/bnb/BNB-2.2-EXTERNAL-ACCEPTANCE-PLAN.md`.
+
+## T-BNB-ACCESSIBILITY-1 — Independent manual WCAG 2.2 AA acceptance (BNB-2.2 handoff)
+
+**Deferred external human acceptance; not a completed accessibility signoff.** Automated Chromium/axe responsive checks already run in app-specific CI, but cannot substitute for actual screen-reader evaluation.
+
+- Deploy the exact tested release to accessible staging/testnet and use qualified human testers for Windows Chrome/Edge with NVDA, macOS Safari with VoiceOver, iOS Safari with VoiceOver, and Android Chrome with TalkBack.
+- Exercise signed-in and anonymous guest/host journeys, keyboard-only access, full reflow/zoom, reading order, focus retention/traps, headings/landmarks, form labels/error announcements, calendar conflicts, provider outages, accessible authentication and successful/rejected/pending submission states.
+- Record dated human tester identity/affiliation, device/OS/browser/AT versions, checklist and results by criterion, defects/fix and retest SHA, independent signoff and evidence pointers.
+- BNB-2.2 live operational release remains **BLOCKED** until human and reviewer evidence is independently verified. Do not mint CI signoff or mark automated axe checks as manual PASS.
+
+The two external gates are *deferred, not waived*. Continue subsequent offline/repository-only roadmap work without activating restricted functions; run only targeted Level 1 checks until real integration/phase milestones.

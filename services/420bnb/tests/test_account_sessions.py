@@ -109,3 +109,74 @@ def test_recovery_epoch_cannot_be_rebound_by_session_exchange(actor):
     response=client.post("/v1/bnb/account/session",headers=headers)
     assert response.status_code==401, response.text
     assert response.json()["detail"]=="SESSION_EPOCH_REVOKED"
+
+
+def test_recovery_proof_single_use_revokes_session(actor,monkeypatch):
+    import time
+    subject,headers=actor
+    session=client.post("/v1/bnb/account/session",headers=headers)
+    assert session.status_code==201,session.text
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://recovery.test.invalid"
+    monkeypatch.setenv("BNB_RECOVERY_ISSUER",issuer)
+    monkeypatch.setenv("BNB_RECOVERY_AUDIENCE","420bnb-recovery")
+    monkeypatch.setenv("BNB_RECOVERY_PUBLIC_KEY_PEM",
+        private.public_key().public_bytes(Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    now=int(time.time())
+    claim=jwt.encode({"iss":issuer,"aud":"420bnb-recovery","sub":subject,
+        "iat":now,"nbf":now,"exp":now+120,"jti":str(uuid4()),
+        "purpose":"account-recovery"},private,algorithm="RS256")
+    recovery={**headers,"x-recovery-proof":claim}
+    success=client.post("/v1/bnb/account/recover",headers=recovery)
+    assert success.status_code==200,success.text
+    assert success.json()["sessions_revoked"] is True
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==401
+    replay=client.post("/v1/bnb/account/recover",headers=recovery)
+    assert replay.status_code==409 and replay.json()["detail"]=="RECOVERY_PROOF_REPLAY"
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("DELETE FROM bnb_authority_proof_used WHERE authority='recovery' AND subject=%s",(subject,))
+
+
+def test_property_claim_forgery_cannot_grant_authority(actor,monkeypatch):
+    import time
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    pid=uuid4()
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_property(id,host_subject,title,public_region,capacity,
+            nightly_minor,currency) VALUES (%s,%s,'Synthetic property','Canada',1,100,'CAD')""",
+            (pid,subject))
+    key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://property.test.invalid"
+    monkeypatch.setenv("BNB_PROPERTY_ISSUER",issuer)
+    monkeypatch.setenv("BNB_PROPERTY_AUDIENCE","420bnb-property")
+    monkeypatch.setenv("BNB_PROPERTY_PUBLIC_KEY_PEM",
+        key.public_key().public_bytes(Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    now=int(time.time())
+    data={"iss":issuer,"aud":"420bnb-property","sub":subject,"iat":now,
+          "nbf":now,"exp":now+120,"jti":str(uuid4()),"purpose":"property-control",
+          "property_id":str(pid)}
+    try:
+        forged=jwt.encode({**data,"purpose":"software-verification"},key,algorithm="RS256")
+        rejected=client.post(f"/v1/bnb/account/properties/{pid}/claims",
+            headers={**headers,"x-property-proof":forged})
+        assert rejected.status_code==401
+        wrong=jwt.encode({**data,"property_id":str(uuid4())},key,algorithm="RS256")
+        rejected=client.post(f"/v1/bnb/account/properties/{pid}/claims",
+            headers={**headers,"x-property-proof":wrong})
+        assert rejected.status_code==403
+        claim=jwt.encode(data,key,algorithm="RS256")
+        accepted=client.post(f"/v1/bnb/account/properties/{pid}/claims",
+            headers={**headers,"x-property-proof":claim})
+        assert accepted.status_code==202,accepted.text
+        assert accepted.json()=={"status":"pending","published":False}
+        replay=client.post(f"/v1/bnb/account/properties/{pid}/claims",
+            headers={**headers,"x-property-proof":claim})
+        assert replay.status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT status FROM bnb_property WHERE id=%s",(pid,)).fetchone()[0]=="draft"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_property_claim WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_authority_proof_used WHERE authority='property' AND subject=%s",(subject,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

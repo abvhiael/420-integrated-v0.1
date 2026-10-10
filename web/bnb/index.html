@@ -181,7 +181,43 @@ async function loadDrafts(){
  mediaStatus.textContent="Media pending independent rights review.";await loadDrafts();
  }catch(e){mediaStatus.textContent=e.message;}
  });
- editor.append(unitForm,policyForm,mediaForm,reviewButton);
+ const pricingForm=document.createElement("form");
+ const priceField=(title,type="number",initial="0")=>{
+ const label=document.createElement("label");label.textContent=title;
+ const field=document.createElement("input");field.type=type;field.required=type!=="date";
+ if(type==="number"){field.min="0";field.value=initial;}
+ label.append(field);return {label,field};
+ };
+ const cleaning=priceField("Cleaning fee in currency minor units"),
+ serviceFee=priceField("Service fee in currency minor units"),
+ taxRate=priceField("Tax basis points (100 = 1%)"),
+ discountRate=priceField("Discount basis points (100 = 1%)"),
+ seasonStart=priceField("Seasonal rate start (optional)","date"),
+ seasonEnd=priceField("Seasonal rate end (optional)","date"),
+ seasonRate=priceField("Seasonal nightly rate in minor units");
+ const saveRates=document.createElement("button");saveRates.type="submit";saveRates.textContent="Save draft rate plan";
+ const rateStatus=document.createElement("p");rateStatus.setAttribute("aria-live","polite");
+ pricingForm.append(cleaning.label,serviceFee.label,taxRate.label,discountRate.label,
+ seasonStart.label,seasonEnd.label,seasonRate.label,saveRates,rateStatus);
+ pricingForm.addEventListener("submit",async event=>{
+ event.preventDefault();rateStatus.textContent="Saving draft rate plan…";
+ const seasonal_rates=[];
+ if(seasonStart.field.value||seasonEnd.field.value){
+ if(!seasonStart.field.value||!seasonEnd.field.value){
+ rateStatus.textContent="Enter both seasonal dates.";return;}
+ seasonal_rates.push({start:seasonStart.field.value,end:seasonEnd.field.value,
+ nightly_minor:Number(seasonRate.field.value)});
+ }
+ try{const response=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/rate-plan",{
+ method:"PUT",headers:hostHeaders(),credentials:"omit",body:JSON.stringify({
+ expected_property_version:item.version,seasonal_rates,cleaning_minor:Number(cleaning.field.value),
+ service_minor:Number(serviceFee.field.value),tax_bps:Number(taxRate.field.value),
+ discount_bps:Number(discountRate.field.value)})});
+ if(!response.ok)throw Error("Rate plan rejected ("+response.status+"). Refresh for latest version.");
+ rateStatus.textContent="Draft rate plan saved.";await loadDrafts();
+ }catch(error){rateStatus.textContent=error.message;}
+ });
+ editor.append(unitForm,policyForm,mediaForm,pricingForm,reviewButton);
  }
 
  const load=document.createElement("button");load.type="button";load.textContent="View units and review status";

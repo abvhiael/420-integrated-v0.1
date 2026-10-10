@@ -1079,6 +1079,38 @@ def read_booking_request(request_id:UUID,authorization:str|None=Header(None)):
             "hold_id":str(row[5]),"confirmed":False,"payment_status":"unavailable"}
 
 
+@app.post("/v1/bnb/reservations/{reservation_id}/expire")
+def expire_payment_pending_reservation(reservation_id:UUID,
+                                       authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"NOT_FOUND")
+            host=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s FOR UPDATE",
+                           (ref[0],)).fetchone()
+            row=c.execute("""SELECT r.hold_id,r.guest_subject,r.status,r.pay_proof_id,
+                h.expires_at FROM bnb_reservation r
+                JOIN bnb_hold h ON h.id=r.hold_id
+                WHERE r.id=%s FOR UPDATE OF r,h""",(reservation_id,)).fetchone()
+            if actor not in (row[1],host[0]):raise HTTPException(404,"NOT_FOUND")
+            if row[2]=="expired":return {"id":str(reservation_id),"state":"expired",
+                                         "confirmed":False}
+            if row[2]!="payment_pending" or row[3] is not None:
+                raise HTTPException(409,"PAY_FINALITY_RECONCILIATION_REQUIRED")
+            if row[4]>datetime.now(timezone.utc):
+                raise HTTPException(409,"PAYMENT_DEADLINE_NOT_REACHED")
+            c.execute("UPDATE bnb_reservation SET status='expired' WHERE id=%s",
+                      (reservation_id,))
+            c.execute("""UPDATE bnb_hold SET status='expired'
+                WHERE id=%s AND status='held'""",(row[0],))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.reservation.expired',%s)""",
+                (uuid4(),actor,ref[0]))
+    return {"id":str(reservation_id),"state":"expired","confirmed":False}
+
+
 @app.post("/v1/bnb/reservations/{reservation_id}/cancel")
 def cancel_pending_reservation(reservation_id:UUID,authorization:str|None=Header(None)):
     """Pre-payment cancellation only; canonical funded refunds require 420Pay."""

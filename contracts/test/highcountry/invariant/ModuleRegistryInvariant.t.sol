@@ -6,11 +6,16 @@ import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCoun
 import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 import { UpgradeState } from "../../../src/highcountry/types/HighCountryEnums.sol";
+import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 import { ModuleRegistry } from "../../../src/highcountry/upgrades/ModuleRegistry.sol";
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
 import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 
-contract ModuleInvariantImplementationV1 { }
+contract ModuleInvariantImplementationV1 {
+    function highCountryModuleIdentity() external pure returns (bytes32, uint32, bytes32, bytes32) {
+        return (keccak256("HC.MODULE.INVARIANT.TEST"), 1, keccak256("ruleset:invariant"), keccak256("HC.INTERFACE.INVARIANT.V1"));
+    }
+}
 
 contract ModuleInvariantReplacement { }
 

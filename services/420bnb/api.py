@@ -223,6 +223,7 @@ def establish_session(authorization: str | None = Header(None)):
                   (id,subject,issuer,issuer_session_id,expires_at)
                   VALUES (%s,%s,%s,%s,%s)""",
                   (sid,proof["subject"],proof["issuer"],proof["issuer_session_id"],proof["expires_at"]))
+                c.execute("UPDATE bnb_identity_session SET recovery_epoch=(SELECT recovery_epoch FROM bnb_account WHERE subject=%s) WHERE id=%s",(proof["subject"],sid))
     return {"session_id":str(sid),"subject":proof["subject"],"expires_at":proof["expires_at"].isoformat(),
             "host_verified":False,"financial_permissions":[]}
 

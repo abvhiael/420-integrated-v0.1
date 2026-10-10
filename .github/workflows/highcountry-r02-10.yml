@@ -40,6 +40,11 @@ jobs:
       - name: Verified canonical randomness adapter regressions
         working-directory: contracts
         run: forge test --match-path 'test/highcountry/integration/CanonicalBreedingRandomnessAdapter.t.sol' -vv
+      - name: Canonical 420 Random proof and route regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/Randomness*.t.sol' -vv
+      - name: Canonical 420 Random verifier
+        run: python3 scripts/verify-420randomness-audit.py
       - name: Retained High Country tests and invariants
         working-directory: contracts
         run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv

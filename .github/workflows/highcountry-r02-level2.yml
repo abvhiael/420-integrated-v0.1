@@ -1,0 +1,41 @@
+name: High Country R02 Level 2 Integration Closeout
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/**'
+      - 'docs/highcountry/**'
+      - '.github/workflows/highcountry-r02-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  highcountry-r02-level2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Cross-contract gameplay and real-dependency integration
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/integration/*.t.sol' -vv
+      - name: Real accounting and adversarial invariant coverage
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/invariant/*.t.sol' -vv
+      - name: Retain real SmartAccount factory and reviewed-selector execution
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/player/HighCountrySessionAccess420.t.sol' -vv
+      - name: Verify High Country action specification and registrations
+        run: python3 scripts/highcountry/verify-r01.py

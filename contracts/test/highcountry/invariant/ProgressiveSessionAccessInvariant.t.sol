@@ -69,6 +69,7 @@ contract ProgressiveSessionAccessInvariantTest is InvariantTarget420 {
         sessionAccess =
             new HighCountrySessionAccess420(address(new MockHCAuthorizationPA4()), address(new MockHCFactoryPA4()));
         target = new RoutineTargetPA4();
+        sessionAccess.reviewRoutineCall(address(target), target.routine.selector);
         sessionAccess.setRoutineCall(address(target), target.routine.selector, true);
         targetContract(address(new ProgressiveSessionAccessHandlerPA4(sessionAccess)));
     }

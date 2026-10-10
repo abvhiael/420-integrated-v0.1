@@ -51,7 +51,8 @@ class PG(unittest.TestCase):
   with self.admin.cursor() as c:
    c.execute("SELECT count(*),max(payload->>'state') FROM doobr_private.event_outbox WHERE tenant_id=%s",(T,))
    self.assertEqual(c.fetchone(),(1,'PICKED_UP'))
-  def take(w):return claim(connect=self.conn,tenant_id=T,worker_id=w,at=NOW)
+  now=datetime.now(timezone.utc)+timedelta(seconds=1)
+  def take(w):return claim(connect=self.conn,tenant_id=T,worker_id=w,at=now)
   with ThreadPoolExecutor(max_workers=2) as pool:
    items=list(pool.map(take,[W,W2]))
   self.assertEqual(sum(i is not None for i in items),1)
@@ -59,11 +60,11 @@ class PG(unittest.TestCase):
   winner=item['worker_id']
   with self.assertRaises(Denied):
    settle(connect=self.conn,tenant_id=T,worker_id=W2 if winner==W else W,
-     event_id=item['event_id'],attempt=item['attempt'],receipt_ref='forged',at=NOW)
+     event_id=item['event_id'],attempt=item['attempt'],receipt_ref='forged',at=now)
   self.assertEqual(settle(connect=self.conn,tenant_id=T,worker_id=winner,
-    event_id=item['event_id'],attempt=item['attempt'],error_code='RETRY',at=NOW),'PENDING')
-  self.assertIsNone(claim(connect=self.conn,tenant_id=T,worker_id=W,at=NOW))
-  later=NOW+timedelta(minutes=1)
+    event_id=item['event_id'],attempt=item['attempt'],error_code='RETRY',at=now),'PENDING')
+  self.assertIsNone(claim(connect=self.conn,tenant_id=T,worker_id=W,at=now))
+  later=now+timedelta(minutes=1)
   item2=claim(connect=self.conn,tenant_id=T,worker_id=W2,at=later)
   self.assertEqual(item2['attempt'],2)
   with self.assertRaises(Denied):

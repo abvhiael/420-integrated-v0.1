@@ -296,6 +296,44 @@ def submit_listing_media(property_id:str,payload:ListingMediaInput,
     return {"id":str(mid),"version":version,"moderation_state":"pending","published":False}
 
 
+class MediaDecisionInput(BaseModel):
+    decision: str
+    reason: str = Field(min_length=8,max_length=500)
+
+
+@app.post("/v1/bnb/internal/media/{media_id}/decision")
+def decide_media(media_id:str,payload:MediaDecisionInput,
+                 x_media_review_proof:str|None=Header(None)):
+    """Separate signed reviewer authority; never trust host-controlled claims."""
+    if payload.decision not in ("approved","rejected","revoked"):
+        raise HTTPException(422,"INVALID_MEDIA_DECISION")
+    if not x_media_review_proof:
+        raise HTTPException(401,"REVIEW_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_media_review_proof,"BNB_MEDIA_REVIEW","media-review")
+    if proof.get("media_id")!=media_id or proof.get("decision")!=payload.decision:
+        raise HTTPException(403,"REVIEW_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT moderation_state,property_id FROM bnb_listing_media
+                WHERE id=%s FOR UPDATE""",(media_id,)).fetchone()
+            if not row:raise HTTPException(404,"MEDIA_NOT_FOUND")
+            allowed={"pending":("approved","rejected"),"approved":("revoked",),
+                     "rejected":(),"revoked":()}
+            if payload.decision not in allowed[row[0]]:
+                raise HTTPException(409,"MEDIA_REVIEW_TRANSITION_DENIED")
+            replay=c.execute("SELECT 1 FROM bnb_media_review_nonce WHERE issuer=%s AND jti=%s",
+                             (proof["iss"],proof["jti"])).fetchone()
+            if replay:raise HTTPException(409,"MEDIA_REVIEW_REPLAY")
+            c.execute("INSERT INTO bnb_media_review_nonce(issuer,jti,media_id) VALUES (%s,%s,%s)",
+                      (proof["iss"],proof["jti"],media_id))
+            c.execute("""UPDATE bnb_listing_media SET moderation_state=%s
+                WHERE id=%s""",(payload.decision,media_id))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,%s,%s)""",
+                (uuid4(),proof["sub"],"bnb.media."+payload.decision,row[1]))
+    return {"media_id":media_id,"state":payload.decision}
+
+
 class UnitInput(BaseModel):
     label: str = Field(min_length=1,max_length=100)
     quantity: int = Field(ge=1,le=1000)

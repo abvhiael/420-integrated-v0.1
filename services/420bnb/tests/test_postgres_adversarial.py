@@ -346,3 +346,31 @@ def test_bnb23_expiry_idempotency_and_capacity_recovery(fixture_property):
     conflict=client.post("/v1/bnb/holds",json={**data,"units":2},
                          headers={**headers,"idempotency-key":"bnb23-expiry-0002"})
     assert conflict.status_code==409
+
+
+def test_bnb23_policy_minimum_nights_guest_and_hold(fixture_property):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_listing_policy
+            (property_id,house_rules,cancellation_policy,timezone_id,min_nights)
+            VALUES (%s,'quiet hours','flexible','America/Regina',3)""",(pid,))
+    try:
+        d=payload(pid)
+        short=client.post("/v1/bnb/holds",json=d,
+            headers={**headers,"idempotency-key":"min-night-policy-001"})
+        assert short.status_code==422
+        assert short.json()["detail"]=="MINIMUM_STAY_NOT_MET"
+        from zoneinfo import ZoneInfo
+        local=(datetime.now(ZoneInfo("America/Regina"))+timedelta(days=12)).date()
+        one=client.get("/v1/bnb/availability/local",params={
+            "property_id":str(pid),"checkin":local.isoformat(),
+            "checkout":(local+timedelta(days=1)).isoformat()})
+        assert one.status_code==422
+        three=client.get("/v1/bnb/availability/local",params={
+            "property_id":str(pid),"checkin":local.isoformat(),
+            "checkout":(local+timedelta(days=3)).isoformat()})
+        assert three.status_code==200,three.text
+        assert three.json()["nights"]==3 and three.json()["min_nights"]==3
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))

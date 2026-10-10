@@ -15,12 +15,13 @@
 - Host may edit only an owned **draft** under a PostgreSQL row lock and explicit expected version. Updates increment the version and produce an audit record.
 - Draft intake does not publish, pay, create a binding booking, or grant property management capabilities.
 - Tests exercise unauthorized header injection, stale version replay, ownership mismatch, state-change denial, read redaction, and transactional persistence.
+- Property manager grant/revoke endpoints verify the acting owner, independently reviewed current property claim, active grantee, bounded capability and expiration, with audited mutation and no financial powers; negative API tests assert unverified owners cannot grant or revoke.
 
 ## Remaining BNB-2.2 exit work — not yet accepted
 
 - Versioned listing snapshots and publication-review lifecycle beyond local draft revisions.
 - Independently approved host, property title/licence/authority proof and review; external-live acceptance remains in T-BNB-PROPERTY-1.
-- Property-scoped manager invitation, consent, grant issuance and revocation end-to-end; no unilateral financial authority.
+- Manager grant/revocation API is implemented but fails closed unless an independently reviewed, unexpired property claim exists. Invitation/consent, expiry/revocation races, self-service manager UX and end-to-end acceptance remain outstanding; no unilateral financial authority.
 - Unit-specific inventory, calendar/timezone/DST-safe host blocks, optimistic conflict checks and multi-instance races.
 - Host onboarding forms, media/rights, listings dashboard, browser accessibility and complete journey BNB-U10–U12.
 - Explicit state/event/audit retention and property transfer/dispute procedures.

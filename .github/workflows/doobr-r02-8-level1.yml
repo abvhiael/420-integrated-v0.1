@@ -2,9 +2,9 @@ name: DOOBR R02.8 Tracking Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['doobr/tracking.py','doobr/auth.py','doobr/storage/migrations/0008_tracking.up.sql','doobr/storage/tests/test_tracking.py','doobr/storage/tests/test_pg_tracking.py','docs/doobr/DOOBR-R02-8-*','.github/workflows/doobr-r02-8-level1.yml']
+    paths: ['doobr/tracking.py','doobr/navigation.py','doobr/auth.py','doobr/storage/migrations/0008_tracking.up.sql','doobr/storage/tests/test_tracking.py','doobr/storage/tests/test_pg_tracking.py','docs/doobr/DOOBR-R02-8-*','.github/workflows/doobr-r02-8-level1.yml']
   pull_request:
-    paths: ['doobr/tracking.py','doobr/auth.py','doobr/storage/migrations/0008_tracking.up.sql','doobr/storage/tests/test_tracking.py','doobr/storage/tests/test_pg_tracking.py','docs/doobr/DOOBR-R02-8-*','.github/workflows/doobr-r02-8-level1.yml']
+    paths: ['doobr/tracking.py','doobr/navigation.py','doobr/auth.py','doobr/storage/migrations/0008_tracking.up.sql','doobr/storage/tests/test_tracking.py','doobr/storage/tests/test_pg_tracking.py','docs/doobr/DOOBR-R02-8-*','.github/workflows/doobr-r02-8-level1.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,7 +42,7 @@ jobs:
           python-version: '3.12'
       - name: Compile and negative tracking cases
         run: |
-          python3 -m py_compile doobr/tracking.py doobr/storage/tests/test_tracking.py doobr/auth.py
+          python3 -m py_compile doobr/navigation.py doobr/tracking.py doobr/storage/tests/test_tracking.py doobr/auth.py
           python3 -m unittest discover -s doobr/storage/tests -p test_tracking.py -v
       - name: Install PostgreSQL client
         run: python3 -m pip install 'psycopg[binary]==3.2.4'

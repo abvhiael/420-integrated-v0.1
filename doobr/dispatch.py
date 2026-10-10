@@ -114,3 +114,52 @@ def decide(*, connect, issuer, store, token, tenant_id, order_id, offer_id,
         return "ASSIGNED" if valid else "RETAILER_READY"
     except Denied:raise
     except Exception as exc:raise Denied("dispatch acceptance unavailable") from exc
+
+def release_assignment(*, connect, issuer, store, token, tenant_id, order_id,
+                       eligibility, reason, at=None):
+    """Operator-authorized pre-pickup release; order returns to retailer-ready.
+
+    Historical offer and reservation retained, capacity freed only once.
+    A later offer is a NEW offer with a fresh id and authorization.
+    """
+    at=at or datetime.now(timezone.utc)
+    if at.tzinfo is None or not isinstance(reason,str) or not reason or len(reason)>256:
+        raise Denied("invalid release")
+    tenant_id,order_id=map(_uuid,(tenant_id,order_id))
+    actor=_principal(issuer,store,token,tenant_id,order_id,at)
+    try:
+        with connect() as db:
+            with db.transaction():
+                with db.cursor() as c:
+                    c.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+                    c.execute("SELECT set_config('doobr.tenant_id',%s,true)",(tenant_id,))
+                    c.execute("""SELECT state FROM doobr_private.delivery_orders
+                        WHERE tenant_id=%s AND order_id=%s FOR UPDATE""",(tenant_id,order_id))
+                    if c.fetchone()!=("ASSIGNED",):
+                        raise Denied("release allowed only before pickup")
+                    c.execute("""SELECT courier_id,offer_id FROM doobr_private.dispatch_assignments
+                        WHERE tenant_id=%s AND order_id=%s AND state='ACTIVE' FOR UPDATE""",
+                        (tenant_id,order_id))
+                    assigned=c.fetchone()
+                    if not assigned:raise Denied("active assignment unavailable")
+                    if eligibility.approve(tenant_id=tenant_id,order_id=order_id,
+                        courier_id=str(assigned[0]),actor_id=actor,reason=reason,at=at) is not True:
+                        raise Denied("independent release authority denied")
+                    c.execute("""UPDATE doobr_private.dispatch_assignments
+                        SET state='RELEASED',released_at=%s
+                        WHERE tenant_id=%s AND order_id=%s AND state='ACTIVE'""",
+                        (at,tenant_id,order_id))
+                    if c.rowcount!=1:raise Denied("reservation conflict")
+                    c.execute("""UPDATE doobr_private.dispatch_offers
+                        SET state='RELEASED',decided_at=%s
+                        WHERE tenant_id=%s AND offer_id=%s AND state='ACCEPTED'""",
+                        (at,tenant_id,str(assigned[1])))
+                    if c.rowcount!=1:raise Denied("offer reservation mismatch")
+                    c.execute("""UPDATE doobr_private.delivery_orders
+                        SET state='RETAILER_READY',revision=revision+1,updated_at=now()
+                        WHERE tenant_id=%s AND order_id=%s AND state='ASSIGNED'""",
+                        (tenant_id,order_id))
+                    if c.rowcount!=1:raise Denied("release race")
+        return "RETAILER_READY"
+    except Denied:raise
+    except Exception as exc:raise Denied("assignment release unavailable") from exc

@@ -685,6 +685,9 @@ def test_bnb25_independent_host_approval_decline_and_expiry(fixture_property,mon
             c.execute("UPDATE bnb_property SET host_subject='transferred-owner' WHERE id=%s",(pid,))
         assert client.post("/v1/bnb/booking-requests/"+rid+"/accept",
                            headers=host_headers).status_code==404
+        assert client.get("/v1/bnb/booking-requests/"+rid,headers=host_headers).status_code==404
+        assert client.get("/v1/bnb/account/booking-requests",
+            params={"role":"host"},headers=host_headers).json()==[]
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("UPDATE bnb_property SET host_subject=%s,status='suspended' WHERE id=%s",
                       (host,pid))

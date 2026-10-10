@@ -146,6 +146,60 @@ def occupancy_in_window(c,property_id,unit_id,start,end):
     return peak_used([*holds,*blocks,*[(x[0],x[1],x[2]) for x in synced]],start,end)
 
 
+class CalendarSyncInput(BaseModel):
+    property_id: str
+    unit_id: str
+    source_id: str = Field(min_length=3,max_length=200)
+    external_event_id: str = Field(min_length=3,max_length=200)
+    source_updated_at: datetime
+    start: datetime
+    end: datetime
+    quantity: int = Field(ge=1,le=1000)
+
+
+@app.post("/v1/bnb/internal/calendar/import",status_code=202)
+def ingest_calendar(payload:CalendarSyncInput,x_calendar_sync_proof:str|None=Header(None)):
+    """Independent signed busy-calendar observations. No booking/payment authority."""
+    if not x_calendar_sync_proof:raise HTTPException(401,"CALENDAR_AUTHORITY_REQUIRED")
+    claim=verify_authority(x_calendar_sync_proof,"BNB_CALENDAR_SYNC","calendar-import")
+    if (claim.get("property_id")!=payload.property_id or
+        claim.get("unit_id")!=payload.unit_id or
+        claim.get("source_id")!=payload.source_id or
+        claim.get("external_event_id")!=payload.external_event_id):
+        raise HTTPException(403,"CALENDAR_SCOPE_MISMATCH")
+    validate_window(payload.start,payload.end)
+    if (payload.source_updated_at.tzinfo is None or
+        payload.source_updated_at>datetime.now(timezone.utc)+timedelta(minutes=5) or
+        payload.source_updated_at<datetime.now(timezone.utc)-timedelta(hours=24)):
+        raise HTTPException(422,"STALE_CALENDAR_SOURCE")
+    with db() as c:
+        with c.transaction():
+            prop=c.execute("SELECT status FROM bnb_property WHERE id=%s FOR UPDATE",
+                           (payload.property_id,)).fetchone()
+            if not prop:raise HTTPException(404,"NOT_FOUND")
+            unit=c.execute("SELECT quantity FROM bnb_unit WHERE id=%s AND property_id=%s",
+                           (payload.unit_id,payload.property_id)).fetchone()
+            if not unit:raise HTTPException(404,"UNIT_NOT_FOUND")
+            if payload.quantity>unit[0]:raise HTTPException(422,"SYNC_QUANTITY_EXCEEDS_CAPACITY")
+            if c.execute("""SELECT 1 FROM bnb_calendar_sync_event WHERE
+                (external_issuer=%s AND jti=%s) OR
+                (external_issuer=%s AND source_id=%s AND external_event_id=%s)""",
+                (claim["iss"],claim["jti"],claim["iss"],payload.source_id,payload.external_event_id)).fetchone():
+                raise HTTPException(409,"CALENDAR_SYNC_REPLAY")
+            prior=occupancy_in_window(c,payload.property_id,payload.unit_id,payload.start,payload.end)
+            if prior is None or prior+payload.quantity>unit[0]:
+                raise HTTPException(409,"SYNC_CAPACITY_CONFLICT")
+            uid=uuid4()
+            c.execute("""INSERT INTO bnb_calendar_sync_event
+                (id,property_id,unit_id,external_issuer,source_id,external_event_id,
+                jti,period,quantity,source_updated_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,tstzrange(%s,%s,'[)'),%s,%s)""",
+                (uid,payload.property_id,payload.unit_id,claim["iss"],payload.source_id,
+                 payload.external_event_id,claim["jti"],payload.start,payload.end,
+                 payload.quantity,payload.source_updated_at))
+    return {"id":str(uid),"state":"busy_imported","booking_authority":False}
+
+
 @app.get("/v1/bnb/availability")
 def guest_availability(property_id:str,start:datetime,end:datetime):
     """Public published-only read. No address, guest identity or booking commitment."""

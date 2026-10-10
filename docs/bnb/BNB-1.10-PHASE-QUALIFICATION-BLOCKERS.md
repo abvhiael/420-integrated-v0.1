@@ -12,6 +12,11 @@ GitHub PR #600 file inventory consists of nine `docs/bnb/BNB-1.1`–`BNB-1.9` ar
 
 Retained exact-PR-head Level 1 source checks for BNB-1.1–1.9, M1 and M2 were all successful at `32390b5962feb991188ed0b90d28699c1f42602b`. These checks validate architecture wording, frozen Genesis flags, presence of selected source interfaces and nontransactional Travel guards; they **do not** simulate money or book real stays. Earlier exact-SHA source checks do not qualify a future changed merge candidate.
 
+
+## Executable remediation update (post-initial audit)
+
+The initial file-inventory finding below describes the reviewed architecture-only candidate `32390b5`, **not the current branch**. A first executable remediation has since been added in `services/420bnb/` and `web/bnb/`: a PostgreSQL migration, FastAPI draft/listings/hold endpoint slice, HMAC-gated trusted ingress assertion, deliberately disabled payment endpoint, non-root local Docker configuration, guest/host preview and PostgreSQL adversarial tests. The targeted `420BnB Runtime Slice` workflow exercises a real CI PostgreSQL instance. See `services/420bnb/README.md` for implemented functionality and outstanding requirements. **This initial runtime slice does not implement booking confirmation, published host verification, signed canonical 420Pay proof reconciliation, live Identity integration or deployed/testnet acceptance.** These remain blockers. The original Level 3 NOT QUALIFIED decision and DO NOT MERGE restriction remain effective.
+
 ## Mandatory executable gaps before Level 3
 
 | Area | Evidence required; current blocker |

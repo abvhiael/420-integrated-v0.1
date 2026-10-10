@@ -70,3 +70,20 @@ assert_true("VAN-01" in r14 and "FIN-01" in r14,"R01.4 municipal and fee gates")
 for i in range(1,13):
     assert_true(f"{i}. " in r14,"R01.4 written regulatory question "+str(i))
 assert_true(flags.get("travel.doobr_transactions") is False,"R01.4 preserved disabled Travel transaction gateway")
+
+# R01.5 authority contract and presence projection documentary boundary assertions.
+r15=read("docs/doobr/DOOBR-R01-5-PROTOCOL-AND-PRESENCE-BOUNDARIES.md")
+assert_true("R01.5 Protocol authority contracts" in roadmap,"canonical R01.5 unchanged")
+for token in ["420Compliance","420Pay","DevelopmentCompensationVault420","420Travel/Maps",
+              "420Identity","420Notifications","420Arbitration","420Location",
+              "LICENSEE_EMPLOYEE","DELIVERY_PERSON","COMMON_CARRIER",
+              "ALLOW|DENY|UNKNOWN","doobr-presence/v1","AVAILABLE|LIMITED|UNAVAILABLE|UNKNOWN",
+              "signature","request_hash","revocation_epoch","fail closed","R01.6 Security/privacy"]:
+    assert_true(token in r15, "R01.5 authority/presence invariant: "+token)
+for i in range(1,17):
+    assert_true(f"R15-T{i:02d}" in r15 if i==1 else f"T{i:02d}" in r15,
+                "R01.5 adversarial vector "+str(i))
+for forbidden in ["courier_id","address","order_id","phone"]:
+    assert_true(forbidden in r15,"R01.5 forbids public field "+forbidden)
+assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.5 does not promote Genesis app")
+assert_true(flags.get("travel.doobr_transactions") is False,"R01.5 Travel gateway stays fail closed")

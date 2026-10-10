@@ -167,6 +167,9 @@ def ingest_calendar(payload:CalendarSyncInput,x_calendar_sync_proof:str|None=Hea
         claim.get("source_id")!=payload.source_id or
         claim.get("external_event_id")!=payload.external_event_id):
         raise HTTPException(403,"CALENDAR_SCOPE_MISMATCH")
+    payload_digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    if claim.get("payload_hash")!=payload_digest:
+        raise HTTPException(403,"CALENDAR_PAYLOAD_NOT_SIGNED")
     validate_window(payload.start,payload.end)
     if (payload.source_updated_at.tzinfo is None or
         payload.source_updated_at>datetime.now(timezone.utc)+timedelta(minutes=5) or
@@ -218,7 +221,8 @@ def guest_availability(property_id:str,start:datetime,end:datetime):
                            "capacity":capacity,"available":0 if peak is None else max(0,capacity-peak)})
     return {"property_id":str(row[0]),"title":row[1],"public_region":row[2],
             "start":start.isoformat(),"end":end.isoformat(),"property_version":row[5],
-            "units":result,"nonbinding":True}
+            "units":result,"nonbinding":True,
+            "as_of":datetime.now(timezone.utc).isoformat()}
 
 
 @app.get("/v1/bnb/availability/local")

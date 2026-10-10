@@ -1,0 +1,47 @@
+name: High Country R03.5 Level 1 Adversarial Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/unit/cultivation/**'
+      - 'docs/highcountry/R03.5-*'
+      - '.github/workflows/highcountry-r03-5.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r03-5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected build
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Source format
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/harvest/HarvestEngine.sol src/highcountry/harvest/HarvestProductRegistry.sol src/highcountry/cultivation/PlantRegistry.sol test/highcountry/unit/cultivation/CultivationEngine.t.sol
+      - name: Security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: Harvest and capacity adversarial tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' -vv
+      - name: Deterministic scoring boundaries
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/HarvestScoring.t.sol' -vv
+      - name: Canonical verifier
+        run: python3 scripts/highcountry/verify-r01.py

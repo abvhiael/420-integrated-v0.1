@@ -11,6 +11,7 @@ from uuid import uuid4
 import psycopg
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from identity import verify_external_token
+from authority import verify_authority
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
@@ -269,7 +270,55 @@ def check_property_access(property_id: str,capability: str,
 
 
 @app.post("/v1/bnb/account/recover")
-def recover_account(authorization: str | None = Header(None)):
-    # Require a future independent purpose-bound 420Identity recovery proof.
-    # Normal login tokens, caller flags and stale sessions may not reset accounts.
-    raise HTTPException(503, "RECOVERY_AUTHORITY_UNAVAILABLE")
+def recover_account(authorization: str | None = Header(None),
+                    x_recovery_proof: str | None = Header(None)):
+    """Fresh separate recovery credential invalidates every old local session."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401,"UNAUTHORIZED")
+    identity=verify_external_token(authorization[7:])
+    if not x_recovery_proof:
+        raise HTTPException(401,"RECOVERY_PROOF_REQUIRED")
+    claim=verify_authority(x_recovery_proof,"BNB_RECOVERY","account-recovery",identity["subject"])
+    with db() as c:
+        with c.transaction():
+            state=c.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",
+                            (identity["subject"],)).fetchone()
+            if not state or state[0]!="active":
+                raise HTTPException(403,"ACCOUNT_DISABLED")
+            inserted=c.execute("""INSERT INTO bnb_authority_proof_used(authority,issuer,proof_jti,subject)
+                  VALUES ('recovery',%s,%s,%s) ON CONFLICT DO NOTHING RETURNING proof_jti""",
+                  (claim["iss"],claim["jti"],identity["subject"])).fetchone()
+            if not inserted:
+                raise HTTPException(409,"RECOVERY_PROOF_REPLAY")
+            c.execute("UPDATE bnb_account SET recovery_epoch=recovery_epoch+1 WHERE subject=%s",
+                      (identity["subject"],))
+            c.execute("UPDATE bnb_identity_session SET revoked_at=now() WHERE subject=%s AND revoked_at IS NULL",
+                      (identity["subject"],))
+    return {"recovered":True,"sessions_revoked":True}
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/claims",status_code=202)
+def submit_property_claim(property_id: str, authorization: str | None = Header(None),
+                          x_property_proof: str | None = Header(None)):
+    """Record external proof only; never auto-publish or grant financial rights."""
+    subject=active_subject(authorization)
+    if not x_property_proof:
+        raise HTTPException(401,"PROPERTY_PROOF_REQUIRED")
+    claim=verify_authority(x_property_proof,"BNB_PROPERTY","property-control",subject)
+    if claim.get("property_id")!=property_id:
+        raise HTTPException(403,"PROPERTY_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            owner=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s FOR UPDATE",
+                            (property_id,)).fetchone()
+            if not owner or owner[0]!=subject:
+                raise HTTPException(404,"NOT_FOUND")
+            used=c.execute("""INSERT INTO bnb_authority_proof_used(authority,issuer,proof_jti,subject)
+               VALUES ('property',%s,%s,%s) ON CONFLICT DO NOTHING RETURNING proof_jti""",
+               (claim["iss"],claim["jti"],subject)).fetchone()
+            if not used:raise HTTPException(409,"PROPERTY_PROOF_REPLAY")
+            c.execute("""INSERT INTO bnb_property_claim(property_id,subject,external_issuer,
+                  external_claim_id,state,expires_at)
+                  VALUES (%s,%s,%s,%s,'pending',to_timestamp(%s))""",
+                  (property_id,subject,claim["iss"],claim["jti"],claim["exp"]))
+    return {"status":"pending","published":False}

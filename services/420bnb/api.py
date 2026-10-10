@@ -13,6 +13,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 from identity import verify_external_token
 from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
+from pricing import quote_breakdown
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
@@ -85,6 +86,145 @@ def peak_occupied_units(intervals,start,end):
         active+=delta
         peak=max(peak,active)
     return peak
+
+
+class SeasonalRate(BaseModel):
+    start: str
+    end: str
+    nightly_minor: int=Field(ge=0,le=10**12)
+
+
+class RatePlanInput(BaseModel):
+    expected_property_version: int=Field(ge=1)
+    seasonal_rates: list[SeasonalRate]=Field(default_factory=list,max_length=100)
+    cleaning_minor: int=Field(ge=0,le=10**12)
+    service_minor: int=Field(default=0,ge=0,le=10**12)
+    tax_bps: int=Field(default=0,ge=0,le=10000)
+    discount_bps: int=Field(default=0,ge=0,le=10000)
+
+
+class QuoteInput(BaseModel):
+    property_id: str
+    unit_id: str|None=None
+    checkin: str
+    checkout: str
+    units: int=Field(default=1,ge=1,le=100)
+    nonce: str=Field(min_length=8,max_length=128)
+
+
+@app.put("/v1/bnb/account/properties/{property_id}/rate-plan")
+def revise_rate_plan(property_id:str,payload:RatePlanInput,authorization:str|None=Header(None)):
+    from datetime import date
+    periods=[]
+    for item in payload.seasonal_rates:
+        try: a,z=date.fromisoformat(item.start),date.fromisoformat(item.end)
+        except ValueError:raise HTTPException(422,"INVALID_SEASONAL_DATE")
+        if a>=z:raise HTTPException(422,"INVALID_SEASONAL_WINDOW")
+        periods.append((a,z))
+    periods.sort()
+    if any(periods[i][0]<periods[i-1][1] for i in range(1,len(periods))):
+        raise HTTPException(422,"OVERLAPPING_SEASONAL_RATES")
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,property_id,subject,payload.expected_property_version)
+            rates=[x.model_dump() for x in payload.seasonal_rates]
+            row=c.execute("""INSERT INTO bnb_rate_plan
+                (property_id,seasonal_rates,cleaning_minor,service_minor,tax_bps,discount_bps)
+                VALUES (%s,%s::jsonb,%s,%s,%s,%s)
+                ON CONFLICT(property_id) DO UPDATE SET
+                version=bnb_rate_plan.version+1,seasonal_rates=EXCLUDED.seasonal_rates,
+                cleaning_minor=EXCLUDED.cleaning_minor,service_minor=EXCLUDED.service_minor,
+                tax_bps=EXCLUDED.tax_bps,discount_bps=EXCLUDED.discount_bps,updated_at=now()
+                RETURNING version""",
+                (property_id,json.dumps(rates),payload.cleaning_minor,payload.service_minor,
+                 payload.tax_bps,payload.discount_bps)).fetchone()
+            version=bump_property(c,property_id,subject,"bnb.rate_plan.updated")
+    return {"property_id":property_id,"rate_version":row[0],
+            "property_version":version,"financial_finality":False}
+
+
+@app.post("/v1/bnb/quotes",status_code=201)
+def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
+    from datetime import date
+    subject=active_subject(authorization)
+    try:checkin=date.fromisoformat(payload.checkin);checkout=date.fromisoformat(payload.checkout)
+    except ValueError:raise HTTPException(422,"INVALID_LOCAL_DATE")
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            prop=c.execute("""SELECT capacity,nightly_minor,status,version,currency,title
+                FROM bnb_property WHERE id=%s FOR UPDATE""",(payload.property_id,)).fetchone()
+            if not prop or prop[2]!="published":raise HTTPException(404,"NOT_FOUND")
+            prior=c.execute("""SELECT id,request_digest,expires_at,status,calculation
+                FROM bnb_price_quote WHERE guest_subject=%s AND nonce=%s FOR UPDATE""",
+                (subject,payload.nonce)).fetchone()
+            if prior:
+                if prior[1]!=digest:raise HTTPException(409,"QUOTE_NONCE_CONFLICT")
+                return {"id":str(prior[0]),"status":("expired" if prior[2]<=datetime.now(timezone.utc) else prior[3]),
+                        "calculation":prior[4],"financial_finality":False}
+            policy=c.execute("""SELECT timezone_id,min_nights,house_rules,cancellation_policy
+                FROM bnb_listing_policy WHERE property_id=%s""",
+                (payload.property_id,)).fetchone()
+            if not policy:raise HTTPException(503,"PRICING_POLICY_UNAVAILABLE")
+            try:start,end,nights=local_stay_window(checkin,checkout,policy[0])
+            except ValueError as e:raise HTTPException(422,str(e))
+            validate_window(start,end)
+            if nights<policy[1]:raise HTTPException(422,"MINIMUM_STAY_NOT_MET")
+            rate=c.execute("""SELECT version,seasonal_rates,cleaning_minor,service_minor,
+                tax_bps,discount_bps FROM bnb_rate_plan WHERE property_id=%s""",
+                (payload.property_id,)).fetchone()
+            if not rate:raise HTTPException(503,"RATE_PLAN_UNAVAILABLE")
+            capacity=prop[0]
+            if payload.unit_id:
+                unit=c.execute("""SELECT quantity FROM bnb_unit WHERE property_id=%s AND id=%s""",
+                               (payload.property_id,payload.unit_id)).fetchone()
+                if not unit:raise HTTPException(404,"UNIT_NOT_FOUND")
+                capacity=unit[0]
+            elif c.execute("SELECT 1 FROM bnb_unit WHERE property_id=%s LIMIT 1",
+                           (payload.property_id,)).fetchone():
+                raise HTTPException(422,"UNIT_SELECTION_REQUIRED")
+            used=occupancy_in_window(c,payload.property_id,payload.unit_id,start,end)
+            if used is None or capacity-used<payload.units:
+                raise HTTPException(409,"CAPACITY_EXHAUSTED")
+            try:
+                calculation=quote_breakdown(checkin,checkout,payload.units,prop[1],
+                    rate[1],rate[2],rate[4],rate[5],rate[3],policy[1])
+            except (ValueError,OverflowError) as e:raise HTTPException(422,str(e))
+            snapshot={"property_id":payload.property_id,"unit_id":payload.unit_id,
+                "guest":subject,"property_version":prop[3],"rate_version":rate[0],
+                "timezone":policy[0],"house_rules":policy[2],"cancellation_policy":policy[3],
+                "calculation":calculation,"currency":prop[4],"checkin":payload.checkin,
+                "checkout":payload.checkout}
+            data=json.dumps(snapshot,sort_keys=True,separators=(",",":"))
+            signature=hashlib.sha256(data.encode()).hexdigest()
+            uid=uuid4()
+            expires=datetime.now(timezone.utc)+timedelta(minutes=10)
+            c.execute("""INSERT INTO bnb_price_quote
+                (id,guest_subject,property_id,unit_id,property_version,rate_version,
+                period,checkin,checkout,currency,quantity,calculation,policy_snapshot,
+                snapshot_sha256,expires_at,nonce,request_digest)
+                VALUES (%s,%s,%s,%s,%s,%s,tstzrange(%s,%s,'[)'),%s,%s,%s,%s,
+                %s::jsonb,%s::jsonb,%s,%s,%s,%s)""",
+                (uid,subject,payload.property_id,payload.unit_id,prop[3],rate[0],
+                 start,end,checkin,checkout,prop[4],payload.units,json.dumps(calculation),
+                 data,signature,expires,payload.nonce,digest))
+    return {"id":str(uid),"status":"issued","expires_at":expires.isoformat(),
+            "snapshot_sha256":signature,"calculation":calculation,"currency":prop[4],
+            "financial_finality":False}
+
+
+@app.get("/v1/bnb/quotes/{quote_id}")
+def get_quote(quote_id:str,authorization:str|None=Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT guest_subject,status,expires_at,calculation,currency,
+            snapshot_sha256 FROM bnb_price_quote WHERE id=%s""",(quote_id,)).fetchone()
+    if not row or row[0]!=subject:raise HTTPException(404,"NOT_FOUND")
+    state="expired" if row[2]<=datetime.now(timezone.utc) else row[1]
+    return {"id":quote_id,"status":state,"expires_at":row[2].isoformat(),
+            "calculation":row[3],"currency":row[4].strip(),
+            "snapshot_sha256":row[5],"financial_finality":False}
 
 
 class HoldInput(BaseModel):

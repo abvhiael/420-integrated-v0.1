@@ -421,6 +421,7 @@ class UnitInput(BaseModel):
 
 
 class CalendarBlockInput(BaseModel):
+    quantity: int | None = Field(default=None,ge=1,le=1000)
     start: datetime
     end: datetime
     reason: str = Field(min_length=1,max_length=160)
@@ -480,7 +481,7 @@ def host_units(property_id:str,authorization:str|None=Header(None)):
 
 
 @app.post("/v1/bnb/account/properties/{property_id}/calendar/blocks",status_code=201)
-def block_unit_dates(property_id:str,unit_id:str,payload:CalendarBlockInput,
+def block_unit_dates(property_id:str,unit_id:str|None=None,payload:CalendarBlockInput=None,
                      authorization:str|None=Header(None)):
     subject=active_subject(authorization)
     validate_window(payload.start,payload.end)
@@ -497,28 +498,33 @@ def block_unit_dates(property_id:str,unit_id:str,payload:CalendarBlockInput,
                 if ((payload.start.utcoffset()!=timedelta(0) and payload.start.astimezone(zone).utcoffset()!=payload.start.utcoffset()) or
                     (payload.end.utcoffset()!=timedelta(0) and payload.end.astimezone(zone).utcoffset()!=payload.end.utcoffset())):
                     raise HTTPException(422,"PROPERTY_TIMEZONE_OFFSET_MISMATCH")
-            if not c.execute("SELECT 1 FROM bnb_unit WHERE id=%s AND property_id=%s",
-                             (unit_id,property_id)).fetchone():
-                raise HTTPException(404,"UNIT_NOT_FOUND")
-            if c.execute("""SELECT 1 FROM bnb_block WHERE unit_id=%s AND
-                 period && tstzrange(%s,%s,'[)') LIMIT 1""",
-                 (unit_id,payload.start,payload.end)).fetchone():
-                raise HTTPException(409,"CALENDAR_CONFLICT")
-            # Property-scoped blocks from earlier schema are conservatively global.
-            if c.execute("""SELECT 1 FROM bnb_block WHERE property_id=%s AND unit_id IS NULL
-                AND period && tstzrange(%s,%s,'[)') LIMIT 1""",
-                (property_id,payload.start,payload.end)).fetchone():
-                raise HTTPException(409,"CALENDAR_CONFLICT")
-            if c.execute("""SELECT 1 FROM bnb_hold WHERE property_id=%s
-                AND period && tstzrange(%s,%s,'[)') AND
-                (status='confirmed' OR (status='held' AND expires_at>now())) LIMIT 1""",
-                (property_id,payload.start,payload.end)).fetchone():
-                raise HTTPException(409,"EXISTING_BOOKING_CONFLICT")
+            if unit_id:
+                unit=c.execute("SELECT quantity FROM bnb_unit WHERE id=%s AND property_id=%s",
+                               (unit_id,property_id)).fetchone()
+                if not unit:raise HTTPException(404,"UNIT_NOT_FOUND")
+                capacity=unit[0]
+            else:
+                # A property-wide closure is all-or-nothing; partial closure is
+                # unit scoped because quantity mapping to units is ambiguous.
+                if payload.quantity is not None:
+                    raise HTTPException(422,"PROPERTY_BLOCK_MUST_BE_FULL")
+                capacity=None
+            closure=payload.quantity if payload.quantity is not None else capacity
+            if unit_id:
+                existing=occupancy_in_window(c,property_id,unit_id,payload.start,payload.end)
+                if existing is None or existing+closure>capacity:
+                    raise HTTPException(409,"CALENDAR_CAPACITY_CONFLICT")
+            else:
+                other=c.execute("""SELECT 1 FROM bnb_hold WHERE property_id=%s
+                    AND period && tstzrange(%s,%s,'[)')
+                    AND (status='confirmed' OR (status='held' AND expires_at>now())) LIMIT 1""",
+                    (property_id,payload.start,payload.end)).fetchone()
+                if other:raise HTTPException(409,"EXISTING_BOOKING_CONFLICT")
             bid=uuid4()
             c.execute("""INSERT INTO bnb_block(id,property_id,unit_id,period,reason,created_by,
-                property_version) VALUES (%s,%s,%s,tstzrange(%s,%s,'[)'),%s,%s,%s)""",
+                property_version,quantity) VALUES (%s,%s,%s,tstzrange(%s,%s,'[)'),%s,%s,%s,%s)""",
                 (bid,property_id,unit_id,payload.start,payload.end,payload.reason,
-                 subject,payload.expected_version))
+                 subject,payload.expected_version,closure))
             version=bump_property(c,property_id,subject,"bnb.calendar.block_created")
     return {"id":str(bid),"version":version,"status":"blocked"}
 

@@ -1161,6 +1161,110 @@ def cancel_pending_reservation(reservation_id:UUID,authorization:str|None=Header
             "refund_status":"not_applicable","confirmed":False}
 
 
+class ReservationReplaceInput(BaseModel):
+    new_quote_id: UUID
+    request_type: str=Field(pattern="^(request|instant)$")
+
+
+@app.post("/v1/bnb/reservations/{reservation_id}/replace",status_code=201)
+def replace_pending_reservation(reservation_id:UUID,payload:ReservationReplaceInput,
+    idempotency_key:str=Header(min_length=8,max_length=128),
+    authorization:str|None=Header(None)):
+    """Atomic consented prepayment replacement; never rewrite frozen terms."""
+    guest=active_subject(authorization)
+    digest=hashlib.sha256(json.dumps({"original":str(reservation_id),
+        "quote":str(payload.new_quote_id),"type":payload.request_type},
+        sort_keys=True).encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            source=c.execute("""SELECT property_id FROM bnb_reservation WHERE id=%s""",
+                             (reservation_id,)).fetchone()
+            if not source:raise HTTPException(404,"NOT_FOUND")
+            prop=c.execute("""SELECT host_subject,status,capacity FROM bnb_property
+                WHERE id=%s FOR UPDATE""",(source[0],)).fetchone()
+            if not prop or prop[1]!="published":raise HTTPException(409,"LISTING_NOT_PUBLISHED")
+            prior=c.execute("""SELECT digest,result FROM bnb_request_dedupe
+                WHERE actor=%s AND operation='reservation_replace' AND key=%s FOR UPDATE""",
+                (guest,idempotency_key)).fetchone()
+            if prior:
+                if prior[0]!=digest:raise HTTPException(409,"IDEMPOTENCY_CONFLICT")
+                return prior[1]
+            old=c.execute("""SELECT hold_id,guest_subject,status,pay_proof_id
+                FROM bnb_reservation WHERE id=%s FOR UPDATE""",(reservation_id,)).fetchone()
+            if not old or old[1]!=guest:raise HTTPException(404,"NOT_FOUND")
+            if old[2]!="payment_pending" or old[3] is not None:
+                raise HTTPException(409,"PAY_FINALITY_RECONCILIATION_REQUIRED")
+            previous=c.execute("""SELECT status,expires_at FROM bnb_hold
+                WHERE id=%s FOR UPDATE""",(old[0],)).fetchone()
+            if previous[0]!="held" or previous[1]<=datetime.now(timezone.utc):
+                raise HTTPException(409,"ORIGINAL_HOLD_INACTIVE")
+            quote=c.execute("""SELECT guest_subject,property_id,unit_id,
+                lower(period),upper(period),quantity,status,expires_at,
+                policy_snapshot,calculation FROM bnb_price_quote WHERE id=%s FOR UPDATE""",
+                (payload.new_quote_id,)).fetchone()
+            now=datetime.now(timezone.utc)
+            if not quote or quote[0]!=guest or quote[1]!=source[0]:
+                raise HTTPException(404,"NEW_QUOTE_NOT_FOUND")
+            if quote[6]!="issued" or quote[7]<=now:
+                raise HTTPException(409,"NEW_QUOTE_EXPIRED_OR_REVOKED")
+            if c.execute("SELECT 1 FROM bnb_hold WHERE quote_id=%s LIMIT 1",
+                         (payload.new_quote_id,)).fetchone():
+                raise HTTPException(409,"NEW_QUOTE_ALREADY_USED")
+            enabled=c.execute("SELECT instant_enabled FROM bnb_booking_policy WHERE property_id=%s",
+                              (source[0],)).fetchone()
+            if payload.request_type=="instant" and (not enabled or not enabled[0]):
+                raise HTTPException(403,"INSTANT_BOOK_NOT_ENABLED")
+            cap=prop[2]
+            if quote[2] is not None:
+                unit=c.execute("""SELECT quantity FROM bnb_unit
+                    WHERE id=%s AND property_id=%s""",(quote[2],source[0])).fetchone()
+                if not unit:raise HTTPException(404,"UNIT_NOT_FOUND")
+                cap=unit[0]
+            elif c.execute("SELECT 1 FROM bnb_unit WHERE property_id=%s LIMIT 1",
+                           (source[0],)).fetchone():
+                raise HTTPException(422,"UNIT_SELECTION_REQUIRED")
+            c.execute("UPDATE bnb_hold SET status='cancelled' WHERE id=%s",(old[0],))
+            used=occupancy_in_window(c,source[0],quote[2],
+                                     quote[3],quote[4])
+            if used is None or used+quote[5]>cap:
+                raise HTTPException(409,"REPLACEMENT_CAPACITY_EXHAUSTED")
+            expiry=min(now+timedelta(minutes=10),quote[7])
+            if expiry<=now:raise HTTPException(409,"REPLACEMENT_DEADLINE_EXPIRED")
+            hold_id=uuid4()
+            frozen=json.dumps(quote[8],sort_keys=True,separators=(",",":"))
+            c.execute("""INSERT INTO bnb_hold(id,property_id,unit_id,guest_subject,
+                period,units,status,expires_at,quote_total_minor,policy_snapshot,quote_id)
+                VALUES (%s,%s,%s,%s,tstzrange(%s,%s,'[)'),%s,'held',%s,%s,%s,%s)""",
+                (hold_id,source[0],quote[2],guest,quote[3],quote[4],
+                 quote[5],expiry,quote[9]["total_minor"],frozen,payload.new_quote_id))
+            c.execute("UPDATE bnb_reservation SET status='cancelled' WHERE id=%s",
+                      (reservation_id,))
+            request_id=uuid4()
+            state="accepted" if payload.request_type=="instant" else "requested"
+            c.execute("""INSERT INTO bnb_booking_request(id,hold_id,property_id,
+                guest_subject,host_subject,request_type,state,deadline,expected_quote_id,decided_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (request_id,hold_id,source[0],guest,prop[0],payload.request_type,
+                 state,expiry,payload.new_quote_id,now if state=="accepted" else None))
+            if state=="accepted":
+                c.execute("""INSERT INTO bnb_reservation(id,hold_id,property_id,
+                    guest_subject,status,booking_request_id,policy_snapshot,quote_id,booking_public_id)
+                    VALUES (%s,%s,%s,%s,'payment_pending',%s,%s,%s,%s)""",
+                    (uuid4(),hold_id,source[0],guest,request_id,frozen,
+                     payload.new_quote_id,uuid4()))
+            response={"replacement_request_id":str(request_id),
+                      "hold_id":str(hold_id),"state":state,
+                      "original_reservation_state":"cancelled",
+                      "confirmed":False,"payment_status":"unavailable"}
+            c.execute("""INSERT INTO bnb_request_dedupe(actor,operation,key,digest,result)
+                VALUES (%s,'reservation_replace',%s,%s,%s::jsonb)""",
+                (guest,idempotency_key,digest,json.dumps(response)))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.reservation.replaced_pre_payment',%s)""",
+                (uuid4(),guest,source[0]))
+    return response
+
+
 @app.post("/v1/bnb/reservations/{reservation_id}/modify")
 def modification_requires_new_quote(reservation_id:UUID,authorization:str|None=Header(None)):
     """Never mutate an accepted frozen stay or price in place."""

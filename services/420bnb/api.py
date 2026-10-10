@@ -1100,6 +1100,185 @@ def read_booking_request(request_id:UUID,authorization:str|None=Header(None)):
             "hold_id":str(row[5]),"confirmed":False,"payment_status":"unavailable"}
 
 
+class PayIntentInput(BaseModel):
+    reservation_id: UUID
+    quote_id: UUID
+    merchant_id: str=Field(min_length=1,max_length=200)
+    payout_controller: str=Field(min_length=1,max_length=200)
+    chain_id: int=Field(gt=0,strict=True)
+    asset: str=Field(min_length=1,max_length=120)
+    asset_amount: str=Field(pattern=r"^[1-9][0-9]{0,77}$")
+    pay_invoice_id: str=Field(min_length=1,max_length=200)
+    pay_invoice_expires: datetime
+    conversion_route_id: str|None=None
+    conversion_quote_id: str|None=None
+    conversion_expires: datetime|None=None
+    minimum_received: str|None=None
+    payer_max: str|None=None
+
+
+class PayFinalityInput(BaseModel):
+    reservation_id: UUID
+    intent_id: UUID
+    pay_invoice_id: str
+    pay_payment_id: str
+    receipt_hash: str=Field(min_length=32,max_length=200)
+    chain_id: int=Field(gt=0,strict=True)
+    asset: str
+    asset_amount: str
+    merchant_id: str
+    payout_controller: str
+    finality: str=Field(pattern="^(FINALIZED|SETTLED)$")
+
+
+def signed_pay_claim(token,purpose,payload):
+    if not token:raise HTTPException(401,"PAY_PROOF_REQUIRED")
+    proof=verify_authority(token,"BNB_PAY","pay-"+purpose)
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    if proof.get("payload_hash")!=digest:
+        raise HTTPException(403,"PAY_PAYLOAD_MISMATCH")
+    if proof.get("authority")!="420Pay" or not proof.get("registry_version"):
+        raise HTTPException(403,"CANONICAL_PAY_AUTHORITY_REQUIRED")
+    return proof
+
+
+@app.post("/v1/bnb/internal/pay/intents",status_code=202)
+def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Header(None)):
+    """Only an independently authorized 420Pay invoice issuer may bind an intent."""
+    proof=signed_pay_claim(x_pay_authority_proof,"intent",payload)
+    now=datetime.now(timezone.utc)
+    if (payload.pay_invoice_expires.tzinfo is None or
+        payload.pay_invoice_expires<=now or
+        payload.pay_invoice_expires>now+timedelta(hours=1)):
+        raise HTTPException(422,"INVALID_PAY_INVOICE_EXPIRY")
+    swap=payload.conversion_route_id is not None
+    if swap:
+        if (not payload.conversion_quote_id or payload.conversion_expires is None or
+            payload.minimum_received is None or payload.payer_max is None or
+            payload.conversion_expires.tzinfo is None or
+            payload.conversion_expires<=now or
+            payload.conversion_expires>payload.pay_invoice_expires or
+            not proof.get("pay_bound_swap_approved")):
+            raise HTTPException(403,"PAY_SWAP_ROUTE_NOT_APPROVED")
+    elif any(x is not None for x in (payload.conversion_quote_id,
+                                     payload.conversion_expires,payload.minimum_received,
+                                     payload.payer_max)):
+        raise HTTPException(422,"UNBOUND_SWAP_FIELDS")
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            prop=c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",
+                           (ref[0],)).fetchone()
+            row=c.execute("""SELECT r.guest_subject,r.status,r.quote_id,
+                h.expires_at,h.status,q.calculation,q.currency,p.host_subject
+                FROM bnb_reservation r JOIN bnb_hold h ON h.id=r.hold_id
+                JOIN bnb_price_quote q ON q.id=r.quote_id
+                JOIN bnb_property p ON p.id=r.property_id
+                WHERE r.id=%s FOR UPDATE OF r,h""",(payload.reservation_id,)).fetchone()
+            if not row or row[1]!="payment_pending" or row[4]!="held" or row[3]<=now:
+                raise HTTPException(409,"RESERVATION_NOT_PAYMENT_ELIGIBLE")
+            if row[2]!=payload.quote_id:raise HTTPException(409,"QUOTE_MISMATCH")
+            if row[5]["total_minor"]<0 or payload.merchant_id!=proof.get("merchant_id") or (
+                payload.payout_controller!=proof.get("payout_controller") or
+                proof.get("merchant_activated") is not True):
+                raise HTTPException(403,"PAY_MERCHANT_NOT_AUTHORIZED")
+            if proof.get("guest_subject")!=row[0] or proof.get("host_subject")!=row[7]:
+                raise HTTPException(403,"PAY_PRINCIPAL_MISMATCH")
+            if proof.get("quoted_minor")!=row[5]["total_minor"] or proof.get("currency")!=row[6].strip():
+                raise HTTPException(409,"INVOICE_QUOTE_AMOUNT_MISMATCH")
+            existing=c.execute("""SELECT id,pay_invoice_id FROM bnb_pay_intent
+                WHERE reservation_id=%s""",(payload.reservation_id,)).fetchone()
+            if existing:
+                if existing[1]!=payload.pay_invoice_id:
+                    raise HTTPException(409,"PAY_INTENT_ALREADY_BOUND")
+                return {"intent_id":str(existing[0]),"state":"pending","confirmed":False}
+            intent_id=uuid4()
+            c.execute("""INSERT INTO bnb_pay_intent
+              (id,reservation_id,quote_id,requester,merchant_id,payout_controller,
+               chain_id,asset,asset_amount,settlement_currency,quoted_minor,
+               pay_invoice_id,pay_invoice_expires,conversion_route_id,
+               conversion_quote_id,conversion_expires,minimum_received,payer_max)
+              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+              (intent_id,payload.reservation_id,payload.quote_id,row[0],
+               payload.merchant_id,payload.payout_controller,payload.chain_id,
+               payload.asset,payload.asset_amount,row[6],row[5]["total_minor"],
+               payload.pay_invoice_id,payload.pay_invoice_expires,
+               payload.conversion_route_id,payload.conversion_quote_id,
+               payload.conversion_expires,payload.minimum_received,payload.payer_max))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.pay.intent_bound',%s::jsonb)""",
+                (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),
+                    "intent_id":str(intent_id)})))
+    return {"intent_id":str(intent_id),"state":"pending",
+            "invoice_id":payload.pay_invoice_id,"confirmed":False}
+
+
+@app.post("/v1/bnb/internal/pay/finality",status_code=202)
+def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=Header(None)):
+    """Finality only from independently authorized canonical Pay signer, no callback shortcuts."""
+    proof=signed_pay_claim(x_pay_authority_proof,"finality",payload)
+    if proof.get("finality_verified") is not True or not proof.get("canonical_receipt"):
+        raise HTTPException(403,"FINALITY_NOT_INDEPENDENTLY_VERIFIED")
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            record=c.execute("""SELECT i.reservation_id,i.pay_invoice_id,i.chain_id,i.asset,
+                i.asset_amount,i.merchant_id,i.payout_controller,i.state,
+                i.pay_invoice_expires,i.conversion_expires,i.pay_payment_id,
+                r.status,r.hold_id,h.status,h.expires_at
+                FROM bnb_pay_intent i JOIN bnb_reservation r ON r.id=i.reservation_id
+                JOIN bnb_hold h ON h.id=r.hold_id
+                WHERE i.id=%s AND i.reservation_id=%s FOR UPDATE OF i,r,h""",
+                (payload.intent_id,payload.reservation_id)).fetchone()
+            if not record:raise HTTPException(404,"PAY_INTENT_NOT_FOUND")
+            if (record[1]!=payload.pay_invoice_id or record[2]!=payload.chain_id or
+                record[3]!=payload.asset or record[4]!=payload.asset_amount or
+                record[5]!=payload.merchant_id or record[6]!=payload.payout_controller):
+                raise HTTPException(409,"CANONICAL_PAY_INVOICE_MISMATCH")
+            if proof.get("chain_id")!=payload.chain_id or proof.get("asset")!=payload.asset or (
+                proof.get("payment_id")!=payload.pay_payment_id):
+                raise HTTPException(403,"PAY_FINALITY_DOMAIN_MISMATCH")
+            duplicate=c.execute("""SELECT pay_payment_id,receipt_hash FROM bnb_pay_finality_event
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone()
+            if duplicate:
+                if duplicate==(payload.pay_payment_id,payload.receipt_hash):
+                    return {"state":record[7],"confirmed":record[11]=="confirmed","replayed":True}
+                raise HTTPException(409,"PAY_EVENT_REPLAY_CONFLICT")
+            if record[10] and record[10]!=payload.pay_payment_id:
+                raise HTTPException(409,"PAY_ALREADY_RECONCILED")
+            now=datetime.now(timezone.utc)
+            viable=(record[11]=="payment_pending" and record[13]=="held" and
+                    record[14]>now and record[8]>now and
+                    (record[9] is None or record[9]>now))
+            next_state="finalized" if viable else "recovery_required"
+            c.execute("""INSERT INTO bnb_pay_finality_event
+                (issuer,jti,pay_payment_id,pay_invoice_id,reservation_id,
+                 receipt_hash,chain_id,finality)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],payload.pay_payment_id,payload.pay_invoice_id,
+                 payload.reservation_id,payload.receipt_hash,payload.chain_id,payload.finality))
+            c.execute("""UPDATE bnb_pay_intent SET state=%s,pay_payment_id=%s,receipt_hash=%s
+                WHERE id=%s""",(next_state,payload.pay_payment_id,payload.receipt_hash,
+                               payload.intent_id))
+            if viable:
+                c.execute("UPDATE bnb_hold SET status='confirmed' WHERE id=%s",(record[12],))
+                c.execute("""UPDATE bnb_reservation SET status='confirmed',pay_proof_id=%s
+                    WHERE id=%s""",(payload.pay_payment_id,payload.reservation_id))
+            else:
+                c.execute("""UPDATE bnb_reservation SET status='recovery_required'
+                    WHERE id=%s AND status='payment_pending'""",(payload.reservation_id,))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,%s,%s::jsonb)""",(uuid4(),"bnb.pay."+next_state,
+                    json.dumps({"reservation_id":str(payload.reservation_id),
+                                "payment_id":payload.pay_payment_id})))
+    return {"state":next_state,"confirmed":viable,"replayed":False}
+
+
 @app.post("/v1/bnb/reservations/{reservation_id}/expire")
 def expire_payment_pending_reservation(reservation_id:UUID,
                                        authorization:str|None=Header(None)):

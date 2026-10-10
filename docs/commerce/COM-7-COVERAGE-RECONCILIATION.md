@@ -144,3 +144,17 @@ regressions require default-success/no-retry, exact error gating, unchanged
 source/settings plus retained failed evidence, and an unsuccessful bounded retry.
 There are 17 harness checks before canonical compilation. Their actual CI results
 and complete final-candidate Level 3 remain pending; this proposal is not a PASS.
+
+## Executable bridge mode correction
+
+Candidate `2f576b41ecaee19e48f607f405f8ab9580111b54` is NOT Level 3 qualified.
+Shard 1's canonical CI step passed 663 reported cases across 106 assigned test
+files, but mandatory coverage could not start:
+`"./scripts/coverage-solc.py": Permission denied (os error 13)`.
+Run 38035654957 / job 114165461822, artifact 11665230200.
+The API tree update incorrectly set this directly invoked bridge to mode 100644.
+Restore mode 100755 without changing its content, and add an executable-access
+regression before canonical compilation. There are 18 harness checks.
+The preceding 17 boundary checks passed, but did not check the file mode.
+The bounded Yul compiler retry has not yet been exercised by this candidate;
+its actual execution and complete replacement Level 3 remain mandatory.

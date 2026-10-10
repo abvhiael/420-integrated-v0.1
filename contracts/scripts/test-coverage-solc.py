@@ -84,6 +84,9 @@ class CoverageBoundary(unittest.TestCase):
         return SimpleNamespace(returncode=returncode,
             stdout=json.dumps({"errors": list(errors)}).encode(), stderr=b"")
 
+    def test_compiler_bridge_is_executable(self):
+        self.assertTrue(os.access(Path(__file__).with_name("coverage-solc.py"), os.X_OK))
+
     def test_successful_default_compile_never_retries(self):
         bridge.restore_optimizer(self.payload)
         calls = []

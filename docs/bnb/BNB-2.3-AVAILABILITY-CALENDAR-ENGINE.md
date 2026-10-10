@@ -1,6 +1,6 @@
 # BNB-2.3 — Availability and Calendar Engine
 
-**Status:** STARTED — canonical BNB-2 phase planning handoff; no Level 1 qualification yet.
+**Status:** REPOSITORY-SIDE LEVEL 1 PASS (implementation SHA `0b025f776d1c88ab38df959e2a5ef4a8f6a1a56b`; [runtime CI #38087076160](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38087076160)). External live calendar-issuer/provider and unrelated manual approvals remain deferred.
 **Prior phase plan:** BNB-2.3 follows Host and Property Management (BNB-2.2). Level 1 per step, retained app milestone M1 at BNB-2.5. Follow repository authority if a newer formally committed roadmap supersedes this step definition.
 
 ## Purpose and exit criteria
@@ -47,3 +47,9 @@ Repository-side implementation on PR #600 now includes:
 **Level 1:** targeted runtime qualification must be checked on one final exact implementation SHA. Older CI run #38086650647 failed its staging-container import because `calendar_engine.py` was missing from Dockerfile; this was remedied in the branch. Do not mark final status PASS until corrected exact-SHA runtime and affected workflows complete successfully. Evidence-only additions can inherit qualified SHA; further implementation changes cannot.
 
 **Remaining operational testnet/external requirements:** real authorized calendar issuer/provider credentials, staged provider key rotation/revocation/outage, publication authority, financial settlement/confirmation and human accessibility/media reviewer approvals remain on the BNB testnet roadmap. These do not authorize restricted features merely because local integration tests pass. Full independent downstream release acceptance is distinct from BNB-2.3 repository-side Level 1.
+
+## BNB-2.3 final repository-side Level 1 closeout
+
+The latest exact implementation SHA `0b025f776d1c88ab38df959e2a5ef4a8f6a1a56b` passed targeted PostgreSQL, security, parallel two-process HTTP inventory, signed calendar sync, DST/minimum stay, hold expiry/cancellation, non-root container staging and automated browser/axe tests in workflow #38087076160. Nine other existing BnB workflows also passed; 420Docs Qualification was appropriately skipped, as no Level 3 was scheduled. Evidence: `docs/bnb/qualification/BNB-2.3-LEVEL1-REPOSITORY-CLOSEOUT.json`.
+
+The earlier CI container import defect is corrected by including `calendar_engine.py` in the staging Dockerfile. Local signed-adapter coverage does not certify a real approved external calendar provider. No publication or financial authority was activated. Evidence/documentation-only commits inherit this qualified implementation SHA; executable changes would require new Level 1 qualification. 

@@ -66,24 +66,23 @@ class Tests(unittest.TestCase):
   return dict(connect=lambda:psycopg.connect(USER_DSN),issuer=Issuer(),store=AuthStore(),
       tenant_id=T,order_id=order,offer_id=offer_id,eligibility=Approved())
  def make_offer(self,order,offer_id,revision=1,eligible=None):
-  return offer(**self.common(order,offer_id),token="operator",courier_id=C,
-      expected_revision=revision,requested_units=1,expires_at=datetime.now(timezone.utc)+timedelta(minutes=3),
-      eligibility=eligible or Approved())
+  return offer(**{**self.common(order,offer_id),"eligibility":eligible or Approved()},token="operator",courier_id=C,
+      expected_revision=revision,requested_units=1,expires_at=datetime.now(timezone.utc)+timedelta(minutes=3))
  def accept(self,order,offer_id,accept=True,eligible=None):
   return decide(**{**self.common(order,offer_id),"eligibility":eligible or Approved()},token="courier",accept=accept)
  def test_actual_capacity_conflict_reassignment_and_replay(self):
   self.make_offer(O1,F1)
   self.assertEqual(self.accept(O1,F1),"ASSIGNED")
   with self.assertRaises(Denied):self.accept(O1,F1)
-  self.make_offer(O2,F2)
-  with self.assertRaises(Denied):self.accept(O2,F2)
+  with self.assertRaises(Denied):self.make_offer(O2,F2)
   with self.assertRaises(Denied):
    release_assignment(connect=lambda:psycopg.connect(USER_DSN),issuer=Issuer(),store=AuthStore(),
     token="operator",tenant_id=T,order_id=O1,eligibility=Reject(),reason="test")
   self.assertEqual(release_assignment(connect=lambda:psycopg.connect(USER_DSN),issuer=Issuer(),store=AuthStore(),
     token="operator",tenant_id=T,order_id=O1,eligibility=Approved(),reason="reassign"),"RETAILER_READY")
+  self.make_offer(O2,F2)
   self.assertEqual(self.accept(O2,F2),"ASSIGNED")
-  with self.assertRaises(Denied):self.make_offer(O1,F3,revision=2,eligible=Reject())
+  with self.assertRaises(Denied):self.make_offer(O1,F3,revision=4,eligible=Reject())
   with self.admin.cursor() as c:
    c.execute("SELECT state FROM doobr_private.dispatch_assignments WHERE tenant_id=%s AND order_id=%s",(T,O1))
    self.assertEqual(c.fetchone()[0],"RELEASED")

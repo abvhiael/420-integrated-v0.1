@@ -1,7 +1,7 @@
 {
   "step": "C02.1",
   "canonical": "Official source registry for federal cannabis rules, BC law/licence materials and Vancouver bylaws/licensing; assign an owner and freshness policy to each source.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS",
   "qualification_level": 1,
   "implementation_sha": "322911dcd99fba8a6f38f57805b64d717665bc09",
   "original_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -12,7 +12,18 @@
   "source_file": "docs/compliance/C02.1-OFFICIAL-SOURCES.json",
   "verifier": "scripts/verify-compliance-c02-1.py",
   "ci_runs": [
-    38074580712
+    {
+      "id": 38074580712,
+      "sha": "322911dcd99fba8a6f38f57805b64d717665bc09",
+      "conclusion": "success",
+      "job_id": 114278763358
+    },
+    {
+      "id": 38074602619,
+      "sha": "47eb54aafeb594e48c34473ef9ff238995d89bf0",
+      "conclusion": "success",
+      "job_id": 114278830321
+    }
   ],
   "owner_policy": "Assigned functional curator roles, no named reviewer or regulator appointed",
   "deferred": [
@@ -22,5 +33,6 @@
   ],
   "level2": "C02.10",
   "level3": "C08.5",
-  "next": "C02.2 — HTML/PDF ingestion with safe redirects, size limits, network allowlists, conditional requests, throttling and permitted archival; reject SSRF and malicious content."
+  "next": "C02.2 — HTML/PDF ingestion with safe redirects, size limits, network allowlists, conditional requests, throttling and permitted archival; reject SSRF and malicious content.",
+  "qualification_result": "PASS: exact SHA registry verifier, retained C01 checks, Go security/race suite, evidence artifact"
 }

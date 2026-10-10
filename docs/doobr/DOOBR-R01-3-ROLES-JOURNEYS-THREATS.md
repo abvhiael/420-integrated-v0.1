@@ -1,5 +1,5 @@
 # DOOBR R01.3 — roles, journeys, abuse cases and operational limits
-Status: PROPOSED DESIGN BASELINE; Level 1 qualification pending. Scope: exact canonical R01.3 on PR #601; current main baseline `c5a4f220d1fbda01f707d359aa9bb32921a138b1`. Predecessor R01.2 approves only disabled-by-default development, NOT live delivery/payment or Genesis promotion.
+Status: COMPLETE — scoped R01.3 design, Level 1 PASS against exact implementation SHA `5c4fb2079cd795c470917a1154458abbdcc96ea2`. Scope: exact canonical R01.3 on PR #601; current main baseline `c5a4f220d1fbda01f707d359aa9bb32921a138b1`. Predecessor R01.2 approves only disabled-by-default development, NOT live delivery/payment or Genesis promotion.
 
 ## Role definitions and least privilege
 | Actor | Allowed actions, once separately authorized | Forbidden authority |
@@ -57,3 +57,10 @@ States: `DRAFT -> ELIGIBILITY_PENDING -> ELIGIBLE -> RETAILER_READY -> OFFERED -
 ## Requirements and qualification
 R01.3 deliverables: role/permission matrix, six canonical journey descriptions, lifecycle state and permission boundaries, eighteen adversarial scenarios, safety/operating limits and explicit future test ownership. This step adds documentary design, not active endpoints. Scoped Level 1 verifies these requirements with assertions against the exact implementation SHA; R01.8 Level 2, R05.10 Level 3, DOOBR-AUDIT-9/10 external tests remain deferred.
 Next canonical step: **R01.4 BC/Vancouver legal matrix, three carrier classifications, eligibility and 420Compliance-owned policy versioning; written regulatory-review questions and dependency contract.**
+
+## Exact-SHA Level 1 closeout
+Canonical R01.3 requirements met: [x] least-privilege matrix for consumers/couriers/retailers/operators/system roles; [x] six end-to-end journey designs; [x] lifecycle and recovery limits; [x] R13-T01–T18 adversarial/abuse matrix; [x] prohibited financial, regulatory, privacy and Travel authority bypass; [x] safety and activation constraints. Scope is design specification and test contracts, not deployed services.
+
+Qualified executable/test/documentary candidate `5c4fb2079cd795c470917a1154458abbdcc96ea2`; targeted [push run 38024619504](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38024619504) and [PR run 38024620805](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38024620805): `DOOBR R01 Level 1 / inventory` SUCCESS on exact candidate. Checks: SHA assertion, Python syntax, R01.1/2 baseline regressions, all R01.3 role/journey/18 threat markers, prior DOOBR authority and GEN-SVC-3 fail-closed validators. Earlier runs 38024589051 and 38024591728 failed on missing canonical vault symbol in R01.3 documentary terminology; corrected at the qualified SHA without weakening verifier. The evidence-only commit inheriting this SHA changes no executable source, tests, workflows, config or substantive requirements.
+
+Main/base `c5a4f220d1fbda01f707d359aa9bb32921a138b1`; active PR #601 `roadmap/doobr-bc-vancouver-infrastructure`. Level 2 R01.8 and Level 3 R05.10 intentionally deferred. External BC/Vancouver legal approval, live provider integrations, 420Compliance readiness, real-pay routes and original DOOBR-AUDIT-9/10 remain NOT QUALIFIED; no live execution authorized. Next canonical step: **R01.4 BC/Vancouver legal matrix, three carrier classifications, eligibility and 420Compliance-owned policy versioning; written regulatory-review questions and dependency contract.**

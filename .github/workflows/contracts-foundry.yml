@@ -200,7 +200,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: foundry-level3-shard-${{ matrix.shard }}-${{ github.sha }}
+          name: foundry-level3-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             artifacts/contracts/shard-${{ matrix.shard }}.log
             artifacts/contracts/shard-${{ matrix.shard }}-targets.txt

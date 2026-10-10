@@ -25,7 +25,7 @@ def permission_change(*,connect,issuer,store,token,tenant_id,order_id,
                     c.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
                     c.execute("SELECT set_config('doobr.tenant_id',%s,true)",(tenant_id,))
                     c.execute("""SELECT state FROM doobr_private.delivery_orders WHERE tenant_id=%s
-                                 AND order_id=%s FOR SHARE""",(tenant_id,order_id))
+                                 AND order_id=%s""",(tenant_id,order_id))
                     row=c.fetchone()
                     if not row or row[0] not in ACTIVE:raise Denied("tracking not allowed in order state")
                     c.execute("""SELECT 1 FROM doobr_private.dispatch_assignments WHERE tenant_id=%s

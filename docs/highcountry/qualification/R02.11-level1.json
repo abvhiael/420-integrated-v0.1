@@ -1,0 +1,91 @@
+{
+  "schema": "highcountry-roadmap-step-qualification-v1",
+  "step": "R02.11",
+  "name": "Reconcile bonus/event access to per-player entitlement resolution and actual consumers",
+  "status": "COMPLETE_REPOSITORY_QUALIFICATION",
+  "qualificationLevel": "Level 1 targeted",
+  "implementationSha": "3d9dde122a20f16d073eff807974f2dc910d96dd",
+  "branch": "review/high-country-complete-audit-20261009",
+  "prNumber": 593,
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "workflow": {
+    "name": "High Country R02.11 Targeted Qualification",
+    "runId": 38023232101,
+    "jobId": 114128527123,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38023232101"
+  },
+  "requirementsSatisfied": [
+    "Per-grower/per-content entitlement binding authorized by original grower and matching shared game profile",
+    "Independent bonus region access by two players with separate canonical entitlement grants",
+    "Wrong game, type, content and profile ownership rejected",
+    "Revoked or inactive entitlements re-evaluated against Gaming Protocol on every read",
+    "Bonus-region and optional-competition consumer gates resolve current player's grants rather than a single registration-wide grant",
+    "Founding regions and ordinary competitions remain outside optional-content gates"
+  ],
+  "filesChanged": [
+    "contracts/src/highcountry/player/HighCountryGamingBridge420.sol",
+    "contracts/src/highcountry/player/IHighCountryGamingAccess420.sol",
+    "contracts/src/highcountry/world/BonusRegionAccess420.sol",
+    "contracts/src/highcountry/player/OptionalCompetitionAccess420.sol",
+    "contracts/test/highcountry/unit/player/HighCountryGamingBridge420.t.sol",
+    "contracts/test/highcountry/unit/world/BonusRegionAccess420.t.sol",
+    "contracts/test/highcountry/unit/player/OptionalCompetitionAccess420.t.sol",
+    "docs/highcountry/R02.11-PLAYER-ENTITLEMENTS.md",
+    ".github/workflows/highcountry-r02-11.yml"
+  ],
+  "checks": [
+    {
+      "name": "Contract build",
+      "status": "PASS"
+    },
+    {
+      "name": "Foundry formatting",
+      "status": "PASS"
+    },
+    {
+      "name": "Security lint",
+      "status": "PASS"
+    },
+    {
+      "name": "Targeted High Country player/access regression suite",
+      "status": "PASS",
+      "suites": 6,
+      "passed": 33,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "Retained High Country tests and invariants",
+      "status": "PASS",
+      "suites": 44,
+      "passed": 195,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "Source/specification verification",
+      "status": "PASS",
+      "actions": 56
+    },
+    {
+      "name": "Bonus, competition, Gaming bridge ABI and retained contract ABI",
+      "status": "PASS"
+    }
+  ],
+  "countNote": "33 targeted tests are a subset of the 195-test retained High Country suite; totals are not additive.",
+  "level2": "Affected High Country app integration and invariant suites already passed; future documented milestone closeout separately deferred.",
+  "level3": "Single comprehensive final app phase exact-SHA qualification and main reconciliation deferred.",
+  "deferred": [
+    "Production/testnet deployment and operational consumer acceptance",
+    "Full app-phase Level 3 and main reconciliation"
+  ],
+  "limitations": [
+    "Bonus and optional event registration's legacy entitlementId remains in storage for ABI compatibility but is no longer a universal player grant; per-player bindings are authoritative.",
+    "No live gameplay/service admission acceptance claimed."
+  ],
+  "blockers": [],
+  "evidenceOnlyCommitPolicy": "Evidence-only commit inherits qualified implementation SHA without rerunning unaffected tests.",
+  "nextCanonicalStep": "R02.12 — Validate module code/interface/version/ruleset and active-state consumers"
+}

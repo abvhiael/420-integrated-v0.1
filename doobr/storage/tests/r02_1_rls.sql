@@ -26,7 +26,7 @@ BEGIN
   INSERT INTO doobr_private.actors(tenant_id,actor_id,identity_ref,kind) VALUES
   ('00000000-0000-4000-8000-000000000002','00000000-0000-4000-8000-000000000020','issuer:user-b','CONSUMER');
   RAISE EXCEPTION 'Cross tenant insert unexpectedly allowed';
- EXCEPTION WHEN check_violation THEN NULL;
+ EXCEPTION WHEN insufficient_privilege THEN NULL;
  END;
 END $$;
 COMMIT;
@@ -48,4 +48,6 @@ BEGIN
  IF n <> 8 THEN RAISE EXCEPTION 'Expected 8 FORCE RLS business tables; got %',n; END IF;
  IF NOT EXISTS(SELECT 1 FROM pg_extension WHERE extname='postgis') THEN RAISE EXCEPTION 'Missing PostGIS'; END IF;
 END $$;
+REVOKE ALL ON ALL TABLES IN SCHEMA doobr_private FROM doobr_test_app;
+REVOKE USAGE ON SCHEMA doobr_private FROM doobr_test_app;
 DROP ROLE doobr_test_app;

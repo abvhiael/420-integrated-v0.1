@@ -67,7 +67,8 @@ func(s *PostgreSQLPublicationStore) Bootstrap(ctx context.Context,p PublicationF
  if s==nil||s.DB==nil||ctx==nil||ctx.Err()!=nil||!ValidPublicationFence(p,time.Now().UTC())||p.Sequence>9223372036854775807||p.RevocationEpoch>9223372036854775807{return false,ErrPublicationStale}
  result,err:=s.DB.ExecContext(ctx,`INSERT INTO compliance_publication_fences
  (scope,sequence,revocation_epoch,policy_digest,dependency_digest,expires_at)
- SELECT $1,$2,$3,$4,$5,$6 WHERE NOT pg_is_in_recovery()\n ON CONFLICT (scope) DO NOTHING`,
+ SELECT $1,$2,$3,$4,$5,$6 WHERE NOT pg_is_in_recovery()
+ ON CONFLICT (scope) DO NOTHING`,
  p.Scope,int64(p.Sequence),int64(p.RevocationEpoch),p.PolicyDigest,p.DependencyDigest,p.ExpiresAt)
  if err!=nil{return false,ErrPublicationStale}
  n,err:=result.RowsAffected();if err!=nil{return false,errors.Join(ErrPublicationStale,err)}

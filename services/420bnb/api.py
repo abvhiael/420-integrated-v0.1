@@ -153,6 +153,9 @@ def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
     digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
     with db() as c:
         with c.transaction():
+            # Same-guest nonce collision across distinct properties is serialized
+            # before property locking, avoiding unhandled unique-constraint races.
+            c.execute("SELECT subject FROM bnb_account WHERE subject=%s FOR UPDATE",(subject,))
             prop=c.execute("""SELECT capacity,nightly_minor,status,version,currency,title
                 FROM bnb_property WHERE id=%s FOR UPDATE""",(payload.property_id,)).fetchone()
             if not prop or prop[2]!="published":raise HTTPException(404,"NOT_FOUND")

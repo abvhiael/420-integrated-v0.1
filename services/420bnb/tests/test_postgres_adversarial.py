@@ -270,3 +270,48 @@ def test_bnb23_calendar_sync_has_no_self_provisioned_authority(fixture_property)
     no_issuer=client.post("/v1/bnb/internal/calendar/import",
         json=body,headers={"x-calendar-sync-proof":"forged"})
     assert no_issuer.status_code==503
+
+
+def test_bnb23_authorized_calendar_sync_replay_stale_and_availability(fixture_property,monkeypatch):
+    pid,headers=fixture_property
+    key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://calendar-authority.test.invalid"
+    monkeypatch.setenv("BNB_CALENDAR_SYNC_ISSUER",issuer)
+    monkeypatch.setenv("BNB_CALENDAR_SYNC_AUDIENCE","bnb-calendar")
+    monkeypatch.setenv("BNB_CALENDAR_SYNC_PUBLIC_KEY_PEM",
+        key.public_key().public_bytes(Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    uid=uuid4()
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_unit(id,property_id,label,quantity) VALUES (%s,%s,'Suite',1)",(uid,pid))
+    start=datetime.fromisoformat(payload(pid)["start"])
+    body={"property_id":str(pid),"unit_id":str(uid),
+          "source_id":"partner-calendar-01","external_event_id":"event-busy-01",
+          "source_updated_at":datetime.now(timezone.utc).isoformat(),
+          "start":start.isoformat(),"end":(start+timedelta(days=2)).isoformat(),"quantity":1}
+    now=int(time.time())
+    proof=jwt.encode({"iss":issuer,"aud":"bnb-calendar","sub":"external-reviewer",
+        "purpose":"calendar-import","jti":"calendar-"+str(uuid4()),
+        "iat":now,"nbf":now,"exp":now+120,
+        "property_id":str(pid),"unit_id":str(uid),"source_id":body["source_id"],
+        "external_event_id":body["external_event_id"]},key,algorithm="RS256")
+    try:
+        route="/v1/bnb/internal/calendar/import"
+        accepted=client.post(route,json=body,headers={"x-calendar-sync-proof":proof})
+        assert accepted.status_code==202,accepted.text
+        assert accepted.json()["booking_authority"] is False
+        repeated=client.post(route,json=body,headers={"x-calendar-sync-proof":proof})
+        assert repeated.status_code==409
+        view=client.get("/v1/bnb/availability",params={
+            "property_id":str(pid),"start":body["start"],"end":body["end"]})
+        assert view.status_code==200 and view.json()["units"][0]["available"]==0
+        forged=client.post(route,json={**body,"unit_id":str(uuid4())},
+                           headers={"x-calendar-sync-proof":proof})
+        assert forged.status_code==403
+        stale=client.post(route,json={**body,"source_updated_at":(
+            datetime.now(timezone.utc)-timedelta(days=3)).isoformat()},
+            headers={"x-calendar-sync-proof":proof})
+        assert stale.status_code==422
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_calendar_sync_event WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))

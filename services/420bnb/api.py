@@ -1259,6 +1259,10 @@ def replace_pending_reservation(reservation_id:UUID,payload:ReservationReplaceIn
             c.execute("""INSERT INTO bnb_request_dedupe(actor,operation,key,digest,result)
                 VALUES (%s,'reservation_replace',%s,%s,%s::jsonb)""",
                 (guest,idempotency_key,digest,json.dumps(response)))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.booking.replacement_requested',%s::jsonb)""",
+                (uuid4(),json.dumps({"reservation_id":str(reservation_id),
+                 "replacement_request_id":str(request_id),"new_hold_id":str(hold_id)})))
             c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
                 VALUES (%s,%s,'bnb.reservation.replaced_pre_payment',%s)""",
                 (uuid4(),guest,source[0]))

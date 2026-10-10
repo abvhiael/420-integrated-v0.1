@@ -1113,8 +1113,8 @@ class PayIntentInput(BaseModel):
     conversion_route_id: str|None=None
     conversion_quote_id: str|None=None
     conversion_expires: datetime|None=None
-    minimum_received: str|None=None
-    payer_max: str|None=None
+    minimum_received: str|None=Field(default=None,pattern=r"^[1-9][0-9]{0,77}$")
+    payer_max: str|None=Field(default=None,pattern=r"^[1-9][0-9]{0,77}$")
 
 
 class PayFinalityInput(BaseModel):
@@ -1169,7 +1169,11 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
             payload.conversion_expires.tzinfo is None or
             payload.conversion_expires<=now or
             payload.conversion_expires>payload.pay_invoice_expires or
-            not proof.get("pay_bound_swap_approved")):
+            proof.get("pay_bound_swap_approved") is not True or
+            proof.get("conversion_route_id")!=payload.conversion_route_id or
+            proof.get("conversion_quote_id")!=payload.conversion_quote_id or
+            proof.get("minimum_received")!=payload.minimum_received or
+            proof.get("payer_max")!=payload.payer_max):
             raise HTTPException(403,"PAY_SWAP_ROUTE_NOT_APPROVED")
     elif any(x is not None for x in (payload.conversion_quote_id,
                                      payload.conversion_expires,payload.minimum_received,
@@ -1272,6 +1276,12 @@ def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=
                     raise HTTPException(409,"PAY_PAYMENT_REPLAY_CONFLICT")
                 return {"state":record[7],"confirmed":record[11]=="confirmed",
                         "replayed":True}
+            receipt_owner=c.execute("""SELECT pay_payment_id,reservation_id
+                FROM bnb_pay_finality_event WHERE issuer=%s AND receipt_hash=%s""",
+                (proof["iss"],payload.receipt_hash)).fetchone()
+            if receipt_owner and (receipt_owner[0]!=payload.pay_payment_id or
+                                  receipt_owner[1]!=payload.reservation_id):
+                raise HTTPException(409,"CANONICAL_RECEIPT_ALREADY_CLAIMED")
             if record[10] and record[10]!=payload.pay_payment_id:
                 raise HTTPException(409,"PAY_ALREADY_RECONCILED")
             now=datetime.now(timezone.utc)

@@ -1012,13 +1012,15 @@ def decide_booking_request(request_id:UUID,decision:str,
             info=c.execute("""SELECT property_id FROM bnb_booking_request
                 WHERE id=%s""",(request_id,)).fetchone()
             if not info:raise HTTPException(404,"NOT_FOUND")
-            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(info[0],))
+            current_property=c.execute("""SELECT host_subject,status FROM bnb_property
+                WHERE id=%s FOR UPDATE""",(info[0],)).fetchone()
             record=c.execute("""SELECT hold_id,guest_subject,host_subject,state,deadline,
                 property_id,expected_quote_id FROM bnb_booking_request
                 WHERE id=%s FOR UPDATE""",(request_id,)).fetchone()
             if decision=="withdraw":
                 if actor!=record[1]:raise HTTPException(404,"NOT_FOUND")
-            elif actor!=record[2]:
+            elif (actor!=record[2] or not current_property or
+                  current_property[0]!=actor or current_property[1]!="published"):
                 raise HTTPException(404,"NOT_FOUND")
             if record[3]!="requested":
                 raise HTTPException(409,"REQUEST_NOT_PENDING")

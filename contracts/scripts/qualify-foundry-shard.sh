@@ -25,6 +25,7 @@ if (( ${#targets[@]} == 0 )); then echo "EMPTY SHARD $shard" >&2; exit 1; fi
 printf 'Shard %s/%s: %s primary units, %s deployable sources and %s test sources, from %s total primary units\n' \
   "$shard" "$count" "${#targets[@]}" "${#sources[@]}" "${#tests[@]}" "${#all[@]}"
 printf '%s\n' "${targets[@]}" > "../artifacts/contracts/shard-${shard}-targets.txt"
+printf '%s\n' "${all[@]}" > "../artifacts/contracts/primary-inventory-shard-${shard}.txt"
 # Compile all assigned sources, tests and scripts; compiler errors fail immediately.
 forge build "${targets[@]}"
 # Enforce deployable runtime/initcode limits on production sources only. Reuse the\n# first build cache rather than forcing a second cold compilation.

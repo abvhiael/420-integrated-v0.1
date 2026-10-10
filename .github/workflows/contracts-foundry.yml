@@ -1,4 +1,4 @@
-# RR-10 exact-head Level 3 canonical qualification trigger; no coverage or job semantics changed.
+# Canonical exact-head Level 3 qualification; coverage is a mandatory gate.
 name: Solidity Contracts
 
 on:
@@ -16,6 +16,7 @@ on:
       - "docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md"
       - "docs/audit/420MEDIA-PHASE-CLOSEOUT.md"
       - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
+      - "docs/audit/DOOBR-PHASE-CLOSEOUT.md"
   pull_request:
     paths:
       - "contracts/**"
@@ -27,6 +28,7 @@ on:
       - "docs/puffbuddies/PB-2.14-PHASE-CLOSEOUT.md"
       - "docs/audit/420MEDIA-PHASE-CLOSEOUT.md"
       - "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md"
+      - "docs/audit/DOOBR-PHASE-CLOSEOUT.md"
   workflow_dispatch:
 
 concurrency:
@@ -159,7 +161,7 @@ jobs:
   # with the full CI fuzz/invariant settings. The fixture runs only after all
   # shards succeed and their combined inventory matches the repository exactly.
   level3-shards:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.head_ref == 'audit/420commerce-com-2-upstream-adaptations')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'))
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
@@ -194,6 +196,14 @@ jobs:
           set -euo pipefail
           mkdir -p ../artifacts/contracts
           bash scripts/qualify-foundry-shard.sh '${{ matrix.shard }}' '4' 2>&1 | tee '../artifacts/contracts/shard-${{ matrix.shard }}.log'
+      - name: Mandatory coverage of the same canonical partition
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/test-coverage-solc.py
+          python3 scripts/test-coverage-partition.py
+          python3 scripts/coverage-foundry-shard.py '${{ matrix.shard }}' '4'
       - name: Upload per-shard diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -202,11 +212,13 @@ jobs:
           path: |
             artifacts/contracts/shard-${{ matrix.shard }}.log
             artifacts/contracts/shard-${{ matrix.shard }}-targets.txt
-          if-no-files-found: warn
+            artifacts/contracts/primary-inventory-shard-${{ matrix.shard }}.txt
+            artifacts/contracts/coverage-shard-${{ matrix.shard }}
+          if-no-files-found: error
           retention-days: 30
 
   level3-fixture:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.head_ref == 'audit/420commerce-com-2-upstream-adaptations')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'))
     needs: level3-shards
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -277,10 +289,16 @@ jobs:
           path: artifacts/contracts/creative-kernel-v1.fixture.json
           if-no-files-found: error
 
-      - name: Coverage
-        continue-on-error: true
-        working-directory: contracts
-        run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary
+      - name: Verify and aggregate all four mandatory coverage partitions
+        run: python3 contracts/scripts/merge-coverage.py artifacts/contracts/shards artifacts/contracts/coverage
+      - name: Retain mandatory coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-coverage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/contracts/coverage
+          if-no-files-found: error
+          retention-days: 30
 
 
   # Preserve the existing main/push qualification and Decision #10 fixture.
@@ -368,6 +386,24 @@ jobs:
           if-no-files-found: error
 
       - name: Coverage
-        continue-on-error: true
         working-directory: contracts
-        run: FOUNDRY_PROFILE=coverage forge coverage --ir-minimum --report summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/test-coverage-solc.py
+          python3 scripts/test-coverage-partition.py
+          python3 scripts/coverage-foundry-shard.py --prepare-main-inventory
+          for shard in 0 1 2 3; do
+            python3 scripts/coverage-foundry-shard.py "$shard" 4
+          done
+          python3 scripts/merge-coverage.py ../artifacts/contracts ../artifacts/contracts/coverage
+      - name: Retain mandatory coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundry-coverage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            artifacts/contracts/coverage
+            artifacts/contracts/coverage-shard-*
+          if-no-files-found: error
+          retention-days: 30

@@ -8,7 +8,7 @@
     "behind": 0,
     "merge_base": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c"
   },
-  "overall_result": "PENDING_NOT_QUALIFIED",
+  "overall_result": "SUPERSEDED_NOT_QUALIFIED",
   "merge_ready": false,
   "primary_solidity_units": 1045,
   "canonical_profile": {
@@ -663,5 +663,14 @@
         }
       ]
     }
-  ]
+  ],
+  "superseded_reason": "Subsequent step-log inspection found failing coverage compilation hidden by continue-on-error; current-main reconciliation and a mandatory-coverage replacement candidate are required.",
+  "known_failed_step": {
+    "run": 38012464287,
+    "job": 114105089125,
+    "step": "Coverage",
+    "failure": "Solc 0.8.24 Yul stack-depth compiler error under minimum IR",
+    "allowed_failure": true,
+    "qualifies": false
+  }
 }

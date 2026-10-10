@@ -59,6 +59,7 @@ on:
       - 'docs/audit/420VERIFY-PHASE-CLOSEOUT.md'
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
+      - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
   pull_request:
     paths:
       - 'consensus/**'
@@ -106,6 +107,7 @@ on:
       - 'docs/audit/420LAUNCHPAD-PHASE-CLOSEOUT.md'
       - 'docs/audit/420MEDIA-PHASE-CLOSEOUT.md'
       - 'docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md'
+      - 'docs/audit/DOOBR-PHASE-CLOSEOUT.md'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -116,7 +118,7 @@ permissions:
 
 jobs:
   offline-core:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -134,7 +136,7 @@ jobs:
       - run: go build ./execution/cmd/node420
 
   production-dependencies:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -150,7 +152,7 @@ jobs:
       - run: bash ./scripts/install-production-deps.sh
 
   geth-engine:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -172,7 +174,7 @@ jobs:
       - run: bash ./scripts/live-engine-smoke.sh
 
   fault-matrix:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/exchange-pretestnet-phase-20260930' || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

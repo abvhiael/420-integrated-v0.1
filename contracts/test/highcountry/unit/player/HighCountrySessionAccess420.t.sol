@@ -290,6 +290,7 @@ contract HighCountrySessionAccess420Test {
     }
 
     function _enableRoutineGrant() internal returns (bytes32 grantId, bytes32 scopeHash) {
+        sessionAccess.reviewRoutineCall(address(target), target.tick.selector);
         sessionAccess.setRoutineCall(address(target), target.tick.selector, true);
         account.setSessionEpoch(SESSION_KEY, account.authorizationEpoch());
         scopeHash = account.sessionScope(address(target), target.tick.selector);
@@ -310,6 +311,7 @@ contract HighCountrySessionAccess420Test {
             "CREATE2 address mismatch"
         );
         realAccount.enableSessionKey(SESSION_KEY);
+        realPolicy.reviewRoutineCall(address(target), target.tick.selector);
         realPolicy.setRoutineCall(address(target), target.tick.selector, true);
         bytes32 component = realAccount.accountComponentId();
         bytes32 scope = realAccount.sessionScope(address(target), target.tick.selector);

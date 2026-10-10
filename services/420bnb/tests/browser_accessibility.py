@@ -42,6 +42,11 @@ with sync_playwright() as p:
                                  "capacity":2,"nightly_minor":1000,"currency":"CAD"}])
         elif "/v1/bnb/availability/local?" in url:
             route.fulfill(json={"units":[{"label":"Suite A","available":2}],"nonbinding":True})
+        elif url.endswith("/v1/bnb/quotes"):
+            route.fulfill(status=201,json={"id":"sample-quote","expires_at":"2027-02-10T14:00:00Z",
+                "currency":"CAD","calculation":{"nights":2,"subtotal_minor":2000,
+                "discount_minor":100,"cleaning_minor":200,"service_minor":50,
+                "tax_minor":105,"total_minor":2255}})
         elif url.endswith("/v1/bnb/account/session"):
             route.fulfill(status=201,json={"session_id":"test-session-id","subject":"fixture-host"})
         elif url.endswith("/v1/bnb/account/properties"):
@@ -63,12 +68,18 @@ with sync_playwright() as p:
     section.get_by_label("Check-out date").fill("2027-02-12")
     section.get_by_role("button",name="Check availability").click()
     expect(section).to_contain_text("2 available")
+    section.get_by_role("button",name="Request nonbinding itemized quote").click()
+    expect(section).to_contain_text("Sign in with a valid 420Identity session first.")
     session.get_by_label("420Identity signed session token (held only in memory; never saved)").fill("test-fixture-only")
     session.get_by_role("button",name="Verify session").click()
     expect(session.get_by_role("button",name="Save unpublished draft")).to_be_enabled()
+    section.get_by_role("button",name="Request nonbinding itemized quote").click()
+    expect(section).to_contain_text("Total 2255 CAD minor units")
+    expect(section).to_contain_text("No payment or booking.")
     session.get_by_role("button",name="Refresh drafts").click()
     expect(session.get_by_role("heading",name="Draft cabin")).to_have_count(1)
     assert session.get_by_label("Minimum stay in nights").count()==1
+    assert session.get_by_label("Cleaning fee in currency minor units").count()==1
     session.get_by_role("button",name="Clear session").click()
     expect(session.get_by_role("button",name="Save unpublished draft")).to_be_disabled()
     session.close()

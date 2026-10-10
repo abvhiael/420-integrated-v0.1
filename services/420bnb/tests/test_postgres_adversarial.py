@@ -573,8 +573,7 @@ def test_bnb24_concurrent_quote_same_guest_nonce_is_single_immutable_row(fixture
 
 def test_bnb25_request_withdraw_idempotency_and_capability(fixture_property):
     pid,headers=fixture_property
-    hold=client.post("/v1/bnb/holds",json=payload(pid),headers={
-        **headers,"idempotency-key":"bnb25-hold-0001"})
+    hold=make_bnb25_hold(pid,headers,"bnb25-quote-0001","bnb25-hold-0001")
     assert hold.status_code==201,hold.text
     route="/v1/bnb/booking-requests"
     body={"hold_id":hold.json()["id"],"request_type":"request"}
@@ -602,8 +601,7 @@ def test_bnb25_request_withdraw_idempotency_and_capability(fixture_property):
 
 def test_bnb25_instant_eligibility_pending_payment_and_cancel(fixture_property):
     pid,headers=fixture_property
-    first=client.post("/v1/bnb/holds",json=payload(pid),headers={
-        **headers,"idempotency-key":"bnb25-instant-hold"})
+    first=make_bnb25_hold(pid,headers,"bnb25-quote-instant","bnb25-instant-hold")
     assert first.status_code==201
     body={"hold_id":first.json()["id"],"request_type":"instant"}
     assert client.post("/v1/bnb/booking-requests",json=body,
@@ -666,8 +664,7 @@ def test_bnb25_independent_host_approval_decline_and_expiry(fixture_property,mon
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("UPDATE bnb_property SET host_subject=%s WHERE id=%s",(host,pid))
     def make_request(suffix):
-        hold=client.post("/v1/bnb/holds",json=payload(pid),headers={
-            **guest_headers,"idempotency-key":"bnb25-host-hold-"+suffix})
+        hold=make_bnb25_hold(pid,guest_headers,"bnb25-host-quote-"+suffix,"bnb25-host-hold-"+suffix)
         assert hold.status_code==201,hold.text
         req=client.post("/v1/bnb/booking-requests",json={
             "hold_id":hold.json()["id"],"request_type":"request"},headers={
@@ -729,8 +726,7 @@ def test_bnb25_expired_pending_payment_releases_capacity_once(fixture_property):
         c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",
                   (pid,))
     try:
-        hold=client.post("/v1/bnb/holds",json=payload(pid),headers={
-            **headers,"idempotency-key":"bnb25-expire-hold-1"})
+        hold=make_bnb25_hold(pid,headers,"bnb25-expire-quote-1","bnb25-expire-hold-1")
         assert hold.status_code==201
         booking=client.post("/v1/bnb/booking-requests",json={
             "hold_id":hold.json()["id"],"request_type":"instant"},headers={

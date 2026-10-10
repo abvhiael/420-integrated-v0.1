@@ -123,3 +123,13 @@ This package is not yet:
 - live Gaming Protocol testnet connected.
 
 Those remain later audit/release work.
+
+## Approved artwork library
+
+The canonical production artwork lives at repository-root `assets/budtender/phase-3.1/` through `phase-3.14/`, with a 368-file inventory at `assets/budtender/asset_inventory.json`. Do not duplicate or regenerate these PNGs in the web client.
+
+The web host resolves only exact inventory-listed PNG paths at `/assets/budtender/phase-3.x/<filename>.png`, with `image/png` MIME and same-origin security headers. `GET /assets/budtender/registry.json` exposes an allowlisted index of URLs, sizes and SHA-256 hashes. Unknown assets and non-GET methods fail closed.
+
+The UI displays a preliminary layered starter-store composition from the approved Phase 3.1 environment and Phase 3.2 counter. These layers are non-authoritative; gameplay and economics remain owned by `BudtenderApplicationService`. Production camera placement, pixel-accurate seams, and mobile-browser visual approval are still required.
+
+Run `npm run assets` to audit all 368 committed PNG signatures, lengths and SHA-256 hashes, then `npm run check && npm test && npm run security && npm run ops`. The artwork and route tests are scoped to the Budtender web client.

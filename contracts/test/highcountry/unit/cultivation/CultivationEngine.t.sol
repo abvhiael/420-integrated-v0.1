@@ -14,6 +14,7 @@ import { PlantRegistry } from "../../../../src/highcountry/cultivation/PlantRegi
 import { RulesetRouter } from "../../../../src/highcountry/rules/RulesetRouter.sol";
 import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../../src/highcountry/cultivation/CultivationEngine.sol";
+import { HarvestEngine } from "../../../../src/highcountry/harvest/HarvestEngine.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { HCInvalidState, HCCapacityExceeded } from "../../../../src/highcountry/errors/HighCountryErrors.sol";
 import { PlantSourcesFixture } from "../../mocks/PlantSourcesFixture.sol";
@@ -23,6 +24,7 @@ interface Vm {
     function warp(
         uint256
     ) external;
+    function prank(address) external;
 }
 
 contract MockLandRegistryHC6 {
@@ -77,6 +79,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
     MockLandRegistryHC6 private land;
     PlantRegistry private plants;
     CultivationEngine private cultivation;
+    HarvestEngine private harvest;
     bytes32 private genomeId;
     bytes32 private approvedRulesetId;
 
@@ -106,6 +109,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
         access.bindPlantRegistry(address(plants));
         _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
+        harvest = new HarvestEngine(address(auth), address(plants), address(cultivation));
         EmergencyState emergency = new EmergencyState(address(auth));
         _grant(
             address(this),
@@ -465,6 +469,38 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(plants.genomeOf(plantId) == genomeId, "canonical genome changed");
         _ready(plantId);
         require(cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId) != bytes32(0), "recovery failed");
+    }
+
+    function testR031HarvestReadySingleUseAndCanonicalProvenance() public {
+        uint64 plantId = 88;
+        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(plantId)), keccak256("hc7:register"));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(plantId)), keccak256("hc7:update"));
+        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.PHENOTYPE_EXPRESS, bytes32(uint256(plantId)), keccak256("hc7:express"));
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+        (bool early,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!early, "pre-READY harvest accepted");
+        cultivation.updateEnvironment(plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000));
+        _ready(plantId);
+        (bool unsealed,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!unsealed, "unsealed harvest accepted");
+        bytes32 expression = cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
+        (bool unauthorized,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!unauthorized, "missing authorization accepted");
+        require(!harvest.isHarvestAccepted(plantId), "rejected harvest mutated state");
+        _grant(address(this), ModuleIds.HARVEST_ENGINE, ActionIds.HARVEST_ACCEPT, bytes32(uint256(plantId)), keccak256("hc7:accept"));
+        vm.prank(address(0xBEEF));
+        (bool foreignGrower,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!foreignGrower, "foreign grower accepted");
+        HarvestEngine.HarvestAcceptance memory h = harvest.acceptHarvest(plantId);
+        require(h.accepted && h.plantId == plantId, "harvest not accepted");
+        require(h.genomeId == genomeId && h.expressionHash == expression, "genome or expression provenance lost");
+        require(h.rulesetId == approvedRulesetId && h.rulesetContentHash != bytes32(0), "ruleset provenance lost");
+        require(h.grower == address(this) && h.parcelId == 11 && h.publicPlotId == 0, "grower/parcel provenance lost");
+        require(harvest.isHarvestAccepted(plantId) && harvest.getHarvest(plantId).accepted, "receipt missing");
+        require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.READY, "R03.1 prematurely released capacity");
+        (bool duplicate,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        require(!duplicate, "duplicate harvest accepted");
+        require(harvest.getHarvest(plantId).expressionHash == expression, "duplicate changed receipt");
     }
 
     function _ready(

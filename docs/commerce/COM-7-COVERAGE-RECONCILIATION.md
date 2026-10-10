@@ -172,3 +172,11 @@ exact compiler input and reports bounded optimizer experiments. It deliberately
 fails and blocks new canonical shards until the correction is selected; it is
 not test execution or Level 3 acceptance. Remove the one-time replay dependency
 before final qualification. No runtime source or test assertion is changed.
+
+The first native replay (run 38040847380 / job 114180663032) confirmed both
+retained compiler attempts fail with unchanged 100-source input. Size runs 1,
+non-inlining and a late-inlining experiment also fail. Those results are diagnostic,
+not PASS. A second replay uses the actual Solc 0.8.24 default pass sequence,
+orders expression splitting before full inlining, and isolates the six selected
+test targets to identify the compiler-sensitive fixture. Production and test
+sources remain unchanged; all canonical shards remain blocked during diagnosis.

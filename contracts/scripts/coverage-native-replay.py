@@ -26,15 +26,21 @@ print(version, flush=True)
 spec = importlib.util.spec_from_file_location("coverage_solc", "contracts/scripts/coverage-solc.py")
 bridge = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bridge)
-default_sequence = "dhfoDgvulfnTUtnIf[xa[r]EscLMcCTUtTOntnfDIulLculVcul[jmul[jul]VcTOculjmul]]jmul[jul]VcTOcul"
+default_sequence = ("dhfoDgvulfnTUtnIf[xa[r]EscLMcCTUtTOntnfDIulLculVcul[j]"
+    "Tpeulxa[rul]xa[r]cLgvifCTUca[r]LSsTFOtfDnca[r]Iulc]jmul[jul]VcTOculjmul")
 variants = [
-    ("current-bridge", None),
-    ("canonical-size-runs-1", {"enabled": True, "runs": 1}),
-    ("default-sequence-without-full-inliner", {"enabled": True, "runs": 200,
+    ("solc-0.8.24-default-without-post-inline-ssa", {"enabled": True, "runs": 200,
+        "details": {"yulDetails": {"optimizerSteps":
+            "dhfoDgvulfnTUtnIf[xa[r]EscLMcCTUtTOntnfDIulLculVcul[j]Tpeulxa[rul]xa[r]cLgvif]jmul[jul]VcTOculjmul:fDnTOcmu"}}}),
+    ("documented-sequence-split-before-inline", {"enabled": True, "runs": 200,
+        "details": {"yulDetails": {"optimizerSteps": "dhfoD[xarrscLMcCTU]xgvifjmul:fDnTOcmu"}}}),
+    ("solc-0.8.24-default-without-full-inliner", {"enabled": True, "runs": 200,
         "details": {"yulDetails": {"optimizerSteps": default_sequence.replace("i", "") + ":fDnTOcmu"}}}),
-    ("documented-sequence-late-inliner", {"enabled": True, "runs": 200,
-        "details": {"yulDetails": {"optimizerSteps": "dhfoD[xarrscLMcCTU]uljmulifDnTOcmu"}}}),
+    ("canonical-without-stack-allocation", {"enabled": True, "runs": 200,
+        "details": {"yulDetails": {"stackAllocation": False}}}),
 ]
+print("REPLAY_OTHER_SETTINGS=" + json.dumps({k: v for k, v in payload["settings"].items()
+    if k not in ("outputSelection", "remappings")}), flush=True)
 output_dir = Path("artifacts/contracts/native-compiler-replay")
 output_dir.mkdir(parents=True, exist_ok=True)
 for name, optimizer in variants:
@@ -56,4 +62,21 @@ for name, optimizer in variants:
         continue
     # A diagnostic compile is not an execution or a comprehensive PASS.
     print("NATIVE_REPLAY_COMPILED=" + name, flush=True)
+targets = [
+    "test/BetReferenceSlotVerticalSlice420.t.sol",
+    "test/ComputeIndependentVerifierSelector420.t.sol",
+    "test/ComputeWorkerConflictingResultSlashEvidence420.t.sol",
+    "test/InteropAudit420.t.sol",
+    "test/RegistryIdentityNames420.t.sol",
+    "test/UniBridgeAdapter420.t.sol",
+]
+for target in targets:
+    candidate = copy.deepcopy(payload)
+    candidate["settings"]["outputSelection"] = {target: payload["settings"]["outputSelection"][target]}
+    result, errors, details = bridge.compile_attempt(candidate,
+        lambda encoded: subprocess.run([str(compiler), "--standard-json"],
+            input=encoded, capture_output=True, timeout=300))
+    record = {"target": target, "attempt": details}
+    print("NATIVE_TARGET=" + json.dumps(record), flush=True)
+    (output_dir / (Path(target).name + ".json")).write_text(json.dumps(record, indent=2) + "\n")
 raise SystemExit("Diagnostic-only candidate is NOT qualified; select and verify correction.")

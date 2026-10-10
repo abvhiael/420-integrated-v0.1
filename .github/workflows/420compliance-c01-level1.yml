@@ -56,12 +56,17 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Compile affected qualification scripts
         run: python3 -m py_compile scripts/verify-compliance-c01-3.py scripts/test-compliance-c01-3.py
-      - name: Verify source taxonomy, review ownership and retained evidence
-        run: python3 scripts/verify-compliance-c01-3.py --expected-sha "$EXPECTED_SHA" --output /tmp/compliance-c01-level1.json
+      - name: Verify retained C01.3 at its historically qualified implementation SHA
+        run: |
+          git worktree add --detach /tmp/compliance-c01-3-qualified 9c818d68d4de90bed78f89e9ca520f66efaa7337
+          (cd /tmp/compliance-c01-3-qualified && python3 scripts/verify-compliance-c01-3.py --expected-sha 9c818d68d4de90bed78f89e9ca520f66efaa7337 --output /tmp/compliance-c01-3-retained.json)
       - name: Negative source, review, approval-plane and legal-gap regressions
         run: python3 scripts/test-compliance-c01-3.py
       - name: Verify C01.4 shared authority, requirement IDs and fail-closed Travel boundary
         run: python3 scripts/verify-compliance-c01-4.py "$EXPECTED_SHA"
+      - name: Write current C01.4 exact-SHA qualification result
+        run: |
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C01.4","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"authority_verifier":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

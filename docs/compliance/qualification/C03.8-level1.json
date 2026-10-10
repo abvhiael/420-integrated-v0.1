@@ -37,5 +37,26 @@
       "failover backup monitoring production acceptance",
       "independent legal publisher authorization"
     ]
+  },
+  "production_hardening": {
+    "status": "LEVEL1_PASS",
+    "qualified_implementation_sha": "2416ee645e204492ca617e92bae11a387e5ac63f",
+    "ci_run_id": 38093302258,
+    "ci_job_id": 114333976031,
+    "ci_conclusion": "success",
+    "implemented": [
+      "production wiring via OpenProductionPublicationRuntime and primary-only reads",
+      "verify-full TLS enforced on production DSN with trusted CA file",
+      "controlled PostgreSQL migration SQL and least-privilege reader/publisher role grants",
+      "database disconnect fail-closed and reconnect durability integration checks",
+      "external reviewer signature approval via ed25519 trusted public-key allowlist and signed publication state"
+    ],
+    "remaining_external_acceptance": [
+      "actual regulator/legal reviewer credentials and independently accepted signing keys",
+      "real production database secrets, CA certificates and role provisioning",
+      "deployment into a serving application and real primary failover or split-brain exercises"
+    ],
+    "level2": "C03 milestone",
+    "level3": "C08.5"
   }
 }

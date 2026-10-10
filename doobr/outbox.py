@@ -1,7 +1,7 @@
 """R02.11 tenant-scoped at-least-once outbox worker; signed callback adapter required."""
 from datetime import datetime,timedelta,timezone
 from uuid import UUID
-from .auth import Denied
+from .auth import Denied,Permission,authorize
 
 def _id(value):
  try:return str(UUID(value))
@@ -82,10 +82,41 @@ def dispatch_once(*,connect,tenant_id,worker_id,callback,at=None):
   # A signed callback adapter is required; do not trust a bare HTTP 200.
   receipt=callback.send_signed(event_id=item['event_id'],event_type=item['event_type'],
       payload=item['payload'],deduplication_key=item['event_id'])
-  if not isinstance(receipt,str) or not receipt:
-   raise Denied("missing signed callback receipt")
+  if (not isinstance(receipt,str) or not receipt or
+      callback.verify_receipt(event_id=item['event_id'],receipt_ref=receipt) is not True):
+   raise Denied("signed callback receipt verification failed")
   return settle(connect=connect,tenant_id=tenant_id,worker_id=worker_id,
        event_id=item['event_id'],attempt=item['attempt'],receipt_ref=receipt,at=at)
  except Exception:
   return settle(connect=connect,tenant_id=tenant_id,worker_id=worker_id,
        event_id=item['event_id'],attempt=item['attempt'],error_code='CALLBACK_FAILED',at=at)
+
+def recover_dead_letter(*,connect,issuer,store,token,tenant_id,order_id,event_id,
+                        recovery_authority,at=None):
+ """Authorized, independently approved recovery without recreating an event."""
+ at=at or datetime.now(timezone.utc)
+ if at.tzinfo is None:raise Denied("invalid recovery time")
+ tenant_id,order_id,event_id=map(_id,(tenant_id,order_id,event_id))
+ session=authorize(issuer=issuer,store=store,signed_token=token,tenant_id=tenant_id,
+   permission=Permission("OPERATOR","RECOVER_OUTBOX","order:"+order_id),now=at)
+ actor=_id(session.actor_id)
+ try:
+  with connect() as db:
+   with db.transaction():
+    with db.cursor() as c:
+     c.execute("SELECT set_config('doobr.tenant_id',%s,true)",(tenant_id,))
+     c.execute("""SELECT status FROM doobr_private.event_outbox
+       WHERE tenant_id=%s AND order_id=%s AND event_id=%s FOR UPDATE""",
+       (tenant_id,order_id,event_id))
+     if c.fetchone()!=("DEAD",):raise Denied("not a recoverable dead letter")
+     if recovery_authority.approve(tenant_id=tenant_id,order_id=order_id,
+             event_id=event_id,actor_id=actor,at=at) is not True:
+      raise Denied("dead-letter recovery unapproved")
+     c.execute("""UPDATE doobr_private.event_outbox SET status='PENDING',
+       attempt_count=0,next_attempt_at=%s,last_error_code=NULL
+       WHERE tenant_id=%s AND order_id=%s AND event_id=%s AND status='DEAD'""",
+       (at,tenant_id,order_id,event_id))
+     if c.rowcount!=1:raise Denied("dead-letter race")
+     return 'PENDING'
+ except Denied:raise
+ except Exception as exc:raise Denied("dead-letter recovery unavailable") from exc

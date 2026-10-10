@@ -15,6 +15,7 @@ import { RulesetRouter } from "../../../../src/highcountry/rules/RulesetRouter.s
 import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { HarvestEngine } from "../../../../src/highcountry/harvest/HarvestEngine.sol";
+import { HarvestProductRegistry } from "../../../../src/highcountry/harvest/HarvestProductRegistry.sol";
 import { HarvestScoring } from "../../../../src/highcountry/harvest/HarvestScoring.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { HCInvalidState, HCCapacityExceeded } from "../../../../src/highcountry/errors/HighCountryErrors.sol";
@@ -83,6 +84,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
     PlantRegistry private plants;
     CultivationEngine private cultivation;
     HarvestEngine private harvest;
+    HarvestProductRegistry private products;
     bytes32 private genomeId;
     bytes32 private approvedRulesetId;
 
@@ -113,6 +115,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
         _bindPlantSources(caps, plants);
         cultivation = new CultivationEngine(address(auth), address(plants));
         harvest = new HarvestEngine(address(auth), address(plants), address(cultivation));
+        products = new HarvestProductRegistry(address(harvest));
         EmergencyState emergency = new EmergencyState(address(auth));
         _grant(
             address(this),
@@ -526,6 +529,21 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(h.rulesetId == approvedRulesetId && h.rulesetContentHash != bytes32(0), "ruleset provenance lost");
         require(h.grower == address(this) && h.parcelId == 11 && h.publicPlotId == 0, "grower/parcel provenance lost");
         require(harvest.isHarvestAccepted(plantId) && harvest.getHarvest(plantId).accepted, "receipt missing");
+        require(products.totalIssuedGrams() == 0, "premature inventory mint");
+        vm.prank(address(0xBEEF));
+        bytes32 productId = products.registerHarvestProduct(plantId);
+        HarvestProductRegistry.Product memory product = products.getProduct(productId);
+        require(product.registered && product.plantId == plantId, "canonical product missing");
+        require(product.grower == address(this) && product.parcelId == 11, "relayer stole provenance");
+        require(product.genomeId == genomeId && product.expressionHash == expression, "product provenance changed");
+        require(product.rulesetId == approvedRulesetId && product.rulesetContentHash != bytes32(0), "ruleset provenance changed");
+        require(product.quantityGrams == harvest.getHarvestScore(plantId).yieldGrams, "quantity not canonical");
+        require(products.issuedGramsByGrower(address(this)) == product.quantityGrams, "grower ledger incorrect");
+        require(products.totalIssuedGrams() == product.quantityGrams, "issuance conservation failed");
+        require(products.totalRegisteredProducts() == 1, "product count");
+        (bool duplicateProduct,) =
+            address(products).call(abi.encodeCall(products.registerHarvestProduct, (plantId)));
+        require(!duplicateProduct && products.totalIssuedGrams() == product.quantityGrams, "replay inflated inventory");
         HarvestScoring.Result memory scored = harvest.getHarvestScore(plantId);
         HarvestScoring.Result memory quote = harvest.quoteHarvest(plantId);
         require(scored.yieldGrams == quote.yieldGrams, "accepted yield differs from quote");

@@ -320,3 +320,29 @@ def test_bnb23_authorized_calendar_sync_replay_stale_and_availability(fixture_pr
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_calendar_sync_event WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
+
+
+def test_bnb23_expiry_idempotency_and_capacity_recovery(fixture_property):
+    pid,headers=fixture_property
+    data=payload(pid)
+    key="bnb23-expiry-0001"
+    created=client.post("/v1/bnb/holds",json=data,
+                        headers={**headers,"idempotency-key":key})
+    assert created.status_code==201,created.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_hold SET expires_at=now()-interval '1 second' WHERE id=%s",
+                  (created.json()["id"],))
+    replay=client.post("/v1/bnb/holds",json=data,
+                       headers={**headers,"idempotency-key":key})
+    assert replay.status_code==201 and replay.json()["status"]=="expired"
+    assert client.post("/v1/bnb/holds/"+created.json()["id"]+"/release",
+                       headers=headers).status_code==409
+    preview=client.get("/v1/bnb/availability",params={
+        "property_id":str(pid),"start":data["start"],"end":data["end"]})
+    assert preview.status_code==200 and preview.json()["units"][0]["available"]==1
+    next_hold=client.post("/v1/bnb/holds",json=data,
+                          headers={**headers,"idempotency-key":"bnb23-expiry-0002"})
+    assert next_hold.status_code==201
+    conflict=client.post("/v1/bnb/holds",json={**data,"units":2},
+                         headers={**headers,"idempotency-key":"bnb23-expiry-0002"})
+    assert conflict.status_code==409

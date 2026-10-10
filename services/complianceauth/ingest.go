@@ -86,7 +86,7 @@ func (f *SourceFetcher) Fetch(ctx context.Context,p SourcePolicy,etag,modified s
  res,err:=client.Do(req);if err!=nil{return Snapshot{},err}
  defer res.Body.Close()
  if res.Request!=nil && (res.Request.URL==nil||res.Request.URL.String()!=p.URL){return Snapshot{},ErrUnsafeSource}
- if res.StatusCode>=300&&res.StatusCode<400{return Snapshot{},ErrUnsafeSource}
+ if res.StatusCode>=300&&res.StatusCode<400&&res.StatusCode!=http.StatusNotModified{return Snapshot{},ErrUnsafeSource}
  if res.StatusCode!=http.StatusOK&&res.StatusCode!=http.StatusNotModified{return Snapshot{},fmt.Errorf("official source HTTP %d",res.StatusCode)}
  snap:=Snapshot{SourceID:p.ID,Status:res.StatusCode,ETag:res.Header.Get("ETag"),LastModified:res.Header.Get("Last-Modified"),RetrievedAt:now,NotModified:res.StatusCode==http.StatusNotModified}
  if snap.NotModified{return snap,nil}

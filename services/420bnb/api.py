@@ -1226,6 +1226,10 @@ def release_hold(hold_id:str,authorization:str|None=Header(None)):
             c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
             row=c.execute("""SELECT status,expires_at FROM bnb_hold WHERE id=%s FOR UPDATE""",
                           (hold_id,)).fetchone()
+            if c.execute("""SELECT 1 FROM bnb_booking_request
+                WHERE hold_id=%s AND state IN ('requested','accepted') LIMIT 1""",
+                (hold_id,)).fetchone():
+                raise HTTPException(409,"BOOKING_REQUEST_MUST_BE_RESOLVED")
             if row[0]=="confirmed":raise HTTPException(409,"CONFIRMED_HOLD_PROTECTED")
             if row[0]=="cancelled":return {"id":hold_id,"status":"cancelled"}
             if row[0]!="held" or row[1]<=datetime.now(timezone.utc):

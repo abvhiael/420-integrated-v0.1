@@ -1,9 +1,9 @@
 # DOOBR R01.1 — merged-baseline repository inventory and gap audit
-Date: 2026-10-09. Status: **Level 1 qualification pending workflow completion**.
+Date: 2026-10-09. Status: **COMPLETE — exact-SHA Level 1 qualified (repository inventory / gaps only)**.
 Canonical step: **R01.1 Repository inventory and gap audit against current main; catalogue exact reuse boundaries.**
 Repository: `abvhiael/420-integrated-v0.1`; active branch `roadmap/doobr-bc-vancouver-infrastructure`; PR #601 (draft).
 Inspected main/base SHA: `c5a4f220d1fbda01f707d359aa9bb32921a138b1` (PR #598 merge).
-Starting R01 branch implementation HEAD: `5b1b5ca168eae77df59f02f4c354d629831774b1`. This report and its verifier/CI introduce a new implementation SHA, to be recorded in a separate exact-head qualification record after the job runs.
+Starting R01 branch implementation HEAD: `5b1b5ca168eae77df59f02f4c354d629831774b1`. The R01.1 inventory verifier and scoped workflow were qualified at exact implementation SHA `cc4df20588d1690efed43f1db46e2c521acff8a3`; this evidence-only update inherits that qualification.
 
 ## Canonical purpose and exit criteria
 Create a current-main source-of-truth inventory, distinguish prior fail-closed Travel compatibility from independently approved DOOBR runtime, map reusable canonical services and frozen authority boundaries, identify all missing standalone deliverables, classify partial/unverified/deferred requirements and supply targeted exact-SHA Level 1 evidence. This is a **source inventory** step, not authorization to begin regulated dispatch nor a premature R01.8 Level 2 milestone.
@@ -53,5 +53,15 @@ Travel's Genesis transaction gateway stays unconditionally disabled; no live can
 
 ## Qualification and disposition
 Required Level 1: Python source syntax, targeted R01.1 inventory verifier, canonical existing DOOBR/GEN-SVC-3 static validators relevant to unchanged compatibility safety, and exact-SHA checkout assertion. No affected Solidity or Go executable file changed, so no global Foundry, Geth, full Docs/Genesis duplication or integration milestone suite is justified.
-CI: `DOOBR R01 Level 1` to be run against the exact PR head with `docs/doobr/**` and `scripts/verify-doobr-r01-1.py` path triggers. **Until its required run passes, R01.1 remains PARTIAL.** Record the final exact implementation SHA, run ID, job result and evidence SHA in a subsequent evidence-only update, not a speculative PASS.
+CI: `DOOBR R01 Level 1` to be run against the exact PR head with `docs/doobr/**` and `scripts/verify-doobr-r01-1.py` path triggers. **PASS** on [GitHub Actions run 38022938626](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38022938626), job `inventory` (SUCCESS), exact head `cc4df20588d1690efed43f1db46e2c521acff8a3`. Independent push-trigger run [38022937531](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38022937531) also SUCCESS at the same SHA. Steps include exact checkout, Python syntax, R01.1 authority/roadmap/source checks, prior DOOBR authority verifier and GEN-SVC-3 validator. This evidence update is documentary only; no executable code, tests, config or workflow changes.
 Next canonical step: **R01.2 Standalone product authorization decision (not a new frozen Genesis app without explicit catalogue decision).**
+
+## Final R01.1 exit-criterion review
+- [x] Current `main`, PR branch, predecessor merge, canonical roadmap and original DOOBR audit evidence identified.
+- [x] Inventory of identified source, config, tests, approvals, service dependencies and CI trigger ownership.
+- [x] Explicit SATISFIED/PARTIAL/MISSING/BLOCKED decisions and implementation versus deferred-scope separation.
+- [x] Reusable 420Pay/DevComp/Travel/Compliance authority boundaries enumerated; no unsupported approvals invented.
+- [x] Scoped exact-implementation-SHA Level 1 GitHub Actions PASS recorded.
+- [x] R01.8 Level 2 / R05.10 Level 3 and DOOBR-AUDIT-9/10 correctly deferred.
+
+**R01.1 COMPLETE only as an inventory/gap audit, not standalone DOOBR execution.** No existing app runtime or cannabis-delivery license is claimed. Next: **R01.2 Standalone product authorization decision (not a new frozen Genesis app without explicit catalogue decision).**

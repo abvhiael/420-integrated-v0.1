@@ -28,6 +28,7 @@ def principal(subject: str | None, role: str | None, signed_at: str | None, sign
     # This is a service-to-service adapter, not a raw user session verifier.
     # Deploy only behind an ingress that verifies the real Identity issuer and
     # signs these scoped assertions; strip incoming x-authenticated-* headers.
+    raise HTTPException(503, "IDENTITY_SESSION_REQUIRED")
     secret = os.getenv("BNB_IDENTITY_ASSERTION_SECRET", "")
     if len(secret) < 32:
         raise HTTPException(503, "IDENTITY_NOT_CONFIGURED")

@@ -15,16 +15,23 @@ import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
 contract MockHighCountryModuleV1 {
     function highCountryModuleIdentity() external pure returns (bytes32, uint32, bytes32, bytes32) {
-        return (keccak256("HC.MODULE.TEST"), 1, keccak256(abi.encode(keccak256("HC.RULESET.V1"), keccak256("ruleset:test"))), keccak256("HC.INTERFACE.TEST.V1"));
+        return (
+            keccak256("HC.MODULE.TEST"),
+            1,
+            keccak256(abi.encode(keccak256("HC.RULESET.V1"), keccak256("ruleset:test"))),
+            keccak256("HC.INTERFACE.TEST.V1")
+        );
     }
 }
 
 contract MockHighCountryModuleV2 { }
 
 interface VmModuleR0212 {
-    function etch(address who, bytes calldata code) external;
+    function etch(
+        address who,
+        bytes calldata code
+    ) external;
 }
-
 
 contract ModuleRegistryTest {
     bytes32 private constant MODULE_ID = keccak256("HC.MODULE.TEST");
@@ -46,21 +53,35 @@ contract ModuleRegistryTest {
         capabilityRegistry.setGrant(
             keccak256("grant:ruleset-register"),
             ICapabilityRegistry420.CapabilityGrant({
-                principal: address(this), componentId: ModuleIds.RULESET_REGISTRY,
-                capabilityId: ActionIds.RULESET_REGISTER, scopeHash: RULESET_ID,
-                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
-                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
-            }), 0
+                principal: address(this),
+                componentId: ModuleIds.RULESET_REGISTRY,
+                capabilityId: ActionIds.RULESET_REGISTER,
+                scopeHash: RULESET_ID,
+                perCallLimit: 0,
+                periodLimit: 0,
+                periodSeconds: 0,
+                validFrom: 0,
+                validUntil: uint64(block.timestamp + 1 days),
+                revoked: false
+            }),
+            0
         );
         rulesets.registerRuleset(keccak256("ruleset:test"));
         capabilityRegistry.setGrant(
             keccak256("grant:bind-rulesets"),
             ICapabilityRegistry420.CapabilityGrant({
-                principal: address(this), componentId: ModuleIds.MODULE_REGISTRY,
-                capabilityId: ActionIds.MODULE_BIND_RULESETS, scopeHash: registry.RULESET_BIND_SCOPE(),
-                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
-                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
-            }), 0
+                principal: address(this),
+                componentId: ModuleIds.MODULE_REGISTRY,
+                capabilityId: ActionIds.MODULE_BIND_RULESETS,
+                scopeHash: registry.RULESET_BIND_SCOPE(),
+                perCallLimit: 0,
+                periodLimit: 0,
+                periodSeconds: 0,
+                validFrom: 0,
+                validUntil: uint64(block.timestamp + 1 days),
+                revoked: false
+            }),
+            0
         );
         registry.bindRulesetRegistry(address(rulesets));
 
@@ -70,21 +91,34 @@ contract ModuleRegistryTest {
         capabilityRegistry.setGrant(
             keccak256("grant:execute"),
             ICapabilityRegistry420.CapabilityGrant({
-                principal: address(this), componentId: ModuleIds.MODULE_REGISTRY,
+                principal: address(this),
+                componentId: ModuleIds.MODULE_REGISTRY,
                 capabilityId: ActionIds.MODULE_EXECUTE,
                 scopeHash: keccak256(abi.encode(MODULE_ID, MockHighCountryModuleV1.highCountryModuleIdentity.selector)),
-                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
-                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
-            }), 0
+                perCallLimit: 0,
+                periodLimit: 0,
+                periodSeconds: 0,
+                validFrom: 0,
+                validUntil: uint64(block.timestamp + 1 days),
+                revoked: false
+            }),
+            0
         );
         capabilityRegistry.setGrant(
             keccak256("grant:restrict"),
             ICapabilityRegistry420.CapabilityGrant({
-                principal: address(this), componentId: ModuleIds.EMERGENCY_STATE,
-                capabilityId: ActionIds.EMERGENCY_RESTRICT, scopeHash: EmergencyDomains.MODULE_ACTIVATION,
-                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
-                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
-            }), 0
+                principal: address(this),
+                componentId: ModuleIds.EMERGENCY_STATE,
+                capabilityId: ActionIds.EMERGENCY_RESTRICT,
+                scopeHash: EmergencyDomains.MODULE_ACTIVATION,
+                perCallLimit: 0,
+                periodLimit: 0,
+                periodSeconds: 0,
+                validFrom: 0,
+                validUntil: uint64(block.timestamp + 1 days),
+                revoked: false
+            }),
+            0
         );
         capabilityRegistry.setGrant(
             keccak256("grant:bind-emergency"),
@@ -189,17 +223,18 @@ contract ModuleRegistryTest {
 
     function testR0212CanonicalRulesetAndArtifactMismatchesRejected() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
-        (bool ok,) = address(registry).call(
-            abi.encodeCall(registry.registerModule, (MODULE_ID, address(implementation), uint32(1), RULESET_ID))
-        );
+        (bool ok,) = address(registry)
+            .call(abi.encodeCall(registry.registerModule, (MODULE_ID, address(implementation), uint32(1), RULESET_ID)));
         require(!ok, "unapproved binary registered");
-        (ok,) = address(registry).call(
-            abi.encodeCall(registry.approveArtifact, (MODULE_ID, address(implementation), uint32(2), RULESET_ID))
-        );
+        (ok,) = address(registry)
+            .call(abi.encodeCall(registry.approveArtifact, (MODULE_ID, address(implementation), uint32(2), RULESET_ID)));
         require(!ok, "wrong version approved");
-        (ok,) = address(registry).call(
-            abi.encodeCall(registry.approveArtifact, (MODULE_ID, address(implementation), uint32(1), keccak256("bogus")))
-        );
+        (ok,) = address(registry)
+            .call(
+                abi.encodeCall(
+                    registry.approveArtifact, (MODULE_ID, address(implementation), uint32(1), keccak256("bogus"))
+                )
+            );
         require(!ok, "unregistered ruleset approved");
         registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
         require(registry.approvedArtifactHash(MODULE_ID) != bytes32(0), "missing manifest approval");
@@ -246,9 +281,7 @@ contract ModuleRegistryTest {
         registry.setModuleState(MODULE_ID, UpgradeState.QUALIFIED);
         registry.setModuleState(MODULE_ID, UpgradeState.SCHEDULED);
         emergency.setRestricted(EmergencyDomains.MODULE_ACTIVATION, true);
-        (bool ok,) = address(registry).call(
-            abi.encodeCall(registry.setModuleState, (MODULE_ID, UpgradeState.ACTIVE))
-        );
+        (bool ok,) = address(registry).call(abi.encodeCall(registry.setModuleState, (MODULE_ID, UpgradeState.ACTIVE)));
         require(!ok, "emergency activated scheduled module");
     }
 

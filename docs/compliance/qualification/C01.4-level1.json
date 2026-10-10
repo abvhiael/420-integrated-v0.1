@@ -3,7 +3,7 @@
   "name": "Agree shared authority with DOOBr and Travel; replace duplicated proposed policy ownership through an explicit roadmap amendment with preserved requirement IDs.",
   "qualification_level": 1,
   "status": "AWAITING_EXACT_SHA_CI",
-  "implementation_sha": "8b4fdac1850a963b781458c342e635021c8f93c2",
+  "implementation_sha": "c2a4bb7fc23bce9c950eddf350e0f0b0624e9180",
   "main_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
   "pr": 602,
   "branch": "audit/420compliance-c01-1-inventory-20261009",
@@ -28,7 +28,8 @@
     "retained_c01_3_regressions": "35 PASS",
     "c01_4_verifier": "FAIL due omitted explicit TRAVEL-TN-08 name; corrected in implementation SHA",
     "current_run_id": 38027231242,
-    "current_run_conclusion": "PENDING"
+    "current_run_conclusion": "PENDING_NEW_SHA",
+    "previous_failure": "Required explicit no transaction activation assertion was absent from amendment; added in implementation SHA"
   },
   "level2": "C01.8 — deferred",
   "level3": "C08.5 — deferred",

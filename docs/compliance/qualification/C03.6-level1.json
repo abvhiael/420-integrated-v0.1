@@ -1,0 +1,40 @@
+{
+  "step": "C03.6",
+  "canonical": "Canonical credential references with validity, verification freshness, revocation and explicit unavailable states; no fabricated live licensing adapter.",
+  "status": "PENDING_REQUIRED_LEVEL1_CI",
+  "qualification_level": 1,
+  "implementation_sha": "014650e8099abd2ec71e79c92f2438485cad9222",
+  "main_sha_observed": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "original_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/credential_reference.go",
+    "services/complianceauth/credential_reference_test.go",
+    "docs/compliance/C03.6-CREDENTIAL-REFERENCES.md",
+    ".github/workflows/420compliance-c01-level1.yml"
+  ],
+  "ci": {
+    "run_id": 38089519554,
+    "job_id": 114322899714,
+    "conclusion": null,
+    "status_at_recording": "queued"
+  },
+  "coverage": [
+    "canonical issuer subject credential kind jurisdiction source digest",
+    "validity interval and verification freshness",
+    "verified, revoked, unavailable, not found and unknown",
+    "mismatch and cancelled verifier checks",
+    "no automatic policy authorization"
+  ],
+  "limitations": [
+    "no independent live licensed-regulator integration or authenticated trusted issuer acceptance",
+    "local verifier interface needs external provider credentials and deployment acceptance"
+  ],
+  "level2": "C03 milestone deferred",
+  "level3": "C08.5 deferred",
+  "blockers": [
+    "exact-SHA required workflow has not completed"
+  ],
+  "next_canonical": "C03.7 — Bound decision receipts and replay prevention; define expiry, decision input commitments and action-stage re-evaluation."
+}

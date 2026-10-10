@@ -619,6 +619,59 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(products.totalRegisteredProducts() == countBefore, "termination duplicated product");
     }
 
+    function testR035AcceptedUnregisteredHarvestSettlesAfterTermination() public {
+        uint64 plantId = 92;
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("r035:register")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(plantId)),
+            keccak256("r035:update")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.PHENOTYPE_EXPRESS,
+            bytes32(uint256(plantId)),
+            keccak256("r035:express")
+        );
+        _grant(
+            address(this),
+            ModuleIds.HARVEST_ENGINE,
+            ActionIds.HARVEST_ACCEPT,
+            bytes32(uint256(plantId)),
+            keccak256("r035:accept")
+        );
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+        cultivation.updateEnvironment(
+            plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
+        );
+        _ready(plantId);
+        cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
+        uint32 activeBefore = plants.activePlantsByParcel(11);
+        harvest.acceptHarvest(plantId);
+        require(products.productOfPlant(plantId) == bytes32(0), "premature issuance");
+        plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
+        require(plants.activePlantsByParcel(11) == activeBefore - 1, "capacity not released");
+        require(harvest.isHarvestAccepted(plantId), "accepted harvest lost");
+        vm.prank(address(0xBEEF));
+        bytes32 productId = products.registerHarvestProduct(plantId);
+        require(products.getProduct(productId).grower == address(this), "relayer changed owner");
+        require(products.getProduct(productId).quantityGrams == harvest.getHarvestScore(plantId).yieldGrams, "score changed");
+        require(products.totalRegisteredProducts() == 1, "settlement did not register once");
+        (bool duplicate,) = address(products).call(abi.encodeCall(products.registerHarvestProduct, (plantId)));
+        require(!duplicate, "duplicate settlement");
+        require(products.totalRegisteredProducts() == 1, "duplicate product count");
+        require(plants.activePlantsByParcel(11) == activeBefore - 1, "settlement changed released capacity");
+    }
+
     function testR034CancellationAndRestrictedModeReleaseCapacityOnce() public {
         uint64 plantId = 91;
         _grant(

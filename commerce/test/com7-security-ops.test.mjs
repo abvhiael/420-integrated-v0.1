@@ -33,7 +33,7 @@ test('COM-7 canonical RPC outage halts sensitive operations without marking paym
  f.setOutage(true);
  await assert.rejects(()=>f.service.status(buyer.address,attempt.attemptId));
  await assert.rejects(()=>f.service.merchantAnalytics(seller.address,store.store_id));
- await assert.rejects(()=>f.service.prepare(buyer.address,{cartId:f.db.get('SELECT cart_id FROM cart_sessions LIMIT 1').cart_id,cartVersion:1,idempotencyKey:'0123456789abcdef'}));
+ await assert.rejects(()=>f.service.prepare(buyer.address,{cartId:f.db.get('SELECT cart_id FROM cart_sessions LIMIT 1').cart_id,cartVersion:1,idempotencyKey:'0123456789abcdef'})); // gitleaks:allow -- public non-secret retry identifier, not a credential
  assert.equal(f.db.get('SELECT COUNT(*) AS n FROM checkout_attempts').n,1);
  assert.equal(f.db.get('SELECT COUNT(*) AS n FROM refund_requests').n,0);
 });

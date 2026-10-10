@@ -159,7 +159,7 @@ jobs:
   # with the full CI fuzz/invariant settings. The fixture runs only after all
   # shards succeed and their combined inventory matches the repository exactly.
   level3-shards:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.head_ref == 'audit/420commerce-com-2-upstream-adaptations')
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
@@ -198,7 +198,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: foundry-level3-shard-${{ matrix.shard }}-${{ github.sha }}
+          name: foundry-level3-shard-${{ matrix.shard }}-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
             artifacts/contracts/shard-${{ matrix.shard }}.log
             artifacts/contracts/shard-${{ matrix.shard }}-targets.txt
@@ -206,7 +206,7 @@ jobs:
           retention-days: 30
 
   level3-fixture:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.head_ref == 'audit/420commerce-com-2-upstream-adaptations')
     needs: level3-shards
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -219,15 +219,15 @@ jobs:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Verify exact qualification head
         env:
-          EXPECTED_SHA: ${{ github.sha }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - name: Download all four mandatory shard inventories
         uses: actions/download-artifact@v4
         with:
-          pattern: foundry-level3-shard-*-${{ github.sha }}
+          pattern: foundry-level3-shard-*-${{ github.event.pull_request.head.sha || github.sha }}
           path: artifacts/contracts/shards
           merge-multiple: true
       - name: Verify complete and unique primary inventory

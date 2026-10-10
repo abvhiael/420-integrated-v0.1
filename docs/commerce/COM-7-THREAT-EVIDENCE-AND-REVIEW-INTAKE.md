@@ -49,3 +49,7 @@ Reviewer entrypoint: `docs/commerce/COM-1.7-SECURITY-THREAT-MODEL.md`; canonical
 ## Qualification decision
 
 **Scoped post-reconciliation Level 1 PASS on executable SHA `95fc1102...`. Comprehensive Level 3 NOT EXECUTED and COM-7 UNQUALIFIED pending unresolved gates.** Do not promote skipped Foundry or absent Genesis/Docs/420 Integrated/deployment checks to successes. Build one exact current-main merge candidate only after repository-side acceptance is complete; Solidity owns the single complete Foundry inventory, Genesis only address/manifest, then appropriate Docs, global, security, deployment and retained Commerce checks. PR #594 remains draft/unmerged.
+
+## Repository recovery/readiness continuation
+
+`COM-7-REPOSITORY-RECOVERY-AND-REVIEW.md` defines repeatable bounded-load thresholds, actual SQLite process-exit recovery, shared-store nonce/replay checks, supported single-process topology, independent reviewer intake and non-reproducible deployment risks. `commerce/test/com7-persistence-load.test.mjs` adds three executed local regression drills. The full retained service/SDK/Indexer/ABI command passed locally with 134 Commerce tests; these local observations do not substitute for exact-candidate CI or complete Level 3. `commerce-security-readiness.yml` retains load traces, redacted pinned secret scan, dependency audit and tree provenance. Existing live COM-8 and independent COM-9 gates remain unpassed.

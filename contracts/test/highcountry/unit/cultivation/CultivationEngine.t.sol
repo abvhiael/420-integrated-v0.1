@@ -557,6 +557,70 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(harvest.getHarvest(plantId).expressionHash == expression, "duplicate changed receipt");
     }
 
+    function testR034HarvestCapacityReleaseConservesProductIssuance() public {
+        uint64 plantId = 90;
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("r034:register")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.CULTIVATION_UPDATE,
+            bytes32(uint256(plantId)),
+            keccak256("r034:update")
+        );
+        _grant(
+            address(this),
+            ModuleIds.CULTIVATION_ENGINE,
+            ActionIds.PHENOTYPE_EXPRESS,
+            bytes32(uint256(plantId)),
+            keccak256("r034:express")
+        );
+        _grant(
+            address(this),
+            ModuleIds.HARVEST_ENGINE,
+            ActionIds.HARVEST_ACCEPT,
+            bytes32(uint256(plantId)),
+            keccak256("r034:harvest")
+        );
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+        cultivation.updateEnvironment(
+            plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
+        );
+        _ready(plantId);
+        cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
+        uint32 activeBefore = plants.activePlantsByParcel(11);
+        uint32 privateBefore = plants.privatePlantsByParcel(11);
+        harvest.acceptHarvest(plantId);
+        bytes32 productId = products.registerHarvestProduct(plantId);
+        uint256 gramsBefore = products.totalIssuedGrams();
+        uint64 countBefore = products.totalRegisteredProducts();
+
+        vm.prank(address(0xBEEF));
+        (bool unauthorized,) = address(plants).call(
+            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
+        );
+        require(!unauthorized, "unauthorized capacity release");
+        require(plants.activePlantsByParcel(11) == activeBefore, "unauthorized changed capacity");
+
+        plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
+        require(plants.activePlantsByParcel(11) == activeBefore - 1, "active capacity not released");
+        require(plants.privatePlantsByParcel(11) == privateBefore - 1, "private capacity not released");
+        require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.TERMINATED, "plant not terminated");
+        (bool replay,) = address(plants).call(
+            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
+        );
+        require(!replay, "duplicate capacity release");
+        require(plants.activePlantsByParcel(11) == activeBefore - 1, "capacity double release");
+        require(products.getProduct(productId).plantId == plantId, "product provenance changed");
+        require(products.totalIssuedGrams() == gramsBefore, "termination changed product issuance");
+        require(products.totalRegisteredProducts() == countBefore, "termination duplicated product");
+    }
+
     function testR031HarvestFailsClosedOnEmergencyAndTerminatedPlant() public {
         uint64 plantId = 89;
         _grant(

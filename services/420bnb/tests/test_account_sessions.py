@@ -270,3 +270,32 @@ def test_draft_property_cross_account_denied(actor,monkeypatch):
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_manager_grant_denied_without_independent_property_review(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    body={"title":"No approval cabin","public_region":"Canada","capacity":1,
+          "nightly_minor":100,"currency":"CAD"}
+    created=client.post("/v1/bnb/properties",headers=headers,json=body)
+    assert created.status_code==201,created.text
+    pid=created.json()["id"]
+    grantee="manager-"+str(uuid4())
+    try:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("INSERT INTO bnb_account(subject) VALUES (%s)",(grantee,))
+        response=client.post(f"/v1/bnb/account/properties/{pid}/managers",
+            headers=headers,json={"subject":grantee,"capability":"edit_listing",
+                 "expires_at":(datetime.now(timezone.utc)+timedelta(days=2)).isoformat()})
+        assert response.status_code==403, response.text
+        assert response.json()["detail"]=="PROPERTY_AUTHORITY_NOT_VERIFIED"
+        revocation=client.delete(f"/v1/bnb/account/properties/{pid}/managers/{grantee}/edit_listing",
+            headers=headers)
+        assert revocation.status_code==403
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert not c.execute("SELECT 1 FROM bnb_property_grant WHERE property_id=%s",(pid,)).fetchone()
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+            c.execute("DELETE FROM bnb_account WHERE subject=%s",(grantee,))

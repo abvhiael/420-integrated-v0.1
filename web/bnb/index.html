@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>420BnB | Stay a little longer</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif}body{background:#101a17;color:#f1f4ed;margin:0}header,main,footer{max-width:1060px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #35483b}h1{font-size:clamp(2rem,5vw,4rem);margin-bottom:8px}.muted{color:#b8c7bb}button,input,select{font:inherit;border-radius:8px;padding:12px}button{background:#a1d18a;color:#132014;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}input,select{background:#26392f;color:white;border:1px solid #829e87}section{margin:30px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{padding:20px;border:1px solid #496050;border-radius:12px;background:#1c2c23}.card h3{margin-top:0}label{display:grid;gap:6px;margin:10px 0}.warning{border-left:4px solid #e9be6c;padding:12px;background:#313026}.hidden{display:none}a{color:#c3e7b1}:focus-visible{outline:3px solid #e9be6c;outline-offset:3px}
+</style></head><body>
+<header><strong>420BnB</strong><nav aria-label="Main"><a href="#explore">Explore</a> · <a href="#hosting">Hosting</a></nav></header>
+<main><h1>Stay a little longer.</h1><p class="muted">Accommodation discovery for the 420 Integrated ecosystem.</p>
+<p class="warning" role="status">Preview service. Bookings and payments are not enabled. Listings shown below depend on your configured API; no reservation is confirmed here.</p>
+<section id="explore" aria-labelledby="explore-title"><h2 id="explore-title">Explore stays</h2>
+<button id="refresh">Refresh public listings</button><p id="results-status" role="status" aria-live="polite">Choose refresh to look for public listings.</p><div class="grid" id="listings"></div></section>
+<section id="hosting" aria-labelledby="host-title"><h2 id="host-title">Host a property</h2><p class="muted">Draft creation requires authenticated, verified host identity. Publication, booking and payments are not available in this preview.</p>
+<form id="host-form"><label>Property title<input required minlength="3" maxlength="160" name="title"></label>
+<label>Public region (not street address)<input required name="public_region"></label>
+<label>Unit capacity<input required name="capacity" type="number" min="1" max="1000" value="1"></label>
+<label>Nightly amount in minor units<input required name="nightly_minor" type="number" min="0" value="5000"></label>
+<label>Currency<select name="currency"><option>CAD</option><option>USD</option></select></label>
+<button type="submit" disabled aria-describedby="host-note">Save draft (requires secure sign-in)</button>
+<p id="host-note" class="muted">A trusted Identity gateway must be configured before draft submissions can be enabled.</p></form></section></main>
+<footer class="muted">420BnB — no public precise property addresses • no wallet custody • payments disabled</footer>
+<script>
+const status=document.querySelector("#results-status"),list=document.querySelector("#listings");
+document.querySelector("#refresh").addEventListener("click",async()=>{
+ status.textContent="Loading public listings…";list.replaceChildren();
+ try {const r=await fetch("/v1/bnb/listings",{credentials:"omit"});
+ if(!r.ok)throw Error("Service unavailable");
+ const data=await r.json();if(!Array.isArray(data))throw Error("Invalid response");
+ status.textContent=data.length?data.length+" public listing(s)":"No published stays available.";
+ for(const item of data){const el=document.createElement("article");el.className="card";
+ const heading=document.createElement("h3");heading.textContent=item.title||"Untitled stay";
+ const details=document.createElement("p");details.textContent=[item.public_region,"Capacity: "+item.capacity,"Nightly: "+item.nightly_minor+" "+item.currency+" minor units"].join(" · ");
+ el.append(heading,details);list.append(el);}
+ }catch{status.textContent="Public listings are unavailable. No reservation has been made.";}
+});
+</script></body></html>

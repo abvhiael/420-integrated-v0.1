@@ -2,8 +2,14 @@
 pragma solidity ^0.8.24;
 
 interface IHighCountryGamingAccess420 {
-    function hasPlayerBonusRegion(uint64 growerProfileId, bytes32 contentId) external view returns (bool);
-    function hasPlayerCompetition(uint64 growerProfileId, bytes32 contentId) external view returns (bool);
+    function hasPlayerBonusRegion(
+        uint64 growerProfileId,
+        bytes32 contentId
+    ) external view returns (bool);
+    function hasPlayerCompetition(
+        uint64 growerProfileId,
+        bytes32 contentId
+    ) external view returns (bool);
     function hasScopedEntitlement(
         uint64 growerProfileId,
         bytes32 entitlementId,

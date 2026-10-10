@@ -35,7 +35,30 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  const endInput=document.createElement("input");endInput.type="date";endInput.required=true;endLabel.append(endInput);
  const check=document.createElement("button");check.type="submit";check.textContent="Check availability";
  const out=document.createElement("p");out.setAttribute("role","status");out.setAttribute("aria-live","polite");
- dateForm.append(startLabel,endLabel,check,out);
+ const choose=document.createElement("label");choose.textContent="Rental unit";
+ const unitSelect=document.createElement("select");choose.append(unitSelect);
+ const quoteBtn=document.createElement("button");quoteBtn.type="button";quoteBtn.textContent="Request nonbinding itemized quote";
+ const quoteOutput=document.createElement("p");quoteOutput.setAttribute("role","status");quoteOutput.setAttribute("aria-live","polite");
+ quoteBtn.addEventListener("click",async()=>{
+ if(!hostProof){quoteOutput.textContent="Sign in with a valid 420Identity session first.";return;}
+ if(!startInput.value||!endInput.value||startInput.value>=endInput.value){
+ quoteOutput.textContent="Select valid check-in and checkout dates.";return;}
+ const nonce="quote-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+ quoteOutput.textContent="Calculating itemized quote…";
+ try{const response=await fetch("/v1/bnb/quotes",{method:"POST",
+ headers:hostHeaders(),credentials:"omit",cache:"no-store",
+ body:JSON.stringify({property_id:item.id,unit_id:unitSelect.value||null,units:1,
+ checkin:startInput.value,checkout:endInput.value,nonce})});
+ if(!response.ok)throw Error("Quote unavailable ("+response.status+").");
+ const priced=await response.json(),bill=priced.calculation;
+ quoteOutput.textContent="Quote "+priced.id+" · Nights: "+bill.nights+
+ " · Base "+bill.subtotal_minor+" · Discount -"+bill.discount_minor+
+ " · Cleaning "+bill.cleaning_minor+" · Service "+bill.service_minor+
+ " · Tax "+bill.tax_minor+" · Total "+bill.total_minor+" "+priced.currency+
+ " minor units. Expires "+priced.expires_at+". No payment or booking.";
+ }catch(error){quoteOutput.textContent=error.message;}
+ });
+ dateForm.append(startLabel,endLabel,check,choose,quoteBtn,out,quoteOutput);
  dateForm.addEventListener("submit",async event=>{
  event.preventDefault();out.textContent="Checking nonbinding availability…";
  if(startInput.value>=endInput.value){out.textContent="Checkout must be later than check-in.";return;}
@@ -43,6 +66,12 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  try{const res=await fetch("/v1/bnb/availability/local?"+params,{credentials:"omit",cache:"no-store"});
  if(!res.ok)throw Error("Availability unavailable ("+res.status+").");
  const data=await res.json();
+ unitSelect.replaceChildren();
+ for(const u of data.units){
+ const option=document.createElement("option");option.value=u.unit_id||"";
+ option.textContent=u.label+" ("+u.available+" available)";option.disabled=u.available<1;
+ unitSelect.append(option);
+ }
  out.textContent=data.units.map(u=>u.label+": "+u.available+" available").join(" · ")+
  " · Preview only; no reservation has been made.";
  }catch(err){out.textContent=err.message;}

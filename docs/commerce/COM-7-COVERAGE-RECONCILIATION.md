@@ -115,3 +115,32 @@ and reject absent, wrong-SHA/profile/partition or incomplete snapshots. Existing
 source, test, assertion, compiler, fuzz/invariant and aggregate gates remain intact.
 The replacement candidate requires actual executed qualification; this correction
 does not manufacture a pass from the failed coverage job.
+
+## Additional native coverage compiler failure
+
+Candidate `f6a642b33d2a59ff94387e94cf56c3aed899c631` did not qualify Level 3.
+All 24 executed non-Solidity workflows passed. Its shard 0 normal canonical
+CI step passed 625 reported cases across 107 assigned test files, but native
+coverage context 9 failed with a pinned Solc Yul stack-depth exception after
+nine successful coverage contexts. Run 38032286595, job 114155612335;
+artifact 11664425353, digest
+`sha256:8a1dd861c102f1e7c7e4dc74a5544262ef397daa5016185200c35f83e1f5611a`.
+The earlier cache-loss failure did not recur. This failure is not waived.
+
+The coverage-only bridge now retains exact standard-JSON inputs, input/source
+hashes, optimizer settings and errors for each compiler attempt. Only a
+`YulException` stack-depth error may receive one bounded retry using Solidity
+0.8.24's documented non-inlining optimizer sequence
+`dhfoD[xarrscLMcCTU]uljmul:fDnTOcmu`.
+Reference: [Solidity 0.8.24 optimizer selection](https://docs.soliditylang.org/en/v0.8.24/internals/optimizer.html#selecting-optimizations).
+The pinned compiler, optimizer runs 200, Cancun/viaIR, source contents,
+all non-optimizer settings, dependency maps and selected inventory stay intact.
+Canonical production compilation and CI fuzz/invariant budgets remain unchanged.
+Coverage source mapping remains approximate and diagnostic.
+
+Syntax errors, other compiler failures, mixed error types and an unsuccessful
+retry remain fatal; no job is allowed to continue on error. Four additional
+regressions require default-success/no-retry, exact error gating, unchanged
+source/settings plus retained failed evidence, and an unsuccessful bounded retry.
+There are 17 harness checks before canonical compilation. Their actual CI results
+and complete final-candidate Level 3 remain pending; this proposal is not a PASS.

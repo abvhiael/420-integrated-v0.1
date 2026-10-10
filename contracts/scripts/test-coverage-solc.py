@@ -2,8 +2,10 @@
 """Verify the coverage bridge cannot silently alter canonical qualification."""
 import copy
 import importlib.util
+import json
 import os
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
 
 spec = importlib.util.spec_from_file_location("coverage_solc", Path(__file__).with_name("coverage-solc.py"))
@@ -75,6 +77,72 @@ class CoverageBoundary(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     bridge.restore_optimizer(payload)
                 self.assertEqual(original, payload)
+
+
+    @staticmethod
+    def compiler_response(errors=(), returncode=0):
+        return SimpleNamespace(returncode=returncode,
+            stdout=json.dumps({"errors": list(errors)}).encode(), stderr=b"")
+
+    def test_successful_default_compile_never_retries(self):
+        bridge.restore_optimizer(self.payload)
+        calls = []
+        result, attempts, selected = bridge.compile_with_fallback(self.payload,
+            lambda encoded: calls.append(json.loads(encoded)) or self.compiler_response())
+        self.assertEqual(1, len(calls))
+        self.assertEqual(["PASS"], [attempt["result"] for attempt in attempts])
+        self.assertEqual(self.payload, selected)
+        self.assertEqual(0, result.returncode)
+
+    def test_only_yul_stack_failure_can_retry(self):
+        bridge.restore_optimizer(self.payload)
+        stack = {"severity": "error", "type": "YulException",
+                 "message": "Variable _3 is 1 too deep in the stack"}
+        parser = {"severity": "error", "type": "ParserError", "message": "invalid source"}
+        for errors, returncode in (([parser], 0), ([stack, parser], 0),
+                                  ([stack], 1), ([], 1),
+                                  ([{**stack, "message": "another Yul failure"}], 0)):
+            with self.subTest(errors=errors, returncode=returncode):
+                calls = []
+                result, attempts, _ = bridge.compile_with_fallback(self.payload,
+                    lambda encoded: calls.append(encoded)
+                        or self.compiler_response(errors, returncode))
+                self.assertEqual(1, len(calls))
+                self.assertEqual("FAIL", attempts[0]["result"])
+                self.assertEqual(returncode, result.returncode)
+
+    def test_yul_retry_preserves_sources_all_other_settings_and_failed_evidence(self):
+        bridge.restore_optimizer(self.payload)
+        original = copy.deepcopy(self.payload)
+        stack = {"severity": "error", "type": "YulException",
+                 "message": "Variable _3 is 1 too deep in the stack"}
+        calls = []
+        def compiler_run(encoded):
+            calls.append(json.loads(encoded))
+            return self.compiler_response([stack] if len(calls) == 1 else [])
+        _, attempts, selected = bridge.compile_with_fallback(self.payload, compiler_run)
+        expected = copy.deepcopy(original)
+        expected["settings"]["optimizer"] = {**bridge.CANONICAL_OPTIMIZER,
+            "details": {"yulDetails": {"optimizerSteps": bridge.STACK_SAFE_SEQUENCE}}}
+        self.assertEqual([original, expected], calls)
+        self.assertEqual(original, self.payload)
+        self.assertEqual(expected, selected)
+        self.assertEqual(["FAIL", "PASS"], [attempt["result"] for attempt in attempts])
+        self.assertEqual([stack], attempts[0]["errors"])
+        self.assertEqual(attempts[0]["sources_sha256"], attempts[1]["sources_sha256"])
+        self.assertNotEqual(attempts[0]["input_sha256"], attempts[1]["input_sha256"])
+        self.assertNotIn("i", bridge.STACK_SAFE_SEQUENCE)
+
+    def test_failed_bounded_retry_remains_an_error(self):
+        bridge.restore_optimizer(self.payload)
+        stack = {"severity": "error", "type": "YulException",
+                 "message": "Variable _3 is 1 too deep in the stack"}
+        calls = []
+        result, attempts, _ = bridge.compile_with_fallback(self.payload,
+            lambda encoded: calls.append(encoded) or self.compiler_response([stack]))
+        self.assertEqual(2, len(calls))
+        self.assertEqual(["FAIL", "FAIL"], [attempt["result"] for attempt in attempts])
+        self.assertEqual([stack], json.loads(result.stdout)["errors"])
 
 
 if __name__ == "__main__":

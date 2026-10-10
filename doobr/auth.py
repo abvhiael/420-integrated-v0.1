@@ -47,10 +47,10 @@ class Permission:
     wallet_required: bool = False
 
 ALLOWED_ACTIONS = {
-    "CONSUMER": frozenset({"READ_OWN_ORDER", "CANCEL_OWN_ORDER"}),
-    "COURIER": frozenset({"READ_ASSIGNED", "ACCEPT_OFFER", "PICKUP", "HANDOFF", "RETURN", "UPDATE_PRESENCE"}),
-    "RETAILER": frozenset({"READ_STORE_ORDER", "READY_PICKUP", "ACCEPT_RETURN"}),
-    "OPERATOR": frozenset({"READ_INCIDENT", "ESCALATE_INCIDENT"}),
+    "CONSUMER": frozenset({"READ_OWN_ORDER", "CANCEL_OWN_ORDER", "TRANSITION_ORDER"}),
+    "COURIER": frozenset({"READ_ASSIGNED", "ACCEPT_OFFER", "PICKUP", "HANDOFF", "RETURN", "UPDATE_PRESENCE", "TRANSITION_ORDER"}),
+    "RETAILER": frozenset({"READ_STORE_ORDER", "READY_PICKUP", "ACCEPT_RETURN", "TRANSITION_ORDER"}),
+    "OPERATOR": frozenset({"READ_INCIDENT", "ESCALATE_INCIDENT", "TRANSITION_ORDER"}),
 }
 
 def authorize(*, issuer: TrustedIdentity, store: AuthorizedSessionStore,

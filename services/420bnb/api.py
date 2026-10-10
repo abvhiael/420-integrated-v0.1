@@ -247,3 +247,10 @@ def check_property_access(property_id: str,capability: str,
             AND grantee_subject=%s AND capability=%s AND revoked_at IS NULL AND expires_at>now()""",
             (property_id,proof["subject"],capability)).fetchone()
     return {"allowed":bool(host or delegated),"capability":capability,"property_id":property_id}
+
+
+@app.post("/v1/bnb/account/recover")
+def recover_account(authorization: str | None = Header(None)):
+    # Require a future independent purpose-bound 420Identity recovery proof.
+    # Normal login tokens, caller flags and stale sessions may not reset accounts.
+    raise HTTPException(503, "RECOVERY_AUTHORITY_UNAVAILABLE")

@@ -1051,6 +1051,22 @@ def decide_booking_request(request_id:UUID,decision:str,
             "payment_status":"unavailable"}
 
 
+@app.get("/v1/bnb/account/booking-requests")
+def list_my_booking_requests(role:str="guest",authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    if role not in ("guest","host"):raise HTTPException(422,"INVALID_ROLE")
+    column="guest_subject" if role=="guest" else "host_subject"
+    with db() as c:
+        records=c.execute("""SELECT id,state,request_type,deadline,property_id,hold_id
+            FROM bnb_booking_request WHERE """+column+"""=%s
+            ORDER BY created_at DESC LIMIT 100""",(actor,)).fetchall()
+    return [{"id":str(x[0]),"state":("expired" if x[1]=="requested" and
+            x[3]<=datetime.now(timezone.utc) else x[1]),
+            "type":x[2],"deadline":x[3].isoformat(),
+            "property_id":str(x[4]),"hold_id":str(x[5]),
+            "confirmed":False} for x in records]
+
+
 @app.get("/v1/bnb/booking-requests/{request_id}")
 def read_booking_request(request_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)

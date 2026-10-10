@@ -780,3 +780,52 @@ def test_bnb25_legacy_unpriced_hold_does_not_grant_booking_authority(fixture_pro
     assert denied.status_code==409 and denied.json()["detail"]=="BOOKING_QUOTE_REQUIRED"
     assert client.post("/v1/bnb/holds/"+held.json()["id"]+"/release",
                        headers=headers).status_code==200
+
+
+def test_bnb25_atomic_quote_based_reservation_replacement_and_replay(fixture_property):
+    from zoneinfo import ZoneInfo
+    pid,headers=fixture_property
+    original=make_bnb25_hold(pid,headers,"bnb25-replace-quote-1",
+                            "bnb25-replace-hold-1")
+    assert original.status_code==201,original.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_booking_policy(property_id,instant_enabled)
+            VALUES (%s,true)""",(pid,))
+    old=client.post("/v1/bnb/booking-requests",json={
+        "hold_id":original.json()["id"],"request_type":"instant"},
+        headers={**headers,"idempotency-key":"bnb25-replace-req-1"})
+    assert old.status_code==201,old.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        old_id=c.execute("SELECT id FROM bnb_reservation WHERE booking_request_id=%s",
+                         (old.json()["id"],)).fetchone()[0]
+    local=(datetime.now(ZoneInfo("America/Regina"))+timedelta(days=18)).date()
+    new_quote=client.post("/v1/bnb/quotes",json={
+        "property_id":str(pid),"checkin":local.isoformat(),
+        "checkout":(local+timedelta(days=3)).isoformat(),
+        "nonce":"bnb25-replace-quote-2"},headers=headers)
+    assert new_quote.status_code==201,new_quote.text
+    path=f"/v1/bnb/reservations/{old_id}/replace"
+    body={"new_quote_id":new_quote.json()["id"],"request_type":"instant"}
+    first=client.post(path,json=body,headers={
+        **headers,"idempotency-key":"bnb25-replace-event-1"})
+    assert first.status_code==201,first.text
+    assert first.json()["original_reservation_state"]=="cancelled"
+    assert first.json()["state"]=="accepted" and first.json()["confirmed"] is False
+    replay=client.post(path,json=body,headers={
+        **headers,"idempotency-key":"bnb25-replace-event-1"})
+    assert replay.status_code==201 and replay.json()==first.json()
+    altered=client.post(path,json={**body,"request_type":"request"},headers={
+        **headers,"idempotency-key":"bnb25-replace-event-1"})
+    assert altered.status_code==409
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        assert c.execute("SELECT status FROM bnb_reservation WHERE id=%s",
+                         (old_id,)).fetchone()[0]=="cancelled"
+        assert c.execute("SELECT status FROM bnb_hold WHERE id=%s",
+                         (original.json()["id"],)).fetchone()[0]=="cancelled"
+        newhold=c.execute("SELECT status,quote_id FROM bnb_hold WHERE id=%s",
+                          (first.json()["hold_id"],)).fetchone()
+        assert newhold[0]=="held"
+        assert str(newhold[1])==new_quote.json()["id"]
+        assert c.execute("""SELECT COUNT(*) FROM bnb_reservation
+            WHERE booking_request_id=%s AND status='payment_pending'""",
+            (first.json()["replacement_request_id"],)).fetchone()[0]==1

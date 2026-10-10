@@ -81,15 +81,30 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
 contract MockBreedingAdapterCaller {
     CanonicalBreedingRandomnessAdapter public randomness;
     HighCountryAuthorization public authorization;
-    constructor(CanonicalBreedingRandomnessAdapter adapter, HighCountryAuthorization auth) {
+    constructor(
+        CanonicalBreedingRandomnessAdapter adapter,
+        HighCountryAuthorization auth
+    ) {
         randomness = adapter;
         authorization = auth;
     }
-    function request(bytes32 id, bytes32 domain, bytes32 context) external {
+    function request(
+        bytes32 id,
+        bytes32 domain,
+        bytes32 context
+    ) external {
         randomness.request(id, domain, context);
     }
-    function cancel(bytes32 id) external { randomness.cancel(id); }
-    function consume(bytes32 id, bytes32 domain, bytes32 context) external returns (bytes32) {
+    function cancel(
+        bytes32 id
+    ) external {
+        randomness.cancel(id);
+    }
+    function consume(
+        bytes32 id,
+        bytes32 domain,
+        bytes32 context
+    ) external returns (bytes32) {
         return randomness.consume(id, domain, context);
     }
 }
@@ -114,10 +129,16 @@ contract CanonicalBreedingRandomnessAdapterTest {
         caps.setGrant(
             grantId,
             ICapabilityRegistry420.CapabilityGrant({
-                principal: address(this), componentId: ModuleIds.RANDOMNESS_COORDINATOR,
-                capabilityId: ActionIds.RANDOMNESS_BIND_BREEDING, scopeHash: adapter.BIND_SCOPE(),
-                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
-                validFrom: 0, validUntil: uint64(block.timestamp + 2 days), revoked: false
+                principal: address(this),
+                componentId: ModuleIds.RANDOMNESS_COORDINATOR,
+                capabilityId: ActionIds.RANDOMNESS_BIND_BREEDING,
+                scopeHash: adapter.BIND_SCOPE(),
+                perCallLimit: 0,
+                periodLimit: 0,
+                periodSeconds: 0,
+                validFrom: 0,
+                validUntil: uint64(block.timestamp + 2 days),
+                revoked: false
             }),
             0
         );
@@ -165,7 +186,8 @@ contract CanonicalBreedingRandomnessAdapterTest {
         (bool ok,) = address(adapter).call(abi.encodeCall(adapter.bindBreedingEngine, (address(caller))));
         require(!ok, "rebound");
         bytes32 wrongDomain = keccak256("HC.RANDOM.UNAPPROVED");
-        (ok,) = address(caller).call(abi.encodeCall(caller.request, (keccak256(abi.encode(wrongDomain, CONTEXT)), wrongDomain, CONTEXT)));
+        (ok,) = address(caller)
+            .call(abi.encodeCall(caller.request, (keccak256(abi.encode(wrongDomain, CONTEXT)), wrongDomain, CONTEXT)));
         require(!ok, "accepted unrelated domain");
         (ok,) = address(caller).call(abi.encodeCall(caller.request, (bytes32(uint256(1)), DOMAIN, CONTEXT)));
         require(!ok, "accepted forged local request id");

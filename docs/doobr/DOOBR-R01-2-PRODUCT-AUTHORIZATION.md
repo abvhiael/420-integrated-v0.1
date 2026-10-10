@@ -36,6 +36,11 @@ Unauthorized source-app promotion, registry ID collision, counterfeit credential
 - [x] Document what product direction authorizes **now** and what independent governance/legal/financial approval remains outstanding.
 - [x] Resolve 420Compliance, 420Travel/Maps, 420Pay, DevComp, Wallet, Identity and licensed retailer authority owners, without creating parallel implementations.
 - [x] Preserve BC/Vancouver first and original DOOBR-AUDIT-9/10 deferred testnet/release status.
-- [ ] Verify Level 1 exact-SHA documentary decision invariants via app-scoped CI; record run and implementation SHA in evidence-only update.
+- [x] Verify Level 1 exact-SHA documentary decision invariants via app-scoped CI: [run #38024372945](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38024372945), inventory job PASS at implementation SHA `814be5fe4bdd7b56628d923da8cd5c258ffe1e5e`.
 
 R01.2 is NOT a chain governance approval or deployment permission; those external approvals remain blocked and may not be manufactured for step completion. R01.8 Level 2 and R05.10 Level 3 deferred. Next canonical step **R01.3 Consumer/courier/retailer/operator roles, journeys, abuse cases and operational limits**.
+
+## Qualified R01.2 closeout
+**Status: COMPLETE — R01.2 documentary decision and bounded product-development authority only.** Required Level 1 fast qualification PASSED at `814be5fe4bdd7b56628d923da8cd5c258ffe1e5e`, GitHub Actions `DOOBR R01 Level 1` run #38024372945, inventory job SUCCESS. The modified `scripts/verify-doobr-r01-1.py` verifies decision text, frozen-catalog exclusion, Travel fail-closed flags, existing roadmap step and authority references; workflow also verifies exact checkout SHA, scoped Python syntax, prior DOOBR authority and GEN-SVC-3 configuration. Main/reconciliation base: `c5a4f220d1fbda01f707d359aa9bb32921a138b1`. PR #601 branch `roadmap/doobr-bc-vancouver-infrastructure` remains open. This document-only evidence closeout inherits the qualified SHA; no source, test, workflow, configuration, dependency or interface is altered by this closeout.
+
+Level 2 deferred to R01.8; Level 3 deferred to R05.10. External governance, service ID and capability authorization, 420Compliance runtime, financial route and licensure remain NOT AUTHORIZED / not complete, as documented above. Next: **R01.3 Consumer/courier/retailer/operator roles, journeys, abuse cases and operational limits**.

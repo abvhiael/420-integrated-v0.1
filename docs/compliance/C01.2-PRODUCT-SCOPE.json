@@ -1,0 +1,744 @@
+{
+  "schema": "420compliance-product-scope/v1",
+  "step": "C01.2",
+  "status": "LOCKED_DEVELOPMENT_SCOPE",
+  "qualification_level": 1,
+  "canonical_definition": "Lock product scope, actors and journeys: traveller, consumer app, courier app, retailer, policy author, independent reviewer, publisher, operator and auditor. Record excluded domains.",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "parent_sha": "81955ad05e7c99e0e0fb4cf39a5960bd4a1dc553",
+  "inherited_qualification": {
+    "step": "C01.1",
+    "implementation_sha": "44c161d9b344080b55296b74319f096535f873c1",
+    "evidence_sha": "81955ad05e7c99e0e0fb4cf39a5960bd4a1dc553",
+    "record": "docs/compliance/qualification/C01.1-level1.json"
+  },
+  "release": {
+    "current_stage": "INFRASTRUCTURE_ONLY",
+    "live_regulated_operations_enabled": false,
+    "runtime_implemented": false,
+    "operational_policy_approved": false,
+    "modes": [
+      "SIMULATION",
+      "REVIEWED_INFORMATION",
+      "TRANSACTIONAL_ENFORCEMENT"
+    ],
+    "simulation_can_authorize": false,
+    "informational_guidance_can_authorize": false,
+    "transactional_enablement_requires": [
+      "C09_deployed_acceptance",
+      "C10_legal_partner_operational_acceptance",
+      "DOOBr_own_release_acceptance"
+    ]
+  },
+  "initial_coverage": {
+    "country": "CA",
+    "province": "BC",
+    "municipality": "Vancouver",
+    "domains": [
+      "non_medical_cannabis_delivery",
+      "reviewed_travel_guidance"
+    ],
+    "candidate_delivery_pack": "CA-BC-VANCOUVER-cannabis-delivery/v1",
+    "unreviewed_region_behaviour": "UNKNOWN_AND_BLOCK_TRANSACTION",
+    "boundary_uncertainty": "REVIEW_REQUIRED_AND_BLOCK_TRANSACTION",
+    "carrier_classes": [
+      "LICENSEE_EMPLOYEE",
+      "DELIVERY_PERSON",
+      "COMMON_CARRIER"
+    ]
+  },
+  "surfaces": [
+    "public_guidance_website",
+    "authenticated_evaluation_API_and_SDK",
+    "private_author_review_publisher_operator_auditor_console",
+    "DOOBr_consumer_courier_retailer_adapters",
+    "420Travel_public_guidance_presence_handoff",
+    "Maps_via_420Location_public_projection"
+  ],
+  "actors": [
+    {
+      "id": "traveller",
+      "access": "PUBLIC_INFORMATION",
+      "allowed_actions": [
+        "read_guidance",
+        "read_coverage",
+        "run_informational_scenario"
+      ],
+      "denied_actions": [
+        "evaluate_private_action",
+        "read_private_decision",
+        "edit_policy",
+        "approve_policy",
+        "publish_policy",
+        "halt_policy",
+        "read_private_evidence"
+      ]
+    },
+    {
+      "id": "consumer_app",
+      "access": "AUTHENTICATED_SERVICE_AND_BOUND_SUBJECT",
+      "allowed_actions": [
+        "evaluate_consumer_action",
+        "read_bound_decision",
+        "receive_invalidation"
+      ],
+      "denied_actions": [
+        "edit_policy",
+        "approve_policy",
+        "publish_policy",
+        "halt_policy",
+        "read_other_tenant",
+        "execute_payment"
+      ]
+    },
+    {
+      "id": "courier_app",
+      "access": "AUTHENTICATED_SERVICE_AND_BOUND_COURIER",
+      "allowed_actions": [
+        "evaluate_dispatch",
+        "evaluate_handover",
+        "evaluate_return",
+        "read_bound_decision",
+        "receive_invalidation"
+      ],
+      "denied_actions": [
+        "edit_policy",
+        "approve_policy",
+        "publish_policy",
+        "halt_policy",
+        "read_other_tenant",
+        "override_denial"
+      ]
+    },
+    {
+      "id": "retailer",
+      "access": "AUTHENTICATED_TENANT_PRINCIPAL",
+      "allowed_actions": [
+        "submit_credential_reference",
+        "evaluate_retailer_action",
+        "read_tenant_decision",
+        "request_redacted_audit_export",
+        "receive_invalidation"
+      ],
+      "denied_actions": [
+        "edit_policy",
+        "approve_policy",
+        "publish_policy",
+        "halt_policy",
+        "read_other_tenant",
+        "override_denial"
+      ]
+    },
+    {
+      "id": "policy_author",
+      "access": "AUTHENTICATED_SCOPED_AUTHOR",
+      "allowed_actions": [
+        "draft_policy",
+        "link_source",
+        "propose_change",
+        "simulate_policy_diff"
+      ],
+      "denied_actions": [
+        "approve_own_policy",
+        "publish_policy",
+        "activate_unreviewed_policy",
+        "edit_approved_bytes",
+        "read_unrelated_private_decision"
+      ]
+    },
+    {
+      "id": "independent_reviewer",
+      "access": "AUTHENTICATED_SCOPED_REVIEWER",
+      "allowed_actions": [
+        "review_policy",
+        "record_finding",
+        "approve_reviewed_digest",
+        "reject_policy",
+        "request_rework"
+      ],
+      "denied_actions": [
+        "approve_own_policy",
+        "publish_policy",
+        "edit_approved_bytes",
+        "execute_payment",
+        "override_denial"
+      ]
+    },
+    {
+      "id": "publisher",
+      "access": "AUTHENTICATED_SCOPED_PUBLISHER",
+      "allowed_actions": [
+        "schedule_approved_digest",
+        "publish_approved_digest",
+        "supersede_approved_policy",
+        "revoke_publication"
+      ],
+      "denied_actions": [
+        "draft_policy",
+        "approve_policy",
+        "activate_unreviewed_policy",
+        "edit_approved_bytes",
+        "override_denial",
+        "execute_payment"
+      ]
+    },
+    {
+      "id": "operator",
+      "access": "AUTHENTICATED_SCOPED_OPERATOR",
+      "allowed_actions": [
+        "inspect_health",
+        "triage_source_failure",
+        "halt_region_domain",
+        "coordinate_incident",
+        "restore_valid_approved_publication"
+      ],
+      "denied_actions": [
+        "draft_policy",
+        "approve_policy",
+        "publish_unreviewed_policy",
+        "override_denial",
+        "reactivate_revoked_policy",
+        "execute_payment"
+      ]
+    },
+    {
+      "id": "auditor",
+      "access": "AUTHENTICATED_READ_ONLY_AUDITOR",
+      "allowed_actions": [
+        "read_scoped_audit",
+        "reproduce_historical_decision",
+        "request_redacted_audit_export"
+      ],
+      "denied_actions": [
+        "edit_policy",
+        "approve_policy",
+        "publish_policy",
+        "halt_policy",
+        "execute_payment",
+        "read_unrelated_private_evidence"
+      ]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "J01",
+      "actor": "traveller",
+      "title": "Browse jurisdiction and topic guidance",
+      "preconditions": [
+        "Explicit region and domain",
+        "Reviewed informational coverage status available"
+      ],
+      "success": "Read dated, sourced guidance with effective intervals and coverage limits",
+      "denied_or_failure": "Missing or withdrawn coverage displays UNKNOWN; no legal-permission claim",
+      "enforcement_owner": "420Compliance public guidance",
+      "data_boundary": "PUBLIC_REDACTED"
+    },
+    {
+      "id": "J02",
+      "actor": "traveller",
+      "title": "Run an informational travel scenario",
+      "preconditions": [
+        "No raw identity, address or live order inputs",
+        "Scenario labelled informational"
+      ],
+      "success": "Show reviewed explanation, obligations and unresolved issues",
+      "denied_or_failure": "Unreviewed region/topic and incomplete facts show gaps; scenario cannot authorize an order",
+      "enforcement_owner": "420Compliance public guidance",
+      "data_boundary": "PUBLIC_REDACTED"
+    },
+    {
+      "id": "J03",
+      "actor": "traveller",
+      "title": "View Travel/Maps regional guidance and DOOBr presence",
+      "preconditions": [
+        "Approved public Location projection",
+        "Current policy visibility and independently supplied coarse availability"
+      ],
+      "success": "Show permitted public guidance and coarse presence with handoff to DOOBr",
+      "denied_or_failure": "Stale supply/policy or anonymity failure suppresses presence; no identifiable courier or checkout",
+      "enforcement_owner": "420Travel/Maps presence composer",
+      "data_boundary": "PUBLIC_REDACTED"
+    },
+    {
+      "id": "J04",
+      "actor": "consumer_app",
+      "title": "Evaluate an intended consumer operation",
+      "preconditions": [
+        "Authenticated app and tenant/subject binding",
+        "Origin/destination, actor class and required evidence"
+      ],
+      "success": "Receive a short-lived action-bound decision and explicit obligations",
+      "denied_or_failure": "Absent evidence, unsupported scope or non-ALLOW blocks the consuming operation",
+      "enforcement_owner": "DOOBr consumer workflow",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J05",
+      "actor": "consumer_app",
+      "title": "Reevaluate after policy or relevant fact change",
+      "preconditions": [
+        "Existing bound operation",
+        "Changed facts, expiry or invalidation notice"
+      ],
+      "success": "Request fresh applicable evaluation without altering historical evidence",
+      "denied_or_failure": "Cached approval, unavailable evaluator or policy conflict cannot preserve permission",
+      "enforcement_owner": "DOOBr consumer workflow",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J06",
+      "actor": "consumer_app",
+      "title": "Read a decision explanation",
+      "preconditions": [
+        "Caller owns the bound tenant/subject/action",
+        "Protected evidence access independently checked"
+      ],
+      "success": "Read reason codes, evaluated versions and relevant obligations",
+      "denied_or_failure": "Cross-tenant/subject request or replayed receipt denied; no public private-decision lookup",
+      "enforcement_owner": "420Compliance authenticated API",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J07",
+      "actor": "courier_app",
+      "title": "Evaluate pickup and dispatch",
+      "preconditions": [
+        "Assigned courier and retailer evidence",
+        "Current order facts, region/time and stage"
+      ],
+      "success": "Return current decision and obligations for DOOBr to enforce",
+      "denied_or_failure": "Wrong courier/actor class, revoked credential or stale policy prevents dispatch",
+      "enforcement_owner": "DOOBr dispatch/custody workflow",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J08",
+      "actor": "courier_app",
+      "title": "Reevaluate at recipient handover",
+      "preconditions": [
+        "Assigned authenticated courier",
+        "Current recipient and stage-specific evidence"
+      ],
+      "success": "Return current decision; courier completes required human checks in DOOBr",
+      "denied_or_failure": "Unknown recipient eligibility, failed evidence, policy change or outage blocks handover",
+      "enforcement_owner": "DOOBr handover workflow",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J09",
+      "actor": "courier_app",
+      "title": "Handle refusal and lawful return",
+      "preconditions": [
+        "Failed delivery or operational halt",
+        "Separate approved recovery/return workflow"
+      ],
+      "success": "Provide applicable return obligations; DOOBr manages custody and safe recovery",
+      "denied_or_failure": "Sale denial never implies abandonment; no reuse of a delivery approval for return or new sale",
+      "enforcement_owner": "DOOBr safety/return workflow",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J10",
+      "actor": "retailer",
+      "title": "Supply exact retailer credential references",
+      "preconditions": [
+        "Authenticated tenant retailer",
+        "Independent approved credential source and exact store scope"
+      ],
+      "success": "Supply reference evidence used in a scoped decision",
+      "denied_or_failure": "Self-declared listing, generic Identity validity or Verify badge cannot establish licence eligibility",
+      "enforcement_owner": "420Compliance evidence adapter / retailer",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J11",
+      "actor": "retailer",
+      "title": "Inspect tenant decision and record obligations",
+      "preconditions": [
+        "Tenant-authorized operation reference",
+        "Record ownership and retention policy"
+      ],
+      "success": "View explanation and redacted audit export; retailer retains its required order/delivery records",
+      "denied_or_failure": "Cross-tenant export or public recipient/signature/address disclosure denied",
+      "enforcement_owner": "Retailer/DOOBr records; Compliance decision audit",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J12",
+      "actor": "retailer",
+      "title": "Respond to credential or region revocation",
+      "preconditions": [
+        "Current independent revocation or halt signal",
+        "Known affected tenant operations"
+      ],
+      "success": "Stop/reassess affected operations and reconcile evidence",
+      "denied_or_failure": "Delayed notice or missed callback cannot keep stale authority; re-read current state",
+      "enforcement_owner": "DOOBr retailer workflow",
+      "data_boundary": "PRIVATE_MINIMIZED"
+    },
+    {
+      "id": "J13",
+      "actor": "policy_author",
+      "title": "Prepare a source-linked policy proposal",
+      "preconditions": [
+        "Scoped author identity",
+        "Pinned official evidence and proposed effective interval"
+      ],
+      "success": "Draft immutable review candidate with cited provisions and uncertainties",
+      "denied_or_failure": "Unsupported source or AI proposal cannot become approved/active content",
+      "enforcement_owner": "420Compliance author workspace",
+      "data_boundary": "PRIVATE_POLICY_REVIEW"
+    },
+    {
+      "id": "J14",
+      "actor": "policy_author",
+      "title": "Submit a policy impact comparison",
+      "preconditions": [
+        "Candidate digest and prior pack",
+        "Simulation-labelled inputs"
+      ],
+      "success": "Explain new allow/deny/gap outcomes for affected apps/regions",
+      "denied_or_failure": "Simulation cannot activate a policy; inconsistent citations or schema require rework",
+      "enforcement_owner": "420Compliance author workspace",
+      "data_boundary": "PRIVATE_POLICY_REVIEW"
+    },
+    {
+      "id": "J15",
+      "actor": "independent_reviewer",
+      "title": "Independently review source and legal interpretation",
+      "preconditions": [
+        "Reviewer separate from author",
+        "Qualified scope and unchanged candidate digest"
+      ],
+      "success": "Approve the reviewed digest or record bounded rejection/findings",
+      "denied_or_failure": "Self-review, insufficient competence, unresolved mandatory conflict or changed bytes cannot approve",
+      "enforcement_owner": "420Compliance independent review",
+      "data_boundary": "PRIVATE_POLICY_REVIEW"
+    },
+    {
+      "id": "J16",
+      "actor": "independent_reviewer",
+      "title": "Request correction without rewriting history",
+      "preconditions": [
+        "Existing finding/review record",
+        "Scoped reviewer authority"
+      ],
+      "success": "Require a new candidate and fresh approval after correction",
+      "denied_or_failure": "Approved content cannot be edited under an old signature; rejection is never activation",
+      "enforcement_owner": "420Compliance independent review",
+      "data_boundary": "PRIVATE_POLICY_REVIEW"
+    },
+    {
+      "id": "J17",
+      "actor": "publisher",
+      "title": "Schedule and publish approved content",
+      "preconditions": [
+        "Publisher separate from author and reviewer",
+        "Current approval, signed manifest, environment and effective time"
+      ],
+      "success": "Publish exactly the approved digest to authorized region/domain at valid commencement",
+      "denied_or_failure": "Wrong digest/environment, future commencement or revoked review prevents activation",
+      "enforcement_owner": "420Compliance publication service",
+      "data_boundary": "PRIVATE_POLICY_REVIEW"
+    },
+    {
+      "id": "J18",
+      "actor": "publisher",
+      "title": "Supersede or revoke a publication",
+      "preconditions": [
+        "Scoped publisher permission",
+        "Reviewed replacement or authorized revocation"
+      ],
+      "success": "Preserve history and trigger affected-consumer invalidation",
+      "denied_or_failure": "Old decision/signature cannot reactivate revoked content; rollback cannot restore unlawful policy",
+      "enforcement_owner": "420Compliance publication service",
+      "data_boundary": "PRIVATE_POLICY_REVIEW"
+    },
+    {
+      "id": "J19",
+      "actor": "operator",
+      "title": "Monitor source freshness and review backlog",
+      "preconditions": [
+        "Scoped operational identity",
+        "Collector and policy health data"
+      ],
+      "success": "Triage outage/expiry and route review; enforce required stale-state halt",
+      "denied_or_failure": "Successful fetch alone does not renew legal review or approve a changed rule",
+      "enforcement_owner": "420Compliance operations",
+      "data_boundary": "PRIVATE_OPERATIONAL"
+    },
+    {
+      "id": "J20",
+      "actor": "operator",
+      "title": "Issue an emergency region/domain halt",
+      "preconditions": [
+        "Authorized emergency operator",
+        "Incident reason, scope and audited command"
+      ],
+      "success": "Reduce permission and invalidate affected decisions while DOOBr recovers safely",
+      "denied_or_failure": "Operator cannot replace DENY/UNKNOWN with ALLOW or invent emergency legal permission",
+      "enforcement_owner": "420Compliance halt / DOOBr recovery",
+      "data_boundary": "PRIVATE_OPERATIONAL"
+    },
+    {
+      "id": "J21",
+      "actor": "operator",
+      "title": "Recover from outage or bad publication",
+      "preconditions": [
+        "Approved incident resolution",
+        "Currently valid approved policy and preserved revocation history"
+      ],
+      "success": "Restore service only using independently approved valid state",
+      "denied_or_failure": "Old backup, revoked key or revoked policy cannot restore permission; uncertain state remains blocked",
+      "enforcement_owner": "420Compliance recovery",
+      "data_boundary": "PRIVATE_OPERATIONAL"
+    },
+    {
+      "id": "J22",
+      "actor": "auditor",
+      "title": "Inspect a bounded audit trail",
+      "preconditions": [
+        "Independent read-only assignment",
+        "Tenant/domain evidence access and redaction policy"
+      ],
+      "success": "Inspect source, review, publication and decision chain of evidence",
+      "denied_or_failure": "Audit role confers no write authority or unrestricted personal-data access",
+      "enforcement_owner": "420Compliance audit console",
+      "data_boundary": "PRIVATE_AUDIT_REDACTED"
+    },
+    {
+      "id": "J23",
+      "actor": "auditor",
+      "title": "Reproduce a historical decision",
+      "preconditions": [
+        "Retained policy/evaluator/geography/input references",
+        "Lawful access to necessary minimized evidence"
+      ],
+      "success": "Reproduce assessed outcome with original versions and clearly historical timestamp",
+      "denied_or_failure": "Missing/expired-retention evidence is a reproducibility gap, not a fabricated pass",
+      "enforcement_owner": "420Compliance audit tooling",
+      "data_boundary": "PRIVATE_AUDIT_REDACTED"
+    },
+    {
+      "id": "J24",
+      "actor": "auditor",
+      "title": "Export independent review evidence",
+      "preconditions": [
+        "Scoped export purpose and access grant",
+        "Redaction and retention checks"
+      ],
+      "success": "Export bounded reproducibility and review package with hashes",
+      "denied_or_failure": "Export cannot expose private addresses, ID scans, signatures, precise tracking or unscoped decisions",
+      "enforcement_owner": "420Compliance audit tooling",
+      "data_boundary": "PRIVATE_AUDIT_REDACTED"
+    }
+  ],
+  "excluded_domains": [
+    {
+      "id": "medical_cannabis",
+      "reason": "Different legal/provider model; separate approved domain required",
+      "revisit": "C11"
+    },
+    {
+      "id": "cultivation",
+      "reason": "420Grow policy domain not covered by delivery/travel packs",
+      "revisit": "C11"
+    },
+    {
+      "id": "accommodation",
+      "reason": "420BnB venue/property and booking policy requires separate review",
+      "revisit": "C11"
+    },
+    {
+      "id": "events",
+      "reason": "420Events permissions and consumption conditions are separate",
+      "revisit": "C11"
+    },
+    {
+      "id": "marketplace_sales",
+      "reason": "General commerce/product-tax policies are separate from DOOBr delivery",
+      "revisit": "C11"
+    },
+    {
+      "id": "unreviewed_jurisdictions",
+      "reason": "No automatic national/provincial coverage; region pack qualification required",
+      "revisit": "C11"
+    },
+    {
+      "id": "international_and_border_crossing",
+      "reason": "Domestic availability cannot authorize crossing national or provincial boundaries",
+      "revisit": "C11"
+    },
+    {
+      "id": "government_licence_issuance",
+      "reason": "Platform cannot issue or replace government licences",
+      "revisit": "NEVER"
+    },
+    {
+      "id": "automated_legal_approval",
+      "reason": "Monitoring and AI may propose changes but may not approve operative rules",
+      "revisit": "NEVER"
+    },
+    {
+      "id": "independent_financial_execution",
+      "reason": "No custody, escrow, payment, conversion, refund or fee-split authority",
+      "revisit": "NEVER"
+    },
+    {
+      "id": "public_personal_evidence",
+      "reason": "No public age/ID/address/signature/tracking/order evidence or reversible personal hashes",
+      "revisit": "NEVER"
+    },
+    {
+      "id": "native_compliance_mobile_app",
+      "reason": "Responsive site/SDK sufficient initially; DOOBr owns native clients",
+      "revisit": "SEPARATE_PRODUCT_DECISION"
+    },
+    {
+      "id": "independent_compliance_billing",
+      "reason": "No standalone fee, token or entitlement product in initial scope; DOOBr premium routing stays canonical",
+      "revisit": "SEPARATE_PRODUCT_DECISION"
+    },
+    {
+      "id": "universal_compliance_certification",
+      "reason": "A reviewed bounded decision cannot certify every applicable law",
+      "revisit": "NEVER"
+    }
+  ],
+  "authority_map": {
+    "420Compliance": "reviewed_policy_and_bounded_evaluation",
+    "DOOBr": "order_dispatch_custody_handover_refusal_return_enforcement",
+    "420Travel": "public_guidance_coarse_presence_and_handoff",
+    "420Location_Maps": "geographic_resolution_and_approved_public_projection",
+    "420Identity": "canonical_profile_issuer_credential_lifecycle_not_regulatory_permission",
+    "420Verify": "bytecode_verification_or_explicitly_scoped_place_evidence_not_licence_approval",
+    "420Registry": "canonical_discovery_provenance_not_legal_permission",
+    "420Oracle": "authorized_observations_not_legal_interpretation_approval",
+    "420Governance": "canonical_protocol_configuration_not_substitute_for_legal_review",
+    "420Pay": "canonical_financial_execution",
+    "420Swap": "approved_asset_conversion_under_canonical_Pay_routes",
+    "420Wallet": "permitted_user_signing_not_policy_approval",
+    "420Notifications": "qualified_notice_transport_not_permission_source",
+    "420Arbitration": "canonical_dispute_authority_not_override_of_mandatory_rules",
+    "DevelopmentCompensationVault420": "canonical_eligible_net_protocol_revenue_routing_not_user_principal"
+  },
+  "decision_contract": {
+    "outcomes": [
+      "ALLOW",
+      "DENY",
+      "REVIEW_REQUIRED",
+      "UNKNOWN"
+    ],
+    "transaction_proceed_outcomes": [
+      "ALLOW"
+    ],
+    "required_inputs": [
+      "caller_identity",
+      "tenant",
+      "subject_or_actor_binding",
+      "action",
+      "operation_reference",
+      "origin_destination_scope",
+      "actor_class",
+      "required_evidence_refs",
+      "relevant_facts",
+      "evaluation_time"
+    ],
+    "required_receipt_fields": [
+      "policy_version",
+      "policy_digest",
+      "evaluator_version",
+      "geography_version",
+      "evidence_refs_and_currentness",
+      "caller_tenant_actor_action_binding",
+      "operation_reference",
+      "evaluated_at",
+      "expires_at",
+      "outcome",
+      "obligations",
+      "reason_codes",
+      "coverage_gaps"
+    ],
+    "obligations_must_be_fulfilled": true,
+    "reauthorization_stages": [
+      "consumer_operation",
+      "pickup_dispatch",
+      "recipient_handover",
+      "material_fact_change",
+      "policy_or_evidence_expiry_revocation"
+    ],
+    "receipt_is_payment_authorization": false,
+    "receipt_is_universal_certificate": false,
+    "outage_fallback": "UNKNOWN_AND_BLOCK_TRANSACTION",
+    "history_is_immutable": true,
+    "return_is_separate_workflow": true
+  },
+  "separation_of_duties": {
+    "author_and_reviewer_distinct": true,
+    "publisher_distinct_from_author_and_reviewer": true,
+    "approval_binds_immutable_digest": true,
+    "changed_bytes_invalidate_approval": true,
+    "reviewer_scope_and_qualification_required": true,
+    "operator_can_only_reduce_permission_in_emergency": true,
+    "no_administrator_allow_override": true,
+    "restoration_requires_current_valid_approved_state": true
+  },
+  "data_boundary": {
+    "public_fields": [
+      "jurisdiction",
+      "domain",
+      "reviewed_explanation",
+      "source_citations",
+      "policy_version",
+      "effective_dates",
+      "last_review_date",
+      "coverage_status",
+      "coarse_region_presence"
+    ],
+    "private_fields": [
+      "subject_reference",
+      "tenant",
+      "operation_reference",
+      "credential_reference",
+      "minimized_evaluation_facts",
+      "protected_source_evidence",
+      "review_findings",
+      "access_audit"
+    ],
+    "never_public": [
+      "birth_date",
+      "ID_document",
+      "private_address",
+      "recipient_name_signature",
+      "precise_GPS_tracking",
+      "private_order_details",
+      "reversible_personal_hash"
+    ],
+    "raw_ID_capture_owned_by": "approved_DOOBR_or_identity_provider_boundary_not_Compliance_public_API",
+    "mandatory_personal_record_retention_owned_by": "accountable_retailer_DOOBR_boundary_with_reviewed_policy",
+    "personal_data_on_chain": false,
+    "full_chain_evidence_storage": false,
+    "redacted_audit_export": true
+  },
+  "policy_change_controls": {
+    "automatic_source_monitoring": true,
+    "AI_output_is_proposal_only": true,
+    "automatic_activation": false,
+    "formal_product_scope_change_required_for_new_domain": true,
+    "new_jurisdiction_requires_C11_qualification": true
+  },
+  "external_acceptance_is_separate": true,
+  "milestone": "C01.8",
+  "phase_closeout": "C08.5",
+  "next_step": "C01.3",
+  "open_questions_owned_by_later_steps": {
+    "C01.3": "Exact authority/source taxonomy, qualified reviewer ownership and legal questions",
+    "C01.4": "Cross-app contract and roadmap reconciliation",
+    "C01.5": "Detailed threat/privacy model",
+    "C01.6": "Schema/API/stack and measured freshness/time/SLA semantics",
+    "C01.7": "Service discovery and optional chain publication strategy",
+    "C04": "Reviewed policy packs and actual activation controls",
+    "C09_C10": "Real deployment, independent reviews, operating partners and live acceptance"
+  },
+  "scope_change_policy": "Changes require explicit versioned product decision, affected-step qualification and preserved prior evidence; no silent expansion or permission inferred from a listing."
+}

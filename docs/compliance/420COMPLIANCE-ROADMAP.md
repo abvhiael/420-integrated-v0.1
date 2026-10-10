@@ -325,3 +325,7 @@ This is a software-development and acceptance roadmap. The source list is a rese
 ## C01.1 adoption and execution register
 
 This file is the repository-adopted copy of the user-approved roadmap. Original phase and step IDs are preserved. C01.1 is the inventory step only; C01.2 remains product-scope lock. See `C01.1-INVENTORY-REUSE-GAPS.md`, `C01.1-INVENTORY.json` and `qualification/C01.1-level1.json` for exact implementation/evidence status. Source review is not operational authorization. Maps is an explicit shared consumer through the existing 420Location boundary.
+
+### C01.2 adopted product contract
+
+The locked scope is recorded in [C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md](C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md) and its machine-readable JSON companion. Nine actors, 24 journeys and 14 exclusions define the first infrastructure release. C01.1 qualification remains retained; C01.2 acceptance is recorded separately.

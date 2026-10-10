@@ -3,6 +3,15 @@ pragma solidity ^0.8.24;
 
 import { IRandomnessRouter420 } from "../../interfaces/IRandomnessRouter420.sol";
 import { RandomDomains } from "../constants/RandomDomains.sol";
+import { ActionIds } from "../constants/ActionIds.sol";
+import { ModuleIds } from "../constants/ModuleIds.sol";
+import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
+import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
+
+interface IHighCountryBreedingBinding {
+    function randomness() external view returns (address);
+    function authorization() external view returns (address);
+}
 
 /// @notice Fail-closed High Country breeding consumer of proof-verified 420 Random.
 /// @dev The canonical router freezes governance routes and validates provider proofs.
@@ -21,7 +30,9 @@ contract CanonicalBreedingRandomnessAdapter {
     }
 
     IRandomnessRouter420 public immutable router;
-    address public immutable breedingEngine;
+    address public breedingEngine;
+    IHighCountryAuthorization public immutable authorization;
+    bytes32 public constant BIND_SCOPE = keccak256("HC.RANDOMNESS.CANONICAL_BREEDING_BIND.V1");
     bytes32 public immutable profileId;
     uint64 public immutable timeoutSeconds;
     mapping(bytes32 => Pending) public pending;
@@ -30,15 +41,31 @@ contract CanonicalBreedingRandomnessAdapter {
     event BreedingRandomnessAbandoned(bytes32 indexed localId);
     event BreedingRandomnessConsumed(bytes32 indexed localId, bytes32 indexed canonicalId);
 
-    constructor(address router_, address breedingEngine_, bytes32 profileId_, uint64 timeoutSeconds_) {
+    constructor(address router_, address authorization_, bytes32 profileId_, uint64 timeoutSeconds_) {
         if (
-            router_.code.length == 0 || breedingEngine_ == address(0) || profileId_ == bytes32(0)
+            router_.code.length == 0 || authorization_.code.length == 0 || profileId_ == bytes32(0)
                 || timeoutSeconds_ == 0
         ) revert InvalidRequest();
         router = IRandomnessRouter420(router_);
-        breedingEngine = breedingEngine_;
+        authorization = IHighCountryAuthorization(authorization_);
         profileId = profileId_;
         timeoutSeconds = timeoutSeconds_;
+    }
+
+    /// @notice One-time capability-authorized binding after the breeding engine is deployed.
+    function bindBreedingEngine(address candidate) external {
+        if (breedingEngine != address(0) || candidate.code.length == 0) revert InvalidRequest();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_BIND_BREEDING,
+                BIND_SCOPE, 0
+            )
+        );
+        if (
+            IHighCountryBreedingBinding(candidate).randomness() != address(this)
+                || IHighCountryBreedingBinding(candidate).authorization() != address(authorization)
+        ) revert InvalidRequest();
+        breedingEngine = candidate;
     }
 
     function request(bytes32 localId, bytes32 domain, bytes32 context) external {

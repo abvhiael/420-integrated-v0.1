@@ -890,7 +890,10 @@ def test_bnb26_fail_closed_unprovisioned_pay_and_signed_finality(fixture_propert
     model=api.PayIntentInput(**body)
     trust={"merchant_id":body["merchant_id"],"payout_controller":body["payout_controller"],
            "merchant_activated":True,"guest_subject":guest,"host_subject":host,
-           "quoted_minor":calc["total_minor"],"currency":currency}
+           "quoted_minor":calc["total_minor"],"currency":currency,
+           "chain_id":420,"asset":"native:$420","asset_amount":body["asset_amount"],
+           "route_kind":"native_420","native_420_route_approved":True,
+           "priced_asset_conversion_approved":True}
     try:
         bad=client.post(endpoint,json=body,headers={"x-pay-authority-proof":sign(
             model,"intent",{**trust,"quoted_minor":1})})

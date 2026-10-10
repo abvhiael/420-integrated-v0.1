@@ -2,7 +2,7 @@
   "step": "BNB-2.4",
   "title": "Pricing and Booking Quotes",
   "qualification_level": "Level 1",
-  "status": "PENDING_EXACT_SHA_CI",
+  "status": "PASS_REPOSITORY_SIDE_LEVEL1",
   "implementation_sha": "837f9427816f75aee6ba1b4826611e17549a81e1",
   "pr_number": 600,
   "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
@@ -18,7 +18,7 @@
     "Negative, monetary, concurrency and authorization tests"
   ],
   "targeted_workflow_run": 38089425722,
-  "required_test_status": "queued at record creation; do not treat as pass",
+  "required_test_status": "completed success",
   "milestones": {
     "level2": "Deferred to documented BNB-2.5 app milestone",
     "level3": "Deferred until full app phase closeout"
@@ -29,5 +29,13 @@
     "Qualified service/host split, permitted deposits and cross-protocol settlement",
     "Live media and human accessibility acceptance"
   ],
-  "next_step": "BNB-2.5 — canonical title/requirements must be read from repository before implementation"
+  "next_step": "BNB-2.5 — canonical title/requirements must be read from repository before implementation",
+  "targeted_workflow_job": 114322621354,
+  "qualification_results": {
+    "runtime": "success",
+    "app_specific_workflows_passed": 10,
+    "failed_runtime_steps": 0,
+    "docs": "skipped (not Level 3)"
+  },
+  "evidence_only_note": "Only documentation/evidence files differ from qualified implementation SHA; no executable change."
 }

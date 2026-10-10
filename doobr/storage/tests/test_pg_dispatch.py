@@ -5,7 +5,7 @@ from datetime import datetime,timedelta,timezone
 from uuid import UUID
 import psycopg
 from doobr.auth import Denied,Session,Grant,VerifiedPrincipal
-from doobr.dispatch import offer,decide,release_assignment
+from doobr.dispatch import offer,decide,release_assignment,match_couriers
 T="00000000-0000-4000-8000-000000002001"
 FOREIGN="00000000-0000-4000-8000-000000002099"
 C="00000000-0000-4000-8000-000000002002"
@@ -70,6 +70,12 @@ class Tests(unittest.TestCase):
       expected_revision=revision,requested_units=1,expires_at=datetime.now(timezone.utc)+timedelta(minutes=3))
  def accept(self,order,offer_id,accept=True,eligible=None):
   return decide(**{**self.common(order,offer_id),"eligibility":eligible or Approved()},token="courier",accept=accept)
+ def test_0_private_capacity_matching(self):
+  found=match_couriers(connect=lambda:psycopg.connect(USER_DSN),issuer=Issuer(),store=AuthStore(),
+   token="operator",tenant_id=T,order_id=O1,eligibility=Approved())
+  self.assertEqual(found,((C,1),))
+  self.assertEqual(match_couriers(connect=lambda:psycopg.connect(USER_DSN),issuer=Issuer(),store=AuthStore(),
+   token="operator",tenant_id=T,order_id=O1,eligibility=Reject()),())
  def test_actual_capacity_conflict_reassignment_and_replay(self):
   self.make_offer(O1,F1)
   self.assertEqual(self.accept(O1,F1),"ASSIGNED")

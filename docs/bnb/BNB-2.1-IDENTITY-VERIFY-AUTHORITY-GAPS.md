@@ -18,3 +18,7 @@
 6. **Testnet acceptance:** independently prove real Identity and approved property authority integration; until then no claims of live verification or enabled transactional booking.
 
 **Qualification policy:** BNB-2.1 Level 1 remains BLOCKED until every above step is implemented/tested against one exact candidate SHA. Retain BNB runtime CI results as partial coverage, not comprehensive authorization evidence. No Level 2/3 or merge assertion.
+
+## Testnet handoff — 2026-10-10
+
+The actual network/Identity420 deployment, live issuer revocation/key lifecycle, independent property issuer governance/approval, and multi-instance provider-backed HTTP/PostgreSQL acceptance are now explicitly enumerated in [BNB-TESTNET-WORK-ROADMAP.md](BNB-TESTNET-WORK-ROADMAP.md) under T-BNB-IDENTITY-1, T-BNB-IDENTITY-2, T-BNB-PROPERTY-1 and T-BNB-INTEGRATION-1. This change relocates execution dependencies; it does **not** satisfy them or close BNB-2.1. Local API authorization, fail-closed recovery, replay, property scope, hostile adapters, and exact-SHA BnB CI remain non-testnet work. Do not promote the synthetic test signer or pending property claims into a live authority. Official ID-AUDIT-9 continues to control upstream network qualification.

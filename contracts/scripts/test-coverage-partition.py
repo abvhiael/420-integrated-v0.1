@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Negative and preservation checks for the qualification evidence boundary."""
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -38,6 +39,44 @@ class EvidenceBoundary(unittest.TestCase):
         del cache["src/C.sol"]
         with self.assertRaises(ValueError):
             partition_module.dependency_closure(cache, ["test/A.t.sol"])
+
+    def test_snapshot_retains_script_after_live_cache_is_pruned(self):
+        targets = ["script/Decision10DeploySeed420.s.sol", "test/A.t.sol"]
+        cache = {targets[0]: {"imports": ["src/B.sol"]},
+                 targets[1]: {"imports": ["src/B.sol"]}, "src/B.sol": {"imports": []}}
+        candidate = "1" * 40
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, "graph.json")
+            partition_module.write_graph_snapshot(path, cache, targets, candidate, 0, 4, "ci")
+            del cache[targets[0]]
+            retained = partition_module.read_graph_snapshot(path, targets, candidate, 0, 4)
+            self.assertEqual(set(retained), set(targets + ["src/B.sol"]))
+            self.assertEqual(set(retained),
+                             partition_module.dependency_closure(retained, targets))
+
+    def test_wrong_candidate_profile_partition_or_missing_graph_fails_closed(self):
+        targets = ["script/Decision10DeploySeed420.s.sol", "test/A.t.sol"]
+        cache = {targets[0]: {"imports": ["src/B.sol"]},
+                 targets[1]: {"imports": ["src/B.sol"]}, "src/B.sol": {"imports": []}}
+        candidate = "1" * 40
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory, "graph.json")
+            partition_module.write_graph_snapshot(path, cache, targets, candidate, 0, 4, "ci")
+            original = json.loads(path.read_text())
+            for key, value in (("candidate_sha", "2" * 40), ("profile", "pr"),
+                               ("shard", 1), ("count", 8), ("targets", targets[1:])):
+                with self.subTest(key=key):
+                    changed = dict(original, **{key: value})
+                    path.write_text(json.dumps(changed))
+                    with self.assertRaises(ValueError):
+                        partition_module.read_graph_snapshot(path, targets, candidate, 0, 4)
+            changed = dict(original, files={targets[1]: cache[targets[1]]})
+            path.write_text(json.dumps(changed))
+            with self.assertRaises(ValueError):
+                partition_module.read_graph_snapshot(path, targets, candidate, 0, 4)
+            path.unlink()
+            with self.assertRaises(FileNotFoundError):
+                partition_module.read_graph_snapshot(path, targets, candidate, 0, 4)
 
     def test_missing_or_duplicate_primary_assignment_fails_closed(self):
         inventory = ["src/A.sol", "src/B.sol", "test/A.t.sol", "test/B.t.sol"]

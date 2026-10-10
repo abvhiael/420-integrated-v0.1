@@ -25,7 +25,7 @@ fields and runtime maps for contracts called across primary ownership boundaries
 No protocol source, test, assertion, ABI, address or authority changes in this
 remediation. No coverage source or test is excluded.
 
-Eleven qualification-harness regressions verify preservation of source/other compiler
+Thirteen qualification-harness regressions verify preservation of source/other compiler
 input, rejection of canonical CI/changed compiler inputs, rejection of incomplete
 or duplicate assignments, preservation of uncovered lines/unknown branch hits and
 failure on unsupported LCOV records. The full context-stride reconstruction check
@@ -36,7 +36,7 @@ and failed (Solc exit 247; cgroup OOM kill). Emitting all production sources in
 one broad coverage shard also exceeded this limit. Neither attempt qualifies.
 Coverage now reuses the canonical four-shard assignment files produced by Solidity
 CI, subdividing each into 16 bounded compiler contexts. Foundry resolves the
-imports of each primary group. The immutable canonical compilation cache supplies
+imports of each primary group. An exact-SHA graph snapshot captured immediately after the initial canonical build supplies
 its complete dependency graph; every transitive import remains selected for
 artifact retention. The bridge emits bytecode and runtime maps for
 **every resolved dependency**, including contracts owned by another primary group.
@@ -81,8 +81,10 @@ and High Country contracts. This is scoped harness evidence, not Level 3.
 Reconciliation includes main `c5a4f220d1fbda01f707d359aa9bb32921a138b1` (DOOBR
 phase closeout). Workflow branch conflicts preserve both Commerce and DOOBR
 qualification entries. Upstream sources, assertions and verification scripts are
-retained. The replacement commit must have both the prior Commerce HEAD and
-current main as parents; its tested tree must match the published tree exactly.
+retained. Merge commit `46152b4af8cb82dc4c3b4b7bb269cc614a1b5761` has the prior Commerce
+HEAD `d2cfdd00778d642e4cef4d9a2aecfac0ae2b3f22` and current main as parents.
+The coverage corrections descend from that merge; the tested tree must match the
+published candidate tree exactly.
 
 The preceding status JSON is a historical checkpoint, not acceptance of this
 replacement. Comprehensive qualification and complete job/step/log inspection
@@ -90,3 +92,26 @@ remain required against one exact reconciled SHA. No skipped, queued, cancelled,
 failed or allowed-failure step counts as passing. PR #594 remains draft/unmerged.
 Actual chain/payment/settlement/refund/live integration evidence remains COM-8;
 independent external security signoff is not claimed.
+
+
+## Sparse-cache lifetime correction
+
+Candidate `7379236e7a688d9ff0666b87f2949ff1b5b8c28b`, Solidity run
+[38028988533](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38028988533),
+job 114145814151, passed its assigned canonical compilation, size checks and
+625 reported test cases across 107 assigned test sources. Mandatory coverage then
+failed: `Canonical compilation cache lacks source script/Decision10DeploySeed420.s.sol`.
+Artifact 11662850000 retains that failure and its successful preceding checks;
+the candidate is **not** comprehensive Level 3 PASS.
+
+Later sparse test commands prune the live cache's script entries. The qualifier
+now snapshots the complete compiler dependency graph immediately after its initial
+assigned build, before production size and per-file test commands. Coverage reads
+that retained snapshot once and verifies exact SHA, CI profile, owner partition
+and complete transitive dependency closure. It never substitutes a later mutable
+cache or silently omits a missing script/dependency. The snapshot is retained in
+the owning shard artifact. Two regressions reproduce post-build script pruning
+and reject absent, wrong-SHA/profile/partition or incomplete snapshots. Existing
+source, test, assertion, compiler, fuzz/invariant and aggregate gates remain intact.
+The replacement candidate requires actual executed qualification; this correction
+does not manufacture a pass from the failed coverage job.

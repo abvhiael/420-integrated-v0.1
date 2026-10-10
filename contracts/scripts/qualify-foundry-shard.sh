@@ -28,6 +28,8 @@ printf '%s\n' "${targets[@]}" > "../artifacts/contracts/shard-${shard}-targets.t
 printf '%s\n' "${all[@]}" > "../artifacts/contracts/primary-inventory-shard-${shard}.txt"
 # Compile all assigned sources, tests and scripts; compiler errors fail immediately.
 forge build "${targets[@]}"
+# Retain the complete graph before sparse test commands prune the live cache.
+python3 scripts/coverage-foundry-shard.py --snapshot-canonical-graph "$shard" "$count"
 # Enforce deployable runtime/initcode limits on production sources only. Reuse the\n# first build cache rather than forcing a second cold compilation.
 if (( ${#sources[@]} )); then
   echo "=== DEPLOYABLE SOURCE SIZE CHECK: ${#sources[@]} sources ==="

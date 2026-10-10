@@ -217,6 +217,7 @@ jobs:
             artifacts/contracts/shard-${{ matrix.shard }}.log
             artifacts/contracts/shard-${{ matrix.shard }}-targets.txt
             artifacts/contracts/primary-inventory-shard-${{ matrix.shard }}.txt
+            artifacts/contracts/compilation-graph-shard-${{ matrix.shard }}.json
             artifacts/contracts/coverage-shard-${{ matrix.shard }}
           if-no-files-found: error
           retention-days: 30
@@ -355,6 +356,7 @@ jobs:
             artifacts/contracts/shard-*.log
             artifacts/contracts/shard-*-targets.txt
             artifacts/contracts/primary-inventory-shard-*.txt
+            artifacts/contracts/compilation-graph-shard-*.json
             artifacts/contracts/expected-inventory.txt
             artifacts/contracts/qualified-inventory.txt
           if-no-files-found: warn

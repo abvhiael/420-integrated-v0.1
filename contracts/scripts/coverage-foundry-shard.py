@@ -50,13 +50,29 @@ def dependency_closure(cache, targets):
     return closure
 
 
-def run_context(inventory, targets, shard, count, evidence, candidate):
+
+def write_graph_snapshot(path, cache, targets, candidate, shard, count, profile):
+    # Capture immediately after the complete assigned build. Later sparse
+    # forge test/coverage commands may prune script or unrelated cache entries.
+    dependency_closure(cache, targets)
+    path.write_text(json.dumps({"candidate_sha": candidate, "shard": shard,
+        "count": count, "profile": profile, "targets": targets, "files": cache},
+        indent=2) + "\n")
+
+
+def read_graph_snapshot(path, targets, candidate, shard, count):
+    snapshot = json.loads(path.read_text())
+    if (snapshot.get("candidate_sha") != candidate or snapshot.get("shard") != shard
+            or snapshot.get("count") != count or snapshot.get("profile") != "ci"
+            or snapshot.get("targets") != targets):
+        raise ValueError("Wrong-SHA, profile or partition in canonical compilation graph")
+    cache = snapshot["files"]
+    dependency_closure(cache, targets)
+    return cache
+
+
+def run_context(inventory, targets, shard, count, evidence, candidate, cache):
     tests, _ = partition(inventory, targets, shard, count)
-    cache_path = Path("cache/solidity-files-cache.json")
-    if not cache_path.exists():
-        # Local scoped debugging may have only the last coverage compilation.
-        cache_path = Path("cache/coverage/solidity-files-cache.json")
-    cache = json.loads(cache_path.read_text())["files"]
     closure = dependency_closure(cache, targets)
     # Sparse artifact handling must also retain imported contracts. Merely
     # requesting their output from Solc does not retain their Foundry artifacts.
@@ -114,6 +130,16 @@ def main():
             (root / f"primary-inventory-shard-{shard}.txt").write_text("\n".join(inventory) + "\n")
             (root / f"shard-{shard}-targets.txt").write_text("\n".join(inventory[shard::4]) + "\n")
         return 0
+    if sys.argv[1:2] == ["--snapshot-canonical-graph"]:
+        shard, count = map(int, sys.argv[2:])
+        inventory = (root / f"primary-inventory-shard-{shard}.txt").read_text().splitlines()
+        targets = (root / f"shard-{shard}-targets.txt").read_text().splitlines()
+        partition(inventory, targets, shard, count)
+        candidate = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        cache = json.loads(Path("cache/solidity-files-cache.json").read_text())["files"]
+        write_graph_snapshot(root / f"compilation-graph-shard-{shard}.json", cache, targets,
+            candidate, shard, count, os.environ.get("FOUNDRY_PROFILE", "default"))
+        return 0
     shard, count = map(int, sys.argv[1:])
     inventory = (root / f"primary-inventory-shard-{shard}.txt").read_text().splitlines()
     targets = (root / f"shard-{shard}-targets.txt").read_text().splitlines()
@@ -126,10 +152,12 @@ def main():
     (evidence / "qualified-candidate.txt").write_text(candidate + "\n")
     (evidence / "foundry-version.txt").write_text(subprocess.check_output(["forge", "--version"], text=True))
     (evidence / "primary-targets.txt").write_text("\n".join(targets) + "\n")
+    cache = read_graph_snapshot(root / f"compilation-graph-shard-{shard}.json",
+        targets, candidate, shard, count)
     contexts = []
     for segment, selected in enumerate(context_partitions(inventory, targets, shard, count)):
         contexts.append(run_context(inventory, selected,
-            shard + segment * count, count * CONTEXTS_PER_SHARD, evidence / f"context-{segment}", candidate))
+            shard + segment * count, count * CONTEXTS_PER_SHARD, evidence / f"context-{segment}", candidate, cache))
     merge = runpy.run_path(str(Path(__file__).with_name("merge-coverage.py")))["merge_lcov"]
     content, source_records = merge([evidence / f"context-{segment}/lcov.info" for segment in range(CONTEXTS_PER_SHARD)])
     (evidence / "lcov.info").write_text(content)
@@ -145,6 +173,6 @@ def main():
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+    except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as error:
         print(f"Coverage shard failed: {error}", file=sys.stderr)
         sys.exit(1)

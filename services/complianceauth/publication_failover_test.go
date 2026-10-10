@@ -6,6 +6,7 @@ func TestC038DatabaseOutageAndReconnect(t *testing.T){
  ctx:=context.Background()
  primary,e:=OpenPostgreSQLPublicationStore(dsn);if e!=nil{t.Fatal(e)}
  secondary,e:=OpenPostgreSQLPublicationStore(dsn);if e!=nil{t.Fatal(e)};defer secondary.DB.Close()
+ if err:=primary.Migrate(ctx);err!=nil{t.Fatal("test schema setup",err)}
  scope:="outage/"+time.Now().UTC().Format("20060102150405.000000000")
  fence:=PublicationFence{Scope:scope,Sequence:1,RevocationEpoch:1,PolicyDigest:Digest([]byte("policy")),DependencyDigest:Digest([]byte("deps")),ExpiresAt:time.Now().Add(time.Hour).Truncate(time.Microsecond)}
  defer secondary.DB.ExecContext(ctx,"DELETE FROM compliance_publication_fences WHERE scope=$1",scope)

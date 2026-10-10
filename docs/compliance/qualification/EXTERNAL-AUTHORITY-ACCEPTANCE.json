@@ -61,5 +61,24 @@
     "evidence_references": []
   },
   "safety": "Do not turn missing evidence into approval, generate simulated production licences or place signing keys in GitHub. No production ALLOW on incomplete authority.",
-  "next_action": "Obtain actual independent authority artifacts using approved off-repository channels, then verify and record hashes/metadata in evidence registry; keep sensitive full documents private."
+  "next_action": "Obtain actual independent authority artifacts using approved off-repository channels, then verify and record hashes/metadata in evidence registry; keep sensitive full documents private.",
+  "disposition": "DEFERRED_TO_TESTNET_AND_PRODUCTION_ACCEPTANCE",
+  "testnet_handoff": "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md",
+  "canonical_milestones": [
+    "C08.3",
+    "C09.1",
+    "C09.3",
+    "C09.4",
+    "C09.5",
+    "C09.6",
+    "C09.7",
+    "C09.8",
+    "C09.9",
+    "C09.10",
+    "C10.1",
+    "C10.2",
+    "C10.3",
+    "C10.7"
+  ],
+  "legal_review_can_start_pre_testnet": true
 }

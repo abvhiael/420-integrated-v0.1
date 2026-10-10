@@ -1,0 +1,61 @@
+name: DOOBR R01 Architecture Level 2
+on:
+  push:
+    branches:
+      - roadmap/doobr-bc-vancouver-infrastructure
+    paths:
+      - 'docs/doobr/**'
+      - 'scripts/verify-doobr-r01-*.py'
+      - '.github/workflows/doobr-r01-level2.yml'
+  pull_request:
+    paths:
+      - 'docs/doobr/**'
+      - 'scripts/verify-doobr-r01-*.py'
+      - '.github/workflows/doobr-r01-level2.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Check exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned schema parser
+        run: python3 -m pip install 'PyYAML==6.0.2'
+      - name: Python compile
+        run: python3 -m py_compile scripts/verify-doobr-r01-1.py scripts/verify-doobr-r01-8.py scripts/verify-doobr-audit-2.py scripts/verify-doobr-audit-5.py scripts/verify-doobr-audit-6.py scripts/verify-doobr-audit-8.py scripts/validate-gen-svc-3.py
+      - name: Retained R01.1-R01.7 contract assertions
+        run: python3 scripts/verify-doobr-r01-1.py
+      - name: R01.8 retained architecture integration
+        run: python3 scripts/verify-doobr-r01-8.py
+      - name: DOOBR compatibility and authority boundary
+        run: |
+          python3 scripts/verify-doobr-audit-2.py
+          python3 scripts/verify-doobr-audit-5.py
+          python3 scripts/verify-doobr-audit-6.py
+          python3 scripts/verify-doobr-audit-8.py
+          python3 scripts/validate-gen-svc-3.py
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Real Travel compatibility regression
+        run: go test -count=1 ./genesis/svc3/travelapp -run '^(TestGenesisCompatibilitySchemas|TestGenesisTransactionMethodsAlwaysDisabled|TestDOOBRAudit3.*|TestDOOBRAudit7.*)$' -v
+      - name: Scoped Travel vet
+        run: go vet ./genesis/svc3/... ./cmd/420travel/...
+      - name: Scoped Travel build
+        run: go build -o /tmp/420travel-r01-level2 ./cmd/420travel
+      - name: Final exact SHA confirmation
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"

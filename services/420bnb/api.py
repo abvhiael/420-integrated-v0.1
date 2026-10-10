@@ -235,13 +235,14 @@ def guest_local_availability(property_id:str,checkin:str,checkout:str):
     with db() as c:
         prop=c.execute("SELECT status FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
         if not prop or prop[0]!="published":raise HTTPException(404,"NOT_FOUND")
-        policy=c.execute("SELECT timezone_id FROM bnb_listing_policy WHERE property_id=%s",
+        policy=c.execute("SELECT timezone_id,min_nights FROM bnb_listing_policy WHERE property_id=%s",
                          (property_id,)).fetchone()
         if not policy:raise HTTPException(503,"PROPERTY_TIMEZONE_UNAVAILABLE")
     try:start,end,nights=local_stay_window(begin,finish,policy[0])
     except ValueError as e:raise HTTPException(422,str(e))
+    if nights<policy[1]:raise HTTPException(422,"MINIMUM_STAY_NOT_MET")
     result=guest_availability(property_id,start,end)
-    return {**result,"timezone_id":policy[0],"nights":nights}
+    return {**result,"timezone_id":policy[0],"nights":nights,"min_nights":policy[1]}
 
 
 @app.post("/v1/bnb/properties", status_code=201)
@@ -380,6 +381,7 @@ def revoke_property_manager(property_id: str,grantee_subject: str,capability: st
 
 class ListingPolicyInput(BaseModel):
     expected_version: int = Field(ge=1)
+    min_nights: int = Field(default=1,ge=1,le=90)
     house_rules: str = Field(min_length=1,max_length=4000)
     cancellation_policy: str = Field(min_length=1,max_length=4000)
     timezone_id: str = Field(min_length=1,max_length=100)
@@ -404,13 +406,13 @@ def update_listing_policy(property_id:str,payload:ListingPolicyInput,
     with db() as c:
         with c.transaction():
             owner_draft(c,property_id,subject,payload.expected_version)
-            c.execute("""INSERT INTO bnb_listing_policy(property_id,house_rules,cancellation_policy,timezone_id)
-                VALUES (%s,%s,%s,%s) ON CONFLICT(property_id) DO UPDATE
+            c.execute("""INSERT INTO bnb_listing_policy(property_id,house_rules,cancellation_policy,timezone_id,min_nights)
+                VALUES (%s,%s,%s,%s,%s) ON CONFLICT(property_id) DO UPDATE
                 SET house_rules=EXCLUDED.house_rules,cancellation_policy=EXCLUDED.cancellation_policy,
-                timezone_id=EXCLUDED.timezone_id""",
-                (property_id,payload.house_rules,payload.cancellation_policy,payload.timezone_id))
+                timezone_id=EXCLUDED.timezone_id,min_nights=EXCLUDED.min_nights""",
+                (property_id,payload.house_rules,payload.cancellation_policy,payload.timezone_id,payload.min_nights))
             version=bump_property(c,property_id,subject,"bnb.listing.policy_updated")
-    return {"version":version,"timezone_id":zone.key,"status":"draft"}
+    return {"version":version,"timezone_id":zone.key,"min_nights":payload.min_nights,"status":"draft"}
 
 
 @app.post("/v1/bnb/account/properties/{property_id}/media",status_code=201)
@@ -769,7 +771,15 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
                 raise HTTPException(409,"CAPACITY_EXHAUSTED")
             uid=uuid4()
             # Explicitly nonbinding quote; no payments permitted in this stage.
-            nights=(payload.end.date()-payload.start.date()).days
+            policy=c.execute("SELECT timezone_id,min_nights FROM bnb_listing_policy WHERE property_id=%s",
+                             (payload.property_id,)).fetchone()
+            if policy:
+                from zoneinfo import ZoneInfo
+                nights=(payload.end.astimezone(ZoneInfo(policy[0])).date()-
+                        payload.start.astimezone(ZoneInfo(policy[0])).date()).days
+                if nights<policy[1]:raise HTTPException(422,"MINIMUM_STAY_NOT_MET")
+            else:
+                nights=(payload.end.date()-payload.start.date()).days
             if nights<=0:raise HTTPException(422,"MINIMUM_NIGHTS")
             total=nights*property_row[1]*payload.units
             c.execute("""INSERT INTO bnb_hold

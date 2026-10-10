@@ -621,6 +621,50 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(products.totalRegisteredProducts() == countBefore, "termination duplicated product");
     }
 
+    function testR034CancellationAndRestrictedModeReleaseCapacityOnce() public {
+        uint64 plantId = 91;
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("r034:cancel:register")
+        );
+        _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+        uint32 activeBefore = plants.activePlantsByParcel(11);
+        uint32 privateBefore = plants.privatePlantsByParcel(11);
+
+        (bool premature,) = address(plants).call(
+            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
+        );
+        require(!premature, "premature termination");
+        require(plants.activePlantsByParcel(11) == activeBefore, "premature release");
+        _ready(plantId);
+        EmergencyState state = EmergencyState(address(cultivation.emergencyState()));
+        _grant(
+            address(this),
+            ModuleIds.EMERGENCY_STATE,
+            ActionIds.EMERGENCY_RESTRICT,
+            EmergencyDomains.CULTIVATION,
+            keccak256("r034:restrict")
+        );
+        state.setRestricted(EmergencyDomains.CULTIVATION, true);
+        (bool wrongStage,) = address(plants).call(
+            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.FLOWERING))
+        );
+        require(!wrongStage, "restricted invalid transition");
+        plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
+        require(plants.activePlantsByParcel(11) == activeBefore - 1, "restricted release wrong");
+        require(plants.privatePlantsByParcel(11) == privateBefore - 1, "restricted private release wrong");
+        require(!harvest.isHarvestAccepted(plantId), "cancelled plant has harvest");
+        require(products.totalRegisteredProducts() == 0, "cancelled plant issued product");
+        (bool replay,) = address(plants).call(
+            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
+        );
+        require(!replay, "cancel replay released capacity");
+        require(plants.activePlantsByParcel(11) == activeBefore - 1, "replay changed capacity");
+    }
+
     function testR031HarvestFailsClosedOnEmergencyAndTerminatedPlant() public {
         uint64 plantId = 89;
         _grant(

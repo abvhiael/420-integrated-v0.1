@@ -979,6 +979,10 @@ def submit_booking_request(payload:BookingRequestInput,
             if payload.request_type=="instant" and (not policy or not policy[0]):
                 raise HTTPException(403,"INSTANT_BOOK_NOT_ENABLED")
             deadline=min(hold[1],datetime.now(timezone.utc)+timedelta(minutes=10))
+            # The request cannot retain inventory beyond its own approval
+            # deadline; occupancy projections already ignore expired holds.
+            c.execute("UPDATE bnb_hold SET expires_at=%s WHERE id=%s",
+                      (deadline,payload.hold_id))
             request_id=uuid4()
             state="accepted" if payload.request_type=="instant" else "requested"
             c.execute("""INSERT INTO bnb_booking_request

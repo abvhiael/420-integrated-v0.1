@@ -6,13 +6,14 @@ import { HighCountryAuthorization } from "../../../../src/highcountry/auth/HighC
 import { ActionIds } from "../../../../src/highcountry/constants/ActionIds.sol";
 import { ModuleIds } from "../../../../src/highcountry/constants/ModuleIds.sol";
 import { UpgradeState } from "../../../../src/highcountry/types/HighCountryEnums.sol";
+import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
 import { EmergencyState } from "../../../../src/highcountry/security/EmergencyState.sol";
 import { ModuleRegistry } from "../../../../src/highcountry/upgrades/ModuleRegistry.sol";
 import { MockCapabilityRegistry } from "../../mocks/MockCapabilityRegistry.sol";
 
 contract MockHighCountryModuleV1 {
     function highCountryModuleIdentity() external pure returns (bytes32, uint32, bytes32, bytes32) {
-        return (keccak256("HC.MODULE.TEST"), 1, keccak256("ruleset:test"), keccak256("HC.INTERFACE.TEST.V1"));
+        return (keccak256("HC.MODULE.TEST"), 1, keccak256(abi.encode(keccak256("HC.RULESET.V1"), keccak256("ruleset:test"))), keccak256("HC.INTERFACE.TEST.V1"));
     }
 }
 
@@ -20,16 +21,40 @@ contract MockHighCountryModuleV2 { }
 
 contract ModuleRegistryTest {
     bytes32 private constant MODULE_ID = keccak256("HC.MODULE.TEST");
-    bytes32 private constant RULESET_ID = keccak256("ruleset:test");
+    bytes32 private immutable RULESET_ID;
 
     MockCapabilityRegistry private capabilityRegistry;
     HighCountryAuthorization private authorization;
     ModuleRegistry private registry;
+    RulesetRegistry private rulesets;
 
     constructor() {
         capabilityRegistry = new MockCapabilityRegistry();
         authorization = new HighCountryAuthorization(address(capabilityRegistry));
         registry = new ModuleRegistry(address(authorization));
+        rulesets = new RulesetRegistry(address(authorization));
+        RULESET_ID = rulesets.deriveRulesetId(keccak256("ruleset:test"));
+        capabilityRegistry.setGrant(
+            keccak256("grant:ruleset-register"),
+            ICapabilityRegistry420.CapabilityGrant({
+                principal: address(this), componentId: ModuleIds.RULESET_REGISTRY,
+                capabilityId: ActionIds.RULESET_REGISTER, scopeHash: RULESET_ID,
+                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
+                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
+            }), 0
+        );
+        rulesets.registerRuleset(keccak256("ruleset:test"));
+        capabilityRegistry.setGrant(
+            keccak256("grant:bind-rulesets"),
+            ICapabilityRegistry420.CapabilityGrant({
+                principal: address(this), componentId: ModuleIds.MODULE_REGISTRY,
+                capabilityId: ActionIds.MODULE_BIND_RULESETS, scopeHash: registry.RULESET_BIND_SCOPE(),
+                perCallLimit: 0, periodLimit: 0, periodSeconds: 0,
+                validFrom: 0, validUntil: uint64(block.timestamp + 1 days), revoked: false
+            }), 0
+        );
+        registry.bindRulesetRegistry(address(rulesets));
+
         _grant(ActionIds.MODULE_REGISTER, keccak256("grant:register"));
         _grant(ActionIds.MODULE_SET_STATE, keccak256("grant:set-state"));
         capabilityRegistry.setGrant(

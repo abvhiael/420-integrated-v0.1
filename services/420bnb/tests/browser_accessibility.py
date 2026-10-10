@@ -11,7 +11,7 @@ with sync_playwright() as p:
     page.goto(PAGE.as_uri())
     assert page.get_by_role("heading", name="Stay a little longer.").count() == 1
     assert page.get_by_role("navigation", name="Main").count() == 1
-    assert page.get_by_role("form").count() >= 1
+    assert page.locator("form").count() >= 2
     assert page.get_by_role("button", name="Save unpublished draft").is_disabled()
     assert page.get_by_role("button", name="Refresh drafts").is_disabled()
     assert page.get_by_label("Property title").count() == 1

@@ -1,0 +1,58 @@
+name: DOOBR R02.7 Dispatch Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/dispatch.py','doobr/storage/migrations/0007_dispatch.up.sql','doobr/storage/tests/test_dispatch.py','docs/doobr/DOOBR-R02-7-*','.github/workflows/doobr-r02-7-level1.yml']
+  pull_request:
+    paths: ['doobr/dispatch.py','doobr/storage/migrations/0007_dispatch.up.sql','doobr/storage/tests/test_dispatch.py','docs/doobr/DOOBR-R02-7-*','.github/workflows/doobr-r02-7-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_7
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_7"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and scoped negative tests
+        run: |
+          python3 -m py_compile doobr/dispatch.py doobr/storage/tests/test_dispatch.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_dispatch.py -v
+      - name: Apply canonical migrations
+        run: |
+          for num in 0001_initial 0002_identity 0003_retailer 0004_courier 0005_presence 0006_order_commands 0007_dispatch; do
+            psql -v ON_ERROR_STOP=1 -f "doobr/storage/migrations/${num}.up.sql"
+          done
+      - name: Verify RLS and unique active offer constraints
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN IF (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='doobr_private' AND c.relname IN ('dispatch_offers','dispatch_assignments') AND c.relrowsecurity AND c.relforcerowsecurity)<>2 THEN RAISE EXCEPTION 'missing dispatch RLS'; END IF; END \$\$;"
+      - name: Assert final SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

@@ -166,6 +166,76 @@ def revise_draft_property(property_id: str, payload: PropertyRevision,
     return {"id":property_id,"status":"draft","version":new[0],"published":False}
 
 
+class ManagerGrantInput(BaseModel):
+    subject: str = Field(min_length=1,max_length=256)
+    capability: str
+    expires_at: datetime
+
+
+def require_verified_property_owner(c, property_id: str, subject: str):
+    owner=c.execute("""SELECT host_subject FROM bnb_property WHERE id=%s FOR UPDATE""",
+                    (property_id,)).fetchone()
+    if not owner or owner[0]!=subject:
+        raise HTTPException(404,"NOT_FOUND")
+    verified=c.execute("""SELECT 1 FROM bnb_property_claim WHERE
+        property_id=%s AND subject=%s AND state='verified' AND
+        expires_at>now() AND reviewed_at IS NOT NULL LIMIT 1""",
+        (property_id,subject)).fetchone()
+    if not verified:
+        raise HTTPException(403,"PROPERTY_AUTHORITY_NOT_VERIFIED")
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/managers", status_code=201)
+def grant_property_manager(property_id: str, payload: ManagerGrantInput,
+                           authorization: str | None = Header(None)):
+    """No grants without independently reviewed ownership and fresh actor session."""
+    subject=active_subject(authorization)
+    if payload.capability not in ("view_reservations","edit_calendar","edit_listing","handle_requests"):
+        raise HTTPException(422,"INVALID_CAPABILITY")
+    if payload.subject==subject:
+        raise HTTPException(422,"SELF_GRANT_NOT_ALLOWED")
+    if payload.expires_at.tzinfo is None or not (
+        datetime.now(timezone.utc)<payload.expires_at<=datetime.now(timezone.utc)+timedelta(days=90)
+    ):
+        raise HTTPException(422,"INVALID_GRANT_EXPIRY")
+    with db() as c:
+        with c.transaction():
+            require_verified_property_owner(c,property_id,subject)
+            account=c.execute("SELECT state FROM bnb_account WHERE subject=%s FOR UPDATE",
+                             (payload.subject,)).fetchone()
+            if not account or account[0]!="active":
+                raise HTTPException(404,"GRANTEE_NOT_FOUND")
+            exists=c.execute("""SELECT 1 FROM bnb_property_grant WHERE property_id=%s
+                AND grantee_subject=%s AND capability=%s""",
+                (property_id,payload.subject,payload.capability)).fetchone()
+            if exists:
+                raise HTTPException(409,"GRANT_ALREADY_EXISTS")
+            c.execute("""INSERT INTO bnb_property_grant(property_id,grantee_subject,
+                capability,expires_at,granted_by) VALUES (%s,%s,%s,%s,%s)""",
+                (property_id,payload.subject,payload.capability,payload.expires_at,subject))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.property.manager_granted',%s)""",(uuid4(),subject,property_id))
+    return {"property_id":property_id,"capability":payload.capability,
+            "grantee_subject":payload.subject,"financial_permissions":[]}
+
+
+@app.delete("/v1/bnb/account/properties/{property_id}/managers/{grantee_subject}/{capability}")
+def revoke_property_manager(property_id: str,grantee_subject: str,capability: str,
+                            authorization: str | None = Header(None)):
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            require_verified_property_owner(c,property_id,subject)
+            changed=c.execute("""UPDATE bnb_property_grant SET revoked_at=now()
+                WHERE property_id=%s AND grantee_subject=%s AND capability=%s
+                AND revoked_at IS NULL RETURNING capability""",
+                (property_id,grantee_subject,capability)).fetchone()
+            if not changed:raise HTTPException(404,"GRANT_NOT_FOUND")
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.property.manager_revoked',%s)""",(uuid4(),subject,property_id))
+    return {"revoked":True}
+
+
 @app.post("/v1/bnb/holds", status_code=201)
 def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_length=128),
          x_authenticated_subject: str | None = Header(None),

@@ -34,7 +34,9 @@ contract HarvestEngine {
     mapping(uint64 => HarvestAcceptance) private _accepted;
     mapping(uint64 => HarvestScoring.Result) private _scored;
 
-    event HarvestScored(uint64 indexed plantId, uint32 yieldGrams, uint16 qualityBps, uint16 geneticBps, HarvestScoring.Grade grade);
+    event HarvestScored(
+        uint64 indexed plantId, uint32 yieldGrams, uint16 qualityBps, uint16 geneticBps, HarvestScoring.Grade grade
+    );
 
     event HarvestAccepted(
         uint64 indexed plantId,

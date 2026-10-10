@@ -502,3 +502,35 @@ def test_bnb23_quantity_closure_atomic_reschedule_and_owner_boundary(actor):
             c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_bnb24_host_rate_plan_is_draft_only_versioned_and_bounded(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    prop=client.post("/v1/bnb/properties",headers=headers,json={
+        "title":"Rateplan property","public_region":"Prairies",
+        "capacity":2,"nightly_minor":5000,"currency":"CAD"})
+    assert prop.status_code==201,prop.text
+    pid=prop.json()["id"]
+    path=f"/v1/bnb/account/properties/{pid}/rate-plan"
+    sample={"expected_property_version":1,"seasonal_rates":[{
+        "start":"2027-06-01","end":"2027-09-01","nightly_minor":8000}],
+        "cleaning_minor":1200,"service_minor":400,"tax_bps":500,"discount_bps":1000}
+    try:
+        assert client.put(path,json=sample).status_code==401
+        overlapping=client.put(path,headers=headers,json={**sample,"seasonal_rates":[
+            {"start":"2027-06-01","end":"2027-08-01","nightly_minor":8000},
+            {"start":"2027-07-01","end":"2027-09-01","nightly_minor":9000}]})
+        assert overlapping.status_code==422
+        applied=client.put(path,headers=headers,json=sample)
+        assert applied.status_code==200,applied.text
+        assert applied.json()["property_version"]==2
+        assert applied.json()["rate_version"]==1
+        assert client.put(path,headers=headers,json=sample).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT COUNT(*) FROM bnb_rate_plan WHERE property_id=%s",(pid,)).fetchone()[0]==1
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

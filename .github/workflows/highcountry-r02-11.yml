@@ -1,0 +1,71 @@
+name: High Country R02.11 Targeted Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/**'
+      - 'docs/highcountry/R02.11-EMERGENCY-ENFORCEMENT.md'
+      - 'docs/highcountry/DEPLOYMENT-AND-TRUST.md'
+      - 'scripts/highcountry/verify-r01.py'
+      - '.github/workflows/highcountry-r02-11.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r02-11:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        run: git rev-parse HEAD
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Contract build
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry test/highcountry
+      - name: Security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: High Country player entitlement and access regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/player/*.t.sol' -vv && forge test --match-path 'test/highcountry/unit/world/BonusRegionAccess420.t.sol' -vv
+      - name: Retained High Country tests and invariants
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/**/*.t.sol' -vv
+      - name: Source specification
+        run: python3 scripts/highcountry/verify-r01.py
+      - name: R02.11 breeding and randomness ABI
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import pathlib,json
+          for name in ('PlantRegistry','CultivationEngine','BreedingEngine','RandomnessCoordinator'):
+              matches=list(pathlib.Path('out').glob('**/'+name+'.json'))
+              assert len(matches)==1, (name,matches)
+              abi=json.loads(matches[0].read_text())['abi']
+              functions={x['name'] for x in abi if x['type']=='function'}
+              assert {'bindEmergencyState','emergencyState','EMERGENCY_BIND_SCOPE'} <= functions,name
+              if name=='BreedingEngine':
+                  assert {'pendingChildOwner','requestedAt','cancelled','BREEDING_TIMEOUT','cancelBreeding','expireBreeding'} <= functions
+              if name=='RandomnessCoordinator':
+                  assert {'cancel','cancelled'} <= functions
+          for name,expected in {
+              'HighCountryGamingBridge420': {'bindPlayerEntitlement','hasPlayerContent','hasPlayerBonusRegion','hasPlayerCompetition'},
+              'BonusRegionAccess420': {'hasAccess','requireAccess'},
+              'OptionalCompetitionAccess420': {'hasAccess','requireAccess'}
+          }.items():
+              matches=list(pathlib.Path('out').glob('**/'+name+'.json'))
+              assert len(matches)==1, (name,matches)
+              functions={x['name'] for x in json.loads(matches[0].read_text())['abi'] if x['type']=='function'}
+              assert expected <= functions, name

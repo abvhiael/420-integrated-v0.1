@@ -1,0 +1,57 @@
+name: High Country R03.3 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/harvest/**'
+      - 'contracts/test/highcountry/unit/cultivation/**'
+      - '.github/workflows/highcountry-r03-3.yml'
+      - 'docs/highcountry/R03.3-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r03-3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected build
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Source formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/harvest/HarvestProductRegistry.sol test/highcountry/unit/cultivation/CultivationEngine.t.sol
+      - name: Security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: Full affected cultivation harvest product regression
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' -vv
+      - name: Retained harvest scoring and boundaries
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/HarvestScoring.t.sol' -vv
+      - name: Harvest product contract ABI
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          matches=list(pathlib.Path('out').glob('**/HarvestProductRegistry.json'))
+          assert len(matches)==1,matches
+          names={v['name'] for v in json.loads(matches[0].read_text())['abi'] if v['type']=='function'}
+          assert {'registerHarvestProduct','getProduct','issuedGramsByGrower','totalIssuedGrams','productOfPlant'} <= names
+          PY
+      - name: Canonical High Country verifier
+        run: python3 scripts/highcountry/verify-r01.py

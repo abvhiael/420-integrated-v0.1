@@ -111,8 +111,38 @@ async function loadDrafts(){
  fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/reviews",{headers:hostHeaders(),credentials:"omit",cache:"no-store"})]);
  if(!a.ok||!b.ok)throw Error("Host details unavailable");
  const unitData=await a.json(),reviewData=await b.json();
- units.textContent=unitData.length+" configured unit(s) · "+(reviewData.at(-1)?.state||"no publication review")+
- " · publication is controlled by an independent authority.";
+ units.replaceChildren();
+ const details=document.createElement("p");details.textContent=unitData.length+" configured unit(s) · "+(reviewData.at(-1)?.state||"no publication review")+
+ " · publication is controlled by an independent authority.";units.append(details);
+ if(item.status==="draft" && unitData.length){
+ const form=document.createElement("form");
+ const selectLabel=document.createElement("label");selectLabel.textContent="Unit to block";
+ const select=document.createElement("select");
+ for(const unit of unitData){const opt=document.createElement("option");opt.value=unit.id;opt.textContent=unit.label;select.append(opt);}
+ selectLabel.append(select);
+ const beginLabel=document.createElement("label");beginLabel.textContent="Closure starts (local time)";
+ const begin=document.createElement("input");begin.type="datetime-local";begin.required=true;beginLabel.append(begin);
+ const finishLabel=document.createElement("label");finishLabel.textContent="Closure ends (local time)";
+ const finish=document.createElement("input");finish.type="datetime-local";finish.required=true;finishLabel.append(finish);
+ const whyLabel=document.createElement("label");whyLabel.textContent="Reason";
+ const why=document.createElement("input");why.maxLength=160;why.required=true;whyLabel.append(why);
+ const submit=document.createElement("button");submit.type="submit";submit.textContent="Block unit dates";
+ const result=document.createElement("p");result.setAttribute("aria-live","polite");
+ form.append(selectLabel,beginLabel,finishLabel,whyLabel,submit,result);
+ form.addEventListener("submit",async event=>{
+ event.preventDefault();
+ const start=new Date(begin.value),end=new Date(finish.value);
+ if(!Number.isFinite(start.valueOf())||!Number.isFinite(end.valueOf())||start>=end){result.textContent="Enter a valid future date interval.";return;}
+ result.textContent="Applying calendar block…";
+ try{const route="/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/calendar/blocks?unit_id="+encodeURIComponent(select.value);
+ const r=await fetch(route,{method:"POST",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({start:start.toISOString(),end:end.toISOString(),reason:why.value,expected_version:item.version})});
+ if(!r.ok)throw Error("Calendar block rejected ("+r.status+"). Refresh to resolve conflicts.");
+ result.textContent="Calendar block recorded.";await loadDrafts();
+ }catch(e){result.textContent=e.message;}
+ });
+ units.append(form);
+ }
  }catch{units.textContent="Host details unavailable.";}
  });article.append(h,meta,editor,load,units);out.append(article);
  }

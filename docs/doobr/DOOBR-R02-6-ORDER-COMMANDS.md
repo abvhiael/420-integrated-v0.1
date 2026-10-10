@@ -1,0 +1,16 @@
+# DOOBR R02.6 — Durable order state machine and exactly-once commands
+
+Status: implementation candidate; Level 1 exact-SHA qualification pending. Branch `roadmap/doobr-bc-vancouver-infrastructure`, PR #601. Canonical definition: R02.6 durable order state machine, exactly-once business semantics through idempotent commands, authorization.
+
+## Implementation and authority
+- `doobr/order_commands.py`: explicitly enumerated non-reversing transitions from eligibility through assigned/pickup/handoff/delivery/return/reconciliation; cancellation/expiry only in early states. The command is accepted only after R02.2 independently verified signed issuer, unrecalled session and per-order role/resource grant, and a separate *external* action/actor/order/state-specific evidence authority approves it. Authenticated consumer ownership and retailer ownership are checked in PostgreSQL. Operator and courier assignments rely on exact R02.2 per-order scoped grants and independent evidence authority; no user role may mint its own credential or policy.
+- `0006_order_commands.up.sql`: tenant-isolated, immutable receipt references with unique command identifiers and applied revisions, forced row-level security and no public privileges. Idempotency is exact-payload: repeat of matching command ID returns the committed result; conflicting payload / tenant / actor / expected version cannot rebind the key. Revision CAS and serialized row locks reject concurrent distinct commands. One transaction commits order revision and command record or neither.
+- `test_pg_order_commands.py`: actual PostgreSQL restricted nonowner role with concurrent command racing, retries, replay substitution, evidence rejection, cross-tenant denial, invalid edges and rollback verification. `test_order_commands.py` checks static edge and malformed command rejection. CI uses exact pinned SHA and migrations through 0006.
+- No DOOBR-proprietary payment, escrow, fund transfer or legal delivery permission is introduced. Any transition requiring external proof must stay denied while the actual 420Compliance, approved retailer, courier/Identity/Pay and custody issuers are not deployed. `evidence_authority` in repository tests is a simulation, **not live permission**.
+- The transition API is a server-side library; no user-facing mutation endpoint is deployed, and R02.7 and later steps own dispatch, matching, outbox/event delivery and operator workflows. Exactly-once applies to persisted **order state mutations**, not external notification, payment or custody side effects. Those require independent canonical command/outbox/reconciliation checks in R02.11/R04.
+- Operational service acceptance and independently approved signoffs are deferred to testnet R06, with corresponding audit gates, not treated as green by mocked credentials.
+
+## Qualification levels
+Level 1: `.github/workflows/doobr-r02-6-level1.yml` targeted unit/adversarial, PostGIS/PostgreSQL migrations and true concurrent transactions. Level 2: R02.13. Level 3: R05.10 exact SHA after main reconciliation. No redundant Foundry/Genesis/420Integrated/global Docs qualification here.
+
+Next canonical step after R02.6 closeout: **R02.7 Matching, scheduling, offers, assignment, capacity, reassignment and conflicts.**

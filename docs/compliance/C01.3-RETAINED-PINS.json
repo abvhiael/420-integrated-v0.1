@@ -1,0 +1,12 @@
+{
+  "docs/compliance/C01.1-INVENTORY.json": "e8f1af99b1b033a4af20bb9250ca4ed0d49b9ca2a77537430d9e01ef405415dc",
+  "docs/compliance/C01.1-INVENTORY-REUSE-GAPS.md": "da64eec8ce1a998e0182a8e1ffde9e1f290d7e7c2bc9c9fdf576138ad08545cf",
+  "docs/compliance/qualification/C01.1-level1.json": "5da3698b281bc057c2cee64add4ab19035871936df355d5e72ce387541c26e7e",
+  "scripts/verify-compliance-c01-1.py": "3a394abe2d29fbd3ee267165e36ef7269f561252e089062a3dfd43a3fb438102",
+  "scripts/test-compliance-c01-1.py": "74a224642987db1ecd1cab9211adeea7d08579b547393339165f5bbe8528a70c",
+  "docs/compliance/C01.2-PRODUCT-SCOPE.json": "b01df8953112f4fa0ec27166498c9a10df7b6c7d547df0811d6bdbadc4ccf8fd",
+  "docs/compliance/C01.2-PRODUCT-SCOPE-AND-JOURNEYS.md": "88946e319e15be5f2c0698179bac9e28877ae5e05ef256706d15d32fed031c8a",
+  "docs/compliance/qualification/C01.2-level1.json": "48e1c2e8b82bc5cd6229f5e5ae5f84c81608b2241d56d494ff1305a35fff3a88",
+  "scripts/verify-compliance-c01-2.py": "f6da90bf942195840095a61371f256bd5b7cbd647b262d6d4f3187a2a3adbfe6",
+  "scripts/test-compliance-c01-2.py": "6bd18832e59e05e6b34fcd2339c7550150c0ee10918dbd7bd6b649c1aa085bcf"
+}

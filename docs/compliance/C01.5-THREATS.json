@@ -1,0 +1,221 @@
+{
+  "schema": "420compliance-threat-model/v1",
+  "step": "C01.5",
+  "qualification_level": 1,
+  "status": "DESIGN_CONTROLS_NOT_IMPLEMENTED",
+  "canonical_definition": "Threat/privacy model: fraudulent sources, manipulated documents, AI prompt injection, approval bypass, tenant leakage, stale decisions, coercion, chain leakage and denial of service.",
+  "risk_method": "STRIDE-informed threat enumeration; security controls are design requirements, not deployed proof",
+  "scope": [
+    "sources",
+    "snapshots",
+    "AI analysis",
+    "legal review",
+    "publication",
+    "evaluation",
+    "DOOBr",
+    "Travel/Maps",
+    "canonical adapters",
+    "private storage",
+    "on-chain commitments"
+  ],
+  "release_enabled": false,
+  "threats": [
+    {
+      "id": "T01",
+      "threat": "Fraudulent official source",
+      "trust_boundary": "collector/source registry",
+      "abuse": "Spoof publisher, redirect, forged licence notice",
+      "mitigation": "allowlisted origin + authenticated provenance + digest and independent review",
+      "negative_expected": "quarantine; UNKNOWN; block regulated evaluation",
+      "downstream_requirements": [
+        "C02.1",
+        "C02.2",
+        "C04.1"
+      ]
+    },
+    {
+      "id": "T02",
+      "threat": "Manipulated evidence",
+      "trust_boundary": "snapshot/parser",
+      "abuse": "Alter PDF sections, remove repeal or effective date",
+      "mitigation": "immutable raw digest, signed snapshot provenance, citation span and parser provenance",
+      "negative_expected": "reject or quarantine; no approval",
+      "downstream_requirements": [
+        "C02.3",
+        "C02.4",
+        "C04.1"
+      ]
+    },
+    {
+      "id": "T03",
+      "threat": "AI prompt injection",
+      "trust_boundary": "collector to analysis proposal",
+      "abuse": "Document embeds instructions to self-approve, exfiltrate or call tools",
+      "mitigation": "untrusted-content isolation, no tool/secret access, quoted spans, independent human review",
+      "negative_expected": "proposal-only, reject commands",
+      "downstream_requirements": [
+        "C02.6",
+        "C04.1"
+      ]
+    },
+    {
+      "id": "T04",
+      "threat": "Approval bypass",
+      "trust_boundary": "author/reviewer/publisher",
+      "abuse": "Self-approve, reuse signature on changed bytes, publish without review",
+      "mitigation": "separate principals, scoped MFA, signed exact digest, current reviewer mandate",
+      "negative_expected": "reject activation and audit attempt",
+      "downstream_requirements": [
+        "C04.1",
+        "C04.2",
+        "C04.8"
+      ]
+    },
+    {
+      "id": "T05",
+      "threat": "Cross-tenant leak",
+      "trust_boundary": "decision API/export",
+      "abuse": "Swap tenant or subject, enumerate references",
+      "mitigation": "authenticated service + tenant/action binding, opaque IDs, per-record policy and redaction",
+      "negative_expected": "deny with no foreign detail",
+      "downstream_requirements": [
+        "C05.1",
+        "C07.2"
+      ]
+    },
+    {
+      "id": "T06",
+      "threat": "Stale/replayed decision",
+      "trust_boundary": "DOOBr dispatch/handover",
+      "abuse": "Reuse old ALLOW after revocation, order change or expiry",
+      "mitigation": "audience/action/order/stage binding, signature, epoch, expiry, fresh reevaluation",
+      "negative_expected": "DENY/UNKNOWN blocks sale stage; preserve lawful recovery",
+      "downstream_requirements": [
+        "C03.7",
+        "C03.8",
+        "C05.4",
+        "C05.5"
+      ]
+    },
+    {
+      "id": "T07",
+      "threat": "Coercion/insider override",
+      "trust_boundary": "review and operations console",
+      "abuse": "Force approval, intimidate reviewer, emergency operator ALLOW",
+      "mitigation": "two-person independence, separate signing, tamper evidence, emergency stop only",
+      "negative_expected": "quarantine, halt, incident review",
+      "downstream_requirements": [
+        "C04.2",
+        "C04.8",
+        "C07.1"
+      ]
+    },
+    {
+      "id": "T08",
+      "threat": "On-chain privacy leakage",
+      "trust_boundary": "commitment/indexer/public guidance",
+      "abuse": "Publish identity/address/order/signature or guessable personal hashes",
+      "mitigation": "data minimization, off-chain protected references, no reversible/low-entropy hashes",
+      "negative_expected": "reject public output and incident containment",
+      "downstream_requirements": [
+        "C05.11",
+        "C07.3"
+      ]
+    },
+    {
+      "id": "T09",
+      "threat": "Denial of service",
+      "trust_boundary": "collector/evaluator/public API",
+      "abuse": "Flood requests, source outage, downstream backpressure",
+      "mitigation": "quotas, bounded parser/evaluator, circuit breakers, retries, incident halts",
+      "negative_expected": "UNKNOWN / no new regulated permission",
+      "downstream_requirements": [
+        "C02.8",
+        "C06.4",
+        "C07.5"
+      ]
+    },
+    {
+      "id": "T10",
+      "threat": "Geographic ambiguity",
+      "trust_boundary": "location and applicability",
+      "abuse": "Boundary spoofing, GPS-only jurisdiction claim",
+      "mitigation": "reviewed versioned authority graph, origin/destination proof, uncertainty state",
+      "negative_expected": "REVIEW_REQUIRED, block transactions",
+      "downstream_requirements": [
+        "C03.1",
+        "C05.3"
+      ]
+    },
+    {
+      "id": "T11",
+      "threat": "Forged credentials",
+      "trust_boundary": "identity/verify/registry adapter",
+      "abuse": "Self-declared retailer/courier status, replay revoked proof",
+      "mitigation": "trusted issuer, exact entity and store binding, revocation freshness",
+      "negative_expected": "deny operations and audit",
+      "downstream_requirements": [
+        "C03.6",
+        "C05.2"
+      ]
+    },
+    {
+      "id": "T12",
+      "threat": "Public presence linkage",
+      "trust_boundary": "Travel/Maps projection",
+      "abuse": "Combine sparse courier counts and time-series regions to identify driver",
+      "mitigation": "coarse region, k-anonymity threshold, suppression, rate/budget controls, expiry",
+      "negative_expected": "suppress rather than disclose",
+      "downstream_requirements": [
+        "C05.6",
+        "C05.7"
+      ]
+    },
+    {
+      "id": "T13",
+      "threat": "Change/rollback race",
+      "trust_boundary": "multi-instance policy publication",
+      "abuse": "Replay superseded policy or stale cache across instances",
+      "mitigation": "monotonic epoch, signed manifest, compare-and-swap publish, negative cache invalidation",
+      "negative_expected": "fail closed and scoped halt",
+      "downstream_requirements": [
+        "C03.8",
+        "C04.10"
+      ]
+    },
+    {
+      "id": "T14",
+      "threat": "Private evidence exfiltration",
+      "trust_boundary": "review/audit export and backups",
+      "abuse": "Overbroad export, logs or backups reveal identifiers",
+      "mitigation": "least privilege, redaction, bounded retention, encryption, access logs",
+      "negative_expected": "deny/export quarantine and incident",
+      "downstream_requirements": [
+        "C07.2",
+        "C07.3"
+      ]
+    },
+    {
+      "id": "T15",
+      "threat": "Payment authority confusion",
+      "trust_boundary": "Pay/Wallet and policy API",
+      "abuse": "Treat ALLOW receipt as payment/custody permission",
+      "mitigation": "distinct payment capability check, no Compliance signing/custody",
+      "negative_expected": "deny and require canonical payment path",
+      "downstream_requirements": [
+        "C05.10"
+      ]
+    },
+    {
+      "id": "T16",
+      "threat": "Unsafe halt recovery",
+      "trust_boundary": "DOOBr refusal/return",
+      "abuse": "Stop operation and abandon item or reuse dispatch ALLOW",
+      "mitigation": "separate reviewed safety-return policy, custody audit, stage-scoped receipt",
+      "negative_expected": "block new sale while preserve safe lawful recovery",
+      "downstream_requirements": [
+        "C05.5"
+      ]
+    }
+  ]
+}

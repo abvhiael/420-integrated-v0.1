@@ -1,0 +1,261 @@
+{
+  "schema": "420compliance-c01.6-contract/v1",
+  "step": "C01.6",
+  "stage": "DESIGN_ONLY_NO_RUNTIME_PERMISSION",
+  "stack": {
+    "api": "Go net/http typed handlers and generated OpenAPI contract (design choice)",
+    "database": "PostgreSQL with PostGIS for reviewed boundaries, row-scoped tenant policy and migrations",
+    "object_store": "versioned encrypted immutable-by-policy object store for permitted legal source snapshots",
+    "workers": "separate sandboxed source ingestion/AI workers and transactionally committed outbox workers",
+    "runtime": "separate public read API, authenticated internal evaluation API, and private review/publisher/admin service; independent credentials and role boundaries",
+    "deployment": "separate staging/testnet/production environments; stateless replicated Go API, isolated ingress/egress collectors, durable HA Postgres/PostGIS, protected blob store, outbox queue, metrics/alerts; no Genesis app/address addition"
+  },
+  "outcomes": {
+    "ALLOW": {
+      "transaction_can_proceed_conditionally": true,
+      "meaning": "assessed scoped obligations satisfied against a current reviewed policy and verified evidence; DOOBr must also satisfy operational/payment/partner gates"
+    },
+    "DENY": {
+      "transaction_can_proceed_conditionally": false,
+      "meaning": "verified applicable prohibition or failed requirement"
+    },
+    "REVIEW_REQUIRED": {
+      "transaction_can_proceed_conditionally": false,
+      "meaning": "unresolved evidence, legal applicability or human review"
+    },
+    "UNKNOWN": {
+      "transaction_can_proceed_conditionally": false,
+      "meaning": "unavailable/stale/unsupported/conflicted evidence or service"
+    }
+  },
+  "interfaces": [
+    {
+      "id": "evaluate",
+      "method": "POST",
+      "path": "/v1/evaluations",
+      "visibility": "AUTHENTICATED_PRIVATE",
+      "request": [
+        "request_id",
+        "tenant_id",
+        "caller_audience",
+        "subject_ref",
+        "operation_ref",
+        "action",
+        "stage",
+        "origin_geo_ref",
+        "destination_geo_ref",
+        "actor_class",
+        "carrier_class",
+        "credential_refs",
+        "facts_digest",
+        "evaluated_at"
+      ],
+      "response": [
+        "decision_id",
+        "outcome",
+        "reason_codes",
+        "obligations",
+        "policy_digest",
+        "policy_version",
+        "evaluator_version",
+        "geography_version",
+        "credential_epoch",
+        "revocation_epoch",
+        "issued_at",
+        "effective_from",
+        "effective_until",
+        "expires_at",
+        "audience",
+        "tenant_id",
+        "operation_ref",
+        "action",
+        "stage",
+        "input_digest",
+        "issuer_signature"
+      ]
+    },
+    {
+      "id": "decision-read",
+      "method": "GET",
+      "path": "/v1/decisions/{decision_id}",
+      "visibility": "AUTHENTICATED_PRIVATE",
+      "response": [
+        "decision_id",
+        "outcome",
+        "policy_digest",
+        "reason_codes",
+        "obligations",
+        "expires_at"
+      ]
+    },
+    {
+      "id": "guidance",
+      "method": "GET",
+      "path": "/v1/public/guidance",
+      "visibility": "PUBLIC_REDACTED",
+      "response": [
+        "coverage",
+        "region",
+        "topic",
+        "citations",
+        "policy_version",
+        "reviewed_at",
+        "effective_from",
+        "effective_until",
+        "information_as_of",
+        "warning"
+      ]
+    },
+    {
+      "id": "coverage",
+      "method": "GET",
+      "path": "/v1/public/coverage",
+      "visibility": "PUBLIC_REDACTED",
+      "response": [
+        "region",
+        "domain",
+        "coverage",
+        "status_as_of",
+        "expires_at"
+      ]
+    },
+    {
+      "id": "policy-status",
+      "method": "GET",
+      "path": "/v1/policy-status",
+      "visibility": "AUTHENTICATED_SERVICE",
+      "response": [
+        "domain",
+        "region",
+        "policy_version",
+        "revocation_epoch",
+        "publication_status",
+        "effective_from",
+        "expires_at"
+      ]
+    },
+    {
+      "id": "review",
+      "method": "POST",
+      "path": "/v1/private/reviews",
+      "visibility": "INDEPENDENT_REVIEWER",
+      "request": [
+        "candidate_digest",
+        "reviewer_id",
+        "scope",
+        "source_evidence_refs",
+        "findings",
+        "decision"
+      ],
+      "response": [
+        "review_id",
+        "digest",
+        "approval_state"
+      ]
+    },
+    {
+      "id": "publish",
+      "method": "POST",
+      "path": "/v1/private/publications",
+      "visibility": "SEPARATE_PUBLISHER",
+      "request": [
+        "approved_digest",
+        "environment",
+        "scope",
+        "effective_from"
+      ],
+      "response": [
+        "publication_id",
+        "status",
+        "epoch"
+      ]
+    },
+    {
+      "id": "halt",
+      "method": "POST",
+      "path": "/v1/private/halts",
+      "visibility": "SCOPED_EMERGENCY_OPERATOR",
+      "request": [
+        "region",
+        "domain",
+        "reason",
+        "incident_id"
+      ],
+      "response": [
+        "halt_id",
+        "revocation_epoch",
+        "status"
+      ]
+    }
+  ],
+  "events": [
+    "source.change.detected",
+    "policy.review.requested",
+    "policy.approved",
+    "policy.published",
+    "policy.revoked",
+    "policy.halted",
+    "decision.invalidated",
+    "source.unavailable"
+  ],
+  "event_envelope": [
+    "event_id",
+    "schema_version",
+    "type",
+    "subject_ref",
+    "partition_key",
+    "sequence",
+    "occurred_at",
+    "published_at",
+    "causation_id",
+    "idempotency_key",
+    "payload_digest",
+    "signature"
+  ],
+  "freshness": {
+    "clock": "RFC3339 UTC instants with explicit timezone offset on input; IANA local zone for reviewed operating hours; never derive applicability from server localtime",
+    "temporal_axes": [
+      "retrieved_at",
+      "published_at",
+      "enacted_at",
+      "commenced_at",
+      "effective_from",
+      "effective_until",
+      "reviewed_at",
+      "review_expires_at",
+      "issued_at",
+      "expires_at",
+      "knowledge_as_of"
+    ],
+    "eligibility": "all mandatory source, evidence, credential, review, signature and policy validity windows checked independently; no fixed global TTL grants authorization",
+    "cache": "bounded by minimum dependency expiry and revocation epoch; missed event cannot extend authorization; re-read on critical transitions",
+    "replay": "action/order/stage/tenant/audience/input-bound signed receipts, immutable history, single-purpose use and nonce/idempotency constraints"
+  },
+  "faults": [
+    "unknown input field",
+    "unsupported schema",
+    "wrong issuer",
+    "wrong audience",
+    "cross-tenant reference",
+    "stale review",
+    "expired credential",
+    "revoked policy",
+    "replayed action",
+    "clock skew",
+    "ambiguous geography",
+    "missing source",
+    "out-of-order event",
+    "duplicate event",
+    "signer rotation",
+    "upstream outage"
+  ],
+  "failure_posture": "NO_TRANSACTION_ALLOW; lawful separately reviewed return/safety action remains possible",
+  "security": "mTLS/service identity plus bound user session and RBAC/ABAC where required; no user-supplied verdict, issuer or endpoint; least-privilege writes; PII off chain",
+  "deferred": [
+    "C01.7 approves discovery/signing/chain commitment",
+    "C01.8 architecture Level 2",
+    "C02-C07 implementation and runtime adversarial tests",
+    "C08.5 Level 3",
+    "C09-C10 deployed and legal/operator acceptance"
+  ]
+}

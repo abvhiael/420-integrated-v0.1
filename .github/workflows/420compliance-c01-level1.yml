@@ -1,0 +1,97 @@
+name: 420Compliance C01 Level 1
+on:
+  push:
+    branches: ['audit/420compliance-*']
+    paths:
+      - 'docs/compliance/420COMPLIANCE-ROADMAP.md'
+      - 'docs/compliance/C01.1-*'
+      - 'docs/compliance/C01.2-*'
+      - 'docs/compliance/C01.3-*'
+      - 'docs/compliance/C01.4-*'
+      - 'docs/compliance/C01.5-*'
+      - 'docs/compliance/C01.6-*'
+      - 'docs/compliance/C01.7-*'
+      - 'services/complianceauth/**'
+      - 'scripts/verify-compliance-c01-1.py'
+      - 'scripts/test-compliance-c01-1.py'
+      - 'scripts/verify-compliance-c01-2.py'
+      - 'scripts/test-compliance-c01-2.py'
+      - 'scripts/verify-compliance-c01-3.py'
+      - 'scripts/test-compliance-c01-3.py'
+      - 'scripts/verify-compliance-c01-4.py'
+      - 'scripts/verify-compliance-c01-5.py'
+      - 'scripts/verify-compliance-c01-6.py'
+      - 'scripts/verify-compliance-c01-7.py'
+      - '.github/workflows/420compliance-c01-level1.yml'
+  pull_request:
+    paths:
+      - 'docs/compliance/420COMPLIANCE-ROADMAP.md'
+      - 'docs/compliance/C01.1-*'
+      - 'docs/compliance/C01.2-*'
+      - 'docs/compliance/C01.3-*'
+      - 'docs/compliance/C01.4-*'
+      - 'docs/compliance/C01.5-*'
+      - 'docs/compliance/C01.6-*'
+      - 'docs/compliance/C01.7-*'
+      - 'services/complianceauth/**'
+      - 'scripts/verify-compliance-c01-1.py'
+      - 'scripts/test-compliance-c01-1.py'
+      - 'scripts/verify-compliance-c01-2.py'
+      - 'scripts/test-compliance-c01-2.py'
+      - 'scripts/verify-compliance-c01-3.py'
+      - 'scripts/test-compliance-c01-3.py'
+      - 'scripts/verify-compliance-c01-4.py'
+      - 'scripts/verify-compliance-c01-5.py'
+      - 'scripts/verify-compliance-c01-6.py'
+      - 'scripts/verify-compliance-c01-7.py'
+      - '.github/workflows/420compliance-c01-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compliance-c01-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-authority-level1:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact implementation SHA and historical evidence
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile affected qualification scripts
+        run: python3 -m py_compile scripts/verify-compliance-c01-3.py scripts/test-compliance-c01-3.py scripts/verify-compliance-c01-5.py scripts/verify-compliance-c01-6.py scripts/verify-compliance-c01-7.py
+      - name: Verify retained C01.3 at its historically qualified implementation SHA
+        run: |
+          git worktree add --detach /tmp/compliance-c01-3-qualified 9c818d68d4de90bed78f89e9ca520f66efaa7337
+          (cd /tmp/compliance-c01-3-qualified && python3 scripts/verify-compliance-c01-3.py --expected-sha 9c818d68d4de90bed78f89e9ca520f66efaa7337 --output /tmp/compliance-c01-3-retained.json)
+      - name: Negative source, review, approval-plane and legal-gap regressions
+        run: python3 scripts/test-compliance-c01-3.py
+      - name: Verify C01.4 shared authority, requirement IDs and fail-closed Travel boundary
+        run: python3 scripts/verify-compliance-c01-4.py "$EXPECTED_SHA"
+      - name: Verify C01.5 adversarial threat/privacy and negative design contracts
+        run: python3 scripts/verify-compliance-c01-5.py "$EXPECTED_SHA"
+      - name: Verify C01.6 contracts, security and negative semantics
+        run: python3 scripts/verify-compliance-c01-6.py "$EXPECTED_SHA"
+      - name: Verify C01.7 scoped service discovery signing and Genesis nonmutation
+        run: python3 scripts/verify-compliance-c01-7.py "$EXPECTED_SHA"
+      - name: Go security implementation and adversarial regressions
+        run: go test ./services/complianceauth -count=1 -v
+      - name: Write current C01.7 exact-SHA qualification result
+        run: |
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C01.7","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c01_7_publication_verifier":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
+      - name: Retain exact-SHA qualification result
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-c01-level1-${{ env.EXPECTED_SHA }}
+          path: /tmp/compliance-c01-level1.json
+          if-no-files-found: error

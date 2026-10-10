@@ -1,0 +1,1245 @@
+{
+  "schema": "420compliance-source-authority/v1",
+  "step": "C01.3",
+  "canonical_definition": "Establish source/authority taxonomy, legal review ownership and BC/Vancouver questions requiring qualified interpretation. Separate legal approval from governance and software qualification.",
+  "status": "LOCKED_DISCOVERY_CONTRACT",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "parent_sha": "3da0809a63b14bb4d0ab8d07475a1aa93df364d8",
+  "qualification_level": 1,
+  "release": "INFRASTRUCTURE_ONLY",
+  "legal_approval_granted": false,
+  "runtime_authorization_implemented": false,
+  "taxonomy": [
+    {
+      "id": "STATUTE",
+      "meaning": "Enacted primary law; jurisdiction and commencement must be established.",
+      "automatic_permission": false
+    },
+    {
+      "id": "REGULATION",
+      "meaning": "Delegated instrument; enabling authority and operative sections must be verified.",
+      "automatic_permission": false
+    },
+    {
+      "id": "AMENDMENT_COMMENCEMENT",
+      "meaning": "Gazette, enactment and commencement evidence; announcement alone is insufficient.",
+      "automatic_permission": false
+    },
+    {
+      "id": "MUNICIPAL_BYLAW",
+      "meaning": "Official municipal instrument; geographic and activity applicability require review.",
+      "automatic_permission": false
+    },
+    {
+      "id": "INDIGENOUS_INSTRUMENT",
+      "meaning": "Instrument from the applicable Nation or authority; applicability is not inferred from map nesting.",
+      "automatic_permission": false
+    },
+    {
+      "id": "LICENCE_CONDITION",
+      "meaning": "General or entity-specific binding conditions where legally established; licence class and holder scope matter.",
+      "automatic_permission": false
+    },
+    {
+      "id": "OFFICIAL_GUIDANCE",
+      "meaning": "Official explanatory material; cannot replace operative provisions or licence conditions.",
+      "automatic_permission": false
+    },
+    {
+      "id": "AUTHORITY_RESPONSE",
+      "meaning": "Scoped regulator or counsel correspondence; record legal basis, limitations and confidentiality.",
+      "automatic_permission": false
+    },
+    {
+      "id": "JUDICIAL_ORDER",
+      "meaning": "Verified judgment or order; binding effect and appeal/stay status require qualified interpretation.",
+      "automatic_permission": false
+    },
+    {
+      "id": "PRIVATE_RESTRICTION",
+      "meaning": "Contract, property or partner restriction; may constrain operations, cannot waive mandatory law.",
+      "automatic_permission": false
+    },
+    {
+      "id": "GEOGRAPHIC_EVIDENCE",
+      "meaning": "Boundaries and address evidence; identifies geography, not legal permission.",
+      "automatic_permission": false
+    },
+    {
+      "id": "SECONDARY_MATERIAL",
+      "meaning": "Research lead only; AI, vendor pages and commentary cannot supply operative authority.",
+      "automatic_permission": false
+    }
+  ],
+  "legal_statuses": [
+    "PROPOSED",
+    "NOT_IN_FORCE",
+    "IN_FORCE",
+    "REPEALED",
+    "SUPERSEDED",
+    "UNKNOWN"
+  ],
+  "authority_dimensions": [
+    "FEDERAL",
+    "PROVINCIAL",
+    "MUNICIPAL",
+    "INDIGENOUS",
+    "ENTITY_SPECIFIC"
+  ],
+  "composition": {
+    "numeric_rank_can_resolve_conflict": false,
+    "geographic_nesting_can_prove_authority": false,
+    "unknown_or_conflict": "REVIEW_REQUIRED_AND_BLOCK",
+    "mandatory_rules_cannot_be_waived_by_private_terms": true,
+    "guidance_is_not_operative_law": true,
+    "authority_graph_requires_review": true
+  },
+  "provenance_required": [
+    "source_id",
+    "instrument_title",
+    "publisher_identity",
+    "official_url_or_private_locator",
+    "source_type",
+    "authority_scope",
+    "instrument_citation",
+    "section_anchor",
+    "raw_snapshot_digest",
+    "retrieved_at",
+    "published_at_if_available",
+    "consolidation_current_to_if_available",
+    "effective_from",
+    "effective_until_or_open",
+    "commencement_evidence",
+    "legal_status",
+    "amendment_and_supersession_refs",
+    "applicability_facts",
+    "collector_identity",
+    "reviewer_scope",
+    "reviewed_digest",
+    "reviewed_at",
+    "review_expiry",
+    "access_class"
+  ],
+  "sources": [
+    {
+      "id": "SRC01",
+      "title": "Cannabis Act",
+      "type": "STATUTE",
+      "authority": "FEDERAL",
+      "url": "https://laws-lois.justice.gc.ca/eng/acts/c-24.5/",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "contents and currency notes",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC02",
+      "title": "Cannabis Regulations",
+      "type": "REGULATION",
+      "authority": "FEDERAL",
+      "url": "https://laws-lois.justice.gc.ca/eng/regulations/sor-2018-144/",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "parts on products, promotion, packaging; commencement notes",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC03",
+      "title": "Cannabis Control and Licensing Act",
+      "type": "STATUTE",
+      "authority": "PROVINCIAL",
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/18029",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "licensing, possession, supply and enforcement",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC04",
+      "title": "Cannabis Licensing Regulation",
+      "type": "REGULATION",
+      "authority": "PROVINCIAL",
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/202_2018",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "sections 1, 2, 4, 5, 5.1, 24 and 37",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC05",
+      "title": "BC cannabis delivery summary",
+      "type": "OFFICIAL_GUIDANCE",
+      "authority": "PROVINCIAL",
+      "url": "https://www2.gov.bc.ca/gov/content/employment-business/business/liquor-regulation-licensing/cannabis-licences/cannabis-resources-information/delivering-cannabis",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "preparing, transporting, completing, record keeping and handbook links",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC06",
+      "title": "Cannabis Retail Store licence handbook",
+      "type": "LICENCE_CONDITION",
+      "authority": "PROVINCIAL",
+      "url": "https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/liquor-regulation-licensing/guides-and-manuals/cannabis-retail-store-licence-handbook.pdf",
+      "discovery_status": "FETCH_FAILED",
+      "inspection_scope": "official PDF returned 502; no bytes or version accepted",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC07",
+      "title": "Producer Retail Store licence handbook",
+      "type": "LICENCE_CONDITION",
+      "authority": "PROVINCIAL",
+      "url": null,
+      "discovery_status": "FETCH_FAILED",
+      "inspection_scope": "official delivery page handbook link failed; resolve canonical URL and current version in C02",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC08",
+      "title": "Vancouver cannabis retail licensing page",
+      "type": "OFFICIAL_GUIDANCE",
+      "authority": "MUNICIPAL",
+      "url": "https://vancouver.ca/doing-business/cannabis-retail-dealer-business-licence.aspx",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "municipal permits and licensing; not proof of any particular current store eligibility",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC09",
+      "title": "Vancouver License By-law and amendments",
+      "type": "MUNICIPAL_BYLAW",
+      "authority": "MUNICIPAL",
+      "url": null,
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "inspection_scope": "obtain official current bylaw, amendments, applicable courier and retailer provisions",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC10",
+      "title": "Vancouver Zoning and Development By-law",
+      "type": "MUNICIPAL_BYLAW",
+      "authority": "MUNICIPAL",
+      "url": null,
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "inspection_scope": "official current text, permitted activity, parcel and development permit conditions",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC11",
+      "title": "Applicable Indigenous authority instruments",
+      "type": "INDIGENOUS_INSTRUMENT",
+      "authority": "INDIGENOUS",
+      "url": null,
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "inspection_scope": "identify authorities and instruments for actual origin/destination/activity; not blanket coverage",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC12",
+      "title": "Actual store licences and endorsements",
+      "type": "LICENCE_CONDITION",
+      "authority": "ENTITY_SPECIFIC",
+      "url": null,
+      "discovery_status": "PARTNER_EVIDENCE_REQUIRED",
+      "inspection_scope": "regulator-verifiable store/holder/class/status/conditions; private access only",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PRIVATE_RESTRICTED"
+    },
+    {
+      "id": "SRC13",
+      "title": "BC Personal Information Protection Act",
+      "type": "STATUTE",
+      "authority": "PROVINCIAL",
+      "url": "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/03063_01",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "collection, use, disclosure, security and retention research entry",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC14",
+      "title": "PIPEDA applicability",
+      "type": "STATUTE",
+      "authority": "FEDERAL",
+      "url": "https://laws-lois.justice.gc.ca/eng/acts/P-8.6/",
+      "discovery_status": "INSPECTED_DISCOVERY",
+      "inspection_scope": "applicability and cross-boundary processing require counsel analysis",
+      "inspected_at_utc": "2026-10-10",
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC15",
+      "title": "BC Cannabis Control Regulation",
+      "type": "REGULATION",
+      "authority": "PROVINCIAL",
+      "url": null,
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "inspection_scope": "obtain official instrument and vehicle/public possession/consumption applicability",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    },
+    {
+      "id": "SRC16",
+      "title": "Property, carrier and partner terms",
+      "type": "PRIVATE_RESTRICTION",
+      "authority": "ENTITY_SPECIFIC",
+      "url": null,
+      "discovery_status": "PARTNER_EVIDENCE_REQUIRED",
+      "inspection_scope": "approved actual agreements; restrictions never enlarge statutory permission",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PRIVATE_RESTRICTED"
+    },
+    {
+      "id": "SRC17",
+      "title": "Travel consumption and park bylaws",
+      "type": "MUNICIPAL_BYLAW",
+      "authority": "MUNICIPAL",
+      "url": null,
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "inspection_scope": "official smoking/parks instruments and place applicability before public guidance",
+      "inspected_at_utc": null,
+      "legal_status": "UNKNOWN",
+      "approved_for_policy": false,
+      "snapshot_status": "NOT_COLLECTED_C02",
+      "owner": "SOURCE_STEWARD",
+      "resolution_step": "C02/C04",
+      "access": "PUBLIC_DISCOVERY"
+    }
+  ],
+  "review_ownership": [
+    {
+      "id": "REGULATORY_REVIEW_LEAD",
+      "qualification": "Independent BC-qualified cannabis regulatory counsel or explicitly validated competent reviewer",
+      "responsibility": "Accountable for applicable legal interpretation, conflicts, operative status and signed digest review.",
+      "appointment_status": "UNAPPOINTED_EXTERNAL",
+      "named_person": null
+    },
+    {
+      "id": "MUNICIPAL_REVIEW_OWNER",
+      "qualification": "Qualified reviewer for Vancouver licensing, zoning and bylaws under lead coordination",
+      "responsibility": "Owns municipal questions and official instrument/permit evidence.",
+      "appointment_status": "UNAPPOINTED_EXTERNAL",
+      "named_person": null
+    },
+    {
+      "id": "INDIGENOUS_AUTHORITY_REVIEW_OWNER",
+      "qualification": "Reviewer with relevant authority/jurisdiction competence and documented consultation mandate",
+      "responsibility": "Identifies applicable instruments and routes unresolved applicability for qualified clarification.",
+      "appointment_status": "UNAPPOINTED_EXTERNAL",
+      "named_person": null
+    },
+    {
+      "id": "PRIVACY_REVIEW_OWNER",
+      "qualification": "Qualified privacy counsel/reviewer under lead coordination",
+      "responsibility": "Owns privacy applicability, minimized evidence and legally justified retention.",
+      "appointment_status": "UNAPPOINTED_EXTERNAL",
+      "named_person": null
+    },
+    {
+      "id": "RETAILER_EVIDENCE_OWNER",
+      "qualification": "Accountable licensed retailer representative",
+      "responsibility": "Supplies authentic store conditions and operational evidence; cannot approve own policy.",
+      "appointment_status": "UNAPPOINTED_EXTERNAL",
+      "named_person": null
+    },
+    {
+      "id": "SOURCE_STEWARD",
+      "qualification": "Scoped Compliance policy author/source analyst",
+      "responsibility": "Collects and verifies provenance, drafts linked interpretations; cannot independently approve.",
+      "appointment_status": "ROLE_DEFINED_NO_PRODUCTION_GRANT",
+      "named_person": null
+    },
+    {
+      "id": "SOFTWARE_QUALIFICATION_OWNER",
+      "qualification": "Repository implementer/test owner",
+      "responsibility": "Qualifies implementation and tests only; cannot issue legal approval.",
+      "appointment_status": "ROLE_DEFINED_NO_PRODUCTION_GRANT",
+      "named_person": null
+    },
+    {
+      "id": "GOVERNANCE_OWNER",
+      "qualification": "Canonical protocol governance authority",
+      "responsibility": "Approves protocol/configuration within canonical authority only; cannot substitute for legal review.",
+      "appointment_status": "ROLE_DEFINED_NO_PRODUCTION_GRANT",
+      "named_person": null
+    },
+    {
+      "id": "PUBLISHER",
+      "qualification": "Separate authenticated policy publisher",
+      "responsibility": "Publishes only the exact approved immutable digest; cannot change interpretation.",
+      "appointment_status": "ROLE_DEFINED_NO_PRODUCTION_GRANT",
+      "named_person": null
+    },
+    {
+      "id": "OPERATOR",
+      "qualification": "Scoped operational owner",
+      "responsibility": "Monitors source/review health and halts uncertainty; cannot override denial or approve policy.",
+      "appointment_status": "ROLE_DEFINED_NO_PRODUCTION_GRANT",
+      "named_person": null
+    }
+  ],
+  "approval_planes": {
+    "legal": "Independent scoped qualified review of cited interpretation and immutable policy digest",
+    "governance": "Canonical protocol/configuration permission; never legal approval",
+    "software": "Exact-SHA tested implementation; never legal approval",
+    "operational": "C09/C10 and accountable partner acceptance; not implied by repository PASS"
+  },
+  "review_controls": {
+    "author_cannot_review_own": true,
+    "publisher_separate_author_reviewer": true,
+    "scope_and_qualification_evidence_required": true,
+    "conflicts_of_interest_checked": true,
+    "review_binds_digest_sources_scope_and_effective_interval": true,
+    "changed_bytes_or_sources_require_new_review": true,
+    "expired_or_revoked_review_blocks": true,
+    "ai_and_collection_cannot_approve": true,
+    "regulator_response_must_be_scoped_and_preserved": true,
+    "operator_halt_cannot_grant_allow": true
+  },
+  "questions": [
+    {
+      "id": "Q01",
+      "topic": "Actor classification",
+      "question": "How is DOOBr and each courier classified for each actual service model, including delivery person versus common carrier and employee branches?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC07"
+      ],
+      "journey_refs": [
+        "J07",
+        "J08",
+        "J09"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.1",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q02",
+      "topic": "Licensee relationship",
+      "question": "What evidence proves delivery on behalf of the licensed seller rather than independent purchase/resale, and what agreements and restrictions apply?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC12",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J04",
+        "J07",
+        "J10"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.1",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q03",
+      "topic": "CRS versus PRS",
+      "question": "Which licence class is accepted in the first pack, what differs by class, and what store-specific conditions must be composed?",
+      "source_refs": [
+        "SRC04",
+        "SRC06",
+        "SRC07",
+        "SRC12"
+      ],
+      "journey_refs": [
+        "J10",
+        "J13",
+        "J15"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.1",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q04",
+      "topic": "Holder and store binding",
+      "question": "How are holder, licence number, issuing authority, exact store, status, endorsements, expiry and suspension independently checked?",
+      "source_refs": [
+        "SRC03",
+        "SRC12"
+      ],
+      "journey_refs": [
+        "J10",
+        "J12"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.1",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q05",
+      "topic": "Age and identification",
+      "question": "What proof is acceptable for purchaser, recipient, delegate and each courier class, and when must checks occur without retaining unnecessary ID copies?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC06",
+        "SRC13"
+      ],
+      "journey_refs": [
+        "J04",
+        "J07",
+        "J08"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.2",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q06",
+      "topic": "Training",
+      "question": "Which carrier classes require which current training evidence, issuer, expiry/revocation checks and retailer accountability?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC07"
+      ],
+      "journey_refs": [
+        "J07",
+        "J08",
+        "J12"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.2",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q07",
+      "topic": "Quantity and equivalency",
+      "question": "How are product classes, transaction quantities, dried-equivalent calculations, plant limits and multi-order aggregation interpreted?",
+      "source_refs": [
+        "SRC01",
+        "SRC02",
+        "SRC04"
+      ],
+      "journey_refs": [
+        "J04",
+        "J07"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.3",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q08",
+      "topic": "Packaging and custody",
+      "question": "What sealing, visibility, tamper, driver access, vehicle and minor-passenger restrictions apply for each carrier class?",
+      "source_refs": [
+        "SRC01",
+        "SRC02",
+        "SRC04",
+        "SRC05",
+        "SRC15"
+      ],
+      "journey_refs": [
+        "J07",
+        "J08"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.4",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q09",
+      "topic": "Hours and clocks",
+      "question": "Which dispatch, handover and return time limits apply by actor and place, including local conditions and daylight-saving/time-zone edges?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC09",
+        "SRC11",
+        "SRC12"
+      ],
+      "journey_refs": [
+        "J05",
+        "J07",
+        "J08",
+        "J09"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.5",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q10",
+      "topic": "Address and boundary",
+      "question": "Which origin/destination types, province boundaries, curbside, excluded locations and uncertain addresses are permitted for each actor?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC09",
+        "SRC10",
+        "SRC11"
+      ],
+      "journey_refs": [
+        "J02",
+        "J04",
+        "J07",
+        "J08"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.5",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q11",
+      "topic": "Municipal retailer authority",
+      "question": "Which business licences, development permits, zoning and parcel-specific conditions apply to the accountable retailer?",
+      "source_refs": [
+        "SRC08",
+        "SRC09",
+        "SRC10",
+        "SRC12"
+      ],
+      "journey_refs": [
+        "J10",
+        "J15"
+      ],
+      "owner": "MUNICIPAL_REVIEW_OWNER",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.6",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q12",
+      "topic": "Municipal courier/platform authority",
+      "question": "Does the actual platform/courier model need additional municipal business licensing or permissions, including extra-municipal origins and local hour limits?",
+      "source_refs": [
+        "SRC08",
+        "SRC09",
+        "SRC10",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J04",
+        "J07"
+      ],
+      "owner": "MUNICIPAL_REVIEW_OWNER",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.6",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q13",
+      "topic": "Indigenous authority",
+      "question": "Which Nation or other authority instruments apply to an actual route, premises and activity, and how are conflicts or unresolved relationships handled?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC11"
+      ],
+      "journey_refs": [
+        "J02",
+        "J04",
+        "J07"
+      ],
+      "owner": "INDIGENOUS_AUTHORITY_REVIEW_OWNER",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.6",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q14",
+      "topic": "Recipient and delegate",
+      "question": "What recipient/delegate identity, age, signature, intoxication and refusal checks require an in-person accountable decision?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC07"
+      ],
+      "journey_refs": [
+        "J08",
+        "J09"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.7",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q15",
+      "topic": "Failed delivery and returns",
+      "question": "What same-day or other return obligations differ by carrier class, and what secure recovery evidence is needed after expiry, refusal or outage?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC07",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J09",
+        "J20",
+        "J21"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.7",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q16",
+      "topic": "Delivery records",
+      "question": "Which order, recipient, signature, provider, custody and contract records are mandatory, retained how long, held by whom, and disclosed to which authority?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC07",
+        "SRC13"
+      ],
+      "journey_refs": [
+        "J08",
+        "J11",
+        "J24"
+      ],
+      "owner": "PRIVACY_REVIEW_OWNER",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.8",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q17",
+      "topic": "Privacy and processing",
+      "question": "What PIPA/PIPEDA applicability, consent, purpose limits, processors, cross-border storage, deletion exceptions and legal holds apply?",
+      "source_refs": [
+        "SRC13",
+        "SRC14",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J06",
+        "J11",
+        "J22",
+        "J24"
+      ],
+      "owner": "PRIVACY_REVIEW_OWNER",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.8",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q18",
+      "topic": "Payment timing",
+      "question": "What qualifies as received payment before custody leaves the store for native assets, conversion, asynchronous confirmation, reversal and refunds?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J04",
+        "J07",
+        "J09"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.9",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q19",
+      "topic": "Fee routing",
+      "question": "Which seller, courier, platform and premium fee disclosures and charging arrangements are permissible, including Dev Compensation eligible net revenue?",
+      "source_refs": [
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J04",
+        "J07"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.9",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q20",
+      "topic": "Promotion and UI",
+      "question": "Which public listing, imagery, sponsored placement, recommendation, upsell and notification restrictions apply to DOOBr, Travel and Maps?",
+      "source_refs": [
+        "SRC01",
+        "SRC02",
+        "SRC04",
+        "SRC06",
+        "SRC08"
+      ],
+      "journey_refs": [
+        "J01",
+        "J03",
+        "J04"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.9",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q21",
+      "topic": "Travel guidance",
+      "question": "Which consumption, public possession, park, property and vehicle rules can be summarized for travellers, with place-specific exclusions and dated evidence?",
+      "source_refs": [
+        "SRC01",
+        "SRC03",
+        "SRC15",
+        "SRC17",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J01",
+        "J02",
+        "J03"
+      ],
+      "owner": "MUNICIPAL_REVIEW_OWNER",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04.10",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q22",
+      "topic": "Source conflict and time",
+      "question": "How are amended text, delayed consolidations, commencement, handbook updates, orders and contradictory summaries reconciled without simplistic source ranking?",
+      "source_refs": [
+        "SRC01",
+        "SRC02",
+        "SRC03",
+        "SRC04",
+        "SRC05",
+        "SRC06",
+        "SRC09"
+      ],
+      "journey_refs": [
+        "J13",
+        "J15",
+        "J17"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C02/C04",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q23",
+      "topic": "Revocation and incidents",
+      "question": "Which regulator or licence changes require stop, notification, evidence preservation, regulator reporting or lawful return for in-flight operations?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC12",
+        "SRC13"
+      ],
+      "journey_refs": [
+        "J12",
+        "J18",
+        "J20",
+        "J21"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C04/C07",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q24",
+      "topic": "Independent review mandate",
+      "question": "What professional competence, jurisdiction/domain authority, independence, conflict checks and signed mandate qualify each reviewer and external regulator response?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC11",
+        "SRC13"
+      ],
+      "journey_refs": [
+        "J15",
+        "J16",
+        "J17"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C01.8/C04",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    },
+    {
+      "id": "Q25",
+      "topic": "Launch acceptance",
+      "question": "What counsel opinion, verified partner licences, insurance, agreements, operational acceptance and regulator clarification are required immediately before live release?",
+      "source_refs": [
+        "SRC03",
+        "SRC04",
+        "SRC09",
+        "SRC11",
+        "SRC12",
+        "SRC16"
+      ],
+      "journey_refs": [
+        "J10",
+        "J15",
+        "J17",
+        "J21"
+      ],
+      "owner": "REGULATORY_REVIEW_LEAD",
+      "status": "OPEN_QUALIFIED_INTERPRETATION_REQUIRED",
+      "decision_effect": "BLOCK_AFFECTED_PERMISSION",
+      "answer": null,
+      "approval_digest": null,
+      "target_step": "C10",
+      "closure_evidence": [
+        "operative_section_citations_and_source_digests",
+        "applicability_and_actor_class_facts",
+        "signed_independent_reviewer_scope_and_digest",
+        "effective_interval_and_revalidation_trigger",
+        "linked_policy_requirement_and_positive_negative_tests"
+      ]
+    }
+  ],
+  "source_failure_controls": {
+    "fetch_success_is_legal_review": false,
+    "missing_or_unreadable_source_can_renew_review": false,
+    "changed_source_requires_triage": true,
+    "no_mirror_silent_substitution": true,
+    "untrusted_text_has_no_tool_or_approval_authority": true
+  },
+  "exit_criteria": {
+    "taxonomy_and_operative_status_defined": true,
+    "role_ownership_and_unappointed_external_gates_visible": true,
+    "BC_Vancouver_question_register_with_closure_evidence": true,
+    "legal_governance_software_operational_planes_separate": true,
+    "prior_scope_and_qualification_preserved": true
+  },
+  "external_blockers": [
+    "Independent qualified legal reviewer and accountable partner not appointed",
+    "Current CRS/PRS handbooks not retrieved or version-approved",
+    "Municipal, Indigenous, entity-specific instruments and applicability unresolved",
+    "All Q01-Q25 remain unresolved before affected policy authorization"
+  ],
+  "level2": "C01.8",
+  "level3": "C08.5",
+  "next_step": "C01.4 \u2014 Agree shared authority with DOOBr and Travel; replace duplicated proposed policy ownership through an explicit roadmap amendment with preserved requirement IDs."
+}

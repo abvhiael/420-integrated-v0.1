@@ -18,6 +18,7 @@ class Session:
     tenant_id: str
     actor_id: str
     subject: str
+    issuer: str
     token_id: str
     expires_at: datetime
     revoked: bool
@@ -65,7 +66,7 @@ def authorize(*, issuer: TrustedIdentity, store: AuthorizedSessionStore,
         if issuer.is_revoked(principal.issuer,principal.token_id):
             raise Denied("identity revoked")
         session=store.resolve(principal.subject,principal.token_id,tenant_id)
-        if session is None or session.tenant_id!=tenant_id or session.subject!=principal.subject or session.token_id!=principal.token_id or session.revoked or session.expires_at<=now:
+        if session is None or session.tenant_id!=tenant_id or session.subject!=principal.subject or session.issuer!=principal.issuer or session.token_id!=principal.token_id or session.revoked or session.expires_at<=now:
             raise Denied("session missing revoked or expired")
         if permission.wallet_required and (session.wallet_consent_until is None or session.wallet_consent_until<=now):
             raise Denied("wallet consent absent or expired")

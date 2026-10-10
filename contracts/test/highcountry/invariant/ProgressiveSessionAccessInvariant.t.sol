@@ -58,7 +58,14 @@ contract ProgressiveSessionAccessHandlerPA4 {
         bool allowed
     ) external {
         if (selector == bytes4(0)) return;
-        sessionAccess.setRoutineCall(UNRELATED_TARGET, selector, allowed);
+        // The handler exercises independently reviewed, unrelated selectors only.
+        // Sensitive or unreviewable selectors must remain rejected by policy.
+        if (allowed) {
+            try sessionAccess.reviewRoutineCall(UNRELATED_TARGET, selector) { }
+            catch { return; }
+        }
+        try sessionAccess.setRoutineCall(UNRELATED_TARGET, selector, allowed) { }
+        catch { return; }
     }
 }
 

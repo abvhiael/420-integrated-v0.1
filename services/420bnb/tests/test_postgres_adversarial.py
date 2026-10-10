@@ -99,3 +99,53 @@ def test_independent_http_clients_share_postgresql_capacity_lock(fixture_propert
         allocated=connection.execute("SELECT COALESCE(SUM(units),0) FROM bnb_hold WHERE property_id=%s",
                                      (pid,)).fetchone()[0]
         assert allocated==1
+
+
+def test_two_actual_server_processes_share_postgres_lock(fixture_property):
+    """Two distinct uvicorn OS processes race on one PostgreSQL capacity slot."""
+    import subprocess
+    import sys
+    import socket
+    import urllib.request
+    import urllib.error
+    import json
+    pid,headers=fixture_property
+    def free_port():
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1",0))
+            return sock.getsockname()[1]
+    ports=[free_port(),free_port()]
+    processes=[]
+    service_dir=str(Path(__file__).resolve().parents[1])
+    try:
+        for port in ports:
+            processes.append(subprocess.Popen([sys.executable,"-m","uvicorn","api:app",
+                "--host","127.0.0.1","--port",str(port)],
+                cwd=service_dir,env=os.environ.copy(),stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL))
+        for port in ports:
+            for attempt in range(60):
+                try:
+                    with urllib.request.urlopen(f"http://127.0.0.1:{port}/health/ready",timeout=1) as ready:
+                        if ready.status==200:break
+                except (OSError,urllib.error.URLError):
+                    time.sleep(.2)
+            else:pytest.fail(f"uvicorn instance on {port} not ready")
+        body=json.dumps(payload(pid)).encode()
+        def send(i):
+            request=urllib.request.Request(
+                f"http://127.0.0.1:{ports[i%2]}/v1/bnb/holds",data=body,
+                headers={**headers,"idempotency-key":f"multiproc-lock-{i:03d}",
+                         "content-type":"application/json"},method="POST")
+            try:
+                with urllib.request.urlopen(request,timeout=20) as response:return response.status
+            except urllib.error.HTTPError as error:return error.code
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            outcomes=list(executor.map(send,range(8)))
+        assert sorted(outcomes)==[201]+[409]*7,outcomes
+    finally:
+        for process in processes:
+            process.terminate()
+        for process in processes:
+            try:process.wait(timeout=5)
+            except subprocess.TimeoutExpired:process.kill();process.wait()

@@ -107,21 +107,63 @@ def listings():
 
 
 @app.post("/v1/bnb/properties", status_code=201)
-def create_property(payload: PropertyInput, x_authenticated_subject: str | None = Header(None),
-                    x_authenticated_role: str | None = Header(None),
-                    x_authenticated_at: str | None = Header(None),
-                    x_authenticated_signature: str | None = Header(None), authorization: str | None = Header(None)):
+def create_property(payload: PropertyInput, authorization: str | None = Header(None)):
+    """Authenticated draft intake only. No verified host or publication grant."""
     subject=active_subject(authorization)
-    role="guest"
-    raise HTTPException(503,"PROPERTY_CLAIM_AUTHORITY_UNAVAILABLE")
     uid=uuid4()
     with db() as c:
-        c.execute("""INSERT INTO bnb_property
-            (id,host_subject,title,public_region,capacity,nightly_minor,currency)
-            VALUES (%s,%s,%s,%s,%s,%s,%s)""",
-            (uid,subject,payload.title,payload.public_region,payload.capacity,
-             payload.nightly_minor,payload.currency))
-    return {"id":str(uid),"status":"draft"}
+        with c.transaction():
+            c.execute("""INSERT INTO bnb_property
+                (id,host_subject,title,public_region,capacity,nightly_minor,currency)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                (uid,subject,payload.title,payload.public_region,payload.capacity,
+                 payload.nightly_minor,payload.currency))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.property.draft_created',%s)""",(uuid4(),subject,uid))
+    return {"id":str(uid),"status":"draft","version":1,"published":False}
+
+
+class PropertyRevision(PropertyInput):
+    expected_version: int = Field(ge=1)
+
+
+@app.get("/v1/bnb/account/properties")
+def my_properties(authorization: str | None = Header(None)):
+    """Return own drafts, never any private address or third-party inventory."""
+    subject=active_subject(authorization)
+    with db() as c:
+        rows=c.execute("""SELECT id,title,public_region,status,version FROM bnb_property
+            WHERE host_subject=%s ORDER BY created_at,id LIMIT 100""",(subject,)).fetchall()
+    return [{"id":str(row[0]),"title":row[1],"public_region":row[2],
+             "status":row[3],"version":row[4]} for row in rows]
+
+
+@app.put("/v1/bnb/account/properties/{property_id}")
+def revise_draft_property(property_id: str, payload: PropertyRevision,
+                          authorization: str | None = Header(None)):
+    """Optimistic version lock; no mutation of externally reviewed/public property."""
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT host_subject,status,version FROM bnb_property
+                WHERE id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if not row or row[0]!=subject:
+                raise HTTPException(404,"NOT_FOUND")
+            if row[1]!="draft":
+                raise HTTPException(409,"PROPERTY_NOT_DRAFT")
+            if row[2]!=payload.expected_version:
+                raise HTTPException(409,"VERSION_CONFLICT")
+            new=c.execute("""UPDATE bnb_property SET title=%s,public_region=%s,
+                capacity=%s,nightly_minor=%s,currency=%s,version=version+1
+                WHERE id=%s AND host_subject=%s AND status='draft' AND version=%s
+                RETURNING version""",(payload.title,payload.public_region,payload.capacity,
+                payload.nightly_minor,payload.currency,property_id,subject,
+                payload.expected_version)).fetchone()
+            if not new:
+                raise HTTPException(409,"VERSION_CONFLICT")
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,'bnb.property.draft_updated',%s)""",(uuid4(),subject,property_id))
+    return {"id":property_id,"status":"draft","version":new[0],"published":False}
 
 
 @app.post("/v1/bnb/holds", status_code=201)

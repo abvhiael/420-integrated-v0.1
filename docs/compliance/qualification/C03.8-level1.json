@@ -1,0 +1,13 @@
+{
+  "step": "C03.8",
+  "qualification_level": 1,
+  "status": "PASS_STORE_CONTRACT_ONLY",
+  "implementation_sha": "efeff3fb12e518a596f8b70a4566ff66b828ccc5",
+  "ci_run": 38090613936,
+  "ci_job": 114326099843,
+  "ci_result": "success",
+  "limitations": [
+    "No durable shared multi-instance store is implemented; only the backend interface and two-instance test fixture are qualified."
+  ],
+  "next_step": "C03.9"
+}

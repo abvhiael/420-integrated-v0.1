@@ -182,3 +182,31 @@ def test_property_claim_forgery_cannot_grant_authority(actor,monkeypatch):
             c.execute("DELETE FROM bnb_property_claim WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_authority_proof_used WHERE authority='property' AND subject=%s",(subject,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_unverified_host_and_manager_cannot_use_property_capabilities(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    pid=uuid4()
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_property(id,host_subject,title,public_region,capacity,
+            nightly_minor,currency) VALUES (%s,%s,'Unverified property','Canada',1,100,'CAD')""",
+            (pid,subject))
+        c.execute("""INSERT INTO bnb_property_grant(property_id,grantee_subject,capability,
+            expires_at,granted_by) VALUES (%s,%s,'edit_listing',now()+interval '1 day',%s)""",
+            (pid,subject,subject))
+    try:
+        endpoint=f"/v1/bnb/account/property/{pid}/access"
+        denied=client.get(endpoint,params={"capability":"edit_listing"},headers=headers)
+        assert denied.status_code==200 and denied.json()["allowed"] is False
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""INSERT INTO bnb_property_claim(property_id,subject,external_issuer,
+                external_claim_id,state,expires_at) VALUES (%s,%s,'synthetic-test-only',
+                %s,'pending',now()+interval '1 day')""",(pid,subject,str(uuid4())))
+        denied=client.get(endpoint,params={"capability":"edit_listing"},headers=headers)
+        assert denied.status_code==200 and denied.json()["allowed"] is False
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property_claim WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

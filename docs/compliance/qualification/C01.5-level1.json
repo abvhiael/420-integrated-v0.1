@@ -1,0 +1,45 @@
+{
+  "schema": "420compliance-qualification/v1",
+  "step": "C01.5",
+  "name": "Threat/privacy model: fraudulent sources, manipulated documents, AI prompt injection, approval bypass, tenant leakage, stale decisions, coercion, chain leakage and denial of service.",
+  "status": "PENDING_EXACT_SHA_LEVEL1_CI",
+  "level": 1,
+  "implementation_sha": "9f6bde143c44b1ffb31e83c9b38a0f3c2e6921fc",
+  "main_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files_changed": [
+    "docs/compliance/C01.5-THREATS.json",
+    "docs/compliance/C01.5-THREAT-PRIVACY-MODEL.md",
+    "scripts/verify-compliance-c01-5.py",
+    ".github/workflows/420compliance-c01-level1.yml"
+  ],
+  "requirements_satisfied": [
+    "16 tracked threat/abuse and negative-outcome cases",
+    "documented source/AI/review/decision/Travel trust boundaries",
+    "PII and on-chain privacy restrictions",
+    "signed publication/revocation/replay threats",
+    "fail-closed unknown/stale/unreviewed decisions",
+    "explicit downstream C02-C07 traceability and C01.8/C08.5 deferrals"
+  ],
+  "qualification_runs": [
+    {
+      "id": 38029778512,
+      "state": "QUEUED_AT_OBSERVATION"
+    },
+    {
+      "id": 38029780520,
+      "state": "QUEUED_AT_OBSERVATION"
+    }
+  ],
+  "security_adversarial_invariant": "Threat-model verifier added, not yet green at qualified SHA",
+  "level2": "C01.8 DEFERRED",
+  "level3": "C08.5 DEFERRED",
+  "live_operational": "C09/C10 NOT_APPROVED",
+  "limitations": [
+    "Design-level scope only; runtime controls are downstream requirements",
+    "Exact-SHA workflow pending; no PASS claimed"
+  ],
+  "next_canonical_step": "C01.6 — Define APIs, schemas, events, outcome meanings, trust boundaries, freshness and time semantics; choose stack and deployment topology."
+}

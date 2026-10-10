@@ -57,6 +57,7 @@ contract ModuleRegistryTest {
 
         _grant(ActionIds.MODULE_REGISTER, keccak256("grant:register"));
         _grant(ActionIds.MODULE_SET_STATE, keccak256("grant:set-state"));
+        _grant(ActionIds.MODULE_APPROVE_ARTIFACT, keccak256("grant:approve-artifact"));
         capabilityRegistry.setGrant(
             keccak256("grant:bind-emergency"),
             ICapabilityRegistry420.CapabilityGrant({
@@ -79,6 +80,7 @@ contract ModuleRegistryTest {
 
     function testRegisterBindsImplementationOnce() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
         require(registry.implementationOf(MODULE_ID) == address(implementation), "implementation mismatch");
 
@@ -93,6 +95,7 @@ contract ModuleRegistryTest {
 
     function testForwardLifecycle() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.setModuleState(MODULE_ID, UpgradeState.QUALIFIED);
         registry.setModuleState(MODULE_ID, UpgradeState.SCHEDULED);
@@ -104,6 +107,7 @@ contract ModuleRegistryTest {
 
     function testCannotSkipLifecycle() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
         (bool ok,) = address(registry)
             .call(abi.encodeWithSelector(registry.setModuleState.selector, MODULE_ID, UpgradeState.ACTIVE));
@@ -112,6 +116,7 @@ contract ModuleRegistryTest {
 
     function testRejectedModuleIsTerminal() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.setModuleState(MODULE_ID, UpgradeState.REJECTED);
         (bool ok,) = address(registry)
@@ -139,6 +144,7 @@ contract ModuleRegistryTest {
 
     function testR0212ScheduledNotExecutableAndActiveExecutable() public {
         MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.approveArtifact(MODULE_ID, address(implementation), 1, RULESET_ID);
         registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
         (bool ok,) = address(registry).call(abi.encodeWithSelector(registry.activeImplementation.selector, MODULE_ID));
         require(!ok, "proposed module was executable");

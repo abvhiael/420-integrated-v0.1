@@ -168,8 +168,8 @@ contract HighCountrySessionAccess420 {
         bytes4 selector,
         uint256 nativeValue
     ) public view returns (bool) {
-        return nativeValue == 0 && target.code.length != 0 && !_sensitiveSelector(selector) && routineCall[target][selector]
-            && reviewedCodeHash[target][selector] == target.codehash;
+        return nativeValue == 0 && target.code.length != 0 && !_sensitiveSelector(selector)
+            && routineCall[target][selector] && reviewedCodeHash[target][selector] == target.codehash;
     }
 
     /// @notice Anything not explicitly routine, or any native-value transfer, must escalate

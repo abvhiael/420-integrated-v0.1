@@ -70,11 +70,10 @@ func (service EvaluationService) Evaluate(p ReviewedPolicy,r EvaluationRequest,n
  if service.Approvals==nil||service.Credentials==nil{return deny("UNKNOWN","INDEPENDENT_AUTHORITIES_UNAVAILABLE")}
  if p.ApprovalToken==""||service.Approvals.VerifyApproval(p.Manifest.Manifest.PolicyDigest,p.Manifest.Manifest.ReviewDigest,p.ApprovalToken,now)!=nil{return deny("UNKNOWN","LEGAL_REVIEW_UNVERIFIED")}
  checked,err:=service.Credentials.VerifyEvidence(r,now);if err!=nil{return deny("UNKNOWN","EVIDENCE_UNVERIFIED")}
- r.Evidence=checked
  if err:=t.Verify(p.Manifest,now);err!=nil{return deny("UNKNOWN","POLICY_UNAVAILABLE")}
  if p.ReviewID=="" || len(p.Rules)==0{return deny("UNKNOWN","REVIEW_OR_POLICY_MISSING")}
  if r.TenantID==""||r.OperationRef==""||r.Action==""||r.Stage==""||r.FactsDigest==""||!digestValid(r.FactsDigest)||r.Audience!=t.Audience||r.Domain!=t.Domain||r.Jurisdiction!=t.Jurisdiction{return deny("REVIEW_REQUIRED","CONTEXT_INCOMPLETE")}
- e:=r.Evidence
+ e:=checked
  if !e.SourceVerified||!e.CredentialsVerified||!e.GeographyVerified||!e.CurrentRevocation||!e.PartnerVerified{return deny("UNKNOWN","MANDATORY_EVIDENCE_UNAVAILABLE")}
  for _,rule:=range p.Rules {
    if rule.ID==""||rule.Fact=="" {return deny("UNKNOWN","INVALID_RULE")}

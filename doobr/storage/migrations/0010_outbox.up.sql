@@ -25,7 +25,7 @@ CREATE TABLE doobr_private.event_receipts(
  FOREIGN KEY(tenant_id,event_id) REFERENCES doobr_private.event_outbox(tenant_id,event_id),
  CHECK(length(consumer_id) BETWEEN 1 AND 128),CHECK(length(receipt_ref) BETWEEN 1 AND 256)
 );
-CREATE FUNCTION doobr_private.enqueue_order_command() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, doobr_private AS $
+CREATE FUNCTION doobr_private.enqueue_order_command() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, doobr_private AS $outbox$
 BEGIN
  IF NEW.tenant_id IS DISTINCT FROM nullif(current_setting('doobr.tenant_id',true),'')::uuid THEN
   RAISE EXCEPTION 'tenant context mismatch';
@@ -36,7 +36,7 @@ BEGIN
            'revision',NEW.applied_revision,'state',NEW.target_state,
            'command_id',NEW.command_id));
  RETURN NEW;
-END $$;
+END $outbox$;
 CREATE TRIGGER order_command_to_outbox AFTER INSERT ON doobr_private.order_commands
  FOR EACH ROW EXECUTE FUNCTION doobr_private.enqueue_order_command();
 DO $$

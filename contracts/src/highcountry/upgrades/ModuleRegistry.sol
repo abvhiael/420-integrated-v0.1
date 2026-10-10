@@ -34,40 +34,59 @@ contract ModuleRegistry is IModuleRegistry {
         authorization = IHighCountryAuthorization(authorization_);
     }
 
-    function bindEmergencyState(address candidate) external {
+    function bindEmergencyState(
+        address candidate
+    ) external {
         if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
         authorization.requireAuthorized(
-            AuthorizationRequest(msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_BIND_EMERGENCY, EMERGENCY_BIND_SCOPE, 0)
+            AuthorizationRequest(
+                msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_BIND_EMERGENCY, EMERGENCY_BIND_SCOPE, 0
+            )
         );
-        if (IEmergencyState(candidate).authorizationRoot() != address(authorization)
-            || !IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.MODULE_ACTIVATION)) revert HCInvalidState();
+        if (
+            IEmergencyState(candidate).authorizationRoot() != address(authorization)
+                || !IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.MODULE_ACTIVATION)
+        ) revert HCInvalidState();
         emergencyState = IEmergencyState(candidate);
         emit EmergencyStateBound(candidate);
     }
 
-    function activeImplementation(bytes32 moduleId) external view returns (address) {
+    function activeImplementation(
+        bytes32 moduleId
+    ) external view returns (address) {
         ModuleRecord memory record = _modules[moduleId];
         if (!record.exists) revert HCModuleNotFound(moduleId);
-        if (record.state != UpgradeState.ACTIVE || address(emergencyState) == address(0)
-            || emergencyState.isRestricted(EmergencyDomains.MODULE_ACTIVATION)
-            || record.implementation.codehash != registeredCodeHash[moduleId]) revert HCInvalidState();
-        _verifyIdentity(moduleId, record.implementation, record.version, record.rulesetId, registeredInterface[moduleId]);
+        if (
+            record.state != UpgradeState.ACTIVE || address(emergencyState) == address(0)
+                || emergencyState.isRestricted(EmergencyDomains.MODULE_ACTIVATION)
+                || record.implementation.codehash != registeredCodeHash[moduleId]
+        ) revert HCInvalidState();
+        _verifyIdentity(
+            moduleId, record.implementation, record.version, record.rulesetId, registeredInterface[moduleId]
+        );
         return record.implementation;
     }
 
     function _verifyIdentity(
-        bytes32 moduleId, address implementation, uint32 version, bytes32 rulesetId, bytes32 expectedInterface
+        bytes32 moduleId,
+        address implementation,
+        uint32 version,
+        bytes32 rulesetId,
+        bytes32 expectedInterface
     ) private view {
         if (implementation.code.length == 0) revert HCInvalidState();
-        (bool ok, bytes memory result) = implementation.staticcall(
-            abi.encodeCall(IHighCountryModuleIdentity.highCountryModuleIdentity, ())
-        );
+        (bool ok, bytes memory result) =
+            implementation.staticcall(abi.encodeCall(IHighCountryModuleIdentity.highCountryModuleIdentity, ()));
         if (!ok || result.length != 128) revert HCInvalidState();
         (bytes32 actualId, uint32 actualVersion, bytes32 actualRuleset, bytes32 actualInterface) =
             abi.decode(result, (bytes32, uint32, bytes32, bytes32));
-        if (actualId != moduleId || actualVersion != version || actualRuleset != rulesetId
-            || actualInterface == bytes32(0) || (expectedInterface != bytes32(0) && actualInterface != expectedInterface))
+        if (
+            actualId != moduleId || actualVersion != version || actualRuleset != rulesetId
+                || actualInterface == bytes32(0)
+                || (expectedInterface != bytes32(0) && actualInterface != expectedInterface)
+        ) {
             revert HCInvalidState();
+        }
     }
 
     function getModule(
@@ -107,7 +126,7 @@ contract ModuleRegistry is IModuleRegistry {
             })
         );
 
-        (, , , bytes32 interfaceId) = IHighCountryModuleIdentity(implementation).highCountryModuleIdentity();
+        (,,, bytes32 interfaceId) = IHighCountryModuleIdentity(implementation).highCountryModuleIdentity();
         registeredCodeHash[moduleId] = implementation.codehash;
         registeredInterface[moduleId] = interfaceId;
         _modules[moduleId] = ModuleRecord({
@@ -129,10 +148,13 @@ contract ModuleRegistry is IModuleRegistry {
         if (!record.exists) revert HCModuleNotFound(moduleId);
         if (!_isValidTransition(record.state, newState)) revert HCInvalidState();
         if (newState == UpgradeState.ACTIVE) {
-            if (address(emergencyState) == address(0)
-                || emergencyState.isRestricted(EmergencyDomains.MODULE_ACTIVATION)
-                || record.implementation.codehash != registeredCodeHash[moduleId]) revert HCInvalidState();
-            _verifyIdentity(moduleId, record.implementation, record.version, record.rulesetId, registeredInterface[moduleId]);
+            if (
+                address(emergencyState) == address(0) || emergencyState.isRestricted(EmergencyDomains.MODULE_ACTIVATION)
+                    || record.implementation.codehash != registeredCodeHash[moduleId]
+            ) revert HCInvalidState();
+            _verifyIdentity(
+                moduleId, record.implementation, record.version, record.rulesetId, registeredInterface[moduleId]
+            );
         }
 
         authorization.requireAuthorized(

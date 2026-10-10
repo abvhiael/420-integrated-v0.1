@@ -41,7 +41,12 @@ contract CanonicalBreedingRandomnessAdapter {
     event BreedingRandomnessAbandoned(bytes32 indexed localId);
     event BreedingRandomnessConsumed(bytes32 indexed localId, bytes32 indexed canonicalId);
 
-    constructor(address router_, address authorization_, bytes32 profileId_, uint64 timeoutSeconds_) {
+    constructor(
+        address router_,
+        address authorization_,
+        bytes32 profileId_,
+        uint64 timeoutSeconds_
+    ) {
         if (
             router_.code.length == 0 || authorization_.code.length == 0 || profileId_ == bytes32(0)
                 || timeoutSeconds_ == 0
@@ -53,7 +58,9 @@ contract CanonicalBreedingRandomnessAdapter {
     }
 
     /// @notice One-time capability-authorized binding after the breeding engine is deployed.
-    function bindBreedingEngine(address candidate) external {
+    function bindBreedingEngine(
+        address candidate
+    ) external {
         if (breedingEngine != address(0) || candidate.code.length == 0) revert InvalidRequest();
         authorization.requireAuthorized(
             AuthorizationRequest(
@@ -68,7 +75,11 @@ contract CanonicalBreedingRandomnessAdapter {
         breedingEngine = candidate;
     }
 
-    function request(bytes32 localId, bytes32 domain, bytes32 context) external {
+    function request(
+        bytes32 localId,
+        bytes32 domain,
+        bytes32 context
+    ) external {
         if (msg.sender != breedingEngine) revert Unauthorized();
         if (
             localId == bytes32(0) || context == bytes32(0) || domain != RandomDomains.BREEDING
@@ -88,7 +99,9 @@ contract CanonicalBreedingRandomnessAdapter {
         emit BreedingRandomnessRouted(localId, canonicalId);
     }
 
-    function cancel(bytes32 localId) external {
+    function cancel(
+        bytes32 localId
+    ) external {
         if (msg.sender != breedingEngine) revert Unauthorized();
         Pending storage p = pending[localId];
         if (p.canonicalId == bytes32(0) || p.cancelled || p.consumed) revert InvalidRequest();

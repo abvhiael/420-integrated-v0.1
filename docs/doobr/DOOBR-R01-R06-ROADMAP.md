@@ -6,10 +6,10 @@ Predecessor: merged DOOBR compatibility audit PR #598. Existing `DOOBR-AUDIT-9` 
 ## Product and authority
 Standalone DOOBR website, mobile consumer and courier clients, retailer portal and private operations console; shared versioned APIs, PostgreSQL/PostGIS, security and observability. `420Travel` receives **only** privacy-safe coarse regional availability/presence, with handoff to DOOBR; never an embedded checkout, courier location feed or authority transfer. Release of live regulated orders remains disabled until explicit governance, legal, partner and operational approval.
 
-Licensed BC retailers remain the seller of record. The platform must verify retailer credentials and the exact license/municipality, carrier classification and legal service agreements. Canonical 420Identity/Verify/Registry own credentials and provenance; 420Location/Search own discovery; 420Pay owns authorized settlement; Wallet signs permitted consents; Arbitration owns dispute authority; Notifications owns canonical notice transport. No independent DOOBR custody, escrow, currency, or competing authority. Only minimal attestations/on-chain commitments; addresses, tracking, ID proofs and content encrypted off-chain.
+Licensed BC retailers remain the seller of record. The platform must verify retailer credentials and the exact license/municipality, carrier classification and legal service agreements. Canonical 420Identity/Verify/Registry own credentials and provenance; **420Compliance is the independently developed, shared jurisdiction-policy decision and regulatory-evidence service for DOOBR, 420Travel and Maps**; 420Location/Search own discovery and geospatial projections; 420Pay owns authorized settlement; Wallet signs permitted consents; Arbitration owns dispute authority; Notifications owns canonical notice transport. DOOBR consumes signed/versioned compliance decisions through a fail-closed adapter; DOOBR must not duplicate policy authority or grant itself a compliance override. Compliance responses do not substitute for live retailer, courier, legal or operating approvals. No independent DOOBR custody, escrow, currency, or competing authority. Only minimal attestations/on-chain commitments; addresses, tracking, ID proofs and content encrypted off-chain.
 
 ## BC + Vancouver compliance profile (versioned, fail-closed)
-Implement `jurisdiction_policy` records with regulator-approved legal citations, effective dates, policy version, municipality overrides and carrier types; deny by default if missing, expired, conflicted or revoked.
+Consume versioned, regulator-reviewed jurisdiction-policy records **from 420Compliance**, including legal citations, effective dates, policy version, municipality overrides and carrier types; deny by default if missing, stale, expired, conflicted, unavailable or revoked. Until the separately developed service exists, use contract-test fixtures and signed simulation responses only, with regulated transactions disabled.
 - Initial profile: `CA-BC-VANCOUVER-cannabis-delivery/v1`. Minimum age 19; retailer licence validity and municipal authorization; legally permitted courier eligibility and training; retailer prepares sealed orders; retailer receives payment before departure; BC-only authorized delivery addresses; per-sale 30g dried-cannabis-equivalent limit; no additional doorstep courier charges; required recipient eligibility, name and signature; audit-worthy handoff and return evidence; applicable 9 a.m.–11 p.m. delivery-person operating window or narrower applicable rule.
 - Maintain distinct `LICENSEE_EMPLOYEE`, `DELIVERY_PERSON`, and `COMMON_CARRIER` policy branches. DO NOT assume the time window, handoff-place rules or failed-delivery return deadlines are identical for common carriers. Have counsel/regulator validate each branch and all record retention before approval.
 - Evaluate origin and destination, local time (IANA time zone and DST), retail licence, order status, carrier authorization, delivery cutoff, package constraints and recipient eligibility **both at dispatch and handoff**. Retain deterministic denial reason and signed policy-version evidence.
@@ -21,8 +21,8 @@ Primary sources (verify at each release): https://www2.gov.bc.ca/gov/content/emp
 R01.1 Repository inventory and gap audit against current main; catalogue exact reuse boundaries.
 R01.2 Standalone product authorization decision (not a new frozen Genesis app without explicit catalogue decision).
 R01.3 Consumer/courier/retailer/operator roles, journeys, abuse cases and operational limits.
-R01.4 BC/Vancouver legal matrix, three carrier classifications, eligibility and policy versioning; written regulatory-review questions.
-R01.5 Protocol authority contracts and protected 420Travel presence/read-only integration.
+R01.4 BC/Vancouver legal matrix, three carrier classifications, eligibility and 420Compliance-owned policy versioning; written regulatory-review questions and dependency contract.
+R01.5 Protocol authority contracts, 420Compliance decision-adapter contract, and protected 420Travel/Maps read-only presence integration.
 R01.6 Security/privacy threat model: GPS, address, age data, records, chain leakage, coercion, impersonation and regulated-goods custody.
 R01.7 OpenAPI/events, UX, native mobile strategy, availability semantics and versioned jurisdiction policy contract.
 R01.8 Architecture decision lock and Level 2 milestone qualification.
@@ -32,7 +32,7 @@ R02.1 Postgres/PostGIS schema, migrations, tenant isolation, encryption/retentio
 R02.2 Identity/session/wallet consent and RBAC/ABAC, expired-role revocation.
 R02.3 Retailer licensing/municipal evidence; seller-of-record order adapter and prepaid proof.
 R02.4 Courier eligibility/training/vehicle credential verification and expiry.
-R02.5 Coarse regional presence, geofences, available capacity and safe Travel projection.
+R02.5 Coarse regional presence, geofences, capacity and safe Travel/Maps projection; 420Compliance decisions gate eligibility but never leak private courier data.
 R02.6 Durable order state machine, exactly-once business semantics through idempotent commands, authorization.
 R02.7 Matching, scheduling, offers, assignment, capacity, reassignment and conflicts.
 R02.8 Tracking/navigation, geospatial protection, location permission lifecycle.
@@ -63,9 +63,9 @@ R04.3 Minimal delivery attestation commitments without PII.
 R04.4 420Pay-bound settlement/receipt and retailer prepaid-order verification; no unauthorized crypto sale/custody.
 R04.5 Wallet consent/session revocation and replay prevention.
 R04.6 Identity, Verify, Registry provenance with expiry/revocation handling.
-R04.7 420Location/Search and Travel projection integration.
+R04.7 420Compliance policy decision, evidence/revocation adapter; 420Location/Search and Travel/Maps read-only projection integration.
 R04.8 Notifications and Arbitration routing.
-R04.9 Payment conservation, compensation, cancellation, duplicate callback and refund tests.
+R04.9 Payment conservation, canonical Dev Compensation Vault routing, cancellation, duplicate callback and refund tests.
 R04.10 ABI, fuzz/invariant, access and adversarial tests; no global duplicate Foundry.
 R04.11 Protocol integration Level 2 milestone.
 
@@ -85,7 +85,7 @@ R05.10 Once-only full Level 3 exact-SHA repository qualification after main reco
 R06.1 Testnet provisioning, secrets/manifest and observability.
 R06.2 Real API, Postgres, worker, event services and public/private endpoints.
 R06.3 Approved contract deployments with ABI/address authority.
-R06.4 Actual Wallet, Identity, Verify, Pay, Notifications and Location live adapters.
+R06.4 Actual Wallet, Identity, Verify, 420Compliance, Pay, Development Compensation Vault, Notifications and Location live adapters.
 R06.5 Partner/regulator carrier model signoff, eligibility and external vendor proofs.
 R06.6 Real devices, push, GPS permissions and live session expiry.
 R06.7 Load, soak, chaos, backup/restore, incident drills.
@@ -96,9 +96,26 @@ R06.11 Frozen approved release SHA, immutable config and promotion/rollback pack
 R06.12 Independent mainnet go/no-go, exact deployed SHA acceptance; live delivery remains OFF until separately approved.
 
 ## Jurisdiction expansion — first-class design and checklist
-Use layered `country -> province/territory -> municipality -> service zone` policy composition with precedence and policy signing; contracts/services consume policy decisions, not hard-coded `Vancouver` or `BC` constants. Separate retail sales permissions, courier legality, age/recipient verification, hours, product limits/equivalency, transport/return deadlines, data retention, tax/payments, business licences, promotional visibility, carriers and insurance.
+420Compliance owns layered `country -> province/territory -> municipality -> service zone` policy composition, precedence, policy signing and effective dates; DOOBR and 420Travel/Maps consume scoped policy decisions, not hard-coded `Vancouver` or `BC` constants. Separate retail sales permissions, courier legality, age/recipient verification, hours, product limits/equivalency, transport/return deadlines, data retention, tax/payments, business licences, promotional visibility, carriers and insurance.
 To add a jurisdiction: legal and regulator research with dated source matrix; explicit policy version and reviewer approval; provider/acquirer/payment-route eligibility; municipal geofences/time zones; credential source integration; source-to-test traceability; simulated dispatch/return and adversarial privacy tests; operating partner signoffs; region-scoped canary disabled-by-default deployment; kill switch and rollback; independent release signoff. Prohibit policy self-activation by an administrator alone.
-Cost of adding jurisdictions is primarily **law, licences, contracts and external integration**, not dispatch-engine coding, if the policy engine and adapter seams are built and tested from R01 onward.
+Cost of adding jurisdictions is primarily **420Compliance policy review, law, licences, contracts and external integration**, not dispatch-engine coding, if the shared policy engine and adapter seams are built and tested from R01 onward.
+
+## Premium-service developer compensation — mandatory canonical routing
+DOOBR is a premium fee-bearing application. Its approved **eligible net protocol revenue** must route the applicable developer compensation through the existing `DevelopmentCompensationVault420` (canonical service `420/service/development-compensation/v1`) under frozen `420/REVENUE/POLICY/APPLICATION_REVENUE/V1`. Do not create a second vault, generic developer withdrawal wallet, local percentage override or parallel custody ledger.
+
+The canonical V1 vault is **not** a blanket percentage of gross order value, retailer cannabis sales proceeds, consumer deposits, courier earnings, refunds, taxes or tips. Its upper limit is **1,000 bps (10%) of eligible net protocol revenue**, with actual compensation bps and the definition/calculation of eligible revenue governed by the frozen policy and an approved application fee schedule. Source authorization is default-deny through `CapabilityRegistry420`, source app scoped and amount aware; `sourceContract + sourceApplicationId + revenueReference` guards replay. Successful authorized routing forwards atomically to the immutable configured **420 Integrated Labs beneficiary**, with an indexable event and no residual vault custody. The platform must not promise a particular take-rate until the canonical fee policy and economics are independently verified.
+
+- Publish separate, transparent consumer/retailer/courier fee displays and approved receipts. Distinguish retailer cannabis purchase total, retailer-collected delivery charge, applicable taxes, courier contractual compensation, platform service fees, authorized adjustments/refunds and eligible net protocol revenue. Do not double charge at handoff, divert protected proceeds or debit a courier's earnings as a hidden fee.
+- Maintain an immutable revenue-reference mapping and reconciliation path from retailer's prepaid order reference -> DOOBR service invoice -> 420Pay canonical receipt -> recognized eligible net protocol revenue -> authorized vault contribution -> beneficiary event. Off-chain simulated accounting must never falsely represent on-chain payment as complete.
+- Failed, partially refunded, disputed, reversed or zero-net revenue must use the canonical authorized correction/accounting policy; do not blindly forward an unreconciled developer percentage. Deny wrong source/application, wrong policy reference, excessive bps, repeated revenueRef, beneficiary mismatch, wrong asset, missing revenue and conservation failures.
+- R01.5: freeze fee ownership/fee basis and authority map; R02.6/R02.12: invoice/ledger/event audit schema and reconciliation; R03.3/R03.6/R03.7: fee disclosure, invoice, payout reporting and controls; R04.4/R04.9: Vault routing plus focused invariant/adversarial testing; R05.4/R05.8: conservation, fraud, privacy and independent review; R06.3/R06.4/R06.9–12: qualified immutable beneficiary, capability grants, deployed address, actual $420/approved token transfers, event indexing and rollback/recovery.
+- The Dev Compensation Vault's own `DEVCOMP-AUDIT-6` through `DEVCOMP-AUDIT-9` remain testnet/release gated (see `docs/audit/DEVCOMP-AUDIT-REMEDIATION-ROADMAP.md`); DOOBR cannot claim real routing qualified before those external dependencies are verified.
+
+## Parallel 420Compliance dependency — coordinated acceptance
+420Compliance is an **independent parallel project**, not a DOOBR submodule, and will separately determine its interfaces, regulatory policy governance and release qualifications. DOOBR must document versioned request/response contracts for: jurisdiction/service category; origin/destination; actor/retailer/courier credentials; time and carrier classification; permission/deny; effective policy version, expiry, evidence references and denial reason. The 420Travel and Maps applications may consume only separately authorized public/coarse applicability and coverage projections, not DOOBR transaction entitlements.
+- On 420Compliance latency, unavailability, unsupported jurisdiction, expired signed decision, negative determination or policy revision mid-delivery: fail closed for new dispatch and require explicit, compliant in-flight exception handling.
+- Cross-service contract tests, adversarial policy spoofing/replay tests, source-to-requirement traceability and testnet integration evidence are mandatory before promotion. Keep simulation fixtures during independent development.
+- Expansion to new jurisdictions requires a 420Compliance-reviewed and signed policy plus DOOBR operating/courier/retailer/payment authorization and separate Travel/Maps projection checks. No one-click self-approval.
 
 ## Qualification model
 Level 1 per ordinary step, affected scope only. Level 2 at R01.8/R02.13/R03.12/R04.11; preserve retained cross-component evidence. Level 3 once at R05.10; R06.12 separately qualifies deployment/mainnet release. Evidence-only commits inherit exact qualified executable SHA where applicable. No skipped/absent gate counts as PASS and no live/regulatory acceptance inferred from CI success.

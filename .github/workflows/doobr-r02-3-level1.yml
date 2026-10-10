@@ -5,9 +5,11 @@ on:
     paths:
       - 'doobr/retailer.py'
       - 'doobr/admission.py'
+      - 'doobr/authority_clients.py'
       - 'doobr/storage/migrations/0003_retailer.up.sql'
       - 'doobr/storage/tests/test_retailer.py'
       - 'doobr/storage/tests/test_admission.py'
+      - 'doobr/storage/tests/test_pg_admission.py'
       - 'doobr/storage/tests/r02_3_rls.sql'
       - 'docs/doobr/DOOBR-R02-3-*'
       - '.github/workflows/doobr-r02-3-level1.yml'
@@ -15,9 +17,11 @@ on:
     paths:
       - 'doobr/retailer.py'
       - 'doobr/admission.py'
+      - 'doobr/authority_clients.py'
       - 'doobr/storage/migrations/0003_retailer.up.sql'
       - 'doobr/storage/tests/test_retailer.py'
       - 'doobr/storage/tests/test_admission.py'
+      - 'doobr/storage/tests/test_pg_admission.py'
       - 'doobr/storage/tests/r02_3_rls.sql'
       - 'docs/doobr/DOOBR-R02-3-*'
       - '.github/workflows/doobr-r02-3-level1.yml'
@@ -58,9 +62,11 @@ jobs:
           python-version: '3.12'
       - name: Compile and exercise retailer authorization
         run: |
-          python3 -m py_compile doobr/retailer.py doobr/admission.py doobr/storage/tests/test_retailer.py doobr/storage/tests/test_admission.py
+          python3 -m py_compile doobr/retailer.py doobr/admission.py doobr/authority_clients.py doobr/storage/tests/test_retailer.py doobr/storage/tests/test_admission.py doobr/storage/tests/test_pg_admission.py
           python3 -m unittest discover -s doobr/storage/tests -p test_retailer.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_admission.py -v
+      - name: Install pinned PostgreSQL driver
+        run: python3 -m pip install 'psycopg[binary]==3.2.4'
       - name: Apply actual PostgreSQL/PostGIS migrations
         run: |
           psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
@@ -68,6 +74,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0003_retailer.up.sql
       - name: Test restricted PostgreSQL RLS
         run: psql -v ON_ERROR_STOP=1 -f doobr/storage/tests/r02_3_rls.sql
+      - name: Real PostgreSQL transaction races, rollback and replay
+        run: python3 -m unittest discover -s doobr/storage/tests -p test_pg_admission.py -v
       - name: Verify exact implementation SHA after tests
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}

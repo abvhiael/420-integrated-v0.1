@@ -1,0 +1,153 @@
+{
+  "step": "C01.3",
+  "name": "Establish source/authority taxonomy, legal review ownership and BC/Vancouver questions requiring qualified interpretation. Separate legal approval from governance and software qualification.",
+  "status": "COMPLETE",
+  "qualification_level": 1,
+  "implementation_sha": "9c818d68d4de90bed78f89e9ca520f66efaa7337",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "parent_sha": "3da0809a63b14bb4d0ab8d07475a1aa93df364d8",
+  "summary": "Locked discovery contract; 12 source types, 17 discovery entries, 10 accountable roles and 25 unresolved source/journey-linked interpretation questions. No legal approval or runtime authorization.",
+  "files_changed": [
+    "docs/compliance/C01.3-SOURCE-AUTHORITY.json",
+    "docs/compliance/C01.3-SOURCE-AUTHORITY-AND-REVIEW.md",
+    "docs/compliance/C01.3-RETAINED-PINS.json",
+    "docs/compliance/420COMPLIANCE-ROADMAP.md",
+    "scripts/verify-compliance-c01-3.py",
+    "scripts/test-compliance-c01-3.py",
+    ".github/workflows/420compliance-c01-level1.yml"
+  ],
+  "exit_criteria": [
+    {
+      "criterion": "Source/authority taxonomy",
+      "result": "SATISFIED",
+      "evidence": "12 source types, six operative statuses, five authority dimensions, 24 provenance fields and conservative composition controls"
+    },
+    {
+      "criterion": "Legal review ownership",
+      "result": "SATISFIED",
+      "evidence": "10 accountable roles, competence/independence/mandate requirements, explicit unappointed external gates"
+    },
+    {
+      "criterion": "BC/Vancouver questions requiring qualified interpretation",
+      "result": "SATISFIED",
+      "evidence": "Q01–Q25 linked to sources, C01.2 journeys, qualified owners, target steps and five closure evidence requirements"
+    },
+    {
+      "criterion": "Separate legal approval from governance and software qualification",
+      "result": "SATISFIED",
+      "evidence": "Four distinct approval planes; negative substitution and unearned approval tests pass"
+    },
+    {
+      "criterion": "Preserve previously qualified scope and evidence",
+      "result": "SATISFIED",
+      "evidence": "10 parent-file hashes verified byte-identical; C01.1/C01.2 exact-SHA records retained; 52 canonical source hashes match"
+    }
+  ],
+  "level1": {
+    "result": "PASS",
+    "regression_tests": 35,
+    "local_result": {
+      "step": "C01.3",
+      "qualification_level": 1,
+      "implementation_sha": "9c818d68d4de90bed78f89e9ca520f66efaa7337",
+      "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+      "parent_sha": "3da0809a63b14bb4d0ab8d07475a1aa93df364d8",
+      "result": "PASS",
+      "taxonomy_types": 12,
+      "sources": 17,
+      "review_roles": 10,
+      "interpretation_questions": 25,
+      "exit_criteria": 5,
+      "prior_qualification": "C01.1_C01.2_UNCHANGED",
+      "legal_and_operational_acceptance": "NOT_GRANTED",
+      "runtime_tests": "NOT_APPLICABLE_DISCOVERY_STEP"
+    },
+    "runs": [
+      {
+        "id": 38025346236,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38025346236",
+        "job_id": 114134907201,
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "9c818d68d4de90bed78f89e9ca520f66efaa7337"
+      },
+      {
+        "id": 38025345045,
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38025345045",
+        "job_id": 114134903022,
+        "event": "push",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "9c818d68d4de90bed78f89e9ca520f66efaa7337"
+      }
+    ],
+    "artifact": {
+      "id": 11659693931,
+      "node_id": "MDg6QXJ0aWZhY3QxMTY1OTY5MzkzMQ==",
+      "name": "compliance-c01-level1-9c818d68d4de90bed78f89e9ca520f66efaa7337",
+      "size_in_bytes": 510,
+      "url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11659693931",
+      "archive_download_url": "https://api.github.com/repos/abvhiael/420-integrated-v0.1/actions/artifacts/11659693931/zip",
+      "expired": false,
+      "digest": "sha256:d80a89b8f0c3f5265ad9419ce2a6ec824c72729950ec3050457e9d9b2481029e",
+      "created_at": "2026-10-10T04:48:40Z",
+      "updated_at": "2026-10-10T04:48:40Z",
+      "expires_at": "2026-10-17T04:48:33Z",
+      "workflow_run": {
+        "id": 38025346236,
+        "repository_id": 1345598861,
+        "head_repository_id": 1345598861,
+        "head_branch": "audit/420compliance-c01-1-inventory-20261009",
+        "head_sha": "9c818d68d4de90bed78f89e9ca520f66efaa7337"
+      }
+    },
+    "checks": [
+      "exact implementation SHA",
+      "affected Python compilation",
+      "schema/authority/owner/provenance/question/exit verification",
+      "negative/adversarial approval, source spoofing, privacy, fail-open and omission regressions",
+      "retained parent evidence/source hashes",
+      "roadmap/document traceability"
+    ],
+    "security_result": "PASS_SPECIFICATION_BOUNDARIES_ONLY",
+    "runtime_tests": "NOT_APPLICABLE_DISCOVERY_STEP"
+  },
+  "qualification_policy": {
+    "level2": "NOT_DUE_C01.8",
+    "level3": "DEFERRED_C08.5",
+    "evidence_only_commit": "Qualification inherited only when the appended record is the sole changed file; evidence SHA is discoverable from git/PR history"
+  },
+  "limitations": [
+    "Discovery inspection is not immutable source ingestion or legal review",
+    "CRS PDF fetch returned 502; PRS handbook retrieval failed; no source bytes/version accepted",
+    "No named independent legal reviewer or accountable partner appointment",
+    "All Q01–Q25 remain unresolved and block affected operational permission",
+    "Municipal, Indigenous, private and additional provincial instruments require C02/C04 discovery and review",
+    "C09/C10 deployed, legal and partner acceptance remains separate"
+  ],
+  "blockers": [],
+  "future_external_blockers": [
+    "Qualified reviewer/partner appointment",
+    "Current handbook and applicable instrument evidence",
+    "Independent interpretation and approved policy pack",
+    "Live operational acceptance"
+  ],
+  "unrelated_ci": {
+    "docs": "Expected skipped; not counted PASS",
+    "oracle": "Unfiltered baseline PR auto-trigger; not required C01.3 evidence; in progress at snapshot",
+    "baseline_yaml_failures": [
+      {
+        "run_id": 38025343969,
+        "path": ".github/workflows/governance-deployment-audit.yml",
+        "classification": "Preexisting workflow YAML defect; unchanged from main"
+      },
+      {
+        "run_id": 38025344493,
+        "path": ".github/workflows/420hz-gca.yml",
+        "classification": "Preexisting workflow YAML defect; unchanged from main"
+      }
+    ]
+  },
+  "next_step": "C01.4 — Agree shared authority with DOOBr and Travel; replace duplicated proposed policy ownership through an explicit roadmap amendment with preserved requirement IDs."
+}

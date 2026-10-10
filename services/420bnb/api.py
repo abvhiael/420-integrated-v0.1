@@ -939,6 +939,9 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
                 raise HTTPException(409,"PROPERTY_BLOCKED")
             if used+payload.units>unit_capacity:
                 raise HTTPException(409,"CAPACITY_EXHAUSTED")
+            if configured and c.execute("SELECT 1 FROM bnb_hold WHERE quote_id=%s LIMIT 1",
+                                        (payload.quote_id,)).fetchone():
+                raise HTTPException(409,"QUOTE_ALREADY_CONSUMED")
             uid=uuid4()
             # Explicitly nonbinding quote; no payments permitted in this stage.
             policy=c.execute("SELECT timezone_id,min_nights FROM bnb_listing_policy WHERE property_id=%s",
@@ -951,12 +954,13 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
             else:
                 nights=(payload.end.date()-payload.start.date()).days
             if nights<=0:raise HTTPException(422,"MINIMUM_NIGHTS")
-            total=nights*property_row[1]*payload.units
+            total=quote[10]["total_minor"] if configured else nights*property_row[1]*payload.units
             c.execute("""INSERT INTO bnb_hold
-                (id,property_id,unit_id,guest_subject,period,units,status,expires_at,quote_total_minor,policy_snapshot)
-                VALUES (%s,%s,%s,%s,tstzrange(%s,%s,'[)'),%s,'held',now()+interval '15 minutes',%s,%s)""",
+                (id,property_id,unit_id,guest_subject,period,units,status,expires_at,
+                quote_total_minor,policy_snapshot,quote_id)
+                VALUES (%s,%s,%s,%s,tstzrange(%s,%s,'[)'),%s,'held',now()+interval '15 minutes',%s,%s,%s)""",
                 (uid,payload.property_id,payload.unit_id,subject,payload.start,payload.end,
-                 payload.units,total,payload.policy_snapshot))
+                 payload.units,total,payload.policy_snapshot,payload.quote_id))
             result={"id":str(uid),"status":"held","total_minor":total,
                     "payment_status":"unavailable","confirmed":False}
             c.execute("""INSERT INTO bnb_request_dedupe(actor,operation,key,digest,result)

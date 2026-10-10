@@ -11,7 +11,7 @@ func TestEvaluatorFailsClosed(t *testing.T){
  signed,err:=Publish(m,Approval{Digest:m.PolicyDigest,AuthorID:"a",ReviewerID:"b",PublisherID:"c",IndependentlyVerified:true},priv);if err!=nil{t.Fatal(err)}
  trust:=Trust{Keys:map[string]Key{"key-a":{Public:pub,Environment:"test"}},MinimumSequence:1,MinimumEpoch:1,Environment:"test",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC"}
  policy:=ReviewedPolicy{Manifest:signed,ReviewID:"review",ApprovalToken:"signed-review-attestation",Rules:[]Requirement{{ID:"R1",Fact:"valid_age",Mandatory:true}}}
- request:=EvaluationRequest{TenantID:"tenant",OperationRef:"order",Action:"dispatch",Stage:"dispatch",Domain:"delivery",Jurisdiction:"BC",Audience:"doobr",FactsDigest:Digest([]byte("verified")),Evidence:Evidence{SourceVerified:true,CredentialsVerified:true,GeographyVerified:true,CurrentRevocation:true,PartnerVerified:true,RequiredFacts:map[string]bool{"valid_age":true}}}
+ request:=EvaluationRequest{TenantID:"tenant",OperationRef:"order",Action:"dispatch",Stage:"dispatch",Domain:"delivery",Jurisdiction:"BC",Audience:"doobr",FactsDigest:Digest([]byte("verified"))}
  service:=EvaluationService{Trust:trust,Approvals:stubApproval{true},Credentials:stubEvidence{true,Evidence{SourceVerified:true,CredentialsVerified:true,GeographyVerified:true,CurrentRevocation:true,PartnerVerified:true,RequiredFacts:map[string]bool{"valid_age":true}}}}
  if got:=service.Evaluate(policy,request,now);got.Outcome!="ALLOW"||got.RequestDigest==""||got.PolicyDigest!=m.PolicyDigest{t.Fatalf("expected scoped positive policy result: %+v",got)}
  cases:=[]struct{name string;mutate func(*ReviewedPolicy,*EvaluationRequest)}{
@@ -32,5 +32,5 @@ func TestEvaluatorFailsClosed(t *testing.T){
  {"required fact absent",func(_ *ReviewedPolicy,r *EvaluationRequest){r.FactsDigest=""}},
  }
  for _,tc:=range cases{t.Run(tc.name,func(t *testing.T){p:=policy;r:=request;tc.mutate(&p,&r);if got:=service.Evaluate(p,r,now);got.Outcome=="ALLOW"{t.Fatalf("unsafe ALLOW: %+v",got)}})}
- if got:=trust.Evaluate(policy,request,now.Add(2*time.Hour));got.Outcome=="ALLOW"{t.Fatal("expired permit accepted")}
+ if got:=service.Evaluate(policy,request,now.Add(2*time.Hour));got.Outcome=="ALLOW"{t.Fatal("expired permit accepted")}
 }

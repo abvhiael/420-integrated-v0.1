@@ -19,26 +19,41 @@ contract would unnecessarily change protocol runtime hashes and provenance.
 optimizer (`enabled: true`, `runs: 200`) for coverage instrumentation only. It
 requires the pinned Solidity `0.8.24+commit.e11b9ed9` binary, the coverage profile,
 Cancun, viaIR and the expected minimum-IR input configuration. Unexpected inputs
-fail closed. Source content, output selection and all other compiler settings are
-preserved. Normal PR/CI/hardening builds continue to invoke Solidity directly.
+fail closed. Source content and all non-optimizer/non-output compiler settings are preserved.
+Output selection expands to every resolved input dependency, retaining existing
+fields and runtime maps for contracts called across primary ownership boundaries. Normal PR/CI/hardening builds continue to invoke Solidity directly.
 No protocol source, test, assertion, ABI, address or authority changes in this
 remediation. No coverage source or test is excluded.
 
-Seven qualification-harness regressions verify preservation of non-optimizer
+Eleven qualification-harness regressions verify preservation of source/other compiler
 input, rejection of canonical CI/changed compiler inputs, rejection of incomplete
 or duplicate assignments, preservation of uncovered lines/unknown branch hits and
-failure on unsupported LCOV records. Local Level 1 passes do not establish Level 3.
+failure on unsupported LCOV records. The full context-stride reconstruction check
+runs before canonical compilation. Local Level 1 passes do not establish Level 3.
 
 A monolithic optimized diagnostic compile exceeded the 8 GiB local memory limit
-and failed (Solc exit 247; cgroup OOM kill). This is not a pass. Coverage instead
-reuses the canonical four-shard assignment files produced by Solidity CI. Every
-production source retains emitted runtime source maps in each coverage context;
-only other shards' tests/scripts are omitted from that context's output selection.
-Imported dependencies remain available. The explicit test-path partition executes
-every assigned test without duplicate cross-shard test execution. All four
-completed exact-SHA reports are mandatory, partitions must match the canonical
-inventory without omissions/duplicates, and their LCOV hits are merged. No
-production source or repository test is removed from the aggregate qualification.
+and failed (Solc exit 247; cgroup OOM kill). Emitting all production sources in
+one broad coverage shard also exceeded this limit. Neither attempt qualifies.
+Coverage now reuses the canonical four-shard assignment files produced by Solidity
+CI, subdividing each into 16 bounded compiler contexts. Foundry resolves the
+imports of each primary group. The immutable canonical compilation cache supplies
+its complete dependency graph; every transitive import remains selected for
+artifact retention. The bridge emits bytecode and runtime maps for
+**every resolved dependency**, including contracts owned by another primary group.
+Only other primary groups are omitted from that context's initial selection;
+source content is never edited. The 16 context partitions must exactly reconstruct
+their canonical shard, and all four shards must reconstruct the unique inventory.
+Coverage explicitly disables Foundry dynamic test linking and executes native
+constructors. The initial linked/sparse attempt failed with missing deployment
+artifacts; those failures do not qualify. Sparse artifact retention also requires
+selecting the full cached import closure, not just asking Solc for extra maps.
+The test-path filters execute every assigned test without cross-context duplication.
+All completed exact-SHA context reports and their merged LCOV data are mandatory.
+No production source or test is removed from the aggregate qualification.
+The preceding reconciled candidate `46152b4af8cb82dc4c3b4b7bb269cc614a1b5761`
+passed the eight non-Solidity core workflows, but its broad coverage configuration
+is superseded by this resource correction; those successes are historical evidence,
+not final acceptance of the replacement candidate.
 
 **Source mappings from optimized IR are approximate.** The summary and LCOV report
 are diagnostic evidence, not a precise production coverage percentage or a new
@@ -48,11 +63,18 @@ invariants; the coverage profile executes its retained 256-run fuzz and 64-run/
 64-depth invariants. Optimized instrumentation does not replace that CI gate.
 
 Canonical shard coverage and fixture aggregation are mandatory; main/push runs
-the same coverage partition serially after its existing build/test gate. `pipefail`
+the same bounded canonical compilation/test partitions serially, followed by
+the same coverage partition, rather than an unbounded full-project compile. `pipefail`
 propagates compiler/test failures; the LCOV report must exist and be nonempty.
 Exact-SHA shard/aggregate artifacts retain execution logs, reports, compiler configuration,
 source-input digest, Foundry version and candidate SHA, including failure logs.
 No allowed-failure coverage result can qualify the phase.
+
+Local Level 1 validation of the final dependency/native-constructor configuration
+passed 33 tests across seven test suites, with zero failures/skips. It compiled
+100 selected files in 105.09 seconds and retained observed hits in 22 production
+runtime sources, including imported ProtocolRegistry, Bridge, Compute, Exchange
+and High Country contracts. This is scoped harness evidence, not Level 3.
 
 ## Main reconciliation and acceptance boundary
 

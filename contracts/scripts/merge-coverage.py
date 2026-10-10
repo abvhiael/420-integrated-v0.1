@@ -64,6 +64,15 @@ def main():
         expected = (directory / f"shard-{shard}-targets.txt").read_text().splitlines()
         if targets != expected or len(targets) != complete["primary_units"]:
             raise ValueError(f"Coverage partition does not match canonical shard {shard}")
+        contexts = complete.get("contexts", [])
+        if len(contexts) != 16:
+            raise ValueError(f"Missing bounded coverage contexts in shard {shard}")
+        for segment, context in enumerate(contexts):
+            actual = (evidence / f"context-{segment}/primary-targets.txt").read_text().splitlines()
+            if (actual != targets[segment::16] or context.get("candidate_sha") != candidate
+                    or context.get("shard") != shard + segment * 4 or context.get("count") != 64
+                    or context.get("result") != "PASS" or context.get("primary_units") != len(actual)):
+                raise ValueError(f"Unqualified bounded coverage context {shard}/{segment}")
         partitions.extend(targets)
         reports.append(evidence / "lcov.info")
         details.append(complete)

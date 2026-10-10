@@ -234,9 +234,26 @@ contract MockHCFactorySession {
     address public immutable entryPoint = address(0x420);
     address public immutable capabilityRegistry;
     address public account;
-    constructor(address registry) { capabilityRegistry = registry; }
-    function setAccount(address candidate) external { account = candidate; }
-    function getAddress(address, address, bytes32) external view returns (address) { return account; }
+
+    constructor(
+        address registry
+    ) {
+        capabilityRegistry = registry;
+    }
+
+    function setAccount(
+        address candidate
+    ) external {
+        account = candidate;
+    }
+
+    function getAddress(
+        address,
+        address,
+        bytes32
+    ) external view returns (address) {
+        return account;
+    }
 }
 
 contract RoutineTargetHCSession {
@@ -289,9 +306,8 @@ contract HighCountrySessionAccess420Test {
             bytes4(keccak256("enableSessionKey(address)"))
         ];
         for (uint256 i; i < blocked.length; i++) {
-            (bool ok,) = address(sessionAccess).call(
-                abi.encodeWithSelector(sessionAccess.setRoutineCall.selector, address(target), blocked[i], true)
-            );
+            (bool ok,) = address(sessionAccess)
+                .call(abi.encodeWithSelector(sessionAccess.setRoutineCall.selector, address(target), blocked[i], true));
             require(!ok, "sensitive selector downgraded");
         }
     }
@@ -300,10 +316,18 @@ contract HighCountrySessionAccess420Test {
         _enableRoutineGrant();
         MockSmartAccountHCSession forged = new MockSmartAccountHCSession(address(registry));
         forged.setSessionEpoch(SESSION_KEY, 1);
-        require(!sessionAccess.isRoutineSessionAuthorized(address(forged), SESSION_KEY, address(target), target.tick.selector), "unattested account authorized");
-        (bool ok,) = address(sessionAccess).call(
-            abi.encodeCall(sessionAccess.attestAccount, (address(forged), address(this), address(0), bytes32(uint256(1))))
+        require(
+            !sessionAccess.isRoutineSessionAuthorized(
+                address(forged), SESSION_KEY, address(target), target.tick.selector
+            ),
+            "unattested account authorized"
         );
+        (bool ok,) = address(sessionAccess)
+            .call(
+                abi.encodeCall(
+                    sessionAccess.attestAccount, (address(forged), address(this), address(0), bytes32(uint256(1)))
+                )
+            );
         require(!ok, "nonfactory account attested");
     }
 

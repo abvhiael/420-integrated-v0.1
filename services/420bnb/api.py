@@ -233,6 +233,7 @@ def revoke_session(session_id: str,authorization: str | None = Header(None)):
     """Revocation may only be requested by the bearer of independent Identity proof."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401,"UNAUTHORIZED")
+    subject=active_subject(authorization)
     proof=verify_external_token(authorization[7:])
     with db() as c:
         result=c.execute("""UPDATE bnb_identity_session SET revoked_at=now()
@@ -249,6 +250,7 @@ def check_property_access(property_id: str,capability: str,
     """Read-only property permission check; never grants ownership or payouts."""
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(401,"UNAUTHORIZED")
+    subject=active_subject(authorization)
     proof=verify_external_token(authorization[7:])
     if capability not in ("view_reservations","edit_calendar","edit_listing","handle_requests"):
         raise HTTPException(422,"INVALID_CAPABILITY")

@@ -10,6 +10,7 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 import { PlantRegistry } from "../cultivation/PlantRegistry.sol";
 import { CultivationEngine } from "../cultivation/CultivationEngine.sol";
+import { HarvestScoring } from "./HarvestScoring.sol";
 
 /// @notice R03.1 harvest acceptance only. Yield/product accounting and plant termination
 ///         are separate canonical R03.2-R03.4 responsibilities.
@@ -31,6 +32,9 @@ contract HarvestEngine {
     PlantRegistry public immutable plantRegistry;
     CultivationEngine public immutable cultivationEngine;
     mapping(uint64 => HarvestAcceptance) private _accepted;
+    mapping(uint64 => HarvestScoring.Result) private _scored;
+
+    event HarvestScored(uint64 indexed plantId, uint32 yieldGrams, uint16 qualityBps, uint16 geneticBps, HarvestScoring.Grade grade);
 
     event HarvestAccepted(
         uint64 indexed plantId,
@@ -109,7 +113,10 @@ contract HarvestEngine {
             acceptedAt: uint64(block.timestamp),
             accepted: true
         });
+        HarvestScoring.Result memory score = HarvestScoring.calculate(plant.genomeId, cultivation.qualityBps);
+        _scored[plantId] = score;
         _accepted[plantId] = acceptance;
+        emit HarvestScored(plantId, score.yieldGrams, score.qualityBps, score.geneticBps, score.grade);
         emit HarvestAccepted(
             acceptance.plantId,
             acceptance.genomeId,
@@ -121,6 +128,23 @@ contract HarvestEngine {
             acceptance.publicPlotId,
             acceptance.acceptedAt
         );
+    }
+
+    function quoteHarvest(
+        uint64 plantId
+    ) external view returns (HarvestScoring.Result memory score) {
+        PlantRegistry.PlantRecord memory plant = plantRegistry.getPlant(plantId);
+        if (plant.stage != PlantRegistry.PlantStage.READY) revert HCInvalidState();
+        CultivationEngine.CultivationState memory state = cultivationEngine.getState(plantId);
+        if (!state.expressionLocked || state.expressionHash == bytes32(0)) revert HCInvalidState();
+        score = HarvestScoring.calculate(plant.genomeId, state.qualityBps);
+    }
+
+    function getHarvestScore(
+        uint64 plantId
+    ) external view returns (HarvestScoring.Result memory score) {
+        if (!_accepted[plantId].accepted) revert HCInvalidState();
+        score = _scored[plantId];
     }
 
     function getHarvest(

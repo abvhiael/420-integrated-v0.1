@@ -66,6 +66,8 @@ contract RandomnessCoordinator {
 
     IHighCountryAuthorization public immutable authorization;
     mapping(bytes32 => RandomRequest) private _requests;
+    mapping(bytes32 => bool) public cancelled;
+    event RandomnessCancelled(bytes32 indexed requestId, address indexed requester);
 
     event RandomnessRequested(
         bytes32 indexed requestId, bytes32 indexed domain, address indexed requester, bytes32 contextHash
@@ -101,7 +103,7 @@ contract RandomnessCoordinator {
         if (entropy == bytes32(0)) revert HCInvalidId();
         RandomRequest storage r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
-        if (r.fulfilled || r.consumed) revert HCInvalidState();
+        if (r.fulfilled || r.consumed || cancelled[requestId]) revert HCInvalidState();
         _auth(ActionIds.RANDOMNESS_FULFILL, requestId);
         r.provider = msg.sender;
         r.entropy = entropy;
@@ -116,13 +118,22 @@ contract RandomnessCoordinator {
     ) external returns (bytes32 entropy) {
         RandomRequest storage r = _requests[requestId];
         if (!r.exists) revert HCNotFound();
-        if (!r.fulfilled || r.consumed) revert HCInvalidState();
+        if (!r.fulfilled || r.consumed || cancelled[requestId]) revert HCInvalidState();
         if (msg.sender != r.requester || r.domain != expectedDomain || r.contextHash != expectedContextHash) {
             revert HCInvalidState();
         }
         r.consumed = true;
         emit RandomnessConsumed(requestId, msg.sender);
         return r.entropy;
+    }
+
+    /// @notice Only the original requester can abandon an unconsumed request.
+    function cancel(bytes32 requestId) external {
+        RandomRequest storage r = _requests[requestId];
+        if (!r.exists) revert HCNotFound();
+        if (msg.sender != r.requester || r.consumed || cancelled[requestId]) revert HCInvalidState();
+        cancelled[requestId] = true;
+        emit RandomnessCancelled(requestId, msg.sender);
     }
 
     function result(

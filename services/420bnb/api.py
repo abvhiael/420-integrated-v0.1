@@ -212,12 +212,17 @@ def establish_session(authorization: str | None = Header(None)):
                             (proof["subject"],)).fetchone()
             if not state or state[0]!="active":
                 raise HTTPException(403,"ACCOUNT_DISABLED")
-            existing=c.execute("""SELECT id,revoked_at FROM bnb_identity_session
+            existing=c.execute("""SELECT id,revoked_at,subject,recovery_epoch FROM bnb_identity_session
                 WHERE issuer=%s AND issuer_session_id=%s FOR UPDATE""",
                 (proof["issuer"],proof["issuer_session_id"])).fetchone()
             if existing:
                 # Never resurrect a revoked issuer session.
                 if existing[1]:raise HTTPException(401,"SESSION_REVOKED")
+                if existing[2]!=proof["subject"]:
+                    raise HTTPException(401,"SESSION_SUBJECT_MISMATCH")
+                epoch=c.execute("SELECT recovery_epoch FROM bnb_account WHERE subject=%s",(proof["subject"],)).fetchone()[0]
+                if existing[3]!=epoch:
+                    raise HTTPException(401,"SESSION_EPOCH_REVOKED")
                 sid=existing[0]
             else:
                 c.execute("""INSERT INTO bnb_identity_session

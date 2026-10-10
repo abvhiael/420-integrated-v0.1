@@ -601,9 +601,8 @@ contract CultivationEngineTest is PlantSourcesFixture {
         uint64 countBefore = products.totalRegisteredProducts();
 
         vm.prank(address(0xBEEF));
-        (bool unauthorized,) = address(plants).call(
-            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
-        );
+        (bool unauthorized,) =
+            address(plants).call(abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED)));
         require(!unauthorized, "unauthorized capacity release");
         require(plants.activePlantsByParcel(11) == activeBefore, "unauthorized changed capacity");
 
@@ -611,9 +610,8 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(plants.activePlantsByParcel(11) == activeBefore - 1, "active capacity not released");
         require(plants.privatePlantsByParcel(11) == privateBefore - 1, "private capacity not released");
         require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.TERMINATED, "plant not terminated");
-        (bool replay,) = address(plants).call(
-            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
-        );
+        (bool replay,) =
+            address(plants).call(abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED)));
         require(!replay, "duplicate capacity release");
         require(plants.activePlantsByParcel(11) == activeBefore - 1, "capacity double release");
         require(products.getProduct(productId).plantId == plantId, "product provenance changed");
@@ -634,9 +632,8 @@ contract CultivationEngineTest is PlantSourcesFixture {
         uint32 activeBefore = plants.activePlantsByParcel(11);
         uint32 privateBefore = plants.privatePlantsByParcel(11);
 
-        (bool premature,) = address(plants).call(
-            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
-        );
+        (bool premature,) =
+            address(plants).call(abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED)));
         require(!premature, "premature termination");
         require(plants.activePlantsByParcel(11) == activeBefore, "premature release");
         _ready(plantId);
@@ -649,18 +646,16 @@ contract CultivationEngineTest is PlantSourcesFixture {
             keccak256("r034:restrict")
         );
         state.setRestricted(EmergencyDomains.CULTIVATION, true);
-        (bool wrongStage,) = address(plants).call(
-            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.FLOWERING))
-        );
+        (bool wrongStage,) =
+            address(plants).call(abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.FLOWERING)));
         require(!wrongStage, "restricted invalid transition");
         plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
         require(plants.activePlantsByParcel(11) == activeBefore - 1, "restricted release wrong");
         require(plants.privatePlantsByParcel(11) == privateBefore - 1, "restricted private release wrong");
         require(!harvest.isHarvestAccepted(plantId), "cancelled plant has harvest");
         require(products.totalRegisteredProducts() == 0, "cancelled plant issued product");
-        (bool replay,) = address(plants).call(
-            abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED))
-        );
+        (bool replay,) =
+            address(plants).call(abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED)));
         require(!replay, "cancel replay released capacity");
         require(plants.activePlantsByParcel(11) == activeBefore - 1, "replay changed capacity");
     }

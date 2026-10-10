@@ -23,6 +23,24 @@ export const BudtenderEntitlement = Object.freeze({
   CROSS_GAME: "420/BUDTENDER/ENTITLEMENT/CROSS_GAME/V1"
 });
 
+export const BudtenderGamingIntegration = Object.freeze({
+  gameId: BUDTENDER_GAME_ID,
+  coreFeatures: Object.freeze([
+    BudtenderFeature.CORE_MANAGEMENT
+  ]),
+  registeredFeatures: Object.freeze([
+    BudtenderFeature.CLOUD_SAVE
+  ]),
+  walletOptionalFeatures: Object.freeze([
+    BudtenderFeature.PREMIUM_DECOR,
+    BudtenderFeature.COLLECTIBLE_FIXTURE,
+    BudtenderFeature.SEASONAL_EVENT,
+    BudtenderFeature.CROSS_GAME_ITEM,
+    BudtenderFeature.REWARD
+  ]),
+  entitlements: BudtenderEntitlement
+});
+
 const requirementByFeature = Object.freeze({
   [BudtenderFeature.CORE_MANAGEMENT]: AccessRequirement.CORE,
   [BudtenderFeature.CLOUD_SAVE]: AccessRequirement.REGISTERED,

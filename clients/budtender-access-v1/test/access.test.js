@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   BUDTENDER_GAME_ID,
   BudtenderFeature,
+  BudtenderGamingIntegration,
   createBudtenderGamingClient,
   evaluateBudtenderAccess
 } from "../src/access.js";
@@ -46,4 +47,45 @@ test("shared SDK adapters are scoped to the Budtender game namespace", async () 
   });
   await client.getProfile("0x0000000000000000000000000000000000000001");
   assert.equal(observedGameId, BUDTENDER_GAME_ID);
+});
+
+
+test("integration metadata freezes the canonical progressive-access boundary", () => {
+  assert.equal(BudtenderGamingIntegration.gameId, BUDTENDER_GAME_ID);
+  assert.deepEqual(BudtenderGamingIntegration.coreFeatures, [BudtenderFeature.CORE_MANAGEMENT]);
+  assert.deepEqual(BudtenderGamingIntegration.registeredFeatures, [BudtenderFeature.CLOUD_SAVE]);
+  assert.deepEqual(
+    BudtenderGamingIntegration.walletOptionalFeatures,
+    [
+      BudtenderFeature.PREMIUM_DECOR,
+      BudtenderFeature.COLLECTIBLE_FIXTURE,
+      BudtenderFeature.SEASONAL_EVENT,
+      BudtenderFeature.CROSS_GAME_ITEM,
+      BudtenderFeature.REWARD
+    ]
+  );
+  assert.ok(Object.isFrozen(BudtenderGamingIntegration));
+  assert.ok(Object.isFrozen(BudtenderGamingIntegration.walletOptionalFeatures));
+});
+
+test("wallet linkage does not create a competitive gameplay feature", () => {
+  for (const forbidden of [
+    "sales-speed-boost",
+    "customer-patience-boost",
+    "margin-boost",
+    "inventory-yield-boost",
+    "progression-rate-boost"
+  ]) {
+    assert.throws(
+      () => evaluateBudtenderAccess({ feature: forbidden, ...linkedConnected }),
+      /Unsupported Budtender feature/
+    );
+  }
+});
+
+test("scoped Gaming client has no wallet-wide enumeration surface", () => {
+  const client = createBudtenderGamingClient({});
+  assert.equal("walletHistory" in client, false);
+  assert.equal("allEntitlementsForWallet" in client, false);
+  assert.equal("allClaimsForWallet" in client, false);
 });

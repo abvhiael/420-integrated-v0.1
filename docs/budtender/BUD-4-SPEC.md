@@ -1,5 +1,7 @@
 # BUD-4 Specification — Store Upgrade Loop
 
+Status: IMPLEMENTED — exact-head repository qualification remains the merge gate.
+
 ## Objective
 
 Create a deterministic progression service for ordinary Budtender store upgrades and physical expansion. This phase remains fully internal to the game economy and must not depend on wallet, chain, account, or cross-game state.

@@ -44,6 +44,10 @@ contract MockHCCompetitionGamingAccess is IHighCountryGamingAccess420 {
         access[keccak256(abi.encode(growerProfileId, entitlementId, contentId))] = allowed;
     }
 
+    function hasPlayerCompetition(uint64 player, bytes32 content) external view returns (bool) {
+        return access[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
+    }
+    function hasPlayerBonusRegion(uint64, bytes32) external pure returns (bool) { return false; }
     function hasScopedEntitlement(
         uint64,
         bytes32,
@@ -119,7 +123,7 @@ contract OptionalCompetitionAccess420Test {
         _register();
         require(!competitionAccess.hasAccess(GROWER_PROFILE_ID, COMPETITION_ID), "missing entitlement accepted");
 
-        gamingAccess.setCompetition(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setCompetition(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         require(competitionAccess.hasAccess(GROWER_PROFILE_ID, COMPETITION_ID), "matching entitlement rejected");
         competitionAccess.requireAccess(GROWER_PROFILE_ID, COMPETITION_ID);
     }
@@ -141,7 +145,7 @@ contract OptionalCompetitionAccess420Test {
 
     function testInactiveOptionalCompetitionFailsClosed() public {
         _register();
-        gamingAccess.setCompetition(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setCompetition(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         competitionAccess.setOptionalCompetitionStatus(COMPETITION_ID, false);
         require(!competitionAccess.hasAccess(GROWER_PROFILE_ID, COMPETITION_ID), "inactive competition accessible");
     }

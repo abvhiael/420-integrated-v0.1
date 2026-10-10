@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>420BnB | Stay a little longer</title>
 <style>
-:root{color-scheme:dark;font-family:system-ui,sans-serif}body{background:#101a17;color:#f1f4ed;margin:0}header,main,footer{max-width:1060px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #35483b}h1{font-size:clamp(2rem,5vw,4rem);margin-bottom:8px}.muted{color:#b8c7bb}button,input,select{font:inherit;border-radius:8px;padding:12px}button{background:#a1d18a;color:#132014;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}input,select{background:#26392f;color:white;border:1px solid #829e87}section{margin:30px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{padding:20px;border:1px solid #496050;border-radius:12px;background:#1c2c23}.card h3{margin-top:0}label{display:grid;gap:6px;margin:10px 0}.warning{border-left:4px solid #e9be6c;padding:12px;background:#313026}.hidden{display:none}a{color:#c3e7b1}:focus-visible{outline:3px solid #e9be6c;outline-offset:3px}
+:root{color-scheme:dark;font-family:system-ui,sans-serif}body{background:#101a17;color:#f1f4ed;margin:0}header,main,footer{max-width:1060px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #35483b}h1{font-size:clamp(2rem,5vw,4rem);margin-bottom:8px}.muted{color:#b8c7bb}button,input,select,textarea{font:inherit;border-radius:8px;padding:12px}button{background:#a1d18a;color:#132014;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}input,select,textarea{background:#26392f;color:white;border:1px solid #829e87}section{margin:30px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.card{padding:20px;border:1px solid #496050;border-radius:12px;background:#1c2c23}.card h3{margin-top:0}label{display:grid;gap:6px;margin:10px 0}.warning{border-left:4px solid #e9be6c;padding:12px;background:#313026}.hidden{display:none}a{color:#c3e7b1}:focus-visible{outline:3px solid #e9be6c;outline-offset:3px}
 </style></head><body>
 <header><strong>420BnB</strong><nav aria-label="Main"><a href="#explore">Explore</a> · <a href="#hosting">Hosting</a></nav></header>
 <main><h1>Stay a little longer.</h1><p class="muted">Accommodation discovery for the 420 Integrated ecosystem.</p>
@@ -100,7 +100,39 @@ async function loadDrafts(){
  units.textContent="Review pending. This does not publish the listing.";
  }catch(e){units.textContent=e.message;}
  });
- editor.append(unitForm,reviewButton);
+ const policyForm=document.createElement("form");
+ const makeField=(caption,kind="input")=>{const label=document.createElement("label");label.textContent=caption;const field=document.createElement(kind);field.required=true;label.append(field);return {label,field};};
+ const rules=makeField("House rules","textarea"),cancel=makeField("Cancellation policy","textarea"),zone=makeField("IANA timezone");
+ zone.field.value="America/Regina";
+ const savePolicy=document.createElement("button");savePolicy.type="submit";savePolicy.textContent="Save draft policies";
+ const policyStatus=document.createElement("p");policyStatus.setAttribute("aria-live","polite");
+ policyForm.append(rules.label,cancel.label,zone.label,savePolicy,policyStatus);
+ policyForm.addEventListener("submit",async event=>{
+ event.preventDefault();policyStatus.textContent="Saving policies…";
+ try{const r=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/policy",{
+ method:"PUT",headers:hostHeaders(),credentials:"omit",body:JSON.stringify({
+ house_rules:rules.field.value,cancellation_policy:cancel.field.value,timezone_id:zone.field.value,expected_version:item.version})});
+ if(!r.ok)throw Error("Policy rejected ("+r.status+"). Refresh for latest version.");
+ policyStatus.textContent="Draft policy saved.";await loadDrafts();
+ }catch(e){policyStatus.textContent=e.message;}
+ });
+ const mediaForm=document.createElement("form");
+ const mediaUrl=makeField("HTTPS media URL"),alt=makeField("Photo description for accessibility"),
+ rights=makeField("Image rights statement","textarea");
+ const saveMedia=document.createElement("button");saveMedia.type="submit";saveMedia.textContent="Submit media for review";
+ const mediaStatus=document.createElement("p");mediaStatus.setAttribute("aria-live","polite");
+ mediaForm.append(mediaUrl.label,alt.label,rights.label,saveMedia,mediaStatus);
+ mediaForm.addEventListener("submit",async event=>{
+ event.preventDefault();mediaStatus.textContent="Submitting media…";
+ try{const r=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(item.id)+"/media",{
+ method:"POST",headers:hostHeaders(),credentials:"omit",body:JSON.stringify({
+ asset_url:mediaUrl.field.value,alt_text:alt.field.value,
+ rights_statement:rights.field.value,expected_version:item.version})});
+ if(!r.ok)throw Error("Media rejected ("+r.status+"). Refresh for latest version.");
+ mediaStatus.textContent="Media pending independent rights review.";await loadDrafts();
+ }catch(e){mediaStatus.textContent=e.message;}
+ });
+ editor.append(unitForm,policyForm,mediaForm,reviewButton);
  }
 
  const load=document.createElement("button");load.type="button";load.textContent="View units and review status";

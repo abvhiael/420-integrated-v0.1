@@ -229,7 +229,8 @@ def revoke_quote(quote_id:str,authorization:str|None=Header(None)):
             row=c.execute("""SELECT property_id,guest_subject,status,expires_at FROM
                 bnb_price_quote WHERE id=%s""",(quote_id,)).fetchone()
             if not row or row[1]!=subject:raise HTTPException(404,"NOT_FOUND")
-            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(row[0],))
+            owner_property_id=row[0]
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(owner_property_id,))
             row=c.execute("""SELECT status,expires_at FROM bnb_price_quote
                 WHERE id=%s FOR UPDATE""",(quote_id,)).fetchone()
             if row[0]=="revoked":return {"id":quote_id,"status":"revoked"}
@@ -240,7 +241,7 @@ def revoke_quote(quote_id:str,authorization:str|None=Header(None)):
                 raise HTTPException(409,"QUOTE_ALREADY_USED")
             c.execute("UPDATE bnb_price_quote SET status='revoked' WHERE id=%s",(quote_id,))
             c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
-                VALUES (%s,%s,'bnb.quote.revoked',%s)""",(uuid4(),subject,None))
+                VALUES (%s,%s,'bnb.quote.revoked',%s)""",(uuid4(),subject,owner_property_id))
     return {"id":quote_id,"status":"revoked"}
 
 

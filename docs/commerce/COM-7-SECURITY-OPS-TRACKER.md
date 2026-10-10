@@ -66,3 +66,20 @@ Main-branch reconciliation is outstanding: GitHub compare of `main` and audit br
 ### Exact-SHA status and required next boundary
 
 Post-reconciliation executable candidate `95fc1102d5b7700609cadaa95ed443acbe6cf65c` contains Swap negative tests in addition to the merge commit. Its exact-SHA applicable CI must complete before COM-7's newly added tests can be qualified. Older successes for `3d9ef79...` are historical/retained evidence, **not** substitutes for the post-merge suite. This update is documentary evidence only. Do not claim independently reviewed production security, live Swap, full chain settlement, multi-instance recovery or Level 3. The final COM-7 phase-closeout must run full canonical Solidity under its owning workflow, Genesis address authority separately, relevant global/Docs and retained Commerce on one exact merge-candidate SHA; PR #594 remains unmerged.
+
+
+## Post-reconciliation Level 1 verification — October 9, 2026
+
+Confirmed executable implementation SHA: `95fc1102d5b7700609cadaa95ed443acbe6cf65c`. All five directly applicable workflows completed successfully **on that exact SHA**, with individual required executed steps reporting success:
+
+| Scope | GitHub Actions run | Verified status |
+| --- | --- | --- |
+| Commerce service / SDK / Indexer / adversarial | [38006770588](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770588) | completed / success |
+| Merchant builder / real-service browser | [38006770545](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770545) | completed / success |
+| Governed Pay safety | [38006770604](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770604) | completed / success |
+| Upstream Market/Pay/Arbitration scoped contract tests | [38006770483](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770483) | completed / success |
+| Retained COM-6 Level 2 | [38006767611](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006767611) | completed / success |
+
+Solidity run [38006770521](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38006770521) classified the PR successfully but **skipped** the full Foundry jobs. These skips do not qualify the canonical full inventory. Existing implementation tests establish local/integration harness behavior, not production-scale load, deployed monitoring/alert delivery, live multi-instance restart, independent external review, real funded chain settlement or COM-8 acceptance.
+
+At inspection, PR #594 was open/draft at documentation-only HEAD `284ff81fcb532cd8dd345ec50a5a941130ab14d6`, and comparison with then-current main `f8bbb62e1cdfe68cff25261fd4a036db1840a15c` yielded 211 ahead / zero behind. This entry is evidence-only. **COM-7 remains in progress; Level 3 has not run and PR must not merge** until canonical acceptance coverage and a single new exact-SHA Level 3 merge candidate are independently established.

@@ -84,6 +84,7 @@ contract HighCountryGamingBridge420 {
     mapping(uint64 => bytes32) public gameProfileIdOfGrower;
     mapping(bytes32 => uint64) public growerProfileIdOfGameProfile;
     mapping(bytes32 => uint64) public growerProfileIdOfMigrationClaim;
+    mapping(uint64 => mapping(bytes32 => mapping(bytes32 => bytes32))) public entitlementForContent;
 
     error ZeroAddress();
     error GrowerAccountMismatch();
@@ -95,6 +96,8 @@ contract HighCountryGamingBridge420 {
     error MigrationClaimMismatch();
     error MigrationClaimAlreadyBound();
     error EntitlementRequired();
+    error InvalidEntitlementBinding();
+    event PlayerEntitlementBound(uint64 indexed growerProfileId, bytes32 indexed entitlementType, bytes32 indexed contentId, bytes32 entitlementId);
 
     event GrowerGamingProfileBound(
         uint64 indexed growerProfileId, bytes32 indexed gameProfileId, address indexed account
@@ -184,6 +187,53 @@ contract HighCountryGamingBridge420 {
 
         growerProfileIdOfMigrationClaim[claimId] = growerProfileId;
         emit MigrationClaimBound(claimId, growerProfileId, gameProfileId);
+    }
+
+    /// @notice Profile owner records their own per-content entitlement, checked again on every read.
+    function bindPlayerEntitlement(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 entitlementType,
+        bytes32 contentId
+    ) external {
+        if (entitlementId == bytes32(0) || entitlementType == bytes32(0) || contentId == bytes32(0)) {
+            revert InvalidEntitlementBinding();
+        }
+        bytes32 gameProfileId = gameProfileIdOfGrower[growerProfileId];
+        if (gameProfileId == bytes32(0)) revert SharedProfileRequired();
+        IGrowerProfileHC420.GrowerProfile memory grower = growerProfiles.getProfile(growerProfileId);
+        IGameIdentityHC420.GameProfile memory shared = gameIdentity.profile(gameProfileId);
+        if (!grower.exists || grower.account != msg.sender || !shared.exists || shared.account != msg.sender
+            || shared.gameId != HighCountryGamingIds.GAME_ID) revert GrowerAccountMismatch();
+        if (!hasScopedEntitlement(growerProfileId, entitlementId, entitlementType, contentId)) {
+            revert EntitlementRequired();
+        }
+        entitlementForContent[growerProfileId][entitlementType][contentId] = entitlementId;
+        emit PlayerEntitlementBound(growerProfileId, entitlementType, contentId, entitlementId);
+    }
+
+    function hasPlayerContent(
+        uint64 growerProfileId,
+        bytes32 entitlementType,
+        bytes32 contentId
+    ) public view returns (bool) {
+        bytes32 entitlementId = entitlementForContent[growerProfileId][entitlementType][contentId];
+        return entitlementId != bytes32(0)
+            && hasScopedEntitlement(growerProfileId, entitlementId, entitlementType, contentId);
+    }
+
+    function hasPlayerBonusRegion(
+        uint64 growerProfileId,
+        bytes32 contentId
+    ) external view returns (bool) {
+        return hasPlayerContent(growerProfileId, HighCountryGamingIds.ENTITLEMENT_BONUS_REGION, contentId);
+    }
+
+    function hasPlayerCompetition(
+        uint64 growerProfileId,
+        bytes32 contentId
+    ) external view returns (bool) {
+        return hasPlayerContent(growerProfileId, HighCountryGamingIds.ENTITLEMENT_COMPETITION, contentId);
     }
 
     function hasActiveEntitlement(

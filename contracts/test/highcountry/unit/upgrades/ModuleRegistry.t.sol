@@ -94,6 +94,34 @@ contract ModuleRegistryTest {
         require(!ok, "rejected module revived");
     }
 
+    function testR0212RejectsEOAAndMissingModuleInterface() public {
+        (bool ok,) = address(registry).call(
+            abi.encodeWithSelector(registry.registerModule.selector, MODULE_ID, address(0x1234), uint32(1), RULESET_ID)
+        );
+        require(!ok, "EOA registered as module");
+        MockHighCountryModuleV2 invalid = new MockHighCountryModuleV2();
+        (ok,) = address(registry).call(
+            abi.encodeWithSelector(registry.registerModule.selector, MODULE_ID, address(invalid), uint32(1), RULESET_ID)
+        );
+        require(!ok, "module without identity accepted");
+    }
+
+    function testR0212ScheduledNotExecutableAndActiveExecutable() public {
+        MockHighCountryModuleV1 implementation = new MockHighCountryModuleV1();
+        registry.registerModule(MODULE_ID, address(implementation), 1, RULESET_ID);
+        (bool ok,) = address(registry).call(abi.encodeWithSelector(registry.activeImplementation.selector, MODULE_ID));
+        require(!ok, "proposed module was executable");
+        registry.setModuleState(MODULE_ID, UpgradeState.QUALIFIED);
+        registry.setModuleState(MODULE_ID, UpgradeState.SCHEDULED);
+        (ok,) = address(registry).call(abi.encodeWithSelector(registry.activeImplementation.selector, MODULE_ID));
+        require(!ok, "scheduled module was executable");
+        registry.setModuleState(MODULE_ID, UpgradeState.ACTIVE);
+        require(registry.activeImplementation(MODULE_ID) == address(implementation), "valid active module rejected");
+        registry.setModuleState(MODULE_ID, UpgradeState.DRAINING);
+        (ok,) = address(registry).call(abi.encodeWithSelector(registry.activeImplementation.selector, MODULE_ID));
+        require(!ok, "draining module executable");
+    }
+
     function _grant(
         bytes32 actionId,
         bytes32 grantId

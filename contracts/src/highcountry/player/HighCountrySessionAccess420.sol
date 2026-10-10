@@ -12,7 +12,11 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
 interface ICanonicalHCFactory420 {
-    function getAddress(address owner, address recovery, bytes32 salt) external view returns (address);
+    function getAddress(
+        address owner,
+        address recovery,
+        bytes32 salt
+    ) external view returns (address);
     function entryPoint() external view returns (address);
     function capabilityRegistry() external view returns (address);
 }
@@ -47,11 +51,14 @@ contract HighCountrySessionAccess420 {
 
     event CanonicalAccountAttested(address indexed account, address indexed initialOwner, bytes32 indexed salt);
 
-    function _sensitiveSelector(bytes4 selector) private pure returns (bool) {
+    function _sensitiveSelector(
+        bytes4 selector
+    ) private pure returns (bool) {
         return selector == bytes4(keccak256("execute(address,uint256,bytes)"))
             || selector == bytes4(keccak256("executeBatch((address,uint256,bytes)[])"))
             || selector == bytes4(keccak256("executeSession(address,(address,uint256,bytes)[])"))
-            || selector == bytes4(keccak256("createSessionGrant(address,address,bytes4,uint256,uint256,uint64,uint64,uint64)"))
+            || selector
+                == bytes4(keccak256("createSessionGrant(address,address,bytes4,uint256,uint256,uint64,uint64,uint64)"))
             || selector == bytes4(keccak256("enableSessionKey(address)"))
             || selector == bytes4(keccak256("revokeKey(address)"))
             || selector == bytes4(keccak256("transfer(address,uint256)"))
@@ -60,7 +67,6 @@ contract HighCountrySessionAccess420 {
             || selector == bytes4(keccak256("setPasskeyVerifier(address)"))
             || selector == bytes4(keccak256("proposeRecovery(address)"));
     }
-
 
     event RoutineSessionCallSet(address indexed target, bytes4 indexed selector, bool allowed);
 
@@ -74,7 +80,10 @@ contract HighCountrySessionAccess420 {
         authorization = IHighCountryAuthorization(authorization_);
         canonicalFactory = ICanonicalHCFactory420(factory_);
         canonicalEntryPoint = canonicalFactory.entryPoint();
-        if (canonicalEntryPoint == address(0) || canonicalFactory.capabilityRegistry() != authorization.capabilityRegistry()) {
+        if (
+            canonicalEntryPoint == address(0)
+                || canonicalFactory.capabilityRegistry() != authorization.capabilityRegistry()
+        ) {
             revert HCInvalidState();
         }
     }
@@ -86,11 +95,15 @@ contract HighCountrySessionAccess420 {
         address initialRecovery,
         bytes32 salt
     ) external {
-        if (account.code.length == 0 || initialOwner == address(0)
-            || canonicalFactory.getAddress(initialOwner, initialRecovery, salt) != account) revert HCInvalidState();
+        if (
+            account.code.length == 0 || initialOwner == address(0)
+                || canonicalFactory.getAddress(initialOwner, initialRecovery, salt) != account
+        ) revert HCInvalidState();
         ISmartAccountHCSession420 wallet = ISmartAccountHCSession420(account);
-        if (wallet.entryPoint() != canonicalEntryPoint
-            || address(wallet.capabilityRegistry()) != authorization.capabilityRegistry()) revert HCInvalidState();
+        if (
+            wallet.entryPoint() != canonicalEntryPoint
+                || address(wallet.capabilityRegistry()) != authorization.capabilityRegistry()
+        ) revert HCInvalidState();
         canonicalAccount[account] = true;
         emit CanonicalAccountAttested(account, initialOwner, salt);
     }
@@ -107,7 +120,9 @@ contract HighCountrySessionAccess420 {
         bytes4 selector,
         bool allowed
     ) external {
-        if (target.code.length == 0 || selector == bytes4(0) || (allowed && _sensitiveSelector(selector))) revert HCInvalidState();
+        if (target.code.length == 0 || selector == bytes4(0) || (allowed && _sensitiveSelector(selector))) {
+            revert HCInvalidState();
+        }
 
         authorization.requireAuthorized(
             AuthorizationRequest({
@@ -159,8 +174,10 @@ contract HighCountrySessionAccess420 {
         address target,
         bytes4 selector
     ) public view returns (bool) {
-        if (!canonicalAccount[smartAccount] || smartAccount.code.length == 0 || sessionKey == address(0)
-            || !isRoutineCall(target, selector, 0)) return false;
+        if (
+            !canonicalAccount[smartAccount] || smartAccount.code.length == 0 || sessionKey == address(0)
+                || !isRoutineCall(target, selector, 0)
+        ) return false;
 
         ISmartAccountHCSession420 account = ISmartAccountHCSession420(smartAccount);
 

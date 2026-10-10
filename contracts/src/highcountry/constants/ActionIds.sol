@@ -45,6 +45,7 @@ library ActionIds {
     bytes32 internal constant RANDOMNESS_REQUEST = keccak256("HC.ACTION.RANDOMNESS_COORDINATOR.REQUEST");
     bytes32 internal constant RANDOMNESS_FULFILL = keccak256("HC.ACTION.RANDOMNESS_COORDINATOR.FULFILL");
     bytes32 internal constant BREEDING_REQUEST = keccak256("HC.ACTION.BREEDING_ENGINE.REQUEST");
+    bytes32 internal constant BREEDING_CANCEL = keccak256("HC.ACTION.BREEDING_ENGINE.CANCEL");
     bytes32 internal constant BREEDING_FINALIZE = keccak256("HC.ACTION.BREEDING_ENGINE.FINALIZE");
 
     bytes32 internal constant PLANT_REGISTER = keccak256("HC.ACTION.PLANT_REGISTRY.REGISTER");

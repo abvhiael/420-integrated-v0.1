@@ -448,6 +448,7 @@ def test_bnb24_immutable_quote_expiry_policy_and_nonce(fixture_property):
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
 
@@ -496,6 +497,7 @@ def test_bnb24_quote_bound_hold_uses_exact_total_and_rejects_reuse(fixture_prope
             c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
             c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
 
@@ -527,5 +529,6 @@ def test_bnb24_concurrent_quote_same_guest_nonce_is_single_immutable_row(fixture
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))

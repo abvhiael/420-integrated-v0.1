@@ -39,7 +39,7 @@ type Manifest struct {
  ReviewExpiresAt time.Time `json:"review_expires_at"`
 }
 type SignedManifest struct{ Manifest Manifest `json:"manifest"`; Signature []byte `json:"signature"` }
-type Approval struct{ Digest string; AuthorID string; ReviewerID string; PublisherID string; IndependentlyVerified bool }
+type Approval struct{ Digest string; ApprovalToken string; AuthorID string; ReviewerID string; PublisherID string; IndependentlyVerified bool }
 type Key struct{ Public ed25519.PublicKey; Environment string; Revoked bool }
 type Trust struct{ Keys map[string]Key; MinimumSequence uint64; MinimumEpoch uint64; Environment string; Audience string; Domain string; Jurisdiction string }
 func digestValid(s string)bool{if len(s)!=64{return false};_,err:=hex.DecodeString(s);return err==nil}

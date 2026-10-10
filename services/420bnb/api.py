@@ -1,5 +1,6 @@
 """420BnB bounded runtime slice. NEVER accepts client financial finality."""
 import hashlib
+import hmac
 import json
 import os
 from datetime import datetime, timedelta, timezone
@@ -19,12 +20,23 @@ def db():
     return psycopg.connect(DATABASE_URL)
 
 
-def principal(subject: str | None, role: str | None):
-    # Only a trusted authenticated reverse proxy can set headers.
-    # Disable routes until the ingress has enforced verified session claims.
-    if os.getenv("BNB_TRUSTED_IDENTITY_PROXY") != "true":
+def principal(subject: str | None, role: str | None, signed_at: str | None, signature: str | None):
+    # This is a service-to-service adapter, not a raw user session verifier.
+    # Deploy only behind an ingress that verifies the real Identity issuer and
+    # signs these scoped assertions; strip incoming x-authenticated-* headers.
+    secret = os.getenv("BNB_IDENTITY_ASSERTION_SECRET", "")
+    if len(secret) < 32:
         raise HTTPException(503, "IDENTITY_NOT_CONFIGURED")
     if not subject or not role or role not in ("host", "guest"):
+        raise HTTPException(401, "UNAUTHORIZED")
+    try:
+        timestamp = int(signed_at or "")
+        if abs(datetime.now(timezone.utc).timestamp() - timestamp) > 30:
+            raise ValueError("stale")
+    except ValueError:
+        raise HTTPException(401, "UNAUTHORIZED")
+    expected = hmac.new(secret.encode(), f"bnb-v1\\n{subject}\\n{role}\\n{timestamp}".encode(), hashlib.sha256).hexdigest()
+    if not signature or not hmac.compare_digest(expected, signature):
         raise HTTPException(401, "UNAUTHORIZED")
     return subject, role
 
@@ -75,8 +87,10 @@ def listings():
 
 @app.post("/v1/bnb/properties", status_code=201)
 def create_property(payload: PropertyInput, x_authenticated_subject: str | None = Header(None),
-                    x_authenticated_role: str | None = Header(None)):
-    subject,role=principal(x_authenticated_subject,x_authenticated_role)
+                    x_authenticated_role: str | None = Header(None),
+                    x_authenticated_at: str | None = Header(None),
+                    x_authenticated_signature: str | None = Header(None)):
+    subject,role=principal(x_authenticated_subject,x_authenticated_role,x_authenticated_at,x_authenticated_signature)
     if role!="host":
         raise HTTPException(403, "FORBIDDEN")
     uid=uuid4()
@@ -92,8 +106,10 @@ def create_property(payload: PropertyInput, x_authenticated_subject: str | None 
 @app.post("/v1/bnb/holds", status_code=201)
 def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_length=128),
          x_authenticated_subject: str | None = Header(None),
-         x_authenticated_role: str | None = Header(None)):
-    subject,role=principal(x_authenticated_subject,x_authenticated_role)
+         x_authenticated_role: str | None = Header(None),
+                    x_authenticated_at: str | None = Header(None),
+                    x_authenticated_signature: str | None = Header(None)):
+    subject,role=principal(x_authenticated_subject,x_authenticated_role,x_authenticated_at,x_authenticated_signature)
     if role!="guest": raise HTTPException(403,"FORBIDDEN")
     validate_window(payload.start,payload.end)
     digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
@@ -142,8 +158,10 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
 
 @app.get("/v1/bnb/holds/{hold_id}")
 def get_hold(hold_id: str,x_authenticated_subject: str | None=Header(None),
-             x_authenticated_role: str | None=Header(None)):
-    subject,_=principal(x_authenticated_subject,x_authenticated_role)
+             x_authenticated_role: str | None=Header(None),
+             x_authenticated_at: str | None=Header(None),
+             x_authenticated_signature: str | None=Header(None)):
+    subject,_=principal(x_authenticated_subject,x_authenticated_role,x_authenticated_at,x_authenticated_signature)
     with db() as c:
         h=c.execute("SELECT guest_subject,status,expires_at FROM bnb_hold WHERE id=%s",
                     (hold_id,)).fetchone()

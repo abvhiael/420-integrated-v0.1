@@ -1,0 +1,478 @@
+{
+  "schema": "420hz-gca-threat-model-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.15",
+  "title": "420Hz Generate Community Awards threat model",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "protectedAssets": [
+    "Wallet/session actor authority and replay domains",
+    "private generation prompts, lyrics, reference audio, draft mixes, stems and project history",
+    "provider credentials, model/provider identity and execution/result commitments",
+    "generation provenance, AI disclosure, consent and source-right references",
+    "canonical Creative Work/Recording/Creator identity and publication state",
+    "420 Rights claims/licenses/provenance and derivative/voice consent boundaries",
+    "payer authorization, funded job credit, accepted price, provider entitlement and payer refund state",
+    "community follow/favorite/playlist source records and privacy",
+    "qualified playback/listener evidence and ChartSnapshot determinism",
+    "Award season/category/policy/nomination/ballot/vote/result/badge history",
+    "moderation reports, evidence, decisions, appeals and challenge history",
+    "Arbitration origin/domain/finality/remedy-consumption boundaries",
+    "storage integrity hashes, tombstones, deletion state and retention policy",
+    "Search/Indexer/Analytics/Notifications derived projections and freshness markers",
+    "service configuration, secrets, logs and operational credentials"
+  ],
+  "trustBoundaries": [
+    "user/browser -> Wallet/SmartAccount authorization",
+    "420Hz app -> 420AI/Compute Market generation execution",
+    "AI worker/provider -> result verification/provenance acceptance",
+    "420Hz -> Creative Protocol / 420 Rights registration and publication",
+    "420Hz -> Storage/Resource providers and gateways",
+    "canonical protocols -> Indexer/Search/Analytics derived reads",
+    "420Hz Community source state -> Charts projections",
+    "Wallet/Identity eligibility -> Awards nomination/voting",
+    "moderation/reporting -> application enforcement",
+    "420Hz -> optional 420Arbitration case/ruling consumption",
+    "application/runtime -> Notifications delivery",
+    "operator/CI/deployment credentials -> infrastructure"
+  ],
+  "adversaries": [
+    "unauthenticated public caller",
+    "authenticated Wallet actor with no privileged capability",
+    "malicious/Sybil Wallet operator controlling many accounts",
+    "malicious generation user crafting prompt/tool/provider injection payloads",
+    "malicious reference-audio uploader",
+    "impersonator claiming another performer/voice/persona",
+    "malicious or compromised AI worker/provider",
+    "malicious storage gateway/provider",
+    "malicious browser/client attempting replay/domain substitution",
+    "chart manipulator/bot farm",
+    "collusive nominator/voter group",
+    "report spammer or abusive blocker/muter",
+    "compromised moderator or Awards operator",
+    "compromised Search/Indexer/Analytics/Notifications service",
+    "compromised operator/deployment/provider credential",
+    "malicious external evidence source or stale Arbitration observer"
+  ],
+  "threatCatalogue": [
+    {
+      "id": "HZGCA-THREAT-001",
+      "name": "Prompt/tool injection",
+      "surface": "Generate/provider boundary",
+      "risk": "prompt or metadata attempts to override provider/tool policy, exfiltrate secrets or widen execution authority",
+      "mitigations": [
+        "treat prompt/lyrics/reference metadata as untrusted content",
+        "provider adapters use fixed structured job schema and bounded capability",
+        "no prompt may alter Wallet/payment/rights/moderation authority",
+        "secrets are never injected into model-visible payloads unless explicitly required and scoped",
+        "tool/network access is denied by default unless a later provider profile explicitly qualifies it"
+      ],
+      "residual": "provider/model content-safety quality remains non-deterministic; authority is bounded regardless"
+    },
+    {
+      "id": "HZGCA-THREAT-002",
+      "name": "Provider/result spoofing",
+      "surface": "420AI/Compute provider result",
+      "risk": "wrong provider/model/job/result is accepted or paid",
+      "mitigations": [
+        "bind job/provider/model/version/result commitment",
+        "verify canonical assignment and accepted verification profile",
+        "provider signature alone is insufficient",
+        "result replay/id mismatch fails closed",
+        "settlement remains verification-gated"
+      ],
+      "residual": "model quality itself is not proven by provider identity"
+    },
+    {
+      "id": "HZGCA-THREAT-003",
+      "name": "Malicious media/metadata",
+      "surface": "uploads/generated outputs/publication",
+      "risk": "parser exploitation, active content, unsafe container/codec, metadata injection",
+      "mitigations": [
+        "content-type/size/hash validation",
+        "scanner/quarantine before publication",
+        "do not execute embedded scripts/macros",
+        "metadata rendered as text, never trusted HTML",
+        "media processing sandbox/resource bounds later runtime"
+      ],
+      "residual": "live codec/scanner hardening remains implementation/testnet work"
+    },
+    {
+      "id": "HZGCA-THREAT-004",
+      "name": "Unsafe URL/HTML schemes",
+      "surface": "artwork/media/reference links/search/community",
+      "risk": "javascript/data/file/credentialed URL, XSS or SSRF-style abuse",
+      "mitigations": [
+        "allowlist safe schemes/origins at presentation boundary",
+        "reject credential-bearing URLs and javascript/data/file schemes where not explicitly allowed",
+        "escape/sanitize user metadata",
+        "server-side fetch paths use DNS/egress/SSRF defenses"
+      ],
+      "residual": "final production CSP/egress policy is later deployment work"
+    },
+    {
+      "id": "HZGCA-THREAT-005",
+      "name": "Unauthorized reference audio",
+      "surface": "Generate reference input",
+      "risk": "user submits audio without required rights/permission",
+      "mitigations": [
+        "reference input requires explicit authorization path",
+        "bind source Work/Recording/License where derivative source is known",
+        "private upload alone never implies permission",
+        "fail closed on missing/revoked authorization"
+      ],
+      "residual": "external legal truth may require dispute process"
+    },
+    {
+      "id": "HZGCA-THREAT-006",
+      "name": "Unconsented voice/persona",
+      "surface": "synthetic voice/persona generation",
+      "risk": "impersonation/deepfake or personality-right violation",
+      "mitigations": [
+        "voice/persona claims require explicit consent/authorization metadata",
+        "personality/model rights remain external/canonical",
+        "public disclosure/provenance remains explicit",
+        "reported dispute may hide publication without rewriting Rights"
+      ],
+      "residual": "identity/consent verification quality depends on later qualified implementation"
+    },
+    {
+      "id": "HZGCA-THREAT-007",
+      "name": "Derivative-rights bypass",
+      "surface": "Generate -> Register/Publish",
+      "risk": "generated derivative is published despite missing transformation/license authority",
+      "mitigations": [
+        "transformation permission remains separate from training permission",
+        "source IDs/licenses are checked before derivative registration/publication",
+        "moderation cannot fabricate rights",
+        "revoked/missing right fails closed"
+      ],
+      "residual": "competing legal claims may require Arbitration/external adjudication"
+    },
+    {
+      "id": "HZGCA-THREAT-008",
+      "name": "Private draft/prompt leakage",
+      "surface": "project/storage/provider/logging/search",
+      "risk": "private prompts, lyrics, drafts, stems or references become public or searchable",
+      "mitigations": [
+        "PRIVATE by default",
+        "provider payload retention <=24h",
+        "Search/Indexer exclude private/unlisted state",
+        "logs/errors redact secret-like/private payloads",
+        "public provenance commits hashes/metadata, not private prompt bytes"
+      ],
+      "residual": "production storage/operator controls require later live evidence"
+    },
+    {
+      "id": "HZGCA-THREAT-009",
+      "name": "Secrets/provider-token leakage",
+      "surface": "client/config/logs/provider adapters",
+      "risk": "API tokens, private keys, mnemonics or deployment secrets leak",
+      "mitigations": [
+        "no private-key custody in 420Hz",
+        "provider tokens remain server-side secret refs",
+        "secret-like fields excluded from public manifests/logs",
+        "durable errors redacted",
+        "CI/deployment credentials least privilege"
+      ],
+      "residual": "live secret manager/key rotation is production evidence"
+    },
+    {
+      "id": "HZGCA-THREAT-010",
+      "name": "Generation spam/resource exhaustion",
+      "surface": "Generate/Compute/Storage",
+      "risk": "cost, worker, queue, storage or API exhaustion",
+      "mitigations": [
+        "bounded quotes/max spend",
+        "per-actor/job idempotency",
+        "rate/quota enforcement",
+        "capacity-aware admission",
+        "timeouts/cancel/retry bounds",
+        "failed/cancelled retention cleanup"
+      ],
+      "residual": "distributed edge/load controls require testnet/production qualification"
+    },
+    {
+      "id": "HZGCA-THREAT-011",
+      "name": "Wallet/session replay or domain substitution",
+      "surface": "all mutations",
+      "risk": "captured authorization reused for different actor/chain/action/payload",
+      "mitigations": [
+        "Wallet/session authority required",
+        "chain/network/action/resource/domain binding",
+        "idempotency/replay keys",
+        "expired/revoked/wrong-domain authorization fails closed",
+        "browser button state is not authority"
+      ],
+      "residual": "runtime signer implementation must preserve these fields"
+    },
+    {
+      "id": "HZGCA-THREAT-012",
+      "name": "Payment/accounting confusion",
+      "surface": "generation economics",
+      "risk": "quote/funding/accepted price/earning/refund are conflated, double charged or misdirected",
+      "mitigations": [
+        "distinct economic states",
+        "accepted-price triple bound",
+        "one payable entitlement per unit",
+        "beneficiary/payer frozen",
+        "retry cannot silently recharge",
+        "refund paid requires canonical movement evidence"
+      ],
+      "residual": "live Vault/Pay integration is later implementation/testnet work"
+    },
+    {
+      "id": "HZGCA-THREAT-013",
+      "name": "Storage hash mismatch/resurrection",
+      "surface": "private/public artifact storage",
+      "risk": "wrong bytes served or deleted state returns from cache/backup",
+      "mitigations": [
+        "content/integrity hashes",
+        "source object binding",
+        "tombstone beats cache/backup/index rebuild",
+        "restore reapplies deletion state",
+        "mismatch fails closed"
+      ],
+      "residual": "provider proof/recovery operations require live qualification"
+    },
+    {
+      "id": "HZGCA-THREAT-014",
+      "name": "Stale/reorged derived state",
+      "surface": "Indexer/Search/Analytics/Charts/Awards reads",
+      "risk": "stale projection drives privileged/public decision",
+      "mitigations": [
+        "derived services are non-authoritative",
+        "source chain/network/checkpoint/freshness required",
+        "security-sensitive actions revalidate canonical state",
+        "reorg/finality policy applied",
+        "stale state labeled or fails closed"
+      ],
+      "residual": "live reorg/rebuild evidence deferred to testnet"
+    },
+    {
+      "id": "HZGCA-THREAT-015",
+      "name": "Community replay/privacy bypass",
+      "surface": "follow/favorite/playlist/share",
+      "risk": "duplicate relation/count inflation or private state leaks",
+      "mitigations": [
+        "logical relation idempotency",
+        "favorite/private playlist privacy defaults",
+        "unlisted excluded from broad discovery",
+        "source visibility is upper bound",
+        "projection rebuild cannot create source state"
+      ],
+      "residual": "runtime API/rate controls later"
+    },
+    {
+      "id": "HZGCA-THREAT-016",
+      "name": "Chart manipulation",
+      "surface": "playback/community/chart pipeline",
+      "risk": "bot/replay/self/sponsored/manual rank inflation",
+      "mitigations": [
+        "RAW_PLAY != QUALIFIED_PLAY",
+        "event replay dedupe",
+        "private/unlisted excluded",
+        "deterministic policy/version",
+        "no sponsored boost",
+        "no direct admin rank edits",
+        "rebuildable snapshot with checkpoint/commitment"
+      ],
+      "residual": "runtime qualified-play threshold and anti-bot signals later"
+    },
+    {
+      "id": "HZGCA-THREAT-017",
+      "name": "Collusive nominations",
+      "surface": "Awards nomination",
+      "risk": "coordinated nominators manufacture ballot placement beyond policy",
+      "mitigations": [
+        "dedup candidate key",
+        "per-nominator caps",
+        "community-threshold uses eligible public deduped state",
+        "eligibility rechecked at ballot freeze",
+        "curated/community/open modes explicit"
+      ],
+      "residual": "social collusion cannot be eliminated purely by architecture; policy must declare assumptions"
+    },
+    {
+      "id": "HZGCA-THREAT-018",
+      "name": "Vote stuffing/Sybil voting",
+      "surface": "Awards voting",
+      "risk": "one actor obtains many votes or replays ballot submissions",
+      "mitigations": [
+        "explicit voter eligibility mode",
+        "Wallet mode never claims unique-human",
+        "Identity-unique mode uses privacy-preserving ballot-scoped nullifier",
+        "one accepted vote per voter key",
+        "wrong/stale/revoked proof fails closed",
+        "deterministic finalization"
+      ],
+      "residual": "production unique-human verifier/provider remains later work"
+    },
+    {
+      "id": "HZGCA-THREAT-019",
+      "name": "Awards tally/result tampering",
+      "surface": "Awards finalization/correction",
+      "risk": "operator edits totals, winner or finalized history",
+      "mitigations": [
+        "frozen ballot/policy",
+        "deterministic tally",
+        "single-use finalization",
+        "immutable AwardResult",
+        "correction uses superseding history",
+        "moderation cannot hand-edit"
+      ],
+      "residual": "runtime implementation must preserve deterministic input ordering"
+    },
+    {
+      "id": "HZGCA-THREAT-020",
+      "name": "Moderation/report bypass or abuse",
+      "surface": "reports/block/mute/hide/lock/suspend/appeal",
+      "risk": "unauthorized censorship, spam, bypass or privilege escalation",
+      "mitigations": [
+        "scoped moderator capability",
+        "report actor/target binding",
+        "idempotent reports",
+        "append-only decisions/appeals",
+        "block/mute do not create protocol authority",
+        "comments gated on moderation controls"
+      ],
+      "residual": "live moderator staffing/response policy is operational"
+    },
+    {
+      "id": "HZGCA-THREAT-021",
+      "name": "Evidence/privacy leakage",
+      "surface": "moderation/rights/Arbitration",
+      "risk": "private evidence or Identity proof is published from a commitment/reference",
+      "mitigations": [
+        "commitment != disclosure authority",
+        "case/role scoped access",
+        "minimum-disclosure voting proofs",
+        "private evidence excluded from Search/Analytics/Notifications",
+        "scoped retention holds"
+      ],
+      "residual": "evidence host/key management later operations"
+    },
+    {
+      "id": "HZGCA-THREAT-022",
+      "name": "Arbitration authority escalation",
+      "surface": "optional dispute integration",
+      "risk": "ruling treated as superuser command",
+      "mitigations": [
+        "explicit opt-in only",
+        "verify service/domain/origin/parties/finality/remedy/replay",
+        "allowlisted HZ remedies only",
+        "originating 420Hz transition rechecks authorization/state",
+        "Arbitration cannot directly move funds/rewrite Rights/Awards"
+      ],
+      "residual": "no 420Hz Arbitration domain/runtime is claimed yet"
+    },
+    {
+      "id": "HZGCA-THREAT-023",
+      "name": "Provider/operator compromise",
+      "surface": "AI/storage/indexer/ops",
+      "risk": "compromised service attempts authority substitution or data tampering",
+      "mitigations": [
+        "replaceable providers remain non-authoritative",
+        "canonical provider/resource/job binding",
+        "least-privilege credentials",
+        "integrity/result verification",
+        "service identity/version validation",
+        "canonical rebuild/reconciliation"
+      ],
+      "residual": "key rotation/suspension/incident runbooks deferred to production"
+    },
+    {
+      "id": "HZGCA-THREAT-024",
+      "name": "Cross-component confused deputy",
+      "surface": "420Hz orchestration",
+      "risk": "one service's valid claim is reused as authorization in another domain",
+      "mitigations": [
+        "explicit authority map",
+        "typed IDs and domain separation",
+        "no Search/Analytics/Notifications authority",
+        "no Community->AwardVote or Chart->AwardResult implicit conversion",
+        "each owning protocol revalidates transition"
+      ],
+      "residual": "later API/interface contracts must preserve domain typing"
+    }
+  ],
+  "acceptedDesignRisks": [
+    "AI model output quality/safety is probabilistic and provider-dependent; authority/rights/payment decisions remain deterministic outside model prose",
+    "Wallet-one-account-one-vote does not provide unique-human guarantees",
+    "social collusion cannot be fully eliminated by static policy and must be bounded/observable",
+    "off-chain evidence availability is not guaranteed by an on-chain/content commitment",
+    "qualified anti-bot, media scanner, edge-rate-limit and provider isolation controls require runtime/testnet evidence",
+    "external legal rights/personality disputes may remain unresolved until canonical/external adjudication"
+  ],
+  "failClosedRules": [
+    "missing/ambiguous actor, chain, domain, capability or replay context blocks mutation",
+    "provider/result mismatch blocks acceptance/settlement",
+    "missing reference/voice/derivative authorization blocks restricted generation/publication path",
+    "private/unlisted data never degrades into public visibility on dependency failure",
+    "stale/unverified derived state cannot authorize privileged or irreversible action",
+    "hash/integrity mismatch blocks artifact use",
+    "quote/funding/accepted-price disagreement blocks spending/settlement",
+    "Awards policy/eligibility/replay/quorum uncertainty blocks vote/finalization",
+    "unscoped moderator/Arbitration action blocks remedy consumption",
+    "required service identity/version unavailable or wrong-network blocks dependent action rather than falling back to guessed authority"
+  ],
+  "invariants": [
+    "HZGCA-THREAT-INV-001 no prompt, model output or provider metadata can grant Wallet, Rights, payment, moderation or governance authority",
+    "HZGCA-THREAT-INV-002 private prompts/drafts/reference audio never enter public Search/Indexer/Analytics by fallback",
+    "HZGCA-THREAT-INV-003 provider identity/signature alone never proves accepted result correctness or settlement entitlement",
+    "HZGCA-THREAT-INV-004 generation reference/voice/derivative paths fail closed without required authorization/consent",
+    "HZGCA-THREAT-INV-005 retries/replays never duplicate charge, provider entitlement, community relation, chart credit, nomination candidate or vote",
+    "HZGCA-THREAT-INV-006 unsafe media/metadata/URL input never becomes executable application authority",
+    "HZGCA-THREAT-INV-007 storage integrity mismatch or deletion tombstone cannot be overridden by cache/backup/projection state",
+    "HZGCA-THREAT-INV-008 derived services never become canonical when stale, compromised or unavailable",
+    "HZGCA-THREAT-INV-009 Charts remain deterministic/rebuildable and cannot accept hidden sponsored/manual rank mutation",
+    "HZGCA-THREAT-INV-010 Awards finalization remains frozen-policy, replay-safe, deterministic and single-use",
+    "HZGCA-THREAT-INV-011 unique-human claims require qualified privacy-preserving eligibility and are never inferred from Wallet count",
+    "HZGCA-THREAT-INV-012 moderation is scoped application enforcement and cannot rewrite external protocol truth",
+    "HZGCA-THREAT-INV-013 private evidence commitments never grant public disclosure authority",
+    "HZGCA-THREAT-INV-014 Arbitration rulings are bounded inputs and never ambient cross-domain execution authority",
+    "HZGCA-THREAT-INV-015 operator/provider credential compromise has bounded authority and cannot become unrelated protocol/custody authority",
+    "HZGCA-THREAT-INV-016 stale/reorged projections fail closed for security-sensitive actions until canonical reconciliation",
+    "HZGCA-THREAT-INV-017 every security-sensitive cross-boundary input binds sufficient source/domain/version/replay context",
+    "HZGCA-THREAT-INV-018 HZ-GCA-1.15 creates no new runtime service, contract, custody, resolver, Identity, Rights, payment or governance authority"
+  ],
+  "deferredRuntimeEvidence": [
+    "production AI worker sandbox/network/tool isolation",
+    "production media scanner/codec sandbox",
+    "distributed edge rate limiting and abuse controls",
+    "live secret manager and credential rotation",
+    "live qualified-play/bot detection",
+    "production unique-human voting verifier",
+    "production evidence host/key management",
+    "public-testnet restart/retry/reorg/rebuild abuse testing",
+    "live incident response/operator suspension runbooks"
+  ],
+  "exitCriteria": [
+    "protected assets, trust boundaries and adversary classes are explicit",
+    "all canonical HZ-GCA-1.15 threats are represented with mitigation/residual risk",
+    "Generate/provider/provenance/rights/storage/privacy/economics/community/charts/awards/moderation/Arbitration threats are covered",
+    "fail-closed rules and security invariants are explicit",
+    "accepted versus deferred runtime risks are separated",
+    "targeted verifier proves threat inventory, prerequisite binding and no-authority guarantees",
+    "no live security control, deployed service, ABI, address or testnet evidence is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.16 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/trust-boundary-model.md",
+    "docs/apps/ai/security.md",
+    "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+    "docs/architecture/420hz/HZ-GCA-1.9-GENERATION-ECONOMICS.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+    "docs/architecture/420hz/HZ-GCA-1.12-AWARDS-ARCHITECTURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.13-NOMINATION-VOTING-POLICY.md",
+    "docs/architecture/420hz/HZ-GCA-1.14-MODERATION-DISPUTE-BOUNDARIES.md",
+    "docs/DOOBTUBE-SECURITY-ABUSE-MODERATION.md",
+    "docs/apps/arbitration/threat-model.md"
+  ]
+}

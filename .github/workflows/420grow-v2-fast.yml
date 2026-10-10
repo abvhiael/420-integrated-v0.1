@@ -1,0 +1,207 @@
+name: 420Grow V2 fast qualification
+on:
+  pull_request:
+    paths:
+      - 'docs/audit/420GROW-V2-*.md'
+      - 'scripts/verify-grow-v2-*.py'
+      - 'grow/security/**'
+      - 'grow/facility/**'
+      - 'grow/plants/**'
+      - 'grow/telemetry/**'
+      - 'grow/equipment/**'
+      - 'grow/cultivation/**'
+      - 'grow/harvest/**'
+      - 'grow/inventory/**'
+      - 'grow/assistance/**'
+      - 'grow/integrations/**'
+      - 'grow/web/**'
+      - 'grow/dashboard/**'
+      - 'grow/cmd/private-server/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'grow/storage/**'
+      - 'scripts/grow-v2-migrate.py'
+      - '.github/workflows/420grow-v2-fast.yml'
+  push:
+    paths:
+      - 'docs/audit/420GROW-V2-*.md'
+      - 'scripts/verify-grow-v2-*.py'
+      - 'grow/security/**'
+      - 'grow/storage/**'
+      - 'grow/harvest/**'
+      - 'grow/inventory/**'
+      - 'grow/assistance/**'
+      - 'grow/integrations/**'
+      - 'grow/facility/**'
+      - 'grow/dashboard/**'
+      - 'grow/cmd/private-server/**'
+      - 'grow/web/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'scripts/grow-v2-migrate.py'
+      - '.github/workflows/420grow-v2-fast.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  v2-app-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: growci
+          POSTGRES_PASSWORD: growci
+          POSTGRES_DB: growtest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U growci -d growtest"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact checkout
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check verifier syntax
+        run: python3 -m py_compile scripts/verify-grow-v2-01.py
+      - name: GROW-V2-01 product scope and non-promotion verification
+        run: python3 scripts/verify-grow-v2-01.py
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: GROW-V2-02 authorization negative tests and static checks
+        run: |
+          go test -count=1 ./grow/security
+          go test -race -count=1 ./grow/security
+          go vet ./grow/security
+      - name: GROW-V2-02 scope and boundary verifier
+        run: |
+          python3 -m py_compile scripts/verify-grow-v2-02.py
+          python3 scripts/verify-grow-v2-02.py
+      - name: GROW-V2-03 PostgreSQL schema / replay / isolation qualification
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          python3 -m py_compile scripts/grow-v2-migrate.py
+          bash grow/storage/test/qualify.sh
+      - name: GROW-V2-04 facility/room/zone authorization and PostgreSQL qualification
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/facility
+          go test -race -count=1 ./grow/facility
+          go vet ./grow/facility
+          test -z "$(gofmt -l grow/facility/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/facility/qualify.sql
+      - name: GROW-V2-05 lifecycle and genetics Level-1 with cumulative Level-2 integration
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/security ./grow/facility ./grow/plants
+          go test -race -count=1 ./grow/security ./grow/facility ./grow/plants
+          go vet ./grow/security ./grow/facility ./grow/plants
+          test -z "$(gofmt -l grow/plants/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/plants/qualify.sql
+      - name: GROW-V2-06 telemetry scoped Level-1 and historical charts
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/telemetry
+          go test -race -count=1 ./grow/telemetry
+          go vet ./grow/telemetry
+          test -z "$(gofmt -l grow/telemetry/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/telemetry/qualify.sql
+          node --test grow/telemetry/chart.test.mjs
+      - name: GROW-V2-07 safety policy, observation adapter and adversarial checks
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/equipment
+          go test -race -count=1 ./grow/equipment
+          go vet ./grow/equipment
+          test -z "$(gofmt -l grow/equipment/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/equipment/qualify.sql
+      - name: GROW-V2-08 nutrients irrigation environmental history and privacy
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/cultivation
+          go test -race -count=1 ./grow/cultivation
+          go vet ./grow/cultivation
+          test -z "$(gofmt -l grow/cultivation/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/cultivation/qualify.sql
+      - name: GROW-V2-09 harvest observations analytics and privacy
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/harvest
+          go test -race -count=1 ./grow/harvest
+          go vet ./grow/harvest
+          gofmt -d grow/harvest/*.go
+          test -z "$(gofmt -l grow/harvest/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/harvest/qualify.sql
+      - name: GROW-V2-10 inventory traceability exports and cumulative Level 2 integration
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/security ./grow/facility ./grow/plants ./grow/telemetry ./grow/equipment ./grow/cultivation ./grow/harvest ./grow/inventory
+          go test -race -count=1 ./grow/security ./grow/facility ./grow/plants ./grow/telemetry ./grow/equipment ./grow/cultivation ./grow/harvest ./grow/inventory
+          go vet ./grow/inventory
+          gofmt -d grow/inventory/*.go
+          test -z "$(gofmt -l grow/inventory/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/inventory/qualify.sql
+      - name: GROW-V2-11 opt-in AI advice privacy and human review Level 1
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/assistance
+          go test -race -count=1 ./grow/assistance
+          go vet ./grow/assistance
+          gofmt -d grow/assistance/*.go
+          test -z "$(gofmt -l grow/assistance/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/assistance/qualify.sql
+      - name: GROW-V2-12 scoped ecosystem outbox and notification Level 1
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+        run: |
+          go test -count=1 ./grow/integrations
+          go test -race -count=1 ./grow/integrations
+          go vet ./grow/integrations
+          gofmt -d grow/integrations/*.go
+          test -z "$(gofmt -l grow/integrations/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/integrations/qualify.sql
+      - name: GROW-V2-13 private cultivation dashboard and mobile UX Level 1
+        env:
+          GROW_MIGRATION_DATABASE_URL: postgresql://growci:growci@127.0.0.1:5432/growtest
+          GROW_DASHBOARD_TEST_DSN: postgresql://grow_v2_dashboard_ci:ci-private-only@127.0.0.1:5432/growtest?sslmode=disable
+        run: |
+          go build ./grow/dashboard ./grow/cmd/private-server
+          go test -count=1 ./grow/dashboard ./grow/cmd/private-server
+          go test -race -count=1 ./grow/dashboard ./grow/cmd/private-server
+          go vet ./grow/dashboard ./grow/cmd/private-server
+          gofmt -d grow/dashboard/*.go grow/cmd/private-server/*.go
+          test -z "$(gofmt -l grow/dashboard/*.go grow/cmd/private-server/*.go)"
+          psql -X -v ON_ERROR_STOP=1 "$GROW_MIGRATION_DATABASE_URL" -f grow/dashboard/qualify.sql
+          go test -tags grow_integration -count=1 ./grow/dashboard
+          node --check grow/web/workspace.js
+          node --test grow/web/test/workspace.test.js
+          (cd grow/web && npm run qualify)
+          test -f grow/web/dist/workspace.html
+          test -f grow/web/dist/workspace.js
+          test -f grow/web/dist/workspace.css
+          node grow/web/test/browser-smoke.mjs
+      - name: GROW-V2-14 security privacy adversarial recovery Level 1
+        run: |
+          go test -count=1 -run '^TestV214' ./grow/dashboard
+          go test -race -count=1 -run '^TestV214' ./grow/dashboard

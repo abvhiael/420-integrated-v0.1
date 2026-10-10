@@ -1,0 +1,60 @@
+name: Commerce service fast qualification
+on:
+  push:
+    branches: ['audit/420commerce-*']
+    paths: ['commerce/**', 'packages/420-sdk/**', '420-indexer/**', 'scripts/commerce/qualify-service.py', '.github/workflows/commerce-service.yml', 'scripts/commerce/check-patch.mjs']
+  pull_request:
+    paths: ['commerce/**', 'packages/420-sdk/**', '420-indexer/**', 'scripts/commerce/qualify-service.py', '.github/workflows/commerce-service.yml', 'scripts/commerce/check-patch.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: commerce-service-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420commerce-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            commerce/package-lock.json
+            packages/420-sdk/package-lock.json
+            420-indexer/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Install locked service dependencies
+        run: npm ci --prefix commerce --ignore-scripts
+      - name: Install locked SDK dependencies
+        run: npm ci --prefix packages/420-sdk --ignore-scripts
+      - name: Install locked Indexer dependencies
+        run: npm ci --prefix 420-indexer --ignore-scripts
+      - name: Dependency security
+        run: |
+          npm audit --prefix commerce --audit-level=moderate
+          npm audit --prefix 420-indexer --omit=dev --audit-level=moderate
+          npm audit --prefix packages/420-sdk --audit-level=moderate
+      - name: Targeted compilation, ABI, retained SDK and Indexer, service integration and adversarial qualification
+        run: python scripts/commerce/qualify-service.py
+      - name: Whitespace and patch verification
+        env:
+          COMMERCE_PATCH_BASE: ${{ github.event.pull_request.base.sha || '' }}
+        run: node scripts/commerce/check-patch.mjs

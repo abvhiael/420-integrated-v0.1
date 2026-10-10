@@ -1,0 +1,52 @@
+name: HZ-GCA-15 Adversarial Level 1
+on:
+  pull_request:
+    paths:
+      - 'hz/generate/src/security-gate.js'
+      - 'hz/generate/src/production-security.js'
+      - 'hz/generate/src/cross-service.js'
+      - 'hz/generate/src/charts.js'
+      - 'hz/generate/src/award-voting.js'
+      - 'hz/generate/src/register-publish.js'
+      - 'hz/generate/test/production-security.test.js'
+      - 'hz/generate/src/jobs.js'
+      - 'hz/generate/test/generation-job.test.js'
+      - 'hz/generate/test/security-gate.test.js'
+      - 'hz/generate/src/index.js'
+      - 'hz/generate/package.json'
+      - '.github/workflows/420hz-gca-15.yml'
+  push:
+    branches:
+      - 'feature/420hz-generate-community-awards-*'
+    paths:
+      - 'hz/generate/src/security-gate.js'
+      - 'hz/generate/src/production-security.js'
+      - 'hz/generate/src/cross-service.js'
+      - 'hz/generate/src/charts.js'
+      - 'hz/generate/src/award-voting.js'
+      - 'hz/generate/src/register-publish.js'
+      - 'hz/generate/test/production-security.test.js'
+      - 'hz/generate/src/jobs.js'
+      - 'hz/generate/test/generation-job.test.js'
+      - 'hz/generate/test/security-gate.test.js'
+      - 'hz/generate/src/index.js'
+      - 'hz/generate/package.json'
+      - '.github/workflows/420hz-gca-15.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Retained security and app qualification
+        working-directory: hz/generate
+        run: npm run qualify

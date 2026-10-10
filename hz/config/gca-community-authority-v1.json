@@ -1,0 +1,235 @@
+{
+  "schema": "420hz-gca-community-authority-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.10",
+  "title": "Define Community authority model",
+  "baseMainSha": "c6b62a6ea75be97564564e56b779dfad7df3f784",
+  "level": 1,
+  "milestoneRequired": false,
+  "authority": {
+    "hzOwned": [
+      "ArtistFollow",
+      "RecordingFavorite",
+      "Playlist",
+      "PlaylistItem"
+    ],
+    "derivedOnly": [
+      "CommunityActivity",
+      "follow/favorite/playlist aggregate counts",
+      "community feeds",
+      "recommendation/ranking inputs derived from community records"
+    ],
+    "externalAuthorities": {
+      "wallet": "Wallet/SmartAccount/session authority for community mutations",
+      "identity": "420Identity optional presentation/eligibility context; not required for ordinary Wallet-authorized community use unless later policy explicitly requires it",
+      "creative": "Creative Protocol Work/Recording/CreatorProfile ownership, rights and publication state",
+      "commons": "420Commons community-space/channel membership/role authority",
+      "town": "420Town community/membership/role/permission/post/thread/comment/vote authority where that app is used",
+      "search": "420Search rebuildable public discovery only",
+      "notifications": "420Notifications opt-in delivery only",
+      "awards": "420Hz Awards product-domain nomination/ballot/vote/result authority",
+      "charts": "future HZ-GCA-1.11 chart methodology/projection authority",
+      "governance": "420Governance/Civic only for explicitly governed policy"
+    }
+  },
+  "accessModel": {
+    "anonymous": [
+      "read PUBLIC creator/community presentation",
+      "read PUBLIC playlists and eligible public community activity",
+      "use public Search/discovery without Wallet"
+    ],
+    "walletAuthorized": [
+      "follow/unfollow artist",
+      "favorite/unfavorite Recording",
+      "create/update/delete own playlist",
+      "add/remove/reorder items in own playlist",
+      "change own playlist visibility",
+      "create non-authoritative share/reference actions where supported"
+    ],
+    "identityOptional": [
+      "display profile/name/avatar where qualified",
+      "policy/eligibility assertions only where a later explicit policy requires them"
+    ],
+    "forbidden": [
+      "client-provided account string as mutation authority",
+      "Wallet connection alone as signing/mutation approval",
+      "Identity profile selection as authority expansion",
+      "Search/Indexer/Notifications cache as mutation authority"
+    ]
+  },
+  "objectRules": [
+    {
+      "type": "ArtistFollow",
+      "owner": "420Hz community state",
+      "keySemantics": "one logical relation per followerAccountRef + artistCreatorId; repeat follow is idempotent or fails without duplicate active relation",
+      "activeSemantics": "active=true means current 420Hz follow relation only",
+      "visibility": "PUBLIC by current HZ-GCA-1.7 default, subject to a later explicit visibility preference policy",
+      "forbiddenImplications": [
+        "Commons/Town membership",
+        "creator ownership/control",
+        "Identity trust/verification",
+        "paid entitlement",
+        "chart-qualified play",
+        "award nomination/vote",
+        "economic right"
+      ]
+    },
+    {
+      "type": "RecordingFavorite",
+      "owner": "420Hz community state",
+      "keySemantics": "one logical relation per accountRef + canonical RecordingId; repeat favorite is idempotent or fails without duplicate active relation",
+      "activeSemantics": "active=true means user preference only",
+      "visibility": "PRIVATE by current HZ-GCA-1.7 default unless user explicitly makes it public under a qualified visibility policy",
+      "forbiddenImplications": [
+        "Recording ownership",
+        "license/right",
+        "qualified play",
+        "chart point",
+        "award vote",
+        "payment/reward"
+      ]
+    },
+    {
+      "type": "Playlist",
+      "owner": "420Hz community state",
+      "keySemantics": "stable opaque playlistId owned by one authorized account/controller",
+      "visibility": "PRIVATE | UNLISTED | PUBLIC",
+      "authorization": "only owner/controller-authorized session may mutate title/metadata/visibility/items",
+      "forbiddenImplications": [
+        "Creative Release authority",
+        "ownership of included Recording",
+        "license to included Recording",
+        "public visibility of otherwise private/unlisted source media",
+        "chart/award/economic authority"
+      ]
+    },
+    {
+      "type": "PlaylistItem",
+      "owner": "420Hz community state",
+      "keySemantics": "stable playlist membership/order edge referring to canonical RecordingId",
+      "visibility": "inherits playlist visibility but playback/discovery remains bounded by the Recording/source visibility",
+      "authorization": "playlist owner/controller only",
+      "forbiddenImplications": [
+        "copy of Recording metadata authority",
+        "rights or playback entitlement",
+        "visibility escalation"
+      ]
+    }
+  ],
+  "shareRepostRules": [
+    "A share is a non-authoritative reference/deep-link operation and does not mutate canonical Recording, rights, visibility or access.",
+    "A repost, if later implemented, is 420Hz application/community state only and must reference the original canonical Recording/release rather than duplicate it.",
+    "Sharing an UNLISTED object does not make it searchable or PUBLIC.",
+    "Sharing cannot grant access to PRIVATE content.",
+    "No share/repost count is canonical evidence of popularity, chart score, award eligibility, identity trust or economic value."
+  ],
+  "activityProjectionRules": [
+    "CommunityActivity is derived/rebuildable and must preserve sourceType/sourceId/sourceRevision.",
+    "Deleting/deactivating a source relation removes or supersedes its derived presentation without rewriting unrelated source objects.",
+    "Projection lag or rebuild failure cannot create new follow/favorite/playlist state.",
+    "Public activity visibility may never exceed the visibility of the underlying source relation/object.",
+    "Aggregate follower/favorite/playlist counts are presentation metrics and may be recomputed from eligible source records.",
+    "No aggregate count is canonical for payments, rights, Charts, Awards or governance."
+  ],
+  "sourceObjectRules": [
+    "Community records reference native canonical Creator/Recording IDs and never re-hash them into a competing canonical identity.",
+    "A favorite/playlist item referring to a Recording does not make an unavailable, deleted, unlisted, private or rights-blocked Recording playable/discoverable.",
+    "Source visibility/readiness/rights checks remain authoritative at read/playback time where applicable.",
+    "If a canonical source object is withdrawn/unavailable, community presentation must fail closed or mark unavailable rather than serving stale access."
+  ],
+  "privacyRules": [
+    "ArtistFollow current default is PUBLIC relation; any future private-follow mode requires explicit policy/versioning rather than silent reinterpretation.",
+    "RecordingFavorite defaults PRIVATE.",
+    "Playlist supports PRIVATE, UNLISTED and PUBLIC visibility.",
+    "CommunityActivity can expose only source-visible fields.",
+    "Private favorites/playlists do not enter public Search, trending or public activity feeds.",
+    "UNLISTED playlists may be opened by direct eligible reference but do not enter broad Search/trending/discovery.",
+    "Changing playlist visibility requires explicit owner-authorized action."
+  ],
+  "moderationInteraction": [
+    "block/mute/report semantics are not finalized by HZ-GCA-1.10 and remain HZ-GCA-1.14 authority/moderation work",
+    "a later block/mute may suppress presentation/interactions but must not silently fabricate unfollow/unfavorite or delete unrelated canonical source state unless the user explicitly requests that action",
+    "comments/replies remain deferred until moderation/reporting/appeal boundaries are fully implemented and qualified",
+    "community state must expose enough stable actor/object references for later moderation without granting moderators rights/payment/identity authority"
+  ],
+  "chartAwardsSeparation": [
+    "follow/favorite/playlist/share/repost events are not automatically qualified chart events",
+    "community popularity does not itself qualify a Recording or artist for an Award",
+    "an AwardVote is a separate HZ Awards object under later frozen policy and can never be inferred from favorite/follow/repost state",
+    "Chart methodology may consume approved community-derived signals only after HZ-GCA-1.11 explicitly defines weighting, anti-gaming and replay rules",
+    "Awards eligibility/voting policy may consume approved community data only after HZ-GCA-1.12/1.13 explicitly defines the boundary"
+  ],
+  "notificationSearchRules": [
+    "Search may index only PUBLIC eligible community objects/projections and remains rebuildable/non-authoritative.",
+    "Notifications may notify about follow/favorite/playlist/community events only under user opt-in/privacy rules and never mutate the source relation.",
+    "Notification delivery failure does not roll back a community mutation.",
+    "Search/notification disappearance does not delete community source state.",
+    "A notification deep link does not bypass Wallet/session authorization for mutations."
+  ],
+  "deletionAndIdempotencyRules": [
+    "follow/unfollow and favorite/unfavorite are idempotent by logical relation key; replay cannot create duplicate active relations or duplicate counters",
+    "playlist mutation uses stable item identities/revisions so retry cannot duplicate a PlaylistItem unless explicitly adding another distinct item is allowed by later implementation policy",
+    "delete/tombstone hides application-controlled private/unlisted community state immediately and follows HZ-GCA-1.8 retention rules",
+    "derived projections must respect tombstones/deactivation and must not resurrect removed relations during rebuild",
+    "community records do not erase immutable external Creative/Identity/chain history"
+  ],
+  "failureRules": [
+    "mutation without qualified Wallet/session actor authority fails closed",
+    "client account/identity display string cannot authorize mutation",
+    "duplicate follow/favorite replay cannot create duplicate active relation",
+    "playlist mutation by non-owner/non-controller fails closed",
+    "playlist visibility cannot widen underlying Recording/source visibility",
+    "private favorite or private playlist entering public Search/activity fails closed",
+    "UNLISTED playlist entering broad Search/trending fails closed",
+    "stale Search/Indexer/Notifications state cannot overwrite community source state",
+    "follow/favorite/playlist/share cannot be interpreted as Commons/Town membership, rights, payment, Award vote or governance action",
+    "comments/replies cannot be enabled before later moderation/reporting requirements are satisfied"
+  ],
+  "invariants": [
+    "HZGCA-COM-001 420Hz owns only its explicit follow/favorite/playlist community state and does not become Identity, Commons/Town, Creative, Chart, Awards, Pay or Governance authority",
+    "HZGCA-COM-002 public community reads may be anonymous; authority-bearing mutations require qualified Wallet/session authorization",
+    "HZGCA-COM-003 optional 420Identity presentation never broadens Wallet/account mutation authority",
+    "HZGCA-COM-004 one follower+artist relation produces at most one active ArtistFollow",
+    "HZGCA-COM-005 one account+Recording relation produces at most one active RecordingFavorite",
+    "HZGCA-COM-006 RecordingFavorite is private by default and cannot leak into public projection without explicit visibility policy/action",
+    "HZGCA-COM-007 Playlist visibility is owner-controlled PRIVATE/UNLISTED/PUBLIC and never widens source Recording visibility",
+    "HZGCA-COM-008 PlaylistItem references native Recording identity and grants no rights/playback/ownership authority",
+    "HZGCA-COM-009 share/repost references do not mutate canonical media/rights/visibility and do not create access",
+    "HZGCA-COM-010 CommunityActivity and aggregate counts are rebuildable projections, not source authority",
+    "HZGCA-COM-011 projection/Search/Notifications failure or lag cannot create/delete/rewrite community source records",
+    "HZGCA-COM-012 follow/favorite/playlist/share/repost state never implies Commons/Town membership, protocol trust, economic entitlement or governance authority",
+    "HZGCA-COM-013 community popularity never automatically becomes a qualified Chart signal, Award nomination or Award vote",
+    "HZGCA-COM-014 deletion/deactivation/tombstone wins over stale projection rebuild and prevents relation resurrection",
+    "HZGCA-COM-015 block/mute/report and comments/replies remain bounded by later HZ-GCA-1.14 moderation authority and cannot be invented here",
+    "HZGCA-COM-016 source Creative/Recording readiness/visibility/rights remains authoritative for playback/discovery despite community references",
+    "HZGCA-COM-017 community mutations are replay/idempotency safe and cannot inflate counts through duplicate requests",
+    "HZGCA-COM-018 Community authority model creates no new custody, rights, identity, payment, chart, awards, storage or governance authority"
+  ],
+  "exitCriteria": [
+    "420Hz-owned community objects and external/derived authority boundaries are explicit",
+    "anonymous-read vs Wallet-authorized mutation rules are explicit",
+    "Identity/Commons/Town/Creative/Search/Notifications/Charts/Awards/Governance separation is explicit",
+    "follow/favorite/playlist/share/repost semantics and forbidden implications are explicit",
+    "privacy/visibility and source-visibility upper bounds are explicit",
+    "replay/idempotency/deletion/anti-resurrection behavior is explicit",
+    "comments and moderation-dependent behavior remain correctly deferred",
+    "machine verifier enforces community vocabulary, separation, privacy and no-escalation invariants",
+    "no ABI, deployment, live service or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.11 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-privacy-v1.json",
+    "docs/DOOBTUBE-PRODUCT-SCOPE.md",
+    "docs/420TOWN-AUDIT.md",
+    "town/schema/v1/object-catalog.json",
+    "docs/420SEARCH-ROADMAP.md",
+    "docs/420NOTIFICATIONS.md"
+  ]
+}

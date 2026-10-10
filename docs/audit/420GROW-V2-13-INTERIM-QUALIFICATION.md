@@ -1,0 +1,20 @@
+# GROW-V2-13 — Interim exact-SHA implementation qualification
+
+**Canonical step:** GROW-V2-13 — Full cultivation dashboard and mobile UX.
+**Disposition:** **IN PROGRESS — code-level frontend/private projection subchecks PASS, full step NOT QUALIFIED.** No full dashboard closeout, deployment, or promotion to GROW-V2-14 is asserted.
+
+- **Exact tested implementation SHA:** `a2fb185f32cab247d3077996f72aeec38b89cb9d`.
+- **PR:** [#582](https://github.com/abvhiael/420-integrated-v0.1/pull/582), branch `audit/420grow-v2-01-product-decision-20261008`, draft/unmerged.
+- **Original PR base:** `ffc6a4028676907c266714b5c1ae8ba3af9a7137`; current main at evidence time `3de7a0d87600fa30ec6090c1351a11d36ba59de9` (branch 258 ahead / 60 behind).
+- **Grow V2 app fast:** [run 37886207281](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37886207281), job `113676664929`, **SUCCESS**, zero failed steps.
+- **Retained Grow fast:** [run 37886207375](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/37886207375), job `113676665439`, **SUCCESS**, zero failed steps.
+- **Test scope:** Node 22 syntax/tests for `workspace.js`, existing public directory tests, static build distribution of workspace HTML/JS/CSS; Go dashboard handler/projection unit, race, vet and strict gofmt; retained Grow V2-01–12 and existing original Grow code/test/build/security qualifications. This establishes **scoped code/build qualification**; it does not establish live private session or end-to-end operation.
+- **Frontend source:** `grow/web/{workspace.html,workspace.js,workspace.css,runtime-config.js,scripts/build.mjs,test/workspace.test.js}`; new page is independent of public farm/business directory and private API is **disabled by default**.
+- **Backend source:** `grow/dashboard/{handler,handler_test,projection,projection_test}.go`, with an injected trusted `Authenticator`, tenant-private `SQLReader` verifying active membership and facility/zone scope, an explicit route allowlist, fixed bounded projections, RLS transaction scoping and fail-closed unavailable states. The public `grow/cmd/server` remains public directory only and does not mount this handler.
+- **Adversarial checks:** anonymous/expired requests rejected, missing service fails closed, unauthorized section denied, cross-tenant row rejected, duplicate/oversized responses denied, hostile section SQL identifiers rejected, frontend mismatched-tenant payloads rejected, no client data in HTML interpolation, HTTPS/origin/credential/redirect/cache constraints.
+- **Dependency limits:** no credentials, signed session provider, production HTTP private server, qualified cross-origin cookie configuration, full typed domain action APIs, or published real customer data.
+- **Original exit criteria still open:** complete operator/home grower/manager/reviewer create/edit/read/export/review flows, actual authenticated private server mount, production-equivalent PostgreSQL projection tests with active scope and RLS, mobile responsive/accessibility manual acceptance, browser session/logout/revocation and recovery, platform API negative checks, full app UI integration acceptance. See [explicit gap register](420GROW-V2-13-DASHBOARD-GAP-REGISTER.md).
+- **Milestones:** V2-10 accumulated Level 2 previously qualified, no additional V2-13 Level 2 required by current canonical roadmap unless real material shared integration warrants it. Full exact-SHA Phase Level 3 remains V2-15, testnet and external production-equivalent acceptance V2-16. Neither substitutes for unfinished V2-13 Level 1.
+- **Next canonical step:** **GROW-V2-13 — Full cultivation dashboard and mobile UX (finish the open exit criteria)**. Once it fully qualifies, advance to **GROW-V2-14 — Security, privacy, adversarial and recovery qualification**.
+
+All documentation closeout commits after the tested SHA are evidence-only if they alter only `docs/audit/` files. The successful existing fast workflows should not be misrepresented as complete end-to-end V2-13 coverage.

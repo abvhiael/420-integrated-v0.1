@@ -19,6 +19,7 @@ on:
       - 'contracts/test/InvoiceRegistry420Fuzz.t.sol'
       - 'contracts/test/SettlementRouter420*.t.sol'
       - 'contracts/test/RefundManager420Fuzz.t.sol'
+      - 'contracts/test/RefundManager420Funded.t.sol'
       - 'contracts/test/GasSponsor420*.t.sol'
       - 'contracts/test/ReplayProtectionConsumer420.t.sol'
       - '420-indexer/src/abi-manifest.ts'

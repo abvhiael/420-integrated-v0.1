@@ -1,0 +1,67 @@
+name: Commerce governed Pay refund qualification
+on:
+  push:
+    branches: ['audit/420commerce-com-2-*']
+    paths:
+      - 'contracts/src/pay/RefundManager420.sol'
+      - 'contracts/test/RefundManager420*.t.sol'
+      - 'commerce/src/**'
+      - 'commerce/sql/**'
+      - 'commerce/test/com6*.mjs'
+      - 'scripts/commerce/qualify-contracts.py'
+      - '.github/workflows/commerce-pay-refunds.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/pay/RefundManager420.sol'
+      - 'contracts/test/RefundManager420*.t.sol'
+      - 'commerce/src/**'
+      - 'commerce/sql/**'
+      - 'commerce/test/com6*.mjs'
+      - 'scripts/commerce/qualify-contracts.py'
+      - '.github/workflows/commerce-pay-refunds.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: commerce-pay-refunds-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420commerce-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Pay source and governance safety verification
+        run: |
+          python3 scripts/verify-420pay-parameters.py
+          python3 scripts/verify-420pay-implementation.py
+          python3 scripts/verify-420pay-hardening.py
+          python3 scripts/verify-420pay-audit.py
+          python3 scripts/verify-genesis-interface-layer.py
+      - name: Assert targeted Foundry ownership remains in Commerce upstream
+        run: |
+          grep -q "'RefundManager420Fuzz.t.sol'" scripts/commerce/qualify-contracts.py
+          grep -q "'RefundManager420Funded.t.sol'" scripts/commerce/qualify-contracts.py
+          echo 'Refund Foundry inventory owned by Commerce upstream contracts; no duplicate compilation.'
+      - name: Forbidden primitive scan
+        run: |
+          if grep -R -nE '\btx\.origin\b|\bselfdestruct\s*\(|\.delegatecall\s*\(' contracts/src/pay; then
+            echo 'Forbidden primitive in canonical Pay contract' >&2
+            exit 1
+          fi
+      - name: Confirm PAY-AUDIT-6 frozen identity gate deferred to canonical Pay lane
+        run: |
+          echo 'This app-scoped gate does not supersede PAY-AUDIT-6 frozen deployment package approval.'
+          echo 'Governed main/testnet deployment, immutable provenance and full Pay audit stay separately gated.'

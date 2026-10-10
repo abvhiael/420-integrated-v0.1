@@ -1,0 +1,40 @@
+name: HZ-GCA-10 Awards Level 1
+on:
+  pull_request:
+    paths:
+      - 'hz/generate/src/awards.js'
+      - 'hz/generate/test/awards.test.js'
+      - 'hz/generate/src/index.js'
+      - 'hz/generate/package.json'
+      - '.github/workflows/420hz-gca-10.yml'
+  push:
+    branches:
+      - 'feature/420hz-generate-community-awards-*'
+    paths:
+      - 'hz/generate/src/awards.js'
+      - 'hz/generate/test/awards.test.js'
+      - 'hz/generate/src/index.js'
+      - 'hz/generate/package.json'
+      - '.github/workflows/420hz-gca-10.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  awards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run retained app tests
+        working-directory: hz/generate
+        run: npm run qualify
+      - name: Verify frozen Awards architecture
+        run: python3 scripts/verify-420hz-gca-1-12.py
+      - name: Verify frozen nomination voting boundaries
+        run: python3 scripts/verify-420hz-gca-1-13.py

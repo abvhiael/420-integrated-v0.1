@@ -1,0 +1,84 @@
+name: 420Hz HZ-GCA-17 Level 3 exact-SHA qualification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420hz-gca-17-level3.yml'
+      - 'hz/generate/**'
+      - 'hz/web/**'
+      - 'hz/config/gca-*.json'
+      - 'scripts/verify-420hz-*.py'
+      - 'services/420ai-provider/**'
+      - 'services/compute-api/**'
+      - 'packages/420-sdk/**'
+      - '420-indexer/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phase:
+    name: HZ-GCA-17 exact-head cumulative phase
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indexer420
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d indexer420"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact checkout and reconciled main
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          git merge-base --is-ancestor 41d173dbcfbeb8299f54f22e7c049f1fec20336d HEAD
+          git rev-list --parents -n 1 c693e07c5551553463e32fad0494c8caaa7c286a | grep -Fx 'c693e07c5551553463e32fad0494c8caaa7c286a bb9a4bc50f87ef915e051ac172959bf3cfc2dfd8 41d173dbcfbeb8299f54f22e7c049f1fec20336d'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate GCA manifests
+        run: |
+          for f in hz/config/gca-*.json; do python3 -m json.tool "$f" >/dev/null; done
+      - name: Complete Generate Community Awards production-boundary regression
+        working-directory: hz/generate
+        run: npm run qualify
+      - name: Cross-domain M2 M3 M4 integration
+        run: node --test hz/generate/test/milestone-integration.test.js hz/generate/test/production-surfaces.test.js
+      - name: Website and Generate verification
+        run: |
+          python3 scripts/verify-420hz-web.py
+          for n in 2 3 4 5 6; do python3 "scripts/verify-420hz-gca-$n.py"; done
+      - name: Retain generation phase architecture verifiers
+        run: |
+          for n in $(seq 1 19); do python3 "scripts/verify-420hz-gca-1-$n.py"; done
+          python3 scripts/verify-420hz-gca-1-20.py
+      - name: Retain AI Compute provider boundary
+        run: |
+          python3 scripts/verify-420ai-compute-integration.py
+          python3 scripts/verify-420ai-provider-runtime.py
+      - name: AI provider runtime regression
+        working-directory: services/420ai-provider
+        run: npm test
+      - name: Compute SDK API compatibility and build
+        working-directory: packages/420-sdk
+        run: npm install --no-audit --no-fund && npm test && npm run build
+      - name: Compute API runtime regression
+        working-directory: services/compute-api
+        run: npm install --no-audit --no-fund && npm test
+      - name: Indexer compatibility on Postgres
+        working-directory: 420-indexer
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@localhost:5432/indexer420
+        run: npm install --no-audit --no-fund && npm test

@@ -1,0 +1,917 @@
+{
+  "schema": "420hz-gca-object-model-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.2",
+  "title": "Define canonical object model",
+  "baseMainSha": "537525ebc636eabc76ff261f5b5ff5d236869b32",
+  "level": 1,
+  "milestoneRequired": false,
+  "identityRules": {
+    "hzOwnedIdEncoding": "opaque bytes32 logical IDs; storage/ABI encoding remains implementation-specific unless a later step freezes it",
+    "externalIds": "preserve the owning protocol's native canonical ID exactly; never re-hash or remap it into a second canonical identity",
+    "privateObjects": "private/draft identifiers must not encode plaintext prompts, lyrics, wallet secrets or provider credentials",
+    "uniqueness": "one object type + one ID identifies one logical object; IDs are never silently recycled after deletion/tombstone",
+    "versioning": "material semantic revisions create a new version or explicit revision edge rather than rewriting immutable history"
+  },
+  "objectClasses": [
+    "HZ_PRIVATE_APPLICATION",
+    "HZ_PUBLIC_APPLICATION",
+    "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+    "EXTERNAL_CANONICAL_REFERENCE",
+    "DERIVED_PROJECTION"
+  ],
+  "objects": [
+    {
+      "type": "GenerationProject",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "projectId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "creator workspace grouping generation intent, drafts and selected takes",
+      "immutable": [
+        "projectId",
+        "creatorAccountRef",
+        "createdAt"
+      ],
+      "mutable": [
+        "title",
+        "projectMetadataCommitment",
+        "selectedOutputId",
+        "archivedAt",
+        "updatedAt"
+      ],
+      "references": [
+        "CreatorAccountRef?",
+        "GenerationIntent[]",
+        "GenerationOutput[]"
+      ],
+      "mustNotDuplicate": [
+        "AIJob",
+        "ComputeJob",
+        "Work",
+        "Recording"
+      ]
+    },
+    {
+      "type": "GenerationIntent",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "intentId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "reviewable user intent before canonical 420AI submission",
+      "immutable": [
+        "intentId",
+        "projectId",
+        "creatorAccountRef",
+        "intentCommitment",
+        "createdAt"
+      ],
+      "mutable": [
+        "status",
+        "supersedesIntentId?",
+        "updatedAt"
+      ],
+      "references": [
+        "GenerationProject",
+        "SourceAuthorizationRef[]?",
+        "AIModelVersionRef?",
+        "PrivacyPolicyRef?"
+      ],
+      "mustNotDuplicate": [
+        "AI request canonical state",
+        "compute request state"
+      ]
+    },
+    {
+      "type": "GenerationRunBinding",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "runId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "application binding from one intent to owning-protocol execution IDs",
+      "immutable": [
+        "runId",
+        "projectId",
+        "intentId",
+        "aiJobId",
+        "createdAt"
+      ],
+      "mutable": [
+        "computeRequestId?",
+        "computeJobId?",
+        "latestObservedAIStatus",
+        "updatedAt"
+      ],
+      "references": [
+        "GenerationIntent",
+        "AIJobRef",
+        "ComputeRequestRef?",
+        "ComputeJobRef?"
+      ],
+      "mustNotDuplicate": [
+        "AIJob fields",
+        "ComputeJob fields",
+        "settlement state"
+      ]
+    },
+    {
+      "type": "GenerationOutput",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "outputId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "one returned mix/take or artifact set awaiting review",
+      "immutable": [
+        "outputId",
+        "runId",
+        "resultCommitment",
+        "resultManifestHash",
+        "createdAt"
+      ],
+      "mutable": [
+        "label",
+        "favorite",
+        "reviewState",
+        "storageManifestRef?",
+        "updatedAt"
+      ],
+      "references": [
+        "GenerationRunBinding",
+        "AIResultRef",
+        "ArtifactManifestRef?"
+      ],
+      "mustNotDuplicate": [
+        "provider verification outcome",
+        "Creative Recording"
+      ]
+    },
+    {
+      "type": "GenerationArtifact",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "artifactId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "typed pointer to mix, stem, lyrics/timing, artwork or other generation artifact",
+      "immutable": [
+        "artifactId",
+        "outputId",
+        "artifactType",
+        "contentCommitment",
+        "createdAt"
+      ],
+      "mutable": [
+        "storageObjectRef?",
+        "retentionState",
+        "updatedAt"
+      ],
+      "references": [
+        "GenerationOutput",
+        "StorageObjectRef?"
+      ],
+      "mustNotDuplicate": [
+        "storage agreement/proof state"
+      ]
+    },
+    {
+      "type": "ProvenanceDraft",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "provenanceDraftId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "pre-publication provenance/disclosure review assembled from authoritative references",
+      "immutable": [
+        "provenanceDraftId",
+        "outputId",
+        "createdAt"
+      ],
+      "mutable": [
+        "aiDisclosureClass",
+        "sourceAuthorizationRefs",
+        "voiceConsentRefs",
+        "manifestCommitment",
+        "reviewState",
+        "updatedAt"
+      ],
+      "references": [
+        "GenerationOutput",
+        "AIModelVersionRef",
+        "AIProviderRef?",
+        "SourceAuthorizationRef[]",
+        "VoiceConsentRef[]"
+      ],
+      "mustNotDuplicate": [
+        "Creative provenanceHash once published",
+        "rights/license authority"
+      ]
+    },
+    {
+      "type": "PublishIntent",
+      "class": "HZ_PRIVATE_APPLICATION",
+      "id": "publishIntentId",
+      "owner": "420Hz product state",
+      "visibility": "PRIVATE_DEFAULT",
+      "purpose": "explicit reviewed handoff to canonical Creative registration/publication",
+      "immutable": [
+        "publishIntentId",
+        "projectId",
+        "outputId",
+        "creatorAccountRef",
+        "reviewCommitment",
+        "createdAt"
+      ],
+      "mutable": [
+        "state",
+        "workId?",
+        "recordingId?",
+        "releaseRef?",
+        "updatedAt"
+      ],
+      "references": [
+        "GenerationProject",
+        "GenerationOutput",
+        "ProvenanceDraft",
+        "CreatorProfileRef?",
+        "WorkRef?",
+        "RecordingRef?"
+      ],
+      "mustNotDuplicate": [
+        "Creative rights/activation state"
+      ]
+    },
+    {
+      "type": "ArtistFollow",
+      "class": "HZ_PUBLIC_APPLICATION",
+      "id": "followId",
+      "owner": "420Hz community state",
+      "visibility": "PUBLIC_RELATION",
+      "purpose": "420Hz follow relation; not Commons membership",
+      "immutable": [
+        "followId",
+        "followerAccountRef",
+        "artistCreatorId",
+        "createdAt"
+      ],
+      "mutable": [
+        "active",
+        "updatedAt"
+      ],
+      "references": [
+        "CreatorAccountRef",
+        "CreatorProfileRef"
+      ],
+      "mustNotDuplicate": [
+        "420Commons membership",
+        "Identity credential"
+      ]
+    },
+    {
+      "type": "RecordingFavorite",
+      "class": "HZ_PUBLIC_APPLICATION",
+      "id": "favoriteId",
+      "owner": "420Hz community state",
+      "visibility": "PUBLIC_OR_PRIVATE_POLICY",
+      "purpose": "user favorite relation for a canonical Recording",
+      "immutable": [
+        "favoriteId",
+        "accountRef",
+        "recordingId",
+        "createdAt"
+      ],
+      "mutable": [
+        "active",
+        "visibility",
+        "updatedAt"
+      ],
+      "references": [
+        "CreatorAccountRef",
+        "RecordingRef"
+      ],
+      "mustNotDuplicate": [
+        "Recording rights",
+        "play count"
+      ]
+    },
+    {
+      "type": "Playlist",
+      "class": "HZ_PUBLIC_APPLICATION",
+      "id": "playlistId",
+      "owner": "420Hz community state",
+      "visibility": "OWNER_SELECTED",
+      "purpose": "ordered user-curated collection",
+      "immutable": [
+        "playlistId",
+        "ownerAccountRef",
+        "createdAt"
+      ],
+      "mutable": [
+        "title",
+        "metadataCommitment",
+        "visibility",
+        "revision",
+        "updatedAt"
+      ],
+      "references": [
+        "PlaylistItem[]"
+      ],
+      "mustNotDuplicate": [
+        "Creative Release authority"
+      ]
+    },
+    {
+      "type": "PlaylistItem",
+      "class": "HZ_PUBLIC_APPLICATION",
+      "id": "playlistItemId",
+      "owner": "420Hz community state",
+      "visibility": "INHERITS_PLAYLIST",
+      "purpose": "stable playlist membership/order edge",
+      "immutable": [
+        "playlistItemId",
+        "playlistId",
+        "recordingId",
+        "addedAt"
+      ],
+      "mutable": [
+        "position",
+        "removedAt?",
+        "revision"
+      ],
+      "references": [
+        "Playlist",
+        "RecordingRef"
+      ],
+      "mustNotDuplicate": [
+        "Recording metadata"
+      ]
+    },
+    {
+      "type": "CommunityActivity",
+      "class": "DERIVED_PROJECTION",
+      "id": "activityId",
+      "owner": "rebuildable projection",
+      "visibility": "PUBLIC_POLICY_FILTERED",
+      "purpose": "derived feed/event view over source community records",
+      "immutable": [
+        "activityId",
+        "sourceType",
+        "sourceId",
+        "sourceRevision"
+      ],
+      "mutable": [],
+      "references": [
+        "ArtistFollow?",
+        "RecordingFavorite?",
+        "Playlist?"
+      ],
+      "mustNotDuplicate": [
+        "source object authority"
+      ]
+    },
+    {
+      "type": "ChartSnapshot",
+      "class": "DERIVED_PROJECTION",
+      "id": "chartSnapshotId",
+      "owner": "rebuildable projection",
+      "visibility": "PUBLIC",
+      "purpose": "versioned chart result derived under a later frozen methodology",
+      "immutable": [
+        "chartSnapshotId",
+        "chartPolicyVersion",
+        "windowStart",
+        "windowEnd",
+        "sourceCheckpoint",
+        "resultCommitment"
+      ],
+      "mutable": [],
+      "references": [
+        "RecordingRef[]"
+      ],
+      "mustNotDuplicate": [
+        "qualified play events",
+        "award votes",
+        "rights state"
+      ]
+    },
+    {
+      "type": "AwardProgram",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "awardProgramId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "stable parent for one awards program",
+      "immutable": [
+        "awardProgramId",
+        "createdAt"
+      ],
+      "mutable": [
+        "name",
+        "metadataCommitment",
+        "policyVersion",
+        "status",
+        "updatedAt"
+      ],
+      "references": [
+        "AwardSeason[]"
+      ],
+      "mustNotDuplicate": [
+        "420Governance proposal"
+      ]
+    },
+    {
+      "type": "AwardSeason",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "seasonId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "bounded awards period under one immutable policy snapshot once opened",
+      "immutable": [
+        "seasonId",
+        "awardProgramId",
+        "seasonKey",
+        "eligibilityStart",
+        "eligibilityEnd",
+        "nominationStart",
+        "nominationEnd",
+        "votingStart",
+        "votingEnd"
+      ],
+      "mutable": [
+        "status",
+        "policyCommitment",
+        "finalizedAt?",
+        "updatedAt"
+      ],
+      "references": [
+        "AwardProgram",
+        "AwardCategory[]",
+        "EligibilityPolicy"
+      ],
+      "mustNotDuplicate": [
+        "Civic governance epoch"
+      ]
+    },
+    {
+      "type": "AwardCategory",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "categoryId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "versioned category definition within a season",
+      "immutable": [
+        "categoryId",
+        "seasonId",
+        "categoryKey",
+        "definitionCommitment",
+        "createdAt"
+      ],
+      "mutable": [
+        "status"
+      ],
+      "references": [
+        "AwardSeason",
+        "EligibilityPolicy"
+      ],
+      "mustNotDuplicate": [
+        "Search category",
+        "Creative RecordingClass"
+      ]
+    },
+    {
+      "type": "EligibilityPolicy",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "eligibilityPolicyId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "versioned eligibility rules snapshotted by season/category",
+      "immutable": [
+        "eligibilityPolicyId",
+        "version",
+        "rulesCommitment",
+        "createdAt"
+      ],
+      "mutable": [
+        "activeForFutureUse"
+      ],
+      "references": [
+        "IdentityPolicyRef?",
+        "AI disclosure policy?",
+        "Creative status requirements"
+      ],
+      "mustNotDuplicate": [
+        "Identity credentials",
+        "Creative rights"
+      ]
+    },
+    {
+      "type": "AwardNomination",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "nominationId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC_AFTER_POLICY",
+      "purpose": "one candidate nomination bound to exact season/category/recording or artist target",
+      "immutable": [
+        "nominationId",
+        "seasonId",
+        "categoryId",
+        "targetType",
+        "targetId",
+        "nominatorRef",
+        "submittedAt",
+        "eligibilitySnapshotCommitment"
+      ],
+      "mutable": [
+        "status",
+        "decisionReasonCommitment?",
+        "updatedAt"
+      ],
+      "references": [
+        "AwardSeason",
+        "AwardCategory",
+        "RecordingRef?",
+        "CreatorProfileRef?",
+        "EligibilityPolicy"
+      ],
+      "mustNotDuplicate": [
+        "Creative ownership",
+        "Identity credential"
+      ]
+    },
+    {
+      "type": "AwardBallot",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "ballotId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "frozen eligible candidate set for one category/season vote",
+      "immutable": [
+        "ballotId",
+        "seasonId",
+        "categoryId",
+        "candidateSetCommitment",
+        "policyCommitment",
+        "frozenAt"
+      ],
+      "mutable": [
+        "status",
+        "closedAt?",
+        "updatedAt"
+      ],
+      "references": [
+        "AwardNomination[]"
+      ],
+      "mustNotDuplicate": [
+        "Civic ballot"
+      ]
+    },
+    {
+      "type": "AwardVote",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "voteId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PRIVACY_POLICY",
+      "purpose": "qualified product-domain vote record or commitment under exact ballot policy",
+      "immutable": [
+        "voteId",
+        "ballotId",
+        "voterEligibilityRef",
+        "choiceCommitment",
+        "submittedAt",
+        "replayDomain"
+      ],
+      "mutable": [
+        "status"
+      ],
+      "references": [
+        "AwardBallot",
+        "IdentityCredentialRef?",
+        "WalletAuthorizationRef"
+      ],
+      "mustNotDuplicate": [
+        "Civic vote",
+        "wallet signature material"
+      ]
+    },
+    {
+      "type": "AwardResult",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "resultId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "finalized category result derived only through the frozen Awards policy",
+      "immutable": [
+        "resultId",
+        "ballotId",
+        "resultCommitment",
+        "winnerTargetIds",
+        "finalizedAt",
+        "policyCommitment"
+      ],
+      "mutable": [],
+      "references": [
+        "AwardBallot",
+        "RecordingRef[]?",
+        "CreatorProfileRef[]?"
+      ],
+      "mustNotDuplicate": [
+        "Governance outcome",
+        "payment/prize settlement"
+      ]
+    },
+    {
+      "type": "AwardBadge",
+      "class": "HZ_AWARD_CANONICAL_PRODUCT_DOMAIN",
+      "id": "badgeId",
+      "owner": "420Hz Awards product domain",
+      "visibility": "PUBLIC",
+      "purpose": "permanent recognition reference derived from one finalized AwardResult",
+      "immutable": [
+        "badgeId",
+        "resultId",
+        "targetType",
+        "targetId",
+        "seasonId",
+        "categoryId",
+        "issuedAt"
+      ],
+      "mutable": [
+        "displayMetadataCommitment"
+      ],
+      "references": [
+        "AwardResult",
+        "RecordingRef?",
+        "CreatorProfileRef?"
+      ],
+      "mustNotDuplicate": [
+        "token/NFT ownership unless a later explicit feature creates one"
+      ]
+    },
+    {
+      "type": "CreatorAccountRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "account",
+      "owner": "SmartAccount/Wallet canonical system",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "account/controller reference",
+      "immutable": [
+        "account"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "account authorization"
+      ]
+    },
+    {
+      "type": "CreatorProfileRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "creatorId",
+      "owner": "420 Creative Protocol",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "native CreatorId reference",
+      "immutable": [
+        "creatorId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "CreatorProfile fields"
+      ]
+    },
+    {
+      "type": "WorkRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "workId",
+      "owner": "420 Creative Protocol",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "native WorkId reference",
+      "immutable": [
+        "workId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "Work fields"
+      ]
+    },
+    {
+      "type": "RecordingRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "recordingId",
+      "owner": "420 Creative Protocol",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "native RecordingId reference",
+      "immutable": [
+        "recordingId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "Recording fields"
+      ]
+    },
+    {
+      "type": "LicenseRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "licenseId",
+      "owner": "420 Creative Protocol",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "native LicenseId reference",
+      "immutable": [
+        "licenseId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "License fields"
+      ]
+    },
+    {
+      "type": "AIJobRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "aiJobId",
+      "owner": "420AI",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "canonical AIJobManager job identifier",
+      "immutable": [
+        "aiJobId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "AI job fields"
+      ]
+    },
+    {
+      "type": "AIModelVersionRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "modelVersionId",
+      "owner": "420AI",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "canonical AI model-version identifier",
+      "immutable": [
+        "modelVersionId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "model-version fields"
+      ]
+    },
+    {
+      "type": "AIProviderRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "providerId",
+      "owner": "420AI/Compute binding",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "provider reference as resolved by owning systems",
+      "immutable": [
+        "providerId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "provider lifecycle"
+      ]
+    },
+    {
+      "type": "ComputeRequestRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "computeRequestId",
+      "owner": "420 ComputeMarket",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "canonical compute request reference",
+      "immutable": [
+        "computeRequestId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "ComputeRequest fields"
+      ]
+    },
+    {
+      "type": "ComputeJobRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "computeJobId",
+      "owner": "420 ComputeMarket",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "canonical compute job reference",
+      "immutable": [
+        "computeJobId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "ComputeJob fields"
+      ]
+    },
+    {
+      "type": "StorageObjectRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "storageObjectIdOrManifest",
+      "owner": "420ResourceProtocol / 420Store",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "canonical storage object/manifest reference selected by later storage integration",
+      "immutable": [
+        "storageObjectIdOrManifest"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "storage proof/agreement state"
+      ]
+    },
+    {
+      "type": "PaymentRef",
+      "class": "EXTERNAL_CANONICAL_REFERENCE",
+      "id": "paymentId",
+      "owner": "420Pay",
+      "visibility": "REFERENCE_ONLY",
+      "purpose": "canonical payment/prize settlement reference",
+      "immutable": [
+        "paymentId"
+      ],
+      "mutable": [],
+      "references": [],
+      "mustNotDuplicate": [
+        "payment lifecycle/refund state"
+      ]
+    }
+  ],
+  "invariants": [
+    "HZGCA-OBJ-001 every object type has one authority class and one stable logical ID field",
+    "HZGCA-OBJ-002 external canonical references preserve native owning-protocol IDs and are never remapped into competing canonical IDs",
+    "HZGCA-OBJ-003 GenerationProject, GenerationIntent, GenerationRunBinding, GenerationOutput, GenerationArtifact and ProvenanceDraft are private by default",
+    "HZGCA-OBJ-004 GenerationRunBinding may reference AI/Compute state but cannot rewrite or duplicate its canonical fields",
+    "HZGCA-OBJ-005 PublishIntent is explicit user application intent and never proves Work/Recording registration or rights activation",
+    "HZGCA-OBJ-006 community Follow/Favorite/Playlist objects do not create 420Commons membership, role or channel authority",
+    "HZGCA-OBJ-007 ChartSnapshot and CommunityActivity are derived/rebuildable and never authoritative for rights, awards or payments",
+    "HZGCA-OBJ-008 Awards objects are product-domain objects and never Civic governance proposals, ballots or votes",
+    "HZGCA-OBJ-009 AwardResult is immutable after finalization and AwardBadge must reference exactly one finalized result",
+    "HZGCA-OBJ-010 award prize/payment references are external 420Pay state and cannot alter award legitimacy",
+    "HZGCA-OBJ-011 object deletion/tombstone never permits silent ID reuse",
+    "HZGCA-OBJ-012 immutable fields cannot be rewritten by later revisions; material semantic changes use explicit version/revision/supersession",
+    "HZGCA-OBJ-013 private object identifiers or commitments must not contain plaintext secrets or protected payloads",
+    "HZGCA-OBJ-014 Creative CreatorId/WorkId/RecordingId/LicenseId native typed IDs remain authoritative and are referenced directly",
+    "HZGCA-OBJ-015 AI and Compute job lifecycles remain owned by their canonical systems; 420Hz stores only binding/observed status metadata",
+    "HZGCA-OBJ-016 no object definition grants signing, custody, settlement, governance, identity, rights or dispute authority outside HZ-GCA-1.1 boundaries"
+  ],
+  "requiredTypes": [
+    "GenerationProject",
+    "GenerationIntent",
+    "GenerationRunBinding",
+    "GenerationOutput",
+    "GenerationArtifact",
+    "ProvenanceDraft",
+    "PublishIntent",
+    "ArtistFollow",
+    "RecordingFavorite",
+    "Playlist",
+    "PlaylistItem",
+    "CommunityActivity",
+    "ChartSnapshot",
+    "AwardProgram",
+    "AwardSeason",
+    "AwardCategory",
+    "EligibilityPolicy",
+    "AwardNomination",
+    "AwardBallot",
+    "AwardVote",
+    "AwardResult",
+    "AwardBadge",
+    "CreatorAccountRef",
+    "CreatorProfileRef",
+    "WorkRef",
+    "RecordingRef",
+    "LicenseRef",
+    "AIJobRef",
+    "AIModelVersionRef",
+    "AIProviderRef",
+    "ComputeRequestRef",
+    "ComputeJobRef",
+    "StorageObjectRef",
+    "PaymentRef"
+  ],
+  "exitCriteria": [
+    "Generate, Community and Awards each have explicit logical object vocabularies",
+    "every object has one ID field, owner/class, visibility, field mutability and reference edges",
+    "external protocol objects are reference-only and retain native IDs",
+    "derived projections are explicitly non-authoritative",
+    "Awards-domain objects are explicitly separate from Civic governance objects",
+    "machine verifier enforces required types, unique IDs/type names and no-duplication invariants",
+    "no contract ABI, fixed address, deployment or testnet claim is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.3 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "hz/config/gca-product-boundaries-v1.json",
+    "contracts/src/creative/shared/CreativeTypes420.sol",
+    "contracts/src/creative/music/WorkRegistry420.sol",
+    "contracts/src/creative/music/RecordingRegistry420.sol",
+    "contracts/src/ai/AIJobManager.sol",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/compute-market/CMP-0.2-CANONICAL-COMPUTE-JOB-SCHEMA.md",
+    "docs/420INDEXER.md",
+    "docs/420SEARCH-GENESIS-CLOSEOUT.md"
+  ]
+}

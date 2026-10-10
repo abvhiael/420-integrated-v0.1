@@ -1,0 +1,35 @@
+name: HZ-GCA-12 Awards UX Level 1
+on:
+  pull_request:
+    paths:
+      - 'hz/awards-web/**'
+      - '.github/workflows/420hz-gca-12.yml'
+  push:
+    branches:
+      - 'feature/420hz-generate-community-awards-*'
+    paths:
+      - 'hz/awards-web/**'
+      - '.github/workflows/420hz-gca-12.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  awards-ux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact head SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax qualification
+        run: node --check hz/awards-web/model.js && node --check hz/awards-web/app.js
+      - name: Awards UX deterministic and adversarial tests
+        run: node --test hz/awards-web/model.test.js
+      - name: Retained Generate Awards lifecycle
+        working-directory: hz/generate
+        run: npm run qualify

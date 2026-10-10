@@ -1,0 +1,285 @@
+{
+  "schema": "420hz-gca-failure-recovery-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.17",
+  "title": "420Hz failure and recovery semantics",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "purpose": "Define deterministic fail-closed failure, retry, partial-output, restart, reconciliation and recovery semantics without inventing live services or deployment state.",
+  "failureClasses": [
+    "CLIENT_OR_SESSION_FAILURE",
+    "DEPENDENCY_UNAVAILABLE",
+    "DEPENDENCY_MISMATCH",
+    "TIMEOUT",
+    "CANCEL_REQUESTED",
+    "PROVIDER_FAILURE",
+    "PARTIAL_OUTPUT",
+    "VERIFICATION_FAILURE",
+    "STORAGE_INTEGRITY_FAILURE",
+    "STALE_OR_REORGED_DERIVED_STATE",
+    "ECONOMIC_RECONCILIATION_FAILURE",
+    "RIGHTS_OR_POLICY_BLOCK",
+    "IDENTITY_ELIGIBILITY_FAILURE",
+    "DUPLICATE_OR_REPLAY",
+    "MODERATION_OR_DISPUTE_HOLD",
+    "NOTIFICATION_DELIVERY_FAILURE",
+    "OPERATOR_OR_CONFIGURATION_FAILURE"
+  ],
+  "recoveryPrinciples": [
+    "reconcile canonical/source authority before retrying any action that could create spend, entitlement, publication, vote, moderation or remedy effects",
+    "never infer terminal success from local UI state, worker prose, queue state, notification delivery or partial artifacts",
+    "retries are idempotent against the original logical operation unless the user explicitly creates a new authorized attempt",
+    "partial results remain non-final until the bound verification and acceptance policy says otherwise",
+    "derived projections are rebuildable and never used to override canonical source state during recovery",
+    "privacy classification survives failure and recovery; dependency failure never widens PRIVATE/UNLISTED state",
+    "recovery preserves immutable history and creates explicit superseding/correction records rather than silently rewriting finalized state",
+    "when safe reconciliation is impossible, remain degraded/read-only or fail closed rather than guessing authority"
+  ],
+  "generationFailureSemantics": {
+    "providerUnavailable": [
+      "before submission, fail without creating provider entitlement or charge",
+      "after canonical submission but before acceptance, reconcile AI/Compute request/job state before rematch/retry",
+      "after acceptance/running, preserve the accepted provider/resource/economic bindings and follow canonical timeout/failure/dispute rules",
+      "provider outage does not authorize switching beneficiary, price, verification profile or privacy policy"
+    ],
+    "timeout": [
+      "client timeout is not proof the server/provider operation failed",
+      "on timeout, query/reconcile by canonical request/job/idempotency references before resubmission",
+      "if canonical state is still pending/running, resume observation rather than creating a new paid attempt",
+      "if canonical terminal state is confirmed, recovery follows that exact terminal state"
+    ],
+    "cancellation": [
+      "local cancel intent is not proof of canonical cancellation",
+      "cancel retry uses the same request/job identity and is idempotent",
+      "after cancellation request, reconcile final canonical job and economic state before showing refund/terminal claims",
+      "cancellation never implies PAYER_REFUND_PAID without canonical payment evidence"
+    ],
+    "partialOutput": [
+      "a partial mix/stem/manifest may be retained as PARTIAL_OUTPUT for user review only when the provider/result manifest identifies it distinctly",
+      "partial artifact presence does not imply SUCCEEDED, VERIFIED, REGISTERED, PUBLISHED or SETTLED",
+      "partial output cannot earn payment unless the accepted canonical policy explicitly supports partial payable units and verification",
+      "user may discard, keep private, or start a new authorized generation attempt; reuse of partial artifacts never bypasses rights/privacy/provenance rules"
+    ],
+    "malformedOrMissingResult": [
+      "do not advance to valid result/verified state",
+      "preserve job/result references and evidence for retry/dispute/refund handling",
+      "artifact hash/manifest mismatch is STORAGE_INTEGRITY_FAILURE or VERIFICATION_FAILURE and fails closed"
+    ]
+  },
+  "retrySemantics": [
+    "same logical mutation + same idempotency key + same material payload reconciles to the existing operation or safely retries the same transition",
+    "same idempotency key + changed material payload is CONFLICT/REPLAY and fails closed",
+    "new paid generation after a terminal failed/cancelled attempt requires a fresh intent/run and fresh authorization unless canonical recovery explicitly preserves the same funded entitlement",
+    "retry never duplicates provider entitlement, payer charge, publication, follow/favorite/playlist relation, chart credit, nomination candidate, vote, moderation action or Arbitration remedy",
+    "backoff/rate-limit behavior may delay retry but cannot alter canonical state",
+    "automatic retry is forbidden for actions requiring new user consent, a new price, changed rights scope, changed beneficiary, changed voter choice or changed moderation remedy"
+  ],
+  "restartRecovery": {
+    "requiredReconciliationOrder": [
+      "1 verify configured chain/network and canonical service identities/versions",
+      "2 restore Wallet/session capability state without recovering private signing secrets into 420Hz",
+      "3 reconcile 420AI/Compute requests, accepted matches, running jobs, result commitments and verification state",
+      "4 reconcile payer funding, provider entitlement, refund/claimability and settlement state",
+      "5 restore Storage manifests/artifact integrity/deletion tombstones and project references",
+      "6 reconcile Creative/Rights publication, licenses, provenance and source authorization",
+      "7 restore 420Hz private project/draft metadata from durable application state",
+      "8 rebuild Community source relations and privacy state",
+      "9 rebuild Charts from eligible source signals/checkpoints",
+      "10 restore Awards season/category/nomination/ballot/vote/result history from canonical product-domain state",
+      "11 restore moderation/report/appeal/challenge state and optional Arbitration references",
+      "12 rebuild Indexer/Search/Analytics projections from canonical/qualified sources",
+      "13 resume Notifications delivery/replay from consumer-owned checkpoints",
+      "14 accept new privileged/money-moving work only after required reconciliations agree"
+    ],
+    "rules": [
+      "restart does not assume in-memory queue/UI state is complete",
+      "durable idempotency/replay keys must survive restart where they guard duplicate side effects",
+      "unfinished operations resume from canonical/durable checkpoints instead of being silently marked failed or successful",
+      "recovery order may skip non-applicable layers but may not move a lower-authority projection ahead of its owning source",
+      "operator recovery actions are bounded by the same authority rules as normal operation"
+    ]
+  },
+  "storageRecovery": [
+    "every recovered artifact is checked against its content/integrity commitment before use",
+    "deletion/tombstone state wins over stale replicas, backups, caches and projection rebuilds",
+    "missing artifact bytes with an existing manifest are reported unavailable and are not replaced with different bytes under the same identity",
+    "restored backups must reapply current privacy/retention/deletion state before becoming readable",
+    "partial or failed generation artifacts retain PRIVATE visibility unless an explicit later publication transition succeeds"
+  ],
+  "economicRecovery": [
+    "before any retry that could spend again, reconcile quote, actual funded credit, accepted price, payer maximum, provider beneficiary and existing entitlement",
+    "provider EARNED/CLAIMABLE/PAID and payer REFUNDABLE/CLAIMABLE/PAID remain distinct through recovery",
+    "timeout/provider failure cannot create a second charge or provider entitlement",
+    "settlement outage preserves verified entitlement without falsely marking PAID",
+    "refund outage preserves payer refund claimability without falsely marking REFUNDED/PAID",
+    "economic disagreement blocks new spending until canonical reconciliation succeeds"
+  ],
+  "rightsPublicationRecovery": [
+    "a Generate result is not publication authority and recovery never auto-registers/publishes it",
+    "Register/Publish retry rechecks Wallet authorization, canonical Creative/Rights source state, rights/consent, disclosure/provenance and idempotency",
+    "if registration succeeded but client response was lost, recovery resolves the existing native Creator/Work/Recording IDs instead of creating duplicates",
+    "if publication rights/consent are revoked or stale before publication completes, fail closed and preserve the unpublished project/result",
+    "moderation or Arbitration cannot rewrite Creative/Rights state during recovery"
+  ],
+  "identityAwardsRecovery": [
+    "Identity eligibility outage blocks unique-human Awards actions that require it but does not fabricate ineligibility or expose private proof data",
+    "vote retry uses the same ballot-scoped voter/nullifier replay domain and cannot create a second accepted vote",
+    "lost vote response is reconciled against Awards canonical vote state before retry",
+    "finalization recovery recomputes from the frozen ballot/policy/accepted-vote set and is single-use",
+    "finalized AwardResult history is never recalculated under a newer policy after restart",
+    "runoff/correction paths remain explicit new records rather than mutation of historical bytes"
+  ],
+  "communityChartsRecovery": [
+    "follow/favorite/playlist mutations reconcile by logical relation/idempotency key after timeout/restart",
+    "duplicate event replay cannot inflate Community counters or Chart credit",
+    "Chart snapshots are rebuilt from eligible source signals plus policy/window/checkpoint and must reproduce deterministic ordering for identical inputs",
+    "stale/reorged source inputs cause degraded/stale labeling or fail-closed behavior according to chart policy",
+    "Search/Analytics rebuild cannot create or resurrect Community/Chart source authority"
+  ],
+  "moderationDisputeRecovery": [
+    "report retry is idempotent and cannot duplicate enforcement",
+    "lost moderation response is reconciled against append-only report/decision/appeal state",
+    "moderator or reviewer capability is revalidated after restart before new enforcement",
+    "vote-abuse review recovery cannot hand-edit tallies; accepted/invalidated vote state drives deterministic retally",
+    "optional Arbitration recovery validates service/domain/origin/parties/finality/remedy/replay before any bounded 420Hz remedy is consumed",
+    "case opening or stale ruling observation never auto-executes a remedy"
+  ],
+  "derivedServiceRecovery": {
+    "indexerSearch": [
+      "Indexer/Search outage does not mutate canonical application/protocol state",
+      "on recovery, projections rebuild/reconcile from canonical source/checkpoints",
+      "wrong-chain, stale or reorged projections are rejected for privileged/security-sensitive decisions",
+      "public availability may degrade to direct canonical reads or unavailable/read-only state where supported"
+    ],
+    "analytics": [
+      "Analytics may lose/rebuild aggregates without affecting source truth",
+      "recovery never ingests protected private payloads merely to reconstruct metrics"
+    ],
+    "notifications": [
+      "delivery failure does not roll back source operations",
+      "consumer replay resumes from notification-owned opaque checkpoints",
+      "stable event/deduplication keys prevent duplicate delivery effects",
+      "deep links/actions after delivery still require normal authorization"
+    ]
+  },
+  "degradedModes": [
+    {
+      "dependency": "420AI/Compute",
+      "mode": "generation unavailable or observation-only",
+      "mustNot": "fabricate local generation success or bypass canonical compute"
+    },
+    {
+      "dependency": "Storage",
+      "mode": "project/artifact read/write unavailable for affected objects",
+      "mustNot": "serve integrity-mismatched replacement bytes"
+    },
+    {
+      "dependency": "Creative/Rights",
+      "mode": "registration/publication disabled",
+      "mustNot": "publish from cached rights state"
+    },
+    {
+      "dependency": "Identity",
+      "mode": "identity-dependent Awards eligibility disabled",
+      "mustNot": "downgrade unique-human policy to Wallet-only silently"
+    },
+    {
+      "dependency": "Pay/Vault",
+      "mode": "new paid generation/settlement actions disabled as required",
+      "mustNot": "mark PAID/REFUNDED from app state"
+    },
+    {
+      "dependency": "Indexer/Search",
+      "mode": "public discovery stale/degraded/unavailable",
+      "mustNot": "become canonical or expose private data"
+    },
+    {
+      "dependency": "Notifications",
+      "mode": "delivery unavailable",
+      "mustNot": "block or change source state"
+    },
+    {
+      "dependency": "Analytics",
+      "mode": "metrics unavailable/stale",
+      "mustNot": "block canonical user workflows"
+    },
+    {
+      "dependency": "Arbitration",
+      "mode": "Arbitration-required remedy path paused/fail-closed",
+      "mustNot": "guess or auto-apply a ruling"
+    }
+  ],
+  "operatorRecoveryRules": [
+    "operators may pause ingestion, matching, generation submission, publication, voting or moderation surfaces when required to prevent unsafe duplicate/privileged effects",
+    "operator tools may inspect/reconcile identifiers and checkpoints but cannot fabricate canonical completion, settlement, rights, votes, winners or rulings",
+    "manual data repair that changes authoritative application state requires a versioned/auditable correction path defined by the owning domain",
+    "after incident recovery, service readiness requires dependency identity/version/freshness/integrity checks appropriate to the surface",
+    "queued work is resumed only after reconciliation determines it remains authorized and non-terminal"
+  ],
+  "failureRules": [
+    "client/network timeout cannot be interpreted as canonical failure or success without reconciliation",
+    "partial output cannot be presented as SUCCEEDED/VERIFIED/REGISTERED/PUBLISHED/SETTLED",
+    "retry before canonical reconciliation cannot create a second paid generation attempt",
+    "changed payload under an existing idempotency key fails closed",
+    "restart cannot discard durable replay/idempotency state for protected mutations",
+    "storage integrity mismatch or tombstoned object cannot be served during recovery",
+    "economic disagreement blocks new spending",
+    "lost Register/Publish response cannot cause duplicate Creative IDs",
+    "Identity outage cannot silently weaken a unique-human voting policy",
+    "lost vote response cannot produce a second accepted vote",
+    "Chart rebuild with identical policy/input/checkpoint cannot produce nondeterministic ordering",
+    "moderation recovery cannot duplicate enforcement or erase appeal history",
+    "Arbitration recovery cannot consume stale/wrong-domain/unfinalized/non-allowlisted remedies",
+    "Indexer/Search/Analytics/Notifications recovery cannot override source authority",
+    "dependency failure cannot widen PRIVATE/UNLISTED visibility",
+    "operator recovery cannot fabricate canonical state"
+  ],
+  "invariants": [
+    "HZGCA-REC-001 timeout/transport failure is ambiguous until reconciled against canonical/durable state",
+    "HZGCA-REC-002 retries are idempotent and never duplicate charges, entitlements, publication, social state, chart credit, nominations, votes, moderation or remedies",
+    "HZGCA-REC-003 partial artifacts never imply verified completion, publication or settlement",
+    "HZGCA-REC-004 recovery reconciles higher-authority canonical sources before lower-authority projections",
+    "HZGCA-REC-005 restart preserves durable idempotency/replay protection for protected mutations",
+    "HZGCA-REC-006 provider failover/rematch cannot change frozen accepted economic/privacy/verification terms without a new authorized transition",
+    "HZGCA-REC-007 storage integrity and deletion tombstones survive restart/backup/projection recovery",
+    "HZGCA-REC-008 economic recovery preserves payer/provider amount/state separation and never fabricates PAID/REFUNDED",
+    "HZGCA-REC-009 Register/Publish recovery resolves existing canonical Creative IDs rather than duplicating successful registration",
+    "HZGCA-REC-010 Identity-dependent unique-human voting fails closed during eligibility uncertainty",
+    "HZGCA-REC-011 Awards vote/finalization recovery is replay-safe, deterministic and single-use",
+    "HZGCA-REC-012 Community/Charts recovery cannot inflate source relations or qualified chart credit",
+    "HZGCA-REC-013 moderation/report/appeal recovery remains append-only and authority-scoped",
+    "HZGCA-REC-014 Arbitration recovery validates exact domain/origin/finality/remedy/replay before bounded consumption",
+    "HZGCA-REC-015 derived-service recovery never overrides canonical source authority or privacy",
+    "HZGCA-REC-016 Notifications delivery recovery cannot roll back or mutate source operations",
+    "HZGCA-REC-017 degraded modes preserve safety by disabling/limiting affected features rather than guessing authority",
+    "HZGCA-REC-018 HZ-GCA-1.17 creates no live recovery daemon, deployment, endpoint, address, custody or new protocol authority"
+  ],
+  "exitCriteria": [
+    "provider failure, timeout, cancellation, malformed/missing result and partial-output semantics are explicit",
+    "retry/idempotency/new-attempt boundaries are explicit",
+    "restart reconciliation order and durable replay protection are explicit",
+    "storage, economics, rights/publication, Identity/Awards, Community/Charts, moderation/Arbitration and derived-service recovery are explicit",
+    "degraded modes and operator-safe recovery boundaries are explicit",
+    "failure/recovery invariants are executable in the targeted verifier",
+    "no runtime recovery service, address, endpoint, live provider behavior or testnet evidence is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.18 through HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+    "docs/architecture/420hz/HZ-GCA-1.9-GENERATION-ECONOMICS.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+    "docs/architecture/420hz/HZ-GCA-1.13-NOMINATION-VOTING-POLICY.md",
+    "docs/architecture/420hz/HZ-GCA-1.14-MODERATION-DISPUTE-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.15-THREAT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.16-API-EVENT-INTERFACE-CONTRACTS.md",
+    "docs/architecture/infrastructure/420ai-compute-infrastructure.md",
+    "docs/architecture/infrastructure/420indexer.md",
+    "docs/420NOTIFICATIONS.md"
+  ]
+}

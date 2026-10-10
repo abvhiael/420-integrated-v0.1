@@ -1,0 +1,14 @@
+{
+  "name": "@420integrated/hz-generation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/errors.js && node --check src/schema.js && node --check src/provider.js && node --check src/jobs.js && node --check src/compute-adapter.js && node --check src/provenance.js && node --check src/project-workspace.js && node --check src/register-publish.js && node --check src/community.js && node --check src/charts.js && node --check src/awards.js && node --check src/award-voting.js && node --check src/award-prizes.js && node --check src/cross-service.js && node --check src/security-gate.js && node --check src/production-security.js && node --check src/production-surfaces.js && node --check src/index.js",
+    "qualify": "npm run check && npm test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

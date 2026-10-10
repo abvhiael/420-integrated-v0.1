@@ -1,0 +1,431 @@
+{
+  "schema": "420hz-gca-architecture-consolidation-v1",
+  "version": 1,
+  "canonicalStep": "HZ-GCA-1",
+  "workPackage": "HZ-GCA-1.18",
+  "title": "Architecture documentation consolidation",
+  "baseMainSha": "d112b2eb55b50a3a4f52a5e2a5364374595efe71",
+  "level": 1,
+  "milestoneRequired": false,
+  "consolidationScope": {
+    "includes": [
+      "HZ-GCA-1.1",
+      "HZ-GCA-1.2",
+      "HZ-GCA-1.3",
+      "HZ-GCA-1.4",
+      "HZ-GCA-1.5",
+      "HZ-GCA-1.6",
+      "HZ-GCA-1.7",
+      "HZ-GCA-1.8",
+      "HZ-GCA-1.9",
+      "HZ-GCA-1.10",
+      "HZ-GCA-1.11",
+      "HZ-GCA-1.12",
+      "HZ-GCA-1.13",
+      "HZ-GCA-1.14",
+      "HZ-GCA-1.15",
+      "HZ-GCA-1.16",
+      "HZ-GCA-1.17"
+    ],
+    "normativeEntryPoint": "docs/architecture/420hz/HZ-GCA-1-ARCHITECTURE.md",
+    "architectureIndex": "docs/architecture/420hz/index.md",
+    "rule": "Consolidation preserves qualified subordinate semantics; subordinate manifests remain normative for exact field-level policy where the master document summarizes them."
+  },
+  "packages": [
+    {
+      "workPackage": "HZ-GCA-1.1",
+      "title": "Define product boundaries",
+      "manifest": "hz/config/gca-product-boundaries-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.2",
+      "title": "Define canonical object model",
+      "manifest": "hz/config/gca-object-model-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.3",
+      "title": "Define Generate lifecycle",
+      "manifest": "hz/config/gca-generate-lifecycle-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.4",
+      "title": "Define AI disclosure rules",
+      "manifest": "hz/config/gca-ai-disclosure-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.4-AI-DISCLOSURE.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.5",
+      "title": "Define provenance model",
+      "manifest": "hz/config/gca-provenance-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.5-PROVENANCE-MODEL.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.6",
+      "title": "Define rights & consent boundaries",
+      "manifest": "hz/config/gca-rights-consent-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.7",
+      "title": "Define privacy model",
+      "manifest": "hz/config/gca-privacy-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.8",
+      "title": "Define storage & retention rules",
+      "manifest": "hz/config/gca-storage-retention-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.9",
+      "title": "Define generation economics",
+      "manifest": "hz/config/gca-generation-economics-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.9-GENERATION-ECONOMICS.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.10",
+      "title": "Define Community authority model",
+      "manifest": "hz/config/gca-community-authority-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.11",
+      "title": "Define Charts rules",
+      "manifest": "hz/config/gca-charts-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.12",
+      "title": "Define Awards architecture",
+      "manifest": "hz/config/gca-awards-architecture-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.12-AWARDS-ARCHITECTURE.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.13",
+      "title": "Define nomination & voting policy framework",
+      "manifest": "hz/config/gca-nomination-voting-policy-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.13-NOMINATION-VOTING-POLICY.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.14",
+      "title": "Define moderation & dispute boundaries",
+      "manifest": "hz/config/gca-moderation-dispute-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.14-MODERATION-DISPUTE-BOUNDARIES.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.15",
+      "title": "Threat model",
+      "manifest": "hz/config/gca-threat-model-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.15-THREAT-MODEL.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.16",
+      "title": "API/event/interface contracts",
+      "manifest": "hz/config/gca-api-interface-contracts-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.16-API-EVENT-INTERFACE-CONTRACTS.md",
+      "qualificationLevel": 1
+    },
+    {
+      "workPackage": "HZ-GCA-1.17",
+      "title": "Failure and recovery semantics",
+      "manifest": "hz/config/gca-failure-recovery-v1.json",
+      "document": "docs/architecture/420hz/HZ-GCA-1.17-FAILURE-RECOVERY-SEMANTICS.md",
+      "qualificationLevel": 1
+    }
+  ],
+  "authorityLedger": [
+    {
+      "domain": "Wallet/SmartAccount authorization",
+      "owner": "Wallet / Smart Accounts",
+      "hzRole": "consume qualified actor/session/capability references only",
+      "derived": false
+    },
+    {
+      "domain": "Identity/eligibility credentials",
+      "owner": "420Identity or explicitly approved verifier source",
+      "hzRole": "consume minimum-disclosure profile/eligibility results only",
+      "derived": false
+    },
+    {
+      "domain": "AI generation execution",
+      "owner": "420AI + Compute Market",
+      "hzRole": "orchestrate/request/observe jobs; never become provider or settlement authority",
+      "derived": false
+    },
+    {
+      "domain": "Creative publication identity",
+      "owner": "420 Creative Protocol",
+      "hzRole": "reference native Creator/Work/Recording IDs and request registration/publication",
+      "derived": false
+    },
+    {
+      "domain": "Rights/licenses/provenance authority",
+      "owner": "420 Rights / Creative rights registries",
+      "hzRole": "validate and reference rights/consent; moderation cannot rewrite",
+      "derived": false
+    },
+    {
+      "domain": "Private Generate project/workspace state",
+      "owner": "420Hz application product domain",
+      "hzRole": "canonical for project/draft/selection/workflow state only",
+      "derived": false
+    },
+    {
+      "domain": "Artifact storage availability/integrity",
+      "owner": "Resource Protocol / qualified storage provider",
+      "hzRole": "retain StorageObjectRef/manifest and privacy/retention policy",
+      "derived": false
+    },
+    {
+      "domain": "Generation funding/settlement",
+      "owner": "420AI/Compute Market/Vault and canonical payment rails",
+      "hzRole": "display/reconcile; never fabricate provider entitlement/refund/payment",
+      "derived": false
+    },
+    {
+      "domain": "Community source relations",
+      "owner": "420Hz Community product domain",
+      "hzRole": "canonical for ArtistFollow/RecordingFavorite/Playlist/PlaylistItem",
+      "derived": false
+    },
+    {
+      "domain": "Charts",
+      "owner": "420Hz Charts policy over eligible source data",
+      "hzRole": "publish deterministic rebuildable ChartSnapshot",
+      "derived": true
+    },
+    {
+      "domain": "Awards product state",
+      "owner": "420Hz Awards product domain",
+      "hzRole": "canonical for Program/Season/Category/Nomination/Ballot/Vote/Result/Badge",
+      "derived": false
+    },
+    {
+      "domain": "Moderation application enforcement",
+      "owner": "420Hz moderation product domain",
+      "hzRole": "reports/hide/lock/suspend/block/mute/appeal/restore within application scope",
+      "derived": false
+    },
+    {
+      "domain": "Arbitration",
+      "owner": "420Arbitration when explicitly adopted",
+      "hzRole": "consume bounded finalized ruling references through allowlisted remedies only",
+      "derived": false
+    },
+    {
+      "domain": "Indexer/Search",
+      "owner": "420Indexer / 420Search",
+      "hzRole": "read/rebuild public projections only",
+      "derived": true
+    },
+    {
+      "domain": "Analytics",
+      "owner": "420Analytics",
+      "hzRole": "privacy-safe aggregate derived metrics only",
+      "derived": true
+    },
+    {
+      "domain": "Notifications",
+      "owner": "420Notifications",
+      "hzRole": "delivery only; no source mutation authority",
+      "derived": true
+    },
+    {
+      "domain": "Governance",
+      "owner": "420Governance / Civic",
+      "hzRole": "no Awards/Community/Charts mutation authority",
+      "derived": false
+    }
+  ],
+  "authoritativeVsDerived": {
+    "authoritative": [
+      "Wallet/SmartAccount authorization",
+      "420Identity credential/eligibility source state",
+      "420AI/Compute Market job/match/verification/settlement state",
+      "Creative Creator/Work/Recording publication state",
+      "Rights/license/provenance source state",
+      "420Hz private Generate project workflow state",
+      "420Hz Community source relation state",
+      "420Hz Awards product-domain state",
+      "420Hz moderation application-enforcement state",
+      "Resource/storage manifest/integrity state as defined by owning provider/protocol"
+    ],
+    "derived": [
+      "ChartSnapshot rankings",
+      "Indexer projections",
+      "Search ranking/discovery",
+      "Analytics aggregates",
+      "Notification delivery state"
+    ],
+    "rule": "Derived state cannot authorize protected writes or override authoritative source state."
+  },
+  "objectDomains": {
+    "generate": [
+      "GenerationProject",
+      "GenerationIntent",
+      "GenerationRunBinding",
+      "GenerationOutput",
+      "GenerationArtifact",
+      "ProvenanceDraft",
+      "PublishIntent"
+    ],
+    "community": [
+      "ArtistFollow",
+      "RecordingFavorite",
+      "Playlist",
+      "PlaylistItem",
+      "CommunityActivity"
+    ],
+    "charts": [
+      "ChartSnapshot"
+    ],
+    "awards": [
+      "AwardProgram",
+      "AwardSeason",
+      "AwardCategory",
+      "EligibilityPolicy",
+      "AwardNomination",
+      "AwardBallot",
+      "AwardVote",
+      "AwardResult",
+      "AwardBadge"
+    ]
+  },
+  "generateLifecycle": [
+    "DRAFT",
+    "QUOTED",
+    "SUBMITTED",
+    "RUNNING",
+    "SUCCEEDED",
+    "REVIEWED",
+    "REGISTERED",
+    "PUBLISHED"
+  ],
+  "generateTerminalRunStates": [
+    "FAILED",
+    "CANCELLED"
+  ],
+  "disclosureClasses": [
+    "HUMAN",
+    "AI_ASSISTED",
+    "AI_GENERATED",
+    "AI_DERIVATIVE"
+  ],
+  "privacyClasses": [
+    "PUBLIC",
+    "UNLISTED",
+    "PRIVATE",
+    "SECRET"
+  ],
+  "architectureSeparations": [
+    "AI transformation permission is distinct from training permission",
+    "Generate success is distinct from Creative registration/publication",
+    "raw play is distinct from qualified play",
+    "Community relation is distinct from Chart credit",
+    "Chart rank is distinct from Awards eligibility/result",
+    "AwardVote is distinct from Chart, Community and Civic/Governance voting",
+    "moderation application enforcement is distinct from Creative/Rights/Identity/Wallet/payment/governance authority",
+    "Arbitration ruling is a bounded input and not ambient remedy authority",
+    "Notification/Search/Indexer/Analytics state is derived/presentation and not canonical source authority",
+    "partial output is distinct from verified success/publication/settlement",
+    "payer refundable/claimable/paid and provider earned/claimable/paid are distinct economic states"
+  ],
+  "crossCuttingRules": {
+    "authorization": "Authority-bearing mutations require qualified Wallet/session actor plus domain/resource/idempotency context.",
+    "privacy": "Private generation inputs/drafts/stems/reference audio and secret material remain non-public unless an explicit later publication rule says otherwise.",
+    "storage": "Integrity commitments and deletion/tombstone state survive restart/rebuild; storage references do not imply universal physical deletion authority.",
+    "economics": "No hidden 420Hz surcharge; retries must not duplicate charge or provider entitlement.",
+    "charts": "Charts are deterministic, versioned and rebuildable derived projections.",
+    "awards": "Awards policy/ballot/result history is versioned/frozen and finalization is deterministic and single-use.",
+    "moderation": "Moderation is application scoped, append-only/auditable and cannot rewrite external protocol truth.",
+    "recovery": "Canonical/source authority is reconciled before retries that could create spend, entitlement, publication, vote, moderation or remedy effects."
+  },
+  "unresolvedAuthorityDuplication": [],
+  "deferredRuntime": [
+    "live generation/provider adapters and runtime APIs",
+    "production AI worker/media scanner isolation",
+    "live storage/provider/deletion qualification",
+    "production unique-human voting verifier",
+    "live Charts qualified-play/anti-bot pipeline",
+    "live moderation/Arbitration adapters",
+    "testnet restart/reorg/recovery evidence",
+    "production endpoints/deployments/addresses"
+  ],
+  "consistencyRules": [
+    "exactly HZ-GCA-1.1 through HZ-GCA-1.17 must be indexed once and in order",
+    "every indexed manifest must declare canonicalStep HZ-GCA-1, its exact workPackage, Level 1 and milestoneRequired false",
+    "every indexed manifest/document path must exist",
+    "no consolidation rule may assign authority contrary to a subordinate qualified manifest",
+    "unresolvedAuthorityDuplication must remain empty before HZ-GCA-1.18 completion",
+    "master document must identify authoritative vs derived state and explicit cross-domain separations",
+    "master/index must point to the exact subordinate normative documents rather than replacing their field-level semantics"
+  ],
+  "exitCriteria": [
+    "one normative architecture entry point summarizes HZ-GCA-1.1 through HZ-GCA-1.17",
+    "one machine-readable consolidation manifest indexes every subordinate manifest/document",
+    "420Hz architecture index exposes the master and all subordinate work packages",
+    "authority ledger and authoritative-vs-derived state are explicit",
+    "object/lifecycle/privacy/storage/economics/Community/Charts/Awards/moderation/security/API/recovery summaries are cross-linked",
+    "no unresolved authority duplication remains",
+    "targeted verifier proves source completeness, ordering and cross-document consistency",
+    "no runtime service, endpoint, address, ABI, deployment or testnet state is invented",
+    "HZ-GCA-1 remains open for HZ-GCA-1.19 and HZ-GCA-1.20"
+  ],
+  "sourceDocs": [
+    "docs/420HZ-GENERATE-COMMUNITY-AWARDS-ROADMAP.md",
+    "docs/architecture/420hz/HZ-GCA-1.1-PRODUCT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.2-CANONICAL-OBJECT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.3-GENERATE-LIFECYCLE.md",
+    "docs/architecture/420hz/HZ-GCA-1.4-AI-DISCLOSURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.5-PROVENANCE-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.6-RIGHTS-CONSENT-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.7-PRIVACY-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.8-STORAGE-RETENTION.md",
+    "docs/architecture/420hz/HZ-GCA-1.9-GENERATION-ECONOMICS.md",
+    "docs/architecture/420hz/HZ-GCA-1.10-COMMUNITY-AUTHORITY.md",
+    "docs/architecture/420hz/HZ-GCA-1.11-CHARTS-RULES.md",
+    "docs/architecture/420hz/HZ-GCA-1.12-AWARDS-ARCHITECTURE.md",
+    "docs/architecture/420hz/HZ-GCA-1.13-NOMINATION-VOTING-POLICY.md",
+    "docs/architecture/420hz/HZ-GCA-1.14-MODERATION-DISPUTE-BOUNDARIES.md",
+    "docs/architecture/420hz/HZ-GCA-1.15-THREAT-MODEL.md",
+    "docs/architecture/420hz/HZ-GCA-1.16-API-EVENT-INTERFACE-CONTRACTS.md",
+    "docs/architecture/420hz/HZ-GCA-1.17-FAILURE-RECOVERY-SEMANTICS.md",
+    "hz/config/gca-product-boundaries-v1.json",
+    "hz/config/gca-object-model-v1.json",
+    "hz/config/gca-generate-lifecycle-v1.json",
+    "hz/config/gca-ai-disclosure-v1.json",
+    "hz/config/gca-provenance-v1.json",
+    "hz/config/gca-rights-consent-v1.json",
+    "hz/config/gca-privacy-v1.json",
+    "hz/config/gca-storage-retention-v1.json",
+    "hz/config/gca-generation-economics-v1.json",
+    "hz/config/gca-community-authority-v1.json",
+    "hz/config/gca-charts-v1.json",
+    "hz/config/gca-awards-architecture-v1.json",
+    "hz/config/gca-nomination-voting-policy-v1.json",
+    "hz/config/gca-moderation-dispute-v1.json",
+    "hz/config/gca-threat-model-v1.json",
+    "hz/config/gca-api-interface-contracts-v1.json",
+    "hz/config/gca-failure-recovery-v1.json",
+    "docs/architecture/index.md"
+  ]
+}

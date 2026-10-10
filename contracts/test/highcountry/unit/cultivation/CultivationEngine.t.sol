@@ -15,6 +15,7 @@ import { RulesetRouter } from "../../../../src/highcountry/rules/RulesetRouter.s
 import { RulesetRegistry } from "../../../../src/highcountry/rules/RulesetRegistry.sol";
 import { CultivationEngine } from "../../../../src/highcountry/cultivation/CultivationEngine.sol";
 import { HarvestEngine } from "../../../../src/highcountry/harvest/HarvestEngine.sol";
+import { HarvestScoring } from "../../../../src/highcountry/harvest/HarvestScoring.sol";
 import { GenesisRoots } from "../../../../src/highcountry/types/HighCountryTypes.sol";
 import { HCInvalidState, HCCapacityExceeded } from "../../../../src/highcountry/errors/HighCountryErrors.sol";
 import { PlantSourcesFixture } from "../../mocks/PlantSourcesFixture.sol";
@@ -525,6 +526,11 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(h.rulesetId == approvedRulesetId && h.rulesetContentHash != bytes32(0), "ruleset provenance lost");
         require(h.grower == address(this) && h.parcelId == 11 && h.publicPlotId == 0, "grower/parcel provenance lost");
         require(harvest.isHarvestAccepted(plantId) && harvest.getHarvest(plantId).accepted, "receipt missing");
+        HarvestScoring.Result memory scored = harvest.getHarvestScore(plantId);
+        HarvestScoring.Result memory quote = harvest.quoteHarvest(plantId);
+        require(scored.yieldGrams == quote.yieldGrams, "accepted yield differs from quote");
+        require(scored.qualityBps == cultivation.getState(plantId).qualityBps, "unsealed quality used");
+        require(scored.grade == HarvestScoring.Grade.PREMIUM, "healthy grade changed");
         require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.READY, "R03.1 prematurely released capacity");
         (bool duplicate,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
         require(!duplicate, "duplicate harvest accepted");

@@ -61,3 +61,13 @@ The targeted BnB runtime workflow now executes a JavaScript syntax check on the 
 - New PostgreSQL adversarial cases cover invalid IANA zone, unsafe media URL, pending moderation, stale versions, no-auth changes and wrong time-zone offset.
 
 **Still not accepted:** full accessible host media/policy editing UI; approved media processing, copyright provenance and moderation operator; complete Playwright authenticated host journey/axe-based audit; unit-capacity calendar allocation under overlapping quantity reservations and multi-instance races; policy-change semantics for already accepted booking snapshots; live independent issuer and property/host approval. Those require additional implementation/qualification; do not label BNB-2.2 COMPLETE.
+
+## Moderator and concurrency hardening (2026-10-10)
+
+The private `/v1/bnb/internal/media/{media_id}/decision` endpoint now requires a purpose-bound signed independent reviewer credential through `BNB_MEDIA_REVIEW_*` trust configuration, verifies exact media and decision scope, requires valid transitions, and uses `007_media_review_nonce.sql` for single-use issuer JTI. Without provisioned external reviewer authority, all approvals fail closed (HTTP 503). This adapter is **not** evidence that a reviewer has been legally/governance approved or operationally provisioned.
+
+The targeted browser check has been expanded from Chromium smoke to responsive mobile/desktop axe-core `wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa` violation assertions, in addition to basic keyboard, form and anonymous-state checks. This does not replace manual screen-reader, browser interoperability, or authenticated workflow acceptance.
+
+A new shared-PostgreSQL concurrency test races **eight independent TestClient instances** for one inventory slot and verifies one success/seven capacity denials. It is still in-process integration—not two separately deployed service processes or a full multiple-unit reservation allocator. Live multi-instance/provider authority remains assigned to `BNB-TESTNET-WORK-ROADMAP.md`. No work here enables guest booking finality, payments or publication.
+
+**Qualification:** app-specific Level 1 exact-SHA CI pending. Do not describe these new tests as green before the reported run completes.

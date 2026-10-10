@@ -1,0 +1,52 @@
+name: 420Compliance C01 Level 1
+on:
+  push:
+    branches: ['audit/420compliance-*']
+    paths:
+      - 'docs/compliance/420COMPLIANCE-ROADMAP.md'
+      - 'docs/compliance/C01.1-*'
+      - 'scripts/verify-compliance-c01-1.py'
+      - 'scripts/test-compliance-c01-1.py'
+      - '.github/workflows/420compliance-c01-level1.yml'
+  pull_request:
+    paths:
+      - 'docs/compliance/420COMPLIANCE-ROADMAP.md'
+      - 'docs/compliance/C01.1-*'
+      - 'scripts/verify-compliance-c01-1.py'
+      - 'scripts/test-compliance-c01-1.py'
+      - '.github/workflows/420compliance-c01-level1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compliance-c01-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  inventory-level1:
+    runs-on: ubuntu-latest
+    env:
+      EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout exact implementation SHA and historical evidence
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assert exact implementation SHA
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Compile affected qualification scripts
+        run: python3 -m py_compile scripts/verify-compliance-c01-1.py scripts/test-compliance-c01-1.py
+      - name: Verify source inventory, reuse boundaries and unchanged authorities
+        run: python3 scripts/verify-compliance-c01-1.py --expected-sha "$EXPECTED_SHA" --output /tmp/compliance-c01-level1.json
+      - name: Negative provenance, omission, scope and stale-SHA regressions
+        run: python3 scripts/test-compliance-c01-1.py
+      - name: Retain exact-SHA qualification result
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-c01-level1-${{ env.EXPECTED_SHA }}
+          path: /tmp/compliance-c01-level1.json
+          if-no-files-found: error

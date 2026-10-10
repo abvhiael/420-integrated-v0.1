@@ -6,7 +6,7 @@ func TestSourceChangeDetection(t *testing.T){
  original:=SourceDocument{SourceID:"FED-ACT",URL:"https://laws-lois.justice.gc.ca",SnapshotDigest:Digest([]byte("raw1")),Available:true,Sections:[]SourceSection{section("s1","Prohibition on X")},Navigation:[]string{"menu1"}}
  cases:=[]struct{name string;change func(*SourceDocument);want string}{
  {"unchanged",func(*SourceDocument){},"NO_MEANINGFUL_CHANGE"},
- {"navigation only",func(x *SourceDocument){x.SnapshotDigest=Digest([]byte("raw2"));x.Navigation=[]string{"menu2"}},"NAVIGATION_ONLY_CHANGE"},
+ {"navigation only",func(x *SourceDocument){x.SnapshotDigest=Digest([]byte("raw2"));x.Navigation=[]string{"menu2"}},"NAVIGATION_ONLY"},
  {"silent amendment",func(x *SourceDocument){x.Sections=[]SourceSection{section("s1","Prohibition on Y")}},"SILENT_AMENDMENT"},
  {"effective date shift",func(x *SourceDocument){x.Sections[0].EffectiveFrom=now.Add(time.Hour)},"EFFECTIVE_DATE_SHIFT"},
  {"removed",func(x *SourceDocument){x.Sections=nil},"REMOVED"},

@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { StoreProgression } from "../../src/budtender/StoreProgression";
+import { StoreProgression } from "../../src/budtender/StoreProgression.ts";
 
 describe("StoreProgression BUD-4", () => {
   it("purchases deterministic upgrades and escalates cost", () => {
@@ -44,5 +44,11 @@ describe("StoreProgression BUD-4", () => {
     const progression = new StoreProgression();
     assert.throws(() => progression.creditCash(-1), /invalid cash credit/);
     assert.equal(progression.snapshot().cash, 0);
+  });
+  it("rejects cash credits that would exceed the safe-integer range", () => {
+    const progression = new StoreProgression(Number.MAX_SAFE_INTEGER);
+    const before = progression.snapshot();
+    assert.throws(() => progression.creditCash(1), /safe integer range/);
+    assert.deepEqual(progression.snapshot(), before);
   });
 });

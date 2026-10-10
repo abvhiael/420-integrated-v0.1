@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
-import { BudtenderCustomerSystem } from "../../src/budtender/BudtenderCustomers";
-import { BudtenderStore } from "../../src/budtender/BudtenderStore";
+import { BudtenderCustomerSystem } from "../../src/budtender/BudtenderCustomers.ts";
+import { BudtenderStore } from "../../src/budtender/BudtenderStore.ts";
 
 describe("BudtenderCustomerSystem BUD-2", () => {
   it("preserves arrival order in the queue", () => {

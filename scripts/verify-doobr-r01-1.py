@@ -100,3 +100,27 @@ for i in range(1,21):
     assert_true(f"SEC-{i:02d}" in r16,"R01.6 adversarial traceability SEC-"+str(i))
 assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.6 frozen Genesis catalog intact")
 assert_true(flags.get("travel.doobr_transactions") is False,"R01.6 regulated Travel gateway remains disabled")
+
+# R01.7 design schema checks: run under exact-head CI with pyyaml.
+import yaml
+r17=read("docs/doobr/DOOBR-R01-7-API-UX-MOBILE-ARCHITECTURE.md")
+spec=yaml.safe_load(read("docs/doobr/openapi-v1.yaml"))
+events=json.loads(read("docs/doobr/events-v1.json"))
+assert_true("R01.7 OpenAPI/events" in roadmap,"canonical R01.7 unchanged")
+assert_true(spec["openapi"]=="3.1.0" and "DESIGN" not in spec["info"]["title"],"proposed OpenAPI 3.1 parsed")
+paths=spec["paths"]
+assert_true("/v1/public/regions/{region_id}/presence" in paths,"R01.7 public presence defined")
+assert_true("/v1/orders" in paths and "/v1/orders/{order_id}" in paths,"R01.7 disabled-by-default order contracts defined")
+public=spec["components"]["schemas"]["PublicRegionPresence"]
+assert_true(public["additionalProperties"] is False,"R01.7 public schema strictly allowlisted")
+expected={"schema_version","region_id","status","observed_at","expires_at","jurisdiction_policy_ref","handoff_url"}
+assert_true(set(public["properties"])==expected,"R01.7 no private public fields")
+assert_true(set(public["properties"]["status"]["enum"])=={"AVAILABLE","LIMITED","UNAVAILABLE","UNKNOWN"},"R01.7 four-state availability")
+assert_true(paths["/v1/orders"]["post"]["security"] != [],"R01.7 create order requires scoped authentication")
+assert_true(len(events["events"])>=14 and events["transport"].startswith("at_least_once"),"R01.7 complete versioned outbox catalogue")
+assert_true("region.presence_updated.v1"==events["public_projection"]["allow_event"],"R01.7 safe public event only")
+for marker in ["Consumer web/mobile","Courier web/mobile","Retailer portal","Operations console","iOS and Android","420Compliance","DevelopmentCompensationVault420","UNKNOWN","R01.8 Architecture decision lock"]:
+    assert_true(marker in r17,"R01.7 UX/mobile/authority documented: "+marker)
+for i in range(1,21):
+    assert_true(f"R17-T{i:02d}" in r17 if i==1 else f"T{i:02d}" in r17,"R01.7 negative requirement "+str(i))
+assert_true(flags.get("travel.doobr_transactions") is False,"R01.7 Travel transaction gate stays disabled")

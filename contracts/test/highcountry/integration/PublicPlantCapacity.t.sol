@@ -344,7 +344,9 @@ contract PublicPlantCapacityTest is PublicPlantCapacityFixture {
         PlantRegistry otherPlants = new PlantRegistry(
             address(auth), address(genomes), address(land), address(other), address(seeds), address(clones)
         );
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, otherPlants.EMERGENCY_BIND_SCOPE());
+        _grant(
+            address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_BIND_EMERGENCY, otherPlants.EMERGENCY_BIND_SCOPE()
+        );
         otherPlants.bindEmergencyState(address(emergency));
         vm.prank(BOB);
         _reject(

@@ -82,3 +82,20 @@ def test_parallel_holds_cannot_overbook(fixture_property):
         results=list(pool.map(send,range(5)))
     assert sum(x.status_code==201 for x in results)==1,[r.status_code for r in results]
     assert sum(x.status_code==409 for x in results)==4
+
+
+def test_independent_http_clients_share_postgresql_capacity_lock(fixture_property):
+    """Separate HTTP test clients, concurrent DB connections, one capacity slot."""
+    pid,headers=fixture_property
+    request=payload(pid)
+    clients=[TestClient(api.app) for _ in range(8)]
+    def send(i):
+        return clients[i].post("/v1/bnb/holds",json=request,
+            headers={**headers,"idempotency-key":f"independent-client-{i:03d}"})
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        outcomes=list(executor.map(send,range(8)))
+    assert sorted(x.status_code for x in outcomes)==[201]+[409]*7
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as connection:
+        allocated=connection.execute("SELECT COALESCE(SUM(units),0) FROM bnb_hold WHERE property_id=%s",
+                                     (pid,)).fetchone()[0]
+        assert allocated==1

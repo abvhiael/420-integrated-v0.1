@@ -4,3 +4,6 @@ p,li,label,span,button{overflow-wrap:anywhere}input,select,textarea{min-width:0;
 
 /* High Street official storefront brand */
 .brand-logo{display:block;max-width:112px;height:auto;object-fit:contain}
+
+/* High Street primary brand: full-size and centered over default page title. */
+header .builder-brand{display:block;width:min(100%,640px);margin:0 auto 1rem}header .builder-brand .brand-logo{display:block;width:100%;max-width:640px;height:auto;max-height:none;object-fit:contain;margin:0 auto}header h1{text-align:center}

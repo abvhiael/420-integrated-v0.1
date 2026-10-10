@@ -80,7 +80,7 @@ A decision must bind to the caller, tenant, action, order or operation, origin/d
 | C01.1 | Audit current main, active branches, roadmaps, service catalogue, contracts, configuration, CI and existing jurisdiction/credential components; produce inventory, reuse matrix and gaps. |
 | C01.2 | Lock product scope, actors and journeys: traveller, consumer app, courier app, retailer, policy author, independent reviewer, publisher, operator and auditor. Record excluded domains. |
 | C01.3 | Establish source/authority taxonomy, legal review ownership and BC/Vancouver questions requiring qualified interpretation. Separate legal approval from governance and software qualification. |
-| C01.4 | Agree shared authority with DOOBr and Travel; replace duplicated proposed policy ownership through an explicit roadmap amendment with preserved requirement IDs. |
+| C01.4 | Agree shared authority with DOOBr and Travel; replace duplicated proposed policy ownership through an explicit roadmap amendment with preserved requirement IDs. See [C01.4 amendment](C01.4-SHARED-AUTHORITY-AMENDMENT.md): retain the canonical IDs and separate legal-policy decision, DOOBr enforcement, and Travel public-presentation authority. |
 | C01.5 | Threat/privacy model: fraudulent sources, manipulated documents, AI prompt injection, approval bypass, tenant leakage, stale decisions, coercion, chain leakage and denial of service. |
 | C01.6 | Define APIs, schemas, events, outcome meanings, trust boundaries, freshness and time semantics; choose stack and deployment topology. |
 | C01.7 | Approve service discovery strategy, signed publication and optional chain commitments; no new Genesis ID/address without canonical approval. |

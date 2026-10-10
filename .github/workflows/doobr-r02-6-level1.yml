@@ -7,6 +7,7 @@ on:
       - 'doobr/auth.py'
       - 'doobr/storage/migrations/0006_order_commands.up.sql'
       - 'doobr/storage/tests/test_pg_order_commands.py'
+      - 'doobr/storage/tests/test_order_commands.py'
       - 'docs/doobr/DOOBR-R02-6-*'
       - '.github/workflows/doobr-r02-6-level1.yml'
   pull_request:
@@ -15,6 +16,7 @@ on:
       - 'doobr/auth.py'
       - 'doobr/storage/migrations/0006_order_commands.up.sql'
       - 'doobr/storage/tests/test_pg_order_commands.py'
+      - 'doobr/storage/tests/test_order_commands.py'
       - 'docs/doobr/DOOBR-R02-6-*'
       - '.github/workflows/doobr-r02-6-level1.yml'
   workflow_dispatch:
@@ -54,6 +56,8 @@ jobs:
           python-version: '3.12'
       - name: Compile command engine and authorization
         run: python3 -m py_compile doobr/order_commands.py doobr/auth.py doobr/storage/tests/test_pg_order_commands.py
+      - name: State machine and invalid command negative cases
+        run: python3 -m unittest discover -s doobr/storage/tests -p test_order_commands.py -v
       - name: Install restricted PostgreSQL test client
         run: python3 -m pip install 'psycopg[binary]==3.2.4'
       - name: Apply canonical R02 migrations

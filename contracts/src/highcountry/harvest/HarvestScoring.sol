@@ -8,7 +8,14 @@ library HarvestScoring {
     uint256 internal constant MAX_GRAMS = 1_000;
     uint256 internal constant BASE_GRAMS = 500;
 
-    enum Grade { NONE, C, B, A, PREMIUM }
+    enum Grade {
+        NONE,
+        C,
+        B,
+        A,
+        PREMIUM
+    }
+
     struct Result {
         uint32 yieldGrams;
         uint16 qualityBps;
@@ -20,7 +27,10 @@ library HarvestScoring {
     /// @dev The low 16 bits of a sealed genome ID provide a reproducible 9000–11000 bps
     ///      game modifier; this is an explicit V1 game rule, not an independently validated
     ///      genotype-to-yield prediction.
-    function calculate(bytes32 genomeId, uint16 qualityBps) internal pure returns (Result memory result) {
+    function calculate(
+        bytes32 genomeId,
+        uint16 qualityBps
+    ) internal pure returns (Result memory result) {
         require(genomeId != bytes32(0), "HARVEST_INVALID_GENOME");
         require(qualityBps <= BPS, "HARVEST_QUALITY_RANGE");
         uint16 genetics = uint16(9_000 + (uint256(genomeId) % 2_001));

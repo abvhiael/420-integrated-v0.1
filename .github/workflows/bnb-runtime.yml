@@ -38,7 +38,7 @@ jobs:
       - name: Install runtime dependencies
         run: python -m pip install -r services/420bnb/requirements.txt
       - name: Apply PostgreSQL schema
-        run: python -c "import os,psycopg,pathlib; c=psycopg.connect(os.environ['BNB_DATABASE_URL']); c.execute(pathlib.Path('services/420bnb/migrations/001_initial.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/002_identity_access.sql').read_text()); c.commit();c.close()"
+        run: python -c "import os,psycopg,pathlib; c=psycopg.connect(os.environ['BNB_DATABASE_URL']); c.execute(pathlib.Path('services/420bnb/migrations/001_initial.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/002_identity_access.sql').read_text()); c.execute(pathlib.Path('services/420bnb/migrations/003_recovery_claims.sql').read_text()); c.commit();c.close()"
       - name: Runtime security and API tests
         run: pytest -q services/420bnb/tests
       - name: Compile runtime module

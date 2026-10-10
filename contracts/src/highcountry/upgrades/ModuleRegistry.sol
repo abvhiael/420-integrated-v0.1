@@ -14,6 +14,7 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { IModuleRegistry } from "../interfaces/IModuleRegistry.sol";
 import { IHighCountryModuleIdentity } from "../interfaces/IHighCountryModuleIdentity.sol";
 import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
+import { IRulesetRegistry } from "../interfaces/IRulesetRegistry.sol";
 import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 import { UpgradeState } from "../types/HighCountryEnums.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
@@ -24,6 +25,9 @@ contract ModuleRegistry is IModuleRegistry {
     mapping(bytes32 => bytes32) public registeredCodeHash;
     mapping(bytes32 => bytes32) public registeredInterface;
     IEmergencyState public emergencyState;
+    IRulesetRegistry public rulesetRegistry;
+    bytes32 public constant RULESET_BIND_SCOPE = keccak256("HC.RULESET.MODULE_BIND.V1");
+    event RulesetRegistryBound(address indexed rulesets);
     bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.MODULE_BIND.V1");
     event EmergencyStateBound(address indexed emergency);
 
@@ -32,6 +36,29 @@ contract ModuleRegistry is IModuleRegistry {
     ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
+    }
+
+    function bindRulesetRegistry(
+        address candidate
+    ) external {
+        if (address(rulesetRegistry) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.MODULE_REGISTRY, ActionIds.MODULE_BIND_RULESETS, RULESET_BIND_SCOPE, 0
+            )
+        );
+        if (address(IRulesetRegistry(candidate).authorization()) != address(authorization)) revert HCInvalidState();
+        rulesetRegistry = IRulesetRegistry(candidate);
+        emit RulesetRegistryBound(candidate);
+    }
+
+    function _requireRegisteredRuleset(
+        bytes32 rulesetId
+    ) private view {
+        if (address(rulesetRegistry) == address(0) || !rulesetRegistry.exists(rulesetId)) revert HCInvalidState();
+        IRulesetRegistry.RulesetRecord memory record = rulesetRegistry.getRuleset(rulesetId);
+        if (!record.exists || record.contentHash == bytes32(0)
+            || rulesetRegistry.deriveRulesetId(record.contentHash) != rulesetId) revert HCInvalidState();
     }
 
     function bindEmergencyState(
@@ -61,6 +88,7 @@ contract ModuleRegistry is IModuleRegistry {
                 || emergencyState.isRestricted(EmergencyDomains.MODULE_ACTIVATION)
                 || record.implementation.codehash != registeredCodeHash[moduleId]
         ) revert HCInvalidState();
+        _requireRegisteredRuleset(record.rulesetId);
         _verifyIdentity(
             moduleId, record.implementation, record.version, record.rulesetId, registeredInterface[moduleId]
         );
@@ -113,6 +141,7 @@ contract ModuleRegistry is IModuleRegistry {
     ) external {
         if (moduleId == bytes32(0) || rulesetId == bytes32(0) || version == 0) revert HCInvalidId();
         if (implementation == address(0)) revert HCZeroAddress();
+        _requireRegisteredRuleset(rulesetId);
         _verifyIdentity(moduleId, implementation, version, rulesetId, bytes32(0));
         if (_modules[moduleId].exists) revert HCModuleAlreadyRegistered(moduleId);
 
@@ -148,6 +177,7 @@ contract ModuleRegistry is IModuleRegistry {
         if (!record.exists) revert HCModuleNotFound(moduleId);
         if (!_isValidTransition(record.state, newState)) revert HCInvalidState();
         if (newState == UpgradeState.ACTIVE) {
+            _requireRegisteredRuleset(record.rulesetId);
             if (
                 address(emergencyState) == address(0) || emergencyState.isRestricted(EmergencyDomains.MODULE_ACTIVATION)
                     || record.implementation.codehash != registeredCodeHash[moduleId]

@@ -230,6 +230,7 @@ def get_quote(quote_id:str,authorization:str|None=Header(None)):
 class HoldInput(BaseModel):
     property_id: str
     unit_id: str | None = None
+    quote_id: str | None = None
     start: datetime
     end: datetime
     units: int = Field(default=1, ge=1, le=100)
@@ -902,6 +903,26 @@ def hold(payload: HoldInput, idempotency_key: str = Header(min_length=8,max_leng
                 if prior[0]=="cancelled":
                     return {**cached,"status":"cancelled","confirmed":False}
                 return cached
+            configured=c.execute("SELECT 1 FROM bnb_rate_plan WHERE property_id=%s",
+                                 (payload.property_id,)).fetchone()
+            if configured:
+                if not payload.quote_id:raise HTTPException(422,"PRICE_QUOTE_REQUIRED")
+                quote=c.execute("""SELECT guest_subject,unit_id,lower(period),upper(period),
+                    quantity,expires_at,status,property_version,rate_version,
+                    policy_snapshot,calculation FROM bnb_price_quote
+                    WHERE id=%s AND property_id=%s FOR UPDATE""",
+                    (payload.quote_id,payload.property_id)).fetchone()
+                if not quote or quote[0]!=subject:raise HTTPException(404,"QUOTE_NOT_FOUND")
+                if quote[5]<=datetime.now(timezone.utc) or quote[6]!="issued":
+                    raise HTTPException(409,"QUOTE_EXPIRED_OR_REVOKED")
+                if (str(quote[1]) if quote[1] else None)!=payload.unit_id or (
+                    quote[2]!=payload.start.astimezone(timezone.utc) or
+                    quote[3]!=payload.end.astimezone(timezone.utc) or quote[4]!=payload.units
+                ):raise HTTPException(409,"QUOTE_STAY_MISMATCH")
+                if payload.policy_snapshot!=json.dumps(quote[9],sort_keys=True,separators=(",",":")):
+                    raise HTTPException(409,"QUOTE_POLICY_SNAPSHOT_MISMATCH")
+            elif payload.quote_id:
+                raise HTTPException(409,"QUOTE_NOT_CONFIGURED")
             unit_capacity=property_row[0]
             if payload.unit_id:
                 unit=c.execute("""SELECT quantity FROM bnb_unit

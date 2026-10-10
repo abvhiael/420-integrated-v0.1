@@ -40,7 +40,7 @@ func (s *PostgreSQLPublicationStore) Load(ctx context.Context,scope string)(Publ
  var p PublicationFence
  // A single primary-stored statement is atomic under READ COMMITTED.
  err:=s.DB.QueryRowContext(ctx,`SELECT scope,sequence,revocation_epoch,policy_digest,dependency_digest,expires_at
- FROM compliance_publication_fences WHERE scope=$1`,scope).Scan(&p.Scope,&p.Sequence,&p.RevocationEpoch,&p.PolicyDigest,&p.DependencyDigest,&p.ExpiresAt)
+ FROM compliance_publication_fences WHERE scope=$1 AND NOT pg_is_in_recovery()`,scope).Scan(&p.Scope,&p.Sequence,&p.RevocationEpoch,&p.PolicyDigest,&p.DependencyDigest,&p.ExpiresAt)
  if err!=nil{return PublicationFence{},ErrPublicationStale}
  return p,nil
 }
@@ -54,7 +54,7 @@ func(s *PostgreSQLPublicationStore) CompareAndSwap(ctx context.Context,scope str
  sequence=$1, revocation_epoch=$2, policy_digest=$3, dependency_digest=$4, expires_at=$5
  WHERE scope=$6 AND sequence=$7 AND revocation_epoch=$8
  AND policy_digest=$9 AND dependency_digest=$10 AND expires_at=$11
- AND expires_at > clock_timestamp()`,
+ AND expires_at > clock_timestamp() AND NOT pg_is_in_recovery()`,
  int64(next.Sequence),int64(next.RevocationEpoch),next.PolicyDigest,next.DependencyDigest,next.ExpiresAt,scope,
  int64(old.Sequence),int64(old.RevocationEpoch),old.PolicyDigest,old.DependencyDigest,old.ExpiresAt)
  if err!=nil{return false,ErrPublicationStale}
@@ -67,7 +67,7 @@ func(s *PostgreSQLPublicationStore) Bootstrap(ctx context.Context,p PublicationF
  if s==nil||s.DB==nil||ctx==nil||ctx.Err()!=nil||!ValidPublicationFence(p,time.Now().UTC())||p.Sequence>9223372036854775807||p.RevocationEpoch>9223372036854775807{return false,ErrPublicationStale}
  result,err:=s.DB.ExecContext(ctx,`INSERT INTO compliance_publication_fences
  (scope,sequence,revocation_epoch,policy_digest,dependency_digest,expires_at)
- VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (scope) DO NOTHING`,
+ SELECT $1,$2,$3,$4,$5,$6 WHERE NOT pg_is_in_recovery()\n ON CONFLICT (scope) DO NOTHING`,
  p.Scope,int64(p.Sequence),int64(p.RevocationEpoch),p.PolicyDigest,p.DependencyDigest,p.ExpiresAt)
  if err!=nil{return false,ErrPublicationStale}
  n,err:=result.RowsAffected();if err!=nil{return false,errors.Join(ErrPublicationStale,err)}

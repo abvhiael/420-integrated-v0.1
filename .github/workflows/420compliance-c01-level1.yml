@@ -102,9 +102,11 @@ jobs:
         run: python3 scripts/verify-compliance-c02-1.py "$EXPECTED_SHA"
       - name: C02.2 source ingestion security tests and race check
         run: go test -race ./services/complianceauth -run TestSafeOfficialIngestion -count=1 -v
-      - name: Write current C02.2 exact-SHA qualification result
+      - name: C02.3 durable snapshot integrity, parser and quarantine regressions
+        run: go test -race ./services/complianceauth -run TestSnapshotArchiveHistoryAndQuarantine -count=1 -v
+      - name: Write current C02.3 exact-SHA qualification result
         run: |
-          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C02.2","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c02_2_safe_ingestion":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
+          python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C02.3","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c02_3_snapshot_archive":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'
       - name: Retain exact-SHA qualification result
         uses: actions/upload-artifact@v4
         with:

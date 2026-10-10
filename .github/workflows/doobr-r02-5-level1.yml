@@ -1,0 +1,60 @@
+name: DOOBR R02.5 Presence Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/region_presence.py', 'doobr/storage/migrations/0005_presence.up.sql', 'doobr/storage/tests/test_region_presence.py', 'docs/doobr/DOOBR-R02-5-*', '.github/workflows/doobr-r02-5-level1.yml']
+  pull_request:
+    paths: ['doobr/region_presence.py', 'doobr/storage/migrations/0005_presence.up.sql', 'doobr/storage/tests/test_region_presence.py', 'docs/doobr/DOOBR-R02-5-*', '.github/workflows/doobr-r02-5-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  presence:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:15-3.4
+        env:
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: doobr_r02_5
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d doobr_r02_5"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: ci-only-password
+      PGDATABASE: doobr_r02_5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before qualification
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: R02.5 safe projection tests
+        run: |
+          python3 -m py_compile doobr/region_presence.py doobr/storage/tests/test_region_presence.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_region_presence.py -v
+      - name: R02.5 real Postgres migrations
+        run: |
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0001_initial.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0002_identity.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0003_retailer.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0004_courier.up.sql
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0005_presence.up.sql
+      - name: Presence forced-RLS policy assertions
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='doobr_private' AND c.relname='courier_region_presence' AND c.relrowsecurity AND c.relforcerowsecurity) THEN RAISE EXCEPTION 'presence RLS not forced'; END IF; END \$\$;"
+      - name: Exact SHA after qualification
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

@@ -53,3 +53,24 @@ def test_anonymous_cannot_create_session_or_mutate(actor):
     assert client.post("/v1/bnb/account/session").status_code==401
     assert client.get("/v1/bnb/account/property/"+str(uuid4())+"/access",
         params={"capability":"edit_listing"}).status_code==401
+
+
+def test_recovery_epoch_invalidates_every_active_session(actor):
+    subject,headers=actor
+    first=client.post("/v1/bnb/account/session",headers=headers)
+    assert first.status_code==201
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_account SET recovery_epoch=recovery_epoch+1 WHERE subject=%s",(subject,))
+    property_id=str(uuid4())
+    response=client.get(f"/v1/bnb/account/property/{property_id}/access",params={"capability":"edit_listing"},headers=headers)
+    assert response.status_code==401
+    assert client.post("/v1/bnb/account/sessions/"+first.json()["session_id"]+"/revoke",headers=headers).status_code==401
+    assert client.post("/v1/bnb/account/recover",headers=headers).status_code==503
+
+
+def test_invalid_property_capability_is_rejected(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    response=client.get("/v1/bnb/account/property/"+str(uuid4())+"/access",
+        params={"capability":"approve_payout"},headers=headers)
+    assert response.status_code==422

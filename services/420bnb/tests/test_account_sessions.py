@@ -210,3 +210,63 @@ def test_unverified_host_and_manager_cannot_use_property_capabilities(actor):
             c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property_claim WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_host_drafts_are_private_and_versioned(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    body={"title":"Private cabin","public_region":"Prairies","capacity":2,
+          "nightly_minor":12000,"currency":"CAD"}
+    created=client.post("/v1/bnb/properties",json=body,headers=headers)
+    assert created.status_code==201,created.text
+    pid=created.json()["id"]
+    try:
+        assert created.json()["status"]=="draft" and created.json()["published"] is False
+        assert created.json()["version"]==1
+        listing=client.get("/v1/bnb/account/properties",headers=headers)
+        assert listing.status_code==200
+        assert any(x["id"]==pid for x in listing.json())
+        assert "private_address" not in listing.text
+        revision={**body,"title":"Updated private cabin","expected_version":1}
+        edited=client.put(f"/v1/bnb/account/properties/{pid}",headers=headers,json=revision)
+        assert edited.status_code==200,edited.text
+        assert edited.json()["version"]==2
+        assert client.put(f"/v1/bnb/account/properties/{pid}",headers=headers,json=revision).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            row=c.execute("SELECT status,title,version FROM bnb_property WHERE id=%s",(pid,)).fetchone()
+            assert row==("draft","Updated private cabin",2)
+            c.execute("UPDATE bnb_property SET status='suspended' WHERE id=%s",(pid,))
+        assert client.put(f"/v1/bnb/account/properties/{pid}",headers=headers,
+                          json={**revision,"expected_version":2}).status_code==409
+        assert client.put(f"/v1/bnb/account/properties/{pid}",
+                          headers={"x-authenticated-subject":subject},json=revision).status_code==401
+        assert client.post("/v1/bnb/payments/intents",headers=headers).status_code==503
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
+
+
+def test_draft_property_cross_account_denied(actor,monkeypatch):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    body={"title":"Cross account house","public_region":"Prairies","capacity":1,
+          "nightly_minor":1000,"currency":"CAD"}
+    created=client.post("/v1/bnb/properties",json=body,headers=headers)
+    assert created.status_code==201,created.text
+    pid=created.json()["id"]
+    other=client.post("/v1/bnb/account/session",headers=headers)
+    assert other.status_code==201
+    try:
+        # Valid self session does not permit mutation of other properties.
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_property SET host_subject=%s WHERE id=%s",("other-host",pid))
+        attempt=client.put(f"/v1/bnb/account/properties/{pid}",headers=headers,
+            json={**body,"expected_version":1})
+        assert attempt.status_code==404
+        assert not any(x["id"]==pid for x in
+                       client.get("/v1/bnb/account/properties",headers=headers).json())
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

@@ -35,8 +35,12 @@ contract HarvestProductRegistry {
     uint64 public totalRegisteredProducts;
 
     event HarvestProductRegistered(
-        bytes32 indexed productId, uint64 indexed plantId, address indexed grower, uint32 quantityGrams,
-        uint16 qualityBps, HarvestScoring.Grade grade
+        bytes32 indexed productId,
+        uint64 indexed plantId,
+        address indexed grower,
+        uint32 quantityGrams,
+        uint16 qualityBps,
+        HarvestScoring.Grade grade
     );
 
     constructor(
@@ -57,10 +61,10 @@ contract HarvestProductRegistry {
         if (productOfPlant[plantId] != bytes32(0)) revert HCInvalidState();
         HarvestEngine.HarvestAcceptance memory h = harvestEngine.getHarvest(plantId);
         HarvestScoring.Result memory score = harvestEngine.getHarvestScore(plantId);
-        if (!h.accepted || h.plantId != plantId || h.grower == address(0)
-            || h.genomeId == bytes32(0) || h.expressionHash == bytes32(0)
-            || h.rulesetId == bytes32(0) || h.rulesetContentHash == bytes32(0)
-            || h.parcelId == 0 || score.qualityBps > 10_000 || score.yieldGrams > 1_000
+        if (
+            !h.accepted || h.plantId != plantId || h.grower == address(0) || h.genomeId == bytes32(0)
+                || h.expressionHash == bytes32(0) || h.rulesetId == bytes32(0) || h.rulesetContentHash == bytes32(0)
+                || h.parcelId == 0 || score.qualityBps > 10_000 || score.yieldGrams > 1_000
         ) revert HCInvalidState();
 
         productId = keccak256(abi.encode("HC.HARVEST.PRODUCT.V1", block.chainid, address(harvestEngine), plantId));

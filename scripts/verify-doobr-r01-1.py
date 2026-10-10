@@ -54,3 +54,19 @@ for i in range(1,19):
     assert_true(f"R13-T{i:02d}" in r13, f"R01.3 threat R13-T{i:02d} documented")
 assert_true(flags.get("travel.doobr_transactions") is False,"R01.3 has not activated Travel regulated transactions")
 assert_true("DOOBR" not in [a["name"] for a in catalog["apps"]],"R01.3 has not altered frozen Genesis catalog")
+
+# R01.4 source-to-policy and external dependency design assertions.
+r14=read("docs/doobr/DOOBR-R01-4-BC-VANCOUVER-COMPLIANCE-CONTRACT.md")
+assert_true("R01.4 BC/Vancouver legal matrix" in roadmap,"canonical R01.4 unchanged")
+for item in ["LICENSEE_EMPLOYEE", "DELIVERY_PERSON", "COMMON_CARRIER",
+             "ComplianceEvaluateDelivery/v1", "ComplianceDecision/v1",
+             "ComplianceCoverage/v1", "420Compliance-owned", "fail closed",
+             "America/Vancouver", "DevelopmentCompensationVault420",
+             "BC/Vancouver", "R01.5 Protocol authority contracts"]:
+    assert_true(item in r14,"R01.4 compliance design: "+item)
+for i in range(1,14):
+    assert_true(f"BC-{i:02d}" in r14,"R01.4 BC matrix case "+str(i))
+assert_true("VAN-01" in r14 and "FIN-01" in r14,"R01.4 municipal and fee gates")
+for i in range(1,13):
+    assert_true(f"{i}. " in r14,"R01.4 written regulatory question "+str(i))
+assert_true(flags.get("travel.doobr_transactions") is False,"R01.4 preserved disabled Travel transaction gateway")

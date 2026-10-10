@@ -483,3 +483,34 @@ def test_bnb24_quote_bound_hold_uses_exact_total_and_rejects_reuse(fixture_prope
             c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
+
+
+def test_bnb24_concurrent_quote_same_guest_nonce_is_single_immutable_row(fixture_property):
+    from concurrent.futures import ThreadPoolExecutor
+    from zoneinfo import ZoneInfo
+    pid,headers=fixture_property
+    start=(datetime.now(ZoneInfo("America/Regina"))+timedelta(days=12)).date()
+    payload={"property_id":str(pid),"checkin":start.isoformat(),
+             "checkout":(start+timedelta(days=2)).isoformat(),
+             "units":1,"nonce":"parallel-quote-0001"}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_listing_policy
+            (property_id,house_rules,cancellation_policy,timezone_id,min_nights)
+            VALUES (%s,'Quiet','Refund policy','America/Regina',1)""",(pid,))
+        c.execute("""INSERT INTO bnb_rate_plan(property_id,cleaning_minor)
+            VALUES (%s,150)""",(pid,))
+    try:
+        def send(_):
+            return client.post("/v1/bnb/quotes",json=payload,headers=headers)
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            results=list(pool.map(send,range(8)))
+        assert all(x.status_code==201 for x in results),[x.text for x in results]
+        assert len({x.json()["id"] for x in results})==1
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT COUNT(*) FROM bnb_price_quote WHERE property_id=%s",
+                             (pid,)).fetchone()[0]==1
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))

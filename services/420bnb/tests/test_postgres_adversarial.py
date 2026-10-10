@@ -288,12 +288,14 @@ def test_bnb23_authorized_calendar_sync_replay_stale_and_availability(fixture_pr
           "source_id":"partner-calendar-01","external_event_id":"event-busy-01",
           "source_updated_at":datetime.now(timezone.utc).isoformat(),
           "start":start.isoformat(),"end":(start+timedelta(days=2)).isoformat(),"quantity":1}
+    from pydantic import BaseModel
+    payload_digest=hashlib.sha256(api.CalendarSyncInput(**body).model_dump_json().encode()).hexdigest()
     now=int(time.time())
     proof=jwt.encode({"iss":issuer,"aud":"bnb-calendar","sub":"external-reviewer",
         "purpose":"calendar-import","jti":"calendar-"+str(uuid4()),
         "iat":now,"nbf":now,"exp":now+120,
         "property_id":str(pid),"unit_id":str(uid),"source_id":body["source_id"],
-        "external_event_id":body["external_event_id"]},key,algorithm="RS256")
+        "external_event_id":body["external_event_id"],"payload_hash":payload_digest},key,algorithm="RS256")
     try:
         route="/v1/bnb/internal/calendar/import"
         accepted=client.post(route,json=body,headers={"x-calendar-sync-proof":proof})
@@ -307,10 +309,13 @@ def test_bnb23_authorized_calendar_sync_replay_stale_and_availability(fixture_pr
         forged=client.post(route,json={**body,"unit_id":str(uuid4())},
                            headers={"x-calendar-sync-proof":proof})
         assert forged.status_code==403
+        tampered=client.post(route,json={**body,"quantity":2},
+            headers={"x-calendar-sync-proof":proof})
+        assert tampered.status_code==403
         stale=client.post(route,json={**body,"source_updated_at":(
             datetime.now(timezone.utc)-timedelta(days=3)).isoformat()},
             headers={"x-calendar-sync-proof":proof})
-        assert stale.status_code==422
+        assert stale.status_code==403
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_calendar_sync_event WHERE property_id=%s",(pid,))

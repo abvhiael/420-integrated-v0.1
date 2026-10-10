@@ -396,6 +396,11 @@ def test_host_policy_and_media_rights_boundaries(actor):
             "alt_text":"Property exterior","rights_statement":"I own the photograph"})
         assert media.status_code==201,media.text
         assert media.json()["moderation_state"]=="pending"
+        assert client.post(f"/v1/bnb/internal/media/{media.json()['id']}/decision",
+            headers=headers,json={"decision":"approved","reason":"Misleading host self approval"}).status_code==401
+        assert client.post(f"/v1/bnb/internal/media/{media.json()['id']}/decision",
+            json={"decision":"approved","reason":"No external issuer configured"},
+            headers={"x-media-review-proof":"forged-token"}).status_code==503
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             assert c.execute("SELECT moderation_state FROM bnb_listing_media WHERE id=%s",
                              (media.json()["id"],)).fetchone()[0]=="pending"

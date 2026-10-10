@@ -39,7 +39,8 @@ emergency_bindings = {
     'BREEDING_BIND_EMERGENCY': 'HC.ACTION.BREEDING_ENGINE.BIND_EMERGENCY',
     'RANDOMNESS_BIND_EMERGENCY': 'HC.ACTION.RANDOMNESS_COORDINATOR.BIND_EMERGENCY',
 }
-require(len(actions) == 55, 'unexpected action catalogue size')
+require(len(actions) == 56, 'unexpected action catalogue size')
+require(actions.count(('RANDOMNESS_BIND_BREEDING', 'HC.ACTION.RANDOMNESS_COORDINATOR.BIND_BREEDING')) == 1, 'missing or modified canonical randomness binding')
 require(actions.count(('BREEDING_CANCEL', 'HC.ACTION.BREEDING_ENGINE.CANCEL')) == 1, 'missing or modified breeding cancellation action')
 action_names = [name for name, _ in actions]
 action_domains = [domain for _, domain in actions]

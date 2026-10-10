@@ -100,6 +100,11 @@ def run_context(inventory, targets, shard, count, evidence, candidate, cache):
             print(line, end="", flush=True)
             log.write(line)
         result = process.wait()
+    attempts_file = evidence / "compiler-attempts.json"
+    if attempts_file.exists():
+        print("COVERAGE COMPILER ATTEMPTS: " + json.dumps({
+            "candidate_sha": candidate, "context": evidence.name,
+            "attempts": json.loads(attempts_file.read_text())}), flush=True)
     if result:
         raise subprocess.CalledProcessError(result, command)
     content = (evidence / "coverage.log").read_text()

@@ -44,10 +44,12 @@ def restore_optimizer(payload):
     return optimizer
 
 
-# The documented Solidity 0.8.24 sequence omits full function inlining,
-# retaining the other simplifying/cleanup passes and automatic stack handling.
+# Derived from pinned Solidity v0.8.24 OptimiserSettings::DefaultYulOptimiserSteps:
+# remove only full function inlining ("i"), retaining expression inlining,
+# function specialization, the complete simplifying pipeline and cleanup.
+# Native replay of the retained failing 100-source input verified this sequence.
 # It is used only after a pinned compiler reports a Yul stack-depth error.
-STACK_SAFE_SEQUENCE = "dhfoD[xarrscLMcCTU]uljmul:fDnTOcmu"
+STACK_SAFE_SEQUENCE = "dhfoDgvulfnTUtnIf[xa[r]EscLMcCTUtTOntnfDIulLculVcul[j]Tpeulxa[rul]xa[r]cLgvfCTUca[r]LSsTFOtfDnca[r]Iulc]jmul[jul]VcTOculjmul:fDnTOcmu"
 
 
 def compile_attempt(payload, compiler_run):
@@ -124,7 +126,7 @@ def main():
     if len(attempts) == 2:
         (evidence / "compiler-fallback-input.json").write_text(json.dumps(selected) + "\n")
         print("Coverage-only Yul stack retry: failed attempt retained; unchanged sources "
-              "use documented non-inlining optimizer sequence.", file=sys.stderr)
+              "use pinned non-inlining optimizer sequence.", file=sys.stderr)
     sys.stdout.buffer.write(result.stdout)
     sys.stderr.buffer.write(result.stderr)
     return result.returncode

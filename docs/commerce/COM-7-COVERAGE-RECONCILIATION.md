@@ -180,3 +180,28 @@ not PASS. A second replay uses the actual Solc 0.8.24 default pass sequence,
 orders expression splitting before full inlining, and isolates the six selected
 test targets to identify the compiler-sensitive fixture. Production and test
 sources remain unchanged; all canonical shards remain blocked during diagnosis.
+
+## Native-verified coverage-only correction
+
+Focused replay run [38041352046](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38041352046)
+/ job 114182065699 verified all 100 retained source contents against the exact
+checkout. Artifact 11665398504, digest
+`sha256:9354022ba83e81464a263e4e2523fc791d673262531273f571988cef2581e600`.
+The normal optimizer failed only when isolating
+`test/RegistryIdentityNames420.t.sol`; the other five selected test targets compiled.
+The complete pinned Solidity 0.8.24 default Yul sequence with only full function
+inlining removed compiled the unchanged complete input successfully:
+`dhfoDgvulfnTUtnIf[xa[r]EscLMcCTUtTOntnfDIulLculVcul[j]Tpeulxa[rul]xa[r]cLgvfCTUca[r]LSsTFOtfDnca[r]Iulc]jmul[jul]VcTOculjmul:fDnTOcmu`.
+The abbreviated non-inlining sequence is superseded; its failed retry remains
+retained. The corrected sequence preserves expression inlining, specialization,
+all remaining default simplification passes and cleanup, compiler runs 200,
+Cancun/viaIR, full dependency maps and unchanged source contents.
+Reference: [pinned Solc optimizer settings](https://github.com/argotorg/solidity/blob/v0.8.24/libsolidity/interface/OptimiserSettings.h).
+Only the same strictly gated Yul stack-depth error can receive one bounded retry.
+All existing 18 harness assertions remain intact, including no full inlining.
+The coverage wrapper reports retained attempts in actual job logs before returning
+success or failure. The one-time replay script and artifact dependency are removed;
+the canonical workflow is restored. Neither diagnostic replay candidate is qualified
+(the jobs deliberately failed after recording experiments). Successful native
+compilation is not coverage execution or Level 3. Complete replacement qualification
+is mandatory before COM-7 acceptance or merge readiness.

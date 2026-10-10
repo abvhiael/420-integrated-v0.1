@@ -160,54 +160,8 @@ jobs:
   # Manual Level 3 uses the same complete primary inventory across four shards,
   # with the full CI fuzz/invariant settings. The fixture runs only after all
   # shards succeed and their combined inventory matches the repository exactly.
-  coverage-native-replay:
-    if: github.event_name == 'pull_request' && github.head_ref == 'audit/420commerce-com-2-upstream-adaptations'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - name: Checkout exact diagnostic candidate
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-      - name: Verify diagnostic source identity
-        env:
-          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
-        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-      - uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: stable
-      - name: Download retained failed compiler input
-        uses: actions/download-artifact@v4
-        with:
-          name: foundry-level3-shard-0-23ea85c907a37791584ffb6c3c9bf741427fc50f
-          run-id: 38038205736
-          github-token: ${{ github.token }}
-          path: artifacts/native-replay-input
-      - name: Bootstrap pinned native compiler
-        shell: bash
-        run: |
-          set -euo pipefail
-          probe_root="$RUNNER_TEMP/native-solc-bootstrap"
-          mkdir -p "$probe_root/src"
-          printf '%s\n' 'pragma solidity =0.8.24; contract CompilerBootstrap {}' > "$probe_root/src/CompilerBootstrap.sol"
-          forge build --root "$probe_root" --use 0.8.24
-      - name: Diagnose exact retained native compiler input
-        run: python3 contracts/scripts/coverage-native-replay.py artifacts/native-replay-input
-      - name: Retain native replay diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-native-replay-${{ github.event.pull_request.head.sha }}
-          path: artifacts/contracts/native-compiler-replay
-          if-no-files-found: error
-          retention-days: 7
-
   level3-shards:
-    needs: coverage-native-replay
-    if: always() && needs.coverage-native-replay.result != 'failure' && needs.coverage-native-replay.result != 'cancelled' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009')))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'))
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:

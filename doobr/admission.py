@@ -42,6 +42,7 @@ def admit_prepaid_order(*, connect, session: Session, tenant_id: str,
         with connect() as db:
             with db.transaction():
                 with db.cursor() as c:
+                    c.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
                     c.execute("SELECT set_config('doobr.tenant_id', %s, true)", (ids[0],))
                     c.execute("""SELECT retailer_id,region_id,state,revision,retailer_order_ref
                                    FROM doobr_private.delivery_orders
@@ -61,7 +62,7 @@ def admit_prepaid_order(*, connect, session: Session, tenant_id: str,
                                          issuer_ref,evidence_digest,valid_from,valid_until,revoked_at
                                    FROM doobr_private.retailer_authorizations
                                   WHERE tenant_id=%s AND retailer_id=%s AND licence_ref=%s
-                                    AND municipality_ref=%s FOR UPDATE""",
+                                    AND municipality_ref=%s""",
                               (ids[0],ids[2],claim.licence_id,municipality_ref))
                     license_row=c.fetchone()
                     if (license_row is None or license_row[1]!=claim.legal_entity_ref

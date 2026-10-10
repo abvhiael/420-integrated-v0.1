@@ -8,7 +8,8 @@
     "check": "node --experimental-strip-types --check src/server.ts && node --check public/app.js",
     "security": "node scripts/security-check.mjs",
     "ops": "node scripts/operations-check.mjs",
-    "start": "node --experimental-strip-types src/server.ts"
+    "start": "node --experimental-strip-types src/server.ts",
+    "assets": "node scripts/asset-qualification.mjs"
   },
   "engines": {
     "node": ">=22"

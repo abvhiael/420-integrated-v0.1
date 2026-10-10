@@ -183,3 +183,20 @@ def test_unit_specific_capacity_and_cross_unit_isolation(fixture_property):
             c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
             c.execute("DELETE FROM bnb_hold WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
+
+
+def test_bnb23_peak_concurrent_quantity_half_open_boundaries():
+    start=datetime(2027,1,10,tzinfo=timezone.utc)
+    end=start+timedelta(days=4)
+    intervals=[
+        (start,start+timedelta(days=2),2),
+        (start+timedelta(days=2),end,2),
+    ]
+    assert api.peak_occupied_units(intervals,start,end)==2
+    assert api.peak_occupied_units(intervals,start+timedelta(days=1),
+                                   start+timedelta(days=3))==2
+    assert api.peak_occupied_units([
+        (start,start+timedelta(days=3),1),
+        (start+timedelta(days=1),end,2),
+    ],start,end)==3
+    assert api.peak_occupied_units([(end,end+timedelta(days=1),5)],start,end)==0

@@ -240,6 +240,62 @@ def revoke_property_manager(property_id: str,grantee_subject: str,capability: st
     return {"revoked":True}
 
 
+class ListingPolicyInput(BaseModel):
+    expected_version: int = Field(ge=1)
+    house_rules: str = Field(min_length=1,max_length=4000)
+    cancellation_policy: str = Field(min_length=1,max_length=4000)
+    timezone_id: str = Field(min_length=1,max_length=100)
+
+
+class ListingMediaInput(BaseModel):
+    expected_version: int = Field(ge=1)
+    asset_url: str = Field(min_length=12,max_length=2000)
+    alt_text: str = Field(min_length=8,max_length=300)
+    rights_statement: str = Field(min_length=8,max_length=500)
+
+
+@app.put("/v1/bnb/account/properties/{property_id}/policy")
+def update_listing_policy(property_id:str,payload:ListingPolicyInput,
+                          authorization:str|None=Header(None)):
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+    try:
+        zone=ZoneInfo(payload.timezone_id)
+    except (ZoneInfoNotFoundError,ValueError,KeyError):
+        raise HTTPException(422,"INVALID_IANA_TIMEZONE")
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,property_id,subject,payload.expected_version)
+            c.execute("""INSERT INTO bnb_listing_policy(property_id,house_rules,cancellation_policy,timezone_id)
+                VALUES (%s,%s,%s,%s) ON CONFLICT(property_id) DO UPDATE
+                SET house_rules=EXCLUDED.house_rules,cancellation_policy=EXCLUDED.cancellation_policy,
+                timezone_id=EXCLUDED.timezone_id""",
+                (property_id,payload.house_rules,payload.cancellation_policy,payload.timezone_id))
+            version=bump_property(c,property_id,subject,"bnb.listing.policy_updated")
+    return {"version":version,"timezone_id":zone.key,"status":"draft"}
+
+
+@app.post("/v1/bnb/account/properties/{property_id}/media",status_code=201)
+def submit_listing_media(property_id:str,payload:ListingMediaInput,
+                         authorization:str|None=Header(None)):
+    from urllib.parse import urlsplit
+    url=urlsplit(payload.asset_url)
+    if url.scheme!="https" or not url.netloc or url.username or url.password or url.fragment:
+        raise HTTPException(422,"INVALID_MEDIA_URL")
+    # Store a reference only; publication and remote fetching require independent
+    # rights moderation and a separately approved asset provider.
+    subject=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            owner_draft(c,property_id,subject,payload.expected_version)
+            mid=uuid4()
+            c.execute("""INSERT INTO bnb_listing_media(id,property_id,asset_url,alt_text,rights_statement)
+                VALUES (%s,%s,%s,%s,%s)""",
+                (mid,property_id,payload.asset_url,payload.alt_text,payload.rights_statement))
+            version=bump_property(c,property_id,subject,"bnb.listing.media_submitted")
+    return {"id":str(mid),"version":version,"moderation_state":"pending","published":False}
+
+
 class UnitInput(BaseModel):
     label: str = Field(min_length=1,max_length=100)
     quantity: int = Field(ge=1,le=1000)
@@ -382,9 +438,16 @@ def request_listing_review(property_id:str,payload:ReviewInput,authorization:str
                 raise HTTPException(409,"REVIEW_ALREADY_PENDING")
             details=c.execute("""SELECT title,public_region,capacity,nightly_minor,currency
                 FROM bnb_property WHERE id=%s""",(property_id,)).fetchone()
+            policy=c.execute("""SELECT house_rules,cancellation_policy,timezone_id
+                FROM bnb_listing_policy WHERE property_id=%s""",(property_id,)).fetchone()
+            media=c.execute("""SELECT COUNT(*) FROM bnb_listing_media
+                WHERE property_id=%s AND moderation_state='approved'""",(property_id,)).fetchone()[0]
+            if not policy:raise HTTPException(409,"LISTING_POLICY_REQUIRED")
+            if media<1:raise HTTPException(409,"APPROVED_MEDIA_REQUIRED")
             snapshot={"property_id":property_id,"title":details[0],"public_region":details[1],
                 "capacity":details[2],"nightly_minor":details[3],"currency":details[4],
                 "version":payload.expected_version,
+                "policy":{"house_rules":policy[0],"cancellation_policy":policy[1],"timezone_id":policy[2]},
                 "units":[{"label":x[0],"quantity":x[1]} for x in units]}
             encoded=json.dumps(snapshot,sort_keys=True,separators=(",",":"))
             digest=hashlib.sha256(encoded.encode()).hexdigest()

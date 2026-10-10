@@ -24,9 +24,11 @@ interface Vm {
     function warp(
         uint256
     ) external;
-    function prank(address) external;
+    function prank(
 }
+        address
 
+    ) external;
 contract MockLandRegistryHC6 {
     struct Parcel {
         address operator;
@@ -473,53 +475,71 @@ contract CultivationEngineTest is PlantSourcesFixture {
 
     function testR031HarvestReadySingleUseAndCanonicalProvenance() public {
         uint64 plantId = 88;
-        _grant(address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER, bytes32(uint256(plantId)), keccak256("hc7:register"));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE, bytes32(uint256(plantId)), keccak256("hc7:update"));
-        _grant(address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.PHENOTYPE_EXPRESS, bytes32(uint256(plantId)), keccak256("hc7:express"));
+        _grant(
         _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
+            address(this),
         (bool early,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+            ModuleIds.PLANT_REGISTRY,
         require(!early, "pre-READY harvest accepted");
-        cultivation.updateEnvironment(plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000));
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
         _ready(plantId);
+            keccak256("hc7:register")
         (bool unsealed,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        );
         require(!unsealed, "unsealed harvest accepted");
+        _grant(
         bytes32 expression = cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
+            address(this),
         (bool unauthorized,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+            ModuleIds.CULTIVATION_ENGINE,
         require(!unauthorized, "missing authorization accepted");
+            ActionIds.CULTIVATION_UPDATE,
         require(!harvest.isHarvestAccepted(plantId), "rejected harvest mutated state");
-        _grant(address(this), ModuleIds.HARVEST_ENGINE, ActionIds.HARVEST_ACCEPT, bytes32(uint256(plantId)), keccak256("hc7:accept"));
+            bytes32(uint256(plantId)),
+            keccak256("hc7:update")
         vm.prank(address(0xBEEF));
+        );
         (bool foreignGrower,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+        _grant(
         require(!foreignGrower, "foreign grower accepted");
+            address(this),
         HarvestEngine.HarvestAcceptance memory h = harvest.acceptHarvest(plantId);
+            ModuleIds.CULTIVATION_ENGINE,
         require(h.accepted && h.plantId == plantId, "harvest not accepted");
+            ActionIds.PHENOTYPE_EXPRESS,
         require(h.genomeId == genomeId && h.expressionHash == expression, "genome or expression provenance lost");
+            bytes32(uint256(plantId)),
         require(h.rulesetId == approvedRulesetId && h.rulesetContentHash != bytes32(0), "ruleset provenance lost");
+            keccak256("hc7:express")
         require(h.grower == address(this) && h.parcelId == 11 && h.publicPlotId == 0, "grower/parcel provenance lost");
+        );
         require(harvest.isHarvestAccepted(plantId) && harvest.getHarvest(plantId).accepted, "receipt missing");
         require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.READY, "R03.1 prematurely released capacity");
         (bool duplicate,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
         require(!duplicate, "duplicate harvest accepted");
+        cultivation.updateEnvironment(
         require(harvest.getHarvest(plantId).expressionHash == expression, "duplicate changed receipt");
+            plantId, CultivationEngine.EnvironmentSnapshot(2400, 6000, 7000, 6000, 6000, 5000)
     }
+        );
 
     function testR031HarvestFailsClosedOnEmergencyAndTerminatedPlant() public {
         uint64 plantId = 89;
         _grant(
-            address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_REGISTER,
-            bytes32(uint256(plantId)), keccak256("hc7:plant89")
         );
         _grant(
-            address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.CULTIVATION_UPDATE,
-            bytes32(uint256(plantId)), keccak256("hc7:env89")
+        _grant(
+            address(this),
+            ModuleIds.HARVEST_ENGINE,
+        );
+            ActionIds.HARVEST_ACCEPT,
+        _grant(
+            bytes32(uint256(plantId)),
+            keccak256("hc7:accept")
+        );
         );
         _grant(
-            address(this), ModuleIds.CULTIVATION_ENGINE, ActionIds.PHENOTYPE_EXPRESS,
-            bytes32(uint256(plantId)), keccak256("hc7:expression89")
-        );
-        _grant(
-            address(this), ModuleIds.HARVEST_ENGINE, ActionIds.HARVEST_ACCEPT,
-            bytes32(uint256(plantId)), keccak256("hc7:harvest89")
         );
         _sourcePlant(caps, plants, plantId, genomeId, address(this), 11);
         cultivation.updateEnvironment(
@@ -529,37 +549,53 @@ contract CultivationEngineTest is PlantSourcesFixture {
         cultivation.expressPhenotype(plantId, genomeId, approvedRulesetId);
         EmergencyState state = EmergencyState(address(cultivation.emergencyState()));
         _grant(
-            address(this), ModuleIds.EMERGENCY_STATE, ActionIds.EMERGENCY_RESTRICT,
-            EmergencyDomains.CULTIVATION, keccak256("hc7:restrict")
         );
         state.setRestricted(EmergencyDomains.CULTIVATION, true);
         (bool restricted,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
         require(!restricted, "restricted harvest accepted");
+            address(this),
         require(!harvest.isHarvestAccepted(plantId), "restricted harvest left receipt");
+            ModuleIds.PLANT_REGISTRY,
         _grant(
-            address(this), ModuleIds.PLANT_REGISTRY, ActionIds.PLANT_ADVANCE,
-            bytes32(uint256(plantId)), keccak256("hc7:terminate")
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("hc7:plant89")
         );
         plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
         (bool terminated,) = address(harvest).call(abi.encodeCall(harvest.acceptHarvest, (plantId)));
+            address(this),
         require(!terminated, "terminated plant harvested");
+            ModuleIds.CULTIVATION_ENGINE,
         require(!harvest.isHarvestAccepted(plantId), "terminated harvest left receipt");
+            ActionIds.CULTIVATION_UPDATE,
     }
+            bytes32(uint256(plantId)),
 
+            keccak256("hc7:env89")
     function _ready(
         uint64 plantId
     ) private {
-        _grant(
             address(this),
+        _grant(
+            ModuleIds.CULTIVATION_ENGINE,
+            address(this),
+            ActionIds.PHENOTYPE_EXPRESS,
             ModuleIds.PLANT_REGISTRY,
+            bytes32(uint256(plantId)),
             ActionIds.PLANT_ADVANCE,
+            keccak256("hc7:expression89")
             bytes32(uint256(plantId)),
             keccak256(abi.encode("hc6:ready", plantId))
         );
+            address(this),
         PlantRegistry.PlantRecord memory p = plants.getPlant(plantId);
+            ModuleIds.HARVEST_ENGINE,
         vm.warp(
+            ActionIds.HARVEST_ACCEPT,
             uint256(p.plantedAt) + plants.GERMINATION_DURATION() + plants.SEEDLING_DURATION()
+            bytes32(uint256(plantId)),
                 + plants.VEGETATIVE_DURATION() + plants.FLOWERING_DURATION()
+            keccak256("hc7:harvest89")
         );
         plants.syncOfflineGrowth(plantId);
         require(plants.getPlant(plantId).stage == PlantRegistry.PlantStage.READY, "ready stage");
@@ -570,10 +606,15 @@ contract CultivationEngineTest is PlantSourcesFixture {
         bytes32 moduleId,
         bytes32 actionId,
         bytes32 scopeHash,
+            address(this),
         bytes32 grantId
+            ModuleIds.EMERGENCY_STATE,
     ) private {
+            ActionIds.EMERGENCY_RESTRICT,
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
+            EmergencyDomains.CULTIVATION,
             principal: principal,
+            keccak256("hc7:restrict")
             componentId: moduleId,
             capabilityId: actionId,
             scopeHash: scopeHash,
@@ -581,10 +622,15 @@ contract CultivationEngineTest is PlantSourcesFixture {
             periodLimit: 0,
             periodSeconds: 0,
             validFrom: 0,
+            address(this),
             validUntil: uint64(block.timestamp + 365 days),
+            ModuleIds.PLANT_REGISTRY,
             revoked: false
+            ActionIds.PLANT_ADVANCE,
         });
+            bytes32(uint256(plantId)),
         caps.setGrant(grantId, grant, 0);
+            keccak256("hc7:terminate")
     }
 
     function _loci() private pure returns (bytes32[28] memory loci) {

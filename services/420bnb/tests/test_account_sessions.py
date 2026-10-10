@@ -1,0 +1,55 @@
+"""BNB-2.1 live PostgreSQL session lifecycle and scoped permission tests."""
+import importlib.util
+import os
+import sys
+from datetime import datetime,timedelta,timezone
+from pathlib import Path
+from uuid import uuid4
+import jwt
+import psycopg
+import pytest
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import Encoding,PublicFormat
+from fastapi.testclient import TestClient
+
+spec=importlib.util.spec_from_file_location("bnb_api_auth",Path(__file__).resolve().parents[1]/"api.py")
+api=importlib.util.module_from_spec(spec);spec.loader.exec_module(api)
+client=TestClient(api.app)
+
+@pytest.fixture()
+def actor(monkeypatch):
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    monkeypatch.setenv("BNB_IDENTITY_PUBLIC_KEY_PEM",private.public_key().public_bytes(Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    monkeypatch.setenv("BNB_IDENTITY_ISSUER","https://identity.test.invalid")
+    monkeypatch.setenv("BNB_IDENTITY_AUDIENCE","420bnb")
+    subject="person-"+str(uuid4())
+    now=int(datetime.now(timezone.utc).timestamp())
+    proof=jwt.encode(dict(sub=subject,iss="https://identity.test.invalid",aud="420bnb",
+        exp=now+300,iat=now,nbf=now,jti="verified-"+str(uuid4())),private,algorithm="RS256")
+    yield subject,{"authorization":"Bearer "+proof}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("DELETE FROM bnb_identity_session WHERE subject=%s",(subject,))
+        c.execute("DELETE FROM bnb_property_grant WHERE grantee_subject=%s",(subject,))
+        c.execute("DELETE FROM bnb_account WHERE subject=%s",(subject,))
+
+def test_session_exchange_revocation_and_scope(actor):
+    subject,headers=actor
+    first=client.post("/v1/bnb/account/session",headers=headers)
+    assert first.status_code==201,first.text
+    assert first.json()["subject"]==subject and first.json()["host_verified"] is False
+    again=client.post("/v1/bnb/account/session",headers=headers)
+    assert again.status_code==201 and again.json()["session_id"]==first.json()["session_id"]
+    fake_property=str(uuid4())
+    access=client.get(f"/v1/bnb/account/property/{fake_property}/access",
+        params={"capability":"edit_calendar"},headers=headers)
+    assert access.status_code==200 and access.json()["allowed"] is False
+    revoked=client.post("/v1/bnb/account/sessions/"+first.json()["session_id"]+"/revoke",headers=headers)
+    assert revoked.status_code==200 and revoked.json()["revoked"]
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==401
+    assert client.get(f"/v1/bnb/account/property/{fake_property}/access",
+        params={"capability":"edit_calendar"},headers=headers).status_code==401
+
+def test_anonymous_cannot_create_session_or_mutate(actor):
+    assert client.post("/v1/bnb/account/session").status_code==401
+    assert client.get("/v1/bnb/account/property/"+str(uuid4())+"/access",
+        params={"capability":"edit_listing"}).status_code==401

@@ -541,7 +541,7 @@ def host_units(property_id:str,authorization:str|None=Header(None)):
 
 
 @app.post("/v1/bnb/account/properties/{property_id}/calendar/blocks",status_code=201)
-def block_unit_dates(property_id:str,unit_id:str|None=None,payload:CalendarBlockInput=None,
+def block_unit_dates(property_id:str,payload:CalendarBlockInput,unit_id:str|None=None,
                      authorization:str|None=Header(None)):
     subject=active_subject(authorization)
     validate_window(payload.start,payload.end)

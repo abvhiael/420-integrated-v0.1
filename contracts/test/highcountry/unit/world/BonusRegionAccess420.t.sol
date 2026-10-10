@@ -44,10 +44,19 @@ contract MockHCGamingAccessBonusRegion is IHighCountryGamingAccess420 {
         bonusAccess[keccak256(abi.encode(growerProfileId, entitlementId, contentId))] = allowed;
     }
 
-    function hasPlayerBonusRegion(uint64 player, bytes32 content) external view returns (bool) {
+    function hasPlayerBonusRegion(
+        uint64 player,
+        bytes32 content
+    ) external view returns (bool) {
         return bonusAccess[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
     }
-    function hasPlayerCompetition(uint64, bytes32) external pure returns (bool) { return false; }
+    function hasPlayerCompetition(
+        uint64,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
     function hasScopedEntitlement(
         uint64,
         bytes32,

@@ -1210,18 +1210,21 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
                     raise HTTPException(409,"PAY_INTENT_ALREADY_BOUND")
                 return {"intent_id":str(existing[0]),"state":"pending","confirmed":False}
             intent_id=uuid4()
-            c.execute("""INSERT INTO bnb_pay_intent
+            inserted=c.execute("""INSERT INTO bnb_pay_intent
               (id,reservation_id,quote_id,requester,merchant_id,payout_controller,
                chain_id,asset,asset_amount,settlement_currency,quoted_minor,
                pay_invoice_id,pay_invoice_expires,conversion_route_id,
                conversion_quote_id,conversion_expires,minimum_received,payer_max)
-              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+              ON CONFLICT DO NOTHING RETURNING id""",
               (intent_id,payload.reservation_id,payload.quote_id,row[0],
                payload.merchant_id,payload.payout_controller,payload.chain_id,
                payload.asset,payload.asset_amount,row[6],row[5]["total_minor"],
                payload.pay_invoice_id,payload.pay_invoice_expires,
                payload.conversion_route_id,payload.conversion_quote_id,
-               payload.conversion_expires,payload.minimum_received,payload.payer_max))
+               payload.conversion_expires,payload.minimum_received,payload.payer_max)).fetchone()
+            if inserted is None:
+                raise HTTPException(409,"PAY_INVOICE_ALREADY_CONSUMED")
             c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
                 VALUES (%s,'bnb.pay.intent_bound',%s::jsonb)""",
                 (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),

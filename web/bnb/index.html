@@ -15,7 +15,7 @@
 <label>Nightly amount in minor units<input required name="nightly_minor" type="number" min="0" value="5000"></label>
 <label>Currency<select name="currency"><option>CAD</option><option>USD</option></select></label>
 <button type="submit" disabled aria-describedby="host-note" id="save-draft">Save unpublished draft</button>
-<p id="host-note" class="muted">Drafts never grant verified hosting, publication or financial permissions.</p></form><section aria-labelledby="my-drafts"><h3 id="my-drafts">Your private drafts</h3><button type="button" id="load-drafts" disabled>Refresh drafts</button><div id="host-drafts"></div></section></section></main>
+<p id="host-note" class="muted">Drafts never grant verified hosting, publication or financial permissions.</p></form><section aria-labelledby="my-drafts"><h3 id="my-drafts">Your private drafts</h3><button type="button" id="load-drafts" disabled>Refresh drafts</button><div id="host-drafts"></div></section><section aria-labelledby="booking-inbox-title"><h3 id="booking-inbox-title">Your booking requests</h3><p class="muted">Approval is not a confirmed or paid reservation.</p><button type="button" id="refresh-bookings">Refresh booking requests</button><div id="booking-inbox" aria-live="polite"></div></section></section></main>
 <footer class="muted">420BnB — no public precise property addresses • no wallet custody • payments disabled</footer>
 <script>
 const status=document.querySelector("#results-status"),list=document.querySelector("#listings");
@@ -308,5 +308,52 @@ async function loadDrafts(){
  }
  }catch(e){out.textContent=e.message;}
 }
+async function loadBookingInbox(){
+ const view=document.querySelector("#booking-inbox");
+ view.textContent="Loading booking requests…";
+ if(!hostProof){view.textContent="Sign in to view private booking requests.";return;}
+ try{
+ const calls=await Promise.all(["guest","host"].map(role=>
+ fetch("/v1/bnb/account/booking-requests?role="+role,{
+ headers:hostHeaders(),credentials:"omit",cache:"no-store"})));
+ if(calls.some(r=>!r.ok))throw Error("Booking requests unavailable.");
+ const all=await Promise.all(calls.map(r=>r.json()));
+ view.replaceChildren();
+ for(let k=0;k<2;k++){
+ const heading=document.createElement("h4");heading.textContent=k===0?"Requests you submitted":"Requests awaiting your host action";
+ view.append(heading);
+ for(const entry of all[k]){
+ const article=document.createElement("article");article.className="card";
+ const caption=document.createElement("p");
+ caption.textContent="Request "+entry.id+" · "+entry.state+" · "+entry.type+
+ " · deadline "+entry.deadline+" · No payment finality.";
+ article.append(caption);
+ if(entry.state==="requested"){
+ const actions=k===0?[["withdraw","Withdraw request"]]:[
+ ["accept","Accept request (payment pending)"],["decline","Decline request"]];
+ const reply=document.createElement("p");reply.setAttribute("role","status");
+ for(const [decision,title] of actions){
+ const button=document.createElement("button");button.type="button";button.textContent=title;
+ button.addEventListener("click",async()=>{
+ button.disabled=true;reply.textContent="Recording "+decision+"…";
+ try{
+ const response=await fetch("/v1/bnb/booking-requests/"+
+ encodeURIComponent(entry.id)+"/"+decision,{
+ method:"POST",headers:hostHeaders(),credentials:"omit"});
+ if(!response.ok)throw Error("Decision rejected ("+response.status+").");
+ reply.textContent="Request updated. No booking/payment confirmation.";
+ await loadBookingInbox();
+ }catch(error){reply.textContent=error.message;button.disabled=false;}
+ });
+ article.append(button);
+ }
+ article.append(reply);
+ }
+ view.append(article);
+ }
+ }
+ }catch(error){view.textContent=error.message;}
+}
+document.querySelector("#refresh-bookings").addEventListener("click",loadBookingInbox);
 document.querySelector("#load-drafts").addEventListener("click",loadDrafts);
 </script></body></html>

@@ -184,3 +184,20 @@ try {
 } catch (cause) {
   showError(cause instanceof Error ? cause.message : "unable to load Budtender");
 }
+
+
+// Assets remain non-authoritative presentation data and never alter the game simulation.
+const sceneStatus = document.querySelector("#scene-asset-status");
+if (sceneStatus) {
+  fetch("/assets/budtender/registry.json")
+    .then(async (res) => { if (!res.ok) throw new Error("asset registry unavailable"); return res.json(); })
+    .then(({ count, assets }) => {
+      const required = [...document.querySelectorAll(".shop-stage img")];
+      const registered = new Set(assets.map((asset) => asset.url));
+      if (count !== 368 || required.some((img) => !registered.has(new URL(img.src).pathname))) {
+        throw new Error("starter-shop asset registration incomplete");
+      }
+      sceneStatus.textContent = "artwork library connected · " + count + " assets";
+    })
+    .catch(() => { sceneStatus.textContent = "artwork unavailable — shop management remains playable"; });
+}

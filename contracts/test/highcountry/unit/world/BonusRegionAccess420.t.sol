@@ -44,6 +44,10 @@ contract MockHCGamingAccessBonusRegion is IHighCountryGamingAccess420 {
         bonusAccess[keccak256(abi.encode(growerProfileId, entitlementId, contentId))] = allowed;
     }
 
+    function hasPlayerBonusRegion(uint64 player, bytes32 content) external view returns (bool) {
+        return bonusAccess[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
+    }
+    function hasPlayerCompetition(uint64, bytes32) external pure returns (bool) { return false; }
     function hasScopedEntitlement(
         uint64,
         bytes32,
@@ -127,7 +131,7 @@ contract BonusRegionAccess420Test {
         _registerBonusRegion();
         require(!bonusRegions.hasAccess(GROWER_PROFILE_ID, BONUS_REGION_ID), "missing entitlement accepted");
 
-        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         require(bonusRegions.hasAccess(GROWER_PROFILE_ID, BONUS_REGION_ID), "valid entitlement rejected");
         bonusRegions.requireAccess(GROWER_PROFILE_ID, BONUS_REGION_ID);
     }
@@ -141,7 +145,7 @@ contract BonusRegionAccess420Test {
 
     function testInactiveBonusRegionFailsClosedEvenWithEntitlement() public {
         _registerBonusRegion();
-        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         bonusRegions.setBonusRegionStatus(BONUS_REGION_ID, false);
 
         require(!bonusRegions.hasAccess(GROWER_PROFILE_ID, BONUS_REGION_ID), "inactive region reported accessible");

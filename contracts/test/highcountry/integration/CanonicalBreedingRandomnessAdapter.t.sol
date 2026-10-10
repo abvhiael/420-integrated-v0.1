@@ -2,7 +2,9 @@
 pragma solidity ^0.8.24;
 
 import { IRandomnessRouter420 } from "../../../src/interfaces/IRandomnessRouter420.sol";
-import { CanonicalBreedingRandomnessAdapter } from "../../../src/highcountry/random/CanonicalBreedingRandomnessAdapter.sol";
+import {
+    CanonicalBreedingRandomnessAdapter
+} from "../../../src/highcountry/random/CanonicalBreedingRandomnessAdapter.sol";
 import { RandomDomains } from "../../../src/highcountry/constants/RandomDomains.sol";
 import { ModuleIds } from "../../../src/highcountry/constants/ModuleIds.sol";
 import { ActionIds } from "../../../src/highcountry/constants/ActionIds.sol";
@@ -15,9 +17,12 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
     bytes32 internal root;
     bytes32 internal proof;
     bytes32 internal identifier;
-    function requestRandomness(bytes32 profile, bytes32 domain, bytes32 purpose, uint64 deadline)
-        external override returns (bytes32 requestId)
-    {
+    function requestRandomness(
+        bytes32 profile,
+        bytes32 domain,
+        bytes32 purpose,
+        uint64 deadline
+    ) external override returns (bytes32 requestId) {
         identifier = keccak256(abi.encode(msg.sender, profile, domain, purpose, deadline));
         bound.requester = msg.sender;
         bound.profileId = profile;
@@ -27,26 +32,50 @@ contract MockBoundRandomRouter is IRandomnessRouter420 {
         bound.status = Status.REQUESTED;
         return identifier;
     }
-    function setResult(Status state, bytes32 randomness, bytes32 proofHash) external {
+    function setResult(
+        Status state,
+        bytes32 randomness,
+        bytes32 proofHash
+    ) external {
         bound.status = state;
         root = randomness;
         proof = proofHash;
     }
-    function request(bytes32 id) external view override returns (Request memory) {
+    function request(
+        bytes32 id
+    ) external view override returns (Request memory) {
         require(id == identifier, "wrong id");
         return bound;
     }
-    function status(bytes32 id) external view override returns (Status) {
+    function status(
+        bytes32 id
+    ) external view override returns (Status) {
         require(id == identifier, "wrong id");
         return bound.status;
     }
-    function result(bytes32 id) external view override returns (bytes32, bytes32) {
+    function result(
+        bytes32 id
+    ) external view override returns (bytes32, bytes32) {
         require(id == identifier, "wrong id");
         return (root, proof);
     }
-    function fulfillRandomness(bytes32, bytes32, bytes calldata) external pure override { revert("fixture"); }
-    function activateFallback(bytes32) external pure override { revert("fixture"); }
-    function voidExpired(bytes32) external pure override { revert("fixture"); }
+    function fulfillRandomness(
+        bytes32,
+        bytes32,
+        bytes calldata
+    ) external pure override {
+        revert("fixture");
+    }
+    function activateFallback(
+        bytes32
+    ) external pure override {
+        revert("fixture");
+    }
+    function voidExpired(
+        bytes32
+    ) external pure override {
+        revert("fixture");
+    }
 }
 
 contract MockBreedingAdapterCaller {

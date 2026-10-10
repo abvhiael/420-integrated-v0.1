@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+from uuid import UUID,uuid4
 
 import psycopg
 sys.path.insert(0,str(Path(__file__).resolve().parent))
@@ -149,6 +149,11 @@ def revise_rate_plan(property_id:str,payload:RatePlanInput,authorization:str|Non
 def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
     from datetime import date
     subject=active_subject(authorization)
+    try:
+        UUID(payload.property_id)
+        if payload.unit_id is not None:UUID(payload.unit_id)
+    except (TypeError,ValueError):
+        raise HTTPException(422,"INVALID_PROPERTY_OR_UNIT_ID")
     try:checkin=date.fromisoformat(payload.checkin);checkout=date.fromisoformat(payload.checkout)
     except ValueError:raise HTTPException(422,"INVALID_LOCAL_DATE")
     digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
@@ -222,7 +227,7 @@ def issue_quote(payload:QuoteInput,authorization:str|None=Header(None)):
 
 
 @app.post("/v1/bnb/quotes/{quote_id}/revoke")
-def revoke_quote(quote_id:str,authorization:str|None=Header(None)):
+def revoke_quote(quote_id:UUID,authorization:str|None=Header(None)):
     subject=active_subject(authorization)
     with db() as c:
         with c.transaction():
@@ -246,7 +251,7 @@ def revoke_quote(quote_id:str,authorization:str|None=Header(None)):
 
 
 @app.get("/v1/bnb/quotes/{quote_id}")
-def get_quote(quote_id:str,authorization:str|None=Header(None)):
+def get_quote(quote_id:UUID,authorization:str|None=Header(None)):
     subject=active_subject(authorization)
     with db() as c:
         row=c.execute("""SELECT guest_subject,status,expires_at,calculation,currency,

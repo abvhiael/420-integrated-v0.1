@@ -299,3 +299,60 @@ def test_manager_grant_denied_without_independent_property_review(actor):
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
             c.execute("DELETE FROM bnb_account WHERE subject=%s",(grantee,))
+
+
+def test_host_units_calendar_review_and_adversarial_boundaries(actor):
+    subject,headers=actor
+    assert client.post("/v1/bnb/account/session",headers=headers).status_code==201
+    props={"title":"Unit inventory property","public_region":"Prairies",
+           "capacity":2,"nightly_minor":12000,"currency":"CAD"}
+    created=client.post("/v1/bnb/properties",headers=headers,json=props)
+    assert created.status_code==201,created.text
+    pid=created.json()["id"]
+    unit_url=f"/v1/bnb/account/properties/{pid}/units"
+    review_url=f"/v1/bnb/account/properties/{pid}/review"
+    start=datetime.now(timezone.utc)+timedelta(days=10)
+    start=start.replace(hour=15,minute=0,second=0,microsecond=0)
+    end=start+timedelta(days=2)
+    try:
+        assert client.post(unit_url,json={"label":"Entire cabin","quantity":3,
+                                           "expected_version":1},headers=headers).status_code==409
+        first=client.post(unit_url,json={"label":"Entire cabin","quantity":2,
+                                         "expected_version":1},headers=headers)
+        assert first.status_code==201,first.text
+        assert first.json()["version"]==2
+        uid=first.json()["id"]
+        assert client.post(unit_url,json={"label":"Retry","quantity":1,
+                                          "expected_version":1},headers=headers).status_code==409
+        assert client.get(unit_url).status_code==401
+        assert len(client.get(unit_url,headers=headers).json())==1
+        assert client.post(review_url,json={"expected_version":1},headers=headers).status_code==409
+        calendar=f"/v1/bnb/account/properties/{pid}/calendar/blocks"
+        data={"start":start.isoformat(),"end":end.isoformat(),
+              "reason":"Owner maintenance","expected_version":2}
+        added=client.post(calendar,params={"unit_id":uid},json=data,headers=headers)
+        assert added.status_code==201,added.text
+        assert added.json()["version"]==3
+        assert client.post(calendar,params={"unit_id":uid},
+                           json={**data,"expected_version":3},headers=headers).status_code==409
+        assert len(client.get(f"/v1/bnb/account/properties/{pid}/calendar",
+                              headers=headers).json())==1
+        review=client.post(review_url,json={"expected_version":3},headers=headers)
+        assert review.status_code==202,review.text
+        assert review.json()["state"]=="pending" and not review.json()["published"]
+        assert len(review.json()["snapshot_hash"])==64
+        assert client.post(review_url,json={"expected_version":3},headers=headers).status_code==409
+        assert client.get(f"/v1/bnb/account/properties/{pid}/reviews").status_code==401
+        records=client.get(f"/v1/bnb/account/properties/{pid}/reviews",headers=headers)
+        assert records.status_code==200 and records.json()[0]["state"]=="pending"
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT status FROM bnb_property WHERE id=%s",(pid,)).fetchone()[0]=="draft"
+            assert c.execute("SELECT COUNT(*) FROM bnb_listing_review WHERE property_id=%s",
+                             (pid,)).fetchone()[0]==1
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_listing_review WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_unit WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))

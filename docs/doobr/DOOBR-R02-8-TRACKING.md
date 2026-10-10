@@ -1,0 +1,9 @@
+# DOOBR R02.8 — Tracking/navigation, geospatial protection, location permission lifecycle
+
+Canonical R02.8. Branch `roadmap/doobr-bc-vancouver-infrastructure`, PR #601. Status: **partial implementation; Level 1 qualification pending**.
+
+Repository code: `doobr/tracking.py` validates signed R02.2 tenant/actor/order-scoped `COURIER/MANAGE_LOCATION` and `WRITE_LOCATION` grants, live assignment, active order lifecycle and independent location-permission authority. Grant requires a short expiry; revoked permission cannot silently reactivate. Sample ingestion requires fresh monotonic timestamps and sequence IDs, independent geofence authority, and authenticated encryption of raw GPS before persistent storage; responses never echo precise GPS.
+
+`doobr/storage/migrations/0008_tracking.up.sql` creates tenant-scoped forced-RLS permission and encrypted location sample tables, bounded retention metadata and replay fields. Public Travel/Maps and regional projection receive no coordinates. End-to-end enforcement of actual encryption key lifecycle, navigation/routing integration, consent/mobile OS revocation events, retention deletion worker, GPS permission UX, trusted geofence adapter, operational issuer authority, and detailed real-PG adversarial lifecycle tests remain outstanding. The presence of an interface is not proof of working third-party service integration. Real permission revocation should halt any subsequent tracking immediately; clients must also stop GPS collection when consent is removed, app is backgrounded without a valid platform grant, order reaches terminal state, or session expires.
+
+R02.8 Level 1 workflow: `.github/workflows/doobr-r02-8-level1.yml`. Full app Level 2 R02.13, comprehensive exact-SHA Level 3 R05.10; live device and service acceptance R06.4/R06.6. Do not enable real-world delivery before independent approvals. Next canonical step is R02.9 — Packaging custody, pickup, recipient ID/name/signature and handoff evidence.

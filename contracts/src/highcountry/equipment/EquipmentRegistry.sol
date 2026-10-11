@@ -133,7 +133,9 @@ contract EquipmentRegistry {
     }
 
     /// @notice Lifecycle authority is bound once, permanently, to prevent arbitrary status toggles.
-    function bindLifecycleController(address controller) external onlyAdmin {
+    function bindLifecycleController(
+        address controller
+    ) external onlyAdmin {
         if (lifecycleController != address(0) || controller == address(0) || controller.code.length == 0) {
             revert HCInvalidState();
         }
@@ -141,7 +143,10 @@ contract EquipmentRegistry {
         emit LifecycleControllerSet(controller);
     }
 
-    function setLifecycleDisabled(bytes32 equipmentId, bool isDisabled) external {
+    function setLifecycleDisabled(
+        bytes32 equipmentId,
+        bool isDisabled
+    ) external {
         if (msg.sender != lifecycleController || retired[equipmentId]) revert HCInvalidState();
         Equipment storage item = _equipment[equipmentId];
         if (!item.exists || disabled[equipmentId] == isDisabled) revert HCInvalidState();
@@ -155,7 +160,9 @@ contract EquipmentRegistry {
         emit EquipmentEffectStatus(equipmentId, isDisabled);
     }
 
-    function retireEquipment(bytes32 equipmentId) external {
+    function retireEquipment(
+        bytes32 equipmentId
+    ) external {
         if (msg.sender != lifecycleController || retired[equipmentId]) revert HCInvalidState();
         Equipment storage item = _equipment[equipmentId];
         if (!item.exists || !disabled[equipmentId]) revert HCInvalidState();
@@ -175,7 +182,10 @@ contract EquipmentRegistry {
         uint64 parcelId
     ) external {
         Equipment storage item = _equipment[equipmentId];
-        if (!item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender || item.parcelId != 0 || parcelId == 0) {
+        if (
+            !item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender
+                || item.parcelId != 0 || parcelId == 0
+        ) {
             revert HCInvalidState();
         }
         if (land.effectiveOperator(parcelId) != msg.sender) revert HCInvalidState();

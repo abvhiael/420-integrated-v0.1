@@ -1156,3 +1156,60 @@ def test_bnb27_signed_failed_payment_is_recoverable_and_replay_safe(fixture_prop
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_pay_failure_event WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_pay_intent WHERE reservation_id=%s",(rid,))
+
+
+def test_bnb28_public_search_private_saved_stays_and_review_moderation(fixture_property):
+    pid,headers=fixture_property
+    results=client.get("/v1/bnb/search",params={"region":"Prairies","min_capacity":1})
+    assert results.status_code==200,results.text
+    assert any(x["id"]==str(pid) for x in results.json())
+    assert all("address" not in x and "host_subject" not in x for x in results.json())
+    assert client.get("/v1/bnb/listings/"+str(pid)).status_code==200
+    assert client.get("/v1/bnb/account/saved-stays").status_code==401
+    assert client.put("/v1/bnb/account/saved-stays/"+str(pid)).status_code==401
+    try:
+        for _ in range(2):
+            assert client.put("/v1/bnb/account/saved-stays/"+str(pid),
+                              headers=headers).status_code==200
+        saved=client.get("/v1/bnb/account/saved-stays",headers=headers)
+        assert saved.status_code==200 and len([x for x in saved.json() if x["id"]==str(pid)])==1
+        assert client.get("/v1/bnb/account/reservations").status_code==401
+        assert client.post("/v1/bnb/reservations/"+str(uuid4())+"/guest-review",
+                           headers=headers,json={"rating":5,"body":"Enjoyed the stay thoroughly"}).status_code==404
+        assert client.delete("/v1/bnb/account/saved-stays/"+str(pid),
+                             headers=headers).status_code==200
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_guest_saved_stay WHERE property_id=%s",(pid,))
+
+
+def test_bnb28_guest_message_nonce_privacy_and_closed_thread(fixture_property):
+    pid,headers=fixture_property
+    held=make_bnb25_hold(pid,headers,"bnb28-msg-quote","bnb28-msg-hold")
+    assert held.status_code==201,held.text
+    created=client.post("/v1/bnb/booking-requests",headers={
+        **headers,"idempotency-key":"bnb28-msg-request"},json={
+        "hold_id":held.json()["id"],"request_type":"request"})
+    assert created.status_code==201,created.text
+    rid=created.json()["id"]
+    msg={"body":"Is quiet parking available?","nonce":"bnb28-message-nonce"}
+    try:
+        assert client.post(f"/v1/bnb/booking-requests/{rid}/messages",json=msg).status_code==401
+        first=client.post(f"/v1/bnb/booking-requests/{rid}/messages",headers=headers,json=msg)
+        assert first.status_code==201,first.text
+        replay=client.post(f"/v1/bnb/booking-requests/{rid}/messages",headers=headers,json=msg)
+        assert replay.status_code==201 and replay.json()["replayed"] is True
+        clash=client.post(f"/v1/bnb/booking-requests/{rid}/messages",headers=headers,
+            json={**msg,"body":"Changed message"})
+        assert clash.status_code==409
+        listed=client.get(f"/v1/bnb/booking-requests/{rid}/messages",headers=headers)
+        assert listed.status_code==200 and len(listed.json())==1
+        withdrawn=client.post(f"/v1/bnb/booking-requests/{rid}/withdraw",headers=headers)
+        assert withdrawn.status_code==200
+        assert client.post(f"/v1/bnb/booking-requests/{rid}/messages",
+                           headers=headers,json={**msg,"nonce":"bnb28-other-nonce"}).status_code==409
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_guest_message WHERE booking_request_id=%s",(rid,))
+            c.execute("DELETE FROM bnb_booking_request WHERE id=%s",(rid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

@@ -322,6 +322,31 @@ def guest_search(region:str="",q:str="",min_capacity:int=1,limit:int=20,offset:i
              "capacity":x[3],"nightly_minor":x[4],"currency":x[5]} for x in rows]
 
 
+@app.get("/v1/bnb/travel/discovery")
+def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:int=0):
+    """Public, nonbinding Travel discovery projection; no geolocation or legal authority inferred."""
+    if len(destination)>100:
+        raise HTTPException(422,"DESTINATION_TOO_LONG")
+    listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
+    return {
+        "version":"bnb-travel-discovery/v1",
+        "nonbinding":True,
+        "transaction_enabled":False,
+        "map_precision":"region_only",
+        "jurisdiction_authority":"unverified",
+        "listings":[{
+            "property_id":entry["id"],
+            "title":entry["title"],
+            "public_region":entry["public_region"],
+            "capacity":entry["capacity"],
+            "price_preview":{"nightly_minor":entry["nightly_minor"],"currency":entry["currency"],"binding":False},
+            "map_marker":None,
+            "booking_handoff":{"method":"GET","path":"/v1/bnb/listings/"+entry["id"],"side_effects":False},
+            "legal_compliance_verified":False,
+        } for entry in listings],
+    }
+
+
 @app.get("/v1/bnb/listings/{property_id}")
 def guest_listing_detail(property_id:UUID):
     with db() as c:

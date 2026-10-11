@@ -14,6 +14,7 @@ from identity import verify_external_token
 from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
 from pricing import quote_breakdown
+from travel_location import resolve_public_place, TravelLocationUnavailable
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
@@ -323,15 +324,26 @@ def guest_search(region:str="",q:str="",min_capacity:int=1,limit:int=20,offset:i
 
 
 @app.get("/v1/bnb/travel/discovery")
-def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:int=0):
+def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:int=0,place_id:str=""):
     """Public, nonbinding Travel discovery projection; no geolocation or legal authority inferred."""
     if len(destination)>100:
         raise HTTPException(422,"DESTINATION_TOO_LONG")
     if min_capacity<1 or min_capacity>1000 or limit<1 or limit>50 or offset<0 or offset>5000:
         raise HTTPException(422,"INVALID_SEARCH_WINDOW")
+    if place_id:
+        try:
+            resolved=resolve_public_place(place_id)
+        except ValueError:
+            raise HTTPException(422,"INVALID_PLACE_ID")
+        except TravelLocationUnavailable:
+            raise HTTPException(503,"TRAVEL_LOCATION_UNAVAILABLE")
+        # The public Travel projection does not prove a BnB property-place binding.
+        # Never silently turn a public destination name into an exact property position.
+        destination=resolved["region"]
     listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
     return {
         "version":"bnb-travel-discovery/v1",
+        "destination_place_id":place_id or None,
         "nonbinding":True,
         "transaction_enabled":False,
         "map_precision":"region_only",

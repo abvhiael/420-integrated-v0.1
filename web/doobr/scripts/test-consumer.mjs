@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {consumerSnapshot} from '../consumer.mjs';
+const normal=consumerSnapshot();
+assert.equal(normal.account.state,'UNAVAILABLE');
+assert.equal(normal.wallet.state,'NOT_CONNECTED');
+assert.equal(normal.orders.state,'UNAVAILABLE');
+assert.equal(normal.receipts.state,'NOT_VERIFIED');
+assert.deepEqual(consumerSnapshot({user:'forged',wallet:true,ageVerified:true,order:{state:'DELIVERED'},receipt:{paid:true}}),normal);
+assert.ok(Object.isFrozen(normal));
+console.log('R03.3 consumer fail-closed web contract PASS');

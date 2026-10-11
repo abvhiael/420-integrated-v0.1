@@ -1334,13 +1334,13 @@ class PayFailureInput(BaseModel):
 @app.post("/v1/bnb/internal/pay/settlement-splits",status_code=202)
 def pay_settlement_split(payload:SettlementSplitInput,x_pay_authority_proof:str|None=Header(None)):
     proof=signed_pay_claim(x_pay_authority_proof,"settlement-split",payload)
-    if proof.get("economic_event_verified") is not True or proof.get("payment_id")!=payload.pay_payment_id:
-        raise HTTPException(403,"PAY_SPLIT_AUTHORITY_REQUIRED")
     if sum((payload.host_amount,payload.platform_amount,payload.developer_amount,
             payload.retained_amount))!=payload.captured_amount:
         raise HTTPException(422,"SPLIT_CONSERVATION_FAILED")
     if len({payload.host_recipient,payload.platform_recipient,payload.developer_recipient})!=3:
         raise HTTPException(422,"SPLIT_RECIPIENT_COLLISION")
+    if proof.get("economic_event_verified") is not True or proof.get("payment_id")!=payload.pay_payment_id:
+        raise HTTPException(403,"PAY_SPLIT_AUTHORITY_REQUIRED")
     if (proof.get("canonical_split_id")!=payload.canonical_split_id or
         proof.get("chain_id")!=payload.chain_id or proof.get("asset")!=payload.asset or
         proof.get("policy_version")!=payload.policy_version or

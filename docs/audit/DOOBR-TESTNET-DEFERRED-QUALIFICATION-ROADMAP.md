@@ -40,6 +40,15 @@ The original canonical R03.7 identifier is preserved. **Only genuine external/de
 
 **Release posture:** private case commands and regulated delivery remain fail closed without externally authorized infrastructure; evidence for these checkboxes requires the actual approved live/testnet environment. Deferral does not imply production readiness. Proceeding beyond R03.7 in the repository roadmap requires an exact-SHA passing Level 1 covering the local implementation, and R03.12 Level 2 / R05.10 Level 3 remain future milestones.
 
+## R03.8 — Native mobile live/device qualification deferred (2026-10-11)
+
+- [ ] **R03.8 / R06.2 / DOOBR-AUDIT-9:** Physically verify AndroidKeyStore hardware attestation, iOS Secure Enclave, protected key lifecycle, OS-level biometric/device-credential challenges, revocation, device loss and backup extraction denial on supported iOS and Android hardware.
+- [ ] **R03.8 / R03.9 / R03.12 / DOOBR-AUDIT-9:** Qualify actual GPS foreground and narrowly scoped background permissions, explicit courier consent, OS force-stop/background restrictions, battery policy and permission denial/revocation while dispatch assignment changes, with encrypted off-chain tracking only.
+- [ ] **R03.8 / R06.1–R06.4 / DOOBR-AUDIT-9:** Configure approved APNs/FCM and 420Notifications signing credentials and authoritative session/notification routing; test expired push, duplicate tokens, revocation, forged notifications, PII absence, device offline/reconnect and provider outages on real devices.
+- [ ] **R03.8 / R03.12 / R06.10 / DOOBR-AUDIT-10:** iOS code-signing entitlements, Apple device provisioning and TestFlight approval, Android production signing and Play validation, mobile accessibility and on-device penetration/security acceptance against the exact built client SHA. No signing secrets in git or public artifacts.
+
+**Do not defer local implementation gaps:** iOS Xcode project/target and build CI, Android build validation, native permission request lifecycle and release-safe notifications/background logic must be implemented and tested in repository before R03.8 is claimed locally complete. Testnet work above is **NOT COMPLETE** and grants no regulated operational authority.
+
 ## DOOBR-AUDIT-9 — deferred to testnet / approved external-service acceptance
 - [ ] First confirm the original canonical step description and independently approved scope. Do not equate the conditional AUDIT-5 design with governance approval.
 - [ ] If DOOBR standalone execution is approved, deploy separately authorized testnet identity/age/credential issuer, provider license and jurisdiction verification, delivery provider gateway, service area restrictions, Pay-bound financial routes (Swap only where approved), refund/dispute authority, and Wallet consent.

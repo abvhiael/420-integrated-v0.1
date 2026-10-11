@@ -1330,3 +1330,30 @@ def test_bnb29_owner_sees_host_reservations_and_pay_only_earnings(fixture_proper
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_identity_session WHERE issuer_session_id=%s",(jti,))
+
+
+def test_bnb29_delegation_expiry_revocation_and_no_financial_authority(fixture_property):
+    pid,headers=fixture_property
+    path=f"/v1/bnb/account/properties/{pid}"
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_property_grant
+            (property_id,grantee_subject,capability,expires_at,granted_by)
+            VALUES (%s,'guest-fixture','view_reservations',now()+interval '1 day','verified-host')""",
+            (pid,))
+    try:
+        scoped=client.get(path+"/host-reservations",headers=headers)
+        assert scoped.status_code==200,scoped.text
+        assert client.get(path+"/earnings",headers=headers).status_code==403
+        assert client.get(path+"/host-requests",headers=headers).status_code==404
+        dashboard=client.get("/v1/bnb/account/hosting",headers=headers)
+        assert any(p["id"]==str(pid) and p["owner"] is False for p in dashboard.json())
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""UPDATE bnb_property_grant SET revoked_at=now()
+                WHERE property_id=%s AND grantee_subject='guest-fixture'""",(pid,))
+        assert client.get(path+"/host-reservations",headers=headers).status_code==404
+        assert all(p["id"]!=str(pid) for p in
+                   client.get("/v1/bnb/account/hosting",headers=headers).json())
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""DELETE FROM bnb_property_grant WHERE property_id=%s
+                AND grantee_subject='guest-fixture'""",(pid,))

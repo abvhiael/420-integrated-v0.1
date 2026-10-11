@@ -15,7 +15,7 @@ from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
 from pricing import quote_breakdown
 from fastapi import FastAPI, Header, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 app = FastAPI(title="420BnB", version="0.1.0")
 DATABASE_URL = os.getenv("BNB_DATABASE_URL", "")
@@ -1283,14 +1283,23 @@ class SettlementSplitInput(BaseModel):
     policy_version: str=Field(min_length=1,max_length=100)
     chain_id: int=Field(gt=0,strict=True)
     asset: str=Field(min_length=1,max_length=120)
-    captured_amount: int=Field(gt=0,le=10**60,strict=True)
+    captured_amount: int=Field(gt=0,le=10**60)
     host_recipient: str=Field(min_length=1,max_length=200)
     platform_recipient: str=Field(min_length=1,max_length=200)
     developer_recipient: str=Field(min_length=1,max_length=200)
-    host_amount: int=Field(ge=0,le=10**60,strict=True)
-    platform_amount: int=Field(ge=0,le=10**60,strict=True)
-    developer_amount: int=Field(ge=0,le=10**60,strict=True)
-    retained_amount: int=Field(ge=0,le=10**60,strict=True)
+    host_amount: int=Field(ge=0,le=10**60)
+    platform_amount: int=Field(ge=0,le=10**60)
+    developer_amount: int=Field(ge=0,le=10**60)
+    retained_amount: int=Field(ge=0,le=10**60)
+
+    @field_validator("captured_amount","host_amount","platform_amount",
+                     "developer_amount","retained_amount",mode="before")
+    @classmethod
+    def amount_is_decimal_integer(cls,v):
+        if type(v) is int and v>=0:return v
+        if isinstance(v,str) and v.isascii() and v.isdecimal() and len(v)<=61:
+            return int(v)
+        raise ValueError("CANONICAL_INTEGER_AMOUNT_REQUIRED")
 
 
 class PayDisbursementInput(BaseModel):
@@ -1305,6 +1314,14 @@ class PayDisbursementInput(BaseModel):
     asset: str=Field(min_length=1,max_length=120)
     policy_version: str=Field(min_length=1,max_length=100)
     receipt_hash: str|None=Field(default=None,min_length=32,max_length=200)
+
+    @field_validator("amount",mode="before")
+    @classmethod
+    def amount_is_decimal_integer(cls,v):
+        if type(v) is int and v>0:return v
+        if isinstance(v,str) and v.isascii() and v.isdecimal() and len(v)<=61:
+            return int(v)
+        raise ValueError("CANONICAL_INTEGER_AMOUNT_REQUIRED")
 
 
 class PayFailureInput(BaseModel):

@@ -3,7 +3,7 @@ from pathlib import Path
 import importlib.util
 from uuid import uuid4
 from fastapi.testclient import TestClient
-from test_postgres_adversarial import fixture_property
+from test_postgres_adversarial import fixture_property,make_bnb25_hold
 import pytest
 
 spec=importlib.util.spec_from_file_location("bnb212_api",Path(__file__).resolve().parents[1]/"api.py")
@@ -130,3 +130,15 @@ def test_compliance_revision_scope_replay_and_independent_revocation(fixture_pro
     assert client.post(revoke,json=body).status_code==200
     assert client.post(revoke,json=body).status_code==409
     assert all(str(property_id)!=item["id"] for item in client.get("/v1/bnb/listings").json())
+
+def test_revoked_accommodation_blocks_booking_request(fixture_property):
+    import os,psycopg
+    property_id,headers=fixture_property
+    hold=make_bnb25_hold(property_id,headers,"compliance-quote-0001","compliance-hold-0001")
+    assert hold.status_code==201,hold.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as conn:
+        conn.execute("UPDATE bnb_compliance_eligibility SET revoked_at=now() WHERE property_id=%s",(property_id,))
+    result=client.post("/v1/bnb/booking-requests",headers={**headers,"idempotency-key":"compliance-req-0001"},
+        json={"hold_id":hold.json()["id"],"request_type":"request"})
+    assert result.status_code==403,result.text
+    assert result.json()["detail"]=="ACCOMMODATION_NOT_AUTHORIZED"

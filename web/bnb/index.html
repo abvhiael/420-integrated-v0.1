@@ -8,6 +8,7 @@
 <p class="warning" role="status">Preview service. Bookings and payments are not enabled. Listings shown below depend on your configured API; no reservation is confirmed here.</p>
 <section id="explore" aria-labelledby="explore-title"><h2 id="explore-title">Explore stays</h2><form id="stay-search"><label>Region<input name="region" maxlength="100" placeholder="Public region"></label><label>Stay name<input name="q" maxlength="100"></label><label>Guests<input name="min_capacity" type="number" min="1" max="1000" value="1"></label><button type="submit">Search stays</button></form>
 <button id="refresh">Refresh public listings</button><p id="results-status" role="status" aria-live="polite">Choose refresh to look for public listings.</p><div class="grid" id="listings"></div></section>
+<section id="travel-discovery" aria-labelledby="travel-discovery-title"><h2 id="travel-discovery-title">Explore destinations with 420Travel</h2><p class="muted">Coarse public regions only. No verified map positions or booking authorization.</p><form id="travel-discovery-form"><label>Destination or region<input id="travel-destination" maxlength="100" autocomplete="off"></label><label>Minimum guest capacity<input id="travel-guests" type="number" min="1" max="1000" value="1"></label><button id="travel-discovery-submit" type="submit">Find public stays</button></form><p id="travel-discovery-status" role="status" aria-live="polite">Search public stays by destination.</p><div id="travel-discovery-results" class="grid"></div></section>
 <section id="guest" aria-labelledby="guest-title"><h2 id="guest-title">Your stays</h2><p class="muted">Private saved stays, booking requests, messages and receipts require a verified 420Identity session.</p><button type="button" id="guest-refresh">Refresh saved stays & reservations</button><div id="saved-stays" aria-live="polite"></div><div id="guest-reservations" aria-live="polite"></div></section>
 <section id="hosting" aria-labelledby="host-title"><h2 id="host-title">Host a property</h2><p class="muted">Authenticated users can prepare private drafts. Independent ownership approval is required for publication; booking and payments remain disabled.</p>
 <form id="host-auth"><label>420Identity signed session token (held only in memory; never saved)<input id="host-token" type="password" autocomplete="off" spellcheck="false" required></label><button type="submit">Verify session</button> <button id="sign-out" type="button">Clear session</button></form><p id="host-status" aria-live="polite" role="status">Not signed in.</p><form id="host-form"><label>Property title<input required minlength="3" maxlength="160" name="title"></label>
@@ -20,6 +21,30 @@
 <footer class="muted">420BnB — no public precise property addresses • no wallet custody • payments disabled</footer>
 <script>
 const status=document.querySelector("#results-status"),list=document.querySelector("#listings");
+document.querySelector("#travel-discovery-form").addEventListener("submit",async event=>{
+ event.preventDefault();
+ const results=document.querySelector("#travel-discovery-results");
+ const message=document.querySelector("#travel-discovery-status");
+ results.replaceChildren();message.textContent="Finding public stays…";
+ const params=new URLSearchParams({destination:document.querySelector("#travel-destination").value,
+  min_capacity:document.querySelector("#travel-guests").value});
+ try{
+  const response=await fetch("/v1/bnb/travel/discovery?"+params,{cache:"no-store",credentials:"omit"});
+  if(!response.ok)throw Error("Destination discovery unavailable.");
+  const data=await response.json();
+  if(!data.nonbinding||data.transaction_enabled!==false||!Array.isArray(data.listings))throw Error("Invalid discovery response.");
+  message.textContent=data.listings.length+" public stay(s). Region-only map data; availability, legal status and price are not confirmed.";
+  for(const stay of data.listings){
+   const article=document.createElement("article");article.className="card";
+   const heading=document.createElement("h3");heading.textContent=stay.title;
+   const region=document.createElement("p");region.textContent=stay.public_region+" · Capacity "+stay.capacity;
+   const info=document.createElement("p");info.textContent="Approximate region only; no verified map pin or legal approval.";
+   const link=document.createElement("a");link.href="#explore";link.textContent="Continue in 420BnB to review listings";
+   article.append(heading,region,info,link);results.append(article);
+  }
+ }catch(error){message.textContent=error.message;}
+});
+
 document.querySelector("#refresh").addEventListener("click",async()=>{
  status.textContent="Loading public listings…";list.replaceChildren();
  try {const params=new URLSearchParams(new FormData(document.querySelector("#stay-search")));

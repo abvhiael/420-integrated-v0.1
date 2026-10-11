@@ -17,7 +17,7 @@ func TestC0310AdversarialCrossLayer(t *testing.T) {
  now:=time.Date(2026,10,10,20,0,0,0,time.UTC)
  t.Run("unknown border and jurisdiction ambiguity",func(t *testing.T){
   graph:=AuthorityGraph{Version:"graph1",AsOf:now,Nodes:[]AuthorityNode{{ID:"federal",Kind:"FEDERAL",LegalJurisdictionID:"CA",SourceDigest:Digest([]byte("fed")),EffectiveFrom:now.Add(-time.Hour)}}}
-  for _,confidence:=range []string{BoundaryUnknown,BoundaryBorder,BoundaryAmbiguous}{
+  for _,confidence:=range []BoundaryConfidence{BoundaryUnknown,BoundaryBorder,BoundaryAmbiguous}{
    location:=AuthorityLocation{OperatingZoneID:"delivery-zone",CandidateJurisdictions:[]string{"CA"},Confidence:confidence,BoundaryEvidenceDigest:Digest([]byte("boundary"))}
    result,err:=ResolveAuthority(graph,location)
    if err==nil||result.PolicyAuthorized||result.State=="RESOLVED"{t.Fatalf("uncertain border allowed %+v %v",result,err)}

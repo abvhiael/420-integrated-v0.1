@@ -653,6 +653,16 @@ def host_scope(c,property_id,actor,capability):
     return owner
 
 
+def calendar_draft(c,property_id,actor,expected_version):
+    row=c.execute("""SELECT host_subject,status,version,capacity FROM bnb_property
+        WHERE id=%s FOR UPDATE""",(property_id,)).fetchone()
+    if not row:raise HTTPException(404,"NOT_FOUND")
+    host_scope(c,property_id,actor,"edit_calendar")
+    if row[1]!="draft":raise HTTPException(409,"PROPERTY_NOT_DRAFT")
+    if row[2]!=expected_version:raise HTTPException(409,"VERSION_CONFLICT")
+    return row
+
+
 @app.get("/v1/bnb/account/hosting")
 def host_dashboard(authorization:str|None=Header(None)):
     actor=active_subject(authorization)
@@ -1029,7 +1039,7 @@ def block_unit_dates(property_id:str,payload:CalendarBlockInput,unit_id:str|None
     validate_window(payload.start,payload.end)
     with db() as c:
         with c.transaction():
-            owner_draft(c,property_id,subject,payload.expected_version)
+            calendar_draft(c,property_id,subject,payload.expected_version)
             policy=c.execute("SELECT timezone_id FROM bnb_listing_policy WHERE property_id=%s",
                              (property_id,)).fetchone()
             if policy:
@@ -1079,10 +1089,12 @@ def revise_calendar_block(property_id:str,block_id:str,payload:CalendarBlockInpu
     validate_window(payload.start,payload.end)
     with db() as c:
         with c.transaction():
-            owner_draft(c,property_id,subject,payload.expected_version)
+            calendar_draft(c,property_id,subject,payload.expected_version)
             old=c.execute("""SELECT unit_id,reason,created_by FROM bnb_block
                 WHERE property_id=%s AND id=%s FOR UPDATE""",(property_id,block_id)).fetchone()
-            if not old or old[2]!=subject:raise HTTPException(404,"BLOCK_NOT_FOUND")
+            if not old:raise HTTPException(404,"BLOCK_NOT_FOUND")
+            owner=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s",(property_id,)).fetchone()[0]
+            if old[2]!=subject and owner!=subject:raise HTTPException(404,"BLOCK_NOT_FOUND")
             unit_id=old[0]
             if unit_id is not None:
                 cap=c.execute("SELECT quantity FROM bnb_unit WHERE id=%s AND property_id=%s",
@@ -1130,9 +1142,9 @@ def remove_calendar_block(property_id:str,block_id:str,expected_version:int,
     subject=active_subject(authorization)
     with db() as c:
         with c.transaction():
-            owner_draft(c,property_id,subject,expected_version)
+            calendar_draft(c,property_id,subject,expected_version)
             deleted=c.execute("""DELETE FROM bnb_block WHERE id=%s AND property_id=%s
-                AND created_by=%s RETURNING id""",(block_id,property_id,subject)).fetchone()
+                AND (created_by=%s OR (SELECT host_subject FROM bnb_property WHERE id=%s)=%s) RETURNING id""",(block_id,property_id,subject,property_id,subject)).fetchone()
             if not deleted:raise HTTPException(404,"BLOCK_NOT_FOUND")
             version=bump_property(c,property_id,subject,"bnb.calendar.block_removed")
     return {"removed":True,"version":version}

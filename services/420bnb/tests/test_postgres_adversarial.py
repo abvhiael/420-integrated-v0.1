@@ -1443,3 +1443,34 @@ def test_bnb29_published_property_calendar_closure_and_suspended_denial(fixture_
             c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb29_delegated_presentation_version_scope_and_no_financial_change(fixture_property):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_property SET status='draft' WHERE id=%s",(pid,))
+        c.execute("""INSERT INTO bnb_property_grant
+            (property_id,grantee_subject,capability,expires_at,granted_by)
+            VALUES (%s,'guest-fixture','edit_listing',now()+interval '1 day','verified-host')""",
+            (pid,))
+    url=f"/v1/bnb/account/properties/{pid}/presentation"
+    payload={"title":"Edited public title","public_region":"Public area","expected_version":1}
+    try:
+        result=client.put(url,headers=headers,json=payload)
+        assert result.status_code==200,result.text
+        assert not result.json()["publication_approval"]
+        assert result.json()["financial_permissions"]==[]
+        assert client.put(url,headers=headers,json=payload).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            fields=c.execute("""SELECT nightly_minor,currency,private_address,status
+                FROM bnb_property WHERE id=%s""",(pid,)).fetchone()
+            assert fields[0]==1000 and fields[1]=="CAD" and fields[2] is None
+            assert fields[3]=="draft"
+            c.execute("""UPDATE bnb_property_grant SET revoked_at=now()
+                WHERE property_id=%s AND grantee_subject='guest-fixture'""",(pid,))
+        assert client.put(url,headers=headers,json={
+            **payload,"expected_version":result.json()["version"]}).status_code==404
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

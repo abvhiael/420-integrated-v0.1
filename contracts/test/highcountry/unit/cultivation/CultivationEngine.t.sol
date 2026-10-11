@@ -664,7 +664,9 @@ contract CultivationEngineTest is PlantSourcesFixture {
         vm.prank(address(0xBEEF));
         bytes32 productId = products.registerHarvestProduct(plantId);
         require(products.getProduct(productId).grower == address(this), "relayer changed owner");
-        require(products.getProduct(productId).quantityGrams == harvest.getHarvestScore(plantId).yieldGrams, "score changed");
+        require(
+            products.getProduct(productId).quantityGrams == harvest.getHarvestScore(plantId).yieldGrams, "score changed"
+        );
         require(products.totalRegisteredProducts() == 1, "settlement did not register once");
         (bool duplicate,) = address(products).call(abi.encodeCall(products.registerHarvestProduct, (plantId)));
         require(!duplicate, "duplicate settlement");

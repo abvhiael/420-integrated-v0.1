@@ -135,3 +135,43 @@ def execute_case(*,connect,issuer,store,token,tenant_id,case_id,event_id,
         return "EXECUTED"
     except Denied:raise
     except Exception as exc:raise Denied("execution evidence or ledger unavailable") from exc
+
+def close_case(*,connect,issuer,store,token,tenant_id,case_id,event_id,
+               operation,expected_revision,at=None):
+    """Reject pending cases or expire stale pending/approved cases under lock."""
+    at=at or datetime.now(timezone.utc)
+    if (at.tzinfo is None or operation not in ("REJECT","EXPIRE")
+        or type(expected_revision) is not int or expected_revision<1):
+        raise Denied("invalid case closure")
+    tenant_id,case_id,event_id=map(uid,(tenant_id,case_id,event_id))
+    actor_session=_session(issuer,store,token,tenant_id,case_id,"OPERATOR","ESCALATE_INCIDENT",at)
+    actor=uid(actor_session.actor_id)
+    try:
+        with connect() as db:
+            with db.transaction():
+                with db.cursor() as c:
+                    c.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+                    c.execute("SELECT set_config('doobr.tenant_id',%s,true)",(tenant_id,))
+                    c.execute("""SELECT state,revision,expires_at,evidence_ref
+                        FROM doobr_private.console_cases WHERE tenant_id=%s AND case_id=%s FOR UPDATE""",
+                        (tenant_id,case_id))
+                    row=c.fetchone()
+                    if not row or row[1]!=expected_revision:
+                        raise Denied("missing or stale case")
+                    state,rev,expiry,evidence=row
+                    if (operation=="REJECT" and (state!="PENDING" or at>=expiry)
+                        or operation=="EXPIRE" and (state not in {"PENDING","APPROVED"} or at<expiry)):
+                        raise Denied("illegal case closure transition")
+                    target="REJECTED" if operation=="REJECT" else "EXPIRED"
+                    c.execute("""UPDATE doobr_private.console_cases SET state=%s,revision=revision+1
+                         WHERE tenant_id=%s AND case_id=%s AND revision=%s AND state=%s
+                         RETURNING revision""",(target,tenant_id,case_id,rev,state))
+                    updated=c.fetchone()
+                    if updated!=(rev+1,):raise Denied("concurrent closure rejected")
+                    c.execute("""INSERT INTO doobr_private.console_case_events
+                         (tenant_id,event_id,case_id,operation,actor_id,case_revision,evidence_digest,recorded_at)
+                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
+                         (tenant_id,event_id,case_id,operation,actor,rev+1,sha256(evidence.encode()).digest(),at))
+        return target
+    except Denied:raise
+    except Exception as exc:raise Denied("durable case closure unavailable") from exc

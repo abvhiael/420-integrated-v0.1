@@ -98,3 +98,34 @@ def test_age_and_identity_verification_requires_independent_guest_claim(fixture_
           "property_id":str(property_id),"jurisdiction_id":"FIXTURE_ONLY",
           "identity_verified":True,"verified_minimum_age":21})
         assert api.require_guest_accommodation_eligibility(conn,property_id,"guest-fixture","synthetic-proof") is None
+
+def test_compliance_revision_scope_replay_and_independent_revocation(fixture_property,monkeypatch):
+    import time
+    property_id,_=fixture_property
+    now=int(time.time())
+    claims={"iss":"fixture-compliance-issuer","jti":"policy-"+str(uuid4()),
+        "property_id":str(property_id),"jurisdiction_id":"FIXTURE_ONLY",
+        "decision":"allowed","revision":2,"license_reference":"fixture-license-2",
+        "minimum_guest_age":18,"identity_required":True,
+        "property_version":1,"nbf":now-1,"exp":now+180}
+    monkeypatch.setattr(api,"verify_authority",lambda token,prefix,purpose:dict(claims))
+    url="/v1/bnb/compliance/eligibility"
+    body={"proof":"synthetic-proof-token"*3}
+    assert client.post(url,json=body).status_code==200
+    assert client.post(url,json=body).status_code==409
+    claims["revision"]=3
+    claims["jurisdiction_id"]="OTHER_PROPERTY"
+    assert client.post(url,json=body).status_code==403
+    claims["jurisdiction_id"]="FIXTURE_ONLY"
+    claims["property_version"]=2
+    assert client.post(url,json=body).status_code==409
+    claims["property_version"]=1
+    claims["jti"]="revision-3-"+str(uuid4())
+    assert client.post(url,json=body).status_code==200
+    revoke="/v1/bnb/compliance/eligibility/revoke"
+    claims["iss"]="wrong-issuer"
+    assert client.post(revoke,json=body).status_code==403
+    claims["iss"]="fixture-compliance-issuer"
+    assert client.post(revoke,json=body).status_code==200
+    assert client.post(revoke,json=body).status_code==409
+    assert all(str(property_id)!=item["id"] for item in client.get("/v1/bnb/listings").json())

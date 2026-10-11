@@ -82,6 +82,11 @@ def test_simultaneous_host_response_moderation_one_wins(records):
         assert c.execute("SELECT count(*) FROM bnb_review_moderation_nonce WHERE target_id=%s",(records["review"],)).fetchone()[0]==1
 
 def test_simultaneous_abuse_decisions_one_wins(records):
+    # Abuse withdrawal applies to content already approved for publication.
+    # A pending response must never be falsely represented as published.
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_review_host_response SET status='approved' WHERE review_id=%s",
+                  (records["review"],))
     path=f"/v1/bnb/internal/abuse-reports/{records['abuse']}/decision"
     def submit(i):
         return client.post(path,headers={"x-guest-review-proof":f"abuse-{i}"},json={"decision":"accepted"})

@@ -30,7 +30,7 @@ func TestC052ProviderBoundariesRevocationAndPrivacy(t *testing.T){
  makeProvider:=func(name string)CredentialProviderHTTP{return CredentialProviderHTTP{Config:CredentialProviderConfig{Name:name,BaseURL:server.URL,Audience:"internal-compliance",ExpectedIssuer:"trusted",Timeout:time.Second},Client:client,Tokens:c052Tokens{}}}
  p:=makeProvider("Identity")
  if _,e:=p.Fetch(context.Background(),"tenant","subject",now);e!=nil{t.Fatal(e)}
- triplet:=CredentialTriplet{Identity:makeProvider("Identity"),Verify:makeProvider("Verify"),Registry:makeProvider("Registry")}
+ triplet:=CredentialTriplet{Identity:makeProvider("Identity"),VerifyProvider:makeProvider("Verify"),Registry:makeProvider("Registry")}
  result,e:=triplet.Verify(context.Background(),"tenant","subject",now)
  if e!=nil||result.EvidenceDigest==""||result.PrivateReferences[0]==""{t.Fatalf("integration %+v %v",result,e)}
  revoked["subject"]=true

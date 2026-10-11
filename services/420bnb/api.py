@@ -555,12 +555,16 @@ def travel_authorized_listings(place_id:str,response:Response,limit:int=20):
             FROM bnb_property p
             JOIN bnb_travel_place_binding b ON b.property_id=p.id
             JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=b.jurisdiction_id
+            JOIN bnb_compliance_eligibility e ON e.property_id=p.id AND e.jurisdiction_id=b.jurisdiction_id
             WHERE p.status='published' AND b.place_id=%s
             AND b.region=%s AND b.country=%s
             AND b.property_version=p.version AND b.revoked_at IS NULL
             AND b.proof_expires_at>now()
             AND j.decision='allowed' AND j.revoked_at IS NULL
             AND j.effective_at<=now() AND j.expires_at>now()
+            AND e.decision='allowed' AND e.revoked_at IS NULL
+            AND e.property_version=p.version
+            AND e.effective_at<=now() AND e.expires_at>now()
             ORDER BY p.id LIMIT %s""",
             (place_id,place["region"],place["country"],limit)).fetchall()
     return {"version":"bnb-travel-authorized/v1","nonbinding":True,

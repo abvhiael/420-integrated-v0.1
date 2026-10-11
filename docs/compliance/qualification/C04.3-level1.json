@@ -1,7 +1,7 @@
 {
   "step": "C04.3",
   "canonical": "Federally applicable product, packaging, quantity-equivalency and promotion requirements; explicitly separate non-medical scope and payment-route legal review.",
-  "status": "PENDING_LEVEL1_AND_INDEPENDENT_LEGAL_ACCEPTANCE",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_LEGAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "3a9af91db9ff60e23bfb2cad46c0dc7d552838bd",
   "main_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -16,9 +16,13 @@
   ],
   "scope": "Fail-closed, read-only non-medical federal candidate evaluator; does not establish current federal legal rule pack or authorize sale/payment.",
   "ci": {
-    "status": "PENDING",
-    "run_id": null,
-    "job_id": null
+    "status": "PASS",
+    "run_id": 38108237657,
+    "job_id": 114378195863,
+    "conclusion": "success",
+    "successful_steps": 50,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "deferred_testnet": [
     "C09.3 authoritative federal source and version collection",
@@ -30,5 +34,7 @@
   ],
   "level2": "Deferred to applicable roadmap milestone",
   "level3": "C08.5",
-  "next_canonical": "C04.4 — BC delivery matrix with separate licensee/employee, delivery-person and common-carrier branches; map every implemented rule to current authoritative provisions and tests."
+  "next_canonical": "C04.4 — BC delivery matrix with separate licensee/employee, delivery-person and common-carrier branches; map every implemented rule to current authoritative provisions and tests.",
+  "qualified_implementation_sha": "09d170dd4db124ce1e5bb5af8779db7c25737e6d",
+  "external_acceptance": "Federal legal interpretation and payment-route legal/partner approval remain C09/C10 gates, not Level 1 software qualification"
 }

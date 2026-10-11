@@ -35,8 +35,13 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  try{const response=await fetch("/v1/bnb/listings/"+encodeURIComponent(item.id),{credentials:"omit"});
  if(!response.ok)throw Error("Listing unavailable.");
  const listing=await response.json();
- detailOutput.textContent=listing.title+" · "+listing.public_region+" · "+listing.capacity+
- " available capacity (subject to selected dates). "+listing.reviews.length+" approved review(s).";
+ detailOutput.replaceChildren();
+ const summary=document.createElement("p");
+ summary.textContent=listing.title+" · "+listing.public_region+" · "+listing.capacity+
+ " capacity (subject to selected dates). "+listing.reviews.length+" approved review(s).";
+ detailOutput.append(summary);
+ for(const review of listing.reviews){const text=document.createElement("p");
+ text.textContent=review.rating+"/5 — "+review.body;detailOutput.append(text);}
  }catch(e){detailOutput.textContent=e.message;}
  });
  const save=document.createElement("button");save.type="button";save.textContent="Save stay";
@@ -349,6 +354,32 @@ async function loadBookingInbox(){
  caption.textContent="Request "+entry.id+" · "+entry.state+" · "+entry.type+
  " · deadline "+entry.deadline+" · No payment finality.";
  article.append(caption);
+ const conversation=document.createElement("div");conversation.setAttribute("aria-live","polite");
+ const retrieve=document.createElement("button");retrieve.type="button";retrieve.textContent="View request messages";
+ retrieve.addEventListener("click",async()=>{
+ try{
+ const response=await fetch("/v1/bnb/booking-requests/"+
+ encodeURIComponent(entry.id)+"/messages",{headers:hostHeaders(),credentials:"omit"});
+ if(!response.ok)throw Error("Messages unavailable.");
+ const messages=await response.json();conversation.replaceChildren();
+ for(const msg of messages){const item=document.createElement("p");
+ item.textContent=msg.sender+": "+msg.body;conversation.append(item);}
+ if(!messages.length)conversation.textContent="No messages yet.";
+ }catch(e){conversation.textContent=e.message;}
+ });
+ article.append(retrieve,conversation);
+ if(entry.state==="requested"||entry.state==="accepted"){
+ const replyText=document.createElement("textarea");replyText.setAttribute("aria-label","Request message");replyText.maxLength=3000;
+ const sendReply=document.createElement("button");sendReply.type="button";sendReply.textContent="Send request message";
+ const sendStatus=document.createElement("p");sendStatus.setAttribute("role","status");
+ sendReply.addEventListener("click",async()=>{
+ const response=await fetch("/v1/bnb/booking-requests/"+encodeURIComponent(entry.id)+"/messages",{
+ method:"POST",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({body:replyText.value,nonce:"request-message-"+Date.now()})});
+ sendStatus.textContent=response.ok?"Message recorded.":"Message unavailable ("+response.status+").";
+ });
+ article.append(replyText,sendReply,sendStatus);
+ }
  if(entry.state==="requested"){
  const actions=k===0?[["withdraw","Withdraw request"]]:[
  ["accept","Accept request (payment pending)"],["decline","Decline request"]];

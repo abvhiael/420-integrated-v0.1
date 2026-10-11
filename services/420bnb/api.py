@@ -671,14 +671,25 @@ def host_dashboard(authorization:str|None=Header(None)):
         rows=c.execute("""SELECT DISTINCT p.id,p.title,p.public_region,p.status,p.version,
             (p.host_subject=%s) AS owner FROM bnb_property p
             LEFT JOIN bnb_property_grant g ON g.property_id=p.id
-            AND g.grantee_subject=%s AND g.capability IN ('view_reservations','handle_requests')
+            AND g.grantee_subject=%s
             AND g.granted_by=p.host_subject AND g.revoked_at IS NULL AND g.expires_at>now()
             WHERE p.host_subject=%s OR
               (g.property_id IS NOT NULL AND EXISTS(SELECT 1 FROM bnb_account a
                WHERE a.subject=%s AND a.state='active'))
             ORDER BY p.id LIMIT 100""",(actor,actor,actor,actor)).fetchall()
+    with db() as c:
+        grants=c.execute("""SELECT g.property_id,g.capability FROM bnb_property_grant g
+            JOIN bnb_property p ON p.id=g.property_id
+            JOIN bnb_account a ON a.subject=g.grantee_subject
+            WHERE g.grantee_subject=%s AND g.granted_by=p.host_subject
+            AND g.revoked_at IS NULL AND g.expires_at>now() AND a.state='active'
+            ORDER BY g.property_id,g.capability""",(actor,)).fetchall()
+    permissions={}
+    for pid,cap in grants:permissions.setdefault(str(pid),[]).append(cap)
     return [{"id":str(x[0]),"title":x[1],"public_region":x[2],"status":x[3],
-             "version":x[4],"owner":x[5]} for x in rows]
+             "version":x[4],"owner":x[5],
+             "capabilities":(["owner"] if x[5] else permissions.get(str(x[0]),[]))}
+            for x in rows]
 
 
 @app.get("/v1/bnb/account/properties/{property_id}/host-requests")

@@ -21,6 +21,7 @@ class OperationsPG(unittest.TestCase):
    c.execute("GRANT USAGE ON SCHEMA doobr_private TO doobr_r0212_user")
    c.execute("GRANT SELECT,INSERT,UPDATE ON doobr_private.instance_heartbeats TO doobr_r0212_user")
    c.execute("GRANT SELECT ON doobr_private.event_outbox TO doobr_r0212_user")
+   c.execute("GRANT SELECT ON doobr_private.operation_audit,doobr_private.order_commands TO doobr_r0212_user")
    c.execute("INSERT INTO doobr_private.tenants(tenant_id,label) VALUES(%s,'ops'),(%s,'other')",(T,OTHER))
  @classmethod
  def tearDownClass(cls):

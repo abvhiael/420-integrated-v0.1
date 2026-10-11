@@ -1030,6 +1030,10 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
             api.SettlementSplitInput(**split),"settlement-split",splitproof))
         assert ok.status_code==202,ok.text
         assert ok.json()["custody"] is False
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""UPDATE bnb_hold SET period=tstzrange(
+                now()-interval '3 days',now()-interval '2 days','[)')
+                WHERE id=%s""",(hold.json()["id"],))
         assert client.post(endpoint,json=split,headers=signed(
             api.SettlementSplitInput(**split),"settlement-split",splitproof)).json()["replayed"]
         route="/v1/bnb/internal/pay/disbursements"
@@ -1041,7 +1045,9 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
                 "receipt_hash":receipt}
             extras={"pay_operation_id":operation,"pay_event_id":body["event_id"],
                 "chain_id":420,"asset":"native:$420","policy_version":"governed-v1",
-                "pay_beneficiary_verified":True,"original_payer_refund":True,
+                "pay_beneficiary_verified":True,"fulfillment_verified":True,
+                "dispute_window_complete":True,"payout_controller_approved":True,
+                "original_payer_refund":True,
                 "refund_recipient":"guest-payer-wallet",
                 "receipt_finalized":state=="finalized"}
             return client.post(route,json=body,headers=signed(api.PayDisbursementInput(**body),

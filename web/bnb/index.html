@@ -39,7 +39,8 @@ document.querySelector("#travel-discovery-form").addEventListener("submit",async
    const heading=document.createElement("h3");heading.textContent=stay.title;
    const region=document.createElement("p");region.textContent=stay.public_region+" · Capacity "+stay.capacity;
    const info=document.createElement("p");info.textContent="Approximate region only; no verified map pin or legal approval.";
-   const link=document.createElement("a");link.href="#explore";link.textContent="Continue in 420BnB to review listings";
+   const link=document.createElement("a");link.href="#explore";link.textContent="Review public listing in 420BnB";
+   link.addEventListener("click",()=>{const search=document.querySelector("#stay-search");search.elements.namedItem("q").value=stay.title;search.requestSubmit();});
    article.append(heading,region,info,link);results.append(article);
   }
  }catch(error){message.textContent=error.message;}

@@ -1385,8 +1385,23 @@ def ingest_pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=He
                 raise HTTPException(404,"PAY_INVOICE_NOT_FOUND")
             if row[1]=="finalized" or row[2]=="confirmed":
                 raise HTTPException(409,"FINALIZED_PAYMENT_REQUIRES_PAY_RECOVERY")
-            if row[1]=="recovery_required":
+            digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+            prior=c.execute("""SELECT reservation_id,pay_invoice_id,failure_code,digest
+                FROM bnb_pay_failure_event WHERE pay_attempt_id=%s""",
+                (payload.pay_attempt_id,)).fetchone()
+            if prior:
+                if prior!=(payload.reservation_id,payload.pay_invoice_id,
+                          payload.failure_code,digest):
+                    raise HTTPException(409,"PAY_FAILURE_REPLAY_CONFLICT")
                 return {"state":"recovery_required","replayed":True,"confirmed":False}
+            if c.execute("""SELECT 1 FROM bnb_pay_failure_event WHERE issuer=%s AND jti=%s""",
+                         (proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"PAY_FAILURE_JTI_REUSED")
+            c.execute("""INSERT INTO bnb_pay_failure_event
+                (issuer,jti,pay_attempt_id,reservation_id,pay_invoice_id,failure_code,digest)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],payload.pay_attempt_id,
+                 payload.reservation_id,payload.pay_invoice_id,payload.failure_code,digest))
             c.execute("""UPDATE bnb_pay_intent SET state='recovery_required'
                 WHERE reservation_id=%s""",(payload.reservation_id,))
             c.execute("""UPDATE bnb_reservation SET status='recovery_required'

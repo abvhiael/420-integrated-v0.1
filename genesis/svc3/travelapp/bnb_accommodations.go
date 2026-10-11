@@ -7,6 +7,7 @@ import (
  "errors"
  "html/template"
  "io"
+ "math"
  "net/http"
  "net/url"
  "os"
@@ -15,12 +16,20 @@ import (
  "time"
 )
 
+type bnbCoarseMarker struct {
+ Latitude float64 `json:"latitude"`
+ Longitude float64 `json:"longitude"`
+ Precision string `json:"precision"`
+}
 type bnbStay struct {
  PropertyID string `json:"property_id"`
  Title string `json:"title"`
  PublicRegion string `json:"public_region"`
  Capacity int `json:"capacity"`
+ MapMarker *bnbCoarseMarker `json:"map_marker"`
 }
+type bnbMapDot struct { X, Y float64; Title, PropertyID string }
+type bnbPage struct { Listings []bnbStay; Dots []bnbMapDot }
 type bnbDiscovery struct {
  Version string `json:"version"`
  Nonbinding bool `json:"nonbinding"`
@@ -30,7 +39,7 @@ type bnbDiscovery struct {
 }
 var bnbPlaceID = regexp.MustCompile(`^[A-Za-z0-9_-]{1,128}$`)
 var bnbPropertyID = regexp.MustCompile(`^[a-fA-F0-9-]{36}$`)
-var bnbTemplate=template.Must(template.New("accommodations").Parse(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Public stays | 420Travel</title><style>body{font:16px system-ui;background:#101913;color:#fff;max-width:60rem;margin:auto;padding:2rem}a{color:#a2e8a4}article{padding:1rem;border:1px solid #456b4d;margin:1rem 0}a:focus-visible{outline:3px solid #a2e8a4}</style></head><body><main><h1>Public accommodations</h1><p>Only current independently eligible published stays appear. Region only: no precise property map markers. Prices, availability and legal terms must be rechecked with 420BnB. No booking occurs in 420Travel.</p>{{range .Listings}}<article><h2>{{.Title}}</h2><p>{{.PublicRegion}} · Capacity {{.Capacity}}</p><a href="/travel/accommodations/handoff?property_id={{.PropertyID}}">Review stay details in 420BnB</a></article>{{else}}<p>No currently eligible accommodations for this place.</p>{{end}}</main></body></html>`))
+var bnbTemplate=template.Must(template.New("accommodations").Parse(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Public stays | 420Travel</title><style>body{font:16px system-ui;background:#101913;color:#fff;max-width:60rem;margin:auto;padding:2rem}a{color:#a2e8a4}article{padding:1rem;border:1px solid #456b4d;margin:1rem 0}a:focus-visible{outline:3px solid #a2e8a4}</style></head><body><main><h1>Public accommodations</h1><p>Only current independently eligible published stays appear. Region only: no precise property map markers. Prices, availability and legal terms must be rechecked with 420BnB. No booking occurs in 420Travel.</p>{{if .Dots}}<section aria-label="Approximate accommodation marker map"><h2>Approximate map — coarse regions, not property locations</h2><svg viewBox="0 0 1000 500" role="img" aria-label="Coarse accommodation map; full accessible listings follow" style="width:100%;height:auto"><path d="M0 250H1000 M500 0V500" stroke="#456b4d"/>{{range .Dots}}<a href="/travel/accommodations/handoff?property_id={{.PropertyID}}" aria-label="Review {{.Title}}"><circle cx="{{.X}}" cy="{{.Y}}" r="6" fill="#a2e8a4"><title>{{.Title}} — approximate region</title></circle></a>{{end}}</svg></section>{{end}}{{range .Listings}}<article><h2>{{.Title}}</h2><p>{{.PublicRegion}} · Capacity {{.Capacity}}</p><a href="/travel/accommodations/handoff?property_id={{.PropertyID}}">Review stay details in 420BnB</a></article>{{else}}<p>No currently eligible accommodations for this place.</p>{{end}}</main></body></html>`))
 
 func withBnBAccommodations(next http.Handler)http.Handler{
  base:=strings.TrimSpace(os.Getenv("TRAVEL_BNB_PUBLIC_URL"))
@@ -71,12 +80,21 @@ func withBnBAccommodations(next http.Handler)http.Handler{
   if err=json.NewDecoder(io.LimitReader(response.Body,262144)).Decode(&data);err!=nil||data.Version!="bnb-travel-authorized/v1"||!data.Nonbinding||data.TransactionEnabled||data.PlaceID!=id||len(data.Listings)>50 {
    http.Error(w,"invalid discovery response",502);return
   }
+  page:=bnbPage{Listings:data.Listings}
   for _,item:=range data.Listings {
    if !bnbPropertyID.MatchString(item.PropertyID)||item.Title==""||len(item.Title)>160||len(item.PublicRegion)>100||item.Capacity<1||item.Capacity>1000 {
     http.Error(w,"invalid discovery listing",502);return
    }
   }
+  for _,item:=range data.Listings {
+   if marker:=item.MapMarker;marker!=nil {
+    if marker.Precision!="coarse_1_degree_grid"||math.IsNaN(marker.Latitude)||math.IsNaN(marker.Longitude)||math.IsInf(marker.Latitude,0)||math.IsInf(marker.Longitude,0)||marker.Latitude < -89.5||marker.Latitude>89.5||marker.Longitude < -179.5||marker.Longitude>179.5||math.Mod(marker.Latitude-0.5,1)!=0||math.Mod(marker.Longitude-0.5,1)!=0 {
+     http.Error(w,"invalid map precision",502);return
+    }
+    page.Dots=append(page.Dots,bnbMapDot{X:(marker.Longitude+180)/360*1000,Y:(90-marker.Latitude)/180*500,Title:item.Title,PropertyID:item.PropertyID})
+   }
+  }
   w.Header().Set("Content-Type","text/html; charset=utf-8")
-  _=bnbTemplate.Execute(w,data)
+  _=bnbTemplate.Execute(w,page)
  })
 }

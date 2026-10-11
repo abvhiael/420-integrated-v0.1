@@ -36,6 +36,19 @@ func withBnBAccommodations(next http.Handler)http.Handler{
  base:=strings.TrimSpace(os.Getenv("TRAVEL_BNB_PUBLIC_URL"))
  client:=&http.Client{Timeout:4*time.Second,CheckRedirect:func(_ *http.Request,_ []*http.Request)error{return errors.New("redirect not allowed")}}
  return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  if r.URL.Path=="/travel/accommodations/handoff" {
+   w.Header().Set("Cache-Control","no-store")
+   if r.Method!="GET" {w.Header().Set("Allow","GET");http.Error(w,"method not allowed",405);return}
+   id:=r.URL.Query().Get("property_id")
+   destination,err:=url.Parse(strings.TrimSpace(os.Getenv("TRAVEL_BNB_WEB_URL")))
+   if !bnbPropertyID.MatchString(id)||err!=nil||destination.Scheme!="https"||destination.Host==""||destination.User!=nil||destination.RawQuery!=""||destination.Fragment!=""||destination.Path!=""&&destination.Path!="/" {
+    http.Error(w,"handoff unavailable",503);return
+   }
+   destination.Path="/"
+   destination.RawQuery=url.Values{"property_id":[]string{id}}.Encode()
+   http.Redirect(w,r,destination.String(),http.StatusSeeOther)
+   return
+  }
   if r.URL.Path!="/travel/accommodations" {next.ServeHTTP(w,r);return}
   w.Header().Set("Cache-Control","no-store");w.Header().Set("X-Content-Type-Options","nosniff")
   w.Header().Set("Referrer-Policy","no-referrer")

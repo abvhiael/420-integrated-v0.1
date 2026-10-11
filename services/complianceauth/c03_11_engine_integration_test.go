@@ -25,7 +25,8 @@ func TestC0311EngineLevel2ReplayAndCarrierBoundary(t *testing.T) {
  signed,err:=Publish(manifest,Approval{Digest:manifest.PolicyDigest,AuthorID:"author",ReviewerID:"reviewer",PublisherID:"publisher",IndependentlyVerified:true},priv);if err!=nil{t.Fatal(err)}
  policy:=ReviewedPolicy{Manifest:signed,ReviewID:"review-1",ApprovalToken:"approved",Rules:rules}
  service:=EvaluationService{Trust:Trust{Keys:map[string]Key{"key":{Public:pub,Environment:"test"}},MinimumSequence:7,MinimumEpoch:3,Environment:"test",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC"},Approvals:stubApproval{true},Credentials:stubEvidence{true,evidence}}
- service.Credentials=c0311TenantBoundEvidence{delegate:service.Credentials,tenant:"tenant"}\n request:=EvaluationRequest{TenantID:"tenant",OperationRef:"operation",Stage:"prepare",Action:"prepare",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC",FactsDigest:Digest(eb)}
+ service.Credentials=c0311TenantBoundEvidence{delegate:service.Credentials,tenant:"tenant"}
+ request:=EvaluationRequest{TenantID:"tenant",OperationRef:"operation",Stage:"prepare",Action:"prepare",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC",FactsDigest:Digest(eb)}
 
  graph:=AuthorityGraph{Version:"historical-geography-v1",AsOf:historical,Nodes:[]AuthorityNode{{ID:"federal",Kind:"FEDERAL",LegalJurisdictionID:"CA",SourceDigest:Digest([]byte("ca")),EffectiveFrom:historical.Add(-time.Hour)},{ID:"province",Kind:"PROVINCE",ParentID:"federal",LegalJurisdictionID:"BC",SourceDigest:Digest([]byte("bc")),EffectiveFrom:historical.Add(-time.Hour)}}}
  location:=AuthorityLocation{OperatingZoneID:"test-service-zone",CandidateJurisdictions:[]string{"BC"},Confidence:BoundaryVerified,BoundaryEvidenceDigest:Digest([]byte("boundary"))}

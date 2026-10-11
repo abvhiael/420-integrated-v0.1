@@ -1,7 +1,7 @@
 {
   "step": "C04.7",
   "canonical": "Travel policy pack for possession/transport/consumption and venue guidance within validated coverage; border crossings and unreviewed places remain explicit gaps.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "dbc923d89ddc7c98546ed67e8d16d0dbe6f2e66c",
   "branch": "audit/420compliance-c01-1-inventory-20261009",
@@ -15,7 +15,13 @@
     "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38114495609,
+    "job_id": 114397284936,
+    "conclusion": "success",
+    "successful_steps": 54,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "requirements": [
     "possession, transport, consumption and venue-specific scoped checks",
@@ -38,5 +44,6 @@
   ],
   "level2": "Not due",
   "level3": "C08.5 deferred",
-  "next_canonical": "C04.8 — Secure signing and scheduled activation, key rotation, compromised-key response, environment isolation and region/domain kill switches. Emergency operators may halt; they may not invent permission."
+  "next_canonical": "C04.8 — Secure signing and scheduled activation, key rotation, compromised-key response, environment isolation and region/domain kill switches. Emergency operators may halt; they may not invent permission.",
+  "external_acceptance": "Reviewed live geography and venue authority and deployed Travel/Maps integration remain C09/C10 acceptance gates"
 }

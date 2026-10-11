@@ -25,7 +25,7 @@ func TestC052ProviderBoundariesRevocationAndPrivacy(t *testing.T){
  defer server.Close()
  client:=server.Client()
  tr:=client.Transport.(*http.Transport).Clone()
- tr.TLSClientConfig=tr.TLSClientConfig.Clone();tr.TLSClientConfig.MinVersion=tls.VersionTLS12
+ tr.TLSClientConfig=tr.TLSClientConfig.Clone();tr.TLSClientConfig.MinVersion=tls.VersionTLS12;tr.Proxy=nil;tr.DialContext=nil;tr.DialTLSContext=nil
  client.Transport=tr
  makeProvider:=func(name string)CredentialProviderHTTP{return CredentialProviderHTTP{Config:CredentialProviderConfig{Name:name,BaseURL:server.URL,Audience:"internal-compliance",ExpectedIssuer:"trusted",Timeout:time.Second},Client:client,Tokens:c052Tokens{}}}
  p:=makeProvider("Identity")

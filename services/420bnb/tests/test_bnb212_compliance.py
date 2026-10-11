@@ -67,6 +67,7 @@ def test_live_compliance_retraction_and_jurisdiction_withdrawal(fixture_property
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as conn:
         conn.execute("UPDATE bnb_compliance_eligibility SET revoked_at=now() WHERE property_id=%s",(property_id,))
     assert not visible()
+    assert client.get("/v1/bnb/reputation/public/"+str(property_id)).status_code==404
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as conn:
         conn.execute("UPDATE bnb_compliance_eligibility SET revoked_at=NULL,expires_at=now()-interval '1 minute' WHERE property_id=%s",(property_id,))
     assert not visible()

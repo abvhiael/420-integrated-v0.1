@@ -82,6 +82,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
     GenomeRegistry private genomes;
     MockLandRegistryHC6 private land;
     PlantRegistry private plants;
+    PublicCultivationAccess private publicAccess;
     CultivationEngine private cultivation;
     HarvestEngine private harvest;
     HarvestProductRegistry private products;
@@ -100,6 +101,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
         land.configure(14, address(0xBEEF), 1, 1);
         land.configure(15, address(this), 1, 2);
         PublicCultivationAccess access = new PublicCultivationAccess(address(auth), address(land));
+        publicAccess = access;
         _createPlantSources(address(auth), address(genomes));
         plants = new PlantRegistry(
             address(auth), address(genomes), address(land), address(access), address(sourceSeeds), address(sourceClones)
@@ -672,6 +674,61 @@ contract CultivationEngineTest is PlantSourcesFixture {
         require(!duplicate, "duplicate settlement");
         require(products.totalRegisteredProducts() == 1, "duplicate product count");
         require(plants.activePlantsByParcel(11) == activeBefore - 1, "settlement changed released capacity");
+    }
+
+    function testR035PublicPlotCapacityReleaseAndReallocation() public {
+        uint64 plotId = 21;
+        uint64 plantId = 93;
+        _grant(
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_REGISTER,
+            bytes32(uint256(plotId)),
+            keccak256("r035:plot")
+        );
+        publicAccess.registerPublicPlot(plotId, 12, 1);
+        _grant(
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_ALLOCATE,
+            bytes32(uint256(plotId)),
+            keccak256("r035:allocation")
+        );
+        publicAccess.allocate(plotId, 1);
+        _grant(
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_RELEASE,
+            bytes32(uint256(plotId)),
+            keccak256("r035:release")
+        );
+        _grant(
+            address(this),
+            ModuleIds.PLANT_REGISTRY,
+            ActionIds.PLANT_REGISTER,
+            bytes32(uint256(plantId)),
+            keccak256("r035:publicplant")
+        );
+        _preparePlantSource(caps, plants, plantId, genomeId, address(this), 12);
+        plants.registerPlantFromSource(
+            plantId, genomeId, address(this), 12, plotId, PlantRegistry.PlantSourceKind.SEED, plantId
+        );
+        require(plants.activePublicPlants(plotId, address(this)) == 1, "public occupancy missing");
+        require(plants.activePlantsByParcel(12) == 1, "parcel occupancy missing");
+        (bool occupiedRelease,) = address(publicAccess).call(abi.encodeCall(publicAccess.release, (plotId)));
+        require(!occupiedRelease, "released occupied allocation");
+        _ready(plantId);
+        plants.advanceStage(plantId, PlantRegistry.PlantStage.TERMINATED);
+        require(plants.activePublicPlants(plotId, address(this)) == 0, "public capacity not released");
+        require(plants.activePlantsByParcel(12) == 0, "parcel capacity not released");
+        require(plants.privatePlantsByParcel(12) == 0, "public termination changed private capacity");
+        require(publicAccess.allocationOf(plotId, address(this)) == 1, "plant released plot reservation");
+        (bool duplicate,) =
+            address(plants).call(abi.encodeCall(plants.advanceStage, (plantId, PlantRegistry.PlantStage.TERMINATED)));
+        require(!duplicate, "double public termination");
+        publicAccess.release(plotId);
+        require(publicAccess.allocationOf(plotId, address(this)) == 0, "allocation not released");
+        require(publicAccess.availableCapacity(plotId) == 1, "public capacity not reusable");
     }
 
     function testR034CancellationAndRestrictedModeReleaseCapacityOnce() public {

@@ -111,6 +111,23 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
    }catch(e){state.textContent="Report unavailable.";}
   });
   detailOutput.append(report,state);
+  const reply=document.createElement("button");reply.type="button";
+  reply.textContent="Respond as verified host";
+  const replyText=document.createElement("textarea");
+  replyText.maxLength=2000;replyText.setAttribute("aria-label","Host response to review");
+  replyText.hidden=true;
+  const replyStatus=document.createElement("p");replyStatus.setAttribute("role","status");
+  reply.addEventListener("click",async()=>{
+   if(!hostProof){replyStatus.textContent="Verified host session required.";return;}
+   if(replyText.hidden){replyText.hidden=false;replyStatus.textContent="Write a response then select Respond as verified host again.";return;}
+   if(!replyText.value.trim()){replyStatus.textContent="Response cannot be empty.";return;}
+   try{
+    const response=await fetch("/v1/bnb/reviews/"+encodeURIComponent(review.review_id)+"/host-response",{
+     method:"POST",headers:hostHeaders(),credentials:"omit",body:JSON.stringify({body:replyText.value})});
+    replyStatus.textContent=response.ok?"Response submitted for independent moderation; not yet public.":"Response unavailable or unauthorized ("+response.status+").";
+   }catch(e){replyStatus.textContent="Response unavailable.";}
+  });
+  detailOutput.append(reply,replyText,replyStatus);
  }
 }
  }catch(e){detailOutput.textContent=e.message;}

@@ -67,11 +67,11 @@ func(p CredentialProviderHTTP) Fetch(ctx context.Context,tenant,subject string,n
  if record.Issuer!=c.ExpectedIssuer||record.Audience!=c.Audience||record.TenantID!=tenant||record.Subject!=subject||!record.Active||record.Revoked||!now.Before(record.ExpiresAt)||!digestValid(record.EvidenceDigest)||!c051Scope(record.EvidenceReference)||len(record.EvidenceReference)>128{return zero,ErrUnauthorized}
  return record,nil
 }
-type CredentialTriplet struct{ Identity,Verify,Registry CredentialProviderHTTP }
+type CredentialTriplet struct{ Identity,VerifyProvider,Registry CredentialProviderHTTP }
 type CredentialTripletResult struct{ PrivateReferences [3]string; EvidenceDigest string }
 func(t CredentialTriplet) Verify(ctx context.Context,tenant,subject string,now time.Time)(CredentialTripletResult,error){
  var zero CredentialTripletResult
- providers:=[]CredentialProviderHTTP{t.Identity,t.Verify,t.Registry}
+ providers:=[]CredentialProviderHTTP{t.Identity,t.VerifyProvider,t.Registry}
  for i,n:=range []string{"Identity","Verify","Registry"} {if providers[i].Config.Name!=n{return zero,ErrUnavailable}}
  var results [3]CredentialAuthorityRecord
  for i,p:=range providers{

@@ -109,9 +109,8 @@ contract InventoryRegistryR041Test {
 
     function testReplayAndOverdrawFailClosed() public {
         inventory.acquire(bytes32(uint256(11)), RESOURCE, address(alice), 2);
-        (bool replay,) =
-            address(inventory)
-                .call(abi.encodeCall(inventory.acquire, (bytes32(uint256(11)), RESOURCE, address(alice), 2)));
+        (bool replay,) = address(inventory)
+            .call(abi.encodeCall(inventory.acquire, (bytes32(uint256(11)), RESOURCE, address(alice), 2)));
         require(!replay, "duplicate issue");
         (bool overdraw,) =
             address(alice).call(abi.encodeCall(alice.reserve, (inventory, bytes32(uint256(12)), RESOURCE, 3)));

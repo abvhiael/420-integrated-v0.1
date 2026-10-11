@@ -656,6 +656,56 @@ def submit_guest_review(reservation_id:UUID,payload:GuestReviewInput,
     return {"id":str(review_id),"state":"pending_moderation","published":False}
 
 
+@app.get("/v1/bnb/internal/reputation/verified-reviews/{property_id}")
+def reputation_verified_review_feed(property_id:UUID,
+    x_reputation_proof:str|None=Header(None)):
+    """Service-to-service consumer proof; 420Reputation owns final score authority."""
+    if not x_reputation_proof:raise HTTPException(401,"REPUTATION_PROOF_REQUIRED")
+    proof=verify_authority(x_reputation_proof,"BNB_REPUTATION","verified-review-read")
+    if proof.get("property_id")!=str(property_id):
+        raise HTTPException(403,"REPUTATION_PROPERTY_SCOPE_MISMATCH")
+    with db() as c:
+        rows=c.execute("""SELECT r.id,r.rating,r.status,r.created_at
+            FROM bnb_guest_review r
+            JOIN bnb_reservation v ON v.id=r.reservation_id
+            JOIN bnb_hold h ON h.id=v.hold_id
+            WHERE r.property_id=%s AND v.status='confirmed'
+              AND upper(h.period)<=now()
+            ORDER BY r.id LIMIT 1000""",(property_id,)).fetchall()
+    return {"version":"bnb-reputation-verified-stays/v1","property_id":str(property_id),
+            "reputation_score_authority":"420Reputation",
+            "reviews":[{"id":str(r[0]),"rating":r[1] if r[2]=="approved" else None,
+                        "state":r[2],"created_at":r[3].isoformat()} for r in rows]}
+
+class ReputationExportReceipt(BaseModel):
+    review_id:UUID
+    revision:int=Field(ge=1,strict=True)
+    external_reference:str=Field(min_length=8,max_length=256)
+
+@app.post("/v1/bnb/internal/reputation/export-receipt")
+def acknowledge_reputation_export(payload:ReputationExportReceipt,
+                                  x_reputation_proof:str|None=Header(None)):
+    if not x_reputation_proof:raise HTTPException(401,"REPUTATION_PROOF_REQUIRED")
+    proof=verify_authority(x_reputation_proof,"BNB_REPUTATION","review-export-receipt")
+    if proof.get("review_id")!=str(payload.review_id) or proof.get("revision")!=payload.revision or proof.get("external_reference")!=payload.external_reference:
+        raise HTTPException(403,"REPUTATION_RECEIPT_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            review=c.execute("SELECT property_id FROM bnb_guest_review WHERE id=%s",
+                             (payload.review_id,)).fetchone()
+            if not review:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(review[0],))
+            prior=c.execute("SELECT last_revision FROM bnb_reputation_export WHERE review_id=%s FOR UPDATE",
+                            (payload.review_id,)).fetchone()
+            if prior and prior[0]>=payload.revision:raise HTTPException(409,"REPUTATION_RECEIPT_STALE")
+            c.execute("""INSERT INTO bnb_reputation_export(review_id,last_revision,exported_at,external_reference)
+                VALUES (%s,%s,now(),%s) ON CONFLICT(review_id) DO UPDATE
+                SET last_revision=excluded.last_revision,exported_at=excluded.exported_at,
+                external_reference=excluded.external_reference""",
+                (payload.review_id,payload.revision,payload.external_reference))
+    return {"accepted":True,"revision":payload.revision,"final_score_authority":"420Reputation"}
+
+
 class HostReviewResponseInput(BaseModel):
     body: str=Field(min_length=1,max_length=2000)
 

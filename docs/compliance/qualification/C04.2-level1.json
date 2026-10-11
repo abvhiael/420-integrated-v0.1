@@ -1,16 +1,19 @@
 {
   "step": "C04.2",
   "canonical": "Reviewer qualifications and delegation; MFA, least privilege, short-lived sessions and approval invalidation when reviewed content changes.",
-  "status": "LEVEL1_TESTS_PASS_INTEGRATION_PENDING",
+  "status": "PENDING_REQUALIFICATION_AFTER_LIFECYCLE_INTEGRATION",
   "qualification_level": 1,
-  "implementation_sha": "347e76315ba7cdd3fa144a5347c0c6452f77420f",
+  "implementation_sha": "caf042fb5b251ea01b5433b8dbb02ba855d2c279",
   "branch": "audit/420compliance-c01-1-inventory-20261009",
   "pr": 602,
   "files": [
     "services/complianceauth/reviewer_authorization.go",
     "services/complianceauth/reviewer_authorization_test.go",
     ".github/workflows/420compliance-c01-level1.yml",
-    "docs/compliance/C04.2-REVIEWER-AUTHORIZATION.md"
+    "docs/compliance/C04.2-REVIEWER-AUTHORIZATION.md",
+    "services/complianceauth/reviewer_lifecycle_integration.go",
+    "services/complianceauth/reviewer_lifecycle_integration_test.go",
+    "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
   ],
   "checks": [
     "Reviewer and approver scope / qualification",
@@ -20,13 +23,11 @@
     "revocation and unavailable authority fail closed"
   ],
   "ci": {
-    "status": "PASS",
-    "run_id": 38106774438,
-    "job_id": 114373865992,
-    "conclusion": "success",
-    "exact_sha": true,
-    "successful_steps": 48,
-    "failed_steps": 0
+    "status": "PENDING_EXACT_SHA",
+    "run_id": null,
+    "job_id": null,
+    "previous_qualifying_run": 38106774438,
+    "previous_implementation_sha": "347e76315ba7cdd3fa144a5347c0c6452f77420f"
   },
   "limitations": [
     "No independent reviewer or MFA provider connected",
@@ -34,10 +35,19 @@
     "No production durable authorization or delegation persistence"
   ],
   "blockers": [
-    "Fresh reviewer authorization must be enforced by production lifecycle review/approval API rather than merely exposed as adapter",
-    "Independent legal qualification and identity/MFA provider acceptance not established"
+    "New software integration requires a successful exact-SHA Compliance CI run"
   ],
   "level2": "Not scheduled for C04.2",
   "level3": "C08.5 deferred",
-  "next_canonical": "C04.3 — Federally applicable product, packaging, quantity-equivalency and promotion requirements; explicitly separate non-medical scope and payment-route legal review."
+  "next_canonical": "C04.3 — Federally applicable product, packaging, quantity-equivalency and promotion requirements; explicitly separate non-medical scope and payment-route legal review.",
+  "deferred_testnet": [
+    "C09.1: provision isolated MFA and issuer identities",
+    "C09.5: trusted external reviewer/qualification/delegation provider integration",
+    "C09.7: deployed revocation, MFA/session expiry, stale digest and outage negative acceptance"
+  ],
+  "deferred_production": [
+    "C10.1: independent legal reviewer qualification and latest-law acceptance",
+    "C10.3: production identity/MFA trust and credential revocation",
+    "C10.7: release authorization and operator signoff"
+  ]
 }

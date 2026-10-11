@@ -1481,6 +1481,15 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
             if (split[8]!=payload.chain_id or split[9]!=payload.asset or
                 split[10]!=payload.policy_version):
                 raise HTTPException(409,"DISBURSEMENT_ASSET_POLICY_MISMATCH")
+            if payload.kind=="host":
+                checkout=c.execute("""SELECT upper(h.period) FROM bnb_reservation r
+                    JOIN bnb_hold h ON h.id=r.hold_id WHERE r.id=%s""",
+                    (payload.reservation_id,)).fetchone()
+                if (not checkout or checkout[0]>datetime.now(timezone.utc) or
+                    proof.get("fulfillment_verified") is not True or
+                    proof.get("dispute_window_complete") is not True or
+                    proof.get("payout_controller_approved") is not True):
+                    raise HTTPException(409,"HOST_PAYOUT_NOT_ELIGIBLE")
             if payload.kind in ("host","platform","developer"):
                 dest={"host":split[5],"platform":split[6],"developer":split[7]}[payload.kind]
                 if payload.recipient!=dest:raise HTTPException(403,"PAYOUT_BENEFICIARY_MISMATCH")
@@ -1533,6 +1542,10 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
             limits={"host":split[1],"platform":split[2],"developer":split[3],"retained":split[4]}
             if any(used.get(k,0)>v for k,v in limits.items()):
                 raise HTTPException(409,"PAYOUT_SHARE_EXCEEDED")
+            if payload.receipt_hash and c.execute("""SELECT 1 FROM bnb_pay_disbursement
+                WHERE pay_receipt_hash=%s AND pay_operation_id!=%s""",
+                (payload.receipt_hash,payload.pay_operation_id)).fetchone():
+                raise HTTPException(409,"PAY_RECEIPT_REUSED")
             if existing and payload.state!=existing[3]:
                 c.execute("""UPDATE bnb_pay_disbursement SET state=%s,pay_event_id=%s,
                     pay_receipt_hash=%s,updated_at=now() WHERE pay_operation_id=%s""",

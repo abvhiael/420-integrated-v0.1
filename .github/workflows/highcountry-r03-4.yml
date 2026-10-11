@@ -1,0 +1,48 @@
+name: High Country R03.4 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/cultivation/**'
+      - 'contracts/src/highcountry/harvest/**'
+      - 'contracts/test/highcountry/unit/cultivation/**'
+      - 'docs/highcountry/R03.4-*'
+      - '.github/workflows/highcountry-r03-4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r03-4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected High Country compilation
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: R03.4 formatting
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/cultivation/PlantRegistry.sol test/highcountry/unit/cultivation/CultivationEngine.t.sol
+      - name: Affected security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: R03.4 exact lifecycle accounting and replay
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' --match-test 'testR034*' -vv
+      - name: Retained cultivation harvest product regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' -vv
+      - name: Canonical app source verifier
+        run: python3 scripts/highcountry/verify-r01.py

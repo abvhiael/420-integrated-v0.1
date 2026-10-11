@@ -44,7 +44,9 @@ contract RulesetRegistryTest {
         require(!ok, "unauthorized ruleset registered");
     }
 
-    function _grant(bytes32 rulesetId) private {
+    function _grant(
+        bytes32 rulesetId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.RULESET_REGISTRY,

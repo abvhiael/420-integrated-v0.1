@@ -29,12 +29,24 @@ contract HC2WorldGenesisTest {
         readiness = new WorldGenesisReadiness(address(genesis), address(regions));
         profiles = new GrowerProfileRegistry(address(authorization), address(regions), address(genesis));
 
-        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("genesis:set-roots"));
-        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("genesis:finalize"));
+        _grant(
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_SET_ROOTS,
+            genesis.ADMIN_SCOPE(),
+            keccak256("genesis:set-roots")
+        );
+        _grant(
+            ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, genesis.ADMIN_SCOPE(), keccak256("genesis:finalize")
+        );
         _grantRegion(1);
         _grantRegion(2);
         _grantRegion(3);
-        _grant(ModuleIds.GROWER_PROFILE_REGISTRY, ActionIds.GROWER_PROFILE_CREATE, bytes32(uint256(1)), keccak256("profile:create:1"));
+        _grant(
+            ModuleIds.GROWER_PROFILE_REGISTRY,
+            ActionIds.GROWER_PROFILE_CREATE,
+            bytes32(uint256(1)),
+            keccak256("profile:create:1")
+        );
     }
 
     function testFoundingRegionsRequireAllThreeSlots() public {
@@ -59,15 +71,16 @@ contract HC2WorldGenesisTest {
         _registerRegionOne();
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
-        (bool ok,) = address(regions).call(
-            abi.encodeWithSelector(
-                regions.registerFoundingRegion.selector,
-                uint16(2),
-                FoundingRegions.REGION_TWO_METADATA,
-                FoundingRegions.REGION_TWO_CLIMATE,
-                FoundingRegions.REGION_TWO_RULESET
-            )
-        );
+        (bool ok,) = address(regions)
+            .call(
+                abi.encodeWithSelector(
+                    regions.registerFoundingRegion.selector,
+                    uint16(2),
+                    FoundingRegions.REGION_TWO_METADATA,
+                    FoundingRegions.REGION_TWO_CLIMATE,
+                    FoundingRegions.REGION_TWO_RULESET
+                )
+            );
         require(!ok, "region registered after genesis finalization");
     }
 
@@ -96,13 +109,27 @@ contract HC2WorldGenesisTest {
     }
 
     function testRejectsInvalidFoundingRegionIds() public {
-        (bool zeroOk,) = address(regions).call(
-            abi.encodeWithSelector(regions.registerFoundingRegion.selector, uint16(0), bytes32(uint256(1)), bytes32(uint256(2)), bytes32(uint256(3)))
-        );
+        (bool zeroOk,) = address(regions)
+            .call(
+                abi.encodeWithSelector(
+                    regions.registerFoundingRegion.selector,
+                    uint16(0),
+                    bytes32(uint256(1)),
+                    bytes32(uint256(2)),
+                    bytes32(uint256(3))
+                )
+            );
         require(!zeroOk, "region zero accepted");
-        (bool fourOk,) = address(regions).call(
-            abi.encodeWithSelector(regions.registerFoundingRegion.selector, uint16(4), bytes32(uint256(1)), bytes32(uint256(2)), bytes32(uint256(3)))
-        );
+        (bool fourOk,) = address(regions)
+            .call(
+                abi.encodeWithSelector(
+                    regions.registerFoundingRegion.selector,
+                    uint16(4),
+                    bytes32(uint256(1)),
+                    bytes32(uint256(2)),
+                    bytes32(uint256(3))
+                )
+            );
         require(!fourOk, "region four accepted");
     }
 
@@ -113,18 +140,35 @@ contract HC2WorldGenesisTest {
     }
 
     function _registerRegionOne() private {
-        regions.registerFoundingRegion(1, FoundingRegions.REGION_ONE_METADATA, FoundingRegions.REGION_ONE_CLIMATE, FoundingRegions.REGION_ONE_RULESET);
+        regions.registerFoundingRegion(
+            1,
+            FoundingRegions.REGION_ONE_METADATA,
+            FoundingRegions.REGION_ONE_CLIMATE,
+            FoundingRegions.REGION_ONE_RULESET
+        );
     }
 
     function _registerRegionTwo() private {
-        regions.registerFoundingRegion(2, FoundingRegions.REGION_TWO_METADATA, FoundingRegions.REGION_TWO_CLIMATE, FoundingRegions.REGION_TWO_RULESET);
+        regions.registerFoundingRegion(
+            2,
+            FoundingRegions.REGION_TWO_METADATA,
+            FoundingRegions.REGION_TWO_CLIMATE,
+            FoundingRegions.REGION_TWO_RULESET
+        );
     }
 
     function _registerRegionThree() private {
-        regions.registerFoundingRegion(3, FoundingRegions.REGION_THREE_METADATA, FoundingRegions.REGION_THREE_CLIMATE, FoundingRegions.REGION_THREE_RULESET);
+        regions.registerFoundingRegion(
+            3,
+            FoundingRegions.REGION_THREE_METADATA,
+            FoundingRegions.REGION_THREE_CLIMATE,
+            FoundingRegions.REGION_THREE_RULESET
+        );
     }
 
-    function _grantRegion(uint16 regionId) private {
+    function _grantRegion(
+        uint16 regionId
+    ) private {
         _grant(
             ModuleIds.REGION_REGISTRY,
             ActionIds.REGION_REGISTER,
@@ -133,7 +177,12 @@ contract HC2WorldGenesisTest {
         );
     }
 
-    function _grant(bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function _grant(
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: moduleId,

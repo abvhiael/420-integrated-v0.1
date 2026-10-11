@@ -3,13 +3,21 @@ pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCAlreadyExists, HCGenesisNotFinalized, HCInvalidRegion, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import {
+    HCAlreadyExists,
+    HCGenesisNotFinalized,
+    HCInvalidRegion,
+    HCNotFound,
+    HCZeroAddress
+} from "../errors/HighCountryErrors.sol";
 import { IGenesisRegistry } from "../interfaces/IGenesisRegistry.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
 interface IRegionRegistryHC2 {
-    function exists(uint16 regionId) external view returns (bool);
+    function exists(
+        uint16 regionId
+    ) external view returns (bool);
 }
 
 contract GrowerProfileRegistry {
@@ -31,7 +39,11 @@ contract GrowerProfileRegistry {
 
     event GrowerProfileCreated(uint64 indexed profileId, address indexed account, uint16 indexed homeRegionId);
 
-    constructor(address authorization_, address regionRegistry_, address genesisRegistry_) {
+    constructor(
+        address authorization_,
+        address regionRegistry_,
+        address genesisRegistry_
+    ) {
         if (authorization_ == address(0) || regionRegistry_ == address(0) || genesisRegistry_ == address(0)) {
             revert HCZeroAddress();
         }
@@ -40,13 +52,17 @@ contract GrowerProfileRegistry {
         genesisRegistry = IGenesisRegistry(genesisRegistry_);
     }
 
-    function getProfile(uint64 profileId) external view returns (GrowerProfile memory) {
+    function getProfile(
+        uint64 profileId
+    ) external view returns (GrowerProfile memory) {
         GrowerProfile memory profile = _profiles[profileId];
         if (!profile.exists) revert HCNotFound();
         return profile;
     }
 
-    function createProfile(uint16 homeRegionId) external returns (uint64 profileId) {
+    function createProfile(
+        uint16 homeRegionId
+    ) external returns (uint64 profileId) {
         if (!genesisRegistry.finalized()) revert HCGenesisNotFinalized();
         if (profileIdOf[msg.sender] != 0) revert HCAlreadyExists();
         if (!regionRegistry.exists(homeRegionId)) revert HCInvalidRegion(homeRegionId);

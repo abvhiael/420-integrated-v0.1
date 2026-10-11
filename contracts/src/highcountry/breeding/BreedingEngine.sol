@@ -2,9 +2,18 @@
 pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
+import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
+import { IEmergencyState } from "../interfaces/IEmergencyState.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
 import { RandomDomains } from "../constants/RandomDomains.sol";
-import { HCAlreadyExists, HCInvalidId, HCInvalidState, HCNotFound, HCZeroAddress } from "../errors/HighCountryErrors.sol";
+import {
+    HCAlreadyExists,
+    HCInvalidId,
+    HCInvalidState,
+    HCNotFound,
+    HCZeroAddress,
+    HCEmergencyRestrictionActive
+} from "../errors/HighCountryErrors.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
 
@@ -17,14 +26,34 @@ interface IGenomeRegistryBreeding {
         bool founding;
         bool exists;
     }
-    function exists(bytes32 genomeId) external view returns (bool);
-    function getGenome(bytes32 genomeId) external view returns (GenomeRecord memory);
-    function registerGenome(bytes32 genomeId, bytes32 lineId, bytes32 metadataHash, bytes32[28] calldata loci) external;
+    function exists(
+        bytes32 genomeId
+    ) external view returns (bool);
+    function getGenome(
+        bytes32 genomeId
+    ) external view returns (GenomeRecord memory);
+    function registerGenome(
+        bytes32 genomeId,
+        bytes32 lineId,
+        bytes32 metadataHash,
+        bytes32[28] calldata loci
+    ) external;
 }
 
 interface IRandomnessCoordinatorBreeding {
-    function request(bytes32 requestId, bytes32 domain, bytes32 contextHash) external;
-    function consume(bytes32 requestId, bytes32 expectedDomain, bytes32 expectedContextHash) external returns (bytes32 entropy);
+    function request(
+        bytes32 requestId,
+        bytes32 domain,
+        bytes32 contextHash
+    ) external;
+    function cancel(
+        bytes32 requestId
+    ) external;
+    function consume(
+        bytes32 requestId,
+        bytes32 expectedDomain,
+        bytes32 expectedContextHash
+    ) external returns (bytes32 entropy);
 }
 
 contract BreedingEngine {
@@ -42,39 +71,121 @@ contract BreedingEngine {
         bool exists;
     }
 
+    IEmergencyState public emergencyState;
+    bytes32 public constant EMERGENCY_BIND_SCOPE = keccak256("HC.EMERGENCY.ENGINE_BIND.V1");
+    event EmergencyStateBound(address indexed emergencyState);
+
+    function bindEmergencyState(
+        address candidate
+    ) external {
+        if (address(emergencyState) != address(0) || candidate.code.length == 0) revert HCInvalidState();
+        authorization.requireAuthorized(
+            AuthorizationRequest(
+                msg.sender, ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_BIND_EMERGENCY, EMERGENCY_BIND_SCOPE, 0
+            )
+        );
+        if (
+            IEmergencyState(candidate).authorizationRoot() != address(authorization)
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.CULTIVATION) == false
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.BREEDING) == false
+                || IEmergencyState(candidate).isAllowedDomain(EmergencyDomains.RANDOMNESS_REQUEST) == false
+        ) revert HCInvalidState();
+        emergencyState = IEmergencyState(candidate);
+        emit EmergencyStateBound(candidate);
+    }
+
+    function _requireUnrestricted(
+        bytes32 domain
+    ) private view {
+        if (address(emergencyState) == address(0) || emergencyState.isRestricted(domain)) {
+            revert HCEmergencyRestrictionActive(domain);
+        }
+    }
+
     IHighCountryAuthorization public immutable authorization;
     IGenomeRegistryBreeding public immutable genomeRegistry;
     IRandomnessCoordinatorBreeding public immutable randomness;
     mapping(uint64 => BreedingEvent) private _events;
+    mapping(bytes32 => uint64) public pendingChildOwner;
+    mapping(uint64 => uint64) public requestedAt;
+    mapping(uint64 => bool) public cancelled;
+    uint64 public constant BREEDING_TIMEOUT = 7 days;
+    event BreedingCancelled(uint64 indexed breedingEventId, bytes32 indexed childGenomeId, bool timedOut);
 
-    event BreedingRequested(uint64 indexed breedingEventId, bytes32 indexed parentA, bytes32 indexed parentB, bytes32 childGenomeId, bytes32 requestId);
+    event BreedingRequested(
+        uint64 indexed breedingEventId,
+        bytes32 indexed parentA,
+        bytes32 indexed parentB,
+        bytes32 childGenomeId,
+        bytes32 requestId
+    );
     event BreedingFinalized(uint64 indexed breedingEventId, bytes32 indexed childGenomeId, bytes32 entropy);
 
-    constructor(address authorization_, address genomeRegistry_, address randomness_) {
-        if (authorization_ == address(0) || genomeRegistry_ == address(0) || randomness_ == address(0)) revert HCZeroAddress();
+    constructor(
+        address authorization_,
+        address genomeRegistry_,
+        address randomness_
+    ) {
+        if (authorization_ == address(0) || genomeRegistry_ == address(0) || randomness_ == address(0)) {
+            revert HCZeroAddress();
+        }
         authorization = IHighCountryAuthorization(authorization_);
         genomeRegistry = IGenomeRegistryBreeding(genomeRegistry_);
         randomness = IRandomnessCoordinatorBreeding(randomness_);
     }
 
-    function requestBreeding(uint64 breedingEventId, bytes32 parentA, bytes32 parentB, bytes32 childGenomeId, bytes32 childLineId, bytes32 metadataHash) external {
-        if (breedingEventId == 0 || parentA == bytes32(0) || parentB == bytes32(0) || childGenomeId == bytes32(0) || childLineId == bytes32(0) || metadataHash == bytes32(0)) revert HCInvalidId();
+    function requestBreeding(
+        uint64 breedingEventId,
+        bytes32 parentA,
+        bytes32 parentB,
+        bytes32 childGenomeId,
+        bytes32 childLineId,
+        bytes32 metadataHash
+    ) external {
+        _requireUnrestricted(EmergencyDomains.BREEDING);
+        _requireUnrestricted(EmergencyDomains.RANDOMNESS_REQUEST);
+        if (
+            breedingEventId == 0 || parentA == bytes32(0) || parentB == bytes32(0) || childGenomeId == bytes32(0)
+                || childLineId == bytes32(0) || metadataHash == bytes32(0)
+        ) revert HCInvalidId();
         if (parentA == parentB) revert HCInvalidState();
         if (!genomeRegistry.exists(parentA) || !genomeRegistry.exists(parentB)) revert HCNotFound();
-        if (genomeRegistry.exists(childGenomeId) || _events[breedingEventId].exists) revert HCAlreadyExists();
+        if (
+            genomeRegistry.exists(childGenomeId) || _events[breedingEventId].exists
+                || pendingChildOwner[childGenomeId] != 0
+        ) revert HCAlreadyExists();
 
         _auth(ActionIds.BREEDING_REQUEST, breedingEventId);
-        bytes32 contextHash = keccak256(abi.encode(breedingEventId, parentA, parentB, childGenomeId, childLineId, metadataHash));
+        bytes32 contextHash =
+            keccak256(abi.encode(breedingEventId, parentA, parentB, childGenomeId, childLineId, metadataHash));
         bytes32 requestId = keccak256(abi.encode(RandomDomains.BREEDING, contextHash));
-        _events[breedingEventId] = BreedingEvent(breedingEventId, parentA, parentB, childGenomeId, childLineId, metadataHash, contextHash, requestId, bytes32(0), false, true);
+        _events[breedingEventId] = BreedingEvent(
+            breedingEventId,
+            parentA,
+            parentB,
+            childGenomeId,
+            childLineId,
+            metadataHash,
+            contextHash,
+            requestId,
+            bytes32(0),
+            false,
+            true
+        );
         randomness.request(requestId, RandomDomains.BREEDING, contextHash);
+        pendingChildOwner[childGenomeId] = breedingEventId;
+        requestedAt[breedingEventId] = uint64(block.timestamp);
         emit BreedingRequested(breedingEventId, parentA, parentB, childGenomeId, requestId);
     }
 
-    function finalizeBreeding(uint64 breedingEventId) external {
+    function finalizeBreeding(
+        uint64 breedingEventId
+    ) external {
+        _requireUnrestricted(EmergencyDomains.BREEDING);
         BreedingEvent storage e = _events[breedingEventId];
         if (!e.exists) revert HCNotFound();
-        if (e.finalized) revert HCInvalidState();
+        if (e.finalized || cancelled[breedingEventId]) revert HCInvalidState();
+        if (pendingChildOwner[e.childGenomeId] != breedingEventId) revert HCInvalidState();
         _auth(ActionIds.BREEDING_FINALIZE, breedingEventId);
 
         bytes32 entropy = randomness.consume(e.requestId, RandomDomains.BREEDING, e.contextHash);
@@ -94,17 +205,64 @@ contract BreedingEngine {
 
         e.entropy = entropy;
         e.finalized = true;
+        delete pendingChildOwner[e.childGenomeId];
         genomeRegistry.registerGenome(e.childGenomeId, e.childLineId, e.metadataHash, child);
         emit BreedingFinalized(breedingEventId, e.childGenomeId, entropy);
     }
 
-    function getBreedingEvent(uint64 breedingEventId) external view returns (BreedingEvent memory) {
+    /// @notice Authorized cancellation is available even when breeding is restricted.
+    function cancelBreeding(
+        uint64 breedingEventId
+    ) external {
+        _auth(ActionIds.BREEDING_CANCEL, breedingEventId);
+        _cancel(breedingEventId, false);
+    }
+
+    /// @notice Anyone may release a stranded reservation after its fixed deadline.
+    function expireBreeding(
+        uint64 breedingEventId
+    ) external {
+        if (!_events[breedingEventId].exists) revert HCNotFound();
+        if (block.timestamp < uint256(requestedAt[breedingEventId]) + BREEDING_TIMEOUT) revert HCInvalidState();
+        _cancel(breedingEventId, true);
+    }
+
+    function _cancel(
+        uint64 breedingEventId,
+        bool timedOut
+    ) private {
+        BreedingEvent storage e = _events[breedingEventId];
+        if (!e.exists) revert HCNotFound();
+        if (e.finalized || cancelled[breedingEventId]) revert HCInvalidState();
+        if (pendingChildOwner[e.childGenomeId] != breedingEventId) revert HCInvalidState();
+        randomness.cancel(e.requestId);
+        cancelled[breedingEventId] = true;
+        delete pendingChildOwner[e.childGenomeId];
+        emit BreedingCancelled(breedingEventId, e.childGenomeId, timedOut);
+    }
+
+    function childGenomeOfFinalizedEvent(
+        uint64 breedingEventId
+    ) external view returns (bytes32) {
+        BreedingEvent storage e = _events[breedingEventId];
+        if (!e.exists || !e.finalized) revert HCInvalidState();
+        return e.childGenomeId;
+    }
+
+    function getBreedingEvent(
+        uint64 breedingEventId
+    ) external view returns (BreedingEvent memory) {
         BreedingEvent memory e = _events[breedingEventId];
         if (!e.exists) revert HCNotFound();
         return e;
     }
 
-    function _auth(bytes32 actionId, uint64 id) private view {
-        authorization.requireAuthorized(AuthorizationRequest(msg.sender, ModuleIds.BREEDING_ENGINE, actionId, bytes32(uint256(id)), 0));
+    function _auth(
+        bytes32 actionId,
+        uint64 id
+    ) private view {
+        authorization.requireAuthorized(
+            AuthorizationRequest(msg.sender, ModuleIds.BREEDING_ENGINE, actionId, bytes32(uint256(id)), 0)
+        );
     }
 }

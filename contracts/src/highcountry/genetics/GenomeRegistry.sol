@@ -3,7 +3,14 @@ pragma solidity ^0.8.24;
 
 import { ActionIds } from "../constants/ActionIds.sol";
 import { ModuleIds } from "../constants/ModuleIds.sol";
-import { HCAlreadyExists, HCGenesisAlreadyFinalized, HCGenesisNotFinalized, HCInvalidId, HCNotFound } from "../errors/HighCountryErrors.sol";
+import {
+    HCAlreadyExists,
+    HCGenesisAlreadyFinalized,
+    HCGenesisNotFinalized,
+    HCInvalidId,
+    HCNotFound,
+    HCZeroAddress
+} from "../errors/HighCountryErrors.sol";
 import { IGenesisRegistry } from "../interfaces/IGenesisRegistry.sol";
 import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorization.sol";
 import { AuthorizationRequest } from "../types/HighCountryTypes.sol";
@@ -29,7 +36,11 @@ contract GenomeRegistry {
 
     event GenomeRegistered(bytes32 indexed genomeId, bytes32 indexed lineId, bool founding, bytes32 metadataHash);
 
-    constructor(address authorization_, address genesisRegistry_) {
+    constructor(
+        address authorization_,
+        address genesisRegistry_
+    ) {
+        if (authorization_ == address(0) || genesisRegistry_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
         genesisRegistry = IGenesisRegistry(genesisRegistry_);
     }
@@ -48,7 +59,9 @@ contract GenomeRegistry {
         _requireAuthorized(ActionIds.FOUNDING_GENOME_REGISTER, genomeId);
         _register(genomeId, lineId, metadataHash, loci, true);
         foundingGenomeOfLine[lineId] = genomeId;
-        unchecked { foundingGenomeCount += 1; }
+        unchecked {
+            foundingGenomeCount += 1;
+        }
     }
 
     function registerGenome(
@@ -62,11 +75,15 @@ contract GenomeRegistry {
         _register(genomeId, lineId, metadataHash, loci, false);
     }
 
-    function exists(bytes32 genomeId) external view returns (bool) {
+    function exists(
+        bytes32 genomeId
+    ) external view returns (bool) {
         return _genomes[genomeId].exists;
     }
 
-    function getGenome(bytes32 genomeId) external view returns (GenomeRecord memory) {
+    function getGenome(
+        bytes32 genomeId
+    ) external view returns (GenomeRecord memory) {
         GenomeRecord memory genome = _genomes[genomeId];
         if (!genome.exists) revert HCNotFound();
         return genome;
@@ -87,18 +104,18 @@ contract GenomeRegistry {
         if (_genomes[genomeId].exists) revert HCAlreadyExists();
 
         _genomes[genomeId] = GenomeRecord({
-            id: genomeId,
-            lineId: lineId,
-            metadataHash: metadataHash,
-            loci: loci,
-            founding: founding,
-            exists: true
+            id: genomeId, lineId: lineId, metadataHash: metadataHash, loci: loci, founding: founding, exists: true
         });
-        unchecked { genomeCount += 1; }
+        unchecked {
+            genomeCount += 1;
+        }
         emit GenomeRegistered(genomeId, lineId, founding, metadataHash);
     }
 
-    function _requireAuthorized(bytes32 actionId, bytes32 genomeId) private view {
+    function _requireAuthorized(
+        bytes32 actionId,
+        bytes32 genomeId
+    ) private view {
         authorization.requireAuthorized(
             AuthorizationRequest({
                 principal: msg.sender,

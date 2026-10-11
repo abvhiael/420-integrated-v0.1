@@ -53,7 +53,29 @@ contract HighCountryAuthorizationTest {
         require(!authorization.isAuthorized(request), "zero principal authorized");
     }
 
-    function _setGrant(uint64 validFrom, uint64 validUntil, bool revoked) private {
+    function testPeriodicOrMalformedPeriodMetadataFailsClosed() public {
+        _setGrant(0, 0, false);
+        registry.setPeriodicLimits(GRANT_ID, 10, 60);
+        require(!authorization.isAuthorized(_request()), "periodic grant accepted");
+        registry.setPeriodicLimits(GRANT_ID, 0, 60);
+        require(!authorization.isAuthorized(_request()), "period-only grant accepted");
+        registry.setPeriodicLimits(GRANT_ID, 10, 0);
+        require(!authorization.isAuthorized(_request()), "limit-only grant accepted");
+        registry.setPeriodicLimits(GRANT_ID, 0, 0);
+        require(authorization.isAuthorized(_request()), "nonperiodic grant rejected");
+    }
+
+    function testMissingActiveGrantMetadataFailsClosed() public {
+        LegacyCapabilityOracle legacy = new LegacyCapabilityOracle();
+        HighCountryAuthorization adapter = new HighCountryAuthorization(address(legacy));
+        require(!adapter.isAuthorized(_request()), "legacy oracle without active metadata accepted");
+    }
+
+    function _setGrant(
+        uint64 validFrom,
+        uint64 validUntil,
+        bool revoked
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: MODULE_ID,
@@ -71,18 +93,27 @@ contract HighCountryAuthorizationTest {
 
     function _request() private view returns (AuthorizationRequest memory) {
         return AuthorizationRequest({
-            principal: address(this),
-            moduleId: MODULE_ID,
-            actionId: ACTION_ID,
-            scopeHash: SCOPE_HASH,
-            amount: AMOUNT
+            principal: address(this), moduleId: MODULE_ID, actionId: ACTION_ID, scopeHash: SCOPE_HASH, amount: AMOUNT
         });
     }
 
-    function _requireAuthorizedReverts(AuthorizationRequest memory request) private returns (bool) {
-        (bool ok,) = address(authorization).call(
-            abi.encodeWithSelector(authorization.requireAuthorized.selector, request)
-        );
+    function _requireAuthorizedReverts(
+        AuthorizationRequest memory request
+    ) private returns (bool) {
+        (bool ok,) =
+            address(authorization).call(abi.encodeWithSelector(authorization.requireAuthorized.selector, request));
         return !ok;
+    }
+}
+
+contract LegacyCapabilityOracle {
+    function isAuthorized(
+        address,
+        bytes32,
+        bytes32,
+        bytes32,
+        uint256
+    ) external pure returns (bool) {
+        return true;
     }
 }

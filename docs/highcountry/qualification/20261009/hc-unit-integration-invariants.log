@@ -1,0 +1,702 @@
+Compiling 90 files with Solc 0.8.24
+Solc 0.8.24 finished in 104.53s
+Compiler run successful with warnings:
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/BreedingRandomnessInvariant.t.sol:36:9:
+   |
+36 |         address(randomness).call(abi.encodeWithSelector(randomness.fulfill.selector, requestId, entropy_));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/BreedingRandomnessInvariant.t.sol:40:9:
+   |
+40 |         address(breeding).call(abi.encodeWithSelector(breeding.finalizeBreeding.selector, uint64(1)));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GenesisRegistryInvariant.t.sol:23:9:
+   |
+23 |         address(genesis).call(abi.encodeWithSelector(genesis.finalizeGenesis.selector));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GenesisRegistryInvariant.t.sol:37:9:
+   |
+37 |         address(genesis).call(abi.encodeWithSelector(genesis.setRoots.selector, replacement));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GeneticsAssetsInvariant.t.sol:45:9:
+   |
+45 |         address(seeds).call(abi.encodeWithSelector(seeds.transfer.selector, 1, newOwner));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GeneticsAssetsInvariant.t.sol:51:9:
+   |
+51 |         address(clones).call(abi.encodeWithSelector(clones.transfer.selector, 2, newOwner));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GeneticsAssetsInvariant.t.sol:57:9:
+   |
+57 |         address(mothers).call(abi.encodeWithSelector(mothers.transfer.selector, 3, newOwner));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GeneticsAssetsInvariant.t.sol:61:9:
+   |
+61 |         address(mothers).call(abi.encodeWithSelector(mothers.consumeCutting.selector, 3));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GeneticsAssetsInvariant.t.sol:69:9:
+   |
+69 |         address(phenotypes)
+   |         ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/GenomeRegistryInvariant.t.sol:31:9:
+   |
+31 |         address(genomes)
+   |         ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/LandAccessInvariant.t.sol:59:9:
+   |
+59 |         address(land)
+   |         ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/LandAccessInvariant.t.sol:72:9:
+   |
+72 |         address(land).call(abi.encodeWithSelector(land.clearOccupancy.selector, uint64(1)));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/LandAccessInvariant.t.sol:76:9:
+   |
+76 |         address(publicAccess).call(abi.encodeWithSelector(publicAccess.allocate.selector, uint64(1), uint32(1)));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/LandAccessInvariant.t.sol:80:9:
+   |
+80 |         address(publicAccess).call(abi.encodeWithSelector(publicAccess.release.selector, uint64(1)));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/LandAccessInvariant.t.sol:86:9:
+   |
+86 |         address(land)
+   |         ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/ModuleRegistryInvariant.t.sol:36:9:
+   |
+36 |         address(registry)
+   |         ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/ModuleRegistryInvariant.t.sol:52:9:
+   |
+52 |         address(registry).call(abi.encodeWithSelector(registry.setModuleState.selector, moduleId, state));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (9302): Return value of low-level calls not used.
+  --> test/highcountry/invariant/WorldGenesisInvariant.t.sol:30:9:
+   |
+30 |         address(regions)
+   |         ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/highcountry/invariant/ContentEntitlementInvariant.t.sol:20:5:
+   |
+20 |     function stepProbeUngatedCore(
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/highcountry/unit/player/HighCountryMigration420.t.sol:123:5:
+    |
+123 |     function testWrongPayloadFailsClosed() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/highcountry/unit/player/HighCountrySessionAccess420.t.sol:259:5:
+    |
+259 |     function testRoutineSessionsHaveZeroNative420SpendLimit() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/highcountry/unit/player/OptionalCompetitionAccess420.t.sol:127:5:
+    |
+127 |     function testMissingRegistrationDoesNotGateBaseCompetition() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for test/highcountry/BaseHighCountryTest.t.sol:BaseHighCountryTest
+[PASS] testFoundationIdsAreDomainSeparated() (gas: 100)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 652.78µs (479.89µs CPU time)
+
+Ran 5 tests for test/highcountry/unit/world/BonusRegionAccess420.t.sol:BonusRegionAccess420Test
+[PASS] testBonusRegionAccessUsesGamingEntitlement() (gas: 225755)
+[PASS] testBonusRegionAdministrationIsCapabilityAuthorized() (gas: 62500)
+[PASS] testFoundingRegionsCannotBecomeWalletGatedBonusRegions() (gas: 28080)
+[PASS] testInactiveBonusRegionFailsClosedEvenWithEntitlement() (gas: 252532)
+[PASS] testRequireAccessFailsClosedWithoutEntitlement() (gas: 161617)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.98ms (1.14ms CPU time)
+2026-10-09T04:46:28.768883Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.768921Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.768931Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769003Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769013Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769050Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769077Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769087Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769096Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+
+Ran 6 tests for test/highcountry/unit/security/EmergencyState.t.sol:EmergencyStateTest
+[PASS] testCapabilityCanRestrictEnumeratedDomain() (gas: 247454)
+[PASS] testCapabilityIsDomainScoped() (gas: 208587)
+[PASS] testPositiveEmergencyDomainEnumeration() (gas: 48391)
+[PASS] testReleaseRequiresSeparateCapability() (gas: 505042)
+[PASS] testRestrictionRequiresCapability() (gas: 40091)
+[PASS] testUnknownDomainDefaultsDenied() (gas: 31687)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 815.54µs (495.77µs CPU time)
+2026-10-09T04:46:28.769397Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769408Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769417Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769451Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769461Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21199)
+
+Ran 3 tests for test/highcountry/unit/breeding/BreedingEngine.t.sol:BreedingEngineTest
+[PASS] testBreedingRequiresDistinctExistingParents() (gas: 200105)
+[PASS] testOnlyOriginalRequesterCanConsumeBoundRequest() (gas: 666636)
+[PASS] testRandomnessReplayDeniedAndBreedingFinalizesOnce() (gas: 2475172)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.27ms (916.38µs CPU time)
+2026-10-09T04:46:28.769484Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769501Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769506Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769511Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769528Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769537Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769544Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.769552Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769562Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769585Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769599Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769609Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769618Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.769991Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770002Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770015Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770045Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770054Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770076Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770090Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770099Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21248)
+2026-10-09T04:46:28.770108Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21248)
+
+Ran 3 tests for test/highcountry/unit/land/PublicCultivationAccess.t.sol:PublicCultivationAccessHC3Test
+[PASS] testAllocationAndReleaseConserveCapacity() (gas: 815776)
+[PASS] testAllocationCannotOverbookPlot() (gas: 338086)
+[PASS] testPublicCapacityCannotExceedParcelCapacity() (gas: 362197)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 966.04µs (547.75µs CPU time)
+2026-10-09T04:46:28.770278Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770290Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770298Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770326Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770332Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770348Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770360Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770367Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770373Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770615Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770627Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770634Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770692Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770698Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770714Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770726Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770733Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.770739Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+
+Ran 1 test for test/highcountry/integration/RealCapabilityGenesis.t.sol:RealCapabilityGenesisTest
+[PASS] testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation() (gas: 1912737)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 629.70µs (528.13µs CPU time)
+2026-10-09T04:46:28.770965Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770976Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.770982Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.771002Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.771008Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.771026Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.771036Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.771042Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.771070Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+
+Ran 5 tests for test/highcountry/unit/auth/HighCountryAuthorization.t.sol:HighCountryAuthorizationTest
+[PASS] testCapabilityApproval() (gas: 240441)
+[PASS] testDefaultDeny() (gas: 12104)
+[PASS] testExpiredCapabilityDenied() (gas: 265908)
+[PASS] testRevokedCapabilityDenied() (gas: 265628)
+[PASS] testZeroPrincipalFailsClosed() (gas: 6230)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 4.78ms (3.68ms CPU time)
+2026-10-09T04:46:28.771400Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.771410Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.771417Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.771437Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.771444Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.771459Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21243)
+
+Ran 5 tests for test/highcountry/unit/genesis/GenesisRegistry.t.sol:GenesisRegistryTest
+[PASS] testCannotChangeRootsAfterFinalization() (gas: 303268)
+[PASS] testCannotFinalizeTwice() (gas: 284091)
+[PASS] testCannotFinalizeWithoutCompleteRoots() (gas: 69222)
+[PASS] testFinalizeDisablesGenesisAuthority() (gas: 268268)
+2026-10-09T04:46:28.771471Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21243)
+[PASS] testSetRootsBeforeFinalization() (gas: 208117)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 4.96ms (3.71ms CPU time)
+2026-10-09T04:46:28.771478Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.771484Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+
+Ran 6 tests for test/highcountry/unit/cultivation/CultivationEngine.t.sol:CultivationEngineTest
+[PASS] testEnvironmentBoundsAndStressQualityDerivation() (gas: 759972)
+[PASS] testExpressionRejectsForeignGenomeWithoutLockingState() (gas: 974496)
+[PASS] testLandOperatorAndCapacityGatePlantRegistration() (gas: 771804)
+[PASS] testOfflineGrowthCatchesUpDeterministically() (gas: 701423)
+[PASS] testPlantLifecycleMovesForwardOnlyAfterRequiredTime() (gas: 696654)
+[PASS] testSixDimensionEnvironmentLocksIntoPhenotypeExpression() (gas: 990946)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 3.09ms (1.90ms CPU time)
+
+Ran 5 tests for test/highcountry/unit/player/HighCountryCrossGame420.t.sol:HighCountryCrossGame420Test
+[PASS] testCrossGameSourceRejected() (gas: 681587)
+[PASS] testInactiveAttestationRejected() (gas: 644869)
+[PASS] testMatchingHighCountryAttestationPasses() (gas: 681666)
+[PASS] testUnboundGrowerRejected() (gas: 449585)
+[PASS] testWrongPayloadRejected() (gas: 681404)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.32ms (1.09ms CPU time)
+2026-10-09T04:46:28.773100Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773117Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773127Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773169Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773179Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773200Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773217Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773227Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773237Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773561Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773574Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773584Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773613Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773622Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773670Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773687Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773697Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.773706Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+
+Ran 5 tests for test/highcountry/unit/genetics/GenomeRegistry.t.sol:GenomeRegistryTest
+[PASS] testFoundingGenomeBlockedAfterGenesisFinalization() (gas: 486044)
+[PASS] testFoundingGenomeRegistersBeforeGenesisFinalization() (gas: 1090445)
+[PASS] testFoundingLineCannotRegisterTwice() (gas: 1238050)
+[PASS] testNormalGenomeRequiresFinalizedGenesis() (gas: 1310482)
+[PASS] testZeroDependenciesRejectedAtDeployment() (gas: 271158)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.68ms (1.24ms CPU time)
+
+Ran 7 tests for test/highcountry/unit/player/HighCountryGamingBridge420.t.sol:HighCountryGamingBridge420Test
+[PASS] testBindsGrowerToCanonicalSharedGameProfile() (gas: 323692)
+[PASS] testConsumedGuestMigrationCanBindOnce() (gas: 601784)
+[PASS] testEntitlementMustBelongToBoundHighCountryProfile() (gas: 734577)
+[PASS] testRejectsBindingByDifferentWallet() (gas: 250664)
+[PASS] testRequireScopedEntitlementFailsClosed() (gas: 346628)
+[PASS] testRequiresSharedGamingProfileBeforeBinding() (gas: 117623)
+[PASS] testScopedEntitlementRequiresMatchingTypeAndContent() (gas: 602680)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.73ms (1.30ms CPU time)
+
+Ran 6 tests for test/highcountry/unit/player/HighCountryMigration420.t.sol:HighCountryMigration420Test
+[PASS] testApplyRequiresCapabilityAuthorization() (gas: 67070)
+[PASS] testConsumedBoundClaimCanBeAppliedOnce() (gas: 219244)
+[PASS] testUnboundZeroGrowerCannotBeApplied() (gas: 206852)
+[PASS] testUnconsumedClaimFailsClosed() (gas: 81528)
+[PASS] testWrongGameFailsClosed() (gas: 81522)
+[PASS] testWrongPayloadFailsClosed() (gas: 33282)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 651.83µs (381.55µs CPU time)
+
+Ran 3 tests for test/highcountry/unit/rules/RulesetRegistry.t.sol:RulesetRegistryTest
+[PASS] testDefaultDenyRegistration() (gas: 38900)
+[PASS] testRegisterRulesetIsImmutableAndUnique() (gas: 302818)
+[PASS] testRulesetIdIsContentBound() (gas: 8997)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 4.42ms (154.07µs CPU time)
+2026-10-09T04:46:28.775987Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776002Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776013Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+
+Ran 3 tests for test/highcountry/unit/rules/RulesetRouter.t.sol:RulesetRouterTest
+[PASS] testAuthorizedRoute() (gas: 520688)
+[PASS] testDefaultDenyRoute() (gas: 314775)
+[PASS] testRouteRequiresRegisteredRuleset() (gas: 201890)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 637.14µs (348.31µs CPU time)
+2026-10-09T04:46:28.776055Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776065Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776086Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776103Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776113Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776122Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+
+Ran 7 tests for test/highcountry/unit/player/HighCountrySessionAccess420.t.sol:HighCountrySessionAccess420Test
+[PASS] testAccountCannotSubstituteCapabilityRegistry() (gas: 1301562)
+[PASS] testRevokedOrInactiveGrantFailsClosed() (gas: 365431)
+[PASS] testRoutineCallPolicyDefaultsToWalletEscalation() (gas: 75988)
+[PASS] testRoutinePolicyAdministrationIsCapabilityAuthorized() (gas: 67065)
+[PASS] testRoutineSessionRequiresExactLiveSmartAccountGrant() (gas: 337399)
+[PASS] testRoutineSessionsHaveZeroNative420SpendLimit() (gas: 5492)
+[PASS] testStaleSessionEpochFailsClosed() (gas: 343392)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.04ms (749.64µs CPU time)
+
+Ran 1 test for test/highcountry/unit/player/IHighCountryGamingAccess420Compile.t.sol:IHighCountryGamingAccess420CompileTest
+[PASS] testInterfaceSelectorSurface() (gas: 100)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 37.95µs (8.53µs CPU time)
+2026-10-09T04:46:28.776488Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776498Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776508Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776538Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776547Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776568Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776584Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776593Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.776606Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-10-09T04:46:28.778186Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778201Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778210Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778255Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778265Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778288Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778304Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778313Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778322Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778595Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778608Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778618Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778691Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778701Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778722Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778746Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778756Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778756Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778765Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.778766Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778776Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778805Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778813Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778835Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778853Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778862Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.778870Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21221)
+2026-10-09T04:46:28.787613Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787633Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787673Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787716Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787726Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787750Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787775Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787785Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+2026-10-09T04:46:28.787795Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21243)
+
+Ran 1 test for test/highcountry/invariant/ModuleRegistryInvariant.t.sol:ModuleRegistryInvariantTest
+[PASS] invariant_HC_INV_UPGRADE_003_NoArbitraryImplementationSwap() (runs: 512, calls: 65536, reverts: 0)
+
+╭------------------------+------------------------+-------+---------+----------╮
+| Contract               | Selector               | Calls | Reverts | Discards |
++==============================================================================+
+| ModuleInvariantHandler | stepAdvanceLifecycle   | 32723 | 0       | 0        |
+|------------------------+------------------------+-------+---------+----------|
+| ModuleInvariantHandler | stepAttemptReplacement | 32813 | 0       | 0        |
+╰------------------------+------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.29s (3.29s CPU time)
+
+Ran 5 tests for test/highcountry/unit/player/OptionalCompetitionAccess420.t.sol:OptionalCompetitionAccess420Test
+[PASS] testAdministrationIsCapabilityAuthorized() (gas: 62656)
+[PASS] testInactiveOptionalCompetitionFailsClosed() (gas: 219391)
+[PASS] testMissingRegistrationDoesNotGateBaseCompetition() (gas: 14335)
+[PASS] testOptionalCompetitionRequiresMatchingEntitlement() (gas: 225691)
+[PASS] testRequireAccessFailsClosedWithoutEntitlement() (gas: 162058)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 345.27µs (206.34µs CPU time)
+2026-10-09T04:46:32.056932Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057080Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057092Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057149Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057157Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057179Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057195Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057203Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057212Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057528Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057538Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057545Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057574Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057589Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057606Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057617Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057625Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21299)
+2026-10-09T04:46:32.057632Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21299)
+
+Ran 1 test for test/highcountry/invariant/GenesisRegistryInvariant.t.sol:GenesisRegistryInvariantTest
+[PASS]
+GenesisRegistryInvariantTest invariants:
+[PASS] invariant_HC_INV_GENESIS_001_FinalizesExactlyOnce
+[PASS] invariant_HC_INV_GENESIS_002_RootsCannotChangeAfterFinalization
+ GenesisRegistryInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭-------------------------+-------------------+-------+---------+----------╮
+| Contract                | Selector          | Calls | Reverts | Discards |
++==========================================================================+
+| GenesisInvariantHandler | stepFinalizeAgain | 32641 | 0       | 0        |
+|-------------------------+-------------------+-------+---------+----------|
+| GenesisInvariantHandler | stepReplaceRoots  | 32895 | 0       | 0        |
+╰-------------------------+-------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.41s (4.41s CPU time)
+
+Ran 5 tests for test/highcountry/unit/genetics/GeneticsAssets.t.sol:GeneticsAssetsTest
+[PASS] testCloneIsTransferableAndTracksCanonicalMother() (gas: 928262)
+[PASS] testCloneRejectsMissingOrMismatchedMother() (gas: 1721295)
+[PASS] testMotherHasFiniteCuttingBudgetAndRetires() (gas: 677588)
+[PASS] testPhenotypeIsPermanentProvenanceRecord() (gas: 416540)
+[PASS] testSeedLotIsTransferableAndKeepsGenomeProvenance() (gas: 577994)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.85ms (836.16µs CPU time)
+2026-10-09T04:46:33.187479Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187516Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187526Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187583Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187592Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187612Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187667Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187680Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.187690Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188227Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188237Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188245Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188279Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188288Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188306Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188335Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188344Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-10-09T04:46:33.188351Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+
+Ran 1 test for test/highcountry/invariant/ContentEntitlementInvariant.t.sol:ContentEntitlementInvariantTest
+[PASS]
+ContentEntitlementInvariantTest invariants:
+[PASS] invariant_HC_INV_ACCESS_026_EntitlementsCannotAlterProtectedCoreBalance
+[PASS] invariant_HC_INV_ACCESS_027_GatedContentFailsClosedWithoutBlockingCorePlay
+[PASS] invariant_HC_INV_ACCESS_028_EntitlementIdentityIsStableAndDomainSeparated
+ ContentEntitlementInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭------------------------------------+----------------------+-------+---------+----------╮
+| Contract                           | Selector             | Calls | Reverts | Discards |
++========================================================================================+
+| ContentEntitlementInvariantHandler | stepProbeUngatedCore | 65536 | 0       | 0        |
+╰------------------------------------+----------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 5.21s (5.21s CPU time)
+
+Ran 5 tests for test/highcountry/unit/land/LandRegistry.t.sol:LandRegistryHC3Test
+[PASS] testGenesisParcelMustMatchLandRoot() (gas: 569017)
+[PASS] testGenesisRegistrationClosesAfterFinalization() (gas: 398267)
+[PASS] testInvalidGenesisProofCannotInjectParcel() (gas: 388866)
+[PASS] testNormalParcelRegistrationRequiresFinalizedGenesis() (gas: 433734)
+[PASS] testOwnershipAndOccupancyAreIndependent() (gas: 1169362)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.25ms (860.56µs CPU time)
+
+Ran 4 tests for test/highcountry/unit/upgrades/ModuleRegistry.t.sol:ModuleRegistryTest
+[PASS] testCannotSkipLifecycle() (gas: 247534)
+[PASS] testForwardLifecycle() (gas: 511710)
+[PASS] testRegisterBindsImplementationOnce() (gas: 363564)
+[PASS] testRejectedModuleIsTerminal() (gas: 304090)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 908.33µs (568.85µs CPU time)
+
+Ran 3 tests for test/highcountry/unit/access/GuestProfileMigration.t.sol:GuestProfileMigrationTest
+[PASS] testManifestedObjectConsumesExactlyOnce() (gas: 348889)
+[PASS] testObjectOutsideManifestCannotCanonicalize() (gas: 247591)
+[PASS] testProfileClaimIsIdempotentAndOneToOne() (gas: 542570)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 804.90µs (564.18µs CPU time)
+
+Ran 6 tests for test/highcountry/unit/world/HC2WorldGenesis.t.sol:HC2WorldGenesisTest
+[PASS] testCannotRegisterRegionAfterGenesisFinalization() (gas: 478328)
+[PASS] testFoundingRegionsRequireAllThreeSlots() (gas: 566398)
+[PASS] testOneProfilePerAccount() (gas: 958135)
+[PASS] testProfileCreationRequiresFinalizedGenesis() (gas: 967568)
+[PASS] testRejectsInvalidFoundingRegionIds() (gas: 60662)
+[PASS] testWorldReadyRequiresFinalizedGenesisAndAllRegions() (gas: 825719)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.01ms (1.26ms CPU time)
+
+Ran 5 tests for test/highcountry/unit/access/HighCountryAccessPolicy.t.sol:HighCountryAccessPolicyTest
+[PASS] testAuthorityBoundarySeparatesOrdinaryAndCanonicalState() (gas: 23750)
+[PASS] testFullParticipantGetsHighValueEcosystemCapabilities() (gas: 17253)
+[PASS] testGuestCanPlayCoreWithoutWallet() (gas: 18682)
+[PASS] testRegisteredAddsCloudAndRecoveryWithoutWallet() (gas: 16507)
+[PASS] testWalletConnectedAddsBreadthNotPower() (gas: 23852)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 302.51µs (165.87µs CPU time)
+2026-10-09T04:46:33.982908Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.982942Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.982963Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983042Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983094Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983130Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983150Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983162Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983172Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983438Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983450Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983460Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983493Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983504Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983527Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983543Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983555Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21252)
+2026-10-09T04:46:33.983564Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21252)
+
+Ran 1 test for test/highcountry/invariant/BreedingRandomnessInvariant.t.sol:BreedingRandomnessInvariantTest
+[PASS]
+BreedingRandomnessInvariantTest invariants:
+[PASS] invariant_HC_INV_BREEDING_014_RequestConsumedOnce
+[PASS] invariant_HC_INV_BREEDING_015_EventAndChildAreImmutable
+ BreedingRandomnessInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭------------------------------------+-----------------------+-------+---------+----------╮
+| Contract                           | Selector              | Calls | Reverts | Discards |
++=========================================================================================+
+| BreedingRandomnessInvariantHandler | stepAttemptRefill     | 32657 | 0       | 0        |
+|------------------------------------+-----------------------+-------+---------+----------|
+| BreedingRandomnessInvariantHandler | stepAttemptRefinalize | 32879 | 0       | 0        |
+╰------------------------------------+-----------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 5.63s (5.63s CPU time)
+
+Ran 1 test for test/highcountry/invariant/WorldGenesisInvariant.t.sol:WorldGenesisInvariantTest
+[PASS]
+WorldGenesisInvariantTest invariants:
+[PASS] invariant_HC_INV_WORLD_004_FoundingRegionsImmutableAfterGenesis
+[PASS] invariant_HC_INV_WORLD_005_ReadinessCannotRegressAfterFinalizedWorld
+ WorldGenesisInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭------------------------------+---------------------------+-------+---------+----------╮
+| Contract                     | Selector                  | Calls | Reverts | Discards |
++=======================================================================================+
+| WorldGenesisInvariantHandler | stepAttemptRegionMutation | 65536 | 0       | 0        |
+╰------------------------------+---------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.04s (9.04s CPU time)
+
+Ran 1 test for test/highcountry/invariant/ProgressiveSessionAccessInvariant.t.sol:ProgressiveSessionAccessInvariantTest
+[PASS]
+ProgressiveSessionAccessInvariantTest invariants:
+[PASS] invariant_HC_INV_ACCESS_024_SessionScopeCannotSpendNative420
+[PASS] invariant_HC_INV_ACCESS_024_UnknownCallsFailClosed
+[PASS] invariant_HC_INV_ACCESS_025_OnlyExplicitRoutineCallsAvoidWalletEscalation
+ ProgressiveSessionAccessInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭------------------------------------+-------------------------+-------+---------+----------╮
+| Contract                           | Selector                | Calls | Reverts | Discards |
++===========================================================================================+
+| ProgressiveSessionAccessHandlerPA4 | stepSetUnrelatedRoutine | 65536 | 0       | 0        |
+╰------------------------------------+-------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.85s (4.85s CPU time)
+
+Ran 1 test for test/highcountry/invariant/LandAccessInvariant.t.sol:LandAccessInvariantTest
+[PASS]
+LandAccessInvariantTest invariants:
+[PASS] invariant_HC_INV_LAND_006_ParcelIdentityAndCapacityRemainStable
+[PASS] invariant_HC_INV_LAND_007_PublicCapacityNeverOverbooksLandOrPlot
+[PASS] invariant_HC_INV_LAND_008_OccupancyStateIsCanonical
+ LandAccessInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭----------------------------+--------------------------+-------+---------+----------╮
+| Contract                   | Selector                 | Calls | Reverts | Discards |
++====================================================================================+
+| LandAccessInvariantHandler | stepAllocateOne          | 13243 | 0       | 0        |
+|----------------------------+--------------------------+-------+---------+----------|
+| LandAccessInvariantHandler | stepAttemptDuplicateLand | 12870 | 0       | 0        |
+|----------------------------+--------------------------+-------+---------+----------|
+| LandAccessInvariantHandler | stepClearOccupancy       | 13064 | 0       | 0        |
+|----------------------------+--------------------------+-------+---------+----------|
+| LandAccessInvariantHandler | stepRelease              | 13180 | 0       | 0        |
+|----------------------------+--------------------------+-------+---------+----------|
+| LandAccessInvariantHandler | stepSetOccupancy         | 13179 | 0       | 0        |
+╰----------------------------+--------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 10.68s (10.67s CPU time)
+
+Ran 1 test for test/highcountry/invariant/ProgressiveAccessInvariant.t.sol:ProgressiveAccessInvariantTest
+[PASS]
+ProgressiveAccessInvariantTest invariants:
+[PASS] invariant_HC_INV_ACCESS_019_CoreGameplayNeverRequiresWallet
+[PASS] invariant_HC_INV_ACCESS_020_SourceProfileHasSingleCanonicalBinding
+[PASS] invariant_HC_INV_ACCESS_021_ObjectCanonicalizesAtMostOnce
+[PASS] invariant_HC_INV_ACCESS_022_ClaimManifestAndPolicyStayImmutable
+[PASS] invariant_HC_INV_ACCESS_023_OrdinaryStateRemainsOffChainAuthority
+ ProgressiveAccessInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭-----------------------------------+--------------------+-------+---------+----------╮
+| Contract                          | Selector           | Calls | Reverts | Discards |
++=====================================================================================+
+| ProgressiveAccessInvariantHandler | stepAttemptReclaim | 65536 | 0       | 0        |
+╰-----------------------------------+--------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.11s (9.11s CPU time)
+
+Ran 1 test for test/highcountry/invariant/CultivationInvariant.t.sol:CultivationInvariantTest
+[PASS]
+CultivationInvariantTest invariants:
+[PASS] invariant_HC_INV_CULTIVATION_016_LifecycleIdentityAndCapacityStayConserved
+[PASS] invariant_HC_INV_CULTIVATION_017_PhenotypeAndEnvironmentStaySealed
+[PASS] invariant_HC_INV_CULTIVATION_018_ScoresRemainBoundedAndConserved
+ CultivationInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭-----------------------------+------------------------------+-------+---------+----------╮
+| Contract                    | Selector                     | Calls | Reverts | Discards |
++=========================================================================================+
+| CultivationInvariantHandler | stepAttemptOverCapacity      | 32665 | 0       | 0        |
+|-----------------------------+------------------------------+-------+---------+----------|
+| CultivationInvariantHandler | stepAttemptSealedEnvironment | 32871 | 0       | 0        |
+╰-----------------------------+------------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 13.78s (13.78s CPU time)
+
+Ran 1 test for test/highcountry/invariant/GenomeRegistryInvariant.t.sol:GenomeRegistryInvariantTest
+[PASS] invariant_HC_INV_GENETICS_009_GenomeRecordIsImmutable() (runs: 512, calls: 65536, reverts: 0)
+
+╭--------------------------------+----------------------+-------+---------+----------╮
+| Contract                       | Selector             | Calls | Reverts | Discards |
++====================================================================================+
+| GenomeRegistryInvariantHandler | stepAttemptDuplicate | 65536 | 0       | 0        |
+╰--------------------------------+----------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 13.87s (13.87s CPU time)
+
+Ran 1 test for test/highcountry/invariant/GeneticsAssetsInvariant.t.sol:GeneticsAssetsInvariantTest
+[PASS]
+GeneticsAssetsInvariantTest invariants:
+[PASS] invariant_HC_INV_GENETICS_010_SeedProvenanceAndQuantityAreImmutable
+[PASS] invariant_HC_INV_GENETICS_011_CloneMotherAndGenomeRemainCanonical
+[PASS] invariant_HC_INV_GENETICS_012_MotherCuttingBudgetIsConserved
+[PASS] invariant_HC_INV_GENETICS_013_PhenotypeProvenanceIsPermanent
+ GeneticsAssetsInvariantTest invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭--------------------------------+------------------------------+-------+---------+----------╮
+| Contract                       | Selector                     | Calls | Reverts | Discards |
++============================================================================================+
+| GeneticsAssetsInvariantHandler | stepAttemptPhenotypeMutation | 13017 | 0       | 0        |
+|--------------------------------+------------------------------+-------+---------+----------|
+| GeneticsAssetsInvariantHandler | stepConsumeMother            | 13179 | 0       | 0        |
+|--------------------------------+------------------------------+-------+---------+----------|
+| GeneticsAssetsInvariantHandler | stepTransferClone            | 13021 | 0       | 0        |
+|--------------------------------+------------------------------+-------+---------+----------|
+| GeneticsAssetsInvariantHandler | stepTransferMother           | 13117 | 0       | 0        |
+|--------------------------------+------------------------------+-------+---------+----------|
+| GeneticsAssetsInvariantHandler | stepTransferSeed             | 13202 | 0       | 0        |
+╰--------------------------------+------------------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.87s (9.86s CPU time)
+
+Ran 35 test suites in 14.29s (89.78s CPU time): 116 tests passed, 0 failed, 0 skipped (116 total tests)

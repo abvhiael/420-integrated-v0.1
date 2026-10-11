@@ -23,8 +23,15 @@ contract GenomeRegistryTest {
         genesis = new GenesisRegistry(address(authorization));
         genomes = new GenomeRegistry(address(authorization), address(genesis));
 
-        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("genetics:roots"));
-        _grant(ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("genetics:finalize"));
+        _grant(
+            ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, genesis.ADMIN_SCOPE(), keccak256("genetics:roots")
+        );
+        _grant(
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_FINALIZE,
+            genesis.ADMIN_SCOPE(),
+            keccak256("genetics:finalize")
+        );
     }
 
     function testFoundingGenomeRegistersBeforeGenesisFinalization() public {
@@ -45,18 +52,28 @@ contract GenomeRegistryTest {
         _grant(ModuleIds.GENOME_REGISTRY, ActionIds.FOUNDING_GENOME_REGISTER, second, keccak256("grant:second"));
         genomes.registerFoundingGenome(1, first, keccak256("metadata:first"), _loci(1));
 
-        (bool ok,) = address(genomes).call(
-            abi.encodeWithSelector(genomes.registerFoundingGenome.selector, 1, second, keccak256("metadata:second"), _loci(2))
-        );
+        (bool ok,) = address(genomes)
+            .call(
+                abi.encodeWithSelector(
+                    genomes.registerFoundingGenome.selector, 1, second, keccak256("metadata:second"), _loci(2)
+                )
+            );
         require(!ok, "duplicate founding line registered");
     }
 
     function testNormalGenomeRequiresFinalizedGenesis() public {
         bytes32 genomeId = keccak256("normal:one");
         _grant(ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, genomeId, keccak256("grant:normal:one"));
-        (bool okBefore,) = address(genomes).call(
-            abi.encodeWithSelector(genomes.registerGenome.selector, genomeId, keccak256("line:normal"), keccak256("metadata:normal"), _loci(3))
-        );
+        (bool okBefore,) = address(genomes)
+            .call(
+                abi.encodeWithSelector(
+                    genomes.registerGenome.selector,
+                    genomeId,
+                    keccak256("line:normal"),
+                    keccak256("metadata:normal"),
+                    _loci(3)
+                )
+            );
         require(!okBefore, "normal genome registered before finalization");
 
         genesis.setRoots(_roots());
@@ -70,13 +87,35 @@ contract GenomeRegistryTest {
         genesis.finalizeGenesis();
         bytes32 genomeId = keccak256("late:founding");
         _grant(ModuleIds.GENOME_REGISTRY, ActionIds.FOUNDING_GENOME_REGISTER, genomeId, keccak256("grant:late"));
-        (bool ok,) = address(genomes).call(
-            abi.encodeWithSelector(genomes.registerFoundingGenome.selector, 2, genomeId, keccak256("metadata:late"), _loci(4))
-        );
+        (bool ok,) = address(genomes)
+            .call(
+                abi.encodeWithSelector(
+                    genomes.registerFoundingGenome.selector, 2, genomeId, keccak256("metadata:late"), _loci(4)
+                )
+            );
         require(!ok, "late founding genome registered");
     }
 
-    function _grant(bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function testZeroDependenciesRejectedAtDeployment() public {
+        bool rejectedAuth;
+        bool rejectedGenesis;
+        try new GenomeRegistry(address(0), address(genesis)) returns (GenomeRegistry) { }
+        catch {
+            rejectedAuth = true;
+        }
+        try new GenomeRegistry(address(authorization), address(0)) returns (GenomeRegistry) { }
+        catch {
+            rejectedGenesis = true;
+        }
+        require(rejectedAuth && rejectedGenesis, "zero dependency deployed");
+    }
+
+    function _grant(
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: moduleId,
@@ -92,8 +131,12 @@ contract GenomeRegistryTest {
         capabilityRegistry.setGrant(grantId, grant, 0);
     }
 
-    function _loci(uint256 salt) private pure returns (bytes32[28] memory loci) {
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode("locus", salt, i));
+    function _loci(
+        uint256 salt
+    ) private pure returns (bytes32[28] memory loci) {
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode("locus", salt, i));
+        }
     }
 
     function _roots() private pure returns (GenesisRoots memory) {

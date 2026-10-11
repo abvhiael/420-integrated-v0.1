@@ -1,0 +1,2386 @@
+{
+  "schema": "highcountry-repository-inventory-v1",
+  "baseline": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "note": "Inventory hashes describe reviewed working content; exact qualification SHA is recorded in PR evidence after final commit. Presence is not feature completeness.",
+  "owned": [
+    {
+      "path": "contracts/src/highcountry/interfaces/IPlantSourceConsumer.sol",
+      "sha256": "0ff0edc65b62e765d196300befe84e1cfca1f88c88ed403cab60140ed277ed4a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IPlantSourceConsumer"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/test/highcountry/integration/PlantSourceConsumption.t.sol",
+      "sha256": "c347aa929637493bb277fc605ba977bd5bc5110146ff89c7d944284e024646db",
+      "classification": "COMPLETE",
+      "contracts": [
+        "ReentrantSeedDependency",
+        "PlantSourceConsumptionTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testFiniteSeedLotConsumesOnePerPlantAndCannotOverdraw",
+        "testCloneConsumedOnceAndCannotTransferOrRegrowAfterTermination",
+        "testOwnerApprovalRequiredEvenForCapabilityAuthorizedIssuer",
+        "testApprovalBindsPlantParcelAndPublicPlot",
+        "testNonownerCannotApproveAndRevocationPreservesResources",
+        "testSeedTransferInvalidatesPriorApprovalEvenAfterTransferBack",
+        "testCloneApprovalRevocationAndOwnershipEpochAreEnforced",
+        "testWrongOwnerGenomeMissingSourceAndZeroSourceDenied",
+        "testLegacySourceLessPathsNeverMintEvenWithValidGrants",
+        "testOnlyBoundPlantRegistryCanConsumeEvenWithHolderCapability",
+        "testDownstreamConsumptionFailureRollsBackPlantCapacitySourceAndApproval",
+        "testCloneConsumptionFailureRollsBackAndCanRetry",
+        "testUnauthorizedAdmissionDoesNotConsumeOwnerApproval",
+        "testCapacityFailurePreservesSeedAndClone",
+        "testTerminationNeverRefundsSourceAndDuplicatePlantCannotConsumeAnotherSource",
+        "testExhaustedSeedLotCannotTransferOrApproveMorePlants",
+        "testPartialSeedTransferMovesOnlyRemainingUnitsAndRequiresNewOwnerConsent",
+        "testSourceBindingsAreOneTimeAndFailClosedWithoutAuthority",
+        "testMaliciousDependencyCannotReenterAdmission",
+        "testMaximumSeedQuantityDoesNotOverflowConsumption",
+        "testFuzzFiniteSeedConservation"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/mocks/PlantSourcesFixture.sol",
+      "sha256": "0671570328789c4e9c923dd8fd27f931b3265d66330ff08b6e21f7263c8b2a01",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "VmHCSourceFixture"
+      ],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/R02.4-PLANT-SOURCE-CONSUMPTION.md",
+      "sha256": "5c77d2c5aae41b4f2556c72e489c490129e50b921ec07ef0ee5d05d05b8f6913",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/verify-r02-4.py",
+      "sha256": "481668d42b94e0d8c4948ec4a6764c299ffb77497359fc1c7a07a8e40b228078",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/highcountry-access-v1/package.json",
+      "sha256": "bccf87b28f6b89fa87c7ea5b63cded3b5f83f525da2ef5178bf28622fa44a907",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/highcountry-access-v1/src/access-state.js",
+      "sha256": "d4a4d97dfd4b38c206f20b46817c835199c3a73f8f96a2c0d3eb4aa4d5ca0988",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/highcountry-access-v1/src/qualification-scenario.js",
+      "sha256": "c74ae211089a9c932aec28515d3a46dcbbedea18e7ef0b6622c98d84aef65cbb",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/highcountry-access-v1/test/access-state.test.js",
+      "sha256": "dba5fa85ac7f6714f07ce2a779e58855a2f6ee9d40c0d625342a27d30173b4aa",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/highcountry-access-v1/test/e2e-qualification.test.js",
+      "sha256": "50c66f39e7b80dcfd1528ea5b2a20add1e29a35426e82ea764e32844c06755bf",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/access/GuestProfileMigration.sol",
+      "sha256": "ea643b45d90cdd635756316d4ccc7e8c20fd561e7f7fe1030f78c977d2bdb572",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GuestProfileMigration"
+      ],
+      "interfaces": [
+        "IGrowerProfileMigration"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/access/HighCountryAccessPolicy.sol",
+      "sha256": "8ee09e74b8dba519d3b06635b53436ab9f0a222923b1d317b0a9cdf34507ff2a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryAccessPolicy"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/auth/HighCountryAuthorization.sol",
+      "sha256": "41f487ded0e61ad2ee9d9ade4cad205791543779288602116cfe1b4ec7fb5eca",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryAuthorization"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/breeding/BreedingEngine.sol",
+      "sha256": "fdf5105d6086be6673ec759404c3cb9b39bb2403f85239dfaa78d7b4aeb9974b",
+      "classification": "COMPLETE",
+      "contracts": [
+        "BreedingEngine"
+      ],
+      "interfaces": [
+        "IGenomeRegistryBreeding",
+        "IRandomnessCoordinatorBreeding"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/breeding/README.md",
+      "sha256": "07fd166dfad409bf425b7c51563cb1fd16d268d2c55ca535ab328bcea0f18a83",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/constants/ActionIds.sol",
+      "sha256": "8f1c80a33b5b3d14c7b6cfa8e5ab74a3187d9902badd56cae7794c32ba2adb88",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/constants/EmergencyDomains.sol",
+      "sha256": "4e950953ce484c154e5eb59e1080da62350c82f86b6ca66c446dafbc3b380796",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/constants/ModuleIds.sol",
+      "sha256": "4badd2e56aa3b78689ce24f25a846a11958e08240da96cb0b83c5ab7101b1bd5",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/constants/RandomDomains.sol",
+      "sha256": "7bf21fb7d3f77ac6d29c51a7773e229731933158bbbc9868fbe250cf8020c5fe",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/cultivation/CultivationEngine.sol",
+      "sha256": "4bf16b0854d61a853f90cd9a9807081397a0e145beed75f840f3bca32424d348",
+      "classification": "COMPLETE",
+      "contracts": [
+        "CultivationEngine"
+      ],
+      "interfaces": [
+        "IPlantRegistryCultivation"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/cultivation/PlantRegistry.sol",
+      "sha256": "c037f7a6af90c82ee05439eef7062c249f0e6d6a726388b9adcbfe0af70e34ed",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PlantRegistry"
+      ],
+      "interfaces": [
+        "IGenomeRegistryPlant",
+        "ILandRegistryPlant"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/cultivation/README.md",
+      "sha256": "666b133e42959db594bc7dc1bbb6af19efc8013c07fda153babe15353cca790e",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/errors/HighCountryErrors.sol",
+      "sha256": "20851c89a39d406c2c7a7159e5fee842d520d140776f97b2eb44a55edefda6fd",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genesis/GenesisRegistry.sol",
+      "sha256": "6020b36ce17a8e3bdd9246d6fb6f524f88c01d1fcedff47695fc65d1f5b0953f",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GenesisRegistry"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/CloneRegistry.sol",
+      "sha256": "d2262d0064dec1a4281e4d14f7ae225e68f87b6a79ebf3597d89a91a290b3795",
+      "classification": "COMPLETE",
+      "contracts": [
+        "CloneRegistry"
+      ],
+      "interfaces": [
+        "IGenomeRegistryClone",
+        "IMotherRegistryClone"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/FoundingGenetics.sol",
+      "sha256": "855be8148a7073bec3d6036ba4fd7d9ba89ce75d1cee1bcde33d45c61030fbdc",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/GenomeRegistry.sol",
+      "sha256": "eab5d6e6db62009877cf6660610e074c40cff151cc2f258e55b31a41b668ee6a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GenomeRegistry"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/MotherRegistry.sol",
+      "sha256": "1a5bcae452a541149755e0e2034d54f43519774972cd0aa7fd300b2e46a2e060",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MotherRegistry"
+      ],
+      "interfaces": [
+        "IGenomeRegistryMother"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/PhenotypeRegistry.sol",
+      "sha256": "6c5f8c5c1749b177e57878d81786711f4181275fbf0a31ec8476f9d1920ac5ca",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PhenotypeRegistry"
+      ],
+      "interfaces": [
+        "IGenomeRegistryPhenotype"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/README.md",
+      "sha256": "8e637ecb64e176fdf7d230a8c191a55f5d3dce903383f8db46f39f0b56ac32c9",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/genetics/SeedRegistry.sol",
+      "sha256": "72f836cd91697edde8e7fd0f86e75d5494e1ce8c9446224863af6cfc59eb83ec",
+      "classification": "COMPLETE",
+      "contracts": [
+        "SeedRegistry"
+      ],
+      "interfaces": [
+        "IGenomeRegistrySeed"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IEmergencyState.sol",
+      "sha256": "82b9e093c3d07cf95eccbd40b72462b1b28723e9e588b84f088950bfbe39613d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IEmergencyState"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IGenesisRegistry.sol",
+      "sha256": "93736b50b55072dacd6e960d59d82720d3f38fa80b59f19752234992f7447006",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IGenesisRegistry"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IHighCountryAuthorization.sol",
+      "sha256": "86ed5cf32bf35c019ed36030b2872230e0df31e3cb5b0936e559b1138b3ce461",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IHighCountryAuthorization"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IHighCountryModule.sol",
+      "sha256": "79b00c9ff673f77476d0d33520f18341b17a003e09d0f3110fabf67389a3a922",
+      "classification": "PARTIAL",
+      "contracts": [],
+      "interfaces": [
+        "IHighCountryModule"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IModuleRegistry.sol",
+      "sha256": "4d7b82540de749356a7ebd50e33b5f095c56f773191b9fe6aa4c9204e9b95571",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IModuleRegistry"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IRulesetRegistry.sol",
+      "sha256": "e25a19d545039aa6a4769785cec78222ac8f73693e0ffed942bf45623b8ba7bb",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IRulesetRegistry"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/interfaces/IRulesetRouter.sol",
+      "sha256": "d5bd67c37de33f1facfcba408d92b0fe0626a5335cfcef5771407d472ee9aaea",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IRulesetRouter"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/land/LandRegistry.sol",
+      "sha256": "177b907771f668c697bf349a22b2725a640ccee54a09cb61ffae58cca6e4667c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "LandRegistry"
+      ],
+      "interfaces": [
+        "IRegionRegistryHC3"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/land/PublicCultivationAccess.sol",
+      "sha256": "65deaadb2ef5a96dd30509d33a1b9560acba592f1acc39f55c455adc6e238fbc",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PublicCultivationAccess"
+      ],
+      "interfaces": [
+        "ILandRegistryHC3",
+        "IPlantOccupancyHC"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/GrowerProfileRegistry.sol",
+      "sha256": "9d21506777a3b3a31904cad711354f0fa94010370a25c13fb87132536d8caed3",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GrowerProfileRegistry"
+      ],
+      "interfaces": [
+        "IRegionRegistryHC2"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountryCrossGame420.sol",
+      "sha256": "86e56ba119416e672593981ff6af04db38a41b2ad796d9f84982b0fef2e02a1b",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryCrossGame420"
+      ],
+      "interfaces": [
+        "IHighCountryCrossGameRegistry420",
+        "IHighCountryGamingProfileBinding420"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountryGamingBridge420.sol",
+      "sha256": "9e06fb8c95070e2f6b1cbb4483e37162eeba0519a6aec08ecae638742c4ff6b9",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryGamingBridge420"
+      ],
+      "interfaces": [
+        "IGameIdentityHC420",
+        "IGameClaimsHC420",
+        "IGameEntitlementsHC420",
+        "IGrowerProfileHC420"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountryGamingIds.sol",
+      "sha256": "82ca5e9b117b48bb2b8943ee7a4adacf6816624f39f941f51b11e37751d5d3fc",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountryMigration420.sol",
+      "sha256": "d1d5b7b189eb97d365959cb3fd74b7198afdeb97a5476153503a0d11434d0bc4",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryMigration420"
+      ],
+      "interfaces": [
+        "IHighCountryGamingMigrationBridge420",
+        "IGameClaimsMigration420"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/HighCountrySessionAccess420.sol",
+      "sha256": "b399cc5d62f47aeb1bbdac31544985849fdfbfe48f94931d6143b995d759687a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountrySessionAccess420"
+      ],
+      "interfaces": [
+        "ISmartAccountHCSession420"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/IHighCountryGamingAccess420.sol",
+      "sha256": "015484edc176e56a6280ff53c5538d1a27dec9a08eb441de42928bd9f5a25907",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [
+        "IHighCountryGamingAccess420"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/player/OptionalCompetitionAccess420.sol",
+      "sha256": "ce851ddf3340e2ec027fe445feb051dd18459e54e6550074f32ff0073416bc86",
+      "classification": "COMPLETE",
+      "contracts": [
+        "OptionalCompetitionAccess420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/random/RandomnessCoordinator.sol",
+      "sha256": "b13bb8539085158634e19cb5200b0014cd537f2bd9f0913cc89535250f817993",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RandomnessCoordinator"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/rules/RulesetRegistry.sol",
+      "sha256": "016f8a99031b572e88212966b0aecd932923ea759b8355551757023fb461d04d",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RulesetRegistry"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/rules/RulesetRouter.sol",
+      "sha256": "9d6a13deb2b33caf7fa5f78a4e3bb8d9d68b73c04075d22f0fae71e1dae51229",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RulesetRouter"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/security/EmergencyState.sol",
+      "sha256": "dc6349799235077e5442c67047abb3cfe33cccd20e792c03762e191026450ac9",
+      "classification": "COMPLETE",
+      "contracts": [
+        "EmergencyState"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/types/HighCountryEnums.sol",
+      "sha256": "2bd75b5f96c4ce36de16b23392eec2d57db3bd24bfdf4b4ff329c1db097a229f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/types/HighCountryTypes.sol",
+      "sha256": "837f65c6b9ead9b46f8966565c399bfdf20b7000dac4caf129eff4ba21681357",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/upgrades/ModuleRegistry.sol",
+      "sha256": "8cbd2487438d2bfd6b0c9425e097c65a7a3c265c2fa22b7dda1d93f7f3106fb4",
+      "classification": "COMPLETE",
+      "contracts": [
+        "ModuleRegistry"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/world/BonusRegionAccess420.sol",
+      "sha256": "4221ffcc40c0abd70342a5b378522a36cfb06ac039fc3487e426715585ff2659",
+      "classification": "COMPLETE",
+      "contracts": [
+        "BonusRegionAccess420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/world/FoundingRegions.sol",
+      "sha256": "699525fd59034ccb97386723f759f50c07859a84b78cb4ae4479b8ee99ec4c1c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/world/RegionRegistry.sol",
+      "sha256": "8ecbcfea2221461d0a4ad9bd186324fc86823b75ee039a1bf20c46154845abca",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RegionRegistry"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/highcountry/world/WorldGenesisReadiness.sol",
+      "sha256": "c678e73b2b31adc671d0b34ecb9227f53d987e14ecca78d7b4a2fbbe892d122f",
+      "classification": "COMPLETE",
+      "contracts": [
+        "WorldGenesisReadiness"
+      ],
+      "interfaces": [
+        "IFoundingRegionReadinessHC2"
+      ],
+      "tests": []
+    },
+    {
+      "path": "contracts/test/highcountry/BaseHighCountryTest.t.sol",
+      "sha256": "f2e22bcd96867ecf1d174dfcc92d9c13da853f00401b6953bb1a288c178184fa",
+      "classification": "COMPLETE",
+      "contracts": [
+        "BaseHighCountryTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testFoundationIdsAreDomainSeparated"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/integration/PublicPlantCapacity.t.sol",
+      "sha256": "a55878005a92dfe347c52d97070752263c98fade2034053a745ec127bdb60160",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PublicPlantCapacityFixture",
+        "PublicPlantCapacityTest"
+      ],
+      "interfaces": [
+        "VmHCPlot"
+      ],
+      "tests": [
+        "testAllocatedNonownerCultivatesAndReleaseWaitsForTermination",
+        "testPrivatePlantsPreventLaterOverreservation",
+        "testReservationsProtectUnusedPublicSlotsFromPrivatePlants",
+        "testAllocationIsGrowerAndPlotSpecific",
+        "testUnauthorizedAdmissionAndRevocationRollBackCounters",
+        "testPublicPlantFlowsThroughCultivationEngine",
+        "testBindingIsOneTimeAndUnauthorizedBindingFails",
+        "testDuplicateMissingGenomeAndUnknownPlotDoNotConsumeCapacity",
+        "testPrivateTerminationFreesReservationSpaceButPublicTerminationKeepsReservation",
+        "testReadyAndUnauthorizedTerminationKeepAllocationOccupied",
+        "testOperatorChangesDoNotEraseOrDuplicateOccupancy",
+        "testMaximumCapacityUsesWideReservationArithmetic",
+        "testFuzzMixedCapacityConservation"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/integration/RealCapabilityBudgetPolicy.t.sol",
+      "sha256": "3f3116b2e6199078ab4b95ea7dec155690f8527c1de69cbf1bc8633453bc1c52",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RealCapabilityBudgetPolicyTest"
+      ],
+      "interfaces": [
+        "VmHCBudget"
+      ],
+      "tests": [
+        "testPeriodicGrantNeverAdmitsRepeatedZeroAmountCalls",
+        "testPeriodicReplacementCannotFallBackToOldUnlimitedGrant",
+        "testExplicitNonperiodicReplacementRestoresAuthorization",
+        "testPeriodicRolloverDoesNotEnableHCGrant",
+        "testHCDoesNotTakeComponentConsumptionAuthority",
+        "testPeriodicGrantDoesNotAuthorizePositiveAmounts"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/integration/RealCapabilityGenesis.t.sol",
+      "sha256": "b7cd5ecab8edfb37b1b6e1d8d8e9fa73ad56547be759d17b88a59c564a66ef65",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RealCapabilityGenesisTest",
+        "RealCapabilityWiringTest"
+      ],
+      "interfaces": [
+        "VmRealCapability"
+      ],
+      "tests": [
+        "testGenesisUsesIssuableRealRegistryScopeAndHonorsRevocation",
+        "testUnregisteredComponentCannotIssueGrant",
+        "testOnlyRegistrarCanRegisterOrRotateComponent",
+        "testOnlyComponentAuthorityCanIssueAndRevoke",
+        "testZeroScopeIsUnissuableAndAdminScopeIsCanonical",
+        "testWrongScopeCannotSetRoots",
+        "testWrongActionCannotSetRootsOrFinalize",
+        "testWrongPrincipalCannotUseGrant",
+        "testModuleActionScopeAndAmountMatchExactly",
+        "testGrantTimeBoundariesAreInclusiveAndExpiredCallsDoNotMutate",
+        "testGrantReplacementRevokesOldTupleAndRevocationStopsConsumer",
+        "testAuthorityHandoffRequiresExplicitOldGrantRevocation",
+        "testRegistrarHandoffDisablesOldRegistrar"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/BreedingRandomnessInvariant.t.sol",
+      "sha256": "160fa6035aac9e5e79699546752415f4e7398486def8817f3e5bbc41ce6e7460",
+      "classification": "COMPLETE",
+      "contracts": [
+        "BreedingRandomnessInvariantHandler",
+        "BreedingRandomnessInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_BREEDING_014_RequestConsumedOnce",
+        "invariant_HC_INV_BREEDING_015_EventAndChildAreImmutable"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/ContentEntitlementInvariant.t.sol",
+      "sha256": "9e4bb564ef2fbb50c20cfefa68c7aea7f6e847a2982b05d959c192e6fc429498",
+      "classification": "COMPLETE",
+      "contracts": [
+        "ContentEntitlementInvariantHandler",
+        "ContentEntitlementInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_ACCESS_026_EntitlementsCannotAlterProtectedCoreBalance",
+        "invariant_HC_INV_ACCESS_027_GatedContentFailsClosedWithoutBlockingCorePlay",
+        "invariant_HC_INV_ACCESS_028_EntitlementIdentityIsStableAndDomainSeparated"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/CultivationInvariant.t.sol",
+      "sha256": "bc908564770d1e5aa20ed7748ad05db509e9cce98f4f0766f01a0a7b4a458b1a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockLandRegistryHC6Invariant",
+        "CultivationInvariantHandler",
+        "CultivationInvariantTest"
+      ],
+      "interfaces": [
+        "VmHC6Invariant"
+      ],
+      "tests": [
+        "invariant_HC_INV_CULTIVATION_016_LifecycleIdentityAndCapacityStayConserved",
+        "invariant_HC_INV_CULTIVATION_017_PhenotypeAndEnvironmentStaySealed",
+        "invariant_HC_INV_CULTIVATION_018_ScoresRemainBoundedAndConserved"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/GenesisRegistryInvariant.t.sol",
+      "sha256": "6814752e7877f1c7c3fe4822a80fd77abda2ed621fad25959761f2ddc1253aad",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GenesisInvariantHandler",
+        "GenesisRegistryInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_GENESIS_001_FinalizesExactlyOnce",
+        "invariant_HC_INV_GENESIS_002_RootsCannotChangeAfterFinalization"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/GeneticsAssetsInvariant.t.sol",
+      "sha256": "90eacaabe098db6c2c3790b6cf6fa6ac27da28566f4233257eb997721873da85",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GeneticsAssetsInvariantHandler",
+        "GeneticsAssetsInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_GENETICS_010_SeedProvenanceAndQuantityAreImmutable",
+        "invariant_HC_INV_GENETICS_011_CloneMotherAndGenomeRemainCanonical",
+        "invariant_HC_INV_GENETICS_012_MotherCuttingBudgetIsConserved",
+        "invariant_HC_INV_GENETICS_013_PhenotypeProvenanceIsPermanent"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/GenomeRegistryInvariant.t.sol",
+      "sha256": "f91945d4f544dd5ba497de6eb39866172a6207f968c0eab77ce0a65adffa4d6c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GenomeRegistryInvariantHandler",
+        "GenomeRegistryInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_GENETICS_009_GenomeRecordIsImmutable"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/LandAccessInvariant.t.sol",
+      "sha256": "d0081d6f42e0520b8066d8c1dc14f04f56f49c25d7564fd0911678675528cc75",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PlotGenomeInvariant",
+        "MockRegionRegistryHC3Invariant",
+        "MockGenesisRegistryHC3Invariant",
+        "LandAccessInvariantHandler",
+        "LandAccessInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_LAND_006_ParcelIdentityAndCapacityRemainStable",
+        "invariant_HC_INV_LAND_007_PublicCapacityNeverOverbooksLandOrPlot",
+        "invariant_HC_INV_LAND_008_OccupancyStateIsCanonical"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/ModuleRegistryInvariant.t.sol",
+      "sha256": "0b8653984a9efa2932fd06eae9f36050ce413dae05a97e881462ab04005e661a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "ModuleInvariantImplementationV1",
+        "ModuleInvariantReplacement",
+        "ModuleInvariantHandler",
+        "ModuleRegistryInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_UPGRADE_003_NoArbitraryImplementationSwap"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/ProgressiveAccessInvariant.t.sol",
+      "sha256": "c9769247d92959439bb4959829f48ffbb937cb51ba04f52835bf73033fb07435",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockGrowerProfilesPAInvariant",
+        "ProgressiveAccessInvariantHandler",
+        "ProgressiveAccessInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_ACCESS_019_CoreGameplayNeverRequiresWallet",
+        "invariant_HC_INV_ACCESS_020_SourceProfileHasSingleCanonicalBinding",
+        "invariant_HC_INV_ACCESS_021_ObjectCanonicalizesAtMostOnce",
+        "invariant_HC_INV_ACCESS_022_ClaimManifestAndPolicyStayImmutable",
+        "invariant_HC_INV_ACCESS_023_OrdinaryStateRemainsOffChainAuthority"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/ProgressiveSessionAccessInvariant.t.sol",
+      "sha256": "518feef8eab31c88c76c9083ad074413e15abd7245024cdc2c50e263794be1cc",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHCAuthorizationPA4",
+        "RoutineTargetPA4",
+        "ProgressiveSessionAccessHandlerPA4",
+        "ProgressiveSessionAccessInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_ACCESS_024_SessionScopeCannotSpendNative420",
+        "invariant_HC_INV_ACCESS_024_UnknownCallsFailClosed",
+        "invariant_HC_INV_ACCESS_025_OnlyExplicitRoutineCallsAvoidWalletEscalation"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/PublicPlantCapacityInvariant.t.sol",
+      "sha256": "d125072e86616c8c0da0ecdc4d593b19f20d3fdd3bf1c41d7bd5aedd9d140c5e",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PublicPlantCapacityHandler",
+        "PublicPlantCapacityInvariantTest"
+      ],
+      "interfaces": [
+        "VmPlotInvariant"
+      ],
+      "tests": [
+        "invariantCapacityAndAllocationConservation"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/invariant/WorldGenesisInvariant.t.sol",
+      "sha256": "d13b5c0239e5cbdae334cd17ff07167affdbe62acd06a2fbbe01cdf94e505227",
+      "classification": "COMPLETE",
+      "contracts": [
+        "WorldGenesisInvariantHandler",
+        "WorldGenesisInvariantTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "invariant_HC_INV_WORLD_004_FoundingRegionsImmutableAfterGenesis",
+        "invariant_HC_INV_WORLD_005_ReadinessCannotRegressAfterFinalizedWorld"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/mocks/Mock420SmartAccount.sol",
+      "sha256": "66dc247ea9e51dcec5a3a2d700187741fd5e50a3f327f4166330cc8ff3b0712c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "Mock420SmartAccount"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/test/highcountry/mocks/MockCapabilityRegistry.sol",
+      "sha256": "c34baa0137255ec941a9324da2855379dd94fff3d7d794d602bb828a63f5284a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockCapabilityRegistry"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/test/highcountry/unit/access/GuestProfileMigration.t.sol",
+      "sha256": "5d2678d4c3745ae85b2bc27f5035a1ee6c921811266963b5082fcdd70435dff8",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockGrowerProfilesPA3",
+        "GuestProfileMigrationTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testProfileClaimIsIdempotentAndOneToOne",
+        "testManifestedObjectConsumesExactlyOnce",
+        "testObjectOutsideManifestCannotCanonicalize"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/access/HighCountryAccessPolicy.t.sol",
+      "sha256": "af63bad0a2086c2b72224e279ebda94f2305b57c83e5a2d4bf2d77426bccef39",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryAccessPolicyTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testGuestCanPlayCoreWithoutWallet",
+        "testRegisteredAddsCloudAndRecoveryWithoutWallet",
+        "testWalletConnectedAddsBreadthNotPower",
+        "testFullParticipantGetsHighValueEcosystemCapabilities",
+        "testAuthorityBoundarySeparatesOrdinaryAndCanonicalState"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/auth/HighCountryAuthorization.t.sol",
+      "sha256": "1e6f057fb5277bfaea2e6cdc788260fddc695fd0d9bc536e781fd94be63c50b0",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HighCountryAuthorizationTest",
+        "LegacyCapabilityOracle"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testDefaultDeny",
+        "testCapabilityApproval",
+        "testExpiredCapabilityDenied",
+        "testRevokedCapabilityDenied",
+        "testZeroPrincipalFailsClosed",
+        "testPeriodicOrMalformedPeriodMetadataFailsClosed",
+        "testMissingActiveGrantMetadataFailsClosed"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/breeding/BreedingEngine.t.sol",
+      "sha256": "08432ce9c248dc77979bb62cda4c45cd9f56be3445fb31af88ba8a04bf9c42cd",
+      "classification": "COMPLETE",
+      "contracts": [
+        "BreedingEngineTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testBreedingRequiresDistinctExistingParents",
+        "testRandomnessReplayDeniedAndBreedingFinalizesOnce",
+        "testOnlyOriginalRequesterCanConsumeBoundRequest"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/cultivation/CultivationEngine.t.sol",
+      "sha256": "a16d586df874152bc926691989b870fd664c69345494069c5a6875373cb38d74",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockLandRegistryHC6",
+        "CultivationEngineTest"
+      ],
+      "interfaces": [
+        "Vm"
+      ],
+      "tests": [
+        "testPlantLifecycleMovesForwardOnlyAfterRequiredTime",
+        "testOfflineGrowthCatchesUpDeterministically",
+        "testLandOperatorAndCapacityGatePlantRegistration",
+        "testEnvironmentBoundsAndStressQualityDerivation",
+        "testSixDimensionEnvironmentLocksIntoPhenotypeExpression",
+        "testExpressionRejectsForeignGenomeWithoutLockingState"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/genesis/GenesisRegistry.t.sol",
+      "sha256": "b940f2ddf190bc564bb3c2b854c662d4d29a74ece514d0cd5cb6f4df893cd77d",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GenesisRegistryTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testSetRootsBeforeFinalization",
+        "testFinalizeDisablesGenesisAuthority",
+        "testCannotFinalizeTwice",
+        "testCannotChangeRootsAfterFinalization",
+        "testCannotFinalizeWithoutCompleteRoots"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/genetics/GeneticsAssets.t.sol",
+      "sha256": "47c7a15b1ba9daa01542c1a725e31e10648df034c027b48d0a7b42916bc8df22",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GeneticsAssetsTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testSeedLotIsTransferableAndKeepsGenomeProvenance",
+        "testCloneIsTransferableAndTracksCanonicalMother",
+        "testCloneRejectsMissingOrMismatchedMother",
+        "testMotherHasFiniteCuttingBudgetAndRetires",
+        "testPhenotypeIsPermanentProvenanceRecord"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/genetics/GenomeRegistry.t.sol",
+      "sha256": "fdb26a0ec7b317beb2ccb3eb2b287f2dcb6d738da9448ad9117c4002f3c5cd5e",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GenomeRegistryTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testFoundingGenomeRegistersBeforeGenesisFinalization",
+        "testFoundingLineCannotRegisterTwice",
+        "testNormalGenomeRequiresFinalizedGenesis",
+        "testFoundingGenomeBlockedAfterGenesisFinalization",
+        "testZeroDependenciesRejectedAtDeployment"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/land/LandRegistry.t.sol",
+      "sha256": "8b6cceb158fe3f58ac86c6ac984b16fb0b7fa24ab02a59495a549da081764842",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockRegionRegistryHC3Unit",
+        "MockGenesisRegistryHC3Unit",
+        "LandRegistryHC3Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testGenesisParcelMustMatchLandRoot",
+        "testInvalidGenesisProofCannotInjectParcel",
+        "testNormalParcelRegistrationRequiresFinalizedGenesis",
+        "testOwnershipAndOccupancyAreIndependent",
+        "testGenesisRegistrationClosesAfterFinalization"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/land/PublicCultivationAccess.t.sol",
+      "sha256": "20b6fce6159e54aa76097875d1fd1db536fe01fa0da62a6b371d3332228685cc",
+      "classification": "COMPLETE",
+      "contracts": [
+        "PlotGenomePublic",
+        "MockRegionRegistryHC3Public",
+        "MockGenesisRegistryHC3Public",
+        "PublicCultivationAccessHC3Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testPublicCapacityCannotExceedParcelCapacity",
+        "testAllocationAndReleaseConserveCapacity",
+        "testAllocationCannotOverbookPlot"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/player/HighCountryCrossGame420.t.sol",
+      "sha256": "709f16ada9b3e5966cf6e43a1d603f439ba512b670534957a6aba3e7f8bec61c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHCBindingCrossGame",
+        "MockCrossGameRegistryHC",
+        "HighCountryCrossGame420Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testMatchingHighCountryAttestationPasses",
+        "testCrossGameSourceRejected",
+        "testWrongPayloadRejected",
+        "testInactiveAttestationRejected",
+        "testUnboundGrowerRejected"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/player/HighCountryGamingBridge420.t.sol",
+      "sha256": "3082f201377e3b55b447734016f934b5d9fe8ce3ee6d76a55fcbd88458475431",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockGameIdentityHC420",
+        "MockGameClaimsHC420",
+        "MockGameEntitlementsHC420",
+        "MockGrowerProfileHC420",
+        "HighCountryGamingBridge420Test"
+      ],
+      "interfaces": [
+        "VmHCGaming420"
+      ],
+      "tests": [
+        "testBindsGrowerToCanonicalSharedGameProfile",
+        "testRejectsBindingByDifferentWallet",
+        "testRequiresSharedGamingProfileBeforeBinding",
+        "testConsumedGuestMigrationCanBindOnce",
+        "testEntitlementMustBelongToBoundHighCountryProfile",
+        "testScopedEntitlementRequiresMatchingTypeAndContent",
+        "testRequireScopedEntitlementFailsClosed"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/player/HighCountryMigration420.t.sol",
+      "sha256": "e01d1fffa7c6a75995fe8578a1bb6b2255231eb6353308f7c87d7effd95f6ae1",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHCAuthorizationMigration",
+        "MockHCBridgeMigration",
+        "MockGameClaimsMigration",
+        "HighCountryMigration420Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testConsumedBoundClaimCanBeAppliedOnce",
+        "testWrongPayloadFailsClosed",
+        "testUnconsumedClaimFailsClosed",
+        "testWrongGameFailsClosed",
+        "testUnboundZeroGrowerCannotBeApplied",
+        "testApplyRequiresCapabilityAuthorization"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/player/HighCountrySessionAccess420.t.sol",
+      "sha256": "bb00dbc2169102fe81a1ec424ac38ff098f23c21e0b2645c10c0608d96126569",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHCAuthorizationSessionAccess",
+        "MockCapabilityRegistryHCSession",
+        "MockSmartAccountHCSession",
+        "RoutineTargetHCSession",
+        "HighCountrySessionAccess420Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testRoutineSessionsHaveZeroNative420SpendLimit",
+        "testRoutineCallPolicyDefaultsToWalletEscalation",
+        "testRoutineSessionRequiresExactLiveSmartAccountGrant",
+        "testPeriodicRoutineGrantIsDeniedEvenForZeroNativeValue",
+        "testStaleSessionEpochFailsClosed",
+        "testAccountCannotSubstituteCapabilityRegistry",
+        "testRevokedOrInactiveGrantFailsClosed",
+        "testRoutinePolicyAdministrationIsCapabilityAuthorized"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/player/IHighCountryGamingAccess420Compile.t.sol",
+      "sha256": "411b54c3c9b95161be21e7da43ad8b0cb6a8795e6272943ebcada99b83f2ee61",
+      "classification": "COMPLETE",
+      "contracts": [
+        "IHighCountryGamingAccess420CompileTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testInterfaceSelectorSurface"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/player/OptionalCompetitionAccess420.t.sol",
+      "sha256": "9610e3b39a9cd4caf230d1e05dca93b159a687027465341cfe534b4e1084eb05",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHCCompetitionAuthorization",
+        "MockHCCompetitionGamingAccess",
+        "OptionalCompetitionAccess420Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testOptionalCompetitionRequiresMatchingEntitlement",
+        "testMissingRegistrationDoesNotGateBaseCompetition",
+        "testRequireAccessFailsClosedWithoutEntitlement",
+        "testInactiveOptionalCompetitionFailsClosed",
+        "testAdministrationIsCapabilityAuthorized"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/rules/RulesetRegistry.t.sol",
+      "sha256": "ffb7bf0a8ccfe73de0bf4bf24b43ea79fcc8422424b6d8f9c0d4052552aec96a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RulesetRegistryTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testRulesetIdIsContentBound",
+        "testRegisterRulesetIsImmutableAndUnique",
+        "testDefaultDenyRegistration"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/rules/RulesetRouter.t.sol",
+      "sha256": "912d35c0e1cf14a847ccd6f45366ec9365d1a95df2494ba6a64cef96f7dc79fe",
+      "classification": "COMPLETE",
+      "contracts": [
+        "RulesetRouterTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testRouteRequiresRegisteredRuleset",
+        "testAuthorizedRoute",
+        "testDefaultDenyRoute"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/security/EmergencyState.t.sol",
+      "sha256": "22727d3602ae5db7b6c126ea3eef5e6f0a825d9070e23ef7a06e962fb5307a75",
+      "classification": "COMPLETE",
+      "contracts": [
+        "EmergencyStateTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testPositiveEmergencyDomainEnumeration",
+        "testUnknownDomainDefaultsDenied",
+        "testRestrictionRequiresCapability",
+        "testCapabilityCanRestrictEnumeratedDomain",
+        "testReleaseRequiresSeparateCapability",
+        "testCapabilityIsDomainScoped"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/upgrades/ModuleRegistry.t.sol",
+      "sha256": "9e3da28bd15fbcceb58bb15ede2f40e4cb1a9e707b21a4b0612d57d4d4076019",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHighCountryModuleV1",
+        "MockHighCountryModuleV2",
+        "ModuleRegistryTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testRegisterBindsImplementationOnce",
+        "testForwardLifecycle",
+        "testCannotSkipLifecycle",
+        "testRejectedModuleIsTerminal"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/world/BonusRegionAccess420.t.sol",
+      "sha256": "576ec5a87c2cb1933ea3bd200ebcb2641a47324f4c46151ea5facc7a4891635a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "MockHCAuthorizationBonusRegion",
+        "MockHCGamingAccessBonusRegion",
+        "BonusRegionAccess420Test"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testFoundingRegionsCannotBecomeWalletGatedBonusRegions",
+        "testBonusRegionAccessUsesGamingEntitlement",
+        "testRequireAccessFailsClosedWithoutEntitlement",
+        "testInactiveBonusRegionFailsClosedEvenWithEntitlement",
+        "testBonusRegionAdministrationIsCapabilityAuthorized"
+      ]
+    },
+    {
+      "path": "contracts/test/highcountry/unit/world/HC2WorldGenesis.t.sol",
+      "sha256": "4a60137bb904d9fa3eeb0785fcfb75927ceb3bf9be74966dd6f118d89a3954bd",
+      "classification": "COMPLETE",
+      "contracts": [
+        "HC2WorldGenesisTest"
+      ],
+      "interfaces": [],
+      "tests": [
+        "testFoundingRegionsRequireAllThreeSlots",
+        "testWorldReadyRequiresFinalizedGenesisAndAllRegions",
+        "testCannotRegisterRegionAfterGenesisFinalization",
+        "testProfileCreationRequiresFinalizedGenesis",
+        "testOneProfilePerAccount",
+        "testRejectsInvalidFoundingRegionIds"
+      ]
+    },
+    {
+      "path": "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
+      "sha256": "f081bff739494360954bd3d4369be1e7b0727f9a7f67d5f2e16d66074c691a44",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/BUILD-AND-OPERATIONS.md",
+      "sha256": "356b956b940b2a4943c069ad59bbd8457221fd235abe233cf0911cc3caca4af6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/DEPLOYMENT-AND-TRUST.md",
+      "sha256": "cccfed37a0e8c5eabfdf513e06035e0c049a24382baf852f079817fdc8c5b188",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/GAMEPLAY-SPECIFICATION.md",
+      "sha256": "9b4f535a4d3502c939273fff825833a5fa90d32e4e9bb770122d3d3bd7e5e478",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GAMING-PROTOCOL-REFERENCE.md",
+      "sha256": "669600c27ab7c178b92c7b64c3e46a45cf4cc776b84bc7f2ded94ea00bfa6b20",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GP-4-SESSION-CAPABILITY.md",
+      "sha256": "bb54a60e6ecb3a94c6bf1ca4eeab0245bcea5c90d9bf088c36440ea6c2c650d3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GP-5-GUEST-MIGRATION.md",
+      "sha256": "db308fb4bdda61fa0ed6d7e1a8e7623a9fcb4f579ba75d844f3b2526d958e986",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GP-6-OPTIONAL-COMPETITION-ACCESS.md",
+      "sha256": "3617848eee3515b8cfed758c68e6902a4766f60493a39e3c687bf2edc1c9e7b1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GP-7-CROSS-GAME-ATTESTATIONS.md",
+      "sha256": "e0b8a9aa168f4c6a6907474b5e93a34c34673deafc83451932c0564de0948432",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GP-8-CLIENT-ACCESS-UX.md",
+      "sha256": "6b78220a545795cf34ceef7984f63d66550f7a46af583e5c7e5e48c4be149b33",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-GP-9-E2E-QUALIFICATION.md",
+      "sha256": "7f3bf27eb555ea2fd4e00a27a0174a83e63e8e72f7e2012d9975a78f5d78c02c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/HC-PA-PROGRESSIVE-ACCESS.md",
+      "sha256": "2ac8f641aff13536ef8d21fd2063bef09f4abf6c54d81230781f07482d9bf96b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/MIGRATION-BOUNDARIES.md",
+      "sha256": "377aed8067e7e0a427a843185f1009bc233d56c5cd192f8281df9bc8a09c3ceb",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/R01-MILESTONE-REVIEW.md",
+      "sha256": "7fef605fdfdf29924c7c827904d774bd7e246049fe96c6a04e11009a7ad09a17",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/R02.1-CAPABILITY-WIRING.md",
+      "sha256": "a25a58743415671e34bd73eefa326dd0867b6c1bfbcf2de3c76339e92ceac323",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/R02.2-CAPABILITY-BUDGET-POLICY.md",
+      "sha256": "0b7270d04e55d66b31d33b014416d3a684174fd27a366ffa4b430b4f28c996c2",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/R02.3-PUBLIC-PLANT-CAPACITY.md",
+      "sha256": "e35eb4dae33ea2e1779450bcd16c761fccf4f4dd80d79b5e04e36942faed5478",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/README.md",
+      "sha256": "205eff806943cbb993ed3dae5469ac532034543563d1bf11b9a167581caa0228",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
+      "sha256": "8a76178c11ed42087f48ec86c1862d397ee8c338cf0773d2ca27234d2ff3629d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/RELEASE-SCOPE.md",
+      "sha256": "1d3799652f3e10644bbc553bf3e6049593843e5d317e5d0d8c2d0d6e2304ed7f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/REPOSITORY-AUDIT-20261009.md",
+      "sha256": "489a08a1006ab17dc900c47784b9a1a85940039e7be12960bb4619eaad180b5b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/TYPES-AND-UNITS.md",
+      "sha256": "925ce10b59467220b5c353fded62d6395f83d97e65085770d905cfd6ba1e0b2c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/hc-access-sdk.log",
+      "sha256": "2e415ac295d4d7e25e6ceb7507b4716a1ca566a056dec5ebdfe3541e80ec83c3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/hc-unit-integration-invariants.log",
+      "sha256": "cb6c95cac5247cf63474a4d99d2aaf30ff429e1ed952b8acd958d09c66100805",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/live-runtime-blocker.log",
+      "sha256": "10d85cf80f6a6231fd58be86af2de6d1416e83cbefb2e17e47c30b4fc120695f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/patch-whitespace.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/qualification.json",
+      "sha256": "4904e26411838a29a4be104f3e50fd2c4b2a1c4cefb1f9e624ccc0892590edd8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/runtime-template.log",
+      "sha256": "2b8bea4424316c75ee418c9876ae82a01c90f53ba106a21899c5728a791e5d29",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/shared-gaming-contracts.log",
+      "sha256": "a02957566e8b3a9af127fffb6a0c2ad0c15dba3ac0854070a5f6f05dc1ff2538",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/shared-runtime-libraries.log",
+      "sha256": "781db9f71b94a6e8c8cf7460431ccfae0d8fd156424a744264b95e0e9610cd80",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/solidity-build-sizes.log",
+      "sha256": "c49c7ba2a539c590529284cd83927327516a75cff3f9bc990cfbcdf767932985",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/solidity-format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/20261009/solidity-static-lint.log",
+      "sha256": "4f2677eda1df88c6566c9d8603741161753fe5f15049eb364c9d6baf9f89a1a3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.2-level1.json",
+      "sha256": "c4f2cd5f2a045d8411a32cc92ab8a5b64ee35a3fa2712f3f85b218666da5b6b6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.3-level1.json",
+      "sha256": "6327526ae84fb9f1869af162501349dd01efb48c42f3d75252e838c8c520434b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.4-level1.json",
+      "sha256": "65ad27e5b80bfa25bb8c79382957d9a227ff0ab6c22d6dab1e693173b6250adb",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.5-level1.json",
+      "sha256": "f71d7c89d93f386bc6fac767c9a76ca37a5f0d7e2a2f60248902f789f9d1d5da",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.6-level1.json",
+      "sha256": "797b23959c93e3641d76aa686ee451c85a0c04c640db5efce481a13ba700fcaf",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7-level2.json",
+      "sha256": "9cc97f2e444dfa176356badc7a569b3aa81a95bd7267693710ca2fc8b0b8c5c6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/hc-access-sdk.txt",
+      "sha256": "397a031c14879d873a616f6c0c06f942693b2c3ff5cc68bf1f05da4b9d217664",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/hc-unit-integration-invariants.txt",
+      "sha256": "26885a4adf2cf97ff4fee30f7bfcbf6975d518d29a5fb1ae14cc6fb3d5a3f00b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/live-runtime-blocker.txt",
+      "sha256": "74fad75ed7fbc4a9d4c03814d46cbf6868e31664398c249b8c08d904b74f0a6d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/patch-whitespace.txt",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/runtime-template.txt",
+      "sha256": "b99e908176c10e10ace4506cf713744c267ec8910fc686d82f5852f5f48249ef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/shared-gaming-contracts.txt",
+      "sha256": "7b75065aa8cc548f5437425b46494ca4926c8f45296f76b3d02866040fcfe4b7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/shared-runtime-libraries.txt",
+      "sha256": "73b2b0760a7191f95df54dc7473642eece828f69097a9662a4ff7e0f8497355a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/solidity-build-sizes.txt",
+      "sha256": "e0303f8f6d0822cc7ed5faf2e6e1b18a87222ae9d223ef529635eafec984a6a3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/solidity-format.txt",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/solidity-static-lint.txt",
+      "sha256": "78716ecd3217ef477bc85acb773cedd253852913a158dd9ec094707386dc6902",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R01.7/specification-check.txt",
+      "sha256": "774565b1174e86680051475b0e607bd4ebe6947b81ba5310999aa8c71966fef8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1-level1.json",
+      "sha256": "f758e20178c8bce0c50edbcca46443a95eae243b2205ce95718c3f7cedd027e1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/build-sizes.json",
+      "sha256": "e0303f8f6d0822cc7ed5faf2e6e1b18a87222ae9d223ef529635eafec984a6a3",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/source-specification.json",
+      "sha256": "70866bde21fd12d6501c4406bcb37552767a41d4a19eb11cf26810828357c2a7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/static-lint.json",
+      "sha256": "69ac37b4afda09fe16fd7a0e2a8e18e3c474fd4c9e7adf8756bfa93599443c10",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.1/targeted-contracts.json",
+      "sha256": "995ba1dd2155fd70720c1af62f65748bfce6cfc2ae82f0bc5a3ff4c351401380",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2-level1.json",
+      "sha256": "544a0bdf0437a70fd07f1f56f97903f58fa7c845b5bed6e34ebdf89d78fc2cf1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/hc-access-sdk.json",
+      "sha256": "2da4f963e15818c11cbd8e234f7a95503337c6ab54e61194145fcf15fee5c186",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/hc-unit-integration-invariants.json",
+      "sha256": "93ad8396d90d7a7c0a433885052aa764268ed09547760715c20065119c53291d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/live-runtime-blocker.json",
+      "sha256": "74fad75ed7fbc4a9d4c03814d46cbf6868e31664398c249b8c08d904b74f0a6d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/runtime-template.json",
+      "sha256": "b99e908176c10e10ace4506cf713744c267ec8910fc686d82f5852f5f48249ef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/shared-gaming-contracts.json",
+      "sha256": "eaf19a343ab5c7430766de5a672aad80cc79920c4f0d2d5ea02f50ef7dfa2301",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/shared-runtime-libraries.json",
+      "sha256": "5ef4224fa49b902f67a9fd8231937e513f70cf1e5c6706a454b31d7f54e1cfbf",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/solidity-build-sizes.json",
+      "sha256": "764d952a874cd94a1c2942553ba13bc136302f59a5d4fc44bf934ffa3dde7ad7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/solidity-format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/solidity-static-lint.json",
+      "sha256": "bccb323db74b3641e7fd39d11448954e12aacfef5fc015e4f6bdf43e36d6d0af",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.2/source-specification.json",
+      "sha256": "1bf4d9a98dee8ab5be7e12a48a2c063f84b7a0cfde4ee0a049831fc434d7c89c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3-level1.json",
+      "sha256": "2ee6a06f6db95c99fc42fc9a97e0757c565ef8b25673864ca7990fa591e8f9f1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/hc-access-sdk.json",
+      "sha256": "6b2a1951ffb9a3df3624fc9422c47e5a6a8f96b612307fe049f6c55e7f1111a9",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/hc-unit-integration-invariants.json",
+      "sha256": "7847242cb4da60ec5b1853142e0399f262e52923c7edbe4b9456b12a77ca6dd8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/live-runtime-blocker.json",
+      "sha256": "74fad75ed7fbc4a9d4c03814d46cbf6868e31664398c249b8c08d904b74f0a6d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/patch-whitespace.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/runtime-template.json",
+      "sha256": "b99e908176c10e10ace4506cf713744c267ec8910fc686d82f5852f5f48249ef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/shared-gaming-contracts.json",
+      "sha256": "68163c48b48ca55e3565c7bb321439d5b1ee24a292377f05697c32bb62de4454",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/shared-runtime-libraries.json",
+      "sha256": "f9091f8ada3ee8a0efc7f63ebf358663b84e2eaa0aaeeb7249b06260d9bd62c0",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/solidity-build-sizes.json",
+      "sha256": "ec9d8081b0444d6fb5e051f3755b8f34f3a0daf2fa621505396c0fb7a5e3a323",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/solidity-format.json",
+      "sha256": "2aad450a651af64c416c81e26101267d5abbb17a3e5255698d5f577df17070e6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/solidity-static-lint.json",
+      "sha256": "85fbfa72e3b571f7dc1ca0c103b5dfe7de702faa796e97325a62c8c58821591a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "docs/highcountry/qualification/R02.3/source-specification.json",
+      "sha256": "6f6060f80e0de997c40b2e3b7dffad841bf0cbf05e7b279f944e6867c48b7f7b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/qualify-r02-1.py",
+      "sha256": "fa835edf86dd042117ed3a3cad1a2abe4082f9dc0b6acb8430bbb7233f26f2c7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/qualify.py",
+      "sha256": "62cab70c23dbc6bac1f7f9f62fa92c7d5e324989f09edbb12b1cc789c922d9b8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/highcountry/verify-r01.py",
+      "sha256": "348d3790721f8a6ed1831373088c5f439343aa5ded1f02ed749c9ac1e0d623bf",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    }
+  ],
+  "sharedDependencies": [
+    {
+      "path": ".github/workflows/budtender-gaming.yml",
+      "sha256": "d34405712627c6bd3f9662f5431bbbd200377210eb25d07035e97128bc5b1575",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-client-hardening.yml",
+      "sha256": "29aad0cc026a0216d8f6e60f25f81d610978c85347e03110f36af4888bfb559b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-cross-game-qualification.yml",
+      "sha256": "b337dd05b0b2d4940b3e0ab8104f686b07d79c7d07c8ff7f2aaca4cf409329bc",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-four-game-e2e.yml",
+      "sha256": "d62f6535243d32b09983ccf41715c14a8886cc718871af67bfd3a25dcb167202",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-live-testnet.yml",
+      "sha256": "60a1d5d6a0b4e19e56fd34cb57797a288ed72955853a5c4311a19b310e26dce2",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-player-profile-service.yml",
+      "sha256": "6042a9457515a5e5c1eb36e0267ff2cc2d23f365c79b512c658ff583069d2198",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-query.yml",
+      "sha256": "95a3829d66d401ef0ec47e0065fddd3d0561f900be3cb807a364f40f7123284a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-runtime.yml",
+      "sha256": "805a4780244acb40186b898abed1a9d504dc5dd86a526a8b5a352ae46e28e01a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-sdk.yml",
+      "sha256": "b9f9f3407648cafb981fb5577f95a771791d4677a692d10bca735ff7ea5c1497",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/gaming-security-hardening.yml",
+      "sha256": "45dc1a7492fa83e0e1caf29a11e51858416dfced16afc6d91196566f68e09b1e",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/green-road-gaming.yml",
+      "sha256": "74b046d81449ffae4a9d7b9e6ebbdc6f283ada97c581e194559c49338ccb21da",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": ".github/workflows/smoke-chrome-gaming.yml",
+      "sha256": "f0d84ebe6ead153137518e574a02750b7cd7a0328b8a12d5487387f1c70f1908",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/420-gaming-testnet-v1/package.json",
+      "sha256": "8c4f6b6de569ee72f0e872e2ddea07875a37d86189d471bde0f0b368deb2fc7e",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/420-gaming-testnet-v1/scripts/cross-game-journey.mjs",
+      "sha256": "74365a36c5683534eaff22f143e3c090c2c4460ea28858092a61db8861ba737d",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/420-gaming-testnet-v1/scripts/entitlement-journey.mjs",
+      "sha256": "75676669f83e99db192180184a03687556ca9705ca899c3fe62f2daedc8965ef",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/420-gaming-testnet-v1/scripts/migration-journey.mjs",
+      "sha256": "70c0e8009f80e4bf697b72f0b50186b56c056253887a375a130c29676edc6e73",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/420-gaming-testnet-v1/scripts/profile-journey.mjs",
+      "sha256": "00768e6ee32b85ca6246135cd4fa15feefd70971a50cf3838cc9328c894fd7cf",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "clients/420-gaming-testnet-v1/scripts/registry-journey.mjs",
+      "sha256": "64f0a9e70467d91f0bf31a525b8534310d4edaa898c24f985fa49e3ac2c35ce8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/CrossGameRegistry420.sol",
+      "sha256": "46c0213df80fdea029e0bce605f5ef40fa0a7a47b50b23b3b649e4c167c798f5",
+      "classification": "COMPLETE",
+      "contracts": [
+        "CrossGameRegistry420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/GameClaims420.sol",
+      "sha256": "56a54b92e74e1c57baa9317a3a147c53f1f82794e2a51b53401fdb02a21c4e6c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GameClaims420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/GameEntitlements420.sol",
+      "sha256": "e87061ba2543fc9c03d44f3d1d78c909888e3c612980f9bb4a253a81e8def54a",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GameEntitlements420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/GameIdentity420.sol",
+      "sha256": "0d3c855269e054c21296725ec6e28f5a3db4f99af650aa81c6e98b1dad49c1ee",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GameIdentity420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/GameRegistry420.sol",
+      "sha256": "d1a6212263752457988791574f75c4d2b43d95c48c893605421018224b35e23c",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GameRegistry420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/GamingAuthorization420.sol",
+      "sha256": "931933b88c5a84948f26670aabe597974f686d1f1082248282a0f5ffaa349405",
+      "classification": "COMPLETE",
+      "contracts": [
+        "GamingAuthorization420"
+      ],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/GamingIds420.sol",
+      "sha256": "da99ecc0e283baebb08e853001cf5e0eadad97ebaf35c7b6867092aa1681363a",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "contracts/src/gaming/access/ProgressiveGamingTypes.sol",
+      "sha256": "a3dac71c4ba80b58bece8ebf45c33381135ccd46b904c7c2e4b6198ee6bd3793",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "deployments/gaming/testnet.runtime.json",
+      "sha256": "8f48db8cb597b279c12bf2ed842cc997d08f5775154fe874826b18ca9c4ff4c5",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-client-hardening/package.json",
+      "sha256": "d1ced541811875befba229222285f4771731ffcddb1fe28702bfe74f75985c55",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-client-hardening/test/four-game-e2e.test.js",
+      "sha256": "a0fc37c524b5115e58a9d3b8b607c74a6f9153ce881c663fb24eefb522f4c34c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-client-hardening/test/hostile-state.test.js",
+      "sha256": "61cff08a01377841c064ec255b66cba8425e8368e28ce9df4162f6350e467da7",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-cross-game-qualification/package.json",
+      "sha256": "116e165518eb6093d0f9593818f39ae7bb57b45a1b49ca11a0eeac8a11e45c4c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-cross-game-qualification/test/cross-game.test.js",
+      "sha256": "a4add2923aad0a45a638e344dbe11fab7e6b7230446a112fc3806e0bc5a0aab6",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/README.md",
+      "sha256": "3328f80eb6d45409d4ea7a1bd5b0f37a17303bd65a68506f5c776674fb61770b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/package.json",
+      "sha256": "3fa362506977b283206a90bcf9b60eb5c7705f81c4d50102cd91994fd562bdfc",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/src/access-state.js",
+      "sha256": "ada10d0f2bc9c355bf66e739e17988413c8a899b0d97ccde97cdaca12f69864b",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/src/client.js",
+      "sha256": "c3f49141beccae64b36c6fbab8f73f8c2cde97225b7c79c95c61fce46825d46c",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/src/contracts.js",
+      "sha256": "2ddd8635dace24afdf6ad4df80e780933aacd75ef8a76052e68887cb48ea21eb",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/src/index.js",
+      "sha256": "e753d957473ef8edec5cfffd3848f0db839f611e3c55afe7bbf7c481fc0eab43",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/test/contracts.test.js",
+      "sha256": "6dd9f3a5cd7d5bae13b2ad632063e595b72138802d3ea3b6a2a74d431f4b6f2f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/test/highcountry-compat.test.js",
+      "sha256": "5f261393e55ed229d3b83d2a6f4d6ab8d45f8187c89f35e1e96e9160b90447ce",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "packages/420-gaming-sdk/test/sdk.test.js",
+      "sha256": "1fabf59b471eeeb6603e5ce61352cd62b13c9589cf45fa7b645af76d48416114",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/gaming/qualify-live-testnet.mjs",
+      "sha256": "f599cc0c0374a7fcdff7130dc4fa42d4d3326630451fc4d99343846856e11415",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "scripts/gaming/verify-runtime-manifest.mjs",
+      "sha256": "a960578ec371e72ca2759633f98a910ca50a597c39d70409654e4bd66e3b8d64",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-player-profile/package.json",
+      "sha256": "a0736b9c7e8e8fed575c68c2b3978600b050914489054861782fd61cd851481e",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-player-profile/src/service.js",
+      "sha256": "267d629ce8e86908a9e44eca6e82d33b18ccca263740ece24f9eeedf41d7b5c1",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-player-profile/test/service.test.js",
+      "sha256": "658385cb897ff961af88e7a08b0c2bec8f97b196cf6aebced780832e995dc292",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-query/package.json",
+      "sha256": "46bc09ce235cd63269de6947e89ad6013cf10b39db488e86ffb8a42f90a8584f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-query/src/finality-state.js",
+      "sha256": "987cfaaf5d23274702128b136ea967e308e01384bb3579c95a99800ad7d5713f",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-query/src/query-service.js",
+      "sha256": "979598313e914d221029e6a4b2bedb701488382f348bebf7d654b0520a037cf8",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-query/test/finality-state.test.js",
+      "sha256": "05802d5666c412d8c9f86e63645cf8f840bbd714ecec70d9be6ab43180b55b03",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    },
+    {
+      "path": "services/420-gaming-query/test/query-service.test.js",
+      "sha256": "ddbaeea81cfefd69ec6dffffa6f22da44a238cd4f045e56bba01c2fe21956307",
+      "classification": "COMPLETE",
+      "contracts": [],
+      "interfaces": [],
+      "tests": []
+    }
+  ]
+}

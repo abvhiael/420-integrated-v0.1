@@ -1,0 +1,55 @@
+name: High Country R03.1 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/**'
+      - 'contracts/test/highcountry/**'
+      - 'docs/highcountry/R03.1-*'
+      - '.github/workflows/highcountry-r03-1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r03-1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Affected High Country compilation
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Format changed R03.1 paths
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/harvest/HarvestEngine.sol src/highcountry/constants/ActionIds.sol test/highcountry/unit/cultivation/CultivationEngine.t.sol
+      - name: App security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: R03.1 ready-plant harvest admission with canonical dependencies and regression suite
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' -vv
+      - name: R03.1 direct ABI and source scope checks
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          out=list(pathlib.Path("out").glob("**/HarvestEngine.json"))
+          assert len(out)==1,out
+          abi=json.loads(out[0].read_text())["abi"]
+          names={v["name"] for v in abi if v["type"]=="function"}
+          assert {"acceptHarvest","getHarvest","isHarvestAccepted","plantRegistry","cultivationEngine","authorization"} <= names
+          PY
+      - name: Retained source-action specification
+        run: python3 scripts/highcountry/verify-r01.py

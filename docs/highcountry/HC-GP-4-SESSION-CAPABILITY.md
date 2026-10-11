@@ -41,7 +41,7 @@ A High Country routine session is considered authorized only when all of the fol
 2. the supplied account exposes the canonical `SmartAccount420` component ID for its own address;
 3. the session key is enabled in the account's current authorization epoch;
 4. the session scope equals the canonical `SmartAccountScopes420.sessionCallScope(...)` value;
-5. the account's capability registry reports an active `SESSION_EXECUTE` grant for the exact session key, component, scope, target and selector;
+5. the account's capability registry matches the trusted registry selected by HighCountryAuthorization and reports an active `SESSION_EXECUTE` grant for the exact session key, component, scope, target and selector;
 6. that grant is currently authorized for a zero-value call.
 
 Epoch changes, recovery-driven invalidation, session revocation, grant revocation, expiry, wrong target, wrong selector and missing grants all fail closed.
@@ -58,3 +58,7 @@ The intended wallet UX is:
 - unknown or newly introduced selectors → wallet/passkey until explicitly reviewed and classified routine.
 
 This preserves the product rule: the wallet is a key, not a tollbooth, without turning game sessions into general-purpose wallet authority.
+
+## Consumer obligation
+
+This verifier does not execute a session or certify that an arbitrary address was deployed by the canonical wallet factory. Production consumers must verify canonical account provenance and execute through the existing wallet/EntryPoint and target capability enforcement. A self-reported account view is not sufficient evidence of wallet deployment.

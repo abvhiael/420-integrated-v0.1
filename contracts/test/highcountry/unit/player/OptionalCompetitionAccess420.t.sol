@@ -8,31 +8,105 @@ import { AuthorizationRequest } from "../../../../src/highcountry/types/HighCoun
 
 contract MockHCCompetitionAuthorization is IHighCountryAuthorization {
     bool public allowed = true;
-    function setAllowed(bool allowed_) external { allowed = allowed_; }
-    function capabilityRegistry() external pure returns (address) { return address(1); }
-    function isAuthorized(AuthorizationRequest calldata) external view returns (bool) { return allowed; }
-    function requireAuthorized(AuthorizationRequest calldata) external view { require(allowed, "unauthorized"); }
+
+    function setAllowed(
+        bool allowed_
+    ) external {
+        allowed = allowed_;
+    }
+
+    function capabilityRegistry() external pure returns (address) {
+        return address(1);
+    }
+
+    function isAuthorized(
+        AuthorizationRequest calldata
+    ) external view returns (bool) {
+        return allowed;
+    }
+
+    function requireAuthorized(
+        AuthorizationRequest calldata
+    ) external view {
+        require(allowed, "unauthorized");
+    }
 }
 
 contract MockHCCompetitionGamingAccess is IHighCountryGamingAccess420 {
     mapping(bytes32 => bool) internal access;
 
-    function setCompetition(uint64 growerProfileId, bytes32 entitlementId, bytes32 contentId, bool allowed) external {
+    function setCompetition(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 contentId,
+        bool allowed
+    ) external {
         access[keccak256(abi.encode(growerProfileId, entitlementId, contentId))] = allowed;
     }
 
-    function hasScopedEntitlement(uint64, bytes32, bytes32, bytes32) external pure returns (bool) { return false; }
-    function requireScopedEntitlement(uint64, bytes32, bytes32, bytes32) external pure { revert("unused"); }
-    function hasBonusRegion(uint64, bytes32, bytes32) external pure returns (bool) { return false; }
-    function hasCosmetic(uint64, bytes32, bytes32) external pure returns (bool) { return false; }
-    function hasCompetitionAccess(uint64 growerProfileId, bytes32 entitlementId, bytes32 contentId)
-        external
-        view
-        returns (bool)
-    {
+    function hasPlayerCompetition(
+        uint64 player,
+        bytes32 content
+    ) external view returns (bool) {
+        return access[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
+    }
+
+    function hasPlayerBonusRegion(
+        uint64,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function hasScopedEntitlement(
+        uint64,
+        bytes32,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function requireScopedEntitlement(
+        uint64,
+        bytes32,
+        bytes32,
+        bytes32
+    ) external pure {
+        revert("unused");
+    }
+
+    function hasBonusRegion(
+        uint64,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function hasCosmetic(
+        uint64,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function hasCompetitionAccess(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 contentId
+    ) external view returns (bool) {
         return access[keccak256(abi.encode(growerProfileId, entitlementId, contentId))];
     }
-    function hasGeneticsAccess(uint64, bytes32, bytes32) external pure returns (bool) { return false; }
+
+    function hasGeneticsAccess(
+        uint64,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
 }
 
 contract OptionalCompetitionAccess420Test {
@@ -59,41 +133,41 @@ contract OptionalCompetitionAccess420Test {
         _register();
         require(!competitionAccess.hasAccess(GROWER_PROFILE_ID, COMPETITION_ID), "missing entitlement accepted");
 
-        gamingAccess.setCompetition(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setCompetition(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         require(competitionAccess.hasAccess(GROWER_PROFILE_ID, COMPETITION_ID), "matching entitlement rejected");
         competitionAccess.requireAccess(GROWER_PROFILE_ID, COMPETITION_ID);
     }
 
     function testMissingRegistrationDoesNotGateBaseCompetition() public {
         bytes32 baseCompetition = keccak256("hc/base/competition/open-cup");
-        require(!competitionAccess.hasAccess(GROWER_PROFILE_ID, baseCompetition), "unregistered competition treated as gated");
+        require(
+            !competitionAccess.hasAccess(GROWER_PROFILE_ID, baseCompetition),
+            "unregistered competition treated as gated"
+        );
     }
 
     function testRequireAccessFailsClosedWithoutEntitlement() public {
         _register();
-        (bool ok,) = address(competitionAccess).call(
-            abi.encodeWithSelector(competitionAccess.requireAccess.selector, GROWER_PROFILE_ID, COMPETITION_ID)
-        );
+        (bool ok,) = address(competitionAccess)
+            .call(abi.encodeWithSelector(competitionAccess.requireAccess.selector, GROWER_PROFILE_ID, COMPETITION_ID));
         require(!ok, "optional competition opened without entitlement");
     }
 
     function testInactiveOptionalCompetitionFailsClosed() public {
         _register();
-        gamingAccess.setCompetition(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setCompetition(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         competitionAccess.setOptionalCompetitionStatus(COMPETITION_ID, false);
         require(!competitionAccess.hasAccess(GROWER_PROFILE_ID, COMPETITION_ID), "inactive competition accessible");
     }
 
     function testAdministrationIsCapabilityAuthorized() public {
         authorization.setAllowed(false);
-        (bool ok,) = address(competitionAccess).call(
-            abi.encodeWithSelector(
-                competitionAccess.registerOptionalCompetition.selector,
-                COMPETITION_ID,
-                ENTITLEMENT_ID,
-                CONTENT_ID
-            )
-        );
+        (bool ok,) = address(competitionAccess)
+            .call(
+                abi.encodeWithSelector(
+                    competitionAccess.registerOptionalCompetition.selector, COMPETITION_ID, ENTITLEMENT_ID, CONTENT_ID
+                )
+            );
         require(!ok, "unauthorized optional competition registered");
     }
 }

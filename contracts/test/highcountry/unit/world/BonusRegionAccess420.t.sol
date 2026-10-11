@@ -9,33 +9,104 @@ import { AuthorizationRequest } from "../../../../src/highcountry/types/HighCoun
 contract MockHCAuthorizationBonusRegion is IHighCountryAuthorization {
     bool public allowed = true;
 
-    function setAllowed(bool allowed_) external { allowed = allowed_; }
-    function capabilityRegistry() external pure returns (address) { return address(1); }
-    function isAuthorized(AuthorizationRequest calldata) external view returns (bool) { return allowed; }
-    function requireAuthorized(AuthorizationRequest calldata) external view { require(allowed, "unauthorized"); }
+    function setAllowed(
+        bool allowed_
+    ) external {
+        allowed = allowed_;
+    }
+
+    function capabilityRegistry() external pure returns (address) {
+        return address(1);
+    }
+
+    function isAuthorized(
+        AuthorizationRequest calldata
+    ) external view returns (bool) {
+        return allowed;
+    }
+
+    function requireAuthorized(
+        AuthorizationRequest calldata
+    ) external view {
+        require(allowed, "unauthorized");
+    }
 }
 
 contract MockHCGamingAccessBonusRegion is IHighCountryGamingAccess420 {
     mapping(bytes32 => bool) internal bonusAccess;
 
-    function setBonusRegion(uint64 growerProfileId, bytes32 entitlementId, bytes32 contentId, bool allowed) external {
+    function setBonusRegion(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 contentId,
+        bool allowed
+    ) external {
         bonusAccess[keccak256(abi.encode(growerProfileId, entitlementId, contentId))] = allowed;
     }
 
-    function hasScopedEntitlement(uint64, bytes32, bytes32, bytes32) external pure returns (bool) { return false; }
-    function requireScopedEntitlement(uint64, bytes32, bytes32, bytes32) external pure { revert("unused"); }
+    function hasPlayerBonusRegion(
+        uint64 player,
+        bytes32 content
+    ) external view returns (bool) {
+        return bonusAccess[keccak256(abi.encode(player, bytes32(uint256(player)), content))];
+    }
 
-    function hasBonusRegion(uint64 growerProfileId, bytes32 entitlementId, bytes32 regionContentId)
-        external
-        view
-        returns (bool)
-    {
+    function hasPlayerCompetition(
+        uint64,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function hasScopedEntitlement(
+        uint64,
+        bytes32,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function requireScopedEntitlement(
+        uint64,
+        bytes32,
+        bytes32,
+        bytes32
+    ) external pure {
+        revert("unused");
+    }
+
+    function hasBonusRegion(
+        uint64 growerProfileId,
+        bytes32 entitlementId,
+        bytes32 regionContentId
+    ) external view returns (bool) {
         return bonusAccess[keccak256(abi.encode(growerProfileId, entitlementId, regionContentId))];
     }
 
-    function hasCosmetic(uint64, bytes32, bytes32) external pure returns (bool) { return false; }
-    function hasCompetitionAccess(uint64, bytes32, bytes32) external pure returns (bool) { return false; }
-    function hasGeneticsAccess(uint64, bytes32, bytes32) external pure returns (bool) { return false; }
+    function hasCosmetic(
+        uint64,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function hasCompetitionAccess(
+        uint64,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
+
+    function hasGeneticsAccess(
+        uint64,
+        bytes32,
+        bytes32
+    ) external pure returns (bool) {
+        return false;
+    }
 }
 
 contract BonusRegionAccess420Test {
@@ -59,9 +130,10 @@ contract BonusRegionAccess420Test {
     }
 
     function testFoundingRegionsCannotBecomeWalletGatedBonusRegions() public {
-        (bool ok,) = address(bonusRegions).call(
-            abi.encodeWithSelector(bonusRegions.registerBonusRegion.selector, uint16(3), ENTITLEMENT_ID, CONTENT_ID)
-        );
+        (bool ok,) = address(bonusRegions)
+            .call(
+                abi.encodeWithSelector(bonusRegions.registerBonusRegion.selector, uint16(3), ENTITLEMENT_ID, CONTENT_ID)
+            );
         require(!ok, "founding region was wallet gated");
     }
 
@@ -69,36 +141,37 @@ contract BonusRegionAccess420Test {
         _registerBonusRegion();
         require(!bonusRegions.hasAccess(GROWER_PROFILE_ID, BONUS_REGION_ID), "missing entitlement accepted");
 
-        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         require(bonusRegions.hasAccess(GROWER_PROFILE_ID, BONUS_REGION_ID), "valid entitlement rejected");
         bonusRegions.requireAccess(GROWER_PROFILE_ID, BONUS_REGION_ID);
     }
 
     function testRequireAccessFailsClosedWithoutEntitlement() public {
         _registerBonusRegion();
-        (bool ok,) = address(bonusRegions).call(
-            abi.encodeWithSelector(bonusRegions.requireAccess.selector, GROWER_PROFILE_ID, BONUS_REGION_ID)
-        );
+        (bool ok,) = address(bonusRegions)
+            .call(abi.encodeWithSelector(bonusRegions.requireAccess.selector, GROWER_PROFILE_ID, BONUS_REGION_ID));
         require(!ok, "bonus region opened without entitlement");
     }
 
     function testInactiveBonusRegionFailsClosedEvenWithEntitlement() public {
         _registerBonusRegion();
-        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, ENTITLEMENT_ID, CONTENT_ID, true);
+        gamingAccess.setBonusRegion(GROWER_PROFILE_ID, bytes32(uint256(GROWER_PROFILE_ID)), CONTENT_ID, true);
         bonusRegions.setBonusRegionStatus(BONUS_REGION_ID, false);
 
         require(!bonusRegions.hasAccess(GROWER_PROFILE_ID, BONUS_REGION_ID), "inactive region reported accessible");
-        (bool ok,) = address(bonusRegions).call(
-            abi.encodeWithSelector(bonusRegions.requireAccess.selector, GROWER_PROFILE_ID, BONUS_REGION_ID)
-        );
+        (bool ok,) = address(bonusRegions)
+            .call(abi.encodeWithSelector(bonusRegions.requireAccess.selector, GROWER_PROFILE_ID, BONUS_REGION_ID));
         require(!ok, "inactive region opened");
     }
 
     function testBonusRegionAdministrationIsCapabilityAuthorized() public {
         authorization.setAllowed(false);
-        (bool ok,) = address(bonusRegions).call(
-            abi.encodeWithSelector(bonusRegions.registerBonusRegion.selector, BONUS_REGION_ID, ENTITLEMENT_ID, CONTENT_ID)
-        );
+        (bool ok,) = address(bonusRegions)
+            .call(
+                abi.encodeWithSelector(
+                    bonusRegions.registerBonusRegion.selector, BONUS_REGION_ID, ENTITLEMENT_ID, CONTENT_ID
+                )
+            );
         require(!ok, "unauthorized bonus region registered");
     }
 }

@@ -1,0 +1,82 @@
+{
+  "schema": "highcountry-roadmap-step-qualification-v1",
+  "step": "R02.13",
+  "name": "Bind canonical SmartAccount deployment provenance and reviewed routine selectors",
+  "status": "COMPLETE_REPOSITORY_QUALIFICATION",
+  "qualificationLevel": "Level 1 targeted",
+  "implementationSha": "b585dcd0ad41f62a5b03eae8e694066b13700301",
+  "branch": "review/high-country-complete-audit-20261009",
+  "prNumber": 593,
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "workflow": {
+    "name": "High Country R02.13 Targeted Qualification",
+    "runId": 38065981704,
+    "jobId": 114253599141,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38065981704"
+  },
+  "implementation": [
+    "HighCountrySessionAccess420 binds an immutable canonical SmartAccountFactory address and verifies trusted EntryPoint and CapabilityRegistry roots",
+    "Deployed accounts require matching deterministic factory getAddress constructor parameters, deployed code and account authority roots prior to session authorization",
+    "Unknown and unattested smart accounts are denied; session authorization checks live epochs, recovery, canonical scope, capability grants, and session revocation",
+    "Independent SESSION_POLICY_REVIEW_ROUTINE_CALL authorizes the exact target/selector/codehash before separate policy enabling; changes in codehash fail closed",
+    "Sensitive wallet, asset, grant, recovery and session selectors and all native value require escalation",
+    "Invariant fuzz handler now independently reviews eligible unrelated selectors and treats expected invalid-selector rejections as expected, maintaining assertions for all protected invariants",
+    "Real SmartAccountFactory420 CREATE2 deployment and SmartAccount420 session key/revoke integration regression retained"
+  ],
+  "checks": [
+    {
+      "name": "Exact SHA",
+      "status": "PASS"
+    },
+    {
+      "name": "Contract build",
+      "status": "PASS"
+    },
+    {
+      "name": "Foundry formatting",
+      "status": "PASS"
+    },
+    {
+      "name": "Security lint",
+      "status": "PASS"
+    },
+    {
+      "name": "SmartAccount provenance/session regressions and progressive session invariants",
+      "status": "PASS"
+    },
+    {
+      "name": "Retained High Country tests and invariants",
+      "status": "PASS",
+      "suites": 44,
+      "passed": 205,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "name": "Source/specification verification",
+      "status": "PASS",
+      "actions": 61
+    },
+    {
+      "name": "R02.13 ABI verifier",
+      "status": "PASS"
+    }
+  ],
+  "securityNotes": [
+    "No owner or permission checks weakened and no failing invariant disabled",
+    "Targeted fixture does not attempt to accept disallowed selectors; expected rejection is handled while stable invariant assertions continue",
+    "Gateway/lifecycle and canonical wallet authorization are retained"
+  ],
+  "level2": "Retained High Country integration and invariant suite passed against exact implementation SHA; separate milestone closeout deferred unless defined by roadmap.",
+  "level3": "Comprehensive accumulated phase reconciliation against current main and all global authorities deferred until end of app audit phase.",
+  "deferred": [
+    "Production deployed factory address and runtime codehash/Genesis manifest attestation",
+    "External wallet/passkey/device and live testnet acceptance",
+    "Phase-wide Level 3 and PR merge"
+  ],
+  "blockers": [],
+  "evidenceOnlyCommitPolicy": "Evidence-only changes do not modify executable files, workflows, dependencies or interfaces; inherit exact passing implementation SHA.",
+  "nextCanonicalStep": "To be determined from canonical roadmap, not inferred"
+}

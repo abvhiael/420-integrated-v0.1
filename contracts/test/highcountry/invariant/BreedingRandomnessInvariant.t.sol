@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import { EmergencyState } from "../../../src/highcountry/security/EmergencyState.sol";
 
 import { ICapabilityRegistry420 } from "../../../src/interfaces/genesis/ICapabilityRegistry420.sol";
 import { HighCountryAuthorization } from "../../../src/highcountry/auth/HighCountryAuthorization.sol";
@@ -20,13 +21,19 @@ contract BreedingRandomnessInvariantHandler {
     BreedingEngine private immutable breeding;
     bytes32 private immutable requestId;
 
-    constructor(RandomnessCoordinator randomness_, BreedingEngine breeding_, bytes32 requestId_) {
+    constructor(
+        RandomnessCoordinator randomness_,
+        BreedingEngine breeding_,
+        bytes32 requestId_
+    ) {
         randomness = randomness_;
         breeding = breeding_;
         requestId = requestId_;
     }
 
-    function stepAttemptRefill(bytes32 entropy_) external {
+    function stepAttemptRefill(
+        bytes32 entropy_
+    ) external {
         address(randomness).call(abi.encodeWithSelector(randomness.fulfill.selector, requestId, entropy_));
     }
 
@@ -57,9 +64,37 @@ contract BreedingRandomnessInvariantTest is InvariantTarget420 {
         genomes = new GenomeRegistry(address(auth), address(genesis));
         randomness = new RandomnessCoordinator(address(auth));
         breeding = new BreedingEngine(address(auth), address(genomes), address(randomness));
-
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("inv:roots"));
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("inv:finalize"));
+        EmergencyState emergency = new EmergencyState(address(auth));
+        _grant(
+            address(this),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_BIND_EMERGENCY,
+            randomness.EMERGENCY_BIND_SCOPE(),
+            keccak256("em:rand")
+        );
+        randomness.bindEmergencyState(address(emergency));
+        _grant(
+            address(this),
+            ModuleIds.BREEDING_ENGINE,
+            ActionIds.BREEDING_BIND_EMERGENCY,
+            breeding.EMERGENCY_BIND_SCOPE(),
+            keccak256("em:breed")
+        );
+        breeding.bindEmergencyState(address(emergency));
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_SET_ROOTS,
+            genesis.ADMIN_SCOPE(),
+            keccak256("inv:roots")
+        );
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_FINALIZE,
+            genesis.ADMIN_SCOPE(),
+            keccak256("inv:finalize")
+        );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
 
@@ -74,10 +109,34 @@ contract BreedingRandomnessInvariantTest is InvariantTarget420 {
         contextHash = keccak256(abi.encode(eventId, parentA, parentB, childId, lineId, metadataHash));
         requestId = keccak256(abi.encode(keccak256("HC.RANDOM.BREEDING.V1"), contextHash));
 
-        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_REQUEST, bytes32(uint256(eventId)), keccak256("inv:breed:req"));
-        _grant(address(this), ModuleIds.BREEDING_ENGINE, ActionIds.BREEDING_FINALIZE, bytes32(uint256(eventId)), keccak256("inv:breed:fin"));
-        _grant(address(breeding), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_REQUEST, requestId, keccak256("inv:rand:req"));
-        _grant(address(this), ModuleIds.RANDOMNESS_COORDINATOR, ActionIds.RANDOMNESS_FULFILL, requestId, keccak256("inv:rand:fulfill"));
+        _grant(
+            address(this),
+            ModuleIds.BREEDING_ENGINE,
+            ActionIds.BREEDING_REQUEST,
+            bytes32(uint256(eventId)),
+            keccak256("inv:breed:req")
+        );
+        _grant(
+            address(this),
+            ModuleIds.BREEDING_ENGINE,
+            ActionIds.BREEDING_FINALIZE,
+            bytes32(uint256(eventId)),
+            keccak256("inv:breed:fin")
+        );
+        _grant(
+            address(breeding),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_REQUEST,
+            requestId,
+            keccak256("inv:rand:req")
+        );
+        _grant(
+            address(this),
+            ModuleIds.RANDOMNESS_COORDINATOR,
+            ActionIds.RANDOMNESS_FULFILL,
+            requestId,
+            keccak256("inv:rand:fulfill")
+        );
         _grant(address(breeding), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, childId, keccak256("inv:child"));
 
         breeding.requestBreeding(eventId, parentA, parentB, childId, lineId, metadataHash);
@@ -104,23 +163,44 @@ contract BreedingRandomnessInvariantTest is InvariantTarget420 {
         require(genomes.exists(childId), "HC-INV-BREEDING-015: child genome missing");
     }
 
-    function _grant(address principal, bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function _grant(
+        address principal,
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
-            principal: principal, componentId: moduleId, capabilityId: actionId, scopeHash: scopeHash,
-            perCallLimit: 0, periodLimit: 0, periodSeconds: 0, validFrom: 0,
-            validUntil: uint64(block.timestamp + 1 days), revoked: false
+            principal: principal,
+            componentId: moduleId,
+            capabilityId: actionId,
+            scopeHash: scopeHash,
+            perCallLimit: 0,
+            periodLimit: 0,
+            periodSeconds: 0,
+            validFrom: 0,
+            validUntil: uint64(block.timestamp + 1 days),
+            revoked: false
         });
         caps.setGrant(grantId, grant, 0);
     }
 
-    function _loci(string memory prefix) private pure returns (bytes32[28] memory loci) {
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode(prefix, i));
+    function _loci(
+        string memory prefix
+    ) private pure returns (bytes32[28] memory loci) {
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode(prefix, i));
+        }
     }
 
     function _roots() private pure returns (GenesisRoots memory) {
         return GenesisRoots({
-            manifestRoot: keccak256("m"), parameterRoot: keccak256("p"), rulesetRoot: keccak256("r"),
-            landRoot: keccak256("l"), randomnessRoot: keccak256("x"), qualificationRoot: keccak256("q")
+            manifestRoot: keccak256("m"),
+            parameterRoot: keccak256("p"),
+            rulesetRoot: keccak256("r"),
+            landRoot: keccak256("l"),
+            randomnessRoot: keccak256("x"),
+            qualificationRoot: keccak256("q")
         });
     }
 }

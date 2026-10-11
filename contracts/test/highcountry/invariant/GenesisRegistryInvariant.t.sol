@@ -13,7 +13,9 @@ import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 contract GenesisInvariantHandler {
     GenesisRegistry public immutable genesis;
 
-    constructor(GenesisRegistry genesis_) {
+    constructor(
+        GenesisRegistry genesis_
+    ) {
         genesis = genesis_;
     }
 
@@ -21,7 +23,9 @@ contract GenesisInvariantHandler {
         address(genesis).call(abi.encodeWithSelector(genesis.finalizeGenesis.selector));
     }
 
-    function stepReplaceRoots(uint256 salt) external {
+    function stepReplaceRoots(
+        uint256 salt
+    ) external {
         GenesisRoots memory replacement = GenesisRoots({
             manifestRoot: keccak256(abi.encode("manifest", salt)),
             parameterRoot: keccak256(abi.encode("parameters", salt)),
@@ -73,12 +77,16 @@ contract GenesisRegistryInvariantTest is InvariantTarget420 {
         require(actual.qualificationRoot == expected.qualificationRoot, "HC-INV-GENESIS-002: qualification");
     }
 
-    function _grant(address principal, bytes32 actionId, bytes32 grantId) private {
+    function _grant(
+        address principal,
+        bytes32 actionId,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: principal,
             componentId: ModuleIds.GENESIS_REGISTRY,
             capabilityId: actionId,
-            scopeHash: bytes32(0),
+            scopeHash: genesis.ADMIN_SCOPE(),
             perCallLimit: 0,
             periodLimit: 0,
             periodSeconds: 0,

@@ -12,7 +12,10 @@ contract WorldGenesisReadiness {
     IGenesisRegistry public immutable genesisRegistry;
     IFoundingRegionReadinessHC2 public immutable regionRegistry;
 
-    constructor(address genesisRegistry_, address regionRegistry_) {
+    constructor(
+        address genesisRegistry_,
+        address regionRegistry_
+    ) {
         if (genesisRegistry_ == address(0) || regionRegistry_ == address(0)) revert HCZeroAddress();
         genesisRegistry = IGenesisRegistry(genesisRegistry_);
         regionRegistry = IFoundingRegionReadinessHC2(regionRegistry_);

@@ -14,6 +14,8 @@ import { IHighCountryAuthorization } from "../interfaces/IHighCountryAuthorizati
 import { AuthorizationRequest, GenesisRoots } from "../types/HighCountryTypes.sol";
 
 contract GenesisRegistry is IGenesisRegistry {
+    bytes32 public constant ADMIN_SCOPE = keccak256("HC.GENESIS.ADMIN.V1");
+
     bytes32 private constant MANIFEST_ROOT = keccak256("manifestRoot");
     bytes32 private constant PARAMETER_ROOT = keccak256("parameterRoot");
     bytes32 private constant RULESET_ROOT = keccak256("rulesetRoot");
@@ -27,7 +29,9 @@ contract GenesisRegistry is IGenesisRegistry {
     bool public finalized;
     bool public genesisAuthorityEnabled = true;
 
-    constructor(address authorization_) {
+    constructor(
+        address authorization_
+    ) {
         if (authorization_ == address(0)) revert HCZeroAddress();
         authorization = IHighCountryAuthorization(authorization_);
     }
@@ -36,7 +40,9 @@ contract GenesisRegistry is IGenesisRegistry {
         return _roots;
     }
 
-    function setRoots(GenesisRoots calldata newRoots) external {
+    function setRoots(
+        GenesisRoots calldata newRoots
+    ) external {
         if (!genesisAuthorityEnabled) revert HCGenesisAuthorityDisabled();
         if (finalized) revert HCGenesisAlreadyFinalized();
         _requireAuthorized(ActionIds.GENESIS_SET_ROOTS);
@@ -66,19 +72,23 @@ contract GenesisRegistry is IGenesisRegistry {
         emit GenesisAuthorityDisabled();
     }
 
-    function _requireAuthorized(bytes32 actionId) private view {
+    function _requireAuthorized(
+        bytes32 actionId
+    ) private view {
         authorization.requireAuthorized(
             AuthorizationRequest({
                 principal: msg.sender,
                 moduleId: ModuleIds.GENESIS_REGISTRY,
                 actionId: actionId,
-                scopeHash: bytes32(0),
+                scopeHash: ADMIN_SCOPE,
                 amount: 0
             })
         );
     }
 
-    function _validateRoots(GenesisRoots memory candidate) private pure {
+    function _validateRoots(
+        GenesisRoots memory candidate
+    ) private pure {
         if (candidate.manifestRoot == bytes32(0)) revert HCInvalidGenesisRoot(MANIFEST_ROOT);
         if (candidate.parameterRoot == bytes32(0)) revert HCInvalidGenesisRoot(PARAMETER_ROOT);
         if (candidate.rulesetRoot == bytes32(0)) revert HCInvalidGenesisRoot(RULESET_ROOT);

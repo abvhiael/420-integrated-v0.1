@@ -1,0 +1,44 @@
+{
+  "step": "R01.2 \u2014 Architecture and authority",
+  "status": "COMPLETE",
+  "qualificationLevel": 1,
+  "implementationSha": "f099a6a2b55822fcfd159f37a0ea0fd1133c6ee5",
+  "mainSha": "0ec695481fc84e6066aeae50baf6e0fd3c7f8731",
+  "branchBaseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "pr": 593,
+  "filesChanged": [
+    "docs/highcountry/ARCHITECTURE-AND-AUTHORITY.md",
+    "docs/highcountry/FILE-INVENTORY-20261009.json",
+    "docs/highcountry/README.md",
+    "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md"
+  ],
+  "checks": {
+    "references": "PASS",
+    "inventoryHashes": "PASS",
+    "documentationOnlyDiff": "PASS",
+    "patchWhitespace": "PASS",
+    "cleanImplementationHead": "PASS",
+    "accessSdkRegressions": "28 passed, 0 failed, 0 skipped"
+  },
+  "commands": [
+    "git diff --check HEAD^ HEAD",
+    "node --test clients/highcountry-access-v1/test/*.test.js packages/420-gaming-sdk/test/*.test.js",
+    "local Python reference/path/hash/scope verification"
+  ],
+  "exitCriteria": {
+    "components": "PASS: component map",
+    "stateAuthority": "PASS: state map",
+    "permissionsDependencies": "PASS: principal/dependency maps",
+    "walletFreePlay": "PASS: internal/canonical market and competition separation",
+    "ordinarySavesVsAssets": "PASS: no automatic promotion; canonical registry authority preserved"
+  },
+  "ci": "No app-specific R01 documentation workflow identified; existing audit branch exclusions skip Docs/Foundry jobs. No skipped job counted as PASS. Targeted local checks authoritative for this Level 1 step.",
+  "level2": "R01.7 pending; no runtime authority dependency introduced",
+  "level3": "Deferred to complete accumulated app-phase closeout; canonical owners preserved",
+  "security": "Architecture boundary review only; no resolution claimed for remaining implementation vulnerabilities",
+  "limitations": "Service market/schema is specified, not implemented; custody, mechanics and exact schema decisions remain R01.3\u2013R01.6; whole app unqualified",
+  "blockers": [],
+  "reconciliation": "Current main includes Commerce merge; no relevant HC/Gaming/profile/query/SDK/frozen-map path changes since branch base. Branch remains unreconciled; final merge-candidate reconciliation deferred to Level 3.",
+  "next": "R01.3 \u2014 Types and units",
+  "nodeOutput": "\u2714 guest can play core gameplay with no wallet prompt (0.841419ms)\n\u2714 registration upgrades cloud save without requiring a wallet (0.157948ms)\n\u2714 wallet-only content prompts only when that optional feature is requested (0.12594ms)\n\u2714 linked but disconnected wallet asks for reconnect at feature boundary (0.119199ms)\n\u2714 connected wallet unlocks optional web3 feature without altering base state progression (0.107211ms)\n\u2714 unknown feature classes fail closed (0.326182ms)\n\u2714 guest-only core play remains available and wallet-free (1.320501ms)\n\u2714 registration unlocks cloud save without requiring a wallet (0.319171ms)\n\u2714 wallet-only features prompt contextually rather than during routine play (0.279601ms)\n\u2714 guest migration follows consume -> bind -> apply and rejects replay (0.586574ms)\n\u2714 optional entitlement requires both wallet access and active entitlement (0.270998ms)\n\u2714 disconnect and reconnect only block wallet-only features (0.218749ms)\n\u2714 revoked routine session escalates without breaking core play (0.269717ms)\n\u2714 cross-game access requires a specific active attestation (0.177328ms)\n\u2714 wallet linkage does not change ordinary progression (0.253302ms)\n\u2714 adapter validation reports missing protocol boundaries (0.848829ms)\n\u2714 adapter validation accepts a complete game transport (1.023092ms)\n\u2714 High Country still keeps routine play wallet-free through shared SDK (1.53208ms)\n\u2714 High Country optional content preserves contextual wallet prompts (0.266983ms)\n\u2714 derives guest registered and wallet-linked states (1.215592ms)\n\u2714 core play never prompts for registration or wallet (0.301535ms)\n\u2714 registered-only feature prompts guests to register (0.174333ms)\n\u2714 wallet feature links then reconnects only at feature boundary (0.17952ms)\n\u2714 client scopes every adapter call to one game id (0.818855ms)\n\u2714 client rejects adapter results explicitly scoped to another game (0.459894ms)\n\u2714 migration adapter failure is not automatically replayed (0.681057ms)\n\u2714 entitlement reads are not cached across revocation (0.285811ms)\n\u2714 missing adapters fail closed (0.324168ms)\n\u2139 tests 28\n\u2139 suites 0\n\u2139 pass 28\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 112.496036\n"
+}

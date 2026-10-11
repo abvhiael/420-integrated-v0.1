@@ -1,0 +1,47 @@
+name: High Country R03.2 Level 1 Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/highcountry/harvest/**'
+      - 'contracts/test/highcountry/unit/cultivation/HarvestScoring.t.sol'
+      - '.github/workflows/highcountry-r03-2.yml'
+      - 'docs/highcountry/R03.2-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r03-2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_SRC: src/highcountry
+      FOUNDRY_TEST: test/highcountry
+      FOUNDRY_SCRIPT: script/highcountry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Check implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build affected High Country contracts
+        working-directory: contracts
+        run: forge build src/highcountry --sizes
+      - name: Format scoring and affected harvest code
+        working-directory: contracts
+        run: forge fmt --check src/highcountry/harvest/HarvestEngine.sol src/highcountry/harvest/HarvestScoring.sol test/highcountry/unit/cultivation/HarvestScoring.t.sol
+      - name: High Country security lint
+        working-directory: contracts
+        run: forge lint src/highcountry --severity high med low
+      - name: Scoring and rounding boundary tests
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/HarvestScoring.t.sol' -vv
+      - name: Harvest admission regression
+        working-directory: contracts
+        run: forge test --match-path 'test/highcountry/unit/cultivation/CultivationEngine.t.sol' -vv
+      - name: Canonical source verifier
+        run: python3 scripts/highcountry/verify-r01.py

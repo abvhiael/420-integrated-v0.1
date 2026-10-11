@@ -1,7 +1,7 @@
 {
   "step": "C04.9",
   "canonical": "Activation impact procedure for pending orders and cached guidance; stop/reassess/return handling belongs to DOOBr, with immutable previous decision evidence.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "2e8083f020bef8395dd96a35109833be33286818",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -26,7 +26,13 @@
     "retained Compliance app-specific tests"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38160881362,
+    "job_id": 114533352040,
+    "conclusion": "success",
+    "successful_steps": 56,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "limitations": [
     "No durable original receipt archive or live DOOBr mutation adapter",
@@ -44,5 +50,6 @@
   ],
   "level2": "At canonical app milestone",
   "level3": "C08.5",
-  "next_canonical": "C04.10 — Approved policy corrections and supersession; rollback may restore only a currently lawful, valid approved version. Preserve the historical error record."
+  "next_canonical": "C04.10 — Approved policy corrections and supersession; rollback may restore only a currently lawful, valid approved version. Preserve the historical error record.",
+  "external_acceptance": "Durable original receipts, real DOOBr state transitions and Travel cache consumers remain C09/C10 gates"
 }

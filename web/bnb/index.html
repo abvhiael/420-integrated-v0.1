@@ -547,6 +547,32 @@ async function loadHostWorkspace(){
  }
  }catch(error){details.textContent=error.message;}
  });
+ if(property.owner){
+ const delegation=document.createElement("form");
+ const grantee=document.createElement("input");grantee.required=true;grantee.maxLength=160;
+ grantee.placeholder="Verified 420Identity subject";grantee.setAttribute("aria-label","Manager subject");
+ const cap=document.createElement("select");cap.setAttribute("aria-label","Manager capability");
+ for(const permission of ["view_reservations","handle_requests","edit_calendar","edit_listing"]){
+ const option=document.createElement("option");option.value=permission;option.textContent=permission;cap.append(option);
+ }
+ const days=document.createElement("input");days.type="number";days.min=1;days.max=90;days.value=7;
+ days.setAttribute("aria-label","Manager access duration in days");
+ const grant=document.createElement("button");grant.type="submit";grant.textContent="Grant scoped manager access";
+ const feedback=document.createElement("p");feedback.setAttribute("role","status");
+ delegation.append(grantee,cap,days,grant,feedback);
+ delegation.addEventListener("submit",async event=>{
+ event.preventDefault();
+ const period=Number(days.value);
+ if(!Number.isInteger(period)||period<1||period>90){feedback.textContent="Choose 1–90 days.";return;}
+ const expires_at=new Date(Date.now()+period*86400000).toISOString();
+ const response=await fetch("/v1/bnb/account/properties/"+encodeURIComponent(property.id)+"/managers",{
+ method:"POST",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({subject:grantee.value,capability:cap.value,expires_at})});
+ feedback.textContent=response.ok?"Manager access granted. No financial authority.":
+ "Delegation denied ("+response.status+"). Independent ownership authorization is required.";
+ });
+ article.append(delegation);
+ }
  article.append(title,open,details);view.append(article);
  }
  }catch(error){view.textContent=error.message;}

@@ -1052,6 +1052,16 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
                 "receipt_finalized":state=="finalized"}
             return client.post(route,json=body,headers=signed(api.PayDisbursementInput(**body),
                 "disbursement",extras))
+        # No host payout before fulfillment even with a valid Pay-signed assertion.
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""UPDATE bnb_hold SET period=tstzrange(
+                now()+interval '5 days',now()+interval '7 days','[)')
+                WHERE id=%s""",(hold.json()["id"],))
+        assert event("host",1,"host-wallet","host-too-early").status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""UPDATE bnb_hold SET period=tstzrange(
+                now()-interval '3 days',now()-interval '2 days','[)')
+                WHERE id=%s""",(hold.json()["id"],))
         assert event("refund",200,"guest-payer-wallet","refund-1").status_code==202
         assert event("refund",150,"guest-payer-wallet","refund-2").status_code==202
         assert event("host",600,"host-wallet","host-payout-1").status_code==202
@@ -1074,6 +1084,12 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
         assert view.json()["remaining_liability"]=="0"
         assert view.json()["bnb_custody"] is False
         assert client.get(f"/v1/bnb/reservations/{rid}/settlement").status_code==401
+        failure={"reservation_id":str(rid),"pay_invoice_id":"invoice-bnb27",
+                 "pay_attempt_id":"attempt-bnb27","failure_code":"settlement_failed"}
+        assert client.post("/v1/bnb/internal/pay/failures",json=failure).status_code==401
+        assert client.post("/v1/bnb/internal/pay/failures",json=failure,headers=signed(
+            api.PayFailureInput(**failure),"failure",{
+            "pay_attempt_id":"attempt-bnb27","failure_code":"settlement_failed"})).status_code==409
     finally:
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_pay_disbursement_event WHERE pay_operation_id LIKE 'refund-%' OR pay_operation_id LIKE 'host-%' OR pay_operation_id LIKE 'developer-%'")

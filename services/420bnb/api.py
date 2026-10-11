@@ -1116,9 +1116,7 @@ def revise_calendar_block(property_id:str,block_id:str,payload:CalendarBlockInpu
 def property_calendar(property_id:str,authorization:str|None=Header(None)):
     subject=active_subject(authorization)
     with db() as c:
-        if not c.execute("SELECT 1 FROM bnb_property WHERE id=%s AND host_subject=%s",
-                         (property_id,subject)).fetchone():
-            raise HTTPException(404,"NOT_FOUND")
+        host_scope(c,property_id,subject,"edit_calendar")
         rows=c.execute("""SELECT id,unit_id,lower(period),upper(period),reason
             FROM bnb_block WHERE property_id=%s ORDER BY lower(period) LIMIT 500""",
             (property_id,)).fetchall()

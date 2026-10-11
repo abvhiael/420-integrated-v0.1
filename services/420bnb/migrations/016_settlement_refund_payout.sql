@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS bnb_settlement_split (
  retained_amount numeric(78,0) NOT NULL CHECK(retained_amount>=0),
  policy_version text NOT NULL,
  canonical_split_id text NOT NULL UNIQUE,
+ payload_digest text NOT NULL CHECK(length(payload_digest)=64),
  created_at timestamptz NOT NULL DEFAULT now(),
  CHECK(host_amount+platform_amount+developer_amount+retained_amount=captured_amount)
 );

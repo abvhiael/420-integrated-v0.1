@@ -1386,7 +1386,7 @@ def pay_disbursement(payload:PayDisbursementInput,x_pay_authority_proof:str|None
     if (proof.get("economic_event_verified") is not True or
         proof.get("pay_operation_id")!=payload.pay_operation_id or
         proof.get("pay_event_id")!=payload.event_id or
-        proof.get("recipient")!=payload.recipient):
+        proof.get("pay_beneficiary_verified") is not True):
         raise HTTPException(403,"PAY_DISBURSEMENT_AUTHORITY_REQUIRED")
     if payload.state=="finalized":
         if not payload.receipt_hash:raise HTTPException(422,"FINAL_RECEIPT_REQUIRED")

@@ -1,0 +1,47 @@
+{
+  "step": "C05.3",
+  "canonical": "Location/Maps applicability adapter; private exact addresses only where required, coarse public region output and no GPS-only proof of legal eligibility.",
+  "status": "PENDING_LEVEL1_CI",
+  "qualification_level": 1,
+  "implementation_sha": "fd3bd1d670b9e9c7402ba58581f3575bb9cd46d0",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/c05_3_location_adapter.go",
+    "services/complianceauth/c05_3_location_adapter_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C05.3-LOCATION-MAPS-APPLICABILITY.md"
+  ],
+  "checks": [
+    "TestC053LocationMapsPrivacyAndAuthority with Go race",
+    "retained app-specific Compliance CI"
+  ],
+  "ci": {
+    "status": "PENDING"
+  },
+  "requirements": [
+    "private trusted Location/Maps evidence resolver",
+    "tenant and operation-bound authorized place associations",
+    "exact address evidence required only when stage requires",
+    "coarse public region without private address or identifiers",
+    "reject GPS-only legal eligibility, source staleness and provider outages"
+  ],
+  "limitations": [
+    "Real authorized 420Location / 420Maps resolver is not deployed",
+    "Real legal geofencing, revocation and multi-service acceptance deferred"
+  ],
+  "deferred_testnet": [
+    "C09.5 trusted source and place identity integration",
+    "C09.7 adversarial stale/withdrawal/replay",
+    "C09.8 420Travel and 420Maps consumers",
+    "C09.9 jurisdiction approval"
+  ],
+  "deferred_production": [
+    "C10.6 stage and map privacy enforcement",
+    "C10.7 go/no-go"
+  ],
+  "level2": "C05.12",
+  "level3": "C08.5",
+  "next_canonical": "C05.4 — DOOBr order acceptance, pickup/dispatch and handover checks; prevent bypass through retries, alternate endpoints, mobile offline queues or operator actions."
+}

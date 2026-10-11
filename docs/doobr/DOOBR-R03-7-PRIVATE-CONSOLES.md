@@ -9,6 +9,11 @@
 - `web/doobr-private/index.html` provides separate operator, safety, compliance and audit sections as an **offline preview**, no forms, no client data, no public deployment, no usable commands. It is intentionally not part of the public site static build.
 - Tests `test_console_cases.py`, `test_private_console.py` and an exact-SHA Level 1 workflow check separation, stale/replayed revision, denied/missing external authority and unverified execution. The existing earlier `review_dual_control` remains a read-only legacy verifier using OPERATOR grants; it is **not an approval path** and must not be substituted for the durable service.
 
+## Follow-up authenticated private API and authority boundary
+- `doobr/private_api.py` now offers strictly allowlisted server-side case command dispatch requiring trusted ingress assertions for MFA, CSRF and origin verification and an authenticated token. This is not a running HTTP API: the trusted ingress must be implemented, tested and deployed before exposing these operations. Browser-supplied booleans are not valid transport attestations.
+- `doobr/private_authority.py` provides an always-denying default and a server-injected verifier contract. No live signed-decision validator or external 420Compliance/420Identity credentials have been supplied or connected. Do not mistake injection of a positive fixture for live acceptance.
+- `doobr/storage/tests/test_private_api.py` provides denial tests, and the R03.7 workflow includes these tests.
+
 ## Remaining prerequisites — no invented live authority
 - Independently connected, deployed and verified 420Identity/Verify/Registry issuer and role grant/revocation feed; 420Compliance versioned policy and safety/incident authority with live credentials, TLS/mTLS, rotation, revocation and audit ownership.
 - Actual private API with authenticated HTTP endpoints and operator, safety and compliance browser sessions; this offline preview cannot manipulate cases. Integrate frontend with trusted API only after its contract and security review, not through direct DB/browser access.

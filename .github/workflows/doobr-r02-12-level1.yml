@@ -41,7 +41,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Compile
-        run: python3 -m py_compile doobr/operations.py doobr/audit_verify.py doobr/storage/tests/test_pg_operations.py\n          bash -n doobr/ops/backup_encrypted.sh doobr/ops/restore_isolated.sh
+        run: |
+          python3 -m py_compile doobr/operations.py doobr/audit_verify.py doobr/storage/tests/test_pg_operations.py
+          bash -n doobr/ops/backup_encrypted.sh doobr/ops/restore_isolated.sh
       - name: Install PostgreSQL client
         run: python3 -m pip install 'psycopg[binary]==3.2.4'
       - name: Canonical migrations 0001-0011

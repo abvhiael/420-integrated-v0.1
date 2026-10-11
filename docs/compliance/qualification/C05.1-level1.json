@@ -1,7 +1,7 @@
 {
   "step": "C05.1",
   "canonical": "Versioned authenticated evaluation API, public guidance API, policy-status API and SDK; bounded pagination, schema validation and compatibility rules.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "7bce2fc054645b0e7da04a829614e497c36398d3",
   "main_base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -20,7 +20,13 @@
     "compatibility via versioned paths and negative unknown-v2 tests"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38164244770,
+    "job_id": 114543372729,
+    "conclusion": "success",
+    "successful_steps": 60,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "level2": "C05.12",
   "level3": "C08.5",
@@ -29,5 +35,6 @@
     "No service-wide rate limiting or production API gateway acceptance",
     "No live legally authorized policy supplied by synthetic fixtures"
   ],
-  "next_canonical": "C05.2 — Identity/Verify/Registry adapters with real configured provider boundaries, revocation, private evidence references and fail-closed errors."
+  "next_canonical": "C05.2 — Identity/Verify/Registry adapters with real configured provider boundaries, revocation, private evidence references and fail-closed errors.",
+  "external_acceptance": "Identity/Verify/Registry real providers, live authentication and deployed consumer testing remain C05.2 and C09/C10 gates"
 }

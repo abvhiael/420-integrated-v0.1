@@ -11,7 +11,21 @@ permissions:
 jobs:
   console:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 16
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: doobrtest
+          POSTGRES_PASSWORD: local_ci_only
+          POSTGRES_DB: doobrtest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U doobrtest -d doobrtest"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,6 +45,20 @@ jobs:
           python3 -m unittest discover -s doobr/storage/tests -p test_private_api.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_private_console.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_retailer_queue.py -v
+      - name: PostgreSQL 16 migration RLS smoke
+        env:
+          PGPASSWORD: local_ci_only
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: doobrtest
+          PGDATABASE: doobrtest
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          psql -v ON_ERROR_STOP=1 -c 'CREATE SCHEMA doobr_private'
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/migrations/0007_private_console_cases.sql
+          psql -v ON_ERROR_STOP=1 -c "SELECT relname,relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname IN ('console_cases','console_case_events') AND relrowsecurity AND relforcerowsecurity" | tee /tmp/rls.txt
+          grep -q console_cases /tmp/rls.txt
+          grep -q console_case_events /tmp/rls.txt
       - name: Verify exact SHA after
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}

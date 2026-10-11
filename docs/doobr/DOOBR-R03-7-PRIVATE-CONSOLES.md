@@ -14,6 +14,12 @@
 - `doobr/private_authority.py` provides an always-denying default and a server-injected verifier contract. No live signed-decision validator or external 420Compliance/420Identity credentials have been supplied or connected. Do not mistake injection of a positive fixture for live acceptance.
 - `doobr/storage/tests/test_private_api.py` provides denial tests, and the R03.7 workflow includes these tests.
 
+## Additional case lifecycle and integration work
+- `close_case` adds explicit transactional REJECT and EXPIRE actions with locked compare-and-set revisions and append-only audit events. The strict private API command router exposes these operations only behind authenticated ingress checks.
+- `web/doobr-private/client.mjs` and `index.html` provide a working same-origin private API client contract for proposals, approvals, execution verification and closing cases, with CSRF headers, no-cache and denial handling. This is NOT a deployed authenticated server, and the static preview is not live.
+- The R03.7 qualification workflow runs a PostgreSQL 16 service, applies migration 0007 in an isolated schema and checks forced tenant RLS flags; this is a migration smoke test, not a production-equivalent full schema, grants, failover or restore qualification.
+- CI browser-client contract and API denial tests are included. Do not interpret mocked decisions as live signed authority acceptance.
+
 ## Remaining prerequisites — no invented live authority
 - Independently connected, deployed and verified 420Identity/Verify/Registry issuer and role grant/revocation feed; 420Compliance versioned policy and safety/incident authority with live credentials, TLS/mTLS, rotation, revocation and audit ownership.
 - Actual private API with authenticated HTTP endpoints and operator, safety and compliance browser sessions; this offline preview cannot manipulate cases. Integrate frontend with trusted API only after its contract and security review, not through direct DB/browser access.

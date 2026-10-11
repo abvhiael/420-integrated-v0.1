@@ -9,7 +9,15 @@ import (
  "time"
 )
 
-// c0311TenantBoundEvidence models an independently authenticated carrier adapter.\n// The generic evaluator delegates tenant/operation validation to this authority.\ntype c0311TenantBoundEvidence struct { delegate CredentialAuthority; tenant string }\nfunc (a c0311TenantBoundEvidence) VerifyEvidence(r EvaluationRequest, at time.Time)(Evidence,error){\n if r.TenantID!=a.tenant{return Evidence{},ErrUnauthorized}\n return a.delegate.VerifyEvidence(r,at)\n}\n\n// C03.11: replay a historical reviewed decision with its original authority
+// c0311TenantBoundEvidence models an independently authenticated carrier adapter.
+// The generic evaluator delegates tenant/operation validation to this authority.
+type c0311TenantBoundEvidence struct { delegate CredentialAuthority; tenant string }
+func (a c0311TenantBoundEvidence) VerifyEvidence(r EvaluationRequest, at time.Time)(Evidence,error){
+ if r.TenantID!=a.tenant{return Evidence{},ErrUnauthorized}
+ return a.delegate.VerifyEvidence(r,at)
+}
+
+// C03.11: replay a historical reviewed decision with its original authority
 // snapshot, then show a current publication/revocation cannot inherit that
 // historical permission. These are fixtures, not production legal approvals.
 func TestC0311EngineLevel2ReplayAndCarrierBoundary(t *testing.T) {

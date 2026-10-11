@@ -16,12 +16,18 @@ interface IHighCountryCrossGameRegistry420 {
         bool exists;
     }
 
-    function attestation(bytes32 attestationId) external view returns (Attestation memory);
-    function isActive(bytes32 attestationId) external view returns (bool);
+    function attestation(
+        bytes32 attestationId
+    ) external view returns (Attestation memory);
+    function isActive(
+        bytes32 attestationId
+    ) external view returns (bool);
 }
 
 interface IHighCountryGamingProfileBinding420 {
-    function gameProfileIdOfGrower(uint64 growerProfileId) external view returns (bytes32);
+    function gameProfileIdOfGrower(
+        uint64 growerProfileId
+    ) external view returns (bytes32);
 }
 
 library HighCountryCrossGameIds420 {
@@ -30,11 +36,12 @@ library HighCountryCrossGameIds420 {
     bytes32 internal constant SUBJECT_STRAIN_DISCOVERY = keccak256("420/HC/CROSS_GAME/STRAIN_DISCOVERY/V1");
     bytes32 internal constant SUBJECT_SEASONAL_ACHIEVEMENT = keccak256("420/HC/CROSS_GAME/SEASONAL_ACHIEVEMENT/V1");
 
-    function attestationId(bytes32 profileId, bytes32 subjectType, bytes32 subjectId, bytes32 payloadHash)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function attestationId(
+        bytes32 profileId,
+        bytes32 subjectType,
+        bytes32 subjectId,
+        bytes32 payloadHash
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode("420/HC/CROSS_GAME/ATTESTATION/V1", profileId, subjectType, subjectId, payloadHash));
     }
 }
@@ -49,13 +56,18 @@ contract HighCountryCrossGame420 {
     error UnsupportedSubjectType();
     error CrossGameAttestationRequired();
 
-    constructor(address crossGameRegistry_, address gamingBridge_) {
+    constructor(
+        address crossGameRegistry_,
+        address gamingBridge_
+    ) {
         if (crossGameRegistry_ == address(0) || gamingBridge_ == address(0)) revert ZeroAddress();
         crossGameRegistry = IHighCountryCrossGameRegistry420(crossGameRegistry_);
         gamingBridge = IHighCountryGamingProfileBinding420(gamingBridge_);
     }
 
-    function isSupportedSubjectType(bytes32 subjectType) public pure returns (bool) {
+    function isSupportedSubjectType(
+        bytes32 subjectType
+    ) public pure returns (bool) {
         return subjectType == HighCountryCrossGameIds420.SUBJECT_GLOBAL_420_CUP
             || subjectType == HighCountryCrossGameIds420.SUBJECT_BREEDER_MILESTONE
             || subjectType == HighCountryCrossGameIds420.SUBJECT_STRAIN_DISCOVERY
@@ -86,11 +98,8 @@ contract HighCountryCrossGame420 {
         if (!crossGameRegistry.isActive(attestationId)) return false;
 
         IHighCountryCrossGameRegistry420.Attestation memory a = crossGameRegistry.attestation(attestationId);
-        return a.exists
-            && a.sourceGameId == HighCountryGamingIds.GAME_ID
-            && a.profileId == profileId
-            && a.subjectType == expectedSubjectType
-            && a.subjectId == expectedSubjectId
+        return a.exists && a.sourceGameId == HighCountryGamingIds.GAME_ID && a.profileId == profileId
+            && a.subjectType == expectedSubjectType && a.subjectId == expectedSubjectId
             && a.payloadHash == expectedPayloadHash;
     }
 
@@ -102,12 +111,8 @@ contract HighCountryCrossGame420 {
         bytes32 expectedPayloadHash
     ) external view {
         if (!hasScopedAttestation(
-            growerProfileId,
-            attestationId,
-            expectedSubjectType,
-            expectedSubjectId,
-            expectedPayloadHash
-        )) revert CrossGameAttestationRequired();
+                growerProfileId, attestationId, expectedSubjectType, expectedSubjectId, expectedPayloadHash
+            )) revert CrossGameAttestationRequired();
     }
 
     function global420CupSubject() external pure returns (bytes32) {

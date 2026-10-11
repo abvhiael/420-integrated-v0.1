@@ -16,21 +16,27 @@ import { MockCapabilityRegistry } from "../mocks/MockCapabilityRegistry.sol";
 contract WorldGenesisInvariantHandler {
     RegionRegistry public immutable regions;
 
-    constructor(RegionRegistry regions_) {
+    constructor(
+        RegionRegistry regions_
+    ) {
         regions = regions_;
     }
 
-    function stepAttemptRegionMutation(uint16 rawId, uint256 salt) external {
+    function stepAttemptRegionMutation(
+        uint16 rawId,
+        uint256 salt
+    ) external {
         uint16 regionId = uint16((uint256(rawId) % 3) + 1);
-        address(regions).call(
-            abi.encodeWithSelector(
-                regions.registerFoundingRegion.selector,
-                regionId,
-                keccak256(abi.encode("mutated:metadata", salt)),
-                keccak256(abi.encode("mutated:climate", salt)),
-                keccak256(abi.encode("mutated:ruleset", salt))
-            )
-        );
+        address(regions)
+            .call(
+                abi.encodeWithSelector(
+                    regions.registerFoundingRegion.selector,
+                    regionId,
+                    keccak256(abi.encode("mutated:metadata", salt)),
+                    keccak256(abi.encode("mutated:climate", salt)),
+                    keccak256(abi.encode("mutated:ruleset", salt))
+                )
+            );
     }
 }
 
@@ -49,15 +55,42 @@ contract WorldGenesisInvariantTest is InvariantTarget420 {
         regions = new RegionRegistry(address(authorization), address(genesis));
         readiness = new WorldGenesisReadiness(address(genesis), address(regions));
 
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("inv:roots"));
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("inv:finalize"));
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_SET_ROOTS,
+            genesis.ADMIN_SCOPE(),
+            keccak256("inv:roots")
+        );
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_FINALIZE,
+            genesis.ADMIN_SCOPE(),
+            keccak256("inv:finalize")
+        );
         _grantRegion(address(this), 1);
         _grantRegion(address(this), 2);
         _grantRegion(address(this), 3);
 
-        regions.registerFoundingRegion(1, FoundingRegions.REGION_ONE_METADATA, FoundingRegions.REGION_ONE_CLIMATE, FoundingRegions.REGION_ONE_RULESET);
-        regions.registerFoundingRegion(2, FoundingRegions.REGION_TWO_METADATA, FoundingRegions.REGION_TWO_CLIMATE, FoundingRegions.REGION_TWO_RULESET);
-        regions.registerFoundingRegion(3, FoundingRegions.REGION_THREE_METADATA, FoundingRegions.REGION_THREE_CLIMATE, FoundingRegions.REGION_THREE_RULESET);
+        regions.registerFoundingRegion(
+            1,
+            FoundingRegions.REGION_ONE_METADATA,
+            FoundingRegions.REGION_ONE_CLIMATE,
+            FoundingRegions.REGION_ONE_RULESET
+        );
+        regions.registerFoundingRegion(
+            2,
+            FoundingRegions.REGION_TWO_METADATA,
+            FoundingRegions.REGION_TWO_CLIMATE,
+            FoundingRegions.REGION_TWO_RULESET
+        );
+        regions.registerFoundingRegion(
+            3,
+            FoundingRegions.REGION_THREE_METADATA,
+            FoundingRegions.REGION_THREE_CLIMATE,
+            FoundingRegions.REGION_THREE_RULESET
+        );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
 
@@ -84,7 +117,10 @@ contract WorldGenesisInvariantTest is InvariantTarget420 {
         require(readiness.worldReady(), "HC-INV-WORLD-005: world readiness regressed");
     }
 
-    function _grantRegion(address principal, uint16 regionId) private {
+    function _grantRegion(
+        address principal,
+        uint16 regionId
+    ) private {
         _grant(
             principal,
             ModuleIds.REGION_REGISTRY,
@@ -94,7 +130,13 @@ contract WorldGenesisInvariantTest is InvariantTarget420 {
         );
     }
 
-    function _grant(address principal, bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId) private {
+    function _grant(
+        address principal,
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: principal,
             componentId: moduleId,

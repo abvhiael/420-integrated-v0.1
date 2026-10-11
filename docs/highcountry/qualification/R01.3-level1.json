@@ -1,0 +1,39 @@
+{
+  "step": "R01.3 \u2014 Types and units",
+  "status": "COMPLETE",
+  "qualificationLevel": 1,
+  "implementationSha": "9710ebc6aead1bec862b67661c5c83d80ee537a0",
+  "mainSha": "0ec695481fc84e6066aeae50baf6e0fd3c7f8731",
+  "baseSha": "3de7a0d87600fa30ec6090c1351a11d36ba59de9",
+  "pr": 593,
+  "branch": "review/high-country-complete-audit-20261009",
+  "filesChanged": [
+    "docs/highcountry/FILE-INVENTORY-20261009.json",
+    "docs/highcountry/README.md",
+    "docs/highcountry/RECONCILIATION-AND-BUILDOUT-ROADMAP.md",
+    "docs/highcountry/TYPES-AND-UNITS.md"
+  ],
+  "checks": {
+    "sourceEnumCatalogues": "PASS: 19 enums",
+    "sourceTypeCatalogue": "PASS: 53 types",
+    "temperatureConversion": "PASS: 3001 exact roundtrips plus rejection boundaries; specification math verification, not production adapter test",
+    "accessSdk": "28 PASS, 0 fail, 0 skip",
+    "referencesInventory": "PASS",
+    "whitespaceDocOnlyCleanHead": "PASS"
+  },
+  "exitCriteria": {
+    "canonicalSchema": "PASS: highcountry-state-v1 envelope, integer/ID/enum/time/control representations",
+    "lifecycle": "PASS: explicit exact/lossy projections and prohibited reverse conversions",
+    "units": "PASS: exact centi/milli mapping; normalized vs physical controls separated",
+    "access": "PASS: three-client/four-contract mapping; connectivity/evidence kept separate",
+    "compatibilityMigration": "PASS: ABI/storage unchanged; source decode/version/range validation and no ambiguous promotion"
+  },
+  "security": "No permission widening or automatic authority promotion; unknown schema/enum, precision loss and invalid conversions reject; runtime adapters remain planned",
+  "ci": "Existing audit branch excludes broad Docs/Foundry jobs; no R01 app-specific workflow identified. Targeted local checks executed, no skipped CI counted as PASS.",
+  "level2": "R01.7 pending",
+  "level3": "Deferred to accumulated phase closeout; no full inventory rerun",
+  "limitations": "Schema specification only; production adapter/runtime validation and deployed acceptance remain R05/R09; R01.6 economic units pending by ownership of that step",
+  "blockers": [],
+  "next": "R01.4 \u2014 Migration boundaries",
+  "nodeOutput": "\u2714 guest can play core gameplay with no wallet prompt (1.16097ms)\n\u2714 registration upgrades cloud save without requiring a wallet (0.217538ms)\n\u2714 wallet-only content prompts only when that optional feature is requested (0.185669ms)\n\u2714 linked but disconnected wallet asks for reconnect at feature boundary (0.223317ms)\n\u2714 connected wallet unlocks optional web3 feature without altering base state progression (0.193722ms)\n\u2714 unknown feature classes fail closed (0.500294ms)\n\u2714 guest-only core play remains available and wallet-free (1.41971ms)\n\u2714 registration unlocks cloud save without requiring a wallet (0.319932ms)\n\u2714 wallet-only features prompt contextually rather than during routine play (0.274964ms)\n\u2714 guest migration follows consume -> bind -> apply and rejects replay (0.624812ms)\n\u2714 optional entitlement requires both wallet access and active entitlement (0.315385ms)\n\u2714 disconnect and reconnect only block wallet-only features (0.236125ms)\n\u2714 revoked routine session escalates without breaking core play (0.276727ms)\n\u2714 cross-game access requires a specific active attestation (0.225249ms)\n\u2714 wallet linkage does not change ordinary progression (0.236977ms)\n\u2714 adapter validation reports missing protocol boundaries (1.038045ms)\n\u2714 adapter validation accepts a complete game transport (0.836561ms)\n\u2714 High Country still keeps routine play wallet-free through shared SDK (1.00864ms)\n\u2714 High Country optional content preserves contextual wallet prompts (0.161304ms)\n\u2714 derives guest registered and wallet-linked states (0.785694ms)\n\u2714 core play never prompts for registration or wallet (0.232971ms)\n\u2714 registered-only feature prompts guests to register (0.122154ms)\n\u2714 wallet feature links then reconnects only at feature boundary (0.129635ms)\n\u2714 client scopes every adapter call to one game id (0.538812ms)\n\u2714 client rejects adapter results explicitly scoped to another game (0.436067ms)\n\u2714 migration adapter failure is not automatically replayed (0.662008ms)\n\u2714 entitlement reads are not cached across revocation (0.174894ms)\n\u2714 missing adapters fail closed (0.29848ms)\n\u2139 tests 28\n\u2139 suites 0\n\u2139 pass 28\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 108.812496\n"
+}

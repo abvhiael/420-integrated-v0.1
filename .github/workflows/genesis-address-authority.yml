@@ -53,7 +53,7 @@ jobs:
   # Genesis owns address/namespace/predeploy authority qualification only.
   # Canonical full Foundry qualification is owned once by Solidity Contracts.
   cross-manifest-authority:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009'
+    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact qualification head

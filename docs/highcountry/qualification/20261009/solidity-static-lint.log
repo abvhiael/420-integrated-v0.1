@@ -1,0 +1,290 @@
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/rules/RulesetRegistry.sol:52:31
+   │
+52 │         uint64 registeredAt = uint64(block.timestamp);
+   │                               ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/highcountry/player/HighCountrySessionAccess420.sol:158:21
+    │
+158 │         if (address(registry) == address(0) || address(registry) != authorization.capabilityRegistry()) return false;
+    │                     ━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/highcountry/player/HighCountrySessionAccess420.sol:131:34
+    │
+131 │         if (accountEpoch == 0 || keyEpoch != accountEpoch) return false;
+    │                                  ━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/highcountry/player/HighCountrySessionAccess420.sol:131:13
+    │
+131 │         if (accountEpoch == 0 || keyEpoch != accountEpoch) return false;
+    │             ━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/highcountry/player/HighCountrySessionAccess420.sol:138:13
+    │
+138 │         if (componentId != SmartAccountScopes420.accountComponentId(smartAccount)) return false;
+    │             ━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/highcountry/player/HighCountrySessionAccess420.sol:146:13
+    │
+146 │             scopeHash
+    │             ━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/highcountry/player/HighCountrySessionAccess420.sol:168:13
+    │
+168 │         if (grantId == bytes32(0)) return false;
+    │             ━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/highcountry/breeding/BreedingEngine.sol:129:9
+    │
+129 │         emit BreedingRequested(breedingEventId, parentA, parentB, childGenomeId, requestId);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/player/GrowerProfileRegistry.sol:85:24
+   │
+85 │             createdAt: uint64(block.timestamp),
+   │                        ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/land/PublicCultivationAccess.sol:75:44
+   │
+75 │         publicCapacityOnParcel[parcelId] = uint32(nextPublicCapacity);
+   │                                            ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/highcountry/breeding/BreedingEngine.sol:158:9
+    │
+158 │         emit BreedingFinalized(breedingEventId, e.childGenomeId, entropy);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/land/PublicCultivationAccess.sol:96:34
+   │
+96 │         plot.allocatedCapacity = uint32(nextAllocated);
+   │                                  ━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/player/HighCountryMigration420.sol:163:24
+    │
+163 │             appliedAt: uint64(block.timestamp),
+    │                        ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/access/GuestProfileMigration.sol:110:24
+    │
+110 │             claimedAt: uint64(block.timestamp),
+    │                        ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/genesis/GenesisRegistry.sol:71:31
+   │
+71 │         emit GenesisFinalized(uint64(block.timestamp));
+   │                               ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/cultivation/PlantRegistry.sol:111:13
+    │
+111 │             uint64(block.timestamp),
+    │             ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/cultivation/PlantRegistry.sol:112:13
+    │
+112 │             uint64(block.timestamp),
+    │             ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/highcountry/cultivation/PlantRegistry.sol:129:34
+    │
+129 │             if (duration == 0 || block.timestamp < uint256(p.lastAdvancedAt) + duration) revert HCInvalidState();
+    │                                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/cultivation/PlantRegistry.sol:132:37
+    │
+132 │             _advanceAt(p, newStage, uint64(block.timestamp));
+    │                                     ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/cultivation/CultivationEngine.sol:77:24
+   │
+77 │             updatedAt: uint64(block.timestamp),
+   │                        ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/cultivation/CultivationEngine.sol:83:65
+   │
+83 │         emit EnvironmentUpdated(plantId, stressBps, qualityBps, uint64(block.timestamp));
+   │                                                                 ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/highcountry/genetics/MotherRegistry.sol:91:32
+   │
+91 │         mother.cuttingsTaken = uint32(next);
+   │                                ━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │
+   │       // casting to 'uint32' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/highcountry/cultivation/PlantRegistry.sol:144:34
+    │
+144 │             if (duration == 0 || block.timestamp < uint256(p.lastAdvancedAt) + duration) break;
+    │                                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/cultivation/CultivationEngine.sol:103:23
+    │
+103 │         s.updatedAt = uint64(block.timestamp);
+    │                       ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/highcountry/cultivation/CultivationEngine.sol:117:21
+    │
+117 │         stressBps = uint16(stress / 6);
+    │                     ━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │
+    │       // casting to 'uint16' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+

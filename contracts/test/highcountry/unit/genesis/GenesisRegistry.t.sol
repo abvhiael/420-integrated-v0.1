@@ -68,12 +68,15 @@ contract GenesisRegistryTest {
         require(!genesis.finalized(), "finalized flag changed");
     }
 
-    function _grant(bytes32 actionId, bytes32 grantId) private {
+    function _grant(
+        bytes32 actionId,
+        bytes32 grantId
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: address(this),
             componentId: ModuleIds.GENESIS_REGISTRY,
             capabilityId: actionId,
-            scopeHash: bytes32(0),
+            scopeHash: genesis.ADMIN_SCOPE(),
             perCallLimit: 0,
             periodLimit: 0,
             periodSeconds: 0,
@@ -84,7 +87,9 @@ contract GenesisRegistryTest {
         capabilityRegistry.setGrant(grantId, grant, 0);
     }
 
-    function _roots(uint256 salt) private pure returns (GenesisRoots memory) {
+    function _roots(
+        uint256 salt
+    ) private pure returns (GenesisRoots memory) {
         return GenesisRoots({
             manifestRoot: keccak256(abi.encode("manifest", salt)),
             parameterRoot: keccak256(abi.encode("parameters", salt)),

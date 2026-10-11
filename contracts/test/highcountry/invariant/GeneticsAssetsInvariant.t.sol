@@ -10,6 +10,7 @@ import { GenomeRegistry } from "../../../src/highcountry/genetics/GenomeRegistry
 import { SeedRegistry } from "../../../src/highcountry/genetics/SeedRegistry.sol";
 import { CloneRegistry } from "../../../src/highcountry/genetics/CloneRegistry.sol";
 import { MotherRegistry } from "../../../src/highcountry/genetics/MotherRegistry.sol";
+import { MockCanonicalPhenotypeSources } from "../mocks/MockCanonicalPhenotypeSources.sol";
 import { PhenotypeRegistry } from "../../../src/highcountry/genetics/PhenotypeRegistry.sol";
 import { GenesisRoots } from "../../../src/highcountry/types/HighCountryTypes.sol";
 import { InvariantTarget420 } from "../../helpers/InvariantTarget420.sol";
@@ -23,7 +24,14 @@ contract GeneticsAssetsInvariantHandler {
     bytes32 public immutable genomeId;
     bytes32 public immutable phenotypeId;
 
-    constructor(SeedRegistry seeds_, CloneRegistry clones_, MotherRegistry mothers_, PhenotypeRegistry phenotypes_, bytes32 genomeId_, bytes32 phenotypeId_) {
+    constructor(
+        SeedRegistry seeds_,
+        CloneRegistry clones_,
+        MotherRegistry mothers_,
+        PhenotypeRegistry phenotypes_,
+        bytes32 genomeId_,
+        bytes32 phenotypeId_
+    ) {
         seeds = seeds_;
         clones = clones_;
         mothers = mothers_;
@@ -32,22 +40,45 @@ contract GeneticsAssetsInvariantHandler {
         phenotypeId = phenotypeId_;
     }
 
-    function stepTransferSeed(address newOwner) external { address(seeds).call(abi.encodeWithSelector(seeds.transfer.selector, 1, newOwner)); }
-    function stepTransferClone(address newOwner) external { address(clones).call(abi.encodeWithSelector(clones.transfer.selector, 2, newOwner)); }
-    function stepTransferMother(address newOwner) external { address(mothers).call(abi.encodeWithSelector(mothers.transfer.selector, 3, newOwner)); }
-    function stepConsumeMother() external { address(mothers).call(abi.encodeWithSelector(mothers.consumeCutting.selector, 3)); }
-    function stepAttemptPhenotypeMutation(uint64 sourcePlantId, uint64 breedingEventId, uint256 salt) external {
-        address(phenotypes).call(
-            abi.encodeWithSelector(
-                phenotypes.registerPhenotype.selector,
-                phenotypeId,
-                genomeId,
-                sourcePlantId,
-                breedingEventId,
-                keccak256(abi.encode("mutated:traits", salt)),
-                keccak256(abi.encode("mutated:metadata", salt))
-            )
-        );
+    function stepTransferSeed(
+        address newOwner
+    ) external {
+        address(seeds).call(abi.encodeWithSelector(seeds.transfer.selector, 1, newOwner));
+    }
+
+    function stepTransferClone(
+        address newOwner
+    ) external {
+        address(clones).call(abi.encodeWithSelector(clones.transfer.selector, 2, newOwner));
+    }
+
+    function stepTransferMother(
+        address newOwner
+    ) external {
+        address(mothers).call(abi.encodeWithSelector(mothers.transfer.selector, 3, newOwner));
+    }
+
+    function stepConsumeMother() external {
+        address(mothers).call(abi.encodeWithSelector(mothers.consumeCutting.selector, 3));
+    }
+
+    function stepAttemptPhenotypeMutation(
+        uint64 sourcePlantId,
+        uint64 breedingEventId,
+        uint256 salt
+    ) external {
+        address(phenotypes)
+            .call(
+                abi.encodeWithSelector(
+                    phenotypes.registerPhenotype.selector,
+                    phenotypeId,
+                    genomeId,
+                    sourcePlantId,
+                    breedingEventId,
+                    keccak256(abi.encode("mutated:traits", salt)),
+                    keccak256(abi.encode("mutated:metadata", salt))
+                )
+            );
     }
 }
 
@@ -79,33 +110,140 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
         mothers = new MotherRegistry(address(auth), address(genomes));
         clones = new CloneRegistry(address(auth), address(genomes), address(mothers));
         phenotypes = new PhenotypeRegistry(address(auth), address(genomes));
+        MockCanonicalPhenotypeSources proven =
+            new MockCanonicalPhenotypeSources(address(auth), address(genomes), genomeId, phenotypeTraits, 55, 44);
+        _grant(
+            address(this),
+            ModuleIds.PHENOTYPE_REGISTRY,
+            ActionIds.PHENOTYPE_BIND_PROVENANCE,
+            phenotypes.BIND_SCOPE(),
+            keccak256("phenotype:bind"),
+            0
+        );
+        phenotypes.bindProvenanceSources(address(proven), address(proven), address(proven));
+        _grant(
+            address(this),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_BIND_CLONES,
+            mothers.BIND_SCOPE(),
+            keccak256("assets:mother:bind"),
+            0
+        );
+        mothers.bindCloneRegistry(address(clones));
 
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_SET_ROOTS, bytes32(0), keccak256("assets:roots"), 0);
-        _grant(address(this), ModuleIds.GENESIS_REGISTRY, ActionIds.GENESIS_FINALIZE, bytes32(0), keccak256("assets:finalize"), 0);
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_SET_ROOTS,
+            genesis.ADMIN_SCOPE(),
+            keccak256("assets:roots"),
+            0
+        );
+        _grant(
+            address(this),
+            ModuleIds.GENESIS_REGISTRY,
+            ActionIds.GENESIS_FINALIZE,
+            genesis.ADMIN_SCOPE(),
+            keccak256("assets:finalize"),
+            0
+        );
         genesis.setRoots(_roots());
         genesis.finalizeGenesis();
 
-        _grant(address(this), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, genomeId, keccak256("assets:genome"), 0);
+        _grant(
+            address(this), ModuleIds.GENOME_REGISTRY, ActionIds.GENOME_REGISTER, genomeId, keccak256("assets:genome"), 0
+        );
         genomes.registerGenome(genomeId, keccak256("hc4:assets:line"), keccak256("hc4:assets:genome:metadata"), _loci());
 
-        _grant(address(this), ModuleIds.SEED_REGISTRY, ActionIds.SEED_REGISTER, bytes32(uint256(1)), keccak256("assets:seed"), 25);
+        _grant(
+            address(this),
+            ModuleIds.SEED_REGISTRY,
+            ActionIds.SEED_REGISTER,
+            bytes32(uint256(1)),
+            keccak256("assets:seed"),
+            25
+        );
         seeds.registerSeedLot(1, genomeId, 44, address(this), 25, seedMetadata);
 
-        _grant(address(this), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_REGISTER, bytes32(uint256(3)), keccak256("assets:mother"), 3);
+        _grant(
+            address(this),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_REGISTER,
+            bytes32(uint256(3)),
+            keccak256("assets:mother"),
+            3
+        );
         mothers.registerMother(3, genomeId, address(this), 3, motherMetadata);
 
-        _grant(address(this), ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_REGISTER, bytes32(uint256(2)), keccak256("assets:clone"), 0);
+        _grant(
+            address(this),
+            ModuleIds.CLONE_REGISTRY,
+            ActionIds.CLONE_REGISTER,
+            bytes32(uint256(2)),
+            keccak256("assets:clone"),
+            0
+        );
+        _grant(
+            address(clones),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_CONSUME_CUTTING,
+            bytes32(uint256(3)),
+            keccak256("assets:clone:cut"),
+            1
+        );
         clones.registerClone(2, genomeId, 3, address(this), cloneMetadata);
 
-        _grant(address(this), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, phenotypeId, keccak256("assets:phenotype"), 0);
+        _grant(
+            address(this),
+            ModuleIds.PHENOTYPE_REGISTRY,
+            ActionIds.PHENOTYPE_REGISTER,
+            phenotypeId,
+            keccak256("assets:phenotype"),
+            0
+        );
         phenotypes.registerPhenotype(phenotypeId, genomeId, 55, 44, phenotypeTraits, phenotypeMetadata);
 
         handler = new GeneticsAssetsInvariantHandler(seeds, clones, mothers, phenotypes, genomeId, phenotypeId);
-        _grant(address(handler), ModuleIds.SEED_REGISTRY, ActionIds.SEED_TRANSFER, bytes32(uint256(1)), keccak256("assets:seed:transfer"), 25);
-        _grant(address(handler), ModuleIds.CLONE_REGISTRY, ActionIds.CLONE_TRANSFER, bytes32(uint256(2)), keccak256("assets:clone:transfer"), 0);
-        _grant(address(handler), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_TRANSFER, bytes32(uint256(3)), keccak256("assets:mother:transfer"), 0);
-        _grant(address(handler), ModuleIds.MOTHER_REGISTRY, ActionIds.MOTHER_CONSUME_CUTTING, bytes32(uint256(3)), keccak256("assets:mother:consume"), 1);
-        _grant(address(handler), ModuleIds.PHENOTYPE_REGISTRY, ActionIds.PHENOTYPE_REGISTER, phenotypeId, keccak256("assets:phenotype:duplicate"), 0);
+        _grant(
+            address(handler),
+            ModuleIds.SEED_REGISTRY,
+            ActionIds.SEED_TRANSFER,
+            bytes32(uint256(1)),
+            keccak256("assets:seed:transfer"),
+            25
+        );
+        _grant(
+            address(handler),
+            ModuleIds.CLONE_REGISTRY,
+            ActionIds.CLONE_TRANSFER,
+            bytes32(uint256(2)),
+            keccak256("assets:clone:transfer"),
+            0
+        );
+        _grant(
+            address(handler),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_TRANSFER,
+            bytes32(uint256(3)),
+            keccak256("assets:mother:transfer"),
+            0
+        );
+        _grant(
+            address(handler),
+            ModuleIds.MOTHER_REGISTRY,
+            ActionIds.MOTHER_CONSUME_CUTTING,
+            bytes32(uint256(3)),
+            keccak256("assets:mother:consume"),
+            1
+        );
+        _grant(
+            address(handler),
+            ModuleIds.PHENOTYPE_REGISTRY,
+            ActionIds.PHENOTYPE_REGISTER,
+            phenotypeId,
+            keccak256("assets:phenotype:duplicate"),
+            0
+        );
         targetContract(address(handler));
     }
 
@@ -131,7 +269,10 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
         require(mother.genomeId == genomeId, "HC-INV-GENETICS-012: mother genome mutated");
         require(mother.metadataHash == motherMetadata, "HC-INV-GENETICS-012: mother metadata mutated");
         require(mother.cuttingsTaken <= mother.maxCuttings, "HC-INV-GENETICS-012: cutting budget exceeded");
-        require(mother.retired == (mother.cuttingsTaken == mother.maxCuttings), "HC-INV-GENETICS-012: retirement state inconsistent");
+        require(
+            mother.retired == (mother.cuttingsTaken == mother.maxCuttings),
+            "HC-INV-GENETICS-012: retirement state inconsistent"
+        );
     }
 
     function invariant_HC_INV_GENETICS_013_PhenotypeProvenanceIsPermanent() public view {
@@ -143,7 +284,14 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
         require(phenotype.metadataHash == phenotypeMetadata, "HC-INV-GENETICS-013: metadata mutated");
     }
 
-    function _grant(address principal, bytes32 moduleId, bytes32 actionId, bytes32 scopeHash, bytes32 grantId, uint256 amount) private {
+    function _grant(
+        address principal,
+        bytes32 moduleId,
+        bytes32 actionId,
+        bytes32 scopeHash,
+        bytes32 grantId,
+        uint256 amount
+    ) private {
         ICapabilityRegistry420.CapabilityGrant memory grant = ICapabilityRegistry420.CapabilityGrant({
             principal: principal,
             componentId: moduleId,
@@ -160,7 +308,9 @@ contract GeneticsAssetsInvariantTest is InvariantTarget420 {
     }
 
     function _loci() private pure returns (bytes32[28] memory loci) {
-        for (uint256 i = 0; i < 28; ++i) loci[i] = keccak256(abi.encode("hc4:assets:locus", i));
+        for (uint256 i = 0; i < 28; ++i) {
+            loci[i] = keccak256(abi.encode("hc4:assets:locus", i));
+        }
     }
 
     function _roots() private pure returns (GenesisRoots memory) {

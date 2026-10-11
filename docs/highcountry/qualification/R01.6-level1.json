@@ -1,0 +1,46 @@
+{
+  "step": "R01.6",
+  "status": "COMPLETE",
+  "qualified_document_head": "04479da8450717ed61534db959e4347f487ca8a7",
+  "main_head": "0ec695481fc84e6066aeae50baf6e0fd3c7f8731",
+  "owner_decision": {
+    "date": "2026-10-09",
+    "instruction": "adopt that baseline",
+    "scope": "Five HC-7/economy rules in GAMEPLAY-SPECIFICATION.md"
+  },
+  "checks": [
+    {
+      "name": "harvest formula and grade partition",
+      "result": "PASS",
+      "inputs": 10001,
+      "grade_counts": {
+        "D": 2500,
+        "C": 2500,
+        "B": 2500,
+        "A": 1500,
+        "S": 1001
+      }
+    },
+    {
+      "name": "published threshold vectors",
+      "result": "PASS",
+      "vectors": 11
+    },
+    {
+      "name": "rounding and maximum base vectors",
+      "result": "PASS",
+      "vectors": 2
+    },
+    {
+      "name": "source links, R04.1..14 retained assignments, adoption status and whitespace",
+      "result": "PASS"
+    }
+  ],
+  "scope": "R01.6 adopted specification only. No implemented HC-7, later-module catalogues, gameplay integration or release readiness qualified. No runtime code changed; prior foundation results retain their original SHAs.",
+  "remaining_implementation_requirements": [
+    "HC-7 exact ABI/action/event/schema implementation and real-stack tests.",
+    "Versioned later-module numerical catalogues and acceptance tests under retained R04 assignments."
+  ],
+  "next": "R01.7 Level 2 milestone qualification; not executed by this step.",
+  "qualification_policy": "Evidence-only commit inherits this exact qualified document SHA."
+}

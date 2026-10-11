@@ -29,7 +29,7 @@ func TestC041PolicyLifecycleSeparationAndReplay(t *testing.T){
  r,events:=l.Snapshot();if r.State!=LifecycleScheduled||len(events)!=3{t.Fatalf("bad event sequence %+v",r)}
  // Activate only after the scheduled clock instant.
  if err:=l.Transition(ctx,LifecycleActive,"publisher","","",now.Add(time.Minute),time.Time{},4);err!=nil{t.Fatal(err)}
- step(LifecycleSuperseded,"publisher","","policy-B",now,5,true)
+ if err:=l.Transition(ctx,LifecycleSuperseded,"publisher","","policy-B",now.Add(time.Minute),time.Time{},5);err!=nil{t.Fatal(err)}
  step(LifecycleRevoked,"publisher","","",now,6,false)
  record,history:=l.Snapshot()
  if record.State!=LifecycleSuperseded||record.SupersededBy!="policy-B"||len(history)!=5{t.Fatalf("invalid terminal state %+v %+v",record,history)}

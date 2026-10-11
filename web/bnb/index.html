@@ -535,6 +535,18 @@ async function loadHostWorkspace(){
  " · finalized payout "+item.payout_finalized+" · Pay authority only";
  else line.textContent=item.subject+" · "+item.capability+" · expires "+item.expires_at;
  details.append(line);
+ if(paths[i]==="/managers"){
+ const revoke=document.createElement("button");revoke.type="button";revoke.textContent="Revoke "+item.capability;
+ const feedback=document.createElement("p");feedback.setAttribute("role","status");
+ revoke.addEventListener("click",async()=>{
+ revoke.disabled=true;
+ const url=base+"/managers/"+encodeURIComponent(item.subject)+"/"+encodeURIComponent(item.capability);
+ const response=await fetch(url,{method:"DELETE",headers:hostHeaders(),credentials:"omit"});
+ feedback.textContent=response.ok?"Manager capability revoked.":"Revocation rejected ("+response.status+").";
+ if(!response.ok)revoke.disabled=false;
+ });
+ details.append(revoke,feedback);
+ }
  if(paths[i]==="/host-requests"&&item.state==="requested"){
  for(const decision of ["accept","decline"]){
  const button=document.createElement("button");button.type="button";

@@ -147,7 +147,7 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
 let hostProof=null;
 const hostStatus=document.querySelector("#host-status");
 function hostHeaders(){return {"authorization":"Bearer "+hostProof,"content-type":"application/json"};}
-function resetHost(){hostProof=null;document.querySelector("#host-token").value="";document.querySelector("#save-draft").disabled=true;document.querySelector("#load-drafts").disabled=true;document.querySelector("#host-drafts").replaceChildren();hostStatus.textContent="Not signed in.";}
+function resetHost(){hostProof=null;document.querySelector("#host-token").value="";document.querySelector("#save-draft").disabled=true;document.querySelector("#load-drafts").disabled=true;document.querySelector("#host-drafts").replaceChildren();document.querySelector("#saved-stays").replaceChildren();document.querySelector("#guest-reservations").replaceChildren();document.querySelector("#booking-inbox").replaceChildren();hostStatus.textContent="Not signed in.";}
 document.querySelector("#sign-out").addEventListener("click",resetHost);
 document.querySelector("#host-auth").addEventListener("submit",async event=>{
  event.preventDefault();

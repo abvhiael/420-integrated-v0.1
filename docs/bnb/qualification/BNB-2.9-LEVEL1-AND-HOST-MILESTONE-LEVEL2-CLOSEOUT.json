@@ -3,14 +3,14 @@
   "name": "Complete Host Application",
   "level1": "PASS_REPOSITORY_SIDE",
   "level2": "PASS_APP_HOST_MILESTONE",
-  "qualified_implementation_sha": "dbc3ecec72c3ec1363208f349cf0c875e0d46644",
+  "qualified_implementation_sha": "a7c770023b661e1594721bde6dcf714e736a67f3",
   "current_main_at_start": "1c509a0f054bcf9fa191f71db29d0dc87f54c528",
   "pr": 600,
   "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
   "tests": {
-    "run_id": 38106935162,
-    "job_id": 114374337852,
-    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38106935162",
+    "run_id": 38107067439,
+    "job_id": 114374712313,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38107067439",
     "status": "completed",
     "conclusion": "success",
     "failed_steps": 0,
@@ -39,22 +39,22 @@
     "External notification channel delivery and manual accessibility acceptance"
   ],
   "next_roadmap_step": "Not verified from canonical repo",
-  "verified_main_at_evidence": "6a76673f5b9daa0fbe0b844ad6f66fc6d18822e0",
+  "verified_main_at_evidence": "6d2932deb243328e1956619e10ef250a8bcc1d88",
   "app_level2": {
     "status": "PASS",
     "app_workflows_passed": 10,
     "app_workflows_failed": 0,
     "workflow_run_ids": [
-      38106935114,
-      38106935165,
-      38106935128,
-      38106935129,
-      38106935072,
-      38106935118,
-      38106935141,
-      38106935143,
-      38106935098,
-      38106935162
+      38107067361,
+      38107067417,
+      38107067464,
+      38107067398,
+      38107067406,
+      38107067473,
+      38107067368,
+      38107067421,
+      38107067380,
+      38107067439
     ]
   },
   "restrictions": [
@@ -62,5 +62,6 @@
     "In-app audit notifications are not independently delivered external notifications",
     "No finished Level 3 and no merged PR"
   ],
-  "evidence_only_commit_policy": "This evidence/doc change after implementation SHA does not require rerun if no code/test/config/workflow/deployment modifications"
+  "evidence_only_commit_policy": "All checks pass at exact implementation SHA a7c770023b661e1594721bde6dcf714e736a67f3; following evidence-only commit inherits SHA; changes to executable source/test/CI/config need requalification.",
+  "completion_state": "PASS: repository-side BNB-2.9 Level 1 and app-specific Level 2; operational testnet gates and phase Level 3 explicitly deferred"
 }

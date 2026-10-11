@@ -8,9 +8,27 @@ import { HCZeroAddress, HCInvalidId, HCInvalidState } from "../errors/HighCountr
 /// @notice R04.1 inventory authority: typed lot identity and permissioned posting to ResourceLedger.
 /// @dev HarvestProductRegistry remains immutable issuance history; ledger balances are spendable stock.
 contract InventoryRegistry {
-    enum Unit { NONE, GRAM, COUNT, CAPACITY }
-    struct Resource { Unit unit; bool active; bool exists; bool harvestOnly; }
-    struct Lot { bytes32 productId; bytes32 resourceId; address grower; uint256 initialAmount; bool exists; }
+    enum Unit {
+        NONE,
+        GRAM,
+        COUNT,
+        CAPACITY
+    }
+
+    struct Resource {
+        Unit unit;
+        bool active;
+        bool exists;
+        bool harvestOnly;
+    }
+
+    struct Lot {
+        bytes32 productId;
+        bytes32 resourceId;
+        address grower;
+        uint256 initialAmount;
+        bool exists;
+    }
 
     address public immutable administrator;
     HarvestProductRegistry public immutable harvestProducts;
@@ -32,8 +50,10 @@ contract InventoryRegistry {
         _;
     }
 
-    constructor(address harvestProducts_) {
-        if (harvestProducts_ == address(0) || harvestProducts_.code.length == 0) revert HCZeroAddress();
+    constructor(
+        address harvestProducts_
+    ) {
+        if (harvestProducts_ == address(0) 
         administrator = msg.sender;
         harvestProducts = HarvestProductRegistry(harvestProducts_);
         ledger = new ResourceLedger(address(this));
@@ -41,28 +61,39 @@ contract InventoryRegistry {
         emit ResourceRegistered(FLOWER_RESOURCE, Unit.GRAM, true);
     }
 
-    function setIssuer(address issuer, bool allowed) external onlyAdmin {
+    function setIssuer(
+        address issuer,
+        bool allowed
+    ) external onlyAdmin {
         if (issuer == address(0)) revert HCZeroAddress();
         issuers[issuer] = allowed;
         emit IssuerUpdated(issuer, allowed);
     }
 
-    function registerResource(bytes32 id, Unit unit) external onlyAdmin {
-        if (id == bytes32(0) || unit == Unit.NONE || resources[id].exists) revert HCInvalidState();
+    function registerResource(
+        bytes32 id,
+        Unit unit
+    ) external onlyAdmin {
+        if (id == bytes32(0) 
         resources[id] = Resource(unit, true, true, false);
         emit ResourceRegistered(id, unit, false);
     }
 
-    function setResourceActive(bytes32 id, bool active) external onlyAdmin {
+    function setResourceActive(
+        bytes32 id,
+        bool active
+    ) external onlyAdmin {
         if (!resources[id].exists) revert HCInvalidState();
         resources[id].active = active;
         emit ResourceActive(id, active);
     }
 
-    function importHarvest(bytes32 productId) external returns (bytes32 lotId) {
-        if (productId == bytes32(0) || importedProduct[productId]) revert HCInvalidState();
+    function importHarvest(
+        bytes32 productId
+    ) external returns (bytes32 lotId) {
+        if (productId == bytes32(0) 
         HarvestProductRegistry.Product memory p = harvestProducts.getProduct(productId);
-        if (!p.registered || p.productId != productId || p.grower == address(0)) revert HCInvalidState();
+        if (!p.registered 
         // A zero-output harvest has an immutable receipt but must not become a tradable lot.
         if (p.quantityGrams == 0) revert HCInvalidState();
         lotId = keccak256(abi.encode("HC.INVENTORY.LOT.V1", block.chainid, address(this), productId));
@@ -73,39 +104,66 @@ contract InventoryRegistry {
         emit LotImported(productId, lotId, p.grower, p.quantityGrams);
     }
 
-    function lot(bytes32 lotId) external view returns (Lot memory) {
+    function lot(
+        bytes32 lotId
+    ) external view returns (Lot memory) {
         Lot memory l = _lots[lotId];
         if (!l.exists) revert HCInvalidState();
         return l;
     }
 
-    function acquire(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+    function acquire(
+        bytes32 op,
+        bytes32 id,
+        address owner,
+        uint256 amount
+    ) external {
         Resource memory r = resources[id];
-        if (!issuers[msg.sender] || !r.exists || !r.active || r.harvestOnly) revert HCInvalidState();
+        if (!issuers[msg.sender] 
         ledger.acquire(op, id, owner, amount);
     }
 
-    function reserve(bytes32 op, bytes32 id, uint256 amount) external {
+    function reserve(
+        bytes32 op,
+        bytes32 id,
+        uint256 amount
+    ) external {
         _ensureActive(id);
         ledger.reserve(op, id, msg.sender, amount);
     }
 
-    function release(bytes32 op, bytes32 id, uint256 amount) external {
+    function release(
+        bytes32 op,
+        bytes32 id,
+        uint256 amount
+    ) external {
         _ensureActive(id);
         ledger.release(op, id, msg.sender, amount);
     }
 
-    function consume(bytes32 op, bytes32 id, uint256 amount, bool fromReserve) external {
+    function consume(
+        bytes32 op,
+        bytes32 id,
+        uint256 amount,
+        bool fromReserve
+    ) external {
         _ensureActive(id);
         ledger.consume(op, id, msg.sender, amount, fromReserve);
     }
 
-    function transferAvailable(bytes32 op, bytes32 id, address to, uint256 amount) external {
+    function transferAvailable(
+        bytes32 op,
+        bytes32 id,
+        address to,
+        uint256 amount
+    ) external {
         _ensureActive(id);
         ledger.transferAvailable(op, id, msg.sender, to, amount);
     }
 
-    function _ensureActive(bytes32 id) private view {
+    function _ensureActive(
+        bytes32 id
+    ) private view {
         // Harvest lots are uniquely issued and typed through their canonical provenance record.
         if (_lots[id].exists) return;
         Resource memory r = resources[id];

@@ -1,7 +1,7 @@
 {
   "step": "C04.4",
   "canonical": "BC delivery matrix with separate licensee/employee, delivery-person and common-carrier branches; map every implemented rule to current authoritative provisions and tests.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "dd052b61f43bb6447030af7a452cd1092cea7319",
   "branch": "audit/420compliance-c01-1-inventory-20261009",
@@ -23,7 +23,13 @@
   ],
   "source_asof": "2026-10-10",
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38109635268,
+    "job_id": 114383035687,
+    "conclusion": "success",
+    "successful_steps": 51,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "testnet_deferred": [
     "C09.3 current official source retention",
@@ -43,5 +49,6 @@
   ],
   "level2": "At documented milestone only",
   "level3": "C08.5 deferred",
-  "next_canonical": "C04.5 — Vancouver retailer/business permissions and applicable municipal operating restrictions; confirm DOOBr's own business category rather than treating retailer licensing as courier authorization."
+  "next_canonical": "C04.5 — Vancouver retailer/business permissions and applicable municipal operating restrictions; confirm DOOBr's own business category rather than treating retailer licensing as courier authorization.",
+  "external_acceptance": "C09/C10 independent legal classification, carrier eligibility and deployed credentials remain pending"
 }

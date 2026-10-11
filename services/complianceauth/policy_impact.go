@@ -3,6 +3,7 @@ package complianceauth
 import (
  "errors"
  "sort"
+ "time"
 )
 
 var ErrImpactSimulation=errors.New("invalid compliance impact simulation")
@@ -59,4 +60,29 @@ func SimulatePolicyImpact(flows []SimulationFlow)(ImpactReport,error){
  }
  sort.Slice(out.Items,func(i,j int)bool{return out.Items[i].FlowID<out.Items[j].FlowID})
  return out,nil
+}
+
+// ImpactEvaluationCase is evaluated against both reviewed policy snapshots
+// with identical request facts; no caller-provided ALLOW outcome is trusted.
+type ImpactEvaluationCase struct{
+ FlowID string
+ Request EvaluationRequest
+ InFlight bool
+}
+func SimulateReviewedPolicyImpact(beforeService,afterService EvaluationService,beforePolicy,afterPolicy ReviewedPolicy,cases []ImpactEvaluationCase,at time.Time)(ImpactReport,error){
+ if len(cases)==0||len(cases)>maxImpactFlows||at.IsZero(){return ImpactReport{},ErrImpactSimulation}
+ beforeDigest:=beforePolicy.Manifest.Manifest.PolicyDigest
+ afterDigest:=afterPolicy.Manifest.Manifest.PolicyDigest
+ if !digestValid(beforeDigest)||!digestValid(afterDigest){return ImpactReport{},ErrImpactSimulation}
+ flows:=make([]SimulationFlow,0,len(cases))
+ for _,c:=range cases{
+  if c.FlowID==""||c.Request.OperationRef==""||c.Request.Stage==""{return ImpactReport{},ErrImpactSimulation}
+  old:=beforeService.Evaluate(beforePolicy,c.Request,at)
+  newResult:=afterService.Evaluate(afterPolicy,c.Request,at)
+  flows=append(flows,SimulationFlow{
+   FlowID:c.FlowID,OperationRef:c.Request.OperationRef,Stage:c.Request.Stage,InFlight:c.InFlight,
+   Before:old.Outcome,After:newResult.Outcome,BeforePolicyDigest:beforeDigest,AfterPolicyDigest:afterDigest,
+  })
+ }
+ return SimulatePolicyImpact(flows)
 }

@@ -32,3 +32,7 @@ CREATE TABLE IF NOT EXISTS bnb_reputation_export (
  exported_at timestamptz,
  external_reference text
 );
+
+ALTER TABLE bnb_guest_message ADD COLUMN IF NOT EXISTS moderation_status text NOT NULL DEFAULT 'visible'
+ CHECK(moderation_status IN ('visible','quarantined'));
+CREATE INDEX IF NOT EXISTS bnb_abuse_pending ON bnb_abuse_report(status,created_at);

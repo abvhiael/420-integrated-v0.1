@@ -423,7 +423,22 @@ async function loadGuestDashboard(){
  method:"POST",headers:hostHeaders(),credentials:"omit",
  body:JSON.stringify({body:message.value,nonce:"guest-message-"+Date.now()})});
  reply.textContent=r.ok?"Message recorded privately.":"Message unavailable ("+r.status+").";
- });card.append(message,send,reply);
+ });
+ const conversation=document.createElement("div");conversation.setAttribute("aria-live","polite");
+ const readMessages=document.createElement("button");readMessages.type="button";readMessages.textContent="Read conversation";
+ readMessages.addEventListener("click",async()=>{
+ conversation.textContent="Loading private messages…";
+ try{const response=await fetch("/v1/bnb/booking-requests/"+
+ encodeURIComponent(stay.request_id)+"/messages",{
+ headers:hostHeaders(),credentials:"omit",cache:"no-store"});
+ if(!response.ok)throw Error("Conversation unavailable.");
+ const messages=await response.json();conversation.replaceChildren();
+ for(const entry of messages){const line=document.createElement("p");
+ line.textContent=entry.sender+": "+entry.body;conversation.append(line);}
+ if(!messages.length)conversation.textContent="No messages yet.";
+ }catch(error){conversation.textContent=error.message;}
+ });
+ card.append(message,send,reply,readMessages,conversation);
  const rating=document.createElement("select");rating.setAttribute("aria-label","Stay rating");
  for(let i=1;i<=5;i++){const op=document.createElement("option");op.value=i;op.textContent=i+" star(s)";rating.append(op);}
  const review=document.createElement("textarea");review.setAttribute("aria-label","Stay review");

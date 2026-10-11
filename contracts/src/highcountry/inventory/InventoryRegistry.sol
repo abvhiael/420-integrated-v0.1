@@ -34,6 +34,9 @@ contract InventoryRegistry {
     HarvestProductRegistry public immutable harvestProducts;
     ResourceLedger public immutable ledger;
     mapping(address => bool) public issuers;
+    mapping(address => mapping(address => bool)) public inventoryOperators;
+
+    event InventoryOperatorUpdated(address indexed owner, address indexed operator, bool approved);
     mapping(bytes32 => Resource) public resources;
     mapping(bytes32 => Lot) private _lots;
     mapping(bytes32 => bool) public importedProduct;
@@ -121,6 +124,31 @@ contract InventoryRegistry {
         Resource memory r = resources[id];
         if (!issuers[msg.sender] || !r.exists || !r.active || r.harvestOnly) revert HCInvalidState();
         ledger.acquire(op, id, owner, amount);
+    }
+
+    /// @notice Explicit opt-in for registered manufacturing modules; never a wallet entitlement.
+    function setInventoryOperator(address operator, bool approved) external {
+        if (operator == address(0) || operator == msg.sender) revert HCInvalidState();
+        inventoryOperators[msg.sender][operator] = approved;
+        emit InventoryOperatorUpdated(msg.sender, operator, approved);
+    }
+
+    function reserveFor(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureActive(id);
+        ledger.reserve(op, id, owner, amount);
+    }
+
+    function releaseFor(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureActive(id);
+        ledger.release(op, id, owner, amount);
+    }
+
+    function consumeReservedFor(bytes32 op, bytes32 id, address owner, uint256 amount) external {
+        if (!inventoryOperators[owner][msg.sender]) revert HCInvalidState();
+        _ensureActive(id);
+        ledger.consume(op, id, owner, amount, true);
     }
 
     function reserve(

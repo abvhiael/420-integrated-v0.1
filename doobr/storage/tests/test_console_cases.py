@@ -3,7 +3,7 @@ from datetime import datetime,timezone
 from unittest.mock import patch
 from types import SimpleNamespace
 from doobr.auth import Denied,ALLOWED_ACTIONS
-from doobr.console_cases import propose_case,approve_case,execute_case
+from doobr.console_cases import propose_case,approve_case,execute_case,close_case
 T="00000000-0000-4000-8000-000000000101"
 C="00000000-0000-4000-8000-000000000102"
 E="00000000-0000-4000-8000-000000000103"
@@ -73,6 +73,14 @@ class TestCaseLedger(unittest.TestCase):
    db=DB([row,(3,)])
    self.assertEqual(execute_case(connect=lambda:db,issuer=None,store=None,token="token",
     tenant_id=T,case_id=C,event_id=E,authority=Authority(),at=NOW),"EXECUTED")
+ def test_reject_or_expire_with_audit(self):
+  with patch("doobr.console_cases.authorize",return_value=sess(A,"one","jti1")):
+   db=DB([("PENDING",1,NOW.replace(year=2027),"signed"),(2,)])
+   self.assertEqual(close_case(connect=lambda:db,issuer=None,store=None,token="t",tenant_id=T,case_id=C,
+    event_id=E,operation="REJECT",expected_revision=1,at=NOW),"REJECTED")
+   self.assertTrue(any("console_case_events" in sql for sql,_ in db.cur.sql))
+   with self.assertRaises(Denied):close_case(connect=lambda:DB([("EXECUTED",3,NOW,"signed")]),
+    issuer=None,store=None,token="t",tenant_id=T,case_id=C,event_id=E,operation="EXPIRE",expected_revision=3,at=NOW)
  def test_no_replayed_execution(self):
   with patch("doobr.console_cases.authorize",return_value=sess(A,"one","jti1")):
    with self.assertRaises(Denied):execute_case(connect=lambda:DB([("SAFETY_HOLD","signed","EXECUTED",3,NOW.replace(year=2027))]),

@@ -1,7 +1,7 @@
 {
   "step": "BNB-2.8",
   "canonical_title": "Complete Guest Application",
-  "status": "PENDING_FINAL_EXACT_SHA_CI",
+  "status": "PASS_REPOSITORY_SIDE_LEVEL1_AND_APP_MILESTONE_LEVEL2",
   "qualification_model": "Level 1 step and guest application milestone Level 2",
   "implementation_sha": "594a073a6a01751a787d0610a8ba128987c1f389",
   "pr_number": 600,
@@ -27,15 +27,45 @@
   "ci": {
     "workflow": "420BnB Runtime Slice",
     "run_id": 38105374866,
+    "job_id": 114369664772,
     "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38105374866",
-    "status": "in_progress; DO NOT CLAIM PASS"
+    "conclusion": "success",
+    "failed_steps": 0,
+    "implementation_sha": "594a073a6a01751a787d0610a8ba128987c1f389"
   },
-  "level2": "Await nine retained 420BnB app workflow completions at same SHA",
-  "level3": "Deferred to full BnB audit-phase merge-candidate reconciliation; canonical Solidity and Genesis owners, no duplicate Foundry",
+  "level2": {
+    "status": "PASS_APP_SCOPED",
+    "milestone": "BNB-2.8 guest API/frontend convergence",
+    "passed_app_workflows": 10,
+    "failed_app_workflows": 0,
+    "workflow_run_ids": [
+      38105374907,
+      38105374831,
+      38105374877,
+      38105374926,
+      38105374810,
+      38105374817,
+      38105374849,
+      38105374852,
+      38105374821,
+      38105374866
+    ]
+  },
+  "level3": "DEFERRED to full app-phase current-main merge candidate and canonical owner qualification",
   "operational_blockers": [
     "Independent accommodation/property claims and authorized real 420Pay finality",
     "Human moderation and production trust root, not simulated by synthetic key",
     "Manual WCAG 2.2 AA screen-reader acceptance and external operational release"
   ],
-  "next_canonical_step": "Not yet verified from authoritative repository roadmap"
+  "next_canonical_step": "Not verified from roadmap; do not assign a fabricated number",
+  "level1": {
+    "status": "PASS",
+    "evidence": "PostgreSQL 001–017, guest search/save/message/review and signed moderation regressions, existing BnB/Pay authority and two-process capacity tests, non-root container and Chromium WCAG automated smoke"
+  },
+  "qualifying_evidence_only_commits": "docs/bnb/BNB-2.8-COMPLETE-GUEST-APPLICATION.md and this evidence only; no executable or CI change after qualified implementation SHA",
+  "remaining_external": [
+    "Live independently authorized 420Pay and 420Swap booking/payment acceptance",
+    "Real property/host claims and moderation operations, separate trust-root acceptance",
+    "Human-operated WCAG 2.2 AA/screen reader test and production deployment acceptance"
+  ]
 }

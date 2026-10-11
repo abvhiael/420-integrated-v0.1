@@ -1417,3 +1417,29 @@ def test_bnb29_guest_cannot_self_approve_with_delegated_host_capability(fixture_
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_booking_request WHERE id=%s",(rid,))
+
+
+def test_bnb29_published_property_calendar_closure_and_suspended_denial(fixture_property):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_property_grant
+            (property_id,grantee_subject,capability,expires_at,granted_by)
+            VALUES (%s,'guest-fixture','edit_calendar',now()+interval '1 day','verified-host')""",
+            (pid,))
+    start=(datetime.now(timezone.utc)+timedelta(days=30)).replace(microsecond=0)
+    payload={"start":start.isoformat(),"end":(start+timedelta(days=2)).isoformat(),
+             "reason":"Safety maintenance","expected_version":1}
+    path=f"/v1/bnb/account/properties/{pid}/calendar/blocks"
+    try:
+        accepted=client.post(path,headers=headers,json=payload)
+        assert accepted.status_code==201,accepted.text
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_property SET status='suspended' WHERE id=%s",(pid,))
+        rejected=client.post(path,headers=headers,json={
+            **payload,"expected_version":accepted.json()["version"]})
+        assert rejected.status_code==409
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

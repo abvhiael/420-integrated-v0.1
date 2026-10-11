@@ -1324,6 +1324,12 @@ def pay_settlement_split(payload:SettlementSplitInput,x_pay_authority_proof:str|
         raise HTTPException(422,"SPLIT_CONSERVATION_FAILED")
     if len({payload.host_recipient,payload.platform_recipient,payload.developer_recipient})!=3:
         raise HTTPException(422,"SPLIT_RECIPIENT_COLLISION")
+    if (proof.get("canonical_split_id")!=payload.canonical_split_id or
+        proof.get("chain_id")!=payload.chain_id or proof.get("asset")!=payload.asset or
+        proof.get("policy_version")!=payload.policy_version or
+        proof.get("developer_recipient_approved") is not True):
+        raise HTTPException(403,"CANONICAL_SPLIT_AUTHORITY_MISMATCH")
+    split_digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
     with db() as c:
         with c.transaction():
             ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
@@ -1338,21 +1344,22 @@ def pay_settlement_split(payload:SettlementSplitInput,x_pay_authority_proof:str|
             if (row[1]!=payload.pay_payment_id or row[2]!=payload.chain_id or
                 row[3]!=payload.asset or int(row[4])!=payload.captured_amount):
                 raise HTTPException(409,"CAPTURE_DOMAIN_MISMATCH")
-            old=c.execute("SELECT canonical_split_id FROM bnb_settlement_split WHERE reservation_id=%s",
+            old=c.execute("SELECT canonical_split_id,payload_digest FROM bnb_settlement_split WHERE reservation_id=%s",
                           (payload.reservation_id,)).fetchone()
             if old:
-                if old[0]!=payload.canonical_split_id:raise HTTPException(409,"SPLIT_ALREADY_FROZEN")
+                if old[0]!=payload.canonical_split_id or old[1]!=split_digest:
+                    raise HTTPException(409,"SPLIT_ALREADY_FROZEN")
                 return {"state":"recorded","replayed":True,"custody":False}
             c.execute("""INSERT INTO bnb_settlement_split
                 (reservation_id,pay_payment_id,chain_id,asset,captured_amount,
                  host_recipient,platform_recipient,developer_recipient,host_amount,
-                 platform_amount,developer_amount,retained_amount,policy_version,canonical_split_id)
-                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                 platform_amount,developer_amount,retained_amount,policy_version,canonical_split_id,payload_digest)
+                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                 (payload.reservation_id,payload.pay_payment_id,payload.chain_id,payload.asset,
                  payload.captured_amount,payload.host_recipient,payload.platform_recipient,
                  payload.developer_recipient,payload.host_amount,payload.platform_amount,
                  payload.developer_amount,payload.retained_amount,payload.policy_version,
-                 payload.canonical_split_id))
+                 payload.canonical_split_id,split_digest))
     return {"state":"recorded","replayed":False,"custody":False}
 
 
@@ -1364,8 +1371,13 @@ def pay_disbursement(payload:PayDisbursementInput,x_pay_authority_proof:str|None
         proof.get("pay_event_id")!=payload.event_id or
         proof.get("recipient")!=payload.recipient):
         raise HTTPException(403,"PAY_DISBURSEMENT_AUTHORITY_REQUIRED")
-    if payload.state=="finalized" and not payload.receipt_hash:
-        raise HTTPException(422,"FINAL_RECEIPT_REQUIRED")
+    if payload.state=="finalized":
+        if not payload.receipt_hash:raise HTTPException(422,"FINAL_RECEIPT_REQUIRED")
+        if proof.get("receipt_finalized") is not True:
+            raise HTTPException(403,"PAY_RECEIPT_NOT_FINALIZED")
+    if (proof.get("chain_id")!=payload.chain_id or proof.get("asset")!=payload.asset or
+        proof.get("policy_version")!=payload.policy_version):
+        raise HTTPException(403,"PAY_DISBURSEMENT_DOMAIN_MISMATCH")
     with db() as c:
         with c.transaction():
             ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",

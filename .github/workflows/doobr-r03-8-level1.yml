@@ -1,0 +1,58 @@
+name: DOOBR R03.8 Mobile Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['mobile/doobr/**','doobr/mobile_security.py','doobr/storage/tests/test_mobile_security.py','.github/workflows/doobr-r03-8-level1.yml']
+  pull_request:
+    paths: ['mobile/doobr/**','doobr/mobile_security.py','doobr/storage/tests/test_mobile_security.py','.github/workflows/doobr-r03-8-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Mobile permission and notification adversarial tests
+        run: |
+          python3 -m py_compile doobr/mobile_security.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_mobile_security.py -v
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Android debug compile
+        run: gradle -p mobile/doobr/android :app:assembleDebug --no-daemon
+      - name: Native manifest and privacy guard
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          android=Path('mobile/doobr/android/app/src/main/AndroidManifest.xml').read_text()
+          ios=Path('mobile/doobr/ios/Info.plist').read_text()
+          assert 'android:allowBackup="false"' in android
+          assert 'android:usesCleartextTraffic="false"' in android
+          assert 'ACCESS_BACKGROUND_LOCATION' not in android
+          assert 'FOREGROUND_SERVICE_LOCATION' not in android
+          assert 'NSLocationAlwaysAndWhenInUseUsageDescription' not in ios
+          assert '<array/>' in ios
+          assert 'NSLocationWhenInUseUsageDescription' in ios
+          PY
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

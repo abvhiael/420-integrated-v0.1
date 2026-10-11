@@ -88,8 +88,31 @@ document.querySelector("#refresh").addEventListener("click",async()=>{
  summary.textContent=listing.title+" · "+listing.public_region+" · "+listing.capacity+
  " capacity (subject to selected dates). "+listing.reviews.length+" approved review(s).";
  detailOutput.append(summary);
- for(const review of listing.reviews){const text=document.createElement("p");
- text.textContent=review.rating+"/5 — "+review.body;detailOutput.append(text);}
+ for(const review of listing.reviews){
+ const text=document.createElement("p");
+ text.textContent=review.rating+"/5 — "+review.body;
+ detailOutput.append(text);
+ if(review.host_response){
+  const response=document.createElement("blockquote");
+  response.textContent="Host response: "+review.host_response;
+  detailOutput.append(response);
+ }
+ if(review.review_id){
+  const report=document.createElement("button");report.type="button";
+  report.textContent="Report review abuse";
+  const state=document.createElement("span");state.setAttribute("role","status");
+  report.addEventListener("click",async()=>{
+   if(!hostProof){state.textContent="Sign in with your verified session to report abuse.";return;}
+   try{
+    const r=await fetch("/v1/bnb/abuse-reports",{method:"POST",
+     headers:hostHeaders(),credentials:"omit",
+     body:JSON.stringify({target_type:"review",target_id:review.review_id,reason:"other",detail:"Requested moderation review"})});
+    state.textContent=r.ok?"Private report submitted for independent review.":"Report unavailable or not authorized ("+r.status+").";
+   }catch(e){state.textContent="Report unavailable.";}
+  });
+  detailOutput.append(report,state);
+ }
+}
  }catch(e){detailOutput.textContent=e.message;}
  });
  const save=document.createElement("button");save.type="button";save.textContent="Save stay";

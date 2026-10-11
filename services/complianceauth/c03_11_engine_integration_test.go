@@ -9,7 +9,7 @@ import (
  "time"
 )
 
-// C03.11: replay a historical reviewed decision with its original authority
+// c0311TenantBoundEvidence models an independently authenticated carrier adapter.\n// The generic evaluator delegates tenant/operation validation to this authority.\ntype c0311TenantBoundEvidence struct { delegate CredentialAuthority; tenant string }\nfunc (a c0311TenantBoundEvidence) VerifyEvidence(r EvaluationRequest, at time.Time)(Evidence,error){\n if r.TenantID!=a.tenant{return Evidence{},ErrUnauthorized}\n return a.delegate.VerifyEvidence(r,at)\n}\n\n// C03.11: replay a historical reviewed decision with its original authority
 // snapshot, then show a current publication/revocation cannot inherit that
 // historical permission. These are fixtures, not production legal approvals.
 func TestC0311EngineLevel2ReplayAndCarrierBoundary(t *testing.T) {
@@ -25,7 +25,7 @@ func TestC0311EngineLevel2ReplayAndCarrierBoundary(t *testing.T) {
  signed,err:=Publish(manifest,Approval{Digest:manifest.PolicyDigest,AuthorID:"author",ReviewerID:"reviewer",PublisherID:"publisher",IndependentlyVerified:true},priv);if err!=nil{t.Fatal(err)}
  policy:=ReviewedPolicy{Manifest:signed,ReviewID:"review-1",ApprovalToken:"approved",Rules:rules}
  service:=EvaluationService{Trust:Trust{Keys:map[string]Key{"key":{Public:pub,Environment:"test"}},MinimumSequence:7,MinimumEpoch:3,Environment:"test",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC"},Approvals:stubApproval{true},Credentials:stubEvidence{true,evidence}}
- request:=EvaluationRequest{TenantID:"tenant",OperationRef:"operation",Stage:"prepare",Action:"prepare",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC",FactsDigest:Digest(eb)}
+ service.Credentials=c0311TenantBoundEvidence{delegate:service.Credentials,tenant:"tenant"}\n request:=EvaluationRequest{TenantID:"tenant",OperationRef:"operation",Stage:"prepare",Action:"prepare",Audience:"doobr",Domain:"delivery",Jurisdiction:"BC",FactsDigest:Digest(eb)}
 
  graph:=AuthorityGraph{Version:"historical-geography-v1",AsOf:historical,Nodes:[]AuthorityNode{{ID:"federal",Kind:"FEDERAL",LegalJurisdictionID:"CA",SourceDigest:Digest([]byte("ca")),EffectiveFrom:historical.Add(-time.Hour)},{ID:"province",Kind:"PROVINCE",ParentID:"federal",LegalJurisdictionID:"BC",SourceDigest:Digest([]byte("bc")),EffectiveFrom:historical.Add(-time.Hour)}}}
  location:=AuthorityLocation{OperatingZoneID:"test-service-zone",CandidateJurisdictions:[]string{"BC"},Confidence:BoundaryVerified,BoundaryEvidenceDigest:Digest([]byte("boundary"))}

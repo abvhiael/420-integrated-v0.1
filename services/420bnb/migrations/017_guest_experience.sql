@@ -26,3 +26,11 @@ CREATE TABLE IF NOT EXISTS bnb_guest_review (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS bnb_guest_review_public ON bnb_guest_review(property_id,status);
+CREATE TABLE IF NOT EXISTS bnb_guest_review_decision (
+ issuer text NOT NULL,
+ jti text NOT NULL,
+ review_id uuid NOT NULL REFERENCES bnb_guest_review(id),
+ decision text NOT NULL CHECK(decision IN ('approved','rejected','withdrawn')),
+ decided_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(issuer,jti)
+);

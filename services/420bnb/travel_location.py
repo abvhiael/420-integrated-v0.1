@@ -3,7 +3,11 @@ import json
 import os
 import re
 from urllib.parse import urlencode, urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import Request, build_opener, HTTPRedirectHandler
+
+class NoTravelRedirect(HTTPRedirectHandler):
+    def redirect_request(self,req,fp,code,msg,headers,newurl):
+        raise TravelLocationUnavailable('TRAVEL_REDIRECT_FORBIDDEN')
 
 class TravelLocationUnavailable(Exception):
     pass
@@ -20,7 +24,7 @@ def resolve_public_place(place_id: str, *, base_url=None, fetch=None):
     endpoint=base+"/travel/api/v1/places?"+urlencode({"destination":""})
     try:
         if fetch is None:
-            with urlopen(Request(endpoint,headers={"Accept":"application/json","Cache-Control":"no-store"}),timeout=4) as response:
+            with build_opener(NoTravelRedirect()).open(Request(endpoint,headers={"Accept":"application/json","Cache-Control":"no-store"}),timeout=4) as response:
                 if response.status!=200:raise TravelLocationUnavailable("TRAVEL_UNAVAILABLE")
                 raw=response.read(262145)
         else:

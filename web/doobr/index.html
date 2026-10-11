@@ -10,15 +10,26 @@
 </head>
 <body><a class="skip" href="#main">Skip to main content</a>
 <header class="site-header"><a href="/" class="brand" aria-label="DOOBr home"><img src="/assets/doobr-logo-480.png" width="240" height="169" alt="DOOBr" decoding="async"></a>
-<nav aria-label="Primary navigation"><a href="#about">About</a><a href="#accessibility">Accessibility</a><a href="#contact">Contact</a></nav></header>
+<nav aria-label="Primary navigation"><a href="#coverage">Coverage</a><a href="#about">About</a><a href="#accessibility">Accessibility</a><a href="#contact">Contact</a></nav></header>
 <main id="main" tabindex="-1"><section class="hero" aria-labelledby="hero-title">
 <p class="eyebrow">British Columbia · Vancouver planning profile</p><h1 id="hero-title">DOOBr is in development.</h1>
 <p>Delivery services are not available. No cannabis orders, eligibility determinations or payments are being accepted.</p>
 <p class="notice" role="status">Operational launch requires independent legal, licensing, partner and security approvals. This site does not verify delivery eligibility.</p>
 </section>
+<section id="coverage" aria-labelledby="coverage-title"><h2 id="coverage-title">Check regional coverage</h2>
+<p>Public lookup is currently informational only. No orders are accepted and no delivery eligibility can be established by a regional result. Exact addresses, age data and GPS are not requested or stored.</p>
+<form id="coverage-form" novalidate><label for="region">Region</label>
+<select id="region" name="region"><option value="VANCOUVER">Vancouver (planning area)</option></select>
+<button type="submit">Check service status</button></form>
+<p id="coverage-response" role="status" aria-live="polite">Coverage is unverified. DOOBr is not operational.</p>
+<p>Service-area information does not establish whether cannabis delivery is lawful, whether any retailer is licensed or whether a courier is eligible. Independent 420Compliance and licensing approval is required.</p>
+</section>
+<section id="support" aria-labelledby="support-title"><h2 id="support-title">Information and support</h2>
+<p>For accessibility assistance or service questions, use the verified support channels published by the operating organization when available. No account registration or personal-data submission is offered here.</p>
+<p>For current legal requirements, consult the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/liquor-regulation-licensing/cannabis-licences/cannabis-resources-information/delivering-cannabis" rel="noopener noreferrer">British Columbia cannabis delivery guidance</a>.</p></section>
 <section id="about" aria-labelledby="about-title"><h2 id="about-title">Built around responsible delivery infrastructure</h2>
 <p>DOOBr is a planned standalone delivery experience. Licensed retailers remain sellers of record. Availability and legal eligibility cannot be inferred from this information page.</p></section>
 <section id="accessibility" aria-labelledby="access-title"><h2 id="access-title">Accessible by design</h2><p>Navigation supports keyboard access, visible focus, reduced motion, high contrast and responsive layouts.</p></section>
 <section id="contact" aria-labelledby="contact-title"><h2 id="contact-title">Service status</h2><p>No consumer accounts, courier enrollment or retailer onboarding are open through this site.</p></section>
 </main><footer><img src="/assets/doobr-logo-480.png" width="124" height="88" alt="DOOBr"><p>Information only · Not a cannabis storefront</p><small>© DOOBr</small></footer>
-</body></html>
+<script type="module" src="/coverage-ui.mjs"></script></body></html>

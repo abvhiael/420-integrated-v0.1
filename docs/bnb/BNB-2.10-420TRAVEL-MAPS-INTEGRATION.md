@@ -59,3 +59,17 @@ The following is now source-controlled and must be qualified on the final implem
 - **Cross-app tests:** `services/420bnb/tests/test_travel_authority.py`, `test_travel_location.py`, and `genesis/svc3/travelapp/bnb_accommodations_test.go` cover invalid IDs, missing upstream, policy scope failures, forged region, untrusted destinations, TLS/cross-origin handoffs and precision downgrade/rejection. CI coverage requires final BnB Runtime Slice and GEN-SVC-3 Travel check successes on one exact implementation SHA.
 
 **Release/acceptance gates still outstanding:** A real governance-approved independent place/property binding issuer, a separate authorized jurisdiction policy signer with approved regional legal coverage, operated revocation/key rotation and expiry refresh, source/service TLS/authorization deployment, real provider place-ID binding, manual and cross-instance release testing. Synthetic signature tests do not constitute that external authorization. Nearby distance searches beyond the coarse supported public place projection remain unavailable until a separately approved location accuracy source exists. No live reservation/payment is enabled through Travel Genesis. Final Level 1 PASS must not be recorded until both BnB and Travel workflows complete successfully.
+
+## Independent operational acceptance gate (introduced after Level 1 code PASS)
+
+`services/420bnb/bnb210_external_acceptance.py` provides a read-only HTTPS probe of live public 420Location/Travel place data and independently filtered BnB accommodation data. It validates a supplied **external** evidence record for separately approved location/property association, jurisdiction policy source and independent security acceptance, with active approval dates, distinct approver/reviewer and recorded public-key fingerprints. The JSON evidence must be obtained from real authorized operators; blank fields and claims of self-approval fail closed. The script does **not** mint keys, legal rulings, place associations or approvals; output `operator_approval_verified=false` is deliberate because metadata plus HTTP responses are not cryptographic/organizational acceptance by themselves.
+
+Invoke on an isolated, approved staging/testnet deployment after configuring HTTPS service origins; never commit the supplied evidence file if sensitive:
+
+```bash
+BNB_TRAVEL_PUBLIC_URL=https://<approved-travel-origin> \
+TRAVEL_BNB_PUBLIC_URL=https://<approved-bnb-origin> \
+python services/420bnb/bnb210_external_acceptance.py /secure/BNB-2.10-APPROVALS.json <approved-place-id> <property-uuid>
+```
+
+All URL origins, independent legal authorizations, public signing keys, deployment attestations and a production-equivalent multi-instance runtime must be provided by their actual custodians. Until these are supplied, **live independent approval, jurisdiction applicability and production-equivalent cross-service acceptance are BLOCKED**, even if the repository-side verifier unit tests pass. This does not permit moving to Level 3 or merging PR #600.

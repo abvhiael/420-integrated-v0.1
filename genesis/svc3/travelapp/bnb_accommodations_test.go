@@ -48,3 +48,23 @@ func TestBnBWebsiteHandoffNoImplicitBooking(t *testing.T){
  if w.Code!=503 {t.Fatalf("non-TLS handoff accepted: %d",w.Code)}
  _=os.ErrNotExist
 }
+
+func TestBnBConsumerCoarseMarkerAndInvalidPrecision(t *testing.T){
+ marker:=`{"latitude":52.5,"longitude":-106.5,"precision":"coarse_1_degree_grid"}`
+ upstream:=httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  fmt.Fprintf(w,`{"version":"bnb-travel-authorized/v1","nonbinding":true,"transaction_enabled":false,"place_id":"place_1","listings":[{"property_id":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","title":"Public stay","public_region":"SK","capacity":2,"map_marker":%s}]}`,marker)
+ }))
+ defer upstream.Close()
+ previous:=http.DefaultTransport
+ http.DefaultTransport=upstream.Client().Transport
+ defer func(){http.DefaultTransport=previous}()
+ t.Setenv("TRAVEL_BNB_PUBLIC_URL",upstream.URL)
+ handler:=withBnBAccommodations(http.NotFoundHandler())
+ w:=httptest.NewRecorder()
+ handler.ServeHTTP(w,httptest.NewRequest("GET","/travel/accommodations?place_id=place_1",nil))
+ if w.Code!=200||!strings.Contains(w.Body.String(),"Approximate map")||!strings.Contains(w.Body.String(),"Public stay"){t.Fatalf("coarse map not rendered: %d %s",w.Code,w.Body.String())}
+ marker=`{"latitude":52.55555,"longitude":-106.5,"precision":"exact"}`
+ w=httptest.NewRecorder()
+ handler.ServeHTTP(w,httptest.NewRequest("GET","/travel/accommodations?place_id=place_1",nil))
+ if w.Code!=502{t.Fatalf("exact location leaked: %d",w.Code)}
+}

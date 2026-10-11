@@ -503,15 +503,23 @@ async function loadHostWorkspace(){
  details.textContent="Loading property operations…";
  try{
  const base="/v1/bnb/account/properties/"+encodeURIComponent(property.id);
- const paths=["/host-reservations","/host-requests","/calendar","/notifications"];
- if(property.owner)paths.push("/earnings","/managers");
+ const grants=property.capabilities||[];
+ const permitted=permission=>property.owner||grants.includes(permission);
+ const candidates=[
+ ["/host-reservations","Reservations","view_reservations"],
+ ["/host-requests","Booking requests","handle_requests"],
+ ["/calendar","Calendar restrictions","edit_calendar"],
+ ["/notifications","Notifications","view_reservations"],
+ ["/earnings","Pay-reported earnings","owner"],
+ ["/managers","Delegated managers","owner"]];
+ const visible=candidates.filter(item=>item[2]==="owner"?property.owner:permitted(item[2]));
+ const paths=visible.map(item=>item[0]);
  const results=await Promise.all(paths.map(path=>fetch(base+path,{
  headers:hostHeaders(),credentials:"omit",cache:"no-store"})));
  if(results.some(res=>!res.ok))throw Error("Some operations require additional authorization or are unavailable.");
  const values=await Promise.all(results.map(res=>res.json()));
  details.replaceChildren();
- const labels=["Reservations","Booking requests","Calendar restrictions","Notifications",
- ...(property.owner?["Pay-reported earnings","Delegated managers"]:[])];
+ const labels=visible.map(item=>item[1]);
  for(let i=0;i<paths.length;i++){
  const heading=document.createElement("h5");heading.textContent=labels[i];details.append(heading);
  const data=values[i];
@@ -519,15 +527,15 @@ async function loadHostWorkspace(){
  if(!rows.length){const empty=document.createElement("p");empty.textContent="No entries.";details.append(empty);}
  for(const item of rows){
  const line=document.createElement("p");
- if(i===0)line.textContent=item.state+" · "+item.checkin+" to "+item.checkout+" · "+item.units+" unit(s)";
- else if(i===1)line.textContent=item.state+" · deadline "+item.deadline;
- else if(i===2)line.textContent=item.start+" to "+item.end+" · "+item.reason;
- else if(i===3)line.textContent=item.type+" · "+item.created_at;
- else if(i===4)line.textContent=item.asset+" · host allocated "+item.host_allocated+
+ if(paths[i]==="/host-reservations")line.textContent=item.state+" · "+item.checkin+" to "+item.checkout+" · "+item.units+" unit(s)";
+ else if(paths[i]==="/host-requests")line.textContent=item.state+" · deadline "+item.deadline;
+ else if(paths[i]==="/calendar")line.textContent=item.start+" to "+item.end+" · "+item.reason;
+ else if(paths[i]==="/notifications")line.textContent=item.type+" · "+item.created_at;
+ else if(paths[i]==="/earnings")line.textContent=item.asset+" · host allocated "+item.host_allocated+
  " · finalized payout "+item.payout_finalized+" · Pay authority only";
  else line.textContent=item.subject+" · "+item.capability+" · expires "+item.expires_at;
  details.append(line);
- if(i===1&&item.state==="requested"){
+ if(paths[i]==="/host-requests"&&item.state==="requested"){
  for(const decision of ["accept","decline"]){
  const button=document.createElement("button");button.type="button";
  button.textContent=decision==="accept"?"Accept (payment pending)":"Decline";
@@ -596,7 +604,9 @@ async function loadHostWorkspace(){
  outcome.textContent=response.ok?"Calendar restriction recorded. Refresh for updated version.":
  "Calendar update denied ("+response.status+"). Refresh version or resolve bookings.";
  });
- article.append(title,open,calendarForm,details);view.append(article);
+ article.append(title,open);
+ if(permitted("edit_calendar"))article.append(calendarForm);
+ article.append(details);view.append(article);
  }
  }catch(error){view.textContent=error.message;}
 }

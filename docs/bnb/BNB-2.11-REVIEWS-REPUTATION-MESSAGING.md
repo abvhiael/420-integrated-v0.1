@@ -31,7 +31,7 @@
 - `POST /v1/bnb/internal/reputation/export-receipt` requires separately signed `review-export-receipt` purpose, exact review/revision/external reference and monotonic stored acknowledgement. BnB never changes a 420Reputation score or executes financial finality.
 - `POST /v1/bnb/internal/abuse-reports/{report_id}/decision` requires independently signed `abuse-report` review proof and permitted one-time pending→accepted/dismissed transition with reviewer nonce and audit event; abuse reports remain private.
 
-**Still required before step completion:** review/message abuse quarantine or removal enforcement, affected browser interactions, production-safe message throttling, exhaustive PostgreSQL adversarial testing for reputation receipt replay/withdrawal and moderation races, and successful Level 1 CI on exact executable SHA. External independent issuer activation and production-equivalent Reputation integration acceptance are separate testnet-dependent gates. Do not treat a new API route as proof the external service has consumed it.
+**Historical implementation gap list (closed by the later enforcement and qualification records below):** review/message abuse quarantine or removal enforcement, affected browser interactions, production-safe message throttling, exhaustive PostgreSQL adversarial testing for reputation receipt replay/withdrawal and moderation races, and successful Level 1 CI on exact executable SHA. External independent issuer activation and production-equivalent Reputation integration acceptance are separate testnet-dependent gates. Do not treat a new API route as proof the external service has consumed it.
 
 ## Enforcement and browser follow-through
 
@@ -40,7 +40,7 @@
 - The public BnB browser displays independently approved host responses, and offers accessible verified-session submission for review-abuse reports and host responses. New host responses remain pending independent moderation; no host-side auto-approval.
 - Tests include unsigned moderator/reputation mutation rejection, strict rating input bounds, property-scope authorization, rejected jurisdiction-independent session bypass and public no-store reputation projection. The cross-service reputation contract is explicitly non-final, without local scoring.
 
-**Outstanding qualification:** run BnB Runtime Slice and changed frontend accessibility on the exact final executable SHA; inspect failures and record a level-1 PASS only when completed. The attached live testnet gate `T-BNB-REPUTATION-211` remains deferred; no independent operator provenance or real 420Reputation deployment has been verified from repository-only code.
+**Historical qualification gate (now satisfied):** the BnB Runtime Slice and frontend accessibility passed on exact implementation SHA `78b06a9bfbb13ad6341d86858bc190833357d7f3`; see final qualification record below. The attached live testnet gate `T-BNB-REPUTATION-211` remains deferred; no independent operator provenance or real 420Reputation deployment has been verified from repository-only code.
 
 ## Final repository-side qualification record — 2026-10-11
 

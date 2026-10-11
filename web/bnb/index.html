@@ -6,8 +6,9 @@
 <header><strong>420BnB</strong><nav aria-label="Main"><a href="#explore">Explore</a> · <a href="#hosting">Hosting</a></nav></header>
 <main><h1>Stay a little longer.</h1><p class="muted">Accommodation discovery for the 420 Integrated ecosystem.</p>
 <p class="warning" role="status">Preview service. Bookings and payments are not enabled. Listings shown below depend on your configured API; no reservation is confirmed here.</p>
-<section id="explore" aria-labelledby="explore-title"><h2 id="explore-title">Explore stays</h2>
+<section id="explore" aria-labelledby="explore-title"><h2 id="explore-title">Explore stays</h2><form id="stay-search"><label>Region<input name="region" maxlength="100" placeholder="Public region"></label><label>Stay name<input name="q" maxlength="100"></label><label>Guests<input name="min_capacity" type="number" min="1" max="1000" value="1"></label><button type="submit">Search stays</button></form>
 <button id="refresh">Refresh public listings</button><p id="results-status" role="status" aria-live="polite">Choose refresh to look for public listings.</p><div class="grid" id="listings"></div></section>
+<section id="guest" aria-labelledby="guest-title"><h2 id="guest-title">Your stays</h2><p class="muted">Private saved stays, booking requests, messages and receipts require a verified 420Identity session.</p><button type="button" id="guest-refresh">Refresh saved stays & reservations</button><div id="saved-stays" aria-live="polite"></div><div id="guest-reservations" aria-live="polite"></div></section>
 <section id="hosting" aria-labelledby="host-title"><h2 id="host-title">Host a property</h2><p class="muted">Authenticated users can prepare private drafts. Independent ownership approval is required for publication; booking and payments remain disabled.</p>
 <form id="host-auth"><label>420Identity signed session token (held only in memory; never saved)<input id="host-token" type="password" autocomplete="off" spellcheck="false" required></label><button type="submit">Verify session</button> <button id="sign-out" type="button">Clear session</button></form><p id="host-status" aria-live="polite" role="status">Not signed in.</p><form id="host-form"><label>Property title<input required minlength="3" maxlength="160" name="title"></label>
 <label>Public region (not street address)<input required name="public_region"></label>
@@ -21,12 +22,32 @@
 const status=document.querySelector("#results-status"),list=document.querySelector("#listings");
 document.querySelector("#refresh").addEventListener("click",async()=>{
  status.textContent="Loading public listings…";list.replaceChildren();
- try {const r=await fetch("/v1/bnb/listings",{credentials:"omit"});
+ try {const params=new URLSearchParams(new FormData(document.querySelector("#stay-search")));
+ const r=await fetch("/v1/bnb/search?"+params,{credentials:"omit",cache:"no-store"});
  if(!r.ok)throw Error("Service unavailable");
  const data=await r.json();if(!Array.isArray(data))throw Error("Invalid response");
  status.textContent=data.length?data.length+" public listing(s)":"No published stays available.";
  for(const item of data){const el=document.createElement("article");el.className="card";
  const heading=document.createElement("h3");heading.textContent=item.title||"Untitled stay";
+ const detail=document.createElement("button");detail.type="button";detail.textContent="View listing details";
+ const detailOutput=document.createElement("div");detailOutput.setAttribute("aria-live","polite");
+ detail.addEventListener("click",async()=>{
+ try{const response=await fetch("/v1/bnb/listings/"+encodeURIComponent(item.id),{credentials:"omit"});
+ if(!response.ok)throw Error("Listing unavailable.");
+ const listing=await response.json();
+ detailOutput.textContent=listing.title+" · "+listing.public_region+" · "+listing.capacity+
+ " available capacity (subject to selected dates). "+listing.reviews.length+" approved review(s).";
+ }catch(e){detailOutput.textContent=e.message;}
+ });
+ const save=document.createElement("button");save.type="button";save.textContent="Save stay";
+ const savedStatus=document.createElement("p");savedStatus.setAttribute("aria-live","polite");
+ save.addEventListener("click",async()=>{
+ if(!hostProof){savedStatus.textContent="Verify your 420Identity session first.";return;}
+ const response=await fetch("/v1/bnb/account/saved-stays/"+encodeURIComponent(item.id),
+ {method:"PUT",headers:hostHeaders(),credentials:"omit"});
+ savedStatus.textContent=response.ok?"Stay saved privately.":"Unable to save stay.";
+ });
+ el.append(detail,detailOutput,save,savedStatus);
  const details=document.createElement("p");details.textContent=[item.public_region,"Capacity: "+item.capacity,"Nightly: "+item.nightly_minor+" "+item.currency+" minor units"].join(" · ");
  const dateForm=document.createElement("form");
  const startLabel=document.createElement("label");startLabel.textContent="Check-in date";
@@ -355,5 +376,70 @@ async function loadBookingInbox(){
  }catch(error){view.textContent=error.message;}
 }
 document.querySelector("#refresh-bookings").addEventListener("click",loadBookingInbox);
+document.querySelector("#stay-search").addEventListener("submit",event=>{
+ event.preventDefault();document.querySelector("#refresh").click();
+});
+async function loadGuestDashboard(){
+ const saved=document.querySelector("#saved-stays"),bookings=document.querySelector("#guest-reservations");
+ saved.textContent="Loading saved stays…";bookings.replaceChildren();
+ if(!hostProof){saved.textContent="Sign in with 420Identity to view your stays.";return;}
+ try{
+ const [a,b]=await Promise.all(["/v1/bnb/account/saved-stays","/v1/bnb/account/reservations"].map(url=>
+ fetch(url,{headers:hostHeaders(),credentials:"omit",cache:"no-store"})));
+ if(!a.ok||!b.ok)throw Error("Private stays unavailable.");
+ const favorite=await a.json(),reservations=await b.json();
+ saved.replaceChildren();
+ const label=document.createElement("h3");label.textContent="Saved stays";saved.append(label);
+ for(const stay of favorite){
+ const item=document.createElement("p");item.textContent=stay.title+" · "+stay.public_region+" ";
+ const unsave=document.createElement("button");unsave.textContent="Remove";
+ unsave.addEventListener("click",async()=>{
+ const r=await fetch("/v1/bnb/account/saved-stays/"+encodeURIComponent(stay.id),{
+ method:"DELETE",headers:hostHeaders(),credentials:"omit"});
+ if(r.ok)await loadGuestDashboard();
+ });item.append(unsave);saved.append(item);
+ }
+ const title=document.createElement("h3");title.textContent="Your reservation dashboard";bookings.append(title);
+ for(const stay of reservations){
+ const card=document.createElement("article");card.className="card";
+ const summary=document.createElement("p");summary.textContent=stay.title+" · "+stay.state+
+ " · "+stay.checkin+" to "+stay.checkout+
+ (stay.confirmed?" · Pay-finalized reservation":" · Not confirmed");
+ card.append(summary);
+ const receipt=document.createElement("button");receipt.type="button";receipt.textContent="View receipt";
+ const receiptText=document.createElement("p");receiptText.setAttribute("role","status");
+ receipt.addEventListener("click",async()=>{
+ const r=await fetch("/v1/bnb/reservations/"+encodeURIComponent(stay.id)+"/receipt",
+ {headers:hostHeaders(),credentials:"omit"});
+ receiptText.textContent=r.ok?"Pay receipt reference: "+(await r.json()).receipt_hash:
+ "No independently authorized finalized Pay receipt available.";
+ });card.append(receipt,receiptText);
+ const message=document.createElement("textarea");message.placeholder="Message about this stay";
+ message.maxLength=3000;message.setAttribute("aria-label","Booking message");
+ const send=document.createElement("button");send.type="button";send.textContent="Send message";
+ const reply=document.createElement("p");reply.setAttribute("role","status");
+ send.addEventListener("click",async()=>{
+ const r=await fetch("/v1/bnb/booking-requests/"+encodeURIComponent(stay.request_id)+"/messages",{
+ method:"POST",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({body:message.value,nonce:"guest-message-"+Date.now()})});
+ reply.textContent=r.ok?"Message recorded privately.":"Message unavailable ("+r.status+").";
+ });card.append(message,send,reply);
+ const rating=document.createElement("select");rating.setAttribute("aria-label","Stay rating");
+ for(let i=1;i<=5;i++){const op=document.createElement("option");op.value=i;op.textContent=i+" star(s)";rating.append(op);}
+ const review=document.createElement("textarea");review.setAttribute("aria-label","Stay review");
+ review.placeholder="Review after your completed, verified stay";
+ const post=document.createElement("button");post.type="button";post.textContent="Submit review for moderation";
+ const reviewStatus=document.createElement("p");reviewStatus.setAttribute("role","status");
+ post.addEventListener("click",async()=>{
+ const r=await fetch("/v1/bnb/reservations/"+encodeURIComponent(stay.id)+"/guest-review",{
+ method:"POST",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({rating:Number(rating.value),body:review.value})});
+ reviewStatus.textContent=r.ok?"Review submitted for independent moderation.":
+ "Review unavailable until your confirmed stay is completed ("+r.status+").";
+ });card.append(rating,review,post,reviewStatus);bookings.append(card);
+ }
+ }catch(e){saved.textContent=e.message;}
+}
+document.querySelector("#guest-refresh").addEventListener("click",loadGuestDashboard);
 document.querySelector("#load-drafts").addEventListener("click",loadDrafts);
 </script></body></html>

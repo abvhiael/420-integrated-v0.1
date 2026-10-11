@@ -638,6 +638,103 @@ class PropertyRevision(PropertyInput):
     expected_version: int = Field(ge=1)
 
 
+def host_scope(c,property_id,actor,capability):
+    """Current owner or fresh, unrevoked, scoped nonfinancial delegation."""
+    owner=c.execute("SELECT host_subject,status FROM bnb_property WHERE id=%s",
+                    (property_id,)).fetchone()
+    if not owner:raise HTTPException(404,"NOT_FOUND")
+    if owner[0]==actor:return owner
+    grant=c.execute("""SELECT 1 FROM bnb_property_grant g
+        JOIN bnb_account a ON a.subject=g.grantee_subject
+        WHERE g.property_id=%s AND g.grantee_subject=%s AND g.capability=%s
+        AND g.revoked_at IS NULL AND g.expires_at>now() AND a.state='active'
+        AND g.granted_by=%s""",(property_id,actor,capability,owner[0])).fetchone()
+    if not grant:raise HTTPException(404,"NOT_FOUND")
+    return owner
+
+
+@app.get("/v1/bnb/account/hosting")
+def host_dashboard(authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        rows=c.execute("""SELECT DISTINCT p.id,p.title,p.public_region,p.status,p.version,
+            (p.host_subject=%s) AS owner FROM bnb_property p
+            LEFT JOIN bnb_property_grant g ON g.property_id=p.id
+            AND g.grantee_subject=%s AND g.capability IN ('view_reservations','handle_requests')
+            AND g.granted_by=p.host_subject AND g.revoked_at IS NULL AND g.expires_at>now()
+            WHERE p.host_subject=%s OR
+              (g.property_id IS NOT NULL AND EXISTS(SELECT 1 FROM bnb_account a
+               WHERE a.subject=%s AND a.state='active'))
+            ORDER BY p.id LIMIT 100""",(actor,actor,actor,actor)).fetchall()
+    return [{"id":str(x[0]),"title":x[1],"public_region":x[2],"status":x[3],
+             "version":x[4],"owner":x[5]} for x in rows]
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/host-reservations")
+def host_reservations(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        host_scope(c,property_id,actor,"view_reservations")
+        rows=c.execute("""SELECT r.id,r.status,r.booking_request_id,lower(h.period),
+            upper(h.period),h.units FROM bnb_reservation r
+            JOIN bnb_hold h ON h.id=r.hold_id
+            WHERE r.property_id=%s ORDER BY r.created_at DESC LIMIT 100""",
+            (property_id,)).fetchall()
+    return [{"id":str(x[0]),"state":x[1],"request_id":str(x[2]) if x[2] else None,
+             "checkin":x[3].isoformat(),"checkout":x[4].isoformat(),
+             "units":x[5],"confirmed":x[1]=="confirmed"} for x in rows]
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/earnings")
+def host_earnings(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        owner=host_scope(c,property_id,actor,"view_reservations")
+        if owner[0]!=actor:raise HTTPException(403,"FINANCIAL_SCOPE_RESTRICTED")
+        rows=c.execute("""SELECT s.asset,s.chain_id,s.host_amount,
+            COALESCE(SUM(d.amount) FILTER
+                (WHERE d.kind='host' AND d.state='finalized'),0),
+            COALESCE(SUM(d.amount) FILTER
+                (WHERE d.kind='host' AND d.state='reserved'),0)
+            FROM bnb_settlement_split s
+            JOIN bnb_reservation r ON r.id=s.reservation_id
+            LEFT JOIN bnb_pay_disbursement d ON d.reservation_id=r.id
+            WHERE r.property_id=%s
+            GROUP BY s.reservation_id,s.asset,s.chain_id,s.host_amount""",
+            (property_id,)).fetchall()
+    return {"payment_authority":"420Pay","bnb_custody":False,"rows":[
+        {"asset":x[0],"chain_id":x[1],"host_allocated":str(x[2]),
+         "payout_finalized":str(x[3]),"payout_reserved":str(x[4])} for x in rows]}
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/notifications")
+def host_notifications(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        host_scope(c,property_id,actor,"view_reservations")
+        events=c.execute("""SELECT id,action,happened_at FROM bnb_audit
+            WHERE resource_id=%s ORDER BY happened_at DESC,id LIMIT 100""",
+            (property_id,)).fetchall()
+    return [{"id":str(x[0]),"type":x[1],"created_at":x[2].isoformat(),
+             "delivery_status":"in_app_only"} for x in events]
+
+
+@app.get("/v1/bnb/account/properties/{property_id}/managers")
+def host_manager_grants(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        owner=c.execute("SELECT host_subject FROM bnb_property WHERE id=%s",
+                        (property_id,)).fetchone()
+        if not owner or owner[0]!=actor:raise HTTPException(404,"NOT_FOUND")
+        rows=c.execute("""SELECT grantee_subject,capability,expires_at
+            FROM bnb_property_grant WHERE property_id=%s AND granted_by=%s
+            AND revoked_at IS NULL AND expires_at>now()
+            ORDER BY grantee_subject,capability LIMIT 100""",
+            (property_id,actor)).fetchall()
+    return [{"subject":x[0],"capability":x[1],
+             "expires_at":x[2].isoformat(),"financial_permissions":[]} for x in rows]
+
+
 @app.get("/v1/bnb/account/properties")
 def my_properties(authorization: str | None = Header(None)):
     """Return own drafts, never any private address or third-party inventory."""

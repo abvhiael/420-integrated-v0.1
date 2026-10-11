@@ -720,6 +720,40 @@ def submit_abuse_report(payload:AbuseReportInput,authorization:str|None=Header(N
     return {"id":str(report_id),"state":"pending","replayed":False}
 
 
+class AbuseReportDecision(BaseModel):
+    decision:str=Field(pattern="^(accepted|dismissed)$")
+
+@app.post("/v1/bnb/internal/abuse-reports/{report_id}/decision")
+def moderate_abuse_report(report_id:UUID,payload:AbuseReportDecision,
+                          x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:raise HTTPException(401,"ABUSE_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","abuse-report")
+    if proof.get("report_id")!=str(report_id) or proof.get("decision")!=payload.decision:
+        raise HTTPException(403,"ABUSE_DECISION_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            report=c.execute("""SELECT property_id,status FROM bnb_abuse_report
+                WHERE id=%s""",(report_id,)).fetchone()
+            if not report:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(report[0],))
+            status=c.execute("SELECT status FROM bnb_abuse_report WHERE id=%s FOR UPDATE",
+                             (report_id,)).fetchone()[0]
+            if status!="pending":raise HTTPException(409,"ABUSE_DECISION_ALREADY_FINAL")
+            if c.execute("SELECT 1 FROM bnb_review_moderation_nonce WHERE issuer=%s AND jti=%s",
+                         (proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"ABUSE_DECISION_REPLAY")
+            c.execute("""INSERT INTO bnb_review_moderation_nonce
+                (issuer,jti,target_type,target_id,decision)
+                VALUES (%s,%s,'abuse_report',%s,%s)""",
+                (proof["iss"],proof["jti"],report_id,payload.decision))
+            c.execute("UPDATE bnb_abuse_report SET status=%s WHERE id=%s",
+                      (payload.decision,report_id))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,%s,%s)""",
+                (uuid4(),proof["sub"],"bnb.abuse_report."+payload.decision,report[0]))
+    return {"report_id":str(report_id),"state":payload.decision}
+
+
 class ReviewModerationDecision(BaseModel):
     decision:str=Field(pattern="^(approved|rejected|withdrawn)$")
 

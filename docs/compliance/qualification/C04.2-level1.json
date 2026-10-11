@@ -1,7 +1,7 @@
 {
   "step": "C04.2",
   "canonical": "Reviewer qualifications and delegation; MFA, least privilege, short-lived sessions and approval invalidation when reviewed content changes.",
-  "status": "PENDING_LEVEL1_CI_AND_INTEGRATION",
+  "status": "LEVEL1_TESTS_PASS_INTEGRATION_PENDING",
   "qualification_level": 1,
   "implementation_sha": "347e76315ba7cdd3fa144a5347c0c6452f77420f",
   "branch": "audit/420compliance-c01-1-inventory-20261009",
@@ -20,9 +20,13 @@
     "revocation and unavailable authority fail closed"
   ],
   "ci": {
-    "status": "NOT_VERIFIED",
-    "run_id": null,
-    "job_id": null
+    "status": "PASS",
+    "run_id": 38106774438,
+    "job_id": 114373865992,
+    "conclusion": "success",
+    "exact_sha": true,
+    "successful_steps": 48,
+    "failed_steps": 0
   },
   "limitations": [
     "No independent reviewer or MFA provider connected",
@@ -30,8 +34,8 @@
     "No production durable authorization or delegation persistence"
   ],
   "blockers": [
-    "Pass app-specific exact-SHA CI",
-    "Wire independent fresh authorization into protected lifecycle operations before full production acceptance"
+    "Fresh reviewer authorization must be enforced by production lifecycle review/approval API rather than merely exposed as adapter",
+    "Independent legal qualification and identity/MFA provider acceptance not established"
   ],
   "level2": "Not scheduled for C04.2",
   "level3": "C08.5 deferred",

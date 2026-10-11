@@ -710,6 +710,7 @@ contract CultivationEngineTest is PlantSourcesFixture {
             keccak256("r035:publicplant")
         );
         _preparePlantSource(caps, plants, plantId, genomeId, address(this), 12);
+        sourceSeeds.approvePlant(plantId, plantId, 12, plotId);
         plants.registerPlantFromSource(
             plantId, genomeId, address(this), 12, plotId, PlantRegistry.PlantSourceKind.SEED, plantId
         );

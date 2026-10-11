@@ -679,28 +679,16 @@ contract CultivationEngineTest is PlantSourcesFixture {
     function testR035PublicPlotCapacityReleaseAndReallocation() public {
         uint64 plotId = 21;
         uint64 plantId = 93;
-        _grant(
-            address(this),
-            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
-            ActionIds.PUBLIC_PLOT_REGISTER,
-            bytes32(uint256(plotId)),
-            keccak256("r035:plot")
+        _sourceGrant(
+            caps, address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, bytes32(uint256(plotId)), 1
         );
         publicAccess.registerPublicPlot(plotId, 12, 1);
-        _grant(
-            address(this),
-            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
-            ActionIds.PUBLIC_PLOT_ALLOCATE,
-            bytes32(uint256(plotId)),
-            keccak256("r035:allocation")
+        _sourceGrant(
+            caps, address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_ALLOCATE, bytes32(uint256(plotId)), 1
         );
         publicAccess.allocate(plotId, 1);
-        _grant(
-            address(this),
-            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
-            ActionIds.PUBLIC_PLOT_RELEASE,
-            bytes32(uint256(plotId)),
-            keccak256("r035:release")
+        _sourceGrant(
+            caps, address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_RELEASE, bytes32(uint256(plotId)), 1
         );
         _grant(
             address(this),

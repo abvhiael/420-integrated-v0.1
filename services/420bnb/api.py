@@ -611,6 +611,7 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
     if not payload.body.strip():raise HTTPException(422,"EMPTY_MESSAGE")
     with db() as c:
         with c.transaction():
+            c.execute("SELECT subject FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,))
             ref=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state
                 FROM bnb_booking_request r WHERE r.id=%s""",(request_id,)).fetchone()
             if not ref:raise HTTPException(404,"NOT_FOUND")
@@ -747,6 +748,7 @@ def submit_abuse_report(payload:AbuseReportInput,authorization:str|None=Header(N
     actor=active_subject(authorization)
     with db() as c:
         with c.transaction():
+            c.execute("SELECT subject FROM bnb_account WHERE subject=%s FOR UPDATE",(actor,))
             if payload.target_type=="review":
                 target=c.execute("""SELECT r.property_id,r.guest_subject,p.host_subject
                     FROM bnb_guest_review r JOIN bnb_property p ON p.id=r.property_id

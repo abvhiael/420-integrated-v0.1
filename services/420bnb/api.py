@@ -19,6 +19,20 @@ from fastapi import FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="420BnB", version="0.1.0")
+@app.middleware("http")
+async def bounded_api_security_headers(request,call_next):
+    """Prevent API data caching, MIME sniffing and browser framing.
+    Identity and financial actions never depend on browser session cookies.
+    """
+    response=await call_next(request)
+    response.headers.setdefault("Cache-Control","no-store")
+    response.headers["X-Content-Type-Options"]="nosniff"
+    response.headers["X-Frame-Options"]="DENY"
+    response.headers["Referrer-Policy"]="no-referrer"
+    response.headers["Content-Security-Policy"]="default-src 'none'; frame-ancestors 'none'"
+    return response
+
+
 DATABASE_URL = os.getenv("BNB_DATABASE_URL", "")
 
 

@@ -1,0 +1,47 @@
+{
+  "step": "C04.4",
+  "canonical": "BC delivery matrix with separate licensee/employee, delivery-person and common-carrier branches; map every implemented rule to current authoritative provisions and tests.",
+  "status": "PENDING_LEVEL1_CI",
+  "qualification_level": 1,
+  "implementation_sha": "dd052b61f43bb6447030af7a452cd1092cea7319",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "files": [
+    "services/complianceauth/bc_delivery_matrix.go",
+    "services/complianceauth/bc_delivery_matrix_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C04.4-BC-DELIVERY-CLASSIFICATION.md",
+    "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
+  ],
+  "requirements": [
+    "Three distinct carrier classes",
+    "BC retailer origin/recipient/delivery and return checks",
+    "Per-rule current authoritative source mapping",
+    "Negative/adversarial branch tests",
+    "Never a legal ALLOW"
+  ],
+  "source_asof": "2026-10-10",
+  "ci": {
+    "status": "PENDING"
+  },
+  "testnet_deferred": [
+    "C09.3 current official source retention",
+    "C09.5 authenticated retailer and carrier verification",
+    "C09.7 deployed revocation and adversarial evidence",
+    "C09.9 independently reviewed exact BC classifications"
+  ],
+  "production_deferred": [
+    "C10.1 legal advice and latest law review",
+    "C10.2 actual retailer/carrier eligibility and insurance",
+    "C10.7 independent final acceptance"
+  ],
+  "limitations": [
+    "Boolean candidate evidence is not authenticated operational evidence",
+    "Local, Indigenous Nation and store licence restrictions require independent review",
+    "C04.5 municipal requirements and C04.6 detailed delivery lifecycle remain canonical future steps"
+  ],
+  "level2": "At documented milestone only",
+  "level3": "C08.5 deferred",
+  "next_canonical": "C04.5 — Vancouver retailer/business permissions and applicable municipal operating restrictions; confirm DOOBr's own business category rather than treating retailer licensing as courier authorization."
+}

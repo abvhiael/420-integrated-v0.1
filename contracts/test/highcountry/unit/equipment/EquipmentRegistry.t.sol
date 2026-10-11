@@ -7,31 +7,52 @@ contract R042Land {
     mapping(uint64 => address) public operators;
     mapping(uint64 => uint32) public capacities;
 
-    function setParcel(uint64 id, address operator, uint32 capacity) external {
+    function setParcel(
+        uint64 id,
+        address operator,
+        uint32 capacity
+    ) external {
         operators[id] = operator;
         capacities[id] = capacity;
     }
 
-    function effectiveOperator(uint64 id) external view returns (address) {
+    function effectiveOperator(
+        uint64 id
+    ) external view returns (address) {
         require(operators[id] != address(0), "unknown parcel");
         return operators[id];
     }
 
-    function growCapacityOf(uint64 id) external view returns (uint32) {
+    function growCapacityOf(
+        uint64 id
+    ) external view returns (uint32) {
         return capacities[id];
     }
 }
 
 contract R042Player {
-    function place(EquipmentRegistry equipment, bytes32 id, uint64 parcelId) external {
+    function place(
+        EquipmentRegistry equipment,
+        bytes32 id,
+        uint64 parcelId
+    ) external {
         equipment.place(id, parcelId);
     }
 
-    function remove(EquipmentRegistry equipment, bytes32 id) external {
+    function remove(
+        EquipmentRegistry equipment,
+        bytes32 id
+    ) external {
         equipment.remove(id);
     }
 
-    function issue(EquipmentRegistry equipment, bytes32 id, bytes32 typeId, address owner, bytes32 ref) external {
+    function issue(
+        EquipmentRegistry equipment,
+        bytes32 id,
+        bytes32 typeId,
+        address owner,
+        bytes32 ref
+    ) external {
         equipment.issue(id, typeId, owner, ref);
     }
 }
@@ -60,7 +81,10 @@ contract EquipmentRegistryR042Test {
         registry.setIssuer(address(this), true);
     }
 
-    function _earn(bytes32 id, uint256 evidence) internal {
+    function _earn(
+        bytes32 id,
+        uint256 evidence
+    ) internal {
         registry.issue(id, TYPE, address(alice), bytes32(evidence));
     }
 
@@ -74,27 +98,28 @@ contract EquipmentRegistryR042Test {
         require(registry.occupiedSlots(1) == 2, "slot conservation");
         int256[6] memory values = registry.effectiveEffects(1, address(alice));
         require(values[0] == 60 && values[1] == -40 && values[2] == 200, "effect sums");
-        for (uint256 i = 3; i < 6; ++i) require(values[i] == 0, "unexpected effect");
+        for (uint256 i = 3; i < 6; ++i) {
+            require(values[i] == 0, "unexpected effect");
+        }
         alice.remove(registry, first);
         alice.remove(registry, second);
         require(registry.occupiedSlots(1) == 0, "slot release");
         values = registry.effectiveEffects(1, address(alice));
-        for (uint256 i; i < 6; ++i) require(values[i] == 0, "removed effect persists");
+        for (uint256 i; i < 6; ++i) {
+            require(values[i] == 0, "removed effect persists");
+        }
     }
 
     function testDenyUntrustedIssuanceAndReplay() public {
-        (bool unauthorized,) = address(bob).call(
-            abi.encodeCall(bob.issue, (registry, bytes32(uint256(1)), TYPE, address(bob), bytes32(uint256(77))))
-        );
+        (bool unauthorized,) = address(bob)
+            .call(abi.encodeCall(bob.issue, (registry, bytes32(uint256(1)), TYPE, address(bob), bytes32(uint256(77)))));
         require(!unauthorized, "untrusted issuer");
         _earn(bytes32(uint256(1)), 77);
-        (bool replay,) = address(registry).call(
-            abi.encodeCall(registry.issue, (bytes32(uint256(2)), TYPE, address(alice), bytes32(uint256(77))))
-        );
+        (bool replay,) = address(registry)
+            .call(abi.encodeCall(registry.issue, (bytes32(uint256(2)), TYPE, address(alice), bytes32(uint256(77)))));
         require(!replay, "earning replay");
-        (bool duplicate,) = address(registry).call(
-            abi.encodeCall(registry.issue, (bytes32(uint256(1)), TYPE, address(alice), bytes32(uint256(78))))
-        );
+        (bool duplicate,) = address(registry)
+            .call(abi.encodeCall(registry.issue, (bytes32(uint256(1)), TYPE, address(alice), bytes32(uint256(78)))));
         require(!duplicate, "duplicate item");
         require(registry.issuedCount() == 1, "counter changed");
     }
@@ -124,13 +149,9 @@ contract EquipmentRegistryR042Test {
         _earn(id, 101);
         alice.place(registry, id, 1);
         land.setParcel(1, address(bob), 2);
-        (bool successor,) = address(registry).call(
-            abi.encodeCall(registry.effectiveEffects, (uint64(1), address(bob)))
-        );
+        (bool successor,) = address(registry).call(abi.encodeCall(registry.effectiveEffects, (uint64(1), address(bob))));
         require(!successor, "successor inherited stale equipment");
-        (bool stale,) = address(registry).call(
-            abi.encodeCall(registry.effectiveEffects, (uint64(1), address(alice)))
-        );
+        (bool stale,) = address(registry).call(abi.encodeCall(registry.effectiveEffects, (uint64(1), address(alice))));
         require(!stale, "stale operator effect");
         alice.remove(registry, id);
         require(registry.occupiedSlots(1) == 0, "failed to recover stranded item");
@@ -140,9 +161,8 @@ contract EquipmentRegistryR042Test {
         EquipmentRegistry.EquipmentType memory kind = registry.equipmentType(TYPE);
         require(kind.catalogueVersion == VERSION && kind.slotCost == 1, "catalogue version");
         int16[6] memory zero;
-        (bool overwrite,) = address(registry).call(
-            abi.encodeCall(registry.registerType, (TYPE, keccak256("new"), uint16(1), zero))
-        );
+        (bool overwrite,) =
+            address(registry).call(abi.encodeCall(registry.registerType, (TYPE, keccak256("new"), uint16(1), zero)));
         require(!overwrite, "catalogue overwritten");
         require(kind.effects[0] == 30 && kind.effects[1] == -20, "changed stats");
     }

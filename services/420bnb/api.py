@@ -327,6 +327,8 @@ def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:i
     """Public, nonbinding Travel discovery projection; no geolocation or legal authority inferred."""
     if len(destination)>100:
         raise HTTPException(422,"DESTINATION_TOO_LONG")
+    if min_capacity<1 or min_capacity>1000 or limit<1 or limit>50 or offset<0 or offset>5000:
+        raise HTTPException(422,"INVALID_SEARCH_WINDOW")
     listings=guest_search(region=destination,min_capacity=min_capacity,limit=limit,offset=offset)
     return {
         "version":"bnb-travel-discovery/v1",

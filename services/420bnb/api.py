@@ -1358,6 +1358,217 @@ def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=
     return {"state":next_state,"confirmed":viable,"replayed":False}
 
 
+class SettlementSplitInput(BaseModel):
+    reservation_id: UUID
+    pay_payment_id: str=Field(min_length=3,max_length=200)
+    canonical_split_id: str=Field(min_length=3,max_length=200)
+    chain_id: int=Field(gt=0,strict=True)
+    asset: str=Field(min_length=1,max_length=120)
+    captured_amount: str=Field(pattern=r"^[1-9][0-9]{0,76}$")
+    host_recipient: str=Field(min_length=3,max_length=200)
+    platform_recipient: str=Field(min_length=3,max_length=200)
+    developer_recipient: str=Field(min_length=3,max_length=200)
+    host_amount: str=Field(pattern=r"^(0|[1-9][0-9]{0,76})$")
+    platform_amount: str=Field(pattern=r"^(0|[1-9][0-9]{0,76})$")
+    developer_amount: str=Field(pattern=r"^(0|[1-9][0-9]{0,76})$")
+    retained_amount: str=Field(pattern=r"^(0|[1-9][0-9]{0,76})$")
+    policy_version: str=Field(min_length=1,max_length=100)
+
+
+class PayDisbursementInput(BaseModel):
+    reservation_id: UUID
+    pay_operation_id: str=Field(min_length=3,max_length=200)
+    kind: str=Field(pattern="^(refund|host|platform|developer|retained)$")
+    recipient: str=Field(min_length=3,max_length=200)
+    amount: str=Field(pattern=r"^[1-9][0-9]{0,76}$")
+    chain_id: int=Field(gt=0,strict=True)
+    asset: str=Field(min_length=1,max_length=120)
+    policy_version: str=Field(min_length=1,max_length=100)
+    state: str=Field(pattern="^(reserved|finalized|failed)$")
+    event_id: str=Field(min_length=3,max_length=200)
+    receipt_hash: str|None=Field(default=None,min_length=32,max_length=200)
+
+
+def financial_claim(payload,token,action):
+    proof=signed_pay_claim(token,action,payload)
+    if proof.get("settlement_authority")!="420Pay" or proof.get("economic_event_verified") is not True:
+        raise HTTPException(403,"PAY_SETTLEMENT_AUTHORITY_REQUIRED")
+    return proof
+
+
+@app.post("/v1/bnb/internal/pay/settlement-splits",status_code=202)
+def ingest_settlement_split(payload:SettlementSplitInput,x_pay_authority_proof:str|None=Header(None)):
+    """Immutable Pay-authorized economic allocations, without BnB custody."""
+    proof=financial_claim(payload,x_pay_authority_proof,"settlement-split")
+    amount=int(payload.captured_amount)
+    components=(int(payload.host_amount),int(payload.platform_amount),
+                int(payload.developer_amount),int(payload.retained_amount))
+    if sum(components)!=amount:raise HTTPException(422,"SPLIT_NOT_CONSERVED")
+    if (proof.get("payment_id")!=payload.pay_payment_id or
+        proof.get("chain_id")!=payload.chain_id or proof.get("asset")!=payload.asset or
+        proof.get("canonical_split_id")!=payload.canonical_split_id or
+        proof.get("policy_version")!=payload.policy_version or
+        proof.get("developer_recipient_approved") is not True):
+        raise HTTPException(403,"PAY_SPLIT_DOMAIN_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            item=c.execute("""SELECT r.status,i.pay_payment_id,i.chain_id,i.asset,
+                i.asset_amount,i.merchant_id,i.payout_controller,i.state
+                FROM bnb_reservation r JOIN bnb_pay_intent i ON i.reservation_id=r.id
+                WHERE r.id=%s FOR UPDATE OF r,i""",(payload.reservation_id,)).fetchone()
+            if not item or item[0]!="confirmed" or item[7]!="finalized":
+                raise HTTPException(409,"PAY_NOT_FINALIZED")
+            if (item[1]!=payload.pay_payment_id or item[2]!=payload.chain_id or
+                item[3]!=payload.asset or int(item[4])!=amount):
+                raise HTTPException(409,"CAPTURE_MISMATCH")
+            previous=c.execute("""SELECT canonical_split_id,host_amount,platform_amount,
+                developer_amount,retained_amount,host_recipient,platform_recipient,
+                developer_recipient,policy_version FROM bnb_settlement_split
+                WHERE reservation_id=%s""",(payload.reservation_id,)).fetchone()
+            values=(payload.canonical_split_id,*components[:3],components[3],
+                    payload.host_recipient,payload.platform_recipient,
+                    payload.developer_recipient,payload.policy_version)
+            if previous:
+                if tuple(previous)!=values:raise HTTPException(409,"SPLIT_REPLAY_CONFLICT")
+                return {"state":"recorded","replayed":True,"custody":False}
+            c.execute("""INSERT INTO bnb_settlement_split
+                (reservation_id,pay_payment_id,chain_id,asset,captured_amount,
+                 host_recipient,platform_recipient,developer_recipient,
+                 host_amount,platform_amount,developer_amount,retained_amount,
+                 policy_version,canonical_split_id)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                (payload.reservation_id,payload.pay_payment_id,payload.chain_id,
+                 payload.asset,amount,payload.host_recipient,payload.platform_recipient,
+                 payload.developer_recipient,*components,payload.policy_version,
+                 payload.canonical_split_id))
+    return {"state":"recorded","replayed":False,"custody":False}
+
+
+@app.post("/v1/bnb/internal/pay/disbursements",status_code=202)
+def ingest_pay_disbursement(payload:PayDisbursementInput,
+                            x_pay_authority_proof:str|None=Header(None)):
+    """Pay alone authorizes economic reservations and terminal disbursements."""
+    proof=financial_claim(payload,x_pay_authority_proof,"disbursement")
+    if (proof.get("pay_operation_id")!=payload.pay_operation_id or
+        proof.get("pay_event_id")!=payload.event_id or
+        proof.get("chain_id")!=payload.chain_id or
+        proof.get("asset")!=payload.asset or
+        proof.get("policy_version")!=payload.policy_version or
+        proof.get("pay_beneficiary_verified") is not True):
+        raise HTTPException(403,"PAY_DISBURSEMENT_DOMAIN_MISMATCH")
+    if payload.state=="finalized" and (not payload.receipt_hash or
+        proof.get("receipt_finalized") is not True):
+        raise HTTPException(403,"DISBURSEMENT_FINALITY_REQUIRED")
+    if payload.state!="finalized" and payload.receipt_hash:
+        raise HTTPException(422,"UNFINALIZED_RECEIPT")
+    digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            split=c.execute("""SELECT captured_amount,host_amount,platform_amount,
+                developer_amount,retained_amount,host_recipient,platform_recipient,
+                developer_recipient,chain_id,asset,policy_version
+                FROM bnb_settlement_split WHERE reservation_id=%s FOR UPDATE""",
+                (payload.reservation_id,)).fetchone()
+            if not split:raise HTTPException(409,"SPLIT_NOT_AUTHORIZED")
+            if (split[8]!=payload.chain_id or split[9]!=payload.asset or
+                split[10]!=payload.policy_version):
+                raise HTTPException(409,"DISBURSEMENT_ASSET_POLICY_MISMATCH")
+            if payload.kind in ("host","platform","developer"):
+                dest={"host":split[5],"platform":split[6],"developer":split[7]}[payload.kind]
+                if payload.recipient!=dest:raise HTTPException(403,"PAYOUT_BENEFICIARY_MISMATCH")
+            elif payload.kind=="refund":
+                if proof.get("original_payer_refund") is not True or (
+                   proof.get("refund_recipient")!=payload.recipient):
+                    raise HTTPException(403,"ORIGINAL_PAYER_REFUND_REQUIRED")
+            else:
+                if proof.get("retained_distribution_approved") is not True:
+                    raise HTTPException(403,"RETAINED_DISTRIBUTION_NOT_APPROVED")
+            prior_event=c.execute("""SELECT event_digest FROM bnb_pay_disbursement_event
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone()
+            if prior_event:
+                if prior_event[0]!=digest:raise HTTPException(409,"PAY_EVENT_REPLAY_CONFLICT")
+                return {"state":payload.state,"replayed":True,"custody":False}
+            if c.execute("SELECT 1 FROM bnb_pay_disbursement_event WHERE event_id=%s",
+                         (payload.event_id,)).fetchone():
+                raise HTTPException(409,"PAY_EVENT_ID_REUSED")
+            existing=c.execute("""SELECT kind,recipient,amount,state,chain_id,asset,policy_version
+                FROM bnb_pay_disbursement WHERE pay_operation_id=%s FOR UPDATE""",
+                (payload.pay_operation_id,)).fetchone()
+            amount=int(payload.amount)
+            if existing:
+                if (existing[0]!=payload.kind or existing[1]!=payload.recipient or
+                    existing[2]!=amount or existing[4]!=payload.chain_id or
+                    existing[5]!=payload.asset or existing[6]!=payload.policy_version):
+                    raise HTTPException(409,"PAY_OPERATION_MUTATED")
+                if existing[3]=="finalized" or (existing[3]=="failed" and
+                    payload.state!="failed"):
+                    raise HTTPException(409,"PAY_OPERATION_TERMINAL")
+                if existing[3]=="reserved" and payload.state=="reserved":
+                    raise HTTPException(409,"DUPLICATE_ECONOMIC_RESERVATION")
+            else:
+                if payload.state!="reserved":
+                    raise HTTPException(409,"UNKNOWN_DISBURSEMENT")
+                c.execute("""INSERT INTO bnb_pay_disbursement
+                    (id,reservation_id,kind,pay_operation_id,recipient,amount,
+                     chain_id,asset,state,policy_version)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'reserved',%s)""",
+                    (uuid4(),payload.reservation_id,payload.kind,
+                     payload.pay_operation_id,payload.recipient,amount,
+                     payload.chain_id,payload.asset,payload.policy_version))
+            usage=c.execute("""SELECT kind,COALESCE(sum(amount),0) FROM bnb_pay_disbursement
+                WHERE reservation_id=%s AND state IN ('reserved','finalized')
+                GROUP BY kind""",(payload.reservation_id,)).fetchall()
+            used=dict(usage)
+            if sum(used.values())>split[0]:
+                raise HTTPException(409,"OVERALLOCATED_CAPTURE")
+            limits={"host":split[1],"platform":split[2],"developer":split[3],"retained":split[4]}
+            if any(used.get(k,0)>v for k,v in limits.items()):
+                raise HTTPException(409,"PAYOUT_SHARE_EXCEEDED")
+            if existing and payload.state!=existing[3]:
+                c.execute("""UPDATE bnb_pay_disbursement SET state=%s,pay_event_id=%s,
+                    pay_receipt_hash=%s,updated_at=now() WHERE pay_operation_id=%s""",
+                    (payload.state,payload.event_id,payload.receipt_hash,
+                     payload.pay_operation_id))
+            c.execute("""INSERT INTO bnb_pay_disbursement_event
+                (issuer,jti,pay_operation_id,event_id,event_digest,state)
+                VALUES (%s,%s,%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],payload.pay_operation_id,
+                 payload.event_id,digest,payload.state))
+    return {"state":payload.state,"replayed":False,"custody":False}
+
+
+@app.get("/v1/bnb/reservations/{reservation_id}/settlement")
+def read_settlement_projection(reservation_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,p.host_subject,s.captured_amount,
+            s.asset,s.chain_id,s.host_amount,s.platform_amount,s.developer_amount
+            FROM bnb_reservation r JOIN bnb_property p ON p.id=r.property_id
+            LEFT JOIN bnb_settlement_split s ON s.reservation_id=r.id
+            WHERE r.id=%s""",(reservation_id,)).fetchone()
+        if not row or actor not in (row[0],row[1]):raise HTTPException(404,"NOT_FOUND")
+        ops=c.execute("""SELECT kind,amount,state FROM bnb_pay_disbursement
+            WHERE reservation_id=%s ORDER BY created_at""",(reservation_id,)).fetchall()
+    pending=sum(int(x[1]) for x in ops if x[2]=="reserved")
+    paid=sum(int(x[1]) for x in ops if x[2]=="finalized")
+    captured=int(row[2]) if row[2] is not None else 0
+    return {"reservation_id":str(reservation_id),"asset":row[3],"chain_id":row[4],
+            "captured_amount":str(captured),"reserved_amount":str(pending),
+            "finalized_amount":str(paid),
+            "remaining_liability":str(captured-pending-paid),
+            "refunded_amount":str(sum(int(x[1]) for x in ops if x[0]=="refund" and x[2]=="finalized")),
+            "disbursements":[{"kind":k,"amount":str(a),"state":state} for k,a,state in ops],
+            "canonical_pay_source":True,"bnb_custody":False}
+
+
 @app.post("/v1/bnb/reservations/{reservation_id}/expire")
 def expire_payment_pending_reservation(reservation_id:UUID,
                                        authorization:str|None=Header(None)):

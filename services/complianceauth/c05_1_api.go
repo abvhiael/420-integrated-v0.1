@@ -2,13 +2,13 @@ package complianceauth
 
 import (
  "context"
+ "bytes"
  "encoding/json"
  "errors"
  "io"
  "net/http"
  "strconv"
  "strings"
- "time"
 )
 
 const ComplianceAPIVersion = "v1"
@@ -128,4 +128,27 @@ func(c C051Client) GetGuidance(ctx context.Context,region string)([]C051Guidance
  if e!=nil||len(page.Items)>maxC051Page{return nil,ErrUnavailable}
  return page.Items,nil
 }
-var _ = time.Second
+
+func(c C051Client) Evaluate(ctx context.Context,request C051DecisionRequest)(C051Decision,error){
+ var result C051Decision
+ if c.HTTP==nil||!strings.HasPrefix(c.BaseURL,"https://")||c.Token==""||!c051Scope(request.TenantID)||!c051Scope(request.OperationRef)||!c051Scope(request.Stage)||!c051Scope(request.Action)||!digestValid(request.PolicyDigest)||!digestValid(request.FactsDigest){return result,ErrUnauthorized}
+ body,e:=json.Marshal(request);if e!=nil{return result,e}
+ req,e:=http.NewRequestWithContext(ctx,http.MethodPost,c.BaseURL+"/api/v1/evaluate",bytes.NewReader(body));if e!=nil{return result,e}
+ req.Header.Set("Content-Type","application/json");req.Header.Set("Accept","application/json");req.Header.Set("Authorization","Bearer "+c.Token)
+ resp,e:=c.HTTP.Do(req);if e!=nil{return result,e};defer resp.Body.Close()
+ if resp.StatusCode!=200{return result,ErrUnavailable}
+ e=json.NewDecoder(io.LimitReader(resp.Body,maxC051Body)).Decode(&result)
+ if e!=nil||result.Outcome!="DENY"&&result.Outcome!="REVIEW_REQUIRED"&&result.Outcome!="ALLOW"||result.Outcome=="ALLOW"&&result.PolicyDigest!=request.PolicyDigest{return C051Decision{},ErrUnavailable}
+ return result,nil
+}
+func(c C051Client) PolicyStatus(ctx context.Context,scope string)([]C051PolicyStatus,error){
+ if c.HTTP==nil||!strings.HasPrefix(c.BaseURL,"https://")||!c051Scope(scope){return nil,ErrUnavailable}
+ req,e:=http.NewRequestWithContext(ctx,http.MethodGet,c.BaseURL+"/api/v1/policies/status?scope="+scope,nil);if e!=nil{return nil,e}
+ req.Header.Set("Accept","application/json")
+ resp,e:=c.HTTP.Do(req);if e!=nil{return nil,e};defer resp.Body.Close()
+ if resp.StatusCode!=200{return nil,ErrUnavailable}
+ var page C051ListPage[C051PolicyStatus]
+ e=json.NewDecoder(io.LimitReader(resp.Body,maxC051Body)).Decode(&page)
+ if e!=nil||len(page.Items)>maxC051Page{return nil,ErrUnavailable}
+ return page.Items,nil
+}

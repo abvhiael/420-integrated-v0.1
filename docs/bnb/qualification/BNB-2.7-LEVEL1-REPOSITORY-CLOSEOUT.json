@@ -2,16 +2,16 @@
   "step": "BNB-2.7",
   "canonical_title": "Settlement, Refunds and Host Payouts",
   "qualification_level": "Level 1",
-  "status": "PENDING_REQUIRED_RUNTIME_CI",
-  "implementation_sha": "c0cedbab7fc972b226e9dfc6d8641b10b9170fea",
+  "status": "PASS_REPOSITORY_SIDE",
+  "implementation_sha": "6c0e9c5ba4c97d860c1d11b58a917f2d94c905f6",
   "pr": 600,
   "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
   "main_at_step_start": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
   "git_divergence_at_start": {
     "behind_main": 339
   },
-  "run_id": 38101121987,
-  "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38101121987",
+  "run_id": 38104393775,
+  "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38104393775",
   "changes": [
     "services/420bnb/migrations/016_settlement_refund_payout.sql",
     "services/420bnb/api.py",
@@ -29,15 +29,54 @@
     "Targeted PostgreSQL and adversarial runtime coverage added"
   ],
   "unqualified": [
-    "Latest exact-SHA runtime and dependent workflow results are queued, not green",
-    "No current-main Level 3 reconciliation or full phase merge"
+    "Full phase Level 3, cross-repository merge and production-equivalent independently authorized 420Pay/420Swap settlement remain outstanding; not Level 1 blockers"
   ],
   "deferred_operational": [
     "Canonical deployed Pay settlement, RefundManager, beneficiary registry and compensation vault provenance",
     "Real money movement, finality-aware partial refund/payout and Fiat/Swap settlement acceptance",
-    "Independent legal fee/tax/dispute policies, operator and security/testnet authorization"
+    "Independent legal fee/tax/dispute policies, operator and security/testnet authorization",
+    "T-BNB-SETTLEMENT-3: independently governed recipient split, Pay RefundManager/SettlementRouter, developer compensation vault activation and live payout finality"
   ],
-  "level2": "Not automatically rerun; app milestone to be decided from authoritative roadmap",
-  "level3": "Deferred to full app audit-phase closeout, one Solidity Foundry owner, separate Genesis authority owner",
-  "next_step": "Not established in this turn; read canonical repository roadmap rather than invent BNB-2.8"
+  "level2": {
+    "status": "PASS_APP_SCOPED",
+    "rationale": "BNB-2.7 introduces major financial lifecycle authority: verify retained BnB-1.1 through BnB-1.9 app workflows against same SHA, without duplicate global Foundry or Genesis.",
+    "checks_passed": 10,
+    "failed_checks": 0,
+    "workflow_ids": [
+      38104393777,
+      38104393685,
+      38104393670,
+      38104393747,
+      38104393754,
+      38104393638,
+      38104393628,
+      38104393750,
+      38104393609,
+      38104393775
+    ]
+  },
+  "level3": {
+    "status": "DEFERRED",
+    "requires": "One future exact-merge-candidate reconciliation against current main; canonical Solidity inventory, separate Genesis address authority, global Docs/qualification and impacted service clients."
+  },
+  "next_step": "Not established from canonical repository evidence; do not invent BNB-2.8.",
+  "last_verified_main_sha": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "pr_base_sha": "f8bbb62e1cdfe68cff25261fd4a036db1840a15c",
+  "run_job_id": 114366684363,
+  "level1": {
+    "status": "PASS",
+    "qualified_sha": "6c0e9c5ba4c97d860c1d11b58a917f2d94c905f6",
+    "workflow": "420BnB Runtime Slice",
+    "run_id": 38104393775,
+    "job_id": 114366684363,
+    "conclusion": "success",
+    "failed_steps": 0,
+    "coverage": [
+      "PostgreSQL migrations through 016; signed settlement, refund, payout and payment-failure adversarial tests",
+      "Full retained BnB runtime API regression and multi-process capacity contention",
+      "Canonical decimal-string amounts, partial refund/payout conservation, replay, failure and recovery cases",
+      "Container staging nonroot build, Chromium guest/host and automated accessibility smoke"
+    ]
+  },
+  "evidence_policy": "Subsequent documentation/evidence-only commits inherit qualified implementation SHA; any executable/CI/config change requires requalification."
 }

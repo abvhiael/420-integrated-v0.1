@@ -65,8 +65,8 @@ func AssessFederalProduct(p FederalProductPolicy, f FederalProductFacts,now time
  if product.BitLen()>256{return fail("EQUIVALENCY_BUDGET_EXCEEDED")}
  result.EquivalentNumerator=product.String()
  result.EquivalentDenominator=den.String()
- if p.PackagingRequired&&!f.PackageVerified{return fail("PACKAGING_UNVERIFIED")}
- if p.PromotionProhibited&&f.PromotionPresent{return fail("PROMOTION_REVIEW_OR_PROHIBITION")}
+ if !p.PackagingRequired||!f.PackageVerified{return fail("PACKAGING_UNVERIFIED")}
+ if !p.PromotionProhibited||f.PromotionPresent{return fail("PROMOTION_REVIEW_OR_PROHIBITION")}
  if f.PaymentRoute==""||!p.PaymentRouteReviewed{return fail("PAYMENT_ROUTE_LEGAL_REVIEW_REQUIRED")}
  result.State="CANDIDATE_REVIEW_REQUIRED"
  result.Reasons=[]string{"INDEPENDENT_LEGAL_AND_OPERATIONAL_AUTHORITY_REQUIRED"}

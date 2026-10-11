@@ -18,6 +18,16 @@ These are **external/testnet/operational acceptance gates**, not unfinished loca
 
 **Prerequisites before promotion:** Repository-side R02.3 application admission authorization, correct atomic persistence, real concurrent PostgreSQL tests and exact-SHA Level 1 qualification must remain qualified; later R02.13 Level 2 and R05.10 Level 3 still apply. A green CI run is not proof of approved external authority. Live transactions remain disabled. These obligations are **deferred, NOT COMPLETE**, and do not block development of unrelated subsequent repository steps once the applicable R02.3 scoped local exit criteria are met.
 
+## R03.7 deferral handoff and acceptance boundaries
+
+**Repository handoff:** R03.7 scoped implementation was exercised by Level 1 workflow [#38166667833](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38166667833) (job `114550532240`) with PASS on implementation SHA `466e794e15ae562eae2dc512a1447ef6b6e1d832`. Its later documentation-only evidence commits are not new executable qualifications. The original R03.7 step retains its identity and its live qualification remains outstanding.
+
+**Deferred here ONLY where a real environment or independent authority is required:** authentic identity/role/revocation service; independently signed safety and 420Compliance policy; private HTTPS/MFA/CSRF ingress with actual issuer and secrets; production-equivalent PostgreSQL migration-chain, privileges, failover and recovery validation; independently executed case effects and replay/reconciliation; regulator/operator acceptance. These remain unchecked below and do not become PASS by deferral.
+
+**Not deferred as live-testnet prerequisites:** local private API implementation and unit tests; state machine and authorization correctness; code-level role segregation; schema migration source and static SQL/RLS tests; private browser client source and no-public-route checks. These require repository-side Level 1 evidence, and any new executable edits require a new SHA qualification. A missing deployable HTTP listener or other local component must be addressed before a claim of full implementation; testnet acceptance does not excuse local code gaps.
+
+**Delivery posture:** continue subsequent repository roadmap work only under explicit *repository-side qualified / live acceptance pending* status, with private case operations and regulated cannabis delivery disabled. Level 2 remains R03.12 and Level 3 remains R05.10.
+
 ## R03.7 — Private consoles: live/testnet/external acceptance register (2026-10-11)
 The original canonical R03.7 identifier is preserved. **Only genuine external/deployment acceptance is deferred**. Repository code and local Level 1 obligations are NOT waived. All items below are **NOT COMPLETE**; no mocks, client-side assertions, unit tests or PostgreSQL sandbox qualify a live regulated service.
 

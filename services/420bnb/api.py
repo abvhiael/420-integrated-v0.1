@@ -1358,6 +1358,47 @@ def ingest_pay_finality(payload:PayFinalityInput,x_pay_authority_proof:str|None=
     return {"state":next_state,"confirmed":viable,"replayed":False}
 
 
+class PayFailureInput(BaseModel):
+    reservation_id: UUID
+    pay_invoice_id: str=Field(min_length=3,max_length=200)
+    pay_attempt_id: str=Field(min_length=3,max_length=200)
+    failure_code: str=Field(pattern="^(declined|provider_unavailable|settlement_failed|reorg|finality_revoked)$")
+
+
+@app.post("/v1/bnb/internal/pay/failures",status_code=202)
+def ingest_pay_failure(payload:PayFailureInput,x_pay_authority_proof:str|None=Header(None)):
+    proof=financial_claim(payload,x_pay_authority_proof,"failure")
+    if proof.get("pay_attempt_id")!=payload.pay_attempt_id or (
+        proof.get("failure_code")!=payload.failure_code):
+        raise HTTPException(403,"PAY_FAILURE_DOMAIN_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("SELECT property_id FROM bnb_reservation WHERE id=%s",
+                          (payload.reservation_id,)).fetchone()
+            if not ref:raise HTTPException(404,"RESERVATION_NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(ref[0],))
+            row=c.execute("""SELECT i.pay_invoice_id,i.state,r.status
+                FROM bnb_pay_intent i JOIN bnb_reservation r ON r.id=i.reservation_id
+                WHERE i.reservation_id=%s FOR UPDATE OF i,r""",
+                (payload.reservation_id,)).fetchone()
+            if not row or row[0]!=payload.pay_invoice_id:
+                raise HTTPException(404,"PAY_INVOICE_NOT_FOUND")
+            if row[1]=="finalized" or row[2]=="confirmed":
+                raise HTTPException(409,"FINALIZED_PAYMENT_REQUIRES_PAY_RECOVERY")
+            if row[1]=="recovery_required":
+                return {"state":"recovery_required","replayed":True,"confirmed":False}
+            c.execute("""UPDATE bnb_pay_intent SET state='recovery_required'
+                WHERE reservation_id=%s""",(payload.reservation_id,))
+            c.execute("""UPDATE bnb_reservation SET status='recovery_required'
+                WHERE id=%s AND status='payment_pending'""",(payload.reservation_id,))
+            c.execute("""INSERT INTO bnb_outbox(id,event_type,payload)
+                VALUES (%s,'bnb.pay.failure_requires_reconciliation',%s::jsonb)""",
+                (uuid4(),json.dumps({"reservation_id":str(payload.reservation_id),
+                    "pay_attempt_id":payload.pay_attempt_id,
+                    "failure_code":payload.failure_code})))
+    return {"state":"recovery_required","replayed":False,"confirmed":False}
+
+
 class SettlementSplitInput(BaseModel):
     reservation_id: UUID
     pay_payment_id: str=Field(min_length=3,max_length=200)

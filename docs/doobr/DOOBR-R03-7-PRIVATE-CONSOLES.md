@@ -29,3 +29,12 @@
 Because these inputs are not available or independently authorized in this repository review, **production live integrations and an actual operable private console are not qualified**. Exact-source success cannot certify them. This R03.7 step remains PARTIAL pending these original requirements; do not advance claiming full completion. Client Level 2 R03.12 and full repo Level 3 R05.10 remain deferred.
 
 **Next canonical step once R03.7 is complete:** R03.8 — Secure iOS/Android builds with platform keystore, push, foreground and narrowly scoped background GPS.
+
+## Latest R03.7 hardening qualification inventory
+Implementation SHA: `466e794e15ae562eae2dc512a1447ef6b6e1d832`. Exact-SHA workflow: [R03.7 #38166667833](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38166667833), queued at recording; a queued job is not a passing qualification. This is a repository evidence-only documentation update.
+- Private API: `doobr/private_api.py`, five allowlisted case actions, authenticated server-owned transport context required; `doobr/storage/tests/test_private_api.py` rejects missing MFA/CSRF/origin, unsupported paths and untrusted field injection.
+- Case lifecycle: `doobr/console_cases.py`, transactionally guarded PENDING / APPROVED / EXECUTED / REJECTED / EXPIRED pathways with event log and version preconditions. Execution records externally attested completion, never performs side effects within the transaction.
+- Independent authority: `doobr/private_authority.py` defaults to denial; signed-decision verification is a dependency contract, **not an operational live issuer**.
+- Connected UI contract: `web/doobr-private/index.html`, `client.mjs` and `test-client.mjs`; uses same-origin POST, CSRF token and authenticated cookie, with fail-closed responses. Real private route/session deployment is NOT implemented.
+- Database checks: PostgreSQL 16 service runs migration 0007 and verifies forced RLS flags and cross-tenant denial as a restricted role through `doobr/storage/tests/console_cases_rls.sql`. This does NOT certify end-to-end migrations, backup/restore, role grants or production-equivalent HA.
+- Remaining release gates: independently configured 420Identity role/revocation and 420Compliance case policies, signed execution verification, transport verification at private ingress, secret lifecycle and actual HTTPS/mTLS credentials, database migration-chain and role acceptance, deployed private operation APIs, and full audit/effect recovery. No live authority or production readiness is claimed.

@@ -1283,3 +1283,50 @@ def test_bnb28_confirmed_poststay_review_requires_independent_moderator(fixture_
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_guest_review_decision WHERE review_id=%s",(review_id,))
             c.execute("DELETE FROM bnb_guest_review WHERE id=%s",(review_id,))
+
+
+def test_bnb29_host_workspace_privacy_and_financial_scope(fixture_property):
+    pid,guest_headers=fixture_property
+    assert client.get("/v1/bnb/account/hosting").status_code==401
+    workspace=client.get("/v1/bnb/account/hosting",headers=guest_headers)
+    assert workspace.status_code==200
+    assert all(x["id"]!=str(pid) for x in workspace.json())
+    for endpoint in ("host-reservations","host-requests","earnings","notifications","managers"):
+        result=client.get(f"/v1/bnb/account/properties/{pid}/{endpoint}",
+                          headers=guest_headers)
+        assert result.status_code in (403,404),result.text
+    assert client.get(f"/v1/bnb/account/properties/{pid}/host-reservations").status_code==401
+    assert client.get(f"/v1/bnb/account/properties/{pid}/earnings").status_code==401
+
+
+def test_bnb29_owner_sees_host_reservations_and_pay_only_earnings(fixture_property,monkeypatch):
+    pid,_=fixture_property
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://identity.test.invalid"
+    monkeypatch.setenv("BNB_IDENTITY_PUBLIC_KEY_PEM",private.public_key().public_bytes(
+        Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    subject="verified-host"
+    now=int(time.time())
+    jti="bnb29-host-"+str(uuid4())
+    token=jwt.encode({"sub":subject,"iss":issuer,"aud":"420bnb",
+        "iat":now,"nbf":now,"exp":now+300,"jti":jti},private,algorithm="RS256")
+    headers={"authorization":"Bearer "+token}
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_account(subject) VALUES (%s) ON CONFLICT DO NOTHING",(subject,))
+        c.execute("""INSERT INTO bnb_identity_session(id,subject,issuer,issuer_session_id,expires_at)
+            VALUES (%s,%s,%s,%s,now()+interval '5 minutes')""",(uuid4(),subject,issuer,jti))
+    try:
+        dashboard=client.get("/v1/bnb/account/hosting",headers=headers)
+        assert dashboard.status_code==200,dashboard.text
+        assert any(row["id"]==str(pid) and row["owner"] for row in dashboard.json())
+        for endpoint in ("host-reservations","host-requests","notifications","managers"):
+            result=client.get(f"/v1/bnb/account/properties/{pid}/{endpoint}",headers=headers)
+            assert result.status_code==200,result.text
+            assert isinstance(result.json(),list)
+        money=client.get(f"/v1/bnb/account/properties/{pid}/earnings",headers=headers)
+        assert money.status_code==200,money.text
+        assert money.json()["bnb_custody"] is False
+        assert money.json()["payment_authority"]=="420Pay"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_identity_session WHERE issuer_session_id=%s",(jti,))

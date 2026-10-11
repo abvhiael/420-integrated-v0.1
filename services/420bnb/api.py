@@ -1770,10 +1770,42 @@ def set_booking_policy(property_id:UUID,payload:BookingPolicyInput,
             "version":version,"publication_approval":False}
 
 
+def require_guest_accommodation_eligibility(c,property_id,guest,age_identity_proof):
+    """Fail-closed signed license/jurisdiction and per-guest age/identity authorization."""
+    row=c.execute("""SELECT e.jurisdiction_id,e.minimum_guest_age,e.identity_required
+        FROM bnb_compliance_eligibility e
+        JOIN bnb_travel_place_binding b ON b.property_id=e.property_id
+            AND b.jurisdiction_id=e.jurisdiction_id
+        JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=e.jurisdiction_id
+        JOIN bnb_property p ON p.id=e.property_id
+        WHERE e.property_id=%s AND e.decision='allowed' AND e.revoked_at IS NULL
+        AND e.property_version=p.version AND e.effective_at<=now() AND e.expires_at>now()
+        AND b.revoked_at IS NULL AND b.proof_expires_at>now()
+        AND b.property_version=p.version
+        AND j.decision='allowed' AND j.revoked_at IS NULL
+        AND j.effective_at<=now() AND j.expires_at>now()""",
+        (property_id,)).fetchone()
+    if not row:raise HTTPException(403,"ACCOMMODATION_NOT_AUTHORIZED")
+    jurisdiction,min_age,identity_required=row
+    if min_age is not None or identity_required:
+        if not age_identity_proof:raise HTTPException(403,"GUEST_ELIGIBILITY_PROOF_REQUIRED")
+        claims=verify_authority(age_identity_proof,"BNB_GUEST_ELIGIBILITY",
+                                "bnb_guest_accommodation_eligibility",guest)
+        if (claims.get("property_id")!=str(property_id) or
+            claims.get("jurisdiction_id")!=jurisdiction or
+            claims.get("identity_verified") is not True):
+            raise HTTPException(403,"GUEST_ELIGIBILITY_SCOPE_MISMATCH")
+        if min_age is not None:
+            verified_age=claims.get("verified_minimum_age")
+            if type(verified_age)!=int or verified_age<min_age:
+                raise HTTPException(403,"GUEST_AGE_NOT_VERIFIED")
+
+
 @app.post("/v1/bnb/booking-requests",status_code=201)
 def submit_booking_request(payload:BookingRequestInput,
                            idempotency_key:str=Header(min_length=8,max_length=128),
-                           authorization:str|None=Header(None)):
+                           authorization:str|None=Header(None),
+                           x_guest_eligibility_proof:str|None=Header(None)):
     guest=active_subject(authorization)
     digest=hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
     with db() as c:
@@ -1785,6 +1817,7 @@ def submit_booking_request(payload:BookingRequestInput,
             prop=c.execute("""SELECT host_subject,status FROM bnb_property
                 WHERE id=%s FOR UPDATE""",(ref[0],)).fetchone()
             if not prop or prop[1]!="published":raise HTTPException(404,"NOT_FOUND")
+            require_guest_accommodation_eligibility(c,ref[0],guest,x_guest_eligibility_proof)
             prior=c.execute("""SELECT digest,result FROM bnb_request_dedupe
                 WHERE actor=%s AND operation='booking_request' AND key=%s FOR UPDATE""",
                 (guest,idempotency_key)).fetchone()

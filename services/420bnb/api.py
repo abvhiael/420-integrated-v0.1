@@ -341,6 +341,9 @@ def ingest_travel_place_binding(payload:TravelBindingProof):
         place=resolve_public_place(place_id)
     except (ValueError,TravelLocationUnavailable):
         raise HTTPException(503,"PUBLIC_PLACE_UNAVAILABLE")
+    jurisdiction=claims.get("jurisdiction_id")
+    if not isinstance(jurisdiction,str) or not (1<=len(jurisdiction)<=100) or not jurisdiction.isascii() or not all(ch.isalnum() or ch in "-_" for ch in jurisdiction):
+        raise HTTPException(422,"INVALID_JURISDICTION_SCOPE")
     if claims.get("region")!=place["region"] or claims.get("country")!=place["country"]:
         raise HTTPException(409,"PLACE_PROVENANCE_MISMATCH")
     with db() as c:
@@ -354,14 +357,15 @@ def ingest_travel_place_binding(payload:TravelBindingProof):
             if c.execute("SELECT 1 FROM bnb_travel_place_binding WHERE proof_jti=%s",(claims["jti"],)).fetchone():
                 raise HTTPException(409,"PROOF_REPLAY")
             c.execute("""INSERT INTO bnb_travel_place_binding
-                (property_id,place_id,region,country,issuer,proof_jti,proof_expires_at,property_version)
-                VALUES (%s,%s,%s,%s,%s,%s,to_timestamp(%s),%s)
+                (property_id,place_id,region,country,jurisdiction_id,issuer,proof_jti,proof_expires_at,property_version)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,to_timestamp(%s),%s)
                 ON CONFLICT(property_id) DO UPDATE SET
                 place_id=excluded.place_id,region=excluded.region,country=excluded.country,
+                jurisdiction_id=excluded.jurisdiction_id,
                 issuer=excluded.issuer,proof_jti=excluded.proof_jti,
                 proof_expires_at=excluded.proof_expires_at,
                 property_version=excluded.property_version,revoked_at=NULL,updated_at=now()""",
-                (property_id,place_id,place["region"],place["country"],claims["iss"],claims["jti"],claims["exp"],prop[0]))
+                (property_id,place_id,place["region"],place["country"],jurisdiction,claims["iss"],claims["jti"],claims["exp"],prop[0]))
     return {"accepted":True,"replayed":False}
 
 @app.post("/v1/bnb/travel/jurisdiction-policy")
@@ -436,7 +440,7 @@ def travel_authorized_listings(place_id:str,limit:int=20):
         rows=c.execute("""SELECT p.id,p.title,p.public_region,p.capacity
             FROM bnb_property p
             JOIN bnb_travel_place_binding b ON b.property_id=p.id
-            JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=b.country
+            JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=b.jurisdiction_id
             WHERE p.status='published' AND b.place_id=%s
             AND b.region=%s AND b.country=%s
             AND b.property_version=p.version AND b.revoked_at IS NULL

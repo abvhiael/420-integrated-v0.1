@@ -591,8 +591,17 @@ def public_verified_stay_reputation(property_id:UUID,response:Response):
     """420Reputation consumer-safe facts only. No scoring or authoritative profile mutation."""
     response.headers["Cache-Control"]="no-store"
     with db() as c:
-        prop=c.execute("SELECT status FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
-        if not prop or prop[0]!="published":raise HTTPException(404,"NOT_FOUND")
+        prop=c.execute("""SELECT p.status FROM bnb_property p
+            JOIN bnb_compliance_eligibility e ON e.property_id=p.id
+            JOIN bnb_travel_place_binding b ON b.property_id=p.id AND b.jurisdiction_id=e.jurisdiction_id
+            JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=e.jurisdiction_id
+            WHERE p.id=%s AND p.status='published'
+            AND e.decision='allowed' AND e.revoked_at IS NULL AND e.property_version=p.version
+            AND e.effective_at<=now() AND e.expires_at>now()
+            AND b.revoked_at IS NULL AND b.property_version=p.version AND b.proof_expires_at>now()
+            AND j.decision='allowed' AND j.revoked_at IS NULL
+            AND j.effective_at<=now() AND j.expires_at>now()""",(property_id,)).fetchone()
+        if not prop:raise HTTPException(404,"NOT_FOUND")
         rows=c.execute("""SELECT r.id,r.rating,r.created_at FROM bnb_guest_review r
             JOIN bnb_reservation v ON v.id=r.reservation_id
             JOIN bnb_hold h ON h.id=v.hold_id

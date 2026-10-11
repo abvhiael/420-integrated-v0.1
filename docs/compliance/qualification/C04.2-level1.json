@@ -1,9 +1,9 @@
 {
   "step": "C04.2",
   "canonical": "Reviewer qualifications and delegation; MFA, least privilege, short-lived sessions and approval invalidation when reviewed content changes.",
-  "status": "PENDING_REQUALIFICATION_AFTER_LIFECYCLE_INTEGRATION",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_TESTNET_ACCEPTANCE_DEFERRED",
   "qualification_level": 1,
-  "implementation_sha": "caf042fb5b251ea01b5433b8dbb02ba855d2c279",
+  "implementation_sha": "28b46104c78d90adf128d7a61098d7da7fc057d9",
   "branch": "audit/420compliance-c01-1-inventory-20261009",
   "pr": 602,
   "files": [
@@ -23,20 +23,23 @@
     "revocation and unavailable authority fail closed"
   ],
   "ci": {
-    "status": "PENDING_EXACT_SHA",
-    "run_id": null,
-    "job_id": null,
-    "previous_qualifying_run": 38106774438,
-    "previous_implementation_sha": "347e76315ba7cdd3fa144a5347c0c6452f77420f"
+    "status": "PASS",
+    "run_id": 38107790106,
+    "job_id": 114376872954,
+    "conclusion": "success",
+    "exact_sha": true,
+    "successful_steps": 49,
+    "failed_steps": 0,
+    "reviewer_lifecycle_integration": "PASS",
+    "go_race": "PASS",
+    "postgres_retained": "PASS"
   },
   "limitations": [
     "No independent reviewer or MFA provider connected",
     "Existing PolicyLifecycle.Transition still relies on trusted actor identity and does not independently call AuthorizeReview",
     "No production durable authorization or delegation persistence"
   ],
-  "blockers": [
-    "New software integration requires a successful exact-SHA Compliance CI run"
-  ],
+  "blockers": [],
   "level2": "Not scheduled for C04.2",
   "level3": "C08.5 deferred",
   "next_canonical": "C04.3 — Federally applicable product, packaging, quantity-equivalency and promotion requirements; explicitly separate non-medical scope and payment-route legal review.",
@@ -49,5 +52,7 @@
     "C10.1: independent legal reviewer qualification and latest-law acceptance",
     "C10.3: production identity/MFA trust and credential revocation",
     "C10.7: release authorization and operator signoff"
-  ]
+  ],
+  "software_integration": "AuthorizedReviewTransition guarded review/approval with independently reverified grant/session/MFA/digest, tests and exact-SHA PASS",
+  "disposition": "C04.2 software step qualified. External reviewer/issuer/MFA provisioning and deployed acceptance remain explicit C09/C10 dependencies, not proof of production eligibility."
 }

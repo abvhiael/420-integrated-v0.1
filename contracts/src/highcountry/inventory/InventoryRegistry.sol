@@ -53,7 +53,7 @@ contract InventoryRegistry {
     constructor(
         address harvestProducts_
     ) {
-        if (harvestProducts_ == address(0) 
+        if (harvestProducts_ == address(0) || harvestProducts_.code.length == 0) revert HCZeroAddress();
         administrator = msg.sender;
         harvestProducts = HarvestProductRegistry(harvestProducts_);
         ledger = new ResourceLedger(address(this));
@@ -74,7 +74,7 @@ contract InventoryRegistry {
         bytes32 id,
         Unit unit
     ) external onlyAdmin {
-        if (id == bytes32(0) 
+        if (id == bytes32(0) || unit == Unit.NONE || resources[id].exists) revert HCInvalidState();
         resources[id] = Resource(unit, true, true, false);
         emit ResourceRegistered(id, unit, false);
     }
@@ -91,9 +91,9 @@ contract InventoryRegistry {
     function importHarvest(
         bytes32 productId
     ) external returns (bytes32 lotId) {
-        if (productId == bytes32(0) 
+        if (productId == bytes32(0) || importedProduct[productId]) revert HCInvalidState();
         HarvestProductRegistry.Product memory p = harvestProducts.getProduct(productId);
-        if (!p.registered 
+        if (!p.registered || p.productId != productId || p.grower == address(0)) revert HCInvalidState();
         // A zero-output harvest has an immutable receipt but must not become a tradable lot.
         if (p.quantityGrams == 0) revert HCInvalidState();
         lotId = keccak256(abi.encode("HC.INVENTORY.LOT.V1", block.chainid, address(this), productId));
@@ -119,7 +119,7 @@ contract InventoryRegistry {
         uint256 amount
     ) external {
         Resource memory r = resources[id];
-        if (!issuers[msg.sender] 
+        if (!issuers[msg.sender] || !r.exists || !r.active || r.harvestOnly) revert HCInvalidState();
         ledger.acquire(op, id, owner, amount);
     }
 

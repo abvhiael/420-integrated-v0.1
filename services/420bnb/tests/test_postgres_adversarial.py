@@ -1357,3 +1357,35 @@ def test_bnb29_delegation_expiry_revocation_and_no_financial_authority(fixture_p
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("""DELETE FROM bnb_property_grant WHERE property_id=%s
                 AND grantee_subject='guest-fixture'""",(pid,))
+
+
+def test_bnb29_delegated_calendar_CAS_and_immediate_revocation(fixture_property):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("UPDATE bnb_property SET status='draft' WHERE id=%s",(pid,))
+        c.execute("""INSERT INTO bnb_property_grant
+            (property_id,grantee_subject,capability,expires_at,granted_by)
+            VALUES (%s,'guest-fixture','edit_calendar',now()+interval '1 day','verified-host')""",
+            (pid,))
+    path=f"/v1/bnb/account/properties/{pid}/calendar/blocks"
+    begin=(datetime.now(timezone.utc)+timedelta(days=20)).replace(microsecond=0)
+    body={"start":begin.isoformat(),"end":(begin+timedelta(days=2)).isoformat(),
+          "reason":"Delegated closure","expected_version":1}
+    try:
+        assert client.get(f"/v1/bnb/account/properties/{pid}/calendar",
+                          headers=headers).status_code==200
+        first=client.post(path,headers=headers,json=body)
+        assert first.status_code==201,first.text
+        assert client.post(path,headers=headers,json=body).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("""UPDATE bnb_property_grant SET revoked_at=now()
+                WHERE property_id=%s AND grantee_subject='guest-fixture'""",(pid,))
+        assert client.get(f"/v1/bnb/account/properties/{pid}/calendar",
+                          headers=headers).status_code==404
+        assert client.post(path,headers=headers,json={
+            **body,"expected_version":first.json()["version"]}).status_code==404
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))

@@ -1,17 +1,27 @@
 {
   "step": "BNB-2.9",
   "name": "Complete Host Application",
-  "level1": "PENDING_EXACT_SHA",
-  "level2": "PENDING_MILESTONE",
-  "qualified_implementation_sha": "6bc7f2772f1b4331038a9e766a1f984f1747a434",
+  "level1": "PASS_REPOSITORY_SIDE",
+  "level2": "PASS_APP_HOST_MILESTONE",
+  "qualified_implementation_sha": "dbc3ecec72c3ec1363208f349cf0c875e0d46644",
   "current_main_at_start": "1c509a0f054bcf9fa191f71db29d0dc87f54c528",
   "pr": 600,
   "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
   "tests": {
-    "run_id": 38106826294,
-    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38106826294",
-    "status": "in_progress",
-    "required": "PostgreSQL/adversarial, API/Identity/delegated permission, container, Chromium/axe; nine retained BnB app workflows on same SHA"
+    "run_id": 38106935162,
+    "job_id": 114374337852,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38106935162",
+    "status": "completed",
+    "conclusion": "success",
+    "failed_steps": 0,
+    "coverage": [
+      "PostgreSQL and Identity-scoped owner/manager authorization",
+      "Immediate delegated revocation and financial isolation",
+      "Draft and published calendar/CAS/overlap regression",
+      "Self-approval prohibition and host request lifecycle",
+      "Non-root container, browser/axe guest/host experience",
+      "All existing BnB runtime and adversarial suites"
+    ]
   },
   "requirements": {
     "host_dashboard": "implemented",
@@ -22,11 +32,35 @@
     "notifications": "in-app scoped audit notifications, not external delivery",
     "delegated_managers": "grant/revoke, revocation, edit_calendar, handle_requests, view_reservations, safe edit_listing"
   },
-  "level3": "deferred full audit-phase reconciliation and canonical Solidity/Genesis qualification",
+  "level3": "DEFERRED: complete audit-phase merge-candidate exact-SHA main reconciliation; canonical Solidity inventory and separate Genesis address authority, 420 Integrated/Docs global, deployment/config",
   "external_gates": [
     "Real Pay/Swap settlement and payout controller acceptance",
     "Verified host and property claims on official testnet",
     "External notification channel delivery and manual accessibility acceptance"
   ],
-  "next_roadmap_step": "Not yet independently verified from repository"
+  "next_roadmap_step": "Not verified from canonical repo",
+  "verified_main_at_evidence": "6a76673f5b9daa0fbe0b844ad6f66fc6d18822e0",
+  "app_level2": {
+    "status": "PASS",
+    "app_workflows_passed": 10,
+    "app_workflows_failed": 0,
+    "workflow_run_ids": [
+      38106935114,
+      38106935165,
+      38106935128,
+      38106935129,
+      38106935072,
+      38106935118,
+      38106935141,
+      38106935143,
+      38106935098,
+      38106935162
+    ]
+  },
+  "restrictions": [
+    "Live independent property authority, actual Pay payouts and release acceptance testnet-gated",
+    "In-app audit notifications are not independently delivered external notifications",
+    "No finished Level 3 and no merged PR"
+  ],
+  "evidence_only_commit_policy": "This evidence/doc change after implementation SHA does not require rerun if no code/test/config/workflow/deployment modifications"
 }

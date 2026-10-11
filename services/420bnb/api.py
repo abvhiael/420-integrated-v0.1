@@ -1337,8 +1337,10 @@ def decide_booking_request(request_id:UUID,decision:str,
             if decision=="withdraw":
                 if actor!=record[1]:raise HTTPException(404,"NOT_FOUND")
             else:
-                if (not current_property or current_property[0]!=record[2] or
-                    current_property[1]!="published"):
+                # Separation of duties: a guest cannot approve their own stay,
+                # including through a legitimate delegated host capability.
+                if (actor==record[1] or not current_property or
+                    current_property[0]!=record[2] or current_property[1]!="published"):
                     raise HTTPException(404,"NOT_FOUND")
                 host_scope(c,info[0],actor,"handle_requests")
             if record[3]!="requested":

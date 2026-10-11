@@ -1,5 +1,5 @@
 package complianceauth
-import("testing";"reflect")
+import("testing";"reflect";"time")
 func TestC039PolicyImpactReport(t *testing.T){
  old,new:=Digest([]byte("old")),Digest([]byte("new"))
  makeFlow:=func(id,before,after string,inFlight bool)SimulationFlow{return SimulationFlow{FlowID:id,OperationRef:"order-"+id,Stage:"checkout",InFlight:inFlight,Before:before,After:after,BeforePolicyDigest:old,AfterPolicyDigest:new}}
@@ -18,4 +18,14 @@ func TestC039PolicyImpactReport(t *testing.T){
  if _,err:=SimulatePolicyImpact(nil);err==nil{t.Fatal("empty simulation accepted")}
  oversized:=make([]SimulationFlow,maxImpactFlows+1)
  if _,err:=SimulatePolicyImpact(oversized);err==nil{t.Fatal("unbounded simulation accepted")}
+}
+
+func TestC039ReviewedSimulationDoesNotTrustCallerAllow(t *testing.T){
+ old,new:=Digest([]byte("before")),Digest([]byte("after"))
+ before:=ReviewedPolicy{Manifest:SignedManifest{Manifest:Manifest{PolicyDigest:old}}}
+ after:=ReviewedPolicy{Manifest:SignedManifest{Manifest:Manifest{PolicyDigest:new}}}
+ cases:=[]ImpactEvaluationCase{{FlowID:"x",Request:EvaluationRequest{TenantID:"t",OperationRef:"order",Stage:"checkout"},InFlight:true}}
+ report,err:=SimulateReviewedPolicyImpact(EvaluationService{},EvaluationService{},before,after,cases,time.Now())
+ if err!=nil||report.PolicyAuthorized||report.Counts["IN_FLIGHT_REEVALUATION_REQUIRED"]!=1{t.Fatalf("unsafe reviewed simulation %+v %v",report,err)}
+ if _,err:=SimulateReviewedPolicyImpact(EvaluationService{},EvaluationService{},before,after,nil,time.Now());err==nil{t.Fatal("empty simulation accepted")}
 }

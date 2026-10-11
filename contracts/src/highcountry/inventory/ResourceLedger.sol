@@ -50,7 +50,7 @@ contract ResourceLedger {
         bytes32 id,
         uint256 amount
     ) private {
-        if (op == bytes32(0) 
+        if (op == bytes32(0) || id == bytes32(0) || amount == 0) revert HCInvalidId();
         if (applied[op]) revert HCInvalidState();
         applied[op] = true;
     }
@@ -125,7 +125,7 @@ contract ResourceLedger {
         uint256 amount
     ) external onlyInventory {
         _once(op, id, amount);
-        if (from == address(0) 
+        if (from == address(0) || to == address(0) || from == to) revert HCInvalidState();
         Balance storage source = _balances[id][from];
         if (source.available < amount) revert HCInvalidState();
         source.available -= amount;

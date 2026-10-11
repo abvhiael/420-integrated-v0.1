@@ -35,6 +35,26 @@ def fixture_property(monkeypatch):
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("""INSERT INTO bnb_property(id,host_subject,title,public_region,status,capacity,nightly_minor,currency)
         VALUES (%s,'verified-host','Synthetic suite','Public region','published',1,1000,'CAD')""",(pid,))
+        # Synthetic test-only authority rows: exercise the older lifecycle under
+        # its new compliance precondition; never create real issuer approvals.
+        c.execute("""INSERT INTO bnb_travel_place_binding
+            (property_id,place_id,region,country,jurisdiction_id,issuer,proof_jti,
+             proof_expires_at,property_version)
+            VALUES (%s,'fixture-place','Public region','CA','FIXTURE_ONLY',
+                    'synthetic-fixture',%s,now()+interval '1 day',1)""",
+            (pid,str(uuid4())))
+        c.execute("""INSERT INTO bnb_travel_jurisdiction_policy
+            (jurisdiction_id,decision,issuer,proof_jti,effective_at,expires_at,revision)
+            VALUES ('FIXTURE_ONLY','allowed','synthetic-fixture',%s,
+                    now()-interval '1 hour',now()+interval '1 day',1)
+            ON CONFLICT(jurisdiction_id) DO NOTHING""",(str(uuid4()),))
+        c.execute("""INSERT INTO bnb_compliance_eligibility
+            (property_id,jurisdiction_id,decision,license_reference,minimum_guest_age,
+             identity_required,issuer,proof_jti,revision,property_version,effective_at,expires_at)
+            VALUES (%s,'FIXTURE_ONLY','allowed','synthetic-fixture-license',NULL,
+                    false,'synthetic-fixture',%s,1,1,
+                    now()-interval '1 hour',now()+interval '1 day')""",
+            (pid,str(uuid4())))
     yield pid,headers
     with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
         c.execute("DELETE FROM bnb_outbox WHERE payload->>'hold_id' IN (SELECT id::text FROM bnb_hold WHERE property_id=%s)",(pid,))
@@ -46,6 +66,8 @@ def fixture_property(monkeypatch):
         c.execute("DELETE FROM bnb_price_quote WHERE property_id=%s",(pid,))
         c.execute("DELETE FROM bnb_rate_plan WHERE property_id=%s",(pid,))
         c.execute("DELETE FROM bnb_listing_policy WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_compliance_eligibility WHERE property_id=%s",(pid,))
+        c.execute("DELETE FROM bnb_travel_place_binding WHERE property_id=%s",(pid,))
         c.execute("DELETE FROM bnb_property WHERE id=%s",(pid,))
         c.execute("DELETE FROM bnb_identity_session WHERE subject='guest-fixture'")
         c.execute("DELETE FROM bnb_account WHERE subject='guest-fixture'")

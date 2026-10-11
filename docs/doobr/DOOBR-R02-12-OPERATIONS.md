@@ -11,3 +11,10 @@ Level 1 workflow `doobr-r02-12-level1.yml` compiles affected Python, migrates Po
 **Open R02.12 acceptance gaps:** implement and test backup/restore automation with encrypted storage, PITR/WAL continuity and isolated actual restore; validate restored tenant RLS, command/outbox audit chain and return/custody data; exercise real audit insert chain and reject malicious updates/deletes; verify live dashboard redaction, alert thresholds, key management, instance crash/restart, horizontal capacity and disaster recovery RPO/RTO. These gaps cannot be marked completed by a successful schema-only CI test. Production credentials, external storage and operational recovery acceptance remain future environment-dependent.
 
 Level 2 R02.13, Level 3 R05.10. Do not merge before phase closeout.
+
+
+## Recovery and audit-hardening increment — 2026-10-10
+
+Added `doobr/audit_verify.py` independent digest recomputation, receipt coverage verification, cross-tenant isolation and privileged audit-mutation rejection tests, plus `doobr/ops/backup_encrypted.sh` and `restore_isolated.sh`. Backup mandates PostgreSQL `sslmode=verify-full`, private age recipient config and protected destination; computes ciphertext SHA256. Restore refuses a non-recovery database URL, validates ciphertext integrity, decrypts with external private key, applies `pg_restore --exit-on-error` and checks forced tenant RLS. Operations require vault-provided key files and protected external backup destination. This is not proof of live key rotation, object-storage immutability, disaster recovery failover, transaction-log PITR or achieved RPO/RTO. Production completion is BLOCKED on separate hosted infrastructure and documented recovery drills. The scoped CI validates source/shell syntax, real PostgreSQL audit, standalone dump and isolated restore, not a live age-backed restoration.
+
+The prior R02.12 exact-SHA run #38092935495 PASS was superseded by implementation and test changes. Await a new exact-SHA Level 1 run before claiming repository-side qualification.

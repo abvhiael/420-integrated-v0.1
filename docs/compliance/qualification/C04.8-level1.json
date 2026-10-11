@@ -1,7 +1,7 @@
 {
   "step": "C04.8",
   "canonical": "Secure signing and scheduled activation, key rotation, compromised-key response, environment isolation and region/domain kill switches. Emergency operators may halt; they may not invent permission.",
-  "status": "PENDING_LEVEL1_CI",
+  "status": "COMPLETE_LEVEL1_PASS_EXTERNAL_INTEGRATION_DEFERRED",
   "qualification_level": 1,
   "implementation_sha": "fbf140f5335b924c052d3760dc72e402adf889cd",
   "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
@@ -15,7 +15,13 @@
     "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
   ],
   "ci": {
-    "status": "PENDING"
+    "status": "PASS",
+    "run_id": 38160307138,
+    "job_id": 114531632963,
+    "conclusion": "success",
+    "successful_steps": 55,
+    "failed_steps": 0,
+    "exact_sha": true
   },
   "requirements": [
     "managed signer separation and canonical signature verification",
@@ -40,5 +46,6 @@
   ],
   "level2": "Not due for ordinary C04.8",
   "level3": "C08.5 deferred",
-  "next_canonical": "C04.9 — Activation impact procedure for pending orders and cached guidance; stop/reassess/return handling belongs to DOOBr, with immutable previous decision evidence."
+  "next_canonical": "C04.9 — Activation impact procedure for pending orders and cached guidance; stop/reassess/return handling belongs to DOOBr, with immutable previous decision evidence.",
+  "external_acceptance": "KMS/HSM signing, trusted authenticated operators and durable multi-instance emergency state remain C09/C10 gates"
 }

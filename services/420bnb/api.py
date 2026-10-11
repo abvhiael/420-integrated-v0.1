@@ -1499,14 +1499,15 @@ def ingest_pay_disbursement(payload:PayDisbursementInput,
             if c.execute("SELECT 1 FROM bnb_pay_disbursement_event WHERE event_id=%s",
                          (payload.event_id,)).fetchone():
                 raise HTTPException(409,"PAY_EVENT_ID_REUSED")
-            existing=c.execute("""SELECT kind,recipient,amount,state,chain_id,asset,policy_version
+            existing=c.execute("""SELECT kind,recipient,amount,state,chain_id,asset,policy_version,reservation_id
                 FROM bnb_pay_disbursement WHERE pay_operation_id=%s FOR UPDATE""",
                 (payload.pay_operation_id,)).fetchone()
             amount=int(payload.amount)
             if existing:
                 if (existing[0]!=payload.kind or existing[1]!=payload.recipient or
                     existing[2]!=amount or existing[4]!=payload.chain_id or
-                    existing[5]!=payload.asset or existing[6]!=payload.policy_version):
+                    existing[5]!=payload.asset or existing[6]!=payload.policy_version or
+                    existing[7]!=payload.reservation_id):
                     raise HTTPException(409,"PAY_OPERATION_MUTATED")
                 if existing[3]=="finalized" or (existing[3]=="failed" and
                     payload.state!="failed"):

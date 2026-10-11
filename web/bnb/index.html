@@ -573,7 +573,30 @@ async function loadHostWorkspace(){
  });
  article.append(delegation);
  }
- article.append(title,open,details);view.append(article);
+ const calendarForm=document.createElement("form");
+ const from=document.createElement("input");from.type="datetime-local";from.required=true;
+ from.setAttribute("aria-label","Host closure start");
+ const until=document.createElement("input");until.type="datetime-local";until.required=true;
+ until.setAttribute("aria-label","Host closure end");
+ const reason=document.createElement("input");reason.required=true;reason.maxLength=160;
+ reason.setAttribute("aria-label","Host closure reason");
+ const commit=document.createElement("button");commit.type="submit";commit.textContent="Block all property dates";
+ const outcome=document.createElement("p");outcome.setAttribute("role","status");
+ calendarForm.append(from,until,reason,commit,outcome);
+ calendarForm.addEventListener("submit",async event=>{
+ event.preventDefault();const start=new Date(from.value),end=new Date(until.value);
+ if(!Number.isFinite(start.valueOf())||!Number.isFinite(end.valueOf())||start>=end){
+ outcome.textContent="Use a valid ordered interval.";return;
+ }
+ const response=await fetch("/v1/bnb/account/properties/"+
+ encodeURIComponent(property.id)+"/calendar/blocks",{method:"POST",
+ headers:hostHeaders(),credentials:"omit",body:JSON.stringify({
+ start:start.toISOString(),end:end.toISOString(),reason:reason.value,
+ expected_version:property.version})});
+ outcome.textContent=response.ok?"Calendar restriction recorded. Refresh for updated version.":
+ "Calendar update denied ("+response.status+"). Refresh version or resolve bookings.";
+ });
+ article.append(title,open,calendarForm,details);view.append(article);
  }
  }catch(error){view.textContent=error.message;}
 }

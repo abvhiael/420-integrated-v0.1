@@ -425,6 +425,36 @@ def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:i
     }
 
 
+@app.get("/v1/bnb/travel/authorized")
+def travel_authorized_listings(place_id:str,limit:int=20):
+    """Only current approved property/place bindings with active allowed policy."""
+    if limit<1 or limit>50:raise HTTPException(422,"INVALID_LIMIT")
+    try:place=resolve_public_place(place_id)
+    except ValueError:raise HTTPException(422,"INVALID_PLACE_ID")
+    except TravelLocationUnavailable:raise HTTPException(503,"PUBLIC_PLACE_UNAVAILABLE")
+    with db() as c:
+        rows=c.execute("""SELECT p.id,p.title,p.public_region,p.capacity
+            FROM bnb_property p
+            JOIN bnb_travel_place_binding b ON b.property_id=p.id
+            JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=b.country
+            WHERE p.status='published' AND b.place_id=%s
+            AND b.region=%s AND b.country=%s
+            AND b.property_version=p.version AND b.revoked_at IS NULL
+            AND b.proof_expires_at>now()
+            AND j.decision='allowed' AND j.revoked_at IS NULL
+            AND j.effective_at<=now() AND j.expires_at>now()
+            ORDER BY p.id LIMIT %s""",
+            (place_id,place["region"],place["country"],limit)).fetchall()
+    return {"version":"bnb-travel-authorized/v1","nonbinding":True,
+            "transaction_enabled":False,"place_id":place_id,
+            "map_precision":"region_only","listings":[
+                {"property_id":str(row[0]),"title":row[1],
+                 "public_region":row[2],"capacity":row[3],
+                 "map_marker":None,
+                 "booking_handoff":{"method":"GET","path":"/v1/bnb/listings/"+str(row[0]),"side_effects":False}}
+                for row in rows]}
+
+
 @app.get("/v1/bnb/listings/{property_id}")
 def guest_listing_detail(property_id:UUID):
     with db() as c:

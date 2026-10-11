@@ -1389,3 +1389,31 @@ def test_bnb29_delegated_calendar_CAS_and_immediate_revocation(fixture_property)
             c.execute("DELETE FROM bnb_block WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb29_guest_cannot_self_approve_with_delegated_host_capability(fixture_property):
+    pid,headers=fixture_property
+    held=make_bnb25_hold(pid,headers,"bnb29-selfquote","bnb29-selfhold")
+    assert held.status_code==201,held.text
+    sent=client.post("/v1/bnb/booking-requests",json={
+        "hold_id":held.json()["id"],"request_type":"request"},headers={
+        **headers,"idempotency-key":"bnb29-self-request"})
+    assert sent.status_code==201,sent.text
+    rid=sent.json()["id"]
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_property_grant
+            (property_id,grantee_subject,capability,expires_at,granted_by)
+            VALUES (%s,'guest-fixture','handle_requests',now()+interval '1 day','verified-host')""",
+            (pid,))
+    try:
+        view=client.get(f"/v1/bnb/account/properties/{pid}/host-requests",headers=headers)
+        assert view.status_code==200 and any(row["id"]==rid for row in view.json())
+        denied=client.post(f"/v1/bnb/booking-requests/{rid}/accept",headers=headers)
+        assert denied.status_code==404
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT state FROM bnb_booking_request WHERE id=%s",
+                             (rid,)).fetchone()[0]=="requested"
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_booking_request WHERE id=%s",(rid,))

@@ -1160,7 +1160,7 @@ def test_bnb27_signed_failed_payment_is_recoverable_and_replay_safe(fixture_prop
 
 def test_bnb28_public_search_private_saved_stays_and_review_moderation(fixture_property):
     pid,headers=fixture_property
-    results=client.get("/v1/bnb/search",params={"region":"Prairies","min_capacity":1})
+    results=client.get("/v1/bnb/search",params={"region":"Public region","min_capacity":1})
     assert results.status_code==200,results.text
     assert any(x["id"]==str(pid) for x in results.json())
     assert all("address" not in x and "host_subject" not in x for x in results.json())

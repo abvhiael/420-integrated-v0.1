@@ -344,6 +344,11 @@ def ingest_travel_place_binding(payload:TravelBindingProof):
     jurisdiction=claims.get("jurisdiction_id")
     if not isinstance(jurisdiction,str) or not (1<=len(jurisdiction)<=100) or not jurisdiction.isascii() or not all(ch.isalnum() or ch in "-_" for ch in jurisdiction):
         raise HTTPException(422,"INVALID_JURISDICTION_SCOPE")
+    grid_lat=claims.get("marker_grid_lat")
+    grid_lon=claims.get("marker_grid_lon")
+    if (grid_lat is None)!=(grid_lon is None) or (grid_lat is not None and
+        (type(grid_lat)!=int or type(grid_lon)!=int or not -90<=grid_lat<=89 or not -180<=grid_lon<=179)):
+        raise HTTPException(422,"INVALID_COARSE_MARKER")
     if claims.get("region")!=place["region"] or claims.get("country")!=place["country"]:
         raise HTTPException(409,"PLACE_PROVENANCE_MISMATCH")
     with db() as c:
@@ -357,15 +362,16 @@ def ingest_travel_place_binding(payload:TravelBindingProof):
             if c.execute("SELECT 1 FROM bnb_travel_place_binding WHERE proof_jti=%s",(claims["jti"],)).fetchone():
                 raise HTTPException(409,"PROOF_REPLAY")
             c.execute("""INSERT INTO bnb_travel_place_binding
-                (property_id,place_id,region,country,jurisdiction_id,issuer,proof_jti,proof_expires_at,property_version)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,to_timestamp(%s),%s)
+                (property_id,place_id,region,country,jurisdiction_id,marker_grid_lat,marker_grid_lon,issuer,proof_jti,proof_expires_at,property_version)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,to_timestamp(%s),%s)
                 ON CONFLICT(property_id) DO UPDATE SET
                 place_id=excluded.place_id,region=excluded.region,country=excluded.country,
                 jurisdiction_id=excluded.jurisdiction_id,
+                marker_grid_lat=excluded.marker_grid_lat,marker_grid_lon=excluded.marker_grid_lon,
                 issuer=excluded.issuer,proof_jti=excluded.proof_jti,
                 proof_expires_at=excluded.proof_expires_at,
                 property_version=excluded.property_version,revoked_at=NULL,updated_at=now()""",
-                (property_id,place_id,place["region"],place["country"],jurisdiction,claims["iss"],claims["jti"],claims["exp"],prop[0]))
+                (property_id,place_id,place["region"],place["country"],jurisdiction,grid_lat,grid_lon,claims["iss"],claims["jti"],claims["exp"],prop[0]))
     return {"accepted":True,"replayed":False}
 
 @app.post("/v1/bnb/travel/jurisdiction-policy")
@@ -473,7 +479,7 @@ def travel_authorized_listings(place_id:str,limit:int=20):
     except ValueError:raise HTTPException(422,"INVALID_PLACE_ID")
     except TravelLocationUnavailable:raise HTTPException(503,"PUBLIC_PLACE_UNAVAILABLE")
     with db() as c:
-        rows=c.execute("""SELECT p.id,p.title,p.public_region,p.capacity
+        rows=c.execute("""SELECT p.id,p.title,p.public_region,p.capacity,b.marker_grid_lat,b.marker_grid_lon
             FROM bnb_property p
             JOIN bnb_travel_place_binding b ON b.property_id=p.id
             JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=b.jurisdiction_id
@@ -490,7 +496,7 @@ def travel_authorized_listings(place_id:str,limit:int=20):
             "map_precision":"region_only","listings":[
                 {"property_id":str(row[0]),"title":row[1],
                  "public_region":row[2],"capacity":row[3],
-                 "map_marker":None,
+                 "map_marker":({"latitude":row[4]+0.5,"longitude":row[5]+0.5,"precision":"coarse_1_degree_grid"} if row[4] is not None and row[5] is not None else None),
                  "booking_handoff":{"method":"GET","path":"/v1/bnb/listings/"+str(row[0]),"side_effects":False}}
                 for row in rows]}
 

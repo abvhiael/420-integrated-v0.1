@@ -181,6 +181,8 @@ jobs:
         run: go test -race ./services/complianceauth -run TestC048ScheduledSigningRotationAndEmergency -count=1 -v
       - name: C04.9 activation impact cached guidance and immutable previous receipt race tests
         run: go test -race ./services/complianceauth -run TestC049ActivationImpactAndPriorEvidence -count=1 -v
+      - name: C04.10 lawful correction supersession history and CAS replay race checks
+        run: go test -race ./services/complianceauth -run TestC0410CorrectionSupersessionAndHistory -count=1 -v
       - name: Write current C03.10 exact-SHA Level 1 qualification result
         run: |
           python3 -c 'import json,os; open("/tmp/compliance-c01-level1.json","w").write(json.dumps({"step":"C03.10","qualification_level":1,"implementation_sha":os.environ["EXPECTED_SHA"],"c03_8_publication_fence":"PASS","retained_C03_7":"PASS","retained_C03_6":"PASS","retained_C03_5":"PASS","retained_C03_4":"PASS","retained_C03_3":"PASS","retained_C03_2":"PASS","retained_C03_1":"PASS","retained_C02_10":"PASS","retained_C02_9":"PASS","retained_C02_8":"PASS","retained_C02_7":"PASS","retained_C02_6":"PASS","retained_C02_5":"PASS","retained_C02_4":"PASS","retained_C02_3":"PASS","retained_C02_2":"PASS","retained_C02_1":"PASS","retained_C01_8":"PASS","go_race":"PASS","retained_C01_7":"PASS","retained_C01_6":"PASS","retained_C01_5":"PASS","retained_C01_4":"PASS","retained_C01_3":"PASS","tests":"PASS"},indent=2)+"\\n")'

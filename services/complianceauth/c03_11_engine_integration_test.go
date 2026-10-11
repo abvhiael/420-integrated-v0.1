@@ -59,6 +59,13 @@ func TestC0311EngineLevel2ReplayAndCarrierBoundary(t *testing.T) {
  revised:=service;revised.Trust.MinimumSequence=8;revised.Trust.MinimumEpoch=4
  denied:=revised.Evaluate(policy,request,current)
  if denied.Outcome=="ALLOW"{t.Fatal("superseded reviewed policy allowed at current epoch")}
+ manifestCurrent:=manifest
+ manifestCurrent.Sequence=8;manifestCurrent.RevocationEpoch=4
+ signedCurrent,err:=Publish(manifestCurrent,Approval{Digest:manifestCurrent.PolicyDigest,AuthorID:"author",ReviewerID:"reviewer",PublisherID:"publisher",IndependentlyVerified:true},priv);if err!=nil{t.Fatal(err)}
+ currentPolicy:=policy;currentPolicy.Manifest=signedCurrent
+ currentDecision:=revised.Evaluate(currentPolicy,request,current)
+ currentReplay:=revised.Evaluate(currentPolicy,request,current)
+ if currentDecision.Outcome!="ALLOW"||currentReplay.Outcome!=currentDecision.Outcome||currentReplay.PolicyDigest!=currentDecision.PolicyDigest||currentReplay.RequestDigest!=currentDecision.RequestDigest||!currentReplay.ExpiresAt.Equal(currentDecision.ExpiresAt){t.Fatalf("current decision not reproducible: %+v %+v",currentDecision,currentReplay)}
  if again:=service.Evaluate(policy,request,historical);again.Outcome!=old.Outcome||again.RequestDigest!=old.RequestDigest{t.Fatal("historical snapshot mutated")}
 
  impact,err:=SimulatePolicyImpact([]SimulationFlow{{FlowID:"carrier-flow",OperationRef:request.OperationRef,Stage:request.Stage,InFlight:true,Before:old.Outcome,After:denied.Outcome,BeforePolicyDigest:fence.PolicyDigest,AfterPolicyDigest:upgraded.PolicyDigest}})

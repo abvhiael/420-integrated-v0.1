@@ -1229,3 +1229,57 @@ def test_bnb28_independent_moderator_required_and_private_review_state(fixture_p
         headers={"x-guest-review-proof":"forged"},json={"decision":"approved"}).status_code in (401,503)
     detail=client.get(f"/v1/bnb/listings/{pid}")
     assert detail.status_code==200 and detail.json()["reviews"]==[]
+
+
+def test_bnb28_confirmed_poststay_review_requires_independent_moderator(fixture_property,monkeypatch):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",(pid,))
+    hold=make_bnb25_hold(pid,headers,"bnb28-review-quote-1","bnb28-review-hold-1")
+    assert hold.status_code==201,hold.text
+    req=client.post("/v1/bnb/booking-requests",json={
+        "hold_id":hold.json()["id"],"request_type":"instant"},headers={
+        **headers,"idempotency-key":"bnb28-review-request"})
+    assert req.status_code==201,req.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        reservation=c.execute("SELECT id FROM bnb_reservation WHERE booking_request_id=%s",
+                              (req.json()["id"],)).fetchone()[0]
+        c.execute("UPDATE bnb_reservation SET status='confirmed' WHERE id=%s",(reservation,))
+        c.execute("""UPDATE bnb_hold SET status='confirmed',
+            period=tstzrange(now()-interval '4 days',now()-interval '2 days','[)')
+            WHERE id=%s""",(hold.json()["id"],))
+    body={"rating":5,"body":"Excellent quiet stay and clear directions"}
+    submitted=client.post(f"/v1/bnb/reservations/{reservation}/guest-review",
+                          headers=headers,json=body)
+    assert submitted.status_code==201,submitted.text
+    review_id=submitted.json()["id"]
+    assert submitted.json()["published"] is False
+    assert client.get(f"/v1/bnb/listings/{pid}").json()["reviews"]==[]
+    mod_key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://moderator.test.invalid"
+    monkeypatch.setenv("BNB_GUEST_REVIEW_PUBLIC_KEY_PEM",
+        mod_key.public_key().public_bytes(Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    monkeypatch.setenv("BNB_GUEST_REVIEW_ISSUER",issuer)
+    monkeypatch.setenv("BNB_GUEST_REVIEW_AUDIENCE","bnb-guest-review")
+    def moderator(decision,nonce):
+        now=int(time.time())
+        token=jwt.encode({"sub":"independent-reviewer","iss":issuer,
+            "aud":"bnb-guest-review","iat":now,"nbf":now,"exp":now+120,"jti":nonce,
+            "purpose":"guest-review","review_id":review_id,"decision":decision},
+            mod_key,algorithm="RS256")
+        return {"x-guest-review-proof":token}
+    path=f"/v1/bnb/internal/guest-reviews/{review_id}/decision"
+    try:
+        approve=client.post(path,json={"decision":"approved"},headers=moderator("approved","mod-bnb28-1"))
+        assert approve.status_code==200,approve.text
+        assert len(client.get(f"/v1/bnb/listings/{pid}").json()["reviews"])==1
+        assert client.post(path,json={"decision":"approved"},
+                           headers=moderator("approved","mod-bnb28-1")).status_code==409
+        revoked=client.post(path,json={"decision":"withdrawn"},
+                            headers=moderator("withdrawn","mod-bnb28-2"))
+        assert revoked.status_code==200
+        assert client.get(f"/v1/bnb/listings/{pid}").json()["reviews"]==[]
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_guest_review_decision WHERE review_id=%s",(review_id,))
+            c.execute("DELETE FROM bnb_guest_review WHERE id=%s",(review_id,))

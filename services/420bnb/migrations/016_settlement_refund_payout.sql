@@ -47,3 +47,14 @@ CREATE TABLE IF NOT EXISTS bnb_pay_disbursement_event (
 );
 CREATE INDEX IF NOT EXISTS bnb_pay_disbursement_reservation
  ON bnb_pay_disbursement(reservation_id,kind,state);
+CREATE TABLE IF NOT EXISTS bnb_pay_failure_event (
+ issuer text NOT NULL,
+ jti text NOT NULL,
+ pay_attempt_id text NOT NULL UNIQUE,
+ reservation_id uuid NOT NULL REFERENCES bnb_reservation(id),
+ pay_invoice_id text NOT NULL,
+ failure_code text NOT NULL,
+ digest text NOT NULL,
+ received_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(issuer,jti)
+);

@@ -323,6 +323,70 @@ def guest_search(region:str="",q:str="",min_capacity:int=1,limit:int=20,offset:i
              "capacity":x[3],"nightly_minor":x[4],"currency":x[5]} for x in rows]
 
 
+class TravelBindingProof(BaseModel):
+    proof: str = Field(min_length=20,max_length=8192)
+
+@app.post("/v1/bnb/travel/place-binding")
+def ingest_travel_place_binding(payload:TravelBindingProof):
+    """Accept only independently signed location/property proofs; never host self-claims."""
+    claims=verify_authority(payload.proof,"BNB_LOCATION_AUTHORITY","bnb_property_place")
+    try:
+        property_id=UUID(claims["property_id"])
+        place_id=claims["place_id"]
+        if not isinstance(place_id,str) or not place_id or len(place_id)>128:
+            raise ValueError()
+    except (KeyError,ValueError,TypeError):
+        raise HTTPException(422,"INVALID_PLACE_BINDING")
+    try:
+        place=resolve_public_place(place_id)
+    except (ValueError,TravelLocationUnavailable):
+        raise HTTPException(503,"PUBLIC_PLACE_UNAVAILABLE")
+    if claims.get("region")!=place["region"] or claims.get("country")!=place["country"]:
+        raise HTTPException(409,"PLACE_PROVENANCE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            prop=c.execute("SELECT version FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,)).fetchone()
+            if not prop or claims.get("property_version")!=prop[0]:
+                raise HTTPException(409,"PROPERTY_VERSION_CHANGED")
+            prior=c.execute("SELECT proof_jti FROM bnb_travel_place_binding WHERE property_id=%s FOR UPDATE",(property_id,)).fetchone()
+            if prior and prior[0]==claims["jti"]:
+                return {"accepted":True,"replayed":True}
+            if c.execute("SELECT 1 FROM bnb_travel_place_binding WHERE proof_jti=%s",(claims["jti"],)).fetchone():
+                raise HTTPException(409,"PROOF_REPLAY")
+            c.execute("""INSERT INTO bnb_travel_place_binding
+                (property_id,place_id,region,country,issuer,proof_jti,proof_expires_at,property_version)
+                VALUES (%s,%s,%s,%s,%s,%s,to_timestamp(%s),%s)
+                ON CONFLICT(property_id) DO UPDATE SET
+                place_id=excluded.place_id,region=excluded.region,country=excluded.country,
+                issuer=excluded.issuer,proof_jti=excluded.proof_jti,
+                proof_expires_at=excluded.proof_expires_at,
+                property_version=excluded.property_version,revoked_at=NULL,updated_at=now()""",
+                (property_id,place_id,place["region"],place["country"],claims["iss"],claims["jti"],claims["exp"],prop[0]))
+    return {"accepted":True,"replayed":False}
+
+@app.post("/v1/bnb/travel/jurisdiction-policy")
+def ingest_travel_jurisdiction_policy(payload:TravelBindingProof):
+    claims=verify_authority(payload.proof,"BNB_JURISDICTION_AUTHORITY","bnb_jurisdiction_policy")
+    jurisdiction=claims.get("jurisdiction_id")
+    decision=claims.get("decision")
+    revision=claims.get("revision")
+    if not isinstance(jurisdiction,str) or not (1<=len(jurisdiction)<=100) or not jurisdiction.isascii() or not all(ch.isalnum() or ch in "-_" for ch in jurisdiction) or decision not in ("allowed","prohibited") or type(revision)!=int or revision<1:
+        raise HTTPException(422,"INVALID_JURISDICTION_POLICY")
+    with db() as c:
+        with c.transaction():
+            previous=c.execute("SELECT revision,proof_jti FROM bnb_travel_jurisdiction_policy WHERE jurisdiction_id=%s FOR UPDATE",(jurisdiction,)).fetchone()
+            if previous and revision<=previous[0]:
+                raise HTTPException(409,"STALE_POLICY_REVISION")
+            c.execute("""INSERT INTO bnb_travel_jurisdiction_policy
+              (jurisdiction_id,decision,issuer,proof_jti,effective_at,expires_at,revision)
+              VALUES (%s,%s,%s,%s,to_timestamp(%s),to_timestamp(%s),%s)
+              ON CONFLICT(jurisdiction_id) DO UPDATE SET decision=excluded.decision,
+              issuer=excluded.issuer,proof_jti=excluded.proof_jti,
+              effective_at=excluded.effective_at,expires_at=excluded.expires_at,
+              revision=excluded.revision,revoked_at=NULL""",
+              (jurisdiction,decision,claims["iss"],claims["jti"],claims["nbf"],claims["exp"],revision))
+    return {"accepted":True,"revision":revision}
+
 @app.get("/v1/bnb/travel/discovery")
 def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:int=0,place_id:str=""):
     """Public, nonbinding Travel discovery projection; no geolocation or legal authority inferred."""

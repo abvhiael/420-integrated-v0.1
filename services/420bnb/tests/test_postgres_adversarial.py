@@ -1096,3 +1096,63 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
             c.execute("DELETE FROM bnb_pay_disbursement WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_settlement_split WHERE reservation_id=%s",(rid,))
             c.execute("DELETE FROM bnb_pay_intent WHERE reservation_id=%s",(rid,))
+
+
+def test_bnb27_signed_failed_payment_is_recoverable_and_replay_safe(fixture_property,monkeypatch):
+    pid,headers=fixture_property
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("INSERT INTO bnb_booking_policy(property_id,instant_enabled) VALUES (%s,true)",(pid,))
+    held=make_bnb25_hold(pid,headers,"bnb27-failure-quote","bnb27-failure-hold")
+    assert held.status_code==201
+    booking=client.post("/v1/bnb/booking-requests",json={
+        "hold_id":held.json()["id"],"request_type":"instant"},
+        headers={**headers,"idempotency-key":"bnb27-failed-booking"})
+    assert booking.status_code==201,booking.text
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        rid,qid=c.execute("""SELECT id,quote_id FROM bnb_reservation
+            WHERE booking_request_id=%s""",(booking.json()["id"],)).fetchone()
+        c.execute("""INSERT INTO bnb_pay_intent(id,reservation_id,quote_id,requester,
+            merchant_id,payout_controller,chain_id,asset,asset_amount,settlement_currency,
+            quoted_minor,pay_invoice_id,pay_invoice_expires,state)
+            VALUES (%s,%s,%s,'guest-fixture','merchant','controller',420,'native:$420',
+            '1000','CAD',100,'invoice-failed-bnb27',now()+interval '10 minutes','pending')""",
+            (uuid4(),rid,qid))
+    private=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+    issuer="https://pay-failures.test.invalid"
+    monkeypatch.setenv("BNB_PAY_ISSUER",issuer)
+    monkeypatch.setenv("BNB_PAY_AUDIENCE","bnb-pay")
+    monkeypatch.setenv("BNB_PAY_PUBLIC_KEY_PEM",private.public_key().public_bytes(
+        Encoding.PEM,PublicFormat.SubjectPublicKeyInfo).decode())
+    def sign(body):
+        now=int(time.time())
+        model=api.PayFailureInput(**body)
+        claims={"iss":issuer,"aud":"bnb-pay","sub":"test-pay",
+          "iat":now,"nbf":now,"exp":now+120,"jti":str(uuid4()),
+          "purpose":"pay-failure","authority":"420Pay","registry_version":"test-v1",
+          "settlement_authority":"420Pay","economic_event_verified":True,
+          "pay_attempt_id":body["pay_attempt_id"],"failure_code":body["failure_code"],
+          "payload_hash":hashlib.sha256(model.model_dump_json().encode()).hexdigest()}
+        return {"x-pay-authority-proof":jwt.encode(claims,private,algorithm="RS256")}
+    body={"reservation_id":str(rid),"pay_invoice_id":"invoice-failed-bnb27",
+          "pay_attempt_id":"pay-attempt-failure-bnb27","failure_code":"settlement_failed"}
+    path="/v1/bnb/internal/pay/failures"
+    try:
+        assert client.post(path,json=body).status_code==401
+        sent=client.post(path,json=body,headers=sign(body))
+        assert sent.status_code==202,sent.text
+        assert sent.json()["state"]=="recovery_required"
+        replay=client.post(path,json=body,headers=sign(body))
+        assert replay.status_code==202 and replay.json()["replayed"]
+        altered={**body,"failure_code":"reorg"}
+        assert client.post(path,json=altered,headers=sign(altered)).status_code==409
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            assert c.execute("SELECT state FROM bnb_pay_intent WHERE reservation_id=%s",
+                             (rid,)).fetchone()[0]=="recovery_required"
+            assert c.execute("SELECT status FROM bnb_reservation WHERE id=%s",
+                             (rid,)).fetchone()[0]=="recovery_required"
+            assert c.execute("SELECT COUNT(*) FROM bnb_pay_failure_event WHERE reservation_id=%s",
+                             (rid,)).fetchone()[0]==1
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_pay_failure_event WHERE reservation_id=%s",(rid,))
+            c.execute("DELETE FROM bnb_pay_intent WHERE reservation_id=%s",(rid,))

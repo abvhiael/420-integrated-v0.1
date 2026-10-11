@@ -141,8 +141,8 @@ with sync_playwright() as p:
     expect(session.locator("#host-workspace")).to_contain_text("Pay-reported earnings")
     session.get_by_role("button",name="Refresh drafts").click()
     expect(session.get_by_role("heading",name="Draft cabin")).to_have_count(1)
-    assert session.get_by_label("Minimum stay in nights").count()==1
-    assert session.get_by_label("Cleaning fee in currency minor units").count()==1
+    expect(session.get_by_label("Minimum stay in nights")).to_have_count(1)
+    expect(session.get_by_label("Cleaning fee in currency minor units")).to_have_count(1)
     session.get_by_role("button",name="Clear session").click()
     expect(session.get_by_role("button",name="Save unpublished draft")).to_be_disabled()
     expect(session.locator("#host-workspace")).to_be_empty()

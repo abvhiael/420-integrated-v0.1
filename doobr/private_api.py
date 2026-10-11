@@ -5,7 +5,7 @@ This adapter does not create a listening server or accept user-supplied authorit
 """
 from dataclasses import dataclass
 from .auth import Denied
-from .console_cases import propose_case,approve_case,execute_case,uid
+from .console_cases import propose_case,approve_case,execute_case,close_case,uid
 
 @dataclass(frozen=True)
 class PrivateRequest:
@@ -39,4 +39,7 @@ def handle_private_request(*,request,connect,issuer,store,authority):
         return {"status":approve_case(**common,expected_revision=data.get("expected_revision"),authority=authority)}
     if request.path=="/private/v1/cases/execute":
         return {"status":execute_case(**common,authority=authority)}
+    if request.path in ("/private/v1/cases/reject","/private/v1/cases/expire"):
+        operation="REJECT" if request.path.endswith("reject") else "EXPIRE"
+        return {"status":close_case(**common,operation=operation,expected_revision=data.get("expected_revision"))}
     raise Denied("unknown private operation")

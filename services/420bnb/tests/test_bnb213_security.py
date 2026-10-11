@@ -67,3 +67,19 @@ def test_api_security_headers_on_success_and_denial(monkeypatch):
         assert response.headers["referrer-policy"]=="no-referrer"
         assert response.headers["cache-control"].startswith("no-store")
         assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
+
+def test_browser_xss_and_csrf_surface_remains_bounded():
+    source=(Path(__file__).resolve().parents[3]/"web/bnb/index.html").read_text()
+    for unsafe in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write(", "eval("):
+        assert unsafe not in source,unsafe
+    assert 'textContent' in source
+    assert 'credentials:"omit"' in source
+    assert 'encodeURIComponent(' in source
+
+def test_no_cross_origin_preflight_authorization():
+    r=client.options("/v1/bnb/booking-requests",headers={
+        "origin":"https://untrusted.example",
+        "access-control-request-method":"POST",
+        "access-control-request-headers":"authorization"})
+    assert "access-control-allow-origin" not in r.headers
+    assert "access-control-allow-credentials" not in r.headers

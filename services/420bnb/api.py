@@ -626,6 +626,10 @@ def send_guest_message(request_id:UUID,payload:GuestMessageInput,
             if prior:
                 if prior[1]!=payload.body:raise HTTPException(409,"MESSAGE_REPLAY_CONFLICT")
                 return {"id":str(prior[0]),"replayed":True}
+            recent=c.execute("""SELECT count(*) FROM bnb_guest_message
+                WHERE sender_subject=%s AND created_at>now()-interval '1 hour'""",
+                (actor,)).fetchone()[0]
+            if recent>=30:raise HTTPException(429,"MESSAGE_RATE_LIMIT")
             mid=uuid4()
             c.execute("""INSERT INTO bnb_guest_message
                 (id,booking_request_id,sender_subject,body,client_nonce)
@@ -762,6 +766,10 @@ def submit_abuse_report(payload:AbuseReportInput,authorization:str|None=Header(N
                 AND target_type=%s AND target_id=%s""",
                 (actor,payload.target_type,payload.target_id)).fetchone()
             if prior:return {"id":str(prior[0]),"state":"pending_or_reviewed","replayed":True}
+            recent=c.execute("""SELECT count(*) FROM bnb_abuse_report
+                WHERE reporter_subject=%s AND created_at>now()-interval '24 hours'""",
+                (actor,)).fetchone()[0]
+            if recent>=20:raise HTTPException(429,"REPORT_RATE_LIMIT")
             report_id=uuid4()
             c.execute("""INSERT INTO bnb_abuse_report
                 (id,reporter_subject,property_id,target_type,target_id,reason,detail)

@@ -18,7 +18,7 @@ import {fixture} from './fixture.mjs';
 const f=setup(),wf=fixture(),temp=mkdtempSync(join(tmpdir(),'com4-browser-'));let api,browser;const errors=[],checks=[];let rejectTx=false,unmined=null,account=seller.address.toLowerCase(),chain='0x1a4';
 f.service.reconcileTaxonomy([{id:'a'.repeat(64),slug:'app-goods',order:0}]);
 f.source.merchant=async id=>({controller:id===b32(1)?seller.address.toLowerCase():address(0),active:id===b32(1)});
-const server=createServer((req,res)=>{if(req.url.startsWith('/v1/'))return api.listeners('request')[0](req,res);const path=req.url==='/'?'index.html':req.url.slice(1);if(!['index.html','builder.html','app.js','style.css','public.html','public.js','public.css','operations.html','operations.js','high-street-logo.svg'].includes(path)){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':path.endsWith('.svg')?'image/svg+xml':'text/html','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(readFileSync(join(temp,'site',path)));});
+const server=createServer((req,res)=>{if(req.url.startsWith('/v1/'))return api.listeners('request')[0](req,res);const path=req.url==='/'?'index.html':req.url.slice(1);if(!['index.html','builder.html','app.js','style.css','public.html','public.js','public.css','operations.html','operations.js','high_street_logo.png'].includes(path)){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':path.endsWith('.png')?'image/png':'text/html','Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"});res.end(readFileSync(join(temp,'site',path)));});
 try{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const origin='http://127.0.0.1:'+server.address().port;
   api=commerceServer(f.service,new RequestAuth(f.db,{origin,chainId:'420',now:f.now}),{origin,now:f.now,rateLimit:10000});
@@ -27,10 +27,10 @@ try{
   execFileSync(process.execPath,['scripts/build.mjs'],{cwd:new URL('..',import.meta.url),env:{...process.env,COMMERCE_WEB_TEST_OUTPUT:join(temp,'site'),COMMERCE_WEB_MANIFEST:manifest,COMMERCE_WEB_MANIFEST_SHA256:createHash('sha256').update(readFileSync(manifest)).digest('hex')},stdio:'inherit'});
   const home=readFileSync(join(temp,'site','index.html'),'utf8'),builder=readFileSync(join(temp,'site','builder.html'),'utf8');
   assert.match(home,/<h1 id="market-title">High Street Marketplace<\/h1>/);
-  assert.match(home,/href="high-street-logo.svg"/);assert.match(home,/href="builder.html"/);
+  assert.match(home,/href="high_street_logo.png"/);assert.match(home,/href="builder.html"/);
   assert.ok(home.indexOf('class="market-hero"')<home.indexOf('<h1 id="market-title"'));
   assert.match(builder,/Merchant storefront builder/);assert.match(builder,/href="\/" aria-label="High Street marketplace home"/);
-  assert.match(readFileSync(join(temp,'site','high-street-logo.svg'),'utf8'),/<svg/);
+  assert.deepEqual([...readFileSync(join(temp,'site','high_street_logo.png')).subarray(0,8)],[137,80,78,71,13,10,26,10]);
   checks.push('built root is public marketplace, builder route and favicon/logo exist');
   browser=await chromium.launch({headless:true,...process.env.COMMERCE_CHROMIUM_PATH?{executablePath:process.env.COMMERCE_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']}: {}});const context=await browser.newContext({viewport:{width:1280,height:900}});const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.dismiss());
   await page.exposeFunction('walletRequest',async call=>{

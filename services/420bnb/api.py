@@ -1215,7 +1215,7 @@ def ingest_pay_intent(payload:PayIntentInput,x_pay_authority_proof:str|None=Head
                chain_id,asset,asset_amount,settlement_currency,quoted_minor,
                pay_invoice_id,pay_invoice_expires,conversion_route_id,
                conversion_quote_id,conversion_expires,minimum_received,payer_max)
-              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
               ON CONFLICT DO NOTHING RETURNING id""",
               (intent_id,payload.reservation_id,payload.quote_id,row[0],
                payload.merchant_id,payload.payout_controller,payload.chain_id,

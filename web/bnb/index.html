@@ -498,13 +498,13 @@ async function loadHostWorkspace(){
  const article=document.createElement("article");article.className="card";
  const title=document.createElement("h4");title.textContent=property.title+" · "+property.status;
  const details=document.createElement("div");details.setAttribute("aria-live","polite");
+ const grants=property.capabilities||[];
+ const permitted=permission=>property.owner||grants.includes(permission);
  const open=document.createElement("button");open.type="button";open.textContent="Manage property operations";
  open.addEventListener("click",async()=>{
  details.textContent="Loading property operations…";
  try{
  const base="/v1/bnb/account/properties/"+encodeURIComponent(property.id);
- const grants=property.capabilities||[];
- const permitted=permission=>property.owner||grants.includes(permission);
  const candidates=[
  ["/host-reservations","Reservations","view_reservations"],
  ["/host-requests","Booking requests","handle_requests"],

@@ -1422,6 +1422,9 @@ def pay_disbursement(payload:PayDisbursementInput,x_pay_authority_proof:str|None
                     raise HTTPException(409,"DISBURSEMENT_REPLAY_CONFLICT")
                 if old[0]=="finalized" or (old[0]=="failed" and payload.state!="reserved"):
                     if old[0]==payload.state or (old[0]=="finalized" and payload.state=="reserved"):
+                        if old[0]=="finalized" and (payload.receipt_hash is not None and
+                            old[8]!=payload.receipt_hash):
+                            raise HTTPException(409,"PAY_RECEIPT_REPLAY_CONFLICT")
                         return {"state":old[0],"replayed":True,"funds_moved_by_bnb":False}
                     raise HTTPException(409,"TERMINAL_DISBURSEMENT")
                 if old[0]=="reserved" and payload.state=="reserved":
@@ -1460,7 +1463,7 @@ def pay_disbursement(payload:PayDisbursementInput,x_pay_authority_proof:str|None
                     pay_receipt_hash=%s,updated_at=now() WHERE pay_operation_id=%s""",
                     (payload.state,payload.event_id,payload.receipt_hash,payload.pay_operation_id))
             else:
-                if payload.state=="failed":raise HTTPException(409,"UNKNOWN_PAY_OPERATION")
+                if payload.state!="reserved":raise HTTPException(409,"PAY_RESERVATION_FIRST_REQUIRED")
                 c.execute("""INSERT INTO bnb_pay_disbursement
                     (id,reservation_id,kind,pay_operation_id,pay_event_id,recipient,
                      amount,chain_id,asset,state,policy_version,pay_receipt_hash)

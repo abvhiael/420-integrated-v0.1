@@ -41,6 +41,13 @@ contract EquipmentRegistry {
     mapping(uint64 => address) public placementOperator;
     mapping(uint64 => int256[6]) private _totals;
     uint256 public issuedCount;
+    address public lifecycleController;
+    mapping(bytes32 => bool) public disabled;
+    mapping(bytes32 => bool) public retired;
+
+    event LifecycleControllerSet(address indexed controller);
+    event EquipmentEffectStatus(bytes32 indexed equipmentId, bool disabled);
+    event EquipmentRetired(bytes32 indexed equipmentId);
 
     event TypeRegistered(bytes32 indexed typeId, bytes32 indexed catalogueVersion, uint16 slotCost);
     event IssuerSet(address indexed issuer, bool approved);
@@ -125,13 +132,50 @@ contract EquipmentRegistry {
         emit EquipmentEarned(equipmentId, typeId, owner, earningRef);
     }
 
+    /// @notice Lifecycle authority is bound once, permanently, to prevent arbitrary status toggles.
+    function bindLifecycleController(address controller) external onlyAdmin {
+        if (lifecycleController != address(0) || controller == address(0) || controller.code.length == 0) {
+            revert HCInvalidState();
+        }
+        lifecycleController = controller;
+        emit LifecycleControllerSet(controller);
+    }
+
+    function setLifecycleDisabled(bytes32 equipmentId, bool isDisabled) external {
+        if (msg.sender != lifecycleController || retired[equipmentId]) revert HCInvalidState();
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists || disabled[equipmentId] == isDisabled) revert HCInvalidState();
+        if (item.parcelId != 0) {
+            int256 direction = isDisabled ? int256(-1) : int256(1);
+            for (uint256 i; i < 6; ++i) {
+                _totals[item.parcelId][i] += direction * _types[item.typeId].effects[i];
+            }
+        }
+        disabled[equipmentId] = isDisabled;
+        emit EquipmentEffectStatus(equipmentId, isDisabled);
+    }
+
+    function retireEquipment(bytes32 equipmentId) external {
+        if (msg.sender != lifecycleController || retired[equipmentId]) revert HCInvalidState();
+        Equipment storage item = _equipment[equipmentId];
+        if (!item.exists || !disabled[equipmentId]) revert HCInvalidState();
+        if (item.parcelId != 0) {
+            uint64 parcelId = item.parcelId;
+            item.parcelId = 0;
+            occupiedSlots[parcelId] -= _types[item.typeId].slotCost;
+            if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
+        }
+        retired[equipmentId] = true;
+        emit EquipmentRetired(equipmentId);
+    }
+
     /// @notice Slots are bounded by authoritative parcel capacity and current operator.
     function place(
         bytes32 equipmentId,
         uint64 parcelId
     ) external {
         Equipment storage item = _equipment[equipmentId];
-        if (!item.exists || item.owner != msg.sender || item.parcelId != 0 || parcelId == 0) {
+        if (!item.exists || retired[equipmentId] || disabled[equipmentId] || item.owner != msg.sender || item.parcelId != 0 || parcelId == 0) {
             revert HCInvalidState();
         }
         if (land.effectiveOperator(parcelId) != msg.sender) revert HCInvalidState();
@@ -158,7 +202,7 @@ contract EquipmentRegistry {
         occupiedSlots[parcelId] -= kind.slotCost;
         if (occupiedSlots[parcelId] == 0) placementOperator[parcelId] = address(0);
         for (uint256 i; i < 6; ++i) {
-            _totals[parcelId][i] -= kind.effects[i];
+            if (!disabled[equipmentId]) _totals[parcelId][i] -= kind.effects[i];
         }
         emit EquipmentRemoved(equipmentId, parcelId);
     }

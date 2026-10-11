@@ -1,6 +1,6 @@
 # DOOBR R03.7 — Private operator, safety and compliance consoles
 
-**Status: PARTIAL; exact-SHA qualification pending.** PR #601, `roadmap/doobr-bc-vancouver-infrastructure`. Main at recent inspection: `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`. Canonical milestone R03.12 Level 2; R05.10 Level 3.
+**Status: Repository-side implemented and targeted Level 1 PASS on SHA `466e794e15ae562eae2dc512a1447ef6b6e1d832`; live/testnet acceptance explicitly DEFERRED, NOT COMPLETE.** PR #601, `roadmap/doobr-bc-vancouver-infrastructure`. Main at recent inspection: `fe21ef07359d6915bf5daac37c4bf24a24fcf19b`. Canonical milestone R03.12 Level 2; R05.10 Level 3.
 
 ## Implemented in current work
 - Separate `OPERATOR`, `SAFETY`, `COMPLIANCE` action allowlists in `doobr/auth.py`. Role grants are still issued and revoked only by the external trusted identity authority.
@@ -26,15 +26,18 @@
 - Controlled migration chain validation against existing schema and PostgreSQL production-equivalent roles; permission/retention review, audit immutability and restore tests; incident and approval queue lifecycle (reject/expiry/retry), cross-service exactly-once completed-effect evidence and compensating failure handling.
 - Deploy private network and admission controls, operator MFA/device protections, least privilege, no public route, operational sign-off and authorization policy review.
 
-Because these inputs are not available or independently authorized in this repository review, **production live integrations and an actual operable private console are not qualified**. Exact-source success cannot certify them. This R03.7 step remains PARTIAL pending these original requirements; do not advance claiming full completion. Client Level 2 R03.12 and full repo Level 3 R05.10 remain deferred.
+Because these inputs are not available or independently authorized in this repository review, **production live integrations and an actual operable private console are not qualified**. Exact-source success cannot certify them. The remaining genuinely external checks are registered in `docs/audit/DOOBR-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md`; R03.7 is repository-side implemented but not live qualified. Client Level 2 R03.12 and full repo Level 3 R05.10 remain deferred.
 
-**Next canonical step once R03.7 is complete:** R03.8 — Secure iOS/Android builds with platform keystore, push, foreground and narrowly scoped background GPS.
+**Next canonical repository step (external acceptance deferred):** R03.8 — Secure iOS/Android builds with platform keystore, push, foreground and narrowly scoped background GPS.
 
 ## Latest R03.7 hardening qualification inventory
-Implementation SHA: `466e794e15ae562eae2dc512a1447ef6b6e1d832`. Exact-SHA workflow: [R03.7 #38166667833](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38166667833), queued at recording; a queued job is not a passing qualification. This is a repository evidence-only documentation update.
+Implementation SHA: `466e794e15ae562eae2dc512a1447ef6b6e1d832`. Exact-SHA workflow: [R03.7 #38166667833](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38166667833), completed with success (job `114550532240`), as checked after run completion. This evidence-only update does not change executable code. This is a repository evidence-only documentation update.
 - Private API: `doobr/private_api.py`, five allowlisted case actions, authenticated server-owned transport context required; `doobr/storage/tests/test_private_api.py` rejects missing MFA/CSRF/origin, unsupported paths and untrusted field injection.
 - Case lifecycle: `doobr/console_cases.py`, transactionally guarded PENDING / APPROVED / EXECUTED / REJECTED / EXPIRED pathways with event log and version preconditions. Execution records externally attested completion, never performs side effects within the transaction.
 - Independent authority: `doobr/private_authority.py` defaults to denial; signed-decision verification is a dependency contract, **not an operational live issuer**.
 - Connected UI contract: `web/doobr-private/index.html`, `client.mjs` and `test-client.mjs`; uses same-origin POST, CSRF token and authenticated cookie, with fail-closed responses. Real private route/session deployment is NOT implemented.
 - Database checks: PostgreSQL 16 service runs migration 0007 and verifies forced RLS flags and cross-tenant denial as a restricted role through `doobr/storage/tests/console_cases_rls.sql`. This does NOT certify end-to-end migrations, backup/restore, role grants or production-equivalent HA.
 - Remaining release gates: independently configured 420Identity role/revocation and 420Compliance case policies, signed execution verification, transport verification at private ingress, secret lifecycle and actual HTTPS/mTLS credentials, database migration-chain and role acceptance, deployed private operation APIs, and full audit/effect recovery. No live authority or production readiness is claimed.
+
+## R03.7 scope closeout (repository vs live)
+The repository implementation consists of role-separated private case commands, authenticated-ingress contract, durable proposal/approval/reject/expire/attested execution transitions, event audit and PostgreSQL RLS, private browser client contract and targeted checks. This does not mean a deployed web server or actual 420Identity/420Compliance authority exists. Live testnet and external acceptance checkboxes are preserved without collapsing or renumbering the canonical step in `docs/audit/DOOBR-TESTNET-DEFERRED-QUALIFICATION-ROADMAP.md`. Do not activate the public frontend or protected private endpoints in an unverified environment. CI run #38166667833 passed on executable implementation SHA `466e794e15ae562eae2dc512a1447ef6b6e1d832`; documentation-only commits inherit this evidence only while implementation files remain unchanged.

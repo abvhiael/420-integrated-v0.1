@@ -503,18 +503,43 @@ def travel_authorized_listings(place_id:str,response:Response,limit:int=20):
                 for row in rows]}
 
 
+@app.get("/v1/bnb/reputation/public/{property_id}")
+def public_verified_stay_reputation(property_id:UUID,response:Response):
+    """420Reputation consumer-safe facts only. No scoring or authoritative profile mutation."""
+    response.headers["Cache-Control"]="no-store"
+    with db() as c:
+        prop=c.execute("SELECT status FROM bnb_property WHERE id=%s",(property_id,)).fetchone()
+        if not prop or prop[0]!="published":raise HTTPException(404,"NOT_FOUND")
+        rows=c.execute("""SELECT r.id,r.rating,r.created_at FROM bnb_guest_review r
+            JOIN bnb_reservation v ON v.id=r.reservation_id
+            JOIN bnb_hold h ON h.id=v.hold_id
+            WHERE r.property_id=%s AND r.status='approved'
+            AND v.status='confirmed' AND upper(h.period)<=now()
+            ORDER BY r.created_at,r.id LIMIT 1000""",(property_id,)).fetchall()
+    return {"version":"bnb-verified-stay-reputation/v1","property_id":str(property_id),
+            "score_authority":"420Reputation","verified_stay_only":True,
+            "financial_authority":False,
+            "reviews":[{"review_id":str(row[0]),"rating":row[1],
+                        "created_at":row[2].isoformat()} for row in rows]}
+
+
 @app.get("/v1/bnb/listings/{property_id}")
 def guest_listing_detail(property_id:UUID):
     with db() as c:
         row=c.execute("""SELECT id,title,public_region,capacity,nightly_minor,currency
             FROM bnb_property WHERE id=%s AND status='published'""",(property_id,)).fetchone()
         if not row:raise HTTPException(404,"NOT_FOUND")
-        reviews=c.execute("""SELECT rating,body,created_at FROM bnb_guest_review
-            WHERE property_id=%s AND status='approved'
-            ORDER BY created_at DESC LIMIT 20""",(property_id,)).fetchall()
+        reviews=c.execute("""SELECT r.rating,r.body,r.created_at,r.id,
+                h.body FROM bnb_guest_review r
+            JOIN bnb_reservation v ON v.id=r.reservation_id
+            JOIN bnb_hold hold ON hold.id=v.hold_id
+            LEFT JOIN bnb_review_host_response h ON h.review_id=r.id AND h.status='approved'
+            WHERE r.property_id=%s AND r.status='approved'
+            AND v.status='confirmed' AND upper(hold.period)<=now()
+            ORDER BY r.created_at DESC LIMIT 20""",(property_id,)).fetchall()
     return {"id":str(row[0]),"title":row[1],"public_region":row[2],"capacity":row[3],
             "nightly_minor":row[4],"currency":row[5],
-            "reviews":[{"rating":r[0],"body":r[1]} for r in reviews]}
+            "reviews":[{"rating":r[0],"body":r[1],"review_id":str(r[3]),"host_response":r[4]} for r in reviews]}
 
 
 @app.get("/v1/bnb/account/saved-stays")

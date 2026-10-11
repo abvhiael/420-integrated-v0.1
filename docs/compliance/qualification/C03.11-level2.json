@@ -1,0 +1,41 @@
+{
+  "step": "C03.11",
+  "canonical": "Engine Level 2 milestone: independently reproducible historical and current decisions; cross-layer and carrier-class integration evidence.",
+  "status": "PENDING_LEVEL2_CI",
+  "qualification_level": 2,
+  "implementation_sha": "e1aa42c4c55e9fb605d77c3588a3e6a8a1924880",
+  "main_sha_observed": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "original_pr_base": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "changed_files": [
+    "services/complianceauth/c03_11_engine_integration_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C03.11-ENGINE-LEVEL2.md"
+  ],
+  "implemented": [
+    "replay historical signed reviewed decisions",
+    "replay current signed publication-epoch decisions",
+    "authority and temporal replay",
+    "publication CAS upgrade, stale cache invalidation and outage denial",
+    "carrier request tenant/audience/facts isolation and receipt replay prevention",
+    "read-only in-flight policy impact classification"
+  ],
+  "ci": {
+    "conclusion": "NOT_VERIFIED",
+    "required": "App-scoped exact-SHA Compliance CI including C03.11 and race detector",
+    "run_id": null,
+    "job_id": null
+  },
+  "limitations": [
+    "No live regulator or independent legal reviewer is connected",
+    "No production DOOBr/Travel/Maps carrier acceptance established",
+    "Receipt ledger is process-local; multi-instance durable replay fencing remains unaccepted",
+    "Actual production database failover/split-brain acceptance outstanding"
+  ],
+  "level3": "Deferred to canonical C08.5",
+  "blockers": [
+    "C03.11 Level 2 CI must pass on the exact implementation SHA before COMPLETE"
+  ],
+  "next_canonical": "C04.1 — Draft/review/approve/schedule/activate/supersede/revoke lifecycle; enforce distinct author and independent reviewer identities."
+}

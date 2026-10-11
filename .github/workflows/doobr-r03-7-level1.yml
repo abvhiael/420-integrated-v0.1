@@ -1,0 +1,35 @@
+name: DOOBR R03.7 Private Console Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/private_console.py','doobr/storage/tests/test_private_console.py','.github/workflows/doobr-r03-7-level1.yml']
+  pull_request:
+    paths: ['doobr/private_console.py','doobr/storage/tests/test_private_console.py','.github/workflows/doobr-r03-7-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  console:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Qualified private console dual control checks
+        run: |
+          python3 -m py_compile doobr/private_console.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_private_console.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_retailer_queue.py -v
+      - name: Verify exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

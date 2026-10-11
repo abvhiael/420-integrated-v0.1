@@ -2,7 +2,7 @@ name: DOOBR R03.7 Private Console Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['doobr/private_console.py','doobr/storage/tests/test_private_console.py','.github/workflows/doobr-r03-7-level1.yml']
+    paths: ['doobr/private_console.py','doobr/console_cases.py','doobr/auth.py','doobr/storage/migrations/0007_private_console_cases.sql','doobr/storage/tests/test_private_console.py','doobr/storage/tests/test_console_cases.py','.github/workflows/doobr-r03-7-level1.yml']
   pull_request:
     paths: ['doobr/private_console.py','doobr/storage/tests/test_private_console.py','.github/workflows/doobr-r03-7-level1.yml']
   workflow_dispatch:
@@ -26,7 +26,8 @@ jobs:
           python-version: '3.12'
       - name: Qualified private console dual control checks
         run: |
-          python3 -m py_compile doobr/private_console.py
+          python3 -m py_compile doobr/private_console.py doobr/console_cases.py doobr/auth.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_console_cases.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_private_console.py -v
           python3 -m unittest discover -s doobr/storage/tests -p test_retailer_queue.py -v
       - name: Verify exact SHA after

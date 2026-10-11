@@ -313,7 +313,16 @@ def guest_search(region:str="",q:str="",min_capacity:int=1,limit:int=20,offset:i
     if len(region)>100 or len(q)>100:raise HTTPException(422,"SEARCH_TOO_LONG")
     with db() as c:
         rows=c.execute("""SELECT id,title,public_region,capacity,nightly_minor,currency
-            FROM bnb_property WHERE status='published' AND capacity>=%s
+            FROM bnb_property p WHERE p.status='published' AND EXISTS (SELECT 1 FROM bnb_compliance_eligibility e
+                JOIN bnb_travel_place_binding b ON b.property_id=e.property_id
+                    AND b.jurisdiction_id=e.jurisdiction_id
+                JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=e.jurisdiction_id
+                WHERE e.property_id=p.id AND e.decision='allowed' AND e.revoked_at IS NULL
+                AND e.property_version=p.version AND e.effective_at<=now()
+                AND e.expires_at>now() AND b.revoked_at IS NULL
+                AND b.property_version=p.version AND b.proof_expires_at>now()
+                AND j.decision='allowed' AND j.revoked_at IS NULL
+                AND j.effective_at<=now() AND j.expires_at>now()) AND capacity>=%s
             AND (%s='' OR public_region ILIKE %s ESCAPE '\\')
             AND (%s='' OR title ILIKE %s ESCAPE '\\')
             ORDER BY id LIMIT %s OFFSET %s""",
@@ -601,7 +610,16 @@ def public_verified_stay_reputation(property_id:UUID,response:Response):
 def guest_listing_detail(property_id:UUID):
     with db() as c:
         row=c.execute("""SELECT id,title,public_region,capacity,nightly_minor,currency
-            FROM bnb_property WHERE id=%s AND status='published'""",(property_id,)).fetchone()
+            FROM bnb_property p WHERE p.id=%s AND p.status='published' AND EXISTS (SELECT 1 FROM bnb_compliance_eligibility e
+                JOIN bnb_travel_place_binding b ON b.property_id=e.property_id
+                    AND b.jurisdiction_id=e.jurisdiction_id
+                JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=e.jurisdiction_id
+                WHERE e.property_id=p.id AND e.decision='allowed' AND e.revoked_at IS NULL
+                AND e.property_version=p.version AND e.effective_at<=now()
+                AND e.expires_at>now() AND b.revoked_at IS NULL
+                AND b.property_version=p.version AND b.proof_expires_at>now()
+                AND j.decision='allowed' AND j.revoked_at IS NULL
+                AND j.effective_at<=now() AND j.expires_at>now())""",(property_id,)).fetchone()
         if not row:raise HTTPException(404,"NOT_FOUND")
         reviews=c.execute("""SELECT r.rating,r.body,r.created_at,r.id,
                 h.body FROM bnb_guest_review r
@@ -972,7 +990,16 @@ def authorized_guest_review_decision(review_id:UUID,payload:GuestReviewDecision,
 def listings():
     with db() as c:
         rows = c.execute("""SELECT id,title,public_region,capacity,nightly_minor,currency,version
-            FROM bnb_property WHERE status='published' ORDER BY id LIMIT 50""").fetchall()
+            FROM bnb_property p WHERE p.status='published' AND EXISTS (SELECT 1 FROM bnb_compliance_eligibility e
+                JOIN bnb_travel_place_binding b ON b.property_id=e.property_id
+                    AND b.jurisdiction_id=e.jurisdiction_id
+                JOIN bnb_travel_jurisdiction_policy j ON j.jurisdiction_id=e.jurisdiction_id
+                WHERE e.property_id=p.id AND e.decision='allowed' AND e.revoked_at IS NULL
+                AND e.property_version=p.version AND e.effective_at<=now()
+                AND e.expires_at>now() AND b.revoked_at IS NULL
+                AND b.property_version=p.version AND b.proof_expires_at>now()
+                AND j.decision='allowed' AND j.revoked_at IS NULL
+                AND j.effective_at<=now() AND j.expires_at>now()) ORDER BY id LIMIT 50""").fetchall()
     return [{"id":str(x[0]),"title":x[1],"public_region":x[2],"capacity":x[3],
              "nightly_minor":x[4],"currency":x[5],"version":x[6]} for x in rows]
 

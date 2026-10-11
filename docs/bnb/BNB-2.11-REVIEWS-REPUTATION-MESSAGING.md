@@ -23,7 +23,7 @@
 - Production-equivalent issuer/key custody and 420Reputation operational acceptance must be explicitly handed to the testnet roadmap where genuine independently administered services are required. Local mock approvals do not qualify these external actions.
 - Level 2 app integration only at a genuine cross-service milestone; Level 3 once at final accumulated BnB phase reconciliation; never duplicate Foundry inventories.
 
-**Status: IN PROGRESS. No BNB-2.11 completion or CI PASS inferred before tests and all repository-side gaps are closed.**
+**Status: REPOSITORY-SIDE COMPLETE — Level 1 PASS and app-focused Level 2 milestone PASS on implementation SHA `78b06a9bfbb13ad6341d86858bc190833357d7f3`; live externally authorized 420Reputation/moderator acceptance deferred to `T-BNB-REPUTATION-211`. No Level 3 qualification or merge is claimed.**
 
 ## Incremental review/reputation and incident integration
 
@@ -41,3 +41,37 @@
 - Tests include unsigned moderator/reputation mutation rejection, strict rating input bounds, property-scope authorization, rejected jurisdiction-independent session bypass and public no-store reputation projection. The cross-service reputation contract is explicitly non-final, without local scoring.
 
 **Outstanding qualification:** run BnB Runtime Slice and changed frontend accessibility on the exact final executable SHA; inspect failures and record a level-1 PASS only when completed. The attached live testnet gate `T-BNB-REPUTATION-211` remains deferred; no independent operator provenance or real 420Reputation deployment has been verified from repository-only code.
+
+## Final repository-side qualification record — 2026-10-11
+
+**Canonical step:** BNB-2.11 — Reviews, Reputation and Messaging; verified-stay reviews, host responses, 420Reputation integration, private guest-host messaging and abuse reporting.
+
+**Level 1 implementation SHA:** `78b06a9bfbb13ad6341d86858bc190833357d7f3`.
+**Evidence-only commit:** follows this SHA and changes this documentation alone; no runtime, CI or requirement semantics changed.
+**Audit branch / PR:** `audit/420bnb-bnb-1-1-source-reconciliation-20261009`, PR #600, DRAFT and UNMERGED.
+**Qualified branch merge base:** `f8bbb62e1cdfe68cff25261fd4a036db1840a15c`.
+**Current main when evidence recorded:** `fe21ef07359d6915bf5daac37c4bf24a24fcf19b` — diverged; 414 commits ahead and 686 behind as reported by GitHub compare (do not infer merge readiness).
+
+### Step requirements and verified repository implementation
+- **Verified stays:** only completed, confirmed BnB stays produce guest reviews. Independently purpose-scoped reviewer JWT authorizes approval/rejection/withdrawal; duplicate decisions and replay JTIs fail closed.
+- **Host responses:** only the current published property's authorized host can respond, once per review; submissions enter independent moderation; publicly returned responses are approved-only.
+- **Reputation:** separately purpose-/property-scoped signed verified-review read endpoint emits only confirmed completed-stay facts, with withdrawn/rejected ratings represented as null; signed receipts are monotonic and replay-protected. 420Reputation remains authoritative for scores and actual ingestion; BnB cannot self-assign scores.
+- **Messaging:** private request-thread access is checked for the guest/current authorized host; nonces are idempotent, declined/withdrawn/expired requests reject writes, and rolling persisted sender quota is serialized with an account row lock.
+- **Abuse:** only authorized guest/host participants can report reviews, private messages and responses; reports are bounded, deduplicated, private, independently dispositioned with signed one-time JWT and audit trail. Accepted reports quarantine messages or withdraw approved reviews/responses. Browser review/response/report controls use safe text rendering and state feedback.
+- **Adversarial coverage:** `test_bnb211_postgres_adversarial.py` exercises concurrent moderator decisions, cross-property host denial, accepted-abuse withdrawal, verified-rating nullification on withdrawal, stale/replayed receipts and simultaneous revision acknowledgement. The final fixture correction explicitly creates an approved host response before testing its withdrawal.
+
+### Level 1 — exact-SHA fast qualification PASS
+- BnB Runtime Slice **PASS**, run [38165200071](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38165200071): PostgreSQL migrations through 019, BnB pytest/security/adversarial cases, Python compilation, non-root container build/smoke, JS syntax, browser accessibility and frontend verification.
+- Associated affected GEN-SVC-3 Travel **PASS**, run [38165200086](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38165200086).
+- All nine retained BNB-1.1 through BNB-1.9 app-contract workflows passed on the same implementation SHA; 420Oracle also passed, run [38165199999](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38165199999).
+- Global Docs workflow **SKIPPED by path policy**, run 38165199964; not required for this ordinary app-scoped level and **not counted as PASS**.
+- Total: **12 executed workflows PASS, zero failures/pending**, on exact implementation SHA. This does not assert that independently issued live credentials have been qualified.
+
+### Level 2 — BNB-2.8–2.11 guest experience / reviews / reputation integration milestone PASS (repository side)
+This is a substantive app integration boundary: existing BNB-2.8 guest/review/request lifecycle and BNB-2.11 reputation, abuse and message state transitions share tables and access control. The **retained full BnB Runtime Slice**, covering BnB PostgreSQL transactions, security, browser, and adversarial review/withdrawal/race paths, **already executed successfully as run 38165200071 on the identical SHA**. Retained BNB-1.7 Guest Host Experience **PASS** (run 38165200007), BNB-1.8 Security Privacy Abuse **PASS** (run 38165199921), and GEN-SVC-3 Travel **PASS** (run 38165200086). These exact-SHA app-focused results are inherited as Level 2 evidence rather than rerunning the same tests ceremonially. This is **repository-side integration**, not production/issuer acceptance.
+
+### Explicit external/live-testnet deferrals
+`T-BNB-REPUTATION-211` in `docs/bnb/BNB-TESTNET-WORK-ROADMAP.md` retains actual independent moderator and Reputation issuer/operator approval, managed signing keys and revocations, official upstream 420Reputation deployment, authenticated real downstream ingestion and score propagation, producer/consumer receipt witnessing, real multi-instance service operation, manual accessibility/incident acceptance and independent operator/security signoff. None is represented as currently accepted. Service-to-service operations remain fail-closed when independent proofs are absent.
+
+### Phase and next-step boundaries
+**BNB-2.11 repository-side step: COMPLETE (Level 1 + milestone Level 2 qualified).** PR #600 is not merged. **Level 3 is DEFERRED** to the *full BnB app audit phase closeout*: reconcile against then-current main, qualify one exact accumulated merge candidate, and use canonical Solidity and Genesis owners without duplicate Foundry inventory. The next roadmap step must be taken from the canonical source; this evidence does not invent or renumber it.

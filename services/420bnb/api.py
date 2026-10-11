@@ -631,6 +631,101 @@ def submit_guest_review(reservation_id:UUID,payload:GuestReviewInput,
     return {"id":str(review_id),"state":"pending_moderation","published":False}
 
 
+class HostReviewResponseInput(BaseModel):
+    body: str=Field(min_length=1,max_length=2000)
+
+@app.post("/v1/bnb/reviews/{review_id}/host-response",status_code=201)
+def respond_to_guest_review(review_id:UUID,payload:HostReviewResponseInput,
+                          authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    if not payload.body.strip():raise HTTPException(422,"EMPTY_RESPONSE")
+    with db() as c:
+        with c.transaction():
+            review=c.execute("SELECT property_id,status FROM bnb_guest_review WHERE id=%s",
+                             (review_id,)).fetchone()
+            if not review or review[1]!="approved":raise HTTPException(404,"NOT_FOUND")
+            prop=c.execute("SELECT host_subject,status FROM bnb_property WHERE id=%s FOR UPDATE",
+                           (review[0],)).fetchone()
+            if not prop or prop[0]!=actor or prop[1]!="published":
+                raise HTTPException(404,"NOT_FOUND")
+            if c.execute("SELECT 1 FROM bnb_review_host_response WHERE review_id=%s",
+                         (review_id,)).fetchone():
+                raise HTTPException(409,"RESPONSE_ALREADY_SUBMITTED")
+            c.execute("""INSERT INTO bnb_review_host_response
+                (review_id,property_id,host_subject,body) VALUES (%s,%s,%s,%s)""",
+                (review_id,review[0],actor,payload.body))
+    return {"review_id":str(review_id),"status":"pending_moderation","published":False}
+
+
+class AbuseReportInput(BaseModel):
+    target_type: str=Field(pattern="^(review|message|host_response)$")
+    target_id:UUID
+    reason:str=Field(pattern="^(harassment|spam|fraud|privacy|other)$")
+    detail:str=Field(default="",max_length=1000)
+
+@app.post("/v1/bnb/abuse-reports",status_code=201)
+def submit_abuse_report(payload:AbuseReportInput,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            if payload.target_type=="review":
+                target=c.execute("""SELECT r.property_id,r.guest_subject,p.host_subject
+                    FROM bnb_guest_review r JOIN bnb_property p ON p.id=r.property_id
+                    WHERE r.id=%s AND r.status='approved'""",(payload.target_id,)).fetchone()
+            elif payload.target_type=="host_response":
+                target=c.execute("""SELECT r.property_id,r.guest_subject,p.host_subject
+                    FROM bnb_review_host_response h JOIN bnb_guest_review r ON r.id=h.review_id
+                    JOIN bnb_property p ON p.id=r.property_id
+                    WHERE h.review_id=%s AND h.status='approved'""",(payload.target_id,)).fetchone()
+            else:
+                target=c.execute("""SELECT br.property_id,br.guest_subject,br.host_subject
+                    FROM bnb_guest_message m JOIN bnb_booking_request br ON br.id=m.booking_request_id
+                    WHERE m.id=%s""",(payload.target_id,)).fetchone()
+            if not target or actor not in (target[1],target[2]):
+                raise HTTPException(404,"NOT_FOUND")
+            prior=c.execute("""SELECT id FROM bnb_abuse_report WHERE reporter_subject=%s
+                AND target_type=%s AND target_id=%s""",
+                (actor,payload.target_type,payload.target_id)).fetchone()
+            if prior:return {"id":str(prior[0]),"state":"pending_or_reviewed","replayed":True}
+            report_id=uuid4()
+            c.execute("""INSERT INTO bnb_abuse_report
+                (id,reporter_subject,property_id,target_type,target_id,reason,detail)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)""",
+                (report_id,actor,target[0],payload.target_type,payload.target_id,payload.reason,payload.detail))
+    return {"id":str(report_id),"state":"pending","replayed":False}
+
+
+class ReviewModerationDecision(BaseModel):
+    decision:str=Field(pattern="^(approved|rejected|withdrawn)$")
+
+@app.post("/v1/bnb/internal/host-responses/{review_id}/decision")
+def moderate_host_review_response(review_id:UUID,payload:ReviewModerationDecision,
+                                  x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:raise HTTPException(401,"REVIEW_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","host-review-response")
+    if proof.get("review_id")!=str(review_id) or proof.get("decision")!=payload.decision:
+        raise HTTPException(403,"REVIEW_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("SELECT property_id,status FROM bnb_review_host_response WHERE review_id=%s",(review_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(row[0],))
+            status=c.execute("SELECT status FROM bnb_review_host_response WHERE review_id=%s FOR UPDATE",
+                             (review_id,)).fetchone()[0]
+            allowed={"pending_moderation":("approved","rejected"),"approved":("withdrawn",)}
+            if payload.decision not in allowed.get(status,()):
+                raise HTTPException(409,"INVALID_REVIEW_RESPONSE_TRANSITION")
+            if c.execute("SELECT 1 FROM bnb_review_moderation_nonce WHERE issuer=%s AND jti=%s",
+                         (proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"MODERATION_REPLAY")
+            c.execute("""INSERT INTO bnb_review_moderation_nonce(issuer,jti,target_type,target_id,decision)
+                VALUES (%s,%s,'host_response',%s,%s)""",
+                (proof["iss"],proof["jti"],review_id,payload.decision))
+            c.execute("UPDATE bnb_review_host_response SET status=%s WHERE review_id=%s",
+                      (payload.decision,review_id))
+    return {"review_id":str(review_id),"state":payload.decision}
+
+
 class GuestReviewDecision(BaseModel):
     decision: str=Field(pattern="^(approved|rejected|withdrawn)$")
 

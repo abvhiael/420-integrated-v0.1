@@ -450,6 +450,43 @@ def submit_guest_review(reservation_id:UUID,payload:GuestReviewInput,
     return {"id":str(review_id),"state":"pending_moderation","published":False}
 
 
+class GuestReviewDecision(BaseModel):
+    decision: str=Field(pattern="^(approved|rejected|withdrawn)$")
+
+
+@app.post("/v1/bnb/internal/guest-reviews/{review_id}/decision")
+def authorized_guest_review_decision(review_id:UUID,payload:GuestReviewDecision,
+                                      x_guest_review_proof:str|None=Header(None)):
+    if not x_guest_review_proof:raise HTTPException(401,"REVIEW_AUTHORITY_REQUIRED")
+    proof=verify_authority(x_guest_review_proof,"BNB_GUEST_REVIEW","guest-review")
+    if proof.get("review_id")!=str(review_id) or proof.get("decision")!=payload.decision:
+        raise HTTPException(403,"REVIEW_SCOPE_MISMATCH")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT property_id,status FROM bnb_guest_review
+                WHERE id=%s""",(review_id,)).fetchone()
+            if not row:raise HTTPException(404,"NOT_FOUND")
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(row[0],))
+            current=c.execute("SELECT status FROM bnb_guest_review WHERE id=%s FOR UPDATE",
+                              (review_id,)).fetchone()[0]
+            permitted={"pending_moderation":{"approved","rejected"},
+                       "approved":{"withdrawn"},"rejected":set(),"withdrawn":set()}
+            if payload.decision not in permitted[current]:
+                raise HTTPException(409,"REVIEW_DECISION_NOT_PERMITTED")
+            if c.execute("""SELECT 1 FROM bnb_guest_review_decision
+                WHERE issuer=%s AND jti=%s""",(proof["iss"],proof["jti"])).fetchone():
+                raise HTTPException(409,"REVIEW_DECISION_REPLAY")
+            c.execute("""INSERT INTO bnb_guest_review_decision(issuer,jti,review_id,decision)
+                VALUES (%s,%s,%s,%s)""",
+                (proof["iss"],proof["jti"],review_id,payload.decision))
+            c.execute("UPDATE bnb_guest_review SET status=%s WHERE id=%s",
+                      (payload.decision,review_id))
+            c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)
+                VALUES (%s,%s,%s,%s)""",
+                (uuid4(),proof["sub"],"bnb.guest_review."+payload.decision,row[0]))
+    return {"review_id":str(review_id),"state":payload.decision}
+
+
 @app.get("/v1/bnb/listings")
 def listings():
     with db() as c:

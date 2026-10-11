@@ -50,6 +50,29 @@ class OperationsPG(unittest.TestCase):
      with self.assertRaises(psycopg.errors.InsufficientPrivilege):
       cur.execute("UPDATE doobr_private.operation_audit SET action='FAKE' WHERE tenant_id=%s",(T,))
   self.assertEqual(verify_chain(connect=self.connect,tenant_id=OTHER)['entries'],0)
+ def test_committed_order_audit_and_tamper_denial(self):
+  actor='00000000-0000-4000-8000-000000007011'
+  buyer='00000000-0000-4000-8000-000000007012'
+  retailer='00000000-0000-4000-8000-000000007013'
+  region='00000000-0000-4000-8000-000000007014'
+  order='00000000-0000-4000-8000-000000007015'
+  cmd='00000000-0000-4000-8000-000000007016'
+  with self.admin.transaction():
+   with self.admin.cursor() as q:
+    q.execute("SELECT set_config('doobr.tenant_id',%s,true)",(T,))
+    for aid,kind in ((actor,'OPERATOR'),(buyer,'CONSUMER'),(retailer,'RETAILER')):
+     q.execute("INSERT INTO doobr_private.actors(tenant_id,actor_id,identity_ref,kind,state) VALUES(%s,%s,%s,%s,'ACTIVE')",(T,aid,aid,kind))
+    q.execute("""INSERT INTO doobr_private.service_regions(tenant_id,region_id,region_code,country_code,province_code,municipality_ref,boundary,policy_ref)
+     VALUES(%s,%s,'ops','CA','BC','Vancouver',ST_Multi(ST_GeomFromText('POLYGON((-123 49,-122 49,-122 50,-123 50,-123 49))',4326)),'policy')""",(T,region))
+    q.execute("""INSERT INTO doobr_private.delivery_orders(tenant_id,order_id,consumer_id,retailer_id,region_id,state)
+     VALUES(%s,%s,%s,%s,%s,'ELIGIBLE')""",(T,order,buyer,retailer,region))
+    q.execute("""INSERT INTO doobr_private.order_commands(tenant_id,command_id,order_id,actor_id,action,target_state,request_digest,expected_revision,applied_revision)
+     VALUES(%s,%s,%s,%s,'APPROVE_ELIGIBILITY','ELIGIBLE',%s,1,2)""",(T,cmd,order,actor,b'c'*32))
+  self.assertEqual(verify_chain(connect=self.connect,tenant_id=T)['entries'],1)
+  with self.admin.cursor() as q:
+   with self.assertRaises(psycopg.errors.RaiseException):
+    q.execute("UPDATE doobr_private.operation_audit SET action='TAMPER' WHERE tenant_id=%s",(T,))
+  self.assertEqual(verify_chain(connect=self.connect,tenant_id=T)['entries'],1)
  def test_audit_tables_forced_rls_and_append_only(self):
   with self.admin.cursor() as c:
    c.execute("""SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace

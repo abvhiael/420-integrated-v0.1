@@ -429,6 +429,42 @@ def travel_discovery(destination:str="",min_capacity:int=1,limit:int=20,offset:i
     }
 
 
+@app.post("/v1/bnb/travel/place-binding/revoke")
+def revoke_travel_place_binding(payload:TravelBindingProof):
+    claims=verify_authority(payload.proof,"BNB_LOCATION_AUTHORITY","bnb_property_place_revoke")
+    try:
+        property_id=UUID(claims["property_id"])
+    except (KeyError,TypeError,ValueError):
+        raise HTTPException(422,"INVALID_PROPERTY_ID")
+    with db() as c:
+        with c.transaction():
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,))
+            row=c.execute("""SELECT place_id,issuer,revoked_at FROM bnb_travel_place_binding
+                WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if not row:raise HTTPException(404,"BINDING_NOT_FOUND")
+            if row[0]!=claims.get("place_id") or row[1]!=claims["iss"]:
+                raise HTTPException(403,"BINDING_ISSUER_MISMATCH")
+            c.execute("""UPDATE bnb_travel_place_binding SET revoked_at=now(),updated_at=now()
+                WHERE property_id=%s AND revoked_at IS NULL""",(property_id,))
+    return {"revoked":True}
+
+@app.post("/v1/bnb/travel/jurisdiction-policy/revoke")
+def revoke_travel_jurisdiction_policy(payload:TravelBindingProof):
+    claims=verify_authority(payload.proof,"BNB_JURISDICTION_AUTHORITY","bnb_jurisdiction_policy_revoke")
+    jurisdiction=claims.get("jurisdiction_id")
+    if not isinstance(jurisdiction,str) or not (1<=len(jurisdiction)<=100):
+        raise HTTPException(422,"INVALID_JURISDICTION_SCOPE")
+    with db() as c:
+        with c.transaction():
+            row=c.execute("""SELECT issuer FROM bnb_travel_jurisdiction_policy
+                WHERE jurisdiction_id=%s FOR UPDATE""",(jurisdiction,)).fetchone()
+            if not row:raise HTTPException(404,"POLICY_NOT_FOUND")
+            if row[0]!=claims["iss"]:raise HTTPException(403,"POLICY_ISSUER_MISMATCH")
+            c.execute("""UPDATE bnb_travel_jurisdiction_policy SET revoked_at=now()
+                WHERE jurisdiction_id=%s AND revoked_at IS NULL""",(jurisdiction,))
+    return {"revoked":True}
+
+
 @app.get("/v1/bnb/travel/authorized")
 def travel_authorized_listings(place_id:str,limit:int=20):
     """Only current approved property/place bindings with active allowed policy."""

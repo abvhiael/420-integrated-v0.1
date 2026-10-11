@@ -32,3 +32,12 @@
 - `POST /v1/bnb/internal/abuse-reports/{report_id}/decision` requires independently signed `abuse-report` review proof and permitted one-time pending→accepted/dismissed transition with reviewer nonce and audit event; abuse reports remain private.
 
 **Still required before step completion:** review/message abuse quarantine or removal enforcement, affected browser interactions, production-safe message throttling, exhaustive PostgreSQL adversarial testing for reputation receipt replay/withdrawal and moderation races, and successful Level 1 CI on exact executable SHA. External independent issuer activation and production-equivalent Reputation integration acceptance are separate testnet-dependent gates. Do not treat a new API route as proof the external service has consumed it.
+
+## Enforcement and browser follow-through
+
+- An independently accepted abuse report now **quarantines** a reported guest message from private thread views or withdraws approved review/host-response visibility, preserving records for audit rather than destructively deleting evidence. Dismissed reports do not alter content. The decision transition and nonce are committed in one transaction.
+- Private thread messages enforce 30 authored messages per sender per rolling hour; abuse reports enforce 20 authored reports per reporter per rolling 24 hours. Each threshold uses an account-row lock in the transaction to prevent concurrent bypass across properties. Existing nonce-idempotent replay behavior is preserved.
+- The public BnB browser displays independently approved host responses, and offers accessible verified-session submission for review-abuse reports and host responses. New host responses remain pending independent moderation; no host-side auto-approval.
+- Tests include unsigned moderator/reputation mutation rejection, strict rating input bounds, property-scope authorization, rejected jurisdiction-independent session bypass and public no-store reputation projection. The cross-service reputation contract is explicitly non-final, without local scoring.
+
+**Outstanding qualification:** run BnB Runtime Slice and changed frontend accessibility on the exact final executable SHA; inspect failures and record a level-1 PASS only when completed. The attached live testnet gate `T-BNB-REPUTATION-211` remains deferred; no independent operator provenance or real 420Reputation deployment has been verified from repository-only code.

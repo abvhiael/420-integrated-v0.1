@@ -1,0 +1,48 @@
+{
+  "step": "C04.9",
+  "canonical": "Activation impact procedure for pending orders and cached guidance; stop/reassess/return handling belongs to DOOBr, with immutable previous decision evidence.",
+  "status": "PENDING_LEVEL1_CI",
+  "qualification_level": 1,
+  "implementation_sha": "2e8083f020bef8395dd96a35109833be33286818",
+  "base_sha": "c5a4f220d1fbda01f707d359aa9bb32921a138b1",
+  "branch": "audit/420compliance-c01-1-inventory-20261009",
+  "pr": 602,
+  "files": [
+    "services/complianceauth/activation_impact.go",
+    "services/complianceauth/activation_impact_test.go",
+    ".github/workflows/420compliance-c01-level1.yml",
+    "docs/compliance/C04.9-ACTIVATION-IMPACT.md",
+    "docs/compliance/C08.3-EXTERNAL-AUTHORITY-TESTNET-HANDOFF.md"
+  ],
+  "requirements": [
+    "current authoritative publication fence and stale cache invalidation",
+    "pending and transit/failed order stop/reassess/return-review instructions",
+    "DOOBr remains sole mutation owner",
+    "previous receipt digest and prior/new policy sequencing preserved",
+    "outage, duplicate, mismatch, invalid stage fail-closed"
+  ],
+  "checks": [
+    "TestC049ActivationImpactAndPriorEvidence with Go race",
+    "retained Compliance app-specific tests"
+  ],
+  "ci": {
+    "status": "PENDING"
+  },
+  "limitations": [
+    "No durable original receipt archive or live DOOBr mutation adapter",
+    "In-memory publication fixture does not establish deployed multi-instance acceptance"
+  ],
+  "deferred_testnet": [
+    "C09.4–C09.5 durable published fence and immutable receipts",
+    "C09.6 actual DOOBr stop/reassess/return integration",
+    "C09.7 multi-instance replay/outage/race",
+    "C09.8 Travel cache invalidation"
+  ],
+  "deferred_production": [
+    "C10.6 live client enforcement",
+    "C10.7 independently approved launch"
+  ],
+  "level2": "At canonical app milestone",
+  "level3": "C08.5",
+  "next_canonical": "C04.10 — Approved policy corrections and supersession; rollback may restore only a currently lawful, valid approved version. Preserve the historical error record."
+}

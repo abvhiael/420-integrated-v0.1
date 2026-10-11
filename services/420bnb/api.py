@@ -15,7 +15,7 @@ from authority import verify_authority
 from calendar_engine import peak_used,strict_local_instant,local_stay_window
 from pricing import quote_breakdown
 from travel_location import resolve_public_place, TravelLocationUnavailable
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="420BnB", version="0.1.0")
@@ -472,8 +472,10 @@ def revoke_travel_jurisdiction_policy(payload:TravelBindingProof):
 
 
 @app.get("/v1/bnb/travel/authorized")
-def travel_authorized_listings(place_id:str,limit:int=20):
+def travel_authorized_listings(place_id:str,response:Response,limit:int=20):
     """Only current approved property/place bindings with active allowed policy."""
+    response.headers["Cache-Control"]="no-store, private"
+    response.headers["X-Content-Type-Options"]="nosniff"
     if limit<1 or limit>50:raise HTTPException(422,"INVALID_LIMIT")
     try:place=resolve_public_place(place_id)
     except ValueError:raise HTTPException(422,"INVALID_PLACE_ID")

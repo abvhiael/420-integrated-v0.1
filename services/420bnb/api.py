@@ -296,6 +296,160 @@ def ready():
     return {"status": "ready", "transactions_enabled": False}
 
 
+class GuestMessageInput(BaseModel):
+    body: str=Field(min_length=1,max_length=3000)
+    nonce: str=Field(min_length=8,max_length=128)
+
+class GuestReviewInput(BaseModel):
+    rating: int=Field(ge=1,le=5,strict=True)
+    body: str=Field(min_length=10,max_length=2000)
+
+
+@app.get("/v1/bnb/search")
+def guest_search(region:str="",q:str="",min_capacity:int=1,limit:int=20,offset:int=0):
+    if min_capacity<1 or min_capacity>1000 or limit<1 or limit>50 or offset<0 or offset>5000:
+        raise HTTPException(422,"INVALID_SEARCH_WINDOW")
+    if len(region)>100 or len(q)>100:raise HTTPException(422,"SEARCH_TOO_LONG")
+    with db() as c:
+        rows=c.execute("""SELECT id,title,public_region,capacity,nightly_minor,currency
+            FROM bnb_property WHERE status='published' AND capacity>=%s
+            AND (%s='' OR public_region ILIKE %s ESCAPE '\\')
+            AND (%s='' OR title ILIKE %s ESCAPE '\\')
+            ORDER BY id LIMIT %s OFFSET %s""",
+            (min_capacity,region,"%"+region.replace("\\","\\\\").replace("%","\\%").replace("_","\\_")+"%",
+             q,"%"+q.replace("\\","\\\\").replace("%","\\%").replace("_","\\_")+"%",limit,offset)).fetchall()
+    return [{"id":str(x[0]),"title":x[1],"public_region":x[2],
+             "capacity":x[3],"nightly_minor":x[4],"currency":x[5]} for x in rows]
+
+
+@app.get("/v1/bnb/listings/{property_id}")
+def guest_listing_detail(property_id:UUID):
+    with db() as c:
+        row=c.execute("""SELECT id,title,public_region,capacity,nightly_minor,currency
+            FROM bnb_property WHERE id=%s AND status='published'""",(property_id,)).fetchone()
+        if not row:raise HTTPException(404,"NOT_FOUND")
+        reviews=c.execute("""SELECT rating,body,created_at FROM bnb_guest_review
+            WHERE property_id=%s AND status='approved'
+            ORDER BY created_at DESC LIMIT 20""",(property_id,)).fetchall()
+    return {"id":str(row[0]),"title":row[1],"public_region":row[2],"capacity":row[3],
+            "nightly_minor":row[4],"currency":row[5],
+            "reviews":[{"rating":r[0],"body":r[1]} for r in reviews]}
+
+
+@app.get("/v1/bnb/account/saved-stays")
+def guest_saved_stays(authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        rows=c.execute("""SELECT p.id,p.title,p.public_region FROM bnb_guest_saved_stay s
+            JOIN bnb_property p ON p.id=s.property_id
+            WHERE s.guest_subject=%s AND p.status='published'
+            ORDER BY s.created_at DESC LIMIT 100""",(actor,)).fetchall()
+    return [{"id":str(x[0]),"title":x[1],"public_region":x[2]} for x in rows]
+
+
+@app.put("/v1/bnb/account/saved-stays/{property_id}")
+def save_guest_stay(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            found=c.execute("""SELECT 1 FROM bnb_property WHERE id=%s AND status='published'""",
+                            (property_id,)).fetchone()
+            if not found:raise HTTPException(404,"NOT_FOUND")
+            c.execute("""INSERT INTO bnb_guest_saved_stay(guest_subject,property_id)
+                VALUES (%s,%s) ON CONFLICT DO NOTHING""",(actor,property_id))
+    return {"saved":True,"property_id":str(property_id)}
+
+
+@app.delete("/v1/bnb/account/saved-stays/{property_id}")
+def unsave_guest_stay(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        c.execute("DELETE FROM bnb_guest_saved_stay WHERE guest_subject=%s AND property_id=%s",
+                  (actor,property_id))
+    return {"saved":False,"property_id":str(property_id)}
+
+
+@app.get("/v1/bnb/account/reservations")
+def guest_reservation_dashboard(authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        rows=c.execute("""SELECT r.id,r.status,r.booking_request_id,p.title,p.public_region,
+            lower(h.period),upper(h.period) FROM bnb_reservation r
+            JOIN bnb_property p ON p.id=r.property_id
+            JOIN bnb_hold h ON h.id=r.hold_id
+            WHERE r.guest_subject=%s ORDER BY r.id DESC LIMIT 100""",(actor,)).fetchall()
+    return [{"id":str(x[0]),"state":x[1],"request_id":str(x[2]),
+            "title":x[3],"public_region":x[4],"checkin":x[5].isoformat(),
+            "checkout":x[6].isoformat(),"confirmed":x[1]=="confirmed"} for x in rows]
+
+
+@app.get("/v1/bnb/booking-requests/{request_id}/messages")
+def guest_messages(request_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        row=c.execute("""SELECT r.guest_subject,r.host_subject,p.host_subject,p.status
+            FROM bnb_booking_request r JOIN bnb_property p ON p.id=r.property_id
+            WHERE r.id=%s""",(request_id,)).fetchone()
+        if not row or (actor!=row[0] and not (actor==row[1] and actor==row[2] and row[3]=="published")):
+            raise HTTPException(404,"NOT_FOUND")
+        data=c.execute("""SELECT id,sender_subject,body,created_at FROM bnb_guest_message
+            WHERE booking_request_id=%s ORDER BY created_at,id LIMIT 100""",(request_id,)).fetchall()
+    return [{"id":str(x[0]),"sender":("you" if x[1]==actor else "other"),
+             "body":x[2],"created_at":x[3].isoformat()} for x in data]
+
+
+@app.post("/v1/bnb/booking-requests/{request_id}/messages",status_code=201)
+def send_guest_message(request_id:UUID,payload:GuestMessageInput,
+                       authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    if not payload.body.strip():raise HTTPException(422,"EMPTY_MESSAGE")
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("""SELECT r.property_id,r.guest_subject,r.host_subject,r.state
+                FROM bnb_booking_request r WHERE r.id=%s""",(request_id,)).fetchone()
+            if not ref:raise HTTPException(404,"NOT_FOUND")
+            property=c.execute("SELECT host_subject,status FROM bnb_property WHERE id=%s FOR UPDATE",
+                               (ref[0],)).fetchone()
+            if actor!=ref[1] and not (actor==ref[2] and actor==property[0] and property[1]=="published"):
+                raise HTTPException(404,"NOT_FOUND")
+            if ref[3] in ("declined","withdrawn","expired"):
+                raise HTTPException(409,"THREAD_CLOSED")
+            prior=c.execute("""SELECT id,body FROM bnb_guest_message
+                WHERE booking_request_id=%s AND sender_subject=%s AND client_nonce=%s""",
+                (request_id,actor,payload.nonce)).fetchone()
+            if prior:
+                if prior[1]!=payload.body:raise HTTPException(409,"MESSAGE_REPLAY_CONFLICT")
+                return {"id":str(prior[0]),"replayed":True}
+            mid=uuid4()
+            c.execute("""INSERT INTO bnb_guest_message
+                (id,booking_request_id,sender_subject,body,client_nonce)
+                VALUES (%s,%s,%s,%s,%s)""",(mid,request_id,actor,payload.body,payload.nonce))
+    return {"id":str(mid),"replayed":False}
+
+
+@app.post("/v1/bnb/reservations/{reservation_id}/guest-review",status_code=201)
+def submit_guest_review(reservation_id:UUID,payload:GuestReviewInput,
+                        authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        with c.transaction():
+            ref=c.execute("""SELECT r.property_id,r.guest_subject,r.status,upper(h.period)
+                FROM bnb_reservation r JOIN bnb_hold h ON h.id=r.hold_id
+                WHERE r.id=%s""",(reservation_id,)).fetchone()
+            if not ref or ref[1]!=actor:raise HTTPException(404,"NOT_FOUND")
+            if ref[2]!="confirmed" or ref[3]>datetime.now(timezone.utc):
+                raise HTTPException(409,"STAY_NOT_COMPLETED")
+            if c.execute("SELECT 1 FROM bnb_guest_review WHERE reservation_id=%s",
+                         (reservation_id,)).fetchone():
+                raise HTTPException(409,"REVIEW_ALREADY_SUBMITTED")
+            review_id=uuid4()
+            c.execute("""INSERT INTO bnb_guest_review
+                (id,reservation_id,property_id,guest_subject,rating,body)
+                VALUES (%s,%s,%s,%s,%s,%s)""",
+                (review_id,reservation_id,ref[0],actor,payload.rating,payload.body))
+    return {"id":str(review_id),"state":"pending_moderation","published":False}
+
+
 @app.get("/v1/bnb/listings")
 def listings():
     with db() as c:

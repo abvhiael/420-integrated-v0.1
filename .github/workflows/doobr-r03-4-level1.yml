@@ -1,0 +1,47 @@
+name: DOOBR R03.4 Courier Client Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/courier_view.py','doobr/storage/tests/test_courier_view.py','web/doobr/**','docs/doobr/DOOBR-R03-4-*','.github/workflows/doobr-r03-4-level1.yml']
+  pull_request:
+    paths: ['doobr/courier_view.py','doobr/storage/tests/test_courier_view.py','web/doobr/**','docs/doobr/DOOBR-R03-4-*','.github/workflows/doobr-r03-4-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  courier-client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Courier ownership, issuer, revocation and eligibility negative tests
+        run: |
+          python3 -m py_compile doobr/courier_view.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_courier_view.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_courier.py -v
+      - name: Static courier status and retained web regressions
+        run: |
+          cd web/doobr
+          node scripts/test-courier.mjs
+          node scripts/test-consumer.mjs
+          node scripts/test-coverage.mjs
+          npm run check
+          npm run build
+          test -f dist/courier.mjs
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

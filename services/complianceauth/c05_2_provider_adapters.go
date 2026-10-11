@@ -46,7 +46,7 @@ func(p CredentialProviderHTTP) Fetch(ctx context.Context,tenant,subject string,n
  c:=p.Config
  if ctx==nil||ctx.Err()!=nil||p.Client==nil||p.Tokens==nil||now.IsZero()||!c051Scope(tenant)||!c051Scope(subject)||!c051Scope(c.Name)||!c051Scope(c.Audience)||!c051Scope(c.ExpectedIssuer)||c.Timeout<=0||c.Timeout>30*time.Second {return zero,ErrUnavailable}
  u,e:=url.Parse(c.BaseURL)
- if e!=nil||u.Scheme!="https"||u.Hostname()==""||u.User!=nil||u.RawQuery!=""||u.Fragment!=""||u.Path!=""||u.Port()!="" {return zero,ErrUnavailable}
+ if e!=nil||u.Scheme!="https"||u.Hostname()==""||u.User!=nil||u.RawQuery!=""||u.Fragment!=""||u.Path!="" {return zero,ErrUnavailable}
  if p.Client.Transport==nil {return zero,ErrUnavailable}
  tr,ok:=p.Client.Transport.(*http.Transport)
  if !ok||tr.TLSClientConfig==nil||tr.TLSClientConfig.InsecureSkipVerify||tr.Proxy!=nil||tr.DialContext!=nil||tr.DialTLSContext!=nil||tr.TLSClientConfig.MinVersion<tls.VersionTLS12{return zero,ErrUnavailable}

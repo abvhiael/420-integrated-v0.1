@@ -1,0 +1,48 @@
+name: DOOBR R03.5 Courier Journey Level 1
+on:
+  push:
+    branches: [roadmap/doobr-bc-vancouver-infrastructure]
+    paths: ['doobr/courier_journey.py','doobr/storage/tests/test_courier_journey.py','web/doobr/**','.github/workflows/doobr-r03-5-level1.yml']
+  pull_request:
+    paths: ['doobr/courier_journey.py','doobr/storage/tests/test_courier_journey.py','web/doobr/**','.github/workflows/doobr-r03-5-level1.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact SHA before
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: App-scoped journey and retained courier authorization tests
+        run: |
+          python3 -m py_compile doobr/courier_journey.py
+          python3 -m unittest discover -s doobr/storage/tests -p test_courier_journey.py -v
+          python3 -m unittest discover -s doobr/storage/tests -p test_courier_view.py -v
+      - name: Courier client privacy and static build
+        run: |
+          cd web/doobr
+          node scripts/test-journey.mjs
+          node scripts/test-courier.mjs
+          node scripts/test-consumer.mjs
+          node scripts/test-coverage.mjs
+          npm run check
+          npm run build
+          test -f dist/journey.mjs
+      - name: Exact SHA after
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"

@@ -2,7 +2,7 @@ name: DOOBR R03.7 Private Console Level 1
 on:
   push:
     branches: [roadmap/doobr-bc-vancouver-infrastructure]
-    paths: ['doobr/private_console.py','doobr/console_cases.py','doobr/private_api.py','doobr/private_authority.py','web/doobr-private/**','doobr/storage/tests/test_private_api.py','doobr/auth.py','doobr/storage/migrations/0007_private_console_cases.sql','doobr/storage/tests/test_private_console.py','doobr/storage/tests/test_console_cases.py','.github/workflows/doobr-r03-7-level1.yml']
+    paths: ['doobr/private_console.py','doobr/console_cases.py','doobr/private_api.py','doobr/private_authority.py','web/doobr-private/**','doobr/storage/tests/test_private_api.py','doobr/auth.py','doobr/storage/migrations/0007_private_console_cases.sql','doobr/storage/tests/test_private_console.py','doobr/storage/tests/test_console_cases.py','doobr/storage/tests/console_cases_rls.sql','.github/workflows/doobr-r03-7-level1.yml']
   pull_request:
     paths: ['doobr/private_console.py','doobr/storage/tests/test_private_console.py','.github/workflows/doobr-r03-7-level1.yml']
   workflow_dispatch:
@@ -64,6 +64,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "SELECT relname,relrowsecurity,relforcerowsecurity FROM pg_class WHERE relname IN ('console_cases','console_case_events') AND relrowsecurity AND relforcerowsecurity" | tee /tmp/rls.txt
           grep -q console_cases /tmp/rls.txt
           grep -q console_case_events /tmp/rls.txt
+          psql -v ON_ERROR_STOP=1 -f doobr/storage/tests/console_cases_rls.sql
       - name: Verify exact SHA after
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}

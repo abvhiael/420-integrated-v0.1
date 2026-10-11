@@ -1213,3 +1213,19 @@ def test_bnb28_guest_message_nonce_privacy_and_closed_thread(fixture_property):
             c.execute("DELETE FROM bnb_guest_message WHERE booking_request_id=%s",(rid,))
             c.execute("DELETE FROM bnb_booking_request WHERE id=%s",(rid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+
+def test_bnb28_independent_moderator_required_and_private_review_state(fixture_property):
+    pid,headers=fixture_property
+    rid=uuid4()
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        c.execute("""INSERT INTO bnb_guest_review
+            (id,reservation_id,property_id,guest_subject,rating,body)
+            SELECT %s,h.id,%s,'guest-fixture',4,'This is a private pending guest review'
+            FROM bnb_reservation h WHERE FALSE""",(rid,pid))
+    assert client.post(f"/v1/bnb/internal/guest-reviews/{rid}/decision",
+        json={"decision":"approved"}).status_code==401
+    assert client.post(f"/v1/bnb/internal/guest-reviews/{rid}/decision",
+        headers={"x-guest-review-proof":"forged"},json={"decision":"approved"}).status_code in (401,503)
+    detail=client.get(f"/v1/bnb/listings/{pid}")
+    assert detail.status_code==200 and detail.json()["reviews"]==[]

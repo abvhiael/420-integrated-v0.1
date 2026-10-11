@@ -1474,3 +1474,51 @@ def test_bnb29_delegated_presentation_version_scope_and_no_financial_change(fixt
         with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
             c.execute("DELETE FROM bnb_property_grant WHERE property_id=%s",(pid,))
             c.execute("DELETE FROM bnb_audit WHERE resource_id=%s",(pid,))
+
+def test_bnb210_authorized_discovery_freshness_and_revocation(fixture_property,monkeypatch):
+    """Cross-service projection must retract immediately on policy, binding or listing state changes."""
+    pid,_=fixture_property
+    monkeypatch.setattr(api,"resolve_public_place",lambda _:{
+        "place_id":"pub_place_1","name":"Public town","region":"Public region",
+        "country":"CA","approximate":True,"latitude":None,"longitude":None})
+    with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+        version=c.execute("SELECT version FROM bnb_property WHERE id=%s",(pid,)).fetchone()[0]
+        c.execute("""INSERT INTO bnb_travel_place_binding
+           (property_id,place_id,region,country,jurisdiction_id,issuer,proof_jti,proof_expires_at,property_version,marker_grid_lat,marker_grid_lon)
+           VALUES (%s,'pub_place_1','Public region','CA','CA_SK','independent-location',%s,now()+interval '4 minutes',%s,52,-107)""",
+           (pid,str(uuid4()),version))
+        c.execute("""INSERT INTO bnb_travel_jurisdiction_policy
+           (jurisdiction_id,decision,issuer,proof_jti,effective_at,expires_at,revision)
+           VALUES ('CA_SK','allowed','independent-policy',%s,now()-interval '1 minute',now()+interval '4 minutes',1)
+           ON CONFLICT(jurisdiction_id) DO UPDATE SET decision='allowed',issuer=excluded.issuer,
+           proof_jti=excluded.proof_jti,effective_at=excluded.effective_at,
+           expires_at=excluded.expires_at,revision=1,revoked_at=NULL""",(str(uuid4()),))
+    try:
+        path="/v1/bnb/travel/authorized?place_id=pub_place_1"
+        result=client.get(path)
+        assert result.status_code==200,result.text
+        items=result.json()["listings"]
+        assert len(items)==1 and items[0]["property_id"]==str(pid)
+        assert items[0]["map_marker"]=={"latitude":52.5,"longitude":-106.5,"precision":"coarse_1_degree_grid"}
+        assert "private_address" not in result.text
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_travel_jurisdiction_policy SET decision='prohibited' WHERE jurisdiction_id='CA_SK'")
+        assert client.get(path).json()["listings"]==[]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_travel_jurisdiction_policy SET decision='allowed',revoked_at=now() WHERE jurisdiction_id='CA_SK'")
+        assert client.get(path).json()["listings"]==[]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_travel_jurisdiction_policy SET revoked_at=NULL WHERE jurisdiction_id='CA_SK'")
+            c.execute("UPDATE bnb_travel_place_binding SET revoked_at=now() WHERE property_id=%s",(pid,))
+        assert client.get(path).json()["listings"]==[]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_travel_place_binding SET revoked_at=NULL WHERE property_id=%s",(pid,))
+            c.execute("UPDATE bnb_property SET status='suspended' WHERE id=%s",(pid,))
+        assert client.get(path).json()["listings"]==[]
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("UPDATE bnb_property SET status='published',version=version+1 WHERE id=%s",(pid,))
+        assert client.get(path).json()["listings"]==[]
+    finally:
+        with psycopg.connect(os.environ["BNB_DATABASE_URL"]) as c:
+            c.execute("DELETE FROM bnb_travel_place_binding WHERE property_id=%s",(pid,))
+            c.execute("DELETE FROM bnb_travel_jurisdiction_policy WHERE jurisdiction_id='CA_SK'")

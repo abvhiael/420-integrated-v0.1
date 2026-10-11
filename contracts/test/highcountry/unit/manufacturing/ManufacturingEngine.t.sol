@@ -7,26 +7,45 @@ import { HarvestProductRegistry } from "../../../../src/highcountry/harvest/Harv
 import { ResourceLedger } from "../../../../src/highcountry/inventory/ResourceLedger.sol";
 
 interface VmR043 {
-    function warp(uint256 timestamp) external;
+    function warp(
+        uint256 timestamp
+    ) external;
 }
 
 contract R043Source {
-    function getProduct(bytes32) external pure returns (HarvestProductRegistry.Product memory) {
+    function getProduct(
+        bytes32
+    ) external pure returns (HarvestProductRegistry.Product memory) {
         revert("not used");
     }
 }
 
 contract R043Actor {
-    function enable(InventoryRegistry inv, address module) external {
+    function enable(
+        InventoryRegistry inv,
+        address module
+    ) external {
         inv.setInventoryOperator(module, true);
     }
-    function start(ManufacturingEngine engine, bytes32 recipeId) external returns (bytes32) {
+
+    function start(
+        ManufacturingEngine engine,
+        bytes32 recipeId
+    ) external returns (bytes32) {
         return engine.start(recipeId);
     }
-    function complete(ManufacturingEngine engine, bytes32 id) external {
+
+    function complete(
+        ManufacturingEngine engine,
+        bytes32 id
+    ) external {
         engine.complete(id);
     }
-    function cancel(ManufacturingEngine engine, bytes32 id) external {
+
+    function cancel(
+        ManufacturingEngine engine,
+        bytes32 id
+    ) external {
         engine.cancel(id);
     }
 }
@@ -114,9 +133,13 @@ contract ManufacturingEngineR043Test {
         amounts[0] = 10;
         outs[0] = FINISHED;
         produced[0] = 3;
-        (bool overrideRecipe,) = address(engine).call(
-            abi.encodeCall(engine.registerRecipe, (RECIPE, bytes32(uint256(2)), ins, amounts, outs, produced, uint64(100), uint16(0)))
-        );
+        (bool overrideRecipe,) = address(engine)
+            .call(
+                abi.encodeCall(
+                    engine.registerRecipe,
+                    (RECIPE, bytes32(uint256(2)), ins, amounts, outs, produced, uint64(100), uint16(0))
+                )
+            );
         require(!overrideRecipe, "mutable recipe");
         inventory.setIssuer(address(engine), false);
         bytes32 id = alice.start(engine, RECIPE);

@@ -680,15 +680,30 @@ contract CultivationEngineTest is PlantSourcesFixture {
         uint64 plotId = 21;
         uint64 plantId = 93;
         _sourceGrant(
-            caps, address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_REGISTER, bytes32(uint256(plotId)), 1
+            caps,
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_REGISTER,
+            bytes32(uint256(plotId)),
+            1
         );
         publicAccess.registerPublicPlot(plotId, 12, 1);
         _sourceGrant(
-            caps, address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_ALLOCATE, bytes32(uint256(plotId)), 1
+            caps,
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_ALLOCATE,
+            bytes32(uint256(plotId)),
+            1
         );
         publicAccess.allocate(plotId, 1);
         _sourceGrant(
-            caps, address(this), ModuleIds.PUBLIC_CULTIVATION_ACCESS, ActionIds.PUBLIC_PLOT_RELEASE, bytes32(uint256(plotId)), 1
+            caps,
+            address(this),
+            ModuleIds.PUBLIC_CULTIVATION_ACCESS,
+            ActionIds.PUBLIC_PLOT_RELEASE,
+            bytes32(uint256(plotId)),
+            1
         );
         _grant(
             address(this),

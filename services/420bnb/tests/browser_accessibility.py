@@ -37,9 +37,25 @@ with sync_playwright() as p:
         url=route.request.url
         if url.endswith("/"):
             route.fulfill(status=200,content_type="text/html",body=PAGE.read_text())
-        elif url.endswith("/v1/bnb/listings"):
+        elif "/v1/bnb/search?" in url or url.endswith("/v1/bnb/listings"):
             route.fulfill(json=[{"id":listing_id,"title":"Accessible cabin","public_region":"Prairies",
                                  "capacity":2,"nightly_minor":1000,"currency":"CAD"}])
+        elif url.endswith("/v1/bnb/listings/"+listing_id):
+            route.fulfill(json={"id":listing_id,"title":"Accessible cabin","public_region":"Prairies",
+                "capacity":2,"nightly_minor":1000,"currency":"CAD","reviews":[]})
+        elif url.endswith("/v1/bnb/account/saved-stays/"+listing_id):
+            route.fulfill(json={"saved":True})
+        elif url.endswith("/v1/bnb/account/saved-stays"):
+            route.fulfill(json=[{"id":listing_id,"title":"Accessible cabin","public_region":"Prairies"}])
+        elif url.endswith("/v1/bnb/account/reservations"):
+            route.fulfill(json=[{"id":"00000000-0000-0000-0000-000000000126",
+                "title":"Accessible cabin","state":"payment_pending",
+                "checkin":"2027-02-10","checkout":"2027-02-12",
+                "confirmed":False,"request_id":"00000000-0000-0000-0000-000000000125"}])
+        elif "/v1/bnb/reservations/" in url and url.endswith("/receipt"):
+            route.fulfill(status=404,json={"detail":"NOT_FINALIZED"})
+        elif "/v1/bnb/booking-requests/" in url and url.endswith("/messages"):
+            route.fulfill(status=201,json={"id":"fixture-message","replayed":False})
         elif "/v1/bnb/availability/local?" in url:
             route.fulfill(json={"units":[{"label":"Suite A","available":2}],"nonbinding":True})
         elif url.endswith("/v1/bnb/quotes"):
@@ -76,6 +92,10 @@ with sync_playwright() as p:
     session.get_by_role("button",name="Refresh public listings").click()
     expect(session.get_by_role("heading",name="Accessible cabin")).to_have_count(1)
     section=session.locator("#explore")
+    section.get_by_role("button",name="View listing details").click()
+    expect(section).to_contain_text("0 approved review(s)")
+    section.get_by_role("button",name="Save stay").click()
+    expect(section).to_contain_text("Verify your 420Identity session first.")
     section.get_by_label("Check-in date").fill("2027-02-10")
     section.get_by_label("Check-out date").fill("2027-02-12")
     section.get_by_role("button",name="Check availability").click()
@@ -85,6 +105,13 @@ with sync_playwright() as p:
     session.get_by_label("420Identity signed session token (held only in memory; never saved)").fill("test-fixture-only")
     session.get_by_role("button",name="Verify session").click()
     expect(session.get_by_role("button",name="Save unpublished draft")).to_be_enabled()
+    section.get_by_role("button",name="Save stay").click()
+    expect(section).to_contain_text("Stay saved privately.")
+    session.get_by_role("button",name="Refresh saved stays & reservations").click()
+    expect(session.locator("#saved-stays")).to_contain_text("Accessible cabin")
+    expect(session.locator("#guest-reservations")).to_contain_text("payment_pending")
+    session.locator("#guest-reservations").get_by_role("button",name="View receipt").click()
+    expect(session.locator("#guest-reservations")).to_contain_text("No independently authorized finalized Pay receipt available.")
     section.get_by_role("button",name="Request nonbinding itemized quote").click()
     expect(section).to_contain_text("Total 2255 CAD minor units")
     expect(section).to_contain_text("No payment or booking.")

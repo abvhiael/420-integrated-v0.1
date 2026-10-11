@@ -374,6 +374,76 @@ def ingest_travel_place_binding(payload:TravelBindingProof):
                 (property_id,place_id,place["region"],place["country"],jurisdiction,grid_lat,grid_lon,claims["iss"],claims["jti"],claims["exp"],prop[0]))
     return {"accepted":True,"replayed":False}
 
+class ComplianceProofInput(BaseModel):
+    proof:str=Field(min_length=32,max_length=8192)
+
+@app.post("/v1/bnb/compliance/eligibility")
+def ingest_compliance_eligibility(payload:ComplianceProofInput):
+    """Only independent Compliance issuer can assert legal eligibility."""
+    claims=verify_authority(payload.proof,"BNB_COMPLIANCE_AUTHORITY","bnb_accommodation_eligibility")
+    try:property_id=UUID(claims["property_id"])
+    except (KeyError,TypeError,ValueError):raise HTTPException(422,"INVALID_PROPERTY_ID")
+    jurisdiction=claims.get("jurisdiction_id")
+    decision=claims.get("decision")
+    revision=claims.get("revision")
+    license_ref=claims.get("license_reference")
+    min_age=claims.get("minimum_guest_age")
+    identity_required=claims.get("identity_required")
+    if (not isinstance(jurisdiction,str) or not (1<=len(jurisdiction)<=100)
+        or not jurisdiction.isascii() or not all(ch.isalnum() or ch in "-_" for ch in jurisdiction)
+        or decision not in ("allowed","prohibited") or type(revision)!=int or revision<1
+        or not isinstance(license_ref,str) or not (1<=len(license_ref)<=160)
+        or (min_age is not None and (type(min_age)!=int or not 0<=min_age<=120))
+        or type(identity_required)!=bool):
+        raise HTTPException(422,"INVALID_COMPLIANCE_CLAIMS")
+    with db() as c:
+        with c.transaction():
+            prop=c.execute("SELECT version FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,)).fetchone()
+            if not prop:raise HTTPException(404,"PROPERTY_NOT_FOUND")
+            if claims.get("property_version")!=prop[0]:
+                raise HTTPException(409,"PROPERTY_VERSION_CHANGED")
+            binding=c.execute("""SELECT jurisdiction_id FROM bnb_travel_place_binding
+                WHERE property_id=%s AND revoked_at IS NULL AND proof_expires_at>now()
+                AND property_version=%s""",(property_id,prop[0])).fetchone()
+            if not binding or binding[0]!=jurisdiction:
+                raise HTTPException(403,"LOCATION_COMPLIANCE_SCOPE_MISMATCH")
+            prior=c.execute("""SELECT revision FROM bnb_compliance_eligibility
+                WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if prior and revision<=prior[0]:
+                raise HTTPException(409,"STALE_COMPLIANCE_REVISION")
+            c.execute("""INSERT INTO bnb_compliance_eligibility
+                (property_id,jurisdiction_id,decision,license_reference,minimum_guest_age,
+                 identity_required,issuer,proof_jti,revision,property_version,effective_at,expires_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,to_timestamp(%s),to_timestamp(%s))
+                ON CONFLICT(property_id) DO UPDATE SET
+                jurisdiction_id=excluded.jurisdiction_id,decision=excluded.decision,
+                license_reference=excluded.license_reference,minimum_guest_age=excluded.minimum_guest_age,
+                identity_required=excluded.identity_required,issuer=excluded.issuer,
+                proof_jti=excluded.proof_jti,revision=excluded.revision,
+                property_version=excluded.property_version,effective_at=excluded.effective_at,
+                expires_at=excluded.expires_at,revoked_at=NULL""",
+                (property_id,jurisdiction,decision,license_ref,min_age,identity_required,
+                 claims["iss"],claims["jti"],revision,prop[0],claims["nbf"],claims["exp"]))
+    return {"accepted":True,"revision":revision,"legal_authority":"independent"}
+
+@app.post("/v1/bnb/compliance/eligibility/revoke")
+def revoke_compliance_eligibility(payload:ComplianceProofInput):
+    claims=verify_authority(payload.proof,"BNB_COMPLIANCE_AUTHORITY","bnb_accommodation_eligibility_revoke")
+    try:property_id=UUID(claims["property_id"])
+    except (KeyError,TypeError,ValueError):raise HTTPException(422,"INVALID_PROPERTY_ID")
+    with db() as c:
+        with c.transaction():
+            c.execute("SELECT id FROM bnb_property WHERE id=%s FOR UPDATE",(property_id,))
+            prior=c.execute("""SELECT issuer,revoked_at FROM bnb_compliance_eligibility
+                WHERE property_id=%s FOR UPDATE""",(property_id,)).fetchone()
+            if not prior:raise HTTPException(404,"COMPLIANCE_RECORD_NOT_FOUND")
+            if prior[0]!=claims["iss"]:raise HTTPException(403,"COMPLIANCE_ISSUER_MISMATCH")
+            if prior[1] is not None:raise HTTPException(409,"COMPLIANCE_ALREADY_REVOKED")
+            c.execute("""UPDATE bnb_compliance_eligibility SET revoked_at=now()
+                WHERE property_id=%s""",(property_id,))
+    return {"revoked":True}
+
+
 @app.post("/v1/bnb/travel/jurisdiction-policy")
 def ingest_travel_jurisdiction_policy(payload:TravelBindingProof):
     claims=verify_authority(payload.proof,"BNB_JURISDICTION_AUTHORITY","bnb_jurisdiction_policy")

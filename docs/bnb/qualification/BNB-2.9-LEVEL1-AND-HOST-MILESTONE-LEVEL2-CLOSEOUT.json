@@ -1,0 +1,32 @@
+{
+  "step": "BNB-2.9",
+  "name": "Complete Host Application",
+  "level1": "PENDING_EXACT_SHA",
+  "level2": "PENDING_MILESTONE",
+  "qualified_implementation_sha": "6bc7f2772f1b4331038a9e766a1f984f1747a434",
+  "current_main_at_start": "1c509a0f054bcf9fa191f71db29d0dc87f54c528",
+  "pr": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "tests": {
+    "run_id": 38106826294,
+    "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38106826294",
+    "status": "in_progress",
+    "required": "PostgreSQL/adversarial, API/Identity/delegated permission, container, Chromium/axe; nine retained BnB app workflows on same SHA"
+  },
+  "requirements": {
+    "host_dashboard": "implemented",
+    "property_administration": "implemented",
+    "calendar": "implemented",
+    "reservations": "implemented",
+    "earnings": "Pay mirror owner-only",
+    "notifications": "in-app scoped audit notifications, not external delivery",
+    "delegated_managers": "grant/revoke, revocation, edit_calendar, handle_requests, view_reservations, safe edit_listing"
+  },
+  "level3": "deferred full audit-phase reconciliation and canonical Solidity/Genesis qualification",
+  "external_gates": [
+    "Real Pay/Swap settlement and payout controller acceptance",
+    "Verified host and property claims on official testnet",
+    "External notification channel delivery and manual accessibility acceptance"
+  ],
+  "next_roadmap_step": "Not yet independently verified from repository"
+}

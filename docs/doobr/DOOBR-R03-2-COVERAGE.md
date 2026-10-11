@@ -1,0 +1,11 @@
+# DOOBR R03.2 — Public coverage lookup, legal availability disclaimers, strict age-appropriate discovery and support
+
+Canonical R03.2 on PR #601. Level 1 required; R03.12 is client Level 2 and R05.10 is single full Level 3.
+
+The public informational-only site now offers an accessible coarse Vancouver region selector (no postal code/address, ID, GPS or order collection), concise source-linked BC delivery guidance, non-operational disclosure, support information without unverified contact endpoints, and no sign-up, payments or checkout. The front-end module `web/doobr/coverage.mjs` fails closed to UNKNOWN even when a future caller supplies a fake or optimistic result; **this is a non-operational placeholder, not a working live availability API**. Live public coverage must require server-side verified signed, unexpired 420Compliance policy and approved/licensed retailer + courier authority and only coarse safe aggregation; none is configured. DOOBr cannot self-authorize cannabis deliveries. The previous R02.5 private Travel/Maps adapter remains service-to-service only; its token must never be sent to browser code. No adult age verification is claimed; public discovery exposes no products, promotions or purchase functions.
+
+Files: `web/doobr/index.html`, `web/doobr/coverage.mjs`, `web/doobr/coverage-ui.mjs`, `web/doobr/scripts/test-coverage.mjs`, updated static build and R03.1 check; workflow `.github/workflows/doobr-r03-2-level1.yml`. The Level 1 check verifies original logo, static build, SHA before/after, negative and spoofed-policy cases, noncollection of PII and non-transactional experience. The test does not substitute for browser automation, screen reader tests (R03.11), production legal approval, live connection/security review or external consumer-support operations.
+
+**Status: PENDING exact-SHA CI.** Keep any failure blocking qualification. Previous R03.1 passed SHA `53f866c2266f5db6032c26c49d0e5f0983612684` run #38107059331. PR remains unmerged; no global Foundry/Genesis rerun. Last verified main before new code: `6a76673f5b9daa0fbe0b844ad6f66fc6d18822e0`.
+
+Next canonical roadmap step: R03.3 Consumer account, Wallet consent where allowed, order state and receipts.

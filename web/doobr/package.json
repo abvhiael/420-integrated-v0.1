@@ -1,0 +1,13 @@
+{
+  "name": "@420integrated/doobr-web",
+  "private": true,
+  "version": "0.3.1",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/qualify.mjs",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

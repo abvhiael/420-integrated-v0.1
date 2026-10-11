@@ -1,0 +1,41 @@
+{
+  "step": "BNB-2.8",
+  "canonical_title": "Complete Guest Application",
+  "status": "PENDING_FINAL_EXACT_SHA_CI",
+  "qualification_model": "Level 1 step and guest application milestone Level 2",
+  "implementation_sha": "594a073a6a01751a787d0610a8ba128987c1f389",
+  "pr_number": 600,
+  "branch": "audit/420bnb-bnb-1-1-source-reconciliation-20261009",
+  "main_at_step_start": "e60c4c74ccd0c950817f98e3da6b67546afd9e24",
+  "changes": [
+    "services/420bnb/migrations/017_guest_experience.sql",
+    "services/420bnb/api.py",
+    "web/bnb/index.html",
+    "services/420bnb/tests/test_postgres_adversarial.py",
+    "services/420bnb/tests/browser_accessibility.py",
+    ".github/workflows/bnb-runtime.yml"
+  ],
+  "requirements": [
+    "Published-only accommodation search and bounded public listing detail",
+    "Guest private saved stays",
+    "Guest quote/hold/request nonbinding checkout",
+    "Own reservation dashboard and canonical Pay receipt read",
+    "Request-scoped authenticated guest/host messages",
+    "Completed-confirmed-stay review with independent review moderation and public withdrawal",
+    "Mobile browser accessibility and privacy regressions"
+  ],
+  "ci": {
+    "workflow": "420BnB Runtime Slice",
+    "run_id": 38105374866,
+    "run_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/38105374866",
+    "status": "in_progress; DO NOT CLAIM PASS"
+  },
+  "level2": "Await nine retained 420BnB app workflow completions at same SHA",
+  "level3": "Deferred to full BnB audit-phase merge-candidate reconciliation; canonical Solidity and Genesis owners, no duplicate Foundry",
+  "operational_blockers": [
+    "Independent accommodation/property claims and authorized real 420Pay finality",
+    "Human moderation and production trust root, not simulated by synthetic key",
+    "Manual WCAG 2.2 AA screen-reader acceptance and external operational release"
+  ],
+  "next_canonical_step": "Not yet verified from authoritative repository roadmap"
+}

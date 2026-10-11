@@ -1025,7 +1025,7 @@ def test_bnb27_pay_owned_split_partial_refunds_and_payout_conservation(fixture_p
         invalid=client.post(endpoint,json={**split,"developer_amount":"51"},
             headers=signed(api.SettlementSplitInput(**{**split,"developer_amount":"51"}),
                            "settlement-split",splitproof))
-        assert invalid.status_code==422,invalid.json()
+        assert invalid.status_code==422
         ok=client.post(endpoint,json=split,headers=signed(
             api.SettlementSplitInput(**split),"settlement-split",splitproof))
         assert ok.status_code==202,ok.text

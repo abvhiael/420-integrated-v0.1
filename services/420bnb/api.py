@@ -599,7 +599,7 @@ def guest_messages(request_id:UUID,authorization:str|None=Header(None)):
         if not row or (actor!=row[0] and not (actor==row[1] and actor==row[2] and row[3]=="published")):
             raise HTTPException(404,"NOT_FOUND")
         data=c.execute("""SELECT id,sender_subject,body,created_at FROM bnb_guest_message
-            WHERE booking_request_id=%s ORDER BY created_at,id LIMIT 100""",(request_id,)).fetchall()
+            WHERE booking_request_id=%s AND moderation_status='visible' ORDER BY created_at,id LIMIT 100""",(request_id,)).fetchall()
     return [{"id":str(x[0]),"sender":("you" if x[1]==actor else "other"),
              "body":x[2],"created_at":x[3].isoformat()} for x in data]
 
@@ -796,6 +796,18 @@ def moderate_abuse_report(report_id:UUID,payload:AbuseReportDecision,
                 (issuer,jti,target_type,target_id,decision)
                 VALUES (%s,%s,'abuse_report',%s,%s)""",
                 (proof["iss"],proof["jti"],report_id,payload.decision))
+            if payload.decision=="accepted":
+                target=c.execute("SELECT target_type,target_id FROM bnb_abuse_report WHERE id=%s",
+                                 (report_id,)).fetchone()
+                if target[0]=="message":
+                    c.execute("UPDATE bnb_guest_message SET moderation_status='quarantined' WHERE id=%s",
+                              (target[1],))
+                elif target[0]=="review":
+                    c.execute("UPDATE bnb_guest_review SET status='withdrawn' WHERE id=%s AND status='approved'",
+                              (target[1],))
+                elif target[0]=="host_response":
+                    c.execute("UPDATE bnb_review_host_response SET status='withdrawn' WHERE review_id=%s AND status='approved'",
+                              (target[1],))
             c.execute("UPDATE bnb_abuse_report SET status=%s WHERE id=%s",
                       (payload.decision,report_id))
             c.execute("""INSERT INTO bnb_audit(id,subject,action,resource_id)

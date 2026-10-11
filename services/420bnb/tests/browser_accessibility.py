@@ -47,6 +47,21 @@ with sync_playwright() as p:
             route.fulfill(json={"saved":True})
         elif url.endswith("/v1/bnb/account/saved-stays"):
             route.fulfill(json=[{"id":listing_id,"title":"Accessible cabin","public_region":"Prairies"}])
+        elif url.endswith("/v1/bnb/account/hosting"):
+            route.fulfill(json=[{"id":listing_id,"title":"Draft cabin","public_region":"Prairies",
+                "status":"draft","version":1,"owner":True}])
+        elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/host-reservations"):
+            route.fulfill(json=[])
+        elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/host-requests"):
+            route.fulfill(json=[])
+        elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/calendar"):
+            route.fulfill(json=[])
+        elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/notifications"):
+            route.fulfill(json=[])
+        elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/earnings"):
+            route.fulfill(json={"payment_authority":"420Pay","bnb_custody":False,"rows":[]})
+        elif url.endswith("/v1/bnb/account/properties/"+listing_id+"/managers"):
+            route.fulfill(json=[])
         elif url.endswith("/v1/bnb/account/reservations"):
             route.fulfill(json=[{"id":"00000000-0000-0000-0000-000000000126",
                 "title":"Accessible cabin","state":"payment_pending",
@@ -120,11 +135,16 @@ with sync_playwright() as p:
     session.get_by_role("button",name="Refresh booking requests").click()
     expect(session.locator("#booking-inbox")).to_contain_text("Requests you submitted")
     expect(session.locator("#booking-inbox")).to_contain_text("Requests awaiting your host action")
+    session.get_by_role("button",name="Refresh host workspace").click()
+    expect(session.locator("#host-workspace")).to_contain_text("Draft cabin")
+    session.get_by_role("button",name="Manage property operations").click()
+    expect(session.locator("#host-workspace")).to_contain_text("Pay-reported earnings")
     session.get_by_role("button",name="Refresh drafts").click()
     expect(session.get_by_role("heading",name="Draft cabin")).to_have_count(1)
     assert session.get_by_label("Minimum stay in nights").count()==1
     assert session.get_by_label("Cleaning fee in currency minor units").count()==1
     session.get_by_role("button",name="Clear session").click()
     expect(session.get_by_role("button",name="Save unpublished draft")).to_be_disabled()
+    expect(session.locator("#host-workspace")).to_be_empty()
     session.close()
     browser.close()

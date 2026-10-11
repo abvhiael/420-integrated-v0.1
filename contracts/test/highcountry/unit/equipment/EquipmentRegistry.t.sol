@@ -124,6 +124,10 @@ contract EquipmentRegistryR042Test {
         _earn(id, 101);
         alice.place(registry, id, 1);
         land.setParcel(1, address(bob), 2);
+        (bool successor,) = address(registry).call(
+            abi.encodeCall(registry.effectiveEffects, (uint64(1), address(bob)))
+        );
+        require(!successor, "successor inherited stale equipment");
         (bool stale,) = address(registry).call(
             abi.encodeCall(registry.effectiveEffects, (uint64(1), address(alice)))
         );

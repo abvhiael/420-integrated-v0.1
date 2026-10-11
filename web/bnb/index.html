@@ -555,6 +555,27 @@ async function loadHostWorkspace(){
  }
  }catch(error){details.textContent=error.message;}
  });
+ if(property.owner||(property.capabilities||[]).includes("edit_listing")){
+ const presentation=document.createElement("form");
+ const newTitle=document.createElement("input");newTitle.value=property.title;newTitle.required=true;
+ newTitle.maxLength=160;newTitle.setAttribute("aria-label","Host listing title");
+ const region=document.createElement("input");region.value=property.public_region;region.required=true;
+ region.maxLength=160;region.setAttribute("aria-label","Host public region");
+ const save=document.createElement("button");save.type="submit";save.textContent="Update draft presentation";
+ const status=document.createElement("p");status.setAttribute("role","status");
+ presentation.append(newTitle,region,save,status);
+ presentation.addEventListener("submit",async e=>{
+ e.preventDefault();
+ const response=await fetch("/v1/bnb/account/properties/"+
+ encodeURIComponent(property.id)+"/presentation",{
+ method:"PUT",headers:hostHeaders(),credentials:"omit",
+ body:JSON.stringify({title:newTitle.value,public_region:region.value,
+ expected_version:property.version})});
+ status.textContent=response.ok?"Draft presentation updated. Refresh version before editing again.":
+ "Presentation edit rejected ("+response.status+"). No financial/publication change.";
+ });
+ article.append(presentation);
+ }
  if(property.owner){
  const delegation=document.createElement("form");
  const grantee=document.createElement("input");grantee.required=true;grantee.maxLength=160;

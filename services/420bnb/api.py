@@ -670,6 +670,19 @@ def host_dashboard(authorization:str|None=Header(None)):
              "version":x[4],"owner":x[5]} for x in rows]
 
 
+@app.get("/v1/bnb/account/properties/{property_id}/host-requests")
+def host_booking_inbox(property_id:UUID,authorization:str|None=Header(None)):
+    actor=active_subject(authorization)
+    with db() as c:
+        owner=host_scope(c,property_id,actor,"handle_requests")
+        if owner[1]!="published":raise HTTPException(404,"NOT_FOUND")
+        rows=c.execute("""SELECT id,state,request_type,deadline,hold_id FROM
+            bnb_booking_request WHERE property_id=%s AND host_subject=%s
+            ORDER BY created_at DESC LIMIT 100""",(property_id,owner[0])).fetchall()
+    return [{"id":str(x[0]),"state":x[1],"type":x[2],
+             "deadline":x[3].isoformat(),"hold_id":str(x[4])} for x in rows]
+
+
 @app.get("/v1/bnb/account/properties/{property_id}/host-reservations")
 def host_reservations(property_id:UUID,authorization:str|None=Header(None)):
     actor=active_subject(authorization)
@@ -1313,9 +1326,11 @@ def decide_booking_request(request_id:UUID,decision:str,
                 WHERE id=%s FOR UPDATE""",(request_id,)).fetchone()
             if decision=="withdraw":
                 if actor!=record[1]:raise HTTPException(404,"NOT_FOUND")
-            elif (actor!=record[2] or not current_property or
-                  current_property[0]!=actor or current_property[1]!="published"):
-                raise HTTPException(404,"NOT_FOUND")
+            else:
+                if (not current_property or current_property[0]!=record[2] or
+                    current_property[1]!="published"):
+                    raise HTTPException(404,"NOT_FOUND")
+                host_scope(c,info[0],actor,"handle_requests")
             if record[3]!="requested":
                 raise HTTPException(409,"REQUEST_NOT_PENDING")
             h=c.execute("""SELECT status,expires_at,policy_snapshot FROM bnb_hold
